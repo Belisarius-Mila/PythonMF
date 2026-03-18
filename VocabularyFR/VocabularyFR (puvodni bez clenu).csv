@@ -1,0 +1,139 @@
+FR,CZ,Order,Sentence,SentenceT,L,HT
+assiette,talíř,1,Je range toujours l'assiette dans le lave-vaisselle.,Po rodinné večeři vždy uklidím talíř do myčky.,ne,ano
+sur,na,2,J'ai laissé mes clés sur la table près de la fenêtre.,Nechal jsem klíče na stole u okna.,ne,ne
+sur,o (na téma),3,Je lis un article sur l'intelligence artificielle.,Čtu článek o umělé inteligenci.,ne,ne
+là-bas,tam / tamhle,4,"Regarde là-bas, on voit les montagnes derrière la vieille gare aujourd'hui.","Podívej tamhle, za starým nádražím jsou dnes vidět hory.",ne,ne
+gâteau,dort,5,"Pour son anniversaire, nous avons préparé un gâteau chocolat et fraises maison.",K narozeninám jsme doma připravili čokoládový dort s jahodami.,ne,ano
+gâteau,koláč,6,"Le dimanche matin, ma grand-mère prépare un gâteau aux pommes délicieux.",V neděli ráno babička peče výborný jablečný koláč.,ne,ne
+trop,příliš / moc,7,"Tu travailles trop ces jours-ci, repose-toi vraiment un peu ce week-end.","Teď moc pracuješ, o víkendu si opravdu trochu odpočiň.",ne,ne
+fort,silný,8,"Aujourd'hui, le vent souffle fort sur la côte, les bateaux restent au port.","Dnes na pobřeží silně fouká, lodě zůstávají v přístavu.",ne,ne
+fort,hlasitě (nahlas),9,"Dans cette salle, parle doucement pour que chacun reste bien concentré.","V této místnosti mluv tiše, aby se každý dobře soustředil.",ne,ne
+chapeau,klobouk,10,"En été, je porte un chapeau clair contre le soleil brûlant.",V létě nosím světlý klobouk proti pálícímu slunci.,ne,ano
+copine,kamarádka,11,"Ma copine d'université vit à Lyon, mais nous parlons chaque semaine.","Moje kamarádka z univerzity žije v Lyonu, ale mluvíme spolu týdně.",ne,ne
+copine,přítelkyně,12,"Ma copine adore le train, nous partons souvent en escapade ensemble.","Moje přítelkyně miluje vlak, často spolu vyrážíme na výlety.",ano,ne
+chanter,zpívat,13,J'aime chanter en voiture pendant les longs trajets du soir.,Rád zpívám v autě během dlouhých večerních cest.,ne,ne
+portefeuille,peněženka,14,"J'ai oublié mon portefeuille, je paie donc avec mon téléphone aujourd'hui.","Zapomněl jsem peněženku, takže dnes platím telefonem.",ne,ano
+portefeuille,portfolio (soubor investic),15,"Avant de modifier mon portefeuille, j'évalue risques et rendements sur cinq ans.","Než upravím portfolio, hodnotím rizika a výnosy za pět let.",ne,ne
+enchanté,těší mě,16,"Enchanté de vous rencontrer enfin, on m'a parlé de votre travail.","Těší mě, že vás konečně poznávám, o vaší práci jsem slyšel.",ne,ne
+Je m'appelle,jmenuji se,17,Je m'appelle Lucie et je travaille dans une petite librairie du centre-ville.,Jmenuji se Lucie a pracuji v malém knihkupectví v centru města.,ne,ne
+Ça va?,Jak se máš?,18,"Salut Marie, ça va aujourd'hui après ton long voyage en train ?","Ahoj Marie, máš se dnes dobře po své dlouhé cestě vlakem?",ne,ne
+Je viens,Pocházím,19,Je viens de Paris. Il vient de Paris.,Pocházím z paříže. On pochází z Paříže.,ne,ne
+Et toi?,A ty?,20,"Moi, je vais bien, et toi, comment s'est passée ta journée ?","Já se mám dobře, a ty, jaký byl tvůj den?",ne,ne
+enchanté,těší mě,21,"Enchanté, je suis très heureux de faire votre connaissance ce soir.","Těší mě, jsem moc rád, že vás dnes večer poznávám.",ne,ne
+à bientôt,brzy na viděnou,22,"Je dois partir maintenant, mais on se retrouve à bientôt pour un café.","Teď už musím jít, ale brzy se znovu uvidíme na kávě.",ne,ano
+au revoir,na shledanou,23,"Merci pour votre visite et au revoir, passez une excellente journée.","Děkuji za vaši návštěvu a na shledanou, přeji vám krásný den.",ne,ne
+je voudrais,chtěl bych,24,"Je voudrais une baguette fraîche et deux croissants, s'il vous plaît.","Chtěl bych čerstvou bagetu a dva croissanty, prosím.",ne,ano
+s'il vous plaît,prosím,25,"Pouvez-vous parler un peu plus lentement, s'il vous plaît ?","Můžete mluvit trochu pomaleji, prosím?",ne,ne
+oui,ano,26,"Oui, je comprends la question et je peux répondre tout de suite.","Ano, otázce rozumím a můžu odpovědět hned.",ano,ne
+moi,mě,27,"Moi, je préfère marcher le matin quand les rues sont encore calmes.","Já dávám přednost ranní chůzi, když jsou ulice ještě klidné.",ne,ne
+aussi,také,28,"J'aime le cinéma, et mon frère aime aussi les films français.",Mám rád kino a můj bratr má také rád francouzské filmy.,ne,ne
+parfait,skvěle,29,Ton idée est parfaite pour notre projet de fin de semaine.,Tvůj nápad je skvělý pro náš víkendový projekt.,ne,ano
+ou,nebo,30,On peut dîner à la maison ou dans ce nouveau restaurant italien.,Můžeme večeřet doma nebo v té nové italské restauraci.,ne,ne
+et,a,31,J'achète du pain et du fromage avant de rentrer à la maison.,"Koupím chleba a sýr, než se vrátím domů.",ne,ne
+où,kde,32,"Où as-tu garé la voiture, près de la gare ou plus loin ?","Kde jsi zaparkoval auto, u nádraží nebo dál?",ne,ne
+d'où,odkud,33,"Paul, tu viens d'où?",Pavle odkud jsi?,ne,ano
+bien,dobře,34,"Aujourd'hui je me sens bien, alors je vais faire une longue promenade.","Dnes se cítím dobře, tak půjdu na dlouhou procházku.",ne,ne
+j'ai,mám,35,"J'ai trois réunions demain matin, donc je dois me coucher tôt.","Zítra ráno mám tři schůzky, takže musím jít brzy spát.",ne,ne
+il habite,bydlí,36,Il habite à Bordeaux avec sa famille depuis plus de dix ans.,Bydlí v Bordeaux se svou rodinou už více než deset let.,ne,ne
+tu as,máš,37,"Tu as beaucoup de patience avec les enfants, c'est admirable.","Máš s dětmi hodně trpělivosti, to je obdivuhodné.",ne,ne
+neveu,synovec,38,Mon neveu adore construire des robots avec de petites pièces en bois.,Můj synovec rád staví roboty z malých dřevěných dílků.,ne,ano
+nièce,neteř,39,Ma nièce apprend le piano et elle progresse très vite.,Moje neteř se učí na klavír a dělá rychlé pokroky.,ne,ano
+fille,dcera,40,Sa fille lit chaque soir avant de dormir.,Jeho dcera si každý večer čte před spaním.,ne,ne
+fils,syn,41,Mon fils commence l'école primaire en septembre.,Můj syn začíná v září chodit do základní školy.,ano,ne
+maintenant,teď,42,Nous devons partir maintenant pour arriver à l'heure.,"Musíme vyrazit teď, abychom dorazili včas.",ne,ne
+tante,teta,43,Ma tante prépare toujours une soupe délicieuse le dimanche.,Moje teta vždy v neděli připravuje výbornou polévku.,ne,ano
+oncle,strýc,44,Mon oncle raconte des histoires drôles pendant les repas de famille.,Můj strýc vypráví během rodinných obědů vtipné historky.,ne,ne
+je,já,45,"Je suis prêt pour l'examen, j'ai beaucoup révisé cette semaine.","Já jsem připravený na zkoušku, tento týden jsem hodně opakoval.",ne,ne
+tu,ty,46,"Tu peux fermer la fenêtre, s'il te plaît ?","Můžeš zavřít okno, prosím?",ne,ne
+il,on,47,Il travaille tard ce soir pour terminer un dossier important.,"On dnes večer pracuje dlouho, aby dokončil důležitý spis.",ne,ne
+elle,ona,48,Elle parle trois langues et apprend maintenant le portugais.,Ona mluví třemi jazyky a teď se učí portugalsky.,ne,ne
+vous,vy,49,Vous arrivez à quelle heure demain matin à la gare ?,V kolik zítra ráno dorazíte na nádraží?,ne,ne
+nous,my,50,Nous allons au marché ensemble chaque samedi matin.,My chodíme společně na trh každou sobotu ráno.,ne,ne
+ils,oni,51,Ils jouent au football dans le parc après l'école.,Oni hrají po škole v parku fotbal.,ne,ne
+elles,ony,52,Elles préparent un exposé sur l'histoire de la photographie.,Ony připravují prezentaci o historii fotografie.,ne,ne
+mon,můj,53,"Mon sac est sous la chaise, juste à côté de la porte.",Můj batoh je pod židlí hned vedle dveří.,ne,ne
+ma,moje,54,Ma voiture est au garage parce que le moteur fait un bruit étrange.,"Moje auto je v servisu, protože motor vydává divný zvuk.",ne,ne
+ton,tvůj,55,Ton téléphone est resté sur la table de la cuisine.,Tvůj telefon zůstal na kuchyňském stole.,ne,ne
+ta,tvá,56,"Ta veste est très élégante, cette couleur te va très bien.","Tvá bunda je velmi elegantní, tahle barva ti moc sluší.",ne,ne
+une,"ona, jedna",57,Une amie de Prague vient nous rendre visite ce week-end.,Jedna kamarádka z Prahy nás přijede o víkendu navštívit.,ne,ne
+un,"on, jeden",58,Un voisin m'a aidé à porter les courses jusqu'à l'ascenseur.,Jeden soused mi pomohl vynést nákup až k výtahu.,ne,ne
+sœur,sestra,59,Ma sœur travaille comme architecte dans une grande entreprise.,Moje sestra pracuje jako architektka ve velké firmě.,ne,ne
+frère,bratr,60,Mon frère cuisine très bien et invente souvent de nouvelles recettes.,Můj bratr vaří velmi dobře a často vymýšlí nové recepty.,ne,ano
+mère,matka,61,Ma mère téléphone chaque dimanche pour prendre des nouvelles.,"Moje matka volá každou neděli, aby zjistila, jak se máme.",ne,ne
+père,otec,62,Mon père se lève tôt pour aller courir avant le travail.,"Můj otec vstává brzy, aby si před prací zaběhal.",ne,ne
+grand-mère,babička,63,Ma grand-mère connaît beaucoup de chansons anciennes par cœur.,Moje babička zná zpaměti spoustu starých písní.,ne,ne
+grand-père,dědeček,64,Mon grand-père aime jouer aux échecs avec ses amis.,Můj dědeček rád hraje šachy se svými přáteli.,ne,ne
+très,velmi,65,Ce film est très touchant et la musique est magnifique.,Tento film je velmi dojemný a hudba je nádherná.,ne,ne
+amusante,zábavný,66,"Cette histoire est vraiment amusante, tout le monde rit.","Ten příběh je opravdu zábavný, všichni se smějí.",ne,ne
+intéressant,zajímavý,67,"Le sujet est intéressant, alors je vais lire encore davantage.","To téma je zajímavé, takže si o něm přečtu ještě víc.",ne,ne
+méchant,"zlý, protivný",68,"Ce voisin paraît méchant, mais en réalité il est timide.","Ten soused působí protivně, ale ve skutečnosti je stydlivý.",ne,ano
+je suis,já jsem,69,"Je suis un peu fatigué aujourd'hui, mais je reste motivé.","Dnes jsem trochu unavený, ale zůstávám motivovaný.",ne,ne
+tu es,ty jsi,70,"Tu es toujours ponctuel, c'est très agréable pour travailler ensemble.","Ty jsi vždy dochvilný, a to je pro společnou práci moc příjemné.",ne,ne
+il est / elle est,"on je, ono je / ona je",71,"Il est très calme, mais elle est beaucoup plus énergique.","On je velmi klidný, ale ona je mnohem energičtější.",ne,ne
+sûr,jistý,72,"Je ne suis pas sûr de la réponse, je vais vérifier encore.","Nejsem si odpovědí jistý, ještě to ověřím.",ne,ne
+bien sûr,samozřejmě,73,"Bien sûr, je peux t'aider à préparer la présentation.","Samozřejmě, můžu ti pomoci připravit prezentaci.",ne,ano
+toujours,pořád vždycky,74,Elle arrive toujours en avance aux rendez-vous importants.,Na důležité schůzky přichází vždycky dřív.,ne,ne
+pas du tout,vůbec,75,Ce n'est pas du tout difficile quand on s'entraîne chaque jour.,"Není to vůbec těžké, když člověk trénuje každý den.",ne,ano
+mais,ale,76,"Je voulais sortir, mais il a commencé à pleuvoir.","Chtěl jsem jít ven, ale začalo pršet.",ne,ne
+voyager,cestovat,77,Il voyage souvent pour le travail.,Často cestuje kvůli práci.,ne,ne
+seule,sám,78,Je suis seule à la maison.,Jsem sama doma.,ne,ano
+déjà,"už, již",79,J’ai déjà mangé.,Už jsem jedl.,ne,ano
+à l’heure,"včas, na čas",80,Le train est à l’heure.,Vlak jede na čas.,ne,ne
+cadeau,dárek,81,"Merci pour le cadeau, ça me fait vraiment plaisir.","Děkuju za dárek, mám z toho opravdu radost.",ne,ano
+par,"skrz, přes",82,Je passe par le parc pour rentrer chez moi.,"Procházím přes park, abych se dostal domů.",ne,ne
+par,za jednotku,83,"Un café, c’est trois euros par personne.",Káva je tři eura na osobu.,ne,ne
+par,"od, kým",84,Ce livre est écrit par un auteur français.,Tuhle knihu napsal francouzský autor.,ne,ne
+près d’ici,blízko,85,"Il y a une boulangerie près d’ici, à deux minutes.","Je tu pekárna blízko odsud, dvě minuty.",ne,ne
+pull,svetr,86,"J’ai froid, je mets un pull.","Je mi zima, vezmu si svetr.",ne,ne
+salut,ahoj,87,Salut ! Ça va ?,Ahoj! Jak se máš?,ne,ne
+d’accord,"dobře, jasně",88,"D’accord, on se retrouve à six heures devant la gare.","Dobře, sejdeme se v šest před nádražím.",ne,ne
+repas,jídlo,89,"Le repas est prêt, on peut manger.","Jídlo je hotové, můžeme jíst.",ne,ano
+déjeuner,"obědvat, oběd",90,"On déjeune à midi, comme d’habitude.","Obědváme v poledne, jako obvykle.",ne,ano
+en général,"obecně, zpravidla, většinou",91,"En général, je me couche tôt pendant la semaine.",Obecně chodím ve všední dny spát brzy.,ne,ano
+parfois,někdy,92,Je viens parfois ici.,Chodím sem někdy.,ne,ano
+pause,přestávka,93,Il est toujours à l`heure pour la pause.,Je vždy včas na přestávce.,ano,ne
+pendant,"během, po dobu",94,Je lis pendant dix minutes avant de dormir.,Čtu deset minut před spaním.,ne,ano
+marcher,"chodit, kráčet",95,"Je marche jusqu’à la gare, c’est près d’ici.","Jdu pěšky na nádraží, je to blízko odsud.",ne,ne
+marcher,fungovat,96,Mon téléphone ne marche plus.,Můj telefon už nefunguje.,ne,ne
+ensemble,"společně, dohromady",97,"On mange ensemble ce soir, d’accord ?","Dnes večer budeme jíst spolu, platí?",ne,ano
+prêt,připravený,98,"Je suis prêt, on peut partir maintenant.","Jsem připravený, můžeme teď vyrazit.",ne,ne
+rester,zůstat,99,Je reste à la maison parce qu’il fait trop froid dehors.,"Zůstanu doma, protože je venku moc zima.",ne,ano
+robe,"šaty, róba",100,Elle porte une robe bleue pour la fête.,Má na sobě modré šaty na oslavu.,ne,ne
+chemise,košile,101,"Ma chemise est sale, je dois la laver.","Moje košile je špinavá, musím ji vyprat.",ne,ano
+ceinture,pásek,102,"Cette ceinture est trop grande, je prends une autre taille.","Tenhle pásek je moc velký, vezmu jinou velikost.",ne,ano
+escuses,omluva,103,"Je te présente mes excuses, je suis en retard.","Omlouvám se, jdu pozdě.",ne,ne
+chercher,hledat,104,Je cherche une boulangerie près d’ici.,Hledám pekárnu někde poblíž.,ne,ne
+bleue,modrý,105,Elle porte une robe bleue aujourd’hui.,Dnes má na sobě modré šaty.,ne,ano
+noir,černý,106,"Je préfère le café noir, sans sucre.","Mám radši černou kávu, bez cukru.",ne,ne
+quartier,čtvrť,107,"J’habite dans un quartier calme, près d’ici.","Bydlím v klidné čtvrti, nedaleko odsud.",ne,ano
+on y va,jdeme na to,108,On y va maintenant ?,Jdeme tam teď? / Vyrazíme teď?,ne,ano
+aujourd'hui,dnes,109,"Il fait beau aujourd’hui, on y va à pied.","Dnes je hezky, půjdeme tam pěšky.",ne,ne
+voisin,soused,110,"Mon voisin est gentil, mais il parle très fort.","Můj soused je hodný, ale mluví hodně nahlas.",ne,ne
+clé,klíč,111,"Je cherche ma clé, je ne la trouve pas.","Hledám klíč, nemůžu ho najít.",ne,ne
+viande,maso,112,Je ne mange pas de viande le soir.,Večer nejím maso.,ne,ano
+coûter,stát,113,"Ça coûte combien, s’il vous plaît ?","Kolik to stojí, prosím?",ne,ano
+des,nějaký (neurčitý člen množného čísla),114,"Je voudrais des macarons au café, s’il vous plaît.","Chtěl bych kávové makronky, prosím.",ne,ne
+jouer,hrát,115,jouer au football; jouer à un jeu; jouer du piano,hrát fotbal; hrát hru; hrát na piano,ne,ano
+fête,oslava,116,"Ce soir, on fait une fête chez moi.",Dnes večer děláme oslavu u mě.,ne,ano
+joli,"pěkný, hezký",117,"C’est un joli quartier, calme et propre.","Je to hezká čtvrť, klidná a čistá.",ne,ne
+content,"spokojený, jsem rád",118,Je suis content de te voir aujourd’hui.,"Jsem rád, že tě dnes vidím.",ne,ano
+jardin,zahrada,119,On mange dans le jardin quand il fait beau.,"Když je hezky, jíme na zahradě.",ne,ano
+coûter,stát,120,Combien ça va coûter au total ? C'est combien au total?,Kolik to bude stát celkem? Kolik je to celkem?,ne,ano
+combien,"kolik, jak moc",121,Combien de temps ça prend ?,Jak dlouho to trvá?,ne,ne
+chaise,židle,122,La chaise est près de la table.,Židle je u stolu.,ne,ano
+amener,"přináší, přivádí",123,Il amène son ami.,Přivádí svého kamaráda.,ne,ano
+comment,jak? / jakým způsobem?,124,Comment ça s’écrit ? Comment ça marche ?,Jak se to píše?  Jak to funguje?,ne,ano
+cinq,pět,125,Il y a cinq livres et quatre stylos sur la table.,Na stole je pět knih a čtyři pera.,ne,ano
+journée,den,126,Passe une bonne journée !,Měj hezký den!,ne,ano
+chez,u někoho /k někomu,127,"On mange chez moi ce soir, d’accord ?","Dnes večer jíme u mě doma, platí?",ne,ano
+cousin,bratranec,128,Mon cousin habite à Prague.,Můj bratranec bydlí v Praze.,ne,ano
+pays,země,129,"Ce pays est beau, mais il fait souvent très chaud.","Tahle země je krásná, ale často je tam velké horko.",ne,ano
+pourquoi,proč,130,Pourquoi tu es en retard aujourd’hui ?,Pourquoi tu es en retard aujourd’hui ?,ne,ano
+magnifique,nádherný,131,C’est un jardin magnifique.,To je nádherná zahrada.,ne,ano
+lourde,těžký,132,Cette valise est lourde.,Tenhle kufr je těžký.,ne,ano
+fatigué,unavený,133,Je suis fatigué aujourd’hui.,Dnes jsem unavený.,ne,ano
+boulangerie,pekárna,134,Il y a une boulangerie près d’ici.,Je tu pekařství nedaleko.,ne,ano
+maison,dům,135,Je rentre à la maison ce soir.,Dnes večer jdu domů.,ne,ano
+capitale,hlavní město,136,Paris est la capitale de la France.,Paříž je hlavní město Francie.,ne,ano
+adorer,"zbožňovat, milovat",137,"J’adore ce quartier, il est calme et joli.","Zbožňuju tuhle čtvrť, je klidná a hezká.",ne,ne
+un peu,trochu,138,"Je parle français un peu, mais je veux progresser.","Mluvím francouzsky trochu, ale chci se zlepšit.",ne,ne

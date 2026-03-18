@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px 'Helvetica Light'}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px 'Helvetica Light'; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1"># VocabularyFR - build a prenos na druhy Mac</p>
+<p class="p2"><br></p>
+<p class="p1">Tento postup pouzivej po kazde uprave aplikace.</p>
+<p class="p2"><br></p>
+<p class="p1">## 1) Build na tvem hlavnim Macu</p>
+<p class="p2"><br></p>
+<p class="p1">```bash</p>
+<p class="p1">cd ~/Desktop/PythonMF/VocabularyFR</p>
+<p class="p1">./build_and_zip.sh</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">Po dokonceni vznikne soubor:</p>
+<p class="p2"><br></p>
+<p class="p1">- `VocabularyFR.app.zip`</p>
+<p class="p2"><br></p>
+<p class="p1">## 2) Prenes ZIP na druhy Mac</p>
+<p class="p2"><br></p>
+<p class="p1">Prenes `VocabularyFR.app.zip` (AirDrop, iCloud, USB, ...).</p>
+<p class="p2"><br></p>
+<p class="p1">## 3) Spusteni na druhem Macu</p>
+<p class="p2"><br></p>
+<p class="p1">```bash</p>
+<p class="p1">cd ~/Desktop/PythonMF/VocabularyFR</p>
+<p class="p1"># nebo do slozky, kam jsi ZIP ulozil</p>
+<p class="p2"><br></p>
+<p class="p1">ditto -x -k VocabularyFR.app.zip .</p>
+<p class="p1">xattr -dr com.apple.quarantine VocabularyFR.app</p>
+<p class="p1">open VocabularyFR.app</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">## Kdyz se app nespusti</p>
+<p class="p2"><br></p>
+<p class="p1">```bash</p>
+<p class="p1">cd ~/Desktop/PythonFM/VocabularyFR</p>
+<p class="p1">chmod 755 VocabularyFR.app/Contents/MacOS/VocabularyFR</p>
+<p class="p1">codesign --force --deep --sign - VocabularyFR.app</p>
+<p class="p1">open VocabularyFR.app</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">## Kdyz app pouziva stary VocabularyFR.csv</p>
+<p class="p2"><br></p>
+<p class="p1">App pracuje se souborem v:</p>
+<p class="p2"><br></p>
+<p class="p1">- `~/Library/Application Support/VocabularyFR/VocabularyFR.csv`</p>
+<p class="p2"><br></p>
+<p class="p1">Nepracuje primo s CSV vedle `.app` na plose.</p>
+<p class="p2"><br></p>
+<p class="p1">Najdi vsechny kopie:</p>
+<p class="p2"><br></p>
+<p class="p1">```bash</p>
+<p class="p1">find ~ -maxdepth 6 -name "VocabularyFR.csv" 2&gt;/dev/null</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">A prepis aktivni soubor novou verzi:</p>
+<p class="p2"><br></p>
+<p class="p1">```bash</p>
+<p class="p1">cp "/cesta/k/novemu/VocabularyFR.csv" "$HOME/Library/Application Support/VocabularyFR/VocabularyFR.csv"</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">Kontrola:</p>
+<p class="p2"><br></p>
+<p class="p1">```bash</p>
+<p class="p1">diff -q "/cesta/k/novemu/VocabularyFR.csv" "$HOME/Library/Application Support/VocabularyFR/VocabularyFR.csv"</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">Pak app zavri a znovu otevri.</p>
+<p class="p2"><br></p>
+<p class="p1">## Obrazky a mapping.json (Pict)</p>
+<p class="p2"><br></p>
+<p class="p1">Po novych upravach app cte obrazky a mapovani z adresare `Pict`.</p>
+<p class="p2"><br></p>
+<p class="p1">Doporucene stabilni umisteni na Macu:</p>
+<p class="p2"><br></p>
+<p class="p1">- `~/Library/Application Support/VocabularyFR/Pict`</p>
+<p class="p2"><br></p>
+<p class="p1">V tomto adresari maji byt:</p>
+<p class="p2"><br></p>
+<p class="p1">- obrazky (`.png/.jpg/.jpeg/.webp/.gif`)</p>
+<p class="p1">- `mapping.json`</p>
+<p class="p2"><br></p>
+<p class="p1">### Jednorazove nasazeni Pict na cilovy Mac</p>
+<p class="p2"><br></p>
+<p class="p1">```bash</p>
+<p class="p1">SRC_PICT="/cesta/k/PythonMF/Pict"</p>
+<p class="p1">DST_PICT="$HOME/Library/Application Support/VocabularyFR/Pict"</p>
+<p class="p2"><br></p>
+<p class="p1">mkdir -p "$DST_PICT"</p>
+<p class="p1">rsync -av --delete "$SRC_PICT"/ "$DST_PICT"/</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">Kontrola:</p>
+<p class="p2"><br></p>
+<p class="p1">```bash</p>
+<p class="p1">ls -lh "$HOME/Library/Application Support/VocabularyFR/Pict"</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">Poznamka: pokud zmenis jen mapovani, staci prekopirovat pouze `mapping.json`.</p>
+<p class="p2"><br></p>
+<p class="p1">```bash</p>
+<p class="p1">cp "/cesta/k/PythonMF/Pict/mapping.json" "$HOME/Library/Application Support/VocabularyFR/Pict/mapping.json"</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">## Jednorazova migrace dat ze stare `.app` (kdyz se zapisovalo dovnitr app)</p>
+<p class="p2"><br></p>
+<p class="p1">Spust na Macu, kde je stara aplikace:</p>
+<p class="p2"><br></p>
+<p class="p1">```bash</p>
+<p class="p1">APP="/Applications/VocabularyFR.app"</p>
+<p class="p1">DATA_DIR="$HOME/Library/Application Support/VocabularyFR"</p>
+<p class="p1">TARGET="$DATA_DIR/VocabularyFR.csv"</p>
+<p class="p2"><br></p>
+<p class="p1">mkdir -p "$DATA_DIR"</p>
+<p class="p2"><br></p>
+<p class="p1"># Najdi CSV uvnitr app bundle (pokud existuje)</p>
+<p class="p1">INTERNAL_CSV="$(find "$APP/Contents" -name "VocabularyFR.csv" -print -quit 2&gt;/dev/null)"</p>
+<p class="p1">echo "INTERNAL_CSV=$INTERNAL_CSV"</p>
+<p class="p2"><br></p>
+<p class="p1">if [ -n "$INTERNAL_CSV" ]; then</p>
+<p class="p1"><span class="Apple-converted-space">  </span># Zalohuj aktualni uzivatelsky soubor (pokud uz existuje)</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if [ -f "$TARGET" ]; then</p>
+<p class="p1"><span class="Apple-converted-space">    </span>cp "$TARGET" "$TARGET.backup.$(date +%Y%m%d-%H%M%S)"</p>
+<p class="p1"><span class="Apple-converted-space">  </span>fi</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span># Presun data ze stare app do spravneho umisteni</p>
+<p class="p1"><span class="Apple-converted-space">  </span>cp "$INTERNAL_CSV" "$TARGET"</p>
+<p class="p1"><span class="Apple-converted-space">  </span>echo "Migrace hotova -&gt; $TARGET"</p>
+<p class="p1">else</p>
+<p class="p1"><span class="Apple-converted-space">  </span>echo "CSV uvnitr app nebylo nalezeno."</p>
+<p class="p1">fi</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">Kontrola:</p>
+<p class="p2"><br></p>
+<p class="p1">```bash</p>
+<p class="p1">ls -lh "$HOME/Library/Application Support/VocabularyFR/VocabularyFR.csv"</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">## Poznamky</p>
+<p class="p2"><br></p>
+<p class="p1">- Vzdy prenasej ZIP, ne samotnou `.app` (ZIP zachova prava souboru).</p>
+<p class="p1">- Pokud je v app tmavy rezim a neni videt text, prepni v macOS `System Settings -&gt; Appearance -&gt; Light`.</p>
+<p class="p1">- Pri update appky se uzivatelska data zachovaji, pokud zustane adresar:</p>
+<p class="p1"><span class="Apple-converted-space">  </span>- `~/Library/Application Support/VocabularyFR/`</p>
+<p class="p1"><span class="Apple-converted-space">  </span>(tedy hlavne `VocabularyFR.csv` a `Pict/`).</p>
+</body>
+</html>

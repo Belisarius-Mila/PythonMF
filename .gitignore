@@ -1,0 +1,24 @@
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+.pytest_cache/
+.mypy_cache/
+build/
+dist/
+.vscode/
+
+# Large loose files in the repo root
+/*.png
+/*.PNG
+/*.jpg
+/*.jpeg
+/*.JPG
+/*.JPEG
+/*.docx
+/*.spec
+
+# Local editor and build artifacts anywhere in the repo
+*.app/
+*.app.zip
+*.code-workspace
