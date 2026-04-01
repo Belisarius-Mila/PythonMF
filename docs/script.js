@@ -33,6 +33,35 @@ const state = {
   timeouts: [],
   audioContext: null,
   crackleTimerId: null,
+  currentVoiceAudio: null,
+};
+
+const manualAudio = {
+  intro2_short: {
+    src: "audio/intro2_short.m4a",
+    text: "Jestli me uz znas, jdeme objevovat, tak klikni na lupu.",
+    lang: "cs-CZ",
+  },
+  intro2_long_1: {
+    src: "audio/intro2_long_1.m4a",
+    text: "Ahoj, ja jsem Benzi. Tvuj dedecek je muj pritel a pozadal me, abych ti pomohl objevovat novy svet.",
+    lang: "cs-CZ",
+  },
+  intro2_long_2: {
+    src: "audio/intro2_long_2.m4a",
+    text: "Svet, kde se mluvi anglicky. To je rec, se kterou se pak domluvis skoro vsude, kam pujdes.",
+    lang: "cs-CZ",
+  },
+  intro2_long_3: {
+    src: "audio/intro2_long_3.m4a",
+    text: "Pojdme na to.",
+    lang: "cs-CZ",
+  },
+  intro3_line: {
+    src: "audio/intro3_line.m4a",
+    text: "Zacneme v mem rodnem lese.",
+    lang: "cs-CZ",
+  },
 };
 
 function clearSceneTimers() {
@@ -58,6 +87,11 @@ function setCaption(title, text) {
 function cancelSpeech() {
   if ("speechSynthesis" in window) {
     window.speechSynthesis.cancel();
+  }
+  if (state.currentVoiceAudio) {
+    state.currentVoiceAudio.pause();
+    state.currentVoiceAudio.currentTime = 0;
+    state.currentVoiceAudio = null;
   }
 }
 
@@ -106,6 +140,47 @@ function speak(text, lang = "cs-CZ") {
     window.speechSynthesis.speak(utterance);
     window.setTimeout(finish, estimateSpeechMs(text));
   });
+}
+
+function playAudioElement(audio, fallbackText, fallbackLang) {
+  return new Promise((resolve) => {
+    let resolved = false;
+    const finish = () => {
+      if (resolved) {
+        return;
+      }
+      resolved = true;
+      resolve();
+    };
+
+    audio.onended = finish;
+    audio.onerror = async () => {
+      state.currentVoiceAudio = null;
+      await speak(fallbackText, fallbackLang);
+      finish();
+    };
+
+    state.currentVoiceAudio = audio;
+    audio.currentTime = 0;
+    const playPromise = audio.play();
+    if (playPromise && typeof playPromise.then === "function") {
+      playPromise.catch(async () => {
+        state.currentVoiceAudio = null;
+        await speak(fallbackText, fallbackLang);
+        finish();
+      });
+    }
+  });
+}
+
+async function speakCue(cueKey) {
+  const cue = manualAudio[cueKey];
+  if (!cue) {
+    return;
+  }
+  const audio = new Audio(cue.src);
+  audio.preload = "auto";
+  await playAudioElement(audio, cue.text, cue.lang);
 }
 
 function ensureAudioContext() {
@@ -228,7 +303,7 @@ async function runIntro1(sequenceId) {
 async function runIntro2(sequenceId) {
   const shortText = "Jestli me uz znas, jdeme objevovat, tak klikni na lupu.";
   setCaption("Benzi", shortText);
-  await speak(shortText, "cs-CZ");
+  await speakCue("intro2_short");
   if (!isSceneActive("intro2", sequenceId)) {
     return;
   }
@@ -239,7 +314,15 @@ async function runIntro2(sequenceId) {
     }
     const longText = "Ahoj, ja jsem Benzi. Tvuj dedecek je muj pritel a pozadal me, abych ti pomohl objevovat novy svet. Svet, kde se mluvi anglicky. To je rec, se kterou se pak domluvis skoro vsude, kam pujdes. Pojdme na to.";
     setCaption("Benzi", longText);
-    await speak(longText, "cs-CZ");
+    await speakCue("intro2_long_1");
+    if (!isSceneActive("intro2", sequenceId)) {
+      return;
+    }
+    await speakCue("intro2_long_2");
+    if (!isSceneActive("intro2", sequenceId)) {
+      return;
+    }
+    await speakCue("intro2_long_3");
     if (!isSceneActive("intro2", sequenceId)) {
       return;
     }
@@ -250,7 +333,7 @@ async function runIntro2(sequenceId) {
 async function runIntro3(sequenceId) {
   const text = "Zacneme v mem rodnem lese.";
   setCaption("Benzi", text);
-  await speak(text, "cs-CZ");
+  await speakCue("intro3_line");
   if (!isSceneActive("intro3", sequenceId)) {
     return;
   }
