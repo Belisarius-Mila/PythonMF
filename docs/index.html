@@ -8,31 +8,20 @@
   </head>
   <body>
     <main class="app-shell">
-      <header class="topbar">
-        <div class="topbar-left">
-          <button class="ui-button" id="repeatButton" type="button">Znovu</button>
-        </div>
-        <div class="title-card">
-          <h1 id="sceneTitle">MMTX - Barevne houby</h1>
-        </div>
-        <div class="topbar-right">
-          <button class="mode-button active" id="colorsMode" type="button">Barvy</button>
-          <button class="mode-button" id="numbersMode" type="button">Cisla</button>
-        </div>
-      </header>
-
-      <section class="scene-card">
-        <div class="scene" id="scene">
-          <img class="scene-image" src="scene.jpg" alt="Lesni scena s houbami a pejskem">
-          <div class="scene-overlay" id="overlay"></div>
-          <div class="speech-bubble hidden" id="speechBubble"></div>
+      <section class="stage-card">
+        <div class="story-stage" id="storyStage">
+          <img class="story-image" id="sceneImage" src="intro1.png" alt="Benziho pribeh">
+          <div class="stage-vignette"></div>
+          <div class="brand-badge">MMTX</div>
+          <button class="magnifier-button hidden" id="magnifierButton" type="button" aria-label="Lupa">
+            <span class="magnifier-icon">🔍</span>
+          </button>
+          <div class="caption-panel" id="captionPanel">
+            <h2 class="caption-title" id="captionTitle">Benziho domek</h2>
+            <p class="caption-text" id="captionText">Klikni kamkoli nebo pockej chvilku.</p>
+          </div>
         </div>
       </section>
-
-      <footer class="bottom-panel">
-        <p class="bottom-title" id="bottomTitle">Klikni na houbu a ozve se barva.</p>
-        <p class="bottom-subtitle" id="bottomSubtitle">Cil: Red, Blue, Green, Orange</p>
-      </footer>
     </main>
 
     <script src="script.js"></script>
