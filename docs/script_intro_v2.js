@@ -2,6 +2,12 @@ const storyStage = document.getElementById("storyStage");
 const sceneImage = document.getElementById("sceneImage");
 const magnifierButton = document.getElementById("magnifierButton");
 const clickPrompt = document.getElementById("clickPrompt");
+const mushroomPortalButton = document.getElementById("mushroomPortalButton");
+const mushroomHud = document.getElementById("mushroomHud");
+const backToSignpostButton = document.getElementById("backToSignpostButton");
+const colorsModeButton = document.getElementById("colorsModeButton");
+const numbersModeButton = document.getElementById("numbersModeButton");
+const mushroomOverlay = document.getElementById("mushroomOverlay");
 
 const scenes = {
   intro1: {
@@ -16,7 +22,42 @@ const scenes = {
   intro4: {
     image: "intro4.png?v=20260402b",
   },
+  mushrooms: {
+    image: "scene.jpg?v=20260402b",
+  },
 };
+
+const numberWords = {
+  1: "One",
+  2: "Two",
+  3: "Three",
+  4: "Four",
+  5: "Five",
+};
+
+const colorHotspots = [
+  { id: "red", word: "Red", color: "#ff6464", rect: { x: 2.5, y: 21.5, w: 26.4, h: 26.8 } },
+  { id: "blue", word: "Blue", color: "#5f8bff", rect: { x: 26.7, y: 45.6, w: 10.1, h: 18.9 } },
+  { id: "green", word: "Green", color: "#6ed76a", rect: { x: 58.0, y: 53.4, w: 18.4, h: 18.5 } },
+  { id: "orange", word: "Orange", color: "#ffb14f", rect: { x: 73.6, y: 30.1, w: 21.8, h: 21.2 } },
+];
+
+const numberHotspots = [
+  { id: "red_1", group: "red", color: "#ff6464", rect: { x: 6.5, y: 29.3, w: 18.2, h: 10.4 }, label: { x: 15.6, y: 38.4 } },
+  { id: "red_2", group: "red", color: "#ff6464", rect: { x: 4.7, y: 61.5, w: 8.3, h: 7.8 }, label: { x: 7.2, y: 69.1 } },
+  { id: "blue_1", group: "blue", color: "#5f8bff", rect: { x: 28.6, y: 49.1, w: 7.2, h: 9.2 }, label: { x: 32.2, y: 56.0 } },
+  { id: "blue_2", group: "blue", color: "#5f8bff", rect: { x: 26.2, y: 73.0, w: 5.2, h: 7.0 }, label: { x: 28.6, y: 80.0 } },
+  { id: "blue_3", group: "blue", color: "#5f8bff", rect: { x: 33.2, y: 71.6, w: 4.8, h: 8.2 }, label: { x: 35.0, y: 75.3 } },
+  { id: "green_1", group: "green", color: "#6ed76a", rect: { x: 61.7, y: 65.2, w: 7.8, h: 7.8 }, label: { x: 65.6, y: 74.8 } },
+  { id: "green_2", group: "green", color: "#6ed76a", rect: { x: 57.7, y: 78.5, w: 5.9, h: 6.9 }, label: { x: 59.9, y: 84.6 } },
+  { id: "green_3", group: "green", color: "#6ed76a", rect: { x: 67.3, y: 78.5, w: 5.9, h: 6.7 }, label: { x: 69.9, y: 85.1 } },
+  { id: "green_4", group: "green", color: "#6ed76a", rect: { x: 64.2, y: 82.4, w: 6.2, h: 6.0 }, label: { x: 67.0, y: 89.2 } },
+  { id: "orange_1", group: "orange", color: "#ffb14f", rect: { x: 75.0, y: 38.3, w: 10.0, h: 4.4 }, label: { x: 79.5, y: 42.3 } },
+  { id: "orange_2", group: "orange", color: "#ffb14f", rect: { x: 87.2, y: 46.7, w: 6.4, h: 3.5 }, label: { x: 90.4, y: 49.1 } },
+  { id: "orange_3", group: "orange", color: "#ffb14f", rect: { x: 75.2, y: 53.3, w: 10.5, h: 4.4 }, label: { x: 80.5, y: 56.2 } },
+  { id: "orange_4", group: "orange", color: "#ffb14f", rect: { x: 88.2, y: 58.6, w: 8.8, h: 3.9 }, label: { x: 91.2, y: 61.4 } },
+  { id: "orange_5", group: "orange", color: "#ffb14f", rect: { x: 75.2, y: 65.8, w: 16.4, h: 6.2 }, label: { x: 83.8, y: 67.3 } },
+];
 
 const state = {
   currentScene: "intro1",
@@ -26,6 +67,15 @@ const state = {
   crackleTimerId: null,
   currentVoiceAudio: null,
   audioUnlocked: false,
+  mushroomMode: "colors",
+  activeHotspotId: "",
+  revealedNumbers: {},
+  groupCounts: {
+    red: 0,
+    blue: 0,
+    green: 0,
+    orange: 0,
+  },
 };
 
 const manualAudio = {
@@ -72,6 +122,9 @@ function isSceneActive(sceneName, sequenceId) {
 }
 
 function cancelSpeech() {
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
   if (state.currentVoiceAudio) {
     state.currentVoiceAudio.pause();
     state.currentVoiceAudio.currentTime = 0;
@@ -123,6 +176,25 @@ async function speakCue(cueKey) {
   const audio = new Audio(cue.src);
   audio.preload = "auto";
   await playAudioElement(audio);
+}
+
+function speakEnglish(text) {
+  if (!("speechSynthesis" in window) || !state.audioUnlocked) {
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-US";
+  utterance.rate = 0.86;
+  utterance.pitch = 1.0;
+  const englishVoice = window.speechSynthesis
+    .getVoices()
+    .find((voice) => voice.lang && voice.lang.toLowerCase().startsWith("en"));
+  if (englishVoice) {
+    utterance.voice = englishVoice;
+  }
+  window.speechSynthesis.speak(utterance);
 }
 
 function ensureAudioContext() {
@@ -207,6 +279,14 @@ function renderScene() {
   sceneImage.src = scene.image;
   magnifierButton.classList.toggle("hidden", state.currentScene !== "intro2");
   clickPrompt.classList.toggle("hidden", state.audioUnlocked || state.currentScene === "intro4");
+  mushroomPortalButton.classList.toggle("hidden", state.currentScene !== "intro4");
+  mushroomHud.classList.toggle("hidden", state.currentScene !== "mushrooms");
+  mushroomOverlay.classList.toggle("hidden", state.currentScene !== "mushrooms");
+  if (state.currentScene === "mushrooms") {
+    renderMushrooms();
+  } else {
+    mushroomOverlay.innerHTML = "";
+  }
 }
 
 function cleanupCurrentScene() {
@@ -230,6 +310,8 @@ function setScene(sceneName) {
     runIntro3(sequenceId);
   } else if (sceneName === "intro4") {
     runIntro4(sequenceId);
+  } else if (sceneName === "mushrooms") {
+    runMushrooms(sequenceId);
   }
 }
 
@@ -281,6 +363,103 @@ function runIntro4(sequenceId) {
   }
 }
 
+function resetMushrooms() {
+  state.mushroomMode = "colors";
+  state.activeHotspotId = "";
+  state.revealedNumbers = {};
+  state.groupCounts = { red: 0, blue: 0, green: 0, orange: 0 };
+}
+
+function currentMushroomHotspots() {
+  return state.mushroomMode === "colors" ? colorHotspots : numberHotspots;
+}
+
+function renderMushrooms() {
+  mushroomOverlay.innerHTML = "";
+
+  colorsModeButton.classList.toggle("active", state.mushroomMode === "colors");
+  numbersModeButton.classList.toggle("active", state.mushroomMode === "numbers");
+
+  currentMushroomHotspots().forEach((hotspot) => {
+    mushroomOverlay.appendChild(createHotspotButton(hotspot));
+  });
+
+  if (state.mushroomMode === "numbers") {
+    numberHotspots.forEach((hotspot) => {
+      const numberValue = state.revealedNumbers[hotspot.id];
+      if (numberValue) {
+        mushroomOverlay.appendChild(createNumberTag(hotspot, numberValue));
+      }
+    });
+  }
+}
+
+function createHotspotButton(hotspot) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "hotspot";
+  if (state.activeHotspotId === hotspot.id) {
+    button.classList.add("active");
+  }
+  button.style.left = `${hotspot.rect.x}%`;
+  button.style.top = `${hotspot.rect.y}%`;
+  button.style.width = `${hotspot.rect.w}%`;
+  button.style.height = `${hotspot.rect.h}%`;
+  button.style.setProperty("--hotspot-glow", hotspot.color);
+  button.setAttribute("aria-label", hotspot.id);
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    activateMushroomHotspot(hotspot);
+  });
+  return button;
+}
+
+function createNumberTag(hotspot, numberValue) {
+  const tag = document.createElement("div");
+  tag.className = "number-tag";
+  tag.textContent = String(numberValue);
+  tag.style.left = `${hotspot.label.x}%`;
+  tag.style.top = `${hotspot.label.y}%`;
+  return tag;
+}
+
+function activateMushroomHotspot(hotspot) {
+  state.activeHotspotId = hotspot.id;
+
+  if (state.mushroomMode === "colors") {
+    speakEnglish(hotspot.word);
+    renderMushrooms();
+    return;
+  }
+
+  let numberValue = state.revealedNumbers[hotspot.id];
+  if (!numberValue) {
+    state.groupCounts[hotspot.group] += 1;
+    numberValue = state.groupCounts[hotspot.group];
+    state.revealedNumbers[hotspot.id] = numberValue;
+  }
+
+  speakEnglish(numberWords[numberValue] ?? String(numberValue));
+  renderMushrooms();
+}
+
+function setMushroomMode(mode) {
+  state.mushroomMode = mode;
+  state.activeHotspotId = "";
+  state.revealedNumbers = {};
+  state.groupCounts = { red: 0, blue: 0, green: 0, orange: 0 };
+  if (state.currentScene === "mushrooms") {
+    renderMushrooms();
+  }
+}
+
+function runMushrooms(sequenceId) {
+  if (!isSceneActive("mushrooms", sequenceId)) {
+    return;
+  }
+  renderMushrooms();
+}
+
 async function primeAudio() {
   unlockAudio();
   await resumeAudioContext();
@@ -297,6 +476,11 @@ storyStage.addEventListener("click", async (event) => {
     setScene("intro4");
     return;
   }
+  if (state.currentScene === "intro4" && event.target === mushroomPortalButton) {
+    resetMushrooms();
+    setScene("mushrooms");
+    return;
+  }
   if (wasLocked && (state.currentScene === "intro2" || state.currentScene === "intro3")) {
     setScene(state.currentScene);
   }
@@ -310,6 +494,30 @@ magnifierButton.addEventListener("click", async (event) => {
   }
 });
 
+mushroomPortalButton.addEventListener("click", async (event) => {
+  event.stopPropagation();
+  await primeAudio();
+  if (state.currentScene === "intro4") {
+    resetMushrooms();
+    setScene("mushrooms");
+  }
+});
+
+backToSignpostButton.addEventListener("click", (event) => {
+  event.stopPropagation();
+  setScene("intro4");
+});
+
+colorsModeButton.addEventListener("click", (event) => {
+  event.stopPropagation();
+  setMushroomMode("colors");
+});
+
+numbersModeButton.addEventListener("click", (event) => {
+  event.stopPropagation();
+  setMushroomMode("numbers");
+});
+
 window.addEventListener("pointerdown", () => {
   primeAudio();
 }, { once: true });
@@ -317,5 +525,7 @@ window.addEventListener("pointerdown", () => {
 window.addEventListener("keydown", () => {
   primeAudio();
 }, { once: true });
+
+window.speechSynthesis?.addEventListener?.("voiceschanged", () => {});
 
 setScene("intro1");
