@@ -225,6 +225,7 @@ body {
   margin-right: auto;
 }
 
+.mushroom-hud #mushroomHelpButton,
 .mushroom-hud #colorsModeButton,
 .mushroom-hud #numbersModeButton {
   margin-left: 10px;

@@ -5,6 +5,7 @@ const clickPrompt = document.getElementById("clickPrompt");
 const mushroomPortalButton = document.getElementById("mushroomPortalButton");
 const mushroomHud = document.getElementById("mushroomHud");
 const backToSignpostButton = document.getElementById("backToSignpostButton");
+const mushroomHelpButton = document.getElementById("mushroomHelpButton");
 const colorsModeButton = document.getElementById("colorsModeButton");
 const numbersModeButton = document.getElementById("numbersModeButton");
 const mushroomOverlay = document.getElementById("mushroomOverlay");
@@ -70,6 +71,7 @@ const state = {
   mushroomMode: "colors",
   activeHotspotId: "",
   revealedNumbers: {},
+  mushroomResetTimeoutId: null,
   groupCounts: {
     red: 0,
     blue: 0,
@@ -104,11 +106,28 @@ const manualAudio = {
     text: "Zacneme v mem rodnem lese.",
     lang: "cs-CZ",
   },
+  mushrooms_colors_intro: {
+    src: "audio/mushrooms_colors_intro.m4a",
+    text: "Klikej na houby a poslouchej barvy.",
+    lang: "cs-CZ",
+  },
+  mushrooms_numbers_intro: {
+    src: "audio/mushrooms_numbers_intro.m4a",
+    text: "Klikej na houby a pocitej.",
+    lang: "cs-CZ",
+  },
 };
 
 function clearSceneTimers() {
   state.timeouts.forEach((timeoutId) => window.clearTimeout(timeoutId));
   state.timeouts = [];
+}
+
+function clearMushroomResetTimeout() {
+  if (state.mushroomResetTimeoutId) {
+    window.clearTimeout(state.mushroomResetTimeoutId);
+    state.mushroomResetTimeoutId = null;
+  }
 }
 
 function schedule(callback, delayMs) {
@@ -291,6 +310,7 @@ function renderScene() {
 
 function cleanupCurrentScene() {
   clearSceneTimers();
+  clearMushroomResetTimeout();
   cancelSpeech();
   stopCrackle();
 }
@@ -364,6 +384,7 @@ function runIntro4(sequenceId) {
 }
 
 function resetMushrooms() {
+  clearMushroomResetTimeout();
   state.mushroomMode = "colors";
   state.activeHotspotId = "";
   state.revealedNumbers = {};
@@ -441,9 +462,23 @@ function activateMushroomHotspot(hotspot) {
 
   speakEnglish(numberWords[numberValue] ?? String(numberValue));
   renderMushrooms();
+
+  if (Object.keys(state.revealedNumbers).length === numberHotspots.length) {
+    clearMushroomResetTimeout();
+    state.mushroomResetTimeoutId = window.setTimeout(() => {
+      if (state.currentScene !== "mushrooms" || state.mushroomMode !== "numbers") {
+        return;
+      }
+      state.activeHotspotId = "";
+      state.revealedNumbers = {};
+      state.groupCounts = { red: 0, blue: 0, green: 0, orange: 0 };
+      renderMushrooms();
+    }, 1500);
+  }
 }
 
 function setMushroomMode(mode) {
+  clearMushroomResetTimeout();
   state.mushroomMode = mode;
   state.activeHotspotId = "";
   state.revealedNumbers = {};
@@ -458,6 +493,14 @@ function runMushrooms(sequenceId) {
     return;
   }
   renderMushrooms();
+}
+
+function playMushroomHelp() {
+  if (state.mushroomMode === "colors") {
+    speakCue("mushrooms_colors_intro");
+  } else {
+    speakCue("mushrooms_numbers_intro");
+  }
 }
 
 async function primeAudio() {
@@ -506,6 +549,14 @@ mushroomPortalButton.addEventListener("click", async (event) => {
 backToSignpostButton.addEventListener("click", (event) => {
   event.stopPropagation();
   setScene("intro4");
+});
+
+mushroomHelpButton.addEventListener("click", async (event) => {
+  event.stopPropagation();
+  await primeAudio();
+  if (state.currentScene === "mushrooms") {
+    playMushroomHelp();
+  }
 });
 
 colorsModeButton.addEventListener("click", (event) => {
