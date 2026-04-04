@@ -3,12 +3,18 @@ const sceneImage = document.getElementById("sceneImage");
 const magnifierButton = document.getElementById("magnifierButton");
 const clickPrompt = document.getElementById("clickPrompt");
 const mushroomPortalButton = document.getElementById("mushroomPortalButton");
+const bunnyPortalButton = document.getElementById("bunnyPortalButton");
 const mushroomHud = document.getElementById("mushroomHud");
 const backToSignpostButton = document.getElementById("backToSignpostButton");
 const mushroomHelpButton = document.getElementById("mushroomHelpButton");
 const colorsModeButton = document.getElementById("colorsModeButton");
 const numbersModeButton = document.getElementById("numbersModeButton");
 const mushroomOverlay = document.getElementById("mushroomOverlay");
+const dialogueHud = document.getElementById("dialogueHud");
+const backFromDialogueButton = document.getElementById("backFromDialogueButton");
+const dialoguePanel = document.getElementById("dialoguePanel");
+const dialogueHelpButton = document.getElementById("dialogueHelpButton");
+const dialogueDoorButton = document.getElementById("dialogueDoorButton");
 
 const scenes = {
   intro1: {
@@ -25,6 +31,12 @@ const scenes = {
   },
   mushrooms: {
     image: "scene.jpg?v=20260402b",
+  },
+  benjiBunny: {
+    image: "BenjiBunnyScene.png?v=20260403b",
+  },
+  owlGarden: {
+    image: "MeetingOul1.PNG?v=20260404b",
   },
 };
 
@@ -72,6 +84,10 @@ const state = {
   activeHotspotId: "",
   revealedNumbers: {},
   mushroomResetTimeoutId: null,
+  visibleDialogueCount: 0,
+  dialoguePhase: "intro",
+  dialogueClickedIds: new Set(),
+  dialogueDoorState: "hidden",
   groupCounts: {
     red: 0,
     blue: 0,
@@ -118,9 +134,31 @@ const manualAudio = {
   },
 };
 
+const benjiBunnyDialogue = [
+  { id: 1, speaker: "Benji", cssClass: "benji", textEn: "Hello.", audioEn: "audio/english/benji_bunny_01_benji_hello_en.mp3", audioCz: "audio/czech/benji_bunny_01_benji_hello_cz.m4a" },
+  { id: 2, speaker: "Bunny", cssClass: "bunny", textEn: "Hello.", audioEn: "audio/english/benji_bunny_02_bunny_hello_en.mp3", audioCz: "audio/czech/benji_bunny_02_bunny_hello_cz.m4a" },
+  { id: 3, speaker: "Benji", cssClass: "benji", textEn: "I am Benji.", audioEn: "audio/english/benji_bunny_03_benji_i_am_benji_en.mp3", audioCz: "audio/czech/benji_bunny_03_benji_i_am_benji_cz.m4a" },
+  { id: 4, speaker: "Bunny", cssClass: "bunny", textEn: "I am Bunny.", audioEn: "audio/english/benji_bunny_04_bunny_i_am_bunny_en.mp3", audioCz: "audio/czech/benji_bunny_04_bunny_i_am_bunny_cz.m4a" },
+  { id: 5, speaker: "Benji", cssClass: "benji", textEn: "We can be friends.", audioEn: "audio/english/benji_bunny_05_benji_we_can_be_friends_en.mp3", audioCz: "audio/czech/benji_bunny_05_benji_we_can_be_friends_cz.m4a" },
+  { id: 6, speaker: "Bunny", cssClass: "bunny", textEn: "Yes, we can.", audioEn: "audio/english/benji_bunny_06_bunny_yes_we_can_en.mp3", audioCz: "audio/czech/benji_bunny_06_bunny_yes_we_can_cz.m4a" },
+  { id: 7, speaker: "Benji", cssClass: "benji", textEn: "Where do we go?", audioEn: "audio/english/benji_bunny_07_benji_where_do_we_go_en.mp3", audioCz: "audio/czech/benji_bunny_07_benji_where_do_we_go_cz.m4a" },
+  { id: 8, speaker: "Bunny", cssClass: "bunny", textEn: "We go to my house. OK?", audioEn: "audio/english/benji_bunny_08_bunny_we_go_to_my_house_ok_en.mp3", audioCz: "audio/czech/benji_bunny_08_bunny_we_go_to_my_house_ok_cz.m4a" },
+  { id: 9, speaker: "Benji", cssClass: "benji", textEn: "OK. Let's go.", audioEn: "audio/english/benji_bunny_09_benji_ok_lets_go_en.mp3", audioCz: "audio/czech/benji_bunny_09_benji_ok_lets_go_cz.m4a" },
+];
+
+const benjiBunnyHelpAudio = {
+  intro: "audio/czech/benji_bunny_scene_help_cz1.m4a",
+};
+
 function clearSceneTimers() {
   state.timeouts.forEach((timeoutId) => window.clearTimeout(timeoutId));
   state.timeouts = [];
+}
+
+function pauseMs(delayMs) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, delayMs);
+  });
 }
 
 function clearMushroomResetTimeout() {
@@ -145,9 +183,14 @@ function cancelSpeech() {
     window.speechSynthesis.cancel();
   }
   if (state.currentVoiceAudio) {
-    state.currentVoiceAudio.pause();
-    state.currentVoiceAudio.currentTime = 0;
+    const activeAudio = state.currentVoiceAudio;
     state.currentVoiceAudio = null;
+    if (typeof activeAudio._finishPlayback === "function") {
+      activeAudio._finishPlayback();
+      activeAudio._finishPlayback = null;
+    }
+    activeAudio.pause();
+    activeAudio.currentTime = 0;
   }
 }
 
@@ -157,15 +200,18 @@ function unlockAudio() {
 }
 function playAudioElement(audio) {
   return new Promise((resolve) => {
+    cancelSpeech();
     let resolved = false;
     const finish = () => {
       if (resolved) {
         return;
       }
       resolved = true;
+      audio._finishPlayback = null;
       resolve();
     };
 
+    audio._finishPlayback = finish;
     audio.onended = finish;
     audio.onerror = () => {
       state.currentVoiceAudio = null;
@@ -182,6 +228,15 @@ function playAudioElement(audio) {
       });
     }
   });
+}
+
+async function playAudioFile(src) {
+  if (!state.audioUnlocked || !src) {
+    return;
+  }
+  const audio = new Audio(src);
+  audio.preload = "auto";
+  await playAudioElement(audio);
 }
 
 async function speakCue(cueKey) {
@@ -297,14 +352,27 @@ function renderScene() {
   const scene = scenes[state.currentScene];
   sceneImage.src = scene.image;
   magnifierButton.classList.toggle("hidden", state.currentScene !== "intro2");
-  clickPrompt.classList.toggle("hidden", state.audioUnlocked || state.currentScene === "intro4");
+  clickPrompt.classList.toggle("hidden", state.audioUnlocked || state.currentScene === "intro4" || state.currentScene === "benjiBunny" || state.currentScene === "owlGarden");
   mushroomPortalButton.classList.toggle("hidden", state.currentScene !== "intro4");
+  bunnyPortalButton.classList.toggle("hidden", state.currentScene !== "intro4");
   mushroomHud.classList.toggle("hidden", state.currentScene !== "mushrooms");
   mushroomOverlay.classList.toggle("hidden", state.currentScene !== "mushrooms");
+  dialogueHud.classList.toggle("hidden", state.currentScene !== "benjiBunny");
+  dialoguePanel.classList.toggle("hidden", state.currentScene !== "benjiBunny");
+  dialogueDoorButton.classList.toggle("hidden", state.currentScene !== "benjiBunny" || state.dialogueDoorState === "hidden");
+  dialogueDoorButton.classList.toggle("ready-final", state.dialogueDoorState === "green");
+  dialogueDoorButton.classList.toggle("pulse-soft", state.currentScene === "benjiBunny" && state.dialogueDoorState !== "hidden");
+  dialogueHelpButton.classList.toggle("hidden", state.currentScene !== "benjiBunny" || state.dialoguePhase === "intro" || state.dialogueDoorState !== "hidden");
+  dialogueHelpButton.classList.toggle("pulse-soft", state.currentScene === "benjiBunny" && state.dialoguePhase !== "intro");
   if (state.currentScene === "mushrooms") {
     renderMushrooms();
   } else {
     mushroomOverlay.innerHTML = "";
+  }
+  if (state.currentScene === "benjiBunny") {
+    renderBenjiBunnyDialogue();
+  } else {
+    dialoguePanel.innerHTML = "";
   }
 }
 
@@ -332,6 +400,10 @@ function setScene(sceneName) {
     runIntro4(sequenceId);
   } else if (sceneName === "mushrooms") {
     runMushrooms(sequenceId);
+  } else if (sceneName === "benjiBunny") {
+    runBenjiBunny(sequenceId);
+  } else if (sceneName === "owlGarden") {
+    runOwlGarden(sequenceId);
   }
 }
 
@@ -495,6 +567,125 @@ function runMushrooms(sequenceId) {
   renderMushrooms();
 }
 
+function resetBenjiBunnyDialogue() {
+  state.visibleDialogueCount = 0;
+  state.dialoguePhase = "intro";
+  state.dialogueClickedIds = new Set();
+  state.dialogueDoorState = "hidden";
+}
+
+function renderBenjiBunnyDialogue() {
+  dialoguePanel.innerHTML = "";
+  let benjiIndex = 0;
+  let bunnyIndex = 0;
+  benjiBunnyDialogue.slice(0, state.visibleDialogueCount).forEach((item) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `dialogue-card ${item.cssClass}`;
+    if (state.dialogueClickedIds.has(item.id)) {
+      button.classList.add("done");
+    }
+
+    if (item.speaker === "Benji") {
+      button.style.left = "22px";
+      button.style.top = `${104 + benjiIndex * 58}px`;
+      benjiIndex += 1;
+    } else {
+      button.style.right = "22px";
+      button.style.top = `${104 + bunnyIndex * 58}px`;
+      bunnyIndex += 1;
+    }
+
+    const speaker = document.createElement("span");
+    speaker.className = "dialogue-speaker";
+    speaker.textContent = `${item.speaker}:`;
+
+    const line = document.createElement("span");
+    line.className = "dialogue-line";
+    const indexBadge = document.createElement("span");
+    indexBadge.className = "dialogue-index";
+    indexBadge.textContent = String(item.id);
+
+    const text = document.createElement("span");
+    text.className = "dialogue-text";
+    text.textContent = item.textEn;
+
+    line.appendChild(indexBadge);
+    line.appendChild(text);
+
+    button.appendChild(speaker);
+    button.appendChild(line);
+    button.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      if (state.dialoguePhase === "intro") {
+        return;
+      }
+      await primeAudio();
+      if (state.currentScene !== "benjiBunny") {
+        return;
+      }
+      state.dialogueClickedIds.add(item.id);
+      renderScene();
+      await playAudioFile(item.audioEn);
+      if (state.currentScene !== "benjiBunny") {
+        return;
+      }
+      await playAudioFile(item.audioCz);
+      if (state.currentScene !== "benjiBunny") {
+        return;
+      }
+      if (state.dialogueClickedIds.size === benjiBunnyDialogue.length) {
+        state.dialogueDoorState = "green";
+        renderScene();
+      }
+    });
+    dialoguePanel.appendChild(button);
+  });
+}
+
+async function runBenjiBunny(sequenceId) {
+  if (!isSceneActive("benjiBunny", sequenceId)) {
+    return;
+  }
+  state.visibleDialogueCount = 0;
+  state.dialoguePhase = "intro";
+  state.dialogueDoorState = "hidden";
+  renderScene();
+
+  for (let index = 0; index < benjiBunnyDialogue.length; index += 1) {
+    if (!isSceneActive("benjiBunny", sequenceId)) {
+      return;
+    }
+    state.visibleDialogueCount = index + 1;
+    renderScene();
+    await playAudioFile(benjiBunnyDialogue[index].audioEn);
+    if (!isSceneActive("benjiBunny", sequenceId)) {
+      return;
+    }
+    await playAudioFile(benjiBunnyDialogue[index].audioCz);
+    if (!isSceneActive("benjiBunny", sequenceId)) {
+      return;
+    }
+    await pauseMs(220);
+  }
+
+  if (!isSceneActive("benjiBunny", sequenceId)) {
+    return;
+  }
+  state.dialoguePhase = "practice";
+  renderScene();
+}
+
+function runOwlGarden(sequenceId) {
+  if (!isSceneActive("owlGarden", sequenceId)) {
+    return;
+  }
+}
+
+async function playBenjiBunnyHelp() {
+  await playAudioFile(benjiBunnyHelpAudio.intro);
+}
+
 function playMushroomHelp() {
   if (state.mushroomMode === "colors") {
     speakCue("mushrooms_colors_intro");
@@ -524,6 +715,11 @@ storyStage.addEventListener("click", async (event) => {
     setScene("mushrooms");
     return;
   }
+  if (state.currentScene === "intro4" && event.target === bunnyPortalButton) {
+    resetBenjiBunnyDialogue();
+    setScene("benjiBunny");
+    return;
+  }
   if (wasLocked && (state.currentScene === "intro2" || state.currentScene === "intro3")) {
     setScene(state.currentScene);
   }
@@ -546,9 +742,42 @@ mushroomPortalButton.addEventListener("click", async (event) => {
   }
 });
 
+bunnyPortalButton.addEventListener("click", async (event) => {
+  event.stopPropagation();
+  await primeAudio();
+  if (state.currentScene === "intro4") {
+    resetBenjiBunnyDialogue();
+    setScene("benjiBunny");
+  }
+});
+
 backToSignpostButton.addEventListener("click", (event) => {
   event.stopPropagation();
   setScene("intro4");
+});
+
+backFromDialogueButton.addEventListener("click", (event) => {
+  event.stopPropagation();
+  setScene("intro4");
+});
+
+dialogueHelpButton.addEventListener("click", async (event) => {
+  event.stopPropagation();
+  await primeAudio();
+  if (state.currentScene === "benjiBunny") {
+    await playBenjiBunnyHelp();
+  }
+});
+
+dialogueDoorButton.addEventListener("click", async (event) => {
+  event.stopPropagation();
+  await primeAudio();
+  if (state.currentScene !== "benjiBunny" || state.dialogueDoorState === "hidden") {
+    return;
+  }
+  if (state.dialogueDoorState === "green") {
+    setScene("owlGarden");
+  }
 });
 
 mushroomHelpButton.addEventListener("click", async (event) => {

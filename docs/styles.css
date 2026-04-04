@@ -66,8 +66,16 @@ body {
 
 .scene-overlay.hidden,
 .mushroom-portal.hidden,
-.mushroom-hud.hidden {
+.bunny-portal.hidden,
+.mushroom-hud.hidden,
+.dialogue-hud.hidden,
+.dialogue-panel.hidden,
+.dialogue-door.hidden {
   display: none;
+}
+
+.hidden {
+  display: none !important;
 }
 
 .stage-vignette {
@@ -127,17 +135,18 @@ body {
 }
 
 .mushroom-portal,
+.bunny-portal,
 .hud-button,
 .hotspot,
-.number-tag {
+.number-tag,
+.dialogue-card {
   border: 3px solid var(--line);
   box-shadow: var(--shadow);
 }
 
-.mushroom-portal {
+.mushroom-portal,
+.bunny-portal {
   position: absolute;
-  right: 17.5%;
-  top: 37%;
   width: min(15vw, 190px);
   min-width: 100px;
   aspect-ratio: 1 / 1;
@@ -151,13 +160,26 @@ body {
   z-index: 7;
 }
 
+.mushroom-portal {
+  right: 17.5%;
+  top: 37%;
+}
+
+.bunny-portal {
+  right: 30.8%;
+  top: 48%;
+  background: rgba(255, 250, 245, 0.95);
+}
+
 .mushroom-portal:hover,
+.bunny-portal:hover,
 .hud-button:hover,
 .hotspot:hover {
   transform: scale(1.04);
 }
 
-.mushroom-portal-icon {
+.mushroom-portal-icon,
+.bunny-portal-icon {
   font-size: clamp(2rem, 4.4vw, 4rem);
   line-height: 1;
 }
@@ -190,6 +212,13 @@ body {
   background: #ffb14f;
 }
 
+.bunny-portal-label {
+  font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #496149;
+}
+
 .mushroom-hud {
   position: absolute;
   top: 16px;
@@ -200,6 +229,22 @@ body {
   align-items: flex-start;
   pointer-events: none;
   z-index: 8;
+}
+
+.dialogue-hud {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+  z-index: 8;
+}
+
+.dialogue-hud > * {
+  pointer-events: auto;
 }
 
 .mushroom-hud > * {
@@ -274,6 +319,124 @@ body {
   z-index: 6;
 }
 
+.dialogue-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+}
+
+.dialogue-card {
+  position: absolute;
+  width: min(21.5vw, 228px);
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 22px;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: transform 140ms ease, background 140ms ease;
+  pointer-events: auto;
+  text-align: left;
+}
+
+.dialogue-card:hover {
+  transform: translateY(-2px);
+  background: #ffffff;
+}
+
+.dialogue-card.benji {
+  border-color: #b07c55;
+}
+
+.dialogue-card.bunny {
+  border-color: #8ead7a;
+}
+
+.dialogue-card.done {
+  background: rgba(246, 252, 241, 0.96);
+}
+
+.dialogue-speaker {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 800;
+  margin-bottom: 2px;
+  opacity: 0.72;
+}
+
+.dialogue-index {
+  display: inline-grid;
+  place-items: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  margin-right: 8px;
+  border-radius: 999px;
+  background: rgba(255, 214, 96, 0.95);
+  color: #3f3010;
+  font-size: 0.86rem;
+  font-weight: 900;
+  vertical-align: middle;
+}
+
+.dialogue-line {
+  display: flex;
+  align-items: flex-start;
+  font-size: clamp(0.92rem, 1.3vw, 1.08rem);
+  line-height: 1.12;
+  font-weight: 700;
+  gap: 0;
+}
+
+.dialogue-text {
+  display: inline-block;
+  padding-top: 0.08rem;
+}
+
+.dialogue-door {
+  position: absolute;
+  right: 3.6%;
+  bottom: 8.2%;
+  width: min(10vw, 110px);
+  height: min(10vw, 110px);
+  min-width: 74px;
+  min-height: 74px;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--line);
+  border-radius: 24px;
+  background: #f3d55d;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  z-index: 8;
+  transition: transform 140ms ease, background 140ms ease;
+}
+
+.dialogue-door.ready-final {
+  background: #89d36c;
+}
+
+.dialogue-door:hover {
+  transform: scale(1.04);
+}
+
+.dialogue-door-icon {
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  line-height: 1;
+}
+
+.pulse-soft {
+  animation: pulse-soft 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
 @keyframes click-pulse {
   0%,
   100% {
@@ -310,6 +473,11 @@ body {
     border-radius: 22px;
   }
 
+  .bunny-portal {
+    min-width: 86px;
+    border-radius: 22px;
+  }
+
   .portal-dot {
     width: 12px;
     height: 12px;
@@ -326,5 +494,21 @@ body {
     width: 40px;
     height: 40px;
     font-size: 1.35rem;
+  }
+
+  .dialogue-door {
+    min-width: 66px;
+    min-height: 66px;
+    border-radius: 20px;
+  }
+
+  .dialogue-panel {
+    inset: 0;
+  }
+
+  .dialogue-card {
+    width: min(33vw, 188px);
+    border-radius: 18px;
+    padding: 8px 10px;
   }
 }

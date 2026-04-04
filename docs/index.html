@@ -28,13 +28,25 @@
               <span class="portal-dot portal-orange"></span>
             </span>
           </button>
+          <button class="bunny-portal hidden" id="bunnyPortalButton" type="button" aria-label="Benji a Bunny">
+            <span class="bunny-portal-icon">🐰</span>
+            <span class="bunny-portal-label">Friends</span>
+          </button>
           <div class="mushroom-hud hidden" id="mushroomHud">
             <button class="hud-button" id="backToSignpostButton" type="button" aria-label="Zpet">↩</button>
             <button class="hud-button" id="mushroomHelpButton" type="button" aria-label="Napoveda">🔊</button>
             <button class="hud-button active" id="colorsModeButton" type="button" aria-label="Barvy">🎨</button>
             <button class="hud-button" id="numbersModeButton" type="button" aria-label="Cisla">123</button>
           </div>
+          <div class="dialogue-hud hidden" id="dialogueHud">
+            <button class="hud-button" id="backFromDialogueButton" type="button" aria-label="Zpet">↩</button>
+            <button class="hud-button pulse-soft" id="dialogueHelpButton" type="button" aria-label="Napoveda">🎤</button>
+          </div>
           <div class="scene-overlay hidden" id="mushroomOverlay"></div>
+          <div class="dialogue-panel hidden" id="dialoguePanel"></div>
+          <button class="dialogue-door hidden" id="dialogueDoorButton" type="button" aria-label="Dvere">
+            <span class="dialogue-door-icon">🚪</span>
+          </button>
         </div>
       </section>
     </main>
