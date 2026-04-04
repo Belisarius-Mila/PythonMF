@@ -101,3 +101,4 @@ Nemigrovat vse najednou. Udelat to po krocich:
 - nedelat velky refaktor pred dalsi funkcni scenou
 - nejdriv dodelat dalsi obsah
 - restrukturalizaci delat az po dalsim stabilnim checkpointu
+- nesahat ted na strukturu jen proto, ze je soubor velky; aktualne je dulezitejsi stabilita funkcnich scen
