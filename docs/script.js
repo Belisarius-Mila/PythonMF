@@ -15,6 +15,12 @@ const backFromDialogueButton = document.getElementById("backFromDialogueButton")
 const dialoguePanel = document.getElementById("dialoguePanel");
 const dialogueHelpButton = document.getElementById("dialogueHelpButton");
 const dialogueDoorButton = document.getElementById("dialogueDoorButton");
+const owlGardenHud = document.getElementById("owlGardenHud");
+const backFromOwlGardenButton = document.getElementById("backFromOwlGardenButton");
+const owlGardenHelpButton = document.getElementById("owlGardenHelpButton");
+const owlGardenOverlay = document.getElementById("owlGardenOverlay");
+const owlGardenPrompt = document.getElementById("owlGardenPrompt");
+const owlGardenDoneBadge = document.getElementById("owlGardenDoneBadge");
 
 const scenes = {
   intro1: {
@@ -72,6 +78,13 @@ const numberHotspots = [
   { id: "orange_5", group: "orange", color: "#ffb14f", rect: { x: 75.2, y: 65.8, w: 16.4, h: 6.2 }, label: { x: 83.8, y: 67.3 } },
 ];
 
+const owlGardenHotspots = [
+  { id: "owl", word: "Owl", color: "#f1c75b", rect: { x: 64.2, y: 21.8, w: 18.6, h: 41.2 } },
+  { id: "stone_one", word: "One", color: "#ffb14f", rect: { x: 15.6, y: 62.8, w: 20.0, h: 7.2 } },
+  { id: "stone_two", word: "Two", color: "#ffb14f", rect: { x: 10.8, y: 71.8, w: 17.4, h: 7.0 } },
+  { id: "stone_three", word: "Three", color: "#ffb14f", rect: { x: 30.0, y: 77.8, w: 18.0, h: 7.0 } },
+];
+
 const state = {
   currentScene: "intro1",
   sequenceId: 0,
@@ -88,6 +101,8 @@ const state = {
   dialoguePhase: "intro",
   dialogueClickedIds: new Set(),
   dialogueDoorState: "hidden",
+  owlGardenActiveId: "",
+  owlGardenFoundIds: new Set(),
   groupCounts: {
     red: 0,
     blue: 0,
@@ -359,6 +374,10 @@ function renderScene() {
   mushroomOverlay.classList.toggle("hidden", state.currentScene !== "mushrooms");
   dialogueHud.classList.toggle("hidden", state.currentScene !== "benjiBunny");
   dialoguePanel.classList.toggle("hidden", state.currentScene !== "benjiBunny");
+  owlGardenHud.classList.toggle("hidden", state.currentScene !== "owlGarden");
+  owlGardenOverlay.classList.toggle("hidden", state.currentScene !== "owlGarden");
+  owlGardenPrompt.classList.toggle("hidden", state.currentScene !== "owlGarden");
+  owlGardenDoneBadge.classList.toggle("hidden", state.currentScene !== "owlGarden" || state.owlGardenFoundIds.size !== owlGardenHotspots.length);
   dialogueDoorButton.classList.toggle("hidden", state.currentScene !== "benjiBunny" || state.dialogueDoorState === "hidden");
   dialogueDoorButton.classList.toggle("ready-final", state.dialogueDoorState === "green");
   dialogueDoorButton.classList.toggle("pulse-soft", state.currentScene === "benjiBunny" && state.dialogueDoorState !== "hidden");
@@ -373,6 +392,11 @@ function renderScene() {
     renderBenjiBunnyDialogue();
   } else {
     dialoguePanel.innerHTML = "";
+  }
+  if (state.currentScene === "owlGarden") {
+    renderOwlGarden();
+  } else {
+    owlGardenOverlay.innerHTML = "";
   }
 }
 
@@ -574,6 +598,11 @@ function resetBenjiBunnyDialogue() {
   state.dialogueDoorState = "hidden";
 }
 
+function resetOwlGarden() {
+  state.owlGardenActiveId = "";
+  state.owlGardenFoundIds = new Set();
+}
+
 function renderBenjiBunnyDialogue() {
   dialoguePanel.innerHTML = "";
   let benjiIndex = 0;
@@ -680,10 +709,21 @@ function runOwlGarden(sequenceId) {
   if (!isSceneActive("owlGarden", sequenceId)) {
     return;
   }
+  resetOwlGarden();
+  renderScene();
+  schedule(() => {
+    if (isSceneActive("owlGarden", sequenceId)) {
+      playOwlGardenHelp();
+    }
+  }, 420);
 }
 
 async function playBenjiBunnyHelp() {
   await playAudioFile(benjiBunnyHelpAudio.intro);
+}
+
+function playOwlGardenHelp() {
+  speakEnglish("Click owl. Then count the stones. One, two, three.");
 }
 
 function playMushroomHelp() {
@@ -761,6 +801,11 @@ backFromDialogueButton.addEventListener("click", (event) => {
   setScene("intro4");
 });
 
+backFromOwlGardenButton.addEventListener("click", (event) => {
+  event.stopPropagation();
+  setScene("intro4");
+});
+
 dialogueHelpButton.addEventListener("click", async (event) => {
   event.stopPropagation();
   await primeAudio();
@@ -777,6 +822,14 @@ dialogueDoorButton.addEventListener("click", async (event) => {
   }
   if (state.dialogueDoorState === "green") {
     setScene("owlGarden");
+  }
+});
+
+owlGardenHelpButton.addEventListener("click", async (event) => {
+  event.stopPropagation();
+  await primeAudio();
+  if (state.currentScene === "owlGarden") {
+    playOwlGardenHelp();
   }
 });
 
@@ -797,6 +850,57 @@ numbersModeButton.addEventListener("click", (event) => {
   event.stopPropagation();
   setMushroomMode("numbers");
 });
+
+function renderOwlGarden() {
+  owlGardenOverlay.innerHTML = "";
+  owlGardenPrompt.textContent = `🦉 ${state.owlGardenFoundIds.size}/${owlGardenHotspots.length}`;
+
+  owlGardenHotspots.forEach((hotspot) => {
+    owlGardenOverlay.appendChild(createOwlGardenHotspotButton(hotspot));
+  });
+}
+
+function createOwlGardenHotspotButton(hotspot) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "hotspot owl-garden-hotspot";
+  if (state.owlGardenActiveId === hotspot.id) {
+    button.classList.add("active");
+  }
+  if (state.owlGardenFoundIds.has(hotspot.id)) {
+    button.classList.add("done");
+  }
+  button.style.left = `${hotspot.rect.x}%`;
+  button.style.top = `${hotspot.rect.y}%`;
+  button.style.width = `${hotspot.rect.w}%`;
+  button.style.height = `${hotspot.rect.h}%`;
+  button.style.setProperty("--hotspot-glow", hotspot.color);
+  button.setAttribute("aria-label", hotspot.word);
+  button.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    await primeAudio();
+    activateOwlGardenHotspot(hotspot);
+  });
+  return button;
+}
+
+function activateOwlGardenHotspot(hotspot) {
+  const wasComplete = state.owlGardenFoundIds.size === owlGardenHotspots.length;
+  state.owlGardenActiveId = hotspot.id;
+  state.owlGardenFoundIds.add(hotspot.id);
+  renderOwlGarden();
+  speakEnglish(hotspot.word);
+
+  const isComplete = state.owlGardenFoundIds.size === owlGardenHotspots.length;
+  if (!wasComplete && isComplete) {
+    schedule(() => {
+      if (state.currentScene === "owlGarden") {
+        speakEnglish("Well done");
+      }
+    }, 900);
+    renderScene();
+  }
+}
 
 window.addEventListener("pointerdown", () => {
   primeAudio();

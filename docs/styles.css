@@ -69,7 +69,11 @@ body {
 .bunny-portal.hidden,
 .mushroom-hud.hidden,
 .dialogue-hud.hidden,
+.owl-garden-hud.hidden,
 .dialogue-panel.hidden,
+.owl-garden-overlay.hidden,
+.owl-garden-prompt.hidden,
+.owl-garden-done.hidden,
 .dialogue-door.hidden {
   display: none;
 }
@@ -243,7 +247,23 @@ body {
   z-index: 8;
 }
 
+.owl-garden-hud {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+  z-index: 8;
+}
+
 .dialogue-hud > * {
+  pointer-events: auto;
+}
+
+.owl-garden-hud > * {
   pointer-events: auto;
 }
 
@@ -324,6 +344,65 @@ body {
   inset: 0;
   z-index: 7;
   pointer-events: none;
+}
+
+.owl-garden-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+}
+
+.owl-garden-overlay > * {
+  pointer-events: auto;
+}
+
+.owl-garden-hotspot {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.owl-garden-hotspot.done {
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.88), 0 0 0 5px var(--hotspot-glow);
+  background: color-mix(in srgb, var(--hotspot-glow) 26%, transparent);
+}
+
+.owl-garden-prompt,
+.owl-garden-done {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--line);
+  box-shadow: var(--shadow);
+  z-index: 8;
+  pointer-events: none;
+}
+
+.owl-garden-prompt {
+  left: 20px;
+  bottom: 20px;
+  min-width: 116px;
+  min-height: 64px;
+  padding: 10px 16px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #4a5d34;
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.owl-garden-done {
+  right: 24px;
+  bottom: 24px;
+  width: min(9vw, 94px);
+  height: min(9vw, 94px);
+  min-width: 70px;
+  min-height: 70px;
+  border-radius: 999px;
+  background: #89d36c;
+  color: #ffffff;
+  font-size: clamp(2rem, 3.2vw, 2.8rem);
+  font-weight: 900;
 }
 
 .dialogue-card {
@@ -510,5 +589,21 @@ body {
     width: min(33vw, 188px);
     border-radius: 18px;
     padding: 8px 10px;
+  }
+
+  .owl-garden-prompt {
+    left: 12px;
+    bottom: 12px;
+    min-width: 96px;
+    min-height: 54px;
+    border-radius: 18px;
+    font-size: 1rem;
+  }
+
+  .owl-garden-done {
+    right: 14px;
+    bottom: 14px;
+    min-width: 58px;
+    min-height: 58px;
   }
 }
