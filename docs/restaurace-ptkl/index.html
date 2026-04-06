@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Restaurant Lines</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="app-card">
+        <header class="hero">
+          <div class="hero-copy">
+            <p class="hero-kicker">Restaurant Dialogue Practice</p>
+            <h1>Restaurant Lines</h1>
+            <p class="hero-subtitle" id="sectionTitle">Loading section...</p>
+          </div>
+          <nav class="section-nav" aria-label="Sections" id="sectionNav"></nav>
+        </header>
+
+        <section class="stage-grid">
+          <article class="dialogue-card">
+            <div class="dialogue-toolbar">
+              <div>
+                <p class="label">Current Line</p>
+                <h2 id="currentSpeaker">Speaker</h2>
+              </div>
+              <p class="counter" id="lineCounter">0 / 0</p>
+            </div>
+
+            <div class="focus-line" id="focusLine">
+              <p class="focus-english" id="focusEnglish">Loading...</p>
+              <p class="focus-czech" id="focusCzech"></p>
+            </div>
+
+            <div class="transcript" id="transcript"></div>
+
+            <section class="portrait-strip">
+              <div class="portrait-frame">
+                <img id="speakerPortrait" alt="" hidden>
+                <div class="portrait-placeholder" id="portraitPlaceholder">Portrait</div>
+              </div>
+              <div class="portrait-meta">
+                <p class="label">Speaker</p>
+                <p class="portrait-name" id="portraitName">No portrait</p>
+              </div>
+            </section>
+
+            <div class="directions-overlay hidden" id="directionsOverlay" aria-live="polite">
+              <div class="directions-arrow" id="directionsArrow"></div>
+              <div class="directions-text" id="directionsText"></div>
+            </div>
+          </article>
+
+          <aside class="scene-card">
+            <div class="scene-media">
+              <img id="sceneImage" alt="Restaurant scene">
+            </div>
+            <div class="scene-caption">
+              <p class="label">Scene</p>
+              <p id="sceneCaption">Section scene</p>
+            </div>
+          </aside>
+        </section>
+
+        <footer class="control-bar">
+          <button class="control-button" id="restartButton" type="button">Restart</button>
+          <button class="control-button" id="readButton" type="button">Read</button>
+          <button class="control-button" id="nextButton" type="button">Next</button>
+          <button class="control-button" id="directionsButton" type="button">Directions</button>
+        </footer>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
