@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Colors and Numbers Web</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="app-card">
+        <header class="hero">
+          <div>
+            <h1>Colors and Numbers</h1>
+          </div>
+          <nav class="mode-nav" aria-label="Screens">
+            <button class="mode-chip active" data-screen-target="main" type="button">Main</button>
+            <button class="mode-chip" data-screen-target="numbers" type="button">Numbers</button>
+            <button class="mode-chip" data-screen-target="turbo" type="button">Turbo</button>
+            <button class="mode-chip" data-screen-target="colors" type="button">Colors</button>
+          </nav>
+        </header>
+
+        <section class="screen active" data-screen="main">
+          <div class="math-board" id="mainBoard"></div>
+
+          <div class="status-strip">
+            <article class="status-card">
+              <span class="status-label">Number</span>
+              <strong class="status-value" id="numberStatus">NUMBER</strong>
+            </article>
+            <article class="status-card">
+              <span class="status-label">Color</span>
+              <strong class="status-value" id="colorStatus">COLOR</strong>
+            </article>
+          </div>
+
+          <div class="action-row">
+            <button class="action-button primary" id="newExampleButton" type="button">New</button>
+            <button class="action-button" data-screen-target="numbers" type="button">Numbers</button>
+            <button class="action-button" data-screen-target="turbo" type="button">Turbo</button>
+            <button class="action-button" data-screen-target="colors" type="button">Colors</button>
+          </div>
+        </section>
+
+        <section class="screen" data-screen="numbers">
+          <div class="numbers-board" id="numbersBoard"></div>
+          <div class="action-row">
+            <button class="action-button primary" id="numbersNewButton" type="button">New</button>
+            <button class="action-button" id="numbersResultButton" type="button">Result</button>
+            <button class="action-button" data-screen-target="main" type="button">Back</button>
+          </div>
+        </section>
+
+        <section class="screen" data-screen="turbo">
+          <div class="practice-stage turbo-stage">
+            <p class="practice-word" id="turboWord"></p>
+            <p class="practice-number" id="turboNumber"></p>
+            <div class="icon-grid" id="turboIcons"></div>
+            <p class="practice-hint" id="turboHint">Go = start/continue, End = pause</p>
+          </div>
+          <div class="action-row">
+            <button class="action-button" data-screen-target="main" type="button">Back</button>
+            <button class="action-button primary" id="turboGoButton" type="button">Go</button>
+            <button class="action-button" id="turboEndButton" type="button">End</button>
+          </div>
+        </section>
+
+        <section class="screen" data-screen="colors">
+          <div class="practice-stage colors-stage">
+            <div class="shape-stage">
+              <div class="shape-object circle" id="colorShape"></div>
+            </div>
+            <p class="practice-word colors-word" id="colorsWord"></p>
+            <p class="practice-hint" id="colorsHint">Go = start, Stop = pause</p>
+          </div>
+          <div class="action-row">
+            <button class="action-button" data-screen-target="main" type="button">Back</button>
+            <button class="action-button primary" id="colorsGoButton" type="button">Go</button>
+            <button class="action-button" id="colorsStopButton" type="button">Stop</button>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
