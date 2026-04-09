@@ -544,6 +544,42 @@ body {
   font-weight: 900;
 }
 
+.owl-garden-outro-bubble {
+  position: absolute;
+  z-index: 8;
+  width: min(28vw, 340px);
+  padding: 12px 16px;
+  border: 3px solid var(--line);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow);
+  pointer-events: none;
+}
+
+.owl-garden-outro-bubble.benji {
+  background: rgba(255, 248, 242, 0.97);
+}
+
+.owl-garden-outro-bubble.bunny {
+  background: rgba(245, 252, 244, 0.97);
+}
+
+.owl-garden-outro-speaker {
+  display: block;
+  margin-bottom: 4px;
+  color: rgba(49, 69, 92, 0.76);
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.owl-garden-outro-text {
+  display: block;
+  color: #31455c;
+  font-size: clamp(0.98rem, 1.45vw, 1.16rem);
+  line-height: 1.24;
+  font-weight: 800;
+}
+
 .dialogue-card {
   position: absolute;
   width: min(21.5vw, 228px);
@@ -779,5 +815,15 @@ body {
     bottom: 14px;
     min-width: 58px;
     min-height: 58px;
+  }
+
+  .owl-garden-outro-bubble {
+    width: min(44vw, 250px);
+    padding: 10px 12px;
+    border-radius: 18px;
+  }
+
+  .owl-garden-outro-text {
+    font-size: 0.94rem;
   }
 }
