@@ -366,6 +366,145 @@ body {
   background: color-mix(in srgb, var(--hotspot-glow) 26%, transparent);
 }
 
+.owl-garden-word,
+.owl-garden-thumb {
+  position: absolute;
+  border: 3px solid var(--line);
+  box-shadow: var(--shadow);
+  z-index: 8;
+}
+
+.owl-garden-dots {
+  position: absolute;
+  z-index: 8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.owl-garden-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  box-shadow: 0 4px 10px rgba(38, 60, 86, 0.16);
+}
+
+.owl-garden-debug-skip {
+  position: absolute;
+  z-index: 6;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.owl-garden-word,
+.owl-garden-thumb {
+  cursor: pointer;
+  transition: transform 140ms ease, background 140ms ease, opacity 140ms ease;
+}
+
+.owl-garden-word:hover,
+.owl-garden-thumb:hover {
+  transform: scale(1.04);
+}
+
+.owl-garden-word {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #31455c;
+  font-size: clamp(0.92rem, 1.45vw, 1.18rem);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.owl-garden-word.active {
+  background: #fff4cf;
+}
+
+.owl-garden-word.done {
+  background: #eff8e7;
+}
+
+.owl-garden-word-badge {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  display: grid;
+  place-items: center;
+  border: 2px solid rgba(140, 162, 188, 0.9);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #31455c;
+  font-size: 1.45rem;
+  font-weight: 900;
+}
+
+.owl-garden-word-badge.locked {
+  background: #eff8e7;
+  color: #2f6934;
+}
+
+.owl-garden-word-label {
+  flex: 1 1 auto;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.owl-garden-word-light {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border: 2px solid rgba(140, 162, 188, 0.9);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.owl-garden-word-light::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: inherit;
+  background: rgba(106, 201, 101, 0.18);
+}
+
+.owl-garden-word-light.on {
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.72), 0 0 18px rgba(106, 201, 101, 0.62);
+}
+
+.owl-garden-word-light.on::after {
+  background: #6ac965;
+}
+
+.owl-garden-thumb {
+  right: 24px;
+  bottom: 24px;
+  width: min(10vw, 110px);
+  height: min(10vw, 110px);
+  min-width: 78px;
+  min-height: 78px;
+  display: grid;
+  place-items: center;
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.97);
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.owl-garden-thumb.hidden {
+  display: none;
+}
+
 .owl-garden-prompt,
 .owl-garden-done {
   position: absolute;
@@ -380,7 +519,7 @@ body {
 .owl-garden-prompt {
   left: 20px;
   bottom: 20px;
-  min-width: 116px;
+  min-width: 180px;
   min-height: 64px;
   padding: 10px 16px;
   border-radius: 22px;
@@ -594,10 +733,45 @@ body {
   .owl-garden-prompt {
     left: 12px;
     bottom: 12px;
-    min-width: 96px;
+    min-width: 148px;
     min-height: 54px;
     border-radius: 18px;
     font-size: 1rem;
+  }
+
+  .owl-garden-word {
+    padding: 0 12px;
+    border-radius: 20px;
+  }
+
+  .owl-garden-dots {
+    gap: 4px;
+  }
+
+  .owl-garden-dot {
+    width: 9px;
+    height: 9px;
+  }
+
+  .owl-garden-word-badge {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+    font-size: 1.15rem;
+  }
+
+  .owl-garden-word-light {
+    width: 24px;
+    height: 24px;
+    flex-basis: 24px;
+  }
+
+  .owl-garden-thumb {
+    right: 14px;
+    bottom: 14px;
+    min-width: 66px;
+    min-height: 66px;
+    border-radius: 22px;
   }
 
   .owl-garden-done {
