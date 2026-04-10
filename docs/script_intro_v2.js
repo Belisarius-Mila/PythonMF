@@ -144,6 +144,21 @@ const owlGardenOutroDialogue = [
   },
 ];
 
+const houseBunnyWheelRect = { x: 29.7, y: 1.2, w: 43.5, h: 79.4 };
+const houseBunnyWheelColors = [
+  { id: "yellow", word: "yellow", index: 0 },
+  { id: "red", word: "red", index: 1 },
+  { id: "white", word: "white", index: 2 },
+  { id: "blue", word: "blue", index: 3 },
+  { id: "grey", word: "grey", index: 4 },
+  { id: "purple", word: "purple", index: 5 },
+  { id: "brown", word: "brown", index: 6 },
+  { id: "orange", word: "orange", index: 7 },
+  { id: "pink", word: "pink", index: 8 },
+  { id: "green", word: "green", index: 9 },
+];
+const houseBunnyCenterColor = { id: "black", word: "black" };
+
 const benjiBunnyDebugSkipRect = { x: 0, y: 76, w: 16, h: 24 };
 const owlGardenDebugSkipRect = { x: 0, y: 76, w: 16, h: 24 };
 
@@ -172,6 +187,11 @@ const state = {
   owlGardenLockedNumbers: {},
   owlGardenHelpPlayed: false,
   owlGardenOutroVisibleCount: 0,
+  houseBunnyPhase: "idle",
+  houseBunnyImageStep: 1,
+  houseBunnyTargetId: "",
+  houseBunnyRemainingIds: [],
+  houseBunnyDartColorId: "",
   groupCounts: {
     red: 0,
     blue: 0,
@@ -219,8 +239,8 @@ const manualAudio = {
 };
 
 const benjiBunnyDialogue = [
-  { id: 1, speaker: "Benji", cssClass: "benji", textEn: "Hello.", audioEn: "audio/english/benji_bunny_01_benji_hello_en.mp3", audioCz: "audio/czech/benji_bunny_01_benji_hello_cz.m4a" },
-  { id: 2, speaker: "Bunny", cssClass: "bunny", textEn: "Hello.", audioEn: "audio/english/benji_bunny_02_bunny_hello_en.mp3", audioCz: "audio/czech/benji_bunny_02_bunny_hello_cz.m4a" },
+  { id: 1, speaker: "Benji", cssClass: "benji", textEn: "Hello.", audioEn: "audio/english/benji_bunny_01_benji_hello_en.mp3", audioCz: "audio/czech/benji_bunny_01_benji_hello_cz.m4a?v=20260410a" },
+  { id: 2, speaker: "Bunny", cssClass: "bunny", textEn: "Hello.", audioEn: "audio/english/benji_bunny_02_bunny_hello_en.mp3", audioCz: "audio/czech/benji_bunny_02_bunny_hello_cz.m4a?v=20260410a" },
   { id: 3, speaker: "Benji", cssClass: "benji", textEn: "I am Benji.", audioEn: "audio/english/benji_bunny_03_benji_i_am_benji_en.mp3", audioCz: "audio/czech/benji_bunny_03_benji_i_am_benji_cz.m4a" },
   { id: 4, speaker: "Bunny", cssClass: "bunny", textEn: "I am Bunny.", audioEn: "audio/english/benji_bunny_04_bunny_i_am_bunny_en.mp3", audioCz: "audio/czech/benji_bunny_04_bunny_i_am_bunny_cz.m4a" },
   { id: 5, speaker: "Benji", cssClass: "benji", textEn: "We can be friends.", audioEn: "audio/english/benji_bunny_05_benji_we_can_be_friends_en.mp3", audioCz: "audio/czech/benji_bunny_05_benji_we_can_be_friends_cz.m4a" },
@@ -233,6 +253,11 @@ const benjiBunnyDialogue = [
 const benjiBunnyHelpAudio = {
   intro: "audio/czech/benji_bunny_scene_help_cz1.m4a",
 };
+
+const houseBunnyIntroAudio = [
+  "audio/czech/house_bunny_01_intro_train_basic_colours_cz.m4a?v=20260410a",
+  "audio/czech/house_bunny_02_intro_excellent_try_again_cz.m4a?v=20260410a",
+];
 
 function clearSceneTimers() {
   state.timeouts.forEach((timeoutId) => window.clearTimeout(timeoutId));
@@ -497,7 +522,14 @@ function stopCrackle() {
 function renderScene() {
   const scene = scenes[state.currentScene];
   const owlGardenOutro = state.currentScene === "owlGarden" && state.owlGardenPhase === "outro";
-  sceneImage.src = owlGardenOutro ? "MeetingOul2.PNG?v=20260409b" : scene.image;
+  const houseBunnyScene = state.currentScene === "houseBunny";
+  let imageSrc = scene.image;
+  if (owlGardenOutro) {
+    imageSrc = "MeetingOul2.PNG?v=20260409b";
+  } else if (houseBunnyScene) {
+    imageSrc = `HouseBunny${state.houseBunnyImageStep}.PNG?v=20260410a`;
+  }
+  sceneImage.src = imageSrc;
   magnifierButton.classList.toggle("hidden", state.currentScene !== "intro2");
   clickPrompt.classList.toggle("hidden", state.audioUnlocked || state.currentScene === "intro4" || state.currentScene === "benjiBunny" || state.currentScene === "owlGarden" || state.currentScene === "houseBunny");
   mushroomPortalButton.classList.toggle("hidden", state.currentScene !== "intro4");
@@ -506,11 +538,11 @@ function renderScene() {
   mushroomOverlay.classList.toggle("hidden", state.currentScene !== "mushrooms");
   dialogueHud.classList.toggle("hidden", state.currentScene !== "benjiBunny");
   dialoguePanel.classList.toggle("hidden", state.currentScene !== "benjiBunny");
-  owlGardenHud.classList.toggle("hidden", state.currentScene !== "owlGarden");
-  owlGardenHelpButton.classList.toggle("hidden", state.currentScene !== "owlGarden" || state.owlGardenPhase !== "play");
-  owlGardenHelpButton.classList.toggle("pulse-soft", state.currentScene === "owlGarden" && state.owlGardenPhase === "play");
-  owlGardenOverlay.classList.toggle("hidden", state.currentScene !== "owlGarden");
-  owlGardenPrompt.classList.toggle("hidden", state.currentScene !== "owlGarden" || state.owlGardenPhase === "outro");
+  owlGardenHud.classList.toggle("hidden", state.currentScene !== "owlGarden" && !houseBunnyScene);
+  owlGardenHelpButton.classList.toggle("hidden", (!houseBunnyScene && state.currentScene !== "owlGarden") || (state.currentScene === "owlGarden" && state.owlGardenPhase !== "play") || (houseBunnyScene && state.houseBunnyPhase !== "waiting"));
+  owlGardenHelpButton.classList.toggle("pulse-soft", (state.currentScene === "owlGarden" && state.owlGardenPhase === "play") || (houseBunnyScene && state.houseBunnyPhase === "waiting"));
+  owlGardenOverlay.classList.toggle("hidden", state.currentScene !== "owlGarden" && !houseBunnyScene);
+  owlGardenPrompt.classList.toggle("hidden", (state.currentScene !== "owlGarden" && !houseBunnyScene) || (state.currentScene === "owlGarden" && state.owlGardenPhase === "outro"));
   owlGardenThumbButton.classList.toggle("hidden", state.currentScene !== "owlGarden" || state.owlGardenPhase !== "play" || (!state.owlGardenHelpPlayed && !state.owlGardenActiveId));
   owlGardenThumbButton.classList.toggle("pulse-soft", state.currentScene === "owlGarden" && state.owlGardenPhase === "play" && !!state.owlGardenActiveId);
   owlGardenDoneBadge.classList.toggle("hidden", true);
@@ -531,6 +563,8 @@ function renderScene() {
   }
   if (state.currentScene === "owlGarden") {
     renderOwlGarden();
+  } else if (houseBunnyScene) {
+    renderHouseBunny();
   } else {
     owlGardenOverlay.innerHTML = "";
   }
@@ -564,6 +598,8 @@ function setScene(sceneName) {
     runBenjiBunny(sequenceId);
   } else if (sceneName === "owlGarden") {
     runOwlGarden(sequenceId);
+  } else if (sceneName === "houseBunny") {
+    runHouseBunny(sequenceId);
   }
 }
 
@@ -742,6 +778,14 @@ function resetOwlGarden() {
   state.owlGardenLockedNumbers = {};
   state.owlGardenHelpPlayed = false;
   state.owlGardenOutroVisibleCount = 0;
+}
+
+function resetHouseBunny() {
+  state.houseBunnyPhase = "idle";
+  state.houseBunnyImageStep = 1;
+  state.houseBunnyTargetId = "";
+  state.houseBunnyRemainingIds = [];
+  state.houseBunnyDartColorId = "";
 }
 
 function renderBenjiBunnyDialogue() {
@@ -951,6 +995,76 @@ async function playOwlGardenOutro(sequenceId) {
   setScene("houseBunny");
 }
 
+function shuffledHouseBunnyColorIds() {
+  const ids = [...houseBunnyWheelColors.map((item) => item.id), houseBunnyCenterColor.id];
+  for (let index = ids.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [ids[index], ids[swapIndex]] = [ids[swapIndex], ids[index]];
+  }
+  return ids;
+}
+
+function currentHouseBunnyColor() {
+  return houseBunnyWheelColors.find((item) => item.id === state.houseBunnyTargetId) ?? (state.houseBunnyTargetId === houseBunnyCenterColor.id ? houseBunnyCenterColor : null);
+}
+
+function nextHouseBunnyColorId() {
+  if (!state.houseBunnyRemainingIds.length) {
+    state.houseBunnyRemainingIds = shuffledHouseBunnyColorIds();
+  }
+  state.houseBunnyTargetId = state.houseBunnyRemainingIds.pop() ?? "";
+  return state.houseBunnyTargetId;
+}
+
+async function speakHouseBunnyLine(text) {
+  await speakEnglishLine(text, { preferredVoiceName: "samantha|ava|victoria|karen", rate: 0.9, pitch: 1.02 });
+}
+
+async function playHouseBunnyCurrentColor() {
+  if (state.currentScene !== "houseBunny" || state.houseBunnyPhase !== "waiting") {
+    return;
+  }
+  const activeColor = currentHouseBunnyColor();
+  if (!activeColor) {
+    return;
+  }
+  await speakHouseBunnyLine(activeColor.word);
+}
+
+async function queueNextHouseBunnyColor(sequenceId, delayMs = 500) {
+  state.houseBunnyPhase = "idle";
+  state.houseBunnyImageStep = 1;
+  state.houseBunnyDartColorId = "";
+  state.houseBunnyTargetId = "";
+  renderScene();
+
+  await pauseMs(delayMs);
+  if (!isSceneActive("houseBunny", sequenceId)) {
+    return;
+  }
+
+  nextHouseBunnyColorId();
+  state.houseBunnyPhase = "waiting";
+  state.houseBunnyImageStep = 1;
+  renderScene();
+  await playHouseBunnyCurrentColor();
+}
+
+async function runHouseBunny(sequenceId) {
+  if (!isSceneActive("houseBunny", sequenceId)) {
+    return;
+  }
+  resetHouseBunny();
+  renderScene();
+  for (const audioSrc of houseBunnyIntroAudio) {
+    await playAudioFile(audioSrc);
+    if (!isSceneActive("houseBunny", sequenceId)) {
+      return;
+    }
+  }
+  await queueNextHouseBunnyColor(sequenceId, 420);
+}
+
 async function playBenjiBunnyHelp() {
   await playAudioFile(benjiBunnyHelpAudio.intro);
 }
@@ -979,6 +1093,55 @@ async function playOwlGardenHelp() {
     return;
   }
   await speakEnglishLine("Listen to the colours: yellow, purple and pink.", { preferredVoiceName: "ash", rate: 0.84, pitch: 0.94 });
+}
+
+function detectHouseBunnyColor(localX, localY, width, height) {
+  const side = Math.min(width, height);
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const dx = localX - centerX;
+  const dy = localY - centerY;
+  const radius = Math.sqrt(dx * dx + dy * dy);
+  const outerRadius = side * 0.49;
+  const innerRadius = side * 0.12;
+  if (radius < innerRadius) {
+    return houseBunnyCenterColor;
+  }
+  if (radius > outerRadius) {
+    return null;
+  }
+
+  const angle = (Math.atan2(dy, dx) * 180 / Math.PI + 450) % 360;
+  const sectorIndex = Math.floor(angle / 36) % houseBunnyWheelColors.length;
+  return houseBunnyWheelColors[sectorIndex] ?? null;
+}
+
+function houseBunnyDartStyle(color) {
+  if (color.id === houseBunnyCenterColor.id) {
+    return {
+      targetXPercent: houseBunnyWheelRect.x + houseBunnyWheelRect.w / 2,
+      targetYPercent: houseBunnyWheelRect.y + houseBunnyWheelRect.h / 2,
+      rotateDeg: 180,
+    };
+  }
+  const centerX = houseBunnyWheelRect.x + houseBunnyWheelRect.w / 2;
+  const centerY = houseBunnyWheelRect.y + houseBunnyWheelRect.h / 2;
+  const angleOverrides = {
+    yellow: 6,
+    red: 33,
+    pink: 318,
+  };
+  const angleDeg = angleOverrides[color.id] ?? (color.index * 36 + 18);
+  const angle = angleDeg * Math.PI / 180;
+  const radiusPercent = houseBunnyWheelRect.w * 0.31;
+  const tipX = centerX + Math.sin(angle) * radiusPercent;
+  const tipY = centerY - Math.cos(angle) * radiusPercent;
+  const rotateDeg = ((Math.atan2(centerY - tipY, centerX - tipX) * 180) / Math.PI) - 180;
+  return {
+    targetXPercent: tipX,
+    targetYPercent: tipY,
+    rotateDeg,
+  };
 }
 
 function playMushroomHelp() {
@@ -1085,6 +1248,8 @@ owlGardenHelpButton.addEventListener("click", async (event) => {
   await primeAudio();
   if (state.currentScene === "owlGarden") {
     await playOwlGardenHelp();
+  } else if (state.currentScene === "houseBunny") {
+    await playHouseBunnyCurrentColor();
   }
 });
 
@@ -1138,6 +1303,64 @@ function renderOwlGarden() {
     owlGardenOverlay.appendChild(createOwlGardenDots(group));
     owlGardenOverlay.appendChild(createOwlGardenWordButton(group));
   });
+}
+
+function renderHouseBunny() {
+  owlGardenOverlay.innerHTML = "";
+  owlGardenPrompt.textContent = state.houseBunnyPhase === "waiting"
+    ? "Listen and click the colour."
+    : state.houseBunnyPhase === "result"
+      ? "Excellent."
+      : state.houseBunnyPhase === "retry"
+        ? "Try again."
+        : "Get ready.";
+
+  const wheel = document.createElement("button");
+  wheel.type = "button";
+  wheel.className = "house-bunny-wheel";
+  wheel.style.left = `${houseBunnyWheelRect.x}%`;
+  wheel.style.top = `${houseBunnyWheelRect.y}%`;
+  wheel.style.width = `${houseBunnyWheelRect.w}%`;
+  wheel.style.height = `${houseBunnyWheelRect.h}%`;
+  wheel.setAttribute("aria-label", "Colour target");
+  wheel.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    if (state.currentScene !== "houseBunny" || state.houseBunnyPhase !== "waiting") {
+      return;
+    }
+    const rect = wheel.getBoundingClientRect();
+    const localX = event.clientX - rect.left;
+    const localY = event.clientY - rect.top;
+    const selectedColor = detectHouseBunnyColor(localX, localY, rect.width, rect.height);
+    if (!selectedColor) {
+      return;
+    }
+    await primeAudio();
+    await handleHouseBunnySelection(selectedColor.id);
+  });
+  owlGardenOverlay.appendChild(wheel);
+
+  if (state.houseBunnyImageStep === 3 && state.houseBunnyDartColorId) {
+    const color = houseBunnyWheelColors.find((item) => item.id === state.houseBunnyDartColorId) ?? (state.houseBunnyDartColorId === houseBunnyCenterColor.id ? houseBunnyCenterColor : null);
+    if (color) {
+      const dart = document.createElement("img");
+      dart.className = "house-bunny-dart";
+      dart.src = "assets/red_dart.png?v=20260410a";
+      dart.alt = "";
+      const style = houseBunnyDartStyle(color);
+      const overlayWidth = owlGardenOverlay.clientWidth || storyStage.clientWidth || 0;
+      const overlayHeight = owlGardenOverlay.clientHeight || storyStage.clientHeight || 0;
+      const dartWidth = Math.min(176, Math.max(118, overlayWidth * 0.11));
+      const dartHeight = dartWidth * (1024 / 1536);
+      const tipOffsetX = dartWidth * 0.44;
+      const tipOffsetY = dartHeight * 0.586;
+      dart.style.width = `${dartWidth}px`;
+      dart.style.left = `${(overlayWidth * style.targetXPercent / 100) - tipOffsetX}px`;
+      dart.style.top = `${(overlayHeight * style.targetYPercent / 100) - tipOffsetY}px`;
+      dart.style.transform = `rotate(${style.rotateDeg}deg)`;
+      owlGardenOverlay.appendChild(dart);
+    }
+  }
 }
 
 function createOwlGardenOutroBubble(item, index) {
@@ -1321,8 +1544,55 @@ async function confirmOwlGardenCurrentGroup() {
   await speakEnglishLine(owlGardenPhrase(group, nextNumber), { preferredVoiceName: "ash", rate: 0.86, pitch: 0.94 });
 }
 
+async function handleHouseBunnySelection(colorId) {
+  if (state.currentScene !== "houseBunny" || state.houseBunnyPhase !== "waiting") {
+    return;
+  }
+
+  if (colorId !== state.houseBunnyTargetId) {
+    state.houseBunnyPhase = "retry";
+    renderScene();
+    await speakHouseBunnyLine("Try again.");
+    if (state.currentScene === "houseBunny") {
+      state.houseBunnyPhase = "waiting";
+      renderScene();
+    }
+    return;
+  }
+
+  const sequenceId = state.sequenceId;
+  state.houseBunnyPhase = "result";
+  renderScene();
+  await speakHouseBunnyLine("Excellent.");
+  if (!isSceneActive("houseBunny", sequenceId)) {
+    return;
+  }
+
+  state.houseBunnyImageStep = 2;
+  renderScene();
+  await pauseMs(360);
+  if (!isSceneActive("houseBunny", sequenceId)) {
+    return;
+  }
+
+  state.houseBunnyImageStep = 3;
+  state.houseBunnyDartColorId = colorId;
+  renderScene();
+  await pauseMs(2000);
+  if (!isSceneActive("houseBunny", sequenceId)) {
+    return;
+  }
+
+  await queueNextHouseBunnyColor(sequenceId, 420);
+}
+
 function debugSkipOwlGarden() {
   if (state.currentScene !== "owlGarden") {
+    return;
+  }
+
+  if (state.owlGardenPhase === "outro") {
+    setScene("houseBunny");
     return;
   }
 
