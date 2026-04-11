@@ -1,4 +1,5 @@
 import csv
+from datetime import datetime
 import json
 import os
 import random
@@ -880,7 +881,7 @@ class VocabularyTrainerApp:
         self._persist_current_status_flags()
 
         try:
-            result = subprocess.run(
+            sync_result = subprocess.run(
                 [sys.executable, script_path],
                 cwd=repo_root,
                 check=False,
@@ -892,17 +893,154 @@ class VocabularyTrainerApp:
             messagebox.showerror("WebUpdate", f"Nepodařilo se spustit synchronizaci:\n{e}")
             return
 
-        output_parts = []
-        if result.stdout.strip():
-            output_parts.append(result.stdout.strip())
-        if result.stderr.strip():
-            output_parts.append(result.stderr.strip())
-        output_text = "\n\n".join(output_parts) if output_parts else "Bez výstupu."
+        sync_parts = []
+        if sync_result.stdout.strip():
+            sync_parts.append(sync_result.stdout.strip())
+        if sync_result.stderr.strip():
+            sync_parts.append(sync_result.stderr.strip())
+        sync_output = "\n\n".join(sync_parts) if sync_parts else "Bez výstupu."
 
-        if result.returncode == 0:
-            messagebox.showinfo("WebUpdate", f"Webová data byla aktualizována.\n\n{output_text}")
-        else:
-            messagebox.showerror("WebUpdate", f"Synchronizace selhala.\n\n{output_text}")
+        if sync_result.returncode != 0:
+            messagebox.showerror("WebUpdate", f"Synchronizace selhala.\n\n{sync_output}")
+            return
+
+        csv_rel = os.path.join("VocabularyEN", "VocabularyEN.csv")
+        json_rel = os.path.join("docs", "data", "vocabulary-en.json")
+        asset_dir_rel = os.path.join("docs", "assets", "vocabulary-en")
+        deploy_targets = [csv_rel, json_rel]
+
+        try:
+            staged_status = subprocess.run(
+                ["git", "diff", "--cached", "--name-only"],
+                cwd=repo_root,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            asset_status = subprocess.run(
+                ["git", "status", "--short", "--", asset_dir_rel],
+                cwd=repo_root,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            target_status = subprocess.run(
+                ["git", "status", "--short", "--", *deploy_targets],
+                cwd=repo_root,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+        except Exception as e:
+            messagebox.showerror("WebUpdate", f"Synchronizace proběhla, ale git kontrola selhala:\n{e}")
+            return
+
+        if staged_status.returncode != 0:
+            messagebox.showerror(
+                "WebUpdate",
+                "Synchronizace proběhla, ale nepodařilo se zkontrolovat staged změny.\n\n"
+                f"{staged_status.stderr.strip() or staged_status.stdout.strip() or 'Bez výstupu.'}",
+            )
+            return
+
+        staged_files = [line.strip() for line in staged_status.stdout.splitlines() if line.strip()]
+        if staged_files:
+            messagebox.showwarning(
+                "WebUpdate",
+                "V repu už jsou staged jiné změny.\n\n"
+                "Nejdřív je commitni nebo odstageuj ručně, pak zkus WebUpdate znovu.\n\n"
+                + "\n".join(staged_files),
+            )
+            return
+
+        if asset_status.returncode != 0:
+            messagebox.showerror(
+                "WebUpdate",
+                "Synchronizace proběhla, ale nepodařilo se zkontrolovat assety.\n\n"
+                f"{asset_status.stderr.strip() or asset_status.stdout.strip() or 'Bez výstupu.'}",
+            )
+            return
+
+        if asset_status.stdout.strip():
+            messagebox.showwarning(
+                "WebUpdate",
+                "Synchronizace proběhla, ale změnily se i obrázkové assety.\n\n"
+                "Automatický deploy přes tlačítko je povolen jen pro CSV a JSON.\n"
+                "Obrázky prosím commitni a pushni ručně.\n\n"
+                + asset_status.stdout.strip(),
+            )
+            return
+
+        if target_status.returncode != 0:
+            messagebox.showerror(
+                "WebUpdate",
+                "Synchronizace proběhla, ale nepodařilo se zkontrolovat deploy soubory.\n\n"
+                f"{target_status.stderr.strip() or target_status.stdout.strip() or 'Bez výstupu.'}",
+            )
+            return
+
+        if not target_status.stdout.strip():
+            messagebox.showinfo("WebUpdate", f"Webová data jsou už aktuální.\n\n{sync_output}")
+            return
+
+        commit_message = f"VocabularyEN web update {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        try:
+            add_result = subprocess.run(
+                ["git", "add", "--", *deploy_targets],
+                cwd=repo_root,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            if add_result.returncode != 0:
+                raise RuntimeError(add_result.stderr.strip() or add_result.stdout.strip() or "git add selhal.")
+
+            commit_result = subprocess.run(
+                ["git", "commit", "-m", commit_message],
+                cwd=repo_root,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            if commit_result.returncode != 0:
+                raise RuntimeError(commit_result.stderr.strip() or commit_result.stdout.strip() or "git commit selhal.")
+
+            push_result = subprocess.run(
+                ["git", "push", "origin", "main"],
+                cwd=repo_root,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            if push_result.returncode != 0:
+                raise RuntimeError(push_result.stderr.strip() or push_result.stdout.strip() or "git push selhal.")
+        except Exception as e:
+            messagebox.showerror(
+                "WebUpdate",
+                "Synchronizace proběhla, ale automatický deploy selhal.\n\n"
+                f"{e}\n\nSync výstup:\n{sync_output}",
+            )
+            return
+
+        deploy_parts = [sync_output]
+        if commit_result.stdout.strip():
+            deploy_parts.append(commit_result.stdout.strip())
+        if push_result.stderr.strip():
+            deploy_parts.append(push_result.stderr.strip())
+        if push_result.stdout.strip():
+            deploy_parts.append(push_result.stdout.strip())
+        deploy_output = "\n\n".join(part for part in deploy_parts if part)
+        messagebox.showinfo(
+            "WebUpdate",
+            "Webová data byla synchronizována, commitnuta a pushnuta na GitHub.\n\n"
+            f"{deploy_output}",
+        )
 
     def load_new_word(self):
         self.stop_turbo()
