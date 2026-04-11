@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vocabulary EN Cards</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="app-frame">
+        <header class="hero-bar">
+          <div class="hero-copy">
+            <p class="eyebrow">VocabularyEN web</p>
+            <h1>Obrazkove karticky EN</h1>
+          </div>
+          <div class="hero-stats">
+            <article class="stat-card">
+              <span class="stat-label">Slovicka</span>
+              <strong class="stat-value" id="totalCount">0</strong>
+            </article>
+            <article class="stat-card">
+              <span class="stat-label">Zbyva</span>
+              <strong class="stat-value" id="remainingCount">0</strong>
+            </article>
+            <article class="stat-card">
+              <span class="stat-label">Sada</span>
+              <strong class="stat-value stat-small" id="selectionLabel">VSE</strong>
+            </article>
+          </div>
+        </header>
+
+        <section class="control-panel">
+          <div class="control-group">
+            <span class="control-label">Filtr</span>
+            <div class="chip-row">
+              <button class="chip active" data-filter="all" type="button">Vse</button>
+              <button class="chip" data-filter="selected" type="button">Jen L</button>
+              <button class="chip" data-filter="hard" type="button">Jen HT</button>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <span class="control-label">Smer</span>
+            <div class="chip-row">
+              <button class="chip active" data-direction="czToEn" type="button">CZ -> EN</button>
+              <button class="chip" data-direction="enToCz" type="button">EN -> CZ</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card-layout">
+          <article class="picture-panel">
+            <div class="picture-wrap">
+              <img id="wordImage" alt="" hidden>
+              <div class="picture-fallback" id="pictureFallback">Bez obrazku</div>
+            </div>
+            <div class="picture-meta">
+              <span class="pill" id="orderBadge">#0</span>
+              <span class="pill pill-soft" id="imageBadge">image</span>
+            </div>
+          </article>
+
+          <article class="study-panel">
+            <div class="prompt-block">
+              <p class="prompt-label" id="promptLabel">Rekni anglicky</p>
+              <h2 class="prompt-text" id="promptText">Nacitam...</h2>
+              <button class="audio-button" id="speakPromptButton" type="button">Prehraj zadani</button>
+            </div>
+
+            <div class="answer-card hidden" id="answerCard">
+              <div class="answer-grid">
+                <div>
+                  <p class="answer-label">EN</p>
+                  <p class="answer-text" id="answerEn">-</p>
+                </div>
+                <div>
+                  <p class="answer-label">CZ</p>
+                  <p class="answer-text" id="answerCz">-</p>
+                </div>
+              </div>
+              <div class="sentence-box" id="sentenceBox">
+                <p class="sentence-label">Sentence</p>
+                <p class="sentence-text" id="sentenceEn">-</p>
+                <p class="sentence-label">SentenceT</p>
+                <p class="sentence-text" id="sentenceCz">-</p>
+              </div>
+            </div>
+
+            <div class="message-strip" id="messageStrip">
+              Klikni na "Nove slovo". Potom muzes odpoved odhalit nebo prehrat.
+            </div>
+
+            <div class="action-grid">
+              <button class="action-button action-primary" id="newWordButton" type="button">Nove slovo</button>
+              <button class="action-button" id="revealButton" type="button">Ukaz odpoved</button>
+              <button class="action-button" id="speakAnswerButton" type="button">Prehraj odpoved</button>
+            </div>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
