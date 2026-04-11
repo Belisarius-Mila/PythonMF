@@ -19,11 +19,11 @@ bus station,autobusové nádraží,17,Let’s meet at the bus station near the c
 bye,ahoj (na rozloučenou),18,"It’s late, so I say bye and go home.","Je pozdě, tak řeknu ahoj a jdu domů.",ne,ne
 can,mohu,19,Can I have this book?,Mohu mít tuto knihu? (podívat se na ní),ne,ne
 cat,kočka,20,The cat sleeps on the chair all afternoon.,Kočka spí celé odpoledne na židli.,ano,ne
-cinema,kino,21,We go to the cinema and buy popcorn.,Jdeme do kina a koupíme si popcorn.,ano,ano
-coffee,káva,22,"I make coffee, and the kitchen smells great.",Uvařím kávu a v kuchyni je krásná vůně.,ano,ano
+cinema,kino,21,We go to the cinema and buy popcorn.,Jdeme do kina a koupíme si popcorn.,ne,ano
+coffee,káva,22,"I make coffee, and the kitchen smells great.",Uvařím kávu a v kuchyni je krásná vůně.,ne,ano
 cook,vařit; kuchař,23,I like to cook simple food for my family.,Rád vařím jednoduché jídlo pro svou rodinu.,ne,ne
 cow,kráva,24,A cow stands in the field and watches us.,Na louce stojí kráva a dívá se na nás.,ano,ne
-crocodile,krokodýl,25,"In the picture, the crocodile has a huge mouth.",Na obrázku má krokodýl obrovskou tlamu.,ne,ne
+crocodile,krokodýl,25,"In the picture, the crocodile has a huge mouth.",Na obrázku má krokodýl obrovskou tlamu.,ano,ne
 dark,tmavý,26,"The room is dark, so I turn on the light.","V pokoji je tma, tak rozsvítím.",ne,ne
 dog,pes,27,The dog waits by the door for a walk.,Pes čeká u dveří na procházku.,ano,ne
 doctor,lékař,28,The doctor listens carefully and speaks calmly.,Doktor pozorně poslouchá a mluví klidně.,ne,ne
@@ -31,7 +31,7 @@ document,dokument,29,Please sign this document at the bottom.,Prosím podepiš t
 drink,"nápoj, pít",30,"When I feel tired, I drink a little water.","Když jsem unavený, napiju se trochu vody.",ano,ano
 drawing,kreslení,31,Your drawing is funny and very clear.,Tvá kresba je vtipná a moc povedená.,ne,ne
 duck,kachna,32,A duck swims slowly across the pond.,Kachna pomalu plave přes rybník.,ne,ne
-elephant,slon,33,The elephant lifts its trunk and greets the kids.,Slon zvedne chobot a jako by zdravil děti.,ne,ne
+elephant,slon,33,The elephant lifts its trunk and greets the kids.,Slon zvedne chobot a jako by zdravil děti.,ano,ne
 English,angličtina,34,I read an English story before I sleep.,Před spaním čtu anglický příběh.,ne,ne
 excuse me,promiňte,35,"Excuse me, is this seat free?","Promiňte, je tohle místo volné?",ano,ano
 eyes,oči,36,Her eyes are tired after a long day.,Po dlouhém dni má unavené oči.,ne,ne
@@ -41,22 +41,22 @@ father,otec,39,My father tells me a short story every time we meet.,Můj otec mi
 field,"pole;"" louka",40,"In the field, the grass moves in the wind.",Na poli se tráva hýbe ve větru.,ne,ne
 film,film,41,"This film is quiet, but it stays in my mind.","Ten film je klidný, ale zůstane mi v hlavě.",ano,ano
 fish,ryba,42,"The fish jumps, and the water makes circles.",Ryba vyskočí a na vodě udělá kruhy.,ano,ano
-food,jídlo,43,"The food is hot, so I wait a moment.","Jídlo je horké, tak chvilku počkám.",ano,ano
+food,jídlo,43,"The food is hot, so I wait a moment.","Jídlo je horké, tak chvilku počkám.",ne,ano
 free,volný; zdarma,44,Are you free this evening for a short walk?,Máš dnes večer čas na krátkou procházku?,ne,ne
 friend,kamarád,45,A good friend helps without asking for anything.,"Dobrý přítel pomůže, aniž by něco chtěl.",ano,ano
 garden,zahrada,46,"In the garden, I plant flowers in spring.",Na zahradě na jaře sázím květiny.,ne,ne
 giraffe,žirafa,47,The giraffe reaches the leaves at the top.,Žirafa dosáhne na listy úplně nahoře.,ne,ne
 goat,koza,48,The goat eats calmly and looks curious.,Koza klidně jí a vypadá zvědavě.,ne,ne
-go,jít,49,"I go to the store, then I come back quickly.",Jdu do obchodu a pak se rychle vrátím.,ano,ano
+go,jít,49,"I go to the store, then I come back quickly.",Jdu do obchodu a pak se rychle vrátím.,ne,ano
 good,dobrý,50,That was a good idea—thank you!,To byl dobrý nápad—děkuju!,ano,ano
 goodbye,nashledanou,51,We wave and say goodbye at the gate.,Zamáváme si a rozloučíme se u brány.,ano,ano
 green,zelený,52,The green tree looks fresh after the rain.,Zelený strom vypadá po dešti svěže.,ne,ne
-grey,šedý,53,"On a grey day, a warm tea helps.",V šedivý den pomůže teplý čaj.,ano,ano
+grey,šedý,53,"On a grey day, a warm tea helps.",V šedivý den pomůže teplý čaj.,ne,ano
 hair,vlasy,54,My hair gets messy in the wind.,Ve větru se mi rozcuchají vlasy.,ne,ne
 happy,šťastný,55,I feel happy when the sun comes out.,"Jsem šťastný, když vyjde slunce.",ne,ne
 hear,slyšet,56,Can you hear the birds outside?,Slyšíš venku ptáky?,ne,ne
 hello,ahoj / dobrý den,57,Hello! How was your day?,Ahoj! Jaký jsi měl den?,ne,ne
-help,pomoc; pomoci,58,"Thank you for your help;"" I really needed it.","Děkuju za pomoc, opravdu jsem ji potřeboval.",ano,ano
+help,pomoc; pomoci,58,"Thank you for your help;"" I really needed it.","Děkuju za pomoc, opravdu jsem ji potřeboval.",ne,ano
 home,domov,59,"After work, I go home and rest for a while.",Po práci jdu domů a chvíli si odpočinu.,ano,ano
 horse,kůň,60,The horse runs fast and then stops quietly.,Kůň rychle běží a pak tiše zastaví.,ne,ne
 house,dům,61,"Our house is small, but we love it.","Náš dům je malý, ale máme ho rádi.",ano,ano
