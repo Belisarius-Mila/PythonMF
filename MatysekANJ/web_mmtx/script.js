@@ -185,6 +185,7 @@ const state = {
   owlGardenCompletedIds: new Set(),
   owlGardenCurrentNumbers: {},
   owlGardenLockedNumbers: {},
+  owlGardenRemainingNumbers: [],
   owlGardenHelpPlayed: false,
   owlGardenOutroVisibleCount: 0,
   houseBunnyPhase: "idle",
@@ -776,6 +777,7 @@ function resetOwlGarden() {
   state.owlGardenCompletedIds = new Set();
   state.owlGardenCurrentNumbers = {};
   state.owlGardenLockedNumbers = {};
+  state.owlGardenRemainingNumbers = shuffledOwlGardenNumbers();
   state.owlGardenHelpPlayed = false;
   state.owlGardenOutroVisibleCount = 0;
 }
@@ -1002,6 +1004,15 @@ function shuffledHouseBunnyColorIds() {
     [ids[index], ids[swapIndex]] = [ids[swapIndex], ids[index]];
   }
   return ids;
+}
+
+function shuffledOwlGardenNumbers() {
+  const numbers = [1, 2, 3, 4, 5, 6, 7, 8];
+  for (let index = numbers.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [numbers[index], numbers[swapIndex]] = [numbers[swapIndex], numbers[index]];
+  }
+  return numbers;
 }
 
 function currentHouseBunnyColor() {
@@ -1474,7 +1485,10 @@ function createOwlGardenWordButton(group) {
 }
 
 function nextOwlGardenNumber(groupId) {
-  const numberValue = 1 + Math.floor(Math.random() * 8);
+  if (!state.owlGardenRemainingNumbers.length) {
+    state.owlGardenRemainingNumbers = shuffledOwlGardenNumbers();
+  }
+  const numberValue = state.owlGardenRemainingNumbers.pop();
   state.owlGardenCurrentNumbers[groupId] = numberValue;
   return numberValue;
 }
