@@ -1,8 +1,8 @@
 {
   "app": "VocabularyEN",
-  "generatedAt": "2026-04-13T11:01:30.561277+00:00",
+  "generatedAt": "2026-04-13T11:09:23.957251+00:00",
   "sourceCsv": "VocabularyEN/VocabularyEN.csv",
-  "itemCount": 155,
+  "itemCount": 156,
   "stats": {
     "selected": 68,
     "hardTraining": 69,
@@ -10,7 +10,7 @@
     "withSentenceTranslation": 142,
     "imageSources": {
       "direct": 140,
-      "fallback": 2,
+      "fallback": 3,
       "mapping": 13
     },
     "uniqueImageFiles": 142
@@ -2331,6 +2331,21 @@
       "order": 155,
       "en": "ice",
       "cz": "led",
+      "sentenceEn": "",
+      "sentenceCz": "",
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/others.png",
+      "imageStem": "others",
+      "imageRequestedStem": "others",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 156,
+      "order": 156,
+      "en": "law",
+      "cz": "zákon",
       "sentenceEn": "",
       "sentenceCz": "",
       "selected": false,
