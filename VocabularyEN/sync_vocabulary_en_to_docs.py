@@ -244,8 +244,10 @@ def build_export_payload(
     synonym_image_map: dict[str, str],
     picture_stems: set[str],
     output_root: Path,
+    asset_dir_name: str,
+    source_csv_label: str,
 ) -> tuple[dict[str, object], dict[Path, str]]:
-    asset_dir = output_root / "assets" / "vocabulary-en"
+    asset_dir = output_root / "assets" / asset_dir_name
     asset_map: dict[Path, str] = {}
     items: list[dict[str, object]] = []
     image_source_counter: Counter[str] = Counter()
@@ -290,7 +292,7 @@ def build_export_payload(
     payload = {
         "app": APP_NAME,
         "generatedAt": datetime.now(timezone.utc).isoformat(),
-        "sourceCsv": "VocabularyEN/VocabularyEN.csv",
+        "sourceCsv": source_csv_label,
         "itemCount": len(items),
         "stats": {
             "selected": sum(1 for row in rows if row.get("L", "ne") == "ano"),
@@ -305,16 +307,22 @@ def build_export_payload(
     return payload, asset_map
 
 
-def write_output(output_root: Path, payload: dict[str, object], asset_map: dict[Path, str]) -> None:
+def write_output(
+    output_root: Path,
+    payload: dict[str, object],
+    asset_map: dict[Path, str],
+    json_name: str,
+    asset_dir_name: str,
+) -> None:
     data_dir = output_root / "data"
-    asset_dir = output_root / "assets" / "vocabulary-en"
+    asset_dir = output_root / "assets" / asset_dir_name
     data_dir.mkdir(parents=True, exist_ok=True)
     ensure_clean_assets_dir(asset_dir, set(asset_map.values()))
 
     for source_path, dest_name in sorted(asset_map.items(), key=lambda item: item[1]):
         shutil.copy2(source_path, asset_dir / dest_name)
 
-    output_json_path = data_dir / "vocabulary-en.json"
+    output_json_path = data_dir / json_name
     output_json_path.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
@@ -335,6 +343,16 @@ def parse_args() -> argparse.Namespace:
         "--output-root",
         default=str(repo_root / "docs"),
         help="Primary web output root. The script writes data/vocabulary-en.json and assets/vocabulary-en/ here.",
+    )
+    parser.add_argument(
+        "--json-name",
+        default="vocabulary-en.json",
+        help="Output JSON filename inside data/.",
+    )
+    parser.add_argument(
+        "--asset-dir-name",
+        default="vocabulary-en",
+        help="Asset subdirectory name inside assets/.",
     )
     parser.add_argument(
         "--extra-output-root",
@@ -359,6 +377,10 @@ def main() -> int:
     base_dirs = build_picture_base_dirs(repo_root, csv_path)
     synonym_image_map = load_external_mapping(base_dirs, csv_path)
     picture_stems = discover_picture_stems(base_dirs)
+    try:
+        source_csv_label = csv_path.relative_to(repo_root).as_posix()
+    except ValueError:
+        source_csv_label = csv_path.as_posix()
 
     payload, asset_map = build_export_payload(
         rows=rows,
@@ -366,6 +388,8 @@ def main() -> int:
         synonym_image_map=synonym_image_map,
         picture_stems=picture_stems,
         output_root=output_roots[0],
+        asset_dir_name=args.asset_dir_name,
+        source_csv_label=source_csv_label,
     )
 
     for output_root in output_roots:
@@ -373,10 +397,10 @@ def main() -> int:
         for item in local_payload["items"]:
             image_path = item.get("image")
             if image_path:
-                item["image"] = f"assets/vocabulary-en/{Path(image_path).name}"
-        write_output(output_root, local_payload, asset_map)
-        print(f"OK  {output_root / 'data' / 'vocabulary-en.json'}")
-        print(f"OK  {output_root / 'assets' / 'vocabulary-en'}")
+                item["image"] = f"assets/{args.asset_dir_name}/{Path(image_path).name}"
+        write_output(output_root, local_payload, asset_map, args.json_name, args.asset_dir_name)
+        print(f"OK  {output_root / 'data' / args.json_name}")
+        print(f"OK  {output_root / 'assets' / args.asset_dir_name}")
 
     stats = payload["stats"]
     print("")

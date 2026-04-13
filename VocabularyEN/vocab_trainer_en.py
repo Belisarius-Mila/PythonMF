@@ -15,7 +15,23 @@ from tkinter import ttk
 from tkinter import messagebox
 
 APP_NAME = "VocabularyEN"
-CSV_FILENAME = "VocabularyEN.csv"
+DEFAULT_DATASET_KEY = "vnuci"
+DATASET_CONFIGS = {
+    "vnuci": {
+        "label": "Vnuci",
+        "csv_filename": "VocabularyEN.csv",
+        "json_name": "vocabulary-en.json",
+        "page_slug": "vocabulary-en",
+        "button_text": "WebUpdate",
+    },
+    "centrum83": {
+        "label": "Centrum 83",
+        "csv_filename": "VocabularyEN83.csv",
+        "json_name": "vocabulary-en83.json",
+        "page_slug": "vocabulary-en83",
+        "button_text": "WebUpdate83",
+    },
+}
 
 # Keep Python defaults intentionally small; most mapping is loaded from Pict/mapping.json.
 SYNONYM_IMAGE_MAP = {}
@@ -31,7 +47,8 @@ PREPOSITION_WORDS = {
 ADJ_ADV_WORDS = {"adjective", "adverb", "pridavnejmeno", "prislovce"}
 
 
-def resolve_csv_path():
+def resolve_csv_path(csv_filename=None):
+    csv_filename = csv_filename or DATASET_CONFIGS[DEFAULT_DATASET_KEY]["csv_filename"]
     # Keep user data in a stable writable location when running as a bundled app.
     if getattr(sys, "frozen", False):
         support_dir = os.path.join(
@@ -41,20 +58,20 @@ def resolve_csv_path():
             APP_NAME,
         )
         os.makedirs(support_dir, exist_ok=True)
-        target_csv = os.path.join(support_dir, CSV_FILENAME)
+        target_csv = os.path.join(support_dir, csv_filename)
         if os.path.exists(target_csv):
             return target_csv
 
         source_candidates = []
         meipass = getattr(sys, "_MEIPASS", None)
         if meipass:
-            source_candidates.append(os.path.join(meipass, CSV_FILENAME))
+            source_candidates.append(os.path.join(meipass, csv_filename))
 
         exe_dir = os.path.dirname(sys.executable)
         app_dir = os.path.abspath(os.path.join(exe_dir, "..", "..", ".."))
         app_parent = os.path.dirname(app_dir)
-        source_candidates.append(os.path.join(app_parent, CSV_FILENAME))
-        source_candidates.append(os.path.join(exe_dir, CSV_FILENAME))
+        source_candidates.append(os.path.join(app_parent, csv_filename))
+        source_candidates.append(os.path.join(exe_dir, csv_filename))
 
         for source in source_candidates:
             if os.path.exists(source):
@@ -69,14 +86,24 @@ def resolve_csv_path():
             writer.writeheader()
         return target_csv
 
-    return os.path.join(os.path.dirname(__file__), CSV_FILENAME)
+    return os.path.join(os.path.dirname(__file__), csv_filename)
+
+
+def dataset_key_for_path(csv_path):
+    basename = os.path.basename(csv_path or "")
+    for key, config in DATASET_CONFIGS.items():
+        if config["csv_filename"] == basename:
+            return key
+    return DEFAULT_DATASET_KEY
 
 
 class VocabularyTrainerApp:
-    def __init__(self, master, csv_path):
+    def __init__(self, master, dataset_key=DEFAULT_DATASET_KEY):
         self.master = master
-        self.csv_path = csv_path
-        self.master.title("Vocabulary EN Trainer")
+        self.dataset_key = dataset_key if dataset_key in DATASET_CONFIGS else DEFAULT_DATASET_KEY
+        self.dataset_config = DATASET_CONFIGS[self.dataset_key]
+        self.csv_path = resolve_csv_path(self.dataset_config["csv_filename"])
+        self.master.title(self._window_title())
         self.master.configure(bg="white")
         self.master.geometry("1320x800")
 
@@ -86,6 +113,7 @@ class VocabularyTrainerApp:
 
         self.filter_var = tk.StringVar(value="all")
         self.lang_var = tk.StringVar(value="CZ")
+        self.dataset_var = tk.StringVar(value=self.dataset_key)
         self.not_known_var = tk.BooleanVar(value=False)
         self.ht_only_var = tk.BooleanVar(value=False)
         self.learned_var = tk.BooleanVar(value=False)
@@ -103,6 +131,16 @@ class VocabularyTrainerApp:
         self.fr_hint_var = tk.StringVar(value="")
         self.thumb_var = tk.StringVar(value="")
         self.remaining_var = tk.StringVar(value="0")
+        self.dataset_status_var = tk.StringVar(value=self._dataset_status_text())
+        self.input_window = None
+        self.input_tree = None
+        self.edit_entry = None
+        self.dataset_badge_label = None
+        self.input_dataset_banner = None
+        self.web_update_button = None
+        self.web_update_83_button = None
+        self.new_fr_entry = None
+        self.new_cz_entry = None
         self.hint_blink_job = None
         self.hint_blink_on = True
         self.hint_blink_toggles = 0
@@ -129,11 +167,6 @@ class VocabularyTrainerApp:
         self._selection_signature = None
         self._shown_in_selection = set()
         self.load_new_word()
-        self.input_window = None
-        self.input_tree = None
-        self.edit_entry = None
-        self.new_fr_entry = None
-        self.new_cz_entry = None
         self.new_fr_var = tk.StringVar(value="")
         self.new_cz_var = tk.StringVar(value="")
         self.new_sentence_var = tk.StringVar(value="")
@@ -180,6 +213,20 @@ class VocabularyTrainerApp:
 
         right = tk.Frame(top_row, bg=top_bg)
         right.pack(side="right", fill="both", expand=True)
+
+        dataset_badge = tk.Label(
+            left,
+            textvariable=self.dataset_status_var,
+            bg="#ffe680",
+            fg="black",
+            font=("Helvetica", 16, "bold"),
+            padx=12,
+            pady=6,
+            relief="ridge",
+            bd=2,
+        )
+        dataset_badge.pack(anchor="w", pady=(0, 10))
+        self.dataset_badge_label = dataset_badge
 
         fr_row = tk.Frame(left, bg=top_bg)
         fr_row.pack(anchor="w", fill="x")
@@ -323,6 +370,26 @@ class VocabularyTrainerApp:
         settings_panel = tk.Frame(bottom_content, bg=params_bg)
         settings_panel.pack(side="left", anchor="nw", padx=(0, 20), pady=(4, 4))
 
+        dataset_box = tk.LabelFrame(settings_panel, text="Dataset", bg=params_bg)
+        dataset_box.pack(anchor="w", pady=(0, 8), fill="x")
+
+        tk.Radiobutton(
+            dataset_box,
+            text="Vnuci (VocabularyEN.csv)",
+            variable=self.dataset_var,
+            value="vnuci",
+            bg=params_bg,
+            command=self.on_dataset_changed,
+        ).pack(anchor="w")
+        tk.Radiobutton(
+            dataset_box,
+            text="Centrum 83 (VocabularyEN83.csv)",
+            variable=self.dataset_var,
+            value="centrum83",
+            bg=params_bg,
+            command=self.on_dataset_changed,
+        ).pack(anchor="w")
+
         filter_box = tk.LabelFrame(settings_panel, text="Výběr slovíček", bg=params_bg)
         filter_box.pack(anchor="w", pady=(0, 8))
 
@@ -429,12 +496,65 @@ class VocabularyTrainerApp:
 
         controls = tk.Frame(bottom_content, bg="white")
         controls.pack(side="right", anchor="se", padx=(20, 10), pady=(10, 12))
-        tk.Button(
-            controls, text="WebUpdate", command=self.run_web_update, width=10
-        ).pack(side="right", padx=(0, 8))
+        self.web_update_83_button = tk.Button(
+            controls, text="WebUpdate83", command=lambda: self.run_web_update("centrum83"), width=12
+        )
+        self.web_update_83_button.pack(side="right", padx=(0, 8))
+        self.web_update_button = tk.Button(
+            controls, text="WebUpdate", command=lambda: self.run_web_update("vnuci"), width=10
+        )
+        self.web_update_button.pack(side="right", padx=(0, 8))
         tk.Button(controls, text="Input", command=self.open_input_window, width=10).pack(
             side="right"
         )
+        self._refresh_dataset_widgets()
+
+    def _window_title(self):
+        return f"Vocabulary EN Trainer - {self.dataset_config['label']} ({self.dataset_config['csv_filename']})"
+
+    def _dataset_status_text(self):
+        return f"Dataset: {self.dataset_config['label']} • {self.dataset_config['csv_filename']}"
+
+    def _refresh_dataset_widgets(self):
+        self.master.title(self._window_title())
+        self.dataset_status_var.set(self._dataset_status_text())
+        if self.input_window and self.input_window.winfo_exists():
+            self.input_window.title(f"Input - {self.dataset_config['csv_filename']}")
+        if self.input_dataset_banner and self.input_dataset_banner.winfo_exists():
+            self.input_dataset_banner.configure(text=self._dataset_status_text())
+        if self.web_update_button is not None:
+            self.web_update_button.configure(state=("normal" if self.dataset_key == "vnuci" else "disabled"))
+        if self.web_update_83_button is not None:
+            self.web_update_83_button.configure(state=("normal" if self.dataset_key == "centrum83" else "disabled"))
+
+    def on_dataset_changed(self):
+        next_key = self.dataset_var.get()
+        if next_key not in DATASET_CONFIGS or next_key == self.dataset_key:
+            self.dataset_var.set(self.dataset_key)
+            return
+
+        self.stop_turbo()
+        if self.current_index is not None:
+            self._persist_current_status_flags()
+
+        self.dataset_key = next_key
+        self.dataset_config = DATASET_CONFIGS[self.dataset_key]
+        self.csv_path = resolve_csv_path(self.dataset_config["csv_filename"])
+        self.rows = self._load_csv()
+        self.current_index = None
+        self.hidden_side = None
+        self._selection_signature = None
+        self._shown_in_selection.clear()
+        self.turbo_selection_signature = None
+        self.turbo_shown_in_selection.clear()
+        self.input_var.set("")
+        self.fr_hint_var.set("")
+        self.thumb_var.set("")
+        self.interval_end_var.set(str(len(self.rows)))
+        self._refresh_dataset_widgets()
+        if self.input_tree:
+            self._populate_input_list()
+        self.load_new_word()
 
     def _load_csv(self):
         if not os.path.exists(self.csv_path):
@@ -871,18 +991,37 @@ class VocabularyTrainerApp:
                 f"Uloženo na plochu:\n{output_path}\n\nImport do Fotek se nepodařil:\n{import_msg}",
             )
 
-    def run_web_update(self):
+    def run_web_update(self, dataset_key):
+        if dataset_key not in DATASET_CONFIGS:
+            messagebox.showerror("WebUpdate", f"Neznámý dataset: {dataset_key}")
+            return
+
+        dataset = DATASET_CONFIGS[dataset_key]
+        button_text = dataset["button_text"]
         repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         script_path = os.path.join(repo_root, "VocabularyEN", "sync_vocabulary_en_to_docs.py")
         if not os.path.exists(script_path):
-            messagebox.showerror("WebUpdate", f"Chybí skript:\n{script_path}")
+            messagebox.showerror(button_text, f"Chybí skript:\n{script_path}")
             return
 
         self._persist_current_status_flags()
+        csv_rel = os.path.join("VocabularyEN", dataset["csv_filename"])
+        json_rel = os.path.join("docs", "data", dataset["json_name"])
+        asset_dir_rel = os.path.join("docs", "assets", "vocabulary-en")
+        deploy_targets = [csv_rel, json_rel]
 
         try:
             sync_result = subprocess.run(
-                [sys.executable, script_path],
+                [
+                    sys.executable,
+                    script_path,
+                    "--csv-path",
+                    os.path.join(repo_root, csv_rel),
+                    "--json-name",
+                    dataset["json_name"],
+                    "--asset-dir-name",
+                    "vocabulary-en",
+                ],
                 cwd=repo_root,
                 check=False,
                 stdout=subprocess.PIPE,
@@ -890,7 +1029,7 @@ class VocabularyTrainerApp:
                 text=True,
             )
         except Exception as e:
-            messagebox.showerror("WebUpdate", f"Nepodařilo se spustit synchronizaci:\n{e}")
+            messagebox.showerror(button_text, f"Nepodařilo se spustit synchronizaci:\n{e}")
             return
 
         sync_parts = []
@@ -901,13 +1040,8 @@ class VocabularyTrainerApp:
         sync_output = "\n\n".join(sync_parts) if sync_parts else "Bez výstupu."
 
         if sync_result.returncode != 0:
-            messagebox.showerror("WebUpdate", f"Synchronizace selhala.\n\n{sync_output}")
+            messagebox.showerror(button_text, f"Synchronizace selhala.\n\n{sync_output}")
             return
-
-        csv_rel = os.path.join("VocabularyEN", "VocabularyEN.csv")
-        json_rel = os.path.join("docs", "data", "vocabulary-en.json")
-        asset_dir_rel = os.path.join("docs", "assets", "vocabulary-en")
-        deploy_targets = [csv_rel, json_rel]
 
         try:
             staged_status = subprocess.run(
@@ -935,12 +1069,12 @@ class VocabularyTrainerApp:
                 text=True,
             )
         except Exception as e:
-            messagebox.showerror("WebUpdate", f"Synchronizace proběhla, ale git kontrola selhala:\n{e}")
+            messagebox.showerror(button_text, f"Synchronizace proběhla, ale git kontrola selhala:\n{e}")
             return
 
         if staged_status.returncode != 0:
             messagebox.showerror(
-                "WebUpdate",
+                button_text,
                 "Synchronizace proběhla, ale nepodařilo se zkontrolovat staged změny.\n\n"
                 f"{staged_status.stderr.strip() or staged_status.stdout.strip() or 'Bez výstupu.'}",
             )
@@ -949,7 +1083,7 @@ class VocabularyTrainerApp:
         staged_files = [line.strip() for line in staged_status.stdout.splitlines() if line.strip()]
         if staged_files:
             messagebox.showwarning(
-                "WebUpdate",
+                button_text,
                 "V repu už jsou staged jiné změny.\n\n"
                 "Nejdřív je commitni nebo odstageuj ručně, pak zkus WebUpdate znovu.\n\n"
                 + "\n".join(staged_files),
@@ -958,7 +1092,7 @@ class VocabularyTrainerApp:
 
         if asset_status.returncode != 0:
             messagebox.showerror(
-                "WebUpdate",
+                button_text,
                 "Synchronizace proběhla, ale nepodařilo se zkontrolovat assety.\n\n"
                 f"{asset_status.stderr.strip() or asset_status.stdout.strip() or 'Bez výstupu.'}",
             )
@@ -966,7 +1100,7 @@ class VocabularyTrainerApp:
 
         if asset_status.stdout.strip():
             messagebox.showwarning(
-                "WebUpdate",
+                button_text,
                 "Synchronizace proběhla, ale změnily se i obrázkové assety.\n\n"
                 "Automatický deploy přes tlačítko je povolen jen pro CSV a JSON.\n"
                 "Obrázky prosím commitni a pushni ručně.\n\n"
@@ -976,17 +1110,17 @@ class VocabularyTrainerApp:
 
         if target_status.returncode != 0:
             messagebox.showerror(
-                "WebUpdate",
+                button_text,
                 "Synchronizace proběhla, ale nepodařilo se zkontrolovat deploy soubory.\n\n"
                 f"{target_status.stderr.strip() or target_status.stdout.strip() or 'Bez výstupu.'}",
             )
             return
 
         if not target_status.stdout.strip():
-            messagebox.showinfo("WebUpdate", f"Webová data jsou už aktuální.\n\n{sync_output}")
+            messagebox.showinfo(button_text, f"Webová data jsou už aktuální.\n\n{sync_output}")
             return
 
-        commit_message = f"VocabularyEN web update {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        commit_message = f"{dataset['button_text']} {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         try:
             add_result = subprocess.run(
                 ["git", "add", "--", *deploy_targets],
@@ -1022,7 +1156,7 @@ class VocabularyTrainerApp:
                 raise RuntimeError(push_result.stderr.strip() or push_result.stdout.strip() or "git push selhal.")
         except Exception as e:
             messagebox.showerror(
-                "WebUpdate",
+                button_text,
                 "Synchronizace proběhla, ale automatický deploy selhal.\n\n"
                 f"{e}\n\nSync výstup:\n{sync_output}",
             )
@@ -1037,7 +1171,7 @@ class VocabularyTrainerApp:
             deploy_parts.append(push_result.stdout.strip())
         deploy_output = "\n\n".join(part for part in deploy_parts if part)
         messagebox.showinfo(
-            "WebUpdate",
+            button_text,
             "Webová data byla synchronizována, commitnuta a pushnuta na GitHub.\n\n"
             f"{deploy_output}",
         )
@@ -1415,7 +1549,7 @@ class VocabularyTrainerApp:
             return
 
         win = tk.Toplevel(self.master)
-        win.title("Input - VocabularyEN.csv")
+        win.title(f"Input - {self.dataset_config['csv_filename']}")
         win.geometry("1320x800")
         win.minsize(1100, 700)
         win.configure(bg="white")
@@ -1433,6 +1567,19 @@ class VocabularyTrainerApp:
 
         list_frame = tk.Frame(win, bg="white")
         list_frame.pack(fill="both", expand=True, padx=12, pady=(12, 8))
+
+        self.input_dataset_banner = tk.Label(
+            list_frame,
+            text=self._dataset_status_text(),
+            bg="#ffe680",
+            fg="black",
+            font=("Helvetica", 15, "bold"),
+            padx=12,
+            pady=6,
+            relief="ridge",
+            bd=2,
+        )
+        self.input_dataset_banner.pack(anchor="w", pady=(0, 10))
 
         scrollbar = tk.Scrollbar(list_frame)
         scrollbar.pack(side="right", fill="y")
@@ -1836,6 +1983,13 @@ class VocabularyTrainerApp:
 
 
 if __name__ == "__main__":
+    start_dataset_key = DEFAULT_DATASET_KEY
+    if len(sys.argv) > 1:
+        candidate = sys.argv[1].strip()
+        if candidate in DATASET_CONFIGS:
+            start_dataset_key = candidate
+        else:
+            start_dataset_key = dataset_key_for_path(candidate)
     root = tk.Tk()
-    app = VocabularyTrainerApp(root, resolve_csv_path())
+    app = VocabularyTrainerApp(root, start_dataset_key)
     root.mainloop()

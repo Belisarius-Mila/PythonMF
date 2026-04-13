@@ -1,4 +1,5 @@
-const DATA_URL = "../data/vocabulary-en.json";
+const appRoot = document.querySelector("[data-json-url]");
+const DATA_URL = appRoot?.dataset.jsonUrl || "../data/vocabulary-en.json";
 
 const ui = {
   totalCount: document.getElementById("totalCount"),

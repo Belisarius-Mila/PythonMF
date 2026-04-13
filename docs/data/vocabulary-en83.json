@@ -1,19 +1,19 @@
 {
   "app": "VocabularyEN",
-  "generatedAt": "2026-04-13T11:01:30.561277+00:00",
-  "sourceCsv": "VocabularyEN/VocabularyEN.csv",
-  "itemCount": 155,
+  "generatedAt": "2026-04-13T11:01:30.977514+00:00",
+  "sourceCsv": "VocabularyEN/VocabularyEN83.csv",
+  "itemCount": 153,
   "stats": {
     "selected": 68,
     "hardTraining": 69,
     "withSentence": 142,
     "withSentenceTranslation": 142,
     "imageSources": {
-      "direct": 140,
-      "fallback": 2,
+      "direct": 139,
+      "fallback": 1,
       "mapping": 13
     },
-    "uniqueImageFiles": 142
+    "uniqueImageFiles": 141
   },
   "items": [
     {
@@ -2299,45 +2299,15 @@
     {
       "id": 153,
       "order": 153,
-      "en": "people",
-      "cz": "lidé",
+      "en": "lazy",
+      "cz": "líný",
       "sentenceEn": "",
       "sentenceCz": "",
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/people.png",
-      "imageStem": "people",
-      "imageRequestedStem": "people",
-      "imageSource": "direct",
-      "imageMissing": false
-    },
-    {
-      "id": 154,
-      "order": 154,
-      "en": "fooball",
-      "cz": "fotbal",
-      "sentenceEn": "",
-      "sentenceCz": "",
-      "selected": false,
-      "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
-      "imageSource": "fallback",
-      "imageMissing": false
-    },
-    {
-      "id": 155,
-      "order": 155,
-      "en": "ice",
-      "cz": "led",
-      "sentenceEn": "",
-      "sentenceCz": "",
-      "selected": false,
-      "hardTraining": false,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
-      "imageRequestedStem": "others",
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
       "imageSource": "fallback",
       "imageMissing": false
     }
