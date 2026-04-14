@@ -7,6 +7,10 @@ const ui = {
   selectionLabel: document.getElementById("selectionLabel"),
   filterButtons: Array.from(document.querySelectorAll("[data-filter]")),
   directionButtons: Array.from(document.querySelectorAll("[data-direction]")),
+  wordSetGroup: document.getElementById("wordSetGroup"),
+  wordSetList: document.getElementById("wordSetList"),
+  wordSetSummary: document.getElementById("wordSetSummary"),
+  clearWordSetsButton: document.getElementById("clearWordSetsButton"),
   wordImage: document.getElementById("wordImage"),
   pictureFallback: document.getElementById("pictureFallback"),
   orderBadge: document.getElementById("orderBadge"),
@@ -33,9 +37,15 @@ const state = {
   revealed: false,
   filter: "all",
   direction: "czToEn",
+  wordSetOptions: [],
+  selectedWordSetKeys: new Set(),
   shownIds: new Set(),
   selectionSignature: "",
 };
+
+function normalizeWordSetKey(value) {
+  return String(value || "").trim().toLocaleLowerCase();
+}
 
 function setChipState(buttons, activeValue, attributeName) {
   buttons.forEach((button) => {
@@ -46,16 +56,116 @@ function setChipState(buttons, activeValue, attributeName) {
 function updateControlButtons() {
   setChipState(ui.filterButtons, state.filter, "filter");
   setChipState(ui.directionButtons, state.direction, "direction");
+  updateWordSetSummary();
 }
 
 function getSelectionLabel() {
+  const wordSetCount = state.selectedWordSetKeys.size;
   if (state.filter === "hard") {
-    return "JEN HT";
+    return wordSetCount ? `JEN HT • OKRUHY ${wordSetCount}` : "JEN HT";
   }
   if (state.filter === "selected") {
-    return "JEN L";
+    return wordSetCount ? `JEN L • OKRUHY ${wordSetCount}` : "JEN L";
   }
-  return "VSE";
+  return wordSetCount ? `VSE • OKRUHY ${wordSetCount}` : "VSE";
+}
+
+function getAvailableWordSets() {
+  const optionsByKey = new Map();
+  const candidateLabels = Array.isArray(state.data?.wordSets) ? state.data.wordSets : [];
+
+  candidateLabels.forEach((label) => {
+    const trimmed = String(label || "").trim();
+    const key = normalizeWordSetKey(trimmed);
+    if (trimmed && key && !optionsByKey.has(key)) {
+      optionsByKey.set(key, { key, label: trimmed });
+    }
+  });
+
+  state.items.forEach((item) => {
+    const labels = Array.isArray(item.wordSets) ? item.wordSets : [];
+    labels.forEach((label) => {
+      const trimmed = String(label || "").trim();
+      const key = normalizeWordSetKey(trimmed);
+      if (trimmed && key && !optionsByKey.has(key)) {
+        optionsByKey.set(key, { key, label: trimmed });
+      }
+    });
+  });
+
+  return Array.from(optionsByKey.values()).sort((left, right) =>
+    left.label.localeCompare(right.label, "cs", { sensitivity: "base" }),
+  );
+}
+
+function updateWordSetSummary() {
+  if (!ui.wordSetSummary) {
+    return;
+  }
+  const count = state.selectedWordSetKeys.size;
+  if (!count) {
+    ui.wordSetSummary.textContent = "Vsechny okruhy";
+  } else if (count === 1) {
+    ui.wordSetSummary.textContent = "1 okruh";
+  } else if (count < 5) {
+    ui.wordSetSummary.textContent = `${count} okruhy`;
+  } else {
+    ui.wordSetSummary.textContent = `${count} okruhu`;
+  }
+  if (ui.clearWordSetsButton) {
+    ui.clearWordSetsButton.disabled = count === 0;
+  }
+}
+
+function renderWordSetControls() {
+  if (!ui.wordSetGroup || !ui.wordSetList) {
+    return;
+  }
+
+  ui.wordSetList.innerHTML = "";
+  const availableKeys = new Set(state.wordSetOptions.map((option) => option.key));
+  state.selectedWordSetKeys = new Set(
+    Array.from(state.selectedWordSetKeys).filter((key) => availableKeys.has(key)),
+  );
+
+  if (!state.wordSetOptions.length) {
+    ui.wordSetGroup.hidden = true;
+    updateWordSetSummary();
+    return;
+  }
+
+  ui.wordSetGroup.hidden = false;
+
+  state.wordSetOptions.forEach((option) => {
+    const label = document.createElement("label");
+    label.className = "wordset-option";
+
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.value = option.key;
+    input.checked = state.selectedWordSetKeys.has(option.key);
+
+    const text = document.createElement("span");
+    text.textContent = option.label;
+
+    label.append(input, text);
+    label.classList.toggle("is-active", input.checked);
+
+    input.addEventListener("change", () => {
+      if (input.checked) {
+        state.selectedWordSetKeys.add(option.key);
+      } else {
+        state.selectedWordSetKeys.delete(option.key);
+      }
+      label.classList.toggle("is-active", input.checked);
+      updateControlButtons();
+      chooseNextItem();
+    });
+
+    ui.wordSetList.append(label);
+  });
+
+  updateWordSetSummary();
 }
 
 function buildSelection() {
@@ -65,6 +175,12 @@ function buildSelection() {
   } else if (state.filter === "hard") {
     items = items.filter((item) => item.hardTraining);
   }
+  if (state.selectedWordSetKeys.size) {
+    items = items.filter((item) => {
+      const labels = Array.isArray(item.wordSets) ? item.wordSets : [];
+      return labels.some((label) => state.selectedWordSetKeys.has(normalizeWordSetKey(label)));
+    });
+  }
   return items;
 }
 
@@ -72,6 +188,7 @@ function currentSignature(selection) {
   return JSON.stringify({
     filter: state.filter,
     direction: state.direction,
+    wordSets: Array.from(state.selectedWordSetKeys).sort(),
     ids: selection.map((item) => item.id),
   });
 }
@@ -279,6 +396,18 @@ function bindEvents() {
     });
   });
 
+  if (ui.clearWordSetsButton) {
+    ui.clearWordSetsButton.addEventListener("click", () => {
+      if (!state.selectedWordSetKeys.size) {
+        return;
+      }
+      state.selectedWordSetKeys.clear();
+      renderWordSetControls();
+      updateControlButtons();
+      chooseNextItem();
+    });
+  }
+
   ui.newWordButton.addEventListener("click", chooseNextItem);
   ui.revealButton.addEventListener("click", revealCurrentItem);
   ui.speakPromptButton.addEventListener("click", speakPrompt);
@@ -301,6 +430,8 @@ async function init() {
   try {
     state.data = await loadData();
     state.items = Array.isArray(state.data.items) ? state.data.items : [];
+    state.wordSetOptions = getAvailableWordSets();
+    renderWordSetControls();
     chooseNextItem();
   } catch (error) {
     renderEmptyState("Nepodarilo se nacist vocabulary-en.json.");

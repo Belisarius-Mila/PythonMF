@@ -30,6 +30,22 @@ PREPOSITION_WORDS = {
 ADJ_ADV_WORDS = {"adjective", "adverb", "pridavnejmeno", "prislovce"}
 
 
+def split_word_sets(value: str) -> list[str]:
+    raw_parts = re.split(r"[|,;]+", (value or "").strip())
+    cleaned: list[str] = []
+    seen: set[str] = set()
+    for part in raw_parts:
+        label = re.sub(r"\s+", " ", part.strip())
+        if not label:
+            continue
+        key = label.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        cleaned.append(label)
+    return cleaned
+
+
 def normalize_word(text: str) -> str:
     value = (text or "").strip().casefold()
     if not value:
@@ -80,6 +96,7 @@ def repair_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
         cz = (row.get("CZ") or "").strip()
         sentence = (row.get("Sentence") or "").strip()
         sentence_t = (row.get("SentenceT") or "").strip()
+        word_set = (row.get("WS") or "").strip()
         learned = (row.get("L") or "ne").strip().lower()
         hard_training = (row.get("HT") or "ne").strip().lower()
 
@@ -98,6 +115,7 @@ def repair_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
                 "Order": "",
                 "Sentence": sentence,
                 "SentenceT": sentence_t,
+                "WS": word_set,
                 "L": learned,
                 "HT": hard_training,
             }
@@ -251,12 +269,16 @@ def build_export_payload(
     asset_map: dict[Path, str] = {}
     items: list[dict[str, object]] = []
     image_source_counter: Counter[str] = Counter()
+    word_sets_seen: dict[str, str] = {}
 
     for index, row in enumerate(rows, start=1):
         requested_stem, image_source = choose_picture_stem(row, picture_stems, synonym_image_map)
         source_path = find_picture_path(requested_stem, base_dirs)
         resolved_stem = requested_stem
         image_missing = False
+        word_sets = split_word_sets(row.get("WS", ""))
+        for label in word_sets:
+            word_sets_seen.setdefault(label.casefold(), label)
 
         if source_path is None and requested_stem != "others":
             source_path = find_picture_path("others", base_dirs)
@@ -279,6 +301,7 @@ def build_export_payload(
             "cz": row.get("CZ", ""),
             "sentenceEn": row.get("Sentence", ""),
             "sentenceCz": row.get("SentenceT", ""),
+            "wordSets": word_sets,
             "selected": row.get("L", "ne") == "ano",
             "hardTraining": row.get("HT", "ne") == "ano",
             "image": image_relative,
@@ -294,9 +317,11 @@ def build_export_payload(
         "generatedAt": datetime.now(timezone.utc).isoformat(),
         "sourceCsv": source_csv_label,
         "itemCount": len(items),
+        "wordSets": sorted(word_sets_seen.values(), key=lambda value: value.casefold()),
         "stats": {
             "selected": sum(1 for row in rows if row.get("L", "ne") == "ano"),
             "hardTraining": sum(1 for row in rows if row.get("HT", "ne") == "ano"),
+            "wordSetCount": len(word_sets_seen),
             "withSentence": sum(1 for row in rows if row.get("Sentence", "").strip()),
             "withSentenceTranslation": sum(1 for row in rows if row.get("SentenceT", "").strip()),
             "imageSources": dict(sorted(image_source_counter.items())),

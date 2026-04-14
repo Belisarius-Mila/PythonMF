@@ -131,12 +131,31 @@ body {
   gap: 10px;
 }
 
+.control-group-wide {
+  flex: 1 1 420px;
+  min-width: min(100%, 420px);
+}
+
 .control-label {
   font-size: 0.86rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-soft);
+}
+
+.control-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.control-helper {
+  margin: -2px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  font-weight: 700;
 }
 
 .chip-row,
@@ -148,12 +167,21 @@ body {
 
 .chip,
 .action-button,
-.audio-button {
+.audio-button,
+.mini-button,
+.wordset-option {
   font: inherit;
   border-radius: 999px;
   border: 2px solid var(--line);
-  cursor: pointer;
   transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+
+.mini-button,
+.wordset-option,
+.chip,
+.action-button,
+.audio-button {
+  cursor: pointer;
 }
 
 .chip {
@@ -162,6 +190,47 @@ body {
   background: #eef5f8;
   color: var(--ink);
   font-weight: 800;
+}
+
+.mini-button {
+  min-height: 36px;
+  padding: 0 14px;
+  background: #eef5f8;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.mini-button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.wordset-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.wordset-option {
+  min-height: 42px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f4f8fa;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.wordset-option input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.wordset-option.is-active {
+  background: #dff0e8;
+  border-color: #72a98f;
 }
 
 .chip.active {
@@ -180,7 +249,9 @@ body {
 
 .action-button:hover,
 .audio-button:hover,
-.chip:hover {
+.chip:hover,
+.mini-button:hover,
+.wordset-option:hover {
   transform: translateY(-1px);
   background: #ffffff;
 }

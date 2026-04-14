@@ -1,11 +1,21 @@
 {
   "app": "VocabularyEN",
-  "generatedAt": "2026-04-13T11:09:23.957251+00:00",
+  "generatedAt": "2026-04-13T12:32:13.537669+00:00",
   "sourceCsv": "VocabularyEN/VocabularyEN.csv",
   "itemCount": 156,
+  "wordSets": [
+    "Actions",
+    "Animals",
+    "Colors",
+    "Family",
+    "Food",
+    "Greetings",
+    "Things"
+  ],
   "stats": {
     "selected": 68,
     "hardTraining": 69,
+    "wordSetCount": 7,
     "withSentence": 142,
     "withSentenceTranslation": 142,
     "imageSources": {
@@ -23,6 +33,9 @@
       "cz": "sklenice (vody)",
       "sentenceEn": "I drink a glass of water when I wake up.",
       "sentenceCz": "Když se probudím, vypiji sklenici vody.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/glass.jpg",
@@ -38,6 +51,7 @@
       "cz": "letiště",
       "sentenceEn": "The airport was busy, so we came early.",
       "sentenceCz": "Letiště bylo plné lidí, tak jsme přijeli brzy.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/airport.webp",
@@ -53,6 +67,9 @@
       "cz": "zvíře",
       "sentenceEn": "The little animal hides behind the tree.",
       "sentenceCz": "To malé zvíře se schovává za stromem.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/animal.webp",
@@ -68,6 +85,9 @@
       "cz": "slůně",
       "sentenceEn": "The baby elephant splashes water and looks happy.",
       "sentenceCz": "Slůně cáká vodu a vypadá spokojeně.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/babyelephant.webp",
@@ -83,6 +103,9 @@
       "cz": "taška",
       "sentenceEn": "I put my phone in my bag and close it.",
       "sentenceCz": "Dám si telefon do tašky a zavřu ji.",
+      "wordSets": [
+        "Things"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/bag.jpg",
@@ -98,6 +121,7 @@
       "cz": "velký",
       "sentenceEn": "This house is big, but it feels warm inside.",
       "sentenceCz": "Tenhle dům je velký, ale uvnitř je útulno.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/big.webp",
@@ -113,6 +137,9 @@
       "cz": "kolo",
       "sentenceEn": "I ride my bike to the park on sunny days.",
       "sentenceCz": "Za slunečných dní jedu na kole do parku.",
+      "wordSets": [
+        "Things"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/bike.jpg",
@@ -128,6 +155,9 @@
       "cz": "pták",
       "sentenceEn": "A small bird sings on the window in the morning.",
       "sentenceCz": "Ráno zpívá na okně malý pták.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/bird.jpg",
@@ -143,6 +173,9 @@
       "cz": "černý",
       "sentenceEn": "He wears a black jacket in the winter.",
       "sentenceCz": "V zimě nosí černou bundu.",
+      "wordSets": [
+        "Colors"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/black.jpg",
@@ -158,6 +191,9 @@
       "cz": "modrý",
       "sentenceEn": "The sky is blue after the rain.",
       "sentenceCz": "Po dešti je nebe modré.",
+      "wordSets": [
+        "Colors"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/blue.jpg",
@@ -173,6 +209,9 @@
       "cz": "kniha",
       "sentenceEn": "This book is short, but I like it a lot.",
       "sentenceCz": "Ta kniha je krátká, ale moc se mi líbí.",
+      "wordSets": [
+        "Things"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/book.jpg",
@@ -188,6 +227,9 @@
       "cz": "krabice",
       "sentenceEn": "Please put the cups back into the box.",
       "sentenceCz": "Prosím dej hrnky zpátky do krabice.",
+      "wordSets": [
+        "Things"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/box.jpg",
@@ -203,6 +245,9 @@
       "cz": "snídaně",
       "sentenceEn": "For breakfast I usually have bread and tea.",
       "sentenceCz": "K snídani si obvykle dám chleba a čaj.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/breakfast.jpg",
@@ -218,6 +263,7 @@
       "cz": "britský",
       "sentenceEn": "My neighbor is British and speaks very politely.",
       "sentenceCz": "Můj soused je Brit a mluví velmi zdvořile.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/british.webp",
@@ -233,6 +279,9 @@
       "cz": "bratr",
       "sentenceEn": "My brother calls me every Sunday evening.",
       "sentenceCz": "Můj bratr mi volá každou neděli večer.",
+      "wordSets": [
+        "Family"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/man.png",
@@ -248,6 +297,9 @@
       "cz": "hamburger",
       "sentenceEn": "We share one burger and laugh about the day.",
       "sentenceCz": "Dáme si jeden burger na půl a smějeme se tomu dni.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/burger.png",
@@ -263,6 +315,7 @@
       "cz": "autobusové nádraží",
       "sentenceEn": "Let’s meet at the bus station near the clock.",
       "sentenceCz": "Sejdeme se na autobusovém nádraží u hodin.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/busstation.webp",
@@ -278,6 +331,9 @@
       "cz": "ahoj (na rozloučenou)",
       "sentenceEn": "It’s late, so I say bye and go home.",
       "sentenceCz": "Je pozdě, tak řeknu ahoj a jdu domů.",
+      "wordSets": [
+        "Greetings"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/bye.png",
@@ -293,6 +349,7 @@
       "cz": "mohu",
       "sentenceEn": "Can I have this book?",
       "sentenceCz": "Mohu mít tuto knihu? (podívat se na ní)",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/can.webp",
@@ -308,6 +365,9 @@
       "cz": "kočka",
       "sentenceEn": "The cat sleeps on the chair all afternoon.",
       "sentenceCz": "Kočka spí celé odpoledne na židli.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": true,
       "hardTraining": false,
       "image": "assets/vocabulary-en/cat.webp",
@@ -323,6 +383,7 @@
       "cz": "kino",
       "sentenceEn": "We go to the cinema and buy popcorn.",
       "sentenceCz": "Jdeme do kina a koupíme si popcorn.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": true,
       "image": "assets/vocabulary-en/cinema.png",
@@ -338,6 +399,9 @@
       "cz": "káva",
       "sentenceEn": "I make coffee, and the kitchen smells great.",
       "sentenceCz": "Uvařím kávu a v kuchyni je krásná vůně.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": false,
       "hardTraining": true,
       "image": "assets/vocabulary-en/coffee.jpg",
@@ -353,6 +417,9 @@
       "cz": "vařit; kuchař",
       "sentenceEn": "I like to cook simple food for my family.",
       "sentenceCz": "Rád vařím jednoduché jídlo pro svou rodinu.",
+      "wordSets": [
+        "Actions"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/cook.webp",
@@ -368,6 +435,9 @@
       "cz": "kráva",
       "sentenceEn": "A cow stands in the field and watches us.",
       "sentenceCz": "Na louce stojí kráva a dívá se na nás.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": true,
       "hardTraining": false,
       "image": "assets/vocabulary-en/cow.webp",
@@ -383,6 +453,9 @@
       "cz": "krokodýl",
       "sentenceEn": "In the picture, the crocodile has a huge mouth.",
       "sentenceCz": "Na obrázku má krokodýl obrovskou tlamu.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": true,
       "hardTraining": false,
       "image": "assets/vocabulary-en/crocodile.webp",
@@ -398,6 +471,9 @@
       "cz": "tmavý",
       "sentenceEn": "The room is dark, so I turn on the light.",
       "sentenceCz": "V pokoji je tma, tak rozsvítím.",
+      "wordSets": [
+        "Colors"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/dark.webp",
@@ -413,6 +489,9 @@
       "cz": "pes",
       "sentenceEn": "The dog waits by the door for a walk.",
       "sentenceCz": "Pes čeká u dveří na procházku.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": true,
       "hardTraining": false,
       "image": "assets/vocabulary-en/dog.jpg",
@@ -428,6 +507,7 @@
       "cz": "lékař",
       "sentenceEn": "The doctor listens carefully and speaks calmly.",
       "sentenceCz": "Doktor pozorně poslouchá a mluví klidně.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/doctor.webp",
@@ -443,6 +523,9 @@
       "cz": "dokument",
       "sentenceEn": "Please sign this document at the bottom.",
       "sentenceCz": "Prosím podepiš tento dokument dole.",
+      "wordSets": [
+        "Things"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/document.webp",
@@ -458,6 +541,9 @@
       "cz": "nápoj, pít",
       "sentenceEn": "When I feel tired, I drink a little water.",
       "sentenceCz": "Když jsem unavený, napiju se trochu vody.",
+      "wordSets": [
+        "Actions"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/drink.jpg",
@@ -473,6 +559,9 @@
       "cz": "kreslení",
       "sentenceEn": "Your drawing is funny and very clear.",
       "sentenceCz": "Tvá kresba je vtipná a moc povedená.",
+      "wordSets": [
+        "Actions"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/drawing.webp",
@@ -488,6 +577,9 @@
       "cz": "kachna",
       "sentenceEn": "A duck swims slowly across the pond.",
       "sentenceCz": "Kachna pomalu plave přes rybník.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/duck.webp",
@@ -503,6 +595,9 @@
       "cz": "slon",
       "sentenceEn": "The elephant lifts its trunk and greets the kids.",
       "sentenceCz": "Slon zvedne chobot a jako by zdravil děti.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": true,
       "hardTraining": false,
       "image": "assets/vocabulary-en/elephant.webp",
@@ -518,6 +613,7 @@
       "cz": "angličtina",
       "sentenceEn": "I read an English story before I sleep.",
       "sentenceCz": "Před spaním čtu anglický příběh.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/english.webp",
@@ -533,6 +629,9 @@
       "cz": "promiňte",
       "sentenceEn": "Excuse me, is this seat free?",
       "sentenceCz": "Promiňte, je tohle místo volné?",
+      "wordSets": [
+        "Greetings"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/excuseme.webp",
@@ -548,6 +647,7 @@
       "cz": "oči",
       "sentenceEn": "Her eyes are tired after a long day.",
       "sentenceCz": "Po dlouhém dni má unavené oči.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/eyes.webp",
@@ -563,6 +663,9 @@
       "cz": "světlý (o vlasech)",
       "sentenceEn": "He has fair hair and a friendly smile.",
       "sentenceCz": "Má světlé vlasy a přátelský úsměv.",
+      "wordSets": [
+        "Colors"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/fair.webp",
@@ -578,6 +681,9 @@
       "cz": "rodina",
       "sentenceEn": "My family eats together on weekends.",
       "sentenceCz": "O víkendu moje rodina jí společně.",
+      "wordSets": [
+        "Family"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/family.jpg",
@@ -593,6 +699,9 @@
       "cz": "otec",
       "sentenceEn": "My father tells me a short story every time we meet.",
       "sentenceCz": "Můj otec mi vždy při setkání vypráví krátký příběh.",
+      "wordSets": [
+        "Family"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/man.png",
@@ -608,6 +717,7 @@
       "cz": "pole;\" louka",
       "sentenceEn": "In the field, the grass moves in the wind.",
       "sentenceCz": "Na poli se tráva hýbe ve větru.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/field.webp",
@@ -623,6 +733,7 @@
       "cz": "film",
       "sentenceEn": "This film is quiet, but it stays in my mind.",
       "sentenceCz": "Ten film je klidný, ale zůstane mi v hlavě.",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/film.webp",
@@ -638,6 +749,9 @@
       "cz": "ryba",
       "sentenceEn": "The fish jumps, and the water makes circles.",
       "sentenceCz": "Ryba vyskočí a na vodě udělá kruhy.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/fish.png",
@@ -653,6 +767,7 @@
       "cz": "jídlo",
       "sentenceEn": "The food is hot, so I wait a moment.",
       "sentenceCz": "Jídlo je horké, tak chvilku počkám.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": true,
       "image": "assets/vocabulary-en/meal.png",
@@ -668,6 +783,7 @@
       "cz": "volný; zdarma",
       "sentenceEn": "Are you free this evening for a short walk?",
       "sentenceCz": "Máš dnes večer čas na krátkou procházku?",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/free.webp",
@@ -683,6 +799,7 @@
       "cz": "kamarád",
       "sentenceEn": "A good friend helps without asking for anything.",
       "sentenceCz": "Dobrý přítel pomůže, aniž by něco chtěl.",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/man.png",
@@ -698,6 +815,7 @@
       "cz": "zahrada",
       "sentenceEn": "In the garden, I plant flowers in spring.",
       "sentenceCz": "Na zahradě na jaře sázím květiny.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/garden.jpg",
@@ -713,6 +831,9 @@
       "cz": "žirafa",
       "sentenceEn": "The giraffe reaches the leaves at the top.",
       "sentenceCz": "Žirafa dosáhne na listy úplně nahoře.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/giraffe.jpg",
@@ -728,6 +849,9 @@
       "cz": "koza",
       "sentenceEn": "The goat eats calmly and looks curious.",
       "sentenceCz": "Koza klidně jí a vypadá zvědavě.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/goat.webp",
@@ -743,6 +867,9 @@
       "cz": "jít",
       "sentenceEn": "I go to the store, then I come back quickly.",
       "sentenceCz": "Jdu do obchodu a pak se rychle vrátím.",
+      "wordSets": [
+        "Actions"
+      ],
       "selected": false,
       "hardTraining": true,
       "image": "assets/vocabulary-en/verb.png",
@@ -758,6 +885,7 @@
       "cz": "dobrý",
       "sentenceEn": "That was a good idea—thank you!",
       "sentenceCz": "To byl dobrý nápad—děkuju!",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/good.png",
@@ -773,6 +901,9 @@
       "cz": "nashledanou",
       "sentenceEn": "We wave and say goodbye at the gate.",
       "sentenceCz": "Zamáváme si a rozloučíme se u brány.",
+      "wordSets": [
+        "Greetings"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/bye.png",
@@ -788,6 +919,9 @@
       "cz": "zelený",
       "sentenceEn": "The green tree looks fresh after the rain.",
       "sentenceCz": "Zelený strom vypadá po dešti svěže.",
+      "wordSets": [
+        "Colors"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/green.webp",
@@ -803,6 +937,9 @@
       "cz": "šedý",
       "sentenceEn": "On a grey day, a warm tea helps.",
       "sentenceCz": "V šedivý den pomůže teplý čaj.",
+      "wordSets": [
+        "Colors"
+      ],
       "selected": false,
       "hardTraining": true,
       "image": "assets/vocabulary-en/grey.webp",
@@ -818,6 +955,7 @@
       "cz": "vlasy",
       "sentenceEn": "My hair gets messy in the wind.",
       "sentenceCz": "Ve větru se mi rozcuchají vlasy.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/hair.jpg",
@@ -833,6 +971,7 @@
       "cz": "šťastný",
       "sentenceEn": "I feel happy when the sun comes out.",
       "sentenceCz": "Jsem šťastný, když vyjde slunce.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/happy.webp",
@@ -848,6 +987,9 @@
       "cz": "slyšet",
       "sentenceEn": "Can you hear the birds outside?",
       "sentenceCz": "Slyšíš venku ptáky?",
+      "wordSets": [
+        "Actions"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/hear.webp",
@@ -863,6 +1005,9 @@
       "cz": "ahoj / dobrý den",
       "sentenceEn": "Hello! How was your day?",
       "sentenceCz": "Ahoj! Jaký jsi měl den?",
+      "wordSets": [
+        "Greetings"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/hello.png",
@@ -878,6 +1023,7 @@
       "cz": "pomoc; pomoci",
       "sentenceEn": "Thank you for your help;\" I really needed it.",
       "sentenceCz": "Děkuju za pomoc, opravdu jsem ji potřeboval.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": true,
       "image": "assets/vocabulary-en/help.webp",
@@ -893,6 +1039,7 @@
       "cz": "domov",
       "sentenceEn": "After work, I go home and rest for a while.",
       "sentenceCz": "Po práci jdu domů a chvíli si odpočinu.",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/home.jpg",
@@ -908,6 +1055,9 @@
       "cz": "kůň",
       "sentenceEn": "The horse runs fast and then stops quietly.",
       "sentenceCz": "Kůň rychle běží a pak tiše zastaví.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/horse.webp",
@@ -923,6 +1073,7 @@
       "cz": "dům",
       "sentenceEn": "Our house is small, but we love it.",
       "sentenceCz": "Náš dům je malý, ale máme ho rádi.",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/house.png",
@@ -938,6 +1089,7 @@
       "cz": "já (jsem)",
       "sentenceEn": "I (am) ready now—let’s start.",
       "sentenceCz": "Už jsem připravený—pojďme začít.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/iam.webp",
@@ -953,6 +1105,7 @@
       "cz": "v",
       "sentenceEn": "The keys are in my pocket.",
       "sentenceCz": "Klíče jsou v mé kapse.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/in.webp",
@@ -968,6 +1121,9 @@
       "cz": "skákat",
       "sentenceEn": "The child can jump over the small puddle.",
       "sentenceCz": "Dítě umí přeskočit malou louži.",
+      "wordSets": [
+        "Actions"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/jump.webp",
@@ -983,6 +1139,7 @@
       "cz": "rybník",
       "sentenceEn": "We sit by the lake / pond and watch the water.",
       "sentenceCz": "Sedíme u rybníka a díváme se na vodu.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/lakepond.webp",
@@ -998,6 +1155,7 @@
       "cz": "levý, vlevo",
       "sentenceEn": "Turn left at the next corner.",
       "sentenceCz": "Na příští křižovatce zahni vlevo.",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/left.jpg",
@@ -1013,6 +1171,7 @@
       "cz": "mít rád",
       "sentenceEn": "I like this song because it is simple.",
       "sentenceCz": "Mám rád tuhle písničku, protože je jednoduchá.",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/like.webp",
@@ -1028,6 +1187,9 @@
       "cz": "lev",
       "sentenceEn": "The lion sleeps in the sun for hours.",
       "sentenceCz": "Lev spí na slunci celé hodiny.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/lion.webp",
@@ -1043,6 +1205,7 @@
       "cz": "žít; bydlet",
       "sentenceEn": "I live near a quiet park.",
       "sentenceCz": "Bydlím blízko klidného parku.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/house.png",
@@ -1058,6 +1221,7 @@
       "cz": "milovat",
       "sentenceEn": "I love calm mornings with no rush.",
       "sentenceCz": "Miluju klidná rána bez spěchu.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/love.jpg",
@@ -1073,6 +1237,9 @@
       "cz": "mléko",
       "sentenceEn": "I add milk to my tea.",
       "sentenceCz": "Dám si do čaje mléko.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/milk.jpg",
@@ -1088,11 +1255,14 @@
       "cz": "máma",
       "sentenceEn": "My mom makes me smile even on hard days.",
       "sentenceCz": "Máma mě rozesměje i v těžkých dnech.",
+      "wordSets": [
+        "Family"
+      ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/woman.png",
-      "imageStem": "woman",
-      "imageRequestedStem": "woman",
+      "image": "assets/vocabulary-en/mother.webp",
+      "imageStem": "mother",
+      "imageRequestedStem": "mother",
       "imageSource": "mapping",
       "imageMissing": false
     },
@@ -1103,6 +1273,9 @@
       "cz": "opice",
       "sentenceEn": "The monkey steals a banana and runs away.",
       "sentenceCz": "Opice ukradne banán a uteče.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/monkey.webp",
@@ -1118,6 +1291,9 @@
       "cz": "matka",
       "sentenceEn": "My mother keeps old photos in a small box.",
       "sentenceCz": "Moje maminka schovává staré fotky v malé krabičce.",
+      "wordSets": [
+        "Family"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/mother.webp",
@@ -1133,6 +1309,7 @@
       "cz": "jméno",
       "sentenceEn": "What is your name?",
       "sentenceCz": "Jak se jmenuješ?",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/name.webp",
@@ -1148,6 +1325,7 @@
       "cz": "nový",
       "sentenceEn": "I bought a new notebook for my ideas.",
       "sentenceCz": "Koupil jsem si nový sešit na nápady.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/new.webp",
@@ -1163,6 +1341,7 @@
       "cz": "zdravotní sestra",
       "sentenceEn": "The nurse checks on the patient with a kind voice.",
       "sentenceCz": "Sestra zkontroluje pacienta a mluví laskavě.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/woman.png",
@@ -1178,6 +1357,7 @@
       "cz": "kancelář",
       "sentenceEn": "In the office, it is quiet in the morning.",
       "sentenceCz": "V kanceláři je ráno klid.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/office.webp",
@@ -1193,6 +1373,7 @@
       "cz": "starý",
       "sentenceEn": "This old chair is still strong.",
       "sentenceCz": "Ta stará židle je pořád pevná.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/old.jpg",
@@ -1208,6 +1389,9 @@
       "cz": "rodiče",
       "sentenceEn": "My parents visit us on Sunday.",
       "sentenceCz": "Moji rodiče nás navštíví v neděli.",
+      "wordSets": [
+        "Family"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/parents.jpg",
@@ -1223,6 +1407,7 @@
       "cz": "park",
       "sentenceEn": "We walk through the park and talk slowly.",
       "sentenceCz": "Projdeme se parkem a v klidu si povídáme.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/park.jpg",
@@ -1238,6 +1423,9 @@
       "cz": "popcorn",
       "sentenceEn": "The popcorn is hot, so I blow on it.",
       "sentenceCz": "Popcorn je horký, tak na něj fouknu.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/popcorn.webp",
@@ -1253,6 +1441,9 @@
       "cz": "králík",
       "sentenceEn": "A rabbit appears, then disappears in the grass.",
       "sentenceCz": "Zajíc se objeví a hned zmizí v trávě.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/rabbit.webp",
@@ -1268,6 +1459,9 @@
       "cz": "červený",
       "sentenceEn": "She chooses the red scarf.",
       "sentenceCz": "Vybere si červenou šálu.",
+      "wordSets": [
+        "Colors"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/red.webp",
@@ -1283,6 +1477,9 @@
       "cz": "nosorožec",
       "sentenceEn": "The rhino looks heavy, but it moves fast.",
       "sentenceCz": "Nosorožec vypadá těžký, ale pohybuje se rychle.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/rhino.webp",
@@ -1298,6 +1495,9 @@
       "cz": "běhat",
       "sentenceEn": "I run to catch the bus.",
       "sentenceCz": "Běžím, abych stihl autobus.",
+      "wordSets": [
+        "Actions"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/hat.png",
@@ -1313,6 +1513,9 @@
       "cz": "ovce",
       "sentenceEn": "The sheep stay close together.",
       "sentenceCz": "Ovce drží pohromadě.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/sheep.webp",
@@ -1328,6 +1531,9 @@
       "cz": "zpívat",
       "sentenceEn": "We sing a short song on the way home.",
       "sentenceCz": "Cestou domů si zazpíváme krátkou písničku.",
+      "wordSets": [
+        "Actions"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/sing.png",
@@ -1343,6 +1549,9 @@
       "cz": "sestra",
       "sentenceEn": "My sister sends me a message every morning.",
       "sentenceCz": "Moje sestra mi posílá zprávu každé ráno.",
+      "wordSets": [
+        "Family"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/woman.png",
@@ -1358,6 +1567,7 @@
       "cz": "malý",
       "sentenceEn": "This cup is small, so I take two.",
       "sentenceCz": "Ten hrnek je malý, tak si vezmu dva.",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/small.webp",
@@ -1373,6 +1583,7 @@
       "cz": "chytrý",
       "sentenceEn": "He is smart, but he stays humble.",
       "sentenceCz": "Je chytrý, ale zůstává skromný.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/smart.webp",
@@ -1388,6 +1599,7 @@
       "cz": "pomalý",
       "sentenceEn": "Please speak slow—I want to understand.",
       "sentenceCz": "Prosím mluv pomalu—chci rozumět.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/slow.webp",
@@ -1403,6 +1615,9 @@
       "cz": "mluvit",
       "sentenceEn": "I speak English a little every day.",
       "sentenceCz": "Každý den trochu mluvím anglicky.",
+      "wordSets": [
+        "Actions"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/speak.webp",
@@ -1418,6 +1633,7 @@
       "cz": "vysoký",
       "sentenceEn": "That tree is tall and easy to see.",
       "sentenceCz": "Ten strom je vysoký a jde dobře vidět.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/tall.webp",
@@ -1433,6 +1649,7 @@
       "cz": "učitel",
       "sentenceEn": "The teacher explains it with a simple example.",
       "sentenceCz": "Učitel to vysvětlí na jednoduchém příkladu.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/teacher.webp",
@@ -1448,6 +1665,9 @@
       "cz": "lístek",
       "sentenceEn": "I buy a ticket and put it in my pocket.",
       "sentenceCz": "Koupím si lístek a dám si ho do kapsy.",
+      "wordSets": [
+        "Things"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/ticket.webp",
@@ -1463,6 +1683,9 @@
       "cz": "chodit",
       "sentenceEn": "Let’s walk slowly and enjoy the air.",
       "sentenceCz": "Pojďme jít pomalu a užít si vzduch.",
+      "wordSets": [
+        "Actions"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/verb.png",
@@ -1478,6 +1701,9 @@
       "cz": "voda",
       "sentenceEn": "Cold water feels good after a long walk.",
       "sentenceCz": "Studená voda je příjemná po dlouhé procházce.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/water.jpg",
@@ -1493,6 +1719,9 @@
       "cz": "bílý",
       "sentenceEn": "The white cat sits on the warm window.",
       "sentenceCz": "Bílá kočka sedí na teplém parapetu.",
+      "wordSets": [
+        "Colors"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/white.webp",
@@ -1508,6 +1737,9 @@
       "cz": "žlutý",
       "sentenceEn": "A yellow flower grows near the path.",
       "sentenceCz": "U cesty roste žlutý květ.",
+      "wordSets": [
+        "Colors"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/yellow.jpg",
@@ -1523,6 +1755,7 @@
       "cz": "zoologická zahrada",
       "sentenceEn": "At the zoo, the kids ask many questions.",
       "sentenceCz": "V zoo se děti ptají na spoustu věcí.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/zahrada.jpg",
@@ -1538,6 +1771,9 @@
       "cz": "zebra",
       "sentenceEn": "The zebra has black and white stripes.",
       "sentenceCz": "Zebra má černobílé pruhy.",
+      "wordSets": [
+        "Animals"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/zebra.webp",
@@ -1553,6 +1789,7 @@
       "cz": "restaurace",
       "sentenceEn": "We choose a small restaurant near the station.",
       "sentenceCz": "Vybereme si malou restauraci blízko nádraží.",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/restaurant.jpg",
@@ -1568,6 +1805,7 @@
       "cz": "blízko",
       "sentenceEn": "The shop is near my home, so I walk there.",
       "sentenceCz": "Obchod je blízko mého domova, tak tam jdu pěšky.",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/near.webp",
@@ -1583,6 +1821,7 @@
       "cz": "daleko",
       "sentenceEn": "Is the bus station far from here?",
       "sentenceCz": "Je autobusové nádraží odtud daleko?",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/far.webp",
@@ -1598,6 +1837,7 @@
       "cz": "rovně",
       "sentenceEn": "Go straight and you will see the bridge.",
       "sentenceCz": "Jdi rovně a uvidíš most.",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/straight.jpg",
@@ -1613,6 +1853,7 @@
       "cz": "zahnout / odbočit",
       "sentenceEn": "Turn right at the next corner and stop there.",
       "sentenceCz": "Zahni doprava na příštím rohu a tam zastav.",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/turn.webp",
@@ -1628,6 +1869,7 @@
       "cz": "hladový",
       "sentenceEn": "I am hungry, so I make a quick sandwich.",
       "sentenceCz": "Jsem hladový, tak si udělám rychlý sendvič.",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/hungry.webp",
@@ -1643,6 +1885,7 @@
       "cz": "teplý",
       "sentenceEn": "I want something warm to drink after the walk.",
       "sentenceCz": "Po procházce chci něco teplého k pití.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/warm.jpg",
@@ -1658,6 +1901,9 @@
       "cz": "vítejte",
       "sentenceEn": "Welcome! Please come in and sit down.",
       "sentenceCz": "Vítejte! Prosím pojďte dál a posaďte se.",
+      "wordSets": [
+        "Greetings"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/welcome.webp",
@@ -1673,6 +1919,9 @@
       "cz": "stůl",
       "sentenceEn": "We ask for a table for two by the window.",
       "sentenceCz": "Požádáme o stůl pro dva u okna.",
+      "wordSets": [
+        "Things"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/table.jpg",
@@ -1688,6 +1937,9 @@
       "cz": "následovat",
       "sentenceEn": "Please follow me;\" your room is this way.",
       "sentenceCz": "Prosím následujte mě, váš pokoj je tudy.",
+      "wordSets": [
+        "Actions"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/follow.webp",
@@ -1703,6 +1955,7 @@
       "cz": "jídelní lístek",
       "sentenceEn": "I read the menu and choose a simple soup.",
       "sentenceCz": "Prohlédnu si jídelní lístek a vyberu si jednoduchou polévku.",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/menu.jpg",
@@ -1718,6 +1971,7 @@
       "cz": "připravený",
       "sentenceEn": "Are you ready to leave now?",
       "sentenceCz": "Jsi připravený teď odejít?",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/ready.webp",
@@ -1733,6 +1987,7 @@
       "cz": "objednat (si)",
       "sentenceEn": "We order food, then we talk quietly.",
       "sentenceCz": "Objednáme si jídlo a pak si v klidu povídáme.",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/order.jpg",
@@ -1748,6 +2003,9 @@
       "cz": "džus",
       "sentenceEn": "She drinks orange juice with breakfast.",
       "sentenceCz": "K snídani pije pomerančový džus.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/juice.png",
@@ -1763,6 +2021,9 @@
       "cz": "jablko",
       "sentenceEn": "I eat an apple on my way to work.",
       "sentenceCz": "Cestou do práce sním jablko.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/apple.png",
@@ -1778,6 +2039,9 @@
       "cz": "pomeranč",
       "sentenceEn": "He peels an orange and shares it with me.",
       "sentenceCz": "Oloupe pomeranč a rozdělí se se mnou.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/orange.webp",
@@ -1793,6 +2057,9 @@
       "cz": "kuře",
       "sentenceEn": "For dinner, we cook chicken with rice.",
       "sentenceCz": "K večeři uvaříme kuře s rýží.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/chicken.png",
@@ -1808,6 +2075,9 @@
       "cz": "rýže",
       "sentenceEn": "I add a little salt to the rice.",
       "sentenceCz": "Do rýže přidám trochu soli.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/rice.jpg",
@@ -1823,6 +2093,9 @@
       "cz": "těstoviny",
       "sentenceEn": "The pasta is ready in ten minutes.",
       "sentenceCz": "Těstoviny jsou hotové za deset minut.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/pasta.jpg",
@@ -1838,6 +2111,9 @@
       "cz": "sýr",
       "sentenceEn": "I put cheese on the bread and heat it.",
       "sentenceCz": "Dám na chleba sýr a ohřeju ho.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/cheese.jpg",
@@ -1853,6 +2129,9 @@
       "cz": "hranolky",
       "sentenceEn": "The fries are hot, so I wait a moment.",
       "sentenceCz": "Hranolky jsou horké, tak chvilku počkám.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/fries.jpg",
@@ -1868,6 +2147,9 @@
       "cz": "brambory",
       "sentenceEn": "We buy potatoes and vegetables at the market.",
       "sentenceCz": "Na trhu koupíme brambory a zeleninu.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/potatoes.jpg",
@@ -1883,6 +2165,9 @@
       "cz": "kečup",
       "sentenceEn": "Can I have ketchup, please?",
       "sentenceCz": "Můžu dostat kečup, prosím?",
+      "wordSets": [
+        "Food"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/ketchup.jpg",
@@ -1898,6 +2183,9 @@
       "cz": "salát",
       "sentenceEn": "I make a small salad with tomatoes.",
       "sentenceCz": "Udělám malý salát s rajčaty.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/salad.jpg",
@@ -1913,6 +2201,9 @@
       "cz": "jídlo",
       "sentenceEn": "Enjoy your meal!",
       "sentenceCz": "Dobrou chuť!",
+      "wordSets": [
+        "Food"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/meal.png",
@@ -1928,6 +2219,7 @@
       "cz": "horký",
       "sentenceEn": "My tea is hot, but it smells great.",
       "sentenceCz": "Můj čaj je horký, ale krásně voní.",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/hot.webp",
@@ -1943,6 +2235,9 @@
       "cz": "omáčka",
       "sentenceEn": "This sauce is simple, but very tasty.",
       "sentenceCz": "Tahle omáčka je jednoduchá, ale moc chutná.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/sauce.jpg",
@@ -1958,6 +2253,9 @@
       "cz": "dezert",
       "sentenceEn": "Would you like dessert after lunch?",
       "sentenceCz": "Dáš si po obědě dezert?",
+      "wordSets": [
+        "Food"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/cake.png",
@@ -1973,6 +2271,9 @@
       "cz": "zmrzlina",
       "sentenceEn": "In summer, we share ice cream in the park.",
       "sentenceCz": "V létě si dáme zmrzlinu v parku.",
+      "wordSets": [
+        "Food"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/icecream.jpg",
@@ -1988,6 +2289,7 @@
       "cz": "účet",
       "sentenceEn": "Excuse me, can we have the bill, please?",
       "sentenceCz": "Promiňte, můžeme dostat účet, prosím?",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/bill.jpg",
@@ -2003,6 +2305,7 @@
       "cz": "libra (měna)",
       "sentenceEn": "It costs twenty pounds in total.",
       "sentenceCz": "Celkem to stojí dvacet liber.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/pound.webp",
@@ -2018,6 +2321,9 @@
       "cz": "karta",
       "sentenceEn": "We pay by card because we have no cash.",
       "sentenceCz": "Zaplatíme kartou, protože nemáme hotovost.",
+      "wordSets": [
+        "Things"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/card.jpg",
@@ -2033,6 +2339,7 @@
       "cz": "zaplatit",
       "sentenceEn": "I pay now, and we can go.",
       "sentenceCz": "Teď zaplatím a můžeme jít.",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/pay.webp",
@@ -2048,6 +2355,7 @@
       "cz": "příště",
       "sentenceEn": "Next time, I will try the pizza.",
       "sentenceCz": "Příště zkusím pizzu.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/nexttime.webp",
@@ -2063,6 +2371,7 @@
       "cz": "zkusit",
       "sentenceEn": "I try a new soup, and it is good.",
       "sentenceCz": "Zkusím novou polévku a je dobrá.",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/try.webp",
@@ -2078,6 +2387,7 @@
       "cz": "znovu",
       "sentenceEn": "We come again because we like this place.",
       "sentenceCz": "Přijdeme znovu, protože se nám to tu líbí.",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/again.webp",
@@ -2093,6 +2403,9 @@
       "cz": "prosím",
       "sentenceEn": "Please speak slowly;\" I want to understand.",
       "sentenceCz": "Prosím mluv pomalu, chci rozumět.",
+      "wordSets": [
+        "Greetings"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/please.webp",
@@ -2108,6 +2421,9 @@
       "cz": "děkuji",
       "sentenceEn": "Thank you for your help today.",
       "sentenceCz": "Děkuji za tvoji dnešní pomoc.",
+      "wordSets": [
+        "Greetings"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/thankyou.webp",
@@ -2123,6 +2439,9 @@
       "cz": "není zač",
       "sentenceEn": "You're welcome—I'm happy to help.",
       "sentenceCz": "Není zač—ráda pomůžu.",
+      "wordSets": [
+        "Greetings"
+      ],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/welcome.webp",
@@ -2138,6 +2457,7 @@
       "cz": "ještě něco",
       "sentenceEn": "Anything else, or is that all?",
       "sentenceCz": "Ještě něco, nebo je to všechno?",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/anythingelse.webp",
@@ -2153,6 +2473,7 @@
       "cz": "kde",
       "sentenceEn": "",
       "sentenceCz": "",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/where.webp",
@@ -2168,6 +2489,7 @@
       "cz": "pravý, správný",
       "sentenceEn": "",
       "sentenceCz": "",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/right.jpg",
@@ -2183,6 +2505,7 @@
       "cz": "chtěl bych, rád bych",
       "sentenceEn": "",
       "sentenceCz": "",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/like.webp",
@@ -2198,6 +2521,7 @@
       "cz": "užít si",
       "sentenceEn": "",
       "sentenceCz": "",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/enjoy.webp",
@@ -2213,6 +2537,7 @@
       "cz": "samozřejmě",
       "sentenceEn": "",
       "sentenceCz": "",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/ofcourse.webp",
@@ -2228,6 +2553,7 @@
       "cz": "jistě",
       "sentenceEn": "",
       "sentenceCz": "",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/sure.webp",
@@ -2243,6 +2569,9 @@
       "cz": "oběd",
       "sentenceEn": "",
       "sentenceCz": "",
+      "wordSets": [
+        "Food"
+      ],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/meal.png",
@@ -2258,6 +2587,7 @@
       "cz": "kolik",
       "sentenceEn": "",
       "sentenceCz": "",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/howmuch.webp",
@@ -2273,6 +2603,7 @@
       "cz": "Co byste si dal? Co byste rád?",
       "sentenceEn": "",
       "sentenceCz": "",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/like.webp",
@@ -2288,6 +2619,7 @@
       "cz": "něco",
       "sentenceEn": "",
       "sentenceCz": "",
+      "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/something.webp",
@@ -2303,6 +2635,7 @@
       "cz": "lidé",
       "sentenceEn": "",
       "sentenceCz": "",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/people.png",
@@ -2318,6 +2651,7 @@
       "cz": "fotbal",
       "sentenceEn": "",
       "sentenceCz": "",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/others.png",
@@ -2333,6 +2667,7 @@
       "cz": "led",
       "sentenceEn": "",
       "sentenceCz": "",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/others.png",
@@ -2348,6 +2683,7 @@
       "cz": "zákon",
       "sentenceEn": "",
       "sentenceCz": "",
+      "wordSets": [],
       "selected": false,
       "hardTraining": false,
       "image": "assets/vocabulary-en/others.png",

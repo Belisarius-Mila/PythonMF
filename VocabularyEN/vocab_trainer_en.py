@@ -32,6 +32,7 @@ DATASET_CONFIGS = {
         "button_text": "WebUpdate83",
     },
 }
+CSV_FIELDNAMES = ["EN", "CZ", "Order", "Sentence", "SentenceT", "WS", "L", "HT"]
 
 # Keep Python defaults intentionally small; most mapping is loaded from Pict/mapping.json.
 SYNONYM_IMAGE_MAP = {}
@@ -81,7 +82,7 @@ def resolve_csv_path(csv_filename=None):
         # First run without bundled CSV: create an empty valid file.
         with open(target_csv, "w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(
-                f, fieldnames=["EN", "CZ", "Order", "Sentence", "SentenceT", "L", "HT"]
+                f, fieldnames=CSV_FIELDNAMES
             )
             writer.writeheader()
         return target_csv
@@ -141,6 +142,7 @@ class VocabularyTrainerApp:
         self.web_update_83_button = None
         self.new_fr_entry = None
         self.new_cz_entry = None
+        self.new_ws_entry = None
         self.hint_blink_job = None
         self.hint_blink_on = True
         self.hint_blink_toggles = 0
@@ -171,6 +173,7 @@ class VocabularyTrainerApp:
         self.new_cz_var = tk.StringVar(value="")
         self.new_sentence_var = tk.StringVar(value="")
         self.new_sentence_t_var = tk.StringVar(value="")
+        self.new_ws_var = tk.StringVar(value="")
 
     def _paste_into_entry(self, event):
         try:
@@ -572,6 +575,7 @@ class VocabularyTrainerApp:
             cz = (row.get("CZ") or "").strip()
             sentence = (row.get("Sentence") or "").strip()
             sentence_t = (row.get("SentenceT") or "").strip()
+            word_set = (row.get("WS") or "").strip()
             learned = (row.get("L") or "ne").strip().lower()
             hard_training = (row.get("HT") or "ne").strip().lower()
 
@@ -590,6 +594,7 @@ class VocabularyTrainerApp:
                     "Order": "",  # recalc below
                     "Sentence": sentence,
                     "SentenceT": sentence_t,
+                    "WS": word_set,
                     "L": learned,
                     "HT": hard_training,
                 }
@@ -601,9 +606,8 @@ class VocabularyTrainerApp:
         return repaired
 
     def _write_rows(self, rows):
-        fieldnames = ["EN", "CZ", "Order", "Sentence", "SentenceT", "L", "HT"]
         with open(self.csv_path, "w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer = csv.DictWriter(f, fieldnames=CSV_FIELDNAMES)
             writer.writeheader()
             writer.writerows(rows)
 
@@ -1099,12 +1103,17 @@ class VocabularyTrainerApp:
             return
 
         if asset_status.stdout.strip():
+            changed_assets = asset_status.stdout.strip()
             messagebox.showwarning(
                 button_text,
-                "Synchronizace proběhla, ale změnily se i obrázkové assety.\n\n"
-                "Automatický deploy přes tlačítko je povolen jen pro CSV a JSON.\n"
-                "Obrázky prosím commitni a pushni ručně.\n\n"
-                + asset_status.stdout.strip(),
+                "Synchronizace proběhla, ale deploy byl zastaven kvůli změněným obrázkovým assetům.\n\n"
+                "To obvykle znamená, že nové nebo upravené slovíčko nově používá jiný obrázek, fallback obrázek, "
+                "nebo se do webu zkopíroval asset, který tam dřív nebyl.\n\n"
+                "Tlačítko automaticky pushuje jen CSV a JSON. Obrázky v docs/assets/vocabulary-en musíš v tomto "
+                "případě commitnout a pushnout ručně.\n\n"
+                "Pokud měníš jen L/HT, překlady nebo věty a assety se nezmění, WebUpdate projde automaticky.\n\n"
+                "Blokující assety:\n"
+                + changed_assets,
             )
             return
 
@@ -1556,10 +1565,12 @@ class VocabularyTrainerApp:
         self.input_window = win
         self.new_fr_entry = None
         self.new_cz_entry = None
+        self.new_ws_entry = None
 
         def _on_input_window_close():
             self.new_fr_entry = None
             self.new_cz_entry = None
+            self.new_ws_entry = None
             self.input_window = None
             win.destroy()
 
@@ -1584,7 +1595,7 @@ class VocabularyTrainerApp:
         scrollbar = tk.Scrollbar(list_frame)
         scrollbar.pack(side="right", fill="y")
 
-        columns = ("Order", "EN", "CZ", "Sentence", "SentenceT", "L", "HT")
+        columns = ("Order", "EN", "CZ", "Sentence", "SentenceT", "WS", "L", "HT")
         tree = ttk.Treeview(
             list_frame,
             columns=columns,
@@ -1601,14 +1612,16 @@ class VocabularyTrainerApp:
         tree.heading("CZ", text="CZ")
         tree.heading("Sentence", text="Sentence")
         tree.heading("SentenceT", text="SentenceT")
+        tree.heading("WS", text="WS")
         tree.heading("L", text="L")
         tree.heading("HT", text="HT")
 
         tree.column("Order", width=80, anchor="center")
         tree.column("EN", width=200, anchor="w")
         tree.column("CZ", width=220, anchor="w")
-        tree.column("Sentence", width=340, anchor="w")
-        tree.column("SentenceT", width=340, anchor="w")
+        tree.column("Sentence", width=280, anchor="w")
+        tree.column("SentenceT", width=280, anchor="w")
+        tree.column("WS", width=180, anchor="w")
         tree.column("L", width=60, anchor="center")
         tree.column("HT", width=60, anchor="center")
 
@@ -1657,8 +1670,21 @@ class VocabularyTrainerApp:
             row=1, column=3, sticky="w", padx=(6, 12), pady=(6, 0)
         )
 
+        tk.Label(form, text="WS:", bg="white").grid(row=2, column=0, sticky="w", pady=(6, 0))
+        ws_hint = tk.Frame(form, bg="white")
+        ws_hint.grid(row=2, column=1, columnspan=3, sticky="w", padx=(6, 12), pady=(6, 0))
+        self.new_ws_entry = tk.Entry(ws_hint, textvariable=self.new_ws_var, width=50)
+        self._bind_entry_paste(self.new_ws_entry)
+        self.new_ws_entry.pack(side="left")
+        tk.Label(
+            ws_hint,
+            text="napr. Colors|Family|Numbers",
+            bg="white",
+            fg="#666666",
+        ).pack(side="left", padx=(8, 0))
+
         buttons_left = tk.Frame(form, bg="white")
-        buttons_left.grid(row=0, column=4, rowspan=2, sticky="w", padx=(6, 0))
+        buttons_left.grid(row=0, column=4, rowspan=3, sticky="w", padx=(6, 0))
         tk.Button(buttons_left, text="Add Row", command=self.add_new_row).pack(side="left")
         tk.Button(buttons_left, text="Insert Row", command=self.insert_row).pack(
             side="left", padx=(8, 0)
@@ -1669,7 +1695,7 @@ class VocabularyTrainerApp:
 
         form.grid_columnconfigure(5, weight=1)
         tk.Button(form, text="Training", command=_on_input_window_close).grid(
-            row=0, column=6, rowspan=2, sticky="e", padx=(8, 0)
+            row=0, column=6, rowspan=3, sticky="e", padx=(8, 0)
         )
 
     def _mark_search_entry(self, entry_widget, found):
@@ -1723,6 +1749,7 @@ class VocabularyTrainerApp:
                     row.get("CZ", ""),
                     row.get("Sentence", ""),
                     row.get("SentenceT", ""),
+                    row.get("WS", ""),
                     self._checkbox_mark(row.get("L", "ne")),
                     self._checkbox_mark(row.get("HT", "ne")),
                 ),
@@ -1748,6 +1775,7 @@ class VocabularyTrainerApp:
                     row.get("CZ", ""),
                     row.get("Sentence", ""),
                     row.get("SentenceT", ""),
+                    row.get("WS", ""),
                     self._checkbox_mark(row.get("L", "ne")),
                     self._checkbox_mark(row.get("HT", "ne")),
                 ),
@@ -1763,13 +1791,13 @@ class VocabularyTrainerApp:
         col_id = self.input_tree.identify_column(event.x)
         if not row_id or not col_id:
             return
-        if col_id not in ("#6", "#7"):  # L, HT
+        if col_id not in ("#7", "#8"):  # L, HT
             return
         try:
             idx = int(row_id)
         except ValueError:
             return "break"
-        column_name = "L" if col_id == "#6" else "HT"
+        column_name = "L" if col_id == "#7" else "HT"
         self._toggle_input_checkbox(idx, column_name)
         self.input_tree.selection_set(row_id)
         self.input_tree.focus(row_id)
@@ -1780,6 +1808,7 @@ class VocabularyTrainerApp:
         cz = self.new_cz_var.get().strip()
         sentence = self.new_sentence_var.get().strip()
         sentence_t = self.new_sentence_t_var.get().strip()
+        word_set = self.new_ws_var.get().strip()
         if not fr or not cz:
             messagebox.showwarning("Chybí data", "Zadej EN i CZ.")
             return
@@ -1797,6 +1826,7 @@ class VocabularyTrainerApp:
             "Order": str(next_order),
             "Sentence": sentence,
             "SentenceT": sentence_t,
+            "WS": word_set,
             "L": "ne",
             "HT": "ne",
         }
@@ -1814,6 +1844,7 @@ class VocabularyTrainerApp:
                     new_row.get("CZ", ""),
                     new_row.get("Sentence", ""),
                     new_row.get("SentenceT", ""),
+                    new_row.get("WS", ""),
                     self._checkbox_mark(new_row.get("L", "ne")),
                     self._checkbox_mark(new_row.get("HT", "ne")),
                 ),
@@ -1826,6 +1857,7 @@ class VocabularyTrainerApp:
         self.new_cz_var.set("")
         self.new_sentence_var.set("")
         self.new_sentence_t_var.set("")
+        self.new_ws_var.set("")
         self._mark_search_entry(self.new_fr_entry, True)
         self._mark_search_entry(self.new_cz_entry, True)
 
@@ -1842,6 +1874,7 @@ class VocabularyTrainerApp:
         cz = self.new_cz_var.get().strip()
         sentence = self.new_sentence_var.get().strip()
         sentence_t = self.new_sentence_t_var.get().strip()
+        word_set = self.new_ws_var.get().strip()
         if not fr or not cz:
             messagebox.showwarning("Chybí data", "Zadej EN i CZ.")
             return
@@ -1859,6 +1892,7 @@ class VocabularyTrainerApp:
             "Order": "",
             "Sentence": sentence,
             "SentenceT": sentence_t,
+            "WS": word_set,
             "L": "ne",
             "HT": "ne",
         }
@@ -1879,6 +1913,7 @@ class VocabularyTrainerApp:
         self.new_cz_var.set("")
         self.new_sentence_var.set("")
         self.new_sentence_t_var.set("")
+        self.new_ws_var.set("")
         self._mark_search_entry(self.new_fr_entry, True)
         self._mark_search_entry(self.new_cz_entry, True)
 
@@ -1914,7 +1949,7 @@ class VocabularyTrainerApp:
         if not values:
             return
 
-        # Columns: Order, EN, CZ, Sentence, SentenceT, L, HT
+        # Columns: Order, EN, CZ, Sentence, SentenceT, WS, L, HT
         fr = (values[1] if len(values) > 1 else "").strip()
         sentence = (values[3] if len(values) > 3 else "").strip()
         self._speak_current({"EN": fr, "Sentence": sentence})
@@ -1931,7 +1966,7 @@ class VocabularyTrainerApp:
             return
 
         col_index = int(col_id.replace("#", "")) - 1
-        columns = ("Order", "EN", "CZ", "Sentence", "SentenceT", "L", "HT")
+        columns = ("Order", "EN", "CZ", "Sentence", "SentenceT", "WS", "L", "HT")
         if col_index < 0 or col_index >= len(columns):
             return
         column_name = columns[col_index]
