@@ -406,6 +406,55 @@ body {
   color: #62419c;
 }
 
+.owl-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(24, 31, 41, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.owl-overlay.hidden {
+  display: none;
+}
+
+.owl-card {
+  position: relative;
+  width: min(760px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
+  padding: 18px;
+  border: 3px solid var(--line);
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow);
+}
+
+.owl-image {
+  width: 100%;
+  max-height: calc(100vh - 110px);
+  display: block;
+  object-fit: contain;
+  border-radius: 22px;
+}
+
+.owl-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
 @media (max-width: 980px) {
   .hero {
     flex-direction: column;
@@ -434,5 +483,15 @@ body {
   .mode-nav {
     justify-content: flex-start;
     width: 100%;
+  }
+
+  .owl-card {
+    width: min(100vw - 24px, 680px);
+    padding: 12px;
+  }
+
+  .owl-close {
+    top: 8px;
+    right: 8px;
   }
 }

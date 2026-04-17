@@ -67,6 +67,9 @@ const ui = {
   numbersBoard: document.getElementById("numbersBoard"),
   numbersNewButton: document.getElementById("numbersNewButton"),
   numbersResultButton: document.getElementById("numbersResultButton"),
+  owlOverlay: document.getElementById("owlOverlay"),
+  owlCloseButton: document.getElementById("owlCloseButton"),
+  owlImage: document.getElementById("owlImage"),
   turboWord: document.getElementById("turboWord"),
   turboNumber: document.getElementById("turboNumber"),
   turboIcons: document.getElementById("turboIcons"),
@@ -100,6 +103,9 @@ const appState = {
     secondColor: "black",
     resultColor: "black",
     slotIcons: { first: null, second: null, result: null },
+    resultPressCount: 0,
+    owlShown: false,
+    owlHideTimer: null,
     visible: {
       firstNum: false,
       firstWord: false,
@@ -128,6 +134,9 @@ const appState = {
     cyclePool: [],
   },
 };
+
+const owlAudio = new Audio("oul170426.m4a");
+owlAudio.preload = "auto";
 
 function randomChoice(items) {
   return items[Math.floor(Math.random() * items.length)];
@@ -406,6 +415,38 @@ function clearNumbersSequence() {
   clearTimers(appState.numbers.timers);
 }
 
+function hideOwlOverlay() {
+  if (appState.numbers.owlHideTimer) {
+    window.clearTimeout(appState.numbers.owlHideTimer);
+    appState.numbers.owlHideTimer = null;
+  }
+  owlAudio.pause();
+  try {
+    owlAudio.currentTime = 0;
+  } catch (error) {
+    // ignore currentTime reset errors
+  }
+  ui.owlOverlay.classList.add("hidden");
+  ui.owlOverlay.setAttribute("aria-hidden", "true");
+}
+
+function showOwlOverlay() {
+  if (appState.numbers.owlShown) {
+    return;
+  }
+  appState.numbers.owlShown = true;
+  cancelSpeech();
+  ui.owlOverlay.classList.remove("hidden");
+  ui.owlOverlay.setAttribute("aria-hidden", "false");
+  try {
+    owlAudio.currentTime = 0;
+  } catch (error) {
+    // ignore currentTime reset errors
+  }
+  owlAudio.play().catch(() => {});
+  appState.numbers.owlHideTimer = window.setTimeout(hideOwlOverlay, 40000);
+}
+
 function newNumbersSequence() {
   clearNumbersSequence();
   const visible = {
@@ -480,9 +521,13 @@ function showNumbersResult() {
   if (appState.numbers.result === null) {
     return;
   }
+  appState.numbers.resultPressCount += 1;
   appState.numbers.visible.result = true;
   renderNumbersBoard();
   speakEnglish(NUMBER_WORDS[appState.numbers.result]);
+  if (appState.numbers.resultPressCount === 3 && !appState.numbers.owlShown) {
+    showOwlOverlay();
+  }
 }
 
 function schedulePractice(mode, delayMs, callback) {
@@ -659,6 +704,7 @@ function showScreen(screenName) {
 
   if (screenName !== "numbers") {
     clearNumbersSequence();
+    hideOwlOverlay();
   }
   if (screenName !== "turbo") {
     resetTurbo();
@@ -688,6 +734,13 @@ function showScreen(screenName) {
 ui.newExampleButton.addEventListener("click", newMainExample);
 ui.numbersNewButton.addEventListener("click", newNumbersSequence);
 ui.numbersResultButton.addEventListener("click", showNumbersResult);
+ui.owlCloseButton.addEventListener("click", hideOwlOverlay);
+ui.owlOverlay.addEventListener("click", (event) => {
+  if (event.target === ui.owlOverlay) {
+    hideOwlOverlay();
+  }
+});
+owlAudio.addEventListener("ended", hideOwlOverlay);
 ui.turboGoButton.addEventListener("click", () => resumePractice("turbo", turboStartCycle));
 ui.turboEndButton.addEventListener("click", () => pausePractice("turbo"));
 ui.colorsGoButton.addEventListener("click", () => resumePractice("colors", colorsStartCycle));
