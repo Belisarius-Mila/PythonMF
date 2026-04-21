@@ -1,8 +1,8 @@
 {
   "app": "VocabularyEN",
-  "generatedAt": "2026-04-21T14:56:24.593248+00:00",
+  "generatedAt": "2026-04-21T15:39:42.725342+00:00",
   "sourceCsv": "VocabularyEN/VocabularyEN.csv",
-  "itemCount": 170,
+  "itemCount": 172,
   "wordSets": [
     "Actions",
     "Animals",
@@ -13,18 +13,18 @@
     "Things"
   ],
   "stats": {
-    "selected": 106,
+    "selected": 107,
     "hardTraining": 70,
     "wordSetCount": 7,
-    "withSentence": 170,
-    "withSentenceTranslation": 170,
+    "withSentence": 172,
+    "withSentenceTranslation": 172,
     "imageSources": {
-      "direct": 151,
-      "fallback": 2,
-      "mapping": 16,
+      "direct": 154,
+      "fallback": 3,
+      "mapping": 14,
       "mapping_to_others": 1
     },
-    "uniqueImageFiles": 155
+    "uniqueImageFiles": 158
   },
   "items": [
     {
@@ -2869,10 +2869,10 @@
       ],
       "selected": true,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/woman.png",
-      "imageStem": "woman",
-      "imageRequestedStem": "woman",
-      "imageSource": "mapping",
+      "image": "assets/vocabulary-en/aunt.png",
+      "imageStem": "aunt",
+      "imageRequestedStem": "aunt",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -2887,10 +2887,10 @@
       ],
       "selected": true,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/man.png",
-      "imageStem": "man",
-      "imageRequestedStem": "man",
-      "imageSource": "mapping",
+      "image": "assets/vocabulary-en/uncle.png",
+      "imageStem": "uncle",
+      "imageRequestedStem": "uncle",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -2905,10 +2905,10 @@
       ],
       "selected": true,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/proverbs.png",
-      "imageStem": "proverbs",
-      "imageRequestedStem": "proverbs",
-      "imageSource": "fallback",
+      "image": "assets/vocabulary-en/cousin.png",
+      "imageStem": "cousin",
+      "imageRequestedStem": "cousin",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -2921,12 +2921,48 @@
       "wordSets": [
         "Colors"
       ],
-      "selected": false,
+      "selected": true,
       "hardTraining": false,
       "image": "assets/vocabulary-en/orange.webp",
       "imageStem": "orange",
       "imageRequestedStem": "orange",
       "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 171,
+      "order": 171,
+      "en": "purple",
+      "cz": "fialový",
+      "sentenceEn": "I like purple flowers.",
+      "sentenceCz": "Mám rád fialové květiny.",
+      "wordSets": [
+        "Colors"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
+      "imageMissing": false
+    },
+    {
+      "id": 172,
+      "order": 172,
+      "en": "pink",
+      "cz": "růžový",
+      "sentenceEn": "Small pink pig.",
+      "sentenceCz": "Malé růžové prasátko.",
+      "wordSets": [
+        "Colors"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/proverbs.png",
+      "imageStem": "proverbs",
+      "imageRequestedStem": "proverbs",
+      "imageSource": "fallback",
       "imageMissing": false
     }
   ]

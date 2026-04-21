@@ -168,4 +168,6 @@ son,syn,166,He has one son and two daughters.,Má syna a dvě dcery.,Family,ano,
 aunt,teta,167,My aunt lives in England.,Moje teta bydlí v Anglii.,Family,ano,ne
 uncle,strýc,168,My uncle likes football.,Můj strýc má rád fotbal.,Family,ano,ne
 cousin,"bratranec, sestřenice",169,I have three cousins.,Mám tři bratrance (sestřenice).,Family,ano,ne
-orange,oranžový,170,I have an orange T-shirt.,Mám oranžové tričko.,Colors,ne,ne
+orange,oranžový,170,I have an orange T-shirt.,Mám oranžové tričko.,Colors,ano,ne
+purple,fialový,171,I like purple flowers.,Mám rád fialové květiny.,Colors,ne,ne
+pink,růžový,172,Small pink pig.,Malé růžové prasátko.,Colors,ne,ne
