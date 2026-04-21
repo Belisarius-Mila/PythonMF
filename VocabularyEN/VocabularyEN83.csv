@@ -4,7 +4,7 @@ airport,letiště,2,"The airport was busy, so we came early.","Letiště bylo pl
 animal,zvíře,3,The little animal hides behind the tree.,To malé zvíře se schovává za stromem.,,ne,ne
 baby elephant,slůně,4,The baby elephant splashes water and looks happy.,Slůně cáká vodu a vypadá spokojeně.,,ne,ne
 bag,taška,5,I put my phone in my bag and close it.,Dám si telefon do tašky a zavřu ji.,,ne,ano
-big,velký,6,"This house is big, but it feels warm inside.","Tenhle dům je velký, ale uvnitř je útulno.",,ne,ne
+big,velký,6,"This house is big, but it feels warm inside.","Tenhle dům je velký, ale uvnitř je útulno.",,ano,ne
 bike,kolo,7,I ride my bike to the park on sunny days.,Za slunečných dní jedu na kole do parku.,,ne,ne
 bird,pták,8,A small bird sings on the window in the morning.,Ráno zpívá na okně malý pták.,,ne,ne
 black,černý,9,He wears a black jacket in the winter.,V zimě nosí černou bundu.,,ne,ne
@@ -19,7 +19,7 @@ bus station,autobusové nádraží,17,Let’s meet at the bus station near the c
 bye,ahoj (na rozloučenou),18,"It’s late, so I say bye and go home.","Je pozdě, tak řeknu ahoj a jdu domů.",,ne,ne
 can,mohu,19,Can I have this book?,Mohu mít tuto knihu? (podívat se na ní),,ne,ne
 cat,kočka,20,The cat sleeps on the chair all afternoon.,Kočka spí celé odpoledne na židli.,,ne,ne
-cinema,kino,21,We go to the cinema and buy popcorn.,Jdeme do kina a koupíme si popcorn.,,ne,ano
+cinema,kino,21,We go to the cinema and buy popcorn.,Jdeme do kina a koupíme si popcorn.,,ano,ano
 coffee,káva,22,"I make coffee, and the kitchen smells great.",Uvařím kávu a v kuchyni je krásná vůně.,,ne,ano
 cook,vařit; kuchař,23,I like to cook simple food for my family.,Rád vařím jednoduché jídlo pro svou rodinu.,,ne,ne
 cow,kráva,24,A cow stands in the field and watches us.,Na louce stojí kráva a dívá se na nás.,,ne,ne
@@ -43,8 +43,8 @@ film,film,41,"This film is quiet, but it stays in my mind.","Ten film je klidný
 fish,ryba,42,"The fish jumps, and the water makes circles.",Ryba vyskočí a na vodě udělá kruhy.,,ne,ano
 food,jídlo,43,"The food is hot, so I wait a moment.","Jídlo je horké, tak chvilku počkám.",,ne,ano
 free,volný; zdarma,44,Are you free this evening for a short walk?,Máš dnes večer čas na krátkou procházku?,,ne,ne
-friend,kamarád,45,A good friend helps without asking for anything.,"Dobrý přítel pomůže, aniž by něco chtěl.",,ne,ano
-garden,zahrada,46,"In the garden, I plant flowers in spring.",Na zahradě na jaře sázím květiny.,,ne,ne
+friend,kamarád,45,A good friend helps without asking for anything.,"Dobrý přítel pomůže, aniž by něco chtěl.",,ano,ano
+garden,zahrada,46,"In the garden, I plant flowers in spring.",Na zahradě na jaře sázím květiny.,,ano,ne
 giraffe,žirafa,47,The giraffe reaches the leaves at the top.,Žirafa dosáhne na listy úplně nahoře.,,ne,ne
 goat,koza,48,The goat eats calmly and looks curious.,Koza klidně jí a vypadá zvědavě.,,ne,ne
 go,jít,49,"I go to the store, then I come back quickly.",Jdu do obchodu a pak se rychle vrátím.,,ne,ano
@@ -52,14 +52,14 @@ good,dobrý,50,That was a good idea—thank you!,To byl dobrý nápad—děkuju!
 goodbye,nashledanou,51,We wave and say goodbye at the gate.,Zamáváme si a rozloučíme se u brány.,,ne,ano
 green,zelený,52,The green tree looks fresh after the rain.,Zelený strom vypadá po dešti svěže.,,ne,ne
 grey,šedý,53,"On a grey day, a warm tea helps.",V šedivý den pomůže teplý čaj.,,ne,ano
-hair,vlasy,54,My hair gets messy in the wind.,Ve větru se mi rozcuchají vlasy.,,ne,ne
+hair,vlasy,54,My hair gets messy in the wind.,Ve větru se mi rozcuchají vlasy.,,ano,ne
 happy,šťastný,55,I feel happy when the sun comes out.,"Jsem šťastný, když vyjde slunce.",,ne,ne
 hear,slyšet,56,Can you hear the birds outside?,Slyšíš venku ptáky?,,ne,ne
 hello,ahoj / dobrý den,57,Hello! How was your day?,Ahoj! Jaký jsi měl den?,,ne,ne
 help,pomoc; pomoci,58,"Thank you for your help;"" I really needed it.","Děkuju za pomoc, opravdu jsem ji potřeboval.",,ne,ano
 home,domov,59,"After work, I go home and rest for a while.",Po práci jdu domů a chvíli si odpočinu.,,ne,ano
 horse,kůň,60,The horse runs fast and then stops quietly.,Kůň rychle běží a pak tiše zastaví.,,ne,ne
-house,dům,61,"Our house is small, but we love it.","Náš dům je malý, ale máme ho rádi.",,ne,ano
+house,dům,61,"Our house is small, but we love it.","Náš dům je malý, ale máme ho rádi.",,ano,ano
 I (am),já (jsem),62,I (am) ready now—let’s start.,Už jsem připravený—pojďme začít.,,ne,ne
 in,v,63,The keys are in my pocket.,Klíče jsou v mé kapse.,,ne,ne
 jump,skákat,64,The child can jump over the small puddle.,Dítě umí přeskočit malou louži.,,ne,ne
@@ -92,7 +92,7 @@ small,malý,90,"This cup is small, so I take two.","Ten hrnek je malý, tak si v
 smart,chytrý,91,"He is smart, but he stays humble.","Je chytrý, ale zůstává skromný.",,ne,ne
 slow,pomalý,92,Please speak slow—I want to understand.,Prosím mluv pomalu—chci rozumět.,,ne,ne
 speak,mluvit,93,I speak English a little every day.,Každý den trochu mluvím anglicky.,,ne,ne
-tall,vysoký,94,That tree is tall and easy to see.,Ten strom je vysoký a jde dobře vidět.,,ne,ne
+tall,vysoký,94,That tree is tall and easy to see.,Ten strom je vysoký a jde dobře vidět.,,ano,ne
 teacher,učitel,95,The teacher explains it with a simple example.,Učitel to vysvětlí na jednoduchém příkladu.,,ne,ne
 ticket,lístek,96,I buy a ticket and put it in my pocket.,Koupím si lístek a dám si ho do kapsy.,,ne,ne
 walk,chodit,97,Let’s walk slowly and enjoy the air.,Pojďme jít pomalu a užít si vzduch.,,ne,ano
@@ -102,8 +102,8 @@ yellow,žlutý,100,A yellow flower grows near the path.,U cesty roste žlutý kv
 zoo,zoologická zahrada,101,"At the zoo, the kids ask many questions.",V zoo se děti ptají na spoustu věcí.,,ne,ne
 zebra,zebra,102,The zebra has black and white stripes.,Zebra má černobílé pruhy.,,ne,ne
 restaurant,restaurace,103,We choose a small restaurant near the station.,Vybereme si malou restauraci blízko nádraží.,,ne,ano
-near,blízko,104,"The shop is near my home, so I walk there.","Obchod je blízko mého domova, tak tam jdu pěšky.",,ne,ano
-far,daleko,105,Is the bus station far from here?,Je autobusové nádraží odtud daleko?,,ne,ano
+near,blízko,104,"The shop is near my home, so I walk there.","Obchod je blízko mého domova, tak tam jdu pěšky.",,ano,ano
+far,daleko,105,Is the bus station far from here?,Je autobusové nádraží odtud daleko?,,ano,ano
 straight,rovně,106,Go straight and you will see the bridge.,Jdi rovně a uvidíš most.,,ne,ano
 turn,zahnout / odbočit,107,Turn right at the next corner and stop there.,Zahni doprava na příštím rohu a tam zastav.,,ne,ano
 hungry,hladový,108,"I am hungry, so I make a quick sandwich.","Jsem hladový, tak si udělám rychlý sendvič.",,ne,ano
@@ -141,7 +141,7 @@ please,prosím,139,"Please speak slowly;"" I want to understand.","Prosím mluv 
 thank you,děkuji,140,Thank you for your help today.,Děkuji za tvoji dnešní pomoc.,,ne,ne
 you're welcome,není zač,141,You're welcome—I'm happy to help.,Není zač—ráda pomůžu.,,ne,ano
 anything else,ještě něco,142,"Anything else, or is that all?","Ještě něco, nebo je to všechno?",,ne,ano
-where,kde,143,,,,ne,ano
+where,kde,143,Where do you go?,Kam jdeš?,,ano,ano
 right,"pravý, správný",144,,,,ne,ano
 would like,"chtěl bych, rád bych",145,,,,ne,ano
 enjoy,užít si,146,,,,ne,ano
