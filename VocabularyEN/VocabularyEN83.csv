@@ -105,7 +105,7 @@ restaurant,restaurace,103,We choose a small restaurant near the station.,Vyberem
 near,blízko,104,"The shop is near my home, so I walk there.","Obchod je blízko mého domova, tak tam jdu pěšky.",,ano,ano
 far,daleko,105,Is the bus station far from here?,Je autobusové nádraží odtud daleko?,,ano,ano
 straight,rovně,106,Go straight and you will see the bridge.,Jdi rovně a uvidíš most.,,ne,ano
-turn,zahnout / odbočit,107,Turn right at the next corner and stop there.,Zahni doprava na příštím rohu a tam zastav.,,ne,ano
+turn,"zahnout, zabočit",107,Turn right at the crossing.,Zahni doprava na příští křižovatce.,,ano,ano
 hungry,hladový,108,"I am hungry, so I make a quick sandwich.","Jsem hladový, tak si udělám rychlý sendvič.",,ne,ano
 warm,teplý,109,I want something warm to drink after the walk.,Po procházce chci něco teplého k pití.,,ne,ne
 welcome,vítejte,110,Welcome! Please come in and sit down.,Vítejte! Prosím pojďte dál a posaďte se.,,ne,ano
@@ -126,7 +126,7 @@ potatoes,brambory,124,We buy potatoes and vegetables at the market.,Na trhu koup
 ketchup,kečup,125,"Can I have ketchup, please?","Můžu dostat kečup, prosím?",,ne,ano
 salad,salát,126,I make a small salad with tomatoes.,Udělám malý salát s rajčaty.,,ne,ano
 meal,jídlo,127,Enjoy your meal!,Dobrou chuť!,,ne,ano
-hot,horký,128,"My tea is hot, but it smells great.","Můj čaj je horký, ale krásně voní.",,ne,ano
+hot,horký,128,"My tea is hot, but it smells great.","Můj čaj je horký, ale krásně voní.",,ne,ne
 sauce,omáčka,129,"This sauce is simple, but very tasty.","Tahle omáčka je jednoduchá, ale moc chutná.",,ne,ano
 dessert,dezert,130,Would you like dessert after lunch?,Dáš si po obědě dezert?,,ne,ano
 ice cream,zmrzlina,131,"In summer, we share ice cream in the park.",V létě si dáme zmrzlinu v parku.,,ne,ano
@@ -164,3 +164,5 @@ o'clock,hodin,162,At five o'clock.,V pět hodin.,,ano,ne
 week,týden,163,I have time on Monday next week.,Mám čas v pondělí příští týden.,,ano,ne
 Monday,pondělí,164,On Monday at eight o'clock.,V pondělí v 8 hodin.,,ano,ne
 agreed,domluveno,165,"Ok Tom, agreed.","Ok Tome, domluveno.",,ano,ne
+then,"pak, tehdy",166,Then you turn right.,Pak zabočíš doprava.,,ano,ne
+meet,"setkat se, seznámit se",167,Nice to meet you.,Rád tě poznávám.,,ano,ne
