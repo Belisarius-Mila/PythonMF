@@ -1,0 +1,4 @@
+user_id,display_name,role,active,ui_language,learn_language,daily_goal
+me,Miloslav,owner,1,CZ,IT,20
+wife,Wife,member,1,CZ,FR,15
+guest,Guest,guest,1,CZ,EN,10

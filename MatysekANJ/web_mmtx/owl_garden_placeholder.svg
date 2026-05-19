@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1407 768" role="img" aria-label="Owl garden placeholder">
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#cfe9f7"/>
+      <stop offset="100%" stop-color="#eef8d7"/>
+    </linearGradient>
+  </defs>
+  <rect width="1407" height="768" fill="url(#sky)"/>
+  <rect y="520" width="1407" height="248" fill="#94c973"/>
+  <circle cx="1130" cy="110" r="72" fill="#fff2b2" opacity="0.9"/>
+  <g fill="#7ab85d">
+    <ellipse cx="220" cy="520" rx="150" ry="120"/>
+    <ellipse cx="420" cy="500" rx="180" ry="130"/>
+    <ellipse cx="1180" cy="520" rx="180" ry="140"/>
+  </g>
+  <g fill="#a56b3c">
+    <rect x="980" y="180" width="90" height="360" rx="45"/>
+  </g>
+  <g transform="translate(900 180)">
+    <ellipse cx="145" cy="90" rx="110" ry="88" fill="#b67c49"/>
+    <ellipse cx="110" cy="72" rx="24" ry="30" fill="#8e5e37"/>
+    <ellipse cx="180" cy="72" rx="24" ry="30" fill="#8e5e37"/>
+    <circle cx="118" cy="92" r="22" fill="#fff3c7"/>
+    <circle cx="172" cy="92" r="22" fill="#fff3c7"/>
+    <circle cx="118" cy="92" r="10" fill="#2d241d"/>
+    <circle cx="172" cy="92" r="10" fill="#2d241d"/>
+    <polygon points="145,112 128,142 162,142" fill="#efb14b"/>
+    <ellipse cx="145" cy="188" rx="78" ry="104" fill="#b67c49"/>
+  </g>
+  <g fill="#f7b24d">
+    <rect x="230" y="485" width="250" height="26" rx="13"/>
+    <rect x="160" y="555" width="210" height="24" rx="12"/>
+    <rect x="430" y="600" width="230" height="24" rx="12"/>
+  </g>
+</svg>

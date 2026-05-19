@@ -1,0 +1,83 @@
+LA,CZ,Order,Sentence,SentenceT,L
+vir,muž,1,vir in urbe est.,muž je ve městě.,ne
+fēmina,žena,2,In hortō fēmina ambulat.,žena chodí po zahradě.,ne
+puer,chlapec,3,Multī puer veniunt.,Mnozí chlapec přicházejí.,ne
+puella,dívka,4,puella magnam rem videt.,dívka vidí velkou věc.,ne
+familia,rodina,5,Cum amīcō familia sedet.,rodina sedí s přítelem.,ne
+pater,otec,6,pater ad villam currit.,otec běží k vile.,ne
+māter,matka,7,Prope flūmen māter stat.,matka stojí u řeky.,ne
+fīlius,syn,8,fīlius librum tenet.,syn drží knihu.,ne
+fīlia,dcera,9,In viā fīlia cantat.,dcera zpívá na cestě.,ne
+līberī,děti,10,līberī domum intrat.,děti vchází do domu.,ne
+servus,otrok,11,servus in urbe est.,otrok je ve městě.,ne
+dominus,pán,12,In hortō dominus ambulat.,pán chodí po zahradě.,ne
+ancilla,otrokyně,13,Multī ancilla veniunt.,Mnozí otrokyně přicházejí.,ne
+domina,paní,14,domina magnam rem videt.,paní vidí velkou věc.,ne
+liber,svobodný,15,Cum amīcō liber sedet.,svobodný sedí s přítelem.,ne
+titulus,"nápis, titul",16,titulus ad villam currit.,"nápis, titul běží k vile.",ne
+pāgina,stránka,17,Prope flūmen pāgina stat.,stránka stojí u řeky.,ne
+antīquus,"starý, dávný",18,antīquus librum tenet.,"starý, dávný drží knihu.",ne
+novus,nový,19,In viā novus cantat.,nový zpívá na cestě.,ne
+cēterī,ostatní,20,cēterī domum intrat.,ostatní vchází do domu.,ne
+meus,můj,21,meus in urbe est.,můj je ve městě.,ne
+tuus,tvůj,22,In hortō tuus ambulat.,tvůj chodí po zahradě.,ne
+centum,sto,23,Multī centum veniunt.,Mnozí sto přicházejí.,ne
+"duo, duae","dva, dvě",24,"duo, duae magnam rem videt.","dva, dvě vidí velkou věc.",ne
+tria,tři,25,Cum amīcō tria sedet.,tři sedí s přítelem.,ne
+-que,a (připojené „a“),26,-que ad villam currit.,a (připojené „a“) běží k vile.,ne
+quis?,kdo?,27,Prope flūmen quis? stat.,kdo? stojí u řeky.,ne
+quae?,která? / kdo? (ž.r.),28,quae? librum tenet.,která? / kdo? (ž.r.) drží knihu.,ne
+quī?,který? / kdo?,29,In viā quī? cantat.,který? / kdo? zpívá na cestě.,ne
+cuius?,čí?,30,cuius? domum intrat.,čí? vchází do domu.,ne
+quot?,kolik?,31,quot? in urbe est.,kolik? je ve městě.,ne
+masculīnum,mužský rod,32,In hortō masculīnum ambulat.,mužský rod chodí po zahradě.,ne
+fēminīnum,ženský rod,33,Multī fēminīnum veniunt.,Mnozí ženský rod přicházejí.,ne
+neutrum,střední rod,34,neutrum magnam rem videt.,střední rod vidí velkou věc.,ne
+genitīvus,genitiv (2. pád),35,Cum amīcō genitīvus sedet.,genitiv (2. pád) sedí s přítelem.,ne
+capitulum,kapitola,36,capitulum ad villam currit.,kapitola běží k vile.,ne
+syllaba,slabika,37,Prope flūmen syllaba stat.,slabika stojí u řeky.,ne
+exemplum,příklad,38,exemplum librum tenet.,příklad drží knihu.,ne
+pēnsum,úkol,39,In viā pēnsum cantat.,úkol zpívá na cestě.,ne
+magnus,velký,40,magnus domum intrat.,velký vchází do domu.,ne
+parvus,malý,41,parvus in urbe est.,malý je ve městě.,ne
+Graecus,"řecký, Řek",42,In hortō Graecus ambulat.,"řecký, Řek chodí po zahradě.",ne
+Rōmānus,"římský, Říman",43,Multī Rōmānus veniunt.,"Mnozí římský, Říman přicházejí.",ne
+Latīnus,latinský,44,Latīnus magnam rem videt.,latinský vidí velkou věc.,ne
+multī,mnozí,45,Cum amīcō multī sedet.,mnozí sedí s přítelem.,ne
+paucī,"málo, několik",46,paucī ad villam currit.,"málo, několik běží k vile.",ne
+ūnus,jeden,47,Prope flūmen ūnus stat.,jeden stojí u řeky.,ne
+duo,dva,48,duo librum tenet.,dva drží knihu.,ne
+trēs,tři,49,In viā trēs cantat.,tři zpívá na cestě.,ne
+sex,šest,50,sex domum intrat.,šest vchází do domu.,ne
+mīlle,tisíc,51,mīlle in urbe est.,tisíc je ve městě.,ne
+prīmus,první,52,In hortō prīmus ambulat.,první chodí po zahradě.,ne
+secundus,druhý,53,Multī secundus veniunt.,Mnozí druhý přicházejí.,ne
+tertius,třetí,54,tertius magnam rem videt.,třetí vidí velkou věc.,ne
+est,je,55,Cum amīcō est sedet.,je sedí s přítelem.,ne
+sunt,jsou,56,sunt ad villam currit.,jsou běží k vile.,ne
+in,v,57,Prope flūmen in stat.,v stojí u řeky.,ne
+et,a,58,et librum tenet.,a drží knihu.,ne
+sed,ale,59,In viā sed cantat.,ale zpívá na cestě.,ne
+nōn,ne,60,nōn domum intrat.,ne vchází do domu.,ne
+quoque,také,61,quoque in urbe est.,také je ve městě.,ne
+-ne?,otázková částice,62,In hortō -ne? ambulat.,otázková částice chodí po zahradě.,ne
+ubi?,kde?,63,Multī ubi? veniunt.,Mnozí kde? přicházejí.,ne
+num?,zda?,64,num? magnam rem videt.,zda? vidí velkou věc.,ne
+quid?,co?,65,Cum amīcō quid? sedet.,co? sedí s přítelem.,ne
+grammatica,gramatika,66,grammatica ad villam currit.,gramatika běží k vile.,ne
+singulāris,jednotné číslo,67,Prope flūmen singulāris stat.,jednotné číslo stojí u řeky.,ne
+plūrālis,množné číslo,68,plūrālis librum tenet.,množné číslo drží knihu.,ne
+fluvius,řeka,69,In viā fluvius cantat.,řeka zpívá na cestě.,ne
+īnsula,ostrov,70,īnsula domum intrat.,ostrov vchází do domu.,ne
+oppidum,město,71,oppidum in urbe est.,město je ve městě.,ne
+ōceanus,oceán,72,In hortō ōceanus ambulat.,oceán chodí po zahradě.,ne
+imperium,říše,73,Multī imperium veniunt.,Mnozí říše přicházejí.,ne
+prōvincia,provincie,74,prōvincia magnam rem videt.,provincie vidí velkou věc.,ne
+numerus,"číslo, počet",75,Cum amīcō numerus sedet.,"číslo, počet sedí s přítelem.",ne
+littera,písmeno,76,littera ad villam currit.,písmeno běží k vile.,ne
+vocābulum,slovo,77,Prope flūmen vocābulum stat.,slovo stojí u řeky.,ne
+estne,"je to, zda je",78,estne librum tenet.,"je to, zda je drží knihu.",ne
+ubi,kde,79,Ubi habitās?,Kde bydlíš?,ne
+num,zda,80,Num Rōma in Galliā est?,"Copak je Řím v Galii? (spíš „ne“, že?)",ne
+quod,že,81,Gaudeō quod hic es.,"Mám radost, že jsi tady.",ne
+quod,protože,82,"Mānet domī, quod aeger est.","Zůstává doma, protože je nemocný.",ne

@@ -1,0 +1,51 @@
+Order,FR,CZ,ForeignImageHit
+3,sur,o (na téma), doplnit obrázek onatable
+6,trop,příliš / moc, doplnit obrázek toomuch, odstranit lomítko
+8,fort,hlasitě (nahlas),doplnit obrázek loud
+18,Et toi?,A ty?,????
+22,je voudrais,chtěl bych, dplnit obrázek Iwant
+27,parfait,skvěle, (chybí obrázek good)
+32,bien,dobře, (chybí obrázek good)
+50,mon,můj, chybí obrázek my
+52,ton,tvůj,(chybí obrázek your)
+55,un,"on, jeden", (chybí obrázek one)
+63,tu es,ty jsi, (chybí obrázek youare)
+64,il est / elle est,"on je, ono je / ona je",
+72,déjà,"už, již", (chybí obrázek already)
+75,par,"skrz, přes", (chybí obrázek through)
+76,par,za jednotku, ????
+77,par,"od, kým",????
+81,d’accord,"dobře, jasně", (chybí obrázek agreed)
+83,déjeuner,"obědvat, oběd", vyřešeno
+85,parfois,někdy, (chybí obrázek sometimes)
+86,pause,přestávka, (chybí obrázek break1)
+87,pendant,"během, po dobu", (chybí obrázek during)
+92,rester,zůstat, vyřešeno
+96,excuses,"omluvy, omluva",dáme jednotné číslo a uděláme obrázek: excuse
+101,on y va,jdeme na to, (doplnit obrázek letsgo)
+107,des,nějaký (neurčitý člen množného čísla), (doplnit obrázek: some)
+110,joli,"pěkný, hezký", vyřešeno
+111,content,"spokojený, jsem rád", (nechat jen spokojený a udělat obrázek: satisfied)
+115,amener,"přináší, přivádí", (doplnit obrázek bring?)
+117,cinq,pět, (doplnit obrázek five)
+119,chez,u někoho /k někomu, (????)
+124,lourde,těžký, (doplnit obrázek hard)
+128,capitale,hlavní město, (doplnit obrázek: capital)
+147,ville,město, (doplnit obrázek town)
+154,placard,"skříňka, kredenc", (doplnit obrázek cupboard)
+157,mince,"hubený, sakra",
+158,sale,špinavý/á,
+159,tasse,hrnek / šálek,
+160,laver,mýt / prát,
+161,collègue,kolega / kolegyně,
+163,fourchette,vidlička,
+166,arriver,přijít; přijet; dorazit,
+168,invité,pozvaný host,
+169,serviette,"ubrousek, ručník",
+172,peut-être,možná,
+178,juste,"správný, jen, právě",
+184,vraiment,"opravdu, skutečně",
+186,"perdu, perdue","ztracený, ztracená",
+188,préparer,"připravit, připravovat",
+189,pressé,"spěchající, ve spěchu",
+191,autre,"jiný, další, jiná",

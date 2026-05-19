@@ -1,151 +1,444 @@
 IT,CZ,Order,Sentence,SentenceT,L,HT,gender_it
 piatto,talíř,1,Metto il piatto nella lavastoviglie.,Dávám talíř do myčky.,ne,ano,m
 su,na,2,Le chiavi sono su questo tavolo.,Klíče jsou na tomto stole.,ne,ne,
-su,o (na téma),3,Leggo un libro su Roma.,Čtu knihu o Římě.,ne,ne,
-laggiù,tam / tamhle,4,"Guarda laggiù, c'è il mare.","Podívej se tamhle, je tam moře.",ne,ano,
-torta,dort,5,Per il compleanno facciamo una torta.,K narozeninám děláme dort.,ne,ne,f
-torta,koláč,6,La nonna prepara una torta di mele.,Babička připravuje jablečný koláč.,ne,ne,f
-troppo,příliš / moc,7,Parli troppo in classe.,Mluvíš ve třídě příliš moc.,ne,ano,
-forte,silný,8,Oggi c'è un vento forte.,Dnes je silný vítr.,ne,ne,
-forte,hlasitě (nahlas),9,Non parlare forte qui.,Tady nemluv nahlas.,ne,ne,
-cappello,klobouk,10,In estate porto un cappello.,V létě nosím klobouk.,ne,ne,m
-amica,kamarádka,11,La mia amica vive a Milano.,Moje kamarádka žije v Miláně.,ano,ne,f
-fidanzata,přítelkyně,12,La mia fidanzata ama viaggiare.,Moje přítelkyně ráda cestuje.,ne,ano,f
-cantare,zpívat,13,Mi piace cantare in macchina.,Rád zpívám v autě.,ne,ne,
-portafoglio,peněženka,14,Il mio portafoglio è a casa.,Moje peněženka je doma.,ne,ano,m
-portafoglio,portfolio (soubor investic),15,Controllo il mio portafoglio ogni mese.,Každý měsíc kontroluji své portfolio.,ne,ne,m
-piacere,těší mě,16,"Piacere, io sono Luca.","Těší mě, já jsem Luca.",ne,ne,
-mi chiamo,jmenuji se,17,Mi chiamo Anna.,Jmenuji se Anna.,ne,ano,
-Come stai?,Jak se máš?,18,"Ciao, come stai?","Ahoj, jak se máš?",ne,ano,
-vengo,pocházím,19,Vengo da Praga.,Pocházím z Prahy.,ne,ano,
-E tu?,A ty?,20,Io sto bene. E tu?,Já se mám dobře. A ty?,ne,ne,
-piacere,těší mě,21,Piacere di conoscerti.,"Těší mě, že tě poznávám.",ne,ne,
-a presto,brzy na viděnou,22,"A presto, ci vediamo domani.","Brzy na viděnou, uvidíme se zítra.",ne,ano,
-arrivederci,na shledanou,23,Arrivederci e buona giornata.,Na shledanou a hezký den.,ne,ano,
-vorrei,chtěl bych,24,"Vorrei un caffè, per favore.","Chtěl bych kávu, prosím.",ne,ano,
-per favore,prosím,25,"Parla piano, per favore.","Mluv pomalu, prosím.",ne,ano,
-sì,ano,26,"Sì, capisco.","Ano, rozumím.",ne,ano,
-io,já,27,Io studio italiano ogni giorno.,Já studuji italštinu každý den.,ne,ano,
-anche,také,28,Anche mio fratello studia.,Také můj bratr studuje.,ne,ano,
-perfetto,skvěle,29,"Perfetto, andiamo adesso.","Skvěle, jdeme teď.",ne,ano,
-o,nebo,30,Mangiamo a casa o fuori?,Jíme doma nebo venku?,ne,ne,
-e,a,31,Compro pane e latte.,Kupuji chleba a mléko.,ne,ne,
-dove,kde,32,Dove abiti?,Kde bydlíš?,ne,ano,
-di dove,odkud,33,Di dove sei?,Odkud jsi?,ne,ano,
-bene,dobře,34,Oggi sto bene.,Dnes se mám dobře.,ne,ne,
-ho,mám,35,Ho due lezioni oggi.,Dnes mám dvě lekce.,ne,ne,
-abita,bydlí,36,Lui abita a Roma.,On bydlí v Římě.,ne,ne,
-hai,máš,37,Hai un minuto?,Máš minutu?,ne,ano,
-nipote,synovec,38,Il mio nipote gioca a calcio.,Můj synovec hraje fotbal.,ne,ano,m
-nipote,neteř,39,La mia nipote suona il piano.,Moje neteř hraje na klavír.,ne,ne,f
-figlia,dcera,40,Sua figlia legge un libro.,Jeho dcera čte knihu.,ne,ano,f
-figlio,syn,41,Mio figlio va a scuola.,Můj syn chodí do školy.,ne,ano,m
-adesso,teď,42,Adesso andiamo a casa.,Teď jdeme domů.,ne,ano,
-zia,teta,43,Mia zia cucina bene.,Moje teta vaří dobře.,ne,ano,f
-zio,strýc,44,Mio zio è molto simpatico.,Můj strýc je velmi sympatický.,ne,ano,m
-io,já,45,Io lavoro in ufficio.,Já pracuji v kanceláři.,ano,ne,
-tu,ty,46,Tu parli italiano bene.,Ty mluvíš italsky dobře.,ano,ne,
-lui,on,47,Lui studia medicina.,On studuje medicínu.,ne,ano,
-lei,ona,48,Lei parla inglese.,Ona mluví anglicky.,ne,ano,
-voi,vy,49,Voi siete pronti?,Vy jste připraveni?,ne,ano,
-noi,my,50,Noi viviamo a Brno.,My žijeme v Brně.,ne,ano,
-loro,oni,51,Loro sono al parco.,Oni jsou v parku.,ne,ano,
-loro,ony,52,Loro studiano insieme.,Ony studují spolu.,ne,ne,
-mio,můj,53,Questo è il mio libro.,To je moje kniha.,ano,ne,
-mia,moje,54,Questa è la mia borsa.,To je moje taška.,ne,ne,
-tuo,tvůj,55,Dov'è il tuo telefono?,Kde je tvůj telefon?,ne,ne,
-tua,tvá,56,La tua giacca è nuova.,Tvá bunda je nová.,ne,ne,
-una,jedna (neurčitý člen),57,Una ragazza canta.,Jedna dívka zpívá.,ano,ne,
-un,jeden (neurčitý člen),58,Un ragazzo legge.,Jeden chlapec čte.,ne,ne,
-sorella,sestra,59,Mia sorella è insegnante.,Moje sestra je učitelka.,ne,ano,f
-fratello,bratr,60,Mio fratello è alto.,Můj bratr je vysoký.,ne,ne,m
-madre,matka,61,Mia madre prepara la cena.,Moje matka připravuje večeři.,ano,ne,f
-padre,otec,62,Mio padre guida la macchina.,Můj otec řídí auto.,ne,ne,m
-nonna,babička,63,Mia nonna guarda la TV.,Moje babička se dívá na televizi.,ne,ano,f
-nonno,dědeček,64,Mio nonno beve il tè.,Můj dědeček pije čaj.,ne,ne,m
-molto,velmi,65,Questo film è molto bello.,Tento film je velmi krásný.,ano,ne,
-divertente,zábavný,66,Il gioco è divertente.,Ta hra je zábavná.,ne,ano,
-interessante,zajímavý,67,Il libro è interessante.,Ta kniha je zajímavá.,ano,ne,
-cattivo,"zlý, protivný",68,Quel cane è cattivo.,Ten pes je zlý.,ne,ano,
-sono,já jsem,69,Sono stanco oggi.,Dnes jsem unavený.,ne,ne,
-sei,ty jsi,70,Sei molto gentile.,Ty jsi velmi milý.,ne,ne,
-lui è / lei è,on je / ona je,71,"Lui è calmo, lei è allegra.","On je klidný, ona je veselá.",ne,ano,
-sicuro,jistý,72,Non sono sicuro.,Nejsem si jistý.,ne,ano,
-certo,samozřejmě,73,"Certo, ti aiuto.","Samozřejmě, pomohu ti.",ne,ano,
-sempre,"pořád, vždycky",74,Arrivo sempre in orario.,Vždy přicházím včas.,ne,ne,
-per niente,vůbec,75,Non è per niente difficile.,Není to vůbec těžké.,ne,ano,
-ma,ale,76,"Vado fuori, ma piove.","Jdu ven, ale prší.",ne,ne,
-giacca,sako,77,Dov’è la mia giacca?,Kde je moje bunda?,ne,ne,f
-brutto,špatný,78,"Che brutto tempo oggi: piove, c’è vento e fa freddo, quindi resto a casa.","Dnes je hrozné počasí: prší, fouká a je zima, takže zůstanu doma.",ne,ano,
-brutto,ošklivý,79,"Mi dispiace dirlo, ma quel commento è stato brutto e mi ha fatto male.","Je mi líto to říct, ale ten komentář byl ošklivý a ublížil mi.",ne,ne,
-specchio,zrcadlo,80,Ogni mattina mi guardo nello specchio e mi pettino i capelli.,Každé ráno se dívám do zrcadla a češu si vlasy.,ne,ne,m
-camicia,košile,81,Preferisci la camicia a righe o quella blu?,"Dáváš přednost pruhované košili, nebo té modré?",ne,ne,f
-lontano,daleko,82,"Non andare troppo lontano, torniamo presto.","Nechoď moc daleko, brzy se vrátíme.",ne,ano,
-ci,tam,83,Ci vado domani. Ci sono.,"Zítra tam půjdu. Jsou tam, existují.",ne,ano,
-ci,"nás, nám",84,Ci dai una mano? Ci vuole tempo.,Pomůžeš nám? Chce to čas.,ne,ano,
-vicino,blízko,85,"La stazione è vicino, andiamo a piedi.","Nádraží je blízko, půjdeme pěšky.",ne,ne,
-vicino,soused,86,Il mio vicino è molto gentile.,Můj soused je moc milý.,ano,ne,m
-uscita,východ,87,Dov’è l’uscita? Non la vedo.,Kde je východ? Nevidím ho.,ne,ne,f
-ora,"teď, nyní",88,"Ora non posso parlare, ti chiamo dopo.","Teď nemůžu mluvit, zavolám ti později.",ano,ne,
-ora,hodina,89,Che ora è? Sono le tre.,Kolik je hodin? Jsou tři.,ne,ano,f
-cappotto,kabát,90,"Fa freddo oggi, quindi prendo il cappotto e la sciarpa.","Dnes je zima, tak si vezmu kabát a šálu.",ne,ano,m
-maglione,svetr,91,"Il maglione è troppo grande, ma è molto comodo.","Svetr je moc velký, ale je hodně pohodlný.",ne,ano,m
-gonna,sukně,92,Oggi indossa una gonna nera e una camicia bianca.,Dnes má na sobě černou sukni a bílou košili.,ne,ne,f
-scontrino,účtenka,93,"Scusi, può farmi lo scontrino, per favore?","Promiňte, můžete mi vystavit účtenku, prosím?",ne,ano,m
-cibo,jídlo,94,"Questo cibo è buono, ma un po’ salato.","Tohle jídlo je dobré, ale trochu slané.",ne,ano,m
-regalo,dárek,95,Ho comprato un regalo per mia moglie.,Koupil jsem dárek pro svou manželku.,ne,ne,m
-compleanno,narozeniny,96,Buon compleanno! Ti auguro tanta felicità.,Všechno nejlepší! Přeju ti hodně štěstí.,ne,ano,m
-biscotto,sušenka,97,"Vorrei un caffè e un biscotto, per favore","Dal bych si kávu a sušenku, prosím.",ne,ano,m
-piazza,náměstí,98,Ci vediamo in piazza alle cinque.,Sejdeme se na náměstí v pět.,ne,ne,f
-lì,tam,99,"Sono lì, vicino alla porta.","Jsem tam, u dveří.",ne,ne,
-giallo,žlutý,100,"Mi piace il colore giallo, soprattutto in estate.","Mám rád žlutou barvu, hlavně v létě.",ne,ano,
-bagno,koupelna,101,Dov’è il bagno? Devo lavarmi le mani.,Kde je koupelna? Potřebuju si umýt ruce.,ne,ne,m
-cane,pes,102,Porto il cane a fare una passeggiata ogni sera.,Beru psa na procházku každý večer.,ne,ne,m
-ogni,každý,103,Ogni giorno bevo un caffè al mattino.,Každý den piju ráno kávu.,ne,ano,
-caldo,teplý,104,Mi piace il tè caldo quando fuori piove.,"Mám rád teplý čaj, když venku prší.",ne,ne,
-tedesco,"němec, němčina",105,Il mio collega è tedesco e vive vicino a Praga.,Můj kolega je Němec a bydlí poblíž Prahy.,ne,ne,
-Lei,Vy,106,Lei parla inglese o tedesco?,Mluvíte anglicky nebo německy?,ne,ne,
-lei,ona,107,Lei è molto gentile e parla tre lingue.,Ona je moc milá a mluví třemi jazyky.,ne,ne,
-ragazza,dívka,108,Conosco una ragazza molto simpatica di Praga.,Znám jednu moc sympatickou holku z Prahy.,ne,ano,f
-guardare,"dívat se, sledovat, hlídat",109,Guardo un film e poi vado a dormire.,Dívám se na film a pak jdu spát.,ne,ano,
-per,pro,110,"Questo regalo è per te, buon compleanno!","Tenhle dárek je pro tebe, všechno nejlepší!",ne,ne,
-per,aby,111,Vado al supermercato per comprare il pane.,"Jdu do supermarketu, abych koupil chleba.",ne,ano,
-pompelmo,grep,112,"Il pompelmo è un po’ amaro, ma mi piace.","Grep je trochu hořký, ale chutná mi.",ne,ne,m
-bicchiere,sklenice,113,"Vorrei un bicchiere d’acqua, per favore.","Dal bych si sklenici vody, prosím.",ne,ano,m
-mirtilli,borůvky,114,A colazione mangio yogurt con i mirtilli.,Ke snídani jím jogurt s borůvkami.,ne,ano,m
-mela,jablko,115,Compro mele e fragole al supermercato.,Kupuju jablka a jahody v supermarketu.,ne,ano,f
-fragola,jahoda,116,Preferisci fragole o mirtilli?,"Dáváš přednost jahodám, nebo borůvkám?",ne,ano,f
-éclair,zákusek,117,Je prends un éclair au chocolat après le repas.,Dám si čokoládový éclair po jídle.,ne,ano,
-allora,"tak, tedy, no tak, tehdy, v tom případě",118,"Allora, cosa facciamo adesso?","Tak, co budeme dělat teď?",ne,ano,
-insegnare,"učit, vyučovat",119,Lei insegna italiano a scuola.,Ona učí italsky ve škole.,ne,ano,
-lavorare,pracovat,120,Lavoro in ospedale e torno a casa la sera.,Pracuju v nemocnici a večer se vracím domů.,ne,ano,
-spesso,často,121,Lui arriva spesso in ritardo.,On často chodí pozdě.,ne,ano,
-ballare,tančit,122,Vuoi ballare con me stasera?,Chceš si se mnou dnes večer zatančit?,ne,ano,
-storia,"historie, příběh",123,Raccontami una storia prima di dormire.,Povídej mi příběh před spaním.,ne,ne,f
-brioche,"brioška, sladké pečivo",124,Prendo una brioche al cioccolato e un caffè.,Dám si čokoládovou briošku a kávu.,ne,ano,f
-forno,trouba,125,"Metto la brioche nel forno per cinque minuti, così è calda.","Dám briošku na pět minut do trouby, aby byla teplá.",ne,ano,m
-mercato,trh,126,Vado al mercato la mattina e compro frutta e verdura.,Ráno jdu na trh a koupím ovoce a zeleninu.,ne,ano,m
-negozio,obchod,127,In quel negozio vendono scarpe e giacche molto belle.,V tom obchodě prodávají moc hezké boty a bundy.,ne,ne,m
-panificio,pekárna,128,C’è un panificio vicino a casa e il pane è sempre caldo.,Je tu pekařství blízko domu a chleba je vždycky teplý.,ne,ano,m
-piacere,"líbit se, potěšení",129,"Mi piace questo posto, è tranquillo e pulito.","Líbí se mi tohle místo, je klidné a čisté.",ne,ano,
-grazie,děkuji,130,"Grazie per l’aiuto, sei molto gentile.","Díky za pomoc, jsi moc hodný.",ne,ano,
-come,"jak, jako",131,Come stai oggi? Hai dormito bene?,Jak se dnes máš? Spal jsi dobře?,ne,ano,
-ufficio,"kancelář, úřad",132,Oggi sono in ufficio fino alle cinque.,Dnes jsem v kanceláři do pěti.,ne,ano,m
-ospedale,nemocnice,133,Lavoro in ospedale e torno a casa la sera.,Pracuju v nemocnici a večer jdu domů.,ne,ano,m
-impegnata,zaneprázdněná,134,Lei è impegnata con il lavoro e non ha tempo.,Ona je zaneprázdněná prací a nemá čas.,ne,ano,
-tutti i giorni,každý den,135,Tutti i giorni ripeto le parole per dieci minuti.,Každý den opakuju slovíčka deset minut.,ne,ano,
-cuoca,kuchařka,136,"È una cuoca bravissima, ma oggi è molto stanca.","Je to výborná kuchařka, ale dnes je hodně unavená.",ne,ano,f
-male,"špatně, zle, bolest",137,"Oggi sto male, quindi resto a casa.","Dnes se cítím špatně, tak zůstanu doma.",ne,ano,
-stazione,"nádraží, stanice",138,"La stazione è vicino, ci andiamo a piedi.","Nádraží je blízko, půjdeme pěšky.",ne,ano,f
-aiuto,pomoc,139,"Grazie per l’aiuto, ne avevo davvero bisogno.","Díky za pomoc, opravdu jsem ji potřeboval.",ne,ano,m
-allegro,veselý,140,Oggi sono allegro perché è una bella giornata.,"Dnes jsem veselý, protože je krásný den.",ne,ano,
-chiesa,kostel,141,"La chiesa è in piazza, vicino al palazzo.","Kostel je na náměstí, vedle paláce.",ne,ano,f
-giocare,"hrát (hra, sport)",142,Mi piace giocare a calcio con gli amici la domenica.,Rád hraju fotbal s kamarády v neděli.,ne,ano,
-estate,léto,143,Quest’estate vado in Italia con la famiglia.,Tohle léto jedu do Itálie s rodinou.,ne,ne,f
-zaino,batoh,144,Metto i libri nello zaino e poi esco di casa.,Dám knihy do batohu a pak jdu z domu.,ne,ne,m
-mese,měsíc,145,"Ci vediamo tra un mese, d’accordo?","Uvidíme se za měsíc, platí?",ne,ne,m
-solito,obvyklý,146,Di solito bevo un caffè al mattino.,Obvykle piju ráno kávu.,ne,ne,
-mangiare,jíst,147,"Mangiamo insieme dopo il lavoro, va bene?","Najíme se spolu po práci, platí?",ne,ne,
-inverno,zima,148,D’inverno metto il cappotto ogni giorno.,V zimě si beru kabát každý den.,ne,ne,m
-gatto,kočka,149,Il gatto dorme sul divano tutto il pomeriggio.,Kočka spí na gauči celé odpoledne.,ne,ne,m
-insieme,"spolu, dohromady",150,Mettiamo tutto insieme sul tavolo.,Dáme všechno dohromady na stůl.,ne,ne,
+su,o,3,Leggo un libro su Roma.,Čtu knihu o Římě.,ne,ne,
+laggiù,tam,4,"Guarda laggiù, c'è il mare.","Podívej se tamhle, je tam moře.",ne,ano,
+torta,"dort, koláč",5,Per il compleanno facciamo una torta.,K narozeninám děláme dort.,ne,ne,f
+troppo,příliš / moc,6,Parli troppo in classe.,Mluvíš ve třídě příliš moc.,ne,ne,
+forte,"silný, hlasitě (nahlas)",7,Oggi c'è un vento forte. Non parlare forte qui.,Dnes je silný vítr. Tady nemluv nahlas.,ne,ne,
+cappello,klobouk,8,In estate porto un cappello.,V létě nosím klobouk.,ne,ne,m
+amica,kamarádka,9,La mia amica vive a Milano.,Moje kamarádka žije v Miláně.,ano,ne,f
+fidanzata,přítelkyně,10,La mia fidanzata ama viaggiare.,Moje přítelkyně ráda cestuje.,ne,ano,f
+cantare,zpívat,11,Mi piace cantare in macchina.,Rád zpívám v autě.,ne,ne,
+portafoglio,peněženka,12,Il mio portafoglio è a casa.,Moje peněženka je doma.,ne,ne,m
+portafoglio,portfolio (soubor investic),13,Controllo il mio portafoglio ogni mese.,Každý měsíc kontroluji své portfolio.,ne,ne,m
+mi chiamo,jmenuji se,14,Mi chiamo Anna.,Jmenuji se Anna.,ne,ne,
+Come stai? Come va?,Jak se máš?,15,"Ciao, come stai?","Ahoj, jak se máš?",ne,ne,
+vengo,pocházím,16,Vengo da Praga.,Pocházím z Prahy.,ne,ne,
+E tu?,A ty?,17,Io sto bene. E tu?,Já se mám dobře. A ty?,ne,ne,
+piacere,těší mě,18,Piacere di conoscerti.,"Těší mě, že tě poznávám.",ne,ne,
+a presto,brzy na viděnou,19,"A presto, ci vediamo domani.","Brzy na viděnou, uvidíme se zítra.",ne,ano,
+arrivederci,na shledanou,20,Arrivederci e buona giornata.,Na shledanou a hezký den.,ne,ne,
+vorrei,chtěl bych,21,"Vorrei un caffè, per favore.","Chtěl bych kávu, prosím.",ne,ne,
+per favore,prosím,22,"Parla piano, per favore.","Mluv pomalu, prosím.",ne,ne,
+sì,ano,23,"Sì, capisco.","Ano, rozumím.",ne,ne,
+io,já,24,Io studio italiano ogni giorno.,Já studuji italštinu každý den.,ne,ne,
+anche,také,25,Anche mio fratello studia.,Také můj bratr studuje.,ne,ne,
+perfetto,skvěle,26,"Perfetto, andiamo adesso.","Skvěle, jdeme teď.",ne,ne,
+o,nebo,27,Mangiamo a casa o fuori?,Jíme doma nebo venku?,ne,ne,
+e,a,28,Compro pane e latte.,Kupuji chleba a mléko.,ne,ne,
+dove,kde,29,Dove abiti?,Kde bydlíš?,ne,ano,
+di dove,odkud,30,Di dove sei?,Odkud jsi?,ne,ano,
+bene,dobře,31,Oggi sto bene.,Dnes se mám dobře.,ne,ne,
+ho,mám,32,Ho due lezioni oggi.,Dnes mám dvě lekce.,ne,ne,
+abita,bydlí,33,Lui abita a Roma.,On bydlí v Římě.,ne,ne,
+hai,máš,34,Hai un minuto?,Máš minutu?,ne,ne,
+nipote,synovec,35,Il mio nipote gioca a calcio.,Můj synovec hraje fotbal.,ne,ne,m
+nipote,neteř,36,La mia nipote suona il piano.,Moje neteř hraje na klavír.,ne,ne,f
+figlia,dcera,37,Sua figlia legge un libro.,Jeho dcera čte knihu.,ne,ne,f
+figlio,syn,38,Mio figlio va a scuola.,Můj syn chodí do školy.,ne,ne,m
+adesso,"teď, nyní",39,Adesso andiamo a casa.,Teď jdeme domů.,ne,ano,
+zia,teta,40,Mia zia cucina bene.,Moje teta vaří dobře.,ano,ne,f
+zio,strýc,41,Mio zio è molto simpatico.,Můj strýc je velmi sympatický.,ne,ne,m
+tu,ty,42,Tu parli italiano bene.,Ty mluvíš italsky dobře.,ano,ne,
+lui,on,43,Lui studia medicina.,On studuje medicínu.,ne,ne,
+voi,vy,44,Voi siete pronti?,Vy jste připraveni?,ne,ne,
+noi,my,45,Noi viviamo a Brno.,My žijeme v Brně.,ne,ne,
+loro,"ony, oni",46,Loro studiano insieme.,Ony studují spolu.,ne,ne,
+mio,můj,47,Questo è il mio libro.,To je moje kniha.,ano,ne,
+mia,moje,48,Questa è la mia borsa.,To je moje taška.,ne,ne,
+tuo,tvůj,49,Dov'è il tuo telefono?,Kde je tvůj telefon?,ne,ne,
+tua,tvá,50,La tua giacca è nuova.,Tvá bunda je nová.,ne,ne,
+una,jedna (neurčitý člen),51,Una ragazza canta.,Jedna dívka zpívá.,ano,ne,
+un,jeden (neurčitý člen),52,Un ragazzo legge.,Jeden chlapec čte.,ne,ne,
+sorella,sestra,53,Mia sorella è insegnante.,Moje sestra je učitelka.,ne,ne,f
+fratello,bratr,54,Mio fratello è alto.,Můj bratr je vysoký.,ne,ne,m
+madre,matka,55,Mia madre prepara la cena.,Moje matka připravuje večeři.,ano,ne,f
+padre,otec,56,Mio padre guida la macchina.,Můj otec řídí auto.,ne,ne,m
+nonna,babička,57,Mia nonna guarda la TV.,Moje babička se dívá na televizi.,ne,ne,f
+nonno,dědeček,58,Mio nonno beve il tè.,Můj dědeček pije čaj.,ne,ne,m
+molto,velmi,59,Questo film è molto bello.,Tento film je velmi krásný.,ano,ne,
+divertente,zábavný,60,Il gioco è divertente.,Ta hra je zábavná.,ne,ne,
+interessante,zajímavý,61,Il libro è interessante.,Ta kniha je zajímavá.,ano,ne,
+cattivo,"zlý, protivný",62,Quel cane è cattivo.,Ten pes je zlý.,ne,ne,
+sono,já jsem,63,Sono stanco oggi.,Dnes jsem unavený.,ne,ne,
+sicuro,jistý,64,Non sono sicuro.,Nejsem si jistý.,ne,ano,
+certo,samozřejmě,65,"Certo, ti aiuto.","Samozřejmě, pomohu ti.",ne,ne,
+sempre,"pořád, stále, vždy",66,Arrivo sempre in orario.,Vždy přicházím včas.,ne,ne,
+per niente,vůbec,67,Non è per niente difficile.,Není to vůbec těžké.,ne,ano,
+ma,ale,68,"Vado fuori, ma piove.","Jdu ven, ale prší.",ne,ne,
+giacca,sako,69,Dov’è la mia giacca?,Kde je moje bunda?,ne,ne,f
+brutto,"ošklivý, špatný",70,"Che brutto tempo oggi: piove, c’è vento e fa freddo.","Dnes je hrozné počasí: prší, fouká a je zima.",ne,ne,
+specchio,zrcadlo,71,Ogni mattina mi guardo nello specchio e mi pettino i capelli.,Každé ráno se dívám do zrcadla a češu si vlasy.,ne,ne,m
+camicia,košile,72,Preferisci la camicia a righe o quella blu?,"Dáváš přednost pruhované košili, nebo té modré?",ne,ne,f
+lontano,daleko,73,"Non andare troppo lontano, torniamo presto.","Nechoď moc daleko, brzy se vrátíme.",ne,ne,
+ci,tam,74,Ci vado domani. Ci sono.,"Zítra tam půjdu. Jsou tam, existují.",ne,ne,
+ci,"nás, nám",75,Ci dai una mano? Ci vuole tempo.,Pomůžeš nám? Chce to čas.,ne,ne,
+vicino,blízko,76,"La stazione è vicino, andiamo a piedi.","Nádraží je blízko, půjdeme pěšky.",ne,ne,
+vicino,soused,77,Il mio vicino è molto gentile.,Můj soused je moc milý.,ano,ne,m
+uscita,východ,78,Dov’è l’uscita? Non la vedo.,Kde je východ? Nevidím ho.,ne,ne,f
+ora,"teď, nyní",79,"Ora non posso parlare, ti chiamo dopo.","Teď nemůžu mluvit, zavolám ti později.",ano,ne,
+ora,hodina,80,Che ora è? Sono le tre.,Kolik je hodin? Jsou tři.,ne,ne,f
+cappotto,kabát,81,"Fa freddo oggi, quindi prendo il cappotto e la sciarpa.","Dnes je zima, tak si vezmu kabát a šálu.",ne,ne,m
+maglione,svetr,82,"Il maglione è troppo grande, ma è molto comodo.","Svetr je moc velký, ale je hodně pohodlný.",ne,ne,m
+gonna,sukně,83,Oggi indossa una gonna nera e una camicia bianca.,Dnes má na sobě černou sukni a bílou košili.,ne,ne,f
+scontrino,účtenka,84,"Scusi, può farmi lo scontrino, per favore?","Promiňte, můžete mi vystavit účtenku, prosím?",ne,ne,m
+cibo,jídlo,85,"Questo cibo è buono, ma un po’ salato.","Tohle jídlo je dobré, ale trochu slané.",ne,ne,m
+regalo,dárek,86,Ho comprato un regalo per mia moglie.,Koupil jsem dárek pro svou manželku.,ne,ne,m
+compleanno,narozeniny,87,Buon compleanno! Ti auguro tanta felicità.,Všechno nejlepší! Přeju ti hodně štěstí.,ne,ne,m
+biscotto,sušenka,88,"Vorrei un caffè e un biscotto, per favore","Dal bych si kávu a sušenku, prosím.",ne,ne,m
+piazza,náměstí,89,Ci vediamo in piazza alle cinque.,Sejdeme se na náměstí v pět.,ne,ne,f
+lì,tam,90,"Sono lì, vicino alla porta.","Jsem tam, u dveří.",ne,ne,
+giallo,žlutý,91,"Mi piace il colore giallo, soprattutto in estate.","Mám rád žlutou barvu, hlavně v létě.",ne,ne,
+bagno,koupelna,92,Dov’è il bagno? Devo lavarmi le mani.,Kde je koupelna? Potřebuju si umýt ruce.,ne,ne,m
+cane,pes,93,Porto il cane a fare una passeggiata ogni sera.,Beru psa na procházku každý večer.,ne,ne,m
+ogni,každý,94,Ogni giorno bevo un caffè al mattino.,Každý den piju ráno kávu.,ne,ano,
+caldo,teplý,95,Mi piace il tè caldo quando fuori piove.,"Mám rád teplý čaj, když venku prší.",ne,ne,
+tedesco,"němec, němčina",96,Il mio collega è tedesco e vive vicino a Praga.,Můj kolega je Němec a bydlí poblíž Prahy.,ne,ne,
+Lei,vy,97,Lei parla inglese o tedesco?,Mluvíte anglicky nebo německy?,ne,ne,
+lei,ona,98,Lei è molto gentile e parla tre lingue.,Ona je moc milá a mluví třemi jazyky.,ne,ne,
+ragazza,dívka,99,Conosco una ragazza molto simpatica di Praga.,Znám jednu moc sympatickou holku z Prahy.,ne,ne,f
+guardare,"dívat se, sledovat",100,Guardo un film e poi vado a dormire.,Dívám se na film a pak jdu spát.,ne,ne,
+per,pro,101,"Questo regalo è per te, buon compleanno!","Tenhle dárek je pro tebe, všechno nejlepší!",ne,ne,
+per,aby,102,Vado al supermercato per comprare il pane.,"Jdu do supermarketu, abych koupil chleba.",ne,ne,
+pompelmo,grep,103,"Il pompelmo è un po’ amaro, ma mi piace.","Grep je trochu hořký, ale chutná mi.",ne,ne,m
+bicchiere,sklenice,104,"Vorrei un bicchiere d’acqua, per favore.","Dal bych si sklenici vody, prosím.",ne,ne,m
+mirtilli,borůvky,105,A colazione mangio yogurt con i mirtilli.,Ke snídani jím jogurt s borůvkami.,ne,ne,m
+mela,jablko,106,Compro mele e fragole al supermercato.,Kupuju jablka a jahody v supermarketu.,ne,ne,f
+fragola,jahoda,107,Preferisci fragole o mirtilli?,"Dáváš přednost jahodám, nebo borůvkám?",ne,ne,f
+éclair,zákusek,108,Je prends un éclair au chocolat après le repas.,Dám si čokoládový éclair po jídle.,ne,ne,m
+allora,"tak, tedy, tehdy",109,"Allora, cosa facciamo adesso?","Tak, co budeme dělat teď?",ne,ano,
+insegnare,"učit, vyučovat",110,Lei insegna italiano a scuola.,Ona učí italsky ve škole.,ne,ne,
+lavorare,pracovat,111,Lavoro in ospedale e torno a casa la sera.,Pracuju v nemocnici a večer se vracím domů.,ne,ne,
+spesso,často,112,Lui arriva spesso in ritardo.,On často chodí pozdě.,ne,ne,
+ballare,tančit,113,Vuoi ballare con me stasera?,Chceš si se mnou dnes večer zatančit?,ne,ne,
+storia,"historie, příběh",114,Raccontami una storia prima di dormire.,Povídej mi příběh před spaním.,ne,ne,f
+brioche,"brioška, sladké pečivo",115,Prendo una brioche al cioccolato e un caffè.,Dám si čokoládovou briošku a kávu.,ne,ne,f
+forno,trouba,116,"Metto la brioche nel forno per cinque minuti, così è calda.","Dám briošku na pět minut do trouby, aby byla teplá.",ne,ano,m
+mercato,trh,117,Vado al mercato la mattina e compro frutta e verdura.,Ráno jdu na trh a koupím ovoce a zeleninu.,ne,ne,m
+negozio,obchod,118,In quel negozio vendono scarpe e giacche molto belle.,V tom obchodě prodávají moc hezké boty a bundy.,ne,ne,m
+panificio,pekárna,119,C’è un panificio vicino a casa e il pane è sempre caldo.,Je tu pekařství blízko domu a chleba je vždycky teplý.,ne,ano,m
+piacere,"líbit se, potěšení",120,"Mi piace questo posto, è tranquillo e pulito.","Líbí se mi tohle místo, je klidné a čisté.",ne,ne,
+grazie,děkuji,121,"Grazie per l’aiuto, sei molto gentile.","Díky za pomoc, jsi moc hodný.",ne,ne,
+come,"jak, jako",122,Come stai oggi? Hai dormito bene?,Jak se dnes máš? Spal jsi dobře?,ne,ne,
+ufficio,"kancelář, úřad",123,Oggi sono in ufficio fino alle cinque.,Dnes jsem v kanceláři do pěti.,ne,ne,m
+ospedale,nemocnice,124,Lavoro in ospedale e torno a casa la sera.,Pracuju v nemocnici a večer jdu domů.,ne,ne,m
+impegnato,zaneprázdněný,125,Lei è impegnata con il lavoro e non ha tempo.,Ona je zaneprázdněná prací a nemá čas.,ne,ne,
+tutti i giorni,každý den,126,Tutti i giorni ripeto le parole per dieci minuti.,Každý den opakuju slovíčka deset minut.,ne,ne,
+cuoca,kuchařka,127,"È una cuoca bravissima, ma oggi è molto stanca.","Je to výborná kuchařka, ale dnes je hodně unavená.",ne,ne,f
+male,"špatně, zle, bolest, zlo",128,"Oggi sto male, quindi resto a casa.","Dnes se cítím špatně, tak zůstanu doma.",ne,ne,
+stazione,"nádraží, stanice",129,"La stazione è vicino, ci andiamo a piedi.","Nádraží je blízko, půjdeme pěšky.",ne,ne,f
+aiuto,pomoc,130,"Grazie per l’aiuto, ne avevo davvero bisogno.","Díky za pomoc, opravdu jsem ji potřeboval.",ne,ano,m
+allegro,"veselý, radostný",131,Oggi sono allegro perché è una bella giornata.,"Dnes jsem veselý, protože je krásný den.",ne,ano,
+chiesa,kostel,132,"La chiesa è in piazza, vicino al palazzo.","Kostel je na náměstí, vedle paláce.",ne,ne,f
+giocare,"hrát, hrát si",133,Mi piace giocare a calcio con gli amici la domenica.,Rád hraju fotbal s kamarády v neděli.,ne,ne,
+estate,léto,134,Quest’estate vado in Italia con la famiglia.,Tohle léto jedu do Itálie s rodinou.,ne,ne,f
+zaino,batoh,135,Metto i libri nello zaino e poi esco di casa.,Dám knihy do batohu a pak jdu z domu.,ne,ne,m
+mese,měsíc,136,"Ci vediamo tra un mese, d’accordo?","Uvidíme se za měsíc, platí?",ne,ne,m
+solito,obvyklý,137,Di solito bevo un caffè al mattino.,Obvykle piju ráno kávu.,ne,ne,
+mangiare,jíst,138,"Mangiamo insieme dopo il lavoro, va bene?","Najíme se spolu po práci, platí?",ne,ne,
+inverno,zima,139,D’inverno metto il cappotto ogni giorno.,V zimě si beru kabát každý den.,ne,ne,m
+gatto,kočka,140,Il gatto dorme sul divano tutto il pomeriggio.,Kočka spí na gauči celé odpoledne.,ne,ne,m
+insieme,"společně, dohromady",141,Mettiamo tutto insieme sul tavolo.,Dáme všechno dohromady na stůl.,ne,ne,
+albergo,hotel,142,Dormiamo in un albergo vicino alla stazione.,Spíme v hotelu blízko nádraží.,ne,ano,m
+andare,"jít, jet",143,Dove andate? In Italia. A Roma.,Kam jedete? Do Itálie. Do Říma.,ne,ne,
+aspettare,čekat,144,Ti aspetto davanti al negozio alle cinque.,Počkám na tebe před obchodem v pět.,ne,ano,
+casa,"dům, domov",145,Oggi resto a casa perché sono stanco.,"Dnes zůstanu doma, protože jsem unavený.",ne,ne,f
+cercare,hledat,146,"Cerco le chiavi, ma non le trovo.","Hledám klíče, ale nemůžu je najít.",ne,ano,
+da,"od, z, u, k",147,Vengo da Praga e lavoro in ospedale.,Jsem z Prahy a pracuju v nemocnici.,ne,ano,
+domani,zítra,148,Domani ho una lezione e devo studiare.,Zítra mám lekci a musím se učit.,ne,ano,
+domattina,zítra ráno,149,"Domattina parto presto, quindi vado a dormire.","Zítra ráno odjíždím brzy, takže jdu spát.",ne,ano,
+esercizio,"cvičení, úkol, trénink",150,Faccio un esercizio di italiano ogni giorno.,Dělám jedno cvičení z italštiny každý den.,ne,ano,m
+favore,laskavost,151,Mi fai un favore? Mi aiuti con questo.,Uděláš mi laskavost? Pomůžeš mi s tím.,ne,ano,m
+forse,možná,152,"Forse stasera piove, quindi resto a casa.","Možná dnes večer bude pršet, tak zůstanu doma.",ne,ano,
+forza,"síla, no tak",153,"Forza, andiamo! Siamo in ritardo.","No tak, jdeme! Jdeme pozdě.",ne,ne,f
+lezione,"lekce, hodina",154,La lezione inizia alle nove e finisce alle dieci.,Lekce začíná v devět a končí v deset.,ne,ne,f
+pagare,platit,155,Posso pagare con la carta o in contanti?,Můžu zaplatit kartou nebo hotově?,ne,ne,
+parola,slovo,156,"Non capisco questa parola, puoi spiegarmela?","Nerozumím tomuhle slovu, můžeš mi ho vysvětlit?",ne,ne,f
+poi,potom / pak,157,"Prima mangiamo, poi andiamo al mercato.","Nejdřív se najíme, pak půjdeme na trh.",ne,ano,
+pregare,"modlit se, prosit",158,"La prego, può ripetere più lentamente?","Prosím vás, můžete to zopakovat pomaleji?",ne,ano,
+qua,tady,159,"Vieni qua un attimo, per favore.","Pojď sem na chvilku, prosím.",ne,ano,
+restare,zůstat,160,Resto qui cinque minuti e poi vado via.,Zůstanu tady pět minut a pak odejdu.,ne,ne,
+ricordare,"pamatovat si, připomenout si",161,Cerco di ricordare le parole con frasi semplici.,Snažím se pamatovat si slovíčka pomocí jednoduchých vět.,ne,ano,
+stasera,dnes večer,162,Stasera mangiamo insieme e parliamo un po’.,Dnes večer se najíme spolu a trochu si popovídáme.,ne,ano,
+subito,"hned, okamžitě",163,"Arrivo subito, aspetta un momento.","Hned přijdu, počkej chvilku.",ne,ano,
+tornare,vrátit se,164,"Torno a casa dopo il lavoro, verso le sei.",Vrátím se domů po práci kolem šesté.,ne,ano,
+treno,vlak,165,"Il treno parte alle sette, quindi usciamo presto.","Vlak odjíždí v sedm, tak vyjdeme brzy.",ne,ano,m
+via,ulice,166,"Devo andare via adesso, a presto!","Musím teď jít pryč, brzy na viděnou!",ne,ne,
+viale,"třída, alej",167,"Abito in un viale grande, pieno di alberi.",Bydlím na velké třídě plné stromů.,ne,ano,m
+vocabolo,"slovíčko, výraz",168,"Questo vocabolo è difficile, ma lo ripeto ogni giorno.","Tohle slovíčko je těžké, ale opakuju ho každý den.",ne,ano,m
+di solito,obvykle,169,"Di solito bevo un caffè al mattino, poi vado al lavoro.",Obvykle si ráno dám kávu a pak jdu do práce.,ne,ne,
+macchina,"auto, vůz, stroj",170,"La macchina è dal meccanico, quindi oggi vado in treno.","Auto je u mechanika, takže dnes jedu vlakem.",ne,ano,f
+quando,"kdy, když",171,"Quando ho tempo, faccio un esercizio di italiano.","Když mám čas, udělám si cvičení z italštiny.",ne,ano,
+nemico,nepřítel,172,Il nemico non dice mai la verita.,Nepřítel nikdy neříká pravdu.,ne,ne,m
+numero,číslo,173,"Scrivi il tuo numero qui, per favore.","Napiš sem svoje číslo, prosím.",ne,ne,m
+occupato,obsazeno,174,Il bagno e occupato in questo momento.,Koupelna je teď obsazená.,ne,ano,
+parlare,mluvit,175,Mi piace parlare italiano con gli amici.,Rád mluvím italsky s přáteli.,ne,ne,
+permesso,"dovolení, svolení",176,Entro solo con il permesso del professore.,Vstoupím jen se svolením profesora.,ne,ano,m
+po',trochu,177,"Sono un po' stanco, ma continuo a studiare.","Jsem trochu unavený, ale pokračuji ve studiu.",ne,ano,
+poco,málo,178,Ho poco tempo prima della lezione.,Mám málo času před hodinou.,ne,ano,
+poco fa,před chvílí,179,L'ho visto poco fa davanti alla stazione.,Viděl jsem ho před chvílí před nádražím.,ne,ano,
+posto,místo,180,C'e un posto libero vicino alla finestra.,U okna je volné místo.,ne,ano,m
+prendere,"vzít, brát",181,Devo prendere il treno delle sette.,Musím stihnout vlak v sedm.,ne,ano,
+pronto,"připravený, hotový, haló, prosím?",182,"Pronto? Chi parla, per favore?","Haló? Kdo mluví, prosím?",ne,ano,
+quale,který,183,Quale libro vuoi leggere oggi?,Kterou knihu chceš dnes číst?,ne,ano,
+questo,tento,184,Questo esercizio e piu facile del primo.,Toto cvičení je lehčí než to první.,ne,ano,
+rispondere,odpovědět,185,Puoi rispondere alla mia domanda?,Můžeš odpovědět na mou otázku?,ne,ano,
+rivista,časopis,186,Compro una rivista italiana alla stazione.,Na nádraží si kupuji italský časopis.,ne,ano,f
+romano,"Říman, římský",187,Conosco un collega romano molto simpatico.,Znám jednoho velmi sympatického kolegu z Říma.,ne,ne,m
+russo,"Rus, ruský",188,"Il mio vicino e russo, ma parla bene italiano.","Můj soused je Rus, ale dobře mluví italsky.",ne,ne,m
+scheda,"karta, lístek",189,Compilo la scheda prima di entrare in classe.,Vyplňuji kartu před vstupem do třídy.,ne,ano,f
+scusare,"omluvit, promiňte",190,"Mi deve scusare, arrivo con cinque minuti di ritardo.","Musíte mě omluvit, přicházím o pět minut později.",ne,ne,
+simpatico,sympatický,191,Il nuovo collega e molto simpatico.,Nový kolega je velmi sympatický.,ne,ne,
+slovacco,"Slovák, slovenský",192,Il mio amico slovacco studia a Brno.,Můj slovenský kamarád studuje v Brně.,ne,ne,m
+so,vím,193,"Non so la risposta, ma posso cercarla.","Neznám odpověď, ale můžu ji najít.",ne,ano,
+sorpresa,překvapení,194,Ho una sorpresa per te dopo cena.,Po večeři pro tebe mám překvapení.,ne,ne,f
+Spagna,Španělsko,195,Quest'estate andiamo in Spagna per due settimane.,Letos v létě jedeme do Španělska na dva týdny.,ne,ne,f
+spremuta,čerstvá šťáva,196,A colazione bevo una spremuta d'arancia.,K snídani piju čerstvou pomerančovou šťávu.,ne,ano,f
+te,"tebe, ti",197,"Aspetto te, non tuo fratello.","Čekám na tebe, ne na tvého bratra.",ne,ne,
+tecnico,"technik, technický",198,Il tecnico arriva domani mattina per controllare il computer.,Technik přijde zítra ráno zkontrolovat počítač.,ne,ne,m
+telefonico,telefonní,199,Ho un contatto telefonico a Roma.,Mám telefonní kontakt v Římě.,ne,ne,
+trovare,najít,200,Spero di trovare presto le mie chiavi.,"Doufám, že brzy najdu své klíče.",ne,ano,
+trovarsi,"nacházet se, být",201,La banca si trova vicino alla piazza.,Banka se nachází blízko náměstí.,ne,ano,
+vaniglia,vanilka,202,Mi piace il gelato alla vaniglia.,Mám rád vanilkovou zmrzlinu.,ne,ne,f
+vendere,"prodat, prodávat",203,Quel negozio vende libri usati.,Ten obchod prodává použité knihy.,ne,ano,
+vino,víno,204,A cena bevo solo un bicchiere di vino.,K večeři piju jen jednu sklenku vína.,ne,ne,m
+vincere,vyhrát,205,Vogliamo vincere questa partita.,Chceme vyhrát tento zápas.,ne,ne,
+zero,nula,206,Oggi ho zero tempo libero.,Dnes mám nulový volný čas.,ne,ne,m
+cena,večeře,207,"La cena e pronta, vieni a tavola.","Večeře je hotová, pojď ke stolu.",ne,ano,f
+che,"jaký, který",208,Il libro che leggo è interessante. Che bella giornata!,"Kniha, kterou čtu, je zajímavá. Jaký krásný den!",ne,ano,
+che cosa,co,209,Che cosa fai dopo il lavoro?,Co děláš po práci?,ne,ano,
+chi,kdo,210,Chi e quella ragazza vicino alla porta?,Kdo je ta dívka u dveří?,ne,ano,
+chiamare,"jmenovat se, volat, telefonovat",211,Ti chiamo stasera dopo cena.,Zavolám ti dnes večer po večeři.,ne,ano,
+conoscere,"znát, poznat",212,Vorrei conoscere meglio i tuoi amici.,Chtěl bych lépe poznat tvoje přátele.,ne,ano,
+di,"z, ze, od",213,Vengo di solito qui a piedi.,Sem obvykle chodím pěšky.,ne,ano,
+dopo,"po, potom",214,A dopo.,Zatím.,ne,ano,
+ecco,tady je; tady jsou,215,Ecco il tuo quaderno sul tavolo.,Tady je tvůj sešit na stole.,ne,ne,
+essere,být,216,Essere puntuale e importante.,Být dochvilný je důležité.,ne,ano,
+euro,euro,217,Questo libro costa dieci euro.,Tato kniha stojí deset eur.,ne,ne,m
+fontana,"kašna, fontána",218,Ci vediamo vicino alla fontana in piazza.,Sejdeme se u kašny na náměstí.,ne,ne,f
+fragile,křehký,219,"Attento, questo bicchiere e fragile.","Opatrně, tahle sklenice je křehká.",ne,ne,
+francese,"Francouz, francouzský",220,Il nostro vicino francese cucina molto bene.,Náš francouzský soused vaří velmi dobře.,ne,ne,
+francobollo,poštovní známka,221,Mi serve un francobollo per questa lettera.,Potřebuji poštovní známku na tento dopis.,ne,ne,m
+gelato,zmrzlina,222,In estate mangio spesso un gelato al limone.,V létě často jím citronovou zmrzlinu.,ne,ne,m
+giorno,den,223,Ogni giorno ripeto almeno dieci parole.,Každý den si opakuji alespoň deset slovíček.,ne,ne,m
+gustoso,chutný,224,Questo sugo e semplice ma molto gustoso.,"Tato omáčka je jednoduchá, ale velmi chutná.",ne,ano,
+inglese,"Angličan, anglický",225,Il professore inglese parla lentamente.,Ten anglický profesor mluví pomalu.,ne,ne,m
+invitato,"pozvaný, host",226,Sono invitato a cena da amici domani.,Zítra jsem pozvaný na večeři k přátelům.,ne,ano,
+italiano,"Ital, italský",227,Un amico italiano mi scrive ogni settimana.,Jeden italský kamarád mi píše každý týden.,ne,ne,
+leggere,číst,228,Mi piace leggere prima di dormire.,Rád čtu před spaním.,ne,ano,
+libero,"volný, svobodný",229,Sabato pomeriggio sono libero.,V sobotu odpoledne mám volno.,ne,ne,
+limone,citron,230,Metto un po' di limone nel tè.,Dávám si trochu citronu do čaje.,ne,ne,m
+minuto,minuta,231,"Aspetta un minuto, arrivo subito.","Počkej minutu, hned přijdu.",ne,ne,m
+meno,méně,232,Oggi parlo meno del solito.,Dnes mluvím méně než obvykle.,ne,ano,
+misto,"míchaný, smíšený",233,Prendo un'insalata mista per pranzo.,K obědu si dám míchaný salát.,ne,ano,
+naturalmente,"přirozeně, samozřejmě",234,"Naturalmente, puoi sederti qui.","Samozřejmě, můžeš si sednout tady.",ne,ano,
+altro,"jiný, další",235,Hai un altro quaderno nello zaino?,Máš v batohu ještě další sešit?,ne,ano,
+arancia,pomeranč,236,Mangio un'arancia dopo pranzo.,Po obědě sním pomeranč.,ne,ano,f
+banana,banán,237,A colazione prendo una banana e un caffè.,K snídani si dám banán a kávu.,ne,ne,f
+bello,"krásný, hezký",238,Hai un vestito davvero bello.,Máš opravdu hezké šaty.,ne,ne,
+benissimo,výborně,239,Parli benissimo italiano per essere all'inizio.,"Mluvíš výborně italsky na to, že jsi na začátku.",ne,ano,
+bravo,"dobrý, šikovný",240,Sei bravo a spiegare le cose difficili.,Jsi šikovný ve vysvětlování těžkých věcí.,ne,ano,
+buono,dobrý,241,Questo pane e molto buono.,Tenhle chléb je velmi dobrý.,ne,ne,
+camera,pokoj,242,La mia camera e piccola ma comoda.,"Můj pokoj je malý, ale pohodlný.",ne,ano,f
+ceco,"Čech, český",243,Un collega ceco mi aiuta con l'italiano.,Jeden český kolega mi pomáhá s italštinou.,ne,ne,m
+nuotare,plavat,244,In estate mi piace nuotare nel lago.,V létě rád plavu v jezeře.,ne,ne,
+pattinare,bruslit,245,D’inverno andiamo a pattinare ogni domenica.,V zimě chodíme bruslit každou neděli.,ne,ne,
+calcio,"fotbal, vápník",246,Mio figlio gioca a calcio con gli amici.,Můj syn hraje s přáteli fotbal.,ne,ne,m
+pescare,"lovit, rybařit",247,Mio nonno ama pescare al fiume.,Můj dědeček rád rybaří u řeky.,ne,ne,
+pescato,"úlovek, ulovená ryba",248,Oggi il pescato del giorno è molto fresco.,Dnešní úlovek dne je velmi čerstvý.,ne,ne,m
+autunno,podzim,249,In autunno le foglie cadono dagli alberi.,Na podzim padá listí ze stromů.,ne,ne,m
+sciare,lyžovat,250,In montagna mi piace sciare.,Na horách rád lyžuji.,ne,ne,
+settimana,týden,251,Lavoro cinque giorni alla settimana.,Pracuji pět dní v týdnu.,ne,ne,f
+disegnare,kreslit,252,I bambini amano disegnare animali.,Děti rády kreslí zvířata.,ne,ne,
+cucinare,vařit,253,Mi piace cucinare per la mia famiglia.,Rád vařím pro svou rodinu.,ne,ne,
+fra,"mezi, za",254,Fra due giorni partiamo per l’Italia.,Za dva dny odjíždíme do Itálie.,ne,ano,
+gli,"ti, ty",255,Gli telefono domani mattina.,Zítra ráno mu zavolám.,ne,ano,
+quante,kolik,256,Quante persone arrivano stasera?,Kolik lidí přijde dnes večer?,ne,ano,
+porco,prase,257,Il porco vive nella fattoria.,Prase žije na farmě.,ne,ne,m
+cartolina,pohlednice,258,Ti mando una cartolina da Roma.,Pošlu ti pohlednici z Říma.,ne,ne,f
+libro,kniha,259,Leggo un libro prima di dormire.,Před spaním čtu knihu.,ne,ne,m
+solo,"sám, pouze, jen",260,Oggi sono solo a casa.,Dnes jsem sám doma.,ne,ne,
+davvero,"opravdu, skutečně",261,È davvero una bella città.,Je to opravdu krásné město.,ne,ano,
+che,že,262,Penso che hai ragione.,"Myslím, že máš pravdu.",ne,ano,
+gentile,"laskavý, milý, zdvořilý",263,Sei molto gentile.,Jsi velmi milý.,ne,ne,
+stanco,unavený,264,Oggi sono stanco.,Dnes jsem unavený.,ne,ne,
+purtroppo,bohužel,265,Purtroppo oggi non posso venire.,Bohužel dnes nemohu přijít.,ne,ano,
+dolce,"sladký, sladkost, jemný, něžný",266,Questo tè è troppo dolce. Ha una voce dolce.,Tento čaj je příliš sladký. Má jemný hlas.,ne,ne,
+un po’,trochu,267,Sono un po’ stanco.,Jsem trochu unavený.,ne,ano,
+malato,nemocný,268,Oggi sono malato.,Dnes jsem nemocný.,ne,ano,
+buonanotte,dobrou noc,269,"Buonanotte, a domani.","Dobrou noc, zítra na shledanou",ne,ne,
+debole,slabý,270,Sono ancora debole.,Jsem ještě slabý.,ne,ano,
+preferire,"preferovat, dávat přednost",271,Preferisco il tè al caffè.,Dávám přednost čaji před kávou.,ne,ne,
+pallacanestro,basketbal,272,Mio figlio gioca a pallacanestro.,Můj syn hraje basketbal.,ne,ne,f
+pallavolo,volejbal,273,Mio figlio gioca a pallavolo.,Můj syn hraje volejbal.,ne,ne,f
+camminare,"chodit, kráčet",274,Mi piace camminare nel bosco.,Rád chodím po lese.,ne,ne,
+odiare,nenávidět,275,Odio aspettare troppo.,Nenávidím dlouhé čekání.,ne,ne,
+abbastanza,"dost, docela",276,Il campeggio è abbastanza vicino.,Kemp je docela blízko.,ne,ano,
+aereo,letadlo,277,Preferiamo l'aereo.,Máme raději letadlo.,ne,ano,m
+alzarsi,"vstát, vstávat",278,Domani mi alzo molto presto.,Zítra vstávám velmi brzy.,ne,ano,
+ancora,ještě,279,Non conosciamo ancora questa città.,Tohle město ještě neznáme.,ne,ano,
+anno,rok,280,Quest'anno andiamo in Italia.,Letos jedeme do Itálie.,ne,ano,m
+aprire,otevřít,281,"Apri la finestra, per favore.","Otevři okno, prosím.",ne,ano,
+asciugamano,ručník,282,Ecco un asciugamano pulito.,Tady je čistý ručník.,ne,ano,m
+auto,auto,283,Andate in auto o in treno?,Jedete autem nebo vlakem?,ne,ano,f
+automobilismo,automobilismus,284,Loro s'interessano molto di automobilismo.,Hodně se zajímají o automobilismus.,ne,ano,m
+caffè,káva,285,Preferisco il tè al caffè.,Dávám přednost čaji před kávou.,ne,ne,m
+campeggio,kemp,286,Dov'è il campeggio?,Kde je kemp?,ne,ano,m
+capire,"rozumět, chápat",287,Capisci quando il dottore parla italiano?,"Rozumíš, když doktor mluví italsky?",ne,ano,
+caro,drahý,288,"Ma l'aereo è troppo caro, no?","Ale letadlo je příliš drahé, ne?",ne,ano,
+certamente,"určitě, jistě",289,"Certamente, ma non per molto tempo.","Určitě, ale ne na dlouho.",ne,ano,
+chiamarsi,jmenovat se,290,Come si chiama la sorella di Luca?,Jak se jmenuje Lukášova sestra?,ne,ano,
+chiuso,"zavřený, zavřeno",291,Il museo è chiuso oggi.,Muzeum je dnes zavřené.,ne,ano,
+città,město,292,Dobbiamo vedere anche altre città interessanti.,Musíme vidět i další zajímavá města.,ne,ne,f
+costare,stát peníze,293,Quanto costa il volo per Parigi?,Kolik stojí let do Paříže?,ne,ano,
+cuore,srdce,294,"Mano fredda, cuore caldo.","Studená ruka, vřelé srdce.",ne,ano,m
+destro,"pravý, a destra vpravo, napravo",295,Gira a destra.,Odboč doprava.,ne,ano,
+difficile,"těžký, nesnadný",296,Deve essere difficile per uno straniero.,Pro cizince to musí být těžké.,ne,ano,
+dormire,spát,297,Non posso dormire.,Nemohu spát.,ne,ne,
+dottore,"doktor, lékař",298,Il dottore parla troppo in fretta.,Doktor mluví příliš rychle.,ne,ne,m
+dovere,"muset, mít povinnost",299,Devo partire per Genova.,Musím jet do Janova.,ne,ano,
+dritto,"rovně, přímo",300,Dovete andare sempre dritto.,Musíte jet pořád rovně.,ne,ano,
+elegante,elegantní,301,Luisa è molto elegante.,Luisa je velmi elegantní.,ne,ano,
+facile,"lehký, snadný",302,Per me non è facile.,Pro mě to není snadné.,ne,ano,
+fermarsi,"zdržet se, zastavit se",303,Vi fermate anche a Roma?,Zastavíte se také v Římě?,ne,ano,
+finestra,okno,304,La finestra è aperta.,Okno je otevřené.,ne,ano,f
+finire,skončit,305,La lezione finisce alle cinque.,Lekce končí v pět.,ne,ano,
+formula,formule,306,Seguono sempre le gare di Formula Uno.,Vždycky sledují závody Formule 1.,ne,ano,f
+foto,"fotka, fotografie",307,Guardo la foto di Roma.,Dívám se na fotku Říma.,ne,ano,f
+Francia,Francie,308,Partiamo per la Francia.,Jedeme do Francie.,ne,ano,
+freddo,studený,309,"Mano fredda, cuore caldo.","Studená ruka, vřelé srdce.",ne,ano,
+fretta,"spěch, in fretta rychle",310,Parli troppo in fretta.,Mluvíš moc rychle.,ne,ano,f
+gara,závod,311,Seguono sempre le gare di Formula Uno.,Vždycky sledují závody Formule 1.,ne,ano,f
+giovane,mladý,312,Mio padre è ancora giovane.,Můj otec je ještě mladý.,ne,ano,
+Giovanni,Jan,313,Quando vengono gli amici di Giovanni?,Kdy přijedou Janovi přátelé?,ne,ano,
+girare,"otočit, odbočit, zahnout",314,Poi girate a destra e dopo il ponte a sinistra.,Pak zahněte doprava a za mostem doleva.,ne,ano,
+Giulia,Julie,315,Viene anche Giulia?,Přijde také Julie?,ne,ano,
+interessare,zajímat,316,Questo programma mi interessa molto.,Tento program mě velmi zajímá.,ne,ano,
+interessarsi di,zajímat se o,317,Loro s'interessano molto di automobilismo.,Hodně se zajímají o automobilismus.,ne,ano,
+là,tam,318,È là.,Je tamhle.,ne,ano,
+lavare,"umýt, prát",319,Una mano lava l'altra.,Ruka ruku myje.,ne,ano,
+lavarsi,umýt se,320,Posso lavarmi le mani?,Mohu si umýt ruce?,ne,ano,
+lentamente,pomalu,321,Il dottore non parla proprio lentamente.,Doktor opravdu nemluví pomalu.,ne,ano,
+Luca,Lukáš,322,La sorella di Luca viene con me.,Lukášova sestra jede se mnou.,ne,ano,
+Luisa,Luisa,323,Luisa è molto elegante.,Luisa je velmi elegantní.,ne,ne,
+lungo,dlouhý,324,Il viaggio in treno è lungo.,Cesta vlakem je dlouhá.,ne,ano,
+mano,ruka,325,Una mano lava l'altra.,Ruka ruku myje.,ne,ano,f
+Margherita,Markéta,326,Margherita viene con noi.,Markéta jde s námi.,ne,ne,
+mattina,ráno,327,Mercoledì mattina partiamo presto.,Ve středu ráno odjíždíme brzy.,ne,ano,f
+me,"mně, mě, mi",328,Per me è lo stesso.,Mně je to jedno.,ne,ano,
+Milano,Milán,329,C'è un volo per Milano adesso?,Letí teď něco do Milána?,ne,ne,
+nave,loď,330,Ci vado con la nave.,Pojedu tam lodí.,ne,ano,f
+niente,"nic, není zač",331,Di niente.,Není zač.,ne,ano,
+ottimista,optimistický,332,Sono ottimista.,Jsem optimista.,ne,ano,
+Parigi,Paříž,333,Quanto costa il volo per Parigi?,Kolik stojí let do Paříže?,ne,ano,
+perché,"proč, protože",334,Perché parti così presto?,Proč odjíždíš tak brzy?,ne,ano,
+ponte,most,335,Dopo il ponte girate a sinistra.,Za mostem zahněte doleva.,ne,ano,m
+problema,problém,336,C'è un piccolo problema.,Je tu malý problém.,ne,ano,m
+programma,program,337,Questo programma mi interessa molto.,Tento program mě velmi zajímá.,ne,ano,m
+proprio,"právě, zrovna",338,Perché proprio là?,Proč právě tam?,ne,ano,
+pulito,čistý,339,Ecco un asciugamano pulito.,Tady je čistý ručník.,ne,ano,
+radio,"rádio, rozhlas",340,Ascolto la radio ogni mattina.,Každé ráno poslouchám rádio.,ne,ne,f
+scusarsi,omluvit se,341,Mi scuso per il ritardo.,Omlouvám se za zpoždění.,ne,ano,
+seguire,"sledovat, následovat",342,Seguono sempre le gare di Formula Uno.,Vždycky sledují závody Formule 1.,ne,ano,
+sentire,"cítit, slyšet",343,Sento un rumore strano.,Slyším zvláštní zvuk.,ne,ano,
+sentirsi,cítit se,344,Oggi non mi sento molto bene.,Dnes se necítím moc dobře.,ne,ano,
+servire,"sloužit, obsluhovat",345,A che serve?,K čemu to je?,ne,ano,
+sinistro,"levý, a sinistra vlevo, nalevo",346,La mano sinistra mi fa male.,Levá ruka mě bolí.,ne,ano,
+sole,slunce,347,Niente di nuovo sotto il sole.,Nic nového pod sluncem.,ne,ano,m
+sotto,pod,348,Niente di nuovo sotto il sole.,Nic nového pod sluncem.,ne,ano,
+sporco,špinavý,349,Il bagno è sporco.,Koupelna je špinavá.,ne,ano,
+stesso,"tentýž, stejný",350,Per me è lo stesso.,Mně je to jedno.,ne,ano,
+stipendio,"plat, výplata",351,Il mio stipendio non è alto.,Můj plat není vysoký.,ne,ano,m
+straniero,cizinec,352,Per uno straniero non è facile.,Pro cizince to není snadné.,ne,ano,m
+tempo,"čas, počasí",353,"Certamente, ma non per molto tempo.","Určitě, ale ne na dlouho.",ne,ano,m
+turista,"turista, turistka",354,Il turista cerca il campeggio.,Turista hledá kemp.,ne,ne,
+tutti,všichni,355,Tutti sono pronti. Tutti e due.,Všichni jsou připraveni. Oba.,ne,ano,
+tutto,"všechno, celý",356,Va tutto bene?,Je všechno v pořádku?,ne,ano,
+"vacanza, vacanze","dovolená, prázdniny",357,Dove andate in vacanza quest'anno?,Kam jedete letos na dovolenou?,ne,ano,f
+vecchio,starý,358,Questo ponte è vecchio.,Tento most je starý.,ne,ano,
+vedere,vidět,359,Ci vediamo sabato.,Uvidíme se v sobotu.,ne,ano,
+venire,"přijít, přijet, jít, jet s kým",360,Vengo con te.,Půjdu s tebou.,ne,ano,
+vero,"pravý, pravdivý, opravdový; è vero to je pravda",361,È vero.,To je pravda.,ne,ano,
+viaggio,cesta,362,Il viaggio in treno è lungo.,Cesta vlakem je dlouhá.,ne,ano,m
+vicino a,blízko,363,Il campeggio è vicino al ponte.,Kemp je blízko mostu.,ne,ano,
+volo,let,364,C'è un volo per Milano adesso?,Letí teď něco do Milána?,ne,ano,m
+vulcano,sopka,365,L'Etna è un vulcano.,Etna je sopka.,ne,ne,m
+lunedì,pondělí,366,Parto lunedì.,Odjíždím v pondělí.,ne,ano,m
+giovedì,čtvrtek,367,Ci vediamo giovedì sera.,Uvidíme se ve čtvrtek večer.,ne,ano,m
+venerdì,pátek,368,Preferisci venerdì?,Raději v pátek?,ne,ano,m
+martedì,úterý,369,Lunedì o martedì.,V pondělí nebo v úterý.,ne,ano,m
+mercoledì,středa,370,Partiamo mercoledì mattina.,Odjíždíme ve středu ráno.,ne,ano,m
+sabato,sobota,371,Ci vediamo sabato.,Uvidíme se v sobotu.,ne,ano,m
+domenica,neděle,372,Domenica partono per l'Italia.,V neděli odjíždějí do Itálie.,ne,ano,f
+quanto,kolik,373,Quanto tempo?,Jak dloho?,ne,ano,
+ammalato,nemocný,374,"Come vedo, sei ammalata.","Jak vidím, jsi nemocná.",ne,ano,
+bicicletta,jízdní kolo,375,Vai in bicicletta?,Jezdíš na kole?,ne,ano,f
+bisogno,potřeba,376,Di che cosa ha bisogno?,Co potřebujete?,ne,ano,m
+chiudere,zavřít,377,Perché chiudi la finestra?,Proč zavíráš okno?,ne,ano,
+cielo,"obloha, nebe",378,Il cielo è coperto.,Je zataženo.,ne,ano,m
+collega,kolega,379,"Certo, siamo colleghi.","Samozřejmě, jsme kolegové.",ne,ano,m
+colore,barva,380,Di che colore è la macchina di Pietro?,Jakou barvu má Petrovo auto?,ne,ano,m
+cominciare,"začít, začínat",381,Comincia a piovere.,Začíná pršet.,ne,ano,
+coperto,"zatažený, pokrytý",382,Il cielo è coperto.,Je zataženo.,ne,ano,
+corso,kurz,383,Segue un corso d'italiano?,Chodíte do kurzu italštiny?,ne,ano,m
+desiderare,přát si,384,Desidera altro?,Přejete si ještě něco?,ne,ano,
+divertimento,zábava,385,Buon divertimento!,Hezkou zábavu.,ne,ano,m
+dizionario,slovník,386,Avete un dizionario italiano-ceco?,Máte italsko-český slovník?,ne,ano,m
+dopodomani,pozítří,387,Già dopodomani.,Už pozítří.,ne,ano,
+fame,hlad,388,Avete fame?,Máte hlad?,ne,ano,f
+film,film,389,"Hai voglia di venire con me a vedere il film ""La vita è bella""?","Máš chuť jít se mnou na film ""Život je krásný""?",ne,ne,m
+frequentare,navštěvovat,390,Però frequento una scuola per interpreti.,Ale chodím do školy pro tlumočníky.,ne,ano,
+fuori,"ven, venku",391,Fa freddo fuori?,Je venku zima?,ne,ano,
+gita,výlet,392,Domani facciamo una gita.,Zítra jedeme na výlet.,ne,ano,f
+grave,"vážný, těžký",393,Non è così grave.,Není to tak zlé.,ne,ano,
+grigio,šedý,394,È grigio.,Je šedá.,ne,ano,
+incontrarsi,"setkat se, sejít se",395,Ci incontriamo un altro giorno.,Sejdeme se jiný den.,ne,ano,
+infatti,"opravdu, to je fakt",396,"Sì, infatti.","Ano, to je fakt.",ne,ano,
+ingegnere,inženýr,397,"Buongiorno, ingegnere.","Dobrý den, pane inženýre.",ne,ano,m
+Inghilterra,Anglie,398,Adesso deve andare per qualche mese in Inghilterra.,Teď musí jet na několik měsíců do Anglie.,ne,ano,f
+interprete,tlumočník,399,Lei fa l'interprete?,Jste tlumočník?,ne,ano,
+libreria,knihkupectví,400,"Scusi, c'è una libreria qui vicino?","Promiňte, je tu někde blízko knihkupectví?",ne,ano,f
+lingua,jazyk,401,Conosce altre lingue straniere?,Znáte jiné cizí jazyky?,ne,ano,f
+Londra,Londýn,402,"A Londra, dove ha una zia.","Do Londýna, kde má tetu.",ne,ano,f
+medico,"doktor, lékař",403,Devo chiamare il medico?,Mám zavolat doktora?,ne,ano,m
+montagna,"hora, hory",404,Dove andate? In montagna.,Kam jedete? Na hory.,ne,ano,f
+ombrello,deštník,405,Allora devo prendere l'ombrello.,Tak si musím vzít deštník.,ne,ano,m
+passo,krok,406,"È a due passi, in questa strada.","Je to pár kroků odtud, v téhle ulici.",ne,ano,m
+piantina,"plánek, mapka",407,Ho bisogno di una piantina di Roma.,Potřebuji plán Říma.,ne,ano,f
+piovere,pršet,408,Proprio ora comincia a piovere.,Právě teď začíná pršet.,ne,ano,
+pomeriggio,odpoledne,409,Hai tempo oggi pomeriggio?,Máš čas dnes odpoledne?,ne,ano,m
+privato,soukromý,410,Prendo lezioni private da una professoressa.,Chodím na soukromé hodiny k jedné profesorce.,ne,ano,
+professoressa,profesorka,411,Prendo lezioni private da una professoressa.,Chodím na soukromé hodiny k jedné profesorce.,ne,ano,f
+qualche cosa,něco,412,Mangiamo qualche cosa?,Dáme si něco?,ne,ano,
+ragione,"pravda, důvod",413,"Già, ha ragione.","Ano, máte pravdu.",ne,ano,f
+ristorante,restaurace,414,Vai in quel nuovo ristorante?,Jdeš do té nové restaurace?,ne,ano,m
+sete,žízeň,415,Hai sete?,Máš žízeň?,ne,ano,f
+signorina,slečna,416,"Prego, signorina.","Prosím, slečno.",ne,ano,f
+stare,"být, mít se, zůstat",417,"Come sta? Bene, grazie, e Lei?","Jak se máte? Dobře, děkuji, a vy?",ne,ano,
+strada,"cesta, ulice, silnice",418,"È a due passi, in questa strada.","Je to pár kroků odtud, v téhle ulici.",ne,ano,f
+Svezia,Švédsko,419,Ora è in viaggio d'affari in Svezia.,Teď je na služební cestě ve Švédsku.,ne,ano,f
+tascabile,kapesní,420,Prendo questo tascabile.,Vezmu si tenhle kapesní.,ne,ano,
+televisione,televize,421,Perché oggi non guardi la televisione?,Proč se dnes nedíváš na televizi?,ne,ano,f
+testa,hlava,422,Ho mal di testa.,Bolí mě hlava.,ne,ano,f
+vita,život,423,La vita è bella.,Život je krásný.,ne,ano,f
+voglia,chuť,424,Hai voglia di venire con noi?,Máš chuť jít s námi?,ne,ano,f
+lasciare stare,nechat být,425,Lasciamo stare.,Necháme to být.,ne,ano,
+fare due passi,jít na krátkou procházku,426,Andate a fare due passi?,Jdete na procházku?,ne,ano,
+fare,dělat,427,Che cosa vuoi fare oggi?,Co chceš dnes dělat?,ne,ano,
+noioso,nudný,428,Questo libro non è noioso.,Tato kniha není nudná.,ne,ano,
+ascoltare,poslouchat,429,Mi piace ascoltare la musica.,Rád poslouchám hudbu.,ne,ano,
+carne,maso,430,Preferisco la carne al pesce.,Dávám přednost masu před rybou.,ne,ano,f
+famoso,"slavný, známý",431,Questo attore è molto famoso.,Tento herec je velmi slavný.,ne,ano,
+comprare,"koupit, kupovat",432,Domani compriamo la frutta al mercato.,Zítra koupíme ovoce na trhu.,ne,ano,
+isola,ostrov,433,Vorrei visitare un’isola greca.,Chtěl bych navštívit nějaký řecký ostrov.,ne,ano,f
+antico,"starobylý, dávný, antický",434,Hanno trovato un vaso antico.,Našli starobylou vázu. Mi piace la storia antica.,ne,ano,
+ambasciata,velvyslanectví,435,Lavora all’ambasciata italiana.,Pracuje na italské ambasádě.,ne,ano,f
+Brasile,Brazílie,436,Il Brasile è un paese molto grande.,Brazílie je velmi velká země.,ne,ano,m
+marrone,hnědý,437,Ho una giacca marrone.,Mám hnědou bundu.,ne,ano,
+calzini,ponožky,438,In inverno porto calzini caldi.,V zimě nosím teplé ponožky.,ne,ano,
+viola,fialový,439,Ho comprato dei fiori viola.,Koupil jsem fialové květiny.,ne,ano,
+guanti,rukavice,440,I guanti neri sono sul tavolo.,Černé rukavice jsou na stole.,ne,ano,
+pantaloni,kalhoty,441,I pantaloni nuovi mi stanno bene.,Nové kalhoty mi dobře sedí.,ne,ano,
+cintura,pásek,442,Questa cintura è troppo lunga.,Tento pásek je příliš dlouhý.,ne,ano,f
+anello,"prsten, kruh",443,Porta un anello d’oro.,Nosí zlatý prsten.,ne,ano,m

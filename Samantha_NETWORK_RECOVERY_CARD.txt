@@ -1,0 +1,132 @@
+SAMANTHA - NOUZOVA SITOVA KARTA PRO TERMINAL
+============================================
+
+Kdyz Wi-Fi vypada pripojena, ale internet nejde, otevri Terminal a opisuj prikazy
+v tomto poradi. Po kazdem bloku zkontroluj, jestli se internet vratil.
+
+
+KROK 1 - ZJISTI, JESTLI JE WI-FI OPRAVDU `en0`
+----------------------------------------------
+
+Zadej:
+
+networksetup -listallhardwareports
+
+Najdi radky:
+
+Hardware Port: Wi-Fi
+Device: en0
+
+Pokud tam bude jine Device, napr. `en1`, v dalsich prikazech pouzij misto `en0`
+toto jine oznaceni.
+
+
+KROK 2 - ZKUS ZISKAT IP ADRESU
+------------------------------
+
+Zadej:
+
+ipconfig getifaddr en0
+
+Kdyz se ukaze adresa jako `192.168...` nebo `10...`, pokracuj KROKEM 4.
+Kdyz se neukaze nic, pokracuj KROKEM 3.
+
+
+KROK 3 - RYCHLA OPRAVA WI-FI A DHCP
+-----------------------------------
+
+Zadej postupne tyto prikazy:
+
+sudo killall Tailscale
+sudo killall WireGuard
+sudo killall NEIKEv2Provider
+sudo ifconfig en0 down
+sudo ifconfig en0 up
+sudo ipconfig set en0 DHCP
+
+Poznamka:
+Kdyz Terminal napise `No matching processes were found`, je to v poradku.
+
+Potom zadej:
+
+ipconfig getifaddr en0
+
+Kdyz se objevi IP adresa, pokracuj KROKEM 4.
+Kdyz se neobjevi nic, pokracuj KROKEM 5.
+
+
+KROK 4 - TEST INTERNETU
+----------------------
+
+Zadej:
+
+ping 8.8.8.8
+
+Kdyz vidis opakovane radky s `time=... ms`, zastav test klavesami:
+
+Ctrl+C
+
+Potom zadej:
+
+ping google.com
+
+Zase po par radcich zastav:
+
+Ctrl+C
+
+Vysledek:
+- Kdyz oba pingy funguji, internet je zpatky.
+- Kdyz `8.8.8.8` funguje, ale `google.com` ne, je problem nejspis DNS.
+- Kdyz nejde ani `8.8.8.8`, pokracuj KROKEM 5.
+
+
+KROK 5 - PLNA OPRAVA MACOS SITOVE KONFIGURACE
+---------------------------------------------
+
+Pouzij, kdyz KROK 3 nepomohl a Mac porad nema IP adresu nebo internet.
+
+Zadej:
+
+cd /Library/Preferences/SystemConfiguration
+
+Potom zadej tyto prikazy:
+
+sudo mv com.apple.airport.preferences.plist ~/Desktop/
+sudo mv NetworkInterfaces.plist ~/Desktop/
+sudo mv preferences.plist ~/Desktop/
+
+Nakonec restartuj Mac:
+
+sudo reboot
+
+
+KROK 6 - PO RESTARTU
+-------------------
+
+Po restartu:
+
+1. Nespoustej hned Tailscale.
+2. Pripoj se nejdrive na obycejnou Wi-Fi.
+3. Otevri Safari a zkus web.
+4. Kdyz Wi-Fi funguje, teprve potom res Tailscale.
+
+Pro kontrolu muzes znovu zadat:
+
+ipconfig getifaddr en0
+ping 8.8.8.8
+ping google.com
+
+
+KDYZ NEVIS, CO DAL
+-----------------
+
+Zavolej si tuhle kartu z Terminalu:
+
+/Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent/scripts/network_recovery_card.sh
+
+Plna technicka memory je tady:
+
+/Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent/memory/technical/macos_wifi_vpn_tailscale_recovery.md
+
+Tento problem sam o sobe neznamena vadny disk, ztratu dat ani mrtvy Mac. Typicky
+jde o rozbite DHCP/routovani nebo konflikt VPN/Tailscale tunelu.

@@ -1,0 +1,414 @@
++-----------------------------------------------------------------------+
+| MultiLO                                                               |
+|                                                                       |
+| Aplikace pro výuku cizích jazyků                                      |
+|                                                                       |
+| Funkční specifikace · v1.0                                            |
+|                                                                       |
+| Jazyky: FR · IT · ES · EN                                             |
++-----------------------------------------------------------------------+
+
+  --- --------------- ------------------------------------- --------------
+  #   Obrazovka       Hlavní funkcionality                  Obrázky
+
+  A   🎛️ Kokpit       Výběr jazyka, navigace na okruhy,     Ne
+                      uživatelský profil                    
+
+  B   🔢 Čísla        Generátor čísel, generátor náh.       Ne
+                      čísel, sčítání/odčítání               
+
+  C   🎨 Barvy        Animované barevné pruhy, drag & drop  Ne
+                      přiřazování                           
+
+  D   📅 Dny v týdnu  Vlastní barvy dnů, animace, psaní     Ne
+                      názvů s kontrolou                     
+
+  E   🗓️ Měsíce       Ilustrace měsíce, doplňování          Ilustrativní
+                      překladu, animované slideshow         
+
+  F   🍎 Ovoce &      Drag & drop na obrázek, TTS           Ano
+      zelenina        výslovnost, chybová hláška            
+
+  G   🐾 Zvířata      Stejná logika jako F, TTS pro         Ano
+                      správnou odpověď                      
+
+  H   🌿 Rostliny     Stejná logika jako F, botanický       Ano
+                      kontext                               
+  --- --------------- ------------------------------------- --------------
+
++-----------------------------------------------------------------------+
+| 🎛️ A · Kokpit                                                         |
+|                                                                       |
+| Centrální navigační obrazovka — výchozí bod celé aplikace             |
++-----------------------------------------------------------------------+
+
+Popis
+
+Kokpit je první obrazovka po spuštění aplikace. Slouží jako rozcestník —
+uživatel zde nastaví cílový jazyk a zvolí tematický okruh, který chce
+procvičovat. Design by měl být přehledný, motivující a vizuálně
+atraktivní.
+
+Funkcionality
+
+-   Výběr cílového jazyka — přepínač/dropdown: FR 🇫🇷 · IT 🇮🇹 · ES 🇪🇸 ·
+    EN 🇬🇧
+
+-   Navigační tlačítka / dlaždice pro každý okruh (B–H) s ikonou a
+    názvem
+
+-   Indikátor pokroku — u každé dlaždice malý progress bar nebo %
+    zvládnutých slov
+
+-   Zobrazení aktuálního uživatelského profilu / přezdívky
+
+Doplňující návrhy
+
+-   Uvítací animace při prvním spuštění — krátké intro s názvem aplikace
+
+-   Tmavý / světlý režim jako rychlé přepínací tlačítko v hlavičce
+
+  ------------ ----------------------------------------------------------
+  💡 Tip       Dlaždice okruhů mohou obsahovat náhledový obrázek z dané
+               kategorie — např. fotka ptáka pro Ptáky, jablko pro Ovoce.
+               Vizuálně atraktivní a okamžitě srozumitelné.
+
+  ------------ ----------------------------------------------------------
+
++-----------------------------------------------------------------------+
+| 🔢 B · Čísla                                                          |
+|                                                                       |
+| Interaktivní práce s čísly v cizím jazyce — tři různé výukové módy    |
++-----------------------------------------------------------------------+
+
+Mód B1 · Generátor čísel z CSV
+
+Uživatel si vybere rozsah (1–20 / 1–100 / 1–1 000 000). Aplikace zobrazí
+číslo v cizím jazyce jako velký nápis uprostřed obrazovky. Po
+nastavitelné době (výchozí 3 s) se pod číslem rozkryje český překlad.
+TTS přečte cizí název.
+
+-   Volba pořadí: sekvenční (1, 2, 3...) nebo náhodné
+
+-   Animace přechodu mezi čísly — slide nebo fade efekt
+
+-   Progress indikátor — kolik čísel z vybrané sady již proběhlo
+
+Mód B2 · Generátor náhodných čísel
+
+Vygeneruje libovolné číslo z rozsahu 1–1 000 000 (ne jen ta z CSV).
+Aplikace ho složí z existujících jazykových stavebních bloků a zobrazí
+zápis i výslovnost v cizím jazyce. TTS přečte výsledek. Skvělé pro
+pokročilejší procvičování.
+
+  ------------ ----------------------------------------------------------
+  ⚠️ Pozor     Čísla nad 20 jsou složená — je potřeba implementovat
+               algoritmické skládání slov (např. FR: 'soixante-dix-neuf'
+               = 79). Toto je technicky nejnáročnější část okruhu B.
+
+  ------------ ----------------------------------------------------------
+
+Mód B3 · Sčítání a odčítání
+
+Aritmetická hra s postupným odhalováním. Sekvence: zobrazí se první člen
+(v cizím jazyce) → operátor + nebo − → druhý člen → = → uživatel stiskne
+tlačítko → výsledek se odhalí a přečte.
+
+-   Nastavitelná obtížnost: jednociferná / dvojciferná
+
+-   Volitelný časový limit na stisk tlačítka (napětí!)
+
+-   Počítadlo správných odpovědí v sezení
+
+-   Pod každým číslem vždy viditelný nápis v cizím jazyce — číslovka
+    jako text
+
+Doplňující návrhy
+
+-   Mód B4 · Poslech: TTS přečte číslo a uživatel napíše nebo vybere
+    správnou variantu
+
+-   Vizuální kalkulačka jako doplňkový prvek obrazovky
+
+  ------------ ----------------------------------------------------------
+  💡 Tip       Pro čísla bez obrázků použijte velkou typografii jako
+               vizuální prvek — čísla v různých jazycích zobrazená vedle
+               sebe různými barvami jsou samy o sobě atraktivní grafika.
+
+  ------------ ----------------------------------------------------------
+
++-----------------------------------------------------------------------+
+| 🎨 C · Barvy                                                          |
+|                                                                       |
+| Vizuální a interaktivní procvičování názvů barev                      |
++-----------------------------------------------------------------------+
+
+Mód C1 · Animované barevné pruhy
+
+Barevné pruhy naskakují na obrazovku jeden po druhém v náhodném pořadí
+(bez opakování, dokud se nevystřídá všech 11 barev). Každý pruh nese
+nápis názvu barvy v cizím jazyce. TTS ho přečte při zobrazení.
+
+-   Efekt: slide zleva nebo shora, mírná fade animace
+
+-   Pruhy mohou mít různou šířku jako typografický prvek
+
+-   Po přečtení všech 11 barev: krátká fanfára a možnost opakovat
+
+-   Volitelný režim: zobrazovat i český název pod cizím
+
+Mód C2 · Drag & Drop přiřazování
+
+Na levé straně obrazovky jsou barevné tvary (obdélníky, kolečka nebo
+čtverečky) seřazené pod sebou. Na pravé straně jsou v náhodném pořadí
+názvy barev v cizím jazyce. Uživatel přetahuje název na odpovídající
+barvu.
+
+-   Správné přiřazení: tvar se zvýrazní, zazní krátký pozitivní zvuk,
+    název zůstane přichycen
+
+-   Chybné přiřazení: název se vrátí zpět, červený blik efekt
+
+-   Po přiřazení všech: výsledkové shrnutí s počtem pokusů
+
+-   Volitelné: český přepis jako nápověda
+
+  ------------ ----------------------------------------------------------
+  💡 Tip       Pro 11 barev zvažte rozdělení do dvou kol po 5–6 barvách,
+               aby obrazovka nebyla přeplněná. Nebo scrollovatelný seznam
+               s fixními popisky.
+
+  ------------ ----------------------------------------------------------
+
+Doplňující návrhy
+
+-   Mód C4 · Psaní: zobrazí se barva, uživatel napíše název v cizím
+    jazyce
+
+-   Animace: barvy se mohou mísit a přecházet — vizuálně poutavý přechod
+
++-----------------------------------------------------------------------+
+| 📅 D · Dny v týdnu                                                    |
+|                                                                       |
+| Personalizace, animace a psaní — tři fáze výuky dnů                   |
++-----------------------------------------------------------------------+
+
+Fáze D0 · Přiřazení barev (personalizace)
+
+Před spuštěním výukových módů si uživatel přiřadí každému dni svou
+oblíbenou barvu z palety 11 dostupných barev. Toto nastavení se uloží a
+platí pro celou obrazovku D. Personalizace zvyšuje zapojení a paměťovou
+asociaci.
+
+-   Barevná paleta jako přehledný výběrový prvek (kruhy / čtverce)
+
+-   Uložení volby do localStorage — platí i po zavření aplikace
+
+-   Možnost resetovat na výchozí barvy
+
+Mód D1 · Animované naskakování dnů
+
+Dny v týdnu od pondělí do neděle naskakují postupně na obrazovku jako
+barevné obdélníky ve zvolených barvách. Každý obdélník nese název dne v
+cizím jazyce. TTS ho přečte při zobrazení.
+
+-   Efekt: slide zprava nebo bounce animace
+
+-   Mezi každým dnem pauza 1–2 s (konfigurovatelná)
+
+-   Pod každým obdélníkem volitelně malý český název jako podtitulek
+
+Mód D2 · Psaní s kontrolou
+
+Zobrazí se všech 7 dnů jako barevné obdélníky s bílým polem uvnitř.
+Vlevo od každého je český název dne, vpravo tlačítko Kontrola. Uživatel
+vypíše cizí název do pole a klikne na Kontrola.
+
+-   Správná odpověď: pole se zeleně zvýrazní, TTS přečte správný název
+
+-   Chybná odpověď: uživatelův text se přesune do červeného pole vpravo,
+    po 2 s se v obdélníku zobrazí správný název zeleně
+
+-   Tolerantní porovnávání: diakritika volitelná, case-insensitive
+
+-   Tlačítko Nápověda: odhalí první písmeno
+
+  ------------ ----------------------------------------------------------
+  💡 Tip       Přidat mód, kde se dny zobrazují v náhodném pořadí (ne
+               vždy Po–Ne) — náročnější na zapamatování a efektivnější
+               pro výuku.
+
+  ------------ ----------------------------------------------------------
+
++-----------------------------------------------------------------------+
+| 🗓️ E · Měsíce v roce                                                  |
+|                                                                       |
+| Ilustrativní slideshow a doplňovací cvičení pro 12 měsíců             |
++-----------------------------------------------------------------------+
+
+Mód E1 · Animovaná slideshow
+
+Měsíce naskakují postupně — každý s ilustrativním obrázkem (krajina,
+příroda, typická scéna) a názvem v cizím jazyce. TTS přečte název.
+Vizuálně bohatý mód vhodný pro úvodní seznámení.
+
+-   Obrázky měsíců: volné fotografie z Unsplash / Pexels (CC0) nebo
+    generované AI
+
+-   Přechod mezi měsíci: cross-fade nebo slide
+
+-   Rychlost přechodu nastavitelná (pomalá / střední / rychlá)
+
+-   Možnost pozastavit na libovolném měsíci
+
+Mód E2 · Doplňování překladu
+
+Zobrazí se ilustrace měsíce a jeho český název. Pod tím je textové pole,
+do něhož uživatel napíše správný název v cizím jazyce. Po odeslání
+okamžitá zpětná vazba.
+
+-   Správně: zelené zvýraznění, TTS přečte správný název, přechod na
+    další
+
+-   Chybně: červené zvýraznění, pod polem se zobrazí správný název
+    zeleně, pod ním špatná odpověď uživatele červeně (pro porovnání)
+
+-   Nápověda: zobrazit první písmeno nebo počet písmen jako _ _ _ _
+
+-   Progress bar: kolik měsíců ze 12 bylo správně zodpovězeno
+
+Doplňující návrhy
+
+-   Mód E4 · Řazení: přehodit měsíce do správného pořadí (drag & drop)
+
+  ------------ ----------------------------------------------------------
+  💡 Tip       Pro ilustrativní obrázky měsíců doporučuji bezplatné CC0
+               fotografie z Unsplash.com — jednoduché vyhledání 'January
+               winter', 'June summer meadow' apod. dává konzistentní sadu
+               12 hezkých fotografií.
+
+  ------------ ----------------------------------------------------------
+
++-----------------------------------------------------------------------+
+| 🍎🐾🌿 F · G · H · Ovoce & zelenina · Zvířata · Rostliny              |
+|                                                                       |
+| Tři okruhy sdílejí stejnou herní logiku — popsáno společně            |
++-----------------------------------------------------------------------+
+
+Sdílená herní mechanika — Drag & Drop identifikace
+
+Základní výukový mód pro všechny tři okruhy. Na obrazovce je zobrazena
+fotografie (ovoce / zvíře / rostlina) a tři nápisy v cizím jazyce —
+jeden správný a dva falešné distraktory. Uživatel přetáhne správný název
+na obrázek.
+
+Průběh kola
+
+-   Zobrazení fotografie v centrálním poli
+
+-   Tři nápisy v cizím jazyce jako přetahovatelné karty (náhodné pořadí)
+
+-   Správná volba: obrázek se zeleně orámuje, TTS přečte správný název,
+    +1 bod; vždy se objeví i český název!!!!
+
+-   Chybná volba: karta se vrátí zpět, TTS přečte větu v cizím jazyce:
+    "Špatná volba, musíš se ještě učit!"
+
+-   Po 3 chybách: automatické odhalení správné odpovědi
+
+-   Přechod na další slovíčko po 1,5 s od správné odpovědi
+
+Výsledkové shrnutí kola
+
+-   Počet správných z celkového počtu (např. 8/10)
+
+-   Přehled chybných slovíček s obrázky — rychlé vizuální opakování
+
+-   Tlačítka: Opakovat chybná / Nové kolo / Zpět na Kokpit
+
+Konfigurace kola
+
+-   Počet slovíček v kole: 5 / 10 / 15 / vše (nastavitelné)
+
+-   Obtížnost distraktorů: ze stejného okruhu (těžší) nebo z libovolného
+    okruhu (lehčí)
+
+-   Časový limit na odpověď: bez limitu / 10 s / 5 s
+
+Doplňující návrhy pro F/G/H
+
+-   Ano! Mód 2 · Kvíz opačně: přehraje se TTS název a uživatel vybere
+    správný obrázek ze 4 možností
+
+-   Ano! Mód 3 · Psaní: zobrazí se obrázek a uživatel napíše název v
+    cizím jazyce
+
+-   Ano! Mód 4 · Flashcard: obrázek na přední straně, název na zadní —
+    otočení kartičky
+
+  ------------ ----------------------------------------------------------
+  🔊 TTS       Ano!!! Chybová hláška 'Špatná volba, musíš se ještě učit!'
+               se přehrává v cizím jazyce. Doporučujeme připravit 2–3
+               různé varianty věty, aby se opakovné chyby necítily
+               monotónně. Ano, to implementovat!!!!
+
+  ------------ ----------------------------------------------------------
+
++-----------------------------------------------------------------------+
+| ⚙️ Technické poznámky                                                 |
+|                                                                       |
+| Průřezové technické aspekty platné pro celou aplikaci                 |
++-----------------------------------------------------------------------+
+
+Text-to-Speech (TTS)
+
+Všechny zvukové funkce jsou postaveny na Web Speech API — dostupné
+zdarma v moderních prohlížečích, bez API klíče, bez serveru, funguje
+offline.
+
+-   Nastavení jazyka hlasu dle vybraného cíle: fr-FR / it-IT / es-ES /
+    en-GB
+
+-   Rychlost řeči (rate) a výška (pitch) konfigurovatelné v nastavení
+
+-   Fallback: pokud hlas není dostupný, přepnout na nejbližší dostupný
+
+  ------------ ----------------------------------------------------------
+  ⚠️ Limit     Web Speech API není dostupné ve všech prohlížečích a jeho
+               chování se liší mezi platformami. Nejlepší podpora:
+               Chrome, Edge. Safari a Firefox mají omezení. Doporučujeme
+               testovat na cílových zařízeních.
+
+  ------------ ----------------------------------------------------------
+
+Perzistence dat (localStorage)
+
+-   Uložení: vybraný jazyk, barvy dnů, progress v okruzích, streak
+    počítadlo
+
+-   Export / import profilu jako JSON soubor — záloha a přenos mezi
+    zařízeními
+
+Obrázky
+
+-   Složka images/ rozdělená dle okruhů — pojmenování dle EN názvu
+    slovíčka
+
+-   Doporučená velikost: 400×400 px, formát JPEG — již připraveno image
+    downloaderem
+
+-   Lazy loading — načítání obrázků jen pro aktuálně zobrazené slovíčko
+
+CSV jako zdroj dat
+
+-   Jediný zdroj pravdy — všechny texty čteny z master CSV při startu
+    aplikace
+
+-   Přidání nového jazyka = přidat sloupec do CSV, žádná změna kódu
+
+-   Přidání nového slovíčka = přidat řádek do CSV + obrázek do správné
+    složky
+
+MultiLO · Funkční specifikace v1.0 · 2026
+
+Připraveno jako základ pro implementaci aplikace.

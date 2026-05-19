@@ -1,0 +1,79 @@
+LA,CZ,Order,Sentence,SentenceT,L
+vir,muž,1,Hodie verbum vir in sententia lego.,Dnes čtu slovo muž v jednoduché větě.,ne
+fēmina,žena,2,Magister verbum fēmina clare explicat.,Učitel slovo žena jasně vysvětluje.,ne
+puer,chlapec,3,In schola verbum puer saepe audimus.,Ve škole slovo chlapec často slyšíme.,ne
+puella,dívka,4,In exercitio brevi verbum puella scribo.,V krátkém cvičení píšu slovo dívka.,ne
+familia,rodina,5,Cum amicis verbum familia lente repeto.,S přáteli slovo rodina pomalu opakuji.,ne
+pater,otec,6,In lectione nova verbum pater intellegere conor.,V nové lekci se snažím porozumět slovu otec.,ne
+māter,matka,7,Hodie verbum māter in sententia lego.,Dnes čtu slovo matka v jednoduché větě.,ne
+fīlius,syn,8,Magister verbum fīlius clare explicat.,Učitel slovo syn jasně vysvětluje.,ne
+fīlia,dcera,9,In schola verbum fīlia saepe audimus.,Ve škole slovo dcera často slyšíme.,ne
+līberī,děti,10,In exercitio brevi verbum līberī scribo.,V krátkém cvičení píšu slovo děti.,ne
+servus,otrok,11,Cum amicis verbum servus lente repeto.,S přáteli slovo otrok pomalu opakuji.,ne
+dominus,pán,12,In lectione nova verbum dominus intellegere conor.,V nové lekci se snažím porozumět slovu pán.,ne
+ancilla,otrokyně,13,Hodie verbum ancilla in sententia lego.,Dnes čtu slovo otrokyně v jednoduché větě.,ne
+domina,paní,14,Magister verbum domina clare explicat.,Učitel slovo paní jasně vysvětluje.,ne
+liber,svobodný,15,In schola verbum liber saepe audimus.,Ve škole slovo svobodný často slyšíme.,ne
+titulus,"nápis, titul",16,In exercitio brevi verbum titulus scribo.,V krátkém cvičení píšu slovo nápis.,ne
+pāgina,stránka,17,Cum amicis verbum pāgina lente repeto.,S přáteli slovo stránka pomalu opakuji.,ne
+antīquus,"starý, dávný",18,In lectione nova verbum antīquus intellegere conor.,V nové lekci se snažím porozumět slovu starý.,ne
+novus,nový,19,Hodie verbum novus in sententia lego.,Dnes čtu slovo nový v jednoduché větě.,ne
+cēterī,ostatní,20,Magister verbum cēterī clare explicat.,Učitel slovo ostatní jasně vysvětluje.,ne
+meus,můj,21,In schola verbum meus saepe audimus.,Ve škole slovo můj často slyšíme.,ne
+tuus,tvůj,22,In exercitio brevi verbum tuus scribo.,V krátkém cvičení píšu slovo tvůj.,ne
+centum,sto,23,Cum amicis verbum centum lente repeto.,S přáteli slovo sto pomalu opakuji.,ne
+"duo, duae","dva, dvě",24,In lectione nova verbum duo intellegere conor.,V nové lekci se snažím porozumět slovu dva.,ne
+tria,tři,25,Hodie verbum tria in sententia lego.,Dnes čtu slovo tři v jednoduché větě.,ne
+-que,a (připojené „a“),26,Magister verbum -que clare explicat.,Učitel slovo a (připojené „a“) jasně vysvětluje.,ne
+quis?,kdo?,27,In schola verbum quis? saepe audimus.,Ve škole slovo kdo? často slyšíme.,ne
+quae?,která? / kdo? (ž.r.),28,In exercitio brevi verbum quae? scribo.,V krátkém cvičení píšu slovo která?.,ne
+quī?,který? / kdo?,29,Cum amicis verbum quī? lente repeto.,S přáteli slovo který? pomalu opakuji.,ne
+cuius?,čí?,30,In lectione nova verbum cuius? intellegere conor.,V nové lekci se snažím porozumět slovu čí?.,ne
+quot?,kolik?,31,Hodie verbum quot? in sententia lego.,Dnes čtu slovo kolik? v jednoduché větě.,ne
+masculīnum,mužský rod,32,Magister verbum masculīnum clare explicat.,Učitel slovo mužský rod jasně vysvětluje.,ne
+fēminīnum,ženský rod,33,In schola verbum fēminīnum saepe audimus.,Ve škole slovo ženský rod často slyšíme.,ne
+neutrum,střední rod,34,In exercitio brevi verbum neutrum scribo.,V krátkém cvičení píšu slovo střední rod.,ne
+genitīvus,genitiv (2. pád),35,Cum amicis verbum genitīvus lente repeto.,S přáteli slovo genitiv (2. pád) pomalu opakuji.,ne
+capitulum,kapitola,36,In lectione nova verbum capitulum intellegere conor.,V nové lekci se snažím porozumět slovu kapitola.,ne
+syllaba,slabika,37,Hodie verbum syllaba in sententia lego.,Dnes čtu slovo slabika v jednoduché větě.,ne
+exemplum,příklad,38,Magister verbum exemplum clare explicat.,Učitel slovo příklad jasně vysvětluje.,ne
+pēnsum,úkol,39,In schola verbum pēnsum saepe audimus.,Ve škole slovo úkol často slyšíme.,ne
+magnus,velký,40,In exercitio brevi verbum magnus scribo.,V krátkém cvičení píšu slovo velký.,ne
+parvus,malý,41,Cum amicis verbum parvus lente repeto.,S přáteli slovo malý pomalu opakuji.,ne
+Graecus,"řecký, Řek",42,In lectione nova verbum Graecus intellegere conor.,V nové lekci se snažím porozumět slovu řecký.,ne
+Rōmānus,"římský, Říman",43,Hodie verbum Rōmānus in sententia lego.,Dnes čtu slovo římský v jednoduché větě.,ne
+Latīnus,latinský,44,Magister verbum Latīnus clare explicat.,Učitel slovo latinský jasně vysvětluje.,ne
+multī,mnozí,45,In schola verbum multī saepe audimus.,Ve škole slovo mnozí často slyšíme.,ne
+paucī,"málo, několik",46,In exercitio brevi verbum paucī scribo.,V krátkém cvičení píšu slovo málo.,ne
+ūnus,jeden,47,Cum amicis verbum ūnus lente repeto.,S přáteli slovo jeden pomalu opakuji.,ne
+duo,dva,48,In lectione nova verbum duo intellegere conor.,V nové lekci se snažím porozumět slovu dva.,ne
+trēs,tři,49,Hodie verbum trēs in sententia lego.,Dnes čtu slovo tři v jednoduché větě.,ne
+sex,šest,50,Magister verbum sex clare explicat.,Učitel slovo šest jasně vysvětluje.,ne
+mīlle,tisíc,51,In schola verbum mīlle saepe audimus.,Ve škole slovo tisíc často slyšíme.,ne
+prīmus,první,52,In exercitio brevi verbum prīmus scribo.,V krátkém cvičení píšu slovo první.,ne
+secundus,druhý,53,Cum amicis verbum secundus lente repeto.,S přáteli slovo druhý pomalu opakuji.,ne
+tertius,třetí,54,In lectione nova verbum tertius intellegere conor.,V nové lekci se snažím porozumět slovu třetí.,ne
+est,je,55,Hodie verbum est in sententia lego.,Dnes čtu slovo je v jednoduché větě.,ne
+sunt,jsou,56,Magister verbum sunt clare explicat.,Učitel slovo jsou jasně vysvětluje.,ne
+in,v,57,In schola verbum in saepe audimus.,Ve škole slovo v často slyšíme.,ne
+et,a,58,In exercitio brevi verbum et scribo.,V krátkém cvičení píšu slovo a.,ne
+sed,ale,59,Cum amicis verbum sed lente repeto.,S přáteli slovo ale pomalu opakuji.,ne
+nōn,ne,60,In lectione nova verbum nōn intellegere conor.,V nové lekci se snažím porozumět slovu ne.,ne
+quoque,také,61,Hodie verbum quoque in sententia lego.,Dnes čtu slovo také v jednoduché větě.,ne
+-ne?,otázková částice,62,Magister verbum -ne? clare explicat.,Učitel slovo otázková částice jasně vysvětluje.,ne
+ubi?,kde?,63,In schola verbum ubi? saepe audimus.,Ve škole slovo kde? často slyšíme.,ne
+num?,zda?,64,In exercitio brevi verbum num? scribo.,V krátkém cvičení píšu slovo zda?.,ne
+quid?,co?,65,Cum amicis verbum quid? lente repeto.,S přáteli slovo co? pomalu opakuji.,ne
+grammatica,gramatika,66,In lectione nova verbum grammatica intellegere conor.,V nové lekci se snažím porozumět slovu gramatika.,ne
+singulāris,jednotné číslo,67,Hodie verbum singulāris in sententia lego.,Dnes čtu slovo jednotné číslo v jednoduché větě.,ne
+plūrālis,množné číslo,68,Magister verbum plūrālis clare explicat.,Učitel slovo množné číslo jasně vysvětluje.,ne
+fluvius,řeka,69,In schola verbum fluvius saepe audimus.,Ve škole slovo řeka často slyšíme.,ne
+īnsula,ostrov,70,In exercitio brevi verbum īnsula scribo.,V krátkém cvičení píšu slovo ostrov.,ne
+oppidum,město,71,Cum amicis verbum oppidum lente repeto.,S přáteli slovo město pomalu opakuji.,ne
+ōceanus,oceán,72,In lectione nova verbum ōceanus intellegere conor.,V nové lekci se snažím porozumět slovu oceán.,ne
+imperium,říše,73,Hodie verbum imperium in sententia lego.,Dnes čtu slovo říše v jednoduché větě.,ne
+prōvincia,provincie,74,Magister verbum prōvincia clare explicat.,Učitel slovo provincie jasně vysvětluje.,ne
+numerus,"číslo, počet",75,In schola verbum numerus saepe audimus.,Ve škole slovo číslo často slyšíme.,ne
+littera,písmeno,76,In exercitio brevi verbum littera scribo.,V krátkém cvičení píšu slovo písmeno.,ne
+vocābulum,slovo,77,Cum amicis verbum vocābulum lente repeto.,S přáteli slovo slovo pomalu opakuji.,ne
+estne,"je to, zda je",78,Estne oppidum magnum?,Je město velké?,ne

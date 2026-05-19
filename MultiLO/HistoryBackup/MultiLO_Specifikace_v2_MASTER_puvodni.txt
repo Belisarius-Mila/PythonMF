@@ -1,0 +1,415 @@
+================================================================
+  MultiLO — FUNKČNÍ SPECIFIKACE APLIKACE
+  Výuka cizích jazyků · FR · IT · ES · EN
+  Verze: 2.3 (Desktop final)
+================================================================
+
+OBSAH
+-----
+  A.  Kokpit (Dashboard)
+  B.  Čísla
+  C.  Barvy
+  D.  Dny v týdnu
+  E.  Měsíce v roce
+  F.  Ovoce a zelenina
+  G.  Zvířata
+  H.  Rostliny
+  I.  Průřezová pravidla UX
+  J.  Technická architektura
+  K.  Doporučené pořadí vývoje (MVP roadmapa)
+
+
+================================================================
+  A. KOKPIT (Dashboard)
+  Centrální navigační obrazovka — výchozí bod aplikace
+================================================================
+
+POPIS
+  Kokpit je první obrazovka po spuštění. Uživatel zde nastaví
+  cílový jazyk, zvolí tematický okruh a vybere typ cvičení.
+  Design: přehledný, motivující, vizuálně atraktivní.
+
+FUNKCIONALITY
+  - Výběr uživatelského profilu (já / partner / host)
+  - Výběr cílového jazyka: FR · IT · ES · EN
+    (vlajky nebo přepínač v horní části)
+  - Dlaždicové menu okruhů (B–H) s ikonou, názvem
+    a mini statistikou (např. "72 % zvládnuto")
+  - Progress bar u každé dlaždice — vizuální stav zvládnutí
+  - Náhledový obrázek z dané kategorie na každé dlaždici
+    (jablko pro Ovoce, pták pro Ptáky atd.)
+  - Společná lišta: Domů · Pokrok · Nastavení ·
+    Zvuk ON/OFF · Změna jazyka
+
+DOPLŇUJÍCÍ NÁVRHY
+  - Uvítací animace při prvním spuštění
+  - Streak počítadlo ("X dní v řadě") v rohu obrazovky
+  - Denní challenge — zvýrazněná dlaždice doporučeného okruhu
+  - Přepínač tmavý / světlý režim v hlavičce
+    (tmavý režim zvýrazní barvy — klíčové pro okruh C)
+
+
+================================================================
+  B. ČÍSLA
+  Interaktivní práce s čísly — čtyři výukové módy
+================================================================
+
+MÓD B1 · ČTENÍ (generátor čísel z CSV)
+  Zobrazí náhodné číslo v cizím jazyce jako velký nápis.
+  Po nastavitelné době (výchozí 3 s) se rozkryje český
+  překlad. TTS přečte cizí název.
+  - Volba rozsahu: 1–20 / 1–100 / 1–1 000 / 1–1 000 000
+  - Volba pořadí: sekvenční nebo náhodné
+  - Animace přechodu: slide nebo fade
+  - Progress indikátor průchodu sadou
+
+MÓD B2 · GENERÁTOR NÁHODNÝCH ČÍSEL
+  Vygeneruje libovolné číslo z rozsahu 1–1 000 000.
+  Tento mód NEČTE hodnoty z CSV — čísla skládá algoritmicky
+  z jazykových bloků a zobrazí zápis + výslovnost.
+  TTS přečte výsledek.
+  ! TECHNICKÁ VÝZVA: Čísla nad 20 jsou složená. Nutná
+    implementace algoritmického skládání (např. FR:
+    "soixante-dix-neuf" = 79). Nejnáročnější část okruhu B.
+  - Tlačítko Nápověda: přehraje výsledek zvukově, ale
+    neukáže text — uživatel trénuje poslech
+
+MÓD B3 · POČÍTÁNÍ (sčítání a odčítání)
+  Postupné odhalování příkladu: první člen → operátor
+  (+ nebo −) → druhý člen → = → stisk tlačítka → výsledek.
+  - Nastavitelná obtížnost: 1–2–3ciferná čísla
+  - Volitelný časový limit na stisk tlačítka
+  - Počítadlo správných odpovědí v sezení
+  - Pod každým číslem vždy viditelný nápis v cizím jazyce
+
+MÓD B4 · POSLECH
+  TTS přečte číslo, uživatel napíše nebo vybere správnou
+  variantu. Čistý trénink poslechu bez vizuální opory.
+
+VIZUÁLNÍ KONCEPT
+  Velký digitální displej (styl kalkulačky). Pro okruh bez
+  obrázků využít velkou barevnou typografii — čísla
+  v různých jazycích vedle sebe jsou samy o sobě atraktivní
+  grafika.
+
+
+================================================================
+  C. BARVY
+  Vizuální a interaktivní procvičování — 11 barev
+================================================================
+
+  Dostupné barvy: červená, modrá, žlutá, zelená, oranžová,
+  fialová, růžová, hnědá, černá, bílá, šedá
+
+MÓD C1 · ANIMOVANÉ PRUHY
+  Barevné pruhy naskakují na obrazovku jeden po druhém
+  v náhodném pořadí (bez opakování, dokud neproběhne
+  všech 11). Každý pruh nese název barvy v cizím jazyce.
+  TTS ho přečte při zobrazení.
+  - Efekt: slide zleva nebo shora + mírná fade animace
+  - Přepínač tvarů: pruh / kruh / čtverec
+  - Volitelně: zobrazit i český název pod cizím
+  - Po všech 11 barvách: krátká fanfára + možnost opakovat
+  ! Pro 11 barev zvažte 2 kola po 5–6, aby nebyla
+    obrazovka přeplněná.
+
+MÓD C2 · DRAG & DROP PŘIŘAZOVÁNÍ
+  Vlevo: barevné tvary seřazené pod sebou.
+  Vpravo: názvy barev v cizím jazyce v náhodném pořadí.
+  Uživatel přetahuje název na odpovídající barvu.
+  - Správně: tvar se zvýrazní, pozitivní zvuk, název přichycen
+  - Chyba: název se vrátí zpět, červený blik efekt
+  - Po dokončení: shrnutí s počtem pokusů
+
+MÓD C3 · BARVOSLEPÝ TEST
+  TTS přehraje název barvy. Uživatel musí kliknout na správný
+  barevný tvar bez jakékoli textové nápovědy.
+  Čistý trénink poslechu a vizuálního rozpoznávání.
+
+MÓD C4 · PSANÍ
+  Zobrazí se barevný tvar, uživatel napíše název v cizím
+  jazyce.
+  - Pod vstupem je znaková lišta pro speciální znaky
+    (např. é, è, ê, à, ç, ñ, ¿, ¡).
+
+
+================================================================
+  D. DNY V TÝDNU
+  Personalizace barev, animace a psaní s kontrolou
+================================================================
+
+FÁZE D0 · PERSONALIZACE (před výukou)
+  Uživatel přiřadí každému dni oblíbenou barvu z palety
+  11 dostupných barev. Nastavení se uloží do souboru
+  settings.json (per uživatel) a platí pro celou obrazovku D.
+  Pokud uživatel barvy nenastaví, použije se generická
+  výchozí sada aplikace.
+  - Barevná paleta jako přehledný výběrový prvek
+  - Personalizace je editovatelná kdykoli v Nastavení
+  - Možnost resetovat na výchozí barvy
+
+MÓD D1 · ANIMOVANÉ NASKAKOVÁNÍ
+  Dny Po–Ne naskakují jako barevné obdélníky v osobních
+  barvách. Každý nese název dne v cizím jazyce. TTS přečte.
+  - Efekt: slide zprava nebo bounce animace
+  - Nastavitelná pauza mezi dny (1–2 s)
+  - Volitelný český podtitulek pod každým dnem
+  - Volitelně: náhodné pořadí dnů (náročnější varianta)
+
+MÓD D2 · PSANÍ S KONTROLOU
+  Všech 7 dnů jako barevné obdélníky s bílým polem uvnitř.
+  Vlevo: český název dne. Vpravo: tlačítko Kontrola.
+  - Správně: pole zeleně zvýrazněno, TTS přečte správný název
+  - Chyba: špatný text se odsouvá do červeného archivu
+    vpravo, po 2 s se v obdélníku objeví správný název zeleně
+  - Tolerance: "Skoro!" při překlep 1 znaku
+  - Diakritika volitelná, case-insensitive
+  - Tlačítko Nápověda: odhalí první písmeno
+  - Pod vstupem je znaková lišta pro speciální znaky
+    (např. é, è, ê, à, ç, ñ, ¿, ¡).
+
+
+================================================================
+  E. MĚSÍCE V ROCE
+  Ilustrativní slideshow a doplňovací cvičení
+================================================================
+
+OBRÁZKY
+  12 ilustrativních fotografií (krajina / příroda / typická
+  scéna každého měsíce). Zdroj: Unsplash CC0.
+  Vyhledávání: "January winter snow", "June summer meadow"...
+
+MÓD E1 · PREZENTACE (slideshow)
+  Měsíce postupně s obrázkem + název v cizím jazyce + TTS.
+  - Přechod: cross-fade nebo slide
+  - Nastavitelná rychlost (pomalá / střední / rychlá)
+  - Možnost pozastavit na libovolném měsíci
+  - Rozdělení do skupin: Jaro / Léto / Podzim / Zima
+  - Doplněk: pozadí aplikace reaguje na roční období
+    (v zimě padá sníh, na podzim listy)
+
+MÓD E2 · PSANÍ S KONTROLOU
+  Zobrazí se obrázek + český název měsíce. Uživatel napíše
+  cizí název do textového pole.
+  - Správně: zelené zvýraznění, TTS přečte, přechod dál
+  - Chyba: správný název zeleně + špatná odpověď červeně
+    (pro přímé porovnání)
+  - Nápověda: první písmeno nebo maska _ _ _ _
+  - Progress bar: X / 12 měsíců správně
+  - Pod vstupem je znaková lišta pro speciální znaky
+    (např. é, è, ê, à, ç, ñ, ¿, ¡).
+
+MÓD E3 · KVÍZ
+  Obrázek + 4 možnosti názvů měsíce → uživatel vybere.
+
+MÓD E4 · ŘAZENÍ
+  Přehodit měsíce do správného pořadí (drag & drop).
+
+
+================================================================
+  F. OVOCE A ZELENINA
+  G. ZVÍŘATA
+  H. ROSTLINY
+
+  Tři okruhy sdílejí stejnou herní logiku — popsáno společně
+================================================================
+
+SDÍLENÁ MECHANIKA — IDENTIFIKACE (MVP klik/tap, fáze 2 drag & drop)
+  Centrální fotografie + 3 nápisy v cizím jazyce
+  (1 správný + 2 falešné distraktory).
+  V MVP uživatel vybírá klikem/tapem. Drag & drop je plánován pro fázi 2.
+
+PRŮBĚH KOLA
+  - Zobrazení fotografie v centrálním poli
+  - 3 nápisy jako přetahovatelné karty v náhodném pořadí
+  - Správně: obrázek zeleně orámován + TTS přečte název
+    + zobrazí se český název + +1 bod
+  - Chyba: karta zpět + TTS přehraje chybovou hlášku
+    a zároveň se zobrazí krátký text (vždy v cílovém jazyce).
+    Obrázek provede krátkou shake animaci (vizuální chyba).
+    Hláška se přehraje při 1. a 2. chybě:
+      FR: "Mauvais choix, réessaye !"
+      IT: "Scelta sbagliata, riprova!"
+      ES: "¡Elección incorrecta, inténtalo de nuevo!"
+      EN: "Wrong choice, try again!"
+  - Po 3 chybách: automatické odhalení správné odpovědi
+    (bez další hlasové hlášky)
+  - Přechod na další po 1,5 s od správné odpovědi
+  - Žádné opakování položky, dokud neproběhne celý balík
+
+VÝSLEDKOVÉ SHRNUTÍ KOLA
+  - Počet správných (např. 8 / 10)
+  - Přehled chybných slovíček s obrázky
+  - Tlačítka: Opakovat chybná · Nové kolo · Zpět na Kokpit
+
+KONFIGURACE KOLA
+  - Počet slovíček: 5 / 10 / 15 / vše
+  - Distraktor: ze stejného okruhu (těžší) nebo libovolný
+  - Časový limit: bez limitu / 10 s / 5 s
+
+ROZŠIŘUJÍCÍ MÓDY
+  Mód 2 · KVÍZ OPAČNĚ
+    TTS přehraje název → uživatel vybere správný obrázek
+    ze 4 možností. Trénink poslechu.
+
+  Mód 3 · PSANÍ
+    Zobrazí se obrázek → uživatel napíše název v cizím
+    jazyce.
+    - Pod vstupem je znaková lišta pro speciální znaky
+      (např. é, è, ê, à, ç, ñ, ¿, ¡).
+
+  Mód 4 · FLASHCARD
+    Obrázek na přední straně, název na zadní.
+    Animace otočení kartičky.
+
+  Mód 5 · STÍNOVÝ MÓD
+    Zobrazí se černá silueta zvířete / rostliny / ovoce.
+    Uživatel hádá, co to je, než se obrázek postupně
+    vybarví. Výborné zejména pro zvířata a rostliny.
+    Technická podmínka: v MVP lze použít jednoduché ztmavení
+    obrázku (např. brightness/kontrast) nebo Pillow preprocess.
+    Kvalitní siluety jako samostatné assety jsou fáze 2.
+
+SPECIFIKA PO OKRUZÍCH
+  G · Zvířata:
+    - Volitelně zobrazit latinský název (přepínač LATIN)
+  H · Rostliny:
+    - Volitelně LATIN mód pro pokročilé
+    - Botanický kontext: bublina s CZ názvem a čeledí
+
+
+================================================================
+  I. PRŮŘEZOVÁ PRAVIDLA UX
+  Platí pro celou aplikaci bez výjimky
+================================================================
+
+JEDNOTNÝ FEEDBACK
+  - Zelená   = správně
+  - Červená  = chyba
+  - Oranžová = nápověda / skoro
+  - Po každé odpovědi vždy zobrazit: správné řešení,
+    odpověď uživatele, krátký feedback
+
+TLAČÍTKA U KAŽDÉ OTÁZKY
+  Přehrát výslovnost · Zopakovat · Další
+  Poznámka: konkrétní chování je per mód.
+  Ve všech psacích módech je pod vstupem znaková lišta
+  pro speciální znaky (é, è, ê, à, ç, ñ, ¿, ¡).
+  - Drag/klik režim: Další je automaticky po správné odpovědi
+  - Psaní: Zopakovat = vymazat vstup a ponechat stejnou úlohu
+  - Flashcard: Další = ruční přechod na další kartičku
+
+TTS (TEXT-TO-SPEECH)
+  Přehrávání výslovnosti pro všechna slovíčka ve všech
+  okruzích. Jazyk hlasu odpovídá cílovému jazyku:
+  fr-FR / it-IT / es-ES / en-GB.
+  Rychlost a výška hlasu konfigurovatelné v nastavení.
+
+INTELIGENTNÍ OPAKOVÁNÍ (SRS light)
+  Aplikace si pamatuje chybná slovíčka a při příštím
+  spuštění okruhu je zařadí na začátek.
+
+GAMIFIKACE
+  - Hvězdičky / medaile za série bez chyby (10 v řadě)
+  - Streak počítadlo (dny v řadě)
+  - Progress % u každého okruhu na Kokpitu
+
+PŘÍSTUPNOST
+  - Tmavý / světlý režim (klíčové pro okruh C)
+  - Zvuk ON / OFF v liště
+  - Tolerantní porovnávání textu (diakritika volitelná,
+    case-insensitive, "Skoro!" při překlep 1 znaku)
+
+
+PŘEPNUTÍ JAZYKA BĚHEM KOLA
+  - Přepnutí jazyka vždy ukončí aktuální kolo
+  - Průběžné výsledky se uloží do progress.json
+  - Nové kolo se spustí od začátku ve zvoleném jazyce
+
+
+================================================================
+  J. TECHNICKÁ ARCHITEKTURA
+================================================================
+
+CÍLOVÁ PLATFORMA (v1)
+  - Desktop aplikace: Python 3.11+ + CustomTkinter
+  - Primární OS: macOS / Windows
+  - V1 je bez Pygame integrace (nižší technické riziko)
+  - Budoucí směr: odlehčená mobilní varianta (např. Pythonista 3)
+
+DATOVÁ VRSTVA
+  - Master CSV jako jediný zdroj pravdy pro slovíčka
+  - Aktuální struktura: item_id, OKRUH, CZ, FR, IT, ES, EN, LATIN
+  - users.csv: profily uživatelů (me / wife / guest)
+    Ve v1 jsou profily pevně 3 (bez přidávání dalších).
+  - user_item_prefs.csv: preference uživatele na úroveň položky
+    (např. barvy dnů, priorita, zapnuto/vypnuto)
+  - Přidání jazyka = nový sloupec v master CSV
+  - Přidání slovíčka = nový řádek + obrázek do odpovídající složky
+
+OBRÁZKY
+  - Kořenová složka: MultiLO/foto/
+  - Vnořené složky dle okruhů (např. zvirata/, rostliny/, ovoce_zelenina/)
+  - Doporučené pojmenování: item_id + EN (např. 233_zebra.jpg)
+  - Velikost: 400x400 px (obecné), 800x500 px (měsíce)
+  - Lazy loading: načítat jen aktuálně potřebné obrázky
+  - Chybějící obrázek: zobrazit jednotný placeholder
+    "Obrázek není dostupný" a zapsat položku do missing_assets.log
+
+TTS ENGINE (DESKTOP)
+  - Python vrstva pro TTS s fallbacky podle OS
+  - Výběr hlasu dle cílového jazyka: fr-FR / it-IT / es-ES / en-GB
+  - Nastavení rychlosti/hlasitosti v UI
+  - Volitelná cache audio výstupu pouze pokud to zvolený
+    TTS backend umožňuje (jinak bez cache)
+  - Ruční audio override: pokud existuje soubor
+    MultiLO/audio/<lang>/<item_id>.mp3, přehraje se přednostně
+    tato nahrávka místo generovaného TTS
+
+PERZISTENCE DAT
+  - progress.json: výsledky, historie chyb, streak, SRS light data
+    Doporučená pole per item/user: seen_count, correct_count,
+    last_seen_at, last_result, next_due_at, streak
+  - settings.json: aktivní jazyk, zvuk ON/OFF, UI volby
+  - user_item_prefs.csv: dlouhodobé preference na položky
+  - Export/import progress.json jako záloha
+
+APLIKAČNÍ MODULY (doporučené rozdělení)
+  - data.py      ... načtení/validace CSV
+  - engine.py    ... logika otázek a vyhodnocení
+  - srs.py       ... inteligentní opakování (light)
+  - storage.py   ... ukládání/načítání JSON
+  - tts.py       ... sjednocené TTS API
+  - ui.py        ... Kokpit + jednotlivé obrazovky
+
+DRAG & DROP STRATEGIE
+  - Cíl: plná drag & drop interakce (C2, F, G, H)
+  - MVP zjednodušení: klikací výběr 1z3
+  - Fáze 2: plnohodnotné drag & drop bez změny datové vrstvy
+
+
+================================================================
+  K. DOPORUČENÉ POŘADÍ VÝVOJE (MVP Roadmapa)
+================================================================
+
+  Krok 1   Datová vrstva: načíst a validovat
+           vocab_master.csv + users.csv + user_item_prefs.csv
+  Krok 2   Kokpit: výběr profilu, jazyka, okruhu, režimu
+  Krok 3   Flashcards pro F/G/H (nejjednodušší obrazové okruhy)
+  Krok 4   F/G/H: klikací výběr 1z3 (MVP náhrada drag & drop)
+  Krok 5   D/E: psaní s kontrolou + tolerantní vyhodnocení
+  Krok 6   C: barvy (animované pruhy + přiřazování klikem)
+  Krok 7   B: čísla B1 + B3 + B4
+           (B2 algoritmické skládání čísel přesunuto do v2+)
+  Krok 8   Průřezově TTS + nastavení zvuku
+  Krok 9   progress.json + SRS light + opakování chyb
+  Krok 10 Fáze 2 UX: drag & drop pro C2/F/G/H
+  Krok 11 Rozšiřující módy: LATIN přepínač, stínový mód,
+           kvíz opačně, sezónní pozadí
+  Krok 12 Budoucí mobilní větev (Pythonista 3 / jiný klient)
+
+
+================================================================
+  MultiLO · Funkční specifikace v2.3 (Desktop) · 2026
+  Merge: MultiLO Specifikace v1.0 + Codex Geminae + final desktop decisions + v2.2 clarifications + v2.3 implementation notes
+================================================================

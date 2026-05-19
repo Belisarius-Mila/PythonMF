@@ -1,0 +1,643 @@
+{
+  "users": {
+    "me": {
+      "items": {
+        "120": {
+          "quiz_1_of_3": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 4,
+            "correct_count": 2,
+            "wrong_count": 2,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T13:51:21.406926+00:00"
+          }
+        },
+        "139": {
+          "quiz_1_of_3": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T13:17:00.246517+00:00"
+          }
+        },
+        "102": {
+          "quiz_1_of_3": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 5,
+            "correct_count": 3,
+            "wrong_count": 2,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T13:53:38.970037+00:00"
+          }
+        },
+        "97": {
+          "quiz_1_of_3": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 8,
+            "correct_count": 3,
+            "wrong_count": 5,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-10T19:59:36.844596+00:00"
+          }
+        },
+        "98": {
+          "quiz_1_of_3": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T13:52:02.669107+00:00"
+          }
+        },
+        "99": {
+          "quiz_1_of_3": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T13:52:05.944674+00:00"
+          }
+        },
+        "100": {
+          "quiz_1_of_3": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T13:52:08.770524+00:00"
+          }
+        },
+        "101": {
+          "quiz_1_of_3": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T13:52:11.090697+00:00"
+          }
+        },
+        "103": {
+          "quiz_1_of_3": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 5,
+            "correct_count": 2,
+            "wrong_count": 3,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T13:53:34.195662+00:00"
+          }
+        },
+        "104": {
+          "quiz_1_of_3": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 2,
+            "correct_count": 1,
+            "wrong_count": 1,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T13:52:21.290520+00:00"
+          }
+        },
+        "111": {
+          "flashcards": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T13:52:39.388652+00:00"
+          }
+        },
+        "112": {
+          "flashcards": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T13:52:40.800479+00:00"
+          }
+        },
+        "113": {
+          "flashcards": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T13:52:41.739343+00:00"
+          }
+        },
+        "114": {
+          "flashcards": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 0,
+            "wrong_count": 1,
+            "last_result": "wrong",
+            "last_seen_at": "2026-03-09T13:52:43.445661+00:00"
+          },
+          "quiz_1_of_3": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T13:53:00.290578+00:00"
+          }
+        },
+        "115": {
+          "flashcards": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 0,
+            "wrong_count": 1,
+            "last_result": "wrong",
+            "last_seen_at": "2026-03-09T13:52:44.563091+00:00"
+          },
+          "quiz_1_of_3": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 4,
+            "correct_count": 2,
+            "wrong_count": 2,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-10T19:56:55.713042+00:00"
+          }
+        },
+        "116": {
+          "flashcards": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 0,
+            "wrong_count": 1,
+            "last_result": "wrong",
+            "last_seen_at": "2026-03-09T13:52:45.921696+00:00"
+          },
+          "quiz_1_of_3": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 4,
+            "correct_count": 2,
+            "wrong_count": 2,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-10T19:57:07.233908+00:00"
+          }
+        },
+        "117": {
+          "flashcards": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 0,
+            "wrong_count": 1,
+            "last_result": "wrong",
+            "last_seen_at": "2026-03-09T13:52:47.693394+00:00"
+          },
+          "quiz_1_of_3": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 4,
+            "correct_count": 2,
+            "wrong_count": 2,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-10T18:44:47.214845+00:00"
+          }
+        },
+        "118": {
+          "flashcards": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 0,
+            "wrong_count": 1,
+            "last_result": "wrong",
+            "last_seen_at": "2026-03-09T13:52:48.598705+00:00"
+          },
+          "quiz_1_of_3": {
+            "okruh": "Rostliny",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T13:53:25.371692+00:00"
+          }
+        },
+        "202": {
+          "quiz_1_of_3": {
+            "okruh": "Zvířata",
+            "last_lang": "FR",
+            "seen_count": 7,
+            "correct_count": 4,
+            "wrong_count": 3,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-10T13:16:06.526472+00:00"
+          }
+        },
+        "236": {
+          "quiz_1_of_3": {
+            "okruh": "Zvířata",
+            "last_lang": "IT",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T16:12:41.248732+00:00"
+          }
+        },
+        "206": {
+          "quiz_1_of_3": {
+            "okruh": "Zvířata",
+            "last_lang": "FR",
+            "seen_count": 11,
+            "correct_count": 5,
+            "wrong_count": 6,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-10T19:59:19.449559+00:00"
+          }
+        },
+        "209": {
+          "quiz_1_of_3": {
+            "okruh": "Zvířata",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T16:13:54.015110+00:00"
+          }
+        },
+        "200": {
+          "quiz_1_of_3": {
+            "okruh": "Zvířata",
+            "last_lang": "FR",
+            "seen_count": 4,
+            "correct_count": 2,
+            "wrong_count": 2,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-10T13:21:46.290535+00:00"
+          }
+        },
+        "213": {
+          "quiz_1_of_3": {
+            "okruh": "Zvířata",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T16:14:05.578465+00:00"
+          }
+        },
+        "207": {
+          "quiz_1_of_3": {
+            "okruh": "Zvířata",
+            "last_lang": "FR",
+            "seen_count": 2,
+            "correct_count": 1,
+            "wrong_count": 1,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T16:14:10.455220+00:00"
+          }
+        },
+        "91": {
+          "quiz_1_of_3": {
+            "okruh": "Ptáci",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T17:25:19.681119+00:00"
+          }
+        },
+        "77": {
+          "quiz_1_of_3": {
+            "okruh": "Ptáci",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T17:25:25.323782+00:00"
+          }
+        },
+        "69": {
+          "quiz_1_of_3": {
+            "okruh": "Ptáci",
+            "last_lang": "FR",
+            "seen_count": 2,
+            "correct_count": 1,
+            "wrong_count": 1,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T17:25:32.858005+00:00"
+          },
+          "flashcards": {
+            "okruh": "Ptáci",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-09T19:52:26.823091+00:00"
+          }
+        },
+        "93": {
+          "quiz_1_of_3": {
+            "okruh": "Ptáci",
+            "last_lang": "FR",
+            "seen_count": 11,
+            "correct_count": 5,
+            "wrong_count": 6,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-10T19:56:44.381107+00:00"
+          },
+          "flashcards": {
+            "okruh": "Ptáci",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 0,
+            "wrong_count": 1,
+            "last_result": "wrong",
+            "last_seen_at": "2026-03-09T19:52:24.841681+00:00"
+          }
+        },
+        "45": {
+          "months_slideshow": {
+            "okruh": "Měsíce v roce",
+            "last_lang": "FR",
+            "seen_count": 9,
+            "correct_count": 0,
+            "wrong_count": 0,
+            "last_result": "seen",
+            "last_seen_at": "2026-03-10T19:55:56.176258+00:00"
+          }
+        },
+        "50": {
+          "months_slideshow": {
+            "okruh": "Měsíce v roce",
+            "last_lang": "FR",
+            "seen_count": 8,
+            "correct_count": 0,
+            "wrong_count": 0,
+            "last_result": "seen",
+            "last_seen_at": "2026-03-10T19:55:58.240110+00:00"
+          }
+        },
+        "3": {
+          "numbers_reading": {
+            "okruh": "Číslovky",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 0,
+            "wrong_count": 0,
+            "last_result": "seen",
+            "last_seen_at": "2026-03-09T19:34:29.966366+00:00"
+          }
+        },
+        "40": {
+          "months_slideshow": {
+            "okruh": "Měsíce v roce",
+            "last_lang": "FR",
+            "seen_count": 6,
+            "correct_count": 0,
+            "wrong_count": 0,
+            "last_result": "seen",
+            "last_seen_at": "2026-03-10T19:56:00.292682+00:00"
+          }
+        },
+        "43": {
+          "months_slideshow": {
+            "okruh": "Měsíce v roce",
+            "last_lang": "FR",
+            "seen_count": 4,
+            "correct_count": 0,
+            "wrong_count": 0,
+            "last_result": "seen",
+            "last_seen_at": "2026-03-10T18:44:09.313631+00:00"
+          },
+          "months_writing": {
+            "okruh": "Měsíce v roce",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 0,
+            "wrong_count": 1,
+            "last_result": "wrong",
+            "last_seen_at": "2026-03-10T14:00:41.187909+00:00"
+          }
+        },
+        "44": {
+          "months_slideshow": {
+            "okruh": "Měsíce v roce",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 0,
+            "wrong_count": 0,
+            "last_result": "seen",
+            "last_seen_at": "2026-03-10T13:23:40.919820+00:00"
+          }
+        },
+        "41": {
+          "months_slideshow": {
+            "okruh": "Měsíce v roce",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 0,
+            "wrong_count": 0,
+            "last_result": "seen",
+            "last_seen_at": "2026-03-10T13:23:43.042349+00:00"
+          }
+        },
+        "42": {
+          "months_slideshow": {
+            "okruh": "Měsíce v roce",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 0,
+            "wrong_count": 0,
+            "last_result": "seen",
+            "last_seen_at": "2026-03-10T13:23:45.282144+00:00"
+          }
+        },
+        "49": {
+          "months_slideshow": {
+            "okruh": "Měsíce v roce",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 0,
+            "wrong_count": 0,
+            "last_result": "seen",
+            "last_seen_at": "2026-03-10T13:23:47.760403+00:00"
+          }
+        },
+        "51": {
+          "months_slideshow": {
+            "okruh": "Měsíce v roce",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 0,
+            "wrong_count": 0,
+            "last_result": "seen",
+            "last_seen_at": "2026-03-10T13:23:49.998877+00:00"
+          }
+        },
+        "48": {
+          "months_slideshow": {
+            "okruh": "Měsíce v roce",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 0,
+            "wrong_count": 0,
+            "last_result": "seen",
+            "last_seen_at": "2026-03-10T13:23:52.606820+00:00"
+          }
+        },
+        "46": {
+          "months_slideshow": {
+            "okruh": "Měsíce v roce",
+            "last_lang": "FR",
+            "seen_count": 2,
+            "correct_count": 0,
+            "wrong_count": 0,
+            "last_result": "seen",
+            "last_seen_at": "2026-03-10T13:24:12.567831+00:00"
+          },
+          "months_writing": {
+            "okruh": "Měsíce v roce",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 0,
+            "wrong_count": 1,
+            "last_result": "wrong",
+            "last_seen_at": "2026-03-10T13:24:10.542969+00:00"
+          }
+        },
+        "9": {
+          "numbers_reading": {
+            "okruh": "Číslovky",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 0,
+            "wrong_count": 0,
+            "last_result": "seen",
+            "last_seen_at": "2026-03-10T13:24:56.383610+00:00"
+          }
+        },
+        "80": {
+          "quiz_1_of_3": {
+            "okruh": "Ptáci",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-10T18:43:22.005793+00:00"
+          }
+        },
+        "62": {
+          "quiz_1_of_3": {
+            "okruh": "Ptáci",
+            "last_lang": "FR",
+            "seen_count": 2,
+            "correct_count": 1,
+            "wrong_count": 1,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-10T18:43:27.191983+00:00"
+          }
+        },
+        "196": {
+          "quiz_1_of_3": {
+            "okruh": "Zelenina a ovoce",
+            "last_lang": "FR",
+            "seen_count": 2,
+            "correct_count": 1,
+            "wrong_count": 1,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-10T18:44:26.772443+00:00"
+          }
+        },
+        "175": {
+          "quiz_1_of_3": {
+            "okruh": "Zelenina a ovoce",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-10T18:48:58.068138+00:00"
+          }
+        },
+        "186": {
+          "quiz_1_of_3": {
+            "okruh": "Zelenina a ovoce",
+            "last_lang": "FR",
+            "seen_count": 4,
+            "correct_count": 2,
+            "wrong_count": 2,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-10T19:57:18.739328+00:00"
+          }
+        },
+        "234": {
+          "quiz_1_of_3": {
+            "okruh": "Zvířata",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 1,
+            "wrong_count": 0,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-10T18:49:14.886384+00:00"
+          }
+        },
+        "216": {
+          "quiz_1_of_3": {
+            "okruh": "Zvířata",
+            "last_lang": "FR",
+            "seen_count": 2,
+            "correct_count": 1,
+            "wrong_count": 1,
+            "last_result": "correct",
+            "last_seen_at": "2026-03-10T18:49:20.727416+00:00"
+          }
+        }
+      }
+    },
+    "wife": {
+      "items": {
+        "39": {
+          "weekdays_writing": {
+            "okruh": "Dny v týdnu",
+            "last_lang": "FR",
+            "seen_count": 1,
+            "correct_count": 0,
+            "wrong_count": 1,
+            "last_result": "wrong",
+            "last_seen_at": "2026-03-10T11:19:08.721342+00:00"
+          }
+        }
+      }
+    }
+  }
+}

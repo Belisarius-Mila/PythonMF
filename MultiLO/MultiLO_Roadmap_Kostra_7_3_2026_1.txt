@@ -1,0 +1,19 @@
+================================================================
+  MultiLO — Navrhované pořadí kroků kostry
+  Datum: 7.3.2026
+================================================================
+
+  Step 4  · Barvy              <- právě sem jsme došli
+  Step 5  · Dny v týdnu        (D1 animace + D2 psaní)
+  Step 6  · Měsíce             (E1 slideshow + E2 psaní)
+  Step 7  · Čísla              (B1 čtení + B3 počítání)
+  Step 8  · Multiple choice    pro F/G/H
+
+  ────────────────────────────────────────────────────────
+
+  Step 9  · TTS průřezově
+  Step 10 · Progress tracking + SRS
+  Step 11 · Grafika + polish
+  Step 12 · Packaging / distribuce
+
+================================================================

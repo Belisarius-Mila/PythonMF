@@ -17,6 +17,7 @@ from PIL import Image, ImageTk
 APP_NAME = "VocabularyFR"
 CSV_FILENAME = "VocabularyFR.csv"
 VERBE_CSV_FILENAME = "VerbeFR.csv"
+PICT_CSV_FILENAME = "FR_Pict.csv"
 
 # Keep Python defaults intentionally small; most mapping is loaded from Pict/mapping.json.
 SYNONYM_IMAGE_MAP = {}
@@ -169,6 +170,12 @@ def resolve_verbe_csv_path(base_csv_path):
     return os.path.join(os.path.dirname(__file__), VERBE_CSV_FILENAME)
 
 
+def resolve_pict_csv_path(base_csv_path):
+    if base_csv_path:
+        return os.path.join(os.path.dirname(base_csv_path), PICT_CSV_FILENAME)
+    return os.path.join(os.path.dirname(__file__), PICT_CSV_FILENAME)
+
+
 class VocabularyTrainerApp:
     def __init__(self, master, csv_path):
         self.master = master
@@ -209,6 +216,7 @@ class VocabularyTrainerApp:
         self.hint_blink_colors = ("blue", "white")
         self.hint_blink_color_index = 0
         self.turbo_mode = False
+        self.all_mode = False
         self.turbo_running = False
         self.turbo_selection_signature = None
         self.turbo_shown_in_selection = set()
@@ -217,10 +225,18 @@ class VocabularyTrainerApp:
         self.fr_voice = "Thomas"
         self.cz_voice = self._resolve_cz_voice()
         self.picture_photo = None
+        self.gender_picture_photo = None
         self.picture_base_dirs = self._build_picture_base_dirs()
         self.synonym_image_map = dict(SYNONYM_IMAGE_MAP)
         self._load_external_mapping()
         self.picture_stems = self._discover_picture_stems()
+        self.pict_csv_path = resolve_pict_csv_path(self.csv_path)
+        self.pict_window = None
+        self.pict_tree = None
+        self.pict_rows = []
+        self.pict_detail_vars = {}
+        self.pict_detail_index = None
+        self.pict_pe_var = tk.BooleanVar(value=False)
 
         self._build_ui()
         last_order = len(self.rows)
@@ -274,7 +290,7 @@ class VocabularyTrainerApp:
         portable_dir = self._portable_data_dir()
         support_dir = _app_support_dir()
         os.makedirs(support_dir, exist_ok=True)
-        for filename in (CSV_FILENAME, VERBE_CSV_FILENAME):
+        for filename in (CSV_FILENAME, VERBE_CSV_FILENAME, PICT_CSV_FILENAME):
             src = os.path.join(portable_dir, filename)
             dst = os.path.join(support_dir, filename)
             self._copy_if_exists(src, dst)
@@ -288,6 +304,7 @@ class VocabularyTrainerApp:
         pairs = [
             (self.csv_path, os.path.join(portable_dir, CSV_FILENAME)),
             (self.verbe_csv_path, os.path.join(portable_dir, VERBE_CSV_FILENAME)),
+            (self.pict_csv_path, os.path.join(portable_dir, PICT_CSV_FILENAME)),
         ]
         for src, dst in pairs:
             self._copy_if_exists(src, dst)
@@ -414,18 +431,61 @@ class VocabularyTrainerApp:
         ).pack(anchor="w")
         train_buttons = tk.Frame(input_frame, bg=top_bg)
         train_buttons.pack(anchor="w", pady=(8, 0))
-        tk.Button(train_buttons, text="New", command=self.load_new_word, width=8).grid(
-            row=0, column=0, padx=(0, 8), pady=(0, 4), sticky="w"
-        )
-        tk.Button(train_buttons, text="Read", command=self.show_translation, width=8).grid(
-            row=1, column=0, padx=(0, 8), sticky="w"
-        )
-        tk.Button(train_buttons, text="Turbo", command=self.load_turbo_word, width=8).grid(
-            row=0, column=1, pady=(0, 4), sticky="w"
-        )
-        tk.Button(train_buttons, text="End", command=self.stop_turbo, width=8).grid(
-            row=1, column=1, sticky="w"
-        )
+        tk.Button(
+            train_buttons,
+            text="New",
+            command=self.load_new_word,
+            width=8,
+            bg="#34c759",
+            fg="black",
+            highlightbackground="#34c759",
+            activebackground="#2ca44b",
+            activeforeground="black",
+        ).grid(row=0, column=0, padx=(0, 8), pady=(0, 4), sticky="w")
+        tk.Button(
+            train_buttons,
+            text="Read",
+            command=self.show_translation,
+            width=8,
+            bg="#007aff",
+            fg="black",
+            highlightbackground="#007aff",
+            activebackground="#0063cc",
+            activeforeground="black",
+        ).grid(row=1, column=0, padx=(0, 8), sticky="w")
+        tk.Button(
+            train_buttons,
+            text="Auto",
+            command=self.load_turbo_word,
+            width=5,
+            bg="#ff9500",
+            fg="black",
+            highlightbackground="#ff9500",
+            activebackground="#cc7700",
+            activeforeground="black",
+        ).grid(row=0, column=1, pady=(0, 4), sticky="w")
+        tk.Button(
+            train_buttons,
+            text="All",
+            command=self.load_all_word,
+            width=5,
+            bg="#af52de",
+            fg="black",
+            highlightbackground="#af52de",
+            activebackground="#8f42b5",
+            activeforeground="black",
+        ).grid(row=0, column=2, padx=(8, 0), pady=(0, 4), sticky="w")
+        tk.Button(
+            train_buttons,
+            text="Fin",
+            command=self.stop_turbo,
+            width=15,
+            bg="#8e8e93",
+            fg="black",
+            highlightbackground="#8e8e93",
+            activebackground="#6f6f73",
+            activeforeground="black",
+        ).grid(row=1, column=1, columnspan=2, sticky="w")
 
         sentence_row = tk.Frame(right, bg=top_bg)
         sentence_row.pack(anchor="w", fill="x", pady=(5, 0))
@@ -617,15 +677,30 @@ class VocabularyTrainerApp:
 
         picture_panel = tk.Frame(bottom_content, bg="white")
         picture_panel.pack(side="left", fill="both", expand=True, padx=(0, 0), pady=(4, 8), anchor="nw")
-        picture_card = tk.Frame(picture_panel, bg="white", bd=2, relief="groove")
-        picture_card.place(relx=0.5, y=4, anchor="n")
+        picture_row = tk.Frame(picture_panel, bg="white")
+        picture_row.place(relx=0.5, y=4, anchor="n")
+        picture_card = tk.Frame(picture_row, bg="white", bd=2, relief="groove", width=260, height=260)
+        picture_card.pack(side="left", padx=(0, 10))
+        picture_card.pack_propagate(False)
         self.picture_label = tk.Label(
             picture_card,
             bg="white",
-            width=240,
-            height=240,
         )
-        self.picture_label.pack(padx=10, pady=10)
+        self.picture_label.place(relx=0.5, rely=0.5, anchor="center")
+        gender_picture_card = tk.Frame(picture_row, bg="white", bd=2, relief="groove", width=260, height=260)
+        gender_picture_card.pack(side="left", padx=(10, 0))
+        gender_picture_card.pack_propagate(False)
+        self.gender_picture_label = tk.Label(
+            gender_picture_card,
+            bg="white",
+        )
+        self.gender_picture_label.place(relx=0.5, rely=0.5, anchor="center")
+        tk.Button(
+            picture_panel,
+            text="PictNew",
+            command=self.open_pict_new_window,
+            width=12,
+        ).place(relx=0.5, y=280, anchor="n")
 
         controls = tk.Frame(bottom_content, bg="white")
         controls.pack(side="right", anchor="se", padx=(20, 10), pady=(10, 12))
@@ -871,14 +946,29 @@ class VocabularyTrainerApp:
                     return path
         return ""
 
-    def _update_picture_display(self, row):
-        if not hasattr(self, "picture_label"):
+    def _find_gender_picture_path(self, gender):
+        gender = (gender or "").strip().lower()
+        if gender == "m":
+            names = ("MaleFox.PNG", "MaleFox.png")
+        elif gender == "f":
+            names = ("FemaleFox.PNG", "FemaleFox.png")
+        else:
+            return ""
+        csv_dir = os.path.dirname(self.csv_path)
+        code_dir = os.path.dirname(__file__)
+        for base in (code_dir, csv_dir):
+            for name in names:
+                path = os.path.join(base, name)
+                if os.path.exists(path):
+                    return path
+        return ""
+
+    def _render_image_label(self, label, path, photo_attr_name):
+        if not label:
             return
-        stem = self._choose_picture_stem(row) if row else "others"
-        path = self._find_picture_path(stem) or self._find_picture_path("others")
         if not path:
-            self.picture_label.configure(image="", text="")
-            self.picture_photo = None
+            label.configure(image="", text="")
+            setattr(self, photo_attr_name, None)
             return
         try:
             img = Image.open(path).convert("RGBA")
@@ -887,11 +977,27 @@ class VocabularyTrainerApp:
             x = (240 - img.width) // 2
             y = (240 - img.height) // 2
             canvas.paste(img, (x, y), img)
-            self.picture_photo = ImageTk.PhotoImage(canvas)
-            self.picture_label.configure(image=self.picture_photo, text="")
+            photo = ImageTk.PhotoImage(canvas)
+            setattr(self, photo_attr_name, photo)
+            label.configure(image=photo, text="")
         except Exception:
-            self.picture_label.configure(image="", text="")
-            self.picture_photo = None
+            label.configure(image="", text="")
+            setattr(self, photo_attr_name, None)
+
+    def _update_picture_display(self, row):
+        if not hasattr(self, "picture_label"):
+            return
+        stem = self._choose_picture_stem(row) if row else "others"
+        path = self._find_picture_path(stem) or self._find_picture_path("others")
+        self._render_image_label(self.picture_label, path, "picture_photo")
+        if hasattr(self, "gender_picture_label"):
+            gender = (row.get("gender_fr") or "").strip().lower() if row else ""
+            gender_path = self._find_gender_picture_path(gender)
+            self._render_image_label(
+                self.gender_picture_label,
+                gender_path,
+                "gender_picture_photo",
+            )
 
     def _filtered_indices(self):
         indices = list(range(len(self.rows)))
@@ -978,16 +1084,29 @@ class VocabularyTrainerApp:
             return f"le {word}"
         return f"la {word}"
 
+    def _update_gender_badge_color(self, gender):
+        gender = (gender or "").strip().lower()
+        color = "black"
+        if gender == "m":
+            color = "#007aff"
+        elif gender == "f":
+            color = "#ff3b30"
+        self.fr_hint_gender_label.configure(fg=color)
+
     def _update_article_display(self, row, force_visible=False):
         if not row:
             self.gender_var.set("")
             self.article_var.set("")
+            self._update_gender_badge_color("")
             return
         if not force_visible and self.lang_var.get() == "CZ":
             self.gender_var.set("")
             self.article_var.set("")
+            self._update_gender_badge_color("")
             return
-        self.gender_var.set((row.get("gender_fr") or "").strip().lower())
+        gender = (row.get("gender_fr") or "").strip().lower()
+        self.gender_var.set(gender)
+        self._update_gender_badge_color(gender)
         self.article_var.set(
             self._format_fr_with_article(row.get("FR", ""), row.get("gender_fr", ""))
         )
@@ -997,6 +1116,7 @@ class VocabularyTrainerApp:
         if self.current_index is not None:
             self._persist_current_status_flags()
         self.turbo_mode = False
+        self.all_mode = False
 
         indices = self._filtered_indices()
         if not indices:
@@ -1080,12 +1200,23 @@ class VocabularyTrainerApp:
             return
         self.turbo_running = True
         self.turbo_mode = True
+        self.all_mode = False
+        self.turbo_speech_generation += 1
+        self._run_turbo_cycle()
+
+    def load_all_word(self):
+        if self.turbo_running:
+            return
+        self.turbo_running = True
+        self.turbo_mode = False
+        self.all_mode = True
         self.turbo_speech_generation += 1
         self._run_turbo_cycle()
 
     def stop_turbo(self):
         self.turbo_running = False
         self.turbo_mode = False
+        self.all_mode = False
         if self.turbo_after_job is not None:
             self.master.after_cancel(self.turbo_after_job)
             self.turbo_after_job = None
@@ -1139,8 +1270,12 @@ class VocabularyTrainerApp:
         self.learned_var.set(learned)
         self.hard_training_var.set(hard_training)
         self.input_var.set("")
-        self.sentence_var.set("")
-        self.sentence_t_var.set("")
+        if self.all_mode:
+            self.sentence_var.set(row.get("Sentence", ""))
+            self.sentence_t_var.set(row.get("SentenceT", ""))
+        else:
+            self.sentence_var.set("")
+            self.sentence_t_var.set("")
         self.thumb_var.set("")
         self.gender_var.set("")
         self.article_var.set("")
@@ -1206,13 +1341,17 @@ class VocabularyTrainerApp:
             self.cz_var.set(row.get("CZ", ""))
             self.sentence_var.set("")
             self.sentence_t_var.set("")
+        elif self.all_mode:
+            self.cz_var.set(row.get("CZ", ""))
+            self.sentence_var.set(row.get("Sentence", ""))
+            self.sentence_t_var.set(row.get("SentenceT", ""))
         else:
             all_meanings = self._cz_meanings_for_fr(row.get("FR", ""))
             self.cz_var.set("\n".join(all_meanings) if all_meanings else row.get("CZ", ""))
             self.sentence_var.set(row.get("Sentence", ""))
             self.sentence_t_var.set(row.get("SentenceT", ""))
         self.hidden_side = None
-        if self.turbo_mode:
+        if self.turbo_mode or self.all_mode:
             self._start_hint_blink(colors=("red", "blue", "white"), font_size=80, max_toggles=18)
             self._speak_turbo_current(row)
         else:
@@ -1344,12 +1483,21 @@ class VocabularyTrainerApp:
 
         fr = (row.get("FR") or "").strip()
         cz = (row.get("CZ") or "").strip()
-        sequence = [
-            (self.fr_voice, fr),
-            (self.cz_voice, cz),
-            (self.fr_voice, fr),
-            (self.cz_voice, cz),
-        ]
+        sentence_t = (row.get("SentenceT") or "").strip()
+        sentence = (row.get("Sentence") or "").strip()
+        if self.all_mode:
+            sequence = [
+                (self.fr_voice, fr),
+                (self.cz_voice, cz),
+                (self.cz_voice, sentence_t),
+                (self.fr_voice, sentence),
+            ]
+        else:
+            sequence = [
+                (self.fr_voice, fr),
+                (self.cz_voice, cz),
+                (self.fr_voice, fr),
+            ]
         sequence = [(voice, text) for voice, text in sequence if text]
         if not sequence:
             if self.turbo_running:
@@ -1371,6 +1519,210 @@ class VocabularyTrainerApp:
                     return
 
         threading.Thread(target=worker, daemon=True).start()
+
+    def _ensure_pict_csv_exists(self):
+        if os.path.exists(self.pict_csv_path):
+            return
+        os.makedirs(os.path.dirname(self.pict_csv_path), exist_ok=True)
+        with open(self.pict_csv_path, "w", encoding="utf-8", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=["FRP", "CZP", "ENP", "PD", "PE"])
+            writer.writeheader()
+
+    def _load_pict_rows(self):
+        self._ensure_pict_csv_exists()
+        with open(self.pict_csv_path, "r", encoding="utf-8-sig", newline="") as f:
+            reader = csv.DictReader(f)
+            return self._repair_pict_rows([row for row in reader])
+
+    def _repair_pict_rows(self, rows):
+        fields = ["FRP", "CZP", "ENP", "PD", "PE"]
+        repaired = []
+        for raw in rows:
+            row = {key: (raw.get(key) or "").strip() for key in fields}
+            if not any(row.values()):
+                continue
+            row["PE"] = "ano" if row["PE"].lower() in ("ano", "yes", "true", "1", "☑") else "ne"
+            repaired.append(row)
+        return repaired
+
+    def _save_pict_rows(self):
+        fieldnames = ["FRP", "CZP", "ENP", "PD", "PE"]
+        with open(self.pict_csv_path, "w", encoding="utf-8", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(self.pict_rows)
+
+    def open_pict_new_window(self):
+        if self.pict_window and self.pict_window.winfo_exists():
+            self.pict_window.lift()
+            return
+
+        try:
+            self.pict_rows = self._load_pict_rows()
+        except Exception as exc:
+            messagebox.showerror("Chyba", f"FR_Pict.csv se nepodařilo načíst:\n{exc}")
+            return
+
+        win = tk.Toplevel(self.master)
+        win.title("PictNew - FR_Pict.csv")
+        win.geometry("1100x650")
+        win.minsize(900, 560)
+        win.configure(bg="white")
+        self.pict_window = win
+
+        def _on_pict_close():
+            self.save_pict_detail_edits()
+            self.pict_window = None
+            self.pict_tree = None
+            self.pict_detail_vars = {}
+            self.pict_detail_index = None
+            self.pict_pe_var.set(False)
+            win.destroy()
+
+        win.protocol("WM_DELETE_WINDOW", _on_pict_close)
+
+        main = tk.Frame(win, bg="white")
+        main.pack(fill="both", expand=True, padx=12, pady=12)
+
+        list_frame = tk.Frame(main, bg="white")
+        list_frame.pack(fill="both", expand=True)
+
+        scrollbar = tk.Scrollbar(list_frame)
+        scrollbar.pack(side="right", fill="y")
+
+        columns = ("FRP", "CZP", "ENP", "PD", "PE")
+        tree = ttk.Treeview(
+            list_frame,
+            columns=columns,
+            show="headings",
+            yscrollcommand=scrollbar.set,
+            selectmode="browse",
+        )
+        tree.pack(side="left", fill="both", expand=True)
+        scrollbar.config(command=tree.yview)
+        self.pict_tree = tree
+
+        for column in columns:
+            tree.heading(column, text=column)
+        tree.column("FRP", width=180, anchor="w")
+        tree.column("CZP", width=220, anchor="w")
+        tree.column("ENP", width=180, anchor="w")
+        tree.column("PD", width=420, anchor="w")
+        tree.column("PE", width=60, anchor="center")
+
+        style = ttk.Style(win)
+        style.configure("Treeview", font=("Helvetica", 14), rowheight=24)
+        style.configure("Treeview.Heading", font=("Helvetica", 14, "bold"))
+
+        tree.bind("<Button-1>", self.save_pict_detail_edits, add="+")
+        tree.bind("<<TreeviewSelect>>", self._on_pict_tree_select)
+        self._populate_pict_tree()
+
+        form = tk.LabelFrame(win, text="FR_Pict.csv", bg="white", padx=10, pady=10)
+        form.pack(fill="x", padx=12, pady=(0, 12))
+
+        self.pict_detail_vars = {
+            "FRP": tk.StringVar(value=""),
+            "CZP": tk.StringVar(value=""),
+            "ENP": tk.StringVar(value=""),
+            "PD": tk.StringVar(value=""),
+        }
+        field_widths = {"FRP": 18, "CZP": 22, "ENP": 18, "PD": 36}
+        for col, key in enumerate(("FRP", "CZP", "ENP", "PD")):
+            tk.Label(form, text=f"{key}:", bg="white").grid(row=0, column=col * 2, sticky="w")
+            entry = tk.Entry(form, textvariable=self.pict_detail_vars[key], width=field_widths[key])
+            self._bind_entry_paste(entry)
+            entry.bind("<Return>", self.save_pict_detail_edits)
+            entry.bind("<FocusOut>", self.save_pict_detail_edits)
+            entry.grid(row=0, column=col * 2 + 1, sticky="w", padx=(6, 14))
+
+        tk.Checkbutton(
+            form,
+            text="PE",
+            variable=self.pict_pe_var,
+            bg="white",
+            command=self.save_pict_detail_edits,
+        ).grid(
+            row=0, column=8, sticky="w", padx=(0, 14)
+        )
+        tk.Button(form, text="Training", command=_on_pict_close).grid(
+            row=0, column=9, sticky="e"
+        )
+        form.columnconfigure(7, weight=1)
+        self._refresh_pict_details()
+
+    def _populate_pict_tree(self):
+        if not self.pict_tree:
+            return
+        for item in self.pict_tree.get_children():
+            self.pict_tree.delete(item)
+        for idx, row in enumerate(self.pict_rows):
+            self.pict_tree.insert(
+                "",
+                tk.END,
+                iid=str(idx),
+                values=(
+                    row.get("FRP", ""),
+                    row.get("CZP", ""),
+                    row.get("ENP", ""),
+                    row.get("PD", ""),
+                    self._checkbox_mark(row.get("PE", "ne")),
+                ),
+            )
+
+    def _on_pict_tree_select(self, event=None):
+        self._refresh_pict_details()
+
+    def _refresh_pict_details(self):
+        if not self.pict_detail_vars:
+            return
+        selected = self.pict_tree.selection() if self.pict_tree else ()
+        row = None
+        self.pict_detail_index = None
+        if selected:
+            try:
+                idx = int(selected[0])
+            except ValueError:
+                idx = -1
+            if 0 <= idx < len(self.pict_rows):
+                row = self.pict_rows[idx]
+                self.pict_detail_index = idx
+        for key, var in self.pict_detail_vars.items():
+            var.set(row.get(key, "") if row else "")
+        self.pict_pe_var.set((row.get("PE", "ne") if row else "ne") == "ano")
+
+    def save_pict_detail_edits(self, event=None):
+        if not self.pict_tree or not self.pict_detail_vars:
+            return
+        idx = self.pict_detail_index
+        if idx is None:
+            return
+        if idx < 0 or idx >= len(self.pict_rows):
+            return
+
+        row = self.pict_rows[idx]
+        new_values = {
+            "FRP": self.pict_detail_vars["FRP"].get().strip(),
+            "CZP": self.pict_detail_vars["CZP"].get().strip(),
+            "ENP": self.pict_detail_vars["ENP"].get().strip(),
+            "PD": self.pict_detail_vars["PD"].get().strip(),
+            "PE": "ano" if self.pict_pe_var.get() else "ne",
+        }
+        if all(row.get(key, "") == value for key, value in new_values.items()):
+            return
+
+        row.update(new_values)
+        self._save_pict_rows()
+        self.pict_tree.item(
+            str(idx),
+            values=(
+                row.get("FRP", ""),
+                row.get("CZP", ""),
+                row.get("ENP", ""),
+                row.get("PD", ""),
+                self._checkbox_mark(row.get("PE", "ne")),
+            ),
+        )
 
     def open_input_window(self):
         if self.input_window and self.input_window.winfo_exists():

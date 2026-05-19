@@ -8,6 +8,19 @@ build/
 dist/
 .vscode/
 
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Sensitive local ChatGPT exports for Samantha Agent
+Samantha_Agent/data/*
+!Samantha_Agent/data/.gitkeep
+Samantha_Agent/data/email/archive/
+
 # Large loose files in the repo root
 /*.png
 /*.PNG

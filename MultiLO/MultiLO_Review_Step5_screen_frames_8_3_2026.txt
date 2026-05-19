@@ -1,0 +1,256 @@
+Claude:
+
+================================================================
+  MultiLO — Review kódu: step5_weekdays.py + screen_frames.py
+  Datum: 8.3.2026
+================================================================
+
+
+================================================================
+  STEP 5 — step5_weekdays.py
+================================================================
+
+CELKOVÉ HODNOCENÍ
+  Nejkomplexnější a nejkvalitnější krok dosud — tři módy,
+  persistentní barvy, edit distance, SingleFlightTTS,
+  replace_process. Vidět jak architektura zraje.
+
+────────────────────────────────────────────────────────────────
+🔴 ZÁVAŽNÉ PROBLÉMY
+────────────────────────────────────────────────────────────────
+
+1. _write_user_color_prefs — nebezpečný write bez atomicity
+   Přepis celého CSV jedním open("w") — pokud dojde k výjimce
+   uprostřed zápisu (disk plný, přerušení), soubor zůstane
+   poškozený nebo prázdný.
+   Řešení: zapisovat do dočasného souboru a pak rename():
+     tmp = prefs_path.with_suffix(".tmp")
+     with tmp.open("w", ...) as handle:
+         writer.writerows(retained)
+     tmp.replace(prefs_path)  # atomická operace
+
+────────────────────────────────────────────────────────────────
+🟡 STŘEDNĚ ZÁVAŽNÉ PROBLÉMY
+────────────────────────────────────────────────────────────────
+
+2. _run_sequence — timing stejný problém jako autoplay v step4
+   Pevný timeout 1800ms — u kratších slov (IT: "lunedì") TTS
+   skončí za 600ms a zbytečně čeká. U delších (FR: "mercredi")
+   může přechod nastat dřív než TTS dohraje.
+   Řešení: konzervativnější timeout nebo TTS callback.
+
+3. assert v produkčním kódu
+   assert isinstance(entry, ctk.CTkEntry)
+   assert isinstance(result, ctk.CTkLabel)
+   assert se přeskočí při spuštění s -O (optimize flag).
+   Řešení: explicitní if not isinstance(...): return
+   nebo prostě důvěřovat struktuře write_rows dict.
+
+4. _color_name_map — duplicitní hardcoded HEX mapa
+   Stejná mapa jako COLOR_HEX_BY_CZ v step4, nyní na dvou
+   místech s mírně odlišnými hodnotami (case rozdíl:
+   step4: #ef4444, step5: #EF4444).
+   Předem odsouhlasený technický dluh — poznamenáno
+   pro budoucí refaktor.
+
+────────────────────────────────────────────────────────────────
+🟢 DROBNOSTI
+────────────────────────────────────────────────────────────────
+
+5. Klávesové zkratky chybí v step5
+   Step3 a step4 mají <space>, <Right>, <Left>.
+   Step5 nemá žádné — nekonzistence pokračuje.
+
+────────────────────────────────────────────────────────────────
+✅ POZITIVA
+────────────────────────────────────────────────────────────────
+
+- _edit_distance: čistá iterativní Levenshtein implementace
+- is_navigating flag: zabraňuje dvojitému replace_process
+- write_after_ids list: správný cleanup after() ID při zavření
+- _next_sequence: elegantní modulo pro cyklické procházení
+
+
+================================================================
+  SCREEN_FRAMES — screen_frames.py
+================================================================
+
+CELKOVÉ HODNOCENÍ
+  Klíčový architektonický soubor — frame-based navigace místo
+  subprocess řetězení. Záměr správný a provedení solidní.
+  Ale jsou tu dva zásadní strukturální problémy.
+
+────────────────────────────────────────────────────────────────
+🔴 ZÁVAŽNÉ PROBLÉMY
+────────────────────────────────────────────────────────────────
+
+1. Cyklické importy — časovaná bomba
+   screen_frames.py importuje ze step3, step4, step5:
+     from step3_flashcards import _build_asset_index, ...
+     from step4_colors import _build_assets, ...
+     from step5_weekdays import _build_weekdays, ...
+   Zatím funguje, ale je to křehké — jakákoli změna importů
+   v step3/4/5 může způsobit cyklický import a crash při startu.
+   Správná architektura: logika (_build_flashcards,
+   _build_weekdays...) by měla být v samostatném core.py nebo
+   logic.py modulu, který importují jak standalone skripty
+   tak screen_frames.
+
+2. Import privátních funkcí (_funkce) napříč moduly
+   from step3_flashcards import _build_asset_index, _placeholder_image
+   from step4_colors import _build_cards as build_color_cards
+   Funkce s prefixem _ jsou konvencí označeny jako privátní.
+   Jejich import přes moduly vytváří těsnou závislost —
+   jakákoli refaktorace internálů step3/4 okamžitě rozbije
+   screen_frames. Přímý důsledek bodu 1 — chybí sdílená
+   logická vrstva.
+
+────────────────────────────────────────────────────────────────
+🟡 STŘEDNĚ ZÁVAŽNÉ PROBLÉMY
+────────────────────────────────────────────────────────────────
+
+3. _save_day_colors v WeekdaysScreen bez error handlingu
+   Na rozdíl od standalone WeekdaysApp kde byl try/except
+   a status label zpráva — zde žádný error handling není.
+   Pokud zápis selže (disk plný, permissions), uživatel
+   se nedozví nic.
+
+4. WeekdaysScreen user selector — nekonzistentní formát
+   Standalone zobrazuje: "me - Já"
+   Screen frame zobrazuje jen: "me"
+   Nekonzistentní UX mezi embedded a standalone verzí.
+
+5. FlashcardsScreen — chybí destroy() override
+   ColorsScreen a WeekdaysScreen mají destroy() s cleanup
+   logiky. FlashcardsScreen ho nemá — nekonzistentní vzor.
+
+────────────────────────────────────────────────────────────────
+🟢 DROBNOSTI
+────────────────────────────────────────────────────────────────
+
+6. APP_TITLE importován ale nepoužit:
+   from step4_colors import APP_TITLE as _UNUSED_COLORS_TITLE
+   Stačí odstranit z importu.
+
+────────────────────────────────────────────────────────────────
+✅ POZITIVA
+────────────────────────────────────────────────────────────────
+
+- _poll_sequence_controls: elegantní polling TTS busy stavu
+  přes after(120) pro unlock tlačítek — čistší než pevný timeout
+- is_leaving flag: konzistentní se standalone verzí
+- _finish_back + after_idle: explicitní destroy write_frame
+  před návratem zabraňuje memory leak scrollable framu
+
+
+================================================================
+  SHRNUTÍ PRIORIT PŘED STEP 6
+================================================================
+
+  🔴  Technický dluh  Cyklické importy — zvážit extrakci
+                      logiky do core.py před Step 6
+  🔴  Technický dluh  Import privátních _funkcí napříč moduly
+  🔴  Brzy            Atomický zápis CSV (_write_user_color_prefs)
+  🟡  Brzy            Error handling v _save_day_colors (screen)
+  🟡  Brzy            user_id vs "user_id - display_name" konzistence
+  🟡  Kostra hotová   Sequence timing (tech dluh step4 + step5)
+  🟢  Refaktor        Sjednotit HEX mapy, klávesové zkratky step5
+  🟢  Drobnost        Odstranit _UNUSED_COLORS_TITLE import
+
+  KLÍČOVÁ OTÁZKA před Step 6:
+  Vytvořit core.py se sdílenou logikou jako Step 5.9,
+  nebo pokračovat kostrou a refaktor udělat najednou po ní?
+
+================================================================
+  MultiLO · Review step5 + screen_frames · 8.3.2026
+================================================================
+
+Codex
+
+Revize je dobrá. Většina bodů je technicky správná. Rozdělil bych to takto.
+
+**Beru jako správné a důležité**
+1. `Atomický zápis CSV`  
+- Souhlas.  
+- `_write_user_color_prefs()` by měl zapisovat přes temp soubor + `replace()`.  
+- To je malý a rozumný fix.
+
+2. `Cyklické importy / import privátních funkcí`  
+- Souhlas.  
+- To je teď největší architektonický dluh v `screen_frames.py`.  
+- Zatím to funguje, ale je to křehké.  
+- Správný směr je vytažení sdílené logiky do samostatného modulu typu `multilo_core.py` nebo `screen_logic.py`.
+
+3. `_save_day_colors` bez error handlingu ve frame verzi  
+- Souhlas.  
+- Tohle je reálný funkční rozdíl oproti standalone verzi a mělo by se dorovnat.
+
+4. `Sequence timing`  
+- Souhlas jako technický dluh.  
+- Teď už máme aspoň lock proti kolizi ovládání a TTS, ale timing je pořád kompromis.
+
+**Beru jako správné, ale ne urgentní**
+5. `Nekonzistentní user selector`  
+- Ano, je to validní UX připomínka.  
+- Není to blocker.
+
+6. `FlashcardsScreen bez explicitního destroy cleanup`  
+- Částečně souhlas.  
+- Není tam autoplay ani delayed `after()` cleanup jako u Colors/Weekdays, takže to není stejně rizikové.  
+- Ale pro konzistenci bych to časem stejně sjednotil.
+
+7. `Klávesové zkratky ve Step 5 chybí`  
+- Souhlas.  
+- To je čistý UX polish, ne architektonický problém.
+
+
+
+8. `Duplicitní HEX mapa`  
+- Souhlas, ale to už jsme vědomě tolerovali jako dluh.  
+- Neřešil bych to před Step 6, pokud zrovna nebudeme refaktorovat shared logic.
+
+9. `_UNUSED_COLORS_TITLE` import`  
+- Ano, drobný cleanup.
+
+**K bodu `assert v produkčním kódu`**
+- U `step5_weekdays.py` to byla validní připomínka.  
+- Ve frame-based řešení už v `screen_frames.py` ty konkrétní `assert` nevidím jako hlavní problém.  
+- Takže obecně ano, ale teď to není priorita.
+
+**Můj závěr**
+Revize míří správně. Nejvyšší priorita před `Step 6` je podle mě:
+
+1. atomický zápis `user_item_prefs.csv`
+2. error handling v `WeekdaysScreen._save_day_colors`
+3. rozhodnutí, jestli uděláme `core.py` teď, nebo až po kostře
+
+**Moje doporučení**
+- `core.py` bych neodkládal až na úplný konec.  
+- Ale také bych kvůli tomu nezastavoval celý vývoj na dlouho.  
+- Nejrozumnější je udělat krátký mezikrok `Step 5.9`:
+  - vyseparovat jen sdílené datové/build funkce z `step3/4/5`
+  - bez změny UI a bez velkého refaktoru obrazovek
+
+To ti sníží riziko před `Step 6`, ale nezastaví momentum.
+
+Moje doporučené pořadí:
+1. `Step 5.6`: atomický zápis + error handling + malé cleanupy
+2. `Step 5.9`: `core.py` / shared logic extraction
+3. `Step 6`: Měsíce
+
+Pokud chceš, udělám teď rovnou `Step 5.6` jako malý bezpečný patch.
+
+Claude
+
+Souhlasím s každým bodem. Jen tři krátké reakce:
+K assert v produkčním kódu — správně. V screen_frames.py ty konkrétní asserty nejsou, takže připomínka se týká jen step5_weekdays.py standalone. Nízká priorita, standalone verze se bude postupně nahrazovat frame verzí.
+K core.py jako Step 5.9 — plně souhlasím s načasováním. Krátký mezikrok je správná volba. Klíčové je vyseparovat jen tyto funkce:
+_build_flashcards, _build_asset_index   ← ze step3
+_build_cards (colors), _build_assets    ← ze step4
+_build_weekdays, _color_name_map        ← ze step5
+_normalize_answer, _edit_distance       ← ze step5
+UI, App třídy a screen frames zůstávají beze změny. Čistý a bezpečný mezikrok.
+K Step 5.6 jako první — rozumné. Malý patch, nulové riziko, odstraní dva reálné funkční bugy před tím než přidáme další vrstvu.
+
+
+

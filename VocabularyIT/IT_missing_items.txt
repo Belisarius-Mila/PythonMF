@@ -1,0 +1,168 @@
+# IT missing items
+# Source: VocabularyIT.csv column CZ compared to Pict/mapping.json keys
+# Format: CZ<TAB>EN
+
+příliš / moc	too much / too
+silný, hlasitě (nahlas)	strong / loudly
+pocházím	I come from
+těší mě	nice to meet you
+ony, oni	they
+borůvky	blueberries
+kancelář, úřad	office
+kuchařka	female cook
+batoh	backpack
+dům, domov	house / home
+cvičení, úkol, trénink	exercise / task / training
+lekce, hodina	lesson
+platit	to pay
+potom / pak	then / afterwards
+dnes večer	tonight
+hned, okamžitě	immediately
+auto, vůz, stroj	car / machine
+časopis	magazine
+sympatický	nice / likeable
+Slovák, slovenský	Slovak
+Španělsko	Spain
+čerstvá šťáva	fresh juice
+tebe, ti	you / to you
+telefonní	telephone
+prodat, prodávat	to sell
+z, ze, od	from / of
+tady je; tady jsou	here is / here are
+euro	euro
+kašna, fontána	fountain
+poštovní známka	postage stamp
+Angličan, anglický	Englishman / English
+pozvaný, host	guest / invited
+volný, svobodný	free
+citron	lemon
+méně	less
+míchaný, smíšený	mixed
+Čech, český	Czech
+plavat	to swim
+úlovek, ulovená ryba	catch / caught fish
+prase	pig
+bohužel	unfortunately
+dost, docela	enough / quite
+letadlo	airplane
+vstát, vstávat	to get up
+ještě	still / yet
+automobilismus	motoring
+kemp	campsite
+rozumět, chápat	to understand
+drahý	expensive / dear
+určitě, jistě	certainly
+jmenovat se	to be called
+zavřený, zavřeno	closed
+stát peníze	to cost
+srdce	heart
+pravý, a destra vpravo, napravo	right / to the right
+těžký, nesnadný	difficult / heavy
+muset, mít povinnost	must / have to
+rovně, přímo	straight ahead
+elegantní	elegant
+lehký, snadný	easy / light
+zdržet se, zastavit se	to stop by / stay
+okno	window
+skončit	to finish
+fotka, fotografie	photo
+Francie	France
+studený	cold
+spěch, in fretta rychle	hurry / quickly
+Jan	John
+otočit, odbočit, zahnout	to turn
+Julie	Julia
+zajímat	to interest
+zajímat se o	to be interested in
+umýt, prát	to wash
+umýt se	to wash oneself
+pomalu	slowly
+Lukáš	Luke
+Luisa	Louise
+dlouhý	long
+ruka	hand / arm
+Markéta	Margaret
+ráno	morning
+mně, mě, mi	me / to me
+Milán	Milan
+loď	boat / ship
+nic, není zač	nothing / you're welcome
+optimistický	optimistic
+Paříž	Paris
+proč, protože	why / because
+problém	problem
+program	program
+právě, zrovna	just / right now
+rádio, rozhlas	radio
+omluvit se	to apologize
+sledovat, následovat	to follow
+cítit, slyšet	to feel / hear
+cítit se	to feel
+sloužit, obsluhovat	to serve
+levý, a sinistra vlevo, nalevo	left / to the left
+slunce	sun
+tentýž, stejný	same
+plat, výplata	salary / wages
+čas, počasí	time / weather
+turista, turistka	tourist
+všichni	everyone
+všechno, celý	everything / whole
+dovolená, prázdniny	holiday / vacation
+vidět	to see
+přijít, přijet, jít, jet s kým	to come / go with someone
+pravý, pravdivý, opravdový; è vero to je pravda	true / real
+cesta	journey / road
+let	flight
+jízdní kolo	bicycle
+potřeba	need
+zavřít	to close
+obloha, nebe	sky
+kolega	colleague
+barva	color
+zatažený, pokrytý	cloudy / covered
+kurz	course
+přát si	to wish
+zábava	entertainment / fun
+slovník	dictionary
+hlad	hunger
+navštěvovat	to attend / visit
+ven, venku	outside
+výlet	trip
+vážný, těžký	serious / severe
+setkat se, sejít se	to meet
+opravdu, to je fakt	indeed / actually
+Anglie	England
+tlumočník	interpreter
+knihkupectví	bookstore
+jazyk	language / tongue
+Londýn	London
+hora, hory	mountain / mountains
+krok	step
+plánek, mapka	small map
+pršet	to rain
+odpoledne	afternoon
+soukromý	private
+profesorka	female professor / teacher
+žízeň	thirst
+slečna	Miss / young lady
+být, mít se, zůstat	to be / stay
+cesta, ulice, silnice	road / street
+Švédsko	Sweden
+kapesní	pocket-sized
+televize	television
+hlava	head
+nechat být	leave alone
+jít na krátkou procházku	go for a short walk
+dělat	to do / make
+nudný	boring
+poslouchat	to listen
+slavný, známý	famous / well-known
+koupit, kupovat	to buy
+ostrov	island
+starobylý, dávný, antický	ancient
+velvyslanectví	embassy
+hnědý	brown
+ponožky	socks
+rukavice	gloves
+kalhoty	pants / trousers
+prsten, kruh	ring / circle

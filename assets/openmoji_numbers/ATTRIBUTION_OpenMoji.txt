@@ -1,0 +1,3 @@
+OpenMoji graphics by HfG Gmuend, https://openmoji.org/
+License: CC BY-SA 4.0
+Source: https://github.com/hfg-gmuend/openmoji (color/72x72 PNG)

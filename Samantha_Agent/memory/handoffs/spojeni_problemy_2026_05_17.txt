@@ -1,0 +1,58 @@
+Zaznam komunikace o problemech se spojenim
+Datum: 2026-05-17
+
+Kontext:
+Mila hlasi opakovane vypadky spojeni a zasekavani pri komunikaci s asistentem/Codexem.
+
+Prubeh komunikace:
+
+Mila:
+opakovane nam vypadava spojeni cim to muze byt?
+
+Odpoved:
+Bylo vysvetleno, ze chybi upresneni, zda vypadava internet obecne, spojeni v Codexu/ChatGPT, nebo bezici Samantha agent / API volani. Jako pracovni predpoklad bylo vzato, ze jde o opakovane vypadky spojeni s Codexem nebo OpenAI.
+
+Uvedene pravdepodobne priciny:
+1. Nestabilni Wi-Fi.
+2. Uspani Macu nebo sitoveho adapteru.
+3. VPN, firewall, antivirus nebo proxy.
+4. Docasny problem na strane OpenAI / Codex sluzby.
+5. Prilis dlouhe bezici operace.
+6. Problem v lokalni terminalove/shell relaci.
+
+Navrzeny prakticky test:
+ping -c 20 8.8.8.8
+ping -c 20 google.com
+
+Interpretace:
+- Pokud pada ping na 8.8.8.8, je problem pravdepodobne v internetu nebo Wi-Fi.
+- Pokud 8.8.8.8 drzi a google.com pada, muze jit o DNS.
+- Pokud oba drzi, ale pada jen Codex/ChatGPT, problem je pravdepodobne v aplikaci, VPN/proxy nebo trase ke sluzbe.
+
+Doporuceni:
+- Vypnout VPN, pokud bezi.
+- Zkusit kabel nebo hotspot misto Wi-Fi.
+- Zabránit uspani Macu behem prace.
+- Zkusit novy terminal a znovu spustit Codex.
+- Pri dlouhych ukolech delit praci na kratsi kroky.
+
+Mila:
+pada jen co se mi ohlasis... a seka se
+
+Odpoved:
+Bylo vysvetleno, ze pokud to pada nebo seka presne ve chvili, kdy asistent zacne odpovidat, nejspis nejde o kod projektu, ale o problem se streamovanim odpovedi, prohlizecem nebo konkretne dlouhym chatem.
+
+Nejpravdepodobnejsi priciny:
+1. Pretizene dlouhe vlakno.
+2. Prohlizec nebo rozsireni, napriklad blokatory, prekladace, Grammarly nebo bezpecnostni pluginy.
+3. VPN, iCloud Private Relay nebo bezpecnostni filtr.
+4. Slabsi RAM/CPU pri vykreslovani dlouheho vlakna.
+
+Navrzene kroky:
+1. Otevrit novy chat a napsat jen: test kratke odpovedi
+2. Zkusit stejny chat v anonymnim okne bez rozsireni.
+3. Pokud bezi VPN nebo iCloud Private Relay, docasne vypnout.
+4. Pokud se seka jen tento dlouhy chat, pokracovat v novem vlakne a znovu nacist kontext z pameti projektu.
+
+Pracovni poznamka:
+Asistent se zavazal odpovidat kratsimi zpravami a nespoustet zbytecne dlouhe vypisy, aby se problem mene projevoval.

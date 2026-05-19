@@ -1,0 +1,67 @@
+MultiLO Cockpit Images
+
+Pouziti:
+- Vygeneruj 7 obrazku pro cockpit.
+- Styl musi byt u vsech stejny.
+- Bez textu v obrazku.
+- Cisty ctvercovy format 1:1.
+- Detska, prijemna, ilustracni estetika.
+- Vyrazne barvy, jednoduche tvary, mekke svetlo.
+- Zadna fotografie, zadny realisticky 3D render, zadne watermarky.
+- Pozadi jemny gradient nebo ciste svetle pozadi.
+- Vysledky ulozit jako PNG do `MultiLO/cockpit_icons/`.
+
+Styl prompt pro vsechny:
+"Flat playful educational illustration, child-friendly, clean shapes, bright colors, soft shadows, consistent visual language, square composition, no text, no watermark, no photo realism"
+
+1. Cislovky
+Soubor: `cislovky.png`
+Prompt:
+"Flat playful educational illustration, child-friendly, clean shapes, bright colors, soft shadows, consistent visual language, square composition, no text, no watermark, no photo realism. A lively composition with large colorful digits, counting beads, simple number blocks, and a clear sense of learning numbers."
+
+2. Zakladni barvy
+Soubor: `zakladni_barvy.png`
+Prompt:
+"Flat playful educational illustration, child-friendly, clean shapes, bright colors, soft shadows, consistent visual language, square composition, no text, no watermark, no photo realism. Color learning theme with bold paint swatches, rainbow strips, colored circles and squares, visually balanced and cheerful."
+
+3. Dny v tydnu
+Soubor: `dny_v_tydnu.png`
+Prompt:
+"Flat playful educational illustration, child-friendly, clean shapes, bright colors, soft shadows, consistent visual language, square composition, no text, no watermark, no photo realism. Seven distinct day cards arranged in a friendly sequence, each with a different color mood, calendar-inspired but simple and playful."
+
+4. Mesice v roce
+Soubor: `mesice_v_roce.png`
+Prompt:
+"Flat playful educational illustration, child-friendly, clean shapes, bright colors, soft shadows, consistent visual language, square composition, no text, no watermark, no photo realism. A circular year composition with four seasons, small seasonal symbols, and a friendly calendar feeling."
+
+5. Zelenina a ovoce
+Soubor: `zelenina_a_ovoce.png`
+Prompt:
+"Flat playful educational illustration, child-friendly, clean shapes, bright colors, soft shadows, consistent visual language, square composition, no text, no watermark, no photo realism. Fresh fruit and vegetables grouped together, including apple, banana, strawberry, carrot, tomato and cucumber, colorful and simple."
+
+6. Zvirata
+Soubor: `zvirata.png`
+Prompt:
+"Flat playful educational illustration, child-friendly, clean shapes, bright colors, soft shadows, consistent visual language, square composition, no text, no watermark, no photo realism. Friendly animal group with lion, elephant, giraffe and bird, expressive but simple shapes, made for language learning."
+
+7. Ptaci
+Soubor: `ptaci.png`
+Prompt:
+"Flat playful educational illustration, child-friendly, clean shapes, bright colors, soft shadows, consistent visual language, square composition, no text, no watermark, no photo realism. Educational bird theme with a small colorful flock including sparrow, owl and kingfisher, simple friendly shapes, clean sky-inspired palette."
+
+8. Rostliny
+Soubor: `rostliny.png`
+Prompt:
+"Flat playful educational illustration, child-friendly, clean shapes, bright colors, soft shadows, consistent visual language, square composition, no text, no watermark, no photo realism. Educational plant theme with tree, leaf, flower and sprout, clean botanical shapes, optimistic and simple."
+
+Poznamka k napojeni:
+- Kod cockpitu hleda soubory v `MultiLO/cockpit_icons/`
+- Nazvy souboru muze nacist i podle slug formy:
+  - `cislovky`
+  - `zakladni_barvy`
+  - `dny_v_tydnu`
+  - `mesice_v_roce`
+  - `zelenina_a_ovoce`
+  - `zvirata`
+  - `ptaci`
+  - `rostliny`

@@ -1,0 +1,83 @@
+[
+  {
+    "id": 1,
+    "speaker": "Benji",
+    "voice_en": "fable",
+    "text_en": "Hello.",
+    "text_cz": "Ahoj.",
+    "audio_en": "benji_bunny_01_benji_hello_en.mp3",
+    "audio_cz": "benji_bunny_01_benji_hello_cz.m4a"
+  },
+  {
+    "id": 2,
+    "speaker": "Bunny",
+    "voice_en": "echo",
+    "text_en": "Hello.",
+    "text_cz": "Ahoj.",
+    "audio_en": "benji_bunny_02_bunny_hello_en.mp3",
+    "audio_cz": "benji_bunny_02_bunny_hello_cz.m4a"
+  },
+  {
+    "id": 3,
+    "speaker": "Benji",
+    "voice_en": "fable",
+    "text_en": "I am Benji.",
+    "text_cz": "Ja jsem Benji.",
+    "audio_en": "benji_bunny_03_benji_i_am_benji_en.mp3",
+    "audio_cz": "benji_bunny_03_benji_i_am_benji_cz.m4a"
+  },
+  {
+    "id": 4,
+    "speaker": "Bunny",
+    "voice_en": "echo",
+    "text_en": "I am Bunny.",
+    "text_cz": "Ja jsem Bunny.",
+    "audio_en": "benji_bunny_04_bunny_i_am_bunny_en.mp3",
+    "audio_cz": "benji_bunny_04_bunny_i_am_bunny_cz.m4a"
+  },
+  {
+    "id": 5,
+    "speaker": "Benji",
+    "voice_en": "fable",
+    "text_en": "We can be friends.",
+    "text_cz": "Muzeme byt kamaradi.",
+    "audio_en": "benji_bunny_05_benji_we_can_be_friends_en.mp3",
+    "audio_cz": "benji_bunny_05_benji_we_can_be_friends_cz.m4a"
+  },
+  {
+    "id": 6,
+    "speaker": "Bunny",
+    "voice_en": "echo",
+    "text_en": "Yes, we can.",
+    "text_cz": "Ano, muzeme.",
+    "audio_en": "benji_bunny_06_bunny_yes_we_can_en.mp3",
+    "audio_cz": "benji_bunny_06_bunny_yes_we_can_cz.m4a"
+  },
+  {
+    "id": 7,
+    "speaker": "Benji",
+    "voice_en": "fable",
+    "text_en": "Where do we go?",
+    "text_cz": "Kam pujdeme?",
+    "audio_en": "benji_bunny_07_benji_where_do_we_go_en.mp3",
+    "audio_cz": "benji_bunny_07_benji_where_do_we_go_cz.m4a"
+  },
+  {
+    "id": 8,
+    "speaker": "Bunny",
+    "voice_en": "echo",
+    "text_en": "We go to my house. OK?",
+    "text_cz": "Pujdeme ke mne domu. Plati?",
+    "audio_en": "benji_bunny_08_bunny_we_go_to_my_house_ok_en.mp3",
+    "audio_cz": "benji_bunny_08_bunny_we_go_to_my_house_ok_cz.m4a"
+  },
+  {
+    "id": 9,
+    "speaker": "Benji",
+    "voice_en": "fable",
+    "text_en": "OK. Let's go.",
+    "text_cz": "Plati. Jdeme.",
+    "audio_en": "benji_bunny_09_benji_ok_lets_go_en.mp3",
+    "audio_cz": "benji_bunny_09_benji_ok_lets_go_cz.m4a"
+  }
+]

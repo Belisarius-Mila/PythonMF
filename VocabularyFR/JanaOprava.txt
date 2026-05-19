@@ -1,0 +1,20 @@
+JanaOprava.txt
+Kontrola sloupce FR v souboru VocabularyFR_Jana.csv
+
+Vlevo je tvar nalezeny ve sloupci FR, vpravo navrh opravy.
+Zahrnuty jsou jen zjevne preklepy nebo zjevne nefrancouzske/zkracene tvary.
+
+escuses -> excuses
+compende -> comprendre
+on -> sur
+y a -> il y a
+en espéces -> en espèces
+beure -> beurre
+cahier d' ècolier -> cahier d'écolier
+Et allois? -> Et alors ?
+
+Poznamky:
+- "on" je francouzsky platne zajmeno, ale u tohoto radku je cesky vyznam "na, pred",
+  proto navrhuji "sur" jako pravdepodobne zamysleny francouzsky tvar pro "na".
+- "y a" je bezny hovorovy zkraceny tvar, ale pro zacatecnicky slovnik je vhodnejsi
+  plny tvar "il y a".

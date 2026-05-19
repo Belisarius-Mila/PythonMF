@@ -1,0 +1,16 @@
+user_id,item_id,enabled,priority,assoc_color_hex,assoc_note
+guest,36,1,1,,
+wife,36,1,2,#4F46E5,Barva dne
+wife,39,1,2,#0EA5E9,Barva dne
+wife,38,1,2,#10B981,Barva dne
+wife,33,1,2,#F59E0B,Barva dne
+wife,35,1,2,#F9FAFB,Barva dne
+wife,37,1,2,#F9FAFB,Barva dne
+wife,34,1,2,#6B7280,Barva dne
+me,36,1,2,#EF4444,Barva dne
+me,39,1,2,#3B82F6,Barva dne
+me,38,1,2,#92400E,Barva dne
+me,33,1,2,#EF4444,Barva dne
+me,35,1,2,#111827,Barva dne
+me,37,1,2,#3B82F6,Barva dne
+me,34,1,2,#FACC15,Barva dne

@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import sys
 import threading
+import time
 import tkinter as tk
 import unicodedata
 from PIL import Image, ImageTk
@@ -15,6 +16,8 @@ from tkinter import messagebox
 
 APP_NAME = "VocabularyIT"
 CSV_FILENAME = "VocabularyIT.csv"
+VERBE_CSV_FILENAME = "VerbeIT.csv"
+PICT_CSV_FILENAME = "IT_Pict.csv"
 
 # Keep Python defaults intentionally small; most mapping is loaded from Pict/mapping.json.
 SYNONYM_IMAGE_MAP = {}
@@ -67,6 +70,52 @@ def resolve_csv_path():
     return os.path.join(os.path.dirname(__file__), CSV_FILENAME)
 
 
+def resolve_verbe_csv_path(base_csv_path):
+    if base_csv_path:
+        candidate = os.path.join(os.path.dirname(base_csv_path), VERBE_CSV_FILENAME)
+        if os.path.exists(candidate):
+            return candidate
+
+    if getattr(sys, "frozen", False):
+        support_dir = os.path.join(
+            os.path.expanduser("~"),
+            "Library",
+            "Application Support",
+            APP_NAME,
+        )
+        os.makedirs(support_dir, exist_ok=True)
+        target_csv = os.path.join(support_dir, VERBE_CSV_FILENAME)
+        if os.path.exists(target_csv):
+            return target_csv
+
+        source_candidates = []
+        meipass = getattr(sys, "_MEIPASS", None)
+        if meipass:
+            source_candidates.append(os.path.join(meipass, VERBE_CSV_FILENAME))
+
+        exe_dir = os.path.dirname(sys.executable)
+        app_dir = os.path.abspath(os.path.join(exe_dir, "..", "..", ".."))
+        app_parent = os.path.dirname(app_dir)
+        source_candidates.append(os.path.join(app_dir, VERBE_CSV_FILENAME))
+        source_candidates.append(os.path.join(app_parent, VERBE_CSV_FILENAME))
+        source_candidates.append(os.path.join(exe_dir, VERBE_CSV_FILENAME))
+
+        for source in source_candidates:
+            if os.path.exists(source):
+                shutil.copy2(source, target_csv)
+                return target_csv
+
+        return target_csv
+
+    return os.path.join(os.path.dirname(__file__), VERBE_CSV_FILENAME)
+
+
+def resolve_pict_csv_path(base_csv_path):
+    if base_csv_path:
+        return os.path.join(os.path.dirname(base_csv_path), PICT_CSV_FILENAME)
+    return os.path.join(os.path.dirname(__file__), PICT_CSV_FILENAME)
+
+
 class VocabularyTrainerApp:
     def __init__(self, master, csv_path):
         self.master = master
@@ -106,6 +155,7 @@ class VocabularyTrainerApp:
         self.hint_blink_colors = ("green", "white")
         self.hint_blink_color_index = 0
         self.turbo_mode = False
+        self.all_mode = False
         self.turbo_running = False
         self.turbo_selection_signature = None
         self.turbo_shown_in_selection = set()
@@ -116,8 +166,16 @@ class VocabularyTrainerApp:
         self.picture_photo = None
         self.picture_base_dirs = self._build_picture_base_dirs()
         self.synonym_image_map = dict(SYNONYM_IMAGE_MAP)
+        self.blocked_image_terms = set()
         self._load_external_mapping()
         self.picture_stems = self._discover_picture_stems()
+        self.pict_csv_path = resolve_pict_csv_path(self.csv_path)
+        self.pict_window = None
+        self.pict_tree = None
+        self.pict_rows = []
+        self.pict_detail_vars = {}
+        self.pict_detail_index = None
+        self.pict_pe_var = tk.BooleanVar(value=False)
 
         self._build_ui()
         last_order = len(self.rows)
@@ -131,6 +189,13 @@ class VocabularyTrainerApp:
         self.input_sort_mode = "order"
         self.edit_entry = None
         self.gender_popup_menu = None
+        self.verbes_window = None
+        self.verbes_tree = None
+        self.verbe_rows = []
+        self.verbe_csv_path = resolve_verbe_csv_path(self.csv_path)
+        self.verbe_detail_vars = {}
+        self.verbe_text_widgets = {}
+        self.verbe_groups = []
         self.new_fr_entry = None
         self.new_cz_entry = None
         self.new_fr_var = tk.StringVar(value="")
@@ -246,18 +311,61 @@ class VocabularyTrainerApp:
         ).pack(anchor="w")
         train_buttons = tk.Frame(input_frame, bg=top_bg)
         train_buttons.pack(anchor="w", pady=(8, 0))
-        tk.Button(train_buttons, text="New", command=self.load_new_word, width=8).grid(
-            row=0, column=0, padx=(0, 8), pady=(0, 4), sticky="w"
-        )
-        tk.Button(train_buttons, text="Read", command=self.show_translation, width=8).grid(
-            row=1, column=0, padx=(0, 8), sticky="w"
-        )
-        tk.Button(train_buttons, text="Turbo", command=self.load_turbo_word, width=8).grid(
-            row=0, column=1, pady=(0, 4), sticky="w"
-        )
-        tk.Button(train_buttons, text="End", command=self.stop_turbo, width=8).grid(
-            row=1, column=1, sticky="w"
-        )
+        tk.Button(
+            train_buttons,
+            text="New",
+            command=self.load_new_word,
+            width=8,
+            bg="#34c759",
+            fg="black",
+            highlightbackground="#34c759",
+            activebackground="#2ca44b",
+            activeforeground="black",
+        ).grid(row=0, column=0, padx=(0, 8), pady=(0, 4), sticky="w")
+        tk.Button(
+            train_buttons,
+            text="Read",
+            command=self.show_translation,
+            width=8,
+            bg="#007aff",
+            fg="black",
+            highlightbackground="#007aff",
+            activebackground="#0063cc",
+            activeforeground="black",
+        ).grid(row=1, column=0, padx=(0, 8), sticky="w")
+        tk.Button(
+            train_buttons,
+            text="Auto",
+            command=self.load_turbo_word,
+            width=5,
+            bg="#ff9500",
+            fg="black",
+            highlightbackground="#ff9500",
+            activebackground="#cc7700",
+            activeforeground="black",
+        ).grid(row=0, column=1, pady=(0, 4), sticky="w")
+        tk.Button(
+            train_buttons,
+            text="All",
+            command=self.load_all_word,
+            width=5,
+            bg="#af52de",
+            fg="black",
+            highlightbackground="#af52de",
+            activebackground="#8f42b5",
+            activeforeground="black",
+        ).grid(row=0, column=2, padx=(8, 0), pady=(0, 4), sticky="w")
+        tk.Button(
+            train_buttons,
+            text="Fin",
+            command=self.stop_turbo,
+            width=15,
+            bg="#8e8e93",
+            fg="black",
+            highlightbackground="#8e8e93",
+            activebackground="#6f6f73",
+            activeforeground="black",
+        ).grid(row=1, column=1, columnspan=2, sticky="w")
 
         sentence_row = tk.Frame(right, bg=top_bg)
         sentence_row.pack(anchor="w", fill="x", pady=(5, 0))
@@ -458,9 +566,18 @@ class VocabularyTrainerApp:
             height=240,
         )
         self.picture_label.pack(padx=10, pady=10)
+        tk.Button(
+            picture_panel,
+            text="PictNew",
+            command=self.open_pict_new_window,
+            width=12,
+        ).place(relx=0.5, y=280, anchor="n")
 
         controls = tk.Frame(bottom_content, bg="white")
         controls.pack(side="right", anchor="se", padx=(20, 10), pady=(10, 12))
+        tk.Button(controls, text="Verbi", command=self.open_verbes_window, width=10).pack(
+            side="right", padx=(0, 8)
+        )
         tk.Button(controls, text="Input", command=self.open_input_window, width=10).pack(
             side="right"
         )
@@ -555,8 +672,25 @@ class VocabularyTrainerApp:
         candidates = []
         for base in self.picture_base_dirs:
             candidates.append(os.path.join(base, "mapping.json"))
+            candidates.append(os.path.join(base, "mapping_it.json"))
         csv_dir = os.path.dirname(self.csv_path)
         candidates.append(os.path.join(csv_dir, "mapping.json"))
+        candidates.append(os.path.join(csv_dir, "mapping_it.json"))
+        dedup = []
+        seen = set()
+        for c in candidates:
+            if c in seen:
+                continue
+            seen.add(c)
+            dedup.append(c)
+        return dedup
+
+    def _blocklist_file_candidates(self):
+        candidates = []
+        for base in self.picture_base_dirs:
+            candidates.append(os.path.join(base, "mapping_it_blocklist.json"))
+        csv_dir = os.path.dirname(self.csv_path)
+        candidates.append(os.path.join(csv_dir, "mapping_it_blocklist.json"))
         dedup = []
         seen = set()
         for c in candidates:
@@ -581,7 +715,19 @@ class VocabularyTrainerApp:
                             self.synonym_image_map[key] = val
             except Exception:
                 continue
-            return
+        for path in self._blocklist_file_candidates():
+            if not os.path.exists(path):
+                continue
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                if isinstance(data, list):
+                    for item in data:
+                        key = self._normalize_word(str(item))
+                        if key:
+                            self.blocked_image_terms.add(key)
+            except Exception:
+                continue
 
     def _normalize_word(self, text):
         val = (text or "").strip().casefold()
@@ -594,7 +740,12 @@ class VocabularyTrainerApp:
 
     def _tokenize_words(self, text):
         raw = re.findall(r"[A-Za-zÀ-ÖØ-öø-ÿ'-]+", (text or "").casefold())
-        return [self._normalize_word(tok) for tok in raw if self._normalize_word(tok)]
+        tokens = []
+        for tok in raw:
+            normalized = self._normalize_word(tok)
+            if len(normalized) > 1:
+                tokens.append(normalized)
+        return tokens
 
     def _is_probable_verb(self, word):
         w = self._normalize_word(word)
@@ -623,16 +774,32 @@ class VocabularyTrainerApp:
         cz = (row.get("CZ") or "").strip()
         it_norm = self._normalize_word(it)
         cz_norm = self._normalize_word(cz)
+        term_blocked = it_norm in self.blocked_image_terms
         tokens = self._tokenize_words(it) + self._tokenize_words(cz)
+        generic_tokens = (
+            FEMALE_PRONOUNS
+            | MALE_PRONOUNS
+            | AMBIGUOUS_PRONOUNS
+            | CONJUNCTION_WORDS
+            | PREPOSITION_WORDS
+            | ADJ_ADV_WORDS
+        )
 
-        for key in [it_norm, cz_norm] + tokens:
+        for index, key in enumerate([it_norm, cz_norm] + tokens):
+            if index >= 2 and key in generic_tokens:
+                continue
             if key and key in self.picture_stems:
                 return key
 
-        for key in [it_norm, cz_norm] + tokens:
-            mapped = self.synonym_image_map.get(key)
-            if mapped:
-                return mapped
+        if not term_blocked:
+            for index, key in enumerate([it_norm, cz_norm] + tokens):
+                if index >= 2 and key in generic_tokens:
+                    continue
+                if key in self.blocked_image_terms:
+                    continue
+                mapped = self.synonym_image_map.get(key)
+                if mapped:
+                    return mapped
 
         token_set = set(tokens)
         if token_set & FEMALE_PRONOUNS:
@@ -657,12 +824,15 @@ class VocabularyTrainerApp:
         stem = self._normalize_word(stem)
         if not stem:
             return ""
-        candidates = [f"{stem}.png", f"{stem}.jpg", f"{stem}.jpeg", f"{stem}.webp", f"{stem}.gif"]
         for base in self.picture_base_dirs:
-            for name in candidates:
-                path = os.path.join(base, name)
-                if os.path.exists(path):
-                    return path
+            if not os.path.isdir(base):
+                continue
+            for name in os.listdir(base):
+                _, ext = os.path.splitext(name)
+                if ext.lower() not in (".png", ".jpg", ".jpeg", ".webp", ".gif"):
+                    continue
+                if self._normalize_word(os.path.splitext(name)[0]) == stem:
+                    return os.path.join(base, name)
         return ""
 
     def _update_picture_display(self, row):
@@ -787,16 +957,29 @@ class VocabularyTrainerApp:
             return f"lo {word}"
         return f"il {word}"
 
+    def _update_gender_badge_color(self, gender):
+        gender = (gender or "").strip().lower()
+        color = "black"
+        if gender == "m":
+            color = "#007aff"
+        elif gender == "f":
+            color = "#ff3b30"
+        self.fr_hint_gender_label.configure(fg=color)
+
     def _update_article_display(self, row, force_visible=False):
         if not row:
             self.gender_var.set("")
             self.article_var.set("")
+            self._update_gender_badge_color("")
             return
         if not force_visible and self.lang_var.get() == "CZ":
             self.gender_var.set("")
             self.article_var.set("")
+            self._update_gender_badge_color("")
             return
-        self.gender_var.set((row.get("gender_it") or "").strip().lower())
+        gender = (row.get("gender_it") or "").strip().lower()
+        self.gender_var.set(gender)
+        self._update_gender_badge_color(gender)
         self.article_var.set(
             self._format_it_with_article(row.get("IT", ""), row.get("gender_it", ""))
         )
@@ -806,6 +989,7 @@ class VocabularyTrainerApp:
         if self.current_index is not None:
             self._persist_current_status_flags()
         self.turbo_mode = False
+        self.all_mode = False
 
         indices = self._filtered_indices()
         if not indices:
@@ -889,12 +1073,23 @@ class VocabularyTrainerApp:
             return
         self.turbo_running = True
         self.turbo_mode = True
+        self.all_mode = False
+        self.turbo_speech_generation += 1
+        self._run_turbo_cycle()
+
+    def load_all_word(self):
+        if self.turbo_running:
+            return
+        self.turbo_running = True
+        self.turbo_mode = False
+        self.all_mode = True
         self.turbo_speech_generation += 1
         self._run_turbo_cycle()
 
     def stop_turbo(self):
         self.turbo_running = False
         self.turbo_mode = False
+        self.all_mode = False
         if self.turbo_after_job is not None:
             self.master.after_cancel(self.turbo_after_job)
             self.turbo_after_job = None
@@ -917,7 +1112,7 @@ class VocabularyTrainerApp:
             self.turbo_shown_in_selection.clear()
             self.remaining_var.set("0")
             self._update_picture_display(None)
-            messagebox.showinfo("Info", "Žádná FR slovíčka pro aktuální výběr.")
+            messagebox.showinfo("Info", "Žádná IT slovíčka pro aktuální výběr.")
             return False
 
         signature = (
@@ -948,8 +1143,12 @@ class VocabularyTrainerApp:
         self.learned_var.set(learned)
         self.hard_training_var.set(hard_training)
         self.input_var.set("")
-        self.sentence_var.set("")
-        self.sentence_t_var.set("")
+        if self.all_mode:
+            self.sentence_var.set(row.get("Sentence", ""))
+            self.sentence_t_var.set(row.get("SentenceT", ""))
+        else:
+            self.sentence_var.set("")
+            self.sentence_t_var.set("")
         self.thumb_var.set("")
         self.gender_var.set("")
         self.article_var.set("")
@@ -1015,13 +1214,17 @@ class VocabularyTrainerApp:
             self.cz_var.set(row.get("CZ", ""))
             self.sentence_var.set("")
             self.sentence_t_var.set("")
+        elif self.all_mode:
+            self.cz_var.set(row.get("CZ", ""))
+            self.sentence_var.set(row.get("Sentence", ""))
+            self.sentence_t_var.set(row.get("SentenceT", ""))
         else:
             all_meanings = self._cz_meanings_for_it(row.get("IT", ""))
             self.cz_var.set("\n".join(all_meanings) if all_meanings else row.get("CZ", ""))
             self.sentence_var.set(row.get("Sentence", ""))
             self.sentence_t_var.set(row.get("SentenceT", ""))
         self.hidden_side = None
-        if self.turbo_mode:
+        if self.turbo_mode or self.all_mode:
             self._start_hint_blink(colors=("red", "green", "white"), font_size=80, max_toggles=18)
             self._speak_turbo_current(row)
         else:
@@ -1120,13 +1323,17 @@ class VocabularyTrainerApp:
                     return voice
         return self.fr_voice
 
-    def _say_blocking(self, voice, text):
+    def _say_blocking(self, voice, text, rate_wpm=None):
         text = (text or "").strip()
         if not text:
             return
         try:
+            cmd = ["say", "-v", voice]
+            if rate_wpm is not None:
+                cmd.extend(["-r", str(rate_wpm)])
+            cmd.append(text)
             subprocess.run(
-                ["say", "-v", voice, text],
+                cmd,
                 check=False,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
@@ -1149,12 +1356,21 @@ class VocabularyTrainerApp:
 
         fr = ((row.get("IT") or row.get("FR") or "").strip())
         cz = (row.get("CZ") or "").strip()
-        sequence = [
-            (self.fr_voice, fr),
-            (self.cz_voice, cz),
-            (self.fr_voice, fr),
-            (self.cz_voice, cz),
-        ]
+        sentence_t = (row.get("SentenceT") or "").strip()
+        sentence = (row.get("Sentence") or "").strip()
+        if self.all_mode:
+            sequence = [
+                (self.fr_voice, fr),
+                (self.cz_voice, cz),
+                (self.cz_voice, sentence_t),
+                (self.fr_voice, sentence),
+            ]
+        else:
+            sequence = [
+                (self.fr_voice, fr),
+                (self.cz_voice, cz),
+                (self.fr_voice, fr),
+            ]
         sequence = [(voice, text) for voice, text in sequence if text]
         if not sequence:
             if self.turbo_running:
@@ -1176,6 +1392,210 @@ class VocabularyTrainerApp:
                     return
 
         threading.Thread(target=worker, daemon=True).start()
+
+    def _ensure_pict_csv_exists(self):
+        if os.path.exists(self.pict_csv_path):
+            return
+        os.makedirs(os.path.dirname(self.pict_csv_path), exist_ok=True)
+        with open(self.pict_csv_path, "w", encoding="utf-8", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=["ITP", "CZP", "ENP", "PD", "PE"])
+            writer.writeheader()
+
+    def _load_pict_rows(self):
+        self._ensure_pict_csv_exists()
+        with open(self.pict_csv_path, "r", encoding="utf-8-sig", newline="") as f:
+            reader = csv.DictReader(f)
+            return self._repair_pict_rows([row for row in reader])
+
+    def _repair_pict_rows(self, rows):
+        fields = ["ITP", "CZP", "ENP", "PD", "PE"]
+        repaired = []
+        for raw in rows:
+            row = {key: (raw.get(key) or "").strip() for key in fields}
+            if not any(row.values()):
+                continue
+            row["PE"] = "ano" if row["PE"].lower() in ("ano", "yes", "true", "1", "☑") else "ne"
+            repaired.append(row)
+        return repaired
+
+    def _save_pict_rows(self):
+        fieldnames = ["ITP", "CZP", "ENP", "PD", "PE"]
+        with open(self.pict_csv_path, "w", encoding="utf-8", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(self.pict_rows)
+
+    def open_pict_new_window(self):
+        if self.pict_window and self.pict_window.winfo_exists():
+            self.pict_window.lift()
+            return
+
+        try:
+            self.pict_rows = self._load_pict_rows()
+        except Exception as exc:
+            messagebox.showerror("Chyba", f"IT_Pict.csv se nepodařilo načíst:\n{exc}")
+            return
+
+        win = tk.Toplevel(self.master)
+        win.title("PictNew - IT_Pict.csv")
+        win.geometry("1100x650")
+        win.minsize(900, 560)
+        win.configure(bg="white")
+        self.pict_window = win
+
+        def _on_pict_close():
+            self.save_pict_detail_edits()
+            self.pict_window = None
+            self.pict_tree = None
+            self.pict_detail_vars = {}
+            self.pict_detail_index = None
+            self.pict_pe_var.set(False)
+            win.destroy()
+
+        win.protocol("WM_DELETE_WINDOW", _on_pict_close)
+
+        main = tk.Frame(win, bg="white")
+        main.pack(fill="both", expand=True, padx=12, pady=12)
+
+        list_frame = tk.Frame(main, bg="white")
+        list_frame.pack(fill="both", expand=True)
+
+        scrollbar = tk.Scrollbar(list_frame)
+        scrollbar.pack(side="right", fill="y")
+
+        columns = ("ITP", "CZP", "ENP", "PD", "PE")
+        tree = ttk.Treeview(
+            list_frame,
+            columns=columns,
+            show="headings",
+            yscrollcommand=scrollbar.set,
+            selectmode="browse",
+        )
+        tree.pack(side="left", fill="both", expand=True)
+        scrollbar.config(command=tree.yview)
+        self.pict_tree = tree
+
+        for column in columns:
+            tree.heading(column, text=column)
+        tree.column("ITP", width=180, anchor="w")
+        tree.column("CZP", width=220, anchor="w")
+        tree.column("ENP", width=180, anchor="w")
+        tree.column("PD", width=420, anchor="w")
+        tree.column("PE", width=60, anchor="center")
+
+        style = ttk.Style(win)
+        style.configure("Treeview", font=("Helvetica", 14), rowheight=24)
+        style.configure("Treeview.Heading", font=("Helvetica", 14, "bold"))
+
+        tree.bind("<Button-1>", self.save_pict_detail_edits, add="+")
+        tree.bind("<<TreeviewSelect>>", self._on_pict_tree_select)
+        self._populate_pict_tree()
+
+        form = tk.LabelFrame(win, text="IT_Pict.csv", bg="white", padx=10, pady=10)
+        form.pack(fill="x", padx=12, pady=(0, 12))
+
+        self.pict_detail_vars = {
+            "ITP": tk.StringVar(value=""),
+            "CZP": tk.StringVar(value=""),
+            "ENP": tk.StringVar(value=""),
+            "PD": tk.StringVar(value=""),
+        }
+        field_widths = {"ITP": 18, "CZP": 22, "ENP": 18, "PD": 36}
+        for col, key in enumerate(("ITP", "CZP", "ENP", "PD")):
+            tk.Label(form, text=f"{key}:", bg="white").grid(row=0, column=col * 2, sticky="w")
+            entry = tk.Entry(form, textvariable=self.pict_detail_vars[key], width=field_widths[key])
+            self._bind_entry_paste(entry)
+            entry.bind("<Return>", self.save_pict_detail_edits)
+            entry.bind("<FocusOut>", self.save_pict_detail_edits)
+            entry.grid(row=0, column=col * 2 + 1, sticky="w", padx=(6, 14))
+
+        tk.Checkbutton(
+            form,
+            text="PE",
+            variable=self.pict_pe_var,
+            bg="white",
+            command=self.save_pict_detail_edits,
+        ).grid(
+            row=0, column=8, sticky="w", padx=(0, 14)
+        )
+        tk.Button(form, text="Training", command=_on_pict_close).grid(
+            row=0, column=9, sticky="e"
+        )
+        form.columnconfigure(7, weight=1)
+        self._refresh_pict_details()
+
+    def _populate_pict_tree(self):
+        if not self.pict_tree:
+            return
+        for item in self.pict_tree.get_children():
+            self.pict_tree.delete(item)
+        for idx, row in enumerate(self.pict_rows):
+            self.pict_tree.insert(
+                "",
+                tk.END,
+                iid=str(idx),
+                values=(
+                    row.get("ITP", ""),
+                    row.get("CZP", ""),
+                    row.get("ENP", ""),
+                    row.get("PD", ""),
+                    self._checkbox_mark(row.get("PE", "ne")),
+                ),
+            )
+
+    def _on_pict_tree_select(self, event=None):
+        self._refresh_pict_details()
+
+    def _refresh_pict_details(self):
+        if not self.pict_detail_vars:
+            return
+        selected = self.pict_tree.selection() if self.pict_tree else ()
+        row = None
+        self.pict_detail_index = None
+        if selected:
+            try:
+                idx = int(selected[0])
+            except ValueError:
+                idx = -1
+            if 0 <= idx < len(self.pict_rows):
+                row = self.pict_rows[idx]
+                self.pict_detail_index = idx
+        for key, var in self.pict_detail_vars.items():
+            var.set(row.get(key, "") if row else "")
+        self.pict_pe_var.set((row.get("PE", "ne") if row else "ne") == "ano")
+
+    def save_pict_detail_edits(self, event=None):
+        if not self.pict_tree or not self.pict_detail_vars:
+            return
+        idx = self.pict_detail_index
+        if idx is None:
+            return
+        if idx < 0 or idx >= len(self.pict_rows):
+            return
+
+        row = self.pict_rows[idx]
+        new_values = {
+            "ITP": self.pict_detail_vars["ITP"].get().strip(),
+            "CZP": self.pict_detail_vars["CZP"].get().strip(),
+            "ENP": self.pict_detail_vars["ENP"].get().strip(),
+            "PD": self.pict_detail_vars["PD"].get().strip(),
+            "PE": "ano" if self.pict_pe_var.get() else "ne",
+        }
+        if all(row.get(key, "") == value for key, value in new_values.items()):
+            return
+
+        row.update(new_values)
+        self._save_pict_rows()
+        self.pict_tree.item(
+            str(idx),
+            values=(
+                row.get("ITP", ""),
+                row.get("CZP", ""),
+                row.get("ENP", ""),
+                row.get("PD", ""),
+                self._checkbox_mark(row.get("PE", "ne")),
+            ),
+        )
 
     def open_input_window(self):
         if self.input_window and self.input_window.winfo_exists():
@@ -1313,6 +1733,381 @@ class VocabularyTrainerApp:
             side="left", padx=(8, 0)
         )
 
+    def _load_verbe_rows(self):
+        if not os.path.exists(self.verbe_csv_path):
+            raise FileNotFoundError(self.verbe_csv_path)
+        with open(self.verbe_csv_path, "r", encoding="utf-8-sig", newline="") as f:
+            reader = csv.DictReader(f)
+            rows = [row for row in reader]
+        return self._repair_verbe_rows(rows)
+
+    def _repair_verbe_rows(self, rows):
+        fields = [
+            "M",
+            "Order",
+            "InfIT",
+            "InfCZ",
+            "Ind1",
+            "Ind2",
+            "Ind3",
+            "IndP1",
+            "IndP2",
+            "IndP3",
+            "FS1",
+            "FS2",
+            "FS3",
+            "FSP1",
+            "FSP2",
+            "FSP3",
+            "Imp1",
+            "Imp2",
+            "Imp3",
+            "ImpP1",
+            "ImpP2",
+            "ImpP3",
+        ]
+        repaired = []
+        for raw in rows:
+            row = {k: (raw.get(k) or "").strip() for k in fields}
+            if not row["InfIT"] and not row["InfCZ"]:
+                continue
+            if row["M"] not in ("ano", "ne"):
+                row["M"] = "ne"
+            repaired.append(row)
+        return repaired
+
+    def _save_verbe_rows(self):
+        if not self.verbe_rows:
+            return
+        fieldnames = [
+            "M",
+            "Order",
+            "InfIT",
+            "InfCZ",
+            "Ind1",
+            "Ind2",
+            "Ind3",
+            "IndP1",
+            "IndP2",
+            "IndP3",
+            "FS1",
+            "FS2",
+            "FS3",
+            "FSP1",
+            "FSP2",
+            "FSP3",
+            "Imp1",
+            "Imp2",
+            "Imp3",
+            "ImpP1",
+            "ImpP2",
+            "ImpP3",
+        ]
+        with open(self.verbe_csv_path, "w", encoding="utf-8", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(self.verbe_rows)
+
+    def open_verbes_window(self):
+        if self.verbes_window and self.verbes_window.winfo_exists():
+            self.verbes_window.lift()
+            return
+
+        try:
+            self.verbe_rows = self._load_verbe_rows()
+        except FileNotFoundError:
+            messagebox.showerror("Chyba", f"Soubor nebyl nalezen: {self.verbe_csv_path}")
+            return
+
+        win = tk.Toplevel(self.master)
+        win.title("Verbi - VerbeIT.csv")
+        win.geometry("1320x800")
+        win.minsize(1100, 700)
+        win.configure(bg="white")
+        self.verbes_window = win
+
+        def _on_verbes_close():
+            self.verbes_window = None
+            self.verbes_tree = None
+            self.verbe_detail_vars = {}
+            self.verbe_text_widgets = {}
+            self.verbe_groups = []
+            win.destroy()
+
+        win.protocol("WM_DELETE_WINDOW", _on_verbes_close)
+
+        main = tk.Frame(win, bg="white")
+        main.pack(fill="both", expand=True, padx=12, pady=12)
+
+        left_panel = tk.Frame(main, bg="white")
+        left_panel.pack(side="left", fill="both", expand=False)
+        right_panel = tk.Frame(main, bg="white")
+        right_panel.pack(side="right", fill="both", expand=True, padx=(16, 0))
+
+        scrollbar = tk.Scrollbar(left_panel)
+        scrollbar.pack(side="right", fill="y")
+
+        columns = ("M", "Order", "InfIT", "InfCZ")
+        tree = ttk.Treeview(
+            left_panel,
+            columns=columns,
+            show="headings",
+            yscrollcommand=scrollbar.set,
+            selectmode="browse",
+            height=28,
+        )
+        tree.pack(side="left", fill="both", expand=True)
+        scrollbar.config(command=tree.yview)
+        self.verbes_tree = tree
+
+        tree.heading("M", text="M")
+        tree.heading("Order", text="Order")
+        tree.heading("InfIT", text="InfIT")
+        tree.heading("InfCZ", text="InfCZ")
+        tree.column("M", width=32, anchor="center")
+        tree.column("Order", width=50, anchor="center")
+        tree.column("InfIT", width=122, anchor="w")
+        tree.column("InfCZ", width=158, anchor="w")
+
+        style = ttk.Style(win)
+        style.configure("Treeview", font=("Helvetica", 14), rowheight=24)
+        style.configure("Treeview.Heading", font=("Helvetica", 14, "bold"))
+
+        tree.bind("<Button-1>", self._on_verbes_tree_click, add="+")
+        tree.bind("<<TreeviewSelect>>", self._on_verbes_tree_select)
+
+        self._populate_verbes_tree()
+
+        self.verbe_detail_vars = {
+            "Ind1": tk.StringVar(value=""),
+            "Ind2": tk.StringVar(value=""),
+            "Ind3": tk.StringVar(value=""),
+            "IndP1": tk.StringVar(value=""),
+            "IndP2": tk.StringVar(value=""),
+            "IndP3": tk.StringVar(value=""),
+            "FS1": tk.StringVar(value=""),
+            "FS2": tk.StringVar(value=""),
+            "FS3": tk.StringVar(value=""),
+            "FSP1": tk.StringVar(value=""),
+            "FSP2": tk.StringVar(value=""),
+            "FSP3": tk.StringVar(value=""),
+            "Imp1": tk.StringVar(value=""),
+            "Imp2": tk.StringVar(value=""),
+            "Imp3": tk.StringVar(value=""),
+            "ImpP1": tk.StringVar(value=""),
+            "ImpP2": tk.StringVar(value=""),
+            "ImpP3": tk.StringVar(value=""),
+        }
+        self.verbe_text_widgets = {}
+
+        forms = tk.Frame(right_panel, bg="white")
+        forms.pack(anchor="nw", fill="both", expand=True)
+
+        groups = [
+            ("Ind", ["Ind1", "Ind2", "Ind3", "IndP1", "IndP2", "IndP3"], "#fff6a8"),
+            ("FS", ["FS1", "FS2", "FS3", "FSP1", "FSP2", "FSP3"], "#dff6dd"),
+            ("Imp", ["Imp1", "Imp2", "Imp3", "ImpP1", "ImpP2", "ImpP3"], "#dce9ff"),
+        ]
+        self.verbe_groups = groups
+        for col, (title, keys, group_bg) in enumerate(groups):
+            group = tk.LabelFrame(forms, text=title, bg=group_bg, padx=8, pady=8)
+            group.grid(row=0, column=col, sticky="n", padx=(0, 12))
+            for r, key in enumerate(keys):
+                txt = tk.Text(
+                    group,
+                    width=17,
+                    height=1,
+                    bg=group_bg,
+                    bd=0,
+                    highlightthickness=0,
+                    wrap="none",
+                    font=("Helvetica", 28),
+                )
+                txt.tag_configure("stem", foreground="black")
+                txt.tag_configure("ending", foreground="red")
+                txt.grid(row=r, column=0, sticky="w", pady=(0, 6))
+                txt.configure(state="disabled")
+                self.verbe_text_widgets[key] = txt
+            tk.Button(
+                forms,
+                text="🔊",
+                width=4,
+                command=lambda k=keys: self._speak_verbe_group(k),
+            ).grid(row=1, column=col, sticky="n", padx=(0, 12), pady=(6, 0))
+
+        bottom = tk.Frame(win, bg="white")
+        bottom.pack(fill="x", padx=12, pady=(0, 12))
+        tk.Button(bottom, text="Training", command=_on_verbes_close).pack(side="right")
+
+        self._refresh_verbe_details()
+
+    def _populate_verbes_tree(self):
+        if not self.verbes_tree:
+            return
+        for item in self.verbes_tree.get_children():
+            self.verbes_tree.delete(item)
+        for idx, row in enumerate(self.verbe_rows):
+            mark = "☑" if row.get("M", "ne") == "ano" else "☐"
+            self.verbes_tree.insert(
+                "",
+                tk.END,
+                iid=str(idx),
+                values=(mark, row.get("Order", ""), row.get("InfIT", ""), row.get("InfCZ", "")),
+            )
+
+    def _checked_verbe_index(self):
+        for idx, row in enumerate(self.verbe_rows):
+            if row.get("M", "ne") == "ano":
+                return idx
+        return None
+
+    def _set_checked_verbe(self, index):
+        changed = False
+        for i, row in enumerate(self.verbe_rows):
+            new_value = "ano" if i == index else "ne"
+            if row.get("M", "ne") != new_value:
+                row["M"] = new_value
+                changed = True
+        if changed:
+            self._save_verbe_rows()
+        self._populate_verbes_tree()
+        if self.verbes_tree is not None and index is not None:
+            iid = str(index)
+            self.verbes_tree.selection_set(iid)
+            self.verbes_tree.focus(iid)
+            self.verbes_tree.see(iid)
+        self._refresh_verbe_details()
+
+    def _on_verbes_tree_click(self, event):
+        if not self.verbes_tree:
+            return
+        region = self.verbes_tree.identify("region", event.x, event.y)
+        if region != "cell":
+            return
+        row_id = self.verbes_tree.identify_row(event.y)
+        col_id = self.verbes_tree.identify_column(event.x)
+        if not row_id or not col_id:
+            return
+        if col_id != "#1":
+            return
+        try:
+            idx = int(row_id)
+        except ValueError:
+            return "break"
+
+        if self.verbe_rows[idx].get("M", "ne") == "ano":
+            self.verbe_rows[idx]["M"] = "ne"
+            self._save_verbe_rows()
+            self._populate_verbes_tree()
+            self._refresh_verbe_details()
+        else:
+            self._set_checked_verbe(idx)
+        return "break"
+
+    def _on_verbes_tree_select(self, event=None):
+        if not self.verbes_tree:
+            return
+        selected = self.verbes_tree.selection()
+        if not selected:
+            self._refresh_verbe_details()
+            return
+        try:
+            idx = int(selected[0])
+        except ValueError:
+            self._refresh_verbe_details()
+            return
+        if 0 <= idx < len(self.verbe_rows) and self.verbe_rows[idx].get("M", "ne") == "ano":
+            self._refresh_verbe_details()
+
+    def _refresh_verbe_details(self):
+        if not self.verbe_detail_vars:
+            return
+        checked_idx = self._checked_verbe_index()
+        if checked_idx is None:
+            for var in self.verbe_detail_vars.values():
+                var.set("")
+            for key in self.verbe_text_widgets:
+                self._set_verbe_widget_text(key, "")
+            return
+        row = self.verbe_rows[checked_idx]
+        stems_by_group = {}
+        for title, keys, _ in self.verbe_groups:
+            stems_by_group[title] = self._compute_group_stem(row, keys)
+        for key, var in self.verbe_detail_vars.items():
+            value = row.get(key, "")
+            var.set(value)
+            group_name = "Ind" if key.startswith("Ind") else ("FS" if key.startswith("FS") else "Imp")
+            self._set_verbe_widget_text(key, value, stems_by_group.get(group_name, ""))
+
+    def _compute_group_stem(self, row, keys):
+        tokens = []
+        for key in keys:
+            token = self._extract_verb_token((row.get(key) or "").strip())
+            if token:
+                tokens.append(token)
+        if len(tokens) < 2:
+            return ""
+        lcp = tokens[0].lower()
+        for tok in tokens[1:]:
+            tok_l = tok.lower()
+            i = 0
+            limit = min(len(lcp), len(tok_l))
+            while i < limit and lcp[i] == tok_l[i]:
+                i += 1
+            lcp = lcp[:i]
+            if len(lcp) < 2:
+                return ""
+        return lcp if len(lcp) >= 2 else ""
+
+    def _extract_verb_token(self, text):
+        text = (text or "").strip()
+        if not text:
+            return ""
+        return text.split()[-1]
+
+    def _set_verbe_widget_text(self, key, text, stem_lower=""):
+        widget = self.verbe_text_widgets.get(key)
+        if widget is None:
+            return
+        text = (text or "").strip()
+        widget.configure(state="normal")
+        widget.delete("1.0", "end")
+        if not text:
+            widget.configure(state="disabled")
+            return
+
+        token = self._extract_verb_token(text)
+        if token and stem_lower and len(token) > len(stem_lower) and token.lower().startswith(stem_lower):
+            head_len = len(text) - len(token)
+            leading = text[:head_len]
+            stem = token[: len(stem_lower)]
+            ending = token[len(stem_lower) :]
+            widget.insert("end", leading + stem, "stem")
+            widget.insert("end", ending, "ending")
+        else:
+            widget.insert("end", text, "stem")
+        widget.configure(state="disabled")
+
+    def _speak_verbe_group(self, keys):
+        if self.no_voice_var.get():
+            return
+        checked_idx = self._checked_verbe_index()
+        if checked_idx is None:
+            return
+        row = self.verbe_rows[checked_idx]
+        parts = [(row.get(k) or "").strip() for k in keys]
+        parts = [p for p in parts if p]
+        if not parts:
+            return
+
+        def worker():
+            for i, part in enumerate(parts):
+                self._say_blocking(self.fr_voice, part, rate_wpm=155)
+                if i < len(parts) - 1:
+                    time.sleep(0.5)
+
+        threading.Thread(target=worker, daemon=True).start()
+
     def _mark_search_entry(self, entry_widget, found):
         if entry_widget is None:
             return
@@ -1445,7 +2240,7 @@ class VocabularyTrainerApp:
         sentence_t = self.new_sentence_t_var.get().strip()
         gender_it = self.new_gender_it_var.get().strip().lower()
         if not fr or not cz:
-            messagebox.showwarning("Chybí data", "Zadej FR i CZ.")
+            messagebox.showwarning("Chybí data", "Zadej IT i CZ.")
             return
 
         next_order = 1
@@ -1511,7 +2306,7 @@ class VocabularyTrainerApp:
         sentence_t = self.new_sentence_t_var.get().strip()
         gender_it = self.new_gender_it_var.get().strip().lower()
         if not fr or not cz:
-            messagebox.showwarning("Chybí data", "Zadej FR i CZ.")
+            messagebox.showwarning("Chybí data", "Zadej IT i CZ.")
             return
 
         try:

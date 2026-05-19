@@ -1,0 +1,64 @@
+Technická poznámka
+MultiLO
+Datum: 2026-03-08
+
+Téma:
+Bug v modulu "Dny v týdnu" při scénáři:
+Psaní -> editace pole -> Zpět do kokpitu
+
+Výsledek:
+Bug je opraven. Návrat do kokpitu po editaci pole v režimu Psaní nyní funguje.
+
+Co nakonec fungovalo:
+1. Nahradit CTkScrollableFrame obyčejným CTkFrame v psacím režimu "Dny v týdnu".
+   - To byl rozhodující fix.
+   - Soubor: screen_frames.py
+
+2. Nechat návrat z obrazovky co nejjednodušší.
+   - zrušit pending joby
+   - odebrat focus
+   - vrátit kokpit
+   - bez složitého teardown řetězce
+
+3. V kokpitu oddělit schování starého screenu od přestavby kokpitu.
+   - Pomohlo to obecné stabilitě návratu.
+   - Soubor: step2_cockpit.py
+
+Co nefungovalo:
+1. after_idle řetězce v návratu.
+   - _prepare_write_back
+   - _destroy_write_frame_then_back
+   - _finish_back
+   - Vedlo to k dalším deadlockům nebo zamrznutí.
+
+2. Varianty typu:
+   - focus_set() + destroy() + after_idle(...)
+   - after(1) návrat
+   - odložené destroy starého screenu
+   - Samy o sobě bug nevyřešily.
+
+3. Pouhé neničení screenu při návratu.
+   - Nepřineslo jisté řešení, pokud uvnitř zůstal problémový widget tree.
+
+Pravděpodobná skutečná příčina:
+- kombinace:
+  - CTkScrollableFrame
+  - aktivní CTkEntry
+  - editace textu
+  - návrat / teardown UI
+
+To byl zjevně problémový lifecycle v CustomTkinter.
+
+Praktický závěr pro další vývoj:
+1. Pro malé formuláře bez skutečné potřeby scrollu nepoužívat CTkScrollableFrame.
+2. U psacích režimů preferovat obyčejný CTkFrame.
+3. Navigaci držet jednoduchou, bez vícestupňových after_idle řetězců.
+4. Když se podobný bug objeví jinde, první podezřelý je:
+   - ScrollableFrame + Entry + destroy/back
+5. Při ladění podobných bugů přidat dočasně print() do __del__ nebo destroy() problematického
+   widgetu — ukáže kdy a z jakého kontextu je volán destroy, což rychleji odhalí cyklické
+   volání.
+
+Co je teď ověřeně funkční:
+- Dny v týdnu -> Psaní -> editace -> Zpět do kokpitu
+

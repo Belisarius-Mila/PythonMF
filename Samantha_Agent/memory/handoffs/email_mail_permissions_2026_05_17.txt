@@ -1,0 +1,52 @@
+Email a oprávnění Mailu - handoff 2026-05-17
+
+Účel
+-----
+Tento záznam má Codex načíst při příští práci, pokud se bude řešit odesílání e-mailů,
+Apple Mail, SSH práce na Macu, nebo vzdálené spouštění úloh bez fyzické přítomnosti
+u Macu.
+
+Shrnutí poslední komunikace
+---------------------------
+Míla přes Codex řešil odeslání PDF daňového přiznání e-mailem přes lokální aplikaci
+Mail na Macu. Odeslání nakonec proběhlo úspěšně, ale bylo nutné fyzicky potvrdit
+macOS dialog na Macu. Z toho plyne důležitý praktický problém: kdyby Míla nebyl doma
+u Macu, odeslání by se mohlo zaseknout na potvrzení oprávnění a neproběhlo by plně
+vzdáleně přes SSH.
+
+Citlivost
+---------
+V komunikaci se pracovalo s daňovým PDF a osobními údaji. Nezapisovat do paměti plný
+název souboru, rodné číslo, adresu ani jiné identifikátory. Stačí si pamatovat, že šlo
+o citlivé daňové PDF a odeslání přes Apple Mail po potvrzení uživatelem.
+
+Co bylo vysvětleno
+------------------
+1. Odeslání přes Apple Mail funguje, ale macOS může poprvé nebo po změně aplikace
+   vyžadovat potvrzení oprávnění.
+2. Krátkodobé řešení je povolit aplikaci, ze které běží Codex/osascript, v nastavení:
+   System Settings -> Privacy & Security -> Automation -> Terminal/iTerm/VS Code -> Mail.
+3. Pokud položka Terminal -> Mail v Automation není vidět, je třeba vyvolat první pokus
+   o ovládání Mailu, například:
+   osascript -e 'tell application "Mail" to activate'
+   Potom macOS zobrazí dialog a uživatel má dát Allow/Povolit.
+4. Pro přístup k souborům z Desktop/Documents může být potřeba přidat Terminal také do:
+   System Settings -> Privacy & Security -> Full Disk Access.
+5. "Přidat Terminal do nastavení" znamená povolit Terminal.app, protože Codex běží
+   uvnitř terminálu a jeho příkazy dědí tato oprávnění.
+
+Dlouhodobě lepší řešení
+-----------------------
+Pro spolehlivé odesílání na dálku je lepší neposílat přes GUI aplikaci Mail, ale připravit
+SMTP skript, který posílá e-mail přímo. Přihlašovací údaje nesmí být v gitu ani v paměti;
+mají být v Keychainu nebo v lokálním .env mimo verzování.
+
+Praktický další krok pro příště
+-------------------------------
+Pokud Míla znovu řeší "aby šel e-mail poslat, i když nejsem doma":
+
+1. Nejdřív ověř, zda je povolená Automation pro Mail u aplikace, ze které běží Codex.
+2. Ověř Full Disk Access pro Terminal/VS Code podle toho, odkud se Codex spouští.
+3. Pokud má být odesílání robustní bez fyzického potvrzení, navrhni SMTP skript a bezpečné
+   uložení tajemství mimo git.
+

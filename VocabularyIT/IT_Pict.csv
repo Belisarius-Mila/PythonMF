@@ -1,0 +1,444 @@
+ITP,CZP,ENP,PD,PE
+piatto,talíř,plate,,ano
+su,na,on,,ano
+su,o (na téma),about,o -> about ?,ano
+laggiù,tam / tamhle,there,tam -> there ?,ano
+torta,"dort, koláč",cake,,ano
+troppo,příliš / moc,toomuch,,ano
+forte,"silný, hlasitě (nahlas)",strong,,ano
+cappello,klobouk,hat,,ano
+amica,kamarádka,woman,,ano
+fidanzata,přítelkyně,woman,,ano
+cantare,zpívat,sing,,ano
+portafoglio,peněženka,wallet,,ano
+portafoglio,portfolio (soubor investic),wallet,,ano
+mi chiamo,jmenuji se,bye,,ano
+Come stai? Come va?,Jak se máš?,bye,,ano
+vengo,pocházím,house,,ano
+E tu?,A ty?,andyou,,ano
+piacere,těší mě,bye,,ano
+a presto,brzy na viděnou,bye,,ano
+arrivederci,na shledanou,bye,,ano
+vorrei,chtěl bych,Iwouldlike,,ano
+per favore,prosím,please,,ano
+sì,ano,yes,,ano
+io,já,me,,ano
+anche,také,also,,ano
+perfetto,skvěle,good,,ano
+o,nebo,or,,ano
+e,a,and,,ano
+dove,kde,where,,ano
+di dove,odkud,fromwhere,,ano
+bene,dobře,good,,ano
+ho,mám,Ihave,,ano
+abita,bydlí,house,,ano
+hai,máš,have,,ano
+nipote,synovec,man,,ano
+nipote,neteř,woman,,ano
+figlia,dcera,sister,,ano
+figlio,syn,man,,ano
+adesso,teď,now,"teď, nyní -> now ?",ano
+zia,teta,aunt,,ano
+zio,strýc,uncle,,ano
+tu,ty,you,,ano
+lui,on,man,,ano
+voi,vy,people,,ano
+noi,my,people,,ano
+loro,"ony, oni",people,,ano
+mio,můj,mym,,ano
+mia,moje,myf,,ano
+tuo,tvůj,yourm,,ano
+tua,tvá,yourf,,ano
+una,jedna (neurčitý člen),a,"add, json doplněno",ne
+un,jeden (neurčitý člen),a,"add, json doplněno",ne
+sorella,sestra,sister,,ano
+fratello,bratr,man,,ano
+madre,matka,mother,,ano
+padre,otec,father,,ano
+nonna,babička,grandmother,,ano
+nonno,dědeček,gradfather,,ano
+molto,velmi,very,,ano
+divertente,zábavný,funny,,ano
+interessante,zajímavý,interesting,,ano
+cattivo,"zlý, protivný",evil,,ano
+sono,já jsem,iam,,ano
+sicuro,jistý,sure,,ano
+certo,samozřejmě,ofcourse,,ano
+sempre,"pořád, stále, vždy",always,,ano
+per niente,vůbec,notatall,,ano
+ma,ale,but,,ano
+giacca,sako,blazer,,ano
+brutto,"ošklivý, špatný",ugly,doplněno do json,ano
+specchio,zrcadlo,miror,,ano
+camicia,košile,shirt,,ano
+lontano,daleko,far,,ano
+ci,tam,there,,ano
+ci,"nás, nám",people,doplněno do json,ano
+vicino,blízko,near,,ano
+vicino,soused,man,,ano
+uscita,východ,exit,,ano
+ora,"teď, nyní",now,,ano
+ora,hodina,clock,,ano
+cappotto,kabát,coat,,ano
+maglione,svetr,sweater,,ano
+gonna,sukně,skirt,,ano
+scontrino,účtenka,bill,,ano
+cibo,jídlo,meal,,ano
+regalo,dárek,present,,ano
+compleanno,narozeniny,cake2,,ano
+biscotto,sušenka,cookie,,ano
+piazza,náměstí,square,,ano
+lì,tam,there,,ano
+giallo,žlutý,yellow,,ano
+bagno,koupelna,bathroom,,ano
+cane,pes,dog,,ano
+ogni,každý,everyday,doplněno do json,ano
+caldo,teplý,warm,,ano
+tedesco,"němec, němčina",german,,ano
+Lei,vy,people,,ano
+lei,ona,woman,,ano
+ragazza,dívka,woman,,ano
+guardare,"dívat se, sledovat",eyes,doplněno do json,ano
+per,per,perJulia,"add, doplněno do json",ne
+per,aby,inorderto,"add, doplněno do json",ne
+pompelmo,grep,grapefruit,,ano
+bicchiere,sklenice,glass,,ano
+mirtilli,borůvky,blueberry,,ano
+mela,jablko,apple,,ano
+fragola,jahoda,strawberry,,ano
+éclair,zákusek,cake,,ano
+allora,"tak, tedy, tehdy",sothenwell,"add, doplněno json",ne
+insegnare,"učit, vyučovat",teacher,,ano
+lavorare,pracovat,letsgo,obr je,ano
+spesso,často,often,"add, doplněno do json",ne
+ballare,tančit,dance,,ano
+storia,"historie, příběh",history,doplněno do json,ano
+brioche,"brioška, sladké pečivo",bakery,"add, doplněno do json",ne
+forno,trouba,oven,,ano
+mercato,trh,market,,ano
+negozio,obchod,store,,ano
+panificio,pekárna,bakery,,ano
+piacere,"líbit se, potěšení",tolikepleasure,"add, doplněno do json",ne
+grazie,děkuji,thankyou,,ano
+come,"jak, jako",how,doplněno do json,ano
+ufficio,"kancelář, úřad",office,,ano
+ospedale,nemocnice,hospital,,ano
+impegnata,zaneprázdněná,busy,doplněno do json,ano
+tutti i giorni,každý den,everyday,,ano
+cuoca,kuchařka,cook,,ano
+male,"špatně, zle, bolest, zlo",painevil,"add, doplněno do json",ne
+stazione,"nádraží, stanice",busstation,json ok,ano
+aiuto,pomoc,help,,ano
+allegro,"veselý, radostný",joyful,,ano
+chiesa,kostel,church,,ano
+giocare,"hrát, hrát si",play,json ok,ano
+estate,léto,summer,,ano
+zaino,batoh,bag,,ano
+mese,měsíc,month,"add, json ok",ne
+solito,obvyklý,usual,"add, json ok",ne
+mangiare,jíst,meal,json ok,ano
+inverno,zima,winter,,ano
+gatto,kočka,cat,,ano
+insieme,"společně, dohromady",people,,ano
+albergo,hotel,hotel,,ano
+andare,"jít, jet",go,"add, json ok",ne
+aspettare,čekat,wait,,ano
+casa,"dům, domov",home,,ano
+cercare,hledat,search,,ano
+da,"od, z, u, k",fromwhere,json ok,ano
+domani,zítra,tomorrow,,ano
+domattina,zítra ráno,tomorrow,json ok,ano
+esercizio,"cvičení, úkol, trénink",excercise,json ok,ano
+favore,laskavost,favor,"add, json ok",ne
+forse,možná,maybe,,ano
+forza,"síla, no tak",power,json ok,ano
+lezione,"lekce, hodina",lesson,json ok,ano
+pagare,platit,pay,,ano
+parola,slovo,word,,ano
+poi,"potom, pak",then2,"add, json ok",ne
+pregare,"modlit se, prosit",pray,"add, json ok",ne
+qua,tady,here,,ano
+restare,zůstat,stay,,ano
+ricordare,"pamatovat si, připomenout si",remember,"add, json ok",ne
+stasera,dnes večer,niceevening,json ok,ano
+subito,"hned, okamžitě",immediately,"add, json ok",ne
+tornare,vrátit se,return,,ano
+treno,vlak,train,,ano
+via,ulice,street,,ano
+viale,"třída, alej",evenue,json ok,ano
+vocabolo,"slovíčko, výraz",word,json ok,ano
+di solito,obvykle,usually,"add, json ok",ne
+macchina,"auto, vůz, stroj",car,json ok,ano
+quando,"kdy, když",when,"add, json ok",ne
+nemico,nepřítel,enemy,"add, json ok",ne
+numero,číslo,number,,ano
+occupato,obsazeno,occupied,"add, json ok",ne
+parlare,mluvit,speak,,ano
+permesso,"dovolení, svolení",permission,"add, json ok",ne
+po',trochu,abit,,ano
+poco,málo,abit,json ok,ano
+poco fa,před chvílí,beforeawhile,"add, json ok",ne
+posto,místo,place,,ano
+prendere,"vzít, brát",take,,ano
+pronto,"připravený, hotový, haló, prosím?",call,json ok,ano
+quale,který,which,"add, json ok",ne
+questo,tento,this,"add, json ok",ne
+rispondere,odpovědět,answer,,ano
+rivista,časopis,book,,ano
+romano,"Říman, římský",romano,json ok,ano
+russo,"Rus, ruský",russian,"add, json ok",ne
+scheda,"karta, lístek",card,json ok,ne
+scusare,"omluvit, promiňte",excuseme,json ok,ano
+simpatico,sympatický,likeable,"add, json ok",ne
+slovacco,"Slovák, slovenský",slovac,json ok,ano
+so,vím,know,json ok,ano
+sorpresa,překvapení,surprise,"add, json ok",ne
+Spagna,Španělsko,spain,,ano
+spremuta,čerstvá šťáva,juice,,ano
+te,"tebe, ti",you,json ok,ano
+tecnico,"technik, technický",technician,json ok,ano
+telefonico,telefonní,call,json ok,ne
+trovare,najít,find,,ano
+trovarsi,"nacházet se, být",findoneself,"add, json ok",ne
+vaniglia,vanilka,vanilla,,ano
+vendere,prodávat,sell,json ok,ano
+vino,víno,wine,"add, json ok",ne
+vincere,vyhrát,win,,ano
+zero,nula,zero,,ano
+cena,večeře,dinner,,ano
+che,"jaký, který",which,"add, json ok",ne
+che cosa,co,what,,ano
+chi,kdo,who,"add, json ok",ne
+chiamare,"jmenovat se, volat, telefonovat",mynamecall,"add, json ok",ne
+conoscere,"znát, poznat",meet,"add, json ok",ano
+di,"z, ze, od",from,json ok,ano
+dopo,"po, potom",after,"add, json ok",ne
+ecco,"tady je, tady jsou",hereyouare,"add, json ok",ne
+essere,být,tobe,,ano
+euro,euro,money,,ano
+fontana,"kašna, fontána",fountain,"add, json ok",ne
+fragile,křehký,fragile,,ano
+francese,"Francouz, francouzský",french,"add, json ok",ne
+francobollo,poštovní známka,,,ne
+gelato,zmrzlina,icecream,,ano
+giorno,den,day,,ano
+gustoso,chutný,tasty,,ano
+inglese,"Angličan, anglický",english,,ano
+invitato,"pozvaný, host",invite,,ano
+italiano,"Ital, italský",italian,"add, json ok",ne
+leggere,číst,book,json ok,ano
+libero,"volný, svobodný",free,json ok,ano
+limone,citron,lemone,,ano
+minuto,minuta,time,json ok,ano
+meno,méně,,,ne
+misto,"míchaný, smíšený",,,ne
+naturalmente,"přirozeně, samozřejmě",ofcourse,json ok,ano
+altro,"jiný, další",other,,ano
+arancia,pomeranč,orange,,ano
+banana,banán,banana,,ano
+bello,"krásný, hezký",beautiful,,ano
+benissimo,výborně,good,json ok,ano
+bravo,"dobrý, šikovný",good,json ok,ne
+buono,dobrý,good,,ano
+camera,pokoj,room,"add, json ok",ne
+ceco,"Čech, český",czech,json ok,ano
+nuotare,plavat,swim,"add, json ok",ne
+pattinare,bruslit,scate,,ano
+calcio,"fotbal, vápník",football,json ok,ano
+pescare,"lovit, rybařit",fish,json ok,ano
+pescato,"úlovek, ulovená ryba",fish,json ok,ano
+autunno,podzim,autumn,,ano
+sciare,lyžovat,ski,,ano
+settimana,týden,week,,ano
+disegnare,kreslit,drawing,json ok,ano
+cucinare,vařit,cook,,ano
+fra,"mezi, za",amongin,"add, json ok",ne
+gli,"ti, ty",menrucksacks,"add, json ok",ne
+quante,kolik,howmuch,json ok,ano
+porco,prase,pig,"add, json ok",ne
+cartolina,pohlednice,postcard,"add, json ok",ne
+libro,kniha,book,,ano
+solo,"sám, pouze, jen",alone,json ok,ano
+davvero,"opravdu, skutečně",really,,ano
+che,že,that,,ano
+gentile,"laskavý, milý, zdvořilý",kind,json ok,ano
+stanco,unavený,tired,,ano
+purtroppo,bohužel,unfortunatelly,"add, json ok",ne
+dolce,"sladký, sladkost, jemný, něžný",cake,json ok,ano
+un po’,trochu,abit,json ok,ano
+malato,nemocný,sick,"add, json ok",ne
+buonanotte,dobrou noc,goodnight,,ano
+debole,slabý,weak,"add, json ok",ne
+preferire,"preferovat, dávat přednost",prefere,"add, json ok",ne
+pallacanestro,basketbal,basketball,,ano
+pallavolo,volejbal,voleyball,,ano
+camminare,"chodit, kráčet",walk,,ano
+odiare,nenávidět,hate,,ano
+abbastanza,"dost, docela",,,ne
+aereo,letadlo,,Pict: airport,ne
+alzarsi,"vstát, vstávat",,vstát -> getup ?,ne
+ancora,ještě,,ještě něco -> anythingelse ?,ne
+anno,rok,year,,ano
+aprire,otevřít,open,,ano
+asciugamano,ručník,towel,,ano
+auto,auto,car,,ano
+automobilismo,automobilismus,,,ne
+caffè,káva,coffee,,ano
+campeggio,kemp,,Pict: park,ne
+capire,"rozumět, chápat",,,ne
+caro,drahý,,,ne
+certamente,"určitě, jistě",,jistě -> sure ?,ne
+chiamarsi,jmenovat se,,jméno -> name ?,ne
+chiuso,"zavřený, zavřeno",,,ne
+città,město,city,,ano
+costare,stát peníze,,stát -> cost ?,ne
+cuore,srdce,,Pict: love,ne
+destro,"pravý, a destra vpravo, napravo",,pravý -> right ?,ne
+difficile,"těžký, nesnadný",,těžký -> difficult ?,ne
+dormire,spát,goodnight,,ano
+dottore,"doktor, lékař",doctor,,ano
+dovere,"muset, mít povinnost",,muset -> must ?,ne
+dritto,"rovně, přímo",,rovně -> straight ?,ne
+elegante,elegantní,,,ne
+facile,"lehký, snadný",,Pict: simple,ne
+fermarsi,"zdržet se, zastavit se",,,ne
+finestra,okno,,,ne
+finire,skončit,,Pict: end,ne
+formula,formule,formula,,ano
+foto,"fotka, fotografie",,,ne
+Francia,Francie,,,ne
+freddo,studený,,"Pict: winter, iceglass",ne
+fretta,"spěch, in fretta rychle",,"spěchající, ve spěchu -> inhurry ?",ne
+gara,závod,race,,ano
+giovane,mladý,young,,ano
+Giovanni,Jan,,,ne
+girare,"otočit, odbočit, zahnout",,"odbočit, zahnout -> turn; zatočit, zahnout -> turn ?",ne
+Giulia,Julie,,,ne
+interessare,zajímat,,Pict: interesting,ne
+interessarsi di,zajímat se o,,Pict: interesting,ne
+là,tam,there,,ano
+lavare,"umýt, prát",,"umýt -> wash; mýt, prát -> wash ?",ne
+lavarsi,umýt se,,umýt -> wash ?,ne
+lentamente,pomalu,,Pict: slow,ne
+Luca,Lukáš,,,ne
+Luisa,Luisa,,,ne
+lungo,dlouhý,,,ne
+mano,ruka,,,ne
+Margherita,Markéta,,,ne
+mattina,ráno,,Pict: breakfast,ne
+me,"mně, mě, mi",,mě -> me ?,ne
+Milano,Milán,,,ne
+nave,loď,,,ne
+niente,"nic, není zač",,nic -> nothing; není zač -> yourwelcome ?,ne
+ottimista,optimistický,,Pict: happy,ne
+Parigi,Paříž,,,ne
+perché,"proč, protože",,proč -> why ?,ne
+ponte,most,bridge,,ano
+problema,problém,,Pict: difficult,ne
+programma,program,,,ne
+proprio,"právě, zrovna",,"jen, právě, správný -> just ?",ne
+pulito,čistý,clean,,ano
+radio,"rádio, rozhlas",,,ne
+scusarsi,omluvit se,,omluva -> excuse ?,ne
+seguire,"sledovat, následovat",,následovat -> follow ?,ne
+sentire,"cítit, slyšet",,slyšet -> hear ?,ne
+sentirsi,cítit se,,,ne
+servire,"sloužit, obsluhovat",,Pict: serve,ne
+sinistro,"levý, a sinistra vlevo, nalevo",,levý -> left ?,ne
+sole,slunce,,"Pict: summer, hot",ne
+sotto,pod,under,,ano
+sporco,špinavý,dirty,,ano
+stesso,"tentýž, stejný",,,ne
+stipendio,"plat, výplata",money,,ano
+straniero,cizinec,foreigner,,ano
+tempo,"čas, počasí",,čas -> time ?,ne
+turista,"turista, turistka",,Pict: travel,ne
+tutti,všichni,,"Pict: all, people",ne
+tutto,"všechno, celý",,Pict: all,ne
+"vacanza, vacanze","dovolená, prázdniny",,"Pict: travel, summer",ne
+vecchio,starý,old,,ano
+vedere,vidět,,Pict: eyes,ne
+venire,"přijít, přijet, jít, jet s kým",,"přijít, přijet -> arrive; jít -> go ?",ne
+vero,"pravý, pravdivý, opravdový; è vero to je pravda",,pravý -> right; pravda -> reason ?,ne
+viaggio,cesta,,Pict: travel,ne
+vicino a,blízko,near,,ano
+volo,let,,Pict: airport,ne
+vulcano,sopka,volcano,,ano
+lunedì,pondělí,monday,,ano
+giovedì,čtvrtek,thursday,,ano
+venerdì,pátek,friday,,ano
+martedì,úterý,tuesday,,ano
+mercoledì,středa,wednesday,,ano
+sabato,sobota,saturday,,ano
+domenica,neděle,sunday,,ano
+quanto,kolik,,"kolik, jak moc -> howmuch ?",ne
+ammalato,nemocný,,"Pict: hospital, doctor",ne
+bicicletta,jízdní kolo,,kolo -> bike ?,ne
+bisogno,potřeba,,Pict: must,ne
+chiudere,zavřít,,,ne
+cielo,"obloha, nebe",,Pict: blue,ne
+collega,kolega,,"kolega, kolegyně -> colleague ?",ne
+colore,barva,,,ne
+cominciare,"začít, začínat",begin,,ano
+coperto,"zatažený, pokrytý",,,ne
+corso,kurz,,"Pict: lesson, school",ne
+desiderare,přát si,,Pict: want,ne
+divertimento,zábava,,"Pict: enjoy, funny",ne
+dizionario,slovník,,"Pict: book, word",ne
+dopodomani,pozítří,datomorrow,,ano
+fame,hlad,,hladový -> hungry ?,ne
+film,film,film,,ano
+frequentare,navštěvovat,,Pict: school,ne
+fuori,"ven, venku",,,ne
+gita,výlet,,Pict: travel,ne
+grave,"vážný, těžký",,těžký -> difficult ?,ne
+grigio,šedý,grey,,ano
+incontrarsi,"setkat se, sejít se",,"setkat se, seznámit se -> meet ?",ne
+infatti,"opravdu, to je fakt",,"opravdu, skutečně -> really ?",ne
+ingegnere,inženýr,engineer,,ano
+Inghilterra,Anglie,,"Pict: british, english",ne
+interprete,tlumočník,,Pict: speak,ne
+libreria,knihkupectví,,Pict: book,ne
+lingua,jazyk,,Pict: speak,ne
+Londra,Londýn,,Pict: british,ne
+medico,"doktor, lékař",doctor,,ano
+montagna,"hora, hory",,,ne
+ombrello,deštník,umbrella,,ano
+passo,krok,,Pict: walk,ne
+piantina,"plánek, mapka",,,ne
+piovere,pršet,,Pict: umbrella,ne
+pomeriggio,odpoledne,,,ne
+privato,soukromý,,,ne
+professoressa,profesorka,,"Pict: teacher, woman",ne
+qualche cosa,něco,something,,ano
+ragione,"pravda, důvod",reason,,ano
+ristorante,restaurace,restaurant,,ano
+sete,žízeň,,"Pict: water, drink",ne
+signorina,slečna,,Pict: woman,ne
+stare,"být, mít se, zůstat",,zůstat -> stay; být -> tobe ?,ne
+strada,"cesta, ulice, silnice",,ulice -> street ?,ne
+Svezia,Švédsko,,,ne
+tascabile,kapesní,,,ne
+televisione,televize,,Pict: film,ne
+testa,hlava,,,ne
+vita,život,life,,ano
+voglia,chuť,appetite,,ano
+lasciare stare,nechat být,,,ne
+fare due passi,jít na krátkou procházku,,Pict: walk,ne
+fare,dělat,,,ne
+noioso,nudný,,Pict: tired,ne
+ascoltare,poslouchat,,Pict: hear,ne
+carne,maso,meat,,ano
+famoso,"slavný, známý",,,ne
+comprare,"koupit, kupovat",,"Pict: pay, store",ne
+isola,ostrov,,Pict: lakepond,ne
+antico,"starobylý, dávný, antický",,Pict: old,ne
+ambasciata,velvyslanectví,,,ne
+Brasile,Brazílie,brazil,,ano
+marrone,hnědý,,,ne
+calzini,ponožky,,,ne
+viola,fialový,purple,,ano
+guanti,rukavice,,,ne
+pantaloni,kalhoty,,,ne
+cintura,pásek,belt,,ano
+anello,"prsten, kruh",,,ne

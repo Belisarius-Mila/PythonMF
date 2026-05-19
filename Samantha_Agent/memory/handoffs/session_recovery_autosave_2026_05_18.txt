@@ -1,0 +1,127 @@
+Handoff: navazani po vypadku a autosave session - 2026-05-18
+
+Účel
+-----
+Tento záznam shrnuje konverzaci a nastavení kolem spolehlivého navazování na práci
+Samantha Agent po výpadku SSH, Codexu nebo ChatGPT/Codex spojení.
+
+Proč to vzniklo
+---------------
+Míla se ptal, jak zabezpečit, aby se po výpadku spojení vždy navázalo přesně na naši
+konverzaci. Důvodem byly opakované výpadky SSH/Codex práce z iPhonu na připojeném Macu.
+
+Vysvětlené rozlišení
+--------------------
+Jsou dvě různé situace:
+
+1. Vypadne SSH z iPhonu, ale Mac a Codex dál běží.
+   - Řešení: používat `screen`.
+   - Codex běží dál na Macu a po novém SSH připojení se uživatel vrátí do stejné relace.
+
+2. Spadne samotný Codex nebo je potřeba začít nové vlákno.
+   - Řešení: `codex resume --last` nebo `codex resume <SESSION_ID>`.
+   - Pro dlouhodobou práci je nutné ukládat handoff do `memory/handoffs/`.
+
+Co bylo nastaveno
+-----------------
+Vznikl skript:
+
+`scripts/samantha_codex.sh`
+
+Ten:
+- používá `screen` relaci `samantha_codex`,
+- pokud relace existuje, připojí se k ní,
+- pokud neexistuje, založí novou relaci a spustí Codex ve složce:
+  `~/Desktop/PythonMF/Samantha_Agent`.
+
+Do `~/.zshrc` byla přidána funkce:
+
+`samantha`
+
+Takže Míla má po SSH spustit:
+
+```bash
+source ~/.zshrc
+samantha
+```
+
+V nové shell relaci stačí typicky jen:
+
+```bash
+samantha
+```
+
+Odpojení od `screen` bez ukončení Codexu:
+
+```text
+Ctrl+A, potom D
+```
+
+Autosave
+--------
+Míla se ptal, zda by šlo automaticky ukládat třeba po 10 minutách.
+
+Byla zvolena konzervativní varianta:
+- automaticky ukládat technické kopie posledního Codex session logu,
+- neukládat automatické shrnutí do `memory/`, protože by mohlo nechtěně uložit citlivé údaje.
+
+Vznikly skripty:
+
+`scripts/autosave_codex_session.sh`
+`scripts/samantha_screen_entry.sh`
+
+Při spuštění přes `samantha` se na pozadí spustí:
+
+```bash
+scripts/autosave_codex_session.sh --watch
+```
+
+Výchozí interval je 600 sekund, tedy 10 minut.
+
+Autosave ukládá do:
+
+`data/session_autosave/`
+
+Typické soubory:
+
+- `latest_session.jsonl`
+- `latest_info.txt`
+- `session_YYYYMMDD_HHMMSS.jsonl`
+
+Bezpečnost autosave
+-------------------
+Autosave jsou technické logy a mohou obsahovat citlivé údaje. Proto:
+
+- nejsou určeny ke commitu,
+- nejsou automaticky vkládány do `memory/`,
+- byly chráněny přes `.gitignore`.
+
+Do `.gitignore` bylo přidáno mimo jiné:
+
+- `.env`
+- `.venv/`
+- `data/session_autosave/`
+
+Pravidla uložená do paměti
+--------------------------
+Vznikl technický memory soubor:
+
+`memory/technical/session_recovery_rules.md`
+
+Ten popisuje:
+- používání `screen`,
+- příkaz `samantha`,
+- `codex resume`,
+- autosave každých 10 minut,
+- pravidlo ručních handoffů pro důležité práce.
+
+Doporučený postup příště
+------------------------
+Když se řeší pokračování po výpadku:
+
+1. Nejprve zkusit `samantha`.
+2. Pokud neběží screen relace a je potřeba navázat na starý Codex, použít:
+   `codex resume --last`.
+3. Po důležité práci říct: "ulož handoff".
+4. Citlivé věci neukládat do handoffu ani do memory bez výslovného souhlasu.
+

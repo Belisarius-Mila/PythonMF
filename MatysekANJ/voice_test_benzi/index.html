@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Benzi Voice Test</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #eef4fb;
+        color: #213040;
+      }
+      main {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      h1 {
+        margin: 0 0 12px;
+      }
+      .note {
+        background: #fff;
+        border: 2px solid #9fb5cf;
+        border-radius: 18px;
+        padding: 14px 16px;
+        margin-bottom: 20px;
+      }
+      .sample {
+        background: #fff;
+        border: 2px solid #9fb5cf;
+        border-radius: 18px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      .sample h2 {
+        margin: 0 0 8px;
+        font-size: 1.1rem;
+      }
+      .sample p {
+        margin: 0 0 10px;
+        color: #5c6d80;
+      }
+      audio {
+        width: 100%;
+      }
+      code {
+        background: #e9f0f8;
+        padding: 2px 6px;
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Benzi Voice Test</h1>
+      <div class="note">
+        Na tomhle Macu je lokalne dostupny jen cesky hlas <code>Zuzana</code>.
+        Test porovnava ruzne rychlosti a ruzne formulace vet, abychom vybrali
+        nejmene neprijemnou variantu pro intro.
+      </div>
+
+      <div class="sample">
+        <h2>01. Kratka vyzva - pomala</h2>
+        <p>Text: Jestli me uz znas, jdeme objevovat, tak klikni na lupu.</p>
+        <audio controls src="audio/01_short_prompt_slow.m4a"></audio>
+      </div>
+
+      <div class="sample">
+        <h2>02. Kratka vyzva - stredni</h2>
+        <p>Text: Jestli me uz znas, jdeme objevovat, tak klikni na lupu.</p>
+        <audio controls src="audio/02_short_prompt_medium.m4a"></audio>
+      </div>
+
+      <div class="sample">
+        <h2>03. Kratka vyzva - teplejsi formulace</h2>
+        <p>Text: Ahoj, jestli me uz znas, klikni na lupu a jdeme objevovat.</p>
+        <audio controls src="audio/03_short_prompt_warm.m4a"></audio>
+      </div>
+
+      <div class="sample">
+        <h2>04. Delsi intro - pomale</h2>
+        <p>Text: Ahoj, ja jsem Benzi. Tvuj dedecek je muj pritel a pozadal me, abych ti pomohl objevovat novy svet. Svet, kde se mluvi anglicky. Pojdme na to.</p>
+        <audio controls src="audio/04_long_intro_slow.m4a"></audio>
+      </div>
+
+      <div class="sample">
+        <h2>05. Delsi intro - zkracene</h2>
+        <p>Text: Ahoj, ja jsem Benzi. Tvuj dedecek me pozadal, abych ti pomohl objevovat svet anglictiny. Pojdme na to.</p>
+        <audio controls src="audio/05_long_intro_shorter.m4a"></audio>
+      </div>
+
+      <div class="sample">
+        <h2>06. Les - pomale</h2>
+        <p>Text: Zacneme v mem rodnem lese.</p>
+        <audio controls src="audio/06_forest_line_slow.m4a"></audio>
+      </div>
+
+      <div class="sample">
+        <h2>07. Les - stredni</h2>
+        <p>Text: Zacneme v mem rodnem lese.</p>
+        <audio controls src="audio/07_forest_line_medium.m4a"></audio>
+      </div>
+
+      <div class="sample">
+        <h2>08. Kratka pobidka</h2>
+        <p>Text: Pojd, ukazu ti cestu.</p>
+        <audio controls src="audio/08_exit_line_warm.m4a"></audio>
+      </div>
+    </main>
+  </body>
+</html>

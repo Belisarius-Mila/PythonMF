@@ -1,0 +1,227 @@
+CODEX
+
+Skvělé zadání. Učesal jsem ho do realizovatelné podoby:
+
+**1. Struktura aplikace**
+
+1. `Kokpit (Home)`: výběr uživatele, cílového jazyka, okruhu, režimu.
+
+2. `Moduly okruhů`: Čísla, Barvy, Dny, Měsíce, Ovoce/Zelenina, Zvířata,
+Rostliny.
+
+3. `Společná lišta`: Domů, Pokrok, Nastavení, Zvuk ON/OFF, Změna jazyka.
+
+**2. Jednotná pravidla UX**
+
+1. Vždy stejné barvy feedbacku: zelená správně, červená chyba, oranžová
+nápověda.
+
+2. U každé otázky tlačítka: `Přehrát výslovnost`, `Zopakovat`, `Další`.
+
+3. Po odpovědi vždy zobrazit: správné řešení, tvoje odpověď, krátký
+feedback.
+
+4. Žádné opakování položky, dokud neproběhne celý balík (kolo).
+
+**3. Moduly podle okruhů (tvůj návrh + úpravy)**
+
+**A) Kokpit**
+
+1. Výběr: uživatel (`me/wife/guest`), jazyk, okruh, typ cvičení.
+
+2. Tlačítka okruhů s ikonou a mini statistikou (např. 72 % zvládnuto).
+
+**B) Čísla**
+
+1. Režim `Čtení`: náhodné číslo, cizí jazyk, po čase český překlad.
+
+2. Režim `Počítání`: sčítání/odčítání, nejdřív zadání, pak kontrola.
+
+3. Volby: rozsah (1–20, 1–100, 1–1000, 1–1 000 000), rychlost zobrazení.
+
+**C) Barvy**
+
+1. Režim `Pruhy`: 11 barev bez opakování, název + výslovnost.
+
+2. Režim `Přiřazení`: drag&drop názvu na barvu.
+
+3. Doplňek: přepínač tvarů (pruh, kruh, čtverec).
+
+**D) Dny v týdnu**
+
+1. Uživatel přiřadí barvu ke každému dni (osobní preference).
+
+2. Režim `Sekvence`: pondělí až neděle s výslovností.
+
+3. Režim `Psaní`: český den vlevo, vyplnění cizího názvu, kontrola +
+oprava po 2 s.
+
+**E) Měsíce**
+
+1. Režim `Obrázek + psaní`: ilustrace + CZ název + pole pro cizí název.
+
+2. Režim `Prezentace`: obrázek + cizí název + výslovnost.
+
+3. Později doplnit obrázky pro všechny měsíce.
+
+**F) Ovoce/Zelenina**
+
+1. Obrázek + 3 možnosti (1 správná, 2 falešné).
+
+2. Drag&drop nebo klik volba.
+
+3. Při chybě hlasová hláška, při správně správná výslovnost.
+
+**G) Zvířata**
+
+1. Stejná logika jako F.
+
+2. Volitelně zobrazit `LATIN` jako rozšiřující info.
+
+**H) Rostliny**
+
+1. Stejná logika jako F.
+
+2. Volitelně `LATIN` režim pro pokročilé.
+
+**4. Doporučené doplnění**
+
+`Historie chyb`: appka častěji vrací slabá slovíčka.
+
+`Offline audio cache`: rychlé přehrávání bez čekání.
+
+**5. Realistické pořadí vývoje (MVP)**
+
+1. Kokpit + výběr uživatele/jazyka/okruhu.
+
+2. Flashcards pro všechny okruhy.
+
+3. Multiple choice pro F/G/H.
+
+4. Psaní pro D/E.
+
+5. Čísla (generátor + počítání).
+
+6. Pokrok a personalizace.
+
+Pokud chceš, další krok připravím přesně jako „specifikaci obrazovek“:
+každá obrazovka = seznam prvků, tlačítek a chování (už rovnou pro
+implementaci v CustomTkinter).
+
+Geminae
+
+To je vynikající a detailní zadání! Máš velmi jasnou představu o User
+Experience (UX), což je polovina úspěchu. Tvá koncepce kombinuje
+vizuální učení, interaktivitu (drag & drop) a zvukovou stopu, což je
+ideální pro zapamatování.
+
+Tady je "učesaný" funkční model, který tvé nápady strukturuje do
+logických celků, doplňuje technické detaily a přidává pár vylepšení pro
+"gamifikaci" (aby to uživatele víc bavilo).
+
+🗺️ Architektura aplikace: "Linguistický Kokpit"
+
+A) Centrální Kokpit (Dashboard)
+
+* Vizuál: Čisté rozhraní s vlajkami (FR, IT, ES, EN) v horní části pro
+volbu jazyka.
+
+* Dlaždicové menu: Každý okruh (Čísla, Barvy, Zvířata...) má svou velkou
+interaktivní kartu s ikonou.
+
+* Progress Bar: U každé dlaždice malý ukazatel (%), jak moc má uživatel
+daný okruh "zmáknutý".
+
+B) Čísla: "Matematický generátor"
+
+* Mód Výuka: Náhodné číslo \rightarrow audio v cizím jazyce \rightarrow
+po 2s český text.
+
+* Mód Kalkulačka: Jednoduché příklady (např. 12 + 8 = ?).
+
+* Můj doplněk: Přidal bych tlačítko "Nápověda", které po stisknutí
+přehraje výsledek zvukově, ale neukáže text, aby uživatel musel trénovat
+poslech.
+
+* Vizuál: Velký digitální displej (jako na kalkulačce).
+
+C) Barvy: "Chromatická laboratoř"
+
+* Mód Proudy: Náhodné barevné pruhy s animací "vjezdu" na obrazovku.
+
+* Mód Přiřazování: Drag & drop názvů k barvám.
+
+* Můj doplněk: "Barvoslepý test" – uživatel slyší název barvy (audio) a
+musí kliknout na správný barevný čtverec bez textové nápovědy.
+
+D) Dny v týdnu: "Barevný kalendář"
+
+* Personalizace: Uživatel si na začátku zvolí barvu pro každý den (např.
+Pondělí = Modrá). Tato barva se pak táhne celou aplikací.
+
+* Psací mód: * Vylepšení: Pokud uživatel udělá chybu v jednom písmenku
+(překlep), aplikace by mohla říct "Skoro!" místo "Chyba", aby nebyl
+frustrovaný.
+
+* Vizuál: Po kontrole se špatné slovo odsouvá do "archivu chyb" vpravo a
+správné slovo se objeví přímo v obdélníku.
+
+E) Měsíce v roce: "Sezónní kolotoč"
+
+* Vizuál: 12 velkých ilustrací.
+
+* Můj doplněk: Rozdělit měsíce do skupin podle ročních období (Jaro,
+Léto...). Pozadí aplikace se může měnit podle toho, jaký měsíc se právě
+procvičuje (v zimě padá sníh, na podzim listy).
+
+F, G, H) Biologie (Ovoce, Zvířata, Rostliny): "Třídění"
+
+* Mechanika: Obrázek + 3 volby (1 správná, 2 falešné).
+
+* Audio zpětná vazba: "Špatná volba..." je vtipné, ale zkusil bych to
+namluvit v daném cizím jazyce, aby byl uživatel v kontaktu s jazykem i
+při chybě (např. "Mauvais choix, réessaye!").
+
+* Můj doplněk: "Stínový mód" – objeví se jen černá silueta
+zvířete/rostliny a uživatel musí poznat, co to je, dřív než se obrázek
+vybarví.
+
+💡 Moje doplňující nápady pro vylepšení
+
+* Audio Engine (TTS vs. Nahrávky):
+
+* Pro začátek doporučuji využít Google Text-to-Speech (gTTS) nebo
+nativní hlasy v systému (SAPI v Windows / AVFoundation v iOS). Umožní to
+plynule přečíst jakékoliv číslo, aniž bys musel nahrávat milion souborů.
+
+* Inteligentní opakování (SRS light):
+
+* Aplikace by si měla pamatovat, která slovíčka uživateli nejdou (ta
+červená pole) a při příštím spuštění daného okruhu je zařadit hned na
+začátek.
+
+* Hvězdičkový systém:
+
+* Za každou správnou sérii (např. 10 barev bez chyby) získá uživatel
+hvězdičku nebo medaili. To motivuje děti i dospělé k dokončení okruhu.
+
+* Noční režim:
+
+* Vzhledem k tomu, že barvy jsou v aplikaci klíčové, přidal bych
+přepínač na tmavý režim, aby barvy na černém pozadí lépe vynikly.
+
+🛠️ Technické doporučení pro realizaci
+
+Pro tento typ interaktivní aplikace (Drag & Drop, animace, audio) vidím
+dvě ideální cesty:
+
+* Webová aplikace (React + Framer Motion): Nejlepší pro Drag & Drop a
+animace. Funguje v prohlížeči i na mobilu.
+
+* Python (Pygame): Skvělé, pokud chceš, aby to vypadalo jako klasická
+starší PC hra. Pygame skvěle zvládá kolize (přetahování objektů na
+sebe).
+
+Jaký by měl být náš další krok? Mám zkusit navrhnout datovou strukturu
+pro ty obrázky (jak je pojmenovat a propojit s CSV), nebo chceš vidět
+ukázku kódu pro ten "Kokpit"?

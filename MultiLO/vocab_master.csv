@@ -1,0 +1,237 @@
+item_id,OKRUH,CZ,FR,IT,ES,EN,LATIN
+1,Číslovky,Čtrnáct,Quatorze,Quattordici,Catorce,Fourteen,
+2,Číslovky,Čtyři,Quatre,Quattro,Cuatro,Four,
+3,Číslovky,Čtyřicet,Quarante,Quaranta,Cuarenta,Forty,
+4,Číslovky,Deset,Dix,Dieci,Diez,Ten,
+5,Číslovky,Devadesát,Quatre-vingt-dix,Novanta,Noventa,Ninety,
+6,Číslovky,Devatenáct,Dix-neuf,Diciannove,Diez y nueve,Nineteen,
+7,Číslovky,Devět,Neuf,Nove,Nueve,Nine,
+8,Číslovky,Dva,Deux,Due,Dos,Two,
+9,Číslovky,Dvacet,Vingt,Venti,Veinte,Twenty,
+10,Číslovky,Dvanáct,Douze,Dodici,Doce,Twelve,
+11,Číslovky,Dvě,Deux,Due,Dos,Two,
+12,Číslovky,Jeden milion,Un million,Un milione,Un millón,One million,
+13,Číslovky,Jedenáct,Onze,Undici,Once,Eleven,
+14,Číslovky,Jedna,Un,Uno,Uno,One,
+15,Číslovky,Milion,Million,Milione,Millón,Million,
+16,Číslovky,Osm,Huit,Otto,Ocho,Eight,
+17,Číslovky,Osmdesát,Quatre-vingts,Ottanta,Ochenta,Eighty,
+18,Číslovky,Osmnáct,Dix-huit,Diciotto,Diez y ocho,Eighteen,
+19,Číslovky,Padesát,Cinquante,Cinquanta,Cincuenta,Fifty,
+20,Číslovky,Patnáct,Quinze,Quindici,Quince,Fifteen,
+21,Číslovky,Pět,Cinq,Cinque,Cinco,Five,
+22,Číslovky,Šedesát,Soixante,Sessanta,Sesenta,Sixty,
+23,Číslovky,Sedm,Sept,Sette,Siete,Seven,
+24,Číslovky,Sedmdesát,Soixante-dix,Settanta,Setenta,Seventy,
+25,Číslovky,Sedmnáct,Dix-sept,Diciassette,Diez y siete,Seventeen,
+26,Číslovky,Šest,Six,Sei,Seis,Six,
+27,Číslovky,Šestnáct,Seize,Sedici,Diez y seis,Sixteen,
+28,Číslovky,Sto,Cent,Cento,Cien,Hundred,
+29,Číslovky,Tisíc,Mille,Mille,Mil,Thousand,
+30,Číslovky,Tři,Trois,Tre,Tres,Three,
+31,Číslovky,Třicet,Trente,Trenta,Treinta,Thirty,
+32,Číslovky,Třináct,Treize,Tredici,Trece,Thirteen,
+33,Dny v týdnu,Čtvrtek,Jeudi,Giovedì,Jueves,Thursday,
+34,Dny v týdnu,Neděle,Dimanche,Domenica,Domingo,Sunday,
+35,Dny v týdnu,Pátek,Vendredi,Venerdì,Viernes,Friday,
+36,Dny v týdnu,Pondělí,Lundi,Lunedì,Lunes,Monday,
+37,Dny v týdnu,Sobota,Samedi,Sabato,Sábado,Saturday,
+38,Dny v týdnu,Středa,Mercredi,Mercoledì,Miércoles,Wednesday,
+39,Dny v týdnu,Úterý,Mardi,Martedì,Martes,Tuesday,
+40,Měsíce v roce,Březen,Mars,Marzo,Marzo,March,
+41,Měsíce v roce,Červen,Juin,Giugno,Junio,June,
+42,Měsíce v roce,Červenec,Juillet,Luglio,Julio,July,
+43,Měsíce v roce,Duben,Avril,Aprile,Abril,April,
+44,Měsíce v roce,Květen,Mai,Maggio,Mayo,May,
+45,Měsíce v roce,Leden,Janvier,Gennaio,Enero,January,
+46,Měsíce v roce,Listopad,Novembre,Novembre,Noviembre,November,
+47,Měsíce v roce,Prosinec,Décembre,Dicembre,Diciembre,December,
+48,Měsíce v roce,Říjen,Octobre,Ottobre,Octubre,October,
+49,Měsíce v roce,Srpen,Août,Agosto,Agosto,August,
+50,Měsíce v roce,Únor,Février,Febbraio,Febrero,February,
+51,Měsíce v roce,Září,Septembre,Settembre,Septiembre,September,
+52,Ptáci,Bažant,Faisan,Fagiano,Faisán,Pheasant,
+53,Ptáci,Čáp,Cigogne,Cicogna,Cigüeña,Stork,
+54,Ptáci,Čáp bílý,Cigogne blanche,Cicogna bianca,Cigüeña blanca,White stork,
+55,Ptáci,Čížek,Chardonneret,Cardellino,Jilguero,Goldfinch,
+56,Ptáci,Datel,Pic vert,Picchio,Pájaro carpintero,Woodpecker,
+57,Ptáci,Drozd,Grive,Tordo,Zorzal,Thrush,
+58,Ptáci,Havran,Corbeau,Corvo,Cuervo,Raven,
+59,Ptáci,Holub,Pigeon,Piccione,Paloma,Pigeon,
+60,Ptáci,Husa,Oie,Oca,Ganso,Goose,
+61,Ptáci,Jestřáb,Épervier,Sparviero,Gavilán,Hawk,
+62,Ptáci,Kachna,Canard,Anatra,Pato,Duck,
+63,Ptáci,Káně,Buse,Poiana,Busardo,Buzzard,
+64,Ptáci,Kavka,Choucas,Taccola,Grajilla,Jackdaw,
+65,Ptáci,Kohout,Coq,Gallo,Gallo,Rooster,
+66,Ptáci,Konipas,Bergeronnette,Ballerina,Lavandera,Wagtail,
+67,Ptáci,Koroptev,Perdrix,Pernice,Perdiz,Partridge,
+68,Ptáci,Kos,Merle,Merlo,Mirlo,Blackbird,
+69,Ptáci,Křepelka,Caille,Quaglia,Codorniz,Quail,
+70,Ptáci,Krkavec,Grand corbeau,Corvo imperiale,Cuervo,Raven,
+71,Ptáci,Krocan,Dindon,Tacchino,Pavo,Turkey,
+72,Ptáci,Kukačka,Coucou,Cuculo,Cuco,Cuckoo,
+73,Ptáci,Kulík,Vanneau,Pavoncella,Avefría,Lapwing,
+74,Ptáci,Labuť,Cygne,Cigno,Cisne,Swan,
+75,Ptáci,Ledňáček,Martin-pêcheur,Martin pescatore,Martín pescador,Kingfisher,
+76,Ptáci,Orel,Aigle,Aquila,Águila,Eagle,
+77,Ptáci,Papoušek,Perroquet,Pappagallo,Loro,Parrot,
+78,Ptáci,Páv,Paon,Pavone,Pavo real,Peacock,
+79,Ptáci,Pelikán,Pélican,Pellicano,Pelícano,Pelican,
+80,Ptáci,Pěnkava,Pinson,Fringuello,Pinzón,Finch,
+81,Ptáci,Plameňák,Flamant rose,Fenicottero,Flamenco,Flamingo,
+82,Ptáci,Pštros,Autruche,Struzzo,Avestruz,Ostrich,
+83,Ptáci,Racek,Goéland,Gabbiano,Gaviota,Gull,
+84,Ptáci,Skřivan,Alouette,Allodola,Alondra,Lark,
+85,Ptáci,Slavík,Rossignol,Usignolo,Ruiseñor,Nightingale,
+86,Ptáci,Sojka,Geai,Ghiandaia,Arrendajo,Jay,
+87,Ptáci,Sokol,Faucon,Falco,Halcón,Falcon,
+88,Ptáci,Sova,Hibou,Gufo,Búho,Owl,
+89,Ptáci,Špačci,Étourneau,Storno,Estornino,Starling,
+90,Ptáci,Straka,Pie,Gazza,Urraca,Magpie,
+91,Ptáci,Sup,Vautour,Avvoltoio,Buitre,Vulture,
+92,Ptáci,Sýkora,Mésange,Cinciallegra,Carbonero,Tit,
+93,Ptáci,Tučňák,Manchot,Pinguino,Pingüino,Penguin,
+94,Ptáci,Vlaštovka,Hirondelle,Rondine,Golondrina,Swallow,
+95,Ptáci,Vrabec,Moineau,Passero,Gorrión,Sparrow,
+96,Ptáci,Vrána,Corneille,Cornacchia,Cuervo,Crow,
+97,Rostliny,Akát,Acacia,Acacia,Acacia,Acacia,Robinia pseudoacacia
+98,Rostliny,Bambus,Bambou,Bambù,Bambú,Bamboo,Bambusoideae
+99,Rostliny,Bazalka,Basilic,Basilico,Albahaca,Basil,Ocimum basilicum
+100,Rostliny,Bez černý,Sureau,Sambuco,Saúco,Elder,Sambucus nigra
+101,Rostliny,Borovice,Pin,Pino,Pino,Pine,Pinus sylvestris
+102,Rostliny,Bříza,Bouleau,Betulla,Abedul,Birch,Betula pendula
+103,Rostliny,Buk,Hêtre,Faggio,Haya,Beech,Fagus sylvatica
+104,Rostliny,Dub,Chêne,Quercia,Roble,Oak,Quercus robur
+105,Rostliny,Fialka,Violette,Viola,Violeta,Violet,Viola odorata
+106,Rostliny,Habr,Charme,Carpino,Carpe,Hornbeam,Carpinus betulus
+107,Rostliny,Heřmánek,Camomille,Camomilla,Manzanilla,Chamomile,Matricaria chamomilla
+108,Rostliny,Jalovec,Genévrier,Ginepro,Enebro,Juniper,Juniperus communis
+109,Rostliny,Jasan,Frêne,Frassino,Fresno,Ash,Fraxinus excelsior
+110,Rostliny,Jasmín,Jasmin,Gelsomino,Jazmín,Jasmine,Jasminum officinale
+111,Rostliny,Javor,Érable,Acero,Arce,Maple,Acer platanoides
+112,Rostliny,Jedle,Sapin,Abete,Abeto,Fir,Abies alba
+113,Rostliny,Jeřáb,Sorbier,Sorbo,Serbal,Rowan,Sorbus aucuparia
+114,Rostliny,Kaktus,Cactus,Cactus,Cactus,Cactus,Cactaceae
+115,Rostliny,Kapradí,Fougère,Felce,Helecho,Fern,Polypodiopsida
+116,Rostliny,Kapradina,Fougère,Felce,Helecho,Fern,Polypodiopsida
+117,Rostliny,Kaštan,Châtaignier,Castagno,Castaño,Chestnut tree,Castanea sativa
+118,Rostliny,Kopřiva,Ortie,Ortica,Ortiga,Nettle,Urtica dioica
+119,Rostliny,Levandule,Lavande,Lavanda,Lavanda,Lavender,Lavandula angustifolia
+120,Rostliny,Lilie,Lys,Giglio,Lirio,Lily,Lilium candidum
+121,Rostliny,Lípa,Tilleul,Tiglio,Tilo,Linden,Tilia cordata
+122,Rostliny,Mák,Coquelicot,Papavero,Amapola,Poppy,Papaver rhoeas
+123,Rostliny,Máta,Menthe,Menta,Menta,Mint,Mentha spicata
+124,Rostliny,Mech,Mousse,Muschio,Musgo,Moss,Bryophyta
+125,Rostliny,Modřín,Mélèze,Larice,Alerce,Larch,Larix decidua
+126,Rostliny,Narcis,Narcisse,Narciso,Narciso,Daffodil,Narcissus pseudonarcissus
+127,Rostliny,Olše,Aulne,Ontano,Aliso,Alder,Alnus glutinosa
+128,Rostliny,Orchidej,Orchidée,Orchidea,Orquídea,Orchid,Orchidaceae
+129,Rostliny,Ostružiník,Ronce,Rovo,Zarza,Bramble,Rubus fruticosus
+130,Rostliny,Palma,Palmier,Palma,Palma,Palm tree,Arecaceae
+131,Rostliny,Pampeliška,Pissenlit,Dente di leone,Diente de león,Dandelion,Taraxacum officinale
+132,Rostliny,Přeslička,Prêle,Equiseto,Cola de caballo,Horsetail,Equisetum arvense
+133,Rostliny,Rákos,Roseau,Canna,Caña,Reed,Phragmites australis
+134,Rostliny,Rozmarýn,Romarin,Rosmarino,Romero,Rosemary,Salvia rosmarinus
+135,Rostliny,Růže,Rose,Rosa,Rosa,Rose,Rosa canina
+136,Rostliny,Sedmikráska,Marguerite,Margherita,Margarita,Daisy,Bellis perennis
+137,Rostliny,Šípkový keř,Églantier,Rosa canina,Rosal silvestre,Wild rose,Rosa canina
+138,Rostliny,Slunečnice,Tournesol,Girasole,Girasol,Sunflower,Helianthus annuus
+139,Rostliny,Smrk,Épicéa,Abete rosso,Pícea,Spruce,Picea abies
+140,Rostliny,Topol,Peuplier,Pioppo,Álamo,Poplar,Populus nigra
+141,Rostliny,Tráva,Herbe,Erba,Hierba,Grass,Poaceae
+142,Rostliny,Trávník,Gazon,Prato,Césped,Lawn,Poaceae
+143,Rostliny,Tulipán,Tulipe,Tulipano,Tulipán,Tulip,Tulipa gesneriana
+144,Rostliny,Tymián,Thym,Timo,Tomillo,Thyme,Thymus vulgaris
+145,Rostliny,Vrba,Saule,Salice,Sauce,Willow,Salix alba
+146,Základní barvy,Bílá,Blanc,Bianco,Blanco,White,
+147,Základní barvy,Černá,Noir,Nero,Negro,Black,
+148,Základní barvy,Červená,Rouge,Rosso,Rojo,Red,
+149,Základní barvy,Fialová,Violet,Viola,Morado,Purple,
+150,Základní barvy,Hnědá,Marron,Marrone,Marrón,Brown,
+151,Základní barvy,Modrá,Bleu,Blu,Azul,Blue,
+152,Základní barvy,Oranžová,Orange,Arancione,Naranja,Orange,
+153,Základní barvy,Růžová,Rose,Rosa,Rosa,Pink,
+154,Základní barvy,Šedá,Gris,Grigio,Gris,Grey,
+155,Základní barvy,Zelená,Vert,Verde,Verde,Green,
+156,Základní barvy,Žlutá,Jaune,Giallo,Amarillo,Yellow,
+157,Zelenina a ovoce,Ananas,Ananas,Ananas,Piña,Pineapple,
+158,Zelenina a ovoce,Avokádo,Avocat,Avocado,Aguacate,Avocado,
+159,Zelenina a ovoce,Banán,Banane,Banana,Plátano,Banana,
+160,Zelenina a ovoce,Borůvka,Myrtille,Mirtillo,Arándano,Blueberry,
+161,Zelenina a ovoce,Brambor,Pomme de terre,Patata,Patata,Potato,
+162,Zelenina a ovoce,Brambora,Pomme de terre,Patata,Patata,Potato,
+163,Zelenina a ovoce,Brokolice,Brocoli,Broccoli,Brócoli,Broccoli,
+164,Zelenina a ovoce,Broskev,Pêche,Pesca,Melocotón,Peach,
+165,Zelenina a ovoce,Celer,Céleri,Sedano,Apio,Celery,
+166,Zelenina a ovoce,Česnek,Ail,Aglio,Ajo,Garlic,
+167,Zelenina a ovoce,Cibule,Oignon,Cipolla,Cebolla,Onion,
+168,Zelenina a ovoce,Citron,Citron,Limone,Limón,Lemon,
+169,Zelenina a ovoce,Cuketa,Courgette,Zucchina,Calabacín,Zucchini,
+170,Zelenina a ovoce,Dýně,Citrouille,Zucca,Calabaza,Pumpkin,
+171,Zelenina a ovoce,Fazole,Haricots,Fagioli,Judías,Beans,
+172,Zelenina a ovoce,Hlávkový salát,Laitue,Lattuga,Lechuga,Lettuce,
+173,Zelenina a ovoce,Hrášek,Petit pois,Pisello,Guisante,Pea,
+174,Zelenina a ovoce,Hrozny,Raisin,Uva,Uva,Grapes,
+175,Zelenina a ovoce,Hruška,Poire,Pera,Pera,Pear,
+176,Zelenina a ovoce,Jablko,Pomme,Mela,Manzana,Apple,
+177,Zelenina a ovoce,Jahoda,Fraise,Fragola,Fresa,Strawberry,
+178,Zelenina a ovoce,Kiwi,Kiwi,Kiwi,Kiwi,Kiwi,
+179,Zelenina a ovoce,Kukuřice,Maïs,Mais,Maíz,Corn,
+180,Zelenina a ovoce,Květák,Chou-fleur,Cavolfiore,Coliflor,Cauliflower,
+181,Zelenina a ovoce,Lilek,Aubergine,Melanzana,Berenjena,Eggplant,
+182,Zelenina a ovoce,Malina,Framboise,Lampone,Frambuesa,Raspberry,
+183,Zelenina a ovoce,Mandarinka,Mandarine,Mandarino,Mandarina,Mandarin,
+184,Zelenina a ovoce,Mango,Mangue,Mango,Mango,Mango,
+185,Zelenina a ovoce,Meloun,Pastèque,Anguria,Sandía,Watermelon,
+186,Zelenina a ovoce,Meruňka,Abricot,Albicocca,Albaricoque,Apricot,
+187,Zelenina a ovoce,Mrkev,Carotte,Carota,Zanahoria,Carrot,
+188,Zelenina a ovoce,Okurka,Concombre,Cetriolo,Pepino,Cucumber,
+189,Zelenina a ovoce,Paprika,Poivron,Peperone,Pimiento,Pepper,
+190,Zelenina a ovoce,Petržel,Persil,Prezzemolo,Perejil,Parsley,
+191,Zelenina a ovoce,Pomeranč,Orange,Arancia,Naranja,Orange,
+192,Zelenina a ovoce,Pšenice,Blé,Grano,Trigo,Wheat,
+193,Zelenina a ovoce,Rajče,Tomate,Pomodoro,Tomate,Tomato,
+194,Zelenina a ovoce,Salát,Laitue,Lattuga,Lechuga,Lettuce,
+195,Zelenina a ovoce,Špenát,Épinard,Spinaci,Espinaca,Spinach,
+196,Zelenina a ovoce,Švestka,Prune,Prugna,Ciruela,Plum,
+197,Zelenina a ovoce,Třešeň,Cerise,Ciliegia,Cerezo,Cherry,
+198,Zelenina a ovoce,Třešně,Cerise,Ciliegia,Cereza,Cherry,
+199,Zelenina a ovoce,Zelí,Chou,Cavolo,Col,Cabbage,
+200,Zvířata,Delfín,Dauphin,Delfino,Delfín,Dolphin,Tursiops truncatus
+201,Zvířata,Had,Serpent,Serpente,Serpiente,Snake,Serpentes
+202,Zvířata,Jelen,Cerf,Cervo,Ciervo,Deer,Cervus elaphus
+203,Zvířata,Klokan,Kangourou,Canguro,Canguro,Kangaroo,Macropus rufus
+204,Zvířata,Kočka,Chat,Gatto,Gato,Cat,Felis catus
+205,Zvířata,Koza,Chèvre,Capra,Cabra,Goat,Capra hircus
+206,Zvířata,Králík,Lapin,Coniglio,Conejo,Rabbit,Oryctolagus cuniculus
+207,Zvířata,Kráva,Vache,Mucca,Vaca,Cow,Bos taurus
+208,Zvířata,Krokodýl,Crocodile,Coccodrillo,Cocodrilo,Crocodile,Crocodylus niloticus
+209,Zvířata,Krysa,Rat,Ratto,Rata,Rat,Rattus norvegicus
+210,Zvířata,Kůň,Cheval,Cavallo,Caballo,Horse,Equus ferus caballus
+211,Zvířata,Lev,Lion,Leone,León,Lion,Panthera leo
+212,Zvířata,Liška,Renard,Volpe,Zorro,Fox,Vulpes vulpes
+213,Zvířata,Medvěd,Ours,Orso,Oso,Bear,Ursus arctos
+214,Zvířata,Myš,Souris,Topo,Ratón,Mouse,Mus musculus
+215,Zvířata,Netopýr,Chauve-souris,Pipistrello,Murciélago,Bat,Chiroptera
+216,Zvířata,Opice,Singe,Scimmia,Mono,Monkey,Simiiformes
+217,Zvířata,Osel,Âne,Asino,Burro,Donkey,Equus africanus asinus
+218,Zvířata,Ovce,Mouton,Pecora,Oveja,Sheep,Ovis aries
+219,Zvířata,Pavouk,Araignée,Ragno,Araña,Spider,Araneae
+220,Zvířata,Pes,Chien,Cane,Perro,Dog,Canis lupus familiaris
+221,Zvířata,Potkan,Rat,Ratto,Rata,Rat,Rattus norvegicus
+222,Zvířata,Prase,Cochon,Maiale,Cerdo,Pig,Sus scrofa domesticus
+223,Zvířata,Ryba,Poisson,Pesce,Pez,Fish,Pisces
+224,Zvířata,Slepice,Poule,Gallina,Gallina,Hen,Gallus gallus domesticus
+225,Zvířata,Slon,Éléphant,Elefante,Elefante,Elephant,Loxodonta africana
+226,Zvířata,Tygr,Tigre,Tigre,Tigre,Tiger,Panthera tigris
+227,Zvířata,Velbloud,Chameau,Cammello,Camello,Camel,Camelus dromedarius
+228,Zvířata,Velryba,Baleine,Balena,Ballena,Whale,Cetacea
+229,Zvířata,Veverka,Écureuil,Scoiattolo,Ardilla,Squirrel,Sciurus vulgaris
+230,Zvířata,Vlk,Loup,Lupo,Lobo,Wolf,Canis lupus
+231,Zvířata,Žába,Grenouille,Rana,Rana,Frog,Anura
+232,Zvířata,Zajíc,Lièvre,Lepre,Liebre,Hare,Lepus europaeus
+233,Zvířata,Zebra,Zèbre,Zebra,Cebra,Zebra,Equus quagga
+234,Zvířata,Želva,Tortue,Tartaruga,Tortuga,Turtle,Testudines
+235,Zvířata,Žirafa,Girafe,Giraffa,Jirafa,Giraffe,Giraffa camelopardalis
+236,Zvířata,Žralok,Requin,Squalo,Tiburón,Shark,Selachimorpha

@@ -1,0 +1,204 @@
+FRP,CZP,ENP,PD,PE
+assiette,talíř,plate,,ano
+sur,na,on,add,ne
+sur,o (na téma),about,add,ne
+là-bas,tam,there,,ano
+gâteau,"dort, koláč",cake,,ano
+trop,"příliš, moc",toomuch,add,ne
+fort,silný,strong,diakritika?,ano
+fort,hlasitě (nahlas),loud,add - repro poskakuje?,ne
+chapeau,klobouk,hat,,ano
+copine,kamarádka,woman,nespárovalo se se json???,ano
+copine,přítelkyně,woman,nespárovalo se se json?,ano
+chanter,zpívat,sing,nespárovalo se se json??,ano
+portefeuille,peněženka,wallet,nespárovalo se se json - diakritika?,ano
+portefeuille,portfolio (soubor investic),wallet,,ano
+Je m'appelle,jmenuji se,bye,,ano
+Ça va?,Jak se máš?,bye,nespárovalo se se json - diakritika,ano
+Je viens,pocházím,house,nespárovalo se,ano
+Et toi?,A ty?,andyou,add,ne
+enchanté,těší mě,bye,nespárovalo se,ano
+à bientôt,brzy na viděnou,bye,nespárovalo se,ano
+au revoir,na shledanou,bye,,ano
+je voudrais,chtěl bych,Iwouldlike,add,ne
+s'il vous plaît,prosím,please,,ano
+oui,ano,yes,add,ne
+moi,mě,me,add,ne
+aussi,také,also,add,ne
+parfait,skvěle,good,,ano
+ou,nebo,or,,ano
+et,a,and,add,ne
+où,"kde, kam",where,"upraveno FR, IT, json",ano
+d'où,odkud,fromwhere,add,ne
+bien,dobře,good,,ano
+j'ai,mám,Ihave,add,ne
+il habite,bydlí,house,nespárovalo se se json - diakritika?,ano
+tu as,máš,have,add,ne
+neveu,synovec,man,,ano
+nièce,neteř,woman,nespárovalo se se json?,ano
+fille,dcera,sister,,ano
+maintenant,"teď, nyní",now,add,ne
+tante,teta,aunt,,ano
+oncle,strýc,uncle,,ano
+je,já,me,add (mě),ne
+tu,ty,you,add,ne
+il,on,man,,ano
+elle,ona,woman,,ano
+vous,vy,people,,ne
+nous,my,people,,ne
+ils,oni,people,,ne
+elles,ony,people,,ne
+mon,můj,mym,add,ne
+ma,moje,myf,add,ne
+ton,tvůj,yourm,add,ne
+ta,tvá,yourf,add,ne
+une,"ona, jedna",woman,,ano
+un,"on, jeden",man,,ano
+grand-mère,babička,grandmother,nespárovalo se  - diakritika?,ano
+grand-père,dědeček,grandfather,Nespárovalo se  - diakritika?,ano
+très,velmi,very,add,ne
+amusante,zábavný,funny,nespárovalo se - diakritika?,ano
+intéressant,zajímavý,interesting,,ano
+méchant,"zlý, protivný",evil,"nespárovalo se, diakritika?",ano
+je suis,já jsem,iam,,ano
+tu es,ty jsi,youare,add,ne
+sûr,jistý,sure,doplněno do json,ano
+bien sûr,samozřejmě,ofcourse,,ano
+toujours,"pořád, stále, vždy",always,add,ne
+pas du tout,vůbec,notatall,,ano
+mais,ale,but,add,ne
+voyager,cestovat,travel,add,ne
+seule,sám,alone,,ano
+déjà,"už, již",already,add,ne
+à l’heure,"včas, na čas",o'clock,doplněno do json,ano
+cadeau,dárek,present,,ano
+par,"skrz, přes",through,add,ne
+par,za jednotku,per,add (za jednotku...),ne
+par,"od, kým",by,add,ne
+près d’ici,blízko,near,,ano
+pull,svetr,sweater,,ano
+salut,ahoj,hello,,ano
+d’accord,"dobře, jasně",good,,ano
+repas,jídlo,food,,ano
+déjeuner,"obědvat, oběd",meal,,ano
+en général,"obecně, zpravidla, většinou",generally,,ano
+parfois,někdy,sometimes,add,ne
+pause,přestávka,break,add,ne
+pendant,"během, po dobu",during,add,ne
+marcher,"chodit, kráčet",walk,add,ne
+marcher,fungovat,workfunction,add,ne
+ensemble,"společně, dohromady",people,,ano
+prêt,připravený,ready,,ano
+rester,zůstat,stay,,ano
+robe,"šaty, róba",dress,nespárovalo se se json -diakritika?,ano
+chemise,košile,shirt,,ano
+ceinture,pásek,belt,,ano
+excuse,omluva,excuse,"add, doplněno do json",ne
+chercher,hledat,search,,ano
+bleue,modrý,blue,,ano
+noir,černý,black,,ano
+quartier,čtvrť,district,"add, doplněno do json",ne
+on y va,jdeme na to,letsgo,,ano
+aujourd'hui,dnes,today,,ano
+voisin,soused,man,,ano
+clé,klíč,key,add,ne
+viande,maso,meat,add,ne
+coûter,stát,cost,add,ne
+des,nějaké (neurčitý člen množného čísla),some,add,ne
+jouer,"hrát, hrát si",play,opraveno v json,ano
+fête,oslava,party,add,ne
+joli,"pěkný, hezký",beautiful,,ano
+content,spokojený,satisfied,"add, dplněno do json",ne
+jardin,zahrada,garden,,ano
+coûter,stát,costmoney,"add, doplněno do json",ne
+combien,kolik,howmuch,doplněno do json,ano
+amener,"přináší, přivádí",bring,doplněno do json,ano
+comment,"jak, jakým způsobem",how,doplněno do json,ano
+cinq,pět,five,"add, doplněno do json",ne
+journée,den,day,add,ne
+chez,"u někoho, k někomu",atby,add,ne
+cousin,bratranec,cousin,,ano
+pays,země,country,"add, doplněno do json",ne
+pourquoi,proč,why,"add, doplněno do json",ne
+magnifique,"nádherný, úžasný",magnificent,"add, doplněno do json",ne
+lourde,těžký,difficult,doplněno do json,ano
+fatigué,unavený,tired,,ano
+boulangerie,pekárna,bakery,,ano
+maison,dům,house,,ano
+capitale,hlavní město,city,doplněno do json,ano
+adorer,"zbožňovat, milovat",adore,"add, doplněno do json",ne
+un peu,trochu,abit,"add, doplněno do json",ne
+homme,muž,man,doplněno do json,ano
+femme,žena,woman,doplněno do json,ano
+garçon,chlapec,boy,"add, doplněno do json",ne
+fille,dívka,woman,,ano
+père,otec,father,,ano
+mère,matka,mother,,ano
+frère,bratr,man,,ano
+soeur,sestra,sister,,ano
+fils,syn,man,,ano
+appartement,byt,apartment,"add, doplněno do json",ne
+école,škola,school,,ano
+livre,kniha,book,,ano
+table,stůl,table,,ano
+chaise,židle,chair,"add, doplněno do json",ne
+voiture,auto,car,,ano
+train,vlak,train,"add, doplněno do json",ne
+ville,město,city,,ano
+hôtel,hotel,hotel,"add, doplněno do json",ne
+sac,taška,bag,,ano
+bienvenue,vítejte,welcome,opraveno v json,ano
+couteau,nůž,knife,"add, doplněno do json",ne
+sucre,cukr,sugar,"add, doplněno do json",ne
+farine,mouka,,,ne
+placard,"skříňka, kredenc",cupboard,"add, doplněno do json",ne
+cassée,"rozbitý, vyřízený",broken,"add, doplněno do json",ne
+verre,sklenice,glass,,ano
+mince,"hubený, sakra",thindarn,"add, přidáno do json",ne
+sale,špinavý,dirty,,ano
+tasse,hrnek,cup,"add, přidáno do json",ne
+laver,"mýt, prát",wash,"add, přidáno do json",ne
+collègue,kolega,colleague,"add, přidáno do json",ne
+chaud,"teplý, horký",hot,"add, doplněno do json",ne
+fourchette,vidlička,fork,"add, doplněno do json",ne
+rien,nic,nothing,"add, doplněno do json",ne
+vouloir,chtít,want,"add, doplněno do json",ne
+arriver,"přijít, přijet",arrive,"add, doplněno do json",ne
+inviter,pozvat,invite,"add, doplněno do json",ne
+invité,pozvaný host,invite,"add, doplněno do json",ne
+serviette,"ubrousek, ručník",towelnapkin,"add, doplněno do json",ne
+appétit,chuť,appetite,"add, doplněno do json",ne
+en espèces,v hotovosti,incash,"add, doplněno do json",ne
+peut-être,možná,maybe,"add, doplněno do json",ne
+quoi,co,what,,ano
+anniversaire,"narozeniny, výročí",cake2,,ano
+vélo,kolo,bike,,ano
+beau,"krásný, hezký",beautiful,,ano
+belle,krásná,beautiful,,ano
+juste,"jen, právě, správný",just,"add, doplněno do json",ne
+nouveau,nový,new,,ano
+vouloir,chtít,want,add,ne
+eau,voda,water,,ano
+"neuf, neuve","devět, nový",ninenew,"add, doplněno do json",ne
+heure,hodina,clock,,ano
+vraiment,"opravdu, skutečně",really,"add, doplněno do json",ne
+que,že,that,"add, doplněno do json",ne
+perdu,ztracený,lost,"add, doplněno do json",ne
+je ne sais pas,nevím,idontknow,"add, doplněno do json",ne
+préparer,"připravit, připravovat",prepare,"add, doplněno do json",ne
+pressé,"spěchající, ve spěchu",inhurry,"add, doplněno do json",ne
+glace,"zmrzlina, led, sklo",iceglass,"add, doplněno do json",ne
+autre,"jiný, další",other,"add, doplněno do json",ne
+métier,"povolání, řemeslo",jobtrade,"add, doplněno do json",ne
+docteur,"doktor, lékař",doctor,"add, doplněno do json",ne
+hôpital,nemocnice,hospital,"add, doplněno do json",ne
+avocat,advokát,lawyer,"add, doplněno do json",ne
+avocat,avokádo,avocado,"add, doplněno do json",ne
+joyeux,"veselý, radostný",joyful,"add, doplněno do json",ne
+quelqu’un,někdo,someone,"add, doplněno do json",ne
+Brésil,Brazílie,brazil,"add, doplněno do json",ne
+bonne soirée,hezký večer,niceevening,"add, doplněno do json",ne
+bonne journée,hezký den,goodday,"add, doplněno do json",ne
+ingénieur,inženýr,engineer,"add, doplněno do json",ne
+à plus tard,"později, uvidíme se později",seeyoulater,"add, doplněno do json",ne
+travail,práce,labour,"add, doplněno do json",ne

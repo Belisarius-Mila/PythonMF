@@ -1,0 +1,137 @@
+Handoff: iCloud e-mail pro Samantha Agent
+Datum: 2026-05-18
+
+Ucel
+----
+Mila chtel zjistit, zda muze Samantha/Codex cist jeho e-maily a zda lze povolit
+dlouhodoby pristup. Vysledkem je smer: prvni prototyp ma cist iCloud Mail pres
+IMAP read-only test, bez odesilani, mazani, presouvani, oznacovani jako prectene
+a bez automatickeho ukladani obsahu e-mailu do pameti.
+
+Citlive udaje
+-------------
+V rozhovoru byla uvedena konkretni iCloud adresa. Do tohoto handoffu neni ulozena
+v plnem zneni; je redigovana jako [iCloud adresa redigovana]. Nebylo sdileno zadne
+app-specific heslo. Pokud bude heslo vytvoreno, patri pouze do lokalniho `.env`,
+nikdy do gitu, dokumentace, chatu ani pameti.
+
+Chronologie konverzace o e-mailech
+----------------------------------
+Mila se zeptal, zda mam pristup k jeho e-mailum a zda je muzu cist. Bylo mu
+vysvetleno, ze momentalne pristup k e-mailum nemam, nevidim Gmail/Outlook/iCloud
+schranku a vidim jen obsah poskytnuty v chatu, nahrane soubory nebo lokalni soubory
+v povolenem workspace.
+
+Byly navrzeny tri prakticke cesty:
+1. Poslat konkretni text e-mailu do chatu.
+2. Exportovat e-mail jako `.eml`, `.txt` nebo PDF do projektu.
+3. Budouci integrace pres bezpecny read-only pristup.
+
+Mila zvolil cestu 3. Byla nactena projektova pamet a existujici handoff k Apple
+Mail opravenim z 2026-05-17. Bylo vysvetleno, ze drive resene odesilani pres Apple
+Mail zavisi na macOS GUI opravnenich, ale pro dlouhodobe spolehlive cteni je lepsi
+nechodit pres aplikaci Mail, nybrz pres server poskytovatele.
+
+Byl zalozen projektovy zaznam:
+`memory/projects/email_readonly_oauth.md`
+
+Do nej byla zapsana pravidla:
+- prvni verze pouze read-only,
+- bez odesilani,
+- bez mazani,
+- bez oznacovani jako prectene,
+- bez automatickeho archivovani nebo stitkovani,
+- bez automatickeho ukladani obsahu e-mailu do pameti,
+- tokeny, hesla a secrets patri pouze do lokalniho `.env` nebo systemoveho uloziste.
+
+Mila upresnil, ze potrebuje e-maily "zde na iPhonu potazmo Macu" pod stejnym uctem.
+Bylo vysvetleno, ze iPhone a Mac nejsou zdroj e-mailu, ale klienti. Samantha se ma
+napojit na server uctu, ktery je v Mailu pouzivan.
+
+Byly vysvetleny varianty:
+- iCloud Mail / Apple ucet -> IMAP pres iCloud Mail,
+- Gmail ucet v Apple Mailu -> Gmail API OAuth,
+- Outlook / Microsoft ucet v Apple Mailu -> Microsoft Graph.
+
+Mila uvedl konkretni iCloud adresu; v pameti je redigovana. Bylo mu receno, ze
+konkretni adresa nebude ukladana do pameti ani dokumentace. V lokalnim `.env` byla
+pripravena jako konfiguracni hodnota pro test, protoze `.env` je ignorovany gitem.
+
+Byl vytvoren testovaci skript:
+`scripts/icloud_list_recent.py`
+
+Skript:
+- cte konfiguraci z `.env`,
+- pouziva `imap.mail.me.com` na portu 993,
+- prihlasi se pres iCloud e-mail a app-specific password,
+- vybere `INBOX` v read-only rezimu,
+- pouzije `BODY.PEEK[HEADER.FIELDS (DATE FROM SUBJECT)]`,
+- vypise pouze datum, odesilatele a predmet poslednich zprav,
+- necte telo e-mailu,
+- nema kod pro mazani, odesilani, presun ani upravu zprav.
+
+Byla doplnena `.env.example` o ukazkove hodnoty:
+- `ICLOUD_MAIL_ADDRESS=your_icloud_email_here`
+- `ICLOUD_MAIL_APP_PASSWORD=your_app_specific_password_here`
+
+Lokalni `.env` byl vytvoren, protoze neexistoval. Obsahuje placeholder pro
+`ICLOUD_MAIL_APP_PASSWORD`. Skutecne heslo musi doplnit Mila lokalne. `.env` je
+ignorovany gitem pravidlem `**/.env`.
+
+Mila se ptal, zda ma otevrit `appleid.apple.com` v prohlizeci. Bylo potvrzeno, ze
+ano, idealne na Macu. Postup:
+1. Otevrit `https://appleid.apple.com`.
+2. Prihlasit se.
+3. Otevrit `Sign-In and Security`.
+4. Najit `Hesla pro konkretni aplikace`.
+5. Vygenerovat heslo s nazvem napr. `Samantha Agent`.
+6. Heslo neposilat do chatu.
+7. Vlozit ho lokalne do `.env`.
+
+Mila nasel polozku "Hesla pro konkretni aplikace". Bylo potvrzeno, ze je to spravne.
+
+Mila se ptal, kde najde `.env`. Bylo zjisteno, ze `.env` jeste neexistuje. Byl
+vytvoren lokalni `.env` a Milovi bylo doporuceno otevrit ho pres:
+
+`open -a TextEdit /Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent/.env`
+
+Pak mel nahradit placeholder `sem_vloz_app_specific_password` heslem od Apple.
+
+Testovaci prikaz byl:
+
+`cd /Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent`
+`python3 scripts/icloud_list_recent.py --limit 10`
+
+Mila napsal, ze to hlasilo "no such file or directory" a ze se nenasel
+`icloud_list_recent.py`. Bylo overeno, ze soubor existuje na ceste:
+
+`/Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent/scripts/icloud_list_recent.py`
+
+Byl doporucen prikaz s plnou cestou:
+
+`python3 /Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent/scripts/icloud_list_recent.py --limit 10`
+
+Aktualni stav pri preruseni
+---------------------------
+Mila napsal, ze se to stale nedari, a pozadal o ulozeni cele e-mailove konverzace
+jako `.txt` a zaroven o ulozeni sekce o povoleni e-mailu do pameti.
+
+Soucasne soubory relevantni k navazani:
+- `scripts/icloud_list_recent.py`
+- `.env` lokalne, ignorovany gitem, obsahuje iCloud konfiguraci a placeholder hesla
+- `.env.example`
+- `memory/projects/email_readonly_oauth.md`
+- tento handoff: `memory/handoffs/email_icloud_setup_conversation_2026_05_18.txt`
+
+Prakticky dalsi krok pri navazani
+---------------------------------
+1. Nechat Milu zkontrolovat, ze skutecne app-specific heslo je vlozene v lokalnim `.env`.
+2. Spustit test prikazem s absolutni cestou:
+   `python3 /Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent/scripts/icloud_list_recent.py --limit 10`
+3. Pokud spadne, vyzadat presnou chybu bez hesla.
+4. Pokud bude chyba `ModuleNotFoundError: dotenv`, nainstalovat nebo pouzit existujici
+   prostredi se zavislostmi podle `requirements.txt`.
+5. Pokud bude chyba prihlaseni, zkontrolovat app-specific password, zapnutou 2FA u Apple
+   ID a IMAP pristup k iCloud Mailu.
+6. Pokud projde, dalsi krok je pridat normalizovane rozhrani do `app/email/` a teprve
+   pak nastroj pro Samanthu.

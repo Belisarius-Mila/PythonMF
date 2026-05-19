@@ -1,0 +1,14 @@
+# Always skipped: rebuildable caches, virtual environments, generated apps,
+# editor/system noise. These are not needed for source-level recovery.
+.DS_Store
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+node_modules/
+build/
+dist/
+*.pyc
+*.pyo

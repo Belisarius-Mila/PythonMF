@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1407 768" role="img" aria-label="Benji and Bunny forest placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#cbead8"/>
+      <stop offset="50%" stop-color="#9bd0a4"/>
+      <stop offset="100%" stop-color="#6ea86c"/>
+    </linearGradient>
+    <radialGradient id="light" cx="70%" cy="18%" r="45%">
+      <stop offset="0%" stop-color="#fff8cf" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#fff8cf" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1407" height="768" fill="url(#bg)"/>
+  <rect width="1407" height="768" fill="url(#light)"/>
+  <g opacity="0.25" fill="#355b36">
+    <rect x="60" y="0" width="90" height="768" rx="45"/>
+    <rect x="250" y="0" width="72" height="768" rx="36"/>
+    <rect x="1070" y="0" width="84" height="768" rx="42"/>
+    <rect x="1260" y="0" width="64" height="768" rx="32"/>
+  </g>
+  <g fill="#5d8b4a" opacity="0.8">
+    <ellipse cx="240" cy="120" rx="220" ry="95"/>
+    <ellipse cx="540" cy="90" rx="240" ry="110"/>
+    <ellipse cx="1100" cy="110" rx="260" ry="115"/>
+  </g>
+  <g>
+    <ellipse cx="540" cy="625" rx="190" ry="85" fill="#8f6a43" opacity="0.18"/>
+    <ellipse cx="820" cy="640" rx="150" ry="70" fill="#8f6a43" opacity="0.16"/>
+  </g>
+  <g transform="translate(430 250)">
+    <ellipse cx="150" cy="340" rx="120" ry="42" fill="#8b6b4c" opacity="0.22"/>
+    <ellipse cx="155" cy="130" rx="75" ry="95" fill="#a96b3f"/>
+    <ellipse cx="150" cy="285" rx="68" ry="102" fill="#a96b3f"/>
+    <ellipse cx="125" cy="118" rx="22" ry="35" fill="#fff4e8"/>
+    <ellipse cx="183" cy="118" rx="22" ry="35" fill="#fff4e8"/>
+    <ellipse cx="154" cy="165" rx="48" ry="42" fill="#fff7ef"/>
+    <circle cx="126" cy="114" r="9" fill="#352417"/>
+    <circle cx="183" cy="114" r="9" fill="#352417"/>
+    <path d="M150 180 q18 16 36 0" stroke="#6d4027" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <rect x="68" y="210" width="52" height="95" rx="24" fill="#a96b3f"/>
+    <rect x="188" y="210" width="52" height="95" rx="24" fill="#a96b3f"/>
+    <rect x="110" y="320" width="34" height="108" rx="16" fill="#a96b3f"/>
+    <rect x="165" y="320" width="34" height="108" rx="16" fill="#a96b3f"/>
+    <rect x="190" y="190" width="74" height="90" rx="18" fill="#8b6c4f"/>
+    <rect x="202" y="202" width="50" height="58" rx="10" fill="#c6a57c"/>
+  </g>
+  <g transform="translate(790 275)">
+    <ellipse cx="96" cy="300" rx="92" ry="36" fill="#8b6b4c" opacity="0.2"/>
+    <ellipse cx="90" cy="105" rx="58" ry="84" fill="#f7f5f0"/>
+    <ellipse cx="64" cy="28" rx="24" ry="70" fill="#f7f5f0" transform="rotate(-12 64 28)"/>
+    <ellipse cx="119" cy="26" rx="24" ry="70" fill="#f7f5f0" transform="rotate(15 119 26)"/>
+    <ellipse cx="64" cy="34" rx="12" ry="46" fill="#f3b4be" transform="rotate(-12 64 34)"/>
+    <ellipse cx="119" cy="32" rx="12" ry="46" fill="#f3b4be" transform="rotate(15 119 32)"/>
+    <ellipse cx="90" cy="225" rx="58" ry="82" fill="#f7f5f0"/>
+    <circle cx="70" cy="100" r="8" fill="#2b231e"/>
+    <circle cx="112" cy="98" r="8" fill="#2b231e"/>
+    <path d="M90 124 q14 10 28 0" stroke="#8d5a57" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <rect x="32" y="254" width="26" height="88" rx="13" fill="#f7f5f0"/>
+    <rect x="124" y="254" width="26" height="88" rx="13" fill="#f7f5f0"/>
+    <rect x="116" y="148" width="70" height="86" rx="18" fill="#6f8d56"/>
+    <rect x="130" y="161" width="42" height="52" rx="10" fill="#9db17a"/>
+  </g>
+</svg>

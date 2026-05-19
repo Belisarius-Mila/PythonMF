@@ -1,0 +1,100 @@
+FRP	CZP	ENP
+un peu	trochu	abit
+sur	o (na téma)	about
+adorer	zbožňovat, milovat	adore
+déjà	už, již	already
+aussi	také	also
+toujours	pořád, stále, vždy	always
+et	a	and
+Et toi?	A ty?	andyou
+appartement	byt	apartment
+appétit	chuť	appetite
+arriver	přijít, přijet	arrive
+chez	u někoho, k někomu	atby
+avocat	avokádo	avocado
+garçon	chlapec	boy
+Brésil	Brazílie	brazil
+pause	přestávka	break
+cassée	rozbitý, vyřízený	broken
+mais	ale	but
+par	od, kým	by
+chaise	židle	chair
+collègue	kolega	colleague
+coûter	stát	cost
+coûter	stát	costmoney
+pays	země	country
+tasse	hrnek	cup
+placard	skříňka, kredenc	cupboard
+journée	den	day
+quartier	čtvrť	district
+docteur	doktor, lékař	doctor
+pendant	během, po dobu	during
+ingénieur	inženýr	engineer
+excuse	omluva	excuse
+cinq	pět	five
+fourchette	vidlička	fork
+d'où	odkud	fromwhere
+bonne journée	hezký den	goodday
+tu as	máš	have
+hôpital	nemocnice	hospital
+chaud	teplý, horký	hot
+hôtel	hotel	hotel
+glace	zmrzlina, led, sklo	iceglass
+je ne sais pas	nevím	idontknow
+j'ai	mám	Ihave
+en espèces	v hotovosti	incash
+pressé	spěchající, ve spěchu	inhurry
+inviter	pozvat	invite
+invité	pozvaný host	invite
+je voudrais	chtěl bych	Iwouldlike
+métier	povolání, řemeslo	jobtrade
+joyeux	veselý, radostný	joyful
+juste	jen, právě, správný	just
+clé	klíč	key
+couteau	nůž	knife
+travail	práce	labour
+avocat	advokát	lawyer
+perdu	ztracený	lost
+fort	hlasitě (nahlas)	loud
+magnifique	nádherný, úžasný	magnificent
+peut-être	možná	maybe
+je	já	me
+moi	mě	me
+viande	maso	meat
+ma	moje	myf
+mon	můj	mym
+bonne soirée	hezký večer	niceevening
+neuf, neuve	devět, nový	ninenew
+rien	nic	nothing
+maintenant	teď, nyní	now
+sur	na	on
+autre	jiný, další	other
+fête	oslava	party
+par	za jednotku	per
+préparer	připravit, připravovat	prepare
+vraiment	opravdu, skutečně	really
+content	spokojený	satisfied
+à plus tard	později, uvidíme se později	seeyoulater
+des	nějaké (neurčitý člen množného čísla)	some
+quelqu’un	někdo	someone
+parfois	někdy	sometimes
+sucre	cukr	sugar
+que	že	that
+mince	hubený, sakra	thindarn
+par	skrz, přes	through
+trop	příliš, moc	toomuch
+serviette	ubrousek, ručník	towelnapkin
+train	vlak	train
+voyager	cestovat	travel
+très	velmi	very
+marcher	chodit, kráčet	walk
+vouloir	chtít	want
+vouloir	chtít	want
+laver	mýt, prát	wash
+pourquoi	proč	why
+marcher	fungovat	workfunction
+oui	ano	yes
+tu	ty	you
+tu es	ty jsi	youare
+ta	tvá	yourf
+ton	tvůj	yourm
