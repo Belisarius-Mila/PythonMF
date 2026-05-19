@@ -48,6 +48,16 @@ class AppliedPhotoImportResult:
     warnings: tuple[str, ...]
 
 
+@dataclass(frozen=True)
+class _PhotoImportPlan:
+    row: dict[str, str]
+    source_name: str
+    target_name: str
+    source_path: Path
+    target_path: Path
+    csv_source: str
+
+
 def prepare_lekarna_photo_import_manifest(
     photo_dir: Path = DEFAULT_PHOTO_DIR,
     csv_path: Path = DEFAULT_DOMACI_LEKY_CSV,
@@ -123,35 +133,28 @@ def apply_lekarna_photo_import_manifest(
     _ensure_within_project(report_dir)
 
     rows = _load_manifest_rows(manifest_path)
+    plans = _plan_photo_import(rows, photo_dir)
     existing_sources = _load_existing_sources(csv_path)
     backup_path = _backup_csv(csv_path)
     warnings: list[str] = []
     renamed: list[tuple[str, str]] = []
     appended_rows: list[dict[str, str]] = []
 
-    for row in rows:
-        source_name = _safe_filename(row["source_file"], "source_file")
-        target_name = _safe_filename(row["new_file"], "new_file")
-        source_path = photo_dir / source_name
-        target_path = photo_dir / target_name
-        csv_source = f"{photo_dir.name}/{target_name}"
-
-        if source_path.exists():
-            if target_path.exists():
-                raise ValueError(f"Cilovy soubor uz existuje: {target_name}")
-            source_path.rename(target_path)
-            renamed.append((source_name, target_name))
-        elif target_path.exists():
-            warnings.append(f"Fotka uz byla prejmenovana: {target_name}")
+    for plan in plans:
+        if plan.source_path.exists():
+            plan.source_path.rename(plan.target_path)
+            renamed.append((plan.source_name, plan.target_name))
+        elif plan.target_path.exists():
+            warnings.append(f"Fotka uz byla prejmenovana: {plan.target_name}")
         else:
-            raise ValueError(f"Chybi zdrojova fotka: {source_name}")
+            raise ValueError(f"Chybi zdrojova fotka: {plan.source_name}")
 
-        if csv_source in existing_sources:
-            warnings.append(f"CSV uz obsahuje zdroj: {csv_source}")
+        if plan.csv_source in existing_sources:
+            warnings.append(f"CSV uz obsahuje zdroj: {plan.csv_source}")
             continue
 
-        appended_rows.append(_manifest_row_to_csv_row(row, csv_source))
-        existing_sources.add(csv_source)
+        appended_rows.append(_manifest_row_to_csv_row(plan.row, plan.csv_source))
+        existing_sources.add(plan.csv_source)
 
     with csv_path.open("a", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=FIELD_NAMES)
@@ -283,6 +286,43 @@ def _validate_manifest_row(row: dict[str, str], line_number: int) -> None:
         raise ValueError(f"Radek {line_number}: chybi {', '.join(missing)}")
     if Path(row["new_file"]).suffix.casefold() not in PHOTO_EXTENSIONS:
         raise ValueError(f"Radek {line_number}: new_file musi byt podporovana fotka")
+
+
+def _plan_photo_import(rows: list[dict[str, str]], photo_dir: Path) -> list[_PhotoImportPlan]:
+    plans: list[_PhotoImportPlan] = []
+    seen_sources: set[str] = set()
+    seen_targets: set[str] = set()
+
+    for index, row in enumerate(rows, start=2):
+        source_name = _safe_filename(row["source_file"], "source_file")
+        target_name = _safe_filename(row["new_file"], "new_file")
+        source_path = photo_dir / source_name
+        target_path = photo_dir / target_name
+
+        if source_name in seen_sources:
+            raise ValueError(f"Radek {index}: duplicitni source_file: {source_name}")
+        if target_name in seen_targets:
+            raise ValueError(f"Radek {index}: duplicitni new_file: {target_name}")
+        seen_sources.add(source_name)
+        seen_targets.add(target_name)
+
+        if source_path.exists() and target_path.exists():
+            raise ValueError(f"Radek {index}: cilovy soubor uz existuje: {target_name}")
+        if not source_path.exists() and not target_path.exists():
+            raise ValueError(f"Radek {index}: chybi zdrojova fotka: {source_name}")
+
+        plans.append(
+            _PhotoImportPlan(
+                row=row,
+                source_name=source_name,
+                target_name=target_name,
+                source_path=source_path,
+                target_path=target_path,
+                csv_source=f"{photo_dir.name}/{target_name}",
+            )
+        )
+
+    return plans
 
 
 def _manifest_row_to_csv_row(row: dict[str, str], csv_source: str) -> dict[str, str]:

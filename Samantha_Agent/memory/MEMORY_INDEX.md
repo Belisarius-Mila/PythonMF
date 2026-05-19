@@ -26,6 +26,14 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `projects/samantha_external_backup.md` - návrh offline zálohování `PythonMF`/Samanthy na externí disk: safe/recovery profily, šifrovaný kontejner, dry-run skript a 3denní připomínka.
 - `../RECOVERY_FROM_BACKUP.md` - lidský a Codex návod pro obnovu Samanthy z externí zálohy na novém Macu.
 
+## Infrastructure Recovery
+
+- `infrastructure/macos_network_recovery.md` - [PRIPOMENOUT] rozcestnik pro DHCP failure, VPN/Tailscale recovery, network plist reset, hotspot/Wi-Fi repair a offline `NETWORK_RECOVERY_CARD.txt`.
+- `infrastructure/codex_reconnect_recovery.md` - [PRIPOMENOUT] reconnect loop handling, navazani pres `samantha`/`screen`, `codex resume`, safe recovery after stream failure a pravidlo nejdrive cist git status + memory.
+- `infrastructure/git_checkpoint_protocol.md` - [PRIPOMENOUT] commit pred rizikovymi operacemi, push pred reconnect recovery, zakaz `git add .`, ochrana cizich zmen a citlivych dat.
+- `infrastructure/ssh_setup.md` - SSH/screen workflow pro vzdalenou praci se Samanthou bez ukladani privatnich SSH tajemstvi.
+- `infrastructure/tailscale_setup.md` - Tailscale provozni poznamky, opatrny start po sitovem incidentu a odkazy na macOS network recovery.
+
 ## Handoffs
 
 - `handoffs/lekarna_audit_tool_done_2026_05_19.md` - [PRIPOMENOUT] Lekarna ma druhy read-only Samantha tool `audit_domaci_lekarna`, ktery vraci checklist polozek k fyzicke kontrole: expirace, umisteni, `nutno_overit`, zbytky bez krabicky, jistota cteni, antibiotika a redeni krve; dalsi krok je live test pres Samanthu a az potom navrh potvrzovaneho zapisoveho workflow.

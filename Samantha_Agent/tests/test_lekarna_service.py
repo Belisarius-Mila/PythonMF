@@ -265,6 +265,46 @@ class LekarnaServiceTests(unittest.TestCase):
                     confirmation_text="",
                 )
 
+    def test_photo_import_apply_preflights_before_renaming(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            directory = Path(temp_dir)
+            photo_dir = directory / "Leky_v_Krabickach"
+            photo_dir.mkdir()
+            (photo_dir / "IMG_1004.HEIC").write_text("fake", encoding="utf-8")
+            csv_path = _fake_csv(directory)
+            manifest_path = directory / "manifest.csv"
+            _write_manifest(
+                manifest_path,
+                [
+                    {
+                        "include": "ano",
+                        "source_file": "IMG_1004.HEIC",
+                        "new_file": "first_valid.heic",
+                        "nazev": "First Valid",
+                    },
+                    {
+                        "include": "ano",
+                        "source_file": "IMG_MISSING.HEIC",
+                        "new_file": "missing_source.heic",
+                        "nazev": "Missing Source",
+                    },
+                ],
+            )
+
+            with self.assertRaises(ValueError):
+                apply_lekarna_photo_import_manifest(
+                    manifest_path=manifest_path,
+                    photo_dir=photo_dir,
+                    csv_path=csv_path,
+                    report_dir=directory,
+                    user_confirmed=True,
+                    confirmation_text=APPLY_CONFIRMATION_PHRASE,
+                )
+
+            self.assertTrue((photo_dir / "IMG_1004.HEIC").exists())
+            self.assertFalse((photo_dir / "first_valid.heic").exists())
+            self.assertEqual(list(directory.glob("domaci_leky.backup_before_photo_import_*.csv")), [])
+
 
 def _fake_csv(directory: Path) -> Path:
     csv_path = directory / "domaci_leky.csv"
