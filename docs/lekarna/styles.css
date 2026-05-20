@@ -265,7 +265,7 @@ input {
 }
 
 .drawer.is-detail {
-  width: min(940px, calc(100vw - 36px));
+  width: min(980px, calc(100vw - 36px));
 }
 
 .drawer.is-open {
@@ -412,8 +412,8 @@ input {
 
 .medicine-detail-grid {
   display: grid;
-  grid-template-columns: minmax(190px, 0.48fr) minmax(430px, 1fr);
-  gap: 16px;
+  grid-template-columns: minmax(150px, 0.34fr) minmax(540px, 1fr);
+  gap: 12px;
   align-items: stretch;
 }
 
@@ -426,7 +426,7 @@ input {
 }
 
 .photo-window {
-  padding: 12px;
+  padding: 10px;
   background:
     linear-gradient(180deg, rgba(244, 231, 197, 0.14), rgba(74, 43, 18, 0.18)),
     rgba(244, 231, 197, 0.06);
@@ -446,7 +446,7 @@ input {
 .medicine-photo-frame img {
   display: block;
   width: 100%;
-  max-height: 230px;
+  max-height: 160px;
   object-fit: contain;
   border: 1px dashed rgba(216, 177, 92, 0.48);
   border-radius: 7px;
@@ -465,20 +465,20 @@ input {
 .photo-caption {
   margin: 10px 0 0;
   color: rgba(244, 231, 197, 0.72);
-  font-size: 0.88rem;
+  font-size: 0.78rem;
 }
 
 .pil-window {
-  min-height: 500px;
-  padding: 114px 92px 88px;
+  min-height: 560px;
+  padding: 136px 118px 104px;
   background:
-    linear-gradient(rgba(255, 244, 213, 0.2), rgba(255, 244, 213, 0.2)),
-    url("./assets/ipl-short.png") center / cover no-repeat;
+    linear-gradient(rgba(255, 244, 213, 0.1), rgba(255, 244, 213, 0.1)),
+    url("./assets/ipl-short.png") center / 100% 100% no-repeat;
   color: #2b1709;
 }
 
 .pil-scroll {
-  max-height: 292px;
+  max-height: 320px;
   overflow-y: auto;
   padding-right: 10px;
   scrollbar-width: thin;
@@ -503,6 +503,12 @@ input {
 .pil-warning {
   margin-top: 12px;
   font-style: italic;
+}
+
+.chatgpt-status {
+  margin: 10px 0 0;
+  color: rgba(244, 231, 197, 0.74);
+  font-size: 0.9rem;
 }
 
 @keyframes breathe {
@@ -577,12 +583,12 @@ input {
   }
 
   .pil-window {
-    min-height: 390px;
-    padding: 78px 46px 62px;
+    min-height: 420px;
+    padding: 90px 56px 72px;
   }
 
   .pil-scroll {
-    max-height: 230px;
+    max-height: 245px;
   }
 
   .hotspot::after {

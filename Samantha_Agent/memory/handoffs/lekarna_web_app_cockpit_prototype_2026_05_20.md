@@ -55,6 +55,12 @@ Funguje:
 - detail leku ma prototypove dve okna:
   - male foto krabicky / placeholder,
   - pergamenove okno `PIL_Short` s podkladem `IPL_Short.PNG`.
+- Po rucnim testu 2026-05-20 byl detail upraven:
+  - pergamen je hlavni viditelna cast, neni oriznuty pres hrany,
+  - foto sloupec je zmenseny,
+  - text v pergamenu ma vetsi vnitrni okraje a vlastni scroll,
+  - ChatGPT fallback otevira pojmenovanou samostatnou zalozku a v aplikaci nechava
+    puvodni panel otevreny.
 
 MP3 napoveda byla vygenerovana z textu s diakritikou:
 
@@ -109,7 +115,7 @@ ChatGPT fallback:
 
 - Skutecna data z `data/lekarna/domaci_leky.csv` zatim nejsou napojena.
 - Seznamy leku v krabickach jsou zatim mock/prototyp.
-- Detail leku zatim nezobrazuje skutecne foto krabicky a skutecny `PIL_Short`.
+- Detail leku zatim pouziva ukazkovou fotku a modelovy `PIL_Short`.
 - Neni hotovy git-safe/export/sifrovaci krok.
 - Heslova brana je zatim jen vizualni/local session brana, ne skutecna ochrana dat.
 - Neprobehl Playwright vizualni test; drive byl blokovan sitovym omezenim npm.
@@ -130,6 +136,7 @@ ChatGPT fallback:
    - `PIL_Short`,
    - `PIL_Match_Status`,
    - zdroj/datum overeni.
+   Migraci skutecnych dat delat az po rozhodnuti exportu/sifrovani.
 5. Z lokalnich query pravidel postupne udelat data-driven mapovani nad exportem,
    aby se nemusela udrzovat natvrdo v `app.js`.
 

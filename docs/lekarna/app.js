@@ -291,11 +291,13 @@ function openSymptoms() {
     if (!matches.length) {
       result.innerHTML = `
         <p>Nerozumím přesně nebo v domácí evidenci nemám jasnou shodu. Můžete zkusit vybrat oblast ručně.</p>
+        <p>ChatGPT se otevře v nové záložce. Tato lékárna zůstane otevřená v původní záložce.</p>
         ${renderIntentSuggestions()}
         <div class="action-row">
-          <button type="button" class="secondary-action" id="openChatGpt">OK, otevřít ChatGPT</button>
+          <button type="button" class="secondary-action" id="openChatGpt">Otevřít ChatGPT v nové záložce</button>
           <button type="button" class="secondary-action" id="closeQuestion">Zavřít</button>
         </div>
+        <p class="chatgpt-status" id="chatGptStatus"></p>
       `;
       result.querySelectorAll("[data-intent-index]").forEach((button) => {
         button.addEventListener("click", () => {
@@ -372,7 +374,15 @@ function openChatGpt(rawQuestion) {
     "Odpověz obecně a bezpečně. Neznáš moje diagnózy ani léky.",
     "Upozorni, kdy je vhodné kontaktovat lékaře nebo lékárníka.",
   ].join(" ");
-  window.open(`https://chatgpt.com/?q=${encodeURIComponent(prompt)}`, "_blank", "noopener,noreferrer");
+  const url = `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`;
+  const opened = window.open(url, "lekarnaChatGpt");
+  const status = document.querySelector("#chatGptStatus");
+  if (status) {
+    status.textContent = opened
+      ? "ChatGPT je otevřený v samostatné záložce. Do lékárny se vrátíte původní záložkou."
+      : "Prohlížeč nové okno zablokoval. Povolte vyskakovací okno nebo otevřete ChatGPT ručně.";
+  }
+  window.focus();
 }
 
 async function playHelp() {
