@@ -103,6 +103,13 @@ Funguje:
     před otevřením krabiček/dotazu čeká na dokončení načtení dat,
   - kliknutí na ChatGPT se nově provádí přes dočasný `<a target="_blank"
     rel="noopener noreferrer">`, aby původní lékárna zůstala otevřená.
+- Po testu na iPhonu/Macu bylo potvrzeno, ze prohlizece se chovaji ruzne:
+  iPhone otevira ChatGPT do jineho okna/zalozky, Mac v nekterem prohlizeci muze
+  nahradit aktualni zalozku. Proto byl ChatGPT fallback zmenen na mezikrok:
+  aplikace nejdrive ukaze panel "Otevřít ChatGPT?" a v nem obycejny viditelny
+  odkaz `<a target="_blank" rel="noopener noreferrer">`. Uživatel tedy klikne
+  primo na normalni odkaz, coz je pro prohlizece spolehlivejsi nez programove
+  otevirani okna.
 
 MP3 napoveda byla vygenerovana z textu s diakritikou:
 
@@ -226,6 +233,8 @@ ChatGPT fallback:
   - `node --check ../docs/lekarna/app.js` prošlo,
   - `curl -I 'http://localhost:8765/app.js?v=encrypted-data-fix-20260520'`
     vratil 200.
+- Po doplneni mezikroku s viditelnym ChatGPT odkazem:
+  - `node --check docs/lekarna/app.js` proslo.
 - Mila rucne otestoval web a potvrdil:
   - hotspoty funguji,
   - napoveda hraje,

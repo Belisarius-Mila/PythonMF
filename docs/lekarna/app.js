@@ -431,15 +431,18 @@ function openSymptoms() {
     }
     const matches = findSymptomMatches(query);
     if (!matches.length) {
+      const chatGptUrl = buildChatGptUrl(input.value);
       result.innerHTML = `
         <p>Nerozumím přesně nebo v domácí evidenci nemám jasnou shodu. Můžete zkusit vybrat oblast ručně.</p>
-        <p>ChatGPT se otevře v nové záložce. Tato lékárna zůstane otevřená v původní záložce.</p>
+        <section class="chatgpt-link-panel" aria-label="Otevřít ChatGPT">
+          <h3>Otevřít ChatGPT?</h3>
+          <p>Nejprve zůstáváte tady v lékárně. Pokud chcete pokračovat mimo aplikaci, klikněte na běžný odkaz níže.</p>
+          <a class="secondary-action" href="${escapeHtml(chatGptUrl)}" target="_blank" rel="noopener noreferrer">Otevřít ChatGPT v nové záložce</a>
+        </section>
         ${renderIntentSuggestions()}
         <div class="action-row">
-          <button type="button" class="secondary-action" id="openChatGpt">Otevřít ChatGPT v nové záložce</button>
           <button type="button" class="secondary-action" id="closeQuestion">Zavřít</button>
         </div>
-        <p class="chatgpt-status" id="chatGptStatus"></p>
       `;
       result.querySelectorAll("[data-intent-index]").forEach((button) => {
         button.addEventListener("click", () => {
@@ -450,7 +453,6 @@ function openSymptoms() {
           });
         });
       });
-      result.querySelector("#openChatGpt").addEventListener("click", () => openChatGpt(input.value));
       result.querySelector("#closeQuestion").addEventListener("click", () => drawer.classList.remove("is-open"));
       return;
     }
@@ -510,24 +512,13 @@ function renderSymptomMatches(matches) {
   `;
 }
 
-function openChatGpt(rawQuestion) {
+function buildChatGptUrl(rawQuestion) {
   const prompt = [
     `Mám tento zdravotní dotaz: "${rawQuestion}".`,
     "Odpověz obecně a bezpečně. Neznáš moje diagnózy ani léky.",
     "Upozorni, kdy je vhodné kontaktovat lékaře nebo lékárníka.",
   ].join(" ");
-  const url = `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`;
-  const link = document.createElement("a");
-  link.href = url;
-  link.target = "_blank";
-  link.rel = "noopener noreferrer";
-  document.body.append(link);
-  link.click();
-  link.remove();
-  const status = document.querySelector("#chatGptStatus");
-  if (status) {
-    status.textContent = "ChatGPT se má otevřít v nové záložce nebo okně. Lékárna zůstává v původní záložce.";
-  }
+  return `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`;
 }
 
 async function playHelp() {
