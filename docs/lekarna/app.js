@@ -431,13 +431,19 @@ function openSymptoms() {
     }
     const matches = findSymptomMatches(query);
     if (!matches.length) {
-      const chatGptUrl = buildChatGptUrl(input.value);
+      const chatGptPrompt = buildChatGptPrompt(input.value);
+      const chatGptUrl = buildChatGptUrl(chatGptPrompt);
       result.innerHTML = `
         <p>Nerozumím přesně nebo v domácí evidenci nemám jasnou shodu. Můžete zkusit vybrat oblast ručně.</p>
         <section class="chatgpt-link-panel" aria-label="Otevřít ChatGPT">
           <h3>Otevřít ChatGPT?</h3>
-          <p>Nejprve zůstáváte tady v lékárně. Pokud chcete pokračovat mimo aplikaci, klikněte na běžný odkaz níže.</p>
-          <a class="secondary-action" href="${escapeHtml(chatGptUrl)}" target="_blank" rel="noopener noreferrer">Otevřít ChatGPT v nové záložce</a>
+          <p>Na Macu může prohlížeč otevřít odkaz ve stejné záložce. Nejjistější postup je zkopírovat dotaz, otevřít ChatGPT v nové záložce ručně a dotaz vložit.</p>
+          <textarea class="chatgpt-prompt-copy" readonly>${escapeHtml(chatGptPrompt)}</textarea>
+          <div class="action-row">
+            <button type="button" class="secondary-action" id="copyChatGptPrompt">Zkopírovat dotaz</button>
+            <a class="secondary-action" href="${escapeHtml(chatGptUrl)}" target="_blank" rel="noopener noreferrer">Otevřít ChatGPT</a>
+          </div>
+          <p class="chatgpt-status" id="chatGptStatus">Tip na Macu: použijte Cmd+klik nebo pravé tlačítko a "Otevřít odkaz v nové záložce".</p>
         </section>
         ${renderIntentSuggestions()}
         <div class="action-row">
@@ -453,6 +459,7 @@ function openSymptoms() {
           });
         });
       });
+      result.querySelector("#copyChatGptPrompt").addEventListener("click", () => copyChatGptPrompt(chatGptPrompt));
       result.querySelector("#closeQuestion").addEventListener("click", () => drawer.classList.remove("is-open"));
       return;
     }
@@ -512,13 +519,35 @@ function renderSymptomMatches(matches) {
   `;
 }
 
-function buildChatGptUrl(rawQuestion) {
-  const prompt = [
+function buildChatGptPrompt(rawQuestion) {
+  return [
     `Mám tento zdravotní dotaz: "${rawQuestion}".`,
     "Odpověz obecně a bezpečně. Neznáš moje diagnózy ani léky.",
     "Upozorni, kdy je vhodné kontaktovat lékaře nebo lékárníka.",
   ].join(" ");
+}
+
+function buildChatGptUrl(prompt) {
   return `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`;
+}
+
+async function copyChatGptPrompt(prompt) {
+  const status = document.querySelector("#chatGptStatus");
+  try {
+    await navigator.clipboard.writeText(prompt);
+    if (status) {
+      status.textContent = "Dotaz je zkopírovaný. Otevřete ChatGPT v nové záložce a vložte ho.";
+    }
+  } catch {
+    const promptBox = document.querySelector(".chatgpt-prompt-copy");
+    if (promptBox) {
+      promptBox.focus();
+      promptBox.select();
+    }
+    if (status) {
+      status.textContent = "Kopírování se nepovedlo automaticky. Označte text v poli a zkopírujte ho ručně.";
+    }
+  }
 }
 
 async function playHelp() {

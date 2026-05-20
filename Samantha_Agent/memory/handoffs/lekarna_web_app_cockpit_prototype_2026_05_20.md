@@ -110,6 +110,11 @@ Funguje:
   odkaz `<a target="_blank" rel="noopener noreferrer">`. Uživatel tedy klikne
   primo na normalni odkaz, coz je pro prohlizece spolehlivejsi nez programove
   otevirani okna.
+- Protoze Mac stale muze podle nastaveni/prohlizece otevrit odkaz ve stejne zalozce,
+  byl fallback doplnen o nejspolehlivejsi variantu: textarea s pripravenym dotazem,
+  tlacitko "Zkopírovat dotaz" a instrukce pouzit Cmd+klik / prave tlacitko
+  "Otevřít odkaz v nové záložce". Primarni bezpecna cesta je tedy kopie dotazu
+  a rucni otevreni nove zalozky.
 
 MP3 napoveda byla vygenerovana z textu s diakritikou:
 
@@ -234,6 +239,8 @@ ChatGPT fallback:
   - `curl -I 'http://localhost:8765/app.js?v=encrypted-data-fix-20260520'`
     vratil 200.
 - Po doplneni mezikroku s viditelnym ChatGPT odkazem:
+  - `node --check docs/lekarna/app.js` proslo.
+- Po doplneni kopirovaciho fallbacku pro Mac:
   - `node --check docs/lekarna/app.js` proslo.
 - Mila rucne otestoval web a potvrdil:
   - hotspoty funguji,

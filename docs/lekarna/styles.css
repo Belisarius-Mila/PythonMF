@@ -429,6 +429,19 @@ input {
   margin: 0 0 10px;
 }
 
+.chatgpt-prompt-copy {
+  width: 100%;
+  min-height: 92px;
+  border: 1px solid rgba(216, 177, 92, 0.28);
+  border-radius: 6px;
+  background: rgba(17, 10, 5, 0.38);
+  color: #f7e5ba;
+  font: inherit;
+  line-height: 1.4;
+  padding: 10px;
+  resize: vertical;
+}
+
 .suggestion-chip {
   min-height: 36px;
   border: 1px solid rgba(216, 177, 92, 0.34);
