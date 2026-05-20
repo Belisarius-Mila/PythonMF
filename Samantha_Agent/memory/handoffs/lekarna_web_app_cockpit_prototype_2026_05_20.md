@@ -88,6 +88,11 @@ Funguje:
   - pri spatnem hesle se data nerozbali,
   - po pokusu o nacteni web zahodi heslo z JS promenne a nepouziva sessionStorage
     pro obchazeni hesla.
+- Ostrý šifrovaný balíček byl 2026-05-20 vytvořen lokálně Mílou po zadání hesla
+  do skrytého terminálového promptu a byl commitnut/pushnut jako:
+  - `docs/lekarna/encrypted-data/lekarna.enc.json`
+  - commit `e46991d Publish encrypted pharmacy data bundle`
+  - heslo nebylo zadáno do chatu, nebylo uloženo do paměti ani do gitu.
 
 MP3 napoveda byla vygenerovana z textu s diakritikou:
 
@@ -140,27 +145,18 @@ ChatGPT fallback:
 
 ## Co neni hotove
 
-- Verejny GitHub Pages zatim nema skutecny zasifrovany balicek, protoze realne
-  heslo nesmi byt zadano do chatu. Balicek musi Mila vytvorit lokalne v terminalu.
-- Dokud neexistuje `docs/lekarna/encrypted-data/lekarna.enc.json`, GitHub Pages
-  zustane v demo rezimu.
+- Je potřeba po doběhnutí GitHub Pages cache ručně otestovat veřejný web se
+  skutečným heslem.
 - Neprobehl Playwright vizualni test; drive byl blokovan sitovym omezenim npm.
 
 ## Dalsi krok
 
-1. Mila lokalne v terminalu spusti:
-
-```bash
-cd /Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent
-.venv/bin/python scripts/export_lekarna_web_private_data.py
-.venv/bin/python scripts/encrypt_lekarna_web_bundle.py
-```
-
-2. Heslo zadat jen do skryteho terminaloveho promptu, nikdy do chatu.
-3. Otestovat lokalni web s `docs/lekarna/encrypted-data/lekarna.enc.json`.
-4. Po potvrzeni commitnout a pushnout pouze zasifrovany balicek, nikdy
-   `docs/lekarna/private-data/`.
-5. Z lokalnich query pravidel postupne udelat data-driven mapovani nad exportem,
+1. Počkejte, až GitHub Pages dosadí nový soubor z commitu `e46991d`; raw GitHub
+   soubor už je dostupný, Pages může několik minut vracet starší cache.
+2. Otevřít veřejný web a zadat heslo:
+   `https://belisarius-mila.github.io/PythonMF/lekarna/`
+3. Ověřit, že se po hesle načtou skutečné seznamy léků a fotky.
+4. Z lokalnich query pravidel postupne udelat data-driven mapovani nad exportem,
    aby se nemusela udrzovat natvrdo v `app.js`.
 
 ## Zmenene nebo relevantni soubory
@@ -182,6 +178,7 @@ cd /Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent
 - `Samantha_Agent/scripts/encrypt_lekarna_web_bundle.py`
 - lokální necommitovaný export `docs/lekarna/private-data/`
 - budoucí veřejně publikovatelný export `docs/lekarna/encrypted-data/lekarna.enc.json`
+  je od commitu `e46991d` už reálně publikovaný v gitu jako šifrovaný balíček.
 
 ## Overeni
 
@@ -208,6 +205,13 @@ cd /Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent
     `jana,mila,home`,
   - `curl -I http://localhost:8765/` vratil 200,
   - `curl -I 'http://localhost:8765/app.js?v=encrypted-data-20260520'` vratil 200.
+- Po vytvoření ostrého šifrovaného balíčku:
+  - `curl -I http://localhost:8765/encrypted-data/lekarna.enc.json` vratil 200,
+  - kontrola struktury balíčku ukázala AES-GCM, PBKDF2-SHA256, 310000 iterací,
+  - `curl -I https://raw.githubusercontent.com/Belisarius-Mila/PythonMF/main/docs/lekarna/encrypted-data/lekarna.enc.json`
+    vratil 200,
+  - GitHub Pages krátce po pushi ještě vracel 404 pro nový encrypted-data soubor,
+    pravděpodobně kvůli cache/nasazení.
 - Mila rucne otestoval web a potvrdil:
   - hotspoty funguji,
   - napoveda hraje,

@@ -259,6 +259,10 @@ Implementovany smer od 2026-05-20:
   otevrit pomoci WebCrypto. Pri spatnem hesle se data nerozbali.
 - Web neuklada heslo ani `sessionStorage` odemceni; po pokusu o nacteni se
   heslo z JS promenne zahodi.
+- Ostrý `docs/lekarna/encrypted-data/lekarna.enc.json` byl vytvořen Mílou lokálně
+  po zadání hesla do skrytého terminálového promptu a pushnut v commitu
+  `e46991d Publish encrypted pharmacy data bundle`.
+- Při zápisu do paměti ani do gitu nebylo uloženo heslo ani hash hesla.
 
 ### Smime vystavit verejne
 
@@ -355,7 +359,12 @@ I v soukromem rezimu musi zustat viditelne:
 
 ## Nejblizsi technicky krok
 
-1. V terminalu lokalne spustit:
+1. Po doběhnutí GitHub Pages cache otestovat veřejný web:
+   `https://belisarius-mila.github.io/PythonMF/lekarna/`
+2. Zadat heslo pouze ručně v prohlížeči a ověřit, že se načtou skutečné seznamy,
+   fotky a `PIL_Short`.
+3. Pokud se při dalším doplnění léků změní CSV/fotky, opakovat lokálně export a
+   šifrování:
 
 ```bash
 cd /Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent
@@ -363,7 +372,5 @@ cd /Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent
 .venv/bin/python scripts/encrypt_lekarna_web_bundle.py
 ```
 
-2. Heslo zadat jen do skryteho terminaloveho promptu, nikdy do chatu.
-3. Vznikly `docs/lekarna/encrypted-data/lekarna.enc.json` otestovat na lokalnim
-   serveru.
-4. Teprve potom zašifrovany balicek commitnout a pushnout na GitHub Pages.
+4. Nový šifrovaný balíček znovu cíleně commitnout; `docs/lekarna/private-data/`
+   nikdy necommitovat.
