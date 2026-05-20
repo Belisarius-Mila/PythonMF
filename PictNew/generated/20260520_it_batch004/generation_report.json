@@ -1,0 +1,332 @@
+[
+  {
+    "status": "generated",
+    "request_index": 31,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260520_it_batch004/meet.webp",
+    "output_file": "meet.webp",
+    "original_bytes": 1642136,
+    "output_bytes": 146230,
+    "request": {
+      "id": "it-meet",
+      "language": "it",
+      "image_name": "meet",
+      "target_filename": "meet.png",
+      "row_numbers": [
+        213
+      ],
+      "words": [
+        "conoscere"
+      ],
+      "czech_meanings": [
+        "znát, poznat"
+      ],
+      "source_entries": [
+        {
+          "row_number": 213,
+          "word": "conoscere",
+          "czech_meaning": "znát, poznat",
+          "source_pd": "add, json ok",
+          "source_pe": "ano"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'meet', but do not illustrate the file name literally unless it matches the meaning. The image must represent the Italian/French word(s) 'conoscere' with Czech meaning 'znát, poznat'. Base the scene primarily on the Czech meaning, then use the foreign word only as context. If the concept is abstract or grammatical, use a concrete everyday visual metaphor that a child can understand. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 32,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260520_it_batch004/after.webp",
+    "output_file": "after.webp",
+    "original_bytes": 1870848,
+    "output_bytes": 206734,
+    "request": {
+      "id": "it-after",
+      "language": "it",
+      "image_name": "after",
+      "target_filename": "after.png",
+      "row_numbers": [
+        215
+      ],
+      "words": [
+        "dopo"
+      ],
+      "czech_meanings": [
+        "po, potom"
+      ],
+      "source_entries": [
+        {
+          "row_number": 215,
+          "word": "dopo",
+          "czech_meaning": "po, potom",
+          "source_pd": "add, json ok",
+          "source_pe": "ne"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'after', but do not illustrate the file name literally unless it matches the meaning. The image must represent the Italian/French word(s) 'dopo' with Czech meaning 'po, potom'. Base the scene primarily on the Czech meaning, then use the foreign word only as context. If the concept is abstract or grammatical, use a concrete everyday visual metaphor that a child can understand. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 33,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260520_it_batch004/hereyouare.webp",
+    "output_file": "hereyouare.webp",
+    "original_bytes": 1738125,
+    "output_bytes": 153522,
+    "request": {
+      "id": "it-hereyouare",
+      "language": "it",
+      "image_name": "hereyouare",
+      "target_filename": "hereyouare.png",
+      "row_numbers": [
+        216
+      ],
+      "words": [
+        "ecco"
+      ],
+      "czech_meanings": [
+        "tady je, tady jsou"
+      ],
+      "source_entries": [
+        {
+          "row_number": 216,
+          "word": "ecco",
+          "czech_meaning": "tady je, tady jsou",
+          "source_pd": "add, json ok",
+          "source_pe": "ne"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'hereyouare', but do not illustrate the file name literally unless it matches the meaning. The image must represent the Italian/French word(s) 'ecco' with Czech meaning 'tady je, tady jsou'. Base the scene primarily on the Czech meaning, then use the foreign word only as context. If the concept is abstract or grammatical, use a concrete everyday visual metaphor that a child can understand. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 34,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260520_it_batch004/fountain.webp",
+    "output_file": "fountain.webp",
+    "original_bytes": 1820055,
+    "output_bytes": 215014,
+    "request": {
+      "id": "it-fountain",
+      "language": "it",
+      "image_name": "fountain",
+      "target_filename": "fountain.png",
+      "row_numbers": [
+        219
+      ],
+      "words": [
+        "fontana"
+      ],
+      "czech_meanings": [
+        "kašna, fontána"
+      ],
+      "source_entries": [
+        {
+          "row_number": 219,
+          "word": "fontana",
+          "czech_meaning": "kašna, fontána",
+          "source_pd": "add, json ok",
+          "source_pe": "ne"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'fountain', but do not illustrate the file name literally unless it matches the meaning. The image must represent the Italian/French word(s) 'fontana' with Czech meaning 'kašna, fontána'. Base the scene primarily on the Czech meaning, then use the foreign word only as context. If the concept is abstract or grammatical, use a concrete everyday visual metaphor that a child can understand. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 35,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260520_it_batch004/french.webp",
+    "output_file": "french.webp",
+    "original_bytes": 1670815,
+    "output_bytes": 166246,
+    "request": {
+      "id": "it-french",
+      "language": "it",
+      "image_name": "french",
+      "target_filename": "french.png",
+      "row_numbers": [
+        221
+      ],
+      "words": [
+        "francese"
+      ],
+      "czech_meanings": [
+        "Francouz, francouzský"
+      ],
+      "source_entries": [
+        {
+          "row_number": 221,
+          "word": "francese",
+          "czech_meaning": "Francouz, francouzský",
+          "source_pd": "add, json ok",
+          "source_pe": "ne"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'french', but do not illustrate the file name literally unless it matches the meaning. The image must represent the Italian/French word(s) 'francese' with Czech meaning 'Francouz, francouzský'. Base the scene primarily on the Czech meaning, then use the foreign word only as context. If the concept is abstract or grammatical, use a concrete everyday visual metaphor that a child can understand. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 36,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260520_it_batch004/postalstamp.webp",
+    "output_file": "postalstamp.webp",
+    "original_bytes": 1461710,
+    "output_bytes": 91720,
+    "request": {
+      "id": "it-postalstamp",
+      "language": "it",
+      "image_name": "postalstamp",
+      "target_filename": "postalstamp.png",
+      "row_numbers": [
+        222
+      ],
+      "words": [
+        "francobollo"
+      ],
+      "czech_meanings": [
+        "poštovní známka"
+      ],
+      "source_entries": [
+        {
+          "row_number": 222,
+          "word": "francobollo",
+          "czech_meaning": "poštovní známka",
+          "source_pd": "add",
+          "source_pe": "ne"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'postalstamp', but do not illustrate the file name literally unless it matches the meaning. The image must represent the Italian/French word(s) 'francobollo' with Czech meaning 'poštovní známka'. Base the scene primarily on the Czech meaning, then use the foreign word only as context. If the concept is abstract or grammatical, use a concrete everyday visual metaphor that a child can understand. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 37,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260520_it_batch004/italian.webp",
+    "output_file": "italian.webp",
+    "original_bytes": 1693449,
+    "output_bytes": 175652,
+    "request": {
+      "id": "it-italian",
+      "language": "it",
+      "image_name": "italian",
+      "target_filename": "italian.png",
+      "row_numbers": [
+        228
+      ],
+      "words": [
+        "italiano"
+      ],
+      "czech_meanings": [
+        "Ital, italský"
+      ],
+      "source_entries": [
+        {
+          "row_number": 228,
+          "word": "italiano",
+          "czech_meaning": "Ital, italský",
+          "source_pd": "add, json ok",
+          "source_pe": "ne"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'italian', but do not illustrate the file name literally unless it matches the meaning. The image must represent the Italian/French word(s) 'italiano' with Czech meaning 'Ital, italský'. Base the scene primarily on the Czech meaning, then use the foreign word only as context. If the concept is abstract or grammatical, use a concrete everyday visual metaphor that a child can understand. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 38,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260520_it_batch004/less.webp",
+    "output_file": "less.webp",
+    "original_bytes": 1724128,
+    "output_bytes": 162538,
+    "request": {
+      "id": "it-less",
+      "language": "it",
+      "image_name": "less",
+      "target_filename": "less.png",
+      "row_numbers": [
+        233
+      ],
+      "words": [
+        "meno"
+      ],
+      "czech_meanings": [
+        "méně"
+      ],
+      "source_entries": [
+        {
+          "row_number": 233,
+          "word": "meno",
+          "czech_meaning": "méně",
+          "source_pd": "add",
+          "source_pe": "ne"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'less', but do not illustrate the file name literally unless it matches the meaning. The image must represent the Italian/French word(s) 'meno' with Czech meaning 'méně'. Base the scene primarily on the Czech meaning, then use the foreign word only as context. If the concept is abstract or grammatical, use a concrete everyday visual metaphor that a child can understand. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 39,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260520_it_batch004/mixed.webp",
+    "output_file": "mixed.webp",
+    "original_bytes": 1566757,
+    "output_bytes": 159364,
+    "request": {
+      "id": "it-mixed",
+      "language": "it",
+      "image_name": "mixed",
+      "target_filename": "mixed.png",
+      "row_numbers": [
+        234
+      ],
+      "words": [
+        "misto"
+      ],
+      "czech_meanings": [
+        "míchaný, smíšený"
+      ],
+      "source_entries": [
+        {
+          "row_number": 234,
+          "word": "misto",
+          "czech_meaning": "míchaný, smíšený",
+          "source_pd": "add",
+          "source_pe": "ne"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'mixed', but do not illustrate the file name literally unless it matches the meaning. The image must represent the Italian/French word(s) 'misto' with Czech meaning 'míchaný, smíšený'. Base the scene primarily on the Czech meaning, then use the foreign word only as context. If the concept is abstract or grammatical, use a concrete everyday visual metaphor that a child can understand. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 40,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260520_it_batch004/room.webp",
+    "output_file": "room.webp",
+    "original_bytes": 1696966,
+    "output_bytes": 158658,
+    "request": {
+      "id": "it-room",
+      "language": "it",
+      "image_name": "room",
+      "target_filename": "room.png",
+      "row_numbers": [
+        243
+      ],
+      "words": [
+        "camera"
+      ],
+      "czech_meanings": [
+        "pokoj"
+      ],
+      "source_entries": [
+        {
+          "row_number": 243,
+          "word": "camera",
+          "czech_meaning": "pokoj",
+          "source_pd": "add, json ok",
+          "source_pe": "ne"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'room', but do not illustrate the file name literally unless it matches the meaning. The image must represent the Italian/French word(s) 'camera' with Czech meaning 'pokoj'. Base the scene primarily on the Czech meaning, then use the foreign word only as context. If the concept is abstract or grammatical, use a concrete everyday visual metaphor that a child can understand. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    }
+  }
+]

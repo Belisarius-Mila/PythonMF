@@ -9,6 +9,17 @@ Datum: 2026-05-20
 Bezpecny postup pro checkpoint pred rizikovou praci, reconnect recovery nebo
 dlouhou session.
 
+V koreni `PythonMF` muze existovat rychla lidska nouzova karticka:
+
+```text
+Samantha_GIT_PUSH.txt
+```
+
+Je tam schvalne kvuli tomu, aby ji Mila rychle nasel, kdyz se Codex nebo VS Code
+seka a nechce dlouze hledat v memory. Kanonicka pravidla ale zustavaji zde:
+root karticka ma byt jen kratka pripominka a nesmi obchazet bezpecne git
+principy.
+
 ## Pred rizikovym krokem
 
 1. Zkontrolovat stav:
@@ -25,6 +36,11 @@ git status --short --branch
 - citliva data, ktera nesmi do gitu.
 
 3. Nepouzivat `git add .`.
+
+Vyjimka: `git add .` pouzit jen tehdy, kdyz byl tesne predtim zkontrolovan
+`git status --short --untracked-files=all` a je jasne, ze workspace neobsahuje
+citlive, docasne ani nesouvisejici soubory. U Samanthy je bezpecny default
+pridavat jen konkretni cesty.
 
 ## Commit
 

@@ -12,6 +12,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 ## Projects
 
 - `projects/lekarna_domaci_leky.md` - projekt Lekarna: evidence domacich leku v `data/lekarna/`, vyhledavani podle potizi, audit lekarnicky a opakovatelny foto import workflow pres manifest.
+- `projects/media_image_resize_utility.md` - obecna bezpecna utilita pro zmensovani obrazku podle cilove velikosti v kB; vychozi cil 250 kB, preset Lekarna 100 kB, preview + potvrzeny apply se zalohou.
 - `projects/tax_priznani_2025.md` - daňové přiznání 2025, výpočty, checklist formuláře a pravidlo neukládat citlivé údaje.
 - `projects/pictnew_vocabulary_image_pipeline.md` - opakovatelný audit a generování obrázků ke slovíčkům FR/IT přes `mapping.json`, `Pict/` a `PictNew/`.
 - `projects/tts_edge_audio_tools.md` - české TTS/MP3 nástroje přes edge-tts, dávkový CSV režim a ruční GUI.
@@ -36,7 +37,11 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `handoffs/dnesni_checkpoint_lekarna_pictnew_git_2026_05_20.md` - [PRIPOMENOUT] denni checkpoint 2026-05-20: Lekarna, media image resize, PictNew batche 001-004 a cilene ulozeni dnesni prace do gitu; dalsi krok je vizualni kontrola batchu 002-004 a batch 005 jen po potvrzeni.
 - `handoffs/lekarna_audit_tool_done_2026_05_19.md` - [PRIPOMENOUT] Lekarna ma druhy read-only Samantha tool `audit_domaci_lekarna`, ktery vraci checklist polozek k fyzicke kontrole: expirace, umisteni, `nutno_overit`, zbytky bez krabicky, jistota cteni, antibiotika a redeni krve; dalsi krok je live test pres Samanthu a az potom navrh potvrzovaneho zapisoveho workflow.
+- `handoffs/lekarna_import_vyrazeni_resize_done_2026_05_20.md` - [PRIPOMENOUT] Lekarna: import novych JPEG/WhatsApp fotek, umisteni, soft-delete workflow pro vyrazeni leku a zmenseni fotek na cca 100 kB jsou hotove; dalsi krok je vratit se k Milovu `Samantha_GIT_PUSH.txt`.
+- `handoffs/media_image_resize_utility_done_2026_05_20.md` - [PRIPOMENOUT] Obecna utilita `app/media/image_resize.py` je hotova a overena na lekarne; dalsi krok je pri pouziti na slovniky nejdriv udelat preview a zvolit cilovou velikost.
+- `handoffs/vocabularyit_pict_csv_audit_2026_05_20.md` - [PRIPOMENOUT] VocabularyIT/PictNew: prompt je upraveny a schvaleny na batchi 001; batch 002, 003 a 004 jsou technicky hotove 10/10 v `PictNew/generated/20260520_it_batch002/` az `batch004/` a cekaji na vizualni kontrolu; batch 005 ani presun do `Pict/` nespoustet bez dalsiho potvrzeni.
 - `handoffs/lekarna_readonly_tool_done_2026_05_19.md` - [PRIPOMENOUT] Lekarna ma prvni bezpecny read-only Samantha tool `search_domaci_leky` nad `data/lekarna/domaci_leky.csv`; dalsi krok je rucni live test pres Samanthu a doladeni synonym/rankingu.
 - `handoffs/samantha_agent_rag_memory_store_2026_05_19.md` - [PRIPOMENOUT] Samantha Agent ma prvni lokalni RAG-like vrstvu nad markdown pameti: kompakni startup kontext, `app/memory_store.py`, tooly `search_memory` a `memory_status`, jednoduchy in-memory index/cache; live testy prosly, dalsi krok je zlepsit ranking/vystup `search_memory`.
 - `handoffs/samantha_agent_rag_search_memory_ranking_2026_05_19.md` - [PRIPOMENOUT] `search_memory` ma vylepseny ranking a vystup: lepsi tokenizace nazvu souboru, jeden snippet za soubor, utlumení starych handoffu, deleni tabulek/odrazek a zkracovani snippetů; dalsi krok je live retest pres Samanthu.

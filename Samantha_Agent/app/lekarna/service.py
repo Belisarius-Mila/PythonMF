@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import csv
 import re
+import shutil
 from pathlib import Path
+from dataclasses import replace
+from datetime import datetime
 
 from .models import DomaciLek, DomaciLekMatch
 
@@ -14,6 +17,7 @@ UNKNOWN_EXPIRATION_VALUES = ("", "nezjisteno", "neuvedeno", "nezadano", "neznamo
 UNKNOWN_LOCATION_VALUES = ("", "nezadano", "neuvedeno", "nezjisteno")
 UNKNOWN_LOCATION_MARKERS = ("umisteni nezadano",)
 FIELD_NAMES = tuple(DomaciLek.__dataclass_fields__.keys())
+RETIRE_CONFIRMATION_PHRASE = "Potvrzuji vyrazeni leku"
 QUERY_ALIASES = {
     "bolest": ("bolest", "bolesti", "zanet", "kloub", "klouby", "zad", "zada"),
     "horecka": ("horecka", "teplota", "nachlazeni", "chripka"),
@@ -55,6 +59,8 @@ def search_domaci_leky_records(
 
     matches: list[DomaciLekMatch] = []
     for lek in load_domaci_leky(csv_path):
+        if _is_retired(lek):
+            continue
         score, reasons = _score_record(lek, query_terms)
         if score <= 0:
             continue
@@ -178,6 +184,107 @@ def format_domaci_lekarna_audit(
     return "\n".join(lines)
 
 
+def format_domaci_lek_retire_preview(
+    query: str,
+    reason: str = "",
+    csv_path: Path = DEFAULT_DOMACI_LEKY_CSV,
+) -> str:
+    candidates = _find_retire_candidates(query=query, csv_path=csv_path)
+    if not candidates:
+        return (
+            f"Vyrazeni leku - pro dotaz `{query}` jsem nenasla jednu aktivni polozku. "
+            "Zkus presnejsi nazev, silu nebo cast nazvu."
+        )
+    if len(candidates) > 1:
+        lines = [
+            f"Vyrazeni leku - dotaz `{query}` je nejednoznacny.",
+            "Upresni, kterou polozku chces vyradit:",
+            "",
+        ]
+        lines.extend(_retire_candidate_line(index, lek) for index, lek in enumerate(candidates, start=1))
+        return "\n".join(lines)
+
+    lek = candidates[0]
+    reason_text = reason.strip() or "duvod neuveden"
+    return "\n".join(
+        [
+            "Vyrazeni leku - navrh zmeny",
+            "Nic zatim nezapisuji do CSV.",
+            "",
+            _retire_candidate_line(1, lek),
+            "",
+            "Po potvrzeni se radek nesmaze, jen oznaci jako vyradeny:",
+            f"- mnozstvi: `{lek.mnozstvi or 'neuvedeno'}` -> `vyradeno`",
+            f"- umisteni: `{lek.umisteni or 'neuvedeno'}` -> `vyradeno`",
+            f"- poznamky: prida se `Vyradeno YYYY-MM-DD: {reason_text}`",
+            "",
+            f"Pro zapis posli potvrzeni obsahujici: `{RETIRE_CONFIRMATION_PHRASE}`",
+        ]
+    )
+
+
+def format_retire_domaci_lek(
+    query: str,
+    reason: str = "",
+    csv_path: Path = DEFAULT_DOMACI_LEKY_CSV,
+    *,
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+) -> str:
+    if not user_confirmed or RETIRE_CONFIRMATION_PHRASE.casefold() not in confirmation_text.casefold():
+        raise ValueError(
+            "Vyrazeni leku zapisuje do CSV a vyzaduje potvrzeni: "
+            f"{RETIRE_CONFIRMATION_PHRASE}"
+        )
+
+    csv_path = csv_path.resolve()
+    _ensure_within_project(csv_path)
+    candidates = _find_retire_candidates(query=query, csv_path=csv_path)
+    if not candidates:
+        raise ValueError(f"Pro dotaz `{query}` jsem nenasla jednu aktivni polozku k vyrazeni.")
+    if len(candidates) > 1:
+        names = ", ".join(lek.nazev for lek in candidates[:8])
+        raise ValueError(f"Dotaz `{query}` je nejednoznacny. Upresni jednu polozku: {names}")
+
+    target = candidates[0]
+    rows = load_domaci_leky(csv_path)
+    backup_path = _backup_csv_for_retire(csv_path)
+    reason_text = reason.strip() or "duvod neuveden"
+    stamp = datetime.now().strftime("%Y-%m-%d")
+    changed = 0
+    updated_rows: list[DomaciLek] = []
+
+    for lek in rows:
+        if _same_inventory_item(lek, target) and not _is_retired(lek):
+            note = _append_note(lek.poznamky, f"Vyradeno {stamp}: {reason_text}")
+            updated_rows.append(
+                replace(
+                    lek,
+                    mnozstvi="vyradeno",
+                    umisteni="vyradeno",
+                    nutno_overit="ano",
+                    poznamky=note,
+                )
+            )
+            changed += 1
+        else:
+            updated_rows.append(lek)
+
+    if changed != 1:
+        raise ValueError(f"Ocekavala jsem zmenu 1 radku, ale zmeneno bylo: {changed}")
+
+    _write_domaci_leky(csv_path, updated_rows)
+    return "\n".join(
+        [
+            "Vyrazeni leku - hotovo",
+            f"Polozka: {target.nazev}",
+            f"Sila / forma: {_join_nonempty(target.sila, target.forma)}",
+            f"Zaloha CSV: {backup_path}",
+            "Radek nebyl smazan; je oznacen jako `vyradeno`.",
+        ]
+    )
+
+
 def _score_record(lek: DomaciLek, query_terms: set[str]) -> tuple[int, list[str]]:
     fields = {
         "nazev": lek.nazev,
@@ -205,6 +312,30 @@ def _score_record(lek: DomaciLek, query_terms: set[str]) -> tuple[int, list[str]
     return score, reasons
 
 
+def _find_retire_candidates(query: str, csv_path: Path) -> list[DomaciLek]:
+    query_terms = _expand_query_terms(query)
+    normalized_query = _normalize(query)
+    if not query_terms and not normalized_query:
+        return []
+
+    candidates: list[DomaciLek] = []
+    for lek in load_domaci_leky(csv_path):
+        if _is_retired(lek):
+            continue
+        haystack = _normalize(
+            " ".join([lek.nazev, lek.ucinna_latka, lek.forma, lek.sila, lek.kategorie, lek.zdroj])
+        )
+        if normalized_query and normalized_query in haystack:
+            candidates.append(lek)
+            continue
+        matched_terms = [term for term in query_terms if term in haystack]
+        if matched_terms and len(matched_terms) >= min(2, len(query_terms)):
+            candidates.append(lek)
+
+    candidates.sort(key=lambda lek: (_normalize(lek.nazev), _normalize(lek.sila), _normalize(lek.forma)))
+    return candidates[:10]
+
+
 def _safety_warnings(lek: DomaciLek) -> list[str]:
     warnings: list[str] = []
     if _normalize(lek.nutno_overit) == "ano":
@@ -227,6 +358,8 @@ def _has_missing_expiration(lek: DomaciLek) -> bool:
 
 
 def _has_unknown_location(lek: DomaciLek) -> bool:
+    if _is_retired(lek):
+        return False
     normalized_location = _normalize(lek.umisteni)
     return (
         normalized_location in UNKNOWN_LOCATION_VALUES
@@ -287,6 +420,50 @@ def _looks_unverified_name(lek: DomaciLek) -> bool:
     return "/" in lek.nazev or "neoveren" in text or "nejist" in text
 
 
+def _is_retired(lek: DomaciLek) -> bool:
+    return (
+        _normalize(lek.mnozstvi) == "vyradeno"
+        or _normalize(lek.umisteni) == "vyradeno"
+        or "vyradeno" in _normalize(lek.poznamky)
+    )
+
+
+def _retire_candidate_line(index: int, lek: DomaciLek) -> str:
+    return (
+        f"{index}. {lek.nazev or 'Nazev neuveden'} | "
+        f"{_join_nonempty(lek.sila, lek.forma)} | "
+        f"mnozstvi: {lek.mnozstvi or 'neuvedeno'} | "
+        f"umisteni: {lek.umisteni or 'neuvedeno'}"
+    )
+
+
+def _same_inventory_item(left: DomaciLek, right: DomaciLek) -> bool:
+    return all(
+        getattr(left, field) == getattr(right, field)
+        for field in ("nazev", "ucinna_latka", "forma", "sila", "zdroj")
+    )
+
+
+def _append_note(existing: str, note: str) -> str:
+    existing = existing.strip()
+    return f"{existing} {note}".strip() if existing else note
+
+
+def _backup_csv_for_retire(csv_path: Path) -> Path:
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_path = csv_path.with_name(f"{csv_path.stem}.backup_before_retire_{stamp}{csv_path.suffix}")
+    shutil.copy2(csv_path, backup_path)
+    return backup_path
+
+
+def _write_domaci_leky(csv_path: Path, records: list[DomaciLek]) -> None:
+    with csv_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=FIELD_NAMES)
+        writer.writeheader()
+        for record in records:
+            writer.writerow({field: getattr(record, field) for field in FIELD_NAMES})
+
+
 def _expand_query_terms(query: str) -> set[str]:
     normalized_query = _normalize(query)
     base_terms = set(_tokens(normalized_query))
@@ -329,3 +506,11 @@ def _normalize(text: str) -> str:
 def _join_nonempty(*values: str) -> str:
     parts = [value for value in values if value]
     return " | ".join(parts) if parts else "neuvedeno"
+
+
+def _ensure_within_project(path: Path) -> None:
+    resolved = path.resolve()
+    try:
+        resolved.relative_to(PROJECT_ROOT)
+    except ValueError as exc:
+        raise ValueError(f"Cesta musi zustat uvnitr Samantha_Agent: {path}") from exc

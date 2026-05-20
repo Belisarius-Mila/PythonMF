@@ -1,0 +1,13 @@
+{
+  "backend": "openai",
+  "model": "gpt-image-2",
+  "size": "1024x1024",
+  "quality": "low",
+  "output_format": "webp",
+  "output_compression": 85,
+  "target_size_kb": 250,
+  "max_size_kb": 300,
+  "batch_size": 10,
+  "output_root": "PictNew/generated",
+  "style_prompt": "Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+}

@@ -260,6 +260,135 @@ Vznikl protokol:
 PictNew/NewVocabulary11052026.txt
 ```
 
+## Aktualni stav 2026-05-20
+
+- Pro `VocabularyIT/IT_Pict.csv` je pripraven `PictNew/NewPicturesRequest20052026.json` s 125 unikatnimi cilovymi obrazky v 13 davkach po 10.
+- `image_generator.py` generuje bezpecne po davkach do `PictNew/generated/YYYYMMDD_it_batchNNN/`, defaultne dry-run, skutecne API volani jen s `--execute` a potvrzenim `Potvrzuji generovani obrazku`.
+- Batch 001 byl po uprave promptu znovu vygenerovan a Mila ho vizualne pochvalil jako povedeny.
+- Batch 002 je technicky hotovy: 10/10 `generated`, vystup `PictNew/generated/20260520_it_batch002/`, nejvetsi soubor cca 185.2 kB, vznikly `generation_report.json` a `review.html`.
+- Batch 003 je technicky hotovy: 10/10 `generated`, vystup `PictNew/generated/20260520_it_batch003/`, nejvetsi soubor cca 240.1 kB, vznikly `generation_report.json` a `review.html`.
+- Batch 004 je technicky hotovy: 10/10 `generated`, vystup `PictNew/generated/20260520_it_batch004/`, nejvetsi soubor cca 210.0 kB, vznikly `generation_report.json` a `review.html`.
+- Dalsi prakticky krok je vizualne zkontrolovat `PictNew/generated/20260520_it_batch002/review.html`, `PictNew/generated/20260520_it_batch003/review.html` a `PictNew/generated/20260520_it_batch004/review.html`.
+- Batch 005 ani presun obrazku do `Pict/` nespoustet bez dalsiho Milova potvrzeni.
+
+Dne 2026-05-20 vznikl také přípravný skript bez generování:
+
+```text
+pict_new_prepare.py
+```
+
+Aktuální použití pro italský pracovní CSV:
+
+```bash
+python3 pict_new_prepare.py --language it --date 2026-05-20 --batch-size 10 --batch-index 1
+```
+
+Výstupy:
+
+```text
+PictNew/NewPicturesRequest20052026.json
+PictNew/NewPicturesReview20052026_batch001.html
+```
+
+Stav po přípravě:
+
+- `IT_Pict.csv` má 128 řádků, kde `PD` obsahuje `add`.
+- Ty odpovídají 125 unikátním cílovým obrázkům, protože některé řádky sdílí stejné `ENP`.
+- Přípravný skript dávkuje podle unikátních cílových obrázků, ne slepě podle řádků CSV.
+- Skript zatím nic negeneruje, nemění `Pict/`, nemění `mapping.json` a nemění CSV.
+
+Dne 2026-05-20 vznikl také první bezpečný generovací skript:
+
+```text
+image_generator.py
+image_generator_config.json
+```
+
+Výchozí nastavení:
+
+- `model`: `gpt-image-2`
+- `size`: `1024x1024`
+- `quality`: `low`
+- `output_format`: `webp`
+- `target_size_kb`: `250`
+- `max_size_kb`: `300`
+- `output_root`: `PictNew/generated`
+
+Bezpečnostní chování:
+
+- Bez `--execute` skript jen vypíše plán a nedělá API volání.
+- Skutečné generování vyžaduje potvrzení:
+
+```text
+Potvrzuji generovani obrazku
+```
+
+- Skript čte `OPENAI_API_KEY` jen z prostředí.
+- Skript ukládá nové obrázky jen do `PictNew/generated/...`, ne do `Pict/`.
+- Po dávce vytváří `generation_report.json` a `review.html`.
+
+Dry-run pro první dávku prošel:
+
+```bash
+python3 image_generator.py --request-json PictNew/NewPicturesRequest20052026.json --batch-index 1
+```
+
+Naplánováno bylo 10 obrázků do:
+
+```text
+PictNew/generated/20260520_it_batch001/
+```
+
+Po potvrzeni 2026-05-20 byl batch 001 skutecne vygenerovan:
+
+- 10/10 obrazku vzniklo.
+- Vsechny obrazky jsou `webp`.
+- Nejvetsi soubor mel cca `74.6 kB`, tedy hluboko pod limitem `300 kB`.
+- Vystupy jsou v:
+
+```text
+PictNew/generated/20260520_it_batch001/
+```
+
+- Kontrolni soubory:
+
+```text
+PictNew/generated/20260520_it_batch001/generation_report.json
+PictNew/generated/20260520_it_batch001/review.html
+```
+
+Pred dalsi davkou ma Mila vizualne zkontrolovat `review.html`.
+
+Po vizualni kontrole batch 001 Mila rozhodl, ze styl je moc detsky/sterilni a obrazek
+`a.webp` je spatne, protoze vysel jako jablko misto metafory neurciteho clenu.
+Stary batch 001 byl smazan a prompt byl upraven:
+
+- vice sceny, pozadi, detailu a stinu,
+- mene baby styl,
+- stridat postavy a nepouzivat porad stejneho kluka/holku,
+- ceske napisy jsou povolene, pokud pomahaji pochopeni obrazku,
+- zakazat nahodne texty, cizi slova, dekorativni pismena a nesmyslne popisky,
+- pro `a` explicitne zakazat pismeno A i jablko a pouzit metaforu jedne neurcite veci.
+
+`PictNew/NewPicturesRequest20052026.json` byl znovu vytvoren s novym promptem a batch
+001 je pripraveny k opakovane generaci.
+
+Po Milove potvrzeni byl batch 001 znovu vygenerovan s novym promptem:
+
+- 10/10 obrazku vzniklo.
+- Vystupy jsou ve `PictNew/generated/20260520_it_batch001/`.
+- Vsechny vystupy jsou `webp`.
+- Nejvetsi soubor je `go.webp` cca `237 kB`, tedy pod limitem `300 kB`.
+- Vznikly nove kontrolni soubory:
+
+```text
+PictNew/generated/20260520_it_batch001/generation_report.json
+PictNew/generated/20260520_it_batch001/review.html
+```
+
+Pred dalsim batchem nebo presunem do `Pict/` ma Mila vizualne zkontrolovat
+`review.html`.
+
 Výsledek testu:
 
 - `VocabularyFR`: 11 nových řádků k doplnění do `FR_Pict.csv`, 112 shod/návrhů k posouzení, 0 bez návrhu

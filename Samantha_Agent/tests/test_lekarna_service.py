@@ -6,9 +6,12 @@ import unittest
 from pathlib import Path
 
 from app.lekarna.service import (
+    RETIRE_CONFIRMATION_PHRASE,
     audit_domaci_lekarna_records,
     format_domaci_lekarna_audit,
+    format_domaci_lek_retire_preview,
     format_domaci_leky_search,
+    format_retire_domaci_lek,
     load_domaci_leky,
     search_domaci_leky_records,
 )
@@ -164,6 +167,87 @@ class LekarnaServiceTests(unittest.TestCase):
 
             after = sorted(path.relative_to(directory) for path in directory.rglob("*"))
             self.assertEqual(before, after)
+
+    def test_retire_preview_is_read_only_and_shows_planned_change(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            directory = Path(temp_dir)
+            csv_path = _fake_csv(directory)
+            before = sorted(path.relative_to(directory) for path in directory.rglob("*"))
+
+            output = format_domaci_lek_retire_preview(
+                "HEPARIN AL",
+                reason="spotrebovano",
+                csv_path=csv_path,
+            )
+
+            after = sorted(path.relative_to(directory) for path in directory.rglob("*"))
+            self.assertEqual(before, after)
+            self.assertIn("Vyrazeni leku - navrh zmeny", output)
+            self.assertIn("HEPARIN AL", output)
+            self.assertIn("mnozstvi: `1 tuba` -> `vyradeno`", output)
+            self.assertIn("umisteni: `horni police` -> `vyradeno`", output)
+            self.assertIn(RETIRE_CONFIRMATION_PHRASE, output)
+
+    def test_retire_apply_requires_explicit_confirmation(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            directory = Path(temp_dir)
+            csv_path = _fake_csv(directory)
+
+            with self.assertRaises(ValueError):
+                format_retire_domaci_lek(
+                    "HEPARIN AL",
+                    reason="spotrebovano",
+                    csv_path=csv_path,
+                    user_confirmed=False,
+                    confirmation_text="",
+                )
+
+            records = load_domaci_leky(csv_path)
+            heparin = next(record for record in records if record.nazev == "HEPARIN AL")
+            self.assertEqual(heparin.mnozstvi, "1 tuba")
+            self.assertEqual(heparin.umisteni, "horni police")
+            self.assertEqual(list(directory.glob("domaci_leky.backup_before_retire_*.csv")), [])
+
+    def test_retire_apply_soft_retires_one_record_and_backs_up_csv(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            directory = Path(temp_dir)
+            csv_path = _fake_csv(directory)
+
+            output = format_retire_domaci_lek(
+                "HEPARIN AL",
+                reason="spotrebovano",
+                csv_path=csv_path,
+                user_confirmed=True,
+                confirmation_text=RETIRE_CONFIRMATION_PHRASE,
+            )
+
+            self.assertIn("Vyrazeni leku - hotovo", output)
+            self.assertIn("HEPARIN AL", output)
+            backups = list(directory.glob("domaci_leky.backup_before_retire_*.csv"))
+            self.assertEqual(len(backups), 1)
+            records = load_domaci_leky(csv_path)
+            self.assertEqual(len(records), 6)
+            heparin = next(record for record in records if record.nazev == "HEPARIN AL")
+            self.assertEqual(heparin.mnozstvi, "vyradeno")
+            self.assertEqual(heparin.umisteni, "vyradeno")
+            self.assertEqual(heparin.nutno_overit, "ano")
+            self.assertIn("Vyradeno", heparin.poznamky)
+            self.assertIn("spotrebovano", heparin.poznamky)
+
+    def test_search_excludes_retired_records(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            csv_path = _fake_csv(Path(temp_dir))
+
+            format_retire_domaci_lek(
+                "HEPARIN AL",
+                reason="spotrebovano",
+                csv_path=csv_path,
+                user_confirmed=True,
+                confirmation_text=RETIRE_CONFIRMATION_PHRASE,
+            )
+
+            output = format_domaci_leky_search("modriny", csv_path=csv_path)
+            self.assertNotIn("HEPARIN AL", output)
 
     def test_photo_import_prepare_manifest_for_new_photos(self) -> None:
         with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:

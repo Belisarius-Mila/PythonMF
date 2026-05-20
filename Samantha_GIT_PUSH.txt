@@ -1,0 +1,66 @@
+SAMANTHA - GIT PUSH
+============================================
+
+Když padá codex:
+
+cd /Users/miloslavfalta/Desktop/PythonMF
+git status
+
+git add .
+git commit -m "Checkpoint before VS Code restart"
+git push
+
+Code → Quit Visual Studio Code
+
+10 sekund
+
+Restart VS Code
+
+
+BEZPECNEJSI POSTUP PRO SAMANTHU / CODEX
+============================================
+
+Smysl:
+Tento soubor je rychla nouzova karticka, kdyz se Codex nebo VS Code seka a je
+potreba ulozit rozpracovanou praci pred restartem. Je schvalne v koreni
+PythonMF, aby byl hned videt i bez hledani v memory.
+
+Dulezite pravidlo:
+Nepouzivat slepe `git add .`, pokud si nejsi jisty obsahem zmen. Muze to
+nechtene pridat docasne soubory, zalohy, autosave, lokalni data nebo citlive
+soubory. Bezpecnejsi je nejdriv zkontrolovat konkretni seznam zmen a pridat jen
+vybrane soubory.
+
+Bezpecny checkpoint:
+
+cd /Users/miloslavfalta/Desktop/PythonMF
+git status --short --untracked-files=all
+
+# 1) Projdi seznam. Nepridavej automaticky data/session_autosave, .env, tokeny,
+#    cele emaily, lokalni archivy ani jine citlive soubory.
+# 2) Pridavej jen konkretni soubory souvisejici s hotovou praci, napriklad:
+
+git add Samantha_Agent/app/... Samantha_Agent/tests/... Samantha_Agent/memory/...
+
+# 3) Znovu zkontroluj, co bude v commitu:
+
+git status --short
+git diff --cached --stat
+
+# 4) Teprve potom commit a push:
+
+git commit -m "Checkpoint before VS Code restart"
+git push origin main
+
+Kdy je mozne pouzit `git add .`:
+Pouze kdyz jsi tesne predtim zkontroloval `git status --short --untracked-files=all`
+a vis, ze ve workspace nejsou zadne citlive, docasne ani nesouvisejici soubory.
+U Samanthy je bezpecnejsi default: nepouzivat.
+
+Po pushi:
+Code → Quit Visual Studio Code
+10 sekund
+Restart VS Code
+
+Kanonicka pravidla jsou v:
+Samantha_Agent/memory/infrastructure/git_checkpoint_protocol.md

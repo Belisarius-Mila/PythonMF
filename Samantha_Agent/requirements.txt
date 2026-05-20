@@ -1,2 +1,4 @@
 openai-agents
+Pillow
+pillow-heif
 python-dotenv

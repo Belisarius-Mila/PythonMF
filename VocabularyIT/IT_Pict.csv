@@ -113,7 +113,7 @@ lavorare,pracovat,letsgo,obr je,ano
 spesso,často,often,"add, doplněno do json",ne
 ballare,tančit,dance,,ano
 storia,"historie, příběh",history,doplněno do json,ano
-brioche,"brioška, sladké pečivo",bakery,"add, doplněno do json",ne
+brioche,"brioška, sladké pečivo",bakery,Obrázek existuje zkontroluj,ano
 forno,trouba,oven,,ano
 mercato,trh,market,,ano
 negozio,obchod,store,,ano
@@ -148,7 +148,7 @@ cercare,hledat,search,,ano
 da,"od, z, u, k",fromwhere,json ok,ano
 domani,zítra,tomorrow,,ano
 domattina,zítra ráno,tomorrow,json ok,ano
-esercizio,"cvičení, úkol, trénink",excercise,json ok,ano
+esercizio,"cvičení, úkol, trénink",exercise,Obrázek existuje zkontroluj,ano
 favore,laskavost,favor,"add, json ok",ne
 forse,možná,maybe,,ano
 forza,"síla, no tak",power,json ok,ano
@@ -165,7 +165,7 @@ subito,"hned, okamžitě",immediately,"add, json ok",ne
 tornare,vrátit se,return,,ano
 treno,vlak,train,,ano
 via,ulice,street,,ano
-viale,"třída, alej",evenue,json ok,ano
+viale,"třída, alej",avenue,Obrázek existuje zkontroluj,ano
 vocabolo,"slovíčko, výraz",word,json ok,ano
 di solito,obvykle,usually,"add, json ok",ne
 macchina,"auto, vůz, stroj",car,json ok,ano
@@ -187,7 +187,7 @@ rispondere,odpovědět,answer,,ano
 rivista,časopis,book,,ano
 romano,"Říman, římský",romano,json ok,ano
 russo,"Rus, ruský",russian,"add, json ok",ne
-scheda,"karta, lístek",card,json ok,ne
+scheda,"karta, lístek",card,Obrázek existuje zkontroluj,ano
 scusare,"omluvit, promiňte",excuseme,json ok,ano
 simpatico,sympatický,likeable,"add, json ok",ne
 slovacco,"Slovák, slovenský",slovac,json ok,ano
@@ -197,7 +197,7 @@ Spagna,Španělsko,spain,,ano
 spremuta,čerstvá šťáva,juice,,ano
 te,"tebe, ti",you,json ok,ano
 tecnico,"technik, technický",technician,json ok,ano
-telefonico,telefonní,call,json ok,ne
+telefonico,telefonní,call,Obrázek existuje zkontroluj,ano
 trovare,najít,find,,ano
 trovarsi,"nacházet se, být",findoneself,"add, json ok",ne
 vaniglia,vanilka,vanilla,,ano
@@ -211,7 +211,7 @@ che cosa,co,what,,ano
 chi,kdo,who,"add, json ok",ne
 chiamare,"jmenovat se, volat, telefonovat",mynamecall,"add, json ok",ne
 conoscere,"znát, poznat",meet,"add, json ok",ano
-di,"z, ze, od",from,json ok,ano
+di,"z, ze, od",fromwhere,json ok,ano
 dopo,"po, potom",after,"add, json ok",ne
 ecco,"tady je, tady jsou",hereyouare,"add, json ok",ne
 essere,být,tobe,,ano
@@ -219,7 +219,7 @@ euro,euro,money,,ano
 fontana,"kašna, fontána",fountain,"add, json ok",ne
 fragile,křehký,fragile,,ano
 francese,"Francouz, francouzský",french,"add, json ok",ne
-francobollo,poštovní známka,,,ne
+francobollo,poštovní známka,postalstamp,add,ne
 gelato,zmrzlina,icecream,,ano
 giorno,den,day,,ano
 gustoso,chutný,tasty,,ano
@@ -230,15 +230,15 @@ leggere,číst,book,json ok,ano
 libero,"volný, svobodný",free,json ok,ano
 limone,citron,lemone,,ano
 minuto,minuta,time,json ok,ano
-meno,méně,,,ne
-misto,"míchaný, smíšený",,,ne
+meno,méně,less,add,ne
+misto,"míchaný, smíšený",mixed,add,ne
 naturalmente,"přirozeně, samozřejmě",ofcourse,json ok,ano
 altro,"jiný, další",other,,ano
 arancia,pomeranč,orange,,ano
 banana,banán,banana,,ano
 bello,"krásný, hezký",beautiful,,ano
 benissimo,výborně,good,json ok,ano
-bravo,"dobrý, šikovný",good,json ok,ne
+bravo,"dobrý, šikovný",good,Obrázek existuje zkontroluj,ano
 buono,dobrý,good,,ano
 camera,pokoj,room,"add, json ok",ne
 ceco,"Čech, český",czech,json ok,ano
@@ -274,95 +274,95 @@ pallacanestro,basketbal,basketball,,ano
 pallavolo,volejbal,voleyball,,ano
 camminare,"chodit, kráčet",walk,,ano
 odiare,nenávidět,hate,,ano
-abbastanza,"dost, docela",,,ne
-aereo,letadlo,,Pict: airport,ne
-alzarsi,"vstát, vstávat",,vstát -> getup ?,ne
-ancora,ještě,,ještě něco -> anythingelse ?,ne
+abbastanza,"dost, docela",enough,add,ne
+aereo,letadlo,airplane,add,ne
+alzarsi,"vstát, vstávat",getup,Obrázek existuje zkontroluj,ano
+ancora,ještě,still,add,ne
 anno,rok,year,,ano
 aprire,otevřít,open,,ano
 asciugamano,ručník,towel,,ano
 auto,auto,car,,ano
-automobilismo,automobilismus,,,ne
+automobilismo,automobilismus,motorsport,add,ne
 caffè,káva,coffee,,ano
-campeggio,kemp,,Pict: park,ne
-capire,"rozumět, chápat",,,ne
-caro,drahý,,,ne
-certamente,"určitě, jistě",,jistě -> sure ?,ne
-chiamarsi,jmenovat se,,jméno -> name ?,ne
-chiuso,"zavřený, zavřeno",,,ne
+campeggio,kemp,camping,add,ne
+capire,"rozumět, chápat",understand,add,ne
+caro,drahý,expensive,add,ne
+certamente,"určitě, jistě",sure,Obrázek existuje zkontroluj,ano
+chiamarsi,jmenovat se,name,Obrázek existuje zkontroluj,ano
+chiuso,"zavřený, zavřeno",closed,add,ne
 città,město,city,,ano
-costare,stát peníze,,stát -> cost ?,ne
-cuore,srdce,,Pict: love,ne
-destro,"pravý, a destra vpravo, napravo",,pravý -> right ?,ne
-difficile,"těžký, nesnadný",,těžký -> difficult ?,ne
+costare,stát peníze,costmoney,Obrázek existuje zkontroluj,ano
+cuore,srdce,heart,add,ne
+destro,"pravý, a destra vpravo, napravo",right,Obrázek existuje zkontroluj,ano
+difficile,"těžký, nesnadný",difficult,Obrázek existuje zkontroluj,ano
 dormire,spát,goodnight,,ano
 dottore,"doktor, lékař",doctor,,ano
-dovere,"muset, mít povinnost",,muset -> must ?,ne
-dritto,"rovně, přímo",,rovně -> straight ?,ne
-elegante,elegantní,,,ne
-facile,"lehký, snadný",,Pict: simple,ne
-fermarsi,"zdržet se, zastavit se",,,ne
-finestra,okno,,,ne
-finire,skončit,,Pict: end,ne
+dovere,"muset, mít povinnost",must,Obrázek existuje zkontroluj,ano
+dritto,"rovně, přímo",straight,Obrázek existuje zkontroluj,ano
+elegante,elegantní,elegant,add,ne
+facile,"lehký, snadný",simple,Obrázek existuje zkontroluj,ano
+fermarsi,"zdržet se, zastavit se",stop,add,ne
+finestra,okno,window,add,ne
+finire,skončit,end,Obrázek existuje zkontroluj,ano
 formula,formule,formula,,ano
-foto,"fotka, fotografie",,,ne
-Francia,Francie,,,ne
-freddo,studený,,"Pict: winter, iceglass",ne
-fretta,"spěch, in fretta rychle",,"spěchající, ve spěchu -> inhurry ?",ne
+foto,"fotka, fotografie",photo,add,ne
+Francia,Francie,france,add,ne
+freddo,studený,cold,add,ne
+fretta,"spěch, in fretta rychle",inhurry,Obrázek existuje zkontroluj,ano
 gara,závod,race,,ano
 giovane,mladý,young,,ano
-Giovanni,Jan,,,ne
-girare,"otočit, odbočit, zahnout",,"odbočit, zahnout -> turn; zatočit, zahnout -> turn ?",ne
-Giulia,Julie,,,ne
-interessare,zajímat,,Pict: interesting,ne
-interessarsi di,zajímat se o,,Pict: interesting,ne
+Giovanni,Jan,man,Obrázek existuje zkontroluj,ano
+girare,"otočit, odbočit, zahnout",turn,Obrázek existuje zkontroluj,ano
+Giulia,Julie,woman,Obrázek existuje zkontroluj,ano
+interessare,zajímat,interesting,Obrázek existuje zkontroluj,ano
+interessarsi di,zajímat se o,interesting,Obrázek existuje zkontroluj,ano
 là,tam,there,,ano
-lavare,"umýt, prát",,"umýt -> wash; mýt, prát -> wash ?",ne
-lavarsi,umýt se,,umýt -> wash ?,ne
-lentamente,pomalu,,Pict: slow,ne
-Luca,Lukáš,,,ne
-Luisa,Luisa,,,ne
-lungo,dlouhý,,,ne
-mano,ruka,,,ne
-Margherita,Markéta,,,ne
-mattina,ráno,,Pict: breakfast,ne
-me,"mně, mě, mi",,mě -> me ?,ne
-Milano,Milán,,,ne
-nave,loď,,,ne
-niente,"nic, není zač",,nic -> nothing; není zač -> yourwelcome ?,ne
-ottimista,optimistický,,Pict: happy,ne
-Parigi,Paříž,,,ne
-perché,"proč, protože",,proč -> why ?,ne
+lavare,"umýt, prát",wash,Obrázek existuje zkontroluj,ano
+lavarsi,umýt se,wash,Obrázek existuje zkontroluj,ano
+lentamente,pomalu,slow,Obrázek existuje zkontroluj,ano
+Luca,Lukáš,man,Obrázek existuje zkontroluj,ano
+Luisa,Luisa,woman,Obrázek existuje zkontroluj,ano
+lungo,dlouhý,long,add,ne
+mano,ruka,hand,add,ne
+Margherita,Markéta,woman,Obrázek existuje zkontroluj,ano
+mattina,ráno,morning,add,ne
+me,"mně, mě, mi",me,Obrázek existuje zkontroluj,ano
+Milano,Milán,milan,add,ne
+nave,loď,ship,add,ne
+niente,"nic, není zač",nothing,Obrázek existuje zkontroluj,ano
+ottimista,optimistický,happy,Obrázek existuje zkontroluj,ano
+Parigi,Paříž,paris,add,ne
+perché,"proč, protože",why,Obrázek existuje zkontroluj,ano
 ponte,most,bridge,,ano
-problema,problém,,Pict: difficult,ne
-programma,program,,,ne
-proprio,"právě, zrovna",,"jen, právě, správný -> just ?",ne
+problema,problém,problem,add,ne
+programma,program,program,add,ne
+proprio,"právě, zrovna",just,Obrázek existuje zkontroluj,ano
 pulito,čistý,clean,,ano
-radio,"rádio, rozhlas",,,ne
-scusarsi,omluvit se,,omluva -> excuse ?,ne
-seguire,"sledovat, následovat",,následovat -> follow ?,ne
-sentire,"cítit, slyšet",,slyšet -> hear ?,ne
-sentirsi,cítit se,,,ne
-servire,"sloužit, obsluhovat",,Pict: serve,ne
-sinistro,"levý, a sinistra vlevo, nalevo",,levý -> left ?,ne
-sole,slunce,,"Pict: summer, hot",ne
+radio,"rádio, rozhlas",radio,add,ne
+scusarsi,omluvit se,excuse,Obrázek existuje zkontroluj,ano
+seguire,"sledovat, následovat",follow,Obrázek existuje zkontroluj,ano
+sentire,"cítit, slyšet",hear,Obrázek existuje zkontroluj,ano
+sentirsi,cítit se,feel,add,ne
+servire,"sloužit, obsluhovat",serve,Obrázek existuje zkontroluj,ano
+sinistro,"levý, a sinistra vlevo, nalevo",left,Obrázek existuje zkontroluj,ano
+sole,slunce,sun,add,ne
 sotto,pod,under,,ano
 sporco,špinavý,dirty,,ano
-stesso,"tentýž, stejný",,,ne
+stesso,"tentýž, stejný",same,add,ne
 stipendio,"plat, výplata",money,,ano
 straniero,cizinec,foreigner,,ano
-tempo,"čas, počasí",,čas -> time ?,ne
-turista,"turista, turistka",,Pict: travel,ne
-tutti,všichni,,"Pict: all, people",ne
-tutto,"všechno, celý",,Pict: all,ne
-"vacanza, vacanze","dovolená, prázdniny",,"Pict: travel, summer",ne
+tempo,"čas, počasí",time,add,ne
+turista,"turista, turistka",tourist,add,ne
+tutti,všichni,all,Obrázek existuje zkontroluj,ano
+tutto,"všechno, celý",all,Obrázek existuje zkontroluj,ano
+"vacanza, vacanze","dovolená, prázdniny",vacation,add,ne
 vecchio,starý,old,,ano
-vedere,vidět,,Pict: eyes,ne
-venire,"přijít, přijet, jít, jet s kým",,"přijít, přijet -> arrive; jít -> go ?",ne
-vero,"pravý, pravdivý, opravdový; è vero to je pravda",,pravý -> right; pravda -> reason ?,ne
-viaggio,cesta,,Pict: travel,ne
+vedere,vidět,see,add,ne
+venire,"přijít, přijet, jít, jet s kým",arrive,Obrázek existuje zkontroluj,ano
+vero,"pravý, pravdivý, opravdový; è vero to je pravda",true,add,ne
+viaggio,cesta,travel,Obrázek existuje zkontroluj,ano
 vicino a,blízko,near,,ano
-volo,let,,Pict: airport,ne
+volo,let,flight,add,ne
 vulcano,sopka,volcano,,ano
 lunedì,pondělí,monday,,ano
 giovedì,čtvrtek,thursday,,ano
@@ -371,74 +371,74 @@ martedì,úterý,tuesday,,ano
 mercoledì,středa,wednesday,,ano
 sabato,sobota,saturday,,ano
 domenica,neděle,sunday,,ano
-quanto,kolik,,"kolik, jak moc -> howmuch ?",ne
-ammalato,nemocný,,"Pict: hospital, doctor",ne
-bicicletta,jízdní kolo,,kolo -> bike ?,ne
-bisogno,potřeba,,Pict: must,ne
-chiudere,zavřít,,,ne
-cielo,"obloha, nebe",,Pict: blue,ne
-collega,kolega,,"kolega, kolegyně -> colleague ?",ne
-colore,barva,,,ne
+quanto,kolik,howmuch,Obrázek existuje zkontroluj,ano
+ammalato,nemocný,sick,add,ne
+bicicletta,jízdní kolo,bike,Obrázek existuje zkontroluj,ano
+bisogno,potřeba,need,add,ne
+chiudere,zavřít,close,add,ne
+cielo,"obloha, nebe",sky,add,ne
+collega,kolega,colleague,Obrázek existuje zkontroluj,ano
+colore,barva,color,add,ne
 cominciare,"začít, začínat",begin,,ano
-coperto,"zatažený, pokrytý",,,ne
-corso,kurz,,"Pict: lesson, school",ne
-desiderare,přát si,,Pict: want,ne
-divertimento,zábava,,"Pict: enjoy, funny",ne
-dizionario,slovník,,"Pict: book, word",ne
+coperto,"zatažený, pokrytý",cloudy,add,ne
+corso,kurz,course,add,ne
+desiderare,přát si,want,Obrázek existuje zkontroluj,ano
+divertimento,zábava,fun,add,ne
+dizionario,slovník,dictionary,add,ne
 dopodomani,pozítří,datomorrow,,ano
-fame,hlad,,hladový -> hungry ?,ne
+fame,hlad,hunger,add,ne
 film,film,film,,ano
-frequentare,navštěvovat,,Pict: school,ne
-fuori,"ven, venku",,,ne
-gita,výlet,,Pict: travel,ne
-grave,"vážný, těžký",,těžký -> difficult ?,ne
+frequentare,navštěvovat,visit,add,ne
+fuori,"ven, venku",outside,add,ne
+gita,výlet,trip,add,ne
+grave,"vážný, těžký",serious,add,ne
 grigio,šedý,grey,,ano
-incontrarsi,"setkat se, sejít se",,"setkat se, seznámit se -> meet ?",ne
-infatti,"opravdu, to je fakt",,"opravdu, skutečně -> really ?",ne
+incontrarsi,"setkat se, sejít se",meet,Obrázek existuje zkontroluj,ano
+infatti,"opravdu, to je fakt",really,Obrázek existuje zkontroluj,ano
 ingegnere,inženýr,engineer,,ano
-Inghilterra,Anglie,,"Pict: british, english",ne
-interprete,tlumočník,,Pict: speak,ne
-libreria,knihkupectví,,Pict: book,ne
-lingua,jazyk,,Pict: speak,ne
-Londra,Londýn,,Pict: british,ne
+Inghilterra,Anglie,england,add,ne
+interprete,tlumočník,interpreter,add,ne
+libreria,knihkupectví,bookstore,add,ne
+lingua,jazyk,language,add,ne
+Londra,Londýn,london,add,ne
 medico,"doktor, lékař",doctor,,ano
-montagna,"hora, hory",,,ne
+montagna,"hora, hory",mountain,add,ne
 ombrello,deštník,umbrella,,ano
-passo,krok,,Pict: walk,ne
-piantina,"plánek, mapka",,,ne
-piovere,pršet,,Pict: umbrella,ne
-pomeriggio,odpoledne,,,ne
-privato,soukromý,,,ne
-professoressa,profesorka,,"Pict: teacher, woman",ne
+passo,krok,step,add,ne
+piantina,"plánek, mapka",map,add,ne
+piovere,pršet,rain,add,ne
+pomeriggio,odpoledne,afternoon,add,ne
+privato,soukromý,private,add,ne
+professoressa,profesorka,teacher,Obrázek existuje zkontroluj,ano
 qualche cosa,něco,something,,ano
 ragione,"pravda, důvod",reason,,ano
 ristorante,restaurace,restaurant,,ano
-sete,žízeň,,"Pict: water, drink",ne
-signorina,slečna,,Pict: woman,ne
-stare,"být, mít se, zůstat",,zůstat -> stay; být -> tobe ?,ne
-strada,"cesta, ulice, silnice",,ulice -> street ?,ne
-Svezia,Švédsko,,,ne
-tascabile,kapesní,,,ne
-televisione,televize,,Pict: film,ne
-testa,hlava,,,ne
+sete,žízeň,thirst,add,ne
+signorina,slečna,woman,Obrázek existuje zkontroluj,ano
+stare,"být, mít se, zůstat",stay,Obrázek existuje zkontroluj,ano
+strada,"cesta, ulice, silnice",street,Obrázek existuje zkontroluj,ano
+Svezia,Švédsko,sweden,add,ne
+tascabile,kapesní,pocket,add,ne
+televisione,televize,television,add,ne
+testa,hlava,head,add,ne
 vita,život,life,,ano
 voglia,chuť,appetite,,ano
-lasciare stare,nechat být,,,ne
-fare due passi,jít na krátkou procházku,,Pict: walk,ne
-fare,dělat,,,ne
-noioso,nudný,,Pict: tired,ne
-ascoltare,poslouchat,,Pict: hear,ne
+lasciare stare,nechat být,leavealone,add,ne
+fare due passi,jít na krátkou procházku,walk,Obrázek existuje zkontroluj,ano
+fare,dělat,do,add,ne
+noioso,nudný,bored,add,ne
+ascoltare,poslouchat,listen,add,ne
 carne,maso,meat,,ano
-famoso,"slavný, známý",,,ne
-comprare,"koupit, kupovat",,"Pict: pay, store",ne
-isola,ostrov,,Pict: lakepond,ne
-antico,"starobylý, dávný, antický",,Pict: old,ne
-ambasciata,velvyslanectví,,,ne
+famoso,"slavný, známý",famous,add,ne
+comprare,"koupit, kupovat",buy,add,ne
+isola,ostrov,island,add,ne
+antico,"starobylý, dávný, antický",ancient,add,ne
+ambasciata,velvyslanectví,embassy,add,ne
 Brasile,Brazílie,brazil,,ano
-marrone,hnědý,,,ne
-calzini,ponožky,,,ne
+marrone,hnědý,brown,add,ne
+calzini,ponožky,socks,add,ne
 viola,fialový,purple,,ano
-guanti,rukavice,,,ne
-pantaloni,kalhoty,,,ne
+guanti,rukavice,gloves,add,ne
+pantaloni,kalhoty,pants,add,ne
 cintura,pásek,belt,,ano
-anello,"prsten, kruh",,,ne
+anello,"prsten, kruh",ring,add,ne

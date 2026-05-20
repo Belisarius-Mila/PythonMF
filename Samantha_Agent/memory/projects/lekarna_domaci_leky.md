@@ -77,7 +77,7 @@ Evidence v `data/lekarna/domaci_leky.csv` uz obsahuje prvni import:
 - zbytky leku bez krabicek z rucnich poznamek,
 - leky prectene z fotek v `data/lekarna/Leky_v_Krabickach/`.
 
-K 2026-05-19 je v CSV 44 polozek. Z fotek krabicek byly doplneny:
+K 2026-05-20 je v CSV 56 polozek. Z fotek krabicek byly doplneny:
 
 - Diclofenac Dr. Muller Pharma gel 10 mg/g,
 - Heparin AL mast 30000 I.E. pro 100 g masti,
@@ -87,6 +87,12 @@ K 2026-05-19 je v CSV 44 polozek. Z fotek krabicek byly doplneny:
 - dalsich 23 polozek z fotek `IMG_8782.HEIC` az `IMG_8804.HEIC`; fotky byly
   prejmenovane na citelne nazvy a import je zdokumentovany v
   `data/lekarna/photo_import_2026_05_19.md`.
+- dalsich 8 polozek z opravenych JPEG fotek `IMG_8808.JPEG` az `IMG_8815.JPEG`;
+  fotky byly prejmenovane na citelne nazvy a import je zdokumentovany v
+  `data/lekarna/photo_import_20260520_015239.md`.
+- dalsi 4 polozky z WhatsApp JPEG fotek `WhatsApp Image 2026-05-19 at 22.11.01*.jpeg`;
+  fotky byly prejmenovane na citelne nazvy a import je zdokumentovany v
+  `data/lekarna/photo_import_20260520_020238.md`.
 
 U fotek neni spolehlive vyctena expirace, proto je u techto polozek `expirace`
 nastavena na `nezjisteno` a `nutno_overit` na `ano`.
@@ -124,3 +130,23 @@ Bezpecnost:
 - Nove polozky maji zustat `nutno_overit=ano`, `overeno_z_letaku=ne`.
 - `expirace=nezjisteno`, pokud neni jasne overena z obalu.
 - Davkovani se nikdy neodvozuje z nazvu ani fotky.
+
+## Vyrazeni leku workflow
+
+Od 2026-05-20 existuje bezpecny soft-delete postup pro vyradeni leku z aktivni
+evidence bez mazani radku:
+
+- Samantha tooly:
+  - `preview_vyrazeni_leku`
+  - `apply_vyrazeni_leku`
+- nejdriv se musi udelat read-only preview konkretni polozky,
+- zapisujici apply krok vyzaduje potvrzovaci vetu:
+  `Potvrzuji vyrazeni leku`,
+- apply krok zalozi zalohu CSV a v radku nastavi:
+  - `mnozstvi=vyradeno`,
+  - `umisteni=vyradeno`,
+  - `nutno_overit=ano`,
+  - do `poznamky` prida `Vyradeno YYYY-MM-DD: <duvod>`.
+
+Vyrazene polozky se nemaji nabizet v beznem hledani domaci lekarny. Radek v CSV
+zustava kvuli historii a dohledatelnosti.

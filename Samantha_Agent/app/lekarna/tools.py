@@ -7,7 +7,12 @@ from .photo_import import (
     format_prepare_lekarna_photo_import_manifest,
     format_validate_lekarna_photo_sources,
 )
-from .service import format_domaci_lekarna_audit, format_domaci_leky_search
+from .service import (
+    format_domaci_lekarna_audit,
+    format_domaci_lek_retire_preview,
+    format_domaci_leky_search,
+    format_retire_domaci_lek,
+)
 
 
 @function_tool
@@ -20,6 +25,28 @@ def search_domaci_leky(query: str, limit: int = 10) -> str:
 def audit_domaci_lekarna() -> str:
     """Read-only audit checklist for local home medicine inventory."""
     return format_domaci_lekarna_audit()
+
+
+@function_tool
+def preview_vyrazeni_leku(query: str, reason: str = "") -> str:
+    """Read-only preview for retiring one medicine inventory item."""
+    return format_domaci_lek_retire_preview(query=query, reason=reason)
+
+
+@function_tool
+def apply_vyrazeni_leku(
+    query: str,
+    reason: str = "",
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+) -> str:
+    """Soft-retire one medicine inventory item after explicit confirmation."""
+    return format_retire_domaci_lek(
+        query=query,
+        reason=reason,
+        user_confirmed=user_confirmed,
+        confirmation_text=confirmation_text,
+    )
 
 
 @function_tool

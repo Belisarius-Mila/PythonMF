@@ -50,11 +50,14 @@ from app.reminders import (
 from app.reminders.due import format_active_due_reminders
 from app.lekarna import (
     apply_lekarna_photo_import,
+    apply_vyrazeni_leku,
     audit_domaci_lekarna,
     prepare_lekarna_photo_import,
+    preview_vyrazeni_leku,
     search_domaci_leky,
     validate_lekarna_photo_sources,
 )
+from app.media import apply_zmenseni_obrazku, preview_zmenseni_obrazku
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -325,6 +328,29 @@ a `expirace=nezjisteno`, pokud expirace neni jasne overena.
 `validate_lekarna_photo_sources` pouzij po importu pro kontrolu, ze zdrojove
 fotky uvedene v CSV existuji.
 
+Lekarna vyrazeni leku pouzij, kdyz Mila rekne, ze chce lek odstranit, vyhodit,
+vyradit, spotreboval ho, je po expiraci nebo uz nema byt nabizen v aktivnim
+prehledavani. Postup je dvoukrokovy: nejdriv vzdy pouzij
+`preview_vyrazeni_leku`, ktery je read-only a ukaze presnou polozku a plan
+zmeny. `apply_vyrazeni_leku` smi zapisovat az po vyslovnem potvrzeni, ze
+aktualni Milova zprava obsahuje vetu `Potvrzuji vyrazeni leku`. Do
+confirmation_text vzdy vloz aktualni Milovu zpravu, nikdy ji nevymyslej ani
+neshrnuj. Vyrazeni je soft-delete: radek se nesmaze, jen se oznaci jako
+`mnozstvi=vyradeno`, `umisteni=vyradeno`, prida se poznamka s datem a duvodem a
+vznikne zaloha CSV. Bez jednoznacne jedne polozky nebo bez potvrzeni zapis
+neprovadej.
+
+Obrazky zmensovani pouzij, kdyz Mila chce zmensit, komprimovat nebo usetrit
+misto u fotografii/obrazku v projektu. Postup je dvoukrokovy: nejdriv vzdy
+`preview_zmenseni_obrazku`, az potom potvrzeny `apply_zmenseni_obrazku`.
+Velikost se zadava jako cilova velikost souboru v kB na jeden obrazek.
+Vychozi obecny cil je cca 250 kB. Pro projekt `lekarna` pouzij preset
+`project="lekarna"` a cil cca 100 kB. Pokud jde o jiny projekt s fotografiemi
+a Mila neurci cilovou velikost, nejdriv se zeptej, jestli pouzit 250 kB nebo
+jinou hodnotu. Apply krok prepisuje obrazky a musi mit aktualni Milovu zpravu
+s potvrzovaci vetou `Potvrzuji zmenseni obrazku`; vzdy zalozi zalohu originalu
+do `data/media/image_resize_backups/` a nic nemaze.
+
 E-mailovy nastroj show_email_case_links pouzij jen pro jedno konkretni UID a jen
 kdyz aktualni Milova zprava obsahuje UID, jasny souhlas a vyslovnou zadost o
 plne URL/odkazy. Do parametru confirmation_text vzdy vloz aktualni Milovu zpravu.
@@ -407,6 +433,10 @@ LOKALNI PAMET:
             run_workflow_command,
             search_domaci_leky,
             audit_domaci_lekarna,
+            preview_vyrazeni_leku,
+            apply_vyrazeni_leku,
+            preview_zmenseni_obrazku,
+            apply_zmenseni_obrazku,
             prepare_lekarna_photo_import,
             apply_lekarna_photo_import,
             validate_lekarna_photo_sources,
