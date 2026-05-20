@@ -26,6 +26,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `projects/multilo_stabilization_cleanup.md` - stabilizace MultiLO návratu do kokpitu, cleanup screenů, pending after callbacky a `tk.Entry` v psacích režimech.
 - `projects/email_readonly_oauth.md` - plán bezpečné read-only OAuth integrace e-mailu pro Samanthu, bez ukládání tokenů nebo obsahu e-mailů do gitu či paměti.
 - `projects/samantha_external_backup.md` - návrh offline zálohování `PythonMF`/Samanthy na externí disk: safe/recovery profily, šifrovaný kontejner, dry-run skript a 3denní připomínka.
+- `projects/automated_recurring_tasks.md` - [PRIPOMENOUT] obecná rutina pro automatické opakující se úkoly: `scripts/daily_3am.py`, macOS launchd, GitHub Actions/cloud směr a bezpečnostní pravidla pro budoucí TTS/git tasky.
 - `../RECOVERY_FROM_BACKUP.md` - lidský a Codex návod pro obnovu Samanthy z externí zálohy na novém Macu.
 
 ## Infrastructure Recovery
@@ -38,6 +39,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `handoffs/automated_recurring_tasks_cloud_2026_05_20.md` - [PRIPOMENOUT] obecná denní rutina ve 3:00 je založená; další vývoj priorita 1 směrem GitHub Actions/cloud, potom první reálný task adapter s allowlistem a testy.
 - `handoffs/dnesni_checkpoint_lekarna_pictnew_git_2026_05_20.md` - [PRIPOMENOUT] denni checkpoint 2026-05-20: Lekarna, media image resize, PictNew batche 001-004 a cilene ulozeni dnesni prace do gitu; dalsi krok je vizualni kontrola batchu 002-004 a batch 005 jen po potvrzeni.
 - `handoffs/lekarna_audit_tool_done_2026_05_19.md` - [PRIPOMENOUT] Lekarna ma druhy read-only Samantha tool `audit_domaci_lekarna`, ktery vraci checklist polozek k fyzicke kontrole: expirace, umisteni, `nutno_overit`, zbytky bez krabicky, jistota cteni, antibiotika a redeni krve; dalsi krok je live test pres Samanthu a az potom navrh potvrzovaneho zapisoveho workflow.
 - `handoffs/lekarna_import_vyrazeni_resize_done_2026_05_20.md` - [PRIPOMENOUT] Lekarna: import novych JPEG/WhatsApp fotek, umisteni, soft-delete workflow pro vyrazeni leku a zmenseni fotek na cca 100 kB jsou hotove; dalsi krok je vratit se k Milovu `Samantha_GIT_PUSH.txt`.

@@ -27,3 +27,16 @@ Testy:
 ```bash
 .venv/bin/python -m unittest discover -s tests
 ```
+
+## Denni rutina ve 3:00
+
+Bezpecny vstupni bod pro denni udrzbu je:
+
+```bash
+.venv/bin/python scripts/daily_3am.py
+```
+
+Rutina loguje do `logs/daily_3am.log`, pouziva lock proti soubehu a denni stav
+v `data/daily_3am/`, aby bylo opakovane spusteni idempotentni. Návod pro macOS
+`launchd`, `pmset wakeorpoweron` a GitHub Actions je v
+[`docs/daily_3am.md`](docs/daily_3am.md).

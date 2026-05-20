@@ -4,3 +4,7 @@ __pycache__/
 .DS_Store
 data/session_autosave/
 data/email/archive/
+data/daily_3am/
+logs/*.log
+logs/*.log.*
+logs/*.lock

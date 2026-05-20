@@ -1,0 +1,33 @@
+name: Samantha Daily 3 AM
+
+on:
+  workflow_dispatch:
+  schedule:
+    # GitHub cron is UTC. Prague is UTC+1 in winter and UTC+2 in summer.
+    # Running at both UTC hours and checking Europe/Prague inside the script
+    # keeps the effective local trigger at 03:00 across DST changes.
+    - cron: "0 1 * * *"
+    - cron: "0 2 * * *"
+
+jobs:
+  daily-3am:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Samantha_Agent
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run scheduled daily routine
+        if: github.event_name == 'schedule'
+        run: python scripts/daily_3am.py --only-at-hour 3
+
+      - name: Run manual daily routine
+        if: github.event_name == 'workflow_dispatch'
+        run: python scripts/daily_3am.py
