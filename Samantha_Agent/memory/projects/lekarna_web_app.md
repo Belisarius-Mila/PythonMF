@@ -243,6 +243,23 @@ Technicky dusledek:
 - V gitu by byl pouze zašifrovany JSON/fotky a aplikacni kod. Heslo samotne ani
   jeho hash by v gitu nebyly.
 
+Implementovany smer od 2026-05-20:
+
+- Lokalni nezasifrovany export zustava v `docs/lekarna/private-data/` a je
+  ignorovany gitem.
+- Verejne publikovatelny balicek ma byt jen
+  `docs/lekarna/encrypted-data/lekarna.enc.json`.
+- Sifrovaci skript `scripts/encrypt_lekarna_web_bundle.py` vezme lokalni
+  `private-data/lekarna.json`, vlozi fotky jako data URL do payloadu a vysledek
+  zasifruje pomoci AES-GCM.
+- Klic se odvozuje z hesla pres PBKDF2-SHA256 se soli a 310000 iteracemi.
+- Heslo se zadava jen do terminalu skrytym promptem; nepatri do chatu, pameti,
+  dokumentace ani gitu.
+- Web na GitHub Pages stahne jen zasifrovany JSON a zkusi jej v prohlizeci
+  otevrit pomoci WebCrypto. Pri spatnem hesle se data nerozbali.
+- Web neuklada heslo ani `sessionStorage` odemceni; po pokusu o nacteni se
+  heslo z JS promenne zahodi.
+
 ### Smime vystavit verejne
 
 - `nazev` - jen pokud nejde o citlivy osobni lek, protoze uz samotny nazev muze
@@ -338,6 +355,15 @@ I v soukromem rezimu musi zustat viditelne:
 
 ## Nejblizsi technicky krok
 
-Vytvorit git-safe export skript, ktery z `data/lekarna/domaci_leky.csv` vyrobi
-vybrany JSON/CSV pro web, napr. do `docs/lekarna/data.json`, az Mila potvrdi
-rozsah publikovanych poli.
+1. V terminalu lokalne spustit:
+
+```bash
+cd /Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent
+.venv/bin/python scripts/export_lekarna_web_private_data.py
+.venv/bin/python scripts/encrypt_lekarna_web_bundle.py
+```
+
+2. Heslo zadat jen do skryteho terminaloveho promptu, nikdy do chatu.
+3. Vznikly `docs/lekarna/encrypted-data/lekarna.enc.json` otestovat na lokalnim
+   serveru.
+4. Teprve potom zašifrovany balicek commitnout a pushnout na GitHub Pages.

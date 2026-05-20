@@ -33,6 +33,7 @@ const defaultBoxData = {
 let boxData = defaultBoxData;
 let medicineData = {};
 let privateDataLoadStarted = false;
+let unlockPassword = "";
 
 const medicinePhotos = {
   sample: {
@@ -169,18 +170,15 @@ const urgentTerms = [
   "otok obliceje",
 ];
 
-if (sessionStorage.getItem("lekarnaUnlocked") === "1") {
-  unlock();
-}
-
 passwordForm.addEventListener("submit", (event) => {
   event.preventDefault();
   if (!passwordInput.value.trim()) {
     passwordInput.focus();
     return;
   }
-  sessionStorage.setItem("lekarnaUnlocked", "1");
+  unlockPassword = passwordInput.value;
   unlock();
+  passwordInput.value = "";
 });
 
 document.querySelectorAll("[data-action]").forEach((button) => {
@@ -265,6 +263,9 @@ function openMedicine(name) {
 async function loadPrivatePharmacyData() {
   if (privateDataLoadStarted) return;
   privateDataLoadStarted = true;
+  const encryptedResult = await loadEncryptedPharmacyData();
+  unlockPassword = "";
+  if (encryptedResult.found) return;
   try {
     const response = await fetch("./private-data/lekarna.json", { cache: "no-store" });
     if (!response.ok) return;
@@ -276,6 +277,73 @@ async function loadPrivatePharmacyData() {
     boxData = defaultBoxData;
     medicineData = {};
   }
+}
+
+async function loadEncryptedPharmacyData() {
+  if (!unlockPassword) return { found: false, loaded: false };
+  let response;
+  try {
+    response = await fetch("./encrypted-data/lekarna.enc.json", { cache: "no-store" });
+  } catch {
+    return { found: false, loaded: false };
+  }
+  if (!response.ok) return { found: false, loaded: false };
+  try {
+    const encrypted = await response.json();
+    const data = await decryptPharmacyBundle(encrypted, unlockPassword);
+    if (!data || !data.boxes || !data.medicines) return { found: true, loaded: false };
+    boxData = data.boxes;
+    medicineData = data.medicines;
+    return { found: true, loaded: true };
+  } catch {
+    boxData = defaultBoxData;
+    medicineData = {};
+    showUnlockMessage("Heslo neotevřelo šifrovaná data. Zkuste stránku obnovit a zadat heslo znovu.");
+    return { found: true, loaded: false };
+  }
+}
+
+async function decryptPharmacyBundle(encrypted, password) {
+  const salt = base64ToBytes(encrypted.salt);
+  const iv = base64ToBytes(encrypted.iv);
+  const ciphertext = base64ToBytes(encrypted.ciphertext);
+  const passwordKey = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(password),
+    "PBKDF2",
+    false,
+    ["deriveKey"],
+  );
+  const key = await crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt,
+      iterations: encrypted.iterations,
+      hash: "SHA-256",
+    },
+    passwordKey,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["decrypt"],
+  );
+  const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
+  return JSON.parse(new TextDecoder().decode(plaintext));
+}
+
+function base64ToBytes(value) {
+  const binary = atob(value);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+  return bytes;
+}
+
+function showUnlockMessage(message) {
+  drawerKicker.textContent = "Domácí lékárna";
+  drawerTitle.textContent = "Demo režim";
+  drawerContent.innerHTML = `<p>${escapeHtml(message)}</p>`;
+  openDrawer();
 }
 
 function renderPilShort(medicine) {

@@ -78,6 +78,16 @@ Funguje:
     a 40 fotek,
   - skutečná data tedy lze proklikat lokálně přes `http://localhost:8765/`,
     ale na GitHub Pages zatím nejsou publikovaná.
+- Rozpracovany a potvrzeny smer verejne publikace je sifrovany balicek:
+  - `scripts/encrypt_lekarna_web_bundle.py` vezme lokalni `private-data/lekarna.json`,
+    vlozi fotky jako data URL a vytvori `docs/lekarna/encrypted-data/lekarna.enc.json`,
+  - sifrovani je AES-GCM, klic je odvozen z hesla pres PBKDF2-SHA256,
+  - heslo se nezapisuje do souboru, hashe, gitu ani pameti; zadava se jen skrytym
+    promptem v terminalu,
+  - web se pokusi otevrit `encrypted-data/lekarna.enc.json` pomoci WebCrypto,
+  - pri spatnem hesle se data nerozbali,
+  - po pokusu o nacteni web zahodi heslo z JS promenne a nepouziva sessionStorage
+    pro obchazeni hesla.
 
 MP3 napoveda byla vygenerovana z textu s diakritikou:
 
@@ -130,34 +140,28 @@ ChatGPT fallback:
 
 ## Co neni hotove
 
-- Skutecna data z `data/lekarna/domaci_leky.csv` zatim nejsou napojena.
-- Seznamy leku v krabickach jsou zatim mock/prototyp.
-- Detail leku zatim pouziva ukazkovou fotku a modelovy `PIL_Short`.
-- Neni hotovy git-safe/export/sifrovaci krok.
-- Heslova brana je zatim jen vizualni/local session brana, ne skutecna ochrana dat.
+- Verejny GitHub Pages zatim nema skutecny zasifrovany balicek, protoze realne
+  heslo nesmi byt zadano do chatu. Balicek musi Mila vytvorit lokalne v terminalu.
+- Dokud neexistuje `docs/lekarna/encrypted-data/lekarna.enc.json`, GitHub Pages
+  zustane v demo rezimu.
 - Neprobehl Playwright vizualni test; drive byl blokovan sitovym omezenim npm.
 
 ## Dalsi krok
 
-1. Rozhodnout technicky rezim publikace:
-   - lokalni/Tailscale-only,
-   - soukromy hosting s autentizaci,
-   - nebo staticky web se zasifrovanym datovym balickem.
-2. Pripravit samostatny export z CSV jen s povolenymi poli.
-3. Napojit krabicky na skutecne seznamy:
-   - `Pils Jana`,
-   - `Pils Mila`,
-   - `Pils Home Store`.
-4. Napojit detail leku:
-   - foto krabicky, pokud smi byt v exportu,
-   - `PIL_Short`,
-   - `PIL_Match_Status`,
-   - zdroj/datum overeni.
-   Migraci skutecnych dat delat az po rozhodnuti exportu/sifrovani.
+1. Mila lokalne v terminalu spusti:
+
+```bash
+cd /Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent
+.venv/bin/python scripts/export_lekarna_web_private_data.py
+.venv/bin/python scripts/encrypt_lekarna_web_bundle.py
+```
+
+2. Heslo zadat jen do skryteho terminaloveho promptu, nikdy do chatu.
+3. Otestovat lokalni web s `docs/lekarna/encrypted-data/lekarna.enc.json`.
+4. Po potvrzeni commitnout a pushnout pouze zasifrovany balicek, nikdy
+   `docs/lekarna/private-data/`.
 5. Z lokalnich query pravidel postupne udelat data-driven mapovani nad exportem,
    aby se nemusela udrzovat natvrdo v `app.js`.
-6. Až bude rozhodnuté heslo/šifrování, převést lokální `private-data` export na
-   veřejně bezpečný šifrovaný balíček a teprve potom ho publikovat.
 
 ## Zmenene nebo relevantni soubory
 
@@ -175,7 +179,9 @@ ChatGPT fallback:
 - `Samantha_Agent/data/lekarna/audio/lekarna_help_intro.mp3`
 - `Samantha_Agent/data/lekarna/tts_help_phrases.csv`
 - `Samantha_Agent/scripts/export_lekarna_web_private_data.py`
+- `Samantha_Agent/scripts/encrypt_lekarna_web_bundle.py`
 - lokální necommitovaný export `docs/lekarna/private-data/`
+- budoucí veřejně publikovatelný export `docs/lekarna/encrypted-data/lekarna.enc.json`
 
 ## Overeni
 
@@ -194,6 +200,14 @@ ChatGPT fallback:
   - `node --check ../docs/lekarna/app.js`,
   - `curl -I http://localhost:8765/private-data/lekarna.json` vratil 200,
   - kontrola exportu: 56 položek, 40 fotek.
+- Po doplneni sifrovani proslo:
+  - `node --check ../docs/lekarna/app.js`,
+  - testovaci sifrovani do `/private/tmp/lekarna_test.enc.json` s dummy heslem,
+  - kontrola struktury balicku: AES-GCM, PBKDF2-SHA256, 310000 iteraci,
+  - Node/WebCrypto test rozbalil dummy testovaci balicek a nasel 56 leku a boxy
+    `jana,mila,home`,
+  - `curl -I http://localhost:8765/` vratil 200,
+  - `curl -I 'http://localhost:8765/app.js?v=encrypted-data-20260520'` vratil 200.
 - Mila rucne otestoval web a potvrdil:
   - hotspoty funguji,
   - napoveda hraje,
@@ -205,6 +219,8 @@ ChatGPT fallback:
 - Neulozeno zadne realne heslo.
 - Heslo ma zustat jen ustne mezi Milou a Janou, ne v pameti, ne v dokumentaci,
   ne v gitu.
+- Nezadavat realne heslo do chatu. Pokud se ma vytvorit realny sifrovany balicek,
+  musi se heslo napsat jen do lokalniho terminaloveho promptu.
 - `data/lekarna/` zustava soukrome a ignorovane gitem.
 - `docs/lekarna/private-data/` zustava soukrome a ignorovane gitem.
 - Plny soukromy CSV a fotky leku nepublikovat bez samostatneho rozhodnuti.

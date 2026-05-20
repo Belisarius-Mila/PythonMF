@@ -23,6 +23,7 @@ Samantha_Agent/data/email/archive/
 
 # Local private web exports, never publish raw household data
 docs/lekarna/private-data/
+!docs/lekarna/encrypted-data/
 
 # Large loose files in the repo root
 /*.png
