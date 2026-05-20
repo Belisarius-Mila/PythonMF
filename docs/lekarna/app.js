@@ -9,7 +9,7 @@ const drawerTitle = document.querySelector("#drawerTitle");
 const drawerContent = document.querySelector("#drawerContent");
 const helpAudio = document.querySelector("#helpAudio");
 
-const boxData = {
+const defaultBoxData = {
   jana: {
     title: "Pils Jana",
     kicker: "Osobní krabička",
@@ -29,6 +29,10 @@ const boxData = {
     medicines: ["Brufen", "Panadol Novum", "ACC Long", "Fenistil gel", "Imodium"],
   },
 };
+
+let boxData = defaultBoxData;
+let medicineData = {};
+let privateDataLoadStarted = false;
 
 const medicinePhotos = {
   sample: {
@@ -199,6 +203,7 @@ closeDrawer.addEventListener("click", () => drawer.classList.remove("is-open"));
 function unlock() {
   lockScreen.classList.add("is-hidden");
   cockpit.classList.remove("is-hidden");
+  void loadPrivatePharmacyData();
 }
 
 function openDrawer() {
@@ -227,7 +232,10 @@ function openBox(key) {
 }
 
 function openMedicine(name) {
-  const photo = medicinePhotos[name] || medicinePhotos.sample;
+  const medicine = medicineData[name] || {};
+  const photo = medicine.photo
+    ? { src: medicine.photo, alt: `Foto krabičky ${name}` }
+    : medicinePhotos[name] || medicinePhotos.sample;
   drawer.classList.add("is-detail");
   drawerKicker.textContent = "Detail léku";
   drawerTitle.textContent = name;
@@ -239,23 +247,60 @@ function openMedicine(name) {
           <img src="${escapeHtml(photo.src)}" alt="${escapeHtml(photo.alt)}">
           <figcaption>${escapeHtml(name)}</figcaption>
         </figure>
-        <p class="photo-caption">Zatím ukázková fotka pro test rozvržení. Později se načte správná fotka z bezpečného exportu.</p>
+        <p class="photo-caption">${medicine.photo ? "Fotka je načtená z lokálního bezpečného exportu." : "Zatím ukázková fotka pro test rozvržení. Později se načte správná fotka z bezpečného exportu."}</p>
       </section>
 
       <section class="pil-window" aria-label="PIL Short">
         <div class="pil-scroll">
           <p class="window-label">PIL_Short</p>
           <p class="pil-lead">${escapeHtml(name)}</p>
-          <p><strong>Na co lék je:</strong> sem se načte krátký, věcný výtah z příbalové informace. Popíše hlavní účel léku bez toho, aby z něj dělal osobní doporučení.</p>
-          <p><strong>Způsob používání:</strong> zde bude jen obecná informace z příbalového letáku, ne dávkovací rada. Konkrétní dávkování zůstává na obalu, lékaři nebo lékárníkovi.</p>
-          <p><strong>Kdy pozor:</strong> výtah připomene hlavní kontraindikace, typické interakce a situace, kdy je lepší lék nepoužít bez ověření.</p>
-          <p><strong>Rizika:</strong> jen prakticky a krátce, bez zbytečného strašení. U nejistého názvu nebo varianty bude viditelně napsáno, že je potřeba ověřit obal.</p>
-          <p class="pil-warning">Domácí evidence. Ověřit obal, expiraci a příbalovou informaci. Nepoužívat jako dávkování.</p>
+          ${renderPilShort(medicine)}
         </div>
       </section>
     </div>
   `;
   openDrawer();
+}
+
+async function loadPrivatePharmacyData() {
+  if (privateDataLoadStarted) return;
+  privateDataLoadStarted = true;
+  try {
+    const response = await fetch("./private-data/lekarna.json", { cache: "no-store" });
+    if (!response.ok) return;
+    const data = await response.json();
+    if (!data || !data.boxes || !data.medicines) return;
+    boxData = data.boxes;
+    medicineData = data.medicines;
+  } catch {
+    boxData = defaultBoxData;
+    medicineData = {};
+  }
+}
+
+function renderPilShort(medicine) {
+  if (medicine.pilShort) {
+    return `
+      <p>${escapeHtml(medicine.pilShort)}</p>
+      <p class="pil-meta">${escapeHtml(formatMedicineMeta(medicine))}</p>
+      <p class="pil-warning">Domácí evidence. Ověřit obal, expiraci a příbalovou informaci. Nepoužívat jako dávkování.</p>
+    `;
+  }
+  return `
+    <p><strong>Na co lék je:</strong> sem se načte krátký, věcný výtah z příbalové informace. Popíše hlavní účel léku bez toho, aby z něj dělal osobní doporučení.</p>
+    <p><strong>Způsob používání:</strong> zde bude jen obecná informace z příbalového letáku, ne dávkovací rada. Konkrétní dávkování zůstává na obalu, lékaři nebo lékárníkovi.</p>
+    <p><strong>Kdy pozor:</strong> výtah připomene hlavní kontraindikace, typické interakce a situace, kdy je lepší lék nepoužít bez ověření.</p>
+    <p><strong>Rizika:</strong> jen prakticky a krátce, bez zbytečného strašení. U nejistého názvu nebo varianty bude viditelně napsáno, že je potřeba ověřit obal.</p>
+    <p class="pil-warning">Domácí evidence. Ověřit obal, expiraci a příbalovou informaci. Nepoužívat jako dávkování.</p>
+  `;
+}
+
+function formatMedicineMeta(medicine) {
+  const parts = [];
+  if (medicine.pilStatus) parts.push(`Status: ${medicine.pilStatus}`);
+  if (medicine.pilCheckedDate) parts.push(`Ověřeno: ${medicine.pilCheckedDate}`);
+  if (medicine.mustVerify === "ano") parts.push("Ověřit obal");
+  return parts.join(" | ");
 }
 
 function openSymptoms() {

@@ -21,6 +21,9 @@ Samantha_Agent/data/*
 !Samantha_Agent/data/.gitkeep
 Samantha_Agent/data/email/archive/
 
+# Local private web exports, never publish raw household data
+docs/lekarna/private-data/
+
 # Large loose files in the repo root
 /*.png
 /*.PNG

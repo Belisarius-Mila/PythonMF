@@ -517,6 +517,11 @@ input {
   font-style: italic;
 }
 
+.pil-meta {
+  color: #6b4211;
+  font-size: 0.9rem;
+}
+
 .chatgpt-status {
   margin: 10px 0 0;
   color: rgba(244, 231, 197, 0.74);

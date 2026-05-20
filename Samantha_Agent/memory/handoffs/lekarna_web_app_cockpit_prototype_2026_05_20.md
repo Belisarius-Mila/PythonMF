@@ -69,6 +69,15 @@ Funguje:
     spodní starocesky napis,
   - ChatGPT fallback byl zmenen z pojmenovane zalozky na `_blank`, aby se
     nenahrazovala ani nezavirala puvodni zalozka s lekarnou.
+- Ostrá data jsou napojená bezpečným lokálním režimem:
+  - aplikace se pokusí načíst `docs/lekarna/private-data/lekarna.json`,
+  - pokud soubor neexistuje, zůstane veřejný demo režim,
+  - `docs/lekarna/private-data/` je v `.gitignore` a nesmí se commitovat,
+  - export se vytváří skriptem `Samantha_Agent/scripts/export_lekarna_web_private_data.py`,
+  - aktuální lokální export obsahuje 56 položek, z toho Jana 4, Míla 3, Home 49,
+    a 40 fotek,
+  - skutečná data tedy lze proklikat lokálně přes `http://localhost:8765/`,
+    ale na GitHub Pages zatím nejsou publikovaná.
 
 MP3 napoveda byla vygenerovana z textu s diakritikou:
 
@@ -147,6 +156,8 @@ ChatGPT fallback:
    Migraci skutecnych dat delat az po rozhodnuti exportu/sifrovani.
 5. Z lokalnich query pravidel postupne udelat data-driven mapovani nad exportem,
    aby se nemusela udrzovat natvrdo v `app.js`.
+6. Až bude rozhodnuté heslo/šifrování, převést lokální `private-data` export na
+   veřejně bezpečný šifrovaný balíček a teprve potom ho publikovat.
 
 ## Zmenene nebo relevantni soubory
 
@@ -163,6 +174,8 @@ ChatGPT fallback:
 - `Samantha_Agent/data/lekarna/IPL_Short.PNG`
 - `Samantha_Agent/data/lekarna/audio/lekarna_help_intro.mp3`
 - `Samantha_Agent/data/lekarna/tts_help_phrases.csv`
+- `Samantha_Agent/scripts/export_lekarna_web_private_data.py`
+- lokální necommitovaný export `docs/lekarna/private-data/`
 
 ## Overeni
 
@@ -177,6 +190,10 @@ ChatGPT fallback:
 - Po oprave scrollu detailu a ChatGPT fallbacku proslo
   `node --check ../docs/lekarna/app.js`; lokalni `app.js` a `styles.css` vratily
   200 pres `http://localhost:8765/`.
+- Po napojeni ostrého lokálního exportu prošlo:
+  - `node --check ../docs/lekarna/app.js`,
+  - `curl -I http://localhost:8765/private-data/lekarna.json` vratil 200,
+  - kontrola exportu: 56 položek, 40 fotek.
 - Mila rucne otestoval web a potvrdil:
   - hotspoty funguji,
   - napoveda hraje,
@@ -189,6 +206,7 @@ ChatGPT fallback:
 - Heslo ma zustat jen ustne mezi Milou a Janou, ne v pameti, ne v dokumentaci,
   ne v gitu.
 - `data/lekarna/` zustava soukrome a ignorovane gitem.
+- `docs/lekarna/private-data/` zustava soukrome a ignorovane gitem.
 - Plny soukromy CSV a fotky leku nepublikovat bez samostatneho rozhodnuti.
 - Web nema davat lekarske doporuceni ani davkovani; ma ukazovat domaci evidenci,
   `PIL_Short`, status jistoty a upozorneni na overeni obalu/lekarne.
