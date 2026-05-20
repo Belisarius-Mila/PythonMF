@@ -1,0 +1,711 @@
+{
+  "created_for": "VocabularyIT",
+  "mapping_file_to_update_later": "Pict/mapping.json",
+  "mapping_not_modified": true,
+  "csv_files_modified_now": [
+    "VocabularyIT/IT_Pict.csv",
+    "VocabularyIT/VocabularyIT.csv"
+  ],
+  "csv_fixes": [
+    {
+      "file": "VocabularyIT/IT_Pict.csv",
+      "old_it": "su",
+      "old_cz": "o (na téma)",
+      "new_it": "su",
+      "new_cz": "o"
+    },
+    {
+      "file": "VocabularyIT/IT_Pict.csv",
+      "old_it": "laggiù",
+      "old_cz": "tam / tamhle",
+      "new_it": "laggiù",
+      "new_cz": "tam"
+    },
+    {
+      "file": "VocabularyIT/IT_Pict.csv",
+      "old_it": "adesso",
+      "old_cz": "teď",
+      "new_it": "adesso",
+      "new_cz": "teď, nyní"
+    },
+    {
+      "file": "VocabularyIT/IT_Pict.csv",
+      "old_it": "per",
+      "old_cz": "per",
+      "new_it": "per",
+      "new_cz": "pro"
+    },
+    {
+      "file": "VocabularyIT/IT_Pict.csv",
+      "old_it": "impegnata",
+      "old_cz": "zaneprázdněná",
+      "new_it": "impegnato",
+      "new_cz": "zaneprázdněný"
+    },
+    {
+      "file": "VocabularyIT/IT_Pict.csv",
+      "old_it": "poi",
+      "old_cz": "potom, pak",
+      "new_it": "poi",
+      "new_cz": "potom / pak"
+    },
+    {
+      "file": "VocabularyIT/IT_Pict.csv",
+      "old_it": "vendere",
+      "old_cz": "prodávat",
+      "new_it": "vendere",
+      "new_cz": "prodat, prodávat"
+    },
+    {
+      "file": "VocabularyIT/IT_Pict.csv",
+      "old_it": "ecco",
+      "old_cz": "tady je, tady jsou",
+      "new_it": "ecco",
+      "new_cz": "tady je; tady jsou"
+    },
+    {
+      "file": "VocabularyIT/IT_Pict.csv",
+      "old_it": "vero",
+      "old_cz": "pravý, pravdivý, opravdový; è vero to je pravda",
+      "new_it": "vero",
+      "new_cz": "pravý, pravdivý, opravdový"
+    },
+    {
+      "file": "VocabularyIT/VocabularyIT.csv",
+      "old_it": "vero",
+      "old_cz": "pravý, pravdivý, opravdový; è vero to je pravda",
+      "new_it": "vero",
+      "new_cz": "pravý, pravdivý, opravdový"
+    }
+  ],
+  "summary": {
+    "csv_fixes": 10,
+    "mapping_adds": 87,
+    "mapping_updates_approved": 1,
+    "mapping_manual_conflicts": 0,
+    "mapping_unchanged": 41
+  },
+  "mapping_adds": [
+    {
+      "key": "potom / pak",
+      "image": "then2",
+      "it": "poi",
+      "pd": "add, json ok",
+      "pe": "ne"
+    },
+    {
+      "key": "hned, okamžitě",
+      "image": "immediately",
+      "it": "subito",
+      "pd": "add, json ok",
+      "pe": "ne"
+    },
+    {
+      "key": "sympatický",
+      "image": "likeable",
+      "it": "simpatico",
+      "pd": "add, json ok",
+      "pe": "ne"
+    },
+    {
+      "key": "kašna, fontána",
+      "image": "fountain",
+      "it": "fontana",
+      "pd": "add, json ok",
+      "pe": "ne"
+    },
+    {
+      "key": "poštovní známka",
+      "image": "postalstamp",
+      "it": "francobollo",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "méně",
+      "image": "less",
+      "it": "meno",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "míchaný, smíšený",
+      "image": "mixed",
+      "it": "misto",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "plavat",
+      "image": "swim",
+      "it": "nuotare",
+      "pd": "add, json ok",
+      "pe": "ne"
+    },
+    {
+      "key": "prase",
+      "image": "pig",
+      "it": "porco",
+      "pd": "add, json ok",
+      "pe": "ne"
+    },
+    {
+      "key": "bohužel",
+      "image": "unfortunatelly",
+      "it": "purtroppo",
+      "pd": "add, json ok",
+      "pe": "ne"
+    },
+    {
+      "key": "dost, docela",
+      "image": "enough",
+      "it": "abbastanza",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "letadlo",
+      "image": "airplane",
+      "it": "aereo",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "ještě",
+      "image": "still",
+      "it": "ancora",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "automobilismus",
+      "image": "motorsport",
+      "it": "automobilismo",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "kemp",
+      "image": "camping",
+      "it": "campeggio",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "rozumět, chápat",
+      "image": "understand",
+      "it": "capire",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "drahý",
+      "image": "expensive",
+      "it": "caro",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "zavřený, zavřeno",
+      "image": "closed",
+      "it": "chiuso",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "srdce",
+      "image": "heart",
+      "it": "cuore",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "elegantní",
+      "image": "elegant",
+      "it": "elegante",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "zdržet se, zastavit se",
+      "image": "stop",
+      "it": "fermarsi",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "okno",
+      "image": "window",
+      "it": "finestra",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "fotka, fotografie",
+      "image": "photo",
+      "it": "foto",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "Francie",
+      "image": "france",
+      "it": "Francia",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "studený",
+      "image": "cold",
+      "it": "freddo",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "dlouhý",
+      "image": "long",
+      "it": "lungo",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "ruka",
+      "image": "hand",
+      "it": "mano",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "ráno",
+      "image": "morning",
+      "it": "mattina",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "Milán",
+      "image": "milan",
+      "it": "Milano",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "loď",
+      "image": "ship",
+      "it": "nave",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "Paříž",
+      "image": "paris",
+      "it": "Parigi",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "problém",
+      "image": "problem",
+      "it": "problema",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "program",
+      "image": "program",
+      "it": "programma",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "rádio, rozhlas",
+      "image": "radio",
+      "it": "radio",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "cítit se",
+      "image": "feel",
+      "it": "sentirsi",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "slunce",
+      "image": "sun",
+      "it": "sole",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "tentýž, stejný",
+      "image": "same",
+      "it": "stesso",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "čas, počasí",
+      "image": "time",
+      "it": "tempo",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "turista, turistka",
+      "image": "tourist",
+      "it": "turista",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "dovolená, prázdniny",
+      "image": "vacation",
+      "it": "vacanza, vacanze",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "vidět",
+      "image": "see",
+      "it": "vedere",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "pravý, pravdivý, opravdový",
+      "image": "true",
+      "it": "vero",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "let",
+      "image": "flight",
+      "it": "volo",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "potřeba",
+      "image": "need",
+      "it": "bisogno",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "zavřít",
+      "image": "close",
+      "it": "chiudere",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "obloha, nebe",
+      "image": "sky",
+      "it": "cielo",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "barva",
+      "image": "color",
+      "it": "colore",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "zatažený, pokrytý",
+      "image": "cloudy",
+      "it": "coperto",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "kurz",
+      "image": "course",
+      "it": "corso",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "zábava",
+      "image": "fun",
+      "it": "divertimento",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "slovník",
+      "image": "dictionary",
+      "it": "dizionario",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "hlad",
+      "image": "hunger",
+      "it": "fame",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "navštěvovat",
+      "image": "visit",
+      "it": "frequentare",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "ven, venku",
+      "image": "outside",
+      "it": "fuori",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "výlet",
+      "image": "trip",
+      "it": "gita",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "vážný, těžký",
+      "image": "serious",
+      "it": "grave",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "setkat se, sejít se",
+      "image": "meet",
+      "it": "incontrarsi",
+      "pd": "Obrázek existuje zkontroluj",
+      "pe": "ano"
+    },
+    {
+      "key": "Anglie",
+      "image": "england",
+      "it": "Inghilterra",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "tlumočník",
+      "image": "interpreter",
+      "it": "interprete",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "knihkupectví",
+      "image": "bookstore",
+      "it": "libreria",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "jazyk",
+      "image": "language",
+      "it": "lingua",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "Londýn",
+      "image": "london",
+      "it": "Londra",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "hora, hory",
+      "image": "mountain",
+      "it": "montagna",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "krok",
+      "image": "step",
+      "it": "passo",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "plánek, mapka",
+      "image": "map",
+      "it": "piantina",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "pršet",
+      "image": "rain",
+      "it": "piovere",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "odpoledne",
+      "image": "afternoon",
+      "it": "pomeriggio",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "soukromý",
+      "image": "private",
+      "it": "privato",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "žízeň",
+      "image": "thirst",
+      "it": "sete",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "Švédsko",
+      "image": "sweden",
+      "it": "Svezia",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "kapesní",
+      "image": "pocket",
+      "it": "tascabile",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "televize",
+      "image": "television",
+      "it": "televisione",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "hlava",
+      "image": "head",
+      "it": "testa",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "nechat být",
+      "image": "leavealone",
+      "it": "lasciare stare",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "dělat",
+      "image": "do",
+      "it": "fare",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "nudný",
+      "image": "bored",
+      "it": "noioso",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "poslouchat",
+      "image": "listen",
+      "it": "ascoltare",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "slavný, známý",
+      "image": "famous",
+      "it": "famoso",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "koupit, kupovat",
+      "image": "buy",
+      "it": "comprare",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "ostrov",
+      "image": "island",
+      "it": "isola",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "starobylý, dávný, antický",
+      "image": "ancient",
+      "it": "antico",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "velvyslanectví",
+      "image": "embassy",
+      "it": "ambasciata",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "hnědý",
+      "image": "brown",
+      "it": "marrone",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "ponožky",
+      "image": "socks",
+      "it": "calzini",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "rukavice",
+      "image": "gloves",
+      "it": "guanti",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "kalhoty",
+      "image": "pants",
+      "it": "pantaloni",
+      "pd": "add",
+      "pe": "ne"
+    },
+    {
+      "key": "prsten, kruh",
+      "image": "ring",
+      "it": "anello",
+      "pd": "add",
+      "pe": "ne"
+    }
+  ],
+  "mapping_updates_approved": [
+    {
+      "key": "modlit se, prosit",
+      "image": "pray",
+      "it": "pregare",
+      "pd": "add, json ok",
+      "pe": "ne",
+      "existing_key": "modlit se, prosit",
+      "old_image": "prey"
+    }
+  ],
+  "mapping_manual_conflicts": []
+}

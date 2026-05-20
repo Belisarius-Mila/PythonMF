@@ -1,8 +1,8 @@
 ITP,CZP,ENP,PD,PE
 piatto,talíř,plate,,ano
 su,na,on,,ano
-su,o,about,o -> about ?,ano
-laggiù,tam,there,tam -> there ?,ano
+su,o (na téma),about,o -> about ?,ano
+laggiù,tam / tamhle,there,tam -> there ?,ano
 torta,"dort, koláč",cake,,ano
 troppo,příliš / moc,toomuch,,ano
 forte,"silný, hlasitě (nahlas)",strong,,ano
@@ -37,7 +37,7 @@ nipote,synovec,man,,ano
 nipote,neteř,woman,,ano
 figlia,dcera,sister,,ano
 figlio,syn,man,,ano
-adesso,"teď, nyní",now,"teď, nyní -> now ?",ano
+adesso,teď,now,"teď, nyní -> now ?",ano
 zia,teta,aunt,,ano
 zio,strýc,uncle,,ano
 tu,ty,you,,ano
@@ -99,7 +99,7 @@ Lei,vy,people,,ano
 lei,ona,woman,,ano
 ragazza,dívka,woman,,ano
 guardare,"dívat se, sledovat",eyes,doplněno do json,ano
-per,pro,perJulia,"add, doplněno do json",ne
+per,per,perJulia,"add, doplněno do json",ne
 per,aby,inorderto,"add, doplněno do json",ne
 pompelmo,grep,grapefruit,,ano
 bicchiere,sklenice,glass,,ano
@@ -123,7 +123,7 @@ grazie,děkuji,thankyou,,ano
 come,"jak, jako",how,doplněno do json,ano
 ufficio,"kancelář, úřad",office,,ano
 ospedale,nemocnice,hospital,,ano
-impegnato,zaneprázdněný,busy,doplněno do json,ano
+impegnata,zaneprázdněná,busy,doplněno do json,ano
 tutti i giorni,každý den,everyday,,ano
 cuoca,kuchařka,cook,,ano
 male,"špatně, zle, bolest, zlo",painevil,"add, doplněno do json",ne
@@ -155,7 +155,7 @@ forza,"síla, no tak",power,json ok,ano
 lezione,"lekce, hodina",lesson,json ok,ano
 pagare,platit,pay,,ano
 parola,slovo,word,,ano
-poi,potom / pak,then2,"add, json ok",ne
+poi,"potom, pak",then2,"add, json ok",ne
 pregare,"modlit se, prosit",pray,"add, json ok",ne
 qua,tady,here,,ano
 restare,zůstat,stay,,ano
@@ -201,7 +201,7 @@ telefonico,telefonní,call,Obrázek existuje zkontroluj,ano
 trovare,najít,find,,ano
 trovarsi,"nacházet se, být",findoneself,"add, json ok",ne
 vaniglia,vanilka,vanilla,,ano
-vendere,"prodat, prodávat",sell,json ok,ano
+vendere,prodávat,sell,json ok,ano
 vino,víno,wine,"add, json ok",ne
 vincere,vyhrát,win,,ano
 zero,nula,zero,,ano
@@ -213,7 +213,7 @@ chiamare,"jmenovat se, volat, telefonovat",mynamecall,"add, json ok",ne
 conoscere,"znát, poznat",meet,"add, json ok",ano
 di,"z, ze, od",fromwhere,json ok,ano
 dopo,"po, potom",after,"add, json ok",ne
-ecco,tady je; tady jsou,hereyouare,"add, json ok",ne
+ecco,"tady je, tady jsou",hereyouare,"add, json ok",ne
 essere,být,tobe,,ano
 euro,euro,money,,ano
 fontana,"kašna, fontána",fountain,"add, json ok",ne
@@ -359,7 +359,7 @@ tutto,"všechno, celý",all,Obrázek existuje zkontroluj,ano
 vecchio,starý,old,,ano
 vedere,vidět,see,add,ne
 venire,"přijít, přijet, jít, jet s kým",arrive,Obrázek existuje zkontroluj,ano
-vero,"pravý, pravdivý, opravdový",true,add,ne
+vero,"pravý, pravdivý, opravdový; è vero to je pravda",true,add,ne
 viaggio,cesta,travel,Obrázek existuje zkontroluj,ano
 vicino a,blízko,near,,ano
 volo,let,flight,add,ne
