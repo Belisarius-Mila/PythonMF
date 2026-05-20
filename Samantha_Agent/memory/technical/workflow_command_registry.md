@@ -84,3 +84,34 @@ backup_project_dry_run
 
 Zaloha je prvni pilotni workflow. Dalsi strukturální projekty maji pouzit stejnou
 vrstvu misto pridavani dlouhych manualnich prikazu do chatu.
+
+## Kandidati k registraci
+
+### PictNew / slovnikove obrazky
+
+Kanonicky postup je popsany v:
+
+```text
+Samantha_Agent/memory/technical/vocabulary_image_generation_workflow.md
+```
+
+Stav 2026-05-20:
+
+- workflow je rucne overeny na `VocabularyIT`,
+- neni jeste registrovany v `app/workflows/commands.py`,
+- Samantha ho proto nesmi spoustet jako volny ad hoc shell podle jedne vety.
+
+Doporucene command/tool kroky:
+
+- `pictnew_prepare_request` - bez API, priprava request JSON,
+- `pictnew_generate_batch_preview` - dry-run bez API,
+- `pictnew_generate_batch_confirmed` - placene generovani jedne davky po potvrzeni,
+- `pictnew_copy_approved_to_pict` - kopie schvalenych `.webp` bez prepisu,
+- `pictnew_update_mapping_preview` a `pictnew_update_mapping_apply` - mapping jen se zalohou a potvrzenim.
+
+Bezpecnostni brany:
+
+- placene API generovani vyzaduje explicitni potvrzeni rozsahu,
+- `Pict/mapping.json` se neupravuje bez samostatneho potvrzeni a zalohy,
+- API klice se nesmi ukladat do repo souboru ani memory,
+- nepouzivat `git add .`.

@@ -74,7 +74,7 @@ neni registrovane, nebo ho navrhnout jako novou kartu.
 | MMTX | `MatysekANJ/MMTX.py`, `MatysekANJ/web_mmtx/`, `docs/` | L1 | Pygame/web vyukova aplikace, hotspoty, sceny, audio podklady. | Workflow pro sync webu do `docs/` a smoke test; pred zmenami cist MMTX memory a handoff. |
 | Matysek English Game concept | `MatysekANJ/anglictina_matysek_V3.py` | L0/L1 | Koncept a starsi Pygame experimenty. | Nechat V3 stabilni; hlavni smer je MMTX. |
 | MultiLO | `MultiLO/` | L1 | Desktop vyukova aplikace, testy `test_multilo_core.py`, `test_storage.py`, rucni retest checklist. | Registrovat read-only/test workflow pro `py_compile` a unit testy; zapisove zmeny delat jen po konkretni zadani. |
-| PictNew / FR+IT obrazky | `pict_new_audit.py`, `Pict/`, `PictNew/`, `VocabularyFR/`, `VocabularyIT/` | L1 | Prvni audit script; memory definuje budoucí audit -> posouzeni -> AddPictures. | Registrovat read-only audit `PictNew`; zapisujici `AddPictures` az po samostatnem potvrzeni a bez API klice v souborech. |
+| PictNew / FR+IT obrazky | `pict_new_audit.py`, `pict_new_prepare.py`, `image_generator.py`, `Pict/`, `PictNew/`, `VocabularyFR/`, `VocabularyIT/` | L1 | Overeny rucni workflow: audit/request -> dry-run -> potvrzene placene batch generovani -> review -> kopie do `Pict/` -> mapping az po dalsim potvrzeni. Kanonicky postup je v `technical/vocabulary_image_generation_workflow.md`. | Registrovat PictNew workflow s oddelenymi kroky: prepare, dry-run, confirmed generate, copy approved, mapping preview/apply se zalohou. |
 | VocabularyEN web cards | `VocabularyEN/`, `docs/vocabulary-en/`, `docs/data/` | L1 | Sync CSV do `docs`, learner web MVP, localStorage stav. | Registrovat sync workflow `VocabularyEN -> docs`; test pres lokalni HTTP server pri UI zmenach. |
 | TTS edge audio | `scripts/generate_tts.py`, `scripts/tts_gui.py` | L1 | Davkove MP3 z CSV a rucni GUI pres `edge-tts`. | Registrovat davkove TTS workflow; GUI spoustet jen na Miluv pokyn a s vedomim, ze otevre okno. |
 | Tax 2025 | `Tax/` | L0/L1 | Checklist a vypocet v memory; citlive podklady v projektu. | Zadne automaticke vypocty bez zadani; pripadny workflow jen pro kontrolu checklistu, bez ukladani rodneho cisla/adres. |
@@ -202,7 +202,7 @@ bezny lidsky pokyn na tento prikaz.
 
 ## Prioritni kandidati
 
-1. `PictNew` read-only audit jako prvni nebackupovy workflow kandidat.
+1. `PictNew` workflow jako prvni nebackupovy workflow kandidat: prepare request, dry-run, potvrzene generovani davky, kopie schvalenych obrazku a mapping preview/apply.
 2. `VocabularyEN` sync do `docs/` jako jednoduchy read/write workflow s jasnym
    vystupem.
 3. `MultiLO` test workflow pro `py_compile` a existujici unit testy.

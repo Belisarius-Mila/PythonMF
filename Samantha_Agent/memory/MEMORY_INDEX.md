@@ -92,6 +92,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `technical/capability_routing_rules.md` - obecne pravidlo pro vsechny projekty: lidsky pokyn -> pochopeny zamer -> registrovana schopnost/tool/workflow -> bezpecnostni rozsah -> potvrzeni podle rizika.
 - `technical/workflow_command_registry.md` - pravidlo, ze lidske workflow pokyny se maji mapovat na predem schvalene presne prikazy v registru, ne na ad hoc shell vymysleny modelem.
 - `technical/project_capability_map.md` - [PRIPOMENOUT] potvrzena taxonomie projektu v `PythonMF` a priorita 1 pro prvni nizkorizikove workflow kandidaty: `PictNew` read-only audit a `VocabularyEN` sync do `docs/`.
+- `technical/vocabulary_image_generation_workflow.md` - [PRIPOMENOUT] pozlacený kanonický workflow pro slovníkové obrázky: audit/request, dry-run, potvrzené placené generování po dávkách, review, kopie do `Pict/`, mapping až po samostatném potvrzení a git checkpoint.
 - `technical/macos_wifi_vpn_tailscale_recovery.md` - [PRIPOMENOUT] priorita 1: recovery protokol pro macOS Wi-Fi/DHCP/VPN/Tailscale vypadky po rozbitem routovani nebo tunnel rozhranich.
 - `../NETWORK_RECOVERY_CARD.txt` - offline nouzova karta pro pripad, ze nejde internet a nejde se dostat do ChatGPT; lze vypsat pres `scripts/network_recovery_card.sh`.
 
