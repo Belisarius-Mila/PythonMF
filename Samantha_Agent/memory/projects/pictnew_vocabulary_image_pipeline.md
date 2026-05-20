@@ -389,6 +389,41 @@ PictNew/generated/20260520_it_batch001/review.html
 Pred dalsim batchem nebo presunem do `Pict/` ma Mila vizualne zkontrolovat
 `review.html`.
 
+### Stav po dogenerovani batchu 012 a 013
+
+Po Milove potvrzeni 2026-05-20 byly dogenerovany posledni batche requestu
+`PictNew/NewPicturesRequest20052026.json`:
+
+- Batch 012: 10/10 obrazku, vsechny status `generated`, nejvetsi soubor cca `230.2 kB`.
+- Batch 013: 5/5 obrazku, vsechny status `generated`, nejvetsi soubor cca `246.6 kB`.
+- Batch 013 byl posledni batch, protoze request ma celkem 125 unikatnich obrazku.
+- Vystupy jsou v:
+
+```text
+PictNew/generated/20260520_it_batch012/
+PictNew/generated/20260520_it_batch013/
+```
+
+- Kontrolni soubory:
+
+```text
+PictNew/generated/20260520_it_batch012/generation_report.json
+PictNew/generated/20260520_it_batch012/review.html
+PictNew/generated/20260520_it_batch013/generation_report.json
+PictNew/generated/20260520_it_batch013/review.html
+```
+
+Obrazky nebyly presunuty do `Pict/` a nebyl upraven `Pict/mapping.json`.
+Pred presunem je dalsi krok vizualne zkontrolovat batch review soubory.
+
+Po Milove potvrzeni, ze vsechny obrazky jsou skvele, byly vygenerovane `.webp`
+soubory z batchu 001 az 013 zkopirovany do `Pict/`.
+
+- Kontrola potvrdila 125/125 cilovych souboru v `Pict/`.
+- Zdrojove soubory v `PictNew/generated/` zustaly zachovane.
+- `Pict/mapping.json` zatim nebyl upraven.
+- Dalsi krok je aktualizovat `Pict/mapping.json` jen po samostatnem potvrzeni a pred zmenou vytvorit zalohu.
+
 Výsledek testu:
 
 - `VocabularyFR`: 11 nových řádků k doplnění do `FR_Pict.csv`, 112 shod/návrhů k posouzení, 0 bez návrhu

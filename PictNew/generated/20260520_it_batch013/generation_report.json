@@ -1,0 +1,167 @@
+[
+  {
+    "status": "generated",
+    "request_index": 121,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260520_it_batch013/brown.webp",
+    "output_file": "brown.webp",
+    "original_bytes": 1981781,
+    "output_bytes": 252472,
+    "request": {
+      "id": "it-brown",
+      "language": "it",
+      "image_name": "brown",
+      "target_filename": "brown.png",
+      "row_numbers": [
+        438
+      ],
+      "words": [
+        "marrone"
+      ],
+      "czech_meanings": [
+        "hnědý"
+      ],
+      "source_entries": [
+        {
+          "row_number": 438,
+          "word": "marrone",
+          "czech_meaning": "hnědý",
+          "source_pd": "add",
+          "source_pe": "ne"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'brown', but do not illustrate the file name literally unless it matches the meaning. The image must represent the Italian/French word(s) 'marrone' with Czech meaning 'hnědý'. Base the scene primarily on the Czech meaning, then use the foreign word only as context. If the concept is abstract or grammatical, use a concrete everyday visual metaphor that a child can understand. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 122,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260520_it_batch013/socks.webp",
+    "output_file": "socks.webp",
+    "original_bytes": 1987011,
+    "output_bytes": 236920,
+    "request": {
+      "id": "it-socks",
+      "language": "it",
+      "image_name": "socks",
+      "target_filename": "socks.png",
+      "row_numbers": [
+        439
+      ],
+      "words": [
+        "calzini"
+      ],
+      "czech_meanings": [
+        "ponožky"
+      ],
+      "source_entries": [
+        {
+          "row_number": 439,
+          "word": "calzini",
+          "czech_meaning": "ponožky",
+          "source_pd": "add",
+          "source_pe": "ne"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'socks', but do not illustrate the file name literally unless it matches the meaning. The image must represent the Italian/French word(s) 'calzini' with Czech meaning 'ponožky'. Base the scene primarily on the Czech meaning, then use the foreign word only as context. If the concept is abstract or grammatical, use a concrete everyday visual metaphor that a child can understand. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 123,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260520_it_batch013/gloves.webp",
+    "output_file": "gloves.webp",
+    "original_bytes": 1766853,
+    "output_bytes": 179150,
+    "request": {
+      "id": "it-gloves",
+      "language": "it",
+      "image_name": "gloves",
+      "target_filename": "gloves.png",
+      "row_numbers": [
+        441
+      ],
+      "words": [
+        "guanti"
+      ],
+      "czech_meanings": [
+        "rukavice"
+      ],
+      "source_entries": [
+        {
+          "row_number": 441,
+          "word": "guanti",
+          "czech_meaning": "rukavice",
+          "source_pd": "add",
+          "source_pe": "ne"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'gloves', but do not illustrate the file name literally unless it matches the meaning. The image must represent the Italian/French word(s) 'guanti' with Czech meaning 'rukavice'. Base the scene primarily on the Czech meaning, then use the foreign word only as context. If the concept is abstract or grammatical, use a concrete everyday visual metaphor that a child can understand. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 124,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260520_it_batch013/pants.webp",
+    "output_file": "pants.webp",
+    "original_bytes": 1727552,
+    "output_bytes": 167084,
+    "request": {
+      "id": "it-pants",
+      "language": "it",
+      "image_name": "pants",
+      "target_filename": "pants.png",
+      "row_numbers": [
+        442
+      ],
+      "words": [
+        "pantaloni"
+      ],
+      "czech_meanings": [
+        "kalhoty"
+      ],
+      "source_entries": [
+        {
+          "row_number": 442,
+          "word": "pantaloni",
+          "czech_meaning": "kalhoty",
+          "source_pd": "add",
+          "source_pe": "ne"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'pants', but do not illustrate the file name literally unless it matches the meaning. The image must represent the Italian/French word(s) 'pantaloni' with Czech meaning 'kalhoty'. Base the scene primarily on the Czech meaning, then use the foreign word only as context. If the concept is abstract or grammatical, use a concrete everyday visual metaphor that a child can understand. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 125,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260520_it_batch013/ring.webp",
+    "output_file": "ring.webp",
+    "original_bytes": 1725720,
+    "output_bytes": 176148,
+    "request": {
+      "id": "it-ring",
+      "language": "it",
+      "image_name": "ring",
+      "target_filename": "ring.png",
+      "row_numbers": [
+        444
+      ],
+      "words": [
+        "anello"
+      ],
+      "czech_meanings": [
+        "prsten, kruh"
+      ],
+      "source_entries": [
+        {
+          "row_number": 444,
+          "word": "anello",
+          "czech_meaning": "prsten, kruh",
+          "source_pd": "add",
+          "source_pe": "ne"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'ring', but do not illustrate the file name literally unless it matches the meaning. The image must represent the Italian/French word(s) 'anello' with Czech meaning 'prsten, kruh'. Base the scene primarily on the Czech meaning, then use the foreign word only as context. If the concept is abstract or grammatical, use a concrete everyday visual metaphor that a child can understand. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    }
+  }
+]
