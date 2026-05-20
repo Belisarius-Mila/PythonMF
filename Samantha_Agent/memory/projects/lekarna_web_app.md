@@ -349,22 +349,30 @@ I v soukromem rezimu musi zustat viditelne:
   nebo trvajicich potizi overit lekare/lekarnika."
 - "U polozek s nejistym statusem nejdrive overit obal."
 
-## Otevrena rozhodnuti
+## Aktualni stav 2026-05-20
 
-1. Ma byt web verejny pres GitHub Pages, nebo soukromy/lokalni?
-2. Ktera pole se smi ukazat Janicce?
-3. Maji se zobrazovat fotky krabicek?
-4. Ma web umet jen prohlizeni, nebo i export/tisk checklistu?
-5. Bude datovy export rucni, nebo generovany skriptem z lokalniho CSV?
+Projekt webove aplikace Lekarna je uzavreny jako hotovy / udrzba priorita 2.
 
-## Nejblizsi technicky krok
+Hotove:
 
-1. Po doběhnutí GitHub Pages cache otestovat veřejný web:
-   `https://belisarius-mila.github.io/PythonMF/lekarna/`
-2. Zadat heslo pouze ručně v prohlížeči a ověřit, že se načtou skutečné seznamy,
-   fotky a `PIL_Short`.
-3. Pokud se při dalším doplnění léků změní CSV/fotky, opakovat lokálně export a
-   šifrování:
+- Verejny web bezi na `https://belisarius-mila.github.io/PythonMF/lekarna/`.
+- Aplikace se odemyka heslem jako desifrovacim klicem; heslo ani hash nejsou ulozene v projektu.
+- Skutecna data, fotky a `PIL_Short` jsou publikovane jen jako sifrovany balik
+  `docs/lekarna/encrypted-data/lekarna.enc.json`.
+- Nesifrovany export `docs/lekarna/private-data/` je lokalni/ignorovany a nesmi se commitovat.
+- ChatGPT fallback ma kopirovaci panel a rucni odkaz, protoze nektere prohlizece na Macu neoteviraji novou zalozku ani po kliknuti.
+- Míla potvrdil, ze nacitani funguje uspokojive; na iPhonu se ChatGPT otevira v jinem okne, na Macu je k dispozici manualni/copy fallback.
+
+Dalsi vyvoj:
+
+- Zadny aktivni dalsi vyvoj neni otevreny.
+- Projekt zustava jako priorita 2, az bude cas nebo novy urgentni pozadavek.
+- Pri novem pozadavku nejdrive cist `handoffs/lekarna_web_app_hotovo_2026_05_20.md`.
+
+## Udrzbovy postup pri zmene dat
+
+Pokud se pri dalsim doplneni leku zmeni CSV/fotky, opakovat lokalne export a
+sifrovani:
 
 ```bash
 cd /Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent
@@ -372,5 +380,6 @@ cd /Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent
 .venv/bin/python scripts/encrypt_lekarna_web_bundle.py
 ```
 
-4. Nový šifrovaný balíček znovu cíleně commitnout; `docs/lekarna/private-data/`
-   nikdy necommitovat.
+Novy sifrovany balicek znovu cilene commitnout; `docs/lekarna/private-data/`
+nikdy necommitovat. Heslo zadavat jen do lokalniho skryteho promptu, nikdy do
+chatu, memory, dokumentace ani gitu.
