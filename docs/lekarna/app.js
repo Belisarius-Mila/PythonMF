@@ -375,14 +375,16 @@ function openChatGpt(rawQuestion) {
     "Upozorni, kdy je vhodné kontaktovat lékaře nebo lékárníka.",
   ].join(" ");
   const url = `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`;
-  const opened = window.open(url, "lekarnaChatGpt");
+  const opened = window.open(url, "_blank");
+  if (opened) {
+    opened.opener = null;
+  }
   const status = document.querySelector("#chatGptStatus");
   if (status) {
     status.textContent = opened
-      ? "ChatGPT je otevřený v samostatné záložce. Do lékárny se vrátíte původní záložkou."
+      ? "ChatGPT se otevřel v nové záložce nebo okně. Lékárna zůstává v původní záložce."
       : "Prohlížeč nové okno zablokoval. Povolte vyskakovací okno nebo otevřete ChatGPT ručně.";
   }
-  window.focus();
 }
 
 async function playHelp() {

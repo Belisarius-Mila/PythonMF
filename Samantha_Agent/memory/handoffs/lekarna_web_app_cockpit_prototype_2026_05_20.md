@@ -61,6 +61,14 @@ Funguje:
   - text v pergamenu ma vetsi vnitrni okraje a vlastni scroll,
   - ChatGPT fallback otevira pojmenovanou samostatnou zalozku a v aplikaci nechava
     puvodni panel otevreny.
+- Po dalsim rucnim testu 2026-05-20 byly opraveny problemy detailu:
+  - v detailu uz nema scrollovat cely obsah s fotkou a pergamenem,
+  - vnejsi detailovy panel ma scroll skryty,
+  - scrolluje jen textova oblast uvnitr pergamenu,
+  - textova oblast pergamenu je umistena do stredove psaci plochy a nema prekryvat
+    spodní starocesky napis,
+  - ChatGPT fallback byl zmenen z pojmenovane zalozky na `_blank`, aby se
+    nenahrazovala ani nezavirala puvodni zalozka s lekarnou.
 
 MP3 napoveda byla vygenerovana z textu s diakritikou:
 
@@ -166,6 +174,9 @@ ChatGPT fallback:
   `curl -I http://localhost:8765/` vratil 200.
 - Po doplneni detailu leku proslo `node --check ../docs/lekarna/app.js` a
   `curl -I http://localhost:8765/assets/ipl-short.png` vratil 200.
+- Po oprave scrollu detailu a ChatGPT fallbacku proslo
+  `node --check ../docs/lekarna/app.js`; lokalni `app.js` a `styles.css` vratily
+  200 pres `http://localhost:8765/`.
 - Mila rucne otestoval web a potvrdil:
   - hotspoty funguji,
   - napoveda hraje,
