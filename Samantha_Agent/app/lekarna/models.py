@@ -22,6 +22,10 @@ class DomaciLek:
     nutno_overit: str
     zdroj: str
     poznamky: str
+    PIL_Short: str
+    PIL_Source: str
+    PIL_Checked_Date: str
+    PIL_Match_Status: str
 
 
 @dataclass(frozen=True)

@@ -31,6 +31,10 @@ utridit domaci zasoby leku.
 - `data/lekarna/photo_imports/` - manifesty pro opakovatelny import novych fotek.
 - `data/lekarna/photo_import_*.md` - reporty z provedenych foto importu.
 
+Poznamka k gitu: `data/lekarna/` je v hlavnim `.gitignore` ignorovane, protoze
+obsahuje soukroma domaci data. Pro verejny nebo rodinny web je vhodne vytvorit
+samostatny export s vybranymi poli, ne automaticky publikovat plny inventar.
+
 ## Navrzeny format evidence
 
 Kazdy lek ma mit minimalne:
@@ -48,6 +52,16 @@ Kazdy lek ma mit minimalne:
 - umisteni,
 - poznamky.
 
+Od 2026-05-20 se pro kratke vytahy z pribalovych informaci pouzivaji volitelne
+sloupce:
+
+- `PIL_Short` - kratky prakticky vytah: na co lek je, jak se obecne pouziva,
+  hlavni kontraindikace a bezna/prakticka rizika,
+- `PIL_Source` - zdroj overeni, idealne SÚKL DLP kod + URL PIL,
+- `PIL_Checked_Date` - datum overeni,
+- `PIL_Match_Status` - stav sparovani, napr. `overeno_sukl_dlp_pil`,
+  `nejisty_nazev`, `neni_lek_nebo_bez_sukl_pil`, `nenalezeno`.
+
 ## Bezpecnostni pravidla
 
 1. Neodhadovat davkovani, pokud neni ulozene a overene.
@@ -56,6 +70,10 @@ Kazdy lek ma mit minimalne:
 3. Pokud je lek po expiraci, oznacit jako nepouzivat bez overeni.
 4. Pokud chybi ucinna latka nebo sila, nevyvozovat zavery podle nazvu naslepo.
 5. Neuvadet jistotu tam, kde evidence obsahuje jen domaci poznamku.
+6. PIL vytahy maji byt prakticke a konzervativni, ale ne alarmisticke; nezvyraznovat
+   raritni katastroficke reakce, pokud nejsou pro bezne rozhodovani zasadni.
+7. U nejasnych nazvu, doplnku stravy, zdravotnickych prostredku nebo osobnich leku
+   nevyrobit PIL text naslepo; radsi oznacit nejisty status a nechat overeni na pozdeji.
 
 ## Priklad budouciho dotazu
 
@@ -96,6 +114,31 @@ K 2026-05-20 je v CSV 56 polozek. Z fotek krabicek byly doplneny:
 
 U fotek neni spolehlive vyctena expirace, proto je u techto polozek `expirace`
 nastavena na `nezjisteno` a `nutno_overit` na `ano`.
+
+K 2026-05-20 byl doplnen `PIL_Short` nebo vysvetlujici status pro vsech 56 radku
+evidence. Pouzity byl SÚKL DLP export 2026-04-27 pro kontrolu kodu/nazvu/PIL a
+konkretni verejne PIL/PDF odkazy tam, kde byly potreba pro text.
+
+Souhrn statusu:
+
+- `overeno_sukl_dlp_pil`: 26
+- `overeno_sukl_dlp_ema_pil`: 1
+- `pravdepodobne_sparovano_sukl_pil`: 1
+- `nejista_varianta_sukl`: 4
+- `nejisty_nazev_pravdepodobne_sukl`: 3
+- `nejisty_nazev`: 4
+- `nenalezeno_sukl_overit_obal`: 7
+- `neni_lek_nebo_bez_sukl_pil`: 8
+- `neni_lek`: 2
+
+Kanonicky postup pro budouci doplnovani novych leku je v:
+
+- `technical/lekarna_pil_short_workflow.md`
+
+Lokalni soukrome vystupy z behu:
+
+- zaloha `data/lekarna/domaci_leky.backup_before_pil_short_all_20260520_152331.csv`,
+- report `data/lekarna/pil_short_report_20260520_152331.md`.
 
 ## Foto import workflow
 

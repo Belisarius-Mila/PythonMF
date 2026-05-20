@@ -41,6 +41,10 @@ FIELD_NAMES = [
     "nutno_overit",
     "zdroj",
     "poznamky",
+    "PIL_Short",
+    "PIL_Source",
+    "PIL_Checked_Date",
+    "PIL_Match_Status",
 ]
 
 
@@ -233,6 +237,26 @@ class LekarnaServiceTests(unittest.TestCase):
             self.assertEqual(heparin.nutno_overit, "ano")
             self.assertIn("Vyradeno", heparin.poznamky)
             self.assertIn("spotrebovano", heparin.poznamky)
+
+    def test_retire_apply_preserves_pil_fields(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            directory = Path(temp_dir)
+            csv_path = _fake_csv(directory)
+
+            format_retire_domaci_lek(
+                "HEPARIN AL",
+                reason="spotrebovano",
+                csv_path=csv_path,
+                user_confirmed=True,
+                confirmation_text=RETIRE_CONFIRMATION_PHRASE,
+            )
+
+            records = load_domaci_leky(csv_path)
+            heparin = next(record for record in records if record.nazev == "HEPARIN AL")
+            self.assertEqual(heparin.PIL_Short, "Pilotni text PIL")
+            self.assertEqual(heparin.PIL_Source, "https://example.test/pil")
+            self.assertEqual(heparin.PIL_Checked_Date, "2026-05-20")
+            self.assertEqual(heparin.PIL_Match_Status, "pilot")
 
     def test_search_excludes_retired_records(self) -> None:
         with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
@@ -461,6 +485,10 @@ def _fake_csv(directory: Path) -> Path:
             "jistota_cteni": "vysoka",
             "nutno_overit": "ano",
             "poznamky": "Expirace neni videt.",
+            "PIL_Short": "Pilotni text PIL",
+            "PIL_Source": "https://example.test/pil",
+            "PIL_Checked_Date": "2026-05-20",
+            "PIL_Match_Status": "pilot",
         },
         {
             "nazev": "CLARINESE",

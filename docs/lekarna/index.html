@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Domácí lékárna</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <section class="lock-screen" id="lockScreen" aria-labelledby="lockTitle">
+      <div class="lock-panel">
+        <p class="eyebrow">Rodinná lékárna</p>
+        <h1 id="lockTitle">Vstup do lékárny</h1>
+        <form class="password-form" id="passwordForm">
+          <label for="passwordInput">Heslo</label>
+          <div class="password-row">
+            <input id="passwordInput" name="password" type="password" autocomplete="current-password">
+            <button type="submit">Otevřít</button>
+          </div>
+          <p class="hint" id="passwordHint">Prototyp: heslo zatím jen odemkne obrazovku v prohlížeči.</p>
+        </form>
+      </div>
+    </section>
+
+    <section class="cockpit is-hidden" id="cockpit" aria-label="Domácí lékárna">
+      <div class="scene-wrap">
+        <img class="scene-image" src="./assets/lekarna-cockpit.png" alt="Interiér staré lékárny s krabičkami Pils Jana, Pils Mila a Pils Home Store.">
+
+        <button class="hotspot hotspot-box hotspot-jana" data-action="box" data-target="jana" aria-label="Otevřít Pils Jana">
+          <span>Pils Jana</span>
+        </button>
+        <button class="hotspot hotspot-box hotspot-mila" data-action="box" data-target="mila" aria-label="Otevřít Pils Mila">
+          <span>Pils Mila</span>
+        </button>
+        <button class="hotspot hotspot-box hotspot-home" data-action="box" data-target="home" aria-label="Otevřít Pils Home Store">
+          <span>Pils Home Store</span>
+        </button>
+        <button class="hotspot hotspot-snake" data-action="symptoms" aria-label="Zadat potíže">
+          <span>Co vás trápí?</span>
+        </button>
+        <button class="hotspot hotspot-help" data-action="help" aria-label="Přehrát nápovědu">
+          <span>Nápověda</span>
+        </button>
+      </div>
+
+      <aside class="drawer" id="drawer" aria-live="polite">
+        <div class="drawer-card">
+          <button class="close-button" id="closeDrawer" aria-label="Zavřít panel">×</button>
+          <p class="drawer-kicker" id="drawerKicker">Domácí lékárna</p>
+          <h2 id="drawerTitle">Klikněte na krabičku</h2>
+          <div class="drawer-content" id="drawerContent">
+            <p>Vyberte jednu z malovaných krabiček nebo hadí otazník.</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <audio id="helpAudio" preload="auto" src="./audio/lekarna-help-intro.mp3"></audio>
+  <script src="./app.js"></script>
+</body>
+</html>
