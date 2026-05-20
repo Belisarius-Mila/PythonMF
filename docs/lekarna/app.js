@@ -32,7 +32,7 @@ const defaultBoxData = {
 
 let boxData = defaultBoxData;
 let medicineData = {};
-let privateDataLoadStarted = false;
+let privateDataLoadPromise = null;
 let unlockPassword = "";
 
 const medicinePhotos = {
@@ -182,12 +182,14 @@ passwordForm.addEventListener("submit", (event) => {
 });
 
 document.querySelectorAll("[data-action]").forEach((button) => {
-  button.addEventListener("click", () => {
+  button.addEventListener("click", async () => {
     const action = button.dataset.action;
     if (action === "box") {
+      await ensurePharmacyDataLoaded();
       openBox(button.dataset.target);
     }
     if (action === "symptoms") {
+      await ensurePharmacyDataLoaded();
       openSymptoms();
     }
     if (action === "help") {
@@ -198,10 +200,16 @@ document.querySelectorAll("[data-action]").forEach((button) => {
 
 closeDrawer.addEventListener("click", () => drawer.classList.remove("is-open"));
 
-function unlock() {
+async function unlock() {
   lockScreen.classList.add("is-hidden");
   cockpit.classList.remove("is-hidden");
-  void loadPrivatePharmacyData();
+  showUnlockLoading();
+  const loaded = await loadPrivatePharmacyData();
+  if (loaded) {
+    drawer.classList.remove("is-open");
+  } else if (drawerTitle.textContent === "Otevírám data") {
+    showUnlockMessage("Šifrovaná data se nenašla nebo nejsou dostupná. Zobrazí se demo režim.");
+  }
 }
 
 function openDrawer() {
@@ -261,22 +269,36 @@ function openMedicine(name) {
 }
 
 async function loadPrivatePharmacyData() {
-  if (privateDataLoadStarted) return;
-  privateDataLoadStarted = true;
-  const encryptedResult = await loadEncryptedPharmacyData();
-  unlockPassword = "";
-  if (encryptedResult.found) return;
-  try {
-    const response = await fetch("./private-data/lekarna.json", { cache: "no-store" });
-    if (!response.ok) return;
-    const data = await response.json();
-    if (!data || !data.boxes || !data.medicines) return;
-    boxData = data.boxes;
-    medicineData = data.medicines;
-  } catch {
-    boxData = defaultBoxData;
-    medicineData = {};
+  if (privateDataLoadPromise) return privateDataLoadPromise;
+  privateDataLoadPromise = (async () => {
+    try {
+      const encryptedResult = await loadEncryptedPharmacyData();
+      if (encryptedResult.found) return encryptedResult.loaded;
+      try {
+        const response = await fetch("./private-data/lekarna.json", { cache: "no-store" });
+        if (!response.ok) return false;
+        const data = await response.json();
+        if (!data || !data.boxes || !data.medicines) return false;
+        boxData = data.boxes;
+        medicineData = data.medicines;
+        return true;
+      } catch {
+        boxData = defaultBoxData;
+        medicineData = {};
+        return false;
+      }
+    } finally {
+      unlockPassword = "";
+    }
+  })();
+  return privateDataLoadPromise;
+}
+
+async function ensurePharmacyDataLoaded() {
+  if (!privateDataLoadPromise) {
+    showUnlockLoading();
   }
+  return loadPrivatePharmacyData();
 }
 
 async function loadEncryptedPharmacyData() {
@@ -343,6 +365,13 @@ function showUnlockMessage(message) {
   drawerKicker.textContent = "Domácí lékárna";
   drawerTitle.textContent = "Demo režim";
   drawerContent.innerHTML = `<p>${escapeHtml(message)}</p>`;
+  openDrawer();
+}
+
+function showUnlockLoading() {
+  drawerKicker.textContent = "Domácí lékárna";
+  drawerTitle.textContent = "Otevírám data";
+  drawerContent.innerHTML = "<p>Načítám a odemykám šifrovanou lékárnu...</p>";
   openDrawer();
 }
 
@@ -488,15 +517,16 @@ function openChatGpt(rawQuestion) {
     "Upozorni, kdy je vhodné kontaktovat lékaře nebo lékárníka.",
   ].join(" ");
   const url = `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`;
-  const opened = window.open(url, "_blank");
-  if (opened) {
-    opened.opener = null;
-  }
+  const link = document.createElement("a");
+  link.href = url;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  document.body.append(link);
+  link.click();
+  link.remove();
   const status = document.querySelector("#chatGptStatus");
   if (status) {
-    status.textContent = opened
-      ? "ChatGPT se otevřel v nové záložce nebo okně. Lékárna zůstává v původní záložce."
-      : "Prohlížeč nové okno zablokoval. Povolte vyskakovací okno nebo otevřete ChatGPT ručně.";
+    status.textContent = "ChatGPT se má otevřít v nové záložce nebo okně. Lékárna zůstává v původní záložce.";
   }
 }
 

@@ -93,6 +93,16 @@ Funguje:
   - `docs/lekarna/encrypted-data/lekarna.enc.json`
   - commit `e46991d Publish encrypted pharmacy data bundle`
   - heslo nebylo zadáno do chatu, nebylo uloženo do paměti ani do gitu.
+- Po ručním testu veřejné aplikace 2026-05-20 byly nalezeny dvě chyby:
+  - osobní léky Jana/Míla občas otevřely demo `PIL_Short`, protože šifrovaný
+    17MB balíček se ještě dešifroval a uživatel mohl kliknout dřív, než byla
+    ostrá data hotová,
+  - ChatGPT fallback v některém prohlížeči nahrazoval původní záložku s aplikací.
+- Oprava:
+  - web po zadání hesla zobrazí "Načítám a odemykám šifrovanou lékárnu..." a
+    před otevřením krabiček/dotazu čeká na dokončení načtení dat,
+  - kliknutí na ChatGPT se nově provádí přes dočasný `<a target="_blank"
+    rel="noopener noreferrer">`, aby původní lékárna zůstala otevřená.
 
 MP3 napoveda byla vygenerovana z textu s diakritikou:
 
@@ -212,6 +222,10 @@ ChatGPT fallback:
     vratil 200,
   - GitHub Pages krátce po pushi ještě vracel 404 pro nový encrypted-data soubor,
     pravděpodobně kvůli cache/nasazení.
+- Po opravě čekání na dešifrování a ChatGPT odkazu:
+  - `node --check ../docs/lekarna/app.js` prošlo,
+  - `curl -I 'http://localhost:8765/app.js?v=encrypted-data-fix-20260520'`
+    vratil 200.
 - Mila rucne otestoval web a potvrdil:
   - hotspoty funguji,
   - napoveda hraje,
