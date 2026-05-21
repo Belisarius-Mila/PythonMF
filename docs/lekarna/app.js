@@ -48,13 +48,6 @@ let medicineData = {};
 let privateDataLoadPromise = null;
 let unlockPassword = "";
 
-const medicinePhotos = {
-  sample: {
-    src: "./assets/meds/sample-hirudoid.jpeg",
-    alt: "Ukázkové foto krabičky léku",
-  },
-};
-
 const symptomIntents = [
   {
     label: "Bolest hlavy / horečka",
@@ -291,9 +284,6 @@ function openVitaminRecommendation() {
 
 function openMedicine(name) {
   const medicine = medicineData[name] || {};
-  const photo = medicine.photo
-    ? { src: medicine.photo, alt: `Foto krabičky ${name}` }
-    : medicinePhotos[name] || medicinePhotos.sample;
   drawer.classList.add("is-detail");
   drawerKicker.textContent = "Detail léku";
   drawerTitle.textContent = name;
@@ -301,11 +291,7 @@ function openMedicine(name) {
     <div class="medicine-detail-grid">
       <section class="photo-window" aria-label="Malé foto krabičky">
         <p class="window-label">Malé foto</p>
-        <figure class="medicine-photo-frame">
-          <img src="${escapeHtml(photo.src)}" alt="${escapeHtml(photo.alt)}">
-          <figcaption>${escapeHtml(name)}</figcaption>
-        </figure>
-        <p class="photo-caption">${medicine.photo ? "Fotka je načtená z lokálního bezpečného exportu." : "Zatím ukázková fotka pro test rozvržení. Později se načte správná fotka z bezpečného exportu."}</p>
+        ${renderMedicinePhoto(name, medicine)}
       </section>
 
       <section class="pil-window" aria-label="PIL Short">
@@ -318,6 +304,25 @@ function openMedicine(name) {
     </div>
   `;
   openDrawer();
+}
+
+function renderMedicinePhoto(name, medicine) {
+  if (!medicine.photo) {
+    return `
+      <div class="medicine-photo-empty">
+        <p>Fotka zatím není v evidenci.</p>
+        <span>${escapeHtml(name)}</span>
+      </div>
+      <p class="photo-caption">Tahle položka pochází ze staršího textového seznamu bez vlastní krabičky.</p>
+    `;
+  }
+  return `
+    <figure class="medicine-photo-frame">
+      <img src="${escapeHtml(medicine.photo)}" alt="Foto krabičky ${escapeHtml(name)}">
+      <figcaption>${escapeHtml(name)}</figcaption>
+    </figure>
+    <p class="photo-caption">Fotka je načtená z lokálního bezpečného exportu.</p>
+  `;
 }
 
 async function loadPrivatePharmacyData() {

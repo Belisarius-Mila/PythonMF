@@ -546,6 +546,32 @@ input {
   overflow-wrap: anywhere;
 }
 
+.medicine-photo-empty {
+  display: grid;
+  min-height: 160px;
+  place-items: center;
+  padding: 18px;
+  border: 1px dashed rgba(216, 177, 92, 0.48);
+  border-radius: 7px;
+  background:
+    radial-gradient(circle at 50% 15%, rgba(255, 229, 175, 0.2), transparent 46%),
+    rgba(24, 13, 6, 0.36);
+  color: rgba(244, 231, 197, 0.82);
+  text-align: center;
+}
+
+.medicine-photo-empty p {
+  margin: 0;
+  color: #f5d88f;
+  font-weight: 700;
+}
+
+.medicine-photo-empty span {
+  margin-top: 6px;
+  font-size: 0.88rem;
+  overflow-wrap: anywhere;
+}
+
 .photo-caption {
   margin: 10px 0 0;
   color: rgba(244, 231, 197, 0.72);
