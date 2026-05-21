@@ -26,6 +26,11 @@ def main() -> None:
         "jana": _box("Pils Jana", "Osobní krabička", "Léky v osobní krabičce Jana."),
         "mila": _box("Pils Mila", "Osobní krabička", "Léky v osobní krabičce Míla."),
         "home": _box("Pils Home Store", "Domácí zásoba", "Společná domácí zásoba léků a přípravků."),
+        "supplements": _box(
+            "Vitamíny a přírodní přípravky",
+            "Koupelna - nová dóza",
+            "Vitamíny, minerály a přírodní přípravky na spánek, nervy a podobné potíže.",
+        ),
     }
 
     for row in rows:
@@ -64,7 +69,62 @@ def _box_key(row: dict[str, str]) -> str:
         return "jana"
     if "mila" in location:
         return "mila"
+    if _is_supplement_row(row):
+        return "supplements"
     return "home"
+
+
+def _is_supplement_row(row: dict[str, str]) -> bool:
+    searchable_haystack = _normalize(
+        " ".join(
+            [
+                row.get("nazev", ""),
+                row.get("kategorie", ""),
+                row.get("pouziti", ""),
+                row.get("umisteni", ""),
+                row.get("poznamky", ""),
+                row.get("PIL_Short", ""),
+            ]
+        )
+    )
+    exclusion_haystack = _normalize(
+        " ".join(
+            [
+                row.get("nazev", ""),
+                row.get("kategorie", ""),
+                row.get("pouziti", ""),
+            ]
+        )
+    )
+    include_terms = (
+        "vitamin",
+        "mineral",
+        "spanek",
+        "nerv",
+        "uklid",
+        "doza",
+        "kozlik",
+        "ostropestrec",
+        "silymarin",
+        "vigant",
+        "horcik",
+        "magnesium",
+        "zinek",
+        "melatonin",
+        "medunka",
+        "levandul",
+        "trezalka",
+    )
+    exclude_terms = (
+        "antibiot",
+        "redeni krve",
+        "specialni lecba",
+        "tlak srdce",
+        "pouze dle lekare",
+    )
+    return any(term in searchable_haystack for term in include_terms) and not any(
+        term in exclusion_haystack for term in exclude_terms
+    )
 
 
 def _medicine_payload(row: dict[str, str], photo: str | None) -> dict[str, object]:

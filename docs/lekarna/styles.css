@@ -213,6 +213,14 @@ input {
   animation: breathe 5.8s ease-in-out infinite;
 }
 
+.hotspot-supplements {
+  left: 8.2%;
+  top: 54.2%;
+  width: 12.5%;
+  height: 29%;
+  animation-delay: 0.4s;
+}
+
 .hotspot-jana {
   left: 21.6%;
   top: 67%;

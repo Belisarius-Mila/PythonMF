@@ -28,6 +28,12 @@ const defaultBoxData = {
     text: "Tady bude společný domácí seznam léků a přípravků.",
     medicines: ["Brufen", "Panadol Novum", "ACC Long", "Fenistil gel", "Imodium"],
   },
+  supplements: {
+    title: "Vitamíny a přírodní přípravky",
+    kicker: "Koupelna - nová dóza",
+    text: "Tady budou vitamíny, minerály a přírodní přípravky na spánek, nervy a podobné potíže.",
+    medicines: ["KOZLIK KNEIPP", "SILYMARIN PREMIUM", "Naturevia Ostropestrec Forte"],
+  },
 };
 
 let boxData = defaultBoxData;
@@ -223,6 +229,13 @@ function resetDrawerMode() {
 function openBox(key) {
   resetDrawerMode();
   const box = boxData[key];
+  if (!box) {
+    drawerKicker.textContent = "Domácí lékárna";
+    drawerTitle.textContent = "Položka se připravuje";
+    drawerContent.innerHTML = "<p>Tahle část lékárny ještě není v datech připravená.</p>";
+    openDrawer();
+    return;
+  }
   drawerKicker.textContent = box.kicker;
   drawerTitle.textContent = box.title;
   drawerContent.innerHTML = `
@@ -279,7 +292,7 @@ async function loadPrivatePharmacyData() {
         if (!response.ok) return false;
         const data = await response.json();
         if (!data || !data.boxes || !data.medicines) return false;
-        boxData = data.boxes;
+        boxData = prepareBoxData(data.boxes, data.medicines);
         medicineData = data.medicines;
         return true;
       } catch {
@@ -314,7 +327,7 @@ async function loadEncryptedPharmacyData() {
     const encrypted = await response.json();
     const data = await decryptPharmacyBundle(encrypted, unlockPassword);
     if (!data || !data.boxes || !data.medicines) return { found: true, loaded: false };
-    boxData = data.boxes;
+    boxData = prepareBoxData(data.boxes, data.medicines);
     medicineData = data.medicines;
     return { found: true, loaded: true };
   } catch {
@@ -323,6 +336,77 @@ async function loadEncryptedPharmacyData() {
     showUnlockMessage("Heslo neotevřelo šifrovaná data. Zkuste stránku obnovit a zadat heslo znovu.");
     return { found: true, loaded: false };
   }
+}
+
+function prepareBoxData(rawBoxes, rawMedicines) {
+  const boxes = {
+    ...cloneBoxData(defaultBoxData),
+    ...cloneBoxData(rawBoxes || {}),
+  };
+  const rawSupplementNames = boxes.supplements?.medicines || [];
+  boxes.supplements = {
+    ...defaultBoxData.supplements,
+    ...(boxes.supplements || {}),
+    medicines: [],
+  };
+
+  const sourceNames = [
+    ...rawSupplementNames,
+    ...Object.keys(rawMedicines || {}).filter((name) => isSupplementMedicine(name, rawMedicines[name])),
+  ];
+  const supplementNames = [...new Set(sourceNames)];
+  if (!supplementNames.length) {
+    supplementNames.push(...defaultBoxData.supplements.medicines);
+  }
+  boxes.supplements.medicines = supplementNames;
+
+  if (boxes.home && Array.isArray(boxes.home.medicines)) {
+    const supplementSet = new Set(supplementNames);
+    boxes.home = {
+      ...boxes.home,
+      medicines: boxes.home.medicines.filter((name) => !supplementSet.has(name)),
+    };
+  }
+
+  return boxes;
+}
+
+function cloneBoxData(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function isSupplementMedicine(name, medicine) {
+  const haystack = normalize([
+    name,
+    medicine?.category,
+    medicine?.use,
+    medicine?.pilShort,
+  ].filter(Boolean).join(" "));
+  const exclusionHaystack = normalize([
+    name,
+    medicine?.category,
+    medicine?.use,
+  ].filter(Boolean).join(" "));
+  const includeTerms = [
+    "vitamin",
+    "mineral",
+    "spanek",
+    "nerv",
+    "uklid",
+    "kozlik",
+    "ostropestrec",
+    "silymarin",
+    "vigant",
+    "horcik",
+    "magnesium",
+    "zinek",
+    "melatonin",
+    "medunka",
+    "levandul",
+    "trezalka",
+  ];
+  const excludeTerms = ["antibiot", "redeni krve", "specialni lecba", "tlak srdce"];
+  return includeTerms.some((term) => haystack.includes(term)) && !excludeTerms.some((term) => exclusionHaystack.includes(term));
 }
 
 async function decryptPharmacyBundle(encrypted, password) {
