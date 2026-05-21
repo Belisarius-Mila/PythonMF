@@ -36,6 +36,13 @@ const defaultBoxData = {
   },
 };
 
+const vitaminRecommendation = {
+  title: "Doporučení pro Janu a Mílu",
+  kicker: "Vitamíny a doplňky",
+  image: "./assets/vit-doporuceni.png?v=vitamin-recommendation-20260521",
+  alt: "Doporučení pro Janu a Mílu k užívání vitamínů a doplňků.",
+};
+
 let boxData = defaultBoxData;
 let medicineData = {};
 let privateDataLoadPromise = null;
@@ -224,6 +231,7 @@ function openDrawer() {
 
 function resetDrawerMode() {
   drawer.classList.remove("is-detail");
+  drawer.classList.remove("is-recommendation");
 }
 
 function openBox(key) {
@@ -240,13 +248,44 @@ function openBox(key) {
   drawerTitle.textContent = box.title;
   drawerContent.innerHTML = `
     <p>${box.text}</p>
+    ${renderBoxExtraActions(key)}
     <div class="medicine-list">
       ${box.medicines.map((name) => `<button type="button" data-medicine="${escapeHtml(name)}">${escapeHtml(name)}</button>`).join("")}
     </div>
   `;
+  drawerContent.querySelectorAll("[data-panel-action]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (button.dataset.panelAction === "vitamin-recommendation") {
+        openVitaminRecommendation();
+      }
+    });
+  });
   drawerContent.querySelectorAll("[data-medicine]").forEach((button) => {
     button.addEventListener("click", () => openMedicine(button.dataset.medicine));
   });
+  openDrawer();
+}
+
+function renderBoxExtraActions(key) {
+  if (key !== "supplements") return "";
+  return `
+    <div class="box-action-list">
+      <button type="button" data-panel-action="vitamin-recommendation">
+        ${escapeHtml(vitaminRecommendation.title)}
+      </button>
+    </div>
+  `;
+}
+
+function openVitaminRecommendation() {
+  drawer.classList.add("is-detail", "is-recommendation");
+  drawerKicker.textContent = vitaminRecommendation.kicker;
+  drawerTitle.textContent = vitaminRecommendation.title;
+  drawerContent.innerHTML = `
+    <figure class="recommendation-frame">
+      <img src="${escapeHtml(vitaminRecommendation.image)}" alt="${escapeHtml(vitaminRecommendation.alt)}">
+    </figure>
+  `;
   openDrawer();
 }
 

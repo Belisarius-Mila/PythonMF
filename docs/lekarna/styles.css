@@ -327,11 +327,18 @@ input {
   margin: 16px 0 0;
 }
 
+.box-action-list {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+}
+
 .compact-list {
   margin-top: 10px;
 }
 
-.medicine-list button {
+.medicine-list button,
+.box-action-list button {
   min-height: 42px;
   border: 1px solid rgba(216, 177, 92, 0.35);
   border-radius: 6px;
@@ -340,6 +347,32 @@ input {
   text-align: left;
   cursor: pointer;
   padding: 10px 12px;
+}
+
+.box-action-list button {
+  border-color: rgba(240, 212, 141, 0.7);
+  background: linear-gradient(135deg, rgba(240, 212, 141, 0.2), rgba(185, 129, 50, 0.18));
+  color: #ffe1a1;
+  font-weight: 700;
+}
+
+.drawer.is-recommendation .drawer-content {
+  overflow-y: auto;
+}
+
+.recommendation-frame {
+  margin: 0;
+  padding: 10px;
+  border: 1px solid rgba(216, 177, 92, 0.32);
+  border-radius: 8px;
+  background: rgba(244, 231, 197, 0.08);
+}
+
+.recommendation-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
 }
 
 .symptom-form {
