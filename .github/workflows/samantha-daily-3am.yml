@@ -9,6 +9,9 @@ on:
     - cron: "0 1 * * *"
     - cron: "0 2 * * *"
 
+permissions:
+  contents: write
+
 jobs:
   daily-3am:
     runs-on: ubuntu-latest
@@ -24,6 +27,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install Python dependencies
+        run: python -m pip install -r requirements.txt edge-tts
+
       - name: Run scheduled daily routine
         if: github.event_name == 'schedule'
         run: python scripts/daily_3am.py --only-at-hour 3
@@ -31,3 +37,31 @@ jobs:
       - name: Run manual daily routine
         if: github.event_name == 'workflow_dispatch'
         run: python scripts/daily_3am.py
+
+      - name: Commit generated ColorsAndNumbers audio
+        working-directory: .
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          files=(
+            "ColorsAndNumbers/web_colors_numbers/app.js"
+            "ColorsAndNumbers/web_colors_numbers/owl_230526.mp3"
+          )
+          existing=()
+          for file in "${files[@]}"; do
+            if [ -e "$file" ]; then
+              existing+=("$file")
+            fi
+          done
+          if [ "${#existing[@]}" -eq 0 ]; then
+            echo "No generated ColorsAndNumbers files exist."
+            exit 0
+          fi
+          git add "${existing[@]}"
+          if git diff --cached --quiet; then
+            echo "No generated ColorsAndNumbers changes to commit."
+          else
+            git commit -m "Update ColorsAndNumbers owl audio"
+            git push
+          fi

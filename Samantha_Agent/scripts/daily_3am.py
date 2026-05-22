@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
 import logging
 from logging.handlers import RotatingFileHandler
 import os
 from pathlib import Path
+import re
 import sys
 from dataclasses import dataclass
 from datetime import datetime
@@ -30,6 +32,8 @@ PRAGUE_TZ = ZoneInfo("Europe/Prague")
 DEFAULT_PROJECT_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_LOG_FILE = DEFAULT_PROJECT_DIR / "logs" / "daily_3am.log"
 DEFAULT_STATE_DIR = DEFAULT_PROJECT_DIR / "data" / "daily_3am"
+DEFAULT_COLORS_NUMBERS_OWL_CONFIG = DEFAULT_PROJECT_DIR / "config" / "colors_numbers_owl_20260523.json"
+COLORS_NUMBERS_ALLOWED_DIR = Path("ColorsAndNumbers") / "web_colors_numbers"
 
 
 class AlreadyRunningError(RuntimeError):
@@ -192,6 +196,150 @@ def write_state(path: Path, payload: dict) -> None:
     tmp_path.replace(path)
 
 
+def read_json_file(path: Path) -> dict:
+    try:
+        with path.open("r", encoding="utf-8") as handle:
+            data = json.load(handle)
+    except OSError as exc:
+        raise DailyTaskError(f"Cannot read task config: {path}") from exc
+    except json.JSONDecodeError as exc:
+        raise DailyTaskError(f"Task config is not valid JSON: {path}") from exc
+    if not isinstance(data, dict):
+        raise DailyTaskError(f"Task config must contain a JSON object: {path}")
+    return data
+
+
+def require_text_field(data: dict, field: str) -> str:
+    value = data.get(field)
+    if not isinstance(value, str) or not value.strip():
+        raise DailyTaskError(f"Task config is missing required text field: {field}")
+    return value.strip()
+
+
+def resolve_repo_path(project_dir: Path, relative_path: str) -> Path:
+    return (project_dir / relative_path).resolve()
+
+
+def ensure_under(path: Path, allowed_root: Path) -> None:
+    try:
+        path.relative_to(allowed_root)
+    except ValueError as exc:
+        raise DailyTaskError(f"Refusing to write outside allowed path: {path}") from exc
+
+
+def update_owl_audio_source(script_path: Path, audio_src: str) -> bool:
+    try:
+        original = script_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise DailyTaskError(f"Cannot read ColorsAndNumbers script: {script_path}") from exc
+
+    replacement = f'const owlAudio = new Audio("{audio_src}");'
+    pattern = r'const owlAudio = new Audio\("[^"]+"\);'
+    updated, count = re.subn(pattern, replacement, original, count=1)
+    if count != 1:
+        raise DailyTaskError("Could not find exactly one ColorsAndNumbers owl audio declaration.")
+    if updated == original:
+        return False
+
+    try:
+        script_path.write_text(updated, encoding="utf-8")
+    except OSError as exc:
+        raise DailyTaskError(f"Cannot update ColorsAndNumbers script: {script_path}") from exc
+    return True
+
+
+async def generate_edge_tts_mp3(text: str, output_path: Path, voice: str, rate: str) -> None:
+    try:
+        import edge_tts
+    except ImportError as exc:  # pragma: no cover - GitHub Actions installs this dependency.
+        raise DailyTaskError("Missing dependency 'edge-tts' for ColorsAndNumbers owl TTS.") from exc
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = output_path.with_suffix(output_path.suffix + ".tmp")
+    try:
+        communicate = edge_tts.Communicate(text=text, voice=voice, rate=rate)
+        await communicate.save(str(tmp_path))
+        if not tmp_path.exists() or tmp_path.stat().st_size <= 0:
+            raise DailyTaskError("Generated ColorsAndNumbers MP3 is empty.")
+        tmp_path.replace(output_path)
+    finally:
+        if tmp_path.exists():
+            tmp_path.unlink()
+
+
+def generate_mp3(text: str, output_path: Path, voice: str, rate: str) -> None:
+    asyncio.run(generate_edge_tts_mp3(text=text, output_path=output_path, voice=voice, rate=rate))
+
+
+def run_colors_numbers_owl_task(
+    context: DailyContext,
+    config_path: Path = DEFAULT_COLORS_NUMBERS_OWL_CONFIG,
+    audio_generator=generate_mp3,
+) -> dict:
+    if not config_path.exists():
+        return {
+            "name": "colors_numbers_owl_tts",
+            "status": "skipped",
+            "message": f"No config found at {config_path}.",
+        }
+
+    config = read_json_file(config_path)
+    scheduled_date = require_text_field(config, "date")
+    if context.run_date != scheduled_date:
+        return {
+            "name": "colors_numbers_owl_tts",
+            "status": "skipped",
+            "scheduled_date": scheduled_date,
+            "run_date": context.run_date,
+        }
+
+    text = require_text_field(config, "text_cs")
+    audio_src = require_text_field(config, "audio_src")
+    output_relative_path = require_text_field(config, "output_relative_path")
+    script_relative_path = require_text_field(config, "script_relative_path")
+    voice = require_text_field(config, "voice")
+    rate = require_text_field(config, "rate")
+
+    repo_root = context.project_dir.parent.resolve()
+    allowed_root = (repo_root / COLORS_NUMBERS_ALLOWED_DIR).resolve()
+    output_path = resolve_repo_path(context.project_dir, output_relative_path)
+    script_path = resolve_repo_path(context.project_dir, script_relative_path)
+    ensure_under(output_path, allowed_root)
+    ensure_under(script_path, allowed_root)
+
+    if output_path.exists() and script_path.exists() and audio_src in script_path.read_text(encoding="utf-8"):
+        return {
+            "name": "colors_numbers_owl_tts",
+            "status": "completed",
+            "message": "ColorsAndNumbers owl audio is already generated and selected.",
+            "changed_files": [],
+        }
+
+    if context.dry_run:
+        return {
+            "name": "colors_numbers_owl_tts",
+            "status": "planned",
+            "scheduled_date": scheduled_date,
+            "output": str(output_path),
+            "script": str(script_path),
+        }
+
+    logging.info("Generating ColorsAndNumbers owl TTS for %s.", scheduled_date)
+    audio_generator(text, output_path, voice, rate)
+    app_js_changed = update_owl_audio_source(script_path, audio_src)
+
+    return {
+        "name": "colors_numbers_owl_tts",
+        "status": "completed",
+        "scheduled_date": scheduled_date,
+        "audio_src": audio_src,
+        "changed_files": [
+            str(output_path.relative_to(repo_root)),
+            *( [str(script_path.relative_to(repo_root))] if app_js_changed else [] ),
+        ],
+    }
+
+
 def is_completed(context: DailyContext) -> bool:
     return read_state(state_path(context)).get("status") == "completed"
 
@@ -237,9 +385,9 @@ def mark_failed(context: DailyContext, error: str) -> None:
 def run_daily_tasks(context: DailyContext) -> dict:
     """Run configured daily work.
 
-    This entry point is intentionally non-destructive for the first version. Concrete
-    work such as TTS generation, git commit, or git push should be added here only
-    after a dedicated preflight and allowlist are implemented.
+    Concrete tasks must keep their own date gates and write allowlists. Git commit
+    and push are handled by the GitHub Actions workflow, not by this Python entry
+    point.
     """
 
     logging.info("Daily 3 AM routine started for %s.", context.run_date)
@@ -250,8 +398,9 @@ def run_daily_tasks(context: DailyContext) -> dict:
             {
                 "name": "daily_3am_skeleton",
                 "status": "completed",
-                "message": "No destructive daily task is configured yet.",
-            }
+                "message": "Daily scheduler is active.",
+            },
+            run_colors_numbers_owl_task(context),
         ]
     }
 

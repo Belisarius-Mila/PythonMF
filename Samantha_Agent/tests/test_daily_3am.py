@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import sys
 import tempfile
 import unittest
@@ -116,6 +117,139 @@ class Daily3AmTests(unittest.TestCase):
             )
 
             self.assertEqual(result, daily_3am.EXIT_SETUP_ERROR)
+
+    def test_colors_numbers_owl_task_generates_one_off_audio(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            project_dir = repo_root / "Samantha_Agent"
+            app_dir = repo_root / "ColorsAndNumbers" / "web_colors_numbers"
+            project_dir.mkdir()
+            app_dir.mkdir(parents=True)
+            script_path = app_dir / "app.js"
+            script_path.write_text('const owlAudio = new Audio("old.mp3?v=1");\n', encoding="utf-8")
+            config_path = project_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "date": "2026-05-23",
+                        "text_cs": "Test text",
+                        "audio_src": "owl_230526.mp3?v=20260523a",
+                        "output_relative_path": "../ColorsAndNumbers/web_colors_numbers/owl_230526.mp3",
+                        "script_relative_path": "../ColorsAndNumbers/web_colors_numbers/app.js",
+                        "voice": "cs-CZ-AntoninNeural",
+                        "rate": "-10%",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            context = daily_3am.DailyContext(
+                project_dir=project_dir,
+                log_file=project_dir / "logs" / "daily_3am.log",
+                state_dir=project_dir / "data" / "daily_3am",
+                run_date="2026-05-23",
+                started_at=datetime.now(daily_3am.PRAGUE_TZ).isoformat(),
+                dry_run=False,
+                force=False,
+            )
+
+            result = daily_3am.run_colors_numbers_owl_task(
+                context,
+                config_path=config_path,
+                audio_generator=lambda text, output, voice, rate: output.write_bytes(b"mp3"),
+            )
+
+            self.assertEqual(result["status"], "completed")
+            self.assertEqual((app_dir / "owl_230526.mp3").read_bytes(), b"mp3")
+            self.assertIn('new Audio("owl_230526.mp3?v=20260523a")', script_path.read_text(encoding="utf-8"))
+            self.assertEqual(
+                result["changed_files"],
+                [
+                    "ColorsAndNumbers/web_colors_numbers/owl_230526.mp3",
+                    "ColorsAndNumbers/web_colors_numbers/app.js",
+                ],
+            )
+
+    def test_colors_numbers_owl_task_skips_other_dates(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project_dir = Path(tmp) / "Samantha_Agent"
+            project_dir.mkdir()
+            config_path = project_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "date": "2026-05-23",
+                        "text_cs": "Test text",
+                        "audio_src": "owl_230526.mp3?v=20260523a",
+                        "output_relative_path": "../ColorsAndNumbers/web_colors_numbers/owl_230526.mp3",
+                        "script_relative_path": "../ColorsAndNumbers/web_colors_numbers/app.js",
+                        "voice": "cs-CZ-AntoninNeural",
+                        "rate": "-10%",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            context = daily_3am.DailyContext(
+                project_dir=project_dir,
+                log_file=project_dir / "logs" / "daily_3am.log",
+                state_dir=project_dir / "data" / "daily_3am",
+                run_date="2026-05-22",
+                started_at=datetime.now(daily_3am.PRAGUE_TZ).isoformat(),
+                dry_run=False,
+                force=False,
+            )
+
+            result = daily_3am.run_colors_numbers_owl_task(
+                context,
+                config_path=config_path,
+                audio_generator=lambda text, output, voice, rate: output.write_bytes(b"mp3"),
+            )
+
+            self.assertEqual(result["status"], "skipped")
+            self.assertEqual(result["scheduled_date"], "2026-05-23")
+
+    def test_colors_numbers_owl_task_dry_run_does_not_write(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            project_dir = repo_root / "Samantha_Agent"
+            app_dir = repo_root / "ColorsAndNumbers" / "web_colors_numbers"
+            project_dir.mkdir()
+            app_dir.mkdir(parents=True)
+            script_path = app_dir / "app.js"
+            script_path.write_text('const owlAudio = new Audio("old.mp3?v=1");\n', encoding="utf-8")
+            config_path = project_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "date": "2026-05-23",
+                        "text_cs": "Test text",
+                        "audio_src": "owl_230526.mp3?v=20260523a",
+                        "output_relative_path": "../ColorsAndNumbers/web_colors_numbers/owl_230526.mp3",
+                        "script_relative_path": "../ColorsAndNumbers/web_colors_numbers/app.js",
+                        "voice": "cs-CZ-AntoninNeural",
+                        "rate": "-10%",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            context = daily_3am.DailyContext(
+                project_dir=project_dir,
+                log_file=project_dir / "logs" / "daily_3am.log",
+                state_dir=project_dir / "data" / "daily_3am",
+                run_date="2026-05-23",
+                started_at=datetime.now(daily_3am.PRAGUE_TZ).isoformat(),
+                dry_run=True,
+                force=False,
+            )
+
+            result = daily_3am.run_colors_numbers_owl_task(
+                context,
+                config_path=config_path,
+                audio_generator=lambda text, output, voice, rate: output.write_bytes(b"mp3"),
+            )
+
+            self.assertEqual(result["status"], "planned")
+            self.assertFalse((app_dir / "owl_230526.mp3").exists())
+            self.assertIn("old.mp3?v=1", script_path.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":
