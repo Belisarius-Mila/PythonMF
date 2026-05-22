@@ -4,6 +4,48 @@ SAMANTHA - NOUZOVA SITOVA KARTA PRO TERMINAL
 Kdyz Wi-Fi vypada pripojena, ale internet nejde, otevri Terminal a opisuj prikazy
 v tomto poradi. Po kazdem bloku zkontroluj, jestli se internet vratil.
 
+KDY TUTO KARTU POUZIT
+--------------------
+
+Pouzij ji:
+
+- kdyz spojeni s Codexem/Samanthou opakovane pada nebo reconnectuje,
+- kdyz Safari/web funguje divne a chat se odpojuje,
+- kdyz `samantha` hlasi problem v network preflightu,
+- kdyz bezi Tailscale/VPN a prace je nestabilni,
+- pred dlouhymi ukoly, pokud uz dnes spojeni zlobilo.
+
+Kdyz jde jen o jeden kratky reconnect, nejdrive zkus:
+
+samantha
+
+Kdyz se reconnect opakuje, pouzij cisty start bez znamych VPN procesu:
+
+source ~/.zshrc
+SAMANTHA_DISABLE_VPN=1 samantha
+
+nebo:
+
+/Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent/scripts/samantha_clean.sh
+
+Kdyz by preflight sam delal problem, preskoc ho:
+
+SAMANTHA_PREFLIGHT=0 samantha
+
+
+PRAVIDLO PRO DLOUHE UKOLY S CODEXEM
+-----------------------------------
+
+Kdyz spojeni neni stabilni, dlouhe ukoly nespoustet jako dlouhe cekani v chatu.
+Codex ma pro videa, exporty, importy a hromadne operace pouzit skript, ktery:
+
+- zapisuje prubeh do `logs/` nebo pracovni slozky,
+- zapisuje vysledek/stav do souboru,
+- umi navazat nebo preskocit uz hotove vystupy,
+- nic nemaze bez vyslovneho souhlasu.
+
+Po reconnectu se ma nejdrive precist log/vystupni soubor a az potom pokracovat.
+
 
 KROK 1 - ZJISTI, JESTLI JE WI-FI OPRAVDU `en0`
 ----------------------------------------------

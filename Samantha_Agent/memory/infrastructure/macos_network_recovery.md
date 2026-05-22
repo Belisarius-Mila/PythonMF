@@ -31,6 +31,18 @@ scripts/network_recovery_card.sh
 
 ## Rychly postup
 
+0. Pri startu Samanthy pouzit diagnostiku:
+
+```bash
+samantha
+```
+
+nebo pro pokus o ukonceni znamych VPN procesu pred startem:
+
+```bash
+SAMANTHA_DISABLE_VPN=1 samantha
+```
+
 1. Overit Wi-Fi rozhrani:
 
 ```bash
@@ -59,6 +71,24 @@ sudo ipconfig set en0 DHCP
 ```bash
 ping 8.8.8.8
 ping google.com
+```
+
+## Aktualni diagnostika reconnectu 2026-05-21
+
+Pro opakovane Codex/ChatGPT reconnecty vznikl read-only monitor:
+
+```bash
+.venv/bin/python scripts/network_watchdog.py --duration 1800 --interval 5
+```
+
+Zachyceny dulezity stav: Wi-Fi mela IPv4, ping na IP adresu i DNS fungovaly, ale
+HTTPS na OpenAI/ChatGPT timeoutovalo. To ukazuje spis na kolisavy lokalni nebo
+trasovy HTTPS/routing/VPN problem nez na samotny GPT Pro ucet.
+
+Detailni handoff:
+
+```text
+memory/handoffs/network_https_reconnect_diagnostic_2026_05_21.md
 ```
 
 ## Bezpecnost

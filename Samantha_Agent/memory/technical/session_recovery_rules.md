@@ -39,7 +39,29 @@ Skript:
 - spusti Codex v `~/Desktop/PythonMF/Samantha_Agent`,
 - spusti automaticky autosave posledni Codex session kazdych 10 minut do
   `data/session_autosave/`,
+- pred pripojenim ke `screen` relaci spusti lehky `scripts/network_preflight.sh`,
 - diky tomu ma Codex nacist `AGENTS.md` a `memory/MEMORY_INDEX.md`.
+
+Preflight je diagnosticky: ve vychozim rezimu nic nevypina, jen vypise stav
+VPN/Tailscale procesu, `utun` rozhrani, IP adresu a ping test. Pro pokus o
+ukonceni znamych VPN procesu pred startem lze pouzit:
+
+```bash
+source ~/.zshrc
+SAMANTHA_DISABLE_VPN=1 samantha
+```
+
+nebo:
+
+```bash
+~/Desktop/PythonMF/Samantha_Agent/scripts/samantha_clean.sh
+```
+
+Pokud by preflight sam zpusoboval problem, lze ho docasne preskocit:
+
+```bash
+SAMANTHA_PREFLIGHT=0 samantha
+```
 
 ## Po vypadku SSH
 
@@ -71,6 +93,124 @@ Odpojeni bez ukonceni:
 ```text
 Ctrl+A, potom D
 ```
+
+## Pravidlo pro nestabilni spojeni a dlouhe ukoly
+
+Kdyz spojeni nebo Codex opakovane reconnectuje, priorita neni pokracovat v dlouhe
+interaktivni praci, ale stabilizovat relaci a zmenit zpusob spousteni ukolu.
+
+Postup:
+
+1. Mila nejdrive zkusi start pres:
+
+```bash
+samantha
+```
+
+2. Pokud reconnecty pokracuji nebo preflight hlasi VPN/tunely/sitovy problem,
+   pouzit cisty start:
+
+```bash
+SAMANTHA_DISABLE_VPN=1 samantha
+```
+
+nebo:
+
+```bash
+~/Desktop/PythonMF/Samantha_Agent/scripts/samantha_clean.sh
+```
+
+3. Pokud jde o dlouhy ukol, Codex ho nema poustet jako dlouhy interaktivni tool
+   call v chatu. Ma vytvorit nebo pouzit skript, ktery:
+
+- zapisuje prubeh do `logs/` nebo projektove pracovni slozky,
+- zapisuje hotovy stav do souboru,
+- je idempotentni nebo umi preskocit uz hotove vystupy,
+- nemaze data bez vyslovneho souhlasu,
+- lze po reconnectu zkontrolovat bez opakovaneho premysleni celeho ukolu.
+
+4. Po dokonceni duleziteho mezikroku ulozit kratky handoff nebo aktualizovat
+   relevantni memory soubor, ale neukladat citliva rodinna/media data.
+
+Kdy toto pravidlo pouzit:
+
+- kdyz se behem par minut objevi opakovany reconnect,
+- kdyz chat/tool call visi dlouho bez vystupu,
+- pred videi, velkymi importy, sifrovanim/exporty nebo hromadnymi operacemi,
+- kdyz Mila pise, ze se se spojenim neda pracovat.
+
+## Pravidlo primereneho checkpointovani
+
+Checkpointovane workflow se nema pouzivat na kazdou drobnost, aby nevznikala
+zbytecna rezie. Codex ma pred delsi praci rychle rozhodnout podle rizika:
+
+### Bez checkpointovaneho workflow
+
+Pouzit primou upravu nebo jeden kratky prikaz, kdyz plati vsechny podminky:
+
+- ukol je maly a snadno opakovatelny,
+- cte nebo meni jednotky souboru,
+- doba behu je radove sekundy az nizke minuty,
+- nevznika mnoho vystupu,
+- pripadny pad nezpusobi ztratu drahe prace,
+- nejde o citliva data, mazani, presun nebo hromadny zapis.
+
+Priklady:
+
+- mala oprava textu nebo jedne funkce,
+- jeden cilovy test,
+- kratky read-only dotaz,
+- mala dokumentacni uprava.
+
+### Lehky checkpoint
+
+Pouzit manifest, log nebo kratky stavovy vystup, kdyz je ukol stredni:
+
+- pracuje s vice soubory, ale ne stovkami,
+- trva nekolik minut,
+- vytvari vystupy, ktere stoji za kontrolu,
+- muze selhat na jednotlivych polozkach.
+
+Minimalni forma:
+
+- seznam vstupu,
+- vystupni slozka,
+- kratky log nebo summary,
+- kontrola po dokonceni.
+
+### Plne checkpointovane workflow
+
+Pouzit skript po davkach se stavovym souborem, kdyz plati aspon jedna podminka:
+
+- ukol muze trvat dele nez cca 5-10 minut,
+- pracuje s desitkami az stovkami souboru nebo zaznamu,
+- pouziva sit, TTS, OCR, generovani obrazku, PDF export, video/media operace,
+  sifrovani nebo GitHub Actions,
+- zpracovava citlive nebo soukrome dokumenty,
+- vysledek je drahy casove, kreditove nebo pracovne,
+- spojeni je nestabilni nebo uz doslo k reconnectu,
+- Mila vyslovne chce moznost navazat po padu.
+
+Minimalni forma:
+
+- vstupni manifest,
+- stavovy soubor s hotovymi a chybovymi polozkami,
+- davkove zpracovani,
+- idempotence: hotove polozky se pri restartu preskoci,
+- validace po davce,
+- finalni summary,
+- zadne mazani bez potvrzeni.
+
+Prakticky vychozi postup:
+
+1. Nejdriv vytvorit nebo nacist manifest.
+2. Zpracovat malou davku.
+3. Zapsat vystupy a stav.
+4. Zkontrolovat pocty, existenci souboru a chyby.
+5. Teprve potom pokracovat dalsi davkou.
+
+Toto pravidlo ma byt pouzito pragmaticky: checkpointovani je ochrana pred
+ztratou prace, ne povinna ceremonie u malych zmen.
 
 ## Kdyz spadne Codex, ne jen SSH
 
@@ -167,6 +307,8 @@ Handoff ma obsahovat:
 - jake soubory byly zmeneny,
 - co je dalsi prakticky krok,
 - co se nesmi zapsat do pameti nebo gitu.
+- navrhovane dalsi kroky, pokud je projekt hotovy nebo pozastaveny a je uzitecne
+  oddelit povinny dalsi krok od volitelnych zlepseni.
 
 Doporuceny zacatek handoffu:
 

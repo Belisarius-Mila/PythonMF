@@ -3,8 +3,11 @@
 __pycache__/
 .DS_Store
 data/session_autosave/
+data/private/
 data/email/archive/
 data/daily_3am/
+data/startup_prompts/
 logs/*.log
 logs/*.log.*
 logs/*.lock
+logs/network_watchdog/

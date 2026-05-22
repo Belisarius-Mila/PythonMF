@@ -54,6 +54,37 @@ screen -ls
 screen -r samantha_codex
 ```
 
+## Network preflight pri startu
+
+`scripts/samantha_codex.sh` spousti `scripts/network_preflight.sh` pred pripojenim
+ke `screen` relaci. Preflight kontroluje:
+
+- bezici zname VPN/Tailscale procesy,
+- pocet `utun` tunelovych rozhrani,
+- IPv4 adresu na Wi-Fi rozhrani,
+- zakladni ping na IP a DNS jmeno.
+
+Vychozi rezim jen diagnostikuje a nic nevypina.
+
+Pro pokus o ukonceni znamych VPN procesu pred startem lze pouzit:
+
+```bash
+source ~/.zshrc
+SAMANTHA_DISABLE_VPN=1 samantha
+```
+
+nebo primo:
+
+```bash
+~/Desktop/PythonMF/Samantha_Agent/scripts/samantha_clean.sh
+```
+
+Preflight lze nouzove preskocit:
+
+```bash
+SAMANTHA_PREFLIGHT=0 samantha
+```
+
 ## Po padu Codexu
 
 Pouzit:
@@ -74,6 +105,22 @@ codex resume <SESSION_ID>
 - Ukoncit jen vlastni diagnosticky proces, ne uzivatelske aplikace.
 - Nepouzivat destruktivni git prikazy.
 - Pred dalsi praci shrnout, co je rozpracovane a co bylo overeno.
+
+## Pravidlo pro dlouhe ukoly pri nestabilnim spojeni
+
+Pri opakovanych reconnectech nepokracovat dlouhymi interaktivnimi tool cally.
+Dlouhe prace spoustet jako samostatne skripty s logem a stavovym vystupem.
+
+Konkretne:
+
+- pred dlouhym ukolem spustit `samantha` nebo pri problemech `SAMANTHA_DISABLE_VPN=1 samantha`,
+- dlouhe davky psat do skriptu v `scripts/` nebo projektove lokalni slozce,
+- prubeh zapisovat do `logs/` nebo soukrome pracovni slozky,
+- vystupy delat navazovatelne a opakovatelne,
+- po reconnectu nejdriv precist vystupni soubor/log a az potom pokracovat.
+
+To plati hlavne pro videa, media importy, exporty, sifrovani balicku a hromadne
+operace nad soubory.
 
 ## Bezpecnost
 
