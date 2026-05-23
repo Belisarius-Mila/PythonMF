@@ -28,6 +28,7 @@ from app.iphone_shortcuts import (
     format_iphone_shortcuts_status,
     prepare_iphone_shortcut_request,
 )
+from app.quick_notes import list_quick_notes_text, show_quick_note_detail_text
 from app.email import (
     archive_email_by_uid,
     build_email_action_case_from_uid,
@@ -236,6 +237,18 @@ def prepare_iphone_shortcut(
         user_confirmed=user_confirmed,
         confirmation_text=confirmation_text,
     )
+
+
+@function_tool
+def list_quick_notes(limit: int = 30) -> str:
+    """List numbered quick notes created from the iPhone Samantha inbox shortcut."""
+    return list_quick_notes_text(limit=limit)
+
+
+@function_tool
+def show_quick_note_detail(note_number: int) -> str:
+    """Show detail for one numbered quick note from the private quick notes index."""
+    return show_quick_note_detail_text(note_number=note_number)
 
 
 def build_agent(memory_text: str) -> Agent:
@@ -695,6 +708,8 @@ LOKALNI PAMET:
             copy_downloads_files_to_knowledge_inbox,
             iphone_shortcuts_playground_status,
             prepare_iphone_shortcut,
+            list_quick_notes,
+            show_quick_note_detail,
             list_recent_email_headers,
             search_email_headers,
             list_recent_seznam_email_headers,

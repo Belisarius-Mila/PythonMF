@@ -75,6 +75,11 @@ Aktualizace 2026-05-23:
   zkratka nejprve dlouho nacitala; v Polohovych sluzbach se aplikace Zkratky
   nezobrazovala, protoze jeste nemela zaregistrovany pristup k poloze. Po
   rucnim spusteni/povoleni zacala zkratka fungovat i u Jany.
+- Zkratka `Rychlá poznámka pro Samanthu.shortcut` byla vytvorena 2026-05-23.
+  Uklada markdown poznamky do iCloud Drive `Shortcuts/Samantha Inbox`. Samantha
+  ma navazujici tooly `list_quick_notes` a `show_quick_note_detail`, ktere
+  poznamkam prideluji stabilni cisla v soukromem indexu
+  `data/private/quick_notes/index.json`.
 
 Samantha ma tool:
 
@@ -151,3 +156,6 @@ Nazev zkratky
    uz pozadala o polohu a je videt v Polohovych sluzbach.
 3. Pro mapy preferovat robustni vetev `Get Maps Link` -> `Open URL` pred primym
    `Get Directions`, pokud se ma jen otevrit cil v Apple Mapach.
+4. U zkratky `Rychlá poznámka pro Samanthu` pouzivat dotazy:
+   `zobraz rychle poznamky`, `ukaž detail poznámky č. 7` nebo navazne
+   `z té poznámky č. 7 uděláme tool`.
