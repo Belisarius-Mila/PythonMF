@@ -12,6 +12,7 @@ Samantha pouzit tool `samantha_system_reports`.
 | Kvantitativni status | Objemovy rust Samanthy: soubory, radky, lokalni stav vs git tracked. | `.venv/bin/python scripts/samantha_quantitative_status.py` |
 | Capability audit | Prehled registrovanych schopnosti, toolu, workflow a hlavních rezerv. | `.venv/bin/python scripts/samantha_capability_audit.py` |
 | Knowledge inbox inventory | Bezpecny inventar velkych podkladu ve private knowledge inboxu bez cteni obsahu. | `.venv/bin/python scripts/samantha_knowledge_inbox.py` |
+| Downloads inventory | Bezpecny inventar top-level souboru ve Stazenych pred kopirovanim do knowledge inboxu. | `.venv/bin/python scripts/samantha_downloads_to_knowledge_inbox.py --list` |
 | Memory status | Stav lokalni pameti, startup kontextu, priorit a pripomenuti. | pres Samanthu tool `memory_status` |
 
 ## Pravidla

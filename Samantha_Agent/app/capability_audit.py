@@ -32,9 +32,19 @@ CAPABILITY_AREAS = (
             "samantha_quantitative_status",
             "samantha_system_reports",
             "samantha_capability_audit",
-            "samantha_knowledge_inbox_inventory",
         ),
         next_gap="Keep new repeated audits registered as system reports.",
+    ),
+    CapabilityArea(
+        name="Knowledge inbox",
+        level="L3/L4",
+        safety="inbox and Downloads inventory read-only; selected Downloads copies require explicit confirmation",
+        tools=(
+            "samantha_knowledge_inbox_inventory",
+            "samantha_downloads_inventory",
+            "copy_downloads_files_to_knowledge_inbox",
+        ),
+        next_gap="Add scoped summarization/import only after explicit file selection and redacted memory diff.",
     ),
     CapabilityArea(
         name="Email read-only and cases",

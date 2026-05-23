@@ -18,7 +18,12 @@ from app.health_check import format_samantha_health_check
 from app.quantitative_status import format_samantha_quantitative_status
 from app.system_reports import format_system_reports_overview
 from app.capability_audit import format_samantha_capability_audit
-from app.knowledge_inbox import ensure_knowledge_inbox_dirs, format_knowledge_inbox_inventory
+from app.knowledge_inbox import (
+    copy_downloads_to_knowledge_inbox,
+    ensure_knowledge_inbox_dirs,
+    format_downloads_inventory,
+    format_knowledge_inbox_inventory,
+)
 from app.email import (
     archive_email_by_uid,
     build_email_action_case_from_uid,
@@ -185,6 +190,26 @@ def samantha_knowledge_inbox_inventory() -> str:
     return format_knowledge_inbox_inventory()
 
 
+@function_tool
+def samantha_downloads_inventory() -> str:
+    """List safe metadata for top-level Downloads files without reading content."""
+    return format_downloads_inventory()
+
+
+@function_tool
+def copy_downloads_files_to_knowledge_inbox(
+    relative_paths: str,
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+) -> str:
+    """Copy selected Downloads files into private knowledge inbox incoming after confirmation."""
+    return copy_downloads_to_knowledge_inbox(
+        relative_paths,
+        user_confirmed=user_confirmed,
+        confirmation_text=confirmation_text,
+    )
+
+
 def build_agent(memory_text: str) -> Agent:
     instructions = f"""
 Jsi Samantha, osobni AI agent pro Milu.
@@ -220,6 +245,17 @@ Kdyz se Mila pta na velke podklady, knowledge inbox, archiv chatu k prostudovani
 nebo co je ve slozce `data/private/knowledge_inbox`, pouzij
 samantha_knowledge_inbox_inventory. Tento tool smi vypsat jen metadata souboru
 a nesmi cist obsah bez dalsiho explicitniho zadani rozsahu.
+Kdyz Mila chce dostat velke podklady ze slozky Stazene/Downloads do knowledge
+inboxu, nejdriv pouzij `samantha_downloads_inventory`, ktery vypise jen metadata
+top-level souboru a necte obsah. Kopirovani vybranych souboru smi provest az
+`copy_downloads_files_to_knowledge_inbox` po samostatnem potvrzeni v aktualni
+zprave. user_confirmed=True smi byt jen tehdy, kdyz aktualni zprava obsahuje
+presny vyber souboru a potvrzovaci vetu `Potvrzuji kopirovani do knowledge inbox`.
+Do confirmation_text vzdy vloz aktualni Milovu potvrzovaci zpravu, nikdy ji
+nevymyslej ani neshrnuj. Tool smi kopirovat pouze vybrane relativni soubory ze
+slozky Downloads do `data/private/knowledge_inbox/incoming/`, nesmi cist obsah pro
+shrnovani, nesmi kopirovat adresare ani cesty mimo Downloads a nesmi nic
+commitovat z `data/private/`.
 Kdyz pri praci vznikne novy opakovatelny ad hoc status, audit nebo report,
 zeptej se: "Udelame z toho novy systemovy report?" Pokud Mila souhlasi,
 zaeviduj ho do registru systemovych reportu, dokumentace a testu.
@@ -613,6 +649,8 @@ LOKALNI PAMET:
             samantha_system_reports,
             samantha_capability_audit,
             samantha_knowledge_inbox_inventory,
+            samantha_downloads_inventory,
+            copy_downloads_files_to_knowledge_inbox,
             list_recent_email_headers,
             search_email_headers,
             list_recent_seznam_email_headers,

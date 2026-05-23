@@ -18,8 +18,11 @@ infrastructure/technical souborech.
    `samantha_capability_audit()`.
 4. Pokud vlozil velke podklady do private knowledge inboxu, nejdriv spustit
    `samantha_knowledge_inbox_inventory()`.
-5. Pred vetsimi zmenami zkontrolovat `git status --short --branch`.
-6. Pri novem opakovatelnem statusu/auditu se zeptat:
+5. Pokud jsou velke podklady jeste ve Stazenych/Downloads, nejdriv spustit
+   `samantha_downloads_inventory()` a kopirovat az po potvrzeni pres
+   `copy_downloads_files_to_knowledge_inbox`.
+6. Pred vetsimi zmenami zkontrolovat `git status --short --branch`.
+7. Pri novem opakovatelnem statusu/auditu se zeptat:
    "Udelame z toho novy systemovy report?"
 
 ## Pred rizikovou nebo delsi praci

@@ -51,6 +51,42 @@ samantha_knowledge_inbox_inventory()
 Inventar smi vypsat jen metadata: oblast, nazev souboru, typ, velikost a datum
 zmeny. Nesmí cist ani vypisovat obsah souboru.
 
+## Import ze Stazene/Downloads
+
+Pokud Mila nechce rucne presouvat soubory, Samantha muze nejdriv vypsat
+bezpecny inventar top-level souboru ve slozce Downloads:
+
+```bash
+.venv/bin/python scripts/samantha_downloads_to_knowledge_inbox.py --list
+```
+
+V Samanthě tomu odpovida tool:
+
+```text
+samantha_downloads_inventory()
+```
+
+Kopirovani je samostatny potvrzovany krok. Rucni CLI priklad:
+
+```bash
+.venv/bin/python scripts/samantha_downloads_to_knowledge_inbox.py --copy soubor.zip --confirm "Potvrzuji kopirovani do knowledge inbox"
+```
+
+V Samanthě tomu odpovida tool:
+
+```text
+copy_downloads_files_to_knowledge_inbox(relative_paths, user_confirmed=True, confirmation_text=...)
+```
+
+Pravidla:
+
+- inventory ze Stazene/Downloads necte obsah, jen metadata top-level souboru;
+- kopirovat se smi jen konkretne vybrane relativni soubory ze slozky Downloads;
+- potvrzeni musi obsahovat vetu `Potvrzuji kopirovani do knowledge inbox`;
+- kopirovani uklada jen do `data/private/knowledge_inbox/incoming/`;
+- adresare a cesty mimo Downloads se odmitaji;
+- pri shode nazvu se cil neprepisuje, vytvori se varianta s `_2`.
+
 ## Bezpecnostni pravidla
 
 - Nikdy necommitovat puvodni velke podklady, exporty chatu, ZIPy ani soukrome

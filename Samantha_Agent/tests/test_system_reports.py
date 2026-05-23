@@ -14,11 +14,13 @@ class SystemReportsTests(unittest.TestCase):
         self.assertIn("Kvantitativni status", text)
         self.assertIn("Capability audit", text)
         self.assertIn("Knowledge inbox inventory", text)
+        self.assertIn("Downloads inventory", text)
         self.assertIn("Memory status", text)
         self.assertIn("samantha_health_check", text)
         self.assertIn("samantha_quantitative_status", text)
         self.assertIn("samantha_capability_audit", text)
         self.assertIn("samantha_knowledge_inbox_inventory", text)
+        self.assertIn("samantha_downloads_inventory", text)
 
     def test_system_reports_registry_has_unique_names(self) -> None:
         names = [report.name for report in SYSTEM_REPORTS]

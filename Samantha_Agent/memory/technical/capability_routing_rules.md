@@ -57,6 +57,8 @@ Aktualni registrovane reporty:
 | "Jake mame systemove reporty?" | `samantha_system_reports()` | vypise registr reportu; nezapisuje |
 | "Co Samantha umi?", "audit schopnosti", "kde jsou workflow rezervy?" | `samantha_capability_audit()` | cte registr toolu a workflow; nezapisuje |
 | "Co je v knowledge inboxu?", "velke podklady", "archiv chatu k prostudovani" | `samantha_knowledge_inbox_inventory()` | vypise jen metadata souboru v private inboxu; necte obsah |
+| "Co mam ve Stazenych pro knowledge inbox?", "najdi podklady v Downloads" | `samantha_downloads_inventory()` | vypise jen metadata top-level souboru ve Stazenych; necte obsah |
+| "Prekopiruj vybrane soubory ze Stazenych do knowledge inboxu" | `copy_downloads_files_to_knowledge_inbox(...)` | kopiruje jen vybrane relativni soubory z Downloads do private inboxu az po potvrzeni |
 | "Stav pameti", "priority", "pripomenuti" | `memory_status()` | cte jen bezpecnou lokalni memory diagnostiku; nezapisuje |
 
 Kdyz pri praci vznikne novy opakovatelny ad hoc status, audit nebo report,
