@@ -58,7 +58,18 @@ Aktualizace 2026-05-23:
   `Set Parked Car`, vetev navigace pouziva `Get Parked Car Location` a
   `Get Directions`.
 - XML validace v2 prosla a podepsany `.shortcut` ma nenulovou velikost.
-- Rucni import a test v2 na iPhonu jeste nejsou potvrzene.
+- Rucni test v2 na iPhonu: ulozeni polohy zacalo fungovat, ale navigacni vetev
+  neotevrela Mapy.
+- Byla vygenerovana treti verze:
+  `~/Documents/Shortcuts Playground/Najit auto v3.shortcut`.
+- Archivovany unsigned XML v3:
+  `~/Documents/Shortcuts Playground/2026-05-23/Najit auto v3-122655.xml`.
+- V3 meni navigacni vetev: `Get Parked Car Location` -> `Get Maps Link` ->
+  `Open URL`. Tím se obchazi problematicke primé `Get Directions`.
+- Pri prvnim podpisu v3 se objevila docasna chyba Apple `NSURLErrorDomain 500`;
+  opakovany podpis prosel. XML validace v3 prosla a podepsany `.shortcut` ma
+  nenulovou velikost.
+- Rucni import a test v3 na iPhonu jeste nejsou potvrzene.
 
 Samantha ma tool:
 
@@ -128,10 +139,10 @@ Nazev zkratky
 
 ## Dalsi prakticky krok
 
-1. Rucne otevrit `Najit auto v2.shortcut` v Apple Shortcuts.
+1. Rucne otevrit `Najit auto v3.shortcut` v Apple Shortcuts.
 2. Zkontrolovat akce:
-   menu `Ulozit polohu auta` / `Navigovat k autu`, polohove opravneni,
-   ulozeni parked car a otevreni Apple Map.
+   menu `Ulozit polohu auta` / `Otevrit auto v Mapach`, polohove opravneni,
+   ulozeni parked car, vytvoreni Maps linku a otevreni Apple Map.
 3. Otestovat na iPhonu: nejdriv ulozit polohu, potom navigovat.
 4. Pokud import nebo logika selze, vzit archivovane XML a opravit shortcut.
 5. Teprve po realnem testu rozsirovat workflow na dalsi uzitecne zkratky.
