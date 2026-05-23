@@ -14,6 +14,9 @@ from app.memory_store import (
     load_startup_memory_context,
     search_memory_text,
 )
+from app.health_check import format_samantha_health_check
+from app.quantitative_status import format_samantha_quantitative_status
+from app.system_reports import format_system_reports_overview
 from app.email import (
     archive_email_by_uid,
     build_email_action_case_from_uid,
@@ -96,11 +99,12 @@ def load_memory(memory_dir: Path = MEMORY_DIR) -> str:
     ), mark_owl_prompt_asked=False)
 
 
-def _search_memory_text(query: str) -> str:
+def _search_memory_text(query: str, source_type: str | None = None) -> str:
     return search_memory_text(
         query=query,
         memory_dir=MEMORY_DIR,
         max_results=MAX_MEMORY_RESULTS,
+        source_type=source_type,
     )
 
 
@@ -148,6 +152,24 @@ def memory_status() -> str:
     return _memory_status_text()
 
 
+@function_tool
+def samantha_health_check(mode: str = "quick") -> str:
+    """Run a read-only Samantha infrastructure health check."""
+    return format_samantha_health_check(mode=mode)
+
+
+@function_tool
+def samantha_quantitative_status(save: bool = False) -> str:
+    """Return aggregate Samantha size metrics; optionally append one safe JSONL metric row."""
+    return format_samantha_quantitative_status(save=save)
+
+
+@function_tool
+def samantha_system_reports() -> str:
+    """List available Samantha system reports and what each report does."""
+    return format_system_reports_overview()
+
+
 def build_agent(memory_text: str) -> Agent:
     instructions = f"""
 Jsi Samantha, osobni AI agent pro Milu.
@@ -165,6 +187,20 @@ Toto je prvni lokalni RAG-like vrstva bez vektorove databaze; neodpovidej
 z domnenek, pokud lze relevantni kontext dohledat v pameti.
 Kdyz se Mila pta na stav pameti, aktivni priority, co je pripomenout pri startu
 nebo technicky stav lokalni pameti, pouzij nastroj memory_status.
+Kdyz se Mila pta na celkovy stav Samanthy, health check, cisty stul, co je
+rozpracovane, nebo chce pred rizikovou praci rychlou kontrolu, pouzij
+samantha_health_check. Vychozi mode je `quick`; pro detailni audit pouzij
+`full`. Tento nastroj je read-only a nesmi cist soukroma data.
+Kdyz se Mila pta na kvantitativni status, objemovy rust, pocet souboru, radku
+nebo lokalni vs git velikost Samanthy, pouzij samantha_quantitative_status.
+Vychozi `save=False` jen vypise tabulky. `save=True` pouzij jen kdyz Mila chce
+ulozit datovou vetu/snapshot; uklada se pouze agregovana metrika bez nazvu
+souboru a bez soukromych dat.
+Kdyz se Mila pta, jake systemove reporty existuji, co umi, jak je spustit,
+nebo aby na zadny report nezapomnel, pouzij samantha_system_reports.
+Kdyz pri praci vznikne novy opakovatelny ad hoc status, audit nebo report,
+zeptej se: "Udelame z toho novy systemovy report?" Pokud Mila souhlasi,
+zaeviduj ho do registru systemovych reportu, dokumentace a testu.
 
 Kdyz v pameti chybi odpoved, rekni to strucne a navrhni dalsi prakticky krok.
 Nikdy nezapisuj ani nezobrazuj API klice, tokeny ani jina tajemstvi.
@@ -550,6 +586,9 @@ LOKALNI PAMET:
         tools=[
             search_memory,
             memory_status,
+            samantha_health_check,
+            samantha_quantitative_status,
+            samantha_system_reports,
             list_recent_email_headers,
             search_email_headers,
             list_recent_seznam_email_headers,

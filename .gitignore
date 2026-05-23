@@ -19,6 +19,8 @@ dist/
 # Sensitive local ChatGPT exports for Samantha Agent
 Samantha_Agent/data/*
 !Samantha_Agent/data/.gitkeep
+!Samantha_Agent/data/metrics/
+!Samantha_Agent/data/metrics/*.jsonl
 Samantha_Agent/data/email/archive/
 
 # Local private web exports, never publish raw household data
