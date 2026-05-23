@@ -92,7 +92,16 @@ Aktualni zaver po porovnani domaci a pracovni site:
 - Mac/macOS Wi-Fi stack zustava mozny, hlavne pokud by zacaly padat i jine site,
   ale po A/B mereni je mene pravdepodobny nez domaci prostredi.
 
-Aktualni dalsi krok:
+Pending stav:
+
+- V pondeli 2026-06-01 ma technik T-Mobile instalovat nove domaci pripojeni
+  pres pevnou linku/DSL.
+- Do te doby je network/reconnect problem vedeny jako pending, pokud se stav
+  vyrazne nezhorsi.
+- Po instalaci nove linky je prakticky dalsi krok spustit 30min watchdog retest
+  a porovnat stabilitu proti puvodnim domacim vysledkum.
+
+Aktualni dalsi krok po instalaci nebo pri zhorseni:
 
 1. Doma udelat jeden nizkorizikovy zasah:
    - restart routeru/AP,
