@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
 
 from app.email.activity_state import load_email_activity_state
@@ -75,7 +76,7 @@ class EmailArchiveToolsTests(unittest.TestCase):
             self.assertIn("links.json", result)
             self.assertIn("attachments/attachments.json", result)
             self.assertIn("original.eml", result)
-            self.assertEqual(state.last_archive_at, "2026-05-19")
+            self.assertEqual(state.last_archive_at, date.today().isoformat())
             self.assertEqual(len([path for path in archive_directory.iterdir() if path.is_dir()]), 1)
 
     def test_output_does_not_include_body_full_urls_or_unredacted_emails(self) -> None:

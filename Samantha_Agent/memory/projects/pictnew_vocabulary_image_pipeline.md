@@ -433,6 +433,54 @@ Tento stav byl ještě podle starší logiky s `_Pict.csv`.
 
 Nová architektura má být upravena tak, aby `_Pict.csv` nebyly povinné.
 
+## Aktualni kanonicky stav 2026-05-23
+
+VocabularyIT vlna z 2026-05-20 je uzavrena.
+
+Hotove:
+
+- Batche 001 az 013 byly vygenerovane do `PictNew/generated/20260520_it_batch001/`
+  az `PictNew/generated/20260520_it_batch013/`.
+- Mila obrazky vizualne schvalil a 125/125 cilovych `.webp` souboru bylo
+  zkopirovano do `Pict/`.
+- `Pict/mapping.json` byl po samostatnem potvrzenem preview aktualizovan.
+- Po aplikaci mappingu audit hlasil:
+  - `added_rows=0`,
+  - `mapping_without_image=0`,
+  - `unresolved=0`.
+- Git checkpoint existuje:
+  - `851b347 Apply VocabularyIT picture mapping updates`.
+
+Aktualni dalsi krok:
+
+- Nepokracovat ve starych batchich 001 az 013; tato vlna je hotova.
+- Pri dalsich obrazcich nejdrive udelat novy read-only audit podle
+  `technical/vocabulary_image_generation_workflow.md`.
+- Placené image API volat jen po vyslovnem potvrzeni rozsahu.
+- `Pict/mapping.json` upravovat jen po samostatnem preview, zaloze a potvrzeni.
+- Nepouzivat `git add .`.
+
+## Historicke handoffy
+
+Tyto handoffy ponechat jako auditni historii prubehu, ale nepouzivat je jako
+aktivni startovni stav projektu. Aktualni stav je tento projektovy soubor,
+kanonicky workflow `technical/vocabulary_image_generation_workflow.md` a finalni
+handoff `handoffs/vocabularyit_mapping_applied_2026_05_20.md`.
+
+- `handoffs/dnesni_checkpoint_lekarna_pictnew_git_2026_05_20.md` - michany denni
+  checkpoint Lekarna, media resize, PictNew a git; prekryto pozdejsimi projektovymi
+  handoffy.
+- `handoffs/vocabularyit_pict_csv_audit_2026_05_20.md` - prvni audit
+  `IT_Pict.csv`, priprava requestu a generovani batchu 001 az 004.
+- `handoffs/vocabularyit_batches_005_011_generated_2026_05_20.md` - technicky
+  hotove batche 005 az 011 pred vizualni kontrolou a kopii do `Pict/`.
+- `handoffs/vocabularyit_batches_012_013_generated_2026_05_20.md` - posledni
+  batche 012 a 013 a kopie vsech 125 obrazku do `Pict/`; prekryto mapping
+  handoffem.
+- `handoffs/pictnew_next_image_generation_phase_2026_05_20.md` - snapshot pred
+  aplikaci mappingu; cast o neaktualizovanem `Pict/mapping.json` je prekryta
+  commitnutym stavem `851b347`.
+
 ## Otevřené otázky
 
 - Přesně doladit strukturu protokolu `NewVocabularyDDMMYYYY.txt`.

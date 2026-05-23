@@ -372,3 +372,24 @@ krok.
   samostatne potvrzeni podle e-mailoveho workflow.
 - Lekarna/Tax/Technika domu: mohou byt domény dokumentu, ne samostatne kopie téhož
   PDF v gitu.
+
+## Historicke handoffy
+
+Tyto handoffy ponechat jako auditni historii, ale nepouzivat je jako aktivni
+startovni stav projektu. Aktualni navazani je v `MEMORY_INDEX.md` pres projektovy
+soubor, technicky workflow a posledni aktivni handoff.
+
+- `handoffs/document_management_private_vault_start_2026_05_21.md` - start
+  projektu a prvni MVP tooly; prekryto realnymi importy a pozdejsim stavem.
+- `handoffs/document_management_private_vault_tax_import_2026_05_22.md` - prvni
+  realny tax PDF import a presun zdrojove kopie do `processed`.
+- `handoffs/document_management_private_vault_cleanup_done_2026_05_22.md` -
+  cleanup workflow po importu, audit `inbox_actions.jsonl` a read-only status.
+- `handoffs/document_management_private_vault_status_done_next_steps_2026_05_22.md` -
+  kompaktni status po cleanupu; prekryto handoffem k fyzickemu tisku a Downloads
+  intake.
+- `handoffs/document_management_tax_generali_import_2026_05_22.md` - import
+  Generali penzijnich PDF podkladu do oblasti `tax`.
+- `handoffs/document_vault_print_workflow_2026_05_22.md` - implementace a test
+  dvoukrokoveho print workflow; prekryto aktivnim handoffem na fyzicke overeni
+  tisku.

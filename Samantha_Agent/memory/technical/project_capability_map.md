@@ -67,7 +67,7 @@ neni registrovane, nebo ho navrhnout jako novou kartu.
 
 | Projekt | Lokace | Uroven | Aktualni schopnosti/workflow | Nejblizsi kandidat na registraci |
 | --- | --- | --- | --- | --- |
-| Samantha Agent/RAG | `Samantha_Agent/` | L3 | Agent nad OpenAI Agents SDK, memory startup kontext, `search_memory`, `memory_status`. | Live retest dotazu na RAG a e-mail read-only; pokud sumi, pridat filtr typu zdroje. |
+| Samantha Agent/RAG | `Samantha_Agent/` | L3 | Agent nad OpenAI Agents SDK, memory startup kontext, `search_memory`, `memory_status`; `search_memory` vraci typ zdroje a podporuje filtr `source_type`; lokalni smoke test 2026-05-23 prosel pro RAG, core/projects/handoffs a e-mail read-only kontext. | Live retest pres Samanthu/OpenAI; embeddings az pokud textove vyhledavani s filtrem nestaci. |
 | iCloud Mail / Email Cases | `Samantha_Agent/app/email/`, `data/email/` | L3/L4 | Bohata sada read-only e-mail toolu, case/action/reminder/archive vrstvy. | Rozmrazit az na Miluv pokyn; doplnit lidsky WorkMode nad ulozenym case/archivem a browser workflow pro potvrzene odkazy. |
 | Backup/restore | `Samantha_Agent/scripts/`, `app/backup/`, `app/workflows/` | L2/L3 | Workflow backupu, snapshot list, preview restore, potvrzena obnova. | Provest dalsi dry-run/ostry test podle stavu sifrovaneho kontejneru. |
 | macOS sit / Tailscale recovery | `NETWORK_RECOVERY_CARD.txt`, `scripts/network_recovery_card.sh` | L1 | Offline recovery karta a rucni diagnostika. | Registrovat read-only diagnosticky workflow nebo jen ponechat jako nouzovy manual. |

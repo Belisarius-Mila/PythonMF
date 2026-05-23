@@ -133,9 +133,13 @@ def _with_startup_context(memory_text: str, mark_owl_prompt_asked: bool) -> str:
 
 
 @function_tool
-def search_memory(query: str) -> str:
-    """Search local Samantha markdown memory and return relevant excerpts."""
-    return _search_memory_text(query)
+def search_memory(query: str, source_type: str | None = None) -> str:
+    """Search local Samantha markdown memory and return relevant excerpts.
+
+    Optional source_type can narrow results to core, projects, handoffs,
+    technical, infrastructure, or stories.
+    """
+    return _search_memory_text(query, source_type=source_type)
 
 
 @function_tool
@@ -154,6 +158,9 @@ V instrukcich dostavas jen startovni kontext: core pamet, aktivni projekty,
 memory index, aktivni pripominky, e-mailovou udrzbu a stav zaloh.
 Kdyz dotaz vyzaduje konkretni kontext, pred odpovedi pouzij nastroj
 search_memory a opirej odpoved o nalezene uryvky z markdown pameti.
+Kdyz Mila hleda aktualni kanonicky stav, preferuj search_memory se
+source_type `core`, `projects` nebo `technical`. Kdyz se pta na historicke
+handoffy nebo navazani po vypadku, pouzij source_type `handoffs`.
 Toto je prvni lokalni RAG-like vrstva bez vektorove databaze; neodpovidej
 z domnenek, pokud lze relevantni kontext dohledat v pameti.
 Kdyz se Mila pta na stav pameti, aktivni priority, co je pripomenout pri startu

@@ -24,6 +24,7 @@ class MemorySearchResult:
     score: int
     path: str
     snippet: str
+    source_type: str
 
 
 @dataclass(frozen=True)
@@ -32,6 +33,7 @@ class MemorySnippetRecord:
     snippet: str
     snippet_terms: frozenset[str]
     filename_terms: frozenset[str]
+    source_type: str
     is_handoff: bool
 
 
@@ -141,14 +143,21 @@ def load_startup_memory_context(
     )
 
 
-def search_memory(query: str, memory_dir: Path = MEMORY_DIR) -> list[MemorySearchResult]:
+def search_memory(
+    query: str,
+    memory_dir: Path = MEMORY_DIR,
+    source_type: str | None = None,
+) -> list[MemorySearchResult]:
     terms = query_terms(query)
     if not terms:
         return []
 
+    normalized_source_type = _normalize_source_type(source_type)
     best_matches_by_path: dict[str, MemorySearchResult] = {}
     index = get_memory_index(memory_dir)
     for record in index.snippets:
+        if normalized_source_type is not None and record.source_type != normalized_source_type:
+            continue
         score = _memory_score(terms, record)
         if score <= 0:
             continue
@@ -157,6 +166,7 @@ def search_memory(query: str, memory_dir: Path = MEMORY_DIR) -> list[MemorySearc
             score=score,
             path=record.path,
             snippet=record.snippet,
+            source_type=record.source_type,
         )
         current = best_matches_by_path.get(record.path)
         if current is None or _is_better_memory_result(result, current):
@@ -172,11 +182,21 @@ def search_memory_text(
     query: str,
     memory_dir: Path = MEMORY_DIR,
     max_results: int = MAX_MEMORY_RESULTS,
+    source_type: str | None = None,
 ) -> str:
     if not query_terms(query):
         return "Dotaz je prilis kratky nebo neobsahuje hledatelna slova."
 
-    matches = search_memory(query=query, memory_dir=memory_dir)
+    normalized_source_type = _normalize_source_type(source_type)
+    if source_type is not None and normalized_source_type is None:
+        allowed = ", ".join(_SOURCE_TYPE_ALIASES)
+        return f"Neznamy typ zdroje `{source_type}`. Pouzij jeden z: {allowed}."
+
+    matches = search_memory(
+        query=query,
+        memory_dir=memory_dir,
+        source_type=normalized_source_type,
+    )
     if not matches:
         return "V markdown pameti jsem nenasla relevantni uryvky."
 
@@ -184,7 +204,7 @@ def search_memory_text(
     for match in matches[:max_results]:
         snippet = _compact_memory_snippet(match.snippet)
         result_lines.append(
-            f"- {match.path} (shoda {match.score}): {snippet}"
+            f"- [{match.source_type}] {match.path} (shoda {match.score}): {snippet}"
         )
 
     return "\n".join(result_lines)
@@ -280,7 +300,8 @@ def _build_memory_index(
         text = path.read_text(encoding="utf-8")
         markdown_chars += len(text)
         filename_terms = frozenset(query_terms(relative_path))
-        is_handoff = relative_path.startswith("handoffs/")
+        source_type = _source_type(relative_path)
+        is_handoff = source_type == "handoffs"
 
         for snippet in memory_snippets(text):
             compact_snippet = " ".join(snippet.split())
@@ -290,6 +311,7 @@ def _build_memory_index(
                     snippet=compact_snippet,
                     snippet_terms=frozenset(query_terms(snippet)),
                     filename_terms=filename_terms,
+                    source_type=source_type,
                     is_handoff=is_handoff,
                 )
             )
@@ -347,9 +369,38 @@ def _memory_score(terms: set[str], record: MemorySnippetRecord) -> int:
     if record.is_handoff and not filename_matches and "[PRIPOMENOUT]" not in record.snippet:
         score -= 3
     if record.is_handoff and "handoff" not in terms:
-        score -= 10
+        score -= 35
 
     return score
+
+
+_SOURCE_TYPE_ALIASES = {
+    "active": "core",
+    "active_projects": "core",
+    "core": "core",
+    "handoff": "handoffs",
+    "handoffs": "handoffs",
+    "infrastructure": "infrastructure",
+    "infra": "infrastructure",
+    "project": "projects",
+    "projects": "projects",
+    "stories": "stories",
+    "story": "stories",
+    "technical": "technical",
+    "tech": "technical",
+}
+
+
+def _normalize_source_type(source_type: str | None) -> str | None:
+    if source_type is None:
+        return None
+    return _SOURCE_TYPE_ALIASES.get(source_type.strip().casefold())
+
+
+def _source_type(relative_path: str) -> str:
+    if "/" not in relative_path:
+        return "core"
+    return relative_path.split("/", 1)[0]
 
 
 def _is_better_memory_result(

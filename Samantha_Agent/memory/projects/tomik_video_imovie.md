@@ -62,5 +62,54 @@ checklistem.
   `scripts/tomik_video_select_imovie.py`, kratky vyber 35 klipu v
   `05_imovie_vyber_short/`, rodinny vyber 82 klipu v `06_imovie_vyber_family/`
   a storyboardy `storyboard_short.md` + `storyboard_family.md`.
-- Dalsi krok je rucne zkontrolovat kratky vyber, importovat jej do iMovie a
-  strihat podle ciselneho poradi souboru a storyboardu.
+- Tento iMovie/PDF smer je prekryty novejsim smerem `FamilyVideoOrganizer`.
+
+## Aktualni kanonicky stav 2026-05-23
+
+Projekt zustava priorita 1, ale aktualni prakticky smer je lokalni webova
+aplikace `FamilyVideoOrganizer`, ne dalsi PDF ani okamzity import do iMovie.
+
+Hotove:
+
+- 217 videi je zauditovano v soukrome slozce `data/private/tomik_rok_2/`.
+- Existuji short/family vybery:
+  - `05_imovie_vyber_short/` - 35 klipu,
+  - `06_imovie_vyber_family/` - 82 klipu.
+- Existuji PDF/review podklady pro rozhodovani s dcerou.
+- V gitu je prvni UI prototyp v `docs/family-video-organizer/`:
+  - tabulka videi,
+  - filtry,
+  - preview panel,
+  - modal pro prehrani videa,
+  - autosave do `localStorage`,
+  - import draftu,
+  - export rozhodnuti do JSON.
+- Bug se zaviranim video modalu byl opraven.
+
+Aktualni dalsi krok:
+
+- Vygenerovat soukromy realny datovy balicek mimo git:
+  `data/private/tomik_rok_2/family_video_organizer_package/`.
+- Pripravit `videos-data.js` s realnymi 217 zaznamy a cestami k nahledum.
+- Otestovat lokalne nacitani 217 zaznamu, nahledy, autosave, export JSON a
+  prehrani videa podle puvodniho nazvu.
+- Jakykoli import dcerina JSON rozhodnuti zpet do short/family vyberu musi byt
+  samostatny potvrzovany krok.
+
+## Historicke handoffy
+
+Tyto handoffy ponechat jako auditni historii, ale nepouzivat je jako aktivni
+startovni stav projektu. Aktualni navazani je tento projektovy soubor a
+`handoffs/family_video_organizer_ui_prototype_2026_05_22.md`.
+
+- `handoffs/tomik_video_imovie_start_2026_05_21.md` - zalozeni projektu a
+  zakladni pravidla soukromi.
+- `handoffs/tomik_video_imovie_audit_hotov_navrh_pokracovani_2026_05_21.md` -
+  audit 217 videi, nahledy, kontaktni listy a chronologicky katalog.
+- `handoffs/tomik_video_imovie_selection_ready_2026_05_21.md` - vytvoreni
+  short/family iMovie vyberu a storyboardu.
+- `handoffs/tomik_video_imovie_pause_waiting_daughter_2026_05_21.md` - pauza
+  pred odsouhlasenim s dcerou, HTML/PDF review vystupy.
+- `handoffs/tomik_video_review_pdfs_done_editable_next_2026_05_22.md` - velke
+  PDF katalogy a uvaha o editovatelnem rozhodovacim listu; prekryto smerem
+  FamilyVideoOrganizer.

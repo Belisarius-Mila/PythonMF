@@ -162,6 +162,47 @@ class MemoryStoreTests(unittest.TestCase):
 
         self.assertLessEqual(len(result), MAX_MEMORY_SNIPPET_CHARS + 40)
         self.assertIn("...", result)
+        self.assertIn("[core]", result)
+
+    def test_search_memory_text_includes_source_type_and_filters_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            memory_dir = Path(temp_dir)
+            project_dir = memory_dir / "projects"
+            handoffs_dir = memory_dir / "handoffs"
+            project_dir.mkdir()
+            handoffs_dir.mkdir()
+            (project_dir / "email_readonly_oauth.md").write_text(
+                "Aktualni email read-only workflow.",
+                encoding="utf-8",
+            )
+            (handoffs_dir / "email_readonly_old.md").write_text(
+                "Historicky email read-only workflow.",
+                encoding="utf-8",
+            )
+
+            all_results = search_memory_text("email read-only", memory_dir=memory_dir)
+            handoff_results = search_memory_text(
+                "email read-only",
+                memory_dir=memory_dir,
+                source_type="handoffs",
+            )
+
+        self.assertIn("[projects] projects/email_readonly_oauth.md", all_results)
+        self.assertNotIn("[handoffs]", all_results.splitlines()[0])
+        self.assertIn("[handoffs] handoffs/email_readonly_old.md", handoff_results)
+
+    def test_search_memory_text_rejects_unknown_source_type(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            memory_dir = Path(temp_dir)
+            (memory_dir / "note.md").write_text("RAG kontext.", encoding="utf-8")
+
+            result = search_memory_text(
+                "rag",
+                memory_dir=memory_dir,
+                source_type="unknown",
+            )
+
+        self.assertIn("Neznamy typ zdroje", result)
 
     def test_search_memory_text_handles_short_and_missing_queries(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

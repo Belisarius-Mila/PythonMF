@@ -383,3 +383,14 @@ cd /Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent
 Novy sifrovany balicek znovu cilene commitnout; `docs/lekarna/private-data/`
 nikdy necommitovat. Heslo zadavat jen do lokalniho skryteho promptu, nikdy do
 chatu, memory, dokumentace ani gitu.
+
+## Historicke handoffy
+
+Tyto handoffy ponechat jako auditni historii webove aplikace, ale nepouzivat je
+jako aktivni navazovaci stav. Aktualni stav webu je tento projektovy soubor a
+`handoffs/lekarna_web_app_hotovo_2026_05_20.md`.
+
+- `handoffs/lekarna_pil_short_done_web_app_start_2026_05_20.md` - dokoncil
+  `PIL_Short` v evidenci a zalozil smer webove aplikace; prekryto hotovym webem.
+- `handoffs/lekarna_web_app_cockpit_prototype_2026_05_20.md` - rozsahly
+  prototyp cockpit webu, sifrovani a ladeni fallbacku; prekryto hotovo handoffem.

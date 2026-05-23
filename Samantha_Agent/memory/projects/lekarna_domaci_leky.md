@@ -193,3 +193,24 @@ evidence bez mazani radku:
 
 Vyrazene polozky se nemaji nabizet v beznem hledani domaci lekarny. Radek v CSV
 zustava kvuli historii a dohledatelnosti.
+
+## Historicke handoffy
+
+Tyto handoffy ponechat jako auditni historii, ale nepouzivat je jako aktivni
+startovni stav projektu. Aktualni navazani pro evidenci Lekarna je pres tento
+projektovy soubor, `technical/lekarna_photo_import_intake.md`,
+`technical/lekarna_pil_short_workflow.md` a posledni stavovy handoff.
+
+- `handoffs/lekarna_readonly_tool_done_2026_05_19.md` - prvni read-only tool
+  `search_domaci_leky`; prekryto pozdejsimi importy a aktualnim stavem evidence.
+- `handoffs/lekarna_audit_tool_done_2026_05_19.md` - read-only audit
+  lekarnicky; schopnost zustava soucasti toolu, ale handoff neni aktualni
+  navazovaci bod.
+- `handoffs/lekarna_import_vyrazeni_resize_done_2026_05_20.md` - import
+  opravenych fotek, umisteni, soft-delete workflow a prvni zmenseni fotek.
+- `handoffs/lekarna_pil_short_done_web_app_start_2026_05_20.md` - doplneni
+  `PIL_Short` pro 56 radku a zalozeni weboveho projektu.
+- `handoffs/lekarna_vitaminy_import_done_2026_05_21.md` - import vitaminu a
+  prirodnich pripravku; prekryto dodatecnym importem a stavovym handoffem.
+- `handoffs/lekarna_dodatecny_import_2026_05_21.md` - dodatecny import dvou
+  fotek, pregenerovani exportu/bundle a zalozeni foto intake checklistu.

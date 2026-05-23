@@ -135,3 +135,113 @@ pro Samanthu.
 - Microsoft Graph permissions reference: `https://learn.microsoft.com/en-us/graph/permissions-reference`
 - Apple app-specific passwords: `https://support.apple.com/en-mide/102654`
 - Apple iCloud Mail server settings: `https://support.apple.com/en-la/HT202304`
+
+## Aktualni kanonicky stav 2026-05-23
+
+Projekt je rozpracovany, ale zakladni read-only vrstvy uz existuji. Tento stav
+prekryva starsi iCloud handoffy z 2026-05-18 a vetsinu implementacnich mezistavu
+z 2026-05-19.
+
+Hotove schopnosti:
+
+- iCloud read-only workflow:
+  - vypsat hlavicky,
+  - hledat v hlavickach,
+  - precist jedno konkretni telo podle UID az po potvrzeni,
+  - fulltextove hledat v textu za rok bez vypisu tel,
+  - vytvaret redigovane shrnuti a safe case.
+- Email triage / case / archive vrstvy:
+  - `run_email_triage_session`,
+  - `save_selected_email_cases_from_uids`,
+  - lokalni `EmailCaseVault`,
+  - lokalni `EmailArchiveVault`,
+  - samostatne potvrzene zobrazeni odkazu z archivu.
+- Reminders napojeni:
+  - z potvrzeneho e-mailoveho action case lze navrhovat a ukladat pripominky
+    podle obecných pravidel reminders workflow.
+- Seznam Mail:
+  - `SeznamReadOnlyEmailProvider` existuje pro INBOX hlavicky a potvrzene cteni
+    jednoho tela podle UID,
+  - `list_recent_seznam_email_headers`,
+  - `search_seznam_email_headers`,
+  - `read_seznam_email_body_by_uid`,
+  - `list_unified_email_headers` rozlisuje zdroj schranky.
+- Lokalni Seznam `.env` je vyplneny mimo git a memory.
+- Read-only Seznam smoke test hlavicek 2026-05-23 prosel:
+  - provider se prihlasil,
+  - nacetl 2 hlavicky,
+  - do vystupu ani memory nebyly vypsany predmety, odesilatele, telo ani URL.
+- Drivejsi Seznam pojistny worklist/prilohy existuji lokalne v
+  `data/private/email_seznam/`:
+  - 34 UID slozek priloh,
+  - 129 lokalnich souboru priloh,
+  - katalog podle metadat/nazvu priloh.
+
+Aktualni dalsi krok:
+
+- Sjednotit potvrzovaci formulace pro cteni tela podle zdroje schranky, napr.
+  aby bylo vzdy jasne, zda jde o iCloud UID nebo Seznam UID.
+- Seznam pojistne prilohy a dokumenty resit jen pres potvrzovane read-only nebo
+  document-vault workflow.
+- Neudelat automaticky fulltext, cteni tel, stahovani priloh, archivaci ani
+  vypis plnych URL bez samostatneho potvrzeni.
+
+Bezpecnostni hranice:
+
+- Neukladat do memory ani gitu e-mailove adresy, hesla, app-specific passwords,
+  tokeny, cela tela e-mailu, plne URL, prilohy ani privatni obsah.
+- Lokalni citliva data zustavaji v `data/email/`, `data/private/email_seznam/`
+  a `.env`; tyto soubory se necommituji.
+- Vystupy do memory smi obsahovat jen architekturu, workflow, pocty a redigovany
+  stav prace.
+
+## Historicke handoffy
+
+Tyto handoffy ponechat jako auditni historii, ale nepouzivat je jako aktivni
+startovni stav projektu. Aktualni navazani je tento projektovy soubor a
+`handoffs/email_seznam_readonly_provider_2026_05_22.md`.
+
+Zaklad iCloud read-only:
+
+- `handoffs/email_mail_permissions_2026_05_17.txt`
+- `handoffs/email_icloud_setup_conversation_2026_05_18.txt`
+- `handoffs/email_icloud_readonly_test_ok_2026_05_18.md`
+- `handoffs/email_icloud_app_email_layer_2026_05_18.md`
+- `handoffs/email_samantha_tool_headers_2026_05_18.md`
+- `handoffs/email_samantha_e2e_headers_ok_2026_05_18.md`
+- `handoffs/email_read_uid_test_ok_2026_05_18.md`
+- `handoffs/email_samantha_read_body_tool_ok_2026_05_18.md`
+- `handoffs/email_safe_workflow_confirmed_2026_05_18.md`
+- `handoffs/email_readonly_workflow_handoff_2026_05_18.md`
+- `handoffs/email_search_headers_ready_2026_05_18.md`
+
+Case, odkazy, reminders a RIXO:
+
+- `handoffs/email_case_workflow_ready_2026_05_19.md`
+- `handoffs/email_samantha_headers_redacted_waiting_uid_2026_05_19.md`
+- `handoffs/email_url_tool_e2e_ok_2026_05_19.md`
+- `handoffs/email_rixo_insurance_phase1_ready_2026_05_19.md`
+- `handoffs/email_rixo_insurance_phase1_implemented_2026_05_19.md`
+- `handoffs/email_action_case_phase2_proposed_2026_05_19.md`
+- `handoffs/email_action_case_phase2_core_done_2026_05_19.md`
+- `handoffs/email_reminders_phase3b_done_2026_05_19.md`
+
+Triage, case vault a archive vault:
+
+- `handoffs/email_work_session_proposed_2026_05_19.md`
+- `handoffs/email_triage_work_mode_proposed_2026_05_19.md`
+- `handoffs/email_triage_work_mode_core_done_2026_05_19.md`
+- `handoffs/email_triage_session_tool_done_2026_05_19.md`
+- `handoffs/email_case_vault_save_tool_done_2026_05_19.md`
+- `handoffs/email_activity_state_done_2026_05_19.md`
+- `handoffs/email_archive_vault_proposed_2026_05_19.md`
+- `handoffs/email_archive_vault_core_done_2026_05_19.md`
+- `handoffs/email_archive_vault_tool_done_2026_05_19.md`
+- `handoffs/email_archive_vault_no_urls_after_archive_2026_05_19.md`
+- `handoffs/email_project_frozen_human_handoff_2026_05_19.md`
+
+Pozdejsi rozsireni:
+
+- `handoffs/email_fulltext_search_tool_2026_05_21.md`
+- `handoffs/email_seznam_pojisteni_prilohy_2026_05_21.md`
+- `handoffs/email_seznam_readonly_provider_2026_05_22.md`

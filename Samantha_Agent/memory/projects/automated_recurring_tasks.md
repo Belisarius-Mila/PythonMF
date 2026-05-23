@@ -5,6 +5,35 @@
 Zalozeno 2026-05-20 jako obecna infrastruktura pro bezpecne automaticke
 spousteni opakujicich se ukolu v projektu `Samantha_Agent`.
 
+## Aktualni kanonicky stav 2026-05-23
+
+Automaticke opakujici se ukoly maji dve vrstvy:
+
+1. Obecny scheduler skeleton `scripts/daily_3am.py`.
+2. Jednorazovy ColorsAndNumbers soví TTS task pro datum `2026-05-23`.
+
+Lokální stav 2026-05-23:
+
+- relevantni automatizacni zmeny jsou podle `git log` v commitu
+  `a640c05 Schedule ColorsAndNumbers owl TTS`;
+- lokalni vetev neni ahead proti `origin/main`, takze z pohledu lokalniho gitu
+  neni pripravena neodeslana sada automatizacnich souboru;
+- `Samantha_Agent/config/colors_numbers_owl_20260523.json` a GitHub Actions
+  workflow jsou v HEAD;
+- `ColorsAndNumbers/web_colors_numbers/owl_230526.mp3` neni v lokalnim HEAD a
+  neni pritomny v pracovnim stromu, takze z lokalniho stavu nelze potvrdit, ze
+  GitHub Actions realne vygeneroval a commitnul audio;
+- lokalni dry-run pro `2026-05-23` na `/private/tmp` prosel a task je stale
+  vyhodnocen jako `planned`.
+
+Aktualni dalsi krok:
+
+- Zkontrolovat GitHub Actions beh `Samantha Daily 3 AM` pro 2026-05-23 nebo
+  vysledek v repozitari po fetch/pull.
+- Pokud akce nebezela nebo selhala, resit samostatne GitHub Actions diagnostiku.
+- Trvalou kazdodenni soví rutinu navrhnout az po vyhodnoceni tohoto jednoho
+  realneho behu.
+
 Prvni implementace je denni rutina ve 3:00:
 
 - `scripts/daily_3am.py` - hlavni Python vstupni bod,
@@ -122,10 +151,11 @@ Cilena sada prosla. Cela stavajici sada `unittest discover -s tests` mela jedno
 starsi selhani mimo tuto zmenu: e-mailovy archivacni test ocekaval fixni datum
 `2026-05-19`, zatimco aktualni den v prostredi byl `2026-05-20`.
 
-## Dalsi krok
+## Historicke handoffy
 
-Navazat cloudovou verzi:
-
-- overit GitHub Actions beh po pushi,
-- rozhodnout, jaky prvni realny nedestruktivni ukol ma cloud spoustet,
-- az potom pridat konkretni task adapter s allowlistem a testy.
+- `handoffs/automated_recurring_tasks_cloud_2026_05_20.md` - prvni scheduler
+  skeleton, macOS `launchd`, GitHub Actions smer a bezpecnostni pravidla pro
+  budouci allowlistovane tasky.
+- `handoffs/colors_numbers_owl_tts_startup_prompt_2026_05_22.md` - jednorazovy
+  ColorsAndNumbers soví TTS task pro 2026-05-23 a denni startovni dotaz na soví
+  text.
