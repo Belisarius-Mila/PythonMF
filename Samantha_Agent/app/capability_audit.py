@@ -54,7 +54,7 @@ CAPABILITY_AREAS = (
             "iphone_shortcuts_playground_status",
             "prepare_iphone_shortcut",
         ),
-        next_gap="Install and test Shortcuts Playground before claiming real .shortcut generation.",
+        next_gap="Generate and manually verify the first simple .shortcut before broader use.",
     ),
     CapabilityArea(
         name="Email read-only and cases",

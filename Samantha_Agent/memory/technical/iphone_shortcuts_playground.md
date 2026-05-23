@@ -32,6 +32,17 @@ vystup je nutne rucne overit.
 
 ## Lokální stav
 
+Aktualizace 2026-05-23:
+
+- Codex marketplace `shortcuts-playground` byl zaregistrovan.
+- Plugin `shortcuts-playground@shortcuts-playground` byl nainstalovan a je
+  `installed, enabled`, verze `1.0.1`.
+- Apple `/usr/bin/shortcuts` CLI existuje.
+- Codex CLI existuje.
+- Vystupni slozka `~/Documents/Shortcuts Playground/` zatim nevznikla.
+- Prvni realny `.shortcut` jeste neni vygenerovany ani rucne otestovany.
+- Pro plne nacteni pluginu je pravdepodobne potreba nova Codex relace.
+
 Samantha ma tool:
 
 ```text
@@ -78,8 +89,9 @@ Potvrzuji pripravu iPhone zkratky
 
 ## Dalsi prakticky krok
 
-1. Nainstalovat nebo zprovoznit Shortcuts Playground plugin pro Codex.
+1. V nove Codex relaci overit, ze je Shortcuts Playground plugin skutecne nacteny.
 2. Spustit `iphone_shortcuts_playground_status()`.
-3. Pripravit prvni velmi jednoduchou testovaci zkratku bez citlivych akci.
-4. Rucne ji otevrit v Apple Shortcuts a overit import.
-5. Teprve potom rozsirovat workflow na uzitecne zkratky pro Milu.
+3. Pripravit nebo pouzit request pro prvni zkratku `Najit auto`.
+4. Vygenerovat `.shortcut` pres Shortcuts Playground.
+5. Rucne ji otevrit v Apple Shortcuts a overit import, oprávneni a logiku.
+6. Teprve potom rozsirovat workflow na dalsi uzitecne zkratky pro Milu.
