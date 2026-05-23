@@ -143,6 +143,17 @@ Vyplnit:
 - Ověřit, zda nebyly zahraniční spojené osoby nebo jiné speciální daňové situace.
 - Před odesláním provést finální kontrolu proti originálním podkladům a aktuálnímu formuláři.
 
+## Odkazy na získání podkladů
+
+- Generali penzijní společnost: klientský portál `https://www.klientskyportal.cz`
+  pro stažení výpisu z penzijního účtu za rok 2025. Neukládat přihlašovací údaje,
+  rodné číslo ani obsah výpisu do memory. Po stažení PDF ho vložit do
+  `data/private/documents/inbox/incoming/` a zpracovat přes dokumentový vault.
+- Stav 2026-05-22: čtyři Generali penzijní PDF podklady byly po potvrzení
+  importovány do private document vaultu v oblasti `tax`; zdrojové kopie byly
+  přesunuty do `inbox/processed/`. Citlivé hodnoty a obsah dokumentů jsou pouze
+  v `data/private/documents/`, ne v memory.
+
 ## Další kroky pro Codex
 
 - Neprovádět nové daňové výpočty bez výslovného zadání.

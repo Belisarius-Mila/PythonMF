@@ -20,6 +20,18 @@ schopnosti. Toto pravidlo plati pro vsechny soucasne i budouci projekty.
    workflow prikaz, vyzadat potvrzeni podle pravidel dane schopnosti.
 6. Spustit pouze registrovanou schopnost, ne ad hoc improvizovany prikaz.
 
+## Volba miry rezie
+
+Pred novym ukolem ma Samantha nebo Codex zvolit primerenou miru workflow rezie:
+
+- maly, rychly a snadno opakovatelny ukol: primy krok bez manifestu,
+- stredni ukol s vice soubory nebo vystupy: lehky manifest/log/summary,
+- dlouhy, sitove citlivy, hromadny, drahy nebo soukromy ukol: plne
+  checkpointovane workflow podle `memory/technical/session_recovery_rules.md`.
+
+Cilem je nepretezovat male ukoly zbytecnou strukturou, ale u delsi prace mit
+navazatelnost po reconnectu, padu Codexu nebo castecne chybe.
+
 ## Typy schopnosti
 
 ### Python tools

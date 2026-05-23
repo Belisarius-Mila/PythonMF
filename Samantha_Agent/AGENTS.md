@@ -62,9 +62,14 @@ Co se resilo:
 Co je hotove:
 Co neni hotove:
 Dalsi krok:
+Navrhovane dalsi kroky:
 Zmenene nebo relevantni soubory:
 Bezpecnost / neukladat:
 ```
+
+`Navrhovane dalsi kroky` pouzivej hlavne u hotovych nebo pozastavenych projektu:
+kratce oddel okamzity dalsi krok od volitelnych navazujicich zlepseni, aby Mila
+pri dalsim navazani videl, kam se da rozumne pokracovat.
 
 ## Bezpecnost a soubory
 

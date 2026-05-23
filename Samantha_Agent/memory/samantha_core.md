@@ -12,6 +12,14 @@ Samantha Agent je pripravovany osobni AI agent. Cil je postupovat po malych prak
 2. Potom postavit agenta nad OpenAI Agents SDK.
 3. Pozdeji doplnit RAG nad exporty z ChatGPT.
 
+## Prakticka kotva
+
+Projekt neni o technologii pro efekt, ale o praktickem pomocnikovi pro konkretni
+lidske agendy. Kulturni metafora `samyce/samice` je ulozena v
+`technical/samantha_cultural_metaphors.md`: stary pocitac by nerozumel
+preklepu, ale Samantha ma hledat zamer, kontext a rozumny dalsi krok i pri
+nepresnem lidskem vstupu.
+
 ## Aktualni technicky stav
 
 - Codex CLI uz funguje.
