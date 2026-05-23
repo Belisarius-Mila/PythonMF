@@ -21,10 +21,15 @@ from app.email import (
     build_rixo_insurance_case_from_uids,
     list_email_archives,
     list_recent_email_headers,
+    list_recent_seznam_email_headers,
+    list_unified_email_headers,
     read_email_body_by_uid,
+    read_seznam_email_body_by_uid,
     run_email_triage_session,
     save_selected_email_cases_from_uids,
     search_email_headers,
+    search_seznam_email_headers,
+    search_email_text_year,
     show_email_archive_links,
     show_email_archive_summary,
     show_email_case_links,
@@ -42,9 +47,12 @@ from app.workflows import (
     run_workflow_command,
 )
 from app.reminders import (
+    inspect_payment_page_for_reminder,
     list_open_reminders,
     mark_reminder_done,
     save_email_action_case_reminder,
+    save_payment_case_document,
+    save_payment_sms_reminder,
     show_reminder_detail,
 )
 from app.reminders.due import format_active_due_reminders
@@ -58,6 +66,21 @@ from app.lekarna import (
     validate_lekarna_photo_sources,
 )
 from app.media import apply_zmenseni_obrazku, preview_zmenseni_obrazku
+from app.documents import (
+    apply_document_import,
+    document_vault_status,
+    format_document_inbox_reminder,
+    inspect_document_text,
+    prepare_document_import,
+    prepare_document_print_job,
+    propose_document_inbox_cleanup,
+    resolve_document_inbox_item,
+    run_document_print_job,
+    save_document_due_reminder,
+    scan_document_inbox,
+    search_private_documents,
+)
+from app.startup_prompts import format_owl_text_startup_prompt
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -65,12 +88,12 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 def load_memory(memory_dir: Path = MEMORY_DIR) -> str:
     """Load the full markdown memory context for compatibility and tests."""
-    return load_full_memory_context(
+    return _with_startup_context(load_full_memory_context(
         memory_dir=memory_dir,
         reminder_formatter=format_active_due_reminders,
         email_activity_formatter=format_email_activity_reminder,
         backup_activity_formatter=format_backup_activity_reminder,
-    )
+    ), mark_owl_prompt_asked=False)
 
 
 def _search_memory_text(query: str) -> str:
@@ -83,12 +106,12 @@ def _search_memory_text(query: str) -> str:
 
 def load_agent_memory(memory_dir: Path = MEMORY_DIR) -> str:
     """Load the compact startup context used by the live agent."""
-    return load_startup_memory_context(
+    return _with_startup_context(load_startup_memory_context(
         memory_dir=memory_dir,
         reminder_formatter=format_active_due_reminders,
         email_activity_formatter=format_email_activity_reminder,
         backup_activity_formatter=format_backup_activity_reminder,
-    )
+    ), mark_owl_prompt_asked=True)
 
 
 def _memory_status_text() -> str:
@@ -98,6 +121,15 @@ def _memory_status_text() -> str:
         email_activity_formatter=format_email_activity_reminder,
         backup_activity_formatter=format_backup_activity_reminder,
     )
+
+
+def _with_startup_context(memory_text: str, mark_owl_prompt_asked: bool) -> str:
+    sections = [
+        memory_text,
+        format_document_inbox_reminder(),
+        format_owl_text_startup_prompt(mark_asked=mark_owl_prompt_asked),
+    ]
+    return "\n\n---\n\n".join(section for section in sections if section)
 
 
 @function_tool
@@ -148,6 +180,38 @@ E-mailovy nastroj search_email_headers pouzij, kdyz Mila hleda e-maily podle
 odesilatele, predmetu, data nebo klicoveho slova. Nastroj smi prohledavat pouze
 hlavicky a smi vracet pouze UID, datum, odesilatele a predmet. Nesmí cist telo
 e-mailu ani nic ukladat do memory.
+
+Seznam e-mailove nastroje `list_recent_seznam_email_headers`,
+`search_seznam_email_headers` a `read_seznam_email_body_by_uid` pouzij, kdyz
+Mila mluvi o Seznamu, stare druhe e-mailove adrese, schrance ze Seznamu nebo
+e-mailech, ktere vidi v Apple Mailu ve `Vsechny prichozi`, ale patri do Seznamu.
+Tyto nastroje pracuji jen read-only nad INBOXem Seznam uctu. Hlavicky vraci jen
+UID, datum, odesilatele a predmet. Telo Seznam e-mailu smi precist jen
+`read_seznam_email_body_by_uid` po stejnem vyslovnem potvrzeni jako u iCloudu:
+aktualni Milova zprava musi obsahovat konkretni UID a jasny souhlas se ctenim
+tela e-mailu ze Seznamu. UID z iCloudu a UID ze Seznamu nejsou zamenné; pri
+potvrzeni i ve vystupu vzdy pojmenuj zdroj schranky, aby bylo jasne, ktery ucet
+se cte. Bez potvrzeni necti telo, neukladej obsah do memory, nic nemaz,
+nepresouvej, neodesilej, nestahuj prilohy, neotevirej odkazy a neoznacuj jako
+prectene.
+
+E-mailovy nastroj `list_unified_email_headers` pouzij, kdyz Mila chce prehled
+vsech prichozich, sjednoceny inbox, nebo si neni jisty, jestli je e-mail na
+iCloudu nebo Seznamu. Tool smi nacist jen hlavicky a musi u kazde polozky ukazat
+zdroj schranky. Pokud jeden zdroj neni nakonfigurovany nebo je nedostupny, nesmi
+kvuli tomu spadnout cele zobrazeni; jen vypise nedostupny zdroj.
+
+E-mailovy nastroj search_email_text_year pouzij, kdyz Mila chce hledat vyrazy
+v textu nebo tele e-mailu za konkretni rok. user_confirmed=True smi byt pouzito
+jen tehdy, kdyz aktualni Milova zprava obsahuje rok, hledane vyrazy, souhlas
+s read-only hledanim v textech/tělech e-mailu a explicitni zakazy: neotevirat
+odkazy, nestahovat prilohy, nic neodesilat, nemazat, nepresouvat a neoznacovat
+jako prectene. Do confirmation_text vzdy vloz aktualni Milovu potvrzovaci
+zpravu, nikdy ji nevymyslej ani neshrnuj. Tool smi pres IMAP fulltextove hledat
+v textu zprav, ale vystup smi vracet jen UID, datum, redigovaneho odesilatele,
+predmet a nalezene vyrazy. Nesmí vypisovat telo e-mailu, plne URL ani prilohy,
+nic ukladat do memory/reminders/vaultu, otevirat odkazy, odesilat, mazat,
+presouvat ani oznacovat jako prectene.
 
 E-mailovy nastroj run_email_triage_session pouzij jen tehdy, kdyz Mila chce
 spustit Email Triage nad poslednimi N dny. user_confirmed=True smi byt pouzito
@@ -246,6 +310,71 @@ confirmation_text vzdy vloz aktualni Milovu potvrzovaci zpravu, nikdy ji
 nevymyslej ani neshrnuj. Pokud potvrzeni chybi, nic neukladej. Tool nesmi ulozit
 cele telo e-mailu, plne URL ani neredigovane e-mailove adresy a nesmi zapisovat
 do memory.
+
+Nastroj save_payment_sms_reminder pouzij pro SMS nebo opsanou zpravu o platbe,
+pojistce, fakture nebo smlouve, kdyz Mila chce ulozit bezpecnou pripominku.
+Je to zapis do `data/reminders/reminders.json`, proto musi byt vzdy samostatne
+potvrzeny aktualni Milovou zpravou: user_confirmed=True smi byt jen tehdy, kdyz
+confirmation_text obsahuje id pripominky a jasny souhlas s ulozenim pripominky.
+Pokud neni overena skutecna splatnost z faktury, platebni stranky, smlouvy nebo
+data pocatku pojisteni, nech verified_due_date prazdne a uloz pouze ukol overit
+splatnost s blizkym review_due_date. Pokud je skutecna splatnost overena, predej
+ji jako verified_due_date a pripadne verified_start_date. Plne URL z SMS nikdy
+neopisuj do notes ani do memory; tool smi ulozit jen domenu odkazu. Tool nesmi
+otevirat odkazy, platit, odesilat, volat banku, cist e-mail ani stahovat prilohy.
+
+Nastroj inspect_payment_page_for_reminder pouzij jako samostatny read-only krok,
+kdyz Mila chce overit skutecnou splatnost z platebni stranky nebo faktury podle
+HTTPS odkazu. user_confirmed=True smi byt jen tehdy, kdyz aktualni Milova zprava
+obsahuje domenu odkazu a jasny souhlas s read-only kontrolou platebni
+stranky/faktury. Do confirmation_text vzdy vloz aktualni Milovu potvrzovaci
+zpravu. Tool smi stranku pouze nacist a vypsat bezpecny vytah: domenu, cislo
+pojistky/smlouvy/faktury, castku, splatnost a pocatek pojisteni/sluzby, pokud je
+najde. Nesmí platit, prihlasovat se, odesilat formulare, stahovat prilohy,
+ukladat plne URL nebo tokeny do memory/reminders ani je opisovat do odpovedi.
+Pokud tool najde `verified_due_date`, pouzij ji teprve v dalsim samostatne
+potvrzenem kroku pro `save_payment_sms_reminder`.
+
+Nastroj save_payment_case_document pouzij, kdyz je k platebnimu pripadu dostupna
+lokalni priloha nebo faktura a Mila chce tento dokument ulozit k pripadu.
+Je to zapis do soukrome slozky `data/private/payment_cases/`, proto musi byt
+samostatne potvrzeny aktualni Milovou zpravou. user_confirmed=True smi byt jen
+tehdy, kdyz confirmation_text obsahuje case_id, presny nazev souboru a jasny
+souhlas s ulozenim faktury/prilohy/dokumentu. Tool smi kopirovat pouze lokalni
+soubor z projektove `data/` nebo `/private/tmp`; nesmi stahovat URL, cist e-mail
+znovu, otevirat prilohy, nic platit ani zapisovat do memory. Pouzivej ho pro PDF
+faktury, navrhy smluv nebo potvrzeni platby, ktere uz byly bezpecne stazene.
+
+Dokumentovy vault pouzij pro obecnou spravu soukromych dokumentu mimo git:
+smlouvy, pojistky, faktury, revize, servisni protokoly, zaruky a dokumentaci ke
+kotli, fotovoltaice, domu, autu nebo dalsim zarizenim. Pri startu nebo kdyz se
+Mila pta, jestli jsou nove dokumenty, jestli je co zpracovat, nebo rekne, ze
+neco ulozil do dokumentove slozky, pouzij `scan_document_inbox`. Tento tool je
+read-only a jen vypise cekajici soubory v `data/private/documents/inbox/incoming/`.
+`prepare_document_import` je read-only nahled importu lokalniho souboru z `data/`
+nebo `/private/tmp`.
+`inspect_document_text` je read-only inspekce textu a kandidatu na due date.
+`apply_document_import` je zapis do `data/private/documents/` a smi byt pouzit
+jen po samostatnem potvrzeni v aktualni Milove zprave; potvrzeni musi obsahovat
+nazev souboru, cilovou oblast a jasny souhlas s ulozenim dokumentu. Dokumenty,
+extrahovany text a indexy nikdy neukladej do memory ani do gitu.
+`search_private_documents` pouzij pro hledani v lokalnim private indexu; vraci
+jen metadata a kratke snippety, ne cele dokumenty. `save_document_due_reminder`
+pouzij az jako samostatny potvrzeny krok z jednoho overeneho due date kandidata.
+Pro tisk dokumentu pouzij dvoukrokovy workflow: `prepare_document_print_job`
+nejdrive vyhleda jednoznacny dokument podle dotazu nebo `document_id` a zkopiruje
+pracovni kopii do `data/private/documents/print_queue/`; originál ve vaultu
+zustava beze zmeny. Samotny tisk smi provest az `run_document_print_job` po
+samostatnem potvrzeni obsahujicim `print_job_id` a jasny souhlas s tiskem.
+Po uspesnem predani tisku systemu se smaze jen kopie z `print_queue`, nikdy ne
+original ve vaultu. Pri chybe tisku kopii ponech a oznam, ze tisk se nedari.
+Po uspesnem importu dokumentu, kdyz zdrojova kopie zustava v inboxu, pouzij
+read-only `propose_document_inbox_cleanup`: ma Milovi polozit otazku
+"Dokument xy zpracovan, presunout do slozky processed?" s volbami 1 presunout,
+2 smazat. Pro volbu 1 pouzij `resolve_document_inbox_item` az po potvrzeni
+presunu. Pro volbu 2 se nejdriv samostatne zeptej "Opravdu chcete dokument xy
+smazat z inboxu?" a mazani proved jen po odpovedi ano a potvrzeni s presnym
+nazvem souboru. Bez potvrzeni nic nemaz ani nepresouvej.
 
 Nastroj list_open_reminders pouzij, kdyz Mila chce vypsat otevrene pripominky.
 Vystup smi obsahovat jen bezpecna pole: id, title, due_date, priority, status a
@@ -369,6 +498,10 @@ oznacovat jako prectene, otevirat odkazy, stahovat prilohy ani ukladat do memory
 
 Bezpecny e-mailovy workflow:
 1. Kdyz Mila chce zkontrolovat e-maily, nejdriv pouzij list_recent_email_headers.
+   Pokud ale rekne Seznam, stara druha adresa nebo Vsechny prichozi s e-mailem
+   ze Seznamu, pouzij misto toho list_recent_seznam_email_headers.
+   Pokud chce vsechny prichozi nebo nevi, kde e-mail je, pouzij
+   list_unified_email_headers.
 2. Pak ho nech vybrat konkretni UID.
 3. Pred ctenim tela si vyzadej jasne potvrzeni pro dane UID.
 4. Teprve potom pouzij read_email_body_by_uid s confirmation_text nastavenym na
@@ -412,6 +545,10 @@ LOKALNI PAMET:
             memory_status,
             list_recent_email_headers,
             search_email_headers,
+            list_recent_seznam_email_headers,
+            search_seznam_email_headers,
+            list_unified_email_headers,
+            search_email_text_year,
             run_email_triage_session,
             save_selected_email_cases_from_uids,
             archive_email_by_uid,
@@ -419,9 +556,13 @@ LOKALNI PAMET:
             show_email_archive_summary,
             show_email_archive_links,
             read_email_body_by_uid,
+            read_seznam_email_body_by_uid,
             build_email_case_from_uid,
             build_email_action_case_from_uid,
+            inspect_payment_page_for_reminder,
             save_email_action_case_reminder,
+            save_payment_case_document,
+            save_payment_sms_reminder,
             list_open_reminders,
             show_reminder_detail,
             mark_reminder_done,
@@ -437,6 +578,17 @@ LOKALNI PAMET:
             apply_vyrazeni_leku,
             preview_zmenseni_obrazku,
             apply_zmenseni_obrazku,
+            scan_document_inbox,
+            document_vault_status,
+            prepare_document_import,
+            inspect_document_text,
+            apply_document_import,
+            search_private_documents,
+            save_document_due_reminder,
+            prepare_document_print_job,
+            run_document_print_job,
+            propose_document_inbox_cleanup,
+            resolve_document_inbox_item,
             prepare_lekarna_photo_import,
             apply_lekarna_photo_import,
             validate_lekarna_photo_sources,
