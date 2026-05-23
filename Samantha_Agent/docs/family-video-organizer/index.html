@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FamilyVideoOrganizer</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="videos-data.example.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-mark">FVO</div>
+      <div>
+        <h1>FamilyVideoOrganizer</h1>
+        <p id="projectMeta">Tomík rok 2</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <span id="saveState" class="save-state">Připraveno</span>
+      <button id="loadDataButton" class="secondary-button" type="button">Načíst data</button>
+      <button id="selectFolderButton" class="secondary-button" type="button">Složka s videi</button>
+      <button id="importDraftButton" class="secondary-button" type="button">Import draftu</button>
+      <button id="exportButton" class="primary-button" type="button">Export rozhodnutí</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="filter-panel">
+      <section class="summary-strip" aria-label="Souhrn">
+        <div><strong id="totalCount">0</strong><span>celkem</span></div>
+        <div><strong id="shortCount">0</strong><span>short</span></div>
+        <div><strong id="familyCount">0</strong><span>family</span></div>
+        <div><strong id="changedCount">0</strong><span>upraveno</span></div>
+      </section>
+
+      <section class="filters" aria-label="Filtry">
+        <label for="searchInput">Hledat</label>
+        <input id="searchInput" type="search" placeholder="název, datum, původní soubor">
+
+        <label for="scopeFilter">Rozsah</label>
+        <select id="scopeFilter">
+          <option value="all">Vše</option>
+          <option value="short">VideoShort</option>
+          <option value="family">VideoFamily</option>
+          <option value="outside">Mimo výběry</option>
+          <option value="changed">Upravené</option>
+          <option value="notes">S poznámkou</option>
+        </select>
+
+        <label for="decisionFilter">Rozhodnutí</label>
+        <select id="decisionFilter">
+          <option value="all">Všechna rozhodnutí</option>
+          <option value="keep">Ponechat</option>
+          <option value="drop">Vyřadit</option>
+          <option value="maybe">Možná</option>
+          <option value="short">Jen short</option>
+          <option value="family">Jen family</option>
+          <option value="both">Obě verze</option>
+        </select>
+      </section>
+
+      <section class="preview-panel" aria-label="Náhled videa">
+        <div class="preview-head">
+          <span id="previewIndex">#</span>
+          <button id="playButton" class="icon-button" type="button" title="Přehrát video">Play</button>
+        </div>
+        <h2 id="previewTitle">Vyber záznam</h2>
+        <p id="previewFile">Náhled se zobrazí při najetí nebo kliknutí na řádek.</p>
+        <div id="previewImages" class="preview-images"></div>
+      </section>
+    </aside>
+
+    <section class="table-shell" aria-label="Seznam videí">
+      <div class="table-toolbar">
+        <div id="activeDataset">Ukázková data</div>
+        <div id="visibleCount">0 záznamů</div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-index">#</th>
+              <th class="col-date">Datum</th>
+              <th class="col-duration">Trvání</th>
+              <th class="col-flag">Short</th>
+              <th class="col-flag">Family</th>
+              <th class="col-title">Název</th>
+              <th class="col-original">Původní název</th>
+              <th class="col-decision">Rozhodnutí</th>
+              <th class="col-note">Poznámka</th>
+              <th class="col-play">Video</th>
+            </tr>
+          </thead>
+          <tbody id="videoRows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="videoModal" class="modal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 id="modalTitle">Video</h2>
+        <button id="closeModalButton" class="icon-button" type="button">Zavřít</button>
+      </div>
+      <video id="videoPlayer" controls></video>
+      <p id="videoFallback" class="video-fallback"></p>
+    </div>
+  </div>
+
+  <input id="dataFileInput" type="file" accept=".js,.json" hidden>
+  <input id="draftFileInput" type="file" accept=".json" hidden>
+  <script src="app.js"></script>
+</body>
+</html>
