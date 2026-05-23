@@ -118,6 +118,27 @@ class Daily3AmTests(unittest.TestCase):
 
             self.assertEqual(result, daily_3am.EXIT_SETUP_ERROR)
 
+    def test_hour_window_allows_delayed_same_day_run(self):
+        now = datetime(2026, 5, 23, 21, 59, tzinfo=daily_3am.PRAGUE_TZ)
+
+        self.assertTrue(daily_3am.is_within_hour_window(now, 17, 5))
+
+    def test_hour_window_rejects_after_tolerance(self):
+        now = datetime(2026, 5, 23, 22, 1, tzinfo=daily_3am.PRAGUE_TZ)
+
+        self.assertFalse(daily_3am.is_within_hour_window(now, 17, 5))
+
+    def test_hour_window_handles_midnight_wrap(self):
+        now = datetime(2026, 5, 24, 2, 30, tzinfo=daily_3am.PRAGUE_TZ)
+
+        self.assertTrue(daily_3am.is_within_hour_window(now, 22, 5))
+
+    def test_time_gate_requires_complete_window_args(self):
+        args = daily_3am.parse_args(["--window-start-hour", "17"])
+
+        with self.assertRaises(ValueError):
+            daily_3am.validate_time_gate_args(args)
+
     def test_colors_numbers_owl_task_generates_one_off_audio(self):
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)

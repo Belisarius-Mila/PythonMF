@@ -13,7 +13,7 @@ from pathlib import Path
 import re
 import sys
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 try:
@@ -113,6 +113,18 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         default=None,
         help="No-op unless current Europe/Prague hour equals this value. Useful for GitHub Actions DST schedules.",
     )
+    parser.add_argument(
+        "--window-start-hour",
+        type=int,
+        default=None,
+        help="No-op unless current Europe/Prague time is inside a window starting at this hour.",
+    )
+    parser.add_argument(
+        "--window-hours",
+        type=int,
+        default=None,
+        help="Number of hours in the allowed window started by --window-start-hour.",
+    )
     return parser.parse_args(argv)
 
 
@@ -169,6 +181,30 @@ def validate_run_date(run_date: str) -> None:
         datetime.strptime(run_date, "%Y-%m-%d")
     except ValueError as exc:
         raise ValueError("--run-date must use YYYY-MM-DD format.") from exc
+
+
+def validate_time_gate_args(args: argparse.Namespace) -> None:
+    if args.only_at_hour is not None and not 0 <= args.only_at_hour <= 23:
+        raise ValueError("--only-at-hour must be between 0 and 23.")
+
+    has_window_start = args.window_start_hour is not None
+    has_window_hours = args.window_hours is not None
+    if has_window_start != has_window_hours:
+        raise ValueError("--window-start-hour and --window-hours must be used together.")
+    if args.only_at_hour is not None and has_window_start:
+        raise ValueError("--only-at-hour cannot be combined with --window-start-hour.")
+    if has_window_start and not 0 <= args.window_start_hour <= 23:
+        raise ValueError("--window-start-hour must be between 0 and 23.")
+    if has_window_hours and not 1 <= args.window_hours <= 24:
+        raise ValueError("--window-hours must be between 1 and 24.")
+
+
+def is_within_hour_window(now: datetime, start_hour: int, window_hours: int) -> bool:
+    start = now.replace(hour=start_hour, minute=0, second=0, microsecond=0)
+    if now < start:
+        start -= timedelta(days=1)
+    end = start + timedelta(hours=window_hours)
+    return start <= now <= end
 
 
 def state_path(context: DailyContext) -> Path:
@@ -441,6 +477,7 @@ def main(argv: list[str] | None = None) -> int:
     now = datetime.now(PRAGUE_TZ)
     try:
         context = build_context(args, now)
+        validate_time_gate_args(args)
         setup_logging(context.log_file)
     except Exception as exc:
         print(f"Setup failed: {exc}", file=sys.stderr)
@@ -452,6 +489,15 @@ def main(argv: list[str] | None = None) -> int:
             "Current Europe/Prague hour is %s, expected %s; no-op.",
             now.hour,
             args.only_at_hour,
+        )
+        return EXIT_OK
+    if args.window_start_hour is not None and not is_within_hour_window(
+        now, args.window_start_hour, args.window_hours
+    ):
+        logging.info(
+            "Current Europe/Prague time is outside allowed window starting at %s:00 for %s hours; no-op.",
+            args.window_start_hour,
+            args.window_hours,
         )
         return EXIT_OK
 

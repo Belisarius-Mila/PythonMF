@@ -3,11 +3,9 @@ name: Samantha Daily 3 AM
 on:
   workflow_dispatch:
   schedule:
-    # GitHub cron is UTC. Prague is UTC+1 in winter and UTC+2 in summer.
-    # Running at both UTC hours and checking Europe/Prague inside the script
-    # keeps the effective local trigger at 03:00 across DST changes.
-    - cron: "0 1 * * *"
-    - cron: "0 2 * * *"
+    # GitHub cron is UTC. This one-off retry is 18:20 Prague summer time
+    # for 2026-05-23, inside the accepted 17:00-22:00 Prague window.
+    - cron: "20 16 * * *"
 
 permissions:
   contents: write
@@ -32,7 +30,7 @@ jobs:
 
       - name: Run scheduled daily routine
         if: github.event_name == 'schedule'
-        run: python scripts/daily_3am.py --only-at-hour 3
+        run: python scripts/daily_3am.py --window-start-hour 17 --window-hours 5
 
       - name: Run manual daily routine
         if: github.event_name == 'workflow_dispatch'
