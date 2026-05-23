@@ -69,7 +69,12 @@ Aktualizace 2026-05-23:
 - Pri prvnim podpisu v3 se objevila docasna chyba Apple `NSURLErrorDomain 500`;
   opakovany podpis prosel. XML validace v3 prosla a podepsany `.shortcut` ma
   nenulovou velikost.
-- Rucni import a test v3 na iPhonu jeste nejsou potvrzene.
+- Rucni import a test v3 na Milove iPhonu: funguje. Ukladani polohy i otevreni
+  auta v Mapach pres Maps link je potvrzene.
+- Sdileni na iPhone Jany pres Zkratky/AirDrop/iCloud bylo resene. U Jany se
+  zkratka nejprve dlouho nacitala; v Polohovych sluzbach se aplikace Zkratky
+  nezobrazovala, protoze jeste nemela zaregistrovany pristup k poloze. Po
+  rucnim spusteni/povoleni zacala zkratka fungovat i u Jany.
 
 Samantha ma tool:
 
@@ -139,10 +144,10 @@ Nazev zkratky
 
 ## Dalsi prakticky krok
 
-1. Rucne otevrit `Najit auto v3.shortcut` v Apple Shortcuts.
-2. Zkontrolovat akce:
-   menu `Ulozit polohu auta` / `Otevrit auto v Mapach`, polohove opravneni,
-   ulozeni parked car, vytvoreni Maps linku a otevreni Apple Map.
-3. Otestovat na iPhonu: nejdriv ulozit polohu, potom navigovat.
-4. Pokud import nebo logika selze, vzit archivovane XML a opravit shortcut.
-5. Teprve po realnem testu rozsirovat workflow na dalsi uzitecne zkratky.
+1. Pri dalsi nove zkratce vyjit z overeneho pipeline:
+   prompt -> XML plist -> validator Craig loop -> `sign_shortcut.sh` -> import
+   postup pro Milu -> rucni test na iPhonu.
+2. U zkratek s polohou na dalsich iPhonech nejdrive overit, ze aplikace Zkratky
+   uz pozadala o polohu a je videt v Polohovych sluzbach.
+3. Pro mapy preferovat robustni vetev `Get Maps Link` -> `Open URL` pred primym
+   `Get Directions`, pokud se ma jen otevrit cil v Apple Mapach.
