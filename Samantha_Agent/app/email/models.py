@@ -27,3 +27,9 @@ class EmailMessage:
     body_text: str
     truncated: bool
     attachments: tuple[EmailAttachmentMeta, ...] = ()
+
+
+@dataclass(frozen=True)
+class EmailTextSearchHit:
+    header: EmailHeader
+    matched_terms: tuple[str, ...]

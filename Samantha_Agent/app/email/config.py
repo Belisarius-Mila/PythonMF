@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ICLOUD_IMAP_HOST = "imap.mail.me.com"
 ICLOUD_IMAP_PORT = 993
+SEZNAM_IMAP_HOST = "imap.seznam.cz"
+SEZNAM_IMAP_PORT = 993
 
 
 class EmailConfigError(RuntimeError):
@@ -24,6 +26,14 @@ class ICloudMailConfig:
     port: int = ICLOUD_IMAP_PORT
 
 
+@dataclass(frozen=True)
+class SeznamMailConfig:
+    address: str
+    password: str
+    host: str = SEZNAM_IMAP_HOST
+    port: int = SEZNAM_IMAP_PORT
+
+
 def load_icloud_mail_config(env_path: Path | None = None) -> ICloudMailConfig:
     load_dotenv(env_path or PROJECT_ROOT / ".env")
 
@@ -36,3 +46,17 @@ def load_icloud_mail_config(env_path: Path | None = None) -> ICloudMailConfig:
         )
 
     return ICloudMailConfig(address=address, app_password=app_password)
+
+
+def load_seznam_mail_config(env_path: Path | None = None) -> SeznamMailConfig:
+    load_dotenv(env_path or PROJECT_ROOT / ".env")
+
+    address = os.getenv("SEZNAM_MAIL_ADDRESS", "").strip()
+    password = os.getenv("SEZNAM_MAIL_PASSWORD", "").strip()
+
+    if not address or not password:
+        raise EmailConfigError(
+            "Chybi lokalni Seznam Mail konfigurace v .env."
+        )
+
+    return SeznamMailConfig(address=address, password=password)

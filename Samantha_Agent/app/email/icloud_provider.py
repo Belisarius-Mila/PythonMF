@@ -12,7 +12,7 @@ from email.message import Message
 from .archive_models import EmailArchiveSource
 from .archive_service import email_message_to_archive_source
 from .config import ICloudMailConfig, load_icloud_mail_config
-from .models import EmailAttachmentMeta, EmailHeader, EmailMessage
+from .models import EmailAttachmentMeta, EmailHeader, EmailMessage, EmailTextSearchHit
 
 
 HEADER_FETCH_SPEC = "(BODY.PEEK[HEADER.FIELDS (DATE FROM SUBJECT)])"
@@ -106,6 +106,61 @@ class ICloudReadOnlyEmailProvider:
                     break
 
         return matches
+
+    def search_text_headers(
+        self,
+        terms: list[str] | tuple[str, ...],
+        since: date,
+        before: date,
+        limit: int = 50,
+    ) -> list[EmailTextSearchHit]:
+        safe_terms = _validate_search_terms(terms)
+        safe_limit = min(max(1, limit), 200)
+        since_imap = _format_imap_date(since)
+        before_imap = _format_imap_date(before)
+        term_order = {term.casefold(): index for index, term in enumerate(safe_terms)}
+
+        try:
+            with imaplib.IMAP4_SSL(self._config.host, self._config.port) as imap:
+                imap.login(self._config.address, self._config.app_password)
+                imap.select("INBOX", readonly=True)
+
+                uid_matches: dict[bytes, set[str]] = {}
+                for term in safe_terms:
+                    for uid in _search_text_uids(
+                        imap=imap,
+                        term=term,
+                        since_imap=since_imap,
+                        before_imap=before_imap,
+                    ):
+                        uid_matches.setdefault(uid, set()).add(term)
+
+                recent_uids = sorted(uid_matches, key=lambda uid: int(uid))[-safe_limit:]
+                hits: list[EmailTextSearchHit] = []
+                for uid in reversed(recent_uids):
+                    header = self._fetch_header(imap=imap, uid=uid)
+                    if header is None:
+                        continue
+                    matched_terms = tuple(
+                        sorted(
+                            uid_matches[uid],
+                            key=lambda term: term_order.get(term.casefold(), 999),
+                        )
+                    )
+                    hits.append(
+                        EmailTextSearchHit(
+                            header=header,
+                            matched_terms=matched_terms,
+                        )
+                    )
+
+                return hits
+        except EmailProviderError:
+            raise
+        except imaplib.IMAP4.error as exc:
+            raise EmailProviderError("IMAP server odmitl pozadavek.") from exc
+        except OSError as exc:
+            raise EmailProviderError("Nepodarilo se pripojit k iCloud Mailu.") from exc
 
     def _fetch_header(
         self,
@@ -343,6 +398,60 @@ def _search_header_uids(imap: imaplib.IMAP4_SSL, query: str) -> list[bytes]:
         raise EmailProviderError("Nepodarilo se vyhledat hlavicky.")
 
     return data[0].split()
+
+
+def _search_text_uids(
+    imap: imaplib.IMAP4_SSL,
+    term: str,
+    since_imap: str,
+    before_imap: str,
+) -> list[bytes]:
+    status, data = imap.uid(
+        "SEARCH",
+        "CHARSET",
+        "UTF-8",
+        "SINCE",
+        since_imap,
+        "BEFORE",
+        before_imap,
+        "TEXT",
+        _quote_imap_utf8(term),
+    )
+    if status != "OK" or not data:
+        raise EmailProviderError("Nepodarilo se fulltextove vyhledat zpravy.")
+    if data[0] is None:
+        return []
+
+    return data[0].split()
+
+
+def _quote_imap_utf8(value: str) -> bytes:
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'.encode("utf-8")
+
+
+def _validate_search_terms(terms: list[str] | tuple[str, ...]) -> list[str]:
+    safe_terms: list[str] = []
+    seen: set[str] = set()
+    for term in terms:
+        normalized = " ".join(str(term).split())
+        folded = normalized.casefold()
+        if not normalized or folded in seen:
+            continue
+        if len(normalized) > 80:
+            raise EmailProviderError("Hledany vyraz je prilis dlouhy.")
+        safe_terms.append(normalized)
+        seen.add(folded)
+
+    if not safe_terms:
+        raise EmailProviderError("Chybi hledany vyraz.")
+    if len(safe_terms) > 10:
+        raise EmailProviderError("Prilis mnoho hledanych vyrazu.")
+    return safe_terms
+
+
+def _format_imap_date(value: date) -> str:
+    return value.strftime("%d-%b-%Y")
 
 
 def _fetch_headers_for_uids(

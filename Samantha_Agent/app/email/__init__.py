@@ -50,6 +50,7 @@ from .case_vault_tools import (
     save_selected_email_cases_from_uids_text,
 )
 from .icloud_provider import ICloudReadOnlyEmailProvider
+from .seznam_provider import SeznamReadOnlyEmailProvider
 from .insurance_case_models import (
     InsuranceActionItem,
     InsuranceAttachmentRef,
@@ -68,9 +69,19 @@ from .link_tools import show_email_case_links, show_email_case_links_text
 from .models import EmailAttachmentMeta, EmailHeader, EmailMessage
 from .redaction import redact_email_addresses
 from .tools import (
+    list_recent_seznam_email_headers,
     list_recent_email_headers,
+    list_unified_email_headers,
+    list_unified_email_headers_text,
     read_email_body_by_uid,
+    read_seznam_email_body_by_uid,
+    search_seznam_email_headers,
     search_email_headers,
+)
+from .text_search_tools import (
+    has_explicit_text_search_confirmation,
+    search_email_text_year,
+    search_email_text_year_text,
 )
 from .triage_tools import (
     has_explicit_triage_confirmation,
@@ -94,6 +105,7 @@ __all__ = [
     "EmailLinkMeta",
     "EmailMessage",
     "ICloudReadOnlyEmailProvider",
+    "SeznamReadOnlyEmailProvider",
     "InsuranceActionItem",
     "InsuranceAttachmentRef",
     "InsuranceCase",
@@ -118,8 +130,12 @@ __all__ = [
     "format_email_action_case",
     "format_email_activity_reminder",
     "list_recent_email_headers",
+    "list_recent_seznam_email_headers",
+    "list_unified_email_headers",
+    "list_unified_email_headers_text",
     "load_email_activity_state",
     "read_email_body_by_uid",
+    "read_seznam_email_body_by_uid",
     "record_email_archive_completed",
     "record_email_triage_completed",
     "reminder_draft_to_dict",
@@ -128,6 +144,7 @@ __all__ = [
     "has_explicit_archive_confirmation",
     "has_explicit_archive_link_confirmation",
     "has_explicit_save_cases_confirmation",
+    "has_explicit_text_search_confirmation",
     "has_explicit_triage_confirmation",
     "list_email_archives",
     "list_email_archives_text",
@@ -136,6 +153,9 @@ __all__ = [
     "save_selected_email_cases_from_uids",
     "save_selected_email_cases_from_uids_text",
     "search_email_headers",
+    "search_seznam_email_headers",
+    "search_email_text_year",
+    "search_email_text_year_text",
     "show_email_case_links",
     "show_email_case_links_text",
     "show_email_archive_links",

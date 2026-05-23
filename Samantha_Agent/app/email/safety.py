@@ -9,6 +9,9 @@ CONFIRMATION_WORDS = (
     "precist",
     "přečti",
     "přečíst",
+    "vypis",
+    "vypsat",
+    "vypiš",
 )
 
 LINK_REQUEST_WORDS = (
