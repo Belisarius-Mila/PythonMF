@@ -85,6 +85,30 @@ backup_project_dry_run
 Zaloha je prvni pilotni workflow. Dalsi strukturální projekty maji pouzit stejnou
 vrstvu misto pridavani dlouhych manualnich prikazu do chatu.
 
+## Souvisejici systemove reporty
+
+Systemove reporty nejsou primarne shell workflow prikazy. Jsou to registrovane
+Python tooly Samanthy se samostatnym registrem v:
+
+```text
+Samantha_Agent/app/system_reports.py
+Samantha_Agent/memory/technical/system_reports.md
+```
+
+Rucni CLI spusteni existuje hlavne pro testovani a lidsky provoz:
+
+| Report | CLI prikaz | Samantha tool |
+| --- | --- | --- |
+| Prehled reportu | `.venv/bin/python scripts/samantha_system_reports.py` | `samantha_system_reports()` |
+| Health check | `.venv/bin/python scripts/samantha_health_check.py --mode quick` | `samantha_health_check(mode="quick")` |
+| Kvantitativni status | `.venv/bin/python scripts/samantha_quantitative_status.py` | `samantha_quantitative_status(save=False)` |
+| Kvantitativni snapshot | `.venv/bin/python scripts/samantha_quantitative_status.py --save` | `samantha_quantitative_status(save=True)` |
+| Memory status | `.venv/bin/python -m app.samantha_agent "Ukaz stav lokalni pameti Samanthy."` | `memory_status()` |
+
+Pravidlo: pokud novy report zacne byt opakovane uzitecny, Samantha se zepta:
+"Udelame z toho novy systemovy report?" Teprve po souhlasu se prida do registru
+reportu, dokumentace a testu.
+
 ## Kandidati k registraci
 
 ### PictNew / slovnikove obrazky

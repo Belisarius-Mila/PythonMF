@@ -42,6 +42,26 @@ reminders, memory, lokalni vaulty a obnovu souboru.
 Tool musi mit vlastni bezpecnostni pravidla a testy. Pokud pracuje s citlivymi
 daty, musi mit potvrzovaci gate.
 
+### System reports
+
+Pouzivat pro kratke ad hoc systemove prehledy, ktere Mila potrebuje spustit
+opakovaně a nechce si pamatovat jejich presne nazvy.
+
+Aktualni registrovane reporty:
+
+| Zamer v bezne reci | Registrovana schopnost | Bezpecnostni rozsah |
+| --- | --- | --- |
+| "Jaky je stav Samanthy?", "health check", "mame cisty stul?" | `samantha_health_check(mode="quick")` | cte memory index, aktivni projekty a git status; nezapisuje |
+| "Kvantitativni status", "kolik mame souboru/radku?", "objemovy rust" | `samantha_quantitative_status(save=False)` | cte agregovane souborove statistiky mimo soukroma data; bez `save=True` nezapisuje |
+| "Uloz kvantitativni snapshot" | `samantha_quantitative_status(save=True)` | ulozi jen agregovanou JSONL datovou vetu bez nazvu souboru a soukromeho obsahu |
+| "Jake mame systemove reporty?" | `samantha_system_reports()` | vypise registr reportu; nezapisuje |
+| "Stav pameti", "priority", "pripomenuti" | `memory_status()` | cte jen bezpecnou lokalni memory diagnostiku; nezapisuje |
+
+Kdyz pri praci vznikne novy opakovatelny ad hoc status, audit nebo report,
+Samantha se ma zeptat: "Udelame z toho novy systemovy report?" Pokud Mila
+souhlasi, pridat ho do `app/system_reports.py`, `memory/technical/system_reports.md`
+a podle potreby do testu.
+
 ### Shell workflow registry
 
 Pouzivat pro lokalni prikazy, ktere maji byt spoustene pres shell, napr. zaloha,
