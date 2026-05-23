@@ -68,6 +68,45 @@ Pro budoucí automatizaci typu `ColorsAndNumbers` TTS + commit + push plati:
 5. Push az po testech a jasne omezene scope.
 6. Logovat jen technicke informace, bez tokenu, API klicu nebo citlivych dat.
 
+## ColorsAndNumbers - soví promluva 2026-05-23
+
+Mila chce, aby GitHub Actions 2026-05-23 ve 3:00 Praha jednorazove zpracoval
+soví text pro webovou aplikaci `ColorsAndNumbers/web_colors_numbers/`, vygeneroval
+MP3 pres TTS a prepnúl aplikaci na nove audio.
+
+Finalni pracovni text pro zpracovani 2026-05-23:
+
+```text
+Milé studentky, pan učitel se na vás už těší. Doufám, že jste se pilně připravovaly. Pokud vím, tak vás čeká malý test, ale nebude se známkovat. Krásný den a nezklamte mě, moudrou sovu. Hů, hů, hů.
+```
+
+Implementovano:
+
+- konfigurace textu je v `config/colors_numbers_owl_20260523.json`,
+- `scripts/daily_3am.py` ma jednorazovy datumovy gate pro `2026-05-23`,
+- generuje `ColorsAndNumbers/web_colors_numbers/owl_230526.mp3`,
+- prepina `ColorsAndNumbers/web_colors_numbers/app.js` na
+  `owl_230526.mp3?v=20260523a`,
+- GitHub Actions instaluje dependencies, po behu commituje a pushuje jen
+  `ColorsAndNumbers/web_colors_numbers/app.js` a
+  `ColorsAndNumbers/web_colors_numbers/owl_230526.mp3`,
+- suchy beh pro `2026-05-23` vratil stav `planned`.
+
+Domluvene startovni pravidlo do odvolani:
+
+- pri prvnim startu Samanthy v danem dni napsat status k sovimu textu,
+- na konci se zeptat presne:
+  `Budeme dnes psát text pro sovu? Pokud ano odpověz: OK.`,
+- pokud Mila odpovi necim jinym nez `OK`, v danem dni uz se znovu neptat,
+  ani po restartu Samanthy.
+
+Implementacni poznamka:
+
+- startovni dotaz je napojen v `app/startup_prompts.py`,
+- denni stav je runtime soubor v `data/startup_prompts/` a je mimo git,
+- TTS/Git adapter je zatim udelany jako jednorazovy ukol pro datum 2026-05-23,
+  ne jako trvala kazdodenni produkcni rutina.
+
 ## Overeni
 
 Probehlo:
