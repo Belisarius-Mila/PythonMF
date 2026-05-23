@@ -16,8 +16,10 @@ infrastructure/technical souborech.
 2. Pokud chce vedet, jake reporty existuji, spustit `samantha_system_reports()`.
 3. Pokud chce vedet, co Samantha umi a kde jsou rezervy, spustit
    `samantha_capability_audit()`.
-4. Pred vetsimi zmenami zkontrolovat `git status --short --branch`.
-5. Pri novem opakovatelnem statusu/auditu se zeptat:
+4. Pokud vlozil velke podklady do private knowledge inboxu, nejdriv spustit
+   `samantha_knowledge_inbox_inventory()`.
+5. Pred vetsimi zmenami zkontrolovat `git status --short --branch`.
+6. Pri novem opakovatelnem statusu/auditu se zeptat:
    "Udelame z toho novy systemovy report?"
 
 ## Pred rizikovou nebo delsi praci

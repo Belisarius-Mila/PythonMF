@@ -32,6 +32,7 @@ CAPABILITY_AREAS = (
             "samantha_quantitative_status",
             "samantha_system_reports",
             "samantha_capability_audit",
+            "samantha_knowledge_inbox_inventory",
         ),
         next_gap="Keep new repeated audits registered as system reports.",
     ),

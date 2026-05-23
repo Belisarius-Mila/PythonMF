@@ -18,6 +18,7 @@ from app.health_check import format_samantha_health_check
 from app.quantitative_status import format_samantha_quantitative_status
 from app.system_reports import format_system_reports_overview
 from app.capability_audit import format_samantha_capability_audit
+from app.knowledge_inbox import ensure_knowledge_inbox_dirs, format_knowledge_inbox_inventory
 from app.email import (
     archive_email_by_uid,
     build_email_action_case_from_uid,
@@ -177,6 +178,13 @@ def samantha_capability_audit() -> str:
     return format_samantha_capability_audit()
 
 
+@function_tool
+def samantha_knowledge_inbox_inventory() -> str:
+    """List safe metadata for private large-context inbox files without reading content."""
+    ensure_knowledge_inbox_dirs()
+    return format_knowledge_inbox_inventory()
+
+
 def build_agent(memory_text: str) -> Agent:
     instructions = f"""
 Jsi Samantha, osobni AI agent pro Milu.
@@ -208,6 +216,10 @@ nebo aby na zadny report nezapomnel, pouzij samantha_system_reports.
 Kdyz se Mila pta na audit schopnosti, capability registry, co Samantha umi,
 co je read-only, co vyzaduje potvrzeni, nebo kde jsou rezervy ve workflow,
 pouzij samantha_capability_audit.
+Kdyz se Mila pta na velke podklady, knowledge inbox, archiv chatu k prostudovani,
+nebo co je ve slozce `data/private/knowledge_inbox`, pouzij
+samantha_knowledge_inbox_inventory. Tento tool smi vypsat jen metadata souboru
+a nesmi cist obsah bez dalsiho explicitniho zadani rozsahu.
 Kdyz pri praci vznikne novy opakovatelny ad hoc status, audit nebo report,
 zeptej se: "Udelame z toho novy systemovy report?" Pokud Mila souhlasi,
 zaeviduj ho do registru systemovych reportu, dokumentace a testu.
@@ -600,6 +612,7 @@ LOKALNI PAMET:
             samantha_quantitative_status,
             samantha_system_reports,
             samantha_capability_audit,
+            samantha_knowledge_inbox_inventory,
             list_recent_email_headers,
             search_email_headers,
             list_recent_seznam_email_headers,

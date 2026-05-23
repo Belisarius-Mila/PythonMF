@@ -104,6 +104,7 @@ Rucni CLI spusteni existuje hlavne pro testovani a lidsky provoz:
 | Kvantitativni status | `.venv/bin/python scripts/samantha_quantitative_status.py` | `samantha_quantitative_status(save=False)` |
 | Kvantitativni snapshot | `.venv/bin/python scripts/samantha_quantitative_status.py --save` | `samantha_quantitative_status(save=True)` |
 | Capability audit | `.venv/bin/python scripts/samantha_capability_audit.py` | `samantha_capability_audit()` |
+| Knowledge inbox inventory | `.venv/bin/python scripts/samantha_knowledge_inbox.py` | `samantha_knowledge_inbox_inventory()` |
 | Memory status | `.venv/bin/python -m app.samantha_agent "Ukaz stav lokalni pameti Samanthy."` | `memory_status()` |
 
 Pravidlo: pokud novy report zacne byt opakovane uzitecny, Samantha se zepta:

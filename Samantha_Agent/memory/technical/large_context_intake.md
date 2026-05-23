@@ -34,6 +34,23 @@ Cela slozka `Samantha_Agent/data/private/` je ignorovana gitem. Do gitu patri
 jen tento navod a pripadne bezpecne, redigovane shrnuti, pokud ho Mila vyslovne
 schvali.
 
+## Bezpecny inventar
+
+Pred ctenim obsahu lze spustit read-only inventar:
+
+```bash
+.venv/bin/python scripts/samantha_knowledge_inbox.py
+```
+
+V Samanthě tomu odpovida tool:
+
+```text
+samantha_knowledge_inbox_inventory()
+```
+
+Inventar smi vypsat jen metadata: oblast, nazev souboru, typ, velikost a datum
+zmeny. Nesmí cist ani vypisovat obsah souboru.
+
 ## Bezpecnostni pravidla
 
 - Nikdy necommitovat puvodni velke podklady, exporty chatu, ZIPy ani soukrome

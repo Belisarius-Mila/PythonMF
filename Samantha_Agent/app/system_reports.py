@@ -39,6 +39,14 @@ SYSTEM_REPORTS = (
         saves_data="ne",
     ),
     SystemReport(
+        name="Knowledge inbox inventory",
+        when_to_use="bezpecny inventar velkych podkladu ve private knowledge inboxu",
+        output="nazvy souboru, typy, velikosti a cas zmeny; necte obsah",
+        command=".venv/bin/python scripts/samantha_knowledge_inbox.py",
+        samantha_tool="samantha_knowledge_inbox_inventory()",
+        saves_data="ne",
+    ),
+    SystemReport(
         name="Memory status",
         when_to_use="stav lokalni pameti, startup kontextu, priorit a pripomenuti",
         output="bezpecna diagnostika memory store bez e-mailu a tajemstvi",

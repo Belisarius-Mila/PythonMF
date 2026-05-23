@@ -56,6 +56,7 @@ Aktualni registrovane reporty:
 | "Uloz kvantitativni snapshot" | `samantha_quantitative_status(save=True)` | ulozi jen agregovanou JSONL datovou vetu bez nazvu souboru a soukromeho obsahu |
 | "Jake mame systemove reporty?" | `samantha_system_reports()` | vypise registr reportu; nezapisuje |
 | "Co Samantha umi?", "audit schopnosti", "kde jsou workflow rezervy?" | `samantha_capability_audit()` | cte registr toolu a workflow; nezapisuje |
+| "Co je v knowledge inboxu?", "velke podklady", "archiv chatu k prostudovani" | `samantha_knowledge_inbox_inventory()` | vypise jen metadata souboru v private inboxu; necte obsah |
 | "Stav pameti", "priority", "pripomenuti" | `memory_status()` | cte jen bezpecnou lokalni memory diagnostiku; nezapisuje |
 
 Kdyz pri praci vznikne novy opakovatelny ad hoc status, audit nebo report,
