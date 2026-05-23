@@ -75,6 +75,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `technical/capability_routing_rules.md` - obecne pravidlo pro vsechny projekty: lidsky pokyn -> pochopeny zamer -> registrovana schopnost/tool/workflow -> bezpecnostni rozsah -> potvrzeni podle rizika + volba miry workflow rezie.
 - `technical/system_reports.md` - prehled dostupnych systemovych reportu Samanthy, jejich ucelu, spusteni a pravidel pro pridavani dalsich reportu.
 - `technical/large_context_intake.md` - pravidla a lokalni ignorovany adresar pro velke podklady k prostudovani, vcetne budoucich exportu chatu, bez commitovani soukromych dat.
+- `technical/iphone_shortcuts_playground.md` - workflow pro budouci tvorbu Apple Shortcuts/iPhone zkratek pres MacStories Shortcuts Playground, vcetne status toolu, request draftu a rucniho overeni vystupu.
 - `technical/general_reminders_workflow.md` - obecne pravidlo pro SMS/e-mail/telefon/papir pripominky: konkretni ukoly s datem patri do `data/reminders/reminders.json`, projektovy kontext do memory/handoffu a opakovane rutiny do automatickych ukolu.
 - `technical/private_document_vault_workflow.md` - workflow pro vkladani, trideni, indexaci, due date extrakci a vyhledavani soukromych dokumentu v `data/private/documents/`; MVP tooly uz existuji.
 - `technical/lekarna_pil_short_workflow.md` - kanonicky workflow pro doplnovani `PIL_Short`: SÚKL DLP sparovani, statusy jistoty, prakticky nealarmisticky vytah, zaloha CSV a testy.

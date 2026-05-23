@@ -47,6 +47,16 @@ CAPABILITY_AREAS = (
         next_gap="Add scoped summarization/import only after explicit file selection and redacted memory diff.",
     ),
     CapabilityArea(
+        name="iPhone shortcuts",
+        level="L3/L4",
+        safety="read-only readiness check; private shortcut request drafts require explicit confirmation",
+        tools=(
+            "iphone_shortcuts_playground_status",
+            "prepare_iphone_shortcut",
+        ),
+        next_gap="Install and test Shortcuts Playground before claiming real .shortcut generation.",
+    ),
+    CapabilityArea(
         name="Email read-only and cases",
         level="L3/L4",
         safety="headers read-only; body, archive, links and case saves require explicit confirmation",

@@ -106,6 +106,7 @@ Rucni CLI spusteni existuje hlavne pro testovani a lidsky provoz:
 | Capability audit | `.venv/bin/python scripts/samantha_capability_audit.py` | `samantha_capability_audit()` |
 | Knowledge inbox inventory | `.venv/bin/python scripts/samantha_knowledge_inbox.py` | `samantha_knowledge_inbox_inventory()` |
 | Downloads inventory | `.venv/bin/python scripts/samantha_downloads_to_knowledge_inbox.py --list` | `samantha_downloads_inventory()` |
+| iPhone shortcuts status | `.venv/bin/python scripts/samantha_iphone_shortcuts.py --status` | `iphone_shortcuts_playground_status()` |
 | Memory status | `.venv/bin/python -m app.samantha_agent "Ukaz stav lokalni pameti Samanthy."` | `memory_status()` |
 
 Pravidlo: pokud novy report zacne byt opakovane uzitecny, Samantha se zepta:

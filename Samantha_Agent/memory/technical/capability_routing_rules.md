@@ -59,6 +59,7 @@ Aktualni registrovane reporty:
 | "Co je v knowledge inboxu?", "velke podklady", "archiv chatu k prostudovani" | `samantha_knowledge_inbox_inventory()` | vypise jen metadata souboru v private inboxu; necte obsah |
 | "Co mam ve Stazenych pro knowledge inbox?", "najdi podklady v Downloads" | `samantha_downloads_inventory()` | vypise jen metadata top-level souboru ve Stazenych; necte obsah |
 | "Prekopiruj vybrane soubory ze Stazenych do knowledge inboxu" | `copy_downloads_files_to_knowledge_inbox(...)` | kopiruje jen vybrane relativni soubory z Downloads do private inboxu az po potvrzeni |
+| "Chci iPhone zkratku", "vytvor Apple Shortcut", "stav Shortcuts Playground" | `iphone_shortcuts_playground_status()` nebo `prepare_iphone_shortcut(...)` | status je read-only; private request draft se zapisuje az po potvrzeni a realny `.shortcut` se musi rucne overit |
 | "Stav pameti", "priority", "pripomenuti" | `memory_status()` | cte jen bezpecnou lokalni memory diagnostiku; nezapisuje |
 
 Kdyz pri praci vznikne novy opakovatelny ad hoc status, audit nebo report,

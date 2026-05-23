@@ -24,6 +24,10 @@ from app.knowledge_inbox import (
     format_downloads_inventory,
     format_knowledge_inbox_inventory,
 )
+from app.iphone_shortcuts import (
+    format_iphone_shortcuts_status,
+    prepare_iphone_shortcut_request,
+)
 from app.email import (
     archive_email_by_uid,
     build_email_action_case_from_uid,
@@ -210,6 +214,30 @@ def copy_downloads_files_to_knowledge_inbox(
     )
 
 
+@function_tool
+def iphone_shortcuts_playground_status() -> str:
+    """Return read-only readiness status for creating iPhone shortcuts via Shortcuts Playground."""
+    return format_iphone_shortcuts_status()
+
+
+@function_tool
+def prepare_iphone_shortcut(
+    name: str,
+    purpose: str,
+    details: str = "",
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+) -> str:
+    """Prepare a private Shortcuts Playground request draft after confirmation."""
+    return prepare_iphone_shortcut_request(
+        name=name,
+        purpose=purpose,
+        details=details,
+        user_confirmed=user_confirmed,
+        confirmation_text=confirmation_text,
+    )
+
+
 def build_agent(memory_text: str) -> Agent:
     instructions = f"""
 Jsi Samantha, osobni AI agent pro Milu.
@@ -256,6 +284,16 @@ nevymyslej ani neshrnuj. Tool smi kopirovat pouze vybrane relativni soubory ze
 slozky Downloads do `data/private/knowledge_inbox/incoming/`, nesmi cist obsah pro
 shrnovani, nesmi kopirovat adresare ani cesty mimo Downloads a nesmi nic
 commitovat z `data/private/`.
+Kdyz Mila chce vytvorit, navrhnout nebo pripravit iPhone zkratku / Apple Shortcut,
+nejdriv pouzij `iphone_shortcuts_playground_status`, pokud neni jasne, zda je
+Shortcuts Playground pripraveny. Pro pripravu konkretni zkratky pouzij
+`prepare_iphone_shortcut`. Bez potvrzeni smi tool vratit jen nahled promptu.
+Soukromy request draft smi zapsat az po samostatnem potvrzeni v aktualni zprave:
+`Potvrzuji pripravu iPhone zkratky`. Do confirmation_text vzdy vloz aktualni
+Milovu potvrzovaci zpravu, nikdy ji nevymyslej ani neshrnuj. Generated `.shortcut`
+soubory se musi pred instalaci rucne otevrit a zkontrolovat v Apple Shortcuts;
+Samantha nesmi tvrdit, ze zkratka je hotova a bezpecna, dokud neprobehl realny
+build/import/review.
 Kdyz pri praci vznikne novy opakovatelny ad hoc status, audit nebo report,
 zeptej se: "Udelame z toho novy systemovy report?" Pokud Mila souhlasi,
 zaeviduj ho do registru systemovych reportu, dokumentace a testu.
@@ -651,6 +689,8 @@ LOKALNI PAMET:
             samantha_knowledge_inbox_inventory,
             samantha_downloads_inventory,
             copy_downloads_files_to_knowledge_inbox,
+            iphone_shortcuts_playground_status,
+            prepare_iphone_shortcut,
             list_recent_email_headers,
             search_email_headers,
             list_recent_seznam_email_headers,

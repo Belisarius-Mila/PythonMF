@@ -21,8 +21,11 @@ infrastructure/technical souborech.
 5. Pokud jsou velke podklady jeste ve Stazenych/Downloads, nejdriv spustit
    `samantha_downloads_inventory()` a kopirovat az po potvrzeni pres
    `copy_downloads_files_to_knowledge_inbox`.
-6. Pred vetsimi zmenami zkontrolovat `git status --short --branch`.
-7. Pri novem opakovatelnem statusu/auditu se zeptat:
+6. Pokud chce Mila iPhone zkratku / Apple Shortcut, nejdriv podle potreby spustit
+   `iphone_shortcuts_playground_status()` a pripravit jen potvrzeny private
+   request pres `prepare_iphone_shortcut()`.
+7. Pred vetsimi zmenami zkontrolovat `git status --short --branch`.
+8. Pri novem opakovatelnem statusu/auditu se zeptat:
    "Udelame z toho novy systemovy report?"
 
 ## Pred rizikovou nebo delsi praci

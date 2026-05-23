@@ -55,6 +55,14 @@ SYSTEM_REPORTS = (
         saves_data="ne",
     ),
     SystemReport(
+        name="iPhone shortcuts status",
+        when_to_use="kontrola pripravenosti MacStories Shortcuts Playground pro tvorbu iPhone zkratek",
+        output="stav Apple shortcuts CLI, Codex CLI, pluginu, vystupni slozky a private request slozky",
+        command=".venv/bin/python scripts/samantha_iphone_shortcuts.py --status",
+        samantha_tool="iphone_shortcuts_playground_status()",
+        saves_data="ne",
+    ),
+    SystemReport(
         name="Memory status",
         when_to_use="stav lokalni pameti, startup kontextu, priorit a pripomenuti",
         output="bezpecna diagnostika memory store bez e-mailu a tajemstvi",
