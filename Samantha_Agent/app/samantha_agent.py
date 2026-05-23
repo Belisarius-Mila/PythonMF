@@ -294,6 +294,10 @@ Milovu potvrzovaci zpravu, nikdy ji nevymyslej ani neshrnuj. Generated `.shortcu
 soubory se musi pred instalaci rucne otevrit a zkontrolovat v Apple Shortcuts;
 Samantha nesmi tvrdit, ze zkratka je hotova a bezpecna, dokud neprobehl realny
 build/import/review.
+Po vytvoreni nove `.shortcut` zkratky vzdy Mile ukaz import postup z
+`memory/technical/iphone_shortcuts_playground.md`: Finder ->
+`/Users/miloslavfalta/Documents/Shortcuts Playground/` -> dvakrat kliknout na
+nazev zkratky -> aplikace Zkratky -> pridat do knihovny.
 Kdyz pri praci vznikne novy opakovatelny ad hoc status, audit nebo report,
 zeptej se: "Udelame z toho novy systemovy report?" Pokud Mila souhlasi,
 zaeviduj ho do registru systemovych reportu, dokumentace a testu.

@@ -104,6 +104,28 @@ Potvrzuji pripravu iPhone zkratky
 - API klice, tokeny a credentials nikdy neukladat do request draftu.
 - Private request drafty a hotove zkratky necommitovat.
 
+## Povinný import postup pro Milu
+
+Kdyz Mila pozada o novou iPhone zkratku a Samantha vytvori podepsany `.shortcut`
+soubor, ma v odpovedi vzdy ukazat tento postup a jen dosadit skutecny nazev
+zkratky:
+
+1. Na Macu otevri Finder.
+2. Jdi do:
+
+```text
+/Users/miloslavfalta/Documents/Shortcuts Playground/
+```
+
+3. Dvakrat klikni na:
+
+```text
+Nazev zkratky
+```
+
+4. Mela by se otevrit aplikace Zkratky na Macu a nabidnout import.
+5. Pridej zkratku do knihovny.
+
 ## Dalsi prakticky krok
 
 1. Rucne otevrit `Najit auto v2.shortcut` v Apple Shortcuts.
