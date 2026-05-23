@@ -63,6 +63,9 @@ Po velkem commitovem uklidu maji byt hned nabidnuty tyto tri veci:
 8. Pravidelny commitovy uklid.
    Jakmile `git status` zacina byt delsi nez par obrazovek, navrhnout tematicky
    commitovy uklid. Toto je samostatny A1+ ukol do odvolani.
+   Po kazdem memory/handoff cleanupu musi nasledovat maly tematicky commit;
+   pokud je prace hotova a repo ma zustat navazatelne i po reconnectu, hned
+   potom push.
 
 9. Zadny velky refaktor bez checkpointu.
    Pred presuny souboru, prejmenovanim, hromadnymi upravami nebo architektonickou
@@ -95,6 +98,32 @@ Plosne cisteni handoffu je mozne, ale pouze ve ctyrech krocich:
 4. Bezpecne provedeni:
    preferovat nejdrive archivaci nebo odstraneni z `MEMORY_INDEX.md`. Fyzicke
    smazani az po potvrzeni a idealne po git checkpointu.
+
+## Prubezna archivace handoffu
+
+Toto je provozni pravidlo odvozene z cleanupu 2026-05-23.
+
+1. Handoff muze byt v `MEMORY_INDEX.md` aktivni jen tehdy, kdyz skutecne ridi
+   dalsi praci.
+2. Jakmile vznikne novejsi kanonicky projektovy status, aktualni handoff nebo
+   infrastructure karta, starsi handoff se ma pri nejblizsi prilezitosti
+   prepnout na historicky mezistav:
+   - odebrat `[PRIPOMENOUT]`,
+   - v indexu kratce napsat, cim je prekryty,
+   - nebo ho presunout jen do sekce `Historicke handoffy` v projektove karte.
+3. Stare handoffy se nemaji mazat jen proto, ze jsou stare. Nejdriv se vyrazuji
+   z aktivni navigace; fyzicke mazani az po samostatnem seznamu a potvrzeni.
+4. Relativni casove formulace typu `zitra`, `dnes`, `pristi start`, `neni
+   commitnute` nebo `pushnout zitra` se maji pri cleanupu prepsat na absolutni
+   datum a overeny stav gitu.
+5. Po kazdem cleanupu pameti nebo indexu musi nasledovat:
+   - `git diff --check`,
+   - cilene `git add` jen souvisejicich souboru,
+   - maly tematicky commit,
+   - push, pokud nejde o zamerne lokalni rozpracovanou praci.
+6. Pokud cleanup zmeni i kod, pustit primerene testy pred commitem. Pokud meni
+   jen markdown pamet, staci `git diff --check` a vecna kontrola aktivnich
+   `[PRIPOMENOUT]`.
 
 ## Navrhovany dalsi krok po velkem commitu
 
