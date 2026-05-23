@@ -195,6 +195,7 @@ def _pending_items(
         "watchdog",
         "GitHub Actions",
         "owl_230526",
+        "owl_240526",
     )
     for row in rows:
         text = f"{row['oblast']} {row['stav']} {row['dalsi']}"

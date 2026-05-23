@@ -27,7 +27,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `projects/email_readonly_oauth.md` - plán bezpečné read-only OAuth integrace e-mailu pro Samanthu, bez ukládání tokenů nebo obsahu e-mailů do gitu či paměti.
 - `projects/document_management_private_vault.md` - priorita 1 projekt soukrome spravy dokumentu mimo git; MVP tooly jsou implementovane pro PDF import, due date kandidaty, private index, vyhledavani a potvrzene remindery.
 - `projects/samantha_external_backup.md` - návrh offline zálohování `PythonMF`/Samanthy na externí disk: safe/recovery profily, šifrovaný kontejner, dry-run skript a 3denní připomínka.
-- `projects/automated_recurring_tasks.md` - [PRIPOMENOUT] automatické opakující se úkoly: `scripts/daily_3am.py`, GitHub Actions workflow a jednorázový ColorsAndNumbers soví TTS task; lokálně není potvrzené vygenerované `owl_230526.mp3`, další krok je ověřit GitHub Actions/výsledek.
+- `projects/automated_recurring_tasks.md` - [PRIPOMENOUT] automatické opakující se úkoly: `scripts/daily_3am.py`, GitHub Actions workflow a ColorsAndNumbers soví TTS tasky; `owl_230526.mp3` byl vygenerován v commitu `c8647de`, další kontrola je nedělní `owl_240526.mp3`.
 - `projects/tomik_video_imovie.md` - [PRIPOMENOUT] projekt priorita 1 pro rodinny iMovie sestřih z malych videi od dcery, tema vnuk Tomik druhy rok; workflow, soukromi, storyboard a exportni checklist.
 - `../RECOVERY_FROM_BACKUP.md` - lidský a Codex návod pro obnovu Samanthy z externí zálohy na novém Macu.
 

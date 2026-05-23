@@ -100,19 +100,20 @@ Pro rutinu, ktera musi bezet i pri vypnutem Macu, pouzij cloud variantu.
 ## Cloud: GitHub Actions v 03:00 Europe/Prague
 
 GitHub Actions cron pouziva UTC, ne `Europe/Prague`. Praha ma v zime UTC+1 a v
-lete UTC+2. Proto workflow spousti job ve dvou UTC casech a Python skript pusti
-skutecnou praci jen tehdy, kdyz je v Praze prave 03:00:
+lete UTC+2. Schedule se muze opozdit, proto je pro cloud lepsi spustit job kratce
+po cilove hodine a v Pythonu povolit casove okno.
+
+Aktualni jednorazovy soví retry pro 2026-05-24 bezi v letnim case v 03:17 Praha:
 
 ```yaml
 schedule:
-  - cron: "0 1 * * *"
-  - cron: "0 2 * * *"
+  - cron: "17 1 * * *"
 ```
 
 Spousteci krok:
 
 ```bash
-python scripts/daily_3am.py --only-at-hour 3
+python scripts/daily_3am.py --window-start-hour 3 --window-hours 5
 ```
 
 Soubor workflow pro skutecne spousteni GitHubem patri do korene git repozitare:
@@ -126,7 +127,7 @@ snadno dohledatelny template k teto dokumentaci. GitHub ji ale sam nespousti,
 pokud neni zkopirovana do korene repozitare.
 
 Pro rucni spusteni pres `workflow_dispatch` se kontrola hodiny nepouziva.
-Kontrola `--only-at-hour 3` se pouziva jen u naplanovaneho `schedule` behu.
+Casove okno se pouziva jen u naplanovaneho `schedule` behu.
 
 ## Budouci TTS + git push krok
 

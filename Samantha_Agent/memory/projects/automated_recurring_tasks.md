@@ -5,34 +5,38 @@
 Zalozeno 2026-05-20 jako obecna infrastruktura pro bezpecne automaticke
 spousteni opakujicich se ukolu v projektu `Samantha_Agent`.
 
-## Aktualni kanonicky stav 2026-05-23
+## Aktualni kanonicky stav 2026-05-23 vecer
 
 Automaticke opakujici se ukoly maji dve vrstvy:
 
 1. Obecny scheduler skeleton `scripts/daily_3am.py`.
-2. Jednorazovy ColorsAndNumbers soví TTS task pro datum `2026-05-23`.
+2. Jednorazove ColorsAndNumbers soví TTS tasky rizene datumem v JSON configu.
 
-Lokální stav 2026-05-23:
+Stav po realnem behu 2026-05-23:
 
-- relevantni automatizacni zmeny jsou podle `git log` v commitu
-  `a640c05 Schedule ColorsAndNumbers owl TTS`;
-- lokalni vetev neni ahead proti `origin/main`, takze z pohledu lokalniho gitu
-  neni pripravena neodeslana sada automatizacnich souboru;
-- `Samantha_Agent/config/colors_numbers_owl_20260523.json` a GitHub Actions
-  workflow jsou v HEAD;
-- `ColorsAndNumbers/web_colors_numbers/owl_230526.mp3` neni v lokalnim HEAD a
-  neni pritomny v pracovnim stromu, takze z lokalniho stavu nelze potvrdit, ze
-  GitHub Actions realne vygeneroval a commitnul audio;
-- lokalni dry-run pro `2026-05-23` na `/private/tmp` prosel a task je stale
-  vyhodnocen jako `planned`.
+- prvni skutecny GitHub Actions soví TTS task nakonec uspel;
+- commit `c8647de Update ColorsAndNumbers owl audio` pridal
+  `ColorsAndNumbers/web_colors_numbers/owl_230526.mp3` a prepnul
+  `ColorsAndNumbers/web_colors_numbers/app.js` na `owl_230526.mp3?v=20260523a`;
+- puvodni prilis tvrda kontrola `--only-at-hour 3` byla nahrazena casovym oknem
+  `--window-start-hour ... --window-hours ...`, protoze GitHub schedule se muze
+  opozdit.
+
+Navazujici jednorazovy ukol 2026-05-24:
+
+- `config/colors_numbers_owl_current.json` je aktualni jednorazovy config pro
+  datum `2026-05-24`;
+- vystup bude `ColorsAndNumbers/web_colors_numbers/owl_240526.mp3`;
+- `app.js` se prepne na `owl_240526.mp3?v=20260524a`;
+- GitHub schedule je pro letni cas napevno nastaven na 03:17 Praha
+  (`17 1 * * *` UTC) a skript pusti skutecnou praci v okne 03:00-08:00 Praha.
 
 Aktualni dalsi krok:
 
-- Zkontrolovat GitHub Actions beh `Samantha Daily 3 AM` pro 2026-05-23 nebo
-  vysledek v repozitari po fetch/pull.
-- Pokud akce nebezela nebo selhala, resit samostatne GitHub Actions diagnostiku.
-- Trvalou kazdodenni soví rutinu navrhnout az po vyhodnoceni tohoto jednoho
-  realneho behu.
+- Po 2026-05-24 03:17 Praha zkontrolovat GitHub Actions beh nebo po fetch/pull
+  overit, zda vznikl `ColorsAndNumbers/web_colors_numbers/owl_240526.mp3`.
+- Potom rozhodnout, jak automatizovat denni zadavani sovich textu bez rucniho
+  prepisovani jednoho JSON configu.
 
 Prvni implementace je denni rutina ve 3:00:
 
@@ -54,7 +58,8 @@ nepushuje. Slouzi jako bezpecny scheduler skeleton:
 - zapisuje denni stav do `data/daily_3am/YYYY-MM-DD.json`,
 - druhe spusteni ve stejny den dela no-op,
 - vraci jasne navratove kody,
-- podporuje `--dry-run`, `--force` a `--only-at-hour`.
+- podporuje `--dry-run`, `--force`, `--only-at-hour` a casove okno
+  `--window-start-hour` + `--window-hours`.
 
 Runtime data a logy jsou ignorovane gitem.
 
@@ -80,11 +85,10 @@ Dalsi vyvoj ma prioritu 1 a ma pokracovat smerem GitHub Actions/cloud.
 Soucasny GitHub Actions workflow:
 
 - bezi na `workflow_dispatch`,
-- ma dva UTC crony kvuli letnimu/zimnimu casu v Praze:
-  - `0 1 * * *`,
-  - `0 2 * * *`,
-- skutecnou praci pri schedule pusti jen tehdy, kdyz `scripts/daily_3am.py`
-  vidi v `Europe/Prague` hodinu 3 (`--only-at-hour 3`).
+- pro aktualni jednorazovy soví task 2026-05-24 je napevno nastaveny na
+  `17 1 * * *`, tedy 03:17 Praha v letnim case;
+- skutecnou praci pri schedule pusti jen v okne 03:00-08:00 Praha
+  (`--window-start-hour 3 --window-hours 5`).
 
 ## Budouci TTS/git workflow
 
@@ -97,29 +101,28 @@ Pro budoucí automatizaci typu `ColorsAndNumbers` TTS + commit + push plati:
 5. Push az po testech a jasne omezene scope.
 6. Logovat jen technicke informace, bez tokenu, API klicu nebo citlivych dat.
 
-## ColorsAndNumbers - soví promluva 2026-05-23
+## ColorsAndNumbers - soví promluva 2026-05-24
 
-Mila chce, aby GitHub Actions 2026-05-23 ve 3:00 Praha jednorazove zpracoval
+Mila chce, aby GitHub Actions 2026-05-24 ve 3:00 Praha jednorazove zpracoval
 soví text pro webovou aplikaci `ColorsAndNumbers/web_colors_numbers/`, vygeneroval
 MP3 pres TTS a prepnúl aplikaci na nove audio.
 
-Finalni pracovni text pro zpracovani 2026-05-23:
+Finalni pracovni text pro zpracovani 2026-05-24:
 
 ```text
-Milé studentky, pan učitel se na vás už těší. Doufám, že jste se pilně připravovaly. Pokud vím, tak vás čeká malý test, ale nebude se známkovat. Krásný den a nezklamte mě, moudrou sovu. Hů, hů, hů.
+Opět zdravím, krásnou neděli. Prý jste osiřeli a bude asi větší klid, že? Takže klid i na učení angličtiny. Ale běžte i ven. Hlavně Jana, je hodně doma a pak je bledá. A ty brýle jsou super!
 ```
 
 Implementovano:
 
-- konfigurace textu je v `config/colors_numbers_owl_20260523.json`,
-- `scripts/daily_3am.py` ma jednorazovy datumovy gate pro `2026-05-23`,
-- generuje `ColorsAndNumbers/web_colors_numbers/owl_230526.mp3`,
+- konfigurace textu je v `config/colors_numbers_owl_current.json`,
+- `scripts/daily_3am.py` ma jednorazovy datumovy gate pro `2026-05-24`,
+- generuje `ColorsAndNumbers/web_colors_numbers/owl_240526.mp3`,
 - prepina `ColorsAndNumbers/web_colors_numbers/app.js` na
-  `owl_230526.mp3?v=20260523a`,
+  `owl_240526.mp3?v=20260524a`,
 - GitHub Actions instaluje dependencies, po behu commituje a pushuje jen
   `ColorsAndNumbers/web_colors_numbers/app.js` a
-  `ColorsAndNumbers/web_colors_numbers/owl_230526.mp3`,
-- suchy beh pro `2026-05-23` vratil stav `planned`.
+  `ColorsAndNumbers/web_colors_numbers/owl_240526.mp3`.
 
 Domluvene startovni pravidlo do odvolani:
 

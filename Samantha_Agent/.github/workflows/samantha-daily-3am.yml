@@ -3,9 +3,9 @@ name: Samantha Daily 3 AM
 on:
   workflow_dispatch:
   schedule:
-    # GitHub cron is UTC. This one-off retry is 18:20 Prague summer time
-    # for 2026-05-23, inside the accepted 17:00-22:00 Prague window.
-    - cron: "20 16 * * *"
+    # GitHub cron is UTC. This one-off Sunday retry is 03:17 Prague summer time
+    # for 2026-05-24, inside the accepted 03:00-08:00 Prague window.
+    - cron: "17 1 * * *"
 
 permissions:
   contents: write
@@ -30,7 +30,7 @@ jobs:
 
       - name: Run scheduled daily routine
         if: github.event_name == 'schedule'
-        run: python scripts/daily_3am.py --window-start-hour 17 --window-hours 5
+        run: python scripts/daily_3am.py --window-start-hour 3 --window-hours 5
 
       - name: Run manual daily routine
         if: github.event_name == 'workflow_dispatch'
@@ -44,7 +44,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           files=(
             "ColorsAndNumbers/web_colors_numbers/app.js"
-            "ColorsAndNumbers/web_colors_numbers/owl_230526.mp3"
+            "ColorsAndNumbers/web_colors_numbers/owl_240526.mp3"
           )
           existing=()
           for file in "${files[@]}"; do

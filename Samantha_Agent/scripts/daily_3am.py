@@ -32,7 +32,7 @@ PRAGUE_TZ = ZoneInfo("Europe/Prague")
 DEFAULT_PROJECT_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_LOG_FILE = DEFAULT_PROJECT_DIR / "logs" / "daily_3am.log"
 DEFAULT_STATE_DIR = DEFAULT_PROJECT_DIR / "data" / "daily_3am"
-DEFAULT_COLORS_NUMBERS_OWL_CONFIG = DEFAULT_PROJECT_DIR / "config" / "colors_numbers_owl_20260523.json"
+DEFAULT_COLORS_NUMBERS_OWL_CONFIG = DEFAULT_PROJECT_DIR / "config" / "colors_numbers_owl_current.json"
 COLORS_NUMBERS_ALLOWED_DIR = Path("ColorsAndNumbers") / "web_colors_numbers"
 
 
