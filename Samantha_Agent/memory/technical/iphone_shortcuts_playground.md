@@ -45,7 +45,20 @@ Aktualizace 2026-05-23:
 - Archivovany unsigned XML:
   `~/Documents/Shortcuts Playground/2026-05-23/Najit auto-113654.xml`.
 - XML validace prosla a podepsany `.shortcut` ma nenulovou velikost.
-- Rucni import a kontrola v Apple Shortcuts jeste nejsou potvrzene.
+- Rucni import na iPhone probehl pres iCloud, ale prvni verze se pri volbe
+  `Ulozit polohu auta` zasekla na nacitani.
+- Pravdepodobna pricina: kombinace `Get Current Location` a rucniho predani
+  polohy do `Set Parked Car` muze na iPhonu cekat na polohove opravneni nebo
+  se zaseknout v systemove Maps/Parked Car akci.
+- Byla vygenerovana jednodussi druha verze:
+  `~/Documents/Shortcuts Playground/Najit auto v2.shortcut`.
+- Archivovany unsigned XML v2:
+  `~/Documents/Shortcuts Playground/2026-05-23/Najit auto v2-114745.xml`.
+- V2 vynechava `Get Current Location`; vetev ulozeni vola primo nativni
+  `Set Parked Car`, vetev navigace pouziva `Get Parked Car Location` a
+  `Get Directions`.
+- XML validace v2 prosla a podepsany `.shortcut` ma nenulovou velikost.
+- Rucni import a test v2 na iPhonu jeste nejsou potvrzene.
 
 Samantha ma tool:
 
@@ -93,7 +106,7 @@ Potvrzuji pripravu iPhone zkratky
 
 ## Dalsi prakticky krok
 
-1. Rucne otevrit `Najit auto.shortcut` v Apple Shortcuts.
+1. Rucne otevrit `Najit auto v2.shortcut` v Apple Shortcuts.
 2. Zkontrolovat akce:
    menu `Ulozit polohu auta` / `Navigovat k autu`, polohove opravneni,
    ulozeni parked car a otevreni Apple Map.
