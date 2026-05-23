@@ -10,6 +10,7 @@ Samantha pouzit tool `samantha_system_reports`.
 | --- | --- | --- |
 | Health check | Rychla kontrola rozpracovanosti, git stavu, pending bodu a varovani. | `.venv/bin/python scripts/samantha_health_check.py --mode quick` |
 | Kvantitativni status | Objemovy rust Samanthy: soubory, radky, lokalni stav vs git tracked. | `.venv/bin/python scripts/samantha_quantitative_status.py` |
+| Capability audit | Prehled registrovanych schopnosti, toolu, workflow a hlavních rezerv. | `.venv/bin/python scripts/samantha_capability_audit.py` |
 | Memory status | Stav lokalni pameti, startup kontextu, priorit a pripomenuti. | pres Samanthu tool `memory_status` |
 
 ## Pravidla

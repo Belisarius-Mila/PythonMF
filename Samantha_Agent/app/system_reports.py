@@ -31,6 +31,14 @@ SYSTEM_REPORTS = (
         saves_data="jen s `--save` jako agregovana JSONL datova veta",
     ),
     SystemReport(
+        name="Capability audit",
+        when_to_use="prehled registrovanych schopnosti, toolu, workflow a hlavních rezerv",
+        output="tabulka oblasti schopnosti, uroven, bezpecnostni rozsah a nejblizsi mezera",
+        command=".venv/bin/python scripts/samantha_capability_audit.py",
+        samantha_tool="samantha_capability_audit()",
+        saves_data="ne",
+    ),
+    SystemReport(
         name="Memory status",
         when_to_use="stav lokalni pameti, startup kontextu, priorit a pripomenuti",
         output="bezpecna diagnostika memory store bez e-mailu a tajemstvi",

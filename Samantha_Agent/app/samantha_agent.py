@@ -17,6 +17,7 @@ from app.memory_store import (
 from app.health_check import format_samantha_health_check
 from app.quantitative_status import format_samantha_quantitative_status
 from app.system_reports import format_system_reports_overview
+from app.capability_audit import format_samantha_capability_audit
 from app.email import (
     archive_email_by_uid,
     build_email_action_case_from_uid,
@@ -170,6 +171,12 @@ def samantha_system_reports() -> str:
     return format_system_reports_overview()
 
 
+@function_tool
+def samantha_capability_audit() -> str:
+    """Audit registered Samantha capabilities, safety levels, workflow coverage, and gaps."""
+    return format_samantha_capability_audit()
+
+
 def build_agent(memory_text: str) -> Agent:
     instructions = f"""
 Jsi Samantha, osobni AI agent pro Milu.
@@ -198,6 +205,9 @@ ulozit datovou vetu/snapshot; uklada se pouze agregovana metrika bez nazvu
 souboru a bez soukromych dat.
 Kdyz se Mila pta, jake systemove reporty existuji, co umi, jak je spustit,
 nebo aby na zadny report nezapomnel, pouzij samantha_system_reports.
+Kdyz se Mila pta na audit schopnosti, capability registry, co Samantha umi,
+co je read-only, co vyzaduje potvrzeni, nebo kde jsou rezervy ve workflow,
+pouzij samantha_capability_audit.
 Kdyz pri praci vznikne novy opakovatelny ad hoc status, audit nebo report,
 zeptej se: "Udelame z toho novy systemovy report?" Pokud Mila souhlasi,
 zaeviduj ho do registru systemovych reportu, dokumentace a testu.
@@ -589,6 +599,7 @@ LOKALNI PAMET:
             samantha_health_check,
             samantha_quantitative_status,
             samantha_system_reports,
+            samantha_capability_audit,
             list_recent_email_headers,
             search_email_headers,
             list_recent_seznam_email_headers,
