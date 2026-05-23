@@ -1,0 +1,67 @@
+# Large context intake
+
+Priorita: 1
+Pripomenout pri startu: ne
+Datum: 2026-05-23
+
+## Ucel
+
+Bezpecny lokalni prostor pro velke podklady, ktere Mila nechce kopirovat do
+chatu: dlouhe texty, exporty, archivy chatu, PDF, JSON/ZIP exporty nebo dalsi
+materialy k prostudovani a pripadne k zapracovani do memory.
+
+## Lokalni adresar
+
+Mila muze vkladat velke podklady sem:
+
+```text
+Samantha_Agent/data/private/knowledge_inbox/incoming/
+```
+
+Pracovni mezivystupy patri sem:
+
+```text
+Samantha_Agent/data/private/knowledge_inbox/processed/
+```
+
+Kratke lokalni poznamky mimo git patri sem:
+
+```text
+Samantha_Agent/data/private/knowledge_inbox/notes/
+```
+
+Cela slozka `Samantha_Agent/data/private/` je ignorovana gitem. Do gitu patri
+jen tento navod a pripadne bezpecne, redigovane shrnuti, pokud ho Mila vyslovne
+schvali.
+
+## Bezpecnostni pravidla
+
+- Nikdy necommitovat puvodni velke podklady, exporty chatu, ZIPy ani soukrome
+  soubory z `data/private/knowledge_inbox/`.
+- Pred ctenim velkeho podkladu nejdriv vypsat jen bezpecny inventar: nazev
+  souboru, typ, velikost, datum zmeny.
+- Nezpracovavat cely archiv automaticky bez jasneho zadani rozsahu.
+- Do memory zapisovat jen kratke redigovane operacni znalosti, ne cele chaty,
+  osobni udaje, tokeny, hesla, API klice ani soukromy obsah.
+- U dlouhych archivnich chatů preferovat davkove zpracovani: inventar -> vyber
+  casti -> extrakce pouceni/projektovych faktu -> navrh memory diffu -> potvrzeni.
+
+## Doporučený postup pro Codex/Samanthu
+
+1. Mila vlozi soubor nebo archiv do `incoming/`.
+2. Na pokyn typu "prostuduj knowledge inbox" nejdriv ukazat inventar a navrhnout
+   rozsah zpracovani.
+3. Pokud Mila potvrdi, vytvorit kratky pracovni souhrn do `processed/`.
+4. Teprve po dalsim souhlasu zapracovat vybrane poznatky do `memory/`.
+5. Po zapracovani udelat tematicky commit jen trackovanych memory/kod souboru,
+   nikdy puvodnich privatnich podkladu.
+
+## Archiv chatu se Samanthou/GPT
+
+Pro budouci archiv nekolika let chatu platí zvlastni opatrnost:
+
+- nejdriv ulozit surovy export jen do `incoming/`;
+- nevkladat ho do promptu ani memory jako celek;
+- zpracovavat po davkach a tematicky;
+- vystupem maji byt strukturovane operacni znalosti, projekty, pravidla,
+  rozhodnuti a handoffy, ne chat history.
