@@ -33,7 +33,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Infrastructure Recovery
 
-- `infrastructure/macos_network_recovery.md` - [PRIPOMENOUT] rozcestnik pro DHCP failure, VPN/Tailscale recovery, network plist reset, hotspot/Wi-Fi repair a offline `NETWORK_RECOVERY_CARD.txt`.
+- `infrastructure/macos_network_recovery.md` - [PRIPOMENOUT] rozcestnik pro DHCP failure, VPN/Tailscale recovery, network plist reset, hotspot/Wi-Fi repair, network watchdog a aktualni diagnozu domaci Wi-Fi/router vs Mac.
 - `infrastructure/codex_reconnect_recovery.md` - [PRIPOMENOUT] reconnect loop handling, navazani pres `samantha`/`screen`, `codex resume`, safe recovery after stream failure a pravidlo nejdrive cist git status + memory.
 - `infrastructure/git_checkpoint_protocol.md` - [PRIPOMENOUT] commit pred rizikovymi operacemi, push pred reconnect recovery, zakaz `git add .`, ochrana cizich zmen a citlivych dat.
 - `infrastructure/ssh_setup.md` - SSH/screen workflow pro vzdalenou praci se Samanthou bez ukladani privatnich SSH tajemstvi.
@@ -41,15 +41,15 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
-- `handoffs/git_commit_cleanup_a1_2026_05_23.md` - [PRIPOMENOUT] A1+ akutni commitovy uklid: do odvolani opakovane navrhovat tematicke commity pri zmene projektu nebo zadosti o novy ukol; prvni krok je `network/reconnect recovery`.
-- `handoffs/memory_cleanup_commit_afternoon_checkpoint_2026_05_23.md` - [PRIPOMENOUT] rozdelany memory cleanup checkpoint: Dokumenty, Lekarna, PictNew/VocabularyIT, Tomik/FamilyVideoOrganizer, E-mail, Samantha/RAG a automaticke ukoly jsou zkomprimovane do kanonickych stavu; zmeny nejsou commitnute, dalsi krok je tematicky commit bez `git add .` nebo infrastruktura podle priority.
+- `handoffs/git_commit_cleanup_a1_2026_05_23.md` - [PRIPOMENOUT] A1+ commitovy uklid: velka memory/RAG davka je commitnuta a pushnuta jako `ef15589`; pravidlo do odvolani je navrhovat tematicke commity pri dalsich vetsich rozpracovanych zmenach.
+- `handoffs/memory_cleanup_commit_afternoon_checkpoint_2026_05_23.md` - historicky checkpoint commitoveho odpoledne: Dokumenty, Lekarna, PictNew/VocabularyIT, Tomik/FamilyVideoOrganizer, E-mail, Samantha/RAG a automaticke ukoly byly zkomprimovane a commitnute v `ef15589`.
 - `handoffs/automated_recurring_tasks_cloud_2026_05_20.md` - historicky mezistav automatickych ukolu: obecna denni rutina ve 3:00, macOS `launchd`, GitHub Actions skeleton a bezpecnostni pravidla.
 - `handoffs/colors_numbers_owl_tts_startup_prompt_2026_05_22.md` - historicky mezistav automatickych ukolu: jednorazovy ColorsAndNumbers soví TTS task pro 2026-05-23 a denni startovni dotaz.
 - `handoffs/lekarna_web_app_hotovo_2026_05_20.md` - Webova aplikace Lekarna je uzavrena jako hotova; verejna aplikace bezi se sifrovanym balickem a dalsi vyvoj je priorita 2 az podle casu nebo urgentnich pozadavku.
 - `handoffs/lekarna_status_po_doplneni_vitaminu_2026_05_21.md` - [PRIPOMENOUT] Lekarna: aktualni stav po kokpitu, doze vitaminu, obrazku doporuceni, fotkach Kozliku/Vigantolvitu a oprave fallbacku; Silymarin stale nema vlastni fotku.
 - `handoffs/family_video_organizer_ui_prototype_2026_05_22.md` - [PRIPOMENOUT] FamilyVideoOrganizer: prvni lokalni webovy UI prototyp je v `docs/family-video-organizer/`, umi tabulku, filtry, autosave, export JSON a video modal; dalsi krok je realny soukromy datovy balicek mimo git.
-- `handoffs/network_domaci_wifi_router_vs_mac_2026_05_21.md` - [PRIPOMENOUT] priorita 1: domaci watchdog ukazal 29 vypadku za 30 minut a casto selhal i ping na gateway `192.168.1.1`; pracovni Wi-Fi retest mel 319/320 OK, takze dalsi krok je domaci router/Wi-Fi/ruseni/linka a retest po zasahu.
-- `handoffs/network_https_reconnect_diagnostic_2026_05_21.md` - [PRIPOMENOUT] Reconnect diagnostika: zachycen stav IPv4+ping+DNS OK, ale HTTPS timeout na OpenAI/ChatGPT; vznikl `scripts/network_watchdog.py`, dalsi krok je delsi mereni pri praci a porovnani domaci Wi-Fi vs hotspot.
+- `handoffs/network_domaci_wifi_router_vs_mac_2026_05_21.md` - [PRIPOMENOUT] aktualni network/reconnect stav: domaci watchdog ukazal 29 vypadku za 30 minut a casto selhal i ping na gateway `192.168.1.1`; pracovni Wi-Fi retest mel 319/320 OK, takze dalsi krok je domaci router/Wi-Fi/ruseni/linka a retest po zasahu.
+- `handoffs/network_https_reconnect_diagnostic_2026_05_21.md` - historicky network mezistav: prvni HTTPS failure diagnostika a vznik `scripts/network_watchdog.py`; prekryto novejsim handoffem `network_domaci_wifi_router_vs_mac_2026_05_21.md` a kanonickym stavem v `infrastructure/macos_network_recovery.md`.
 - `handoffs/payment_sms_reminder_tool_done_2026_05_21.md` - [PRIPOMENOUT] Platebni SMS workflow je hotovy: `inspect_payment_page_for_reminder` read-only overi splatnost z HTTPS stranky/API bez plne URL/tokenu, `save_payment_sms_reminder` ulozi overovaci nebo platebni pripominku a `save_payment_case_document` ulozi lokalni fakturu/prilohu do `data/private/payment_cases/`.
 - `handoffs/document_vault_next_physical_print_and_downloads_intake_2026_05_22.md` - [PRIPOMENOUT] pri jakemkoli dalsim vstupu do projektu dokumenty nejdriv napsat presnou vetu o nutnosti fyzicky overit tisk alespon jednoho dokumentu a vyzvat Milu k odpovedi `Ok`; dalsi plan je potvrzovany intake dokumentu ze slozky Stazene/Downloads do inboxu.
 - `handoffs/media_image_resize_utility_done_2026_05_20.md` - [PRIPOMENOUT] Obecna utilita `app/media/image_resize.py` je hotova a overena na lekarne; dalsi krok je pri pouziti na slovniky nejdriv udelat preview a zvolit cilovou velikost.

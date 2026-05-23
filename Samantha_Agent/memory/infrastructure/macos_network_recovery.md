@@ -73,7 +73,7 @@ ping 8.8.8.8
 ping google.com
 ```
 
-## Aktualni diagnostika reconnectu 2026-05-21
+## Aktualni kanonicky stav reconnectu 2026-05-23
 
 Pro opakovane Codex/ChatGPT reconnecty vznikl read-only monitor:
 
@@ -81,14 +81,52 @@ Pro opakovane Codex/ChatGPT reconnecty vznikl read-only monitor:
 .venv/bin/python scripts/network_watchdog.py --duration 1800 --interval 5
 ```
 
-Zachyceny dulezity stav: Wi-Fi mela IPv4, ping na IP adresu i DNS fungovaly, ale
-HTTPS na OpenAI/ChatGPT timeoutovalo. To ukazuje spis na kolisavy lokalni nebo
-trasovy HTTPS/routing/VPN problem nez na samotny GPT Pro ucet.
+Aktualni zaver po porovnani domaci a pracovni site:
 
-Detailni handoff:
+- nejde primarne o globalni OpenAI vypadek ani GPT Pro ucet;
+- domaci 30min watchdog mel 131/160 OK a 29 `NO_IP_CONNECTIVITY`;
+- pri domacich vypadcich casto selhal i ping na gateway `192.168.1.1`, zatimco
+  Mac mel stale Wi-Fi IPv4;
+- pracovni Wi-Fi retest mel 319/320 OK a jeden nepresvedcivy non-OK vzorek;
+- nejpravdepodobnejsi hlavni pricina je domaci Wi-Fi/router/AP/ruseni/linka;
+- Mac/macOS Wi-Fi stack zustava mozny, hlavne pokud by zacaly padat i jine site,
+  ale po A/B mereni je mene pravdepodobny nez domaci prostredi.
+
+Aktualni dalsi krok:
+
+1. Doma udelat jeden nizkorizikovy zasah:
+   - restart routeru/AP,
+   - jine pasmo 2.4/5 GHz nebo sednout bliz k routeru,
+   - pokud je k dispozici, Ethernet/USB-C adapter.
+2. Hned potom spustit watchdog:
+
+```bash
+cd ~/Desktop/PythonMF/Samantha_Agent
+.venv/bin/python scripts/network_watchdog.py --duration 1800 --interval 5
+```
+
+3. Vyhodnotit posledni summary:
+
+```bash
+ls -lt logs/network_watchdog | head
+```
+
+Interpretace:
+
+- Pokud po domacim zasahu watchdog drzi, hlavni vinik je domaci
+  Wi-Fi/router/linka/ruseni.
+- Pokud porad pada ping na gateway, vinik je velmi pravdepodobne spojeni
+  MacBook-router/AP/ruseni, ne OpenAI.
+- Pokud gateway drzi, ale pada internet/HTTPS, resit router WAN, DNS, provider
+  nebo filtraci.
+- Pokud zacnou padat i jine site, presunout podezreni na Mac/macOS Wi-Fi stack,
+  VPN/Tailscale/routing historii nebo obecny systemovy problem.
+
+Historicke handoffy:
 
 ```text
 memory/handoffs/network_https_reconnect_diagnostic_2026_05_21.md
+memory/handoffs/network_domaci_wifi_router_vs_mac_2026_05_21.md
 ```
 
 ## Bezpecnost

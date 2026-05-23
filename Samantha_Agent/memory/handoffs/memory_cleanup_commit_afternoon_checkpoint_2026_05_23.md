@@ -1,7 +1,7 @@
 Nazev: Memory cleanup - checkpoint rozdelaneho commitoveho odpoledne
 Priorita: A1+
-Stav: rozpracovane
-Pripomenout pri startu: ano
+Stav: hotovo
+Pripomenout pri startu: ne
 Datum: 2026-05-23
 
 Co se resilo:
@@ -10,6 +10,8 @@ Co se resilo:
   navazovani tak, aby Samantha/Codex pri startu neskakal do starych mezistavu.
 - Nejde o mazani handoffu; stare handoff soubory zustavaji fyzicky v
   `memory/handoffs/` jako auditni historie.
+- Tato davka byla commitnuta a pushnuta jako
+  `ef15589 Clean up Samantha memory handoffs and RAG search`.
 
 Co je hotove v teto rozpracovane davce:
 - Dokumenty / private vault:
@@ -69,9 +71,9 @@ Co je hotove v teto rozpracovane davce:
   - lokalni dry-run `scripts/daily_3am.py --run-date 2026-05-23 --dry-run`
     prosel s runtime cestami v `/private/tmp`.
 
-Aktualni git stav pri checkpointu:
-- Branch: `main...origin/main`
-- Zmenene soubory:
+Git stav pri puvodnim checkpointu pred commitem:
+- Branch tehdy: `main...origin/main`
+- Zmenene soubory tehdy:
   - `Samantha_Agent/memory/ACTIVE_PROJECTS.md`
   - `Samantha_Agent/memory/MEMORY_INDEX.md`
   - `Samantha_Agent/memory/projects/document_management_private_vault.md`
@@ -90,26 +92,17 @@ Aktualni git stav pri checkpointu:
   - tento handoff
 
 Co neni hotove:
-- Tato memory cleanup davka zatim neni commitnuta.
-- Pro RAG kod byl spusten cileny test, compileall a cely test suite, viz vyse.
-- Zbyva udelat tematicky commit teto cleanup davky nebo uklidit infrastrukturu
-  podle dalsi priority.
+- Puvodni memory cleanup davka je hotova, commitnuta a pushnuta.
+- Infrastructure/network cleanup se dela navazujicim krokem po tomto commitu.
 
 Dalsi krok:
-- Pri navazani nejdrive spustit:
-  - `git status --short --branch`
-  - `git diff --stat`
-- Pak rozhodnout:
-  - bud udelat tematicky memory/RAG cleanup commit bez `git add .`,
-  - nebo pokracovat dalsim projektem v handoff cleanupu, doporucene infrastruktura,
-  - nebo udelat tematicky commit aktualni memory cleanup davky.
-- Pokud se bude commitovat, nepouzivat `git add .`; pridat cilene jen memory
-  soubory souvisejici s timto cleanupem.
+- Tento checkpoint brat jako historickou auditni stopu k commitu `ef15589`.
+- Pro dalsi praci navazovat z `ACTIVE_PROJECTS.md`, `MEMORY_INDEX.md` a
+  konkretni projektove/infrastrukturni karty.
 
 Navrhovane dalsi kroky:
-- Dalsi audit: infrastruktura, nebo tematicky commit aktualni davky.
-- Po 1-2 dalsich projektech udelat tematicky commit, aby se rozpracovany cleanup
-  nezvetsoval donekonecna.
+- Dalsi audit po `ef15589`: infrastruktura/network reconnect.
+- Po infrastructure cleanupu udelat samostatny maly commit, pokud vzniknou zmeny.
 
 Zmenene nebo relevantni soubory:
 - `Samantha_Agent/memory/MEMORY_INDEX.md`

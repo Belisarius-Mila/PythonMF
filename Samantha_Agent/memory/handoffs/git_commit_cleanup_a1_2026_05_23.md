@@ -1,6 +1,6 @@
 Nazev: Commitove odpoledne - uklid rozpracovanych zmen
 Priorita: A1+
-Stav: rozpracovane
+Stav: aktivni pravidlo
 Pripomenout pri startu: ano
 Datum: 2026-05-23
 
@@ -10,26 +10,30 @@ Co se resilo:
 
 Co je hotove:
 - Ulozen akutni ukol priorita A1+.
-- Prvni konkretni uklidovy krok je projekt `network/reconnect recovery`.
+- Velka memory/RAG cleanup davka byla commitnuta a pushnuta jako
+  `ef15589 Clean up Samantha memory handoffs and RAG search`.
+- Repo bylo po pushi ciste.
+- Pravidlo zustava aktivni do odvolani: pri delsim `git status`, zmene projektu
+  nebo nove rozpracovane oblasti navrhnout tematicky commitovy uklid.
 
 Co neni hotove:
-- Zbyva postupne projit a commitnout nebo odlozit ostatni rozpracovane oblasti.
-- Nesmichavat nesouvisejici soubory do jednoho commitu.
+- Nejde o jednorazovy task, ale o provozni pravidlo.
+- Pri novych zmenach stale plati: nesmichavat nesouvisejici soubory do jednoho
+  commitu a nepouzivat `git add .`.
 
 Dalsi krok:
-- Po dokonceni prvnich tematickych commitu navrhnout dalsi tematicky commit podle aktualniho git stavu.
-- Po velkem commitovem uklidu hned nabidnout probrani A1+ rustovych pravidel Samanthy a hlavne audit/uklid bobtnajicich handoffu podle `memory/technical/samantha_growth_rules.md`.
-- Nabidnout tri maximalne prioritni body: cisty stul, pouceni z uklidu a jasnejsi rezim dalsiho vyvoje.
+- Drzet cisty stul: pred dalsi vetsi praci vzdy zkontrolovat `git status`.
+- Pokud vzniknou nove zmeny, delat male tematicke commity podle oblasti.
+- Po infrastructure/network cleanupu udelat samostatny maly commit, pokud vzniknou
+  souborove zmeny.
 
 Navrhovane dalsi kroky:
-- `network/reconnect recovery` - dokoncit a pushnout samostatny commit.
-- `Sprava dokumentu / private vault` - samostatny commit po fyzickem overeni tisku nebo po dalsim potvrzenem kroku.
-- `iCloud/Seznam Mail read-only` - samostatny commit pouze pro e-mailove tooly a testy, bez citlivych dat.
-- `Tomik video / FamilyVideoOrganizer` - samostatny commit pro git-safe UI a bez soukromych videi/dat.
-- `Reminders / platebni SMS` - samostatny commit pro tooly a testy, bez plnych URL nebo tokenu.
-- Pametove soubory a handoffy uklidit v samostatnem memory-only commitu, pokud budou prilis promichane s vice projekty.
-- Po velkem commitu probrat `technical/samantha_growth_rules.md`, vcetne plosneho auditu starych handoffu.
-- Pilotne udelat `handoff compression per project`, idealne nejdrive pro `Sprava dokumentu / private vault`, potom pro `E-mail`.
+- Pokracovat jen podle aktualniho `ACTIVE_PROJECTS.md`, ne podle stareho seznamu
+  rozpracovanych commitu v tomto handoffu.
+- Infrastructure/network reconnect cleanup je dalsi vybrana oblast po commitu
+  `ef15589`.
+- Pokud bude git stav opet narustat, navrhnout dalsi tematicky commit pred
+  zmenou projektu.
 
 Zmenene nebo relevantni soubory:
 - `memory/handoffs/git_commit_cleanup_a1_2026_05_23.md`
