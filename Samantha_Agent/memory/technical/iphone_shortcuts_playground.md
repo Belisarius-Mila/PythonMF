@@ -39,9 +39,13 @@ Aktualizace 2026-05-23:
   `installed, enabled`, verze `1.0.1`.
 - Apple `/usr/bin/shortcuts` CLI existuje.
 - Codex CLI existuje.
-- Vystupni slozka `~/Documents/Shortcuts Playground/` zatim nevznikla.
-- Prvni realny `.shortcut` jeste neni vygenerovany ani rucne otestovany.
-- Pro plne nacteni pluginu je pravdepodobne potreba nova Codex relace.
+- Vystupni slozka `~/Documents/Shortcuts Playground/` vznikla pri prvnim buildu.
+- Prvni realny `.shortcut` byl vygenerovany:
+  `~/Documents/Shortcuts Playground/Najit auto.shortcut`.
+- Archivovany unsigned XML:
+  `~/Documents/Shortcuts Playground/2026-05-23/Najit auto-113654.xml`.
+- XML validace prosla a podepsany `.shortcut` ma nenulovou velikost.
+- Rucni import a kontrola v Apple Shortcuts jeste nejsou potvrzene.
 
 Samantha ma tool:
 
@@ -89,9 +93,10 @@ Potvrzuji pripravu iPhone zkratky
 
 ## Dalsi prakticky krok
 
-1. V nove Codex relaci overit, ze je Shortcuts Playground plugin skutecne nacteny.
-2. Spustit `iphone_shortcuts_playground_status()`.
-3. Pripravit nebo pouzit request pro prvni zkratku `Najit auto`.
-4. Vygenerovat `.shortcut` pres Shortcuts Playground.
-5. Rucne ji otevrit v Apple Shortcuts a overit import, oprávneni a logiku.
-6. Teprve potom rozsirovat workflow na dalsi uzitecne zkratky pro Milu.
+1. Rucne otevrit `Najit auto.shortcut` v Apple Shortcuts.
+2. Zkontrolovat akce:
+   menu `Ulozit polohu auta` / `Navigovat k autu`, polohove opravneni,
+   ulozeni parked car a otevreni Apple Map.
+3. Otestovat na iPhonu: nejdriv ulozit polohu, potom navigovat.
+4. Pokud import nebo logika selze, vzit archivovane XML a opravit shortcut.
+5. Teprve po realnem testu rozsirovat workflow na dalsi uzitecne zkratky.

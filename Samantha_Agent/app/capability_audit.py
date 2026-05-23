@@ -54,7 +54,7 @@ CAPABILITY_AREAS = (
             "iphone_shortcuts_playground_status",
             "prepare_iphone_shortcut",
         ),
-        next_gap="Generate and manually verify the first simple .shortcut before broader use.",
+        next_gap="Manually import and test Najit auto before broader shortcut generation.",
     ),
     CapabilityArea(
         name="Email read-only and cases",
