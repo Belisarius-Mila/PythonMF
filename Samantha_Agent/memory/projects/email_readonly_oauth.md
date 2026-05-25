@@ -171,6 +171,15 @@ Hotove schopnosti:
   - provider se prihlasil,
   - nacetl 2 hlavicky,
   - do vystupu ani memory nebyly vypsany predmety, odesilatele, telo ani URL.
+- iCloud Mail byl 2026-05-24 znovu zprovoznen pres lokalni `.env` a Apple
+  app-specific password pojmenovane v Apple uctu `Samantha Mail`.
+  Read-only IMAP login prosel a smoke test posledni hlavicky fungoval.
+  Skutecna iCloud adresa a app-specific password zustavaji pouze v lokalnim
+  ignorovanem `.env`, ne v memory ani v gitu.
+- Rodinne e-mailove kontakty jsou ulozene jen soukrome v
+  `data/private/contacts/family_contacts.json`. Memory smi obsahovat jen tuto
+  obecnou informaci, ne vypis adres. Pri citlivych dokumentech porad pred
+  odeslanim overit prijemce a prilohu.
 - Drivejsi Seznam pojistny worklist/prilohy existuji lokalne v
   `data/private/email_seznam/`:
   - 34 UID slozek priloh,

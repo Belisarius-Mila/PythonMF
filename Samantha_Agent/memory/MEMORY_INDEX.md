@@ -62,6 +62,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `handoffs/email_seznam_readonly_provider_2026_05_22.md` - aktualni e-mailovy stav: iCloud read-only vrstvy existuji, Seznam Mail read-only provider a `Unified Inbox` jsou implementovane, lokalni Seznam `.env` je vyplneny a smoke test hlavicek 2026-05-23 prosel bez vypisu predmetu/adres.
 - `handoffs/iphone_shortcuts_najit_auto_done_2026_05_23.md` - hotovy checkpoint iPhone zkratek: Shortcuts Playground plugin pro Codex je nainstalovany, `Najit auto v3.shortcut` funguje u Mily i Jany a kanonicke pouceni je v `technical/iphone_shortcuts_playground.md`.
 - `handoffs/iphone_shortcuts_quick_notes_continue_2026_05_23.md` - [PRIPOMENOUT] zitrejsi navazani na iPhone zkratky: quick notes zkratka funguje, Samantha umi ocislovany seznam/detail poznamek a dalsi krok je vybrat dalsi malou zkratku nebo akci z poznamky.
+- `handoffs/iphone_shortcuts_freeze_infrastructure_layer_2026_05_25.md` - aktualni zmrazovaci handoff pro iPhone Shortcuts / Mobile Input Layer: doplneny puvodni seznam 7 kandidatu na zkratky, stav hotovych zkratek, bezpecnostni hranice a pravidlo nepokracovat bez vyslovneho navratu.
+- `handoffs/quick_notes_infsystem_top3_feedback_2026_05_24.md` - doslovne ulozeny feedback k QN #13 systemova mapa, QN #10 ziva znalostni databaze a QN #4/#6 bezpecny akcni inbox; ceka na brzké zapracovani.
 - `handoffs/stories_batch_2026_05_14.md` - batch více pohádek z jednoho chatu, rozdělený do samostatných story memory souborů.
 - `handoffs/chatgpt_handoff_2026_05_14.md` - kompaktní předání po dlouhém ChatGPT vlákně, včetně promptu pro Codex a promptu pro nový ChatGPT chat.
 - `handoffs/mmtx_web_handoff_2026_05_14.md` - handoff k webové verzi MMTX v `docs/`, hotovým scénám OwlGarden a HouseBunny, audio strategii a mirroru.
@@ -84,7 +86,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `technical/lekarna_pil_short_workflow.md` - kanonicky workflow pro doplnovani `PIL_Short`: SÚKL DLP sparovani, statusy jistoty, prakticky nealarmisticky vytah, zaloha CSV a testy.
 - `technical/lekarna_photo_import_intake.md` - kanonicky vstupni checklist pro nove fotky lekarna: co ma Mila dodat, kam patri polozky, potvrzovaci vety a bezpecny postup importu.
 - `technical/workflow_command_registry.md` - pravidlo, ze lidske workflow pokyny se maji mapovat na predem schvalene presne prikazy v registru, ne na ad hoc shell vymysleny modelem.
-- `technical/project_capability_map.md` - [PRIPOMENOUT] potvrzena taxonomie projektu v `PythonMF` a priorita 1 pro prvni nizkorizikove workflow kandidaty: `PictNew` read-only audit a `VocabularyEN` sync do `docs/`.
+- `technical/project_capability_map.md` - [PRIPOMENOUT] potvrzena taxonomie `Project` / `Tool` / `Infrastructure capability`; iPhone Shortcuts jsou Mobile Input Layer, ne samostatny projekt; priorita 1 pro prvni nizkorizikove workflow kandidaty zustava `PictNew` read-only audit a `VocabularyEN` sync do `docs/`.
 - `technical/vocabulary_image_generation_workflow.md` - [PRIPOMENOUT] pozlacený kanonický workflow pro slovníkové obrázky: audit/request, dry-run, potvrzené placené generování po dávkách, review, kopie do `Pict/`, mapping až po samostatném potvrzení a git checkpoint.
 - `technical/macos_wifi_vpn_tailscale_recovery.md` - priorita 1: recovery protokol pro macOS Wi-Fi/DHCP/VPN/Tailscale vypadky po rozbitem routovani nebo tunnel rozhranich.
 - `../NETWORK_RECOVERY_CARD.txt` - offline nouzova karta pro pripad, ze nejde internet a nejde se dostat do ChatGPT; lze vypsat pres `scripts/network_recovery_card.sh`.

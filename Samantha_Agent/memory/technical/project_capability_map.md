@@ -23,6 +23,24 @@ Mila potvrdil tuto taxonomii:
 - memory karty se maji zakladat jen pro prijate projekty, ktere budou opravdu
   zive nebo se s nimi bude aktivne pracovat.
 
+Aktualizace 2026-05-24: Mila potvrdil treti kategorii `Infrastructure capability`.
+Pravidlo:
+
+- `Project` je dlouhodoby cil nebo obsahova/pracovni oblast.
+- `Tool` je konkretni lokalni schopnost, funkce, skript nebo `function_tool`.
+- `Infrastructure capability` je schopnostni vrstva napric projekty a tooly.
+
+Jednovetne pravidlo:
+
+> Projekt je cil. Tool je vykonavatel. Infrastructure capability je vrstva,
+> ktera pomaha vice projektum a toolum.
+
+`iPhone Shortcuts / Mobile Input Layer` patri do `Infrastructure capability`,
+ne mezi samostatne projekty. Jednotlive zkratky nejsou Samantha tooly; jsou
+mobilni vstupni nebo akcni kanaly. Skutecne Samantha tooly jsou az Python
+schopnosti, ktere tyto vstupy obsluhuji, napr. `list_quick_notes` a
+`show_quick_note_detail`.
+
 Prvni prakticke workflow kandidaty:
 
 1. `PictNew` read-only audit.
@@ -49,6 +67,37 @@ Oba maji jasny vstup, vystup a nizke riziko.
 | E-mail read-only | L3/L4 | Hlavicky, hledani hlavicek, cteni konkretniho UID po potvrzeni, action case, case vault, archive vault, reminders, RIXO case. | Samostatne potvrzeni pro telo, ulozeni, archivaci, plne URL a oznaceni pripominky jako hotove. Nic neodesilat, nemazat, nepresouvat, neoznacovat jako prectene. |
 | Reminders | L3 | Vypsat otevrene pripominky, detail, ulozit potvrzeny email action case, oznacit jako hotove. | Ulozeni a dokončení vyzaduje potvrzeni; bez plnych URL a bez neredigovanych adres. |
 | Backup a obnova | L2/L3 | Registrovany backup workflow; tooly pro snapshoty, preview obnovy a potvrzenou obnovu. | Recovery pouze do `/Volumes/SamanthaSecureBackup/SamanthaBackups`; obnova nejdriv preview, potom potvrzeni, citlive cesty vyzaduji slovo `citlive` nebo `recovery`. |
+
+## Infrastructure capabilities
+
+`Infrastructure capability` neni samostatny projekt ani jeden tool. Je to
+provozni schopnostni vrstva, ktera zvysuje silu Samanthy napric projekty.
+
+| Capability | Stav | Obsahuje | Krmi / pomaha |
+| --- | --- | --- | --- |
+| Mobile Input Layer / iPhone Shortcuts | aktivni priorita 2 | `.shortcut` soubory, Shortcuts Playground pipeline, quick notes intake, budouci voice task inbox | quick notes, reminders, dokumenty, nakupy, lekarna, rodinne workflow |
+| Memory/RAG Layer | aktivni | startup memory, `search_memory`, `memory_status`, memory index | vsechny projekty a handoffy |
+| System Reports Layer | aktivni | health check, kvantitativni status, memory status, system reports registry | orientace pri startu, cleanup, monitoring rustu |
+| Git Checkpoint Layer | aktivni | git checkpoint protocol, tematicke commity, push pred rizikovou praci | bezpecne navazovani a obnova po vypadku |
+| Reconnect/Session Recovery Layer | aktivni | `samantha`, `screen`, autosave, reconnect handoff pravidla | dlouhe prace, SSH vypadky, Codex reconnect |
+| Private Vault / Sensitive Intake Layer | aktivni u dokumentu | document inbox, private index, potvrzene importy, due date kandidati | dokumenty, faktury, nakupy, pojisteni, e-mail prilohy |
+| Backup/Restore Layer | aktivni | safe/recovery backup profily, snapshoty, preview restore | obnova Samanthy a celeho `PythonMF` |
+| Network Recovery Layer | pending | watchdog, macOS/Tailscale recovery, offline recovery karta | stabilita prace a vzdaleny pristup |
+| Workflow Registry Layer | aktivni zaklad | registrovane `argv` workflow, preview/run brany | bezpecne spousteni opakovatelnych shell postupu |
+| Future Voice Task Inbox | koncept | hlasove quick notes, triage, draftovani, potvrzovane akce | asynchronni zadavani ukolu bez kvazi-SSH autopilota |
+
+Kandidati na nove nebo rozsirene infrastructure capabilities:
+
+1. `Mobile Capture Layer` - sjednotit quick notes, dokument do trezoru, fakturu
+   do archivu a rychlou pripominku jako rodinu iPhone vstupu.
+2. `Purchase/Warranty Archive Layer` - soukromy archiv objednavek, faktur a
+   zaruk napric domacimi nakupy.
+3. `Human Confirmation Layer` - jednotne potvrzovaci brany pro posilani,
+   mazani, presuny, objednavky, platby a publikaci.
+4. `Async Task Queue` - rucne spoustena fronta quick notes: klasifikace,
+   navrh dalsi akce, potvrzene povyseni na ukol/tool/reminder.
+5. `Family Ops Layer` - rodinne vstupy a vystupy: Jana, leky, auto, dokumenty,
+   domaci provoz; jen jako vrstva, ne jako novy projekt.
 
 ## Registrovane shell workflow
 

@@ -9,6 +9,18 @@ Datum: 2026-05-23
 Pripravit Samanthu na tvorbu Apple Shortcuts / iPhone zkratek pres MacStories
 Shortcuts Playground.
 
+Klasifikace potvrzena 2026-05-24:
+
+- `iPhone Shortcuts / Mobile Input Layer` je `Infrastructure capability`.
+- Neni to samostatny kanonicky projekt.
+- Jednotliva zkratka neni Samantha tool; je to mobilni vstupni kanal nebo akcni
+  tlacitko.
+- Samantha tool je az lokalni Python schopnost, ktera zkratku obsluhuje, napr.
+  `list_quick_notes`, `show_quick_note_detail` nebo budouci
+  `classify_quick_note`.
+- Bezpecna veta: zkratky smi posilat vstupy do fronty a spoustet lokalni
+  iPhone utilitu, ale rizikove akce na Macu nebo ven z domu vyzaduji potvrzeni.
+
 Zdroj inspirace byl soukromy podklad v knowledge inboxu
 `zkratkystahnoutzgit.txt`; puvodni clanek ani soukromy soubor se neukladaji do
 memory jako plny text.
