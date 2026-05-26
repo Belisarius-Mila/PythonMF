@@ -19,6 +19,14 @@ from app.reminders.tools import has_explicit_reminder_save_confirmation
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DOCUMENTS_DIR = PROJECT_ROOT / "data" / "private" / "documents"
+DEFAULT_MOBILE_DOCUMENT_INBOX = (
+    Path.home()
+    / "Library"
+    / "Mobile Documents"
+    / "iCloud~is~workflow~my~workflows"
+    / "Documents"
+    / "SamanthaDocumentInbox"
+)
 MAX_DOCUMENT_BYTES = 50 * 1024 * 1024
 MAX_INDEX_TEXT_CHARS = 200_000
 MAX_OUTPUT_SNIPPET_CHARS = 320
@@ -100,6 +108,16 @@ class DocumentPrintJobResult:
     message: str
 
 
+@dataclass(frozen=True)
+class MobileDocumentBatchResult:
+    batch_id: str
+    document_title: str
+    page_count: int
+    processing_dir: Path
+    pdf_path: Path
+    manifest_path: Path
+
+
 def prepare_document_import_summary(
     source_path: str,
     document_hint: str = "",
@@ -134,7 +152,11 @@ def prepare_document_import_summary(
         f"- Navrzeny typ: {metadata['document_type']}",
         f"- Navrzena oblast: {metadata['domain']}",
         f"- Protistrana: {metadata['counterparty'] or 'nezjisteno'}",
+        f"- Vazba na majetek/zarizeni: {metadata['related_asset'] or 'nezjisteno'}",
     ]
+    suggested_tags = metadata.get("tags", [])
+    if isinstance(suggested_tags, list) and suggested_tags:
+        lines.append(f"- Navrzene tagy: {', '.join(safe_text(str(tag)) for tag in suggested_tags[:12])}")
     if duplicate:
         lines.append(f"- Duplicita: stejny hash uz je ulozen jako {duplicate.get('document_id')}")
     if extraction.warning:
@@ -211,6 +233,187 @@ def scan_document_inbox_summary(
         ]
     )
     return "\n".join(lines)
+
+
+def scan_mobile_document_inbox_summary(
+    mobile_inbox_dir: Path = DEFAULT_MOBILE_DOCUMENT_INBOX,
+    max_batches: int = 20,
+) -> str:
+    """Read-only scan of iPhone Shortcuts document capture inbox."""
+    inbox = mobile_inbox_dir.expanduser()
+    if not inbox.exists():
+        return f"Mobile document inbox zatim neexistuje: `{safe_text(str(inbox))}`."
+    if not inbox.is_dir():
+        return f"Mobile document inbox neni slozka: `{safe_text(str(inbox))}`."
+
+    process_request = inbox / "process_request.json"
+    manifests = sorted(
+        inbox.glob("scan_*_manifest.json"),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    if not manifests:
+        request_state = "ano" if process_request.exists() else "ne"
+        return (
+            "Mobile document inbox je prazdny.\n"
+            f"- Process request: {request_state}\n"
+            f"- Slozka: `{safe_text(str(inbox))}`\n"
+            "- Dalsi krok: na iPhonu spustit zkratku `Skenovat dokument pro Samanthu v4`."
+        )
+
+    lines = [
+        "Mobile document inbox - zachycene davky (read-only):",
+        f"- Slozka: `{safe_text(str(inbox))}`",
+        f"- Process request: {'ano' if process_request.exists() else 'ne'}",
+        f"- Pocet manifestu: {len(manifests)}",
+        "",
+    ]
+    shown = manifests[: max(1, max_batches)]
+    for manifest_path in shown:
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            lines.append(f"- {safe_text(manifest_path.name)} | chyba manifestu: {safe_text(str(exc))}")
+            continue
+
+        batch_id = safe_text(str(manifest.get("batch_id", ""))).strip()
+        title = safe_text(str(manifest.get("document_title", ""))).strip() or "bez nazvu"
+        expected_count = safe_text(str(manifest.get("page_count", ""))).strip() or "nezjisteno"
+        if batch_id:
+            pages = sorted(inbox.glob(f"{batch_id}_page_*"))
+        else:
+            pages = []
+        modified = datetime.fromtimestamp(manifest_path.stat().st_mtime).strftime("%Y-%m-%d %H:%M")
+        lines.extend(
+            [
+                f"- Batch: {batch_id or safe_text(manifest_path.stem)}",
+                f"  Nazev: {title}",
+                f"  Stranky: {len(pages)} nalezeno / {expected_count} podle manifestu",
+                f"  Manifest: {safe_text(manifest_path.name)} | zmeneno {modified}",
+            ]
+        )
+        if pages:
+            page_names = ", ".join(safe_text(path.name) for path in pages[:8])
+            if len(pages) > 8:
+                page_names += f", ... dalsich {len(pages) - 8}"
+            lines.append(f"  Soubory: {page_names}")
+    if len(manifests) > len(shown):
+        lines.append(f"- ... dalsich {len(manifests) - len(shown)}")
+    lines.extend(
+        [
+            "",
+            "Bezpecnost: tento scan jen vypisuje manifesty a nazvy souboru, nic nepresouva ani necte obsah fotek.",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def prepare_mobile_document_batch_summary(
+    batch_id: str = "",
+    mobile_inbox_dir: Path = DEFAULT_MOBILE_DOCUMENT_INBOX,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> str:
+    try:
+        result = prepare_mobile_document_batch(
+            batch_id=batch_id,
+            mobile_inbox_dir=mobile_inbox_dir,
+            vault_dir=vault_dir,
+        )
+    except ValueError as exc:
+        return f"Priprava mobilniho dokumentu byla odmitnuta: {exc}"
+
+    return (
+        "Mobilni dokument je pripraveny ke kontrole/importu.\n"
+        f"- Batch: {safe_text(result.batch_id)}\n"
+        f"- Nazev: {safe_text(result.document_title)}\n"
+        f"- Stranky: {result.page_count}\n"
+        f"- Pracovni slozka: `{relative_to_project(result.processing_dir)}`\n"
+        f"- PDF: `{relative_to_project(result.pdf_path)}`\n"
+        f"- Manifest: `{relative_to_project(result.manifest_path)}`\n"
+        "- Zdrojove fotky v iCloud inboxu zustaly beze zmeny.\n"
+        "Dalsi krok: zkontrolovat PDF a potom teprve spustit read-only "
+        "`prepare_document_import` nad vytvorenym PDF."
+    )
+
+
+def prepare_mobile_document_batch(
+    batch_id: str = "",
+    mobile_inbox_dir: Path = DEFAULT_MOBILE_DOCUMENT_INBOX,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> MobileDocumentBatchResult:
+    inbox = mobile_inbox_dir.expanduser().resolve()
+    if not inbox.exists() or not inbox.is_dir():
+        raise ValueError(f"mobile inbox neexistuje nebo neni slozka: {inbox}")
+
+    manifest_path, manifest = select_mobile_batch_manifest(inbox=inbox, batch_id=batch_id)
+    raw_batch_id = safe_text(str(manifest.get("batch_id", ""))).strip()
+    if not raw_batch_id or not re.fullmatch(r"[A-Za-z0-9_.-]+", raw_batch_id):
+        raise ValueError("manifest nema bezpecny batch_id.")
+    document_title = safe_text(str(manifest.get("document_title", ""))).strip() or raw_batch_id
+    expected_count = int(str(manifest.get("page_count", "0")).strip() or "0")
+    pages = sorted(
+        inbox.glob(f"{raw_batch_id}_page_*"),
+        key=mobile_page_sort_key,
+    )
+    if not pages:
+        raise ValueError(f"pro batch {raw_batch_id} nebyly nalezeny zadne stranky.")
+    if expected_count and len(pages) != expected_count:
+        raise ValueError(
+            f"pocet stran nesedi: nalezeno {len(pages)}, manifest uvadi {expected_count}."
+        )
+    for page in pages:
+        validate_source_file(page)
+
+    safe_batch_id = safe_slug(raw_batch_id, default="mobile-scan", limit=80)
+    work_root = vault_dir / "mobile_inbox" / "processing"
+    processing_dir = next_available_path(work_root / safe_batch_id)
+    originals_dir = processing_dir / "originals"
+    normalized_dir = processing_dir / "normalized_pages"
+    originals_dir.mkdir(parents=True, exist_ok=False)
+    normalized_dir.mkdir(parents=True, exist_ok=False)
+
+    copied_originals: list[str] = []
+    normalized_pages: list[Path] = []
+    for index, page in enumerate(pages, start=1):
+        original_target = originals_dir / f"page_{index:03d}{safe_image_suffix(page)}"
+        shutil.copy2(page, original_target)
+        copied_originals.append(str(relative_to_project(original_target)))
+        normalized_target = normalized_dir / f"page_{index:03d}.jpg"
+        normalize_mobile_document_page(page, normalized_target)
+        normalized_pages.append(normalized_target)
+
+    pdf_path = processing_dir / f"{safe_batch_id}.pdf"
+    build_pdf_from_images(normalized_pages, pdf_path)
+    prepared_at = datetime.now(timezone.utc).replace(microsecond=0)
+    processing_manifest = {
+        "schema_version": "1",
+        "status": "prepared",
+        "prepared_at": prepared_at.isoformat(),
+        "batch_id": raw_batch_id,
+        "document_title": document_title,
+        "source_manifest": str(manifest_path),
+        "source_pages": [str(page) for page in pages],
+        "original_copies": copied_originals,
+        "normalized_pages": [str(relative_to_project(path)) for path in normalized_pages],
+        "pdf_path": str(relative_to_project(pdf_path)),
+        "source_preserved": True,
+        "do_not_commit": True,
+    }
+    output_manifest = processing_dir / "manifest.json"
+    output_manifest.write_text(
+        json.dumps(processing_manifest, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    append_jsonl(vault_dir / "index" / "mobile_batches.jsonl", processing_manifest)
+
+    return MobileDocumentBatchResult(
+        batch_id=raw_batch_id,
+        document_title=document_title,
+        page_count=len(pages),
+        processing_dir=processing_dir,
+        pdf_path=pdf_path,
+        manifest_path=output_manifest,
+    )
 
 
 def format_document_inbox_reminder(vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> str:
@@ -416,6 +619,11 @@ def apply_document_import_file(
     shutil.copy2(source, destination)
 
     due_dates = find_due_date_candidates(extraction.text)
+    explicit_tags = parse_tags(tags)
+    suggested_tags = metadata.get("tags", [])
+    if not isinstance(suggested_tags, list):
+        suggested_tags = []
+
     record = {
         "document_id": safe_document_id,
         "original_filename": source.name,
@@ -424,7 +632,7 @@ def apply_document_import_file(
         "document_type": metadata["document_type"],
         "counterparty": safe_text(str(metadata.get("counterparty") or "")),
         "related_asset": safe_text(str(metadata.get("related_asset") or "")),
-        "tags": parse_tags(tags),
+        "tags": merge_tags(explicit_tags, [str(tag) for tag in suggested_tags]),
         "sha256": digest,
         "size_bytes": source.stat().st_size,
         "imported_at": archive_time.isoformat(),
@@ -1176,6 +1384,101 @@ def delete_document_inbox_item(
     return f"Dokument byl smazan z inboxu: `{relative_to_project(source)}`."
 
 
+def select_mobile_batch_manifest(
+    inbox: Path,
+    batch_id: str = "",
+) -> tuple[Path, dict[str, Any]]:
+    manifests = sorted(
+        inbox.glob("scan_*_manifest.json"),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    if not manifests:
+        raise ValueError("v mobile inboxu neni zadny scan manifest.")
+
+    wanted = safe_text(batch_id).strip()
+    if wanted:
+        matches: list[tuple[Path, dict[str, Any]]] = []
+        for path in manifests:
+            manifest = read_json_file(path)
+            if safe_text(str(manifest.get("batch_id", ""))).strip() == wanted:
+                matches.append((path, manifest))
+        if not matches:
+            raise ValueError(f"batch_id {wanted} nebyl v mobile inboxu nalezen.")
+        return matches[0]
+
+    if len(manifests) > 1:
+        choices: list[str] = []
+        for path in manifests[:5]:
+            manifest = read_json_file(path)
+            choices.append(safe_text(str(manifest.get("batch_id", path.stem))))
+        raise ValueError(
+            "v mobile inboxu je vice batchu; zadej konkretni batch_id. "
+            f"Kandidati: {', '.join(choices)}"
+        )
+    return manifests[0], read_json_file(manifests[0])
+
+
+def read_json_file(path: Path) -> dict[str, Any]:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"nejde precist JSON manifest {path.name}: {exc}") from exc
+    if not isinstance(data, dict):
+        raise ValueError(f"JSON manifest {path.name} nema objektovy tvar.")
+    return data
+
+
+def mobile_page_sort_key(path: Path) -> tuple[int, str]:
+    match = re.search(r"_page_(\d+)", path.stem)
+    page_number = int(match.group(1)) if match else 999_999
+    return page_number, path.name
+
+
+def safe_image_suffix(path: Path) -> str:
+    suffix = path.suffix.casefold()
+    if suffix in {".jpg", ".jpeg", ".png", ".heic", ".heif", ".tif", ".tiff"}:
+        return suffix
+    return ".img"
+
+
+def normalize_mobile_document_page(source: Path, target: Path) -> None:
+    try:
+        from PIL import Image, ImageOps
+    except ImportError as exc:
+        raise ValueError("chybi Python balik Pillow pro zpracovani obrazku.") from exc
+
+    try:
+        from pillow_heif import register_heif_opener
+
+        register_heif_opener()
+    except ImportError:
+        pass
+
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with Image.open(source) as image:
+        normalized = ImageOps.exif_transpose(image)
+        normalized = ImageOps.autocontrast(normalized.convert("RGB"))
+        normalized.save(target, format="JPEG", quality=92, optimize=True)
+
+
+def build_pdf_from_images(images: list[Path], target: Path) -> None:
+    if not images:
+        raise ValueError("nelze vytvorit PDF bez stran.")
+    try:
+        from PIL import Image
+    except ImportError as exc:
+        raise ValueError("chybi Python balik Pillow pro tvorbu PDF.") from exc
+
+    pdf_pages = []
+    for image_path in images:
+        with Image.open(image_path) as image:
+            pdf_pages.append(image.convert("RGB").copy())
+    target.parent.mkdir(parents=True, exist_ok=True)
+    first, rest = pdf_pages[0], pdf_pages[1:]
+    first.save(target, "PDF", save_all=True, append_images=rest, resolution=200.0)
+
+
 def validate_source_file(source: Path) -> None:
     if not source.is_file():
         raise ValueError("source_path musi ukazovat na soubor.")
@@ -1716,30 +2019,34 @@ def propose_metadata(
     target_domain: str = "",
     counterparty: str = "",
     related_asset: str = "",
-) -> dict[str, str]:
+) -> dict[str, Any]:
     combined = f"{source.name}\n{document_hint}\n{text[:5000]}".casefold()
     document_type = safe_slug(document_hint, default="", limit=50) if document_hint else ""
     if not document_type:
         document_type = guess_document_type(combined)
     domain = normalize_domain(target_domain or guess_domain(combined, document_type))
+    asset = safe_text(related_asset or guess_related_asset(combined))
     return {
         "document_type": document_type,
         "domain": domain,
         "counterparty": safe_text(counterparty or guess_counterparty(text)),
-        "related_asset": safe_text(related_asset or guess_related_asset(combined)),
+        "related_asset": asset,
+        "tags": suggest_document_tags(combined, document_type, domain, asset),
     }
 
 
 def guess_document_type(text: str) -> str:
-    if any(word in text for word in ("faktura", "invoice", "splatnost", "variabilni symbol", "variabilní symbol")):
+    if any(word in text for word in ("zelena karta", "zelená karta", "green card")):
+        return "green_card"
+    if any(word in text for word in ("faktura", "invoice", "danovy doklad", "daňový doklad", "vyuctovani", "vyúčtování", "variabilni symbol", "variabilní symbol")):
         return "invoice"
     if any(word in text for word in ("pojistka", "pojisteni", "pojištění", "pojistna smlouva", "pojistná smlouva")):
         return "insurance_policy"
     if any(word in text for word in ("smlouva", "contract")):
         return "contract"
-    if any(word in text for word in ("revize", "revizni", "revizní")):
+    if any(word in text for word in ("stk", "technicka kontrola", "technická kontrola", "emisni kontrola", "emisní kontrola", "revize", "revizni", "revizní")):
         return "inspection_report"
-    if any(word in text for word in ("servis", "udrzba", "údržba", "protokol")):
+    if any(word in text for word in ("servis", "servisni", "servisní", "garanční prohlídka", "garancni prohlidka", "udrzba", "údržba", "zakazkovy list", "zakázkový list", "protokol")):
         return "service_report"
     if any(word in text for word in ("zaruka", "záruka", "warranty")):
         return "warranty"
@@ -1747,6 +2054,9 @@ def guess_document_type(text: str) -> str:
 
 
 def guess_domain(text: str, document_type: str) -> str:
+    if any(word in text for word in ("volvo", "v40", "vozidlo", "spz", "vin", "stk", "technicka kontrola", "technická kontrola", "servisni prohlidka", "servisní prohlídka")):
+        if document_type in {"invoice", "service_report", "inspection_report", "green_card"}:
+            return "car"
     if document_type == "insurance_policy":
         return "insurance"
     if any(word in text for word in ("pojist", "rixo", "pojistovna", "pojišťovna")):
@@ -1755,7 +2065,7 @@ def guess_domain(text: str, document_type: str) -> str:
         return "energy"
     if any(word in text for word in ("kotel", "komin", "komín", "dum", "dům", "home")):
         return "home"
-    if any(word in text for word in ("auto", "vozidlo", "spz", "vin")):
+    if any(word in text for word in ("auto", "vozidlo", "spz", "vin", "volvo", "stk")):
         return "car"
     if any(word in text for word in ("dan", "daň", "financni urad", "finanční úřad")):
         return "tax"
@@ -1776,13 +2086,56 @@ def guess_counterparty(text: str) -> str:
 
 
 def guess_related_asset(text: str) -> str:
+    if "volvo" in text and "v40" in text:
+        return "Volvo V40"
+    if "volvo" in text:
+        return "Volvo"
     if "fotovolta" in text or "fve" in text:
         return "fotovoltaika"
     if "kotel" in text:
         return "kotel"
-    if "auto" in text or "vozidlo" in text:
+    if any(word in text for word in ("auto", "vozidlo", "spz", "vin", "stk")):
         return "auto"
     return ""
+
+
+def suggest_document_tags(
+    text: str,
+    document_type: str,
+    domain: str,
+    related_asset: str,
+) -> list[str]:
+    tags: list[str] = [domain, document_type]
+    if related_asset:
+        tags.append(related_asset)
+    checks = (
+        ("auto", ("auto", "vozidlo", "spz", "vin", "stk", "volvo")),
+        ("volvo-v40", ("volvo v40", "v40")),
+        ("pojisteni", ("pojist", "zelena karta", "zelená karta")),
+        ("faktura", ("faktura", "invoice", "danovy doklad", "daňový doklad")),
+        ("servis", ("servis", "udrzba", "údržba", "garanční prohlídka", "garancni prohlidka")),
+        ("technicka-kontrola", ("stk", "technicka kontrola", "technická kontrola", "emisni kontrola", "emisní kontrola")),
+        ("splatnost", ("splatnost", "uhradit", "zaplatit")),
+        ("platnost", ("platnost do", "platna do", "platná do")),
+    )
+    for tag, markers in checks:
+        if any(marker in text for marker in markers):
+            tags.append(tag)
+    for year in re.findall(r"\b20\d{2}\b", text):
+        tags.append(year)
+    return merge_tags([], tags)
+
+
+def merge_tags(primary: list[str], secondary: list[str]) -> list[str]:
+    merged: list[str] = []
+    seen: set[str] = set()
+    for tag in [*primary, *secondary]:
+        safe = safe_slug(str(tag), default="", limit=60)
+        if not safe or safe in seen:
+            continue
+        merged.append(safe)
+        seen.add(safe)
+    return merged
 
 
 def find_due_date_candidates(text: str) -> list[dict[str, Any]]:

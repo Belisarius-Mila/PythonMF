@@ -12,12 +12,14 @@ from .vault import (
     has_explicit_document_import_confirmation,
     inspect_document_text_summary,
     prepare_document_import_summary,
+    prepare_mobile_document_batch_summary,
     prepare_document_print_job_summary,
     propose_document_inbox_cleanup_summary,
     resolve_document_inbox_item_summary,
     run_document_print_job_summary,
     save_document_due_reminder_summary,
     scan_document_inbox_summary,
+    scan_mobile_document_inbox_summary,
     search_private_documents_summary,
 )
 
@@ -26,6 +28,18 @@ from .vault import (
 def scan_document_inbox(max_items: int = 20) -> str:
     """Read-only scan of private document inbox for newly dropped files."""
     return scan_document_inbox_text(max_items=max_items)
+
+
+@function_tool
+def scan_mobile_document_inbox(max_batches: int = 20) -> str:
+    """Read-only scan of iPhone Shortcuts document capture inbox."""
+    return scan_mobile_document_inbox_text(max_batches=max_batches)
+
+
+@function_tool
+def prepare_mobile_document_batch(batch_id: str = "") -> str:
+    """Prepare a captured iPhone document batch as a local working PDF; does not import or delete."""
+    return prepare_mobile_document_batch_text(batch_id=batch_id)
 
 
 @function_tool
@@ -166,6 +180,27 @@ def scan_document_inbox_text(
         vault_dir=vault_dir,
         max_items=max(1, min(max_items, 50)),
     )
+
+
+def scan_mobile_document_inbox_text(
+    max_batches: int = 20,
+    mobile_inbox_dir: Path | None = None,
+) -> str:
+    kwargs = {"max_batches": max(1, min(max_batches, 50))}
+    if mobile_inbox_dir is not None:
+        kwargs["mobile_inbox_dir"] = mobile_inbox_dir
+    return scan_mobile_document_inbox_summary(**kwargs)
+
+
+def prepare_mobile_document_batch_text(
+    batch_id: str = "",
+    mobile_inbox_dir: Path | None = None,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> str:
+    kwargs = {"batch_id": batch_id, "vault_dir": vault_dir}
+    if mobile_inbox_dir is not None:
+        kwargs["mobile_inbox_dir"] = mobile_inbox_dir
+    return prepare_mobile_document_batch_summary(**kwargs)
 
 
 def propose_document_inbox_cleanup_text(

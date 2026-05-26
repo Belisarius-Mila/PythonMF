@@ -12,12 +12,14 @@ from app.documents.tools import (
     document_vault_status_text,
     inspect_document_text_text,
     prepare_document_import_text,
+    prepare_mobile_document_batch_text,
     prepare_document_print_job_text,
     propose_document_inbox_cleanup_text,
     resolve_document_inbox_item_text,
     run_document_print_job_text,
     save_document_due_reminder_text,
     scan_document_inbox_text,
+    scan_mobile_document_inbox_text,
     search_private_documents_text,
 )
 from app.documents.vault import format_document_inbox_reminder
@@ -27,6 +29,11 @@ from app.documents.vault import TableExtractionResult
 from app.documents.vault import TextExtractionResult
 from app.documents.vault import enrich_pdf_text_with_tables
 from app.documents.vault import extract_text
+
+try:
+    from PIL import Image
+except ImportError:  # pragma: no cover
+    Image = None
 
 
 class DocumentVaultToolsTests(unittest.TestCase):
@@ -63,6 +70,67 @@ class DocumentVaultToolsTests(unittest.TestCase):
             self.assertIn("Document inbox", result)
             self.assertIn("nova-faktura.pdf", result)
             self.assertIn("prepare_document_import", result)
+
+    def test_scan_mobile_document_inbox_groups_pages_by_manifest(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            inbox = Path(temp_dir) / "SamanthaDocumentInbox"
+            inbox.mkdir()
+            (inbox / "process_request.json").write_text(
+                '{"request":"process_mobile_document_inbox"}',
+                encoding="utf-8",
+            )
+            (inbox / "scan_B_manifest.json").write_text(
+                json.dumps(
+                    {
+                        "batch_id": "scan_B",
+                        "document_title": "Test",
+                        "page_count": "2",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (inbox / "scan_B_page_1.jpeg").write_bytes(b"page1")
+            (inbox / "scan_B_page_2.jpeg").write_bytes(b"page2")
+
+            result = scan_mobile_document_inbox_text(mobile_inbox_dir=inbox)
+
+            self.assertIn("Mobile document inbox", result)
+            self.assertIn("Process request: ano", result)
+            self.assertIn("Batch: scan_B", result)
+            self.assertIn("Nazev: Test", result)
+            self.assertIn("2 nalezeno / 2", result)
+
+    @unittest.skipIf(Image is None, "Pillow is not installed")
+    def test_prepare_mobile_document_batch_creates_working_pdf_without_deleting_source(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            inbox = root / "SamanthaDocumentInbox"
+            vault = root / "documents"
+            inbox.mkdir()
+            (inbox / "scan_B_manifest.json").write_text(
+                json.dumps(
+                    {
+                        "batch_id": "scan_B",
+                        "document_title": "Test",
+                        "page_count": "2",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            Image.new("RGB", (40, 50), "white").save(inbox / "scan_B_page_1.jpeg")
+            Image.new("RGB", (40, 50), "white").save(inbox / "scan_B_page_2.jpeg")
+
+            result = prepare_mobile_document_batch_text(
+                batch_id="scan_B",
+                mobile_inbox_dir=inbox,
+                vault_dir=vault,
+            )
+
+            self.assertIn("Mobilni dokument je pripraveny", result)
+            self.assertTrue((vault / "mobile_inbox" / "processing" / "scan_b" / "scan_b.pdf").exists())
+            self.assertTrue((vault / "mobile_inbox" / "processing" / "scan_b" / "manifest.json").exists())
+            self.assertTrue((inbox / "scan_B_page_1.jpeg").exists())
+            self.assertTrue((inbox / "scan_B_page_2.jpeg").exists())
 
     def test_document_inbox_startup_reminder_hides_filenames(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -135,6 +203,49 @@ class DocumentVaultToolsTests(unittest.TestCase):
             self.assertIn("doc-test", docs_index)
             self.assertIn("fotovoltaiku", text_index)
             self.assertIn("2026-07-31", due_index)
+
+    def test_car_document_import_suggests_asset_and_tags(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            source = root / "volvo-v40-faktura.txt"
+            source.write_text(
+                "Danovy doklad za Volvo V40. Servisni prohlidka a vymena oleje. "
+                "Splatnost 31.7.2026.",
+                encoding="utf-8",
+            )
+            vault = root / "documents"
+
+            preview = prepare_document_import_text(
+                source_path=str(source),
+                vault_dir=vault,
+            )
+            self.assertIn("Navrzena oblast: car", preview)
+            self.assertIn("Vazba na majetek/zarizeni: Volvo V40", preview)
+
+            result = apply_document_import_text(
+                source_path=str(source),
+                target_domain="car",
+                document_id="volvo-v40-servis-2026",
+                user_confirmed=True,
+                confirmation_text="Potvrzuji, uloz dokument volvo-v40-faktura.txt do oblasti car.",
+                vault_dir=vault,
+            )
+
+            self.assertIn("Stav: ulozeno", result)
+            manifest = json.loads(
+                (
+                    vault
+                    / "vault"
+                    / "car"
+                    / "volvo-v40-servis-2026"
+                    / "manifest.json"
+                ).read_text(encoding="utf-8")
+            )
+            self.assertEqual(manifest["document_type"], "invoice")
+            self.assertEqual(manifest["related_asset"], "Volvo V40")
+            self.assertIn("volvo-v40", manifest["tags"])
+            self.assertIn("faktura", manifest["tags"])
+            self.assertIn("servis", manifest["tags"])
 
     def test_duplicate_content_is_not_imported_twice(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

@@ -87,12 +87,14 @@ from app.documents import (
     format_document_inbox_reminder,
     inspect_document_text,
     prepare_document_import,
+    prepare_mobile_document_batch,
     prepare_document_print_job,
     propose_document_inbox_cleanup,
     resolve_document_inbox_item,
     run_document_print_job,
     save_document_due_reminder,
     scan_document_inbox,
+    scan_mobile_document_inbox,
     search_private_documents,
 )
 from app.startup_prompts import format_owl_text_startup_prompt
@@ -507,8 +509,15 @@ kotli, fotovoltaice, domu, autu nebo dalsim zarizenim. Pri startu nebo kdyz se
 Mila pta, jestli jsou nove dokumenty, jestli je co zpracovat, nebo rekne, ze
 neco ulozil do dokumentove slozky, pouzij `scan_document_inbox`. Tento tool je
 read-only a jen vypise cekajici soubory v `data/private/documents/inbox/incoming/`.
+Pokud Mila pouzil iPhone zkratku pro skenovani dokumentu nebo zkratku
+`Zpracovat dokumenty pro Samanthu`, pouzij `scan_mobile_document_inbox`. Tento
+tool je read-only a jen vypise mobilni batch manifesty a nazvy stran v iCloud
+inboxu `SamanthaDocumentInbox`.
 `prepare_document_import` je read-only nahled importu lokalniho souboru z `data/`
 nebo `/private/tmp`.
+`prepare_mobile_document_batch` je write-safe priprava mobilniho batchu: zkopiruje
+fotky z iCloud inboxu do `data/private/documents/mobile_inbox/processing/` a
+vytvori pracovni PDF. Nesmí mazat zdrojove fotky ani finalne importovat dokument.
 `inspect_document_text` je read-only inspekce textu a kandidatu na due date.
 `apply_document_import` je zapis do `data/private/documents/` a smi byt pouzit
 jen po samostatnem potvrzeni v aktualni Milove zprave; potvrzeni musi obsahovat
@@ -746,8 +755,10 @@ LOKALNI PAMET:
             preview_zmenseni_obrazku,
             apply_zmenseni_obrazku,
             scan_document_inbox,
+            scan_mobile_document_inbox,
             document_vault_status,
             prepare_document_import,
+            prepare_mobile_document_batch,
             inspect_document_text,
             apply_document_import,
             search_private_documents,

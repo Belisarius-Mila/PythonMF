@@ -188,9 +188,9 @@ Overeno:
   faze.
 - Tiskovy workflow je implementovany jako dvoukrokovy: priprava kopie do
   `print_queue` a az potom potvrzeny systemovy tisk pres macOS `lp`.
-- Povinný příští ruční/provozní test dokumentového projektu: fyzicky ověřit, že
-  dokument po potvrzeném tisku skutečně vyjel z tiskárny. Codex umí potvrdit jen
-  předání do macOS tiskové fronty.
+- Fyzicky tisk byl dodatecne overen Milou na TXT dokumentu o zkratkach; neni uz
+  potreba startovni pripominka k overeni tisku. Codex stale umi technicky
+  potvrdit jen predani do macOS tiskove fronty.
 
 ## Realny PDF test 2026-05-21
 
@@ -364,6 +364,40 @@ Bezpecnost: do memory neukladat plny text dokumentu, rodne cislo, adresu, castky
 ani jina osobni/danova data. Do memory patri jen tento redigovany stav a dalsi
 krok.
 
+## Mobilni iPhone scan intake 2026-05-26
+
+Prvni bezpecna faze mobilniho intake je rozpracovana a realne otestovana:
+
+- iPhone zkratka `Skenovat dokument pro Samanthu v4.shortcut` uklada do iCloud
+  slozky `SamanthaDocumentInbox`;
+- zkratka umi vice stran pod jednim technickym identifikatorem batchu;
+- lidsky nazev dokumentu se uklada do manifestu jako `document_title`;
+- druha zkratka `Zpracovat dokumenty pro Samanthu.shortcut` vytvari
+  `process_request.json`, ktery signalizuje, ze ma Samantha zpracovat inbox;
+- `scan_mobile_document_inbox` je read-only tool, ktery najde process request,
+  manifesty a stranky bez mazani nebo importu;
+- `prepare_mobile_document_batch` kopiruje zdrojove fotky do pracovniho adresare,
+  normalizuje stranky pres Pillow, vytvori PDF a ulozi pracovni manifest;
+- zdrojove fotky v iCloud inboxu zustavaji beze zmeny.
+
+Realny test:
+
+- batch `scan_B`;
+- lidsky nazev v manifestu: testovaci dokument;
+- 2 nalezene stranky;
+- pracovni adresar
+  `data/private/documents/mobile_inbox/processing/scan_b/`;
+- vytvoreno `scan_b.pdf`;
+- nad PDF probehl `prepare_document_import`.
+
+Poznamka ke klasifikaci: testovaci text byl o zkratce Najit auto, proto navrh
+metadat mohl vypadat jako auto dokument. To neni chyba mobilniho intake, ale
+signal, ze dalsi krok ma zlepsit klasifikaci testovacich/technickych dokumentu a
+zavest `case_id` pro vecne souvisejici dokumenty.
+
+Bezpecnost: pracovni PDF, fotky a extrahovany text zustavaji v `data/private/`
+mimo git. Finalni import do vaultu musi zustat potvrzovany.
+
 ## Vztah k existujicim projektum
 
 - Platebni SMS/reminders: konkretni faktury/prilohy z platebnich pripadu se mohou
@@ -391,5 +425,5 @@ soubor, technicky workflow a posledni aktivni handoff.
 - `handoffs/document_management_tax_generali_import_2026_05_22.md` - import
   Generali penzijnich PDF podkladu do oblasti `tax`.
 - `handoffs/document_vault_print_workflow_2026_05_22.md` - implementace a test
-  dvoukrokoveho print workflow; prekryto aktivnim handoffem na fyzicke overeni
-  tisku.
+  dvoukrokoveho print workflow; fyzicke overeni bylo pozdeji potvrzeno Milou na
+  TXT dokumentu o zkratkach.
