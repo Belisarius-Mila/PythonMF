@@ -158,3 +158,33 @@ A headless pygame start, pokud je to možné.
 
 Souhrn ChatGPT/Codex konverzace k nové aplikaci `MMTX.py`, příběhové scéně s houbami, režimu barev, režimu čísel, hotspotům, geometrii klikacích oblastí a dynamickému číslování hub.
 
+## Web MMTX - ForestSchool 2026-05-26
+
+Ve webové verzi MMTX je rozpracovaná nová funkcionalita `forestSchool`:
+
+- hlavní produkční soubory jsou `docs/index.html`, `docs/script_intro_v2.js`, `docs/styles_intro_v2.css`,
+- mirror je `MatysekANJ/web_mmtx/`,
+- nové assety jsou `ForestSchool1.PNG` a `audio/czech/forest_school_help_cz.mp3` v obou složkách,
+- scéna jde otevřít přímo přes `?scene=forestSchool`,
+- po pěti správných barvách v `houseBunny` hra přejde do `forestSchool`,
+- `forestSchool` je YES/NO cvičení: sova vykouzlí předmět, zeptá se anglicky `Is this a ...?`, dítě volí `YES` nebo `NO`,
+- první pětka předmětů je `ball`, `book`, `apple`, `car`, `house`,
+- po úpravě 2026-05-26 začíná `forestSchool` krátkým demo ántré: Bunny jednou odpoví špatně `Yes, it is.`, Benji pak správně `No, it isn't.`, skóre se během dema neplní, sova řekne `Will you try?` a teprve pak začíná Matýskovo odpovídání,
+- Bunny a Benji v demu mají lokální anglická MP3, aby nepřebírali hlas sovy,
+- Matýskovy předměty se vybírají z promíchané fronty bez opakování, takže se v pětikolovém běhu vystřídají všechny položky,
+- odměny jsou zobrazené jako malé mochomůrky posunuté víc vpravo, aby méně kryly sovu,
+- kouzlení má paprsek z hůlky směrem k předmětu; případně doladit `left`/`top`/`rotate` ve `.forest-school-wand-beam`,
+- předměty jsou napojené jako PNG assety v `assets/forest_school_*.png`; `book`, `apple`, `car` a `house` byly 2026-05-26 znovu vygenerované AI workflow ve stylu `PictNew` a převedené na průhledné 1254x1254 PNG,
+- za správné odpovědi přibývá pět odměnových koleček, špatná odpověď zopakuje stejnou otázku,
+- česká nápověda je přes tlačítko mikrofonu a přehrává lokální MP3; viditelný text používá `klikni ... no`, audio kvůli výslovnosti používá fonetické `klikňi ... nou`.
+- lokální kandidáti na dalších 40 předmětů jsou v `data/forest_school_object_candidates_20260526.txt`; root `.gitignore` ignoruje `Samantha_Agent/data/*`, takže tento seznam je zatím lokální pracovní podklad, pokud nebude explicitně force-addnutý.
+
+Ověřeno 2026-05-26:
+
+- `node --check ../docs/script_intro_v2.js` prošel,
+- `docs/` a `MatysekANJ/web_mmtx/` měly stejný JS/CSS,
+- lokální server `python3 -m http.server 8011` v `docs/` vracel `index.html`, `script_intro_v2.js`, `styles_intro_v2.css`, `ForestSchool1.PNG`, českou nápovědu i demo MP3 přes HTTP 200.
+
+Další krok:
+
+- ručně otevřít `http://127.0.0.1:8011/index.html?scene=forestSchool` a ověřit poslední vizuální umístění mochomůrek, paprsku, tlačítek a audia v reálném prohlížeči.

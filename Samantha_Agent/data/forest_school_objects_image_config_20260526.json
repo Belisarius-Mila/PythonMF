@@ -1,0 +1,13 @@
+{
+  "backend": "openai",
+  "model": "gpt-image-2",
+  "size": "1024x1024",
+  "quality": "low",
+  "output_format": "png",
+  "output_compression": 100,
+  "target_size_kb": 900,
+  "max_size_kb": 1600,
+  "batch_size": 4,
+  "output_root": "PictNew/generated",
+  "style_prompt": "High-quality warm storybook vocabulary illustration for a child learner, but not babyish. Rich color, natural internal shading, clear silhouette, polished children's educational game asset quality. One isolated main object only. Use a perfectly flat solid #ff00ff chroma-key background for later background removal. The background must be one uniform color with no scenery, no floor plane, no texture, no shadow, no gradient, no reflections. Do not use #ff00ff anywhere in the object. No text, no letters, no labels, no watermark, no signature."
+}

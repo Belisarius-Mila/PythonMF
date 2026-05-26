@@ -1,0 +1,54 @@
+ForestSchool - navrh dalsich predmetu pro Matyska
+Datum: 2026-05-26
+
+Ucel:
+- Kandidati na dalsi obrazky/predmety pro YES/NO hru ve ForestSchool.
+- Mily muze radky mazat, prepisovat nebo doplnit.
+- Pro generovani obrazku budeme brat jen schvalene radky.
+
+Format:
+EN | CZ | poznamka
+
+01. teddy bear | medvidek | hracka, jasne rozpoznatelna
+02. dinosaur | dinosaurus | oblibene tema kluku, dobre vizualni
+03. robot | robot | blizke pohadkam s Piskotem
+04. train | vlak | vozidlo, snadno poznatelne
+05. plane | letadlo | vozidlo, akcni predmet
+06. boat | lod | jednoduche, dobre se kresli
+07. rocket | raketa | dobrodruzstvi, vesmir
+08. truck | nakladak | vozidlo, odlisne od car
+09. bus | autobus | bezny predmet z mesta
+10. bike | kolo | detsky relevantni pohyb
+
+11. helmet | helma | kolo, bezpecnost, dobre rozpoznatelne
+12. backpack | batoh | skola/vylet/les
+13. flashlight | baterka | lesni vyprava
+14. map | mapa | objevovani, dobrodruzstvi
+15. compass | kompas | lesni/skautsky predmet
+16. tent | stan | vylet, taboreni
+17. campfire | ohen | lesni atmosphera, kreslit bez nebezpecnych detailu
+18. binoculars | dalekohled | pozorovani prirody
+19. shovel | lopatka | hriste/pisek/zahrada
+20. bucket | kyblik | hriste/pisek
+
+21. soccer ball | fotbalovy mic | odlisit od obecneho ball
+22. kite | drak | venkovni hrani
+23. puzzle | puzzle | hracka, uceni
+24. blocks | kostky | staveni, jednoduche tvary
+25. crayons | pastelky | kresleni
+26. pencil | tuzka | skola/kresleni
+27. scissors | nuzky | bezny skolni predmet, kreslit detsky a bezpecne
+28. glue | lepidlo | skolni/tvorivy predmet
+29. drum | bubinek | hudba, jasny predmet
+30. guitar | kytara | hudba, vizualne atraktivni
+
+31. cookie | susenka | jidlo, jednoduche
+32. sandwich | sendvic | svacina
+33. banana | banan | ovoce, jednoduche
+34. strawberry | jahoda | ovoce, barevne
+35. ice cream | zmrzlina | oblibene, jasny tvar
+36. water bottle | lahev na vodu | vylet/skola
+37. cap | cepice | obleceni, ale predmet samostatne
+38. boots | boty/holinky | venku/les
+39. umbrella | destnik | pocasi, jasny tvar
+40. key | klic | jednoduchy predmet, muze byt soucast pribehu

@@ -567,6 +567,200 @@ body {
   filter: drop-shadow(0 8px 12px rgba(39, 22, 12, 0.28));
 }
 
+
+.forest-school-rewards {
+  position: absolute;
+  left: 64%;
+  top: 5.2%;
+  z-index: 8;
+  display: flex;
+  gap: 8px;
+  transform: none;
+  pointer-events: none;
+}
+
+.forest-school-reward {
+  display: grid;
+  place-items: center;
+  width: clamp(20px, 2.6vw, 34px);
+  height: clamp(20px, 2.6vw, 34px);
+  border: 2px solid rgba(255, 255, 255, 0.88);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.56);
+  box-shadow: 0 8px 18px rgba(38, 60, 86, 0.18);
+  font-size: clamp(0.82rem, 1.8vw, 1.32rem);
+  filter: grayscale(1);
+  opacity: 0.48;
+}
+
+.forest-school-reward.active {
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.62), 0 0 18px rgba(241, 200, 93, 0.62);
+  filter: none;
+  opacity: 1;
+}
+
+.forest-school-magic,
+.forest-school-item {
+  position: absolute;
+  left: 50%;
+  top: 62%;
+  z-index: 10;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.forest-school-magic {
+  width: min(20vw, 230px);
+  height: min(20vw, 230px);
+  min-width: 130px;
+  min-height: 130px;
+}
+
+.forest-school-wand-beam {
+  position: absolute;
+  left: 58.5%;
+  top: 42%;
+  z-index: 8;
+  width: min(24vw, 300px);
+  height: 7px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 234, 123, 0.98), rgba(255, 255, 255, 0));
+  transform-origin: left center;
+  pointer-events: none;
+  animation: forest-school-wand-beam 900ms ease-out both;
+}
+
+.forest-school-spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #ffe878;
+  box-shadow: 0 0 18px rgba(255, 232, 120, 0.85);
+  animation: forest-school-spark 900ms ease-out both;
+}
+
+.forest-school-item {
+  animation: forest-school-appear 420ms ease-out both;
+}
+
+.forest-school-object-drawing,
+.forest-school-object-drawing svg {
+  display: block;
+  width: min(12vw, 146px);
+  height: min(12vw, 146px);
+  min-width: 75px;
+  min-height: 75px;
+}
+
+.forest-school-object-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 16px 18px rgba(38, 60, 86, 0.22));
+}
+
+.forest-school-object-drawing {
+  filter: drop-shadow(0 16px 18px rgba(38, 60, 86, 0.22));
+}
+
+.forest-school-help {
+  position: absolute;
+  left: auto;
+  right: 2.5%;
+  bottom: 4.8%;
+  z-index: 9;
+  width: min(30vw, 330px);
+  min-height: clamp(46px, 5.5vw, 66px);
+  display: grid;
+  place-items: center;
+  padding: 8px 14px;
+  border: 3px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #31455c;
+  box-shadow: var(--shadow);
+  font-size: clamp(0.82rem, 1.08vw, 0.98rem);
+  font-weight: 850;
+  line-height: 1.22;
+  text-align: center;
+  transform: none;
+  pointer-events: none;
+}
+
+.owl-garden-prompt.forest-school-prompt {
+  left: 2.5%;
+  bottom: 4.8%;
+  min-width: min(26vw, 250px);
+  min-height: clamp(46px, 5.5vw, 66px);
+  padding: 8px 14px;
+  font-size: clamp(0.9rem, 1.35vw, 1.08rem);
+  line-height: 1.12;
+  text-align: center;
+}
+
+.forest-school-answer-row {
+  position: absolute;
+  left: 50%;
+  bottom: 4.8%;
+  z-index: 9;
+  display: flex;
+  gap: clamp(10px, 2.8vw, 30px);
+  transform: translateX(-50%);
+}
+
+.forest-school-answer {
+  width: clamp(74px, 9.2vw, 112px);
+  height: clamp(46px, 5.5vw, 66px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 3px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  color: #ffffff;
+  cursor: pointer;
+  transition: transform 140ms ease, filter 140ms ease, opacity 140ms ease;
+}
+
+.forest-school-answer:hover:not(:disabled) {
+  transform: scale(1.04);
+}
+
+.forest-school-answer:disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.forest-school-answer.yes {
+  background: #4fba65;
+}
+
+.forest-school-answer.no {
+  background: #df5a54;
+}
+
+.forest-school-answer-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.24);
+  font-size: clamp(0.82rem, 1.2vw, 1rem);
+  font-weight: 950;
+}
+
+.forest-school-answer-label {
+  font-size: clamp(0.82rem, 1.28vw, 1.08rem);
+  font-weight: 950;
+}
+
 .owl-garden-outro-bubble {
   position: absolute;
   z-index: 8;
@@ -721,6 +915,46 @@ body {
   }
   50% {
     transform: translateX(-50%) scale(1.05);
+  }
+}
+
+
+@keyframes forest-school-appear {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.74);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes forest-school-spark {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--spark-angle)) translateX(0) scale(0.6);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--spark-angle)) translateX(92px) scale(0.2);
+  }
+}
+
+@keyframes forest-school-wand-beam {
+  0% {
+    opacity: 0;
+    transform: rotate(112deg) scaleX(0.08);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(112deg) scaleX(1);
   }
 }
 

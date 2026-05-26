@@ -48,6 +48,9 @@ const scenes = {
   houseBunny: {
     image: "HouseBunny1.PNG?v=20260409a",
   },
+  forestSchool: {
+    image: "ForestSchool1.PNG?v=20260526a",
+  },
 };
 
 const numberWords = {
@@ -158,9 +161,27 @@ const houseBunnyWheelColors = [
   { id: "green", word: "green", index: 9 },
 ];
 const houseBunnyCenterColor = { id: "black", word: "black" };
+const houseBunnyWinCount = 5;
+const forestSchoolWinCount = 5;
+const forestSchoolObjects = [
+  { id: "ball", word: "ball" },
+  { id: "book", word: "book" },
+  { id: "apple", word: "apple" },
+  { id: "car", word: "car" },
+  { id: "house", word: "house" },
+];
+const forestSchoolQuestionWords = ["ball", "book", "apple", "car", "house"];
+const forestSchoolHelpDisplayText = "Je to správně? Pokud ano klikni jes, pokud ne klikni no.";
+const forestSchoolHelpSpokenText = "Je to správně? Pokud ano, klikňi na jes. Pokud ne, klikňi na nou.";
+const forestSchoolHelpAudio = "audio/czech/forest_school_help_cz.mp3?v=20260526j";
+const forestSchoolDemoAudio = {
+  bunnyYes: "audio/english/forest_school_bunny_yes_it_is.mp3?v=20260526l",
+  benjiNo: "audio/english/forest_school_benji_no_it_isnt.mp3?v=20260526l",
+};
 
 const benjiBunnyDebugSkipRect = { x: 0, y: 76, w: 16, h: 24 };
 const owlGardenDebugSkipRect = { x: 0, y: 76, w: 16, h: 24 };
+const forestSchoolDebugRect = { x: 0, y: 0, w: 14, h: 20 };
 
 const state = {
   currentScene: "intro1",
@@ -185,6 +206,7 @@ const state = {
   owlGardenCompletedIds: new Set(),
   owlGardenCurrentNumbers: {},
   owlGardenLockedNumbers: {},
+  owlGardenRemainingNumbers: [],
   owlGardenHelpPlayed: false,
   owlGardenOutroVisibleCount: 0,
   houseBunnyPhase: "idle",
@@ -192,6 +214,14 @@ const state = {
   houseBunnyTargetId: "",
   houseBunnyRemainingIds: [],
   houseBunnyDartColorId: "",
+  houseBunnyScore: 0,
+  forestSchoolPhase: "intro",
+  forestSchoolScore: 0,
+  forestSchoolCurrentObjectId: "",
+  forestSchoolQuestionWord: "",
+  forestSchoolAnswerYes: true,
+  forestSchoolRemainingIds: [],
+  forestSchoolHelpVisible: false,
   groupCounts: {
     red: 0,
     blue: 0,
@@ -442,6 +472,59 @@ function speakEnglishLine(text, options = {}) {
   });
 }
 
+function pickCzechVoice(preferredNameFragment = "") {
+  const voices = window.speechSynthesis?.getVoices?.() ?? [];
+  const czechVoices = voices.filter((voice) => voice.lang && voice.lang.toLowerCase().startsWith("cs"));
+  if (preferredNameFragment) {
+    const preferredNames = preferredNameFragment
+      .split("|")
+      .map((item) => item.trim().toLowerCase())
+      .filter(Boolean);
+    for (const preferredName of preferredNames) {
+      const preferred = czechVoices.find((voice) => voice.name.toLowerCase().includes(preferredName));
+      if (preferred) {
+        return preferred;
+      }
+    }
+  }
+  return czechVoices[0] ?? null;
+}
+
+function speakCzechLine(text, options = {}) {
+  if (!("speechSynthesis" in window) || !state.audioUnlocked) {
+    return Promise.resolve();
+  }
+
+  window.speechSynthesis.cancel();
+  return new Promise((resolve) => {
+    state.currentSpeechResolve = resolve;
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "cs-CZ";
+    utterance.rate = options.rate ?? 0.9;
+    utterance.pitch = options.pitch ?? 1.0;
+
+    const czechVoice = pickCzechVoice(options.preferredVoiceName ?? "");
+    if (czechVoice) {
+      utterance.voice = czechVoice;
+    }
+
+    const finish = () => {
+      if (state.currentSpeechResolve !== resolve) {
+        return;
+      }
+      state.currentSpeechResolve = null;
+      state.currentSpeechUtterance = null;
+      resolve();
+    };
+
+    utterance.onend = finish;
+    utterance.onerror = finish;
+    state.currentSpeechUtterance = utterance;
+    window.speechSynthesis.speak(utterance);
+  });
+}
+
 function ensureAudioContext() {
   if (!window.AudioContext && !window.webkitAudioContext) {
     return null;
@@ -523,6 +606,7 @@ function renderScene() {
   const scene = scenes[state.currentScene];
   const owlGardenOutro = state.currentScene === "owlGarden" && state.owlGardenPhase === "outro";
   const houseBunnyScene = state.currentScene === "houseBunny";
+  const forestSchoolScene = state.currentScene === "forestSchool";
   let imageSrc = scene.image;
   if (owlGardenOutro) {
     imageSrc = "MeetingOul2.PNG?v=20260409b";
@@ -531,18 +615,19 @@ function renderScene() {
   }
   sceneImage.src = imageSrc;
   magnifierButton.classList.toggle("hidden", state.currentScene !== "intro2");
-  clickPrompt.classList.toggle("hidden", state.audioUnlocked || state.currentScene === "intro4" || state.currentScene === "benjiBunny" || state.currentScene === "owlGarden" || state.currentScene === "houseBunny");
+  clickPrompt.classList.toggle("hidden", state.audioUnlocked || state.currentScene === "intro4" || state.currentScene === "benjiBunny" || state.currentScene === "owlGarden" || houseBunnyScene);
   mushroomPortalButton.classList.toggle("hidden", state.currentScene !== "intro4");
   bunnyPortalButton.classList.toggle("hidden", state.currentScene !== "intro4");
   mushroomHud.classList.toggle("hidden", state.currentScene !== "mushrooms");
   mushroomOverlay.classList.toggle("hidden", state.currentScene !== "mushrooms");
   dialogueHud.classList.toggle("hidden", state.currentScene !== "benjiBunny");
   dialoguePanel.classList.toggle("hidden", state.currentScene !== "benjiBunny");
-  owlGardenHud.classList.toggle("hidden", state.currentScene !== "owlGarden" && !houseBunnyScene);
-  owlGardenHelpButton.classList.toggle("hidden", (!houseBunnyScene && state.currentScene !== "owlGarden") || (state.currentScene === "owlGarden" && state.owlGardenPhase !== "play") || (houseBunnyScene && state.houseBunnyPhase !== "waiting"));
-  owlGardenHelpButton.classList.toggle("pulse-soft", (state.currentScene === "owlGarden" && state.owlGardenPhase === "play") || (houseBunnyScene && state.houseBunnyPhase === "waiting"));
-  owlGardenOverlay.classList.toggle("hidden", state.currentScene !== "owlGarden" && !houseBunnyScene);
-  owlGardenPrompt.classList.toggle("hidden", (state.currentScene !== "owlGarden" && !houseBunnyScene) || (state.currentScene === "owlGarden" && state.owlGardenPhase === "outro"));
+  owlGardenHud.classList.toggle("hidden", state.currentScene !== "owlGarden" && !houseBunnyScene && !forestSchoolScene);
+  owlGardenHelpButton.classList.toggle("hidden", (!houseBunnyScene && !forestSchoolScene && state.currentScene !== "owlGarden") || (state.currentScene === "owlGarden" && state.owlGardenPhase !== "play") || (houseBunnyScene && state.houseBunnyPhase !== "waiting"));
+  owlGardenHelpButton.classList.toggle("pulse-soft", (state.currentScene === "owlGarden" && state.owlGardenPhase === "play") || (houseBunnyScene && state.houseBunnyPhase === "waiting") || forestSchoolScene);
+  owlGardenOverlay.classList.toggle("hidden", state.currentScene !== "owlGarden" && !houseBunnyScene && !forestSchoolScene);
+  owlGardenPrompt.classList.toggle("hidden", (state.currentScene !== "owlGarden" && !houseBunnyScene && !forestSchoolScene) || (state.currentScene === "owlGarden" && state.owlGardenPhase === "outro") || (forestSchoolScene && (state.forestSchoolPhase === "intro" || state.forestSchoolPhase === "conjure")));
+  owlGardenPrompt.classList.toggle("forest-school-prompt", forestSchoolScene);
   owlGardenThumbButton.classList.toggle("hidden", state.currentScene !== "owlGarden" || state.owlGardenPhase !== "play" || (!state.owlGardenHelpPlayed && !state.owlGardenActiveId));
   owlGardenThumbButton.classList.toggle("pulse-soft", state.currentScene === "owlGarden" && state.owlGardenPhase === "play" && !!state.owlGardenActiveId);
   owlGardenDoneBadge.classList.toggle("hidden", true);
@@ -565,6 +650,8 @@ function renderScene() {
     renderOwlGarden();
   } else if (houseBunnyScene) {
     renderHouseBunny();
+  } else if (forestSchoolScene) {
+    renderForestSchool();
   } else {
     owlGardenOverlay.innerHTML = "";
   }
@@ -600,6 +687,13 @@ function setScene(sceneName) {
     runOwlGarden(sequenceId);
   } else if (sceneName === "houseBunny") {
     runHouseBunny(sequenceId);
+  } else if (sceneName === "forestSchool") {
+    if (!state.audioUnlocked) {
+      resetForestSchool();
+      renderScene();
+      return;
+    }
+    runForestSchool(sequenceId);
   }
 }
 
@@ -776,6 +870,7 @@ function resetOwlGarden() {
   state.owlGardenCompletedIds = new Set();
   state.owlGardenCurrentNumbers = {};
   state.owlGardenLockedNumbers = {};
+  state.owlGardenRemainingNumbers = shuffledOwlGardenNumbers();
   state.owlGardenHelpPlayed = false;
   state.owlGardenOutroVisibleCount = 0;
 }
@@ -786,6 +881,17 @@ function resetHouseBunny() {
   state.houseBunnyTargetId = "";
   state.houseBunnyRemainingIds = [];
   state.houseBunnyDartColorId = "";
+  state.houseBunnyScore = 0;
+}
+
+function resetForestSchool() {
+  state.forestSchoolPhase = "intro";
+  state.forestSchoolScore = 0;
+  state.forestSchoolCurrentObjectId = "";
+  state.forestSchoolQuestionWord = "";
+  state.forestSchoolAnswerYes = true;
+  state.forestSchoolRemainingIds = shuffledForestSchoolObjectIds();
+  state.forestSchoolHelpVisible = false;
 }
 
 function renderBenjiBunnyDialogue() {
@@ -1004,6 +1110,15 @@ function shuffledHouseBunnyColorIds() {
   return ids;
 }
 
+function shuffledOwlGardenNumbers() {
+  const numbers = [1, 2, 3, 4, 5, 6, 7, 8];
+  for (let index = numbers.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [numbers[index], numbers[swapIndex]] = [numbers[swapIndex], numbers[index]];
+  }
+  return numbers;
+}
+
 function currentHouseBunnyColor() {
   return houseBunnyWheelColors.find((item) => item.id === state.houseBunnyTargetId) ?? (state.houseBunnyTargetId === houseBunnyCenterColor.id ? houseBunnyCenterColor : null);
 }
@@ -1065,6 +1180,159 @@ async function runHouseBunny(sequenceId) {
   await queueNextHouseBunnyColor(sequenceId, 420);
 }
 
+async function speakForestSchoolOwlLine(text) {
+  await speakEnglishLine(text, { preferredVoiceName: "ash", rate: 0.84, pitch: 0.94 });
+}
+
+async function speakForestSchoolBunnyLine(text) {
+  const played = text === "Yes, it is." ? await playAudioFileIfAvailable(forestSchoolDemoAudio.bunnyYes) : false;
+  if (!played) {
+    await speakEnglishLine(text, { preferredVoiceName: "samantha|ava|karen|victoria", rate: 0.9, pitch: 1.12 });
+  }
+}
+
+async function speakForestSchoolBenjiLine(text) {
+  const played = text === "No, it isn't." ? await playAudioFileIfAvailable(forestSchoolDemoAudio.benjiNo) : false;
+  if (!played) {
+    await speakEnglishLine(text, { preferredVoiceName: "daniel|fred|fable", rate: 0.88, pitch: 0.96 });
+  }
+}
+
+function currentForestSchoolObject() {
+  return forestSchoolObjects.find((item) => item.id === state.forestSchoolCurrentObjectId) ?? forestSchoolObjects[0];
+}
+
+function forestSchoolObjectById(objectId) {
+  return forestSchoolObjects.find((item) => item.id === objectId) ?? forestSchoolObjects[0];
+}
+
+function shuffledForestSchoolObjectIds() {
+  const ids = forestSchoolObjects.map((item) => item.id);
+  for (let index = ids.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [ids[index], ids[swapIndex]] = [ids[swapIndex], ids[index]];
+  }
+  return ids;
+}
+
+function nextForestSchoolObject() {
+  if (!state.forestSchoolRemainingIds.length) {
+    state.forestSchoolRemainingIds = shuffledForestSchoolObjectIds();
+  }
+  return forestSchoolObjectById(state.forestSchoolRemainingIds.pop());
+}
+
+function wrongForestSchoolQuestionWord(objectWord) {
+  const wrongWords = forestSchoolQuestionWords.filter((word) => word !== objectWord);
+  return wrongWords[Math.floor(Math.random() * wrongWords.length)] ?? objectWord;
+}
+
+function setForestSchoolQuestion(object, questionWord) {
+  state.forestSchoolCurrentObjectId = object.id;
+  state.forestSchoolQuestionWord = questionWord;
+  state.forestSchoolAnswerYes = questionWord === object.word;
+}
+
+function pickForestSchoolQuestion() {
+  const object = nextForestSchoolObject();
+  const shouldBeCorrect = Math.random() >= 0.38;
+  const questionWord = shouldBeCorrect ? object.word : wrongForestSchoolQuestionWord(object.word);
+  setForestSchoolQuestion(object, questionWord);
+}
+
+async function queueNextForestSchoolQuestion(sequenceId, delayMs = 650) {
+  state.forestSchoolPhase = "conjure";
+  renderScene();
+  await pauseMs(delayMs);
+  if (!isSceneActive("forestSchool", sequenceId)) {
+    return;
+  }
+  pickForestSchoolQuestion();
+  state.forestSchoolPhase = "question";
+  renderScene();
+  await speakForestSchoolOwlLine(`Is this a ${state.forestSchoolQuestionWord}?`);
+}
+
+async function runForestSchoolDemo(sequenceId) {
+  const demoIds = shuffledForestSchoolObjectIds();
+  const bunnyObject = forestSchoolObjectById(demoIds.pop());
+  const benjiObject = forestSchoolObjectById(demoIds.pop());
+
+  state.forestSchoolPhase = "conjure";
+  renderScene();
+  await pauseMs(650);
+  if (!isSceneActive("forestSchool", sequenceId)) {
+    return false;
+  }
+
+  setForestSchoolQuestion(bunnyObject, wrongForestSchoolQuestionWord(bunnyObject.word));
+  state.forestSchoolPhase = "demoBunny";
+  renderScene();
+  await speakForestSchoolOwlLine(`Is this a ${state.forestSchoolQuestionWord}?`);
+  if (!isSceneActive("forestSchool", sequenceId)) {
+    return false;
+  }
+  await speakForestSchoolBunnyLine("Yes, it is.");
+  if (!isSceneActive("forestSchool", sequenceId)) {
+    return false;
+  }
+  await pauseMs(650);
+
+  state.forestSchoolPhase = "conjure";
+  renderScene();
+  await pauseMs(650);
+  if (!isSceneActive("forestSchool", sequenceId)) {
+    return false;
+  }
+
+  setForestSchoolQuestion(benjiObject, wrongForestSchoolQuestionWord(benjiObject.word));
+  state.forestSchoolPhase = "demoBenji";
+  renderScene();
+  await speakForestSchoolOwlLine(`Is this a ${state.forestSchoolQuestionWord}?`);
+  if (!isSceneActive("forestSchool", sequenceId)) {
+    return false;
+  }
+  await speakForestSchoolBenjiLine("No, it isn't.");
+  if (!isSceneActive("forestSchool", sequenceId)) {
+    return false;
+  }
+  await pauseMs(650);
+
+  state.forestSchoolCurrentObjectId = "";
+  state.forestSchoolQuestionWord = "";
+  state.forestSchoolAnswerYes = true;
+  state.forestSchoolPhase = "demoReady";
+  renderScene();
+  await speakForestSchoolOwlLine("Will you try?");
+  return isSceneActive("forestSchool", sequenceId);
+}
+
+async function runForestSchool(sequenceId) {
+  if (!isSceneActive("forestSchool", sequenceId)) {
+    return;
+  }
+  resetForestSchool();
+  renderScene();
+  await pauseMs(900);
+  if (!isSceneActive("forestSchool", sequenceId)) {
+    return;
+  }
+  await speakForestSchoolOwlLine("Welcome to forest school.");
+  if (!isSceneActive("forestSchool", sequenceId)) {
+    return;
+  }
+  await playForestSchoolHelp();
+  if (!isSceneActive("forestSchool", sequenceId)) {
+    return;
+  }
+  const demoFinished = await runForestSchoolDemo(sequenceId);
+  if (!demoFinished || !isSceneActive("forestSchool", sequenceId)) {
+    return;
+  }
+  state.forestSchoolRemainingIds = shuffledForestSchoolObjectIds();
+  await queueNextForestSchoolQuestion(sequenceId, 700);
+}
+
 async function playBenjiBunnyHelp() {
   await playAudioFile(benjiBunnyHelpAudio.intro);
 }
@@ -1093,6 +1361,18 @@ async function playOwlGardenHelp() {
     return;
   }
   await speakEnglishLine("Listen to the colours: yellow, purple and pink.", { preferredVoiceName: "ash", rate: 0.84, pitch: 0.94 });
+}
+
+async function playForestSchoolHelp() {
+  if (state.currentScene !== "forestSchool") {
+    return;
+  }
+  state.forestSchoolHelpVisible = true;
+  renderScene();
+  const playedHelpAudio = await playAudioFileIfAvailable(forestSchoolHelpAudio);
+  if (!playedHelpAudio) {
+    await speakCzechLine(forestSchoolHelpSpokenText, { rate: 0.86 });
+  }
 }
 
 function detectHouseBunnyColor(localX, localY, width, height) {
@@ -1180,6 +1460,10 @@ storyStage.addEventListener("click", async (event) => {
   }
   if (wasLocked && (state.currentScene === "intro2" || state.currentScene === "intro3")) {
     setScene(state.currentScene);
+    return;
+  }
+  if (state.currentScene === "forestSchool" && (wasLocked || state.forestSchoolPhase === "intro")) {
+    setScene("forestSchool");
   }
 });
 
@@ -1250,6 +1534,8 @@ owlGardenHelpButton.addEventListener("click", async (event) => {
     await playOwlGardenHelp();
   } else if (state.currentScene === "houseBunny") {
     await playHouseBunnyCurrentColor();
+  } else if (state.currentScene === "forestSchool") {
+    await playForestSchoolHelp();
   }
 });
 
@@ -1339,6 +1625,7 @@ function renderHouseBunny() {
     await handleHouseBunnySelection(selectedColor.id);
   });
   owlGardenOverlay.appendChild(wheel);
+  owlGardenOverlay.appendChild(createForestSchoolDebugButton());
 
   if (state.houseBunnyImageStep === 3 && state.houseBunnyDartColorId) {
     const color = houseBunnyWheelColors.find((item) => item.id === state.houseBunnyDartColorId) ?? (state.houseBunnyDartColorId === houseBunnyCenterColor.id ? houseBunnyCenterColor : null);
@@ -1361,6 +1648,189 @@ function renderHouseBunny() {
       owlGardenOverlay.appendChild(dart);
     }
   }
+}
+
+function renderForestSchool() {
+  owlGardenOverlay.innerHTML = "";
+  owlGardenPrompt.textContent = state.forestSchoolPhase === "intro"
+    ? "Owl is speaking..."
+    : state.forestSchoolPhase === "conjure"
+      ? "Magic..."
+    : state.forestSchoolPhase === "done"
+      ? "Excellent."
+    : state.forestSchoolPhase === "finished"
+        ? "Forest school complete."
+      : state.forestSchoolPhase === "demoReady"
+        ? "Will you try?"
+      : state.forestSchoolPhase === "checking"
+        ? "Listening..."
+      : state.forestSchoolPhase === "retry"
+        ? "Try again."
+        : `Is this a ${state.forestSchoolQuestionWord}?`;
+
+  const rewards = document.createElement("div");
+  rewards.className = "forest-school-rewards";
+  for (let index = 0; index < 5; index += 1) {
+    const reward = document.createElement("span");
+    reward.className = "forest-school-reward";
+    reward.textContent = "🍄";
+    if (index < state.forestSchoolScore) {
+      reward.classList.add("active");
+    }
+    rewards.appendChild(reward);
+  }
+  owlGardenOverlay.appendChild(rewards);
+
+  if (state.forestSchoolPhase === "conjure") {
+    const beam = document.createElement("div");
+    beam.className = "forest-school-wand-beam";
+    owlGardenOverlay.appendChild(beam);
+
+    const magic = document.createElement("div");
+    magic.className = "forest-school-magic";
+    for (let index = 0; index < 8; index += 1) {
+      const spark = document.createElement("span");
+      spark.className = "forest-school-spark";
+      spark.style.setProperty("--spark-angle", `${index * 45}deg`);
+      magic.appendChild(spark);
+    }
+    owlGardenOverlay.appendChild(magic);
+  }
+
+  if (state.forestSchoolPhase === "demoBunny" || state.forestSchoolPhase === "demoBenji" || state.forestSchoolPhase === "question" || state.forestSchoolPhase === "checking" || state.forestSchoolPhase === "done" || state.forestSchoolPhase === "retry" || state.forestSchoolPhase === "finished") {
+    const currentObject = currentForestSchoolObject();
+    const item = document.createElement("div");
+    item.className = `forest-school-item forest-school-item-${currentObject.id}`;
+    item.setAttribute("aria-label", currentObject.word);
+    item.appendChild(createForestSchoolObjectDrawing(currentObject.id));
+    owlGardenOverlay.appendChild(item);
+  }
+
+  const showForestSchoolHelp = state.forestSchoolHelpVisible
+    || state.forestSchoolPhase === "question"
+    || state.forestSchoolPhase === "checking"
+    || state.forestSchoolPhase === "done"
+    || state.forestSchoolPhase === "retry";
+  if (showForestSchoolHelp) {
+    const help = document.createElement("div");
+    help.className = "forest-school-help";
+    help.textContent = forestSchoolHelpDisplayText;
+    owlGardenOverlay.appendChild(help);
+  }
+
+  const controls = document.createElement("div");
+  controls.className = "forest-school-answer-row";
+  controls.appendChild(createForestSchoolAnswerButton(true));
+  controls.appendChild(createForestSchoolAnswerButton(false));
+  owlGardenOverlay.appendChild(controls);
+}
+
+function createForestSchoolObjectDrawing(objectId) {
+  const drawing = document.createElement("span");
+  drawing.className = "forest-school-object-drawing";
+  if (forestSchoolQuestionWords.includes(objectId)) {
+    const image = document.createElement("img");
+    image.className = "forest-school-object-image";
+    image.src = `assets/forest_school_${objectId}.png?v=20260526b`;
+    image.alt = objectId;
+    drawing.appendChild(image);
+    return drawing;
+  }
+
+  const drawings = {
+    ball: `
+      <svg viewBox="0 0 120 120" role="img" aria-label="ball">
+        <circle class="svg-shadow" cx="60" cy="64" r="46"></circle>
+        <circle class="svg-outline" cx="60" cy="58" r="45"></circle>
+        <path class="svg-ball-red" d="M21 48c9-25 34-39 59-31 13 4 23 13 30 24-25-2-46 5-65 21-8-6-16-10-24-14Z"></path>
+        <path class="svg-ball-blue" d="M34 85c13 15 36 21 56 10 18-10 28-29 24-49-27-1-50 8-68 27-5 5-9 9-12 12Z"></path>
+        <path class="svg-ball-band" d="M24 52c14 6 24 13 31 22 8 10 13 22 15 34"></path>
+        <path class="svg-shine" d="M43 31c7-5 16-7 24-5"></path>
+      </svg>
+    `,
+    book: `
+      <svg viewBox="0 0 120 120" role="img" aria-label="book">
+        <path class="svg-shadow" d="M17 88c19 12 36 14 52 7 13 7 27 6 43-2V36c-16 9-30 10-43 3-15 7-32 6-52-4v53Z"></path>
+        <path class="svg-outline" d="M14 82c18 12 36 14 53 6 13 8 28 7 45-2V30c-17 10-32 11-45 3-15 8-33 7-53-4v53Z"></path>
+        <path class="svg-book-left" d="M20 39c16 7 30 8 43 2v39c-13 5-27 4-43-4V39Z"></path>
+        <path class="svg-book-right" d="M72 41c11 5 22 4 34-2v39c-13 7-24 8-34 2V41Z"></path>
+        <path class="svg-book-fold" d="M67 34v55"></path>
+        <path class="svg-book-line" d="M30 53h21M30 64h18M83 52h14M83 63h17"></path>
+      </svg>
+    `,
+    star: `
+      <svg viewBox="0 0 120 120" role="img" aria-label="star">
+        <path class="svg-shadow" d="M61 13l13 29 32 3-24 22 7 31-28-16-28 16 7-31-24-22 32-3 13-29Z"></path>
+        <path class="svg-outline" d="M60 9l14 31 34 4-25 23 7 34-30-17-30 17 7-34-25-23 34-4 14-31Z"></path>
+        <path class="svg-star-fill" d="M60 18l11 27 29 3-22 19 6 28-24-15-24 15 6-28-22-19 29-3 11-27Z"></path>
+        <path class="svg-shine" d="M50 39c5-8 11-12 18-13"></path>
+      </svg>
+    `,
+    apple: `
+      <svg viewBox="0 0 120 120" role="img" aria-label="apple">
+        <path class="svg-shadow" d="M61 31c9-10 27-11 38 4 13 19 3 58-25 68-5 2-9-1-14-1s-10 3-15 1C17 93 7 54 20 35c11-15 29-14 38-4h3Z"></path>
+        <path class="svg-stem" d="M60 28c1-12 7-20 18-24"></path>
+        <path class="svg-leaf" d="M70 18c13-8 26-5 32 8-14 7-25 5-32-8Z"></path>
+        <path class="svg-outline" d="M60 31c9-11 28-12 39 4 13 20 2 58-25 68-6 2-10-2-14-2s-9 4-15 2C18 93 7 55 21 35c11-16 30-15 39-4Z"></path>
+        <path class="svg-apple-fill" d="M60 39c8-9 23-10 31 3 10 16 1 44-20 52-5 2-8-2-11-2s-7 4-12 2c-21-8-30-36-20-52 8-13 24-12 32-3Z"></path>
+        <path class="svg-shine" d="M41 48c5-7 12-9 20-8"></path>
+      </svg>
+    `,
+    box: `
+      <svg viewBox="0 0 120 120" role="img" aria-label="box">
+        <path class="svg-shadow" d="M22 40l38-18 39 18v49l-39 20-38-20V40Z"></path>
+        <path class="svg-outline" d="M18 36l42-20 43 20v51l-43 22-42-22V36Z"></path>
+        <path class="svg-box-top" d="M18 36l42 19 43-19-43-20-42 20Z"></path>
+        <path class="svg-box-left" d="M18 36l42 19v54L18 87V36Z"></path>
+        <path class="svg-box-right" d="M60 55l43-19v51l-43 22V55Z"></path>
+        <path class="svg-box-line" d="M60 55v54M36 45l42-20"></path>
+      </svg>
+    `,
+  };
+  drawing.innerHTML = drawings[objectId] ?? drawings.ball;
+  return drawing;
+}
+
+function createForestSchoolAnswerButton(answerYes) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `forest-school-answer ${answerYes ? "yes" : "no"}`;
+  button.disabled = state.forestSchoolPhase !== "question";
+  button.setAttribute("aria-label", answerYes ? "Yes" : "No");
+
+  const icon = document.createElement("span");
+  icon.className = "forest-school-answer-icon";
+  icon.textContent = answerYes ? "OK" : "X";
+
+  const label = document.createElement("span");
+  label.className = "forest-school-answer-label";
+  label.textContent = answerYes ? "YES" : "NO";
+
+  button.appendChild(icon);
+  button.appendChild(label);
+  button.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    await primeAudio();
+    await handleForestSchoolAnswer(answerYes);
+  });
+  return button;
+}
+
+function createForestSchoolDebugButton() {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "owl-garden-debug-skip";
+  button.style.left = `${forestSchoolDebugRect.x}%`;
+  button.style.top = `${forestSchoolDebugRect.y}%`;
+  button.style.width = `${forestSchoolDebugRect.w}%`;
+  button.style.height = `${forestSchoolDebugRect.h}%`;
+  button.setAttribute("aria-label", "Debug forest school");
+  button.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    await primeAudio();
+    setScene("forestSchool");
+  });
+  return button;
 }
 
 function createOwlGardenOutroBubble(item, index) {
@@ -1474,7 +1944,10 @@ function createOwlGardenWordButton(group) {
 }
 
 function nextOwlGardenNumber(groupId) {
-  const numberValue = 1 + Math.floor(Math.random() * 8);
+  if (!state.owlGardenRemainingNumbers.length) {
+    state.owlGardenRemainingNumbers = shuffledOwlGardenNumbers();
+  }
+  const numberValue = state.owlGardenRemainingNumbers.pop();
   state.owlGardenCurrentNumbers[groupId] = numberValue;
   return numberValue;
 }
@@ -1562,6 +2035,7 @@ async function handleHouseBunnySelection(colorId) {
 
   const sequenceId = state.sequenceId;
   state.houseBunnyPhase = "result";
+  state.houseBunnyScore += 1;
   renderScene();
   await speakHouseBunnyLine("Excellent.");
   if (!isSceneActive("houseBunny", sequenceId)) {
@@ -1583,7 +2057,58 @@ async function handleHouseBunnySelection(colorId) {
     return;
   }
 
+  if (state.houseBunnyScore >= houseBunnyWinCount) {
+    await speakHouseBunnyLine("Great job. Let's go to forest school.");
+    if (isSceneActive("houseBunny", sequenceId)) {
+      setScene("forestSchool");
+    }
+    return;
+  }
+
   await queueNextHouseBunnyColor(sequenceId, 420);
+}
+
+async function handleForestSchoolAnswer(answerYes) {
+  if (state.currentScene !== "forestSchool" || state.forestSchoolPhase !== "question") {
+    return;
+  }
+
+  const sequenceId = state.sequenceId;
+  state.forestSchoolPhase = "checking";
+  renderScene();
+  await speakEnglishLine(answerYes ? "yes" : "no", { preferredVoiceName: "samantha|ava|victoria|karen", rate: 0.9, pitch: 1.02 });
+  if (!isSceneActive("forestSchool", sequenceId)) {
+    return;
+  }
+
+  if (answerYes !== state.forestSchoolAnswerYes) {
+    state.forestSchoolPhase = "retry";
+    renderScene();
+    await speakForestSchoolOwlLine("Try again.");
+    if (isSceneActive("forestSchool", sequenceId)) {
+      state.forestSchoolPhase = "question";
+      renderScene();
+      await speakForestSchoolOwlLine(`Is this a ${state.forestSchoolQuestionWord}?`);
+    }
+    return;
+  }
+
+  state.forestSchoolScore += 1;
+  state.forestSchoolPhase = "done";
+  renderScene();
+  await speakForestSchoolOwlLine("Excellent.");
+  if (!isSceneActive("forestSchool", sequenceId)) {
+    return;
+  }
+
+  if (state.forestSchoolScore >= forestSchoolWinCount) {
+    state.forestSchoolPhase = "finished";
+    renderScene();
+    await speakForestSchoolOwlLine("Great job. Forest school is finished.");
+    return;
+  }
+
+  await queueNextForestSchoolQuestion(sequenceId, 650);
 }
 
 function debugSkipOwlGarden() {
@@ -1620,4 +2145,5 @@ window.addEventListener("keydown", () => {
 
 window.speechSynthesis?.addEventListener?.("voiceschanged", () => {});
 
-setScene("intro1");
+const requestedScene = new URLSearchParams(window.location.search).get("scene");
+setScene(requestedScene === "forestSchool" ? "forestSchool" : "intro1");

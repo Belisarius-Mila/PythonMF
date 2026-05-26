@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-05-26",
+  "language": "forest_school",
+  "source_csv": "",
+  "output_dir": "PictNew/generated",
+  "target_size_kb": 900,
+  "max_size_kb": 1600,
+  "batch_size": 4,
+  "total_source_rows": 4,
+  "total_requests": 4,
+  "total_unique_target_images": 4,
+  "duplicate_source_rows": 0,
+  "total_batches": 1,
+  "style_prompt": "High-quality warm storybook vocabulary illustration for a child learner, but not babyish. Rich color, natural internal shading, clear silhouette, polished children's educational game asset quality. One isolated main object only. Use a perfectly flat solid #ff00ff chroma-key background for later background removal. The background must be one uniform color with no scenery, no floor plane, no texture, no shadow, no gradient, no reflections. Do not use #ff00ff anywhere in the object. No text, no letters, no labels, no watermark, no signature.",
+  "requests": [
+    {
+      "id": "forest-school-book",
+      "language": "forest_school",
+      "image_name": "forest_school_book",
+      "target_filename": "forest_school_book.webp",
+      "row_numbers": [1],
+      "words": ["book"],
+      "czech_meanings": ["kniha"],
+      "source_entries": [
+        {
+          "row_number": 1,
+          "word": "book",
+          "czech_meaning": "kniha",
+          "source_pd": "forest school object",
+          "source_pe": "ne"
+        }
+      ],
+      "prompt": "Create one square image for a children's English learning game object asset. The image must represent the English word 'book' with Czech meaning 'kniha'. Draw one open picture book as the unmistakable main subject, occupying most of the frame, with rich storybook illustration quality similar to high-end vocabulary cards: warm colors, natural internal shading, polished details, child-friendly but not babyish. The book should feel suitable for a magical forest school game, but do not draw the forest school scene. Isolated object only on a perfectly flat solid #ff00ff chroma-key background for later background removal. No text, no readable letters, no labels, no watermark, no signature."
+    },
+    {
+      "id": "forest-school-apple",
+      "language": "forest_school",
+      "image_name": "forest_school_apple",
+      "target_filename": "forest_school_apple.webp",
+      "row_numbers": [2],
+      "words": ["apple"],
+      "czech_meanings": ["jablko"],
+      "source_entries": [
+        {
+          "row_number": 2,
+          "word": "apple",
+          "czech_meaning": "jablko",
+          "source_pd": "forest school object",
+          "source_pe": "ne"
+        }
+      ],
+      "prompt": "Create one square image for a children's English learning game object asset. The image must represent the English word 'apple' with Czech meaning 'jablko'. Draw one bright red apple as the unmistakable main subject, occupying most of the frame, with rich storybook illustration quality similar to high-end vocabulary cards: warm colors, natural internal shading, polished details, child-friendly but not babyish. The apple may have a small leaf, but do not use #ff00ff in the object. Isolated object only on a perfectly flat solid #ff00ff chroma-key background for later background removal. No text, no readable letters, no labels, no watermark, no signature."
+    },
+    {
+      "id": "forest-school-car",
+      "language": "forest_school",
+      "image_name": "forest_school_car",
+      "target_filename": "forest_school_car.webp",
+      "row_numbers": [3],
+      "words": ["car"],
+      "czech_meanings": ["auto"],
+      "source_entries": [
+        {
+          "row_number": 3,
+          "word": "car",
+          "czech_meaning": "auto",
+          "source_pd": "forest school object",
+          "source_pe": "ne"
+        }
+      ],
+      "prompt": "Create one square image for a children's English learning game object asset. The image must represent the English word 'car' with Czech meaning 'auto'. Draw one friendly toy car as the unmistakable main subject, occupying most of the frame, with rich storybook illustration quality similar to high-end vocabulary cards: warm colors, natural internal shading, polished details, child-friendly but not babyish. The car should be simple and instantly readable for a five-year-old. Isolated object only on a perfectly flat solid #ff00ff chroma-key background for later background removal. No text, no readable letters, no labels, no watermark, no signature."
+    },
+    {
+      "id": "forest-school-house",
+      "language": "forest_school",
+      "image_name": "forest_school_house",
+      "target_filename": "forest_school_house.webp",
+      "row_numbers": [4],
+      "words": ["house"],
+      "czech_meanings": ["dům"],
+      "source_entries": [
+        {
+          "row_number": 4,
+          "word": "house",
+          "czech_meaning": "dům",
+          "source_pd": "forest school object",
+          "source_pe": "ne"
+        }
+      ],
+      "prompt": "Create one square image for a children's English learning game object asset. The image must represent the English word 'house' with Czech meaning 'dům'. Draw one cozy toy house or small wooden model house as the unmistakable main subject, occupying most of the frame, with rich storybook illustration quality similar to high-end vocabulary cards: warm colors, natural internal shading, polished details, child-friendly but not babyish. The house should be simple and instantly readable for a five-year-old. Isolated object only on a perfectly flat solid #ff00ff chroma-key background for later background removal. No text, no readable letters, no labels, no watermark, no signature."
+    }
+  ]
+}
