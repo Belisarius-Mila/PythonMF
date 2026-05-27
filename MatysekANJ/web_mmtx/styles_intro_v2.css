@@ -267,6 +267,11 @@ body {
   pointer-events: auto;
 }
 
+.owl-garden-hud .forest-school-map-button {
+  margin-left: 10px;
+  margin-right: auto;
+}
+
 .mushroom-hud > * {
   pointer-events: auto;
 }
@@ -570,11 +575,11 @@ body {
 
 .forest-school-rewards {
   position: absolute;
-  left: 64%;
-  top: 5.2%;
+  right: 14.5%;
+  top: 5.4%;
   z-index: 8;
   display: flex;
-  gap: 8px;
+  gap: clamp(3px, 0.55vw, 7px);
   transform: none;
   pointer-events: none;
 }
@@ -582,13 +587,13 @@ body {
 .forest-school-reward {
   display: grid;
   place-items: center;
-  width: clamp(20px, 2.6vw, 34px);
-  height: clamp(20px, 2.6vw, 34px);
+  width: clamp(18px, 2.2vw, 30px);
+  height: clamp(18px, 2.2vw, 30px);
   border: 2px solid rgba(255, 255, 255, 0.88);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.56);
   box-shadow: 0 8px 18px rgba(38, 60, 86, 0.18);
-  font-size: clamp(0.82rem, 1.8vw, 1.32rem);
+  font-size: clamp(0.74rem, 1.55vw, 1.12rem);
   filter: grayscale(1);
   opacity: 0.48;
 }
@@ -745,6 +750,11 @@ body {
   background: #df5a54;
 }
 
+.forest-school-answer.demo-highlight {
+  opacity: 1;
+  animation: forest-school-demo-answer 980ms ease-in-out both;
+}
+
 .forest-school-answer-icon {
   display: grid;
   place-items: center;
@@ -759,6 +769,173 @@ body {
 .forest-school-answer-label {
   font-size: clamp(0.82rem, 1.28vw, 1.08rem);
   font-weight: 950;
+}
+
+.forest-school-choice-card {
+  position: absolute;
+  left: 50%;
+  bottom: 4.8%;
+  z-index: 12;
+  width: min(44vw, 520px);
+  min-width: 300px;
+  padding: 14px 16px;
+  border: 3px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: var(--shadow);
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.forest-school-choice-text {
+  color: #31455c;
+  font-size: clamp(0.95rem, 1.38vw, 1.15rem);
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.forest-school-choice-actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.forest-school-choice-button {
+  min-width: clamp(82px, 9vw, 118px);
+  min-height: clamp(42px, 4.8vw, 58px);
+  border: 3px solid var(--line);
+  border-radius: 14px;
+  color: #ffffff;
+  box-shadow: 0 8px 16px rgba(38, 60, 86, 0.18);
+  cursor: pointer;
+  font-size: clamp(0.95rem, 1.45vw, 1.18rem);
+  font-weight: 950;
+}
+
+.forest-school-choice-button.yes {
+  background: #4fba65;
+}
+
+.forest-school-choice-button.no {
+  background: #df5a54;
+}
+
+.forest-school-choice-button:hover {
+  transform: scale(1.04);
+}
+
+.forest-school-map-panel {
+  position: absolute;
+  left: 2.5%;
+  top: 15%;
+  z-index: 15;
+  width: min(31vw, 380px);
+  min-width: 286px;
+  padding: 14px;
+  border: 3px solid #7d9a75;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 252, 235, 0.98), rgba(238, 250, 226, 0.98));
+  box-shadow: 0 20px 40px rgba(38, 60, 86, 0.18);
+}
+
+.forest-school-map-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.forest-school-map-title {
+  color: #314b33;
+  font-size: clamp(1rem, 1.35vw, 1.18rem);
+  font-weight: 950;
+}
+
+.forest-school-map-close {
+  width: 34px;
+  height: 34px;
+  border: 2px solid #7d9a75;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #314b33;
+  box-shadow: 0 6px 12px rgba(38, 60, 86, 0.14);
+  cursor: pointer;
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.forest-school-map-path {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.forest-school-map-path::before {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 50%;
+  height: 5px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(125, 154, 117, 0.18), rgba(125, 154, 117, 0.42), rgba(125, 154, 117, 0.18));
+  transform: translateY(-50%);
+}
+
+.forest-school-map-node {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border: 3px solid #7d9a75;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #496149;
+  box-shadow: 0 8px 14px rgba(38, 60, 86, 0.13);
+  cursor: pointer;
+  font-size: clamp(1rem, 1.7vw, 1.36rem);
+  font-weight: 950;
+}
+
+.forest-school-map-node.visited {
+  background: #dff0c8;
+}
+
+.forest-school-map-node.current {
+  background: #f6d56e;
+  border-color: #b07835;
+  color: #3d3118;
+  transform: scale(1.05);
+}
+
+.forest-school-map-node:hover {
+  transform: scale(1.04);
+}
+
+.forest-school-map-node.current:hover {
+  transform: scale(1.08);
+}
+
+.forest-school-map-words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.forest-school-map-word {
+  border: 2px solid rgba(125, 154, 117, 0.54);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  color: #314b33;
+  padding: 5px 9px;
+  font-size: clamp(0.74rem, 1vw, 0.9rem);
+  font-weight: 850;
 }
 
 .owl-garden-outro-bubble {
@@ -905,6 +1082,30 @@ body {
   }
   50% {
     transform: scale(1.06);
+  }
+}
+
+@keyframes forest-school-demo-answer {
+  0% {
+    filter: brightness(1);
+    transform: translateY(0) scale(1);
+  }
+
+  22%,
+  62% {
+    filter: brightness(1.28);
+    transform: translateY(-3px) scale(1.12);
+  }
+
+  42%,
+  82% {
+    filter: brightness(0.92);
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    filter: brightness(1);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -1072,6 +1273,39 @@ body {
     bottom: 14px;
     min-width: 58px;
     min-height: 58px;
+  }
+
+  .forest-school-choice-card {
+    width: min(86vw, 430px);
+    min-width: 0;
+    padding: 12px;
+  }
+
+  .forest-school-choice-actions {
+    gap: 10px;
+  }
+
+  .forest-school-rewards {
+    right: 10.5%;
+    top: 6%;
+  }
+
+  .forest-school-map-panel {
+    left: 12px;
+    top: 86px;
+    width: min(84vw, 340px);
+    min-width: 0;
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .forest-school-map-path {
+    gap: 8px;
+  }
+
+  .forest-school-map-close {
+    width: 32px;
+    height: 32px;
   }
 
   .owl-garden-outro-bubble {

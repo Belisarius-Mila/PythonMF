@@ -17,6 +17,7 @@ const dialogueHelpButton = document.getElementById("dialogueHelpButton");
 const dialogueDoorButton = document.getElementById("dialogueDoorButton");
 const owlGardenHud = document.getElementById("owlGardenHud");
 const backFromOwlGardenButton = document.getElementById("backFromOwlGardenButton");
+const forestSchoolMapButton = document.getElementById("forestSchoolMapButton");
 const owlGardenHelpButton = document.getElementById("owlGardenHelpButton");
 const owlGardenOverlay = document.getElementById("owlGardenOverlay");
 const owlGardenPrompt = document.getElementById("owlGardenPrompt");
@@ -162,18 +163,136 @@ const houseBunnyWheelColors = [
 ];
 const houseBunnyCenterColor = { id: "black", word: "black" };
 const houseBunnyWinCount = 5;
-const forestSchoolWinCount = 5;
-const forestSchoolObjects = [
-  { id: "ball", word: "ball" },
-  { id: "book", word: "book" },
-  { id: "apple", word: "apple" },
-  { id: "car", word: "car" },
-  { id: "house", word: "house" },
+const forestSchoolLessons = [
+  {
+    title: "Lesson one",
+    objects: [
+      { id: "ball", word: "ball", translation: "míč" },
+      { id: "car", word: "car", translation: "auto" },
+      { id: "book", word: "book", translation: "kniha" },
+      { id: "house", word: "house", translation: "dům" },
+      { id: "apple", word: "apple", translation: "jablko" },
+    ],
+  },
+  {
+    title: "Lesson two",
+    objects: [
+      { id: "train", word: "train", translation: "vlak" },
+      { id: "cup", word: "cup", translation: "hrnek" },
+      { id: "shoe", word: "shoe", translation: "bota" },
+      { id: "tree", word: "tree", translation: "strom" },
+      { id: "banana", word: "banana", translation: "banán" },
+    ],
+  },
+  {
+    title: "Lesson three",
+    objects: [
+      { id: "boat", word: "boat", translation: "loď" },
+      { id: "plate", word: "plate", translation: "talíř" },
+      { id: "sock", word: "sock", translation: "ponožka" },
+      { id: "flower", word: "flower", translation: "kytka" },
+      { id: "orange", word: "orange", translation: "pomeranč" },
+    ],
+  },
+  {
+    title: "Lesson four",
+    objects: [
+      { id: "bus", word: "bus", translation: "autobus" },
+      { id: "spoon", word: "spoon", translation: "lžička" },
+      { id: "hat", word: "hat", translation: "čepice" },
+      { id: "sun", word: "sun", translation: "slunce" },
+      { id: "carrot", word: "carrot", translation: "mrkev" },
+    ],
+  },
+  {
+    title: "Lesson five",
+    objects: [
+      { id: "bike", word: "bike", translation: "kolo" },
+      { id: "chair", word: "chair", translation: "židle" },
+      { id: "bag", word: "bag", translation: "batoh" },
+      { id: "moon", word: "moon", translation: "měsíc" },
+      { id: "bread", word: "bread", translation: "chleba" },
+    ],
+  },
+  {
+    title: "Lesson six",
+    objects: [
+      { id: "truck", word: "truck", translation: "náklaďák" },
+      { id: "table", word: "table", translation: "stůl" },
+      { id: "bed", word: "bed", translation: "postel" },
+      { id: "star", word: "star", translation: "hvězda" },
+      { id: "cake", word: "cake", translation: "dort" },
+    ],
+  },
+  {
+    title: "Lesson seven",
+    objects: [
+      { id: "plane", word: "plane", translation: "letadlo" },
+      { id: "door", word: "door", translation: "dveře" },
+      { id: "box", word: "box", translation: "krabice" },
+      { id: "cloud", word: "cloud", translation: "mrak" },
+      { id: "milk", word: "milk", translation: "mléko" },
+    ],
+  },
+  {
+    title: "Lesson eight",
+    objects: [
+      { id: "rocket", word: "rocket", translation: "raketa" },
+      { id: "window", word: "window", translation: "okno" },
+      { id: "key", word: "key", translation: "klíč" },
+      { id: "stone", word: "stone", translation: "kámen" },
+      { id: "water", word: "water", translation: "voda" },
+    ],
+  },
+  {
+    title: "Lesson nine",
+    objects: [
+      { id: "robot", word: "robot", translation: "robot" },
+      { id: "fork", word: "fork", translation: "vidlička" },
+      { id: "cap", word: "cap", translation: "čepice" },
+      { id: "leaf", word: "leaf", translation: "list" },
+      { id: "cookie", word: "cookie", translation: "sušenka" },
+    ],
+  },
+  {
+    title: "Lesson ten",
+    objects: [
+      { id: "block", word: "block", translation: "kostka" },
+      { id: "pencil", word: "pencil", translation: "tužka" },
+      { id: "pants", word: "pants", translation: "kalhoty" },
+      { id: "stick", word: "stick", translation: "klacek" },
+      { id: "corn", word: "corn", translation: "kukuřice" },
+    ],
+  },
+  {
+    title: "Lesson eleven",
+    objects: [
+      { id: "doll", word: "doll", translation: "panenka" },
+      { id: "map", word: "map", translation: "mapa" },
+      { id: "soap", word: "soap", translation: "mýdlo" },
+      { id: "pillow", word: "pillow", translation: "polštář" },
+      { id: "grape", word: "grape", translation: "hroznové víno" },
+    ],
+  },
+  {
+    title: "Lesson twelve",
+    objects: [
+      { id: "toy", word: "toy", translation: "hračka" },
+      { id: "kite", word: "kite", translation: "drak" },
+      { id: "lamp", word: "lamp", translation: "lampa" },
+      { id: "boots", word: "boots", translation: "holinky" },
+      { id: "pea", word: "pea", translation: "hrášek" },
+    ],
+  },
 ];
-const forestSchoolQuestionWords = ["ball", "book", "apple", "car", "house"];
+const forestSchoolWinCount = 8;
+const forestSchoolObjects = forestSchoolLessons.flatMap((lesson) => lesson.objects);
+const forestSchoolQuestionWords = forestSchoolObjects.map((item) => item.word);
 const forestSchoolHelpDisplayText = "Je to správně? Pokud ano klikni jes, pokud ne klikni no.";
 const forestSchoolHelpSpokenText = "Je to správně? Pokud ano, klikňi na jes. Pokud ne, klikňi na nou.";
 const forestSchoolHelpAudio = "audio/czech/forest_school_help_cz.mp3?v=20260527czvoice";
+const forestSchoolLessonChoiceText = "Chceš pokračovat další lekcí? Stiskni Ano. Pokud chceš opakovat, stiskni Ne.";
+const forestSchoolLessonChoiceSpokenText = "Chceš pokračovat další lekcí? Stiskňi ano. Pokud chceš opakovat, stiskňi ne.";
 const forestSchoolDemoAudio = {
   bunnyYes: "audio/english/forest_school_bunny_yes_it_is.mp3?v=20260527voice",
   benjiNo: "audio/english/forest_school_benji_no_it_isnt.mp3?v=20260527benji",
@@ -216,12 +335,16 @@ const state = {
   houseBunnyDartColorId: "",
   houseBunnyScore: 0,
   forestSchoolPhase: "intro",
+  forestSchoolLessonIndex: 0,
   forestSchoolScore: 0,
   forestSchoolCurrentObjectId: "",
   forestSchoolQuestionWord: "",
   forestSchoolAnswerYes: true,
   forestSchoolRemainingIds: [],
+  forestSchoolReviewIndex: 0,
   forestSchoolHelpVisible: false,
+  forestSchoolMapOpen: false,
+  forestSchoolDemoAnswerHighlight: "",
   groupCounts: {
     red: 0,
     blue: 0,
@@ -623,6 +746,7 @@ function renderScene() {
   dialogueHud.classList.toggle("hidden", state.currentScene !== "benjiBunny");
   dialoguePanel.classList.toggle("hidden", state.currentScene !== "benjiBunny");
   owlGardenHud.classList.toggle("hidden", state.currentScene !== "owlGarden" && !houseBunnyScene && !forestSchoolScene);
+  forestSchoolMapButton.classList.toggle("hidden", !forestSchoolScene);
   owlGardenHelpButton.classList.toggle("hidden", (!houseBunnyScene && !forestSchoolScene && state.currentScene !== "owlGarden") || (state.currentScene === "owlGarden" && state.owlGardenPhase !== "play") || (houseBunnyScene && state.houseBunnyPhase !== "waiting"));
   owlGardenHelpButton.classList.toggle("pulse-soft", (state.currentScene === "owlGarden" && state.owlGardenPhase === "play") || (houseBunnyScene && state.houseBunnyPhase === "waiting") || forestSchoolScene);
   owlGardenOverlay.classList.toggle("hidden", state.currentScene !== "owlGarden" && !houseBunnyScene && !forestSchoolScene);
@@ -884,14 +1008,19 @@ function resetHouseBunny() {
   state.houseBunnyScore = 0;
 }
 
-function resetForestSchool() {
+function resetForestSchool(options = {}) {
+  const requestedLessonIndex = options.lessonIndex ?? state.forestSchoolLessonIndex ?? 0;
+  state.forestSchoolLessonIndex = Math.min(Math.max(requestedLessonIndex, 0), forestSchoolLessons.length - 1);
   state.forestSchoolPhase = "intro";
   state.forestSchoolScore = 0;
   state.forestSchoolCurrentObjectId = "";
   state.forestSchoolQuestionWord = "";
   state.forestSchoolAnswerYes = true;
   state.forestSchoolRemainingIds = shuffledForestSchoolObjectIds();
+  state.forestSchoolReviewIndex = 0;
   state.forestSchoolHelpVisible = false;
+  state.forestSchoolMapOpen = false;
+  state.forestSchoolDemoAnswerHighlight = "";
 }
 
 function renderBenjiBunnyDialogue() {
@@ -1198,6 +1327,18 @@ async function speakForestSchoolBenjiLine(text) {
   }
 }
 
+function currentForestSchoolLesson() {
+  return forestSchoolLessons[state.forestSchoolLessonIndex] ?? forestSchoolLessons[0];
+}
+
+function currentForestSchoolObjects() {
+  return currentForestSchoolLesson().objects;
+}
+
+function currentForestSchoolQuestionWords() {
+  return currentForestSchoolObjects().map((item) => item.word);
+}
+
 function currentForestSchoolObject() {
   return forestSchoolObjects.find((item) => item.id === state.forestSchoolCurrentObjectId) ?? forestSchoolObjects[0];
 }
@@ -1207,7 +1348,7 @@ function forestSchoolObjectById(objectId) {
 }
 
 function shuffledForestSchoolObjectIds() {
-  const ids = forestSchoolObjects.map((item) => item.id);
+  const ids = currentForestSchoolObjects().map((item) => item.id);
   for (let index = ids.length - 1; index > 0; index -= 1) {
     const swapIndex = Math.floor(Math.random() * (index + 1));
     [ids[index], ids[swapIndex]] = [ids[swapIndex], ids[index]];
@@ -1223,7 +1364,7 @@ function nextForestSchoolObject() {
 }
 
 function wrongForestSchoolQuestionWord(objectWord) {
-  const wrongWords = forestSchoolQuestionWords.filter((word) => word !== objectWord);
+  const wrongWords = currentForestSchoolQuestionWords().filter((word) => word !== objectWord);
   return wrongWords[Math.floor(Math.random() * wrongWords.length)] ?? objectWord;
 }
 
@@ -1238,6 +1379,19 @@ function pickForestSchoolQuestion() {
   const shouldBeCorrect = Math.random() >= 0.38;
   const questionWord = shouldBeCorrect ? object.word : wrongForestSchoolQuestionWord(object.word);
   setForestSchoolQuestion(object, questionWord);
+}
+
+async function flashForestSchoolDemoAnswer(answerYes, sequenceId) {
+  state.forestSchoolDemoAnswerHighlight = answerYes ? "yes" : "no";
+  renderScene();
+  await pauseMs(980);
+  if (!isSceneActive("forestSchool", sequenceId)) {
+    return false;
+  }
+  state.forestSchoolDemoAnswerHighlight = "";
+  renderScene();
+  await pauseMs(220);
+  return isSceneActive("forestSchool", sequenceId);
 }
 
 async function queueNextForestSchoolQuestion(sequenceId, delayMs = 650) {
@@ -1276,7 +1430,10 @@ async function runForestSchoolDemo(sequenceId) {
   if (!isSceneActive("forestSchool", sequenceId)) {
     return false;
   }
-  await pauseMs(650);
+  const bunnyFlashFinished = await flashForestSchoolDemoAnswer(false, sequenceId);
+  if (!bunnyFlashFinished) {
+    return false;
+  }
 
   state.forestSchoolPhase = "conjure";
   renderScene();
@@ -1285,22 +1442,26 @@ async function runForestSchoolDemo(sequenceId) {
     return false;
   }
 
-  setForestSchoolQuestion(benjiObject, wrongForestSchoolQuestionWord(benjiObject.word));
+  setForestSchoolQuestion(benjiObject, benjiObject.word);
   state.forestSchoolPhase = "demoBenji";
   renderScene();
   await speakForestSchoolOwlLine(`Is this a ${state.forestSchoolQuestionWord}?`);
   if (!isSceneActive("forestSchool", sequenceId)) {
     return false;
   }
-  await speakForestSchoolBenjiLine("No, it isn't.");
+  await speakForestSchoolBenjiLine("Yes, it is.");
   if (!isSceneActive("forestSchool", sequenceId)) {
     return false;
   }
-  await pauseMs(650);
+  const benjiFlashFinished = await flashForestSchoolDemoAnswer(true, sequenceId);
+  if (!benjiFlashFinished) {
+    return false;
+  }
 
   state.forestSchoolCurrentObjectId = "";
   state.forestSchoolQuestionWord = "";
   state.forestSchoolAnswerYes = true;
+  state.forestSchoolDemoAnswerHighlight = "";
   state.forestSchoolPhase = "demoReady";
   renderScene();
   await speakForestSchoolOwlLine("Will you try?");
@@ -1311,7 +1472,7 @@ async function runForestSchool(sequenceId) {
   if (!isSceneActive("forestSchool", sequenceId)) {
     return;
   }
-  resetForestSchool();
+  resetForestSchool({ lessonIndex: 0 });
   renderScene();
   await pauseMs(900);
   if (!isSceneActive("forestSchool", sequenceId)) {
@@ -1331,6 +1492,78 @@ async function runForestSchool(sequenceId) {
   }
   state.forestSchoolRemainingIds = shuffledForestSchoolObjectIds();
   await queueNextForestSchoolQuestion(sequenceId, 700);
+}
+
+async function startForestSchoolLesson(sequenceId, lessonIndex, options = {}) {
+  resetForestSchool({ lessonIndex });
+  renderScene();
+  await pauseMs(420);
+  if (!isSceneActive("forestSchool", sequenceId)) {
+    return;
+  }
+  if (options.announce) {
+    await speakForestSchoolOwlLine(currentForestSchoolLesson().title);
+    if (!isSceneActive("forestSchool", sequenceId)) {
+      return;
+    }
+  }
+  state.forestSchoolRemainingIds = shuffledForestSchoolObjectIds();
+  await queueNextForestSchoolQuestion(sequenceId, 520);
+}
+
+async function jumpToForestSchoolLesson(lessonIndex) {
+  if (state.currentScene !== "forestSchool") {
+    return;
+  }
+  cleanupCurrentScene();
+  state.currentScene = "forestSchool";
+  state.sequenceId += 1;
+  state.forestSchoolMapOpen = false;
+  const sequenceId = state.sequenceId;
+  await startForestSchoolLesson(sequenceId, lessonIndex, { announce: true });
+}
+
+async function runForestSchoolReview(sequenceId) {
+  const reviewObjects = currentForestSchoolObjects();
+  state.forestSchoolPhase = "review";
+  for (let index = 0; index < reviewObjects.length; index += 1) {
+    if (!isSceneActive("forestSchool", sequenceId)) {
+      return;
+    }
+    const object = reviewObjects[index];
+    state.forestSchoolReviewIndex = index;
+    state.forestSchoolCurrentObjectId = object.id;
+    state.forestSchoolQuestionWord = object.word;
+    renderScene();
+    await pauseMs(360);
+    if (!isSceneActive("forestSchool", sequenceId)) {
+      return;
+    }
+    await speakEnglishLine(object.word, { preferredVoiceName: "ash", rate: 0.84, pitch: 0.94 });
+    if (!isSceneActive("forestSchool", sequenceId)) {
+      return;
+    }
+    await speakCzechLine(object.translation, { rate: 0.86 });
+    await pauseMs(430);
+  }
+
+  if (!isSceneActive("forestSchool", sequenceId)) {
+    return;
+  }
+  state.forestSchoolCurrentObjectId = "";
+  state.forestSchoolQuestionWord = "";
+  state.forestSchoolReviewIndex = 0;
+
+  if (state.forestSchoolLessonIndex >= forestSchoolLessons.length - 1) {
+    state.forestSchoolPhase = "finished";
+    renderScene();
+    await speakForestSchoolOwlLine("Great job. Forest school is finished.");
+    return;
+  }
+
+  state.forestSchoolPhase = "lessonChoice";
+  renderScene();
+  await speakCzechLine(forestSchoolLessonChoiceSpokenText, { rate: 0.86 });
 }
 
 async function playBenjiBunnyHelp() {
@@ -1505,7 +1738,18 @@ backFromDialogueButton.addEventListener("click", (event) => {
 
 backFromOwlGardenButton.addEventListener("click", (event) => {
   event.stopPropagation();
+  state.forestSchoolMapOpen = false;
   setScene("intro4");
+});
+
+forestSchoolMapButton.addEventListener("click", async (event) => {
+  event.stopPropagation();
+  await primeAudio();
+  if (state.currentScene !== "forestSchool") {
+    return;
+  }
+  state.forestSchoolMapOpen = !state.forestSchoolMapOpen;
+  renderScene();
 });
 
 dialogueHelpButton.addEventListener("click", async (event) => {
@@ -1656,6 +1900,10 @@ function renderForestSchool() {
     ? "Owl is speaking..."
     : state.forestSchoolPhase === "conjure"
       ? "Magic..."
+    : state.forestSchoolPhase === "review"
+      ? `${currentForestSchoolObject().word} - ${currentForestSchoolObject().translation}`
+    : state.forestSchoolPhase === "lessonChoice"
+      ? "Choose."
     : state.forestSchoolPhase === "done"
       ? "Excellent."
     : state.forestSchoolPhase === "finished"
@@ -1670,7 +1918,7 @@ function renderForestSchool() {
 
   const rewards = document.createElement("div");
   rewards.className = "forest-school-rewards";
-  for (let index = 0; index < 5; index += 1) {
+  for (let index = 0; index < forestSchoolWinCount; index += 1) {
     const reward = document.createElement("span");
     reward.className = "forest-school-reward";
     reward.textContent = "🍄";
@@ -1697,7 +1945,7 @@ function renderForestSchool() {
     owlGardenOverlay.appendChild(magic);
   }
 
-  if (state.forestSchoolPhase === "demoBunny" || state.forestSchoolPhase === "demoBenji" || state.forestSchoolPhase === "question" || state.forestSchoolPhase === "checking" || state.forestSchoolPhase === "done" || state.forestSchoolPhase === "retry" || state.forestSchoolPhase === "finished") {
+  if (state.forestSchoolPhase === "demoBunny" || state.forestSchoolPhase === "demoBenji" || state.forestSchoolPhase === "question" || state.forestSchoolPhase === "checking" || state.forestSchoolPhase === "done" || state.forestSchoolPhase === "retry" || state.forestSchoolPhase === "review") {
     const currentObject = currentForestSchoolObject();
     const item = document.createElement("div");
     item.className = `forest-school-item forest-school-item-${currentObject.id}`;
@@ -1718,11 +1966,102 @@ function renderForestSchool() {
     owlGardenOverlay.appendChild(help);
   }
 
-  const controls = document.createElement("div");
-  controls.className = "forest-school-answer-row";
-  controls.appendChild(createForestSchoolAnswerButton(true));
-  controls.appendChild(createForestSchoolAnswerButton(false));
-  owlGardenOverlay.appendChild(controls);
+  const showAnswerControls = state.forestSchoolPhase === "question"
+    || state.forestSchoolPhase === "checking"
+    || state.forestSchoolPhase === "done"
+    || state.forestSchoolPhase === "retry"
+    || !!state.forestSchoolDemoAnswerHighlight;
+  if (showAnswerControls) {
+    const controls = document.createElement("div");
+    controls.className = "forest-school-answer-row";
+    controls.appendChild(createForestSchoolAnswerButton(true));
+    controls.appendChild(createForestSchoolAnswerButton(false));
+    owlGardenOverlay.appendChild(controls);
+  }
+
+  if (state.forestSchoolPhase === "lessonChoice") {
+    const card = document.createElement("div");
+    card.className = "forest-school-choice-card";
+
+    const text = document.createElement("div");
+    text.className = "forest-school-choice-text";
+    text.textContent = forestSchoolLessonChoiceText;
+    card.appendChild(text);
+
+    const actions = document.createElement("div");
+    actions.className = "forest-school-choice-actions";
+    actions.appendChild(createForestSchoolLessonChoiceButton(true));
+    actions.appendChild(createForestSchoolLessonChoiceButton(false));
+    card.appendChild(actions);
+    owlGardenOverlay.appendChild(card);
+  }
+
+  if (state.forestSchoolMapOpen) {
+    owlGardenOverlay.appendChild(createForestSchoolMapPanel());
+  }
+}
+
+function createForestSchoolMapPanel() {
+  const panel = document.createElement("div");
+  panel.className = "forest-school-map-panel";
+  panel.setAttribute("role", "dialog");
+  panel.setAttribute("aria-label", "Mapa lekci");
+
+  const header = document.createElement("div");
+  header.className = "forest-school-map-header";
+
+  const title = document.createElement("div");
+  title.className = "forest-school-map-title";
+  title.textContent = "Mapa lekcí";
+  header.appendChild(title);
+
+  const closeButton = document.createElement("button");
+  closeButton.type = "button";
+  closeButton.className = "forest-school-map-close";
+  closeButton.setAttribute("aria-label", "Zavrit mapu lekci");
+  closeButton.textContent = "×";
+  closeButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    state.forestSchoolMapOpen = false;
+    renderScene();
+  });
+  header.appendChild(closeButton);
+  panel.appendChild(header);
+
+  const path = document.createElement("div");
+  path.className = "forest-school-map-path";
+  forestSchoolLessons.forEach((lesson, index) => {
+    const node = document.createElement("button");
+    node.type = "button";
+    node.className = "forest-school-map-node";
+    if (index === state.forestSchoolLessonIndex) {
+      node.classList.add("current");
+    } else if (index < state.forestSchoolLessonIndex) {
+      node.classList.add("visited");
+    }
+    node.setAttribute("aria-label", lesson.title);
+    node.textContent = String(index + 1);
+    node.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      await primeAudio();
+      await jumpToForestSchoolLesson(index);
+    });
+    path.appendChild(node);
+  });
+  panel.appendChild(path);
+
+  const currentLesson = currentForestSchoolLesson();
+  const words = document.createElement("div");
+  words.className = "forest-school-map-words";
+  currentLesson.objects.forEach((object) => {
+    const word = document.createElement("span");
+    word.className = "forest-school-map-word";
+    word.textContent = object.word;
+    words.appendChild(word);
+  });
+  panel.appendChild(words);
+
+  return panel;
 }
 
 function createForestSchoolObjectDrawing(objectId) {
@@ -1731,7 +2070,7 @@ function createForestSchoolObjectDrawing(objectId) {
   if (forestSchoolQuestionWords.includes(objectId)) {
     const image = document.createElement("img");
     image.className = "forest-school-object-image";
-    image.src = `assets/forest_school_${objectId}.png?v=20260526b`;
+    image.src = `assets/forest_school_${objectId}.png?v=20260527lessons`;
     image.alt = objectId;
     drawing.appendChild(image);
     return drawing;
@@ -1791,10 +2130,27 @@ function createForestSchoolObjectDrawing(objectId) {
   return drawing;
 }
 
+function createForestSchoolLessonChoiceButton(continueNext) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `forest-school-choice-button ${continueNext ? "yes" : "no"}`;
+  button.textContent = continueNext ? "Ano" : "Ne";
+  button.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    await primeAudio();
+    await handleForestSchoolLessonChoice(continueNext);
+  });
+  return button;
+}
+
 function createForestSchoolAnswerButton(answerYes) {
   const button = document.createElement("button");
   button.type = "button";
   button.className = `forest-school-answer ${answerYes ? "yes" : "no"}`;
+  const highlightKey = answerYes ? "yes" : "no";
+  if (state.forestSchoolDemoAnswerHighlight === highlightKey) {
+    button.classList.add("demo-highlight");
+  }
   button.disabled = state.forestSchoolPhase !== "question";
   button.setAttribute("aria-label", answerYes ? "Yes" : "No");
 
@@ -2102,13 +2458,32 @@ async function handleForestSchoolAnswer(answerYes) {
   }
 
   if (state.forestSchoolScore >= forestSchoolWinCount) {
-    state.forestSchoolPhase = "finished";
-    renderScene();
-    await speakForestSchoolOwlLine("Great job. Forest school is finished.");
+    await runForestSchoolReview(sequenceId);
     return;
   }
 
   await queueNextForestSchoolQuestion(sequenceId, 650);
+}
+
+async function handleForestSchoolLessonChoice(continueNext) {
+  if (state.currentScene !== "forestSchool" || state.forestSchoolPhase !== "lessonChoice") {
+    return;
+  }
+
+  const sequenceId = state.sequenceId;
+  if (continueNext) {
+    const nextLessonIndex = state.forestSchoolLessonIndex + 1;
+    if (nextLessonIndex >= forestSchoolLessons.length) {
+      state.forestSchoolPhase = "finished";
+      renderScene();
+      await speakForestSchoolOwlLine("Great job. Forest school is finished.");
+      return;
+    }
+    await startForestSchoolLesson(sequenceId, nextLessonIndex, { announce: true });
+    return;
+  }
+
+  await startForestSchoolLesson(sequenceId, state.forestSchoolLessonIndex, { announce: false });
 }
 
 function debugSkipOwlGarden() {
