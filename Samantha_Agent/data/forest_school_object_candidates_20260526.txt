@@ -20,28 +20,6 @@ EN | CZ | poznamka
 09. bus | autobus | bezny predmet z mesta
 10. bike | kolo | detsky relevantni pohyb
 
-11. helmet | helma | kolo, bezpecnost, dobre rozpoznatelne
-12. backpack | batoh | skola/vylet/les
-13. flashlight | baterka | lesni vyprava
-14. map | mapa | objevovani, dobrodruzstvi
-15. compass | kompas | lesni/skautsky predmet
-16. tent | stan | vylet, taboreni
-17. campfire | ohen | lesni atmosphera, kreslit bez nebezpecnych detailu
-18. binoculars | dalekohled | pozorovani prirody
-19. shovel | lopatka | hriste/pisek/zahrada
-20. bucket | kyblik | hriste/pisek
-
-21. soccer ball | fotbalovy mic | odlisit od obecneho ball
-22. kite | drak | venkovni hrani
-23. puzzle | puzzle | hracka, uceni
-24. blocks | kostky | staveni, jednoduche tvary
-25. crayons | pastelky | kresleni
-26. pencil | tuzka | skola/kresleni
-27. scissors | nuzky | bezny skolni predmet, kreslit detsky a bezpecne
-28. glue | lepidlo | skolni/tvorivy predmet
-29. drum | bubinek | hudba, jasny predmet
-30. guitar | kytara | hudba, vizualne atraktivni
-
 31. cookie | susenka | jidlo, jednoduche
 32. sandwich | sendvic | svacina
 33. banana | banan | ovoce, jednoduche
@@ -52,3 +30,272 @@ EN | CZ | poznamka
 38. boots | boty/holinky | venku/les
 39. umbrella | destnik | pocasi, jasny tvar
 40. key | klic | jednoduchy predmet, muze byt soucast pribehu
+
+-----------------------------------------------------------------------
+
+To je skvělý věk na začátek! Pětileté děti se nejlépe učí slova, která mohou hned vidět, osahat si je nebo je denně používají.
+Vyloučil jsem zvířata a vybral **50 praktických, neživých předmětů** z herny, domácnosti, jídla a venkovního světa. Pro snazší učení jsem je rozdělil do 5 tematických kategorií po 10 slovech.
+## 1. Hračky a zábava (Toys & Fun)
+To, co má vnuk nejblíže a s čím si hned spojí pozitivní emoce.
+ * **Ball** – Míč
+ * **Toy** – Hračka
+ * **Book** – Kniha
+ * **Blocks** – Kostky (stavebnice)
+ * **Car** – Auto (hračka i opravdové)
+ * **Doll** – Panenka / figurka
+ * **Train** – Vláček
+ * **Balloon** – Balónek
+ * **Bike** – Kolo
+ * **Crayon** – Voskovka / pastelka
+## 2. Jídlo, ovoce a zelenina (Food, Fruit & Veg)
+Věci, které vidí každý den na talíři.
+ * **Apple** – Jablko
+ * **Banana** – Banán
+ * **Orange** – Pomeranč
+ * **Carrot** – Mrkev
+ * **Potato** – Brambora
+ * **Milk** – Mléko
+ * **Water** – Voda
+ * **Bread** – Chleba
+ * **Cake** – Dort / koláč
+ * **Sweet** – Bonbon / sladkost
+## 3. Kolem stolu a v kuchyni (Around the Table)
+Základní předměty pro stolování.
+ * **Spoon** – Lžička
+ * **Fork** – Vidlička
+ * **Cup** – Hrnek
+ * **Plate** – Talíř
+ * **Table** – Stůl
+ * **Chair** – Židle
+## 4. Oblečení a osobní věci (Clothes & Personal items)
+Slova, která využijete při každodenním oblékání a hygieně.
+ * **Shoe** – Bota
+ * **Sock** – Ponožka
+ * **Hat** – Čepice / klobouk
+ * **T-shirt** – Tričko
+ * **Pants** – Kalhoty
+ * **Bed** – Postel
+ * **Blanket** – Deka / peřina
+ * **Toothbrush** – Zubní kartáček
+ * **Soap** – Mýdlo
+ * **Bag** – Batoh / taška
+## 5. Venku a kolem nás (Outside & Nature)
+Neživé věci, které potkáte na procházce nebo doma.
+ * **House** – Dům
+ * **Tree** – Strom
+ * **Flower** – Kytka
+ * **Sun** – Slunce
+ * **Moon** – Měsíc
+ * **Star** – Hvězda
+ * **Cloud** – Mrak
+ * **Stone** – Kámen
+ * **Key** – Klíč
+ * **Door** – Dveře
+ * **Window** – Okno
+ * **Box** – Krabice
+ * **Paper** – Papír
+ * **Pencil** – Tužka
+> **Tip na učení:** Nezkoušejte s ním všech 50 slov najednou. Vyberte si vždycky 3 až 5 slov na týden. Když si bude hrát s autem, řekněte: *„Podívej, to je CAR.“* Když mu budete dávat banán, řekněte: *„Tady je BANANA.“* Spojení slova s reálným předmětem je v tomto věku nejúčinnější!
+>
+
+------------------------------------------------------------
+Tady je návrh 50 základních předmětů pro Matýska — rozdělených do tematických skupin pro snazší učení:
+
+🍎 Ovoce & zelenina (10)
+	1.	apple
+	2.	banana
+	3.	orange
+	4.	strawberry
+	5.	grape
+	6.	carrot
+	7.	potato
+	8.	tomato
+	9.	corn
+	10.	pea
+🧸 Hračky & hra (8)
+11. ball
+12. toy
+13. car (autíčko)
+14. block (kostka)
+15. doll
+16. book
+17. crayon
+18. puzzle
+🏠 Doma (10)
+19. cup
+20. plate
+21. spoon
+22. chair
+23. table
+24. bed
+25. pillow
+26. door
+27. window
+28. lamp
+👕 Oblečení (7)
+29. shoe
+30. sock
+31. hat
+32. jacket
+33. shirt
+34. pants
+35. glove
+🌳 Venku & příroda (7)
+36. flower
+37. tree
+38. leaf
+39. stone / rock
+40. stick
+41. sun
+42. cloud
+🎒 Školka & každodenní věci (8)
+43. bag
+44. box
+45. key
+46. umbrella
+47. brush (kartáček/kartáč)
+48. soap
+49. towel
+50. balloon
+
+Pár poznámek k výběru:
+	∙	Slova jsou krátká, foneticky přijatelná pro 5leté dítě a vizuálně dobře zobrazitelná obrázkem.
+	∙	Záměrně jsem vynechal abstrakta a složená slova.
+	∙	„Tomato” a „potato” jsou technicky zelenina/ovoce, ale zároveň každodenní kuchyňské věci — dvojí přínos.
+
+--------------------------------------------
+Puvodni navrh 10 lekci je nahrazen finalnim navrhem 12 lekci nize.
+Prvni lekce musi zustat aktualni dataset hry: ball, car, book, house, apple.
+
+=======================================================================
+Adamuv navrh 12 lekci pro ForestSchool
+Datum doplneni: 2026-05-27
+
+Cil:
+- Zkombinovat slova z celeho dokumentu a argumenty vyse.
+- Drzet lekce kratke: 5 slov na lekci.
+- Prvni lekce je aktualni dataset ve hre.
+- Slova maji byt dobre viditelna jako samostatny obrazek.
+- Vyhybat se dlouhym nebo zbytecne tezko vyslovitelnym slovum.
+
+Princip vyberu:
+- Kazda lekce ma mix sveta: hracka/vozidlo, jidlo, domaci vec, obleceni/osobni vec, venku/priroda.
+- Prednost maji kratka slova s jasnym tvarem: ball, car, cup, shoe, tree.
+- Slozena nebo delsi slova nechavam zatim jako rezervu: teddy bear, sandwich, water bottle, strawberry, toothbrush, umbrella.
+- Zvirata zatim nezarazuji, aby scena zustala u predmetu.
+- Kdyz ma slovo dve bezne varianty, preferuji kratsi nebo vyslovnostne snazsi variantu: hat/cap misto t-shirt, block misto blocks.
+
+Vybrana slova pro 12 lekci:
+
+Lekce 1:
+- ball | mic | aktualni dataset, hracka, velmi snadne
+- car | auto | aktualni dataset, jasny predmet
+- book | kniha | aktualni dataset, skolka/doma
+- house | dum | aktualni dataset, velky jasny tvar
+- apple | jablko | aktualni dataset, jidlo
+
+Lekce 2:
+- train | vlak | vozidlo, oblibene a dobre rozpoznatelne
+- cup | hrnek | domaci vec, kratke slovo
+- shoe | bota | obleceni, kazdodenni
+- tree | strom | venku, jasny tvar
+- banana | banan | jidlo, jednoduche a barevne
+
+Lekce 3:
+- boat | lod | vozidlo, kratke slovo
+- plate | talir | domaci vec, jasny tvar
+- sock | ponozka | obleceni, kratke
+- flower | kytka | venku, dobre kreslitelne
+- orange | pomeranc | jidlo/barva, bezne slovo
+
+Lekce 4:
+- bus | autobus | vozidlo, velmi kratke EN
+- spoon | lzicka | kuchynska vec, jasny tvar
+- hat | cepice/klobouk | obleceni, snadne
+- sun | slunce | venku, velmi jasny symbol
+- carrot | mrkev | jidlo, barevne
+
+Lekce 5:
+- bike | kolo | pohyb/venek, kratke
+- chair | zidle | domaci vec, bezne
+- bag | batoh/taska | skolka/vylet
+- moon | mesic | venku/noc, jasny tvar
+- bread | chleba | jidlo, kazdodenni
+
+Lekce 6:
+- truck | nakladak | vozidlo, odlisne od car
+- table | stul | domaci vec
+- bed | postel | doma, velmi bezne
+- star | hvezda | venku/noc, jasny symbol
+- cake | dort | jidlo, motivacni
+
+Lekce 7:
+- plane | letadlo | vozidlo, akcni predmet
+- door | dvere | doma, kratke
+- box | krabice | samostatny jasny predmet
+- cloud | mrak | venku/pocasi
+- milk | mleko | jidlo/piti, kratke
+
+Lekce 8:
+- rocket | raketa | vesmir, dobrodruzstvi
+- window | okno | doma, viditelne
+- key | klic | maly predmet, soucast pribehu
+- stone | kamen | venku, jednoduchy tvar
+- water | voda | kazdodenni, kratke
+
+Lekce 9:
+- robot | robot | blizke pohadkam s Piskotem
+- fork | vidlicka | kuchynska vec, kratke
+- cap | cepice | jednodussi alternativa k dlouhemu obleceni
+- leaf | list | venku, jednoduchy tvar
+- cookie | susenka | jidlo, motivacni
+
+Lekce 10:
+- block | kostka | hracka, lepsi singular nez blocks
+- pencil | tuzka | skolka/kresleni
+- pants | kalhoty | obleceni, bezne
+- stick | klacek | venku/les
+- corn | kukurice | jidlo, kratke
+
+Lekce 11:
+- doll | panenka/figurka | hracka
+- map | mapa | vylet/objevovani, kratke a dobre zobrazitelne
+- soap | mydlo | hygiena, kratke
+- pillow | polstar | doma
+- grape | hroznove vino | jidlo, kratke EN
+
+Lekce 12:
+- toy | hracka | obecne a velmi snadne
+- kite | drak | venkovni hrani, kratke EN
+- lamp | lampa | doma
+- boots | boty/holinky | venek, jasny predmet
+- pea | hrasek | jidlo, velmi kratke
+
+Rezerva pro pozdejsi lekce nebo opakovani:
+- teddy bear | medvidek | hezke, ale slozene slovo
+- dinosaur | dinosaurus | zabavne, ale delsi
+- balloon | balonek | hezke, ale trochu delsi
+- puzzle | puzzle | dobre vizualni, ale vyslovnost muze mast
+- crayon | pastelka | dobre vizualni, ale vyslovnost muze byt tezsi nez map/kite
+- jacket | bunda | pouzitelne, ale delsi nez hat/cap
+- shirt | tricko/kosile | pouzitelne, ale muze se plest s t-shirt
+- glove | rukavice | pouzitelne, ale mene caste
+- tomato | rajce | pouzitelne, ale podobne s potato
+- potato | brambora | pouzitelne, ale mene vizualne zajimave
+- sweet | bonbon/sladkost | vyznam muze byt moc obecny
+- brush | kartac | mozne, ale pozor na zamenu kartac/zubni kartacek
+- towel | rucnik | pouzitelne, ale mene zabavne
+- helmet | helma | dobre pro kolo, ale delsi slovo
+- backpack | batoh | lepsi nahradit kratsim `bag`
+- flashlight | baterka | hezke pro les, ale dlouhe a tezsi
+- compass | kompas | dobrodruzne, ale mene bezne pro 6 let
+- tent | stan | dobre pro les, mozny kandidat do dalsi vlny
+- campfire | ohen | atmosfericke, ale slovo je slozene a obrazek muze byt citlivy
+- binoculars | dalekohled | vizualne hezke, ale velmi dlouhe
+- shovel | lopatka | pouzitelne, ale mene univerzalni
+- bucket | kyblik | pouzitelne, ale vybral jsem kratsi box
+- soccer ball | fotbalovy mic | slozene, zatim staci obecne `ball`
+- scissors | nuzky | bezny skolni predmet, ale pro hru radeji pozdeji
+- glue | lepidlo | pouzitelne, ale mene vizualne vyrazne
+- drum | bubinek | kratke a dobre, mozny kandidat do dalsi vlny
+- guitar | kytara | hezke, ale delsi a vizualne slozitejsi

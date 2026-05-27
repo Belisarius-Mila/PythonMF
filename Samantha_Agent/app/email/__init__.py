@@ -67,6 +67,12 @@ from .insurance_case_tools import (
 )
 from .link_tools import show_email_case_links, show_email_case_links_text
 from .models import EmailAttachmentMeta, EmailHeader, EmailMessage
+from .outbound_tools import (
+    prepare_forward_email_by_uid,
+    prepare_forward_email_by_uid_text,
+    send_prepared_email_draft,
+    send_prepared_email_draft_text,
+)
 from .redaction import redact_email_addresses
 from .tools import (
     list_recent_seznam_email_headers,
@@ -148,10 +154,14 @@ __all__ = [
     "has_explicit_triage_confirmation",
     "list_email_archives",
     "list_email_archives_text",
+    "prepare_forward_email_by_uid",
+    "prepare_forward_email_by_uid_text",
     "run_email_triage_session",
     "run_email_triage_session_text",
     "save_selected_email_cases_from_uids",
     "save_selected_email_cases_from_uids_text",
+    "send_prepared_email_draft",
+    "send_prepared_email_draft_text",
     "search_email_headers",
     "search_seznam_email_headers",
     "search_email_text_year",

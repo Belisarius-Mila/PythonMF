@@ -16,8 +16,11 @@ from email.header import decode_header
 from email.message import Message
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+load_dotenv(PROJECT_ROOT / ".env")
 OUT_DIR = PROJECT_ROOT / "data" / "private" / "email_seznam"
 DEFAULT_TERMS = (
     "pojiš",
@@ -110,10 +113,21 @@ def decode_header_value(value: str | None) -> str:
     parts: list[str] = []
     for part, encoding in decode_header(value):
         if isinstance(part, bytes):
-            parts.append(part.decode(encoding or "utf-8", errors="replace"))
+            parts.append(decode_header_bytes(part, encoding))
         else:
             parts.append(part)
     return " ".join(" ".join(parts).split())
+
+
+def decode_header_bytes(part: bytes, encoding: str | None) -> str:
+    for candidate in (encoding, "utf-8", "latin-1"):
+        if not candidate:
+            continue
+        try:
+            return part.decode(candidate, errors="replace")
+        except LookupError:
+            continue
+    return part.decode("utf-8", errors="replace")
 
 
 def quote_imap_utf8(value: str) -> bytes:

@@ -2,6 +2,28 @@
 
 Projekt zalozen 2026-05-19.
 
+## Aktualni stav 2026-05-26
+
+Posledni uspesna ostra recovery zaloha je podle
+`Samantha_Agent/data/backup/activity_state.json` z 2026-05-19:
+
+```text
+/Volumes/SamanthaSecureBackup/SamanthaBackups/snapshots/20260519_200917/PythonMF
+```
+
+K 2026-05-26 je zaloha starsi nez 3 dny. Mila je mimo domov a externi disk je
+doma, proto se ostra zaloha realne provede az v patek 2026-05-29.
+
+Do te doby ma Samantha/Codex pri kazdem startu nebo navazani zkontrolovat stav:
+
+```bash
+.venv/bin/python scripts/backup_status.py
+```
+
+Pokud posledni zaloha chybi nebo je starsi nez 3 dny, ma to rict v prvni odpovedi
+kazdy den, dokud neprobehnou nova uspesna zaloha. Nejde o automaticke kopirovani:
+pripominka sama nic nekopiruje, nemaze ani necte tajemstvi.
+
 ## Cil
 
 Pripravit jednoduchou offline zalohu projektu `PythonMF` a Samanthy na externi
@@ -108,6 +130,16 @@ Samantha_Agent/data/backup/activity_state.json
 Samantha ma pri startu pripominat zalohu, pokud posledni uspesna zaloha chybi
 nebo je starsi nez 3 dny. Pripominka sama nic nekopiruje, nemaze ani necte
 tajemstvi.
+
+Pro Codex relace, ktere nemusi spoustet runtime Samanthy, je povinny startovni
+fallback prikaz:
+
+```bash
+.venv/bin/python scripts/backup_status.py
+```
+
+Tento prikaz cte jen lokalni stav `data/backup/activity_state.json` a podle data
+vypise, zda je zaloha v 3dennim intervalu nebo se ma pripomenout.
 
 ## Bezpecnostni pravidla
 

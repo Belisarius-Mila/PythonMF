@@ -1,7 +1,7 @@
 Nazev: Dokumentovy vault - navazani po tisku a intake ze Stazenych
 Priorita: 1
 Stav: rozpracovane
-Pripomenout pri startu: ano
+Pripomenout pri startu: ne
 Datum: 2026-05-22
 
 Co se resilo:
@@ -10,8 +10,10 @@ Co se resilo:
 - Realny test penzijni smlouvy prosel az po predani do macOS tiskove fronty:
   tiskovy prikaz uspel, pracovni kopie z `print_queue` byla smazana a original
   zustal ve vaultu.
-- Codex ale neumi fyzicky overit, ze papir skutecne vyjel z tiskarny.
-- Mila chce pri dalsim vstupu do projektu dokumenty povinne fyzicky overit tisk.
+- Puvodne zustalo otevrene fyzicke overeni tisku, protoze Codex umi potvrdit jen
+  predani do macOS tiskove fronty.
+- Mila dodatecne potvrdil, ze fyzicky tisk uz byl vyzkouseny na TXT dokumentu o
+  zkratkach a vysledek je ulozeny.
 - Mila navrhl dalsi vstupni variantu: misto rucniho vkladani do inboxu rict, ze
   dokument je ve slozce Stazene/Downloads; Samantha ho najde, ukaze nazev a cas
   ulozeni/zmeny a az po potvrzeni ho presune do inboxu.
@@ -25,22 +27,24 @@ Co je hotove:
   - audit v `data/private/documents/index/print_jobs.jsonl`.
 - Memory workflow doplneno o pravidlo, ze intake ze Stazenych/Downloads ma byt
   dvoukrokovy a potvrzovany.
-
-Povinny ukol pri pristim navazani v projektu dokumenty:
-- Napsat Milovi presne:
-  `Domluvili jsme se, že pro další vývoj projektu je nutné fyzicky ověřit tisk alespoň jednoho dokumentu. Jestli souhlasíš napiš: Ok.`
+- Fyzicky tisk papiru byl Milou overen na TXT dokumentu o zkratkach; startovni
+  pripominka k overeni tisku uz neni potreba.
 
 Co neni hotove:
 - Neni implementovany tool pro read-only vyhledani dokumentu ve Stazenych.
 - Neni implementovany potvrzeny presun dokumentu ze Stazenych do
   `data/private/documents/inbox/incoming/`.
 - Neni implementovana detailni kontrola tiskove fronty po odeslani dokumentu.
+- Neni implementovany vztahovy prehled dokumentu podle case/asset/protistrany.
 
 Dalsi krok:
-1. Pri jakemkoli dalsim vstupu do projektu dokumenty nejdriv napsat Milovi
-   presnou vetu:
-   `Domluvili jsme se, že pro další vývoj projektu je nutné fyzicky ověřit tisk alespoň jednoho dokumentu. Jestli souhlasíš napiš: Ok.`
-2. Potom implementovat downloads intake workflow:
+1. Pokracovat v navrhu klasifikace/vazeb dokumentu:
+   - pouzivat `case_id` nebo podobny vztahovy klic pro dokumenty, ktere patri k
+     jednomu pripadu napric typy,
+   - zachovat `domain`, `document_type`, `counterparty`, `related_asset` a `tags`
+     jako samostatne osy klasifikace,
+   - doplnit read-only prehled skupin podle souvislosti.
+2. Implementovat downloads intake workflow:
    - `prepare_document_inbox_from_downloads` jako read-only vyhledani kandidatu,
    - `move_document_from_downloads_to_inbox` jako potvrzeny presun do inboxu,
    - auditni zaznam intake akce,

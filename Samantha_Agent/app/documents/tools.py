@@ -7,12 +7,15 @@ from agents import function_tool
 from .vault import (
     DEFAULT_DOCUMENTS_DIR,
     apply_document_import_file,
+    apply_mobile_document_final_import_summary,
     document_vault_status_summary,
     format_document_inbox_reminder,
     has_explicit_document_import_confirmation,
     inspect_document_text_summary,
     prepare_document_import_summary,
+    prepare_mobile_document_final_import_summary,
     prepare_mobile_document_batch_summary,
+    process_mobile_document_inbox_summary,
     prepare_document_print_job_summary,
     propose_document_inbox_cleanup_summary,
     resolve_document_inbox_item_summary,
@@ -43,6 +46,62 @@ def prepare_mobile_document_batch(batch_id: str = "") -> str:
 
 
 @function_tool
+def process_mobile_document_inbox(batch_id: str = "", force_reprocess: bool = False) -> str:
+    """Process requested iPhone document batches into private working PDFs and OCR metadata; does not import."""
+    return process_mobile_document_inbox_text(batch_id=batch_id, force_reprocess=force_reprocess)
+
+
+@function_tool
+def prepare_mobile_document_final_import(
+    batch_id: str = "",
+    target_domain: str = "",
+    document_type: str = "",
+    counterparty: str = "",
+    related_asset: str = "",
+    tags: str = "",
+    case_id: str = "",
+) -> str:
+    """Preview final import of one processed mobile document; read-only."""
+    return prepare_mobile_document_final_import_text(
+        batch_id=batch_id,
+        target_domain=target_domain,
+        document_type=document_type,
+        counterparty=counterparty,
+        related_asset=related_asset,
+        tags=tags,
+        case_id=case_id,
+    )
+
+
+@function_tool
+def apply_mobile_document_final_import(
+    batch_id: str = "",
+    target_domain: str = "",
+    document_type: str = "",
+    counterparty: str = "",
+    related_asset: str = "",
+    tags: str = "",
+    document_id: str = "",
+    case_id: str = "",
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+) -> str:
+    """Import one processed mobile document into the private vault after explicit confirmation."""
+    return apply_mobile_document_final_import_text(
+        batch_id=batch_id,
+        target_domain=target_domain,
+        document_type=document_type,
+        counterparty=counterparty,
+        related_asset=related_asset,
+        tags=tags,
+        document_id=document_id,
+        case_id=case_id,
+        user_confirmed=user_confirmed,
+        confirmation_text=confirmation_text,
+    )
+
+
+@function_tool
 def prepare_document_import(source_path: str, document_hint: str = "") -> str:
     """Read-only preview of a local private document import."""
     return prepare_document_import_text(source_path=source_path, document_hint=document_hint)
@@ -63,6 +122,7 @@ def apply_document_import(
     related_asset: str = "",
     tags: str = "",
     document_id: str = "",
+    case_id: str = "",
     user_confirmed: bool = False,
     confirmation_text: str = "",
 ) -> str:
@@ -75,6 +135,7 @@ def apply_document_import(
         related_asset=related_asset,
         tags=tags,
         document_id=document_id,
+        case_id=case_id,
         user_confirmed=user_confirmed,
         confirmation_text=confirmation_text,
     )
@@ -203,6 +264,74 @@ def prepare_mobile_document_batch_text(
     return prepare_mobile_document_batch_summary(**kwargs)
 
 
+def process_mobile_document_inbox_text(
+    batch_id: str = "",
+    mobile_inbox_dir: Path | None = None,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    max_batches: int = 20,
+    force_reprocess: bool = False,
+) -> str:
+    kwargs = {
+        "batch_id": batch_id,
+        "vault_dir": vault_dir,
+        "max_batches": max(1, min(max_batches, 50)),
+        "force_reprocess": force_reprocess,
+    }
+    if mobile_inbox_dir is not None:
+        kwargs["mobile_inbox_dir"] = mobile_inbox_dir
+    return process_mobile_document_inbox_summary(**kwargs)
+
+
+def prepare_mobile_document_final_import_text(
+    batch_id: str = "",
+    target_domain: str = "",
+    document_type: str = "",
+    counterparty: str = "",
+    related_asset: str = "",
+    tags: str = "",
+    case_id: str = "",
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> str:
+    return prepare_mobile_document_final_import_summary(
+        batch_id=batch_id,
+        target_domain=target_domain,
+        document_type=document_type,
+        counterparty=counterparty,
+        related_asset=related_asset,
+        tags=tags,
+        case_id=case_id,
+        vault_dir=vault_dir,
+    )
+
+
+def apply_mobile_document_final_import_text(
+    batch_id: str = "",
+    target_domain: str = "",
+    document_type: str = "",
+    counterparty: str = "",
+    related_asset: str = "",
+    tags: str = "",
+    document_id: str = "",
+    case_id: str = "",
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> str:
+    return apply_mobile_document_final_import_summary(
+        batch_id=batch_id,
+        target_domain=target_domain,
+        document_type=document_type,
+        counterparty=counterparty,
+        related_asset=related_asset,
+        tags=tags,
+        document_id=document_id,
+        case_id=case_id,
+        user_confirmed=user_confirmed,
+        confirmation_text=confirmation_text,
+        vault_dir=vault_dir,
+    )
+
+
 def propose_document_inbox_cleanup_text(
     source_path: str,
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
@@ -285,6 +414,7 @@ def apply_document_import_text(
     related_asset: str = "",
     tags: str = "",
     document_id: str = "",
+    case_id: str = "",
     user_confirmed: bool = False,
     confirmation_text: str = "",
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
@@ -311,6 +441,7 @@ def apply_document_import_text(
             related_asset=related_asset,
             tags=tags,
             document_id=document_id,
+            case_id=case_id,
             vault_dir=vault_dir,
         )
     except ValueError as exc:

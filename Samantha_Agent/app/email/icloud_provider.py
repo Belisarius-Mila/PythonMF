@@ -396,6 +396,8 @@ def _search_header_uids(imap: imaplib.IMAP4_SSL, query: str) -> list[bytes]:
     )
     if status != "OK" or not data:
         raise EmailProviderError("Nepodarilo se vyhledat hlavicky.")
+    if data[0] is None:
+        return []
 
     return data[0].split()
 
@@ -489,11 +491,22 @@ def _decode_header_value(value: str | None) -> str:
     decoded_parts: list[str] = []
     for part, encoding in decode_header(value):
         if isinstance(part, bytes):
-            decoded_parts.append(part.decode(encoding or "utf-8", errors="replace"))
+            decoded_parts.append(_decode_header_bytes(part, encoding))
         else:
             decoded_parts.append(part)
 
     return " ".join(" ".join(decoded_parts).split())
+
+
+def _decode_header_bytes(part: bytes, encoding: str | None) -> str:
+    for candidate in (encoding, "utf-8", "latin-1"):
+        if not candidate:
+            continue
+        try:
+            return part.decode(candidate, errors="replace")
+        except LookupError:
+            continue
+    return part.decode("utf-8", errors="replace")
 
 
 def _message_to_header(internal_id: str, message: Message) -> EmailHeader:

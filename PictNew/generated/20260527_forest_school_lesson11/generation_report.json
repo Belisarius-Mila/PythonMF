@@ -1,0 +1,87 @@
+[
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson11/forest_school_doll.png",
+    "output_file": "forest_school_doll.png",
+    "request": {
+      "id": "forest-school-doll",
+      "language": "forest_school",
+      "image_name": "forest_school_doll",
+      "words": [
+        "doll"
+      ],
+      "czech_meanings": [
+        "panenka/figurka"
+      ],
+      "lesson": 11
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson11/forest_school_map.png",
+    "output_file": "forest_school_map.png",
+    "request": {
+      "id": "forest-school-map",
+      "language": "forest_school",
+      "image_name": "forest_school_map",
+      "words": [
+        "map"
+      ],
+      "czech_meanings": [
+        "mapa"
+      ],
+      "lesson": 11
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson11/forest_school_soap.png",
+    "output_file": "forest_school_soap.png",
+    "request": {
+      "id": "forest-school-soap",
+      "language": "forest_school",
+      "image_name": "forest_school_soap",
+      "words": [
+        "soap"
+      ],
+      "czech_meanings": [
+        "mydlo"
+      ],
+      "lesson": 11
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson11/forest_school_pillow.png",
+    "output_file": "forest_school_pillow.png",
+    "request": {
+      "id": "forest-school-pillow",
+      "language": "forest_school",
+      "image_name": "forest_school_pillow",
+      "words": [
+        "pillow"
+      ],
+      "czech_meanings": [
+        "polstar"
+      ],
+      "lesson": 11
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson11/forest_school_grape.png",
+    "output_file": "forest_school_grape.png",
+    "request": {
+      "id": "forest-school-grape",
+      "language": "forest_school",
+      "image_name": "forest_school_grape",
+      "words": [
+        "grape"
+      ],
+      "czech_meanings": [
+        "hroznove vino"
+      ],
+      "lesson": 11
+    }
+  }
+]

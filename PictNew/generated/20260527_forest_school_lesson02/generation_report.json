@@ -1,0 +1,92 @@
+[
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson02/forest_school_train.png",
+    "output_file": "forest_school_train.png",
+    "request": {
+      "id": "forest-school-train",
+      "language": "forest_school",
+      "image_name": "forest_school_train",
+      "words": [
+        "train"
+      ],
+      "czech_meanings": [
+        "vlak"
+      ],
+      "lesson": 2,
+      "prompt_summary": "one small colorful toy train with a locomotive and one simple carriage, no face, no eyes, no mouth"
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson02/forest_school_cup.png",
+    "output_file": "forest_school_cup.png",
+    "request": {
+      "id": "forest-school-cup",
+      "language": "forest_school",
+      "image_name": "forest_school_cup",
+      "words": [
+        "cup"
+      ],
+      "czech_meanings": [
+        "hrnek"
+      ],
+      "lesson": 2,
+      "prompt_summary": "one simple colorful mug/cup with a handle"
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson02/forest_school_shoe.png",
+    "output_file": "forest_school_shoe.png",
+    "request": {
+      "id": "forest-school-shoe",
+      "language": "forest_school",
+      "image_name": "forest_school_shoe",
+      "words": [
+        "shoe"
+      ],
+      "czech_meanings": [
+        "bota"
+      ],
+      "lesson": 2,
+      "prompt_summary": "one single child-friendly shoe, not a pair, side view"
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson02/forest_school_tree.png",
+    "output_file": "forest_school_tree.png",
+    "request": {
+      "id": "forest-school-tree",
+      "language": "forest_school",
+      "image_name": "forest_school_tree",
+      "words": [
+        "tree"
+      ],
+      "czech_meanings": [
+        "strom"
+      ],
+      "lesson": 2,
+      "prompt_summary": "one simple friendly deciduous tree, brown trunk and green leafy crown"
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson02/forest_school_banana.png",
+    "output_file": "forest_school_banana.png",
+    "request": {
+      "id": "forest-school-banana",
+      "language": "forest_school",
+      "image_name": "forest_school_banana",
+      "words": [
+        "banana"
+      ],
+      "czech_meanings": [
+        "banan"
+      ],
+      "lesson": 2,
+      "prompt_summary": "one single bright yellow curved banana"
+    }
+  }
+]

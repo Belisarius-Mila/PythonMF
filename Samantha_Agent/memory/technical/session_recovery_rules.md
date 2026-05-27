@@ -42,6 +42,17 @@ Skript:
 - pred pripojenim ke `screen` relaci spusti lehky `scripts/network_preflight.sh`,
 - diky tomu ma Codex nacist `AGENTS.md` a `memory/MEMORY_INDEX.md`.
 
+Pri startu nebo navazani ma Codex/Samantha take zkontrolovat stav recovery zalohy:
+
+```bash
+.venv/bin/python scripts/backup_status.py
+```
+
+Pokud vystup hlasi, ze posledni uspesna zaloha chybi nebo je starsi nez 3 dny,
+ma to byt receno v prvni odpovedi kazdy den, dokud nova uspesna zaloha neaktualizuje
+`data/backup/activity_state.json`. Pripominka sama nic nekopiruje, nemaze ani
+necte tajemstvi.
+
 Preflight je diagnosticky: ve vychozim rezimu nic nevypina, jen vypise stav
 VPN/Tailscale procesu, `utun` rozhrani, IP adresu a ping test. Pro pokus o
 ukonceni znamych VPN procesu pred startem lze pouzit:

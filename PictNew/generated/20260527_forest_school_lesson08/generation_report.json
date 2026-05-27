@@ -1,0 +1,87 @@
+[
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson08/forest_school_rocket.png",
+    "output_file": "forest_school_rocket.png",
+    "request": {
+      "id": "forest-school-rocket",
+      "language": "forest_school",
+      "image_name": "forest_school_rocket",
+      "words": [
+        "rocket"
+      ],
+      "czech_meanings": [
+        "raketa"
+      ],
+      "lesson": 8
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson08/forest_school_window.png",
+    "output_file": "forest_school_window.png",
+    "request": {
+      "id": "forest-school-window",
+      "language": "forest_school",
+      "image_name": "forest_school_window",
+      "words": [
+        "window"
+      ],
+      "czech_meanings": [
+        "okno"
+      ],
+      "lesson": 8
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson08/forest_school_key.png",
+    "output_file": "forest_school_key.png",
+    "request": {
+      "id": "forest-school-key",
+      "language": "forest_school",
+      "image_name": "forest_school_key",
+      "words": [
+        "key"
+      ],
+      "czech_meanings": [
+        "klic"
+      ],
+      "lesson": 8
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson08/forest_school_stone.png",
+    "output_file": "forest_school_stone.png",
+    "request": {
+      "id": "forest-school-stone",
+      "language": "forest_school",
+      "image_name": "forest_school_stone",
+      "words": [
+        "stone"
+      ],
+      "czech_meanings": [
+        "kamen"
+      ],
+      "lesson": 8
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson08/forest_school_water.png",
+    "output_file": "forest_school_water.png",
+    "request": {
+      "id": "forest-school-water",
+      "language": "forest_school",
+      "image_name": "forest_school_water",
+      "words": [
+        "water"
+      ],
+      "czech_meanings": [
+        "voda"
+      ],
+      "lesson": 8
+    }
+  }
+]

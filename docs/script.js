@@ -128,18 +128,18 @@ const owlGardenOutroDialogue = [
     id: 1,
     speaker: "Benji",
     cssClass: "benji",
-    preferredVoiceName: "fable",
+    preferredVoiceName: "junior|aaron|evan|samantha|ava",
     textEn: "Bunny, do you remember the colors? Yellow, purple, pink...",
-    audioEn: "audio/english/owl_garden_08_benji_do_you_remember_colors_en.mp3?v=20260409a",
+    audioEn: "audio/english/owl_garden_08_benji_do_you_remember_colors_en.mp3?v=20260527voice",
     audioCz: "audio/czech/owl_garden_08_benji_do_you_remember_colors_cz.m4a?v=20260409a",
   },
   {
     id: 2,
     speaker: "Bunny",
     cssClass: "bunny",
-    preferredVoiceName: "echo",
+    preferredVoiceName: "junior|samantha|ava|victoria|karen",
     textEn: "Yes. But we can train all colors in my house. Let's go.",
-    audioEn: "audio/english/owl_garden_09_bunny_we_can_train_all_colors_en.mp3?v=20260409a",
+    audioEn: "audio/english/owl_garden_09_bunny_we_can_train_all_colors_en.mp3?v=20260527voice",
     audioCz: "audio/czech/owl_garden_09_bunny_we_can_train_all_colors_cz.m4a?v=20260409a",
   },
 ];
@@ -239,15 +239,15 @@ const manualAudio = {
 };
 
 const benjiBunnyDialogue = [
-  { id: 1, speaker: "Benji", cssClass: "benji", textEn: "Hello.", audioEn: "audio/english/benji_bunny_01_benji_hello_en.mp3", audioCz: "audio/czech/benji_bunny_01_benji_hello_cz.m4a?v=20260410a" },
-  { id: 2, speaker: "Bunny", cssClass: "bunny", textEn: "Hello.", audioEn: "audio/english/benji_bunny_02_bunny_hello_en.mp3", audioCz: "audio/czech/benji_bunny_02_bunny_hello_cz.m4a?v=20260410a" },
-  { id: 3, speaker: "Benji", cssClass: "benji", textEn: "I am Benji.", audioEn: "audio/english/benji_bunny_03_benji_i_am_benji_en.mp3", audioCz: "audio/czech/benji_bunny_03_benji_i_am_benji_cz.m4a" },
-  { id: 4, speaker: "Bunny", cssClass: "bunny", textEn: "I am Bunny.", audioEn: "audio/english/benji_bunny_04_bunny_i_am_bunny_en.mp3", audioCz: "audio/czech/benji_bunny_04_bunny_i_am_bunny_cz.m4a" },
-  { id: 5, speaker: "Benji", cssClass: "benji", textEn: "We can be friends.", audioEn: "audio/english/benji_bunny_05_benji_we_can_be_friends_en.mp3", audioCz: "audio/czech/benji_bunny_05_benji_we_can_be_friends_cz.m4a" },
-  { id: 6, speaker: "Bunny", cssClass: "bunny", textEn: "Yes, we can.", audioEn: "audio/english/benji_bunny_06_bunny_yes_we_can_en.mp3", audioCz: "audio/czech/benji_bunny_06_bunny_yes_we_can_cz.m4a" },
-  { id: 7, speaker: "Benji", cssClass: "benji", textEn: "Where do we go?", audioEn: "audio/english/benji_bunny_07_benji_where_do_we_go_en.mp3", audioCz: "audio/czech/benji_bunny_07_benji_where_do_we_go_cz.m4a" },
-  { id: 8, speaker: "Bunny", cssClass: "bunny", textEn: "We go to my house. OK?", audioEn: "audio/english/benji_bunny_08_bunny_we_go_to_my_house_ok_en.mp3", audioCz: "audio/czech/benji_bunny_08_bunny_we_go_to_my_house_ok_cz.m4a" },
-  { id: 9, speaker: "Benji", cssClass: "benji", textEn: "OK. Let's go.", audioEn: "audio/english/benji_bunny_09_benji_ok_lets_go_en.mp3", audioCz: "audio/czech/benji_bunny_09_benji_ok_lets_go_cz.m4a" },
+  { id: 1, speaker: "Benji", cssClass: "benji", textEn: "Hello.", audioEn: "audio/english/benji_bunny_01_benji_hello_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_01_benji_hello_cz.m4a?v=20260410a" },
+  { id: 2, speaker: "Bunny", cssClass: "bunny", textEn: "Hello.", audioEn: "audio/english/benji_bunny_02_bunny_hello_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_02_bunny_hello_cz.m4a?v=20260410a" },
+  { id: 3, speaker: "Benji", cssClass: "benji", textEn: "I am Benji.", audioEn: "audio/english/benji_bunny_03_benji_i_am_benji_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_03_benji_i_am_benji_cz.m4a" },
+  { id: 4, speaker: "Bunny", cssClass: "bunny", textEn: "I am Bunny.", audioEn: "audio/english/benji_bunny_04_bunny_i_am_bunny_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_04_bunny_i_am_bunny_cz.m4a" },
+  { id: 5, speaker: "Benji", cssClass: "benji", textEn: "We can be friends.", audioEn: "audio/english/benji_bunny_05_benji_we_can_be_friends_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_05_benji_we_can_be_friends_cz.m4a" },
+  { id: 6, speaker: "Bunny", cssClass: "bunny", textEn: "Yes, we can.", audioEn: "audio/english/benji_bunny_06_bunny_yes_we_can_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_06_bunny_yes_we_can_cz.m4a" },
+  { id: 7, speaker: "Benji", cssClass: "benji", textEn: "Where do we go?", audioEn: "audio/english/benji_bunny_07_benji_where_do_we_go_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_07_benji_where_do_we_go_cz.m4a" },
+  { id: 8, speaker: "Bunny", cssClass: "bunny", textEn: "We go to my house. OK?", audioEn: "audio/english/benji_bunny_08_bunny_we_go_to_my_house_ok_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_08_bunny_we_go_to_my_house_ok_cz.m4a" },
+  { id: 9, speaker: "Benji", cssClass: "benji", textEn: "OK. Let's go.", audioEn: "audio/english/benji_bunny_09_benji_ok_lets_go_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_09_benji_ok_lets_go_cz.m4a" },
 ];
 
 const benjiBunnyHelpAudio = {

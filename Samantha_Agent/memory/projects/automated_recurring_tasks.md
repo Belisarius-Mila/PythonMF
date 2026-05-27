@@ -5,7 +5,7 @@
 Zalozeno 2026-05-20 jako obecna infrastruktura pro bezpecne automaticke
 spousteni opakujicich se ukolu v projektu `Samantha_Agent`.
 
-## Aktualni kanonicky stav 2026-05-23 vecer
+## Aktualni kanonicky stav 2026-05-26
 
 Automaticke opakujici se ukoly maji dve vrstvy:
 
@@ -22,19 +22,18 @@ Stav po realnem behu 2026-05-23:
   `--window-start-hour ... --window-hours ...`, protoze GitHub schedule se muze
   opozdit.
 
-Navazujici jednorazovy ukol 2026-05-24:
+Navazujici jednorazovy ukol 2026-05-24 je splneny:
 
 - `config/colors_numbers_owl_current.json` je aktualni jednorazovy config pro
   datum `2026-05-24`;
-- vystup bude `ColorsAndNumbers/web_colors_numbers/owl_240526.mp3`;
-- `app.js` se prepne na `owl_240526.mp3?v=20260524a`;
-- GitHub schedule je pro letni cas napevno nastaven na 03:17 Praha
-  (`17 1 * * *` UTC) a skript pusti skutecnou praci v okne 03:00-08:00 Praha.
+- vystup `ColorsAndNumbers/web_colors_numbers/owl_240526.mp3` existuje;
+- publikovana kopie `docs/colors-numbers/owl_240526.mp3` existuje;
+- `ColorsAndNumbers/web_colors_numbers/app.js` a `docs/colors-numbers/app.js`
+  miri na `owl_240526.mp3?v=20260524a`;
+- kontrola byla provedena 2026-05-26 lokalne ve workspace.
 
 Aktualni dalsi krok:
 
-- Po 2026-05-24 03:17 Praha zkontrolovat GitHub Actions beh nebo po fetch/pull
-  overit, zda vznikl `ColorsAndNumbers/web_colors_numbers/owl_240526.mp3`.
 - Potom rozhodnout, jak automatizovat denni zadavani sovich textu bez rucniho
   prepisovani jednoho JSON configu.
 

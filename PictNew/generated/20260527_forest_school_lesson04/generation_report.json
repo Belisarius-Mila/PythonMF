@@ -1,0 +1,87 @@
+[
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson04/forest_school_bus.png",
+    "output_file": "forest_school_bus.png",
+    "request": {
+      "id": "forest-school-bus",
+      "language": "forest_school",
+      "image_name": "forest_school_bus",
+      "words": [
+        "bus"
+      ],
+      "czech_meanings": [
+        "autobus"
+      ],
+      "lesson": 4
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson04/forest_school_spoon.png",
+    "output_file": "forest_school_spoon.png",
+    "request": {
+      "id": "forest-school-spoon",
+      "language": "forest_school",
+      "image_name": "forest_school_spoon",
+      "words": [
+        "spoon"
+      ],
+      "czech_meanings": [
+        "lzicka"
+      ],
+      "lesson": 4
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson04/forest_school_hat.png",
+    "output_file": "forest_school_hat.png",
+    "request": {
+      "id": "forest-school-hat",
+      "language": "forest_school",
+      "image_name": "forest_school_hat",
+      "words": [
+        "hat"
+      ],
+      "czech_meanings": [
+        "cepice/klobouk"
+      ],
+      "lesson": 4
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson04/forest_school_sun.png",
+    "output_file": "forest_school_sun.png",
+    "request": {
+      "id": "forest-school-sun",
+      "language": "forest_school",
+      "image_name": "forest_school_sun",
+      "words": [
+        "sun"
+      ],
+      "czech_meanings": [
+        "slunce"
+      ],
+      "lesson": 4
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson04/forest_school_carrot.png",
+    "output_file": "forest_school_carrot.png",
+    "request": {
+      "id": "forest-school-carrot",
+      "language": "forest_school",
+      "image_name": "forest_school_carrot",
+      "words": [
+        "carrot"
+      ],
+      "czech_meanings": [
+        "mrkev"
+      ],
+      "lesson": 4
+    }
+  }
+]

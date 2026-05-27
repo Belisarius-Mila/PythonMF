@@ -7,6 +7,8 @@ from email.header import decode_header
 from email.message import Message
 from html.parser import HTMLParser
 
+from .archive_models import EmailArchiveSource
+from .archive_service import email_message_to_archive_source
 from .config import SeznamMailConfig, load_seznam_mail_config
 from .models import EmailAttachmentMeta, EmailHeader, EmailMessage
 
@@ -98,6 +100,38 @@ class SeznamReadOnlyEmailProvider:
         except OSError as exc:
             raise SeznamEmailProviderError("Nepodarilo se pripojit k Seznam Mailu.") from exc
 
+    def read_archive_source_by_uid(
+        self,
+        uid: str,
+        max_chars: int = 50_000,
+    ) -> EmailArchiveSource:
+        safe_uid = _validate_uid(uid)
+        safe_max_chars = min(max(1_000, max_chars), 200_000)
+        try:
+            with imaplib.IMAP4_SSL(self._config.host, self._config.port) as imap:
+                imap.login(self._config.address, self._config.password)
+                imap.select("INBOX", readonly=True)
+
+                status, message_data = imap.uid(
+                    "FETCH",
+                    safe_uid.encode("ascii"),
+                    MESSAGE_FETCH_SPEC,
+                )
+                if status != "OK" or not message_data:
+                    raise SeznamEmailProviderError("Nepodarilo se nacist zpravu podle UID.")
+
+                return _message_data_to_archive_source(
+                    uid=safe_uid,
+                    message_data=message_data,
+                    max_chars=safe_max_chars,
+                )
+        except SeznamEmailProviderError:
+            raise
+        except imaplib.IMAP4.error as exc:
+            raise SeznamEmailProviderError("IMAP server Seznam odmitl pozadavek.") from exc
+        except OSError as exc:
+            raise SeznamEmailProviderError("Nepodarilo se pripojit k Seznam Mailu.") from exc
+
     def _fetch_header(
         self,
         imap: imaplib.IMAP4_SSL,
@@ -167,6 +201,39 @@ def _message_data_to_email_message(
         body_text=body_text,
         truncated=truncated,
         attachments=tuple(_extract_attachment_metadata(message)),
+    )
+
+
+def _message_data_to_archive_source(
+    uid: str,
+    message_data: list[object],
+    max_chars: int,
+) -> EmailArchiveSource:
+    raw_message = _first_safe_message_payload(message_data)
+    if raw_message is None:
+        raise SeznamEmailProviderError("Zprava je prazdna nebo prilis velka.")
+
+    message = message_from_bytes(raw_message)
+    body_text = _extract_body_text(message)
+    if len(body_text) > max_chars:
+        body_text = body_text[:max_chars].rstrip()
+
+    email_message = EmailMessage(
+        header=_message_to_header(
+            internal_id=uid,
+            message=message,
+        ),
+        body_text=body_text,
+        truncated=False,
+        attachments=tuple(_extract_attachment_metadata(message)),
+    )
+    return email_message_to_archive_source(
+        message=email_message,
+        body_html="",
+        original_eml=raw_message,
+        message_id=_decode_header_value(message.get("Message-ID")),
+        mailbox="INBOX",
+        provider="seznam",
     )
 
 

@@ -1,0 +1,87 @@
+[
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson06/forest_school_truck.png",
+    "output_file": "forest_school_truck.png",
+    "request": {
+      "id": "forest-school-truck",
+      "language": "forest_school",
+      "image_name": "forest_school_truck",
+      "words": [
+        "truck"
+      ],
+      "czech_meanings": [
+        "nakladak"
+      ],
+      "lesson": 6
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson06/forest_school_table.png",
+    "output_file": "forest_school_table.png",
+    "request": {
+      "id": "forest-school-table",
+      "language": "forest_school",
+      "image_name": "forest_school_table",
+      "words": [
+        "table"
+      ],
+      "czech_meanings": [
+        "stul"
+      ],
+      "lesson": 6
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson06/forest_school_bed.png",
+    "output_file": "forest_school_bed.png",
+    "request": {
+      "id": "forest-school-bed",
+      "language": "forest_school",
+      "image_name": "forest_school_bed",
+      "words": [
+        "bed"
+      ],
+      "czech_meanings": [
+        "postel"
+      ],
+      "lesson": 6
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson06/forest_school_star.png",
+    "output_file": "forest_school_star.png",
+    "request": {
+      "id": "forest-school-star",
+      "language": "forest_school",
+      "image_name": "forest_school_star",
+      "words": [
+        "star"
+      ],
+      "czech_meanings": [
+        "hvezda"
+      ],
+      "lesson": 6
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson06/forest_school_cake.png",
+    "output_file": "forest_school_cake.png",
+    "request": {
+      "id": "forest-school-cake",
+      "language": "forest_school",
+      "image_name": "forest_school_cake",
+      "words": [
+        "cake"
+      ],
+      "czech_meanings": [
+        "dort"
+      ],
+      "lesson": 6
+    }
+  }
+]

@@ -1,0 +1,87 @@
+[
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson07/forest_school_plane.png",
+    "output_file": "forest_school_plane.png",
+    "request": {
+      "id": "forest-school-plane",
+      "language": "forest_school",
+      "image_name": "forest_school_plane",
+      "words": [
+        "plane"
+      ],
+      "czech_meanings": [
+        "letadlo"
+      ],
+      "lesson": 7
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson07/forest_school_door.png",
+    "output_file": "forest_school_door.png",
+    "request": {
+      "id": "forest-school-door",
+      "language": "forest_school",
+      "image_name": "forest_school_door",
+      "words": [
+        "door"
+      ],
+      "czech_meanings": [
+        "dvere"
+      ],
+      "lesson": 7
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson07/forest_school_box.png",
+    "output_file": "forest_school_box.png",
+    "request": {
+      "id": "forest-school-box",
+      "language": "forest_school",
+      "image_name": "forest_school_box",
+      "words": [
+        "box"
+      ],
+      "czech_meanings": [
+        "krabice"
+      ],
+      "lesson": 7
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson07/forest_school_cloud.png",
+    "output_file": "forest_school_cloud.png",
+    "request": {
+      "id": "forest-school-cloud",
+      "language": "forest_school",
+      "image_name": "forest_school_cloud",
+      "words": [
+        "cloud"
+      ],
+      "czech_meanings": [
+        "mrak"
+      ],
+      "lesson": 7
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson07/forest_school_milk.png",
+    "output_file": "forest_school_milk.png",
+    "request": {
+      "id": "forest-school-milk",
+      "language": "forest_school",
+      "image_name": "forest_school_milk",
+      "words": [
+        "milk"
+      ],
+      "czech_meanings": [
+        "mleko"
+      ],
+      "lesson": 7
+    }
+  }
+]

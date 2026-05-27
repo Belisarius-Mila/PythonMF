@@ -38,6 +38,7 @@ from app.email import (
     list_recent_email_headers,
     list_recent_seznam_email_headers,
     list_unified_email_headers,
+    prepare_forward_email_by_uid,
     read_email_body_by_uid,
     read_seznam_email_body_by_uid,
     run_email_triage_session,
@@ -45,6 +46,7 @@ from app.email import (
     search_email_headers,
     search_seznam_email_headers,
     search_email_text_year,
+    send_prepared_email_draft,
     show_email_archive_links,
     show_email_archive_summary,
     show_email_case_links,
@@ -83,11 +85,14 @@ from app.lekarna import (
 from app.media import apply_zmenseni_obrazku, preview_zmenseni_obrazku
 from app.documents import (
     apply_document_import,
+    apply_mobile_document_final_import,
     document_vault_status,
     format_document_inbox_reminder,
     inspect_document_text,
     prepare_document_import,
+    prepare_mobile_document_final_import,
     prepare_mobile_document_batch,
+    process_mobile_document_inbox,
     prepare_document_print_job,
     propose_document_inbox_cleanup,
     resolve_document_inbox_item,
@@ -433,6 +438,17 @@ lokalniho `links.json`; nesmi odkazy otevirat, volat provider/IMAP, cist iCloud,
 stahovat nebo spoustet prilohy, odesilat, mazat, presouvat, oznacovat jako
 prectene ani ukladat do memory.
 
+E-mailove preposilani je zapisova/odesilaci workflow, proto vzdy pouzij dva
+samostatne kroky. `prepare_forward_email_by_uid` smi nacist jeden konkretni
+e-mail a vytvorit lokalni draft v `data/email/outbox_drafts/` jen kdyz aktualni
+Milova zprava obsahuje provider (`icloud` nebo `seznam`), UID, prijemce a jasny
+souhlas s pripravenim preposlani. Tento krok nic neodesila.
+`send_prepared_email_draft` smi odeslat az existujici draft a jen po dalsim
+samostatnem potvrzeni v aktualni zprave; potvrzeni musi obsahovat draft id,
+prijemce a jasny souhlas s odeslanim. Nikdy neposilej e-mail primo ve stejnem
+kroku, ve kterem byl draft pripraven. Nikdy nevymyslej potvrzovaci text.
+Neposilej na neovereneho prijemce a po odeslani neukladej obsah e-mailu do memory.
+
 E-mailovy nastroj read_email_body_by_uid pouzij jen pro jedno konkretni UID a jen
 kdyz Mila vyslovne potvrdi, ze chce precist telo tohoto konkretniho e-mailu.
 Pokud potvrzeni chybi, nejdriv se zeptej a nastroj volej s user_confirmed=False
@@ -518,6 +534,16 @@ nebo `/private/tmp`.
 `prepare_mobile_document_batch` je write-safe priprava mobilniho batchu: zkopiruje
 fotky z iCloud inboxu do `data/private/documents/mobile_inbox/processing/` a
 vytvori pracovni PDF. Nesmí mazat zdrojove fotky ani finalne importovat dokument.
+`process_mobile_document_inbox` pouzij, kdyz v mobilnim inboxu existuje
+`process_request.json` ze zkratky `Zpracovat dokumenty pro Samanthu` a Mila chce
+dokumenty zpracovat. Tool pripravi PDF, ulozi OCR/textovou analyzu do `data/private`
+a oznaci request jako zpracovany; finalni import do vaultu stale neprovede.
+`prepare_mobile_document_final_import` je read-only kontrolni krok po zpracovani
+jednoho mobilniho dokumentu: ukaze PDF, navrzena metadata, case_id/souvislost a
+potvrzovaci vetu. Pouzivej ho pred finalnim ulozenim mobilniho dokumentu.
+`apply_mobile_document_final_import` smi finalne ulozit jeden mobilni dokument do
+vaultu az po samostatnem potvrzeni v aktualni Milove zprave; potvrzeni musi
+obsahovat nazev PDF, cilovou oblast a jasny souhlas s ulozenim.
 `inspect_document_text` je read-only inspekce textu a kandidatu na due date.
 `apply_document_import` je zapis do `data/private/documents/` a smi byt pouzit
 jen po samostatnem potvrzeni v aktualni Milove zprave; potvrzeni musi obsahovat
@@ -728,6 +754,8 @@ LOKALNI PAMET:
             run_email_triage_session,
             save_selected_email_cases_from_uids,
             archive_email_by_uid,
+            prepare_forward_email_by_uid,
+            send_prepared_email_draft,
             list_email_archives,
             show_email_archive_summary,
             show_email_archive_links,
@@ -759,6 +787,9 @@ LOKALNI PAMET:
             document_vault_status,
             prepare_document_import,
             prepare_mobile_document_batch,
+            process_mobile_document_inbox,
+            prepare_mobile_document_final_import,
+            apply_mobile_document_final_import,
             inspect_document_text,
             apply_document_import,
             search_private_documents,

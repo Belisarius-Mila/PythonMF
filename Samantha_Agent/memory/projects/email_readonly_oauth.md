@@ -73,6 +73,12 @@ Prvni verze nesmi:
 - automaticky archivovat nebo stitkovat,
 - automaticky zapisovat obsah nebo citlive detaily do pameti.
 
+Poznamka 2026-05-26: read-only pravidla stale plati pro hledani, triage,
+cteni, archivaci a praci s prilohami. Vyjimkou je nove samostatne outbound
+workflow pro preposlani e-mailu, ktere neni automaticke: nejdrive se po
+vyslovnem potvrzeni vytvori lokalni draft v `data/email/outbox_drafts/`, a az
+po druhem samostatnem potvrzeni se draft odesle pres SMTP.
+
 ## Provozni pripominka: tydenni kontrola a zaloha
 
 Mila chce, aby Samantha pri startu pripomnela e-mailovou udrzbu, pokud se dele
@@ -166,6 +172,16 @@ Hotove schopnosti:
   - `search_seznam_email_headers`,
   - `read_seznam_email_body_by_uid`,
   - `list_unified_email_headers` rozlisuje zdroj schranky.
+- Potvrzene preposilani e-mailu:
+  - `prepare_forward_email_by_uid` vytvori lokalni draft z jednoho konkretniho
+    iCloud nebo Seznam UID; draft se uklada do ignorovane slozky
+    `data/email/outbox_drafts/` a obsahuje puvodni zpravu jako `.eml`, pokud je
+    dostupna,
+  - `send_prepared_email_draft` odesle az existujici draft a vyzaduje druhe
+    samostatne potvrzeni s `draft_id`, prijemcem a souhlasem s odeslanim,
+  - iCloud SMTP pouziva `smtp.mail.me.com:587` se STARTTLS, Seznam SMTP pouziva
+    `smtp.seznam.cz:465` se SSL/TLS; udaje zustavaji jen v lokalnim `.env`,
+  - outbound workflow nesmi byt spojeno do jednoho kroku se ctenim e-mailu.
 - Lokalni Seznam `.env` je vyplneny mimo git a memory.
 - Read-only Seznam smoke test hlavicek 2026-05-23 prosel:
   - provider se prihlasil,
@@ -185,6 +201,12 @@ Hotove schopnosti:
   - 34 UID slozek priloh,
   - 129 lokalnich souboru priloh,
   - katalog podle metadat/nazvu priloh.
+- Dokumentovy vault ma od 2026-05-26 lepsi klasifikaci pro auto dokumenty:
+  Volvo/V40, faktury, zelene karty, servisni prohlidky, STK/technicke kontroly,
+  splatnost a platnost se propisuji do `domain`, `document_type`,
+  `related_asset` a tagu. Cilem je, aby dotazy typu "pojistky za Volvo V40",
+  "vsechny faktury za Volvo" nebo "posledni prohlidka" fungovaly nad private
+  document vaultem.
 
 Aktualni dalsi krok:
 
@@ -194,13 +216,19 @@ Aktualni dalsi krok:
   document-vault workflow.
 - Neudelat automaticky fulltext, cteni tel, stahovani priloh, archivaci ani
   vypis plnych URL bez samostatneho potvrzeni.
+- Preposilani delat pouze dvoukrokove: pripravit draft, ukazat `draft_id`, a
+  teprve po dalsim potvrzeni odeslat. Nikdy neposilat rovnou po prvnim dotazu.
+- Pokud Mila rekne, ze je e-mail v "mailu" nebo ve sloucenem inboxu a prvni
+  kontrolovana schranka ho nenajde, dalsi read-only krok je zkontrolovat i druhou
+  nakonfigurovanou schranku pres unified/dual-mailbox workflow. Mila vidi oba
+  ucty sloucene v klientovi, proto se nema spolehat jen na prvni odhad zdroje.
 
 Bezpecnostni hranice:
 
 - Neukladat do memory ani gitu e-mailove adresy, hesla, app-specific passwords,
   tokeny, cela tela e-mailu, plne URL, prilohy ani privatni obsah.
 - Lokalni citliva data zustavaji v `data/email/`, `data/private/email_seznam/`
-  a `.env`; tyto soubory se necommituji.
+  a `.env`; `data/email/archive/` i `data/email/outbox_drafts/` se necommituji.
 - Vystupy do memory smi obsahovat jen architekturu, workflow, pocty a redigovany
   stav prace.
 

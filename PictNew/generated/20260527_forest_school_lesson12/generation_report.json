@@ -1,0 +1,87 @@
+[
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson12/forest_school_toy.png",
+    "output_file": "forest_school_toy.png",
+    "request": {
+      "id": "forest-school-toy",
+      "language": "forest_school",
+      "image_name": "forest_school_toy",
+      "words": [
+        "toy"
+      ],
+      "czech_meanings": [
+        "hracka"
+      ],
+      "lesson": 12
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson12/forest_school_kite.png",
+    "output_file": "forest_school_kite.png",
+    "request": {
+      "id": "forest-school-kite",
+      "language": "forest_school",
+      "image_name": "forest_school_kite",
+      "words": [
+        "kite"
+      ],
+      "czech_meanings": [
+        "drak"
+      ],
+      "lesson": 12
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson12/forest_school_lamp.png",
+    "output_file": "forest_school_lamp.png",
+    "request": {
+      "id": "forest-school-lamp",
+      "language": "forest_school",
+      "image_name": "forest_school_lamp",
+      "words": [
+        "lamp"
+      ],
+      "czech_meanings": [
+        "lampa"
+      ],
+      "lesson": 12
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson12/forest_school_boots.png",
+    "output_file": "forest_school_boots.png",
+    "request": {
+      "id": "forest-school-boots",
+      "language": "forest_school",
+      "image_name": "forest_school_boots",
+      "words": [
+        "boots"
+      ],
+      "czech_meanings": [
+        "boty/holinky"
+      ],
+      "lesson": 12
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson12/forest_school_pea.png",
+    "output_file": "forest_school_pea.png",
+    "request": {
+      "id": "forest-school-pea",
+      "language": "forest_school",
+      "image_name": "forest_school_pea",
+      "words": [
+        "pea"
+      ],
+      "czech_meanings": [
+        "hrasek"
+      ],
+      "lesson": 12
+    }
+  }
+]

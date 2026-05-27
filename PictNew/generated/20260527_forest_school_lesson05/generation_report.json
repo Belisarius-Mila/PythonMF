@@ -1,0 +1,87 @@
+[
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson05/forest_school_bike.png",
+    "output_file": "forest_school_bike.png",
+    "request": {
+      "id": "forest-school-bike",
+      "language": "forest_school",
+      "image_name": "forest_school_bike",
+      "words": [
+        "bike"
+      ],
+      "czech_meanings": [
+        "kolo"
+      ],
+      "lesson": 5
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson05/forest_school_chair.png",
+    "output_file": "forest_school_chair.png",
+    "request": {
+      "id": "forest-school-chair",
+      "language": "forest_school",
+      "image_name": "forest_school_chair",
+      "words": [
+        "chair"
+      ],
+      "czech_meanings": [
+        "zidle"
+      ],
+      "lesson": 5
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson05/forest_school_bag.png",
+    "output_file": "forest_school_bag.png",
+    "request": {
+      "id": "forest-school-bag",
+      "language": "forest_school",
+      "image_name": "forest_school_bag",
+      "words": [
+        "bag"
+      ],
+      "czech_meanings": [
+        "batoh/taska"
+      ],
+      "lesson": 5
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson05/forest_school_moon.png",
+    "output_file": "forest_school_moon.png",
+    "request": {
+      "id": "forest-school-moon",
+      "language": "forest_school",
+      "image_name": "forest_school_moon",
+      "words": [
+        "moon"
+      ],
+      "czech_meanings": [
+        "mesic"
+      ],
+      "lesson": 5
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson05/forest_school_bread.png",
+    "output_file": "forest_school_bread.png",
+    "request": {
+      "id": "forest-school-bread",
+      "language": "forest_school",
+      "image_name": "forest_school_bread",
+      "words": [
+        "bread"
+      ],
+      "czech_meanings": [
+        "chleba"
+      ],
+      "lesson": 5
+    }
+  }
+]

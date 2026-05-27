@@ -16,6 +16,11 @@ Tyto instrukce plati pro praci ve slozce `Samantha_Agent/`.
 - Pokud v pameti chybi dulezity kontext, upozorni na to a pokracuj s rozumnym predpokladem.
 - Pri startu nove SSH/Codex relace zkontroluj pravidla v `memory/technical/session_recovery_rules.md`.
 - Pokud `MEMORY_INDEX.md` obsahuje polozky oznacene `[PRIPOMENOUT]`, upozorni na ne pri navazovani prace nebo kdyz se Mila pta, na cem pokracovat.
+- Pri startu nove relace vzdy zkontroluj stav zalohy pres
+  `.venv/bin/python scripts/backup_status.py`. Pokud je posledni uspesna zaloha
+  starsi nez 3 dny nebo chybi, upozorni na to v prvni odpovedi kazdy den, dokud
+  neprobehnou nova uspesna zaloha. Pripominka sama nic nekopiruje, nemaze ani
+  necte tajemstvi.
 - Autosave nouzove obnovy ma bezet pri startu pres `samantha`: kazdych 10 minut uklada TXT/JSONL do `data/session_autosave/`.
 - Soubory v `data/session_autosave/` jsou jen nouzova obnova, nikdy je necommituj.
 

@@ -62,6 +62,13 @@ DOMAIN_ALIASES = {
     "health": "health",
     "zdravi": "health",
     "zdraví": "health",
+    "food": "food",
+    "jidlo": "food",
+    "jídlo": "food",
+    "recept": "food",
+    "recepty": "food",
+    "kuchyne": "food",
+    "kuchyně": "food",
     "tax": "tax",
     "dane": "tax",
     "daně": "tax",
@@ -116,6 +123,33 @@ class MobileDocumentBatchResult:
     processing_dir: Path
     pdf_path: Path
     manifest_path: Path
+
+
+@dataclass(frozen=True)
+class MobileDocumentProcessItem:
+    batch_id: str
+    document_title: str
+    status: str
+    page_count: int
+    processing_dir: Path | None = None
+    pdf_path: Path | None = None
+    manifest_path: Path | None = None
+    extraction_method: str = ""
+    ocr_needed: bool = False
+    document_type: str = ""
+    domain: str = ""
+    due_date_count: int = 0
+    warning: str = ""
+
+
+@dataclass(frozen=True)
+class MobileDocumentFinalMetadata:
+    domain: str
+    document_type: str
+    counterparty: str
+    related_asset: str
+    tags: str
+    case_id: str
 
 
 def prepare_document_import_summary(
@@ -334,6 +368,332 @@ def prepare_mobile_document_batch_summary(
         "Dalsi krok: zkontrolovat PDF a potom teprve spustit read-only "
         "`prepare_document_import` nad vytvorenym PDF."
     )
+
+
+def process_mobile_document_inbox_summary(
+    batch_id: str = "",
+    mobile_inbox_dir: Path = DEFAULT_MOBILE_DOCUMENT_INBOX,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    max_batches: int = 20,
+    force_reprocess: bool = False,
+) -> str:
+    try:
+        items, request_warning = process_mobile_document_inbox(
+            batch_id=batch_id,
+            mobile_inbox_dir=mobile_inbox_dir,
+            vault_dir=vault_dir,
+            max_batches=max_batches,
+            force_reprocess=force_reprocess,
+        )
+    except ValueError as exc:
+        return f"Zpracovani mobilniho inboxu bylo odmitnuto: {exc}"
+
+    if not items:
+        return "Zpracovani mobilniho inboxu: nebyl nalezen zadny batch ke zpracovani."
+
+    processed = sum(1 for item in items if item.status in {"prepared", "already_prepared", "reprocessed"})
+    failed = sum(1 for item in items if item.status == "failed")
+    lines = [
+        "Zpracovani mobilniho inboxu probehlo.",
+        f"- Batchu celkem: {len(items)}",
+        f"- Pripraveno ke kontrole/importu: {processed}",
+        f"- Chyby: {failed}",
+    ]
+    if request_warning:
+        lines.append(f"- Poznamka k requestu: {safe_text(request_warning)}")
+    lines.append("")
+
+    for item in items:
+        lines.extend(
+            [
+                f"- Batch: {safe_text(item.batch_id)}",
+                f"  Nazev: {safe_text(item.document_title) or 'bez nazvu'}",
+                f"  Stav: {safe_text(item.status)}",
+            ]
+        )
+        if item.page_count:
+            lines.append(f"  Stranky: {item.page_count}")
+        if item.pdf_path is not None:
+            lines.append(f"  PDF: `{relative_to_project(item.pdf_path)}`")
+        if item.manifest_path is not None:
+            lines.append(f"  Manifest: `{relative_to_project(item.manifest_path)}`")
+        if item.extraction_method:
+            lines.append(
+                f"  Text/OCR: {safe_text(item.extraction_method)} | "
+                f"OCR potreba: {'ano' if item.ocr_needed else 'ne'}"
+            )
+        if item.document_type or item.domain:
+            lines.append(
+                f"  Navrh: {safe_text(item.domain or 'other')} / "
+                f"{safe_text(item.document_type or 'document')}"
+            )
+        lines.append(f"  Due date kandidati: {item.due_date_count}")
+        if item.warning:
+            lines.append(f"  Poznamka: {safe_text(item.warning)}")
+
+    lines.extend(
+        [
+            "",
+            "Bezpecnost: finalni import do vaultu neprobehl. Zdrojove fotky v iCloud "
+            "inboxu zustaly beze zmeny. Dalsi krok je kontrola PDF a potvrzeny import.",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def prepare_mobile_document_final_import_summary(
+    batch_id: str = "",
+    target_domain: str = "",
+    document_type: str = "",
+    counterparty: str = "",
+    related_asset: str = "",
+    tags: str = "",
+    case_id: str = "",
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> str:
+    try:
+        prepared = find_prepared_mobile_batch_for_import(
+            vault_dir=vault_dir,
+            batch_id=batch_id,
+            include_imported=True,
+        )
+        analysis = ensure_prepared_mobile_analysis(
+            prepared=prepared,
+            vault_dir=vault_dir,
+        )
+    except ValueError as exc:
+        return f"Priprava finalniho importu mobilniho dokumentu byla odmitnuta: {exc}"
+
+    metadata = choose_mobile_final_metadata(
+        analysis=analysis,
+        target_domain=target_domain,
+        document_type=document_type,
+        counterparty=counterparty,
+        related_asset=related_asset,
+        tags=tags,
+        case_id=case_id,
+    )
+    manifest = read_json_file(prepared.manifest_path)
+    already_imported = bool(manifest.get("final_import_done", False))
+    due_dates = analysis.get("due_dates", [])
+    if not isinstance(due_dates, list):
+        due_dates = []
+
+    lines = [
+        "Navrh finalniho importu mobilniho dokumentu (read-only):",
+        f"- Batch: {safe_text(prepared.batch_id)}",
+        f"- Nazev: {safe_text(prepared.document_title) or 'bez nazvu'}",
+        f"- Stranky: {prepared.page_count}",
+        f"- PDF ke kontrole: `{relative_to_project(prepared.pdf_path)}`",
+        f"- Manifest: `{relative_to_project(prepared.manifest_path)}`",
+        f"- Stav importu: {'uz importovano' if already_imported else 'ceka na potvrzeni'}",
+        f"- Text/OCR: {safe_text(str(analysis.get('extraction_method', '')))} | "
+        f"OCR potreba: {'ano' if analysis.get('ocr_needed') else 'ne'}",
+        f"- Navrzena oblast: {metadata.domain}",
+        f"- Navrzeny typ: {metadata.document_type}",
+        f"- Protistrana: {metadata.counterparty or 'nezjisteno'}",
+        f"- Vazba na vec/majetek: {metadata.related_asset or 'nezjisteno'}",
+        f"- Case ID / souvislost: {metadata.case_id or 'nezadano'}",
+    ]
+    if metadata.tags:
+        lines.append(f"- Tagy: {metadata.tags}")
+    lines.append(f"- Due date kandidati: {len(due_dates)}")
+    warning = safe_text(str(analysis.get("warning", "")))
+    if warning:
+        lines.append(f"- Poznamka: {warning}")
+
+    lines.extend(
+        [
+            "",
+            "Kontrola pred ulozenim:",
+            "1. Otevri PDF a zkontroluj citelnost/orez.",
+            "2. Pokud kvalita nesedi, nepokracuj ve finalnim importu a zkusime RAW/LIGHT/BW nebo GPT PDF.",
+            "3. Pokud sedi kvalita i metadata, potvrd ulozeni.",
+            "",
+            "Potvrzovaci veta pro navrzena metadata:",
+            f"`Potvrzuji, uloz dokument {prepared.pdf_path.name} do oblasti {metadata.domain}.`",
+            "",
+            "Pokud chces zmenit klasifikaci, pouzij pri finalnim importu jine hodnoty "
+            "`target_domain`, `document_type`, `tags` nebo `case_id`.",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def apply_mobile_document_final_import_summary(
+    batch_id: str = "",
+    target_domain: str = "",
+    document_type: str = "",
+    counterparty: str = "",
+    related_asset: str = "",
+    tags: str = "",
+    document_id: str = "",
+    case_id: str = "",
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> str:
+    try:
+        prepared = find_prepared_mobile_batch_for_import(
+            vault_dir=vault_dir,
+            batch_id=batch_id,
+            include_imported=False,
+        )
+        analysis = ensure_prepared_mobile_analysis(
+            prepared=prepared,
+            vault_dir=vault_dir,
+        )
+    except ValueError as exc:
+        return f"Finalni import mobilniho dokumentu byl odmitnut: {exc}"
+
+    metadata = choose_mobile_final_metadata(
+        analysis=analysis,
+        target_domain=target_domain,
+        document_type=document_type,
+        counterparty=counterparty,
+        related_asset=related_asset,
+        tags=tags,
+        case_id=case_id,
+    )
+    if not user_confirmed or not has_explicit_document_import_confirmation(
+        filename=prepared.pdf_path.name,
+        target_domain=metadata.domain,
+        confirmation_text=confirmation_text,
+    ):
+        return (
+            "Nejdrive potrebuji samostatne potvrzeni od Mily v aktualni zprave. "
+            f"Potvrzeni musi obsahovat nazev souboru {prepared.pdf_path.name}, "
+            f"cilovou oblast {metadata.domain} a jasny souhlas s ulozenim dokumentu. "
+            f"Navrzena veta: Potvrzuji, uloz dokument {prepared.pdf_path.name} "
+            f"do oblasti {metadata.domain}."
+        )
+
+    try:
+        result = apply_document_import_file(
+            source_path=str(prepared.pdf_path),
+            target_domain=metadata.domain,
+            document_type=metadata.document_type,
+            counterparty=metadata.counterparty,
+            related_asset=metadata.related_asset,
+            tags=metadata.tags,
+            document_id=document_id,
+            case_id=metadata.case_id,
+            vault_dir=vault_dir,
+        )
+    except ValueError as exc:
+        return f"Finalni import mobilniho dokumentu byl odmitnut: {exc}"
+
+    mark_mobile_document_final_import(
+        prepared=prepared,
+        result=result,
+        metadata=metadata,
+        vault_dir=vault_dir,
+    )
+    status = "ulozeno" if result.created else "uz existuje"
+    return (
+        f"Stav: {status}. Document ID: {result.document_id}. "
+        f"Batch: {prepared.batch_id}. Dokument: {relative_to_project(result.destination)}. "
+        f"Manifest: {relative_to_project(result.manifest)}. "
+        "Mobilni pracovni PDF je oznacene jako finalne importovane. "
+        "Zdrojove fotky v iCloud inboxu se timto krokem nemazou."
+    )
+
+
+def process_mobile_document_inbox(
+    batch_id: str = "",
+    mobile_inbox_dir: Path = DEFAULT_MOBILE_DOCUMENT_INBOX,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    max_batches: int = 20,
+    force_reprocess: bool = False,
+) -> tuple[list[MobileDocumentProcessItem], str]:
+    inbox = mobile_inbox_dir.expanduser().resolve()
+    if not inbox.exists() or not inbox.is_dir():
+        raise ValueError(f"mobile inbox neexistuje nebo neni slozka: {inbox}")
+
+    request_path = inbox / "process_request.json"
+    if not request_path.exists():
+        raise ValueError("chybi process_request.json; spust zkratku `Zpracovat dokumenty pro Samanthu`.")
+    request = read_json_file(request_path)
+    request_name = safe_text(str(request.get("request", ""))).strip()
+    if request_name and request_name != "process_mobile_document_inbox":
+        raise ValueError(f"process_request.json ma neznamy request: {request_name}")
+    request_status = safe_text(str(request.get("status", ""))).strip().casefold()
+    if request_status in {"processed", "done", "hotovo"} and not force_reprocess:
+        raise ValueError("process_request.json je uz oznaceny jako processed; pro opakovani pouzij force_reprocess=True.")
+
+    manifests = select_mobile_process_manifests(
+        inbox=inbox,
+        batch_id=batch_id,
+        max_batches=max(1, min(max_batches, 50)),
+    )
+    items: list[MobileDocumentProcessItem] = []
+    run_started_at = datetime.now(timezone.utc).replace(microsecond=0)
+    for manifest_path, manifest in manifests:
+        raw_batch_id = safe_text(str(manifest.get("batch_id", ""))).strip()
+        title = safe_text(str(manifest.get("document_title", ""))).strip() or raw_batch_id
+        try:
+            existing = find_existing_prepared_mobile_batch(
+                vault_dir=vault_dir,
+                batch_id=raw_batch_id,
+                source_manifest=manifest_path,
+            )
+            if existing is None:
+                prepared = prepare_mobile_document_batch(
+                    batch_id=raw_batch_id,
+                    mobile_inbox_dir=inbox,
+                    vault_dir=vault_dir,
+                )
+                status = "prepared"
+            else:
+                prepared = existing
+                status = "reprocessed" if force_reprocess else "already_prepared"
+            item = analyze_prepared_mobile_document(
+                prepared=prepared,
+                status=status,
+                vault_dir=vault_dir,
+                force_reprocess=force_reprocess,
+            )
+        except ValueError as exc:
+            item = MobileDocumentProcessItem(
+                batch_id=raw_batch_id or safe_text(manifest_path.stem),
+                document_title=title,
+                status="failed",
+                page_count=0,
+                warning=str(exc),
+            )
+        items.append(item)
+
+    process_record = {
+        "schema_version": "1",
+        "request": "process_mobile_document_inbox",
+        "status": "processed" if all(item.status != "failed" for item in items) else "partial",
+        "processed_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "started_at": run_started_at.isoformat(),
+        "batch_count": len(items),
+        "batches": [
+            {
+                "batch_id": item.batch_id,
+                "document_title": item.document_title,
+                "status": item.status,
+                "pdf_path": str(relative_to_project(item.pdf_path)) if item.pdf_path else "",
+                "manifest_path": str(relative_to_project(item.manifest_path)) if item.manifest_path else "",
+                "document_type": item.document_type,
+                "domain": item.domain,
+                "due_date_count": item.due_date_count,
+                "warning": item.warning,
+            }
+            for item in items
+        ],
+        "source_preserved": True,
+        "final_import_done": False,
+        "do_not_commit": True,
+    }
+    append_jsonl(vault_dir / "index" / "mobile_process_runs.jsonl", process_record)
+    request_warning = write_mobile_process_result(
+        request_path=request_path,
+        process_record=process_record,
+    )
+    return items, request_warning
 
 
 def prepare_mobile_document_batch(
@@ -566,6 +926,7 @@ def apply_document_import_file(
     related_asset: str = "",
     tags: str = "",
     document_id: str = "",
+    case_id: str = "",
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
     now: datetime | None = None,
 ) -> DocumentImportResult:
@@ -632,6 +993,7 @@ def apply_document_import_file(
         "document_type": metadata["document_type"],
         "counterparty": safe_text(str(metadata.get("counterparty") or "")),
         "related_asset": safe_text(str(metadata.get("related_asset") or "")),
+        "case_id": safe_slug(case_id, default="", limit=100) if case_id else "",
         "tags": merge_tags(explicit_tags, [str(tag) for tag in suggested_tags]),
         "sha256": digest,
         "size_bytes": source.stat().st_size,
@@ -1419,6 +1781,292 @@ def select_mobile_batch_manifest(
     return manifests[0], read_json_file(manifests[0])
 
 
+def select_mobile_process_manifests(
+    inbox: Path,
+    batch_id: str = "",
+    max_batches: int = 20,
+) -> list[tuple[Path, dict[str, Any]]]:
+    wanted = safe_text(batch_id).strip()
+    if wanted:
+        return [select_mobile_batch_manifest(inbox=inbox, batch_id=wanted)]
+
+    manifests = sorted(
+        inbox.glob("scan_*_manifest.json"),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    if not manifests:
+        raise ValueError("v mobile inboxu neni zadny scan manifest.")
+
+    selected: list[tuple[Path, dict[str, Any]]] = []
+    for path in manifests[:max_batches]:
+        selected.append((path, read_json_file(path)))
+    return selected
+
+
+def find_existing_prepared_mobile_batch(
+    vault_dir: Path,
+    batch_id: str,
+    source_manifest: Path,
+) -> MobileDocumentBatchResult | None:
+    wanted_source = str(source_manifest)
+    for row in reversed(read_jsonl(vault_dir / "index" / "mobile_batches.jsonl")):
+        if safe_text(str(row.get("batch_id", ""))).strip() != batch_id:
+            continue
+        if str(row.get("source_manifest", "")) != wanted_source:
+            continue
+        pdf_path = project_path_from_record(str(row.get("pdf_path", "")))
+        manifest_path = pdf_path.parent / "manifest.json"
+        if not pdf_path.exists() or not manifest_path.exists():
+            continue
+        document_title = safe_text(str(row.get("document_title", ""))).strip() or batch_id
+        page_count = len(row.get("normalized_pages", [])) if isinstance(row.get("normalized_pages"), list) else 0
+        return MobileDocumentBatchResult(
+            batch_id=batch_id,
+            document_title=document_title,
+            page_count=page_count,
+            processing_dir=pdf_path.parent,
+            pdf_path=pdf_path,
+            manifest_path=manifest_path,
+        )
+    return None
+
+
+def analyze_prepared_mobile_document(
+    prepared: MobileDocumentBatchResult,
+    status: str,
+    vault_dir: Path,
+    force_reprocess: bool = False,
+) -> MobileDocumentProcessItem:
+    analysis_path = prepared.processing_dir / "analysis.json"
+    text_path = prepared.processing_dir / "extracted_text.txt"
+    if analysis_path.exists() and text_path.exists() and not force_reprocess:
+        analysis = read_json_file(analysis_path)
+        return MobileDocumentProcessItem(
+            batch_id=prepared.batch_id,
+            document_title=prepared.document_title,
+            status=status,
+            page_count=prepared.page_count,
+            processing_dir=prepared.processing_dir,
+            pdf_path=prepared.pdf_path,
+            manifest_path=prepared.manifest_path,
+            extraction_method=safe_text(str(analysis.get("extraction_method", ""))),
+            ocr_needed=bool(analysis.get("ocr_needed", False)),
+            document_type=safe_text(str(analysis.get("document_type", ""))),
+            domain=safe_text(str(analysis.get("domain", ""))),
+            due_date_count=int(analysis.get("due_date_count", 0) or 0),
+            warning=safe_text(str(analysis.get("warning", ""))),
+        )
+
+    extraction = extract_text(prepared.pdf_path)
+    text_path.write_text(extraction.text, encoding="utf-8")
+    metadata = propose_metadata(
+        source=prepared.pdf_path,
+        text=extraction.text,
+    )
+    due_dates = find_due_date_candidates(extraction.text)
+    analysis = {
+        "schema_version": "1",
+        "status": "analyzed",
+        "analyzed_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "batch_id": prepared.batch_id,
+        "document_title": prepared.document_title,
+        "pdf_path": str(relative_to_project(prepared.pdf_path)),
+        "extracted_text_path": str(relative_to_project(text_path)),
+        "extraction_method": extraction.method,
+        "ocr_needed": extraction.ocr_needed,
+        "warning": extraction.warning,
+        "document_type": metadata.get("document_type", "document"),
+        "domain": metadata.get("domain", "other"),
+        "counterparty": metadata.get("counterparty", ""),
+        "related_asset": metadata.get("related_asset", ""),
+        "tags": metadata.get("tags", []),
+        "due_date_count": len(due_dates),
+        "due_dates": due_dates,
+        "source_preserved": True,
+        "final_import_done": False,
+        "do_not_commit": True,
+    }
+    write_json(analysis_path, analysis)
+    append_jsonl(vault_dir / "index" / "mobile_analyses.jsonl", analysis)
+
+    processing_manifest = read_json_file(prepared.manifest_path)
+    processing_manifest["status"] = "analyzed"
+    processing_manifest["analysis_path"] = str(relative_to_project(analysis_path))
+    processing_manifest["extracted_text_path"] = str(relative_to_project(text_path))
+    processing_manifest["final_import_done"] = False
+    write_json(prepared.manifest_path, processing_manifest)
+
+    return MobileDocumentProcessItem(
+        batch_id=prepared.batch_id,
+        document_title=prepared.document_title,
+        status=status,
+        page_count=prepared.page_count,
+        processing_dir=prepared.processing_dir,
+        pdf_path=prepared.pdf_path,
+        manifest_path=prepared.manifest_path,
+        extraction_method=extraction.method,
+        ocr_needed=extraction.ocr_needed,
+        document_type=safe_text(str(metadata.get("document_type", "document"))),
+        domain=safe_text(str(metadata.get("domain", "other"))),
+        due_date_count=len(due_dates),
+        warning=extraction.warning,
+    )
+
+
+def find_prepared_mobile_batch_for_import(
+    vault_dir: Path,
+    batch_id: str = "",
+    include_imported: bool = False,
+) -> MobileDocumentBatchResult:
+    wanted = safe_text(batch_id).strip()
+    records = list(reversed(read_jsonl(vault_dir / "index" / "mobile_batches.jsonl")))
+    if not records:
+        raise ValueError("neni pripraveny zadny mobilni dokument; nejdrive spust process_mobile_document_inbox.")
+
+    skipped_imported = False
+    for row in records:
+        row_batch_id = safe_text(str(row.get("batch_id", ""))).strip()
+        if wanted and row_batch_id != wanted:
+            continue
+        pdf_path = project_path_from_record(str(row.get("pdf_path", "")))
+        manifest_path = pdf_path.parent / "manifest.json"
+        if not pdf_path.exists() or not manifest_path.exists():
+            continue
+        manifest = read_json_file(manifest_path)
+        if manifest.get("final_import_done") and not include_imported:
+            skipped_imported = True
+            continue
+        document_title = safe_text(str(row.get("document_title", ""))).strip() or row_batch_id
+        page_count = len(row.get("normalized_pages", [])) if isinstance(row.get("normalized_pages"), list) else 0
+        return MobileDocumentBatchResult(
+            batch_id=row_batch_id,
+            document_title=document_title,
+            page_count=page_count,
+            processing_dir=pdf_path.parent,
+            pdf_path=pdf_path,
+            manifest_path=manifest_path,
+        )
+
+    if wanted:
+        raise ValueError(f"pripraveny batch {wanted} nebyl nalezen nebo uz byl importovan.")
+    if skipped_imported:
+        raise ValueError("vsechny nalezene mobilni dokumenty uz jsou finalne importovane.")
+    raise ValueError("neni pripraveny zadny mobilni dokument s existujicim PDF.")
+
+
+def ensure_prepared_mobile_analysis(
+    prepared: MobileDocumentBatchResult,
+    vault_dir: Path,
+) -> dict[str, Any]:
+    analysis_path = prepared.processing_dir / "analysis.json"
+    if not analysis_path.exists():
+        analyze_prepared_mobile_document(
+            prepared=prepared,
+            status="analyzed",
+            vault_dir=vault_dir,
+            force_reprocess=False,
+        )
+    return read_json_file(analysis_path)
+
+
+def choose_mobile_final_metadata(
+    analysis: dict[str, Any],
+    target_domain: str = "",
+    document_type: str = "",
+    counterparty: str = "",
+    related_asset: str = "",
+    tags: str = "",
+    case_id: str = "",
+) -> MobileDocumentFinalMetadata:
+    analysis_tags = analysis.get("tags", [])
+    if not isinstance(analysis_tags, list):
+        analysis_tags = []
+    merged_tags = merge_tags(
+        parse_tags(tags),
+        [safe_text(str(tag)) for tag in analysis_tags],
+    )
+    return MobileDocumentFinalMetadata(
+        domain=normalize_domain(target_domain or safe_text(str(analysis.get("domain", "other")))),
+        document_type=safe_slug(
+            document_type or safe_text(str(analysis.get("document_type", "document"))),
+            default="document",
+            limit=50,
+        ),
+        counterparty=safe_text(counterparty or str(analysis.get("counterparty", ""))),
+        related_asset=safe_text(related_asset or str(analysis.get("related_asset", ""))),
+        tags=", ".join(merged_tags),
+        case_id=safe_slug(case_id, default="", limit=100) if case_id else "",
+    )
+
+
+def mark_mobile_document_final_import(
+    prepared: MobileDocumentBatchResult,
+    result: DocumentImportResult,
+    metadata: MobileDocumentFinalMetadata,
+    vault_dir: Path,
+) -> None:
+    imported_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    import_record = {
+        "schema_version": "1",
+        "batch_id": prepared.batch_id,
+        "document_title": prepared.document_title,
+        "document_id": result.document_id,
+        "created": result.created,
+        "imported_at": imported_at,
+        "source_pdf": str(relative_to_project(prepared.pdf_path)),
+        "stored_path": str(relative_to_project(result.destination)),
+        "manifest_path": str(relative_to_project(result.manifest)),
+        "domain": metadata.domain,
+        "document_type": metadata.document_type,
+        "counterparty": metadata.counterparty,
+        "related_asset": metadata.related_asset,
+        "tags": parse_tags(metadata.tags),
+        "case_id": metadata.case_id,
+        "source_preserved": True,
+        "do_not_commit": True,
+    }
+    append_jsonl(vault_dir / "index" / "mobile_final_imports.jsonl", import_record)
+
+    processing_manifest = read_json_file(prepared.manifest_path)
+    processing_manifest["final_import_done"] = True
+    processing_manifest["final_imported_at"] = imported_at
+    processing_manifest["final_document_id"] = result.document_id
+    processing_manifest["final_stored_path"] = str(relative_to_project(result.destination))
+    processing_manifest["final_manifest_path"] = str(relative_to_project(result.manifest))
+    processing_manifest["case_id"] = metadata.case_id
+    write_json(prepared.manifest_path, processing_manifest)
+
+    analysis_path = prepared.processing_dir / "analysis.json"
+    if analysis_path.exists():
+        analysis = read_json_file(analysis_path)
+        analysis["final_import_done"] = True
+        analysis["final_imported_at"] = imported_at
+        analysis["final_document_id"] = result.document_id
+        analysis["final_stored_path"] = str(relative_to_project(result.destination))
+        analysis["case_id"] = metadata.case_id
+        write_json(analysis_path, analysis)
+
+
+def write_mobile_process_result(
+    request_path: Path,
+    process_record: dict[str, Any],
+) -> str:
+    result_path = request_path.with_name("process_result.json")
+    try:
+        write_json(result_path, process_record)
+        request = read_json_file(request_path)
+        request["status"] = process_record["status"]
+        request["processed_at"] = process_record["processed_at"]
+        request["process_result"] = result_path.name
+        write_json(request_path, request)
+    except OSError as exc:
+        return f"nepodarilo se zapsat process_result/process_request: {exc}"
+    except ValueError as exc:
+        return f"nepodarilo se aktualizovat process_request: {exc}"
+    return ""
+
+
 def read_json_file(path: Path) -> dict[str, Any]:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -1444,7 +2092,7 @@ def safe_image_suffix(path: Path) -> str:
 
 def normalize_mobile_document_page(source: Path, target: Path) -> None:
     try:
-        from PIL import Image, ImageOps
+        from PIL import Image, ImageEnhance, ImageFilter, ImageOps
     except ImportError as exc:
         raise ValueError("chybi Python balik Pillow pro zpracovani obrazku.") from exc
 
@@ -1457,9 +2105,437 @@ def normalize_mobile_document_page(source: Path, target: Path) -> None:
 
     target.parent.mkdir(parents=True, exist_ok=True)
     with Image.open(source) as image:
-        normalized = ImageOps.exif_transpose(image)
-        normalized = ImageOps.autocontrast(normalized.convert("RGB"))
+        normalized = ImageOps.exif_transpose(image).convert("RGB")
+        if should_use_mobile_document_raw_profile():
+            normalized.save(target, format="JPEG", quality=94, optimize=True)
+            return
+        rectified = rectify_mobile_document_page_with_opencv(normalized)
+        if rectified is not None:
+            normalized = rectified
+        else:
+            normalized = crop_mobile_page_area(normalized)
+            normalized = crop_mobile_document_content(normalized, padding_ratio=0.08)
+            deskew_angle = estimate_mobile_document_skew_angle(normalized)
+            if abs(deskew_angle) >= 0.25:
+                normalized = normalized.rotate(deskew_angle, resample=Image.Resampling.BICUBIC, expand=True, fillcolor=(255, 255, 255))
+                normalized = crop_mobile_page_area(normalized)
+                normalized = crop_mobile_document_content(normalized, padding_ratio=0.05)
+        normalized = ImageOps.autocontrast(normalized, cutoff=1)
+        normalized = ImageEnhance.Brightness(normalized).enhance(1.18)
+        normalized = ImageEnhance.Contrast(normalized).enhance(1.10)
+        normalized = normalized.filter(ImageFilter.SHARPEN)
+        if should_use_mobile_document_bw_profile():
+            normalized = clean_mobile_document_as_black_white(normalized)
         normalized.save(target, format="JPEG", quality=92, optimize=True)
+
+
+def should_use_mobile_document_raw_profile() -> bool:
+    value = os.environ.get("SAMANTHA_DOCUMENT_CLEAN_PROFILE", "raw").strip().casefold()
+    return value in {"raw", "original", "none", "passthrough"}
+
+
+def should_use_mobile_document_bw_profile() -> bool:
+    value = os.environ.get("SAMANTHA_DOCUMENT_CLEAN_PROFILE", "raw").strip().casefold()
+    return value not in {"0", "false", "no", "color", "colour", "rgb"}
+
+
+def clean_mobile_document_as_black_white(image: Any) -> Any:
+    try:
+        import cv2  # type: ignore
+        import numpy as np  # type: ignore
+        from PIL import Image, ImageFilter, ImageOps
+    except Exception:
+        return image
+
+    grayscale = ImageOps.autocontrast(image.convert("L"), cutoff=1)
+    array = np.array(grayscale)
+    if array.size == 0:
+        return image
+
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    enhanced = clahe.apply(array)
+    background = cv2.GaussianBlur(enhanced, (0, 0), sigmaX=45, sigmaY=45)
+    flattened = cv2.divide(enhanced, background, scale=255)
+    flattened = cv2.GaussianBlur(flattened, (3, 3), 0)
+    _, thresholded = cv2.threshold(flattened, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    thresholded = remove_mobile_scan_noise_components(thresholded, cv2=cv2, np=np)
+    thresholded = remove_mobile_scan_margin_artifacts(thresholded, cv2=cv2, np=np)
+    cleaned = Image.fromarray(thresholded, mode="L")
+    cleaned = crop_mobile_document_content(cleaned.convert("RGB"), padding_ratio=0.015).convert("L")
+    cleaned = remove_light_edge_noise(cleaned)
+    cleaned = place_mobile_document_on_a4_canvas(cleaned)
+    return cleaned.filter(ImageFilter.SHARPEN).convert("RGB")
+
+
+def remove_mobile_scan_noise_components(thresholded: Any, cv2: Any, np: Any) -> Any:
+    black_mask = (thresholded < 128).astype("uint8")
+    component_count, labels, stats, _ = cv2.connectedComponentsWithStats(black_mask, connectivity=8)
+    cleaned_mask = np.zeros_like(black_mask)
+    height, width = black_mask.shape[:2]
+    edge_margin = max(3, int(min(width, height) * 0.006))
+    min_area = max(3, int(width * height * 0.0000015))
+    for label in range(1, component_count):
+        x, y, w, h, area = stats[label]
+        touches_edge = (
+            x <= edge_margin
+            or y <= edge_margin
+            or x + w >= width - edge_margin
+            or y + h >= height - edge_margin
+        )
+        if area <= min_area:
+            continue
+        if touches_edge and area > min_area * 8:
+            continue
+        cleaned_mask[labels == label] = 1
+    return np.where(cleaned_mask > 0, 0, 255).astype("uint8")
+
+
+def remove_mobile_scan_margin_artifacts(thresholded: Any, cv2: Any, np: Any) -> Any:
+    black_mask = (thresholded < 128).astype("uint8")
+    component_count, labels, stats, _ = cv2.connectedComponentsWithStats(black_mask, connectivity=8)
+    cleaned_mask = np.zeros_like(black_mask)
+    height, width = black_mask.shape[:2]
+    min_area = max(4, int(width * height * 0.000002))
+    side_band = int(width * 0.07)
+    top_band = int(height * 0.08)
+    bottom_band = int(height * 0.04)
+    for label in range(1, component_count):
+        x, y, w, h, area = stats[label]
+        if area <= min_area:
+            continue
+        near_left = x < side_band
+        near_right = x + w > width - side_band
+        near_top = y < top_band
+        near_bottom = y + h > height - bottom_band
+        long_horizontal = w > width * 0.18 and h < height * 0.035
+        long_vertical = h > height * 0.18 and w < width * 0.04
+        bulky_margin_mark = area > min_area * 12 and (near_left or near_right or near_top or near_bottom)
+        if near_bottom and long_horizontal:
+            continue
+        if near_top and long_horizontal and (near_left or near_right) and area > min_area * 10:
+            continue
+        if long_horizontal:
+            cleaned_mask[labels == label] = 1
+            continue
+        if (near_left or near_right) and (long_vertical or bulky_margin_mark):
+            continue
+        if (near_left or near_right) and area > min_area * 24:
+            continue
+        cleaned_mask[labels == label] = 1
+    return np.where(cleaned_mask > 0, 0, 255).astype("uint8")
+
+
+def remove_light_edge_noise(image: Any) -> Any:
+    width, height = image.size
+    if width <= 0 or height <= 0:
+        return image
+    pixels = image.load()
+    edge = max(8, int(min(width, height) * 0.012))
+    for y in range(height):
+        for x in range(width):
+            if x >= edge and y >= edge and x < width - edge and y < height - edge:
+                continue
+            if pixels[x, y] > 105:
+                pixels[x, y] = 255
+    return image
+
+
+def place_mobile_document_on_a4_canvas(image: Any) -> Any:
+    from PIL import Image
+
+    canvas_width, canvas_height = 1240, 1754
+    margin_x = 40
+    margin_y = 52
+    available_width = canvas_width - 2 * margin_x
+    available_height = canvas_height - 2 * margin_y
+    width, height = image.size
+    if width <= 0 or height <= 0:
+        return image
+    scale = min(available_width / width, available_height / height)
+    resized = image.resize(
+        (max(1, int(width * scale)), max(1, int(height * scale))),
+        resample=Image.Resampling.LANCZOS,
+    )
+    canvas = Image.new("L", (canvas_width, canvas_height), 255)
+    left = (canvas_width - resized.width) // 2
+    top = (canvas_height - resized.height) // 2
+    canvas.paste(resized, (left, top))
+    return canvas
+
+
+def rectify_mobile_document_page_with_opencv(image: Any) -> Any | None:
+    if os.environ.get("SAMANTHA_DOCUMENT_OPENCV_RECTIFY", "0").casefold() not in {"1", "true", "yes"}:
+        return None
+
+    try:
+        import cv2  # type: ignore
+        import numpy as np  # type: ignore
+        from PIL import Image
+    except Exception:
+        return None
+
+    rgb = np.array(image.convert("RGB"))
+    height, width = rgb.shape[:2]
+    max_dimension = 1400
+    scale = max(width, height) / max_dimension if max(width, height) > max_dimension else 1.0
+    small = cv2.resize(rgb, (int(width / scale), int(height / scale)), interpolation=cv2.INTER_AREA)
+    gray = cv2.cvtColor(small, cv2.COLOR_RGB2GRAY)
+    image_area = small.shape[0] * small.shape[1]
+    page_quad = detect_document_quad_from_bright_page(
+        gray=gray,
+        cv2=cv2,
+        np=np,
+        image_area=image_area,
+        scale=scale,
+    )
+    if page_quad is None:
+        page_quad = detect_document_quad_from_edges(
+            gray=gray,
+            cv2=cv2,
+            image_area=image_area,
+            scale=scale,
+        )
+
+    if page_quad is None:
+        return None
+
+    rect = order_quad_points(page_quad, np=np)
+    top_left, top_right, bottom_right, bottom_left = rect
+    width_top = np.linalg.norm(top_right - top_left)
+    width_bottom = np.linalg.norm(bottom_right - bottom_left)
+    height_left = np.linalg.norm(bottom_left - top_left)
+    height_right = np.linalg.norm(bottom_right - top_right)
+    target_width = int(max(width_top, width_bottom))
+    target_height = int(max(height_left, height_right))
+    if target_width < width * 0.35 or target_height < height * 0.35:
+        return None
+    if target_width * target_height < width * height * 0.18:
+        return None
+
+    destination = np.array(
+        [
+            [0, 0],
+            [target_width - 1, 0],
+            [target_width - 1, target_height - 1],
+            [0, target_height - 1],
+        ],
+        dtype="float32",
+    )
+    matrix = cv2.getPerspectiveTransform(rect, destination)
+    warped = cv2.warpPerspective(rgb, matrix, (target_width, target_height), borderMode=cv2.BORDER_REPLICATE)
+    if warped.shape[1] > warped.shape[0]:
+        warped = cv2.rotate(warped, cv2.ROTATE_90_CLOCKWISE)
+    return Image.fromarray(warped)
+
+
+def detect_document_quad_from_bright_page(gray: Any, cv2: Any, np: Any, image_area: int, scale: float) -> Any | None:
+    otsu_threshold_value, _ = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    threshold = min(255, int(otsu_threshold_value) + 5)
+    _, mask = cv2.threshold(gray, threshold, 255, cv2.THRESH_BINARY)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9, 9))
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=2)
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if not contours:
+        return None
+    for contour in sorted(contours, key=cv2.contourArea, reverse=True)[:5]:
+        if cv2.contourArea(contour) < image_area * 0.35:
+            continue
+        hull = cv2.convexHull(contour)
+        perimeter = cv2.arcLength(hull, True)
+        for epsilon in (0.02, 0.025, 0.03, 0.04, 0.05):
+            approx = cv2.approxPolyDP(hull, epsilon * perimeter, True)
+            if len(approx) == 4:
+                return approx.reshape(4, 2).astype("float32") * scale
+    return None
+
+
+def detect_document_quad_from_edges(gray: Any, cv2: Any, image_area: int, scale: float) -> Any | None:
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    edges = cv2.Canny(blurred, 40, 120)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+    edges = cv2.dilate(edges, kernel, iterations=1)
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    for contour in sorted(contours, key=cv2.contourArea, reverse=True)[:12]:
+        area = cv2.contourArea(contour)
+        if area < image_area * 0.22:
+            continue
+        perimeter = cv2.arcLength(contour, True)
+        approx = cv2.approxPolyDP(contour, 0.025 * perimeter, True)
+        if len(approx) == 4:
+            return approx.reshape(4, 2).astype("float32") * scale
+    return None
+
+
+def order_quad_points(points: Any, np: Any) -> Any:
+    rect = np.zeros((4, 2), dtype="float32")
+    sums = points.sum(axis=1)
+    diffs = np.diff(points, axis=1)
+    rect[0] = points[np.argmin(sums)]
+    rect[2] = points[np.argmax(sums)]
+    rect[1] = points[np.argmin(diffs)]
+    rect[3] = points[np.argmax(diffs)]
+    return rect
+
+
+def crop_mobile_page_area(image: Any) -> Any:
+    grayscale = image.convert("L")
+    threshold = min(235, otsu_threshold(grayscale) + 20)
+    mask = grayscale.point(lambda pixel: 255 if pixel > threshold else 0)
+    bbox = mask.getbbox()
+    if not bbox:
+        return image
+
+    left, top, right, bottom = bbox
+    width, height = image.size
+    crop_area = (right - left) * (bottom - top)
+    original_area = width * height
+    if crop_area < original_area * 0.35:
+        return image
+    if (right - left) < width * 0.45 or (bottom - top) < height * 0.45:
+        return image
+
+    margin_x = max(12, int((right - left) * 0.015))
+    margin_y = max(12, int((bottom - top) * 0.015))
+    left = max(0, left - margin_x)
+    top = max(0, top - margin_y)
+    right = min(width, right + margin_x)
+    bottom = min(height, bottom + margin_y)
+    if (right - left) >= width * 0.985 and (bottom - top) >= height * 0.985:
+        return image
+    return image.crop((left, top, right, bottom))
+
+
+def crop_mobile_document_content(image: Any, padding_ratio: float = 0.06) -> Any:
+    from PIL import ImageOps
+
+    width, height = image.size
+    inset_x = max(0, int(width * 0.025))
+    inset_y = max(0, int(height * 0.025))
+    working = image.crop((inset_x, inset_y, width - inset_x, height - inset_y))
+    grayscale = ImageOps.autocontrast(working.convert("L"), cutoff=1)
+    threshold = estimate_dark_content_threshold(grayscale)
+    mask = grayscale.point(lambda pixel: 255 if pixel < threshold else 0)
+    bbox = mask.getbbox()
+    if not bbox:
+        return image
+
+    left, top, right, bottom = bbox
+    left += inset_x
+    right += inset_x
+    top += inset_y
+    bottom += inset_y
+    crop_width = right - left
+    crop_height = bottom - top
+    original_area = width * height
+    crop_area = crop_width * crop_height
+    if crop_area < original_area * 0.03:
+        return image
+    if crop_width < width * 0.2 or crop_height < height * 0.08:
+        return image
+
+    margin_x = max(18, int(crop_width * padding_ratio))
+    margin_y = max(18, int(crop_height * padding_ratio))
+    left = max(0, left - margin_x)
+    top = max(0, top - margin_y)
+    right = min(width, right + margin_x)
+    bottom = min(height, bottom + margin_y)
+
+    if (right - left) >= width * 0.98 and (bottom - top) >= height * 0.98:
+        return image
+    return image.crop((left, top, right, bottom))
+
+
+def otsu_threshold(grayscale: Any) -> int:
+    histogram = grayscale.histogram()
+    total = sum(histogram)
+    if total <= 0:
+        return 128
+    sum_total = sum(value * count for value, count in enumerate(histogram))
+    sum_background = 0
+    weight_background = 0
+    best_threshold = 128
+    best_variance = 0.0
+    for value, count in enumerate(histogram):
+        weight_background += count
+        if weight_background <= 0:
+            continue
+        weight_foreground = total - weight_background
+        if weight_foreground <= 0:
+            break
+        sum_background += value * count
+        mean_background = sum_background / weight_background
+        mean_foreground = (sum_total - sum_background) / weight_foreground
+        variance = weight_background * weight_foreground * (mean_background - mean_foreground) ** 2
+        if variance > best_variance:
+            best_variance = variance
+            best_threshold = value
+    return best_threshold
+
+
+def estimate_dark_content_threshold(grayscale: Any) -> int:
+    histogram = grayscale.histogram()
+    total = sum(histogram)
+    if total <= 0:
+        return 210
+    dark_pixels = 0
+    threshold = 210
+    # Prefer the darkest 35 percent at most; this avoids treating mild paper
+    # shade as content while still catching grey text from phone scans.
+    for value, count in enumerate(histogram):
+        dark_pixels += count
+        if dark_pixels / total >= 0.35:
+            threshold = max(135, min(215, value + 12))
+            break
+    return threshold
+
+
+def estimate_mobile_document_skew_angle(image: Any) -> float:
+    from PIL import Image, ImageOps
+
+    grayscale = ImageOps.autocontrast(image.convert("L"), cutoff=1)
+    max_width = 900
+    if grayscale.width > max_width:
+        ratio = max_width / grayscale.width
+        grayscale = grayscale.resize(
+            (max_width, max(1, int(grayscale.height * ratio))),
+            resample=Image.Resampling.BILINEAR,
+        )
+
+    threshold = estimate_dark_content_threshold(grayscale)
+    angles = [value / 2 for value in range(-10, 11)]
+    best_angle = 0.0
+    best_score = 0.0
+    for angle in angles:
+        rotated = grayscale.rotate(angle, resample=Image.Resampling.BILINEAR, expand=True, fillcolor=255)
+        score = horizontal_projection_score(rotated, threshold=threshold)
+        if score > best_score:
+            best_score = score
+            best_angle = angle
+    return best_angle
+
+
+def horizontal_projection_score(grayscale: Any, threshold: int) -> float:
+    width, height = grayscale.size
+    if width <= 0 or height <= 0:
+        return 0.0
+    pixels = grayscale.load()
+    row_counts: list[int] = []
+    total_dark = 0
+    step_x = max(1, width // 700)
+    for y in range(height):
+        count = 0
+        for x in range(0, width, step_x):
+            if pixels[x, y] < threshold:
+                count += 1
+        row_counts.append(count)
+        total_dark += count
+    if total_dark < max(40, width // step_x):
+        return 0.0
+
+    mean = total_dark / len(row_counts)
+    variance = sum((count - mean) ** 2 for count in row_counts) / len(row_counts)
+    transitions = sum(abs(row_counts[index] - row_counts[index - 1]) for index in range(1, len(row_counts)))
+    return variance + transitions * 0.05
 
 
 def build_pdf_from_images(images: list[Path], target: Path) -> None:
@@ -2042,9 +3118,13 @@ def guess_document_type(text: str) -> str:
         return "invoice"
     if any(word in text for word in ("pojistka", "pojisteni", "pojištění", "pojistna smlouva", "pojistná smlouva")):
         return "insurance_policy"
+    if looks_like_recipe_document(text):
+        return "recipe"
+    if looks_like_diet_guidance(text):
+        return "diet_guidance"
     if any(word in text for word in ("smlouva", "contract")):
         return "contract"
-    if any(word in text for word in ("stk", "technicka kontrola", "technická kontrola", "emisni kontrola", "emisní kontrola", "revize", "revizni", "revizní")):
+    if has_stk_marker(text) or any(word in text for word in ("technicka kontrola", "technická kontrola", "emisni kontrola", "emisní kontrola", "revize", "revizni", "revizní")):
         return "inspection_report"
     if any(word in text for word in ("servis", "servisni", "servisní", "garanční prohlídka", "garancni prohlidka", "udrzba", "údržba", "zakazkovy list", "zakázkový list", "protokol")):
         return "service_report"
@@ -2054,7 +3134,11 @@ def guess_document_type(text: str) -> str:
 
 
 def guess_domain(text: str, document_type: str) -> str:
-    if any(word in text for word in ("volvo", "v40", "vozidlo", "spz", "vin", "stk", "technicka kontrola", "technická kontrola", "servisni prohlidka", "servisní prohlídka")):
+    if document_type == "recipe":
+        return "food"
+    if document_type == "diet_guidance":
+        return "health"
+    if any(word in text for word in ("volvo", "v40", "vozidlo", "spz", "vin", "technicka kontrola", "technická kontrola", "servisni prohlidka", "servisní prohlídka")) or has_stk_marker(text):
         if document_type in {"invoice", "service_report", "inspection_report", "green_card"}:
             return "car"
     if document_type == "insurance_policy":
@@ -2065,13 +3149,76 @@ def guess_domain(text: str, document_type: str) -> str:
         return "energy"
     if any(word in text for word in ("kotel", "komin", "komín", "dum", "dům", "home")):
         return "home"
-    if any(word in text for word in ("auto", "vozidlo", "spz", "vin", "volvo", "stk")):
+    if any(word in text for word in ("auto", "vozidlo", "spz", "vin", "volvo")) or has_stk_marker(text):
         return "car"
     if any(word in text for word in ("dan", "daň", "financni urad", "finanční úřad")):
         return "tax"
     if document_type == "warranty":
         return "warranty"
     return "other"
+
+
+def has_stk_marker(text: str) -> bool:
+    return bool(re.search(r"(?<![a-z0-9])stk(?![a-z0-9])", text))
+
+
+def looks_like_recipe_document(text: str) -> bool:
+    strong_markers = (
+        "recept",
+        "recepty",
+        "přísady",
+        "prisady",
+        "ingredience",
+        "doba přípravy",
+        "doba pripravy",
+        "porce",
+    )
+    if any(marker in text for marker in strong_markers):
+        return True
+    recipe_words = (
+        "salát",
+        "salat",
+        "polévka",
+        "polevka",
+        "brambor",
+        "mrkev",
+        "cuketa",
+        "lžíce",
+        "lzice",
+        "ocet",
+        "olej",
+        "sůl",
+        "sul",
+        "vaříme",
+        "varime",
+        "nakrájíme",
+        "nakrajime",
+    )
+    return sum(1 for marker in recipe_words if marker in text) >= 3
+
+
+def looks_like_diet_guidance(text: str) -> bool:
+    diet_markers = (
+        "dieta",
+        "dietní",
+        "dietni",
+        "jídelníček",
+        "jidelnicek",
+        "pacient",
+        "potraviny",
+        "purin",
+        "sacharid",
+        "bílkovin",
+        "bilkovin",
+        "vláknin",
+        "vlaknin",
+        "cukrovk",
+        "diabet",
+        "cholesterol",
+        "dna ",
+        " dnou",
+    )
+    return sum(1 for marker in diet_markers if marker in text) >= 2
 
 
 def guess_counterparty(text: str) -> str:
@@ -2109,18 +3256,23 @@ def suggest_document_tags(
     if related_asset:
         tags.append(related_asset)
     checks = (
-        ("auto", ("auto", "vozidlo", "spz", "vin", "stk", "volvo")),
+        ("auto", ("auto", "vozidlo", "spz", "vin", "volvo")),
         ("volvo-v40", ("volvo v40", "v40")),
         ("pojisteni", ("pojist", "zelena karta", "zelená karta")),
         ("faktura", ("faktura", "invoice", "danovy doklad", "daňový doklad")),
         ("servis", ("servis", "udrzba", "údržba", "garanční prohlídka", "garancni prohlidka")),
-        ("technicka-kontrola", ("stk", "technicka kontrola", "technická kontrola", "emisni kontrola", "emisní kontrola")),
+        ("technicka-kontrola", ("technicka kontrola", "technická kontrola", "emisni kontrola", "emisní kontrola")),
+        ("recept", ("recept", "přísady", "prisady", "ingredience", "doba přípravy", "doba pripravy")),
+        ("jidlo", ("salát", "salat", "polévka", "polevka", "brambor", "mrkev", "cuketa")),
+        ("dieta", ("dieta", "dietní", "dietni", "jídelníček", "jidelnicek", "purin", "diabet")),
         ("splatnost", ("splatnost", "uhradit", "zaplatit")),
         ("platnost", ("platnost do", "platna do", "platná do")),
     )
     for tag, markers in checks:
         if any(marker in text for marker in markers):
             tags.append(tag)
+    if has_stk_marker(text):
+        tags.append("technicka-kontrola")
     for year in re.findall(r"\b20\d{2}\b", text):
         tags.append(year)
     return merge_tags([], tags)
@@ -2331,6 +3483,13 @@ def next_available_path(path: Path) -> Path:
         if not candidate.exists():
             return candidate
         counter += 1
+
+
+def project_path_from_record(value: str) -> Path:
+    path = Path(value)
+    if path.is_absolute():
+        return path
+    return PROJECT_ROOT / path
 
 
 def count_files(path: Path) -> int:

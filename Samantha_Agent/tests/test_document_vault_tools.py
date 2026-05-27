@@ -9,10 +9,13 @@ from unittest.mock import patch
 
 from app.documents.tools import (
     apply_document_import_text,
+    apply_mobile_document_final_import_text,
     document_vault_status_text,
     inspect_document_text_text,
     prepare_document_import_text,
+    prepare_mobile_document_final_import_text,
     prepare_mobile_document_batch_text,
+    process_mobile_document_inbox_text,
     prepare_document_print_job_text,
     propose_document_inbox_cleanup_text,
     resolve_document_inbox_item_text,
@@ -24,7 +27,9 @@ from app.documents.tools import (
 )
 from app.documents.vault import format_document_inbox_reminder
 from app.documents.vault import has_explicit_document_import_confirmation
+from app.documents.vault import normalize_mobile_document_page
 from app.documents.vault import parse_macos_vision_ocr_json
+from app.documents.vault import propose_metadata
 from app.documents.vault import TableExtractionResult
 from app.documents.vault import TextExtractionResult
 from app.documents.vault import enrich_pdf_text_with_tables
@@ -131,6 +136,240 @@ class DocumentVaultToolsTests(unittest.TestCase):
             self.assertTrue((vault / "mobile_inbox" / "processing" / "scan_b" / "manifest.json").exists())
             self.assertTrue((inbox / "scan_B_page_1.jpeg").exists())
             self.assertTrue((inbox / "scan_B_page_2.jpeg").exists())
+
+    @unittest.skipIf(Image is None, "Pillow is not installed")
+    @patch.dict("os.environ", {"SAMANTHA_DOCUMENT_CLEAN_PROFILE": "bw"})
+    def test_normalize_mobile_document_page_crops_borders(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            source = root / "page.jpeg"
+            target = root / "normalized.jpg"
+            image = Image.new("RGB", (800, 1000), "white")
+            for y in range(300, 701, 40):
+                for x in range(220, 581):
+                    for dy in range(0, 5):
+                        image.putpixel((x, y + dy), (20, 20, 20))
+            image.save(source)
+
+            normalize_mobile_document_page(source, target)
+
+            with Image.open(target) as normalized:
+                self.assertEqual(normalized.size, (1240, 1754))
+                grayscale = normalized.convert("L")
+                histogram = grayscale.histogram()
+                total = sum(histogram)
+                dark_pixels = sum(histogram[:80])
+                light_pixels = sum(histogram[220:])
+                self.assertGreater(dark_pixels, 500)
+                self.assertGreater(light_pixels / total, 0.8)
+
+    @unittest.skipIf(Image is None, "Pillow is not installed")
+    @patch.dict("os.environ", {"SAMANTHA_DOCUMENT_CLEAN_PROFILE": "raw"})
+    def test_normalize_mobile_document_page_raw_profile_preserves_geometry(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            source = root / "page.jpeg"
+            target = root / "normalized.jpg"
+            Image.new("RGB", (800, 1000), "white").save(source)
+
+            normalize_mobile_document_page(source, target)
+
+            with Image.open(target) as normalized:
+                self.assertEqual(normalized.size, (800, 1000))
+
+    def test_process_mobile_document_inbox_requires_process_request(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            inbox = Path(temp_dir) / "SamanthaDocumentInbox"
+            vault = Path(temp_dir) / "documents"
+            inbox.mkdir()
+
+            result = process_mobile_document_inbox_text(
+                mobile_inbox_dir=inbox,
+                vault_dir=vault,
+            )
+
+            self.assertIn("chybi process_request.json", result)
+            self.assertFalse(vault.exists())
+
+    @unittest.skipIf(Image is None, "Pillow is not installed")
+    @patch.dict(
+        "os.environ",
+        {
+            "SAMANTHA_DOCUMENT_TESSERACT_OCR": "0",
+            "SAMANTHA_DOCUMENT_OCR": "0",
+        },
+    )
+    def test_process_mobile_document_inbox_creates_pdf_analysis_and_marks_request(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            inbox = root / "SamanthaDocumentInbox"
+            vault = root / "documents"
+            inbox.mkdir()
+            (inbox / "process_request.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": "1",
+                        "request": "process_mobile_document_inbox",
+                        "source": "iphone_shortcut",
+                        "status": "requested",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (inbox / "scan_B_manifest.json").write_text(
+                json.dumps(
+                    {
+                        "batch_id": "scan_B",
+                        "document_title": "Test",
+                        "page_count": "2",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            Image.new("RGB", (80, 100), "white").save(inbox / "scan_B_page_1.jpeg")
+            Image.new("RGB", (80, 100), "white").save(inbox / "scan_B_page_2.jpeg")
+
+            result = process_mobile_document_inbox_text(
+                mobile_inbox_dir=inbox,
+                vault_dir=vault,
+            )
+
+            processing = vault / "mobile_inbox" / "processing" / "scan_b"
+            self.assertIn("Zpracovani mobilniho inboxu probehlo", result)
+            self.assertIn("Batch: scan_B", result)
+            self.assertTrue((processing / "scan_b.pdf").exists())
+            self.assertTrue((processing / "manifest.json").exists())
+            self.assertTrue((processing / "analysis.json").exists())
+            self.assertTrue((processing / "extracted_text.txt").exists())
+            self.assertTrue((inbox / "scan_B_page_1.jpeg").exists())
+            self.assertTrue((inbox / "scan_B_page_2.jpeg").exists())
+            self.assertTrue((inbox / "process_result.json").exists())
+            request = json.loads((inbox / "process_request.json").read_text(encoding="utf-8"))
+            self.assertEqual(request["status"], "processed")
+
+            second = process_mobile_document_inbox_text(
+                mobile_inbox_dir=inbox,
+                vault_dir=vault,
+            )
+            self.assertIn("uz oznaceny jako processed", second)
+
+    @unittest.skipIf(Image is None, "Pillow is not installed")
+    @patch.dict(
+        "os.environ",
+        {
+            "SAMANTHA_DOCUMENT_TESSERACT_OCR": "0",
+            "SAMANTHA_DOCUMENT_OCR": "0",
+        },
+    )
+    def test_mobile_document_final_import_requires_preview_and_confirmation(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            inbox = root / "SamanthaDocumentInbox"
+            vault = root / "documents"
+            inbox.mkdir()
+            (inbox / "process_request.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": "1",
+                        "request": "process_mobile_document_inbox",
+                        "source": "iphone_shortcut",
+                        "status": "requested",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (inbox / "scan_R_manifest.json").write_text(
+                json.dumps(
+                    {
+                        "batch_id": "scan_R",
+                        "document_title": "Recept test",
+                        "page_count": "1",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            Image.new("RGB", (80, 100), "white").save(inbox / "scan_R_page_1.jpeg")
+            process_mobile_document_inbox_text(
+                batch_id="scan_R",
+                mobile_inbox_dir=inbox,
+                vault_dir=vault,
+            )
+
+            preview = prepare_mobile_document_final_import_text(
+                batch_id="scan_R",
+                target_domain="food",
+                document_type="recipe",
+                tags="recept",
+                case_id="rodinne-recepty",
+                vault_dir=vault,
+            )
+
+            self.assertIn("Navrh finalniho importu", preview)
+            self.assertIn("scan_r.pdf", preview)
+            self.assertIn("rodinne-recepty", preview)
+
+            rejected = apply_mobile_document_final_import_text(
+                batch_id="scan_R",
+                target_domain="food",
+                document_type="recipe",
+                tags="recept",
+                case_id="rodinne-recepty",
+                vault_dir=vault,
+            )
+            self.assertIn("Nejdrive potrebuji samostatne potvrzeni", rejected)
+
+            imported = apply_mobile_document_final_import_text(
+                batch_id="scan_R",
+                target_domain="food",
+                document_type="recipe",
+                tags="recept",
+                document_id="recept-test",
+                case_id="rodinne-recepty",
+                user_confirmed=True,
+                confirmation_text="Potvrzuji, uloz dokument scan_r.pdf do oblasti food.",
+                vault_dir=vault,
+            )
+
+            self.assertIn("Stav: ulozeno", imported)
+            self.assertTrue((vault / "vault" / "food" / "recept-test" / "scan_r.pdf").exists())
+            manifest = json.loads(
+                (vault / "mobile_inbox" / "processing" / "scan_r" / "manifest.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            self.assertTrue(manifest["final_import_done"])
+            self.assertEqual(manifest["final_document_id"], "recept-test")
+            docs_index = (vault / "index" / "documents_index.jsonl").read_text(encoding="utf-8")
+            self.assertIn('"case_id": "rodinne-recepty"', docs_index)
+
+    def test_recipe_metadata_does_not_treat_kostky_as_stk(self) -> None:
+        metadata = propose_metadata(
+            source=Path("scan_d.pdf"),
+            text=(
+                "Ruský salát\n"
+                "Přísady na 4 porce: brambory a mrkev nakrájíme na kostky. "
+                "Přidáme lžíce octa, olej a sůl. Doba přípravy 45 minut."
+            ),
+        )
+
+        self.assertEqual(metadata["document_type"], "recipe")
+        self.assertEqual(metadata["domain"], "food")
+        self.assertIn("recept", metadata["tags"])
+        self.assertNotIn("technicka-kontrola", metadata["tags"])
+
+    def test_diet_guidance_metadata_is_health_not_car(self) -> None:
+        metadata = propose_metadata(
+            source=Path("scan_f.pdf"),
+            text=(
+                "Potraviny z hlediska obsahu purinových látek. Dieta při dně "
+                "a jídelníček pacienta s cukrovkou musí respektovat sacharidy "
+                "a optimální množství bílkovin."
+            ),
+        )
+
+        self.assertEqual(metadata["document_type"], "diet_guidance")
+        self.assertEqual(metadata["domain"], "health")
+        self.assertIn("dieta", metadata["tags"])
 
     def test_document_inbox_startup_reminder_hides_filenames(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

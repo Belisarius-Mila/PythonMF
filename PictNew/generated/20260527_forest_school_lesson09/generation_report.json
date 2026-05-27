@@ -1,0 +1,87 @@
+[
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson09/forest_school_robot.png",
+    "output_file": "forest_school_robot.png",
+    "request": {
+      "id": "forest-school-robot",
+      "language": "forest_school",
+      "image_name": "forest_school_robot",
+      "words": [
+        "robot"
+      ],
+      "czech_meanings": [
+        "robot"
+      ],
+      "lesson": 9
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson09/forest_school_fork.png",
+    "output_file": "forest_school_fork.png",
+    "request": {
+      "id": "forest-school-fork",
+      "language": "forest_school",
+      "image_name": "forest_school_fork",
+      "words": [
+        "fork"
+      ],
+      "czech_meanings": [
+        "vidlicka"
+      ],
+      "lesson": 9
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson09/forest_school_cap.png",
+    "output_file": "forest_school_cap.png",
+    "request": {
+      "id": "forest-school-cap",
+      "language": "forest_school",
+      "image_name": "forest_school_cap",
+      "words": [
+        "cap"
+      ],
+      "czech_meanings": [
+        "cepice"
+      ],
+      "lesson": 9
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson09/forest_school_leaf.png",
+    "output_file": "forest_school_leaf.png",
+    "request": {
+      "id": "forest-school-leaf",
+      "language": "forest_school",
+      "image_name": "forest_school_leaf",
+      "words": [
+        "leaf"
+      ],
+      "czech_meanings": [
+        "list"
+      ],
+      "lesson": 9
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson09/forest_school_cookie.png",
+    "output_file": "forest_school_cookie.png",
+    "request": {
+      "id": "forest-school-cookie",
+      "language": "forest_school",
+      "image_name": "forest_school_cookie",
+      "words": [
+        "cookie"
+      ],
+      "czech_meanings": [
+        "susenka"
+      ],
+      "lesson": 9
+    }
+  }
+]

@@ -1,0 +1,92 @@
+[
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson03/forest_school_boat.png",
+    "output_file": "forest_school_boat.png",
+    "request": {
+      "id": "forest-school-boat",
+      "language": "forest_school",
+      "image_name": "forest_school_boat",
+      "words": [
+        "boat"
+      ],
+      "czech_meanings": [
+        "lod"
+      ],
+      "lesson": 3,
+      "prompt_summary": "one simple small toy boat, side view, no face, no water"
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson03/forest_school_plate.png",
+    "output_file": "forest_school_plate.png",
+    "request": {
+      "id": "forest-school-plate",
+      "language": "forest_school",
+      "image_name": "forest_school_plate",
+      "words": [
+        "plate"
+      ],
+      "czech_meanings": [
+        "talir"
+      ],
+      "lesson": 3,
+      "prompt_summary": "one simple round dinner plate, slightly angled, no food"
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson03/forest_school_sock.png",
+    "output_file": "forest_school_sock.png",
+    "request": {
+      "id": "forest-school-sock",
+      "language": "forest_school",
+      "image_name": "forest_school_sock",
+      "words": [
+        "sock"
+      ],
+      "czech_meanings": [
+        "ponozka"
+      ],
+      "lesson": 3,
+      "prompt_summary": "one single colorful child sock, not a pair"
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson03/forest_school_flower.png",
+    "output_file": "forest_school_flower.png",
+    "request": {
+      "id": "forest-school-flower",
+      "language": "forest_school",
+      "image_name": "forest_school_flower",
+      "words": [
+        "flower"
+      ],
+      "czech_meanings": [
+        "kytka"
+      ],
+      "lesson": 3,
+      "prompt_summary": "one single cheerful flower with stem and leaves"
+    }
+  },
+  {
+    "status": "generated",
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260527_forest_school_lesson03/forest_school_orange.png",
+    "output_file": "forest_school_orange.png",
+    "request": {
+      "id": "forest-school-orange",
+      "language": "forest_school",
+      "image_name": "forest_school_orange",
+      "words": [
+        "orange"
+      ],
+      "czech_meanings": [
+        "pomeranc"
+      ],
+      "lesson": 3,
+      "prompt_summary": "one single whole orange fruit with small green leaf"
+    }
+  }
+]
