@@ -1,0 +1,978 @@
+from __future__ import annotations
+
+import json
+import re
+import shutil
+import unicodedata
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from http import HTTPStatus
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from typing import Any
+from urllib.parse import parse_qs, urlparse
+
+from .vault import (
+    DEFAULT_DOCUMENTS_DIR,
+    PROJECT_ROOT,
+    apply_document_import_file,
+    extract_text,
+    find_due_date_candidates,
+    find_duplicate_by_sha,
+    merge_tags,
+    normalize_domain,
+    parse_tags,
+    propose_metadata,
+    read_json_file,
+    read_jsonl,
+    relative_to_project,
+    safe_filename,
+    safe_slug,
+    safe_text,
+    sha256_file,
+    tokenize,
+    validate_source_file,
+    write_json,
+    append_jsonl,
+)
+
+
+DEFAULT_DOWNLOADS_DIR = Path.home() / "Downloads"
+SCANDOCU_ROOT_NAME = "scandocu"
+SCANDOCU_ACTIONS_FILE = "scandocu_actions.jsonl"
+SCANDOCU_CLASSIFIER_VERSION = "2026-05-27-lease-party-asset-v2"
+
+
+@dataclass(frozen=True)
+class ScanDocuCandidate:
+    token: str
+    source_path: Path
+    working_path: Path
+    metadata_path: Path
+    title: str
+    domain: str
+    document_type: str
+    counterparty: str
+    related_asset: str
+    tags: list[str]
+    case_id: str
+    extraction_method: str
+    ocr_needed: bool
+    warning: str
+    due_date_count: int
+    duplicate_document_id: str = ""
+    probable_duplicates: list[dict[str, Any]] | None = None
+
+    def to_api(self) -> dict[str, Any]:
+        return {
+            "found": True,
+            "token": self.token,
+            "source_name": self.source_path.name,
+            "source_path": str(self.source_path),
+            "working_path": str(relative_to_project(self.working_path)),
+            "pdf_url": f"/pdf/{self.token}",
+            "title": self.title,
+            "domain": self.domain,
+            "document_type": self.document_type,
+            "counterparty": self.counterparty,
+            "related_asset": self.related_asset,
+            "tags": ", ".join(self.tags),
+            "case_id": self.case_id,
+            "extraction_method": self.extraction_method,
+            "ocr_needed": self.ocr_needed,
+            "warning": self.warning,
+            "due_date_count": self.due_date_count,
+            "duplicate_document_id": self.duplicate_document_id,
+            "probable_duplicates": self.probable_duplicates or [],
+        }
+
+
+def scandocu_root(vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> Path:
+    return vault_dir / SCANDOCU_ROOT_NAME
+
+
+def scandocu_processing_dir(vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> Path:
+    return scandocu_root(vault_dir) / "processing"
+
+
+def scandocu_actions_path(vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> Path:
+    return vault_dir / "index" / SCANDOCU_ACTIONS_FILE
+
+
+def scan_downloads_for_pdfs(
+    downloads_dir: Path = DEFAULT_DOWNLOADS_DIR,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    limit: int = 50,
+) -> list[dict[str, Any]]:
+    downloads = downloads_dir.expanduser().resolve()
+    if not downloads.exists() or not downloads.is_dir():
+        raise ValueError(f"Downloads slozka neexistuje nebo neni slozka: {downloads}")
+    rows: list[dict[str, Any]] = []
+    for path in sorted(downloads.glob("*.pdf"), key=lambda item: item.stat().st_mtime, reverse=True)[:limit]:
+        try:
+            validate_source_file(path)
+            digest = sha256_file(path)
+        except ValueError as exc:
+            rows.append(
+                {
+                    "name": path.name,
+                    "path": str(path),
+                    "size_bytes": path.stat().st_size if path.exists() else 0,
+                    "modified_at": format_mtime(path),
+                    "status": "invalid",
+                    "warning": str(exc),
+                }
+            )
+            continue
+        rows.append(
+            {
+                "name": path.name,
+                "path": str(path),
+                "size_bytes": path.stat().st_size,
+                "modified_at": format_mtime(path),
+                "status": classify_download_pdf_status(vault_dir=vault_dir, sha256=digest),
+                "sha256": digest,
+            }
+        )
+    return rows
+
+
+def prepare_next_scandocu_pdf(
+    downloads_dir: Path = DEFAULT_DOWNLOADS_DIR,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> ScanDocuCandidate | None:
+    for item in scan_downloads_for_pdfs(downloads_dir=downloads_dir, vault_dir=vault_dir, limit=200):
+        if item.get("status") != "new":
+            continue
+        return prepare_scandocu_candidate(
+            source=Path(str(item["path"])),
+            vault_dir=vault_dir,
+        )
+    return None
+
+
+def get_scandocu_candidate(token: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> ScanDocuCandidate:
+    token = safe_slug(token, default="", limit=64)
+    if not token:
+        raise ValueError("chybi token dokumentu.")
+    metadata_path = scandocu_processing_dir(vault_dir) / token / "candidate.json"
+    if not metadata_path.exists():
+        raise ValueError("ScanDocu kandidat nebyl nalezen.")
+    data = read_json_file(metadata_path)
+    return candidate_from_record(data, metadata_path=metadata_path)
+
+
+def prepare_scandocu_candidate(source: Path, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> ScanDocuCandidate:
+    source = source.expanduser().resolve()
+    if source.suffix.casefold() != ".pdf":
+        raise ValueError("ScanDocu umi v teto fazi zpracovat jen PDF soubory.")
+    validate_source_file(source)
+    digest = sha256_file(source)
+    token = safe_slug(f"{source.stem}-{digest[:12]}", default=f"pdf-{digest[:12]}", limit=64)
+    target_dir = scandocu_processing_dir(vault_dir) / token
+    metadata_path = target_dir / "candidate.json"
+    if metadata_path.exists():
+        existing = read_json_file(metadata_path)
+        if existing.get("classifier_version") == SCANDOCU_CLASSIFIER_VERSION:
+            return candidate_from_record(existing, metadata_path=metadata_path)
+
+    target_dir.mkdir(parents=True, exist_ok=True)
+    working_path = target_dir / safe_filename(source.name)
+    if not working_path.exists():
+        shutil.copy2(source, working_path)
+    extraction = extract_text(working_path)
+    metadata = propose_metadata(source=working_path, text=extraction.text)
+    due_dates = find_due_date_candidates(extraction.text)
+    duplicate = find_duplicate_by_sha(vault_dir=vault_dir, sha256=digest)
+    suggested_title = suggest_document_title(source=source, metadata=metadata)
+    probable_duplicates = find_probable_duplicate_documents(
+        vault_dir=vault_dir,
+        source=source,
+        text=extraction.text,
+        metadata=metadata,
+    )
+    record = {
+        "schema_version": "1",
+        "classifier_version": SCANDOCU_CLASSIFIER_VERSION,
+        "token": token,
+        "status": "prepared",
+        "prepared_at": now_iso(),
+        "source_path": str(source),
+        "source_name": source.name,
+        "source_sha256": digest,
+        "source_modified_at": format_mtime(source),
+        "working_path": str(relative_to_project(working_path)),
+        "title": suggested_title,
+        "domain": metadata.get("domain", "other"),
+        "document_type": metadata.get("document_type", "document"),
+        "counterparty": metadata.get("counterparty", ""),
+        "related_asset": metadata.get("related_asset", ""),
+        "tags": metadata.get("tags", []),
+        "case_id": "",
+        "extraction_method": extraction.method,
+        "ocr_needed": extraction.ocr_needed,
+        "warning": extraction.warning,
+        "due_date_count": len(due_dates),
+        "duplicate_document_id": str(duplicate.get("document_id", "")) if duplicate else "",
+        "probable_duplicates": probable_duplicates,
+        "source_preserved": True,
+        "do_not_commit": True,
+    }
+    write_json(metadata_path, record)
+    append_jsonl(vault_dir / "index" / "scandocu_candidates.jsonl", record)
+    return candidate_from_record(record, metadata_path=metadata_path)
+
+
+def import_scandocu_candidate(
+    token: str,
+    title: str,
+    domain: str,
+    document_type: str,
+    counterparty: str = "",
+    related_asset: str = "",
+    tags: str = "",
+    case_id: str = "",
+    allow_probable_duplicate: bool = False,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> dict[str, Any]:
+    candidate = get_scandocu_candidate(token=token, vault_dir=vault_dir)
+    if candidate.duplicate_document_id:
+        append_scandocu_action(
+            vault_dir=vault_dir,
+            action="duplicate",
+            token=candidate.token,
+            source_path=candidate.source_path,
+            source_sha256=sha256_file(candidate.working_path),
+            document_id=candidate.duplicate_document_id,
+        )
+        return {
+            "status": "duplicate",
+            "document_id": candidate.duplicate_document_id,
+            "message": "Dokument se stejnym obsahem uz je ve vaultu.",
+        }
+    probable_duplicates = candidate.probable_duplicates or []
+    if probable_duplicates and not allow_probable_duplicate:
+        return {
+            "status": "probable_duplicate",
+            "message": "Tento dokument je pravdepodobne uz ulozeny. Potvrd ve ScanDocu volbu `Presto ulozit`.",
+            "probable_duplicates": probable_duplicates,
+        }
+
+    final_title = safe_text(title) or candidate.title
+    final_domain = normalize_domain(domain or candidate.domain)
+    final_type = safe_slug(document_type or candidate.document_type, default="document", limit=50)
+    final_tags = ", ".join(
+        merge_tags(
+            parse_tags(tags),
+            candidate.tags,
+        )
+    )
+    final_case_id = safe_slug(case_id, default="", limit=100) if case_id else ""
+    document_id = safe_slug(final_title, default="", limit=100)
+    result = apply_document_import_file(
+        source_path=str(candidate.working_path),
+        target_domain=final_domain,
+        document_type=final_type,
+        counterparty=counterparty,
+        related_asset=related_asset,
+        tags=final_tags,
+        document_id=document_id,
+        case_id=final_case_id,
+        document_title=final_title,
+        vault_dir=vault_dir,
+    )
+    update_scandocu_candidate_status(
+        candidate=candidate,
+        status="imported",
+        document_id=result.document_id,
+        domain=final_domain,
+        document_type=final_type,
+        title=final_title,
+        case_id=final_case_id,
+        vault_dir=vault_dir,
+    )
+    append_scandocu_action(
+        vault_dir=vault_dir,
+        action="imported",
+        token=candidate.token,
+        source_path=candidate.source_path,
+        source_sha256=sha256_file(candidate.working_path),
+        document_id=result.document_id,
+    )
+    return {
+        "status": "imported" if result.created else "duplicate",
+        "document_id": result.document_id,
+        "created": result.created,
+        "stored_path": str(relative_to_project(result.destination)),
+        "manifest_path": str(relative_to_project(result.manifest)),
+        "message": result.message,
+    }
+
+
+def skip_scandocu_candidate(
+    token: str,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> dict[str, Any]:
+    candidate = get_scandocu_candidate(token=token, vault_dir=vault_dir)
+    update_scandocu_candidate_status(
+        candidate=candidate,
+        status="skipped",
+        document_id="",
+        domain=candidate.domain,
+        document_type=candidate.document_type,
+        title=candidate.title,
+        case_id=candidate.case_id,
+        vault_dir=vault_dir,
+    )
+    append_scandocu_action(
+        vault_dir=vault_dir,
+        action="skipped",
+        token=candidate.token,
+        source_path=candidate.source_path,
+        source_sha256=sha256_file(candidate.working_path),
+        document_id="",
+    )
+    return {"status": "skipped", "message": "Dokument byl pro tuto frontu preskocen."}
+
+
+def classify_download_pdf_status(vault_dir: Path, sha256: str) -> str:
+    if find_duplicate_by_sha(vault_dir=vault_dir, sha256=sha256):
+        return "already_in_vault"
+    for row in reversed(read_jsonl(scandocu_actions_path(vault_dir))):
+        if row.get("source_sha256") == sha256 and row.get("action") in {"imported", "skipped", "duplicate"}:
+            return str(row.get("action"))
+    return "new"
+
+
+def find_probable_duplicate_documents(
+    vault_dir: Path,
+    source: Path,
+    text: str,
+    metadata: dict[str, Any],
+    limit: int = 3,
+) -> list[dict[str, Any]]:
+    documents = read_jsonl(vault_dir / "index" / "documents_index.jsonl")
+    if not documents:
+        return []
+    text_by_id = {
+        str(row.get("document_id", "")): str(row.get("text", ""))
+        for row in read_jsonl(vault_dir / "index" / "text_index.jsonl")
+    }
+    query_terms = build_duplicate_query_terms(source=source, text=text, metadata=metadata)
+    if not query_terms:
+        return []
+
+    important_terms = important_duplicate_terms(source, text)
+    scored: list[tuple[int, dict[str, Any], list[str]]] = []
+    for item in documents:
+        document_id = str(item.get("document_id", ""))
+        haystack = " ".join(
+            [
+                str(item.get("document_id", "")),
+                str(item.get("title", "")),
+                str(item.get("original_filename", "")),
+                str(item.get("stored_path", "")),
+                str(item.get("domain", "")),
+                str(item.get("document_type", "")),
+                str(item.get("counterparty", "")),
+                str(item.get("related_asset", "")),
+                " ".join(str(tag) for tag in item.get("tags", []) if isinstance(tag, str)),
+                text_by_id.get(document_id, ""),
+            ]
+        )
+        haystack_terms = {normalize_duplicate_term(term) for term in tokenize(haystack) if normalize_duplicate_term(term)}
+        matched = [term for term in query_terms if term in haystack_terms]
+        if not matched:
+            continue
+        important_matches = [term for term in matched if term in important_terms]
+        if not important_matches:
+            continue
+        if len(important_matches) < 2 and len(matched) < 3:
+            continue
+        score = len(matched) + (len(important_matches) * 3)
+        if score < 8:
+            continue
+        scored.append((score, item, matched[:8]))
+
+    results: list[dict[str, Any]] = []
+    for score, item, matched in sorted(scored, key=lambda row: row[0], reverse=True)[:limit]:
+        results.append(
+            {
+                "document_id": safe_text(str(item.get("document_id", ""))),
+                "title": safe_text(str(item.get("title", ""))),
+                "original_filename": safe_text(str(item.get("original_filename", ""))),
+                "stored_path": safe_text(str(item.get("stored_path", ""))),
+                "domain": safe_text(str(item.get("domain", ""))),
+                "document_type": safe_text(str(item.get("document_type", ""))),
+                "score": score,
+                "matched_terms": matched,
+            }
+        )
+    return results
+
+
+def build_duplicate_query_terms(source: Path, text: str, metadata: dict[str, Any]) -> list[str]:
+    raw = " ".join(
+        [
+            source.stem,
+            split_camel_case(source.stem),
+            str(metadata.get("document_type", "")),
+            str(metadata.get("domain", "")),
+            str(metadata.get("counterparty", "")),
+            str(metadata.get("related_asset", "")),
+            text[:3000],
+        ]
+    )
+    terms = []
+    for term in tokenize(raw):
+        cleaned = normalize_duplicate_term(term)
+        if not is_duplicate_signal_term(cleaned):
+            continue
+        terms.append(cleaned)
+    return list(dict.fromkeys(terms))[:80]
+
+
+def important_duplicate_terms(source: Path, text: str) -> set[str]:
+    del text
+    raw = f"{source.stem} {split_camel_case(source.stem)}"
+    return {
+        normalize_duplicate_term(term)
+        for term in tokenize(raw)
+        if is_duplicate_signal_term(normalize_duplicate_term(term), min_len=4)
+    }
+
+
+def split_camel_case(value: str) -> str:
+    return re.sub(r"(?<=[a-zá-ž])(?=[A-ZÁ-Ž])", " ", value)
+
+
+def normalize_duplicate_term(value: str) -> str:
+    folded = unicodedata.normalize("NFKD", value.casefold())
+    ascii_value = "".join(char for char in folded if not unicodedata.combining(char))
+    return re.sub(r"[^a-z0-9_.-]+", "-", ascii_value).strip("-")[:80]
+
+
+def is_duplicate_signal_term(value: str, min_len: int = 4) -> bool:
+    if len(value) < min_len:
+        return False
+    if value.isdigit():
+        return False
+    return value not in DUPLICATE_STOPWORDS
+
+
+def normalize_probable_duplicates(value: Any) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    normalized: list[dict[str, Any]] = []
+    for item in value:
+        if not isinstance(item, dict):
+            continue
+        normalized.append(
+            {
+                "document_id": safe_text(str(item.get("document_id", ""))),
+                "title": safe_text(str(item.get("title", ""))),
+                "original_filename": safe_text(str(item.get("original_filename", ""))),
+                "stored_path": safe_text(str(item.get("stored_path", ""))),
+                "domain": safe_text(str(item.get("domain", ""))),
+                "document_type": safe_text(str(item.get("document_type", ""))),
+                "score": int(item.get("score", 0) or 0),
+                "matched_terms": [
+                    normalize_duplicate_term(str(term))
+                    for term in item.get("matched_terms", [])
+                    if normalize_duplicate_term(str(term))
+                ][:8],
+            }
+        )
+    return normalized
+
+
+DUPLICATE_STOPWORDS = {
+    "dokument",
+    "document",
+    "smlouva",
+    "smlouvy",
+    "smlouvu",
+    "smlouve",
+    "contract",
+    "najem",
+    "najemni",
+    "strana",
+    "page",
+    "datum",
+    "podpis",
+    "priloha",
+    "příloha",
+    "adresa",
+    "ulice",
+    "jmeno",
+    "prijmeni",
+    "rodne",
+    "cislo",
+    "trvaleho",
+    "pobytu",
+    "sidla",
+    "narozeni",
+    "miloslav",
+    "falta",
+    "praha",
+    "ceska",
+    "republika",
+    "other",
+    "download",
+    "scan",
+    "pdf",
+}
+
+
+def candidate_from_record(data: dict[str, Any], metadata_path: Path) -> ScanDocuCandidate:
+    working_path = project_path_from_record_local(str(data.get("working_path", "")))
+    tags = data.get("tags", [])
+    if not isinstance(tags, list):
+        tags = parse_tags(str(tags))
+    return ScanDocuCandidate(
+        token=safe_slug(str(data.get("token", "")), default="", limit=64),
+        source_path=Path(str(data.get("source_path", ""))).expanduser(),
+        working_path=working_path,
+        metadata_path=metadata_path,
+        title=safe_text(str(data.get("title", ""))),
+        domain=normalize_domain(str(data.get("domain", "other"))),
+        document_type=safe_slug(str(data.get("document_type", "document")), default="document", limit=50),
+        counterparty=safe_text(str(data.get("counterparty", ""))),
+        related_asset=safe_text(str(data.get("related_asset", ""))),
+        tags=[safe_slug(str(tag), default="", limit=60) for tag in tags if safe_slug(str(tag), default="", limit=60)],
+        case_id=safe_slug(str(data.get("case_id", "")), default="", limit=100),
+        extraction_method=safe_text(str(data.get("extraction_method", ""))),
+        ocr_needed=bool(data.get("ocr_needed", False)),
+        warning=safe_text(str(data.get("warning", ""))),
+        due_date_count=int(data.get("due_date_count", 0) or 0),
+        duplicate_document_id=safe_slug(str(data.get("duplicate_document_id", "")), default="", limit=140),
+        probable_duplicates=normalize_probable_duplicates(data.get("probable_duplicates", [])),
+    )
+
+
+def update_scandocu_candidate_status(
+    candidate: ScanDocuCandidate,
+    status: str,
+    document_id: str,
+    domain: str,
+    document_type: str,
+    title: str,
+    case_id: str,
+    vault_dir: Path,
+) -> None:
+    data = read_json_file(candidate.metadata_path)
+    data["status"] = status
+    data["updated_at"] = now_iso()
+    data["final_document_id"] = document_id
+    data["title"] = safe_text(title)
+    data["domain"] = normalize_domain(domain)
+    data["document_type"] = safe_slug(document_type, default="document", limit=50)
+    data["case_id"] = safe_slug(case_id, default="", limit=100) if case_id else ""
+    write_json(candidate.metadata_path, data)
+
+
+def append_scandocu_action(
+    vault_dir: Path,
+    action: str,
+    token: str,
+    source_path: Path,
+    source_sha256: str,
+    document_id: str = "",
+) -> None:
+    append_jsonl(
+        scandocu_actions_path(vault_dir),
+        {
+            "action": action,
+            "action_at": now_iso(),
+            "token": token,
+            "source_name": source_path.name,
+            "source_path": str(source_path),
+            "source_sha256": source_sha256,
+            "document_id": document_id,
+            "do_not_commit": True,
+        },
+    )
+
+
+def suggest_document_title(source: Path, metadata: dict[str, Any]) -> str:
+    stem = source.stem.strip()
+    doc_type = safe_text(str(metadata.get("document_type", "")))
+    domain = safe_text(str(metadata.get("domain", "")))
+    if stem and not stem.casefold().startswith(("scan", "document", "untitled", "download")):
+        return safe_text(split_camel_case(stem))
+    parts = [part for part in (domain, doc_type, datetime.now().date().isoformat()) if part]
+    return " ".join(parts) or "Dokument"
+
+
+def project_path_from_record_local(value: str) -> Path:
+    path = Path(value)
+    if path.is_absolute():
+        return path
+    return PROJECT_ROOT / path
+
+
+def format_mtime(path: Path) -> str:
+    return datetime.fromtimestamp(path.stat().st_mtime, timezone.utc).replace(microsecond=0).isoformat()
+
+
+def now_iso() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
+class ScanDocuServer:
+    def __init__(
+        self,
+        downloads_dir: Path = DEFAULT_DOWNLOADS_DIR,
+        vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    ) -> None:
+        self.downloads_dir = downloads_dir
+        self.vault_dir = vault_dir
+
+    def make_handler(self):
+        app = self
+
+        class Handler(BaseHTTPRequestHandler):
+            server_version = "ScanDocu/0.1"
+
+            def do_GET(self) -> None:  # noqa: N802
+                parsed = urlparse(self.path)
+                try:
+                    if parsed.path == "/":
+                        self.respond_html(SCANDOCU_HTML)
+                        return
+                    if parsed.path == "/api/next":
+                        candidate = prepare_next_scandocu_pdf(
+                            downloads_dir=app.downloads_dir,
+                            vault_dir=app.vault_dir,
+                        )
+                        if candidate is None:
+                            self.respond_json({"found": False, "message": "V Downloads neni zadne nove PDF ke zpracovani."})
+                        else:
+                            self.respond_json(candidate.to_api())
+                        return
+                    if parsed.path == "/api/list":
+                        self.respond_json(
+                            {
+                                "downloads_dir": str(app.downloads_dir),
+                                "items": scan_downloads_for_pdfs(
+                                    downloads_dir=app.downloads_dir,
+                                    vault_dir=app.vault_dir,
+                                ),
+                            }
+                        )
+                        return
+                    if parsed.path.startswith("/pdf/"):
+                        token = parsed.path.rsplit("/", 1)[-1]
+                        candidate = get_scandocu_candidate(token=token, vault_dir=app.vault_dir)
+                        self.respond_file(candidate.working_path, "application/pdf")
+                        return
+                    self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
+                except ValueError as exc:
+                    self.respond_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
+                except OSError as exc:
+                    self.respond_json({"error": str(exc)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+
+            def do_POST(self) -> None:  # noqa: N802
+                parsed = urlparse(self.path)
+                try:
+                    payload = self.read_json()
+                    if parsed.path == "/api/save":
+                        result = import_scandocu_candidate(
+                            token=str(payload.get("token", "")),
+                            title=str(payload.get("title", "")),
+                            domain=str(payload.get("domain", "")),
+                            document_type=str(payload.get("document_type", "")),
+                            counterparty=str(payload.get("counterparty", "")),
+                            related_asset=str(payload.get("related_asset", "")),
+                            tags=str(payload.get("tags", "")),
+                            case_id=str(payload.get("case_id", "")),
+                            allow_probable_duplicate=bool(payload.get("allow_probable_duplicate", False)),
+                            vault_dir=app.vault_dir,
+                        )
+                        self.respond_json(result)
+                        return
+                    if parsed.path == "/api/skip":
+                        self.respond_json(
+                            skip_scandocu_candidate(
+                                token=str(payload.get("token", "")),
+                                vault_dir=app.vault_dir,
+                            )
+                        )
+                        return
+                    self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
+                except ValueError as exc:
+                    self.respond_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
+                except OSError as exc:
+                    self.respond_json({"error": str(exc)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+
+            def read_json(self) -> dict[str, Any]:
+                length = int(self.headers.get("Content-Length", "0") or "0")
+                raw = self.rfile.read(length).decode("utf-8") if length else "{}"
+                data = json.loads(raw or "{}")
+                if not isinstance(data, dict):
+                    raise ValueError("JSON payload musi byt objekt.")
+                return data
+
+            def respond_html(self, html: str, status: HTTPStatus = HTTPStatus.OK) -> None:
+                payload = html.encode("utf-8")
+                self.send_response(status)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(payload)))
+                self.end_headers()
+                self.wfile.write(payload)
+
+            def respond_json(self, data: dict[str, Any], status: HTTPStatus = HTTPStatus.OK) -> None:
+                payload = json.dumps(data, ensure_ascii=False).encode("utf-8")
+                self.send_response(status)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(payload)))
+                self.end_headers()
+                self.wfile.write(payload)
+
+            def respond_file(self, path: Path, content_type: str) -> None:
+                root = scandocu_processing_dir(app.vault_dir).resolve()
+                resolved = path.resolve()
+                if root not in resolved.parents:
+                    raise ValueError("pozadovany soubor neni ve ScanDocu processing slozce.")
+                payload = resolved.read_bytes()
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", content_type)
+                self.send_header("Content-Length", str(len(payload)))
+                self.end_headers()
+                self.wfile.write(payload)
+
+            def log_message(self, format: str, *args: Any) -> None:
+                return
+
+        return Handler
+
+    def serve(self, host: str = "127.0.0.1", port: int = 8765) -> None:
+        server = ThreadingHTTPServer((host, port), self.make_handler())
+        print(f"ScanDocu bezi na http://{host}:{port}", flush=True)
+        server.serve_forever()
+
+
+SCANDOCU_HTML = """<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ScanDocu</title>
+  <style>
+    :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { margin: 0; background: #f4f5f7; color: #1d2430; }
+    header { padding: 14px 22px; background: #1f2937; color: white; display: flex; align-items: center; justify-content: space-between; }
+    h1 { font-size: 20px; margin: 0; font-weight: 650; letter-spacing: 0; }
+    main { display: grid; grid-template-columns: minmax(360px, 430px) minmax(0, 1fr); gap: 16px; padding: 16px; height: calc(100vh - 56px); box-sizing: border-box; }
+    section { background: white; border: 1px solid #d9dee7; border-radius: 8px; overflow: hidden; }
+    .panel { padding: 16px; overflow: auto; }
+    label { display: block; margin: 12px 0 6px; font-size: 13px; font-weight: 650; color: #374151; }
+    input, select, textarea { box-sizing: border-box; width: 100%; border: 1px solid #c8ced8; border-radius: 6px; padding: 10px 11px; font: inherit; background: white; color: #111827; }
+    textarea { min-height: 72px; resize: vertical; }
+    iframe { width: 100%; height: 100%; border: 0; background: #e5e7eb; }
+    .meta { display: grid; gap: 7px; margin: 10px 0 14px; font-size: 13px; color: #4b5563; }
+    .meta strong { color: #111827; }
+    .actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+    button { border: 0; border-radius: 6px; padding: 10px 13px; font: inherit; font-weight: 650; cursor: pointer; }
+    .primary { background: #2563eb; color: white; }
+    .secondary { background: #e5e7eb; color: #111827; }
+    .danger { background: #fee2e2; color: #991b1b; }
+    .status { padding: 9px 11px; margin: 12px 0; border-radius: 6px; background: #eef2ff; color: #273070; font-size: 13px; }
+    .duplicate-box { margin: 12px 0; padding: 11px; border-radius: 7px; background: #fff7ed; border: 1px solid #fed7aa; color: #7c2d12; font-size: 13px; }
+    .duplicate-box ul { margin: 8px 0 0; padding-left: 18px; }
+    .duplicate-box li { margin: 5px 0; overflow-wrap: anywhere; }
+    .checkline { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; color: #7c2d12; font-weight: 650; }
+    .checkline input { width: auto; margin-top: 3px; }
+    .hidden { display: none; }
+    @media (max-width: 860px) {
+      main { grid-template-columns: 1fr; height: auto; }
+      iframe { height: 72vh; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ScanDocu</h1>
+    <button class="secondary" id="nextBtn">Další PDF</button>
+  </header>
+  <main>
+    <section class="panel">
+      <div id="status" class="status">Načítám nejnovější PDF z Downloads...</div>
+      <div id="formWrap" class="hidden">
+        <div class="meta">
+          <div><strong>Soubor:</strong> <span id="sourceName"></span></div>
+          <div><strong>OCR:</strong> <span id="ocrInfo"></span></div>
+          <div><strong>Termíny:</strong> <span id="dueInfo"></span></div>
+          <div id="duplicateLine" class="hidden"><strong>Duplicita:</strong> <span id="duplicateInfo"></span></div>
+        </div>
+        <div id="probableDuplicateBox" class="duplicate-box hidden">
+          <strong>Tento dokument je pravděpodobně už uložený.</strong>
+          <ul id="probableDuplicateList"></ul>
+          <label class="checkline" for="allowDuplicate">
+            <input id="allowDuplicate" type="checkbox">
+            Přesto uložit jako další dokument
+          </label>
+        </div>
+        <label for="title">Název dokumentu</label>
+        <input id="title" autocomplete="off">
+        <label for="domain">Oblast</label>
+        <select id="domain">
+          <option value="food">food</option>
+          <option value="health">health</option>
+          <option value="car">car</option>
+          <option value="insurance">insurance</option>
+          <option value="energy">energy</option>
+          <option value="home">home</option>
+          <option value="tax">tax</option>
+          <option value="warranty">warranty</option>
+          <option value="other">other</option>
+        </select>
+        <label for="documentType">Typ dokumentu</label>
+        <input id="documentType" autocomplete="off">
+        <label for="counterparty">Protistrana</label>
+        <input id="counterparty" autocomplete="off">
+        <label for="relatedAsset">Související věc</label>
+        <input id="relatedAsset" autocomplete="off">
+        <label for="caseId">Case ID / souvislost</label>
+        <input id="caseId" autocomplete="off">
+        <label for="tags">Tagy</label>
+        <textarea id="tags"></textarea>
+        <div class="actions">
+          <button class="primary" id="saveBtn">Uložit</button>
+          <button class="secondary" id="skipBtn">Přeskočit</button>
+          <button class="danger" id="stopBtn">Ukončit</button>
+        </div>
+      </div>
+    </section>
+    <section>
+      <iframe id="pdfFrame" title="Náhled PDF"></iframe>
+    </section>
+  </main>
+  <script>
+    const fields = {
+      status: document.getElementById("status"),
+      formWrap: document.getElementById("formWrap"),
+      sourceName: document.getElementById("sourceName"),
+      ocrInfo: document.getElementById("ocrInfo"),
+      dueInfo: document.getElementById("dueInfo"),
+      duplicateLine: document.getElementById("duplicateLine"),
+      duplicateInfo: document.getElementById("duplicateInfo"),
+      probableDuplicateBox: document.getElementById("probableDuplicateBox"),
+      probableDuplicateList: document.getElementById("probableDuplicateList"),
+      allowDuplicate: document.getElementById("allowDuplicate"),
+      title: document.getElementById("title"),
+      domain: document.getElementById("domain"),
+      documentType: document.getElementById("documentType"),
+      counterparty: document.getElementById("counterparty"),
+      relatedAsset: document.getElementById("relatedAsset"),
+      caseId: document.getElementById("caseId"),
+      tags: document.getElementById("tags"),
+      pdfFrame: document.getElementById("pdfFrame")
+    };
+    let current = null;
+
+    async function loadNext() {
+      fields.status.textContent = "Hledám další PDF...";
+      fields.formWrap.classList.add("hidden");
+      fields.pdfFrame.removeAttribute("src");
+      const res = await fetch("/api/next");
+      const data = await res.json();
+      if (!data.found) {
+        current = null;
+        fields.status.textContent = data.message || "Nenalezeno.";
+        return;
+      }
+      current = data;
+      fields.status.textContent = "Zkontroluj PDF a metadata.";
+      fields.formWrap.classList.remove("hidden");
+      fields.sourceName.textContent = data.source_name;
+      fields.ocrInfo.textContent = `${data.extraction_method || "nezjištěno"} / OCR: ${data.ocr_needed ? "ano" : "ne"}`;
+      fields.dueInfo.textContent = String(data.due_date_count || 0);
+      fields.duplicateLine.classList.toggle("hidden", !data.duplicate_document_id);
+      fields.duplicateInfo.textContent = data.duplicate_document_id || "";
+      renderProbableDuplicates(data.probable_duplicates || []);
+      fields.title.value = data.title || "";
+      fields.domain.value = data.domain || "other";
+      fields.documentType.value = data.document_type || "document";
+      fields.counterparty.value = data.counterparty || "";
+      fields.relatedAsset.value = data.related_asset || "";
+      fields.caseId.value = data.case_id || "";
+      fields.tags.value = data.tags || "";
+      fields.pdfFrame.src = data.pdf_url;
+    }
+
+    async function saveCurrent() {
+      if (!current) return;
+      fields.status.textContent = "Ukládám...";
+      const res = await fetch("/api/save", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          token: current.token,
+          title: fields.title.value,
+          domain: fields.domain.value,
+          document_type: fields.documentType.value,
+          counterparty: fields.counterparty.value,
+          related_asset: fields.relatedAsset.value,
+          case_id: fields.caseId.value,
+          tags: fields.tags.value,
+          allow_probable_duplicate: fields.allowDuplicate.checked
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || data.error || data.status === "probable_duplicate") {
+        fields.status.textContent = data.message || data.error || "Uložení selhalo.";
+        if (data.probable_duplicates) renderProbableDuplicates(data.probable_duplicates);
+        return;
+      }
+      fields.status.textContent = `Uloženo: ${data.document_id}. Chceš další PDF?`;
+      fields.formWrap.classList.add("hidden");
+      current = null;
+    }
+
+    function renderProbableDuplicates(items) {
+      fields.allowDuplicate.checked = false;
+      fields.probableDuplicateList.innerHTML = "";
+      fields.probableDuplicateBox.classList.toggle("hidden", items.length === 0);
+      items.forEach((item) => {
+        const li = document.createElement("li");
+        const name = item.title || item.original_filename || item.document_id || "bez názvu";
+        const path = item.stored_path || "";
+        li.textContent = `${name} | ${item.domain || "other"} / ${item.document_type || "document"} | ${path}`;
+        fields.probableDuplicateList.appendChild(li);
+      });
+    }
+
+    async function skipCurrent() {
+      if (!current) return;
+      await fetch("/api/skip", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({token: current.token})
+      });
+      await loadNext();
+    }
+
+    document.getElementById("nextBtn").addEventListener("click", loadNext);
+    document.getElementById("saveBtn").addEventListener("click", saveCurrent);
+    document.getElementById("skipBtn").addEventListener("click", skipCurrent);
+    document.getElementById("stopBtn").addEventListener("click", () => {
+      fields.status.textContent = "ScanDocu ukončeno v prohlížeči. Server můžeš zastavit v terminálu.";
+      fields.formWrap.classList.add("hidden");
+      fields.pdfFrame.removeAttribute("src");
+      current = null;
+    });
+    loadNext();
+  </script>
+</body>
+</html>
+"""
+
+
+def run_scandocu_server(
+    host: str = "127.0.0.1",
+    port: int = 8765,
+    downloads_dir: Path = DEFAULT_DOWNLOADS_DIR,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> None:
+    ScanDocuServer(downloads_dir=downloads_dir, vault_dir=vault_dir).serve(host=host, port=port)

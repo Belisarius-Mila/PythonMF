@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -22,9 +23,12 @@ from app.documents.tools import (
     run_document_print_job_text,
     save_document_due_reminder_text,
     scan_document_inbox_text,
+    scan_downloaded_pdfs_text,
     scan_mobile_document_inbox_text,
     search_private_documents_text,
 )
+from app.documents.scandocu import import_scandocu_candidate
+from app.documents.scandocu import prepare_next_scandocu_pdf
 from app.documents.vault import format_document_inbox_reminder
 from app.documents.vault import has_explicit_document_import_confirmation
 from app.documents.vault import normalize_mobile_document_page
@@ -342,6 +346,116 @@ class DocumentVaultToolsTests(unittest.TestCase):
             docs_index = (vault / "index" / "documents_index.jsonl").read_text(encoding="utf-8")
             self.assertIn('"case_id": "rodinne-recepty"', docs_index)
 
+    def test_scandocu_processes_newest_download_pdf_into_vault(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            downloads = root / "Downloads"
+            vault = root / "documents"
+            downloads.mkdir()
+            older = downloads / "older.pdf"
+            newer = downloads / "gpt-recept.pdf"
+            older.write_bytes(b"%PDF-1.4\nStarsi dokument\n")
+            newer.write_bytes(
+                "%PDF-1.4\nRecept\nPrisady: brambory, mrkev, sul a olej.\nDoba pripravy 30 minut.\n".encode(
+                    "utf-8"
+                )
+            )
+            os.utime(older, (1_700_000_000, 1_700_000_000))
+            os.utime(newer, (1_700_000_100, 1_700_000_100))
+
+            scan = scan_downloaded_pdfs_text(downloads_dir=downloads, vault_dir=vault)
+            self.assertIn("gpt-recept.pdf", scan)
+            self.assertIn("stav: new", scan)
+
+            candidate = prepare_next_scandocu_pdf(downloads_dir=downloads, vault_dir=vault)
+            self.assertIsNotNone(candidate)
+            assert candidate is not None
+            self.assertEqual(candidate.source_path.name, "gpt-recept.pdf")
+            self.assertTrue(candidate.working_path.exists())
+
+            result = import_scandocu_candidate(
+                token=candidate.token,
+                title="Rodinne recepty salat",
+                domain="food",
+                document_type="recipe",
+                tags="recept, test",
+                case_id="rodinne-recepty",
+                vault_dir=vault,
+            )
+
+            self.assertEqual(result["status"], "imported")
+            self.assertEqual(result["document_id"], "rodinne-recepty-salat")
+            stored = vault / "vault" / "food" / "rodinne-recepty-salat" / "gpt-recept.pdf"
+            self.assertTrue(stored.exists())
+            manifest = json.loads((stored.parent / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["title"], "Rodinne recepty salat")
+            self.assertEqual(manifest["case_id"], "rodinne-recepty")
+
+    def test_scandocu_blocks_probable_duplicate_until_confirmed(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            downloads = root / "Downloads"
+            vault = root / "documents"
+            downloads.mkdir()
+            existing = root / "najemni-smlouva-jan-novak-dubova.pdf"
+            existing.write_bytes(
+                b"%PDF-1.4\n"
+                b"Najemni smlouva\n"
+                b"Najemce: Jan Novak\n"
+                b"Adresa bytu: Dubova ulice\n"
+            )
+            imported = apply_document_import_text(
+                source_path=str(existing),
+                target_domain="home",
+                document_type="lease",
+                counterparty="Jan Novak",
+                tags="najem, dubova",
+                document_id="najemni-smlouva-jan-novak-dubova",
+                document_title="Najemni smlouva Jan Novak Dubova",
+                user_confirmed=True,
+                confirmation_text="Potvrzuji, uloz dokument najemni-smlouva-jan-novak-dubova.pdf do oblasti home.",
+                vault_dir=vault,
+            )
+            self.assertIn("Stav: ulozeno", imported)
+
+            new_pdf = downloads / "gpt-najem-dubova-novak.pdf"
+            new_pdf.write_bytes(
+                b"%PDF-1.4\n"
+                b"Najemni smlouva k bytu v ulici Dubova.\n"
+                b"Jmeno najemce: Jan Novak.\n"
+                b"Dokument vytvoreny z noveho PDF exportu.\n"
+            )
+
+            candidate = prepare_next_scandocu_pdf(downloads_dir=downloads, vault_dir=vault)
+            self.assertIsNotNone(candidate)
+            assert candidate is not None
+            self.assertTrue(candidate.probable_duplicates)
+            duplicate = candidate.probable_duplicates[0]
+            self.assertEqual(duplicate["document_id"], "najemni-smlouva-jan-novak-dubova")
+            self.assertIn("vault/home/najemni-smlouva-jan-novak-dubova", duplicate["stored_path"])
+
+            blocked = import_scandocu_candidate(
+                token=candidate.token,
+                title="Najemni smlouva Jan Novak Dubova kopie",
+                domain="home",
+                document_type="lease",
+                tags="najem, dubova",
+                vault_dir=vault,
+            )
+            self.assertEqual(blocked["status"], "probable_duplicate")
+            self.assertIn("pravdepodobne", blocked["message"])
+
+            confirmed = import_scandocu_candidate(
+                token=candidate.token,
+                title="Najemni smlouva Jan Novak Dubova kopie",
+                domain="home",
+                document_type="lease",
+                tags="najem, dubova",
+                allow_probable_duplicate=True,
+                vault_dir=vault,
+            )
+            self.assertEqual(confirmed["status"], "imported")
+
     def test_recipe_metadata_does_not_treat_kostky_as_stk(self) -> None:
         metadata = propose_metadata(
             source=Path("scan_d.pdf"),
@@ -370,6 +484,56 @@ class DocumentVaultToolsTests(unittest.TestCase):
         self.assertEqual(metadata["document_type"], "diet_guidance")
         self.assertEqual(metadata["domain"], "health")
         self.assertIn("dieta", metadata["tags"])
+
+    def test_auto_substring_does_not_classify_as_car(self) -> None:
+        metadata = propose_metadata(
+            source=Path("lekarna.pdf"),
+            text=(
+                "Lékárna vydala automaticky připravený přehled doporučení. "
+                "Dokument obsahuje poznámky k užívání a běžné položky domácí lékárny."
+            ),
+        )
+
+        self.assertNotEqual(metadata["domain"], "car")
+        self.assertNotIn("auto", metadata["tags"])
+
+    def test_lease_contract_metadata_is_home_without_year_tags(self) -> None:
+        metadata = propose_metadata(
+            source=Path("NajemniSmlouvaDubovaUlice.pdf"),
+            text=(
+                "Nájemní smlouva k bytu v ulici Dubova. "
+                "Nájemce: Jan Novak. Pronajímatel předává byt k užívání. "
+                "Smlouva obsahuje data 2025, 2026 a 2036."
+            ),
+        )
+
+        self.assertEqual(metadata["document_type"], "lease")
+        self.assertEqual(metadata["domain"], "home")
+        self.assertEqual(metadata["counterparty"], "Jan Novak")
+        self.assertEqual(metadata["related_asset"], "Dubova ulice")
+        self.assertIn("najem", metadata["tags"])
+        self.assertIn("bydleni", metadata["tags"])
+        self.assertNotIn("2025", metadata["tags"])
+        self.assertNotIn("2026", metadata["tags"])
+
+    def test_lease_counterparty_from_party_block(self) -> None:
+        metadata = propose_metadata(
+            source=Path("NajemniSmlouvaDubovaUlice.pdf"),
+            text=(
+                "Jako pronajímatel na straně jedné\n"
+                "Titul, jméno a příjmení: Miloslav Falta\n"
+                "jako pronajímatel\n"
+                "Titul, jméno a příjmení: Jan Novak\n"
+                "Titul, jméno a příjmení: Eva Novak\n"
+                "jako nájemce na straně druhé\n"
+                "Byt se nachází v Dubova ulice."
+            ),
+        )
+
+        self.assertEqual(metadata["document_type"], "lease")
+        self.assertEqual(metadata["domain"], "home")
+        self.assertEqual(metadata["counterparty"], "Jan Novak; Eva Novak")
+        self.assertEqual(metadata["related_asset"], "Dubova ulice")
 
     def test_document_inbox_startup_reminder_hides_filenames(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

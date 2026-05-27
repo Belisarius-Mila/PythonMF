@@ -927,6 +927,7 @@ def apply_document_import_file(
     tags: str = "",
     document_id: str = "",
     case_id: str = "",
+    document_title: str = "",
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
     now: datetime | None = None,
 ) -> DocumentImportResult:
@@ -987,6 +988,7 @@ def apply_document_import_file(
 
     record = {
         "document_id": safe_document_id,
+        "title": safe_text(document_title),
         "original_filename": source.name,
         "stored_path": str(relative_to_project(destination)),
         "domain": normalized_domain,
@@ -3101,7 +3103,7 @@ def propose_metadata(
     if not document_type:
         document_type = guess_document_type(combined)
     domain = normalize_domain(target_domain or guess_domain(combined, document_type))
-    asset = safe_text(related_asset or guess_related_asset(combined))
+    asset = safe_text(related_asset or guess_related_asset_for_document(source=source, text=text, folded=combined, document_type=document_type))
     return {
         "document_type": document_type,
         "domain": domain,
@@ -3122,6 +3124,8 @@ def guess_document_type(text: str) -> str:
         return "recipe"
     if looks_like_diet_guidance(text):
         return "diet_guidance"
+    if looks_like_lease_document(text):
+        return "lease"
     if any(word in text for word in ("smlouva", "contract")):
         return "contract"
     if has_stk_marker(text) or any(word in text for word in ("technicka kontrola", "technická kontrola", "emisni kontrola", "emisní kontrola", "revize", "revizni", "revizní")):
@@ -3138,6 +3142,8 @@ def guess_domain(text: str, document_type: str) -> str:
         return "food"
     if document_type == "diet_guidance":
         return "health"
+    if document_type == "lease":
+        return "home"
     if any(word in text for word in ("volvo", "v40", "vozidlo", "spz", "vin", "technicka kontrola", "technická kontrola", "servisni prohlidka", "servisní prohlídka")) or has_stk_marker(text):
         if document_type in {"invoice", "service_report", "inspection_report", "green_card"}:
             return "car"
@@ -3149,7 +3155,7 @@ def guess_domain(text: str, document_type: str) -> str:
         return "energy"
     if any(word in text for word in ("kotel", "komin", "komín", "dum", "dům", "home")):
         return "home"
-    if any(word in text for word in ("auto", "vozidlo", "spz", "vin", "volvo")) or has_stk_marker(text):
+    if has_car_marker(text):
         return "car"
     if any(word in text for word in ("dan", "daň", "financni urad", "finanční úřad")):
         return "tax"
@@ -3159,7 +3165,25 @@ def guess_domain(text: str, document_type: str) -> str:
 
 
 def has_stk_marker(text: str) -> bool:
-    return bool(re.search(r"(?<![a-z0-9])stk(?![a-z0-9])", text))
+    return has_short_token_marker(text, "stk")
+
+
+def has_auto_marker(text: str) -> bool:
+    return has_short_token_marker(text, "auto")
+
+
+def has_short_token_marker(text: str, token: str) -> bool:
+    return bool(re.search(rf"(?<![a-z0-9]){re.escape(token)}(?![a-z0-9])", text))
+
+
+def has_car_marker(text: str) -> bool:
+    return (
+        has_auto_marker(text)
+        or has_stk_marker(text)
+        or has_short_token_marker(text, "spz")
+        or has_short_token_marker(text, "vin")
+        or any(word in text for word in ("vozidlo", "volvo"))
+    )
 
 
 def looks_like_recipe_document(text: str) -> bool:
@@ -3221,7 +3245,28 @@ def looks_like_diet_guidance(text: str) -> bool:
     return sum(1 for marker in diet_markers if marker in text) >= 2
 
 
+def looks_like_lease_document(text: str) -> bool:
+    lease_markers = (
+        "nájemní smlouva",
+        "najemni smlouva",
+        "nájemce",
+        "najemce",
+        "pronajímatel",
+        "pronajimatel",
+        "nájemné",
+        "najemne",
+        "byt",
+        "bytu",
+        "bytová jednotka",
+        "bytova jednotka",
+    )
+    return sum(1 for marker in lease_markers if marker in text) >= 2
+
+
 def guess_counterparty(text: str) -> str:
+    counterparty = guess_lease_counterparty(text)
+    if counterparty:
+        return counterparty
     for raw_line in text.splitlines()[:30]:
         line = normalize_whitespace(raw_line)
         if not 3 <= len(line) <= 100:
@@ -3230,6 +3275,78 @@ def guess_counterparty(text: str) -> str:
         if any(marker in folded for marker in ("s.r.o", "a.s", "pojistovna", "pojišťovna", "servis", "rixo")):
             return line
     return ""
+
+
+def guess_lease_counterparty(text: str) -> str:
+    structured_names = guess_lease_counterparty_from_party_block(text)
+    if structured_names:
+        return structured_names
+    for raw_line in re.split(r"[\n\r.]+", text[:8000]):
+        line = normalize_whitespace(raw_line)
+        folded = line.casefold()
+        if not folded.startswith(("nájemce:", "najemce:", "pronajímatel:", "pronajimatel:")):
+            continue
+        if ":" in line:
+            candidate = normalize_whitespace(line.split(":", 1)[1])
+            if 3 <= len(candidate) <= 100 and len(candidate.split()) >= 2:
+                return candidate
+    return ""
+
+
+def guess_lease_counterparty_from_party_block(text: str) -> str:
+    lines = [normalize_whitespace(line) for line in text[:12000].splitlines()]
+    for index, line in enumerate(lines):
+        folded = line.casefold()
+        if "jako nájemce" not in folded and "jako najemce" not in folded:
+            continue
+        names: list[str] = []
+        start = max(0, index - 40)
+        for previous_index in range(index - 1, start - 1, -1):
+            previous = lines[previous_index].casefold()
+            if "jako pronajímatel" in previous or "jako pronajimatel" in previous:
+                start = previous_index + 1
+                break
+        for candidate_line in lines[start:index]:
+            candidate = extract_person_name_from_labeled_line(candidate_line)
+            if candidate and candidate not in names:
+                names.append(candidate)
+        if names:
+            return "; ".join(names[:3])
+    return ""
+
+
+def extract_person_name_from_labeled_line(line: str) -> str:
+    folded = line.casefold()
+    labels = (
+        "titul, jméno a příjmení",
+        "titul, jmeno a prijmeni",
+        "jméno a příjmení",
+        "jmeno a prijmeni",
+    )
+    if not any(label in folded for label in labels) or ":" not in line:
+        return ""
+    value = normalize_whitespace(line.split(":", 1)[1])
+    value = re.split(r"\s+(?:e-mail|email|telefon|tel\.?)\b", value, maxsplit=1, flags=re.IGNORECASE)[0]
+    value = value.split("|", 1)[0].strip(" ,;")
+    if not 3 <= len(value) <= 100:
+        return ""
+    words = value.split()
+    if len(words) < 2 or len(words) > 5:
+        return ""
+    if not all(re.match(r"^[A-ZÁ-Ž][\wÀ-ž.'-]*$", word) for word in words):
+        return ""
+    return value
+
+
+def guess_related_asset_for_document(
+    source: Path,
+    text: str,
+    folded: str,
+    document_type: str,
+) -> str:
+    if document_type == "lease":
+        return guess_lease_related_asset(source=source, text=text, folded=folded)
+    return guess_related_asset(folded)
 
 
 def guess_related_asset(text: str) -> str:
@@ -3241,9 +3358,50 @@ def guess_related_asset(text: str) -> str:
         return "fotovoltaika"
     if "kotel" in text:
         return "kotel"
-    if any(word in text for word in ("auto", "vozidlo", "spz", "vin", "stk")):
+    if has_car_marker(text):
         return "auto"
     return ""
+
+
+def guess_lease_related_asset(source: Path, text: str, folded: str) -> str:
+    address = extract_street_from_text(text)
+    if address:
+        return address
+    filename_address = extract_street_from_filename(source)
+    if filename_address:
+        return filename_address
+    if "byt" in folded or "bytu" in folded:
+        return "byt"
+    return ""
+
+
+def extract_street_from_text(text: str) -> str:
+    patterns = (
+        r"\b([A-ZÁ-Ž][\wÀ-ž.'-]{3,40})\s+(?:ulice|ul\.)\b",
+        r"\b(?:ulice|ul\.)\s+([A-ZÁ-Ž][\wÀ-ž.'-]{3,40})\b",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, text[:12000])
+        if match:
+            street = normalize_whitespace(match.group(1))
+            if street.casefold() not in {"tato", "této", "teto"}:
+                return f"{street} ulice"
+    return ""
+
+
+def extract_street_from_filename(source: Path) -> str:
+    words = split_camel_case_text(source.stem).split()
+    ignored = {"najemni", "nájemní", "smlouva", "lease", "contract", "dokument", "document"}
+    useful = [word for word in words if safe_slug(word, default="", limit=40) not in ignored]
+    if not useful:
+        return ""
+    if useful[-1].casefold() in {"ulice", "ul"} and len(useful) >= 2:
+        return f"{useful[-2]} ulice"
+    return ""
+
+
+def split_camel_case_text(value: str) -> str:
+    return re.sub(r"(?<=[a-zá-ž])(?=[A-ZÁ-Ž])", " ", value)
 
 
 def suggest_document_tags(
@@ -3256,7 +3414,7 @@ def suggest_document_tags(
     if related_asset:
         tags.append(related_asset)
     checks = (
-        ("auto", ("auto", "vozidlo", "spz", "vin", "volvo")),
+        ("auto", ("vozidlo", "volvo")),
         ("volvo-v40", ("volvo v40", "v40")),
         ("pojisteni", ("pojist", "zelena karta", "zelená karta")),
         ("faktura", ("faktura", "invoice", "danovy doklad", "daňový doklad")),
@@ -3265,16 +3423,18 @@ def suggest_document_tags(
         ("recept", ("recept", "přísady", "prisady", "ingredience", "doba přípravy", "doba pripravy")),
         ("jidlo", ("salát", "salat", "polévka", "polevka", "brambor", "mrkev", "cuketa")),
         ("dieta", ("dieta", "dietní", "dietni", "jídelníček", "jidelnicek", "purin", "diabet")),
+        ("najem", ("nájemní smlouva", "najemni smlouva", "nájemce", "najemce", "nájemné", "najemne")),
+        ("bydleni", ("byt", "bytu", "bytová jednotka", "bytova jednotka", "pronajímatel", "pronajimatel")),
         ("splatnost", ("splatnost", "uhradit", "zaplatit")),
         ("platnost", ("platnost do", "platna do", "platná do")),
     )
     for tag, markers in checks:
         if any(marker in text for marker in markers):
             tags.append(tag)
+    if has_car_marker(text):
+        tags.append("auto")
     if has_stk_marker(text):
         tags.append("technicka-kontrola")
-    for year in re.findall(r"\b20\d{2}\b", text):
-        tags.append(year)
     return merge_tags([], tags)
 
 

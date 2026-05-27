@@ -4,6 +4,11 @@ from pathlib import Path
 
 from agents import function_tool
 
+from .scandocu import (
+    DEFAULT_DOWNLOADS_DIR,
+    prepare_next_scandocu_pdf,
+    scan_downloads_for_pdfs,
+)
 from .vault import (
     DEFAULT_DOCUMENTS_DIR,
     apply_document_import_file,
@@ -18,6 +23,7 @@ from .vault import (
     process_mobile_document_inbox_summary,
     prepare_document_print_job_summary,
     propose_document_inbox_cleanup_summary,
+    relative_to_project,
     resolve_document_inbox_item_summary,
     run_document_print_job_summary,
     save_document_due_reminder_summary,
@@ -49,6 +55,18 @@ def prepare_mobile_document_batch(batch_id: str = "") -> str:
 def process_mobile_document_inbox(batch_id: str = "", force_reprocess: bool = False) -> str:
     """Process requested iPhone document batches into private working PDFs and OCR metadata; does not import."""
     return process_mobile_document_inbox_text(batch_id=batch_id, force_reprocess=force_reprocess)
+
+
+@function_tool
+def scan_downloaded_pdfs(max_items: int = 20) -> str:
+    """Read-only scan of PDF files in Downloads for ScanDocu processing."""
+    return scan_downloaded_pdfs_text(max_items=max_items)
+
+
+@function_tool
+def prepare_next_scandocu_document() -> str:
+    """Prepare the newest unprocessed Downloads PDF for ScanDocu review; does not import."""
+    return prepare_next_scandocu_document_text()
 
 
 @function_tool
@@ -123,6 +141,7 @@ def apply_document_import(
     tags: str = "",
     document_id: str = "",
     case_id: str = "",
+    document_title: str = "",
     user_confirmed: bool = False,
     confirmation_text: str = "",
 ) -> str:
@@ -136,6 +155,7 @@ def apply_document_import(
         tags=tags,
         document_id=document_id,
         case_id=case_id,
+        document_title=document_title,
         user_confirmed=user_confirmed,
         confirmation_text=confirmation_text,
     )
@@ -282,6 +302,58 @@ def process_mobile_document_inbox_text(
     return process_mobile_document_inbox_summary(**kwargs)
 
 
+def scan_downloaded_pdfs_text(
+    max_items: int = 20,
+    downloads_dir: Path = DEFAULT_DOWNLOADS_DIR,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> str:
+    try:
+        items = scan_downloads_for_pdfs(
+            downloads_dir=downloads_dir,
+            vault_dir=vault_dir,
+            limit=max(1, min(max_items, 50)),
+        )
+    except ValueError as exc:
+        return f"ScanDocu scan Downloads byl odmitnut: {exc}"
+    if not items:
+        return f"ScanDocu: v `{downloads_dir}` neni zadne PDF."
+    lines = [
+        "ScanDocu PDF v Downloads (read-only):",
+        f"- Slozka: `{downloads_dir}`",
+    ]
+    for item in items:
+        lines.append(
+            f"- {item['name']} | {item.get('modified_at', '')} | "
+            f"{item.get('size_bytes', 0)} B | stav: {item.get('status', 'unknown')}"
+        )
+    return "\n".join(lines)
+
+
+def prepare_next_scandocu_document_text(
+    downloads_dir: Path = DEFAULT_DOWNLOADS_DIR,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> str:
+    try:
+        candidate = prepare_next_scandocu_pdf(
+            downloads_dir=downloads_dir,
+            vault_dir=vault_dir,
+        )
+    except ValueError as exc:
+        return f"ScanDocu priprava byla odmitnuta: {exc}"
+    if candidate is None:
+        return "ScanDocu: v Downloads neni zadne nove PDF ke zpracovani."
+    return (
+        "ScanDocu dokument je pripraveny ke kontrole.\n"
+        f"- Soubor: {candidate.source_path.name}\n"
+        f"- Pracovni kopie: `{relative_to_project(candidate.working_path)}`\n"
+        f"- Token: {candidate.token}\n"
+        f"- Navrzeny nazev: {candidate.title}\n"
+        f"- Navrh: {candidate.domain} / {candidate.document_type}\n"
+        f"- OCR: {candidate.extraction_method} | OCR potreba: {'ano' if candidate.ocr_needed else 'ne'}\n"
+        "Dalsi krok: otevrit ScanDocu web a potvrdit/upravit metadata."
+    )
+
+
 def prepare_mobile_document_final_import_text(
     batch_id: str = "",
     target_domain: str = "",
@@ -415,6 +487,7 @@ def apply_document_import_text(
     tags: str = "",
     document_id: str = "",
     case_id: str = "",
+    document_title: str = "",
     user_confirmed: bool = False,
     confirmation_text: str = "",
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
@@ -442,6 +515,7 @@ def apply_document_import_text(
             tags=tags,
             document_id=document_id,
             case_id=case_id,
+            document_title=document_title,
             vault_dir=vault_dir,
         )
     except ValueError as exc:

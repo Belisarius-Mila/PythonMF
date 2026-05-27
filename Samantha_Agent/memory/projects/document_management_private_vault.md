@@ -173,6 +173,40 @@ Overeno:
 - `.venv/bin/python -m unittest tests.test_document_vault_tools tests.test_payment_case_documents tests.test_payment_sms_reminders tests.test_reminders_store tests.test_reminders_tools tests.test_reminders_query_tools`
 - `.venv/bin/python -m py_compile app/documents/__init__.py app/documents/vault.py app/documents/tools.py app/samantha_agent.py tests/test_document_vault_tools.py`
 
+## ScanDocu a cockpit 2026-05-27/28
+
+Hlavni aktualni vstupni cesta pro nove skenovane dokumenty je:
+
+1. Mila nafoti dokument a v GPT z nej pripravi PDF.
+2. PDF stahne do `Downloads`.
+3. `ScanDocu` vezme nejmladsi nezpracovane PDF, vytvori soukromou pracovni kopii,
+   udela OCR/navrh metadat a ukaze lokalni webovou kontrolu.
+4. Klik `Ulozit` ve ScanDocu je potvrzenim finalniho importu do private vaultu.
+
+Implementovano:
+
+- `app/documents/scandocu.py` - ScanDocu procesor, stav PDF v Downloads,
+  priprava kandidata, pravdepodobne duplicity a potvrzeny import.
+- `scripts/scandocu_server.py` a `scripts/start_scandocu.sh` - lokalni ScanDocu
+  server a spousteci wrapper.
+- `app/cockpit.py`, `scripts/cockpit_server.py`, `scripts/start_cockpit.sh` -
+  prvni prototyp `Samantha Cockpit` na `http://127.0.0.1:8770`.
+
+Rozhodnuti:
+
+- Cockpit zatim neni samostatny projekt. Je to lokalni ovladaci vrstva k
+  dokumentovemu workflow a dalsim rutinnim schopnostem Samanthy.
+- Pokud se z cockpitu stane obecny ridici panel pro vice oblasti, muze se
+  pozdeji presunout do samostatne infrastructure capability.
+
+Overeno:
+
+- ScanDocu bezi lokalne na `http://127.0.0.1:8766`.
+- Cockpit bezi lokalne na `http://127.0.0.1:8770`.
+- Oprava samostatneho okna ScanDocu byla Milou overena: zavreni ScanDocu uz
+  nezavira cockpit.
+- Testy dokumentoveho vaultu prosly s novymi ScanDocu scenari.
+
 ## Omezena mista MVP
 
 - OCR je implementovane pres Homebrew nastroje `poppler` + `tesseract`:
