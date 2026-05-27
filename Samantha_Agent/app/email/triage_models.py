@@ -8,6 +8,8 @@ from .action_case_models import ActionCaseAttachmentMeta, ActionCaseLinkDomain, 
 @dataclass(frozen=True)
 class TriageEmailItem:
     uid: str
+    source: str
+    folder: str
     date: str
     sender: str
     subject: str

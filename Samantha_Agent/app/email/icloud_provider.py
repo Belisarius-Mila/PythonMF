@@ -12,12 +12,15 @@ from email.message import Message
 from .archive_models import EmailArchiveSource
 from .archive_service import email_message_to_archive_source
 from .config import ICloudMailConfig, load_icloud_mail_config
-from .models import EmailAttachmentMeta, EmailHeader, EmailMessage, EmailTextSearchHit
+from .models import EmailAttachmentMeta, EmailHeader, EmailMessage, EmailMessageBatch, EmailSkippedMessage, EmailTextSearchHit
 
 
 HEADER_FETCH_SPEC = "(BODY.PEEK[HEADER.FIELDS (DATE FROM SUBJECT)])"
 MESSAGE_FETCH_SPEC = "(RFC822.SIZE BODY.PEEK[])"
+MESSAGE_SIZE_FETCH_SPEC = "(RFC822.SIZE)"
 MAX_MESSAGE_BYTES = 2_000_000
+ICLOUD_DEFAULT_FOLDERS = ("INBOX",)
+ICLOUD_SPAM_FOLDER_CANDIDATES = ("Junk", "Spam", "Bulk Mail")
 
 
 class EmailProviderError(RuntimeError):
@@ -28,13 +31,13 @@ class ICloudReadOnlyEmailProvider:
     def __init__(self, config: ICloudMailConfig | None = None) -> None:
         self._config = config or load_icloud_mail_config()
 
-    def list_recent_headers(self, limit: int = 10) -> list[EmailHeader]:
+    def list_recent_headers(self, limit: int = 10, folder: str = "INBOX") -> list[EmailHeader]:
         safe_limit = max(1, limit)
 
         try:
             with imaplib.IMAP4_SSL(self._config.host, self._config.port) as imap:
                 imap.login(self._config.address, self._config.app_password)
-                imap.select("INBOX", readonly=True)
+                _select_readonly_folder(imap, folder)
 
                 status, data = imap.uid("SEARCH", None, "ALL")
                 if status != "OK" or not data:
@@ -45,7 +48,7 @@ class ICloudReadOnlyEmailProvider:
                 headers: list[EmailHeader] = []
 
                 for uid in reversed(recent_uids):
-                    header = self._fetch_header(imap, uid)
+                    header = self._fetch_header(imap, uid, folder=folder)
                     if header is not None:
                         headers.append(header)
 
@@ -71,13 +74,14 @@ class ICloudReadOnlyEmailProvider:
         try:
             with imaplib.IMAP4_SSL(self._config.host, self._config.port) as imap:
                 imap.login(self._config.address, self._config.app_password)
-                imap.select("INBOX", readonly=True)
+                _select_readonly_folder(imap, "INBOX")
 
                 uids = _search_header_uids(imap, normalized_query)
                 headers = _fetch_headers_for_uids(
                     imap=imap,
                     uids=uids,
                     limit=safe_limit,
+                    folder="INBOX",
                 )
         except EmailProviderError:
             raise
@@ -138,7 +142,7 @@ class ICloudReadOnlyEmailProvider:
                 recent_uids = sorted(uid_matches, key=lambda uid: int(uid))[-safe_limit:]
                 hits: list[EmailTextSearchHit] = []
                 for uid in reversed(recent_uids):
-                    header = self._fetch_header(imap=imap, uid=uid)
+                    header = self._fetch_header(imap=imap, uid=uid, folder="INBOX")
                     if header is None:
                         continue
                     matched_terms = tuple(
@@ -166,6 +170,7 @@ class ICloudReadOnlyEmailProvider:
         self,
         imap: imaplib.IMAP4_SSL,
         uid: bytes,
+        folder: str = "INBOX",
     ) -> EmailHeader | None:
         status, message_data = imap.uid("FETCH", uid, HEADER_FETCH_SPEC)
         if status != "OK" or not message_data:
@@ -178,12 +183,15 @@ class ICloudReadOnlyEmailProvider:
         return _message_to_header(
             internal_id=uid.decode("ascii", errors="replace"),
             message=message_from_bytes(raw_header),
+            source="iCloud",
+            folder=folder,
         )
 
     def read_message_by_uid(
         self,
         uid: str,
         max_chars: int = 4_000,
+        folder: str = "INBOX",
     ) -> EmailMessage:
         safe_uid = _validate_uid(uid)
         safe_max_chars = min(max(200, max_chars), 20_000)
@@ -191,7 +199,7 @@ class ICloudReadOnlyEmailProvider:
         try:
             with imaplib.IMAP4_SSL(self._config.host, self._config.port) as imap:
                 imap.login(self._config.address, self._config.app_password)
-                imap.select("INBOX", readonly=True)
+                _select_readonly_folder(imap, folder)
 
                 status, message_data = imap.uid(
                     "FETCH",
@@ -205,6 +213,8 @@ class ICloudReadOnlyEmailProvider:
                     uid=safe_uid,
                     message_data=message_data,
                     max_chars=safe_max_chars,
+                    source="iCloud",
+                    folder=folder,
                 )
         except EmailProviderError:
             raise
@@ -217,6 +227,7 @@ class ICloudReadOnlyEmailProvider:
         self,
         uid: str,
         max_chars: int = 50_000,
+        folder: str = "INBOX",
     ) -> EmailArchiveSource:
         safe_uid = _validate_uid(uid)
         safe_max_chars = min(max(1_000, max_chars), 200_000)
@@ -224,7 +235,7 @@ class ICloudReadOnlyEmailProvider:
         try:
             with imaplib.IMAP4_SSL(self._config.host, self._config.port) as imap:
                 imap.login(self._config.address, self._config.app_password)
-                imap.select("INBOX", readonly=True)
+                _select_readonly_folder(imap, folder)
 
                 status, message_data = imap.uid(
                     "FETCH",
@@ -238,6 +249,7 @@ class ICloudReadOnlyEmailProvider:
                     uid=safe_uid,
                     message_data=message_data,
                     max_chars=safe_max_chars,
+                    folder=folder,
                 )
         except EmailProviderError:
             raise
@@ -251,38 +263,84 @@ class ICloudReadOnlyEmailProvider:
         days: int = 7,
         limit: int = 50,
         max_chars: int = 3_000,
+        folder: str = "INBOX",
     ) -> list[EmailMessage]:
+        return list(
+            self.list_recent_messages_with_skipped(
+                days=days,
+                limit=limit,
+                max_chars=max_chars,
+                folders=(folder,),
+            ).messages
+        )
+
+    def list_recent_messages_with_skipped(
+        self,
+        days: int = 7,
+        limit: int = 50,
+        max_chars: int = 3_000,
+        folders: tuple[str, ...] = ICLOUD_DEFAULT_FOLDERS,
+        include_spam: bool = False,
+    ) -> EmailMessageBatch:
         safe_days = min(max(1, days), 30)
         safe_limit = min(max(1, limit), 200)
         safe_max_chars = min(max(200, max_chars), 20_000)
         since_date = (date.today() - timedelta(days=safe_days - 1)).strftime("%d-%b-%Y")
+        folder_names = _dedupe_keep_order((*folders, *(ICLOUD_SPAM_FOLDER_CANDIDATES if include_spam else ())))
+        messages: list[EmailMessage] = []
+        skipped: list[EmailSkippedMessage] = []
+        unavailable: list[str] = []
+        found_spam_folder = False
 
         try:
             with imaplib.IMAP4_SSL(self._config.host, self._config.port) as imap:
                 imap.login(self._config.address, self._config.app_password)
-                imap.select("INBOX", readonly=True)
 
-                status, data = imap.uid("SEARCH", None, "SINCE", since_date)
-                if status != "OK" or not data:
-                    raise EmailProviderError("Nepodarilo se nacist seznam zprav.")
-
-                uids = data[0].split()
-                recent_uids = uids[-safe_limit:]
-                messages: list[EmailMessage] = []
-
-                for uid in reversed(recent_uids):
-                    status, message_data = imap.uid("FETCH", uid, MESSAGE_FETCH_SPEC)
-                    if status != "OK" or not message_data:
+                for folder_name in folder_names:
+                    if not _select_readonly_folder(imap, folder_name, required=False):
                         continue
-                    messages.append(
-                        _message_data_to_email_message(
-                            uid=uid.decode("ascii", errors="replace"),
-                            message_data=message_data,
-                            max_chars=safe_max_chars,
-                        )
-                    )
+                    if folder_name in ICLOUD_SPAM_FOLDER_CANDIDATES:
+                        found_spam_folder = True
+                    status, data = imap.uid("SEARCH", None, "SINCE", since_date)
+                    if status != "OK" or not data:
+                        continue
 
-                return messages
+                    uids = data[0].split()
+                    recent_uids = uids[-safe_limit:]
+
+                    for uid in reversed(recent_uids):
+                        header = self._fetch_header(imap, uid, folder=folder_name)
+                        if header is None:
+                            continue
+                        size = _fetch_message_size(imap, uid)
+                        if size is not None and size > MAX_MESSAGE_BYTES:
+                            skipped.append(EmailSkippedMessage(header=header, reason="too_large"))
+                            continue
+                        status, message_data = imap.uid("FETCH", uid, MESSAGE_FETCH_SPEC)
+                        if status != "OK" or not message_data:
+                            skipped.append(EmailSkippedMessage(header=header, reason="fetch_failed"))
+                            continue
+                        try:
+                            messages.append(
+                                _message_data_to_email_message(
+                                    uid=uid.decode("ascii", errors="replace"),
+                                    message_data=message_data,
+                                    max_chars=safe_max_chars,
+                                    source="iCloud",
+                                    folder=folder_name,
+                                )
+                            )
+                        except EmailProviderError:
+                            skipped.append(EmailSkippedMessage(header=header, reason="unreadable"))
+                            continue
+
+                if include_spam and not found_spam_folder:
+                    unavailable.append("iCloud: spam/nevyzadana posta nebyla nalezena mezi znamymi slozkami")
+                return EmailMessageBatch(
+                    messages=tuple(messages),
+                    skipped=tuple(skipped),
+                    unavailable=tuple(unavailable),
+                )
         except EmailProviderError:
             raise
         except imaplib.IMAP4.error as exc:
@@ -324,6 +382,8 @@ def _message_data_to_email_message(
     uid: str,
     message_data: list[object],
     max_chars: int,
+    source: str = "iCloud",
+    folder: str = "INBOX",
 ) -> EmailMessage:
     raw_message = _first_safe_message_payload(message_data)
     if raw_message is None:
@@ -340,6 +400,8 @@ def _message_data_to_email_message(
         header=_message_to_header(
             internal_id=uid,
             message=message,
+            source=source,
+            folder=folder,
         ),
         body_text=body_text,
         truncated=truncated,
@@ -351,6 +413,7 @@ def _message_data_to_archive_source(
     uid: str,
     message_data: list[object],
     max_chars: int,
+    folder: str = "INBOX",
 ) -> EmailArchiveSource:
     raw_message = _first_safe_message_payload(message_data)
     if raw_message is None:
@@ -367,6 +430,8 @@ def _message_data_to_archive_source(
         header=_message_to_header(
             internal_id=uid,
             message=message,
+            source="iCloud",
+            folder=folder,
         ),
         body_text=body_text,
         truncated=False,
@@ -377,7 +442,7 @@ def _message_data_to_archive_source(
         body_html=body_html,
         original_eml=raw_message,
         message_id=_decode_header_value(message.get("Message-ID")),
-        mailbox="INBOX",
+        mailbox=folder,
         provider="icloud",
     )
 
@@ -460,6 +525,7 @@ def _fetch_headers_for_uids(
     imap: imaplib.IMAP4_SSL,
     uids: list[bytes],
     limit: int,
+    folder: str = "INBOX",
 ) -> list[EmailHeader]:
     headers: list[EmailHeader] = []
     sorted_uids = sorted(uids, key=lambda uid: int(uid))
@@ -478,6 +544,8 @@ def _fetch_headers_for_uids(
             _message_to_header(
                 internal_id=uid.decode("ascii", errors="replace"),
                 message=message_from_bytes(raw_header),
+                source="iCloud",
+                folder=folder,
             )
         )
 
@@ -509,13 +577,64 @@ def _decode_header_bytes(part: bytes, encoding: str | None) -> str:
     return part.decode("utf-8", errors="replace")
 
 
-def _message_to_header(internal_id: str, message: Message) -> EmailHeader:
+def _message_to_header(
+    internal_id: str,
+    message: Message,
+    source: str = "",
+    folder: str = "",
+) -> EmailHeader:
     return EmailHeader(
         internal_id=internal_id,
         date=_decode_header_value(message.get("Date")),
         sender=_decode_header_value(message.get("From")),
         subject=_decode_header_value(message.get("Subject")),
+        source=source,
+        folder=folder,
     )
+
+
+def _select_readonly_folder(
+    imap: imaplib.IMAP4_SSL,
+    folder: str,
+    required: bool = True,
+) -> bool:
+    try:
+        status, _data = imap.select(folder, readonly=True)
+    except imaplib.IMAP4.error:
+        if required:
+            raise EmailProviderError(f"Nepodarilo se otevrit slozku {folder}.")
+        return False
+    if status == "OK":
+        return True
+    if required:
+        raise EmailProviderError(f"Nepodarilo se otevrit slozku {folder}.")
+    return False
+
+
+def _fetch_message_size(imap: imaplib.IMAP4_SSL, uid: bytes) -> int | None:
+    status, message_data = imap.uid("FETCH", uid, MESSAGE_SIZE_FETCH_SPEC)
+    if status != "OK" or not message_data:
+        return None
+    for item in message_data:
+        metadata = item[0] if isinstance(item, tuple) else item
+        if isinstance(metadata, bytes):
+            size_match = re.search(rb"RFC822\.SIZE\s+(\d+)", metadata)
+            if size_match:
+                return int(size_match.group(1))
+    return None
+
+
+def _dedupe_keep_order(items: tuple[str, ...]) -> tuple[str, ...]:
+    seen: set[str] = set()
+    result: list[str] = []
+    for item in items:
+        normalized = item.strip()
+        folded = normalized.casefold()
+        if not normalized or folded in seen:
+            continue
+        seen.add(folded)
+        result.append(normalized)
+    return tuple(result)
 
 
 def _validate_uid(uid: str) -> str:

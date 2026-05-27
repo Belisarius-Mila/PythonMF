@@ -10,12 +10,15 @@ from html.parser import HTMLParser
 from .archive_models import EmailArchiveSource
 from .archive_service import email_message_to_archive_source
 from .config import SeznamMailConfig, load_seznam_mail_config
-from .models import EmailAttachmentMeta, EmailHeader, EmailMessage
+from .models import EmailAttachmentMeta, EmailHeader, EmailMessage, EmailMessageBatch, EmailSkippedMessage
 
 
 HEADER_FETCH_SPEC = "(BODY.PEEK[HEADER.FIELDS (DATE FROM SUBJECT)])"
 MESSAGE_FETCH_SPEC = "(RFC822.SIZE BODY.PEEK[])"
+MESSAGE_SIZE_FETCH_SPEC = "(RFC822.SIZE)"
 MAX_MESSAGE_BYTES = 2_000_000
+SEZNAM_DEFAULT_FOLDERS = ("INBOX",)
+SEZNAM_SPAM_FOLDER_CANDIDATES = ("spam", "Spam", "Junk", "Bulk Mail")
 
 
 class SeznamEmailProviderError(RuntimeError):
@@ -26,12 +29,12 @@ class SeznamReadOnlyEmailProvider:
     def __init__(self, config: SeznamMailConfig | None = None) -> None:
         self._config = config or load_seznam_mail_config()
 
-    def list_recent_headers(self, limit: int = 10) -> list[EmailHeader]:
+    def list_recent_headers(self, limit: int = 10, folder: str = "INBOX") -> list[EmailHeader]:
         safe_limit = min(max(1, limit), 200)
         try:
             with imaplib.IMAP4_SSL(self._config.host, self._config.port) as imap:
                 imap.login(self._config.address, self._config.password)
-                imap.select("INBOX", readonly=True)
+                _select_readonly_folder(imap, folder)
 
                 status, data = imap.uid("SEARCH", None, "ALL")
                 if status != "OK" or not data:
@@ -39,7 +42,7 @@ class SeznamReadOnlyEmailProvider:
 
                 headers: list[EmailHeader] = []
                 for uid in reversed(data[0].split()[-safe_limit:]):
-                    header = self._fetch_header(imap, uid)
+                    header = self._fetch_header(imap, uid, folder=folder)
                     if header is not None:
                         headers.append(header)
                 return headers
@@ -73,12 +76,20 @@ class SeznamReadOnlyEmailProvider:
         return matches
 
     def read_message_by_uid(self, uid: str, max_chars: int = 4_000) -> EmailMessage:
+        return self.read_message_by_uid_from_folder(uid=uid, max_chars=max_chars, folder="INBOX")
+
+    def read_message_by_uid_from_folder(
+        self,
+        uid: str,
+        max_chars: int = 4_000,
+        folder: str = "INBOX",
+    ) -> EmailMessage:
         safe_uid = _validate_uid(uid)
         safe_max_chars = min(max(200, max_chars), 20_000)
         try:
             with imaplib.IMAP4_SSL(self._config.host, self._config.port) as imap:
                 imap.login(self._config.address, self._config.password)
-                imap.select("INBOX", readonly=True)
+                _select_readonly_folder(imap, folder)
 
                 status, message_data = imap.uid(
                     "FETCH",
@@ -92,6 +103,8 @@ class SeznamReadOnlyEmailProvider:
                     uid=safe_uid,
                     message_data=message_data,
                     max_chars=safe_max_chars,
+                    source="Seznam",
+                    folder=folder,
                 )
         except SeznamEmailProviderError:
             raise
@@ -104,13 +117,14 @@ class SeznamReadOnlyEmailProvider:
         self,
         uid: str,
         max_chars: int = 50_000,
+        folder: str = "INBOX",
     ) -> EmailArchiveSource:
         safe_uid = _validate_uid(uid)
         safe_max_chars = min(max(1_000, max_chars), 200_000)
         try:
             with imaplib.IMAP4_SSL(self._config.host, self._config.port) as imap:
                 imap.login(self._config.address, self._config.password)
-                imap.select("INBOX", readonly=True)
+                _select_readonly_folder(imap, folder)
 
                 status, message_data = imap.uid(
                     "FETCH",
@@ -124,6 +138,7 @@ class SeznamReadOnlyEmailProvider:
                     uid=safe_uid,
                     message_data=message_data,
                     max_chars=safe_max_chars,
+                    folder=folder,
                 )
         except SeznamEmailProviderError:
             raise
@@ -136,6 +151,7 @@ class SeznamReadOnlyEmailProvider:
         self,
         imap: imaplib.IMAP4_SSL,
         uid: bytes,
+        folder: str = "INBOX",
     ) -> EmailHeader | None:
         status, message_data = imap.uid("FETCH", uid, HEADER_FETCH_SPEC)
         if status != "OK" or not message_data:
@@ -146,7 +162,98 @@ class SeznamReadOnlyEmailProvider:
         return _message_to_header(
             internal_id=uid.decode("ascii", errors="replace"),
             message=message_from_bytes(raw_header),
+            source="Seznam",
+            folder=folder,
         )
+
+    def list_recent_messages(
+        self,
+        days: int = 7,
+        limit: int = 50,
+        max_chars: int = 3_000,
+        folder: str = "INBOX",
+    ) -> list[EmailMessage]:
+        return list(
+            self.list_recent_messages_with_skipped(
+                days=days,
+                limit=limit,
+                max_chars=max_chars,
+                folders=(folder,),
+            ).messages
+        )
+
+    def list_recent_messages_with_skipped(
+        self,
+        days: int = 7,
+        limit: int = 50,
+        max_chars: int = 3_000,
+        folders: tuple[str, ...] = SEZNAM_DEFAULT_FOLDERS,
+        include_spam: bool = False,
+    ) -> EmailMessageBatch:
+        from datetime import date, timedelta
+
+        safe_days = min(max(1, days), 30)
+        safe_limit = min(max(1, limit), 200)
+        safe_max_chars = min(max(200, max_chars), 20_000)
+        since_date = (date.today() - timedelta(days=safe_days - 1)).strftime("%d-%b-%Y")
+        folder_names = _dedupe_keep_order((*folders, *(SEZNAM_SPAM_FOLDER_CANDIDATES if include_spam else ())))
+        messages: list[EmailMessage] = []
+        skipped: list[EmailSkippedMessage] = []
+        unavailable: list[str] = []
+        found_spam_folder = False
+
+        try:
+            with imaplib.IMAP4_SSL(self._config.host, self._config.port) as imap:
+                imap.login(self._config.address, self._config.password)
+
+                for folder_name in folder_names:
+                    if not _select_readonly_folder(imap, folder_name, required=False):
+                        continue
+                    if folder_name in SEZNAM_SPAM_FOLDER_CANDIDATES:
+                        found_spam_folder = True
+                    status, data = imap.uid("SEARCH", None, "SINCE", since_date)
+                    if status != "OK" or not data:
+                        continue
+
+                    for uid in reversed(data[0].split()[-safe_limit:]):
+                        header = self._fetch_header(imap, uid, folder=folder_name)
+                        if header is None:
+                            continue
+                        size = _fetch_message_size(imap, uid)
+                        if size is not None and size > MAX_MESSAGE_BYTES:
+                            skipped.append(EmailSkippedMessage(header=header, reason="too_large"))
+                            continue
+                        status, message_data = imap.uid("FETCH", uid, MESSAGE_FETCH_SPEC)
+                        if status != "OK" or not message_data:
+                            skipped.append(EmailSkippedMessage(header=header, reason="fetch_failed"))
+                            continue
+                        try:
+                            messages.append(
+                                _message_data_to_email_message(
+                                    uid=uid.decode("ascii", errors="replace"),
+                                    message_data=message_data,
+                                    max_chars=safe_max_chars,
+                                    source="Seznam",
+                                    folder=folder_name,
+                                )
+                            )
+                        except SeznamEmailProviderError:
+                            skipped.append(EmailSkippedMessage(header=header, reason="unreadable"))
+                            continue
+
+                if include_spam and not found_spam_folder:
+                    unavailable.append("Seznam: spam/nevyzadana posta nebyla nalezena mezi znamymi slozkami")
+                return EmailMessageBatch(
+                    messages=tuple(messages),
+                    skipped=tuple(skipped),
+                    unavailable=tuple(unavailable),
+                )
+        except SeznamEmailProviderError:
+            raise
+        except imaplib.IMAP4.error as exc:
+            raise SeznamEmailProviderError("IMAP server Seznam odmitl pozadavek.") from exc
+        except OSError as exc:
+            raise SeznamEmailProviderError("Nepodarilo se pripojit k Seznam Mailu.") from exc
 
 
 def _first_bytes_payload(message_data: list[object]) -> bytes | None:
@@ -182,6 +289,8 @@ def _message_data_to_email_message(
     uid: str,
     message_data: list[object],
     max_chars: int,
+    source: str = "Seznam",
+    folder: str = "INBOX",
 ) -> EmailMessage:
     raw_message = _first_safe_message_payload(message_data)
     if raw_message is None:
@@ -197,6 +306,8 @@ def _message_data_to_email_message(
         header=_message_to_header(
             internal_id=uid,
             message=message,
+            source=source,
+            folder=folder,
         ),
         body_text=body_text,
         truncated=truncated,
@@ -208,6 +319,7 @@ def _message_data_to_archive_source(
     uid: str,
     message_data: list[object],
     max_chars: int,
+    folder: str = "INBOX",
 ) -> EmailArchiveSource:
     raw_message = _first_safe_message_payload(message_data)
     if raw_message is None:
@@ -222,6 +334,8 @@ def _message_data_to_archive_source(
         header=_message_to_header(
             internal_id=uid,
             message=message,
+            source="Seznam",
+            folder=folder,
         ),
         body_text=body_text,
         truncated=False,
@@ -232,18 +346,69 @@ def _message_data_to_archive_source(
         body_html="",
         original_eml=raw_message,
         message_id=_decode_header_value(message.get("Message-ID")),
-        mailbox="INBOX",
+        mailbox=folder,
         provider="seznam",
     )
 
 
-def _message_to_header(internal_id: str, message: Message) -> EmailHeader:
+def _message_to_header(
+    internal_id: str,
+    message: Message,
+    source: str = "",
+    folder: str = "",
+) -> EmailHeader:
     return EmailHeader(
         internal_id=internal_id,
         date=_decode_header_value(message.get("Date")),
         sender=_decode_header_value(message.get("From")),
         subject=_decode_header_value(message.get("Subject")),
+        source=source,
+        folder=folder,
     )
+
+
+def _select_readonly_folder(
+    imap: imaplib.IMAP4_SSL,
+    folder: str,
+    required: bool = True,
+) -> bool:
+    try:
+        status, _data = imap.select(folder, readonly=True)
+    except imaplib.IMAP4.error:
+        if required:
+            raise SeznamEmailProviderError(f"Nepodarilo se otevrit slozku {folder}.")
+        return False
+    if status == "OK":
+        return True
+    if required:
+        raise SeznamEmailProviderError(f"Nepodarilo se otevrit slozku {folder}.")
+    return False
+
+
+def _fetch_message_size(imap: imaplib.IMAP4_SSL, uid: bytes) -> int | None:
+    status, message_data = imap.uid("FETCH", uid, MESSAGE_SIZE_FETCH_SPEC)
+    if status != "OK" or not message_data:
+        return None
+    for item in message_data:
+        metadata = item[0] if isinstance(item, tuple) else item
+        if isinstance(metadata, bytes):
+            size_match = re.search(rb"RFC822\.SIZE\s+(\d+)", metadata)
+            if size_match:
+                return int(size_match.group(1))
+    return None
+
+
+def _dedupe_keep_order(items: tuple[str, ...]) -> tuple[str, ...]:
+    seen: set[str] = set()
+    result: list[str] = []
+    for item in items:
+        normalized = item.strip()
+        folded = normalized.casefold()
+        if not normalized or folded in seen:
+            continue
+        seen.add(folded)
+        result.append(normalized)
+    return tuple(result)
 
 
 def _decode_header_value(value: str | None) -> str:

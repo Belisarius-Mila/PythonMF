@@ -4,7 +4,7 @@ import unittest
 
 from app.email.config import EmailConfigError
 from app.email.models import EmailHeader
-from app.email.tools import list_unified_email_headers_text
+from app.email.tools import list_unified_email_headers_text, show_new_email_overview_text
 
 
 class EmailUnifiedToolsTests(unittest.TestCase):
@@ -68,6 +68,28 @@ class EmailUnifiedToolsTests(unittest.TestCase):
         self.assertIn("Nenasel jsem zadne dostupne e-mailove hlavicky.", result)
         self.assertIn("iCloud: chybi lokalni konfigurace pro iCloud Mail", result)
         self.assertIn("Seznam: chybi lokalni konfigurace pro Seznam Mail", result)
+
+    def test_new_email_overview_adds_safe_next_steps(self) -> None:
+        result = show_new_email_overview_text(
+            limit_per_source=5,
+            icloud_provider_factory=lambda: _FakeProvider(
+                [
+                    EmailHeader(
+                        internal_id="10",
+                        date="Mon, 18 May 2026 08:00:00 +0200",
+                        sender="Sender <sender@example.com>",
+                        subject="iCloud test",
+                    )
+                ]
+            ),
+            seznam_provider_factory=_missing_config,
+        )
+
+        self.assertIn("Zdroj: iCloud", result)
+        self.assertIn("Dalsi mozne kroky podle UID:", result)
+        self.assertIn("Precist telo konkretniho e-mailu", result)
+        self.assertIn("tento prehled necetl tela e-mailu", result)
+        self.assertNotIn("sender@example.com", result)
 
 
 class _FakeProvider:

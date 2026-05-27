@@ -37,11 +37,13 @@ from app.email import (
     list_email_archives,
     list_recent_email_headers,
     list_recent_seznam_email_headers,
+    show_new_email_overview,
     list_unified_email_headers,
     prepare_forward_email_by_uid,
     read_email_body_by_uid,
     read_seznam_email_body_by_uid,
     run_email_triage_session,
+    run_unified_email_triage_session,
     save_selected_email_cases_from_uids,
     search_email_headers,
     search_seznam_email_headers,
@@ -92,6 +94,7 @@ from app.documents import (
     prepare_document_import,
     prepare_mobile_document_final_import,
     prepare_mobile_document_batch,
+    prepare_next_scandocu_document,
     process_mobile_document_inbox,
     prepare_document_print_job,
     propose_document_inbox_cleanup,
@@ -99,6 +102,7 @@ from app.documents import (
     run_document_print_job,
     save_document_due_reminder,
     scan_document_inbox,
+    scan_downloaded_pdfs,
     scan_mobile_document_inbox,
     search_private_documents,
 )
@@ -529,6 +533,10 @@ Pokud Mila pouzil iPhone zkratku pro skenovani dokumentu nebo zkratku
 `Zpracovat dokumenty pro Samanthu`, pouzij `scan_mobile_document_inbox`. Tento
 tool je read-only a jen vypise mobilni batch manifesty a nazvy stran v iCloud
 inboxu `SamanthaDocumentInbox`.
+Pro novy hlavni proces ScanDocu pouzij `scan_downloaded_pdfs`, kdyz Mila rekne,
+ze ma hotove PDF z GPT v Downloads. `prepare_next_scandocu_document` pripravi
+nejnovejsi nezpracovane PDF z Downloads jako soukromou pracovni kopii a navrh
+metadat; finalni potvrzeni ma probiihat v lokalni web aplikaci ScanDocu.
 `prepare_document_import` je read-only nahled importu lokalniho souboru z `data/`
 nebo `/private/tmp`.
 `prepare_mobile_document_batch` je write-safe priprava mobilniho batchu: zkopiruje
@@ -688,7 +696,18 @@ otevrene otazky a bezpecnostni poznamka. Nesmí odesilat, mazat, presouvat,
 oznacovat jako prectene, otevirat odkazy, stahovat prilohy ani ukladat do memory.
 
 Bezpecny e-mailovy workflow:
-1. Kdyz Mila chce zkontrolovat e-maily, nejdriv pouzij list_recent_email_headers.
+1. Kdyz Mila chce klasifikovat nove/posledni e-maily na dulezite/nedulezite,
+   udelat triage nebo kompletni prehled s navrhem dalsich kroku, pouzij rovnou
+   run_unified_email_triage_session. Tento nastroj smi automaticky cist hlavicky
+   a omezena tela kandidatnich e-mailu read-only z iCloud i Seznamu, vcetne
+   nevyzadane posty/spamu, pokud je slozka dostupna. Jeho pevna bezpecnostni
+   politika zakazuje otevirat odkazy, stahovat prilohy, odesilat, mazat,
+   presouvat a oznacovat jako prectene. Velke nebo necitelne zpravy se nesmi
+   tise zahodit; musi byt uvedene v sekci preskocenych polozek s UID, zdrojem,
+   slozkou, predmetem a duvodem.
+   Kdyz Mila chce jen rychly prehled novych nebo poslednich e-mailu bez konkretni
+   schranky, pouzij show_new_email_overview.
+   Kdyz Mila chce zkontrolovat e-maily v konkretni schrance, pouzij list_recent_email_headers.
    Pokud ale rekne Seznam, stara druha adresa nebo Vsechny prichozi s e-mailem
    ze Seznamu, pouzij misto toho list_recent_seznam_email_headers.
    Pokud chce vsechny prichozi nebo nevi, kde e-mail je, pouzij
@@ -749,9 +768,11 @@ LOKALNI PAMET:
             search_email_headers,
             list_recent_seznam_email_headers,
             search_seznam_email_headers,
+            show_new_email_overview,
             list_unified_email_headers,
             search_email_text_year,
             run_email_triage_session,
+            run_unified_email_triage_session,
             save_selected_email_cases_from_uids,
             archive_email_by_uid,
             prepare_forward_email_by_uid,
@@ -783,10 +804,12 @@ LOKALNI PAMET:
             preview_zmenseni_obrazku,
             apply_zmenseni_obrazku,
             scan_document_inbox,
+            scan_downloaded_pdfs,
             scan_mobile_document_inbox,
             document_vault_status,
             prepare_document_import,
             prepare_mobile_document_batch,
+            prepare_next_scandocu_document,
             process_mobile_document_inbox,
             prepare_mobile_document_final_import,
             apply_mobile_document_final_import,

@@ -9,6 +9,8 @@ class EmailHeader:
     date: str
     sender: str
     subject: str
+    source: str = ""
+    folder: str = ""
 
 
 @dataclass(frozen=True)
@@ -27,6 +29,19 @@ class EmailMessage:
     body_text: str
     truncated: bool
     attachments: tuple[EmailAttachmentMeta, ...] = ()
+
+
+@dataclass(frozen=True)
+class EmailSkippedMessage:
+    header: EmailHeader
+    reason: str
+
+
+@dataclass(frozen=True)
+class EmailMessageBatch:
+    messages: tuple[EmailMessage, ...]
+    skipped: tuple[EmailSkippedMessage, ...] = ()
+    unavailable: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)

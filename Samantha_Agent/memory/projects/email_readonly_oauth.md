@@ -223,6 +223,69 @@ Aktualni dalsi krok:
   nakonfigurovanou schranku pres unified/dual-mailbox workflow. Mila vidi oba
   ucty sloucene v klientovi, proto se nema spolehat jen na prvni odhad zdroje.
 
+## Ad-hoc prehled novych e-mailu
+
+Stav 2026-05-27:
+
+- existuje pohodlny Samantha tool `show_new_email_overview`;
+- pouziti: kdyz Mila rekne napr. "Udelej prehled novych e-mailu" nebo "zkontroluj
+  nove e-maily" bez urceni schranky;
+- tool vola sjednoceny read-only prehled iCloud + Seznam a prida bezpecne menu
+  dalsich kroku podle UID;
+- necte tela e-mailu, nestahuje prilohy, neotevira odkazy, nic neposila, nemaze,
+  nepresouva ani neoznacuje jako prectene;
+- dalsi prace stale vyzaduje explicitni UID a samostatne potvrzeni podle typu
+  akce.
+
+## Automaticka read-only Email Triage
+
+Stav 2026-05-27:
+
+- pro skutecne rozdeleni dulezite/nedulezite se nema zustat jen u hlavicek;
+- `run_email_triage_session` muze na Miluv bezny pokyn rovnou cist hlavicky a
+  omezene telo kandidatnich e-mailu read-only;
+- dlouhe potvrzeni ve stylu "Potvrzuji Email Triage..." uz neni vyzadovane ve
+  vychozim rezimu;
+- automaticka bezpecnostni politika je pevna: neotevirat odkazy, nestahovat
+  prilohy, nic neodesilat, nemazat, nepresouvat a neoznacovat jako prectene;
+- tool stale nic neuklada do EmailCaseVault, reminders ani memory; navazujici
+  case, archivace, plne URL, pripominka nebo odeslani zustavaji samostatne
+  potvrzovane kroky podle konkretniho UID.
+
+## Unified triage pres iCloud + Seznam + spam
+
+Stav 2026-05-28:
+
+- preferovany tool pro Milovo "udelat triage e-mailu" je
+  `run_unified_email_triage_session`;
+- cte read-only omezena tela z obou nakonfigurovanych schranek:
+  - iCloud,
+  - Seznam;
+- ve vychozim nastaveni zkousi k INBOXu pridat i spam/nevyzadanou postu pres
+  zname slozky `Junk`, `Spam`, `Bulk Mail`; pokud spam slozka neni nalezena,
+  vystup to uvede v nedostupnych zdrojich a pokracuje;
+- kazda polozka ve vystupu nese `Zdroj: provider / slozka`, protoze UID samo
+  o sobe neni unikatni napric schrankami a slozkami;
+- velke, prazdne nebo necitelne zpravy se nesmi tiše zahodit: objevi se v sekci
+  `Preskocene velke/necitene zpravy` s UID, zdrojem, slozkou, predmetem a
+  duvodem, aby Mila mohl rozhodnout o samostatnem zpracovani;
+- ostré cteni porad neotevira odkazy, nestahuje prilohy, nic neodesila, nemaze,
+  nepresouva a neoznacuje jako prectene.
+- scoring byl doladen pro realny provoz:
+  - pojistky, faktury, platby, doruceni, klientské portaly a bezpecnost uctu maji
+    vyssi vahu;
+  - marketing, politicke pozvanky, knihkupectvi, newslettery a spam maji nizsi
+    vahu;
+  - low priorita se nepovazuje za deadline/action/case kandidat.
+- report zobrazuje u polozek `UID`, zdroj/slozku a datum doruceni, aby se zpravy
+  daly dohledat v klientovi.
+- low sekce jsou zkracene limitem, aby chat nezaplavily newslettery a spam.
+- otevreny navazujici ukol: plny triage report ukladat do lokalniho souboru v
+  ignorovane slozce, napr. `data/email/triage_reports/`, a do chatu vracet jen
+  prehled plus cestu k souboru.
+- aktualni handoff:
+  `handoffs/email_unified_triage_scoring_report_checkpoint_2026_05_28.md`.
+
 Bezpecnostni hranice:
 
 - Neukladat do memory ani gitu e-mailove adresy, hesla, app-specific passwords,

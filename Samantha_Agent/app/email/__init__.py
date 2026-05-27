@@ -66,7 +66,7 @@ from .insurance_case_tools import (
     build_rixo_insurance_case_from_uids_text,
 )
 from .link_tools import show_email_case_links, show_email_case_links_text
-from .models import EmailAttachmentMeta, EmailHeader, EmailMessage
+from .models import EmailAttachmentMeta, EmailHeader, EmailMessage, EmailMessageBatch, EmailSkippedMessage
 from .outbound_tools import (
     prepare_forward_email_by_uid,
     prepare_forward_email_by_uid_text,
@@ -77,6 +77,8 @@ from .redaction import redact_email_addresses
 from .tools import (
     list_recent_seznam_email_headers,
     list_recent_email_headers,
+    show_new_email_overview,
+    show_new_email_overview_text,
     list_unified_email_headers,
     list_unified_email_headers_text,
     read_email_body_by_uid,
@@ -93,6 +95,8 @@ from .triage_tools import (
     has_explicit_triage_confirmation,
     run_email_triage_session,
     run_email_triage_session_text,
+    run_unified_email_triage_session,
+    run_unified_email_triage_session_text,
 )
 
 __all__ = [
@@ -110,6 +114,8 @@ __all__ = [
     "EmailHeader",
     "EmailLinkMeta",
     "EmailMessage",
+    "EmailMessageBatch",
+    "EmailSkippedMessage",
     "ICloudReadOnlyEmailProvider",
     "SeznamReadOnlyEmailProvider",
     "InsuranceActionItem",
@@ -137,6 +143,8 @@ __all__ = [
     "format_email_activity_reminder",
     "list_recent_email_headers",
     "list_recent_seznam_email_headers",
+    "show_new_email_overview",
+    "show_new_email_overview_text",
     "list_unified_email_headers",
     "list_unified_email_headers_text",
     "load_email_activity_state",
@@ -158,6 +166,8 @@ __all__ = [
     "prepare_forward_email_by_uid_text",
     "run_email_triage_session",
     "run_email_triage_session_text",
+    "run_unified_email_triage_session",
+    "run_unified_email_triage_session_text",
     "save_selected_email_cases_from_uids",
     "save_selected_email_cases_from_uids_text",
     "send_prepared_email_draft",

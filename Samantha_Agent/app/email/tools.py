@@ -94,6 +94,37 @@ def list_unified_email_headers(limit_per_source: int = 10) -> str:
     return list_unified_email_headers_text(limit_per_source=limit_per_source)
 
 
+@function_tool
+def show_new_email_overview(limit_per_source: int = 10) -> str:
+    """Show an ad-hoc safe overview of recent email headers and available next actions."""
+    return show_new_email_overview_text(limit_per_source=limit_per_source)
+
+
+def show_new_email_overview_text(
+    limit_per_source: int = 10,
+    icloud_provider_factory: Callable[[], object] = ICloudReadOnlyEmailProvider,
+    seznam_provider_factory: Callable[[], object] = SeznamReadOnlyEmailProvider,
+) -> str:
+    overview = list_unified_email_headers_text(
+        limit_per_source=limit_per_source,
+        icloud_provider_factory=icloud_provider_factory,
+        seznam_provider_factory=seznam_provider_factory,
+    )
+    next_steps = [
+        "",
+        "Dalsi mozne kroky podle UID:",
+        "- Precist telo konkretniho e-mailu: vyzaduje samostatne potvrzeni s UID a zdrojem schranky.",
+        "- Vytvorit pracovni case nebo action case: az po potvrzenem cteni konkretniho UID.",
+        "- Navrhnout pripominku: az po vytvoreni action case, ulozeni pripominky je druhy samostatny krok.",
+        "- Archivovat dulezity e-mail: vyzaduje samostatne potvrzeni konkretniho UID.",
+        "- Zobrazit plne odkazy: vyzaduje samostatne potvrzeni konkretniho UID.",
+        "",
+        "Bezpecnost: tento prehled necetl tela e-mailu, nestahoval prilohy, neoteviral odkazy, "
+        "nic neodeslal, nemazal, nepresouval ani neoznacil jako prectene.",
+    ]
+    return overview + "\n" + "\n".join(next_steps)
+
+
 def list_unified_email_headers_text(
     limit_per_source: int = 10,
     icloud_provider_factory: Callable[[], object] = ICloudReadOnlyEmailProvider,
