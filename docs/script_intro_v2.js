@@ -4,6 +4,7 @@ const magnifierButton = document.getElementById("magnifierButton");
 const clickPrompt = document.getElementById("clickPrompt");
 const mushroomPortalButton = document.getElementById("mushroomPortalButton");
 const bunnyPortalButton = document.getElementById("bunnyPortalButton");
+const forestSchoolPortalButton = document.getElementById("forestSchoolPortalButton");
 const mushroomHud = document.getElementById("mushroomHud");
 const backToSignpostButton = document.getElementById("backToSignpostButton");
 const mushroomHelpButton = document.getElementById("mushroomHelpButton");
@@ -741,6 +742,7 @@ function renderScene() {
   clickPrompt.classList.toggle("hidden", state.audioUnlocked || state.currentScene === "intro4" || state.currentScene === "benjiBunny" || state.currentScene === "owlGarden" || houseBunnyScene);
   mushroomPortalButton.classList.toggle("hidden", state.currentScene !== "intro4");
   bunnyPortalButton.classList.toggle("hidden", state.currentScene !== "intro4");
+  forestSchoolPortalButton.classList.toggle("hidden", state.currentScene !== "intro4");
   mushroomHud.classList.toggle("hidden", state.currentScene !== "mushrooms");
   mushroomOverlay.classList.toggle("hidden", state.currentScene !== "mushrooms");
   dialogueHud.classList.toggle("hidden", state.currentScene !== "benjiBunny");
@@ -1691,6 +1693,10 @@ storyStage.addEventListener("click", async (event) => {
     setScene("benjiBunny");
     return;
   }
+  if (state.currentScene === "intro4" && event.target === forestSchoolPortalButton) {
+    setScene("forestSchool");
+    return;
+  }
   if (wasLocked && (state.currentScene === "intro2" || state.currentScene === "intro3")) {
     setScene(state.currentScene);
     return;
@@ -1723,6 +1729,14 @@ bunnyPortalButton.addEventListener("click", async (event) => {
   if (state.currentScene === "intro4") {
     resetBenjiBunnyDialogue();
     setScene("benjiBunny");
+  }
+});
+
+forestSchoolPortalButton.addEventListener("click", async (event) => {
+  event.stopPropagation();
+  await primeAudio();
+  if (state.currentScene === "intro4") {
+    setScene("forestSchool");
   }
 });
 
