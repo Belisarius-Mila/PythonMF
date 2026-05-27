@@ -5,12 +5,14 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import csv
 import json
 import logging
 from logging.handlers import RotatingFileHandler
 import os
 from pathlib import Path
 import re
+import shutil
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -33,7 +35,12 @@ DEFAULT_PROJECT_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_LOG_FILE = DEFAULT_PROJECT_DIR / "logs" / "daily_3am.log"
 DEFAULT_STATE_DIR = DEFAULT_PROJECT_DIR / "data" / "daily_3am"
 DEFAULT_COLORS_NUMBERS_OWL_CONFIG = DEFAULT_PROJECT_DIR / "config" / "colors_numbers_owl_current.json"
-COLORS_NUMBERS_ALLOWED_DIR = Path("ColorsAndNumbers") / "web_colors_numbers"
+DEFAULT_COLORS_NUMBERS_OWL_SPEECH_CSV = DEFAULT_PROJECT_DIR / "config" / "OwlSpeech.csv"
+COLORS_NUMBERS_APP_DIR = Path("ColorsAndNumbers") / "web_colors_numbers"
+DOCS_COLORS_NUMBERS_APP_DIR = Path("docs") / "colors-numbers"
+COLORS_NUMBERS_ALLOWED_DIRS = (COLORS_NUMBERS_APP_DIR, DOCS_COLORS_NUMBERS_APP_DIR)
+COLORS_NUMBERS_DEFAULT_OWL_VOICE = "cs-CZ-AntoninNeural"
+COLORS_NUMBERS_DEFAULT_OWL_RATE = "-10%"
 
 
 class AlreadyRunningError(RuntimeError):
@@ -263,6 +270,17 @@ def ensure_under(path: Path, allowed_root: Path) -> None:
         raise DailyTaskError(f"Refusing to write outside allowed path: {path}") from exc
 
 
+def ensure_under_any(path: Path, allowed_roots: tuple[Path, ...]) -> None:
+    for allowed_root in allowed_roots:
+        try:
+            path.relative_to(allowed_root)
+            return
+        except ValueError:
+            continue
+    allowed = ", ".join(str(root) for root in allowed_roots)
+    raise DailyTaskError(f"Refusing to write outside allowed paths ({allowed}): {path}")
+
+
 def update_owl_audio_source(script_path: Path, audio_src: str) -> bool:
     try:
         original = script_path.read_text(encoding="utf-8")
@@ -307,11 +325,138 @@ def generate_mp3(text: str, output_path: Path, voice: str, rate: str) -> None:
     asyncio.run(generate_edge_tts_mp3(text=text, output_path=output_path, voice=voice, rate=rate))
 
 
+def find_owl_speech_row(csv_path: Path, run_date: str) -> dict | None:
+    try:
+        with csv_path.open("r", encoding="utf-8", newline="") as handle:
+            reader = csv.DictReader(handle)
+            required = {"date", "full_text"}
+            if not reader.fieldnames or not required.issubset(set(reader.fieldnames)):
+                raise DailyTaskError(f"Owl speech CSV must contain columns: {', '.join(sorted(required))}")
+            for row in reader:
+                if row.get("date") == run_date:
+                    text = (row.get("full_text") or "").strip()
+                    if not text:
+                        raise DailyTaskError(f"Owl speech CSV row for {run_date} is missing full_text.")
+                    return row
+    except OSError as exc:
+        raise DailyTaskError(f"Cannot read owl speech CSV: {csv_path}") from exc
+    return None
+
+
+def owl_audio_filename(run_date: str) -> str:
+    parsed = datetime.strptime(run_date, "%Y-%m-%d")
+    return f"owl_{parsed.strftime('%d%m%y')}.mp3"
+
+
+def owl_audio_src(run_date: str, filename: str) -> str:
+    return f"{filename}?v={run_date.replace('-', '')}a"
+
+
+def colors_numbers_targets(repo_root: Path, filename: str) -> list[tuple[Path, Path]]:
+    return [
+        (
+            (repo_root / COLORS_NUMBERS_APP_DIR / filename).resolve(),
+            (repo_root / COLORS_NUMBERS_APP_DIR / "app.js").resolve(),
+        ),
+        (
+            (repo_root / DOCS_COLORS_NUMBERS_APP_DIR / filename).resolve(),
+            (repo_root / DOCS_COLORS_NUMBERS_APP_DIR / "app.js").resolve(),
+        ),
+    ]
+
+
+def run_colors_numbers_owl_csv_task(
+    context: DailyContext,
+    speech_csv_path: Path = DEFAULT_COLORS_NUMBERS_OWL_SPEECH_CSV,
+    audio_generator=generate_mp3,
+) -> dict:
+    if not speech_csv_path.exists():
+        return {
+            "name": "colors_numbers_owl_tts_csv",
+            "status": "skipped",
+            "message": f"No owl speech CSV found at {speech_csv_path}.",
+        }
+
+    row = find_owl_speech_row(speech_csv_path, context.run_date)
+    if row is None:
+        return {
+            "name": "colors_numbers_owl_tts_csv",
+            "status": "skipped",
+            "message": "No owl speech row for run date.",
+            "run_date": context.run_date,
+        }
+
+    text = (row["full_text"] or "").strip()
+    filename = owl_audio_filename(context.run_date)
+    audio_src = owl_audio_src(context.run_date, filename)
+    voice = (row.get("voice") or COLORS_NUMBERS_DEFAULT_OWL_VOICE).strip()
+    rate = (row.get("rate") or COLORS_NUMBERS_DEFAULT_OWL_RATE).strip()
+
+    repo_root = context.project_dir.parent.resolve()
+    allowed_roots = tuple((repo_root / allowed_dir).resolve() for allowed_dir in COLORS_NUMBERS_ALLOWED_DIRS)
+    targets = colors_numbers_targets(repo_root, filename)
+    for output_path, script_path in targets:
+        ensure_under_any(output_path, allowed_roots)
+        ensure_under_any(script_path, allowed_roots)
+        if not script_path.exists():
+            raise DailyTaskError(f"ColorsAndNumbers script is missing: {script_path}")
+
+    if all(output_path.exists() for output_path, _ in targets) and all(
+        audio_src in script_path.read_text(encoding="utf-8") for _, script_path in targets
+    ):
+        return {
+            "name": "colors_numbers_owl_tts_csv",
+            "status": "completed",
+            "message": "ColorsAndNumbers daily owl audio is already generated and selected.",
+            "changed_files": [],
+        }
+
+    if context.dry_run:
+        return {
+            "name": "colors_numbers_owl_tts_csv",
+            "status": "planned",
+            "scheduled_date": context.run_date,
+            "audio_src": audio_src,
+            "outputs": [str(output_path.relative_to(repo_root)) for output_path, _ in targets],
+        }
+
+    logging.info("Generating daily ColorsAndNumbers owl TTS for %s.", context.run_date)
+    primary_output = targets[0][0]
+    audio_generator(text, primary_output, voice, rate)
+    changed_files = [str(primary_output.relative_to(repo_root))]
+
+    for output_path, _ in targets[1:]:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(primary_output, output_path)
+        changed_files.append(str(output_path.relative_to(repo_root)))
+
+    for _, script_path in targets:
+        if update_owl_audio_source(script_path, audio_src):
+            changed_files.append(str(script_path.relative_to(repo_root)))
+
+    return {
+        "name": "colors_numbers_owl_tts_csv",
+        "status": "completed",
+        "scheduled_date": context.run_date,
+        "audio_src": audio_src,
+        "changed_files": changed_files,
+    }
+
+
 def run_colors_numbers_owl_task(
     context: DailyContext,
     config_path: Path = DEFAULT_COLORS_NUMBERS_OWL_CONFIG,
+    speech_csv_path: Path = DEFAULT_COLORS_NUMBERS_OWL_SPEECH_CSV,
     audio_generator=generate_mp3,
 ) -> dict:
+    csv_result = run_colors_numbers_owl_csv_task(
+        context,
+        speech_csv_path=speech_csv_path,
+        audio_generator=audio_generator,
+    )
+    if csv_result["status"] != "skipped" or speech_csv_path.exists():
+        return csv_result
+
     if not config_path.exists():
         return {
             "name": "colors_numbers_owl_tts",
@@ -337,7 +482,7 @@ def run_colors_numbers_owl_task(
     rate = require_text_field(config, "rate")
 
     repo_root = context.project_dir.parent.resolve()
-    allowed_root = (repo_root / COLORS_NUMBERS_ALLOWED_DIR).resolve()
+    allowed_root = (repo_root / COLORS_NUMBERS_APP_DIR).resolve()
     output_path = resolve_repo_path(context.project_dir, output_relative_path)
     script_path = resolve_repo_path(context.project_dir, script_relative_path)
     ensure_under(output_path, allowed_root)

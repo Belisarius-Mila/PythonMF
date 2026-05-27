@@ -37,6 +37,32 @@ Aktualni dalsi krok:
 - Potom rozhodnout, jak automatizovat denni zadavani sovich textu bez rucniho
   prepisovani jednoho JSON configu.
 
+## ColorsAndNumbers soví CSV fronta od 2026-05-28
+
+Stav 2026-05-27:
+
+- ruční jednorázový JSON zůstává jako fallback pro starší testovaný režim;
+- nový kanonický zdroj denních promluv je `config/OwlSpeech.csv`;
+- čitelný kontrolní náhled je `../ColorsAndNumbers/OwlSpeech.txt`;
+- `scripts/daily_3am.py` pro datum z CSV generuje MP3 do:
+  - `ColorsAndNumbers/web_colors_numbers/owl_DDMMYY.mp3`,
+  - `docs/colors-numbers/owl_DDMMYY.mp3`;
+- stejný běh přepíná `app.js` v obou kopiích na nové audio se zdrojem typu
+  `owl_280526.mp3?v=20260528a`;
+- GitHub Actions workflow je nastavené na denní cron `0 1 * * *`, což v pražském
+  letním čase odpovídá 03:00, a Python skript má navíc bezpečnostní okno
+  03:00-08:00 Praha;
+- workflow commituje jen explicitně povolené soubory `app.js` a `owl_*.mp3`
+  v adresářích ColorsAndNumbers a `docs/colors-numbers`.
+
+Ověření:
+
+```bash
+.venv/bin/python -m unittest tests/test_daily_3am.py
+.venv/bin/python -m py_compile scripts/daily_3am.py
+.venv/bin/python scripts/daily_3am.py --run-date 2026-05-28 --dry-run --force
+```
+
 Prvni implementace je denni rutina ve 3:00:
 
 - `scripts/daily_3am.py` - hlavni Python vstupni bod,

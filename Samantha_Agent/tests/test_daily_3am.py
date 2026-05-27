@@ -176,6 +176,7 @@ class Daily3AmTests(unittest.TestCase):
             result = daily_3am.run_colors_numbers_owl_task(
                 context,
                 config_path=config_path,
+                speech_csv_path=project_dir / "missing_owl_speech.csv",
                 audio_generator=lambda text, output, voice, rate: output.write_bytes(b"mp3"),
             )
 
@@ -222,6 +223,7 @@ class Daily3AmTests(unittest.TestCase):
             result = daily_3am.run_colors_numbers_owl_task(
                 context,
                 config_path=config_path,
+                speech_csv_path=project_dir / "missing_owl_speech.csv",
                 audio_generator=lambda text, output, voice, rate: output.write_bytes(b"mp3"),
             )
 
@@ -265,12 +267,67 @@ class Daily3AmTests(unittest.TestCase):
             result = daily_3am.run_colors_numbers_owl_task(
                 context,
                 config_path=config_path,
+                speech_csv_path=project_dir / "missing_owl_speech.csv",
                 audio_generator=lambda text, output, voice, rate: output.write_bytes(b"mp3"),
             )
 
             self.assertEqual(result["status"], "planned")
             self.assertFalse((app_dir / "owl_230526.mp3").exists())
             self.assertIn("old.mp3?v=1", script_path.read_text(encoding="utf-8"))
+
+    def test_colors_numbers_owl_task_generates_daily_csv_audio(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            project_dir = repo_root / "Samantha_Agent"
+            app_dir = repo_root / "ColorsAndNumbers" / "web_colors_numbers"
+            docs_dir = repo_root / "docs" / "colors-numbers"
+            project_dir.mkdir()
+            app_dir.mkdir(parents=True)
+            docs_dir.mkdir(parents=True)
+            for script_path in (app_dir / "app.js", docs_dir / "app.js"):
+                script_path.write_text('const owlAudio = new Audio("old.mp3?v=1");\n', encoding="utf-8")
+            csv_path = project_dir / "OwlSpeech.csv"
+            csv_path.write_text(
+                "\n".join(
+                    [
+                        "date,part_a,part_b,part_c,full_text",
+                        '2026-05-28,A,B,C,"Daily test text"',
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            context = daily_3am.DailyContext(
+                project_dir=project_dir,
+                log_file=project_dir / "logs" / "daily_3am.log",
+                state_dir=project_dir / "data" / "daily_3am",
+                run_date="2026-05-28",
+                started_at=datetime.now(daily_3am.PRAGUE_TZ).isoformat(),
+                dry_run=False,
+                force=False,
+            )
+
+            result = daily_3am.run_colors_numbers_owl_task(
+                context,
+                speech_csv_path=csv_path,
+                audio_generator=lambda text, output, voice, rate: output.write_bytes(
+                    f"{text}|{voice}|{rate}".encode("utf-8")
+                ),
+            )
+
+            self.assertEqual(result["status"], "completed")
+            self.assertEqual((app_dir / "owl_280526.mp3").read_bytes(), (docs_dir / "owl_280526.mp3").read_bytes())
+            self.assertIn('new Audio("owl_280526.mp3?v=20260528a")', (app_dir / "app.js").read_text(encoding="utf-8"))
+            self.assertIn('new Audio("owl_280526.mp3?v=20260528a")', (docs_dir / "app.js").read_text(encoding="utf-8"))
+            self.assertEqual(
+                result["changed_files"],
+                [
+                    "ColorsAndNumbers/web_colors_numbers/owl_280526.mp3",
+                    "docs/colors-numbers/owl_280526.mp3",
+                    "ColorsAndNumbers/web_colors_numbers/app.js",
+                    "docs/colors-numbers/app.js",
+                ],
+            )
 
 
 if __name__ == "__main__":

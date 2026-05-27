@@ -3,9 +3,9 @@ name: Samantha Daily 3 AM
 on:
   workflow_dispatch:
   schedule:
-    # GitHub cron is UTC. This one-off Sunday retry is 03:17 Prague summer time
-    # for 2026-05-24, inside the accepted 03:00-08:00 Prague window.
-    - cron: "17 1 * * *"
+    # GitHub cron is UTC. During Prague summer time this starts at 03:00.
+    # The Python task still checks the 03:00-08:00 Prague window as a safety gate.
+    - cron: "0 1 * * *"
 
 permissions:
   contents: write
@@ -40,11 +40,14 @@ jobs:
         working-directory: .
         run: |
           set -euo pipefail
+          shopt -s nullglob
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           files=(
             "ColorsAndNumbers/web_colors_numbers/app.js"
-            "ColorsAndNumbers/web_colors_numbers/owl_240526.mp3"
+            "docs/colors-numbers/app.js"
+            ColorsAndNumbers/web_colors_numbers/owl_*.mp3
+            docs/colors-numbers/owl_*.mp3
           )
           existing=()
           for file in "${files[@]}"; do
