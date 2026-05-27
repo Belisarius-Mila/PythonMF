@@ -131,10 +131,10 @@ const owlGardenOutroDialogue = [
     id: 1,
     speaker: "Benji",
     cssClass: "benji",
-    preferredVoiceName: "junior|aaron|evan|samantha|ava",
+    preferredVoiceName: "brian|andrew|roger|guy|daniel|alex|aaron|evan|junior",
     textEn: "Bunny, do you remember the colors? Yellow, purple, pink...",
-    audioEn: "audio/english/owl_garden_08_benji_do_you_remember_colors_en.mp3?v=20260527voice",
-    audioCz: "audio/czech/owl_garden_08_benji_do_you_remember_colors_cz.m4a?v=20260409a",
+    audioEn: "audio/english/owl_garden_08_benji_do_you_remember_colors_en.mp3?v=20260527benji",
+    audioCz: "audio/czech/owl_garden_08_benji_do_you_remember_colors_cz.mp3?v=20260527czvoice",
   },
   {
     id: 2,
@@ -143,7 +143,7 @@ const owlGardenOutroDialogue = [
     preferredVoiceName: "junior|samantha|ava|victoria|karen",
     textEn: "Yes. But we can train all colors in my house. Let's go.",
     audioEn: "audio/english/owl_garden_09_bunny_we_can_train_all_colors_en.mp3?v=20260527voice",
-    audioCz: "audio/czech/owl_garden_09_bunny_we_can_train_all_colors_cz.m4a?v=20260409a",
+    audioCz: "audio/czech/owl_garden_09_bunny_we_can_train_all_colors_cz.mp3?v=20260527czvoice",
   },
 ];
 
@@ -173,10 +173,10 @@ const forestSchoolObjects = [
 const forestSchoolQuestionWords = ["ball", "book", "apple", "car", "house"];
 const forestSchoolHelpDisplayText = "Je to správně? Pokud ano klikni jes, pokud ne klikni no.";
 const forestSchoolHelpSpokenText = "Je to správně? Pokud ano, klikňi na jes. Pokud ne, klikňi na nou.";
-const forestSchoolHelpAudio = "audio/czech/forest_school_help_cz.mp3?v=20260526j";
+const forestSchoolHelpAudio = "audio/czech/forest_school_help_cz.mp3?v=20260527czvoice";
 const forestSchoolDemoAudio = {
   bunnyYes: "audio/english/forest_school_bunny_yes_it_is.mp3?v=20260527voice",
-  benjiNo: "audio/english/forest_school_benji_no_it_isnt.mp3?v=20260527voice",
+  benjiNo: "audio/english/forest_school_benji_no_it_isnt.mp3?v=20260527benji",
 };
 
 const benjiBunnyDebugSkipRect = { x: 0, y: 76, w: 16, h: 24 };
@@ -232,61 +232,61 @@ const state = {
 
 const manualAudio = {
   intro2_short: {
-    src: "audio/intro2_short.m4a",
+    src: "audio/intro2_short.mp3?v=20260527czvoice",
     text: "Jestli me uz znas, jdeme objevovat, tak klikni na lupu.",
     lang: "cs-CZ",
   },
   intro2_long_1: {
-    src: "audio/intro2_long_1.m4a",
+    src: "audio/intro2_long_1.mp3?v=20260527czvoice",
     text: "Ahoj, ja jsem Benzi. Tvuj dedecek je muj pritel a pozadal me, abych ti pomohl objevovat novy svet.",
     lang: "cs-CZ",
   },
   intro2_long_2: {
-    src: "audio/intro2_long_2.m4a",
+    src: "audio/intro2_long_2.mp3?v=20260527czvoice",
     text: "Svet, kde se mluvi anglicky. To je rec, se kterou se pak domluvis skoro vsude, kam pujdes.",
     lang: "cs-CZ",
   },
   intro2_long_3: {
-    src: "audio/intro2_long_3.m4a",
+    src: "audio/intro2_long_3.mp3?v=20260527czvoice",
     text: "Pojdme na to.",
     lang: "cs-CZ",
   },
   intro3_line: {
-    src: "audio/intro3_line.m4a",
+    src: "audio/intro3_line.mp3?v=20260527czvoice",
     text: "Zacneme v mem rodnem lese.",
     lang: "cs-CZ",
   },
   mushrooms_colors_intro: {
-    src: "audio/mushrooms_colors_intro.m4a",
+    src: "audio/mushrooms_colors_intro.mp3?v=20260527czvoice",
     text: "Klikej na houby a poslouchej barvy.",
     lang: "cs-CZ",
   },
   mushrooms_numbers_intro: {
-    src: "audio/mushrooms_numbers_intro.m4a",
+    src: "audio/mushrooms_numbers_intro.mp3?v=20260527czvoice",
     text: "Klikej na houby a pocitej.",
     lang: "cs-CZ",
   },
 };
 
 const benjiBunnyDialogue = [
-  { id: 1, speaker: "Benji", cssClass: "benji", textEn: "Hello.", audioEn: "audio/english/benji_bunny_01_benji_hello_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_01_benji_hello_cz.m4a?v=20260410a" },
-  { id: 2, speaker: "Bunny", cssClass: "bunny", textEn: "Hello.", audioEn: "audio/english/benji_bunny_02_bunny_hello_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_02_bunny_hello_cz.m4a?v=20260410a" },
-  { id: 3, speaker: "Benji", cssClass: "benji", textEn: "I am Benji.", audioEn: "audio/english/benji_bunny_03_benji_i_am_benji_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_03_benji_i_am_benji_cz.m4a" },
-  { id: 4, speaker: "Bunny", cssClass: "bunny", textEn: "I am Bunny.", audioEn: "audio/english/benji_bunny_04_bunny_i_am_bunny_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_04_bunny_i_am_bunny_cz.m4a" },
-  { id: 5, speaker: "Benji", cssClass: "benji", textEn: "We can be friends.", audioEn: "audio/english/benji_bunny_05_benji_we_can_be_friends_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_05_benji_we_can_be_friends_cz.m4a" },
-  { id: 6, speaker: "Bunny", cssClass: "bunny", textEn: "Yes, we can.", audioEn: "audio/english/benji_bunny_06_bunny_yes_we_can_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_06_bunny_yes_we_can_cz.m4a" },
-  { id: 7, speaker: "Benji", cssClass: "benji", textEn: "Where do we go?", audioEn: "audio/english/benji_bunny_07_benji_where_do_we_go_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_07_benji_where_do_we_go_cz.m4a" },
-  { id: 8, speaker: "Bunny", cssClass: "bunny", textEn: "We go to my house. OK?", audioEn: "audio/english/benji_bunny_08_bunny_we_go_to_my_house_ok_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_08_bunny_we_go_to_my_house_ok_cz.m4a" },
-  { id: 9, speaker: "Benji", cssClass: "benji", textEn: "OK. Let's go.", audioEn: "audio/english/benji_bunny_09_benji_ok_lets_go_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_09_benji_ok_lets_go_cz.m4a" },
+  { id: 1, speaker: "Benji", cssClass: "benji", textEn: "Hello.", audioEn: "audio/english/benji_bunny_01_benji_hello_en.mp3?v=20260527benji", audioCz: "audio/czech/benji_bunny_01_benji_hello_cz.mp3?v=20260527czvoice" },
+  { id: 2, speaker: "Bunny", cssClass: "bunny", textEn: "Hello.", audioEn: "audio/english/benji_bunny_02_bunny_hello_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_02_bunny_hello_cz.mp3?v=20260527czvoice" },
+  { id: 3, speaker: "Benji", cssClass: "benji", textEn: "I am Benji.", audioEn: "audio/english/benji_bunny_03_benji_i_am_benji_en.mp3?v=20260527benji", audioCz: "audio/czech/benji_bunny_03_benji_i_am_benji_cz.mp3?v=20260527czvoice" },
+  { id: 4, speaker: "Bunny", cssClass: "bunny", textEn: "I am Bunny.", audioEn: "audio/english/benji_bunny_04_bunny_i_am_bunny_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_04_bunny_i_am_bunny_cz.mp3?v=20260527czvoice" },
+  { id: 5, speaker: "Benji", cssClass: "benji", textEn: "We can be friends.", audioEn: "audio/english/benji_bunny_05_benji_we_can_be_friends_en.mp3?v=20260527benji", audioCz: "audio/czech/benji_bunny_05_benji_we_can_be_friends_cz.mp3?v=20260527czvoice" },
+  { id: 6, speaker: "Bunny", cssClass: "bunny", textEn: "Yes, we can.", audioEn: "audio/english/benji_bunny_06_bunny_yes_we_can_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_06_bunny_yes_we_can_cz.mp3?v=20260527czvoice" },
+  { id: 7, speaker: "Benji", cssClass: "benji", textEn: "Where do we go?", audioEn: "audio/english/benji_bunny_07_benji_where_do_we_go_en.mp3?v=20260527benji", audioCz: "audio/czech/benji_bunny_07_benji_where_do_we_go_cz.mp3?v=20260527czvoice" },
+  { id: 8, speaker: "Bunny", cssClass: "bunny", textEn: "We go to my house. OK?", audioEn: "audio/english/benji_bunny_08_bunny_we_go_to_my_house_ok_en.mp3?v=20260527voice", audioCz: "audio/czech/benji_bunny_08_bunny_we_go_to_my_house_ok_cz.mp3?v=20260527czvoice" },
+  { id: 9, speaker: "Benji", cssClass: "benji", textEn: "OK. Let's go.", audioEn: "audio/english/benji_bunny_09_benji_ok_lets_go_en.mp3?v=20260527benji", audioCz: "audio/czech/benji_bunny_09_benji_ok_lets_go_cz.mp3?v=20260527czvoice" },
 ];
 
 const benjiBunnyHelpAudio = {
-  intro: "audio/czech/benji_bunny_scene_help_cz1.m4a",
+  intro: "audio/czech/benji_bunny_scene_help_cz1.mp3?v=20260527czvoice",
 };
 
 const houseBunnyIntroAudio = [
-  "audio/czech/house_bunny_01_intro_train_basic_colours_cz.m4a?v=20260410a",
-  "audio/czech/house_bunny_02_intro_excellent_try_again_cz.m4a?v=20260410a",
+  "audio/czech/house_bunny_01_intro_train_basic_colours_cz.mp3?v=20260527clickni",
+  "audio/czech/house_bunny_02_intro_excellent_try_again_cz.mp3?v=20260527tryagain",
 ];
 
 function clearSceneTimers() {
@@ -1032,7 +1032,7 @@ async function runOwlGarden(sequenceId) {
   if (!isSceneActive("owlGarden", sequenceId)) {
     return;
   }
-  await playAudioFile("audio/czech/owl_garden_01_owl_hello_benji_bunny_cz.m4a");
+  await playAudioFile("audio/czech/owl_garden_01_owl_hello_benji_bunny_cz.mp3?v=20260527czvoice");
   if (!isSceneActive("owlGarden", sequenceId)) {
     return;
   }
@@ -1041,7 +1041,7 @@ async function runOwlGarden(sequenceId) {
   if (!isSceneActive("owlGarden", sequenceId)) {
     return;
   }
-  await playAudioFile("audio/czech/owl_garden_02_owl_i_have_presents_cz.m4a");
+  await playAudioFile("audio/czech/owl_garden_02_owl_i_have_presents_cz.mp3?v=20260527czvoice");
   if (!isSceneActive("owlGarden", sequenceId)) {
     return;
   }
@@ -1050,7 +1050,7 @@ async function runOwlGarden(sequenceId) {
   if (!isSceneActive("owlGarden", sequenceId)) {
     return;
   }
-  await playAudioFile("audio/czech/owl_garden_03_owl_count_apples_sunflowers_pigs_cz.m4a?v=20260409a");
+  await playAudioFile("audio/czech/owl_garden_03_owl_count_apples_sunflowers_pigs_cz.mp3?v=20260527czvoice");
   if (!isSceneActive("owlGarden", sequenceId)) {
     return;
   }
@@ -1194,7 +1194,7 @@ async function speakForestSchoolBunnyLine(text) {
 async function speakForestSchoolBenjiLine(text) {
   const played = text === "No, it isn't." ? await playAudioFileIfAvailable(forestSchoolDemoAudio.benjiNo) : false;
   if (!played) {
-    await speakEnglishLine(text, { preferredVoiceName: "junior|aaron|evan|samantha|ava", rate: 0.9, pitch: 1.06 });
+    await speakEnglishLine(text, { preferredVoiceName: "brian|andrew|roger|guy|daniel|alex|aaron|evan|junior", rate: 0.9, pitch: 1.04 });
   }
 }
 
@@ -1344,19 +1344,19 @@ async function playOwlGardenHelp() {
 
   state.owlGardenHelpPlayed = true;
   renderScene();
-  await playAudioFile("audio/czech/owl_garden_04_help_click_words_cz.m4a?v=20260409a");
+  await playAudioFile("audio/czech/owl_garden_04_help_click_words_cz.mp3?v=20260527czvoice");
   if (state.currentScene !== "owlGarden") {
     return;
   }
-  await playAudioFile("audio/czech/owl_garden_05_help_thumbs_up_cz.m4a");
+  await playAudioFile("audio/czech/owl_garden_05_help_thumbs_up_cz.mp3?v=20260527czvoice");
   if (state.currentScene !== "owlGarden") {
     return;
   }
-  await playAudioFile("audio/czech/owl_garden_06_help_green_light_cz.m4a");
+  await playAudioFile("audio/czech/owl_garden_06_help_green_light_cz.mp3?v=20260527czvoice");
   if (state.currentScene !== "owlGarden") {
     return;
   }
-  await playAudioFile("audio/czech/owl_garden_07_help_all_done_cz.m4a");
+  await playAudioFile("audio/czech/owl_garden_07_help_all_done_cz.mp3?v=20260527czvoice");
   if (state.currentScene !== "owlGarden") {
     return;
   }
