@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -12,9 +13,11 @@ from .icloud_provider import EmailProviderError, ICloudReadOnlyEmailProvider
 from .outbound import (
     DEFAULT_OUTBOX_DRAFT_DIR,
     OutboundEmailError,
+    SentCopyResult,
     has_explicit_forward_prepare_confirmation,
     prepare_forward_draft,
     redacted_send_summary,
+    save_sent_copy_best_effort,
     send_forward_draft,
     validate_email_address,
 )
@@ -126,6 +129,7 @@ def send_prepared_email_draft_text(
     draft_dir: Path = DEFAULT_OUTBOX_DRAFT_DIR,
     smtp_config_loader: Callable[[str], OutgoingMailConfig] = load_smtp_config,
     smtp_factory: Callable[..., Any] | None = None,
+    sent_copy_saver: Callable[[bytes, OutgoingMailConfig, datetime], SentCopyResult] | None = save_sent_copy_best_effort,
 ) -> str:
     try:
         result = send_forward_draft(
@@ -135,6 +139,7 @@ def send_prepared_email_draft_text(
             draft_dir=draft_dir,
             smtp_config_loader=smtp_config_loader,
             smtp_factory=smtp_factory,
+            sent_copy_saver=sent_copy_saver,
         )
     except EmailConfigError as exc:
         return f"Chybi lokalni SMTP/e-mail konfigurace: {exc}"

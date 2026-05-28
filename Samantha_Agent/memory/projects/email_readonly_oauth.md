@@ -218,6 +218,25 @@ Aktualni dalsi krok:
   vypis plnych URL bez samostatneho potvrzeni.
 - Preposilani delat pouze dvoukrokove: pripravit draft, ukazat `draft_id`, a
   teprve po dalsim potvrzeni odeslat. Nikdy neposilat rovnou po prvnim dotazu.
+- Po incidentu 2026-05-28 s rodinnym preposlanim plati: SMTP uspech sam o sobe
+  nestaci jako dohledatelny dukaz v klientovi. `send_prepared_email_draft`
+  uklada po odeslani best-effort kopii do IMAP Odeslanych, vychozi provider je
+  iCloud `Sent Messages`, aby Mila videl kopii v souhrnnem iCloud uctu. Metadata
+  draftu musi rozlisovat `delivery_status=smtp_sent` a `sent_copy_status`.
+- SMS pres macOS Messages je zatim jen pokus o odeslani. Pokud se nepodari
+  stav spolehlive overit, nehlasit ji jako dorucenou ani hotovou; u dulezite
+  komunikace zustava primarni e-mail s dohledatelnou kopii.
+- SMS/RCS diagnostika 2026-05-28:
+  - iMessage z Macu fungovala, ale SMS/RCS z Macu zustavaly ve fronte nebo
+    koncily chybou;
+  - pricina byla na iPhonu v `Zpravy -> Odesilani a prijem`: bylo zaskrtnute
+    jen e-mailove Apple ID, ne telefonni cislo;
+  - po zaskrtnuti telefonniho cisla rucni zprava z Macu odesla a test pres
+    Samanthu na Android kontakt prosel jako RCS s `is_sent=1`, `is_delivered=1`,
+    `error=0`;
+  - provozni pravidlo: u SMS/RCS vzdy po pokusu cist `~/Library/Messages/chat.db`
+    a hlasit odeslano jen pri `is_sent=1` nebo `is_delivered=1`; pri `error != 0`
+    nebo dlouhem `is_sent=0` hlasit problem, ne uspech.
 - Pokud Mila rekne, ze je e-mail v "mailu" nebo ve sloucenem inboxu a prvni
   kontrolovana schranka ho nenajde, dalsi read-only krok je zkontrolovat i druhou
   nakonfigurovanou schranku pres unified/dual-mailbox workflow. Mila vidi oba

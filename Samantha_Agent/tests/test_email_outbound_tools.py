@@ -12,6 +12,7 @@ from app.email.outbound_tools import (
     prepare_forward_email_by_uid_text,
     send_prepared_email_draft_text,
 )
+from app.email.outbound import SentCopyResult
 
 
 class EmailOutboundToolsTests(unittest.TestCase):
@@ -81,6 +82,7 @@ class EmailOutboundToolsTests(unittest.TestCase):
                 draft_dir=Path(temp_dir),
                 smtp_config_loader=_smtp_config,
                 smtp_factory=lambda *args, **kwargs: smtp,
+                sent_copy_saver=_sent_copy_saved,
             )
             self.assertIn("Odeslani bylo odmitnuto", denied)
             self.assertEqual(len(smtp.sent_messages), 0)
@@ -92,12 +94,18 @@ class EmailOutboundToolsTests(unittest.TestCase):
                 draft_dir=Path(temp_dir),
                 smtp_config_loader=_smtp_config,
                 smtp_factory=lambda *args, **kwargs: smtp,
+                sent_copy_saver=_sent_copy_saved,
             )
 
             self.assertIn("Odeslano", sent)
+            self.assertIn("Kopie v odeslanych: ulozena (icloud: Sent Messages)", sent)
             self.assertEqual(len(smtp.sent_messages), 1)
             metadata = json.loads((Path(temp_dir) / draft_id / "metadata.json").read_text(encoding="utf-8"))
             self.assertEqual(metadata["status"], "sent")
+            self.assertEqual(metadata["delivery_status"], "smtp_sent")
+            self.assertEqual(metadata["sent_copy_status"], "saved")
+            self.assertEqual(metadata["sent_copy_provider"], "icloud")
+            self.assertEqual(metadata["sent_copy_folder"], "Sent Messages")
 
 
 class _Provider:
@@ -150,6 +158,19 @@ def _smtp_config(provider: str) -> OutgoingMailConfig:
         port=587,
         security="starttls",
         provider=provider,
+    )
+
+
+def _sent_copy_saved(
+    message_bytes: bytes,
+    smtp_config: OutgoingMailConfig,
+    sent_timestamp: object,
+) -> SentCopyResult:
+    return SentCopyResult(
+        status="saved",
+        provider="icloud",
+        folder="Sent Messages",
+        detail="test saver",
     )
 
 
