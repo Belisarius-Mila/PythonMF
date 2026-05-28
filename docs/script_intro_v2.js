@@ -292,6 +292,7 @@ const forestSchoolQuestionWords = forestSchoolObjects.map((item) => item.word);
 const forestSchoolHelpDisplayText = "Je to správně? Pokud ano klikni jes, pokud ne klikni no.";
 const forestSchoolHelpSpokenText = "Je to správně? Pokud ano, klikňi na jes. Pokud ne, klikňi na nou.";
 const forestSchoolHelpAudio = "audio/czech/forest_school_help_cz.mp3?v=20260527czvoice";
+const forestSchoolLessonPreviewSpokenText = "Nejprve si ukážeme slovíčka z této lekce. Poslechněte si anglické slovíčko a opakujte si výslovnost.";
 const forestSchoolLessonChoiceText = "Chceš pokračovat další lekcí? Stiskni Ano. Pokud chceš opakovat, stiskni Ne.";
 const forestSchoolLessonChoiceSpokenText = "Chceš pokračovat další lekcí? Stiskňi ano. Pokud chceš opakovat, stiskňi ne.";
 const forestSchoolDemoAudio = {
@@ -1409,6 +1410,50 @@ async function queueNextForestSchoolQuestion(sequenceId, delayMs = 650) {
   await speakForestSchoolOwlLine(`Is this a ${state.forestSchoolQuestionWord}?`);
 }
 
+async function runForestSchoolLessonPreview(sequenceId) {
+  const previewObjects = currentForestSchoolObjects();
+  state.forestSchoolPhase = "lessonPreview";
+  state.forestSchoolCurrentObjectId = "";
+  state.forestSchoolQuestionWord = "";
+  state.forestSchoolReviewIndex = 0;
+  renderScene();
+  await speakCzechLine(forestSchoolLessonPreviewSpokenText, { rate: 0.86 });
+  if (!isSceneActive("forestSchool", sequenceId)) {
+    return false;
+  }
+
+  for (let index = 0; index < previewObjects.length; index += 1) {
+    const object = previewObjects[index];
+    state.forestSchoolReviewIndex = index;
+    state.forestSchoolCurrentObjectId = object.id;
+    state.forestSchoolQuestionWord = object.word;
+    renderScene();
+    await pauseMs(360);
+    if (!isSceneActive("forestSchool", sequenceId)) {
+      return false;
+    }
+    await speakEnglishLine(object.word, { preferredVoiceName: "ash", rate: 0.8, pitch: 0.94 });
+    if (!isSceneActive("forestSchool", sequenceId)) {
+      return false;
+    }
+    await pauseMs(180);
+    await speakEnglishLine(object.word, { preferredVoiceName: "ash", rate: 0.8, pitch: 0.94 });
+    if (!isSceneActive("forestSchool", sequenceId)) {
+      return false;
+    }
+    await speakCzechLine(object.translation, { rate: 0.86 });
+    if (!isSceneActive("forestSchool", sequenceId)) {
+      return false;
+    }
+    await pauseMs(430);
+  }
+
+  state.forestSchoolCurrentObjectId = "";
+  state.forestSchoolQuestionWord = "";
+  state.forestSchoolReviewIndex = 0;
+  return isSceneActive("forestSchool", sequenceId);
+}
+
 async function runForestSchoolDemo(sequenceId) {
   const demoIds = shuffledForestSchoolObjectIds();
   const bunnyObject = forestSchoolObjectById(demoIds.pop());
@@ -1492,6 +1537,10 @@ async function runForestSchool(sequenceId) {
   if (!demoFinished || !isSceneActive("forestSchool", sequenceId)) {
     return;
   }
+  const previewFinished = await runForestSchoolLessonPreview(sequenceId);
+  if (!previewFinished || !isSceneActive("forestSchool", sequenceId)) {
+    return;
+  }
   state.forestSchoolRemainingIds = shuffledForestSchoolObjectIds();
   await queueNextForestSchoolQuestion(sequenceId, 700);
 }
@@ -1508,6 +1557,10 @@ async function startForestSchoolLesson(sequenceId, lessonIndex, options = {}) {
     if (!isSceneActive("forestSchool", sequenceId)) {
       return;
     }
+  }
+  const previewFinished = await runForestSchoolLessonPreview(sequenceId);
+  if (!previewFinished || !isSceneActive("forestSchool", sequenceId)) {
+    return;
   }
   state.forestSchoolRemainingIds = shuffledForestSchoolObjectIds();
   await queueNextForestSchoolQuestion(sequenceId, 520);
@@ -1914,6 +1967,10 @@ function renderForestSchool() {
     ? "Owl is speaking..."
     : state.forestSchoolPhase === "conjure"
       ? "Magic..."
+    : state.forestSchoolPhase === "lessonPreview"
+      ? state.forestSchoolCurrentObjectId
+        ? `${currentForestSchoolObject().word} - ${currentForestSchoolObject().translation}`
+        : "Listen and repeat."
     : state.forestSchoolPhase === "review"
       ? `${currentForestSchoolObject().word} - ${currentForestSchoolObject().translation}`
     : state.forestSchoolPhase === "lessonChoice"
@@ -1959,7 +2016,7 @@ function renderForestSchool() {
     owlGardenOverlay.appendChild(magic);
   }
 
-  if (state.forestSchoolPhase === "demoBunny" || state.forestSchoolPhase === "demoBenji" || state.forestSchoolPhase === "question" || state.forestSchoolPhase === "checking" || state.forestSchoolPhase === "done" || state.forestSchoolPhase === "retry" || state.forestSchoolPhase === "review") {
+  if (state.forestSchoolPhase === "demoBunny" || state.forestSchoolPhase === "demoBenji" || state.forestSchoolPhase === "question" || state.forestSchoolPhase === "checking" || state.forestSchoolPhase === "done" || state.forestSchoolPhase === "retry" || state.forestSchoolPhase === "review" || (state.forestSchoolPhase === "lessonPreview" && state.forestSchoolCurrentObjectId)) {
     const currentObject = currentForestSchoolObject();
     const item = document.createElement("div");
     item.className = `forest-school-item forest-school-item-${currentObject.id}`;
