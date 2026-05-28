@@ -1,0 +1,216 @@
+from __future__ import annotations
+
+import json
+import tempfile
+import unittest
+from pathlib import Path
+
+from app.cockpit import (
+    COCKPIT_HTML,
+    document_work_status,
+    move_document_lifecycle_action,
+    prepare_document_print_action,
+    search_document_index,
+)
+
+
+class CockpitTests(unittest.TestCase):
+    def test_document_work_status_groups_downloads_and_review_queue(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault = Path(temp_dir) / "documents"
+            index = vault / "index"
+            index.mkdir(parents=True)
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "reviewed-doc",
+                        "title": "Reviewed",
+                        "domain": "tax",
+                        "document_type": "confirmation",
+                        "stored_path": "data/private/documents/vault/tax/reviewed-doc/reviewed.pdf",
+                    },
+                    {
+                        "document_id": "pending-doc",
+                        "title": "Pending",
+                        "domain": "insurance",
+                        "document_type": "policy",
+                        "stored_path": "data/private/documents/vault/insurance/pending-doc/pending.pdf",
+                    },
+                ],
+            )
+            self.write_jsonl(
+                index / "scandocu_actions.jsonl",
+                [
+                    {"action": "reviewed", "document_id": "reviewed-doc"},
+                ],
+            )
+            downloads = {
+                "ok": True,
+                "items": [
+                    {"name": "new.pdf", "status": "new", "modified_at": "2026-05-28T20:00:00+00:00"},
+                    {
+                        "name": "encrypted.pdf",
+                        "status": "new",
+                        "is_encrypted": True,
+                        "modified_at": "2026-05-28T19:00:00+00:00",
+                    },
+                    {"name": "already.pdf", "status": "already_in_vault"},
+                    {"name": "skipped.pdf", "status": "skipped"},
+                    {"name": "broken.pdf", "status": "invalid"},
+                ],
+            }
+
+            status = document_work_status(downloads=downloads, vault_dir=vault)
+
+            self.assertEqual(status["summary"]["new_pdf_count"], 2)
+            self.assertEqual(status["summary"]["problem_count"], 4)
+            self.assertEqual(status["summary"]["review_pending_count"], 1)
+            self.assertEqual(status["review"]["next_items"][0]["document_id"], "pending-doc")
+            self.assertEqual(status["problems"][0]["problem_kind"], "encrypted")
+            self.assertEqual(status["problems"][1]["problem_kind"], "duplicate")
+
+    def test_cockpit_html_contains_document_work_controls(self) -> None:
+        self.assertIn("Práce s dokumenty", COCKPIT_HTML)
+        self.assertIn("Nová PDF ve Downloads", COCKPIT_HTML)
+        self.assertIn("Uložené dokumenty k revizi", COCKPIT_HTML)
+        self.assertIn("Problémy", COCKPIT_HTML)
+        self.assertIn("Zpracovat další dokument", COCKPIT_HTML)
+
+    def test_document_search_returns_structured_redacted_results(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault = Path(temp_dir) / "documents"
+            index = vault / "index"
+            index.mkdir(parents=True)
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "doc-revize",
+                        "title": "Revize fotovoltaiky",
+                        "original_filename": "revize.pdf",
+                        "domain": "energy",
+                        "document_type": "inspection_report",
+                        "counterparty": "Servis",
+                        "related_asset": "fotovoltaika",
+                        "stored_path": "data/private/documents/vault/energy/doc-revize/revize.pdf",
+                        "tags": ["kontrola"],
+                    }
+                ],
+            )
+            self.write_jsonl(
+                index / "text_index.jsonl",
+                [
+                    {
+                        "document_id": "doc-revize",
+                        "text": (
+                            "Revizni protokol fotovoltaika. Kontakt servis@example.com, "
+                            "rodne cislo 641215/0987 a odkaz https://example.com/private."
+                        ),
+                    }
+                ],
+            )
+
+            result = search_document_index("fotovoltaika", vault_dir=vault)
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["count"], 1)
+            found = result["results"][0]
+            self.assertEqual(found["document_id"], "doc-revize")
+            self.assertIn("[e-mail redigovan]", found["snippet"])
+            self.assertIn("[rodne cislo redigovano]", found["snippet"])
+            self.assertIn("[URL redigovano]", found["snippet"])
+            self.assertNotIn("641215/0987", found["snippet"])
+            self.assertNotIn("https://example.com/private", found["snippet"])
+
+    def test_cockpit_html_contains_document_search_controls(self) -> None:
+        self.assertIn("Najít dokument", COCKPIT_HTML)
+        self.assertIn("documentSearchInput", COCKPIT_HTML)
+        self.assertIn("/api/documents/search", COCKPIT_HTML)
+        self.assertIn("Rozbalit", COCKPIT_HTML)
+        self.assertIn("Sbalit", COCKPIT_HTML)
+        self.assertIn("search-detail hidden", COCKPIT_HTML)
+        self.assertIn("Tisknout", COCKPIT_HTML)
+        self.assertIn("Archivovat", COCKPIT_HTML)
+        self.assertIn("Do koše", COCKPIT_HTML)
+
+    def test_prepare_print_action_creates_queue_copy(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault, document_id, source = self.create_indexed_document(Path(temp_dir))
+
+            result = prepare_document_print_action(document_id=document_id, vault_dir=vault)
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["document_id"], document_id)
+            self.assertTrue((vault / "print_queue").exists())
+            self.assertTrue(source.exists())
+
+    def test_archive_action_moves_document_and_updates_index(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault, document_id, source = self.create_indexed_document(Path(temp_dir))
+
+            result = move_document_lifecycle_action(
+                document_id=document_id,
+                target="archive",
+                confirmation_text=f"Potvrzuji, archivuj dokument {document_id}.",
+                vault_dir=vault,
+            )
+
+            docs = self.read_jsonl(vault / "index" / "documents_index.jsonl")
+            self.assertTrue(result["ok"])
+            self.assertEqual(docs[0]["lifecycle_status"], "archived")
+            self.assertIn("/archive/", docs[0]["stored_path"])
+            self.assertFalse(source.exists())
+            self.assertTrue(Path(docs[0]["stored_path"]).exists())
+
+    def test_trash_action_requires_exact_confirmation(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault, document_id, source = self.create_indexed_document(Path(temp_dir))
+
+            result = move_document_lifecycle_action(
+                document_id=document_id,
+                target="trash",
+                confirmation_text="ano",
+                vault_dir=vault,
+            )
+
+            docs = self.read_jsonl(vault / "index" / "documents_index.jsonl")
+            self.assertFalse(result["ok"])
+            self.assertNotIn("lifecycle_status", docs[0])
+            self.assertTrue(source.exists())
+
+    @staticmethod
+    def write_jsonl(path: Path, rows: list[dict[str, object]]) -> None:
+        path.write_text(
+            "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows),
+            encoding="utf-8",
+        )
+
+    @classmethod
+    def create_indexed_document(cls, root: Path) -> tuple[Path, str, Path]:
+        vault = root / "documents"
+        document_id = "doc-akce"
+        document_dir = vault / "vault" / "tax" / document_id
+        document_dir.mkdir(parents=True)
+        source = document_dir / "smlouva.pdf"
+        source.write_bytes(b"%PDF-1.4\nTest document\n")
+        record = {
+            "document_id": document_id,
+            "title": "Smlouva",
+            "original_filename": "smlouva.pdf",
+            "domain": "tax",
+            "document_type": "contract",
+            "stored_path": str(source),
+        }
+        (vault / "index").mkdir(parents=True)
+        cls.write_jsonl(vault / "index" / "documents_index.jsonl", [record])
+        (document_dir / "manifest.json").write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+        return vault, document_id, source
+
+    @staticmethod
+    def read_jsonl(path: Path) -> list[dict[str, object]]:
+        return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+
+
+if __name__ == "__main__":
+    unittest.main()
