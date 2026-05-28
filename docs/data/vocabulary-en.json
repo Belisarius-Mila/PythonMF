@@ -1,8 +1,8 @@
 {
   "app": "VocabularyEN",
-  "generatedAt": "2026-05-01T19:43:15.287969+00:00",
+  "generatedAt": "2026-05-28T07:50:34.515397+00:00",
   "sourceCsv": "VocabularyEN/VocabularyEN.csv",
-  "itemCount": 172,
+  "itemCount": 186,
   "wordSets": [
     "Actions",
     "Animals",
@@ -16,15 +16,14 @@
     "selected": 107,
     "hardTraining": 70,
     "wordSetCount": 7,
-    "withSentence": 172,
-    "withSentenceTranslation": 172,
+    "withSentence": 186,
+    "withSentenceTranslation": 186,
     "imageSources": {
-      "direct": 157,
+      "direct": 173,
       "fallback": 1,
-      "mapping": 13,
-      "mapping_to_others": 1
+      "mapping": 12
     },
-    "uniqueImageFiles": 159
+    "uniqueImageFiles": 174
   },
   "items": [
     {
@@ -39,9 +38,9 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/glass.jpg",
-      "imageStem": "glass",
-      "imageRequestedStem": "glass",
+      "image": "assets/vocabulary-en/a.webp",
+      "imageStem": "a",
+      "imageRequestedStem": "a",
       "imageSource": "direct",
       "imageMissing": false
     },
@@ -511,7 +510,7 @@
       "wordSets": [],
       "selected": true,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/doctor.webp",
+      "image": "assets/vocabulary-en/doctor.png",
       "imageStem": "doctor",
       "imageRequestedStem": "doctor",
       "imageSource": "direct",
@@ -873,10 +872,10 @@
       ],
       "selected": true,
       "hardTraining": true,
-      "image": "assets/vocabulary-en/verb.png",
-      "imageStem": "verb",
-      "imageRequestedStem": "verb",
-      "imageSource": "mapping",
+      "image": "assets/vocabulary-en/go.webp",
+      "imageStem": "go",
+      "imageRequestedStem": "go",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -1689,10 +1688,10 @@
       ],
       "selected": true,
       "hardTraining": true,
-      "image": "assets/vocabulary-en/others.png",
-      "imageStem": "others",
+      "image": "assets/vocabulary-en/walk.png",
+      "imageStem": "walk",
       "imageRequestedStem": "walk",
-      "imageSource": "mapping_to_others",
+      "imageSource": "direct",
       "imageMissing": false
     },
     {
@@ -2223,7 +2222,7 @@
       "wordSets": [],
       "selected": true,
       "hardTraining": true,
-      "image": "assets/vocabulary-en/hot.webp",
+      "image": "assets/vocabulary-en/hot.png",
       "imageStem": "hot",
       "imageRequestedStem": "hot",
       "imageSource": "direct",
@@ -2962,6 +2961,258 @@
       "image": "assets/vocabulary-en/pink.png",
       "imageStem": "pink",
       "imageRequestedStem": "pink",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 173,
+      "order": 173,
+      "en": "bear",
+      "cz": "medvěd",
+      "sentenceEn": "The bear walks slowly through the forest.",
+      "sentenceCz": "Medvěd pomalu kráčí lesem.",
+      "wordSets": [
+        "Animals"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/bear.png",
+      "imageStem": "bear",
+      "imageRequestedStem": "bear",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 174,
+      "order": 174,
+      "en": "camel",
+      "cz": "velbloud",
+      "sentenceEn": "The camel carries water across the desert.",
+      "sentenceCz": "Velbloud nese vodu přes poušť.",
+      "wordSets": [
+        "Animals"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/camel.png",
+      "imageStem": "camel",
+      "imageRequestedStem": "camel",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 175,
+      "order": 175,
+      "en": "deer",
+      "cz": "jelen",
+      "sentenceEn": "A deer stands quietly near the trees.",
+      "sentenceCz": "Jelen tiše stojí u stromů.",
+      "wordSets": [
+        "Animals"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/deer.png",
+      "imageStem": "deer",
+      "imageRequestedStem": "deer",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 176,
+      "order": 176,
+      "en": "eagle",
+      "cz": "orel",
+      "sentenceEn": "The eagle flies high above the mountains.",
+      "sentenceCz": "Orel letí vysoko nad horami.",
+      "wordSets": [
+        "Animals"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/eagle.png",
+      "imageStem": "eagle",
+      "imageRequestedStem": "eagle",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 177,
+      "order": 177,
+      "en": "fox",
+      "cz": "liška",
+      "sentenceEn": "The fox runs quickly through the grass.",
+      "sentenceCz": "Liška rychle běží trávou.",
+      "wordSets": [
+        "Animals"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/fox.png",
+      "imageStem": "fox",
+      "imageRequestedStem": "fox",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 178,
+      "order": 178,
+      "en": "goose",
+      "cz": "husa",
+      "sentenceEn": "The goose walks by the pond and honks.",
+      "sentenceCz": "Husa jde u rybníka a kejhá.",
+      "wordSets": [
+        "Animals"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/goose.png",
+      "imageStem": "goose",
+      "imageRequestedStem": "goose",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 179,
+      "order": 179,
+      "en": "hippo",
+      "cz": "hroch",
+      "sentenceEn": "The hippo rests in the water.",
+      "sentenceCz": "Hroch odpočívá ve vodě.",
+      "wordSets": [
+        "Animals"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/hippo.png",
+      "imageStem": "hippo",
+      "imageRequestedStem": "hippo",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 180,
+      "order": 180,
+      "en": "mouse",
+      "cz": "myš",
+      "sentenceEn": "The mouse hides under the table.",
+      "sentenceCz": "Myš se schová pod stolem.",
+      "wordSets": [
+        "Animals"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/mouse.png",
+      "imageStem": "mouse",
+      "imageRequestedStem": "mouse",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 181,
+      "order": 181,
+      "en": "parrot",
+      "cz": "papoušek",
+      "sentenceEn": "The parrot says hello in a funny voice.",
+      "sentenceCz": "Papoušek řekne ahoj legračním hlasem.",
+      "wordSets": [
+        "Animals"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/parrot.png",
+      "imageStem": "parrot",
+      "imageRequestedStem": "parrot",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 182,
+      "order": 182,
+      "en": "pig",
+      "cz": "prase",
+      "sentenceEn": "The pig plays in the mud.",
+      "sentenceCz": "Prase si hraje v blátě.",
+      "wordSets": [
+        "Animals"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/pig.webp",
+      "imageStem": "pig",
+      "imageRequestedStem": "pig",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 183,
+      "order": 183,
+      "en": "snake",
+      "cz": "had",
+      "sentenceEn": "The snake moves quietly in the warm sand.",
+      "sentenceCz": "Had se tiše pohybuje v teplém písku.",
+      "wordSets": [
+        "Animals"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/snake.png",
+      "imageStem": "snake",
+      "imageRequestedStem": "snake",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 184,
+      "order": 184,
+      "en": "tortoise",
+      "cz": "želva",
+      "sentenceEn": "The tortoise walks very slowly.",
+      "sentenceCz": "Želva jde velmi pomalu.",
+      "wordSets": [
+        "Animals"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/tortoise.png",
+      "imageStem": "tortoise",
+      "imageRequestedStem": "tortoise",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 185,
+      "order": 185,
+      "en": "turkey",
+      "cz": "krocan",
+      "sentenceEn": "The turkey stands near the farm gate.",
+      "sentenceCz": "Krocan stojí u brány farmy.",
+      "wordSets": [
+        "Animals"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/turkey.png",
+      "imageStem": "turkey",
+      "imageRequestedStem": "turkey",
+      "imageSource": "direct",
+      "imageMissing": false
+    },
+    {
+      "id": 186,
+      "order": 186,
+      "en": "wolf",
+      "cz": "vlk",
+      "sentenceEn": "The wolf looks at the moon.",
+      "sentenceCz": "Vlk se dívá na měsíc.",
+      "wordSets": [
+        "Animals"
+      ],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/wolf.png",
+      "imageStem": "wolf",
+      "imageRequestedStem": "wolf",
       "imageSource": "direct",
       "imageMissing": false
     }
