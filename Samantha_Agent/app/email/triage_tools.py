@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +21,8 @@ from .triage_service import triage_email_messages
 URL_PATTERN = re.compile(r"https?://\S+", re.IGNORECASE)
 LOW_INBOX_DISPLAY_LIMIT = 20
 SPAM_DISPLAY_LIMIT = 15
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_TRIAGE_REPORT_DIR = PROJECT_ROOT / "data" / "email" / "triage_reports"
 TRIAGE_WORDS = ("triage", "email triage")
 HEADER_READ_WORDS = ("hlavicky", "hlavicek", "hlavičky", "hlaviček", "headers")
 BODY_READ_WORDS = ("tel", "tela", "telo", "těla", "tělo", "body")
@@ -129,6 +132,7 @@ def run_unified_email_triage_session_text(
     icloud_provider_factory: Callable[[], object] = ICloudReadOnlyEmailProvider,
     seznam_provider_factory: Callable[[], object] = SeznamReadOnlyEmailProvider,
     activity_state_path: Path = DEFAULT_EMAIL_ACTIVITY_STATE_PATH,
+    report_dir: Path | None = DEFAULT_TRIAGE_REPORT_DIR,
 ) -> str:
     safe_days = min(max(1, days), 30)
     safe_limit = min(max(1, limit_per_folder), 200)
@@ -165,6 +169,15 @@ def run_unified_email_triage_session_text(
 
     triage = triage_email_messages(messages)
     record_email_triage_completed(path=activity_state_path)
+    report_path = save_email_triage_report(
+        triage=triage,
+        days=safe_days,
+        skipped=tuple(skipped),
+        unavailable=tuple(unavailable),
+        unified=True,
+        include_spam=include_spam,
+        report_dir=report_dir,
+    )
     return format_email_triage_session_result(
         triage=triage,
         days=safe_days,
@@ -172,6 +185,7 @@ def run_unified_email_triage_session_text(
         unavailable=tuple(unavailable),
         unified=True,
         include_spam=include_spam,
+        report_path=report_path,
     )
 
 
@@ -184,6 +198,7 @@ def run_email_triage_session_text(
     require_confirmation: bool = False,
     provider_factory: Callable[[], object] = ICloudReadOnlyEmailProvider,
     activity_state_path: Path = DEFAULT_EMAIL_ACTIVITY_STATE_PATH,
+    report_dir: Path | None = DEFAULT_TRIAGE_REPORT_DIR,
 ) -> str:
     safe_days = min(max(1, days), 30)
     safe_limit = min(max(1, limit), 200)
@@ -226,7 +241,16 @@ def run_email_triage_session_text(
 
     triage = triage_email_messages(messages)
     record_email_triage_completed(path=activity_state_path)
-    return format_email_triage_session_result(triage=triage, days=safe_days)
+    report_path = save_email_triage_report(
+        triage=triage,
+        days=safe_days,
+        report_dir=report_dir,
+    )
+    return format_email_triage_session_result(
+        triage=triage,
+        days=safe_days,
+        report_path=report_path,
+    )
 
 
 def has_explicit_triage_confirmation(days: int, confirmation_text: str) -> bool:
@@ -251,6 +275,7 @@ def format_email_triage_session_result(
     unavailable: tuple[str, ...] = (),
     unified: bool = False,
     include_spam: bool = False,
+    report_path: Path | None = None,
 ) -> str:
     lines = [
         (
@@ -299,6 +324,9 @@ def format_email_triage_session_result(
         lines.append("")
         lines.append("Nedostupne zdroje:")
         lines.extend(f"- {_safe_text(item)}" for item in unavailable)
+    if report_path is not None:
+        lines.append("")
+        lines.append(f"Plny lokalni report: {_safe_text(report_path)}")
     lines.extend(
         [
             "",
@@ -307,6 +335,101 @@ def format_email_triage_session_result(
             "oznaceno jako prectene. Tato bezpecnostni politika je automaticka "
             "vychozi brzda triage. Nic nebylo ulozeno do EmailCaseVault, reminders "
             f"ani memory. Spam slozky: {'zahrnuty' if include_spam else 'nezahrnuty'}.",
+        ]
+    )
+    return _sanitize_output("\n".join(lines))
+
+
+def save_email_triage_report(
+    triage: TriageResult,
+    days: int,
+    skipped: tuple[EmailSkippedMessage, ...] = (),
+    unavailable: tuple[str, ...] = (),
+    unified: bool = False,
+    include_spam: bool = False,
+    report_dir: Path | None = DEFAULT_TRIAGE_REPORT_DIR,
+) -> Path | None:
+    if report_dir is None:
+        return None
+
+    report_dir.mkdir(parents=True, exist_ok=True)
+    scope = "unified" if unified else "icloud"
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    path = report_dir / f"{stamp}_{scope}_email_triage_{days}d.md"
+    path.write_text(
+        format_email_triage_full_report(
+            triage=triage,
+            days=days,
+            skipped=skipped,
+            unavailable=unavailable,
+            unified=unified,
+            include_spam=include_spam,
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def format_email_triage_full_report(
+    triage: TriageResult,
+    days: int,
+    skipped: tuple[EmailSkippedMessage, ...] = (),
+    unavailable: tuple[str, ...] = (),
+    unified: bool = False,
+    include_spam: bool = False,
+) -> str:
+    lines = [
+        (
+            f"Unified Email Triage Full Report: poslednich {days} dni"
+            if unified
+            else f"Email Triage Full Report: poslednich {days} dni"
+        ),
+        "",
+        "Souhrn:",
+        f"- Celkem precteno pro triage: {len(triage.all_items)}",
+        f"- High: {len(_items_by_priority(triage.all_items, 'high'))}",
+        f"- Normal: {len(_items_by_priority(triage.all_items, 'normal'))}",
+        f"- Low/newsletter/spam: {len(_items_by_priority(triage.all_items, 'low'))}",
+        f"- Case kandidati: {len(triage.case_candidates)}",
+        f"- Preskocene velke/necitene: {len(skipped)}",
+        "",
+        "High priorita:",
+    ]
+    _append_items(lines, _items_by_priority(triage.all_items, "high"), detail=True)
+    lines.append("")
+    lines.append("Normal priorita:")
+    _append_items(lines, _items_by_priority(triage.all_items, "normal"), detail=True)
+    lines.append("")
+    lines.append("Deadline signaly mezi high/normal:")
+    _append_items(lines, triage.deadline_emails, detail=True)
+    lines.append("")
+    lines.append("Low priorita - inbox/newslettery:")
+    _append_items(
+        lines,
+        tuple(item for item in triage.newsletter_emails if item.category != "spam"),
+        detail=True,
+    )
+    lines.append("")
+    lines.append("Low priorita - spam:")
+    _append_items(
+        lines,
+        tuple(item for item in triage.newsletter_emails if item.category == "spam"),
+        detail=True,
+    )
+    lines.append("")
+    lines.append("Preskocene velke/necitene zpravy:")
+    _append_skipped_items(lines, skipped)
+    if unavailable:
+        lines.append("")
+        lines.append("Nedostupne zdroje:")
+        lines.extend(f"- {_safe_text(item)}" for item in unavailable)
+    lines.extend(
+        [
+            "",
+            "Bezpecnost: report je lokalni a adresar je ignorovany gitem. "
+            "Triage byla read-only; odkazy nebyly otevreny, prilohy nebyly "
+            "stazeny, nic nebylo odeslano, smazano, presunuto ani oznaceno "
+            f"jako prectene. Spam slozky: {'zahrnuty' if include_spam else 'nezahrnuty'}.",
         ]
     )
     return _sanitize_output("\n".join(lines))

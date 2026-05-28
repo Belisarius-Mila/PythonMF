@@ -6,6 +6,7 @@ data/session_autosave/
 data/private/
 data/email/archive/
 data/email/outbox_drafts/
+data/email/triage_reports/
 data/daily_3am/
 data/startup_prompts/
 logs/*.log

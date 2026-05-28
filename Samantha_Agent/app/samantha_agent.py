@@ -54,6 +54,7 @@ from app.email import (
     show_email_case_links,
 )
 from app.email.activity_state import format_email_activity_reminder
+from app.messages import send_confirmed_sms_rcs
 from app.backup import (
     format_backup_activity_reminder,
     list_backup_snapshots,
@@ -743,6 +744,17 @@ Bezpecny e-mailovy workflow:
 14. Do memory neukladej nic automaticky. Pokud Mila chce neco ulozit, vyzadej si
    vyslovny souhlas a ukladej jen kratke redigovane shrnuti, ne obsah e-mailu.
 
+SMS/RCS workflow:
+1. Kdyz Mila chce poslat SMS/RCS zpravu, pouzij send_confirmed_sms_rcs az po
+   samostatnem potvrzeni v aktualni zprave. Potvrzeni musi obsahovat
+   `Potvrzuji`, zamer odeslat/poslat SMS/RCS/zpravu a prijemce kontaktem nebo
+   telefonem. Do confirmation_text vloz aktualni Milovu zpravu.
+2. Preferuj contact_name pro rodinne kontakty ulozene v lokalnim soukromem
+   adresari. Telefonni cisla nevypisuj zbytecne; tool je sam maskuje.
+3. Po odeslani povinne reportuj stav z Messages databaze: is_sent,
+   is_delivered a error. Pokud tool stav nenajde nebo error neni nula,
+   nepovazuj zpravu za potvrzene dorucenou.
+
 LOKALNI PAMET:
 {memory_text}
 """.strip()
@@ -773,6 +785,7 @@ LOKALNI PAMET:
             search_email_text_year,
             run_email_triage_session,
             run_unified_email_triage_session,
+            send_confirmed_sms_rcs,
             save_selected_email_cases_from_uids,
             archive_email_by_uid,
             prepare_forward_email_by_uid,

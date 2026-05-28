@@ -389,6 +389,38 @@ class EmailTriageToolsTests(unittest.TestCase):
         self.assertIn("UID: spam-14 | Datum:", result)
         self.assertNotIn("UID: spam-15 | Datum:", result)
 
+    def test_triage_saves_full_report_to_local_report_dir(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            report_dir = Path(temp_dir) / "reports"
+            result = run_unified_email_triage_session_text(
+                days=2,
+                limit_per_folder=50,
+                include_spam=True,
+                icloud_provider_factory=lambda: _UnifiedProvider(
+                    messages=[
+                        _message_with_subject(
+                            uid=f"newsletter-{index}",
+                            source="iCloud",
+                            folder="INBOX",
+                            subject=f"Newsletter {index}",
+                            body="Newsletter a marketing.",
+                        )
+                        for index in range(25)
+                    ]
+                ),
+                seznam_provider_factory=lambda: _UnifiedProvider(messages=[]),
+                activity_state_path=Path(temp_dir) / "activity_state.json",
+                report_dir=report_dir,
+            )
+
+            reports = list(report_dir.glob("*_unified_email_triage_2d.md"))
+            self.assertEqual(len(reports), 1)
+            report_text = reports[0].read_text(encoding="utf-8")
+
+        self.assertIn("Plny lokalni report:", result)
+        self.assertIn("Unified Email Triage Full Report: poslednich 2 dni", report_text)
+        self.assertIn("UID: newsletter-24 | Datum:", report_text)
+
 
 class _FakeProvider:
     def __init__(self) -> None:

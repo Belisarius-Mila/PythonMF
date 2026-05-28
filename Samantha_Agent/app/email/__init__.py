@@ -92,11 +92,14 @@ from .text_search_tools import (
     search_email_text_year_text,
 )
 from .triage_tools import (
+    DEFAULT_TRIAGE_REPORT_DIR,
+    format_email_triage_full_report,
     has_explicit_triage_confirmation,
     run_email_triage_session,
     run_email_triage_session_text,
     run_unified_email_triage_session,
     run_unified_email_triage_session_text,
+    save_email_triage_report,
 )
 
 __all__ = [
@@ -104,6 +107,7 @@ __all__ = [
     "ActionCaseAttachmentMeta",
     "ActionCaseLinkDomain",
     "DEFAULT_EMAIL_ARCHIVE_DIR",
+    "DEFAULT_TRIAGE_REPORT_DIR",
     "EmailAttachmentMeta",
     "EmailActionCase",
     "EmailActivityState",
@@ -139,6 +143,7 @@ __all__ = [
     "build_rixo_insurance_case_from_uids_text",
     "email_message_to_archive_source",
     "format_insurance_case",
+    "format_email_triage_full_report",
     "format_email_action_case",
     "format_email_activity_reminder",
     "list_recent_email_headers",
@@ -172,6 +177,7 @@ __all__ = [
     "save_selected_email_cases_from_uids_text",
     "send_prepared_email_draft",
     "send_prepared_email_draft_text",
+    "save_email_triage_report",
     "search_email_headers",
     "search_seznam_email_headers",
     "search_email_text_year",
