@@ -121,6 +121,19 @@ p {
   background: var(--accent-strong);
 }
 
+.video-folder-button {
+  border-color: var(--keep);
+  background: var(--keep);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.video-folder-button:hover {
+  border-color: #0f5c37;
+  background: #0f5c37;
+  color: #ffffff;
+}
+
 .secondary-button:hover,
 .icon-button:hover {
   border-color: var(--accent);
@@ -302,6 +315,11 @@ tbody tr:nth-child(even) {
 tbody tr:hover,
 tbody tr.is-active {
   background: #ecf8f6;
+}
+
+tbody tr.is-locked {
+  background: #dff3ee;
+  box-shadow: inset 4px 0 0 var(--keep);
 }
 
 td {

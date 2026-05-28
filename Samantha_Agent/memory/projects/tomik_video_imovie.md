@@ -96,11 +96,48 @@ Aktualni dalsi krok:
 - Jakykoli import dcerina JSON rozhodnuti zpet do short/family vyberu musi byt
   samostatny potvrzovany krok.
 
+## Aktualni kanonicky stav 2026-05-29
+
+Projekt zustava priorita 1. Aktualni prakticky smer je otestovat u dcery
+lehky balicek `FamilyVideoOrganizer` bez kopirovani MP4 souboru.
+
+Hotove:
+
+- Generator `scripts/tomik_family_video_package.py` vytvari soukromy balicek
+  mimo git z dat v `data/private/tomik_rok_2/`.
+- Aktualni lehky ZIP je pripraven jako
+  `data/private/tomik_rok_2/family_video_organizer_light_20260528.zip`.
+- Balicek obsahuje `videos-data.js` pro 217 videi, 35 short kandidatu,
+  82 family kandidatu a 651 nahledu; MP4 soubory v ZIPu nejsou.
+- UI v `docs/family-video-organizer/` ma Safari fallback pres vyber souboru,
+  zelene tlacitko `Slozka s videi`, zamykani aktivniho radku kliknutim,
+  autosave a export JSON.
+- Dcera muze ZIP rozbalit kamkoli, nejlepe vedle slozky s MP4; v Safari vybere
+  MP4 soubory nebo slozku podle podpory prohlizece.
+
+Overeno:
+
+- `node --check docs/family-video-organizer/app.js`
+- `.venv/bin/python -m unittest tests/test_tomik_family_video_package.py`
+- `unzip -t data/private/tomik_rok_2/family_video_organizer_light_20260528.zip`
+
+Dalsi krok:
+
+- Poslat ZIP dceri, nechat ji vybrat slozku/soubory s MP4, udelat rozhodnuti
+  a poznamky, a poslat zpet exportovany JSON.
+- Import dcerina JSON zpet do short/family vyberu delat az jako samostatny
+  potvrzeny krok.
+
+Bezpecnost:
+
+- `data/private/` zustava mimo git. Do gitu patri jen generator, UI, testy a
+  pametovy handoff bez soukromych videi.
+
 ## Historicke handoffy
 
 Tyto handoffy ponechat jako auditni historii, ale nepouzivat je jako aktivni
 startovni stav projektu. Aktualni navazani je tento projektovy soubor a
-`handoffs/family_video_organizer_ui_prototype_2026_05_22.md`.
+`handoffs/family_video_organizer_package_ready_2026_05_29.md`.
 
 - `handoffs/tomik_video_imovie_start_2026_05_21.md` - zalozeni projektu a
   zakladni pravidla soukromi.

@@ -19,7 +19,7 @@
     <div class="header-actions">
       <span id="saveState" class="save-state">Připraveno</span>
       <button id="loadDataButton" class="secondary-button" type="button">Načíst data</button>
-      <button id="selectFolderButton" class="secondary-button" type="button">Složka s videi</button>
+      <button id="selectFolderButton" class="primary-button video-folder-button" type="button">Složka s videi</button>
       <button id="importDraftButton" class="secondary-button" type="button">Import draftu</button>
       <button id="exportButton" class="primary-button" type="button">Export rozhodnutí</button>
     </div>
@@ -111,6 +111,7 @@
 
   <input id="dataFileInput" type="file" accept=".js,.json" hidden>
   <input id="draftFileInput" type="file" accept=".json" hidden>
-  <script src="app.js"></script>
+  <input id="videoFolderInput" type="file" accept=".mp4,video/mp4" webkitdirectory multiple hidden>
+  <script src="app.js?v=20260529-pin-row"></script>
 </body>
 </html>

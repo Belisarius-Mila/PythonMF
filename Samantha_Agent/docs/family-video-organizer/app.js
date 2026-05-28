@@ -5,7 +5,9 @@ const state = {
   project: window.FAMILY_VIDEO_DATA?.project || "Family video",
   decisions: {},
   activeId: null,
+  lockedId: null,
   directoryHandle: null,
+  videoFilesByName: new Map(),
 };
 
 const elements = {
@@ -32,6 +34,7 @@ const elements = {
   importDraftButton: document.getElementById("importDraftButton"),
   dataFileInput: document.getElementById("dataFileInput"),
   draftFileInput: document.getElementById("draftFileInput"),
+  videoFolderInput: document.getElementById("videoFolderInput"),
   videoModal: document.getElementById("videoModal"),
   modalTitle: document.getElementById("modalTitle"),
   videoPlayer: document.getElementById("videoPlayer"),
@@ -139,6 +142,7 @@ function renderRows() {
     const tr = document.createElement("tr");
     tr.dataset.id = video.id;
     if (state.activeId === video.id) tr.classList.add("is-active");
+    if (state.lockedId === video.id) tr.classList.add("is-locked");
     tr.innerHTML = `
       <td class="muted-cell">${escapeHtml(video.id)}</td>
       <td>${escapeHtml(video.date)}</td>
@@ -151,12 +155,14 @@ function renderRows() {
       <td><textarea class="note-input" data-note-for="${escapeHtml(video.id)}" rows="1">${escapeHtml(current.note)}</textarea></td>
       <td><button class="play-row-button" data-play-for="${escapeHtml(video.id)}" type="button">Play</button></td>
     `;
-    tr.addEventListener("mouseenter", () => activateVideo(video.id));
+    tr.addEventListener("mouseenter", () => {
+      if (!state.lockedId) activateVideo(video.id);
+    });
     tr.addEventListener("click", (event) => {
       if (event.target instanceof HTMLSelectElement || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLButtonElement) {
         return;
       }
-      activateVideo(video.id);
+      activateVideo(video.id, { lock: true });
     });
     elements.videoRows.appendChild(tr);
   }
@@ -170,12 +176,17 @@ function decisionSelect(id, selected) {
   return `<select class="decision-select ${className}" data-decision-for="${escapeHtml(id)}">${options}</select>`;
 }
 
-function activateVideo(id) {
-  state.activeId = id;
+function activateVideo(id, options = {}) {
   const video = state.videos.find((item) => item.id === id);
   if (!video) return;
 
-  document.querySelectorAll("tbody tr").forEach((row) => row.classList.toggle("is-active", row.dataset.id === id));
+  state.activeId = id;
+  if (options.lock) state.lockedId = id;
+
+  document.querySelectorAll("tbody tr").forEach((row) => {
+    row.classList.toggle("is-active", row.dataset.id === id);
+    row.classList.toggle("is-locked", row.dataset.id === state.lockedId);
+  });
   elements.previewIndex.textContent = `#${video.id}`;
   elements.previewTitle.textContent = video.title;
   elements.previewFile.textContent = video.originalName;
@@ -272,18 +283,36 @@ async function openVideo(video) {
     }
   }
 
+  const selectedFile = state.videoFilesByName.get(video.originalName);
+  if (selectedFile) {
+    elements.videoPlayer.src = URL.createObjectURL(selectedFile);
+    elements.videoModal.hidden = false;
+    return;
+  }
+
   elements.videoPlayer.src = video.videoPath || video.originalName;
   elements.videoModal.hidden = false;
-  elements.videoFallback.textContent = "Pokud se video nespustí, rozbal aplikaci do složky s videi nebo použij tlačítko Složka s videi.";
+  elements.videoFallback.textContent = "Pokud se video nespustí, použij tlačítko Složka s videi a vyber složku nebo všechny MP4 soubory.";
 }
 
 async function selectVideoFolder() {
   if (!("showDirectoryPicker" in window)) {
-    setSaveState("Výběr složky tento prohlížeč neumí");
+    elements.videoFolderInput.click();
     return;
   }
   state.directoryHandle = await window.showDirectoryPicker({ mode: "read" });
+  state.videoFilesByName = new Map();
   setSaveState("Složka s videi připojena");
+}
+
+function selectVideoFiles(files) {
+  const videoFiles = Array.from(files || []).filter((file) => {
+    const name = normalize(file.name);
+    return name.endsWith(".mp4") || file.type === "video/mp4";
+  });
+  state.videoFilesByName = new Map(videoFiles.map((file) => [file.name, file]));
+  state.directoryHandle = null;
+  setSaveState(`Video soubory připojeny: ${state.videoFilesByName.size}`);
 }
 
 function importDraft(file) {
@@ -326,6 +355,7 @@ function importData(file) {
       state.project = payload.project || "Family video";
       state.videos = Array.isArray(payload.videos) ? payload.videos : [];
       state.activeId = state.videos[0]?.id || null;
+      state.lockedId = null;
       elements.projectMeta.textContent = state.project;
       elements.activeDataset.textContent = file.name;
       updateSummary();
@@ -378,6 +408,9 @@ function wireEvents() {
     const file = elements.dataFileInput.files?.[0];
     if (file) importData(file);
   });
+  elements.videoFolderInput.addEventListener("change", () => {
+    selectVideoFiles(elements.videoFolderInput.files);
+  });
   elements.draftFileInput.addEventListener("change", () => {
     const file = elements.draftFileInput.files?.[0];
     if (file) importDraft(file);
@@ -399,7 +432,10 @@ function wireEvents() {
     const target = event.target;
     if (target instanceof HTMLButtonElement && target.dataset.playFor) {
       const video = state.videos.find((item) => item.id === target.dataset.playFor);
-      if (video) openVideo(video);
+      if (video) {
+        activateVideo(video.id, { lock: true });
+        openVideo(video);
+      }
     }
   });
 }
@@ -407,7 +443,7 @@ function wireEvents() {
 function init() {
   elements.projectMeta.textContent = state.project;
   if (!("showDirectoryPicker" in window)) {
-    elements.selectFolderButton.title = "Dostupné hlavně v Chrome/Edge";
+    elements.selectFolderButton.title = "Vyber složku nebo označ všechny MP4 soubory";
   }
   loadDraft();
   wireEvents();
