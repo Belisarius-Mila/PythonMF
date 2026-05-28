@@ -22,10 +22,12 @@ from .vault import (
     prepare_mobile_document_batch_summary,
     process_mobile_document_inbox_summary,
     prepare_document_print_job_summary,
+    preview_document_reindex_summary,
     propose_document_inbox_cleanup_summary,
     relative_to_project,
     resolve_document_inbox_item_summary,
     run_document_print_job_summary,
+    apply_document_reindex_summary,
     save_document_due_reminder_summary,
     scan_document_inbox_summary,
     scan_mobile_document_inbox_summary,
@@ -67,6 +69,28 @@ def scan_downloaded_pdfs(max_items: int = 20) -> str:
 def prepare_next_scandocu_document() -> str:
     """Prepare the newest unprocessed Downloads PDF for ScanDocu review; does not import."""
     return prepare_next_scandocu_document_text()
+
+
+@function_tool
+def preview_document_reindex(max_documents: int = 50, mode: str = "improve_weak") -> str:
+    """Read-only preview of metadata improvements for already imported private documents."""
+    return preview_document_reindex_text(max_documents=max_documents, mode=mode)
+
+
+@function_tool
+def apply_document_reindex(
+    max_documents: int = 50,
+    mode: str = "improve_weak",
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+) -> str:
+    """Apply confirmed metadata reindex to already imported private documents."""
+    return apply_document_reindex_text(
+        max_documents=max_documents,
+        mode=mode,
+        user_confirmed=user_confirmed,
+        confirmation_text=confirmation_text,
+    )
 
 
 @function_tool
@@ -351,6 +375,34 @@ def prepare_next_scandocu_document_text(
         f"- Navrh: {candidate.domain} / {candidate.document_type}\n"
         f"- OCR: {candidate.extraction_method} | OCR potreba: {'ano' if candidate.ocr_needed else 'ne'}\n"
         "Dalsi krok: otevrit ScanDocu web a potvrdit/upravit metadata."
+    )
+
+
+def preview_document_reindex_text(
+    max_documents: int = 50,
+    mode: str = "improve_weak",
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> str:
+    return preview_document_reindex_summary(
+        vault_dir=vault_dir,
+        max_documents=max_documents,
+        mode=mode,
+    )
+
+
+def apply_document_reindex_text(
+    max_documents: int = 50,
+    mode: str = "improve_weak",
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> str:
+    return apply_document_reindex_summary(
+        vault_dir=vault_dir,
+        max_documents=max_documents,
+        mode=mode,
+        user_confirmed=user_confirmed,
+        confirmation_text=confirmation_text,
     )
 
 

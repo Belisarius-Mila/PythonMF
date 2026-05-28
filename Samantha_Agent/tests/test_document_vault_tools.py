@@ -13,10 +13,12 @@ from app.documents.tools import (
     apply_mobile_document_final_import_text,
     document_vault_status_text,
     inspect_document_text_text,
+    apply_document_reindex_text,
     prepare_document_import_text,
     prepare_mobile_document_final_import_text,
     prepare_mobile_document_batch_text,
     process_mobile_document_inbox_text,
+    preview_document_reindex_text,
     prepare_document_print_job_text,
     propose_document_inbox_cleanup_text,
     resolve_document_inbox_item_text,
@@ -29,6 +31,9 @@ from app.documents.tools import (
 )
 from app.documents.scandocu import import_scandocu_candidate
 from app.documents.scandocu import prepare_next_scandocu_pdf
+from app.documents.scandocu import prepare_next_stored_document_review
+from app.documents.scandocu import scan_downloads_for_pdfs
+from app.documents.scandocu import SCANDOCU_HTML
 from app.documents.vault import format_document_inbox_reminder
 from app.documents.vault import has_explicit_document_import_confirmation
 from app.documents.vault import normalize_mobile_document_page
@@ -456,6 +461,39 @@ class DocumentVaultToolsTests(unittest.TestCase):
             )
             self.assertEqual(confirmed["status"], "imported")
 
+    def test_importing_unlocked_pdf_skips_related_encrypted_download_variant(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            downloads = root / "Downloads"
+            vault = root / "documents"
+            downloads.mkdir()
+            encrypted = downloads / "review-auto-pojisteni-navrh-2025-c04557f68165.pdf"
+            unlocked = downloads / "review-auto-pojisteni-navrh-2025-Odemknute.pdf"
+            encrypted.write_bytes(b"%PDF-1.4\n/Encrypt\n")
+            unlocked.write_bytes(b"%PDF-1.4\nPojistna smlouva Volvo V40\n")
+            os.utime(encrypted, (1_700_000_000, 1_700_000_000))
+            os.utime(unlocked, (1_700_000_100, 1_700_000_100))
+
+            candidate = prepare_next_scandocu_pdf(downloads_dir=downloads, vault_dir=vault)
+            self.assertIsNotNone(candidate)
+            assert candidate is not None
+            self.assertEqual(candidate.source_path.name, unlocked.name)
+
+            result = import_scandocu_candidate(
+                token=candidate.token,
+                title="Auto pojisteni Volvo V40",
+                domain="insurance",
+                document_type="insurance_policy",
+                allow_probable_duplicate=True,
+                vault_dir=vault,
+            )
+
+            self.assertEqual(result["status"], "imported")
+            self.assertIn(encrypted.name, result["skipped_related_download_variants"])
+            statuses = {item["name"]: item["status"] for item in scan_downloads_for_pdfs(downloads_dir=downloads, vault_dir=vault)}
+            self.assertEqual(statuses[unlocked.name], "already_in_vault")
+            self.assertEqual(statuses[encrypted.name], "skipped")
+
     def test_recipe_metadata_does_not_treat_kostky_as_stk(self) -> None:
         metadata = propose_metadata(
             source=Path("scan_d.pdf"),
@@ -649,6 +687,196 @@ class DocumentVaultToolsTests(unittest.TestCase):
             self.assertIn("volvo-v40", manifest["tags"])
             self.assertIn("faktura", manifest["tags"])
             self.assertIn("servis", manifest["tags"])
+
+    def test_motorcycle_registration_metadata_is_suggested(self) -> None:
+        metadata = propose_metadata(
+            source=Path("pojistna-smlouva-motocykl.pdf"),
+            text=(
+                "Pojistna smlouva\n"
+                "Tovarni znacka YAMAHA Registracni znacka 1A2 3456\n"
+                "Obchodni oznaceni TRACER 9 GT Rozlisovaci znacka statu CZ\n"
+                "Druh vozidla: motocykl\n"
+                "RZ vozidla: 1A2 3456\n"
+                "Pojistovna Test a.s.\n"
+            ),
+        )
+
+        self.assertEqual(metadata["domain"], "insurance")
+        self.assertEqual(metadata["document_type"], "insurance_policy")
+        self.assertEqual(metadata["related_asset"], "motocykl YAMAHA TRACER 9 GT SPZ 1A23456")
+        self.assertIn("motocykl", metadata["tags"])
+        self.assertIn("spz", metadata["tags"])
+        self.assertIn("spz-1a23456", metadata["tags"])
+
+    def test_motorcycle_without_registration_uses_make_and_model(self) -> None:
+        metadata = propose_metadata(
+            source=Path("pojistna-smlouva-motocykl.pdf"),
+            text=(
+                "Pojistna smlouva\n"
+                "Tovarni znacka YAMAHA Registracni znacka NENI\n"
+                "Obchodni oznaceni TRACER 9 GT Rozlisovaci znacka statu CZ\n"
+                "Druh vozidla motocykl\n"
+            ),
+        )
+
+        self.assertEqual(metadata["related_asset"], "motocykl YAMAHA TRACER 9 GT")
+        self.assertIn("motocykl", metadata["tags"])
+        self.assertIn("auto", metadata["tags"])
+        self.assertNotIn("spz", metadata["tags"])
+
+    def test_volvo_v40_policy_metadata_uses_clean_vehicle_asset(self) -> None:
+        metadata = propose_metadata(
+            source=Path("auto-pojisteni-volvo.pdf"),
+            text=(
+                "Pojistná smlouva\n"
+                "Česká podnikatelská pojišťovna, a. s., Vienna Insurance Group\n"
+                "Tovární značka: VOLVO VIN (výrobní číslo karoserie): TESTVIN1234567890\n"
+                "Obchodní označení / Typ: V40 CROSS COUNTRY Série a číslo TP: TEST1234\n"
+                "Registrační značka (SPZ): 9Z99999 Celková hmotnost v kg: 1980\n"
+            ),
+        )
+
+        self.assertEqual(metadata["counterparty"], "Česká podnikatelská pojišťovna, a. s., Vienna Insurance Group")
+        self.assertEqual(metadata["related_asset"], "auto VOLVO V40 CROSS COUNTRY SPZ 9Z99999")
+        self.assertIn("volvo-v40", metadata["tags"])
+        self.assertIn("spz-9z99999", metadata["tags"])
+
+    def test_document_reindex_previews_and_applies_weak_metadata_updates(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            source = root / "najemni-smlouva-dubova.txt"
+            source.write_text(
+                "Nájemní smlouva k bytu v ulici Dubova.\n"
+                "Titul, jméno a příjmení: Jan Novak\n"
+                "jako nájemce na straně druhé\n",
+                encoding="utf-8",
+            )
+            vault = root / "documents"
+
+            imported = apply_document_import_text(
+                source_path=str(source),
+                target_domain="other",
+                document_type="document",
+                document_id="stary-dokument",
+                user_confirmed=True,
+                confirmation_text="Potvrzuji, uloz dokument najemni-smlouva-dubova.txt do oblasti other.",
+                vault_dir=vault,
+            )
+            self.assertIn("Stav: ulozeno", imported)
+            manifest_path = vault / "vault" / "other" / "stary-dokument" / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["counterparty"] = ""
+            manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+            index_path = vault / "index" / "documents_index.jsonl"
+            rows = _read_jsonl(index_path)
+            rows[0]["counterparty"] = ""
+            with index_path.open("w", encoding="utf-8") as handle:
+                for row in rows:
+                    json.dump(row, handle, ensure_ascii=False)
+                    handle.write("\n")
+
+            preview = preview_document_reindex_text(vault_dir=vault)
+            self.assertIn("Dokumentu s navrzenou zmenou: 1", preview)
+            self.assertIn("document_type: document -> lease", preview)
+            self.assertIn("counterparty: [prazdne] -> [vyplneno]", preview)
+
+            blocked = apply_document_reindex_text(vault_dir=vault)
+            self.assertIn("nebyl spusten", blocked)
+
+            applied = apply_document_reindex_text(
+                vault_dir=vault,
+                user_confirmed=True,
+                confirmation_text="Potvrzuji reindex ulozenych dokumentu.",
+            )
+            self.assertIn("Upravenych dokumentu: 1", applied)
+            self.assertIn("reindex_backups", applied)
+
+            manifest = json.loads(
+                (
+                    vault
+                    / "vault"
+                    / "other"
+                    / "stary-dokument"
+                    / "manifest.json"
+                ).read_text(encoding="utf-8")
+            )
+            self.assertEqual(manifest["domain"], "home")
+            self.assertEqual(manifest["document_type"], "lease")
+            self.assertEqual(manifest["counterparty"], "Jan Novak")
+            self.assertIn("najem", manifest["tags"])
+
+            docs = _read_jsonl(vault / "index" / "documents_index.jsonl")
+            self.assertEqual(docs[0]["domain"], "home")
+            self.assertEqual(docs[0]["document_type"], "lease")
+
+    def test_scandocu_review_updates_existing_document_metadata(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            source = root / "najemni-smlouva-dubova.txt"
+            source.write_text(
+                "Nájemní smlouva k bytu v ulici Dubova.\n"
+                "Titul, jméno a příjmení: Jan Novak\n"
+                "jako nájemce na straně druhé\n",
+                encoding="utf-8",
+            )
+            vault = root / "documents"
+
+            imported = apply_document_import_text(
+                source_path=str(source),
+                target_domain="other",
+                document_type="document",
+                document_id="stary-dokument-review",
+                user_confirmed=True,
+                confirmation_text="Potvrzuji, uloz dokument najemni-smlouva-dubova.txt do oblasti other.",
+                vault_dir=vault,
+            )
+            self.assertIn("Stav: ulozeno", imported)
+
+            candidate = prepare_next_stored_document_review(vault_dir=vault)
+            self.assertIsNotNone(candidate)
+            assert candidate is not None
+            self.assertEqual(candidate.source_mode, "vault_review")
+            self.assertEqual(candidate.review_document_id, "stary-dokument-review")
+            self.assertEqual(candidate.domain, "home")
+            self.assertEqual(candidate.document_type, "lease")
+
+            result = import_scandocu_candidate(
+                token=candidate.token,
+                title="Najemni smlouva Dubova",
+                domain="home",
+                document_type="lease",
+                counterparty="Jan Novak",
+                related_asset="Dubova ulice",
+                tags="home, lease, najem, bydleni, dubova-ulice",
+                vault_dir=vault,
+            )
+            self.assertEqual(result["status"], "reviewed")
+            self.assertEqual(result["document_id"], "stary-dokument-review")
+            self.assertIn("review_backups", result["backup_dir"])
+
+            manifest = json.loads(
+                (
+                    vault
+                    / "vault"
+                    / "other"
+                    / "stary-dokument-review"
+                    / "manifest.json"
+                ).read_text(encoding="utf-8")
+            )
+            self.assertEqual(manifest["title"], "Najemni smlouva Dubova")
+            self.assertEqual(manifest["domain"], "home")
+            self.assertEqual(manifest["document_type"], "lease")
+            self.assertEqual(manifest["counterparty"], "Jan Novak")
+            self.assertEqual(manifest["related_asset"], "Dubova ulice")
+            self.assertIn("dubova-ulice", manifest["tags"])
+
+            next_candidate = prepare_next_stored_document_review(vault_dir=vault)
+            self.assertIsNone(next_candidate)
+
+    def test_scandocu_ui_contains_encrypted_pdf_guidance(self) -> None:
+        self.assertIn("PDF je šifrované nebo zamčené", SCANDOCU_HTML)
+        self.assertIn("Heslo nepiš do chatu", SCANDOCU_HTML)
+        self.assertIn("renderEncryptedHelp", SCANDOCU_HTML)
 
     def test_duplicate_content_is_not_imported_twice(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

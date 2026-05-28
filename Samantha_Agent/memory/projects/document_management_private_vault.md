@@ -207,6 +207,34 @@ Overeno:
   nezavira cockpit.
 - Testy dokumentoveho vaultu prosly s novymi ScanDocu scenari.
 
+## Checkpoint 2026-05-28 - reimport a revize ulozenych priloh
+
+Aktualni smer:
+
+- Pokracovat dokument po dokumentu, ne hromadne bez kontroly.
+- Pro nove nebo znovu pripravene PDF pouzivat `Downloads -> ScanDocu -> kontrola -> Ulozit`.
+- Pro drive ulozene dokumenty pouzit ScanDocu review rezim a po lidskem potvrzeni
+  aktualizovat jen metadata existujiciho dokumentu, ne vytvaret duplicitni novy
+  zaznam.
+
+Hotove zlepseni:
+
+- ScanDocu review rezim `?mode=review` a cockpit tlacitko `Revidovat ulozene`.
+- Lepsi nacteni a navrh metadat pro vozidla: druh vozidla, znacka/model a SPZ/RZ,
+  pokud jsou v textu dostupne.
+- Sifrovana PDF maji ve ScanDocu jasnou napovedu: odemknout lokalne v Preview a
+  ulozit novou kopii do Downloads; hesla se nikam neukladaji.
+- Po ulozeni odemcene varianty se podobna starsi sifrovana varianta ve fronte umi
+  oznacit jako preskocena, aby se znovu nenabizela.
+- Bez potvrzeni `Presto ulozit jako dalsi dokument` ScanDocu neulozi dokument,
+  ktery vypada jako pravdepodobna duplicita nebo souvisejici dokument.
+
+Dalsi krok priorita 1:
+
+- Az Mila vlozi novou kopii najemni smlouvy do Downloads, otevrit ScanDocu,
+  zkontrolovat kvalitu nacteni, metadata a duplicity a az potom potvrdit ulozeni.
+- Pote pokracovat se znovuukladanim/revizi uz ulozenych priloh po jednom dokumentu.
+
 ## Omezena mista MVP
 
 - OCR je implementovane pres Homebrew nastroje `poppler` + `tesseract`:

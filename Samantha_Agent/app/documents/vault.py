@@ -152,6 +152,16 @@ class MobileDocumentFinalMetadata:
     case_id: str
 
 
+@dataclass(frozen=True)
+class DocumentReindexProposal:
+    document_id: str
+    stored_path: Path
+    manifest_path: Path
+    current: dict[str, Any]
+    proposed: dict[str, Any]
+    changes: dict[str, dict[str, Any]]
+
+
 def prepare_document_import_summary(
     source_path: str,
     document_hint: str = "",
@@ -1111,6 +1121,253 @@ def search_private_documents_summary(
     lines.append("")
     lines.append("Bezpecnost: vysledky jsou jen metadata a kratke snippety, ne cele dokumenty.")
     return "\n".join(lines)
+
+
+def preview_document_reindex_summary(
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    max_documents: int = 50,
+    mode: str = "improve_weak",
+) -> str:
+    proposals = build_document_reindex_proposals(
+        vault_dir=vault_dir,
+        max_documents=max_documents,
+        mode=mode,
+    )
+    documents = read_jsonl(vault_dir / "index" / "documents_index.jsonl")
+    lines = [
+        "Navrh reindexu ulozenych dokumentu (read-only):",
+        f"- Dokumentu v indexu: {len(documents)}",
+        f"- Dokumentu s navrzenou zmenou: {len(proposals)}",
+        f"- Rezim: {safe_text(mode)}",
+    ]
+    if not proposals:
+        lines.append("- Nic k doplneni podle aktualnich pravidel.")
+    for proposal in proposals[:max(1, min(max_documents, 20))]:
+        changed_fields = ", ".join(proposal.changes.keys())
+        lines.append(f"- {safe_text(proposal.document_id)} | zmeny: {safe_text(changed_fields)}")
+        for field, change in proposal.changes.items():
+            before = redact_reindex_value(field, change.get("before"))
+            after = redact_reindex_value(field, change.get("after"))
+            lines.append(f"  {field}: {before} -> {after}")
+    if len(proposals) > 20:
+        lines.append(f"- ... dalsich {len(proposals) - 20} navrhu")
+    lines.append("")
+    lines.append(
+        "Bezpecnost: nic nebylo zapsano. Pro aplikaci je nutne samostatne potvrzeni "
+        "s textem obsahujicim `potvrzuji` a `reindex`."
+    )
+    return "\n".join(lines)
+
+
+def apply_document_reindex_summary(
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    max_documents: int = 50,
+    mode: str = "improve_weak",
+) -> str:
+    if not has_explicit_reindex_confirmation(user_confirmed, confirmation_text):
+        return (
+            "Reindex ulozenych dokumentu nebyl spusten.\n"
+            "Bezpecnost: jde o zapis do soukromeho vaultu. Potvrd vetou obsahujici `potvrzuji` a `reindex`."
+        )
+    proposals = build_document_reindex_proposals(
+        vault_dir=vault_dir,
+        max_documents=max_documents,
+        mode=mode,
+    )
+    if not proposals:
+        return "Reindex ulozenych dokumentu: zadne zmeny k aplikaci."
+
+    backup_dir = backup_reindex_targets(vault_dir=vault_dir, proposals=proposals)
+    document_rows = read_jsonl(vault_dir / "index" / "documents_index.jsonl")
+    updated_by_id = {proposal.document_id: apply_reindex_changes_to_record(proposal) for proposal in proposals}
+    new_rows = [updated_by_id.get(str(row.get("document_id", "")), row) for row in document_rows]
+    write_jsonl(vault_dir / "index" / "documents_index.jsonl", new_rows)
+    for proposal in proposals:
+        write_json(proposal.manifest_path, updated_by_id[proposal.document_id])
+    append_jsonl(
+        vault_dir / "index" / "document_reindex_runs.jsonl",
+        {
+            "run_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+            "mode": safe_text(mode),
+            "changed_count": len(proposals),
+            "backup_dir": str(relative_to_project(backup_dir)),
+            "document_ids": [proposal.document_id for proposal in proposals],
+        },
+    )
+    return (
+        "Reindex ulozenych dokumentu dokoncen.\n"
+        f"- Upravenych dokumentu: {len(proposals)}\n"
+        f"- Zaloha pred zmenou: `{relative_to_project(backup_dir)}`\n"
+        "- Aktualizovano: manifesty a `index/documents_index.jsonl`.\n"
+        "Bezpecnost: PDF ani textovy index nebyly meneny."
+    )
+
+
+def build_document_reindex_proposals(
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    max_documents: int = 50,
+    mode: str = "improve_weak",
+) -> list[DocumentReindexProposal]:
+    mode = normalize_reindex_mode(mode)
+    documents = read_jsonl(vault_dir / "index" / "documents_index.jsonl")
+    text_by_id = {
+        str(row.get("document_id", "")): str(row.get("text", ""))
+        for row in read_jsonl(vault_dir / "index" / "text_index.jsonl")
+    }
+    proposals: list[DocumentReindexProposal] = []
+    for row in documents[: max(1, min(max_documents, 500))]:
+        document_id = safe_slug(str(row.get("document_id", "")), default="", limit=140)
+        if not document_id:
+            continue
+        stored_path = PROJECT_ROOT / str(row.get("stored_path", ""))
+        if not stored_path.exists():
+            continue
+        manifest_path = stored_path.parent / "manifest.json"
+        manifest = read_json_file(manifest_path) if manifest_path.exists() else {}
+        current = {**row, **manifest}
+        text = text_by_id.get(document_id, "")
+        if not text.strip():
+            text = reindex_metadata_fallback_text(current=current, source=stored_path)
+        proposed_metadata = propose_metadata(source=stored_path, text=text)
+        proposed = {
+            "title": suggest_reindex_title(current=current, source=stored_path),
+            "domain": proposed_metadata.get("domain", ""),
+            "document_type": proposed_metadata.get("document_type", ""),
+            "counterparty": proposed_metadata.get("counterparty", ""),
+            "related_asset": proposed_metadata.get("related_asset", ""),
+            "tags": proposed_metadata.get("tags", []),
+        }
+        changes = build_reindex_changes(current=current, proposed=proposed, mode=mode)
+        if changes:
+            proposals.append(
+                DocumentReindexProposal(
+                    document_id=document_id,
+                    stored_path=stored_path,
+                    manifest_path=manifest_path,
+                    current=current,
+                    proposed=proposed,
+                    changes=changes,
+                )
+            )
+    return proposals
+
+
+def normalize_reindex_mode(mode: str) -> str:
+    safe = safe_slug(mode, default="improve_weak", limit=40)
+    if safe not in {"fill_blank", "improve_weak", "force"}:
+        return "improve_weak"
+    return safe
+
+
+def build_reindex_changes(
+    current: dict[str, Any],
+    proposed: dict[str, Any],
+    mode: str,
+) -> dict[str, dict[str, Any]]:
+    changes: dict[str, dict[str, Any]] = {}
+    for field in ("domain", "document_type", "counterparty", "related_asset"):
+        before = normalize_reindex_scalar(current.get(field, ""))
+        after = normalize_reindex_scalar(proposed.get(field, ""))
+        if should_update_reindex_field(field=field, before=before, after=after, mode=mode):
+            changes[field] = {"before": before, "after": after}
+    before_tags = [str(tag) for tag in current.get("tags", []) if isinstance(tag, str)]
+    after_tags = merge_tags(before_tags, [str(tag) for tag in proposed.get("tags", []) if isinstance(tag, str)])
+    if changes and after_tags != merge_tags(before_tags, []):
+        changes["tags"] = {"before": before_tags, "after": after_tags}
+    return changes
+
+
+def should_update_reindex_field(field: str, before: str, after: str, mode: str) -> bool:
+    if not after or before == after:
+        return False
+    if mode == "force":
+        return True
+    if not before or before in {"nezjisteno", "unknown", "none"}:
+        return True
+    if mode == "fill_blank":
+        return False
+    if field == "domain":
+        return before == "other" and after != "other"
+    if field == "document_type":
+        return before in {"document", "contract"} and after not in {"document", "contract"}
+    if field == "related_asset":
+        return before in {"auto", "byt"} and after not in {"auto", "byt"}
+    return False
+
+
+def normalize_reindex_scalar(value: Any) -> str:
+    return safe_text(str(value or "")).strip()
+
+
+def suggest_reindex_title(current: dict[str, Any], source: Path) -> str:
+    title = normalize_reindex_scalar(current.get("title", ""))
+    if title:
+        return title
+    stem = split_camel_case_text(source.stem).replace("_", " ").replace("-", " ")
+    return normalize_whitespace(stem).title()
+
+
+def reindex_metadata_fallback_text(current: dict[str, Any], source: Path) -> str:
+    parts = [
+        source.name,
+        str(current.get("original_filename", "")),
+        str(current.get("document_id", "")),
+        str(current.get("document_type", "")),
+        str(current.get("domain", "")),
+        str(current.get("counterparty", "")),
+        str(current.get("related_asset", "")),
+        " ".join(str(tag) for tag in current.get("tags", []) if isinstance(tag, str)),
+    ]
+    return "\n".join(parts)
+
+
+def apply_reindex_changes_to_record(proposal: DocumentReindexProposal) -> dict[str, Any]:
+    updated = dict(proposal.current)
+    for field, change in proposal.changes.items():
+        updated[field] = change["after"]
+    updated["reindexed_at"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    updated["reindex_source"] = "document_reindex"
+    return updated
+
+
+def backup_reindex_targets(vault_dir: Path, proposals: list[DocumentReindexProposal]) -> Path:
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    backup_dir = vault_dir / "index" / "reindex_backups" / stamp
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    index_path = vault_dir / "index" / "documents_index.jsonl"
+    if index_path.exists():
+        shutil.copy2(index_path, backup_dir / "documents_index.jsonl")
+    manifest_dir = backup_dir / "manifests"
+    manifest_dir.mkdir(parents=True, exist_ok=True)
+    for proposal in proposals:
+        if proposal.manifest_path.exists():
+            shutil.copy2(proposal.manifest_path, manifest_dir / f"{proposal.document_id}.manifest.json")
+    return backup_dir
+
+
+def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as handle:
+        for row in rows:
+            json.dump(row, handle, ensure_ascii=False, sort_keys=True)
+            handle.write("\n")
+
+
+def has_explicit_reindex_confirmation(user_confirmed: bool, confirmation_text: str) -> bool:
+    if not user_confirmed:
+        return False
+    normalized = normalize_confirmation_text(confirmation_text)
+    return "reindex" in normalized and any(word in normalized for word in ("potvrzuji", "ano"))
+
+
+def redact_reindex_value(field: str, value: Any) -> str:
+    if field in {"counterparty", "related_asset", "title"}:
+        return "[vyplneno]" if normalize_reindex_scalar(value) else "[prazdne]"
+    if field == "tags" and isinstance(value, list):
+        return ", ".join(safe_text(str(tag)) for tag in value[:10])
+    return safe_text(str(value or ""))
 
 
 def prepare_document_print_job_summary(
@@ -3181,8 +3438,9 @@ def has_car_marker(text: str) -> bool:
         has_auto_marker(text)
         or has_stk_marker(text)
         or has_short_token_marker(text, "spz")
+        or has_short_token_marker(text, "rz")
         or has_short_token_marker(text, "vin")
-        or any(word in text for word in ("vozidlo", "volvo"))
+        or any(word in text for word in ("vozidlo", "volvo", "motocykl", "motorka"))
     )
 
 
@@ -3269,12 +3527,24 @@ def guess_counterparty(text: str) -> str:
         return counterparty
     for raw_line in text.splitlines()[:30]:
         line = normalize_whitespace(raw_line)
-        if not 3 <= len(line) <= 100:
-            continue
         folded = line.casefold()
-        if any(marker in folded for marker in ("s.r.o", "a.s", "pojistovna", "pojišťovna", "servis", "rixo")):
-            return line
+        compact = re.sub(r"\s+", "", folded)
+        if any(marker in folded for marker in ("s.r.o", "pojistovna", "pojišťovna", "servis", "rixo")) or "a.s" in compact:
+            company = clean_counterparty_line(line)
+            if 3 <= len(company) <= 120:
+                return company
     return ""
+
+
+def clean_counterparty_line(line: str) -> str:
+    cleaned = normalize_whitespace(line)
+    cleaned = re.split(
+        r",\s*(?:IČO|ICO|Pobřežní|Pobrezni|se\s+sídlem|se\s+sidlem)\b",
+        cleaned,
+        maxsplit=1,
+        flags=re.IGNORECASE,
+    )[0]
+    return cleaned.strip(" ,;")
 
 
 def guess_lease_counterparty(text: str) -> str:
@@ -3346,21 +3616,105 @@ def guess_related_asset_for_document(
 ) -> str:
     if document_type == "lease":
         return guess_lease_related_asset(source=source, text=text, folded=folded)
-    return guess_related_asset(folded)
+    return guess_related_asset(text)
 
 
 def guess_related_asset(text: str) -> str:
-    if "volvo" in text and "v40" in text:
+    folded = text.casefold()
+    registration = extract_vehicle_registration(text)
+    vehicle = guess_vehicle_kind(folded)
+    vehicle_name = extract_vehicle_make_model(text)
+    if vehicle:
+        detail = f"{vehicle} {vehicle_name}".strip()
+        return f"{detail} SPZ {registration}" if registration else detail
+    if vehicle_name:
+        return f"auto {vehicle_name} SPZ {registration}" if registration else f"auto {vehicle_name}"
+    if "volvo" in folded and "v40" in folded:
         return "Volvo V40"
-    if "volvo" in text:
+    if "volvo" in folded:
         return "Volvo"
-    if "fotovolta" in text or "fve" in text:
+    if "fotovolta" in folded or "fve" in folded:
         return "fotovoltaika"
-    if "kotel" in text:
+    if "kotel" in folded:
         return "kotel"
-    if has_car_marker(text):
-        return "auto"
+    if has_car_marker(folded):
+        return f"auto SPZ {registration}" if registration else "auto"
     return ""
+
+
+def guess_vehicle_kind(folded_text: str) -> str:
+    if "motocykl" in folded_text or "motorka" in folded_text:
+        return "motocykl"
+    return ""
+
+
+def extract_vehicle_registration(text: str) -> str:
+    patterns = (
+        r"\b(?:spz|rz)\s*(?:vozidla)?\s*(?:\([^)]*\))?\s*[:#-]?\s*([A-Z0-9][A-Z0-9 -]{4,12})\b",
+        r"\b(?:registrační|registracni|evidenční|evidencni)\s+(?:značka|znacka|číslo|cislo)\s*(?:\([^)]*\))?\s*[:#-]?\s*([A-Z0-9][A-Z0-9 -]{4,12})\b",
+    )
+    for pattern in patterns:
+        for match in re.finditer(pattern, text[:20000], flags=re.IGNORECASE):
+            candidate = normalize_vehicle_registration(match.group(1))
+            if candidate:
+                return candidate
+    return ""
+
+
+def extract_vehicle_make_model(text: str) -> str:
+    make = ""
+    model = ""
+    for raw_line in text[:20000].splitlines():
+        line = normalize_whitespace(raw_line)
+        folded = line.casefold()
+        if not make and ("tovární značka" in folded or "tovarni znacka" in folded):
+            make = extract_table_value_after_label(
+                line,
+                ("Tovární značka", "Tovarni znacka"),
+                ("VIN", "Registrační značka", "Registracni znacka", "RZ", "SPZ"),
+            )
+        if not model and ("obchodní označení" in folded or "obchodni oznaceni" in folded):
+            model = extract_table_value_after_label(
+                line,
+                ("Obchodní označení", "Obchodni oznaceni"),
+                ("Série", "Serie", "Rozlišovací značka", "Rozlisovaci znacka", "Státu", "Statu"),
+            )
+        if make and model:
+            break
+    return normalize_whitespace(" ".join(part for part in (make, model) if part))
+
+
+def extract_table_value_after_label(line: str, labels: tuple[str, ...], stop_labels: tuple[str, ...]) -> str:
+    value = line
+    folded = line.casefold()
+    for label in labels:
+        index = folded.find(label.casefold())
+        if index >= 0:
+            value = line[index + len(label) :]
+            break
+    for stop in stop_labels:
+        stop_index = value.casefold().find(stop.casefold())
+        if stop_index >= 0:
+            value = value[:stop_index]
+    value = normalize_whitespace(value).strip(" :;-")
+    value = re.sub(r"^/\s*(?:typ|type)\s*:\s*", "", value, flags=re.IGNORECASE)
+    value = re.sub(r"^(?:typ|type)\s*:\s*", "", value, flags=re.IGNORECASE)
+    if value.casefold() in {"není", "neni", "neuvedeno"}:
+        return ""
+    if not 2 <= len(value) <= 60:
+        return ""
+    return value
+
+
+def normalize_vehicle_registration(value: str) -> str:
+    normalized = re.sub(r"[^A-Za-z0-9]", "", value).upper()
+    if not 5 <= len(normalized) <= 10:
+        return ""
+    if not any(char.isdigit() for char in normalized):
+        return ""
+    if normalized in {"VOZIDLA", "ZNACKA", "CISLO"}:
+        return ""
+    return normalized
 
 
 def guess_lease_related_asset(source: Path, text: str, folded: str) -> str:
@@ -3415,6 +3769,7 @@ def suggest_document_tags(
         tags.append(related_asset)
     checks = (
         ("auto", ("vozidlo", "volvo")),
+        ("motocykl", ("motocykl", "motorka")),
         ("volvo-v40", ("volvo v40", "v40")),
         ("pojisteni", ("pojist", "zelena karta", "zelená karta")),
         ("faktura", ("faktura", "invoice", "danovy doklad", "daňový doklad")),
@@ -3433,6 +3788,10 @@ def suggest_document_tags(
             tags.append(tag)
     if has_car_marker(text):
         tags.append("auto")
+    registration = extract_vehicle_registration(text)
+    if registration:
+        tags.append("spz")
+        tags.append(f"spz-{registration}")
     if has_stk_marker(text):
         tags.append("technicka-kontrola")
     return merge_tags([], tags)

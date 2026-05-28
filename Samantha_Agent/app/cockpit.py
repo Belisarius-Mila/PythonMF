@@ -233,6 +233,7 @@ COCKPIT_HTML = """<!doctype html>
     <div class="toolbar">
       <button class="secondary" id="refreshBtn">Obnovit</button>
       <button class="primary" id="scanDocuBtn">Otevřít ScanDocu</button>
+      <button class="secondary" id="scanDocuReviewBtn">Revidovat uložené</button>
       <button class="secondary" id="terminalBtn">Terminál v projektu</button>
     </div>
   </header>
@@ -278,6 +279,7 @@ COCKPIT_HTML = """<!doctype html>
     const actionMessage = document.getElementById("actionMessage");
     const refreshBtn = document.getElementById("refreshBtn");
     const scanDocuBtn = document.getElementById("scanDocuBtn");
+    const scanDocuReviewBtn = document.getElementById("scanDocuReviewBtn");
     const terminalBtn = document.getElementById("terminalBtn");
 
     function statusClass(value) {
@@ -353,24 +355,26 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
-    async function openScanDocu() {
+    async function openScanDocu(reviewMode = false) {
       const scanDocuWindow = window.open(
         "about:blank",
-        "SamanthaScanDocu",
+        reviewMode ? "SamanthaScanDocuReview" : "SamanthaScanDocu",
         "popup=yes,width=1380,height=920,left=80,top=60"
       );
-      scanDocuBtn.disabled = true;
-      showMessage("Spouštím ScanDocu...");
+      const activeButton = reviewMode ? scanDocuReviewBtn : scanDocuBtn;
+      activeButton.disabled = true;
+      showMessage(reviewMode ? "Spouštím ScanDocu Review..." : "Spouštím ScanDocu...");
       try {
         const res = await fetch("/api/scandocu/open", {method: "POST"});
         const data = await res.json();
         showMessage(data.message || data.error || "Hotovo.");
         if (data.ok && data.url) {
+          const targetUrl = reviewMode ? `${data.url}/?mode=review` : data.url;
           if (scanDocuWindow) {
-            scanDocuWindow.location.href = data.url;
+            scanDocuWindow.location.href = targetUrl;
             scanDocuWindow.focus();
           } else {
-            showMessage(`${data.message || "ScanDocu běží."} Popup okno bylo blokováno, otevři ${data.url}`);
+            showMessage(`${data.message || "ScanDocu běží."} Popup okno bylo blokováno, otevři ${targetUrl}`);
           }
         } else if (scanDocuWindow) {
           scanDocuWindow.close();
@@ -382,12 +386,13 @@ COCKPIT_HTML = """<!doctype html>
         }
         showMessage(`Chyba: ${err}`);
       } finally {
-        scanDocuBtn.disabled = false;
+        activeButton.disabled = false;
       }
     }
 
     refreshBtn.addEventListener("click", refresh);
-    scanDocuBtn.addEventListener("click", openScanDocu);
+    scanDocuBtn.addEventListener("click", () => openScanDocu(false));
+    scanDocuReviewBtn.addEventListener("click", () => openScanDocu(true));
     terminalBtn.addEventListener("click", () => postAction("/api/terminal/open", terminalBtn));
     refresh();
   </script>
