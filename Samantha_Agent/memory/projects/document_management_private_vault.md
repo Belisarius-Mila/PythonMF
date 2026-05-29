@@ -235,6 +235,45 @@ Dalsi krok priorita 1:
   zkontrolovat kvalitu nacteni, metadata a duplicity a az potom potvrdit ulozeni.
 - Pote pokracovat se znovuukladanim/revizi uz ulozenych priloh po jednom dokumentu.
 
+## Checkpoint 2026-05-29 - Cockpit command inbox / hlasove ovladani
+
+Novy koncept:
+
+- iPhone muze slouzit jako jednoduchy hlasovy/textovy ovladac cockpitu.
+- Zkratka na iPhonu by po diktovani ulozila kratky prikaz do iCloud inboxu.
+- Cockpit na Macu by inbox periodicky kontroloval, prikaz naroutoval na bezpecnou
+  schopnost a vysledek zobrazil v panelu.
+- Prvni implementace ma byt textovy command inbox bez iPhonu: rucne vlozeny JSON
+  prikaz do slozky, poller v cockpitu, intent router a result panel.
+
+Bezpecnostni hranice:
+
+- Automaticky lze spoustet jen read-only akce:
+  - hledani dokumentu,
+  - hledani e-mailovych hlavicek,
+  - status e-mailove komunikace,
+  - status PDF ve Downloads,
+  - backup/status report.
+- Zapisujici nebo rizikove akce se nesmi spoustet hlasem samostatne:
+  - tisk,
+  - archivace,
+  - presun do kose / mazani,
+  - odesilani e-mailu nebo SMS,
+  - zmena metadat.
+- U rizikovych akci smi hlasovy prikaz jen pripravit navrh; finalni krok musi
+  potvrdit Mila v cockpitu kliknutim nebo presnou potvrzovaci vetou.
+
+Navrzeny tok:
+
+```text
+iPhone Shortcut -> iCloud command inbox -> Cockpit poller -> intent router -> safe tool -> result panel
+```
+
+Navrzeny dalsi krok:
+
+- Zalozit `SamanthaCockpitInbox` mimo git, definovat JSON schema prikazu a
+  implementovat prvni read-only intent `document_search`.
+
 ## Omezena mista MVP
 
 - OCR je implementovane pres Homebrew nastroje `poppler` + `tesseract`:
