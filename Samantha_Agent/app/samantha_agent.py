@@ -88,6 +88,7 @@ from app.lekarna import (
 from app.media import apply_zmenseni_obrazku, preview_zmenseni_obrazku
 from app.documents import (
     apply_document_import,
+    apply_document_reindex,
     apply_mobile_document_final_import,
     document_vault_status,
     format_document_inbox_reminder,
@@ -96,6 +97,7 @@ from app.documents import (
     prepare_mobile_document_final_import,
     prepare_mobile_document_batch,
     prepare_next_scandocu_document,
+    preview_document_reindex,
     process_mobile_document_inbox,
     prepare_document_print_job,
     propose_document_inbox_cleanup,
@@ -538,6 +540,9 @@ Pro novy hlavni proces ScanDocu pouzij `scan_downloaded_pdfs`, kdyz Mila rekne,
 ze ma hotove PDF z GPT v Downloads. `prepare_next_scandocu_document` pripravi
 nejnovejsi nezpracovane PDF z Downloads jako soukromou pracovni kopii a navrh
 metadat; finalni potvrzeni ma probiihat v lokalni web aplikaci ScanDocu.
+Pokud Mila chce znovu nacist nebo opravit metadata uz ulozenych dokumentu,
+pouzij nejdrive `preview_document_reindex`. `apply_document_reindex` smi zapisovat
+az po samostatnem potvrzeni; vytvari zalohu indexu/manifestu a nemeni PDF.
 `prepare_document_import` je read-only nahled importu lokalniho souboru z `data/`
 nebo `/private/tmp`.
 `prepare_mobile_document_batch` je write-safe priprava mobilniho batchu: zkopiruje
@@ -818,9 +823,11 @@ LOKALNI PAMET:
             apply_zmenseni_obrazku,
             scan_document_inbox,
             scan_downloaded_pdfs,
+            preview_document_reindex,
             scan_mobile_document_inbox,
             document_vault_status,
             prepare_document_import,
+            apply_document_reindex,
             prepare_mobile_document_batch,
             prepare_next_scandocu_document,
             process_mobile_document_inbox,

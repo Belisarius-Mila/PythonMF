@@ -141,9 +141,11 @@ CAPABILITY_AREAS = (
         tools=(
             "scan_document_inbox",
             "scan_downloaded_pdfs",
+            "preview_document_reindex",
             "scan_mobile_document_inbox",
             "document_vault_status",
             "prepare_document_import",
+            "apply_document_reindex",
             "prepare_mobile_document_batch",
             "prepare_next_scandocu_document",
             "process_mobile_document_inbox",
