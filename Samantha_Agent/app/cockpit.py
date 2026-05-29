@@ -523,6 +523,40 @@ def open_project_terminal() -> dict[str, Any]:
     return {"ok": completed.returncode == 0, "message": message, "returncode": completed.returncode}
 
 
+def open_terminal_command(command: str, label: str) -> dict[str, Any]:
+    script = (
+        'tell application "Terminal"\n'
+        "  activate\n"
+        f'  do script "cd {shell_quote_for_applescript(str(PROJECT_ROOT))}; {command}"\n'
+        "end tell\n"
+    )
+    try:
+        completed = subprocess.run(
+            ["/usr/bin/osascript", "-e", script],
+            capture_output=True,
+            text=True,
+            timeout=8,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return {"ok": False, "message": f"{label} se nepodařilo otevřít: {exc}"}
+    detail = completed.stderr.strip() or completed.stdout.strip()
+    message = detail or f"{label} otevřen v novém Terminal okně."
+    return {"ok": completed.returncode == 0, "message": message, "returncode": completed.returncode}
+
+
+def open_samantha_chat() -> dict[str, Any]:
+    return open_terminal_command("source ~/.zshrc; samantha", "Samantha chat")
+
+
+def open_codex_cli() -> dict[str, Any]:
+    return open_terminal_command("source ~/.zshrc; codex resume --last || codex", "Codex CLI")
+
+
+def shell_quote_for_applescript(value: str) -> str:
+    return "'" + value.replace("'", "'\\''") + "'"
+
+
 class CockpitServer:
     def __init__(self, host: str = "127.0.0.1", port: int = COCKPIT_PORT) -> None:
         self.host = host
@@ -565,6 +599,12 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/terminal/open":
                     self.respond_json(open_project_terminal())
+                    return
+                if parsed.path == "/api/samantha/open":
+                    self.respond_json(open_samantha_chat())
+                    return
+                if parsed.path == "/api/codex/open":
+                    self.respond_json(open_codex_cli())
                     return
                 if parsed.path == "/api/documents/print/prepare":
                     payload = self.read_json()
@@ -784,6 +824,8 @@ COCKPIT_HTML = """<!doctype html>
       <button class="secondary" id="webAppsBtn">Webové aplikace</button>
       <button class="primary" id="scanDocuBtn">Otevřít ScanDocu</button>
       <button class="secondary" id="scanDocuReviewBtn">Revidovat uložené</button>
+      <button class="secondary" id="samanthaChatBtn">Samantha chat</button>
+      <button class="secondary" id="codexCliBtn">Codex CLI</button>
       <button class="secondary" id="terminalBtn">Terminál v projektu</button>
     </div>
   </header>
@@ -815,6 +857,8 @@ COCKPIT_HTML = """<!doctype html>
             <button class="primary" id="dashboardProcessBtn">Zpracovat další</button>
             <button class="secondary" id="dashboardReviewBtn">Revidovat další</button>
             <button class="secondary" id="dashboardWebAppsBtn">Webové aplikace</button>
+            <button class="secondary" id="dashboardSamanthaBtn">Samantha chat</button>
+            <button class="secondary" id="dashboardCodexBtn">Codex CLI</button>
             <button class="secondary" id="dashboardRefreshBtn">Obnovit stav</button>
           </div>
           <div id="dashboardActionHint" class="status-line"></div>
@@ -917,6 +961,8 @@ COCKPIT_HTML = """<!doctype html>
     const scanDocuReviewBtn = document.getElementById("scanDocuReviewBtn");
     const processNextBtn = document.getElementById("processNextBtn");
     const reviewNextBtn = document.getElementById("reviewNextBtn");
+    const samanthaChatBtn = document.getElementById("samanthaChatBtn");
+    const codexCliBtn = document.getElementById("codexCliBtn");
     const terminalBtn = document.getElementById("terminalBtn");
     const webAppsBtn = document.getElementById("webAppsBtn");
     const webAppsModal = document.getElementById("webAppsModal");
@@ -933,6 +979,8 @@ COCKPIT_HTML = """<!doctype html>
     const dashboardProcessBtn = document.getElementById("dashboardProcessBtn");
     const dashboardReviewBtn = document.getElementById("dashboardReviewBtn");
     const dashboardWebAppsBtn = document.getElementById("dashboardWebAppsBtn");
+    const dashboardSamanthaBtn = document.getElementById("dashboardSamanthaBtn");
+    const dashboardCodexBtn = document.getElementById("dashboardCodexBtn");
     const dashboardRefreshBtn = document.getElementById("dashboardRefreshBtn");
     const dashboardActionHint = document.getElementById("dashboardActionHint");
     const newPdfCount = document.getElementById("newPdfCount");
@@ -1384,6 +1432,8 @@ COCKPIT_HTML = """<!doctype html>
     dashboardProcessBtn.addEventListener("click", () => openScanDocu(false));
     dashboardReviewBtn.addEventListener("click", () => openScanDocu(true));
     dashboardWebAppsBtn.addEventListener("click", openWebAppsModal);
+    dashboardSamanthaBtn.addEventListener("click", () => postAction("/api/samantha/open", dashboardSamanthaBtn));
+    dashboardCodexBtn.addEventListener("click", () => postAction("/api/codex/open", dashboardCodexBtn));
     webAppsBtn.addEventListener("click", openWebAppsModal);
     webAppsCloseBtn.addEventListener("click", closeWebAppsModal);
     webAppsModal.addEventListener("click", (event) => {
@@ -1398,6 +1448,8 @@ COCKPIT_HTML = """<!doctype html>
     });
     scanDocuBtn.addEventListener("click", () => openScanDocu(false));
     scanDocuReviewBtn.addEventListener("click", () => openScanDocu(true));
+    samanthaChatBtn.addEventListener("click", () => postAction("/api/samantha/open", samanthaChatBtn));
+    codexCliBtn.addEventListener("click", () => postAction("/api/codex/open", codexCliBtn));
     processNextBtn.addEventListener("click", () => openScanDocu(false));
     reviewNextBtn.addEventListener("click", () => openScanDocu(true));
     documentSearchBtn.addEventListener("click", searchDocuments);
