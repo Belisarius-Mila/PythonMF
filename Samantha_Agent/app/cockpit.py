@@ -42,6 +42,7 @@ SCANDOCU_PORT = 8766
 SCANDOCU_LOG_DIR = PROJECT_ROOT / "data" / "private" / "documents" / "scandocu"
 SCANDOCU_LOG_FILE = SCANDOCU_LOG_DIR / "server.log"
 SCANDOCU_SERVER_SCRIPT = PROJECT_ROOT / "scripts" / "scandocu_server.py"
+GIT_ROOT = PROJECT_ROOT.parent
 LOCAL_WEB_APPS = {
     "family-video-organizer": PROJECT_ROOT / "docs" / "family-video-organizer",
 }
@@ -111,6 +112,41 @@ def cockpit_status() -> dict[str, Any]:
         "backup": format_backup_activity_reminder(),
         "vault": document_vault_status_summary(),
         "scandocu": probe_scandocu(),
+        "git": git_status_summary(),
+    }
+
+
+def git_status_summary(root: Path = GIT_ROOT) -> dict[str, Any]:
+    try:
+        completed = subprocess.run(
+            ["/usr/bin/git", "-C", str(root), "status", "--short", "--branch"],
+            capture_output=True,
+            text=True,
+            timeout=3,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return {"ok": False, "message": str(exc), "branch": "", "dirty_count": 0, "dirty_files": []}
+    if completed.returncode != 0:
+        return {
+            "ok": False,
+            "message": (completed.stderr or completed.stdout).strip(),
+            "branch": "",
+            "dirty_count": 0,
+            "dirty_files": [],
+        }
+    lines = [line for line in completed.stdout.splitlines() if line.strip()]
+    branch = lines[0].replace("## ", "", 1) if lines else ""
+    dirty_files = [line.strip() for line in lines[1:]]
+    message = "čistý pracovní strom" if not dirty_files else f"{len(dirty_files)} změn v pracovním stromu"
+    return {
+        "ok": True,
+        "message": message,
+        "branch": branch,
+        "dirty_count": len(dirty_files),
+        "dirty_files": dirty_files[:8],
+        "ahead": "ahead" in branch,
+        "behind": "behind" in branch,
     }
 
 
@@ -674,6 +710,20 @@ COCKPIT_HTML = """<!doctype html>
     button.secondary { background: #dfe5ec; }
     button:disabled { opacity: .6; cursor: wait; }
     .grid { display: grid; grid-template-columns: minmax(320px, 1.15fr) minmax(320px, .85fr); gap: 16px; align-items: start; }
+    .today-dashboard { display: grid; grid-template-columns: 1.05fr 1fr 1fr; gap: 12px; align-items: stretch; }
+    .dashboard-card { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); overflow: hidden; display: grid; grid-template-rows: auto 1fr; min-height: 168px; }
+    .dashboard-card h2 { margin: 0; padding: 12px 14px; font-size: 14px; border-bottom: 1px solid var(--line); background: #f8fafc; }
+    .dashboard-body { padding: 13px 14px; display: grid; gap: 10px; align-content: start; }
+    .dashboard-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .metric { border: 1px solid #edf0f4; border-radius: 7px; padding: 9px; background: #fbfcfe; min-width: 0; }
+    .metric-value { display: block; font-size: 24px; font-weight: 750; line-height: 1; }
+    .metric-label { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.25; }
+    .dashboard-list { display: grid; gap: 8px; }
+    .dashboard-row { display: grid; grid-template-columns: minmax(92px, auto) minmax(0, 1fr); gap: 10px; align-items: start; font-size: 13px; }
+    .dashboard-label { color: var(--muted); }
+    .dashboard-value { overflow-wrap: anywhere; }
+    .quick-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-content: start; }
+    .quick-actions button { width: 100%; }
     .work-grid { display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: 12px; align-items: stretch; }
     .work-card { border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: #fbfcfe; display: grid; gap: 10px; align-content: start; min-height: 170px; }
     .work-card h3 { margin: 0; font-size: 13px; color: #253047; }
@@ -722,8 +772,8 @@ COCKPIT_HTML = """<!doctype html>
     .app-description { color: #344054; font-size: 13px; line-height: 1.4; margin-top: 3px; }
     .app-kind { color: var(--muted); font-size: 12px; margin-top: 4px; }
     .button-link { display: inline-block; border-radius: 6px; padding: 9px 12px; font-weight: 650; text-decoration: none; background: var(--blue); color: white; white-space: nowrap; }
-    @media (max-width: 1050px) { .work-grid { grid-template-columns: 1fr; } }
-    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
+    @media (max-width: 1050px) { .today-dashboard { grid-template-columns: 1fr; } .work-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -738,6 +788,39 @@ COCKPIT_HTML = """<!doctype html>
     </div>
   </header>
   <main>
+    <div class="today-dashboard" aria-label="Dnešní přehled">
+      <section class="dashboard-card">
+        <h2>Dnes</h2>
+        <div class="dashboard-body">
+          <div class="dashboard-metrics">
+            <div class="metric"><span id="todayNewPdfCount" class="metric-value">0</span><span class="metric-label">nová PDF</span></div>
+            <div class="metric"><span id="todayReviewCount" class="metric-value">0</span><span class="metric-label">k revizi</span></div>
+            <div class="metric"><span id="todayProblemCount" class="metric-value">0</span><span class="metric-label">problémy</span></div>
+          </div>
+          <div id="todayHint" class="status-line"></div>
+        </div>
+      </section>
+      <section class="dashboard-card">
+        <h2>Stav</h2>
+        <div class="dashboard-body dashboard-list">
+          <div class="dashboard-row"><span class="dashboard-label">ScanDocu</span><span id="dashboardScanDocu" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Záloha</span><span id="dashboardBackup" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Git</span><span id="dashboardGit" class="dashboard-value"></span></div>
+        </div>
+      </section>
+      <section class="dashboard-card">
+        <h2>Akce</h2>
+        <div class="dashboard-body">
+          <div class="quick-actions">
+            <button class="primary" id="dashboardProcessBtn">Zpracovat další</button>
+            <button class="secondary" id="dashboardReviewBtn">Revidovat další</button>
+            <button class="secondary" id="dashboardWebAppsBtn">Webové aplikace</button>
+            <button class="secondary" id="dashboardRefreshBtn">Obnovit stav</button>
+          </div>
+          <div id="dashboardActionHint" class="status-line"></div>
+        </div>
+      </section>
+    </div>
     <div id="statusLine" class="status-line">Načítám stav...</div>
     <section>
       <h2>Práce s dokumenty</h2>
@@ -840,6 +923,18 @@ COCKPIT_HTML = """<!doctype html>
     const webAppsCloseBtn = document.getElementById("webAppsCloseBtn");
     const webAppsStatus = document.getElementById("webAppsStatus");
     const webAppsList = document.getElementById("webAppsList");
+    const todayNewPdfCount = document.getElementById("todayNewPdfCount");
+    const todayReviewCount = document.getElementById("todayReviewCount");
+    const todayProblemCount = document.getElementById("todayProblemCount");
+    const todayHint = document.getElementById("todayHint");
+    const dashboardScanDocu = document.getElementById("dashboardScanDocu");
+    const dashboardBackup = document.getElementById("dashboardBackup");
+    const dashboardGit = document.getElementById("dashboardGit");
+    const dashboardProcessBtn = document.getElementById("dashboardProcessBtn");
+    const dashboardReviewBtn = document.getElementById("dashboardReviewBtn");
+    const dashboardWebAppsBtn = document.getElementById("dashboardWebAppsBtn");
+    const dashboardRefreshBtn = document.getElementById("dashboardRefreshBtn");
+    const dashboardActionHint = document.getElementById("dashboardActionHint");
     const newPdfCount = document.getElementById("newPdfCount");
     const reviewCount = document.getElementById("reviewCount");
     const problemCount = document.getElementById("problemCount");
@@ -875,6 +970,7 @@ COCKPIT_HTML = """<!doctype html>
           : `<span class="warn">ScanDocu neběží</span> | ${data.scandocu ? data.scandocu.url : ""}`;
         backupText.textContent = data.backup || "";
         vaultText.textContent = data.vault || "";
+        renderDashboard(data);
         renderDocumentWork(data.document_work || {});
         renderDownloads(data.downloads || {});
       } catch (err) {
@@ -895,6 +991,8 @@ COCKPIT_HTML = """<!doctype html>
       problemCount.textContent = String(summary.problem_count || 0);
       processNextBtn.disabled = newItems.length === 0;
       reviewNextBtn.disabled = reviewItems.length === 0;
+      dashboardProcessBtn.disabled = newItems.length === 0;
+      dashboardReviewBtn.disabled = reviewItems.length === 0;
       renderWorkList(newPdfList, newItems, (item) => ({
         title: item.name || "",
         meta: `${item.status || ""} | ${item.modified_at || ""}`
@@ -907,6 +1005,60 @@ COCKPIT_HTML = """<!doctype html>
         title: item.name || "",
         meta: `${item.problem_label || item.status || ""} | ${item.modified_at || ""}`
       }), "Žádné zjevné problémy ve frontě.");
+    }
+
+    function renderDashboard(data) {
+      const work = data.document_work || {};
+      const summary = work.summary || {};
+      const review = work.review || {};
+      const newCount = summary.new_pdf_count || 0;
+      const reviewPending = summary.review_pending_count || review.pending_count || 0;
+      const problemTotal = summary.problem_count || 0;
+      todayNewPdfCount.textContent = String(newCount);
+      todayReviewCount.textContent = String(reviewPending);
+      todayProblemCount.textContent = String(problemTotal);
+      todayHint.textContent = dashboardTodayHint(newCount, reviewPending, problemTotal);
+      dashboardActionHint.textContent = newCount > 0
+        ? "Nejbližší akce: zpracovat další PDF přes ScanDocu."
+        : reviewPending > 0
+          ? "Nejbližší akce: revidovat uložený dokument."
+          : "Fronta nevypadá akutně.";
+
+      const scandocu = data.scandocu || {};
+      dashboardScanDocu.innerHTML = scandocu.running
+        ? `<span class="ok">běží</span> | ${scandocu.url || ""}`
+        : `<span class="warn">neběží</span> | ${scandocu.url || ""}`;
+
+      const backupState = classifyBackup(data.backup || "");
+      dashboardBackup.innerHTML = `<span class="${backupState.className}">${backupState.label}</span>`;
+
+      const git = data.git || {};
+      if (!git.ok) {
+        dashboardGit.innerHTML = `<span class="warn">nelze zjistit</span>`;
+      } else {
+        const gitClass = git.dirty_count ? "warn" : "ok";
+        const sync = git.ahead ? " | čeká push" : git.behind ? " | čeká pull" : "";
+        dashboardGit.innerHTML = `<span class="${gitClass}">${git.message || ""}</span>${sync}<br>${git.branch || ""}`;
+      }
+    }
+
+    function dashboardTodayHint(newCount, reviewPending, problemTotal) {
+      if (newCount > 0) return `Ve frontě je ${newCount} nových PDF.`;
+      if (reviewPending > 0) return `Nová PDF nejsou, ale ${reviewPending} uložených dokumentů čeká na revizi.`;
+      if (problemTotal > 0) return `Fronta nemá nové PDF, ale má ${problemTotal} položek k ruční kontrole.`;
+      return "Dokumentová fronta je klidná.";
+    }
+
+    function classifyBackup(text) {
+      if (!text) return {label: "neznámý stav", className: "warn"};
+      const lower = text.toLocaleLowerCase("cs-CZ");
+      if (lower.includes("starsi nez 3 dny") || lower.includes("starší než 3 dny") || lower.includes("chybi") || lower.includes("chybí")) {
+        return {label: "potřebuje zálohu", className: "warn"};
+      }
+      if (lower.includes("posledni uspesna") || lower.includes("poslední úspěšná")) {
+        return {label: "záloha evidovaná", className: "ok"};
+      }
+      return {label: "zkontrolovat", className: "warn"};
     }
 
     function renderWorkList(target, items, mapItem, emptyText) {
@@ -1228,6 +1380,10 @@ COCKPIT_HTML = """<!doctype html>
     }
 
     refreshBtn.addEventListener("click", refresh);
+    dashboardRefreshBtn.addEventListener("click", refresh);
+    dashboardProcessBtn.addEventListener("click", () => openScanDocu(false));
+    dashboardReviewBtn.addEventListener("click", () => openScanDocu(true));
+    dashboardWebAppsBtn.addEventListener("click", openWebAppsModal);
     webAppsBtn.addEventListener("click", openWebAppsModal);
     webAppsCloseBtn.addEventListener("click", closeWebAppsModal);
     webAppsModal.addEventListener("click", (event) => {

@@ -72,6 +72,14 @@ class CockpitTests(unittest.TestCase):
             self.assertEqual(status["problems"][1]["problem_kind"], "duplicate")
 
     def test_cockpit_html_contains_document_work_controls(self) -> None:
+        self.assertIn("Dnes", COCKPIT_HTML)
+        self.assertIn("Stav", COCKPIT_HTML)
+        self.assertIn("Akce", COCKPIT_HTML)
+        self.assertIn("todayNewPdfCount", COCKPIT_HTML)
+        self.assertIn("dashboardScanDocu", COCKPIT_HTML)
+        self.assertIn("dashboardGit", COCKPIT_HTML)
+        self.assertIn("dashboardProcessBtn", COCKPIT_HTML)
+        self.assertIn("renderDashboard(data)", COCKPIT_HTML)
         self.assertIn("Práce s dokumenty", COCKPIT_HTML)
         self.assertIn("Nová PDF ve Downloads", COCKPIT_HTML)
         self.assertIn("Uložené dokumenty k revizi", COCKPIT_HTML)
