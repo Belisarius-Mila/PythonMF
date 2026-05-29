@@ -11,6 +11,7 @@ from app.cockpit import (
     move_document_lifecycle_action,
     prepare_document_print_action,
     search_document_index,
+    web_apps_catalog,
 )
 
 
@@ -133,6 +134,24 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Tisknout", COCKPIT_HTML)
         self.assertIn("Archivovat", COCKPIT_HTML)
         self.assertIn("Do koše", COCKPIT_HTML)
+
+    def test_cockpit_html_contains_web_apps_modal(self) -> None:
+        self.assertIn("Webové aplikace", COCKPIT_HTML)
+        self.assertIn("webAppsModal", COCKPIT_HTML)
+        self.assertIn("/api/web-apps", COCKPIT_HTML)
+        self.assertIn("openWebApp(app)", COCKPIT_HTML)
+        self.assertIn("SamanthaWebApp_", COCKPIT_HTML)
+        self.assertNotIn('target = "_blank"', COCKPIT_HTML)
+        self.assertIn("Zavřít", COCKPIT_HTML)
+
+    def test_web_apps_catalog_contains_known_apps(self) -> None:
+        catalog = web_apps_catalog()
+        titles = {item["title"] for item in catalog["apps"]}
+
+        self.assertTrue(catalog["ok"])
+        self.assertIn("ScanDocu", titles)
+        self.assertIn("Lékárna", titles)
+        self.assertIn("Family Video Organizer", titles)
 
     def test_prepare_print_action_creates_queue_copy(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

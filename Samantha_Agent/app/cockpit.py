@@ -36,11 +36,70 @@ from app.documents.vault import (
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 COCKPIT_PORT = 8770
+COCKPIT_URL = f"http://127.0.0.1:{COCKPIT_PORT}"
 SCANDOCU_URL = "http://127.0.0.1:8766"
 SCANDOCU_PORT = 8766
 SCANDOCU_LOG_DIR = PROJECT_ROOT / "data" / "private" / "documents" / "scandocu"
 SCANDOCU_LOG_FILE = SCANDOCU_LOG_DIR / "server.log"
 SCANDOCU_SERVER_SCRIPT = PROJECT_ROOT / "scripts" / "scandocu_server.py"
+LOCAL_WEB_APPS = {
+    "family-video-organizer": PROJECT_ROOT / "docs" / "family-video-organizer",
+}
+WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
+    {
+        "id": "scandocu",
+        "title": "ScanDocu",
+        "description": "Kontrola, klasifikace a uložení PDF dokumentů z Downloads do soukromého document vaultu.",
+        "url": SCANDOCU_URL,
+        "kind": "lokální",
+    },
+    {
+        "id": "cockpit",
+        "title": "Samantha Cockpit",
+        "description": "Řídicí panel pro dokumenty, ScanDocu, zálohy a praktické rutiny Samanthy.",
+        "url": COCKPIT_URL,
+        "kind": "lokální",
+    },
+    {
+        "id": "lekarna",
+        "title": "Lékárna",
+        "description": "Šifrovaná webová evidence domácí lékárny s vyhledáním léků a stručnými pokyny.",
+        "url": "https://belisarius-mila.github.io/PythonMF/lekarna/",
+        "kind": "GitHub Pages",
+    },
+    {
+        "id": "matysek-mmtx",
+        "title": "Matýsek MMTX",
+        "description": "Příběhová dětská výuková aplikace se scénami, obrázky, hlasem a lekcemi Forest School.",
+        "url": "https://belisarius-mila.github.io/PythonMF/",
+        "kind": "GitHub Pages",
+    },
+    {
+        "id": "colors-numbers",
+        "title": "Colors and Numbers",
+        "description": "Jednoduchá výuková webová aplikace s barvami, čísly a sovími hlasovými nahrávkami.",
+        "url": "https://belisarius-mila.github.io/PythonMF/colors-numbers/",
+        "kind": "GitHub Pages",
+    },
+    {
+        "id": "vocabulary-en",
+        "title": "Vocabulary EN",
+        "description": "Obrazové kartičky pro anglická slovíčka, připravené z lokální slovníkové evidence.",
+        "url": "https://belisarius-mila.github.io/PythonMF/vocabulary-en/",
+        "kind": "GitHub Pages",
+    },
+    {
+        "id": "family-video-organizer",
+        "title": "Family Video Organizer",
+        "description": "Lokální prototyp pro třídění rodinných videí, výběr záběrů a přípravu podkladů pro sestřih.",
+        "url": "/local-apps/family-video-organizer/",
+        "kind": "lokální prototyp",
+    },
+)
+
+
+def web_apps_catalog() -> dict[str, Any]:
+    return {"ok": True, "apps": [dict(item) for item in WEB_APP_CATALOG]}
 
 
 def cockpit_status() -> dict[str, Any]:
@@ -450,10 +509,16 @@ class CockpitServer:
                 if parsed.path == "/api/status":
                     self.respond_json(cockpit_status())
                     return
+                if parsed.path == "/api/web-apps":
+                    self.respond_json(web_apps_catalog())
+                    return
                 if parsed.path == "/api/documents/search":
                     params = parse_qs(parsed.query)
                     query = params.get("q", [""])[0]
                     self.respond_json(search_document_index(query=query))
+                    return
+                if parsed.path.startswith("/local-apps/"):
+                    self.respond_local_app_file(parsed.path)
                     return
                 self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
 
@@ -520,7 +585,63 @@ class CockpitServer:
                 self.end_headers()
                 self.wfile.write(data)
 
+            def respond_local_app_file(self, request_path: str) -> None:
+                parts = [part for part in request_path.split("/") if part]
+                if len(parts) < 2 or parts[0] != "local-apps":
+                    self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
+                    return
+                app_id = parts[1]
+                root = LOCAL_WEB_APPS.get(app_id)
+                if root is None:
+                    self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
+                    return
+                rel_parts = parts[2:]
+                if not rel_parts:
+                    relative = Path("index.html")
+                elif request_path.endswith("/"):
+                    relative = Path(*rel_parts) / "index.html"
+                else:
+                    relative = Path(*rel_parts)
+                try:
+                    root_resolved = root.resolve(strict=True)
+                    target = (root / relative).resolve(strict=True)
+                except FileNotFoundError:
+                    self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
+                    return
+                if root_resolved != target and root_resolved not in target.parents:
+                    self.respond_json({"error": "forbidden"}, status=HTTPStatus.FORBIDDEN)
+                    return
+                if not target.is_file():
+                    self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
+                    return
+                data = target.read_bytes()
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", content_type_for_path(target))
+                self.send_header("Cache-Control", "no-store, max-age=0")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
         return Handler
+
+
+def content_type_for_path(path: Path) -> str:
+    suffix = path.suffix.casefold()
+    if suffix == ".html":
+        return "text/html; charset=utf-8"
+    if suffix == ".css":
+        return "text/css; charset=utf-8"
+    if suffix == ".js":
+        return "text/javascript; charset=utf-8"
+    if suffix == ".json":
+        return "application/json; charset=utf-8"
+    if suffix in {".png"}:
+        return "image/png"
+    if suffix in {".jpg", ".jpeg"}:
+        return "image/jpeg"
+    if suffix == ".webp":
+        return "image/webp"
+    return "application/octet-stream"
 
 
 COCKPIT_HTML = """<!doctype html>
@@ -589,8 +710,20 @@ COCKPIT_HTML = """<!doctype html>
     .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
     .message { margin-top: 10px; padding: 9px 10px; border-radius: 6px; background: #eef4ff; color: #1d3b74; font-size: 13px; }
     .hidden { display: none; }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 20; background: rgba(15, 23, 42, .42); display: flex; align-items: flex-start; justify-content: center; padding: 72px 18px 24px; }
+    .modal-backdrop.hidden { display: none; }
+    .modal { width: min(860px, 100%); max-height: calc(100vh - 96px); overflow: auto; background: white; border: 1px solid #cfd7e3; border-radius: 8px; box-shadow: 0 24px 60px rgba(15, 23, 42, .28); }
+    .modal-header { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 13px 14px; border-bottom: 1px solid var(--line); background: #f8fafc; }
+    .modal-header h2 { margin: 0; padding: 0; border: 0; background: transparent; }
+    .modal-body { padding: 13px 14px; display: grid; gap: 10px; }
+    .app-list { display: grid; gap: 9px; }
+    .app-card { border: 1px solid #edf0f4; border-radius: 8px; padding: 11px; background: #fbfcfe; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+    .app-title { font-weight: 750; }
+    .app-description { color: #344054; font-size: 13px; line-height: 1.4; margin-top: 3px; }
+    .app-kind { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .button-link { display: inline-block; border-radius: 6px; padding: 9px 12px; font-weight: 650; text-decoration: none; background: var(--blue); color: white; white-space: nowrap; }
     @media (max-width: 1050px) { .work-grid { grid-template-columns: 1fr; } }
-    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -598,6 +731,7 @@ COCKPIT_HTML = """<!doctype html>
     <h1>Samantha Cockpit</h1>
     <div class="toolbar">
       <button class="secondary" id="refreshBtn">Obnovit</button>
+      <button class="secondary" id="webAppsBtn">Webové aplikace</button>
       <button class="primary" id="scanDocuBtn">Otevřít ScanDocu</button>
       <button class="secondary" id="scanDocuReviewBtn">Revidovat uložené</button>
       <button class="secondary" id="terminalBtn">Terminál v projektu</button>
@@ -675,6 +809,18 @@ COCKPIT_HTML = """<!doctype html>
       <div class="body"><pre id="vaultText"></pre></div>
     </section>
   </main>
+  <div id="webAppsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="webAppsTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="webAppsTitle">Webové aplikace</h2>
+        <button class="secondary" id="webAppsCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div id="webAppsStatus" class="status-line">Načítám aplikace...</div>
+        <div id="webAppsList" class="app-list"></div>
+      </div>
+    </div>
+  </div>
   <script>
     const statusLine = document.getElementById("statusLine");
     const downloadsBody = document.getElementById("downloadsBody");
@@ -689,6 +835,11 @@ COCKPIT_HTML = """<!doctype html>
     const processNextBtn = document.getElementById("processNextBtn");
     const reviewNextBtn = document.getElementById("reviewNextBtn");
     const terminalBtn = document.getElementById("terminalBtn");
+    const webAppsBtn = document.getElementById("webAppsBtn");
+    const webAppsModal = document.getElementById("webAppsModal");
+    const webAppsCloseBtn = document.getElementById("webAppsCloseBtn");
+    const webAppsStatus = document.getElementById("webAppsStatus");
+    const webAppsList = document.getElementById("webAppsList");
     const newPdfCount = document.getElementById("newPdfCount");
     const reviewCount = document.getElementById("reviewCount");
     const problemCount = document.getElementById("problemCount");
@@ -1006,7 +1157,89 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
+    async function openWebAppsModal() {
+      webAppsModal.classList.remove("hidden");
+      webAppsStatus.textContent = "Načítám aplikace...";
+      webAppsList.innerHTML = "";
+      try {
+        const res = await fetch("/api/web-apps");
+        const data = await res.json();
+        renderWebApps(data.apps || []);
+        webAppsStatus.textContent = data.apps && data.apps.length
+          ? `${data.apps.length} aplikací k dispozici.`
+          : "Žádná aplikace není v katalogu.";
+      } catch (err) {
+        webAppsStatus.textContent = `Chyba načtení aplikací: ${err}`;
+      }
+    }
+
+    function closeWebAppsModal() {
+      webAppsModal.classList.add("hidden");
+    }
+
+    function renderWebApps(apps) {
+      webAppsList.innerHTML = "";
+      apps.forEach((app) => {
+        const card = document.createElement("div");
+        card.className = "app-card";
+        const text = document.createElement("div");
+        const title = document.createElement("div");
+        title.className = "app-title";
+        title.textContent = app.title || "";
+        const description = document.createElement("div");
+        description.className = "app-description";
+        description.textContent = app.description || "";
+        const kind = document.createElement("div");
+        kind.className = "app-kind";
+        kind.textContent = app.kind || "";
+        const link = document.createElement("button");
+        link.className = "button-link";
+        link.type = "button";
+        link.textContent = "Otevřít";
+        link.addEventListener("click", () => openWebApp(app));
+        text.appendChild(title);
+        text.appendChild(description);
+        text.appendChild(kind);
+        card.appendChild(text);
+        card.appendChild(link);
+        webAppsList.appendChild(card);
+      });
+    }
+
+    function openWebApp(app) {
+      if (!app || !app.url) return;
+      if (app.id === "scandocu") {
+        openScanDocu(false);
+        return;
+      }
+      const targetUrl = new URL(app.url, window.location.href).href;
+      const windowName = `SamanthaWebApp_${String(app.id || "app").replace(/[^A-Za-z0-9_]+/g, "_")}`;
+      const appWindow = window.open(
+        "about:blank",
+        windowName,
+        "popup=yes,width=1280,height=880,left=120,top=70"
+      );
+      if (appWindow) {
+        appWindow.location.href = targetUrl;
+        appWindow.focus();
+      } else {
+        showMessage(`Popup okno bylo blokováno, otevři ${targetUrl}`);
+      }
+    }
+
     refreshBtn.addEventListener("click", refresh);
+    webAppsBtn.addEventListener("click", openWebAppsModal);
+    webAppsCloseBtn.addEventListener("click", closeWebAppsModal);
+    webAppsModal.addEventListener("click", (event) => {
+      if (event.target === webAppsModal) {
+        closeWebAppsModal();
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !webAppsModal.classList.contains("hidden")) {
+        closeWebAppsModal();
+      }
+    });
     scanDocuBtn.addEventListener("click", () => openScanDocu(false));
     scanDocuReviewBtn.addEventListener("click", () => openScanDocu(true));
     processNextBtn.addEventListener("click", () => openScanDocu(false));
