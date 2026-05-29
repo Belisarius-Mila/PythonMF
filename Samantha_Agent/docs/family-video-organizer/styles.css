@@ -34,12 +34,12 @@ textarea {
 }
 
 .app-header {
-  height: 72px;
+  min-height: 72px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  padding: 0 22px;
+  padding: 10px 22px;
   background: #ffffff;
   border-bottom: 1px solid var(--line);
   position: sticky;
@@ -51,7 +51,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 12px;
-  min-width: 280px;
+  min-width: 250px;
 }
 
 .brand-mark {
@@ -149,48 +149,55 @@ p {
 .filter-panel {
   border-right: 1px solid var(--line);
   background: #fbfcfd;
-  padding: 16px;
+  padding: 12px 14px;
   overflow-y: auto;
 }
 
 .summary-strip {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(4, minmax(76px, 1fr));
+  gap: 6px;
+  min-width: 380px;
+  max-width: 520px;
+  flex: 1 1 420px;
 }
 
 .summary-strip div {
   border: 1px solid var(--line);
   background: var(--panel);
-  border-radius: 8px;
-  padding: 12px;
+  border-radius: 7px;
+  padding: 7px 9px;
 }
 
 .summary-strip strong {
   display: block;
-  font-size: 24px;
+  font-size: 19px;
   line-height: 1;
 }
 
 .summary-strip span {
   display: block;
-  margin-top: 5px;
+  margin-top: 4px;
   font-size: 12px;
   color: var(--muted);
 }
 
 .filters,
 .preview-panel {
-  margin-top: 16px;
+  margin-top: 12px;
   border: 1px solid var(--line);
   background: var(--panel);
   border-radius: 8px;
-  padding: 14px;
+  padding: 12px;
+}
+
+.filters {
+  margin-top: 0;
 }
 
 .filters label {
   display: block;
-  margin: 12px 0 6px;
+  margin: 9px 0 5px;
   color: var(--muted);
   font-size: 12px;
   font-weight: 700;
@@ -221,13 +228,13 @@ p {
 }
 
 .preview-panel h2 {
-  margin-top: 12px;
-  font-size: 18px;
+  margin-top: 9px;
+  font-size: 17px;
   line-height: 1.25;
 }
 
 .preview-panel p {
-  margin-top: 8px;
+  margin-top: 6px;
   color: var(--muted);
   font-size: 13px;
   overflow-wrap: anywhere;
@@ -235,13 +242,14 @@ p {
 
 .preview-images {
   display: grid;
-  gap: 8px;
-  margin-top: 14px;
+  gap: 6px;
+  margin-top: 10px;
 }
 
 .preview-image {
   width: 100%;
-  min-height: 110px;
+  height: min(46vh, 520px);
+  min-height: 220px;
   object-fit: contain;
   background: #101827;
   border-radius: 6px;
@@ -497,6 +505,16 @@ video {
 
   .preview-images {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .summary-strip {
+    min-width: 100%;
+    flex-basis: 100%;
+  }
+
+  .preview-image {
+    height: 180px;
+    min-height: 140px;
   }
 
   .table-scroll {

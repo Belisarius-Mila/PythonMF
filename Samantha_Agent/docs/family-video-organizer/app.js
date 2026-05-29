@@ -7,7 +7,9 @@ const state = {
   activeId: null,
   lockedId: null,
   directoryHandle: null,
+  videoHandlesByName: new Map(),
   videoFilesByName: new Map(),
+  videoObjectUrlsByName: new Map(),
 };
 
 const elements = {
@@ -268,15 +270,28 @@ async function playActiveVideo() {
 
 async function openVideo(video) {
   elements.modalTitle.textContent = video.originalName;
-  elements.videoFallback.textContent = "";
+  elements.videoFallback.textContent = "Načítám video...";
   elements.videoPlayer.removeAttribute("src");
+  elements.videoPlayer.load();
+  elements.videoModal.hidden = false;
+
+  const cachedHandle = state.videoHandlesByName.get(video.originalName);
+  if (cachedHandle) {
+    try {
+      const file = await cachedHandle.getFile();
+      setVideoSource(video.originalName, file);
+      return;
+    } catch {
+      elements.videoFallback.textContent = `Video nebylo nalezeno ve vybrané složce: ${video.originalName}`;
+    }
+  }
 
   if (state.directoryHandle && "getFileHandle" in state.directoryHandle) {
     try {
       const fileHandle = await state.directoryHandle.getFileHandle(video.originalName);
       const file = await fileHandle.getFile();
-      elements.videoPlayer.src = URL.createObjectURL(file);
-      elements.videoModal.hidden = false;
+      state.videoHandlesByName.set(video.originalName, fileHandle);
+      setVideoSource(video.originalName, file);
       return;
     } catch {
       elements.videoFallback.textContent = `Video nebylo nalezeno ve vybrané složce: ${video.originalName}`;
@@ -285,14 +300,40 @@ async function openVideo(video) {
 
   const selectedFile = state.videoFilesByName.get(video.originalName);
   if (selectedFile) {
-    elements.videoPlayer.src = URL.createObjectURL(selectedFile);
-    elements.videoModal.hidden = false;
+    setVideoSource(video.originalName, selectedFile);
     return;
   }
 
   elements.videoPlayer.src = video.videoPath || video.originalName;
-  elements.videoModal.hidden = false;
   elements.videoFallback.textContent = "Pokud se video nespustí, použij tlačítko Složka s videi a vyber složku nebo všechny MP4 soubory.";
+  playLoadedVideo();
+}
+
+function setVideoSource(name, file) {
+  let url = state.videoObjectUrlsByName.get(name);
+  if (!url) {
+    url = URL.createObjectURL(file);
+    state.videoObjectUrlsByName.set(name, url);
+  }
+  elements.videoPlayer.src = url;
+  elements.videoPlayer.load();
+  elements.videoFallback.textContent = "";
+  playLoadedVideo();
+}
+
+function clearVideoObjectUrls() {
+  for (const url of state.videoObjectUrlsByName.values()) {
+    URL.revokeObjectURL(url);
+  }
+  state.videoObjectUrlsByName = new Map();
+}
+
+async function playLoadedVideo() {
+  try {
+    await elements.videoPlayer.play();
+  } catch {
+    elements.videoFallback.textContent = "Video je připravené. Pokud se nespustilo samo, klikni do přehrávače.";
+  }
 }
 
 async function selectVideoFolder() {
@@ -300,18 +341,38 @@ async function selectVideoFolder() {
     elements.videoFolderInput.click();
     return;
   }
+  clearVideoObjectUrls();
   state.directoryHandle = await window.showDirectoryPicker({ mode: "read" });
+  state.videoHandlesByName = await indexVideoHandles(state.directoryHandle);
   state.videoFilesByName = new Map();
-  setSaveState("Složka s videi připojena");
+  setSaveState(`Složka s videi připojena: ${state.videoHandlesByName.size}`);
+}
+
+async function indexVideoHandles(directoryHandle) {
+  const handles = new Map();
+  if (!directoryHandle || !("entries" in directoryHandle)) return handles;
+  setSaveState("Indexuji složku s videi...");
+  try {
+    for await (const [name, handle] of directoryHandle.entries()) {
+      if (handle.kind === "file" && normalize(name).endsWith(".mp4")) {
+        handles.set(name, handle);
+      }
+    }
+  } catch {
+    setSaveState("Složka připojena bez indexu");
+  }
+  return handles;
 }
 
 function selectVideoFiles(files) {
+  clearVideoObjectUrls();
   const videoFiles = Array.from(files || []).filter((file) => {
     const name = normalize(file.name);
     return name.endsWith(".mp4") || file.type === "video/mp4";
   });
   state.videoFilesByName = new Map(videoFiles.map((file) => [file.name, file]));
   state.directoryHandle = null;
+  state.videoHandlesByName = new Map();
   setSaveState(`Video soubory připojeny: ${state.videoFilesByName.size}`);
 }
 
@@ -373,6 +434,7 @@ function closeModal() {
   elements.videoPlayer.pause();
   elements.videoPlayer.removeAttribute("src");
   elements.videoPlayer.load();
+  elements.videoFallback.textContent = "";
   elements.videoModal.hidden = true;
 }
 

@@ -54,6 +54,13 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Add MP4 files to the package as hardlinks or copies. Default package is lightweight.",
     )
+    parser.add_argument(
+        "--thumbnail-limit",
+        type=int,
+        default=1,
+        choices=(1, 2, 3),
+        help="Number of thumbnails copied per video. Default: 1 for email-friendly packages.",
+    )
     return parser.parse_args()
 
 
@@ -112,6 +119,7 @@ def make_video_record(
     family_map: dict[str, dict[str, str]],
     thumbs_dir: Path,
     package_thumbs_dir: Path,
+    thumbnail_limit: int,
 ) -> tuple[dict[str, object], int, int]:
     index = row["index"].strip().zfill(3)
     proposed_name = row.get("proposed_name", "").strip()
@@ -121,7 +129,7 @@ def make_video_record(
     thumbs: list[str] = []
     copied = 0
     missing = 0
-    for field in ("thumb_1", "thumb_2", "thumb_3"):
+    for field in ("thumb_1", "thumb_2", "thumb_3")[:thumbnail_limit]:
         name = row.get(field, "").strip()
         if not name:
             continue
@@ -250,7 +258,11 @@ def build_family_video_package(
     app_dir: Path = DEFAULT_APP_DIR,
     out_dir: Path = DEFAULT_OUT_DIR,
     include_videos: bool = False,
+    thumbnail_limit: int = 1,
 ) -> PackageSummary:
+    if thumbnail_limit not in (1, 2, 3):
+        raise ValueError("thumbnail_limit must be 1, 2, or 3")
+
     audit_csv = root / "03_audit" / "video_audit_described.csv"
     short_csv = root / "05_imovie_vyber_short" / "selection_manifest_short.csv"
     family_csv = root / "06_imovie_vyber_family" / "selection_manifest_family.csv"
@@ -276,7 +288,14 @@ def build_family_video_package(
     copied_thumbnails = 0
     missing_thumbnails = 0
     for row in read_csv(audit_csv):
-        record, copied, missing = make_video_record(row, short_map, family_map, thumbs_dir, package_thumbs_dir)
+        record, copied, missing = make_video_record(
+            row,
+            short_map,
+            family_map,
+            thumbs_dir,
+            package_thumbs_dir,
+            thumbnail_limit,
+        )
         videos.append(record)
         copied_thumbnails += copied
         missing_thumbnails += missing
@@ -308,6 +327,7 @@ def main() -> None:
         app_dir=args.app_dir,
         out_dir=args.out_dir,
         include_videos=args.include_videos,
+        thumbnail_limit=args.thumbnail_limit,
     )
     print(f"package={summary.output_dir}")
     print(f"videos={summary.videos}")

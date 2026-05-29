@@ -16,6 +16,12 @@
         <p id="projectMeta">Tomík rok 2</p>
       </div>
     </div>
+    <section class="summary-strip" aria-label="Souhrn">
+      <div><strong id="totalCount">0</strong><span>celkem</span></div>
+      <div><strong id="familyCount">0</strong><span>family</span></div>
+      <div><strong id="shortCount">0</strong><span>short</span></div>
+      <div><strong id="changedCount">0</strong><span>upraveno</span></div>
+    </section>
     <div class="header-actions">
       <span id="saveState" class="save-state">Připraveno</span>
       <button id="loadDataButton" class="secondary-button" type="button">Načíst data</button>
@@ -27,13 +33,6 @@
 
   <main class="workspace">
     <aside class="filter-panel">
-      <section class="summary-strip" aria-label="Souhrn">
-        <div><strong id="totalCount">0</strong><span>celkem</span></div>
-        <div><strong id="shortCount">0</strong><span>short</span></div>
-        <div><strong id="familyCount">0</strong><span>family</span></div>
-        <div><strong id="changedCount">0</strong><span>upraveno</span></div>
-      </section>
-
       <section class="filters" aria-label="Filtry">
         <label for="searchInput">Hledat</label>
         <input id="searchInput" type="search" placeholder="název, datum, původní soubor">
@@ -104,7 +103,7 @@
         <h2 id="modalTitle">Video</h2>
         <button id="closeModalButton" class="icon-button" type="button">Zavřít</button>
       </div>
-      <video id="videoPlayer" controls></video>
+      <video id="videoPlayer" controls preload="metadata"></video>
       <p id="videoFallback" class="video-fallback"></p>
     </div>
   </div>

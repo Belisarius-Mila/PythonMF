@@ -19,7 +19,13 @@ class TomikFamilyVideoPackageTests(unittest.TestCase):
             self._write_app(app_dir)
             self._write_private_source(root)
 
-            summary = build_family_video_package(root=root, app_dir=app_dir, out_dir=out_dir, include_videos=True)
+            summary = build_family_video_package(
+                root=root,
+                app_dir=app_dir,
+                out_dir=out_dir,
+                include_videos=True,
+                thumbnail_limit=3,
+            )
 
             self.assertEqual(summary.videos, 2)
             self.assertEqual(summary.short_videos, 1)
@@ -70,6 +76,9 @@ class TomikFamilyVideoPackageTests(unittest.TestCase):
             self.assertFalse(summary.includes_videos)
             self.assertFalse((out_dir / "videos" / "clip001.mp4").exists())
             self.assertIn("Slozka s videi", (out_dir / "README.md").read_text(encoding="utf-8"))
+
+            payload = self._read_videos_data(out_dir / "videos-data.js")
+            self.assertEqual(payload["videos"][0]["thumbs"], ["thumbs/clip001__1.jpg"])
 
     def _write_app(self, app_dir: Path) -> None:
         app_dir.mkdir(parents=True)
