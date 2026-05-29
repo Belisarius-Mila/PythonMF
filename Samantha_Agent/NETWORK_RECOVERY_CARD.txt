@@ -122,6 +122,193 @@ Vysledek:
 - Kdyz nejde ani `8.8.8.8`, pokracuj KROKEM 5.
 
 
+KROK 4A - KDYZ HOTSPOT FUNGUJE, ALE DOMACI WI-FI NE
+---------------------------------------------------
+
+Toto je jina situace nez uplne mrtva Wi-Fi. Kdyz iPhone hotspot funguje, znamena
+to obvykle:
+
+- Wi-Fi rozhrani Macu `en0` neni mrtve,
+- zakladni TCP/IP, DNS a Safari/ChatGPT umi fungovat,
+- podezreni se presouva na konkretni domaci Wi-Fi, router, DHCP, ruseni,
+  ulozeny profil site nebo konflikt po prepnuti site.
+
+Nez budes mazat macOS sitove konfigurace podle KROKU 5, udelej nejdriv toto.
+
+1. Na hotspotu si over aktualni stav:
+
+route -n get default
+ipconfig getifaddr en0
+ping -c 4 8.8.8.8
+ping -c 4 google.com
+
+U hotspotu by gateway casto vypadala jako `172.20.10.1`. To je v poradku.
+
+2. Odpoj hotspot a pripoj domaci Wi-Fi.
+
+Kdyz to nejde z menu baru, zkus jen vypnout a zapnout Wi-Fi:
+
+networksetup -setairportpower en0 off
+networksetup -setairportpower en0 on
+
+Potom se znovu pripoj k domaci Wi-Fi.
+
+3. Hned po pripojeni domaci Wi-Fi zadej:
+
+ipconfig getifaddr en0
+route -n get default
+
+Interpretace:
+
+- Neni zadna IP adresa: Mac se k domaci Wi-Fi nepripojil spravne nebo nedostal
+  DHCP lease. Zkus `sudo ipconfig set en0 DHCP`, pripadne restart routeru.
+- IP je `169.254...`: Mac nedostal DHCP od routeru. To ukazuje na router/DHCP,
+  spatny profil site, spatne heslo nebo ruseni.
+- IP je `192.168...` nebo `10...`, ale chybi default gateway: problem je
+  routovani/DHCP na domaci siti.
+- IP i gateway existuji: pokracuj ping testem.
+
+4. Otestuj gateway, internet a DNS:
+
+route -n get default
+
+Vystup ukaze radek `gateway: ...`. Tuto adresu pouzij v dalsim prikazu:
+
+ping -c 4 ADRESA_GATEWAY_Z_PREDCHOZIHO_VYSTUPU
+ping -c 4 8.8.8.8
+ping -c 4 google.com
+
+Interpretace:
+
+- Gateway nejde: problem je mezi Macem a domacim routerem/AP nebo v routeru.
+  Zkus sednout bliz k routeru, 2.4/5 GHz pasmo, restart routeru, pripadne jinou
+  domaci Wi-Fi sit.
+- Gateway jde, ale `8.8.8.8` nejde: router vidi Mac, ale nema internet/WAN nebo
+  spatne routuje.
+- `8.8.8.8` jde, ale `google.com` nejde: problem je DNS.
+- Vsechny tri pingy jdou, ale ChatGPT/Codex pada: spust watchdog nebo zkus
+  prohlizec/Safari; muze jit o kratke vypadky nebo HTTPS stabilitu.
+
+5. Kdyz domaci Wi-Fi ma IP, ale internet je divny, zkus odstranit DNS/proxy
+   podezreni:
+
+networksetup -getdnsservers Wi-Fi
+scutil --proxy
+
+Kdyz je nastavena necekana proxy, vypni ji v System Settings > Network > Wi-Fi >
+Details > Proxies.
+
+6. Kdyz domaci Wi-Fi stale nejde, ale hotspot ano:
+
+- nerus hned celou macOS sit podle KROKU 5,
+- zapomen domaci Wi-Fi v System Settings > Wi-Fi > Details > Forget This Network,
+- restartuj router/AP,
+- znovu se pripoj k domaci Wi-Fi,
+- pokud je dostupny Ethernet/USB-C adapter, otestuj kabel do routeru.
+
+7. Kdyz domaci Wi-Fi funguje na jinem zarizeni, ale na Macu ne:
+
+Toto je dulezity A/B test. Napriklad kdyz iPhone na stejne domaci Wi-Fi normalne
+otevre web pri vypnutych mobilnich datech, router a internetova linka jsou
+pravdepodobne v poradku. Podezreni se pak presouva na Mac:
+
+- ulozeny profil konkretni Wi-Fi site,
+- DHCP lease pro Mac,
+- Private Wi-Fi Address / zmenena MAC adresa,
+- DNS/proxy nastaveni jen na Macu,
+- ruseni nebo problem konkretniho pasma pro Mac.
+
+Prakticky dalsi postup:
+
+1. Na Macu dej u domaci Wi-Fi `Forget This Network`.
+2. Znovu se pripoj heslem.
+3. V detailu Wi-Fi zkus vypnout/zapnout `Private Wi-Fi Address`, pokud je
+   dostupna.
+4. Zadej:
+
+sudo ipconfig set en0 DHCP
+ipconfig getifaddr en0
+route -n get default
+
+5. Pokud Mac stale nedostane IP, restartuj router/AP.
+
+Kdyz naopak nejde mobilni 4G/5G na iPhonu, ale Wi-Fi na tom iPhonu jde, je to
+samostatny problem mobilnich dat operatora, SIM/eSIM, signalu, tarifu nebo
+nastaveni mobilnich dat. Neni to dukaz, ze je domaci Wi-Fi spatna.
+
+8. Kdyz mobilni data nejdou na vice telefonech:
+
+Kdyz 4G/5G nejde na Milove iPhonu ani na Janine iPhonu, ale domaci Wi-Fi na
+telefonu funguje, pravdepodobne se prekryvaji dve ruzne veci:
+
+- domaci Wi-Fi/linka muze byt v poradku,
+- mobilni sit operatora muze mit vypadek nebo slaby signal,
+- hotspot z iPhonu nemusi byt spolehlivy zalozni internet, pokud mobilni data
+  prave nefungují.
+
+Rychly test na iPhonu:
+
+1. Vypnout Wi-Fi.
+2. Zapnout mobilni data.
+3. Otevrit jednoduchy web v Safari.
+4. Zapnout/vypnout Letovy rezim na 10 sekund.
+5. V Nastaveni > Mobilni data zkusit prepnout 5G/4G/LTE podle dostupne volby.
+
+Interpretace:
+
+- Kdyz mobilni data nejdou na dvou telefonech se stejnym operatorem, je velmi
+  pravdepodobny vypadek operatora, lokalni slaby signal nebo problem tarifu/SIM.
+- Kdyz domaci Wi-Fi na telefonu jde, domaci router ma internet aspon pro telefon.
+- Kdyz Mac nejde na domaci Wi-Fi, ale telefon na domaci Wi-Fi jde, res Mac vs
+  domaci Wi-Fi profil/DHCP podle bodu 7.
+- Kdyz Mac jede pres hotspot, ale telefon tvrdi, ze mobilni data nejdou, over,
+  jestli Mac neni porad na domaci Wi-Fi nebo jine siti. Pouzij:
+
+route -n get default
+ipconfig getifaddr en0
+
+9. Kdyz funguje 5G, ale 4G ne:
+
+Pozor na nazvy:
+
+- `5G` muze znamenat mobilni 5G operatora,
+- `5 GHz` muze znamenat domaci Wi-Fi pasmo routeru,
+- `4G` obvykle znamena mobilni LTE/4G operatora, ne domaci Wi-Fi.
+
+Kdyz Mac funguje pres iPhone hotspot na mobilnim 5G, ale 4G/LTE na telefonech
+nejde, Mac a Wi-Fi rozhrani jsou pravdepodobne v poradku. Problem je nejspis
+v mobilni 4G/LTE vrstve operatora, signalu, lokalni bunce nebo nastaveni
+mobilnich dat. Prakticky:
+
+- nech iPhone pokud mozno na 5G, kdyz pres nej hotspot funguje,
+- na iPhonu zkus Letovy rezim na 10 sekund,
+- v Nastaveni > Mobilni data zkus prepnout hlas/data mezi 5G Auto, 5G On a LTE,
+- kdyz 4G nejde na dvou telefonech se stejnym operatorem, nepovazuj to za chybu
+  Macu ani domaci Wi-Fi.
+
+Kdyz naopak funguje domaci Wi-Fi pasmo 5 GHz, ale nefunguje druhe pasmo nebo
+jina domaci Wi-Fi sit, je podezreni na router/AP:
+
+- spatne pasmo 2.4 GHz nebo 5 GHz,
+- ruseni,
+- ulozeny profil site na Macu,
+- DHCP pro konkretni SSID,
+- problem routeru po padu nebo restartu.
+
+Prakticky:
+
+1. Pripoj Mac k tomu pasmu/SSID, ktere funguje.
+2. Pokud druhe pasmo/SSID nejde, zapomen jen tu problemovou sit a pridej ji
+   znovu.
+3. Restartuj router/AP az potom, kdyz problemove pasmo nejde ani na jinem
+   zarizeni.
+4. Pri stabilizaci prace zustan na fungujici ceste a nespoustej VPN/Tailscale,
+   dokud neni jasne, ze zakladni internet drzi.
+
+KROK 5 pouzij az kdyz nejde ani hotspot, nebo kdyz Mac nedostava IP adresu ani
+na vice ruznych sitich.
+
+
 KROK 5 - PLNA OPRAVA MACOS SITOVE KONFIGURACE
 ---------------------------------------------
 

@@ -2,7 +2,6 @@
 # Do not use this filter for the final encrypted disaster-recovery profile.
 .env
 .env.*
-Samantha_Agent/data/session_autosave/
 Samantha_Agent/data/email/
 Samantha_Agent/data/reminders/
 Tax/

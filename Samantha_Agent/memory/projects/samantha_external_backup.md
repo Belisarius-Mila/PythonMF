@@ -2,17 +2,20 @@
 
 Projekt zalozen 2026-05-19.
 
-## Aktualni stav 2026-05-26
+## Aktualni stav 2026-05-29
 
 Posledni uspesna ostra recovery zaloha je podle
-`Samantha_Agent/data/backup/activity_state.json` z 2026-05-19:
+`Samantha_Agent/data/backup/activity_state.json` z 2026-05-29:
 
 ```text
-/Volumes/SamanthaSecureBackup/SamanthaBackups/snapshots/20260519_200917/PythonMF
+/Volumes/SamanthaSecureBackup/SamanthaBackups/snapshots/20260529_225518/PythonMF
 ```
 
-K 2026-05-26 je zaloha starsi nez 3 dny. Mila je mimo domov a externi disk je
-doma, proto se ostra zaloha realne provede az v patek 2026-05-29.
+Zaloha probehla po odemceni kontejneru `SamanthaSecureBackup`. Behem behu se
+ukazalo, ze `Samantha_Agent/data/session_autosave/` narostlo zhruba na 30 GB a
+zbytecne prodlouzilo zalohu. Od 2026-05-29 se proto session autosave vynechava
+v `backup_rsync_filter_always.rules`, tedy i v recovery profilu. Autosave je
+nouzovy reconnect log, ne kanonicka disaster-recovery data.
 
 Do te doby ma Samantha/Codex pri kazdem startu nebo navazani zkontrolovat stav:
 
@@ -54,7 +57,6 @@ jako:
 - vynechava `.env` a `.env.*`,
 - vynechava `Samantha_Agent/data/email/`,
 - vynechava `Samantha_Agent/data/reminders/`,
-- vynechava `Samantha_Agent/data/session_autosave/`,
 - vynechava `Tax/`,
 - zalohuje jen `~/.codex/config.toml`, nikdy `~/.codex/auth.json`.
 
@@ -64,6 +66,9 @@ jako:
 - muze zahrnout `.env`, e-mailove lokalni archivy, reminders a Tax,
 - zahrnuje `~/.codex/config.toml`, `~/.codex/history.jsonl` a `~/.codex/sessions/`,
 - nikdy nezalohuje `~/.codex/auth.json`.
+
+Oba profily vzdy vynechavaji `Samantha_Agent/data/session_autosave/`, protoze jde
+o nouzove logy relaci s vysokym rizikem rychleho narustu velikosti.
 
 ## Skript
 

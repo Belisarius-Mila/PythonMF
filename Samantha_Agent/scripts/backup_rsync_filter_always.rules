@@ -1,5 +1,6 @@
 # Always skipped: rebuildable caches, virtual environments, generated apps,
-# editor/system noise. These are not needed for source-level recovery.
+# emergency session logs, editor/system noise. These are not needed for
+# source-level recovery and can grow very large.
 .DS_Store
 __pycache__/
 .pytest_cache/
@@ -10,5 +11,6 @@ venv/
 node_modules/
 build/
 dist/
+Samantha_Agent/data/session_autosave/
 *.pyc
 *.pyo
