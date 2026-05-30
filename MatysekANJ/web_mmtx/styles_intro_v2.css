@@ -291,6 +291,11 @@ body {
   pointer-events: auto;
 }
 
+.dialogue-hud .dialogue-door {
+  margin-left: 10px;
+  margin-right: auto;
+}
+
 .owl-garden-hud > * {
   pointer-events: auto;
 }
@@ -521,17 +526,17 @@ body {
 }
 
 .owl-garden-thumb {
-  right: 24px;
-  bottom: 24px;
-  width: min(10vw, 110px);
-  height: min(10vw, 110px);
-  min-width: 78px;
-  min-height: 78px;
+  left: 70%;
+  top: 34%;
+  width: min(5vw, 55px);
+  height: min(5vw, 55px);
+  min-width: 39px;
+  min-height: 39px;
   display: grid;
   place-items: center;
-  border-radius: 26px;
+  border-radius: 14px;
   background: rgba(255, 255, 255, 0.97);
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(1rem, 2vw, 1.5rem);
 }
 
 .owl-garden-thumb.hidden {
@@ -1068,21 +1073,7 @@ body {
 }
 
 .dialogue-door {
-  position: absolute;
-  right: 3.6%;
-  bottom: 8.2%;
-  width: min(10vw, 110px);
-  height: min(10vw, 110px);
-  min-width: 74px;
-  min-height: 74px;
-  display: grid;
-  place-items: center;
-  border: 3px solid var(--line);
-  border-radius: 24px;
   background: #f3d55d;
-  box-shadow: var(--shadow);
-  cursor: pointer;
-  z-index: 8;
   transition: transform 140ms ease, background 140ms ease;
 }
 
@@ -1092,11 +1083,6 @@ body {
 
 .dialogue-door:hover {
   transform: scale(1.04);
-}
-
-.dialogue-door-icon {
-  font-size: clamp(2.2rem, 4vw, 3.4rem);
-  line-height: 1;
 }
 
 .pulse-soft {
@@ -1294,11 +1280,9 @@ body {
   }
 
   .owl-garden-thumb {
-    right: 14px;
-    bottom: 14px;
-    min-width: 66px;
-    min-height: 66px;
-    border-radius: 22px;
+    min-width: 39px;
+    min-height: 39px;
+    border-radius: 14px;
   }
 
   .owl-garden-done {
