@@ -1,0 +1,335 @@
+Pozustalost / rodinny nouzovy balik
+Datum zalozeni: 2026-05-30
+Priorita: 1
+Pripomenout pri startu: ano
+
+Ucel
+----
+Projekt ma pripravit rodinny system pro pripad, ze by Mila, Jana nebo oba naraz
+zemreli nebo byli dlouhodobe neschopni jednat. Cilem neni ukladat citliva data
+do Samanthy nebo gitu, ale pripravit strukturu a postup, aby dcery vedely:
+
+- kde hledat dulezite informace,
+- koho kontaktovat,
+- co resit hned a co az pozdeji,
+- jak najit financni zavazky, pojistky, nemovitosti, vozidla a digitalni pristupy,
+- jak respektovat prani rodicu,
+- jak postupovat v pozustalostnim rizeni.
+
+Bezpecnostni zasada
+-------------------
+Tento soubor je jen navrh struktury. Nesmí obsahovat:
+
+- hesla,
+- obnovovaci klice,
+- rodna cisla,
+- cisla uctu,
+- cisla pojistnych smluv,
+- cisla uveru nebo hypotek,
+- cele kopie smluv,
+- pristupy k bankam, e-mailum, telefonu, iCloudu nebo password manageru.
+
+Skutecna data patri az do soukromeho sifrovaneho balicku mimo git, typicky:
+
+- sifrovany kontejner nebo archiv ulozeny na externim disku,
+- idealne jeste jedna offline zaloha,
+- jasne oznaceny soubor typu `Rodinny_nouzovy_balik_YYYY-MM-DD`,
+- testovana obnova bez toho, aby se heslo ukladalo do Samanthy.
+
+Heslo nebo pristupovy mechanismus nesmi byt ulozen v otevrenem textu. Je potreba
+zvolit postup, ktery dcery realne zvladnou, ale nezpusobi bezpecnostni riziko:
+
+- password manager s nouzovym pristupem,
+- zalepena obalka ulozena fyzicky oddelene,
+- rozdeleni tajemstvi mezi dve osoby,
+- notarska nebo jina pravni/bezpecna uschova,
+- jasny navod, jak se k heslu dostat, ale bez samotneho hesla v tomto projektu.
+
+Pravni ram v CR, orientacne
+---------------------------
+Toto neni pravni rada. Pravni cast je potreba pozdeji projit s notarem nebo
+advokatem, zejmena pokud pujde o zavet, dedickou smlouvu, nemovitosti,
+podnikani, vetsi majetek, dluhy, darovani nebo slozitejsi rodinne vztahy.
+
+Overene zdroje k 2026-05-30:
+
+- Portal verejne spravy: rizeni o pozustalosti probiha pred notarem jako
+  soudnim komisarem, soud rizeni zpravidla zahajuje bez navrhu na zaklade
+  oznameni matriky o umrti.
+  https://portal.gov.cz/informace/rizeni-o-pozustalosti-dedicke-rizeni-INF-82
+- Notarska komora CR: notar je jako soudni komisar poveren soudem, notare si
+  v pozustalostnim rizeni nelze libovolne vybrat.
+  https://www.nkcr.cz/sluzby/dedicke-pravo/projednani-pozustalosti
+- Portal verejne spravy: notarsky zapis o pravnim jednani pro pripad smrti se
+  tyka zejmena zaveti, dedicke smlouvy, dovetku, spravce pozustalosti nebo
+  prohlaseni o vydedeni; notarem sepsana zavet je evidovana u Notarske komory.
+  https://portal.gov.cz/sluzby-vs/sepsani-notarskeho-zapisu-o-pravnim-jednani-pro-pripad-smrti-S8616
+- Portal verejne spravy: Notarska komora CR muze osobam s pravnim zajmem
+  sdelit, zda je evidovana zavet nebo jina listina pro pripad smrti a u ktereho
+  notare je ulozena.
+  https://portal.gov.cz/sluzby-vs/sdeleni-informace-o-zaveti-S8607
+- Notarska komora CR: vyhrada soupisu je ochrana proti tomu, aby dedic hradil
+  dluhy zustavitele nad hodnotu nabyteho dedictvi; jde o vec k reseni v
+  pozustalostnim rizeni.
+  https://www.nkcr.cz/vasi-notari/detail/239_1064-pozustalostni-rizeni-slovnicek-pojmu
+
+Dulezite pravni body k promysleni
+---------------------------------
+1. Zavet
+   - Soukrome prani v sifrovanem souboru neni nahrada radne zaveti.
+   - Zavet ma formalni pravidla. Pro rodinny klid a dohledatelnost je vhodne
+     zvazit notarsky zapis a evidenci u Notarske komory CR.
+   - V zaveti by melo byt jasne, kdo ma co zdedit, pripadne co se ma prodat,
+     zachovat nebo rozdelit.
+
+2. Dedicka smlouva
+   - U manzelu muze byt zajimava dedicka smlouva, ale musi se resit s notarem.
+   - Ma vyssi stabilitu nez zavet, ale neni vhodna na vse bez pravni konzultace.
+
+3. Dovetek a odkazy
+   - Pro konkretni veci, prani nebo odkazy muze existovat dovetek.
+   - Prakticke pro veci sentimentalni hodnoty nebo drobnejsi urceni.
+
+4. Nepominutelni dedicove
+   - Potomci maji v ceskem dedickem pravu zvlastni postaveni.
+   - Pokud by rodice chteli majetek rozdelit jinak nez prirozene mezi deti,
+     je nutne to resit s notarem.
+
+5. Spolecne jmeni manzelu
+   - Pri umrti jednoho z manzelu se resi i vyporadani spolecneho jmeni.
+   - V praxi je dulezite mit prehled, co je spolecne, co je vyhradne jednoho
+     z manzelu a co je zatizeno hypotekou, pujckou nebo vecnym bremenem.
+
+6. Dluhy, uvery, hypoteky
+   - Dcery musi vedet, ze dluhy a zavazky se v pozustalosti resi systemove.
+   - Je dulezite konzultovat s notarem vyhradu soupisu, aby se neprehledly
+     zavazky nebo riziko predluzene pozustalosti.
+
+7. Spravce pozustalosti
+   - Pokud by majetek vyzadoval rychlou spravu, napr. firma, pronajem,
+     nemovitost, zvire, vozidlo nebo slozite zavazky, stoji za to probrat
+     s notarem povolani spravce pozustalosti.
+
+8. Prani mimo pravne zavaznou cast
+   - Pohreb, rozlouceni, komu dat vedet, co nezverejnovat, co udelat s osobnimi
+     vecmi, fotkami, digitalnim archivem nebo rodinnymi predmety.
+   - Tato prani mohou byt moralni a prakticka instrukce, ale nemusi mit stejnou
+     pravni vahu jako zavet.
+
+Navrhovana struktura sifrovaneho rodinneho balicku
+--------------------------------------------------
+Balicek by mel mit jednoduchou strukturu, aby ho dcery v krizove situaci
+nemusely lustit.
+
+1. START_ZDE.txt
+   - kratky lidsky navod,
+   - co je tento balik,
+   - kdy ho otevrit,
+   - koho kontaktovat jako prvniho,
+   - upozorneni, ze se nema unahlene manipulovat s ucty a majetkem bez notare.
+
+2. POSTUP_PRO_DCERY_PRI_UMRTI.txt
+   - prvnich 24 hodin,
+   - prvni tyden,
+   - pozustalostni rizeni,
+   - finance a uvery,
+   - nemovitosti,
+   - vozidla,
+   - pojistky,
+   - digitalni pozustalost.
+
+3. KONTAKTY.txt
+   - notarska kancelar nebo preferovany notar pro pripravu dokumentu,
+   - advokat,
+   - financni poradce nebo pojistovak,
+   - ucetni/danovy poradce,
+   - kontakt na zamestnavatele nebo dulezite instituce,
+   - rodinne kontakty.
+
+4. MAJETEK_PREHLED.txt
+   - nemovitosti,
+   - vozidla,
+   - bankovni instituce bez plnych pristupu,
+   - investice,
+   - hotovost a cenne veci,
+   - vybaveni domacnosti vyssi hodnoty,
+   - rodinne predmety se sentimentalni hodnotou.
+
+5. ZAVAZKY_PREHLED.txt
+   - hypoteky,
+   - pujcky,
+   - leasing,
+   - kreditni karty,
+   - pravidelne platby,
+   - zavazky vuci statu nebo institucim.
+
+6. POJISTKY_PREHLED.txt
+   - zivotni pojisteni,
+   - urazove pojisteni,
+   - pojisteni nemovitosti a domacnosti,
+   - povinne ruceni a havarijni pojisteni,
+   - cestovni pojisteni,
+   - kde jsou smlouvy a koho kontaktovat.
+
+7. PRAVNI_DOKUMENTY_KDE_JSOU.txt
+   - kde je zavet nebo notarsky zapis,
+   - kde je pripadna dedicka smlouva,
+   - kde jsou kupni smlouvy, LV, hypotecni smlouvy,
+   - kde jsou oddaci listy, rodne listy, dulezite listiny,
+   - co je v originalu a co jen kopie.
+
+8. DIGITALNI_POZUSTALOST.txt
+   - jak postupovat s mobilem, pocitacem, e-maily, iCloudem, Googlem,
+     socialnimi sitemi, weby, doménami a predplatnymi,
+   - kde je password manager,
+   - jak ziskat nouzovy pristup bez ukladani hesel do otevreneho textu,
+   - co s fotkami, videi a rodinnymi archivy.
+
+9. PRANI_RODICU.txt
+   - pohreb a rozlouceni,
+   - co by rodice chteli zachovat,
+   - co nema smysl resit,
+   - osobni vzkazy,
+   - veci pro vnuky a vnucky,
+   - citlive pokyny, ktere nejsou vhodne pro verejnou rodinnou diskusi.
+
+10. REVIZE_A_HISTORIE.txt
+   - datum posledni aktualizace,
+   - kdo kontroloval,
+   - co se zmenilo,
+   - dalsi planovana kontrola.
+
+Postup pro Milu a Janu
+----------------------
+Faze 1: Sucha mapa bez citlivych detailu
+
+- Sepsat seznam oblasti, ktere do balicku patri.
+- Nepsat zatim hesla ani cisla smluv.
+- Udelat prvni mapu: banky, pojistovny, nemovitosti, vozidla, uvery, investice,
+  digitalni ucty, rodinne dokumenty.
+- U kazde polozky uvest jen kde hledat a koho kontaktovat.
+
+Faze 2: Pravni konzultace
+
+- Domluvit notare a probrat zavet, pripadne dedickou smlouvu nebo dovetek.
+- Probrat, zda ma smysl spravce pozustalosti.
+- Probrat, jak nejlepe popsat nemovitosti, hypoteky a spolecne jmeni manzelu.
+- Overit, jak nalozit s pranim ohledne pohrebu a osobnich veci.
+
+Faze 3: Sifrovany private balik
+
+- Vytvorit soukromy adresar mimo git.
+- Vytvorit sifrovany kontejner nebo archiv.
+- Ulozit do nej strukturovane texty a pripadne PDF kopie.
+- Nechat v otevrene casti jen navod, kde je balik a jak se ma otevrit.
+- Otestovat, ze soubor jde otevrit na cistem pocitaci bez specialni znalosti.
+
+Faze 4: Pristup pro dcery
+
+- Vysvetlit dceram, ze balik existuje, kde je fyzicky ulozen a kdy ho pouzit.
+- Nedavat jim bez rozmyslu otevrene heslo v beznem chatu.
+- Nastavit nouzovy pristup tak, aby byl prakticky a nebyl zavisly na jednom
+  cloveku nebo jednom zarizeni.
+- Dat jim kratky papirovy navod: co delat prvni den a koho volat.
+
+Faze 5: Pravidelna revize
+
+- Kontrola minimalne jednou rocne.
+- Ihned aktualizovat po zmene nemovitosti, hypoteky, pojistky, banky, telefonu,
+  password manageru, rodinne situace nebo zaveti.
+- Po kazde vetsi zmene udelat novou verzi sifrovaneho balicku a otestovat
+  otevreni.
+
+Postup pro dcery pri umrti nebo vazne nehode
+--------------------------------------------
+Toto je orientacni postup, ktery se pozdeji dopracuje do samostatneho navodu.
+
+Prvni hodiny:
+
+- Pokud jde o nehodu nebo akutni stav, volat zachrannou sluzbu / policii podle
+  situace.
+- Postarat se o bezpeci lidi, deti, domacnosti, zvirat a majetku.
+- Nejednat ve stresu s financemi, nevybirat penize a nepodepisovat zavazne veci,
+  pokud to neni nezbytne a pravne jasne.
+- Najit `START_ZDE.txt` v rodinnem nouzovem balicku.
+
+Prvni dny:
+
+- Resit umrtní list a pohrebni zalezitosti.
+- Zjistit, kdo byl vypravitelem pohřbu, protoze ho casto kontaktuje notar v
+  uvodnim setreni.
+- Najit kontakt na notare/advokata pripravy dokumentu, ale pockat na notare
+  povereneho soudem pro pozustalostni rizeni.
+- Zajistit domacnost, nemovitosti, auta, doklady, klice a dulezite listiny.
+- Informovat nejblizsi rodinu a dulezite instituce podle checklistu.
+
+Pozustalostni rizeni:
+
+- Pocitat s tim, ze rizeni vede soud a prakticky ho resi notar jako soudni
+  komisar povereny soudem.
+- Pripravit pro notare prehled majetku, dluhu, pojistek, uctu, nemovitosti,
+  vozidel a dulezitych dokumentu.
+- Pokud existuji zavazky nebo nejistota kolem dluhu, zeptat se notare na vyhradu
+  soupisu.
+- Pokud existuje zavet nebo jina listina pro pripad smrti, upozornit na to
+  notare. Notarem evidovane listiny by mely byt dohledatelne pres prislusnou
+  evidenci.
+
+Finance a majetek:
+
+- Sepsat banky a instituce, ale nepristupovat do cizich uctu bez pravni jistoty.
+- Zkontrolovat trvale platby, pojistky, hypoteky, energie a zavazky, aby
+  nevznikaly zbytecne skody.
+- U nemovitosti zajistit fyzicke klice, alarmy, pojisteni, energie, vodu,
+  vytapeni a zakladni udrzbu.
+- U vozidel zajistit klice, technicky prukaz, pojisteni, parkovani a pripadne
+  odhlaseni/prodej az podle pravniho stavu.
+
+Digitalni pozustalost:
+
+- Neformatovat telefony a pocitace.
+- Nechat bezet dulezite zarizeni, pokud obsahuje pristupy nebo 2FA.
+- Najit navod k password manageru a nouzovemu pristupu.
+- Postupovat opatrne u e-mailu, iCloudu, fotek, domen, predplatnych a socialnich
+  siti.
+
+Co pripravit jako prvni konkretni praci
+---------------------------------------
+1. Zalozit soukromy working draft mimo git:
+   `data/private/pozustalost/`
+
+2. Vytvorit prazdne sablony:
+   - `START_ZDE.txt`
+   - `POSTUP_PRO_DCERY_PRI_UMRTI.txt`
+   - `KONTAKTY.txt`
+   - `MAJETEK_PREHLED.txt`
+   - `ZAVAZKY_PREHLED.txt`
+   - `POJISTKY_PREHLED.txt`
+   - `PRAVNI_DOKUMENTY_KDE_JSOU.txt`
+   - `DIGITALNI_POZUSTALOST.txt`
+   - `PRANI_RODICU.txt`
+   - `REVIZE_A_HISTORIE.txt`
+
+3. Nejdrive vyplnit jen oblasti a mista, kde dokumenty existuji.
+
+4. Teprve potom resit sifrovani, heslo a sdileni pristupu.
+
+5. Nakonec domluvit notare a pravne vycistit zavet / dedickou smlouvu / dovetek.
+
+Otevrene otazky pro dalsi sezeni
+--------------------------------
+- Chceme jen prakticky nouzovy balik, nebo i formalni notarskou pripravu zaveti?
+- Chceme, aby dcery mely pristup hned, nebo az pres nouzovy mechanismus?
+- Kdo ma byt prvni kontakt: dcera, obe dcery, nekdo dalsi z rodiny, advokat?
+- Jak resit pripad, ze zemre jen Mila, jen Jana, nebo oba naraz?
+- Co patri do pravne zavazne casti a co jen do prani?
+- Jak zajistit pristup k telefonu, pocitaci a 2FA bez nebezpecneho ukladani hesel?
+- Kolik kopii sifrovaneho balicku ma existovat a kde fyzicky budou?
+- Jak casto budeme delat revizi?
+
+Navrzeny dalsi krok
+-------------------
+Pri dalsim navazani projit tento soubor s Milou a Janou, vybrat nejmensi prakticky
+MVP a zalozit soukromy adresar `data/private/pozustalost/` s prazdnymi sablonami
+bez citlivych hodnot. Az po schvaleni struktury resit sifrovani, fyzicke ulozeni
+a notarskou konzultaci.
