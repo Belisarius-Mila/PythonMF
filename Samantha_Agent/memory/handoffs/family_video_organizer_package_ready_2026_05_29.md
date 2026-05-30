@@ -1,7 +1,7 @@
-Nazev: FamilyVideoOrganizer - realny lehky balicek pripraveny k testu
+Nazev: FamilyVideoOrganizer - realny lehky balicek poslany dceri
 Priorita: 1
-Stav: ceka na externi test
-Pripomenout pri startu: ano
+Stav: ceka na dcerin export JSON
+Pripomenout pri startu: ne
 Datum: 2026-05-29
 
 Co se resilo:
@@ -48,24 +48,23 @@ Co je hotove:
 - Tlacitko `Slozka s videi` je zelene.
 - Klik na radek nebo radkove `Play` zamkne aktivni radek, aby hover pri pohybu
   mysi k tlacitku `Play` neprepnul na jine video.
+- Mila 2026-05-29 doplnil, ze ZIP uz byl dceri poslany.
 
 Co neni hotove:
-- Neni jeste provedena zpetna realna zkouska u dcery.
 - Neni jeste zpracovan dcerin export JSON rozhodnuti.
+- Neni jeste potvrzeno, jak presne dopadl dcerin realny test.
 - Neni implementovan importer dcerina rozhodnuti zpet do short/family manifestu
   nebo do iMovie vyberu; to musi byt samostatny potvrzovany krok.
-- Neni finalizovany text doprovodne zpravy pro dceru.
 
 Dalsi krok:
-- Poslat dceri `family_video_organizer_light_20260528.zip` a kratky navod:
-  rozbalit ZIP, otevrit `index.html`, kliknout `Slozka s videi`, vybrat slozku
-  s MP4, projit rozhodnuti/poznamky a nakonec poslat zpet exportovany JSON.
+- Pockat na dcerin export JSON rozhodnuti/poznamek a potom ho pouze read-only
+  zkontrolovat; import zpet do short/family vyberu delat az po samostatnem
+  potvrzeni.
 
 Navrhovane dalsi kroky:
 - Okamzite:
-  - udelat jeste jeden rucni smoke test aktualniho ZIPu v Chrome/Edge nebo Safari,
-  - pripravit kratky lidsky navod pro dceru,
-  - poslat ZIP.
+  - pockat na exportovany JSON od dcery,
+  - po prijeti nacist JSON a shrnout rozdily bez automatickeho prepisu manifestu.
 - Po dcerine odpovedi:
   - nacist jeji JSON pres `Import draftu`,
   - zkontrolovat diff proti puvodnim short/family vyberum,

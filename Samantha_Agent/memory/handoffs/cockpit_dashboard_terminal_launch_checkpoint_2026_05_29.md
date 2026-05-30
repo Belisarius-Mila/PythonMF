@@ -1,8 +1,17 @@
 Nazev: Samantha Cockpit - dashboard a spousteni Samantha/Codex z UI
 Priorita: 1
-Stav: hotovo lokalne commitnuto, ceka push
-Pripomenout pri startu: ano
+Stav: hotovo, Cockpit commity uz jsou na origin/main
+Pripomenout pri startu: ne
 Datum: 2026-05-29
+
+Aktualizace 2026-05-29 pozdeji:
+- Puvodni stav `branch main ahead 6` je prekryty.
+- Podle `git log --oneline --decorate -12` jsou Cockpit commity uz na
+  `origin/main`.
+- Aktualni `HEAD` i `origin/main` jsou
+  `e123d52 Add emotion management tool notes`.
+- Dalsi cockpit krok uz neni push sesti commitu; podle potreby rucne retestovat
+  tlacitka `Samantha chat` / `Codex CLI`, nebo pokracovat v command inboxu.
 
 Co se resilo:
 - Navazalo se na Cockpit po checkpointu `cockpit_web_apps_checkpoint_2026_05_29.md`.
@@ -36,22 +45,23 @@ Overeni:
 - Cockpit proces po poslednim restartu poslouchal na portu 8770 jako PID `30834`.
 
 Co neni hotove:
-- Branch `main` je lokalne ahead proti `origin/main` o 6 commitu.
-- Push na GitHub zatim nebyl proveden.
-- Pracovni strom neni uplne cisty: zustava zmena v `Samantha_Agent/memory/contacts.md`, kterou Codex zamerne necommitoval bez vyslovneho potvrzeni kvuli citlivejsimu charakteru souboru.
+- Puvodni Cockpit push uz neni aktualni problem; Cockpit commity jsou na
+  `origin/main`.
+- Aktualni `HEAD` i `origin/main` jsou
+  `e123d52 Add emotion management tool notes`.
 - Externi zaloha Samanthy je stale stara: posledni uspesna zaloha je z 2026-05-19.
 
 Dalsi krok:
 - Pri navazani nejdrive spustit:
   - `.venv/bin/python scripts/backup_status.py`
   - `git -C /Users/miloslavfalta/Desktop/PythonMF status --short --branch`
-- Pokud Míla potvrdi publikaci, pushnout lokalni commity:
-  - `git -C /Users/miloslavfalta/Desktop/PythonMF push origin main`
-- Samostatne rozhodnout, co udelat s `memory/contacts.md`: zkontrolovat diff a commitnout jen po Milove vyslovnem potvrzeni, nebo ponechat lokalne.
+- Podle potreby rucne retestovat `Samantha chat` a `Codex CLI`.
+- Pokud se ma navazovat na hlasove/textove ovladani, pokracovat read-only
+  command inboxem, ne rizikovymi akcemi bez potvrzeni.
 
 Navrhovane dalsi kroky:
-- Okamzity: pushnout 6 lokalnich commitu na GitHub, pokud je internet stabilni a Míla souhlasi.
-- Potom rucne kliknout v Cockpitu na `Samantha chat` a `Codex CLI`, jestli Terminal otevre spravnou relaci.
+- Okamzity: rucne kliknout v Cockpitu na `Samantha chat` a `Codex CLI`, jestli Terminal otevre spravnou relaci.
+- Navazujici: pokud Míla chce ovladani z iPhonu, zacit textovym read-only command inboxem.
 - Volitelne pozdeji pridat do dashboardu jasnejsi tlacitko `Pushnout commity` az po navrhu bezpecne potvrzovaci brany.
 
 Zmenene nebo relevantni soubory:
@@ -62,7 +72,6 @@ Zmenene nebo relevantni soubory:
 - `memory/handoffs/cockpit_web_apps_checkpoint_2026_05_29.md`
 - `memory/ACTIVE_PROJECTS.md`
 - `memory/MEMORY_INDEX.md`
-- `memory/contacts.md` - zustava mimo commit; neukladat obsah do handoffu.
 
 Bezpecnost / neukladat:
 - Necommitovat `data/private/`.

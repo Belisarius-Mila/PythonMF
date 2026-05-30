@@ -70,6 +70,23 @@ jako:
 Oba profily vzdy vynechavaji `Samantha_Agent/data/session_autosave/`, protoze jde
 o nouzove logy relaci s vysokym rizikem rychleho narustu velikosti.
 
+## Pripomenout pri pristi recovery zaloze
+
+Pri pristim pripojeni disku udelat novou recovery zalohu uz s opravenym filtrem,
+tedy bez `Samantha_Agent/data/session_autosave/`.
+
+Postup:
+
+1. Spustit dry-run recovery zalohy do pripojeneho sifrovaneho kontejneru.
+2. Spustit ostrou recovery zalohu az po uspesnem dry-runu.
+3. Overit, ze novy snapshot ma `backup_manifest.txt` a `READ_ME_FIRST_RECOVERY.md`.
+4. Overit, ze `.venv/bin/python scripts/backup_status.py` ukazuje nove datum
+   posledni uspesne zalohy.
+5. Teprve potom se samostatnym potvrzenim od Mily smazat jen stary nafouknuty
+   snapshot `20260529_225518`.
+
+Stary snapshot `20260529_225518` nemazat pred vznikem a overenim noveho snapshotu.
+
 ## Skript
 
 Pripraveny zaklad:

@@ -98,8 +98,8 @@ Aktualni dalsi krok:
 
 ## Aktualni kanonicky stav 2026-05-29
 
-Projekt zustava priorita 1. Aktualni prakticky smer je otestovat u dcery
-lehky balicek `FamilyVideoOrganizer` bez kopirovani MP4 souboru.
+Projekt zustava priorita 1. Aktualni prakticky smer je pockat na dcerin
+export JSON z lehkeho balicku `FamilyVideoOrganizer` bez kopirovani MP4 souboru.
 
 Hotove:
 
@@ -114,6 +114,7 @@ Hotove:
   autosave a export JSON.
 - Dcera muze ZIP rozbalit kamkoli, nejlepe vedle slozky s MP4; v Safari vybere
   MP4 soubory nebo slozku podle podpory prohlizece.
+- Mila 2026-05-29 doplnil, ze ZIP uz byl dceri poslany.
 
 Overeno:
 
@@ -123,8 +124,8 @@ Overeno:
 
 Dalsi krok:
 
-- Poslat ZIP dceri, nechat ji vybrat slozku/soubory s MP4, udelat rozhodnuti
-  a poznamky, a poslat zpet exportovany JSON.
+- Pockat na dcerin exportovany JSON s rozhodnutimi a poznamkami.
+- Po prijeti JSON nejdriv udelat read-only kontrolu a shrnuti rozdilu.
 - Import dcerina JSON zpet do short/family vyberu delat az jako samostatny
   potvrzeny krok.
 
