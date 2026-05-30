@@ -72,3 +72,285 @@ Zase k emocím asi nejstrašnější věc která ty emoce podporuje a je to tako
 
 QN -29:
 Napadlo mě nazvat to téma emoce pracovní Emotion Management Tool…
+
+---
+
+EMT jako mobilní aplikace pro iPhone a Android
+
+Pracovní představa: Emotion Management Tool by mohl být mobilní aplikace pro
+okamžiky, kdy je člověk pod tlakem nepříjemné emoce a sám v tu chvíli nedokáže
+dobře přemýšlet. Aplikace by neměla nahrazovat psychologa, právníka ani krizovou
+linku. Měla by být první bezpečná brzda: rychle zachytit stav, snížit tlak,
+zabránit impulzivní reakci, pomoci emoci vypustit bezpečným způsobem a podle
+příčiny nabídnout rozumný další krok.
+
+Základní princip aplikace je: v akutním stavu nesmí uživatel dostat složitou
+teorii. Potřebuje velká jednoduchá tlačítka, krátké věty, klidný tón a minimum
+rozhodování. Aplikace by měla počítat s tím, že člověk může být rozzlobený,
+ponížený, vyděšený, zraněný, zahlcený, v sebelítosti nebo v pocitu křivdy. V tu
+chvíli je důležité ho nehodnotit a nepřesvědčovat, ale nejdřív ho bezpečně
+zpomalit.
+
+První obrazovka
+
+První obrazovka by měla být nouzově jednoduchá:
+
+Nadpis:
+
+Zastavme to na chvíli.
+
+Pod tím krátká věta:
+
+Teď nemusíš nic řešit naráz. Nejdřív snížíme tlak, potom vybereme další krok.
+
+Hlavní tlačítka:
+
+1. Jsem naštvaný / naštvaná
+2. Je mi líto / cítím křivdu
+3. Bojím se / jsem v panice
+4. Chci někomu hned napsat nebo zavolat
+5. Cítím se poníženě nebo odmítnutě
+6. Mám problém ve vztahu
+7. Mám problém v práci
+8. Mám problém s rodinou
+9. Mám právní nebo úřední problém
+10. Potřebuji krizovou pomoc
+
+Uživatel by mohl vybrat jedno nebo více tlačítek. Více výběrů je důležitých,
+protože emoce nebývají čisté. Člověk může být zároveň rozzlobený, ponížený a mít
+strach z následků. Aplikace by z výběru sestavila krátký průchod: nejdřív
+uklidnění těla, potom bezpečné vypuštění emoce, potom rozlišení příčiny a teprve
+nakonec návrh akce.
+
+Akutní uklidnění
+
+Po prvním výběru by aplikace měla automaticky nabídnout krátký uklidňovací
+režim. Ne jako ezoteriku, ale jako praktickou brzdu:
+
+- Odlož telefonát nebo zprávu o 10 minut.
+- Pokud můžeš, odejdi fyzicky z místa konfliktu.
+- Napij se vody.
+- Polož obě nohy na zem.
+- Napiš sem všechno, co bys nejraději řekl. Zatím to nikomu neposílej.
+- Aplikace může nastavit časovač: 90 sekund, 3 minuty, 10 minut.
+
+V akutní fázi by aplikace měla jasně rozlišovat mezi textem pro vypuštění emoce
+a textem k odeslání. Mohla by mít režim "bezpečný výlev", kde uživatel napíše
+nejostřejší verzi toho, co cítí. Aplikace by u toho opakovala: Toto je jen
+ventil, ne zpráva k odeslání. Po dopsání by nabídla tři kroky:
+
+1. Nechat text zavřený v aplikaci.
+2. Přepsat ho do klidnější verze.
+3. Smazat ho po přečtení.
+
+Mapování problému
+
+Po prvním zklidnění by aplikace mohla položit několik krátkých otázek formou
+tlačítek:
+
+- Co to spustilo?
+- Kdo je v tom zapojen?
+- Musíš reagovat hned?
+- Hrozí reálná škoda, nebo jde hlavně o emoční tlak?
+- Potřebuješ spíš uklidnit, poradit, připravit odpověď, nebo najít pomoc?
+
+Oblasti problému:
+
+- vztah / partner
+- děti / rodina
+- práce / kolega / šéf
+- peníze / dluh / smlouva
+- úřad / policie / soud
+- zdraví
+- osamělost
+- pocit křivdy
+- stud / ponížení
+- strach z budoucnosti
+- konflikt přes zprávy
+- opakující se myšlenka
+
+Každá oblast by vedla na jinou obrazovku. Například:
+
+Konflikt přes zprávy:
+
+- Aplikace doporučí nic neposílat v první vlně.
+- Nabídne návrh neutrální odpovědi: "Teď jsem rozhozený, ozvu se později."
+- Nabídne uložit koncept a připomenout návrat za 30 minut.
+- Nabídne přepsat ostrý text do tří verzí: velmi krátká, klidná, pevná.
+
+Vztahový konflikt:
+
+- Aplikace oddělí bolest od útoku.
+- Zeptá se, jestli jde o jednorázovou hádku nebo opakovaný vzorec.
+- Nabídne formulaci: "Potřebuju pauzu, nechci teď říct něco, čeho bych litoval."
+- Později nabídne přípravu rozhovoru: co chci říct, co nechci udělat, co je
+  minimální cíl.
+
+Pracovní konflikt:
+
+- Aplikace upozorní, že písemná reakce může mít následky.
+- Doporučí uložit fakta zvlášť od emocí.
+- Nabídne jednoduchý zápis: datum, kdo, co se stalo, svědci, dokumenty.
+- Podle závažnosti nabídne poradit se s HR, odbory, právníkem nebo blízkou osobou.
+
+Právní nebo úřední problém:
+
+- Aplikace nesmí dávat definitivní právní rady.
+- Může pomoci udělat pořádek: co se stalo, termíny, dokumenty, kdo poslal výzvu,
+  jaká je lhůta.
+- Pokud je riziko vysoké, doporučí právní konzultaci.
+- Může nabídnout checklist: nic nemaž, schovej dokumenty, nereaguj útočně,
+  ověř lhůty, zapiš časovou osu.
+
+Sebelítost a pocit křivdy:
+
+- Aplikace by měla citlivě rozlišit bolest od přiživování bolesti.
+- Nemá říkat "nelituj se", protože to člověka v akutní fázi jen zraní.
+- Může říct: "Bolest je skutečná. Teď se ale podíváme, jestli ji tvoje hlava
+  právě nezvětšuje opakováním stejného příběhu."
+- Nabídne cvičení: napiš, co se stalo; napiš, co si k tomu tvoje hlava přidává;
+  napiš jednu věc, kterou můžeš udělat dnes.
+
+Krizová větev
+
+Aplikace musí mít viditelnou krizovou větev. Pokud uživatel vybere "Potřebuji
+krizovou pomoc", nebo pokud text obsahuje signály sebepoškození, násilí,
+domácího násilí, vydírání, akutního strachu nebo ztráty kontroly, aplikace má
+přepnout do bezpečnostního režimu.
+
+Bezpečnostní režim:
+
+- krátká věta: "Teď je důležitá bezpečnost, ne dokonalé řešení."
+- tlačítko zavolat tísňovou linku podle země
+- tlačítko kontaktovat blízkou osobu
+- tlačítko zobrazit krizové linky
+- tlačítko najít odbornou psychologickou pomoc
+- u právního/domácího násilí možnost zobrazit právní poradnu nebo organizace,
+  které řeší domácí násilí
+
+Pro Českou republiku by bylo možné mít uložený lokální seznam kontaktů: 112,
+155, Linka první psychické pomoci, krizová centra, Bílý kruh bezpečí, případně
+další ověřené organizace. Pro jiné země by se seznam měl řídit lokalizací.
+Kontakty se musí pravidelně aktualizovat a zdrojovat.
+
+Osobní profily a připravené plány
+
+Silná stránka aplikace by byla v tom, že se připraví předem, ne až v krizi.
+Uživatel by si mohl v klidném stavu nastavit:
+
+- moje nejčastější spouštěče
+- lidé, kterým nemám psát v první vlně
+- moje bezpečná věta pro odklad reakce
+- můj krizový kontakt
+- co mi obvykle pomáhá
+- co mi naopak škodí
+- jak poznám, že už nejde jen o emoci, ale o riziko
+
+Aplikace by potom v akutní chvíli nemusela začínat od nuly. Mohla by říct:
+
+"Toto je jeden z tvých známých spouštěčů. Minule pomohlo nepsat hned, projít
+3minutový ventil a vrátit se k odpovědi později."
+
+Soukromí a ukládání dat
+
+Protože půjde o velmi citlivé texty, výchozí režim musí být privacy-first:
+
+- data ukládat primárně lokálně v telefonu
+- umožnit zámek Face ID / Touch ID / PIN
+- citlivé zápisy šifrovat
+- nedělat cloudovou synchronizaci bez výslovného souhlasu
+- umožnit automatické smazání "výlevu" po určité době
+- jasně oddělit lokální záznamy od případné AI analýzy
+
+Pokud by aplikace používala AI, musí být uživateli jasné, kdy text opouští
+telefon. Ideální MVP by mohlo začít bez AI: pravidlový průvodce, tlačítka,
+časovače, předpřipravené texty a lokální deník. AI by přišla až později jako
+volitelná vrstva pro přepis ostré zprávy do klidnější verze, shrnutí situace
+nebo návrh dalšího kroku.
+
+Možný návrh aplikace
+
+Technicky dává smysl multiplatformní vývoj:
+
+1. React Native / Expo
+   - rychlý vývoj pro iPhone i Android
+   - dobré pro prototyp a MVP
+   - snadnější sdílení jedné kódové základny
+
+2. Flutter
+   - také jedna kódová základna pro iOS i Android
+   - velmi dobré UI a výkon
+   - vhodné, pokud se bude chtít uhlazenější aplikace
+
+3. Nativní Swift + Kotlin
+   - nejlepší integrace do systému
+   - dražší a pomalejší vývoj
+   - vhodné až pro vyspělou verzi
+
+Prakticky bych začal React Native / Expo nebo Flutterem. První MVP nemusí umět
+všechno. Mělo by umět:
+
+- první akutní obrazovku
+- výběr emocí a oblastí problému
+- 3minutový uklidňovací průchod
+- bezpečný textový ventil
+- přepis ostré zprávy do klidné verze podle šablon
+- krizovou obrazovku s kontakty
+- lokální historii jen pokud ji uživatel výslovně zapne
+- nastavení osobních spouštěčů a bezpečných vět
+
+Datový model MVP:
+
+- EmotionEvent: čas, vybrané emoce, oblast problému, intenzita, poznámka
+- Trigger: název, popis, doporučený postup
+- SafePlan: bezpečná věta, krizový kontakt, co pomáhá, co ne
+- VentText: soukromý text, volba smazat/uložit/přepsat
+- HelpResource: typ pomoci, země, kontakt, URL, ověřeno kdy
+
+Distribuce
+
+První fáze:
+
+- prototyp jen pro osobní testování
+- iPhone přes TestFlight
+- Android přes interní testování v Google Play Console nebo APK pro omezený okruh
+- bez veřejné reklamy, nejdřív ověřit, že průchod opravdu pomáhá a neškodí
+
+Druhá fáze:
+
+- beta pro malé množství známých uživatelů
+- sběr anonymní zpětné vazby bez citlivých textů
+- doplnění krizových kontaktů a právních upozornění podle země
+- kontrola textů psychologem a právníkem
+
+Třetí fáze:
+
+- veřejné vydání v App Store a Google Play
+- jasné disclaimer texty: aplikace není zdravotnický prostředek, nenahrazuje
+  psychoterapii, psychiatra, právníka ani tísňové služby
+- pravidelná aktualizace kontaktů krizové pomoci
+- samostatná privacy policy
+
+Rizika
+
+Největší riziko je, že aplikace v těžké situaci uživatele špatně uklidní,
+bagatelizuje skutečné nebezpečí, nebo ho naopak nechá v samotě, když potřebuje
+člověka. Proto musí být krizová větev jednoduchá a viditelná. Aplikace má být
+brzda, kompas a bezpečný prostor, ne autorita, která rozhoduje za uživatele.
+
+Druhé riziko je práce s citlivými daty. Emoční texty mohou obsahovat jména,
+vztahy, právní problémy, zdravotní informace a intimní detaily. Výchozí stav
+musí být lokální, šifrovaný a opatrný. Žádné posílání do cloudu bez jasného
+souhlasu.
+
+Třetí riziko je přílišná složitost. Člověk v emoci nezvládne dlouhé menu. Proto
+musí být akutní režim extrémně jednoduchý a pokročilé funkce až v klidném režimu.
+
+Shrnutí ideje
+
+EMT aplikace by měla být osobní emoční brzda v kapse. V první minutě člověka
+zastaví, ve třetí minutě mu dá bezpečný ventil, v desáté minutě mu pomůže
+rozlišit příčinu a později mu nabídne rozumnou akci. Někdy to bude jen odložit
+zprávu. Někdy přepsat ostrou odpověď. Někdy pojmenovat sebelítost. Někdy uložit
+fakta k pracovnímu nebo právnímu problému. A někdy jasně říct: tohle už není na
+aplikaci, teď je potřeba člověk, psycholog, krizová linka, lékař nebo právník.
