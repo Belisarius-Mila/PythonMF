@@ -1,0 +1,9 @@
+Use case: illustration-story
+Asset type: concept screen for a preschool English learning web game
+Primary request: Wide children's storybook illustration for Scene 4, "Old Bridge and Basket".
+Scene/backdrop: A small wooden bridge over a shallow stream at the edge of the forest, with reeds, stones, dragonflies, and a lost picnic basket near the bridge.
+Subject: Benji, Bunny, Bruno, Fiona, and Sunny gather around the basket and their own travel objects. The scene should support "I have a map", "I have a carrot", "I have a lantern", "I have a scarf", "I have nuts".
+Composition: Wide game-screen frame. Put the basket and objects in clear clickable positions: map, carrot, lantern, scarf, nuts, apples. Animals should be near their objects but not covering them. Leave room at top for HUD.
+Style: polished children's storybook digital art, gentle water reflections, warm friendly colors, clear object silhouettes for preschool interaction.
+Avoid: written labels, text, logos, watermarks, scary bridge, cluttered basket.
+

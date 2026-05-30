@@ -1,0 +1,8 @@
+Use case: illustration-story
+Asset type: concept screen for a preschool English learning web game
+Primary request: Wide children's storybook illustration for Scene 6, "Lake Feast Finale".
+Scene/backdrop: A beautiful forest lake clearing with warm evening light, lily pads, lanterns, picnic blankets, baskets of apples and berries, and a calm lake behind.
+Subject: A joyful gathering of forest animals at the lake. Include Benji, Bunny, Bruno the badger, Fiona the fox, Sunny the squirrel, Owl, plus several background forest animals such as deer, hedgehog, duck, frog, mouse, and bird. The main five friends should remain prominent in the foreground.
+Composition: Wide final screen, celebratory but readable. Foreground has the main friends around a picnic blanket. Background animals are smaller but friendly. No text. Leave top area clear for HUD and final replay button.
+Style: polished warm children's book finale, magical lantern glow, happy faces, rich but organized composition.
+Avoid: written text, logos, watermarks, overcrowding, scary night, photorealism.

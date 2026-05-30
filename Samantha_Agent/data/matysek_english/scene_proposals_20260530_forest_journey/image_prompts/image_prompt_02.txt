@@ -1,0 +1,9 @@
+Use case: illustration-story
+Asset type: concept screen for a preschool English learning web game
+Primary request: Wide children's storybook illustration for Scene 2, "Mossy Stump Rest".
+Scene/backdrop: A cozy forest rest stop with a large mossy stump, fern leaves, acorns, a small travel map on the ground, and warm shafts of sunlight through trees.
+Subject: Benji, Bunny, Bruno the badger, Fiona the fox, and Sunny the squirrel are resting. Bunny sits on the stump, Benji looks cheerful but tired, Bruno holds a small lantern, Fiona adjusts a scarf, Sunny has nuts nearby.
+Composition: Wide game-screen frame with the characters placed at different heights around the stump, leaving clickable empty spaces around the map, carrot, lantern, scarf, and nuts. Top area remains clear for HUD.
+Style: warm polished children's book digital painting, playful, calm, cozy forest colors, expressive tired-but-happy animal faces.
+Avoid: text, letters, speech bubbles, dark scary forest, realistic animal anatomy, cluttered objects.
+

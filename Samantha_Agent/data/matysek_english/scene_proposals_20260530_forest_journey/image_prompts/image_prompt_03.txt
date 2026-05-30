@@ -1,0 +1,9 @@
+Use case: illustration-story
+Asset type: concept screen for a preschool English learning web game
+Primary request: Wide children's storybook illustration for Scene 3, "Field Path by the Village".
+Scene/backdrop: A path between golden fields, with a small friendly village in the distance, a fence, a windmill or little barn, and the next forest visible far ahead.
+Subject: The animal group travels along the path. Benji walks in front with a map, Bunny hops beside him, Bruno walks steadily, Fiona points toward the road, Sunny runs along a fence rail.
+Composition: Wide interactive game screen, clear foreground path, animals spaced left to right so each can be tapped. Include a few simple props: signpost, map, apple basket, fence gate. Keep top-left clear for HUD.
+Style: bright children's book adventure illustration, soft countryside light, readable characters, friendly village, no danger.
+Avoid: text on signposts, vehicles, humans, logos, watermarks, overly busy background.
+
