@@ -293,6 +293,46 @@ Digitalni pozustalost:
 - Postupovat opatrne u e-mailu, iCloudu, fotek, domen, predplatnych a socialnich
   siti.
 
+Technicke napojeni na Document Management
+-----------------------------------------
+Pozustalost nema byt druhy paralelni dokumentovy system. Hlavni dokumentovy
+trezor zustava `data/private/documents/`; projekt Pozustalost ma byt nad nim
+specialni stitek, manifest a finalni sifrovany export pro rodinu.
+
+Prakticke pravidlo:
+
+- Bezna pojistka, faktura, smlouva, servisni protokol nebo dokument k domu patri
+  dal do Document Managementu.
+- U dokumentu, ktere jsou dulezite pro pozustalost, se pozdeji doplni metadata
+  nebo tagy:
+  - `pozustalost_relevantni: ano/ne`
+  - `pozustalost_sekce: pojistky|nemovitosti|zavazky|vozidla|pravni|digitalni`
+  - `zahrnout_do_balicku: ano/ne`
+  - `uroven_citlivosti: normalni|vysoka|extremni`
+- Finalni rodinny balik se bude skládat z vybranych dokumentu, kratkych
+  vysvetleni a manifestu, ne z celeho private document vaultu.
+- Finalni balik pro dcery musi byt samostatne sifrovany a ulozeny tak, aby sel
+  otevrit i bez bezici Samanthy.
+
+Co nepatri do bezneho OCR/indexu Document Managementu:
+
+- master password nebo recovery klice,
+- presny postup pro ziskani pristupu k password manageru,
+- osobni vzkazy, ktere nemaji byt bezne dohledatelne,
+- citlive instrukce typu kde je obalka, klic, externi disk nebo nouzovy kod,
+- kompletni detail bankovnich pristupu.
+
+Tyto extremne citlive veci patri jen do finalniho sifrovaneho balicku, fyzickeho
+nouzoveho mechanismu nebo do jineho predem domluveneho bezpecneho ulozeni.
+
+Prvni technicky krok 2026-05-31:
+
+- Zalozen soukromy pracovni adresar mimo git: `data/private/pozustalost/`.
+- Zalozeny prazdne pracovni sablony v `data/private/pozustalost/working/`.
+- Zalozen pracovni manifest `data/private/pozustalost/manifest/pozustalost_manifest.json`.
+- Tyto soubory jsou v ignorovane slozce `data/private/`, proto se nebudou
+  commitovat. Zatim neobsahuji konkretni citlive hodnoty.
+
 Co pripravit jako prvni konkretni praci
 ---------------------------------------
 1. Zalozit soukromy working draft mimo git:

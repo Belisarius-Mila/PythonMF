@@ -17,16 +17,23 @@ Co je hotove:
 - Pravni cast je orientacni a opira se o verejne aktualni zdroje Portalu verejne
   spravy a Notarske komory CR.
 - Nastaveno jako priorita 1 a pripomenuti pri startu.
+- 2026-05-31 doplneno technicke pravidlo: Pozustalost nema byt druhy paralelni
+  dokumentovy system, ale stitek/manifest/sifrovany export nad existujicim
+  Document Managementem.
+- 2026-05-31 zalozen soukromy pracovni adresar mimo git
+  `data/private/pozustalost/` s prazdnymi sablonami a pracovnim manifestem.
 
 Co neni hotove:
 - Nejsou vyplnena zadna konkretni citliva data.
 - Neni vytvoren soukromy sifrovany balik.
 - Neni rozhodnuty mechanismus predani hesla/pristupu dceram.
 - Neni provedena notarska ani advokatni konzultace.
+- Pozustalostni metadata zatim nejsou implementovana primo v Document Management
+  toolingu; zatim jsou popsana jen pravidlem a pracovnim manifestem.
 
 Dalsi krok:
-Projit navrh s Milou a Janou, vybrat nejmensi MVP a zalozit soukromy adresar
-`data/private/pozustalost/` s prazdnymi sablonami bez citlivych hodnot.
+Projit soukrome sablony a vyplnit nejdrive jen mapu oblasti bez cisel smluv,
+uctu, hesel a recovery klicu.
 
 Navrhovane dalsi kroky:
 Okamzite: odsouhlasit strukturu a rozhodnout, zda jako prvni pripravit
@@ -40,6 +47,7 @@ Zmenene nebo relevantni soubory:
 - `memory/handoffs/pozustalost_start_2026_05_30.md`
 - `memory/ACTIVE_PROJECTS.md`
 - `memory/MEMORY_INDEX.md`
+- `data/private/pozustalost/` - soukrome sablony mimo git, necommitovat
 
 Bezpecnost / neukladat:
 Do gitu, memory ani otevrenych textu neukladat hesla, obnovovaci klice, rodna
