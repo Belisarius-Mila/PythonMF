@@ -1,8 +1,9 @@
 Use case: illustration-story
 Asset type: concept screen for a preschool English learning web game
-Primary request: Wide children's storybook illustration for Scene 6, "Lake Feast Finale".
+Primary request: Wide children's storybook illustration for Scene 6, "Lake Feast Finale", corrected for consistent main heroes.
 Scene/backdrop: A beautiful forest lake clearing with warm evening light, lily pads, lanterns, picnic blankets, baskets of apples and berries, and a calm lake behind.
-Subject: A joyful gathering of forest animals at the lake. Include Benji, Bunny, Bruno the badger, Fiona the fox, Sunny the squirrel, Owl, plus several background forest animals such as deer, hedgehog, duck, frog, mouse, and bird. The main five friends should remain prominent in the foreground.
-Composition: Wide final screen, celebratory but readable. Foreground has the main friends around a picnic blanket. Background animals are smaller but friendly. No text. Leave top area clear for HUD and final replay button.
+Reference consistency: The same five heroes remain consistent and prominent. Benji is the brown-and-white production dog with travel bag. Bunny is the white/light gray production rabbit with green backpack. Bruno is the badger in green coat with lantern. Fiona is the fox with purple scarf and pink travel coat. Sunny is the squirrel with yellow coat and teal scarf.
+Subject: A joyful lake gathering. The main five heroes are in the foreground around a picnic blanket. Additional small forest guests may appear only in the background near the lake, such as deer, hedgehog, duck, mouse, and small birds.
+Composition: Wide final screen, celebratory but readable. Foreground clearly belongs to the main five heroes. Background guests are smaller and secondary. No text. Leave top area clear for HUD and final replay button.
 Style: polished warm children's book finale, magical lantern glow, happy faces, rich but organized composition.
-Avoid: written text, logos, watermarks, overcrowding, scary night, photorealism.
+Avoid: written text, letters, logos, watermarks, overcrowding, scary night, photorealism, monkeys, bears, frogs in the foreground.

@@ -1,9 +1,9 @@
 Use case: illustration-story
 Asset type: concept screen for a preschool English learning web game
-Primary request: Wide children's storybook illustration for Scene 5, "Gate to the Second Forest".
+Primary request: Wide children's storybook illustration for Scene 5, "Gate to the Second Forest", corrected for consistent five-hero cast.
 Scene/backdrop: The entrance to a second deeper forest, shown as a friendly natural arch made of branches and glowing leaves. A path leads through the arch toward distant lake light.
-Subject: The five animal friends stand near the arch, ready but a little tired. Owl may be perched above the arch as a guide. Benji and Bunny stand together; Bruno holds the lantern; Fiona looks confident; Sunny waves.
-Composition: Wide game screen with each character in a clear tap target area. The arch/gate is central but not blocking characters. Leave clean upper corners for HUD and enough lower space for big YES/NO buttons later.
+Reference consistency: Keep the same five hero designs and travel clothes as the corrected journey set. Benji is the brown-and-white production dog with travel bag. Bunny is the white/light gray production rabbit with long pink ears and green backpack. Bruno is the badger in a green coat with lantern. Fiona is the fox with purple scarf and pink travel coat. Sunny is the squirrel with yellow coat and teal scarf.
+Subject: Only the five heroes stand near the arch, ready but a little tired: Benji, Bunny, Bruno, Fiona, Sunny. No owl and no other animals are present.
+Composition: Wide game screen with each hero in a clear tap target area. The arch/gate is central but not blocking characters. Leave clean upper corners for HUD and enough lower space for big YES/NO buttons later.
 Style: magical but gentle children's book illustration, warm twilight gold and green, hopeful, not spooky.
-Avoid: dark horror forest, text, runes, signs with letters, humans, clutter, tiny animals.
-
+Avoid: dark horror forest, text, runes, signs with letters, humans, clutter, tiny animals, any other animals, background animals, birds, frogs, bears, monkeys.

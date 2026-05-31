@@ -15,6 +15,44 @@ Czech working title: `Cesta do druheho lesa`
 
 ## Kanonicka sestava
 
+## Kanon vzhledu po review 2026-05-31
+
+Sceny 1-5 maji byt konzistentni cestovni parta peti hrdinu. Nepridavat zadne
+jine postavy, zvirata ani nahodne komparzisty.
+
+Benji a Bunny musi vychazet ze stavajicich produkcnich scen:
+
+- Benji: hnedy a bily pratelky pes s velkyma ocima, bilym pruhem na cele,
+  kulatym cumakem a teplym vyrazem; cestovni satchel/batuzek muze navazovat na
+  Benji/Bunny a ForestSchool styl.
+- Bunny: bily/svetle sedy kralik s dlouhyma ruzovyma usima, velkyma ocima,
+  jemnym usmevem a zelenym cestovnim batuzkem nebo zeleno-oranzovym cestovnim
+  oblecenim.
+- Bruno: jezevec v zelenem cestovnim kabatku, klidny a spolehlivy, drzi malou
+  lucernu.
+- Fiona: lisenka v ruzovo-fialovem cestovnim kabatku nebo sale, chytra a
+  sebejista.
+- Sunny: veverka ve zlutem cestovnim kabatku a tyrkysove sale, hrava a rychla.
+
+Kanon obleceni:
+
+- vsichni maji jemny cestovni prvek: batuzek, brasnu, salu, kabatek nebo
+  lucernu,
+- obleceni nesmi prebit druh zviratka ani cistotu siluety,
+- vzhled ma byt opakovatelny napric scenami.
+
+Zakaz ve scenach 1-5:
+
+- zadne opice, medvedi, zaby, kachny, jeleni, mysky, ptaci ani dalsi zvirata,
+- zadni komparz,
+- zadne lidske postavy,
+- zadny text v obraze.
+
+Vyjimka:
+
+- scena 6 u jezera muze mit dalsi lesni zviratka jako hosty, ale hlavni petice
+  musi zustat jasne dominantni.
+
 ### Benji
 
 - druh: dog
@@ -53,9 +91,9 @@ Alternativy: `Sally Squirrel`, `Nibbles`, `Hazel Squirrel`.
 
 ### Owl
 
-- role: kratky voiceover a napoveda,
-- nemusi byt ve vsech scenach fyzicky,
-- jazykovy vzor: `Listen. Tap Benji. Say: I am Benji.`
+Po review 2026-05-31 neni Owl soucast cestovni dialogove petice. Pokud ji
+později pouzijeme, tak jen jako technickou napovedu v UI, ne jako postavu v
+dialogu scen 1-5.
 
 ## Gramaticke jadro
 
@@ -127,4 +165,3 @@ Pro petilete dite jsou vhodne tri typy reakci:
 - `to be` ve vsech osobach je pro dite abstraktni. Musi byt vzdy navazane na konkretni postavy.
 - `you` jednotne/mnozne je tezke. V prvni verzi ho staci slyset, ne testovat.
 - `have/has` nemichat hned do kazde vety.
-

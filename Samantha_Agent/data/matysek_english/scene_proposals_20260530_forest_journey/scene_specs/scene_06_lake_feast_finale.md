@@ -22,13 +22,14 @@ mapu, mrkev, lucernu, salu, orisky.
 
 ## Obrazova varianta C
 
-Jezero s malym molem a lucernami. Owl sedi na vetvi a rika zaverecnou vetu.
+Jezero s malym molem a lucernami. Hlavni petice je v popredi a zaverecnou vetu
+rika nekdo z nich.
 
 ## Interakce pro Matyska
 
 - Kliknout postupne na hlavni postavy a slyset jejich finalni vetu.
 - Kliknout na spolecnou deku: `We have a feast.`
-- Kliknout na vsechna zviratka: `They are friends.`
+- Kliknout na hlavni petici: `We are friends.`
 - Volitelne tlacitko replay cele cesty.
 
 ## Dialog A - zaverecny minimalni
@@ -39,7 +40,7 @@ Bunny: We are happy.
 Bruno: We are friends.
 Fiona: They are here.
 Sunny: We have a feast!
-Owl: Well done.
+Fiona: Well done.
 ```
 
 ## Dialog B - opakovani predmetu
@@ -56,17 +57,16 @@ All: We have a feast.
 ## Dialog C - slavnostni
 
 ```text
-Owl: Look at the lake.
+Benji: Look at the lake.
 Benji: It is beautiful.
 Bunny: We are together.
-Fiona: They are our friends.
+Fiona: We are together.
 Bruno: We are safe.
 Sunny: I am so happy!
-All: Hello, friends!
+All: We are friends!
 ```
 
 ## Proc se scena hodi
 
 Po peti aktivnich scenach potrebuje dite klidnou odmenu. Finale muze byt mene
 interaktivni, ale melo by davat smysl jako motivace pro dalsi kapitolu.
-

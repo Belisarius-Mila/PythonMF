@@ -28,21 +28,21 @@ Dete klika na postavy podle `he`, `she`, `we`, `they`.
 
 ## Interakce pro Matyska
 
-- Owl rekne: `He is Bruno.` Matysek klikne na Bruna.
-- Owl rekne: `She is Fiona.` Matysek klikne na Fionu.
-- Owl rekne: `They are Benji and Bunny.` Jemne pulzuji dve postavy.
+- UI napoveda rekne: `He is Bruno.` Matysek klikne na Bruna.
+- UI napoveda rekne: `She is Fiona.` Matysek klikne na Fionu.
+- UI napoveda rekne: `They are Benji and Bunny.` Jemne pulzuji dve postavy.
 - `It is a map.` Matysek klikne na mapu.
 
-## Dialog A - pronouns pres Owl
+## Dialog A - pronouns pres hlavni petici
 
 ```text
-Owl: He is Bruno.
+Fiona: He is Bruno.
 Bruno: I am Bruno.
-Owl: She is Fiona.
+Bruno: She is Fiona.
 Fiona: I am Fiona.
-Owl: It is a map.
+Benji: It is a map.
 Benji: I have a map.
-Owl: They are friends.
+Sunny: They are friends.
 Bunny: We are friends.
 ```
 
@@ -54,7 +54,7 @@ Bunny: You are here.
 Fiona: He is Bruno.
 Bruno: She is Fiona.
 Sunny: I am on the fence!
-Owl: It is a village.
+Fiona: It is a village.
 All: We are going to the lake.
 ```
 
@@ -66,11 +66,10 @@ Sunny: I am fast.
 Bruno: I am strong.
 Bunny: I am small.
 Benji: You are my friends.
-Owl: They are ready.
+Fiona: They are ready.
 ```
 
 ## Proc se scena hodi
 
 Pole a cesta daji vizualne cisty prostor. Dite vidi jednotlive postavy oddelene,
 takze `he/she/they` lze ucit bez textove tabulky.
-

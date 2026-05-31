@@ -1,9 +1,9 @@
 Use case: illustration-story
 Asset type: concept screen for a preschool English learning web game
-Primary request: Wide children's storybook illustration for Scene 1, "Clearing Meeting".
+Primary request: Wide children's storybook illustration for Scene 1, "Clearing Meeting", corrected for consistent characters.
 Scene/backdrop: A sunny forest clearing with soft grass, wildflowers, a few mushrooms, and a visible path continuing deeper into the forest. Leave clear empty sky/foliage space near the top for game HUD buttons.
-Subject: Benji the friendly young dog and Bunny the rabbit meet three new animals: Bruno the badger, Fiona the fox, and Sunny the squirrel. They stand in a loose semicircle as if greeting each other for the first time.
-Composition: Wide 16:9-ish frame, game screen layout, all five animals clearly separated with readable silhouettes and room around them for clickable hotspots. No text, no letters, no UI, no speech bubbles.
+Reference consistency: Match Benji and Bunny to the existing production look from BenjiBunnyScene and ForestSchool. Benji is a warm brown-and-white friendly dog with a white face stripe, big rounded eyes, and a small tan travel bag. Bunny is a white/light gray rabbit with long pink ears, big eyes, and a green travel backpack. Bruno is a badger in a green travel coat with a small lantern. Fiona is a fox with a purple scarf and pink travel coat. Sunny is a squirrel with a yellow coat and teal scarf.
+Subject: Only these five heroes are present: Benji, Bunny, Bruno, Fiona, and Sunny. They stand in a loose semicircle as if greeting each other for the first time.
+Composition: Wide 16:9-ish frame, game screen layout, all five heroes clearly separated with readable silhouettes and room around them for clickable hotspots. No text, no letters, no UI, no speech bubbles.
 Style: warm polished children's book digital painting, gentle expressive faces, bright but natural colors, soft forest light, clean edges suitable for an interactive game.
-Avoid: scary mood, photorealism, clutter, tiny characters, written text, logos, watermarks.
-
+Avoid: scary mood, photorealism, clutter, tiny characters, written text, logos, watermarks, any other animals, background animals, birds, frogs, bears, monkeys, humans.

@@ -7,12 +7,12 @@ Navaznost: posledni zastavka pred jezerem, skupina je unavena a musi se secist
 ## Popis sceny cesky
 
 Zviratka dorazi k prirodni brane z vetvi, listi a svetylek. Za branou je druhy
-les a v dalky prosvita jezero. Owl sedi nad branou a pred vstupem pomaha
-zkontrolovat, kdo je kdo. Je to idealni pro ano/ne otazky.
+les a v dalky prosvita jezero. Pred vstupem si petice sama zkontroluje, kdo je
+kdo. Je to idealni pro ano/ne otazky.
 
 ## Obrazova varianta A
 
-Brana uprostred, Owl nahore, zviratka pod ni ve skupine. Dole je misto pro velka
+Brana uprostred, hlavni petice pod ni ve skupine. Dole je misto pro velka
 tlacitka YES/NO.
 
 ## Obrazova varianta B
@@ -25,7 +25,7 @@ Brana ma pet svetylek. Kazda spravna odpoved rozsviti jedno svetylko.
 
 ## Interakce pro Matyska
 
-- Owl ukaze na jednu postavu a zepta se: `Are you Bunny?`
+- UI napoveda ukaze na jednu postavu a spusti otazku: `Are you Bunny?`
 - Matysek klikne `YES` nebo `NO`.
 - Pokud je odpoved `NO`, postava rekne spravnou vetu: `No. I am Benji.`
 - Po peti miniotazkach se brana otevre.
@@ -33,22 +33,22 @@ Brana ma pet svetylek. Kazda spravna odpoved rozsviti jedno svetylko.
 ## Dialog A - jednoduche identity
 
 ```text
-Owl: Are you Benji?
+Fiona: Are you Benji?
 Benji: Yes, I am.
-Owl: Are you Bunny?
+Fiona: Are you Bunny?
 Benji: No, I am not. I am Benji.
 Bunny: I am Bunny.
-Owl: Good. You are ready.
+Bruno: Good. You are ready.
 ```
 
 ## Dialog B - skupinove
 
 ```text
-Owl: Are you ready?
+Fiona: Are you ready?
 All: Yes, we are.
-Owl: Is he Bruno?
+Fiona: Is he Bruno?
 Bunny: Yes, he is.
-Owl: Is she Fiona?
+Bruno: Is she Fiona?
 Benji: Yes, she is.
 Sunny: Are we at the lake?
 Fiona: Not yet!
@@ -69,4 +69,3 @@ Bunny: We are almost there.
 
 Ano/ne brana je herne prirozena. Dite nemusi cist dlouhe vety, jen slysi otazku,
 vidi postavu a klikne na velke `YES` nebo `NO`.
-

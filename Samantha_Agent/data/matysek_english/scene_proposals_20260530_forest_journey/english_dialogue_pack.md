@@ -13,7 +13,7 @@ Bunny: Hi! I am Bunny.
 Bruno: Hello. I am Bruno.
 Fiona: Hi. I am Fiona.
 Sunny: Hello! I am Sunny.
-Owl: They are friends.
+Fiona: They are friends.
 All: We are friends!
 ```
 
@@ -27,7 +27,7 @@ Bunny: I am happy.
 Bruno: Hello. I am Bruno.
 Fiona: Hi. I am Fiona.
 Sunny: I am Sunny!
-Owl: Benji is a dog. Bunny is a rabbit. Fiona is a fox.
+Bruno: Benji is a dog. Bunny is a rabbit. Fiona is a fox.
 ```
 
 ### C - more social
@@ -52,7 +52,7 @@ Benji: I am tired too.
 Sunny: I am not tired!
 Fiona: You are fast, Sunny.
 Bruno: We are okay.
-Owl: We are friends.
+Bruno: We are friends.
 ```
 
 ### B - how are you
@@ -69,7 +69,6 @@ Bunny: You are funny, Sunny.
 ### C - to be drill in story
 
 ```text
-Owl: Listen.
 Benji: I am Benji. I am ready.
 Bunny: I am Bunny. I am tired.
 Bruno: I am Bruno. I am strong.
@@ -83,13 +82,13 @@ All: We are ready.
 ### A - pronouns
 
 ```text
-Owl: He is Bruno.
+Fiona: He is Bruno.
 Bruno: I am Bruno.
-Owl: She is Fiona.
+Bruno: She is Fiona.
 Fiona: I am Fiona.
-Owl: It is a map.
+Benji: It is a map.
 Benji: I have a map.
-Owl: They are friends.
+Sunny: They are friends.
 Bunny: We are friends.
 ```
 
@@ -101,7 +100,7 @@ Bunny: You are here.
 Fiona: He is Bruno.
 Bruno: She is Fiona.
 Sunny: I am on the fence!
-Owl: It is a village.
+Fiona: It is a village.
 All: We are going to the lake.
 ```
 
@@ -113,7 +112,7 @@ Sunny: I am fast.
 Bruno: I am strong.
 Bunny: I am small.
 Benji: You are my friends.
-Owl: They are ready.
+Fiona: They are ready.
 ```
 
 ## Scene 4 - Old Bridge and Basket
@@ -126,17 +125,17 @@ Bunny: I have a carrot.
 Bruno: I have a lantern.
 Fiona: I have a scarf.
 Sunny: I have nuts.
-Owl: Good. We have what we need.
+Fiona: Good. We have what we need.
 ```
 
 ### B - have and has
 
 ```text
-Owl: Benji has a map.
+Fiona: Benji has a map.
 Benji: I have a map.
-Owl: Bunny has a carrot.
+Bruno: Bunny has a carrot.
 Bunny: I have a carrot.
-Owl: Bruno has a lantern.
+Benji: Bruno has a lantern.
 Bruno: I have a lantern.
 Fiona: We have a basket.
 ```
@@ -157,22 +156,22 @@ Fiona: Yes. I have my scarf.
 ### A - identity questions
 
 ```text
-Owl: Are you Benji?
+Fiona: Are you Benji?
 Benji: Yes, I am.
-Owl: Are you Bunny?
+Fiona: Are you Bunny?
 Benji: No, I am not. I am Benji.
 Bunny: I am Bunny.
-Owl: Good. You are ready.
+Bruno: Good. You are ready.
 ```
 
 ### B - group check
 
 ```text
-Owl: Are you ready?
+Fiona: Are you ready?
 All: Yes, we are.
-Owl: Is he Bruno?
+Fiona: Is he Bruno?
 Bunny: Yes, he is.
-Owl: Is she Fiona?
+Bruno: Is she Fiona?
 Benji: Yes, she is.
 Sunny: Are we at the lake?
 Fiona: Not yet!
@@ -199,7 +198,7 @@ Bunny: We are happy.
 Bruno: We are friends.
 Fiona: They are here.
 Sunny: We have a feast!
-Owl: Well done.
+Fiona: Well done.
 ```
 
 ### B - object recap
@@ -216,12 +215,11 @@ All: We have a feast.
 ### C - warm finale
 
 ```text
-Owl: Look at the lake.
+Benji: Look at the lake.
 Benji: It is beautiful.
 Bunny: We are together.
-Fiona: They are our friends.
+Fiona: We are together.
 Bruno: We are safe.
 Sunny: I am so happy!
-All: Hello, friends!
+All: We are friends!
 ```
-

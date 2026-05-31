@@ -9,7 +9,7 @@
 | 3 Field path | Cesta mezi poli kolem vesnice | `I am`, `you are`, `he is`, `she is` | vlastnosti: fast, slow, clever, strong | Prihradit pronoun k postave |
 | 4 Old bridge basket | Najdou kosik a veci | `I have...`, `You have...` | `He has`, `She has`, `We have` | Kliknout na predmet, ktery postava ma |
 | 5 Second forest gate | Kontrola pred vstupem do druheho lesa | `Are you...? Yes, I am. No, I am not.` | `They are ready` | Odpovedet ano/ne podle postavy |
-| 6 Lake feast finale | Setkani u jezera | `We are here`, `They are friends`, `We have a feast` | opakovani cele kapitoly | Staticky zaverecny obraz + replay dialogu |
+| 6 Lake feast finale | Setkani u jezera | `We are here`, `We are friends`, `We have a feast` | opakovani cele kapitoly | Staticky zaverecny obraz + replay dialogu |
 
 ## Doporuceny postup uceni
 
@@ -43,4 +43,3 @@ Pokud bude kapitola velka, doporucuji prvni verzi:
 - bez plneho testovani vsech osob,
 - jen `I am`, `You are`, `He is`, `She is`, `I have`,
 - zbytek pridat po realnem testu s Matyskem.
-

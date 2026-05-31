@@ -1,9 +1,10 @@
 Use case: illustration-story
 Asset type: concept screen for a preschool English learning web game
-Primary request: Wide children's storybook illustration for Scene 4, "Old Bridge and Basket".
+Primary request: Wide children's storybook illustration for Scene 4, "Old Bridge and Basket", corrected for consistent five-hero cast.
 Scene/backdrop: A small wooden bridge over a shallow stream at the edge of the forest, with reeds, stones, dragonflies, and a lost picnic basket near the bridge.
-Subject: Benji, Bunny, Bruno, Fiona, and Sunny gather around the basket and their own travel objects. The scene should support "I have a map", "I have a carrot", "I have a lantern", "I have a scarf", "I have nuts".
-Composition: Wide game-screen frame. Put the basket and objects in clear clickable positions: map, carrot, lantern, scarf, nuts, apples. Animals should be near their objects but not covering them. Leave room at top for HUD.
-Style: polished children's storybook digital art, gentle water reflections, warm friendly colors, clear object silhouettes for preschool interaction.
-Avoid: written labels, text, logos, watermarks, scary bridge, cluttered basket.
-
+Reference consistency: Keep the same five hero designs and travel clothes as the corrected journey set. Benji is the brown-and-white production dog with white face stripe and travel bag. Bunny is the white/light gray production rabbit with long pink ears and green backpack. Bruno is the badger in a green coat with small lantern. Fiona is the red fox with purple scarf and pink travel coat. Sunny is the squirrel with yellow coat, teal scarf, and nuts.
+Exact characters required: only Benji, Bunny, Bruno, Fiona, and Sunny. Show these five characters clearly and do not replace them with other animal species.
+Objects required: a map near Benji, a carrot near Bunny, a lantern with Bruno, a scarf with Fiona, nuts with Sunny, apples in the basket.
+Composition: Wide 16:9-ish game-screen frame. All five characters are separated and large enough for tap targets. Objects are clearly visible and not covered. Top area remains clear for HUD buttons. No text, no letters, no labels, no UI, no speech bubbles.
+Style: polished warm children's storybook digital illustration, gentle stream reflections, clean readable shapes for preschool interaction.
+Avoid: any extra characters, any background animals, wrong species, written text, logos, watermarks, scary bridge, cluttered basket, birds, frogs, bears, monkeys, humans.

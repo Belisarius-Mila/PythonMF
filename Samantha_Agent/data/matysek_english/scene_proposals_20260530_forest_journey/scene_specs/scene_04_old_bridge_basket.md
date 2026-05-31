@@ -27,7 +27,7 @@ co maji.
 ## Interakce pro Matyska
 
 - Postava rekne `I have a carrot.` Matysek klikne na mrkev.
-- Owl rekne `Who has a lantern?` Matysek klikne na Bruna nebo lucernu.
+- UI napoveda rekne `Who has a lantern?` Matysek klikne na Bruna nebo lucernu.
 - Po trech spravnych kliknutich se mostek rozzari.
 
 ## Dialog A - jen `I have`
@@ -38,17 +38,17 @@ Bunny: I have a carrot.
 Bruno: I have a lantern.
 Fiona: I have a scarf.
 Sunny: I have nuts.
-Owl: Good. We have what we need.
+Fiona: Good. We have what we need.
 ```
 
 ## Dialog B - `have/has` jemne
 
 ```text
-Owl: Benji has a map.
+Fiona: Benji has a map.
 Benji: I have a map.
-Owl: Bunny has a carrot.
+Bruno: Bunny has a carrot.
 Bunny: I have a carrot.
-Owl: Bruno has a lantern.
+Benji: Bruno has a lantern.
 Bruno: I have a lantern.
 Fiona: We have a basket.
 ```
@@ -68,4 +68,3 @@ Fiona: Yes. I have my scarf.
 
 `Have` je nejlepsi ucit pres predmety v ruce. Mostek dava jasny dramaticky cil:
 kdyz vime, co kdo ma, muzeme jit dal.
-

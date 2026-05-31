@@ -28,11 +28,11 @@ videt, ze se skupina teprve dava dohromady.
 
 ## Interakce pro Matyska
 
-1. Owl rekne: `Tap Benji.`
+1. UI napoveda rekne: `Tap Benji.`
 2. Benji rekne: `Hello. I am Benji.`
 3. Matysek klikne na Benjiho.
 4. Postupne stejne Bunny, Bruno, Fiona, Sunny.
-5. Mini kontrola: Owl rekne `Who is Fiona?` a Matysek klikne na lisku.
+5. Mini kontrola: UI napoveda rekne `Who is Fiona?` a Matysek klikne na lisku.
 
 ## Dialog A - nejjednodussi
 
@@ -42,7 +42,7 @@ Bunny: Hi! I am Bunny.
 Bruno: Hello. I am Bruno.
 Fiona: Hi. I am Fiona.
 Sunny: Hello! I am Sunny.
-Owl: They are friends.
+Fiona: They are friends.
 All: We are friends!
 ```
 
@@ -56,7 +56,7 @@ Bunny: I am happy.
 Bruno: Hello. I am Bruno.
 Fiona: Hi. I am Fiona.
 Sunny: I am Sunny!
-Owl: Benji is a dog. Bunny is a rabbit. Fiona is a fox.
+Bruno: Benji is a dog. Bunny is a rabbit. Fiona is a fox.
 ```
 
 ## Dialog C - vice socialni
@@ -77,8 +77,7 @@ Scena prirozene zavadi osoby:
 
 - `I` pres vlastni predstaveni,
 - `you` pres osloveni,
-- `he/she` pres Owl komentare,
+- `he/she` pres kratke komentare hlavni petice,
 - `we/they` pres skupinu.
 
 Nemusi se nic vysvetlovat gramaticky. Dite jen vidi, kdo mluvi.
-

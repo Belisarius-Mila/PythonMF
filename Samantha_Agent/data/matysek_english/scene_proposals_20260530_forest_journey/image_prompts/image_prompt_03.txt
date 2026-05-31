@@ -1,9 +1,9 @@
 Use case: illustration-story
 Asset type: concept screen for a preschool English learning web game
-Primary request: Wide children's storybook illustration for Scene 3, "Field Path by the Village".
+Primary request: Wide children's storybook illustration for Scene 3, "Field Path by the Village", corrected for consistent five-hero cast.
 Scene/backdrop: A path between golden fields, with a small friendly village in the distance, a fence, a windmill or little barn, and the next forest visible far ahead.
-Subject: The animal group travels along the path. Benji walks in front with a map, Bunny hops beside him, Bruno walks steadily, Fiona points toward the road, Sunny runs along a fence rail.
-Composition: Wide interactive game screen, clear foreground path, animals spaced left to right so each can be tapped. Include a few simple props: signpost, map, apple basket, fence gate. Keep top-left clear for HUD.
+Reference consistency: Keep the same five hero designs and travel clothes as the corrected journey set. Benji is the brown-and-white production dog with travel bag. Bunny is the white/light gray production rabbit with green backpack. Bruno is the badger in a green coat with lantern. Fiona is the fox with purple scarf and pink travel coat. Sunny is the squirrel with yellow coat and teal scarf.
+Subject: Only the five heroes travel along the path. Benji walks in front with a map, Bunny hops beside him, Bruno walks steadily, Fiona points toward the road, Sunny runs along a fence rail.
+Composition: Wide interactive game screen, clear foreground path, the five heroes spaced left to right so each can be tapped. Include a few simple props: signpost with no writing, map, apple basket, fence gate. Keep top-left clear for HUD.
 Style: bright children's book adventure illustration, soft countryside light, readable characters, friendly village, no danger.
-Avoid: text on signposts, vehicles, humans, logos, watermarks, overly busy background.
-
+Avoid: written text anywhere, letters, numbers, vehicles, humans, logos, watermarks, overly busy background, any other animals, background animals, birds, frogs, bears, monkeys.

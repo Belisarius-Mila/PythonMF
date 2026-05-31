@@ -21,7 +21,8 @@ Tento adresar pripravuje dalsi vetsi kapitolu anglictiny pro Matyska:
 - Bruno - badger. Zni pevne, hodne, trosku starsi; dobre se vyslovuje.
 - Fiona - fox. Jasne, mile, aliterace `Fiona Fox`.
 - Sunny - squirrel. Veverka muze byt rychla, hrava a trochu komicka.
-- Owl - pruvodce a vypravovac, ale nemel by prebijet dialogy deti/zviratek.
+- Owl - nepouzivat jako cestovni postavu ani dialogoveho hrdinu v teto kapitole;
+  pripadne jen jako budouci UI napovedu mimo pribeh.
 
 Alternativy jmen jsou v `01_story_bible.md`.
 
@@ -37,6 +38,7 @@ Alternativy jmen jsou v `01_story_bible.md`.
 - `scene_specs/scene_06_lake_feast_finale.md` - velke setkani u jezera.
 - `interaction_design.md` - jak bude Matysek reagovat, ne jen sledovat.
 - `curriculum_map.md` - prehled vet a gramatiky po scenach.
+- `character_consistency_brief.md` - kanon vzhledu a zakaz cizich zvirat ve scenach 1-5.
 - `image_prompts/image_prompt_01..06.txt` - prompty pro 6 navrhovych obrazku.
 - `image_manifest.md` - seznam obrazku, az budou vygenerovane.
 
@@ -46,6 +48,11 @@ Hlavni princip: Matysek neni testovan. Pomaha zviratkum dojit na slavnost.
 Kazda zastavka ma jednoduchou dramatickou situaci, kde se anglictina deje proto,
 ze ji postavy potrebuji. Vet je malo, ale opakuji se s obmenou.
 
+Po review 2026-05-31 plati doplnene pravidlo: v cestovnich scenach 1-5 nesmi
+byt zadna dalsi zvirata. Vsechny dialogy a interakce stavi jen na petici
+Benji, Bunny, Bruno, Fiona a Sunny. Jen zaverecna jezerni scena muze pridat
+dalsi lesni hosty, ale jen jako tichy vizualni doprovod v pozadi.
+
 V dalsi fazi bychom vybrali:
 
 1. finalni jmena postav,
@@ -53,4 +60,3 @@ V dalsi fazi bychom vybrali:
 3. zda ma byt styl obrazku bliz k soucasnemu MMTX, nebo vic pohadkove knizkovy,
 4. kolik dialogu ma byt v jedne scene,
 5. jestli Matysek bude klikat, opakovat nahlas, nebo oboji.
-

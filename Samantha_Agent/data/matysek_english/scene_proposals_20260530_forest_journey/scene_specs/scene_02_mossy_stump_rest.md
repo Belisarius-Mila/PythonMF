@@ -39,7 +39,7 @@ Benji: I am tired too.
 Sunny: I am not tired!
 Fiona: You are fast, Sunny.
 Bruno: We are okay.
-Owl: We are friends.
+Bruno: We are friends.
 ```
 
 ## Dialog B - `How are you?`
@@ -56,7 +56,6 @@ Bunny: You are funny, Sunny.
 ## Dialog C - vice `to be`
 
 ```text
-Owl: Listen.
 Benji: I am Benji. I am ready.
 Bunny: I am Bunny. I am tired.
 Bruno: I am Bruno. I am strong.
@@ -70,4 +69,3 @@ All: We are ready.
 Pocity jsou pro dite citelne z obrazku. `I am tired` neni abstraktni, protoze
 Bunny skutecne sedi unavene na parezu. `You are fast` muze byt reakce na Sunny,
 kterou Matysek vidi poskakovat.
-
