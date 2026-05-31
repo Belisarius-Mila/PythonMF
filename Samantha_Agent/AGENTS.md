@@ -21,6 +21,10 @@ Tyto instrukce plati pro praci ve slozce `Samantha_Agent/`.
   starsi nez 3 dny nebo chybi, upozorni na to v prvni odpovedi kazdy den, dokud
   neprobehnou nova uspesna zaloha. Pripominka sama nic nekopiruje, nemaze ani
   necte tajemstvi.
+- Pri startu nove Codex CLI relace se ma podle moznosti spustit nebo otevrit
+  Samantha Cockpit pres `scripts/start_cockpit.sh`. Cockpit bezi lokalne na
+  `http://127.0.0.1:8770`. Pokud uz bezi, jen otevrit existujici adresu v
+  prohlizeci; neukoncovat bezici relaci.
 - Autosave nouzove obnovy ma bezet pri startu pres `samantha`: kazdych 10 minut uklada TXT/JSONL do `data/session_autosave/`.
 - Soubory v `data/session_autosave/` jsou jen nouzova obnova, nikdy je necommituj.
 

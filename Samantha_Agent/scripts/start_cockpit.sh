@@ -2,30 +2,6 @@
 set -eu
 
 PROJECT_DIR="/Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent"
-PORT="8770"
-URL="http://127.0.0.1:${PORT}"
-LOG_DIR="${PROJECT_DIR}/data/private/cockpit"
-LOG_FILE="${LOG_DIR}/server.log"
 
-mkdir -p "${LOG_DIR}"
 cd "${PROJECT_DIR}"
-
-if /usr/bin/curl -fsS "${URL}/api/status" >/dev/null 2>&1; then
-  open "${URL}" >/dev/null 2>&1 || true
-  echo "Samantha Cockpit už běží: ${URL}"
-  exit 0
-fi
-
-existing_pid="$(lsof -tiTCP:${PORT} -sTCP:LISTEN || true)"
-if [[ -n "${existing_pid}" ]]; then
-  kill ${existing_pid} >/dev/null 2>&1 || true
-  sleep 0.5
-fi
-
-if ! /usr/bin/curl -fsS "${URL}/api/status" >/dev/null 2>&1; then
-  nohup "${PROJECT_DIR}/.venv/bin/python" "${PROJECT_DIR}/scripts/cockpit_server.py" --port "${PORT}" >> "${LOG_FILE}" 2>&1 &
-  sleep 2
-fi
-
-open "${URL}" >/dev/null 2>&1 || true
-echo "Samantha Cockpit spuštěn: ${URL}"
+exec "${PROJECT_DIR}/.venv/bin/python" "${PROJECT_DIR}/scripts/open_cockpit.py" "$@"
