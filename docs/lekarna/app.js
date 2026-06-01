@@ -64,14 +64,14 @@ const symptomIntents = [
   {
     label: "Kašel / zahlenění",
     terms: ["kasel", "kašel", "hlen", "hleny", "zahleneni", "zahleneni", "vykaslat", "prudušky", "prudusky"],
-    names: ["ACC Long", "Stoptussin IVAX"],
-    note: "ACC je hlavně na hustý hlen. Varianta Stoptussinu není plně ověřená, proto ověřit obal.",
+    names: ["Tussical 1,5 mg/ml sirup", "ACC Long", "Stoptussin IVAX"],
+    note: "Tussical je na suchý dráždivý kašel, ACC hlavně na hustý hlen. Varianta Stoptussinu není plně ověřená, proto ověřit obal.",
   },
   {
     label: "Rýma, nachlazení, chřipka",
     terms: ["ryma", "rýma", "nachlazeni", "nachlazení", "ucpany nos", "nos", "chripka", "chřipka"],
-    names: ["Paralen Grip", "Panadol Novum", "Sterimar nosni hygiena", "Visine Yxin ED"],
-    note: "Paralen Grip má více variant, nutné ověřit konkrétní složení na obalu.",
+    names: ["Tussical 1,5 mg/ml sirup", "Xylomax Neo 1 mg/ml nosní sprej", "Paralen Grip", "Panadol Novum", "Sterimar nosni hygiena", "Visine Yxin ED"],
+    note: "Tussical je pro suchý kašel, Xylomax Neo krátkodobě uvolňuje ucpaný nos. Paralen Grip má více variant, nutné ověřit konkrétní složení na obalu.",
   },
   {
     label: "Bolest v krku / dutina ústní",
