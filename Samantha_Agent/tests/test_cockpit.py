@@ -17,13 +17,14 @@ from app.cockpit import (
     new_email_headers_overview,
     parse_email_processing_items,
     prepare_document_print_action,
+    read_email_processing_message_detail,
     read_email_processing_decisions,
     save_email_processing_decision,
     search_document_index,
     set_document_reading_status_action,
     web_apps_catalog,
 )
-from app.email.models import EmailHeader
+from app.email.models import EmailAttachmentMeta, EmailHeader, EmailMessage
 
 
 class CockpitTests(unittest.TestCase):
@@ -354,11 +355,58 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("legacy_id", item)
         self.assertNotEqual(item["id"], item["legacy_id"])
 
+    def test_read_email_processing_message_detail_reads_body_and_attachment_metadata(self) -> None:
+        provider = _FakeMessageProvider(
+            EmailMessage(
+                header=EmailHeader(
+                    internal_id="14157",
+                    date="Mon, 1 Jun 2026 10:00:00 +0200",
+                    sender="Sender <sender@example.com>",
+                    subject="Faktura za služby",
+                    source="iCloud",
+                    folder="INBOX",
+                ),
+                body_text="Dobrý den, v příloze posíláme fakturu.",
+                truncated=False,
+                attachments=(
+                    EmailAttachmentMeta(
+                        filename="faktura.pdf",
+                        content_type="application/pdf",
+                        size_bytes=12345,
+                        part_id="2",
+                        content_id="",
+                        disposition="attachment",
+                    ),
+                ),
+            )
+        )
+
+        result = read_email_processing_message_detail(
+            provider="iCloud",
+            folder="INBOX",
+            uid="14157",
+            icloud_provider_factory=lambda: provider,
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(provider.calls[0]["uid"], "14157")
+        self.assertEqual(result["email"]["subject"], "Faktura za služby")
+        self.assertEqual(result["email"]["body_text"], "Dobrý den, v příloze posíláme fakturu.")
+        self.assertEqual(result["email"]["attachments"][0]["filename"], "faktura.pdf")
+        self.assertEqual(result["email"]["attachments"][0]["part_id"], "2")
+
+    def test_read_email_processing_message_detail_rejects_unknown_provider(self) -> None:
+        result = read_email_processing_message_detail(provider="gmail", folder="INBOX", uid="14157")
+
+        self.assertFalse(result["ok"])
+        self.assertIn("Neznámý", result["message"])
+
     def test_email_processing_html_contains_readonly_overview_controls(self) -> None:
         self.assertIn("Email Processing", EMAIL_PROCESSING_HTML)
         self.assertIn("/api/email-processing/overview", EMAIL_PROCESSING_HTML)
         self.assertIn("/api/email-processing/decision", EMAIL_PROCESSING_HTML)
         self.assertIn("/api/email-processing/new-headers", EMAIL_PROCESSING_HTML)
+        self.assertIn("/api/email-processing/read-message", EMAIL_PROCESSING_HTML)
         self.assertIn("read-only", EMAIL_PROCESSING_HTML)
         self.assertIn("Obnovit nové", EMAIL_PROCESSING_HTML)
         self.assertIn("Načti emaily", EMAIL_PROCESSING_HTML)
@@ -375,7 +423,13 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("processEmailsBtn", EMAIL_PROCESSING_HTML)
         self.assertIn("SamanthaEmailWorkQueue", EMAIL_PROCESSING_HTML)
         self.assertIn("Koš - čeká na potvrzení", EMAIL_PROCESSING_HTML)
-        self.assertIn("Tohle okno zatím nic nečte, nestahuje a nemaže", EMAIL_PROCESSING_HTML)
+        self.assertIn("Detail se načte read-only", EMAIL_PROCESSING_HTML)
+        self.assertIn("Detail e-mailu", EMAIL_PROCESSING_HTML)
+        self.assertIn("Uložit e-mail", EMAIL_PROCESSING_HTML)
+        self.assertIn("Neukládat", EMAIL_PROCESSING_HTML)
+        self.assertIn("Uložit</label>", EMAIL_PROCESSING_HTML)
+        self.assertIn("Zpracovat dávku", EMAIL_PROCESSING_HTML)
+        self.assertIn("hlavní seznam je vyprázdněný", EMAIL_PROCESSING_HTML)
         self.assertIn("headersBusy", EMAIL_PROCESSING_HTML)
         self.assertIn("Doplňuji chybějící hlavičky", EMAIL_PROCESSING_HTML)
         self.assertIn("Zpracovat", EMAIL_PROCESSING_HTML)
@@ -522,6 +576,25 @@ class _FakeEmailProvider:
 
     def list_recent_headers(self, limit: int = 10) -> list[EmailHeader]:
         return self._headers[:limit]
+
+
+class _FakeMessageProvider:
+    def __init__(self, message: EmailMessage) -> None:
+        self._message = message
+        self.calls: list[dict[str, object]] = []
+
+    def read_message_by_uid(self, uid: str, max_chars: int = 4_000, folder: str = "INBOX") -> EmailMessage:
+        self.calls.append({"uid": uid, "max_chars": max_chars, "folder": folder})
+        return self._message
+
+    def read_message_by_uid_from_folder(
+        self,
+        uid: str,
+        max_chars: int = 4_000,
+        folder: str = "INBOX",
+    ) -> EmailMessage:
+        self.calls.append({"uid": uid, "max_chars": max_chars, "folder": folder})
+        return self._message
 
 
 if __name__ == "__main__":

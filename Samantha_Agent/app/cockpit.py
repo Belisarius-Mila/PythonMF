@@ -38,7 +38,7 @@ from app.documents.vault import (
 )
 from app.email.config import EmailConfigError
 from app.email.icloud_provider import EmailProviderError, ICloudReadOnlyEmailProvider
-from app.email.models import EmailHeader
+from app.email.models import EmailAttachmentMeta, EmailHeader, EmailMessage
 from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEmailProvider
 
 
@@ -574,6 +574,80 @@ def empty_email_processing_overview() -> dict[str, Any]:
         "text": "",
         "items": [],
         "updated_at": "",
+    }
+
+
+def email_attachment_to_processing_detail(attachment: EmailAttachmentMeta) -> dict[str, Any]:
+    return {
+        "filename": attachment.filename or "(bez názvu)",
+        "content_type": attachment.content_type or "application/octet-stream",
+        "size_bytes": attachment.size_bytes,
+        "part_id": attachment.part_id,
+        "content_id": attachment.content_id,
+        "disposition": attachment.disposition,
+    }
+
+
+def email_message_to_processing_detail(message: EmailMessage) -> dict[str, Any]:
+    header = message.header
+    return {
+        "provider": header.source,
+        "folder": header.folder or "INBOX",
+        "uid": str(header.internal_id),
+        "date": header.date,
+        "sender": header.sender,
+        "subject": header.subject or "(bez předmětu)",
+        "body_text": message.body_text,
+        "truncated": message.truncated,
+        "attachments": [email_attachment_to_processing_detail(attachment) for attachment in message.attachments],
+    }
+
+
+def read_email_processing_message_detail(
+    *,
+    provider: str,
+    folder: str,
+    uid: str,
+    max_chars: int = 12_000,
+    icloud_provider_factory: Callable[[], object] | None = None,
+    seznam_provider_factory: Callable[[], object] | None = None,
+) -> dict[str, Any]:
+    safe_provider = provider.strip().casefold()
+    safe_folder = folder.strip() or "INBOX"
+    safe_uid = uid.strip()
+    safe_max_chars = min(max(500, max_chars), 20_000)
+    if not safe_uid:
+        return {"ok": False, "message": "Chybí UID e-mailu."}
+
+    try:
+        if safe_provider == "icloud":
+            provider_client = (icloud_provider_factory or ICloudReadOnlyEmailProvider)()
+            message = provider_client.read_message_by_uid(  # type: ignore[attr-defined]
+                uid=safe_uid,
+                folder=safe_folder,
+                max_chars=safe_max_chars,
+            )
+        elif safe_provider == "seznam":
+            provider_client = (seznam_provider_factory or SeznamReadOnlyEmailProvider)()
+            if hasattr(provider_client, "read_message_by_uid_from_folder"):
+                message = provider_client.read_message_by_uid_from_folder(  # type: ignore[attr-defined]
+                    uid=safe_uid,
+                    folder=safe_folder,
+                    max_chars=safe_max_chars,
+                )
+            else:
+                message = provider_client.read_message_by_uid(uid=safe_uid, max_chars=safe_max_chars)  # type: ignore[attr-defined]
+        else:
+            return {"ok": False, "message": "Neznámý e-mailový zdroj."}
+    except EmailConfigError:
+        return {"ok": False, "message": "Chybí lokální konfigurace e-mailu."}
+    except (EmailProviderError, SeznamEmailProviderError) as exc:
+        return {"ok": False, "message": str(exc) or "E-mail se nepodařilo načíst."}
+
+    return {
+        "ok": True,
+        "message": "E-mail načten read-only.",
+        "email": email_message_to_processing_detail(message),
     }
 
 
@@ -1282,6 +1356,22 @@ class CockpitServer:
                         )
                     )
                     return
+                if parsed.path == "/api/email-processing/read-message":
+                    payload = self.read_json()
+                    raw_max_chars = payload.get("max_chars", 12000)
+                    try:
+                        max_chars = int(raw_max_chars)
+                    except (TypeError, ValueError):
+                        max_chars = 12000
+                    self.respond_json(
+                        read_email_processing_message_detail(
+                            provider=str(payload.get("provider", "")),
+                            folder=str(payload.get("folder", "INBOX")),
+                            uid=str(payload.get("uid", "")),
+                            max_chars=max_chars,
+                        )
+                    )
+                    return
                 if parsed.path == "/api/email-processing/new-headers":
                     payload = self.read_json()
                     raw_limit = payload.get("limit_per_source", 10)
@@ -1827,17 +1917,6 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         .replaceAll("'", "&#39;");
     }
 
-    function workQueueRows(items) {
-      if (!items.length) return '<div class="empty">Žádné položky.</div>';
-      return items.map((item) => `
-        <article class="item">
-          <div class="subject">${escapeHtml(item.subject || "(bez předmětu)")}</div>
-          <div class="meta">${escapeHtml(itemMeta(item))}</div>
-          ${item.reason ? `<div class="reason">Důvod: ${escapeHtml(item.reason)}</div>` : ""}
-        </article>
-      `).join("");
-    }
-
     function openWorkQueueWindow() {
       const counts = decisionCounts(emailItems);
       if (!counts.total || counts.decided < counts.total) {
@@ -1852,6 +1931,13 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         window.alert("Popup okno bylo blokováno. Povol v prohlížeči vyskakovací okna pro lokální Cockpit.");
         return;
       }
+      const queueItems = [...toProcess, ...toTrash].map((item) => ({
+        ...item,
+        queueAction: item.action === "trash_requested" ? "trash_requested" : "process",
+        queueDecision: item.action === "trash_requested" ? "trash_requested" : "",
+        saveAttachments: []
+      }));
+      const queuePayload = JSON.stringify(queueItems).replaceAll("</", "<\\/");
       queue.document.open();
       queue.document.write(`<!doctype html>
 <html lang="cs">
@@ -1865,20 +1951,41 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
     header { padding: 16px 20px; background: var(--panel); border-bottom: 1px solid var(--line); }
     h1 { margin: 0; font-size: 20px; }
+    button { border: 0; border-radius: 6px; padding: 8px 11px; font: inherit; font-weight: 650; cursor: pointer; white-space: nowrap; }
+    button.primary { background: var(--blue); color: white; }
+    button.secondary { background: #e8eef8; color: #1d3b74; }
+    button.danger { background: #fee2e2; color: var(--red); }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
     main { padding: 18px 20px 28px; display: grid; gap: 14px; }
+    .topbar { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .queue-grid { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 14px; align-items: start; }
     section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
     h2 { margin: 0; padding: 12px 14px; font-size: 14px; border-bottom: 1px solid var(--line); background: #f8fafc; }
     .body { padding: 13px 14px; display: grid; gap: 9px; }
-    .item { border: 1px solid #edf0f4; border-radius: 8px; padding: 10px; background: #fbfcfe; display: grid; gap: 5px; }
+    .item { border: 1px solid #edf0f4; border-radius: 8px; padding: 10px; background: #fbfcfe; display: grid; gap: 5px; text-align: left; width: 100%; color: inherit; }
+    .item.active { border-color: #8eb1ed; background: #f4f8ff; }
     .subject { font-weight: 750; overflow-wrap: anywhere; }
     .meta, .reason, .empty, .note { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
     .note strong { color: var(--ink); }
-    .trash h2 { color: var(--red); }
+    .status { font-size: 12px; font-weight: 700; color: var(--amber); }
+    .status.done { color: #16794c; }
+    .detail-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+    .detail-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-top: 1px solid #edf0f4; padding-top: 10px; }
+    .detail-actions label, .attachment-row label { display: inline-flex; gap: 5px; align-items: center; }
+    pre { margin: 0; max-height: 360px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; background: #fbfcfe; border: 1px solid #edf0f4; border-radius: 7px; padding: 10px; }
+    .attachments { display: grid; gap: 8px; }
+    .attachment-row { border: 1px solid #edf0f4; border-radius: 7px; padding: 9px; display: grid; gap: 6px; background: #fbfcfe; }
+    .attachment-tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .hidden { display: none; }
+    @media (max-width: 820px) { .queue-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <header>
-    <h1>Email Work Queue</h1>
+    <div class="topbar">
+      <h1>Email Work Queue</h1>
+      <button class="primary" id="batchBtn" disabled>Zpracovat dávku</button>
+    </div>
   </header>
   <main>
     <section>
@@ -1887,22 +1994,219 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         <div><strong>Připraveno ke zpracování:</strong> ${toProcess.length}</div>
         <div><strong>Koš čeká na potvrzení:</strong> ${toTrash.length}</div>
         <div><strong>Ignorováno:</strong> ${ignored.length}</div>
-        <div>Tohle okno zatím nic nečte, nestahuje a nemaže. Další krok bude postupně otevírat konkrétní položky a každé čtení e-mailu, uložení PDF nebo smazání bude samostatně potvrzené.</div>
+        <div id="queueStatus">Klikni na e-mail vlevo. Detail se načte read-only, bez stahování příloh a bez mazání.</div>
       </div>
     </section>
-    <section>
-      <h2>Zpracovat</h2>
-      <div class="body">${workQueueRows(toProcess)}</div>
-    </section>
-    <section class="trash">
-      <h2>Koš - čeká na potvrzení</h2>
-      <div class="body">${workQueueRows(toTrash)}</div>
-    </section>
+    <div class="queue-grid">
+      <section>
+        <h2>E-maily k rozhodnutí</h2>
+        <div class="body" id="queueList"></div>
+      </section>
+      <section>
+        <h2>Detail e-mailu</h2>
+        <div class="body" id="detailPane">
+          <div class="empty">Vyber e-mail ze seznamu.</div>
+        </div>
+      </section>
+    </div>
   </main>
+  <script>
+    const queueItems = ${queuePayload};
+    const queueList = document.getElementById("queueList");
+    const detailPane = document.getElementById("detailPane");
+    const queueStatus = document.getElementById("queueStatus");
+    const batchBtn = document.getElementById("batchBtn");
+    let selectedId = queueItems.length ? queueItems[0].id : "";
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function itemMeta(item) {
+      const parts = [];
+      if (item.provider) parts.push(item.provider);
+      if (item.folder) parts.push(item.folder);
+      if (item.uid) parts.push("UID " + item.uid);
+      if (item.date) parts.push(item.date);
+      if (item.category) parts.push(item.category);
+      return parts.join(" | ");
+    }
+
+    function decisionLabel(item) {
+      if (item.queueDecision === "save") return "uložit";
+      if (item.queueDecision === "skip") return "neukládat";
+      if (item.queueDecision === "trash_requested") return "koš čeká na potvrzení";
+      return "čeká na rozhodnutí";
+    }
+
+    function renderQueueList() {
+      if (!queueItems.length) {
+        queueList.innerHTML = '<div class="empty">Fronta je prázdná.</div>';
+        detailPane.innerHTML = '<div class="empty">Žádný e-mail ke zpracování.</div>';
+        batchBtn.disabled = true;
+        return;
+      }
+      queueList.innerHTML = queueItems.map((item) => {
+        const active = item.id === selectedId ? " active" : "";
+        const done = item.queueDecision ? " done" : "";
+        return '<button type="button" class="item' + active + '" data-id="' + escapeHtml(item.id) + '">' +
+          '<span class="subject">' + escapeHtml(item.subject || "(bez předmětu)") + '</span>' +
+          '<span class="meta">' + escapeHtml(itemMeta(item)) + '</span>' +
+          (item.reason ? '<span class="reason">Důvod: ' + escapeHtml(item.reason) + '</span>' : "") +
+          '<span class="status' + done + '">' + escapeHtml(decisionLabel(item)) + '</span>' +
+          '</button>';
+      }).join("");
+      queueList.querySelectorAll(".item").forEach((button) => {
+        button.addEventListener("click", () => selectItem(button.dataset.id || ""));
+      });
+      updateBatchState();
+    }
+
+    function updateBatchState() {
+      const decided = queueItems.filter((item) => Boolean(item.queueDecision)).length;
+      batchBtn.disabled = !queueItems.length || decided < queueItems.length;
+      queueStatus.textContent = queueItems.length
+        ? "Rozhodnuto " + decided + "/" + queueItems.length + ". Ukládání a fyzické mazání budou další potvrzený krok."
+        : "Fronta je prázdná.";
+    }
+
+    function currentItem() {
+      return queueItems.find((item) => item.id === selectedId) || queueItems[0] || null;
+    }
+
+    function renderAttachmentRows(item, attachments) {
+      if (!attachments.length) return '<div class="empty">Bez příloh.</div>';
+      return attachments.map((attachment, index) => {
+        const partId = attachment.part_id || String(index);
+        const checked = (item.saveAttachments || []).includes(partId) ? " checked" : "";
+        const size = attachment.size_bytes === null || attachment.size_bytes === undefined
+          ? "velikost neznámá"
+          : Math.round(Number(attachment.size_bytes) / 1024) + " kB";
+        return '<div class="attachment-row" data-part-id="' + escapeHtml(partId) + '">' +
+          '<div><strong>' + escapeHtml(attachment.filename || "(bez názvu)") + '</strong></div>' +
+          '<div class="meta">' + escapeHtml(attachment.content_type || "") + " | " + escapeHtml(size) + '</div>' +
+          '<div class="attachment-tools">' +
+          '<label><input type="checkbox" class="attachment-save" data-part-id="' + escapeHtml(partId) + '"' + checked + '> Uložit</label>' +
+          '<button type="button" class="secondary attachment-toggle">Rozkliknout</button>' +
+          '</div>' +
+          '<div class="meta hidden attachment-detail">part_id: ' + escapeHtml(partId) + '<br>dispozice: ' + escapeHtml(attachment.disposition || "") + '</div>' +
+          '</div>';
+      }).join("");
+    }
+
+    async function selectItem(itemId) {
+      selectedId = itemId;
+      const item = currentItem();
+      renderQueueList();
+      if (!item) return;
+      detailPane.innerHTML = '<div class="empty">Načítám e-mail read-only...</div>';
+      try {
+        const res = await fetch("/api/email-processing/read-message", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            provider: item.provider,
+            folder: item.folder || "INBOX",
+            uid: item.uid,
+            max_chars: 12000
+          })
+        });
+        const data = await res.json();
+        if (!data.ok) {
+          detailPane.innerHTML = '<div class="empty">' + escapeHtml(data.message || "E-mail se nepodařilo načíst.") + '</div>';
+          return;
+        }
+        item.detail = data.email || {};
+        renderDetail(item);
+      } catch (err) {
+        detailPane.innerHTML = '<div class="empty">Chyba načtení: ' + escapeHtml(err) + '</div>';
+      }
+    }
+
+    function setQueueDecision(item, decision) {
+      item.queueDecision = decision;
+      if (decision === "skip") item.saveAttachments = [];
+      renderQueueList();
+      renderDetail(item);
+    }
+
+    function renderDetail(item) {
+      const detail = item.detail || {};
+      const attachments = detail.attachments || [];
+      detailPane.innerHTML =
+        '<div class="detail-head">' +
+          '<div>' +
+            '<div class="subject">' + escapeHtml(detail.subject || item.subject || "(bez předmětu)") + '</div>' +
+            '<div class="meta">' + escapeHtml((detail.sender ? detail.sender + " | " : "") + itemMeta(item)) + '</div>' +
+          '</div>' +
+          '<div class="status' + (item.queueDecision ? " done" : "") + '">' + escapeHtml(decisionLabel(item)) + '</div>' +
+        '</div>' +
+        '<div class="detail-actions">' +
+          '<label><input type="checkbox" id="saveEmail"' + (item.queueDecision === "save" ? " checked" : "") + '> Uložit e-mail</label>' +
+          '<label><input type="checkbox" id="skipEmail"' + (item.queueDecision === "skip" ? " checked" : "") + '> Neukládat</label>' +
+          '<button type="button" class="danger" id="trashEmail">Koš</button>' +
+        '</div>' +
+        '<div><strong>Tělo e-mailu</strong></div>' +
+        '<pre>' + escapeHtml(detail.body_text || "") + (detail.truncated ? "\\n\\n[Text je zkrácený.]" : "") + '</pre>' +
+        '<div><strong>Přílohy</strong></div>' +
+        '<div class="attachments">' + renderAttachmentRows(item, attachments) + '</div>';
+
+      document.getElementById("saveEmail").addEventListener("change", (event) => {
+        setQueueDecision(item, event.target.checked ? "save" : "");
+      });
+      document.getElementById("skipEmail").addEventListener("change", (event) => {
+        setQueueDecision(item, event.target.checked ? "skip" : "");
+      });
+      document.getElementById("trashEmail").addEventListener("click", () => {
+        const ok = window.confirm("Opravdu označit e-mail ke smazání?\\n\\nSkutečné smazání bude samostatná potvrzená akce v dalším kroku.");
+        if (!ok) return;
+        setQueueDecision(item, "trash_requested");
+      });
+      detailPane.querySelectorAll(".attachment-save").forEach((input) => {
+        input.addEventListener("change", () => {
+          const partId = input.dataset.partId || "";
+          const current = new Set(item.saveAttachments || []);
+          if (input.checked) current.add(partId);
+          else current.delete(partId);
+          item.saveAttachments = Array.from(current);
+          if (item.saveAttachments.length && item.queueDecision !== "save") item.queueDecision = "save";
+          renderQueueList();
+        });
+      });
+      detailPane.querySelectorAll(".attachment-toggle").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detailNode = button.closest(".attachment-row").querySelector(".attachment-detail");
+          detailNode.classList.toggle("hidden");
+          button.textContent = detailNode.classList.contains("hidden") ? "Rozkliknout" : "Zavřít";
+        });
+      });
+    }
+
+    batchBtn.addEventListener("click", () => {
+      const ok = window.confirm("Označit dávku jako zpracovanou v pracovní frontě?\\n\\nArchivace příloh a fyzické mazání nejsou v tomto kroku ještě spuštěné.");
+      if (!ok) return;
+      queueItems.splice(0, queueItems.length);
+      selectedId = "";
+      renderQueueList();
+    });
+
+    renderQueueList();
+    if (selectedId) selectItem(selectedId);
+  <` + `/script>
 </body>
 </html>`);
       queue.document.close();
       queue.focus();
+      emailItems = [];
+      window.lastOverviewText = "";
+      renderItems(emailItems);
+      updateWorkQueueState();
+      overviewStatus.textContent = "Fronta byla otevřena v okně Email Work Queue; hlavní seznam je vyprázdněný.";
     }
 
     async function loadNewHeaders(options = {}) {
