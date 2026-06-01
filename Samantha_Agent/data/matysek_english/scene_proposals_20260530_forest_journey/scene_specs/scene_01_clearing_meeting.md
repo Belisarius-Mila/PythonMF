@@ -203,24 +203,23 @@ Moje doporučení před programováním:
 
 ## Hlasový casting
 
-Hlasové ukázky pro odsouhlasení jsou připravené zde:
+Hlasové ukázky a finální hlasový lock jsou připravené zde:
 
 ```text
-data/matysek_english/voice_casting_20260601_scene01/
+data/matysek_english/voice_casting_20260601_scene01_recast/
+data/matysek_english/voice_casting_20260601_scene01_recast/VOICE_LOCK_20260601.md
 ```
 
-Stávající hlasy:
+Finální odsouhlasený výběr:
 
-- Benji: `fable` - ponechat z původních scén
-- Bunny: ponechat podle kanonické reference `reference_bunny_echo_i_am_bunny.mp3`; dnešní nové generace `echo` nepovažovat automaticky za stejný hlas
+- Benji: `reference_benji_fable_i_am_benji.mp3`
+- Bunny: `reference_bunny_echo_i_am_bunny.mp3`
+- Bruno: `bruno_macos_daniel_01_hello_i_am_bruno.mp3`
+- Fiona: `fiona_macos_karen_01_hi_i_am_fiona.mp3`
+- Sunny: `sunny_young_coral_01_hello_i_am_sunny.mp3`
 
-Návrh k poslechu:
-
-- Fiona: potvrzená kanonická reference `fiona_shimmer_we_are_friends_too.mp3`; finalni repliky Fiony generovat nebo vybirat tak, aby odpovidaly teto konkretni MP3
-- Bruno: potvrzená kanonická reference `bruno_onyx_hello_i_am_bruno.mp3`; finalni repliky Bruna generovat nebo vybirat tak, aby odpovidaly teto konkretni MP3
-- Sunny: potvrzená kanonická reference `sunny_young_nova_01_hello_i_am_sunny.mp3`; finalni repliky Sunny generovat nebo vybirat tak, aby odpovidaly teto konkretni MP3
-
-Po odsouhlasení se sem zapíše finální mapa hlasů a teprve potom se vygeneruje finální audio celé scény.
+Predchozi volby Fiona=`shimmer`, Bruno=`onyx`, Sunny=`nova` jsou nahrazeny recastingem.
+Teprve podle tohoto locku se ma pripravit finalni audio cele sceny.
 
 Pravidlo pro stabilitu hlasů: každá postava musí mít konkrétní odsouhlasené MP3
 jako kanonickou referenci. Během vývoje se nesmí spoléhat jen na název TTS hlasu,
