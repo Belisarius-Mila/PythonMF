@@ -10,6 +10,8 @@ from app.cockpit import (
     EMAIL_PROCESSING_HTML,
     document_reference,
     document_work_status,
+    email_header_to_processing_item,
+    email_processing_item_id,
     latest_email_processing_overview,
     move_document_lifecycle_action,
     new_email_headers_overview,
@@ -277,34 +279,80 @@ class CockpitTests(unittest.TestCase):
             self.assertEqual(decisions["abc123"]["item"]["uid"], "14157")
 
     def test_new_email_headers_overview_wraps_readonly_unified_text(self) -> None:
-        result = new_email_headers_overview(
-            limit_per_source=50,
-            since="2026-06-01T07:00:00+00:00",
-            icloud_provider_factory=lambda: _FakeEmailProvider(
-                [
-                    EmailHeader(
-                        internal_id="10",
-                        date="Mon, 1 Jun 2026 10:00:00 +0200",
-                        sender="Sender <sender@example.com>",
-                        subject="Nový iCloud e-mail",
-                    ),
-                    EmailHeader(
-                        internal_id="9",
-                        date="Sun, 31 May 2026 10:00:00 +0200",
-                        sender="Old <old@example.com>",
-                        subject="Starý e-mail",
-                    )
-                ]
-            ),
-            seznam_provider_factory=lambda: _FakeEmailProvider([]),
-        )
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            result = new_email_headers_overview(
+                limit_per_source=50,
+                since="2026-06-01T07:00:00+00:00",
+                decisions_path=Path(temp_dir) / "email_processing_decisions.json",
+                icloud_provider_factory=lambda: _FakeEmailProvider(
+                    [
+                        EmailHeader(
+                            internal_id="10",
+                            date="Mon, 1 Jun 2026 10:00:00 +0200",
+                            sender="Sender <sender@example.com>",
+                            subject="Nový iCloud e-mail",
+                        ),
+                        EmailHeader(
+                            internal_id="9",
+                            date="Sun, 31 May 2026 10:00:00 +0200",
+                            sender="Old <old@example.com>",
+                            subject="Starý e-mail",
+                        )
+                    ]
+                ),
+                seznam_provider_factory=lambda: _FakeEmailProvider([]),
+            )
 
         self.assertTrue(result["ok"])
-        self.assertEqual(result["limit_per_source"], 20)
+        self.assertEqual(result["limit_per_source"], 50)
         self.assertEqual(len(result["items"]), 1)
         self.assertEqual(result["items"][0]["subject"], "Nový iCloud e-mail")
         self.assertEqual(result["items"][0]["category"], "ostatní")
         self.assertNotIn("text", result)
+
+    def test_email_processing_id_is_stable_for_same_provider_folder_uid(self) -> None:
+        first = email_processing_item_id(
+            "faktury/e-shopy",
+            "iCloud",
+            "INBOX",
+            "14157",
+            "Mon, 1 Jun 2026 10:00:00 +0200",
+            "Původní předmět",
+        )
+        second = email_processing_item_id(
+            "ostatní",
+            "iCloud",
+            "INBOX",
+            "14157",
+            "2026-06-01",
+            "Jinak zapsaný předmět",
+        )
+        third = email_processing_item_id(
+            "ostatní",
+            "Seznam",
+            "INBOX",
+            "14157",
+            "2026-06-01",
+            "Jinak zapsaný předmět",
+        )
+
+        self.assertEqual(first, second)
+        self.assertNotEqual(first, third)
+
+    def test_email_header_processing_item_keeps_legacy_id_for_old_decisions(self) -> None:
+        item = email_header_to_processing_item(
+            EmailHeader(
+                internal_id="14157",
+                date="Mon, 1 Jun 2026 10:00:00 +0200",
+                sender="Sender <sender@example.com>",
+                subject="Nový iCloud e-mail",
+            ),
+            "iCloud",
+        )
+
+        self.assertIn("id", item)
+        self.assertIn("legacy_id", item)
+        self.assertNotEqual(item["id"], item["legacy_id"])
 
     def test_email_processing_html_contains_readonly_overview_controls(self) -> None:
         self.assertIn("Email Processing", EMAIL_PROCESSING_HTML)
@@ -312,10 +360,24 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/email-processing/decision", EMAIL_PROCESSING_HTML)
         self.assertIn("/api/email-processing/new-headers", EMAIL_PROCESSING_HTML)
         self.assertIn("read-only", EMAIL_PROCESSING_HTML)
-        self.assertIn("Obnovit okno", EMAIL_PROCESSING_HTML)
-        self.assertIn("Načíst nové hlavičky", EMAIL_PROCESSING_HTML)
+        self.assertIn("Obnovit nové", EMAIL_PROCESSING_HTML)
+        self.assertIn("Načti emaily", EMAIL_PROCESSING_HTML)
+        self.assertIn("Za posledních:", EMAIL_PROCESSING_HTML)
+        self.assertIn('id="emailDaysInput"', EMAIL_PROCESSING_HTML)
+        self.assertIn('min="1"', EMAIL_PROCESSING_HTML)
+        self.assertIn('max="14"', EMAIL_PROCESSING_HTML)
+        self.assertIn("Okno startuje prázdné", EMAIL_PROCESSING_HTML)
+        self.assertIn("Pracovní seznam je prázdný", EMAIL_PROCESSING_HTML)
+        self.assertIn("ve zvoleném rozsahu 1-14 dní", EMAIL_PROCESSING_HTML)
+        self.assertIn("loadNewHeaders({lastSevenDays: true})", EMAIL_PROCESSING_HTML)
+        self.assertIn("loadNewHeaders({newOnly: true})", EMAIL_PROCESSING_HTML)
+        self.assertIn("Zpracovat e-maily", EMAIL_PROCESSING_HTML)
+        self.assertIn("processEmailsBtn", EMAIL_PROCESSING_HTML)
+        self.assertIn("SamanthaEmailWorkQueue", EMAIL_PROCESSING_HTML)
+        self.assertIn("Koš - čeká na potvrzení", EMAIL_PROCESSING_HTML)
+        self.assertIn("Tohle okno zatím nic nečte, nestahuje a nemaže", EMAIL_PROCESSING_HTML)
         self.assertIn("headersBusy", EMAIL_PROCESSING_HTML)
-        self.assertIn("Načítám hlavičky", EMAIL_PROCESSING_HTML)
+        self.assertIn("Doplňuji chybějící hlavičky", EMAIL_PROCESSING_HTML)
         self.assertIn("Zpracovat", EMAIL_PROCESSING_HTML)
         self.assertIn("Ignorovat", EMAIL_PROCESSING_HTML)
         self.assertIn("Koš", EMAIL_PROCESSING_HTML)

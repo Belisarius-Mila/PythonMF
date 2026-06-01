@@ -156,9 +156,50 @@ EMAIL_PROCESSING_ACTIONS = {"process", "ignore", "trash_requested", ""}
 EMAIL_PROCESSING_CATEGORY_ORDER = ("faktury/e-shopy", "pojištění/smlouvy", "úřady/daně", "ostatní")
 
 
-def email_processing_item_id(category: str, provider: str, folder: str, uid: str, date: str, subject: str) -> str:
+def email_processing_stable_key(provider: str, folder: str, uid: str) -> str:
+    provider_key = " ".join(provider.casefold().split())
+    folder_key = " ".join((folder or "INBOX").casefold().split())
+    uid_key = str(uid).strip()
+    if not provider_key or not uid_key:
+        return ""
+    return "|".join([provider_key, folder_key, uid_key])
+
+
+def email_processing_legacy_item_id(category: str, provider: str, folder: str, uid: str, date: str, subject: str) -> str:
     raw = "|".join([category, provider, folder, uid, date, subject])
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def email_processing_item_id(category: str, provider: str, folder: str, uid: str, date: str, subject: str) -> str:
+    stable_key = email_processing_stable_key(provider, folder, uid)
+    if stable_key:
+        return hashlib.sha256(stable_key.encode("utf-8")).hexdigest()[:16]
+    return email_processing_legacy_item_id(category, provider, folder, uid, date, subject)
+
+
+def email_processing_decision_lookup_keys(decisions: dict[str, dict[str, Any]]) -> set[str]:
+    keys = set(decisions)
+    for decision in decisions.values():
+        item = decision.get("item", {})
+        if not isinstance(item, dict):
+            continue
+        item_id = str(item.get("id", "")).strip()
+        legacy_id = str(item.get("legacy_id", "")).strip()
+        if item_id:
+            keys.add(item_id)
+        if legacy_id:
+            keys.add(legacy_id)
+        computed_id = email_processing_item_id(
+            str(item.get("category", "")),
+            str(item.get("provider", "")),
+            str(item.get("folder", "")),
+            str(item.get("uid", "")),
+            str(item.get("date", "")),
+            str(item.get("subject", "")),
+        )
+        if computed_id:
+            keys.add(computed_id)
+    return keys
 
 
 def classify_email_processing_category(subject: str, sender: str = "") -> str:
@@ -248,6 +289,14 @@ def email_header_to_processing_item(header: EmailHeader, source: str) -> dict[st
         header.date,
         header.subject or "",
     )
+    item["legacy_id"] = email_processing_legacy_item_id(
+        category,
+        source,
+        folder,
+        str(header.internal_id),
+        header.date,
+        header.subject or "",
+    )
     return item
 
 
@@ -261,6 +310,14 @@ def parse_email_processing_items(text: str) -> list[dict[str, Any]]:
         if not current:
             return
         current["id"] = email_processing_item_id(
+            str(current.get("category", "")),
+            str(current.get("provider", "")),
+            str(current.get("folder", "")),
+            str(current.get("uid", "")),
+            str(current.get("date", "")),
+            str(current.get("subject", "")),
+        )
+        current["legacy_id"] = email_processing_legacy_item_id(
             str(current.get("category", "")),
             str(current.get("provider", "")),
             str(current.get("folder", "")),
@@ -372,13 +429,24 @@ def save_email_processing_decision(
 
 
 def new_email_headers_overview(
-    limit_per_source: int = 10,
+    limit_per_source: int = 50,
     since: str = "",
+    days: int = 0,
+    known_ids: set[str] | None = None,
+    decisions_path: Path = EMAIL_PROCESSING_DECISIONS_FILE,
     icloud_provider_factory: Callable[[], object] | None = None,
     seznam_provider_factory: Callable[[], object] | None = None,
 ) -> dict[str, Any]:
-    safe_limit = min(max(1, limit_per_source), 20)
+    safe_limit = min(max(1, limit_per_source), 75)
     since_ts = parse_iso_timestamp(since)
+    safe_days = min(max(0, days), 14)
+    since_days_ts = 0.0
+    if not since_ts and safe_days:
+        since_days_ts = datetime.now(timezone.utc).timestamp() - (safe_days * 24 * 60 * 60)
+    cutoff_ts = since_ts or since_days_ts
+    known = {str(item_id).strip() for item_id in (known_ids or set()) if str(item_id).strip()}
+    decided = read_email_processing_decisions(decisions_path)
+    decided_keys = email_processing_decision_lookup_keys(decided)
     entries: list[dict[str, Any]] = []
     unavailable: list[str] = []
     providers: list[tuple[str, Callable[[], object], type[Exception], str]] = [
@@ -407,15 +475,25 @@ def new_email_headers_overview(
             continue
         for header in headers:
             header_ts = email_header_timestamp(header.date)
-            if since_ts and (not header_ts or header_ts <= since_ts):
+            if cutoff_ts and (not header_ts or header_ts <= cutoff_ts):
                 continue
-            entries.append(email_header_to_processing_item(header, source))
+            item = email_header_to_processing_item(header, source)
+            item_id = str(item.get("id", ""))
+            legacy_id = str(item.get("legacy_id", ""))
+            if item_id in known or legacy_id in known or item_id in decided_keys or legacy_id in decided_keys:
+                continue
+            entries.append(item)
 
     entries.sort(key=lambda item: email_header_timestamp(str(item.get("date", ""))), reverse=True)
     if entries:
-        message = f"Načteno {len(entries)} nových e-mailových hlaviček read-only."
+        if safe_days and not since_ts:
+            message = f"Načteno {len(entries)} e-mailových hlaviček za posledních {safe_days} dní read-only."
+        else:
+            message = f"Načteno {len(entries)} nových e-mailových hlaviček read-only."
     elif since_ts:
         message = "Od otevření přehledu nepřišly žádné novější e-mailové hlavičky."
+    elif safe_days:
+        message = f"Za posledních {safe_days} dní nebyly nalezeny žádné e-mailové hlavičky."
     else:
         message = "Nebyly nalezeny žádné e-mailové hlavičky."
     return {
@@ -424,6 +502,9 @@ def new_email_headers_overview(
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "limit_per_source": safe_limit,
         "since": since,
+        "days": safe_days,
+        "known_count": len(known),
+        "skipped_decided_count": len(decided_keys),
         "items": entries,
         "unavailable": unavailable,
     }
@@ -467,7 +548,10 @@ def latest_email_processing_overview(root: Path = EMAIL_SESSION_HANDOFF_DIR) -> 
     decisions = read_email_processing_decisions(root / EMAIL_PROCESSING_DECISIONS_FILE.name)
     items = parse_email_processing_items(text)
     for item in items:
-        decision = decisions.get(str(item.get("id", "")), {})
+        decision = (
+            decisions.get(str(item.get("id", "")), {})
+            or decisions.get(str(item.get("legacy_id", "")), {})
+        )
         action = str(decision.get("action", ""))
         item["action"] = "process" if action == "save" else action
     return {
@@ -478,6 +562,18 @@ def latest_email_processing_overview(root: Path = EMAIL_SESSION_HANDOFF_DIR) -> 
         "text": text,
         "items": items,
         "updated_at": updated_at,
+    }
+
+
+def empty_email_processing_overview() -> dict[str, Any]:
+    return {
+        "ok": True,
+        "message": "Pracovní seznam je prázdný. Zvol rozsah a načti e-maily.",
+        "path": "",
+        "title": "Email Processing",
+        "text": "",
+        "items": [],
+        "updated_at": "",
     }
 
 
@@ -1116,7 +1212,7 @@ class CockpitServer:
                     self.respond_json(web_apps_catalog())
                     return
                 if parsed.path == "/api/email-processing/overview":
-                    self.respond_json(latest_email_processing_overview())
+                    self.respond_json(empty_email_processing_overview())
                     return
                 if parsed.path == "/api/documents/search":
                     params = parse_qs(parsed.query)
@@ -1189,14 +1285,25 @@ class CockpitServer:
                 if parsed.path == "/api/email-processing/new-headers":
                     payload = self.read_json()
                     raw_limit = payload.get("limit_per_source", 10)
+                    raw_days = payload.get("days", 0)
                     try:
                         limit = int(raw_limit)
                     except (TypeError, ValueError):
                         limit = 10
+                    try:
+                        days = int(raw_days)
+                    except (TypeError, ValueError):
+                        days = 0
+                    raw_known_ids = payload.get("known_ids", [])
+                    known_ids = set()
+                    if isinstance(raw_known_ids, list):
+                        known_ids = {str(item_id).strip() for item_id in raw_known_ids if str(item_id).strip()}
                     self.respond_json(
                         new_email_headers_overview(
                             limit_per_source=limit,
                             since=str(payload.get("since", "")),
+                            days=days,
+                            known_ids=known_ids,
                         )
                     )
                     return
@@ -1306,8 +1413,10 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     button { border: 0; border-radius: 6px; padding: 9px 12px; font: inherit; font-weight: 650; cursor: pointer; white-space: nowrap; }
     button.primary { background: var(--blue); color: white; }
     button.secondary { background: #e8eef8; color: #1d3b74; }
+    input[type="number"] { width: 54px; border: 1px solid var(--line); border-radius: 6px; padding: 8px 7px; font: inherit; font-weight: 650; color: var(--ink); background: white; }
     main { padding: 18px 20px 28px; display: grid; gap: 14px; }
     .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+    .days-control { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; white-space: nowrap; }
     .grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; align-items: start; }
     section, aside { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
     h2 { margin: 0; padding: 12px 14px; font-size: 14px; border-bottom: 1px solid var(--line); background: #f8fafc; }
@@ -1332,6 +1441,8 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     .email-actions input { margin: 0; }
     .trash-button { background: #fee2e2; color: #991b1b; padding: 7px 10px; }
     .decision { color: var(--green); font-size: 12px; font-weight: 650; }
+    .work-button { width: 100%; }
+    .work-button:disabled { opacity: 0.45; cursor: not-allowed; }
     .headers-box { display: grid; gap: 8px; margin-top: 10px; }
     .busy-row { display: none; align-items: center; gap: 8px; padding: 8px 9px; border-radius: 7px; background: #eef4ff; color: #1d3b74; font-size: 13px; font-weight: 650; }
     .busy-row.active { display: flex; }
@@ -1347,15 +1458,20 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
   <header>
     <h1>Email Processing</h1>
     <div class="toolbar">
-      <button class="secondary" id="refreshBtn">Obnovit okno</button>
-      <button class="primary" id="loadHeadersBtn">Načíst nové hlavičky</button>
+      <button class="secondary" id="refreshBtn">Obnovit nové</button>
+      <span class="days-control">
+        <span>Za posledních:</span>
+        <input id="emailDaysInput" type="number" min="1" max="14" step="1" value="7" inputmode="numeric" aria-label="Počet dní">
+        <span>dní</span>
+      </span>
+      <button class="primary" id="loadHeadersBtn">Načti emaily</button>
       <button class="secondary" id="cockpitBtn">Otevřít Cockpit</button>
     </div>
   </header>
   <main>
     <div class="grid">
       <section>
-        <h2>Rozhodnutí k e-mailům za posledních 7 dní</h2>
+        <h2>Pracovní seznam e-mailů</h2>
         <div class="body">
           <div id="overviewStatus" class="status-line">Načítám uložený přehled...</div>
           <div id="overview" class="overview"></div>
@@ -1365,15 +1481,16 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         <h2>Bezpečnost</h2>
         <div class="body meta">
           <div><strong>Režim:</strong> <span class="safe">read-only</span></div>
-          <div>Okno zobrazuje poslední uložený pracovní přehled z lokálního soukromého souboru.</div>
-          <div><strong>Obnovit okno:</strong> znovu načte uložený přehled a pracovní volby z disku.</div>
-          <div><strong>Načíst nové hlavičky:</strong> read-only se podívá do iCloud + Seznam na nejnovější hlavičky, bez těl a příloh.</div>
+          <div>Okno startuje prázdné. Nové hlavičky se načtou až tlačítkem.</div>
+          <div><strong>Obnovit nové:</strong> doplní jen e-maily novější než aktuální seznam.</div>
+          <div><strong>Načti emaily:</strong> doplní jen e-maily ve zvoleném rozsahu 1-14 dní, které ještě nejsou v aktuálním seznamu ani nemají uložené rozhodnutí.</div>
           <div><strong>Koš:</strong> tlačítko zatím jen označí e-mail ke smazání; skutečné smazání bude samostatná potvrzená akce.</div>
           <div><strong>Další krok:</strong> vybrat konkrétní UID a zdroj; načtení e-mailu nebo PDF až po samostatném potvrzení.</div>
           <div id="sourcePath" class="status-line"></div>
           <div id="updatedAt" class="status-line"></div>
+          <button class="primary work-button" id="processEmailsBtn" disabled>Zpracovat e-maily</button>
+          <div id="processEmailsStatus" class="status-line">Nejdřív přiřaď status všem viditelným e-mailům.</div>
           <div class="headers-box">
-            <button class="secondary" id="loadHeadersAsideBtn">Zkontrolovat nové hlavičky</button>
             <div id="headersBusy" class="busy-row" role="status" aria-live="polite">
               <span class="spinner" aria-hidden="true"></span>
               <span id="headersBusyText">Načítám...</span>
@@ -1397,10 +1514,12 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     const updatedAt = document.getElementById("updatedAt");
     const refreshBtn = document.getElementById("refreshBtn");
     const loadHeadersBtn = document.getElementById("loadHeadersBtn");
-    const loadHeadersAsideBtn = document.getElementById("loadHeadersAsideBtn");
+    const emailDaysInput = document.getElementById("emailDaysInput");
     const headersBusy = document.getElementById("headersBusy");
     const headersBusyText = document.getElementById("headersBusyText");
     const newHeadersStatus = document.getElementById("newHeadersStatus");
+    const processEmailsBtn = document.getElementById("processEmailsBtn");
+    const processEmailsStatus = document.getElementById("processEmailsStatus");
     const cockpitBtn = document.getElementById("cockpitBtn");
     let headersBusyTimer = null;
     let emailItems = [];
@@ -1472,6 +1591,38 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       return "";
     }
 
+    function decisionCounts(items) {
+      const counts = {total: 0, decided: 0, process: 0, ignore: 0, trash: 0};
+      (items || []).forEach((item) => {
+        counts.total += 1;
+        if (item.action) counts.decided += 1;
+        if (item.action === "process") counts.process += 1;
+        if (item.action === "ignore") counts.ignore += 1;
+        if (item.action === "trash_requested") counts.trash += 1;
+      });
+      return counts;
+    }
+
+    function updateWorkQueueState() {
+      const counts = decisionCounts(emailItems);
+      const actionable = counts.process + counts.trash;
+      if (!counts.total) {
+        processEmailsBtn.disabled = true;
+        processEmailsBtn.textContent = "Zpracovat e-maily";
+        processEmailsStatus.textContent = "Zatím není načtený žádný e-mailový seznam.";
+        return;
+      }
+      if (counts.decided < counts.total) {
+        processEmailsBtn.disabled = true;
+        processEmailsBtn.textContent = "Zpracovat e-maily";
+        processEmailsStatus.textContent = `Rozhodnuto ${counts.decided}/${counts.total}. Zbývá označit ${counts.total - counts.decided}.`;
+        return;
+      }
+      processEmailsBtn.disabled = false;
+      processEmailsStatus.textContent = `Připraveno: zpracovat ${counts.process}, koš ${counts.trash}, ignorovat ${counts.ignore}.`;
+      processEmailsBtn.textContent = actionable ? `Zpracovat e-maily (${actionable})` : "Zpracovat e-maily";
+    }
+
     function itemMeta(item) {
       const parts = [];
       if (item.provider) parts.push(item.provider);
@@ -1494,6 +1645,30 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       return Number.isFinite(parsed) ? parsed : 0;
     }
 
+    function knownItemIds() {
+      const ids = [];
+      emailItems.forEach((item) => {
+        if (item && item.id) ids.push(item.id);
+        if (item && item.legacy_id) ids.push(item.legacy_id);
+      });
+      return ids;
+    }
+
+    function newestItemIso() {
+      const latest = Math.max(0, ...emailItems.map(itemDateValue));
+      return latest ? new Date(latest).toISOString() : "";
+    }
+
+    function selectedDays() {
+      const parsed = Number.parseInt(emailDaysInput.value, 10);
+      if (!Number.isFinite(parsed)) return 7;
+      return Math.min(14, Math.max(1, parsed));
+    }
+
+    function normalizeDaysInput() {
+      emailDaysInput.value = String(selectedDays());
+    }
+
     function mergeItems(existing, incoming) {
       const byId = new Map();
       (existing || []).forEach((item) => {
@@ -1501,9 +1676,11 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       });
       (incoming || []).forEach((item) => {
         if (!item || !item.id || byId.has(item.id)) return;
+        if (item.legacy_id && byId.has(item.legacy_id)) return;
         byId.set(item.id, item);
+        if (item.legacy_id) byId.set(item.legacy_id, item);
       });
-      return Array.from(byId.values()).sort((a, b) => itemDateValue(b) - itemDateValue(a));
+      return Array.from(new Set(byId.values())).sort((a, b) => itemDateValue(b) - itemDateValue(a));
     }
 
     function createEmailCard(item) {
@@ -1580,6 +1757,13 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     function renderItems(items) {
       overview.innerHTML = "";
       if (!items || !items.length) {
+        if (!window.lastOverviewText) {
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = "Pracovní seznam je prázdný. Zadej rozsah 1-14 dní a klikni Načti emaily.";
+          overview.appendChild(empty);
+          return;
+        }
         renderSections(splitOverview(window.lastOverviewText || ""));
         return;
       }
@@ -1628,33 +1812,135 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         item.action = action;
         decisionNode.textContent = actionLabel(action);
         overviewStatus.textContent = data.message || "Rozhodnutí uloženo.";
+        updateWorkQueueState();
       } catch (err) {
         decisionNode.textContent = `Chyba: ${err}`;
       }
     }
 
-    async function loadNewHeaders() {
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function workQueueRows(items) {
+      if (!items.length) return '<div class="empty">Žádné položky.</div>';
+      return items.map((item) => `
+        <article class="item">
+          <div class="subject">${escapeHtml(item.subject || "(bez předmětu)")}</div>
+          <div class="meta">${escapeHtml(itemMeta(item))}</div>
+          ${item.reason ? `<div class="reason">Důvod: ${escapeHtml(item.reason)}</div>` : ""}
+        </article>
+      `).join("");
+    }
+
+    function openWorkQueueWindow() {
+      const counts = decisionCounts(emailItems);
+      if (!counts.total || counts.decided < counts.total) {
+        window.alert("Nejdřív přiřaď status všem viditelným e-mailům.");
+        return;
+      }
+      const toProcess = emailItems.filter((item) => item.action === "process");
+      const toTrash = emailItems.filter((item) => item.action === "trash_requested");
+      const ignored = emailItems.filter((item) => item.action === "ignore");
+      const queue = window.open("", "SamanthaEmailWorkQueue", "popup=yes,width=980,height=760,left=140,top=70");
+      if (!queue) {
+        window.alert("Popup okno bylo blokováno. Povol v prohlížeči vyskakovací okna pro lokální Cockpit.");
+        return;
+      }
+      queue.document.open();
+      queue.document.write(`<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Email Work Queue</title>
+  <style>
+    :root { --bg: #f5f7fb; --panel: #ffffff; --ink: #162033; --muted: #667085; --line: #d9e0ea; --blue: #1f5fbf; --red: #991b1b; --amber: #9a5b00; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    header { padding: 16px 20px; background: var(--panel); border-bottom: 1px solid var(--line); }
+    h1 { margin: 0; font-size: 20px; }
+    main { padding: 18px 20px 28px; display: grid; gap: 14px; }
+    section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    h2 { margin: 0; padding: 12px 14px; font-size: 14px; border-bottom: 1px solid var(--line); background: #f8fafc; }
+    .body { padding: 13px 14px; display: grid; gap: 9px; }
+    .item { border: 1px solid #edf0f4; border-radius: 8px; padding: 10px; background: #fbfcfe; display: grid; gap: 5px; }
+    .subject { font-weight: 750; overflow-wrap: anywhere; }
+    .meta, .reason, .empty, .note { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+    .note strong { color: var(--ink); }
+    .trash h2 { color: var(--red); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Email Work Queue</h1>
+  </header>
+  <main>
+    <section>
+      <h2>Souhrn</h2>
+      <div class="body note">
+        <div><strong>Připraveno ke zpracování:</strong> ${toProcess.length}</div>
+        <div><strong>Koš čeká na potvrzení:</strong> ${toTrash.length}</div>
+        <div><strong>Ignorováno:</strong> ${ignored.length}</div>
+        <div>Tohle okno zatím nic nečte, nestahuje a nemaže. Další krok bude postupně otevírat konkrétní položky a každé čtení e-mailu, uložení PDF nebo smazání bude samostatně potvrzené.</div>
+      </div>
+    </section>
+    <section>
+      <h2>Zpracovat</h2>
+      <div class="body">${workQueueRows(toProcess)}</div>
+    </section>
+    <section class="trash">
+      <h2>Koš - čeká na potvrzení</h2>
+      <div class="body">${workQueueRows(toTrash)}</div>
+    </section>
+  </main>
+</body>
+</html>`);
+      queue.document.close();
+      queue.focus();
+    }
+
+    async function loadNewHeaders(options = {}) {
+      const lastSevenDays = Boolean(options.lastSevenDays);
+      const newOnly = Boolean(options.newOnly);
       const startedAt = Date.now();
+      const days = selectedDays();
+      refreshBtn.disabled = true;
       loadHeadersBtn.disabled = true;
-      loadHeadersAsideBtn.disabled = true;
+      emailDaysInput.disabled = true;
       headersBusy.classList.add("active");
-      headersBusyText.textContent = "Načítám hlavičky... 0 s";
+      headersBusyText.textContent = lastSevenDays
+        ? `Doplňuji chybějící hlavičky za posledních ${days} dní... 0 s`
+        : "Načítám nové hlavičky... 0 s";
       headersBusyTimer = window.setInterval(() => {
         const seconds = Math.max(0, Math.round((Date.now() - startedAt) / 1000));
-        headersBusyText.textContent = `Načítám hlavičky z iCloud + Seznam... ${seconds} s`;
+        headersBusyText.textContent = lastSevenDays
+          ? `Doplňuji posledních ${days} dní z iCloud + Seznam... ${seconds} s`
+          : `Načítám nové hlavičky z iCloud + Seznam... ${seconds} s`;
       }, 1000);
-      newHeadersStatus.textContent = "Načítám nejnovější hlavičky z iCloud + Seznam...";
+      newHeadersStatus.textContent = lastSevenDays
+        ? `Doplňuji jen dosud nenačtené a nerozhodnuté hlavičky za posledních ${days} dní...`
+        : "Doplňuji jen nové příchozí hlavičky z iCloud + Seznam...";
       try {
+        const payload = lastSevenDays
+          ? {limit_per_source: days <= 7 ? 50 : 75, days, known_ids: knownItemIds()}
+          : {limit_per_source: 25, since: newestItemIso() || overviewSince, known_ids: knownItemIds()};
         const res = await fetch("/api/email-processing/new-headers", {
           method: "POST",
           headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({limit_per_source: 10, since: overviewSince})
+          body: JSON.stringify(payload)
         });
         const data = await res.json();
         const incoming = data.items || [];
         const before = emailItems.length;
         emailItems = mergeItems(emailItems, incoming);
         renderItems(emailItems);
+        updateWorkQueueState();
         const added = emailItems.length - before;
         const unavailable = data.unavailable && data.unavailable.length
           ? ` Nedostupné zdroje: ${data.unavailable.join("; ")}`
@@ -1668,8 +1954,9 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
           headersBusyTimer = null;
         }
         headersBusy.classList.remove("active");
+        refreshBtn.disabled = false;
         loadHeadersBtn.disabled = false;
-        loadHeadersAsideBtn.disabled = false;
+        emailDaysInput.disabled = false;
       }
     }
 
@@ -1694,6 +1981,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         overviewSince = data.updated_at || "";
         emailItems = mergeItems([], data.items || []);
         renderItems(emailItems);
+        updateWorkQueueState();
       } catch (err) {
         overviewStatus.textContent = `Chyba načtení: ${err}`;
       } finally {
@@ -1701,9 +1989,10 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       }
     }
 
-    refreshBtn.addEventListener("click", loadOverview);
-    loadHeadersBtn.addEventListener("click", loadNewHeaders);
-    loadHeadersAsideBtn.addEventListener("click", loadNewHeaders);
+    refreshBtn.addEventListener("click", () => loadNewHeaders({newOnly: true}));
+    emailDaysInput.addEventListener("change", normalizeDaysInput);
+    loadHeadersBtn.addEventListener("click", () => loadNewHeaders({lastSevenDays: true}));
+    processEmailsBtn.addEventListener("click", openWorkQueueWindow);
     cockpitBtn.addEventListener("click", () => {
       const cockpit = window.open("/", "SamanthaCockpit", "popup=yes,width=1280,height=880,left=90,top=60");
       if (cockpit) cockpit.focus();
