@@ -73,6 +73,7 @@ CZ: Ahoj! Já jsem Benji.
 
 Bunny: Hi! I am Bunny. We are friends.
 CZ: Ahoj! Já jsem Bunny. Jsme kamarádi.
+CZ výslovnost: Ahoj! Já jsem Bany. Jsme kamarádi.
 
 Bruno: Hello. I am Bruno.
 CZ: Ahoj. Já jsem Bruno.
@@ -82,6 +83,7 @@ CZ: Ahoj. Já jsem Fiona.
 
 Sunny: Hello! I am Sunny.
 CZ: Ahoj! Já jsem Sunny.
+CZ výslovnost: Ahoj! Já jsem Sany.
 
 Fiona: We are friends too.
 CZ: My jsme také kamarádi.

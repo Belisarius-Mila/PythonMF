@@ -461,6 +461,7 @@ const clearingDialogue = [
     cue: "Tap Bunny.",
     textEn: "Hi! I am Bunny. We are friends.",
     textCz: "Ahoj! Já jsem Bunny. Jsme kamarádi.",
+    textCzSpeech: "Ahoj! Já jsem Bany. Jsme kamarádi.",
     preferredVoiceName: "junior|samantha|ava|victoria|karen",
   },
   {
@@ -488,6 +489,7 @@ const clearingDialogue = [
     cue: "Tap Sunny.",
     textEn: "Hello! I am Sunny.",
     textCz: "Ahoj! Já jsem Sunny.",
+    textCzSpeech: "Ahoj! Já jsem Sany.",
     preferredVoiceName: "nova|samantha|ava|victoria|karen|junior",
   },
   {
@@ -1474,7 +1476,7 @@ async function playClearingCharacterReview(characterId) {
   if (!isSceneActive("clearingMeeting", sequenceId)) {
     return;
   }
-  await speakCzechLine(item.textCz, { rate: 0.9 });
+  await speakCzechLine(item.textCzSpeech ?? item.textCz, { rate: 0.9 });
   if (!isSceneActive("clearingMeeting", sequenceId)) {
     return;
   }
@@ -1529,7 +1531,7 @@ async function playClearingDialogueItem(index, phase = "speaking") {
   if (state.currentScene !== "clearingMeeting") {
     return false;
   }
-  await speakCzechLine(item.textCz, { rate: 0.9 });
+  await speakCzechLine(item.textCzSpeech ?? item.textCz, { rate: 0.9 });
   if (state.currentScene !== "clearingMeeting") {
     return false;
   }
