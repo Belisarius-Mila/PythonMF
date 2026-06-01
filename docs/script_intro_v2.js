@@ -464,14 +464,13 @@ const clearingDialogue = [
     characterId: "bunny",
     speaker: "Bunny",
     cue: "Tap Bunny.",
-    textEn: "Hello. I am Bunny. We are friends.",
+    textEn: "Hello. I am Bunny.",
     audioEn: [
       "audio/english/benji_bunny_02_bunny_hello_en.mp3?v=20260527voice",
       "audio/english/benji_bunny_04_bunny_i_am_bunny_en.mp3?v=20260527voice",
-      "audio/english/scene01_02_bunny_we_are_friends_tail_en.mp3?v=20260601bunnyfriends1",
     ],
-    textCz: "Ahoj. Já jsem Bunny. Jsme kamarádi.",
-    textCzSpeech: "Ahoj. Já jsem Bany. Jsme kamarádi.",
+    textCz: "Ahoj. Já jsem Bunny.",
+    textCzSpeech: "Ahoj. Já jsem Bany.",
     preferredVoiceName: "junior|samantha|ava|victoria|karen",
   },
   {
