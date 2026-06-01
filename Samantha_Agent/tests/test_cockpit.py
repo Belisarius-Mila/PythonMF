@@ -12,6 +12,7 @@ from app.cockpit import (
     document_work_status,
     email_header_to_processing_item,
     email_processing_item_id,
+    email_processing_pending_work_items,
     latest_email_processing_overview,
     move_document_lifecycle_action,
     new_email_headers_overview,
@@ -401,15 +402,53 @@ class CockpitTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertIn("Neznámý", result["message"])
 
+    def test_email_processing_pending_work_items_returns_only_actionable_decisions(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "email_processing_decisions.json"
+            save_email_processing_decision(
+                item_id="process-1",
+                action="process",
+                item={
+                    "id": "process-1",
+                    "category": "faktury/e-shopy",
+                    "provider": "iCloud",
+                    "folder": "INBOX",
+                    "uid": "14157",
+                    "date": "Mon, 1 Jun 2026 10:00:00 +0200",
+                    "subject": "Faktura",
+                },
+                path=path,
+            )
+            save_email_processing_decision(
+                item_id="ignore-1",
+                action="ignore",
+                item={"id": "ignore-1", "uid": "14158", "subject": "Ignorovat"},
+                path=path,
+            )
+
+            result = email_processing_pending_work_items(path=path)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["count"], 1)
+        self.assertEqual(result["items"][0]["id"], "process-1")
+        self.assertEqual(result["items"][0]["action"], "process")
+        self.assertFalse(result["items"][0]["is_new_header"])
+
     def test_email_processing_html_contains_readonly_overview_controls(self) -> None:
         self.assertIn("Email Processing", EMAIL_PROCESSING_HTML)
         self.assertIn("/api/email-processing/overview", EMAIL_PROCESSING_HTML)
+        self.assertIn("/api/email-processing/pending-work", EMAIL_PROCESSING_HTML)
         self.assertIn("/api/email-processing/decision", EMAIL_PROCESSING_HTML)
         self.assertIn("/api/email-processing/new-headers", EMAIL_PROCESSING_HTML)
         self.assertIn("/api/email-processing/read-message", EMAIL_PROCESSING_HTML)
         self.assertIn("read-only", EMAIL_PROCESSING_HTML)
         self.assertIn("Obnovit nové", EMAIL_PROCESSING_HTML)
+        self.assertIn('id="refreshBtn" disabled', EMAIL_PROCESSING_HTML)
+        self.assertIn("Nejdřív použij Načti emaily", EMAIL_PROCESSING_HTML)
+        self.assertIn("updateRefreshButtonState", EMAIL_PROCESSING_HTML)
         self.assertIn("Načti emaily", EMAIL_PROCESSING_HTML)
+        self.assertIn("Načti rozpracované", EMAIL_PROCESSING_HTML)
+        self.assertIn("loadPendingWork", EMAIL_PROCESSING_HTML)
         self.assertIn("Za posledních:", EMAIL_PROCESSING_HTML)
         self.assertIn('id="emailDaysInput"', EMAIL_PROCESSING_HTML)
         self.assertIn('min="1"', EMAIL_PROCESSING_HTML)
@@ -422,12 +461,18 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Zpracovat e-maily", EMAIL_PROCESSING_HTML)
         self.assertIn("processEmailsBtn", EMAIL_PROCESSING_HTML)
         self.assertIn("SamanthaEmailWorkQueue", EMAIL_PROCESSING_HTML)
+        self.assertIn("initializeWorkQueueWindow", EMAIL_PROCESSING_HTML)
         self.assertIn("Koš - čeká na potvrzení", EMAIL_PROCESSING_HTML)
         self.assertIn("Detail se načte read-only", EMAIL_PROCESSING_HTML)
         self.assertIn("Detail e-mailu", EMAIL_PROCESSING_HTML)
+        self.assertIn("detailLoaded", EMAIL_PROCESSING_HTML)
+        self.assertIn("Načítám celý e-mail read-only", EMAIL_PROCESSING_HTML)
+        self.assertIn("Detail načten z cache", EMAIL_PROCESSING_HTML)
+        self.assertIn("IMAP se znovu nevolal", EMAIL_PROCESSING_HTML)
         self.assertIn("Uložit e-mail", EMAIL_PROCESSING_HTML)
         self.assertIn("Neukládat", EMAIL_PROCESSING_HTML)
         self.assertIn("Uložit</label>", EMAIL_PROCESSING_HTML)
+        self.assertIn("Otevření souboru bude dostupné po potvrzeném uložení přílohy", EMAIL_PROCESSING_HTML)
         self.assertIn("Zpracovat dávku", EMAIL_PROCESSING_HTML)
         self.assertIn("hlavní seznam je vyprázdněný", EMAIL_PROCESSING_HTML)
         self.assertIn("headersBusy", EMAIL_PROCESSING_HTML)

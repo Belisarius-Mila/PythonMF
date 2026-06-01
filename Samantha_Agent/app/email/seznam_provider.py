@@ -17,6 +17,7 @@ HEADER_FETCH_SPEC = "(BODY.PEEK[HEADER.FIELDS (DATE FROM SUBJECT)])"
 MESSAGE_FETCH_SPEC = "(RFC822.SIZE BODY.PEEK[])"
 MESSAGE_SIZE_FETCH_SPEC = "(RFC822.SIZE)"
 MAX_MESSAGE_BYTES = 2_000_000
+MAX_EXPLICIT_MESSAGE_BYTES = 25_000_000
 SEZNAM_DEFAULT_FOLDERS = ("INBOX",)
 SEZNAM_SPAM_FOLDER_CANDIDATES = ("spam", "Spam", "Junk", "Bulk Mail")
 
@@ -105,6 +106,7 @@ class SeznamReadOnlyEmailProvider:
                     max_chars=safe_max_chars,
                     source="Seznam",
                     folder=folder,
+                    max_message_bytes=MAX_EXPLICIT_MESSAGE_BYTES,
                 )
         except SeznamEmailProviderError:
             raise
@@ -263,7 +265,7 @@ def _first_bytes_payload(message_data: list[object]) -> bytes | None:
     return None
 
 
-def _first_safe_message_payload(message_data: list[object]) -> bytes | None:
+def _first_safe_message_payload(message_data: list[object], max_bytes: int = MAX_MESSAGE_BYTES) -> bytes | None:
     for item in message_data:
         if not (isinstance(item, tuple) and len(item) >= 2):
             continue
@@ -272,12 +274,12 @@ def _first_safe_message_payload(message_data: list[object]) -> bytes | None:
         if not isinstance(payload, bytes):
             continue
 
-        if len(payload) > MAX_MESSAGE_BYTES:
+        if len(payload) > max_bytes:
             return None
 
         if isinstance(metadata, bytes):
             size_match = re.search(rb"RFC822\.SIZE\s+(\d+)", metadata)
-            if size_match and int(size_match.group(1)) > MAX_MESSAGE_BYTES:
+            if size_match and int(size_match.group(1)) > max_bytes:
                 return None
 
         return payload
@@ -291,8 +293,9 @@ def _message_data_to_email_message(
     max_chars: int,
     source: str = "Seznam",
     folder: str = "INBOX",
+    max_message_bytes: int = MAX_MESSAGE_BYTES,
 ) -> EmailMessage:
-    raw_message = _first_safe_message_payload(message_data)
+    raw_message = _first_safe_message_payload(message_data, max_bytes=max_message_bytes)
     if raw_message is None:
         raise SeznamEmailProviderError("Zprava je prazdna nebo prilis velka.")
 

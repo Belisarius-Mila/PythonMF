@@ -428,6 +428,42 @@ def save_email_processing_decision(
     return {"ok": True, "message": label, "item_id": item_id, "action": action}
 
 
+def email_processing_pending_work_items(
+    path: Path = EMAIL_PROCESSING_DECISIONS_FILE,
+) -> dict[str, Any]:
+    decisions = read_email_processing_decisions(path)
+    items: list[dict[str, Any]] = []
+    for item_id, decision in decisions.items():
+        action = str(decision.get("action", ""))
+        if action not in {"process", "trash_requested"}:
+            continue
+        raw_item = decision.get("item", {})
+        if not isinstance(raw_item, dict):
+            continue
+        item = dict(raw_item)
+        item["id"] = str(item.get("id") or item_id)
+        item["action"] = action
+        item["is_new_header"] = False
+        if "legacy_id" not in item:
+            item["legacy_id"] = email_processing_legacy_item_id(
+                str(item.get("category", "")),
+                str(item.get("provider", "")),
+                str(item.get("folder", "")),
+                str(item.get("uid", "")),
+                str(item.get("date", "")),
+                str(item.get("subject", "")),
+            )
+        items.append(item)
+
+    items.sort(key=lambda item: email_header_timestamp(str(item.get("date", ""))), reverse=True)
+    return {
+        "ok": True,
+        "message": f"Načteno rozpracovaných e-mailů: {len(items)}.",
+        "items": items,
+        "count": len(items),
+    }
+
+
 def new_email_headers_overview(
     limit_per_source: int = 50,
     since: str = "",
@@ -1288,6 +1324,9 @@ class CockpitServer:
                 if parsed.path == "/api/email-processing/overview":
                     self.respond_json(empty_email_processing_overview())
                     return
+                if parsed.path == "/api/email-processing/pending-work":
+                    self.respond_json(email_processing_pending_work_items())
+                    return
                 if parsed.path == "/api/documents/search":
                     params = parse_qs(parsed.query)
                     query = params.get("q", [""])[0]
@@ -1548,13 +1587,14 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
   <header>
     <h1>Email Processing</h1>
     <div class="toolbar">
-      <button class="secondary" id="refreshBtn">Obnovit nové</button>
+      <button class="secondary" id="refreshBtn" disabled>Obnovit nové</button>
       <span class="days-control">
         <span>Za posledních:</span>
         <input id="emailDaysInput" type="number" min="1" max="14" step="1" value="7" inputmode="numeric" aria-label="Počet dní">
         <span>dní</span>
       </span>
       <button class="primary" id="loadHeadersBtn">Načti emaily</button>
+      <button class="secondary" id="loadPendingBtn">Načti rozpracované</button>
       <button class="secondary" id="cockpitBtn">Otevřít Cockpit</button>
     </div>
   </header>
@@ -1572,8 +1612,9 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         <div class="body meta">
           <div><strong>Režim:</strong> <span class="safe">read-only</span></div>
           <div>Okno startuje prázdné. Nové hlavičky se načtou až tlačítkem.</div>
-          <div><strong>Obnovit nové:</strong> doplní jen e-maily novější než aktuální seznam.</div>
+          <div><strong>Obnovit nové:</strong> aktivuje se až po načtení seznamu a doplní jen e-maily novější než nejnovější viditelný e-mail.</div>
           <div><strong>Načti emaily:</strong> doplní jen e-maily ve zvoleném rozsahu 1-14 dní, které ještě nejsou v aktuálním seznamu ani nemají uložené rozhodnutí.</div>
+          <div><strong>Načti rozpracované:</strong> vrátí do seznamu e-maily, které už mají status `Zpracovat` nebo `Koš` a čekají na Work Queue.</div>
           <div><strong>Koš:</strong> tlačítko zatím jen označí e-mail ke smazání; skutečné smazání bude samostatná potvrzená akce.</div>
           <div><strong>Další krok:</strong> vybrat konkrétní UID a zdroj; načtení e-mailu nebo PDF až po samostatném potvrzení.</div>
           <div id="sourcePath" class="status-line"></div>
@@ -1604,6 +1645,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     const updatedAt = document.getElementById("updatedAt");
     const refreshBtn = document.getElementById("refreshBtn");
     const loadHeadersBtn = document.getElementById("loadHeadersBtn");
+    const loadPendingBtn = document.getElementById("loadPendingBtn");
     const emailDaysInput = document.getElementById("emailDaysInput");
     const headersBusy = document.getElementById("headersBusy");
     const headersBusyText = document.getElementById("headersBusyText");
@@ -1695,6 +1737,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
 
     function updateWorkQueueState() {
       const counts = decisionCounts(emailItems);
+      updateRefreshButtonState();
       const actionable = counts.process + counts.trash;
       if (!counts.total) {
         processEmailsBtn.disabled = true;
@@ -1747,6 +1790,14 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     function newestItemIso() {
       const latest = Math.max(0, ...emailItems.map(itemDateValue));
       return latest ? new Date(latest).toISOString() : "";
+    }
+
+    function updateRefreshButtonState() {
+      const canRefresh = Boolean(newestItemIso());
+      refreshBtn.disabled = !canRefresh;
+      refreshBtn.title = canRefresh
+        ? "Doplní jen e-maily novější než nejnovější viditelný e-mail."
+        : "Nejdřív použij Načti emaily.";
     }
 
     function selectedDays() {
@@ -1917,6 +1968,208 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         .replaceAll("'", "&#39;");
     }
 
+    function initializeWorkQueueWindow(queue, queueItems) {
+      const queueDoc = queue.document;
+      const queueList = queueDoc.getElementById("queueList");
+      const detailPane = queueDoc.getElementById("detailPane");
+      const queueStatus = queueDoc.getElementById("queueStatus");
+      const batchBtn = queueDoc.getElementById("batchBtn");
+      let selectedId = queueItems.length ? queueItems[0].id : "";
+
+      function decisionLabel(item) {
+        if (item.detailLoading) return "načítám detail...";
+        if (item.detailLoaded) return item.queueDecision ? decisionLabel({...item, detailLoaded: false}) : "detail načten";
+        if (item.queueDecision === "save") return "uložit";
+        if (item.queueDecision === "skip") return "neukládat";
+        if (item.queueDecision === "trash_requested") return "koš čeká na potvrzení";
+        return "čeká na rozhodnutí";
+      }
+
+      function currentItem() {
+        return queueItems.find((item) => item.id === selectedId) || queueItems[0] || null;
+      }
+
+      function updateBatchState() {
+        const decided = queueItems.filter((item) => Boolean(item.queueDecision)).length;
+        batchBtn.disabled = !queueItems.length || decided < queueItems.length;
+        queueStatus.textContent = queueItems.length
+          ? `Rozhodnuto ${decided}/${queueItems.length}. Ukládání a fyzické mazání budou další potvrzený krok.`
+          : "Fronta je prázdná.";
+      }
+
+      function renderQueueList() {
+        if (!queueItems.length) {
+          queueList.innerHTML = '<div class="empty">Fronta je prázdná.</div>';
+          detailPane.innerHTML = '<div class="empty">Žádný e-mail ke zpracování.</div>';
+          batchBtn.disabled = true;
+          return;
+        }
+        queueList.innerHTML = queueItems.map((item) => {
+          const active = item.id === selectedId ? " active" : "";
+          const done = item.queueDecision || item.detailLoaded ? " done" : "";
+          const loading = item.detailLoading ? " loading" : "";
+          return '<button type="button" class="item' + active + '" data-id="' + escapeHtml(item.id) + '">' +
+            '<span class="subject">' + escapeHtml(item.subject || "(bez předmětu)") + '</span>' +
+            '<span class="meta">' + escapeHtml(itemMeta(item)) + '</span>' +
+            (item.reason ? '<span class="reason">Důvod: ' + escapeHtml(item.reason) + '</span>' : "") +
+            '<span class="status' + done + loading + '">' + escapeHtml(decisionLabel(item)) + '</span>' +
+            '</button>';
+        }).join("");
+        queueList.querySelectorAll(".item").forEach((button) => {
+          button.addEventListener("click", () => selectItem(button.dataset.id || ""));
+        });
+        updateBatchState();
+      }
+
+      function renderAttachmentRows(item, attachments) {
+        if (!attachments.length) return '<div class="empty">Bez příloh.</div>';
+        return attachments.map((attachment, index) => {
+          const partId = attachment.part_id || String(index);
+          const checked = (item.saveAttachments || []).includes(partId) ? " checked" : "";
+          const size = attachment.size_bytes === null || attachment.size_bytes === undefined
+            ? "velikost neznámá"
+            : Math.round(Number(attachment.size_bytes) / 1024) + " kB";
+          return '<div class="attachment-row" data-part-id="' + escapeHtml(partId) + '">' +
+            '<div><strong>' + escapeHtml(attachment.filename || "(bez názvu)") + '</strong></div>' +
+            '<div class="meta">' + escapeHtml(attachment.content_type || "") + " | " + escapeHtml(size) + '</div>' +
+            '<div class="attachment-tools">' +
+            '<label><input type="checkbox" class="attachment-save" data-part-id="' + escapeHtml(partId) + '"' + checked + '> Uložit</label>' +
+            '<button type="button" class="secondary attachment-toggle">Metadata</button>' +
+            '</div>' +
+            '<div class="meta hidden attachment-detail">part_id: ' + escapeHtml(partId) + '<br>dispozice: ' + escapeHtml(attachment.disposition || "") + '<br>Otevření souboru bude dostupné po potvrzeném uložení přílohy.</div>' +
+            '</div>';
+        }).join("");
+      }
+
+      function setQueueDecision(item, decision) {
+        item.queueDecision = decision;
+        if (decision === "skip") item.saveAttachments = [];
+        renderQueueList();
+        renderDetail(item);
+      }
+
+      function renderLoadingDetail(item) {
+        detailPane.innerHTML =
+          '<div class="detail-head">' +
+            '<div>' +
+              '<div class="subject">' + escapeHtml(item.subject || "(bez předmětu)") + '</div>' +
+              '<div class="meta">' + escapeHtml(itemMeta(item)) + '</div>' +
+            '</div>' +
+            '<div class="status loading">načítám detail</div>' +
+          '</div>' +
+          '<div class="loading-box"><span class="mini-spinner" aria-hidden="true"></span><span>Načítám celý e-mail read-only. U zpráv s PDF přílohami to může chvíli trvat.</span></div>';
+      }
+
+      function renderDetail(item) {
+        const detail = item.detail || {};
+        const attachments = detail.attachments || [];
+        detailPane.innerHTML =
+          '<div class="detail-head">' +
+            '<div>' +
+              '<div class="subject">' + escapeHtml(detail.subject || item.subject || "(bez předmětu)") + '</div>' +
+              '<div class="meta">' + escapeHtml((detail.sender ? detail.sender + " | " : "") + itemMeta(item)) + '</div>' +
+            '</div>' +
+            '<div class="status' + (item.queueDecision ? " done" : "") + '">' + escapeHtml(decisionLabel(item)) + '</div>' +
+          '</div>' +
+          '<div class="detail-actions">' +
+            '<label><input type="checkbox" id="saveEmail"' + (item.queueDecision === "save" ? " checked" : "") + '> Uložit e-mail</label>' +
+            '<label><input type="checkbox" id="skipEmail"' + (item.queueDecision === "skip" ? " checked" : "") + '> Neukládat</label>' +
+            '<button type="button" class="danger" id="trashEmail">Koš</button>' +
+          '</div>' +
+          '<div><strong>Tělo e-mailu</strong></div>' +
+          '<pre>' + escapeHtml(detail.body_text || "") + (detail.truncated ? "\\n\\n[Text je zkrácený.]" : "") + '</pre>' +
+          '<div><strong>Přílohy</strong></div>' +
+          '<div class="attachments">' + renderAttachmentRows(item, attachments) + '</div>';
+
+        queueDoc.getElementById("saveEmail").addEventListener("change", (event) => {
+          setQueueDecision(item, event.target.checked ? "save" : "");
+        });
+        queueDoc.getElementById("skipEmail").addEventListener("change", (event) => {
+          setQueueDecision(item, event.target.checked ? "skip" : "");
+        });
+        queueDoc.getElementById("trashEmail").addEventListener("click", () => {
+          const ok = queue.confirm("Opravdu označit e-mail ke smazání?\\n\\nSkutečné smazání bude samostatná potvrzená akce v dalším kroku.");
+          if (!ok) return;
+          setQueueDecision(item, "trash_requested");
+        });
+        detailPane.querySelectorAll(".attachment-save").forEach((input) => {
+          input.addEventListener("change", () => {
+            const partId = input.dataset.partId || "";
+            const current = new Set(item.saveAttachments || []);
+            if (input.checked) current.add(partId);
+            else current.delete(partId);
+            item.saveAttachments = Array.from(current);
+            if (item.saveAttachments.length && item.queueDecision !== "save") item.queueDecision = "save";
+            renderQueueList();
+          });
+        });
+        detailPane.querySelectorAll(".attachment-toggle").forEach((button) => {
+          button.addEventListener("click", () => {
+            const detailNode = button.closest(".attachment-row").querySelector(".attachment-detail");
+            detailNode.classList.toggle("hidden");
+            button.textContent = detailNode.classList.contains("hidden") ? "Metadata" : "Zavřít";
+          });
+        });
+      }
+
+      async function selectItem(itemId) {
+        selectedId = itemId;
+        const item = currentItem();
+        renderQueueList();
+        if (!item) return;
+        if (item.detailLoaded) {
+          queueStatus.textContent = "Detail načten z cache v tomto okně. IMAP se znovu nevolal.";
+          renderDetail(item);
+          return;
+        }
+        if (item.detailLoading) {
+          renderLoadingDetail(item);
+          return;
+        }
+        item.detailLoading = true;
+        renderQueueList();
+        renderLoadingDetail(item);
+        queueStatus.textContent = "Načítám celý e-mail read-only. U větších zpráv s PDF to může chvíli trvat.";
+        try {
+          const res = await fetch("/api/email-processing/read-message", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+              provider: item.provider,
+              folder: item.folder || "INBOX",
+              uid: item.uid,
+              max_chars: 12000
+            })
+          });
+          const data = await res.json();
+          if (!data.ok) {
+            detailPane.innerHTML = '<div class="empty">' + escapeHtml(data.message || "E-mail se nepodařilo načíst.") + '</div>';
+            return;
+          }
+          item.detail = data.email || {};
+          item.detailLoaded = true;
+          queueStatus.textContent = "Detail načten. Další kliknutí na stejný e-mail použije cache v tomto okně.";
+          renderDetail(item);
+        } catch (err) {
+          detailPane.innerHTML = '<div class="empty">Chyba načtení: ' + escapeHtml(err) + '</div>';
+        } finally {
+          item.detailLoading = false;
+          renderQueueList();
+        }
+      }
+
+      batchBtn.addEventListener("click", () => {
+        const ok = queue.confirm("Označit dávku jako zpracovanou v pracovní frontě?\\n\\nArchivace příloh a fyzické mazání nejsou v tomto kroku ještě spuštěné.");
+        if (!ok) return;
+        queueItems.splice(0, queueItems.length);
+        selectedId = "";
+        renderQueueList();
+      });
+
+      renderQueueList();
+      if (selectedId) selectItem(selectedId);
+    }
+
     function openWorkQueueWindow() {
       const counts = decisionCounts(emailItems);
       if (!counts.total || counts.decided < counts.total) {
@@ -1937,7 +2190,6 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         queueDecision: item.action === "trash_requested" ? "trash_requested" : "",
         saveAttachments: []
       }));
-      const queuePayload = JSON.stringify(queueItems).replaceAll("</", "<\\/");
       queue.document.open();
       queue.document.write(`<!doctype html>
 <html lang="cs">
@@ -1969,6 +2221,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     .note strong { color: var(--ink); }
     .status { font-size: 12px; font-weight: 700; color: var(--amber); }
     .status.done { color: #16794c; }
+    .status.loading { color: #1f5fbf; }
     .detail-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
     .detail-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-top: 1px solid #edf0f4; padding-top: 10px; }
     .detail-actions label, .attachment-row label { display: inline-flex; gap: 5px; align-items: center; }
@@ -1976,6 +2229,9 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     .attachments { display: grid; gap: 8px; }
     .attachment-row { border: 1px solid #edf0f4; border-radius: 7px; padding: 9px; display: grid; gap: 6px; background: #fbfcfe; }
     .attachment-tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .loading-box { display: flex; align-items: center; gap: 8px; padding: 10px; border: 1px solid #bfd0ef; border-radius: 7px; background: #eef4ff; color: #1d3b74; font-weight: 650; }
+    .mini-spinner { width: 14px; height: 14px; border: 2px solid #bfd0ef; border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; flex: 0 0 auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
     .hidden { display: none; }
     @media (max-width: 820px) { .queue-grid { grid-template-columns: 1fr; } }
   </style>
@@ -2010,197 +2266,10 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       </section>
     </div>
   </main>
-  <script>
-    const queueItems = ${queuePayload};
-    const queueList = document.getElementById("queueList");
-    const detailPane = document.getElementById("detailPane");
-    const queueStatus = document.getElementById("queueStatus");
-    const batchBtn = document.getElementById("batchBtn");
-    let selectedId = queueItems.length ? queueItems[0].id : "";
-
-    function escapeHtml(value) {
-      return String(value || "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#39;");
-    }
-
-    function itemMeta(item) {
-      const parts = [];
-      if (item.provider) parts.push(item.provider);
-      if (item.folder) parts.push(item.folder);
-      if (item.uid) parts.push("UID " + item.uid);
-      if (item.date) parts.push(item.date);
-      if (item.category) parts.push(item.category);
-      return parts.join(" | ");
-    }
-
-    function decisionLabel(item) {
-      if (item.queueDecision === "save") return "uložit";
-      if (item.queueDecision === "skip") return "neukládat";
-      if (item.queueDecision === "trash_requested") return "koš čeká na potvrzení";
-      return "čeká na rozhodnutí";
-    }
-
-    function renderQueueList() {
-      if (!queueItems.length) {
-        queueList.innerHTML = '<div class="empty">Fronta je prázdná.</div>';
-        detailPane.innerHTML = '<div class="empty">Žádný e-mail ke zpracování.</div>';
-        batchBtn.disabled = true;
-        return;
-      }
-      queueList.innerHTML = queueItems.map((item) => {
-        const active = item.id === selectedId ? " active" : "";
-        const done = item.queueDecision ? " done" : "";
-        return '<button type="button" class="item' + active + '" data-id="' + escapeHtml(item.id) + '">' +
-          '<span class="subject">' + escapeHtml(item.subject || "(bez předmětu)") + '</span>' +
-          '<span class="meta">' + escapeHtml(itemMeta(item)) + '</span>' +
-          (item.reason ? '<span class="reason">Důvod: ' + escapeHtml(item.reason) + '</span>' : "") +
-          '<span class="status' + done + '">' + escapeHtml(decisionLabel(item)) + '</span>' +
-          '</button>';
-      }).join("");
-      queueList.querySelectorAll(".item").forEach((button) => {
-        button.addEventListener("click", () => selectItem(button.dataset.id || ""));
-      });
-      updateBatchState();
-    }
-
-    function updateBatchState() {
-      const decided = queueItems.filter((item) => Boolean(item.queueDecision)).length;
-      batchBtn.disabled = !queueItems.length || decided < queueItems.length;
-      queueStatus.textContent = queueItems.length
-        ? "Rozhodnuto " + decided + "/" + queueItems.length + ". Ukládání a fyzické mazání budou další potvrzený krok."
-        : "Fronta je prázdná.";
-    }
-
-    function currentItem() {
-      return queueItems.find((item) => item.id === selectedId) || queueItems[0] || null;
-    }
-
-    function renderAttachmentRows(item, attachments) {
-      if (!attachments.length) return '<div class="empty">Bez příloh.</div>';
-      return attachments.map((attachment, index) => {
-        const partId = attachment.part_id || String(index);
-        const checked = (item.saveAttachments || []).includes(partId) ? " checked" : "";
-        const size = attachment.size_bytes === null || attachment.size_bytes === undefined
-          ? "velikost neznámá"
-          : Math.round(Number(attachment.size_bytes) / 1024) + " kB";
-        return '<div class="attachment-row" data-part-id="' + escapeHtml(partId) + '">' +
-          '<div><strong>' + escapeHtml(attachment.filename || "(bez názvu)") + '</strong></div>' +
-          '<div class="meta">' + escapeHtml(attachment.content_type || "") + " | " + escapeHtml(size) + '</div>' +
-          '<div class="attachment-tools">' +
-          '<label><input type="checkbox" class="attachment-save" data-part-id="' + escapeHtml(partId) + '"' + checked + '> Uložit</label>' +
-          '<button type="button" class="secondary attachment-toggle">Rozkliknout</button>' +
-          '</div>' +
-          '<div class="meta hidden attachment-detail">part_id: ' + escapeHtml(partId) + '<br>dispozice: ' + escapeHtml(attachment.disposition || "") + '</div>' +
-          '</div>';
-      }).join("");
-    }
-
-    async function selectItem(itemId) {
-      selectedId = itemId;
-      const item = currentItem();
-      renderQueueList();
-      if (!item) return;
-      detailPane.innerHTML = '<div class="empty">Načítám e-mail read-only...</div>';
-      try {
-        const res = await fetch("/api/email-processing/read-message", {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({
-            provider: item.provider,
-            folder: item.folder || "INBOX",
-            uid: item.uid,
-            max_chars: 12000
-          })
-        });
-        const data = await res.json();
-        if (!data.ok) {
-          detailPane.innerHTML = '<div class="empty">' + escapeHtml(data.message || "E-mail se nepodařilo načíst.") + '</div>';
-          return;
-        }
-        item.detail = data.email || {};
-        renderDetail(item);
-      } catch (err) {
-        detailPane.innerHTML = '<div class="empty">Chyba načtení: ' + escapeHtml(err) + '</div>';
-      }
-    }
-
-    function setQueueDecision(item, decision) {
-      item.queueDecision = decision;
-      if (decision === "skip") item.saveAttachments = [];
-      renderQueueList();
-      renderDetail(item);
-    }
-
-    function renderDetail(item) {
-      const detail = item.detail || {};
-      const attachments = detail.attachments || [];
-      detailPane.innerHTML =
-        '<div class="detail-head">' +
-          '<div>' +
-            '<div class="subject">' + escapeHtml(detail.subject || item.subject || "(bez předmětu)") + '</div>' +
-            '<div class="meta">' + escapeHtml((detail.sender ? detail.sender + " | " : "") + itemMeta(item)) + '</div>' +
-          '</div>' +
-          '<div class="status' + (item.queueDecision ? " done" : "") + '">' + escapeHtml(decisionLabel(item)) + '</div>' +
-        '</div>' +
-        '<div class="detail-actions">' +
-          '<label><input type="checkbox" id="saveEmail"' + (item.queueDecision === "save" ? " checked" : "") + '> Uložit e-mail</label>' +
-          '<label><input type="checkbox" id="skipEmail"' + (item.queueDecision === "skip" ? " checked" : "") + '> Neukládat</label>' +
-          '<button type="button" class="danger" id="trashEmail">Koš</button>' +
-        '</div>' +
-        '<div><strong>Tělo e-mailu</strong></div>' +
-        '<pre>' + escapeHtml(detail.body_text || "") + (detail.truncated ? "\\n\\n[Text je zkrácený.]" : "") + '</pre>' +
-        '<div><strong>Přílohy</strong></div>' +
-        '<div class="attachments">' + renderAttachmentRows(item, attachments) + '</div>';
-
-      document.getElementById("saveEmail").addEventListener("change", (event) => {
-        setQueueDecision(item, event.target.checked ? "save" : "");
-      });
-      document.getElementById("skipEmail").addEventListener("change", (event) => {
-        setQueueDecision(item, event.target.checked ? "skip" : "");
-      });
-      document.getElementById("trashEmail").addEventListener("click", () => {
-        const ok = window.confirm("Opravdu označit e-mail ke smazání?\\n\\nSkutečné smazání bude samostatná potvrzená akce v dalším kroku.");
-        if (!ok) return;
-        setQueueDecision(item, "trash_requested");
-      });
-      detailPane.querySelectorAll(".attachment-save").forEach((input) => {
-        input.addEventListener("change", () => {
-          const partId = input.dataset.partId || "";
-          const current = new Set(item.saveAttachments || []);
-          if (input.checked) current.add(partId);
-          else current.delete(partId);
-          item.saveAttachments = Array.from(current);
-          if (item.saveAttachments.length && item.queueDecision !== "save") item.queueDecision = "save";
-          renderQueueList();
-        });
-      });
-      detailPane.querySelectorAll(".attachment-toggle").forEach((button) => {
-        button.addEventListener("click", () => {
-          const detailNode = button.closest(".attachment-row").querySelector(".attachment-detail");
-          detailNode.classList.toggle("hidden");
-          button.textContent = detailNode.classList.contains("hidden") ? "Rozkliknout" : "Zavřít";
-        });
-      });
-    }
-
-    batchBtn.addEventListener("click", () => {
-      const ok = window.confirm("Označit dávku jako zpracovanou v pracovní frontě?\\n\\nArchivace příloh a fyzické mazání nejsou v tomto kroku ještě spuštěné.");
-      if (!ok) return;
-      queueItems.splice(0, queueItems.length);
-      selectedId = "";
-      renderQueueList();
-    });
-
-    renderQueueList();
-    if (selectedId) selectItem(selectedId);
-  <` + `/script>
 </body>
 </html>`);
       queue.document.close();
+      initializeWorkQueueWindow(queue, queueItems);
       queue.focus();
       emailItems = [];
       window.lastOverviewText = "";
@@ -2212,10 +2281,17 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     async function loadNewHeaders(options = {}) {
       const lastSevenDays = Boolean(options.lastSevenDays);
       const newOnly = Boolean(options.newOnly);
+      const newestVisible = newestItemIso();
+      if (newOnly && !newestVisible) {
+        newHeadersStatus.textContent = "Obnovit nové je dostupné až po prvním načtení seznamu. Nejdřív použij Načti emaily.";
+        updateRefreshButtonState();
+        return;
+      }
       const startedAt = Date.now();
       const days = selectedDays();
       refreshBtn.disabled = true;
       loadHeadersBtn.disabled = true;
+      loadPendingBtn.disabled = true;
       emailDaysInput.disabled = true;
       headersBusy.classList.add("active");
       headersBusyText.textContent = lastSevenDays
@@ -2233,7 +2309,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       try {
         const payload = lastSevenDays
           ? {limit_per_source: days <= 7 ? 50 : 75, days, known_ids: knownItemIds()}
-          : {limit_per_source: 25, since: newestItemIso() || overviewSince, known_ids: knownItemIds()};
+          : {limit_per_source: 25, since: newestVisible, known_ids: knownItemIds()};
         const res = await fetch("/api/email-processing/new-headers", {
           method: "POST",
           headers: {"Content-Type": "application/json"},
@@ -2258,14 +2334,39 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
           headersBusyTimer = null;
         }
         headersBusy.classList.remove("active");
-        refreshBtn.disabled = false;
+        updateRefreshButtonState();
         loadHeadersBtn.disabled = false;
+        loadPendingBtn.disabled = false;
         emailDaysInput.disabled = false;
+      }
+    }
+
+    async function loadPendingWork() {
+      loadPendingBtn.disabled = true;
+      newHeadersStatus.textContent = "Načítám rozpracované e-maily z uložených rozhodnutí...";
+      try {
+        const res = await fetch("/api/email-processing/pending-work");
+        const data = await res.json();
+        if (!data.ok) {
+          newHeadersStatus.textContent = data.message || "Rozpracované e-maily se nepodařilo načíst.";
+          return;
+        }
+        const before = emailItems.length;
+        emailItems = mergeItems(emailItems, data.items || []);
+        renderItems(emailItems);
+        updateWorkQueueState();
+        const added = emailItems.length - before;
+        newHeadersStatus.textContent = `${data.message || "Rozpracované e-maily načteny."} Přidáno do hlavního seznamu: ${added}.`;
+      } catch (err) {
+        newHeadersStatus.textContent = `Chyba načtení rozpracovaných e-mailů: ${err}`;
+      } finally {
+        loadPendingBtn.disabled = false;
       }
     }
 
     async function loadOverview() {
       refreshBtn.disabled = true;
+      loadPendingBtn.disabled = true;
       overviewStatus.textContent = "Načítám uložený přehled...";
       overview.innerHTML = "";
       try {
@@ -2289,13 +2390,15 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       } catch (err) {
         overviewStatus.textContent = `Chyba načtení: ${err}`;
       } finally {
-        refreshBtn.disabled = false;
+        updateRefreshButtonState();
+        loadPendingBtn.disabled = false;
       }
     }
 
     refreshBtn.addEventListener("click", () => loadNewHeaders({newOnly: true}));
     emailDaysInput.addEventListener("change", normalizeDaysInput);
     loadHeadersBtn.addEventListener("click", () => loadNewHeaders({lastSevenDays: true}));
+    loadPendingBtn.addEventListener("click", loadPendingWork);
     processEmailsBtn.addEventListener("click", openWorkQueueWindow);
     cockpitBtn.addEventListener("click", () => {
       const cockpit = window.open("/", "SamanthaCockpit", "popup=yes,width=1280,height=880,left=90,top=60");
@@ -3049,7 +3152,11 @@ COCKPIT_HTML = """<!doctype html>
         openScanDocu(false);
         return;
       }
-      const targetUrl = new URL(app.url, window.location.href).href;
+      const target = new URL(app.url, window.location.href);
+      if (app.kind === "GitHub Pages") {
+        target.searchParams.set("cockpit_cache", String(Date.now()));
+      }
+      const targetUrl = target.href;
       const windowName = `SamanthaWebApp_${String(app.id || "app").replace(/[^A-Za-z0-9_]+/g, "_")}`;
       const appWindow = window.open(
         "about:blank",

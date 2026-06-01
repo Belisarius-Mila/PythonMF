@@ -112,6 +112,21 @@ class SeznamProviderParserTests(unittest.TestCase):
                 max_chars=1_000,
             )
 
+    def test_message_data_to_email_message_allows_larger_explicit_limit(self) -> None:
+        raw_message = b"From: Sender <sender@example.com>\r\nSubject: Big selected\r\n\r\nBody"
+
+        message = _message_data_to_email_message(
+            uid="789",
+            message_data=[
+                (b"1 (RFC822.SIZE 2000001 BODY[] {2000001}", raw_message)
+            ],
+            max_chars=1_000,
+            max_message_bytes=25_000_000,
+        )
+
+        self.assertEqual(message.header.subject, "Big selected")
+        self.assertEqual(message.body_text, "Body")
+
     def test_validate_uid_requires_digits(self) -> None:
         self.assertEqual(_validate_uid(" 123 "), "123")
         with self.assertRaises(SeznamEmailProviderError):
