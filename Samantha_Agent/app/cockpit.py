@@ -43,6 +43,7 @@ SCANDOCU_PORT = 8766
 SCANDOCU_LOG_DIR = PROJECT_ROOT / "data" / "private" / "documents" / "scandocu"
 SCANDOCU_LOG_FILE = SCANDOCU_LOG_DIR / "server.log"
 SCANDOCU_SERVER_SCRIPT = PROJECT_ROOT / "scripts" / "scandocu_server.py"
+EMAIL_SESSION_HANDOFF_DIR = PROJECT_ROOT / "data" / "private" / "email_session_handoffs"
 GIT_ROOT = PROJECT_ROOT.parent
 LOCAL_WEB_APPS = {
     "family-video-organizer": PROJECT_ROOT / "docs" / "family-video-organizer",
@@ -60,6 +61,13 @@ WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
         "title": "Samantha Cockpit",
         "description": "Řídicí panel pro dokumenty, ScanDocu, zálohy a praktické rutiny Samanthy.",
         "url": COCKPIT_URL,
+        "kind": "lokální",
+    },
+    {
+        "id": "email-processing",
+        "title": "Email Processing",
+        "description": "Read-only pracovní přehled e-mailových kandidátů a navazující zpracování PDF.",
+        "url": "/email-processing/",
         "kind": "lokální",
     },
     {
@@ -125,6 +133,51 @@ READING_STATUS_ALIASES: dict[str, str] = {
 
 def web_apps_catalog() -> dict[str, Any]:
     return {"ok": True, "apps": [dict(item) for item in WEB_APP_CATALOG]}
+
+
+def latest_email_processing_overview(root: Path = EMAIL_SESSION_HANDOFF_DIR) -> dict[str, Any]:
+    files = sorted(
+        root.glob("weekly_email_overview_*_private.md") if root.exists() else [],
+        key=lambda path: (path.stat().st_mtime, path.name),
+        reverse=True,
+    )
+    if not files:
+        return {
+            "ok": False,
+            "message": "Žádný uložený e-mailový přehled zatím není k dispozici.",
+            "path": "",
+            "title": "Email Processing",
+            "text": "",
+            "updated_at": "",
+        }
+
+    path = files[0]
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        return {
+            "ok": False,
+            "message": f"Přehled se nepodařilo načíst: {exc}",
+            "path": str(relative_to_project(path)),
+            "title": path.name,
+            "text": "",
+            "updated_at": "",
+        }
+
+    title = path.stem
+    for line in text.splitlines():
+        if line.startswith("# "):
+            title = line[2:].strip() or title
+            break
+    updated_at = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).replace(microsecond=0).isoformat()
+    return {
+        "ok": True,
+        "message": "Načten poslední uložený read-only přehled e-mailů.",
+        "path": str(relative_to_project(path)),
+        "title": title,
+        "text": text,
+        "updated_at": updated_at,
+    }
 
 
 def cockpit_status() -> dict[str, Any]:
@@ -752,11 +805,17 @@ class CockpitServer:
                 if parsed.path == "/":
                     self.respond_html(COCKPIT_HTML)
                     return
+                if parsed.path == "/email-processing/":
+                    self.respond_html(EMAIL_PROCESSING_HTML)
+                    return
                 if parsed.path == "/api/status":
                     self.respond_json(cockpit_status())
                     return
                 if parsed.path == "/api/web-apps":
                     self.respond_json(web_apps_catalog())
+                    return
+                if parsed.path == "/api/email-processing/overview":
+                    self.respond_json(latest_email_processing_overview())
                     return
                 if parsed.path == "/api/documents/search":
                     params = parse_qs(parsed.query)
@@ -906,6 +965,182 @@ def content_type_for_path(path: Path) -> str:
     return "application/octet-stream"
 
 
+EMAIL_PROCESSING_HTML = """<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Email Processing</title>
+  <style>
+    :root { --bg: #f5f7fb; --panel: #ffffff; --ink: #162033; --muted: #667085; --line: #d9e0ea; --blue: #1f5fbf; --green: #16794c; --amber: #9a5b00; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    header { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 20px; background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 2; }
+    h1 { margin: 0; font-size: 20px; }
+    button { border: 0; border-radius: 6px; padding: 9px 12px; font: inherit; font-weight: 650; cursor: pointer; white-space: nowrap; }
+    button.primary { background: var(--blue); color: white; }
+    button.secondary { background: #e8eef8; color: #1d3b74; }
+    main { padding: 18px 20px 28px; display: grid; gap: 14px; }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+    .grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; align-items: start; }
+    section, aside { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    h2 { margin: 0; padding: 12px 14px; font-size: 14px; border-bottom: 1px solid var(--line); background: #f8fafc; }
+    .body { padding: 13px 14px; }
+    .status-line { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+    .meta { display: grid; gap: 7px; color: var(--muted); font-size: 13px; }
+    .meta strong { color: var(--ink); }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .pill { border: 1px solid var(--line); border-radius: 999px; padding: 5px 8px; font-size: 12px; background: #f8fafc; }
+    .overview { display: grid; gap: 10px; }
+    .category { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; overflow: hidden; }
+    .category h3 { margin: 0; padding: 10px 11px; font-size: 14px; border-bottom: 1px solid #edf0f4; }
+    .category pre { margin: 0; padding: 11px; white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: #263244; }
+    .empty { padding: 14px; color: var(--muted); }
+    .safe { color: var(--green); font-weight: 700; }
+    .warn { color: var(--amber); font-weight: 700; }
+    @media (max-width: 900px) { header { align-items: flex-start; flex-direction: column; } .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Email Processing</h1>
+    <div class="toolbar">
+      <button class="secondary" id="refreshBtn">Obnovit</button>
+      <button class="secondary" id="cockpitBtn">Otevřít Cockpit</button>
+    </div>
+  </header>
+  <main>
+    <div class="grid">
+      <section>
+        <h2>Přehled e-mailů za posledních 7 dní</h2>
+        <div class="body">
+          <div id="overviewStatus" class="status-line">Načítám uložený přehled...</div>
+          <div id="overview" class="overview"></div>
+        </div>
+      </section>
+      <aside>
+        <h2>Bezpečnost</h2>
+        <div class="body meta">
+          <div><strong>Režim:</strong> <span class="safe">read-only</span></div>
+          <div>Okno zobrazuje poslední uložený pracovní přehled z lokálního soukromého souboru.</div>
+          <div>Nečte znovu schránky, nestahuje přílohy, neotevírá odkazy a nic ve schránkách nemění.</div>
+          <div><strong>Další krok:</strong> vybrat konkrétní UID a zdroj; načtení e-mailu nebo PDF až po samostatném potvrzení.</div>
+          <div id="sourcePath" class="status-line"></div>
+          <div id="updatedAt" class="status-line"></div>
+          <div class="pill-row">
+            <span class="pill">faktury/e-shopy</span>
+            <span class="pill">pojištění/smlouvy</span>
+            <span class="pill">úřady/daně</span>
+            <span class="pill">ostatní</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+  <script>
+    const overviewStatus = document.getElementById("overviewStatus");
+    const overview = document.getElementById("overview");
+    const sourcePath = document.getElementById("sourcePath");
+    const updatedAt = document.getElementById("updatedAt");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const cockpitBtn = document.getElementById("cockpitBtn");
+
+    function categoryTitle(raw) {
+      return raw.replace(/^#+\\s*/, "").trim();
+    }
+
+    function splitOverview(text) {
+      const allowed = new Set([
+        "Faktury / e-shopy",
+        "Pojisteni / smlouvy",
+        "Pojištění / smlouvy",
+        "Urady / dane",
+        "Úřady / daně",
+        "Ostatni kandidati",
+        "Ostatní kandidáti",
+        "Doporučeny dalsi krok po navazani",
+        "Doporučený další krok po navázání"
+      ]);
+      const sections = [];
+      let current = null;
+      text.split(/\\r?\\n/).forEach((line) => {
+        if (line.startsWith("## ")) {
+          const title = categoryTitle(line);
+          if (allowed.has(title)) {
+            current = {title, lines: []};
+            sections.push(current);
+          } else {
+            current = null;
+          }
+          return;
+        }
+        if (current) current.lines.push(line);
+      });
+      return sections.map((section) => ({
+        title: section.title,
+        text: section.lines.join("\\n").trim()
+      })).filter((section) => section.text);
+    }
+
+    function renderSections(sections) {
+      overview.innerHTML = "";
+      if (!sections.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "Uložený přehled neobsahuje rozpoznatelné kategorie.";
+        overview.appendChild(empty);
+        return;
+      }
+      sections.forEach((section) => {
+        const card = document.createElement("div");
+        card.className = "category";
+        const title = document.createElement("h3");
+        title.textContent = section.title;
+        const pre = document.createElement("pre");
+        pre.textContent = section.text;
+        card.appendChild(title);
+        card.appendChild(pre);
+        overview.appendChild(card);
+      });
+    }
+
+    async function loadOverview() {
+      refreshBtn.disabled = true;
+      overviewStatus.textContent = "Načítám uložený přehled...";
+      overview.innerHTML = "";
+      try {
+        const res = await fetch("/api/email-processing/overview");
+        const data = await res.json();
+        overviewStatus.textContent = data.message || "";
+        sourcePath.textContent = data.path ? `Soubor: ${data.path}` : "";
+        updatedAt.textContent = data.updated_at ? `Aktualizováno: ${data.updated_at}` : "";
+        if (!data.ok) {
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = data.message || "Přehled není k dispozici.";
+          overview.appendChild(empty);
+          return;
+        }
+        renderSections(splitOverview(data.text || ""));
+      } catch (err) {
+        overviewStatus.textContent = `Chyba načtení: ${err}`;
+      } finally {
+        refreshBtn.disabled = false;
+      }
+    }
+
+    refreshBtn.addEventListener("click", loadOverview);
+    cockpitBtn.addEventListener("click", () => {
+      const cockpit = window.open("/", "SamanthaCockpit", "popup=yes,width=1280,height=880,left=90,top=60");
+      if (cockpit) cockpit.focus();
+    });
+    loadOverview();
+  </script>
+</body>
+</html>
+"""
+
+
 COCKPIT_HTML = """<!doctype html>
 <html lang="cs">
 <head>
@@ -1010,6 +1245,7 @@ COCKPIT_HTML = """<!doctype html>
     <div class="toolbar">
       <button class="secondary" id="refreshBtn">Obnovit</button>
       <button class="secondary" id="webAppsBtn">Webové aplikace</button>
+      <button class="secondary" id="emailProcessingBtn">Email Processing</button>
       <button class="primary" id="scanDocuBtn">Otevřít ScanDocu</button>
       <button class="secondary" id="scanDocuReviewBtn">Revidovat uložené</button>
       <button class="secondary" id="samanthaChatBtn">Samantha chat</button>
@@ -1045,6 +1281,7 @@ COCKPIT_HTML = """<!doctype html>
             <button class="primary" id="dashboardProcessBtn">Zpracovat další</button>
             <button class="secondary" id="dashboardReviewBtn">Revidovat další</button>
             <button class="secondary" id="dashboardWebAppsBtn">Webové aplikace</button>
+            <button class="secondary" id="dashboardEmailBtn">Email Processing</button>
             <button class="secondary" id="dashboardSamanthaBtn">Samantha chat</button>
             <button class="secondary" id="dashboardCodexBtn">Codex CLI</button>
             <button class="secondary" id="dashboardRefreshBtn">Obnovit stav</button>
@@ -1153,6 +1390,7 @@ COCKPIT_HTML = """<!doctype html>
     const codexCliBtn = document.getElementById("codexCliBtn");
     const terminalBtn = document.getElementById("terminalBtn");
     const webAppsBtn = document.getElementById("webAppsBtn");
+    const emailProcessingBtn = document.getElementById("emailProcessingBtn");
     const webAppsModal = document.getElementById("webAppsModal");
     const webAppsCloseBtn = document.getElementById("webAppsCloseBtn");
     const webAppsStatus = document.getElementById("webAppsStatus");
@@ -1167,6 +1405,7 @@ COCKPIT_HTML = """<!doctype html>
     const dashboardProcessBtn = document.getElementById("dashboardProcessBtn");
     const dashboardReviewBtn = document.getElementById("dashboardReviewBtn");
     const dashboardWebAppsBtn = document.getElementById("dashboardWebAppsBtn");
+    const dashboardEmailBtn = document.getElementById("dashboardEmailBtn");
     const dashboardSamanthaBtn = document.getElementById("dashboardSamanthaBtn");
     const dashboardCodexBtn = document.getElementById("dashboardCodexBtn");
     const dashboardRefreshBtn = document.getElementById("dashboardRefreshBtn");
@@ -1658,14 +1897,29 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
+    function openEmailProcessing() {
+      const emailWindow = window.open(
+        "/email-processing/",
+        "SamanthaEmailProcessing",
+        "popup=yes,width=1280,height=880,left=120,top=70"
+      );
+      if (emailWindow) {
+        emailWindow.focus();
+      } else {
+        showMessage("Popup okno bylo blokováno, otevři /email-processing/");
+      }
+    }
+
     refreshBtn.addEventListener("click", refresh);
     dashboardRefreshBtn.addEventListener("click", refresh);
     dashboardProcessBtn.addEventListener("click", () => openScanDocu(false));
     dashboardReviewBtn.addEventListener("click", () => openScanDocu(true));
     dashboardWebAppsBtn.addEventListener("click", openWebAppsModal);
+    dashboardEmailBtn.addEventListener("click", openEmailProcessing);
     dashboardSamanthaBtn.addEventListener("click", () => postAction("/api/samantha/open", dashboardSamanthaBtn));
     dashboardCodexBtn.addEventListener("click", () => postAction("/api/codex/open", dashboardCodexBtn));
     webAppsBtn.addEventListener("click", openWebAppsModal);
+    emailProcessingBtn.addEventListener("click", openEmailProcessing);
     webAppsCloseBtn.addEventListener("click", closeWebAppsModal);
     webAppsModal.addEventListener("click", (event) => {
       if (event.target === webAppsModal) {

@@ -7,8 +7,10 @@ from pathlib import Path
 
 from app.cockpit import (
     COCKPIT_HTML,
+    EMAIL_PROCESSING_HTML,
     document_reference,
     document_work_status,
+    latest_email_processing_overview,
     move_document_lifecycle_action,
     prepare_document_print_action,
     search_document_index,
@@ -207,12 +209,43 @@ class CockpitTests(unittest.TestCase):
         self.assertNotIn('target = "_blank"', COCKPIT_HTML)
         self.assertIn("Zavřít", COCKPIT_HTML)
 
+    def test_email_processing_overview_reads_latest_private_resume(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            older = root / "weekly_email_overview_2026_05_31_private.md"
+            latest = root / "weekly_email_overview_2026_06_01_private.md"
+            older.write_text("# Older\n\n## Faktury / e-shopy\n\n- Stará položka\n", encoding="utf-8")
+            latest.write_text("# Latest\n\n## Faktury / e-shopy\n\n- Nová položka\n", encoding="utf-8")
+
+            result = latest_email_processing_overview(root=root)
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["title"], "Latest")
+            self.assertIn("Nová položka", result["text"])
+            self.assertNotIn("Stará položka", result["text"])
+            self.assertTrue(result["path"].endswith("weekly_email_overview_2026_06_01_private.md"))
+
+    def test_email_processing_html_contains_readonly_overview_controls(self) -> None:
+        self.assertIn("Email Processing", EMAIL_PROCESSING_HTML)
+        self.assertIn("/api/email-processing/overview", EMAIL_PROCESSING_HTML)
+        self.assertIn("read-only", EMAIL_PROCESSING_HTML)
+        self.assertIn("faktury/e-shopy", EMAIL_PROCESSING_HTML)
+        self.assertIn("pojištění/smlouvy", EMAIL_PROCESSING_HTML)
+
+    def test_cockpit_html_contains_email_processing_controls(self) -> None:
+        self.assertIn("Email Processing", COCKPIT_HTML)
+        self.assertIn("emailProcessingBtn", COCKPIT_HTML)
+        self.assertIn("dashboardEmailBtn", COCKPIT_HTML)
+        self.assertIn("/email-processing/", COCKPIT_HTML)
+        self.assertIn("openEmailProcessing", COCKPIT_HTML)
+
     def test_web_apps_catalog_contains_known_apps(self) -> None:
         catalog = web_apps_catalog()
         titles = {item["title"] for item in catalog["apps"]}
 
         self.assertTrue(catalog["ok"])
         self.assertIn("ScanDocu", titles)
+        self.assertIn("Email Processing", titles)
         self.assertIn("Lékárna", titles)
         self.assertIn("Family Video Organizer", titles)
 
