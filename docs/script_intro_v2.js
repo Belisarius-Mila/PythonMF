@@ -450,9 +450,13 @@ const clearingDialogue = [
     characterId: "benji",
     speaker: "Benji",
     cue: "Tap Benji.",
-    textEn: "Hello! I am Benji.",
-    audioEn: "audio/english/scene01_01_benji_hello_i_am_benji_en.mp3?v=20260601voices",
+    textEn: "Hello. I am Benji.",
+    audioEn: [
+      "audio/english/benji_bunny_01_benji_hello_en.mp3?v=20260527benji",
+      "audio/english/benji_bunny_03_benji_i_am_benji_en.mp3?v=20260527benji",
+    ],
     textCz: "Ahoj! Já jsem Benji.",
+    textCzSpeech: "Ahoj! Já jsem Benži.",
     preferredVoiceName: "fable|brian|andrew|roger|guy|daniel|alex|aaron|evan|junior",
   },
   {
@@ -460,10 +464,13 @@ const clearingDialogue = [
     characterId: "bunny",
     speaker: "Bunny",
     cue: "Tap Bunny.",
-    textEn: "Hi! I am Bunny. We are friends.",
-    audioEn: "audio/english/scene01_02_bunny_hi_i_am_bunny_we_are_friends_en.mp3?v=20260601voices",
-    textCz: "Ahoj! Já jsem Bunny. Jsme kamarádi.",
-    textCzSpeech: "Ahoj! Já jsem Bany. Jsme kamarádi.",
+    textEn: "Hello. I am Bunny.",
+    audioEn: [
+      "audio/english/benji_bunny_02_bunny_hello_en.mp3?v=20260527voice",
+      "audio/english/benji_bunny_04_bunny_i_am_bunny_en.mp3?v=20260527voice",
+    ],
+    textCz: "Ahoj. Já jsem Bunny.",
+    textCzSpeech: "Ahoj. Já jsem Bany.",
     preferredVoiceName: "junior|samantha|ava|victoria|karen",
   },
   {
@@ -1457,8 +1464,16 @@ async function playClearingIntroHelp() {
 
 async function playClearingEnglishLine(item) {
   if (item.audioEn) {
-    const played = await playAudioFile(item.audioEn);
-    if (played) {
+    const audioSources = Array.isArray(item.audioEn) ? item.audioEn : [item.audioEn];
+    let playedAll = audioSources.length > 0;
+    for (const audioSrc of audioSources) {
+      const played = await playAudioFile(audioSrc);
+      if (!played) {
+        playedAll = false;
+        break;
+      }
+    }
+    if (playedAll) {
       return;
     }
   }
