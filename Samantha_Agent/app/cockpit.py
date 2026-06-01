@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import hashlib
+import re
 import shutil
 import subprocess
 import time
@@ -44,6 +45,7 @@ SCANDOCU_LOG_DIR = PROJECT_ROOT / "data" / "private" / "documents" / "scandocu"
 SCANDOCU_LOG_FILE = SCANDOCU_LOG_DIR / "server.log"
 SCANDOCU_SERVER_SCRIPT = PROJECT_ROOT / "scripts" / "scandocu_server.py"
 EMAIL_SESSION_HANDOFF_DIR = PROJECT_ROOT / "data" / "private" / "email_session_handoffs"
+EMAIL_PROCESSING_DECISIONS_FILE = EMAIL_SESSION_HANDOFF_DIR / "email_processing_decisions.json"
 GIT_ROOT = PROJECT_ROOT.parent
 LOCAL_WEB_APPS = {
     "family-video-organizer": PROJECT_ROOT / "docs" / "family-video-organizer",
@@ -135,6 +137,144 @@ def web_apps_catalog() -> dict[str, Any]:
     return {"ok": True, "apps": [dict(item) for item in WEB_APP_CATALOG]}
 
 
+EMAIL_PROCESSING_CATEGORY_TITLES = {
+    "Faktury / e-shopy": "faktury/e-shopy",
+    "Pojisteni / smlouvy": "pojištění/smlouvy",
+    "Pojištění / smlouvy": "pojištění/smlouvy",
+    "Urady / dane": "úřady/daně",
+    "Úřady / daně": "úřady/daně",
+    "Ostatni kandidati": "ostatní",
+    "Ostatní kandidáti": "ostatní",
+}
+EMAIL_PROCESSING_ACTIONS = {"process", "save", "ignore", "trash_requested", ""}
+
+
+def email_processing_item_id(category: str, provider: str, folder: str, uid: str, date: str, subject: str) -> str:
+    raw = "|".join([category, provider, folder, uid, date, subject])
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def parse_email_processing_items(text: str) -> list[dict[str, Any]]:
+    items: list[dict[str, Any]] = []
+    category = ""
+    current: dict[str, Any] | None = None
+
+    def finish_current() -> None:
+        nonlocal current
+        if not current:
+            return
+        current["id"] = email_processing_item_id(
+            str(current.get("category", "")),
+            str(current.get("provider", "")),
+            str(current.get("folder", "")),
+            str(current.get("uid", "")),
+            str(current.get("date", "")),
+            str(current.get("subject", "")),
+        )
+        items.append(current)
+        current = None
+
+    for line in text.splitlines():
+        section = re.match(r"^##\s+(.+?)\s*$", line)
+        if section:
+            finish_current()
+            category = EMAIL_PROCESSING_CATEGORY_TITLES.get(section.group(1).strip(), "")
+            continue
+        if not category:
+            continue
+
+        numbered = re.match(r"^\d+\.\s+(.+?)\s+/\s+(.+?)\s+/\s+UID\s+([^/]+?)\s+/\s+([0-9]{4}-[0-9]{2}-[0-9]{2})\s*$", line)
+        if numbered:
+            finish_current()
+            current = {
+                "category": category,
+                "provider": numbered.group(1).strip(),
+                "folder": numbered.group(2).strip(),
+                "uid": numbered.group(3).strip(),
+                "date": numbered.group(4).strip(),
+                "subject": "",
+                "reason": "",
+            }
+            continue
+
+        bullet = re.match(r"^-\s+(.+?)\s+UID\s+([^:]+):\s*(.+?)\s*$", line)
+        if bullet:
+            finish_current()
+            subject = bullet.group(3).strip()
+            current = {
+                "category": category,
+                "provider": bullet.group(1).strip(),
+                "folder": "",
+                "uid": bullet.group(2).strip(),
+                "date": "",
+                "subject": subject,
+                "reason": subject,
+            }
+            finish_current()
+            continue
+
+        if not current:
+            continue
+        subject = re.match(r"^\s*-\s+Predmet:\s*(.+?)\s*$", line)
+        if subject:
+            current["subject"] = subject.group(1).strip()
+            continue
+        reason = re.match(r"^\s*-\s+Duvod:\s*(.+?)\s*$", line)
+        if reason:
+            current["reason"] = reason.group(1).strip()
+            continue
+
+    finish_current()
+    return items
+
+
+def read_email_processing_decisions(path: Path = EMAIL_PROCESSING_DECISIONS_FILE) -> dict[str, dict[str, Any]]:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    decisions = data.get("decisions", {})
+    if not isinstance(decisions, dict):
+        return {}
+    return {str(key): value for key, value in decisions.items() if isinstance(value, dict)}
+
+
+def save_email_processing_decision(
+    *,
+    item_id: str,
+    action: str,
+    item: dict[str, Any] | None = None,
+    path: Path = EMAIL_PROCESSING_DECISIONS_FILE,
+) -> dict[str, Any]:
+    item_id = item_id.strip()
+    action = action.strip()
+    if not item_id:
+        return {"ok": False, "message": "Chybí ID e-mailu."}
+    if action not in EMAIL_PROCESSING_ACTIONS:
+        return {"ok": False, "message": "Neznámá akce."}
+
+    decisions = read_email_processing_decisions(path)
+    if action:
+        decisions[item_id] = {
+            "action": action,
+            "updated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+            "item": item if isinstance(item, dict) else {},
+        }
+    else:
+        decisions.pop(item_id, None)
+    write_json(path, {"decisions": decisions})
+    label = {
+        "process": "označeno ke zpracování",
+        "save": "označeno k uložení",
+        "ignore": "označeno k ignorování",
+        "trash_requested": "označeno ke smazání po potvrzení",
+        "": "rozhodnutí zrušeno",
+    }[action]
+    return {"ok": True, "message": label, "item_id": item_id, "action": action}
+
+
 def latest_email_processing_overview(root: Path = EMAIL_SESSION_HANDOFF_DIR) -> dict[str, Any]:
     files = sorted(
         root.glob("weekly_email_overview_*_private.md") if root.exists() else [],
@@ -170,12 +310,18 @@ def latest_email_processing_overview(root: Path = EMAIL_SESSION_HANDOFF_DIR) -> 
             title = line[2:].strip() or title
             break
     updated_at = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).replace(microsecond=0).isoformat()
+    decisions = read_email_processing_decisions(root / EMAIL_PROCESSING_DECISIONS_FILE.name)
+    items = parse_email_processing_items(text)
+    for item in items:
+        decision = decisions.get(str(item.get("id", "")), {})
+        item["action"] = str(decision.get("action", ""))
     return {
         "ok": True,
         "message": "Načten poslední uložený read-only přehled e-mailů.",
         "path": str(relative_to_project(path)),
         "title": title,
         "text": text,
+        "items": items,
         "updated_at": updated_at,
     }
 
@@ -874,6 +1020,17 @@ class CockpitServer:
                         )
                     )
                     return
+                if parsed.path == "/api/email-processing/decision":
+                    payload = self.read_json()
+                    item = payload.get("item")
+                    self.respond_json(
+                        save_email_processing_decision(
+                            item_id=str(payload.get("item_id", "")),
+                            action=str(payload.get("action", "")),
+                            item=item if isinstance(item, dict) else {},
+                        )
+                    )
+                    return
                 self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
 
             def read_json(self) -> dict[str, Any]:
@@ -995,6 +1152,16 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     .category { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; overflow: hidden; }
     .category h3 { margin: 0; padding: 10px 11px; font-size: 14px; border-bottom: 1px solid #edf0f4; }
     .category pre { margin: 0; padding: 11px; white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: #263244; }
+    .email-list { display: grid; gap: 10px; }
+    .email-card { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; padding: 11px; display: grid; gap: 8px; }
+    .email-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
+    .email-title { font-weight: 750; overflow-wrap: anywhere; }
+    .email-meta, .email-reason { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+    .email-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-top: 1px solid #edf0f4; padding-top: 8px; }
+    .email-actions label { display: inline-flex; gap: 5px; align-items: center; font-size: 13px; }
+    .email-actions input { margin: 0; }
+    .trash-button { background: #fee2e2; color: #991b1b; padding: 7px 10px; }
+    .decision { color: var(--green); font-size: 12px; font-weight: 650; }
     .empty { padding: 14px; color: var(--muted); }
     .safe { color: var(--green); font-weight: 700; }
     .warn { color: var(--amber); font-weight: 700; }
@@ -1012,7 +1179,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
   <main>
     <div class="grid">
       <section>
-        <h2>Přehled e-mailů za posledních 7 dní</h2>
+        <h2>Rozhodnutí k e-mailům za posledních 7 dní</h2>
         <div class="body">
           <div id="overviewStatus" class="status-line">Načítám uložený přehled...</div>
           <div id="overview" class="overview"></div>
@@ -1024,6 +1191,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
           <div><strong>Režim:</strong> <span class="safe">read-only</span></div>
           <div>Okno zobrazuje poslední uložený pracovní přehled z lokálního soukromého souboru.</div>
           <div>Nečte znovu schránky, nestahuje přílohy, neotevírá odkazy a nic ve schránkách nemění.</div>
+          <div><strong>Koš:</strong> tlačítko zatím jen označí e-mail ke smazání; skutečné smazání bude samostatná potvrzená akce.</div>
           <div><strong>Další krok:</strong> vybrat konkrétní UID a zdroj; načtení e-mailu nebo PDF až po samostatném potvrzení.</div>
           <div id="sourcePath" class="status-line"></div>
           <div id="updatedAt" class="status-line"></div>
@@ -1104,6 +1272,124 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       });
     }
 
+    function actionLabel(action) {
+      if (action === "process") return "Zpracovat";
+      if (action === "save") return "Uložit";
+      if (action === "ignore") return "Ignorovat";
+      if (action === "trash_requested") return "Koš - čeká na potvrzení";
+      return "";
+    }
+
+    function itemMeta(item) {
+      const parts = [];
+      if (item.provider) parts.push(item.provider);
+      if (item.folder) parts.push(item.folder);
+      if (item.uid) parts.push(`UID ${item.uid}`);
+      if (item.date) parts.push(item.date);
+      if (item.category) parts.push(item.category);
+      return parts.join(" | ");
+    }
+
+    function renderItems(items) {
+      overview.innerHTML = "";
+      if (!items || !items.length) {
+        renderSections(splitOverview(window.lastOverviewText || ""));
+        return;
+      }
+      const list = document.createElement("div");
+      list.className = "email-list";
+      items.forEach((item) => {
+        const card = document.createElement("div");
+        card.className = "email-card";
+        card.dataset.itemId = item.id || "";
+        const head = document.createElement("div");
+        head.className = "email-head";
+        const summary = document.createElement("div");
+        const title = document.createElement("div");
+        title.className = "email-title";
+        title.textContent = item.subject || "(bez předmětu)";
+        const meta = document.createElement("div");
+        meta.className = "email-meta";
+        meta.textContent = itemMeta(item);
+        const decision = document.createElement("div");
+        decision.className = "decision";
+        decision.textContent = actionLabel(item.action || "");
+        summary.appendChild(title);
+        summary.appendChild(meta);
+        if (item.reason) {
+          const reason = document.createElement("div");
+          reason.className = "email-reason";
+          reason.textContent = `Důvod: ${item.reason}`;
+          summary.appendChild(reason);
+        }
+        head.appendChild(summary);
+        head.appendChild(decision);
+
+        const actions = document.createElement("div");
+        actions.className = "email-actions";
+        [
+          ["process", "Zpracovat"],
+          ["save", "Uložit"],
+          ["ignore", "Ignorovat"]
+        ].forEach(([value, labelText]) => {
+          const label = document.createElement("label");
+          const input = document.createElement("input");
+          input.type = "checkbox";
+          input.checked = item.action === value;
+          input.addEventListener("change", () => {
+            const nextAction = input.checked ? value : "";
+            actions.querySelectorAll('input[type="checkbox"]').forEach((other) => {
+              if (other !== input) other.checked = false;
+            });
+            saveDecision(item, nextAction, decision);
+          });
+          label.appendChild(input);
+          label.appendChild(document.createTextNode(labelText));
+          actions.appendChild(label);
+        });
+
+        const trash = document.createElement("button");
+        trash.className = "trash-button";
+        trash.type = "button";
+        trash.textContent = "Koš";
+        trash.addEventListener("click", () => {
+          const ok = window.confirm("Označit tento e-mail ke smazání?\\n\\nE-mail se teď fyzicky nemaže, jen se uloží pracovní rozhodnutí.");
+          if (!ok) return;
+          actions.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+            input.checked = false;
+          });
+          saveDecision(item, "trash_requested", decision);
+        });
+        actions.appendChild(trash);
+        card.appendChild(head);
+        card.appendChild(actions);
+        list.appendChild(card);
+      });
+      overview.appendChild(list);
+    }
+
+    async function saveDecision(item, action, decisionNode) {
+      if (!item || !item.id) return;
+      decisionNode.textContent = "Ukládám...";
+      try {
+        const res = await fetch("/api/email-processing/decision", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({item_id: item.id, action, item})
+        });
+        const data = await res.json();
+        if (!data.ok) {
+          decisionNode.textContent = data.message || "Uložení selhalo";
+          return;
+        }
+        item.action = action;
+        decisionNode.textContent = actionLabel(action);
+        overviewStatus.textContent = data.message || "Rozhodnutí uloženo.";
+      } catch (err) {
+        decisionNode.textContent = `Chyba: ${err}`;
+      }
+    }
+
     async function loadOverview() {
       refreshBtn.disabled = true;
       overviewStatus.textContent = "Načítám uložený přehled...";
@@ -1121,7 +1407,8 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
           overview.appendChild(empty);
           return;
         }
-        renderSections(splitOverview(data.text || ""));
+        window.lastOverviewText = data.text || "";
+        renderItems(data.items || []);
       } catch (err) {
         overviewStatus.textContent = `Chyba načtení: ${err}`;
       } finally {

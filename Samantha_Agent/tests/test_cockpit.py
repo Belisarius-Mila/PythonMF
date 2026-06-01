@@ -12,7 +12,10 @@ from app.cockpit import (
     document_work_status,
     latest_email_processing_overview,
     move_document_lifecycle_action,
+    parse_email_processing_items,
     prepare_document_print_action,
+    read_email_processing_decisions,
+    save_email_processing_decision,
     search_document_index,
     set_document_reading_status_action,
     web_apps_catalog,
@@ -215,7 +218,13 @@ class CockpitTests(unittest.TestCase):
             older = root / "weekly_email_overview_2026_05_31_private.md"
             latest = root / "weekly_email_overview_2026_06_01_private.md"
             older.write_text("# Older\n\n## Faktury / e-shopy\n\n- Stará položka\n", encoding="utf-8")
-            latest.write_text("# Latest\n\n## Faktury / e-shopy\n\n- Nová položka\n", encoding="utf-8")
+            latest.write_text(
+                "# Latest\n\n## Faktury / e-shopy\n\n"
+                "1. iCloud / INBOX / UID 14157 / 2026-05-29\n"
+                "   - Predmet: Nová položka\n"
+                "   - Duvod: faktura\n",
+                encoding="utf-8",
+            )
 
             result = latest_email_processing_overview(root=root)
 
@@ -224,11 +233,56 @@ class CockpitTests(unittest.TestCase):
             self.assertIn("Nová položka", result["text"])
             self.assertNotIn("Stará položka", result["text"])
             self.assertTrue(result["path"].endswith("weekly_email_overview_2026_06_01_private.md"))
+            self.assertEqual(len(result["items"]), 1)
+            self.assertEqual(result["items"][0]["category"], "faktury/e-shopy")
+
+    def test_email_processing_parser_extracts_candidates(self) -> None:
+        text = """# Přehled
+
+## Faktury / e-shopy
+
+1. iCloud / INBOX / UID 14157 / 2026-05-29
+   - Predmet: Vaše faktura od společnosti Apple
+   - Duvod: faktura, silny kandidat na ulozeni
+
+## Ostatni kandidati
+
+- Seznam UID 155560: T-Mobile pevny internet.
+"""
+
+        items = parse_email_processing_items(text)
+
+        self.assertEqual(len(items), 2)
+        self.assertEqual(items[0]["provider"], "iCloud")
+        self.assertEqual(items[0]["uid"], "14157")
+        self.assertEqual(items[0]["subject"], "Vaše faktura od společnosti Apple")
+        self.assertEqual(items[1]["category"], "ostatní")
+        self.assertEqual(items[1]["provider"], "Seznam")
+
+    def test_email_processing_decision_is_saved_privately(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "email_processing_decisions.json"
+            result = save_email_processing_decision(
+                item_id="abc123",
+                action="process",
+                item={"uid": "14157", "provider": "iCloud"},
+                path=path,
+            )
+
+            decisions = read_email_processing_decisions(path)
+            self.assertTrue(result["ok"])
+            self.assertEqual(decisions["abc123"]["action"], "process")
+            self.assertEqual(decisions["abc123"]["item"]["uid"], "14157")
 
     def test_email_processing_html_contains_readonly_overview_controls(self) -> None:
         self.assertIn("Email Processing", EMAIL_PROCESSING_HTML)
         self.assertIn("/api/email-processing/overview", EMAIL_PROCESSING_HTML)
+        self.assertIn("/api/email-processing/decision", EMAIL_PROCESSING_HTML)
         self.assertIn("read-only", EMAIL_PROCESSING_HTML)
+        self.assertIn("Zpracovat", EMAIL_PROCESSING_HTML)
+        self.assertIn("Uložit", EMAIL_PROCESSING_HTML)
+        self.assertIn("Ignorovat", EMAIL_PROCESSING_HTML)
+        self.assertIn("Koš", EMAIL_PROCESSING_HTML)
         self.assertIn("faktury/e-shopy", EMAIL_PROCESSING_HTML)
         self.assertIn("pojištění/smlouvy", EMAIL_PROCESSING_HTML)
 
