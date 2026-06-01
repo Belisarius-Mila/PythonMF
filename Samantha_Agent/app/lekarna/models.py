@@ -26,6 +26,7 @@ class DomaciLek:
     PIL_Source: str
     PIL_Checked_Date: str
     PIL_Match_Status: str
+    Search_Tags: str
 
 
 @dataclass(frozen=True)

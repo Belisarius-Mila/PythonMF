@@ -21,6 +21,7 @@ from app.lekarna.photo_import import (
     prepare_lekarna_photo_import_manifest,
     validate_lekarna_photo_sources,
 )
+from app.lekarna.search_tags import build_search_tags
 
 
 FIELD_NAMES = [
@@ -45,6 +46,7 @@ FIELD_NAMES = [
     "PIL_Source",
     "PIL_Checked_Date",
     "PIL_Match_Status",
+    "Search_Tags",
 ]
 
 
@@ -68,6 +70,32 @@ class LekarnaServiceTests(unittest.TestCase):
             names = [match.lek.nazev for match in matches]
             self.assertIn("ACYLPYRIN", names)
             self.assertIn("PARALEN GRIP", names)
+
+    def test_search_uses_explicit_search_tags(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            csv_path = _fake_csv(Path(temp_dir))
+
+            matches = search_domaci_leky_records("ucpany nos", csv_path=csv_path)
+
+            names = [match.lek.nazev for match in matches]
+            self.assertIn("CLARINESE", names)
+            self.assertIn("vyhledavaci tagy", matches[0].reasons[0])
+
+    def test_build_search_tags_adds_common_home_terms(self) -> None:
+        tags = build_search_tags(
+            {
+                "nazev": "Tussical 1,5 mg/ml sirup",
+                "ucinna_latka": "butamirát-citrát",
+                "forma": "sirup",
+                "kategorie": "kašel / nachlazení / chřipka",
+                "pouziti": "suchý dráždivý kašel",
+                "PIL_Short": "Tlumí suchý dráždivý kašel při nachlazení.",
+            }
+        )
+
+        self.assertIn("suchý kašel", tags)
+        self.assertIn("dráždivý kašel", tags)
+        self.assertIn("nachlazení", tags)
 
     def test_search_by_common_query_finds_modriny(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -501,6 +529,7 @@ def _fake_csv(directory: Path) -> Path:
             "jistota_cteni": "vysoka",
             "nutno_overit": "ne",
             "poznamky": "Zbytek bez originalni krabicky.",
+            "Search_Tags": "alergie; rýma; ucpaný nos",
         },
     ]
     with csv_path.open("w", encoding="utf-8", newline="") as handle:

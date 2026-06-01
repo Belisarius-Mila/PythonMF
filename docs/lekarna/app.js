@@ -658,6 +658,7 @@ function findMedicineMatches(searchTerms) {
         medicine?.category,
         medicine?.use,
         medicine?.form,
+        medicine?.searchTags,
         medicine?.pilShort,
       ].filter(Boolean).join(" "));
       const score = searchTerms.reduce((total, term) => {

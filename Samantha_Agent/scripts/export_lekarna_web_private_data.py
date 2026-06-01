@@ -142,6 +142,7 @@ def _medicine_payload(row: dict[str, str], photo: str | None) -> dict[str, objec
         "pilStatus": row.get("PIL_Match_Status", ""),
         "pilSource": row.get("PIL_Source", ""),
         "pilCheckedDate": row.get("PIL_Checked_Date", ""),
+        "searchTags": row.get("Search_Tags", ""),
         "photo": photo,
     }
 

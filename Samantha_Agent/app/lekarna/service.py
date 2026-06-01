@@ -21,10 +21,14 @@ RETIRE_CONFIRMATION_PHRASE = "Potvrzuji vyrazeni leku"
 QUERY_ALIASES = {
     "bolest": ("bolest", "bolesti", "zanet", "kloub", "klouby", "zad", "zada"),
     "horecka": ("horecka", "teplota", "nachlazeni", "chripka"),
-    "kasel": ("kasel", "nachlazeni", "chripka"),
+    "kasel": ("kasel", "suchy", "drazdivy", "hlen", "zahleneni", "prudusky"),
     "alergie": ("alergie", "alergicka"),
     "prujem": ("prujem", "traveni", "zaludek", "streva"),
     "nachlazeni": ("nachlazeni", "chripka", "ryma", "horecka", "kasel"),
+    "ryma": ("ryma", "ucpany", "nos", "dutiny", "nachlazeni"),
+    "rycma": ("ryma", "ucpany", "nos", "dutiny", "nachlazeni"),
+    "rima": ("ryma", "ucpany", "nos", "dutiny", "nachlazeni"),
+    "ucpany": ("ucpany", "nos", "ryma", "dutiny", "nachlazeni"),
     "traveni": ("traveni", "nadymani", "zaludek", "prujem", "probiotika"),
     "modriny": ("modriny", "otoky", "otok", "podlitiny", "uraz"),
 }
@@ -290,6 +294,7 @@ def _score_record(lek: DomaciLek, query_terms: set[str]) -> tuple[int, list[str]
         "nazev": lek.nazev,
         "kategorie": lek.kategorie,
         "pouziti": lek.pouziti,
+        "vyhledavaci tagy": lek.Search_Tags,
         "ucinna latka": lek.ucinna_latka,
         "poznamky": lek.poznamky,
     }
@@ -297,6 +302,7 @@ def _score_record(lek: DomaciLek, query_terms: set[str]) -> tuple[int, list[str]
         "nazev": 4,
         "kategorie": 5,
         "pouziti": 5,
+        "vyhledavaci tagy": 7,
         "ucinna latka": 3,
         "poznamky": 1,
     }
@@ -304,7 +310,7 @@ def _score_record(lek: DomaciLek, query_terms: set[str]) -> tuple[int, list[str]
     reasons: list[str] = []
     for label, value in fields.items():
         normalized_value = _normalize(value)
-        matched_terms = sorted(term for term in query_terms if term and term in normalized_value)
+        matched_terms = sorted(term for term in query_terms if _matches_term(normalized_value, term))
         if not matched_terms:
             continue
         score += weights[label] * len(matched_terms)
@@ -469,13 +475,21 @@ def _expand_query_terms(query: str) -> set[str]:
     base_terms = set(_tokens(normalized_query))
     expanded = set(base_terms)
     for key, aliases in QUERY_ALIASES.items():
-        if key in base_terms or any(alias in normalized_query for alias in aliases):
+        if key in base_terms or key in normalized_query:
             expanded.update(aliases)
     return {term for term in expanded if len(term) >= 3}
 
 
 def _tokens(text: str) -> list[str]:
     return re.findall(r"[a-z0-9_]+", text)
+
+
+def _matches_term(haystack: str, term: str) -> bool:
+    if not term:
+        return False
+    if " " in term:
+        return term in haystack
+    return re.search(rf"\b{re.escape(term)}[a-z0-9_]*\b", haystack) is not None
 
 
 def _normalize(text: str) -> str:
