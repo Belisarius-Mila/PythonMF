@@ -6,7 +6,9 @@ import re
 import shutil
 import subprocess
 import time
+from collections.abc import Callable
 from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -34,6 +36,10 @@ from app.documents.vault import (
     write_json,
     write_jsonl,
 )
+from app.email.config import EmailConfigError
+from app.email.icloud_provider import EmailProviderError, ICloudReadOnlyEmailProvider
+from app.email.models import EmailHeader
+from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEmailProvider
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -146,12 +152,103 @@ EMAIL_PROCESSING_CATEGORY_TITLES = {
     "Ostatni kandidati": "ostatní",
     "Ostatní kandidáti": "ostatní",
 }
-EMAIL_PROCESSING_ACTIONS = {"process", "save", "ignore", "trash_requested", ""}
+EMAIL_PROCESSING_ACTIONS = {"process", "ignore", "trash_requested", ""}
+EMAIL_PROCESSING_CATEGORY_ORDER = ("faktury/e-shopy", "pojištění/smlouvy", "úřady/daně", "ostatní")
 
 
 def email_processing_item_id(category: str, provider: str, folder: str, uid: str, date: str, subject: str) -> str:
     raw = "|".join([category, provider, folder, uid, date, subject])
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def classify_email_processing_category(subject: str, sender: str = "") -> str:
+    value = f"{subject} {sender}".casefold()
+    if any(
+        token in value
+        for token in (
+            "pojišt",
+            "pojist",
+            "smlouv",
+            "zelen",
+            "karta",
+            "generali",
+            "kooperativa",
+            "čpp",
+            "cpp",
+        )
+    ):
+        return "pojištění/smlouvy"
+    if any(token in value for token in ("úřad", "urad", "daň", "dan", "finanční", "financni", "datov", "správa")):
+        return "úřady/daně"
+    if any(
+        token in value
+        for token in (
+            "faktura",
+            "objedn",
+            "platba",
+            "zaplac",
+            "booking",
+            "temu",
+            "apple",
+            "doruč",
+            "doruc",
+            "balík",
+            "balicek",
+            "zásilk",
+            "zasilk",
+            "eshop",
+            "e-shop",
+        )
+    ):
+        return "faktury/e-shopy"
+    return "ostatní"
+
+
+def email_header_timestamp(value: str) -> float:
+    try:
+        parsed = parsedate_to_datetime(value)
+    except (TypeError, ValueError, IndexError):
+        return 0.0
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.timestamp()
+
+
+def parse_iso_timestamp(value: str) -> float:
+    if not value:
+        return 0.0
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return 0.0
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.timestamp()
+
+
+def email_header_to_processing_item(header: EmailHeader, source: str) -> dict[str, Any]:
+    category = classify_email_processing_category(header.subject, header.sender)
+    folder = header.folder or "INBOX"
+    item = {
+        "category": category,
+        "provider": source,
+        "folder": folder,
+        "uid": str(header.internal_id),
+        "date": header.date,
+        "subject": header.subject or "(bez předmětu)",
+        "reason": "nová hlavička z read-only kontroly",
+        "action": "",
+        "is_new_header": True,
+    }
+    item["id"] = email_processing_item_id(
+        category,
+        source,
+        folder,
+        str(header.internal_id),
+        header.date,
+        header.subject or "",
+    )
+    return item
 
 
 def parse_email_processing_items(text: str) -> list[dict[str, Any]]:
@@ -267,12 +364,69 @@ def save_email_processing_decision(
     write_json(path, {"decisions": decisions})
     label = {
         "process": "označeno ke zpracování",
-        "save": "označeno k uložení",
         "ignore": "označeno k ignorování",
         "trash_requested": "označeno ke smazání po potvrzení",
         "": "rozhodnutí zrušeno",
     }[action]
     return {"ok": True, "message": label, "item_id": item_id, "action": action}
+
+
+def new_email_headers_overview(
+    limit_per_source: int = 10,
+    since: str = "",
+    icloud_provider_factory: Callable[[], object] | None = None,
+    seznam_provider_factory: Callable[[], object] | None = None,
+) -> dict[str, Any]:
+    safe_limit = min(max(1, limit_per_source), 20)
+    since_ts = parse_iso_timestamp(since)
+    entries: list[dict[str, Any]] = []
+    unavailable: list[str] = []
+    providers: list[tuple[str, Callable[[], object], type[Exception], str]] = [
+        (
+            "iCloud",
+            icloud_provider_factory or ICloudReadOnlyEmailProvider,
+            EmailProviderError,
+            "iCloud: read-only přístup selhal",
+        ),
+        (
+            "Seznam",
+            seznam_provider_factory or SeznamReadOnlyEmailProvider,
+            SeznamEmailProviderError,
+            "Seznam: read-only přístup selhal",
+        ),
+    ]
+    for source, provider_factory, provider_error, error_message in providers:
+        try:
+            provider = provider_factory()
+            headers = provider.list_recent_headers(limit=safe_limit)  # type: ignore[attr-defined]
+        except EmailConfigError:
+            unavailable.append(f"{source}: chybí lokální konfigurace")
+            continue
+        except provider_error:
+            unavailable.append(error_message)
+            continue
+        for header in headers:
+            header_ts = email_header_timestamp(header.date)
+            if since_ts and (not header_ts or header_ts <= since_ts):
+                continue
+            entries.append(email_header_to_processing_item(header, source))
+
+    entries.sort(key=lambda item: email_header_timestamp(str(item.get("date", ""))), reverse=True)
+    if entries:
+        message = f"Načteno {len(entries)} nových e-mailových hlaviček read-only."
+    elif since_ts:
+        message = "Od otevření přehledu nepřišly žádné novější e-mailové hlavičky."
+    else:
+        message = "Nebyly nalezeny žádné e-mailové hlavičky."
+    return {
+        "ok": True,
+        "message": message,
+        "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "limit_per_source": safe_limit,
+        "since": since,
+        "items": entries,
+        "unavailable": unavailable,
+    }
 
 
 def latest_email_processing_overview(root: Path = EMAIL_SESSION_HANDOFF_DIR) -> dict[str, Any]:
@@ -314,7 +468,8 @@ def latest_email_processing_overview(root: Path = EMAIL_SESSION_HANDOFF_DIR) -> 
     items = parse_email_processing_items(text)
     for item in items:
         decision = decisions.get(str(item.get("id", "")), {})
-        item["action"] = str(decision.get("action", ""))
+        action = str(decision.get("action", ""))
+        item["action"] = "process" if action == "save" else action
     return {
         "ok": True,
         "message": "Načten poslední uložený read-only přehled e-mailů.",
@@ -1031,6 +1186,20 @@ class CockpitServer:
                         )
                     )
                     return
+                if parsed.path == "/api/email-processing/new-headers":
+                    payload = self.read_json()
+                    raw_limit = payload.get("limit_per_source", 10)
+                    try:
+                        limit = int(raw_limit)
+                    except (TypeError, ValueError):
+                        limit = 10
+                    self.respond_json(
+                        new_email_headers_overview(
+                            limit_per_source=limit,
+                            since=str(payload.get("since", "")),
+                        )
+                    )
+                    return
                 self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
 
             def read_json(self) -> dict[str, Any]:
@@ -1152,8 +1321,9 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     .category { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; overflow: hidden; }
     .category h3 { margin: 0; padding: 10px 11px; font-size: 14px; border-bottom: 1px solid #edf0f4; }
     .category pre { margin: 0; padding: 11px; white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: #263244; }
-    .email-list { display: grid; gap: 10px; }
+    .category-items { display: grid; gap: 9px; padding: 10px; }
     .email-card { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; padding: 11px; display: grid; gap: 8px; }
+    .email-card.new-header { border-color: #b8cdf2; background: #f5f8ff; }
     .email-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
     .email-title { font-weight: 750; overflow-wrap: anywhere; }
     .email-meta, .email-reason { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
@@ -1162,6 +1332,11 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     .email-actions input { margin: 0; }
     .trash-button { background: #fee2e2; color: #991b1b; padding: 7px 10px; }
     .decision { color: var(--green); font-size: 12px; font-weight: 650; }
+    .headers-box { display: grid; gap: 8px; margin-top: 10px; }
+    .busy-row { display: none; align-items: center; gap: 8px; padding: 8px 9px; border-radius: 7px; background: #eef4ff; color: #1d3b74; font-size: 13px; font-weight: 650; }
+    .busy-row.active { display: flex; }
+    .spinner { width: 14px; height: 14px; border: 2px solid #bfd0ef; border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; flex: 0 0 auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
     .empty { padding: 14px; color: var(--muted); }
     .safe { color: var(--green); font-weight: 700; }
     .warn { color: var(--amber); font-weight: 700; }
@@ -1172,7 +1347,8 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
   <header>
     <h1>Email Processing</h1>
     <div class="toolbar">
-      <button class="secondary" id="refreshBtn">Obnovit</button>
+      <button class="secondary" id="refreshBtn">Obnovit okno</button>
+      <button class="primary" id="loadHeadersBtn">Načíst nové hlavičky</button>
       <button class="secondary" id="cockpitBtn">Otevřít Cockpit</button>
     </div>
   </header>
@@ -1190,11 +1366,20 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         <div class="body meta">
           <div><strong>Režim:</strong> <span class="safe">read-only</span></div>
           <div>Okno zobrazuje poslední uložený pracovní přehled z lokálního soukromého souboru.</div>
-          <div>Nečte znovu schránky, nestahuje přílohy, neotevírá odkazy a nic ve schránkách nemění.</div>
+          <div><strong>Obnovit okno:</strong> znovu načte uložený přehled a pracovní volby z disku.</div>
+          <div><strong>Načíst nové hlavičky:</strong> read-only se podívá do iCloud + Seznam na nejnovější hlavičky, bez těl a příloh.</div>
           <div><strong>Koš:</strong> tlačítko zatím jen označí e-mail ke smazání; skutečné smazání bude samostatná potvrzená akce.</div>
           <div><strong>Další krok:</strong> vybrat konkrétní UID a zdroj; načtení e-mailu nebo PDF až po samostatném potvrzení.</div>
           <div id="sourcePath" class="status-line"></div>
           <div id="updatedAt" class="status-line"></div>
+          <div class="headers-box">
+            <button class="secondary" id="loadHeadersAsideBtn">Zkontrolovat nové hlavičky</button>
+            <div id="headersBusy" class="busy-row" role="status" aria-live="polite">
+              <span class="spinner" aria-hidden="true"></span>
+              <span id="headersBusyText">Načítám...</span>
+            </div>
+            <div id="newHeadersStatus" class="status-line"></div>
+          </div>
           <div class="pill-row">
             <span class="pill">faktury/e-shopy</span>
             <span class="pill">pojištění/smlouvy</span>
@@ -1211,7 +1396,15 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     const sourcePath = document.getElementById("sourcePath");
     const updatedAt = document.getElementById("updatedAt");
     const refreshBtn = document.getElementById("refreshBtn");
+    const loadHeadersBtn = document.getElementById("loadHeadersBtn");
+    const loadHeadersAsideBtn = document.getElementById("loadHeadersAsideBtn");
+    const headersBusy = document.getElementById("headersBusy");
+    const headersBusyText = document.getElementById("headersBusyText");
+    const newHeadersStatus = document.getElementById("newHeadersStatus");
     const cockpitBtn = document.getElementById("cockpitBtn");
+    let headersBusyTimer = null;
+    let emailItems = [];
+    let overviewSince = "";
 
     function categoryTitle(raw) {
       return raw.replace(/^#+\\s*/, "").trim();
@@ -1274,7 +1467,6 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
 
     function actionLabel(action) {
       if (action === "process") return "Zpracovat";
-      if (action === "save") return "Uložit";
       if (action === "ignore") return "Ignorovat";
       if (action === "trash_requested") return "Koš - čeká na potvrzení";
       return "";
@@ -1290,82 +1482,133 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       return parts.join(" | ");
     }
 
+    function categoryTitleForKey(key) {
+      if (key === "faktury/e-shopy") return "Faktury / e-shopy";
+      if (key === "pojištění/smlouvy") return "Pojištění / smlouvy";
+      if (key === "úřady/daně") return "Úřady / daně";
+      return "Ostatní";
+    }
+
+    function itemDateValue(item) {
+      const parsed = Date.parse(item.date || "");
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function mergeItems(existing, incoming) {
+      const byId = new Map();
+      (existing || []).forEach((item) => {
+        if (item && item.id) byId.set(item.id, item);
+      });
+      (incoming || []).forEach((item) => {
+        if (!item || !item.id || byId.has(item.id)) return;
+        byId.set(item.id, item);
+      });
+      return Array.from(byId.values()).sort((a, b) => itemDateValue(b) - itemDateValue(a));
+    }
+
+    function createEmailCard(item) {
+      const card = document.createElement("div");
+      card.className = item.is_new_header ? "email-card new-header" : "email-card";
+      card.dataset.itemId = item.id || "";
+      const head = document.createElement("div");
+      head.className = "email-head";
+      const summary = document.createElement("div");
+      const title = document.createElement("div");
+      title.className = "email-title";
+      title.textContent = item.subject || "(bez předmětu)";
+      const meta = document.createElement("div");
+      meta.className = "email-meta";
+      meta.textContent = itemMeta(item);
+      const decision = document.createElement("div");
+      decision.className = "decision";
+      decision.textContent = item.is_new_header ? "nově načteno" : actionLabel(item.action || "");
+      summary.appendChild(title);
+      summary.appendChild(meta);
+      if (item.reason) {
+        const reason = document.createElement("div");
+        reason.className = "email-reason";
+        reason.textContent = `Důvod: ${item.reason}`;
+        summary.appendChild(reason);
+      }
+      head.appendChild(summary);
+      head.appendChild(decision);
+
+      const actions = document.createElement("div");
+      actions.className = "email-actions";
+      [
+        ["process", "Zpracovat"],
+        ["ignore", "Ignorovat"]
+      ].forEach(([value, labelText]) => {
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.checked = item.action === value;
+        input.addEventListener("change", () => {
+          const nextAction = input.checked ? value : "";
+          actions.querySelectorAll('input[type="checkbox"]').forEach((other) => {
+            if (other !== input) other.checked = false;
+          });
+          item.is_new_header = false;
+          card.classList.remove("new-header");
+          saveDecision(item, nextAction, decision);
+        });
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(labelText));
+        actions.appendChild(label);
+      });
+
+      const trash = document.createElement("button");
+      trash.className = "trash-button";
+      trash.type = "button";
+      trash.textContent = "Koš";
+      trash.addEventListener("click", () => {
+        const ok = window.confirm("Označit tento e-mail ke smazání?\\n\\nE-mail se teď fyzicky nemaže, jen se uloží pracovní rozhodnutí.");
+        if (!ok) return;
+        actions.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+          input.checked = false;
+        });
+        item.is_new_header = false;
+        card.classList.remove("new-header");
+        saveDecision(item, "trash_requested", decision);
+      });
+      actions.appendChild(trash);
+      card.appendChild(head);
+      card.appendChild(actions);
+      return card;
+    }
+
     function renderItems(items) {
       overview.innerHTML = "";
       if (!items || !items.length) {
         renderSections(splitOverview(window.lastOverviewText || ""));
         return;
       }
-      const list = document.createElement("div");
-      list.className = "email-list";
+      const order = ["faktury/e-shopy", "pojištění/smlouvy", "úřady/daně", "ostatní"];
+      const grouped = new Map(order.map((key) => [key, []]));
       items.forEach((item) => {
-        const card = document.createElement("div");
-        card.className = "email-card";
-        card.dataset.itemId = item.id || "";
-        const head = document.createElement("div");
-        head.className = "email-head";
-        const summary = document.createElement("div");
-        const title = document.createElement("div");
-        title.className = "email-title";
-        title.textContent = item.subject || "(bez předmětu)";
-        const meta = document.createElement("div");
-        meta.className = "email-meta";
-        meta.textContent = itemMeta(item);
-        const decision = document.createElement("div");
-        decision.className = "decision";
-        decision.textContent = actionLabel(item.action || "");
-        summary.appendChild(title);
-        summary.appendChild(meta);
-        if (item.reason) {
-          const reason = document.createElement("div");
-          reason.className = "email-reason";
-          reason.textContent = `Důvod: ${item.reason}`;
-          summary.appendChild(reason);
-        }
-        head.appendChild(summary);
-        head.appendChild(decision);
-
-        const actions = document.createElement("div");
-        actions.className = "email-actions";
-        [
-          ["process", "Zpracovat"],
-          ["save", "Uložit"],
-          ["ignore", "Ignorovat"]
-        ].forEach(([value, labelText]) => {
-          const label = document.createElement("label");
-          const input = document.createElement("input");
-          input.type = "checkbox";
-          input.checked = item.action === value;
-          input.addEventListener("change", () => {
-            const nextAction = input.checked ? value : "";
-            actions.querySelectorAll('input[type="checkbox"]').forEach((other) => {
-              if (other !== input) other.checked = false;
-            });
-            saveDecision(item, nextAction, decision);
-          });
-          label.appendChild(input);
-          label.appendChild(document.createTextNode(labelText));
-          actions.appendChild(label);
-        });
-
-        const trash = document.createElement("button");
-        trash.className = "trash-button";
-        trash.type = "button";
-        trash.textContent = "Koš";
-        trash.addEventListener("click", () => {
-          const ok = window.confirm("Označit tento e-mail ke smazání?\\n\\nE-mail se teď fyzicky nemaže, jen se uloží pracovní rozhodnutí.");
-          if (!ok) return;
-          actions.querySelectorAll('input[type="checkbox"]').forEach((input) => {
-            input.checked = false;
-          });
-          saveDecision(item, "trash_requested", decision);
-        });
-        actions.appendChild(trash);
-        card.appendChild(head);
-        card.appendChild(actions);
-        list.appendChild(card);
+        const key = order.includes(item.category) ? item.category : "ostatní";
+        grouped.get(key).push(item);
       });
-      overview.appendChild(list);
+      order.forEach((key) => {
+        const groupItems = grouped.get(key);
+        const section = document.createElement("div");
+        section.className = "category";
+        const title = document.createElement("h3");
+        title.textContent = `${categoryTitleForKey(key)} (${groupItems.length})`;
+        const body = document.createElement("div");
+        body.className = "category-items";
+        if (groupItems.length) {
+          groupItems.forEach((item) => body.appendChild(createEmailCard(item)));
+        } else {
+          const empty = document.createElement("div");
+          empty.className = "status-line";
+          empty.textContent = "Žádné položky.";
+          body.appendChild(empty);
+        }
+        section.appendChild(title);
+        section.appendChild(body);
+        overview.appendChild(section);
+      });
     }
 
     async function saveDecision(item, action, decisionNode) {
@@ -1390,6 +1633,46 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       }
     }
 
+    async function loadNewHeaders() {
+      const startedAt = Date.now();
+      loadHeadersBtn.disabled = true;
+      loadHeadersAsideBtn.disabled = true;
+      headersBusy.classList.add("active");
+      headersBusyText.textContent = "Načítám hlavičky... 0 s";
+      headersBusyTimer = window.setInterval(() => {
+        const seconds = Math.max(0, Math.round((Date.now() - startedAt) / 1000));
+        headersBusyText.textContent = `Načítám hlavičky z iCloud + Seznam... ${seconds} s`;
+      }, 1000);
+      newHeadersStatus.textContent = "Načítám nejnovější hlavičky z iCloud + Seznam...";
+      try {
+        const res = await fetch("/api/email-processing/new-headers", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({limit_per_source: 10, since: overviewSince})
+        });
+        const data = await res.json();
+        const incoming = data.items || [];
+        const before = emailItems.length;
+        emailItems = mergeItems(emailItems, incoming);
+        renderItems(emailItems);
+        const added = emailItems.length - before;
+        const unavailable = data.unavailable && data.unavailable.length
+          ? ` Nedostupné zdroje: ${data.unavailable.join("; ")}`
+          : "";
+        newHeadersStatus.textContent = `${data.message || "Hotovo."} Přidáno do hlavního seznamu: ${added}.${unavailable}`;
+      } catch (err) {
+        newHeadersStatus.textContent = `Chyba načtení hlaviček: ${err}`;
+      } finally {
+        if (headersBusyTimer) {
+          window.clearInterval(headersBusyTimer);
+          headersBusyTimer = null;
+        }
+        headersBusy.classList.remove("active");
+        loadHeadersBtn.disabled = false;
+        loadHeadersAsideBtn.disabled = false;
+      }
+    }
+
     async function loadOverview() {
       refreshBtn.disabled = true;
       overviewStatus.textContent = "Načítám uložený přehled...";
@@ -1408,7 +1691,9 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
           return;
         }
         window.lastOverviewText = data.text || "";
-        renderItems(data.items || []);
+        overviewSince = data.updated_at || "";
+        emailItems = mergeItems([], data.items || []);
+        renderItems(emailItems);
       } catch (err) {
         overviewStatus.textContent = `Chyba načtení: ${err}`;
       } finally {
@@ -1417,6 +1702,8 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     }
 
     refreshBtn.addEventListener("click", loadOverview);
+    loadHeadersBtn.addEventListener("click", loadNewHeaders);
+    loadHeadersAsideBtn.addEventListener("click", loadNewHeaders);
     cockpitBtn.addEventListener("click", () => {
       const cockpit = window.open("/", "SamanthaCockpit", "popup=yes,width=1280,height=880,left=90,top=60");
       if (cockpit) cockpit.focus();
