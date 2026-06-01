@@ -1,83 +1,244 @@
 # Scene 1 - Clearing Meeting
 
-Cesky nazev: Paseka, kde se vsichni poprve potkaji
-Vyukovy cil: pozdravy, predstavovani, `I am`, prvni `he is / she is`
-Navaznost: po soucasne scene Benji + Bunny a po skoku dvermi do dalsiho sveta
+Český název: Paseka, kde se všichni poprvé potkají
+Výukový cíl: pozdravy, představování, `I am`, první skupinové `we are`, `we are going`, `too`, `together`
+Návaznost: po současné scéně Benji + Bunny a po skoku dveřmi do dalšího světa
+Stav: pracovní scénář k odsouhlasení, zatím neprogramovat
 
-## Popis sceny cesky
+## Popis scény česky
 
-Benji a Bunny vyjdou z dveri na malou slunnou paseku. Na pasece uz ceka
-klidny jezevec Bruno. Z krovi vykoukne liska Fiona a z vetve seskoci veverka
-Sunny. Nejsou to nepratele, ale budouci kamaradi. Nekteri se znaji, nekteri ne.
-Scena je mila, pomala a ma fungovat jako prvni "social English" lekce.
+Benji a Bunny vyjdou z dveří na malou slunnou paseku. Na pasece už jsou s nimi v přátelském půlkruhu Bruno, Fiona a Sunny. Nejsou to nepřátelé, ale budoucí kamarádi. Někteří se znají, někteří ne. Scéna je milá, pomalá a má fungovat jako první „social English“ lekce.
 
-## Obrazova varianta A
+Hlavní obrazová varianta je varianta A: paseka v lese, všechny postavy stojí v půlkruhu a jsou vidět od začátku. Benji a Bunny jsou vlevo, Bruno uprostřed, Fiona a Sunny s ostatními v kruhu podle hotového obrázku. Varianty s pódiem, třemi cestami nebo postupným fyzickým příchodem postav se pro tuto verzi nepoužijí.
 
-Paseka v lese, vsechny postavy v pulkruhu. Benji a Bunny vlevo, Bruno uprostred,
-Fiona prichazi zprava, Sunny je na nizke vetvi nad nimi.
+## Cíl pro dítě
 
-## Obrazova varianta B
+Matýsek nemusí číst. Má jen poslouchat, dívat se a klikat na postavu, na kterou ho navede anglická hlasová nápověda a blikající šipka.
 
-Paseka s malym kamenem jako prirodni podium. Kazde zviratko postupne stoupne na
-kamen a rekne `I am...`.
+Princip:
 
-## Obrazova varianta C
+1. Scéna řekne anglicky, koho má Matýsek najít.
+2. U správné postavy bliká šipka nebo jemný světelný ukazatel.
+3. Matýsek klikne na postavu.
+4. Postava řekne krátkou anglickou větu.
+5. U postavy se objeví anglická bublina.
+6. Po anglické větě následuje krátký mluvený český překlad.
+7. Aktivuje se další postava.
 
-Paseka se tremi cestami. Kazde nove zviratko prijde z jine cesty, aby bylo
-videt, ze se skupina teprve dava dohromady.
+## Souhrnná nápověda vpravo nahoře
 
-## Interakce pro Matyska
+Vpravo nahoře bude malý český panel pro rodiče nebo pro rychlé vysvětlení scény:
 
-1. UI napoveda rekne: `Tap Benji.`
-2. Benji rekne: `Hello. I am Benji.`
-3. Matysek klikne na Benjiho.
-4. Postupne stejne Bunny, Bruno, Fiona, Sunny.
-5. Mini kontrola: UI napoveda rekne `Who is Fiona?` a Matysek klikne na lisku.
+```text
+Poslouchej anglickou nápovědu.
+Klikni na postavu, na kterou ukazuje šipka.
+Postava řekne větu anglicky a potom česky.
+Ikona knihy otevře slovníček.
+```
 
-## Dialog A - nejjednodussi
+Panel má být stručný, ne školní výklad. Může být schovaný pod ikonou `?`, pokud by rušil obraz.
+
+Tu nápovědu bych zobrazil, přečetl a po přečtení schoval za otazník. Otazník by krátce zablikal a zůstal na obrazovce. Po jeho stisku by se nápověda znovu otevřela a přečetla.
+
+## Start dialogu
+
+Návrh bez složité režie:
+
+1. Po příchodu do scény se krátce zobrazí a přečte česká nápověda vpravo nahoře.
+2. Automaticky se spustí první anglická nápověda: `Tap Benji.`
+3. U Benjiho začne blikat šipka.
+4. Pokud Matýsek neklikne, po několika sekundách se `Tap Benji.` zopakuje.
+5. Po kliknutí Benji řekne svou větu a objeví se bublina.
+6. Po doznění anglické věty zazní krátký český překlad. Český překlad se nezobrazuje jako další bublina.
+7. Stejný rytmus pokračuje přes Bunny, Bruna, Fionu a Sunny.
+
+Toto je programově zvládnutelné bez velkého rizika: jde o jednu scénu, jeden aktivní hotspot, jednoduchou animaci šipky, jednu bublinu a sekvenční dialog.
+
+## Finální pracovní dialog A
+
+Toto je aktuálně preferovaný hlavní dialog. Varianty B a C jsou pro tuto scénu odloženy.
 
 ```text
 Benji: Hello! I am Benji.
-Bunny: Hi! I am Bunny.
+CZ: Ahoj! Já jsem Benji.
+
+Bunny: Hi! I am Bunny. We are friends.
+CZ: Ahoj! Já jsem Bunny. Jsme kamarádi.
+
 Bruno: Hello. I am Bruno.
+CZ: Ahoj. Já jsem Bruno.
+
 Fiona: Hi. I am Fiona.
+CZ: Ahoj. Já jsem Fiona.
+
 Sunny: Hello! I am Sunny.
-Fiona: They are friends.
-All: We are friends!
+CZ: Ahoj! Já jsem Sunny.
+
+Fiona: We are friends too.
+CZ: My jsme také kamarádi.
+
+Bruno: We are going to the lake.
+CZ: Jdeme k jezeru.
+
+Benji: We are going to the lake too.
+CZ: My jdeme k jezeru také.
+
+Sunny: We can go together.
+CZ: Můžeme jít společně.
+
+Fiona: Now we are all friends!
+CZ: Teď jsme všichni kamarádi!
 ```
 
-## Dialog B - s `How are you?`
+## Poznámka k angličtině
+
+Původní jednodušší návrh `We go to the lake` byl pro první dětskou scénu použitelný, protože je velmi krátký a dobře opakuje `we` + `go` + `lake`.
+
+Pro finální pracovní dialog ale volíme přirozenější anglickou variantu:
 
 ```text
-Benji: Hello, Bunny.
-Bunny: Hello, Benji.
-Benji: How are you?
-Bunny: I am happy.
-Bruno: Hello. I am Bruno.
-Fiona: Hi. I am Fiona.
-Sunny: I am Sunny!
-Bruno: Benji is a dog. Bunny is a rabbit. Fiona is a fox.
+Bruno: We are going to the lake.
+Benji: We are going to the lake too.
 ```
 
-## Dialog C - vice socialni
+Nebo ještě dětsky a akčně: ... toto bychg nechal napozději.
 
 ```text
-Bunny: Hi, Benji. You are here!
-Benji: Yes. I am here.
-Bruno: Good morning. I am Bruno.
-Fiona: Hello, Bruno. I am Fiona.
-Sunny: And I am Sunny!
-Benji: We are going to the lake.
-Bunny: We are going together.
+Bruno: Let's go to the lake.
+Benji: Yes! Let's go too.
 ```
 
-## Proc se scena hodi
+Tahle formulace je o trochu delší, ale zní přirozeněji a pořád je pro dítě dobře pochopitelná, protože se opakuje stejný rytmus `We are going...`.
 
-Scena prirozene zavadi osoby:
+## Slovníček přes ikonu knihy
 
-- `I` pres vlastni predstaveni,
-- `you` pres osloveni,
-- `he/she` pres kratke komentare hlavni petice,
-- `we/they` pres skupinu.
+U každé scény bude malá ikona knihy. Po kliknutí se otevře jednoduchý slovníček důležitých slov a frází ze scény.
 
-Nemusi se nic vysvetlovat gramaticky. Dite jen vidi, kdo mluvi.
+Pro tuto scénu:
+
+```text
+Hello - ahoj
+I am - já jsem
+friends - kamarádi
+we are - my jsme
+too - také
+going / go - jít / jdeme
+lake - jezero
+can - můžeme
+together - společně
+now - teď
+all - všichni
+```
+
+Návrh chování slovníčku:
+
+1. Ikona knihy je viditelná, ale neruší hlavní obraz.
+2. Po kliknutí se otevře malý panel s boxíky pod sebou.
+3. Každý boxík má formát `English - česky`.
+4. Po kliknutí na boxík se přehraje anglické slovo a potom český význam.
+5. Panel lze zavřít křížkem nebo opětovným kliknutím na knihu.
+
+To je programově reálné a užitečné. Není nutné dělat z toho samostatnou minihru v první verzi.
+
+## Interakce pro Matýska
+
+První průchod:
+
+1. Anglická nápověda: `Tap Benji.`
+2. Šipka bliká u Benjiho.
+3. Matýsek klikne na Benjiho.
+4. Benji řekne: `Hello! I am Benji.`
+5. Zazní nebo se zobrazí: `Ahoj! Já jsem Benji.`
+6. Pokračuje Bunny, Bruno, Fiona, Sunny.
+
+Mini kontrola po představení:
+
+1. Anglická nápověda: `Who is Fiona?`
+2. Šipka tentokrát nejdřív nemusí blikat, aby Matýsek zkusil najít Fionu podle obrázku.
+3. Když neklikne nebo klikne vedle, šipka jemně pomůže.
+4. Po správném kliknutí Fiona řekne: `Hi. I am Fiona.`
+
+Opakované klikání:
+
+- Po dokončení hlavní sekvence může Matýsek klikat na libovolnou postavu.
+- Každá postava zopakuje svou hlavní větu.
+- Ikona reproduktoru může zopakovat poslední anglickou nápovědu.
+
+## Adamovy poznámky
+
+Souhlasím s tím, že pro první implementaci necháme jen dialog A. Je přehledný, zapamatovatelný a dobře se převádí na sekvenční klikání.
+
+Navrhuji držet první verzi technicky střídmě:
+
+- jeden obraz pozadí,
+- pět klikacích oblastí pro postavy,
+- jedna aktivní blikající šipka,
+- jedna řečová bublina,
+- jednoduchý mluvený český překlad po anglické větě,
+- český help panel vpravo nahoře,
+- ikona knihy se slovníčkem,
+- možnost zopakovat poslední pokyn.
+
+Tohle je hezké, ale pořád rozumně malé sousto. Vyhnul bych se zatím složitým animacím chůze, plynulému pohybu postav, lip-syncu, větveným rozhovorům nebo velké slovníkové minihře. Tyto věci můžeme přidat až po ověření, že základní scéna funguje a Matýska baví.
+
+Moje doporučení před programováním:
+
+1. Odsouhlasit přesné znění dialogu.
+2. Počítat s tím, že český překlad bude jen mluvený, ne jako další textová bublina.
+3. V implementačním checklistu počítat s finální pracovní variantou `We are going to the lake`.
+4. Potom teprve vytvořit implementační checklist pro první scénu.
+
+## Hlasový casting
+
+Hlasové ukázky pro odsouhlasení jsou připravené zde:
+
+```text
+data/matysek_english/voice_casting_20260601_scene01/
+```
+
+Stávající hlasy:
+
+- Benji: `fable` - ponechat z původních scén
+- Bunny: ponechat podle kanonické reference `reference_bunny_echo_i_am_bunny.mp3`; dnešní nové generace `echo` nepovažovat automaticky za stejný hlas
+
+Návrh k poslechu:
+
+- Fiona: potvrzená kanonická reference `fiona_shimmer_we_are_friends_too.mp3`; finalni repliky Fiony generovat nebo vybirat tak, aby odpovidaly teto konkretni MP3
+- Bruno: potvrzená kanonická reference `bruno_onyx_hello_i_am_bruno.mp3`; finalni repliky Bruna generovat nebo vybirat tak, aby odpovidaly teto konkretni MP3
+- Sunny: potvrzená kanonická reference `sunny_young_nova_01_hello_i_am_sunny.mp3`; finalni repliky Sunny generovat nebo vybirat tak, aby odpovidaly teto konkretni MP3
+
+Po odsouhlasení se sem zapíše finální mapa hlasů a teprve potom se vygeneruje finální audio celé scény.
+
+Pravidlo pro stabilitu hlasů: každá postava musí mít konkrétní odsouhlasené MP3
+jako kanonickou referenci. Během vývoje se nesmí spoléhat jen na název TTS hlasu,
+protože pozdější generace stejného názvu může znít jinak. Finální audio se po
+odsouhlasení uloží jako asset a už se neregeneruje bez výslovného recastu.
+
+## Mílovy poznámky z tohoto kola
+
+- Obrazová varianta A zůstává, varianty B a C ne.
+- Sekce `Interakce pro Matýska` se líbí a má být základem.
+- Dialog A má zůstat jako hlavní dialog a byl Mílou upraven.
+- Dialog B a dialog C se pro první verzi nepoužijí.
+- Dialog se musí nějak jasně spustit.
+- Když zvířátko domluví anglicky, má následovat český překlad.
+- Anglický text má být vidět jako bublina u úst nebo blízko mluvící postavy.
+- Každá scéna by měla mít ikonu knihy pro slovníček důležitých neintuitivních slovíček.
+- Slovníček má být jednoduchý: anglicky - česky, ideálně klikatelné boxíky s přehráním.
+- Dokument může fungovat jako výměna návrhů: Mílovy poznámky a Adamovy poznámky se budou opakovaně doplňovat, dokud scénář nebude zralý na programování.
+- Interakce a grafika mají být hezké, ale rozsah má zůstat realistický. Neprogramujeme hru 8K.
+
+## Mílovy poznámky z nové
+
+Český překlad jen mluvené slovo. Další menší poznámky v textu. Ještě třeba dořešit hlasy postav v angličtině. Benji a Bunny by zůstali z původních scén, třeba přidat mladý ženský hlas Fiona, hlubší mužský jezevec a mladý nejlépe dětský Sunny...
+
+## Proč se scéna hodí
+
+Scéna přirozeně zavádí osoby a skupinu:
+
+- `I am` přes vlastní představení,
+- `we are` přes kamarády,
+- `too` přes připojení ke skupině,
+- `going / lake / together` přes cíl další cesty.
+
+Nemusí se nic vysvětlovat gramaticky. Dítě jen vidí, kdo mluví, a slyší krátké opakované věty.

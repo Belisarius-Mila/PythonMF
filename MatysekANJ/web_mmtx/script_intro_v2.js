@@ -5,6 +5,7 @@ const clickPrompt = document.getElementById("clickPrompt");
 const mushroomPortalButton = document.getElementById("mushroomPortalButton");
 const bunnyPortalButton = document.getElementById("bunnyPortalButton");
 const forestSchoolPortalButton = document.getElementById("forestSchoolPortalButton");
+const forestJourneyPortalButton = document.getElementById("forestJourneyPortalButton");
 const mushroomHud = document.getElementById("mushroomHud");
 const backToSignpostButton = document.getElementById("backToSignpostButton");
 const mushroomHelpButton = document.getElementById("mushroomHelpButton");
@@ -43,6 +44,9 @@ const scenes = {
   },
   benjiBunny: {
     image: "BenjiBunnyScene.png?v=20260403b",
+  },
+  clearingMeeting: {
+    image: "ForestJourneyScene01.png?v=20260601a",
   },
   owlGarden: {
     image: "MeetingOul1.PNG?v=20260404b",
@@ -322,6 +326,12 @@ const state = {
   dialoguePhase: "intro",
   dialogueClickedIds: new Set(),
   dialogueDoorState: "hidden",
+  clearingPhase: "intro",
+  clearingActiveIndex: -1,
+  clearingBubbleIndex: -1,
+  clearingClickedIds: new Set(),
+  clearingHelpVisible: false,
+  clearingDictionaryOpen: false,
   owlGardenPhase: "intro",
   owlGardenActiveId: "",
   owlGardenCompletedIds: new Set(),
@@ -408,6 +418,121 @@ const benjiBunnyDialogue = [
 const benjiBunnyHelpAudio = {
   intro: "audio/czech/benji_bunny_scene_help_cz1.mp3?v=20260527czvoice",
 };
+
+
+const clearingHelpText = "Poslouchej anglickou napovedu. Klikni na postavu, na kterou ukazuje sipka. Postava rekne vetu anglicky a potom cesky. Ikona knihy otevira slovnicek.";
+
+const clearingDictionary = [
+  { en: "Hello", cz: "ahoj" },
+  { en: "I am", cz: "ja jsem" },
+  { en: "friends", cz: "kamaradi" },
+  { en: "we are", cz: "my jsme" },
+  { en: "too", cz: "take" },
+  { en: "going", cz: "jdeme" },
+  { en: "lake", cz: "jezero" },
+  { en: "together", cz: "spolecne" },
+];
+
+const clearingCharacters = [
+  { id: "benji", name: "Benji", rect: { x: 6.2, y: 36.8, w: 23.4, h: 45.5 }, arrow: { x: 18.8, y: 32.0 }, bubble: { x: 7.0, y: 20.5 } },
+  { id: "bunny", name: "Bunny", rect: { x: 28.0, y: 36.6, w: 13.4, h: 43.8 }, arrow: { x: 34.5, y: 32.0 }, bubble: { x: 26.0, y: 20.0 } },
+  { id: "bruno", name: "Bruno", rect: { x: 43.0, y: 26.6, w: 22.0, h: 55.6 }, arrow: { x: 53.4, y: 21.6 }, bubble: { x: 43.6, y: 13.8 } },
+  { id: "fiona", name: "Fiona", rect: { x: 64.8, y: 34.4, w: 17.4, h: 48.8 }, arrow: { x: 73.2, y: 29.6 }, bubble: { x: 62.0, y: 19.0 } },
+  { id: "sunny", name: "Sunny", rect: { x: 80.2, y: 39.2, w: 16.9, h: 43.2 }, arrow: { x: 88.0, y: 34.2 }, bubble: { x: 73.0, y: 23.2 } },
+];
+
+const clearingDialogue = [
+  {
+    id: 1,
+    characterId: "benji",
+    speaker: "Benji",
+    cue: "Tap Benji.",
+    textEn: "Hello! I am Benji.",
+    textCz: "Ahoj! Ja jsem Benji.",
+    preferredVoiceName: "fable|brian|andrew|roger|guy|daniel|alex|aaron|evan|junior",
+  },
+  {
+    id: 2,
+    characterId: "bunny",
+    speaker: "Bunny",
+    cue: "Tap Bunny.",
+    textEn: "Hi! I am Bunny. We are friends.",
+    textCz: "Ahoj! Ja jsem Bunny. Jsme kamaradi.",
+    preferredVoiceName: "junior|samantha|ava|victoria|karen",
+  },
+  {
+    id: 3,
+    characterId: "bruno",
+    speaker: "Bruno",
+    cue: "Tap Bruno.",
+    textEn: "Hello. I am Bruno.",
+    textCz: "Ahoj. Ja jsem Bruno.",
+    preferredVoiceName: "onyx|aaron|roger|daniel|guy",
+  },
+  {
+    id: 4,
+    characterId: "fiona",
+    speaker: "Fiona",
+    cue: "Tap Fiona.",
+    textEn: "Hi. I am Fiona.",
+    textCz: "Ahoj. Ja jsem Fiona.",
+    preferredVoiceName: "shimmer|samantha|ava|victoria|karen",
+  },
+  {
+    id: 5,
+    characterId: "sunny",
+    speaker: "Sunny",
+    cue: "Tap Sunny.",
+    textEn: "Hello! I am Sunny.",
+    textCz: "Ahoj! Ja jsem Sunny.",
+    preferredVoiceName: "nova|samantha|ava|victoria|karen|junior",
+  },
+  {
+    id: 6,
+    characterId: "fiona",
+    speaker: "Fiona",
+    cue: "Tap Fiona.",
+    textEn: "We are friends too.",
+    textCz: "My jsme take kamaradi.",
+    preferredVoiceName: "shimmer|samantha|ava|victoria|karen",
+  },
+  {
+    id: 7,
+    characterId: "bruno",
+    speaker: "Bruno",
+    cue: "Tap Bruno.",
+    textEn: "We are going to the lake.",
+    textCz: "Jdeme k jezeru.",
+    preferredVoiceName: "onyx|aaron|roger|daniel|guy",
+  },
+  {
+    id: 8,
+    characterId: "benji",
+    speaker: "Benji",
+    cue: "Tap Benji.",
+    textEn: "We are going to the lake too.",
+    textCz: "My jdeme k jezeru take.",
+    preferredVoiceName: "fable|brian|andrew|roger|guy|daniel|alex|aaron|evan|junior",
+  },
+  {
+    id: 9,
+    characterId: "sunny",
+    speaker: "Sunny",
+    cue: "Tap Sunny.",
+    textEn: "We can go together.",
+    textCz: "Muzeme jit spolecne.",
+    preferredVoiceName: "nova|samantha|ava|victoria|karen|junior",
+  },
+  {
+    id: 10,
+    characterId: "fiona",
+    speaker: "Fiona",
+    cue: "Tap Fiona.",
+    textEn: "Now we are all friends!",
+    textCz: "Ted jsme vsichni kamaradi!",
+    preferredVoiceName: "shimmer|samantha|ava|victoria|karen",
+  },
+];
 
 const houseBunnyIntroAudio = [
   "audio/czech/house_bunny_01_intro_train_basic_colours_cz.mp3?v=20260527clickni",
@@ -732,6 +857,7 @@ function renderScene() {
   const owlGardenOutro = state.currentScene === "owlGarden" && state.owlGardenPhase === "outro";
   const houseBunnyScene = state.currentScene === "houseBunny";
   const forestSchoolScene = state.currentScene === "forestSchool";
+  const clearingScene = state.currentScene === "clearingMeeting";
   let imageSrc = scene.image;
   if (owlGardenOutro) {
     imageSrc = "MeetingOul2.PNG?v=20260409b";
@@ -740,14 +866,15 @@ function renderScene() {
   }
   sceneImage.src = imageSrc;
   magnifierButton.classList.toggle("hidden", state.currentScene !== "intro2");
-  clickPrompt.classList.toggle("hidden", state.audioUnlocked || state.currentScene === "intro4" || state.currentScene === "benjiBunny" || state.currentScene === "owlGarden" || houseBunnyScene);
+  clickPrompt.classList.toggle("hidden", state.audioUnlocked || state.currentScene === "intro4" || state.currentScene === "benjiBunny" || clearingScene || state.currentScene === "owlGarden" || houseBunnyScene);
   mushroomPortalButton.classList.toggle("hidden", state.currentScene !== "intro4");
   bunnyPortalButton.classList.toggle("hidden", state.currentScene !== "intro4");
   forestSchoolPortalButton.classList.toggle("hidden", state.currentScene !== "intro4");
+  forestJourneyPortalButton.classList.toggle("hidden", state.currentScene !== "intro4");
   mushroomHud.classList.toggle("hidden", state.currentScene !== "mushrooms");
   mushroomOverlay.classList.toggle("hidden", state.currentScene !== "mushrooms");
-  dialogueHud.classList.toggle("hidden", state.currentScene !== "benjiBunny");
-  dialoguePanel.classList.toggle("hidden", state.currentScene !== "benjiBunny");
+  dialogueHud.classList.toggle("hidden", state.currentScene !== "benjiBunny" && !clearingScene);
+  dialoguePanel.classList.toggle("hidden", state.currentScene !== "benjiBunny" && !clearingScene);
   owlGardenHud.classList.toggle("hidden", state.currentScene !== "owlGarden" && !houseBunnyScene && !forestSchoolScene);
   forestSchoolMapButton.classList.toggle("hidden", !forestSchoolScene);
   owlGardenHelpButton.classList.toggle("hidden", (!houseBunnyScene && !forestSchoolScene && state.currentScene !== "owlGarden") || (state.currentScene === "owlGarden" && state.owlGardenPhase !== "play") || (houseBunnyScene && state.houseBunnyPhase !== "waiting"));
@@ -758,11 +885,13 @@ function renderScene() {
   owlGardenThumbButton.classList.toggle("hidden", state.currentScene !== "owlGarden" || state.owlGardenPhase !== "play" || (!state.owlGardenHelpPlayed && !state.owlGardenActiveId));
   owlGardenThumbButton.classList.toggle("pulse-soft", state.currentScene === "owlGarden" && state.owlGardenPhase === "play" && !!state.owlGardenActiveId);
   owlGardenDoneBadge.classList.toggle("hidden", true);
-  dialogueDoorButton.classList.toggle("hidden", state.currentScene !== "benjiBunny" || state.dialogueDoorState === "hidden");
-  dialogueDoorButton.classList.toggle("ready-final", state.currentScene === "benjiBunny" && state.dialogueDoorState === "green");
-  dialogueDoorButton.classList.toggle("pulse-soft", state.currentScene === "benjiBunny" && state.dialogueDoorState !== "hidden");
-  dialogueHelpButton.classList.toggle("hidden", state.currentScene !== "benjiBunny" || state.dialoguePhase === "intro" || state.dialogueDoorState !== "hidden");
-  dialogueHelpButton.classList.toggle("pulse-soft", state.currentScene === "benjiBunny" && state.dialoguePhase !== "intro");
+  const clearingDoorReady = clearingScene && state.clearingPhase === "complete";
+  const benjiDoorVisible = state.currentScene === "benjiBunny" && state.dialogueDoorState !== "hidden";
+  dialogueDoorButton.classList.toggle("hidden", !benjiDoorVisible && !clearingDoorReady);
+  dialogueDoorButton.classList.toggle("ready-final", (state.currentScene === "benjiBunny" && state.dialogueDoorState === "green") || clearingDoorReady);
+  dialogueDoorButton.classList.toggle("pulse-soft", benjiDoorVisible || clearingDoorReady);
+  dialogueHelpButton.classList.toggle("hidden", (state.currentScene !== "benjiBunny" && !clearingScene) || (state.currentScene === "benjiBunny" && (state.dialoguePhase === "intro" || state.dialogueDoorState !== "hidden")));
+  dialogueHelpButton.classList.toggle("pulse-soft", (state.currentScene === "benjiBunny" && state.dialoguePhase !== "intro") || clearingScene);
   if (state.currentScene === "mushrooms") {
     renderMushrooms();
   } else {
@@ -770,6 +899,8 @@ function renderScene() {
   }
   if (state.currentScene === "benjiBunny") {
     renderBenjiBunnyDialogue();
+  } else if (clearingScene) {
+    renderClearingMeeting();
   } else {
     dialoguePanel.innerHTML = "";
   }
@@ -810,6 +941,8 @@ function setScene(sceneName) {
     runMushrooms(sequenceId);
   } else if (sceneName === "benjiBunny") {
     runBenjiBunny(sequenceId);
+  } else if (sceneName === "clearingMeeting") {
+    runClearingMeeting(sequenceId);
   } else if (sceneName === "owlGarden") {
     runOwlGarden(sequenceId);
   } else if (sceneName === "houseBunny") {
@@ -991,6 +1124,15 @@ function resetBenjiBunnyDialogue() {
   state.dialogueDoorState = "hidden";
 }
 
+function resetClearingMeeting() {
+  state.clearingPhase = "intro";
+  state.clearingActiveIndex = -1;
+  state.clearingBubbleIndex = -1;
+  state.clearingClickedIds = new Set();
+  state.clearingHelpVisible = false;
+  state.clearingDictionaryOpen = false;
+}
+
 function resetOwlGarden() {
   state.owlGardenPhase = "intro";
   state.owlGardenActiveId = "";
@@ -1027,6 +1169,7 @@ function resetForestSchool(options = {}) {
 }
 
 function renderBenjiBunnyDialogue() {
+  dialoguePanel.classList.remove("clearing-panel");
   dialoguePanel.innerHTML = "";
   dialoguePanel.appendChild(createBenjiBunnyDebugSkipButton());
   let benjiIndex = 0;
@@ -1146,6 +1289,221 @@ async function runBenjiBunny(sequenceId) {
   }
   state.dialoguePhase = "practice";
   renderScene();
+}
+
+
+function currentClearingItem() {
+  return clearingDialogue[state.clearingActiveIndex] ?? clearingDialogue[0];
+}
+
+function clearingCharacterById(characterId) {
+  return clearingCharacters.find((character) => character.id === characterId) ?? clearingCharacters[0];
+}
+
+function renderClearingMeeting() {
+  dialoguePanel.innerHTML = "";
+  dialoguePanel.classList.add("clearing-panel");
+  const activeItem = state.clearingActiveIndex >= 0 ? currentClearingItem() : null;
+  const activeCharacter = activeItem ? clearingCharacterById(activeItem.characterId) : null;
+
+  clearingCharacters.forEach((character) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "clearing-character";
+    if (activeItem?.characterId === character.id && state.clearingPhase === "waiting") {
+      button.classList.add("active");
+    }
+    if ([...state.clearingClickedIds].some((dialogueId) => clearingDialogue.find((item) => item.id === dialogueId)?.characterId === character.id)) {
+      button.classList.add("visited");
+    }
+    button.style.left = `${character.rect.x}%`;
+    button.style.top = `${character.rect.y}%`;
+    button.style.width = `${character.rect.w}%`;
+    button.style.height = `${character.rect.h}%`;
+    button.setAttribute("aria-label", character.name);
+    button.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      await primeAudio();
+      await handleClearingCharacterClick(character.id);
+    });
+    dialoguePanel.appendChild(button);
+  });
+
+  if (activeCharacter && state.clearingPhase === "waiting") {
+    const arrow = document.createElement("div");
+    arrow.className = "clearing-arrow";
+    arrow.style.left = `${activeCharacter.arrow.x}%`;
+    arrow.style.top = `${activeCharacter.arrow.y}%`;
+    arrow.textContent = "↓";
+    dialoguePanel.appendChild(arrow);
+  }
+
+  if (state.clearingBubbleIndex >= 0) {
+    const item = clearingDialogue[state.clearingBubbleIndex];
+    const character = clearingCharacterById(item.characterId);
+    const bubble = document.createElement("div");
+    bubble.className = `clearing-bubble clearing-bubble-${character.id}`;
+    bubble.style.left = `${character.bubble.x}%`;
+    bubble.style.top = `${character.bubble.y}%`;
+    bubble.innerHTML = `<strong>${item.speaker}</strong><span>${item.textEn}</span>`;
+    dialoguePanel.appendChild(bubble);
+  }
+
+  const cue = document.createElement("div");
+  cue.className = "clearing-cue";
+  cue.textContent = state.clearingPhase === "complete"
+    ? "Great. Open the door."
+    : activeItem
+      ? activeItem.cue
+      : "Listen.";
+  dialoguePanel.appendChild(cue);
+
+  const helpButton = document.createElement("button");
+  helpButton.type = "button";
+  helpButton.className = `clearing-help-tab ${state.clearingHelpVisible ? "open" : "pulse-soft"}`;
+  helpButton.textContent = state.clearingHelpVisible ? "×" : "?";
+  helpButton.setAttribute("aria-label", "Ceska napoveda");
+  helpButton.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    await primeAudio();
+    if (state.clearingHelpVisible) {
+      state.clearingHelpVisible = false;
+      renderScene();
+      return;
+    }
+    await playClearingHelp();
+  });
+  dialoguePanel.appendChild(helpButton);
+
+  if (state.clearingHelpVisible) {
+    const help = document.createElement("div");
+    help.className = "clearing-help-card";
+    help.textContent = clearingHelpText;
+    dialoguePanel.appendChild(help);
+  }
+
+  const bookButton = document.createElement("button");
+  bookButton.type = "button";
+  bookButton.className = "clearing-book-button";
+  bookButton.textContent = "📖";
+  bookButton.setAttribute("aria-label", "Slovnicek");
+  bookButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    state.clearingDictionaryOpen = !state.clearingDictionaryOpen;
+    renderScene();
+  });
+  dialoguePanel.appendChild(bookButton);
+
+  if (state.clearingDictionaryOpen) {
+    dialoguePanel.appendChild(createClearingDictionaryPanel());
+  }
+}
+
+function createClearingDictionaryPanel() {
+  const panel = document.createElement("div");
+  panel.className = "clearing-dictionary";
+  const title = document.createElement("div");
+  title.className = "clearing-dictionary-title";
+  title.textContent = "Slovnicek";
+  panel.appendChild(title);
+
+  clearingDictionary.forEach((entry) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "clearing-dictionary-item";
+    button.textContent = `${entry.en} - ${entry.cz}`;
+    button.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      await primeAudio();
+      await speakEnglishLine(entry.en, { rate: 0.82 });
+      await speakCzechLine(entry.cz, { rate: 0.9 });
+    });
+    panel.appendChild(button);
+  });
+
+  return panel;
+}
+
+async function playClearingHelp() {
+  if (state.currentScene !== "clearingMeeting") {
+    return;
+  }
+  state.clearingDictionaryOpen = false;
+  state.clearingHelpVisible = true;
+  renderScene();
+  await speakCzechLine(clearingHelpText, { rate: 0.88 });
+  if (state.currentScene !== "clearingMeeting") {
+    return;
+  }
+  state.clearingHelpVisible = false;
+  renderScene();
+}
+
+async function activateClearingStep(index) {
+  if (state.currentScene !== "clearingMeeting") {
+    return;
+  }
+  if (index >= clearingDialogue.length) {
+    state.clearingActiveIndex = -1;
+    state.clearingBubbleIndex = -1;
+    state.clearingPhase = "complete";
+    renderScene();
+    await speakEnglishLine("Great. Open the door.", { rate: 0.82 });
+    return;
+  }
+  state.clearingPhase = "waiting";
+  state.clearingActiveIndex = index;
+  state.clearingBubbleIndex = -1;
+  renderScene();
+  await speakEnglishLine(clearingDialogue[index].cue, { rate: 0.82 });
+}
+
+async function handleClearingCharacterClick(characterId) {
+  if (state.currentScene !== "clearingMeeting" || state.clearingPhase !== "waiting") {
+    return;
+  }
+  const item = currentClearingItem();
+  if (item.characterId !== characterId) {
+    await speakEnglishLine(item.cue, { rate: 0.82 });
+    return;
+  }
+  state.clearingPhase = "speaking";
+  state.clearingBubbleIndex = state.clearingActiveIndex;
+  renderScene();
+  await speakEnglishLine(item.textEn, {
+    preferredVoiceName: item.preferredVoiceName,
+    rate: 0.84,
+  });
+  if (state.currentScene !== "clearingMeeting") {
+    return;
+  }
+  await speakCzechLine(item.textCz, { rate: 0.9 });
+  if (state.currentScene !== "clearingMeeting") {
+    return;
+  }
+  state.clearingClickedIds.add(item.id);
+  await pauseMs(180);
+  await activateClearingStep(state.clearingActiveIndex + 1);
+}
+
+async function runClearingMeeting(sequenceId) {
+  if (!isSceneActive("clearingMeeting", sequenceId)) {
+    return;
+  }
+  resetClearingMeeting();
+  renderScene();
+  if (!state.audioUnlocked) {
+    return;
+  }
+  await pauseMs(260);
+  if (!isSceneActive("clearingMeeting", sequenceId)) {
+    return;
+  }
+  await playClearingHelp();
+  if (!isSceneActive("clearingMeeting", sequenceId)) {
+    return;
+  }
+  await activateClearingStep(0);
 }
 
 async function runOwlGarden(sequenceId) {
@@ -1750,12 +2108,21 @@ storyStage.addEventListener("click", async (event) => {
     setScene("forestSchool");
     return;
   }
+  if (state.currentScene === "intro4" && event.target === forestJourneyPortalButton) {
+    resetClearingMeeting();
+    setScene("clearingMeeting");
+    return;
+  }
   if (wasLocked && (state.currentScene === "intro2" || state.currentScene === "intro3")) {
     setScene(state.currentScene);
     return;
   }
   if (state.currentScene === "forestSchool" && (wasLocked || state.forestSchoolPhase === "intro")) {
     setScene("forestSchool");
+    return;
+  }
+  if (state.currentScene === "clearingMeeting" && wasLocked) {
+    setScene("clearingMeeting");
   }
 });
 
@@ -1793,6 +2160,15 @@ forestSchoolPortalButton.addEventListener("click", async (event) => {
   }
 });
 
+forestJourneyPortalButton.addEventListener("click", async (event) => {
+  event.stopPropagation();
+  await primeAudio();
+  if (state.currentScene === "intro4") {
+    resetClearingMeeting();
+    setScene("clearingMeeting");
+  }
+});
+
 backToSignpostButton.addEventListener("click", (event) => {
   event.stopPropagation();
   setScene("intro4");
@@ -1824,16 +2200,17 @@ dialogueHelpButton.addEventListener("click", async (event) => {
   await primeAudio();
   if (state.currentScene === "benjiBunny") {
     await playBenjiBunnyHelp();
+  } else if (state.currentScene === "clearingMeeting") {
+    await playClearingHelp();
   }
 });
 
 dialogueDoorButton.addEventListener("click", async (event) => {
   event.stopPropagation();
   await primeAudio();
-  if (state.currentScene !== "benjiBunny" || state.dialogueDoorState === "hidden") {
-    return;
-  }
-  if (state.dialogueDoorState === "green") {
+  if (state.currentScene === "benjiBunny" && state.dialogueDoorState === "green") {
+    setScene("owlGarden");
+  } else if (state.currentScene === "clearingMeeting" && state.clearingPhase === "complete") {
     setScene("owlGarden");
   }
 });
@@ -2592,4 +2969,4 @@ window.addEventListener("keydown", () => {
 window.speechSynthesis?.addEventListener?.("voiceschanged", () => {});
 
 const requestedScene = new URLSearchParams(window.location.search).get("scene");
-setScene(requestedScene === "forestSchool" ? "forestSchool" : "intro1");
+setScene(requestedScene === "forestSchool" ? "forestSchool" : requestedScene === "clearingMeeting" ? "clearingMeeting" : "intro1");
