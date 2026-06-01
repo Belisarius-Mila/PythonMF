@@ -605,12 +605,13 @@ function containsUrgentTerm(query) {
 }
 
 function findSymptomMatches(query) {
-  return symptomIntents
+  const searchTerms = expandSearchTerms(query);
+  const intentMatches = symptomIntents
     .map((intent) => {
       const score = intent.terms.reduce((total, term) => {
         const normalizedTerm = normalize(term);
         if (!normalizedTerm) return total;
-        if (query.includes(normalizedTerm)) return total + normalizedTerm.length;
+        if (searchTerms.some((searchTerm) => searchTerm.includes(normalizedTerm))) return total + normalizedTerm.length;
         return total;
       }, 0);
       return { ...intent, score };
@@ -618,6 +619,58 @@ function findSymptomMatches(query) {
     .filter((intent) => intent.score > 0)
     .sort((left, right) => right.score - left.score)
     .slice(0, 3);
+  const intentNames = new Set(intentMatches.flatMap((intent) => intent.names));
+  const directNames = findMedicineMatches(searchTerms).filter((name) => !intentNames.has(name));
+  if (directNames.length) {
+    intentMatches.push({
+      label: "Přímá shoda v evidenci",
+      terms: [],
+      names: directNames,
+      note: "Tyto položky odpovídají přímo názvu, kategorii, použití nebo zkrácenému PIL textu.",
+      score: 1,
+    });
+  }
+  return intentMatches;
+}
+
+function expandSearchTerms(query) {
+  const terms = new Set([query]);
+  const aliases = [
+    ["rycma", ["ryma", "ucpany nos", "nachlazeni"]],
+    ["rima", ["ryma", "ucpany nos", "nachlazeni"]],
+    ["kasel", ["kasel", "suchy kasel", "drazdivy kasel", "hlen"]],
+    ["nachlazeni", ["nachlazeni", "ryma", "kasel", "ucpany nos"]],
+    ["chripka", ["chripka", "nachlazeni", "kasel", "ryma"]],
+  ];
+  aliases.forEach(([needle, values]) => {
+    if (query.includes(needle)) {
+      values.forEach((value) => terms.add(normalize(value)));
+    }
+  });
+  return Array.from(terms).filter(Boolean);
+}
+
+function findMedicineMatches(searchTerms) {
+  return Object.entries(medicineData)
+    .map(([name, medicine]) => {
+      const haystack = normalize([
+        name,
+        medicine?.category,
+        medicine?.use,
+        medicine?.form,
+        medicine?.pilShort,
+      ].filter(Boolean).join(" "));
+      const score = searchTerms.reduce((total, term) => {
+        if (!term) return total;
+        if (haystack.includes(term)) return total + term.length;
+        return total;
+      }, 0);
+      return { name, score };
+    })
+    .filter((item) => item.score > 0)
+    .sort((left, right) => right.score - left.score || left.name.localeCompare(right.name, "cs-CZ"))
+    .slice(0, 8)
+    .map((item) => item.name);
 }
 
 function renderIntentSuggestions() {
