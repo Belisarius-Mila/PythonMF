@@ -23,10 +23,11 @@ Co je hotove:
   - Matysek klikne na Benjiho a pak postupne i opakovane na dalsi postavy,
   - vpravo nahore ma byt souhrnna napoveda ke scene v cestine.
 - 2026-06-01 po Milove odsouhlaseni se zacal prvni implementacni pruchod.
-- Scena je zapojena do webove MMTX verze jako `clearingMeeting` mezi aktualni
-  scenu Benji+Bunny a sovou.
-- Dvere po Benji+Bunny vedou na paseku, dvere z paseky po dokonceni vedou dal
-  do soví zahrady.
+- Scena je zapojena do webove MMTX verze jako `clearingMeeting`.
+- Podle Milovy korekce 2026-06-01 ma cesta k jezeru vlastni samostatnou ikonu
+  `Lake` na rozcestniku `intro4` a nema byt soucasti starych cest.
+- Dvere po Benji+Bunny zustavaji ve stare vetvi a vedou dal do soví zahrady.
+- Dvere z paseky po dokonceni sceny vedou take do soví zahrady.
 - Lokální testovaci URL:
   `http://127.0.0.1:8012/index.html?scene=clearingMeeting`
 
@@ -39,13 +40,14 @@ Co neni hotove:
   repliky podle odsouhlasenych hlasovych referenci.
 
 Dalsi krok:
-- Rucne otestovat `clearingMeeting` v prohlizeci, hlavne: start sceny, ceska
-  napoveda pod `?`, slovnicek pod knihou, aktivni sipka, klikani na postavy,
-  postup dialogu a dvere do soví zahrady.
+- Rucne otestovat rozcestnik a `clearingMeeting` v prohlizeci, hlavne: nova
+  samostatna ikona `Lake` na rozcestniku, start sceny, ceska napoveda pod `?`,
+  slovnicek pod knihou, aktivni sipka, klikani na postavy, postup dialogu a
+  dvere do soví zahrady.
 
 Navrhovane dalsi kroky:
 - Okamzite:
-  1. Otestovat `http://127.0.0.1:8012/index.html?scene=clearingMeeting`.
+  1. Otestovat rozcestnik a `http://127.0.0.1:8012/index.html?scene=clearingMeeting`.
   2. Doladit hotspoty a UI podle toho, co bude v prohlizeci mimo.
   3. Rozhodnout, zda prvni pruchod staci pro commit, nebo jeste pred commitem
      dogenerovat finalni MP3.
