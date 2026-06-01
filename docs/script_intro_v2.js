@@ -420,17 +420,17 @@ const benjiBunnyHelpAudio = {
 };
 
 
-const clearingHelpText = "Poslouchej anglickou napovedu. Klikni na postavu, na kterou ukazuje sipka. Postava rekne vetu anglicky a potom cesky. Ikona knihy otevira slovnicek.";
+const clearingHelpText = "Poslouchej anglickou nápovědu. Klikni na postavu, na kterou ukazuje šipka. Postava řekne větu anglicky a potom česky. Ikona knihy otevírá slovníček.";
 
 const clearingDictionary = [
   { en: "Hello", cz: "ahoj" },
-  { en: "I am", cz: "ja jsem" },
-  { en: "friends", cz: "kamaradi" },
+  { en: "I am", cz: "já jsem" },
+  { en: "friends", cz: "kamarádi" },
   { en: "we are", cz: "my jsme" },
-  { en: "too", cz: "take" },
+  { en: "too", cz: "také" },
   { en: "going", cz: "jdeme" },
   { en: "lake", cz: "jezero" },
-  { en: "together", cz: "spolecne" },
+  { en: "together", cz: "společně" },
 ];
 
 const clearingCharacters = [
@@ -441,6 +441,8 @@ const clearingCharacters = [
   { id: "sunny", name: "Sunny", rect: { x: 80.2, y: 39.2, w: 16.9, h: 43.2 }, arrow: { x: 88.0, y: 34.2 }, bubble: { x: 73.0, y: 23.2 } },
 ];
 
+const clearingIntroClickCount = 5;
+
 const clearingDialogue = [
   {
     id: 1,
@@ -448,7 +450,7 @@ const clearingDialogue = [
     speaker: "Benji",
     cue: "Tap Benji.",
     textEn: "Hello! I am Benji.",
-    textCz: "Ahoj! Ja jsem Benji.",
+    textCz: "Ahoj! Já jsem Benji.",
     preferredVoiceName: "fable|brian|andrew|roger|guy|daniel|alex|aaron|evan|junior",
   },
   {
@@ -457,7 +459,7 @@ const clearingDialogue = [
     speaker: "Bunny",
     cue: "Tap Bunny.",
     textEn: "Hi! I am Bunny. We are friends.",
-    textCz: "Ahoj! Ja jsem Bunny. Jsme kamaradi.",
+    textCz: "Ahoj! Já jsem Bunny. Jsme kamarádi.",
     preferredVoiceName: "junior|samantha|ava|victoria|karen",
   },
   {
@@ -466,7 +468,7 @@ const clearingDialogue = [
     speaker: "Bruno",
     cue: "Tap Bruno.",
     textEn: "Hello. I am Bruno.",
-    textCz: "Ahoj. Ja jsem Bruno.",
+    textCz: "Ahoj. Já jsem Bruno.",
     preferredVoiceName: "onyx|aaron|roger|daniel|guy",
   },
   {
@@ -475,7 +477,7 @@ const clearingDialogue = [
     speaker: "Fiona",
     cue: "Tap Fiona.",
     textEn: "Hi. I am Fiona.",
-    textCz: "Ahoj. Ja jsem Fiona.",
+    textCz: "Ahoj. Já jsem Fiona.",
     preferredVoiceName: "shimmer|samantha|ava|victoria|karen",
   },
   {
@@ -484,7 +486,7 @@ const clearingDialogue = [
     speaker: "Sunny",
     cue: "Tap Sunny.",
     textEn: "Hello! I am Sunny.",
-    textCz: "Ahoj! Ja jsem Sunny.",
+    textCz: "Ahoj! Já jsem Sunny.",
     preferredVoiceName: "nova|samantha|ava|victoria|karen|junior",
   },
   {
@@ -493,7 +495,7 @@ const clearingDialogue = [
     speaker: "Fiona",
     cue: "Tap Fiona.",
     textEn: "We are friends too.",
-    textCz: "My jsme take kamaradi.",
+    textCz: "My jsme také kamarádi.",
     preferredVoiceName: "shimmer|samantha|ava|victoria|karen",
   },
   {
@@ -511,7 +513,7 @@ const clearingDialogue = [
     speaker: "Benji",
     cue: "Tap Benji.",
     textEn: "We are going to the lake too.",
-    textCz: "My jdeme k jezeru take.",
+    textCz: "My jdeme k jezeru také.",
     preferredVoiceName: "fable|brian|andrew|roger|guy|daniel|alex|aaron|evan|junior",
   },
   {
@@ -520,7 +522,7 @@ const clearingDialogue = [
     speaker: "Sunny",
     cue: "Tap Sunny.",
     textEn: "We can go together.",
-    textCz: "Muzeme jit spolecne.",
+    textCz: "Můžeme jít společně.",
     preferredVoiceName: "nova|samantha|ava|victoria|karen|junior",
   },
   {
@@ -529,7 +531,7 @@ const clearingDialogue = [
     speaker: "Fiona",
     cue: "Tap Fiona.",
     textEn: "Now we are all friends!",
-    textCz: "Ted jsme vsichni kamaradi!",
+    textCz: "Teď jsme všichni kamarádi!",
     preferredVoiceName: "shimmer|samantha|ava|victoria|karen",
   },
 ];
@@ -1353,9 +1355,11 @@ function renderClearingMeeting() {
   cue.className = "clearing-cue";
   cue.textContent = state.clearingPhase === "complete"
     ? "Great. Open the door."
-    : activeItem
-      ? activeItem.cue
-      : "Listen.";
+    : state.clearingPhase === "auto" || state.clearingPhase === "speaking"
+      ? "Listen."
+      : activeItem
+        ? activeItem.cue
+        : "Listen.";
   dialoguePanel.appendChild(cue);
 
   const helpButton = document.createElement("button");
@@ -1404,7 +1408,7 @@ function createClearingDictionaryPanel() {
   panel.className = "clearing-dictionary";
   const title = document.createElement("div");
   title.className = "clearing-dictionary-title";
-  title.textContent = "Slovnicek";
+  title.textContent = "Slovníček";
   panel.appendChild(title);
 
   clearingDictionary.forEach((entry) => {
@@ -1439,16 +1443,69 @@ async function playClearingHelp() {
   renderScene();
 }
 
+async function completeClearingMeeting() {
+  if (state.currentScene !== "clearingMeeting") {
+    return;
+  }
+  state.clearingActiveIndex = -1;
+  state.clearingBubbleIndex = -1;
+  state.clearingPhase = "complete";
+  renderScene();
+  await speakEnglishLine("Great. Open the door.", { rate: 0.82 });
+}
+
+async function playClearingDialogueItem(index, phase = "speaking") {
+  if (state.currentScene !== "clearingMeeting") {
+    return false;
+  }
+  const item = clearingDialogue[index];
+  if (!item) {
+    return false;
+  }
+  state.clearingPhase = phase;
+  state.clearingActiveIndex = index;
+  state.clearingBubbleIndex = index;
+  renderScene();
+  await speakEnglishLine(item.textEn, {
+    preferredVoiceName: item.preferredVoiceName,
+    rate: 0.84,
+  });
+  if (state.currentScene !== "clearingMeeting") {
+    return false;
+  }
+  await speakCzechLine(item.textCz, { rate: 0.9 });
+  if (state.currentScene !== "clearingMeeting") {
+    return false;
+  }
+  state.clearingClickedIds.add(item.id);
+  renderScene();
+  await pauseMs(260);
+  return state.currentScene === "clearingMeeting";
+}
+
+async function runClearingAutomaticDialogue(startIndex) {
+  state.clearingPhase = "auto";
+  renderScene();
+  await pauseMs(320);
+  for (let index = startIndex; index < clearingDialogue.length; index += 1) {
+    const stillActive = await playClearingDialogueItem(index, "auto");
+    if (!stillActive) {
+      return;
+    }
+  }
+  await completeClearingMeeting();
+}
+
 async function activateClearingStep(index) {
   if (state.currentScene !== "clearingMeeting") {
     return;
   }
   if (index >= clearingDialogue.length) {
-    state.clearingActiveIndex = -1;
-    state.clearingBubbleIndex = -1;
-    state.clearingPhase = "complete";
-    renderScene();
-    await speakEnglishLine("Great. Open the door.", { rate: 0.82 });
+    await completeClearingMeeting();
+    return;
+  }
+  if (index >= clearingIntroClickCount) {
+    await runClearingAutomaticDialogue(index);
     return;
   }
   state.clearingPhase = "waiting";
@@ -1467,23 +1524,12 @@ async function handleClearingCharacterClick(characterId) {
     await speakEnglishLine(item.cue, { rate: 0.82 });
     return;
   }
-  state.clearingPhase = "speaking";
-  state.clearingBubbleIndex = state.clearingActiveIndex;
-  renderScene();
-  await speakEnglishLine(item.textEn, {
-    preferredVoiceName: item.preferredVoiceName,
-    rate: 0.84,
-  });
-  if (state.currentScene !== "clearingMeeting") {
+  const currentIndex = state.clearingActiveIndex;
+  const stillActive = await playClearingDialogueItem(currentIndex, "speaking");
+  if (!stillActive) {
     return;
   }
-  await speakCzechLine(item.textCz, { rate: 0.9 });
-  if (state.currentScene !== "clearingMeeting") {
-    return;
-  }
-  state.clearingClickedIds.add(item.id);
-  await pauseMs(180);
-  await activateClearingStep(state.clearingActiveIndex + 1);
+  await activateClearingStep(currentIndex + 1);
 }
 
 async function runClearingMeeting(sequenceId) {
