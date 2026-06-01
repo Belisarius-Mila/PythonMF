@@ -1,0 +1,110 @@
+Zkratky - Mac + Terminal
+========================
+
+Rychla referencni karta pro ovladani Macu a praci v Terminalu.
+
+Legenda:
+- Cmd = Command
+- Option = Alt
+- Ctrl = Control
+- Shift = Shift
+- Esc = Escape
+- Space = mezernik
+- Return = Enter
+- Delete = Backspace
+
+
+MAC
+---
+
+Zkratka                         Co umi
+Cmd + Space                     Otevre Spotlight pro hledani aplikaci, souboru a vypocty.
+Cmd + Tab                       Prepina mezi otevrenymi aplikacemi.
+Cmd + `                         Prepina mezi okny aktualni aplikace.
+Cmd + H                         Skryje aktualni aplikaci.
+Option + Cmd + H                Skryje vsechny ostatni aplikace.
+Cmd + M                         Minimalizuje aktualni okno do Docku.
+Option + Cmd + M                Minimalizuje vsechna okna aktualni aplikace.
+Cmd + Q                         Ukonci aktualni aplikaci.
+Option + Cmd + Esc              Otevre vynucene ukonceni zasekle aplikace.
+Ctrl + Cmd + Q                  Okamzite zamkne obrazovku.
+Cmd + N                         Nove okno nebo novy dokument.
+Cmd + T                         Nova karta v aplikacich, ktere podporuji karty.
+Cmd + W                         Zavre aktualni okno nebo kartu.
+Cmd + S                         Ulozi aktualni dokument.
+Shift + Cmd + S                 Ulozi jako nebo duplikuje dokument podle aplikace.
+Cmd + P                         Tisk.
+Cmd + Z                         Zpet posledni akce.
+Shift + Cmd + Z                 Znovu provede vracenou akci.
+Cmd + X                         Vyjme vybrany text nebo objekt.
+Cmd + C                         Zkopiruje vyber.
+Cmd + V                         Vlozi ze schranky.
+Option + Shift + Cmd + V        Vlozi bez formatovani, pokud to aplikace podporuje.
+Cmd + A                         Vybere vse.
+Cmd + F                         Hledani v aktualnim okne nebo dokumentu.
+Cmd + G                         Najde dalsi vysledek hledani.
+Shift + Cmd + G                 Najde predchozi vysledek hledani.
+Cmd + ,                         Otevre nastaveni aktualni aplikace.
+Cmd + L                         Skoci do adresniho radku ve Finderu/Safari, nebo do lokace podle aplikace.
+Cmd + R                         Obnovi stranku, nahled nebo obsah okna.
+Cmd + +                         Priblizi obsah.
+Cmd + -                         Oddali obsah.
+Cmd + 0                         Vrati vychozi priblizeni.
+Cmd + [                         Zpet v historii okna nebo slozek.
+Cmd + ]                         Vpred v historii okna nebo slozek.
+Shift + Cmd + 3                 Ulozi screenshot cele obrazovky.
+Shift + Cmd + 4                 Vyber oblasti pro screenshot.
+Shift + Cmd + 5                 Otevre panel screenshotu a nahravani obrazovky.
+Space ve Finderu                Quick Look nahled vybraneho souboru.
+Return ve Finderu               Prejmenuje vybrany soubor.
+Cmd + Delete ve Finderu         Presune vybrany soubor do kose.
+Shift + Cmd + Delete            Vysype kos.
+Cmd + I ve Finderu              Informace o souboru nebo slozce.
+Shift + Cmd + G ve Finderu      Prejit do slozky podle cesty.
+Cmd + Up ve Finderu             Prejde do nadrazene slozky.
+Cmd + Down ve Finderu           Otevre vybranou slozku nebo soubor.
+
+
+TERMINAL
+--------
+
+Zkratka                         Co umi
+Tab                             Doplni prikaz, soubor nebo slozku.
+Tab Tab                         Nabidne moznosti doplneni.
+Sipka nahoru                    Predchozi prikaz v historii.
+Sipka dolu                      Dalsi prikaz v historii.
+Ctrl + R                        Zpetne hledani v historii prikazu.
+Ctrl + G                        Ukonci hledani v historii bez spusteni prikazu.
+Ctrl + A                        Skoci na zacatek radku.
+Ctrl + E                        Skoci na konec radku.
+Option + Left                   Skoci o slovo doleva.
+Option + Right                  Skoci o slovo doprava.
+Ctrl + U                        Smaze text od kurzoru na zacatek radku.
+Ctrl + K                        Smaze text od kurzoru na konec radku.
+Ctrl + W                        Smaze slovo pred kurzorem.
+Option + Delete                 Smaze slovo pred kurzorem v macOS Terminalu.
+Ctrl + Y                        Vlozi text smazany pres Ctrl + U/K/W.
+Ctrl + L                        Vycisti obrazovku terminalu.
+Cmd + K                         Vycisti scrollback aktualniho okna Terminalu.
+Ctrl + C                        Prerusi bezici prikaz nebo proces.
+Ctrl + D                        Ukonci vstup; na prazdnem radku zavre shell.
+Ctrl + Z                        Pozastavi bezici proces na pozadi.
+fg                              Vrati pozastaveny proces do popredi.
+bg                              Pusti pozastaveny proces na pozadi.
+Ctrl + T                        Prohodi dva znaky kolem kurzoru.
+Cmd + N                         Nove okno Terminalu.
+Cmd + T                         Nova karta Terminalu.
+Cmd + W                         Zavre aktualni kartu nebo okno.
+Shift + Cmd + ]                 Dalsi karta Terminalu.
+Shift + Cmd + [                 Predchozi karta Terminalu.
+Cmd + 1 az Cmd + 9              Prepne na konkretni kartu Terminalu.
+Cmd + +                         Zvetsi pismo v Terminalu.
+Cmd + -                         Zmensi pismo v Terminalu.
+Cmd + 0                         Vrati vychozi velikost pisma.
+Cmd + F                         Hledani ve vystupu Terminalu.
+Cmd + C pri vyberu textu        Kopiruje vybrany text.
+Cmd + V                         Vlozi text do Terminalu.
+Ctrl + Option + Cmd + V         Vlozi vybrany text jako escaped text, pokud to Terminal podporuje.
+Ctrl + X Ctrl + E               Otevre aktualni prikaz v editoru podle promenne EDITOR.
+clear                           Vycisti obrazovku podobne jako Ctrl + L.
+exit                            Korektne ukonci aktualni shell.
