@@ -420,7 +420,8 @@ const benjiBunnyHelpAudio = {
 };
 
 
-const clearingHelpText = "Poslouchej anglickou nápovědu. Klikni na postavu, na kterou ukazuje šipka. Postava řekne větu anglicky a potom česky. Ikona knihy otevírá slovníček.";
+const clearingHelpText = "Celou scénu můžeš spustit znovu tlačítkem šipky v kruhu. Doporučujeme scénu přehrát několikrát a několikrát si projít slovníček, to je ikona knihy.";
+const clearingIntroHelpText = "Poslouchej anglickou nápovědu. Klikni na postavu, na kterou ukazuje šipka. Postava řekne větu anglicky a potom česky. Ikona knihy otevírá slovníček.";
 
 const clearingDictionary = [
   { en: "Hello", cz: "ahoj" },
@@ -1302,6 +1303,10 @@ function clearingCharacterById(characterId) {
   return clearingCharacters.find((character) => character.id === characterId) ?? clearingCharacters[0];
 }
 
+function clearingReviewItemForCharacter(characterId) {
+  return clearingDialogue.find((item, index) => index < clearingIntroClickCount && item.characterId === characterId);
+}
+
 function renderClearingMeeting() {
   dialoguePanel.innerHTML = "";
   dialoguePanel.classList.add("clearing-panel");
@@ -1362,23 +1367,6 @@ function renderClearingMeeting() {
         : "Listen.";
   dialoguePanel.appendChild(cue);
 
-  const helpButton = document.createElement("button");
-  helpButton.type = "button";
-  helpButton.className = `clearing-help-tab ${state.clearingHelpVisible ? "open" : "pulse-soft"}`;
-  helpButton.textContent = state.clearingHelpVisible ? "×" : "?";
-  helpButton.setAttribute("aria-label", "Ceska napoveda");
-  helpButton.addEventListener("click", async (event) => {
-    event.stopPropagation();
-    await primeAudio();
-    if (state.clearingHelpVisible) {
-      state.clearingHelpVisible = false;
-      renderScene();
-      return;
-    }
-    await playClearingHelp();
-  });
-  dialoguePanel.appendChild(helpButton);
-
   if (state.clearingHelpVisible) {
     const help = document.createElement("div");
     help.className = "clearing-help-card";
@@ -1397,6 +1385,20 @@ function renderClearingMeeting() {
     renderScene();
   });
   dialoguePanel.appendChild(bookButton);
+
+  if (state.clearingPhase === "complete") {
+    const replayButton = document.createElement("button");
+    replayButton.type = "button";
+    replayButton.className = "clearing-replay-button pulse-soft";
+    replayButton.textContent = "↻";
+    replayButton.setAttribute("aria-label", "Spustit scénu znovu");
+    replayButton.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      await primeAudio();
+      await restartClearingMeetingSequence();
+    });
+    dialoguePanel.appendChild(replayButton);
+  }
 
   if (state.clearingDictionaryOpen) {
     dialoguePanel.appendChild(createClearingDictionaryPanel());
@@ -1426,6 +1428,60 @@ function createClearingDictionaryPanel() {
   });
 
   return panel;
+}
+
+async function playClearingIntroHelp() {
+  if (state.currentScene !== "clearingMeeting") {
+    return;
+  }
+  await speakCzechLine(clearingIntroHelpText, { rate: 0.88 });
+}
+
+async function restartClearingMeetingSequence() {
+  if (state.currentScene !== "clearingMeeting") {
+    return;
+  }
+  cancelSpeech();
+  state.sequenceId += 1;
+  resetClearingMeeting();
+  renderScene();
+  await pauseMs(180);
+  if (state.currentScene !== "clearingMeeting") {
+    return;
+  }
+  await activateClearingStep(0);
+}
+
+async function playClearingCharacterReview(characterId) {
+  if (state.currentScene !== "clearingMeeting") {
+    return;
+  }
+  const item = clearingReviewItemForCharacter(characterId);
+  if (!item) {
+    return;
+  }
+  state.sequenceId += 1;
+  const sequenceId = state.sequenceId;
+  const itemIndex = clearingDialogue.indexOf(item);
+  state.clearingPhase = "complete";
+  state.clearingActiveIndex = -1;
+  state.clearingBubbleIndex = itemIndex;
+  renderScene();
+  await speakEnglishLine(item.textEn, {
+    preferredVoiceName: item.preferredVoiceName,
+    rate: 0.84,
+  });
+  if (!isSceneActive("clearingMeeting", sequenceId)) {
+    return;
+  }
+  await speakCzechLine(item.textCz, { rate: 0.9 });
+  if (!isSceneActive("clearingMeeting", sequenceId)) {
+    return;
+  }
+  state.clearingPhase = "complete";
+  state.clearingActiveIndex = -1;
+  state.clearingBubbleIndex = itemIndex;
+  renderScene();
 }
 
 async function playClearingHelp() {
@@ -1516,7 +1572,14 @@ async function activateClearingStep(index) {
 }
 
 async function handleClearingCharacterClick(characterId) {
-  if (state.currentScene !== "clearingMeeting" || state.clearingPhase !== "waiting") {
+  if (state.currentScene !== "clearingMeeting") {
+    return;
+  }
+  if (state.clearingPhase === "complete") {
+    await playClearingCharacterReview(characterId);
+    return;
+  }
+  if (state.clearingPhase !== "waiting") {
     return;
   }
   const item = currentClearingItem();
@@ -1545,7 +1608,7 @@ async function runClearingMeeting(sequenceId) {
   if (!isSceneActive("clearingMeeting", sequenceId)) {
     return;
   }
-  await playClearingHelp();
+  await playClearingIntroHelp();
   if (!isSceneActive("clearingMeeting", sequenceId)) {
     return;
   }

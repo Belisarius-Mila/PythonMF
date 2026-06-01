@@ -25,26 +25,35 @@ Princip:
 6. Po anglické větě následuje krátký mluvený český překlad.
 7. Aktivuje se další postava.
 
-## Souhrnná nápověda vpravo nahoře
+## Hlavní nápověda přes mikrofon
 
-Vpravo nahoře bude malý český panel pro rodiče nebo pro rychlé vysvětlení scény:
+Hlavní česká nápověda patří pod horní tlačítko mikrofonu, aby se neduplikovala s další ikonou v obraze.
+
+```text
+Celou scénu můžeš spustit znovu tlačítkem šipky v kruhu.
+Doporučujeme scénu přehrát několikrát a několikrát si projít slovníček, to je ikona knihy.
+```
+
+Panel má být stručný, ne školní výklad. V obraze zůstává samostatně viditelná ikona knihy pro slovníček a po dokončení scény tlačítko šipky v kruhu pro opakování celé sekvence.
+
+## Krátká startovní nápověda
+
+Při prvním vstupu do scény má jednou zaznít původní krátká orientační nápověda:
 
 ```text
 Poslouchej anglickou nápovědu.
 Klikni na postavu, na kterou ukazuje šipka.
 Postava řekne větu anglicky a potom česky.
-Ikona knihy otevře slovníček.
+Ikona knihy otevírá slovníček.
 ```
 
-Panel má být stručný, ne školní výklad. Může být schovaný pod ikonou `?`, pokud by rušil obraz.
-
-Tu nápovědu bych zobrazil, přečetl a po přečtení schoval za otazník. Otazník by krátce zablikal a zůstal na obrazovce. Po jeho stisku by se nápověda znovu otevřela a přečetla.
+Tato krátká nápověda se po startu nemusí znovu opakovat. Horní mikrofon zůstává pro hlavní nápovědu k opakování scény a slovníčku.
 
 ## Start dialogu
 
 Návrh bez složité režie:
 
-1. Po příchodu do scény se krátce zobrazí a přečte česká nápověda vpravo nahoře.
+1. Po příchodu do scény jednou zazní krátká česká orientační nápověda.
 2. Automaticky se spustí první anglická nápověda: `Tap Benji.`
 3. U Benjiho začne blikat šipka.
 4. Pokud Matýsek neklikne, po několika sekundách se `Tap Benji.` zopakuje.
@@ -161,8 +170,9 @@ Mini kontrola po představení:
 Opakované klikání:
 
 - Po dokončení hlavní sekvence může Matýsek klikat na libovolnou postavu.
-- Každá postava zopakuje svou hlavní větu.
-- Ikona reproduktoru může zopakovat poslední anglickou nápovědu.
+- Každá postava jen zopakuje své představení a nespustí další dialog.
+- Tlačítko šipky v kruhu vpravo dole spustí celou sekvenci znovu.
+- Horní mikrofon přehraje hlavní českou nápovědu ke scéně.
 
 ## Adamovy poznámky
 
@@ -177,7 +187,8 @@ Navrhuji držet první verzi technicky střídmě:
 - jednoduchý mluvený český překlad po anglické větě,
 - český help panel vpravo nahoře,
 - ikona knihy se slovníčkem,
-- možnost zopakovat poslední pokyn.
+- možnost po dokončení zopakovat celou sekvenci tlačítkem šipky v kruhu,
+- možnost po dokončení kliknout na libovolnou postavu a přehrát jen její představení.
 
 Tohle je hezké, ale pořád rozumně malé sousto. Vyhnul bych se zatím složitým animacím chůze, plynulému pohybu postav, lip-syncu, větveným rozhovorům nebo velké slovníkové minihře. Tyto věci můžeme přidat až po ověření, že základní scéna funguje a Matýska baví.
 

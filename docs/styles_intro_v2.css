@@ -1458,7 +1458,8 @@ body {
 }
 
 .clearing-help-tab,
-.clearing-book-button {
+.clearing-book-button,
+.clearing-replay-button {
   position: absolute;
   right: 20px;
   z-index: 12;
@@ -1485,6 +1486,17 @@ body {
 
 .clearing-book-button {
   top: 172px;
+}
+
+.clearing-replay-button {
+  right: 20px;
+  bottom: 20px;
+  border-radius: 999px;
+  background: #fff4cf;
+}
+
+.clearing-replay-button:hover {
+  transform: scale(1.05);
 }
 
 .clearing-help-tab.open {
