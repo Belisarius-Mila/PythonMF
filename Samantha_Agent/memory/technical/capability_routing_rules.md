@@ -98,6 +98,19 @@ Nebudu cist tela, otevirat odkazy, stahovat prilohy, mazat, presouvat ani
 oznacovat jako prectene.
 ```
 
+Pevny rychly vstup:
+
+```text
+Prosím přehled emailů za posledních 7 dní
+```
+
+Samantha ho ma mapovat na sjednoceny read-only prehled iCloud + Seznam za
+poslednich 7 dni. Vychozi razeni: hlavne zpravy s PDF prilohami nebo signalem
+dokumentu/prilohy; kategorie `faktury/e-shopy`, `pojisteni/smlouvy`,
+`urady/dane`, `ostatni`; vystup jen hlavicky a kratky duvod dulezitosti.
+Bez dalsiho potvrzeni necist cela tela, nestahovat prilohy, neotevirat odkazy,
+neukladat PDF, nic neposilat, nemazat, nepresouvat ani neoznacovat jako prectene.
+
 Pokyn:
 
 ```text

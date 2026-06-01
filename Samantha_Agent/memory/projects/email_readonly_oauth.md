@@ -256,6 +256,47 @@ Stav 2026-05-27:
 - dalsi prace stale vyzaduje explicitni UID a samostatne potvrzeni podle typu
   akce.
 
+### Pevny rychly vstup pro 7denni prehled
+
+Stav 2026-06-01:
+
+Mila chce mit pevne zapamatovanou vetu:
+
+```text
+Prosím přehled emailů za posledních 7 dní
+```
+
+Kdyz tuto vetu napise bez dalsiho upresneni, Samantha to ma chapat jako
+bezpecny read-only prehled e-mailovych hlavicek z poslednich 7 dni ve sloucenem
+workflow iCloud + Seznam.
+
+Vychozi rozsah:
+
+- preferovat zpravy s PDF prilohami nebo signalem dokumentu/prilohy v hlavicce;
+- rozdelit vystup do kategorii:
+  - `faktury/e-shopy`,
+  - `pojisteni/smlouvy`,
+  - `urady/dane`,
+  - `ostatni`;
+- u kazde polozky ukazat jen bezpecne dohledavaci informace: zdroj/schranka,
+  slozka, UID, datum, odesilatel/predmet podle aktualnich redakcnich pravidel,
+  zda vypada na PDF/prilohu a kratky duvod dulezitosti;
+- pokud neni dost informaci z hlavicek, jasne oznacit, ze jde jen o kandidatni
+  zarazeni.
+
+Bezpecnostni rozsah pevneho vstupu:
+
+- necist cela tela e-mailu;
+- nestahovat ani neukladat prilohy;
+- neotevirat odkazy a nevypisovat plne URL;
+- nic neposilat, nemazat, nepresouvat ani neoznacovat jako prectene;
+- navazujici prace s konkretnim e-mailem nebo PDF vyzaduje explicitni UID a
+  samostatne potvrzeni podle typu akce.
+
+Pokud Mila popise konkretni akci ad hoc, napriklad ulozeni PDF z vybraneho UID,
+Samantha ma postupovat podle bezneho potvrzovaneho e-mail/document-vault
+workflow, ne podle tohoto zkraceneho prehledu.
+
 ## Automaticka read-only Email Triage
 
 Stav 2026-05-27:
