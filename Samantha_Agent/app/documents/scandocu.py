@@ -5,7 +5,7 @@ import re
 import shutil
 import unicodedata
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -39,6 +39,7 @@ from .vault import (
 
 
 DEFAULT_DOWNLOADS_DIR = Path.home() / "Downloads"
+DEFAULT_DOWNLOADS_MAX_AGE_DAYS = 7
 SCANDOCU_ROOT_NAME = "scandocu"
 SCANDOCU_ACTIONS_FILE = "scandocu_actions.jsonl"
 SCANDOCU_CLASSIFIER_VERSION = "2026-05-28-vehicle-asset-v1"
@@ -108,12 +109,17 @@ def scan_downloads_for_pdfs(
     downloads_dir: Path = DEFAULT_DOWNLOADS_DIR,
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
     limit: int = 50,
+    max_age_days: int | None = DEFAULT_DOWNLOADS_MAX_AGE_DAYS,
 ) -> list[dict[str, Any]]:
     downloads = downloads_dir.expanduser().resolve()
     if not downloads.exists() or not downloads.is_dir():
         raise ValueError(f"Downloads slozka neexistuje nebo neni slozka: {downloads}")
     rows: list[dict[str, Any]] = []
-    for path in sorted(downloads.glob("*.pdf"), key=lambda item: item.stat().st_mtime, reverse=True)[:limit]:
+    cutoff = datetime.now(timezone.utc) - timedelta(days=max_age_days) if max_age_days is not None else None
+    paths = sorted(downloads.glob("*.pdf"), key=lambda item: item.stat().st_mtime, reverse=True)
+    for path in paths:
+        if cutoff is not None and datetime.fromtimestamp(path.stat().st_mtime, timezone.utc) < cutoff:
+            continue
         try:
             validate_source_file(path)
             digest = sha256_file(path)
@@ -129,17 +135,84 @@ def scan_downloads_for_pdfs(
                 }
             )
             continue
-        rows.append(
-            {
-                "name": path.name,
-                "path": str(path),
-                "size_bytes": path.stat().st_size,
-                "modified_at": format_mtime(path),
-                "status": classify_download_pdf_status(vault_dir=vault_dir, sha256=digest),
-                "sha256": digest,
-            }
-        )
+        duplicate = find_duplicate_by_sha(vault_dir=vault_dir, sha256=digest)
+        item = {
+            "name": path.name,
+            "path": str(path),
+            "size_bytes": path.stat().st_size,
+            "modified_at": format_mtime(path),
+            "status": "already_in_vault" if duplicate else classify_download_pdf_status(vault_dir=vault_dir, sha256=digest),
+            "sha256": digest,
+        }
+        if duplicate:
+            item["duplicate_document_id"] = safe_text(str(duplicate.get("document_id", "")))
+        rows.append(item)
+        if len(rows) >= limit:
+            break
     return rows
+
+
+def search_downloads_for_pdfs(
+    query: str = "",
+    modified_date: str = "",
+    downloads_dir: Path = DEFAULT_DOWNLOADS_DIR,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    limit: int = 30,
+) -> list[dict[str, Any]]:
+    downloads = downloads_dir.expanduser().resolve()
+    if not downloads.exists() or not downloads.is_dir():
+        raise ValueError(f"Downloads slozka neexistuje nebo neni slozka: {downloads}")
+    query_terms = [term.casefold() for term in tokenize(query) if len(term) >= 2]
+    target_date = parse_search_date(modified_date)
+    rows: list[dict[str, Any]] = []
+    for path in sorted(downloads.glob("*.pdf"), key=lambda item: item.stat().st_mtime, reverse=True):
+        if query_terms and not all(term in path.name.casefold() for term in query_terms):
+            continue
+        if target_date is not None and local_modified_date(path) != target_date:
+            continue
+        try:
+            validate_source_file(path)
+            digest = sha256_file(path)
+            duplicate = find_duplicate_by_sha(vault_dir=vault_dir, sha256=digest)
+            status = "already_in_vault" if duplicate else classify_download_pdf_status(vault_dir=vault_dir, sha256=digest)
+            warning = ""
+        except ValueError as exc:
+            digest = ""
+            duplicate = None
+            status = "invalid"
+            warning = str(exc)
+        item = {
+            "name": path.name,
+            "path": str(path),
+            "size_bytes": path.stat().st_size if path.exists() else 0,
+            "modified_at": format_mtime(path),
+            "modified_date": local_modified_date(path).isoformat(),
+            "status": status,
+        }
+        if digest:
+            item["sha256"] = digest
+        if duplicate:
+            item["duplicate_document_id"] = safe_text(str(duplicate.get("document_id", "")))
+        if warning:
+            item["warning"] = warning
+        rows.append(item)
+        if len(rows) >= limit:
+            break
+    return rows
+
+
+def parse_search_date(value: str) -> date | None:
+    cleaned = value.strip()
+    if not cleaned:
+        return None
+    try:
+        return date.fromisoformat(cleaned)
+    except ValueError as exc:
+        raise ValueError("Datum pro hledání zadej ve formátu YYYY-MM-DD.") from exc
+
+
+def local_modified_date(path: Path) -> date:
+    return datetime.fromtimestamp(path.stat().st_mtime).date()
 
 
 def prepare_next_scandocu_pdf(
@@ -154,6 +227,30 @@ def prepare_next_scandocu_pdf(
             vault_dir=vault_dir,
         )
     return None
+
+
+def prepare_specific_download_pdf(
+    source_path: str,
+    downloads_dir: Path = DEFAULT_DOWNLOADS_DIR,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> ScanDocuCandidate:
+    downloads = downloads_dir.expanduser().resolve()
+    source = Path(source_path).expanduser().resolve()
+    if downloads not in source.parents:
+        raise ValueError("Vybraný soubor není uvnitř povolené Downloads složky.")
+    validate_source_file(source)
+    digest = sha256_file(source)
+    duplicate = find_duplicate_by_sha(vault_dir=vault_dir, sha256=digest)
+    if duplicate:
+        stored_path = PROJECT_ROOT / str(duplicate.get("stored_path", ""))
+        if not stored_path.exists():
+            raise ValueError("Dokument je v indexu, ale uložený soubor ve vaultu nebyl nalezen.")
+        return prepare_stored_document_review_candidate(
+            document_record=duplicate,
+            stored_path=stored_path,
+            vault_dir=vault_dir,
+        )
+    return prepare_scandocu_candidate(source=source, vault_dir=vault_dir)
 
 
 def prepare_next_stored_document_review(
@@ -900,10 +997,29 @@ class ScanDocuServer:
                             self.respond_json(candidate.to_api())
                         return
                     if parsed.path == "/api/list":
+                        params = parse_qs(parsed.query)
+                        max_age_days_value = params.get("max_age_days", [str(DEFAULT_DOWNLOADS_MAX_AGE_DAYS)])[0]
+                        max_age_days = None if max_age_days_value == "all" else int(max_age_days_value)
                         self.respond_json(
                             {
                                 "downloads_dir": str(app.downloads_dir),
+                                "max_age_days": max_age_days,
                                 "items": scan_downloads_for_pdfs(
+                                    downloads_dir=app.downloads_dir,
+                                    vault_dir=app.vault_dir,
+                                    max_age_days=max_age_days,
+                                ),
+                            }
+                        )
+                        return
+                    if parsed.path == "/api/search-downloads":
+                        params = parse_qs(parsed.query)
+                        self.respond_json(
+                            {
+                                "downloads_dir": str(app.downloads_dir),
+                                "items": search_downloads_for_pdfs(
+                                    query=params.get("q", [""])[0],
+                                    modified_date=params.get("date", [""])[0],
                                     downloads_dir=app.downloads_dir,
                                     vault_dir=app.vault_dir,
                                 ),
@@ -947,6 +1063,14 @@ class ScanDocuServer:
                                 vault_dir=app.vault_dir,
                             )
                         )
+                        return
+                    if parsed.path == "/api/select-download":
+                        candidate = prepare_specific_download_pdf(
+                            source_path=str(payload.get("source_path", "")),
+                            downloads_dir=app.downloads_dir,
+                            vault_dir=app.vault_dir,
+                        )
+                        self.respond_json(candidate.to_api())
                         return
                     self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
                 except ValueError as exc:
@@ -1022,6 +1146,15 @@ SCANDOCU_HTML = """<!doctype html>
     .meta { display: grid; gap: 7px; margin: 10px 0 14px; font-size: 13px; color: #4b5563; }
     .meta strong { color: #111827; }
     .actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+    .completion-actions { display: flex; gap: 8px; margin: 10px 0 12px; flex-wrap: wrap; }
+    .download-search { display: grid; gap: 8px; padding: 11px; margin-bottom: 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb; }
+    .download-search-grid { display: grid; grid-template-columns: minmax(0, 1fr) 145px auto; gap: 8px; align-items: end; }
+    .download-search label { margin: 0 0 4px; }
+    .download-results { display: grid; gap: 7px; }
+    .download-result { border-top: 1px solid #e5e7eb; padding-top: 7px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 12px; }
+    .download-result:first-child { border-top: 0; padding-top: 0; }
+    .download-result-title { font-weight: 650; overflow-wrap: anywhere; }
+    .download-result-meta { color: #6b7280; margin-top: 2px; overflow-wrap: anywhere; }
     button { border: 0; border-radius: 6px; padding: 10px 13px; font: inherit; font-weight: 650; cursor: pointer; }
     .primary { background: #2563eb; color: white; }
     .secondary { background: #e5e7eb; color: #111827; }
@@ -1039,17 +1172,41 @@ SCANDOCU_HTML = """<!doctype html>
     @media (max-width: 860px) {
       main { grid-template-columns: 1fr; height: auto; }
       iframe { height: 72vh; }
+      .download-search-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <header>
     <h1>ScanDocu</h1>
-    <button class="secondary" id="nextBtn">Další PDF</button>
+    <div class="actions" style="margin-top: 0;">
+      <button class="secondary" id="cockpitBtn">Zpět do Cockpitu</button>
+      <button class="secondary" id="nextBtn">Další PDF</button>
+    </div>
   </header>
   <main>
     <section class="panel">
+      <div class="download-search">
+        <div class="download-search-grid">
+          <div>
+            <label for="downloadQuery">Najít PDF v Downloads podle názvu</label>
+            <input id="downloadQuery" autocomplete="off" placeholder="část názvu souboru">
+          </div>
+          <div>
+            <label for="downloadDate">Datum</label>
+            <input id="downloadDate" type="date">
+          </div>
+          <button class="secondary" id="downloadSearchBtn">Hledat</button>
+        </div>
+        <div id="downloadSearchStatus" class="status hidden"></div>
+        <div id="downloadSearchResults" class="download-results"></div>
+      </div>
       <div id="status" class="status">Načítám dokument...</div>
+      <div id="completionActions" class="completion-actions hidden">
+        <button class="primary" id="continueBtn">Ano, další dokument</button>
+        <button class="secondary" id="searchAgainBtn">Hledat jiné PDF</button>
+        <button class="secondary" id="finishBtn">Ne, hotovo</button>
+      </div>
       <div id="formWrap" class="hidden">
         <div class="meta">
           <div><strong>Režim:</strong> <span id="modeInfo"></span></div>
@@ -1128,6 +1285,12 @@ SCANDOCU_HTML = """<!doctype html>
       probableDuplicateList: document.getElementById("probableDuplicateList"),
       encryptedBox: document.getElementById("encryptedBox"),
       allowDuplicate: document.getElementById("allowDuplicate"),
+      downloadQuery: document.getElementById("downloadQuery"),
+      downloadDate: document.getElementById("downloadDate"),
+      downloadSearchBtn: document.getElementById("downloadSearchBtn"),
+      downloadSearchStatus: document.getElementById("downloadSearchStatus"),
+      downloadSearchResults: document.getElementById("downloadSearchResults"),
+      completionActions: document.getElementById("completionActions"),
       title: document.getElementById("title"),
       domain: document.getElementById("domain"),
       documentType: document.getElementById("documentType"),
@@ -1146,6 +1309,7 @@ SCANDOCU_HTML = """<!doctype html>
     async function loadNext() {
       fields.status.textContent = isReviewMode ? "Hledám další uložený dokument..." : "Hledám další PDF...";
       fields.formWrap.classList.add("hidden");
+      fields.completionActions.classList.add("hidden");
       fields.pdfFrame.removeAttribute("src");
       const res = await fetch(`/api/next?mode=${appMode}`);
       const data = await res.json();
@@ -1154,9 +1318,14 @@ SCANDOCU_HTML = """<!doctype html>
         fields.status.textContent = data.message || "Nenalezeno.";
         return;
       }
+      loadCandidate(data);
+    }
+
+    function loadCandidate(data) {
       current = data;
       fields.status.textContent = "Zkontroluj PDF a metadata.";
       fields.formWrap.classList.remove("hidden");
+      fields.completionActions.classList.add("hidden");
       fields.modeInfo.textContent = data.source_mode === "vault_review" ? "revize uloženého dokumentu" : "nový dokument z Downloads";
       fields.sourceName.textContent = data.source_name;
       fields.reviewLine.classList.toggle("hidden", data.source_mode !== "vault_review");
@@ -1175,6 +1344,73 @@ SCANDOCU_HTML = """<!doctype html>
       fields.caseId.value = data.case_id || "";
       fields.tags.value = data.tags || "";
       fields.pdfFrame.src = data.pdf_url;
+    }
+
+    async function searchDownloads() {
+      const query = fields.downloadQuery.value.trim();
+      const date = fields.downloadDate.value.trim();
+      fields.downloadSearchResults.innerHTML = "";
+      fields.downloadSearchStatus.classList.remove("hidden");
+      if (!query && !date) {
+        fields.downloadSearchStatus.textContent = "Zadej část názvu nebo datum.";
+        return;
+      }
+      fields.downloadSearchStatus.textContent = "Hledám PDF v Downloads...";
+      fields.downloadSearchBtn.disabled = true;
+      try {
+        const res = await fetch(`/api/search-downloads?q=${encodeURIComponent(query)}&date=${encodeURIComponent(date)}`);
+        const data = await res.json();
+        renderDownloadSearchResults(data.items || []);
+        fields.downloadSearchStatus.textContent = data.items && data.items.length
+          ? `Nalezeno: ${data.items.length}`
+          : "Nenalezeno žádné PDF.";
+      } catch (err) {
+        fields.downloadSearchStatus.textContent = `Chyba hledání: ${err}`;
+      } finally {
+        fields.downloadSearchBtn.disabled = false;
+      }
+    }
+
+    function renderDownloadSearchResults(items) {
+      fields.downloadSearchResults.innerHTML = "";
+      items.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "download-result";
+        const text = document.createElement("div");
+        const title = document.createElement("div");
+        title.className = "download-result-title";
+        title.textContent = item.name || "";
+        const meta = document.createElement("div");
+        meta.className = "download-result-meta";
+        meta.textContent = `${item.modified_date || item.modified_at || ""} | ${item.status || "unknown"} | ${item.size_bytes || 0} B`;
+        const button = document.createElement("button");
+        button.className = "secondary";
+        button.type = "button";
+        button.textContent = item.status === "already_in_vault" ? "Revidovat z vaultu" : "Zpracovat";
+        button.disabled = item.status === "invalid";
+        button.addEventListener("click", () => selectDownload(item.path));
+        text.appendChild(title);
+        text.appendChild(meta);
+        row.appendChild(text);
+        row.appendChild(button);
+        fields.downloadSearchResults.appendChild(row);
+      });
+    }
+
+    async function selectDownload(sourcePath) {
+      if (!sourcePath) return;
+      fields.status.textContent = "Připravuji vybraný dokument...";
+      const res = await fetch("/api/select-download", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({source_path: sourcePath})
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        fields.status.textContent = data.error || "Vybraný dokument nejde připravit.";
+        return;
+      }
+      loadCandidate(data);
     }
 
     async function saveCurrent() {
@@ -1208,6 +1444,7 @@ SCANDOCU_HTML = """<!doctype html>
       }
       fields.status.textContent = `${data.status === "reviewed" ? "Aktualizováno" : "Uloženo"}: ${data.document_id}. Chceš pokračovat?`;
       fields.formWrap.classList.add("hidden");
+      fields.completionActions.classList.remove("hidden");
       current = null;
     }
 
@@ -1248,11 +1485,39 @@ SCANDOCU_HTML = """<!doctype html>
     }
 
     document.getElementById("nextBtn").addEventListener("click", loadNext);
+    document.getElementById("cockpitBtn").addEventListener("click", () => {
+      window.location.href = "http://127.0.0.1:8770";
+    });
+    document.getElementById("continueBtn").addEventListener("click", loadNext);
+    document.getElementById("searchAgainBtn").addEventListener("click", () => {
+      fields.completionActions.classList.add("hidden");
+      fields.formWrap.classList.add("hidden");
+      fields.pdfFrame.removeAttribute("src");
+      current = null;
+      fields.status.textContent = "Zadej název nebo datum a vyhledej další PDF.";
+      fields.downloadQuery.focus();
+    });
+    document.getElementById("finishBtn").addEventListener("click", () => {
+      fields.completionActions.classList.add("hidden");
+      fields.formWrap.classList.add("hidden");
+      fields.pdfFrame.removeAttribute("src");
+      current = null;
+      fields.status.textContent = "Hotovo. Okno můžeš zavřít nebo se vrátit k hledání.";
+      window.close();
+    });
+    document.getElementById("downloadSearchBtn").addEventListener("click", searchDownloads);
+    fields.downloadQuery.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        searchDownloads();
+      }
+    });
     document.getElementById("saveBtn").addEventListener("click", saveCurrent);
     document.getElementById("skipBtn").addEventListener("click", skipCurrent);
     document.getElementById("stopBtn").addEventListener("click", () => {
       fields.status.textContent = "ScanDocu ukončeno v prohlížeči. Server můžeš zastavit v terminálu.";
       fields.formWrap.classList.add("hidden");
+      fields.completionActions.classList.add("hidden");
       fields.pdfFrame.removeAttribute("src");
       current = null;
     });

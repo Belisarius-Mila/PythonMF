@@ -344,6 +344,7 @@ def scan_downloaded_pdfs_text(
     lines = [
         "ScanDocu PDF v Downloads (read-only):",
         f"- Slozka: `{downloads_dir}`",
+        "- Vychozi rozsah: poslednich 7 dni",
     ]
     for item in items:
         lines.append(
@@ -365,7 +366,7 @@ def prepare_next_scandocu_document_text(
     except ValueError as exc:
         return f"ScanDocu priprava byla odmitnuta: {exc}"
     if candidate is None:
-        return "ScanDocu: v Downloads neni zadne nove PDF ke zpracovani."
+        return "ScanDocu: v Downloads neni zadne nove PDF z poslednich 7 dni ke zpracovani."
     return (
         "ScanDocu dokument je pripraveny ke kontrole.\n"
         f"- Soubor: {candidate.source_path.name}\n"

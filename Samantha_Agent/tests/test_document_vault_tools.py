@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -31,8 +32,10 @@ from app.documents.tools import (
 )
 from app.documents.scandocu import import_scandocu_candidate
 from app.documents.scandocu import prepare_next_scandocu_pdf
+from app.documents.scandocu import prepare_specific_download_pdf
 from app.documents.scandocu import prepare_next_stored_document_review
 from app.documents.scandocu import scan_downloads_for_pdfs
+from app.documents.scandocu import search_downloads_for_pdfs
 from app.documents.scandocu import SCANDOCU_HTML
 from app.documents.vault import format_document_inbox_reminder
 from app.documents.vault import has_explicit_document_import_confirmation
@@ -365,8 +368,9 @@ class DocumentVaultToolsTests(unittest.TestCase):
                     "utf-8"
                 )
             )
-            os.utime(older, (1_700_000_000, 1_700_000_000))
-            os.utime(newer, (1_700_000_100, 1_700_000_100))
+            now = time.time()
+            os.utime(older, (now - 60, now - 60))
+            os.utime(newer, (now, now))
 
             scan = scan_downloaded_pdfs_text(downloads_dir=downloads, vault_dir=vault)
             self.assertIn("gpt-recept.pdf", scan)
@@ -395,6 +399,82 @@ class DocumentVaultToolsTests(unittest.TestCase):
             manifest = json.loads((stored.parent / "manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(manifest["title"], "Rodinne recepty salat")
             self.assertEqual(manifest["case_id"], "rodinne-recepty")
+
+    def test_scandocu_default_download_scan_ignores_files_older_than_week(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            downloads = root / "Downloads"
+            vault = root / "documents"
+            downloads.mkdir()
+            old_pdf = downloads / "stary-dokument.pdf"
+            recent_pdf = downloads / "novy-dokument.pdf"
+            old_pdf.write_bytes(b"%PDF-1.4\nStary dokument\n")
+            recent_pdf.write_bytes(b"%PDF-1.4\nNovy dokument\n")
+            now = time.time()
+            os.utime(old_pdf, (now - 9 * 24 * 60 * 60, now - 9 * 24 * 60 * 60))
+            os.utime(recent_pdf, (now, now))
+
+            default_items = scan_downloads_for_pdfs(downloads_dir=downloads, vault_dir=vault)
+            all_items = scan_downloads_for_pdfs(downloads_dir=downloads, vault_dir=vault, max_age_days=None)
+
+            self.assertEqual([item["name"] for item in default_items], ["novy-dokument.pdf"])
+            self.assertEqual({item["name"] for item in all_items}, {"novy-dokument.pdf", "stary-dokument.pdf"})
+
+    def test_scandocu_search_downloads_finds_old_pdf_by_name_or_date(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            downloads = root / "Downloads"
+            vault = root / "documents"
+            downloads.mkdir()
+            old_pdf = downloads / "NajemniSmlouvaErbenovaUlice.pdf"
+            old_pdf.write_bytes(b"%PDF-1.4\nNajemni smlouva\n")
+            old_timestamp = 1_715_940_000
+            os.utime(old_pdf, (old_timestamp, old_timestamp))
+            old_date = time.strftime("%Y-%m-%d", time.localtime(old_timestamp))
+
+            by_name = search_downloads_for_pdfs(query="Erbenova", downloads_dir=downloads, vault_dir=vault)
+            by_date = search_downloads_for_pdfs(modified_date=old_date, downloads_dir=downloads, vault_dir=vault)
+            candidate = prepare_specific_download_pdf(
+                source_path=str(old_pdf),
+                downloads_dir=downloads,
+                vault_dir=vault,
+            )
+
+            self.assertEqual(by_name[0]["name"], old_pdf.name)
+            self.assertEqual(by_date[0]["name"], old_pdf.name)
+            self.assertEqual(candidate.source_path.name, old_pdf.name)
+
+    def test_scandocu_select_download_already_in_vault_opens_review_candidate(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            downloads = root / "Downloads"
+            vault = root / "documents"
+            downloads.mkdir()
+            pdf = downloads / "NajemniSmlouvaErbenovaUlice.pdf"
+            pdf.write_bytes(b"%PDF-1.4\nNajemni smlouva Erbenova ulice\n")
+
+            imported = apply_document_import_text(
+                source_path=str(pdf),
+                target_domain="home",
+                document_type="lease",
+                document_id="najemni-smlouva-erbenova-ulice",
+                document_title="Najemni smlouva Erbenova ulice",
+                user_confirmed=True,
+                confirmation_text="Potvrzuji, uloz dokument NajemniSmlouvaErbenovaUlice.pdf do oblasti home.",
+                vault_dir=vault,
+            )
+            found = search_downloads_for_pdfs(query="Erbenova", downloads_dir=downloads, vault_dir=vault)
+            candidate = prepare_specific_download_pdf(
+                source_path=str(pdf),
+                downloads_dir=downloads,
+                vault_dir=vault,
+            )
+
+            self.assertIn("Stav: ulozeno", imported)
+            self.assertEqual(found[0]["status"], "already_in_vault")
+            self.assertEqual(found[0]["duplicate_document_id"], "najemni-smlouva-erbenova-ulice")
+            self.assertEqual(candidate.source_mode, "vault_review")
+            self.assertEqual(candidate.review_document_id, "najemni-smlouva-erbenova-ulice")
 
     def test_scandocu_blocks_probable_duplicate_until_confirmed(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -471,8 +551,9 @@ class DocumentVaultToolsTests(unittest.TestCase):
             unlocked = downloads / "review-auto-pojisteni-navrh-2025-Odemknute.pdf"
             encrypted.write_bytes(b"%PDF-1.4\n/Encrypt\n")
             unlocked.write_bytes(b"%PDF-1.4\nPojistna smlouva Volvo V40\n")
-            os.utime(encrypted, (1_700_000_000, 1_700_000_000))
-            os.utime(unlocked, (1_700_000_100, 1_700_000_100))
+            now = time.time()
+            os.utime(encrypted, (now - 60, now - 60))
+            os.utime(unlocked, (now, now))
 
             candidate = prepare_next_scandocu_pdf(downloads_dir=downloads, vault_dir=vault)
             self.assertIsNotNone(candidate)
@@ -877,6 +958,13 @@ class DocumentVaultToolsTests(unittest.TestCase):
         self.assertIn("PDF je šifrované nebo zamčené", SCANDOCU_HTML)
         self.assertIn("Heslo nepiš do chatu", SCANDOCU_HTML)
         self.assertIn("renderEncryptedHelp", SCANDOCU_HTML)
+
+    def test_scandocu_ui_contains_completion_actions(self) -> None:
+        self.assertIn("Zpět do Cockpitu", SCANDOCU_HTML)
+        self.assertIn("Ano, další dokument", SCANDOCU_HTML)
+        self.assertIn("Hledat jiné PDF", SCANDOCU_HTML)
+        self.assertIn("Ne, hotovo", SCANDOCU_HTML)
+        self.assertIn("Revidovat z vaultu", SCANDOCU_HTML)
 
     def test_duplicate_content_is_not_imported_twice(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

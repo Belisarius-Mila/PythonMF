@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import shutil
 import subprocess
 import time
@@ -12,7 +13,7 @@ from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from app.backup.activity_state import format_backup_activity_reminder
-from app.documents.scandocu import DEFAULT_DOWNLOADS_DIR, reviewed_document_ids, scan_downloads_for_pdfs
+from app.documents.scandocu import DEFAULT_DOWNLOADS_DIR, scan_downloads_for_pdfs
 from app.documents.vault import (
     DEFAULT_DOCUMENTS_DIR,
     build_snippet,
@@ -97,6 +98,29 @@ WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
         "kind": "lokální prototyp",
     },
 )
+
+READING_STATUS_LABELS: dict[str, str] = {
+    "ok": "OK",
+    "needs_review": "k revizi",
+    "unreadable": "nečitelné",
+    "superseded": "nahrazeno lepší kopií",
+}
+READING_STATUS_ALIASES: dict[str, str] = {
+    "ok": "ok",
+    "k": "ok",
+    "o.k.": "ok",
+    "needs_review": "needs_review",
+    "k-revizi": "needs_review",
+    "k_revizi": "needs_review",
+    "revize": "needs_review",
+    "unreadable": "unreadable",
+    "necitelne": "unreadable",
+    "nečitelné": "unreadable",
+    "superseded": "superseded",
+    "nahrazeno": "superseded",
+    "nahrazeno-lepsi-kopii": "superseded",
+    "nahrazeno_lepsi_kopii": "superseded",
+}
 
 
 def web_apps_catalog() -> dict[str, Any]:
@@ -199,15 +223,19 @@ def document_work_status(
 
 
 def stored_documents_review_status(vault_dir: Path = DEFAULT_DOCUMENTS_DIR, limit: int = 8) -> dict[str, Any]:
-    reviewed = reviewed_document_ids(vault_dir)
+    text_by_id = {
+        str(item.get("document_id", "")): str(item.get("text", ""))
+        for item in read_jsonl(vault_dir / "index" / "text_index.jsonl")
+    }
     pending: list[dict[str, Any]] = []
-    reviewed_count = 0
+    status_counts = {status: 0 for status in READING_STATUS_LABELS}
     for row in read_jsonl(vault_dir / "index" / "documents_index.jsonl"):
         document_id = str(row.get("document_id", ""))
         if not document_id:
             continue
-        if document_id in reviewed:
-            reviewed_count += 1
+        reading_status = effective_document_reading_status(row, text_chars=len(text_by_id.get(document_id, "")))
+        status_counts[reading_status] = status_counts.get(reading_status, 0) + 1
+        if reading_status != "needs_review":
             continue
         pending.append(
             {
@@ -216,13 +244,145 @@ def stored_documents_review_status(vault_dir: Path = DEFAULT_DOCUMENTS_DIR, limi
                 "domain": str(row.get("domain", "")),
                 "document_type": str(row.get("document_type", "")),
                 "stored_path": str(row.get("stored_path", "")),
+                "reading_status": reading_status,
+                "reading_status_label": READING_STATUS_LABELS[reading_status],
             }
         )
     return {
         "pending_count": len(pending),
-        "reviewed_count": reviewed_count,
+        "reviewed_count": status_counts.get("ok", 0),
+        "status_counts": status_counts,
+        "status_labels": READING_STATUS_LABELS,
         "next_items": pending[:limit],
     }
+
+
+def normalize_reading_status(value: str) -> str:
+    normalized = safe_slug(value, default="", limit=80)
+    if normalized in READING_STATUS_LABELS:
+        return normalized
+    alias = READING_STATUS_ALIASES.get(normalized)
+    if alias:
+        return alias
+    raise ValueError("Neznámý stav čtení dokumentu.")
+
+
+def document_reference(document_id: str) -> str:
+    digest = hashlib.sha256(document_id.encode("utf-8")).hexdigest()[:16]
+    return f"docref-{digest}"
+
+
+def find_document_row_index_by_reference(documents: list[dict[str, Any]], reference: str) -> int | None:
+    safe_reference = safe_slug(reference, default="", limit=140)
+    if not safe_reference:
+        return None
+    for index, row in enumerate(documents):
+        if str(row.get("document_id", "")) == safe_reference:
+            return index
+    if safe_reference.startswith("docref-"):
+        for index, row in enumerate(documents):
+            document_id = str(row.get("document_id", ""))
+            if document_id and document_reference(document_id) == safe_reference:
+                return index
+    return None
+
+
+def effective_document_reading_status(record: dict[str, Any], text_chars: int | None = None) -> str:
+    explicit = str(record.get("reading_status", "") or record.get("document_reading_status", ""))
+    if explicit:
+        try:
+            return normalize_reading_status(explicit)
+        except ValueError:
+            pass
+    indexed_chars = text_chars
+    if indexed_chars is None:
+        extraction = record.get("text_extraction")
+        if isinstance(extraction, dict):
+            try:
+                indexed_chars = int(extraction.get("indexed_chars") or 0)
+            except (TypeError, ValueError):
+                indexed_chars = 0
+        else:
+            indexed_chars = 0
+    return "ok" if indexed_chars > 0 else "needs_review"
+
+
+def set_document_reading_status_action(
+    document_id: str,
+    reading_status: str,
+    note: str = "",
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> dict[str, Any]:
+    safe_document_id = safe_slug(document_id, default="", limit=140)
+    if not safe_document_id:
+        return {"ok": False, "message": "Chybí document_id."}
+    try:
+        normalized_status = normalize_reading_status(reading_status)
+    except ValueError as exc:
+        return {"ok": False, "message": str(exc)}
+
+    documents_path = vault_dir / "index" / "documents_index.jsonl"
+    documents = read_jsonl(documents_path)
+    row_index = find_document_row_index_by_reference(documents, safe_document_id)
+    if row_index is None:
+        return {"ok": False, "message": "Dokument nebyl nalezen v indexu."}
+
+    current = dict(documents[row_index])
+    resolved_document_id = str(current.get("document_id", ""))
+    stored_path = PROJECT_ROOT / str(current.get("stored_path", ""))
+    manifest_path = stored_path.parent / "manifest.json"
+    manifest = read_json_file(manifest_path) if manifest_path.exists() else {}
+    updated = {**current, **manifest}
+    previous_status = effective_document_reading_status(updated)
+    now_value = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    updated["reading_status"] = normalized_status
+    updated["reading_status_updated_at"] = now_value
+    if note.strip():
+        updated["reading_status_note"] = safe_text(note.strip())
+
+    backup_dir = backup_document_reading_status_metadata(
+        vault_dir=vault_dir,
+        document_id=resolved_document_id,
+        manifest_path=manifest_path,
+    )
+    documents[row_index] = updated
+    write_jsonl(documents_path, documents)
+    if manifest_path.exists():
+        write_json(manifest_path, updated)
+    append_jsonl(
+        vault_dir / "index" / "document_reading_status_actions.jsonl",
+        {
+            "action": "set_reading_status",
+            "document_id": resolved_document_id,
+            "previous_status": previous_status,
+            "reading_status": normalized_status,
+            "reading_status_label": READING_STATUS_LABELS[normalized_status],
+            "note": safe_text(note.strip()),
+            "created_at": now_value,
+            "backup_dir": str(relative_to_project(backup_dir)),
+            "do_not_commit": True,
+        },
+    )
+    return {
+        "ok": True,
+        "document_id": safe_text(resolved_document_id),
+        "document_ref": document_reference(resolved_document_id),
+        "reading_status": normalized_status,
+        "reading_status_label": READING_STATUS_LABELS[normalized_status],
+        "message": f"Stav dokumentu uložen: {READING_STATUS_LABELS[normalized_status]}.",
+    }
+
+
+def backup_document_reading_status_metadata(vault_dir: Path, document_id: str, manifest_path: Path) -> Path:
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    backup_dir = vault_dir / "index" / "status_backups" / f"{stamp}_{document_id}"
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    index_path = vault_dir / "index" / "documents_index.jsonl"
+    if index_path.exists():
+        shutil.copy2(index_path, backup_dir / "documents_index.jsonl")
+    if manifest_path.exists():
+        shutil.copy2(manifest_path, backup_dir / "manifest.json")
+    return backup_dir
 
 
 def download_problem_kind(item: dict[str, Any]) -> str:
@@ -270,7 +430,7 @@ def search_document_index(
         str(item.get("document_id", "")): str(item.get("text", ""))
         for item in read_jsonl(vault_dir / "index" / "text_index.jsonl")
     }
-    scored: list[tuple[int, dict[str, Any], str]] = []
+    scored: list[tuple[int, dict[str, Any], str, int]] = []
     for document_id, metadata in documents.items():
         text = text_by_id.get(document_id, "")
         haystack = " ".join(
@@ -293,13 +453,17 @@ def search_document_index(
         snippet = build_snippet(text, terms) if text else ""
         if not snippet.strip():
             snippet = "Text zatím není k dispozici; shoda je podle metadat."
-        scored.append((score, metadata, snippet))
+        scored.append((score, metadata, snippet, len(text)))
 
     results: list[dict[str, Any]] = []
-    for score, metadata, snippet in sorted(scored, key=lambda row: row[0], reverse=True)[: max(1, min(limit, 20))]:
+    for score, metadata, snippet, text_chars in sorted(scored, key=lambda row: row[0], reverse=True)[
+        : max(1, min(limit, 20))
+    ]:
+        reading_status = effective_document_reading_status(metadata, text_chars=text_chars)
         results.append(
             {
                 "score": score,
+                "document_ref": document_reference(str(metadata.get("document_id", ""))),
                 "document_id": safe_text(str(metadata.get("document_id", ""))),
                 "title": safe_text(str(metadata.get("title") or metadata.get("original_filename") or "")),
                 "original_filename": safe_text(str(metadata.get("original_filename", ""))),
@@ -309,6 +473,8 @@ def search_document_index(
                 "related_asset": safe_text(str(metadata.get("related_asset", ""))),
                 "stored_path": safe_text(str(metadata.get("stored_path", ""))),
                 "lifecycle_status": safe_text(str(metadata.get("lifecycle_status", "active") or "active")),
+                "reading_status": reading_status,
+                "reading_status_label": READING_STATUS_LABELS[reading_status],
                 "snippet": sanitize_output(snippet),
             }
         )
@@ -322,8 +488,13 @@ def search_document_index(
 
 
 def prepare_document_print_action(document_id: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> dict[str, Any]:
+    documents = read_jsonl(vault_dir / "index" / "documents_index.jsonl")
+    row_index = find_document_row_index_by_reference(documents, document_id)
+    if row_index is None:
+        return {"ok": False, "message": "Dokument nebyl nalezen v indexu."}
+    resolved_document_id = str(documents[row_index].get("document_id", ""))
     try:
-        result = prepare_document_print_job(document_id=document_id, vault_dir=vault_dir)
+        result = prepare_document_print_job(document_id=resolved_document_id, vault_dir=vault_dir)
     except ValueError as exc:
         return {"ok": False, "message": str(exc)}
     return {
@@ -365,22 +536,27 @@ def move_document_lifecycle_action(
     confirmation_text: str,
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
 ) -> dict[str, Any]:
-    safe_document_id = safe_slug(document_id, default="", limit=140)
-    if not safe_document_id:
+    safe_reference = safe_slug(document_id, default="", limit=140)
+    if not safe_reference:
         return {"ok": False, "message": "Chybí document_id."}
+    documents = read_jsonl(vault_dir / "index" / "documents_index.jsonl")
+    row_index = find_document_row_index_by_reference(documents, safe_reference)
+    if row_index is None:
+        return {"ok": False, "message": "Dokument nebyl nalezen v indexu."}
+    resolved_document_id = str(documents[row_index].get("document_id", ""))
     if target not in {"archive", "trash"}:
         return {"ok": False, "message": "Neznámá akce nad dokumentem."}
     required = (
-        f"Potvrzuji, archivuj dokument {safe_document_id}."
+        f"Potvrzuji, archivuj dokument {safe_reference}."
         if target == "archive"
-        else f"Potvrzuji, přesuň dokument {safe_document_id} do koše."
+        else f"Potvrzuji, přesuň dokument {safe_reference} do koše."
     )
     if confirmation_text.strip() != required:
         return {"ok": False, "message": f"Chybí přesné potvrzení: {required}"}
 
     try:
         return move_document_to_archive_or_trash(
-            document_id=safe_document_id,
+            document_id=resolved_document_id,
             target=target,
             vault_dir=vault_dir,
         )
@@ -629,6 +805,16 @@ class CockpitServer:
                         )
                     )
                     return
+                if parsed.path == "/api/documents/reading-status":
+                    payload = self.read_json()
+                    self.respond_json(
+                        set_document_reading_status_action(
+                            document_id=str(payload.get("document_id", "")),
+                            reading_status=str(payload.get("reading_status", "")),
+                            note=str(payload.get("note", "")),
+                        )
+                    )
+                    return
                 self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
 
             def read_json(self) -> dict[str, Any]:
@@ -773,7 +959,7 @@ COCKPIT_HTML = """<!doctype html>
     .work-item:first-child { border-top: 0; padding-top: 0; }
     .work-meta { color: var(--muted); font-size: 11px; margin-top: 2px; }
     .search-controls { display: grid; grid-template-columns: minmax(220px, 1fr) auto; gap: 10px; align-items: center; }
-    input[type="search"] { box-sizing: border-box; width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 10px 11px; font: inherit; background: white; color: var(--ink); }
+    input[type="search"], select { box-sizing: border-box; width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 10px 11px; font: inherit; background: white; color: var(--ink); }
     .search-results { display: grid; gap: 9px; margin-top: 12px; }
     .search-result { border: 1px solid #edf0f4; border-radius: 8px; padding: 10px; background: #fbfcfe; display: grid; gap: 5px; }
     .search-result-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
@@ -781,6 +967,8 @@ COCKPIT_HTML = """<!doctype html>
     .search-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
     .search-detail { display: grid; gap: 5px; margin-top: 6px; padding-top: 8px; border-top: 1px solid #edf0f4; }
     .search-snippet { font-size: 12px; line-height: 1.45; color: #263244; overflow-wrap: anywhere; }
+    .status-select-row { display: grid; grid-template-columns: 120px minmax(190px, 260px); gap: 10px; align-items: center; margin-top: 4px; }
+    .status-select-row label { color: var(--muted); font-size: 12px; }
     .danger-soft { background: #fee2e2; color: #991b1b; }
     .stack { display: grid; gap: 16px; }
     section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
@@ -871,7 +1059,7 @@ COCKPIT_HTML = """<!doctype html>
       <div class="body">
         <div class="work-grid">
           <div class="work-card">
-            <h3>Nová PDF ve Downloads</h3>
+            <h3>Nová PDF ve Downloads za 7 dní</h3>
             <div id="newPdfCount" class="work-count">0</div>
             <div class="actions">
               <button class="primary" id="processNextBtn">Zpracovat další dokument</button>
@@ -908,7 +1096,7 @@ COCKPIT_HTML = """<!doctype html>
     </section>
     <div class="grid">
       <section>
-        <h2>PDF ve Downloads</h2>
+        <h2>PDF ve Downloads za 7 dní</h2>
         <div class="body">
           <div id="downloadPills" class="pills"></div>
           <table>
@@ -993,6 +1181,12 @@ COCKPIT_HTML = """<!doctype html>
     const documentSearchBtn = document.getElementById("documentSearchBtn");
     const documentSearchStatus = document.getElementById("documentSearchStatus");
     const documentSearchResults = document.getElementById("documentSearchResults");
+    const readingStatusOptions = [
+      ["ok", "OK"],
+      ["needs_review", "k revizi"],
+      ["unreadable", "nečitelné"],
+      ["superseded", "nahrazeno lepší kopií"]
+    ];
 
     function statusClass(value) {
       if (value === "new") return "ok";
@@ -1201,6 +1395,7 @@ COCKPIT_HTML = """<!doctype html>
         return;
       }
       results.forEach((item) => {
+        const documentRef = item.document_ref || item.document_id;
         const card = document.createElement("div");
         card.className = "search-result";
         const head = document.createElement("div");
@@ -1211,7 +1406,7 @@ COCKPIT_HTML = """<!doctype html>
         title.textContent = item.title || item.original_filename || item.document_id || "Dokument bez názvu";
         const meta = document.createElement("div");
         meta.className = "search-meta";
-        meta.textContent = `${item.domain || "other"} / ${item.document_type || "document"} | ${item.counterparty || "protistrana nezjištěna"} | ${item.related_asset || "věc nezjištěna"}`;
+        meta.textContent = `Čtení: ${item.reading_status_label || "k revizi"} | ${item.domain || "other"} / ${item.document_type || "document"} | ${item.counterparty || "protistrana nezjištěna"} | ${item.related_asset || "věc nezjištěna"}`;
         const toggle = document.createElement("button");
         toggle.className = "secondary";
         toggle.type = "button";
@@ -1227,6 +1422,24 @@ COCKPIT_HTML = """<!doctype html>
         const lifecycle = document.createElement("div");
         lifecycle.className = "search-meta";
         lifecycle.textContent = `Stav: ${item.lifecycle_status || "active"}`;
+        const readingStatus = document.createElement("div");
+        readingStatus.className = "search-meta";
+        readingStatus.textContent = `Stav čtení: ${item.reading_status_label || "k revizi"}`;
+        const statusRow = document.createElement("div");
+        statusRow.className = "status-select-row";
+        const statusLabel = document.createElement("label");
+        statusLabel.textContent = "Stav čtení";
+        const statusSelect = document.createElement("select");
+        readingStatusOptions.forEach(([value, label]) => {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = label;
+          option.selected = value === (item.reading_status || "needs_review");
+          statusSelect.appendChild(option);
+        });
+        statusSelect.addEventListener("change", () => setDocumentReadingStatus(documentRef, statusSelect.value));
+        statusRow.appendChild(statusLabel);
+        statusRow.appendChild(statusSelect);
         const snippet = document.createElement("div");
         snippet.className = "search-snippet";
         snippet.textContent = item.snippet || "";
@@ -1244,9 +1457,9 @@ COCKPIT_HTML = """<!doctype html>
         trashBtn.className = "danger-soft";
         trashBtn.type = "button";
         trashBtn.textContent = "Do koše";
-        printBtn.addEventListener("click", () => printDocument(item.document_id));
-        archiveBtn.addEventListener("click", () => moveDocumentLifecycle(item.document_id, "archive"));
-        trashBtn.addEventListener("click", () => moveDocumentLifecycle(item.document_id, "trash"));
+        printBtn.addEventListener("click", () => printDocument(documentRef));
+        archiveBtn.addEventListener("click", () => moveDocumentLifecycle(documentRef, "archive"));
+        trashBtn.addEventListener("click", () => moveDocumentLifecycle(documentRef, "trash"));
         actions.appendChild(printBtn);
         actions.appendChild(archiveBtn);
         actions.appendChild(trashBtn);
@@ -1257,6 +1470,8 @@ COCKPIT_HTML = """<!doctype html>
         detail.appendChild(id);
         detail.appendChild(path);
         detail.appendChild(lifecycle);
+        detail.appendChild(readingStatus);
+        detail.appendChild(statusRow);
         detail.appendChild(snippet);
         detail.appendChild(actions);
         toggle.addEventListener("click", () => {
@@ -1319,6 +1534,22 @@ COCKPIT_HTML = """<!doctype html>
       if (result.ok && documentSearchInput.value.trim().length >= 2) {
         await searchDocuments();
         await refresh();
+      }
+    }
+
+    async function setDocumentReadingStatus(documentId, readingStatus) {
+      if (!documentId) return;
+      documentSearchStatus.textContent = "Ukládám stav čtení dokumentu...";
+      const result = await postJson("/api/documents/reading-status", {
+        document_id: documentId,
+        reading_status: readingStatus
+      });
+      documentSearchStatus.textContent = result.message || "Stav uložen.";
+      if (result.ok) {
+        await refresh();
+        if (documentSearchInput.value.trim().length >= 2) {
+          await searchDocuments();
+        }
       }
     }
 

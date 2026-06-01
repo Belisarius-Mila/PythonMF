@@ -7,10 +7,12 @@ from pathlib import Path
 
 from app.cockpit import (
     COCKPIT_HTML,
+    document_reference,
     document_work_status,
     move_document_lifecycle_action,
     prepare_document_print_action,
     search_document_index,
+    set_document_reading_status_action,
     web_apps_catalog,
 )
 
@@ -30,6 +32,7 @@ class CockpitTests(unittest.TestCase):
                         "domain": "tax",
                         "document_type": "confirmation",
                         "stored_path": "data/private/documents/vault/tax/reviewed-doc/reviewed.pdf",
+                        "reading_status": "ok",
                     },
                     {
                         "document_id": "pending-doc",
@@ -67,6 +70,8 @@ class CockpitTests(unittest.TestCase):
             self.assertEqual(status["summary"]["new_pdf_count"], 2)
             self.assertEqual(status["summary"]["problem_count"], 4)
             self.assertEqual(status["summary"]["review_pending_count"], 1)
+            self.assertEqual(status["review"]["status_counts"]["ok"], 1)
+            self.assertEqual(status["review"]["status_counts"]["needs_review"], 1)
             self.assertEqual(status["review"]["next_items"][0]["document_id"], "pending-doc")
             self.assertEqual(status["problems"][0]["problem_kind"], "encrypted")
             self.assertEqual(status["problems"][1]["problem_kind"], "duplicate")
@@ -130,11 +135,54 @@ class CockpitTests(unittest.TestCase):
             self.assertEqual(result["count"], 1)
             found = result["results"][0]
             self.assertEqual(found["document_id"], "doc-revize")
+            self.assertEqual(found["document_ref"], document_reference("doc-revize"))
+            self.assertEqual(found["reading_status"], "ok")
+            self.assertEqual(found["reading_status_label"], "OK")
             self.assertIn("[e-mail redigovan]", found["snippet"])
             self.assertIn("[rodne cislo redigovano]", found["snippet"])
             self.assertIn("[URL redigovano]", found["snippet"])
             self.assertNotIn("641215/0987", found["snippet"])
             self.assertNotIn("https://example.com/private", found["snippet"])
+
+    def test_document_search_marks_metadata_only_result_as_needs_review(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault = Path(temp_dir) / "documents"
+            index = vault / "index"
+            index.mkdir(parents=True)
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "doc-text",
+                        "title": "Alpha text",
+                        "domain": "tax",
+                        "document_type": "confirmation",
+                        "stored_path": "data/private/documents/vault/tax/doc-text/text.pdf",
+                    },
+                    {
+                        "document_id": "doc-metadata-only",
+                        "title": "Metadataonly smlouva",
+                        "domain": "insurance",
+                        "document_type": "policy",
+                        "stored_path": "data/private/documents/vault/insurance/doc-metadata-only/doc.pdf",
+                        "text_extraction": {"indexed_chars": 0},
+                    },
+                ],
+            )
+            self.write_jsonl(
+                index / "text_index.jsonl",
+                [
+                    {"document_id": "doc-text", "text": "Alpha searchable text."},
+                    {"document_id": "doc-metadata-only", "text": ""},
+                ],
+            )
+
+            result = search_document_index("metadataonly", vault_dir=vault)
+
+            self.assertEqual(result["count"], 1)
+            self.assertEqual(result["results"][0]["document_id"], "doc-metadata-only")
+            self.assertEqual(result["results"][0]["reading_status"], "needs_review")
+            self.assertEqual(result["results"][0]["reading_status_label"], "k revizi")
 
     def test_cockpit_html_contains_document_search_controls(self) -> None:
         self.assertIn("Najít dokument", COCKPIT_HTML)
@@ -146,6 +194,9 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Tisknout", COCKPIT_HTML)
         self.assertIn("Archivovat", COCKPIT_HTML)
         self.assertIn("Do koše", COCKPIT_HTML)
+        self.assertIn("Stav čtení", COCKPIT_HTML)
+        self.assertIn("/api/documents/reading-status", COCKPIT_HTML)
+        self.assertIn("nahrazeno lepší kopií", COCKPIT_HTML)
 
     def test_cockpit_html_contains_web_apps_modal(self) -> None:
         self.assertIn("Webové aplikace", COCKPIT_HTML)
@@ -210,6 +261,44 @@ class CockpitTests(unittest.TestCase):
             self.assertNotIn("lifecycle_status", docs[0])
             self.assertTrue(source.exists())
 
+    def test_set_document_reading_status_updates_index_manifest_and_audit_log(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault, document_id, _source = self.create_indexed_document(Path(temp_dir))
+
+            result = set_document_reading_status_action(
+                document_id=document_id,
+                reading_status="unreadable",
+                note="OCR později",
+                vault_dir=vault,
+            )
+
+            docs = self.read_jsonl(vault / "index" / "documents_index.jsonl")
+            manifest = json.loads((vault / "vault" / "tax" / document_id / "manifest.json").read_text(encoding="utf-8"))
+            actions = self.read_jsonl(vault / "index" / "document_reading_status_actions.jsonl")
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["reading_status"], "unreadable")
+            self.assertEqual(docs[0]["reading_status"], "unreadable")
+            self.assertEqual(manifest["reading_status"], "unreadable")
+            self.assertEqual(actions[0]["document_id"], document_id)
+            self.assertEqual(actions[0]["reading_status"], "unreadable")
+            self.assertTrue((vault / "index" / "status_backups").exists())
+
+    def test_set_document_reading_status_accepts_document_ref(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault, _document_id, _source = self.create_indexed_document(Path(temp_dir), document_id="doc-1234567890")
+
+            result = set_document_reading_status_action(
+                document_id=document_reference("doc-1234567890"),
+                reading_status="superseded",
+                vault_dir=vault,
+            )
+
+            docs = self.read_jsonl(vault / "index" / "documents_index.jsonl")
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["document_id"], "doc-[rodne cislo redigovano]")
+            self.assertEqual(docs[0]["document_id"], "doc-1234567890")
+            self.assertEqual(docs[0]["reading_status"], "superseded")
+
     @staticmethod
     def write_jsonl(path: Path, rows: list[dict[str, object]]) -> None:
         path.write_text(
@@ -218,9 +307,8 @@ class CockpitTests(unittest.TestCase):
         )
 
     @classmethod
-    def create_indexed_document(cls, root: Path) -> tuple[Path, str, Path]:
+    def create_indexed_document(cls, root: Path, document_id: str = "doc-akce") -> tuple[Path, str, Path]:
         vault = root / "documents"
-        document_id = "doc-akce"
         document_dir = vault / "vault" / "tax" / document_id
         document_dir.mkdir(parents=True)
         source = document_dir / "smlouva.pdf"
