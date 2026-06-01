@@ -5,9 +5,11 @@ import hashlib
 import re
 import shutil
 import subprocess
+import tempfile
 import time
 from collections.abc import Callable
 from datetime import datetime, timezone
+from email import message_from_bytes
 from email.utils import parsedate_to_datetime
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -19,6 +21,7 @@ from app.backup.activity_state import format_backup_activity_reminder
 from app.documents.scandocu import DEFAULT_DOWNLOADS_DIR, scan_downloads_for_pdfs
 from app.documents.vault import (
     DEFAULT_DOCUMENTS_DIR,
+    apply_document_import_file,
     build_snippet,
     document_vault_status_summary,
     append_jsonl,
@@ -29,6 +32,7 @@ from app.documents.vault import (
     read_json_file,
     relative_to_project,
     run_document_print_job,
+    safe_filename,
     safe_text,
     safe_slug,
     sanitize_output,
@@ -36,6 +40,9 @@ from app.documents.vault import (
     write_json,
     write_jsonl,
 )
+from app.email.activity_state import DEFAULT_EMAIL_ACTIVITY_STATE_PATH, record_email_archive_completed
+from app.email.archive_models import EmailArchiveSource
+from app.email.archive_service import DEFAULT_EMAIL_ARCHIVE_DIR, save_email_archive
 from app.email.config import EmailConfigError
 from app.email.icloud_provider import EmailProviderError, ICloudReadOnlyEmailProvider
 from app.email.models import EmailAttachmentMeta, EmailHeader, EmailMessage
@@ -52,6 +59,7 @@ SCANDOCU_LOG_FILE = SCANDOCU_LOG_DIR / "server.log"
 SCANDOCU_SERVER_SCRIPT = PROJECT_ROOT / "scripts" / "scandocu_server.py"
 EMAIL_SESSION_HANDOFF_DIR = PROJECT_ROOT / "data" / "private" / "email_session_handoffs"
 EMAIL_PROCESSING_DECISIONS_FILE = EMAIL_SESSION_HANDOFF_DIR / "email_processing_decisions.json"
+EMAIL_WORK_QUEUE_ACTIONS_FILE = EMAIL_SESSION_HANDOFF_DIR / "email_work_queue_actions.jsonl"
 GIT_ROOT = PROJECT_ROOT.parent
 LOCAL_WEB_APPS = {
     "family-video-organizer": PROJECT_ROOT / "docs" / "family-video-organizer",
@@ -685,6 +693,345 @@ def read_email_processing_message_detail(
         "message": "E-mail načten read-only.",
         "email": email_message_to_processing_detail(message),
     }
+
+
+def process_email_work_queue_batch(
+    *,
+    items: list[dict[str, Any]],
+    trash_confirmation_text: str = "",
+    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+    documents_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    decisions_path: Path = EMAIL_PROCESSING_DECISIONS_FILE,
+    actions_path: Path = EMAIL_WORK_QUEUE_ACTIONS_FILE,
+    activity_state_path: Path = DEFAULT_EMAIL_ACTIVITY_STATE_PATH,
+    icloud_provider_factory: Callable[[], object] | None = None,
+    seznam_provider_factory: Callable[[], object] | None = None,
+) -> dict[str, Any]:
+    if not items:
+        return {"ok": False, "message": "Dávka je prázdná.", "items": []}
+
+    processed: list[dict[str, Any]] = []
+    has_error = False
+    for raw_item in items:
+        if not isinstance(raw_item, dict):
+            has_error = True
+            processed.append({"ok": False, "message": "Neplatná položka dávky."})
+            continue
+        result = process_email_work_queue_item(
+            item=raw_item,
+            trash_confirmation_text=trash_confirmation_text,
+            archive_directory=archive_directory,
+            documents_dir=documents_dir,
+            decisions_path=decisions_path,
+            activity_state_path=activity_state_path,
+            icloud_provider_factory=icloud_provider_factory,
+            seznam_provider_factory=seznam_provider_factory,
+        )
+        processed.append(result)
+        has_error = has_error or not bool(result.get("ok"))
+
+    summary = {
+        "saved": sum(1 for item in processed if item.get("status") == "saved"),
+        "skipped": sum(1 for item in processed if item.get("status") == "skipped"),
+        "trash_pending": sum(1 for item in processed if item.get("status") == "trash_pending"),
+        "trashed": sum(1 for item in processed if item.get("status") == "trashed"),
+        "errors": sum(1 for item in processed if not item.get("ok")),
+        "attachments_imported": sum(int(item.get("attachments_imported", 0) or 0) for item in processed),
+    }
+    append_jsonl(
+        actions_path,
+        {
+            "action": "process_email_work_queue_batch",
+            "created_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+            "summary": summary,
+            "items": [
+                {
+                    "item_id": str(item.get("item_id", "")),
+                    "provider": str(item.get("provider", "")),
+                    "folder": str(item.get("folder", "")),
+                    "uid": str(item.get("uid", "")),
+                    "status": str(item.get("status", "")),
+                    "archive_id": str(item.get("archive_id", "")),
+                    "attachments_imported": int(item.get("attachments_imported", 0) or 0),
+                }
+                for item in processed
+            ],
+            "do_not_commit": True,
+        },
+    )
+    message = (
+        "Dávka zpracována s chybami."
+        if has_error
+        else "Dávka zpracována. Archivované e-maily a PDF přílohy jsou uložené lokálně."
+    )
+    return {"ok": not has_error, "message": message, "summary": summary, "items": processed}
+
+
+def process_email_work_queue_item(
+    *,
+    item: dict[str, Any],
+    trash_confirmation_text: str,
+    archive_directory: Path,
+    documents_dir: Path,
+    decisions_path: Path,
+    activity_state_path: Path,
+    icloud_provider_factory: Callable[[], object] | None,
+    seznam_provider_factory: Callable[[], object] | None,
+) -> dict[str, Any]:
+    item_id = safe_text(str(item.get("id", ""))).strip()
+    provider = safe_text(str(item.get("provider", ""))).strip()
+    folder = safe_text(str(item.get("folder", "INBOX"))).strip() or "INBOX"
+    uid = safe_text(str(item.get("uid", ""))).strip()
+    decision = safe_text(str(item.get("queueDecision") or item.get("action") or "")).strip()
+    save_attachment_ids = {
+        safe_text(str(part_id)).strip()
+        for part_id in item.get("saveAttachments", [])
+        if safe_text(str(part_id)).strip()
+    }
+    base = {
+        "item_id": item_id,
+        "provider": provider,
+        "folder": folder,
+        "uid": uid,
+    }
+    if not uid or not provider:
+        return {**base, "ok": False, "status": "error", "message": "Položce chybí provider nebo UID."}
+    if decision == "skip":
+        clear_email_processing_decision(item_id=item_id, path=decisions_path)
+        return {**base, "ok": True, "status": "skipped", "message": "E-mail byl uzavřen bez uložení."}
+    if decision == "trash_requested":
+        return process_email_work_queue_trash_item(
+            base=base,
+            trash_confirmation_text=trash_confirmation_text,
+            decisions_path=decisions_path,
+            icloud_provider_factory=icloud_provider_factory,
+            seznam_provider_factory=seznam_provider_factory,
+        )
+    if decision != "save":
+        return {**base, "ok": False, "status": "error", "message": "Položka nemá platné dávkové rozhodnutí."}
+
+    try:
+        source = read_email_archive_source_for_processing(
+            provider=provider,
+            folder=folder,
+            uid=uid,
+            icloud_provider_factory=icloud_provider_factory,
+            seznam_provider_factory=seznam_provider_factory,
+        )
+    except (EmailConfigError, EmailProviderError, SeznamEmailProviderError) as exc:
+        return {**base, "ok": False, "status": "error", "message": str(exc)}
+
+    archive_result = save_email_archive(source, directory=archive_directory)
+    if archive_result.created:
+        record_email_archive_completed(path=activity_state_path)
+
+    attachment_results = import_selected_email_pdf_attachments(
+        source=source,
+        selected_part_ids=save_attachment_ids,
+        documents_dir=documents_dir,
+        category=safe_text(str(item.get("category", ""))),
+    )
+    clear_email_processing_decision(item_id=item_id, path=decisions_path)
+    ok_attachments = [result for result in attachment_results if result.get("ok")]
+    failed_attachments = [result for result in attachment_results if not result.get("ok")]
+    return {
+        **base,
+        "ok": not failed_attachments,
+        "status": "saved",
+        "archive_id": archive_result.archive_id,
+        "archive_created": archive_result.created,
+        "archive_path": str(relative_to_project(archive_result.path)),
+        "attachments_imported": len(ok_attachments),
+        "attachments": attachment_results,
+        "message": (
+            f"E-mail uložen do EmailArchiveVault; PDF příloh uloženo: {len(ok_attachments)}."
+            if not failed_attachments
+            else f"E-mail uložen, ale {len(failed_attachments)} příloh se nepodařilo uložit."
+        ),
+    }
+
+
+def read_email_archive_source_for_processing(
+    *,
+    provider: str,
+    folder: str,
+    uid: str,
+    icloud_provider_factory: Callable[[], object] | None,
+    seznam_provider_factory: Callable[[], object] | None,
+) -> EmailArchiveSource:
+    safe_provider = provider.strip().casefold()
+    safe_uid = uid.strip()
+    safe_folder = folder.strip() or "INBOX"
+    if safe_provider == "icloud":
+        client = (icloud_provider_factory or ICloudReadOnlyEmailProvider)()
+    elif safe_provider == "seznam":
+        client = (seznam_provider_factory or SeznamReadOnlyEmailProvider)()
+    else:
+        raise EmailProviderError("Neznámý e-mailový zdroj.")
+    source = client.read_archive_source_by_uid(uid=safe_uid, folder=safe_folder, max_chars=200_000)  # type: ignore[attr-defined]
+    if not isinstance(source, EmailArchiveSource):
+        raise EmailProviderError("Provider vrátil neplatný archivní zdroj.")
+    return source
+
+
+def import_selected_email_pdf_attachments(
+    *,
+    source: EmailArchiveSource,
+    selected_part_ids: set[str],
+    documents_dir: Path,
+    category: str,
+) -> list[dict[str, Any]]:
+    if not selected_part_ids:
+        return []
+    if source.original_eml is None:
+        return [
+            {
+                "ok": False,
+                "part_id": part_id,
+                "message": "Archivní zdroj neobsahuje původní EML, přílohu nelze uložit.",
+            }
+            for part_id in sorted(selected_part_ids)
+        ]
+
+    message = message_from_bytes(source.original_eml)
+    meta_by_part_id = {attachment.part_id: attachment for attachment in source.attachments}
+    imported: list[dict[str, Any]] = []
+    found_part_ids: set[str] = set()
+    with tempfile.TemporaryDirectory(prefix="samantha_email_pdf_", dir="/private/tmp") as temp_dir:
+        temp_root = Path(temp_dir)
+        for index, part in enumerate(message.walk() if message.is_multipart() else [message]):
+            part_id = str(index)
+            if part_id not in selected_part_ids:
+                continue
+            found_part_ids.add(part_id)
+            meta = meta_by_part_id.get(part_id)
+            filename = safe_filename((meta.filename if meta else part.get_filename()) or f"attachment-{part_id}.pdf")
+            content_type = (meta.content_type if meta else part.get_content_type()) or ""
+            if content_type.casefold() != "application/pdf" and not filename.casefold().endswith(".pdf"):
+                imported.append(
+                    {
+                        "ok": False,
+                        "part_id": part_id,
+                        "filename": safe_text(filename),
+                        "message": "Příloha není PDF; pro dávkový import byla přeskočena.",
+                    }
+                )
+                continue
+            payload = part.get_payload(decode=True)
+            if not isinstance(payload, bytes) or not payload:
+                imported.append(
+                    {
+                        "ok": False,
+                        "part_id": part_id,
+                        "filename": safe_text(filename),
+                        "message": "Příloha neobsahuje čitelná data.",
+                    }
+                )
+                continue
+            temp_path = temp_root / filename
+            temp_path.write_bytes(payload)
+            try:
+                result = apply_document_import_file(
+                    source_path=str(temp_path),
+                    target_domain=email_processing_category_to_document_domain(category),
+                    document_type="email-attachment-pdf",
+                    counterparty=source.sender,
+                    tags=f"email,email-attachment,pdf,{source.provider}",
+                    case_id=f"email-{source.provider}-{source.uid}",
+                    document_title=f"E-mail UID {source.uid} příloha {filename}",
+                    vault_dir=documents_dir,
+                )
+            except ValueError as exc:
+                imported.append(
+                    {
+                        "ok": False,
+                        "part_id": part_id,
+                        "filename": safe_text(filename),
+                        "message": str(exc),
+                    }
+                )
+                continue
+            imported.append(
+                {
+                    "ok": True,
+                    "part_id": part_id,
+                    "filename": safe_text(filename),
+                    "document_id": result.document_id,
+                    "created": result.created,
+                    "stored_path": str(relative_to_project(result.destination)),
+                    "message": result.message,
+                }
+            )
+
+    for missing_part_id in sorted(selected_part_ids - found_part_ids):
+        imported.append(
+            {
+                "ok": False,
+                "part_id": missing_part_id,
+                "message": "Vybraná příloha nebyla v e-mailu nalezena.",
+            }
+        )
+    return imported
+
+
+def email_processing_category_to_document_domain(category: str) -> str:
+    normalized = category.casefold()
+    if "pojist" in normalized or "smlouv" in normalized:
+        return "insurance"
+    if "úřad" in normalized or "urad" in normalized or "dan" in normalized:
+        return "tax"
+    return "other"
+
+
+def process_email_work_queue_trash_item(
+    *,
+    base: dict[str, Any],
+    trash_confirmation_text: str,
+    decisions_path: Path,
+    icloud_provider_factory: Callable[[], object] | None,
+    seznam_provider_factory: Callable[[], object] | None,
+) -> dict[str, Any]:
+    required = f"Potvrzuji, přesuň e-mail UID {base['uid']} do koše."
+    if trash_confirmation_text.strip() != required:
+        return {
+            **base,
+            "ok": True,
+            "status": "trash_pending",
+            "required_confirmation": required,
+            "message": f"Koš čeká na přesné potvrzení: {required}",
+        }
+    try:
+        safe_provider = str(base["provider"]).strip().casefold()
+        if safe_provider == "icloud":
+            client = (icloud_provider_factory or ICloudReadOnlyEmailProvider)()
+        elif safe_provider == "seznam":
+            client = (seznam_provider_factory or SeznamReadOnlyEmailProvider)()
+        else:
+            raise EmailProviderError("Neznámý e-mailový zdroj.")
+        move_to_trash = getattr(client, "move_message_to_trash", None)
+        if not callable(move_to_trash):
+            return {
+                **base,
+                "ok": False,
+                "status": "trash_pending",
+                "required_confirmation": required,
+                "message": "Provider zatím neumí bezpečný přesun do koše; položka zůstává čekající.",
+            }
+        move_to_trash(uid=str(base["uid"]), folder=str(base["folder"]))  # type: ignore[misc]
+    except (EmailConfigError, EmailProviderError, SeznamEmailProviderError) as exc:
+        return {**base, "ok": False, "status": "trash_pending", "required_confirmation": required, "message": str(exc)}
+    clear_email_processing_decision(item_id=str(base["item_id"]), path=decisions_path)
+    return {**base, "ok": True, "status": "trashed", "message": "E-mail byl přesunut do koše."}
+
+
+def clear_email_processing_decision(*, item_id: str, path: Path) -> None:
+    if not item_id:
+        return
+    decisions = read_email_processing_decisions(path)
+    if item_id not in decisions:
+        return
+    decisions.pop(item_id, None)
+    write_json(path, {"decisions": decisions})
 
 
 def cockpit_status() -> dict[str, Any]:
@@ -1408,6 +1755,17 @@ class CockpitServer:
                             folder=str(payload.get("folder", "INBOX")),
                             uid=str(payload.get("uid", "")),
                             max_chars=max_chars,
+                        )
+                    )
+                    return
+                if parsed.path == "/api/email-processing/process-batch":
+                    payload = self.read_json()
+                    raw_items = payload.get("items", [])
+                    items = raw_items if isinstance(raw_items, list) else []
+                    self.respond_json(
+                        process_email_work_queue_batch(
+                            items=[item for item in items if isinstance(item, dict)],
+                            trash_confirmation_text=str(payload.get("trash_confirmation_text", "")),
                         )
                     )
                     return
@@ -2158,12 +2516,56 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         }
       }
 
-      batchBtn.addEventListener("click", () => {
-        const ok = queue.confirm("Označit dávku jako zpracovanou v pracovní frontě?\\n\\nArchivace příloh a fyzické mazání nejsou v tomto kroku ještě spuštěné.");
+      batchBtn.addEventListener("click", async () => {
+        const trashItems = queueItems.filter((item) => item.queueDecision === "trash_requested");
+        let trashConfirmation = "";
+        if (trashItems.length) {
+          const required = trashItems.length === 1
+            ? "Potvrzuji, přesuň e-mail UID " + trashItems[0].uid + " do koše."
+            : "";
+          const promptText = required
+            ? "Pro přesun do koše opiš přesně potvrzovací větu:\\n\\n" + required
+            : "V dávce je více e-mailů do koše. Koš zůstane čekající; nejdřív zpracuj ukládání a potom maž jednotlivě.";
+          const entered = required ? queue.prompt(promptText, "") : "";
+          if (required && entered === null) return;
+          trashConfirmation = entered || "";
+        }
+        const ok = queue.confirm("Zpracovat dávku?\\n\\nUložené e-maily půjdou do EmailArchiveVault. Vybrané PDF přílohy půjdou do private document vaultu a fulltextového indexu.");
         if (!ok) return;
-        queueItems.splice(0, queueItems.length);
-        selectedId = "";
-        renderQueueList();
+        batchBtn.disabled = true;
+        queueStatus.textContent = "Zpracovávám dávku. U větších PDF to může chvíli trvat.";
+        try {
+          const res = await fetch("/api/email-processing/process-batch", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+              items: queueItems,
+              trash_confirmation_text: trashConfirmation
+            })
+          });
+          const data = await res.json();
+          if (!data.ok) {
+            queueStatus.textContent = data.message || "Zpracování dávky skončilo s chybou.";
+          } else {
+            queueStatus.textContent = data.message || "Dávka zpracována.";
+          }
+          const remaining = [];
+          const byId = new Map((data.items || []).map((result) => [result.item_id, result]));
+          queueItems.forEach((item) => {
+            const result = byId.get(item.id);
+            item.batchResult = result || {};
+            if (!result || !result.ok || result.status === "trash_pending") remaining.push(item);
+          });
+          queueItems.splice(0, queueItems.length, ...remaining);
+          selectedId = queueItems.length ? queueItems[0].id : "";
+          renderQueueList();
+          if (selectedId) renderDetail(currentItem());
+          else detailPane.innerHTML = '<div class="empty">Dávka je hotová.</div>';
+        } catch (err) {
+          queueStatus.textContent = "Chyba zpracování dávky: " + err;
+        } finally {
+          updateBatchState();
+        }
       });
 
       renderQueueList();

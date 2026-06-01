@@ -1,4 +1,4 @@
-Nazev: Email Work Queue - detail e-mailu a prvni zpracovatelske UI
+Nazev: Email Work Queue - davkove zpracovani, PDF prilohy a potvrzeny kos
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
@@ -7,6 +7,7 @@ Datum: 2026-06-01
 Co se resilo:
 - Navazani na Email Processing v Cockpitu a priprava skutecneho zpracovani e-mailu po triage.
 - Mila upresnil cil: v Email Work Queue ma byt po kliknuti videt cele telo e-mailu, prilohy, volby ulozit/neukladat/kos a davkove zpracovani.
+- Navazujici cil 2026-06-01: skutecne `Zpracovat davku`, ukladani e-mailu a PDF priloh, kos pres potvrzeni a fulltextova dohledatelnost.
 - Matysek zmeny v repozitari resi jina session a tato prace je nema menit ani commitovat.
 
 Co je hotove:
@@ -21,29 +22,38 @@ Co je hotove:
 - Detail v otevrenem Work Queue okne se cachuje; opakovane kliknuti na stejny e-mail uz znovu nevola IMAP.
 - Pri nacitani detailu je videt stav `Nacitam cely e-mail read-only`; u PDF je jasne napsano, ze to muze trvat.
 - Tlacitko u priloh bylo prejmenovane z `Rozkliknout` na `Metadata`, protoze zatim neotevira soubor, jen ukazuje metadata a informaci, ze otevreni PDF prijde po potvrzenem ulozeni prilohy.
-- Testy `tests.test_cockpit` a `tests.test_seznam_provider` pokryvaji read-only detail, rozpracovane polozky, popup UI, cache/loading texty a vetsi explicitni limit zpravy.
+- Pridan backend endpoint `/api/email-processing/process-batch`.
+- `Zpracovat davku` v popupu uz vola serverovy endpoint misto pouheho vycisteni fronty.
+- Pro `Ulozit e-mail` se e-mail uklada do lokalniho `EmailArchiveVault` pres stavajici `save_email_archive`.
+- Vybrane PDF prilohy se z puvodniho EML vytahnou podle `part_id` a pres `apply_document_import_file` se ulozi do private document vaultu, vcetne `documents_index.jsonl` a `text_index.jsonl`, tedy jsou fulltextove dohledatelne v dokumentovem hledani.
+- Pro `Neukladat` se polozka uzavre bez provider callu a smaze se jen lokalni pracovni rozhodnuti.
+- Pro `Kos` existuje presna potvrzovaci veta `Potvrzuji, přesuň e-mail UID ... do koše.`; server bez ni vraci `trash_pending`.
+- iCloud i Seznam provider maji metodu `move_message_to_trash`; pouziva IMAP `MOVE`, pripadne fallback `COPY` do kose + `STORE \Deleted`, ale nepouziva `EXPUNGE`.
+- Batch zapisuje audit do lokalniho ignorovaneho JSONL `data/private/email_session_handoffs/email_work_queue_actions.jsonl`.
+- Testy `tests.test_cockpit`, `tests.test_email_archive_tools`, `tests.test_email_icloud_archive_provider`, `tests.test_seznam_provider`, `tests.test_payment_case_documents` a `tests.test_email_activity_state` pokryvaji read-only detail, rozpracovane polozky, popup UI, batch archivaci, PDF import, skip, potvrzovaci branu kose a provider parsovani.
 - Lokalni Cockpit byl po upravach restartovan a bezi na `http://127.0.0.1:8770`.
 
 Co neni hotove:
-- Tlacitko `Zpracovat davku` zatim jen vycisti pracovni frontu v popupu; jeste nearchivuje e-mail, neuklada PDF a fyzicky nemaze.
-- Fyzicke smazani e-mailu zatim neni implementovane. Musi byt samostatne potvrzovane a otestovane.
-- Ukladani vybranych priloh do document vaultu/inboxu zatim neni implementovane. Aktualni archivacni vrstva e-mailu uklada jen metadata priloh.
-- PDF prilohy zatim nejdou z Work Queue otevrit; aktualne jde jen zobrazit metadata a zaskrtnout budoucí ulozeni.
-- Fulltextove vyhledani ulozeneho e-mailu existuje pres EmailArchiveVault koncept, ale jeste neni propojene s Work Queue davkou a dokumentovym vyhledavanim v Cockpitu.
+- Realny move-to-trash pres iCloud/Seznam je implementovany, ale jeste nebyl rucne otestovan na konkretni bezpecne vybrane zprave.
+- PDF prilohy po ulozeni zatim nejdou primo otevrit z Work Queue; jsou ulozene ve vaultu a dohledatelne pres document search.
+- Work Queue zatim nezobrazuje detailni vysledek ulozeni jednotlivych priloh v detail pane, jen stav fronty.
+- Fulltext celeho tela ulozeneho e-mailu je v EmailArchiveVault souborech, ale dokumentove fulltextove hledani zatim prohledava hlavne ulozene PDF prilohy; sjednocene hledani e-mail archive + document vault je dalsi navazujici krok.
 
 Dalsi krok:
-- Implementovat potvrzene `Zpracovat davku`: pro polozky `Ulozit` ulozit e-mail do EmailArchiveVault a vybrane prilohy do soukromeho document inbox/vault workflow; pro `Neukladat` jen uzavrit bez ulozeni; pro `Kos` nejdrive zobrazit presne potvrzeni a teprve potom resit skutecny delete/move-to-trash.
+- Rucne otestovat jednu malou davku v Cockpitu: jeden e-mail ulozit, jednu PDF prilohu ulozit, jednu polozku neukladat; potom overit hledani ve `Documenty` a lokalni `EmailArchiveVault`.
 
 Navrhovane dalsi kroky:
-- Okamzite: udelat batch endpoint bez destruktivniho mazani, ktery ulozi jen e-mailovy archiv a zapise audit vysledek.
-- Potom: pridat bezpecne ulozeni vybranych PDF priloh a napojit je na document vault index.
-- Nakonec: zvazit fyzicke mazani e-mailu jako oddeleny workflow s presnou potvrzovaci vetou a mozna spise `move to Trash` nez okamzite `EXPUNGE`.
+- Okamzite: rucni realny test batch ulozeni bez mazani a overeni fulltextu PDF prilohy.
+- Potom: rucni realny test presunu jedne zcela bezpecne zpravy do kose pres presnou potvrzovaci vetu; overit, ze neni trvale expungovana.
+- Navazujici zlepseni: v detailu Work Queue zobrazit ulozene `archive_id`, `document_id` a odkaz/cestu k ulozene PDF priloze; sjednotit vyhledavani nad EmailArchiveVault a document vaultem.
 
 Zmenene nebo relevantni soubory:
 - `app/cockpit.py`
 - `app/email/icloud_provider.py`
 - `app/email/seznam_provider.py`
 - `tests/test_cockpit.py`
+- `tests/test_email_archive_tools.py`
+- `tests/test_email_icloud_archive_provider.py`
 - `tests/test_seznam_provider.py`
 - `memory/ACTIVE_PROJECTS.md`
 - `memory/MEMORY_INDEX.md`
@@ -51,4 +61,6 @@ Zmenene nebo relevantni soubory:
 Bezpecnost / neukladat:
 - Do handoffu nejsou ulozene zadne predmety realnych e-mailu, tela e-mailu, adresy, UID, tokeny ani hesla.
 - Realna tela e-mailu zustavaji pouze lokalne v Cockpit UI po explicitnim kliknuti.
+- Batch uklada plny e-mail a PDF prilohy jen do lokalnich soukromych slozek; tyto runtime soubory necommitovat.
+- Kos vyzaduje presnou potvrzovaci vetu a kod nepouziva `EXPUNGE`.
 - Soukrome runtime soubory v `data/private/` a `data/session_autosave/` necommitovat.

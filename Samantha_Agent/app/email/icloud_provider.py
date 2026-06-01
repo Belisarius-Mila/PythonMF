@@ -22,6 +22,7 @@ MAX_MESSAGE_BYTES = 2_000_000
 MAX_EXPLICIT_MESSAGE_BYTES = 25_000_000
 ICLOUD_DEFAULT_FOLDERS = ("INBOX",)
 ICLOUD_SPAM_FOLDER_CANDIDATES = ("Junk", "Spam", "Bulk Mail")
+ICLOUD_TRASH_FOLDER_CANDIDATES = ("Deleted Messages", "Trash", "Deleted Items", "Bin")
 
 
 class EmailProviderError(RuntimeError):
@@ -257,6 +258,25 @@ class ICloudReadOnlyEmailProvider:
             raise
         except imaplib.IMAP4.error as exc:
             raise EmailProviderError("IMAP server odmitl pozadavek.") from exc
+        except OSError as exc:
+            raise EmailProviderError("Nepodarilo se pripojit k iCloud Mailu.") from exc
+
+    def move_message_to_trash(self, uid: str, folder: str = "INBOX") -> None:
+        safe_uid = _validate_uid(uid)
+        try:
+            with imaplib.IMAP4_SSL(self._config.host, self._config.port) as imap:
+                imap.login(self._config.address, self._config.app_password)
+                _select_writable_folder(imap, folder)
+                _move_uid_to_trash(
+                    imap=imap,
+                    uid=safe_uid.encode("ascii"),
+                    trash_candidates=ICLOUD_TRASH_FOLDER_CANDIDATES,
+                    provider_label="iCloud",
+                )
+        except EmailProviderError:
+            raise
+        except imaplib.IMAP4.error as exc:
+            raise EmailProviderError("IMAP server odmitl presun do kose.") from exc
         except OSError as exc:
             raise EmailProviderError("Nepodarilo se pripojit k iCloud Mailu.") from exc
 
@@ -612,6 +632,54 @@ def _select_readonly_folder(
     if required:
         raise EmailProviderError(f"Nepodarilo se otevrit slozku {folder}.")
     return False
+
+
+def _select_writable_folder(imap: imaplib.IMAP4_SSL, folder: str) -> None:
+    try:
+        status, _data = imap.select(folder, readonly=False)
+    except imaplib.IMAP4.error as exc:
+        raise EmailProviderError(f"Nepodarilo se otevrit slozku {folder} pro zapis.") from exc
+    if status != "OK":
+        raise EmailProviderError(f"Nepodarilo se otevrit slozku {folder} pro zapis.")
+
+
+def _move_uid_to_trash(
+    imap: imaplib.IMAP4_SSL,
+    uid: bytes,
+    trash_candidates: tuple[str, ...],
+    provider_label: str,
+) -> None:
+    for trash_folder in trash_candidates:
+        mailbox = _mailbox_command_arg(trash_folder)
+        try:
+            status, _data = imap.uid("MOVE", uid, mailbox)
+        except imaplib.IMAP4.error:
+            status = "NO"
+        if status == "OK":
+            return
+
+    for trash_folder in trash_candidates:
+        mailbox = _mailbox_command_arg(trash_folder)
+        try:
+            copy_status, _copy_data = imap.uid("COPY", uid, mailbox)
+        except imaplib.IMAP4.error:
+            continue
+        if copy_status != "OK":
+            continue
+        store_status, _store_data = imap.uid("STORE", uid, "+FLAGS.SILENT", r"(\Deleted)")
+        if store_status == "OK":
+            return
+        raise EmailProviderError(
+            f"{provider_label}: zprava byla zkopirovana do kose, ale nepodarilo se oznacit puvodni zpravu."
+        )
+
+    raise EmailProviderError(f"{provider_label}: nepodarilo se najit nebo pouzit slozku Kos.")
+
+
+def _mailbox_command_arg(folder: str) -> str:
+    if re.search(r"[\s(){}%*\"\\\\]", folder):
+        return '"' + folder.replace("\\", "\\\\").replace('"', '\\"') + '"'
+    return folder
 
 
 def _fetch_message_size(imap: imaplib.IMAP4_SSL, uid: bytes) -> int | None:

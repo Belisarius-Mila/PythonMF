@@ -18,6 +18,7 @@ from app.cockpit import (
     new_email_headers_overview,
     parse_email_processing_items,
     prepare_document_print_action,
+    process_email_work_queue_batch,
     read_email_processing_message_detail,
     read_email_processing_decisions,
     save_email_processing_decision,
@@ -25,6 +26,7 @@ from app.cockpit import (
     set_document_reading_status_action,
     web_apps_catalog,
 )
+from app.email.archive_models import EmailArchiveSource
 from app.email.models import EmailAttachmentMeta, EmailHeader, EmailMessage
 
 
@@ -434,6 +436,163 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["items"][0]["action"], "process")
         self.assertFalse(result["items"][0]["is_new_header"])
 
+    def test_process_email_work_queue_batch_archives_email_and_imports_pdf_attachment(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            decisions_path = root / "decisions.json"
+            archive_dir = root / "email_archive"
+            documents_dir = root / "documents"
+            actions_path = root / "work_queue_actions.jsonl"
+            activity_state_path = root / "activity_state.json"
+            raw_message = _raw_email_with_pdf_attachment()
+            provider = _FakeArchiveProvider(
+                EmailArchiveSource(
+                    uid="14157",
+                    date="Mon, 1 Jun 2026 10:00:00 +0200",
+                    sender="Sender <sender@example.com>",
+                    subject="Faktura za služby",
+                    body_text="Dobrý den, v příloze posíláme fakturu.",
+                    attachments=(
+                        EmailAttachmentMeta(
+                            filename="faktura.pdf",
+                            content_type="application/pdf",
+                            size_bytes=62,
+                            part_id="2",
+                            content_id="",
+                            disposition="attachment",
+                        ),
+                    ),
+                    original_eml=raw_message,
+                    provider="icloud",
+                    mailbox="INBOX",
+                )
+            )
+            save_email_processing_decision(
+                item_id="process-1",
+                action="process",
+                item={"id": "process-1", "provider": "iCloud", "folder": "INBOX", "uid": "14157"},
+                path=decisions_path,
+            )
+
+            result = process_email_work_queue_batch(
+                items=[
+                    {
+                        "id": "process-1",
+                        "provider": "iCloud",
+                        "folder": "INBOX",
+                        "uid": "14157",
+                        "category": "faktury/e-shopy",
+                        "queueDecision": "save",
+                        "saveAttachments": ["2"],
+                    }
+                ],
+                archive_directory=archive_dir,
+                documents_dir=documents_dir,
+                decisions_path=decisions_path,
+                actions_path=actions_path,
+                activity_state_path=activity_state_path,
+                icloud_provider_factory=lambda: provider,
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["summary"]["saved"], 1)
+            self.assertEqual(result["summary"]["attachments_imported"], 1)
+            self.assertTrue((archive_dir / "email-14157-faktura-za-sluzby" / "metadata.json").exists())
+            self.assertEqual(read_email_processing_decisions(decisions_path), {})
+            docs = self.read_jsonl(documents_dir / "index" / "documents_index.jsonl")
+            text_rows = self.read_jsonl(documents_dir / "index" / "text_index.jsonl")
+            self.assertEqual(len(docs), 1)
+            self.assertEqual(docs[0]["document_type"], "email-attachment-pdf")
+            self.assertIn("faktura.pdf", docs[0]["original_filename"])
+            self.assertEqual(len(text_rows), 1)
+            self.assertTrue(actions_path.exists())
+            self.assertTrue(activity_state_path.exists())
+
+    def test_process_email_work_queue_batch_skip_clears_decision_without_provider_call(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "decisions.json"
+            save_email_processing_decision(
+                item_id="skip-1",
+                action="process",
+                item={"id": "skip-1", "provider": "iCloud", "folder": "INBOX", "uid": "14157"},
+                path=path,
+            )
+
+            result = process_email_work_queue_batch(
+                items=[
+                    {
+                        "id": "skip-1",
+                        "provider": "iCloud",
+                        "folder": "INBOX",
+                        "uid": "14157",
+                        "queueDecision": "skip",
+                    }
+                ],
+                archive_directory=Path(temp_dir) / "archive",
+                documents_dir=Path(temp_dir) / "documents",
+                decisions_path=path,
+                actions_path=Path(temp_dir) / "actions.jsonl",
+                activity_state_path=Path(temp_dir) / "activity.json",
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["summary"]["skipped"], 1)
+            self.assertEqual(read_email_processing_decisions(path), {})
+
+    def test_process_email_work_queue_batch_trash_requires_exact_confirmation(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            provider = _FakeArchiveProvider(_archive_source_without_attachment())
+
+            result = process_email_work_queue_batch(
+                items=[
+                    {
+                        "id": "trash-1",
+                        "provider": "iCloud",
+                        "folder": "INBOX",
+                        "uid": "14157",
+                        "queueDecision": "trash_requested",
+                    }
+                ],
+                archive_directory=Path(temp_dir) / "archive",
+                documents_dir=Path(temp_dir) / "documents",
+                decisions_path=Path(temp_dir) / "decisions.json",
+                actions_path=Path(temp_dir) / "actions.jsonl",
+                activity_state_path=Path(temp_dir) / "activity.json",
+                icloud_provider_factory=lambda: provider,
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["summary"]["trash_pending"], 1)
+            self.assertFalse(provider.trash_calls)
+            self.assertIn("Potvrzuji, přesuň e-mail UID 14157 do koše.", result["items"][0]["required_confirmation"])
+
+    def test_process_email_work_queue_batch_confirmed_trash_uses_provider_move(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            provider = _FakeArchiveProvider(_archive_source_without_attachment())
+
+            result = process_email_work_queue_batch(
+                items=[
+                    {
+                        "id": "trash-1",
+                        "provider": "iCloud",
+                        "folder": "INBOX",
+                        "uid": "14157",
+                        "queueDecision": "trash_requested",
+                    }
+                ],
+                trash_confirmation_text="Potvrzuji, přesuň e-mail UID 14157 do koše.",
+                archive_directory=Path(temp_dir) / "archive",
+                documents_dir=Path(temp_dir) / "documents",
+                decisions_path=Path(temp_dir) / "decisions.json",
+                actions_path=Path(temp_dir) / "actions.jsonl",
+                activity_state_path=Path(temp_dir) / "activity.json",
+                icloud_provider_factory=lambda: provider,
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["summary"]["trashed"], 1)
+            self.assertEqual(provider.trash_calls, [{"uid": "14157", "folder": "INBOX"}])
+
     def test_email_processing_html_contains_readonly_overview_controls(self) -> None:
         self.assertIn("Email Processing", EMAIL_PROCESSING_HTML)
         self.assertIn("/api/email-processing/overview", EMAIL_PROCESSING_HTML)
@@ -441,6 +600,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/email-processing/decision", EMAIL_PROCESSING_HTML)
         self.assertIn("/api/email-processing/new-headers", EMAIL_PROCESSING_HTML)
         self.assertIn("/api/email-processing/read-message", EMAIL_PROCESSING_HTML)
+        self.assertIn("/api/email-processing/process-batch", EMAIL_PROCESSING_HTML)
         self.assertIn("read-only", EMAIL_PROCESSING_HTML)
         self.assertIn("Obnovit nové", EMAIL_PROCESSING_HTML)
         self.assertIn('id="refreshBtn" disabled', EMAIL_PROCESSING_HTML)
@@ -640,6 +800,54 @@ class _FakeMessageProvider:
     ) -> EmailMessage:
         self.calls.append({"uid": uid, "max_chars": max_chars, "folder": folder})
         return self._message
+
+
+class _FakeArchiveProvider:
+    def __init__(self, source: EmailArchiveSource) -> None:
+        self._source = source
+        self.archive_calls: list[dict[str, object]] = []
+        self.trash_calls: list[dict[str, object]] = []
+
+    def read_archive_source_by_uid(self, uid: str, max_chars: int = 50_000, folder: str = "INBOX") -> EmailArchiveSource:
+        self.archive_calls.append({"uid": uid, "max_chars": max_chars, "folder": folder})
+        return self._source
+
+    def move_message_to_trash(self, uid: str, folder: str = "INBOX") -> None:
+        self.trash_calls.append({"uid": uid, "folder": folder})
+
+
+def _archive_source_without_attachment() -> EmailArchiveSource:
+    return EmailArchiveSource(
+        uid="14157",
+        date="Mon, 1 Jun 2026 10:00:00 +0200",
+        sender="Sender <sender@example.com>",
+        subject="Faktura za služby",
+        body_text="Dobrý den.",
+        provider="icloud",
+        mailbox="INBOX",
+    )
+
+
+def _raw_email_with_pdf_attachment() -> bytes:
+    pdf_bytes = b"%PDF-1.4\n1 0 obj <<>> endobj\ntrailer <<>>\n%%EOF\n"
+    return (
+        b"From: Sender <sender@example.com>\r\n"
+        b"Date: Mon, 1 Jun 2026 10:00:00 +0200\r\n"
+        b"Subject: Faktura za sluzby\r\n"
+        b"MIME-Version: 1.0\r\n"
+        b"Content-Type: multipart/mixed; boundary=\"outer\"\r\n"
+        b"\r\n"
+        b"--outer\r\n"
+        b"Content-Type: text/plain; charset=utf-8\r\n"
+        b"\r\n"
+        b"Dobry den, v priloze posilame fakturu.\r\n"
+        b"--outer\r\n"
+        b"Content-Type: application/pdf; name=\"faktura.pdf\"\r\n"
+        b"Content-Disposition: attachment; filename=\"faktura.pdf\"\r\n"
+        b"\r\n"
+        + pdf_bytes
+        + b"\r\n--outer--\r\n"
+    )
 
 
 if __name__ == "__main__":
