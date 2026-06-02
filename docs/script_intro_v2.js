@@ -19,6 +19,7 @@ const dialogueHelpButton = document.getElementById("dialogueHelpButton");
 const dialogueDoorButton = document.getElementById("dialogueDoorButton");
 const owlGardenHud = document.getElementById("owlGardenHud");
 const backFromOwlGardenButton = document.getElementById("backFromOwlGardenButton");
+const owlGardenDoorButton = document.getElementById("owlGardenDoorButton");
 const forestSchoolMapButton = document.getElementById("forestSchoolMapButton");
 const owlGardenHelpButton = document.getElementById("owlGardenHelpButton");
 const owlGardenOverlay = document.getElementById("owlGardenOverlay");
@@ -150,6 +151,8 @@ const owlGardenDictionary = [
   { en: "count", cz: "počítej" },
   { en: "garden", cz: "zahrada" },
 ];
+
+const owlGardenReviewHelpText = "Nyní můžeš procvičovat slovíčka, když otevřeš slovník, knihu. Dále můžeš s kamarády pokračovat, pokud stiskneš ikonu dveře.";
 
 const owlGardenOutroDialogue = [
   {
@@ -945,6 +948,8 @@ function renderScene() {
   dialogueHud.classList.toggle("hidden", state.currentScene !== "benjiBunny" && !clearingScene);
   dialoguePanel.classList.toggle("hidden", state.currentScene !== "benjiBunny" && !clearingScene);
   owlGardenHud.classList.toggle("hidden", state.currentScene !== "owlGarden" && !houseBunnyScene && !forestSchoolScene);
+  owlGardenDoorButton.classList.toggle("hidden", state.currentScene !== "owlGarden" || state.owlGardenPhase !== "review");
+  owlGardenDoorButton.classList.toggle("pulse-soft", state.currentScene === "owlGarden" && state.owlGardenPhase === "review");
   forestSchoolMapButton.classList.toggle("hidden", !forestSchoolScene);
   owlGardenHelpButton.classList.toggle("hidden", (!houseBunnyScene && !forestSchoolScene && state.currentScene !== "owlGarden") || (state.currentScene === "owlGarden" && state.owlGardenPhase !== "play") || (houseBunnyScene && state.houseBunnyPhase !== "waiting"));
   owlGardenHelpButton.classList.toggle("pulse-soft", (state.currentScene === "owlGarden" && state.owlGardenPhase === "play") || (houseBunnyScene && state.houseBunnyPhase === "waiting") || forestSchoolScene);
@@ -1838,6 +1843,18 @@ async function playOwlGardenOutro(sequenceId) {
   setScene("houseBunny");
 }
 
+async function completeOwlGardenCounting(sequenceId) {
+  if (!isSceneActive("owlGarden", sequenceId)) {
+    return;
+  }
+  state.owlGardenPhase = "review";
+  state.owlGardenActiveId = "";
+  state.owlGardenHelpPlayed = true;
+  state.owlGardenDictionaryOpen = false;
+  renderScene();
+  await speakCzechLine(owlGardenReviewHelpText, { rate: 0.88 });
+}
+
 function shuffledHouseBunnyColorIds() {
   const ids = [...houseBunnyWheelColors.map((item) => item.id), houseBunnyCenterColor.id];
   for (let index = ids.length - 1; index > 0; index -= 1) {
@@ -2264,6 +2281,14 @@ async function playOwlGardenHelp() {
   await speakCzechLine("Ikona knihy otevírá slovníček pro čísla, barvy a věci v zahradě.", { rate: 0.88 });
 }
 
+async function continueFromOwlGardenReview() {
+  if (state.currentScene !== "owlGarden" || state.owlGardenPhase !== "review") {
+    return;
+  }
+  state.sequenceId += 1;
+  await playOwlGardenOutro(state.sequenceId);
+}
+
 async function playForestSchoolHelp() {
   if (state.currentScene !== "forestSchool") {
     return;
@@ -2482,6 +2507,12 @@ owlGardenHelpButton.addEventListener("click", async (event) => {
   }
 });
 
+owlGardenDoorButton.addEventListener("click", async (event) => {
+  event.stopPropagation();
+  await primeAudio();
+  await continueFromOwlGardenReview();
+});
+
 owlGardenThumbButton.addEventListener("click", async (event) => {
   event.stopPropagation();
   await primeAudio();
@@ -2522,7 +2553,9 @@ function renderOwlGarden() {
   }
 
   const activeGroup = owlGardenGroups.find((group) => group.id === state.owlGardenActiveId);
-  if (activeGroup) {
+  if (state.owlGardenPhase === "review") {
+    owlGardenPrompt.textContent = "Open the book or press the door.";
+  } else if (activeGroup) {
     owlGardenPrompt.textContent = `${activeGroup.colorWord} ${activeGroup.objectWord}: ${state.owlGardenCompletedIds.size}/${owlGardenGroups.length}`;
   } else {
     owlGardenPrompt.textContent = `Choose apples, sunflowers or pigs. Listen for yellow, purple and pink.`;
@@ -3101,7 +3134,7 @@ async function confirmOwlGardenCurrentGroup() {
     if (state.owlGardenCompletedIds.size === owlGardenGroups.length) {
       await playAudioFile("audio/effects/owl_garden_fanfare.mp3");
       if (state.currentScene === "owlGarden" && state.owlGardenPhase === "play") {
-        await playOwlGardenOutro(state.sequenceId);
+        await completeOwlGardenCounting(state.sequenceId);
       }
       return;
     }
@@ -3242,6 +3275,10 @@ function debugSkipOwlGarden() {
     setScene("houseBunny");
     return;
   }
+  if (state.owlGardenPhase === "review") {
+    continueFromOwlGardenReview();
+    return;
+  }
 
   cleanupCurrentScene();
   state.sequenceId += 1;
@@ -3252,7 +3289,7 @@ function debugSkipOwlGarden() {
   state.owlGardenCurrentNumbers = { ...state.owlGardenLockedNumbers };
   state.owlGardenActiveId = "";
   state.owlGardenHelpPlayed = true;
-  state.owlGardenPhase = "outro";
+  state.owlGardenPhase = "review";
   state.owlGardenOutroVisibleCount = owlGardenOutroDialogue.length;
   renderScene();
 }
