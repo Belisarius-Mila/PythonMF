@@ -477,7 +477,7 @@ const clearingCharacters = [
   { id: "sunny", name: "Sunny", rect: { x: 80.2, y: 39.2, w: 16.9, h: 43.2 }, arrow: { x: 88.0, y: 34.2 }, bubble: { x: 73.0, y: 23.2 } },
 ];
 
-const clearingIntroClickCount = 5;
+const clearingIntroClickCount = 6;
 
 const clearingDialogue = [
   {
@@ -485,14 +485,13 @@ const clearingDialogue = [
     characterId: "benji",
     speaker: "Benji",
     cue: "Tap Benji.",
-    textEn: "Hello. I am Benji. We are friends!",
+    textEn: "Hello. I am Benji.",
     audioEn: [
       "audio/english/benji_bunny_01_benji_hello_en.mp3?v=20260527benji",
       "audio/english/benji_bunny_03_benji_i_am_benji_en.mp3?v=20260527benji",
-      "audio/english/benji_fable_we_are_friends_01_plain.mp3?v=20260602benjifriends1",
     ],
-    textCz: "Ahoj! Já jsem Benji. Jsme kamarádi!",
-    textCzSpeech: "Ahoj! Já jsem Benži. Jsme kamarádi!",
+    textCz: "Ahoj! Já jsem Benji.",
+    textCzSpeech: "Ahoj! Já jsem Benži.",
     preferredVoiceName: "fable|brian|andrew|roger|guy|daniel|alex|aaron|evan|junior",
   },
   {
@@ -511,6 +510,17 @@ const clearingDialogue = [
   },
   {
     id: 3,
+    characterId: "benji",
+    speaker: "Benji",
+    cue: "Tap Benji.",
+    textEn: "We are friends!",
+    audioEn: "audio/english/benji_fable_we_are_friends_01_plain.mp3?v=20260602benjifriends2",
+    textCz: "Jsme kamarádi!",
+    autoAdvance: true,
+    preferredVoiceName: "fable|brian|andrew|roger|guy|daniel|alex|aaron|evan|junior",
+  },
+  {
+    id: 4,
     characterId: "bruno",
     speaker: "Bruno",
     cue: "Tap Bruno.",
@@ -520,7 +530,7 @@ const clearingDialogue = [
     preferredVoiceName: "onyx|aaron|roger|daniel|guy",
   },
   {
-    id: 4,
+    id: 5,
     characterId: "fiona",
     speaker: "Fiona",
     cue: "Tap Fiona.",
@@ -530,7 +540,7 @@ const clearingDialogue = [
     preferredVoiceName: "shimmer|samantha|ava|victoria|karen",
   },
   {
-    id: 5,
+    id: 6,
     characterId: "sunny",
     speaker: "Sunny",
     cue: "Tap Sunny.",
@@ -541,7 +551,7 @@ const clearingDialogue = [
     preferredVoiceName: "nova|samantha|ava|victoria|karen|junior",
   },
   {
-    id: 6,
+    id: 7,
     characterId: "fiona",
     speaker: "Fiona",
     cue: "Tap Fiona.",
@@ -551,7 +561,7 @@ const clearingDialogue = [
     preferredVoiceName: "shimmer|samantha|ava|victoria|karen",
   },
   {
-    id: 7,
+    id: 8,
     characterId: "bruno",
     speaker: "Bruno",
     cue: "Tap Bruno.",
@@ -561,7 +571,7 @@ const clearingDialogue = [
     preferredVoiceName: "onyx|aaron|roger|daniel|guy",
   },
   {
-    id: 8,
+    id: 9,
     characterId: "benji",
     speaker: "Benji",
     cue: "Tap Benji.",
@@ -571,7 +581,7 @@ const clearingDialogue = [
     preferredVoiceName: "fable|brian|andrew|roger|guy|daniel|alex|aaron|evan|junior",
   },
   {
-    id: 9,
+    id: 10,
     characterId: "sunny",
     speaker: "Sunny",
     cue: "Tap Sunny.",
@@ -581,7 +591,7 @@ const clearingDialogue = [
     preferredVoiceName: "nova|samantha|ava|victoria|karen|junior",
   },
   {
-    id: 10,
+    id: 11,
     characterId: "fiona",
     speaker: "Fiona",
     cue: "Tap Fiona.",
@@ -1683,6 +1693,13 @@ async function activateClearingStep(index) {
   }
   if (index >= clearingIntroClickCount) {
     await runClearingAutomaticDialogue(index);
+    return;
+  }
+  if (clearingDialogue[index]?.autoAdvance) {
+    const stillActive = await playClearingDialogueItem(index, "auto");
+    if (stillActive) {
+      await activateClearingStep(index + 1);
+    }
     return;
   }
   state.clearingPhase = "waiting";
