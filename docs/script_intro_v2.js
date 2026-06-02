@@ -326,6 +326,7 @@ const state = {
   dialoguePhase: "intro",
   dialogueClickedIds: new Set(),
   dialogueDoorState: "hidden",
+  benjiBunnyDictionaryOpen: false,
   clearingPhase: "intro",
   clearingActiveIndex: -1,
   clearingBubbleIndex: -1,
@@ -418,6 +419,20 @@ const benjiBunnyDialogue = [
 const benjiBunnyHelpAudio = {
   intro: "audio/czech/benji_bunny_scene_help_cz1.mp3?v=20260527czvoice",
 };
+
+const benjiBunnyDictionary = [
+  { en: "Hello", cz: "ahoj" },
+  { en: "I am", cz: "já jsem" },
+  { en: "Benji", cz: "Benji" },
+  { en: "Bunny", cz: "Bunny" },
+  { en: "we can", cz: "my můžeme" },
+  { en: "friends", cz: "kamarádi" },
+  { en: "where", cz: "kam" },
+  { en: "go", cz: "jít" },
+  { en: "house", cz: "dům" },
+  { en: "OK", cz: "dobře" },
+  { en: "let's go", cz: "pojďme" },
+];
 
 
 const clearingHelpText = "Celou scénu můžeš spustit znovu tlačítkem šipky v kruhu. Doporučujeme scénu přehrát několikrát a několikrát si projít slovníček, to je ikona knihy.";
@@ -1261,6 +1276,49 @@ function renderBenjiBunnyDialogue() {
     });
     dialoguePanel.appendChild(button);
   });
+
+  if (state.dialoguePhase !== "intro") {
+    const bookButton = document.createElement("button");
+    bookButton.type = "button";
+    bookButton.className = "benji-bunny-book-button";
+    bookButton.textContent = "📖";
+    bookButton.setAttribute("aria-label", "Slovnicek");
+    bookButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      state.benjiBunnyDictionaryOpen = !state.benjiBunnyDictionaryOpen;
+      renderScene();
+    });
+    dialoguePanel.appendChild(bookButton);
+  }
+
+  if (state.dialoguePhase !== "intro" && state.benjiBunnyDictionaryOpen) {
+    dialoguePanel.appendChild(createBenjiBunnyDictionaryPanel());
+  }
+}
+
+function createBenjiBunnyDictionaryPanel() {
+  const panel = document.createElement("div");
+  panel.className = "clearing-dictionary benji-bunny-dictionary";
+  const title = document.createElement("div");
+  title.className = "clearing-dictionary-title";
+  title.textContent = "Slovníček";
+  panel.appendChild(title);
+
+  benjiBunnyDictionary.forEach((entry) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "clearing-dictionary-item";
+    button.textContent = `${entry.en} - ${entry.cz}`;
+    button.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      await primeAudio();
+      await speakEnglishLine(entry.en, { rate: 0.82 });
+      await speakCzechLine(entry.cz, { rate: 0.9 });
+    });
+    panel.appendChild(button);
+  });
+
+  return panel;
 }
 
 function createBenjiBunnyDebugSkipButton() {
@@ -1289,6 +1347,7 @@ async function runBenjiBunny(sequenceId) {
   state.visibleDialogueCount = 0;
   state.dialoguePhase = "intro";
   state.dialogueDoorState = "hidden";
+  state.benjiBunnyDictionaryOpen = false;
   renderScene();
 
   for (let index = 0; index < benjiBunnyDialogue.length; index += 1) {
@@ -2131,6 +2190,10 @@ async function runForestSchoolReview(sequenceId) {
 
 async function playBenjiBunnyHelp() {
   await playAudioFile(benjiBunnyHelpAudio.intro);
+  if (state.currentScene !== "benjiBunny") {
+    return;
+  }
+  await speakCzechLine("Ikona knihy otevírá slovníček. Klikni na slovo ve slovníčku a uslyšíš ho anglicky i česky.", { rate: 0.88 });
 }
 
 async function playOwlGardenHelp() {

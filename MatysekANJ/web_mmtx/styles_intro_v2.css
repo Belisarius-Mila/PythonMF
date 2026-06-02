@@ -1114,6 +1114,41 @@ body {
   transform: scale(1.04);
 }
 
+.benji-bunny-book-button {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  z-index: 12;
+  width: min(6vw, 70px);
+  height: min(6vw, 70px);
+  min-width: 54px;
+  min-height: 54px;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #31455c;
+  box-shadow: var(--shadow);
+  font-size: clamp(1.35rem, 2.3vw, 2rem);
+  font-weight: 900;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.benji-bunny-book-button:hover {
+  transform: scale(1.05);
+}
+
+.clearing-dictionary.benji-bunny-dictionary {
+  top: auto;
+  right: 100px;
+  bottom: 20px;
+  width: min(32vw, 390px);
+  max-height: min(70vh, 520px);
+  overflow-y: auto;
+}
+
 .pulse-soft {
   animation: pulse-soft 1.5s ease-in-out infinite;
 }
@@ -1560,4 +1595,3 @@ body {
     transform: translate(-50%, -50%) translateY(-10px);
   }
 }
-
