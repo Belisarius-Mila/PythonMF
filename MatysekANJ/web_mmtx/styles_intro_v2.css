@@ -572,6 +572,32 @@ body {
   display: none;
 }
 
+.owl-garden-book-button {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  z-index: 12;
+  width: min(6vw, 70px);
+  height: min(6vw, 70px);
+  min-width: 54px;
+  min-height: 54px;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #31455c;
+  box-shadow: var(--shadow);
+  font-size: clamp(1.35rem, 2.3vw, 2rem);
+  font-weight: 900;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.owl-garden-book-button:hover {
+  transform: scale(1.05);
+}
+
 .owl-garden-prompt,
 .owl-garden-done {
   position: absolute;
@@ -609,6 +635,16 @@ body {
   color: #ffffff;
   font-size: clamp(2rem, 3.2vw, 2.8rem);
   font-weight: 900;
+}
+
+.clearing-dictionary.owl-garden-dictionary {
+  top: auto;
+  right: 100px;
+  bottom: 20px;
+  width: min(32vw, 390px);
+  max-height: min(72vh, 540px);
+  overflow-y: auto;
+  z-index: 12;
 }
 
 .house-bunny-wheel {

@@ -132,6 +132,25 @@ const owlGardenNumberWords = {
   8: "eight",
 };
 
+const owlGardenDictionary = [
+  { en: "one", cz: "jedna" },
+  { en: "two", cz: "dva" },
+  { en: "three", cz: "tři" },
+  { en: "four", cz: "čtyři" },
+  { en: "five", cz: "pět" },
+  { en: "six", cz: "šest" },
+  { en: "seven", cz: "sedm" },
+  { en: "eight", cz: "osm" },
+  { en: "purple", cz: "fialová" },
+  { en: "yellow", cz: "žlutá" },
+  { en: "pink", cz: "růžová" },
+  { en: "apples", cz: "jablka" },
+  { en: "sunflowers", cz: "slunečnice" },
+  { en: "pigs", cz: "prasátka" },
+  { en: "count", cz: "počítej" },
+  { en: "garden", cz: "zahrada" },
+];
+
 const owlGardenOutroDialogue = [
   {
     id: 1,
@@ -340,6 +359,7 @@ const state = {
   owlGardenLockedNumbers: {},
   owlGardenRemainingNumbers: [],
   owlGardenHelpPlayed: false,
+  owlGardenDictionaryOpen: false,
   owlGardenOutroVisibleCount: 0,
   houseBunnyPhase: "idle",
   houseBunnyImageStep: 1,
@@ -1180,6 +1200,7 @@ function resetOwlGarden() {
   state.owlGardenLockedNumbers = {};
   state.owlGardenRemainingNumbers = shuffledOwlGardenNumbers();
   state.owlGardenHelpPlayed = false;
+  state.owlGardenDictionaryOpen = false;
   state.owlGardenOutroVisibleCount = 0;
 }
 
@@ -2220,6 +2241,10 @@ async function playOwlGardenHelp() {
     return;
   }
   await speakEnglishLine("Listen to the colours: yellow, purple and pink.", { preferredVoiceName: "ash", rate: 0.84, pitch: 0.94 });
+  if (state.currentScene !== "owlGarden") {
+    return;
+  }
+  await speakCzechLine("Ikona knihy otevírá slovníček pro čísla, barvy a věci v zahradě.", { rate: 0.88 });
 }
 
 async function playForestSchoolHelp() {
@@ -2490,6 +2515,50 @@ function renderOwlGarden() {
     owlGardenOverlay.appendChild(createOwlGardenDots(group));
     owlGardenOverlay.appendChild(createOwlGardenWordButton(group));
   });
+
+  owlGardenOverlay.appendChild(createOwlGardenDictionaryButton());
+  if (state.owlGardenDictionaryOpen) {
+    owlGardenOverlay.appendChild(createOwlGardenDictionaryPanel());
+  }
+}
+
+function createOwlGardenDictionaryButton() {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "owl-garden-book-button";
+  button.textContent = "📖";
+  button.setAttribute("aria-label", "Slovnicek");
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    state.owlGardenDictionaryOpen = !state.owlGardenDictionaryOpen;
+    renderScene();
+  });
+  return button;
+}
+
+function createOwlGardenDictionaryPanel() {
+  const panel = document.createElement("div");
+  panel.className = "clearing-dictionary owl-garden-dictionary";
+  const title = document.createElement("div");
+  title.className = "clearing-dictionary-title";
+  title.textContent = "Slovníček";
+  panel.appendChild(title);
+
+  owlGardenDictionary.forEach((entry) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "clearing-dictionary-item";
+    button.textContent = `${entry.en} - ${entry.cz}`;
+    button.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      await primeAudio();
+      await speakEnglishLine(entry.en, { preferredVoiceName: "ash", rate: 0.82, pitch: 0.94 });
+      await speakCzechLine(entry.cz, { rate: 0.9 });
+    });
+    panel.appendChild(button);
+  });
+
+  return panel;
 }
 
 function renderHouseBunny() {
