@@ -450,13 +450,14 @@ const clearingDialogue = [
     characterId: "benji",
     speaker: "Benji",
     cue: "Tap Benji.",
-    textEn: "Hello. I am Benji.",
+    textEn: "Hello. I am Benji. We are friends!",
     audioEn: [
       "audio/english/benji_bunny_01_benji_hello_en.mp3?v=20260527benji",
       "audio/english/benji_bunny_03_benji_i_am_benji_en.mp3?v=20260527benji",
+      "audio/english/benji_fable_we_are_friends_01_plain.mp3?v=20260602benjifriends1",
     ],
-    textCz: "Ahoj! Já jsem Benji.",
-    textCzSpeech: "Ahoj! Já jsem Benži.",
+    textCz: "Ahoj! Já jsem Benji. Jsme kamarádi!",
+    textCzSpeech: "Ahoj! Já jsem Benži. Jsme kamarádi!",
     preferredVoiceName: "fable|brian|andrew|roger|guy|daniel|alex|aaron|evan|junior",
   },
   {
