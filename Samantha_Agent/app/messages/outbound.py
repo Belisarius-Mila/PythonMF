@@ -187,6 +187,7 @@ def has_explicit_sms_send_confirmation(
 
 
 def send_via_messages_app(phone: str, message_text: str, service: str = "SMS") -> None:
+    activate_messages_app()
     script = """
 on run argv
     set recipientPhone to item 1 of argv
@@ -212,6 +213,16 @@ end run
         capture_output=True,
         text=True,
         timeout=30,
+    )
+
+
+def activate_messages_app() -> None:
+    subprocess.run(
+        ["osascript", "-e", 'tell application "Messages" to activate'],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=10,
     )
 
 

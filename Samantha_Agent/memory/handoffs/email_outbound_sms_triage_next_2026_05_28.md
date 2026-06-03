@@ -31,6 +31,9 @@ Co je hotove:
 - Implementovan novy tool `send_confirmed_sms_rcs`:
   - vstup: kontakt nebo telefonni cislo, text, samostatne potvrzeni;
   - odeslani pres macOS Messages bez shell interpolace;
+  - pred vlastnim odeslanim musi nejdriv aktivovat aplikaci Messages pres
+    `tell application "Messages" to activate`, protoze bez aktivace AppleScript
+    nekdy timeoutuje jeste pred zapisem zpravy do `chat.db`;
   - po odeslani povinne cte lokalni `~/Library/Messages/chat.db`;
   - vraci stav podle `is_sent`, `is_delivered`, `error`;
   - nehlasi uspech jen podle exit code AppleScriptu.
@@ -61,6 +64,10 @@ Co neni hotove:
 Dalsi krok:
 - Pri prvni realne potrebe poslat SMS/RCS pouzit `send_confirmed_sms_rcs` a
   porovnat vraceny stav s Messages/iPhonem.
+- Pokud AppleScript pri odeslani timeoutuje a `chat.db` nenajde novou odchozi
+  zpravu, postup je: aktivovat Messages, zopakovat odeslani stejnou sluzbou,
+  ktera historicky fungovala pro dany kontakt, a znovu overit `is_sent`,
+  `is_delivered`, `error`.
 - Pri dalsi email triage zkontrolovat souhrn v chatu a podle potreby otevrit
   lokalni plny report v `data/email/triage_reports/`.
 - U pojistnych PDF pouzit pravidla z e-mailu pouze lokalne, bez zapisovani

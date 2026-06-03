@@ -6,12 +6,14 @@ import tempfile
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
+from unittest.mock import patch
 
 from app.messages.outbound import (
     MACOS_MESSAGES_EPOCH,
     MessageDeliveryStatus,
     read_latest_outbound_message_status,
     resolve_message_recipient,
+    send_via_messages_app,
     send_confirmed_sms_rcs_text,
 )
 
@@ -105,6 +107,18 @@ class MessagesOutboundToolsTests(unittest.TestCase):
         self.assertEqual(result.error, 4)
         self.assertEqual(result.is_sent, 0)
         self.assertEqual(result.is_delivered, 0)
+
+    def test_messages_app_is_activated_before_applescript_send(self) -> None:
+        with patch("app.messages.outbound.subprocess.run") as run:
+            send_via_messages_app("+420777111222", "Test zprava", "SMS")
+
+        self.assertEqual(len(run.call_args_list), 2)
+        self.assertEqual(
+            run.call_args_list[0].args[0],
+            ["osascript", "-e", 'tell application "Messages" to activate'],
+        )
+        self.assertEqual(run.call_args_list[1].args[0][0:2], ["osascript", "-e"])
+        self.assertEqual(run.call_args_list[1].args[0][-3:], ["+420777111222", "Test zprava", "SMS"])
 
 
 def _contacts_path(root: Path) -> Path:

@@ -237,6 +237,11 @@ Aktualni dalsi krok:
   - provozni pravidlo: u SMS/RCS vzdy po pokusu cist `~/Library/Messages/chat.db`
     a hlasit odeslano jen pri `is_sent=1` nebo `is_delivered=1`; pri `error != 0`
     nebo dlouhem `is_sent=0` hlasit problem, ne uspech.
+- Doplnene pouceni 2026-06-03: pred AppleScript odeslanim vzdy nejdriv aktivovat
+  aplikaci Messages (`tell application "Messages" to activate`). Pokud odeslani
+  timeoutuje a `chat.db` nepotvrdi novou odchozi zpravu, nepovazovat pokus za
+  odeslany; aktivovat Messages, zopakovat stejnou historicky funkcni sluzbou
+  pro kontakt a znovu overit stav v databazi.
 - Pokud Mila rekne, ze je e-mail v "mailu" nebo ve sloucenem inboxu a prvni
   kontrolovana schranka ho nenajde, dalsi read-only krok je zkontrolovat i druhou
   nakonfigurovanou schranku pres unified/dual-mailbox workflow. Mila vidi oba
