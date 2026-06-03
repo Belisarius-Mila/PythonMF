@@ -34,16 +34,16 @@ Aktualni presety:
 | Bunny | `bunny_reference.mp3` | `Yes. But we can train all colors in my house. Let's go.` | Aktualni F5 baseline po testech. |
 | Bruno | `bruno_reference.mp3` | `Hello. I am Bruno. We are going to the lake.` | Zamcena uspokojiva `onyx` reference po poslechu; 4.920 s. |
 | Fiona | `fiona_reference.mp3` | `Hi. I am Fiona. We are friends too.` | Prodlouzena scene 01 reference: Karen intro + Karen veta pres macOS `say`; 2.760 s. |
-| Sunny | `sunny_reference.mp3` | `Hello! I am Sunny.` | Stary placeholder; Mila chce Sunny znovu castovat pozdeji. |
+| Sunny | `sunny_reference.mp3` | `Hello! I am Sunny. We can go together.` | Zamcena `young_nova` reference po poslechu F5 testu; 3.864 s. |
 
-Poznamka 2026-06-03: Benji, Bruno a Fiona uz nemaji puvodni velmi kratke reference. Bruno byl prepnuty z kovoveho `macOS Daniel` na `onyx`. Sunny zatim nebrat jako finalni hlas.
+Poznamka 2026-06-03: Benji, Bruno a Fiona uz nemaji puvodni velmi kratke reference. Bruno byl prepnuty z kovoveho `macOS Daniel` na `onyx`. Sunny byl po odmítnutí `Junior` a poslechu F5 testu zamknuty na `young_nova`.
 
-Sunny recast kandidat:
+Sunny recast historie:
 
-- `data/matysek_english/voice_references/sunny_reference_junior_together_20260603.mp3`
+- `data/matysek_english/voice_references/sunny_reference_young_nova_together_20260603.mp3` je aktualni zamceny zdroj pro `locked_forest_journey_20260603/sunny_reference.mp3`.
 - `ref_text`: `Hello! I am Sunny. We can go together.`
-- zdroj: `macOS Junior`, soubory `sunny_macos_junior_01_hello_i_am_sunny.mp3` a `sunny_macos_junior_02_we_can_go_together.mp3`
-- duvod: mladsi muzsky/klukovsky smer, mel by se mene plest s Fionou nez aktualni `young coral`.
+- testovaci F5 vystup `sunny_young_nova_ready_to_go_need_20260603_01.mp3` podle Mily zni dobre.
+- `Junior` znel zastřene/kovove a nepouzivat jako Sunny baseline.
 
 ## Lokalni prostredi
 
