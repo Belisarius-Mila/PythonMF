@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Small wrapper for Matysek English F5-TTS Bunny voice experiments."""
+"""Small wrapper for Matysek English F5-TTS voice experiments."""
 
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -18,17 +20,26 @@ DEFAULT_CLI = REPO_ROOT / ".venv_f5tts2/bin/f5-tts_infer-cli"
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "data/matysek_english/voice_references"
 DEFAULT_REF_AUDIO = DEFAULT_OUTPUT_DIR / "bunny_long_gifts_scene_we_can_train_all_colors_20260602.mp3"
 DEFAULT_REF_TEXT = "Yes. But we can train all colors in my house. Let's go."
+DEFAULT_VOICE_MANIFEST = (
+    DEFAULT_OUTPUT_DIR / "locked_forest_journey_20260603/voice_reference_manifest.json"
+)
 MAX_REF_SECONDS = 12.0
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Generate a Bunny-style English MP3 via local F5-TTS CLI."
+        description="Generate Matysek English MP3 lines via local F5-TTS CLI."
     )
     parser.add_argument("--cli", type=Path, default=DEFAULT_CLI)
     parser.add_argument("--model", default="F5TTS_v1_Base")
     parser.add_argument("--device", default="cpu")
-    parser.add_argument("--ref-audio", type=Path, default=DEFAULT_REF_AUDIO)
+    parser.add_argument(
+        "--character",
+        choices=["benji", "bunny", "bruno", "fiona", "sunny"],
+        help="Use a locked Matysek voice reference from the manifest.",
+    )
+    parser.add_argument("--voice-manifest", type=Path, default=DEFAULT_VOICE_MANIFEST)
+    parser.add_argument("--ref-audio", type=Path, default=None)
     parser.add_argument("--ref-text", default=None)
     parser.add_argument("--ref-text-file", type=Path, default=None)
     parser.add_argument("--gen-text", default=None)
@@ -42,7 +53,37 @@ def parse_args() -> argparse.Namespace:
         help="Allow ref audio over 12s. F5 may clip it, so this is usually a bad idea.",
     )
     parser.add_argument("--print-command", action="store_true")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Validate inputs and print the F5 command without running generation.",
+    )
     return parser.parse_args()
+
+
+def repo_path(path_value: str | Path) -> Path:
+    path = Path(path_value).expanduser()
+    if path.is_absolute():
+        return path.resolve()
+    return (REPO_ROOT / path).resolve()
+
+
+def load_voice_reference(manifest_path: Path, character: str) -> tuple[Path, str]:
+    manifest = repo_path(manifest_path)
+    if not manifest.exists():
+        raise SystemExit(f"Manifest hlasu neexistuje: {manifest}")
+
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    try:
+        voice = data["voices"][character]
+        ref_audio = repo_path(voice["ref_audio"])
+        ref_text = str(voice["ref_text"]).strip()
+    except KeyError as exc:
+        raise SystemExit(f"V manifestu chybi hlas '{character}' nebo jeho pole: {exc}") from exc
+
+    if not ref_text:
+        raise SystemExit(f"V manifestu je prazdny ref_text pro hlas: {character}")
+    return ref_audio, ref_text
 
 
 def read_text_arg(value: str | None, file_path: Path | None, default: str | None = None) -> str:
@@ -100,10 +141,18 @@ def mp3_duration_seconds(path: Path) -> float | None:
 def main() -> int:
     args = parse_args()
 
-    ref_audio = args.ref_audio.expanduser().resolve()
+    locked_ref_audio = DEFAULT_REF_AUDIO
+    locked_ref_text = DEFAULT_REF_TEXT
+    if args.character:
+        locked_ref_audio, locked_ref_text = load_voice_reference(
+            args.voice_manifest,
+            args.character,
+        )
+
+    ref_audio = repo_path(args.ref_audio) if args.ref_audio else locked_ref_audio.resolve()
     output_dir = args.output_dir.expanduser().resolve()
     cli = args.cli.expanduser().resolve()
-    ref_text = read_text_arg(args.ref_text, args.ref_text_file, DEFAULT_REF_TEXT)
+    ref_text = read_text_arg(args.ref_text, args.ref_text_file, locked_ref_text)
     gen_text = read_text_arg(args.gen_text, args.gen_text_file)
 
     if not cli.exists():
@@ -143,8 +192,12 @@ def main() -> int:
     if args.nfe_step is not None:
         command.extend(["--nfe_step", str(args.nfe_step)])
 
-    if args.print_command:
-        print(" ".join(command))
+    if args.print_command or args.dry_run:
+        print(shlex.join(command))
+    if args.dry_run:
+        if duration is not None:
+            print(f"Reference: {duration:.3f} s")
+        return 0
 
     start = time.perf_counter()
     subprocess.run(command, check=True, env=env)

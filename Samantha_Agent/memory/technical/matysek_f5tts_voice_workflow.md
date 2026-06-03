@@ -2,7 +2,7 @@
 
 ## Ucel
 
-Tento workflow slouzi jako lokalni tool pro generovani anglickych Bunny/Benji kandidatu pres F5-TTS v projektu Matysek English / MMTX.
+Tento workflow slouzi jako lokalni tool pro generovani anglickych hlasovych kandidatu pres F5-TTS v projektu Matysek English / MMTX.
 
 Hlavni pouceni z testu 2026-06-02:
 
@@ -10,7 +10,33 @@ Hlavni pouceni z testu 2026-06-02:
 - `ref_text` musi presne odpovidat pouzitemu referencnimu audiu,
 - spojena 20s Bunny reference se lokalne klipovala a vysledek byl spatny,
 - 12s reference a puvodni kratka reference znely Mile kvalitativne podobne,
-- prakticky baseline pro Bunnyho zatim zustava puvodni kratka reference.
+- prakticky baseline pro Bunnyho zustava 7.344s reference z vety `Yes. But we can train all colors in my house. Let's go.`
+
+## Zamcene hlasy z 2026-06-03
+
+Lokalni registr referencnich hlasu:
+
+```text
+data/matysek_english/voice_references/locked_forest_journey_20260603/
+```
+
+Manifest pro wrapper:
+
+```text
+data/matysek_english/voice_references/locked_forest_journey_20260603/voice_reference_manifest.json
+```
+
+Aktualni presety:
+
+| Postava | Ref audio | Ref text | Poznamka |
+| --- | --- | --- | --- |
+| Benji | `benji_reference.mp3` | `I am Benji.` | Schvaleny scene 01 voice lock; kratka reference 1.344 s. |
+| Bunny | `bunny_reference.mp3` | `Yes. But we can train all colors in my house. Let's go.` | Aktualni F5 baseline po testech. |
+| Bruno | `bruno_reference.mp3` | `Hello. I am Bruno.` | Schvaleny scene 01 voice lock; kratka reference 1.620 s. |
+| Fiona | `fiona_reference.mp3` | `Hi. I am Fiona.` | Schvaleny scene 01 voice lock; kratka reference 1.698 s. |
+| Sunny | `sunny_reference.mp3` | `Hello! I am Sunny.` | Schvaleny scene 01 voice lock; reference 3.048 s. |
+
+Riziko: Benji, Bruno a Fiona maji velmi kratke reference. Pokud budou F5 vystupy nestabilni, dalsi krok je vyrobit pro konkretni postavu delsi 6-10s referenci a znovu ji zamknout v manifestu.
 
 ## Lokalni prostredi
 
@@ -36,12 +62,32 @@ Repo obsahuje wrapper:
 scripts/matysek_f5tts_generate.py
 ```
 
-Priklad pro puvodni kratkou Bunny referenci:
+Priklad pro zamceny Bunny preset:
 
 ```bash
 .venv/bin/python scripts/matysek_f5tts_generate.py \
+  --character bunny \
   --gen-text "Hello, I am Bunny. Benji and me we are friends. Are we going together to the lake?" \
   --output-file output_original_short_ref_lake_test_01.mp3
+```
+
+Priklad pro Benjiho:
+
+```bash
+.venv/bin/python scripts/matysek_f5tts_generate.py \
+  --character benji \
+  --gen-text "Hello, Bunny. We are going to the lake." \
+  --output-file benji_lake_test_01.mp3
+```
+
+Overeni bez spusteni F5:
+
+```bash
+.venv/bin/python scripts/matysek_f5tts_generate.py \
+  --character bunny \
+  --gen-text "Hello, Benji." \
+  --output-file bunny_dry_run_test.mp3 \
+  --dry-run
 ```
 
 Wrapper nastavuje lokalni cache:
