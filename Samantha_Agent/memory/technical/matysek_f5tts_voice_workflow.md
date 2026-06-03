@@ -32,11 +32,18 @@ Aktualni presety:
 | --- | --- | --- | --- |
 | Benji | `benji_reference.mp3` | `Hello! I am Benji. We are going to the lake too.` | Prodlouzena scene 01 reference z existujicich `fable` MP3; 4.920 s. |
 | Bunny | `bunny_reference.mp3` | `Yes. But we can train all colors in my house. Let's go.` | Aktualni F5 baseline po testech. |
-| Bruno | `bruno_reference.mp3` | `Hello. I am Bruno. We are going to the lake.` | Prodlouzena scene 01 reference: Daniel intro + Daniel veta pres macOS `say`; 2.952 s. |
+| Bruno | `bruno_reference.mp3` | `Hello. I am Bruno. We are going to the lake.` | Zamcena uspokojiva `onyx` reference po poslechu; 4.920 s. |
 | Fiona | `fiona_reference.mp3` | `Hi. I am Fiona. We are friends too.` | Prodlouzena scene 01 reference: Karen intro + Karen veta pres macOS `say`; 2.760 s. |
 | Sunny | `sunny_reference.mp3` | `Hello! I am Sunny.` | Stary placeholder; Mila chce Sunny znovu castovat pozdeji. |
 
-Poznamka 2026-06-03: Benji, Bruno a Fiona uz nemaji puvodni velmi kratke reference. Sunny zatim nebrat jako finalni hlas.
+Poznamka 2026-06-03: Benji, Bruno a Fiona uz nemaji puvodni velmi kratke reference. Bruno byl prepnuty z kovoveho `macOS Daniel` na `onyx`. Sunny zatim nebrat jako finalni hlas.
+
+Sunny recast kandidat:
+
+- `data/matysek_english/voice_references/sunny_reference_junior_together_20260603.mp3`
+- `ref_text`: `Hello! I am Sunny. We can go together.`
+- zdroj: `macOS Junior`, soubory `sunny_macos_junior_01_hello_i_am_sunny.mp3` a `sunny_macos_junior_02_we_can_go_together.mp3`
+- duvod: mladsi muzsky/klukovsky smer, mel by se mene plest s Fionou nez aktualni `young coral`.
 
 ## Lokalni prostredi
 
