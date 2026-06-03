@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 import time
 from collections.abc import Callable
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from email import message_from_bytes
 from email.utils import parsedate_to_datetime
 from http import HTTPStatus
@@ -47,6 +47,8 @@ from app.email.config import EmailConfigError
 from app.email.icloud_provider import EmailProviderError, ICloudReadOnlyEmailProvider
 from app.email.models import EmailAttachmentMeta, EmailHeader, EmailMessage
 from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEmailProvider
+from app.reminders.query_tools import mark_reminder_done_text
+from app.reminders.store import DEFAULT_REMINDERS_PATH, load_reminders_store
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -60,6 +62,7 @@ SCANDOCU_SERVER_SCRIPT = PROJECT_ROOT / "scripts" / "scandocu_server.py"
 EMAIL_SESSION_HANDOFF_DIR = PROJECT_ROOT / "data" / "private" / "email_session_handoffs"
 EMAIL_PROCESSING_DECISIONS_FILE = EMAIL_SESSION_HANDOFF_DIR / "email_processing_decisions.json"
 EMAIL_WORK_QUEUE_ACTIONS_FILE = EMAIL_SESSION_HANDOFF_DIR / "email_work_queue_actions.jsonl"
+EMAIL_ATTACHMENT_PREVIEW_DIR = Path("/private/tmp/samantha_email_attachment_preview")
 GIT_ROOT = PROJECT_ROOT.parent
 LOCAL_WEB_APPS = {
     "family-video-organizer": PROJECT_ROOT / "docs" / "family-video-organizer",
@@ -1048,6 +1051,66 @@ def read_email_archive_source_for_processing(
     return source
 
 
+def preview_email_work_queue_attachment_action(
+    *,
+    provider: str,
+    folder: str,
+    uid: str,
+    part_id: str,
+    preview_dir: Path = EMAIL_ATTACHMENT_PREVIEW_DIR,
+    opener: Callable[[list[str]], object] | None = None,
+    icloud_provider_factory: Callable[[], object] | None = None,
+    seznam_provider_factory: Callable[[], object] | None = None,
+) -> dict[str, Any]:
+    safe_part_id = safe_text(part_id).strip()
+    if not safe_part_id:
+        return {"ok": False, "message": "Chybí ID přílohy pro náhled."}
+    try:
+        source = read_email_archive_source_for_processing(
+            provider=provider,
+            folder=folder,
+            uid=uid,
+            icloud_provider_factory=icloud_provider_factory,
+            seznam_provider_factory=seznam_provider_factory,
+        )
+    except (EmailConfigError, EmailProviderError, SeznamEmailProviderError) as exc:
+        return {"ok": False, "message": str(exc)}
+    if source.original_eml is None:
+        return {"ok": False, "message": "Archivní zdroj neobsahuje původní EML, přílohu nelze otevřít."}
+
+    message = message_from_bytes(source.original_eml)
+    meta_by_part_id = {attachment.part_id: attachment for attachment in source.attachments}
+    for index, part in enumerate(message.walk() if message.is_multipart() else [message]):
+        current_part_id = str(index)
+        if current_part_id != safe_part_id:
+            continue
+        meta = meta_by_part_id.get(current_part_id)
+        filename = safe_filename((meta.filename if meta else part.get_filename()) or f"attachment-{current_part_id}.pdf")
+        content_type = (meta.content_type if meta else part.get_content_type()) or ""
+        if content_type.casefold() != "application/pdf" and not filename.casefold().endswith(".pdf"):
+            return {"ok": False, "part_id": safe_part_id, "filename": safe_text(filename), "message": "Náhled je zatím povolený jen pro PDF přílohy."}
+        payload = part.get_payload(decode=True)
+        if not isinstance(payload, bytes) or not payload:
+            return {"ok": False, "part_id": safe_part_id, "filename": safe_text(filename), "message": "Příloha neobsahuje čitelná data."}
+
+        preview_dir.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        preview_name = f"{stamp}_{safe_slug(provider, default='email', limit=24)}_{safe_slug(uid, default='uid', limit=40)}_{filename}"
+        preview_path = next_available_path(preview_dir / preview_name)
+        preview_path.write_bytes(payload)
+        runner = opener or (lambda command: subprocess.run(command, check=False))
+        runner(["/usr/bin/open", str(preview_path)])
+        return {
+            "ok": True,
+            "message": "PDF příloha otevřena jako dočasný náhled; nebyla uložena do document vaultu.",
+            "part_id": safe_part_id,
+            "filename": safe_text(filename),
+            "preview_path": str(preview_path),
+        }
+
+    return {"ok": False, "part_id": safe_part_id, "message": "Vybraná příloha nebyla v e-mailu nalezena."}
+
+
 def import_selected_email_pdf_attachments(
     *,
     source: EmailArchiveSource,
@@ -1131,6 +1194,7 @@ def import_selected_email_pdf_attachments(
                     "part_id": part_id,
                     "filename": safe_text(filename),
                     "document_id": result.document_id,
+                    "document_ref": document_reference(result.document_id),
                     "created": result.created,
                     "stored_path": str(relative_to_project(result.destination)),
                     "message": result.message,
@@ -1235,9 +1299,431 @@ def cockpit_status() -> dict[str, Any]:
         "document_work": document_work_status(downloads=downloads),
         "backup": format_backup_activity_reminder(),
         "vault": document_vault_status_summary(),
+        "reminders": reminders_status(),
         "scandocu": probe_scandocu(),
         "git": git_status_summary(),
     }
+
+
+def reminders_status(path: Path = DEFAULT_REMINDERS_PATH, today: date | None = None) -> dict[str, Any]:
+    today_date = today or date.today()
+    groups: dict[str, list[dict[str, Any]]] = {
+        "overdue": [],
+        "today": [],
+        "soon": [],
+        "later": [],
+        "undated": [],
+    }
+    try:
+        raw_reminders = load_reminders_store(path)["reminders"]
+    except (OSError, ValueError) as exc:
+        return {"ok": False, "message": str(exc), "groups": groups, "counts": {}}
+
+    open_count = 0
+    open_raw_reminders: list[dict[str, Any]] = []
+    for raw in raw_reminders:
+        if not isinstance(raw, dict):
+            continue
+        if safe_text(str(raw.get("status", ""))).casefold() != "open":
+            continue
+        open_count += 1
+        open_raw_reminders.append(raw)
+        item = reminder_status_item(raw=raw, today=today_date)
+        due_date = item.get("due_date")
+        if not due_date:
+            groups["undated"].append(item)
+        elif item["days_until"] < 0:
+            groups["overdue"].append(item)
+        elif item["days_until"] == 0:
+            groups["today"].append(item)
+        elif item["days_until"] <= 14:
+            groups["soon"].append(item)
+        else:
+            groups["later"].append(item)
+
+    for items in groups.values():
+        items.sort(key=lambda item: (item.get("due_date") or "9999-12-31", item.get("id") or ""))
+
+    active_count = len(groups["overdue"]) + len(groups["today"]) + len(groups["soon"])
+    return {
+        "ok": True,
+        "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "today": today_date.isoformat(),
+        "groups": groups,
+        "counts": {
+            "open": open_count,
+            "active": active_count,
+            "conflicts": len(reminder_conflicts(open_raw_reminders)),
+            "overdue": len(groups["overdue"]),
+            "today": len(groups["today"]),
+            "soon": len(groups["soon"]),
+            "later": len(groups["later"]),
+            "undated": len(groups["undated"]),
+        },
+        "conflicts": reminder_conflicts(open_raw_reminders),
+        "startup_window_days": 14,
+        "message": (
+            "Pri startu Samanthy se ukazuji prosle, dnesni a do 14 dnu. "
+            "Cockpit zobrazuje vsechny otevrene pripominky."
+        ),
+    }
+
+
+def reminder_conflicts(raw_reminders: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    groups: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for raw in raw_reminders:
+        if not reminder_is_payment_related(raw):
+            continue
+        asset = normalize_reminder_asset(str(raw.get("related_asset", "")))
+        coverage_start = safe_text(str(raw.get("coverage_start", ""))).strip()
+        if not asset or not coverage_start:
+            continue
+        groups.setdefault((asset, coverage_start), []).append(raw)
+
+    conflicts: list[dict[str, Any]] = []
+    for (asset, coverage_start), items in sorted(groups.items()):
+        if len(items) < 2:
+            continue
+        conflicts.append(
+            {
+                "asset": asset,
+                "coverage_start": coverage_start,
+                "severity": "high",
+                "message": (
+                    "Pozor: více otevřených platebních připomínek pro stejné vozidlo "
+                    "a stejný začátek krytí. Nekonat platbu bez porovnání nabídek."
+                ),
+                "items": [
+                    {
+                        "reminder_ref": reminder_reference(str(item.get("id", ""))),
+                        "id": safe_text(str(item.get("id", "")))[:180],
+                        "title": safe_text(str(item.get("title", "")))[:180],
+                        "due_date": safe_text(str(item.get("due_date", "")))[:40],
+                        "priority": safe_text(str(item.get("priority", "")))[:32],
+                        "source_type": safe_text(str((item.get("source") or {}).get("type", "")))[:64]
+                        if isinstance(item.get("source"), dict)
+                        else "",
+                        "conflict_note": safe_text(str(item.get("conflict_note", "")))[:500],
+                    }
+                    for item in items
+                ],
+            }
+        )
+    return conflicts
+
+
+def reminder_is_payment_related(raw: dict[str, Any]) -> bool:
+    text = " ".join(
+        [
+            str(raw.get("id", "")),
+            str(raw.get("title", "")),
+            str(raw.get("notes", "")),
+            str((raw.get("source") or {}).get("type", "")) if isinstance(raw.get("source"), dict) else "",
+        ]
+    ).casefold()
+    return any(term in text for term in ("zaplat", "platb", "pojist", "payment_due", "splatnost"))
+
+
+def normalize_reminder_asset(value: str) -> str:
+    text = safe_text(value).strip()
+    if not text:
+        return ""
+    return " ".join(text.upper().replace("/", " ").split())
+
+
+def mark_reminder_done_action(
+    reminder_id: str,
+    path: Path = DEFAULT_REMINDERS_PATH,
+) -> dict[str, Any]:
+    clean_id = reminder_id.strip()
+    if not clean_id:
+        return {"ok": False, "message": "Chybí id připomínky.", "reminders": reminders_status(path=path)}
+    reminder = find_reminder_record(reminder_id=clean_id, path=path)
+    if reminder is None:
+        return {"ok": False, "message": "Připomínka nebyla nalezena.", "reminders": reminders_status(path=path)}
+    resolved_id = str(reminder.get("id", ""))
+
+    message = mark_reminder_done_text(
+        reminder_id=resolved_id,
+        user_confirmed=True,
+        confirmation_text=f"Potvrzuji, označ {resolved_id} jako splněno.",
+        path=path,
+    )
+    ok = message.startswith("Oznaceno jako hotove:")
+    return {
+        "ok": ok,
+        "reminder_id": safe_text(resolved_id),
+        "reminder_ref": reminder_reference(resolved_id),
+        "message": safe_text(message),
+        "reminders": reminders_status(path=path),
+    }
+
+
+def reminder_source_detail_action(
+    reminder_id: str,
+    reminders_path: Path = DEFAULT_REMINDERS_PATH,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    icloud_provider_factory: Callable[[], object] | None = None,
+    seznam_provider_factory: Callable[[], object] | None = None,
+) -> dict[str, Any]:
+    reminder = find_reminder_record(reminder_id=reminder_id, path=reminders_path)
+    if reminder is None:
+        return {"ok": False, "message": "Připomínka nebyla nalezena."}
+
+    source = reminder.get("source")
+    if not isinstance(source, dict):
+        source = {}
+    source_type = safe_text(str(source.get("type", ""))).casefold()
+    base = {
+        "reminder": reminder_status_item(reminder, today=date.today()),
+        "source": {
+            "type": safe_text(str(source.get("type", "")))[:64],
+            "uid": safe_text(str(source.get("uid", "")))[:180],
+            "date": safe_text(str(source.get("date", "")))[:120],
+            "sender": safe_text(str(source.get("sender", "")))[:180],
+        },
+        "links": safe_reminder_links(reminder.get("links")),
+        "notes": sanitize_output(str(reminder.get("notes", "")))[:2000],
+    }
+    if source_type == "email":
+        return reminder_email_source_detail(
+            base=base,
+            source=source,
+            icloud_provider_factory=icloud_provider_factory,
+            seznam_provider_factory=seznam_provider_factory,
+        )
+    if source_type == "private_document":
+        return reminder_document_source_detail(base=base, source=source, vault_dir=vault_dir)
+    return {
+        **base,
+        "ok": True,
+        "kind": source_type or "source",
+        "message": "Zdroj připomínky nemá přímý e-mail ani PDF vazbu.",
+    }
+
+
+def find_reminder_record(reminder_id: str, path: Path = DEFAULT_REMINDERS_PATH) -> dict[str, Any] | None:
+    clean_id = reminder_id.strip()
+    if not clean_id:
+        return None
+    for reminder in load_reminders_store(path)["reminders"]:
+        if not isinstance(reminder, dict):
+            continue
+        stored_id = str(reminder.get("id", ""))
+        if stored_id == clean_id or reminder_reference(stored_id) == clean_id:
+            return reminder
+    return None
+
+
+def safe_reminder_links(value: Any) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    links: list[dict[str, Any]] = []
+    for item in value:
+        if not isinstance(item, dict):
+            continue
+        links.append(
+            {
+                "domain": safe_text(str(item.get("domain", "")))[:180],
+                "count": safe_text(str(item.get("count", "")))[:24],
+            }
+        )
+    return links
+
+
+def reminder_email_source_detail(
+    *,
+    base: dict[str, Any],
+    source: dict[str, Any],
+    icloud_provider_factory: Callable[[], object] | None = None,
+    seznam_provider_factory: Callable[[], object] | None = None,
+) -> dict[str, Any]:
+    uid = str(source.get("uid", "")).strip()
+    if not uid:
+        return {**base, "ok": False, "kind": "email", "message": "Zdrojový e-mail nemá UID."}
+
+    folder = str(source.get("folder", "")).strip() or "INBOX"
+    preferred = safe_text(str(source.get("provider", ""))).casefold()
+    providers = [preferred] if preferred in {"icloud", "seznam"} else ["icloud", "seznam"]
+    attempts: list[str] = []
+    for provider in providers:
+        detail = read_email_processing_message_detail(
+            provider=provider,
+            folder=folder,
+            uid=uid,
+            max_chars=10_000,
+            icloud_provider_factory=icloud_provider_factory,
+            seznam_provider_factory=seznam_provider_factory,
+        )
+        if detail.get("ok"):
+            return {
+                **base,
+                "ok": True,
+                "kind": "email",
+                "message": f"E-mail načten read-only ze zdroje {provider}.",
+                "email": detail.get("email", {}),
+            }
+        attempts.append(f"{provider}: {safe_text(str(detail.get('message', 'neúspěch')))}")
+
+    return {
+        **base,
+        "ok": False,
+        "kind": "email",
+        "message": "Zdrojový e-mail se nepodařilo načíst read-only. " + " | ".join(attempts),
+    }
+
+
+def reminder_document_source_detail(
+    *,
+    base: dict[str, Any],
+    source: dict[str, Any],
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> dict[str, Any]:
+    source_uid = str(source.get("uid", "")).strip()
+    row = find_document_record_for_source(source_uid=source_uid, vault_dir=vault_dir)
+    if row is None:
+        return {
+            **base,
+            "ok": False,
+            "kind": "document",
+            "message": "Související dokument nebyl nalezen ve vault indexu.",
+        }
+
+    document_id = str(row.get("document_id", ""))
+    text_by_id = {
+        str(item.get("document_id", "")): str(item.get("text", ""))
+        for item in read_jsonl(vault_dir / "index" / "text_index.jsonl")
+    }
+    text = text_by_id.get(document_id, "")
+    terms = [term.casefold() for term in tokenize(" ".join([document_id, source_uid, str(row.get("title", ""))]))]
+    snippet = build_snippet(text, terms) if text and terms else text[:900]
+    if not snippet.strip():
+        snippet = "Text zatím není k dispozici; detail je podle metadat."
+
+    reading_status = effective_document_reading_status(row, text_chars=len(text))
+    stored_path = str(row.get("stored_path", ""))
+    return {
+        **base,
+        "ok": True,
+        "kind": "document",
+        "message": "Dokument nalezen ve vaultu.",
+        "document": {
+            "document_id": safe_text(document_id),
+            "document_ref": document_reference(document_id),
+            "title": safe_text(str(row.get("title") or row.get("original_filename") or document_id)),
+            "original_filename": safe_text(str(row.get("original_filename", ""))),
+            "domain": safe_text(str(row.get("domain", ""))),
+            "document_type": safe_text(str(row.get("document_type", ""))),
+            "counterparty": safe_text(str(row.get("counterparty", ""))),
+            "related_asset": safe_text(str(row.get("related_asset", ""))),
+            "stored_path": safe_text(stored_path),
+            "reading_status": reading_status,
+            "reading_status_label": READING_STATUS_LABELS[reading_status],
+            "snippet": sanitize_output(snippet),
+            "due_contexts": reminder_document_due_contexts(document_id=document_id, vault_dir=vault_dir),
+            "can_open_pdf": document_stored_path_is_openable_pdf(stored_path, vault_dir=vault_dir),
+        },
+    }
+
+
+def find_document_record_for_source(source_uid: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> dict[str, Any] | None:
+    clean_uid = source_uid.strip()
+    documents = read_jsonl(vault_dir / "index" / "documents_index.jsonl")
+    row_index = find_document_row_index_by_reference(documents, clean_uid)
+    if row_index is not None:
+        return documents[row_index]
+
+    if clean_uid:
+        search = search_document_index(clean_uid, vault_dir=vault_dir, limit=1)
+        results = search.get("results") if search.get("ok") else []
+        if isinstance(results, list) and results:
+            found_id = str(results[0].get("document_id", ""))
+            found_index = find_document_row_index_by_reference(documents, found_id)
+            if found_index is not None:
+                return documents[found_index]
+    return None
+
+
+def reminder_document_due_contexts(document_id: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> list[dict[str, Any]]:
+    contexts: list[dict[str, Any]] = []
+    for item in read_jsonl(vault_dir / "index" / "due_dates.jsonl"):
+        if str(item.get("document_id", "")) != document_id:
+            continue
+        contexts.append(
+            {
+                "date": safe_text(str(item.get("date", "")))[:40],
+                "type": safe_text(str(item.get("type", "")))[:80],
+                "confidence": safe_text(str(item.get("confidence", "")))[:40],
+                "context": sanitize_output(str(item.get("context", "")))[:700],
+            }
+        )
+        if len(contexts) >= 4:
+            break
+    return contexts
+
+
+def document_stored_path_is_openable_pdf(stored_path: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> bool:
+    try:
+        root = vault_dir.resolve(strict=True)
+        target = (PROJECT_ROOT / stored_path).resolve(strict=True)
+    except (OSError, RuntimeError):
+        return False
+    return target.is_file() and target.suffix.casefold() == ".pdf" and (target == root or root in target.parents)
+
+
+def open_document_pdf_action(
+    document_id: str,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    opener: Callable[[list[str]], object] | None = None,
+) -> dict[str, Any]:
+    documents = read_jsonl(vault_dir / "index" / "documents_index.jsonl")
+    row_index = find_document_row_index_by_reference(documents, document_id)
+    if row_index is None:
+        return {"ok": False, "message": "Dokument nebyl nalezen ve vault indexu."}
+    row = documents[row_index]
+    stored_path = str(row.get("stored_path", ""))
+    if not document_stored_path_is_openable_pdf(stored_path, vault_dir=vault_dir):
+        return {"ok": False, "message": "PDF není dostupné nebo neleží ve vaultu."}
+
+    target = (PROJECT_ROOT / stored_path).resolve(strict=True)
+    runner = opener or (lambda command: subprocess.run(command, check=False))
+    runner(["/usr/bin/open", str(target)])
+    return {
+        "ok": True,
+        "message": "PDF otevřeno v lokální aplikaci.",
+        "document_id": safe_text(str(row.get("document_id", ""))),
+        "document_ref": document_reference(str(row.get("document_id", ""))),
+    }
+
+
+def reminder_status_item(raw: dict[str, Any], today: date) -> dict[str, Any]:
+    due_date = parse_reminder_due_date(raw.get("due_date"))
+    source = raw.get("source")
+    if not isinstance(source, dict):
+        source = {}
+    reminder_id = str(raw.get("id", ""))
+    return {
+        "reminder_ref": reminder_reference(reminder_id),
+        "id": safe_text(reminder_id)[:180],
+        "title": safe_text(str(raw.get("title", "")))[:180],
+        "due_date": due_date.isoformat() if due_date else "",
+        "days_until": (due_date - today).days if due_date else 999999,
+        "priority": safe_text(str(raw.get("priority", "")))[:32],
+        "status": safe_text(str(raw.get("status", "")))[:32],
+        "source_type": safe_text(str(source.get("type", "")))[:64],
+        "related_asset": safe_text(str(raw.get("related_asset", "")))[:180],
+        "coverage_start": safe_text(str(raw.get("coverage_start", "")))[:40],
+        "conflict_note": safe_text(str(raw.get("conflict_note", "")))[:500],
+    }
+
+
+def parse_reminder_due_date(value: Any) -> date | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        return date.fromisoformat(value.strip())
+    except ValueError:
+        return None
 
 
 def git_status_summary(root: Path = GIT_ROOT) -> dict[str, Any]:
@@ -1370,6 +1856,11 @@ def normalize_reading_status(value: str) -> str:
 def document_reference(document_id: str) -> str:
     digest = hashlib.sha256(document_id.encode("utf-8")).hexdigest()[:16]
     return f"docref-{digest}"
+
+
+def reminder_reference(reminder_id: str) -> str:
+    digest = hashlib.sha256(reminder_id.encode("utf-8")).hexdigest()[:16]
+    return f"remref-{digest}"
 
 
 def find_document_row_index_by_reference(documents: list[dict[str, Any]], reference: str) -> int | None:
@@ -1858,6 +2349,9 @@ class CockpitServer:
                 if parsed.path == "/api/status":
                     self.respond_json(cockpit_status())
                     return
+                if parsed.path == "/api/reminders":
+                    self.respond_json(reminders_status())
+                    return
                 if parsed.path == "/api/web-apps":
                     self.respond_json(web_apps_catalog())
                     return
@@ -1890,6 +2384,18 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/codex/open":
                     self.respond_json(open_codex_cli())
+                    return
+                if parsed.path == "/api/reminders/done":
+                    payload = self.read_json()
+                    self.respond_json(mark_reminder_done_action(reminder_id=str(payload.get("reminder_id", ""))))
+                    return
+                if parsed.path == "/api/reminders/source":
+                    payload = self.read_json()
+                    self.respond_json(reminder_source_detail_action(reminder_id=str(payload.get("reminder_id", ""))))
+                    return
+                if parsed.path == "/api/documents/open":
+                    payload = self.read_json()
+                    self.respond_json(open_document_pdf_action(document_id=str(payload.get("document_id", ""))))
                     return
                 if parsed.path == "/api/documents/print/prepare":
                     payload = self.read_json()
@@ -1948,6 +2454,17 @@ class CockpitServer:
                             folder=str(payload.get("folder", "INBOX")),
                             uid=str(payload.get("uid", "")),
                             max_chars=max_chars,
+                        )
+                    )
+                    return
+                if parsed.path == "/api/email-processing/preview-attachment":
+                    payload = self.read_json()
+                    self.respond_json(
+                        preview_email_work_queue_attachment_action(
+                            provider=str(payload.get("provider", "")),
+                            folder=str(payload.get("folder", "INBOX")),
+                            uid=str(payload.get("uid", "")),
+                            part_id=str(payload.get("part_id", "")),
                         )
                     )
                     return
@@ -2544,6 +3061,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       const purgeTrashBtn = queueDoc.getElementById("purgeTrashBtn");
       let selectedId = queueItems.length ? queueItems[0].id : "";
       let permanentDeleteItems = [];
+      let recentImportedAttachments = [];
 
       function decisionLabel(item) {
         if (item.detailLoading) return "načítám detail...";
@@ -2620,11 +3138,98 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
             '<div class="meta">' + escapeHtml(attachment.content_type || "") + " | " + escapeHtml(size) + '</div>' +
             '<div class="attachment-tools">' +
             '<label><input type="checkbox" class="attachment-save" data-part-id="' + escapeHtml(partId) + '"' + checked + '> Uložit</label>' +
+            '<button type="button" class="secondary attachment-preview" data-part-id="' + escapeHtml(partId) + '">Náhled PDF</button>' +
             '<button type="button" class="secondary attachment-toggle">Metadata</button>' +
             '</div>' +
-            '<div class="meta hidden attachment-detail">part_id: ' + escapeHtml(partId) + '<br>dispozice: ' + escapeHtml(attachment.disposition || "") + '<br>Otevření souboru bude dostupné po potvrzeném uložení přílohy.</div>' +
+            '<div class="meta hidden attachment-detail">part_id: ' + escapeHtml(partId) + '<br>dispozice: ' + escapeHtml(attachment.disposition || "") + '<br>Náhled PDF otevře dočasnou kopii; trvalé uložení do vaultu proběhne až po zaškrtnutí Uložit a zpracování dávky.</div>' +
             '</div>';
         }).join("");
+      }
+
+      function renderRecentImportedAttachments() {
+        if (!recentImportedAttachments.length) return "";
+        return '<div><strong>Právě uložené přílohy</strong></div>' +
+          '<div class="attachments">' +
+          recentImportedAttachments.map((attachment) => {
+            const documentId = attachment.document_ref || attachment.document_id || "";
+            return '<div class="attachment-row">' +
+              '<div><strong>' + escapeHtml(attachment.filename || "uložená příloha") + '</strong></div>' +
+              '<div class="meta">Dokument: ' + escapeHtml(documentId) + '</div>' +
+              '<div class="attachment-tools">' +
+              '<button type="button" class="primary attachment-open" data-document-id="' + escapeHtml(documentId) + '">Otevřít uložené PDF</button>' +
+              '</div>' +
+              '</div>';
+          }).join("") +
+          '</div>';
+      }
+
+      function bindAttachmentOpenButtons() {
+        detailPane.querySelectorAll(".attachment-open").forEach((button) => {
+          button.addEventListener("click", async () => {
+            const documentId = button.dataset.documentId || "";
+            if (!documentId) return;
+            button.disabled = true;
+            queueStatus.textContent = "Otevírám uložené PDF z document vaultu.";
+            try {
+              const res = await fetch("/api/documents/open", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({document_id: documentId})
+              });
+              const data = await res.json();
+              queueStatus.textContent = data.message || (data.ok ? "PDF otevřeno." : "PDF se nepodařilo otevřít.");
+            } catch (err) {
+              queueStatus.textContent = "Chyba otevření PDF: " + err;
+            } finally {
+              button.disabled = false;
+            }
+          });
+        });
+      }
+
+      function bindAttachmentPreviewButtons(item) {
+        detailPane.querySelectorAll(".attachment-preview").forEach((button) => {
+          button.addEventListener("click", async () => {
+            const partId = button.dataset.partId || "";
+            if (!partId) return;
+            button.disabled = true;
+            queueStatus.textContent = "Otevírám dočasný náhled PDF přílohy. Příloha se neukládá do vaultu.";
+            try {
+              const res = await fetch("/api/email-processing/preview-attachment", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                  provider: item.provider,
+                  folder: item.folder || "INBOX",
+                  uid: item.uid,
+                  part_id: partId
+                })
+              });
+              const data = await res.json();
+              queueStatus.textContent = data.message || (data.ok ? "Náhled otevřen." : "Náhled se nepodařilo otevřít.");
+            } catch (err) {
+              queueStatus.textContent = "Chyba náhledu přílohy: " + err;
+            } finally {
+              button.disabled = false;
+            }
+          });
+        });
+      }
+
+      function collectImportedAttachments(results, items) {
+        const itemById = new Map((items || []).map((item) => [item.id, item]));
+        const imported = [];
+        (results || []).forEach((result) => {
+          const sourceItem = itemById.get(result.item_id) || {};
+          (result.attachments || []).forEach((attachment) => {
+            if (!attachment || !attachment.ok || !(attachment.document_ref || attachment.document_id)) return;
+            imported.push({
+              ...attachment,
+              subject: sourceItem.subject || ""
+            });
+          });
+        });
+        return imported;
       }
 
       function setQueueDecision(item, decision) {
@@ -2665,8 +3270,11 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
           '<div><strong>Tělo e-mailu</strong></div>' +
           '<pre>' + escapeHtml(detail.body_text || "") + (detail.truncated ? "\\n\\n[Text je zkrácený.]" : "") + '</pre>' +
           '<div><strong>Přílohy</strong></div>' +
-          '<div class="attachments">' + renderAttachmentRows(item, attachments) + '</div>';
+          '<div class="attachments">' + renderAttachmentRows(item, attachments) + '</div>' +
+          renderRecentImportedAttachments();
 
+        bindAttachmentOpenButtons();
+        bindAttachmentPreviewButtons(item);
         queueDoc.getElementById("saveEmail").addEventListener("change", (event) => {
           setQueueDecision(item, event.target.checked ? "save" : "");
         });
@@ -2769,6 +3377,11 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
           } else {
             queueStatus.textContent = data.message || "Dávka zpracována.";
           }
+          const importedNow = collectImportedAttachments(data.items || [], workItems);
+          if (importedNow.length) {
+            recentImportedAttachments = importedNow.concat(recentImportedAttachments).slice(0, 20);
+            queueStatus.textContent += " Uložené PDF přílohy můžeš otevřít v detailu.";
+          }
           const remaining = [];
           const byId = new Map((data.items || []).map((result) => [result.item_id, result]));
           queueItems.forEach((item) => {
@@ -2780,7 +3393,10 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
           selectedId = queueItems.length ? queueItems[0].id : "";
           renderQueueList();
           if (selectedId) renderDetail(currentItem());
-          else detailPane.innerHTML = '<div class="empty">Dávka je hotová.</div>';
+          else {
+            detailPane.innerHTML = '<div class="empty">Dávka je hotová.</div>' + renderRecentImportedAttachments();
+            bindAttachmentOpenButtons();
+          }
         } catch (err) {
           queueStatus.textContent = "Chyba zpracování dávky: " + err;
         } finally {
@@ -3230,6 +3846,26 @@ COCKPIT_HTML = """<!doctype html>
     .app-description { color: #344054; font-size: 13px; line-height: 1.4; margin-top: 3px; }
     .app-kind { color: var(--muted); font-size: 12px; margin-top: 4px; }
     .button-link { display: inline-block; border-radius: 6px; padding: 9px 12px; font-weight: 650; text-decoration: none; background: var(--blue); color: white; white-space: nowrap; }
+    .reminder-list { display: grid; gap: 10px; }
+    .reminder-conflict { border: 1px solid #f59e0b; border-radius: 8px; padding: 10px; background: #fffbeb; display: grid; gap: 7px; }
+    .reminder-conflict-title { font-weight: 750; color: #92400e; }
+    .reminder-conflict-item { border-top: 1px solid #fde68a; padding-top: 7px; display: grid; gap: 5px; }
+    .reminder-conflict-item:first-of-type { border-top: 0; padding-top: 0; }
+    .reminder-group { display: grid; gap: 7px; }
+    .reminder-group h3 { margin: 0; font-size: 13px; color: #253047; }
+    .reminder-card { border: 1px solid #edf0f4; border-radius: 8px; padding: 10px; background: #fbfcfe; display: grid; gap: 4px; }
+    .reminder-card-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
+    .reminder-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .reminder-title { font-weight: 700; }
+    .reminder-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+    .reminder-done { background: #dcfce7; color: #166534; }
+    .reminder-source { border-top: 1px solid #edf0f4; margin-top: 6px; padding-top: 8px; display: grid; gap: 7px; }
+    .reminder-source pre { margin: 0; border: 1px solid #edf0f4; border-radius: 7px; padding: 9px; background: white; max-height: 320px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .reminder-source-row { color: #344054; font-size: 12px; overflow-wrap: anywhere; }
+    .vault-summary { display: grid; gap: 10px; }
+    .vault-summary pre { border: 1px solid #edf0f4; border-radius: 7px; padding: 10px; background: #fbfcfe; }
+    .vault-summary details { border: 1px solid #edf0f4; border-radius: 7px; padding: 9px 10px; background: #fbfcfe; }
+    .vault-summary summary { cursor: pointer; font-weight: 650; }
     @media (max-width: 1050px) { .today-dashboard { grid-template-columns: 1fr; } .work-grid { grid-template-columns: 1fr; } }
     @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
   </style>
@@ -3240,6 +3876,7 @@ COCKPIT_HTML = """<!doctype html>
     <div class="toolbar">
       <button class="secondary" id="refreshBtn">Obnovit</button>
       <button class="secondary" id="webAppsBtn">Webové aplikace</button>
+      <button class="secondary" id="remindersBtn">Reminders</button>
       <button class="secondary" id="emailProcessingBtn">Email Processing</button>
       <button class="primary" id="scanDocuBtn">Otevřít ScanDocu</button>
       <button class="secondary" id="scanDocuReviewBtn">Revidovat uložené</button>
@@ -3265,6 +3902,7 @@ COCKPIT_HTML = """<!doctype html>
         <h2>Stav</h2>
         <div class="dashboard-body dashboard-list">
           <div class="dashboard-row"><span class="dashboard-label">ScanDocu</span><span id="dashboardScanDocu" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Reminders</span><span id="dashboardReminders" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Záloha</span><span id="dashboardBackup" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Git</span><span id="dashboardGit" class="dashboard-value"></span></div>
         </div>
@@ -3276,6 +3914,7 @@ COCKPIT_HTML = """<!doctype html>
             <button class="primary" id="dashboardProcessBtn">Zpracovat další</button>
             <button class="secondary" id="dashboardReviewBtn">Revidovat další</button>
             <button class="secondary" id="dashboardWebAppsBtn">Webové aplikace</button>
+            <button class="secondary" id="dashboardRemindersBtn">Reminders</button>
             <button class="secondary" id="dashboardEmailBtn">Email Processing</button>
             <button class="secondary" id="dashboardSamanthaBtn">Samantha chat</button>
             <button class="secondary" id="dashboardCodexBtn">Codex CLI</button>
@@ -3352,10 +3991,22 @@ COCKPIT_HTML = """<!doctype html>
       </div>
     </div>
     <section>
-      <h2>Document Vault</h2>
-      <div class="body"><pre id="vaultText"></pre></div>
+      <h2>Souhrn vaultu</h2>
+      <div class="body"><div id="vaultText" class="vault-summary"></div></div>
     </section>
   </main>
+  <div id="remindersModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="remindersTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="remindersTitle">Reminders</h2>
+        <button class="secondary" id="remindersCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div id="remindersStatus" class="status-line">Načítám připomínky...</div>
+        <div id="remindersList" class="reminder-list"></div>
+      </div>
+    </div>
+  </div>
   <div id="webAppsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="webAppsTitle">
     <div class="modal">
       <div class="modal-header">
@@ -3385,7 +4036,12 @@ COCKPIT_HTML = """<!doctype html>
     const codexCliBtn = document.getElementById("codexCliBtn");
     const terminalBtn = document.getElementById("terminalBtn");
     const webAppsBtn = document.getElementById("webAppsBtn");
+    const remindersBtn = document.getElementById("remindersBtn");
     const emailProcessingBtn = document.getElementById("emailProcessingBtn");
+    const remindersModal = document.getElementById("remindersModal");
+    const remindersCloseBtn = document.getElementById("remindersCloseBtn");
+    const remindersStatus = document.getElementById("remindersStatus");
+    const remindersList = document.getElementById("remindersList");
     const webAppsModal = document.getElementById("webAppsModal");
     const webAppsCloseBtn = document.getElementById("webAppsCloseBtn");
     const webAppsStatus = document.getElementById("webAppsStatus");
@@ -3395,11 +4051,13 @@ COCKPIT_HTML = """<!doctype html>
     const todayProblemCount = document.getElementById("todayProblemCount");
     const todayHint = document.getElementById("todayHint");
     const dashboardScanDocu = document.getElementById("dashboardScanDocu");
+    const dashboardReminders = document.getElementById("dashboardReminders");
     const dashboardBackup = document.getElementById("dashboardBackup");
     const dashboardGit = document.getElementById("dashboardGit");
     const dashboardProcessBtn = document.getElementById("dashboardProcessBtn");
     const dashboardReviewBtn = document.getElementById("dashboardReviewBtn");
     const dashboardWebAppsBtn = document.getElementById("dashboardWebAppsBtn");
+    const dashboardRemindersBtn = document.getElementById("dashboardRemindersBtn");
     const dashboardEmailBtn = document.getElementById("dashboardEmailBtn");
     const dashboardSamanthaBtn = document.getElementById("dashboardSamanthaBtn");
     const dashboardCodexBtn = document.getElementById("dashboardCodexBtn");
@@ -3445,7 +4103,7 @@ COCKPIT_HTML = """<!doctype html>
           ? `<span class="ok">ScanDocu běží</span> | ${data.scandocu.url}`
           : `<span class="warn">ScanDocu neběží</span> | ${data.scandocu ? data.scandocu.url : ""}`;
         backupText.textContent = data.backup || "";
-        vaultText.textContent = data.vault || "";
+        renderVaultSummary(data.vault || "");
         renderDashboard(data);
         renderDocumentWork(data.document_work || {});
         renderDownloads(data.downloads || {});
@@ -3505,6 +4163,15 @@ COCKPIT_HTML = """<!doctype html>
         ? `<span class="ok">běží</span> | ${scandocu.url || ""}`
         : `<span class="warn">neběží</span> | ${scandocu.url || ""}`;
 
+      const reminders = data.reminders || {};
+      const reminderCounts = reminders.counts || {};
+      const activeReminders = reminderCounts.active || 0;
+      const openReminders = reminderCounts.open || 0;
+      const conflictReminders = reminderCounts.conflicts || 0;
+      const reminderClass = conflictReminders > 0 ? "bad" : activeReminders > 0 ? "warn" : openReminders > 0 ? "ok" : "ok";
+      const conflictText = conflictReminders > 0 ? ` | <span class="bad">${conflictReminders} konflikt</span>` : "";
+      dashboardReminders.innerHTML = `<span class="${reminderClass}">${activeReminders} aktivní</span> | ${openReminders} otevřené${conflictText}`;
+
       const backupState = classifyBackup(data.backup || "");
       dashboardBackup.innerHTML = `<span class="${backupState.className}">${backupState.label}</span>`;
 
@@ -3523,6 +4190,35 @@ COCKPIT_HTML = """<!doctype html>
       if (reviewPending > 0) return `Nová PDF nejsou, ale ${reviewPending} uložených dokumentů čeká na revizi.`;
       if (problemTotal > 0) return `Fronta nemá nové PDF, ale má ${problemTotal} položek k ruční kontrole.`;
       return "Dokumentová fronta je klidná.";
+    }
+
+    function renderVaultSummary(text) {
+      vaultText.innerHTML = "";
+      const raw = text || "";
+      if (!raw) {
+        const empty = document.createElement("div");
+        empty.className = "status-line";
+        empty.textContent = "Souhrn vaultu není dostupný.";
+        vaultText.appendChild(empty);
+        return;
+      }
+      const marker = "\\n- Inbox audit";
+      const markerIndex = raw.indexOf(marker);
+      const currentText = markerIndex >= 0 ? raw.slice(0, markerIndex).trim() : raw.trim();
+      const auditText = markerIndex >= 0 ? raw.slice(markerIndex + 1).trim() : "";
+      const current = document.createElement("pre");
+      current.textContent = currentText;
+      vaultText.appendChild(current);
+      if (auditText) {
+        const details = document.createElement("details");
+        const summary = document.createElement("summary");
+        summary.textContent = "Auditní historie inboxu";
+        const audit = document.createElement("pre");
+        audit.textContent = auditText;
+        details.appendChild(summary);
+        details.appendChild(audit);
+        vaultText.appendChild(details);
+      }
     }
 
     function classifyBackup(text) {
@@ -3842,6 +4538,279 @@ COCKPIT_HTML = """<!doctype html>
       webAppsModal.classList.add("hidden");
     }
 
+    async function openRemindersModal() {
+      remindersModal.classList.remove("hidden");
+      remindersStatus.textContent = "Načítám připomínky...";
+      remindersList.innerHTML = "";
+      try {
+        const res = await fetch("/api/reminders");
+        const data = await res.json();
+        renderReminders(data);
+      } catch (err) {
+        remindersStatus.textContent = `Chyba načtení připomínek: ${err}`;
+      }
+    }
+
+    function closeRemindersModal() {
+      remindersModal.classList.add("hidden");
+    }
+
+    function renderReminders(data) {
+      const counts = data.counts || {};
+      remindersStatus.textContent = data.ok
+        ? `${counts.open || 0} otevřené; ${counts.active || 0} ve startovním okně do ${data.startup_window_days || 14} dnů.`
+        : (data.message || "Připomínky nejdou načíst.");
+      remindersList.innerHTML = "";
+      renderReminderConflicts(data.conflicts || []);
+      const groups = data.groups || {};
+      const order = [
+        ["overdue", "Prošlé"],
+        ["today", "Dnes"],
+        ["soon", "Do 14 dnů"],
+        ["later", "Později"],
+        ["undated", "Bez data"]
+      ];
+      let rendered = 0;
+      order.forEach(([key, label]) => {
+        const items = groups[key] || [];
+        if (!items.length) return;
+        rendered += items.length;
+        const group = document.createElement("div");
+        group.className = "reminder-group";
+        const heading = document.createElement("h3");
+        heading.textContent = `${label} (${items.length})`;
+        group.appendChild(heading);
+        items.forEach((item) => {
+          const actionId = item.reminder_ref || item.id || "";
+          const card = document.createElement("div");
+          card.className = "reminder-card";
+          const head = document.createElement("div");
+          head.className = "reminder-card-head";
+          const title = document.createElement("div");
+          title.className = "reminder-title";
+          title.textContent = item.title || item.id || "Připomínka bez názvu";
+          const actions = document.createElement("div");
+          actions.className = "reminder-actions";
+          const sourceBtn = document.createElement("button");
+          sourceBtn.type = "button";
+          sourceBtn.className = "secondary";
+          sourceBtn.textContent = "Zdroj";
+          sourceBtn.disabled = !actionId;
+          const doneBtn = document.createElement("button");
+          doneBtn.type = "button";
+          doneBtn.className = "reminder-done";
+          doneBtn.textContent = "Splněno";
+          doneBtn.disabled = !actionId;
+          doneBtn.addEventListener("click", () => markReminderDone(actionId, doneBtn));
+          actions.appendChild(sourceBtn);
+          actions.appendChild(doneBtn);
+          const meta = document.createElement("div");
+          meta.className = "reminder-meta";
+          const due = item.due_date ? `deadline ${item.due_date}` : "bez data";
+          meta.textContent = `${due} | priorita ${item.priority || "nezadaná"} | zdroj ${item.source_type || "nezadaný"}`;
+          const id = document.createElement("div");
+          id.className = "reminder-meta";
+          id.textContent = `id: ${item.id || ""}`;
+          const sourceDetail = document.createElement("div");
+          sourceDetail.className = "reminder-source hidden";
+          sourceBtn.addEventListener("click", () => loadReminderSource(actionId, sourceDetail, sourceBtn));
+          head.appendChild(title);
+          head.appendChild(actions);
+          card.appendChild(head);
+          card.appendChild(meta);
+          card.appendChild(id);
+          card.appendChild(sourceDetail);
+          group.appendChild(card);
+        });
+        remindersList.appendChild(group);
+      });
+      if (!rendered) {
+        const empty = document.createElement("div");
+        empty.className = "status-line";
+        empty.textContent = "Žádné otevřené připomínky.";
+        remindersList.appendChild(empty);
+      }
+    }
+
+    function renderReminderConflicts(conflicts) {
+      conflicts.forEach((conflict) => {
+        const box = document.createElement("div");
+        box.className = "reminder-conflict";
+        const title = document.createElement("div");
+        title.className = "reminder-conflict-title";
+        title.textContent = `Konflikt plateb: ${conflict.asset || "stejná věc"} | krytí od ${conflict.coverage_start || "nezjištěno"}`;
+        const message = document.createElement("div");
+        message.className = "reminder-meta";
+        message.textContent = conflict.message || "Nekonat platbu bez porovnání.";
+        box.appendChild(title);
+        box.appendChild(message);
+        (conflict.items || []).forEach((item) => {
+          const row = document.createElement("div");
+          row.className = "reminder-conflict-item";
+          const summary = document.createElement("div");
+          summary.className = "reminder-meta";
+          summary.textContent = `${item.title || item.id || "Připomínka"} | deadline ${item.due_date || "bez data"} | zdroj ${item.source_type || "nezadaný"}`;
+          const note = document.createElement("div");
+          note.className = "reminder-meta";
+          note.textContent = item.conflict_note || "";
+          const sourceBtn = document.createElement("button");
+          sourceBtn.type = "button";
+          sourceBtn.className = "secondary";
+          sourceBtn.textContent = "Zdroj";
+          sourceBtn.disabled = !item.reminder_ref;
+          const detail = document.createElement("div");
+          detail.className = "reminder-source hidden";
+          sourceBtn.addEventListener("click", () => loadReminderSource(item.reminder_ref || "", detail, sourceBtn));
+          row.appendChild(summary);
+          if (item.conflict_note) row.appendChild(note);
+          row.appendChild(sourceBtn);
+          row.appendChild(detail);
+          box.appendChild(row);
+        });
+        remindersList.appendChild(box);
+      });
+    }
+
+    async function loadReminderSource(reminderId, detailNode, button) {
+      if (!reminderId) return;
+      if (!detailNode.classList.contains("hidden") && detailNode.dataset.loaded === "1") {
+        detailNode.classList.add("hidden");
+        button.textContent = "Zdroj";
+        return;
+      }
+      button.disabled = true;
+      button.textContent = "Načítám...";
+      detailNode.classList.remove("hidden");
+      detailNode.textContent = "Načítám zdroj read-only...";
+      try {
+        const result = await postJson("/api/reminders/source", {reminder_id: reminderId});
+        renderReminderSource(result, detailNode);
+        detailNode.dataset.loaded = "1";
+        button.textContent = "Skrýt zdroj";
+      } catch (err) {
+        detailNode.textContent = `Chyba načtení zdroje: ${err}`;
+        button.textContent = "Zdroj";
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    function renderReminderSource(result, detailNode) {
+      detailNode.innerHTML = "";
+      const status = document.createElement("div");
+      status.className = "reminder-source-row";
+      status.textContent = result.message || (result.ok ? "Zdroj načten." : "Zdroj se nepodařilo načíst.");
+      detailNode.appendChild(status);
+      if (result.kind === "email" && result.email) {
+        renderReminderEmailSource(result.email, detailNode);
+      } else if (result.kind === "document" && result.document) {
+        renderReminderDocumentSource(result.document, detailNode);
+      } else {
+        renderReminderGenericSource(result, detailNode);
+      }
+    }
+
+    function appendSourceRow(parent, label, value) {
+      if (!value) return;
+      const row = document.createElement("div");
+      row.className = "reminder-source-row";
+      row.textContent = `${label}: ${value}`;
+      parent.appendChild(row);
+    }
+
+    function appendSourcePre(parent, text) {
+      if (!text) return;
+      const pre = document.createElement("pre");
+      pre.textContent = text;
+      parent.appendChild(pre);
+    }
+
+    function renderReminderEmailSource(email, detailNode) {
+      appendSourceRow(detailNode, "Předmět", email.subject || "");
+      appendSourceRow(detailNode, "Od", email.sender || "");
+      appendSourceRow(detailNode, "Datum", email.date || "");
+      appendSourceRow(detailNode, "Zdroj", `${email.provider || ""} / ${email.folder || ""} / UID ${email.uid || ""}`);
+      appendSourcePre(detailNode, email.body_text || "");
+      const attachments = email.attachments || [];
+      if (attachments.length) {
+        appendSourceRow(
+          detailNode,
+          "Přílohy",
+          attachments.map((item) => `${item.filename || "(bez názvu)"} | ${item.content_type || ""} | ${item.size_bytes || 0} B`).join("; ")
+        );
+      }
+    }
+
+    function renderReminderDocumentSource(documentInfo, detailNode) {
+      appendSourceRow(detailNode, "Dokument", documentInfo.title || documentInfo.document_id || "");
+      appendSourceRow(detailNode, "Soubor", documentInfo.original_filename || "");
+      appendSourceRow(detailNode, "Oblast", documentInfo.domain || "");
+      appendSourceRow(detailNode, "Typ", documentInfo.document_type || "");
+      appendSourceRow(detailNode, "Protistrana", documentInfo.counterparty || "");
+      appendSourceRow(detailNode, "Vazba", documentInfo.related_asset || "");
+      appendSourceRow(detailNode, "Stav čtení", documentInfo.reading_status_label || "");
+      appendSourcePre(detailNode, documentInfo.snippet || "");
+      const contexts = documentInfo.due_contexts || [];
+      contexts.forEach((item) => {
+        appendSourcePre(detailNode, `${item.date || ""} | ${item.type || ""} | ${item.confidence || ""}\n${item.context || ""}`);
+      });
+      if (documentInfo.can_open_pdf && documentInfo.document_ref) {
+        const openBtn = document.createElement("button");
+        openBtn.type = "button";
+        openBtn.className = "secondary";
+        openBtn.textContent = "Otevřít PDF";
+        openBtn.addEventListener("click", () => openReminderDocument(documentInfo.document_ref, openBtn));
+        detailNode.appendChild(openBtn);
+      }
+    }
+
+    function renderReminderGenericSource(result, detailNode) {
+      const source = result.source || {};
+      appendSourceRow(detailNode, "Typ", source.type || "");
+      appendSourceRow(detailNode, "UID", source.uid || "");
+      appendSourceRow(detailNode, "Datum", source.date || "");
+      appendSourceRow(detailNode, "Odesílatel", source.sender || "");
+      appendSourcePre(detailNode, result.notes || "");
+      const links = result.links || [];
+      if (links.length) {
+        appendSourceRow(detailNode, "Odkazy", links.map((item) => `${item.domain || ""} (${item.count || "1"})`).join("; "));
+      }
+    }
+
+    async function openReminderDocument(documentId, button) {
+      if (!documentId) return;
+      button.disabled = true;
+      try {
+        const result = await postJson("/api/documents/open", {document_id: documentId});
+        remindersStatus.textContent = result.message || "Hotovo.";
+      } catch (err) {
+        remindersStatus.textContent = `Chyba otevření PDF: ${err}`;
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    async function markReminderDone(reminderId, button) {
+      if (!reminderId) return;
+      if (!window.confirm("Označit tuto připomínku jako splněnou?")) {
+        return;
+      }
+      button.disabled = true;
+      remindersStatus.textContent = "Označuji připomínku jako splněnou...";
+      try {
+        const result = await postJson("/api/reminders/done", {reminder_id: reminderId});
+        if (result.reminders) {
+          renderReminders(result.reminders);
+        }
+        remindersStatus.textContent = result.message || "Hotovo.";
+        await refresh();
+      } catch (err) {
+        remindersStatus.textContent = `Chyba uložení připomínky: ${err}`;
+      } finally {
+        button.disabled = false;
+      }
+    }
+
     function renderWebApps(apps) {
       webAppsList.innerHTML = "";
       apps.forEach((app) => {
@@ -3914,11 +4883,19 @@ COCKPIT_HTML = """<!doctype html>
     dashboardProcessBtn.addEventListener("click", () => openScanDocu(false));
     dashboardReviewBtn.addEventListener("click", () => openScanDocu(true));
     dashboardWebAppsBtn.addEventListener("click", openWebAppsModal);
+    dashboardRemindersBtn.addEventListener("click", openRemindersModal);
     dashboardEmailBtn.addEventListener("click", openEmailProcessing);
     dashboardSamanthaBtn.addEventListener("click", () => postAction("/api/samantha/open", dashboardSamanthaBtn));
     dashboardCodexBtn.addEventListener("click", () => postAction("/api/codex/open", dashboardCodexBtn));
     webAppsBtn.addEventListener("click", openWebAppsModal);
+    remindersBtn.addEventListener("click", openRemindersModal);
     emailProcessingBtn.addEventListener("click", openEmailProcessing);
+    remindersCloseBtn.addEventListener("click", closeRemindersModal);
+    remindersModal.addEventListener("click", (event) => {
+      if (event.target === remindersModal) {
+        closeRemindersModal();
+      }
+    });
     webAppsCloseBtn.addEventListener("click", closeWebAppsModal);
     webAppsModal.addEventListener("click", (event) => {
       if (event.target === webAppsModal) {
@@ -3926,7 +4903,9 @@ COCKPIT_HTML = """<!doctype html>
       }
     });
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && !webAppsModal.classList.contains("hidden")) {
+      if (event.key === "Escape" && !remindersModal.classList.contains("hidden")) {
+        closeRemindersModal();
+      } else if (event.key === "Escape" && !webAppsModal.classList.contains("hidden")) {
         closeWebAppsModal();
       }
     });

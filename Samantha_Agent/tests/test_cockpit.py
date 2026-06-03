@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
 
 from app.cockpit import (
@@ -14,14 +15,20 @@ from app.cockpit import (
     email_processing_item_id,
     email_processing_pending_work_items,
     latest_email_processing_overview,
+    mark_reminder_done_action,
     move_document_lifecycle_action,
     new_email_headers_overview,
+    open_document_pdf_action,
     parse_email_processing_items,
     prepare_document_print_action,
+    preview_email_work_queue_attachment_action,
     process_email_work_queue_batch,
     process_email_work_queue_purge_trash_batch,
     read_email_processing_message_detail,
     read_email_processing_decisions,
+    reminder_reference,
+    reminder_source_detail_action,
+    reminders_status,
     save_email_processing_decision,
     search_document_index,
     set_document_reading_status_action,
@@ -98,6 +105,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("dashboardScanDocu", COCKPIT_HTML)
         self.assertIn("dashboardGit", COCKPIT_HTML)
         self.assertIn("dashboardProcessBtn", COCKPIT_HTML)
+        self.assertIn("dashboardRemindersBtn", COCKPIT_HTML)
+        self.assertIn("dashboardReminders", COCKPIT_HTML)
         self.assertIn("renderDashboard(data)", COCKPIT_HTML)
         self.assertIn("Samantha chat", COCKPIT_HTML)
         self.assertIn("Codex CLI", COCKPIT_HTML)
@@ -108,6 +117,270 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Uložené dokumenty k revizi", COCKPIT_HTML)
         self.assertIn("Problémy", COCKPIT_HTML)
         self.assertIn("Zpracovat další dokument", COCKPIT_HTML)
+        self.assertIn("Reminders", COCKPIT_HTML)
+        self.assertIn("remindersModal", COCKPIT_HTML)
+        self.assertIn("/api/reminders", COCKPIT_HTML)
+        self.assertIn("/api/reminders/done", COCKPIT_HTML)
+        self.assertIn("/api/reminders/source", COCKPIT_HTML)
+        self.assertIn("/api/documents/open", COCKPIT_HTML)
+        self.assertIn("markReminderDone", COCKPIT_HTML)
+        self.assertIn("loadReminderSource", COCKPIT_HTML)
+        self.assertIn("item.reminder_ref", COCKPIT_HTML)
+        self.assertIn("renderReminderConflicts", COCKPIT_HTML)
+        self.assertIn("Konflikt plateb", COCKPIT_HTML)
+        self.assertIn("Otevřít PDF", COCKPIT_HTML)
+        self.assertIn("Splněno", COCKPIT_HTML)
+        self.assertIn("Zdroj", COCKPIT_HTML)
+        self.assertIn("Souhrn vaultu", COCKPIT_HTML)
+        self.assertIn("Auditní historie inboxu", COCKPIT_HTML)
+        self.assertIn('const marker = "\\n- Inbox audit";', COCKPIT_HTML)
+
+    def test_reminders_status_groups_startup_window_and_future(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "reminders.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "reminders": [
+                            self.reminder("overdue", "Prošlé", "2026-05-31"),
+                            self.reminder("soon", "Brzy", "2026-06-10"),
+                            self.reminder("later", "Později", "2026-08-01"),
+                            self.reminder("done", "Hotovo", "2026-06-03", status="done"),
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = reminders_status(path=path, today=date(2026, 6, 3))
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["counts"]["open"], 3)
+            self.assertEqual(result["counts"]["active"], 2)
+            self.assertEqual(result["groups"]["overdue"][0]["id"], "overdue")
+            self.assertEqual(result["groups"]["soon"][0]["id"], "soon")
+            self.assertEqual(result["groups"]["later"][0]["id"], "later")
+            self.assertEqual(result["groups"]["later"][0]["reminder_ref"], reminder_reference("later"))
+
+    def test_mark_reminder_done_action_changes_selected_reminder_only(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "reminders.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "reminders": [
+                            self.reminder("mark-id", "Označit", "2026-06-10"),
+                            self.reminder("other-id", "Nechat", "2026-06-11"),
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = mark_reminder_done_action("mark-id", path=path)
+            stored = json.loads(path.read_text(encoding="utf-8"))["reminders"]
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(stored[0]["status"], "done")
+            self.assertEqual(stored[1]["status"], "open")
+            self.assertEqual(result["reminders"]["counts"]["open"], 1)
+            self.assertEqual(result["reminders"]["groups"]["soon"][0]["id"], "other-id")
+
+    def test_mark_reminder_done_action_accepts_reminder_reference(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "reminders.json"
+            sensitive_id = "sms-rixo-zaplatit-pojistku-3275111280-2026-05-21"
+            path.write_text(
+                json.dumps({"reminders": [self.reminder(sensitive_id, "Označit", "2026-06-10")]}),
+                encoding="utf-8",
+            )
+
+            result = mark_reminder_done_action(reminder_reference(sensitive_id), path=path)
+            stored = json.loads(path.read_text(encoding="utf-8"))["reminders"]
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(stored[0]["status"], "done")
+            self.assertEqual(result["reminder_ref"], reminder_reference(sensitive_id))
+            self.assertNotIn("3275111280", result["message"])
+
+    def test_reminders_status_reports_payment_conflict_for_same_asset_and_coverage(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "reminders.json"
+            rixo = self.reminder("rixo-id", "Zaplatit RIXO", "2026-07-31")
+            cpp = self.reminder("cpp-id", "Zaplatit ČPP", "2026-08-01")
+            for item in (rixo, cpp):
+                item["related_asset"] = "auto VOLVO V40 CROSS COUNTRY SPZ 4SN8981"
+                item["coverage_start"] = "2026-08-01"
+                item["conflict_note"] = "Nekonat platbu bez porovnani."
+            path.write_text(json.dumps({"reminders": [rixo, cpp]}), encoding="utf-8")
+
+            result = reminders_status(path=path, today=date(2026, 6, 3))
+
+            self.assertEqual(result["counts"]["conflicts"], 1)
+            self.assertEqual(len(result["conflicts"]), 1)
+            self.assertEqual(result["conflicts"][0]["asset"], "AUTO VOLVO V40 CROSS COUNTRY SPZ 4SN8981")
+            self.assertEqual(result["conflicts"][0]["coverage_start"], "2026-08-01")
+            self.assertEqual(len(result["conflicts"][0]["items"]), 2)
+            self.assertEqual(result["conflicts"][0]["items"][0]["reminder_ref"], reminder_reference("rixo-id"))
+
+    def test_reminder_source_detail_loads_email_readonly(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "reminders.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "reminders": [
+                            {
+                                **self.reminder("email-reminder", "Email", "2026-06-10"),
+                                "source": {
+                                    "type": "email",
+                                    "uid": "14157",
+                                    "date": "Mon, 1 Jun 2026 10:00:00 +0200",
+                                    "sender": "Sender <[e-mail redigovan]>",
+                                    "provider": "icloud",
+                                },
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            provider = _FakeMessageProvider(
+                EmailMessage(
+                    header=EmailHeader(
+                        internal_id="14157",
+                        date="Mon, 1 Jun 2026 10:00:00 +0200",
+                        sender="Sender <sender@example.com>",
+                        subject="Pojistka vozidla",
+                        source="iCloud",
+                        folder="INBOX",
+                    ),
+                    body_text="Platba se týká vozidla Volvo.",
+                    truncated=False,
+                    attachments=(),
+                )
+            )
+
+            result = reminder_source_detail_action(
+                "email-reminder",
+                reminders_path=path,
+                icloud_provider_factory=lambda: provider,
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["kind"], "email")
+            self.assertEqual(result["email"]["subject"], "Pojistka vozidla")
+            self.assertEqual(provider.calls[0]["uid"], "14157")
+
+    def test_reminder_source_detail_finds_private_document_context(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            reminders_path = root / "reminders.json"
+            reminders_path.write_text(
+                json.dumps(
+                    {
+                        "reminders": [
+                            {
+                                **self.reminder(
+                                    "document-reminder",
+                                    "Zaplatit ČPP autopojištění",
+                                    "2026-08-01",
+                                ),
+                                "source": {
+                                    "type": "private_document",
+                                    "uid": "cpp-predpis-pojistne-smlouvy-3270612451-2026",
+                                    "date": "",
+                                    "sender": "Private document vault",
+                                },
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            vault = root / "documents"
+            index = vault / "index"
+            stored_dir = vault / "vault" / "insurance" / "cpp-predpis-pojistne-smlouvy-3270612451-2026"
+            stored_dir.mkdir(parents=True)
+            pdf = stored_dir / "predpis.pdf"
+            pdf.write_bytes(b"%PDF-1.4\n")
+            index.mkdir(parents=True)
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "cpp-predpis-pojistne-smlouvy-3270612451-2026",
+                        "title": "ČPP předpis pojistné smlouvy",
+                        "original_filename": "predpis.pdf",
+                        "domain": "insurance",
+                        "document_type": "payment_notice",
+                        "related_asset": "VOLVO 4SN 8981",
+                        "stored_path": str(pdf),
+                    }
+                ],
+            )
+            self.write_jsonl(
+                index / "text_index.jsonl",
+                [
+                    {
+                        "document_id": "cpp-predpis-pojistne-smlouvy-3270612451-2026",
+                        "text": "Předpis pojistného pro VOLVO 4SN 8981. Datum splatnosti 1. 8. 2026.",
+                    }
+                ],
+            )
+            self.write_jsonl(
+                index / "due_dates.jsonl",
+                [
+                    {
+                        "document_id": "cpp-predpis-pojistne-smlouvy-3270612451-2026",
+                        "date": "2026-08-01",
+                        "type": "payment_due",
+                        "confidence": "high",
+                        "context": "K úhradě pro VOLVO 4SN 8981.",
+                    }
+                ],
+            )
+
+            result = reminder_source_detail_action(
+                reminder_reference("document-reminder"),
+                reminders_path=reminders_path,
+                vault_dir=vault,
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["kind"], "document")
+            self.assertEqual(result["document"]["related_asset"], "VOLVO 4SN 8981")
+            self.assertTrue(result["document"]["can_open_pdf"])
+            self.assertIn("VOLVO", result["document"]["snippet"])
+            self.assertEqual(result["document"]["due_contexts"][0]["date"], "2026-08-01")
+
+    def test_open_document_pdf_action_opens_only_indexed_vault_pdf(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            index = vault / "index"
+            stored_dir = vault / "vault" / "insurance" / "doc-open"
+            stored_dir.mkdir(parents=True)
+            pdf = stored_dir / "doklad.pdf"
+            pdf.write_bytes(b"%PDF-1.4\n")
+            index.mkdir(parents=True)
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "doc-open",
+                        "title": "Doklad",
+                        "stored_path": str(pdf),
+                    }
+                ],
+            )
+            calls: list[list[str]] = []
+
+            result = open_document_pdf_action("doc-open", vault_dir=vault, opener=lambda command: calls.append(command))
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(calls[0][0], "/usr/bin/open")
+            self.assertEqual(Path(calls[0][1]), pdf.resolve())
 
     def test_document_search_returns_structured_redacted_results(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -556,9 +829,57 @@ class CockpitTests(unittest.TestCase):
             self.assertEqual(len(docs), 1)
             self.assertEqual(docs[0]["document_type"], "email-attachment-pdf")
             self.assertIn("faktura.pdf", docs[0]["original_filename"])
+            self.assertEqual(result["items"][0]["attachments"][0]["document_id"], docs[0]["document_id"])
+            self.assertEqual(result["items"][0]["attachments"][0]["document_ref"], document_reference(docs[0]["document_id"]))
             self.assertEqual(len(text_rows), 1)
             self.assertTrue(actions_path.exists())
             self.assertTrue(activity_state_path.exists())
+
+    def test_preview_email_work_queue_attachment_opens_temp_pdf_without_vault_import(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            preview_dir = root / "preview"
+            raw_message = _raw_email_with_pdf_attachment()
+            provider = _FakeArchiveProvider(
+                EmailArchiveSource(
+                    uid="14157",
+                    date="Mon, 1 Jun 2026 10:00:00 +0200",
+                    sender="Sender <sender@example.com>",
+                    subject="Faktura za služby",
+                    body_text="Dobrý den, v příloze posíláme fakturu.",
+                    attachments=(
+                        EmailAttachmentMeta(
+                            filename="faktura.pdf",
+                            content_type="application/pdf",
+                            size_bytes=62,
+                            part_id="2",
+                            content_id="",
+                            disposition="attachment",
+                        ),
+                    ),
+                    original_eml=raw_message,
+                    provider="icloud",
+                    mailbox="INBOX",
+                )
+            )
+            commands: list[list[str]] = []
+
+            result = preview_email_work_queue_attachment_action(
+                provider="iCloud",
+                folder="INBOX",
+                uid="14157",
+                part_id="2",
+                preview_dir=preview_dir,
+                opener=lambda command: commands.append(command),
+                icloud_provider_factory=lambda: provider,
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertIn("dočasný náhled", result["message"])
+            self.assertEqual(commands[0][0], "/usr/bin/open")
+            self.assertTrue(Path(commands[0][1]).exists())
+            self.assertTrue(str(Path(commands[0][1])).startswith(str(preview_dir)))
+            self.assertFalse((root / "documents" / "index" / "documents_index.jsonl").exists())
 
     def test_process_email_work_queue_batch_skip_clears_decision_without_provider_call(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -791,7 +1112,13 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Uložit e-mail", EMAIL_PROCESSING_HTML)
         self.assertIn("Neukládat", EMAIL_PROCESSING_HTML)
         self.assertIn("Uložit</label>", EMAIL_PROCESSING_HTML)
-        self.assertIn("Otevření souboru bude dostupné po potvrzeném uložení přílohy", EMAIL_PROCESSING_HTML)
+        self.assertIn("Náhled PDF", EMAIL_PROCESSING_HTML)
+        self.assertIn("/api/email-processing/preview-attachment", EMAIL_PROCESSING_HTML)
+        self.assertIn("bindAttachmentPreviewButtons", EMAIL_PROCESSING_HTML)
+        self.assertIn("Právě uložené přílohy", EMAIL_PROCESSING_HTML)
+        self.assertIn("Otevřít uložené PDF", EMAIL_PROCESSING_HTML)
+        self.assertIn("/api/documents/open", EMAIL_PROCESSING_HTML)
+        self.assertIn("collectImportedAttachments", EMAIL_PROCESSING_HTML)
         self.assertIn("Zpracovat dávku", EMAIL_PROCESSING_HTML)
         self.assertIn("hlavní seznam je vyprázdněný", EMAIL_PROCESSING_HTML)
         self.assertIn("headersBusy", EMAIL_PROCESSING_HTML)
@@ -901,6 +1228,20 @@ class CockpitTests(unittest.TestCase):
             self.assertEqual(result["document_id"], "doc-[rodne cislo redigovano]")
             self.assertEqual(docs[0]["document_id"], "doc-1234567890")
             self.assertEqual(docs[0]["reading_status"], "superseded")
+
+    @staticmethod
+    def reminder(reminder_id: str, title: str, due_date: str, status: str = "open") -> dict[str, object]:
+        return {
+            "id": reminder_id,
+            "title": title,
+            "notes": "",
+            "due_date": due_date,
+            "priority": "high",
+            "status": status,
+            "source": {"type": "test", "uid": "manual", "date": "", "sender": "test"},
+            "links": [],
+            "attachments": [],
+        }
 
     @staticmethod
     def write_jsonl(path: Path, rows: list[dict[str, object]]) -> None:

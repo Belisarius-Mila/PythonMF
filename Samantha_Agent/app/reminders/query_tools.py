@@ -170,7 +170,7 @@ def mark_reminder_done_text(
 def has_explicit_done_confirmation(reminder_id: str, confirmation_text: str) -> bool:
     normalized = confirmation_text.casefold()
     return (
-        reminder_id.strip() in normalized
+        reminder_id.strip().casefold() in normalized
         and any(word in normalized for word in DONE_CONFIRMATION_WORDS)
         and any(word in normalized for word in MARK_CONFIRMATION_WORDS)
     )

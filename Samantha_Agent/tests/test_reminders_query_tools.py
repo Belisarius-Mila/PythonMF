@@ -100,6 +100,21 @@ class ReminderQueryToolsTests(unittest.TestCase):
             self.assertEqual(store["reminders"][0]["title"], "Objednat prohlidku fotovoltaiky")
             self.assertEqual(store["reminders"][1]["status"], "open")
 
+    def test_mark_reminder_done_confirmation_matches_id_case_insensitively(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = _write_store(Path(temp_dir), [_reminder("Mark-ID", "open")])
+
+            result = mark_reminder_done_text(
+                "Mark-ID",
+                user_confirmed=True,
+                confirmation_text="Potvrzuji, oznac mark-id jako hotove.",
+                path=path,
+            )
+            store = load_reminders_store(path)
+
+            self.assertIn("Oznaceno jako hotove: Mark-ID", result)
+            self.assertEqual(store["reminders"][0]["status"], "done")
+
     def test_missing_id_returns_safe_error(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             path = _write_store(Path(temp_dir), [_reminder("existing-id", "open")])
