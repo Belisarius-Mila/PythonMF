@@ -106,6 +106,27 @@ codex resume <SESSION_ID>
 - Nepouzivat destruktivni git prikazy.
 - Pred dalsi praci shrnout, co je rozpracovane a co bylo overeno.
 
+## [PRIPOMENOUT] Cockpit Recovery centrum
+
+Priorita 1 pro pristi praci na Cockpitu: pridat read-only Recovery centrum pro
+navazani po padu Samanthy/Codexu. Cilem je, aby Mila nemusel lovit terminalovy
+postup v pameti.
+
+Minimalni obsah:
+
+- posledni autosave timestamp z `data/session_autosave/` bez vypisu citliveho
+  obsahu logu,
+- kratke git status summary,
+- posledni relevantni handoff nebo odkaz na `MEMORY_INDEX.md`,
+- doporuceny dalsi prikaz: `samantha`, pripadne `codex resume --last`,
+- jasne upozorneni, ze recovery panel je read-only a nic neprepisuje.
+
+Kanonicky handoff:
+
+```text
+memory/handoffs/cockpit_recovery_center_priority_2026_06_03.md
+```
+
 ## Pravidlo pro dlouhe ukoly pri nestabilnim spojeni
 
 Pri opakovanych reconnectech nepokracovat dlouhymi interaktivnimi tool cally.
