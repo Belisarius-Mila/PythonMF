@@ -19,6 +19,7 @@ from app.cockpit import (
     parse_email_processing_items,
     prepare_document_print_action,
     process_email_work_queue_batch,
+    process_email_work_queue_purge_trash_batch,
     read_email_processing_message_detail,
     read_email_processing_decisions,
     save_email_processing_decision,
@@ -288,6 +289,7 @@ class CockpitTests(unittest.TestCase):
                 limit_per_source=50,
                 since="2026-06-01T07:00:00+00:00",
                 decisions_path=Path(temp_dir) / "email_processing_decisions.json",
+                actions_path=Path(temp_dir) / "email_work_queue_actions.jsonl",
                 icloud_provider_factory=lambda: _FakeEmailProvider(
                     [
                         EmailHeader(
@@ -313,6 +315,56 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["items"][0]["subject"], "Nový iCloud e-mail")
         self.assertEqual(result["items"][0]["category"], "ostatní")
         self.assertNotIn("text", result)
+
+    def test_new_email_headers_overview_skips_completed_work_queue_items(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            actions_path = Path(temp_dir) / "email_work_queue_actions.jsonl"
+            completed_id = email_processing_item_id("", "iCloud", "INBOX", "10", "", "")
+            self.write_jsonl(
+                actions_path,
+                [
+                    {
+                        "action": "process_email_work_queue_batch",
+                        "items": [
+                            {
+                                "item_id": completed_id,
+                                "provider": "iCloud",
+                                "folder": "INBOX",
+                                "uid": "10",
+                                "status": "saved",
+                            }
+                        ],
+                    }
+                ],
+            )
+
+            result = new_email_headers_overview(
+                limit_per_source=50,
+                since="2026-06-01T07:00:00+00:00",
+                decisions_path=Path(temp_dir) / "email_processing_decisions.json",
+                actions_path=actions_path,
+                icloud_provider_factory=lambda: _FakeEmailProvider(
+                    [
+                        EmailHeader(
+                            internal_id="11",
+                            date="Mon, 1 Jun 2026 11:00:00 +0200",
+                            sender="Sender <sender@example.com>",
+                            subject="Ještě nezpracovaný e-mail",
+                        ),
+                        EmailHeader(
+                            internal_id="10",
+                            date="Mon, 1 Jun 2026 10:00:00 +0200",
+                            sender="Sender <sender@example.com>",
+                            subject="Už zpracovaný e-mail",
+                        ),
+                    ]
+                ),
+                seznam_provider_factory=lambda: _FakeEmailProvider([]),
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual([item["uid"] for item in result["items"]], ["11"])
+        self.assertGreaterEqual(result["skipped_completed_count"], 1)
 
     def test_email_processing_id_is_stable_for_same_provider_folder_uid(self) -> None:
         first = email_processing_item_id(
@@ -564,7 +616,7 @@ class CockpitTests(unittest.TestCase):
             self.assertTrue(result["ok"])
             self.assertEqual(result["summary"]["trash_pending"], 1)
             self.assertFalse(provider.trash_calls)
-            self.assertIn("Potvrzuji, přesuň e-mail UID 14157 do koše.", result["items"][0]["required_confirmation"])
+            self.assertIn("Potvrzuji, přesuň 1 e-mail označený ke smazání do koše.", result["items"][0]["required_confirmation"])
 
     def test_process_email_work_queue_batch_confirmed_trash_uses_provider_move(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -592,6 +644,105 @@ class CockpitTests(unittest.TestCase):
             self.assertTrue(result["ok"])
             self.assertEqual(result["summary"]["trashed"], 1)
             self.assertEqual(provider.trash_calls, [{"uid": "14157", "folder": "INBOX"}])
+            self.assertEqual(result["items"][0]["trash_folder"], "Deleted Messages")
+            self.assertEqual(result["items"][0]["trash_uid"], "914157")
+            self.assertEqual(result["items"][0]["message_id"], "<14157@example.com>")
+
+    def test_process_email_work_queue_batch_confirmed_bulk_trash_uses_one_confirmation(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            provider = _FakeArchiveProvider(_archive_source_without_attachment())
+
+            result = process_email_work_queue_batch(
+                items=[
+                    {
+                        "id": "trash-1",
+                        "provider": "iCloud",
+                        "folder": "INBOX",
+                        "uid": "14157",
+                        "queueDecision": "trash_requested",
+                    },
+                    {
+                        "id": "trash-2",
+                        "provider": "iCloud",
+                        "folder": "INBOX",
+                        "uid": "14158",
+                        "queueDecision": "trash_requested",
+                    },
+                ],
+                trash_confirmation_text="Potvrzuji, přesuň 2 e-maily označené ke smazání do koše.",
+                archive_directory=Path(temp_dir) / "archive",
+                documents_dir=Path(temp_dir) / "documents",
+                decisions_path=Path(temp_dir) / "decisions.json",
+                actions_path=Path(temp_dir) / "actions.jsonl",
+                activity_state_path=Path(temp_dir) / "activity.json",
+                icloud_provider_factory=lambda: provider,
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["summary"]["trashed"], 2)
+            self.assertEqual(
+                provider.trash_calls,
+                [
+                    {"uid": "14157", "folder": "INBOX"},
+                    {"uid": "14158", "folder": "INBOX"},
+                ],
+            )
+
+    def test_process_email_work_queue_purge_trash_requires_confirmation(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            provider = _FakeArchiveProvider(_archive_source_without_attachment())
+
+            result = process_email_work_queue_purge_trash_batch(
+                items=[
+                    {
+                        "id": "trash-1",
+                        "provider": "iCloud",
+                        "uid": "14157",
+                        "trash_folder": "Deleted Messages",
+                        "trash_uid": "914157",
+                    }
+                ],
+                actions_path=Path(temp_dir) / "actions.jsonl",
+                icloud_provider_factory=lambda: provider,
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["summary"]["purge_pending"], 1)
+            self.assertFalse(provider.purge_calls)
+            self.assertIn("čeká na potvrzení tlačítkem", result["message"])
+
+    def test_process_email_work_queue_purge_trash_confirmed_uses_provider_expunge(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            provider = _FakeArchiveProvider(_archive_source_without_attachment())
+
+            result = process_email_work_queue_purge_trash_batch(
+                items=[
+                    {
+                        "id": "trash-1",
+                        "provider": "iCloud",
+                        "uid": "14157",
+                        "trash_folder": "Deleted Messages",
+                        "trash_uid": "914157",
+                        "message_id": "<14157@example.com>",
+                    }
+                ],
+                confirmed=True,
+                actions_path=Path(temp_dir) / "actions.jsonl",
+                icloud_provider_factory=lambda: provider,
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["summary"]["purged"], 1)
+            self.assertEqual(
+                provider.purge_calls,
+                [
+                    {
+                        "trash_uid": "914157",
+                        "message_id": "<14157@example.com>",
+                        "trash_folder": "Deleted Messages",
+                    }
+                ],
+            )
 
     def test_email_processing_html_contains_readonly_overview_controls(self) -> None:
         self.assertIn("Email Processing", EMAIL_PROCESSING_HTML)
@@ -601,6 +752,14 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/email-processing/new-headers", EMAIL_PROCESSING_HTML)
         self.assertIn("/api/email-processing/read-message", EMAIL_PROCESSING_HTML)
         self.assertIn("/api/email-processing/process-batch", EMAIL_PROCESSING_HTML)
+        self.assertIn("/api/email-processing/purge-trash", EMAIL_PROCESSING_HTML)
+        self.assertIn("trashBatchBtn", EMAIL_PROCESSING_HTML)
+        self.assertIn("purgeTrashBtn", EMAIL_PROCESSING_HTML)
+        self.assertIn("Emaily určené ke smazání smazat", EMAIL_PROCESSING_HTML)
+        self.assertIn("Trvale smazat e-maily v koši", EMAIL_PROCESSING_HTML)
+        self.assertIn("confirmed: true", EMAIL_PROCESSING_HTML)
+        self.assertNotIn("Potvrzuji, trvale smaž", EMAIL_PROCESSING_HTML)
+        self.assertNotIn("opiš přesně potvrzovací větu", EMAIL_PROCESSING_HTML)
         self.assertIn("read-only", EMAIL_PROCESSING_HTML)
         self.assertIn("Obnovit nové", EMAIL_PROCESSING_HTML)
         self.assertIn('id="refreshBtn" disabled', EMAIL_PROCESSING_HTML)
@@ -807,13 +966,24 @@ class _FakeArchiveProvider:
         self._source = source
         self.archive_calls: list[dict[str, object]] = []
         self.trash_calls: list[dict[str, object]] = []
+        self.purge_calls: list[dict[str, object]] = []
 
     def read_archive_source_by_uid(self, uid: str, max_chars: int = 50_000, folder: str = "INBOX") -> EmailArchiveSource:
         self.archive_calls.append({"uid": uid, "max_chars": max_chars, "folder": folder})
         return self._source
 
-    def move_message_to_trash(self, uid: str, folder: str = "INBOX") -> None:
+    def move_message_to_trash(self, uid: str, folder: str = "INBOX") -> dict[str, str]:
         self.trash_calls.append({"uid": uid, "folder": folder})
+        return {"trash_folder": "Deleted Messages", "trash_uid": f"9{uid}", "message_id": f"<{uid}@example.com>"}
+
+    def permanently_delete_message_from_trash(
+        self,
+        *,
+        trash_uid: str = "",
+        message_id: str = "",
+        trash_folder: str = "",
+    ) -> None:
+        self.purge_calls.append({"trash_uid": trash_uid, "message_id": message_id, "trash_folder": trash_folder})
 
 
 def _archive_source_without_attachment() -> EmailArchiveSource:

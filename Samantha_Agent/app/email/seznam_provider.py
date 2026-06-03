@@ -14,13 +14,14 @@ from .models import EmailAttachmentMeta, EmailHeader, EmailMessage, EmailMessage
 
 
 HEADER_FETCH_SPEC = "(BODY.PEEK[HEADER.FIELDS (DATE FROM SUBJECT)])"
+MESSAGE_ID_FETCH_SPEC = "(BODY.PEEK[HEADER.FIELDS (MESSAGE-ID)])"
 MESSAGE_FETCH_SPEC = "(RFC822.SIZE BODY.PEEK[])"
 MESSAGE_SIZE_FETCH_SPEC = "(RFC822.SIZE)"
 MAX_MESSAGE_BYTES = 2_000_000
 MAX_EXPLICIT_MESSAGE_BYTES = 25_000_000
 SEZNAM_DEFAULT_FOLDERS = ("INBOX",)
 SEZNAM_SPAM_FOLDER_CANDIDATES = ("spam", "Spam", "Junk", "Bulk Mail")
-SEZNAM_TRASH_FOLDER_CANDIDATES = ("Trash", "Kos", "Deleted Messages", "Deleted Items")
+SEZNAM_TRASH_FOLDER_CANDIDATES = ("trash", "Trash", "Kos", "Deleted Messages", "Deleted Items")
 
 
 class SeznamEmailProviderError(RuntimeError):
@@ -150,24 +151,61 @@ class SeznamReadOnlyEmailProvider:
         except OSError as exc:
             raise SeznamEmailProviderError("Nepodarilo se pripojit k Seznam Mailu.") from exc
 
-    def move_message_to_trash(self, uid: str, folder: str = "INBOX") -> None:
+    def move_message_to_trash(self, uid: str, folder: str = "INBOX") -> dict[str, str]:
         safe_uid = _validate_uid(uid)
         try:
             with imaplib.IMAP4_SSL(self._config.host, self._config.port) as imap:
                 imap.login(self._config.address, self._config.password)
                 _select_writable_folder(imap, folder)
-                _move_uid_to_trash(
+                message_id = _fetch_message_id(imap, safe_uid.encode("ascii"))
+                result = _move_uid_to_trash(
                     imap=imap,
                     uid=safe_uid.encode("ascii"),
                     trash_candidates=SEZNAM_TRASH_FOLDER_CANDIDATES,
                     provider_label="Seznam",
                 )
+                return {**result, "message_id": message_id}
         except SeznamEmailProviderError:
             raise
         except imaplib.IMAP4.error as exc:
             raise SeznamEmailProviderError("IMAP server Seznam odmitl presun do kose.") from exc
         except OSError as exc:
             raise SeznamEmailProviderError("Nepodarilo se pripojit k Seznam Mailu.") from exc
+
+    def permanently_delete_message_from_trash(
+        self,
+        *,
+        trash_uid: str = "",
+        message_id: str = "",
+        trash_folder: str = "",
+    ) -> None:
+        folders = _dedupe_keep_order((trash_folder, *SEZNAM_TRASH_FOLDER_CANDIDATES))
+        safe_trash_uid = _validate_uid(trash_uid) if trash_uid else ""
+        safe_message_id = " ".join(str(message_id).split())
+        if not safe_trash_uid and not safe_message_id:
+            raise SeznamEmailProviderError("Chybi UID v kosi nebo Message-ID pro trvale smazani.")
+
+        try:
+            with imaplib.IMAP4_SSL(self._config.host, self._config.port) as imap:
+                imap.login(self._config.address, self._config.password)
+                for folder_name in folders:
+                    if not folder_name:
+                        continue
+                    if not _select_writable_folder_optional(imap, folder_name):
+                        continue
+                    target_uid = safe_trash_uid or _find_uid_by_message_id(imap, safe_message_id)
+                    if not target_uid:
+                        continue
+                    _delete_uid_and_expunge(imap, target_uid.encode("ascii"))
+                    return
+        except SeznamEmailProviderError:
+            raise
+        except imaplib.IMAP4.error as exc:
+            raise SeznamEmailProviderError("IMAP server Seznam odmitl trvale smazani z kose.") from exc
+        except OSError as exc:
+            raise SeznamEmailProviderError("Nepodarilo se pripojit k Seznam Mailu.") from exc
+
+        raise SeznamEmailProviderError("Zpravu se nepodarilo najit v kosi pro trvale smazani.")
 
     def _fetch_header(
         self,
@@ -417,37 +455,108 @@ def _select_writable_folder(imap: imaplib.IMAP4_SSL, folder: str) -> None:
         raise SeznamEmailProviderError(f"Nepodarilo se otevrit slozku {folder} pro zapis.")
 
 
+def _select_writable_folder_optional(imap: imaplib.IMAP4_SSL, folder: str) -> bool:
+    try:
+        status, _data = imap.select(folder, readonly=False)
+    except imaplib.IMAP4.error:
+        return False
+    return status == "OK"
+
+
 def _move_uid_to_trash(
     imap: imaplib.IMAP4_SSL,
     uid: bytes,
     trash_candidates: tuple[str, ...],
     provider_label: str,
-) -> None:
+) -> dict[str, str]:
     for trash_folder in trash_candidates:
         mailbox = _mailbox_command_arg(trash_folder)
         try:
-            status, _data = imap.uid("MOVE", uid, mailbox)
+            status, data = imap.uid("MOVE", uid, mailbox)
         except imaplib.IMAP4.error:
             status = "NO"
         if status == "OK":
-            return
+            return {
+                "trash_folder": trash_folder,
+                "trash_uid": _copyuid_destination_uid(data, uid),
+            }
 
     for trash_folder in trash_candidates:
         mailbox = _mailbox_command_arg(trash_folder)
         try:
-            copy_status, _copy_data = imap.uid("COPY", uid, mailbox)
+            copy_status, copy_data = imap.uid("COPY", uid, mailbox)
         except imaplib.IMAP4.error:
             continue
         if copy_status != "OK":
             continue
         store_status, _store_data = imap.uid("STORE", uid, "+FLAGS.SILENT", r"(\Deleted)")
         if store_status == "OK":
-            return
+            return {
+                "trash_folder": trash_folder,
+                "trash_uid": _copyuid_destination_uid(copy_data, uid),
+            }
         raise SeznamEmailProviderError(
             f"{provider_label}: zprava byla zkopirovana do kose, ale nepodarilo se oznacit puvodni zpravu."
         )
 
     raise SeznamEmailProviderError(f"{provider_label}: nepodarilo se najit nebo pouzit slozku Kos.")
+
+
+def _fetch_message_id(imap: imaplib.IMAP4_SSL, uid: bytes) -> str:
+    status, message_data = imap.uid("FETCH", uid, MESSAGE_ID_FETCH_SPEC)
+    if status != "OK" or not message_data:
+        return ""
+    raw_header = _first_bytes_payload(message_data)
+    if raw_header is None:
+        return ""
+    return _decode_header_value(message_from_bytes(raw_header).get("Message-ID"))
+
+
+def _copyuid_destination_uid(data: list[object], source_uid: bytes) -> str:
+    chunks: list[bytes] = []
+    for item in data or []:
+        if isinstance(item, bytes):
+            chunks.append(item)
+        elif isinstance(item, tuple):
+            chunks.extend(part for part in item if isinstance(part, bytes))
+    text = b" ".join(chunks).decode("ascii", errors="ignore")
+    match = re.search(r"COPYUID\s+\d+\s+([0-9:,]+)\s+([0-9:,]+)", text, re.IGNORECASE)
+    if not match:
+        return ""
+    source_set, destination_set = match.groups()
+    if source_set != source_uid.decode("ascii", errors="ignore"):
+        return ""
+    if not re.fullmatch(r"\d+", destination_set):
+        return ""
+    return destination_set
+
+
+def _find_uid_by_message_id(imap: imaplib.IMAP4_SSL, message_id: str) -> str:
+    if not message_id:
+        return ""
+    status, data = imap.uid("SEARCH", None, "HEADER", "MESSAGE-ID", _quote_imap_search_value(message_id))
+    if status != "OK" or not data or data[0] is None:
+        return ""
+    uids = data[0].split()
+    if len(uids) != 1:
+        return ""
+    return uids[0].decode("ascii", errors="ignore")
+
+
+def _delete_uid_and_expunge(imap: imaplib.IMAP4_SSL, uid: bytes) -> None:
+    store_status, _store_data = imap.uid("STORE", uid, "+FLAGS.SILENT", r"(\Deleted)")
+    if store_status != "OK":
+        raise SeznamEmailProviderError("Zpravu v kosi se nepodarilo oznacit ke smazani.")
+    try:
+        expunge_status, _expunge_data = imap.uid("EXPUNGE", uid)
+    except imaplib.IMAP4.error:
+        expunge_status, _expunge_data = imap.expunge()
+    if expunge_status != "OK":
+        raise SeznamEmailProviderError("Zpravu v kosi se nepodarilo fyzicky odstranit.")
+
+
+def _quote_imap_search_value(value: str) -> str:
+    return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
 def _mailbox_command_arg(folder: str) -> str:

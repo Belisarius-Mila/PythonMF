@@ -210,6 +210,35 @@ def email_processing_decision_lookup_keys(decisions: dict[str, dict[str, Any]]) 
     return keys
 
 
+def email_processing_completed_lookup_keys(actions_path: Path = EMAIL_WORK_QUEUE_ACTIONS_FILE) -> set[str]:
+    keys: set[str] = set()
+    completed_statuses = {"saved", "skipped", "trashed", "purged"}
+    for action in read_jsonl(actions_path):
+        raw_items = action.get("items", [])
+        if not isinstance(raw_items, list):
+            continue
+        for raw_item in raw_items:
+            if not isinstance(raw_item, dict):
+                continue
+            status = str(raw_item.get("status", "")).strip()
+            if status not in completed_statuses:
+                continue
+            item_id = str(raw_item.get("item_id", "")).strip()
+            if item_id:
+                keys.add(item_id)
+            computed_id = email_processing_item_id(
+                "",
+                str(raw_item.get("provider", "")),
+                str(raw_item.get("folder", "INBOX")),
+                str(raw_item.get("uid", "")),
+                "",
+                "",
+            )
+            if computed_id:
+                keys.add(computed_id)
+    return keys
+
+
 def classify_email_processing_category(subject: str, sender: str = "") -> str:
     value = f"{subject} {sender}".casefold()
     if any(
@@ -478,6 +507,7 @@ def new_email_headers_overview(
     days: int = 0,
     known_ids: set[str] | None = None,
     decisions_path: Path = EMAIL_PROCESSING_DECISIONS_FILE,
+    actions_path: Path = EMAIL_WORK_QUEUE_ACTIONS_FILE,
     icloud_provider_factory: Callable[[], object] | None = None,
     seznam_provider_factory: Callable[[], object] | None = None,
 ) -> dict[str, Any]:
@@ -491,6 +521,7 @@ def new_email_headers_overview(
     known = {str(item_id).strip() for item_id in (known_ids or set()) if str(item_id).strip()}
     decided = read_email_processing_decisions(decisions_path)
     decided_keys = email_processing_decision_lookup_keys(decided)
+    completed_keys = email_processing_completed_lookup_keys(actions_path)
     entries: list[dict[str, Any]] = []
     unavailable: list[str] = []
     providers: list[tuple[str, Callable[[], object], type[Exception], str]] = [
@@ -524,7 +555,14 @@ def new_email_headers_overview(
             item = email_header_to_processing_item(header, source)
             item_id = str(item.get("id", ""))
             legacy_id = str(item.get("legacy_id", ""))
-            if item_id in known or legacy_id in known or item_id in decided_keys or legacy_id in decided_keys:
+            if (
+                item_id in known
+                or legacy_id in known
+                or item_id in decided_keys
+                or legacy_id in decided_keys
+                or item_id in completed_keys
+                or legacy_id in completed_keys
+            ):
                 continue
             entries.append(item)
 
@@ -549,6 +587,7 @@ def new_email_headers_overview(
         "days": safe_days,
         "known_count": len(known),
         "skipped_decided_count": len(decided_keys),
+        "skipped_completed_count": len(completed_keys),
         "items": entries,
         "unavailable": unavailable,
     }
@@ -712,6 +751,12 @@ def process_email_work_queue_batch(
 
     processed: list[dict[str, Any]] = []
     has_error = False
+    trash_batch_size = sum(
+        1
+        for item in items
+        if isinstance(item, dict)
+        and safe_text(str(item.get("queueDecision") or item.get("action") or "")).strip() == "trash_requested"
+    )
     for raw_item in items:
         if not isinstance(raw_item, dict):
             has_error = True
@@ -726,6 +771,7 @@ def process_email_work_queue_batch(
             activity_state_path=activity_state_path,
             icloud_provider_factory=icloud_provider_factory,
             seznam_provider_factory=seznam_provider_factory,
+            trash_batch_size=trash_batch_size,
         )
         processed.append(result)
         has_error = has_error or not bool(result.get("ok"))
@@ -767,6 +813,132 @@ def process_email_work_queue_batch(
     return {"ok": not has_error, "message": message, "summary": summary, "items": processed}
 
 
+def process_email_work_queue_purge_trash_batch(
+    *,
+    items: list[dict[str, Any]],
+    confirmed: bool = False,
+    confirmation_text: str = "",
+    actions_path: Path = EMAIL_WORK_QUEUE_ACTIONS_FILE,
+    icloud_provider_factory: Callable[[], object] | None = None,
+    seznam_provider_factory: Callable[[], object] | None = None,
+) -> dict[str, Any]:
+    if not items:
+        return {"ok": False, "message": "Dávka pro trvalé smazání je prázdná.", "items": []}
+
+    safe_items = [item for item in items if isinstance(item, dict)]
+    if not confirmed and confirmation_text.strip() != "yes":
+        return {
+            "ok": True,
+            "message": "Trvalé smazání čeká na potvrzení tlačítkem.",
+            "summary": {"purge_pending": len(safe_items), "purged": 0, "errors": 0},
+            "items": [
+                {
+                    "item_id": safe_text(str(item.get("id") or item.get("item_id") or "")),
+                    "provider": safe_text(str(item.get("provider", ""))),
+                    "uid": safe_text(str(item.get("uid", ""))),
+                    "status": "purge_pending",
+                    "ok": True,
+                }
+                for item in safe_items
+            ],
+        }
+
+    processed: list[dict[str, Any]] = []
+    has_error = False
+    for item in safe_items:
+        result = process_email_work_queue_purge_trash_item(
+            item=item,
+            icloud_provider_factory=icloud_provider_factory,
+            seznam_provider_factory=seznam_provider_factory,
+        )
+        processed.append(result)
+        has_error = has_error or not bool(result.get("ok"))
+
+    summary = {
+        "purged": sum(1 for item in processed if item.get("status") == "purged"),
+        "purge_pending": sum(1 for item in processed if item.get("status") == "purge_pending"),
+        "errors": sum(1 for item in processed if not item.get("ok")),
+    }
+    append_jsonl(
+        actions_path,
+        {
+            "action": "purge_email_work_queue_trash_batch",
+            "created_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+            "summary": summary,
+            "items": [
+                {
+                    "item_id": str(item.get("item_id", "")),
+                    "provider": str(item.get("provider", "")),
+                    "trash_folder": str(item.get("trash_folder", "")),
+                    "trash_uid": str(item.get("trash_uid", "")),
+                    "status": str(item.get("status", "")),
+                }
+                for item in processed
+            ],
+            "do_not_commit": True,
+        },
+    )
+    message = "Trvalé smazání skončilo s chybami." if has_error else "E-maily v koši byly trvale smazány."
+    return {"ok": not has_error, "message": message, "summary": summary, "items": processed}
+
+
+def email_processing_message_id_ref(value: object) -> str:
+    normalized = " ".join(str(value or "").split())
+    if len(normalized) > 300:
+        return ""
+    return normalized
+
+
+def process_email_work_queue_purge_trash_item(
+    *,
+    item: dict[str, Any],
+    icloud_provider_factory: Callable[[], object] | None,
+    seznam_provider_factory: Callable[[], object] | None,
+) -> dict[str, Any]:
+    base = {
+        "item_id": safe_text(str(item.get("id") or item.get("item_id") or "")),
+        "provider": safe_text(str(item.get("provider", ""))),
+        "uid": safe_text(str(item.get("uid", ""))),
+        "folder": safe_text(str(item.get("folder", ""))),
+        "trash_folder": safe_text(str(item.get("trash_folder", ""))),
+        "trash_uid": safe_text(str(item.get("trash_uid", ""))),
+        "message_id": email_processing_message_id_ref(item.get("message_id", "")),
+    }
+    if not base["provider"]:
+        return {**base, "ok": False, "status": "error", "message": "Položce chybí provider."}
+    if not base["trash_uid"] and not base["message_id"]:
+        return {
+            **base,
+            "ok": False,
+            "status": "purge_pending",
+            "message": "Chybí UID v koši i Message-ID; nelze bezpečně trvale smazat.",
+        }
+    try:
+        safe_provider = str(base["provider"]).strip().casefold()
+        if safe_provider == "icloud":
+            client = (icloud_provider_factory or ICloudReadOnlyEmailProvider)()
+        elif safe_provider == "seznam":
+            client = (seznam_provider_factory or SeznamReadOnlyEmailProvider)()
+        else:
+            raise EmailProviderError("Neznámý e-mailový zdroj.")
+        purge = getattr(client, "permanently_delete_message_from_trash", None)
+        if not callable(purge):
+            return {
+                **base,
+                "ok": False,
+                "status": "purge_pending",
+                "message": "Provider zatím neumí trvalé smazání z koše.",
+            }
+        purge(  # type: ignore[misc]
+            trash_uid=str(base["trash_uid"]),
+            message_id=str(base["message_id"]),
+            trash_folder=str(base["trash_folder"]),
+        )
+    except (EmailConfigError, EmailProviderError, SeznamEmailProviderError) as exc:
+        return {**base, "ok": False, "status": "purge_pending", "message": str(exc)}
+    return {**base, "ok": True, "status": "purged", "message": "E-mail byl trvale smazán z koše."}
+
+
 def process_email_work_queue_item(
     *,
     item: dict[str, Any],
@@ -777,6 +949,7 @@ def process_email_work_queue_item(
     activity_state_path: Path,
     icloud_provider_factory: Callable[[], object] | None,
     seznam_provider_factory: Callable[[], object] | None,
+    trash_batch_size: int = 1,
 ) -> dict[str, Any]:
     item_id = safe_text(str(item.get("id", ""))).strip()
     provider = safe_text(str(item.get("provider", ""))).strip()
@@ -806,6 +979,7 @@ def process_email_work_queue_item(
             decisions_path=decisions_path,
             icloud_provider_factory=icloud_provider_factory,
             seznam_provider_factory=seznam_provider_factory,
+            trash_batch_size=trash_batch_size,
         )
     if decision != "save":
         return {**base, "ok": False, "status": "error", "message": "Položka nemá platné dávkové rozhodnutí."}
@@ -990,9 +1164,19 @@ def process_email_work_queue_trash_item(
     decisions_path: Path,
     icloud_provider_factory: Callable[[], object] | None,
     seznam_provider_factory: Callable[[], object] | None,
+    trash_batch_size: int = 1,
 ) -> dict[str, Any]:
-    required = f"Potvrzuji, přesuň e-mail UID {base['uid']} do koše."
-    if trash_confirmation_text.strip() != required:
+    safe_batch_size = max(1, int(trash_batch_size or 1))
+    if safe_batch_size == 1:
+        noun = "e-mail označený"
+    elif safe_batch_size in {2, 3, 4}:
+        noun = "e-maily označené"
+    else:
+        noun = "e-mailů označených"
+    required = f"Potvrzuji, přesuň {safe_batch_size} {noun} ke smazání do koše."
+    legacy_required = f"Potvrzuji, přesuň e-mail UID {base['uid']} do koše."
+    entered = trash_confirmation_text.strip()
+    if entered not in {required, legacy_required}:
         return {
             **base,
             "ok": True,
@@ -1017,11 +1201,20 @@ def process_email_work_queue_trash_item(
                 "required_confirmation": required,
                 "message": "Provider zatím neumí bezpečný přesun do koše; položka zůstává čekající.",
             }
-        move_to_trash(uid=str(base["uid"]), folder=str(base["folder"]))  # type: ignore[misc]
+        trash_result = move_to_trash(uid=str(base["uid"]), folder=str(base["folder"]))  # type: ignore[misc]
     except (EmailConfigError, EmailProviderError, SeznamEmailProviderError) as exc:
         return {**base, "ok": False, "status": "trash_pending", "required_confirmation": required, "message": str(exc)}
     clear_email_processing_decision(item_id=str(base["item_id"]), path=decisions_path)
-    return {**base, "ok": True, "status": "trashed", "message": "E-mail byl přesunut do koše."}
+    trash_meta = trash_result if isinstance(trash_result, dict) else {}
+    return {
+        **base,
+        "ok": True,
+        "status": "trashed",
+        "trash_folder": safe_text(str(trash_meta.get("trash_folder", ""))),
+        "trash_uid": safe_text(str(trash_meta.get("trash_uid", ""))),
+        "message_id": email_processing_message_id_ref(trash_meta.get("message_id", "")),
+        "message": "E-mail byl přesunut do koše.",
+    }
 
 
 def clear_email_processing_decision(*, item_id: str, path: Path) -> None:
@@ -1769,6 +1962,18 @@ class CockpitServer:
                         )
                     )
                     return
+                if parsed.path == "/api/email-processing/purge-trash":
+                    payload = self.read_json()
+                    raw_items = payload.get("items", [])
+                    items = raw_items if isinstance(raw_items, list) else []
+                    self.respond_json(
+                        process_email_work_queue_purge_trash_batch(
+                            items=[item for item in items if isinstance(item, dict)],
+                            confirmed=bool(payload.get("confirmed")),
+                            confirmation_text=str(payload.get("confirmation_text", "")),
+                        )
+                    )
+                    return
                 if parsed.path == "/api/email-processing/new-headers":
                     payload = self.read_json()
                     raw_limit = payload.get("limit_per_source", 10)
@@ -2331,15 +2536,21 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       const queueList = queueDoc.getElementById("queueList");
       const detailPane = queueDoc.getElementById("detailPane");
       const queueStatus = queueDoc.getElementById("queueStatus");
+      const queueProcessCount = queueDoc.getElementById("queueProcessCount");
+      const queueTrashCount = queueDoc.getElementById("queueTrashCount");
+      const queuePurgeCount = queueDoc.getElementById("queuePurgeCount");
       const batchBtn = queueDoc.getElementById("batchBtn");
+      const trashBatchBtn = queueDoc.getElementById("trashBatchBtn");
+      const purgeTrashBtn = queueDoc.getElementById("purgeTrashBtn");
       let selectedId = queueItems.length ? queueItems[0].id : "";
+      let permanentDeleteItems = [];
 
       function decisionLabel(item) {
         if (item.detailLoading) return "načítám detail...";
         if (item.detailLoaded) return item.queueDecision ? decisionLabel({...item, detailLoaded: false}) : "detail načten";
         if (item.queueDecision === "save") return "uložit";
         if (item.queueDecision === "skip") return "neukládat";
-        if (item.queueDecision === "trash_requested") return "koš čeká na potvrzení";
+        if (item.queueDecision === "trash_requested") return "koš připraven";
         return "čeká na rozhodnutí";
       }
 
@@ -2347,11 +2558,25 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         return queueItems.find((item) => item.id === selectedId) || queueItems[0] || null;
       }
 
+      function updateSummaryCounts() {
+        const workItems = queueItems.filter((item) => item.queueDecision !== "trash_requested");
+        const trashItems = queueItems.filter((item) => item.queueDecision === "trash_requested");
+        if (queueProcessCount) queueProcessCount.textContent = String(workItems.length);
+        if (queueTrashCount) queueTrashCount.textContent = String(trashItems.length);
+        if (queuePurgeCount) queuePurgeCount.textContent = String(permanentDeleteItems.length);
+      }
+
       function updateBatchState() {
         const decided = queueItems.filter((item) => Boolean(item.queueDecision)).length;
-        batchBtn.disabled = !queueItems.length || decided < queueItems.length;
+        const workItems = queueItems.filter((item) => item.queueDecision !== "trash_requested");
+        const workReady = workItems.filter((item) => Boolean(item.queueDecision)).length;
+        const trashItems = queueItems.filter((item) => item.queueDecision === "trash_requested");
+        updateSummaryCounts();
+        batchBtn.disabled = !workItems.length || workReady < workItems.length;
+        trashBatchBtn.disabled = !trashItems.length;
+        purgeTrashBtn.disabled = !permanentDeleteItems.length;
         queueStatus.textContent = queueItems.length
-          ? `Rozhodnuto ${decided}/${queueItems.length}. Ukládání a fyzické mazání budou další potvrzený krok.`
+          ? `Rozhodnuto ${decided}/${queueItems.length}. Koš: ${trashItems.length}. Ukládání a mazání se spouští odděleně.`
           : "Fronta je prázdná.";
       }
 
@@ -2360,6 +2585,9 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
           queueList.innerHTML = '<div class="empty">Fronta je prázdná.</div>';
           detailPane.innerHTML = '<div class="empty">Žádný e-mail ke zpracování.</div>';
           batchBtn.disabled = true;
+          trashBatchBtn.disabled = true;
+          purgeTrashBtn.disabled = !permanentDeleteItems.length;
+          updateSummaryCounts();
           return;
         }
         queueList.innerHTML = queueItems.map((item) => {
@@ -2517,18 +2745,10 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       }
 
       batchBtn.addEventListener("click", async () => {
-        const trashItems = queueItems.filter((item) => item.queueDecision === "trash_requested");
-        let trashConfirmation = "";
-        if (trashItems.length) {
-          const required = trashItems.length === 1
-            ? "Potvrzuji, přesuň e-mail UID " + trashItems[0].uid + " do koše."
-            : "";
-          const promptText = required
-            ? "Pro přesun do koše opiš přesně potvrzovací větu:\\n\\n" + required
-            : "V dávce je více e-mailů do koše. Koš zůstane čekající; nejdřív zpracuj ukládání a potom maž jednotlivě.";
-          const entered = required ? queue.prompt(promptText, "") : "";
-          if (required && entered === null) return;
-          trashConfirmation = entered || "";
+        const workItems = queueItems.filter((item) => item.queueDecision !== "trash_requested");
+        if (!workItems.length) {
+          queueStatus.textContent = "V této frontě jsou jen kandidáti ke koši. Použij tlačítko Emaily určené ke smazání smazat.";
+          return;
         }
         const ok = queue.confirm("Zpracovat dávku?\\n\\nUložené e-maily půjdou do EmailArchiveVault. Vybrané PDF přílohy půjdou do private document vaultu a fulltextového indexu.");
         if (!ok) return;
@@ -2539,8 +2759,8 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
-              items: queueItems,
-              trash_confirmation_text: trashConfirmation
+              items: workItems,
+              trash_confirmation_text: ""
             })
           });
           const data = await res.json();
@@ -2554,7 +2774,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
           queueItems.forEach((item) => {
             const result = byId.get(item.id);
             item.batchResult = result || {};
-            if (!result || !result.ok || result.status === "trash_pending") remaining.push(item);
+            if (!result || !result.ok || result.status === "trash_pending" || item.queueDecision === "trash_requested") remaining.push(item);
           });
           queueItems.splice(0, queueItems.length, ...remaining);
           selectedId = queueItems.length ? queueItems[0].id : "";
@@ -2564,6 +2784,103 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         } catch (err) {
           queueStatus.textContent = "Chyba zpracování dávky: " + err;
         } finally {
+          updateBatchState();
+        }
+      });
+
+      trashBatchBtn.addEventListener("click", async () => {
+        const trashItems = queueItems.filter((item) => item.queueDecision === "trash_requested");
+        if (!trashItems.length) {
+          queueStatus.textContent = "Žádné e-maily nejsou označené ke smazání.";
+          return;
+        }
+        const noun = trashItems.length === 1
+          ? "e-mail označený"
+          : (trashItems.length >= 2 && trashItems.length <= 4 ? "e-maily označené" : "e-mailů označených");
+        const required = "Potvrzuji, přesuň " + trashItems.length + " " + noun + " ke smazání do koše.";
+        const ok = queue.confirm(
+          "Přesunout do koše " + trashItems.length + " e-mailů označených ke smazání?\\n\\n" +
+          "Nepoužívá se EXPUNGE; zprávy se jen přesunou do koše provideru."
+        );
+        if (!ok) return;
+        trashBatchBtn.disabled = true;
+        queueStatus.textContent = "Přesouvám označené e-maily do koše.";
+        try {
+          const res = await fetch("/api/email-processing/process-batch", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+              items: trashItems,
+              trash_confirmation_text: required
+            })
+          });
+          const data = await res.json();
+          queueStatus.textContent = data.message || (data.ok ? "Koš zpracován." : "Koš skončil s chybou.");
+          const byId = new Map((data.items || []).map((result) => [result.item_id, result]));
+          const remaining = [];
+          queueItems.forEach((item) => {
+            const result = byId.get(item.id);
+            item.batchResult = result || {};
+            if (result && result.ok && result.status === "trashed") {
+              permanentDeleteItems.push({
+                id: item.id,
+                item_id: item.id,
+                provider: item.provider,
+                folder: item.folder || "INBOX",
+                uid: item.uid,
+                subject: item.subject || "",
+                trash_folder: result.trash_folder || "",
+                trash_uid: result.trash_uid || "",
+                message_id: result.message_id || ""
+              });
+            }
+            if (!result || !result.ok || result.status === "trash_pending") remaining.push(item);
+          });
+          queueItems.splice(0, queueItems.length, ...remaining);
+          selectedId = queueItems.length ? queueItems[0].id : "";
+          renderQueueList();
+          if (selectedId) renderDetail(currentItem());
+          else detailPane.innerHTML = '<div class="empty">Koš je hotový.</div>';
+        } catch (err) {
+          queueStatus.textContent = "Chyba přesunu do koše: " + err;
+        } finally {
+          updateBatchState();
+        }
+      });
+
+      purgeTrashBtn.addEventListener("click", async () => {
+        if (!permanentDeleteItems.length) {
+          queueStatus.textContent = "Žádné e-maily nejsou připravené k trvalému smazání z koše.";
+          return;
+        }
+        const count = permanentDeleteItems.length;
+        const ok = queue.confirm(
+          "Trvale smazat z koše " + count + " e-mailů?\\n\\n" +
+          "Tato akce je nevratná a použije IMAP EXPUNGE nad zprávami v koši."
+        );
+        if (!ok) return;
+        purgeTrashBtn.disabled = true;
+        queueStatus.textContent = "Trvale mažu e-maily z koše.";
+        try {
+          const res = await fetch("/api/email-processing/purge-trash", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+              items: permanentDeleteItems,
+              confirmed: true
+            })
+          });
+          const data = await res.json();
+          queueStatus.textContent = data.message || (data.ok ? "Trvalé smazání dokončeno." : "Trvalé smazání skončilo s chybou.");
+          const byId = new Map((data.items || []).map((result) => [result.item_id, result]));
+          permanentDeleteItems = permanentDeleteItems.filter((item) => {
+            const result = byId.get(item.item_id || item.id);
+            item.purgeResult = result || {};
+            return !result || !result.ok || result.status !== "purged";
+          });
+          updateBatchState();
+        } catch (err) {
+          queueStatus.textContent = "Chyba trvalého smazání z koše: " + err;
           updateBatchState();
         }
       });
@@ -2612,6 +2929,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     button:disabled { opacity: 0.45; cursor: not-allowed; }
     main { padding: 18px 20px 28px; display: grid; gap: 14px; }
     .topbar { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .topbar-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .queue-grid { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 14px; align-items: start; }
     section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
     h2 { margin: 0; padding: 12px 14px; font-size: 14px; border-bottom: 1px solid var(--line); background: #f8fafc; }
@@ -2642,15 +2960,20 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
   <header>
     <div class="topbar">
       <h1>Email Work Queue</h1>
-      <button class="primary" id="batchBtn" disabled>Zpracovat dávku</button>
+      <div class="topbar-actions">
+        <button class="danger" id="purgeTrashBtn" disabled>Trvale smazat e-maily v koši</button>
+        <button class="danger" id="trashBatchBtn" disabled>Emaily určené ke smazání smazat</button>
+        <button class="primary" id="batchBtn" disabled>Zpracovat dávku</button>
+      </div>
     </div>
   </header>
   <main>
     <section>
       <h2>Souhrn</h2>
       <div class="body note">
-        <div><strong>Připraveno ke zpracování:</strong> ${toProcess.length}</div>
-        <div><strong>Koš čeká na potvrzení:</strong> ${toTrash.length}</div>
+        <div><strong>Připraveno ke zpracování:</strong> <span id="queueProcessCount">${toProcess.length}</span></div>
+        <div><strong>Koš čeká na potvrzení:</strong> <span id="queueTrashCount">${toTrash.length}</span></div>
+        <div><strong>Trvalé smazání v koši:</strong> <span id="queuePurgeCount">0</span></div>
         <div><strong>Ignorováno:</strong> ${ignored.length}</div>
         <div id="queueStatus">Klikni na e-mail vlevo. Detail se načte read-only, bez stahování příloh a bez mazání.</div>
       </div>

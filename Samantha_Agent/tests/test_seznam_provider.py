@@ -13,6 +13,7 @@ from app.email.config import (
     load_seznam_mail_config,
 )
 from app.email.seznam_provider import (
+    SEZNAM_TRASH_FOLDER_CANDIDATES,
     SeznamEmailProviderError,
     _message_data_to_email_message,
     _validate_uid,
@@ -43,6 +44,9 @@ class SeznamConfigTests(unittest.TestCase):
 
 
 class SeznamProviderParserTests(unittest.TestCase):
+    def test_trash_folder_candidates_include_lowercase_seznam_trash(self) -> None:
+        self.assertIn("trash", SEZNAM_TRASH_FOLDER_CANDIDATES)
+
     def test_message_data_to_email_message_extracts_text_header_and_attachment(self) -> None:
         raw_message = (
             b"From: Pojistovna <kontakt@example.com>\r\n"
