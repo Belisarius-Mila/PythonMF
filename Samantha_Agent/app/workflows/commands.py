@@ -14,7 +14,8 @@ from agents import function_tool
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SAMANTHA_DIR = PROJECT_ROOT / "Samantha_Agent"
-BACKUP_SCRIPT = SAMANTHA_DIR / "scripts" / "backup_samantha.command"
+PYTHON_BIN = SAMANTHA_DIR / ".venv" / "bin" / "python"
+BACKUP_SCRIPT = SAMANTHA_DIR / "scripts" / "backup_samantha_python.py"
 SECURE_BACKUP_ROOT = Path("/Volumes/SamanthaSecureBackup/SamanthaBackups")
 DEFAULT_PENDING_COMMAND_PATH = SAMANTHA_DIR / "data" / "workflows" / "pending_command.json"
 
@@ -61,6 +62,7 @@ WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
             "udělej recovery zálohu",
         ),
         argv=(
+            str(PYTHON_BIN),
             str(BACKUP_SCRIPT),
             "--execute",
             "--profile",
@@ -113,6 +115,7 @@ WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
             "dry-run zálohy",
         ),
         argv=(
+            str(PYTHON_BIN),
             str(BACKUP_SCRIPT),
             "--dry-run",
             "--profile",

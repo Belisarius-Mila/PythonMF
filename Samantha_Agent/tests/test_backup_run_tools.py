@@ -59,6 +59,28 @@ class BackupRunToolsTests(unittest.TestCase):
             self.assertIn("Dry-run zalohy dokoncen", result)
             self.assertIn("fake backup mode=--dry-run profile=safe", result)
 
+    def test_python_backup_script_runs_through_python_bin(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "SamanthaBackups"
+            root.mkdir()
+            script = Path(temp_dir) / "backup_samantha_python.py"
+            script.write_text(
+                "import sys\n"
+                "print('python backup argv=' + ' '.join(sys.argv[1:]))\n",
+                encoding="utf-8",
+            )
+
+            result = run_project_backup_text(
+                mode="dry-run",
+                profile="safe",
+                target=str(root),
+                script_path=script,
+                python_bin=Path(__import__("sys").executable),
+            )
+
+            self.assertIn("Dry-run zalohy dokoncen", result)
+            self.assertIn("python backup argv=--dry-run --profile safe", result)
+
 
 if __name__ == "__main__":
     unittest.main()

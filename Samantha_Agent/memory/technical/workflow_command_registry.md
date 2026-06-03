@@ -85,6 +85,15 @@ backup_project_dry_run
 Zaloha je prvni pilotni workflow. Dalsi strukturální projekty maji pouzit stejnou
 vrstvu misto pridavani dlouhych manualnich prikazu do chatu.
 
+Od 2026-06-03 je hlavni implementace backup workflow Pythonovy inkrementalni
+nastroj bez `rsync/mmap`:
+
+```bash
+.venv/bin/python scripts/backup_samantha_python.py --execute --profile recovery --target /Volumes/SamanthaSecureBackup/SamanthaBackups
+```
+
+Stary `scripts/backup_samantha.command` zustava jen jako fallback.
+
 ## Souvisejici systemove reporty
 
 Systemove reporty nejsou primarne shell workflow prikazy. Jsou to registrovane

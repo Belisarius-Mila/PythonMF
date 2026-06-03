@@ -19,6 +19,8 @@ class WorkflowCommandTests(unittest.TestCase):
         result = list_workflow_commands_text()
 
         self.assertIn("backup_project_recovery", result)
+        self.assertIn(".venv/bin/python", result)
+        self.assertIn("backup_samantha_python.py", result)
         self.assertIn("--execute --profile recovery", result)
         self.assertIn("Samantha smi spoustet jen prikazy z tohoto registru", result)
 

@@ -7,7 +7,8 @@ from agents import function_tool
 
 
 SAMANTHA_DIR = Path(__file__).resolve().parents[2]
-DEFAULT_BACKUP_SCRIPT = SAMANTHA_DIR / "scripts" / "backup_samantha.command"
+DEFAULT_PYTHON_BIN = SAMANTHA_DIR / ".venv" / "bin" / "python"
+DEFAULT_BACKUP_SCRIPT = SAMANTHA_DIR / "scripts" / "backup_samantha_python.py"
 DEFAULT_BACKUP_ROOT = Path("/Volumes/SamanthaSecureBackup/SamanthaBackups")
 
 
@@ -22,6 +23,7 @@ def run_project_backup_text(
     profile: str = "recovery",
     target: str = "",
     script_path: Path = DEFAULT_BACKUP_SCRIPT,
+    python_bin: Path = DEFAULT_PYTHON_BIN,
 ) -> str:
     mode = (mode or "execute").strip().casefold()
     profile = (profile or "recovery").strip().casefold()
@@ -46,14 +48,8 @@ def run_project_backup_text(
             f"{backup_root.parent}. Pripoj externi disk a sifrovany kontejner."
         )
 
-    command = [
-        str(script_path),
-        f"--{mode}",
-        "--profile",
-        profile,
-        "--target",
-        str(backup_root),
-    ]
+    command = _backup_command(script_path=script_path, python_bin=python_bin)
+    command.extend([f"--{mode}", "--profile", profile, "--target", str(backup_root)])
     result = subprocess.run(
         command,
         cwd=str(SAMANTHA_DIR),
@@ -96,3 +92,9 @@ def _tail_lines(text: str, max_lines: int) -> str:
         return text
     omitted = len(lines) - max_lines
     return "\n".join([f"... zkraceno, vynechano {omitted} radku ...", *lines[-max_lines:]])
+
+
+def _backup_command(script_path: Path, python_bin: Path) -> list[str]:
+    if script_path.suffix == ".py":
+        return [str(python_bin), str(script_path)]
+    return [str(script_path)]
