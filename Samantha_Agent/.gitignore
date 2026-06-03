@@ -1,5 +1,7 @@
 .env
 .venv/
+.venv_f5tts/
+.venv_f5tts2/
 __pycache__/
 .DS_Store
 data/session_autosave/
