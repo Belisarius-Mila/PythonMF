@@ -30,13 +30,13 @@ Aktualni presety:
 
 | Postava | Ref audio | Ref text | Poznamka |
 | --- | --- | --- | --- |
-| Benji | `benji_reference.mp3` | `I am Benji.` | Schvaleny scene 01 voice lock; kratka reference 1.344 s. |
+| Benji | `benji_reference.mp3` | `Hello! I am Benji. We are going to the lake too.` | Prodlouzena scene 01 reference z existujicich `fable` MP3; 4.920 s. |
 | Bunny | `bunny_reference.mp3` | `Yes. But we can train all colors in my house. Let's go.` | Aktualni F5 baseline po testech. |
-| Bruno | `bruno_reference.mp3` | `Hello. I am Bruno.` | Schvaleny scene 01 voice lock; kratka reference 1.620 s. |
-| Fiona | `fiona_reference.mp3` | `Hi. I am Fiona.` | Schvaleny scene 01 voice lock; kratka reference 1.698 s. |
-| Sunny | `sunny_reference.mp3` | `Hello! I am Sunny.` | Schvaleny scene 01 voice lock; reference 3.048 s. |
+| Bruno | `bruno_reference.mp3` | `Hello. I am Bruno. We are going to the lake.` | Prodlouzena scene 01 reference: Daniel intro + Daniel veta pres macOS `say`; 2.952 s. |
+| Fiona | `fiona_reference.mp3` | `Hi. I am Fiona. We are friends too.` | Prodlouzena scene 01 reference: Karen intro + Karen veta pres macOS `say`; 2.760 s. |
+| Sunny | `sunny_reference.mp3` | `Hello! I am Sunny.` | Stary placeholder; Mila chce Sunny znovu castovat pozdeji. |
 
-Riziko: Benji, Bruno a Fiona maji velmi kratke reference. Pokud budou F5 vystupy nestabilni, dalsi krok je vyrobit pro konkretni postavu delsi 6-10s referenci a znovu ji zamknout v manifestu.
+Poznamka 2026-06-03: Benji, Bruno a Fiona uz nemaji puvodni velmi kratke reference. Sunny zatim nebrat jako finalni hlas.
 
 ## Lokalni prostredi
 
