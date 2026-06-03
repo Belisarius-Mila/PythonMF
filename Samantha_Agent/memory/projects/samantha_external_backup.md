@@ -2,7 +2,61 @@
 
 Projekt zalozen 2026-05-19.
 
-## Aktualni stav 2026-05-29
+## Aktualni stav 2026-06-03
+
+Posledni uspesna ostra recovery zaloha je podle
+`Samantha_Agent/data/backup/activity_state.json` z 2026-06-03:
+
+```text
+/Volumes/SamanthaSecureBackup/SamanthaBackups/snapshots/20260603_175327/PythonMF
+```
+
+Zaloha probehla po vymene problemoveho hubu za primejsi propojku a pres novy
+Pythonovy inkrementalni nastroj:
+
+```bash
+.venv/bin/python scripts/backup_samantha_python.py --execute --profile recovery --target /Volumes/SamanthaSecureBackup/SamanthaBackups --progress-every 5000
+```
+
+Vystup behu:
+
+```text
+files seen: 13856
+files copied: 1174
+files hard-linked: 12682
+files skipped: 0
+bytes copied: 338166106
+```
+
+Overeni po behu:
+
+- snapshot ma `backup_manifest.txt`,
+- snapshot ma `READ_ME_FIRST_RECOVERY.md`,
+- snapshot ma `PythonMF/` a `codex_home/`,
+- `scripts/backup_status.py` hlasi, ze posledni zaloha je v 3dennim intervalu
+  `2026-06-03`.
+
+Po samostatnem potvrzeni od Mily byly 2026-06-03 smazany nedokoncene snapshoty
+z neuspesnych pokusu:
+
+```text
+20260603_162647
+20260603_163709
+```
+
+Soucasne byl po potvrzeni smazan stary nafouknuty, ale uspesny snapshot z
+2026-05-29:
+
+```text
+20260529_225518
+```
+
+Pouzite misto na `/Volumes/SamanthaSecureBackup` kleslo zhruba z `54Gi` na
+`24Gi`. Novy snapshot `20260603_175327` po smazani stareho hardlinkovaneho
+snapshotu ukazuje v `du` vetsi vlastni velikost (`18G`), protoze sdilene bloky
+jsou ted uctovane jemu.
+
+## Predchozi stav 2026-05-29
 
 Posledni uspesna ostra recovery zaloha je podle
 `Samantha_Agent/data/backup/activity_state.json` z 2026-05-29:
@@ -86,6 +140,78 @@ Postup:
    snapshot `20260529_225518`.
 
 Stary snapshot `20260529_225518` nemazat pred vznikem a overenim noveho snapshotu.
+
+## USB checkpoint 2026-06-03
+
+Dne 2026-06-03 byla nova zaloha pozastavena jeste pred dry-runem, protoze Mac
+nevidel externi disk ani beznou flashku pripojenou pres stejny USB hub.
+
+Pred restartem platilo:
+
+- `/Volumes` ukazovalo jen `Macintosh HD`,
+- `diskutil list` videl jen interni disk,
+- `hdiutil info` neukazal pripojeny image/kontejner,
+- `system_profiler SPUSBDataType SPThunderboltDataType` neukazal externi hub ani
+  storage zarizeni,
+- Thunderbolt porty hlasily `No device connected`.
+
+Navazani po restartu:
+
+1. Nejdriv overit fyzicke pripojeni pres `/Volumes`, `diskutil list`,
+   `system_profiler SPUSBDataType SPThunderboltDataType` a `hdiutil info`.
+2. Pokud se objevi `/Volumes/Falta`, najit a odemknout sifrovany kontejner
+   `SamanthaSecureBackup.sparsebundle`.
+3. Pokud se objevi `/Volumes/SamanthaSecureBackup`, spustit nejdriv recovery
+   dry-run.
+4. Ostrou recovery zalohu spustit az po kontrole dry-runu a Milove potvrzeni.
+
+Aktualizace po pokusu o zalohu 2026-06-03:
+
+- Disk `Falta` i sifrovany svazek `/Volumes/SamanthaSecureBackup` byly po
+  pripojeni videt.
+- Stary `/usr/bin/rsync` (`openrsync`, kompatibilita 2.6.9) neumel spolehlive
+  udelat presny dry-run s `--link-dest`; padal na `Bad file descriptor`.
+- Ostre recovery pokusy nedobehly:
+  - snapshot `20260603_162647` spadl na `mmap: Operation timed out` uvnitr
+    `.venv_f5tts2`,
+  - filtr byl opraven o `.venv_*/`,
+  - snapshot `20260603_163709` spadl na `mmap: Operation timed out` na malem CSV.
+- `scripts/backup_status.py` stale spravne ukazuje posledni uspesnou zalohu
+  `20260529_225518`; novy uspesny stav se nezapsal.
+- `scripts/backup_samantha.command` byl opraven tak, aby jako predchozi snapshot
+  vybiral jen adresare s `backup_manifest.txt` a ignoroval nedokoncene snapshoty.
+
+Dokud se nevyjasni stabilita I/O, nepoustet dalsi stejny pokus pres stejny
+hub/kabel. Dalsi rozumny krok je zkusit stabilnejsi pripojeni disku nebo pripravit
+alternativu k `/usr/bin/rsync` pro recovery profil.
+
+Optimalizace 2026-06-03:
+
+- Vznikla alternativni Pythonova inkrementalni zaloha:
+
+```bash
+.venv/bin/python scripts/backup_samantha_python.py --execute --profile recovery --target /Volumes/SamanthaSecureBackup/SamanthaBackups
+```
+
+- Nastroj nepouziva `rsync` ani `mmap`; soubory kopiruje po blocich a nezmenene
+  soubory hardlinkuje z posledniho dokonceneho snapshotu.
+- Dokonceny snapshot je rozpoznany jen podle `backup_manifest.txt`; nedokoncene
+  adresare z neuspesnych pokusu se nepouziji jako reference.
+- Manifest a stav posledni uspesne zalohy se zapisi az po uspesnem dobehu.
+- Lokalni testy prosly pres:
+
+```bash
+.venv/bin/python -m unittest tests.test_backup_incremental tests.test_backup_activity_state tests.test_backup_restore_tools tests.test_backup_run_tools
+```
+
+- Dalsi ostry pokus ma jit prednostne pres Pythonovy nastroj, ale az po
+  stabilnejsim fyzickem pripojeni disku.
+
+Podrobny handoff je v:
+
+```text
+memory/handoffs/backup_usb_hub_restart_checkpoint_2026_06_03.md
+```
 
 ## Skript
 

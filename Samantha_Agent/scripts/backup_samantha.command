@@ -124,7 +124,12 @@ if [ "$MODE" = "dry-run" ]; then
 fi
 PREVIOUS_SNAPSHOT=""
 if [ -d "$BACKUP_ROOT/snapshots" ]; then
-  PREVIOUS_SNAPSHOT="$(find "$BACKUP_ROOT/snapshots" -maxdepth 1 -mindepth 1 -type d -print 2>/dev/null | sort | tail -n 1 || true)"
+  for CANDIDATE_SNAPSHOT in $(find "$BACKUP_ROOT/snapshots" -maxdepth 1 -mindepth 1 -type d -print 2>/dev/null | sort -r); do
+    if [ -f "$CANDIDATE_SNAPSHOT/backup_manifest.txt" ]; then
+      PREVIOUS_SNAPSHOT="$CANDIDATE_SNAPSHOT"
+      break
+    fi
+  done
 fi
 
 BASE_RSYNC_ARGS=(
