@@ -458,7 +458,7 @@ const benjiBunnyDictionary = [
 ];
 
 
-const clearingHelpText = "Celou scénu můžeš spustit znovu tlačítkem šipky v kruhu. Doporučujeme scénu přehrát několikrát a několikrát si projít slovníček, to je ikona knihy.";
+const clearingHelpText = "Dveřmi vstoupíš do další scény nebo si přehraj vše znovu.";
 const clearingIntroHelpText = "Poslouchej anglickou nápovědu. Klikni na postavu, na kterou ukazuje šipka. Postava řekne větu anglicky a potom česky. Ikona knihy otevírá slovníček.";
 
 const clearingDictionary = [
@@ -1480,7 +1480,7 @@ function renderClearingMeeting() {
   const cue = document.createElement("div");
   cue.className = "clearing-cue";
   cue.textContent = state.clearingPhase === "complete"
-    ? "Great. Open the door."
+    ? "Great. Open the door or run again."
     : state.clearingPhase === "auto" || state.clearingPhase === "speaking"
       ? "Listen."
       : activeItem
@@ -1646,7 +1646,7 @@ async function completeClearingMeeting() {
   state.clearingBubbleIndex = -1;
   state.clearingPhase = "complete";
   renderScene();
-  await speakEnglishLine("Great. Open the door.", { rate: 0.82 });
+  await speakEnglishLine("Great. Open the door or run again.", { rate: 0.82 });
 }
 
 async function playClearingDialogueItem(index, phase = "speaking") {
