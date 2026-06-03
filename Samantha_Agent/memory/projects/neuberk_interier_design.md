@@ -2,7 +2,8 @@
 
 Zalozeno: 2026-05-31
 Priorita: 2
-Stav: zalozen soukromy pracovni prostor a prvni mistnost Kacenka
+Stav: soukromy pracovni prostor zalozen; pro Kacenku existuji prvni fotky a
+pracovni/cista verze prekresu jedne steny mimo git
 
 ## Smysl
 
@@ -101,6 +102,8 @@ Nove knihovny zvazit az podle potreby:
 
 ## Dalsi krok
 
-Mila postupne doda fotografie, planky a rozmery. Nejdriv je ulozit do soukrome
-slozky `data/private/neuberk_interier_design/rooms/kacenka/`, potom vyplnit
-brief a udelat prvni textove varianty navrhu.
+Navazat na soukrome podklady v
+`data/private/neuberk_interier_design/rooms/kacenka/`. Pro jednu stenu uz
+existuje pracovni kontrolni i cisty finalni prekres mimo git. Dalsi prakticky
+krok je slozit dostupne stenove podklady do jednoducheho 2D pochopeni mistnosti
+a doplnit brief pred navrhem prvnich variant rozmistení.
