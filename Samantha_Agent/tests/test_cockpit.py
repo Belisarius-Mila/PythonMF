@@ -17,6 +17,7 @@ from app.cockpit import (
     cockpit_status,
     create_document_due_reminder_action,
     document_reference,
+    document_intake_email_scan_status,
     document_intake_status,
     document_cases_status,
     document_case_detail_status,
@@ -187,6 +188,13 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(sources["mobile"]["count"], 1)
         self.assertEqual(sources["local_inbox"]["count"], 1)
         self.assertEqual(sources["mobile"]["items"][0]["title"], "Mobilní scan")
+        self.assertEqual(len(result["unified_items"]), 4)
+        self.assertEqual(result["unified_items"][0]["source_id"], "downloads")
+        self.assertEqual(result["unified_items"][0]["action_kind"], "open_scandocu")
+        self.assertEqual(result["unified_items"][1]["source_id"], "email")
+        self.assertEqual(result["unified_items"][1]["action_kind"], "open_email_processing")
+        self.assertEqual(result["unified_items"][2]["source_id"], "mobile")
+        self.assertEqual(result["unified_items"][3]["source_id"], "local_inbox")
         self.assertNotIn("image", json.dumps(result, ensure_ascii=False))
 
     def test_document_cases_status_groups_by_asset_and_counterparty(self) -> None:
@@ -849,7 +857,13 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("actionQueueList", COCKPIT_HTML)
         self.assertIn("renderActionQueue", COCKPIT_HTML)
         self.assertIn("actionQueueButton", COCKPIT_HTML)
-        self.assertIn("refresh({silent: true, includeSecondary: false})", COCKPIT_HTML)
+        self.assertIn("INTAKE_LOCAL_MONITOR_MS = 10 * 60 * 1000", COCKPIT_HTML)
+        self.assertIn("INTAKE_EMAIL_MONITOR_MS = 30 * 60 * 1000", COCKPIT_HTML)
+        self.assertIn("runEmailIntakeMonitor", COCKPIT_HTML)
+        self.assertIn("hideEmailIntakeCandidate", COCKPIT_HTML)
+        self.assertIn("Neukazovat", COCKPIT_HTML)
+        self.assertIn("filter_reasons", COCKPIT_HTML)
+        self.assertIn("/api/documents/intake-email-scan", COCKPIT_HTML)
         self.assertIn("recordFrontendError", COCKPIT_HTML)
         self.assertIn("verifyButtonHealth", COCKPIT_HTML)
         self.assertIn("runFrontendHealthCheck", COCKPIT_HTML)
@@ -869,10 +883,14 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Nová PDF ve Downloads", COCKPIT_HTML)
         self.assertIn("Uložené dokumenty k revizi", COCKPIT_HTML)
         self.assertIn("Problémy", COCKPIT_HTML)
-        self.assertIn("Vstupy dokumentů", COCKPIT_HTML)
+        self.assertIn("Dokumentový intake", COCKPIT_HTML)
         self.assertIn("documentIntakeCount", COCKPIT_HTML)
+        self.assertIn("documentIntakeSummary", COCKPIT_HTML)
         self.assertIn("documentIntakeList", COCKPIT_HTML)
         self.assertIn("renderDocumentIntake", COCKPIT_HTML)
+        self.assertIn("unified_items", COCKPIT_HTML)
+        self.assertIn("Souhrn zdrojů", COCKPIT_HTML)
+        self.assertIn("E-mail kandidáti", COCKPIT_HTML)
         self.assertIn("Downloads / e-mail / mobilní sken / lokální inbox", COCKPIT_HTML)
         self.assertIn("Vazby / cases", COCKPIT_HTML)
         self.assertIn("documentCasesCount", COCKPIT_HTML)
@@ -1946,6 +1964,63 @@ Dalsi krok:
         self.assertEqual(result["items"][0]["subject"], "Nový iCloud e-mail")
         self.assertEqual(result["items"][0]["category"], "ostatní")
         self.assertNotIn("text", result)
+
+    def test_document_intake_email_scan_status_is_headers_only(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            result = document_intake_email_scan_status(
+                limit_per_source=10,
+                since="2026-06-01T07:00:00+00:00",
+                days=0,
+                decisions_path=Path(temp_dir) / "email_processing_decisions.json",
+                actions_path=Path(temp_dir) / "email_work_queue_actions.jsonl",
+                icloud_provider_factory=lambda: _FakeEmailProvider(
+                    [
+                        EmailHeader(
+                            internal_id="10",
+                            date="Mon, 1 Jun 2026 10:00:00 +0200",
+                            sender="Pojišťovna <pojistovna@example.com>",
+                            subject="Pojistná smlouva PDF",
+                            attachments=(
+                                EmailAttachmentMeta(
+                                    filename="smlouva.pdf",
+                                    content_type="application/pdf",
+                                    size_bytes=300_000,
+                                    part_id="2",
+                                    content_id="",
+                                    disposition="attachment",
+                                ),
+                            ),
+                        ),
+                        EmailHeader(
+                            internal_id="11",
+                            date="Mon, 1 Jun 2026 11:00:00 +0200",
+                            sender="Pet Shop <shop@example.com>",
+                            subject="Akce na krmivo pro mazlíčky",
+                        )
+                    ]
+                ),
+                seznam_provider_factory=lambda: _FakeEmailProvider([]),
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["raw_count"], 2)
+        self.assertEqual(result["count"], 1)
+        self.assertEqual(result["filtered_out_count"], 1)
+        self.assertEqual(result["items"][0]["subject"], "Pojistná smlouva PDF")
+        self.assertEqual(result["items"][0]["sender"], "Pojišťovna <[e-mail redigovan]>")
+        self.assertEqual(result["items"][0]["pdf_attachment_count"], 1)
+        self.assertEqual(result["items"][0]["large_pdf_attachment_count"], 1)
+        self.assertEqual(result["items"][0]["attachment_metadata"][0]["filename"], "smlouva.pdf")
+        self.assertEqual(result["items"][0]["filter_label"], "Dokumentový kandidát")
+        self.assertIn("document_candidates", result["filter"]["mode"])
+        self.assertEqual(result["monitor"]["mode"], "headers_only")
+        self.assertTrue(result["monitor"]["does_not_read_bodies"])
+        self.assertTrue(result["monitor"]["does_not_download_attachments"])
+        self.assertTrue(result["monitor"]["does_read_attachment_metadata"])
+        self.assertTrue(result["monitor"]["does_not_write_decisions"])
+        serialized = json.dumps(result, ensure_ascii=False)
+        self.assertNotIn("body_text", serialized)
+        self.assertNotIn("PDFDATA", serialized)
 
     def test_new_email_headers_overview_skips_completed_work_queue_items(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

@@ -1114,6 +1114,72 @@ EMAIL_PROCESSING_CATEGORY_TITLES = {
 }
 EMAIL_PROCESSING_ACTIONS = {"process", "ignore", "trash_requested", ""}
 EMAIL_PROCESSING_CATEGORY_ORDER = ("faktury/e-shopy", "pojištění/smlouvy", "úřady/daně", "ostatní")
+DOCUMENT_INTAKE_LARGE_PDF_BYTES = 150_000
+DOCUMENT_INTAKE_EMAIL_POSITIVE_TERMS = (
+    "smlouv",
+    "pojist",
+    "pojišt",
+    "faktura",
+    "invoice",
+    "doklad",
+    "účten",
+    "ucten",
+    "upom",
+    "splat",
+    "platba",
+    "předpis",
+    "predpis",
+    "vyúčt",
+    "vyuct",
+    "dokument",
+    "potvrzen",
+    "protokol",
+    "revize",
+    "servis",
+    "výzva",
+    "vyzva",
+    "úřad",
+    "urad",
+    "daň",
+    "dan",
+    "pdf",
+    "příloha",
+    "priloha",
+    "contract",
+    "policy",
+    "reminder",
+    "payment",
+    "statement",
+    "receipt",
+)
+DOCUMENT_INTAKE_EMAIL_NEGATIVE_TERMS = (
+    "newsletter",
+    "akce",
+    "sleva",
+    "slev",
+    "výprodej",
+    "vyprodej",
+    "nabídka",
+    "nabidka",
+    "promo",
+    "reklam",
+    "marketing",
+    "krmivo",
+    "granule",
+    "chovat",
+    "mazlíček",
+    "mazlicek",
+    "pet",
+    "feed",
+    "notifikace",
+    "notification",
+    "upozornění",
+    "upozorneni",
+    "aplikace",
+    "app",
+    "novinky",
+    "tipy",
+)
 
 
 def email_processing_stable_key(provider: str, folder: str, uid: str) -> str:
@@ -1259,16 +1325,42 @@ def parse_iso_timestamp(value: str) -> float:
 def email_header_to_processing_item(header: EmailHeader, source: str) -> dict[str, Any]:
     category = classify_email_processing_category(header.subject, header.sender)
     folder = header.folder or "INBOX"
+    attachments = tuple(getattr(header, "attachments", ()) or ())
+    attachment_items = [
+        {
+            "filename": attachment.filename,
+            "content_type": attachment.content_type,
+            "size_bytes": attachment.size_bytes,
+            "part_id": attachment.part_id,
+            "disposition": attachment.disposition,
+        }
+        for attachment in attachments
+    ]
+    pdf_attachments = [
+        attachment
+        for attachment in attachments
+        if "pdf" in f"{attachment.filename} {attachment.content_type}".casefold()
+    ]
+    large_pdf_attachments = [
+        attachment
+        for attachment in pdf_attachments
+        if isinstance(attachment.size_bytes, int) and attachment.size_bytes >= DOCUMENT_INTAKE_LARGE_PDF_BYTES
+    ]
     item = {
         "category": category,
         "provider": source,
         "folder": folder,
         "uid": str(header.internal_id),
         "date": header.date,
+        "sender": header.sender,
         "subject": header.subject or "(bez předmětu)",
         "reason": "nová hlavička z read-only kontroly",
         "action": "",
         "is_new_header": True,
+        "attachments": attachment_items,
+        "attachment_count": len(attachments),
+        "pdf_attachment_count": len(pdf_attachments),
+        "large_pdf_attachment_count": len(large_pdf_attachments),
     }
     item["id"] = email_processing_item_id(
         category,
@@ -1287,6 +1379,62 @@ def email_header_to_processing_item(header: EmailHeader, source: str) -> dict[st
         header.subject or "",
     )
     return item
+
+
+def document_intake_email_candidate_filter(item: dict[str, Any]) -> dict[str, Any]:
+    subject = str(item.get("subject", ""))
+    sender = str(item.get("sender", ""))
+    category = str(item.get("category", ""))
+    reason = str(item.get("reason", ""))
+    value = f"{subject} {sender} {category} {reason}".casefold()
+    matched_positive = sorted({term for term in DOCUMENT_INTAKE_EMAIL_POSITIVE_TERMS if term in value})
+    matched_negative = sorted({term for term in DOCUMENT_INTAKE_EMAIL_NEGATIVE_TERMS if term in value})
+    raw_attachments = item.get("attachments", [])
+    attachments = raw_attachments if isinstance(raw_attachments, list) else []
+    pdf_attachment_count = int(item.get("pdf_attachment_count", 0) or 0)
+    large_pdf_attachment_count = int(item.get("large_pdf_attachment_count", 0) or 0)
+
+    score = 0
+    reasons: list[str] = []
+    if large_pdf_attachment_count:
+        score += 8
+        reasons.append(f"velké PDF přílohy: {large_pdf_attachment_count}")
+    elif pdf_attachment_count:
+        score += 6
+        reasons.append(f"PDF přílohy: {pdf_attachment_count}")
+    elif attachments:
+        score += 1
+        reasons.append(f"přílohy: {len(attachments)}")
+    if category in {"pojištění/smlouvy", "úřady/daně"}:
+        score += 5
+        reasons.append(category)
+    elif category == "faktury/e-shopy":
+        score += 3
+        reasons.append("faktura/platba/e-shop")
+    if matched_positive:
+        score += min(6, len(matched_positive) * 2)
+        reasons.append("dokumentové slovo: " + ", ".join(matched_positive[:3]))
+    if "pdf" in value or "příloha" in value or "priloha" in value:
+        score += 3
+        reasons.append("možná PDF příloha")
+    if matched_negative and not matched_positive and category == "ostatní":
+        score -= 5
+        reasons.append("pravděpodobný marketing/notifikace")
+    elif matched_negative:
+        score -= 1
+
+    include = score >= 2
+    if include and not reasons:
+        reasons.append("slabý dokumentový kandidát")
+    label = "Dokumentový kandidát" if include else "Potlačeno filtrem"
+    return {
+        "include": include,
+        "score": score,
+        "label": label,
+        "reasons": reasons[:4],
+        "matched_positive": matched_positive[:8],
+        "matched_negative": matched_negative[:8],
+    }
 
 
 def parse_email_processing_items(text: str) -> list[dict[str, Any]]:
@@ -3587,16 +3735,165 @@ def document_intake_status(
         local,
     ]
     total = sum(int(source.get("count", 0) or 0) for source in sources)
+    unified_items = document_intake_unified_items(sources=sources, limit=max(4, limit * 2))
     return {
         "ok": True,
         "count": total,
         "sources": sources,
+        "unified_items": unified_items,
+        "monitor": {
+            "local_interval_minutes": 10,
+            "email_interval_minutes": 30,
+            "email_mode": "headers_only",
+        },
         "message": (
             f"Čeká {total} dokumentových vstupů napříč zdroji."
             if total
             else "Žádný nový dokumentový vstup nečeká."
         ),
     }
+
+
+def document_intake_email_scan_status(
+    *,
+    limit_per_source: int = 10,
+    since: str = "",
+    days: int = 1,
+    known_ids: set[str] | None = None,
+    decisions_path: Path = EMAIL_PROCESSING_DECISIONS_FILE,
+    actions_path: Path = EMAIL_WORK_QUEUE_ACTIONS_FILE,
+    icloud_provider_factory: Callable[[], object] | None = None,
+    seznam_provider_factory: Callable[[], object] | None = None,
+) -> dict[str, Any]:
+    result = new_email_headers_overview(
+        limit_per_source=limit_per_source,
+        since=since,
+        days=days,
+        known_ids=known_ids,
+        decisions_path=decisions_path,
+        actions_path=actions_path,
+        icloud_provider_factory=icloud_provider_factory,
+        seznam_provider_factory=seznam_provider_factory,
+    )
+    raw_items = [item for item in result.get("items", []) if isinstance(item, dict)]
+    items: list[dict[str, Any]] = []
+    filtered_out_count = 0
+    for item in raw_items:
+        email_filter = document_intake_email_candidate_filter(item)
+        if not email_filter["include"]:
+            filtered_out_count += 1
+            continue
+        raw_attachments = item.get("attachments", [])
+        attachments = raw_attachments if isinstance(raw_attachments, list) else []
+        safe_item = {
+            "id": safe_text(str(item.get("id", "")))[:180],
+            "legacy_id": safe_text(str(item.get("legacy_id", "")))[:180],
+            "provider": safe_text(str(item.get("provider", "")))[:80],
+            "folder": safe_text(str(item.get("folder", "")))[:80],
+            "uid": safe_text(str(item.get("uid", "")))[:80],
+            "date": safe_text(str(item.get("date", "")))[:120],
+            "sender": safe_text(str(item.get("sender", "")))[:180],
+            "subject": safe_text(str(item.get("subject", "") or "E-mail bez předmětu"))[:180],
+            "category": safe_text(str(item.get("category", "")))[:80],
+            "reason": safe_text(str(item.get("reason", "")))[:180],
+            "attachment_count": int(item.get("attachment_count", 0) or 0),
+            "pdf_attachment_count": int(item.get("pdf_attachment_count", 0) or 0),
+            "large_pdf_attachment_count": int(item.get("large_pdf_attachment_count", 0) or 0),
+            "attachment_metadata": [
+                {
+                    "filename": safe_text(str(attachment.get("filename", "") if isinstance(attachment, dict) else ""))[:180],
+                    "content_type": safe_text(str(attachment.get("content_type", "") if isinstance(attachment, dict) else ""))[:80],
+                    "size_bytes": attachment.get("size_bytes") if isinstance(attachment, dict) else None,
+                }
+                for attachment in attachments[:5]
+                if isinstance(attachment, dict)
+            ],
+            "filter_score": int(email_filter["score"]),
+            "filter_label": safe_text(str(email_filter["label"]))[:80],
+            "filter_reasons": [
+                safe_text(str(reason))[:120]
+                for reason in email_filter["reasons"]
+                if str(reason).strip()
+            ],
+        }
+        items.append(safe_item)
+    filter_message = (
+        f"Dokumentový filtr: z {len(raw_items)} hlaviček zobrazeno {len(items)}, "
+        f"potlačeno {filtered_out_count}."
+    )
+    return {
+        "ok": bool(result.get("ok", True)),
+        "message": safe_text(filter_message)[:300],
+        "generated_at": safe_text(str(result.get("generated_at", "")))[:80],
+        "raw_count": len(raw_items),
+        "count": len(items),
+        "filtered_out_count": filtered_out_count,
+        "items": items,
+        "unavailable": [
+            safe_text(str(item))[:180]
+            for item in result.get("unavailable", [])
+            if str(item).strip()
+        ],
+        "filter": {
+            "mode": "document_candidates",
+            "description": "Zobrazuje jen hlavičky se signály smlouvy, pojištění, faktury, upomínky, úřadu nebo PDF.",
+            "filtered_out_count": filtered_out_count,
+        },
+        "monitor": {
+            "interval_minutes": 30,
+            "mode": "headers_only",
+            "does_not_read_bodies": True,
+            "does_not_download_attachments": True,
+            "does_read_attachment_metadata": True,
+            "does_not_write_decisions": True,
+        },
+    }
+
+
+def document_intake_unified_items(*, sources: list[dict[str, Any]], limit: int = 10) -> list[dict[str, Any]]:
+    source_priority = {"downloads": 10, "email": 20, "mobile": 30, "local_inbox": 40}
+    action_by_source = {
+        "downloads": {"kind": "open_scandocu", "label": "ScanDocu"},
+        "email": {"kind": "open_email_processing", "label": "Email Processing"},
+        "mobile": {"kind": "manual", "label": ""},
+        "local_inbox": {"kind": "manual", "label": ""},
+    }
+    status_labels = {
+        "ready": "čeká",
+        "problem": "problém",
+        "missing": "chybí",
+        "empty": "prázdné",
+    }
+    items: list[dict[str, Any]] = []
+    for source in sources:
+        source_id = safe_text(str(source.get("id", ""))).strip()
+        source_label = safe_text(str(source.get("label", "") or source_id))[:80]
+        source_status = safe_text(str(source.get("status", "")))[:40]
+        action = action_by_source.get(source_id, {"kind": "manual", "label": ""})
+        for index, raw_item in enumerate(source.get("items", []) if isinstance(source.get("items"), list) else []):
+            if not isinstance(raw_item, dict):
+                continue
+            title = safe_text(str(raw_item.get("title", "") or "Dokumentový vstup"))[:180]
+            meta = safe_text(str(raw_item.get("meta", "")))[:240]
+            items.append(
+                {
+                    "source_id": source_id,
+                    "source_label": source_label,
+                    "source_status": source_status,
+                    "source_status_label": status_labels.get(source_status, source_status),
+                    "title": title,
+                    "meta": meta,
+                    "next_action": safe_text(str(source.get("next_action", "")))[:240],
+                    "action_kind": action["kind"],
+                    "action_label": action["label"],
+                    "sort_key": source_priority.get(source_id, 90) + index / 100,
+                }
+            )
+    items.sort(key=lambda item: float(item.get("sort_key", 999)))
+    return [
+        {key: value for key, value in item.items() if key != "sort_key"}
+        for item in items[: max(1, limit)]
+    ]
 
 
 def mobile_document_intake_source(
@@ -5281,6 +5578,29 @@ class CockpitServer:
                         )
                     )
                     return
+                if parsed.path == "/api/documents/intake-email-scan":
+                    payload = self.read_json()
+                    try:
+                        limit = int(payload.get("limit_per_source", 10))
+                    except (TypeError, ValueError):
+                        limit = 10
+                    try:
+                        days = int(payload.get("days", 1))
+                    except (TypeError, ValueError):
+                        days = 1
+                    raw_known_ids = payload.get("known_ids", [])
+                    known_ids = set()
+                    if isinstance(raw_known_ids, list):
+                        known_ids = {str(item_id).strip() for item_id in raw_known_ids if str(item_id).strip()}
+                    self.respond_json(
+                        document_intake_email_scan_status(
+                            limit_per_source=limit,
+                            since=str(payload.get("since", "")),
+                            days=days,
+                            known_ids=known_ids,
+                        )
+                    )
+                    return
                 if parsed.path == "/api/email-processing/decision":
                     payload = self.read_json()
                     item = payload.get("item")
@@ -6889,9 +7209,9 @@ COCKPIT_HTML = """<!doctype html>
             <div id="problemList" class="work-list"></div>
           </div>
           <div class="work-card">
-            <h3>Vstupy dokumentů</h3>
+            <h3>Dokumentový intake</h3>
             <div id="documentIntakeCount" class="work-count">0</div>
-            <div class="status-line">Downloads / e-mail / mobilní sken / lokální inbox</div>
+            <div id="documentIntakeSummary" class="status-line">Downloads / e-mail / mobilní sken / lokální inbox</div>
             <div id="documentIntakeList" class="work-list"></div>
           </div>
           <div class="work-card">
@@ -7208,6 +7528,7 @@ COCKPIT_HTML = """<!doctype html>
     const reviewList = document.getElementById("reviewList");
     const problemList = document.getElementById("problemList");
     const documentIntakeCount = document.getElementById("documentIntakeCount");
+    const documentIntakeSummary = document.getElementById("documentIntakeSummary");
     const documentIntakeList = document.getElementById("documentIntakeList");
     const documentCasesCount = document.getElementById("documentCasesCount");
     const documentCasesStatus = document.getElementById("documentCasesStatus");
@@ -7445,7 +7766,19 @@ COCKPIT_HTML = """<!doctype html>
       actionMessage.classList.toggle("hidden", !text);
     }
 
+    const INTAKE_LOCAL_MONITOR_MS = 10 * 60 * 1000;
+    const INTAKE_EMAIL_MONITOR_MS = 30 * 60 * 1000;
     let refreshInFlight = false;
+    let latestDocumentIntakeData = null;
+    let lastEmailIntakeMonitor = {
+      generated_at: "",
+      count: 0,
+      raw_count: 0,
+      filtered_out_count: 0,
+      items: [],
+      message: "E-mailové hlavičky zatím nebyly automaticky zkontrolované.",
+      unavailable: []
+    };
 
     async function refresh(options = {}) {
       if (refreshInFlight) return;
@@ -7469,7 +7802,8 @@ COCKPIT_HTML = """<!doctype html>
         renderUrgentReminderAlert(data.urgent_reminders || {});
 	        renderActionQueue(data.action_queue || {});
         renderDocumentWork(data.document_work || {});
-        renderDocumentIntake(data.document_intake || {});
+        latestDocumentIntakeData = data.document_intake || {};
+        renderDocumentIntake(latestDocumentIntakeData);
         renderDocumentCases(data.document_cases || {});
         renderDocumentClassification(data.document_classification || {});
         renderDocumentDueCandidates(data.document_due_candidates || {});
@@ -7490,6 +7824,61 @@ COCKPIT_HTML = """<!doctype html>
       refreshProjectsSummary();
       refreshQuantitativeSummary();
       refreshConsistencySummary();
+    }
+
+    async function runEmailIntakeMonitor() {
+      try {
+        const payload = lastEmailIntakeMonitor.generated_at
+          ? {limit_per_source: 10, since: lastEmailIntakeMonitor.generated_at}
+          : {limit_per_source: 10, days: 1};
+        const res = await fetch("/api/documents/intake-email-scan", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        lastEmailIntakeMonitor = {
+          generated_at: data.generated_at || new Date().toISOString(),
+          count: Number(data.count || 0),
+          raw_count: Number(data.raw_count || 0),
+          filtered_out_count: Number(data.filtered_out_count || 0),
+          items: data.items || [],
+          message: data.message || "E-mailové hlavičky zkontrolované read-only.",
+          unavailable: data.unavailable || []
+        };
+        renderDocumentIntake(latestDocumentIntakeData || {});
+      } catch (err) {
+        recordFrontendError(err);
+        lastEmailIntakeMonitor = {
+          ...lastEmailIntakeMonitor,
+          message: `Chyba e-mail intake monitoru: ${err}`,
+          unavailable: []
+        };
+        renderDocumentIntake(latestDocumentIntakeData || {});
+      }
+    }
+
+    async function hideEmailIntakeCandidate(item, button) {
+      const itemId = item.id || "";
+      if (!itemId) return;
+      if (button) button.disabled = true;
+      try {
+        const res = await fetch("/api/email-processing/decision", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({item_id: itemId, action: "ignore", item})
+        });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.message || "Nepodařilo se uložit ignorování.");
+        lastEmailIntakeMonitor.items = (lastEmailIntakeMonitor.items || []).filter((candidate) => candidate.id !== itemId);
+        lastEmailIntakeMonitor.count = lastEmailIntakeMonitor.items.length;
+        lastEmailIntakeMonitor.message = "E-mail skrytý z Cockpitu. V dalších scanech se nebude zobrazovat.";
+        renderDocumentIntake(latestDocumentIntakeData || {});
+      } catch (err) {
+        recordFrontendError(err);
+        if (button) button.disabled = false;
+        showMessage(`Chyba při skrývání e-mailu: ${err}`);
+      }
     }
 
     function renderDocumentWork(work) {
@@ -7521,14 +7910,120 @@ COCKPIT_HTML = """<!doctype html>
 
     function renderDocumentIntake(data) {
       const sources = data.sources || [];
-      documentIntakeCount.textContent = String(data.count || 0);
+      const unifiedItems = data.unified_items || [];
+      const sourceCount = (sourceId) => {
+        const source = sources.find((item) => item.id === sourceId) || {};
+        return Number(source.count || 0);
+      };
+      const downloadsCount = sourceCount("downloads");
+      const queuedEmailCount = sourceCount("email");
+      const mobileCount = sourceCount("mobile");
+      const localInboxCount = sourceCount("local_inbox");
+      const emailCandidateCount = Number(lastEmailIntakeMonitor.count || 0);
+      const filteredEmailCount = Number(lastEmailIntakeMonitor.filtered_out_count || 0);
+      documentIntakeCount.textContent = String(Number(data.count || 0) + emailCandidateCount);
+      if (documentIntakeSummary) {
+        documentIntakeSummary.textContent = `Downloads: ${downloadsCount} | E-mail kandidáti: ${emailCandidateCount} | E-mail work queue: ${queuedEmailCount} | Mobilní: ${mobileCount} | Lokální: ${localInboxCount} | Potlačeno e-mail filtrem: ${filteredEmailCount}`;
+      }
       documentIntakeList.innerHTML = "";
-      if (!sources.length) {
+      if (!sources.length && !unifiedItems.length) {
         const empty = document.createElement("div");
         empty.className = "status-line";
         empty.textContent = data.message || "Vstupy dokumentů nejdou načíst.";
         documentIntakeList.appendChild(empty);
         return;
+      }
+      const monitor = document.createElement("div");
+      monitor.className = "work-meta";
+      monitor.textContent = "Monitor: lokální zdroje každých 10 min; e-mailové hlavičky read-only každých 30 min.";
+      documentIntakeList.appendChild(monitor);
+      if (unifiedItems.length) {
+        unifiedItems.forEach((item) => {
+          const row = document.createElement("div");
+          row.className = "work-item";
+          const title = document.createElement("div");
+          title.textContent = `${item.source_label || "Zdroj"}: ${item.title || "Dokumentový vstup"}`;
+          const meta = document.createElement("div");
+          meta.className = "work-meta";
+          meta.textContent = `${item.source_status_label || item.source_status || ""}${item.meta ? " | " + item.meta : ""}`;
+          const action = document.createElement("div");
+          action.className = "work-meta";
+          action.textContent = item.next_action || "";
+          row.appendChild(title);
+          row.appendChild(meta);
+          row.appendChild(action);
+          if (item.action_kind === "open_scandocu") {
+            const button = document.createElement("button");
+            button.className = "secondary";
+            button.type = "button";
+            button.textContent = item.action_label || "ScanDocu";
+            button.addEventListener("click", () => openScanDocu(false));
+            row.appendChild(button);
+          } else if (item.action_kind === "open_email_processing") {
+            const button = document.createElement("button");
+            button.className = "secondary";
+            button.type = "button";
+            button.textContent = item.action_label || "Email Processing";
+            button.addEventListener("click", openEmailProcessing);
+            row.appendChild(button);
+          }
+          documentIntakeList.appendChild(row);
+        });
+      } else {
+        const empty = document.createElement("div");
+        empty.className = "status-line";
+        empty.textContent = data.message || "Žádný nový dokumentový vstup nečeká.";
+        documentIntakeList.appendChild(empty);
+      }
+      if (lastEmailIntakeMonitor.count > 0) {
+        lastEmailIntakeMonitor.items.slice(0, 5).forEach((item) => {
+          const row = document.createElement("div");
+          row.className = "work-item";
+          const title = document.createElement("div");
+          title.textContent = `E-mail kandidát: ${item.subject || "E-mail bez předmětu"}`;
+          const meta = document.createElement("div");
+          meta.className = "work-meta";
+          meta.textContent = `${item.provider || "e-mail"} / ${item.folder || "INBOX"} | ${item.date || ""} | ${item.sender || ""}`;
+          const action = document.createElement("div");
+          action.className = "work-meta";
+          const filterReasons = (item.filter_reasons || []).join("; ");
+          const attachmentMeta = item.pdf_attachment_count
+            ? ` PDF: ${item.pdf_attachment_count}${item.large_pdf_attachment_count ? ", velké PDF: " + item.large_pdf_attachment_count : ""}.`
+            : (item.attachment_count ? ` Přílohy: ${item.attachment_count}.` : "");
+          action.textContent = `${item.filter_label || "Dokumentový kandidát"}${filterReasons ? " | " + filterReasons : ""}.${attachmentMeta} Read-only: tělo e-mailu není načtené, přílohy nejsou stažené.`;
+          const button = document.createElement("button");
+          button.className = "secondary";
+          button.type = "button";
+          button.textContent = "Email Processing";
+          button.addEventListener("click", openEmailProcessing);
+          const hideButton = document.createElement("button");
+          hideButton.className = "secondary";
+          hideButton.type = "button";
+          hideButton.textContent = "Neukazovat";
+          hideButton.addEventListener("click", () => hideEmailIntakeCandidate(item, hideButton));
+          row.appendChild(title);
+          row.appendChild(meta);
+          row.appendChild(action);
+          row.appendChild(button);
+          row.appendChild(hideButton);
+          documentIntakeList.appendChild(row);
+        });
+      }
+      const emailMonitor = document.createElement("div");
+      emailMonitor.className = "work-meta";
+      const unavailable = lastEmailIntakeMonitor.unavailable.length
+        ? ` Nedostupné: ${lastEmailIntakeMonitor.unavailable.join("; ")}`
+        : "";
+      const filteredOut = lastEmailIntakeMonitor.filtered_out_count
+        ? ` Potlačeno filtrem: ${lastEmailIntakeMonitor.filtered_out_count}.`
+        : "";
+      emailMonitor.textContent = `E-mail monitor: ${lastEmailIntakeMonitor.message}${filteredOut}${unavailable}`;
+      documentIntakeList.appendChild(emailMonitor);
+      if (sources.length) {
+        const summaryTitle = document.createElement("div");
+        summaryTitle.className = "case-section-title";
+        summaryTitle.textContent = "Souhrn zdrojů";
+        documentIntakeList.appendChild(summaryTitle);
       }
       sources.forEach((source) => {
         const row = document.createElement("div");
@@ -9658,8 +10153,10 @@ COCKPIT_HTML = """<!doctype html>
 	    });
 	    runFrontendHealthCheck();
 	    window.setInterval(runFrontendHealthCheck, 60000);
-	    window.setInterval(() => refresh({silent: true, includeSecondary: false}), 60000);
+	    window.setInterval(() => refresh({silent: true, includeSecondary: false}), INTAKE_LOCAL_MONITOR_MS);
+      window.setInterval(runEmailIntakeMonitor, INTAKE_EMAIL_MONITOR_MS);
 	    refresh();
+      window.setTimeout(runEmailIntakeMonitor, 5000);
 	  </script>
 </body>
 </html>

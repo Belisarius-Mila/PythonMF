@@ -12,10 +12,11 @@ from email.message import Message
 from .archive_models import EmailArchiveSource
 from .archive_service import email_message_to_archive_source
 from .config import ICloudMailConfig, load_icloud_mail_config
+from .header_metadata import extract_attachment_metadata_from_bodystructure
 from .models import EmailAttachmentMeta, EmailHeader, EmailMessage, EmailMessageBatch, EmailSkippedMessage, EmailTextSearchHit
 
 
-HEADER_FETCH_SPEC = "(BODY.PEEK[HEADER.FIELDS (DATE FROM SUBJECT)])"
+HEADER_WITH_STRUCTURE_FETCH_SPEC = "(RFC822.SIZE BODYSTRUCTURE BODY.PEEK[HEADER.FIELDS (DATE FROM SUBJECT)])"
 MESSAGE_ID_FETCH_SPEC = "(BODY.PEEK[HEADER.FIELDS (MESSAGE-ID)])"
 MESSAGE_FETCH_SPEC = "(RFC822.SIZE BODY.PEEK[])"
 MESSAGE_SIZE_FETCH_SPEC = "(RFC822.SIZE)"
@@ -175,7 +176,7 @@ class ICloudReadOnlyEmailProvider:
         uid: bytes,
         folder: str = "INBOX",
     ) -> EmailHeader | None:
-        status, message_data = imap.uid("FETCH", uid, HEADER_FETCH_SPEC)
+        status, message_data = imap.uid("FETCH", uid, HEADER_WITH_STRUCTURE_FETCH_SPEC)
         if status != "OK" or not message_data:
             return None
 
@@ -188,6 +189,7 @@ class ICloudReadOnlyEmailProvider:
             message=message_from_bytes(raw_header),
             source="iCloud",
             folder=folder,
+            attachments=extract_attachment_metadata_from_bodystructure(message_data),
         )
 
     def read_message_by_uid(
@@ -593,7 +595,7 @@ def _fetch_headers_for_uids(
     recent_uids = sorted_uids[-limit:]
 
     for uid in reversed(recent_uids):
-        status, message_data = imap.uid("FETCH", uid, HEADER_FETCH_SPEC)
+        status, message_data = imap.uid("FETCH", uid, HEADER_WITH_STRUCTURE_FETCH_SPEC)
         if status != "OK" or not message_data:
             continue
 
@@ -607,6 +609,7 @@ def _fetch_headers_for_uids(
                 message=message_from_bytes(raw_header),
                 source="iCloud",
                 folder=folder,
+                attachments=extract_attachment_metadata_from_bodystructure(message_data),
             )
         )
 
@@ -643,6 +646,7 @@ def _message_to_header(
     message: Message,
     source: str = "",
     folder: str = "",
+    attachments: tuple[EmailAttachmentMeta, ...] = (),
 ) -> EmailHeader:
     return EmailHeader(
         internal_id=internal_id,
@@ -651,6 +655,7 @@ def _message_to_header(
         subject=_decode_header_value(message.get("Subject")),
         source=source,
         folder=folder,
+        attachments=attachments,
     )
 
 

@@ -10,10 +10,11 @@ from html.parser import HTMLParser
 from .archive_models import EmailArchiveSource
 from .archive_service import email_message_to_archive_source
 from .config import SeznamMailConfig, load_seznam_mail_config
+from .header_metadata import extract_attachment_metadata_from_bodystructure
 from .models import EmailAttachmentMeta, EmailHeader, EmailMessage, EmailMessageBatch, EmailSkippedMessage
 
 
-HEADER_FETCH_SPEC = "(BODY.PEEK[HEADER.FIELDS (DATE FROM SUBJECT)])"
+HEADER_WITH_STRUCTURE_FETCH_SPEC = "(RFC822.SIZE BODYSTRUCTURE BODY.PEEK[HEADER.FIELDS (DATE FROM SUBJECT)])"
 MESSAGE_ID_FETCH_SPEC = "(BODY.PEEK[HEADER.FIELDS (MESSAGE-ID)])"
 MESSAGE_FETCH_SPEC = "(RFC822.SIZE BODY.PEEK[])"
 MESSAGE_SIZE_FETCH_SPEC = "(RFC822.SIZE)"
@@ -213,7 +214,7 @@ class SeznamReadOnlyEmailProvider:
         uid: bytes,
         folder: str = "INBOX",
     ) -> EmailHeader | None:
-        status, message_data = imap.uid("FETCH", uid, HEADER_FETCH_SPEC)
+        status, message_data = imap.uid("FETCH", uid, HEADER_WITH_STRUCTURE_FETCH_SPEC)
         if status != "OK" or not message_data:
             return None
         raw_header = _first_bytes_payload(message_data)
@@ -224,6 +225,7 @@ class SeznamReadOnlyEmailProvider:
             message=message_from_bytes(raw_header),
             source="Seznam",
             folder=folder,
+            attachments=extract_attachment_metadata_from_bodystructure(message_data),
         )
 
     def list_recent_messages(
@@ -417,6 +419,7 @@ def _message_to_header(
     message: Message,
     source: str = "",
     folder: str = "",
+    attachments: tuple[EmailAttachmentMeta, ...] = (),
 ) -> EmailHeader:
     return EmailHeader(
         internal_id=internal_id,
@@ -425,6 +428,7 @@ def _message_to_header(
         subject=_decode_header_value(message.get("Subject")),
         source=source,
         folder=folder,
+        attachments=attachments,
     )
 
 

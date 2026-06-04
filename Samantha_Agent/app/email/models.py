@@ -11,6 +11,7 @@ class EmailHeader:
     subject: str
     source: str = ""
     folder: str = ""
+    attachments: tuple[EmailAttachmentMeta, ...] = ()
 
 
 @dataclass(frozen=True)
