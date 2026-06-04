@@ -126,9 +126,30 @@ o nouzove logy relaci s vysokym rizikem rychleho narustu velikosti.
 
 ## Pripomenout pri pristi recovery zaloze
 
-[PRIPOMENOUT] Pri pristim pripojeni `SamanthaSecureBackup` a pri dalsi recovery
-zaloze udelat kratky restore drill do docasne slozky, bez prepisu zivych dat.
-Dne 2026-06-03 nebylo mozne drill dokoncit, protoze disk byl uz vysunut.
+Restore drill byl dokoncen 2026-06-04 bez prepisu zivych dat.
+
+Overeny snapshot:
+
+```text
+20260603_175327
+```
+
+Postup:
+
+1. Overeno, ze `/Volumes/SamanthaSecureBackup` je pripojeny a snapshot ma
+   recovery profil.
+2. Vybran maly bezpecny soubor:
+   `Samantha_Agent/AGENTS.md`.
+3. Soubor obnoven pouze do:
+   `/private/tmp/samantha_restore_drill/Samantha_Agent/AGENTS.md`.
+4. `cmp` proti aktualnimu souboru prosel bez rozdilu.
+5. SHA-256 obou souboru byl shodny:
+   `6b50675b800c6b4c4eee8f60c02b660bfbce958578dbc78180b0a7013d98cd2d`.
+
+Zive projektove soubory nebyly prepsane a ze zalohy nebylo nic mazano.
+
+Pri pristim pripojeni `SamanthaSecureBackup` a pri dalsi recovery zaloze je
+vhodne restore drill zopakovat po nove uspesne zaloze.
 
 Minimalni postup po pristi uspesne zaloze:
 
