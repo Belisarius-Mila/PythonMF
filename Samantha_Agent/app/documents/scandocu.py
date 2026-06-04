@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
+from .consistency_audit import AuditFact, best_asset_label, document_row_to_fact, primary_amount
 from .vault import (
     DEFAULT_DOCUMENTS_DIR,
     PROJECT_ROOT,
@@ -42,7 +43,9 @@ DEFAULT_DOWNLOADS_DIR = Path.home() / "Downloads"
 DEFAULT_DOWNLOADS_MAX_AGE_DAYS = 7
 SCANDOCU_ROOT_NAME = "scandocu"
 SCANDOCU_ACTIONS_FILE = "scandocu_actions.jsonl"
-SCANDOCU_CLASSIFIER_VERSION = "2026-05-28-vehicle-asset-v1"
+SCANDOCU_CLASSIFIER_VERSION = "2026-06-03-travel-classifier-v2"
+SCANDOCU_EXTRACTOR_RETRY_VERSION = "2026-06-03-pdf-text-cache-v3"
+SCANDOCU_TOKEN_LIMIT = 80
 
 
 @dataclass(frozen=True)
@@ -257,9 +260,18 @@ def prepare_next_stored_document_review(
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
 ) -> ScanDocuCandidate | None:
     reviewed = reviewed_document_ids(vault_dir)
+    text_by_id = {
+        str(row.get("document_id", "")): str(row.get("text", ""))
+        for row in read_jsonl(vault_dir / "index" / "text_index.jsonl")
+    }
     for item in read_jsonl(vault_dir / "index" / "documents_index.jsonl"):
         document_id = safe_slug(str(item.get("document_id", "")), default="", limit=140)
         if not document_id or document_id in reviewed:
+            continue
+        lifecycle_status = safe_text(str(item.get("lifecycle_status", "active") or "active")).casefold()
+        if lifecycle_status in {"archived", "trashed"}:
+            continue
+        if not scandocu_document_needs_review(item, text_chars=len(text_by_id.get(document_id, ""))):
             continue
         stored_path = PROJECT_ROOT / str(item.get("stored_path", ""))
         if not stored_path.exists():
@@ -270,6 +282,25 @@ def prepare_next_stored_document_review(
             vault_dir=vault_dir,
         )
     return None
+
+
+def scandocu_document_needs_review(record: dict[str, Any], text_chars: int | None = None) -> bool:
+    explicit = safe_slug(str(record.get("reading_status", "") or record.get("document_reading_status", "")), default="", limit=80)
+    if explicit in {"ok", "unreadable", "superseded"}:
+        return False
+    if explicit in {"needs_review", "k-revizi", "k_revizi", "revize"}:
+        return True
+    indexed_chars = text_chars
+    if indexed_chars is None:
+        extraction = record.get("text_extraction")
+        if isinstance(extraction, dict):
+            try:
+                indexed_chars = int(extraction.get("indexed_chars") or 0)
+            except (TypeError, ValueError):
+                indexed_chars = 0
+        else:
+            indexed_chars = 0
+    return int(indexed_chars or 0) == 0
 
 
 def reviewed_document_ids(vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> set[str]:
@@ -283,7 +314,7 @@ def reviewed_document_ids(vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> set[str]:
 
 
 def get_scandocu_candidate(token: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> ScanDocuCandidate:
-    token = safe_slug(token, default="", limit=64)
+    token = safe_slug(token, default="", limit=SCANDOCU_TOKEN_LIMIT)
     if not token:
         raise ValueError("chybi token dokumentu.")
     metadata_path = scandocu_processing_dir(vault_dir) / token / "candidate.json"
@@ -291,6 +322,15 @@ def get_scandocu_candidate(token: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) 
         raise ValueError("ScanDocu kandidat nebyl nalezen.")
     data = read_json_file(metadata_path)
     return candidate_from_record(data, metadata_path=metadata_path)
+
+
+def can_reuse_scandocu_candidate(record: dict[str, Any]) -> bool:
+    if record.get("classifier_version") != SCANDOCU_CLASSIFIER_VERSION:
+        return False
+    extraction_method = str(record.get("extraction_method", ""))
+    if extraction_method == "pdf-no-text" or extraction_method.startswith("macos-vision-ocr"):
+        return record.get("extractor_retry_version") == SCANDOCU_EXTRACTOR_RETRY_VERSION
+    return True
 
 
 def prepare_scandocu_candidate(source: Path, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> ScanDocuCandidate:
@@ -304,7 +344,7 @@ def prepare_scandocu_candidate(source: Path, vault_dir: Path = DEFAULT_DOCUMENTS
     metadata_path = target_dir / "candidate.json"
     if metadata_path.exists():
         existing = read_json_file(metadata_path)
-        if existing.get("classifier_version") == SCANDOCU_CLASSIFIER_VERSION:
+        if can_reuse_scandocu_candidate(existing):
             return candidate_from_record(existing, metadata_path=metadata_path)
 
     target_dir.mkdir(parents=True, exist_ok=True)
@@ -325,6 +365,7 @@ def prepare_scandocu_candidate(source: Path, vault_dir: Path = DEFAULT_DOCUMENTS
     record = {
         "schema_version": "1",
         "classifier_version": SCANDOCU_CLASSIFIER_VERSION,
+        "extractor_retry_version": SCANDOCU_EXTRACTOR_RETRY_VERSION,
         "token": token,
         "status": "prepared",
         "prepared_at": now_iso(),
@@ -362,12 +403,12 @@ def prepare_stored_document_review_candidate(
     validate_source_file(stored_path)
     digest = sha256_file(stored_path)
     document_id = safe_slug(str(document_record.get("document_id", "")), default=f"doc-{digest[:8]}", limit=140)
-    token = safe_slug(f"review-{document_id}-{digest[:12]}", default=f"review-{digest[:12]}", limit=80)
+    token = safe_slug(f"review-{document_id}-{digest[:12]}", default=f"review-{digest[:12]}", limit=SCANDOCU_TOKEN_LIMIT)
     target_dir = scandocu_processing_dir(vault_dir) / token
     metadata_path = target_dir / "candidate.json"
     if metadata_path.exists():
         existing = read_json_file(metadata_path)
-        if existing.get("classifier_version") == SCANDOCU_CLASSIFIER_VERSION:
+        if can_reuse_scandocu_candidate(existing):
             return candidate_from_record(existing, metadata_path=metadata_path)
 
     target_dir.mkdir(parents=True, exist_ok=True)
@@ -384,6 +425,7 @@ def prepare_stored_document_review_candidate(
     record = {
         "schema_version": "1",
         "classifier_version": SCANDOCU_CLASSIFIER_VERSION,
+        "extractor_retry_version": SCANDOCU_EXTRACTOR_RETRY_VERSION,
         "source_mode": "vault_review",
         "token": token,
         "status": "prepared",
@@ -473,6 +515,26 @@ def import_scandocu_candidate(
     )
     final_case_id = safe_slug(case_id, default="", limit=100) if case_id else ""
     document_id = safe_slug(final_title, default="", limit=100)
+    consistency_conflicts = find_import_consistency_conflicts(
+        candidate=candidate,
+        final_title=final_title,
+        final_domain=final_domain,
+        final_type=final_type,
+        counterparty=counterparty or candidate.counterparty,
+        related_asset=related_asset or candidate.related_asset,
+        tags=final_tags,
+        document_id=document_id,
+        vault_dir=vault_dir,
+    )
+    if consistency_conflicts and not allow_probable_duplicate:
+        return {
+            "status": "consistency_conflict",
+            "message": (
+                "Dokument věcně koliduje s již uloženým pojištěním pro stejné vozidlo "
+                "a stejné období. Zkontroluj konflikty a potvrď `Přesto uložit`, pokud má jít o další platný dokument."
+            ),
+            "consistency_conflicts": consistency_conflicts,
+        }
     result = apply_document_import_file(
         source_path=str(candidate.working_path),
         target_domain=final_domain,
@@ -517,6 +579,111 @@ def import_scandocu_candidate(
         "message": result.message,
         "skipped_related_download_variants": skipped_variants,
     }
+
+
+def find_import_consistency_conflicts(
+    *,
+    candidate: ScanDocuCandidate,
+    final_title: str,
+    final_domain: str,
+    final_type: str,
+    counterparty: str,
+    related_asset: str,
+    tags: str,
+    document_id: str,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> list[dict[str, Any]]:
+    if final_domain not in {"insurance", "car"}:
+        return []
+
+    extraction = extract_text(candidate.working_path)
+    candidate_fact = document_row_to_fact(
+        row={
+            "document_id": f"pending:{candidate.token}",
+            "title": final_title,
+            "original_filename": candidate.source_path.name,
+            "domain": final_domain,
+            "document_type": final_type,
+            "counterparty": counterparty,
+            "related_asset": related_asset,
+            "tags": parse_tags(tags),
+        },
+        text=extraction.text,
+    )
+    if candidate_fact is None or not candidate_fact.asset_key or not candidate_fact.coverage_start:
+        return []
+
+    matches = [
+        item
+        for item in existing_insurance_auto_document_facts(vault_dir=vault_dir)
+        if item.asset_key == candidate_fact.asset_key
+        and item.coverage_start == candidate_fact.coverage_start
+        and item.amounts
+    ]
+    risky_matches = [item for item in matches if import_fact_is_materially_distinct(candidate_fact, item)]
+    if not risky_matches:
+        return []
+
+    items = [candidate_fact, *risky_matches]
+    return [
+        {
+            "severity": "warning",
+            "code": "insurance_auto_existing_same_asset_period",
+            "title": f"Ve vaultu už je pojistný dokument pro {best_asset_label(items)}",
+            "message": (
+                "Stejné vozidlo a stejný začátek krytí už mají ve vaultu jiný pojistný dokument. "
+                "Před uložením porovnat smlouvu/návrh, částku a pojistitele."
+            ),
+            "asset": best_asset_label(items),
+            "coverage_start": candidate_fact.coverage_start,
+            "document_id": document_id,
+            "items": import_consistency_items(items),
+        }
+    ]
+
+
+def existing_insurance_auto_document_facts(vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> list[AuditFact]:
+    text_by_id = {
+        str(item.get("document_id", "")): str(item.get("text", ""))
+        for item in read_jsonl(vault_dir / "index" / "text_index.jsonl")
+    }
+    facts: list[AuditFact] = []
+    for row in read_jsonl(vault_dir / "index" / "documents_index.jsonl"):
+        fact = document_row_to_fact(row=row, text=text_by_id.get(str(row.get("document_id", "")), ""))
+        if fact is not None:
+            facts.append(fact)
+    return facts
+
+
+def import_fact_is_materially_distinct(candidate: AuditFact, existing: AuditFact) -> bool:
+    candidate_numbers = set(candidate.policy_numbers)
+    existing_numbers = set(existing.policy_numbers)
+    if candidate_numbers and existing_numbers and candidate_numbers == existing_numbers:
+        return False
+    if candidate_numbers and existing_numbers and candidate_numbers.isdisjoint(existing_numbers):
+        return True
+    candidate_amount = primary_amount(candidate)
+    existing_amount = primary_amount(existing)
+    if candidate_amount and existing_amount and candidate_amount != existing_amount:
+        return True
+    return not candidate_numbers or not existing_numbers
+
+
+def import_consistency_items(items: list[AuditFact]) -> list[dict[str, str]]:
+    result: list[dict[str, str]] = []
+    for item in items:
+        result.append(
+            {
+                "source_type": "pending_import" if item.source_id.startswith("pending:") else item.source_type,
+                "source_id": safe_text(item.source_id),
+                "label": safe_text(item.title),
+                "amount": primary_amount(item),
+                "coverage_start": item.coverage_start,
+                "insurer": item.insurer,
+                "policy_numbers": ", ".join(item.policy_numbers),
+            }
+        )
+    return result
 
 
 def mark_resolved_download_variants_skipped(
@@ -869,7 +1036,7 @@ def candidate_from_record(data: dict[str, Any], metadata_path: Path) -> ScanDocu
         tags = parse_tags(str(tags))
     return ScanDocuCandidate(
         source_mode=safe_slug(str(data.get("source_mode", "downloads_import")), default="downloads_import", limit=40),
-        token=safe_slug(str(data.get("token", "")), default="", limit=64),
+        token=safe_slug(str(data.get("token", "")), default="", limit=SCANDOCU_TOKEN_LIMIT),
         source_path=Path(str(data.get("source_path", ""))).expanduser(),
         working_path=working_path,
         metadata_path=metadata_path,
@@ -1217,7 +1384,7 @@ SCANDOCU_HTML = """<!doctype html>
           <div id="duplicateLine" class="hidden"><strong>Duplicita:</strong> <span id="duplicateInfo"></span></div>
         </div>
         <div id="probableDuplicateBox" class="duplicate-box hidden">
-          <strong>Tento dokument je pravděpodobně už uložený.</strong>
+          <strong id="duplicateBoxTitle">Tento dokument je pravděpodobně už uložený.</strong>
           <ul id="probableDuplicateList"></ul>
           <label class="checkline" for="allowDuplicate">
             <input id="allowDuplicate" type="checkbox">
@@ -1281,6 +1448,7 @@ SCANDOCU_HTML = """<!doctype html>
       dueInfo: document.getElementById("dueInfo"),
       duplicateLine: document.getElementById("duplicateLine"),
       duplicateInfo: document.getElementById("duplicateInfo"),
+      duplicateBoxTitle: document.getElementById("duplicateBoxTitle"),
       probableDuplicateBox: document.getElementById("probableDuplicateBox"),
       probableDuplicateList: document.getElementById("probableDuplicateList"),
       encryptedBox: document.getElementById("encryptedBox"),
@@ -1334,7 +1502,7 @@ SCANDOCU_HTML = """<!doctype html>
       fields.dueInfo.textContent = String(data.due_date_count || 0);
       fields.duplicateLine.classList.toggle("hidden", !data.duplicate_document_id);
       fields.duplicateInfo.textContent = data.duplicate_document_id || "";
-      renderProbableDuplicates(data.probable_duplicates || []);
+      renderImportWarnings(data.probable_duplicates || [], data.consistency_conflicts || []);
       renderEncryptedHelp(data);
       fields.title.value = data.title || "";
       fields.domain.value = data.domain || "other";
@@ -1415,8 +1583,8 @@ SCANDOCU_HTML = """<!doctype html>
 
     async function saveCurrent() {
       if (!current) return;
-      if ((current.probable_duplicates || []).length > 0 && !fields.allowDuplicate.checked) {
-        fields.status.textContent = "Neuloženo: dokument vypadá jako možná duplicita. Zkontroluj seznam a zaškrtni `Přesto uložit jako další dokument`, pokud ho chceš uložit.";
+      if (((current.probable_duplicates || []).length > 0 || (current.consistency_conflicts || []).length > 0) && !fields.allowDuplicate.checked) {
+        fields.status.textContent = "Neuloženo: dokument má varování. Zkontroluj seznam a zaškrtni `Přesto uložit jako další dokument`, pokud ho chceš uložit.";
         fields.probableDuplicateBox.scrollIntoView({behavior: "smooth", block: "center"});
         return;
       }
@@ -1437,9 +1605,12 @@ SCANDOCU_HTML = """<!doctype html>
         })
       });
       const data = await res.json();
-      if (!res.ok || data.error || data.status === "probable_duplicate") {
+      if (!res.ok || data.error || data.status === "probable_duplicate" || data.status === "consistency_conflict") {
         fields.status.textContent = data.message || data.error || "Uložení selhalo.";
-        if (data.probable_duplicates) renderProbableDuplicates(data.probable_duplicates);
+        current.consistency_conflicts = data.consistency_conflicts || [];
+        if (data.probable_duplicates || data.consistency_conflicts) {
+          renderImportWarnings(data.probable_duplicates || current.probable_duplicates || [], data.consistency_conflicts || []);
+        }
         return;
       }
       fields.status.textContent = `${data.status === "reviewed" ? "Aktualizováno" : "Uloženo"}: ${data.document_id}. Chceš pokračovat?`;
@@ -1448,11 +1619,17 @@ SCANDOCU_HTML = """<!doctype html>
       current = null;
     }
 
-    function renderProbableDuplicates(items) {
+    function renderImportWarnings(items, consistencyConflicts) {
       fields.allowDuplicate.checked = false;
       fields.probableDuplicateList.innerHTML = "";
-      fields.probableDuplicateBox.classList.toggle("hidden", items.length === 0);
-      if (items.length > 0) {
+      const hasDuplicates = items.length > 0;
+      const hasConsistencyConflicts = consistencyConflicts.length > 0;
+      fields.probableDuplicateBox.classList.toggle("hidden", !hasDuplicates && !hasConsistencyConflicts);
+      if (hasConsistencyConflicts) {
+        fields.duplicateBoxTitle.textContent = "Dokument věcně koliduje s již uloženým pojištěním.";
+        fields.status.textContent = "Věcný konflikt: zkontroluj seznam níže. Bez zaškrtnutí `Přesto uložit jako další dokument` se dokument neuloží.";
+      } else if (hasDuplicates) {
+        fields.duplicateBoxTitle.textContent = "Tento dokument je pravděpodobně už uložený.";
         fields.status.textContent = "Možná duplicita: zkontroluj seznam níže. Bez zaškrtnutí `Přesto uložit jako další dokument` se dokument neuloží.";
       }
       items.forEach((item) => {
@@ -1460,6 +1637,18 @@ SCANDOCU_HTML = """<!doctype html>
         const name = item.title || item.original_filename || item.document_id || "bez názvu";
         const path = item.stored_path || "";
         li.textContent = `${name} | ${item.domain || "other"} / ${item.document_type || "document"} | ${path}`;
+        fields.probableDuplicateList.appendChild(li);
+      });
+      consistencyConflicts.forEach((finding) => {
+        const li = document.createElement("li");
+        const title = finding.title || finding.code || "věcný konflikt";
+        const details = (finding.items || []).map((item) => {
+          const label = item.label || item.source_id || "";
+          const amount = item.amount ? ` | ${item.amount}` : "";
+          const policy = item.policy_numbers ? ` | smlouva/návrh ${item.policy_numbers}` : "";
+          return `${label}${amount}${policy}`;
+        }).join("; ");
+        li.textContent = `${title}: ${details}`;
         fields.probableDuplicateList.appendChild(li);
       });
     }

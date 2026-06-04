@@ -499,6 +499,37 @@ zavest `case_id` pro vecne souvisejici dokumenty.
 Bezpecnost: pracovni PDF, fotky a extrahovany text zustavaji v `data/private/`
 mimo git. Finalni import do vaultu musi zustat potvrzovany.
 
+## Cockpit dokumentovy checkpoint 2026-06-04
+
+Cockpit je prakticka lokalni ovladaci vrstva pro document management na
+`http://127.0.0.1:8770`.
+
+Hotove funkcni oblasti:
+
+- `Dokumenty k revizi`: prehled zero-text/OCR, kratky text, slaba metadata a
+  dokumenty cekajici na rucni kontrolu.
+- `Vazby / cases`: ukazuje jen skutecne vazby s vice dokumenty; jedno-dokumentove
+  samostatne vazby jsou schovane, aby UI nematlo.
+- `Klasifikace`: ukazuje pokryti metadat a umoznuje doplnit oblast, typ,
+  protistranu a souvisejici vec.
+- `Terminy v dokumentech`: ukazuje due-date kandidaty a umi po potvrzeni vytvorit
+  pripominku.
+- Detail case v2: po rozbaleni case ukazuje dokumenty, otevrene pripominky,
+  terminove kandidaty, platebni konflikty a kratke `case_health` doporuceni.
+
+Bezpecnostni pravidla zustavaji:
+
+- Cockpit vraci redigovane reference, ne raw `document_id` v detailu case.
+- Plne dokumenty, PDF, OCR texty, cele e-maily a citlive identifikatory zustavaji
+  mimo git v `data/private/`.
+- Akce typu reminder, tisk, archivace nebo presun do kose zustavaji potvrzovane.
+
+Dalsi prakticky krok:
+
+- Rucne otestovat detail case v UI.
+- Potom rozhodnout, zda pokracovat OCR/re-review pipeline pro zero-text dokumenty,
+  nebo sjednocenym intake panelem Downloads / e-mail / mobilni sken.
+
 ## Vztah k existujicim projektum
 
 - Platebni SMS/reminders: konkretni faktury/prilohy z platebnich pripadu se mohou

@@ -1,6 +1,6 @@
 Nazev: Cockpit Recovery centrum po padu Samanthy
 Priorita: 1
-Stav: ceka na implementaci
+Stav: ceka na retest
 Pripomenout pri startu: ano
 Datum: 2026-06-03
 
@@ -19,15 +19,24 @@ Co je hotove:
 - Pri startu pres `samantha` ma bezet autosave do `data/session_autosave/`.
 - Zapisuje se priorita 1 pripominka, aby se pri dalsi praci na Cockpitu
   nezapomnelo na recovery centrum.
+- Dne 2026-06-03 je v Cockpitu implementovane MVP Recovery centra:
+  - tlacitko `Recovery centrum` v sekci `Akce`,
+  - endpoint `/api/recovery/status`,
+  - read-only metadata posledniho `session_*` autosave snapshotu bez cteni obsahu,
+  - git status summary,
+  - aktivni projekt Recovery centra,
+  - dva recovery handoffy,
+  - prikazy `samantha`, `source ~/.zshrc && samantha` a `codex resume --last`.
 
 Co neni hotove:
-- Cockpit zatim nema samostatny panel / kartu pro obnovu kontextu po padu.
-- Neni hotovy endpoint/report, ktery by lidsky shrnul posledni autosave,
-  posledni git stav, posledni handoff a doporuceny navazovaci krok.
+- Ceka rucni retest v UI: otevrit Cockpit, kliknout `Recovery centrum`,
+  zkontrolovat citelnost obsahu a zavirani modalu.
+- Volitelne pozdeji doplnit diagnostiku casu endpointu, health stav tlacitek
+  a bezpecny restart Cockpitu podle ulozeneho seznamu priorit.
 
 Dalsi krok:
-- Pri dalsi praci na Cockpitu navrhnout a implementovat maly panel
-  `Recovery centrum` nebo `Obnova po padu`.
+- Rucne otestovat v Cockpitu tlacitko `Recovery centrum` a potvrdit, jestli
+  rozlozeni a text staci pro realne navazani po padu.
 
 Navrhovane dalsi kroky:
 - Okamzity krok: pridat v Cockpitu viditelnou priorita 1 kartu, ktera ukaze
@@ -43,7 +52,8 @@ Zmenene nebo relevantni soubory:
 - `memory/infrastructure/codex_reconnect_recovery.md`
 - `memory/ACTIVE_PROJECTS.md`
 - `memory/MEMORY_INDEX.md`
-- budoucne pravdepodobne `app/cockpit.py` a `tests/test_cockpit.py`
+- `app/cockpit.py`
+- `tests/test_cockpit.py`
 
 Bezpecnost / neukladat:
 - Do memory ani gitu neukladat obsah citlivych autosave logu.

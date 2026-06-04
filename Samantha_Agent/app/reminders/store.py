@@ -74,6 +74,13 @@ def load_reminders_store(path: Path = DEFAULT_REMINDERS_PATH) -> dict[str, list[
     return {"reminders": reminders}
 
 
+def write_reminders_store(
+    store: dict[str, list[dict[str, Any]]],
+    path: Path = DEFAULT_REMINDERS_PATH,
+) -> None:
+    _write_reminders_store(path=path, store=store)
+
+
 def _write_reminders_store(
     path: Path,
     store: dict[str, list[dict[str, Any]]],

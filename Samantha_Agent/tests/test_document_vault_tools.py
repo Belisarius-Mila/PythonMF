@@ -31,7 +31,9 @@ from app.documents.tools import (
     search_private_documents_text,
 )
 from app.documents.scandocu import import_scandocu_candidate
+from app.documents.scandocu import get_scandocu_candidate
 from app.documents.scandocu import prepare_next_scandocu_pdf
+from app.documents.scandocu import prepare_scandocu_candidate
 from app.documents.scandocu import prepare_specific_download_pdf
 from app.documents.scandocu import prepare_next_stored_document_review
 from app.documents.scandocu import scan_downloads_for_pdfs
@@ -42,6 +44,7 @@ from app.documents.vault import has_explicit_document_import_confirmation
 from app.documents.vault import normalize_mobile_document_page
 from app.documents.vault import parse_macos_vision_ocr_json
 from app.documents.vault import propose_metadata
+from app.documents.vault import resolve_pdftotext_binary
 from app.documents.vault import TableExtractionResult
 from app.documents.vault import TextExtractionResult
 from app.documents.vault import enrich_pdf_text_with_tables
@@ -476,6 +479,128 @@ class DocumentVaultToolsTests(unittest.TestCase):
             self.assertEqual(candidate.source_mode, "vault_review")
             self.assertEqual(candidate.review_document_id, "najemni-smlouva-erbenova-ulice")
 
+    def test_scandocu_review_candidate_keeps_long_token_for_pdf_preview(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            source = root / "pojisteni.pdf"
+            source.write_bytes(b"%PDF-1.4\nPojisteni vozidla\n")
+            long_id = "kooperativa-pojisteni-vozidla-6300720621-2023"
+            imported = apply_document_import_text(
+                source_path=str(source),
+                target_domain="insurance",
+                document_type="insurance_policy",
+                document_id=long_id,
+                document_title="Pojisteni vozidla 6300720621",
+                user_confirmed=True,
+                confirmation_text="Potvrzuji, uloz dokument pojisteni.pdf do oblasti insurance.",
+                vault_dir=vault,
+            )
+            self.assertIn("Stav: ulozeno", imported)
+            self.mark_document_needs_review(vault, long_id)
+
+            candidate = prepare_next_stored_document_review(vault_dir=vault)
+            self.assertIsNotNone(candidate)
+            assert candidate is not None
+            self.assertGreater(len(candidate.token), 64)
+            self.assertEqual(candidate.to_api()["pdf_url"], f"/pdf/{candidate.token}")
+
+            loaded = get_scandocu_candidate(candidate.token, vault_dir=vault)
+            self.assertEqual(loaded.token, candidate.token)
+            self.assertEqual(loaded.working_path, candidate.working_path)
+
+    def test_scandocu_retries_stale_no_text_candidate_cache(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            source = root / "reportlab-text.pdf"
+            source.write_bytes(b"%PDF-1.4\nText layer available\n")
+            no_text = TextExtractionResult(
+                text="",
+                method="pdf-no-text",
+                ocr_needed=True,
+                warning="old cache",
+            )
+            with_text = TextExtractionResult(
+                text="Text layer available",
+                method="pdftotext",
+                ocr_needed=False,
+                warning="",
+            )
+            metadata = {
+                "domain": "other",
+                "document_type": "document",
+                "counterparty": "",
+                "related_asset": "",
+                "tags": [],
+            }
+            with patch("app.documents.scandocu.extract_text", return_value=no_text), patch(
+                "app.documents.scandocu.propose_metadata",
+                return_value=metadata,
+            ):
+                stale = prepare_scandocu_candidate(source=source, vault_dir=vault)
+
+            stale_data = json.loads(stale.metadata_path.read_text(encoding="utf-8"))
+            stale_data.pop("extractor_retry_version", None)
+            stale.metadata_path.write_text(json.dumps(stale_data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+            with patch("app.documents.scandocu.extract_text", return_value=with_text), patch(
+                "app.documents.scandocu.propose_metadata",
+                return_value=metadata,
+            ):
+                refreshed = prepare_scandocu_candidate(source=source, vault_dir=vault)
+
+            refreshed_data = json.loads(refreshed.metadata_path.read_text(encoding="utf-8"))
+            self.assertEqual(refreshed.extraction_method, "pdftotext")
+            self.assertFalse(refreshed.ocr_needed)
+            self.assertEqual(refreshed_data["extractor_retry_version"], "2026-06-03-pdf-text-cache-v3")
+
+    def test_scandocu_retries_stale_ocr_candidate_cache(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            source = root / "reportlab-text.pdf"
+            source.write_bytes(b"%PDF-1.4\nText layer available\n")
+            ocr_text = TextExtractionResult(
+                text="OCR text",
+                method="macos-vision-ocr",
+                ocr_needed=False,
+                warning="",
+            )
+            with_text = TextExtractionResult(
+                text="Text layer available",
+                method="pdftotext",
+                ocr_needed=False,
+                warning="",
+            )
+            metadata = {
+                "domain": "other",
+                "document_type": "document",
+                "counterparty": "",
+                "related_asset": "",
+                "tags": [],
+            }
+            with patch("app.documents.scandocu.extract_text", return_value=ocr_text), patch(
+                "app.documents.scandocu.propose_metadata",
+                return_value=metadata,
+            ):
+                stale = prepare_scandocu_candidate(source=source, vault_dir=vault)
+
+            stale_data = json.loads(stale.metadata_path.read_text(encoding="utf-8"))
+            stale_data["extractor_retry_version"] = "2026-06-03-pdf-text-cache-v2"
+            stale.metadata_path.write_text(json.dumps(stale_data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+            with patch("app.documents.scandocu.extract_text", return_value=with_text), patch(
+                "app.documents.scandocu.propose_metadata",
+                return_value=metadata,
+            ):
+                refreshed = prepare_scandocu_candidate(source=source, vault_dir=vault)
+
+            refreshed_data = json.loads(refreshed.metadata_path.read_text(encoding="utf-8"))
+            self.assertEqual(refreshed.extraction_method, "pdftotext")
+            self.assertFalse(refreshed.ocr_needed)
+            self.assertEqual(refreshed_data["extractor_retry_version"], "2026-06-03-pdf-text-cache-v3")
+
     def test_scandocu_blocks_probable_duplicate_until_confirmed(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
@@ -536,6 +661,80 @@ class DocumentVaultToolsTests(unittest.TestCase):
                 domain="home",
                 document_type="lease",
                 tags="najem, dubova",
+                allow_probable_duplicate=True,
+                vault_dir=vault,
+            )
+            self.assertEqual(confirmed["status"], "imported")
+
+    def test_scandocu_blocks_insurance_auto_consistency_conflict_until_confirmed(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            downloads = root / "Downloads"
+            vault = root / "documents"
+            downloads.mkdir()
+            existing = root / "cpp-predpis-3270612451.pdf"
+            existing.write_bytes(
+                b"%PDF-1.4\n"
+                b"PREDPIS POJISTNEHO POJISTNA SMLOUVA | 3270612451\n"
+                b"Obdobi: 1. 8. 2026 - 31. 7. 2027\n"
+                b"RZ / VIN: 4SN 8981 / YV1MV79L1G2335020\n"
+                b"VOLVO V40 CROSS COUNTRY\n"
+                b"Ceska podnikatelska pojistovna, a. s., Vienna Insurance Group\n"
+                b"Vase nove predepsane pojistne cini 4 512 Kc/ rocne\n"
+            )
+            imported = apply_document_import_text(
+                source_path=str(existing),
+                target_domain="insurance",
+                document_type="insurance_payment_notice",
+                counterparty="CPP",
+                related_asset="auto VOLVO V40 CROSS COUNTRY SPZ 4SN8981",
+                document_id="cpp-predpis-pojistne-smlouvy-3270612451-2026",
+                document_title="CPP predpis pojistne smlouvy 3270612451",
+                user_confirmed=True,
+                confirmation_text="Potvrzuji, uloz dokument cpp-predpis-3270612451.pdf do oblasti insurance.",
+                vault_dir=vault,
+            )
+            self.assertIn("Stav: ulozeno", imported)
+
+            new_pdf = downloads / "rixo-novy-navrh.pdf"
+            new_pdf.write_bytes(
+                b"%PDF-1.4\n"
+                b"Cislo navrhu pojistne smlouvy 3275111280\n"
+                b"POJISTITEL Ceska podnikatelska pojistovna, a. s., Vienna Insurance Group\n"
+                b"Pocatek pojisteni: 01.08.2026 00:00\n"
+                b"Registracni znacka (SPZ): 4SN8981\n"
+                b"VOLVO V40 CROSS COUNTRY\n"
+                b"Pojistne za pojistne obdobi - castka k uhrade: 4 956 Kc\n"
+            )
+
+            candidate = prepare_next_scandocu_pdf(downloads_dir=downloads, vault_dir=vault)
+            self.assertIsNotNone(candidate)
+            assert candidate is not None
+            self.assertFalse(candidate.probable_duplicates)
+
+            blocked = import_scandocu_candidate(
+                token=candidate.token,
+                title="RIXO navrh pojistne smlouvy 3275111280",
+                domain="insurance",
+                document_type="insurance_policy",
+                counterparty="CPP",
+                related_asset="auto VOLVO V40 CROSS COUNTRY SPZ 4SN8981",
+                tags="auto, pojisteni",
+                vault_dir=vault,
+            )
+            self.assertEqual(blocked["status"], "consistency_conflict")
+            self.assertEqual(blocked["consistency_conflicts"][0]["asset"], "VOLVO V40 SPZ 4SN8981")
+            self.assertIn("4 956 Kč", str(blocked["consistency_conflicts"]))
+            self.assertIn("4 512 Kč", str(blocked["consistency_conflicts"]))
+
+            confirmed = import_scandocu_candidate(
+                token=candidate.token,
+                title="RIXO navrh pojistne smlouvy 3275111280",
+                domain="insurance",
+                document_type="insurance_policy",
+                counterparty="CPP",
+                related_asset="auto VOLVO V40 CROSS COUNTRY SPZ 4SN8981",
+                tags="auto, pojisteni",
                 allow_probable_duplicate=True,
                 vault_dir=vault,
             )
@@ -634,6 +833,23 @@ class DocumentVaultToolsTests(unittest.TestCase):
         self.assertIn("bydleni", metadata["tags"])
         self.assertNotIn("2025", metadata["tags"])
         self.assertNotIn("2026", metadata["tags"])
+
+    def test_booking_travel_metadata_is_not_lease(self) -> None:
+        metadata = propose_metadata(
+            source=Path("Bibione_2026_prakticke_informace_pro_dceru.pdf"),
+            text=(
+                "Bibione 2026 - praktické informace z potvrzení Booking.com. "
+                "Rezervace ubytování, check-in a check-out, adresa apartmánu, "
+                "pokyny k pobytu, parkování pro auto a informace k dovolené."
+            ),
+        )
+
+        self.assertEqual(metadata["document_type"], "travel_booking")
+        self.assertEqual(metadata["domain"], "travel")
+        self.assertEqual(metadata["related_asset"], "")
+        self.assertIn("cestovani", metadata["tags"])
+        self.assertNotIn("auto", metadata["tags"])
+        self.assertNotIn("bydleni", metadata["tags"])
 
     def test_lease_counterparty_from_party_block(self) -> None:
         metadata = propose_metadata(
@@ -912,6 +1128,7 @@ class DocumentVaultToolsTests(unittest.TestCase):
                 vault_dir=vault,
             )
             self.assertIn("Stav: ulozeno", imported)
+            self.mark_document_needs_review(vault, "stary-dokument-review")
 
             candidate = prepare_next_stored_document_review(vault_dir=vault)
             self.assertIsNotNone(candidate)
@@ -954,6 +1171,59 @@ class DocumentVaultToolsTests(unittest.TestCase):
             next_candidate = prepare_next_stored_document_review(vault_dir=vault)
             self.assertIsNone(next_candidate)
 
+    def test_scandocu_review_skips_trashed_documents(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            index = vault / "index"
+            trashed_dir = vault / "trash" / "trashed-doc"
+            active_dir = vault / "vault" / "tax" / "active-doc"
+            trashed_dir.mkdir(parents=True)
+            active_dir.mkdir(parents=True)
+            trashed_pdf = trashed_dir / "trashed.pdf"
+            active_pdf = active_dir / "active.pdf"
+            trashed_pdf.write_bytes(b"%PDF-1.4\nTrashed\n")
+            active_pdf.write_bytes(b"%PDF-1.4\nActive\n")
+            index.mkdir(parents=True)
+            (index / "documents_index.jsonl").write_text(
+                "\n".join(
+                    json.dumps(row, ensure_ascii=False)
+                    for row in [
+                        {
+                            "document_id": "trashed-doc",
+                            "title": "Trashed",
+                            "stored_path": str(trashed_pdf),
+                            "lifecycle_status": "trashed",
+                        },
+                        {
+                            "document_id": "active-doc",
+                            "title": "Active",
+                            "stored_path": str(active_pdf),
+                        },
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            candidate = prepare_next_stored_document_review(vault_dir=vault)
+
+            self.assertIsNotNone(candidate)
+            assert candidate is not None
+            self.assertEqual(candidate.review_document_id, "active-doc")
+
+    @staticmethod
+    def mark_document_needs_review(vault: Path, document_id: str) -> None:
+        index_path = vault / "index" / "documents_index.jsonl"
+        rows = _read_jsonl(index_path)
+        for row in rows:
+            if str(row.get("document_id", "")) == document_id:
+                row["reading_status"] = "needs_review"
+        index_path.write_text(
+            "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows),
+            encoding="utf-8",
+        )
+
     def test_scandocu_ui_contains_encrypted_pdf_guidance(self) -> None:
         self.assertIn("PDF je šifrované nebo zamčené", SCANDOCU_HTML)
         self.assertIn("Heslo nepiš do chatu", SCANDOCU_HTML)
@@ -965,6 +1235,8 @@ class DocumentVaultToolsTests(unittest.TestCase):
         self.assertIn("Hledat jiné PDF", SCANDOCU_HTML)
         self.assertIn("Ne, hotovo", SCANDOCU_HTML)
         self.assertIn("Revidovat z vaultu", SCANDOCU_HTML)
+        self.assertIn("consistency_conflict", SCANDOCU_HTML)
+        self.assertIn("renderImportWarnings", SCANDOCU_HTML)
 
     def test_duplicate_content_is_not_imported_twice(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -1405,6 +1677,18 @@ class DocumentVaultToolsTests(unittest.TestCase):
 
         self.assertEqual(result.method, "pdftotext")
         self.assertIn("Tabulka", result.text)
+
+    def test_resolve_pdftotext_uses_common_homebrew_path_when_path_is_sparse(self) -> None:
+        def fake_is_file(path: Path) -> bool:
+            return str(path) == "/usr/local/bin/pdftotext"
+
+        with patch("app.documents.vault.shutil.which", return_value=None), patch(
+            "app.documents.vault.Path.is_file",
+            fake_is_file,
+        ):
+            resolved = resolve_pdftotext_binary()
+
+        self.assertEqual(resolved, "/usr/local/bin/pdftotext")
 
     def test_pdfplumber_tables_enrich_existing_text(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

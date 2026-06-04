@@ -14,9 +14,9 @@ PROJECT_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_PORT = 8770
 
 
-def status_ok(url: str) -> bool:
+def url_ok(url: str, *, timeout: float = 1.5) -> bool:
     try:
-        with urllib.request.urlopen(f"{url}/api/status", timeout=0.5) as response:
+        with urllib.request.urlopen(url, timeout=timeout) as response:
             return 200 <= response.status < 300
     except (OSError, urllib.error.URLError):
         return False
@@ -64,20 +64,20 @@ def main() -> int:
     url = f"http://{args.host}:{args.port}"
     log_file = PROJECT_DIR / "data" / "private" / "cockpit" / "server.log"
 
-    if status_ok(url):
+    if url_ok(url):
         if not args.no_open:
             open_browser(url)
         print(f"Samantha Cockpit už běží: {url}")
         return 0
 
     if port_is_busy(args.host, args.port):
-        print(f"Port {args.port} je obsazený, ale neodpovídá na {url}/api/status.", file=sys.stderr)
+        print(f"Port {args.port} je obsazený, ale hlavní stránka Cockpitu neodpovídá na {url}.", file=sys.stderr)
         print("Neukončuji existující proces automaticky.", file=sys.stderr)
         return 1
 
     start_server(args.host, args.port, log_file)
     for _ in range(40):
-        if status_ok(url):
+        if url_ok(url):
             if not args.no_open:
                 open_browser(url)
             print(f"Samantha Cockpit spuštěn: {url}")

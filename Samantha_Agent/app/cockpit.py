@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import csv
 import json
 import hashlib
+import os
 import re
 import shutil
 import subprocess
@@ -18,9 +20,11 @@ from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from app.backup.activity_state import format_backup_activity_reminder
+from app.documents.consistency_audit import format_document_consistency_audit, run_document_consistency_audit
 from app.documents.scandocu import DEFAULT_DOWNLOADS_DIR, scan_downloads_for_pdfs
 from app.documents.vault import (
     DEFAULT_DOCUMENTS_DIR,
+    DEFAULT_MOBILE_DOCUMENT_INBOX,
     apply_document_import_file,
     build_snippet,
     document_vault_status_summary,
@@ -36,10 +40,19 @@ from app.documents.vault import (
     safe_text,
     safe_slug,
     sanitize_output,
+    save_document_due_reminder_summary,
     tokenize,
     write_json,
     write_jsonl,
 )
+from app.quantitative_status import DEFAULT_METRICS_PATH as QUANTITATIVE_STATUS_METRICS_PATH
+from app.quantitative_status import ExtensionStats as QuantitativeExtensionStats
+from app.quantitative_status import run_samantha_quantitative_status
+from app.quick_notes import DEFAULT_ICLOUD_SHORTCUTS_INBOX, DEFAULT_INDEX_PATH as QUICK_NOTES_INDEX_PATH
+from app.quick_notes import sync_quick_notes_index
+from app.urgent_reminders import DEFAULT_INDEX_PATH as URGENT_REMINDERS_INDEX_PATH
+from app.urgent_reminders import mark_urgent_reminder_done
+from app.urgent_reminders import sync_urgent_reminders_index
 from app.email.activity_state import DEFAULT_EMAIL_ACTIVITY_STATE_PATH, record_email_archive_completed
 from app.email.archive_models import EmailArchiveSource
 from app.email.archive_service import DEFAULT_EMAIL_ARCHIVE_DIR, save_email_archive
@@ -48,7 +61,7 @@ from app.email.icloud_provider import EmailProviderError, ICloudReadOnlyEmailPro
 from app.email.models import EmailAttachmentMeta, EmailHeader, EmailMessage
 from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEmailProvider
 from app.reminders.query_tools import mark_reminder_done_text
-from app.reminders.store import DEFAULT_REMINDERS_PATH, load_reminders_store
+from app.reminders.store import DEFAULT_REMINDERS_PATH, load_reminders_store, write_reminders_store
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -59,11 +72,20 @@ SCANDOCU_PORT = 8766
 SCANDOCU_LOG_DIR = PROJECT_ROOT / "data" / "private" / "documents" / "scandocu"
 SCANDOCU_LOG_FILE = SCANDOCU_LOG_DIR / "server.log"
 SCANDOCU_SERVER_SCRIPT = PROJECT_ROOT / "scripts" / "scandocu_server.py"
+COCKPIT_RESTART_SCRIPT = PROJECT_ROOT / "scripts" / "restart_cockpit.py"
 EMAIL_SESSION_HANDOFF_DIR = PROJECT_ROOT / "data" / "private" / "email_session_handoffs"
+LOCAL_SEZNAM_EMAIL_DIR = PROJECT_ROOT / "data" / "private" / "email_seznam"
 EMAIL_PROCESSING_DECISIONS_FILE = EMAIL_SESSION_HANDOFF_DIR / "email_processing_decisions.json"
 EMAIL_WORK_QUEUE_ACTIONS_FILE = EMAIL_SESSION_HANDOFF_DIR / "email_work_queue_actions.jsonl"
 EMAIL_ATTACHMENT_PREVIEW_DIR = Path("/private/tmp/samantha_email_attachment_preview")
 GIT_ROOT = PROJECT_ROOT.parent
+ACTIVE_PROJECTS_PATH = PROJECT_ROOT / "memory" / "ACTIVE_PROJECTS.md"
+SESSION_AUTOSAVE_DIR = PROJECT_ROOT / "data" / "session_autosave"
+MEMORY_INDEX_PATH = PROJECT_ROOT / "memory" / "MEMORY_INDEX.md"
+RECOVERY_HANDOFF_PATHS = (
+    PROJECT_ROOT / "memory" / "handoffs" / "cockpit_recovery_center_priority_2026_06_03.md",
+    PROJECT_ROOT / "memory" / "handoffs" / "cockpit_development_priorities_2026_06_03.md",
+)
 LOCAL_WEB_APPS = {
     "family-video-organizer": PROJECT_ROOT / "docs" / "family-video-organizer",
 }
@@ -148,10 +170,937 @@ READING_STATUS_ALIASES: dict[str, str] = {
     "nahrazeno-lepsi-kopii": "superseded",
     "nahrazeno_lepsi_kopii": "superseded",
 }
+DOCUMENT_REVIEW_REASON_LABELS: dict[str, str] = {
+    "needs_review": "stav čtení k revizi",
+    "zero_text": "bez textové vrstvy",
+    "short_text": "krátký text",
+    "ocr_needed": "OCR kandidát",
+    "weak_metadata": "doplnit údaje",
+}
+DOCUMENT_REVIEW_FIELD_LABELS: dict[str, str] = {
+    "domain": "oblast",
+    "document_type": "typ dokumentu",
+    "counterparty": "protistrana",
+    "related_asset": "vazba na auto/projekt/věc",
+}
+DOCUMENT_DOMAIN_LABELS: dict[str, str] = {
+    "car": "auto",
+    "home": "domácnost / bydlení",
+    "insurance": "pojištění",
+    "tax": "daně",
+    "energy": "energie",
+    "health": "zdraví",
+    "warranty": "záruky",
+    "other": "ostatní",
+}
+DOCUMENT_TYPE_LABELS: dict[str, str] = {
+    "document": "dokument",
+    "email-attachment-pdf": "PDF příloha e-mailu",
+    "invoice": "faktura / doklad",
+    "insurance_payment_notice": "předpis platby pojistného",
+    "insurance_policy": "pojistná smlouva",
+    "lease": "nájemní smlouva",
+    "payment_notice": "předpis platby",
+    "policy": "smlouva",
+    "tax-penzijni-generali": "daňové penzijní potvrzení",
+    "confirmation": "potvrzení",
+}
+DOCUMENT_CASE_GROUP_LABELS: dict[str, str] = {
+    "asset": "Vazba podle věci",
+    "counterparty": "Vazba podle protistrany",
+    "unlinked": "Bez vazby",
+}
+DOCUMENT_METADATA_UPDATE_FIELDS: tuple[str, ...] = (
+    "domain",
+    "document_type",
+    "counterparty",
+    "related_asset",
+)
+DOCUMENT_DUE_TYPE_LABELS: dict[str, str] = {
+    "payment_due": "platba",
+    "valid_until": "konec platnosti",
+    "service_due": "servis / revize",
+    "deadline": "termín",
+    "context_date": "kontextové datum",
+    "unknown_date": "nejasné datum",
+}
+DOCUMENT_REVIEW_GROUPS: tuple[dict[str, str], ...] = (
+    {
+        "id": "zero_text",
+        "label": "Bez textu / OCR",
+        "empty_label": "Žádný aktivní dokument bez textové vrstvy.",
+        "action": "Spustit OCR nebo po ruční kontrole označit jako OK bez textu.",
+    },
+    {
+        "id": "short_text",
+        "label": "Krátký text",
+        "empty_label": "Žádný aktivní dokument s podezřele krátkým textem.",
+        "action": "Ručně ověřit, zda se načetl celý dokument; případně OCR nebo ruční revize.",
+    },
+    {
+        "id": "weak_metadata",
+        "label": "Slabá metadata",
+        "empty_label": "Žádný aktivní dokument se slabými metadaty.",
+        "action": "Doplnit metadata: oblast, typ, protistranu nebo související věc.",
+    },
+    {
+        "id": "needs_review",
+        "label": "K revizi",
+        "empty_label": "Žádný další aktivní dokument označený k revizi.",
+        "action": "Otevřít dokument a potvrdit stav čtení.",
+    },
+    {
+        "id": "ok",
+        "label": "V pořádku",
+        "empty_label": "Zatím žádný aktivní dokument není označený jako OK.",
+        "action": "Bez akce.",
+    },
+)
 
 
 def web_apps_catalog() -> dict[str, Any]:
     return {"ok": True, "apps": [dict(item) for item in WEB_APP_CATALOG]}
+
+
+def recovery_center_status(
+    *,
+    autosave_dir: Path = SESSION_AUTOSAVE_DIR,
+    active_projects_path: Path = ACTIVE_PROJECTS_PATH,
+    memory_index_path: Path = MEMORY_INDEX_PATH,
+    handoff_paths: tuple[Path, ...] = RECOVERY_HANDOFF_PATHS,
+    git_status: Callable[[], dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    git = git_status() if git_status is not None else git_status_summary()
+    return {
+        "ok": True,
+        "message": "Recovery centrum je read-only a nic neprepisuje.",
+        "generated_at": datetime.now().isoformat(timespec="seconds"),
+        "autosave": latest_autosave_metadata(autosave_dir),
+        "git": git,
+        "active_project": recovery_active_project(active_projects_path),
+        "handoffs": recovery_handoff_summaries(handoff_paths),
+        "memory_index": {
+            "path": str(relative_to_project(memory_index_path)),
+            "exists": memory_index_path.exists(),
+        },
+        "commands": [
+            {
+                "label": "Bezny navrat do bezici relace",
+                "command": "samantha",
+                "note": "Pripoji existujici screen relaci, nebo zalozi novou.",
+            },
+            {
+                "label": "Kdyz shell prikaz neexistuje",
+                "command": "source ~/.zshrc && samantha",
+                "note": "Nacte shell konfiguraci a pak spusti Samanthu.",
+            },
+            {
+                "label": "Po padu Codexu",
+                "command": "codex resume --last",
+                "note": "Navaze posledni Codex session v adresari projektu.",
+            },
+        ],
+        "references": [
+            "memory/technical/session_recovery_rules.md",
+            "memory/infrastructure/codex_reconnect_recovery.md",
+            "memory/handoffs/cockpit_recovery_center_priority_2026_06_03.md",
+        ],
+        "safety_note": "Autosave logy jsou jen nouzova lokalni obnova; panel ukazuje metadata, ne obsah logu.",
+    }
+
+
+def latest_autosave_metadata(path: Path) -> dict[str, Any]:
+    if not path.exists() or not path.is_dir():
+        return {
+            "ok": False,
+            "message": "Autosave slozka zatim neexistuje.",
+            "dir": str(relative_to_project(path)),
+            "file_count": 0,
+            "latest_file": "",
+            "latest_modified_at": "",
+            "latest_age_seconds": None,
+        }
+    files = [
+        item
+        for item in path.iterdir()
+        if item.is_file()
+        and item.name.startswith("session_")
+        and item.suffix.lower() in {".txt", ".jsonl"}
+    ]
+    if not files:
+        return {
+            "ok": False,
+            "message": "V autosave slozce nejsou zadne TXT/JSONL snapshoty.",
+            "dir": str(relative_to_project(path)),
+            "file_count": 0,
+            "latest_file": "",
+            "latest_modified_at": "",
+            "latest_age_seconds": None,
+        }
+    latest = max(files, key=lambda item: item.stat().st_mtime)
+    modified = latest.stat().st_mtime
+    age_seconds = max(0, int(time.time() - modified))
+    return {
+        "ok": True,
+        "message": "Autosave metadata nactena bez cteni obsahu logu.",
+        "dir": str(relative_to_project(path)),
+        "file_count": len(files),
+        "latest_file": latest.name,
+        "latest_modified_at": datetime.fromtimestamp(modified).isoformat(timespec="seconds"),
+        "latest_age_seconds": age_seconds,
+    }
+
+
+def recovery_active_project(path: Path = ACTIVE_PROJECTS_PATH) -> dict[str, Any]:
+    try:
+        projects = parse_active_projects_table(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        return {
+            "ok": False,
+            "message": f"ACTIVE_PROJECTS nejde nacist: {exc}",
+            "source": str(relative_to_project(path)),
+        }
+    project = next((item for item in projects if item.get("name") == "Cockpit Recovery centrum"), None)
+    if project is None:
+        return {
+            "ok": False,
+            "message": "Cockpit Recovery centrum neni v ACTIVE_PROJECTS.",
+            "source": str(relative_to_project(path)),
+        }
+    return {
+        "ok": True,
+        "message": "Aktivni projekt Recovery centra nalezen.",
+        "source": str(relative_to_project(path)),
+        "name": project.get("name", ""),
+        "priority": project.get("priority", ""),
+        "status": project.get("status", ""),
+        "next_step": project.get("next_step", ""),
+        "memory_file": project.get("memory_file", ""),
+        "handoff": project.get("handoff", ""),
+        "flags": project.get("flags", []),
+    }
+
+
+def recovery_handoff_summaries(paths: tuple[Path, ...] = RECOVERY_HANDOFF_PATHS) -> list[dict[str, Any]]:
+    return [recovery_handoff_summary(path) for path in paths]
+
+
+def recovery_handoff_summary(path: Path) -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "ok": path.exists(),
+        "path": str(relative_to_project(path)),
+        "title": "",
+        "priority": "",
+        "status": "",
+        "remind_on_start": "",
+        "date": "",
+        "next_step": "",
+    }
+    if not path.exists():
+        result["message"] = "Handoff soubor neexistuje."
+        return result
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError as exc:
+        result["ok"] = False
+        result["message"] = f"Handoff nejde nacist: {exc}"
+        return result
+    fields: dict[str, str] = {}
+    capture_next = False
+    next_lines: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        if capture_next:
+            if stripped and not stripped.endswith(":"):
+                next_lines.append(stripped.lstrip("- ").strip())
+                if len(next_lines) >= 2:
+                    capture_next = False
+            elif stripped.endswith(":"):
+                capture_next = False
+        if ":" in stripped:
+            key, value = stripped.split(":", 1)
+            normalized = key.strip().casefold()
+            if normalized in {"nazev", "priorita", "stav", "pripomenout pri startu", "datum"}:
+                fields[normalized] = value.strip()
+            if normalized == "dalsi krok":
+                capture_next = True
+                if value.strip():
+                    next_lines.append(value.strip())
+    result.update(
+        {
+            "title": safe_text(fields.get("nazev", ""))[:180],
+            "priority": safe_text(fields.get("priorita", ""))[:40],
+            "status": safe_text(fields.get("stav", ""))[:120],
+            "remind_on_start": safe_text(fields.get("pripomenout pri startu", ""))[:40],
+            "date": safe_text(fields.get("datum", ""))[:40],
+            "next_step": safe_text(" ".join(next_lines))[:300],
+        }
+    )
+    result["message"] = "Handoff metadata nactena."
+    return result
+
+
+def quick_notes_status(
+    *,
+    inbox_dir: Path = DEFAULT_ICLOUD_SHORTCUTS_INBOX,
+    index_path: Path = QUICK_NOTES_INDEX_PATH,
+    limit: int = 20,
+) -> dict[str, Any]:
+    inbox_exists = inbox_dir.exists()
+    try:
+        notes = sync_quick_notes_index(inbox_dir=inbox_dir, index_path=index_path)
+    except (OSError, ValueError) as exc:
+        fallback = quick_notes_status_from_index(index_path=index_path, limit=limit)
+        if fallback["notes"]:
+            return {
+                **fallback,
+                "ok": True,
+                "message": f"Quick Notes z lokálního indexu; iCloud sync teď selhal: {exc}",
+                "inbox_exists": inbox_exists,
+                "inbox": str(inbox_dir),
+                "index": str(relative_to_project(index_path)),
+                "sync_error": safe_text(str(exc))[:300],
+            }
+        return {
+            **fallback,
+            "ok": False,
+            "message": f"Quick Notes se nepodařilo načíst: {exc}",
+            "inbox_exists": inbox_exists,
+            "inbox": str(inbox_dir),
+            "index": str(relative_to_project(index_path)),
+            "sync_error": safe_text(str(exc))[:300],
+        }
+
+    active_notes = sorted(
+        (note for note in notes if note.status == "inbox"),
+        key=lambda note: note.note_number,
+        reverse=True,
+    )
+    shown = active_notes[: max(1, limit)]
+    if not inbox_exists:
+        message = "Quick Notes inbox zatím není synchronizovaný na Mac."
+    elif not active_notes:
+        message = "Quick Notes inbox je prázdný."
+    else:
+        message = f"{len(active_notes)} poznámek v Quick Notes inboxu."
+    return {
+        "ok": True,
+        "message": message,
+        "inbox_exists": inbox_exists,
+        "inbox": str(inbox_dir),
+        "index": str(relative_to_project(index_path)),
+        "counts": {"active": len(active_notes), "total": len(notes)},
+        "notes": [
+            {
+                "note_number": note.note_number,
+                "category": safe_text(note.category)[:80],
+                "status": safe_text(note.status)[:80],
+                "created_at": safe_text(note.created_at)[:80],
+                "modified_at": safe_text(note.modified_at)[:80],
+                "title": safe_text(note.title)[:180],
+                "snippet": safe_text(note.snippet)[:300],
+                "size_bytes": note.size_bytes,
+            }
+            for note in shown
+        ],
+    }
+
+
+def quick_notes_status_from_index(*, index_path: Path, limit: int = 20) -> dict[str, Any]:
+    try:
+        data = json.loads(index_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        records: list[dict[str, Any]] = []
+    else:
+        raw_records = data.get("notes", [])
+        records = raw_records if isinstance(raw_records, list) else []
+    usable = [record for record in records if isinstance(record, dict)]
+    active = [record for record in usable if str(record.get("status", "inbox") or "inbox") == "inbox"]
+    active.sort(key=lambda item: quick_note_number(item), reverse=True)
+    return {
+        "ok": True,
+        "message": "Quick Notes načtené z lokálního indexu.",
+        "inbox_exists": False,
+        "inbox": "",
+        "index": str(relative_to_project(index_path)),
+        "counts": {"active": len(active), "total": len(usable)},
+        "notes": [
+            {
+                "note_number": quick_note_number(record),
+                "category": safe_text(str(record.get("category", "inbox") or "inbox"))[:80],
+                "status": safe_text(str(record.get("status", "inbox") or "inbox"))[:80],
+                "created_at": safe_text(str(record.get("created_at", "") or ""))[:80],
+                "modified_at": safe_text(str(record.get("modified_at", "") or ""))[:80],
+                "title": safe_text(str(record.get("title", "") or ""))[:180],
+                "snippet": safe_text(str(record.get("snippet", "") or ""))[:300],
+                "size_bytes": quick_note_size(record),
+            }
+            for record in active[: max(1, limit)]
+        ],
+    }
+
+
+def quick_note_detail_status(
+    note_number: int,
+    *,
+    inbox_dir: Path = DEFAULT_ICLOUD_SHORTCUTS_INBOX,
+    index_path: Path = QUICK_NOTES_INDEX_PATH,
+    max_chars: int = 50000,
+) -> dict[str, Any]:
+    if note_number < 1:
+        return {
+            "ok": False,
+            "message": "Neplatné číslo Quick Note.",
+            "note_number": note_number,
+            "body_text": "",
+            "truncated": False,
+        }
+
+    try:
+        notes = sync_quick_notes_index(inbox_dir=inbox_dir, index_path=index_path)
+    except (OSError, ValueError) as exc:
+        return quick_note_detail_from_index(
+            note_number=note_number,
+            index_path=index_path,
+            max_chars=max_chars,
+            sync_error=exc,
+        )
+
+    note = next((item for item in notes if item.note_number == note_number and item.status == "inbox"), None)
+    if note is None:
+        return {
+            "ok": False,
+            "message": f"Quick Note #{note_number} není v aktivním inboxu.",
+            "note_number": note_number,
+            "body_text": "",
+            "truncated": False,
+        }
+
+    return quick_note_detail_payload(
+        note_number=note.note_number,
+        category=note.category,
+        status=note.status,
+        created_at=note.created_at,
+        modified_at=note.modified_at,
+        title=note.title,
+        snippet=note.snippet,
+        size_bytes=note.size_bytes,
+        source_path=note.source_path,
+        max_chars=max_chars,
+    )
+
+
+def quick_note_detail_from_index(
+    *,
+    note_number: int,
+    index_path: Path,
+    max_chars: int,
+    sync_error: Exception | None = None,
+) -> dict[str, Any]:
+    try:
+        data = json.loads(index_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        message = f"Quick Note #{note_number} se nepodařilo najít v lokálním indexu."
+        if sync_error is not None:
+            message += f" iCloud sync teď selhal: {sync_error}"
+        return {
+            "ok": False,
+            "message": message,
+            "note_number": note_number,
+            "body_text": "",
+            "truncated": False,
+            "index_error": safe_text(str(exc))[:300],
+        }
+
+    raw_records = data.get("notes", [])
+    records = raw_records if isinstance(raw_records, list) else []
+    record = next(
+        (
+            item
+            for item in records
+            if isinstance(item, dict)
+            and quick_note_number(item) == note_number
+            and str(item.get("status", "inbox") or "inbox") == "inbox"
+        ),
+        None,
+    )
+    if record is None:
+        return {
+            "ok": False,
+            "message": f"Quick Note #{note_number} není v lokálním indexu aktivního inboxu.",
+            "note_number": note_number,
+            "body_text": "",
+            "truncated": False,
+        }
+
+    payload = quick_note_detail_payload(
+        note_number=quick_note_number(record),
+        category=safe_text(str(record.get("category", "inbox") or "inbox"))[:80],
+        status=safe_text(str(record.get("status", "inbox") or "inbox"))[:80],
+        created_at=safe_text(str(record.get("created_at", "") or ""))[:80],
+        modified_at=safe_text(str(record.get("modified_at", "") or ""))[:80],
+        title=safe_text(str(record.get("title", "") or ""))[:180],
+        snippet=safe_text(str(record.get("snippet", "") or ""))[:300],
+        size_bytes=quick_note_size(record),
+        source_path=Path(str(record.get("source_path", "") or "")),
+        max_chars=max_chars,
+    )
+    if sync_error is not None:
+        payload["message"] = f"{payload['message']} Detail je z lokálního indexu; iCloud sync teď selhal: {sync_error}"
+        payload["sync_error"] = safe_text(str(sync_error))[:300]
+    return payload
+
+
+def quick_note_detail_payload(
+    *,
+    note_number: int,
+    category: str,
+    status: str,
+    created_at: str,
+    modified_at: str,
+    title: str,
+    snippet: str,
+    size_bytes: int,
+    source_path: Path,
+    max_chars: int,
+) -> dict[str, Any]:
+    body_text = ""
+    truncated = False
+    message = f"Quick Note #{note_number} načtena."
+    source_suffix = source_path.suffix.lower()
+    if not source_path.is_file() or source_suffix not in {".md", ".txt"}:
+        message = f"Quick Note #{note_number} je v indexu, ale zdrojový soubor nejde bezpečně přečíst."
+    else:
+        try:
+            text = source_path.read_text(encoding="utf-8", errors="replace")
+        except OSError as exc:
+            message = f"Quick Note #{note_number} se nepodařilo přečíst: {exc}"
+        else:
+            truncated = len(text) > max_chars
+            body_text = text[:max_chars].rstrip()
+
+    return {
+        "ok": bool(body_text),
+        "message": message,
+        "note_number": note_number,
+        "category": safe_text(category)[:80],
+        "status": safe_text(status)[:80],
+        "created_at": safe_text(created_at)[:80],
+        "modified_at": safe_text(modified_at)[:80],
+        "title": safe_text(title)[:180],
+        "snippet": safe_text(snippet)[:300],
+        "size_bytes": size_bytes,
+        "body_text": body_text,
+        "truncated": truncated,
+    }
+
+
+def urgent_reminders_status(
+    *,
+    inbox_dir: Path = DEFAULT_ICLOUD_SHORTCUTS_INBOX,
+    index_path: Path = URGENT_REMINDERS_INDEX_PATH,
+    limit: int = 12,
+) -> dict[str, Any]:
+    inbox_exists = inbox_dir.exists()
+    try:
+        reminders = sync_urgent_reminders_index(inbox_dir=inbox_dir, index_path=index_path)
+    except (OSError, ValueError) as exc:
+        fallback = urgent_reminders_status_from_index(index_path=index_path, limit=limit)
+        if fallback["items"]:
+            return {
+                **fallback,
+                "ok": True,
+                "message": f"Důležitá připomenutí z lokálního indexu; iCloud sync teď selhal: {exc}",
+                "inbox_exists": inbox_exists,
+                "inbox": str(inbox_dir),
+                "index": str(relative_to_project(index_path)),
+                "sync_error": safe_text(str(exc))[:300],
+            }
+        return {
+            **fallback,
+            "ok": False,
+            "message": f"Důležitá připomenutí se nepodařilo načíst: {exc}",
+            "inbox_exists": inbox_exists,
+            "inbox": str(inbox_dir),
+            "index": str(relative_to_project(index_path)),
+            "sync_error": safe_text(str(exc))[:300],
+        }
+
+    open_items = sorted(
+        (item for item in reminders if item.status == "open"),
+        key=lambda item: item.reminder_number,
+        reverse=True,
+    )
+    shown = open_items[: max(1, limit)]
+    if not inbox_exists:
+        message = "Inbox pro mobilní vstupy zatím není synchronizovaný na Mac."
+    elif not open_items:
+        message = "Žádná otevřená důležitá připomenutí."
+    else:
+        message = f"{len(open_items)} otevřených důležitých připomenutí."
+    return {
+        "ok": True,
+        "message": message,
+        "inbox_exists": inbox_exists,
+        "inbox": str(inbox_dir),
+        "index": str(relative_to_project(index_path)),
+        "counts": {"open": len(open_items), "total": len(reminders)},
+        "items": [
+            {
+                "reminder_number": item.reminder_number,
+                "priority": safe_text(item.priority)[:80],
+                "status": safe_text(item.status)[:80],
+                "created_at": safe_text(item.created_at)[:80],
+                "modified_at": safe_text(item.modified_at)[:80],
+                "title": safe_text(item.title)[:180],
+                "summary": safe_text(item.summary)[:300],
+                "size_bytes": item.size_bytes,
+            }
+            for item in shown
+        ],
+    }
+
+
+def urgent_reminders_status_from_index(*, index_path: Path, limit: int = 12) -> dict[str, Any]:
+    try:
+        data = json.loads(index_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        records: list[dict[str, Any]] = []
+    else:
+        raw_records = data.get("reminders", [])
+        records = raw_records if isinstance(raw_records, list) else []
+    usable = [record for record in records if isinstance(record, dict)]
+    open_items = [record for record in usable if str(record.get("status", "open") or "open") == "open"]
+    open_items.sort(key=lambda item: urgent_reminder_number(item), reverse=True)
+    return {
+        "ok": True,
+        "message": "Důležitá připomenutí načtená z lokálního indexu.",
+        "inbox_exists": False,
+        "inbox": "",
+        "index": str(relative_to_project(index_path)),
+        "counts": {"open": len(open_items), "total": len(usable)},
+        "items": [
+            {
+                "reminder_number": urgent_reminder_number(record),
+                "priority": safe_text(str(record.get("priority", "urgent") or "urgent"))[:80],
+                "status": safe_text(str(record.get("status", "open") or "open"))[:80],
+                "created_at": safe_text(str(record.get("created_at", "") or ""))[:80],
+                "modified_at": safe_text(str(record.get("modified_at", "") or ""))[:80],
+                "title": safe_text(str(record.get("title", "") or ""))[:180],
+                "summary": safe_text(str(record.get("summary", "") or ""))[:300],
+                "size_bytes": urgent_reminder_size(record),
+            }
+            for record in open_items[: max(1, limit)]
+        ],
+    }
+
+
+def urgent_reminder_done_action(
+    reminder_number: int,
+    *,
+    index_path: Path = URGENT_REMINDERS_INDEX_PATH,
+) -> dict[str, Any]:
+    if reminder_number < 1:
+        return {
+            "ok": False,
+            "message": "Chybí platné číslo důležité připomínky.",
+            "urgent_reminders": urgent_reminders_status_from_index(index_path=index_path),
+        }
+    try:
+        reminder = mark_urgent_reminder_done(reminder_number, index_path=index_path)
+    except (OSError, ValueError) as exc:
+        return {
+            "ok": False,
+            "message": f"Důležitou připomínku se nepodařilo označit jako splněnou: {exc}",
+            "urgent_reminders": urgent_reminders_status_from_index(index_path=index_path),
+        }
+    if reminder is None:
+        return {
+            "ok": False,
+            "message": f"Důležitá připomínka #{reminder_number} nebyla nalezena.",
+            "urgent_reminders": urgent_reminders_status_from_index(index_path=index_path),
+        }
+    return {
+        "ok": True,
+        "reminder_number": reminder.reminder_number,
+        "message": f"Důležitá připomínka #{reminder.reminder_number} označena jako splněná.",
+        "urgent_reminders": urgent_reminders_status_from_index(index_path=index_path),
+    }
+
+
+def quick_note_number(record: dict[str, Any]) -> int:
+    try:
+        return int(record.get("note_number", 0) or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def quick_note_size(record: dict[str, Any]) -> int:
+    try:
+        return int(record.get("size_bytes", 0) or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def urgent_reminder_number(record: dict[str, Any]) -> int:
+    try:
+        return int(record.get("reminder_number", 0) or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def urgent_reminder_size(record: dict[str, Any]) -> int:
+    try:
+        return int(record.get("size_bytes", 0) or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def projects_status(path: Path = ACTIVE_PROJECTS_PATH) -> dict[str, Any]:
+    try:
+        projects = parse_active_projects_table(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        return {
+            "ok": False,
+            "message": f"Seznam projektů se nepodařilo načíst: {exc}",
+            "projects": [],
+            "summary": empty_projects_summary(),
+        }
+    summary = summarize_projects(projects)
+    return {
+        "ok": True,
+        "message": f"{summary['total']} aktivních projektů v paměti.",
+        "source": str(relative_to_project(path)),
+        "projects": projects,
+        "summary": summary,
+    }
+
+
+def quantitative_status_overview(
+    *,
+    metrics_path: Path = QUANTITATIVE_STATUS_METRICS_PATH,
+    project_root: Path = PROJECT_ROOT,
+    repo_root: Path = GIT_ROOT,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> dict[str, Any]:
+    current = run_samantha_quantitative_status(
+        save=False,
+        project_root=project_root,
+        repo_root=repo_root,
+        metrics_path=metrics_path,
+        runner=runner,
+    )
+    previous = read_last_quantitative_metric(metrics_path)
+    diff = diff_quantitative_status(current=current, previous=previous)
+    return {
+        "ok": True,
+        "message": "Kvantitativní status načten.",
+        "metrics_path": str(relative_to_project(metrics_path)),
+        "current": quantitative_result_to_json(current),
+        "previous": previous,
+        "diff": diff,
+    }
+
+
+def read_last_quantitative_metric(metrics_path: Path) -> dict[str, Any] | None:
+    try:
+        rows = read_jsonl(metrics_path)
+    except OSError:
+        return None
+    if not rows:
+        return None
+    last = rows[-1]
+    return last if isinstance(last, dict) else None
+
+
+def quantitative_result_to_json(result) -> dict[str, Any]:
+    return {
+        "created_at": result.created_at,
+        "git_summary": result.git_summary,
+        "stored_path": str(relative_to_project(result.stored_path)) if result.stored_path else "",
+        "totals": {
+            "local": quantitative_stats_totals(result.local_stats),
+            "git_tracked": quantitative_stats_totals(result.git_stats),
+        },
+        "local": quantitative_stats_to_json(result.local_stats),
+        "git_tracked": quantitative_stats_to_json(result.git_stats),
+    }
+
+
+def quantitative_stats_totals(stats: dict[str, QuantitativeExtensionStats]) -> dict[str, int]:
+    return {
+        "files": sum(item.files for item in stats.values()),
+        "lines": sum(item.lines for item in stats.values()),
+    }
+
+
+def quantitative_stats_to_json(stats: dict[str, QuantitativeExtensionStats]) -> dict[str, dict[str, int]]:
+    return {key: {"files": value.files, "lines": value.lines} for key, value in stats.items()}
+
+
+def diff_quantitative_status(
+    *,
+    current,
+    previous: dict[str, Any] | None,
+) -> dict[str, Any]:
+    current_local = quantitative_stats_to_json(current.local_stats)
+    current_git = quantitative_stats_to_json(current.git_stats)
+    previous_local = extract_quantitative_stats(previous, "local")
+    previous_git = extract_quantitative_stats(previous, "git_tracked")
+    return {
+        "totals": {
+            "local": diff_totals(quantitative_stats_totals(current.local_stats), extract_quantitative_totals(previous, "local")),
+            "git_tracked": diff_totals(quantitative_stats_totals(current.git_stats), extract_quantitative_totals(previous, "git_tracked")),
+        },
+        "local": diff_stat_rows(current_local, previous_local),
+        "git_tracked": diff_stat_rows(current_git, previous_git),
+    }
+
+
+def extract_quantitative_stats(row: dict[str, Any] | None, key: str) -> dict[str, dict[str, int]]:
+    if not row:
+        return {}
+    raw = row.get(key, {})
+    if not isinstance(raw, dict):
+        return {}
+    result: dict[str, dict[str, int]] = {}
+    for extension, item in raw.items():
+        if not isinstance(item, dict):
+            continue
+        result[str(extension)] = {
+            "files": int(item.get("files", 0) or 0),
+            "lines": int(item.get("lines", 0) or 0),
+        }
+    return result
+
+
+def extract_quantitative_totals(row: dict[str, Any] | None, key: str) -> dict[str, int]:
+    if not row:
+        return {"files": 0, "lines": 0}
+    raw = row.get("totals", {})
+    if not isinstance(raw, dict):
+        return {"files": 0, "lines": 0}
+    totals = raw.get(key, {})
+    if not isinstance(totals, dict):
+        return {"files": 0, "lines": 0}
+    return {
+        "files": int(totals.get("files", 0) or 0),
+        "lines": int(totals.get("lines", 0) or 0),
+    }
+
+
+def diff_totals(current: dict[str, int], previous: dict[str, int]) -> dict[str, int]:
+    return {
+        "files": current["files"] - previous["files"],
+        "lines": current["lines"] - previous["lines"],
+    }
+
+
+def diff_stat_rows(
+    current: dict[str, dict[str, int]],
+    previous: dict[str, dict[str, int]],
+    limit: int = 12,
+) -> list[dict[str, int | str]]:
+    keys = sorted(set(current) | set(previous))
+    rows: list[dict[str, int | str]] = []
+    for key in keys:
+        current_item = current.get(key, {"files": 0, "lines": 0})
+        previous_item = previous.get(key, {"files": 0, "lines": 0})
+        delta_files = current_item["files"] - previous_item["files"]
+        delta_lines = current_item["lines"] - previous_item["lines"]
+        if delta_files == 0 and delta_lines == 0:
+            continue
+        rows.append(
+            {
+                "extension": key,
+                "files": current_item["files"],
+                "lines": current_item["lines"],
+                "delta_files": delta_files,
+                "delta_lines": delta_lines,
+            }
+        )
+    rows.sort(key=lambda item: (-abs(int(item["delta_lines"])), -abs(int(item["delta_files"])), str(item["extension"])))
+    return rows[:limit]
+
+
+def parse_active_projects_table(text: str) -> list[dict[str, Any]]:
+    projects: list[dict[str, Any]] = []
+    headers: list[str] = []
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line.startswith("|") or not line.endswith("|"):
+            continue
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        if not cells:
+            continue
+        if set("".join(cells)) <= {"-", ":", " "}:
+            continue
+        if not headers:
+            headers = [normalize_project_header(cell) for cell in cells]
+            continue
+        if len(cells) < len(headers):
+            cells.extend([""] * (len(headers) - len(cells)))
+        row = dict(zip(headers, cells[: len(headers)], strict=False))
+        name = safe_text(row.get("oblast", ""))
+        if not name:
+            continue
+        status = safe_text(row.get("stav", ""))
+        next_step = safe_text(row.get("dalsi_krok", ""))
+        project = {
+            "name": name,
+            "priority": safe_text(row.get("priorita", "")),
+            "status": status,
+            "next_step": next_step,
+            "memory_file": safe_text(row.get("memory_soubor", "")),
+            "handoff": safe_text(row.get("handoff", "")),
+            "flags": project_flags(status=status, next_step=next_step, row=row),
+        }
+        projects.append(project)
+    return projects
+
+
+def normalize_project_header(value: str) -> str:
+    return {
+        "oblast": "oblast",
+        "priorita": "priorita",
+        "stav": "stav",
+        "memory soubor": "memory_soubor",
+        "handoff": "handoff",
+        "dalsi krok": "dalsi_krok",
+        "další krok": "dalsi_krok",
+    }.get(value.casefold(), safe_slug(value, default="field", limit=40).replace("-", "_"))
+
+
+def project_flags(status: str, next_step: str, row: dict[str, str]) -> list[str]:
+    folded = " ".join([status, next_step, *row.values()]).casefold()
+    flags: list[str] = []
+    checks = (
+        ("připomenout", ("[pripomenout]", "[připomenout]", "pripomenout", "připomenout")),
+        ("čeká na retest", ("ceka na retest", "čeká na retest", "rucni retest", "ruční retest", "rucne otestovat", "ručně otestovat")),
+        ("hotovo/údržba", ("hotovo / udrzba", "hotovo / údržba", "zadny aktivni vyvoj", "žádný aktivní vývoj")),
+        ("blokováno", ("blokov", "ceka na rozhodnuti", "čeká na rozhodnutí")),
+    )
+    for label, needles in checks:
+        if any(needle in folded for needle in needles):
+            flags.append(label)
+    return flags
+
+
+def summarize_projects(projects: list[dict[str, Any]]) -> dict[str, Any]:
+    summary = empty_projects_summary()
+    summary["total"] = len(projects)
+    for project in projects:
+        priority = str(project.get("priority", "") or "nezadáno")
+        summary["priority_counts"][priority] = summary["priority_counts"].get(priority, 0) + 1
+        flags = project.get("flags", [])
+        if isinstance(flags, list):
+            for flag in flags:
+                summary["flag_counts"][str(flag)] = summary["flag_counts"].get(str(flag), 0) + 1
+    return summary
+
+
+def empty_projects_summary() -> dict[str, Any]:
+    return {"total": 0, "priority_counts": {}, "flag_counts": {}}
 
 
 EMAIL_PROCESSING_CATEGORY_TITLES = {
@@ -1293,16 +2242,189 @@ def clear_email_processing_decision(*, item_id: str, path: Path) -> None:
 
 def cockpit_status() -> dict[str, Any]:
     downloads = safe_downloads_status()
+    document_work = document_work_status(downloads=downloads)
+    document_intake = document_intake_status(downloads=downloads)
+    document_cases = document_cases_status()
+    document_classification = document_classification_status()
+    document_due_candidates = document_due_candidates_status()
+    reminders = reminders_status()
+    urgent = urgent_reminders_status()
     return {
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "downloads": downloads,
-        "document_work": document_work_status(downloads=downloads),
+        "document_work": document_work,
+        "document_intake": document_intake,
+        "document_cases": document_cases,
+        "document_classification": document_classification,
+        "document_due_candidates": document_due_candidates,
+        "action_queue": action_queue_status(document_work=document_work, reminders=reminders, urgent_reminders=urgent),
         "backup": format_backup_activity_reminder(),
         "vault": document_vault_status_summary(),
-        "reminders": reminders_status(),
+        "reminders": reminders,
+        "urgent_reminders": urgent,
         "scandocu": probe_scandocu(),
         "git": git_status_summary(),
     }
+
+
+def action_queue_status(
+    document_work: dict[str, Any] | None = None,
+    reminders: dict[str, Any] | None = None,
+    urgent_reminders: dict[str, Any] | None = None,
+    limit: int = 8,
+) -> dict[str, Any]:
+    work = document_work if document_work is not None else document_work_status()
+    reminder_data = reminders if reminders is not None else reminders_status()
+    urgent_data = urgent_reminders if urgent_reminders is not None else {"items": []}
+    items: list[dict[str, Any]] = []
+
+    for urgent_item in (urgent_data.get("items") or [])[:3]:
+        title = safe_text(str(urgent_item.get("summary") or urgent_item.get("title") or ""))[:180]
+        created = safe_text(str(urgent_item.get("created_at", "")))[:60]
+        items.append(
+            {
+                "kind": "urgent_reminder",
+                "priority": 1,
+                "title": title or "Důležité připomenutí",
+                "detail": f"Mobilní urgentní vstup{': ' + created if created else ''}",
+                "action": "open_urgent_reminders",
+                "action_label": "Otevřít připomenutí",
+            }
+        )
+
+    for conflict in (reminder_data.get("conflicts") or [])[:3]:
+        conflict_items = conflict.get("items") or []
+        asset = safe_text(str(conflict.get("asset", "")))[:120]
+        coverage_start = safe_text(str(conflict.get("coverage_start", "")))[:40]
+        items.append(
+            {
+                "kind": "payment_conflict",
+                "priority": 1,
+                "title": f"Konflikt plateb{': ' + asset if asset else ''}",
+                "detail": (
+                    f"{len(conflict_items)} otevřené platební připomínky"
+                    f"{' od ' + coverage_start if coverage_start else ''}. Nekonat platbu bez porovnání."
+                ),
+                "action": "open_reminders",
+                "action_label": "Otevřít Reminders",
+            }
+        )
+
+    for problem in (work.get("problems") or [])[:3]:
+        name = safe_text(str(problem.get("name", "")))[:180]
+        label = safe_text(str(problem.get("problem_label") or problem.get("status") or "problém"))[:80]
+        modified = safe_text(str(problem.get("modified_at", "")))[:60]
+        items.append(
+            {
+                "kind": "document_problem",
+                "priority": 1,
+                "title": name or "Dokument vyžaduje ruční kontrolu",
+                "detail": f"{label}{' | ' + modified if modified else ''}",
+                "action": "open_scandocu",
+                "action_label": "Otevřít ScanDocu",
+            }
+        )
+
+    for pdf in (work.get("new_pdfs") or [])[:3]:
+        name = safe_text(str(pdf.get("name", "")))[:180]
+        modified = safe_text(str(pdf.get("modified_at", "")))[:60]
+        items.append(
+            {
+                "kind": "new_pdf",
+                "priority": 2,
+                "title": name or "Nové PDF ve Downloads",
+                "detail": f"Nový dokument čeká na zpracování{': ' + modified if modified else '.'}",
+                "action": "open_scandocu",
+                "action_label": "Zpracovat",
+            }
+        )
+
+    review = work.get("review") or {}
+    for review_item in (review.get("next_items") or [])[:3]:
+        title = safe_text(str(review_item.get("title") or review_item.get("document_id") or ""))[:180]
+        domain = safe_text(str(review_item.get("domain", "other")))[:60]
+        document_type = safe_text(str(review_item.get("document_type", "document")))[:60]
+        items.append(
+            {
+                "kind": "document_review",
+                "priority": 2,
+                "title": title or "Uložený dokument k revizi",
+                "detail": f"{domain} / {document_type}",
+                "action": "open_scandocu_review",
+                "action_label": "Revidovat",
+            }
+        )
+
+    groups = reminder_data.get("groups") or {}
+    for group_name, label, priority in [
+        ("overdue", "Po termínu", 1),
+        ("today", "Dnes", 2),
+        ("soon", "Brzy", 3),
+    ]:
+        for reminder in (groups.get(group_name) or [])[:2]:
+            title = safe_text(str(reminder.get("title", "")))[:180]
+            due_date = safe_text(str(reminder.get("due_date", "")))[:40]
+            amount = safe_text(str(reminder.get("amount_due", "")))[:80]
+            detail_parts = [label]
+            if due_date:
+                detail_parts.append(due_date)
+            if amount:
+                detail_parts.append(amount)
+            items.append(
+                {
+                    "kind": "reminder",
+                    "priority": priority,
+                    "title": title or "Otevřená připomínka",
+                    "detail": " | ".join(detail_parts),
+                    "action": "open_reminders",
+                    "action_label": "Otevřít Reminders",
+                }
+            )
+
+    items.sort(key=lambda item: (int(item.get("priority", 9)), kind_rank(str(item.get("kind", "")))))
+    limited_items = items[: max(0, limit)]
+    counts = {
+        "total": len(items),
+        "shown": len(limited_items),
+        "priority_1": sum(1 for item in items if item.get("priority") == 1),
+        "priority_2": sum(1 for item in items if item.get("priority") == 2),
+        "priority_3": sum(1 for item in items if item.get("priority") == 3),
+    }
+    if not limited_items:
+        message = "Žádná urgentní akce."
+    elif counts["priority_1"]:
+        message = f"{counts['priority_1']} akutních položek k řešení."
+    else:
+        message = f"{len(limited_items)} navržených dalších kroků."
+    return {"ok": True, "items": limited_items, "counts": counts, "message": message}
+
+
+def kind_rank(kind: str) -> int:
+    ranks = {
+        "urgent_reminder": 0,
+        "payment_conflict": 1,
+        "document_problem": 2,
+        "new_pdf": 3,
+        "document_review": 4,
+        "reminder": 5,
+    }
+    return ranks.get(kind, 99)
+
+
+def document_consistency_status() -> dict[str, Any]:
+    try:
+        result = run_document_consistency_audit()
+    except (OSError, ValueError) as exc:
+        result = {
+            "ok": False,
+            "scope": "insurance_auto",
+            "fact_count": 0,
+            "finding_count": 0,
+            "severity_counts": {},
+            "findings": [],
+            "message": str(exc),
+        }
+    return {**result, "summary_text": format_document_consistency_audit(result)}
 
 
 def reminders_status(path: Path = DEFAULT_REMINDERS_PATH, today: date | None = None) -> dict[str, Any]:
@@ -1403,6 +2525,8 @@ def reminder_conflicts(raw_reminders: list[dict[str, Any]]) -> list[dict[str, An
                         "source_type": safe_text(str((item.get("source") or {}).get("type", "")))[:64]
                         if isinstance(item.get("source"), dict)
                         else "",
+                        "amount_due": safe_text(str(item.get("amount_due", "")))[:80],
+                        "amount_note": safe_text(str(item.get("amount_note", "")))[:240],
                         "conflict_note": safe_text(str(item.get("conflict_note", "")))[:500],
                     }
                     for item in items
@@ -1457,6 +2581,125 @@ def mark_reminder_done_action(
         "message": safe_text(message),
         "reminders": reminders_status(path=path),
     }
+
+
+def cancel_payment_reminder_action(
+    reminder_id: str,
+    *,
+    reason: str = "",
+    evidence_archive_id: str = "",
+    reminders_path: Path = DEFAULT_REMINDERS_PATH,
+    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+) -> dict[str, Any]:
+    clean_id = reminder_id.strip()
+    if not clean_id:
+        return {"ok": False, "message": "Chybí id připomínky.", "reminders": reminders_status(path=reminders_path)}
+
+    store = load_reminders_store(reminders_path)
+    reminder = find_reminder_record_in_store(clean_id, store)
+    if reminder is None:
+        return {"ok": False, "message": "Připomínka nebyla nalezena.", "reminders": reminders_status(path=reminders_path)}
+    if not reminder_is_payment_related(reminder):
+        return {
+            "ok": False,
+            "message": "Připomínka nevypadá jako platební/pojistná připomínka.",
+            "reminders": reminders_status(path=reminders_path),
+        }
+
+    evidence = email_archive_evidence_summary(
+        evidence_archive_id=evidence_archive_id or "latest",
+        archive_directory=archive_directory,
+    )
+    if evidence is None:
+        return {
+            "ok": False,
+            "message": "E-mailový důkaz nebyl nalezen v EmailArchiveVault.",
+            "reminders": reminders_status(path=reminders_path),
+        }
+
+    now = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    resolution_reason = safe_text(reason).strip() or (
+        "Pojišťovna akceptovala odstoupení od duplicitní nebo nevýhodné smlouvy."
+    )
+    reminder["status"] = "cancelled"
+    reminder["resolution"] = {
+        "status": "cancelled",
+        "reason": resolution_reason,
+        "resolved_at": now,
+        "resolved_by": "samantha_cockpit",
+    }
+    reminder["evidence"] = evidence
+    write_reminders_store(store, path=reminders_path)
+    return {
+        "ok": True,
+        "reminder_id": safe_text(str(reminder.get("id", ""))),
+        "reminder_ref": reminder_reference(str(reminder.get("id", ""))),
+        "evidence": evidence,
+        "message": "Platební připomínka byla uzavřena jako zrušená a e-mail byl připojen jako důkaz.",
+        "reminders": reminders_status(path=reminders_path),
+    }
+
+
+def find_reminder_record_in_store(reminder_id: str, store: dict[str, list[dict[str, Any]]]) -> dict[str, Any] | None:
+    clean_id = reminder_id.strip()
+    if not clean_id:
+        return None
+    for reminder in store.get("reminders", []):
+        if not isinstance(reminder, dict):
+            continue
+        stored_id = str(reminder.get("id", ""))
+        if stored_id == clean_id or reminder_reference(stored_id) == clean_id:
+            return reminder
+    return None
+
+
+def email_archive_evidence_summary(
+    *,
+    evidence_archive_id: str,
+    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+) -> dict[str, Any] | None:
+    archive_id = str(evidence_archive_id).strip()
+    if not archive_id:
+        return None
+    if archive_id == "latest":
+        latest = latest_email_archive_metadata_path(archive_directory=archive_directory)
+        if latest is None:
+            return None
+        metadata_path = latest
+        archive_id = latest.parent.name
+    else:
+        if "/" in archive_id or "\\" in archive_id or archive_id.startswith("."):
+            return None
+        metadata_path = archive_directory / archive_id / "metadata.json"
+
+    try:
+        root = archive_directory.resolve(strict=True)
+        resolved_metadata = metadata_path.resolve(strict=True)
+    except OSError:
+        return None
+    if root not in resolved_metadata.parents:
+        return None
+    try:
+        metadata = read_json_file(resolved_metadata)
+    except (OSError, ValueError, json.JSONDecodeError):
+        return None
+    return {
+        "type": "email_archive",
+        "archive_id": str(metadata.get("archive_id") or archive_id)[:180],
+        "archive_path": str(relative_to_project(resolved_metadata.parent)),
+        "metadata_path": str(relative_to_project(resolved_metadata)),
+        "subject": safe_text(str(metadata.get("subject", "")))[:240],
+        "sender": safe_text(str(metadata.get("from", "")))[:180],
+        "email_date": safe_text(str(metadata.get("date", "")))[:120],
+        "archived_at": safe_text(str(metadata.get("archived_at", "")))[:80],
+    }
+
+
+def latest_email_archive_metadata_path(*, archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR) -> Path | None:
+    candidates = [path for path in archive_directory.glob("*/metadata.json") if path.is_file()]
+    if not candidates:
+        return None
+    return max(candidates, key=lambda path: path.stat().st_mtime)
 
 
 def reminder_source_detail_action(
@@ -1544,6 +2787,17 @@ def reminder_email_source_detail(
 
     folder = str(source.get("folder", "")).strip() or "INBOX"
     preferred = safe_text(str(source.get("provider", ""))).casefold()
+    if preferred == "seznam":
+        local_detail = local_seznam_email_source_detail(uid=uid, folder=folder)
+        if local_detail is not None:
+            return {
+                **base,
+                "ok": True,
+                "kind": "email",
+                "message": "E-mail dohledán v lokálním Seznam katalogu a cache příloh.",
+                "email": local_detail,
+            }
+
     providers = [preferred] if preferred in {"icloud", "seznam"} else ["icloud", "seznam"]
     attempts: list[str] = []
     for provider in providers:
@@ -1571,6 +2825,74 @@ def reminder_email_source_detail(
         "kind": "email",
         "message": "Zdrojový e-mail se nepodařilo načíst read-only. " + " | ".join(attempts),
     }
+
+
+def local_seznam_email_source_detail(uid: str, folder: str) -> dict[str, Any] | None:
+    row = local_seznam_email_catalog_row(uid=uid)
+    attachment_dir = LOCAL_SEZNAM_EMAIL_DIR / "attachments" / safe_email_folder_part(folder) / f"uid_{uid}"
+    attachments = local_email_attachment_details(attachment_dir)
+    if row is None and not attachments:
+        return None
+    return {
+        "provider": "seznam",
+        "folder": safe_text(folder or str(row.get("folder", "")) if row else folder)[:80],
+        "uid": safe_text(uid)[:80],
+        "subject": safe_text(str(row.get("subject", "")) if row else "")[:300],
+        "sender": safe_text(str(row.get("sender", "")) if row else "")[:240],
+        "date": safe_text(str(row.get("date", "")) if row else "")[:160],
+        "body_text": (
+            "Lokální rychlý náhled ze Seznam katalogu. Pro plné tělo e-mailu použít "
+            "read-only načtení e-mailu; PDF přílohy jsou níže vypsané z lokální cache."
+        ),
+        "attachments": attachments,
+    }
+
+
+def safe_email_folder_part(folder: str) -> str:
+    cleaned = safe_text(folder or "INBOX").replace("/", "_").replace("\\", "_").strip()
+    return cleaned[:80] or "INBOX"
+
+
+def local_seznam_email_catalog_row(uid: str) -> dict[str, str] | None:
+    catalog_paths = [
+        LOCAL_SEZNAM_EMAIL_DIR / "seznam_pojisteni_smlouvy_2011_2026.csv",
+        LOCAL_SEZNAM_EMAIL_DIR / "seznam_pojisteni_only_2011_2026.csv",
+        LOCAL_SEZNAM_EMAIL_DIR / "seznam_pojisteni_smlouvy_priority_2011_2026.csv",
+    ]
+    for path in catalog_paths:
+        if not path.exists():
+            continue
+        try:
+            with path.open("r", encoding="utf-8", newline="") as handle:
+                for row in csv.DictReader(handle):
+                    if str(row.get("uid", "")).strip() == uid:
+                        return dict(row)
+        except OSError:
+            continue
+    return None
+
+
+def local_email_attachment_details(path: Path) -> list[dict[str, Any]]:
+    if not path.exists() or not path.is_dir():
+        return []
+    attachments: list[dict[str, Any]] = []
+    for item in sorted(path.iterdir()):
+        if not item.is_file() or item.name == "attachments_manifest.json":
+            continue
+        try:
+            size = item.stat().st_size
+        except OSError:
+            size = 0
+        content_type = "application/pdf" if item.suffix.casefold() == ".pdf" else "application/octet-stream"
+        attachments.append(
+            {
+                "filename": safe_text(item.name)[:240],
+                "content_type": content_type,
+                "size_bytes": size,
+                "stored_path": safe_text(str(relative_to_project(item)))[:500],
+            }
+        )
+    return attachments
 
 
 def reminder_document_source_detail(
@@ -1621,6 +2943,7 @@ def reminder_document_source_detail(
             "reading_status_label": READING_STATUS_LABELS[reading_status],
             "snippet": sanitize_output(snippet),
             "due_contexts": reminder_document_due_contexts(document_id=document_id, vault_dir=vault_dir),
+            "payment_options": document_payment_options(text),
             "can_open_pdf": document_stored_path_is_openable_pdf(stored_path, vault_dir=vault_dir),
         },
     }
@@ -1660,6 +2983,409 @@ def reminder_document_due_contexts(document_id: str, vault_dir: Path = DEFAULT_D
         if len(contexts) >= 4:
             break
     return contexts
+
+
+def document_due_candidates_status(
+    *,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    reminders_path: Path = DEFAULT_REMINDERS_PATH,
+    today: date | None = None,
+    limit: int = 8,
+) -> dict[str, Any]:
+    today_date = today or date.today()
+    candidates = build_document_due_candidates(
+        vault_dir=vault_dir,
+        reminders_path=reminders_path,
+        today=today_date,
+    )
+    actionable = [item for item in candidates if item["status"] == "ready"]
+    already = [item for item in candidates if item["status"] == "already_reminded"]
+    past = [item for item in candidates if item["status"] == "past_due"]
+    shown = candidates[: max(1, limit)]
+    return {
+        "ok": True,
+        "today": today_date.isoformat(),
+        "candidate_count": len(candidates),
+        "actionable_count": len(actionable),
+        "already_reminded_count": len(already),
+        "past_count": len(past),
+        "items": [public_document_due_candidate(item) for item in shown],
+        "truncated": len(candidates) > len(shown),
+        "message": (
+            f"Termíny: {len(actionable)} ke schválení, {len(already)} už hlídáno, "
+            f"{len(past)} prošlé bez nové připomínky."
+        ),
+    }
+
+
+def document_case_asset_matches(value: str, case_assets: set[str]) -> bool:
+    candidate = normalize_reminder_asset(value)
+    if not candidate:
+        return False
+    for asset in case_assets:
+        normalized = normalize_reminder_asset(asset)
+        if len(normalized) < 3:
+            continue
+        if candidate == normalized or candidate in normalized or normalized in candidate:
+            return True
+    return False
+
+
+def open_reminder_records(reminders_path: Path) -> list[dict[str, Any]]:
+    try:
+        reminders = load_reminders_store(reminders_path).get("reminders", [])
+    except (OSError, ValueError):
+        reminders = []
+    return [
+        item
+        for item in reminders
+        if isinstance(item, dict) and safe_text(str(item.get("status", ""))).casefold() == "open"
+    ]
+
+
+def public_document_case_reminder(raw: dict[str, Any], today: date) -> dict[str, Any]:
+    item = reminder_status_item(raw, today)
+    item.pop("id", None)
+    return item
+
+
+def public_document_case_conflict(conflict: dict[str, Any]) -> dict[str, Any]:
+    public = dict(conflict)
+    public["items"] = [
+        {key: value for key, value in item.items() if key != "id"}
+        for item in conflict.get("items", [])
+        if isinstance(item, dict)
+    ]
+    return public
+
+
+def document_case_health_status(
+    *,
+    reminders: list[dict[str, Any]],
+    due_candidates: list[dict[str, Any]],
+    conflicts: list[dict[str, Any]],
+) -> dict[str, Any]:
+    actionable_count = sum(1 for item in due_candidates if item.get("status") == "ready")
+    already_count = sum(1 for item in due_candidates if item.get("status") == "already_reminded")
+    conflict_count = len(conflicts)
+    reminder_count = len(reminders)
+    if conflict_count:
+        status = "bad"
+        label = "konflikt"
+        recommendation = "Nejdřív porovnat konfliktní připomínky a nekonat platbu naslepo."
+    elif actionable_count:
+        status = "warn"
+        label = "zkontrolovat"
+        recommendation = "Zkontrolovat termíny ke schválení a vytvořit připomínku jen pro skutečně platný závazek."
+    elif reminder_count or already_count:
+        status = "ok"
+        label = "hlídáno"
+        recommendation = "Nic nového není potřeba; case už má existující hlídání nebo připomínku."
+    else:
+        status = "ok"
+        label = "bez akce"
+        recommendation = "Není nalezen konflikt ani termín, který by teď vyžadoval akci."
+    return {
+        "status": status,
+        "label": label,
+        "open_reminder_count": reminder_count,
+        "actionable_due_count": actionable_count,
+        "already_reminded_due_count": already_count,
+        "conflict_count": conflict_count,
+        "summary": (
+            f"Stav: připomínky {reminder_count}, konflikty {conflict_count}, "
+            f"termíny ke schválení {actionable_count}. Doporučení: {recommendation}"
+        ),
+    }
+
+
+def build_document_due_candidates(
+    *,
+    vault_dir: Path,
+    reminders_path: Path,
+    today: date,
+) -> list[dict[str, Any]]:
+    documents = {
+        str(row.get("document_id", "")): row
+        for row in read_jsonl(vault_dir / "index" / "documents_index.jsonl")
+        if str(row.get("document_id", "")).strip()
+        and safe_text(str(row.get("lifecycle_status", "active") or "active")).casefold() not in {"archived", "trashed"}
+    }
+    try:
+        reminders = load_reminders_store(reminders_path).get("reminders", [])
+    except (OSError, ValueError):
+        reminders = []
+    reminders_by_id = {
+        str(item.get("id", "")): item
+        for item in reminders
+        if isinstance(item, dict) and str(item.get("id", "")).strip()
+    }
+
+    grouped: dict[tuple[str, str, str], dict[str, Any]] = {}
+    for row in read_jsonl(vault_dir / "index" / "due_dates.jsonl"):
+        if not bool(row.get("create_reminder_candidate")):
+            continue
+        document_id = str(row.get("document_id", "")).strip()
+        document = documents.get(document_id)
+        if document is None:
+            continue
+        due_date = parse_document_due_date(str(row.get("date", "")))
+        if due_date is None:
+            continue
+        due_type = safe_slug(str(row.get("type", "")), default="deadline", limit=50)
+        key = (document_id, due_type, due_date.isoformat())
+        current = grouped.get(key)
+        context = sanitize_output(str(row.get("context", "")))[:700]
+        if current is None:
+            title = safe_text(str(document.get("title") or document.get("original_filename") or document_id))[:180]
+            reminder_id = document_due_candidate_reminder_id(
+                document_id=document_id,
+                due_type=due_type,
+                due_date=due_date.isoformat(),
+            )
+            reminder = reminders_by_id.get(reminder_id)
+            days_until = (due_date - today).days
+            if reminder is not None:
+                status = "already_reminded"
+            elif days_until < 0:
+                status = "past_due"
+            else:
+                status = "ready"
+            current = {
+                "candidate_ref": document_due_candidate_reference(document_id, due_type, due_date.isoformat()),
+                "document_id": document_id,
+                "document_ref": document_reference(document_id),
+                "title": title,
+                "domain": safe_text(str(document.get("domain", "")))[:80],
+                "domain_label": document_domain_label(str(document.get("domain", ""))),
+                "document_type": safe_text(str(document.get("document_type", "")))[:80],
+                "document_type_label": document_type_label(str(document.get("document_type", ""))),
+                "counterparty": safe_text(str(document.get("counterparty", "")))[:180],
+                "related_asset": safe_text(str(document.get("related_asset", "")))[:180],
+                "date": due_date.isoformat(),
+                "days_until": days_until,
+                "type": due_type,
+                "type_label": DOCUMENT_DUE_TYPE_LABELS.get(due_type, due_type),
+                "confidence": safe_text(str(row.get("confidence", "")))[:40],
+                "context": context,
+                "context_count": 1,
+                "amount_due": extract_amount_from_due_context(context),
+                "status": status,
+                "status_label": document_due_candidate_status_label(status),
+                "reminder_id": reminder_id,
+                "reminder_ref": reminder_reference(reminder_id),
+                "reminder_status": safe_text(str(reminder.get("status", "")))[:40] if reminder is not None else "",
+                "suggested_title": document_due_candidate_title(title=title, due_type=due_type),
+                "suggested_notes": document_due_candidate_notes(title=title, due_type=due_type, context=context),
+                "priority": "high" if due_type in {"payment_due", "valid_until"} else "medium",
+            }
+            grouped[key] = current
+        else:
+            current["context_count"] = int(current.get("context_count", 1)) + 1
+            if not current.get("amount_due"):
+                current["amount_due"] = extract_amount_from_due_context(context)
+
+    candidates = list(grouped.values())
+    candidates.sort(
+        key=lambda item: (
+            0 if item["status"] == "ready" else 1 if item["status"] == "already_reminded" else 2,
+            item["date"],
+            str(item["title"]).casefold(),
+        )
+    )
+    return candidates
+
+
+def public_document_due_candidate(item: dict[str, Any]) -> dict[str, Any]:
+    return {
+        key: value
+        for key, value in item.items()
+        if key not in {"document_id", "reminder_id"}
+    }
+
+
+def create_document_due_reminder_action(
+    *,
+    candidate_ref: str,
+    title: str = "",
+    notes: str = "",
+    priority: str = "",
+    confirmed: bool = False,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    reminders_path: Path = DEFAULT_REMINDERS_PATH,
+    today: date | None = None,
+) -> dict[str, Any]:
+    if not confirmed:
+        return {"ok": False, "message": "Chybí potvrzení vytvoření připomínky."}
+    today_date = today or date.today()
+    candidates = build_document_due_candidates(vault_dir=vault_dir, reminders_path=reminders_path, today=today_date)
+    candidate = next((item for item in candidates if item["candidate_ref"] == candidate_ref.strip()), None)
+    if candidate is None:
+        return {
+            "ok": False,
+            "message": "Termínový kandidát nebyl nalezen.",
+            "document_due_candidates": document_due_candidates_status(
+                vault_dir=vault_dir,
+                reminders_path=reminders_path,
+                today=today_date,
+            ),
+        }
+    if candidate["status"] == "already_reminded":
+        return {
+            "ok": False,
+            "message": "Pro tento termín už připomínka existuje.",
+            "document_due_candidates": document_due_candidates_status(
+                vault_dir=vault_dir,
+                reminders_path=reminders_path,
+                today=today_date,
+            ),
+        }
+    if candidate["status"] == "past_due":
+        return {
+            "ok": False,
+            "message": "Termín je už v minulosti; novou připomínku z něj teď nevytvářím.",
+            "document_due_candidates": document_due_candidates_status(
+                vault_dir=vault_dir,
+                reminders_path=reminders_path,
+                today=today_date,
+            ),
+        }
+
+    reminder_id = str(candidate["reminder_id"])
+    reminder_title = safe_text(title.strip())[:160] or str(candidate["suggested_title"])
+    reminder_notes = safe_text(notes.strip())[:700] or str(candidate["suggested_notes"])
+    result_text = save_document_due_reminder_summary(
+        document_id=str(candidate["document_id"]),
+        title=reminder_title,
+        due_date=str(candidate["date"]),
+        due_date_type=str(candidate["type"]),
+        notes=reminder_notes,
+        priority=priority or str(candidate["priority"]),
+        user_confirmed=True,
+        confirmation_text=f"Potvrzuji, uloz pripominku {reminder_id}.",
+        reminders_path=reminders_path,
+    )
+    ok = result_text.startswith("Ulozeno:")
+    if ok:
+        enrich_document_due_reminder(reminder_id=reminder_id, candidate=candidate, reminders_path=reminders_path)
+    return {
+        "ok": ok,
+        "reminder_ref": reminder_reference(reminder_id),
+        "message": safe_text(result_text),
+        "document_due_candidates": document_due_candidates_status(
+            vault_dir=vault_dir,
+            reminders_path=reminders_path,
+            today=today_date,
+        ),
+        "reminders": reminders_status(path=reminders_path, today=today_date),
+    }
+
+
+def enrich_document_due_reminder(*, reminder_id: str, candidate: dict[str, Any], reminders_path: Path) -> None:
+    store = load_reminders_store(reminders_path)
+    reminder = next((item for item in store.get("reminders", []) if item.get("id") == reminder_id), None)
+    if reminder is None:
+        return
+    if candidate.get("related_asset"):
+        reminder["related_asset"] = safe_text(str(candidate.get("related_asset", "")))[:180]
+    if candidate.get("amount_due"):
+        reminder["amount_due"] = safe_text(str(candidate.get("amount_due", "")))[:80]
+        reminder["amount_note"] = "Částka byla odhadnuta z krátkého kontextu termínu v dokumentu."
+    reminder["document_ref"] = safe_text(str(candidate.get("document_ref", "")))[:80]
+    reminder["due_date_type"] = safe_text(str(candidate.get("type", "")))[:80]
+    write_reminders_store(store, path=reminders_path)
+
+
+def document_due_candidate_reference(document_id: str, due_type: str, due_date: str) -> str:
+    digest = hashlib.sha256(f"{document_id}|{due_type}|{due_date}".encode("utf-8")).hexdigest()[:16]
+    return f"dueref-{digest}"
+
+
+def document_due_candidate_reminder_id(*, document_id: str, due_type: str, due_date: str) -> str:
+    safe_document_id = safe_slug(document_id, default="document", limit=140)
+    safe_due_type = safe_slug(due_type, default="deadline", limit=50)
+    return f"document-{safe_document_id}-{safe_due_type}-{due_date}"
+
+
+def parse_document_due_date(value: str) -> date | None:
+    try:
+        return date.fromisoformat(value.strip())
+    except ValueError:
+        return None
+
+
+def document_due_candidate_status_label(status: str) -> str:
+    if status == "ready":
+        return "ke schválení"
+    if status == "already_reminded":
+        return "už hlídáno"
+    if status == "past_due":
+        return "prošlé"
+    return "nejasné"
+
+
+def document_due_candidate_title(*, title: str, due_type: str) -> str:
+    if due_type == "payment_due":
+        return safe_text(f"Zaplatit podle dokumentu: {title}")[:160]
+    if due_type == "valid_until":
+        return safe_text(f"Zkontrolovat konec platnosti: {title}")[:160]
+    if due_type == "service_due":
+        return safe_text(f"Zajistit servis/revizi: {title}")[:160]
+    return safe_text(f"Zkontrolovat termín v dokumentu: {title}")[:160]
+
+
+def document_due_candidate_notes(*, title: str, due_type: str, context: str) -> str:
+    type_label = DOCUMENT_DUE_TYPE_LABELS.get(due_type, due_type)
+    return safe_text(f"Potvrzený kandidát z dokumentu ({type_label}). Kontext: {context or title}")[:700]
+
+
+def extract_amount_from_due_context(context: str) -> str:
+    match = re.search(r"\b([0-9][0-9 ]{0,12}\s*K[čc])\b", context)
+    return safe_text(match.group(1))[:80] if match else ""
+
+
+def document_payment_options(text: str) -> list[dict[str, str]]:
+    options: list[dict[str, str]] = []
+    if not text.strip():
+        return options
+
+    base_match = re.search(
+        r"nov[ěe]\s+p[řr]edepsan[ée]\s+pojistn[ée]\s+[čc]in[íi]\s+([0-9 ]+\s*K[čc])",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if base_match:
+        options.append(
+            {
+                "label": "Stávající pojištění bez doplňkového MAXI",
+                "amount": safe_text(base_match.group(1)),
+                "note": "Částka z věty o nově předepsaném ročním pojistném.",
+            }
+        )
+
+    extra_match = re.search(
+        r"Ro[čc]n[íi]\s+pojistn[ée]\s+za\s+dopl[ňn]kov[ée]\s+poji[šs]t[ěe]n[íi].{0,120}?MAXI:\s*([0-9 ]+\s*K[čc])",
+        text,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    total_match = re.search(
+        r"Pojistn[ée]\s+za\s+pojistn[ée]\s+obdob[íi]\s*\(nav[ýy][šs]en[ée].{0,180}?MAXI\):\s*([0-9 ]+\s*K[čc])",
+        text,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if total_match:
+        note = "Varianta vznikne jen zaplacením dodatku s doplňkovým pojištěním MAXI."
+        if extra_match:
+            note = f"{note} Samotné doplňkové MAXI: {safe_text(extra_match.group(1))}."
+        options.append(
+            {
+                "label": "Varianta s doplňkovým pojištěním MAXI",
+                "amount": safe_text(total_match.group(1)),
+                "note": note,
+            }
+        )
+
+    return options
 
 
 def document_stored_path_is_openable_pdf(stored_path: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> bool:
@@ -1713,6 +3439,8 @@ def reminder_status_item(raw: dict[str, Any], today: date) -> dict[str, Any]:
         "source_type": safe_text(str(source.get("type", "")))[:64],
         "related_asset": safe_text(str(raw.get("related_asset", "")))[:180],
         "coverage_start": safe_text(str(raw.get("coverage_start", "")))[:40],
+        "amount_due": safe_text(str(raw.get("amount_due", "")))[:80],
+        "amount_note": safe_text(str(raw.get("amount_note", "")))[:240],
         "conflict_note": safe_text(str(raw.get("conflict_note", "")))[:500],
     }
 
@@ -1776,8 +3504,6 @@ def safe_downloads_status(limit: int = 20) -> dict[str, Any]:
         path_value = item.get("path")
         if isinstance(path_value, str) and path_value and is_pdf_encrypted(Path(path_value)):
             item["is_encrypted"] = True
-            item["problem_kind"] = "encrypted"
-            item["problem_label"] = "šifrované PDF"
     return {
         "ok": True,
         "folder": str(DEFAULT_DOWNLOADS_DIR),
@@ -1808,6 +3534,730 @@ def document_work_status(
     }
 
 
+def document_intake_status(
+    downloads: dict[str, Any] | None = None,
+    *,
+    decisions_path: Path = EMAIL_PROCESSING_DECISIONS_FILE,
+    mobile_inbox_dir: Path = DEFAULT_MOBILE_DOCUMENT_INBOX,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    limit: int = 5,
+) -> dict[str, Any]:
+    downloads = downloads if downloads is not None else safe_downloads_status(limit=50)
+    download_items = [item for item in downloads.get("items", []) if isinstance(item, dict)]
+    new_downloads = [item for item in download_items if item.get("status") == "new"]
+    email_pending = email_processing_pending_work_items(path=decisions_path)
+    email_items = [
+        item for item in email_pending.get("items", [])
+        if isinstance(item, dict) and str(item.get("action", "")) == "process"
+    ]
+    mobile = mobile_document_intake_source(mobile_inbox_dir=mobile_inbox_dir, limit=limit)
+    local = local_document_inbox_source(vault_dir=vault_dir, limit=limit)
+    sources = [
+        {
+            "id": "downloads",
+            "label": "Downloads",
+            "count": len(new_downloads),
+            "status": "ready" if new_downloads else "empty",
+            "next_action": "Zpracovat další PDF přes ScanDocu." if new_downloads else "Žádné nové PDF ke zpracování.",
+            "items": [
+                {
+                    "title": safe_text(str(item.get("name", "")))[:180],
+                    "meta": safe_text(str(item.get("modified_at", "")))[:120],
+                }
+                for item in new_downloads[:limit]
+            ],
+        },
+        {
+            "id": "email",
+            "label": "E-mail work queue",
+            "count": len(email_items),
+            "status": "ready" if email_items else "empty",
+            "next_action": "Zpracovat označené e-maily a PDF přílohy." if email_items else "Žádný e-mail není označený ke zpracování.",
+            "items": [
+                {
+                    "title": safe_text(str(item.get("subject", "") or "E-mail bez předmětu"))[:180],
+                    "meta": safe_text(
+                        f"{item.get('provider', '')} / {item.get('folder', '')} / {item.get('date', '')}"
+                    )[:180],
+                }
+                for item in email_items[:limit]
+            ],
+        },
+        mobile,
+        local,
+    ]
+    total = sum(int(source.get("count", 0) or 0) for source in sources)
+    return {
+        "ok": True,
+        "count": total,
+        "sources": sources,
+        "message": (
+            f"Čeká {total} dokumentových vstupů napříč zdroji."
+            if total
+            else "Žádný nový dokumentový vstup nečeká."
+        ),
+    }
+
+
+def mobile_document_intake_source(
+    *,
+    mobile_inbox_dir: Path = DEFAULT_MOBILE_DOCUMENT_INBOX,
+    limit: int = 5,
+) -> dict[str, Any]:
+    inbox = mobile_inbox_dir.expanduser()
+    process_request = inbox / "process_request.json"
+    if not inbox.exists():
+        return {
+            "id": "mobile",
+            "label": "Mobilní sken",
+            "count": 0,
+            "status": "missing",
+            "next_action": "Mobilní inbox zatím není synchronizovaný na Mac.",
+            "items": [],
+        }
+    if not inbox.is_dir():
+        return {
+            "id": "mobile",
+            "label": "Mobilní sken",
+            "count": 0,
+            "status": "problem",
+            "next_action": "Mobilní inbox není složka.",
+            "items": [],
+        }
+    manifests = sorted(
+        inbox.glob("scan_*_manifest.json"),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    items: list[dict[str, str]] = []
+    for manifest_path in manifests[:limit]:
+        try:
+            manifest = read_json_file(manifest_path)
+        except ValueError as exc:
+            items.append(
+                {
+                    "title": safe_text(manifest_path.name)[:180],
+                    "meta": f"chyba manifestu: {safe_text(str(exc))[:120]}",
+                }
+            )
+            continue
+        batch_id = safe_text(str(manifest.get("batch_id", ""))).strip()
+        title = safe_text(str(manifest.get("document_title", ""))).strip() or batch_id or manifest_path.stem
+        expected_count = safe_text(str(manifest.get("page_count", ""))).strip() or "?"
+        pages = sorted(inbox.glob(f"{batch_id}_page_*")) if batch_id else []
+        modified = datetime.fromtimestamp(manifest_path.stat().st_mtime).isoformat(timespec="minutes")
+        items.append(
+            {
+                "title": title[:180],
+                "meta": f"{len(pages)} / {expected_count} stran | {modified}",
+            }
+        )
+    count = len(manifests)
+    request_note = " Process request čeká." if process_request.exists() else ""
+    return {
+        "id": "mobile",
+        "label": "Mobilní sken",
+        "count": count,
+        "status": "ready" if count else "empty",
+        "next_action": (
+            f"Připravit nebo zpracovat mobilní batch.{request_note}"
+            if count
+            else f"Žádný mobilní scan nečeká.{request_note}"
+        ),
+        "items": items,
+    }
+
+
+def local_document_inbox_source(
+    *,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    limit: int = 5,
+) -> dict[str, Any]:
+    incoming = vault_dir / "inbox" / "incoming"
+    if not incoming.exists():
+        return {
+            "id": "local_inbox",
+            "label": "Lokální inbox",
+            "count": 0,
+            "status": "missing",
+            "next_action": "Lokální document inbox zatím neexistuje.",
+            "items": [],
+        }
+    if not incoming.is_dir():
+        return {
+            "id": "local_inbox",
+            "label": "Lokální inbox",
+            "count": 0,
+            "status": "problem",
+            "next_action": "Lokální document inbox není složka.",
+            "items": [],
+        }
+    files = sorted(
+        (item for item in incoming.iterdir() if item.is_file()),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    return {
+        "id": "local_inbox",
+        "label": "Lokální inbox",
+        "count": len(files),
+        "status": "ready" if files else "empty",
+        "next_action": "Připravit import souboru z inboxu." if files else "Lokální inbox je prázdný.",
+        "items": [
+            {
+                "title": safe_text(path.name)[:180],
+                "meta": f"{path.stat().st_size} B | {datetime.fromtimestamp(path.stat().st_mtime).isoformat(timespec='minutes')}",
+            }
+            for path in files[:limit]
+        ],
+    }
+
+
+def document_cases_status(
+    *,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    limit: int = 6,
+    documents_per_case: int = 3,
+) -> dict[str, Any]:
+    groups: dict[str, dict[str, Any]] = {}
+    active_count = 0
+    linked_count = 0
+    unlinked_count = 0
+    for row in read_jsonl(vault_dir / "index" / "documents_index.jsonl"):
+        document_id = safe_text(str(row.get("document_id", ""))).strip()
+        if not document_id:
+            continue
+        lifecycle_status = safe_text(str(row.get("lifecycle_status", "active") or "active")).casefold()
+        if lifecycle_status in {"archived", "trashed"}:
+            continue
+        active_count += 1
+        title = safe_text(str(row.get("title") or row.get("original_filename") or document_id))[:180]
+        domain = safe_text(str(row.get("domain", "")))[:80]
+        document_type = safe_text(str(row.get("document_type", "")))[:80]
+        counterparty = safe_text(str(row.get("counterparty", "")))[:120]
+        related_asset = safe_text(str(row.get("related_asset", "")))[:120]
+        reading_status = effective_document_reading_status(row)
+        if related_asset:
+            linked_count += 1
+            group_type = "asset"
+            group_label = related_asset
+            group_key = f"asset:{related_asset.casefold()}"
+        else:
+            unlinked_count += 1
+            if counterparty:
+                group_type = "counterparty"
+                group_label = f"Protistrana: {counterparty}"
+                group_key = f"counterparty:{counterparty.casefold()}"
+            else:
+                group_type = "unlinked"
+                group_label = "Bez vazby"
+                group_key = "unlinked:"
+        group = groups.setdefault(
+            group_key,
+            {
+                "case_ref": document_case_reference(group_key),
+                "label": group_label,
+                "group_type": group_type,
+                "document_count": 0,
+                "domains": set(),
+                "document_types": set(),
+                "documents": [],
+            },
+        )
+        group["document_count"] += 1
+        if domain:
+            group["domains"].add(domain)
+        if document_type:
+            group["document_types"].add(document_type)
+        if len(group["documents"]) < max(1, documents_per_case):
+            group["documents"].append(
+                {
+                    "document_ref": document_reference(document_id),
+                    "title": title,
+                    "domain": domain,
+                    "domain_label": document_domain_label(domain),
+                    "document_type": document_type,
+                    "document_type_label": document_type_label(document_type),
+                    "counterparty": counterparty,
+                    "related_asset": related_asset,
+                    "reading_status": reading_status,
+                    "reading_status_label": READING_STATUS_LABELS.get(reading_status, reading_status),
+                }
+            )
+    all_groups = []
+    for group in groups.values():
+        all_groups.append(
+            {
+                "case_ref": group["case_ref"],
+                "label": group["label"],
+                "group_type": group["group_type"],
+                "group_type_label": document_case_group_type_label(group["group_type"]),
+                "summary": document_case_summary(
+                    group_type=str(group["group_type"]),
+                    label=str(group["label"]),
+                    document_count=int(group["document_count"]),
+                    domains=sorted(group["domains"]),
+                    document_types=sorted(group["document_types"]),
+                ),
+                "document_count": group["document_count"],
+                "domains": sorted(group["domains"]),
+                "domain_labels": [document_domain_label(value) for value in sorted(group["domains"])],
+                "document_types": sorted(group["document_types"]),
+                "document_type_labels": [document_type_label(value) for value in sorted(group["document_types"])],
+                "documents": group["documents"],
+            }
+        )
+    cases = [item for item in all_groups if int(item["document_count"]) >= 2]
+    singletons_count = sum(1 for item in all_groups if int(item["document_count"]) == 1)
+    cases.sort(
+        key=lambda item: (
+            0 if item["group_type"] == "asset" else 1 if item["group_type"] == "counterparty" else 2,
+            -int(item["document_count"]),
+            str(item["label"]).casefold(),
+        )
+    )
+    return {
+        "ok": True,
+        "active_documents": active_count,
+        "candidate_group_count": len(all_groups),
+        "case_count": len(cases),
+        "singletons_count": singletons_count,
+        "linked_count": linked_count,
+        "unlinked_count": unlinked_count,
+        "cases": cases[:limit],
+        "truncated": len(cases) > limit,
+        "message": (
+            f"{len(cases)} skutečných vazeb/cases; {singletons_count} samostatných dokumentů skryto; "
+            f"{unlinked_count} dokumentů bez related_asset."
+            if active_count
+            else "Ve vaultu nejsou aktivní dokumenty pro vazby."
+        ),
+    }
+
+
+def document_case_detail_status(
+    case_ref: str,
+    *,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    reminders_path: Path = DEFAULT_REMINDERS_PATH,
+    today: date | None = None,
+    limit: int = 30,
+) -> dict[str, Any]:
+    safe_case_ref = safe_slug(case_ref, default="", limit=140)
+    if not safe_case_ref:
+        return {"ok": False, "message": "Chybí case_ref.", "documents": []}
+
+    today_date = today or date.today()
+    groups: dict[str, dict[str, Any]] = {}
+    for row in read_jsonl(vault_dir / "index" / "documents_index.jsonl"):
+        document_id = safe_text(str(row.get("document_id", ""))).strip()
+        if not document_id:
+            continue
+        lifecycle_status = safe_text(str(row.get("lifecycle_status", "active") or "active")).casefold()
+        if lifecycle_status in {"archived", "trashed"}:
+            continue
+        domain = safe_text(str(row.get("domain", "")))[:80]
+        document_type = safe_text(str(row.get("document_type", "")))[:80]
+        counterparty = safe_text(str(row.get("counterparty", "")))[:180]
+        related_asset = safe_text(str(row.get("related_asset", "")))[:180]
+        if related_asset:
+            group_type = "asset"
+            group_label = related_asset
+            group_key = f"asset:{related_asset.casefold()}"
+        elif counterparty:
+            group_type = "counterparty"
+            group_label = f"Protistrana: {counterparty}"
+            group_key = f"counterparty:{counterparty.casefold()}"
+        else:
+            group_type = "unlinked"
+            group_label = "Bez vazby"
+            group_key = "unlinked:"
+
+        group = groups.setdefault(
+            group_key,
+            {
+                "case_ref": document_case_reference(group_key),
+                "label": group_label,
+                "group_type": group_type,
+                "domains": set(),
+                "document_types": set(),
+                "documents": [],
+                "document_ids": set(),
+            },
+        )
+        group["document_ids"].add(document_id)
+        if domain:
+            group["domains"].add(domain)
+        if document_type:
+            group["document_types"].add(document_type)
+        stored_path = safe_text(str(row.get("stored_path", "")))[:500]
+        reading_status = effective_document_reading_status(row)
+        group["documents"].append(
+            {
+                "document_ref": document_reference(document_id),
+                "title": safe_text(str(row.get("title") or row.get("original_filename") or document_id))[:220],
+                "domain": domain,
+                "domain_label": document_domain_label(domain),
+                "document_type": document_type,
+                "document_type_label": document_type_label(document_type),
+                "counterparty": counterparty,
+                "related_asset": related_asset,
+                "reading_status": reading_status,
+                "reading_status_label": READING_STATUS_LABELS.get(reading_status, reading_status),
+                "can_open_pdf": document_stored_path_is_openable_pdf(stored_path, vault_dir=vault_dir),
+            }
+        )
+
+    for group in groups.values():
+        if group["case_ref"] != safe_case_ref or len(group["documents"]) < 2:
+            continue
+        documents = sorted(
+            group["documents"],
+            key=lambda item: (
+                str(item.get("document_type_label", "")).casefold(),
+                str(item.get("title", "")).casefold(),
+            ),
+        )
+        summary = document_case_summary(
+            group_type=str(group["group_type"]),
+            label=str(group["label"]),
+            document_count=len(documents),
+            domains=sorted(group["domains"]),
+            document_types=sorted(group["document_types"]),
+        )
+        raw_document_ids = {str(item) for item in group.get("document_ids", set()) if str(item).strip()}
+        document_refs = {document_reference(document_id) for document_id in raw_document_ids}
+        case_assets = {
+            safe_text(str(doc.get("related_asset", ""))).strip()
+            for doc in documents
+            if safe_text(str(doc.get("related_asset", ""))).strip()
+        }
+        if str(group["group_type"]) == "asset":
+            case_assets.add(safe_text(str(group["label"])).strip())
+
+        open_reminders = open_reminder_records(reminders_path)
+        case_open_reminders = []
+        for reminder in open_reminders:
+            source = reminder.get("source") if isinstance(reminder.get("source"), dict) else {}
+            source_uid = safe_text(str(source.get("uid", ""))).strip() if isinstance(source, dict) else ""
+            related_asset = safe_text(str(reminder.get("related_asset", ""))).strip()
+            if (
+                source_uid in raw_document_ids
+                or source_uid in document_refs
+                or document_case_asset_matches(related_asset, case_assets)
+            ):
+                case_open_reminders.append(reminder)
+        case_open_reminders.sort(
+            key=lambda item: (
+                parse_reminder_due_date(item.get("due_date")) or date.max,
+                safe_text(str(item.get("title", ""))).casefold(),
+            )
+        )
+
+        due_candidates = [
+            item
+            for item in build_document_due_candidates(
+                vault_dir=vault_dir,
+                reminders_path=reminders_path,
+                today=today_date,
+            )
+            if str(item.get("document_id", "")).strip() in raw_document_ids
+            or document_case_asset_matches(str(item.get("related_asset", "")), case_assets)
+        ]
+        conflicts = [
+            conflict
+            for conflict in reminder_conflicts(open_reminders)
+            if document_case_asset_matches(str(conflict.get("asset", "")), case_assets)
+        ]
+        public_reminders = [public_document_case_reminder(reminder, today_date) for reminder in case_open_reminders]
+        public_due_candidates = [public_document_due_candidate(item) for item in due_candidates]
+        public_conflicts = [public_document_case_conflict(conflict) for conflict in conflicts]
+        case_health = document_case_health_status(
+            reminders=public_reminders,
+            due_candidates=public_due_candidates,
+            conflicts=public_conflicts,
+        )
+        return {
+            "ok": True,
+            "case_ref": safe_case_ref,
+            "label": safe_text(str(group["label"]))[:180],
+            "group_type": safe_text(str(group["group_type"]))[:80],
+            "group_type_label": document_case_group_type_label(str(group["group_type"])),
+            "summary": summary,
+            "document_count": len(documents),
+            "documents": documents[: max(1, limit)],
+            "reminders": public_reminders,
+            "due_candidates": public_due_candidates,
+            "conflicts": public_conflicts,
+            "case_health": case_health,
+            "truncated": len(documents) > max(1, limit),
+            "message": "Detail case načten.",
+        }
+    return {"ok": False, "message": "Case nebyl nalezen nebo má jen jeden dokument.", "documents": []}
+
+
+def document_classification_status(
+    *,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    limit: int = 6,
+) -> dict[str, Any]:
+    active_count = 0
+    complete_count = 0
+    field_counts = {field: 0 for field in DOCUMENT_REVIEW_FIELD_LABELS}
+    items: list[dict[str, Any]] = []
+    domain_counts: dict[str, int] = {}
+    type_counts: dict[str, int] = {}
+    for row in read_jsonl(vault_dir / "index" / "documents_index.jsonl"):
+        document_id = safe_text(str(row.get("document_id", ""))).strip()
+        if not document_id:
+            continue
+        lifecycle_status = safe_text(str(row.get("lifecycle_status", "active") or "active")).casefold()
+        if lifecycle_status in {"archived", "trashed"}:
+            continue
+        active_count += 1
+        domain = safe_text(str(row.get("domain", "")))[:80]
+        document_type = safe_text(str(row.get("document_type", "")))[:80]
+        counterparty = safe_text(str(row.get("counterparty", "")))[:120]
+        related_asset = safe_text(str(row.get("related_asset", "")))[:120]
+        if domain:
+            domain_counts[document_domain_label(domain)] = domain_counts.get(document_domain_label(domain), 0) + 1
+        if document_type:
+            type_counts[document_type_label(document_type)] = type_counts.get(document_type_label(document_type), 0) + 1
+        missing_fields = document_classification_missing_fields(
+            domain=domain,
+            document_type=document_type,
+            counterparty=counterparty,
+            related_asset=related_asset,
+        )
+        if not missing_fields:
+            complete_count += 1
+            continue
+        for field in missing_fields:
+            field_counts[field] = field_counts.get(field, 0) + 1
+        missing_labels = [DOCUMENT_REVIEW_FIELD_LABELS.get(field, field) for field in missing_fields]
+        items.append(
+            {
+                "document_ref": document_reference(document_id),
+                "title": safe_text(str(row.get("title") or row.get("original_filename") or document_id))[:180],
+                "domain": domain,
+                "domain_label": document_domain_label(domain),
+                "document_type": document_type,
+                "document_type_label": document_type_label(document_type),
+                "counterparty": counterparty,
+                "related_asset": related_asset,
+                "missing_fields": missing_fields,
+                "missing_labels": missing_labels,
+                "classification_summary": (
+                    f"{document_domain_label(domain)} / {document_type_label(document_type)} | "
+                    f"{counterparty or 'protistrana chybí'} | {related_asset or 'vazba chybí'}"
+                ),
+                "recommended_action": f"Doplnit: {', '.join(missing_labels)}.",
+            }
+        )
+    items.sort(key=lambda item: (-len(item["missing_fields"]), item["title"].casefold()))
+    issue_count = active_count - complete_count
+    quality_percent = round((complete_count / active_count) * 100) if active_count else 100
+    return {
+        "ok": True,
+        "active_documents": active_count,
+        "complete_count": complete_count,
+        "issue_count": issue_count,
+        "quality_percent": quality_percent,
+        "field_counts": field_counts,
+        "field_labels": DOCUMENT_REVIEW_FIELD_LABELS,
+        "domain_counts": domain_counts,
+        "document_type_counts": type_counts,
+        "items": items[:limit],
+        "truncated": len(items) > limit,
+        "message": (
+            f"Klasifikace: {complete_count}/{active_count} dokumentů má kompletní základní metadata "
+            f"({quality_percent} %)."
+            if active_count
+            else "Klasifikace: ve vaultu nejsou aktivní dokumenty."
+        ),
+    }
+
+
+def document_classification_missing_fields(
+    *,
+    domain: str,
+    document_type: str,
+    counterparty: str,
+    related_asset: str,
+) -> list[str]:
+    missing: list[str] = []
+    domain_slug = safe_slug(domain, default="", limit=80)
+    type_slug = safe_slug(document_type, default="", limit=80)
+    if not domain_slug or domain_slug in {"other", "unknown"}:
+        missing.append("domain")
+    if not type_slug or type_slug in {"document", "unknown"}:
+        missing.append("document_type")
+    if not safe_text(counterparty):
+        missing.append("counterparty")
+    if not safe_text(related_asset):
+        missing.append("related_asset")
+    return missing
+
+
+def update_document_classification_metadata_action(
+    document_id: str,
+    metadata: dict[str, Any],
+    *,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> dict[str, Any]:
+    safe_reference = safe_slug(document_id, default="", limit=140)
+    if not safe_reference:
+        return {"ok": False, "message": "Chybí document_id."}
+    if not isinstance(metadata, dict):
+        return {"ok": False, "message": "Chybí metadata dokumentu."}
+
+    documents_path = vault_dir / "index" / "documents_index.jsonl"
+    documents = read_jsonl(documents_path)
+    row_index = find_document_row_index_by_reference(documents, safe_reference)
+    if row_index is None:
+        return {"ok": False, "message": "Dokument nebyl nalezen v indexu."}
+
+    current = dict(documents[row_index])
+    resolved_document_id = str(current.get("document_id", ""))
+    updates: dict[str, str] = {}
+    for field in DOCUMENT_METADATA_UPDATE_FIELDS:
+        if field not in metadata:
+            continue
+        raw_value = str(metadata.get(field, "") or "").strip()
+        if field in {"domain", "document_type"}:
+            updates[field] = safe_slug(raw_value, default="", limit=80)
+        else:
+            updates[field] = safe_text(raw_value)[:180]
+    if not updates:
+        return {"ok": False, "message": "Není co uložit; nebylo předáno žádné podporované metadata pole."}
+
+    previous = {field: safe_text(str(current.get(field, "") or "")) for field in DOCUMENT_METADATA_UPDATE_FIELDS}
+    changed = {
+        field: value
+        for field, value in updates.items()
+        if safe_text(str(current.get(field, "") or "")) != value
+    }
+    if not changed:
+        return {
+            "ok": True,
+            "document_id": safe_text(resolved_document_id),
+            "document_ref": document_reference(resolved_document_id),
+            "message": "Metadata se nezměnila.",
+            "document_classification": document_classification_status(vault_dir=vault_dir),
+        }
+
+    stored_path_value = str(current.get("stored_path", "") or "")
+    manifest_path = (PROJECT_ROOT / stored_path_value).parent / "manifest.json" if stored_path_value else None
+    now_value = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    backup_dir = backup_document_metadata(vault_dir=vault_dir, document_id=resolved_document_id, manifest_path=manifest_path)
+
+    updated = dict(current)
+    updated.update(changed)
+    updated["metadata_updated_at"] = now_value
+    documents[row_index] = updated
+    write_jsonl(documents_path, documents)
+    if manifest_path is not None and manifest_path.exists():
+        manifest = read_json_file(manifest_path)
+        manifest.update(updated)
+        write_json(manifest_path, manifest)
+
+    append_jsonl(
+        vault_dir / "index" / "document_metadata_actions.jsonl",
+        {
+            "action": "update_classification_metadata",
+            "document_id": resolved_document_id,
+            "previous": previous,
+            "updated": {field: safe_text(str(updated.get(field, "") or "")) for field in DOCUMENT_METADATA_UPDATE_FIELDS},
+            "changed_fields": sorted(changed),
+            "created_at": now_value,
+            "backup_dir": str(relative_to_project(backup_dir)),
+            "do_not_commit": True,
+        },
+    )
+    missing_fields = document_classification_missing_fields(
+        domain=str(updated.get("domain", "")),
+        document_type=str(updated.get("document_type", "")),
+        counterparty=str(updated.get("counterparty", "")),
+        related_asset=str(updated.get("related_asset", "")),
+    )
+    return {
+        "ok": True,
+        "document_id": safe_text(resolved_document_id),
+        "document_ref": document_reference(resolved_document_id),
+        "changed_fields": sorted(changed),
+        "missing_fields": missing_fields,
+        "message": (
+            f"Metadata dokumentu uložena. Změněno: "
+            f"{', '.join(DOCUMENT_REVIEW_FIELD_LABELS.get(field, field) for field in sorted(changed))}."
+        ),
+        "document_classification": document_classification_status(vault_dir=vault_dir),
+    }
+
+
+def backup_document_metadata(vault_dir: Path, document_id: str, manifest_path: Path | None) -> Path:
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    backup_dir = vault_dir / "index" / "metadata_backups" / f"{stamp}_{document_id}"
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    index_path = vault_dir / "index" / "documents_index.jsonl"
+    if index_path.exists():
+        shutil.copy2(index_path, backup_dir / "documents_index.jsonl")
+    if manifest_path is not None and manifest_path.exists():
+        shutil.copy2(manifest_path, backup_dir / "manifest.json")
+    return backup_dir
+
+
+def document_case_reference(group_key: str) -> str:
+    digest = hashlib.sha256(group_key.encode("utf-8")).hexdigest()[:16]
+    return f"caseref-{digest}"
+
+
+def document_domain_label(value: str) -> str:
+    clean = safe_slug(value, default="", limit=80)
+    return DOCUMENT_DOMAIN_LABELS.get(clean, safe_text(value) or "oblast nezjištěna")
+
+
+def document_type_label(value: str) -> str:
+    clean = safe_slug(value, default="", limit=80)
+    return DOCUMENT_TYPE_LABELS.get(clean, safe_text(value) or "typ nezjištěn")
+
+
+def document_case_group_type_label(value: str) -> str:
+    clean = safe_slug(value, default="", limit=80)
+    return DOCUMENT_CASE_GROUP_LABELS.get(clean, safe_text(value) or "Vazba")
+
+
+def document_case_summary(
+    *,
+    group_type: str,
+    label: str,
+    document_count: int,
+    domains: list[str],
+    document_types: list[str],
+) -> str:
+    group_label = document_case_group_type_label(group_type)
+    domain_text = ", ".join(document_domain_label(value) for value in domains) or "oblast nezjištěna"
+    type_text = ", ".join(document_type_label(value) for value in document_types[:3]) or "typ nezjištěn"
+    if group_type == "asset":
+        reason = (
+            f"Samostatná související věc: {label}."
+            if document_count == 1
+            else f"Dokumenty mají stejnou související věc: {label}."
+        )
+    elif group_type == "counterparty":
+        reason = (
+            f"Dokument zatím nemá věc, ale má protistranu: {label.replace('Protistrana: ', '')}."
+            if document_count == 1
+            else f"Dokumenty zatím nemají věc, ale sdílí stejnou protistranu: {label.replace('Protistrana: ', '')}."
+        )
+    else:
+        reason = (
+            "Dokument zatím nemá vyplněnou věc ani protistranu."
+            if document_count == 1
+            else "Dokumenty zatím nemají vyplněnou věc ani protistranu."
+        )
+    return f"{group_label}: {reason} {document_count} dokumentů; {domain_text}; {type_text}."
+
+
 def stored_documents_review_status(vault_dir: Path = DEFAULT_DOCUMENTS_DIR, limit: int = 8) -> dict[str, Any]:
     text_by_id = {
         str(item.get("document_id", "")): str(item.get("text", ""))
@@ -1818,6 +4268,9 @@ def stored_documents_review_status(vault_dir: Path = DEFAULT_DOCUMENTS_DIR, limi
     for row in read_jsonl(vault_dir / "index" / "documents_index.jsonl"):
         document_id = str(row.get("document_id", ""))
         if not document_id:
+            continue
+        lifecycle_status = safe_text(str(row.get("lifecycle_status", "active") or "active")).casefold()
+        if lifecycle_status in {"archived", "trashed"}:
             continue
         reading_status = effective_document_reading_status(row, text_chars=len(text_by_id.get(document_id, "")))
         status_counts[reading_status] = status_counts.get(reading_status, 0) + 1
@@ -1841,6 +4294,231 @@ def stored_documents_review_status(vault_dir: Path = DEFAULT_DOCUMENTS_DIR, limi
         "status_labels": READING_STATUS_LABELS,
         "next_items": pending[:limit],
     }
+
+
+def document_review_report_status(
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    limit: int = 12,
+    short_text_threshold: int = 500,
+) -> dict[str, Any]:
+    text_by_id = {
+        str(item.get("document_id", "")): str(item.get("text", ""))
+        for item in read_jsonl(vault_dir / "index" / "text_index.jsonl")
+    }
+    documents = read_jsonl(vault_dir / "index" / "documents_index.jsonl")
+    status_counts = {status: 0 for status in READING_STATUS_LABELS}
+    reason_counts = {reason: 0 for reason in DOCUMENT_REVIEW_REASON_LABELS}
+    items: list[dict[str, Any]] = []
+    grouped_items: dict[str, list[dict[str, Any]]] = {group["id"]: [] for group in DOCUMENT_REVIEW_GROUPS}
+    active_count = 0
+    for row in documents:
+        document_id = str(row.get("document_id", ""))
+        if not document_id:
+            continue
+        lifecycle_status = safe_text(str(row.get("lifecycle_status", "active") or "active")).casefold()
+        if lifecycle_status in {"archived", "trashed"}:
+            continue
+        active_count += 1
+        text_chars = len(text_by_id.get(document_id, ""))
+        reading_status = effective_document_reading_status(row, text_chars=text_chars)
+        status_counts[reading_status] = status_counts.get(reading_status, 0) + 1
+        extraction = row.get("text_extraction")
+        if not isinstance(extraction, dict):
+            extraction = {}
+
+        reasons: list[str] = []
+        weak_fields: list[str] = []
+        if reading_status == "needs_review":
+            reasons.append("needs_review")
+        if text_chars == 0:
+            reasons.append("zero_text")
+        elif text_chars < short_text_threshold:
+            reasons.append("short_text")
+        if extraction.get("ocr_needed") is True:
+            reasons.append("ocr_needed")
+        for field, fallback in (("domain", "other"), ("document_type", "document")):
+            value = safe_slug(str(row.get(field, "")), default="", limit=80)
+            if not value or value in {fallback, "unknown"}:
+                weak_fields.append(field)
+        for field in ("counterparty", "related_asset"):
+            if not safe_text(str(row.get(field, ""))):
+                weak_fields.append(field)
+        if weak_fields:
+            reasons.append("weak_metadata")
+
+        for reason in set(reasons):
+            reason_counts[reason] = reason_counts.get(reason, 0) + 1
+        if not reasons:
+            continue
+        weak_labels = [DOCUMENT_REVIEW_FIELD_LABELS.get(field, field) for field in weak_fields]
+        reason_labels = [DOCUMENT_REVIEW_REASON_LABELS.get(reason, reason) for reason in reasons]
+        if weak_labels and len(reasons) == 1 and reasons[0] == "weak_metadata":
+            review_summary = f"Doplnit: {', '.join(weak_labels)}."
+        elif weak_labels:
+            review_summary = f"Zkontrolovat čtení a doplnit: {', '.join(weak_labels)}."
+        else:
+            review_summary = "Zkontrolovat čtení dokumentu."
+        decision_group = document_review_decision_group(reasons)
+        recommended_action = document_review_recommended_action(decision_group, weak_labels)
+
+        item = {
+            "document_id": document_id,
+            "document_ref": document_reference(document_id),
+            "title": safe_text(str(row.get("title") or row.get("original_filename") or document_id))[:180],
+            "domain": safe_text(str(row.get("domain", "")))[:80],
+            "document_type": safe_text(str(row.get("document_type", "")))[:80],
+            "counterparty": safe_text(str(row.get("counterparty", "")))[:120],
+            "related_asset": safe_text(str(row.get("related_asset", "")))[:120],
+            "reading_status": reading_status,
+            "reading_status_label": READING_STATUS_LABELS.get(reading_status, reading_status),
+            "text_chars": text_chars,
+            "extraction_method": safe_text(str(extraction.get("method", "")))[:80],
+            "weak_metadata_fields": weak_fields,
+            "weak_metadata_labels": weak_labels,
+            "decision_group": decision_group,
+            "decision_group_label": document_review_group_label(decision_group),
+            "recommended_action": recommended_action,
+            "review_summary": review_summary,
+            "reading_summary": f"Čtení: {READING_STATUS_LABELS.get(reading_status, reading_status)}, text {text_chars} znaků",
+            "classification_summary": (
+                f"Oblast: {safe_text(str(row.get('domain', '')))[:80] or 'nezjištěna'}; "
+                f"typ: {safe_text(str(row.get('document_type', '')))[:80] or 'nezjištěn'}"
+            ),
+            "reasons": [
+                {"id": reason, "label": label}
+                for reason, label in zip(reasons, reason_labels)
+            ],
+        }
+        items.append(item)
+        grouped_items.setdefault(decision_group, []).append(item)
+
+    items.sort(
+        key=lambda item: (
+            0 if any(reason["id"] in {"needs_review", "zero_text", "ocr_needed"} for reason in item["reasons"]) else 1,
+            item["text_chars"],
+            item["title"].casefold(),
+        )
+    )
+    for group_items in grouped_items.values():
+        group_items.sort(
+            key=lambda item: (
+                item["text_chars"],
+                item["title"].casefold(),
+            )
+        )
+    reading_issue_count = sum(
+        1
+        for item in items
+        if any(reason["id"] in {"needs_review", "zero_text", "short_text", "ocr_needed"} for reason in item["reasons"])
+    )
+    metadata_issue_count = sum(
+        1
+        for item in items
+        if any(reason["id"] == "weak_metadata" for reason in item["reasons"])
+    )
+    if not items:
+        message = f"V pořádku: {active_count} aktivních dokumentů bez zjevné revize."
+    elif reading_issue_count == 0:
+        message = (
+            f"Čtení je v pořádku. {metadata_issue_count} dokumentům chybí doplnit údaje "
+            "jako protistrana nebo vazba na auto/projekt."
+        )
+    else:
+        message = (
+            f"{len(items)} dokumentů vyžaduje kontrolu: {reading_issue_count} kvůli čtení/OCR, "
+            f"{metadata_issue_count} kvůli doplnění údajů."
+        )
+    groups = document_review_report_groups(
+        grouped_items=grouped_items,
+        ok_count=max(0, active_count - len(items)),
+        limit=limit,
+    )
+    return {
+        "summary": {
+            "total_indexed": len(documents),
+            "active_documents": active_count,
+            "candidate_count": len(items),
+            "short_text_threshold": short_text_threshold,
+            "status_counts": status_counts,
+            "reason_counts": reason_counts,
+            "reason_labels": DOCUMENT_REVIEW_REASON_LABELS,
+            "field_labels": DOCUMENT_REVIEW_FIELD_LABELS,
+        },
+        "groups": groups,
+        "items": items[:limit],
+        "truncated": len(items) > limit,
+        "message": message,
+    }
+
+
+def document_review_decision_group(reasons: list[str]) -> str:
+    reason_set = set(reasons)
+    if "zero_text" in reason_set or "ocr_needed" in reason_set:
+        return "zero_text"
+    if "short_text" in reason_set:
+        return "short_text"
+    if "weak_metadata" in reason_set:
+        return "weak_metadata"
+    if "needs_review" in reason_set:
+        return "needs_review"
+    return "ok"
+
+
+def document_review_group_label(group_id: str) -> str:
+    for group in DOCUMENT_REVIEW_GROUPS:
+        if group["id"] == group_id:
+            return group["label"]
+    return group_id
+
+
+def document_review_recommended_action(group_id: str, weak_labels: list[str]) -> str:
+    if group_id == "zero_text":
+        return "OCR nebo ruční kontrola; pokud dokument text nepotřebuje, označit jako OK bez textu."
+    if group_id == "short_text":
+        return "Ověřit, zda je text kompletní; při neúplném čtení spustit OCR nebo ruční revizi."
+    if group_id == "weak_metadata":
+        missing = f": {', '.join(weak_labels)}" if weak_labels else "."
+        return f"Doplnit metadata{missing}"
+    if group_id == "needs_review":
+        return "Otevřít dokument, zkontrolovat čtení a potvrdit stav."
+    return "Bez akce."
+
+
+def document_review_report_groups(
+    *,
+    grouped_items: dict[str, list[dict[str, Any]]],
+    ok_count: int,
+    limit: int,
+) -> list[dict[str, Any]]:
+    groups: list[dict[str, Any]] = []
+    for group in DOCUMENT_REVIEW_GROUPS:
+        group_id = group["id"]
+        if group_id == "ok":
+            groups.append(
+                {
+                    "id": group_id,
+                    "label": group["label"],
+                    "count": ok_count,
+                    "empty_label": group["empty_label"],
+                    "recommended_action": group["action"],
+                    "items": [],
+                    "truncated": False,
+                }
+            )
+            continue
+        items = grouped_items.get(group_id, [])
+        groups.append(
+            {
+                "id": group_id,
+                "label": group["label"],
+                "count": len(items),
+                "empty_label": group["empty_label"],
+                "recommended_action": group["action"],
+                "items": items[:limit],
+                "truncated": len(items) > limit,
+            }
+        )
+    return groups
 
 
 def normalize_reading_status(value: str) -> str:
@@ -1873,7 +4551,11 @@ def find_document_row_index_by_reference(documents: list[dict[str, Any]], refere
     if safe_reference.startswith("docref-"):
         for index, row in enumerate(documents):
             document_id = str(row.get("document_id", ""))
-            if document_id and document_reference(document_id) == safe_reference:
+            redacted_document_id = safe_text(document_id)
+            if document_id and (
+                document_reference(document_id) == safe_reference
+                or document_reference(redacted_document_id) == safe_reference
+            ):
                 return index
     return None
 
@@ -1977,15 +4659,13 @@ def backup_document_reading_status_metadata(vault_dir: Path, document_id: str, m
 
 
 def download_problem_kind(item: dict[str, Any]) -> str:
+    status = str(item.get("status", ""))
+    if status in {"already_in_vault", "duplicate", "skipped", "imported"}:
+        return ""
     if item.get("is_encrypted"):
         return "encrypted"
-    status = str(item.get("status", ""))
     if status == "invalid":
         return "invalid"
-    if status in {"already_in_vault", "duplicate"}:
-        return "duplicate"
-    if status == "skipped":
-        return "skipped"
     return ""
 
 
@@ -1993,8 +4673,6 @@ def with_problem_label(item: dict[str, Any]) -> dict[str, Any]:
     kind = download_problem_kind(item)
     labels = {
         "encrypted": "šifrované PDF",
-        "duplicate": "už uložené / duplicita",
-        "skipped": "přeskočeno",
         "invalid": "neplatný soubor",
     }
     enriched = dict(item)
@@ -2290,6 +4968,91 @@ def open_project_terminal() -> dict[str, Any]:
     return {"ok": completed.returncode == 0, "message": message, "returncode": completed.returncode}
 
 
+def cockpit_process_command(pid: int) -> str:
+    try:
+        completed = subprocess.run(
+            ["ps", "-p", str(pid), "-o", "command="],
+            capture_output=True,
+            text=True,
+            timeout=3,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
+    if completed.returncode != 0:
+        return ""
+    return completed.stdout.strip()
+
+
+def command_is_cockpit_server(command: str) -> bool:
+    script_path = str(PROJECT_ROOT / "scripts" / "cockpit_server.py")
+    return script_path in command or "scripts/cockpit_server.py" in command
+
+
+def start_cockpit_restart_action(
+    *,
+    confirmed: bool,
+    host: str = "127.0.0.1",
+    port: int = COCKPIT_PORT,
+    pid: int | None = None,
+    launcher: Callable[..., object] | None = None,
+) -> dict[str, Any]:
+    if not confirmed:
+        return {
+            "ok": False,
+            "message": "Restart Cockpitu nebyl potvrzen.",
+            "status": "confirmation_required",
+        }
+    current_pid = pid if pid is not None else os.getpid()
+    command = cockpit_process_command(current_pid)
+    if not command_is_cockpit_server(command):
+        return {
+            "ok": False,
+            "message": "Bezpečnostní kontrola selhala: aktuální proces nevypadá jako Cockpit server.",
+            "status": "unsafe_target",
+            "pid": current_pid,
+        }
+    log_file = PROJECT_ROOT / "data" / "private" / "cockpit" / "restart.log"
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+    log_handle = log_file.open("a", encoding="utf-8")
+    command_args = [
+        str(PROJECT_ROOT / ".venv" / "bin" / "python"),
+        str(COCKPIT_RESTART_SCRIPT),
+        "--pid",
+        str(current_pid),
+        "--host",
+        host,
+        "--port",
+        str(port),
+    ]
+    starter = launcher or subprocess.Popen
+    try:
+        starter(
+            command_args,
+            cwd=str(PROJECT_ROOT),
+            stdout=log_handle,
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
+        log_handle.close()
+    except OSError as exc:
+        log_handle.close()
+        return {
+            "ok": False,
+            "message": f"Restart worker se nepodařilo spustit: {exc}",
+            "status": "worker_failed",
+            "pid": current_pid,
+        }
+    return {
+        "ok": True,
+        "message": "Bezpečný restart Cockpitu zahájen. Stránka bude pár sekund nedostupná, potom ji obnov.",
+        "status": "restart_started",
+        "pid": current_pid,
+        "url": f"http://{host}:{port}",
+        "log": str(relative_to_project(log_file)),
+    }
+
+
 def open_terminal_command(command: str, label: str) -> dict[str, Any]:
     script = (
         'tell application "Terminal"\n'
@@ -2335,6 +5098,9 @@ class CockpitServer:
         server.serve_forever()
 
     def make_handler(self):
+        cockpit_host = self.host
+        cockpit_port = self.port
+
         class Handler(BaseHTTPRequestHandler):
             server_version = "SamanthaCockpit/0.1"
 
@@ -2355,6 +5121,33 @@ class CockpitServer:
                 if parsed.path == "/api/web-apps":
                     self.respond_json(web_apps_catalog())
                     return
+                if parsed.path == "/api/recovery/status":
+                    self.respond_json(recovery_center_status())
+                    return
+                if parsed.path == "/api/quick-notes/status":
+                    self.respond_json(quick_notes_status())
+                    return
+                if parsed.path == "/api/urgent-reminders/status":
+                    self.respond_json(urgent_reminders_status())
+                    return
+                if parsed.path == "/api/quick-notes/detail":
+                    params = parse_qs(parsed.query)
+                    raw_note_number = params.get("note_number", params.get("note", ["0"]))[0]
+                    try:
+                        note_number = int(raw_note_number)
+                    except (TypeError, ValueError):
+                        note_number = 0
+                    self.respond_json(quick_note_detail_status(note_number=note_number))
+                    return
+                if parsed.path == "/api/projects/status":
+                    self.respond_json(projects_status())
+                    return
+                if parsed.path == "/api/quantitative-status":
+                    self.respond_json(quantitative_status_overview())
+                    return
+                if parsed.path == "/api/consistency-status":
+                    self.respond_json(document_consistency_status())
+                    return
                 if parsed.path == "/api/email-processing/overview":
                     self.respond_json(empty_email_processing_overview())
                     return
@@ -2365,6 +5158,14 @@ class CockpitServer:
                     params = parse_qs(parsed.query)
                     query = params.get("q", [""])[0]
                     self.respond_json(search_document_index(query=query))
+                    return
+                if parsed.path == "/api/documents/review-report":
+                    self.respond_json(document_review_report_status())
+                    return
+                if parsed.path == "/api/documents/case-detail":
+                    params = parse_qs(parsed.query)
+                    case_ref = params.get("case_ref", [""])[0]
+                    self.respond_json(document_case_detail_status(case_ref=case_ref))
                     return
                 if parsed.path.startswith("/local-apps/"):
                     self.respond_local_app_file(parsed.path)
@@ -2379,6 +5180,16 @@ class CockpitServer:
                 if parsed.path == "/api/terminal/open":
                     self.respond_json(open_project_terminal())
                     return
+                if parsed.path == "/api/cockpit/restart":
+                    payload = self.read_json()
+                    self.respond_json(
+                        start_cockpit_restart_action(
+                            confirmed=bool(payload.get("confirmed")),
+                            host=cockpit_host,
+                            port=cockpit_port,
+                        )
+                    )
+                    return
                 if parsed.path == "/api/samantha/open":
                     self.respond_json(open_samantha_chat())
                     return
@@ -2388,6 +5199,24 @@ class CockpitServer:
                 if parsed.path == "/api/reminders/done":
                     payload = self.read_json()
                     self.respond_json(mark_reminder_done_action(reminder_id=str(payload.get("reminder_id", ""))))
+                    return
+                if parsed.path == "/api/reminders/cancel-payment":
+                    payload = self.read_json()
+                    self.respond_json(
+                        cancel_payment_reminder_action(
+                            reminder_id=str(payload.get("reminder_id", "")),
+                            reason=str(payload.get("reason", "")),
+                            evidence_archive_id=str(payload.get("evidence_archive_id", "")),
+                        )
+                    )
+                    return
+                if parsed.path == "/api/urgent-reminders/done":
+                    payload = self.read_json()
+                    try:
+                        reminder_number = int(payload.get("reminder_number", 0) or 0)
+                    except (TypeError, ValueError):
+                        reminder_number = 0
+                    self.respond_json(urgent_reminder_done_action(reminder_number=reminder_number))
                     return
                 if parsed.path == "/api/reminders/source":
                     payload = self.read_json()
@@ -2427,6 +5256,28 @@ class CockpitServer:
                             document_id=str(payload.get("document_id", "")),
                             reading_status=str(payload.get("reading_status", "")),
                             note=str(payload.get("note", "")),
+                        )
+                    )
+                    return
+                if parsed.path == "/api/documents/classification-metadata":
+                    payload = self.read_json()
+                    raw_metadata = payload.get("metadata")
+                    self.respond_json(
+                        update_document_classification_metadata_action(
+                            document_id=str(payload.get("document_id", "")),
+                            metadata=raw_metadata if isinstance(raw_metadata, dict) else {},
+                        )
+                    )
+                    return
+                if parsed.path == "/api/documents/due-reminder":
+                    payload = self.read_json()
+                    self.respond_json(
+                        create_document_due_reminder_action(
+                            candidate_ref=str(payload.get("candidate_ref", "")),
+                            title=str(payload.get("title", "")),
+                            notes=str(payload.get("notes", "")),
+                            priority=str(payload.get("priority", "")),
+                            confirmed=bool(payload.get("confirmed")),
                         )
                     )
                     return
@@ -3796,14 +6647,36 @@ COCKPIT_HTML = """<!doctype html>
     .dashboard-value { overflow-wrap: anywhere; }
     .quick-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-content: start; }
     .quick-actions button { width: 100%; }
+    .health-panel { border: 1px solid #cfd7e3; border-radius: 8px; background: #fbfcfe; padding: 10px 12px; display: grid; gap: 7px; }
+    .health-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    .health-item { border: 1px solid #edf0f4; border-radius: 7px; background: white; padding: 8px; min-width: 0; }
+    .health-label { display: block; color: var(--muted); font-size: 11px; line-height: 1.2; }
+    .health-value { display: block; margin-top: 3px; font-size: 13px; font-weight: 650; overflow-wrap: anywhere; }
+    .urgent-alert { border: 2px solid var(--red); border-radius: 8px; background: #fff4f2; padding: 12px 14px; display: grid; gap: 9px; }
+    .urgent-alert.hidden { display: none; }
+    .urgent-alert-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    .urgent-alert-title { color: var(--red); font-weight: 800; }
+    .urgent-alert-list { display: grid; gap: 5px; color: #5f1d18; font-size: 13px; }
+    .action-queue { display: grid; gap: 9px; }
+    .action-card { border: 1px solid #edf0f4; border-radius: 8px; padding: 11px; background: #fbfcfe; display: grid; gap: 8px; }
+    .action-card-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: start; }
+    .action-title { font-weight: 750; overflow-wrap: anywhere; }
+    .action-detail { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
     .work-grid { display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: 12px; align-items: stretch; }
     .work-card { border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: #fbfcfe; display: grid; gap: 10px; align-content: start; min-height: 170px; }
     .work-card h3 { margin: 0; font-size: 13px; color: #253047; }
     .work-count { font-size: 27px; font-weight: 750; line-height: 1; }
     .work-list { display: grid; gap: 7px; font-size: 12px; color: #344054; }
+    .review-report-list { max-height: 360px; overflow: auto; padding-right: 4px; align-content: start; }
     .work-item { border-top: 1px solid #edf0f4; padding-top: 7px; overflow-wrap: anywhere; }
     .work-item:first-child { border-top: 0; padding-top: 0; }
     .work-meta { color: var(--muted); font-size: 11px; margin-top: 2px; }
+    .review-group { border-top: 1px solid #edf0f4; padding-top: 9px; display: grid; gap: 7px; }
+    .review-group:first-child { border-top: 0; padding-top: 0; }
+    .review-group-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+    .review-group-title { font-weight: 750; color: #253047; }
+    .review-group-count { color: var(--muted); font-size: 11px; white-space: nowrap; }
+    .review-action { color: #344054; font-size: 12px; font-weight: 650; }
     .search-controls { display: grid; grid-template-columns: minmax(220px, 1fr) auto; gap: 10px; align-items: center; }
     input[type="search"], select { box-sizing: border-box; width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 10px 11px; font: inherit; background: white; color: var(--ink); }
     .search-results { display: grid; gap: 9px; margin-top: 12px; }
@@ -3846,7 +6719,46 @@ COCKPIT_HTML = """<!doctype html>
     .app-description { color: #344054; font-size: 13px; line-height: 1.4; margin-top: 3px; }
     .app-kind { color: var(--muted); font-size: 12px; margin-top: 4px; }
     .button-link { display: inline-block; border-radius: 6px; padding: 9px 12px; font-weight: 650; text-decoration: none; background: var(--blue); color: white; white-space: nowrap; }
-    .reminder-list { display: grid; gap: 10px; }
+    .project-toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+    .project-toolbar button.active { background: var(--blue); color: white; }
+    .project-list { display: grid; gap: 9px; }
+    .project-card { border: 1px solid #edf0f4; border-radius: 8px; padding: 11px; background: #fbfcfe; display: grid; gap: 7px; }
+    .project-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
+    .project-title { font-weight: 750; overflow-wrap: anywhere; }
+    .project-priority { border: 1px solid var(--line); border-radius: 999px; padding: 3px 7px; font-size: 12px; background: white; color: #344054; }
+    .project-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+    .project-next { color: #263244; font-size: 13px; line-height: 1.4; overflow-wrap: anywhere; }
+    .project-flags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .project-flag { border-radius: 999px; padding: 3px 7px; font-size: 11px; background: #fff7ed; color: #9a6700; }
+    .project-detail { display: grid; gap: 5px; border-top: 1px solid #edf0f4; padding-top: 7px; }
+    .project-detail.hidden { display: none; }
+    .quick-note-detail pre { white-space: pre-wrap; margin: 6px 0 0; max-height: 360px; overflow: auto; border: 1px solid #edf0f4; border-radius: 7px; padding: 10px; background: #fff; font-size: 13px; line-height: 1.45; }
+    .quantitative-panel { display: grid; gap: 10px; }
+    .quantitative-summary { display: grid; gap: 6px; }
+    .quantitative-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .quantitative-card { border: 1px solid #edf0f4; border-radius: 8px; padding: 10px; background: #fbfcfe; display: grid; gap: 5px; }
+    .quantitative-card h3 { margin: 0; font-size: 13px; color: #253047; }
+    .quantitative-card pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+	    .quantitative-diff-list { display: grid; gap: 8px; }
+	    .quantitative-diff-item { border-top: 1px solid #edf0f4; padding-top: 8px; display: grid; gap: 4px; }
+	    .quantitative-diff-item:first-child { border-top: 0; padding-top: 0; }
+	    .quantitative-diff-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+	    .recovery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+		    .recovery-card { border: 1px solid #edf0f4; border-radius: 8px; padding: 10px; background: #fbfcfe; display: grid; gap: 5px; }
+		    .recovery-card h3 { margin: 0; font-size: 13px; color: #253047; }
+		    .recovery-list { display: grid; gap: 8px; }
+		    .recovery-command { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; background: #fff; border: 1px solid #edf0f4; border-radius: 7px; padding: 8px; overflow-wrap: anywhere; }
+    .diagnostics-list { display: grid; gap: 8px; }
+    .diagnostics-row { border: 1px solid #edf0f4; border-radius: 8px; padding: 10px; background: #fbfcfe; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
+    .diagnostics-row-title { font-weight: 750; overflow-wrap: anywhere; }
+    .diagnostics-row-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; margin-top: 3px; }
+    .diagnostics-badge { border-radius: 999px; padding: 3px 8px; font-size: 12px; font-weight: 700; background: white; border: 1px solid var(--line); }
+    .case-detail { border-top: 1px solid #edf0f4; margin-top: 8px; padding-top: 8px; display: grid; gap: 8px; }
+    .case-detail.hidden { display: none; }
+    .case-section-title { font-size: 12px; font-weight: 750; color: #253047; margin-top: 2px; }
+    .case-status-row { border: 1px solid #edf0f4; border-radius: 8px; padding: 8px; background: #fff; display: grid; gap: 4px; }
+    .case-document-row { border: 1px solid #edf0f4; border-radius: 8px; padding: 9px; background: #fbfcfe; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
+		    .reminder-list { display: grid; gap: 10px; }
     .reminder-conflict { border: 1px solid #f59e0b; border-radius: 8px; padding: 10px; background: #fffbeb; display: grid; gap: 7px; }
     .reminder-conflict-title { font-weight: 750; color: #92400e; }
     .reminder-conflict-item { border-top: 1px solid #fde68a; padding-top: 7px; display: grid; gap: 5px; }
@@ -3867,7 +6779,7 @@ COCKPIT_HTML = """<!doctype html>
     .vault-summary details { border: 1px solid #edf0f4; border-radius: 7px; padding: 9px 10px; background: #fbfcfe; }
     .vault-summary summary { cursor: pointer; font-weight: 650; }
     @media (max-width: 1050px) { .today-dashboard { grid-template-columns: 1fr; } .work-grid { grid-template-columns: 1fr; } }
-    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
+	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .recovery-grid { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -3876,13 +6788,11 @@ COCKPIT_HTML = """<!doctype html>
     <div class="toolbar">
       <button class="secondary" id="refreshBtn">Obnovit</button>
       <button class="secondary" id="webAppsBtn">Webové aplikace</button>
+      <button class="secondary" id="projectsBtn">Projekty</button>
       <button class="secondary" id="remindersBtn">Reminders</button>
       <button class="secondary" id="emailProcessingBtn">Email Processing</button>
       <button class="primary" id="scanDocuBtn">Otevřít ScanDocu</button>
       <button class="secondary" id="scanDocuReviewBtn">Revidovat uložené</button>
-      <button class="secondary" id="samanthaChatBtn">Samantha chat</button>
-      <button class="secondary" id="codexCliBtn">Codex CLI</button>
-      <button class="secondary" id="terminalBtn">Terminál v projektu</button>
     </div>
   </header>
   <main>
@@ -3903,6 +6813,9 @@ COCKPIT_HTML = """<!doctype html>
         <div class="dashboard-body dashboard-list">
           <div class="dashboard-row"><span class="dashboard-label">ScanDocu</span><span id="dashboardScanDocu" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Reminders</span><span id="dashboardReminders" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Projekty</span><span id="dashboardProjects" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Kvantitativní</span><span id="dashboardQuantitative" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Audit</span><span id="dashboardConsistency" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Záloha</span><span id="dashboardBackup" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Git</span><span id="dashboardGit" class="dashboard-value"></span></div>
         </div>
@@ -3913,19 +6826,43 @@ COCKPIT_HTML = """<!doctype html>
           <div class="quick-actions">
             <button class="primary" id="dashboardProcessBtn">Zpracovat další</button>
             <button class="secondary" id="dashboardReviewBtn">Revidovat další</button>
-            <button class="secondary" id="dashboardWebAppsBtn">Webové aplikace</button>
-            <button class="secondary" id="dashboardRemindersBtn">Reminders</button>
-            <button class="secondary" id="dashboardEmailBtn">Email Processing</button>
-            <button class="secondary" id="dashboardSamanthaBtn">Samantha chat</button>
-            <button class="secondary" id="dashboardCodexBtn">Codex CLI</button>
-            <button class="secondary" id="dashboardRefreshBtn">Obnovit stav</button>
-          </div>
+	            <button class="secondary" id="dashboardTerminalBtn">Terminál v projektu</button>
+		            <button class="secondary" id="dashboardQuantitativeBtn">Kvantitativní status</button>
+		            <button class="secondary" id="dashboardQuickNotesBtn">QN přehled</button>
+		            <button class="secondary" id="dashboardUrgentRemindersBtn">Důležitá připomenutí</button>
+		            <button class="secondary" id="dashboardRecoveryBtn">Recovery centrum</button>
+		            <button class="secondary" id="dashboardDiagnosticsBtn">Diagnostika</button>
+		            <button class="secondary" id="dashboardRestartBtn">Restart Cockpitu</button>
+		            <button class="secondary" id="dashboardRefreshBtn">Obnovit stav</button>
+	          </div>
           <div id="dashboardActionHint" class="status-line"></div>
         </div>
       </section>
-    </div>
-    <div id="statusLine" class="status-line">Načítám stav...</div>
-    <section>
+	    </div>
+	    <div id="statusLine" class="status-line">Načítám stav...</div>
+		    <div id="frontendHealthPanel" class="health-panel" aria-label="Health stav Cockpitu">
+		      <div class="health-grid">
+		        <div class="health-item"><span class="health-label">Frontend</span><span id="frontendHealthJs" class="health-value warn">JS se zatím nespustil</span></div>
+		        <div class="health-item"><span class="health-label">Tlačítka</span><span id="frontendHealthButtons" class="health-value warn">čekám na napojení</span></div>
+		        <div class="health-item"><span class="health-label">API</span><span id="frontendHealthApi" class="health-value warn">čekám na kontrolu</span></div>
+		        <div class="health-item"><span class="health-label">Poslední chyba</span><span id="frontendHealthError" class="health-value ok">žádná</span></div>
+		      </div>
+		    </div>
+		    <section id="urgentReminderAlert" class="urgent-alert hidden" aria-live="polite">
+		      <div class="urgent-alert-head">
+		        <div id="urgentReminderAlertTitle" class="urgent-alert-title">Důležitá připomenutí</div>
+		        <button class="secondary" id="urgentReminderAlertBtn">Otevřít</button>
+		      </div>
+		      <div id="urgentReminderAlertList" class="urgent-alert-list"></div>
+		    </section>
+		    <section>
+		      <h2>Co teď dělat</h2>
+		      <div class="body">
+		        <div id="actionQueueStatus" class="status-line">Načítám doporučené akce...</div>
+		        <div id="actionQueueList" class="action-queue"></div>
+		      </div>
+		    </section>
+		    <section>
       <h2>Práce s dokumenty</h2>
       <div class="body">
         <div class="work-grid">
@@ -3948,8 +6885,41 @@ COCKPIT_HTML = """<!doctype html>
           <div class="work-card">
             <h3>Problémy</h3>
             <div id="problemCount" class="work-count">0</div>
-            <div class="status-line">Šifrované / duplicitní / přeskočené</div>
+            <div class="status-line">Akční chyby ve frontě</div>
             <div id="problemList" class="work-list"></div>
+          </div>
+          <div class="work-card">
+            <h3>Vstupy dokumentů</h3>
+            <div id="documentIntakeCount" class="work-count">0</div>
+            <div class="status-line">Downloads / e-mail / mobilní sken / lokální inbox</div>
+            <div id="documentIntakeList" class="work-list"></div>
+          </div>
+          <div class="work-card">
+            <h3>Vazby / cases</h3>
+            <div id="documentCasesCount" class="work-count">0</div>
+            <div id="documentCasesStatus" class="status-line">Seskupení podle věci nebo protistrany.</div>
+            <div id="documentCasesList" class="work-list"></div>
+          </div>
+          <div class="work-card">
+            <h3>Klasifikace</h3>
+            <div id="documentClassificationCount" class="work-count">0</div>
+            <div id="documentClassificationStatus" class="status-line">Kvalita metadat dokumentů.</div>
+            <div id="documentClassificationList" class="work-list"></div>
+          </div>
+          <div class="work-card">
+            <h3>Termíny v dokumentech</h3>
+            <div id="documentDueCount" class="work-count">0</div>
+            <div id="documentDueStatus" class="status-line">Kandidáti na připomínky z dokumentů.</div>
+            <div id="documentDueList" class="work-list"></div>
+          </div>
+          <div class="work-card">
+            <h3>Dokumenty k revizi</h3>
+            <div id="reviewReportCount" class="work-count">0</div>
+            <div class="actions">
+              <button class="secondary" id="reviewReportBtn">Načíst report</button>
+            </div>
+            <div id="reviewReportStatus" class="status-line">Report zatím není načtený. Skupiny: Bez textu / OCR, Krátký text, Slabá metadata, K revizi, V pořádku.</div>
+            <div id="reviewReportList" class="work-list review-report-list"></div>
           </div>
         </div>
       </div>
@@ -3994,6 +6964,10 @@ COCKPIT_HTML = """<!doctype html>
       <h2>Souhrn vaultu</h2>
       <div class="body"><div id="vaultText" class="vault-summary"></div></div>
     </section>
+    <section>
+      <h2>Consistency Audit</h2>
+      <div class="body"><pre id="consistencyText"></pre></div>
+    </section>
   </main>
   <div id="remindersModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="remindersTitle">
     <div class="modal">
@@ -4019,6 +6993,130 @@ COCKPIT_HTML = """<!doctype html>
       </div>
     </div>
   </div>
+  <div id="projectsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="projectsTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="projectsTitle">Aktuální projekty</h2>
+        <button class="secondary" id="projectsCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div id="projectsStatus" class="status-line">Načítám projekty...</div>
+        <div class="project-toolbar" aria-label="Filtr projektů">
+          <button class="secondary active" type="button" data-project-filter="all">Vše</button>
+          <button class="secondary" type="button" data-project-filter="priority1">Priorita 1</button>
+          <button class="secondary" type="button" data-project-filter="remind">Připomenout</button>
+          <button class="secondary" type="button" data-project-filter="waiting">Čeká na mě</button>
+        </div>
+        <div id="projectsList" class="project-list"></div>
+      </div>
+    </div>
+  </div>
+	  <div id="quickNotesModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="quickNotesTitle">
+	    <div class="modal">
+	      <div class="modal-header">
+	        <h2 id="quickNotesTitle">QN přehled</h2>
+        <button class="secondary" id="quickNotesCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div id="quickNotesStatus" class="status-line">Načítám Quick Notes...</div>
+        <div id="quickNotesList" class="project-list"></div>
+	      </div>
+	    </div>
+	  </div>
+	  <div id="urgentRemindersModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="urgentRemindersTitle">
+	    <div class="modal">
+	      <div class="modal-header">
+	        <h2 id="urgentRemindersTitle">Důležitá připomenutí</h2>
+        <button class="secondary" id="urgentRemindersCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div id="urgentRemindersStatus" class="status-line">Načítám důležitá připomenutí...</div>
+        <div id="urgentRemindersList" class="project-list"></div>
+	      </div>
+	    </div>
+	  </div>
+		  <div id="recoveryModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="recoveryTitle">
+		    <div class="modal">
+		      <div class="modal-header">
+		        <h2 id="recoveryTitle">Recovery centrum</h2>
+	        <button class="secondary" id="recoveryCloseBtn">Zavřít</button>
+	      </div>
+	      <div class="modal-body">
+	        <div id="recoveryStatus" class="status-line">Načítám recovery stav...</div>
+	        <div class="recovery-grid">
+	          <div class="recovery-card">
+	            <h3>Autosave</h3>
+	            <div id="recoveryAutosave" class="project-meta"></div>
+	          </div>
+	          <div class="recovery-card">
+	            <h3>Git</h3>
+	            <div id="recoveryGit" class="project-meta"></div>
+	          </div>
+	        </div>
+	        <div class="recovery-card">
+	          <h3>Aktivní navázání</h3>
+	          <div id="recoveryProject" class="project-next"></div>
+	        </div>
+	        <div class="recovery-card">
+	          <h3>Handoffy</h3>
+	          <div id="recoveryHandoffs" class="recovery-list"></div>
+	        </div>
+	        <div class="recovery-card">
+	          <h3>Příkazy</h3>
+	          <div id="recoveryCommands" class="recovery-list"></div>
+	        </div>
+		      </div>
+		    </div>
+		  </div>
+	  <div id="diagnosticsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="diagnosticsTitle">
+	    <div class="modal">
+	      <div class="modal-header">
+	        <h2 id="diagnosticsTitle">Diagnostika</h2>
+	        <button class="secondary" id="diagnosticsCloseBtn">Zavřít</button>
+	      </div>
+	      <div class="modal-body">
+	        <div id="diagnosticsStatus" class="status-line">Načítám diagnostiku...</div>
+	        <div class="recovery-card">
+	          <h3>Frontend</h3>
+	          <div id="diagnosticsFrontend" class="project-meta"></div>
+	        </div>
+	        <div class="recovery-card">
+	          <h3>Endpointy</h3>
+	          <div id="diagnosticsEndpointList" class="diagnostics-list"></div>
+	        </div>
+	        <div class="recovery-card">
+	          <h3>Poslední chyby</h3>
+	          <div id="diagnosticsErrorList" class="diagnostics-list"></div>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+		  <div id="quantitativeModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="quantitativeTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="quantitativeTitle">Kvantitativní status</h2>
+        <button class="secondary" id="quantitativeCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body quantitative-panel">
+        <div id="quantitativeStatus" class="status-line">Načítám kvantitativní status...</div>
+        <div class="quantitative-grid">
+          <div class="quantitative-card">
+            <h3>Aktuální stav</h3>
+            <pre id="quantitativeCurrent"></pre>
+          </div>
+          <div class="quantitative-card">
+            <h3>Poslední snapshot</h3>
+            <pre id="quantitativePrevious"></pre>
+          </div>
+        </div>
+        <div class="quantitative-card">
+          <h3>Diff</h3>
+          <div id="quantitativeDiffTotals" class="quantitative-summary"></div>
+          <div id="quantitativeDiffList" class="quantitative-diff-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
   <script>
     const statusLine = document.getElementById("statusLine");
     const downloadsBody = document.getElementById("downloadsBody");
@@ -4032,10 +7130,8 @@ COCKPIT_HTML = """<!doctype html>
     const scanDocuReviewBtn = document.getElementById("scanDocuReviewBtn");
     const processNextBtn = document.getElementById("processNextBtn");
     const reviewNextBtn = document.getElementById("reviewNextBtn");
-    const samanthaChatBtn = document.getElementById("samanthaChatBtn");
-    const codexCliBtn = document.getElementById("codexCliBtn");
-    const terminalBtn = document.getElementById("terminalBtn");
     const webAppsBtn = document.getElementById("webAppsBtn");
+    const projectsBtn = document.getElementById("projectsBtn");
     const remindersBtn = document.getElementById("remindersBtn");
     const emailProcessingBtn = document.getElementById("emailProcessingBtn");
     const remindersModal = document.getElementById("remindersModal");
@@ -4046,39 +7142,296 @@ COCKPIT_HTML = """<!doctype html>
     const webAppsCloseBtn = document.getElementById("webAppsCloseBtn");
     const webAppsStatus = document.getElementById("webAppsStatus");
     const webAppsList = document.getElementById("webAppsList");
+    const projectsModal = document.getElementById("projectsModal");
+    const projectsCloseBtn = document.getElementById("projectsCloseBtn");
+    const projectsStatus = document.getElementById("projectsStatus");
+    const projectsList = document.getElementById("projectsList");
+    const quickNotesModal = document.getElementById("quickNotesModal");
+	    const quickNotesCloseBtn = document.getElementById("quickNotesCloseBtn");
+	    const quickNotesStatus = document.getElementById("quickNotesStatus");
+	    const quickNotesList = document.getElementById("quickNotesList");
+    const urgentRemindersModal = document.getElementById("urgentRemindersModal");
+    const urgentRemindersCloseBtn = document.getElementById("urgentRemindersCloseBtn");
+    const urgentRemindersStatus = document.getElementById("urgentRemindersStatus");
+    const urgentRemindersList = document.getElementById("urgentRemindersList");
+	    const recoveryModal = document.getElementById("recoveryModal");
+	    const recoveryCloseBtn = document.getElementById("recoveryCloseBtn");
+	    const recoveryStatus = document.getElementById("recoveryStatus");
+	    const recoveryAutosave = document.getElementById("recoveryAutosave");
+	    const recoveryGit = document.getElementById("recoveryGit");
+		    const recoveryProject = document.getElementById("recoveryProject");
+		    const recoveryHandoffs = document.getElementById("recoveryHandoffs");
+		    const recoveryCommands = document.getElementById("recoveryCommands");
+    const diagnosticsModal = document.getElementById("diagnosticsModal");
+    const diagnosticsCloseBtn = document.getElementById("diagnosticsCloseBtn");
+    const diagnosticsStatus = document.getElementById("diagnosticsStatus");
+    const diagnosticsFrontend = document.getElementById("diagnosticsFrontend");
+    const diagnosticsEndpointList = document.getElementById("diagnosticsEndpointList");
+    const diagnosticsErrorList = document.getElementById("diagnosticsErrorList");
+		    const quantitativeModal = document.getElementById("quantitativeModal");
+    const quantitativeCloseBtn = document.getElementById("quantitativeCloseBtn");
+    const quantitativeStatus = document.getElementById("quantitativeStatus");
+    const quantitativeCurrent = document.getElementById("quantitativeCurrent");
+    const quantitativePrevious = document.getElementById("quantitativePrevious");
+    const quantitativeDiffTotals = document.getElementById("quantitativeDiffTotals");
+    const quantitativeDiffList = document.getElementById("quantitativeDiffList");
     const todayNewPdfCount = document.getElementById("todayNewPdfCount");
     const todayReviewCount = document.getElementById("todayReviewCount");
     const todayProblemCount = document.getElementById("todayProblemCount");
     const todayHint = document.getElementById("todayHint");
     const dashboardScanDocu = document.getElementById("dashboardScanDocu");
     const dashboardReminders = document.getElementById("dashboardReminders");
+    const dashboardProjects = document.getElementById("dashboardProjects");
+    const dashboardQuantitative = document.getElementById("dashboardQuantitative");
+    const dashboardConsistency = document.getElementById("dashboardConsistency");
     const dashboardBackup = document.getElementById("dashboardBackup");
     const dashboardGit = document.getElementById("dashboardGit");
     const dashboardProcessBtn = document.getElementById("dashboardProcessBtn");
     const dashboardReviewBtn = document.getElementById("dashboardReviewBtn");
-    const dashboardWebAppsBtn = document.getElementById("dashboardWebAppsBtn");
-    const dashboardRemindersBtn = document.getElementById("dashboardRemindersBtn");
-    const dashboardEmailBtn = document.getElementById("dashboardEmailBtn");
-    const dashboardSamanthaBtn = document.getElementById("dashboardSamanthaBtn");
-    const dashboardCodexBtn = document.getElementById("dashboardCodexBtn");
-    const dashboardRefreshBtn = document.getElementById("dashboardRefreshBtn");
+    const dashboardTerminalBtn = document.getElementById("dashboardTerminalBtn");
+		    const dashboardQuantitativeBtn = document.getElementById("dashboardQuantitativeBtn");
+		    const dashboardQuickNotesBtn = document.getElementById("dashboardQuickNotesBtn");
+    const dashboardUrgentRemindersBtn = document.getElementById("dashboardUrgentRemindersBtn");
+			    const dashboardRecoveryBtn = document.getElementById("dashboardRecoveryBtn");
+    const dashboardDiagnosticsBtn = document.getElementById("dashboardDiagnosticsBtn");
+    const dashboardRestartBtn = document.getElementById("dashboardRestartBtn");
+			    const dashboardRefreshBtn = document.getElementById("dashboardRefreshBtn");
     const dashboardActionHint = document.getElementById("dashboardActionHint");
+    const urgentReminderAlert = document.getElementById("urgentReminderAlert");
+    const urgentReminderAlertTitle = document.getElementById("urgentReminderAlertTitle");
+    const urgentReminderAlertList = document.getElementById("urgentReminderAlertList");
+    const urgentReminderAlertBtn = document.getElementById("urgentReminderAlertBtn");
     const newPdfCount = document.getElementById("newPdfCount");
     const reviewCount = document.getElementById("reviewCount");
     const problemCount = document.getElementById("problemCount");
     const newPdfList = document.getElementById("newPdfList");
     const reviewList = document.getElementById("reviewList");
     const problemList = document.getElementById("problemList");
+    const documentIntakeCount = document.getElementById("documentIntakeCount");
+    const documentIntakeList = document.getElementById("documentIntakeList");
+    const documentCasesCount = document.getElementById("documentCasesCount");
+    const documentCasesStatus = document.getElementById("documentCasesStatus");
+    const documentCasesList = document.getElementById("documentCasesList");
+    const documentClassificationCount = document.getElementById("documentClassificationCount");
+    const documentClassificationStatus = document.getElementById("documentClassificationStatus");
+    const documentClassificationList = document.getElementById("documentClassificationList");
+    const documentDueCount = document.getElementById("documentDueCount");
+    const documentDueStatus = document.getElementById("documentDueStatus");
+    const documentDueList = document.getElementById("documentDueList");
+    const reviewReportCount = document.getElementById("reviewReportCount");
+    const reviewReportBtn = document.getElementById("reviewReportBtn");
+    const reviewReportStatus = document.getElementById("reviewReportStatus");
+    const reviewReportList = document.getElementById("reviewReportList");
     const documentSearchInput = document.getElementById("documentSearchInput");
     const documentSearchBtn = document.getElementById("documentSearchBtn");
     const documentSearchStatus = document.getElementById("documentSearchStatus");
     const documentSearchResults = document.getElementById("documentSearchResults");
+    const frontendHealthJs = document.getElementById("frontendHealthJs");
+    const frontendHealthButtons = document.getElementById("frontendHealthButtons");
+    const frontendHealthApi = document.getElementById("frontendHealthApi");
+    const frontendHealthError = document.getElementById("frontendHealthError");
+    const actionQueueStatus = document.getElementById("actionQueueStatus");
+    const actionQueueList = document.getElementById("actionQueueList");
     const readingStatusOptions = [
       ["ok", "OK"],
       ["needs_review", "k revizi"],
       ["unreadable", "nečitelné"],
       ["superseded", "nahrazeno lepší kopií"]
     ];
+    let currentProjects = [];
+    let currentProjectFilter = "all";
+    let currentQuantitative = null;
+    let frontendLastError = "";
+    let frontendErrorHistory = [];
+    const diagnosticsEndpoints = [
+      ["Hlavní status", "/api/status"],
+      ["Recovery", "/api/recovery/status"],
+      ["Webové aplikace", "/api/web-apps"],
+      ["Projekty", "/api/projects/status"],
+      ["Quick Notes", "/api/quick-notes/status"],
+      ["Důležitá připomenutí", "/api/urgent-reminders/status"],
+      ["Kvantitativní", "/api/quantitative-status"],
+      ["Consistency audit", "/api/consistency-status"],
+      ["Dokumenty k revizi", "/api/documents/review-report"]
+    ];
+
+    function setHealthValue(node, text, className) {
+      if (!node) return;
+      node.textContent = text;
+      node.className = `health-value ${className || ""}`.trim();
+    }
+
+    function recordFrontendError(error) {
+      const text = String(error && (error.message || error.reason || error) || "neznámá chyba");
+      frontendLastError = text;
+      frontendErrorHistory = [
+        {createdAt: new Date().toISOString(), text},
+        ...frontendErrorHistory
+      ].slice(0, 8);
+      setHealthValue(frontendHealthError, text.slice(0, 220), "bad");
+    }
+
+    window.addEventListener("error", (event) => {
+      recordFrontendError(event.error || event.message || "frontend error");
+      setHealthValue(frontendHealthJs, "chyba ve frontendu", "bad");
+    });
+    window.addEventListener("unhandledrejection", (event) => {
+      recordFrontendError(event.reason || "unhandled promise rejection");
+      setHealthValue(frontendHealthJs, "chyba ve frontendu", "bad");
+    });
+
+    function verifyButtonHealth() {
+      const requiredIds = [
+        "refreshBtn",
+        "webAppsBtn",
+        "projectsBtn",
+        "remindersBtn",
+        "emailProcessingBtn",
+        "scanDocuBtn",
+        "scanDocuReviewBtn",
+        "dashboardProcessBtn",
+        "dashboardReviewBtn",
+        "dashboardTerminalBtn",
+        "dashboardQuantitativeBtn",
+	        "dashboardQuickNotesBtn",
+        "dashboardUrgentRemindersBtn",
+	        "dashboardRecoveryBtn",
+	        "dashboardRestartBtn",
+	        "dashboardRefreshBtn",
+        "urgentReminderAlertBtn",
+        "reviewReportBtn",
+        "documentSearchBtn",
+        "processNextBtn",
+        "reviewNextBtn"
+      ];
+      const missing = requiredIds.filter((id) => !document.getElementById(id));
+      if (missing.length) {
+        setHealthValue(frontendHealthButtons, `chybí ${missing.length}: ${missing.slice(0, 3).join(", ")}`, "bad");
+        recordFrontendError(`Chybí UI tlačítka: ${missing.join(", ")}`);
+        return false;
+      }
+      setHealthValue(frontendHealthButtons, "napojeno", "ok");
+      return true;
+    }
+
+    async function checkEndpointHealth(url, timeoutMs = 2500) {
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const startedAt = performance.now();
+        const res = await fetch(url, {cache: "no-store", signal: controller.signal});
+        const elapsed = Math.round(performance.now() - startedAt);
+        return {url, ok: res.ok, status: res.status, elapsed};
+      } catch (err) {
+        return {url, ok: false, status: 0, elapsed: 0, error: String(err)};
+      } finally {
+        window.clearTimeout(timer);
+      }
+    }
+
+    async function runFrontendHealthCheck() {
+      setHealthValue(frontendHealthJs, "běží", "ok");
+      verifyButtonHealth();
+      setHealthValue(frontendHealthApi, "kontroluji...", "warn");
+      const results = await Promise.all([
+        checkEndpointHealth("/api/status"),
+        checkEndpointHealth("/api/recovery/status")
+      ]);
+      const failed = results.filter((item) => !item.ok);
+      if (failed.length) {
+        setHealthValue(frontendHealthApi, `chyba ${failed.map((item) => item.url).join(", ")}`, "bad");
+        recordFrontendError(`API health selhal: ${failed.map((item) => `${item.url} ${item.status || item.error || ""}`).join("; ")}`);
+      } else {
+        const slowest = Math.max(...results.map((item) => item.elapsed || 0));
+        setHealthValue(frontendHealthApi, `OK, max ${slowest} ms`, "ok");
+        if (!frontendLastError) {
+          setHealthValue(frontendHealthError, "žádná", "ok");
+        }
+      }
+    }
+
+    async function openDiagnosticsModal() {
+      diagnosticsModal.classList.remove("hidden");
+      diagnosticsStatus.textContent = "Měřím endpointy...";
+      diagnosticsFrontend.textContent = "";
+      diagnosticsEndpointList.innerHTML = "";
+      diagnosticsErrorList.innerHTML = "";
+      const buttonsOk = verifyButtonHealth();
+      diagnosticsFrontend.textContent = [
+        `Frontend JS: běží`,
+        `Tlačítka: ${buttonsOk ? "napojeno" : "problém"}`,
+        `Poslední chyba: ${frontendLastError || "žádná"}`
+      ].join(" | ");
+      try {
+        const results = await Promise.all(
+          diagnosticsEndpoints.map(([label, url]) =>
+            checkEndpointHealth(url, 8000).then((result) => ({...result, label}))
+          )
+        );
+        renderDiagnosticsEndpointRows(results);
+        renderDiagnosticsErrors();
+        const failed = results.filter((item) => !item.ok);
+        diagnosticsStatus.textContent = failed.length
+          ? `Diagnostika doběhla: ${failed.length} endpointů má problém.`
+          : "Diagnostika doběhla: endpointy odpovídají.";
+      } catch (err) {
+        recordFrontendError(err);
+        diagnosticsStatus.textContent = `Chyba diagnostiky: ${err}`;
+      }
+    }
+
+    function closeDiagnosticsModal() {
+      diagnosticsModal.classList.add("hidden");
+    }
+
+    function renderDiagnosticsEndpointRows(results) {
+      diagnosticsEndpointList.innerHTML = "";
+      results.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "diagnostics-row";
+        const text = document.createElement("div");
+        const title = document.createElement("div");
+        title.className = "diagnostics-row-title";
+        title.textContent = item.label || item.url || "";
+        const meta = document.createElement("div");
+        meta.className = "diagnostics-row-meta";
+        meta.textContent = `${item.url || ""} | status ${item.status || 0} | ${item.elapsed || 0} ms${item.error ? " | " + item.error : ""}`;
+        const badge = document.createElement("div");
+        badge.className = `diagnostics-badge ${item.ok ? "ok" : "bad"}`;
+        badge.textContent = item.ok ? "OK" : "chyba";
+        text.appendChild(title);
+        text.appendChild(meta);
+        row.appendChild(text);
+        row.appendChild(badge);
+        diagnosticsEndpointList.appendChild(row);
+      });
+    }
+
+    function renderDiagnosticsErrors() {
+      diagnosticsErrorList.innerHTML = "";
+      if (!frontendErrorHistory.length) {
+        const empty = document.createElement("div");
+        empty.className = "status-line";
+        empty.textContent = "Žádné frontend/API chyby nejsou zachycené.";
+        diagnosticsErrorList.appendChild(empty);
+        return;
+      }
+      frontendErrorHistory.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "diagnostics-row";
+        const text = document.createElement("div");
+        const title = document.createElement("div");
+        title.className = "diagnostics-row-title";
+        title.textContent = item.text || "";
+        const meta = document.createElement("div");
+        meta.className = "diagnostics-row-meta";
+        meta.textContent = item.createdAt || "";
+        text.appendChild(title);
+        text.appendChild(meta);
+        row.appendChild(text);
+        diagnosticsErrorList.appendChild(row);
+      });
+    }
 
     function statusClass(value) {
       if (value === "new") return "ok";
@@ -4092,9 +7445,17 @@ COCKPIT_HTML = """<!doctype html>
       actionMessage.classList.toggle("hidden", !text);
     }
 
-    async function refresh() {
+    let refreshInFlight = false;
+
+    async function refresh(options = {}) {
+      if (refreshInFlight) return;
+      refreshInFlight = true;
+      const silent = options.silent === true;
+      const includeSecondary = options.includeSecondary !== false;
       refreshBtn.disabled = true;
-      statusLine.textContent = "Načítám stav...";
+      if (!silent) {
+        statusLine.textContent = "Načítám stav...";
+      }
       try {
         const res = await fetch("/api/status");
         const data = await res.json();
@@ -4102,16 +7463,33 @@ COCKPIT_HTML = """<!doctype html>
         scanDocuState.innerHTML = data.scandocu && data.scandocu.running
           ? `<span class="ok">ScanDocu běží</span> | ${data.scandocu.url}`
           : `<span class="warn">ScanDocu neběží</span> | ${data.scandocu ? data.scandocu.url : ""}`;
-        backupText.textContent = data.backup || "";
-        renderVaultSummary(data.vault || "");
-        renderDashboard(data);
+	        backupText.textContent = data.backup || "";
+	        renderVaultSummary(data.vault || "");
+	        renderDashboard(data);
+        renderUrgentReminderAlert(data.urgent_reminders || {});
+	        renderActionQueue(data.action_queue || {});
         renderDocumentWork(data.document_work || {});
+        renderDocumentIntake(data.document_intake || {});
+        renderDocumentCases(data.document_cases || {});
+        renderDocumentClassification(data.document_classification || {});
+        renderDocumentDueCandidates(data.document_due_candidates || {});
         renderDownloads(data.downloads || {});
+        if (includeSecondary) {
+          refreshSecondaryStatus();
+        }
       } catch (err) {
+        recordFrontendError(err);
         statusLine.textContent = `Chyba načtení: ${err}`;
       } finally {
         refreshBtn.disabled = false;
+        refreshInFlight = false;
       }
+    }
+
+    function refreshSecondaryStatus() {
+      refreshProjectsSummary();
+      refreshQuantitativeSummary();
+      refreshConsistencySummary();
     }
 
     function renderDocumentWork(work) {
@@ -4141,7 +7519,552 @@ COCKPIT_HTML = """<!doctype html>
       }), "Žádné zjevné problémy ve frontě.");
     }
 
-    function renderDashboard(data) {
+    function renderDocumentIntake(data) {
+      const sources = data.sources || [];
+      documentIntakeCount.textContent = String(data.count || 0);
+      documentIntakeList.innerHTML = "";
+      if (!sources.length) {
+        const empty = document.createElement("div");
+        empty.className = "status-line";
+        empty.textContent = data.message || "Vstupy dokumentů nejdou načíst.";
+        documentIntakeList.appendChild(empty);
+        return;
+      }
+      sources.forEach((source) => {
+        const row = document.createElement("div");
+        row.className = "work-item";
+        const title = document.createElement("div");
+        title.textContent = `${source.label || source.id || "Zdroj"}: ${source.count || 0}`;
+        const meta = document.createElement("div");
+        meta.className = "work-meta";
+        meta.textContent = source.next_action || source.status || "";
+        row.appendChild(title);
+        row.appendChild(meta);
+        (source.items || []).slice(0, 2).forEach((item) => {
+          const detail = document.createElement("div");
+          detail.className = "work-meta";
+          detail.textContent = `${item.title || ""}${item.meta ? " | " + item.meta : ""}`;
+          row.appendChild(detail);
+        });
+        documentIntakeList.appendChild(row);
+      });
+    }
+
+    function renderDocumentCases(data) {
+      const cases = data.cases || [];
+      documentCasesCount.textContent = String(data.case_count || 0);
+      documentCasesStatus.textContent = data.message || "Vazby dokumentů nejsou načtené.";
+      documentCasesList.innerHTML = "";
+      if (!cases.length) {
+        const empty = document.createElement("div");
+        empty.className = "status-line";
+        empty.textContent = "Žádné skutečné vazby se dvěma a více dokumenty nejsou zjištěné.";
+        documentCasesList.appendChild(empty);
+        return;
+      }
+      cases.slice(0, 6).forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "work-item";
+        const title = document.createElement("div");
+        title.textContent = `${item.label || "Case"}: ${item.document_count || 0}`;
+        const meta = document.createElement("div");
+        meta.className = "work-meta";
+        meta.textContent = item.summary || item.group_type_label || "";
+        row.appendChild(title);
+        row.appendChild(meta);
+        (item.documents || []).slice(0, 2).forEach((doc) => {
+          const detail = document.createElement("div");
+          detail.className = "work-meta";
+          detail.textContent = `${doc.title || ""} | ${doc.domain_label || doc.domain || "oblast nezjištěna"} / ${doc.document_type_label || doc.document_type || "typ nezjištěn"}`;
+          row.appendChild(detail);
+        });
+        const detailNode = document.createElement("div");
+        detailNode.className = "case-detail hidden";
+        const actions = document.createElement("div");
+        actions.className = "actions";
+        const detailBtn = document.createElement("button");
+        detailBtn.className = "secondary";
+        detailBtn.type = "button";
+        detailBtn.textContent = "Detail case";
+        detailBtn.addEventListener("click", () => loadDocumentCaseDetail(item.case_ref, detailNode, detailBtn));
+        actions.appendChild(detailBtn);
+        row.appendChild(actions);
+        row.appendChild(detailNode);
+        documentCasesList.appendChild(row);
+      });
+      if (data.truncated) {
+        const note = document.createElement("div");
+        note.className = "status-line";
+        note.textContent = "Seznam vazeb je zkrácený.";
+        documentCasesList.appendChild(note);
+      }
+    }
+
+    async function loadDocumentCaseDetail(caseRef, detailNode, button) {
+      if (!caseRef) return;
+      if (!detailNode.classList.contains("hidden") && detailNode.dataset.loaded === "true") {
+        detailNode.classList.add("hidden");
+        button.textContent = "Detail case";
+        return;
+      }
+      button.disabled = true;
+      button.textContent = "Načítám...";
+      documentCasesStatus.textContent = "Načítám detail case...";
+      try {
+        const res = await fetch(`/api/documents/case-detail?case_ref=${encodeURIComponent(caseRef)}`);
+        const data = await res.json();
+        renderDocumentCaseDetail(data, detailNode);
+        detailNode.classList.remove("hidden");
+        detailNode.dataset.loaded = "true";
+        button.textContent = "Skrýt detail";
+        documentCasesStatus.textContent = data.message || "Detail case načten.";
+      } catch (err) {
+        recordFrontendError(err);
+        documentCasesStatus.textContent = `Chyba detailu case: ${err}`;
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    function appendDocumentCaseSection(target, titleText, items, emptyText, renderItem) {
+      const title = document.createElement("div");
+      title.className = "case-section-title";
+      title.textContent = titleText;
+      target.appendChild(title);
+      if (!items || !items.length) {
+        const empty = document.createElement("div");
+        empty.className = "work-meta";
+        empty.textContent = emptyText;
+        target.appendChild(empty);
+        return;
+      }
+      items.forEach((item) => target.appendChild(renderItem(item)));
+    }
+
+    function renderDocumentCaseStatusRow(titleText, metaText, detailText) {
+      const row = document.createElement("div");
+      row.className = "case-status-row";
+      const title = document.createElement("div");
+      title.className = "search-title";
+      title.textContent = titleText;
+      row.appendChild(title);
+      if (metaText) {
+        const meta = document.createElement("div");
+        meta.className = "work-meta";
+        meta.textContent = metaText;
+        row.appendChild(meta);
+      }
+      if (detailText) {
+        const detail = document.createElement("div");
+        detail.className = "work-meta";
+        detail.textContent = detailText;
+        row.appendChild(detail);
+      }
+      return row;
+    }
+
+    function renderDocumentCaseDetail(data, target) {
+      target.innerHTML = "";
+      if (!data.ok) {
+        const error = document.createElement("div");
+        error.className = "work-meta";
+        error.textContent = data.message || "Case detail se nepodařilo načíst.";
+        target.appendChild(error);
+        return;
+      }
+      const summary = document.createElement("div");
+      summary.className = "work-meta";
+      summary.textContent = data.summary || "";
+      target.appendChild(summary);
+      if (data.case_health && data.case_health.summary) {
+        const health = document.createElement("div");
+        health.className = "case-status-row";
+        health.textContent = data.case_health.summary;
+        target.appendChild(health);
+      }
+      appendDocumentCaseSection(
+        target,
+        "Připomínky",
+        data.reminders || [],
+        "Žádná otevřená připomínka k této case.",
+        (item) => renderDocumentCaseStatusRow(
+          item.title || "Připomínka",
+          `${item.due_date || "bez data"} | ${item.priority || "priorita neurčena"} | ${item.related_asset || "bez vazby"}`,
+          item.amount_due || item.amount_note || ""
+        )
+      );
+      appendDocumentCaseSection(
+        target,
+        "Termíny case",
+        data.due_candidates || [],
+        "Žádný termín z dokumentů k této case.",
+        (item) => renderDocumentCaseStatusRow(
+          item.suggested_title || item.title || "Termín",
+          `${item.date || "bez data"} | ${item.status_label || item.status || "stav neurčen"} | ${item.type_label || item.type || "typ neurčen"}`,
+          item.context || ""
+        )
+      );
+      appendDocumentCaseSection(
+        target,
+        "Konflikty",
+        data.conflicts || [],
+        "Žádný konflikt k této case.",
+        (item) => renderDocumentCaseStatusRow(
+          item.message || "Konflikt",
+          `${item.asset || "věc neurčena"} | začátek krytí ${item.coverage_start || "neurčen"}`,
+          `${(item.items || []).length} konfliktních připomínek`
+        )
+      );
+      const documentsTitle = document.createElement("div");
+      documentsTitle.className = "case-section-title";
+      documentsTitle.textContent = "Dokumenty v case";
+      target.appendChild(documentsTitle);
+      (data.documents || []).forEach((doc) => {
+        const row = document.createElement("div");
+        row.className = "case-document-row";
+        const text = document.createElement("div");
+        const title = document.createElement("div");
+        title.className = "search-title";
+        title.textContent = doc.title || "Dokument";
+        const meta = document.createElement("div");
+        meta.className = "work-meta";
+        meta.textContent = `${doc.domain_label || doc.domain || "oblast nezjištěna"} / ${doc.document_type_label || doc.document_type || "typ nezjištěn"} | ${doc.counterparty || "protistrana nezjištěna"} | ${doc.reading_status_label || ""}`;
+        text.appendChild(title);
+        text.appendChild(meta);
+        row.appendChild(text);
+        if (doc.can_open_pdf && doc.document_ref) {
+          const openBtn = document.createElement("button");
+          openBtn.className = "secondary";
+          openBtn.type = "button";
+          openBtn.textContent = "Otevřít PDF";
+          openBtn.addEventListener("click", () => openCaseDocument(doc.document_ref, openBtn));
+          row.appendChild(openBtn);
+        }
+        target.appendChild(row);
+      });
+      if (data.truncated) {
+        const note = document.createElement("div");
+        note.className = "status-line";
+        note.textContent = "Detail case je zkrácený.";
+        target.appendChild(note);
+      }
+    }
+
+    async function openCaseDocument(documentRef, button) {
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "Otevírám...";
+      try {
+        const result = await postJson("/api/documents/open", {document_id: documentRef});
+        documentCasesStatus.textContent = result.message || "Dokument otevřen.";
+      } catch (err) {
+        recordFrontendError(err);
+        documentCasesStatus.textContent = `Chyba otevření dokumentu: ${err}`;
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText || "Otevřít PDF";
+      }
+    }
+
+    function renderDocumentClassification(data) {
+      const items = data.items || [];
+      documentClassificationCount.textContent = String(data.issue_count || 0);
+      documentClassificationStatus.textContent = data.message || "Klasifikace není načtená.";
+      documentClassificationList.innerHTML = "";
+      if (!items.length) {
+        const empty = document.createElement("div");
+        empty.className = "status-line";
+        empty.textContent = data.active_documents ? "Základní metadata jsou kompletní." : "Žádné dokumenty ke klasifikaci.";
+        documentClassificationList.appendChild(empty);
+        return;
+      }
+      items.slice(0, 6).forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "work-item";
+        const title = document.createElement("div");
+        title.textContent = item.title || "Dokument";
+        const action = document.createElement("div");
+        action.className = "work-meta";
+        action.textContent = item.recommended_action || "";
+        const meta = document.createElement("div");
+        meta.className = "work-meta";
+        meta.textContent = item.classification_summary || "";
+        const actions = document.createElement("div");
+        actions.className = "actions";
+        const editBtn = document.createElement("button");
+        editBtn.className = "secondary";
+        editBtn.type = "button";
+        editBtn.textContent = "Doplnit metadata";
+        editBtn.addEventListener("click", () => updateDocumentClassificationMetadata(item, editBtn));
+        actions.appendChild(editBtn);
+        row.appendChild(title);
+        row.appendChild(action);
+        row.appendChild(meta);
+        row.appendChild(actions);
+        documentClassificationList.appendChild(row);
+      });
+      if (data.truncated) {
+        const note = document.createElement("div");
+        note.className = "status-line";
+        note.textContent = "Seznam klasifikace je zkrácený.";
+        documentClassificationList.appendChild(note);
+      }
+    }
+
+    function promptClassificationValue(label, currentValue, helpText) {
+      const value = window.prompt(`${label}\\n${helpText}`, currentValue || "");
+      if (value === null) return null;
+      return value.trim();
+    }
+
+    async function updateDocumentClassificationMetadata(item, button) {
+      const documentRef = item.document_ref || item.document_id || "";
+      if (!documentRef) return;
+      const domain = promptClassificationValue(
+        "Oblast dokumentu",
+        item.domain || "",
+        "Např. insurance, car, home, tax, energy, health, warranty, other."
+      );
+      if (domain === null) return;
+      const documentType = promptClassificationValue(
+        "Typ dokumentu",
+        item.document_type || "",
+        "Např. insurance_policy, insurance_payment_notice, invoice, lease, green_card, email-attachment-pdf, tax-penzijni-generali, document."
+      );
+      if (documentType === null) return;
+      const counterparty = promptClassificationValue("Protistrana", item.counterparty || "", "Kdo dokument vystavil nebo koho se smluvně týká.");
+      if (counterparty === null) return;
+      const relatedAsset = promptClassificationValue("Vazba na auto/projekt/věc", item.related_asset || "", "Např. auto, Volvo V40, byt, penze, energie.");
+      if (relatedAsset === null) return;
+      const summary = [
+        `Oblast: ${domain || "(prázdné)"}`,
+        `Typ: ${documentType || "(prázdné)"}`,
+        `Protistrana: ${counterparty || "(prázdné)"}`,
+        `Vazba: ${relatedAsset || "(prázdné)"}`
+      ].join("\\n");
+      const ok = window.confirm(`Uložit metadata dokumentu?\\n\\n${item.title || "Dokument"}\\n\\n${summary}`);
+      if (!ok) return;
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "Ukládám...";
+      documentClassificationStatus.textContent = "Ukládám metadata dokumentu...";
+      try {
+        const result = await postJson("/api/documents/classification-metadata", {
+          document_id: documentRef,
+          metadata: {
+            domain,
+            document_type: documentType,
+            counterparty,
+            related_asset: relatedAsset
+          }
+        });
+        documentClassificationStatus.textContent = result.message || "Metadata uložena.";
+        if (result.ok) {
+          if (result.document_classification) {
+            renderDocumentClassification(result.document_classification);
+          }
+          await refresh({silent: true});
+        }
+      } catch (err) {
+        recordFrontendError(err);
+        documentClassificationStatus.textContent = `Chyba uložení metadat: ${err}`;
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText || "Doplnit metadata";
+      }
+    }
+
+    function renderDocumentDueCandidates(data) {
+      const items = data.items || [];
+      documentDueCount.textContent = String(data.actionable_count || 0);
+      documentDueStatus.textContent = data.message || "Termíny nejsou načtené.";
+      documentDueList.innerHTML = "";
+      if (!items.length) {
+        const empty = document.createElement("div");
+        empty.className = "status-line";
+        empty.textContent = "Žádné termínové kandidáty vhodné k připomínce nejsou v indexu.";
+        documentDueList.appendChild(empty);
+        return;
+      }
+      items.slice(0, 8).forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "work-item";
+        const title = document.createElement("div");
+        title.textContent = `${item.date || "bez data"} | ${item.type_label || item.type || "termín"} | ${item.status_label || ""}`;
+        const meta = document.createElement("div");
+        meta.className = "work-meta";
+        const amount = item.amount_due ? ` | částka ${item.amount_due}` : "";
+        meta.textContent = `${item.title || "Dokument"}${amount}`;
+        const context = document.createElement("div");
+        context.className = "work-meta";
+        context.textContent = item.context || "";
+        row.appendChild(title);
+        row.appendChild(meta);
+        row.appendChild(context);
+        if (item.status === "ready") {
+          const actions = document.createElement("div");
+          actions.className = "actions";
+          const btn = document.createElement("button");
+          btn.className = "secondary";
+          btn.type = "button";
+          btn.textContent = "Vytvořit připomínku";
+          btn.addEventListener("click", () => createDocumentDueReminder(item, btn));
+          actions.appendChild(btn);
+          row.appendChild(actions);
+        }
+        documentDueList.appendChild(row);
+      });
+      if (data.truncated) {
+        const note = document.createElement("div");
+        note.className = "status-line";
+        note.textContent = "Seznam termínů je zkrácený.";
+        documentDueList.appendChild(note);
+      }
+    }
+
+    async function createDocumentDueReminder(item, button) {
+      const candidateRef = item.candidate_ref || "";
+      if (!candidateRef) return;
+      const defaultTitle = item.suggested_title || `Zkontrolovat termín ${item.date || ""}`;
+      const title = window.prompt("Název připomínky", defaultTitle);
+      if (title === null) return;
+      const defaultNotes = item.suggested_notes || item.context || "";
+      const notes = window.prompt("Poznámka k připomínce", defaultNotes);
+      if (notes === null) return;
+      const summary = [
+        `Datum: ${item.date || ""}`,
+        `Typ: ${item.type_label || item.type || ""}`,
+        `Dokument: ${item.title || ""}`,
+        `Název: ${title.trim() || defaultTitle}`
+      ].join("\\n");
+      const ok = window.confirm(`Vytvořit připomínku z dokumentu?\\n\\n${summary}`);
+      if (!ok) return;
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "Ukládám...";
+      documentDueStatus.textContent = "Ukládám připomínku...";
+      try {
+        const result = await postJson("/api/documents/due-reminder", {
+          candidate_ref: candidateRef,
+          title: title.trim(),
+          notes: notes.trim(),
+          priority: item.priority || "high",
+          confirmed: true
+        });
+        documentDueStatus.textContent = result.message || "Hotovo.";
+        if (result.document_due_candidates) {
+          renderDocumentDueCandidates(result.document_due_candidates);
+        }
+        if (result.ok) {
+          await refresh({silent: true});
+        }
+      } catch (err) {
+        recordFrontendError(err);
+        documentDueStatus.textContent = `Chyba vytvoření připomínky: ${err}`;
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText || "Vytvořit připomínku";
+      }
+    }
+
+    async function loadDocumentReviewReport() {
+      reviewReportBtn.disabled = true;
+      reviewReportStatus.textContent = "Načítám report dokumentů k revizi...";
+      reviewReportList.innerHTML = "";
+      try {
+        const res = await fetch("/api/documents/review-report");
+        const data = await res.json();
+        renderDocumentReviewReport(data);
+      } catch (err) {
+        recordFrontendError(err);
+        reviewReportStatus.textContent = `Chyba reportu: ${err}`;
+      } finally {
+        reviewReportBtn.disabled = false;
+      }
+    }
+
+    function renderDocumentReviewReport(data) {
+      const summary = data.summary || {};
+      const groups = data.groups || [];
+      reviewReportCount.textContent = String(summary.candidate_count || 0);
+      reviewReportStatus.textContent = data.message || "Report načten.";
+      reviewReportList.innerHTML = "";
+      if (!groups.length) {
+        const empty = document.createElement("div");
+        empty.className = "work-item empty";
+        empty.textContent = "Žádný dokument nevyžaduje revizi podle aktuálních pravidel.";
+        reviewReportList.appendChild(empty);
+        return;
+      }
+      groups.forEach((group) => {
+        const groupNode = document.createElement("div");
+        groupNode.className = "review-group";
+        const head = document.createElement("div");
+        head.className = "review-group-head";
+        const title = document.createElement("div");
+        title.className = "review-group-title";
+        title.textContent = group.label || group.id || "Skupina";
+        const count = document.createElement("div");
+        count.className = "review-group-count";
+        count.textContent = `${group.count || 0} položek`;
+        head.appendChild(title);
+        head.appendChild(count);
+        groupNode.appendChild(head);
+        const action = document.createElement("div");
+        action.className = "review-action";
+        action.textContent = group.recommended_action || "";
+        groupNode.appendChild(action);
+        const items = group.items || [];
+        if (!items.length) {
+          const empty = document.createElement("div");
+          empty.className = "work-meta";
+          empty.textContent = group.empty_label || "Bez položek.";
+          groupNode.appendChild(empty);
+          reviewReportList.appendChild(groupNode);
+          return;
+        }
+        items.forEach((item) => {
+          groupNode.appendChild(renderDocumentReviewReportItem(item));
+        });
+        if (group.truncated) {
+          const note = document.createElement("div");
+          note.className = "work-meta";
+          note.textContent = "Skupina je zkrácená; další položky existují v indexu.";
+          groupNode.appendChild(note);
+        }
+        reviewReportList.appendChild(groupNode);
+      });
+      if (data.truncated) {
+        const note = document.createElement("div");
+        note.className = "status-line";
+        note.textContent = "Celkový report je zkrácený; další položky existují v indexu.";
+        reviewReportList.appendChild(note);
+      }
+    }
+
+    function renderDocumentReviewReportItem(item) {
+        const row = document.createElement("div");
+        row.className = "work-item";
+        const title = document.createElement("div");
+        title.className = "work-title";
+        title.textContent = item.title || item.document_id || "Dokument bez názvu";
+        const recommendation = document.createElement("div");
+        recommendation.className = "work-meta";
+        recommendation.textContent = item.recommended_action || item.review_summary || "Zkontrolovat dokument.";
+        const meta = document.createElement("div");
+        meta.className = "work-meta";
+        meta.textContent = `${item.classification_summary || ""} | ${item.reading_summary || ""}`;
+        const reasons = document.createElement("div");
+        reasons.className = "work-meta";
+        reasons.textContent = (item.reasons || []).map((reason) => reason.label || reason.id || "").filter(Boolean).join(", ");
+        row.appendChild(title);
+        row.appendChild(recommendation);
+        row.appendChild(meta);
+        if (reasons.textContent) row.appendChild(reasons);
+        return row;
+    }
+
+	    function renderDashboard(data) {
       const work = data.document_work || {};
       const summary = work.summary || {};
       const review = work.review || {};
@@ -4172,6 +8095,10 @@ COCKPIT_HTML = """<!doctype html>
       const conflictText = conflictReminders > 0 ? ` | <span class="bad">${conflictReminders} konflikt</span>` : "";
       dashboardReminders.innerHTML = `<span class="${reminderClass}">${activeReminders} aktivní</span> | ${openReminders} otevřené${conflictText}`;
 
+      dashboardProjects.innerHTML = `<span class="warn">načítám samostatně</span>`;
+      dashboardQuantitative.innerHTML = `<span class="warn">načítám samostatně</span>`;
+      dashboardConsistency.innerHTML = `<span class="warn">načítám samostatně</span>`;
+
       const backupState = classifyBackup(data.backup || "");
       dashboardBackup.innerHTML = `<span class="${backupState.className}">${backupState.label}</span>`;
 
@@ -4182,7 +8109,246 @@ COCKPIT_HTML = """<!doctype html>
         const gitClass = git.dirty_count ? "warn" : "ok";
         const sync = git.ahead ? " | čeká push" : git.behind ? " | čeká pull" : "";
         dashboardGit.innerHTML = `<span class="${gitClass}">${git.message || ""}</span>${sync}<br>${git.branch || ""}`;
+	      }
+	    }
+
+	    function renderActionQueue(queue) {
+	      const items = queue.items || [];
+	      const counts = queue.counts || {};
+	      actionQueueStatus.textContent = queue.message || (
+	        items.length ? `${items.length} doporučených akcí.` : "Žádná urgentní akce."
+	      );
+	      actionQueueList.innerHTML = "";
+	      if (!items.length) {
+	        const empty = document.createElement("div");
+	        empty.className = "status-line";
+	        empty.textContent = "Nic akutního. Vhodný další krok je jen ruční kontrola projektu nebo pokračování podle plánu.";
+	        actionQueueList.appendChild(empty);
+	        return;
+	      }
+	      items.forEach((item) => {
+	        const card = document.createElement("div");
+	        card.className = "action-card";
+	        const head = document.createElement("div");
+	        head.className = "action-card-head";
+	        const title = document.createElement("div");
+	        title.className = "action-title";
+	        title.textContent = item.title || "Doporučená akce";
+	        const badge = document.createElement("span");
+	        badge.className = "project-priority";
+	        badge.textContent = `P${item.priority || "?"}`;
+	        head.appendChild(title);
+	        head.appendChild(badge);
+	        const detail = document.createElement("div");
+	        detail.className = "action-detail";
+	        detail.textContent = item.detail || "";
+	        card.appendChild(head);
+	        card.appendChild(detail);
+	        const button = actionQueueButton(item);
+	        if (button) card.appendChild(button);
+	        actionQueueList.appendChild(card);
+	      });
+	      if (counts.total > items.length) {
+	        const more = document.createElement("div");
+	        more.className = "status-line";
+	        more.textContent = `Zobrazeno ${items.length} z ${counts.total} položek.`;
+	        actionQueueList.appendChild(more);
+	      }
+	    }
+
+	    function actionQueueButton(item) {
+	      const action = item.action || "";
+	      if (!action || action === "none") return null;
+	      const button = document.createElement("button");
+	      button.className = "secondary";
+	      button.type = "button";
+	      button.textContent = item.action_label || "Otevřít";
+	      button.addEventListener("click", () => {
+	        if (action === "open_scandocu") {
+	          openScanDocu(false);
+	        } else if (action === "open_scandocu_review") {
+	          openScanDocu(true);
+	        } else if (action === "open_reminders") {
+	          openRemindersModal();
+        } else if (action === "open_urgent_reminders") {
+          openUrgentRemindersModal();
+	        } else if (action === "open_recovery") {
+	          openRecoveryModal();
+	        }
+	      });
+	      return button;
+	    }
+
+	    function renderConsistencyAudit(consistency) {
+      const node = document.getElementById("consistencyText");
+      if (!node) return;
+      node.textContent = consistency.summary_text || "";
+    }
+
+    async function fetchJson(url) {
+      const res = await fetch(url);
+      if (!res.ok) {
+        const error = new Error(`${url} returned ${res.status}`);
+        recordFrontendError(error);
+        throw error;
       }
+      return await res.json();
+    }
+
+    async function refreshProjectsSummary() {
+      dashboardProjects.innerHTML = `<span class="warn">načítám...</span>`;
+      try {
+        const res = await fetch("/api/projects/status");
+        const projects = await res.json();
+        const projectSummary = projects.summary || {};
+        const priorityCounts = projectSummary.priority_counts || {};
+        const flagCounts = projectSummary.flag_counts || {};
+        const priorityOne = (priorityCounts["1"] || 0) + (priorityCounts["A1+"] || 0);
+        const remindCount = flagCounts["připomenout"] || 0;
+        dashboardProjects.innerHTML = projects.ok === false
+          ? `<span class="warn">nelze načíst</span>`
+          : `<span class="${priorityOne > 0 ? "warn" : "ok"}">${priorityOne} priorita 1</span> | ${projectSummary.total || 0} celkem${remindCount ? ` | ${remindCount} připomenout` : ""}`;
+      } catch (err) {
+        recordFrontendError(err);
+        dashboardProjects.innerHTML = `<span class="warn">chyba načtení</span>`;
+      }
+    }
+
+    async function refreshQuantitativeSummary() {
+      dashboardQuantitative.innerHTML = `<span class="warn">načítám...</span>`;
+      try {
+        const quantitative = await fetchJson("/api/quantitative-status");
+        const quantitativeCurrentSummary = quantitative.current || {};
+        const quantitativeTotals = quantitativeCurrentSummary.totals || {};
+        const quantitativeLocalTotals = quantitativeTotals.local || {};
+        const quantitativeGitTotals = quantitativeTotals.git_tracked || {};
+        dashboardQuantitative.innerHTML = quantitative.ok === false
+          ? `<span class="warn">nelze zjistit</span>`
+          : `<span class="ok">${quantitativeLocalTotals.files || 0} souborů</span> | ${quantitativeLocalTotals.lines || 0} lokálních řádků | git ${quantitativeGitTotals.lines || 0} řádků`;
+      } catch (err) {
+        recordFrontendError(err);
+        dashboardQuantitative.innerHTML = `<span class="warn">chyba načtení</span>`;
+      }
+    }
+
+    async function refreshConsistencySummary() {
+      dashboardConsistency.innerHTML = `<span class="warn">načítám...</span>`;
+      renderConsistencyAudit({summary_text: "Načítám consistency audit samostatně..."});
+      try {
+        const consistency = await fetchJson("/api/consistency-status");
+        const severityCounts = consistency.severity_counts || {};
+        const criticalFindings = severityCounts.critical || 0;
+        const warningFindings = severityCounts.warning || 0;
+        const findingCount = consistency.finding_count || 0;
+        const auditClass = criticalFindings > 0 ? "bad" : warningFindings > 0 ? "warn" : "ok";
+        dashboardConsistency.innerHTML = consistency.ok === false
+          ? `<span class="warn">nelze zjistit</span>`
+          : `<span class="${auditClass}">${findingCount} nálezů</span>`;
+        renderConsistencyAudit(consistency || {});
+      } catch (err) {
+        recordFrontendError(err);
+        dashboardConsistency.innerHTML = `<span class="warn">chyba načtení</span>`;
+        renderConsistencyAudit({summary_text: `Chyba načtení consistency auditu: ${err}`});
+      }
+    }
+
+    async function openQuantitativeModal() {
+      quantitativeModal.classList.remove("hidden");
+      quantitativeStatus.textContent = "Načítám kvantitativní status...";
+      quantitativeCurrent.textContent = "";
+      quantitativePrevious.textContent = "";
+      quantitativeDiffTotals.innerHTML = "";
+      quantitativeDiffList.innerHTML = "";
+      try {
+        const data = await fetchJson("/api/quantitative-status");
+        currentQuantitative = data;
+        renderQuantitativeStatus(data);
+      } catch (err) {
+        recordFrontendError(err);
+        quantitativeStatus.textContent = `Chyba načtení kvantitativního statusu: ${err}`;
+      }
+    }
+
+    function closeQuantitativeModal() {
+      quantitativeModal.classList.add("hidden");
+    }
+
+    function renderQuantitativeStatus(data) {
+      const current = data.current || {};
+      const previous = data.previous || null;
+      const diff = data.diff || {};
+      const currentLocal = (current.totals && current.totals.local) || {files: 0, lines: 0};
+      const currentGit = (current.totals && current.totals.git_tracked) || {files: 0, lines: 0};
+      const previousLocal = previous ? (((previous.totals || {}).local) || {files: 0, lines: 0}) : {files: 0, lines: 0};
+      const previousGit = previous ? (((previous.totals || {}).git_tracked) || {files: 0, lines: 0}) : {files: 0, lines: 0};
+      const diffLocal = (diff.totals && diff.totals.local) || {files: 0, lines: 0};
+      const diffGit = (diff.totals && diff.totals.git_tracked) || {files: 0, lines: 0};
+
+      quantitativeStatus.textContent = data.message || "Kvantitativní status načten.";
+      quantitativeCurrent.textContent = [
+        `Created: ${current.created_at || ""}`,
+        `Git: ${current.git_summary || ""}`,
+        `Stored: ${current.stored_path || "ne"}`,
+        "",
+        `Lokalni: ${currentLocal.files || 0} souborů, ${currentLocal.lines || 0} řádků`,
+        `Git tracked: ${currentGit.files || 0} souborů, ${currentGit.lines || 0} řádků`,
+      ].join("\\n");
+      quantitativePrevious.textContent = previous ? [
+        `Created: ${previous.created_at || ""}`,
+        `Git: ${previous.git_summary || ""}`,
+        `Lokalni: ${previousLocal.files || 0} souborů, ${previousLocal.lines || 0} řádků`,
+        `Git tracked: ${previousGit.files || 0} souborů, ${previousGit.lines || 0} řádků`,
+      ].join("\\n") : "Žádný předchozí snapshot nebyl nalezen.";
+
+      quantitativeDiffTotals.innerHTML = "";
+      [
+        ["Lokalni soubory", diffLocal.files],
+        ["Lokalni řádky", diffLocal.lines],
+        ["Git tracked soubory", diffGit.files],
+        ["Git tracked řádky", diffGit.lines],
+      ].forEach(([label, delta]) => {
+        const row = document.createElement("div");
+        row.className = "quantitative-diff-meta";
+        row.textContent = `${label}: ${formatDelta(Number(delta))}`;
+        quantitativeDiffTotals.appendChild(row);
+      });
+
+      quantitativeDiffList.innerHTML = "";
+      const sections = [
+        ["Lokalní diff", diff.local || []],
+        ["Git tracked diff", diff.git_tracked || []],
+      ];
+      sections.forEach(([label, items]) => {
+        const heading = document.createElement("div");
+        heading.className = "project-meta";
+        heading.textContent = label;
+        quantitativeDiffList.appendChild(heading);
+        if (!items.length) {
+          const empty = document.createElement("div");
+          empty.className = "quantitative-diff-meta";
+          empty.textContent = "Bez změn.";
+          quantitativeDiffList.appendChild(empty);
+          return;
+        }
+        items.forEach((item) => {
+          const row = document.createElement("div");
+          row.className = "quantitative-diff-item";
+          const title = document.createElement("div");
+          title.className = "project-title";
+          title.textContent = item.extension || "";
+          const meta = document.createElement("div");
+          meta.className = "quantitative-diff-meta";
+          meta.textContent = `Soubory ${formatDelta(Number(item.delta_files))} | Řádky ${formatDelta(Number(item.delta_lines))} | nyní ${item.files || 0} souborů / ${item.lines || 0} řádků`;
+          row.appendChild(title);
+          row.appendChild(meta);
+          quantitativeDiffList.appendChild(row);
+        });
+      });
+    }
+
+    function formatDelta(value) {
+      const prefix = value > 0 ? "+" : "";
+      return `${prefix}${value}`;
     }
 
     function dashboardTodayHint(newCount, reviewPending, problemTotal) {
@@ -4283,7 +8449,7 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
-    async function postAction(url, button) {
+	    async function postAction(url, button) {
       button.disabled = true;
       showMessage("Provádím akci...");
       try {
@@ -4291,14 +8457,46 @@ COCKPIT_HTML = """<!doctype html>
         const data = await res.json();
         showMessage(data.message || data.error || "Hotovo.");
         await refresh();
-      } catch (err) {
-        showMessage(`Chyba: ${err}`);
-      } finally {
+	      } catch (err) {
+	        recordFrontendError(err);
+	        showMessage(`Chyba: ${err}`);
+	      } finally {
         button.disabled = false;
-      }
-    }
+	      }
+	    }
 
-    async function searchDocuments() {
+	    async function restartCockpit() {
+	      const ok = window.confirm(
+	        "Restartovat lokální Samantha Cockpit?\\n\\n" +
+	        "Akce ukončí jen ověřený proces Cockpitu na portu 8770 a spustí ho znovu. " +
+	        "Stránka bude pár sekund nedostupná."
+	      );
+	      if (!ok) return;
+	      dashboardRestartBtn.disabled = true;
+	      showMessage("Spouštím bezpečný restart Cockpitu...");
+	      try {
+	        const res = await fetch("/api/cockpit/restart", {
+	          method: "POST",
+	          headers: {"Content-Type": "application/json"},
+	          body: JSON.stringify({confirmed: true})
+	        });
+	        const data = await res.json();
+	        showMessage(data.message || (data.ok ? "Restart zahájen." : "Restart se nepodařilo zahájit."));
+	        if (data.ok) {
+	          window.setTimeout(() => {
+	            window.location.reload();
+	          }, 4500);
+	        } else {
+	          dashboardRestartBtn.disabled = false;
+	        }
+	      } catch (err) {
+	        recordFrontendError(err);
+	        showMessage(`Chyba restartu Cockpitu: ${err}`);
+	        dashboardRestartBtn.disabled = false;
+	      }
+	    }
+
+	    async function searchDocuments() {
       const query = documentSearchInput.value.trim();
       documentSearchResults.innerHTML = "";
       if (query.length < 2) {
@@ -4508,8 +8706,9 @@ COCKPIT_HTML = """<!doctype html>
           scanDocuWindow.close();
         }
         await refresh();
-      } catch (err) {
-        if (scanDocuWindow) {
+	      } catch (err) {
+	        recordFrontendError(err);
+	        if (scanDocuWindow) {
           scanDocuWindow.close();
         }
         showMessage(`Chyba: ${err}`);
@@ -4530,12 +8729,410 @@ COCKPIT_HTML = """<!doctype html>
           ? `${data.apps.length} aplikací k dispozici.`
           : "Žádná aplikace není v katalogu.";
       } catch (err) {
+        recordFrontendError(err);
         webAppsStatus.textContent = `Chyba načtení aplikací: ${err}`;
       }
     }
 
     function closeWebAppsModal() {
       webAppsModal.classList.add("hidden");
+    }
+
+    async function openProjectsModal() {
+      projectsModal.classList.remove("hidden");
+      projectsStatus.textContent = "Načítám projekty...";
+      projectsList.innerHTML = "";
+      try {
+        const res = await fetch("/api/projects/status");
+        const data = await res.json();
+        currentProjects = data.projects || [];
+        renderProjects(currentProjects, currentProjectFilter);
+        const summary = data.summary || {};
+        const flags = summary.flag_counts || {};
+        const remind = flags["připomenout"] || 0;
+        projectsStatus.textContent = data.ok
+          ? `${summary.total || 0} projektů v registru${remind ? `; ${remind} připomenout.` : "."}`
+          : (data.message || "Projekty nejdou načíst.");
+      } catch (err) {
+        recordFrontendError(err);
+        projectsStatus.textContent = `Chyba načtení projektů: ${err}`;
+      }
+    }
+
+    function closeProjectsModal() {
+      projectsModal.classList.add("hidden");
+    }
+
+    async function openQuickNotesModal() {
+      quickNotesModal.classList.remove("hidden");
+      quickNotesStatus.textContent = "Načítám Quick Notes...";
+      quickNotesList.innerHTML = "";
+      try {
+        const data = await fetchJson("/api/quick-notes/status");
+        renderQuickNotes(data);
+      } catch (err) {
+        recordFrontendError(err);
+        quickNotesStatus.textContent = `Chyba načtení Quick Notes: ${err}`;
+      }
+    }
+
+	    function closeQuickNotesModal() {
+	      quickNotesModal.classList.add("hidden");
+	    }
+
+    async function openUrgentRemindersModal() {
+      urgentRemindersModal.classList.remove("hidden");
+      urgentRemindersStatus.textContent = "Načítám důležitá připomenutí...";
+      urgentRemindersList.innerHTML = "";
+      try {
+        const data = await fetchJson("/api/urgent-reminders/status");
+        renderUrgentReminders(data);
+      } catch (err) {
+        recordFrontendError(err);
+        urgentRemindersStatus.textContent = `Chyba načtení důležitých připomenutí: ${err}`;
+      }
+    }
+
+    function closeUrgentRemindersModal() {
+      urgentRemindersModal.classList.add("hidden");
+    }
+
+    function renderUrgentReminderAlert(data) {
+      const counts = data.counts || {};
+      const openCount = counts.open || 0;
+      urgentReminderAlert.classList.toggle("hidden", openCount <= 0);
+      urgentReminderAlertList.innerHTML = "";
+      if (openCount <= 0) {
+        urgentReminderAlertTitle.textContent = "Důležitá připomenutí";
+        return;
+      }
+      urgentReminderAlertTitle.textContent = `Důležitá připomenutí: ${openCount}`;
+      (data.items || []).slice(0, 3).forEach((item) => {
+        const line = document.createElement("div");
+        line.textContent = `#${item.reminder_number || "?"}: ${item.summary || item.title || ""}`;
+        urgentReminderAlertList.appendChild(line);
+      });
+      if ((data.items || []).length > 3 || openCount > 3) {
+        const more = document.createElement("div");
+        more.textContent = "Další položky jsou v přehledu.";
+        urgentReminderAlertList.appendChild(more);
+      }
+    }
+
+    function renderUrgentReminders(data) {
+      const counts = data.counts || {};
+      urgentRemindersStatus.textContent = data.ok
+        ? `${counts.open || 0} otevřených. ${data.message || ""}`
+        : (data.message || "Důležitá připomenutí nejdou načíst.");
+      urgentRemindersList.innerHTML = "";
+      const items = data.items || [];
+      if (!items.length) {
+        const empty = document.createElement("div");
+        empty.className = "status-line";
+        empty.textContent = data.inbox_exists ? "Žádná otevřená důležitá připomenutí." : "Inbox zatím není synchronizovaný na Mac.";
+        urgentRemindersList.appendChild(empty);
+        return;
+      }
+      items.forEach((item) => {
+        const card = document.createElement("div");
+        card.className = "project-card";
+        const head = document.createElement("div");
+        head.className = "project-head";
+        const title = document.createElement("div");
+        title.className = "project-title";
+        title.textContent = `Připomenutí #${item.reminder_number || "?"}: ${item.summary || item.title || ""}`;
+        const badge = document.createElement("span");
+        badge.className = "project-priority bad";
+        badge.textContent = item.priority || "urgent";
+        head.appendChild(title);
+        head.appendChild(badge);
+        const meta = document.createElement("div");
+        meta.className = "project-meta";
+        meta.textContent = `${item.created_at || ""} | ${item.size_bytes || 0} B | ${item.status || "open"}`;
+        const actions = document.createElement("div");
+        actions.className = "project-flags";
+        const doneBtn = document.createElement("button");
+        doneBtn.type = "button";
+        doneBtn.className = "reminder-done";
+        doneBtn.textContent = "Splněno";
+        doneBtn.disabled = !item.reminder_number;
+        doneBtn.addEventListener("click", () => markUrgentReminderDone(item.reminder_number, doneBtn));
+        actions.appendChild(doneBtn);
+        card.appendChild(head);
+        card.appendChild(meta);
+        card.appendChild(actions);
+        urgentRemindersList.appendChild(card);
+      });
+    }
+
+	    async function openRecoveryModal() {
+	      recoveryModal.classList.remove("hidden");
+	      recoveryStatus.textContent = "Načítám recovery stav...";
+	      recoveryAutosave.textContent = "";
+	      recoveryGit.textContent = "";
+	      recoveryProject.textContent = "";
+	      recoveryHandoffs.innerHTML = "";
+	      recoveryCommands.innerHTML = "";
+	      try {
+	        const data = await fetchJson("/api/recovery/status");
+	        renderRecoveryStatus(data);
+		      } catch (err) {
+		        recordFrontendError(err);
+		        recoveryStatus.textContent = `Chyba načtení Recovery centra: ${err}`;
+	      }
+	    }
+
+	    function closeRecoveryModal() {
+	      recoveryModal.classList.add("hidden");
+	    }
+
+	    function renderRecoveryStatus(data) {
+	      const autosave = data.autosave || {};
+	      const git = data.git || {};
+	      const project = data.active_project || {};
+	      recoveryStatus.textContent = `${data.message || "Recovery centrum načteno."} ${data.safety_note || ""}`;
+	      recoveryAutosave.textContent = autosave.ok
+	        ? `Poslední: ${autosave.latest_file || ""} | ${autosave.latest_modified_at || ""} | ${formatAge(autosave.latest_age_seconds)} | souborů: ${autosave.file_count || 0}`
+	        : (autosave.message || "Autosave metadata nejsou dostupná.");
+	      recoveryGit.textContent = git.ok
+	        ? `${git.message || ""} | ${git.branch || ""}${git.dirty_count ? ` | ukázka: ${(git.dirty_files || []).join("; ")}` : ""}`
+	        : (git.message || "Git status nejde načíst.");
+	      recoveryProject.textContent = project.ok
+	        ? `${project.name || "Cockpit Recovery centrum"} | priorita ${project.priority || ""} | ${project.next_step || project.status || ""}`
+	        : (project.message || "Aktivní projekt Recovery centra není nalezen.");
+	      renderRecoveryHandoffs(data.handoffs || []);
+	      renderRecoveryCommands(data.commands || []);
+	    }
+
+	    function renderRecoveryHandoffs(items) {
+	      recoveryHandoffs.innerHTML = "";
+	      if (!items.length) {
+	        recoveryHandoffs.textContent = "Žádné recovery handoffy nejsou nastavené.";
+	        return;
+	      }
+	      items.forEach((item) => {
+	        const card = document.createElement("div");
+	        card.className = "project-card";
+	        const title = document.createElement("div");
+	        title.className = "project-title";
+	        title.textContent = item.title || item.path || "Handoff";
+	        const meta = document.createElement("div");
+	        meta.className = "project-meta";
+	        meta.textContent = `${item.path || ""} | priorita ${item.priority || ""} | ${item.status || ""} | ${item.date || ""}`;
+	        const next = document.createElement("div");
+	        next.className = "project-next";
+	        next.textContent = item.next_step || item.message || "";
+	        card.appendChild(title);
+	        card.appendChild(meta);
+	        card.appendChild(next);
+	        recoveryHandoffs.appendChild(card);
+	      });
+	    }
+
+	    function renderRecoveryCommands(items) {
+	      recoveryCommands.innerHTML = "";
+	      items.forEach((item) => {
+	        const card = document.createElement("div");
+	        card.className = "project-card";
+	        const title = document.createElement("div");
+	        title.className = "project-title";
+	        title.textContent = item.label || "Příkaz";
+	        const command = document.createElement("div");
+	        command.className = "recovery-command";
+	        command.textContent = item.command || "";
+	        const note = document.createElement("div");
+	        note.className = "project-meta";
+	        note.textContent = item.note || "";
+	        card.appendChild(title);
+	        card.appendChild(command);
+	        card.appendChild(note);
+	        recoveryCommands.appendChild(card);
+	      });
+	    }
+
+	    function formatAge(seconds) {
+	      if (seconds === null || seconds === undefined) return "stáří neznámé";
+	      const value = Number(seconds);
+	      if (!Number.isFinite(value)) return "stáří neznámé";
+	      if (value < 60) return `${Math.round(value)} s`;
+	      if (value < 3600) return `${Math.round(value / 60)} min`;
+	      if (value < 86400) return `${Math.round(value / 3600)} h`;
+	      return `${Math.round(value / 86400)} d`;
+	    }
+
+	    function renderQuickNotes(data) {
+      const counts = data.counts || {};
+      quickNotesStatus.textContent = data.ok
+        ? `${counts.active || 0} aktivních QN. ${data.message || ""}`
+        : (data.message || "Quick Notes nejdou načíst.");
+      quickNotesList.innerHTML = "";
+      const notes = data.notes || [];
+      if (!notes.length) {
+        const empty = document.createElement("div");
+        empty.className = "status-line";
+        empty.textContent = data.inbox_exists ? "Žádné aktivní QN." : "Inbox zatím není synchronizovaný na Mac.";
+        quickNotesList.appendChild(empty);
+        return;
+      }
+      notes.forEach((note) => {
+        const card = document.createElement("div");
+        card.className = "project-card";
+        const head = document.createElement("div");
+        head.className = "project-head";
+        const title = document.createElement("div");
+        title.className = "project-title";
+        title.textContent = `QN #${note.note_number || "?"}: ${note.snippet || note.title || ""}`;
+        const badge = document.createElement("span");
+        badge.className = "project-priority";
+        badge.textContent = note.category || "inbox";
+        head.appendChild(title);
+        head.appendChild(badge);
+        const meta = document.createElement("div");
+        meta.className = "project-meta";
+        meta.textContent = `${note.created_at || ""} | ${note.size_bytes || 0} B`;
+        const actions = document.createElement("div");
+        actions.className = "project-flags";
+        const detailBtn = document.createElement("button");
+        detailBtn.className = "secondary";
+        detailBtn.type = "button";
+        detailBtn.textContent = "Detail";
+        const detail = document.createElement("div");
+        detail.className = "project-detail quick-note-detail hidden";
+        detailBtn.addEventListener("click", () => loadQuickNoteDetail(note, detail, detailBtn));
+        actions.appendChild(detailBtn);
+        card.appendChild(head);
+        card.appendChild(meta);
+        card.appendChild(actions);
+        card.appendChild(detail);
+        quickNotesList.appendChild(card);
+      });
+    }
+
+    async function loadQuickNoteDetail(note, detailNode, button) {
+      if (!note.note_number) {
+        detailNode.textContent = "QN nemá platné číslo.";
+        detailNode.classList.remove("hidden");
+        return;
+      }
+      if (detailNode.dataset.loaded === "true") {
+        const isHidden = detailNode.classList.toggle("hidden");
+        button.textContent = isHidden ? "Detail" : "Zavřít detail";
+        return;
+      }
+      button.disabled = true;
+      button.textContent = "Načítám...";
+      detailNode.classList.remove("hidden");
+      detailNode.textContent = "Načítám detail QN...";
+      try {
+        const data = await fetchJson(`/api/quick-notes/detail?note_number=${encodeURIComponent(note.note_number)}`);
+        detailNode.innerHTML = "";
+        const status = document.createElement("div");
+        status.className = "project-meta";
+        status.textContent = data.ok
+          ? `${data.created_at || ""} | ${data.size_bytes || 0} B${data.truncated ? " | zkráceno" : ""}`
+          : (data.message || "Detail QN se nepodařilo načíst.");
+        const pre = document.createElement("pre");
+        pre.textContent = data.body_text || data.message || "";
+        detailNode.appendChild(status);
+        detailNode.appendChild(pre);
+        detailNode.dataset.loaded = "true";
+        button.textContent = "Zavřít detail";
+      } catch (err) {
+        detailNode.textContent = `Chyba načtení detailu QN: ${err}`;
+        button.textContent = "Detail";
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    function projectMatchesFilter(project, filter) {
+      const priority = String(project.priority || "");
+      const flags = project.flags || [];
+      const haystack = `${project.status || ""} ${project.next_step || ""}`.toLocaleLowerCase("cs-CZ");
+      if (filter === "priority1") return priority === "1" || priority === "A1+";
+      if (filter === "remind") return flags.includes("připomenout");
+      if (filter === "waiting") {
+        return flags.includes("čeká na retest")
+          || flags.includes("blokováno")
+          || haystack.includes("čeká")
+          || haystack.includes("ceka")
+          || haystack.includes("rozhodnout")
+          || haystack.includes("otestovat")
+          || haystack.includes("retest");
+      }
+      return true;
+    }
+
+    function renderProjects(projects, filter) {
+      projectsList.innerHTML = "";
+      document.querySelectorAll("[data-project-filter]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.projectFilter === filter);
+      });
+      const filtered = (projects || []).filter((project) => projectMatchesFilter(project, filter));
+      if (!filtered.length) {
+        const empty = document.createElement("div");
+        empty.className = "status-line";
+        empty.textContent = "Žádný projekt pro tento filtr.";
+        projectsList.appendChild(empty);
+        return;
+      }
+      filtered.forEach((project) => {
+        const card = document.createElement("div");
+        card.className = "project-card";
+        const head = document.createElement("div");
+        head.className = "project-head";
+        const title = document.createElement("div");
+        title.className = "project-title";
+        title.textContent = project.name || "Projekt bez názvu";
+        const priority = document.createElement("span");
+        priority.className = "project-priority";
+        priority.textContent = `P ${project.priority || "?"}`;
+        head.appendChild(title);
+        head.appendChild(priority);
+        const status = document.createElement("div");
+        status.className = "project-meta";
+        status.textContent = project.status || "";
+        const next = document.createElement("div");
+        next.className = "project-next";
+        next.textContent = project.next_step ? `Další krok: ${project.next_step}` : "Další krok není uveden.";
+        const flags = document.createElement("div");
+        flags.className = "project-flags";
+        (project.flags || []).forEach((flag) => {
+          const node = document.createElement("span");
+          node.className = "project-flag";
+          node.textContent = flag;
+          flags.appendChild(node);
+        });
+        const toggle = document.createElement("button");
+        toggle.className = "secondary";
+        toggle.type = "button";
+        toggle.textContent = "Detail";
+        const detail = document.createElement("div");
+        detail.className = "project-detail hidden";
+        appendProjectDetail(detail, "Memory", project.memory_file || "");
+        appendProjectDetail(detail, "Handoff", project.handoff || "");
+        appendProjectDetail(detail, "Stav", project.status || "");
+        appendProjectDetail(detail, "Další krok", project.next_step || "");
+        toggle.addEventListener("click", () => {
+          const hidden = detail.classList.toggle("hidden");
+          toggle.textContent = hidden ? "Detail" : "Sbalit";
+        });
+        card.appendChild(head);
+        card.appendChild(status);
+        card.appendChild(next);
+        if ((project.flags || []).length) card.appendChild(flags);
+        card.appendChild(toggle);
+        card.appendChild(detail);
+        projectsList.appendChild(card);
+      });
+    }
+
+    function appendProjectDetail(parent, label, value) {
+      if (!value) return;
+      const row = document.createElement("div");
+      row.className = "project-meta";
+      row.textContent = `${label}: ${value}`;
+      parent.appendChild(row);
     }
 
     async function openRemindersModal() {
@@ -4607,7 +9204,11 @@ COCKPIT_HTML = """<!doctype html>
           const meta = document.createElement("div");
           meta.className = "reminder-meta";
           const due = item.due_date ? `deadline ${item.due_date}` : "bez data";
-          meta.textContent = `${due} | priorita ${item.priority || "nezadaná"} | zdroj ${item.source_type || "nezadaný"}`;
+          const amount = item.amount_due ? ` | částka ${item.amount_due}` : "";
+          meta.textContent = `${due}${amount} | priorita ${item.priority || "nezadaná"} | zdroj ${item.source_type || "nezadaný"}`;
+          const amountNote = document.createElement("div");
+          amountNote.className = "reminder-meta";
+          amountNote.textContent = item.amount_note || "";
           const id = document.createElement("div");
           id.className = "reminder-meta";
           id.textContent = `id: ${item.id || ""}`;
@@ -4618,6 +9219,7 @@ COCKPIT_HTML = """<!doctype html>
           head.appendChild(actions);
           card.appendChild(head);
           card.appendChild(meta);
+          if (item.amount_note) card.appendChild(amountNote);
           card.appendChild(id);
           card.appendChild(sourceDetail);
           group.appendChild(card);
@@ -4649,7 +9251,11 @@ COCKPIT_HTML = """<!doctype html>
           row.className = "reminder-conflict-item";
           const summary = document.createElement("div");
           summary.className = "reminder-meta";
-          summary.textContent = `${item.title || item.id || "Připomínka"} | deadline ${item.due_date || "bez data"} | zdroj ${item.source_type || "nezadaný"}`;
+          const amount = item.amount_due ? ` | částka ${item.amount_due}` : "";
+          summary.textContent = `${item.title || item.id || "Připomínka"} | deadline ${item.due_date || "bez data"}${amount} | zdroj ${item.source_type || "nezadaný"}`;
+          const amountNote = document.createElement("div");
+          amountNote.className = "reminder-meta";
+          amountNote.textContent = item.amount_note || "";
           const note = document.createElement("div");
           note.className = "reminder-meta";
           note.textContent = item.conflict_note || "";
@@ -4658,17 +9264,55 @@ COCKPIT_HTML = """<!doctype html>
           sourceBtn.className = "secondary";
           sourceBtn.textContent = "Zdroj";
           sourceBtn.disabled = !item.reminder_ref;
+          const cancelBtn = document.createElement("button");
+          cancelBtn.type = "button";
+          cancelBtn.className = "secondary";
+          cancelBtn.textContent = "Uzavřít jako zrušené";
+          cancelBtn.disabled = !item.reminder_ref;
           const detail = document.createElement("div");
           detail.className = "reminder-source hidden";
           sourceBtn.addEventListener("click", () => loadReminderSource(item.reminder_ref || "", detail, sourceBtn));
+          cancelBtn.addEventListener("click", () => cancelPaymentReminder(item.reminder_ref || "", cancelBtn));
           row.appendChild(summary);
+          if (item.amount_note) row.appendChild(amountNote);
           if (item.conflict_note) row.appendChild(note);
           row.appendChild(sourceBtn);
+          row.appendChild(cancelBtn);
           row.appendChild(detail);
           box.appendChild(row);
         });
         remindersList.appendChild(box);
       });
+    }
+
+    async function cancelPaymentReminder(reminderId, button) {
+      if (!reminderId) return;
+      const confirmed = window.confirm(
+        "Uzavřít tuto platební připomínku jako zrušenou? Jako důkaz se připojí poslední uložený e-mail z EmailArchiveVault."
+      );
+      if (!confirmed) return;
+      const originalText = button ? button.textContent : "";
+      if (button) {
+        button.disabled = true;
+        button.textContent = "Uzavírám...";
+      }
+      remindersStatus.textContent = "Uzavírám připomínku a připojuji e-mailový důkaz...";
+      try {
+        const result = await postJson("/api/reminders/cancel-payment", {
+          reminder_id: reminderId,
+          evidence_archive_id: "latest",
+          reason: "Pojišťovna akceptovala odstoupení od duplicitní nebo nevýhodné smlouvy."
+        });
+        remindersStatus.textContent = result.message || (result.ok ? "Připomínka byla uzavřena." : "Připomínku se nepodařilo uzavřít.");
+        if (result.reminders) renderReminders(result.reminders);
+        await refresh({silent: true, includeSecondary: false});
+      } catch (err) {
+        remindersStatus.textContent = `Chyba uzavření připomínky: ${err}`;
+        if (button) {
+          button.disabled = false;
+          button.textContent = originalText || "Uzavřít jako zrušené";
+        }
+      }
     }
 
     async function loadReminderSource(reminderId, detailNode, button) {
@@ -4736,7 +9380,7 @@ COCKPIT_HTML = """<!doctype html>
         appendSourceRow(
           detailNode,
           "Přílohy",
-          attachments.map((item) => `${item.filename || "(bez názvu)"} | ${item.content_type || ""} | ${item.size_bytes || 0} B`).join("; ")
+          attachments.map((item) => `${item.filename || "(bez názvu)"} | ${item.content_type || ""} | ${item.size_bytes || 0} B${item.stored_path ? " | " + item.stored_path : ""}`).join("; ")
         );
       }
     }
@@ -4749,6 +9393,17 @@ COCKPIT_HTML = """<!doctype html>
       appendSourceRow(detailNode, "Protistrana", documentInfo.counterparty || "");
       appendSourceRow(detailNode, "Vazba", documentInfo.related_asset || "");
       appendSourceRow(detailNode, "Stav čtení", documentInfo.reading_status_label || "");
+      const paymentOptions = documentInfo.payment_options || [];
+      if (paymentOptions.length) {
+        appendSourceRow(
+          detailNode,
+          "Platební varianty",
+          paymentOptions.map((item) => `${item.label || "Varianta"}: ${item.amount || ""}`).join("; ")
+        );
+        paymentOptions.forEach((item) => {
+          if (item.note) appendSourceRow(detailNode, item.label || "Varianta", item.note);
+        });
+      }
       appendSourcePre(detailNode, documentInfo.snippet || "");
       const contexts = documentInfo.due_contexts || [];
       contexts.forEach((item) => {
@@ -4806,6 +9461,28 @@ COCKPIT_HTML = """<!doctype html>
         await refresh();
       } catch (err) {
         remindersStatus.textContent = `Chyba uložení připomínky: ${err}`;
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    async function markUrgentReminderDone(reminderNumber, button) {
+      if (!reminderNumber) return;
+      if (!window.confirm("Označit toto důležité připomenutí jako splněné?")) {
+        return;
+      }
+      button.disabled = true;
+      urgentRemindersStatus.textContent = "Označuji důležité připomenutí jako splněné...";
+      try {
+        const result = await postJson("/api/urgent-reminders/done", {reminder_number: reminderNumber});
+        if (result.urgent_reminders) {
+          renderUrgentReminders(result.urgent_reminders);
+          renderUrgentReminderAlert(result.urgent_reminders);
+        }
+        urgentRemindersStatus.textContent = result.message || "Hotovo.";
+        await refresh({silent: true, includeSecondary: false});
+      } catch (err) {
+        urgentRemindersStatus.textContent = `Chyba uložení důležité připomínky: ${err}`;
       } finally {
         button.disabled = false;
       }
@@ -4882,18 +9559,33 @@ COCKPIT_HTML = """<!doctype html>
     dashboardRefreshBtn.addEventListener("click", refresh);
     dashboardProcessBtn.addEventListener("click", () => openScanDocu(false));
     dashboardReviewBtn.addEventListener("click", () => openScanDocu(true));
-    dashboardWebAppsBtn.addEventListener("click", openWebAppsModal);
-    dashboardRemindersBtn.addEventListener("click", openRemindersModal);
-    dashboardEmailBtn.addEventListener("click", openEmailProcessing);
-    dashboardSamanthaBtn.addEventListener("click", () => postAction("/api/samantha/open", dashboardSamanthaBtn));
-    dashboardCodexBtn.addEventListener("click", () => postAction("/api/codex/open", dashboardCodexBtn));
-    webAppsBtn.addEventListener("click", openWebAppsModal);
+	    dashboardTerminalBtn.addEventListener("click", () => postAction("/api/terminal/open", dashboardTerminalBtn));
+		    dashboardQuantitativeBtn.addEventListener("click", openQuantitativeModal);
+		    dashboardQuickNotesBtn.addEventListener("click", openQuickNotesModal);
+    dashboardUrgentRemindersBtn.addEventListener("click", openUrgentRemindersModal);
+    urgentReminderAlertBtn.addEventListener("click", openUrgentRemindersModal);
+		    dashboardRecoveryBtn.addEventListener("click", openRecoveryModal);
+    dashboardDiagnosticsBtn.addEventListener("click", openDiagnosticsModal);
+    dashboardRestartBtn.addEventListener("click", restartCockpit);
+			    webAppsBtn.addEventListener("click", openWebAppsModal);
+    projectsBtn.addEventListener("click", openProjectsModal);
+    reviewReportBtn.addEventListener("click", loadDocumentReviewReport);
     remindersBtn.addEventListener("click", openRemindersModal);
     emailProcessingBtn.addEventListener("click", openEmailProcessing);
-    remindersCloseBtn.addEventListener("click", closeRemindersModal);
+	    remindersCloseBtn.addEventListener("click", closeRemindersModal);
+		    quickNotesCloseBtn.addEventListener("click", closeQuickNotesModal);
+    urgentRemindersCloseBtn.addEventListener("click", closeUrgentRemindersModal);
+		    recoveryCloseBtn.addEventListener("click", closeRecoveryModal);
+    diagnosticsCloseBtn.addEventListener("click", closeDiagnosticsModal);
+		    quantitativeCloseBtn.addEventListener("click", closeQuantitativeModal);
     remindersModal.addEventListener("click", (event) => {
       if (event.target === remindersModal) {
         closeRemindersModal();
+      }
+    });
+    quantitativeModal.addEventListener("click", (event) => {
+      if (event.target === quantitativeModal) {
+        closeQuantitativeModal();
       }
     });
     webAppsCloseBtn.addEventListener("click", closeWebAppsModal);
@@ -4902,29 +9594,73 @@ COCKPIT_HTML = """<!doctype html>
         closeWebAppsModal();
       }
     });
+    projectsCloseBtn.addEventListener("click", closeProjectsModal);
+    projectsModal.addEventListener("click", (event) => {
+      if (event.target === projectsModal) {
+        closeProjectsModal();
+      }
+    });
+	    quickNotesModal.addEventListener("click", (event) => {
+	      if (event.target === quickNotesModal) {
+	        closeQuickNotesModal();
+	      }
+	    });
+    urgentRemindersModal.addEventListener("click", (event) => {
+      if (event.target === urgentRemindersModal) {
+        closeUrgentRemindersModal();
+      }
+    });
+	    recoveryModal.addEventListener("click", (event) => {
+	      if (event.target === recoveryModal) {
+	        closeRecoveryModal();
+	      }
+	    });
+    diagnosticsModal.addEventListener("click", (event) => {
+      if (event.target === diagnosticsModal) {
+        closeDiagnosticsModal();
+      }
+    });
+    document.querySelectorAll("[data-project-filter]").forEach((button) => {
+      button.addEventListener("click", () => {
+        currentProjectFilter = button.dataset.projectFilter || "all";
+        renderProjects(currentProjects, currentProjectFilter);
+      });
+    });
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !remindersModal.classList.contains("hidden")) {
         closeRemindersModal();
+      } else if (event.key === "Escape" && !quantitativeModal.classList.contains("hidden")) {
+        closeQuantitativeModal();
       } else if (event.key === "Escape" && !webAppsModal.classList.contains("hidden")) {
         closeWebAppsModal();
-      }
+      } else if (event.key === "Escape" && !projectsModal.classList.contains("hidden")) {
+        closeProjectsModal();
+	      } else if (event.key === "Escape" && !quickNotesModal.classList.contains("hidden")) {
+	        closeQuickNotesModal();
+      } else if (event.key === "Escape" && !urgentRemindersModal.classList.contains("hidden")) {
+        closeUrgentRemindersModal();
+		      } else if (event.key === "Escape" && !recoveryModal.classList.contains("hidden")) {
+		        closeRecoveryModal();
+      } else if (event.key === "Escape" && !diagnosticsModal.classList.contains("hidden")) {
+        closeDiagnosticsModal();
+		      }
     });
     scanDocuBtn.addEventListener("click", () => openScanDocu(false));
     scanDocuReviewBtn.addEventListener("click", () => openScanDocu(true));
-    samanthaChatBtn.addEventListener("click", () => postAction("/api/samantha/open", samanthaChatBtn));
-    codexCliBtn.addEventListener("click", () => postAction("/api/codex/open", codexCliBtn));
     processNextBtn.addEventListener("click", () => openScanDocu(false));
     reviewNextBtn.addEventListener("click", () => openScanDocu(true));
     documentSearchBtn.addEventListener("click", searchDocuments);
-    documentSearchInput.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        searchDocuments();
-      }
-    });
-    terminalBtn.addEventListener("click", () => postAction("/api/terminal/open", terminalBtn));
-    refresh();
-  </script>
+	    documentSearchInput.addEventListener("keydown", (event) => {
+	      if (event.key === "Enter") {
+	        event.preventDefault();
+	        searchDocuments();
+	      }
+	    });
+	    runFrontendHealthCheck();
+	    window.setInterval(runFrontendHealthCheck, 60000);
+	    window.setInterval(() => refresh({silent: true, includeSecondary: false}), 60000);
+	    refresh();
+	  </script>
 </body>
 </html>
 """

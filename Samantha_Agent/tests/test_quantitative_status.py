@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 
 from app.quantitative_status import (
+    _iter_local_files,
     format_samantha_quantitative_status,
     run_samantha_quantitative_status,
 )
@@ -77,6 +78,24 @@ class QuantitativeStatusTests(unittest.TestCase):
         self.assertIn("| Metrika | Lokalni | Git tracked |", text)
         self.assertIn("Lokalni objem podle typu:", text)
         self.assertIn("Git tracked objem podle typu:", text)
+
+    def test_local_files_skip_runtime_temp_and_virtualenv_dirs(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            (root / "app").mkdir()
+            (root / "app" / "main.py").write_text("print('ok')\n", encoding="utf-8")
+            (root / ".venv_f5tts2" / "lib").mkdir(parents=True)
+            (root / ".venv_f5tts2" / "lib" / "large.py").write_text("ignored\n", encoding="utf-8")
+            (root / "tmpabc123").mkdir()
+            (root / "tmpabc123" / "scratch.py").write_text("ignored\n", encoding="utf-8")
+            (root / "data" / "tmp").mkdir(parents=True)
+            (root / "data" / "tmp" / "scratch.py").write_text("ignored\n", encoding="utf-8")
+            (root / "data" / "session_autosave").mkdir()
+            (root / "data" / "session_autosave" / "autosave.txt").write_text("ignored\n", encoding="utf-8")
+
+            relative_paths = {path.relative_to(root).as_posix() for path in _iter_local_files(root)}
+
+        self.assertEqual(relative_paths, {"app/main.py"})
 
 
 def _project_root(repo_root: Path) -> Path:

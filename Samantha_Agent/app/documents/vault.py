@@ -75,6 +75,11 @@ DOMAIN_ALIASES = {
     "warranty": "warranty",
     "zaruka": "warranty",
     "záruka": "warranty",
+    "travel": "travel",
+    "cestovani": "travel",
+    "cestování": "travel",
+    "dovolena": "travel",
+    "dovolená": "travel",
     "other": "other",
     "ostatni": "other",
     "ostatní": "other",
@@ -2882,9 +2887,12 @@ def extract_text(source: Path) -> TextExtractionResult:
 
 
 def extract_pdf_with_pdftotext(source: Path) -> TextExtractionResult:
+    pdftotext = resolve_pdftotext_binary()
+    if not pdftotext:
+        return TextExtractionResult(text="", method="pdftotext-unavailable", ocr_needed=True)
     try:
         completed = subprocess.run(
-            ["pdftotext", "-layout", str(source), "-"],
+            [pdftotext, "-layout", str(source), "-"],
             check=False,
             capture_output=True,
             text=True,
@@ -2895,6 +2903,20 @@ def extract_pdf_with_pdftotext(source: Path) -> TextExtractionResult:
     if completed.returncode == 0 and completed.stdout.strip():
         return TextExtractionResult(text=completed.stdout, method="pdftotext", ocr_needed=False)
     return TextExtractionResult(text="", method="pdftotext-empty", ocr_needed=True)
+
+
+def resolve_pdftotext_binary() -> str:
+    found = shutil.which("pdftotext")
+    if found:
+        return found
+    for candidate in (
+        "/usr/local/bin/pdftotext",
+        "/opt/homebrew/bin/pdftotext",
+        "/usr/bin/pdftotext",
+    ):
+        if Path(candidate).is_file():
+            return candidate
+    return ""
 
 
 def is_pdf_encrypted(source: Path) -> bool:
@@ -3377,6 +3399,8 @@ def guess_document_type(text: str) -> str:
         return "invoice"
     if any(word in text for word in ("pojistka", "pojisteni", "pojištění", "pojistna smlouva", "pojistná smlouva")):
         return "insurance_policy"
+    if looks_like_travel_document(text):
+        return "travel_booking"
     if looks_like_recipe_document(text):
         return "recipe"
     if looks_like_diet_guidance(text):
@@ -3399,6 +3423,8 @@ def guess_domain(text: str, document_type: str) -> str:
         return "food"
     if document_type == "diet_guidance":
         return "health"
+    if document_type == "travel_booking":
+        return "travel"
     if document_type == "lease":
         return "home"
     if any(word in text for word in ("volvo", "v40", "vozidlo", "spz", "vin", "technicka kontrola", "technická kontrola", "servisni prohlidka", "servisní prohlídka")) or has_stk_marker(text):
@@ -3513,12 +3539,33 @@ def looks_like_lease_document(text: str) -> bool:
         "pronajimatel",
         "nájemné",
         "najemne",
-        "byt",
-        "bytu",
+        r"\bbyt\b",
+        r"\bbytu\b",
         "bytová jednotka",
         "bytova jednotka",
     )
-    return sum(1 for marker in lease_markers if marker in text) >= 2
+    return sum(1 for marker in lease_markers if re.search(marker, text)) >= 2
+
+
+def looks_like_travel_document(text: str) -> bool:
+    travel_markers = (
+        "booking.com",
+        "rezervace",
+        "potvrzení rezervace",
+        "potvrzeni rezervace",
+        "ubytování",
+        "ubytovani",
+        "check-in",
+        "check-out",
+        "hotel",
+        "apartmán",
+        "apartman",
+        "pobyt",
+        "pobytu",
+        "dovolená",
+        "dovolena",
+    )
+    return sum(1 for marker in travel_markers if marker in text) >= 2
 
 
 def guess_counterparty(text: str) -> str:
@@ -3616,6 +3663,8 @@ def guess_related_asset_for_document(
 ) -> str:
     if document_type == "lease":
         return guess_lease_related_asset(source=source, text=text, folded=folded)
+    if document_type == "travel_booking":
+        return ""
     return guess_related_asset(text)
 
 
@@ -3778,15 +3827,16 @@ def suggest_document_tags(
         ("recept", ("recept", "přísady", "prisady", "ingredience", "doba přípravy", "doba pripravy")),
         ("jidlo", ("salát", "salat", "polévka", "polevka", "brambor", "mrkev", "cuketa")),
         ("dieta", ("dieta", "dietní", "dietni", "jídelníček", "jidelnicek", "purin", "diabet")),
+        ("cestovani", ("booking.com", "rezervace", "ubytování", "ubytovani", "check-in", "check-out", "hotel", "apartmán", "apartman", "dovolená", "dovolena")),
         ("najem", ("nájemní smlouva", "najemni smlouva", "nájemce", "najemce", "nájemné", "najemne")),
-        ("bydleni", ("byt", "bytu", "bytová jednotka", "bytova jednotka", "pronajímatel", "pronajimatel")),
+        ("bydleni", ("nájemní smlouva", "najemni smlouva", "bytová jednotka", "bytova jednotka", "pronajímatel", "pronajimatel")),
         ("splatnost", ("splatnost", "uhradit", "zaplatit")),
         ("platnost", ("platnost do", "platna do", "platná do")),
     )
     for tag, markers in checks:
         if any(marker in text for marker in markers):
             tags.append(tag)
-    if has_car_marker(text):
+    if domain != "travel" and has_car_marker(text):
         tags.append("auto")
     registration = extract_vehicle_registration(text)
     if registration:

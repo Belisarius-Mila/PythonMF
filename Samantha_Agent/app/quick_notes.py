@@ -14,6 +14,7 @@ DEFAULT_ICLOUD_SHORTCUTS_INBOX = (
 DEFAULT_PRIVATE_DIR = PROJECT_ROOT / "data" / "private" / "quick_notes"
 DEFAULT_INDEX_PATH = DEFAULT_PRIVATE_DIR / "index.json"
 SUPPORTED_SUFFIXES = {".md", ".txt"}
+IGNORED_FILE_PREFIXES = ("samantha_reminder_",)
 
 
 @dataclass(frozen=True)
@@ -175,7 +176,9 @@ def _iter_note_files(inbox_dir: Path) -> list[Path]:
         (
             path
             for path in inbox_dir.iterdir()
-            if path.is_file() and path.suffix.casefold() in SUPPORTED_SUFFIXES
+            if path.is_file()
+            and path.suffix.casefold() in SUPPORTED_SUFFIXES
+            and not path.name.casefold().startswith(IGNORED_FILE_PREFIXES)
         ),
         key=lambda path: (path.stat().st_mtime, path.name.casefold()),
     )

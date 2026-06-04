@@ -27,6 +27,7 @@ EXCLUDED_RELATIVE_DIRS = {
     Path("data/session_autosave"),
     Path("data/email/archive"),
     Path("data/metrics"),
+    Path("data/tmp"),
     Path("logs"),
 }
 
@@ -161,7 +162,7 @@ def _iter_git_files(project_root: Path, repo_root: Path, runner: Runner) -> list
 
 def _is_excluded(relative: Path) -> bool:
     parts = relative.parts
-    if any(part in EXCLUDED_DIR_NAMES for part in parts):
+    if any(part in EXCLUDED_DIR_NAMES or part.startswith(".venv_") or part.startswith("tmp") for part in parts):
         return True
     return any(relative == excluded or excluded in relative.parents for excluded in EXCLUDED_RELATIVE_DIRS)
 
