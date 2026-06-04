@@ -2,8 +2,9 @@
 
 Zalozeno: 2026-05-31
 Priorita: 2
-Stav: soukromy pracovni prostor zalozen; pro Kacenku existuji prvni fotky a
-pracovni/cista verze prekresu jedne steny mimo git
+Stav: soukromy pracovni prostor zalozen; pro Kacenku existuji soukrome fotky,
+stenove prekresy, pudorys a prvni koncepty knihovny / ctecího / detskeho koutku
+mimo git
 
 ## Smysl
 
@@ -103,7 +104,8 @@ Nove knihovny zvazit az podle potreby:
 ## Dalsi krok
 
 Navazat na soukrome podklady v
-`data/private/neuberk_interier_design/rooms/kacenka/`. Pro jednu stenu uz
-existuje pracovni kontrolni i cisty finalni prekres mimo git. Dalsi prakticky
-krok je slozit dostupne stenove podklady do jednoducheho 2D pochopeni mistnosti
-a doplnit brief pred navrhem prvnich variant rozmistení.
+`data/private/neuberk_interier_design/rooms/kacenka/`. Pro Kacenku uz existuji
+soukrome pracovni stenove prekresy, pudorys a prvni vizualni koncepty hlavni
+zapadni steny s knihovnou a zonami pro cteni, deti a spani. Dalsi prakticky krok
+je po navratu k projektu zkontrolovat posledni koncept proti pudorysu: pruchody,
+kolize s topenim/dvermi a realnou hloubku knihovny a rozkladaciho gauce.
