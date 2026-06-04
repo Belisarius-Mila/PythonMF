@@ -48,3 +48,16 @@ Zmenene nebo relevantni soubory:
 Bezpecnost / neukladat:
 - Health panel je read-only.
 - Nezobrazuje obsah autosave logu, e-mailu, dokumentu ani soukromych dat.
+
+Dodatecna oprava 2026-06-04:
+- Mila nahlasil, ze v Cockpitu zustala posledni chyba
+  `API health selhal: /api/status AbortError: Fetch is aborted...`.
+- `/api/status` a `/api/recovery/status` byly rucne zmereny a odpovidaly rychle
+  kolem 0.3-0.5 s; problem byl tedy pravdepodobne stale zobrazeny abort z
+  predchoziho restartu nebo kratkeho timeoutu health probe.
+- Frontend health probe ma delsi timeout 6000 ms, `AbortError` se zobrazi jako
+  citelny `timeout po 6000 ms` a po uspesne API kontrole se stara API health
+  chyba smaze z viditelneho pole `Poslední chyba`.
+- Oprava byla overena pres `py_compile`, `tests.test_cockpit`, `node --check`
+  vytazeneho cockpit JS a bezpecny restart Cockpitu; novy `/api/status` po
+  restartu vratil HTTP 200.

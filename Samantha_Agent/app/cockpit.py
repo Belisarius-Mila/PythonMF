@@ -7635,7 +7635,7 @@ COCKPIT_HTML = """<!doctype html>
       return true;
     }
 
-    async function checkEndpointHealth(url, timeoutMs = 2500) {
+    async function checkEndpointHealth(url, timeoutMs = 6000) {
       const controller = new AbortController();
       const timer = window.setTimeout(() => controller.abort(), timeoutMs);
       try {
@@ -7644,7 +7644,8 @@ COCKPIT_HTML = """<!doctype html>
         const elapsed = Math.round(performance.now() - startedAt);
         return {url, ok: res.ok, status: res.status, elapsed};
       } catch (err) {
-        return {url, ok: false, status: 0, elapsed: 0, error: String(err)};
+        const isAbort = err && err.name === "AbortError";
+        return {url, ok: false, status: 0, elapsed: timeoutMs, error: isAbort ? `timeout po ${timeoutMs} ms` : String(err)};
       } finally {
         window.clearTimeout(timer);
       }
@@ -7665,7 +7666,10 @@ COCKPIT_HTML = """<!doctype html>
       } else {
         const slowest = Math.max(...results.map((item) => item.elapsed || 0));
         setHealthValue(frontendHealthApi, `OK, max ${slowest} ms`, "ok");
-        if (!frontendLastError) {
+        if (frontendLastError.startsWith("API health selhal:")) {
+          frontendLastError = "";
+          setHealthValue(frontendHealthError, "žádná", "ok");
+        } else if (!frontendLastError) {
           setHealthValue(frontendHealthError, "žádná", "ok");
         }
       }
