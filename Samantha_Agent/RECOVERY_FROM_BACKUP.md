@@ -3,6 +3,12 @@
 Tento navod je pro situaci, kdy puvodni Mac neni dostupny, ale existuje externi
 disk se zalohou `PythonMF` / `Samantha_Agent`.
 
+Polopaticka rychla karta pro novy Mac je v:
+
+```text
+RECOVERY_CARD_NEW_MAC.md
+```
+
 Navod je psany pro cloveka i pro Codex. Pokud obnovu dela Codex, nejdriv mu dej
 tento soubor jako instrukce a rekni mu, aby nic nemazal a pred kazdym prepisem
 existujici slozky se zeptal.

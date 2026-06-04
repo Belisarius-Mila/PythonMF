@@ -31,7 +31,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `projects/neuberk_interier_design.md` - projekt Neuberk interiér design: soukromý pracovní prostor pro fotky, plánky, rozměry a návrhy interiéru domu; první místnost je půdní hostovská místnost `Kačenka` pro dcery s dětmi, první čistý překres jedné stěny je hotový mimo git v `data/private/neuberk_interier_design/`.
 - `projects/automated_recurring_tasks.md` - automatické opakující se úkoly: `scripts/daily_3am.py`, GitHub Actions workflow a ColorsAndNumbers soví TTS tasky; `owl_230526.mp3` byl vygenerován v commitu `c8647de` a kontrola 2026-05-26 potvrdila existenci `owl_240526.mp3`.
 - `projects/tomik_video_imovie.md` - [PRIPOMENOUT] projekt priorita 1 pro rodinny iMovie sestřih z malych videi od dcery, tema vnuk Tomik druhy rok; workflow, soukromi, storyboard a exportni checklist.
-- `../RECOVERY_FROM_BACKUP.md` - lidský a Codex návod pro obnovu Samanthy z externí zálohy na novém Macu.
+- `RECOVERY_CARD_NEW_MAC.md` - polopatická nouzová karta pro obnovu Samanthy na novém Macu z GitHubu a externí recovery zálohy.
+- `RECOVERY_FROM_BACKUP.md` - podrobnější lidský a Codex návod pro obnovu Samanthy z externí zálohy na novém Macu.
 
 ## Infrastructure Recovery
 
@@ -128,7 +129,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `technical/vocabulary_image_generation_workflow.md` - [PRIPOMENOUT] pozlacený kanonický workflow pro slovníkové obrázky: audit/request, dry-run, potvrzené placené generování po dávkách, review, kopie do `Pict/`, mapping až po samostatném potvrzení a git checkpoint.
 - `technical/matysek_f5tts_voice_workflow.md` - [PRIPOMENOUT] lokalni F5-TTS workflow/tool pro Matysek English Bunny hlas: wrapper `scripts/matysek_f5tts_generate.py`, pravidlo reference do ~12 s, presny `ref_text`, CPU casy a pouceni z porovnani 20s/12s/puvodni kratke reference.
 - `technical/macos_wifi_vpn_tailscale_recovery.md` - priorita 1: recovery protokol pro macOS Wi-Fi/DHCP/VPN/Tailscale vypadky po rozbitem routovani nebo tunnel rozhranich.
-- `../NETWORK_RECOVERY_CARD.txt` - offline nouzova karta pro pripad, ze nejde internet a nejde se dostat do ChatGPT; lze vypsat pres `scripts/network_recovery_card.sh`.
+- `NETWORK_RECOVERY_CARD.txt` - offline nouzova karta pro pripad, ze nejde internet a nejde se dostat do ChatGPT; lze vypsat pres `scripts/network_recovery_card.sh`.
 
 ## Stories
 

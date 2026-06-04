@@ -217,6 +217,7 @@ memory/handoffs/backup_usb_hub_restart_checkpoint_2026_06_03.md
 Pripraveny zaklad:
 
 ```text
+Samantha_Agent/RECOVERY_CARD_NEW_MAC.md
 Samantha_Agent/RECOVERY_FROM_BACKUP.md
 Samantha_Agent/scripts/create_samantha_secure_backup.command
 Samantha_Agent/scripts/backup_samantha.command
