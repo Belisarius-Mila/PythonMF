@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VocabularyFR Web</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <h1>VocabularyFR</h1>
+      <p id="fileStatus">CSV není načtené</p>
+    </div>
+    <div class="header-actions">
+      <button id="openDirectBtn" type="button">Otevřít CSV</button>
+      <label class="file-button">
+        Načíst CSV
+        <input id="fileInput" type="file" accept=".csv,text/csv">
+      </label>
+      <button id="saveDirectBtn" type="button" disabled>Uložit</button>
+      <button id="exportBtn" type="button" disabled>Export CSV</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="left-pane">
+      <div class="toolbar">
+        <input id="searchInput" type="search" placeholder="Hledat FR / CZ / větu">
+        <select id="filterSelect" aria-label="Filtr">
+          <option value="all">Vše</option>
+          <option value="unknown">Neumím</option>
+          <option value="hard">HT</option>
+          <option value="learned">Naučeno</option>
+          <option value="with-sentence">S větou</option>
+        </select>
+        <select id="sortSelect" aria-label="Řazení">
+          <option value="order">Pořadí</option>
+          <option value="fr">FR A-Z</option>
+          <option value="cz">CZ A-Z</option>
+        </select>
+      </div>
+
+      <div class="stats" aria-live="polite">
+        <span><strong id="totalCount">0</strong> celkem</span>
+        <span><strong id="visibleCount">0</strong> zobrazeno</span>
+        <span><strong id="learnedCount">0</strong> naučeno</span>
+        <span><strong id="hardCount">0</strong> HT</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Rod</th>
+              <th>FR</th>
+              <th>CZ</th>
+              <th>L</th>
+              <th>HT</th>
+            </tr>
+          </thead>
+          <tbody id="rowsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="right-pane">
+      <div class="trainer">
+        <div class="trainer-top">
+          <button id="prevBtn" type="button" disabled>←</button>
+          <button id="randomBtn" type="button" disabled>Náhodně</button>
+          <button id="nextBtn" type="button" disabled>→</button>
+        </div>
+        <div class="word-card">
+          <div class="picture-stage">
+            <img id="pictureImg" alt="" hidden>
+            <img id="genderPictureImg" class="gender-picture" alt="" hidden>
+            <div id="pictureFallback" class="picture-fallback">Bez obrázku</div>
+          </div>
+          <button id="flipBtn" class="word-main" type="button" disabled>Načti CSV</button>
+          <div id="wordSub" class="word-sub"></div>
+          <div id="sentenceLine" class="sentence"></div>
+          <div id="sentenceTLine" class="sentence muted"></div>
+          <div id="pictureMeta" class="picture-meta"></div>
+        </div>
+        <div class="speech-panel">
+          <div class="speech-actions">
+            <button id="speakWordBtn" type="button" disabled>Přečíst slovo</button>
+            <button id="speakSentenceBtn" type="button" disabled>Přečíst větu</button>
+            <label class="check-label compact"><input id="autoSpeakField" type="checkbox"> Auto</label>
+          </div>
+          <label class="voice-label">Hlas
+            <select id="voiceSelect"></select>
+          </label>
+          <div class="loop-panel">
+            <button id="loopToggleBtn" type="button" disabled>Start smyčky</button>
+            <label>Režim
+              <select id="loopModeSelect">
+                <option value="random">Náhodně</option>
+                <option value="sequence">Postupně</option>
+              </select>
+            </label>
+            <label>Číst
+              <select id="loopSpeechSelect">
+                <option value="word">Slovo</option>
+                <option value="word-sentence">Slovo + věta</option>
+              </select>
+            </label>
+            <label>Sekundy
+              <input id="loopIntervalField" type="number" min="2" max="30" step="1" value="5">
+            </label>
+          </div>
+          <div id="loopStatus" class="loop-status">Smyčka vypnutá</div>
+        </div>
+      </div>
+
+      <form id="editForm" class="editor">
+        <div class="editor-head">
+          <h2 id="editorTitle">Nové slovíčko</h2>
+          <button id="newBtn" type="button">Nový řádek</button>
+        </div>
+        <label>FR<input id="frField" name="FR" autocomplete="off"></label>
+        <label>CZ<input id="czField" name="CZ" autocomplete="off"></label>
+        <label>Věta FR<input id="sentenceField" name="Sentence" autocomplete="off"></label>
+        <label>Věta CZ<input id="sentenceTField" name="SentenceT" autocomplete="off"></label>
+        <div class="editor-grid">
+          <label>Rod
+            <select id="genderField" name="gender_fr">
+              <option value=""></option>
+              <option value="m">m</option>
+              <option value="f">f</option>
+            </select>
+          </label>
+          <label class="check-label"><input id="learnedField" type="checkbox" name="L"> Naučeno</label>
+          <label class="check-label"><input id="hardField" type="checkbox" name="HT"> HT</label>
+        </div>
+        <div class="editor-actions">
+          <button id="applyBtn" type="submit" disabled>Uložit řádek</button>
+          <button id="insertAfterBtn" type="button" disabled>Vložit za vybraný</button>
+          <button id="deleteBtn" type="button" class="danger" disabled>Smazat</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
