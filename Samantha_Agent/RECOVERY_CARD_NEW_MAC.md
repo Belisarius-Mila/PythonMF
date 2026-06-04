@@ -9,6 +9,20 @@ Mám GitHub repo PythonMF.
 Mám externí zálohu SamanthaSecureBackup.
 ```
 
+## Přístup z iPhonu
+
+Nejrychlejší adresa:
+
+```text
+https://github.com/Belisarius-Mila/PythonMF/blob/main/Samantha_Agent/RECOVERY_CARD_NEW_MAC.md
+```
+
+Ještě jednodušší cesta v GitHubu:
+
+```text
+Belisarius-Mila/PythonMF -> START_HERE_RECOVERY.md
+```
+
 Nejdůležitější pravidlo: **nic nemaž a nic nepřepisuj naslepo**. Když si nejsi
 jistý, nech existující složku stranou a obnovuj do nové.
 

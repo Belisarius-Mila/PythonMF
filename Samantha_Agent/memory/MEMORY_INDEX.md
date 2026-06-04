@@ -31,6 +31,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `projects/neuberk_interier_design.md` - projekt Neuberk interiér design: soukromý pracovní prostor pro fotky, plánky, rozměry a návrhy interiéru domu; první místnost je půdní hostovská místnost `Kačenka` pro dcery s dětmi, první čistý překres jedné stěny je hotový mimo git v `data/private/neuberk_interier_design/`.
 - `projects/automated_recurring_tasks.md` - automatické opakující se úkoly: `scripts/daily_3am.py`, GitHub Actions workflow a ColorsAndNumbers soví TTS tasky; `owl_230526.mp3` byl vygenerován v commitu `c8647de` a kontrola 2026-05-26 potvrdila existenci `owl_240526.mp3`.
 - `projects/tomik_video_imovie.md` - [PRIPOMENOUT] projekt priorita 1 pro rodinny iMovie sestřih z malych videi od dcery, tema vnuk Tomik druhy rok; workflow, soukromi, storyboard a exportni checklist.
+- `../START_HERE_RECOVERY.md` - krátký kořenový startovací soubor pro iPhone/GitHub: kam kliknout, když původní Mac nejde zapnout.
 - `RECOVERY_CARD_NEW_MAC.md` - polopatická nouzová karta pro obnovu Samanthy na novém Macu z GitHubu a externí recovery zálohy.
 - `RECOVERY_FROM_BACKUP.md` - podrobnější lidský a Codex návod pro obnovu Samanthy z externí zálohy na novém Macu.
 
