@@ -17,29 +17,26 @@ Co je hotove:
   se pouzivaji jen podle item-level review.
 - Prvni celkovy prehled je ulozen mimo git v:
   `data/private/family_memory_films/usa_2019/03_overview/usa_2019_tomik2_overview.md`.
+- Predstrihovy formular je vygenerovany mimo git v:
+  `data/private/family_memory_films/usa_2019/03_overview/film_selection_form.html`.
+  Pracuje s `film_selection_review.csv`, ma 2688 polozek, denni filtr,
+  rating `A/B/C/skip`, volby pro kratky/dlouhy film, autosave, CSV export a
+  prehravani videi pres read-only lokalni server originalu.
 - Git-safe memory byla aktualizovana a pushnuta commitem:
   `c4762f6 Document USA 2019 film overview step`.
 
 Co neni hotove:
-- Jeste neni vytvoreny druhy rozhodovaci formular pro predstrihovy vyber fotek
-  a videi podle dnu/kapitol.
 - Jeste neni hotovy finalni seznam konkretne vybranych fotek a videi pro iMovie.
 
 Dalsi krok:
-- Vytvorit private predstrihovy formular v `03_overview/`, ktery bude slouzit
-  k vyberu kandidatu pro kratky a dlouhy film:
-  - den nebo kapitola,
-  - kandidat do kratkeho filmu,
-  - kandidat do dlouheho filmu,
-  - fotky A,
-  - videa A,
-  - poznamka pro strih,
-  - autosave a CSV export,
-  - prehravani videi tam, kde se pracuje s konkretni video polozkou.
+- Otevrit `http://127.0.0.1:8792/03_overview/film_selection_form.html`.
+- Rucne oznacit kandidaty fotek a videi: hlavne `A`, `B`, `skip`, kandidat
+  kratky film, kandidat dlouhy film a poznamka pro strih.
+- Po praci stahnout CSV a pri navazani brat nejnovejsi
+  `~/Downloads/film_selection_review*.csv` jako zdroj pravdy.
 
 Navrhovane dalsi kroky:
-- Okamzite: vygenerovat prvni verzi predstrihoveho CSV a HTML formulare.
-- Potom: Mila projde formular, ulozi/stahne CSV a Adam vezme nejnovejsi
+- Okamzite: Mila projde formular, ulozi/stahne CSV a Adam vezme nejnovejsi
   stazene CSV jako zdroj pravdy.
 - Dale: podle vyberu pripravit iMovie importni balicek nebo strihovy checklist.
 
@@ -53,6 +50,8 @@ Zmenene nebo relevantni soubory:
   - `data/private/family_memory_films/usa_2019/02_review/block_review.csv`
   - `data/private/family_memory_films/usa_2019/02_review/mixed_2019_08_05/mixed_2019-08-05_review.csv`
   - `data/private/family_memory_films/usa_2019/03_overview/usa_2019_tomik2_overview.md`
+  - `data/private/family_memory_films/usa_2019/03_overview/film_selection_review.csv`
+  - `data/private/family_memory_films/usa_2019/03_overview/film_selection_form.html`
 
 Bezpecnost / neukladat:
 - Do gitu nedavat fotky, videa, nahledy, manifesty, GPS metadata, realne rodinne
@@ -65,5 +64,8 @@ Copy/paste handoff:
 - Cisty seznam dnu je hotovy, `2019-08-05` je smesny zdroj, ne den filmu.
 - Master prehled `Tomik 2` je v
   `data/private/family_memory_films/usa_2019/03_overview/usa_2019_tomik2_overview.md`.
-- Dalsi krok je udelat predstrihovy formular pro vyber fotek a videi do
-  kratkeho a dlouheho filmu, s autosave, CSV exportem a prehravanim videi.
+- Predstrihovy formular je v
+  `data/private/family_memory_films/usa_2019/03_overview/film_selection_form.html`
+  a bezi na `http://127.0.0.1:8792/03_overview/film_selection_form.html`.
+- Dalsi krok je rucne oznacit kandidaty fotek/videi a stahnout
+  `film_selection_review.csv`.

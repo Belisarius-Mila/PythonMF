@@ -130,6 +130,7 @@ Relevantni git-safe skripty:
 - `scripts/family_memory_prepare_review.py`
 - `scripts/family_memory_prepare_block_review.py`
 - `scripts/family_memory_prepare_mixed_review.py`
+- `scripts/family_memory_prepare_film_selection.py`
 
 ## Aktualni stav k 2026-06-05
 
@@ -141,19 +142,23 @@ Relevantni git-safe skripty:
   `data/private/family_memory_films/usa_2019/03_overview/usa_2019_tomik2_overview.md`.
   Obsahuje ciste dny, pocty fotek/videi, navrh kratkeho filmu, navrh dlouheho
   filmu a doporuceni pro zarazeni fotografii.
-- Dalsi prakticky krok uz neni oprava datumu, ale vyber kandidatu do filmu:
-  pripravit review formular pro foto/video vyber po kapitolach nebo dnech,
-  s autosave, CSV exportem a prehravanim videi.
+- Predstrihovy formular pro foto/video vyber je vygenerovany mimo git v
+  `data/private/family_memory_films/usa_2019/03_overview/film_selection_form.html`.
+  Pracuje s `film_selection_review.csv`, ma 2688 polozek, denni filtr,
+  rating `A/B/C/skip`, volby pro kratky/dlouhy film, autosave, CSV export a
+  prehravani videi pres read-only lokalni server originalu.
 
 ## Aktualni dalsi krok
 
-Pripravit druhy rozhodovaci formular pro predstrihovy vyber:
+Rucne projit predstrihovy formular:
 
-- radek = den nebo kapitola,
-- sloupce = kandidat do kratkeho filmu, kandidat do dlouheho filmu, fotky A,
-  videa A, poznamka pro strih,
-- zachovat autosave do prohlizece a CSV export,
-- u videi zachovat tlacitko `Prehrat video`,
+- URL pro aktualni lokalni server:
+  `http://127.0.0.1:8792/03_overview/film_selection_form.html`
+- u fotek i videi oznacovat hlavne `A`, `B`, `skip`, kandidat kratky film,
+  kandidat dlouhy film a poznamku pro strih,
+- po praci stahnout `film_selection_review.csv`,
+- pri navazani vzit nejnovejsi stazene
+  `~/Downloads/film_selection_review*.csv` jako zdroj pravdy,
 - vystup brat jako podklad pro iMovie import/organizaci, ne jako prikaz k mazani
   originalu.
 
