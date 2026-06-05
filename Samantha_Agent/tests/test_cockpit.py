@@ -1223,7 +1223,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("456", calls[0]["args"])
         self.assertTrue(calls[0]["start_new_session"])
 
-    def test_start_adam_voice_mode_action_launches_watcher_once(self) -> None:
+    def test_start_adam_voice_mode_action_launches_watcher_with_terminal_bridge_by_default(self) -> None:
         calls: list[dict[str, object]] = []
 
         def fake_launcher(args, **kwargs):
@@ -1241,11 +1241,35 @@ class CockpitTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(result["status"], "started")
         self.assertEqual(result["pid"], 12345)
+        self.assertTrue(result["terminal_bridge"])
         self.assertEqual(calls[0]["args"][1], str(cockpit_module.ADAM_VOICE_MODE_SCRIPT))
         self.assertIn("--poll", calls[0]["args"])
-        self.assertNotIn("--terminal-bridge", calls[0]["args"])
+        self.assertIn("--terminal-bridge", calls[0]["args"])
         self.assertTrue(calls[0]["start_new_session"])
         write_status.assert_called()
+
+    def test_start_adam_voice_mode_action_can_disable_terminal_bridge(self) -> None:
+        calls: list[dict[str, object]] = []
+
+        def fake_launcher(args, **kwargs):
+            calls.append({"args": args, **kwargs})
+            return SimpleNamespace(pid=12345)
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            log_file = Path(temp_dir) / "adam_voice_mode.log"
+            with (
+                patch("app.cockpit.load_voice_mode_status", return_value={"running": False}),
+                patch("app.cockpit.write_voice_mode_status"),
+            ):
+                result = start_adam_voice_mode_action(
+                    launcher=fake_launcher,
+                    log_file=log_file,
+                    terminal_bridge=False,
+                )
+
+        self.assertTrue(result["ok"])
+        self.assertFalse(result["terminal_bridge"])
+        self.assertNotIn("--terminal-bridge", calls[0]["args"])
 
     def test_start_adam_voice_mode_action_can_enable_terminal_bridge(self) -> None:
         calls: list[dict[str, object]] = []

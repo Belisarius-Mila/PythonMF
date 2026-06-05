@@ -244,6 +244,27 @@ def mark_pending_for_adam_processed(
     return pending
 
 
+def mark_matching_pending_delivered_to_terminal(
+    command: VoiceCommand,
+    *,
+    path: Path = ADAM_PENDING_COMMAND_PATH,
+) -> dict[str, Any] | None:
+    pending = load_pending_for_adam(path=path)
+    if not pending.get("ok") or not pending.get("pending"):
+        return None
+    if str(pending.get("text") or "").strip() != command.text.strip():
+        return None
+
+    now = utc_now()
+    pending["pending"] = False
+    pending["status"] = "processed_by_terminal_bridge"
+    pending["terminal_delivered_at"] = now
+    pending["updated_at"] = now
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(pending, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return pending
+
+
 def load_voice_mode_status(
     *,
     status_path: Path = ADAM_VOICE_MODE_STATUS_PATH,
@@ -447,6 +468,8 @@ def build_spoken_result_for_command(
             bridge_result = terminal_bridge(command)
             if bridge_result.get("ok"):
                 message = "Pokyn jsem vložil do Codex terminálu. Adam ho převezme přímo tam."
+                if pending_path is not None:
+                    mark_matching_pending_delivered_to_terminal(command, path=pending_path)
                 append_voice_history_turn(command, adam_response=message, route="terminal_bridge", path=history_path)
                 return message
             bridge_status = str(bridge_result.get("status") or "terminal_bridge_failed")

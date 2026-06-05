@@ -95,7 +95,10 @@ def build_codex_terminal_prompt(command: VoiceCommand) -> str:
         "Hlasový pokyn od Míly z Cockpitu: "
         f"{text} "
         "Zpracuj ho jako běžný uživatelský pokyn; pokud zjistíš riziko změny dat, "
-        "odesílání, mazání, commitu, platby nebo tajemství, vyžádej si ruční potvrzení."
+        "odesílání, mazání, commitu, platby nebo tajemství, vyžádej si ruční potvrzení. "
+        "Po dokončení napiš výsledek do chatu a přečti stručnou verzi výsledku nahlas přes "
+        "`.venv/bin/python scripts/speak_edge_open.py \"STRUČNÝ VÝSLEDEK\"`. "
+        "Nečti nahlas tajemství, celé osobní údaje ani dlouhé citlivé texty."
     )
 
 
@@ -236,6 +239,7 @@ on run argv
   tell application "System Events"
     set the clipboard to promptText
     keystroke "v" using command down
+    delay 0.25
     if shouldSubmit is "1" then key code 36
   end tell
   return "delivered"
@@ -253,14 +257,11 @@ on run argv
   end tell
   delay 0.2
   tell application "System Events"
-    set the clipboard to "Terminal: Focus Terminal"
-    keystroke "p" using {command down, shift down}
-    delay 0.15
-    keystroke "v" using command down
-    key code 36
-    delay 0.25
+    keystroke "u" using control down
+    delay 0.1
     set the clipboard to promptText
     keystroke "v" using command down
+    delay 0.25
     if shouldSubmit is "1" then key code 36
   end tell
   return "delivered_vscode"

@@ -5989,11 +5989,8 @@ def start_adam_voice_mode_action(
         "--poll",
         "0.5",
     ]
-    bridge_enabled = (
-        os.environ.get("ADAM_VOICE_TERMINAL_BRIDGE", "").strip().lower() in {"1", "true", "yes", "ano"}
-        if terminal_bridge is None
-        else terminal_bridge
-    )
+    bridge_env = os.environ.get("ADAM_VOICE_TERMINAL_BRIDGE", "").strip().lower()
+    bridge_enabled = terminal_bridge if terminal_bridge is not None else bridge_env not in {"0", "false", "no", "ne"}
     if bridge_enabled:
         command_args.append("--terminal-bridge")
     starter = launcher or subprocess.Popen

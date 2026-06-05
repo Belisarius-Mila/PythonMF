@@ -13,6 +13,7 @@ from app.speech.terminal_bridge import (
     deliver_prompt_to_vscode,
     deliver_voice_command_to_terminal,
     load_marked_codex_tty,
+    vscode_applescript,
 )
 from app.speech.voice_inbox import load_latest_voice_command
 
@@ -42,6 +43,8 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertEqual(decision["status"], "allowed")
         self.assertIn("Kolik jsme dnes napsali řádků kódu?", prompt)
         self.assertIn("vyžádej si ruční potvrzení", prompt)
+        self.assertIn("přečti stručnou verzi výsledku nahlas", prompt)
+        self.assertIn("scripts/speak_edge_open.py", prompt)
 
     def test_change_command_requires_manual_terminal_prompt(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -124,6 +127,14 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertEqual(calls[0]["args"][0], "/usr/bin/osascript")
         self.assertEqual(calls[0]["args"][-1], "0")
         self.assertFalse(result["submitted"])
+
+    def test_vscode_applescript_does_not_paste_focus_command_text(self) -> None:
+        script = vscode_applescript()
+
+        self.assertNotIn(">workbench.action.terminal.focus", script)
+        self.assertNotIn("Terminal: Focus Terminal", script)
+        self.assertIn("promptText", script)
+        self.assertRegex(script, r'keystroke "v" using command down\s+delay 0\.25\s+if shouldSubmit is "1" then key code 36')
 
     def test_discover_codex_ttys_finds_codex_process_tty(self) -> None:
         def fake_ps_runner(args, **kwargs):
