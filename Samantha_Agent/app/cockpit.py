@@ -1297,6 +1297,7 @@ def build_project_catalog_items(
         next_step = safe_text(project.get("next_step", ""))
         memory_file = safe_text(project.get("memory_file", ""))
         handoff = safe_text(project.get("handoff", ""))
+        management = project_management_signals(project)
         item = {
             "category": "project",
             "category_label": "Project",
@@ -1309,7 +1310,12 @@ def build_project_catalog_items(
             "handoff": handoff,
             "last_worked": latest_date_hint(status, next_step, memory_file, handoff),
             "flags": project.get("flags", []),
+            "management_flags": management["flags"],
+            "management_status": management["status"],
+            "management_reason": management["reason"],
+            "needs_attention": management["needs_attention"],
             "detail_fields": [
+                {"label": "Správa", "value": management["reason"]},
                 {"label": "Memory", "value": memory_file},
                 {"label": "Handoff", "value": handoff},
                 {"label": "Stav", "value": status},
@@ -1373,21 +1379,87 @@ def project_catalog_flags(category: str, *values: str) -> list[str]:
     return flags
 
 
+def project_management_signals(project: dict[str, Any]) -> dict[str, Any]:
+    status = safe_text(project.get("status", ""))
+    next_step = safe_text(project.get("next_step", ""))
+    memory_file = safe_text(project.get("memory_file", ""))
+    handoff = safe_text(project.get("handoff", ""))
+    folded = " ".join([status, next_step]).casefold()
+    flags: list[str] = []
+    if not has_project_reference(memory_file):
+        flags.append("chybí memory")
+    if not has_project_reference(handoff):
+        flags.append("chybí handoff")
+    if not has_project_reference(next_step):
+        flags.append("chybí další krok")
+    if any(needle in folded for needle in ("rozhodnout", "čeká", "ceka", "retest", "otestovat")):
+        flags.append("čeká na Mílu")
+    if any(needle in folded for needle in ("žádný aktivní vývoj", "zadny aktivni vyvoj", "hotovo / údržba", "hotovo / udrzba")):
+        flags.append("údržba")
+
+    blocking_flags = [flag for flag in flags if flag != "údržba"]
+    if not blocking_flags:
+        return {
+            "status": "ok",
+            "reason": "Projekt má uvedený další krok, memory i handoff.",
+            "flags": flags,
+            "needs_attention": False,
+        }
+    if flags == ["údržba"]:
+        return {
+            "status": "maintenance",
+            "reason": "Projekt je v údržbě bez okamžité akce.",
+            "flags": flags,
+            "needs_attention": False,
+        }
+    return {
+        "status": "needs_attention",
+        "reason": "Doplnit nebo rozhodnout: " + ", ".join(blocking_flags) + ".",
+        "flags": flags,
+        "needs_attention": True,
+    }
+
+
+def has_project_reference(value: str) -> bool:
+    folded = safe_text(value).strip().strip("`").casefold()
+    if not folded:
+        return False
+    missing_values = {
+        "-",
+        "n/a",
+        "na",
+        "none",
+        "zatim neni",
+        "zatím není",
+        "neni",
+        "není",
+        "zadny",
+        "žádný",
+    }
+    return folded not in missing_values
+
+
 def summarize_project_catalog(
     projects: list[dict[str, Any]],
     tools: list[dict[str, Any]],
     infrastructure_capabilities: list[dict[str, Any]],
 ) -> dict[str, Any]:
+    management_counts: dict[str, int] = {}
+    for project in projects:
+        signals = project_management_signals(project)
+        status = safe_text(signals.get("status", ""))
+        management_counts[status] = management_counts.get(status, 0) + 1
     return {
         "projects": len(projects),
         "tools": len(tools),
         "infrastructure_capabilities": len(infrastructure_capabilities),
         "total": len(projects) + len(tools) + len(infrastructure_capabilities),
+        "project_management": management_counts,
     }
 
 
-def empty_project_catalog_summary() -> dict[str, int]:
-    return {"projects": 0, "tools": 0, "infrastructure_capabilities": 0, "total": 0}
+def empty_project_catalog_summary() -> dict[str, Any]:
+    return {"projects": 0, "tools": 0, "infrastructure_capabilities": 0, "total": 0, "project_management": {}}
 
 
 def latest_date_hint(*values: str) -> str:
@@ -7610,17 +7682,19 @@ COCKPIT_HTML = """<!doctype html>
     .button-link { display: inline-block; border-radius: 6px; padding: 9px 12px; font-weight: 650; text-decoration: none; background: var(--blue); color: white; white-space: nowrap; }
     .project-toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
     .project-toolbar button.active { background: var(--blue); color: white; }
-    .project-list { display: grid; gap: 9px; }
-    .project-card { border: 1px solid #edf0f4; border-radius: 8px; padding: 11px; background: #fbfcfe; display: grid; gap: 7px; }
-    .project-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
-    .project-title { font-weight: 750; overflow-wrap: anywhere; }
-    .project-priority { border: 1px solid var(--line); border-radius: 999px; padding: 3px 7px; font-size: 12px; background: white; color: #344054; }
-    .project-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
-    .project-next { color: #263244; font-size: 13px; line-height: 1.4; overflow-wrap: anywhere; }
-    .project-flags { display: flex; gap: 6px; flex-wrap: wrap; }
-    .project-flag { border-radius: 999px; padding: 3px 7px; font-size: 11px; background: #fff7ed; color: #9a6700; }
-    .project-detail { display: grid; gap: 5px; border-top: 1px solid #edf0f4; padding-top: 7px; }
-    .project-detail.hidden { display: none; }
+	    .project-list { display: grid; gap: 9px; }
+	    .project-card { border: 1px solid #edf0f4; border-radius: 8px; padding: 11px; background: #fbfcfe; display: grid; gap: 7px; }
+	    .project-card.needs-attention { border-color: #fed7aa; background: #fffaf3; }
+	    .project-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
+	    .project-title { font-weight: 750; overflow-wrap: anywhere; }
+	    .project-priority { border: 1px solid var(--line); border-radius: 999px; padding: 3px 7px; font-size: 12px; background: white; color: #344054; }
+	    .project-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+	    .project-next { color: #263244; font-size: 13px; line-height: 1.4; overflow-wrap: anywhere; }
+	    .project-flags { display: flex; gap: 6px; flex-wrap: wrap; }
+	    .project-flag { border-radius: 999px; padding: 3px 7px; font-size: 11px; background: #fff7ed; color: #9a6700; }
+	    .project-flag.attention { background: #fee2e2; color: #991b1b; }
+	    .project-detail { display: grid; gap: 5px; border-top: 1px solid #edf0f4; padding-top: 7px; }
+	    .project-detail.hidden { display: none; }
     .quick-note-detail pre { white-space: pre-wrap; margin: 6px 0 0; max-height: 360px; overflow: auto; border: 1px solid #edf0f4; border-radius: 7px; padding: 10px; background: #fff; font-size: 13px; line-height: 1.45; }
     .quantitative-panel { display: grid; gap: 10px; }
     .quantitative-summary { display: grid; gap: 6px; }
@@ -7906,10 +7980,11 @@ COCKPIT_HTML = """<!doctype html>
           <button class="secondary" type="button" data-project-filter="projects">Projekty</button>
           <button class="secondary" type="button" data-project-filter="tools">Tooly</button>
           <button class="secondary" type="button" data-project-filter="infrastructure">Vrstvy</button>
-          <button class="secondary" type="button" data-project-filter="priority1">Priorita 1</button>
-          <button class="secondary" type="button" data-project-filter="remind">Připomenout</button>
-          <button class="secondary" type="button" data-project-filter="waiting">Čeká na mě</button>
-        </div>
+	          <button class="secondary" type="button" data-project-filter="priority1">Priorita 1</button>
+	          <button class="secondary" type="button" data-project-filter="remind">Připomenout</button>
+	          <button class="secondary" type="button" data-project-filter="waiting">Čeká na mě</button>
+	          <button class="secondary" type="button" data-project-filter="needs_attention">Doplnit</button>
+	        </div>
         <div id="projectsList" class="project-list"></div>
       </div>
     </div>
@@ -10291,13 +10366,15 @@ COCKPIT_HTML = """<!doctype html>
         const data = await res.json();
         currentProjects = data.items || data.projects || [];
         renderProjects(currentProjects, currentProjectFilter);
-        const summary = data.summary || {};
-        const catalogSummary = data.catalog_summary || {};
-        const flags = summary.flag_counts || {};
-        const remind = flags["připomenout"] || 0;
-        projectsStatus.textContent = data.ok
-          ? `${catalogSummary.projects || summary.total || 0} projektů, ${catalogSummary.tools || 0} toolů, ${catalogSummary.infrastructure_capabilities || 0} infrastrukturních vrstev${remind ? `; ${remind} připomenout.` : "."}`
-          : (data.message || "Projekty nejdou načíst.");
+	        const summary = data.summary || {};
+	        const catalogSummary = data.catalog_summary || {};
+	        const management = catalogSummary.project_management || {};
+	        const flags = summary.flag_counts || {};
+	        const remind = flags["připomenout"] || 0;
+	        const needsAttention = management.needs_attention || 0;
+	        projectsStatus.textContent = data.ok
+	          ? `${catalogSummary.projects || summary.total || 0} projektů, ${catalogSummary.tools || 0} toolů, ${catalogSummary.infrastructure_capabilities || 0} infrastrukturních vrstev${remind ? `; ${remind} připomenout` : ""}${needsAttention ? `; ${needsAttention} doplnit` : ""}.`
+	          : (data.message || "Projekty nejdou načíst.");
       } catch (err) {
         recordFrontendError(err);
         projectsStatus.textContent = `Chyba načtení projektů a schopností: ${err}`;
@@ -10649,13 +10726,15 @@ COCKPIT_HTML = """<!doctype html>
       if (filter === "projects") return category === "project";
       if (filter === "tools") return category === "tool";
       if (filter === "infrastructure") return category === "infrastructure";
-      if (filter === "priority1") return priority === "1" || priority === "A1+";
-      if (filter === "remind") return flags.includes("připomenout");
-      if (filter === "waiting") {
-        return flags.includes("čeká na retest")
-          || flags.includes("blokováno")
-          || haystack.includes("čeká")
-          || haystack.includes("ceka")
+	      if (filter === "priority1") return priority === "1" || priority === "A1+";
+	      if (filter === "remind") return flags.includes("připomenout");
+	      if (filter === "needs_attention") return Boolean(project.needs_attention);
+	      if (filter === "waiting") {
+	        return flags.includes("čeká na retest")
+	          || flags.includes("blokováno")
+	          || (project.management_flags || []).includes("čeká na Mílu")
+	          || haystack.includes("čeká")
+	          || haystack.includes("ceka")
           || haystack.includes("rozhodnout")
           || haystack.includes("otestovat")
           || haystack.includes("retest");
@@ -10676,10 +10755,11 @@ COCKPIT_HTML = """<!doctype html>
         projectsList.appendChild(empty);
         return;
       }
-      filtered.forEach((project) => {
-        const card = document.createElement("div");
-        card.className = "project-card";
-        const head = document.createElement("div");
+	      filtered.forEach((project) => {
+	        const card = document.createElement("div");
+	        card.className = "project-card";
+	        if (project.needs_attention) card.classList.add("needs-attention");
+	        const head = document.createElement("div");
         head.className = "project-head";
         const title = document.createElement("div");
         title.className = "project-title";
@@ -10694,26 +10774,35 @@ COCKPIT_HTML = """<!doctype html>
         const status = document.createElement("div");
         status.className = "project-meta";
         status.textContent = project.summary || project.status || "";
-        const next = document.createElement("div");
-        next.className = "project-next";
+	        const next = document.createElement("div");
+	        next.className = "project-next";
         const nextLabel = project.category === "tool"
           ? "Bezpečnostní rozsah"
           : project.category === "infrastructure"
             ? "Pomáhá"
             : "Další krok";
-        next.textContent = project.next_step ? `${nextLabel}: ${project.next_step}` : `${nextLabel} není uveden.`;
-        const flags = document.createElement("div");
-        flags.className = "project-flags";
+	        next.textContent = project.next_step ? `${nextLabel}: ${project.next_step}` : `${nextLabel} není uveden.`;
+	        const management = document.createElement("div");
+	        management.className = project.needs_attention ? "project-next" : "project-meta";
+	        management.textContent = project.management_reason || "";
+	        const flags = document.createElement("div");
+	        flags.className = "project-flags";
         const categoryFlag = document.createElement("span");
         categoryFlag.className = "project-flag";
         categoryFlag.textContent = project.category_label || project.category || "Project";
         flags.appendChild(categoryFlag);
-        (project.flags || []).forEach((flag) => {
-          const node = document.createElement("span");
-          node.className = "project-flag";
-          node.textContent = flag;
-          flags.appendChild(node);
-        });
+	        (project.flags || []).forEach((flag) => {
+	          const node = document.createElement("span");
+	          node.className = "project-flag";
+	          node.textContent = flag;
+	          flags.appendChild(node);
+	        });
+	        (project.management_flags || []).forEach((flag) => {
+	          const node = document.createElement("span");
+	          node.className = `project-flag ${project.needs_attention ? "attention" : ""}`;
+	          node.textContent = flag;
+	          flags.appendChild(node);
+	        });
         const toggle = document.createElement("button");
         toggle.className = "secondary";
         toggle.type = "button";
@@ -10729,9 +10818,10 @@ COCKPIT_HTML = """<!doctype html>
           toggle.textContent = hidden ? "Detail" : "Sbalit";
         });
         card.appendChild(head);
-        card.appendChild(status);
-        card.appendChild(next);
-        if ((project.flags || []).length) card.appendChild(flags);
+	        card.appendChild(status);
+	        card.appendChild(next);
+	        if (management.textContent) card.appendChild(management);
+	        if ((project.flags || []).length || (project.management_flags || []).length) card.appendChild(flags);
         card.appendChild(toggle);
         card.appendChild(detail);
         projectsList.appendChild(card);

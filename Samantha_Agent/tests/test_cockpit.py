@@ -921,6 +921,9 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Projekty a schopnosti", COCKPIT_HTML)
         self.assertIn('data-project-filter="tools"', COCKPIT_HTML)
         self.assertIn('data-project-filter="infrastructure"', COCKPIT_HTML)
+        self.assertIn('data-project-filter="needs_attention"', COCKPIT_HTML)
+        self.assertIn("needs-attention", COCKPIT_HTML)
+        self.assertIn("management_reason", COCKPIT_HTML)
         self.assertIn("/api/projects/status", COCKPIT_HTML)
         self.assertNotIn('id="quantitativeBtn"', COCKPIT_HTML)
         self.assertIn("dashboardQuantitative", COCKPIT_HTML)
@@ -1233,8 +1236,27 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(status["catalog_summary"]["tools"], 1)
         self.assertEqual(status["catalog_summary"]["infrastructure_capabilities"], 1)
         self.assertEqual(status["catalog_summary"]["total"], 3)
+        self.assertEqual(status["catalog_summary"]["project_management"]["needs_attention"], 1)
         self.assertEqual([item["category"] for item in status["items"]], ["project", "tool", "infrastructure"])
         self.assertEqual(status["items"][0]["last_worked"], "2026-06-04")
+        self.assertTrue(status["items"][0]["needs_attention"])
+        self.assertIn("čeká na Mílu", status["items"][0]["management_flags"])
+
+    def test_project_management_signals_find_missing_project_handoff_and_next_step(self) -> None:
+        item = cockpit_module.project_management_signals(
+            {
+                "status": "Rozpracovane",
+                "next_step": "",
+                "memory_file": "`projects/docs.md`",
+                "handoff": "zatim neni",
+            }
+        )
+
+        self.assertEqual(item["status"], "needs_attention")
+        self.assertTrue(item["needs_attention"])
+        self.assertIn("chybí handoff", item["flags"])
+        self.assertIn("chybí další krok", item["flags"])
+        self.assertIn("Doplnit nebo rozhodnout", item["reason"])
 
     def test_recovery_center_status_reports_metadata_without_autosave_content(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
