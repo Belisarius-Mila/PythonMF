@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import time
@@ -59,13 +60,18 @@ def wait_for_latest_voice_command(
     timeout_seconds: float = 180.0,
     poll_seconds: float = 1.0,
     since_mtime_ns: int | None = None,
+    since_signature: str | None = None,
 ) -> VoiceCommand:
     latest_path = inbox_dir / "latest_voice_command.md"
     deadline = time.monotonic() + max(0.0, timeout_seconds)
     while True:
         if latest_path.exists():
             mtime_ns = latest_path.stat().st_mtime_ns
-            if since_mtime_ns is None or mtime_ns > since_mtime_ns:
+            signature = file_signature(latest_path)
+            if since_signature is not None:
+                if signature != since_signature:
+                    return parse_voice_command_file(latest_path)
+            elif since_mtime_ns is None or mtime_ns > since_mtime_ns:
                 return parse_voice_command_file(latest_path)
         if time.monotonic() >= deadline:
             break
@@ -93,6 +99,17 @@ def latest_voice_command_mtime_ns(*, inbox_dir: Path = VOICE_COMMAND_INBOX_DIR) 
     if not latest_path.exists():
         return None
     return latest_path.stat().st_mtime_ns
+
+
+def latest_voice_command_signature(*, inbox_dir: Path = VOICE_COMMAND_INBOX_DIR) -> str | None:
+    latest_path = inbox_dir / "latest_voice_command.md"
+    if not latest_path.exists():
+        return None
+    return file_signature(latest_path)
+
+
+def file_signature(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def parse_voice_command_file(path: Path) -> VoiceCommand:
@@ -249,21 +266,35 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--inbox-dir", type=Path, default=VOICE_COMMAND_INBOX_DIR)
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON.")
     parser.add_argument("--wait", action="store_true", help="Wait for a latest voice command before printing triage.")
+    parser.add_argument("--follow", action="store_true", help="Keep watching and print every new voice command triage.")
     parser.add_argument("--since-now", action="store_true", help="With --wait, ignore an existing latest command and wait for a newer one.")
     parser.add_argument("--timeout", type=float, default=180.0, help="Maximum seconds to wait with --wait.")
     parser.add_argument("--poll", type=float, default=1.0, help="Polling interval in seconds with --wait.")
+    parser.add_argument("--count", type=int, default=0, help="With --follow, stop after this many commands. 0 means no count limit.")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_arg_parser().parse_args(argv)
     since_mtime_ns = latest_voice_command_mtime_ns(inbox_dir=args.inbox_dir) if args.since_now else None
+    since_signature = latest_voice_command_signature(inbox_dir=args.inbox_dir) if args.since_now else None
+    if args.follow:
+        return follow_voice_commands(
+            inbox_dir=args.inbox_dir,
+            timeout_seconds=args.timeout,
+            poll_seconds=args.poll,
+            since_mtime_ns=since_mtime_ns,
+            since_signature=since_signature,
+            json_output=args.json,
+            count=args.count,
+        )
     command = (
         wait_for_latest_voice_command(
             inbox_dir=args.inbox_dir,
             timeout_seconds=args.timeout,
             poll_seconds=args.poll,
             since_mtime_ns=since_mtime_ns,
+            since_signature=since_signature,
         )
         if args.wait
         else load_latest_voice_command(inbox_dir=args.inbox_dir)
@@ -273,6 +304,41 @@ def main(argv: list[str] | None = None) -> int:
     else:
         print(format_voice_command_for_adam(command))
     return 0 if command.ok else 1
+
+
+def follow_voice_commands(
+    *,
+    inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
+    timeout_seconds: float = 180.0,
+    poll_seconds: float = 1.0,
+    since_mtime_ns: int | None = None,
+    since_signature: str | None = None,
+    json_output: bool = False,
+    count: int = 0,
+) -> int:
+    processed = 0
+    current_since = since_mtime_ns
+    current_signature = since_signature
+    while True:
+        command = wait_for_latest_voice_command(
+            inbox_dir=inbox_dir,
+            timeout_seconds=timeout_seconds,
+            poll_seconds=poll_seconds,
+            since_mtime_ns=current_since,
+            since_signature=current_signature,
+        )
+        if not command.ok:
+            print(json.dumps(voice_command_to_dict(command), ensure_ascii=False) if json_output else format_voice_command_for_adam(command), flush=True)
+            return 0 if processed else 1
+
+        print(json.dumps(voice_command_to_dict(command), ensure_ascii=False) if json_output else format_voice_command_for_adam(command), flush=True)
+        processed += 1
+        current_since = latest_voice_command_mtime_ns(inbox_dir=inbox_dir)
+        current_signature = latest_voice_command_signature(inbox_dir=inbox_dir)
+        if count > 0 and processed >= count:
+            return 0
+        if not json_output:
+            print("\n--- čekám na další hlasový pokyn ---\n", flush=True)
 
 
 if __name__ == "__main__":

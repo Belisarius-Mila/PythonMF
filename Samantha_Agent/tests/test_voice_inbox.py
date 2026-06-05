@@ -99,6 +99,58 @@ class VoiceInboxTests(unittest.TestCase):
         self.assertIn("Fraška", command.text)
         self.assertEqual(command.triage.risk, "read_only")
 
+    def test_voice_inbox_follow_cli_waits_for_new_command_and_stops_after_count(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            inbox = Path(temp_dir)
+            (inbox / "latest_voice_command.md").write_text(
+                "# Voice command\n\n"
+                "Created at: 2026-06-05T09:00:00+00:00\n"
+                "Status: transcribed_only_not_executed\n\n"
+                "## Text\n\n"
+                "Starý pokyn.\n",
+                encoding="utf-8",
+            )
+
+            def write_later() -> None:
+                time.sleep(1.5)
+                (inbox / "latest_voice_command.md").write_text(
+                    "# Voice command\n\n"
+                    "Created at: 2026-06-05T10:00:00+00:00\n"
+                    "Status: transcribed_only_not_executed\n\n"
+                    "## Text\n\n"
+                    "Najdi stav projektu Dokumenty.\n",
+                    encoding="utf-8",
+                )
+
+            thread = threading.Thread(target=write_later)
+            thread.start()
+            completed = subprocess.run(
+                [
+                    ".venv/bin/python",
+                    "scripts/voice_inbox_triage.py",
+                    "--follow",
+                    "--since-now",
+                    "--count",
+                    "1",
+                    "--timeout",
+                    "5",
+                    "--poll",
+                    "0.01",
+                    "--inbox-dir",
+                    str(inbox),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=8,
+                check=False,
+            )
+            thread.join(timeout=2)
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertIn("VOICE INBOX TRIAGE", completed.stdout)
+        self.assertIn("Najdi stav projektu Dokumenty.", completed.stdout)
+        self.assertIn("- risk: read_only", completed.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

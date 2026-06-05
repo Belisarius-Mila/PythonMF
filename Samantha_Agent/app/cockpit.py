@@ -7787,8 +7787,9 @@ COCKPIT_HTML = """<!doctype html>
     .app-description { color: #344054; font-size: 13px; line-height: 1.4; margin-top: 3px; }
     .app-kind { color: var(--muted); font-size: 12px; margin-top: 4px; }
     .button-link { display: inline-block; border-radius: 6px; padding: 9px 12px; font-weight: 650; text-decoration: none; background: var(--blue); color: white; white-space: nowrap; }
-    .project-toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
-    .project-toolbar button.active { background: var(--blue); color: white; }
+	    .project-toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+	    .project-toolbar button.active { background: var(--blue); color: white; }
+	    .voice-command-actions button.active { background: var(--blue); color: white; }
 	    .project-list { display: grid; gap: 9px; }
 	    .project-card { border: 1px solid #edf0f4; border-radius: 8px; padding: 11px; background: #fbfcfe; display: grid; gap: 7px; }
 	    .project-card.needs-attention { border-color: #fed7aa; background: #fffaf3; }
@@ -7923,14 +7924,15 @@ COCKPIT_HTML = """<!doctype html>
       </section>
 	    </div>
 	    <div id="statusLine" class="status-line">Načítám stav...</div>
-	    <section id="voiceCommandPanel">
-	      <h2>Hlasový pokyn</h2>
-	      <div class="body voice-command-grid">
-	        <div class="voice-command-actions">
-	          <button class="primary" id="voiceRecordBtn">Nahrát hlasový pokyn</button>
-	          <button class="secondary" id="voiceStopBtn" disabled>Zastavit a přepsat</button>
-	        </div>
-	        <div id="voiceCommandStatus" class="status-line">Pokyn se po přepisu automaticky uloží pro Codex. Nic se samo nespustí.</div>
+		    <section id="voiceCommandPanel">
+		      <h2>Hlasový pokyn</h2>
+		      <div class="body voice-command-grid">
+		        <div class="voice-command-actions">
+		          <button class="secondary" id="voiceModeToggleBtn" aria-pressed="false">Hlasový mód: vypnuto</button>
+		          <button class="primary" id="voiceRecordBtn">Nahrát hlasový pokyn</button>
+		          <button class="secondary" id="voiceStopBtn" disabled>Zastavit a přepsat</button>
+		        </div>
+		        <div id="voiceCommandStatus" class="status-line">Pokyn se po přepisu automaticky uloží pro Codex. Nic se samo nespustí.</div>
 	        <div class="voice-transcript-row">
 	          <label for="voiceTranscript">Přepis</label>
 	          <textarea id="voiceTranscript" placeholder="Tady se objeví přepsaný hlasový pokyn." spellcheck="true"></textarea>
@@ -8309,6 +8311,7 @@ COCKPIT_HTML = """<!doctype html>
 			    const dashboardSpeakSelectionBtn = document.getElementById("dashboardSpeakSelectionBtn");
 			    const dashboardRefreshBtn = document.getElementById("dashboardRefreshBtn");
     const dashboardActionHint = document.getElementById("dashboardActionHint");
+    const voiceModeToggleBtn = document.getElementById("voiceModeToggleBtn");
     const voiceRecordBtn = document.getElementById("voiceRecordBtn");
     const voiceStopBtn = document.getElementById("voiceStopBtn");
     const voiceCommandStatus = document.getElementById("voiceCommandStatus");
@@ -8435,8 +8438,9 @@ COCKPIT_HTML = """<!doctype html>
 	        "dashboardRecoveryBtn",
 	        "dashboardRestartBtn",
 	        "dashboardSpeakBtn",
-	        "dashboardSpeakSelectionBtn",
+        "dashboardSpeakSelectionBtn",
 	        "dashboardRefreshBtn",
+        "voiceModeToggleBtn",
         "voiceRecordBtn",
         "voiceStopBtn",
         "urgentReminderAlertBtn",
@@ -10303,7 +10307,8 @@ COCKPIT_HTML = """<!doctype html>
 	    let voiceStream = null;
 	    let voiceChunks = [];
 	    let voiceStopTimer = null;
-	    let voiceRecordingStartedAt = 0;
+		    let voiceRecordingStartedAt = 0;
+		    let voiceModeEnabled = localStorage.getItem("samanthaVoiceModeEnabled") === "true";
 
 	    function preferredVoiceMimeType() {
 	      if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) {
@@ -10339,14 +10344,31 @@ COCKPIT_HTML = """<!doctype html>
 	      });
 	    }
 
-	    function resetVoiceRecordingUi() {
+		    function resetVoiceRecordingUi() {
 	      voiceRecordBtn.disabled = false;
 	      voiceRecordBtn.classList.remove("recording");
 	      voiceStopBtn.disabled = true;
 	      if (voiceStopTimer) {
 	        window.clearTimeout(voiceStopTimer);
 	        voiceStopTimer = null;
-	      }
+		    }
+
+		    function updateVoiceModeUi() {
+		      voiceModeToggleBtn.textContent = voiceModeEnabled ? "Hlasový mód: zapnuto" : "Hlasový mód: vypnuto";
+		      voiceModeToggleBtn.setAttribute("aria-pressed", voiceModeEnabled ? "true" : "false");
+		      voiceModeToggleBtn.classList.toggle("active", voiceModeEnabled);
+		      if (voiceModeEnabled) {
+		        voiceCommandStatus.textContent = "Hlasový mód je zapnutý. Adam může mít spuštěné čekání na nové pokyny; stačí nahrávat další hlasové pokyny.";
+		      } else {
+		        voiceCommandStatus.textContent = "Pokyn se po přepisu automaticky uloží pro Codex. Nic se samo nespustí.";
+		      }
+		    }
+
+		    function toggleVoiceMode() {
+		      voiceModeEnabled = !voiceModeEnabled;
+		      localStorage.setItem("samanthaVoiceModeEnabled", voiceModeEnabled ? "true" : "false");
+		      updateVoiceModeUi();
+		    }
 	    }
 
 	    async function startVoiceRecording() {
@@ -10424,14 +10446,15 @@ COCKPIT_HTML = """<!doctype html>
 	          })
 	        });
 	        const data = await res.json();
-	        if (data.ok) {
-	          voiceTranscript.value = data.text || "";
+		        if (data.ok) {
+		          voiceTranscript.value = data.text || "";
 	          const totalMs = Date.now() - requestStartedAt;
 	          const serverMs = data.duration_ms || 0;
 	          const openaiMs = data.timing && data.timing.openai_ms ? data.timing.openai_ms : 0;
 	          const timing = `celkem ${Math.round(totalMs / 1000)} s, server ${Math.round(serverMs / 1000)} s, OpenAI ${Math.round(openaiMs / 1000)} s, audio ${data.audio_kb || audioKb} kB`;
 	          const savedHint = data.latest_voice_command_path ? ` Uloženo: ${data.latest_voice_command_path}.` : "";
-	          voiceCommandStatus.textContent = `${data.message || "Hlasový pokyn byl přepsán a uložen."}${savedHint} (${timing})`;
+		          const modeHint = voiceModeEnabled ? " Hlasový mód: čekám na Adamovo převzetí nebo další nahrávku." : "";
+		          voiceCommandStatus.textContent = `${data.message || "Hlasový pokyn byl přepsán a uložen."}${savedHint}${modeHint} (${timing})`;
 	        } else {
 	          voiceCommandStatus.textContent = data.message || "Přepis hlasu selhal.";
 	        }
@@ -11603,8 +11626,10 @@ COCKPIT_HTML = """<!doctype html>
     dashboardRestartBtn.addEventListener("click", restartCockpit);
     dashboardSpeakBtn.addEventListener("click", speakDashboardStatus);
     dashboardSpeakSelectionBtn.addEventListener("click", speakSelectedText);
+    voiceModeToggleBtn.addEventListener("click", toggleVoiceMode);
     voiceRecordBtn.addEventListener("click", startVoiceRecording);
     voiceStopBtn.addEventListener("click", stopVoiceRecording);
+    updateVoiceModeUi();
 			    webAppsBtn.addEventListener("click", openWebAppsModal);
     projectsBtn.addEventListener("click", openProjectsModal);
     reviewReportBtn.addEventListener("click", loadDocumentReviewReport);
