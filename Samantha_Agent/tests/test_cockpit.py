@@ -897,6 +897,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("todayNewPdfCount", COCKPIT_HTML)
         self.assertIn("dashboardScanDocu", COCKPIT_HTML)
         self.assertIn("dashboardGit", COCKPIT_HTML)
+        self.assertIn("git-safe", COCKPIT_HTML)
+        self.assertIn("private/family mimo", COCKPIT_HTML)
         self.assertIn("dashboardOverall", COCKPIT_HTML)
         self.assertIn("dashboardOverallLabel", COCKPIT_HTML)
         self.assertIn("dashboardOverallReason", COCKPIT_HTML)
@@ -1111,6 +1113,21 @@ class CockpitTests(unittest.TestCase):
         self.assertNotIn("quantitative", status)
         self.assertNotIn("projects", status)
         self.assertNotIn("consistency", status)
+
+    def test_git_dirty_line_classification_separates_private_family_and_safe_changes(self) -> None:
+        app_item = cockpit_module.classify_git_dirty_line(" M Samantha_Agent/app/cockpit.py")
+        family_item = cockpit_module.classify_git_dirty_line("?? Samantha_Agent/memory/projects/family_memory_films.md")
+        private_item = cockpit_module.classify_git_dirty_line("?? Samantha_Agent/data/private/documents/index.json")
+        memory_item = cockpit_module.classify_git_dirty_line(" M Samantha_Agent/memory/MEMORY_INDEX.md")
+        speech_item = cockpit_module.classify_git_dirty_line("?? Samantha_Agent/app/speech/__init__.py")
+
+        self.assertEqual(app_item["commit_safety"], "safe")
+        self.assertEqual(app_item["category"], "app_code")
+        self.assertEqual(family_item["commit_safety"], "exclude")
+        self.assertEqual(family_item["category"], "family_memory")
+        self.assertEqual(private_item["commit_safety"], "exclude")
+        self.assertEqual(memory_item["commit_safety"], "review")
+        self.assertEqual(speech_item["category"], "speech_tooling")
 
     def test_start_cockpit_restart_action_requires_confirmation_and_safe_process(self) -> None:
         self.assertEqual(

@@ -4082,6 +4082,19 @@ def git_status_summary(root: Path = GIT_ROOT) -> dict[str, Any]:
     lines = [line for line in completed.stdout.splitlines() if line.strip()]
     branch = lines[0].replace("## ", "", 1) if lines else ""
     dirty_files = [line.strip() for line in lines[1:]]
+    dirty_items = [classify_git_dirty_line(line) for line in dirty_files]
+    categories: dict[str, int] = {}
+    for item in dirty_items:
+        category = str(item.get("category", "other"))
+        categories[category] = categories.get(category, 0) + 1
+    safe_commit_candidates = [
+        item for item in dirty_items
+        if item.get("commit_safety") == "safe"
+    ]
+    excluded_private = [
+        item for item in dirty_items
+        if item.get("commit_safety") == "exclude"
+    ]
     message = "čistý pracovní strom" if not dirty_files else f"{len(dirty_files)} změn v pracovním stromu"
     return {
         "ok": True,
@@ -4089,8 +4102,61 @@ def git_status_summary(root: Path = GIT_ROOT) -> dict[str, Any]:
         "branch": branch,
         "dirty_count": len(dirty_files),
         "dirty_files": dirty_files[:8],
+        "dirty_items": dirty_items[:12],
+        "categories": categories,
+        "safe_commit_count": len(safe_commit_candidates),
+        "excluded_private_count": len(excluded_private),
+        "safe_commit_candidates": safe_commit_candidates[:8],
+        "excluded_private": excluded_private[:8],
         "ahead": "ahead" in branch,
         "behind": "behind" in branch,
+    }
+
+
+def classify_git_dirty_line(line: str) -> dict[str, Any]:
+    raw = safe_text(str(line)).strip()
+    status = raw[:2].strip() or "?"
+    path = raw[3:].strip() if len(raw) > 3 else raw
+    normalized = path.replace("\\", "/")
+    folded = normalized.casefold()
+    category = "other"
+    commit_safety = "safe"
+    reason = "Git-safe technická nebo projektová změna."
+    if "family_memory" in folded or "family-memory" in folded or "/family_memory" in folded:
+        category = "family_memory"
+        commit_safety = "exclude"
+        reason = "Family Memory práce je v této session výslovně mimo commit."
+    elif "/data/private/" in folded or folded.startswith("samantha_agent/data/private/"):
+        category = "private_data"
+        commit_safety = "exclude"
+        reason = "Private data nepatří do gitu."
+    elif "/data/session_autosave/" in folded or folded.startswith("samantha_agent/data/session_autosave/"):
+        category = "autosave"
+        commit_safety = "exclude"
+        reason = "Nouzové autosave logy se nikdy necommitují."
+    elif "/memory/active_projects.md" in folded or "/memory/memory_index.md" in folded:
+        category = "memory_index"
+        commit_safety = "review"
+        reason = "Memory index může obsahovat smíšené hunky; před commitem zkontrolovat obsah."
+    elif "/memory/" in folded:
+        category = "memory"
+        commit_safety = "review"
+        reason = "Memory soubor vyžaduje kontrolu citlivosti a tématu."
+    elif "/app/speech/" in folded or normalized.endswith("/scripts/speak_text.py"):
+        category = "speech_tooling"
+        reason = "Technická TTS/speech změna; commitovat jen po samostatném ověření."
+    elif "/tests/" in folded:
+        category = "tests"
+    elif "/app/" in folded:
+        category = "app_code"
+    elif "/scripts/" in folded:
+        category = "script"
+    return {
+        "status": status,
+        "path": normalized,
+        "category": category,
+        "commit_safety": commit_safety,
+        "reason": reason,
     }
 
 
@@ -9309,12 +9375,16 @@ COCKPIT_HTML = """<!doctype html>
       } else {
         const gitClass = git.dirty_count ? "warn" : "ok";
         const sync = git.ahead ? " | čeká push" : git.behind ? " | čeká pull" : "";
-        dashboardGit.innerHTML = `<span class="${gitClass}">${git.message || ""}</span>${sync}<br>${git.branch || ""}`;
+        const reviewCount = Math.max(0, Number(git.dirty_count || 0) - Number(git.safe_commit_count || 0) - Number(git.excluded_private_count || 0));
+        const gitBreakdown = git.dirty_count
+          ? `<br>git-safe ${git.safe_commit_count || 0} | zkontrolovat ${reviewCount} | private/family mimo ${git.excluded_private_count || 0}`
+          : "";
+        dashboardGit.innerHTML = `<span class="${gitClass}">${git.message || ""}</span>${sync}<br>${git.branch || ""}${gitBreakdown}`;
         setDashboardStatusSignal(
           "git",
           git.dirty_count || git.ahead || git.behind ? "warn" : "ok",
           git.dirty_count
-            ? `Git: ${git.message || `${git.dirty_count} změn v pracovní kopii`}`
+            ? `Git: ${git.message || `${git.dirty_count} změn v pracovní kopii`} | git-safe ${git.safe_commit_count || 0}, private/family mimo ${git.excluded_private_count || 0}`
             : git.ahead
               ? "Git: lokální změny čekají na push"
               : git.behind
