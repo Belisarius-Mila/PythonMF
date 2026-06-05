@@ -8,6 +8,7 @@ from app.speech.voice_inbox import VoiceCommand, normalize_for_triage, voice_com
 
 
 MAX_TERMINAL_PROMPT_CHARS = 1200
+PS_COMMAND = ["ps", "-axo", "pid=,ppid=,tty=,comm=,args="]
 
 TERMINAL_MANUAL_TERMS = (
     "smaz",
@@ -92,17 +93,85 @@ def build_codex_terminal_prompt(command: VoiceCommand) -> str:
     )
 
 
+def normalize_tty(value: str) -> str:
+    text = str(value or "").strip()
+    if text.startswith("/dev/"):
+        return text.removeprefix("/dev/")
+    return text
+
+
+def discover_codex_ttys(
+    *,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> list[str]:
+    try:
+        completed = runner(
+            PS_COMMAND,
+            capture_output=True,
+            text=True,
+            timeout=4,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return []
+    if completed.returncode != 0:
+        return []
+
+    tty_by_pid: dict[int, str] = {}
+    parent_by_pid: dict[int, int] = {}
+    codex_pids: set[int] = set()
+    for line in completed.stdout.splitlines():
+        parts = line.strip().split(None, 4)
+        if len(parts) < 5:
+            continue
+        pid_text, ppid_text, tty, comm, args = parts
+        try:
+            pid = int(pid_text)
+            ppid = int(ppid_text)
+        except ValueError:
+            continue
+        tty_by_pid[pid] = normalize_tty(tty)
+        parent_by_pid[pid] = ppid
+        folded = f"{comm} {args}".casefold()
+        if "codex" in folded and "app-server" not in folded:
+            codex_pids.add(pid)
+
+    result: list[str] = []
+    seen: set[str] = set()
+    for pid in sorted(codex_pids):
+        current = pid
+        for _ in range(20):
+            tty = tty_by_pid.get(current, "")
+            if tty and tty != "??" and tty not in seen:
+                seen.add(tty)
+                result.append(tty)
+                break
+            parent = parent_by_pid.get(current)
+            if parent is None or parent == current:
+                break
+            current = parent
+    return result
+
+
 def terminal_applescript() -> str:
     return r'''
 on run argv
   set promptText to item 1 of argv
   set shouldSubmit to item 2 of argv
+  set targetTtys to {}
+  if (count of argv) >= 3 then
+    set AppleScript's text item delimiters to ","
+    set targetTtys to text items of (item 3 of argv)
+    set AppleScript's text item delimiters to ""
+  end if
   tell application "Terminal"
     set foundTarget to false
     repeat with terminalWindow in windows
       repeat with terminalTab in tabs of terminalWindow
         set tabProcesses to processes of terminalTab
-        if tabProcesses contains "codex" then
+        set tabTty to tty of terminalTab
+        if tabTty starts with "/dev/" then set tabTty to text 6 thru -1 of tabTty
+        if (tabProcesses contains "codex") or (targetTtys contains tabTty) then
           set selected tab of terminalWindow to terminalTab
           set index of terminalWindow to 1
           set foundTarget to true
@@ -111,7 +180,7 @@ on run argv
       end repeat
       if foundTarget then exit repeat
     end repeat
-    if not foundTarget then error "Nenalezen Terminal tab s procesem codex."
+    if not foundTarget then error "Nenalezen Terminal tab s procesem codex ani s odpovídajícím TTY."
     activate
   end tell
   delay 0.2
@@ -130,12 +199,21 @@ def deliver_prompt_to_terminal(
     *,
     submit: bool = True,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+    ps_runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
     script: str | None = None,
     timeout: float = 8.0,
 ) -> dict[str, Any]:
     safe_prompt = squash_terminal_text(prompt)
+    codex_ttys = discover_codex_ttys(runner=ps_runner)
     completed = runner(
-        ["/usr/bin/osascript", "-e", script or terminal_applescript(), safe_prompt, "1" if submit else "0"],
+        [
+            "/usr/bin/osascript",
+            "-e",
+            script or terminal_applescript(),
+            safe_prompt,
+            "1" if submit else "0",
+            ",".join(codex_ttys),
+        ],
         capture_output=True,
         text=True,
         timeout=timeout,
@@ -147,12 +225,14 @@ def deliver_prompt_to_terminal(
             "status": "terminal_delivery_failed",
             "message": (completed.stderr or completed.stdout or "Terminálový bridge selhal.").strip(),
             "returncode": completed.returncode,
+            "target_ttys": codex_ttys,
         }
     return {
         "ok": True,
         "status": "delivered",
         "message": "Pokyn byl vložen do Codex terminálu.",
         "submitted": submit,
+        "target_ttys": codex_ttys,
     }
 
 
@@ -161,6 +241,7 @@ def deliver_voice_command_to_terminal(
     *,
     submit: bool = True,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+    ps_runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
 ) -> dict[str, Any]:
     decision = assess_terminal_bridge(command)
     if not decision.get("ok"):
@@ -169,7 +250,7 @@ def deliver_voice_command_to_terminal(
             "command": voice_command_to_dict(command),
         }
     prompt = build_codex_terminal_prompt(command)
-    delivery = deliver_prompt_to_terminal(prompt, submit=submit, runner=runner)
+    delivery = deliver_prompt_to_terminal(prompt, submit=submit, runner=runner, ps_runner=ps_runner)
     return {
         **delivery,
         "prompt": prompt,

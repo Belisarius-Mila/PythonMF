@@ -8,6 +8,7 @@ from pathlib import Path
 from app.speech.terminal_bridge import (
     assess_terminal_bridge,
     build_codex_terminal_prompt,
+    discover_codex_ttys,
     deliver_prompt_to_terminal,
     deliver_voice_command_to_terminal,
 )
@@ -58,17 +59,37 @@ class TerminalBridgeTests(unittest.TestCase):
             calls.append({"args": args, **kwargs})
             return subprocess.CompletedProcess(args=args, returncode=0, stdout="delivered\n", stderr="")
 
+        def fake_ps_runner(args, **kwargs):
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
+
         result = deliver_prompt_to_terminal(
             "Hlasový pokyn od Míly.",
             submit=False,
             runner=fake_runner,
+            ps_runner=fake_ps_runner,
             script="return \"delivered\"",
         )
 
         self.assertTrue(result["ok"])
         self.assertEqual(calls[0]["args"][0], "/usr/bin/osascript")
-        self.assertEqual(calls[0]["args"][-1], "0")
+        self.assertEqual(calls[0]["args"][-2], "0")
+        self.assertEqual(calls[0]["args"][-1], "")
         self.assertFalse(result["submitted"])
+
+    def test_discover_codex_ttys_finds_codex_process_tty(self) -> None:
+        def fake_ps_runner(args, **kwargs):
+            return subprocess.CompletedProcess(
+                args=args,
+                returncode=0,
+                stdout=(
+                    "100 1 ttys001 zsh -zsh\n"
+                    "101 100 ttys001 node /usr/local/bin/codex -C /repo .\n"
+                    "102 1 ?? codex app-server --analytics-default-enabled\n"
+                ),
+                stderr="",
+            )
+
+        self.assertEqual(discover_codex_ttys(runner=fake_ps_runner), ["ttys001"])
 
     def test_deliver_voice_command_returns_manual_required_without_calling_runner(self) -> None:
         def fake_runner(*args, **kwargs):

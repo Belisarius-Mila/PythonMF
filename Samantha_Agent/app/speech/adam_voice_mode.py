@@ -438,10 +438,16 @@ def build_spoken_result_for_command(
                 return message
             bridge_status = str(bridge_result.get("status") or "terminal_bridge_failed")
             bridge_reason = str(bridge_result.get("reason") or bridge_result.get("message") or "Terminálový bridge pokyn nepřevzal.")
-            message = (
-                "Pokyn jsem kvůli bezpečnosti nebo technické chybě nevložil do terminálu. "
-                "Zadej ho prosím přesně ručně v Codex terminálu."
-            )
+            if bridge_status == "terminal_delivery_failed":
+                message = (
+                    "Pokyn jsem bezpečnostně pustil, ale technicky se mi ho nepodařilo vložit do Codex terminálu. "
+                    "Nechávám ho Adamovi připravený v hlasovém inboxu."
+                )
+            else:
+                message = (
+                    "Pokyn jsem do terminálu nevložil, protože vyžaduje ruční přesnou formulaci v Codex terminálu. "
+                    "Nechávám ho Adamovi připravený v hlasovém inboxu."
+                )
             if pending_path is not None:
                 save_pending_for_adam(
                     command,
