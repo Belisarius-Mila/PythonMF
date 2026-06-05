@@ -18,6 +18,9 @@ from app.cockpit import (
     cockpit_status,
     create_document_due_reminder_action,
     document_reference,
+    cockpit_speak_action,
+    cockpit_transcribe_voice_action,
+    save_voice_command_to_inbox,
     document_intake_email_scan_status,
     document_intake_status,
     document_cases_status,
@@ -977,6 +980,21 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Restart Cockpitu", COCKPIT_HTML)
         self.assertIn("restartCockpit", COCKPIT_HTML)
         self.assertIn("/api/cockpit/restart", COCKPIT_HTML)
+        self.assertIn("dashboardSpeakBtn", COCKPIT_HTML)
+        self.assertIn("Přečíst stav", COCKPIT_HTML)
+        self.assertIn("dashboardSpeakSelectionBtn", COCKPIT_HTML)
+        self.assertIn("Přečíst výběr", COCKPIT_HTML)
+        self.assertIn("lastSelectedSpeechText", COCKPIT_HTML)
+        self.assertIn("speakSelectedText", COCKPIT_HTML)
+        self.assertIn("speakDashboardStatus", COCKPIT_HTML)
+        self.assertIn("/api/speech/speak", COCKPIT_HTML)
+        self.assertIn("voiceRecordBtn", COCKPIT_HTML)
+        self.assertIn("Nahrát hlasový pokyn", COCKPIT_HTML)
+        self.assertIn("voiceStopBtn", COCKPIT_HTML)
+        self.assertIn("voiceTranscript", COCKPIT_HTML)
+        self.assertIn("startVoiceRecording", COCKPIT_HTML)
+        self.assertIn("transcribeVoiceRecording", COCKPIT_HTML)
+        self.assertIn("/api/speech/transcribe", COCKPIT_HTML)
         self.assertIn("frontendHealthPanel", COCKPIT_HTML)
         self.assertIn("frontendHealthJs", COCKPIT_HTML)
         self.assertIn("JS se zatím nespustil", COCKPIT_HTML)
@@ -1166,6 +1184,68 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("--pid", calls[0]["args"])
         self.assertIn("456", calls[0]["args"])
         self.assertTrue(calls[0]["start_new_session"])
+
+    def test_cockpit_speak_action_returns_speech_result(self) -> None:
+        with patch("app.cockpit.speak_text", return_value={"ok": True, "message": "Přečteno."}) as speak:
+            result = cockpit_speak_action("Stav Cockpitu je v pořádku.")
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["message"], "Přečteno.")
+        speak.assert_called_once_with("Stav Cockpitu je v pořádku.", voice="Zuzana")
+
+    def test_cockpit_speak_action_reports_speech_error(self) -> None:
+        with patch("app.cockpit.speak_text", side_effect=cockpit_module.SpeechError("AudioQueueStart failed")):
+            result = cockpit_speak_action("Test")
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "speech_failed")
+        self.assertIn("AudioQueueStart failed", result["message"])
+
+    def test_cockpit_transcribe_voice_action_returns_transcript(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            with patch(
+                "app.cockpit.transcribe_audio_base64",
+                return_value={"ok": True, "text": "Najdi dnešní dokumenty."},
+            ) as transcribe:
+                result = cockpit_transcribe_voice_action(
+                    {"audio_base64": "abc", "mime_type": "audio/webm", "language": "cs"},
+                    inbox_dir=Path(temp_dir),
+                )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["text"], "Najdi dnešní dokumenty.")
+        self.assertTrue(result["saved"])
+        self.assertIn("latest_voice_command.md", result["latest_voice_command_path"])
+        self.assertIn("přepsán a uložen", result["message"])
+        transcribe.assert_called_once_with("abc", mime_type="audio/webm", language="cs")
+
+    def test_save_voice_command_to_inbox_writes_latest_and_index(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            result = save_voice_command_to_inbox(
+                {"text": "Najdi poslední PDF."},
+                inbox_dir=Path(temp_dir),
+            )
+            latest_path = Path(temp_dir) / "latest_voice_command.md"
+            index_path = Path(temp_dir) / "index.jsonl"
+
+            self.assertTrue(result["saved"])
+            self.assertTrue(latest_path.exists())
+            self.assertTrue(index_path.exists())
+            self.assertIn("Najdi poslední PDF.", latest_path.read_text(encoding="utf-8"))
+            self.assertIn("transcribed_only_not_executed", latest_path.read_text(encoding="utf-8"))
+            self.assertIn("voice_command_", result["voice_command_path"])
+            self.assertIn("latest_voice_command.md", result["latest_voice_command_path"])
+
+    def test_cockpit_transcribe_voice_action_reports_error(self) -> None:
+        with patch(
+            "app.cockpit.transcribe_audio_base64",
+            side_effect=cockpit_module.TranscriptionError("Chybí OPENAI_API_KEY"),
+        ):
+            result = cockpit_transcribe_voice_action({"audio_base64": "", "mime_type": "audio/webm"})
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "transcription_failed")
+        self.assertIn("Chybí OPENAI_API_KEY", result["message"])
 
     def test_parse_active_projects_table_and_summary(self) -> None:
         text = """# Active Projects

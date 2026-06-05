@@ -63,6 +63,7 @@ from app.email.models import EmailAttachmentMeta, EmailHeader, EmailMessage
 from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEmailProvider
 from app.reminders.query_tools import mark_reminder_done_text
 from app.reminders.store import DEFAULT_REMINDERS_PATH, load_reminders_store, write_reminders_store
+from app.speech import SpeechError, TranscriptionError, speak_text, transcribe_audio_base64
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -83,6 +84,7 @@ GIT_ROOT = PROJECT_ROOT.parent
 ACTIVE_PROJECTS_PATH = PROJECT_ROOT / "memory" / "ACTIVE_PROJECTS.md"
 PROJECT_CAPABILITY_MAP_PATH = PROJECT_ROOT / "memory" / "technical" / "project_capability_map.md"
 SESSION_AUTOSAVE_DIR = PROJECT_ROOT / "data" / "session_autosave"
+VOICE_COMMAND_INBOX_DIR = PROJECT_ROOT / "data" / "private" / "voice_inbox"
 MEMORY_INDEX_PATH = PROJECT_ROOT / "memory" / "MEMORY_INDEX.md"
 RECOVERY_HANDOFF_PATHS = (
     PROJECT_ROOT / "memory" / "handoffs" / "cockpit_recovery_center_priority_2026_06_03.md",
@@ -5977,6 +5979,97 @@ def open_codex_cli() -> dict[str, Any]:
     return open_terminal_command("source ~/.zshrc; codex resume --last || codex", "Codex CLI")
 
 
+def cockpit_speak_action(text: str, *, voice: str = "Zuzana") -> dict[str, Any]:
+    try:
+        return speak_text(text, voice=voice)
+    except SpeechError as exc:
+        return {
+            "ok": False,
+            "message": f"Hlasový výstup selhal: {exc}",
+            "status": "speech_failed",
+        }
+
+
+def save_voice_command_to_inbox(
+    transcription: dict[str, Any],
+    *,
+    inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    text = safe_text(str(transcription.get("text", "") or "")).strip()
+    if not text:
+        raise ValueError("Chybí přepsaný text hlasového pokynu.")
+
+    created_at = (now or datetime.now(timezone.utc)).replace(microsecond=0)
+    stamp = created_at.strftime("%Y%m%d_%H%M%S")
+    inbox_dir.mkdir(parents=True, exist_ok=True)
+    command_path = inbox_dir / f"voice_command_{stamp}.md"
+    counter = 2
+    while command_path.exists():
+        command_path = inbox_dir / f"voice_command_{stamp}_{counter}.md"
+        counter += 1
+
+    content = (
+        "# Voice command\n\n"
+        f"Created at: {created_at.isoformat()}\n"
+        "Source: Samantha Cockpit / Hlasový pokyn\n"
+        "Status: transcribed_only_not_executed\n\n"
+        "## Text\n\n"
+        f"{text}\n"
+    )
+    command_path.write_text(content, encoding="utf-8")
+    latest_path = inbox_dir / "latest_voice_command.md"
+    latest_path.write_text(content, encoding="utf-8")
+
+    record = {
+        "created_at": created_at.isoformat(),
+        "path": str(relative_to_project(command_path)),
+        "latest_path": str(relative_to_project(latest_path)),
+        "text_chars": len(text),
+        "status": "transcribed_only_not_executed",
+    }
+    append_jsonl(inbox_dir / "index.jsonl", record)
+    return {
+        "saved": True,
+        "voice_command_path": str(relative_to_project(command_path)),
+        "latest_voice_command_path": str(relative_to_project(latest_path)),
+    }
+
+
+def cockpit_transcribe_voice_action(
+    payload: dict[str, Any],
+    *,
+    inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
+) -> dict[str, Any]:
+    try:
+        result = transcribe_audio_base64(
+            str(payload.get("audio_base64", "")),
+            mime_type=str(payload.get("mime_type", "")),
+            language=str(payload.get("language", "cs") or "cs"),
+        )
+        result.update(save_voice_command_to_inbox(result, inbox_dir=inbox_dir))
+        result["message"] = "Hlasový pokyn byl přepsán a uložen pro Codex."
+        return result
+    except TranscriptionError as exc:
+        return {
+            "ok": False,
+            "message": f"Přepis hlasu selhal: {exc}",
+            "status": "transcription_failed",
+        }
+    except OSError as exc:
+        return {
+            "ok": False,
+            "message": f"Přepis se povedl, ale uložení hlasového pokynu selhalo: {exc}",
+            "status": "voice_inbox_save_failed",
+        }
+    except ValueError as exc:
+        return {
+            "ok": False,
+            "message": f"Přepis se povedl, ale hlasový pokyn nejde uložit: {exc}",
+            "status": "voice_inbox_save_failed",
+        }
+
+
 def shell_quote_for_applescript(value: str) -> str:
     return "'" + value.replace("'", "'\\''") + "'"
 
@@ -6073,6 +6166,14 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/terminal/open":
                     self.respond_json(open_project_terminal())
+                    return
+                if parsed.path == "/api/speech/speak":
+                    payload = self.read_json()
+                    self.respond_json(cockpit_speak_action(text=str(payload.get("text", ""))))
+                    return
+                if parsed.path == "/api/speech/transcribe":
+                    payload = self.read_json()
+                    self.respond_json(cockpit_transcribe_voice_action(payload))
                     return
                 if parsed.path == "/api/cockpit/restart":
                     payload = self.read_json()
@@ -7640,6 +7741,7 @@ COCKPIT_HTML = """<!doctype html>
     .review-action { color: #344054; font-size: 12px; font-weight: 650; }
     .search-controls { display: grid; grid-template-columns: minmax(220px, 1fr) auto; gap: 10px; align-items: center; }
     input[type="search"], select { box-sizing: border-box; width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 10px 11px; font: inherit; background: white; color: var(--ink); }
+    textarea { box-sizing: border-box; width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 10px 11px; font: inherit; background: white; color: var(--ink); resize: vertical; min-height: 94px; }
     .search-results { display: grid; gap: 9px; margin-top: 12px; }
     .search-result { border: 1px solid #edf0f4; border-radius: 8px; padding: 10px; background: #fbfcfe; display: grid; gap: 5px; }
     .search-result-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
@@ -7655,6 +7757,11 @@ COCKPIT_HTML = """<!doctype html>
     section h2 { margin: 0; padding: 12px 14px; font-size: 14px; border-bottom: 1px solid var(--line); background: #f8fafc; }
     .body { padding: 13px 14px; }
     .status-line { color: var(--muted); font-size: 13px; }
+    .voice-command-grid { display: grid; gap: 10px; }
+    .voice-command-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .voice-command-actions button.recording { background: #fee2e2; color: var(--red); }
+    .voice-transcript-row { display: grid; gap: 6px; }
+    .voice-transcript-row label { color: #253047; font-size: 12px; font-weight: 750; }
     .pills { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; }
     .pill { border: 1px solid var(--line); border-radius: 999px; padding: 5px 8px; font-size: 12px; background: #f8fafc; color: #344054; }
     .ok { color: var(--green); }
@@ -7807,6 +7914,8 @@ COCKPIT_HTML = """<!doctype html>
 		            <button class="secondary" id="dashboardRecoveryBtn">Recovery centrum</button>
 		            <button class="secondary" id="dashboardDiagnosticsBtn">Diagnostika</button>
 		            <button class="secondary" id="dashboardRestartBtn">Restart Cockpitu</button>
+		            <button class="secondary" id="dashboardSpeakBtn">Přečíst stav</button>
+		            <button class="secondary" id="dashboardSpeakSelectionBtn">Přečíst výběr</button>
 		            <button class="secondary" id="dashboardRefreshBtn">Obnovit stav</button>
 	          </div>
           <div id="dashboardActionHint" class="status-line"></div>
@@ -7814,6 +7923,20 @@ COCKPIT_HTML = """<!doctype html>
       </section>
 	    </div>
 	    <div id="statusLine" class="status-line">Načítám stav...</div>
+	    <section id="voiceCommandPanel">
+	      <h2>Hlasový pokyn</h2>
+	      <div class="body voice-command-grid">
+	        <div class="voice-command-actions">
+	          <button class="primary" id="voiceRecordBtn">Nahrát hlasový pokyn</button>
+	          <button class="secondary" id="voiceStopBtn" disabled>Zastavit a přepsat</button>
+	        </div>
+	        <div id="voiceCommandStatus" class="status-line">Pokyn se po přepisu automaticky uloží pro Codex. Nic se samo nespustí.</div>
+	        <div class="voice-transcript-row">
+	          <label for="voiceTranscript">Přepis</label>
+	          <textarea id="voiceTranscript" placeholder="Tady se objeví přepsaný hlasový pokyn." spellcheck="true"></textarea>
+	        </div>
+	      </div>
+	    </section>
 		    <div id="frontendHealthPanel" class="health-panel" aria-label="Health stav Cockpitu">
 		      <div class="health-grid">
 		        <div class="health-item"><span class="health-label">Frontend</span><span id="frontendHealthJs" class="health-value warn">JS se zatím nespustil</span></div>
@@ -8179,11 +8302,17 @@ COCKPIT_HTML = """<!doctype html>
 		    const dashboardQuantitativeBtn = document.getElementById("dashboardQuantitativeBtn");
 		    const dashboardQuickNotesBtn = document.getElementById("dashboardQuickNotesBtn");
     const dashboardUrgentRemindersBtn = document.getElementById("dashboardUrgentRemindersBtn");
-			    const dashboardRecoveryBtn = document.getElementById("dashboardRecoveryBtn");
+    const dashboardRecoveryBtn = document.getElementById("dashboardRecoveryBtn");
     const dashboardDiagnosticsBtn = document.getElementById("dashboardDiagnosticsBtn");
     const dashboardRestartBtn = document.getElementById("dashboardRestartBtn");
+			    const dashboardSpeakBtn = document.getElementById("dashboardSpeakBtn");
+			    const dashboardSpeakSelectionBtn = document.getElementById("dashboardSpeakSelectionBtn");
 			    const dashboardRefreshBtn = document.getElementById("dashboardRefreshBtn");
     const dashboardActionHint = document.getElementById("dashboardActionHint");
+    const voiceRecordBtn = document.getElementById("voiceRecordBtn");
+    const voiceStopBtn = document.getElementById("voiceStopBtn");
+    const voiceCommandStatus = document.getElementById("voiceCommandStatus");
+    const voiceTranscript = document.getElementById("voiceTranscript");
     const urgentReminderAlert = document.getElementById("urgentReminderAlert");
     const urgentReminderAlertTitle = document.getElementById("urgentReminderAlertTitle");
     const urgentReminderAlertList = document.getElementById("urgentReminderAlertList");
@@ -8280,6 +8409,14 @@ COCKPIT_HTML = """<!doctype html>
       setHealthValue(frontendHealthJs, "chyba ve frontendu", "bad");
     });
 
+    let lastSelectedSpeechText = "";
+    document.addEventListener("selectionchange", () => {
+      const selected = (window.getSelection ? window.getSelection().toString() : "").trim();
+      if (selected) {
+        lastSelectedSpeechText = selected;
+      }
+    });
+
     function verifyButtonHealth() {
       const requiredIds = [
         "refreshBtn",
@@ -8297,7 +8434,11 @@ COCKPIT_HTML = """<!doctype html>
         "dashboardUrgentRemindersBtn",
 	        "dashboardRecoveryBtn",
 	        "dashboardRestartBtn",
+	        "dashboardSpeakBtn",
+	        "dashboardSpeakSelectionBtn",
 	        "dashboardRefreshBtn",
+        "voiceRecordBtn",
+        "voiceStopBtn",
         "urgentReminderAlertBtn",
         "reviewReportBtn",
         "documentSearchBtn",
@@ -10115,6 +10256,191 @@ COCKPIT_HTML = """<!doctype html>
 	      }
 	    }
 
+	    async function speakText(text, button, label) {
+	      const cleaned = (text || "").trim();
+	      if (!cleaned) {
+	        showMessage("Nejdřív označ text, který mám přečíst.");
+	        return;
+	      }
+	      button.disabled = true;
+	      showMessage(label || "Čtu nahlas...");
+	      try {
+	        const res = await fetch("/api/speech/speak", {
+	          method: "POST",
+	          headers: {"Content-Type": "application/json"},
+	          body: JSON.stringify({text: cleaned})
+	        });
+	        const data = await res.json();
+	        showMessage(data.message || (data.ok ? "Přečteno nahlas." : "Hlasový výstup selhal."));
+	      } catch (err) {
+	        recordFrontendError(err);
+	        showMessage(`Chyba hlasového výstupu: ${err}`);
+	      } finally {
+	        button.disabled = false;
+	      }
+	    }
+
+	    async function speakDashboardStatus() {
+	      const parts = [
+	        statusLine.textContent,
+	        dashboardOverallLabel.textContent,
+	        dashboardOverallReason.textContent,
+	        dashboardActionHint.textContent
+	      ].map((part) => (part || "").trim()).filter(Boolean);
+	      const text = parts.length
+	        ? parts.join(". ")
+	        : "Samantha Cockpit běží, ale aktuální stav ještě není načtený.";
+	      await speakText(text, dashboardSpeakBtn, "Čtu aktuální stav nahlas...");
+	    }
+
+	    async function speakSelectedText() {
+	      const currentSelection = (window.getSelection ? window.getSelection().toString() : "").trim();
+	      const text = currentSelection || lastSelectedSpeechText;
+	      await speakText(text, dashboardSpeakSelectionBtn, "Čtu vybraný text nahlas...");
+	    }
+
+	    let voiceRecorder = null;
+	    let voiceStream = null;
+	    let voiceChunks = [];
+	    let voiceStopTimer = null;
+	    let voiceRecordingStartedAt = 0;
+
+	    function preferredVoiceMimeType() {
+	      if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) {
+	        return "";
+	      }
+	      const candidates = [
+	        "audio/webm;codecs=opus",
+	        "audio/webm",
+	        "audio/mp4",
+	        "audio/aac"
+	      ];
+	      return candidates.find((candidate) => MediaRecorder.isTypeSupported(candidate)) || "";
+	    }
+
+	    function createVoiceRecorder(stream, mimeType) {
+	      const baseOptions = mimeType ? {mimeType} : {};
+	      try {
+	        return new MediaRecorder(stream, {
+	          ...baseOptions,
+	          audioBitsPerSecond: 32000
+	        });
+	      } catch (err) {
+	        return new MediaRecorder(stream, baseOptions);
+	      }
+	    }
+
+	    function blobToDataUrl(blob) {
+	      return new Promise((resolve, reject) => {
+	        const reader = new FileReader();
+	        reader.onloadend = () => resolve(String(reader.result || ""));
+	        reader.onerror = () => reject(reader.error || new Error("Audio se nepodařilo načíst."));
+	        reader.readAsDataURL(blob);
+	      });
+	    }
+
+	    function resetVoiceRecordingUi() {
+	      voiceRecordBtn.disabled = false;
+	      voiceRecordBtn.classList.remove("recording");
+	      voiceStopBtn.disabled = true;
+	      if (voiceStopTimer) {
+	        window.clearTimeout(voiceStopTimer);
+	        voiceStopTimer = null;
+	      }
+	    }
+
+	    async function startVoiceRecording() {
+	      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
+	        voiceCommandStatus.textContent = "Tento prohlížeč nepodporuje nahrávání z mikrofonu.";
+	        return;
+	      }
+	      voiceRecordBtn.disabled = true;
+	      voiceCommandStatus.textContent = "Žádám o přístup k mikrofonu...";
+	      try {
+	        voiceStream = await navigator.mediaDevices.getUserMedia({
+	          audio: {
+	            channelCount: 1,
+	            echoCancellation: true,
+	            noiseSuppression: true,
+	            autoGainControl: true
+	          }
+	        });
+	        voiceChunks = [];
+	        const mimeType = preferredVoiceMimeType();
+	        voiceRecorder = createVoiceRecorder(voiceStream, mimeType);
+	        voiceRecorder.addEventListener("dataavailable", (event) => {
+	          if (event.data && event.data.size > 0) {
+	            voiceChunks.push(event.data);
+	          }
+	        });
+	        voiceRecorder.addEventListener("stop", transcribeVoiceRecording);
+	        voiceRecorder.start();
+	        voiceRecordingStartedAt = Date.now();
+	        voiceRecordBtn.classList.add("recording");
+	        voiceStopBtn.disabled = false;
+	        voiceCommandStatus.textContent = "Nahrávám hlasový pokyn. Limit je 30 sekund.";
+	        voiceStopTimer = window.setTimeout(stopVoiceRecording, 30000);
+	      } catch (err) {
+	        recordFrontendError(err);
+	        voiceCommandStatus.textContent = `Mikrofon se nepodařilo spustit: ${err}`;
+	        resetVoiceRecordingUi();
+	      }
+	    }
+
+	    function stopVoiceRecording() {
+	      if (voiceRecorder && voiceRecorder.state === "recording") {
+	        voiceCommandStatus.textContent = "Zastavuji nahrávání a připravuji přepis...";
+	        voiceRecorder.stop();
+	      }
+	      resetVoiceRecordingUi();
+	    }
+
+	    async function transcribeVoiceRecording() {
+	      if (voiceStream) {
+	        voiceStream.getTracks().forEach((track) => track.stop());
+	        voiceStream = null;
+	      }
+	      const blob = new Blob(voiceChunks, {type: (voiceRecorder && voiceRecorder.mimeType) || "audio/webm"});
+	      voiceRecorder = null;
+	      voiceChunks = [];
+	      if (!blob.size) {
+	        voiceCommandStatus.textContent = "Nahrávka je prázdná. Zkus to znovu.";
+	        return;
+	      }
+	      const recordedSeconds = voiceRecordingStartedAt ? Math.max(0, Math.round((Date.now() - voiceRecordingStartedAt) / 1000)) : 0;
+	      const audioKb = Math.round(blob.size / 1024);
+	      const requestStartedAt = Date.now();
+	      voiceCommandStatus.textContent = `Přepisuji hlasový pokyn (${recordedSeconds} s, ${audioKb} kB)...`;
+	      try {
+	        const dataUrl = await blobToDataUrl(blob);
+	        const audioBase64 = dataUrl.includes(",") ? dataUrl.split(",", 2)[1] : dataUrl;
+	        const res = await fetch("/api/speech/transcribe", {
+	          method: "POST",
+	          headers: {"Content-Type": "application/json"},
+	          body: JSON.stringify({
+	            audio_base64: audioBase64,
+	            mime_type: blob.type || "audio/webm",
+	            language: "cs"
+	          })
+	        });
+	        const data = await res.json();
+	        if (data.ok) {
+	          voiceTranscript.value = data.text || "";
+	          const totalMs = Date.now() - requestStartedAt;
+	          const serverMs = data.duration_ms || 0;
+	          const openaiMs = data.timing && data.timing.openai_ms ? data.timing.openai_ms : 0;
+	          const timing = `celkem ${Math.round(totalMs / 1000)} s, server ${Math.round(serverMs / 1000)} s, OpenAI ${Math.round(openaiMs / 1000)} s, audio ${data.audio_kb || audioKb} kB`;
+	          const savedHint = data.latest_voice_command_path ? ` Uloženo: ${data.latest_voice_command_path}.` : "";
+	          voiceCommandStatus.textContent = `${data.message || "Hlasový pokyn byl přepsán a uložen."}${savedHint} (${timing})`;
+	        } else {
+	          voiceCommandStatus.textContent = data.message || "Přepis hlasu selhal.";
+	        }
+	      } catch (err) {
+	        recordFrontendError(err);
+	        voiceCommandStatus.textContent = `Přepis hlasu selhal: ${err}`;
+	      }
+	    }
+
 	    async function searchDocuments() {
       const query = documentSearchInput.value.trim();
       documentSearchResults.innerHTML = "";
@@ -11275,6 +11601,10 @@ COCKPIT_HTML = """<!doctype html>
       }
     });
     dashboardRestartBtn.addEventListener("click", restartCockpit);
+    dashboardSpeakBtn.addEventListener("click", speakDashboardStatus);
+    dashboardSpeakSelectionBtn.addEventListener("click", speakSelectedText);
+    voiceRecordBtn.addEventListener("click", startVoiceRecording);
+    voiceStopBtn.addEventListener("click", stopVoiceRecording);
 			    webAppsBtn.addEventListener("click", openWebAppsModal);
     projectsBtn.addEventListener("click", openProjectsModal);
     reviewReportBtn.addEventListener("click", loadDocumentReviewReport);

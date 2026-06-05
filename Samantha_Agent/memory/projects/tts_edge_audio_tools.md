@@ -13,6 +13,21 @@ Byla nainstalována knihovna:
 
 - `edge-tts`, ověřená verze `7.2.7`
 
+Stav k 2026-06-05:
+
+- Lokální hlasový výstup Samanthy má MVP přes macOS `say` + `afplay`.
+- Modul `app/speech/local_tts.py` bezpečně přečte krátký text hlasem `Zuzana`, nejdřív vytvoří dočasný AIFF a potom ho přehraje.
+- Skript `scripts/speak_text.py` slouží pro ruční smoke test z terminálu.
+- Cockpit má endpoint `/api/speech/speak` a tlačítko `Přečíst stav`, které nahlas přečte aktuálně viditelný dashboard stav.
+- Cockpit má také tlačítko `Přečíst výběr`: čte aktuálně označený text a kvůli iPhonu si pamatuje poslední textový výběr, pokud klepnutí na tlačítko výběr zruší.
+- Hlasový vstup má MVP panel `Hlasový pokyn`: browser nahraje krátké audio přes mikrofon, endpoint `/api/speech/transcribe` ho přepíše přes OpenAI audio transcription a výsledek se pouze zobrazí v textarea. Přepis sám nespouští žádné akce.
+- Po prvním ručním testu trval krátký přepis zhruba minutu, proto panel od 2026-06-05 nahrává s nižším audio bitrate a po přepisu ukazuje diagnostiku `celkem / server / OpenAI / audio kB`, aby šlo poznat, jestli je pomalé API volání, přenos nebo velikost nahrávky.
+- Po dalším ručním testu 2026-06-05 Míla potvrdil, že přepis už je rychlý; původní problém s minutovým čekáním je po úpravě bitrate/diagnostiky považovaný za vyřešený pro aktuální MVP.
+- Test z iPhonu přes vzdálený prohlížeč 2026-06-05 hlásil, že prohlížeč hlasový vstup nepodporuje. Priorita je proto praktický hlasový vstup z Macu; iPhone vstup řešit později jen pokud bude potřeba přes HTTPS/secure context nebo jinou mobilní cestu.
+- Po úspěšném přepisu Cockpit automaticky ukládá text hlasového pokynu do soukromého ignorovaného inboxu `data/private/voice_inbox/`: timestampovaný `voice_command_YYYYMMDD_HHMMSS.md`, `latest_voice_command.md` a `index.jsonl`. Není potřeba další tlačítko `Uložit pro Codex`.
+- Uložený hlasový pokyn má stav `transcribed_only_not_executed`: Codex/Samantha si ho může později přečíst, ale přepis sám nespouští žádnou akci.
+- Důležitý technický poznatek: přehrávání z běžné sandbox relace může selhat na `AudioQueueStart failed (-66680)`, ale stejný výstup funguje mimo sandbox / z běžícího Cockpitu.
+
 ## Cíl
 
 Cílem je mít praktický způsob, jak vytvářet české hlasové MP3 soubory pro výukové aplikace, pohádky, slovíčka a další projekty.

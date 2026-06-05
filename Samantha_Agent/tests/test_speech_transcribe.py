@@ -1,0 +1,82 @@
+from __future__ import annotations
+
+import base64
+import tempfile
+import unittest
+from pathlib import Path
+from types import SimpleNamespace
+
+from app.speech.transcribe import (
+    MAX_AUDIO_BYTES,
+    TranscriptionError,
+    decode_audio_base64,
+    normalize_mime_type,
+    transcribe_audio_base64,
+    transcribe_audio_bytes,
+)
+
+
+class FakeTranscriptions:
+    def __init__(self) -> None:
+        self.calls = []
+
+    def create(self, **kwargs):
+        self.calls.append(kwargs)
+        return SimpleNamespace(text="Najdi dnešní dokumenty.")
+
+
+class FakeOpenAIClient:
+    def __init__(self) -> None:
+        self.transcriptions = FakeTranscriptions()
+        self.audio = SimpleNamespace(transcriptions=self.transcriptions)
+
+
+class SpeechTranscribeTests(unittest.TestCase):
+    def test_decode_audio_base64_accepts_plain_and_data_url(self) -> None:
+        encoded = base64.b64encode(b"audio").decode("ascii")
+
+        self.assertEqual(decode_audio_base64(encoded), b"audio")
+        self.assertEqual(decode_audio_base64(f"data:audio/webm;base64,{encoded}"), b"audio")
+
+    def test_decode_audio_base64_rejects_bad_or_large_audio(self) -> None:
+        with self.assertRaises(TranscriptionError):
+            decode_audio_base64("not valid base64")
+        with self.assertRaises(TranscriptionError):
+            decode_audio_base64(base64.b64encode(b"x" * (MAX_AUDIO_BYTES + 1)).decode("ascii"))
+
+    def test_normalize_mime_type_allows_expected_audio_formats(self) -> None:
+        self.assertEqual(normalize_mime_type("audio/webm;codecs=opus"), "audio/webm")
+        self.assertEqual(normalize_mime_type("audio/mp4"), "audio/mp4")
+        with self.assertRaises(TranscriptionError):
+            normalize_mime_type("text/plain")
+
+    def test_transcribe_audio_bytes_uses_openai_client_and_deletes_temp_file(self) -> None:
+        client = FakeOpenAIClient()
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            result = transcribe_audio_bytes(
+                b"fake audio",
+                mime_type="audio/webm",
+                client=client,
+                temp_dir=temp_dir,
+            )
+            leftovers = list(Path(temp_dir).iterdir())
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["text"], "Najdi dnešní dokumenty.")
+        self.assertEqual(result["audio_bytes"], 10)
+        self.assertEqual(leftovers, [])
+        self.assertEqual(client.transcriptions.calls[0]["model"], "gpt-4o-mini-transcribe")
+        self.assertEqual(client.transcriptions.calls[0]["language"], "cs")
+
+    def test_transcribe_audio_base64_passes_decoded_audio_to_client(self) -> None:
+        client = FakeOpenAIClient()
+        encoded = base64.b64encode(b"fake audio").decode("ascii")
+
+        result = transcribe_audio_base64(encoded, mime_type="audio/webm", client=client)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["text"], "Najdi dnešní dokumenty.")
+
+
+if __name__ == "__main__":
+    unittest.main()
