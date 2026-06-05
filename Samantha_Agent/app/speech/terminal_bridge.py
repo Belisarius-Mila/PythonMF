@@ -194,6 +194,68 @@ end run
 '''.strip()
 
 
+def vscode_applescript() -> str:
+    return r'''
+on run argv
+  set promptText to item 1 of argv
+  set shouldSubmit to item 2 of argv
+  tell application "Visual Studio Code"
+    activate
+  end tell
+  delay 0.2
+  tell application "System Events"
+    set the clipboard to "Terminal: Focus Terminal"
+    keystroke "p" using {command down, shift down}
+    delay 0.15
+    keystroke "v" using command down
+    key code 36
+    delay 0.25
+    set the clipboard to promptText
+    keystroke "v" using command down
+    if shouldSubmit is "1" then key code 36
+  end tell
+  return "delivered_vscode"
+end run
+'''.strip()
+
+
+def deliver_prompt_to_vscode(
+    prompt: str,
+    *,
+    submit: bool = True,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+    script: str | None = None,
+    timeout: float = 8.0,
+) -> dict[str, Any]:
+    safe_prompt = squash_terminal_text(prompt)
+    completed = runner(
+        [
+            "/usr/bin/osascript",
+            "-e",
+            script or vscode_applescript(),
+            safe_prompt,
+            "1" if submit else "0",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+        check=False,
+    )
+    if completed.returncode != 0:
+        return {
+            "ok": False,
+            "status": "vscode_delivery_failed",
+            "message": (completed.stderr or completed.stdout or "VS Code bridge selhal.").strip(),
+            "returncode": completed.returncode,
+        }
+    return {
+        "ok": True,
+        "status": "delivered_vscode",
+        "message": "Pokyn byl vložen do aktivního VS Code terminálu.",
+        "submitted": submit,
+    }
+
+
 def deliver_prompt_to_terminal(
     prompt: str,
     *,
@@ -201,6 +263,8 @@ def deliver_prompt_to_terminal(
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
     ps_runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
     script: str | None = None,
+    vscode_script: str | None = None,
+    vscode_fallback: bool = True,
     timeout: float = 8.0,
 ) -> dict[str, Any]:
     safe_prompt = squash_terminal_text(prompt)
@@ -220,13 +284,32 @@ def deliver_prompt_to_terminal(
         check=False,
     )
     if completed.returncode != 0:
-        return {
+        terminal_error = {
             "ok": False,
             "status": "terminal_delivery_failed",
             "message": (completed.stderr or completed.stdout or "Terminálový bridge selhal.").strip(),
             "returncode": completed.returncode,
             "target_ttys": codex_ttys,
         }
+        if vscode_fallback:
+            vscode_result = deliver_prompt_to_vscode(
+                safe_prompt,
+                submit=submit,
+                runner=runner,
+                script=vscode_script,
+                timeout=timeout,
+            )
+            if vscode_result.get("ok"):
+                return {
+                    **vscode_result,
+                    "terminal_status": terminal_error,
+                    "target_ttys": codex_ttys,
+                }
+            return {
+                **terminal_error,
+                "vscode_status": vscode_result,
+            }
+        return terminal_error
     return {
         "ok": True,
         "status": "delivered",

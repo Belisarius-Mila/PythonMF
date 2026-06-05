@@ -10,6 +10,7 @@ from app.speech.terminal_bridge import (
     build_codex_terminal_prompt,
     discover_codex_ttys,
     deliver_prompt_to_terminal,
+    deliver_prompt_to_vscode,
     deliver_voice_command_to_terminal,
 )
 from app.speech.voice_inbox import load_latest_voice_command
@@ -68,12 +69,59 @@ class TerminalBridgeTests(unittest.TestCase):
             runner=fake_runner,
             ps_runner=fake_ps_runner,
             script="return \"delivered\"",
+            vscode_fallback=False,
         )
 
         self.assertTrue(result["ok"])
         self.assertEqual(calls[0]["args"][0], "/usr/bin/osascript")
         self.assertEqual(calls[0]["args"][-2], "0")
         self.assertEqual(calls[0]["args"][-1], "")
+        self.assertFalse(result["submitted"])
+
+    def test_deliver_prompt_falls_back_to_vscode_when_terminal_is_missing(self) -> None:
+        calls = []
+
+        def fake_runner(args, **kwargs):
+            calls.append({"args": args, **kwargs})
+            if len(calls) == 1:
+                return subprocess.CompletedProcess(args=args, returncode=1, stdout="", stderr="No Terminal tab.")
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="delivered_vscode\n", stderr="")
+
+        def fake_ps_runner(args, **kwargs):
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
+
+        result = deliver_prompt_to_terminal(
+            "Hlasový pokyn od Míly.",
+            submit=True,
+            runner=fake_runner,
+            ps_runner=fake_ps_runner,
+            script="error \"No Terminal tab.\"",
+            vscode_script="return \"delivered_vscode\"",
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "delivered_vscode")
+        self.assertEqual(result["terminal_status"]["status"], "terminal_delivery_failed")
+        self.assertEqual(len(calls), 2)
+
+    def test_deliver_prompt_to_vscode_uses_osascript_arguments_without_shell(self) -> None:
+        calls = []
+
+        def fake_runner(args, **kwargs):
+            calls.append({"args": args, **kwargs})
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="delivered_vscode\n", stderr="")
+
+        result = deliver_prompt_to_vscode(
+            "Hlasový pokyn od Míly.",
+            submit=False,
+            runner=fake_runner,
+            script="return \"delivered_vscode\"",
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "delivered_vscode")
+        self.assertEqual(calls[0]["args"][0], "/usr/bin/osascript")
+        self.assertEqual(calls[0]["args"][-1], "0")
         self.assertFalse(result["submitted"])
 
     def test_discover_codex_ttys_finds_codex_process_tty(self) -> None:
