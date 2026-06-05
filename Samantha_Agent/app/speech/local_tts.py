@@ -4,7 +4,7 @@ import subprocess
 from typing import Any
 
 
-DEFAULT_VOICE = "Daniel"
+DEFAULT_VOICE = "Zuzana"
 ALLOWED_VOICES = {"Daniel", "Zuzana"}
 MAX_SPEECH_CHARS = 1500
 SAY_BIN = "/usr/bin/say"

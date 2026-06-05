@@ -21,7 +21,7 @@ class LocalTtsTests(unittest.TestCase):
         result = speak_text("Test hlasu.", runner=fake_runner)
 
         self.assertTrue(result["ok"])
-        self.assertEqual(calls, [[SAY_BIN, "-v", "Daniel", "Test hlasu."]])
+        self.assertEqual(calls, [[SAY_BIN, "-v", "Zuzana", "Test hlasu."]])
 
     def test_speak_text_rejects_empty_text_and_unknown_voice(self) -> None:
         with self.assertRaises(SpeechError):
