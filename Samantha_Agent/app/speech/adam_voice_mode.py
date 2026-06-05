@@ -8,6 +8,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
+from agents import Agent, Runner
+from dotenv import load_dotenv
+
 from app.speech.report import speak_report
 from app.speech.voice_inbox import (
     VOICE_COMMAND_INBOX_DIR,
@@ -20,6 +23,17 @@ from app.speech.voice_inbox import (
 
 
 ADAM_VOICE_MODE_STATUS_PATH = VOICE_COMMAND_INBOX_DIR / "adam_voice_mode_status.json"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+DIRECT_RESPONSE_INSTRUCTIONS = """
+Jsi Adam v hlasovém režimu Samantha Cockpitu.
+Odpovídej česky, krátce, lidsky a přímo.
+Když máš něco říct konkrétní osobě, oslov ji přímo.
+Neopakuj uživateli jeho diktovaný text.
+Neprováděj žádné externí akce, nemaž, neposílej, neplať, necommituj.
+Pokud jde jen o společenskou nebo konverzační odpověď, odpověz přirozeně.
+Použij maximálně dvě věty.
+""".strip()
 
 
 def utc_now() -> str:
@@ -93,7 +107,9 @@ def load_voice_mode_status(
             age_seconds = max(0.0, (datetime.now(timezone.utc) - updated).total_seconds())
         except ValueError:
             age_seconds = None
-    running = pid_exists(pid) and (age_seconds is None or age_seconds <= stale_after_seconds)
+    state = str(payload.get("state") or "")
+    terminal_state = state in {"stopped", "timeout", "completed"}
+    running = (not terminal_state) and pid_exists(pid) and (age_seconds is None or age_seconds <= stale_after_seconds)
     payload["running"] = running
     payload["stale"] = not running
     payload["age_seconds"] = age_seconds
@@ -120,23 +136,105 @@ def spoken_notice_for_command(command: VoiceCommand) -> str:
     return f"Nový hlasový pokyn byl přijat. Text pokynu: {text or 'bez textu'}"
 
 
+def voice_command_needs_codex_work(text: str) -> bool:
+    folded = " ".join(str(text or "").casefold().split())
+    work_terms = (
+        "najdi",
+        "dohled",
+        "zobraz",
+        "otevři",
+        "otevri",
+        "zkontroluj",
+        "prozkoumej",
+        "uprav",
+        "oprav",
+        "commit",
+        "push",
+        "git",
+        "cockpit",
+        "dokument",
+        "projekt",
+        "email",
+        "e-mail",
+        "reminder",
+        "připom",
+        "scan",
+        "soubor",
+        "test",
+    )
+    conversational_terms = (
+        "co jí řekneš",
+        "co ji reknes",
+        "co mu řekneš",
+        "co mu reknes",
+        "co jim řekneš",
+        "co jim reknes",
+        "pozdrav",
+        "zdraví tě",
+        "zdravi te",
+        "řekni jí",
+        "rekni ji",
+        "řekni mu",
+        "rekni mu",
+    )
+    if any(term in folded for term in conversational_terms):
+        return False
+    return any(term in folded for term in work_terms)
+
+
+def generate_direct_voice_response(
+    text: str,
+    *,
+    runner: Callable[..., Any] = Runner.run_sync,
+) -> str:
+    load_dotenv(PROJECT_ROOT / ".env", override=True)
+    agent = Agent(
+        name="AdamVoiceResponder",
+        instructions=DIRECT_RESPONSE_INSTRUCTIONS,
+        tools=[],
+    )
+    result = runner(agent, text)
+    response = str(getattr(result, "final_output", "") or "").strip()
+    return response or "Slyším tě. Tady Adam, jsem připravený pomoct."
+
+
+def build_spoken_result_for_command(
+    command: VoiceCommand,
+    *,
+    response_generator: Callable[[str], str] = generate_direct_voice_response,
+) -> str:
+    triage = command.triage
+    text = command.text.strip()
+    if not command.ok:
+        return "Hlasový pokyn nemá použitelný text. Zkus ho prosím nahrát znovu."
+    if triage.risk in {"blocked", "needs_confirmation"}:
+        return "Pokyn jsem přijal, ale je rizikový nebo mění data. Neprovedu ho bez výslovného potvrzení v chatu."
+    if voice_command_needs_codex_work(text):
+        return "Pokyn jsem přijal. Tohle vyžaduje pracovní převzetí Adamem v Codexu, takže ho nechávám připravený v hlasovém inboxu."
+    try:
+        return response_generator(text)
+    except Exception:
+        return "Pokyn jsem přijal, ale automatická odpověď se nepovedla. Nechávám ho připravený Adamovi k převzetí v Codexu."
+
+
 def handle_voice_command(
     command: VoiceCommand,
     *,
     speak: Callable[..., dict[str, Any]] = speak_report,
+    response_generator: Callable[[str], str] = generate_direct_voice_response,
     should_speak: bool = True,
     status_path: Path = ADAM_VOICE_MODE_STATUS_PATH,
     started_at: str | None = None,
 ) -> dict[str, Any]:
-    notice = spoken_notice_for_command(command)
+    spoken_result = build_spoken_result_for_command(command, response_generator=response_generator)
     speech_result = {"ok": True, "message": "Hlasové oznámení vypnuté.", "transport": "disabled"}
     if should_speak:
-        speech_result = speak(notice, allow_local_fallback=False)
+        speech_result = speak(spoken_result, allow_local_fallback=False)
     state = "command_ready" if command.ok else "waiting"
     status = write_voice_mode_status(
         status_path=status_path,
         state=state,
-        message=notice,
+        message=spoken_result,
         last_command=command,
         started_at=started_at,
     )
@@ -145,7 +243,8 @@ def handle_voice_command(
         "status": status,
         "speech": speech_result,
         "command": voice_command_to_dict(command),
-        "notice": notice,
+        "notice": spoken_result,
+        "response": spoken_result,
     }
 
 
@@ -182,7 +281,7 @@ def run_voice_mode(
                 return 0
             command = wait_for_latest_voice_command(
                 inbox_dir=inbox_dir,
-                timeout_seconds=poll_seconds,
+                timeout_seconds=max(0.1, poll_seconds),
                 poll_seconds=min(max(0.1, poll_seconds), 1.0),
                 since_signature=since_signature,
             )
@@ -203,8 +302,8 @@ def run_voice_mode(
             )
             printer(format_voice_command_for_adam(command))
             printer("")
-            printer("ADAM VOICE MODE NOTICE:")
-            printer(result["notice"])
+            printer("ADAM VOICE MODE RESPONSE:")
+            printer(result["response"])
             printer("")
             seen += 1
             if count > 0 and seen >= count:

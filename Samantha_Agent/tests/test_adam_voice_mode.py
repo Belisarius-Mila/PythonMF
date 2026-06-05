@@ -3,15 +3,15 @@ from __future__ import annotations
 import json
 import subprocess
 import tempfile
-import threading
-import time
 import unittest
 from pathlib import Path
 
 from app.speech.adam_voice_mode import (
+    build_spoken_result_for_command,
     handle_voice_command,
     load_voice_mode_status,
     spoken_notice_for_command,
+    voice_command_needs_codex_work,
     write_voice_mode_status,
 )
 from app.speech.voice_inbox import load_latest_voice_command
@@ -48,13 +48,61 @@ class AdamVoiceModeTests(unittest.TestCase):
             write_voice_command(latest, "Připrav návrh odpovědi.")
             command = load_latest_voice_command(inbox_dir=inbox)
 
-            result = handle_voice_command(command, should_speak=False, status_path=status_path)
+            result = handle_voice_command(
+                command,
+                response_generator=lambda text: "Návrh odpovědi je připravený.",
+                should_speak=False,
+                status_path=status_path,
+            )
             payload = json.loads(status_path.read_text(encoding="utf-8"))
 
         self.assertTrue(result["ok"])
         self.assertEqual(result["speech"]["transport"], "disabled")
         self.assertEqual(payload["state"], "command_ready")
         self.assertEqual(payload["last_command"]["text"], "Připrav návrh odpovědi.")
+
+    def test_handle_voice_command_speaks_generated_response_not_input_text(self) -> None:
+        spoken = []
+
+        def fake_speak(text, **kwargs):
+            spoken.append(text)
+            return {"ok": True, "transport": "fake", "message": "Přečteno."}
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            inbox = Path(temp_dir)
+            latest = inbox / "latest_voice_command.md"
+            status_path = inbox / "adam_voice_mode_status.json"
+            write_voice_command(latest, "Adame, Janička přijela a zdraví Tě. Co jí řekneš?")
+            command = load_latest_voice_command(inbox_dir=inbox)
+
+            result = handle_voice_command(
+                command,
+                speak=fake_speak,
+                response_generator=lambda text: "Ahoj Janičko, rád tě poznávám. Můžu pro tebe něco udělat?",
+                status_path=status_path,
+            )
+
+        self.assertEqual(spoken, ["Ahoj Janičko, rád tě poznávám. Můžu pro tebe něco udělat?"])
+        self.assertEqual(result["response"], spoken[0])
+        self.assertNotIn("Janička přijela", spoken[0])
+
+    def test_build_spoken_result_routes_codex_work_without_claiming_done(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            inbox = Path(temp_dir)
+            latest = inbox / "latest_voice_command.md"
+            write_voice_command(latest, "Adame, najdi stav dokumentů v Cockpitu.")
+            command = load_latest_voice_command(inbox_dir=inbox)
+
+        response = build_spoken_result_for_command(
+            command,
+            response_generator=lambda text: self.fail("work command should not call direct responder"),
+        )
+
+        self.assertIn("vyžaduje pracovní převzetí", response)
+
+    def test_voice_command_needs_codex_work_keeps_greetings_direct(self) -> None:
+        self.assertFalse(voice_command_needs_codex_work("Janička přijela a zdraví tě. Co jí řekneš?"))
+        self.assertTrue(voice_command_needs_codex_work("Najdi stav dokumentů v Cockpitu."))
 
     def test_load_voice_mode_status_reports_missing_watcher(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -78,18 +126,25 @@ class AdamVoiceModeTests(unittest.TestCase):
         self.assertTrue(status["running"])
         self.assertEqual(status["state"], "listening")
 
-    def test_adam_voice_mode_cli_waits_for_new_command_and_stops_after_count(self) -> None:
+    def test_load_voice_mode_status_treats_stopped_state_as_not_running(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            status_path = Path(temp_dir) / "status.json"
+            write_voice_mode_status(
+                status_path=status_path,
+                state="stopped",
+                message="Watcher byl zastaven.",
+            )
+
+            status = load_voice_mode_status(status_path=status_path)
+
+        self.assertFalse(status["running"])
+        self.assertEqual(status["state"], "stopped")
+
+    def test_adam_voice_mode_cli_can_process_existing_command_and_stops_after_count(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             inbox = Path(temp_dir)
             status_path = inbox / "status.json"
-            write_voice_command(inbox / "latest_voice_command.md", "Starý pokyn.")
-
-            def write_later() -> None:
-                time.sleep(1.5)
-                write_voice_command(inbox / "latest_voice_command.md", "Najdi stav projektu Dokumenty.")
-
-            thread = threading.Thread(target=write_later)
-            thread.start()
+            write_voice_command(inbox / "latest_voice_command.md", "Najdi stav projektu Dokumenty.")
             completed = subprocess.run(
                 [
                     ".venv/bin/python",
@@ -98,6 +153,7 @@ class AdamVoiceModeTests(unittest.TestCase):
                     str(inbox),
                     "--status-path",
                     str(status_path),
+                    "--include-existing",
                     "--count",
                     "1",
                     "--timeout",
@@ -111,11 +167,11 @@ class AdamVoiceModeTests(unittest.TestCase):
                 timeout=8,
                 check=False,
             )
-            thread.join(timeout=2)
             payload = json.loads(status_path.read_text(encoding="utf-8"))
 
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertIn("VOICE INBOX TRIAGE", completed.stdout)
+        self.assertIn("ADAM VOICE MODE RESPONSE", completed.stdout)
         self.assertIn("Najdi stav projektu Dokumenty.", completed.stdout)
         self.assertEqual(payload["state"], "completed")
         self.assertEqual(payload["last_command"]["text"], "Najdi stav projektu Dokumenty.")
