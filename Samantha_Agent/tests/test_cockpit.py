@@ -993,6 +993,13 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Hlasový mód: vypnuto", COCKPIT_HTML)
         self.assertIn("samanthaVoiceModeEnabled", COCKPIT_HTML)
         self.assertIn("toggleVoiceMode", COCKPIT_HTML)
+        update_start = COCKPIT_HTML.index("function updateVoiceModeUi()")
+        toggle_start = COCKPIT_HTML.index("function toggleVoiceMode()")
+        self.assertLess(update_start, toggle_start)
+        self.assertRegex(
+            COCKPIT_HTML,
+            r"voiceStopTimer = null;\s*}\s*}\s*function updateVoiceModeUi\(\)",
+        )
         self.assertIn("Nahrát hlasový pokyn", COCKPIT_HTML)
         self.assertIn("voiceStopBtn", COCKPIT_HTML)
         self.assertIn("voiceTranscript", COCKPIT_HTML)

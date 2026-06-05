@@ -10344,14 +10344,15 @@ COCKPIT_HTML = """<!doctype html>
 	      });
 	    }
 
-		    function resetVoiceRecordingUi() {
+	    function resetVoiceRecordingUi() {
 	      voiceRecordBtn.disabled = false;
 	      voiceRecordBtn.classList.remove("recording");
 	      voiceStopBtn.disabled = true;
 	      if (voiceStopTimer) {
 	        window.clearTimeout(voiceStopTimer);
 	        voiceStopTimer = null;
-		    }
+	      }
+	    }
 
 		    function updateVoiceModeUi() {
 		      voiceModeToggleBtn.textContent = voiceModeEnabled ? "Hlasový mód: zapnuto" : "Hlasový mód: vypnuto";
@@ -10369,7 +10370,6 @@ COCKPIT_HTML = """<!doctype html>
 		      localStorage.setItem("samanthaVoiceModeEnabled", voiceModeEnabled ? "true" : "false");
 		      updateVoiceModeUi();
 		    }
-	    }
 
 	    async function startVoiceRecording() {
 	      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
