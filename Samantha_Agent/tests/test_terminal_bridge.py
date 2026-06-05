@@ -190,6 +190,43 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertEqual(tty_calls[0][0], "ttys005")
         self.assertEqual(runner_calls, [])
 
+    def test_deliver_prompt_reports_marked_tty_and_vscode_failures(self) -> None:
+        calls = []
+
+        def fake_runner(args, **kwargs):
+            calls.append(args)
+            if len(calls) == 1:
+                return subprocess.CompletedProcess(args=args, returncode=1, stdout="", stderr="No Terminal tab.")
+            return subprocess.CompletedProcess(args=args, returncode=1, stdout="", stderr="osascript nemá povoleno posílání stisknutí kláves.")
+
+        def fake_ps_runner(args, **kwargs):
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
+
+        def fake_tty_deliverer(tty, prompt, **kwargs):
+            return {"ok": False, "status": "tty_delivery_failed", "message": "Operation not permitted", "target_tty": tty}
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker = Path(temp_dir) / "current_codex_tty.json"
+            marker.write_text('{"tty": "ttys005"}', encoding="utf-8")
+
+            result = deliver_prompt_to_terminal(
+                "Hlasový pokyn od Míly.",
+                runner=fake_runner,
+                ps_runner=fake_ps_runner,
+                script="error \"No Terminal tab.\"",
+                vscode_script="error \"osascript nemá povoleno posílání stisknutí kláves.\"",
+                marked_tty_path=marker,
+                tty_deliverer=fake_tty_deliverer,
+            )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "terminal_delivery_failed")
+        self.assertIn("No Terminal tab.", result["message"])
+        self.assertIn("TTY ttys005: Operation not permitted", result["message"])
+        self.assertIn("VS Code fallback: osascript nemá povoleno", result["message"])
+        self.assertEqual(result["marked_tty_status"]["target_tty"], "ttys005")
+        self.assertEqual(result["vscode_status"]["status"], "vscode_delivery_failed")
+
     def test_deliver_voice_command_returns_manual_required_without_calling_runner(self) -> None:
         def fake_runner(*args, **kwargs):
             self.fail("manual command must not call osascript")

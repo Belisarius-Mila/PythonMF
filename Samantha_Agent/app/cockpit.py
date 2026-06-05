@@ -6214,6 +6214,41 @@ def cockpit_transcribe_voice_action(
         }
 
 
+def cockpit_save_voice_text_action(
+    payload: dict[str, Any],
+    *,
+    inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
+) -> dict[str, Any]:
+    text = safe_text(str(payload.get("text", "") or "")).strip()
+    if not text:
+        return {
+            "ok": False,
+            "message": "Chybí text hlasového pokynu.",
+            "status": "empty_voice_text",
+        }
+    try:
+        result = {
+            "ok": True,
+            "text": text,
+            "message": "Textový hlasový pokyn byl uložen pro Codex.",
+            "status": "voice_text_saved",
+        }
+        result.update(save_voice_command_to_inbox({"text": text}, inbox_dir=inbox_dir))
+        return result
+    except OSError as exc:
+        return {
+            "ok": False,
+            "message": f"Uložení textového hlasového pokynu selhalo: {exc}",
+            "status": "voice_inbox_save_failed",
+        }
+    except ValueError as exc:
+        return {
+            "ok": False,
+            "message": f"Textový hlasový pokyn nejde uložit: {exc}",
+            "status": "voice_inbox_save_failed",
+        }
+
+
 def shell_quote_for_applescript(value: str) -> str:
     return "'" + value.replace("'", "'\\''") + "'"
 
@@ -6322,6 +6357,10 @@ class CockpitServer:
                 if parsed.path == "/api/speech/transcribe":
                     payload = self.read_json()
                     self.respond_json(cockpit_transcribe_voice_action(payload))
+                    return
+                if parsed.path == "/api/speech/voice-text":
+                    payload = self.read_json()
+                    self.respond_json(cockpit_save_voice_text_action(payload))
                     return
                 if parsed.path == "/api/voice-mode/start":
                     self.respond_json(start_adam_voice_mode_action())
@@ -8089,6 +8128,7 @@ COCKPIT_HTML = """<!doctype html>
 		          <button class="secondary" id="voiceModeStopBtn">Zastavit poslech</button>
 		          <button class="primary" id="voiceRecordBtn">Nahrát hlasový pokyn</button>
 		          <button class="secondary" id="voiceStopBtn" disabled>Zastavit a přepsat</button>
+		          <button class="primary" id="voiceTranscriptSendBtn">Odeslat přepis Adamovi</button>
 		        </div>
 		        <div id="voiceCommandStatus" class="status-line">Pokyn se po přepisu automaticky uloží pro Codex. Adam reaguje jen při spuštěném watcheru.</div>
 		        <div id="voiceModeRuntimeStatus" class="status-line">Adam Voice Mode watcher: čekám na kontrolu.</div>
@@ -8481,6 +8521,7 @@ COCKPIT_HTML = """<!doctype html>
     const voiceModeRuntimeStatus = document.getElementById("voiceModeRuntimeStatus");
     const voicePendingStatus = document.getElementById("voicePendingStatus");
     const voiceTranscript = document.getElementById("voiceTranscript");
+    const voiceTranscriptSendBtn = document.getElementById("voiceTranscriptSendBtn");
     const urgentReminderAlert = document.getElementById("urgentReminderAlert");
     const urgentReminderAlertTitle = document.getElementById("urgentReminderAlertTitle");
     const urgentReminderAlertList = document.getElementById("urgentReminderAlertList");
@@ -8622,6 +8663,7 @@ COCKPIT_HTML = """<!doctype html>
         "voicePendingStatus",
         "voiceRecordBtn",
         "voiceStopBtn",
+        "voiceTranscriptSendBtn",
         "urgentReminderAlertBtn",
         "reviewReportBtn",
         "documentSearchBtn",
@@ -10655,7 +10697,7 @@ COCKPIT_HTML = """<!doctype html>
 
 	    async function startVoiceRecording() {
 	      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
-	        voiceCommandStatus.textContent = "Tento prohlížeč nepodporuje nahrávání z mikrofonu.";
+	        voiceCommandStatus.textContent = "Tento prohlížeč nepodporuje přímé nahrávání. Použij diktování do pole Přepis a tlačítko Odeslat přepis Adamovi.";
 	        return;
 	      }
 	      voiceRecordBtn.disabled = true;
@@ -10743,6 +10785,33 @@ COCKPIT_HTML = """<!doctype html>
 	      } catch (err) {
 	        recordFrontendError(err);
 	        voiceCommandStatus.textContent = `Přepis hlasu selhal: ${err}`;
+	      }
+	    }
+
+	    async function submitVoiceTranscript() {
+	      const text = voiceTranscript.value.trim();
+	      if (!text) {
+	        voiceCommandStatus.textContent = "Nejdřív napiš nebo nadiktuj text do pole Přepis.";
+	        voiceTranscript.focus();
+	        return;
+	      }
+	      voiceTranscriptSendBtn.disabled = true;
+	      voiceCommandStatus.textContent = "Ukládám přepis pro Adama...";
+	      try {
+	        const data = await postJson("/api/speech/voice-text", {text});
+	        if (data.ok) {
+	          const savedHint = data.latest_voice_command_path ? ` Uloženo: ${data.latest_voice_command_path}.` : "";
+	          const modeHint = voiceModeEnabled ? " Hlasový mód: čekám na Adamovo převzetí." : "";
+	          voiceCommandStatus.textContent = `${data.message || "Textový hlasový pokyn byl uložen."}${savedHint}${modeHint}`;
+	          await refresh({silent: true, includeSecondary: false});
+	        } else {
+	          voiceCommandStatus.textContent = data.message || "Textový hlasový pokyn se nepodařilo uložit.";
+	        }
+	      } catch (err) {
+	        recordFrontendError(err);
+	        voiceCommandStatus.textContent = `Textový hlasový pokyn se nepodařilo uložit: ${err}`;
+	      } finally {
+	        voiceTranscriptSendBtn.disabled = false;
 	      }
 	    }
 
@@ -11913,6 +11982,7 @@ COCKPIT_HTML = """<!doctype html>
     voiceModeStopBtn.addEventListener("click", stopVoiceModeWatcher);
     voiceRecordBtn.addEventListener("click", startVoiceRecording);
     voiceStopBtn.addEventListener("click", stopVoiceRecording);
+    voiceTranscriptSendBtn.addEventListener("click", submitVoiceTranscript);
     updateVoiceModeUi();
 			    webAppsBtn.addEventListener("click", openWebAppsModal);
     projectsBtn.addEventListener("click", openProjectsModal);

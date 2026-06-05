@@ -321,10 +321,12 @@ def deliver_prompt_to_terminal(
 ) -> dict[str, Any]:
     safe_prompt = squash_terminal_text(prompt)
     marked_tty = load_marked_codex_tty(marked_tty_path)
+    marked_tty_error: dict[str, Any] | None = None
     if marked_tty:
         tty_result = tty_deliverer(marked_tty, safe_prompt, submit=submit)
         if tty_result.get("ok"):
             return tty_result
+        marked_tty_error = tty_result
 
     codex_ttys = discover_codex_ttys(runner=ps_runner)
     completed = runner(
@@ -349,6 +351,8 @@ def deliver_prompt_to_terminal(
             "returncode": completed.returncode,
             "target_ttys": codex_ttys,
         }
+        if marked_tty_error:
+            terminal_error["marked_tty_status"] = marked_tty_error
         if vscode_fallback:
             vscode_result = deliver_prompt_to_vscode(
                 safe_prompt,
@@ -363,6 +367,11 @@ def deliver_prompt_to_terminal(
                     "terminal_status": terminal_error,
                     "target_ttys": codex_ttys,
                 }
+            detail_parts = [terminal_error["message"]]
+            if marked_tty_error:
+                detail_parts.append(f"TTY {marked_tty_error.get('target_tty')}: {marked_tty_error.get('message')}")
+            detail_parts.append(f"VS Code fallback: {vscode_result.get('message')}")
+            terminal_error["message"] = " | ".join(part for part in detail_parts if part)
             return {
                 **terminal_error,
                 "vscode_status": vscode_result,

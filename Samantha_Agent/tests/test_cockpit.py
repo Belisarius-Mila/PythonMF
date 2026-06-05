@@ -19,6 +19,7 @@ from app.cockpit import (
     create_document_due_reminder_action,
     document_reference,
     cockpit_edge_tts_action,
+    cockpit_save_voice_text_action,
     cockpit_speak_action,
     cockpit_transcribe_voice_action,
     save_voice_command_to_inbox,
@@ -1028,9 +1029,14 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Nahrát hlasový pokyn", COCKPIT_HTML)
         self.assertIn("voiceStopBtn", COCKPIT_HTML)
         self.assertIn("voiceTranscript", COCKPIT_HTML)
+        self.assertIn("voiceTranscriptSendBtn", COCKPIT_HTML)
+        self.assertIn("Odeslat přepis Adamovi", COCKPIT_HTML)
         self.assertIn("startVoiceRecording", COCKPIT_HTML)
         self.assertIn("transcribeVoiceRecording", COCKPIT_HTML)
+        self.assertIn("submitVoiceTranscript", COCKPIT_HTML)
         self.assertIn("/api/speech/transcribe", COCKPIT_HTML)
+        self.assertIn("/api/speech/voice-text", COCKPIT_HTML)
+        self.assertIn("Tento prohlížeč nepodporuje přímé nahrávání.", COCKPIT_HTML)
         self.assertIn("frontendHealthPanel", COCKPIT_HTML)
         self.assertIn("frontendHealthJs", COCKPIT_HTML)
         self.assertIn("JS se zatím nespustil", COCKPIT_HTML)
@@ -1368,6 +1374,28 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("latest_voice_command.md", result["latest_voice_command_path"])
         self.assertIn("přepsán a uložen", result["message"])
         transcribe.assert_called_once_with("abc", mime_type="audio/webm", language="cs")
+
+    def test_cockpit_save_voice_text_action_writes_inbox(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            result = cockpit_save_voice_text_action(
+                {"text": "Adame, spočítej dnešní handoffy."},
+                inbox_dir=Path(temp_dir),
+            )
+            latest_path = Path(temp_dir) / "latest_voice_command.md"
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["status"], "voice_text_saved")
+            self.assertTrue(result["saved"])
+            self.assertIn("latest_voice_command.md", result["latest_voice_command_path"])
+            self.assertIn("Adame, spočítej dnešní handoffy.", latest_path.read_text(encoding="utf-8"))
+
+    def test_cockpit_save_voice_text_action_rejects_empty_text(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            result = cockpit_save_voice_text_action({"text": "   "}, inbox_dir=Path(temp_dir))
+
+            self.assertFalse(result["ok"])
+            self.assertEqual(result["status"], "empty_voice_text")
+            self.assertFalse((Path(temp_dir) / "latest_voice_command.md").exists())
 
     def test_save_voice_command_to_inbox_writes_latest_and_index(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
