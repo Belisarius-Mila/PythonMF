@@ -47,6 +47,13 @@ Co je hotove:
   Puvodni videa se ctou read-only pres druhy lokalni server nad
   `/Users/miloslavfalta/Desktop/USA` na `http://127.0.0.1:8790/`. Review formular
   zustava na `http://127.0.0.1:8789/`.
+- Po Milove hlaseni, ze tlacitko nevidi, byl soukromy formular upraven tak, aby
+  mel pod kazdym nahledem velke modre tlacitko `Přehrát video` a v hlavicce text
+  `verze s přehráváním videa 2026-06-05 16:18`. Spravna URL pro obchazeni cache:
+  `http://127.0.0.1:8789/mixed_2019_08_05/mixed_2019-08-05_form.html?v=20260605-1618`.
+- Tento typ formulare byl zaznamenan jako znovupouzitelny workflow v
+  `memory/technical/media_review_form_workflow.md`; dalsi vhodny krok je vytvorit
+  git-safe generator/sablonu pro dalsi projekty.
 
 Co neni hotove:
 - Neni hotovy rucni review contact sheetu.
@@ -65,6 +72,8 @@ Dalsi krok:
 - Pokud nefunguje tlacitko `Přehrát video`, overit nebo znovu spustit read-only
   server ve zdrojove slozce `/Users/miloslavfalta/Desktop/USA`:
   `python3 -m http.server 8790 --bind 127.0.0.1`.
+- Pokud Safari stale ukazuje starou verzi, otevrit formular s cache-busterem:
+  `http://127.0.0.1:8789/mixed_2019_08_05/mixed_2019-08-05_form.html?v=20260605-1618`.
 - Pri navazani vzit nejnovejsi `~/Downloads/block_review*.csv` jako zdroj pravdy,
   aby se neprepsaly Milovy rucni poznamky.
 - Pokud Mila stahne detailni smesne CSV, vzit nejnovejsi
