@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
@@ -50,6 +51,48 @@ def load_latest_voice_command(*, inbox_dir: Path = VOICE_COMMAND_INBOX_DIR) -> V
             message="Žádný hlasový pokyn zatím není uložený.",
         )
     return parse_voice_command_file(latest_path)
+
+
+def wait_for_latest_voice_command(
+    *,
+    inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
+    timeout_seconds: float = 180.0,
+    poll_seconds: float = 1.0,
+    since_mtime_ns: int | None = None,
+) -> VoiceCommand:
+    latest_path = inbox_dir / "latest_voice_command.md"
+    deadline = time.monotonic() + max(0.0, timeout_seconds)
+    while True:
+        if latest_path.exists():
+            mtime_ns = latest_path.stat().st_mtime_ns
+            if since_mtime_ns is None or mtime_ns > since_mtime_ns:
+                return parse_voice_command_file(latest_path)
+        if time.monotonic() >= deadline:
+            break
+        time.sleep(max(0.1, poll_seconds))
+
+    triage = VoiceCommandTriage(
+        risk="none",
+        action="wait",
+        reason="Během čekání nepřišel nový hlasový pokyn.",
+        requires_confirmation=False,
+    )
+    return VoiceCommand(
+        ok=False,
+        path=str(latest_path),
+        created_at="",
+        status="timeout",
+        text="",
+        triage=triage,
+        message="Nový hlasový pokyn nebyl nalezen.",
+    )
+
+
+def latest_voice_command_mtime_ns(*, inbox_dir: Path = VOICE_COMMAND_INBOX_DIR) -> int | None:
+    latest_path = inbox_dir / "latest_voice_command.md"
+    if not latest_path.exists():
+        return None
+    return latest_path.stat().st_mtime_ns
 
 
 def parse_voice_command_file(path: Path) -> VoiceCommand:
@@ -205,12 +248,26 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Read-only triage of the latest Samantha Cockpit voice command.")
     parser.add_argument("--inbox-dir", type=Path, default=VOICE_COMMAND_INBOX_DIR)
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON.")
+    parser.add_argument("--wait", action="store_true", help="Wait for a latest voice command before printing triage.")
+    parser.add_argument("--since-now", action="store_true", help="With --wait, ignore an existing latest command and wait for a newer one.")
+    parser.add_argument("--timeout", type=float, default=180.0, help="Maximum seconds to wait with --wait.")
+    parser.add_argument("--poll", type=float, default=1.0, help="Polling interval in seconds with --wait.")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_arg_parser().parse_args(argv)
-    command = load_latest_voice_command(inbox_dir=args.inbox_dir)
+    since_mtime_ns = latest_voice_command_mtime_ns(inbox_dir=args.inbox_dir) if args.since_now else None
+    command = (
+        wait_for_latest_voice_command(
+            inbox_dir=args.inbox_dir,
+            timeout_seconds=args.timeout,
+            poll_seconds=args.poll,
+            since_mtime_ns=since_mtime_ns,
+        )
+        if args.wait
+        else load_latest_voice_command(inbox_dir=args.inbox_dir)
+    )
     if args.json:
         print(json.dumps(voice_command_to_dict(command), ensure_ascii=False, indent=2))
     else:
