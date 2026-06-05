@@ -136,6 +136,79 @@ class DocumentConsistencyAuditTests(unittest.TestCase):
             codes = [item["code"] for item in result["findings"]]
 
             self.assertIn("multiple_payment_options_in_document", codes)
+            self.assertTrue(result["findings"][0]["finding_id"].startswith("audit-"))
+
+    def test_audit_can_suppress_resolved_finding_from_local_decisions(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            index = vault / "index"
+            index.mkdir(parents=True)
+            reminders_path = root / "reminders.json"
+            decisions_path = root / "private" / "consistency_audit_decisions.json"
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "cpp-predpis-pojistne-smlouvy-3270612451-2026",
+                        "document_type": "insurance_payment_notice",
+                        "domain": "insurance",
+                        "counterparty": "ČPP",
+                        "related_asset": "auto VOLVO V40 CROSS COUNTRY SPZ 4SN8981",
+                        "tags": ["auto", "pojisteni"],
+                    },
+                ],
+            )
+            self.write_jsonl(
+                index / "text_index.jsonl",
+                [
+                    {
+                        "document_id": "cpp-predpis-pojistne-smlouvy-3270612451-2026",
+                        "text": (
+                            "Období: 1. 8. 2026 - 31. 7. 2027. "
+                            "RZ / VIN: 4SN 8981 / YV1MV79L1G2335020. "
+                            "Vaše nově předepsané pojistné činí 4 512 Kč/ ročně. "
+                            "Roční pojistné za doplňkové pojištění nákladů na nájem "
+                            "náhradního vozidla MAXI: 499 Kč. "
+                            "Pojistné za pojistné období (navýšené o doplňkové "
+                            "pojištění nákladů na nájem náhradního vozidla MAXI): 5 011 Kč."
+                        ),
+                    },
+                ],
+            )
+            reminders_path.write_text(json.dumps({"reminders": []}), encoding="utf-8")
+            first = run_document_consistency_audit(vault_dir=vault, reminders_path=reminders_path)
+            finding_id = first["findings"][0]["finding_id"]
+            decisions_path.parent.mkdir(parents=True)
+            decisions_path.write_text(
+                json.dumps(
+                    {
+                        "decisions": [
+                            {
+                                "finding_id": finding_id,
+                                "status": "resolved",
+                                "reason": "Základní pojistné je vybraná varianta; MAXI je volitelný doplněk.",
+                                "decided_at": "2026-06-05",
+                            }
+                        ]
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            result = run_document_consistency_audit(
+                vault_dir=vault,
+                reminders_path=reminders_path,
+                decisions_path=decisions_path,
+            )
+            formatted = format_document_consistency_audit(result)
+
+        self.assertEqual(result["finding_count"], 0)
+        self.assertEqual(result["raw_finding_count"], 1)
+        self.assertEqual(result["suppressed_finding_count"], 1)
+        self.assertEqual(result["suppressed_findings"][0]["finding_id"], finding_id)
+        self.assertIn("Potlačeno lokálním rozhodnutím: 1", formatted)
 
     @staticmethod
     def write_jsonl(path: Path, rows: list[dict[str, object]]) -> None:

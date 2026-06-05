@@ -1231,6 +1231,10 @@ class DocumentVaultToolsTests(unittest.TestCase):
 
     def test_scandocu_ui_contains_completion_actions(self) -> None:
         self.assertIn("Zpět do Cockpitu", SCANDOCU_HTML)
+        self.assertIn("function returnToCockpit", SCANDOCU_HTML)
+        self.assertIn("window.opener.focus", SCANDOCU_HTML)
+        self.assertIn('window.open(cockpitUrl, "SamanthaCockpit"', SCANDOCU_HTML)
+        self.assertNotIn('document.getElementById("cockpitBtn").addEventListener("click", () => {\n      window.location.href = "http://127.0.0.1:8770";', SCANDOCU_HTML)
         self.assertIn("Ano, další dokument", SCANDOCU_HTML)
         self.assertIn("Hledat jiné PDF", SCANDOCU_HTML)
         self.assertIn("Ne, hotovo", SCANDOCU_HTML)

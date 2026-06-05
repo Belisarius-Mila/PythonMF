@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from datetime import date
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import app.cockpit as cockpit_module
@@ -877,12 +878,16 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("dashboardOverall", COCKPIT_HTML)
         self.assertIn("dashboardOverallLabel", COCKPIT_HTML)
         self.assertIn("dashboardOverallReason", COCKPIT_HTML)
+        self.assertIn('title="Otevřít detail stavu"', COCKPIT_HTML)
         self.assertIn("dashboard-overall-warn", COCKPIT_HTML)
         self.assertIn("Akce potřeba", COCKPIT_HTML)
         self.assertIn("updateDashboardOverallStatus", COCKPIT_HTML)
         self.assertIn("setDashboardStatusSignal", COCKPIT_HTML)
         self.assertIn("dashboardStatusPriority", COCKPIT_HTML)
         self.assertIn("dashboardValueIsPending", COCKPIT_HTML)
+        self.assertIn("dashboard-updated", COCKPIT_HTML)
+        self.assertIn("setDashboardValue", COCKPIT_HTML)
+        self.assertIn("formatDashboardLoadedAt", COCKPIT_HTML)
         self.assertIn("dashboardProcessBtn", COCKPIT_HTML)
         self.assertIn("dashboardTerminalBtn", COCKPIT_HTML)
         self.assertIn("dashboardQuantitativeBtn", COCKPIT_HTML)
@@ -899,11 +904,15 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("quantitativeModal", COCKPIT_HTML)
         self.assertIn("/api/quantitative-status", COCKPIT_HTML)
         self.assertIn("dashboardQuickNotesBtn", COCKPIT_HTML)
+        self.assertIn("dashboardQuickNotes", COCKPIT_HTML)
+        self.assertIn("refreshQuickNotesSummary", COCKPIT_HTML)
         self.assertIn("quickNotesModal", COCKPIT_HTML)
         self.assertIn("/api/quick-notes/status", COCKPIT_HTML)
         self.assertIn("/api/quick-notes/detail", COCKPIT_HTML)
         self.assertIn("openQuickNotesModal", COCKPIT_HTML)
         self.assertIn("loadQuickNoteDetail", COCKPIT_HTML)
+        self.assertIn("quickNoteTriageLine", COCKPIT_HTML)
+        self.assertIn("Klasifikace", COCKPIT_HTML)
         self.assertIn("dashboardUrgentRemindersBtn", COCKPIT_HTML)
         self.assertIn("urgentReminderAlert", COCKPIT_HTML)
         self.assertIn("urgentRemindersModal", COCKPIT_HTML)
@@ -917,6 +926,15 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("openRecoveryModal", COCKPIT_HTML)
         self.assertIn("dashboardDiagnosticsBtn", COCKPIT_HTML)
         self.assertIn("diagnosticsModal", COCKPIT_HTML)
+        self.assertIn("diagnosticsStatusSignals", COCKPIT_HTML)
+        self.assertIn("renderDiagnosticsStatusSignals", COCKPIT_HTML)
+        self.assertIn("dashboardSignalLabel", COCKPIT_HTML)
+        self.assertIn("dashboardSignalMeaning", COCKPIT_HTML)
+        self.assertIn("dashboardSignalNextAction", COCKPIT_HTML)
+        self.assertIn(".diagnostics-row.loading", COCKPIT_HTML)
+        self.assertIn("samostatné načítání", COCKPIT_HTML)
+        self.assertIn("Co teď:", COCKPIT_HTML)
+        self.assertIn("Čekám na kontroly", COCKPIT_HTML)
         self.assertIn("openDiagnosticsModal", COCKPIT_HTML)
         self.assertIn("renderDiagnosticsEndpointRows", COCKPIT_HTML)
         self.assertIn("diagnosticsEndpoints", COCKPIT_HTML)
@@ -954,6 +972,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("setDashboardPendingIfEmpty", COCKPIT_HTML)
         self.assertIn("escapeDashboardHtml", COCKPIT_HTML)
         self.assertIn("consistencyDashboardSummary", COCKPIT_HTML)
+        self.assertIn("suppressed_finding_count", COCKPIT_HTML)
+        self.assertIn("potlačeno", COCKPIT_HTML)
         self.assertIn("v 3dennim intervalu", COCKPIT_HTML)
         self.assertIn("/api/consistency-status", COCKPIT_HTML)
         self.assertIn("renderDashboard(data)", COCKPIT_HTML)
@@ -1297,6 +1317,7 @@ Dalsi krok:
         self.assertEqual(result["counts"]["active"], 2)
         self.assertEqual(result["notes"][0]["note_number"], 2)
         self.assertEqual(result["notes"][0]["snippet"], "Novější QN.")
+        self.assertEqual(result["notes"][0]["triage"]["classification"], "Nezařazeno")
         self.assertNotIn("source_path", result["notes"][0])
 
     def test_urgent_reminders_status_is_separate_from_quick_notes(self) -> None:
@@ -1391,6 +1412,37 @@ Dalsi krok:
         self.assertEqual(result["items"][0]["summary"], "Fallback připomenutí.")
         self.assertNotIn("source_path", result["items"][0])
 
+    def test_urgent_reminders_status_retries_transient_icloud_deadlock(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            inbox = root / "Shortcuts"
+            inbox.mkdir()
+            index_path = root / "private" / "urgent_reminders" / "index.json"
+            reminder = SimpleNamespace(
+                reminder_number=3,
+                priority="urgent",
+                status="open",
+                created_at="2026-06-05 09:19:42",
+                modified_at="2026-06-05 09:19:42",
+                title="Samantha důležité připomenutí",
+                summary="Nová iPhone připomínka.",
+                size_bytes=278,
+            )
+
+            with (
+                patch(
+                    "app.cockpit.sync_urgent_reminders_index",
+                    side_effect=[OSError(11, "Resource deadlock avoided"), [reminder]],
+                ),
+                patch("app.cockpit.time.sleep", return_value=None),
+            ):
+                result = urgent_reminders_status(inbox_dir=inbox, index_path=index_path)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["counts"]["open"], 1)
+        self.assertEqual(result["items"][0]["reminder_number"], 3)
+        self.assertEqual(result["items"][0]["summary"], "Nová iPhone připomínka.")
+
     def test_urgent_reminder_done_action_hides_open_item_without_deleting_record(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
@@ -1475,6 +1527,25 @@ Dalsi krok:
         self.assertEqual(result["notes"][0]["note_number"], 7)
         self.assertEqual(result["notes"][0]["snippet"], "Fallback poznámka.")
         self.assertNotIn("source_path", result["notes"][0])
+
+    def test_quick_notes_status_adds_triage_hint_for_cockpit_project_note(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            inbox = root / "Shortcuts"
+            inbox.mkdir()
+            index_path = root / "private" / "quick_notes" / "index.json"
+            (inbox / "project_note.md").write_text(
+                "# Samantha inbox\n\nDatum: 2026-06-05 05:14:45\n\nPoznámka:\nChybí tlačítko projekty v Cockpitu a seznam toolů.\n",
+                encoding="utf-8",
+            )
+
+            result = quick_notes_status(inbox_dir=inbox, index_path=index_path)
+            detail = quick_note_detail_status(note_number=1, inbox_dir=inbox, index_path=index_path)
+
+        self.assertEqual(result["notes"][0]["triage"]["classification"], "Cockpit / správa projektů")
+        self.assertIn("Cockpit", result["notes"][0]["triage"]["suggested_next_step"])
+        self.assertFalse(result["notes"][0]["triage"]["sensitive"])
+        self.assertEqual(detail["triage"]["classification"], "Cockpit / správa projektů")
 
     def test_quick_note_detail_status_reads_full_body_without_source_path(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -2661,6 +2732,11 @@ Dalsi krok:
         self.assertIn("processEmailsBtn", EMAIL_PROCESSING_HTML)
         self.assertIn("SamanthaEmailWorkQueue", EMAIL_PROCESSING_HTML)
         self.assertIn("initializeWorkQueueWindow", EMAIL_PROCESSING_HTML)
+        self.assertIn("function returnToCockpit", EMAIL_PROCESSING_HTML)
+        self.assertIn("window.opener.focus", EMAIL_PROCESSING_HTML)
+        self.assertIn("window.close()", EMAIL_PROCESSING_HTML)
+        self.assertIn('cockpitBtn.addEventListener("click", returnToCockpit)', EMAIL_PROCESSING_HTML)
+        self.assertNotIn('cockpitBtn.addEventListener("click", () => {\\n      const cockpit = window.open("/", "SamanthaCockpit"', EMAIL_PROCESSING_HTML)
         self.assertIn("Koš - čeká na potvrzení", EMAIL_PROCESSING_HTML)
         self.assertIn("Detail se načte read-only", EMAIL_PROCESSING_HTML)
         self.assertIn("Detail e-mailu", EMAIL_PROCESSING_HTML)

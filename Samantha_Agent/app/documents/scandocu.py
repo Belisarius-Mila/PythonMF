@@ -1673,10 +1673,28 @@ SCANDOCU_HTML = """<!doctype html>
       await loadNext();
     }
 
+    function returnToCockpit() {
+      const cockpitUrl = "http://127.0.0.1:8770";
+      if (window.opener && !window.opener.closed) {
+        try {
+          window.opener.focus();
+        } catch (err) {
+          // Focus can fail across browser contexts; closing the ScanDocu popup is still the right fallback.
+        }
+        window.close();
+        return;
+      }
+      const cockpit = window.open(cockpitUrl, "SamanthaCockpit", "popup=yes,width=1280,height=880,left=90,top=60");
+      if (cockpit) {
+        cockpit.focus();
+        window.close();
+      } else {
+        window.location.href = cockpitUrl;
+      }
+    }
+
     document.getElementById("nextBtn").addEventListener("click", loadNext);
-    document.getElementById("cockpitBtn").addEventListener("click", () => {
-      window.location.href = "http://127.0.0.1:8770";
-    });
+    document.getElementById("cockpitBtn").addEventListener("click", returnToCockpit);
     document.getElementById("continueBtn").addEventListener("click", loadNext);
     document.getElementById("searchAgainBtn").addEventListener("click", () => {
       fields.completionActions.classList.add("hidden");

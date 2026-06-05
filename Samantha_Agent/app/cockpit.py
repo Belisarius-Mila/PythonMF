@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import errno
 import json
 import hashlib
 import os
@@ -504,6 +505,7 @@ def quick_notes_status(
                 "title": safe_text(note.title)[:180],
                 "snippet": safe_text(note.snippet)[:300],
                 "size_bytes": note.size_bytes,
+                "triage": quick_note_triage_hint(note.snippet),
             }
             for note in shown
         ],
@@ -538,6 +540,7 @@ def quick_notes_status_from_index(*, index_path: Path, limit: int = 20) -> dict[
                 "title": safe_text(str(record.get("title", "") or ""))[:180],
                 "snippet": safe_text(str(record.get("snippet", "") or ""))[:300],
                 "size_bytes": quick_note_size(record),
+                "triage": quick_note_triage_hint(str(record.get("snippet", "") or "")),
             }
             for record in active[: max(1, limit)]
         ],
@@ -696,6 +699,81 @@ def quick_note_detail_payload(
         "size_bytes": size_bytes,
         "body_text": body_text,
         "truncated": truncated,
+        "triage": quick_note_triage_hint(body_text or snippet),
+    }
+
+
+def quick_note_triage_hint(text: str) -> dict[str, Any]:
+    folded = safe_text(text).casefold()
+    checks: tuple[tuple[str, tuple[str, ...], str, bool], ...] = (
+        (
+            "Cockpit / správa projektů",
+            ("cockpit", "kokpit", "projekt", "projekty", "tool", "vrstva", "stavove okno", "stavové okno"),
+            "Zařadit jako návrh na Cockpit; před zápisem udělat malý plán nebo patch.",
+            False,
+        ),
+        (
+            "Dokumenty / private vault",
+            ("dokument", "pdf", "smlouv", "pojist", "faktura", "scan", "scandocu", "trezor"),
+            "Zkontrolovat, jestli jde o dokument, připomínku nebo metadata; nic nepřesouvat bez potvrzení.",
+            True,
+        ),
+        (
+            "Připomínka / úkol",
+            ("připome", "pripome", "zavolat", "zavolej", "termín", "termin", "deadline", "úkol", "ukol"),
+            "Navrhnout připomínku nebo akční položku; uložit až po potvrzení.",
+            False,
+        ),
+        (
+            "Matýsek / výuka angličtiny",
+            ("matýsek", "matysek", "angličtin", "anglictin", "bunny", "benji", "forest", "lekce"),
+            "Zařadit do MMTX/Matýsek English a před změnou načíst příslušný handoff.",
+            False,
+        ),
+        (
+            "Zdraví / lékárna",
+            ("zdrav", "lék", "lek", "ekzém", "ekzem", "kůže", "kuze", "dávkov", "davkov"),
+            "Brát jako citlivou poznámku; nedělat zdravotní závěry a případné uložení potvrdit.",
+            True,
+        ),
+        (
+            "Rodina / média",
+            ("family", "rodin", "dovolen", "usa", "film", "fotk", "video", "imovie"),
+            "Držet odděleně od ostatních commitů; soukromé soubory necommitovat bez výslovného souhlasu.",
+            True,
+        ),
+        (
+            "Nákup / záruka",
+            ("nákup", "nakup", "objedn", "záruk", "zaruk", "eshop", "e-shop", "prodej"),
+            "Navrhnout nákupní nebo záruční workflow; ukládání dokladů jen do soukromého archivu.",
+            True,
+        ),
+        (
+            "Esej / psaní",
+            ("esej", "text", "kapitol", "emoce", "fraška", "fraska", "dante"),
+            "Zařadit jako textový námět; před úpravami držet verzi a cílový výstup.",
+            False,
+        ),
+        (
+            "E-mail / komunikace",
+            ("email", "e-mail", "mail", "zpráv", "zprav", "odeslat", "poslat"),
+            "Použít e-mailový read-only nebo dvoukrokový outbound workflow podle rizika.",
+            True,
+        ),
+    )
+    for label, needles, next_step, sensitive in checks:
+        if any(needle in folded for needle in needles):
+            return {
+                "classification": label,
+                "suggested_next_step": next_step,
+                "sensitive": sensitive,
+                "safety_note": "Zobrazit jen bezpečný souhrn v přehledu." if sensitive else "Bez tiché akce; nejdřív návrh nebo potvrzení.",
+            }
+    return {
+        "classification": "Nezařazeno",
+        "suggested_next_step": "Přečíst detail a ručně rozhodnout, jestli z toho bude projekt, tool, reminder nebo jen poznámka.",
+        "sensitive": False,
+        "safety_note": "Bez tiché akce; jen návrh klasifikace.",
     }
 
 
@@ -706,8 +784,20 @@ def urgent_reminders_status(
     limit: int = 12,
 ) -> dict[str, Any]:
     inbox_exists = inbox_dir.exists()
+    sync_error: OSError | ValueError | None = None
     try:
-        reminders = sync_urgent_reminders_index(inbox_dir=inbox_dir, index_path=index_path)
+        for attempt in range(2):
+            try:
+                reminders = sync_urgent_reminders_index(inbox_dir=inbox_dir, index_path=index_path)
+                break
+            except OSError as exc:
+                sync_error = exc
+                if getattr(exc, "errno", None) == errno.EDEADLK and attempt == 0:
+                    time.sleep(0.25)
+                    continue
+                raise
+        else:
+            raise sync_error or OSError("iCloud sync selhal.")
     except (OSError, ValueError) as exc:
         fallback = urgent_reminders_status_from_index(index_path=index_path, limit=limit)
         if fallback["items"]:
@@ -7196,15 +7286,32 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       }
     }
 
+    function returnToCockpit() {
+      const cockpitUrl = "/";
+      if (window.opener && !window.opener.closed) {
+        try {
+          window.opener.focus();
+        } catch (err) {
+          // Focus can fail across browser contexts; closing this popup still avoids duplicate Cockpit windows.
+        }
+        window.close();
+        return;
+      }
+      const cockpit = window.open(cockpitUrl, "SamanthaCockpit", "popup=yes,width=1280,height=880,left=90,top=60");
+      if (cockpit) {
+        cockpit.focus();
+        window.close();
+      } else {
+        window.location.href = cockpitUrl;
+      }
+    }
+
     refreshBtn.addEventListener("click", () => loadNewHeaders({newOnly: true}));
     emailDaysInput.addEventListener("change", normalizeDaysInput);
     loadHeadersBtn.addEventListener("click", () => loadNewHeaders({lastSevenDays: true}));
     loadPendingBtn.addEventListener("click", loadPendingWork);
     processEmailsBtn.addEventListener("click", openWorkQueueWindow);
-    cockpitBtn.addEventListener("click", () => {
-      const cockpit = window.open("/", "SamanthaCockpit", "popup=yes,width=1280,height=880,left=90,top=60");
-      if (cockpit) cockpit.focus();
-    });
+    cockpitBtn.addEventListener("click", returnToCockpit);
     loadOverview();
   </script>
 </body>
@@ -7254,6 +7361,7 @@ COCKPIT_HTML = """<!doctype html>
     .dashboard-row { display: grid; grid-template-columns: minmax(92px, auto) minmax(0, 1fr); gap: 10px; align-items: start; font-size: 13px; }
     .dashboard-label { color: var(--muted); }
     .dashboard-value { overflow-wrap: anywhere; }
+    .dashboard-updated { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; line-height: 1.25; }
     .dashboard-overall { border: 1px solid var(--line); border-radius: 8px; padding: 10px; display: grid; gap: 4px; background: #fbfcfe; }
     .dashboard-overall-ok { border-color: #bbf7d0; background: #f0fdf4; }
     .dashboard-overall-warn { border-color: #fde68a; background: #fffbeb; }
@@ -7268,6 +7376,10 @@ COCKPIT_HTML = """<!doctype html>
     .health-item { border: 1px solid #edf0f4; border-radius: 7px; background: white; padding: 8px; min-width: 0; }
     .health-label { display: block; color: var(--muted); font-size: 11px; line-height: 1.2; }
     .health-value { display: block; margin-top: 3px; font-size: 13px; font-weight: 650; overflow-wrap: anywhere; }
+    .diagnostics-row.bad { border-left: 4px solid var(--red); padding-left: 8px; }
+    .diagnostics-row.warn { border-left: 4px solid var(--amber); padding-left: 8px; }
+    .diagnostics-row.loading { border-left: 4px solid var(--blue); padding-left: 8px; }
+    .diagnostics-row.ok { border-left: 4px solid var(--green); padding-left: 8px; }
     .urgent-alert { border: 2px solid var(--red); border-radius: 8px; background: #fff4f2; padding: 12px 14px; display: grid; gap: 9px; }
     .urgent-alert.hidden { display: none; }
     .urgent-alert-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
@@ -7427,7 +7539,7 @@ COCKPIT_HTML = """<!doctype html>
       <section class="dashboard-card">
         <h2>Stav</h2>
         <div class="dashboard-body dashboard-list">
-          <div id="dashboardOverall" class="dashboard-overall dashboard-overall-loading">
+          <div id="dashboardOverall" class="dashboard-overall dashboard-overall-loading" role="button" tabindex="0" title="Otevřít detail stavu">
             <span id="dashboardOverallLabel" class="dashboard-overall-label">Načítám</span>
             <span id="dashboardOverallReason" class="dashboard-overall-reason">Skládám hlavní a samostatně načítané kontroly.</span>
           </div>
@@ -7436,6 +7548,7 @@ COCKPIT_HTML = """<!doctype html>
           <div class="dashboard-row"><span class="dashboard-label">Projekty</span><span id="dashboardProjects" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Kvantitativní</span><span id="dashboardQuantitative" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Audit</span><span id="dashboardConsistency" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">QN</span><span id="dashboardQuickNotes" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Záloha</span><span id="dashboardBackup" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Git</span><span id="dashboardGit" class="dashboard-value"></span></div>
         </div>
@@ -7700,6 +7813,10 @@ COCKPIT_HTML = """<!doctype html>
 	      <div class="modal-body">
 	        <div id="diagnosticsStatus" class="status-line">Načítám diagnostiku...</div>
 	        <div class="recovery-card">
+	          <h3>Stav</h3>
+	          <div id="diagnosticsStatusSignals" class="diagnostics-list"></div>
+	        </div>
+	        <div class="recovery-card">
 	          <h3>Frontend</h3>
 	          <div id="diagnosticsFrontend" class="project-meta"></div>
 	        </div>
@@ -7788,6 +7905,7 @@ COCKPIT_HTML = """<!doctype html>
     const diagnosticsModal = document.getElementById("diagnosticsModal");
     const diagnosticsCloseBtn = document.getElementById("diagnosticsCloseBtn");
     const diagnosticsStatus = document.getElementById("diagnosticsStatus");
+    const diagnosticsStatusSignals = document.getElementById("diagnosticsStatusSignals");
     const diagnosticsFrontend = document.getElementById("diagnosticsFrontend");
     const diagnosticsEndpointList = document.getElementById("diagnosticsEndpointList");
     const diagnosticsErrorList = document.getElementById("diagnosticsErrorList");
@@ -7807,6 +7925,7 @@ COCKPIT_HTML = """<!doctype html>
     const dashboardProjects = document.getElementById("dashboardProjects");
     const dashboardQuantitative = document.getElementById("dashboardQuantitative");
     const dashboardConsistency = document.getElementById("dashboardConsistency");
+    const dashboardQuickNotes = document.getElementById("dashboardQuickNotes");
     const dashboardBackup = document.getElementById("dashboardBackup");
     const dashboardGit = document.getElementById("dashboardGit");
     const dashboardOverall = document.getElementById("dashboardOverall");
@@ -7997,6 +8116,7 @@ COCKPIT_HTML = """<!doctype html>
       diagnosticsModal.classList.remove("hidden");
       diagnosticsStatus.textContent = "Měřím endpointy...";
       diagnosticsFrontend.textContent = "";
+      renderDiagnosticsStatusSignals();
       diagnosticsEndpointList.innerHTML = "";
       diagnosticsErrorList.innerHTML = "";
       const buttonsOk = verifyButtonHealth();
@@ -8025,6 +8145,80 @@ COCKPIT_HTML = """<!doctype html>
 
     function closeDiagnosticsModal() {
       diagnosticsModal.classList.add("hidden");
+    }
+
+    function renderDiagnosticsStatusSignals() {
+      if (!diagnosticsStatusSignals) return;
+      diagnosticsStatusSignals.innerHTML = "";
+      const signals = Object.values(dashboardStatusSignals || {}).filter(Boolean);
+      if (!signals.length) {
+        const empty = document.createElement("div");
+        empty.className = "diagnostics-row";
+        empty.textContent = "Stavové signály zatím nejsou načtené.";
+        diagnosticsStatusSignals.appendChild(empty);
+        return;
+      }
+      signals.slice().sort((a, b) => {
+        const rankDiff = dashboardStatusRank(b.level) - dashboardStatusRank(a.level);
+        if (rankDiff) return rankDiff;
+        return dashboardStatusPriority(b.key) - dashboardStatusPriority(a.key);
+      }).forEach((signal) => {
+        const row = document.createElement("div");
+        row.className = `diagnostics-row ${signal.level || "ok"}`;
+        const title = document.createElement("div");
+        title.className = "diagnostics-row-title";
+        title.textContent = `${dashboardSignalLabel(signal.key)}: ${dashboardSignalMeaning(signal.level)}`;
+        const detail = document.createElement("div");
+        detail.className = "project-meta";
+        detail.textContent = signal.reason || "";
+        const action = document.createElement("div");
+        action.className = "project-meta";
+        action.textContent = `Co teď: ${dashboardSignalNextAction(signal)}`;
+        row.appendChild(title);
+        row.appendChild(detail);
+        row.appendChild(action);
+        diagnosticsStatusSignals.appendChild(row);
+      });
+    }
+
+    function dashboardSignalMeaning(level) {
+      return {
+        bad: "chyba nebo nutná akce",
+        warn: "varování / ruční kontrola",
+        loading: "samostatné načítání",
+        ok: "v pořádku"
+      }[level] || "stav neznámý";
+    }
+
+    function dashboardSignalNextAction(signal) {
+      const level = signal && signal.level || "ok";
+      const reason = String(signal && signal.reason || "").toLocaleLowerCase("cs-CZ");
+      if (level === "loading") return "počkat na samostatné načtení nebo stisknout Obnovit stav";
+      if (level === "bad") return "otevřít diagnostiku endpointů nebo příslušné okno a řešit chybu";
+      if (level === "warn") {
+        if (reason.includes("připomen")) return "otevřít příslušný přehled a rozhodnout, jestli je akce potřeba";
+        if (reason.includes("git")) return "zkontrolovat pracovní strom a případně udělat tematický commit";
+        if (reason.includes("záloh")) return "zkontrolovat stav zálohy";
+        if (reason.includes("audit")) return "otevřít auditní detail";
+        if (reason.includes("dokument")) return "otevřít dokumentovou frontu nebo ScanDocu";
+        return "otevřít detail dané oblasti a rozhodnout další krok";
+      }
+      return "nic akutního";
+    }
+
+    function dashboardSignalLabel(key) {
+      return {
+        main: "Hlavní status",
+        consistency: "Audit",
+        documents: "Dokumenty",
+        reminders: "Reminders",
+        backup: "Záloha",
+        git: "Git",
+        projects: "Projekty",
+        quickNotes: "QN",
+        quantitative: "Kvantitativní",
+        scandocu: "ScanDocu"
+      }[key] || key || "Signál";
     }
 
     function renderDiagnosticsEndpointRows(results) {
@@ -8147,6 +8341,7 @@ COCKPIT_HTML = """<!doctype html>
       refreshProjectsSummary();
       refreshQuantitativeSummary();
       refreshConsistencySummary();
+      refreshQuickNotesSummary();
     }
 
     async function runEmailIntakeMonitor() {
@@ -8939,6 +9134,7 @@ COCKPIT_HTML = """<!doctype html>
       setDashboardPendingIfEmpty(dashboardProjects, "načítám samostatně");
       setDashboardPendingIfEmpty(dashboardQuantitative, "načítám samostatně");
       setDashboardPendingIfEmpty(dashboardConsistency, "načítám samostatně");
+      setDashboardPendingIfEmpty(dashboardQuickNotes, "načítám samostatně");
       if (dashboardValueIsPending(dashboardProjects)) {
         setDashboardStatusSignal("projects", "loading", "Projekty se načítají samostatně");
       }
@@ -8948,9 +9144,12 @@ COCKPIT_HTML = """<!doctype html>
       if (dashboardValueIsPending(dashboardConsistency)) {
         setDashboardStatusSignal("consistency", "loading", "Audit se načítá samostatně");
       }
+      if (dashboardValueIsPending(dashboardQuickNotes)) {
+        setDashboardStatusSignal("quickNotes", "loading", "QN se načítají samostatně");
+      }
 
       const backupState = classifyBackup(data.backup || "");
-      dashboardBackup.innerHTML = `<span class="${backupState.className}">${backupState.label}</span>`;
+      setDashboardValue(dashboardBackup, `<span class="${backupState.className}">${backupState.label}</span>`);
       setDashboardStatusSignal(
         "backup",
         backupState.className === "ok" ? "ok" : "warn",
@@ -9062,6 +9261,17 @@ COCKPIT_HTML = """<!doctype html>
       return !text || text.includes("načítám");
     }
 
+    function setDashboardValue(node, html, loadedAt = new Date()) {
+      if (!node) return;
+      node.innerHTML = `${html}<span class="dashboard-updated">načteno ${formatDashboardLoadedAt(loadedAt)}</span>`;
+    }
+
+    function formatDashboardLoadedAt(value) {
+      const date = value instanceof Date ? value : new Date(value);
+      if (!Number.isFinite(date.getTime())) return "čas neznámý";
+      return date.toLocaleTimeString("cs-CZ", {hour: "2-digit", minute: "2-digit", second: "2-digit"});
+    }
+
     function dashboardStatusRank(level) {
       if (level === "bad") return 4;
       if (level === "warn") return 3;
@@ -9079,6 +9289,7 @@ COCKPIT_HTML = """<!doctype html>
         backup: 60,
         git: 50,
         projects: 40,
+        quickNotes: 35,
         quantitative: 30,
         scandocu: 10
       };
@@ -9124,7 +9335,7 @@ COCKPIT_HTML = """<!doctype html>
         reasons = actionSignals;
       } else if (worst.level === "loading") {
         level = "loading";
-        label = "Načítám detail";
+        label = "Čekám na kontroly";
         reasons = loadingSignals;
       }
       dashboardOverall.className = `dashboard-overall dashboard-overall-${level}`;
@@ -9146,14 +9357,16 @@ COCKPIT_HTML = """<!doctype html>
     function consistencyDashboardSummary(consistency) {
       if (!consistency || consistency.ok === false) return "nelze zjistit";
       const findingCount = Number(consistency.finding_count || 0);
-      if (!findingCount) return "0 nálezů";
+      const suppressedCount = Number(consistency.suppressed_finding_count || 0);
+      const suppressedSuffix = suppressedCount ? ` | ${suppressedCount} potlačeno` : "";
+      if (!findingCount) return `0 nálezů${suppressedSuffix}`;
       const severityCounts = consistency.severity_counts || {};
       const severity = severityCounts.critical ? "kritické" : severityCounts.warning ? "varování" : "info";
       const findings = Array.isArray(consistency.findings) ? consistency.findings : [];
       const first = findings[0] || {};
       const title = String(first.title || first.message || "detail je v auditním okně");
       const compactTitle = title.length > 90 ? `${title.slice(0, 87)}...` : title;
-      return `${findingCount} ${severity}: ${compactTitle}`;
+      return `${findingCount} ${severity}: ${compactTitle}${suppressedSuffix}`;
     }
 
     async function fetchJson(url) {
@@ -9177,9 +9390,12 @@ COCKPIT_HTML = """<!doctype html>
         const flagCounts = projectSummary.flag_counts || {};
         const priorityOne = (priorityCounts["1"] || 0) + (priorityCounts["A1+"] || 0);
         const remindCount = flagCounts["připomenout"] || 0;
-        dashboardProjects.innerHTML = projects.ok === false
-          ? `<span class="warn">nelze načíst</span>`
-          : `<span class="${priorityOne > 0 ? "warn" : "ok"}">${priorityOne} priorita 1</span> | ${projectSummary.total || 0} projektů | ${catalogSummary.tools || 0} toolů | ${catalogSummary.infrastructure_capabilities || 0} vrstev${remindCount ? ` | ${remindCount} připomenout` : ""}`;
+        setDashboardValue(
+          dashboardProjects,
+          projects.ok === false
+            ? `<span class="warn">nelze načíst</span>`
+            : `<span class="${priorityOne > 0 ? "warn" : "ok"}">${priorityOne} priorita 1</span> | ${projectSummary.total || 0} projektů | ${catalogSummary.tools || 0} toolů | ${catalogSummary.infrastructure_capabilities || 0} vrstev${remindCount ? ` | ${remindCount} připomenout` : ""}`
+        );
         setDashboardStatusSignal(
           "projects",
           projects.ok === false ? "warn" : remindCount > 0 ? "warn" : "ok",
@@ -9191,7 +9407,7 @@ COCKPIT_HTML = """<!doctype html>
         );
       } catch (err) {
         recordFrontendError(err);
-        dashboardProjects.innerHTML = `<span class="warn">chyba načtení</span>`;
+        setDashboardValue(dashboardProjects, `<span class="warn">chyba načtení</span>`);
         setDashboardStatusSignal("projects", "warn", `Projekty: chyba načtení (${err})`);
       }
     }
@@ -9204,9 +9420,12 @@ COCKPIT_HTML = """<!doctype html>
         const quantitativeTotals = quantitativeCurrentSummary.totals || {};
         const quantitativeLocalTotals = quantitativeTotals.local || {};
         const quantitativeGitTotals = quantitativeTotals.git_tracked || {};
-        dashboardQuantitative.innerHTML = quantitative.ok === false
-          ? `<span class="warn">nelze zjistit</span>`
-          : `<span class="ok">${quantitativeLocalTotals.files || 0} souborů</span> | ${quantitativeLocalTotals.lines || 0} lokálních řádků | git ${quantitativeGitTotals.lines || 0} řádků`;
+        setDashboardValue(
+          dashboardQuantitative,
+          quantitative.ok === false
+            ? `<span class="warn">nelze zjistit</span>`
+            : `<span class="ok">${quantitativeLocalTotals.files || 0} souborů</span> | ${quantitativeLocalTotals.lines || 0} lokálních řádků | git ${quantitativeGitTotals.lines || 0} řádků`
+        );
         setDashboardStatusSignal(
           "quantitative",
           quantitative.ok === false ? "warn" : "ok",
@@ -9214,7 +9433,7 @@ COCKPIT_HTML = """<!doctype html>
         );
       } catch (err) {
         recordFrontendError(err);
-        dashboardQuantitative.innerHTML = `<span class="warn">chyba načtení</span>`;
+        setDashboardValue(dashboardQuantitative, `<span class="warn">chyba načtení</span>`);
         setDashboardStatusSignal("quantitative", "warn", `Kvantitativní status: chyba načtení (${err})`);
       }
     }
@@ -9229,9 +9448,12 @@ COCKPIT_HTML = """<!doctype html>
         const warningFindings = severityCounts.warning || 0;
         const findingCount = consistency.finding_count || 0;
         const auditClass = criticalFindings > 0 ? "bad" : warningFindings > 0 ? "warn" : "ok";
-        dashboardConsistency.innerHTML = consistency.ok === false
-          ? `<span class="warn">nelze zjistit</span>`
-          : `<span class="${auditClass}">${escapeDashboardHtml(consistencyDashboardSummary(consistency))}</span>`;
+        setDashboardValue(
+          dashboardConsistency,
+          consistency.ok === false
+            ? `<span class="warn">nelze zjistit</span>`
+            : `<span class="${auditClass}">${escapeDashboardHtml(consistencyDashboardSummary(consistency))}</span>`
+        );
         setDashboardStatusSignal(
           "consistency",
           consistency.ok === false ? "warn" : criticalFindings > 0 ? "bad" : warningFindings > 0 ? "warn" : "ok",
@@ -9241,9 +9463,35 @@ COCKPIT_HTML = """<!doctype html>
         clearFrontendErrorsMatching("escapeHtml");
       } catch (err) {
         recordFrontendError(err);
-        dashboardConsistency.innerHTML = `<span class="warn">chyba načtení</span>`;
+        setDashboardValue(dashboardConsistency, `<span class="warn">chyba načtení</span>`);
         setDashboardStatusSignal("consistency", "warn", `Audit: chyba načtení (${err})`);
         renderConsistencyAudit({summary_text: `Chyba načtení consistency auditu: ${err}`});
+      }
+    }
+
+    async function refreshQuickNotesSummary() {
+      setDashboardPendingIfEmpty(dashboardQuickNotes, "načítám...");
+      try {
+        const quickNotes = await fetchJson("/api/quick-notes/status");
+        const counts = quickNotes.counts || {};
+        const active = counts.active || 0;
+        const first = (quickNotes.notes || [])[0] || {};
+        const firstClass = first.triage && first.triage.classification ? ` | poslední: ${escapeDashboardHtml(first.triage.classification)}` : "";
+        setDashboardValue(
+          dashboardQuickNotes,
+          quickNotes.ok === false
+            ? `<span class="warn">nelze načíst</span>`
+            : `<span class="${active > 0 ? "warn" : "ok"}">${active} aktivní</span>${firstClass}`
+        );
+        setDashboardStatusSignal(
+          "quickNotes",
+          quickNotes.ok === false ? "warn" : active > 0 ? "warn" : "ok",
+          quickNotes.ok === false ? "QN: nelze načíst" : active > 0 ? `QN: ${active} aktivních poznámek` : "QN inbox je prázdný"
+        );
+      } catch (err) {
+        recordFrontendError(err);
+        setDashboardValue(dashboardQuickNotes, `<span class="warn">chyba načtení</span>`);
+        setDashboardStatusSignal("quickNotes", "warn", `QN: chyba načtení (${err})`);
       }
     }
 
@@ -9996,6 +10244,12 @@ COCKPIT_HTML = """<!doctype html>
         const meta = document.createElement("div");
         meta.className = "project-meta";
         meta.textContent = `${note.created_at || ""} | ${note.size_bytes || 0} B`;
+        const triage = document.createElement("div");
+        triage.className = "project-next";
+        triage.textContent = quickNoteTriageLine(note.triage || {});
+        const safety = document.createElement("div");
+        safety.className = "project-meta";
+        safety.textContent = (note.triage && note.triage.safety_note) || "";
         const actions = document.createElement("div");
         actions.className = "project-flags";
         const detailBtn = document.createElement("button");
@@ -10008,10 +10262,18 @@ COCKPIT_HTML = """<!doctype html>
         actions.appendChild(detailBtn);
         card.appendChild(head);
         card.appendChild(meta);
+        card.appendChild(triage);
+        if (safety.textContent) card.appendChild(safety);
         card.appendChild(actions);
         card.appendChild(detail);
         quickNotesList.appendChild(card);
       });
+    }
+
+    function quickNoteTriageLine(triage) {
+      const classification = triage.classification || "Nezařazeno";
+      const next = triage.suggested_next_step || "Přečíst detail a ručně rozhodnout.";
+      return `Klasifikace: ${classification}. Další krok: ${next}`;
     }
 
     async function loadQuickNoteDetail(note, detailNode, button) {
@@ -10037,9 +10299,17 @@ COCKPIT_HTML = """<!doctype html>
         status.textContent = data.ok
           ? `${data.created_at || ""} | ${data.size_bytes || 0} B${data.truncated ? " | zkráceno" : ""}`
           : (data.message || "Detail QN se nepodařilo načíst.");
+        const triage = document.createElement("div");
+        triage.className = "project-next";
+        triage.textContent = quickNoteTriageLine(data.triage || {});
+        const safety = document.createElement("div");
+        safety.className = "project-meta";
+        safety.textContent = (data.triage && data.triage.safety_note) || "";
         const pre = document.createElement("pre");
         pre.textContent = data.body_text || data.message || "";
         detailNode.appendChild(status);
+        detailNode.appendChild(triage);
+        if (safety.textContent) detailNode.appendChild(safety);
         detailNode.appendChild(pre);
         detailNode.dataset.loaded = "true";
         button.textContent = "Zavřít detail";
@@ -10587,6 +10857,13 @@ COCKPIT_HTML = """<!doctype html>
     urgentReminderAlertBtn.addEventListener("click", openUrgentRemindersModal);
 		    dashboardRecoveryBtn.addEventListener("click", openRecoveryModal);
     dashboardDiagnosticsBtn.addEventListener("click", openDiagnosticsModal);
+    dashboardOverall.addEventListener("click", openDiagnosticsModal);
+    dashboardOverall.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openDiagnosticsModal();
+      }
+    });
     dashboardRestartBtn.addEventListener("click", restartCockpit);
 			    webAppsBtn.addEventListener("click", openWebAppsModal);
     projectsBtn.addEventListener("click", openProjectsModal);

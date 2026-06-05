@@ -18,6 +18,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `projects/pictnew_vocabulary_image_pipeline.md` - opakovatelný audit a generování obrázků ke slovíčkům FR/IT přes `mapping.json`, `Pict/` a `PictNew/`.
 - `projects/tts_edge_audio_tools.md` - české TTS/MP3 nástroje přes edge-tts, dávkový CSV režim a ruční GUI.
 - `projects/vocabulary_en_web_cards.md` - webové obrazové kartičky EN z `VocabularyEN.csv`, sync do `docs/`, learner MVP a workflow pro chybějící obrázky.
+- `projects/vocabularyfr_web_trainer.md` - VocabularyFR web trainer pro Janu: webový MVP prototyp z desktopové Tkinter aplikace s CSV editací, audio cache, obrázky a auto smyčkou; checkpoint prototypu je commit `da93eba`.
 - `projects/fraška_dante_esa_concept.md` - koncept eseje o frašce, dantovské ose, egu, smíření a nově definovaných pojmech.
 - `projects/pohadkova_knizka_gpt_canva.md` - domácí dětská knížka z GPT pohádek, Canva sazba, stylová bible a workflow pro ilustrace.
 - `projects/vedecke_clanky.md` - knihovna průlomových vědeckých článků v `data/vedecke_clanky/`, evidence PDF, odkazů, obrázků, shrnutí a pravidlo ptát se před internetovým doplněním.
@@ -89,6 +90,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `handoffs/document_vault_next_physical_print_and_downloads_intake_2026_05_22.md` - dokumentovy vault: fyzicky tisk byl Milou overen na TXT dokumentu o zkratkach; dalsi plan je klasifikace/vazby mezi dokumenty a potvrzovany intake ze slozky Stazene/Downloads do inboxu.
 - `handoffs/media_image_resize_utility_done_2026_05_20.md` - Obecna utilita `app/media/image_resize.py` je hotova a overena na lekarne; dalsi krok je pri pouziti na slovniky nejdriv udelat preview a zvolit cilovou velikost.
 - `handoffs/vocabularyit_mapping_applied_2026_05_20.md` - VocabularyIT/PictNew finalni stav aktualni vlny: `Pict/mapping.json` byl po schvalenem preview aktualizovan, audit je cisty a git checkpoint existuje jako `851b347 Apply VocabularyIT picture mapping updates`.
+- `handoffs/vocabularyfr_web_trainer_checkpoint_2026_06_04.md` - VocabularyFR Web Trainer pro Janu: webový MVP prototyp je hotový a commitnutý jako `da93eba Add VocabularyFR web trainer prototype`; další krok je deploy/checklist pro předání `VocabularyFR/web/` Janě a rozhodnutí macOS helper vs. Pythonista/iCloud test.
 - `handoffs/samantha_agent_rag_search_memory_ranking_2026_05_19.md` - historicky RAG mezistav: `search_memory` ma vylepseny ranking a vystup; aktualni kanonicky stav je v `samantha_core.md`.
 - `handoffs/session_recovery_autosave_2026_05_18.txt` - handoff ke konverzaci o navazovani po vypadku, `screen`, prikazu `samantha`, `codex resume` a autosave session logu po 10 minutach.
 - `handoffs/test_kratky_handoff_2026_05_18.md` - testovaci handoff s prioritou 3 bez pripomenuti pri startu, overeni pravidla pro kratky handoff.

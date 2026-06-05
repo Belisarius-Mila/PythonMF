@@ -65,8 +65,12 @@ Oba maji jasny vstup, vystup a nizke riziko.
 | Lokalni pamet | L3 | `search_memory`, `memory_status`; RAG-like vyhledavani v markdown pameti. | Necte e-maily ani tajemstvi; jen memory soubory. |
 | Workflow registry | L3 | `list_workflow_commands`, `preview_workflow_command`, `run_workflow_command`. | Shell jen z presne registrovaneho `argv`; zapisujici prikaz dvoukrokove. |
 | E-mail read-only | L3/L4 | Hlavicky, hledani hlavicek, cteni konkretniho UID po potvrzeni, action case, case vault, archive vault, reminders, RIXO case. | Samostatne potvrzeni pro telo, ulozeni, archivaci, plne URL a oznaceni pripominky jako hotove. Nic neodesilat, nemazat, nepresouvat, neoznacovat jako prectene. |
+| Dokumentovy vault / ScanDocu | L3/L4 | Pracovni dokumentova fronta, import PDF, klasifikace, hledani, case detail, terminovi kandidati, tisk, archivace a kos. | Cteni a prehledy jsou read-only; tisk, archivace, kos, import a ulozeni pripominky maji potvrzovaci brany. |
+| Quick Notes / Samantha inbox | L3/L4 | Ocislovany seznam a detail hlasovych/rychlych poznamek, navazujici inbox pro budouci triage a draft akci. | Seznam a detail jsou read-only; povyseni QN na ukol, reminder, document intake nebo workflow musi byt potvrzene. |
 | Reminders | L3 | Vypsat otevrene pripominky, detail, ulozit potvrzeny email action case, oznacit jako hotove. | Ulozeni a dokončení vyzaduje potvrzeni; bez plnych URL a bez neredigovanych adres. |
 | Backup a obnova | L2/L3 | Registrovany backup workflow; tooly pro snapshoty, preview obnovy a potvrzenou obnovu. | Recovery pouze do `/Volumes/SamanthaSecureBackup/SamanthaBackups`; obnova nejdriv preview, potom potvrzeni, citlive cesty vyzaduji slovo `citlive` nebo `recovery`. |
+| TTS edge audio | L1 | `scripts/generate_tts.py`, `scripts/tts_gui.py`; davkove MP3 z CSV a rucni GUI pres `edge-tts`. | GUI otevirat jen na Miluv pokyn; davkove generovani a zapis MP3 smerovat do zvoleneho projektu/adresare. |
+| Media image resize | L3 | `preview_zmenseni_obrazku`, `apply_zmenseni_obrazku`, `scripts/resize_images.py`; zmensovani fotek/obrazku podle cilove velikosti v kB. | Vzdy preview pred apply; apply vyzaduje vetu `Potvrzuji zmenseni obrazku` a zalozi zalohu originalu do `data/media/image_resize_backups/`. |
 
 ## Infrastructure capabilities
 

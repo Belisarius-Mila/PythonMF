@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from collections import defaultdict
@@ -11,6 +12,7 @@ from app.documents.vault import DEFAULT_DOCUMENTS_DIR, read_jsonl, safe_text
 from app.reminders.store import DEFAULT_REMINDERS_PATH, load_reminders_store
 
 
+DEFAULT_AUDIT_DECISIONS_PATH = DEFAULT_DOCUMENTS_DIR / "index" / "consistency_audit_decisions.json"
 AMOUNT_PATTERN = re.compile(r"(?P<amount>\d{1,3}(?:[ .]\d{3})*)\s*K[čc]")
 POLICY_PATTERN = re.compile(
     r"(?:pojistn[áé]\s+smlouva|n[áa]vrh(?:u)?\s+pojistn[ée]\s+smlouvy|variabiln[íi]\s+symbol)\D{0,80}(\d{10})",
@@ -51,19 +53,26 @@ def run_document_consistency_audit(
     *,
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
     reminders_path: Path = DEFAULT_REMINDERS_PATH,
+    decisions_path: Path | None = None,
 ) -> dict[str, Any]:
     facts = collect_insurance_auto_facts(vault_dir=vault_dir, reminders_path=reminders_path)
     findings = build_consistency_findings(facts)
+    decisions = load_audit_decisions(decisions_path or DEFAULT_AUDIT_DECISIONS_PATH)
+    active_findings, suppressed_findings = apply_audit_decisions(findings, decisions)
     severity_counts: dict[str, int] = defaultdict(int)
-    for finding in findings:
+    for finding in active_findings:
         severity_counts[str(finding.get("severity", "info"))] += 1
     return {
         "ok": True,
         "scope": "insurance_auto",
         "fact_count": len(facts),
-        "finding_count": len(findings),
+        "finding_count": len(active_findings),
+        "raw_finding_count": len(findings),
+        "suppressed_finding_count": len(suppressed_findings),
         "severity_counts": dict(sorted(severity_counts.items())),
-        "findings": findings,
+        "findings": active_findings,
+        "suppressed_findings": suppressed_findings,
+        "decision_count": len(decisions),
     }
 
 
@@ -75,6 +84,9 @@ def format_document_consistency_audit(result: dict[str, Any]) -> str:
         f"- Fakta: {int(result.get('fact_count', 0) or 0)}",
         f"- Nálezy: {int(result.get('finding_count', 0) or 0)}",
     ]
+    suppressed_count = int(result.get("suppressed_finding_count", 0) or 0)
+    if suppressed_count:
+        lines.append(f"- Potlačeno lokálním rozhodnutím: {suppressed_count}")
     counts = result.get("severity_counts")
     if isinstance(counts, dict) and counts:
         lines.append(
@@ -326,6 +338,63 @@ def document_payment_options_resolved_by_reminder(document: AuditFact, reminders
     return bool(base_amounts & reminder_amounts)
 
 
+def load_audit_decisions(path: Path) -> dict[str, dict[str, Any]]:
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return {}
+    except (OSError, json.JSONDecodeError, TypeError):
+        return {}
+
+    decisions: dict[str, dict[str, Any]] = {}
+    if isinstance(raw, dict):
+        for container_key in ("resolved_findings", "suppressed_findings"):
+            container = raw.get(container_key)
+            if isinstance(container, dict):
+                for finding_id, decision in container.items():
+                    if isinstance(decision, dict):
+                        decisions[safe_text(str(finding_id))] = decision
+        rows = raw.get("decisions")
+    else:
+        rows = raw
+    if isinstance(rows, list):
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            finding_id = safe_text(str(row.get("finding_id", "")))
+            if finding_id:
+                decisions[finding_id] = row
+    return decisions
+
+
+def apply_audit_decisions(
+    findings: list[dict[str, Any]],
+    decisions: dict[str, dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    if not decisions:
+        return findings, []
+    active: list[dict[str, Any]] = []
+    suppressed: list[dict[str, Any]] = []
+    for finding in findings:
+        decision = decisions.get(str(finding.get("finding_id", "")))
+        if decision and audit_decision_suppresses(decision):
+            item = dict(finding)
+            item["suppression"] = {
+                "status": safe_text(str(decision.get("status") or decision.get("decision") or "resolved"))[:80],
+                "reason": safe_text(str(decision.get("reason", "")))[:300],
+                "decided_at": safe_text(str(decision.get("decided_at", "")))[:80],
+            }
+            suppressed.append(item)
+        else:
+            active.append(finding)
+    return active, suppressed
+
+
+def audit_decision_suppresses(decision: dict[str, Any]) -> bool:
+    status = safe_text(str(decision.get("status") or decision.get("decision") or "")).casefold()
+    return status in {"resolved", "suppressed", "ok", "ignored", "potlačeno", "potlaceno", "vyřešeno", "vyreseno"}
+
+
 def dedupe_findings(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
     seen: set[tuple[str, str, str]] = set()
     result: list[dict[str, Any]] = []
@@ -338,10 +407,32 @@ def dedupe_findings(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if key in seen:
             continue
         seen.add(key)
+        finding["finding_id"] = consistency_finding_id(finding)
         result.append(finding)
     severity_order = {"critical": 0, "warning": 1, "info": 2}
     result.sort(key=lambda item: (severity_order.get(str(item.get("severity", "")), 9), str(item.get("title", ""))))
     return result
+
+
+def consistency_finding_id(finding: dict[str, Any]) -> str:
+    items = finding.get("items") if isinstance(finding.get("items"), list) else []
+    signature = {
+        "code": safe_text(str(finding.get("code", ""))),
+        "asset": safe_text(str(finding.get("asset", ""))),
+        "coverage_start": safe_text(str(finding.get("coverage_start", ""))),
+        "policy_numbers": [safe_text(str(item)) for item in finding.get("policy_numbers", []) if item],
+        "items": [
+            {
+                "source_type": safe_text(str(item.get("source_type", ""))),
+                "source_id": safe_text(str(item.get("source_id", ""))),
+                "amount": normalize_amount(str(item.get("amount", ""))),
+            }
+            for item in items
+            if isinstance(item, dict)
+        ],
+    }
+    payload = json.dumps(signature, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return "audit-" + hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
 
 def extract_vehicle_asset(*, related_asset: str, text: str) -> tuple[str, str]:
