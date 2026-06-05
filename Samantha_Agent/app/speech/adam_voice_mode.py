@@ -24,6 +24,7 @@ from app.speech.voice_inbox import (
 
 ADAM_VOICE_MODE_STATUS_PATH = VOICE_COMMAND_INBOX_DIR / "adam_voice_mode_status.json"
 ADAM_PENDING_COMMAND_PATH = VOICE_COMMAND_INBOX_DIR / "pending_for_adam.json"
+ADAM_VOICE_HISTORY_PATH = VOICE_COMMAND_INBOX_DIR / "adam_voice_history.jsonl"
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 DIRECT_RESPONSE_INSTRUCTIONS = """
@@ -33,6 +34,7 @@ Když máš něco říct konkrétní osobě, oslov ji přímo.
 Neopakuj uživateli jeho diktovaný text.
 Neprováděj žádné externí akce, nemaž, neposílej, neplať, necommituj.
 Pokud jde jen o společenskou nebo konverzační odpověď, odpověz přirozeně.
+Ber v úvahu krátkou hlasovou historii, pokud je v dotazu relevantní.
 Použij maximálně dvě věty.
 """.strip()
 
@@ -75,12 +77,91 @@ def write_voice_mode_status(
     return payload
 
 
+def load_voice_history(
+    *,
+    path: Path = ADAM_VOICE_HISTORY_PATH,
+    limit: int = 6,
+) -> list[dict[str, Any]]:
+    if limit <= 0 or not path.exists():
+        return []
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return []
+
+    history: list[dict[str, Any]] = []
+    for line in lines[-max(limit * 3, limit):]:
+        if not line.strip():
+            continue
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(item, dict):
+            history.append(item)
+    return history[-limit:]
+
+
+def format_voice_history_for_prompt(history: list[dict[str, Any]]) -> str:
+    if not history:
+        return "Hlasová historie je zatím prázdná."
+    lines = ["Nedávná hlasová historie:"]
+    for item in history:
+        user_text = str(item.get("user_text") or item.get("text") or "").strip()
+        adam_response = str(item.get("adam_response") or item.get("response") or "").strip()
+        if user_text:
+            lines.append(f"Míla: {user_text}")
+        if adam_response:
+            lines.append(f"Adam: {adam_response}")
+    return "\n".join(lines)
+
+
+def append_manual_voice_history_turn(
+    *,
+    user_text: str,
+    adam_response: str,
+    route: str = "codex_manual",
+    path: Path = ADAM_VOICE_HISTORY_PATH,
+) -> dict[str, Any]:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload: dict[str, Any] = {
+        "created_at": utc_now(),
+        "route": route,
+        "user_text": str(user_text or "").strip(),
+        "adam_response": str(adam_response or "").strip(),
+    }
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    return payload
+
+
+def append_voice_history_turn(
+    command: VoiceCommand,
+    *,
+    adam_response: str,
+    route: str,
+    path: Path = ADAM_VOICE_HISTORY_PATH,
+) -> dict[str, Any]:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload: dict[str, Any] = {
+        "created_at": utc_now(),
+        "route": route,
+        "user_text": command.text.strip(),
+        "adam_response": str(adam_response or "").strip(),
+        "command": voice_command_to_dict(command),
+    }
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    return payload
+
+
 def save_pending_for_adam(
     command: VoiceCommand,
     *,
     reason: str,
     message: str,
     path: Path = ADAM_PENDING_COMMAND_PATH,
+    history_path: Path = ADAM_VOICE_HISTORY_PATH,
 ) -> dict[str, Any]:
     path.parent.mkdir(parents=True, exist_ok=True)
     now = utc_now()
@@ -92,6 +173,7 @@ def save_pending_for_adam(
         "message": message,
         "text": command.text.strip(),
         "command": voice_command_to_dict(command),
+        "voice_history": load_voice_history(path=history_path, limit=6),
         "created_at": now,
         "updated_at": now,
         "path": str(path),
@@ -129,13 +211,47 @@ def load_pending_for_adam(
     return payload
 
 
+def mark_pending_for_adam_processed(
+    *,
+    adam_response: str,
+    path: Path = ADAM_PENDING_COMMAND_PATH,
+    history_path: Path = ADAM_VOICE_HISTORY_PATH,
+) -> dict[str, Any]:
+    pending = load_pending_for_adam(path=path)
+    if not pending.get("ok"):
+        return pending
+    if not pending.get("pending"):
+        pending["ok"] = False
+        pending["message"] = "Žádný čekající hlasový pokyn není připravený k označení jako vyřízený."
+        return pending
+
+    now = utc_now()
+    response_text = str(adam_response or "").strip()
+    pending["pending"] = False
+    pending["status"] = "processed_by_codex"
+    pending["response"] = response_text
+    pending["processed_at"] = now
+    pending["updated_at"] = now
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(pending, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    append_manual_voice_history_turn(
+        user_text=str(pending.get("text") or ""),
+        adam_response=response_text,
+        route="codex_manual",
+        path=history_path,
+    )
+    return pending
+
+
 def load_voice_mode_status(
     *,
     status_path: Path = ADAM_VOICE_MODE_STATUS_PATH,
     pending_path: Path = ADAM_PENDING_COMMAND_PATH,
+    history_path: Path = ADAM_VOICE_HISTORY_PATH,
     stale_after_seconds: float = 15.0,
 ) -> dict[str, Any]:
     pending_for_adam = load_pending_for_adam(path=pending_path)
+    voice_history = load_voice_history(path=history_path, limit=3)
     if not status_path.exists():
         return {
             "ok": True,
@@ -144,6 +260,8 @@ def load_voice_mode_status(
             "message": "Adam Voice Mode watcher neběží.",
             "status_path": str(status_path),
             "pending_for_adam": pending_for_adam,
+            "voice_history_count": len(voice_history),
+            "last_voice_turn": voice_history[-1] if voice_history else None,
         }
     try:
         payload = json.loads(status_path.read_text(encoding="utf-8"))
@@ -155,6 +273,8 @@ def load_voice_mode_status(
             "message": f"Stav Adam Voice Mode nejde načíst: {exc}",
             "status_path": str(status_path),
             "pending_for_adam": pending_for_adam,
+            "voice_history_count": len(voice_history),
+            "last_voice_turn": voice_history[-1] if voice_history else None,
         }
 
     pid = int(payload.get("pid") or 0)
@@ -174,6 +294,8 @@ def load_voice_mode_status(
     payload["age_seconds"] = age_seconds
     payload["status_path"] = str(status_path)
     payload["pending_for_adam"] = pending_for_adam
+    payload["voice_history_count"] = len(voice_history)
+    payload["last_voice_turn"] = voice_history[-1] if voice_history else None
     if not running and payload.get("state") == "listening":
         payload["state"] = "stale"
         payload["message"] = "Adam Voice Mode watcher pravděpodobně neběží nebo se dlouho neozval."
@@ -260,6 +382,8 @@ def pending_reason_for_command(command: VoiceCommand) -> str | None:
 def generate_direct_voice_response(
     text: str,
     *,
+    history: list[dict[str, Any]] | None = None,
+    history_path: Path = ADAM_VOICE_HISTORY_PATH,
     runner: Callable[..., Any] = Runner.run_sync,
 ) -> str:
     load_dotenv(PROJECT_ROOT / ".env", override=True)
@@ -268,7 +392,13 @@ def generate_direct_voice_response(
         instructions=DIRECT_RESPONSE_INSTRUCTIONS,
         tools=[],
     )
-    result = runner(agent, text)
+    recent_history = load_voice_history(path=history_path, limit=6) if history is None else history
+    prompt = (
+        f"{format_voice_history_for_prompt(recent_history)}\n\n"
+        "Aktuální hlasový vstup od Míly:\n"
+        f"{text.strip()}"
+    )
+    result = runner(agent, prompt)
     response = str(getattr(result, "final_output", "") or "").strip()
     return response or "Slyším tě. Tady Adam, jsem připravený pomoct."
 
@@ -276,8 +406,9 @@ def generate_direct_voice_response(
 def build_spoken_result_for_command(
     command: VoiceCommand,
     *,
-    response_generator: Callable[[str], str] = generate_direct_voice_response,
+    response_generator: Callable[..., str] = generate_direct_voice_response,
     pending_path: Path | None = ADAM_PENDING_COMMAND_PATH,
+    history_path: Path = ADAM_VOICE_HISTORY_PATH,
 ) -> str:
     triage = command.triage
     text = command.text.strip()
@@ -287,19 +418,45 @@ def build_spoken_result_for_command(
     if pending_reason == "requires_confirmation":
         message = "Pokyn jsem přijal, ale je rizikový nebo mění data. Neprovedu ho bez výslovného potvrzení v chatu."
         if pending_path is not None:
-            save_pending_for_adam(command, reason=pending_reason, message=message, path=pending_path)
+            save_pending_for_adam(
+                command,
+                reason=pending_reason,
+                message=message,
+                path=pending_path,
+                history_path=history_path,
+            )
+        append_voice_history_turn(command, adam_response=message, route=pending_reason, path=history_path)
         return message
     if pending_reason == "codex_work":
         message = "Pokyn jsem přijal. Tohle vyžaduje pracovní převzetí Adamem v Codexu, takže ho nechávám připravený v hlasovém inboxu."
         if pending_path is not None:
-            save_pending_for_adam(command, reason=pending_reason, message=message, path=pending_path)
+            save_pending_for_adam(
+                command,
+                reason=pending_reason,
+                message=message,
+                path=pending_path,
+                history_path=history_path,
+            )
+        append_voice_history_turn(command, adam_response=message, route=pending_reason, path=history_path)
         return message
     try:
-        return response_generator(text)
+        if response_generator is generate_direct_voice_response:
+            response = generate_direct_voice_response(text, history_path=history_path)
+        else:
+            response = response_generator(text)
+        append_voice_history_turn(command, adam_response=response, route="direct_response", path=history_path)
+        return response
     except Exception:
         message = "Pokyn jsem přijal, ale automatická odpověď se nepovedla. Nechávám ho připravený Adamovi k převzetí v Codexu."
         if pending_path is not None:
-            save_pending_for_adam(command, reason="direct_response_failed", message=message, path=pending_path)
+            save_pending_for_adam(
+                command,
+                reason="direct_response_failed",
+                message=message,
+                path=pending_path,
+                history_path=history_path,
+            )
+        append_voice_history_turn(command, adam_response=message, route="direct_response_failed", path=history_path)
         return message
 
 
@@ -307,16 +464,18 @@ def handle_voice_command(
     command: VoiceCommand,
     *,
     speak: Callable[..., dict[str, Any]] = speak_report,
-    response_generator: Callable[[str], str] = generate_direct_voice_response,
+    response_generator: Callable[..., str] = generate_direct_voice_response,
     should_speak: bool = True,
     status_path: Path = ADAM_VOICE_MODE_STATUS_PATH,
     pending_path: Path | None = ADAM_PENDING_COMMAND_PATH,
+    history_path: Path = ADAM_VOICE_HISTORY_PATH,
     started_at: str | None = None,
 ) -> dict[str, Any]:
     spoken_result = build_spoken_result_for_command(
         command,
         response_generator=response_generator,
         pending_path=pending_path,
+        history_path=history_path,
     )
     speech_result = {"ok": True, "message": "Hlasové oznámení vypnuté.", "transport": "disabled"}
     if should_speak:
@@ -346,6 +505,7 @@ def run_voice_mode(
     inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
     status_path: Path = ADAM_VOICE_MODE_STATUS_PATH,
     pending_path: Path | None = ADAM_PENDING_COMMAND_PATH,
+    history_path: Path = ADAM_VOICE_HISTORY_PATH,
     since_now: bool = True,
     timeout_seconds: float = 0.0,
     poll_seconds: float = 1.0,
@@ -393,6 +553,7 @@ def run_voice_mode(
                 should_speak=should_speak,
                 status_path=status_path,
                 pending_path=pending_path,
+                history_path=history_path,
                 started_at=started_at,
             )
             printer(format_voice_command_for_adam(command))
@@ -425,6 +586,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--inbox-dir", type=Path, default=VOICE_COMMAND_INBOX_DIR)
     parser.add_argument("--status-path", type=Path, default=ADAM_VOICE_MODE_STATUS_PATH)
     parser.add_argument("--pending-path", type=Path, default=ADAM_PENDING_COMMAND_PATH)
+    parser.add_argument("--history-path", type=Path, default=ADAM_VOICE_HISTORY_PATH)
     parser.add_argument("--since-now", action="store_true", default=True, help="Ignorovat existující latest pokyn a čekat na nový.")
     parser.add_argument("--include-existing", action="store_true", help="Zpracovat i aktuální latest pokyn.")
     parser.add_argument("--timeout", type=float, default=0.0, help="Celkový timeout v sekundách. 0 znamená bez limitu.")
@@ -440,6 +602,7 @@ def main(argv: list[str] | None = None) -> int:
         inbox_dir=args.inbox_dir,
         status_path=args.status_path,
         pending_path=args.pending_path,
+        history_path=args.history_path,
         since_now=not args.include_existing,
         timeout_seconds=args.timeout,
         poll_seconds=args.poll,

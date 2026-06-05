@@ -10,12 +10,19 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.speech.adam_voice_mode import ADAM_PENDING_COMMAND_PATH, load_pending_for_adam
+from app.speech.adam_voice_mode import (
+    ADAM_PENDING_COMMAND_PATH,
+    ADAM_VOICE_HISTORY_PATH,
+    format_voice_history_for_prompt,
+    load_pending_for_adam,
+    load_voice_history,
+)
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Zobrazí hlasový pokyn čekající na převzetí Adamem v Codexu.")
     parser.add_argument("--path", type=Path, default=ADAM_PENDING_COMMAND_PATH)
+    parser.add_argument("--history-path", type=Path, default=ADAM_VOICE_HISTORY_PATH)
     parser.add_argument("--json", action="store_true", help="Vypsat celý záznam jako JSON.")
     return parser
 
@@ -35,6 +42,11 @@ def main(argv: list[str] | None = None) -> int:
     print("")
     print("TEXT:")
     print(str(pending.get("text") or pending.get("message") or "Žádný hlasový pokyn nečeká na Adama."))
+    history = load_voice_history(path=args.history_path, limit=3)
+    if history:
+        print("")
+        print("KONTEXT:")
+        print(format_voice_history_for_prompt(history))
     return 0 if pending.get("ok") else 1
 
 

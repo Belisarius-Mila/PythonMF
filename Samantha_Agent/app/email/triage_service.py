@@ -306,7 +306,9 @@ def _priority(
         return "low"
     if is_delivery or is_order:
         return "normal"
-    if has_deadline or has_action:
+    if has_deadline:
+        return "high"
+    if has_action:
         return "normal"
     if is_newsletter:
         return "low"
