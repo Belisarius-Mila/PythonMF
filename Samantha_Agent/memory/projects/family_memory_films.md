@@ -159,7 +159,7 @@ Relevantni git-safe skripty:
 Rucne projit predstrihovy formular:
 
 - URL pro aktualni lokalni server:
-  `http://127.0.0.1:8792/03_overview/film_selection_form.html`
+  `http://127.0.0.1:8793/03_overview/film_selection_form.html`
 - u fotek i videi oznacovat hlavne `A`, `B`, `skip`, kandidat kratky film,
   kandidat dlouhy film a poznamku pro strih; Adamuv rating je jen startovni
   navrh a hlavne rodinne/emocni momenty muze Mila povysit rucne,

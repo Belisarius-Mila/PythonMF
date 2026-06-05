@@ -34,7 +34,7 @@ Co neni hotove:
 - Jeste neni hotovy finalni seznam konkretne vybranych fotek a videi pro iMovie.
 
 Dalsi krok:
-- Otevrit `http://127.0.0.1:8792/03_overview/film_selection_form.html`.
+- Otevrit `http://127.0.0.1:8793/03_overview/film_selection_form.html`.
 - Rucne zkontrolovat Adamuv rating; hlavne rodinne/emocni momenty muze Mila
   povysit z `B/C` na `A`.
 - Dale doladit kandidat kratky film, kandidat dlouhy film, roli a poznamku pro
@@ -75,7 +75,7 @@ Copy/paste handoff:
   `data/private/family_memory_films/usa_2019/03_overview/usa_2019_tomik2_overview.md`.
 - Predstrihovy formular je v
   `data/private/family_memory_films/usa_2019/03_overview/film_selection_form.html`
-  a bezi na `http://127.0.0.1:8792/03_overview/film_selection_form.html`.
+  a bezi na `http://127.0.0.1:8793/03_overview/film_selection_form.html`.
 - Adamuv prvni rating je aplikovany: `A=406`, `B=913`, `C=1369`.
 - Dalsi krok je rucne zkontrolovat/povysit rodinne momenty a stahnout
   `film_selection_review.csv`.
