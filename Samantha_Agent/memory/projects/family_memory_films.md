@@ -131,15 +131,33 @@ Relevantni git-safe skripty:
 - `scripts/family_memory_prepare_block_review.py`
 - `scripts/family_memory_prepare_mixed_review.py`
 
+## Aktualni stav k 2026-06-05
+
+- Cisty seznam 15 filmu pouzitelnych dnu USA 2019 je odsouhlaseny:
+  `2019-07-20` az `2019-08-03`.
+- Den `2019-08-05` neni samostatny den filmu; je to smesny zdroj, jehoz
+  videa se pouzivaji jen podle item-level review.
+- Prvni celkovy prehled ve stylu `Tomik 2` je ulozen mimo git v
+  `data/private/family_memory_films/usa_2019/03_overview/usa_2019_tomik2_overview.md`.
+  Obsahuje ciste dny, pocty fotek/videi, navrh kratkeho filmu, navrh dlouheho
+  filmu a doporuceni pro zarazeni fotografii.
+- Dalsi prakticky krok uz neni oprava datumu, ale vyber kandidatu do filmu:
+  pripravit review formular pro foto/video vyber po kapitolach nebo dnech,
+  s autosave, CSV exportem a prehravanim videi.
+
 ## Aktualni dalsi krok
 
-Rucne projit `block_review_form.html` na lokalnim serveru nad
-`02_review/block_review.csv`, hlavne radky oznacene `roztřídit` a pripadne
-bloky s chybnym/smesnym datem. Po stazeni upraveneho CSV vzit nejnovejsi
-`~/Downloads/block_review*.csv` jako zdroj pravdy. Pred jakymkoliv zasahem do
-originalu si vyzadat samostatne potvrzeni.
+Pripravit druhy rozhodovaci formular pro predstrihovy vyber:
 
-U smesneho dne `2019-08-05` navazovat pres samostatny formular:
-`http://127.0.0.1:8789/mixed_2019_08_05/mixed_2019-08-05_form.html`.
-Pri dalsim navazani brat nejnovejsi `~/Downloads/mixed_2019-08-05_review*.csv`
-jako zdroj pravdy, pokud Mila formular upravi a stahne.
+- radek = den nebo kapitola,
+- sloupce = kandidat do kratkeho filmu, kandidat do dlouheho filmu, fotky A,
+  videa A, poznamka pro strih,
+- zachovat autosave do prohlizece a CSV export,
+- u videi zachovat tlacitko `Prehrat video`,
+- vystup brat jako podklad pro iMovie import/organizaci, ne jako prikaz k mazani
+  originalu.
+
+Pokud se bude jeste vracet ke smesnemu dni `2019-08-05`, pouzivat novejsi
+lokalni formular s videoprehravanim a ne stary port z drivejsiho handoffu.
+Pri dalsi uprave brat nejnovejsi stazene
+`~/Downloads/mixed_2019-08-05_review*.csv` jako zdroj pravdy.
