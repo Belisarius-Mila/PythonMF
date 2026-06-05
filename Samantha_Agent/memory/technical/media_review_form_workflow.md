@@ -16,6 +16,11 @@ souborech.
 - Nacist lokalni CSV s radky pro jednotlive soubory nebo bloky.
 - Ukazat nahled/thumbnail.
 - U videi nabidnout tlacitko `Přehrát video` pres lokalni read-only server.
+- Prubezne ukladat rozpracovany stav do `localStorage` v prohlizeci.
+- Pri znovuotevreni formulare automaticky obnovit autosave, pokud odpovida
+  poctu radku v CSV.
+- Nabidnout samostatne `Stáhnout autosave CSV`, aby bylo mozne zachranit
+  rozpracovanou praci i pred finalnim exportem.
 - Umoznit editovat rozhodovaci pole:
   - `use_in_film`
   - `correct_day`
@@ -29,6 +34,8 @@ souborech.
 
 - Originaly nikdy nemazat, neprejmenovavat ani nepresouvat.
 - Formular pracuje jen s kopii rozhodovaciho CSV.
+- Autosave je lokalni v danem prohlizeci a profilu; neni to zaloha v gitu ani
+  na disku projektu, dokud Mila nestahne CSV.
 - Fotky, videa, realne manifesty, GPS data, thumbnails a rodinne poznamky patri
   do `data/private/` nebo mimo repo, ne do gitu.
 - Do gitu patri jen generatory, sablony, workflow a git-safe souhrny.
@@ -67,7 +74,7 @@ data/private/family_memory_films/usa_2019/02_review/mixed_2019_08_05/mixed_2019-
 URL v aktualni relaci:
 
 ```text
-http://127.0.0.1:8789/mixed_2019_08_05/mixed_2019-08-05_form.html?v=20260605-1618
+http://127.0.0.1:8791/mixed_2019_08_05/mixed_2019-08-05_form.html?v=20260605-1710
 ```
 
 ## Dalsi krok pro zobecneni
