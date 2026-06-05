@@ -919,6 +919,13 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/urgent-reminders/status", COCKPIT_HTML)
         self.assertIn("/api/urgent-reminders/done", COCKPIT_HTML)
         self.assertIn("openUrgentRemindersModal", COCKPIT_HTML)
+        self.assertIn("refreshUrgentRemindersSummary", COCKPIT_HTML)
+        self.assertIn("URGENT_REMINDERS_MONITOR_MS = 30 * 1000", COCKPIT_HTML)
+        self.assertIn("urgentReminderBodyText", COCKPIT_HTML)
+        self.assertIn("urgent-alert-detail", COCKPIT_HTML)
+        self.assertIn("urgent-reminder-body", COCKPIT_HTML)
+        self.assertIn("Důležitá připomenutí: chyba načtení", COCKPIT_HTML)
+        self.assertIn("hasLoadError", COCKPIT_HTML)
         self.assertIn("markUrgentReminderDone", COCKPIT_HTML)
         self.assertIn("dashboardRecoveryBtn", COCKPIT_HTML)
         self.assertIn("recoveryModal", COCKPIT_HTML)
@@ -1345,6 +1352,29 @@ Dalsi krok:
         self.assertEqual(urgent["items"][0]["summary"], "Zavolat do servisu.")
         self.assertNotIn("source_path", urgent["items"][0])
 
+    def test_urgent_reminders_status_returns_full_body_text_for_long_reminder(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            inbox = root / "Shortcuts"
+            inbox.mkdir()
+            urgent_index = root / "private" / "urgent_reminders" / "index.json"
+            long_body = (
+                "První řádek delší připomínky.\n"
+                "Druhý řádek s vysvětlením, které se nevejde do krátkého červeného řádku.\n"
+                "Třetí řádek s konkrétním dalším krokem."
+            )
+            (inbox / "samantha_reminder_2026-06-05_11-30-00.md").write_text(
+                f"# Samantha důležité připomenutí\n\nDatum: 2026-06-05 11:30:00\nPriorita: urgent\n\nPřipomenutí:\n{long_body}\n",
+                encoding="utf-8",
+            )
+
+            urgent = urgent_reminders_status(inbox_dir=inbox, index_path=urgent_index)
+
+        self.assertEqual(urgent["counts"]["open"], 1)
+        self.assertIn("První řádek", urgent["items"][0]["summary"])
+        self.assertEqual(urgent["items"][0]["body_text"], long_body)
+        self.assertNotIn("source_path", urgent["items"][0])
+
     def test_action_queue_prioritizes_urgent_mobile_reminders(self) -> None:
         queue = action_queue_status(
             document_work={"new_pdfs": [], "problems": [], "review": {"next_items": []}},
@@ -1442,6 +1472,43 @@ Dalsi krok:
         self.assertEqual(result["counts"]["open"], 1)
         self.assertEqual(result["items"][0]["reminder_number"], 3)
         self.assertEqual(result["items"][0]["summary"], "Nová iPhone připomínka.")
+
+    def test_urgent_reminders_status_retries_multiple_icloud_deadlocks(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            inbox = root / "Shortcuts"
+            inbox.mkdir()
+            index_path = root / "private" / "urgent_reminders" / "index.json"
+            reminder = SimpleNamespace(
+                reminder_number=4,
+                priority="urgent",
+                status="open",
+                created_at="2026-06-05 11:45:00",
+                modified_at="2026-06-05 11:45:00",
+                title="Samantha důležité připomenutí",
+                summary="Po několika deadlocích načteno.",
+                body_text="Po několika deadlocích načteno celé.",
+                size_bytes=312,
+            )
+
+            with (
+                patch(
+                    "app.cockpit.sync_urgent_reminders_index",
+                    side_effect=[
+                        OSError(11, "Resource deadlock avoided"),
+                        OSError(11, "Resource deadlock avoided"),
+                        OSError(11, "Resource deadlock avoided"),
+                        [reminder],
+                    ],
+                ),
+                patch("app.cockpit.time.sleep", return_value=None) as sleep_mock,
+            ):
+                result = urgent_reminders_status(inbox_dir=inbox, index_path=index_path)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(sleep_mock.call_count, 3)
+        self.assertEqual(result["counts"]["open"], 1)
+        self.assertEqual(result["items"][0]["body_text"], "Po několika deadlocích načteno celé.")
 
     def test_urgent_reminder_done_action_hides_open_item_without_deleting_record(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

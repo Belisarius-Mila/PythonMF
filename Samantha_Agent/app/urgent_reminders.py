@@ -21,6 +21,7 @@ class UrgentReminder:
     source_path: Path
     title: str
     summary: str
+    body_text: str
     created_at: str
     modified_at: str
     size_bytes: int
@@ -59,6 +60,7 @@ def sync_urgent_reminders_index(
                 "source_path": source_key,
                 "title": _extract_title(text, source_path),
                 "summary": _extract_summary(text),
+                "body_text": _extract_body_text(text),
                 "created_at": _extract_datetime(text) or _format_timestamp(stat.st_mtime),
                 "modified_at": _format_timestamp(stat.st_mtime),
                 "size_bytes": stat.st_size,
@@ -162,6 +164,22 @@ def _extract_summary(text: str) -> str:
     return "(prazdne pripomenuti)"
 
 
+def _extract_body_text(text: str) -> str:
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        if line.strip().casefold().rstrip(":") in {"pripomenuti", "připomenutí", "ukol", "úkol"}:
+            body = "\n".join(lines[index + 1:]).strip()
+            return body or "(prazdne pripomenuti)"
+    body_lines = []
+    for line in lines:
+        stripped = line.strip()
+        lowered = stripped.casefold()
+        if not stripped or stripped.startswith("#") or lowered.startswith(("datum:", "priorita:")):
+            continue
+        body_lines.append(line)
+    return "\n".join(body_lines).strip() or "(prazdne pripomenuti)"
+
+
 def _extract_datetime(text: str) -> str | None:
     return _extract_field(text, "datum")
 
@@ -206,6 +224,7 @@ def _record_to_reminder(record: dict[str, Any]) -> UrgentReminder:
         source_path=Path(str(record["source_path"])),
         title=str(record.get("title") or ""),
         summary=str(record.get("summary") or ""),
+        body_text=str(record.get("body_text") or record.get("summary") or ""),
         created_at=str(record.get("created_at") or ""),
         modified_at=str(record.get("modified_at") or ""),
         size_bytes=int(record.get("size_bytes") or 0),

@@ -786,14 +786,14 @@ def urgent_reminders_status(
     inbox_exists = inbox_dir.exists()
     sync_error: OSError | ValueError | None = None
     try:
-        for attempt in range(2):
+        for attempt in range(5):
             try:
                 reminders = sync_urgent_reminders_index(inbox_dir=inbox_dir, index_path=index_path)
                 break
             except OSError as exc:
                 sync_error = exc
-                if getattr(exc, "errno", None) == errno.EDEADLK and attempt == 0:
-                    time.sleep(0.25)
+                if getattr(exc, "errno", None) == errno.EDEADLK and attempt < 4:
+                    time.sleep(0.25 * (attempt + 1))
                     continue
                 raise
         else:
@@ -848,6 +848,7 @@ def urgent_reminders_status(
                 "modified_at": safe_text(item.modified_at)[:80],
                 "title": safe_text(item.title)[:180],
                 "summary": safe_text(item.summary)[:300],
+                "body_text": safe_multiline_text(str(getattr(item, "body_text", item.summary)), limit=8000),
                 "size_bytes": item.size_bytes,
             }
             for item in shown
@@ -882,6 +883,7 @@ def urgent_reminders_status_from_index(*, index_path: Path, limit: int = 12) -> 
                 "modified_at": safe_text(str(record.get("modified_at", "") or ""))[:80],
                 "title": safe_text(str(record.get("title", "") or ""))[:180],
                 "summary": safe_text(str(record.get("summary", "") or ""))[:300],
+                "body_text": safe_multiline_text(str(record.get("body_text") or record.get("summary", "") or ""), limit=8000),
                 "size_bytes": urgent_reminder_size(record),
             }
             for record in open_items[: max(1, limit)]
@@ -948,6 +950,11 @@ def urgent_reminder_size(record: dict[str, Any]) -> int:
         return int(record.get("size_bytes", 0) or 0)
     except (TypeError, ValueError):
         return 0
+
+
+def safe_multiline_text(value: str, *, limit: int = 8000) -> str:
+    lines = [safe_text(line) for line in str(value or "").splitlines()]
+    return "\n".join(lines).strip()[:limit]
 
 
 def projects_status(
@@ -7385,6 +7392,11 @@ COCKPIT_HTML = """<!doctype html>
     .urgent-alert-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
     .urgent-alert-title { color: var(--red); font-weight: 800; }
     .urgent-alert-list { display: grid; gap: 5px; color: #5f1d18; font-size: 13px; }
+    .urgent-alert-item { border-top: 1px solid #fecaca; padding-top: 7px; display: grid; gap: 5px; }
+    .urgent-alert-item:first-child { border-top: 0; padding-top: 0; }
+    .urgent-alert-summary { width: 100%; text-align: left; padding: 7px 8px; background: #fee2e2; color: #7f1d1d; }
+    .urgent-alert-detail { white-space: pre-wrap; overflow-wrap: anywhere; color: #5f1d18; background: #fff; border: 1px solid #fecaca; border-radius: 7px; padding: 8px; max-height: 220px; overflow: auto; }
+    .urgent-reminder-body { white-space: pre-wrap; overflow-wrap: anywhere; border: 1px solid #edf0f4; border-radius: 7px; background: white; padding: 9px; max-height: 360px; overflow: auto; color: #263244; font-size: 13px; line-height: 1.45; }
     .action-queue { display: grid; gap: 9px; }
     .action-card { border: 1px solid #edf0f4; border-radius: 8px; padding: 11px; background: #fbfcfe; display: grid; gap: 8px; }
     .action-card-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: start; }
@@ -8284,7 +8296,9 @@ COCKPIT_HTML = """<!doctype html>
 
     const INTAKE_LOCAL_MONITOR_MS = 10 * 60 * 1000;
     const INTAKE_EMAIL_MONITOR_MS = 30 * 60 * 1000;
+    const URGENT_REMINDERS_MONITOR_MS = 30 * 1000;
     let refreshInFlight = false;
+    let urgentRemindersRefreshInFlight = false;
     let latestDocumentIntakeData = null;
     let lastEmailIntakeMonitor = {
       generated_at: "",
@@ -8342,6 +8356,23 @@ COCKPIT_HTML = """<!doctype html>
       refreshQuantitativeSummary();
       refreshConsistencySummary();
       refreshQuickNotesSummary();
+      refreshUrgentRemindersSummary();
+    }
+
+    async function refreshUrgentRemindersSummary() {
+      if (urgentRemindersRefreshInFlight) return;
+      urgentRemindersRefreshInFlight = true;
+      try {
+        const data = await fetchJson("/api/urgent-reminders/status");
+        renderUrgentReminderAlert(data || {});
+        if (!urgentRemindersModal.classList.contains("hidden")) {
+          renderUrgentReminders(data || {});
+        }
+      } catch (err) {
+        recordFrontendError(err);
+      } finally {
+        urgentRemindersRefreshInFlight = false;
+      }
     }
 
     async function runEmailIntakeMonitor() {
@@ -10054,17 +10085,38 @@ COCKPIT_HTML = """<!doctype html>
     function renderUrgentReminderAlert(data) {
       const counts = data.counts || {};
       const openCount = counts.open || 0;
-      urgentReminderAlert.classList.toggle("hidden", openCount <= 0);
+      const hasLoadError = data && data.ok === false;
+      urgentReminderAlert.classList.toggle("hidden", openCount <= 0 && !hasLoadError);
       urgentReminderAlertList.innerHTML = "";
+      if (hasLoadError) {
+        urgentReminderAlertTitle.textContent = "Důležitá připomenutí: chyba načtení";
+        const line = document.createElement("div");
+        line.className = "urgent-alert-detail";
+        line.textContent = data.message || "Důležitá připomenutí se nepodařilo načíst.";
+        urgentReminderAlertList.appendChild(line);
+        return;
+      }
       if (openCount <= 0) {
         urgentReminderAlertTitle.textContent = "Důležitá připomenutí";
         return;
       }
       urgentReminderAlertTitle.textContent = `Důležitá připomenutí: ${openCount}`;
       (data.items || []).slice(0, 3).forEach((item) => {
-        const line = document.createElement("div");
-        line.textContent = `#${item.reminder_number || "?"}: ${item.summary || item.title || ""}`;
-        urgentReminderAlertList.appendChild(line);
+        const row = document.createElement("div");
+        row.className = "urgent-alert-item";
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.className = "urgent-alert-summary";
+        toggle.textContent = `#${item.reminder_number || "?"}: ${item.summary || item.title || ""}`;
+        const detail = document.createElement("div");
+        detail.className = "urgent-alert-detail hidden";
+        detail.textContent = urgentReminderBodyText(item);
+        toggle.addEventListener("click", () => {
+          detail.classList.toggle("hidden");
+        });
+        row.appendChild(toggle);
+        row.appendChild(detail);
+        urgentReminderAlertList.appendChild(row);
       });
       if ((data.items || []).length > 3 || openCount > 3) {
         const more = document.createElement("div");
@@ -10103,6 +10155,9 @@ COCKPIT_HTML = """<!doctype html>
         const meta = document.createElement("div");
         meta.className = "project-meta";
         meta.textContent = `${item.created_at || ""} | ${item.size_bytes || 0} B | ${item.status || "open"}`;
+        const body = document.createElement("div");
+        body.className = "urgent-reminder-body";
+        body.textContent = urgentReminderBodyText(item);
         const actions = document.createElement("div");
         actions.className = "project-flags";
         const doneBtn = document.createElement("button");
@@ -10114,9 +10169,14 @@ COCKPIT_HTML = """<!doctype html>
         actions.appendChild(doneBtn);
         card.appendChild(head);
         card.appendChild(meta);
+        card.appendChild(body);
         card.appendChild(actions);
         urgentRemindersList.appendChild(card);
       });
+    }
+
+    function urgentReminderBodyText(item) {
+      return item.body_text || item.summary || item.title || "";
     }
 
 	    async function openRecoveryModal() {
@@ -10957,8 +11017,10 @@ COCKPIT_HTML = """<!doctype html>
 	    runFrontendHealthCheck();
 	    window.setInterval(runFrontendHealthCheck, 60000);
 	    window.setInterval(() => refresh({silent: true, includeSecondary: false}), INTAKE_LOCAL_MONITOR_MS);
+      window.setInterval(refreshUrgentRemindersSummary, URGENT_REMINDERS_MONITOR_MS);
       window.setInterval(runEmailIntakeMonitor, INTAKE_EMAIL_MONITOR_MS);
 	    refresh();
+      window.setTimeout(refreshUrgentRemindersSummary, 3000);
       window.setTimeout(runEmailIntakeMonitor, 5000);
 	  </script>
 </body>
