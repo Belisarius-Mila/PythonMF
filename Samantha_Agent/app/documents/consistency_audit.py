@@ -238,6 +238,8 @@ def build_consistency_findings(facts: list[AuditFact]) -> list[dict[str, Any]]:
 
         for item in items:
             if len(item.amounts) >= 2:
+                if document_payment_options_resolved_by_reminder(item, reminders):
+                    continue
                 findings.append(
                     {
                         "severity": "warning",
@@ -302,6 +304,26 @@ def primary_amount(item: AuditFact) -> str:
     if item.amounts:
         return safe_text(str(item.amounts[0].get("amount", "")))
     return ""
+
+
+def document_payment_options_resolved_by_reminder(document: AuditFact, reminders: list[AuditFact]) -> bool:
+    if document.source_type != "document":
+        return False
+    has_optional_total = any(amount.get("kind") == "optional_total" for amount in document.amounts)
+    base_amounts = {
+        normalize_amount(str(amount.get("amount", "")))
+        for amount in document.amounts
+        if amount.get("kind") in {"base_renewal", "payment_due"}
+    }
+    if not has_optional_total or not base_amounts:
+        return False
+    reminder_amounts = {
+        normalize_amount(str(amount.get("amount", "")))
+        for reminder in reminders
+        for amount in reminder.amounts
+        if amount.get("kind") == "reminder"
+    }
+    return bool(base_amounts & reminder_amounts)
 
 
 def dedupe_findings(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:

@@ -35,6 +35,8 @@ from app.cockpit import (
     new_email_headers_overview,
     open_document_pdf_action,
     parse_active_projects_table,
+    parse_global_tools_table,
+    parse_infrastructure_capabilities_table,
     parse_email_processing_items,
     prepare_document_print_action,
     projects_status,
@@ -618,6 +620,68 @@ class CockpitTests(unittest.TestCase):
         self.assertNotIn("document_id", result["items"][0])
         self.assertNotIn("doc-trashed", json.dumps(result, ensure_ascii=False))
 
+    def test_document_due_candidate_uses_existing_reminder_amount_for_resolved_cpp_maxi_variant(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            index = vault / "index"
+            index.mkdir(parents=True)
+            reminders_path = root / "reminders.json"
+            document_id = "cpp-predpis-pojistne-smlouvy-3270612451-2026"
+            reminder_id = f"document-{document_id}-payment_due-2026-08-01"
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": document_id,
+                        "title": "ČPP předpis pojistného",
+                        "domain": "insurance",
+                        "document_type": "insurance_payment_notice",
+                        "related_asset": "auto VOLVO V40 CROSS COUNTRY SPZ 4SN8981",
+                    }
+                ],
+            )
+            self.write_jsonl(
+                index / "text_index.jsonl",
+                [
+                    {
+                        "document_id": document_id,
+                        "text": (
+                            "Vaše nově předepsané pojistné činí 4 512 Kč/ ročně. "
+                            "Roční pojistné za doplňkové pojištění nákladů na nájem "
+                            "náhradního vozidla MAXI: 499 Kč. "
+                            "Pojistné za pojistné období (navýšené o doplňkové "
+                            "pojištění nákladů na nájem náhradního vozidla MAXI): 5 011 Kč."
+                        ),
+                    }
+                ],
+            )
+            self.write_jsonl(
+                index / "due_dates.jsonl",
+                [
+                    {
+                        "document_id": document_id,
+                        "date": "2026-08-01",
+                        "type": "payment_due",
+                        "confidence": "high",
+                        "create_reminder_candidate": True,
+                        "context": "K ÚHRADĚ 5 011 Kč DATUM SPLATNOSTI 1. 8. 2026 4 512 Kč",
+                    }
+                ],
+            )
+            reminder = self.reminder(reminder_id, "Zaplatit ČPP autopojištění", "2026-08-01")
+            reminder["amount_due"] = "4 512 Kč"
+            reminder["amount_note"] = "Platíme základ bez doplňkového MAXI."
+            reminders_path.write_text(json.dumps({"reminders": [reminder]}, ensure_ascii=False), encoding="utf-8")
+
+            result = document_due_candidates_status(vault_dir=vault, reminders_path=reminders_path, today=date(2026, 6, 4))
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["already_reminded_count"], 1)
+        self.assertEqual(result["items"][0]["status"], "already_reminded")
+        self.assertEqual(result["items"][0]["amount_due"], "4 512 Kč")
+        self.assertEqual(result["items"][0]["amount_note"], "Platíme základ bez doplňkového MAXI.")
+
     def test_create_document_due_reminder_requires_confirmation_and_writes_safe_reminder(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
@@ -810,12 +874,24 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("todayNewPdfCount", COCKPIT_HTML)
         self.assertIn("dashboardScanDocu", COCKPIT_HTML)
         self.assertIn("dashboardGit", COCKPIT_HTML)
+        self.assertIn("dashboardOverall", COCKPIT_HTML)
+        self.assertIn("dashboardOverallLabel", COCKPIT_HTML)
+        self.assertIn("dashboardOverallReason", COCKPIT_HTML)
+        self.assertIn("dashboard-overall-warn", COCKPIT_HTML)
+        self.assertIn("Akce potřeba", COCKPIT_HTML)
+        self.assertIn("updateDashboardOverallStatus", COCKPIT_HTML)
+        self.assertIn("setDashboardStatusSignal", COCKPIT_HTML)
+        self.assertIn("dashboardStatusPriority", COCKPIT_HTML)
+        self.assertIn("dashboardValueIsPending", COCKPIT_HTML)
         self.assertIn("dashboardProcessBtn", COCKPIT_HTML)
         self.assertIn("dashboardTerminalBtn", COCKPIT_HTML)
         self.assertIn("dashboardQuantitativeBtn", COCKPIT_HTML)
         self.assertIn("projectsBtn", COCKPIT_HTML)
         self.assertIn("dashboardProjects", COCKPIT_HTML)
         self.assertIn("projectsModal", COCKPIT_HTML)
+        self.assertIn("Projekty a schopnosti", COCKPIT_HTML)
+        self.assertIn('data-project-filter="tools"', COCKPIT_HTML)
+        self.assertIn('data-project-filter="infrastructure"', COCKPIT_HTML)
         self.assertIn("/api/projects/status", COCKPIT_HTML)
         self.assertNotIn('id="quantitativeBtn"', COCKPIT_HTML)
         self.assertIn("dashboardQuantitative", COCKPIT_HTML)
@@ -865,6 +941,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("filter_reasons", COCKPIT_HTML)
         self.assertIn("/api/documents/intake-email-scan", COCKPIT_HTML)
         self.assertIn("recordFrontendError", COCKPIT_HTML)
+        self.assertIn("clearFrontendErrorsMatching", COCKPIT_HTML)
         self.assertIn("verifyButtonHealth", COCKPIT_HTML)
         self.assertIn("runFrontendHealthCheck", COCKPIT_HTML)
         self.assertIn('window.addEventListener("error"', COCKPIT_HTML)
@@ -874,6 +951,10 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Consistency Audit", COCKPIT_HTML)
         self.assertIn("consistencyText", COCKPIT_HTML)
         self.assertIn("renderConsistencyAudit", COCKPIT_HTML)
+        self.assertIn("setDashboardPendingIfEmpty", COCKPIT_HTML)
+        self.assertIn("escapeDashboardHtml", COCKPIT_HTML)
+        self.assertIn("consistencyDashboardSummary", COCKPIT_HTML)
+        self.assertIn("v 3dennim intervalu", COCKPIT_HTML)
         self.assertIn("/api/consistency-status", COCKPIT_HTML)
         self.assertIn("renderDashboard(data)", COCKPIT_HTML)
         self.assertNotIn('id="samanthaChatBtn"', COCKPIT_HTML)
@@ -1037,6 +1118,51 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(status["summary"]["total"], 2)
         self.assertEqual(status["summary"]["priority_counts"]["1"], 1)
         self.assertEqual(status["summary"]["flag_counts"]["připomenout"], 1)
+
+    def test_project_capability_map_tables_are_exposed_in_projects_status(self) -> None:
+        active_projects_text = """# Active Projects
+
+| Oblast | Priorita | Stav | Memory soubor | Handoff | Dalsi krok |
+| --- | --- | --- | --- | --- | --- |
+| Dokumenty | 1 | Rozpracovane 2026-06-04 | `projects/docs.md` | `handoffs/docs_2026_06_04.md` | Rucne otestovat cockpit. |
+"""
+        capability_map_text = """# Project capability map
+
+## Globalni schopnosti Samanthy
+
+| Oblast | Uroven | Aktualni schopnost | Bezpecnostni brana |
+| --- | --- | --- | --- |
+| Lokalni pamet | L3 | `search_memory`, `memory_status` | Necte e-maily ani tajemstvi. |
+
+## Infrastructure capabilities
+
+| Capability | Stav | Obsahuje | Krmi / pomaha |
+| --- | --- | --- | --- |
+| Mobile Input Layer / iPhone Shortcuts | aktivni priorita 2 | quick notes intake | dokumenty, reminders |
+"""
+        tools = parse_global_tools_table(capability_map_text)
+        capabilities = parse_infrastructure_capabilities_table(capability_map_text)
+
+        self.assertEqual(tools[0]["name"], "Lokalni pamet")
+        self.assertEqual(tools[0]["level"], "L3")
+        self.assertEqual(capabilities[0]["name"], "Mobile Input Layer / iPhone Shortcuts")
+        self.assertEqual(capabilities[0]["contains"], "quick notes intake")
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            active_projects = root / "ACTIVE_PROJECTS.md"
+            active_projects.write_text(active_projects_text, encoding="utf-8")
+            capability_map = root / "project_capability_map.md"
+            capability_map.write_text(capability_map_text, encoding="utf-8")
+            status = projects_status(path=active_projects, capability_map_path=capability_map)
+
+        self.assertTrue(status["ok"])
+        self.assertEqual(status["catalog_summary"]["projects"], 1)
+        self.assertEqual(status["catalog_summary"]["tools"], 1)
+        self.assertEqual(status["catalog_summary"]["infrastructure_capabilities"], 1)
+        self.assertEqual(status["catalog_summary"]["total"], 3)
+        self.assertEqual([item["category"] for item in status["items"]], ["project", "tool", "infrastructure"])
+        self.assertEqual(status["items"][0]["last_worked"], "2026-06-04")
 
     def test_recovery_center_status_reports_metadata_without_autosave_content(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

@@ -80,6 +80,7 @@ EMAIL_WORK_QUEUE_ACTIONS_FILE = EMAIL_SESSION_HANDOFF_DIR / "email_work_queue_ac
 EMAIL_ATTACHMENT_PREVIEW_DIR = Path("/private/tmp/samantha_email_attachment_preview")
 GIT_ROOT = PROJECT_ROOT.parent
 ACTIVE_PROJECTS_PATH = PROJECT_ROOT / "memory" / "ACTIVE_PROJECTS.md"
+PROJECT_CAPABILITY_MAP_PATH = PROJECT_ROOT / "memory" / "technical" / "project_capability_map.md"
 SESSION_AUTOSAVE_DIR = PROJECT_ROOT / "data" / "session_autosave"
 MEMORY_INDEX_PATH = PROJECT_ROOT / "memory" / "MEMORY_INDEX.md"
 RECOVERY_HANDOFF_PATHS = (
@@ -189,13 +190,16 @@ DOCUMENT_DOMAIN_LABELS: dict[str, str] = {
     "insurance": "pojištění",
     "tax": "daně",
     "energy": "energie",
+    "employment": "práce / zaměstnání",
     "health": "zdraví",
     "warranty": "záruky",
     "other": "ostatní",
 }
 DOCUMENT_TYPE_LABELS: dict[str, str] = {
+    "contract": "smlouva",
     "document": "dokument",
     "email-attachment-pdf": "PDF příloha e-mailu",
+    "employment_contract": "pracovní smlouva",
     "invoice": "faktura / doklad",
     "insurance_payment_notice": "předpis platby pojistného",
     "insurance_policy": "pojistná smlouva",
@@ -856,7 +860,10 @@ def urgent_reminder_size(record: dict[str, Any]) -> int:
         return 0
 
 
-def projects_status(path: Path = ACTIVE_PROJECTS_PATH) -> dict[str, Any]:
+def projects_status(
+    path: Path = ACTIVE_PROJECTS_PATH,
+    capability_map_path: Path = PROJECT_CAPABILITY_MAP_PATH,
+) -> dict[str, Any]:
     try:
         projects = parse_active_projects_table(path.read_text(encoding="utf-8"))
     except OSError as exc:
@@ -864,15 +871,39 @@ def projects_status(path: Path = ACTIVE_PROJECTS_PATH) -> dict[str, Any]:
             "ok": False,
             "message": f"Seznam projektů se nepodařilo načíst: {exc}",
             "projects": [],
+            "tools": [],
+            "infrastructure_capabilities": [],
+            "items": [],
             "summary": empty_projects_summary(),
+            "catalog_summary": empty_project_catalog_summary(),
         }
+    tools: list[dict[str, Any]] = []
+    infrastructure_capabilities: list[dict[str, Any]] = []
+    capability_error = ""
+    try:
+        capability_map_text = capability_map_path.read_text(encoding="utf-8")
+        tools = parse_global_tools_table(capability_map_text)
+        infrastructure_capabilities = parse_infrastructure_capabilities_table(capability_map_text)
+    except OSError as exc:
+        capability_error = f"Mapa schopností se nepodařila načíst: {exc}"
     summary = summarize_projects(projects)
+    items = build_project_catalog_items(projects, tools, infrastructure_capabilities)
+    catalog_summary = summarize_project_catalog(projects, tools, infrastructure_capabilities)
     return {
         "ok": True,
-        "message": f"{summary['total']} aktivních projektů v paměti.",
+        "message": (
+            f"{summary['total']} aktivních projektů, "
+            f"{len(tools)} toolů a {len(infrastructure_capabilities)} infrastrukturních vrstev v paměti."
+        ),
         "source": str(relative_to_project(path)),
+        "capability_source": str(relative_to_project(capability_map_path)),
+        "capability_error": capability_error,
         "projects": projects,
+        "tools": tools,
+        "infrastructure_capabilities": infrastructure_capabilities,
+        "items": items,
         "summary": summary,
+        "catalog_summary": catalog_summary,
     }
 
 
@@ -1057,6 +1088,217 @@ def parse_active_projects_table(text: str) -> list[dict[str, Any]]:
         }
         projects.append(project)
     return projects
+
+
+def parse_global_tools_table(text: str) -> list[dict[str, Any]]:
+    tools: list[dict[str, Any]] = []
+    for row in parse_markdown_table_in_section(text, "Globalni schopnosti Samanthy"):
+        name = safe_text(row.get("oblast", ""))
+        if not name:
+            continue
+        tools.append(
+            {
+                "name": name,
+                "level": safe_text(row.get("uroven", "")),
+                "status": safe_text(row.get("aktualni_schopnost", "")),
+                "safety_gate": safe_text(row.get("bezpecnostni_brana", "")),
+            }
+        )
+    return tools
+
+
+def parse_infrastructure_capabilities_table(text: str) -> list[dict[str, Any]]:
+    capabilities: list[dict[str, Any]] = []
+    for row in parse_markdown_table_in_section(text, "Infrastructure capabilities"):
+        name = safe_text(row.get("capability", ""))
+        if not name:
+            continue
+        capabilities.append(
+            {
+                "name": name,
+                "status": safe_text(row.get("stav", "")),
+                "contains": safe_text(row.get("obsahuje", "")),
+                "helps": safe_text(row.get("krmi_pomaha", "")),
+            }
+        )
+    return capabilities
+
+
+def parse_markdown_table_in_section(text: str, heading: str) -> list[dict[str, str]]:
+    table_lines: list[str] = []
+    in_section = False
+    found_table = False
+    target = heading.casefold()
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        heading_match = re.match(r"^(#{1,6})\s+(.+?)\s*$", line)
+        if heading_match:
+            current_heading = heading_match.group(2).casefold()
+            if current_heading == target:
+                in_section = True
+                table_lines = []
+                found_table = False
+                continue
+            if in_section:
+                break
+        if not in_section:
+            continue
+        if line.startswith("|") and line.endswith("|"):
+            table_lines.append(line)
+            found_table = True
+            continue
+        if found_table and line:
+            break
+    return parse_markdown_table_lines(table_lines)
+
+
+def parse_markdown_table_lines(lines: list[str]) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    headers: list[str] = []
+    for line in lines:
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        if not cells:
+            continue
+        if set("".join(cells)) <= {"-", ":", " "}:
+            continue
+        if not headers:
+            headers = [normalize_catalog_header(cell) for cell in cells]
+            continue
+        if len(cells) < len(headers):
+            cells.extend([""] * (len(headers) - len(cells)))
+        rows.append(dict(zip(headers, cells[: len(headers)], strict=False)))
+    return rows
+
+
+def normalize_catalog_header(value: str) -> str:
+    folded = value.casefold()
+    mapping = {
+        "oblast": "oblast",
+        "úroveň": "uroven",
+        "uroven": "uroven",
+        "aktualni schopnost": "aktualni_schopnost",
+        "aktuální schopnost": "aktualni_schopnost",
+        "bezpecnostni brana": "bezpecnostni_brana",
+        "bezpečnostní brána": "bezpecnostni_brana",
+        "capability": "capability",
+        "stav": "stav",
+        "obsahuje": "obsahuje",
+        "krmi / pomaha": "krmi_pomaha",
+        "krmí / pomáhá": "krmi_pomaha",
+    }
+    return mapping.get(folded, safe_slug(value, default="field", limit=50).replace("-", "_"))
+
+
+def build_project_catalog_items(
+    projects: list[dict[str, Any]],
+    tools: list[dict[str, Any]],
+    infrastructure_capabilities: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    items: list[dict[str, Any]] = []
+    for project in projects:
+        status = safe_text(project.get("status", ""))
+        next_step = safe_text(project.get("next_step", ""))
+        memory_file = safe_text(project.get("memory_file", ""))
+        handoff = safe_text(project.get("handoff", ""))
+        item = {
+            "category": "project",
+            "category_label": "Project",
+            "name": safe_text(project.get("name", "")),
+            "priority": safe_text(project.get("priority", "")),
+            "status": status,
+            "summary": status,
+            "next_step": next_step,
+            "memory_file": memory_file,
+            "handoff": handoff,
+            "last_worked": latest_date_hint(status, next_step, memory_file, handoff),
+            "flags": project.get("flags", []),
+            "detail_fields": [
+                {"label": "Memory", "value": memory_file},
+                {"label": "Handoff", "value": handoff},
+                {"label": "Stav", "value": status},
+                {"label": "Další krok", "value": next_step},
+            ],
+        }
+        items.append(item)
+    for tool in tools:
+        status = safe_text(tool.get("status", ""))
+        safety_gate = safe_text(tool.get("safety_gate", ""))
+        level = safe_text(tool.get("level", ""))
+        items.append(
+            {
+                "category": "tool",
+                "category_label": "Tool",
+                "name": safe_text(tool.get("name", "")),
+                "level": level,
+                "status": status,
+                "summary": status,
+                "next_step": safety_gate,
+                "flags": project_catalog_flags("tool", status, safety_gate),
+                "detail_fields": [
+                    {"label": "Úroveň", "value": level},
+                    {"label": "Schopnost", "value": status},
+                    {"label": "Bezpečnostní brána", "value": safety_gate},
+                ],
+            }
+        )
+    for capability in infrastructure_capabilities:
+        status = safe_text(capability.get("status", ""))
+        contains = safe_text(capability.get("contains", ""))
+        helps = safe_text(capability.get("helps", ""))
+        items.append(
+            {
+                "category": "infrastructure",
+                "category_label": "Infrastructure capability",
+                "name": safe_text(capability.get("name", "")),
+                "status": status,
+                "summary": contains,
+                "next_step": helps,
+                "flags": project_catalog_flags("infrastructure", status, contains, helps),
+                "detail_fields": [
+                    {"label": "Stav", "value": status},
+                    {"label": "Obsahuje", "value": contains},
+                    {"label": "Krmí / pomáhá", "value": helps},
+                ],
+            }
+        )
+    return items
+
+
+def project_catalog_flags(category: str, *values: str) -> list[str]:
+    folded = " ".join(values).casefold()
+    flags: list[str] = []
+    if "pending" in folded or "koncept" in folded:
+        flags.append("čeká na rozhodnutí")
+    if "aktivni" in folded or "aktivní" in folded:
+        flags.append("aktivní")
+    if "potvrzeni" in folded or "potvrzení" in folded:
+        flags.append("potvrzovací brána")
+    return flags
+
+
+def summarize_project_catalog(
+    projects: list[dict[str, Any]],
+    tools: list[dict[str, Any]],
+    infrastructure_capabilities: list[dict[str, Any]],
+) -> dict[str, Any]:
+    return {
+        "projects": len(projects),
+        "tools": len(tools),
+        "infrastructure_capabilities": len(infrastructure_capabilities),
+        "total": len(projects) + len(tools) + len(infrastructure_capabilities),
+    }
+
+
+def empty_project_catalog_summary() -> dict[str, int]:
+    return {"projects": 0, "tools": 0, "infrastructure_capabilities": 0, "total": 0}
+
+
+def latest_date_hint(*values: str) -> str:
+    dates: list[str] = []
+    for value in values:
+        for match in re.findall(r"\b(20\d{2})[-_](\d{2})[-_](\d{2})\b", value or ""):
+            dates.append("-".join(match))
+    return max(dates) if dates else ""
 
 
 def normalize_project_header(value: str) -> str:
@@ -3259,6 +3501,11 @@ def build_document_due_candidates(
         if str(row.get("document_id", "")).strip()
         and safe_text(str(row.get("lifecycle_status", "active") or "active")).casefold() not in {"archived", "trashed"}
     }
+    text_by_document_id = {
+        str(row.get("document_id", "")): str(row.get("text", ""))
+        for row in read_jsonl(vault_dir / "index" / "text_index.jsonl")
+        if str(row.get("document_id", "")).strip()
+    }
     try:
         reminders = load_reminders_store(reminders_path).get("reminders", [])
     except (OSError, ValueError):
@@ -3299,6 +3546,13 @@ def build_document_due_candidates(
                 status = "past_due"
             else:
                 status = "ready"
+            document_text = text_by_document_id.get(document_id, "")
+            amount_due, amount_note = document_due_candidate_amount(
+                context=context,
+                document_text=document_text,
+                reminder=reminder,
+                due_type=due_type,
+            )
             current = {
                 "candidate_ref": document_due_candidate_reference(document_id, due_type, due_date.isoformat()),
                 "document_id": document_id,
@@ -3317,7 +3571,8 @@ def build_document_due_candidates(
                 "confidence": safe_text(str(row.get("confidence", "")))[:40],
                 "context": context,
                 "context_count": 1,
-                "amount_due": extract_amount_from_due_context(context),
+                "amount_due": amount_due,
+                "amount_note": amount_note,
                 "status": status,
                 "status_label": document_due_candidate_status_label(status),
                 "reminder_id": reminder_id,
@@ -3331,7 +3586,15 @@ def build_document_due_candidates(
         else:
             current["context_count"] = int(current.get("context_count", 1)) + 1
             if not current.get("amount_due"):
-                current["amount_due"] = extract_amount_from_due_context(context)
+                document_text = text_by_document_id.get(document_id, "")
+                amount_due, amount_note = document_due_candidate_amount(
+                    context=context,
+                    document_text=document_text,
+                    reminder=reminders_by_id.get(str(current.get("reminder_id", ""))),
+                    due_type=due_type,
+                )
+                current["amount_due"] = amount_due
+                current["amount_note"] = amount_note
 
     candidates = list(grouped.values())
     candidates.sort(
@@ -3438,7 +3701,10 @@ def enrich_document_due_reminder(*, reminder_id: str, candidate: dict[str, Any],
         reminder["related_asset"] = safe_text(str(candidate.get("related_asset", "")))[:180]
     if candidate.get("amount_due"):
         reminder["amount_due"] = safe_text(str(candidate.get("amount_due", "")))[:80]
-        reminder["amount_note"] = "Částka byla odhadnuta z krátkého kontextu termínu v dokumentu."
+        reminder["amount_note"] = (
+            safe_text(str(candidate.get("amount_note", "")))[:240]
+            or "Částka byla odhadnuta z krátkého kontextu termínu v dokumentu."
+        )
     reminder["document_ref"] = safe_text(str(candidate.get("document_ref", "")))[:80]
     reminder["due_date_type"] = safe_text(str(candidate.get("type", "")))[:80]
     write_reminders_store(store, path=reminders_path)
@@ -3490,6 +3756,29 @@ def document_due_candidate_notes(*, title: str, due_type: str, context: str) -> 
 def extract_amount_from_due_context(context: str) -> str:
     match = re.search(r"\b([0-9][0-9 ]{0,12}\s*K[čc])\b", context)
     return safe_text(match.group(1))[:80] if match else ""
+
+
+def document_due_candidate_amount(
+    *,
+    context: str,
+    document_text: str,
+    reminder: dict[str, Any] | None,
+    due_type: str,
+) -> tuple[str, str]:
+    if reminder is not None:
+        reminder_amount = safe_text(str(reminder.get("amount_due", "")))[:80]
+        if reminder_amount:
+            reminder_note = safe_text(str(reminder.get("amount_note", "")))[:240]
+            return reminder_amount, reminder_note or "Částka převzata z existující otevřené připomínky."
+    if due_type == "payment_due":
+        options = document_payment_options(document_text)
+        base_options = [item for item in options if "bez doplňkového MAXI" in item.get("label", "")]
+        optional_options = [item for item in options if "MAXI" in item.get("label", "") and item not in base_options]
+        if base_options and optional_options:
+            amount = safe_text(str(base_options[0].get("amount", "")))[:80]
+            if amount:
+                return amount, "Částka vybrána ze základní varianty; navýšená MAXI varianta je volitelný dodatek."
+    return extract_amount_from_due_context(context), ""
 
 
 def document_payment_options(text: str) -> list[dict[str, str]]:
@@ -6965,6 +7254,13 @@ COCKPIT_HTML = """<!doctype html>
     .dashboard-row { display: grid; grid-template-columns: minmax(92px, auto) minmax(0, 1fr); gap: 10px; align-items: start; font-size: 13px; }
     .dashboard-label { color: var(--muted); }
     .dashboard-value { overflow-wrap: anywhere; }
+    .dashboard-overall { border: 1px solid var(--line); border-radius: 8px; padding: 10px; display: grid; gap: 4px; background: #fbfcfe; }
+    .dashboard-overall-ok { border-color: #bbf7d0; background: #f0fdf4; }
+    .dashboard-overall-warn { border-color: #fde68a; background: #fffbeb; }
+    .dashboard-overall-bad { border-color: #fecaca; background: #fff4f2; }
+    .dashboard-overall-loading { border-color: #dbeafe; background: #eff6ff; }
+    .dashboard-overall-label { font-weight: 800; font-size: 15px; }
+    .dashboard-overall-reason { color: #344054; font-size: 12px; line-height: 1.35; overflow-wrap: anywhere; }
     .quick-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-content: start; }
     .quick-actions button { width: 100%; }
     .health-panel { border: 1px solid #cfd7e3; border-radius: 8px; background: #fbfcfe; padding: 10px 12px; display: grid; gap: 7px; }
@@ -7131,6 +7427,10 @@ COCKPIT_HTML = """<!doctype html>
       <section class="dashboard-card">
         <h2>Stav</h2>
         <div class="dashboard-body dashboard-list">
+          <div id="dashboardOverall" class="dashboard-overall dashboard-overall-loading">
+            <span id="dashboardOverallLabel" class="dashboard-overall-label">Načítám</span>
+            <span id="dashboardOverallReason" class="dashboard-overall-reason">Skládám hlavní a samostatně načítané kontroly.</span>
+          </div>
           <div class="dashboard-row"><span class="dashboard-label">ScanDocu</span><span id="dashboardScanDocu" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Reminders</span><span id="dashboardReminders" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Projekty</span><span id="dashboardProjects" class="dashboard-value"></span></div>
@@ -7316,13 +7616,16 @@ COCKPIT_HTML = """<!doctype html>
   <div id="projectsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="projectsTitle">
     <div class="modal">
       <div class="modal-header">
-        <h2 id="projectsTitle">Aktuální projekty</h2>
+        <h2 id="projectsTitle">Projekty a schopnosti</h2>
         <button class="secondary" id="projectsCloseBtn">Zavřít</button>
       </div>
       <div class="modal-body">
-        <div id="projectsStatus" class="status-line">Načítám projekty...</div>
-        <div class="project-toolbar" aria-label="Filtr projektů">
+        <div id="projectsStatus" class="status-line">Načítám projekty a schopnosti...</div>
+        <div class="project-toolbar" aria-label="Filtr projektů a schopností">
           <button class="secondary active" type="button" data-project-filter="all">Vše</button>
+          <button class="secondary" type="button" data-project-filter="projects">Projekty</button>
+          <button class="secondary" type="button" data-project-filter="tools">Tooly</button>
+          <button class="secondary" type="button" data-project-filter="infrastructure">Vrstvy</button>
           <button class="secondary" type="button" data-project-filter="priority1">Priorita 1</button>
           <button class="secondary" type="button" data-project-filter="remind">Připomenout</button>
           <button class="secondary" type="button" data-project-filter="waiting">Čeká na mě</button>
@@ -7506,6 +7809,9 @@ COCKPIT_HTML = """<!doctype html>
     const dashboardConsistency = document.getElementById("dashboardConsistency");
     const dashboardBackup = document.getElementById("dashboardBackup");
     const dashboardGit = document.getElementById("dashboardGit");
+    const dashboardOverall = document.getElementById("dashboardOverall");
+    const dashboardOverallLabel = document.getElementById("dashboardOverallLabel");
+    const dashboardOverallReason = document.getElementById("dashboardOverallReason");
     const dashboardProcessBtn = document.getElementById("dashboardProcessBtn");
     const dashboardReviewBtn = document.getElementById("dashboardReviewBtn");
     const dashboardTerminalBtn = document.getElementById("dashboardTerminalBtn");
@@ -7564,6 +7870,7 @@ COCKPIT_HTML = """<!doctype html>
     let currentQuantitative = null;
     let frontendLastError = "";
     let frontendErrorHistory = [];
+    let dashboardStatusSignals = {};
     const diagnosticsEndpoints = [
       ["Hlavní status", "/api/status"],
       ["Recovery", "/api/recovery/status"],
@@ -7590,6 +7897,17 @@ COCKPIT_HTML = """<!doctype html>
         ...frontendErrorHistory
       ].slice(0, 8);
       setHealthValue(frontendHealthError, text.slice(0, 220), "bad");
+    }
+
+    function clearFrontendErrorsMatching(matchText) {
+      if (!matchText) return;
+      frontendErrorHistory = frontendErrorHistory.filter((item) => !String(item.text || "").includes(matchText));
+      if (frontendLastError.includes(matchText)) {
+        frontendLastError = "";
+      }
+      if (!frontendLastError) {
+        setHealthValue(frontendHealthError, "žádná", "ok");
+      }
     }
 
     window.addEventListener("error", (event) => {
@@ -7818,6 +8136,7 @@ COCKPIT_HTML = """<!doctype html>
       } catch (err) {
         recordFrontendError(err);
         statusLine.textContent = `Chyba načtení: ${err}`;
+        setDashboardStatusSignal("main", "bad", `Hlavní status: ${err}`);
       } finally {
         refreshBtn.disabled = false;
         refreshInFlight = false;
@@ -8322,13 +8641,13 @@ COCKPIT_HTML = """<!doctype html>
       const domain = promptClassificationValue(
         "Oblast dokumentu",
         item.domain || "",
-        "Např. insurance, car, home, tax, energy, health, warranty, other."
+        "Např. insurance, car, home, tax, energy, employment, health, warranty, other."
       );
       if (domain === null) return;
       const documentType = promptClassificationValue(
         "Typ dokumentu",
         item.document_type || "",
-        "Např. insurance_policy, insurance_payment_notice, invoice, lease, green_card, email-attachment-pdf, tax-penzijni-generali, document."
+        "Např. insurance_policy, insurance_payment_notice, employment_contract, invoice, lease, green_card, email-attachment-pdf, tax-penzijni-generali, document."
       );
       if (documentType === null) return;
       const counterparty = promptClassificationValue("Protistrana", item.counterparty || "", "Kdo dokument vystavil nebo koho se smluvně týká.");
@@ -8564,6 +8883,7 @@ COCKPIT_HTML = """<!doctype html>
     }
 
 	    function renderDashboard(data) {
+      setDashboardStatusSignal("main", "ok", "Hlavní status načten");
       const work = data.document_work || {};
       const summary = work.summary || {};
       const review = work.review || {};
@@ -8574,6 +8894,14 @@ COCKPIT_HTML = """<!doctype html>
       todayReviewCount.textContent = String(reviewPending);
       todayProblemCount.textContent = String(problemTotal);
       todayHint.textContent = dashboardTodayHint(newCount, reviewPending, problemTotal);
+      const documentSignal = problemTotal > 0
+        ? {level: "warn", reason: `Dokumenty: ${problemTotal} problémů k ruční kontrole`}
+        : newCount > 0
+          ? {level: "warn", reason: `Dokumenty: ${newCount} nových PDF čeká na zpracování`}
+          : reviewPending > 0
+            ? {level: "warn", reason: `Dokumenty: ${reviewPending} uložených dokumentů čeká na revizi`}
+            : {level: "ok", reason: "Dokumentová fronta je klidná"};
+      setDashboardStatusSignal("documents", documentSignal.level, documentSignal.reason);
       dashboardActionHint.textContent = newCount > 0
         ? "Nejbližší akce: zpracovat další PDF přes ScanDocu."
         : reviewPending > 0
@@ -8584,6 +8912,11 @@ COCKPIT_HTML = """<!doctype html>
       dashboardScanDocu.innerHTML = scandocu.running
         ? `<span class="ok">běží</span> | ${scandocu.url || ""}`
         : `<span class="warn">neběží</span> | ${scandocu.url || ""}`;
+      setDashboardStatusSignal(
+        "scandocu",
+        "ok",
+        scandocu.running ? "ScanDocu běží" : "ScanDocu neběží; spustí se až při práci s PDF"
+      );
 
       const reminders = data.reminders || {};
       const reminderCounts = reminders.counts || {};
@@ -8593,21 +8926,56 @@ COCKPIT_HTML = """<!doctype html>
       const reminderClass = conflictReminders > 0 ? "bad" : activeReminders > 0 ? "warn" : openReminders > 0 ? "ok" : "ok";
       const conflictText = conflictReminders > 0 ? ` | <span class="bad">${conflictReminders} konflikt</span>` : "";
       dashboardReminders.innerHTML = `<span class="${reminderClass}">${activeReminders} aktivní</span> | ${openReminders} otevřené${conflictText}`;
+      setDashboardStatusSignal(
+        "reminders",
+        conflictReminders > 0 ? "bad" : activeReminders > 0 ? "warn" : "ok",
+        conflictReminders > 0
+          ? `Reminders: ${conflictReminders} konflikt`
+          : activeReminders > 0
+            ? `Reminders: ${activeReminders} aktivní připomenutí`
+            : "Reminders bez akutní akce"
+      );
 
-      dashboardProjects.innerHTML = `<span class="warn">načítám samostatně</span>`;
-      dashboardQuantitative.innerHTML = `<span class="warn">načítám samostatně</span>`;
-      dashboardConsistency.innerHTML = `<span class="warn">načítám samostatně</span>`;
+      setDashboardPendingIfEmpty(dashboardProjects, "načítám samostatně");
+      setDashboardPendingIfEmpty(dashboardQuantitative, "načítám samostatně");
+      setDashboardPendingIfEmpty(dashboardConsistency, "načítám samostatně");
+      if (dashboardValueIsPending(dashboardProjects)) {
+        setDashboardStatusSignal("projects", "loading", "Projekty se načítají samostatně");
+      }
+      if (dashboardValueIsPending(dashboardQuantitative)) {
+        setDashboardStatusSignal("quantitative", "loading", "Kvantitativní status se načítá samostatně");
+      }
+      if (dashboardValueIsPending(dashboardConsistency)) {
+        setDashboardStatusSignal("consistency", "loading", "Audit se načítá samostatně");
+      }
 
       const backupState = classifyBackup(data.backup || "");
       dashboardBackup.innerHTML = `<span class="${backupState.className}">${backupState.label}</span>`;
+      setDashboardStatusSignal(
+        "backup",
+        backupState.className === "ok" ? "ok" : "warn",
+        `Záloha: ${backupState.label}`
+      );
 
       const git = data.git || {};
       if (!git.ok) {
         dashboardGit.innerHTML = `<span class="warn">nelze zjistit</span>`;
+        setDashboardStatusSignal("git", "warn", "Git: nelze zjistit stav");
       } else {
         const gitClass = git.dirty_count ? "warn" : "ok";
         const sync = git.ahead ? " | čeká push" : git.behind ? " | čeká pull" : "";
         dashboardGit.innerHTML = `<span class="${gitClass}">${git.message || ""}</span>${sync}<br>${git.branch || ""}`;
+        setDashboardStatusSignal(
+          "git",
+          git.dirty_count || git.ahead || git.behind ? "warn" : "ok",
+          git.dirty_count
+            ? `Git: ${git.message || `${git.dirty_count} změn v pracovní kopii`}`
+            : git.ahead
+              ? "Git: lokální změny čekají na push"
+              : git.behind
+                ? "Git: vzdálené změny čekají na pull"
+                : "Git je synchronizovaný"
+        );
 	      }
 	    }
 
@@ -8678,10 +9046,114 @@ COCKPIT_HTML = """<!doctype html>
 	      return button;
 	    }
 
-	    function renderConsistencyAudit(consistency) {
+    function renderConsistencyAudit(consistency) {
       const node = document.getElementById("consistencyText");
       if (!node) return;
       node.textContent = consistency.summary_text || "";
+    }
+
+    function setDashboardPendingIfEmpty(node, text) {
+      if (!node || node.textContent.trim()) return;
+      node.innerHTML = `<span class="warn">${escapeDashboardHtml(text || "načítám...")}</span>`;
+    }
+
+    function dashboardValueIsPending(node) {
+      const text = String(node && node.textContent || "").trim().toLocaleLowerCase("cs-CZ");
+      return !text || text.includes("načítám");
+    }
+
+    function dashboardStatusRank(level) {
+      if (level === "bad") return 4;
+      if (level === "warn") return 3;
+      if (level === "loading") return 2;
+      if (level === "ok") return 1;
+      return 0;
+    }
+
+    function dashboardStatusPriority(key) {
+      const priorities = {
+        main: 100,
+        consistency: 90,
+        documents: 80,
+        reminders: 70,
+        backup: 60,
+        git: 50,
+        projects: 40,
+        quantitative: 30,
+        scandocu: 10
+      };
+      return priorities[key] || 0;
+    }
+
+    function setDashboardStatusSignal(key, level, reason) {
+      if (!key) return;
+      dashboardStatusSignals = {
+        ...dashboardStatusSignals,
+        [key]: {key, level: level || "ok", reason: reason || ""}
+      };
+      updateDashboardOverallStatus();
+    }
+
+    function updateDashboardOverallStatus() {
+      if (!dashboardOverall || !dashboardOverallLabel || !dashboardOverallReason) return;
+      const signals = Object.values(dashboardStatusSignals).filter(Boolean);
+      if (!signals.length) {
+        dashboardOverall.className = "dashboard-overall dashboard-overall-loading";
+        dashboardOverallLabel.textContent = "Načítám";
+        dashboardOverallReason.textContent = "Skládám hlavní a samostatně načítané kontroly.";
+        return;
+      }
+      const sorted = signals.slice().sort((a, b) => {
+        const rankDiff = dashboardStatusRank(b.level) - dashboardStatusRank(a.level);
+        if (rankDiff) return rankDiff;
+        return dashboardStatusPriority(b.key) - dashboardStatusPriority(a.key);
+      });
+      const worst = sorted[0] || {level: "loading"};
+      const actionSignals = sorted.filter((item) => item.level === "bad" || item.level === "warn");
+      const loadingSignals = sorted.filter((item) => item.level === "loading");
+      let level = "ok";
+      let label = "V pořádku";
+      let reasons = ["Hlavní kontroly jsou bez zásahu."];
+      if (worst.level === "bad") {
+        level = "bad";
+        label = "Akce potřeba";
+        reasons = actionSignals;
+      } else if (worst.level === "warn") {
+        level = "warn";
+        label = "Pozor";
+        reasons = actionSignals;
+      } else if (worst.level === "loading") {
+        level = "loading";
+        label = "Načítám detail";
+        reasons = loadingSignals;
+      }
+      dashboardOverall.className = `dashboard-overall dashboard-overall-${level}`;
+      dashboardOverallLabel.textContent = label;
+      dashboardOverallReason.textContent = Array.isArray(reasons)
+        ? reasons.map((item) => item.reason || "").filter(Boolean).slice(0, 3).join(" | ")
+        : String(reasons || "");
+    }
+
+    function escapeDashboardHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function consistencyDashboardSummary(consistency) {
+      if (!consistency || consistency.ok === false) return "nelze zjistit";
+      const findingCount = Number(consistency.finding_count || 0);
+      if (!findingCount) return "0 nálezů";
+      const severityCounts = consistency.severity_counts || {};
+      const severity = severityCounts.critical ? "kritické" : severityCounts.warning ? "varování" : "info";
+      const findings = Array.isArray(consistency.findings) ? consistency.findings : [];
+      const first = findings[0] || {};
+      const title = String(first.title || first.message || "detail je v auditním okně");
+      const compactTitle = title.length > 90 ? `${title.slice(0, 87)}...` : title;
+      return `${findingCount} ${severity}: ${compactTitle}`;
     }
 
     async function fetchJson(url) {
@@ -8695,26 +9167,37 @@ COCKPIT_HTML = """<!doctype html>
     }
 
     async function refreshProjectsSummary() {
-      dashboardProjects.innerHTML = `<span class="warn">načítám...</span>`;
+      setDashboardPendingIfEmpty(dashboardProjects, "načítám...");
       try {
         const res = await fetch("/api/projects/status");
         const projects = await res.json();
         const projectSummary = projects.summary || {};
+        const catalogSummary = projects.catalog_summary || {};
         const priorityCounts = projectSummary.priority_counts || {};
         const flagCounts = projectSummary.flag_counts || {};
         const priorityOne = (priorityCounts["1"] || 0) + (priorityCounts["A1+"] || 0);
         const remindCount = flagCounts["připomenout"] || 0;
         dashboardProjects.innerHTML = projects.ok === false
           ? `<span class="warn">nelze načíst</span>`
-          : `<span class="${priorityOne > 0 ? "warn" : "ok"}">${priorityOne} priorita 1</span> | ${projectSummary.total || 0} celkem${remindCount ? ` | ${remindCount} připomenout` : ""}`;
+          : `<span class="${priorityOne > 0 ? "warn" : "ok"}">${priorityOne} priorita 1</span> | ${projectSummary.total || 0} projektů | ${catalogSummary.tools || 0} toolů | ${catalogSummary.infrastructure_capabilities || 0} vrstev${remindCount ? ` | ${remindCount} připomenout` : ""}`;
+        setDashboardStatusSignal(
+          "projects",
+          projects.ok === false ? "warn" : remindCount > 0 ? "warn" : "ok",
+          projects.ok === false
+            ? "Projekty: nelze načíst"
+            : remindCount > 0
+              ? `Projekty: ${remindCount} připomenout`
+              : "Projekty bez samostatného varování"
+        );
       } catch (err) {
         recordFrontendError(err);
         dashboardProjects.innerHTML = `<span class="warn">chyba načtení</span>`;
+        setDashboardStatusSignal("projects", "warn", `Projekty: chyba načtení (${err})`);
       }
     }
 
     async function refreshQuantitativeSummary() {
-      dashboardQuantitative.innerHTML = `<span class="warn">načítám...</span>`;
+      setDashboardPendingIfEmpty(dashboardQuantitative, "načítám...");
       try {
         const quantitative = await fetchJson("/api/quantitative-status");
         const quantitativeCurrentSummary = quantitative.current || {};
@@ -8724,14 +9207,20 @@ COCKPIT_HTML = """<!doctype html>
         dashboardQuantitative.innerHTML = quantitative.ok === false
           ? `<span class="warn">nelze zjistit</span>`
           : `<span class="ok">${quantitativeLocalTotals.files || 0} souborů</span> | ${quantitativeLocalTotals.lines || 0} lokálních řádků | git ${quantitativeGitTotals.lines || 0} řádků`;
+        setDashboardStatusSignal(
+          "quantitative",
+          quantitative.ok === false ? "warn" : "ok",
+          quantitative.ok === false ? "Kvantitativní status: nelze zjistit" : "Kvantitativní status načten"
+        );
       } catch (err) {
         recordFrontendError(err);
         dashboardQuantitative.innerHTML = `<span class="warn">chyba načtení</span>`;
+        setDashboardStatusSignal("quantitative", "warn", `Kvantitativní status: chyba načtení (${err})`);
       }
     }
 
     async function refreshConsistencySummary() {
-      dashboardConsistency.innerHTML = `<span class="warn">načítám...</span>`;
+      setDashboardPendingIfEmpty(dashboardConsistency, "načítám...");
       renderConsistencyAudit({summary_text: "Načítám consistency audit samostatně..."});
       try {
         const consistency = await fetchJson("/api/consistency-status");
@@ -8742,11 +9231,18 @@ COCKPIT_HTML = """<!doctype html>
         const auditClass = criticalFindings > 0 ? "bad" : warningFindings > 0 ? "warn" : "ok";
         dashboardConsistency.innerHTML = consistency.ok === false
           ? `<span class="warn">nelze zjistit</span>`
-          : `<span class="${auditClass}">${findingCount} nálezů</span>`;
+          : `<span class="${auditClass}">${escapeDashboardHtml(consistencyDashboardSummary(consistency))}</span>`;
+        setDashboardStatusSignal(
+          "consistency",
+          consistency.ok === false ? "warn" : criticalFindings > 0 ? "bad" : warningFindings > 0 ? "warn" : "ok",
+          consistency.ok === false ? "Audit: nelze zjistit" : `Audit: ${consistencyDashboardSummary(consistency)}`
+        );
         renderConsistencyAudit(consistency || {});
+        clearFrontendErrorsMatching("escapeHtml");
       } catch (err) {
         recordFrontendError(err);
         dashboardConsistency.innerHTML = `<span class="warn">chyba načtení</span>`;
+        setDashboardStatusSignal("consistency", "warn", `Audit: chyba načtení (${err})`);
         renderConsistencyAudit({summary_text: `Chyba načtení consistency auditu: ${err}`});
       }
     }
@@ -8894,6 +9390,16 @@ COCKPIT_HTML = """<!doctype html>
       }
       if (lower.includes("posledni uspesna") || lower.includes("poslední úspěšná")) {
         return {label: "záloha evidovaná", className: "ok"};
+      }
+      if (
+        lower.includes("v 3dennim intervalu")
+        || lower.includes("v 3denním intervalu")
+        || lower.includes("posledni zaloha je v 3dennim intervalu")
+        || lower.includes("poslední záloha je v 3denním intervalu")
+        || lower.includes("v poradku")
+        || lower.includes("v pořádku")
+      ) {
+        return {label: "v pořádku", className: "ok"};
       }
       return {label: "zkontrolovat", className: "warn"};
     }
@@ -9239,22 +9745,23 @@ COCKPIT_HTML = """<!doctype html>
 
     async function openProjectsModal() {
       projectsModal.classList.remove("hidden");
-      projectsStatus.textContent = "Načítám projekty...";
+      projectsStatus.textContent = "Načítám projekty a schopnosti...";
       projectsList.innerHTML = "";
       try {
         const res = await fetch("/api/projects/status");
         const data = await res.json();
-        currentProjects = data.projects || [];
+        currentProjects = data.items || data.projects || [];
         renderProjects(currentProjects, currentProjectFilter);
         const summary = data.summary || {};
+        const catalogSummary = data.catalog_summary || {};
         const flags = summary.flag_counts || {};
         const remind = flags["připomenout"] || 0;
         projectsStatus.textContent = data.ok
-          ? `${summary.total || 0} projektů v registru${remind ? `; ${remind} připomenout.` : "."}`
+          ? `${catalogSummary.projects || summary.total || 0} projektů, ${catalogSummary.tools || 0} toolů, ${catalogSummary.infrastructure_capabilities || 0} infrastrukturních vrstev${remind ? `; ${remind} připomenout.` : "."}`
           : (data.message || "Projekty nejdou načíst.");
       } catch (err) {
         recordFrontendError(err);
-        projectsStatus.textContent = `Chyba načtení projektů: ${err}`;
+        projectsStatus.textContent = `Chyba načtení projektů a schopností: ${err}`;
       }
     }
 
@@ -9548,6 +10055,10 @@ COCKPIT_HTML = """<!doctype html>
       const priority = String(project.priority || "");
       const flags = project.flags || [];
       const haystack = `${project.status || ""} ${project.next_step || ""}`.toLocaleLowerCase("cs-CZ");
+      const category = project.category || "project";
+      if (filter === "projects") return category === "project";
+      if (filter === "tools") return category === "tool";
+      if (filter === "infrastructure") return category === "infrastructure";
       if (filter === "priority1") return priority === "1" || priority === "A1+";
       if (filter === "remind") return flags.includes("připomenout");
       if (filter === "waiting") {
@@ -9571,7 +10082,7 @@ COCKPIT_HTML = """<!doctype html>
       if (!filtered.length) {
         const empty = document.createElement("div");
         empty.className = "status-line";
-        empty.textContent = "Žádný projekt pro tento filtr.";
+        empty.textContent = "Žádná položka pro tento filtr.";
         projectsList.appendChild(empty);
         return;
       }
@@ -9582,20 +10093,31 @@ COCKPIT_HTML = """<!doctype html>
         head.className = "project-head";
         const title = document.createElement("div");
         title.className = "project-title";
-        title.textContent = project.name || "Projekt bez názvu";
+        title.textContent = project.name || "Položka bez názvu";
         const priority = document.createElement("span");
         priority.className = "project-priority";
-        priority.textContent = `P ${project.priority || "?"}`;
+        priority.textContent = project.priority
+          ? `P ${project.priority}`
+          : (project.level || project.category_label || project.category || "?");
         head.appendChild(title);
         head.appendChild(priority);
         const status = document.createElement("div");
         status.className = "project-meta";
-        status.textContent = project.status || "";
+        status.textContent = project.summary || project.status || "";
         const next = document.createElement("div");
         next.className = "project-next";
-        next.textContent = project.next_step ? `Další krok: ${project.next_step}` : "Další krok není uveden.";
+        const nextLabel = project.category === "tool"
+          ? "Bezpečnostní rozsah"
+          : project.category === "infrastructure"
+            ? "Pomáhá"
+            : "Další krok";
+        next.textContent = project.next_step ? `${nextLabel}: ${project.next_step}` : `${nextLabel} není uveden.`;
         const flags = document.createElement("div");
         flags.className = "project-flags";
+        const categoryFlag = document.createElement("span");
+        categoryFlag.className = "project-flag";
+        categoryFlag.textContent = project.category_label || project.category || "Project";
+        flags.appendChild(categoryFlag);
         (project.flags || []).forEach((flag) => {
           const node = document.createElement("span");
           node.className = "project-flag";
@@ -9608,10 +10130,10 @@ COCKPIT_HTML = """<!doctype html>
         toggle.textContent = "Detail";
         const detail = document.createElement("div");
         detail.className = "project-detail hidden";
-        appendProjectDetail(detail, "Memory", project.memory_file || "");
-        appendProjectDetail(detail, "Handoff", project.handoff || "");
-        appendProjectDetail(detail, "Stav", project.status || "");
-        appendProjectDetail(detail, "Další krok", project.next_step || "");
+        appendProjectDetail(detail, "Naposledy práce", project.last_worked || "");
+        (project.detail_fields || []).forEach((field) => {
+          appendProjectDetail(detail, field.label || "", field.value || "");
+        });
         toggle.addEventListener("click", () => {
           const hidden = detail.classList.toggle("hidden");
           toggle.textContent = hidden ? "Detail" : "Sbalit";

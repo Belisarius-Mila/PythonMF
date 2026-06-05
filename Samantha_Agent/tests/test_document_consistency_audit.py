@@ -12,7 +12,7 @@ from app.documents.consistency_audit import (
 
 
 class DocumentConsistencyAuditTests(unittest.TestCase):
-    def test_audit_reports_duplicate_reminders_parallel_policies_and_payment_options(self) -> None:
+    def test_audit_reports_duplicate_reminders_and_parallel_policies_without_resolved_option_noise(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
             vault = root / "documents"
@@ -87,11 +87,55 @@ class DocumentConsistencyAuditTests(unittest.TestCase):
             self.assertEqual(result["severity_counts"]["critical"], 1)
             self.assertIn("duplicate_open_payment_reminders", codes)
             self.assertIn("parallel_policy_paths_same_asset", codes)
-            self.assertIn("multiple_payment_options_in_document", codes)
+            self.assertNotIn("multiple_payment_options_in_document", codes)
             formatted = format_document_consistency_audit(result)
             self.assertIn("VOLVO V40 SPZ 4SN8981", formatted)
             self.assertIn("4 512 Kč", formatted)
             self.assertIn("4 956 Kč", formatted)
+
+    def test_audit_reports_payment_options_when_no_base_amount_reminder_resolves_them(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            index = vault / "index"
+            index.mkdir(parents=True)
+            reminders_path = root / "reminders.json"
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "cpp-predpis-pojistne-smlouvy-3270612451-2026",
+                        "document_type": "insurance_payment_notice",
+                        "domain": "insurance",
+                        "counterparty": "ČPP",
+                        "related_asset": "auto VOLVO V40 CROSS COUNTRY SPZ 4SN8981",
+                        "tags": ["auto", "pojisteni"],
+                    },
+                ],
+            )
+            self.write_jsonl(
+                index / "text_index.jsonl",
+                [
+                    {
+                        "document_id": "cpp-predpis-pojistne-smlouvy-3270612451-2026",
+                        "text": (
+                            "Období: 1. 8. 2026 - 31. 7. 2027. "
+                            "RZ / VIN: 4SN 8981 / YV1MV79L1G2335020. "
+                            "Vaše nově předepsané pojistné činí 4 512 Kč/ ročně. "
+                            "Roční pojistné za doplňkové pojištění nákladů na nájem "
+                            "náhradního vozidla MAXI: 499 Kč. "
+                            "Pojistné za pojistné období (navýšené o doplňkové "
+                            "pojištění nákladů na nájem náhradního vozidla MAXI): 5 011 Kč."
+                        ),
+                    },
+                ],
+            )
+            reminders_path.write_text(json.dumps({"reminders": []}), encoding="utf-8")
+
+            result = run_document_consistency_audit(vault_dir=vault, reminders_path=reminders_path)
+            codes = [item["code"] for item in result["findings"]]
+
+            self.assertIn("multiple_payment_options_in_document", codes)
 
     @staticmethod
     def write_jsonl(path: Path, rows: list[dict[str, object]]) -> None:

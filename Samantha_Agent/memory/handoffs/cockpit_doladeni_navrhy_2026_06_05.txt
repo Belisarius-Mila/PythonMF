@@ -1,0 +1,68 @@
+Cockpit - navrhy na doladeni
+Datum: 2026-06-05
+
+Kontext:
+- Cockpit uz ma semafor, diagnostiku, akcni frontu, restart, dokumentove cases a audit.
+- Cilem dalsiho ladeni je snizit potrebu ptat se "proc to ukazuje..." a udelat stav akcnejsi.
+- Cockpit ma rikat nejen "je problem", ale i "co presne znamena" a "co mam ted udelat".
+
+Navrhy:
+
+1. Vysvetlit stav jednim klikem
+- U hlavniho semaforu a sekundarnich karet pridat detail: co je OK, co je varovani, co se nacita, co je posledni chyba.
+- Detail ma byt diagnosticky, ale bez vypisovani citlivych dat.
+
+2. Pravidla pro potlaceni vyresenych varovani
+- Audit by mel rozlisit skutecny nalez od uz vyresene situace.
+- Pokud existuje potvrzena pripominka nebo rucni rozhodnuti, muze se nalez oznacit jako vyreseny/potlaceny.
+- Priklad: CPP MAXI varianta je volitelny doplnek, plati se zakladni varianta.
+
+3. Stav "co mam ted udelat"
+- Z kazdeho varovani vyrobit konkretni doporucenou akci.
+- Pokud akce neni potreba, jasne zobrazit "nic ted".
+
+4. Cas posledni aktualizace kazde sekundarni karty
+- Projekty, Kvantitativni, Audit, QN a Zaloha by mely ukazovat, kdy se naposledy nacetly.
+- To zabrani dojmu, ze hodnoty nahodne mizi nebo se nacitaji jinde.
+
+5. QN jako skutecny inbox v Cockpitu
+- Videt posledni QN, aktivni QN, detail a navrzenou klasifikaci.
+- System muze navrhnout dalsi krok, ale bez tichych akci.
+- U citlivych poznamek zobrazit jen bezpecny souhrn.
+
+6. Dokumentovy case detail v2.1
+- U dokumentoveho case ukazat, proc je zdravy nebo nezdravy.
+- Detail by mel obsahovat terminy, vyresene konflikty, otevrene pripominky a zdroj rozhodnuti.
+
+7. Auditni rozhodnuti ulozena lokalne
+- Rucni rozhodnuti typu "toto je OK" ulozit jako lokalni private audit metadata, ne do gitu.
+- Varovani se pak nemusi vracet, ale zustane dohledatelne.
+
+8. Lepsi git/pracovni strom karta
+- Rozlisit aktualni rozpracovane zmeny, cizi rozpracovane soubory a private data.
+- Navrhnout tematicky commit jen pro cast, ktera je bezpecna pro git.
+
+9. UI pro "stale nejasne"
+- Kdyz system nevi, ukazat presne co chybi: metadata, rucni rozhodnuti, zdroj, pripominka nebo selhane nacitani.
+- Vyhnout se obecnemu "varovani" bez vysvetleni.
+
+10. Maly retest panel po restartu
+- Po restartu ukazat rychly stav: frontend OK, API OK, audit OK, dokumenty OK.
+- Pokud neco selze, zobrazit posledni chybu a konkretni endpoint.
+
+Doporucene poradi:
+1. QN inbox/detail v Cockpitu.
+2. Vyresena/potlacena auditni rozhodnuti.
+3. Detail "proc je semafor v tomto stavu".
+4. Dokumentovy case health detail.
+5. Lepsi karta pracovního stromu a git-safe navrhy commitu.
+
+Dodatek po precteni QN #37 z 2026-06-05:
+- QN #37 rika, ze Cockpit potrebuje prehledne stavove okno pro vsechny projekty.
+- U kazde polozky ma byt: co projekt dela, soucasny stav, priorita, problemy,
+  dalsi krok a kdy se na nem naposledy pracovalo.
+- Vedle projektu maji byt videt take tooly a treti kategorie, kterou uz mame
+  v pameti pojmenovanou jako `Infrastructure capability`.
+- Prakticky to znamena rozsirit dnesni okno `Projekty`, ktere uz existuje,
+  z pouheho prehledu `ACTIVE_PROJECTS.md` na provozni mapu:
+  `Project` / `Tool` / `Infrastructure capability`.
