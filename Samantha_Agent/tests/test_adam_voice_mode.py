@@ -237,6 +237,7 @@ class AdamVoiceModeTests(unittest.TestCase):
     def test_voice_command_needs_codex_work_keeps_greetings_direct(self) -> None:
         self.assertFalse(voice_command_needs_codex_work("Janička přijela a zdraví tě. Co jí řekneš?"))
         self.assertTrue(voice_command_needs_codex_work("Najdi stav dokumentů v Cockpitu."))
+        self.assertTrue(voice_command_needs_codex_work("Adame, napiš stručně stav hlasového brydže."))
 
     def test_load_voice_mode_status_reports_missing_watcher(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

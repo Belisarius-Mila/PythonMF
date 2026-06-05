@@ -324,6 +324,12 @@ def voice_command_needs_codex_work(text: str) -> bool:
     work_terms = (
         "najdi",
         "dohled",
+        "napiš",
+        "napis",
+        "shrň",
+        "shrn",
+        "ukaž",
+        "ukaz",
         "zobraz",
         "otevři",
         "otevri",
@@ -349,6 +355,13 @@ def voice_command_needs_codex_work(text: str) -> bool:
         "scan",
         "soubor",
         "test",
+        "codex",
+        "terminál",
+        "terminal",
+        "hlasov",
+        "bridge",
+        "brydž",
+        "brydz",
     )
     conversational_terms = (
         "co jí řekneš",
