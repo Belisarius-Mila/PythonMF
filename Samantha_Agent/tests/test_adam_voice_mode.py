@@ -122,6 +122,60 @@ class AdamVoiceModeTests(unittest.TestCase):
         self.assertEqual(pending["reason"], "codex_work")
         self.assertEqual(pending["text"], "Adame, najdi stav dokumentů v Cockpitu.")
 
+    def test_build_spoken_result_can_route_safe_codex_work_to_terminal_bridge(self) -> None:
+        calls = []
+
+        def fake_terminal_bridge(command):
+            calls.append(command.text)
+            return {"ok": True, "status": "delivered"}
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            inbox = Path(temp_dir)
+            latest = inbox / "latest_voice_command.md"
+            pending_path = inbox / "pending_for_adam.json"
+            history_path = inbox / "adam_voice_history.jsonl"
+            write_voice_command(latest, "Kolik jsme dnes napsali řádků kódu?")
+            command = load_latest_voice_command(inbox_dir=inbox)
+
+            response = build_spoken_result_for_command(
+                command,
+                response_generator=lambda text: self.fail("work command should not call direct responder"),
+                pending_path=pending_path,
+                history_path=history_path,
+                terminal_bridge=fake_terminal_bridge,
+            )
+            history = load_voice_history(path=history_path, limit=2)
+
+        self.assertEqual(calls, ["Kolik jsme dnes napsali řádků kódu?"])
+        self.assertIn("vložil do Codex terminálu", response)
+        self.assertFalse(pending_path.exists())
+        self.assertEqual(history[0]["route"], "terminal_bridge")
+
+    def test_build_spoken_result_saves_pending_when_terminal_bridge_rejects(self) -> None:
+        def fake_terminal_bridge(command):
+            return {"ok": False, "status": "manual_required", "reason": "Změnový pokyn."}
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            inbox = Path(temp_dir)
+            latest = inbox / "latest_voice_command.md"
+            pending_path = inbox / "pending_for_adam.json"
+            history_path = inbox / "adam_voice_history.jsonl"
+            write_voice_command(latest, "Najdi stav Cockpitu.")
+            command = load_latest_voice_command(inbox_dir=inbox)
+
+            response = build_spoken_result_for_command(
+                command,
+                response_generator=lambda text: self.fail("work command should not call direct responder"),
+                pending_path=pending_path,
+                history_path=history_path,
+                terminal_bridge=fake_terminal_bridge,
+            )
+            pending = json.loads(pending_path.read_text(encoding="utf-8"))
+
+        self.assertIn("nevložil do terminálu", response)
+        self.assertTrue(pending["pending"])
+        self.assertEqual(pending["reason"], "manual_required")
+
     def test_handle_voice_command_saves_codex_work_as_pending_for_adam(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             inbox = Path(temp_dir)

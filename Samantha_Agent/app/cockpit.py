@@ -5970,6 +5970,7 @@ def start_adam_voice_mode_action(
     *,
     launcher: Callable[..., object] | None = None,
     log_file: Path = ADAM_VOICE_MODE_LOG_FILE,
+    terminal_bridge: bool | None = None,
 ) -> dict[str, Any]:
     current = load_voice_mode_status()
     if current.get("running"):
@@ -5988,6 +5989,13 @@ def start_adam_voice_mode_action(
         "--poll",
         "0.5",
     ]
+    bridge_enabled = (
+        os.environ.get("ADAM_VOICE_TERMINAL_BRIDGE", "").strip().lower() in {"1", "true", "yes", "ano"}
+        if terminal_bridge is None
+        else terminal_bridge
+    )
+    if bridge_enabled:
+        command_args.append("--terminal-bridge")
     starter = launcher or subprocess.Popen
     try:
         process = starter(
@@ -6017,6 +6025,7 @@ def start_adam_voice_mode_action(
         "message": "Adam Voice Mode watcher spuštěn. Teď můžeš nahrávat hlasové pokyny.",
         "pid": pid,
         "log": str(relative_to_project(log_file)),
+        "terminal_bridge": bridge_enabled,
         "voice_mode": load_voice_mode_status(stale_after_seconds=60.0),
     }
 

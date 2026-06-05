@@ -12,6 +12,7 @@ from agents import Agent, Runner
 from dotenv import load_dotenv
 
 from app.speech.report import speak_report
+from app.speech.terminal_bridge import deliver_voice_command_to_terminal
 from app.speech.voice_inbox import (
     VOICE_COMMAND_INBOX_DIR,
     VoiceCommand,
@@ -409,6 +410,7 @@ def build_spoken_result_for_command(
     response_generator: Callable[..., str] = generate_direct_voice_response,
     pending_path: Path | None = ADAM_PENDING_COMMAND_PATH,
     history_path: Path = ADAM_VOICE_HISTORY_PATH,
+    terminal_bridge: Callable[[VoiceCommand], dict[str, Any]] | None = None,
 ) -> str:
     triage = command.triage
     text = command.text.strip()
@@ -428,6 +430,28 @@ def build_spoken_result_for_command(
         append_voice_history_turn(command, adam_response=message, route=pending_reason, path=history_path)
         return message
     if pending_reason == "codex_work":
+        if terminal_bridge is not None:
+            bridge_result = terminal_bridge(command)
+            if bridge_result.get("ok"):
+                message = "Pokyn jsem vložil do Codex terminálu. Adam ho převezme přímo tam."
+                append_voice_history_turn(command, adam_response=message, route="terminal_bridge", path=history_path)
+                return message
+            bridge_status = str(bridge_result.get("status") or "terminal_bridge_failed")
+            bridge_reason = str(bridge_result.get("reason") or bridge_result.get("message") or "Terminálový bridge pokyn nepřevzal.")
+            message = (
+                "Pokyn jsem kvůli bezpečnosti nebo technické chybě nevložil do terminálu. "
+                "Zadej ho prosím přesně ručně v Codex terminálu."
+            )
+            if pending_path is not None:
+                save_pending_for_adam(
+                    command,
+                    reason=bridge_status,
+                    message=f"{message} Důvod: {bridge_reason}",
+                    path=pending_path,
+                    history_path=history_path,
+                )
+            append_voice_history_turn(command, adam_response=message, route=bridge_status, path=history_path)
+            return message
         message = "Pokyn jsem přijal. Tohle vyžaduje pracovní převzetí Adamem v Codexu, takže ho nechávám připravený v hlasovém inboxu."
         if pending_path is not None:
             save_pending_for_adam(
@@ -469,6 +493,7 @@ def handle_voice_command(
     status_path: Path = ADAM_VOICE_MODE_STATUS_PATH,
     pending_path: Path | None = ADAM_PENDING_COMMAND_PATH,
     history_path: Path = ADAM_VOICE_HISTORY_PATH,
+    terminal_bridge: Callable[[VoiceCommand], dict[str, Any]] | None = None,
     started_at: str | None = None,
 ) -> dict[str, Any]:
     spoken_result = build_spoken_result_for_command(
@@ -476,6 +501,7 @@ def handle_voice_command(
         response_generator=response_generator,
         pending_path=pending_path,
         history_path=history_path,
+        terminal_bridge=terminal_bridge,
     )
     speech_result = {"ok": True, "message": "Hlasové oznámení vypnuté.", "transport": "disabled"}
     if should_speak:
@@ -511,16 +537,22 @@ def run_voice_mode(
     poll_seconds: float = 1.0,
     count: int = 0,
     should_speak: bool = True,
+    terminal_bridge_enabled: bool = False,
+    terminal_bridge_submit: bool = True,
     printer: Callable[[str], None] = print,
 ) -> int:
     started_at = utc_now()
     seen = 0
     since_signature = latest_voice_command_signature(inbox_dir=inbox_dir) if since_now else None
     deadline = time.monotonic() + timeout_seconds if timeout_seconds > 0 else None
+    listening_message = (
+        "Adam Voice Mode poslouchá nové hlasové pokyny."
+        + (" Terminálový bridge je zapnutý." if terminal_bridge_enabled else "")
+    )
     write_voice_mode_status(
         status_path=status_path,
         state="listening",
-        message="Adam Voice Mode poslouchá nové hlasové pokyny.",
+        message=listening_message,
         started_at=started_at,
     )
     try:
@@ -543,7 +575,7 @@ def run_voice_mode(
                 write_voice_mode_status(
                     status_path=status_path,
                     state="listening",
-                    message="Adam Voice Mode poslouchá nové hlasové pokyny.",
+                    message=listening_message,
                     started_at=started_at,
                 )
                 continue
@@ -554,6 +586,11 @@ def run_voice_mode(
                 status_path=status_path,
                 pending_path=pending_path,
                 history_path=history_path,
+                terminal_bridge=(
+                    (lambda current_command: deliver_voice_command_to_terminal(current_command, submit=terminal_bridge_submit))
+                    if terminal_bridge_enabled
+                    else None
+                ),
                 started_at=started_at,
             )
             printer(format_voice_command_for_adam(command))
@@ -593,6 +630,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--poll", type=float, default=1.0, help="Interval kontroly v sekundách.")
     parser.add_argument("--count", type=int, default=0, help="Počet nových pokynů před ukončením. 0 znamená bez limitu.")
     parser.add_argument("--no-speak", action="store_true", help="Nevyslovovat oznámení nahlas.")
+    parser.add_argument("--terminal-bridge", action="store_true", help="Bezpečné pracovní pokyny vložit do aktivního Codex terminálu.")
+    parser.add_argument("--terminal-bridge-no-submit", action="store_true", help="Prompt do terminálu jen vložit, neodesílat Enterem.")
     return parser
 
 
@@ -608,6 +647,8 @@ def main(argv: list[str] | None = None) -> int:
         poll_seconds=args.poll,
         count=args.count,
         should_speak=not args.no_speak,
+        terminal_bridge_enabled=args.terminal_bridge,
+        terminal_bridge_submit=not args.terminal_bridge_no_submit,
     )
 
 
