@@ -55,10 +55,10 @@ def decode_audio_base64(audio_base64: str, *, max_bytes: int = MAX_AUDIO_BYTES) 
     return data
 
 
-def openai_api_key_available() -> bool:
+def openai_api_key_available(env_path: Path | str | None = None) -> bool:
     if os.environ.get("OPENAI_API_KEY"):
         return True
-    load_dotenv(PROJECT_ROOT / ".env")
+    load_dotenv(env_path or PROJECT_ROOT / ".env", override=True)
     return bool(os.environ.get("OPENAI_API_KEY"))
 
 

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import base64
+import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 from types import SimpleNamespace
 
 from app.speech.transcribe import (
@@ -11,6 +13,7 @@ from app.speech.transcribe import (
     TranscriptionError,
     decode_audio_base64,
     normalize_mime_type,
+    openai_api_key_available,
     transcribe_audio_base64,
     transcribe_audio_bytes,
 )
@@ -49,6 +52,14 @@ class SpeechTranscribeTests(unittest.TestCase):
         self.assertEqual(normalize_mime_type("audio/mp4"), "audio/mp4")
         with self.assertRaises(TranscriptionError):
             normalize_mime_type("text/plain")
+
+    def test_openai_api_key_available_reloads_empty_env_from_dotenv(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            env_path = Path(temp_dir) / ".env"
+            env_path.write_text("OPENAI_API_KEY=test-key-from-dotenv\n", encoding="utf-8")
+            with patch.dict(os.environ, {"OPENAI_API_KEY": ""}, clear=False):
+                self.assertTrue(openai_api_key_available(env_path=env_path))
+                self.assertEqual(os.environ["OPENAI_API_KEY"], "test-key-from-dotenv")
 
     def test_transcribe_audio_bytes_uses_openai_client_and_deletes_temp_file(self) -> None:
         client = FakeOpenAIClient()
