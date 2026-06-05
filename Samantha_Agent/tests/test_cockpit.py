@@ -990,9 +990,13 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/speech/speak", COCKPIT_HTML)
         self.assertIn("voiceRecordBtn", COCKPIT_HTML)
         self.assertIn("voiceModeToggleBtn", COCKPIT_HTML)
+        self.assertIn("dashboardVoiceMode", COCKPIT_HTML)
+        self.assertIn("voiceModeRuntimeStatus", COCKPIT_HTML)
+        self.assertIn("Adam Voice Mode watcher", COCKPIT_HTML)
         self.assertIn("Hlasový mód: vypnuto", COCKPIT_HTML)
         self.assertIn("samanthaVoiceModeEnabled", COCKPIT_HTML)
         self.assertIn("toggleVoiceMode", COCKPIT_HTML)
+        self.assertIn("scripts/adam_voice_mode.py", COCKPIT_HTML)
         update_start = COCKPIT_HTML.index("function updateVoiceModeUi()")
         toggle_start = COCKPIT_HTML.index("function toggleVoiceMode()")
         self.assertLess(update_start, toggle_start)
@@ -1130,6 +1134,7 @@ class CockpitTests(unittest.TestCase):
             patch("app.cockpit.document_vault_status_summary", return_value="vault ok"),
             patch("app.cockpit.reminders_status", return_value={"ok": True, "counts": {}}),
             patch("app.cockpit.probe_scandocu", return_value={"running": False}),
+            patch("app.cockpit.load_voice_mode_status", return_value={"ok": True, "running": False, "state": "stopped"}),
             patch("app.cockpit.git_status_summary", return_value={"ok": True}),
         ):
             status = cockpit_status()
@@ -1141,6 +1146,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("document_due_candidates", status)
         self.assertIn("action_queue", status)
         self.assertIn("reminders", status)
+        self.assertIn("voice_mode", status)
         self.assertIn("git", status)
         self.assertNotIn("quantitative", status)
         self.assertNotIn("projects", status)

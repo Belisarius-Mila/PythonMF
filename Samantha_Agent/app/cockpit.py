@@ -64,6 +64,7 @@ from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEm
 from app.reminders.query_tools import mark_reminder_done_text
 from app.reminders.store import DEFAULT_REMINDERS_PATH, load_reminders_store, write_reminders_store
 from app.speech import SpeechError, TranscriptionError, speak_text, transcribe_audio_base64
+from app.speech.adam_voice_mode import load_voice_mode_status
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -2824,6 +2825,7 @@ def cockpit_status() -> dict[str, Any]:
         "reminders": reminders,
         "urgent_reminders": urgent,
         "scandocu": probe_scandocu(),
+        "voice_mode": load_voice_mode_status(),
         "git": git_status_summary(),
     }
 
@@ -7894,6 +7896,7 @@ COCKPIT_HTML = """<!doctype html>
           </div>
           <div class="dashboard-row"><span class="dashboard-label">ScanDocu</span><span id="dashboardScanDocu" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Reminders</span><span id="dashboardReminders" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Hlas</span><span id="dashboardVoiceMode" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Projekty</span><span id="dashboardProjects" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Kvantitativní</span><span id="dashboardQuantitative" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Audit</span><span id="dashboardConsistency" class="dashboard-value"></span></div>
@@ -7932,7 +7935,8 @@ COCKPIT_HTML = """<!doctype html>
 		          <button class="primary" id="voiceRecordBtn">Nahrát hlasový pokyn</button>
 		          <button class="secondary" id="voiceStopBtn" disabled>Zastavit a přepsat</button>
 		        </div>
-		        <div id="voiceCommandStatus" class="status-line">Pokyn se po přepisu automaticky uloží pro Codex. Nic se samo nespustí.</div>
+		        <div id="voiceCommandStatus" class="status-line">Pokyn se po přepisu automaticky uloží pro Codex. Adam reaguje jen při spuštěném watcheru.</div>
+		        <div id="voiceModeRuntimeStatus" class="status-line">Adam Voice Mode watcher: čekám na kontrolu.</div>
 	        <div class="voice-transcript-row">
 	          <label for="voiceTranscript">Přepis</label>
 	          <textarea id="voiceTranscript" placeholder="Tady se objeví přepsaný hlasový pokyn." spellcheck="true"></textarea>
@@ -8289,6 +8293,7 @@ COCKPIT_HTML = """<!doctype html>
     const todayHint = document.getElementById("todayHint");
     const dashboardScanDocu = document.getElementById("dashboardScanDocu");
     const dashboardReminders = document.getElementById("dashboardReminders");
+    const dashboardVoiceMode = document.getElementById("dashboardVoiceMode");
     const dashboardProjects = document.getElementById("dashboardProjects");
     const dashboardQuantitative = document.getElementById("dashboardQuantitative");
     const dashboardConsistency = document.getElementById("dashboardConsistency");
@@ -8315,6 +8320,7 @@ COCKPIT_HTML = """<!doctype html>
     const voiceRecordBtn = document.getElementById("voiceRecordBtn");
     const voiceStopBtn = document.getElementById("voiceStopBtn");
     const voiceCommandStatus = document.getElementById("voiceCommandStatus");
+    const voiceModeRuntimeStatus = document.getElementById("voiceModeRuntimeStatus");
     const voiceTranscript = document.getElementById("voiceTranscript");
     const urgentReminderAlert = document.getElementById("urgentReminderAlert");
     const urgentReminderAlertTitle = document.getElementById("urgentReminderAlertTitle");
@@ -8441,6 +8447,7 @@ COCKPIT_HTML = """<!doctype html>
         "dashboardSpeakSelectionBtn",
 	        "dashboardRefreshBtn",
         "voiceModeToggleBtn",
+        "voiceModeRuntimeStatus",
         "voiceRecordBtn",
         "voiceStopBtn",
         "urgentReminderAlertBtn",
@@ -8588,6 +8595,7 @@ COCKPIT_HTML = """<!doctype html>
         if (reason.includes("záloh")) return "zkontrolovat stav zálohy";
         if (reason.includes("audit")) return "otevřít auditní detail";
         if (reason.includes("dokument")) return "otevřít dokumentovou frontu nebo ScanDocu";
+        if (reason.includes("hlas")) return "spustit Adam Voice Mode watcher v terminálu, nebo hlasový mód vypnout";
         return "otevřít detail dané oblasti a rozhodnout další krok";
       }
       return "nic akutního";
@@ -8601,6 +8609,7 @@ COCKPIT_HTML = """<!doctype html>
         reminders: "Reminders",
         backup: "Záloha",
         git: "Git",
+        voice: "Hlas",
         projects: "Projekty",
         quickNotes: "QN",
         quantitative: "Kvantitativní",
@@ -9563,6 +9572,30 @@ COCKPIT_HTML = """<!doctype html>
             : "Reminders bez akutní akce"
       );
 
+      const voiceMode = data.voice_mode || {};
+      latestVoiceModeRuntime = voiceMode;
+      const voiceRunning = Boolean(voiceMode.running);
+      const voiceState = voiceMode.state || "unknown";
+      const voiceMessage = voiceMode.message || "Adam Voice Mode stav není načtený.";
+      dashboardVoiceMode.innerHTML = voiceRunning
+        ? `<span class="ok">Adam poslouchá</span><br>${voiceState}`
+        : `<span class="${voiceModeEnabled ? "warn" : "ok"}">${voiceModeEnabled ? "Adam neposlouchá" : "vypnuto"}</span><br>${voiceState}`;
+      if (voiceModeRuntimeStatus) {
+        voiceModeRuntimeStatus.textContent = voiceRunning
+          ? `Adam Voice Mode watcher běží: ${voiceMessage}`
+          : `Adam Voice Mode watcher neběží: ${voiceMessage}`;
+      }
+      setDashboardStatusSignal(
+        "voice",
+        voiceModeEnabled && !voiceRunning ? "warn" : "ok",
+        voiceModeEnabled && !voiceRunning
+          ? "Hlasový mód je v UI zapnutý, ale Adam Voice Mode watcher neběží"
+          : voiceRunning
+            ? "Adam Voice Mode watcher běží"
+            : "Hlasový mód je vypnutý"
+      );
+      updateVoiceModeUi();
+
       setDashboardPendingIfEmpty(dashboardProjects, "načítám samostatně");
       setDashboardPendingIfEmpty(dashboardQuantitative, "načítám samostatně");
       setDashboardPendingIfEmpty(dashboardConsistency, "načítám samostatně");
@@ -9799,6 +9832,7 @@ COCKPIT_HTML = """<!doctype html>
         reminders: 70,
         backup: 60,
         git: 50,
+        voice: 45,
         projects: 40,
         quickNotes: 35,
         quantitative: 30,
@@ -10309,6 +10343,7 @@ COCKPIT_HTML = """<!doctype html>
 	    let voiceStopTimer = null;
 		    let voiceRecordingStartedAt = 0;
 		    let voiceModeEnabled = localStorage.getItem("samanthaVoiceModeEnabled") === "true";
+		    let latestVoiceModeRuntime = null;
 
 	    function preferredVoiceMimeType() {
 	      if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) {
@@ -10358,10 +10393,13 @@ COCKPIT_HTML = """<!doctype html>
 		      voiceModeToggleBtn.textContent = voiceModeEnabled ? "Hlasový mód: zapnuto" : "Hlasový mód: vypnuto";
 		      voiceModeToggleBtn.setAttribute("aria-pressed", voiceModeEnabled ? "true" : "false");
 		      voiceModeToggleBtn.classList.toggle("active", voiceModeEnabled);
+		      const watcherRunning = Boolean(latestVoiceModeRuntime && latestVoiceModeRuntime.running);
 		      if (voiceModeEnabled) {
-		        voiceCommandStatus.textContent = "Hlasový mód je zapnutý. Adam může mít spuštěné čekání na nové pokyny; stačí nahrávat další hlasové pokyny.";
+		        voiceCommandStatus.textContent = watcherRunning
+		          ? "Hlasový mód je zapnutý a Adam Voice Mode watcher běží. Nahrané pokyny se budou hlásit Adamovi."
+		          : "Hlasový mód je zapnutý jen v UI. Adam neposlouchá, dokud neběží scripts/adam_voice_mode.py.";
 		      } else {
-		        voiceCommandStatus.textContent = "Pokyn se po přepisu automaticky uloží pro Codex. Nic se samo nespustí.";
+		        voiceCommandStatus.textContent = "Pokyn se po přepisu automaticky uloží pro Codex. Adam reaguje jen při spuštěném watcheru.";
 		      }
 		    }
 
