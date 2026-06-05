@@ -1266,7 +1266,7 @@ class CockpitTests(unittest.TestCase):
 
         self.assertTrue(result["ok"])
         self.assertEqual(result["message"], "Přečteno.")
-        speak.assert_called_once_with("Stav Cockpitu je v pořádku.", voice="Zuzana")
+        speak.assert_called_once_with("Stav Cockpitu je v pořádku.", voice="Daniel")
 
     def test_cockpit_speak_action_reports_speech_error(self) -> None:
         with patch("app.cockpit.speak_text", side_effect=cockpit_module.SpeechError("AudioQueueStart failed")):

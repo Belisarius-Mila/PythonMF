@@ -65,6 +65,7 @@ from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEm
 from app.reminders.query_tools import mark_reminder_done_text
 from app.reminders.store import DEFAULT_REMINDERS_PATH, load_reminders_store, write_reminders_store
 from app.speech import SpeechError, TranscriptionError, speak_text, transcribe_audio_base64
+from app.speech.local_tts import DEFAULT_VOICE
 from app.speech.adam_voice_mode import (
     load_voice_mode_status,
     pid_exists,
@@ -6081,7 +6082,7 @@ def open_codex_cli() -> dict[str, Any]:
     return open_terminal_command("source ~/.zshrc; codex resume --last || codex", "Codex CLI")
 
 
-def cockpit_speak_action(text: str, *, voice: str = "Zuzana") -> dict[str, Any]:
+def cockpit_speak_action(text: str, *, voice: str = DEFAULT_VOICE) -> dict[str, Any]:
     try:
         return speak_text(text, voice=voice)
     except SpeechError as exc:
