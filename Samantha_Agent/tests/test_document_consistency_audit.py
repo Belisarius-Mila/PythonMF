@@ -8,6 +8,7 @@ from pathlib import Path
 from app.documents.consistency_audit import (
     format_document_consistency_audit,
     run_document_consistency_audit,
+    save_audit_decision,
 )
 
 
@@ -209,6 +210,24 @@ class DocumentConsistencyAuditTests(unittest.TestCase):
         self.assertEqual(result["suppressed_finding_count"], 1)
         self.assertEqual(result["suppressed_findings"][0]["finding_id"], finding_id)
         self.assertIn("Potlačeno lokálním rozhodnutím: 1", formatted)
+
+    def test_save_audit_decision_writes_private_resolution_record(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            decisions_path = Path(temp_dir) / "private" / "consistency_audit_decisions.json"
+
+            result = save_audit_decision(
+                finding_id="audit-test-123",
+                status="resolved",
+                reason="Ručně ověřeno jako neakční nález.",
+                decisions_path=decisions_path,
+                decided_at="2026-06-05T12:00:00+00:00",
+            )
+            stored = json.loads(decisions_path.read_text(encoding="utf-8"))
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(stored["decisions"][0]["finding_id"], "audit-test-123")
+        self.assertEqual(stored["decisions"][0]["status"], "resolved")
+        self.assertIn("Ručně ověřeno", stored["decisions"][0]["reason"])
 
     @staticmethod
     def write_jsonl(path: Path, rows: list[dict[str, object]]) -> None:

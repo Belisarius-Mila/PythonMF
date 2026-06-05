@@ -5,6 +5,7 @@ import json
 import re
 from collections import defaultdict
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -388,6 +389,50 @@ def apply_audit_decisions(
         else:
             active.append(finding)
     return active, suppressed
+
+
+def save_audit_decision(
+    *,
+    finding_id: str,
+    status: str,
+    reason: str,
+    decisions_path: Path = DEFAULT_AUDIT_DECISIONS_PATH,
+    decided_at: str = "",
+) -> dict[str, Any]:
+    safe_finding_id = safe_text(str(finding_id))[:120]
+    safe_status = safe_text(str(status or "resolved"))[:80]
+    if not safe_finding_id:
+        return {"ok": False, "message": "Chybí finding_id auditního nálezu."}
+    if not audit_decision_suppresses({"status": safe_status}):
+        return {"ok": False, "message": "Auditní rozhodnutí musí mít stav resolved/suppressed/ok."}
+    safe_reason = safe_text(str(reason))[:500]
+    if len(safe_reason) < 8:
+        return {"ok": False, "message": "Doplň krátký důvod, proč je nález v pořádku."}
+    now = decided_at or datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+    try:
+        raw = json.loads(decisions_path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        raw = {}
+    except (OSError, json.JSONDecodeError, TypeError):
+        raw = {}
+    if not isinstance(raw, dict):
+        raw = {}
+    decisions = raw.get("decisions")
+    if not isinstance(decisions, list):
+        decisions = []
+    decisions = [item for item in decisions if isinstance(item, dict) and str(item.get("finding_id", "")) != safe_finding_id]
+    decision = {
+        "finding_id": safe_finding_id,
+        "status": safe_status,
+        "reason": safe_reason,
+        "decided_at": now,
+    }
+    decisions.append(decision)
+    raw["decisions"] = decisions
+    decisions_path.parent.mkdir(parents=True, exist_ok=True)
+    decisions_path.write_text(json.dumps(raw, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return {"ok": True, "message": "Auditní nález byl uložen jako lokálně vyřešený.", "decision": decision}
 
 
 def audit_decision_suppresses(decision: dict[str, Any]) -> bool:

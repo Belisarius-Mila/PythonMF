@@ -21,7 +21,7 @@ from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from app.backup.activity_state import format_backup_activity_reminder
-from app.documents.consistency_audit import format_document_consistency_audit, run_document_consistency_audit
+from app.documents.consistency_audit import format_document_consistency_audit, run_document_consistency_audit, save_audit_decision
 from app.documents.scandocu import DEFAULT_DOWNLOADS_DIR, scan_downloads_for_pdfs
 from app.documents.vault import (
     DEFAULT_DOCUMENTS_DIR,
@@ -2912,6 +2912,13 @@ def document_consistency_status() -> dict[str, Any]:
             "message": str(exc),
         }
     return {**result, "summary_text": format_document_consistency_audit(result)}
+
+
+def resolve_consistency_finding_action(*, finding_id: str, reason: str, status: str = "resolved") -> dict[str, Any]:
+    decision = save_audit_decision(finding_id=finding_id, status=status, reason=reason)
+    if not decision.get("ok"):
+        return {**decision, "consistency": document_consistency_status()}
+    return {**decision, "consistency": document_consistency_status()}
 
 
 def reminders_status(path: Path = DEFAULT_REMINDERS_PATH, today: date | None = None) -> dict[str, Any]:
@@ -5901,6 +5908,16 @@ class CockpitServer:
                         reminder_number = 0
                     self.respond_json(urgent_reminder_done_action(reminder_number=reminder_number))
                     return
+                if parsed.path == "/api/consistency/resolve-finding":
+                    payload = self.read_json()
+                    self.respond_json(
+                        resolve_consistency_finding_action(
+                            finding_id=str(payload.get("finding_id", "")),
+                            reason=str(payload.get("reason", "")),
+                            status=str(payload.get("status", "resolved")),
+                        )
+                    )
+                    return
                 if parsed.path == "/api/reminders/source":
                     payload = self.read_json()
                     self.respond_json(reminder_source_detail_action(reminder_id=str(payload.get("reminder_id", ""))))
@@ -7518,6 +7535,12 @@ COCKPIT_HTML = """<!doctype html>
     .vault-summary pre { border: 1px solid #edf0f4; border-radius: 7px; padding: 10px; background: #fbfcfe; }
     .vault-summary details { border: 1px solid #edf0f4; border-radius: 7px; padding: 9px 10px; background: #fbfcfe; }
     .vault-summary summary { cursor: pointer; font-weight: 650; }
+    .consistency-panel { display: grid; gap: 10px; }
+    .consistency-panel pre { border: 1px solid #edf0f4; border-radius: 7px; padding: 10px; background: #fbfcfe; }
+    .consistency-finding { border: 1px solid #edf0f4; border-radius: 8px; padding: 10px; background: #fbfcfe; display: grid; gap: 7px; }
+    .consistency-finding-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: start; }
+    .consistency-finding-title { font-weight: 750; overflow-wrap: anywhere; }
+    .consistency-finding-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
     @media (max-width: 1050px) { .today-dashboard { grid-template-columns: 1fr; } .work-grid { grid-template-columns: 1fr; } }
 	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .recovery-grid { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
   </style>
@@ -7711,7 +7734,7 @@ COCKPIT_HTML = """<!doctype html>
     </section>
     <section>
       <h2>Consistency Audit</h2>
-      <div class="body"><pre id="consistencyText"></pre></div>
+      <div class="body"><div id="consistencyText" class="consistency-panel"></div></div>
     </section>
   </main>
   <div id="remindersModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="remindersTitle">
@@ -9279,7 +9302,82 @@ COCKPIT_HTML = """<!doctype html>
     function renderConsistencyAudit(consistency) {
       const node = document.getElementById("consistencyText");
       if (!node) return;
-      node.textContent = consistency.summary_text || "";
+      node.innerHTML = "";
+      const summary = document.createElement("pre");
+      summary.textContent = consistency.summary_text || "";
+      node.appendChild(summary);
+      const findings = Array.isArray(consistency.findings) ? consistency.findings : [];
+      findings.forEach((finding) => {
+        const card = document.createElement("div");
+        card.className = "consistency-finding";
+        const head = document.createElement("div");
+        head.className = "consistency-finding-head";
+        const title = document.createElement("div");
+        title.className = "consistency-finding-title";
+        title.textContent = finding.title || finding.message || finding.finding_id || "Auditní nález";
+        const badge = document.createElement("span");
+        badge.className = `project-priority ${finding.severity === "critical" ? "bad" : "warn"}`;
+        badge.textContent = finding.severity || "warning";
+        head.appendChild(title);
+        head.appendChild(badge);
+        const meta = document.createElement("div");
+        meta.className = "consistency-finding-meta";
+        meta.textContent = `${finding.code || ""} | ${finding.asset || ""} | ${finding.coverage_start || ""} | ${finding.finding_id || ""}`;
+        const message = document.createElement("div");
+        message.className = "project-next";
+        message.textContent = finding.message || "";
+        const actions = document.createElement("div");
+        actions.className = "project-flags";
+        const okBtn = document.createElement("button");
+        okBtn.type = "button";
+        okBtn.className = "secondary";
+        okBtn.textContent = "Označit jako OK";
+        okBtn.disabled = !finding.finding_id;
+        okBtn.addEventListener("click", () => resolveConsistencyFinding(finding, okBtn));
+        actions.appendChild(okBtn);
+        card.appendChild(head);
+        card.appendChild(meta);
+        if (message.textContent) card.appendChild(message);
+        card.appendChild(actions);
+        node.appendChild(card);
+      });
+      const suppressedCount = Number(consistency.suppressed_finding_count || 0);
+      if (suppressedCount) {
+        const suppressed = document.createElement("div");
+        suppressed.className = "consistency-finding-meta";
+        suppressed.textContent = `${suppressedCount} nálezů je potlačeno lokálním rozhodnutím.`;
+        node.appendChild(suppressed);
+      }
+    }
+
+    async function resolveConsistencyFinding(finding, button) {
+      const findingId = finding && finding.finding_id || "";
+      if (!findingId) return;
+      const defaultReason = finding.code === "multiple_payment_options_in_document"
+        ? "Zkontrolováno ručně: jde o volitelnou variantu nebo vyřešenou platební cestu."
+        : "Zkontrolováno ručně a nález je v pořádku.";
+      const reason = window.prompt("Proč je tento auditní nález v pořádku? Uloží se jen lokálně do private dat.", defaultReason);
+      if (!reason) return;
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "Ukládám...";
+      try {
+        const result = await postJson("/api/consistency/resolve-finding", {
+          finding_id: findingId,
+          status: "resolved",
+          reason
+        });
+        if (result.consistency) {
+          renderConsistencyAudit(result.consistency);
+        }
+        await refreshConsistencySummary();
+        showMessage(result.message || "Auditní rozhodnutí uloženo.");
+      } catch (err) {
+        recordFrontendError(err);
+        showMessage(`Chyba uložení auditního rozhodnutí: ${err}`);
+        button.disabled = false;
+        button.textContent = originalText;
+      }
     }
 
     function setDashboardPendingIfEmpty(node, text) {
