@@ -12,6 +12,7 @@ from app.speech.terminal_bridge import (
     deliver_prompt_to_terminal,
     deliver_prompt_to_vscode,
     deliver_voice_command_to_terminal,
+    load_marked_codex_tty,
 )
 from app.speech.voice_inbox import load_latest_voice_command
 
@@ -138,6 +139,45 @@ class TerminalBridgeTests(unittest.TestCase):
             )
 
         self.assertEqual(discover_codex_ttys(runner=fake_ps_runner), ["ttys001"])
+
+    def test_load_marked_codex_tty_reads_private_marker(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker = Path(temp_dir) / "current_codex_tty.json"
+            marker.write_text('{"tty": "/dev/ttys005"}', encoding="utf-8")
+
+            self.assertEqual(load_marked_codex_tty(marker), "ttys005")
+
+    def test_deliver_prompt_prefers_marked_tty_before_gui_fallback(self) -> None:
+        runner_calls = []
+        tty_calls = []
+
+        def fake_runner(args, **kwargs):
+            runner_calls.append(args)
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="delivered\n", stderr="")
+
+        def fake_ps_runner(args, **kwargs):
+            self.fail("marked tty delivery should not need process discovery")
+
+        def fake_tty_deliverer(tty, prompt, **kwargs):
+            tty_calls.append((tty, prompt, kwargs))
+            return {"ok": True, "status": "delivered_tty", "submitted": kwargs.get("submit")}
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker = Path(temp_dir) / "current_codex_tty.json"
+            marker.write_text('{"tty": "ttys005"}', encoding="utf-8")
+
+            result = deliver_prompt_to_terminal(
+                "Hlasový pokyn od Míly.",
+                runner=fake_runner,
+                ps_runner=fake_ps_runner,
+                marked_tty_path=marker,
+                tty_deliverer=fake_tty_deliverer,
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "delivered_tty")
+        self.assertEqual(tty_calls[0][0], "ttys005")
+        self.assertEqual(runner_calls, [])
 
     def test_deliver_voice_command_returns_manual_required_without_calling_runner(self) -> None:
         def fake_runner(*args, **kwargs):

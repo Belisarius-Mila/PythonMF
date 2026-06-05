@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import json
 import re
 import subprocess
+import termios
+import fcntl
+from pathlib import Path
 from typing import Any, Callable
 
 from app.speech.voice_inbox import VoiceCommand, normalize_for_triage, voice_command_to_dict
@@ -9,6 +13,8 @@ from app.speech.voice_inbox import VoiceCommand, normalize_for_triage, voice_com
 
 MAX_TERMINAL_PROMPT_CHARS = 1200
 PS_COMMAND = ["ps", "-axo", "pid=,ppid=,tty=,comm=,args="]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+CURRENT_CODEX_TTY_PATH = PROJECT_ROOT / "data/private/voice_inbox/current_codex_tty.json"
 
 TERMINAL_MANUAL_TERMS = (
     "smaz",
@@ -153,6 +159,49 @@ def discover_codex_ttys(
     return result
 
 
+def load_marked_codex_tty(path: Path = CURRENT_CODEX_TTY_PATH) -> str:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return ""
+    tty = normalize_tty(str(payload.get("tty") or ""))
+    if not tty or tty == "??":
+        return ""
+    return tty
+
+
+def deliver_prompt_to_tty(
+    tty: str,
+    prompt: str,
+    *,
+    submit: bool = True,
+    ioctl_func: Callable[..., Any] = fcntl.ioctl,
+) -> dict[str, Any]:
+    target_tty = normalize_tty(tty)
+    if not target_tty or target_tty == "??":
+        return {"ok": False, "status": "tty_delivery_failed", "message": "Chybí cílové TTY."}
+    tty_path = Path("/dev") / target_tty
+    payload = squash_terminal_text(prompt) + ("\n" if submit else "")
+    try:
+      with tty_path.open("wb", buffering=0) as handle:
+          for char in payload:
+              ioctl_func(handle.fileno(), termios.TIOCSTI, char.encode("utf-8"))
+    except (OSError, ValueError) as exc:
+        return {
+            "ok": False,
+            "status": "tty_delivery_failed",
+            "message": str(exc),
+            "target_tty": target_tty,
+        }
+    return {
+        "ok": True,
+        "status": "delivered_tty",
+        "message": f"Pokyn byl vložen do cílového Codex TTY {target_tty}.",
+        "submitted": submit,
+        "target_tty": target_tty,
+    }
+
+
 def terminal_applescript() -> str:
     return r'''
 on run argv
@@ -265,9 +314,17 @@ def deliver_prompt_to_terminal(
     script: str | None = None,
     vscode_script: str | None = None,
     vscode_fallback: bool = True,
+    marked_tty_path: Path = CURRENT_CODEX_TTY_PATH,
+    tty_deliverer: Callable[..., dict[str, Any]] = deliver_prompt_to_tty,
     timeout: float = 8.0,
 ) -> dict[str, Any]:
     safe_prompt = squash_terminal_text(prompt)
+    marked_tty = load_marked_codex_tty(marked_tty_path)
+    if marked_tty:
+        tty_result = tty_deliverer(marked_tty, safe_prompt, submit=submit)
+        if tty_result.get("ok"):
+            return tty_result
+
     codex_ttys = discover_codex_ttys(runner=ps_runner)
     completed = runner(
         [
