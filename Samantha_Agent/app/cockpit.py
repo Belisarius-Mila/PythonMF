@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import errno
+import base64
 import json
 import hashlib
 import os
@@ -65,6 +66,12 @@ from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEm
 from app.reminders.query_tools import mark_reminder_done_text
 from app.reminders.store import DEFAULT_REMINDERS_PATH, load_reminders_store, write_reminders_store
 from app.speech import SpeechError, TranscriptionError, speak_text, transcribe_audio_base64
+from app.speech.edge_tts_mp3 import (
+    DEFAULT_EDGE_TTS_RATE,
+    DEFAULT_EDGE_TTS_VOICE,
+    EdgeTtsError,
+    synthesize_edge_tts_mp3_sync,
+)
 from app.speech.local_tts import DEFAULT_VOICE
 from app.speech.adam_voice_mode import (
     load_voice_mode_status,
@@ -6093,6 +6100,34 @@ def cockpit_speak_action(text: str, *, voice: str = DEFAULT_VOICE) -> dict[str, 
         }
 
 
+def cockpit_edge_tts_action(
+    text: str,
+    *,
+    voice: str = DEFAULT_EDGE_TTS_VOICE,
+    rate: str = DEFAULT_EDGE_TTS_RATE,
+    synthesizer: Callable[..., bytes] = synthesize_edge_tts_mp3_sync,
+) -> dict[str, Any]:
+    try:
+        audio = synthesizer(text, voice=voice, rate=rate)
+    except (SpeechError, EdgeTtsError) as exc:
+        return {
+            "ok": False,
+            "message": f"Edge TTS selhalo: {exc}",
+            "status": "edge_tts_failed",
+            "voice": voice,
+        }
+    return {
+        "ok": True,
+        "message": "Text byl namluven českým mužským hlasem.",
+        "status": "edge_tts_ready",
+        "voice": voice,
+        "rate": rate,
+        "mime_type": "audio/mpeg",
+        "audio_base64": base64.b64encode(audio).decode("ascii"),
+        "audio_bytes": len(audio),
+    }
+
+
 def save_voice_command_to_inbox(
     transcription: dict[str, Any],
     *,
@@ -6273,6 +6308,10 @@ class CockpitServer:
                 if parsed.path == "/api/speech/speak":
                     payload = self.read_json()
                     self.respond_json(cockpit_speak_action(text=str(payload.get("text", ""))))
+                    return
+                if parsed.path == "/api/speech/edge-tts":
+                    payload = self.read_json()
+                    self.respond_json(cockpit_edge_tts_action(text=str(payload.get("text", ""))))
                     return
                 if parsed.path == "/api/speech/transcribe":
                     payload = self.read_json()
@@ -10441,13 +10480,30 @@ COCKPIT_HTML = """<!doctype html>
 	      button.disabled = true;
 	      showMessage(label || "Čtu nahlas...");
 	      try {
+	        const edgeRes = await fetch("/api/speech/edge-tts", {
+	          method: "POST",
+	          headers: {"Content-Type": "application/json"},
+	          body: JSON.stringify({text: cleaned})
+	        });
+	        const edgeData = await edgeRes.json();
+	        if (edgeData.ok && edgeData.audio_base64) {
+	          const audio = new Audio(`data:${edgeData.mime_type || "audio/mpeg"};base64,${edgeData.audio_base64}`);
+	          try {
+	            await audio.play();
+	            showMessage(edgeData.message || "Přečteno českým mužským hlasem.");
+	            return;
+	          } catch (playErr) {
+	            recordFrontendError(playErr);
+	          }
+	        }
 	        const res = await fetch("/api/speech/speak", {
 	          method: "POST",
 	          headers: {"Content-Type": "application/json"},
 	          body: JSON.stringify({text: cleaned})
 	        });
 	        const data = await res.json();
-	        showMessage(data.message || (data.ok ? "Přečteno nahlas." : "Hlasový výstup selhal."));
+	        const fallbackHint = edgeData && edgeData.message ? ` Edge TTS: ${edgeData.message}` : "";
+	        showMessage((data.message || (data.ok ? "Přečteno nahlas." : "Hlasový výstup selhal.")) + fallbackHint);
 	      } catch (err) {
 	        recordFrontendError(err);
 	        showMessage(`Chyba hlasového výstupu: ${err}`);

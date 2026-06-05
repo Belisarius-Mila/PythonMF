@@ -18,6 +18,7 @@ from app.cockpit import (
     cockpit_status,
     create_document_due_reminder_action,
     document_reference,
+    cockpit_edge_tts_action,
     cockpit_speak_action,
     cockpit_transcribe_voice_action,
     save_voice_command_to_inbox,
@@ -990,6 +991,9 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("speakSelectedText", COCKPIT_HTML)
         self.assertIn("speakDashboardStatus", COCKPIT_HTML)
         self.assertIn("/api/speech/speak", COCKPIT_HTML)
+        self.assertIn("/api/speech/edge-tts", COCKPIT_HTML)
+        self.assertIn("audio_base64", COCKPIT_HTML)
+        self.assertIn("new Audio", COCKPIT_HTML)
         self.assertIn("voiceRecordBtn", COCKPIT_HTML)
         self.assertIn("voiceModeToggleBtn", COCKPIT_HTML)
         self.assertIn("dashboardVoiceMode", COCKPIT_HTML)
@@ -1275,6 +1279,25 @@ class CockpitTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "speech_failed")
         self.assertIn("AudioQueueStart failed", result["message"])
+
+    def test_cockpit_edge_tts_action_returns_audio_base64(self) -> None:
+        result = cockpit_edge_tts_action("Test", synthesizer=lambda *args, **kwargs: b"MP3")
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "edge_tts_ready")
+        self.assertEqual(result["voice"], "cs-CZ-AntoninNeural")
+        self.assertEqual(result["mime_type"], "audio/mpeg")
+        self.assertEqual(result["audio_base64"], "TVAz")
+
+    def test_cockpit_edge_tts_action_reports_error(self) -> None:
+        def fail(*args, **kwargs):
+            raise cockpit_module.EdgeTtsError("síť není dostupná")
+
+        result = cockpit_edge_tts_action("Test", synthesizer=fail)
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "edge_tts_failed")
+        self.assertIn("síť není dostupná", result["message"])
 
     def test_cockpit_transcribe_voice_action_returns_transcript(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
