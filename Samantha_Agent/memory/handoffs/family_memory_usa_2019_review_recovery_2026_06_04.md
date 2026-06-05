@@ -43,6 +43,10 @@ Co je hotove:
   konzervativni vizualni pruchod priradil 226 videi k jasnym dnům a 54 nechal
   mimo zpracovani. Cele bloky `2019-08-05_B01/B02` zustavaji v `block_review.csv`
   jako `roztřídit` s poznamkou, ze se maji resit po jednotlivych videich.
+- Detailni formular `mixed_2019-08-05_form.html` umi tlacitko `Přehrát video`.
+  Puvodni videa se ctou read-only pres druhy lokalni server nad
+  `/Users/miloslavfalta/Desktop/USA` na `http://127.0.0.1:8790/`. Review formular
+  zustava na `http://127.0.0.1:8789/`.
 
 Co neni hotove:
 - Neni hotovy rucni review contact sheetu.
@@ -58,6 +62,9 @@ Dalsi krok:
 - Pro detail smesneho dne otevrit
   `http://127.0.0.1:8789/mixed_2019_08_05/mixed_2019-08-05_form.html`,
   zkontrolovat hlavne radky s `confidence=stredni` a pripadne radky `ne`.
+- Pokud nefunguje tlacitko `Přehrát video`, overit nebo znovu spustit read-only
+  server ve zdrojove slozce `/Users/miloslavfalta/Desktop/USA`:
+  `python3 -m http.server 8790 --bind 127.0.0.1`.
 - Pri navazani vzit nejnovejsi `~/Downloads/block_review*.csv` jako zdroj pravdy,
   aby se neprepsaly Milovy rucni poznamky.
 - Pokud Mila stahne detailni smesne CSV, vzit nejnovejsi
