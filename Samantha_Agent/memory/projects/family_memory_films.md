@@ -131,6 +131,7 @@ Relevantni git-safe skripty:
 - `scripts/family_memory_prepare_block_review.py`
 - `scripts/family_memory_prepare_mixed_review.py`
 - `scripts/family_memory_prepare_film_selection.py`
+- `scripts/family_memory_propose_film_ratings.py`
 
 ## Aktualni stav k 2026-06-05
 
@@ -147,6 +148,11 @@ Relevantni git-safe skripty:
   Pracuje s `film_selection_review.csv`, ma 2688 polozek, denni filtr,
   rating `A/B/C/skip`, volby pro kratky/dlouhy film, autosave, CSV export a
   prehravani videi pres read-only lokalni server originalu.
+- Adamuv prvni technicko-dramaturgicky navrh ratingu je aplikovany do
+  `film_selection_review.csv`: `A=406`, `B=913`, `C=1369`. Pred aplikaci
+  vznikla zaloha
+  `film_selection_review.before_adam_rating_20260605_2229.csv` a souhrn
+  `adam_rating_proposal.md`.
 
 ## Aktualni dalsi krok
 
@@ -155,7 +161,8 @@ Rucne projit predstrihovy formular:
 - URL pro aktualni lokalni server:
   `http://127.0.0.1:8792/03_overview/film_selection_form.html`
 - u fotek i videi oznacovat hlavne `A`, `B`, `skip`, kandidat kratky film,
-  kandidat dlouhy film a poznamku pro strih,
+  kandidat dlouhy film a poznamku pro strih; Adamuv rating je jen startovni
+  navrh a hlavne rodinne/emocni momenty muze Mila povysit rucne,
 - po praci stahnout `film_selection_review.csv`,
 - pri navazani vzit nejnovejsi stazene
   `~/Downloads/film_selection_review*.csv` jako zdroj pravdy,

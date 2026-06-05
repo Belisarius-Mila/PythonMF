@@ -22,6 +22,11 @@ Co je hotove:
   Pracuje s `film_selection_review.csv`, ma 2688 polozek, denni filtr,
   rating `A/B/C/skip`, volby pro kratky/dlouhy film, autosave, CSV export a
   prehravani videi pres read-only lokalni server originalu.
+- Adamuv prvni technicko-dramaturgicky navrh ratingu je aplikovany do
+  `film_selection_review.csv`: `A=406`, `B=913`, `C=1369`. Pred aplikaci
+  vznikla zaloha
+  `film_selection_review.before_adam_rating_20260605_2229.csv` a report
+  `adam_rating_proposal.md`.
 - Git-safe memory byla aktualizovana a pushnuta commitem:
   `c4762f6 Document USA 2019 film overview step`.
 
@@ -30,8 +35,10 @@ Co neni hotove:
 
 Dalsi krok:
 - Otevrit `http://127.0.0.1:8792/03_overview/film_selection_form.html`.
-- Rucne oznacit kandidaty fotek a videi: hlavne `A`, `B`, `skip`, kandidat
-  kratky film, kandidat dlouhy film a poznamka pro strih.
+- Rucne zkontrolovat Adamuv rating; hlavne rodinne/emocni momenty muze Mila
+  povysit z `B/C` na `A`.
+- Dale doladit kandidat kratky film, kandidat dlouhy film, roli a poznamku pro
+  strih.
 - Po praci stahnout CSV a pri navazani brat nejnovejsi
   `~/Downloads/film_selection_review*.csv` jako zdroj pravdy.
 
@@ -52,6 +59,8 @@ Zmenene nebo relevantni soubory:
   - `data/private/family_memory_films/usa_2019/03_overview/usa_2019_tomik2_overview.md`
   - `data/private/family_memory_films/usa_2019/03_overview/film_selection_review.csv`
   - `data/private/family_memory_films/usa_2019/03_overview/film_selection_form.html`
+  - `data/private/family_memory_films/usa_2019/03_overview/adam_rating_proposal.md`
+  - `data/private/family_memory_films/usa_2019/03_overview/film_selection_review.before_adam_rating_20260605_2229.csv`
 
 Bezpecnost / neukladat:
 - Do gitu nedavat fotky, videa, nahledy, manifesty, GPS metadata, realne rodinne
@@ -67,5 +76,6 @@ Copy/paste handoff:
 - Predstrihovy formular je v
   `data/private/family_memory_films/usa_2019/03_overview/film_selection_form.html`
   a bezi na `http://127.0.0.1:8792/03_overview/film_selection_form.html`.
-- Dalsi krok je rucne oznacit kandidaty fotek/videi a stahnout
+- Adamuv prvni rating je aplikovany: `A=406`, `B=913`, `C=1369`.
+- Dalsi krok je rucne zkontrolovat/povysit rodinne momenty a stahnout
   `film_selection_review.csv`.
