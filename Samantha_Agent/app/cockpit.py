@@ -8523,6 +8523,16 @@ COCKPIT_HTML = """<!doctype html>
     let frontendLastError = "";
     let frontendErrorHistory = [];
     let dashboardStatusSignals = {};
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
     const diagnosticsEndpoints = [
       ["Hlavní status", "/api/status"],
       ["Recovery", "/api/recovery/status"],

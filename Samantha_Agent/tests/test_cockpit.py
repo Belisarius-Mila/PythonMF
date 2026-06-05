@@ -990,6 +990,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("lastSelectedSpeechText", COCKPIT_HTML)
         self.assertIn("speakSelectedText", COCKPIT_HTML)
         self.assertIn("speakDashboardStatus", COCKPIT_HTML)
+        self.assertIn("function escapeHtml(value)", COCKPIT_HTML)
         self.assertIn("/api/speech/speak", COCKPIT_HTML)
         self.assertIn("/api/speech/edge-tts", COCKPIT_HTML)
         self.assertIn("audio_base64", COCKPIT_HTML)
@@ -1016,7 +1017,10 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("scripts/adam_voice_mode.py", COCKPIT_HTML)
         update_start = COCKPIT_HTML.index("function updateVoiceModeUi()")
         toggle_start = COCKPIT_HTML.index("function toggleVoiceMode()")
+        escape_start = COCKPIT_HTML.index("function escapeHtml(value)")
+        voice_dashboard_escape = COCKPIT_HTML.index("${escapeHtml(voiceState)}")
         self.assertLess(update_start, toggle_start)
+        self.assertLess(escape_start, voice_dashboard_escape)
         self.assertRegex(
             COCKPIT_HTML,
             r"voiceStopTimer = null;\s*}\s*}\s*function updateVoiceModeUi\(\)",
