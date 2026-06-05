@@ -7868,6 +7868,7 @@ COCKPIT_HTML = """<!doctype html>
     .voice-command-grid { display: grid; gap: 10px; }
     .voice-command-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .voice-command-actions button.recording { background: #fee2e2; color: var(--red); }
+    .voice-command-actions button:disabled { cursor: not-allowed; }
     .voice-transcript-row { display: grid; gap: 6px; }
     .voice-transcript-row label { color: #253047; font-size: 12px; font-weight: 750; }
     .pills { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; }
@@ -9697,8 +9698,15 @@ COCKPIT_HTML = """<!doctype html>
           ? `Adam Voice Mode watcher běží: ${voiceMessage}`
           : `Adam Voice Mode watcher neběží: ${voiceMessage}`;
       }
-      if (voiceModeStartBtn) voiceModeStartBtn.disabled = voiceRunning;
-      if (voiceModeStopBtn) voiceModeStopBtn.disabled = !voiceRunning;
+      if (voiceModeStartBtn) {
+        voiceModeStartBtn.disabled = voiceRunning;
+        voiceModeStartBtn.textContent = voiceRunning ? "Poslech běží" : "Spustit Adamův poslech";
+        voiceModeStartBtn.classList.toggle("active", voiceRunning);
+      }
+      if (voiceModeStopBtn) {
+        voiceModeStopBtn.disabled = !voiceRunning;
+        voiceModeStopBtn.textContent = voiceRunning ? "Zastavit poslech" : "Poslech neběží";
+      }
       setDashboardStatusSignal(
         "voice",
         voiceModeEnabled && !voiceRunning ? "warn" : "ok",
