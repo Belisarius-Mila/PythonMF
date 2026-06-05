@@ -47,6 +47,7 @@ let boxData = defaultBoxData;
 let medicineData = {};
 let privateDataLoadPromise = null;
 let unlockPassword = "";
+let previousDrawerView = null;
 
 const symptomIntents = [
   {
@@ -204,7 +205,7 @@ document.querySelectorAll("[data-action]").forEach((button) => {
   });
 });
 
-closeDrawer.addEventListener("click", () => drawer.classList.remove("is-open"));
+closeDrawer.addEventListener("click", closeCurrentDrawerView);
 
 async function unlock() {
   lockScreen.classList.add("is-hidden");
@@ -225,6 +226,39 @@ function openDrawer() {
 function resetDrawerMode() {
   drawer.classList.remove("is-detail");
   drawer.classList.remove("is-recommendation");
+  previousDrawerView = null;
+}
+
+function captureDrawerView() {
+  previousDrawerView = {
+    isDetail: drawer.classList.contains("is-detail"),
+    isRecommendation: drawer.classList.contains("is-recommendation"),
+    kicker: drawerKicker.textContent,
+    title: drawerTitle.textContent,
+    content: drawerContent.innerHTML,
+  };
+}
+
+function restorePreviousDrawerView() {
+  if (!previousDrawerView) return false;
+  const previous = previousDrawerView;
+  previousDrawerView = null;
+  drawer.classList.toggle("is-detail", previous.isDetail);
+  drawer.classList.toggle("is-recommendation", previous.isRecommendation);
+  drawerKicker.textContent = previous.kicker;
+  drawerTitle.textContent = previous.title;
+  drawerContent.innerHTML = previous.content;
+  bindDrawerContentActions();
+  openDrawer();
+  return true;
+}
+
+function closeCurrentDrawerView() {
+  if (drawer.classList.contains("is-detail") && restorePreviousDrawerView()) {
+    return;
+  }
+  previousDrawerView = null;
+  drawer.classList.remove("is-open");
 }
 
 function openBox(key) {
@@ -271,6 +305,7 @@ function renderBoxExtraActions(key) {
 }
 
 function openVitaminRecommendation() {
+  captureDrawerView();
   drawer.classList.add("is-detail", "is-recommendation");
   drawerKicker.textContent = vitaminRecommendation.kicker;
   drawerTitle.textContent = vitaminRecommendation.title;
@@ -283,6 +318,7 @@ function openVitaminRecommendation() {
 }
 
 function openMedicine(name) {
+  captureDrawerView();
   const medicine = medicineData[name] || {};
   drawer.classList.add("is-detail");
   drawerKicker.textContent = "Detail léku";
@@ -582,22 +618,50 @@ function openSymptoms() {
         button.addEventListener("click", () => {
           const intent = symptomIntents[Number(button.dataset.intentIndex)];
           result.innerHTML = renderSymptomMatches([intent]);
-          result.querySelectorAll("[data-medicine]").forEach((medicineButton) => {
-            medicineButton.addEventListener("click", () => openMedicine(medicineButton.dataset.medicine));
-          });
+          bindDrawerContentActions();
         });
       });
       result.querySelector("#copyChatGptPrompt").addEventListener("click", () => copyChatGptPrompt(chatGptPrompt));
-      result.querySelector("#closeQuestion").addEventListener("click", () => drawer.classList.remove("is-open"));
+      result.querySelector("#closeQuestion").addEventListener("click", closeCurrentDrawerView);
       return;
     }
     result.innerHTML = renderSymptomMatches(matches);
-    result.querySelectorAll("[data-medicine]").forEach((button) => {
-      button.addEventListener("click", () => openMedicine(button.dataset.medicine));
-    });
+    bindDrawerContentActions();
   });
   openDrawer();
   input.focus();
+}
+
+function bindDrawerContentActions() {
+  drawerContent.querySelectorAll("[data-panel-action]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (button.dataset.panelAction === "vitamin-recommendation") {
+        openVitaminRecommendation();
+      }
+    });
+  });
+  drawerContent.querySelectorAll("[data-medicine]").forEach((button) => {
+    button.addEventListener("click", () => openMedicine(button.dataset.medicine));
+  });
+  drawerContent.querySelectorAll("[data-intent-index]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const intent = symptomIntents[Number(button.dataset.intentIndex)];
+      const result = drawerContent.querySelector("#symptomResult") || drawerContent;
+      result.innerHTML = renderSymptomMatches([intent]);
+      bindDrawerContentActions();
+    });
+  });
+  const copyPromptButton = drawerContent.querySelector("#copyChatGptPrompt");
+  if (copyPromptButton) {
+    copyPromptButton.addEventListener("click", () => {
+      const promptBox = drawerContent.querySelector(".chatgpt-prompt-copy");
+      copyChatGptPrompt(promptBox ? promptBox.value : "");
+    });
+  }
+  const closeQuestionButton = drawerContent.querySelector("#closeQuestion");
+  if (closeQuestionButton) {
+    closeQuestionButton.addEventListener("click", closeCurrentDrawerView);
+  }
 }
 
 function containsUrgentTerm(query) {
