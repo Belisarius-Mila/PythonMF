@@ -3555,22 +3555,75 @@ def public_document_case_conflict(conflict: dict[str, Any]) -> dict[str, Any]:
 
 def document_case_health_status(
     *,
+    documents: list[dict[str, Any]] | None = None,
     reminders: list[dict[str, Any]],
     due_candidates: list[dict[str, Any]],
     conflicts: list[dict[str, Any]],
 ) -> dict[str, Any]:
+    document_items = documents or []
     actionable_count = sum(1 for item in due_candidates if item.get("status") == "ready")
     already_count = sum(1 for item in due_candidates if item.get("status") == "already_reminded")
     conflict_count = len(conflicts)
     reminder_count = len(reminders)
+    review_document_count = sum(
+        1
+        for item in document_items
+        if str(item.get("reading_status", "") or "").casefold() in {"needs_review", "unreadable"}
+    )
+    signals: list[dict[str, str]] = []
+    if conflict_count:
+        signals.append(
+            {
+                "level": "bad",
+                "label": "Konflikt",
+                "detail": f"{conflict_count} konfliktů v připomínkách nebo platbách.",
+                "next_action": "Porovnat konfliktní podklady a nekonat platbu naslepo.",
+            }
+        )
+    if actionable_count:
+        signals.append(
+            {
+                "level": "warn",
+                "label": "Termíny ke schválení",
+                "detail": f"{actionable_count} termínů z dokumentů čeká na rozhodnutí.",
+                "next_action": "Ověřit, zda jde o skutečný závazek, a případně vytvořit připomínku.",
+            }
+        )
+    if review_document_count:
+        signals.append(
+            {
+                "level": "warn",
+                "label": "Dokumenty k revizi",
+                "detail": f"{review_document_count} dokumentů v case není potvrzeno jako OK.",
+                "next_action": "Otevřít dokumenty k revizi a doplnit stav čtení.",
+            }
+        )
+    if reminder_count:
+        signals.append(
+            {
+                "level": "ok",
+                "label": "Otevřené hlídání",
+                "detail": f"{reminder_count} otevřených připomínek je navázáno na case.",
+                "next_action": "Bez nové akce, pokud připomínka odpovídá platnému závazku.",
+            }
+        )
+    if already_count:
+        signals.append(
+            {
+                "level": "ok",
+                "label": "Termíny už hlídané",
+                "detail": f"{already_count} termínů už má existující připomínku.",
+                "next_action": "Nevytvářet duplicitní připomínku.",
+            }
+        )
     if conflict_count:
         status = "bad"
         label = "konflikt"
         recommendation = "Nejdřív porovnat konfliktní připomínky a nekonat platbu naslepo."
-    elif actionable_count:
+    elif actionable_count or review_document_count:
         status = "warn"
         label = "zkontrolovat"
-        recommendation = "Zkontrolovat termíny ke schválení a vytvořit připomínku jen pro skutečně platný závazek."
+        recommendation = "Zkontrolovat termíny nebo dokumenty k revizi a akci udělat jen pro skutečně platný závazek."
     elif reminder_count or already_count:
         status = "ok"
         label = "hlídáno"
@@ -3579,6 +3632,15 @@ def document_case_health_status(
         status = "ok"
         label = "bez akce"
         recommendation = "Není nalezen konflikt ani termín, který by teď vyžadoval akci."
+    if not signals:
+        signals.append(
+            {
+                "level": "ok",
+                "label": "Bez akčního nálezu",
+                "detail": "Case nemá konflikt, nový termín ke schválení ani dokument k revizi.",
+                "next_action": "Nic akutního.",
+            }
+        )
     return {
         "status": status,
         "label": label,
@@ -3586,9 +3648,12 @@ def document_case_health_status(
         "actionable_due_count": actionable_count,
         "already_reminded_due_count": already_count,
         "conflict_count": conflict_count,
+        "review_document_count": review_document_count,
+        "signals": signals,
         "summary": (
             f"Stav: připomínky {reminder_count}, konflikty {conflict_count}, "
-            f"termíny ke schválení {actionable_count}. Doporučení: {recommendation}"
+            f"termíny ke schválení {actionable_count}, dokumenty k revizi {review_document_count}. "
+            f"Doporučení: {recommendation}"
         ),
     }
 
@@ -4663,6 +4728,7 @@ def document_case_detail_status(
         public_due_candidates = [public_document_due_candidate(item) for item in due_candidates]
         public_conflicts = [public_document_case_conflict(conflict) for conflict in conflicts]
         case_health = document_case_health_status(
+            documents=documents,
             reminders=public_reminders,
             due_candidates=public_due_candidates,
             conflicts=public_conflicts,
@@ -8748,6 +8814,7 @@ COCKPIT_HTML = """<!doctype html>
         health.className = "case-status-row";
         health.textContent = data.case_health.summary;
         target.appendChild(health);
+        appendDocumentCaseHealthSignals(target, data.case_health.signals || []);
       }
       appendDocumentCaseSection(
         target,
@@ -8815,6 +8882,31 @@ COCKPIT_HTML = """<!doctype html>
         note.textContent = "Detail case je zkrácený.";
         target.appendChild(note);
       }
+    }
+
+    function appendDocumentCaseHealthSignals(target, signals) {
+      if (!signals.length) return;
+      const title = document.createElement("div");
+      title.className = "case-section-title";
+      title.textContent = "Proč tento stav";
+      target.appendChild(title);
+      signals.forEach((signal) => {
+        const row = document.createElement("div");
+        row.className = "case-status-row";
+        const heading = document.createElement("div");
+        heading.className = `search-title ${signal.level === "bad" ? "bad" : signal.level === "warn" ? "warn" : "ok"}`;
+        heading.textContent = signal.label || "Signál";
+        const detail = document.createElement("div");
+        detail.className = "work-meta";
+        detail.textContent = signal.detail || "";
+        const action = document.createElement("div");
+        action.className = "work-meta";
+        action.textContent = signal.next_action ? `Co teď: ${signal.next_action}` : "";
+        row.appendChild(heading);
+        if (detail.textContent) row.appendChild(detail);
+        if (action.textContent) row.appendChild(action);
+        target.appendChild(row);
+      });
     }
 
     async function openCaseDocument(documentRef, button) {

@@ -343,6 +343,7 @@ class CockpitTests(unittest.TestCase):
                         "document_type": "insurance_policy",
                         "counterparty": "ČPP",
                         "related_asset": "auto",
+                        "reading_status": "ok",
                     },
                     {
                         "document_id": "auto-doc-2",
@@ -351,6 +352,7 @@ class CockpitTests(unittest.TestCase):
                         "document_type": "invoice",
                         "counterparty": "ČPP",
                         "related_asset": "auto",
+                        "reading_status": "ok",
                     },
                 ],
             )
@@ -392,10 +394,30 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(detail["due_candidates"][0]["status"], "already_reminded")
         self.assertEqual(detail["case_health"]["status"], "ok")
         self.assertEqual(detail["case_health"]["open_reminder_count"], 1)
+        self.assertEqual(detail["case_health"]["review_document_count"], 0)
+        signal_labels = [item["label"] for item in detail["case_health"]["signals"]]
+        self.assertIn("Otevřené hlídání", signal_labels)
+        self.assertIn("Termíny už hlídané", signal_labels)
         serialized = json.dumps(detail, ensure_ascii=False)
         self.assertNotIn("document_id", serialized)
         self.assertNotIn('"id"', serialized)
         self.assertNotIn("auto-doc-1", serialized)
+
+    def test_document_case_health_reports_documents_needing_review(self) -> None:
+        health = cockpit_module.document_case_health_status(
+            documents=[
+                {"title": "OK", "reading_status": "ok"},
+                {"title": "K revizi", "reading_status": "needs_review"},
+            ],
+            reminders=[],
+            due_candidates=[],
+            conflicts=[],
+        )
+
+        self.assertEqual(health["status"], "warn")
+        self.assertEqual(health["review_document_count"], 1)
+        self.assertIn("Dokumenty k revizi", [item["label"] for item in health["signals"]])
+        self.assertIn("dokumenty k revizi", health["summary"])
 
     def test_document_classification_status_reports_missing_metadata_fields(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -1011,6 +1033,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Detail case", COCKPIT_HTML)
         self.assertIn("loadDocumentCaseDetail", COCKPIT_HTML)
         self.assertIn("appendDocumentCaseSection", COCKPIT_HTML)
+        self.assertIn("appendDocumentCaseHealthSignals", COCKPIT_HTML)
+        self.assertIn("Proč tento stav", COCKPIT_HTML)
         self.assertIn("Termíny case", COCKPIT_HTML)
         self.assertIn("/api/documents/case-detail", COCKPIT_HTML)
         self.assertIn("Klasifikace", COCKPIT_HTML)
