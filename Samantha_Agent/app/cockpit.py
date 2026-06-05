@@ -8046,6 +8046,7 @@ COCKPIT_HTML = """<!doctype html>
 		        </div>
 		        <div id="voiceCommandStatus" class="status-line">Pokyn se po přepisu automaticky uloží pro Codex. Adam reaguje jen při spuštěném watcheru.</div>
 		        <div id="voiceModeRuntimeStatus" class="status-line">Adam Voice Mode watcher: čekám na kontrolu.</div>
+		        <div id="voicePendingStatus" class="status-line">Žádný hlasový pokyn nečeká na Adama.</div>
 	        <div class="voice-transcript-row">
 	          <label for="voiceTranscript">Přepis</label>
 	          <textarea id="voiceTranscript" placeholder="Tady se objeví přepsaný hlasový pokyn." spellcheck="true"></textarea>
@@ -8432,6 +8433,7 @@ COCKPIT_HTML = """<!doctype html>
     const voiceStopBtn = document.getElementById("voiceStopBtn");
     const voiceCommandStatus = document.getElementById("voiceCommandStatus");
     const voiceModeRuntimeStatus = document.getElementById("voiceModeRuntimeStatus");
+    const voicePendingStatus = document.getElementById("voicePendingStatus");
     const voiceTranscript = document.getElementById("voiceTranscript");
     const urgentReminderAlert = document.getElementById("urgentReminderAlert");
     const urgentReminderAlertTitle = document.getElementById("urgentReminderAlertTitle");
@@ -8561,6 +8563,7 @@ COCKPIT_HTML = """<!doctype html>
         "voiceModeStartBtn",
         "voiceModeStopBtn",
         "voiceModeRuntimeStatus",
+        "voicePendingStatus",
         "voiceRecordBtn",
         "voiceStopBtn",
         "urgentReminderAlertBtn",
@@ -9690,13 +9693,23 @@ COCKPIT_HTML = """<!doctype html>
       const voiceRunning = Boolean(voiceMode.running);
       const voiceState = voiceMode.state || "unknown";
       const voiceMessage = voiceMode.message || "Adam Voice Mode stav není načtený.";
+      const voicePending = voiceMode.pending_for_adam || {};
+      const voicePendingActive = Boolean(voicePending.pending);
+      const voicePendingText = String(voicePending.text || "");
+      const voicePendingShort = voicePendingText.length > 160 ? `${voicePendingText.slice(0, 160)}...` : voicePendingText;
+      const voicePendingDashboard = voicePendingActive ? `<br><span class="warn">čeká pokyn</span>` : "";
       dashboardVoiceMode.innerHTML = voiceRunning
-        ? `<span class="ok">Adam poslouchá</span><br>${voiceState}`
-        : `<span class="${voiceModeEnabled ? "warn" : "ok"}">${voiceModeEnabled ? "Adam neposlouchá" : "vypnuto"}</span><br>${voiceState}`;
+        ? `<span class="ok">Adam poslouchá</span><br>${escapeHtml(voiceState)}${voicePendingDashboard}`
+        : `<span class="${voiceModeEnabled || voicePendingActive ? "warn" : "ok"}">${voiceModeEnabled ? "Adam neposlouchá" : "vypnuto"}</span><br>${escapeHtml(voiceState)}${voicePendingDashboard}`;
       if (voiceModeRuntimeStatus) {
         voiceModeRuntimeStatus.textContent = voiceRunning
           ? `Adam Voice Mode watcher běží: ${voiceMessage}`
           : `Adam Voice Mode watcher neběží: ${voiceMessage}`;
+      }
+      if (voicePendingStatus) {
+        voicePendingStatus.textContent = voicePendingActive
+          ? `Čeká hlasový pokyn na Adama: ${voicePendingShort || voicePending.message || "bez textu"}`
+          : voicePending.message || "Žádný hlasový pokyn nečeká na Adama.";
       }
       if (voiceModeStartBtn) {
         voiceModeStartBtn.disabled = voiceRunning;
@@ -9709,8 +9722,10 @@ COCKPIT_HTML = """<!doctype html>
       }
       setDashboardStatusSignal(
         "voice",
-        voiceModeEnabled && !voiceRunning ? "warn" : "ok",
-        voiceModeEnabled && !voiceRunning
+        voicePendingActive || (voiceModeEnabled && !voiceRunning) ? "warn" : "ok",
+        voicePendingActive
+          ? "Čeká hlasový pokyn na převzetí Adamem v Codexu"
+          : voiceModeEnabled && !voiceRunning
           ? "Hlasový mód je v UI zapnutý, ale Adam Voice Mode watcher neběží"
           : voiceRunning
             ? "Adam Voice Mode watcher běží"

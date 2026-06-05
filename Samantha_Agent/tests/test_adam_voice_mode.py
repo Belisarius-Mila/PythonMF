@@ -9,6 +9,7 @@ from pathlib import Path
 from app.speech.adam_voice_mode import (
     build_spoken_result_for_command,
     handle_voice_command,
+    load_pending_for_adam,
     load_voice_mode_status,
     spoken_notice_for_command,
     voice_command_needs_codex_work,
@@ -90,15 +91,52 @@ class AdamVoiceModeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             inbox = Path(temp_dir)
             latest = inbox / "latest_voice_command.md"
+            pending_path = inbox / "pending_for_adam.json"
             write_voice_command(latest, "Adame, najdi stav dokumentů v Cockpitu.")
             command = load_latest_voice_command(inbox_dir=inbox)
 
         response = build_spoken_result_for_command(
             command,
             response_generator=lambda text: self.fail("work command should not call direct responder"),
+            pending_path=pending_path,
         )
 
         self.assertIn("vyžaduje pracovní převzetí", response)
+        pending = json.loads(pending_path.read_text(encoding="utf-8"))
+        self.assertTrue(pending["pending"])
+        self.assertEqual(pending["reason"], "codex_work")
+        self.assertEqual(pending["text"], "Adame, najdi stav dokumentů v Cockpitu.")
+
+    def test_handle_voice_command_saves_codex_work_as_pending_for_adam(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            inbox = Path(temp_dir)
+            latest = inbox / "latest_voice_command.md"
+            status_path = inbox / "adam_voice_mode_status.json"
+            pending_path = inbox / "pending_for_adam.json"
+            write_voice_command(latest, "Adame, kolik jsme dnes napsali řádků kódu?")
+            command = load_latest_voice_command(inbox_dir=inbox)
+
+            result = handle_voice_command(
+                command,
+                response_generator=lambda text: self.fail("work command should not call direct responder"),
+                should_speak=False,
+                status_path=status_path,
+                pending_path=pending_path,
+            )
+            status = json.loads(status_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(status["state"], "pending_for_adam")
+        self.assertTrue(result["pending_for_adam"]["pending"])
+        self.assertEqual(result["pending_for_adam"]["reason"], "codex_work")
+        self.assertIn("řádků kódu", result["pending_for_adam"]["text"])
+
+    def test_load_pending_for_adam_reports_missing_file(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            pending = load_pending_for_adam(path=Path(temp_dir) / "pending_for_adam.json")
+
+        self.assertTrue(pending["ok"])
+        self.assertFalse(pending["pending"])
+        self.assertEqual(pending["status"], "none")
 
     def test_voice_command_needs_codex_work_keeps_greetings_direct(self) -> None:
         self.assertFalse(voice_command_needs_codex_work("Janička přijela a zdraví tě. Co jí řekneš?"))
@@ -144,6 +182,7 @@ class AdamVoiceModeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             inbox = Path(temp_dir)
             status_path = inbox / "status.json"
+            pending_path = inbox / "pending_for_adam.json"
             write_voice_command(inbox / "latest_voice_command.md", "Najdi stav projektu Dokumenty.")
             completed = subprocess.run(
                 [
@@ -153,6 +192,8 @@ class AdamVoiceModeTests(unittest.TestCase):
                     str(inbox),
                     "--status-path",
                     str(status_path),
+                    "--pending-path",
+                    str(pending_path),
                     "--include-existing",
                     "--count",
                     "1",
@@ -168,6 +209,7 @@ class AdamVoiceModeTests(unittest.TestCase):
                 check=False,
             )
             payload = json.loads(status_path.read_text(encoding="utf-8"))
+            pending = json.loads(pending_path.read_text(encoding="utf-8"))
 
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertIn("VOICE INBOX TRIAGE", completed.stdout)
@@ -175,6 +217,33 @@ class AdamVoiceModeTests(unittest.TestCase):
         self.assertIn("Najdi stav projektu Dokumenty.", completed.stdout)
         self.assertEqual(payload["state"], "completed")
         self.assertEqual(payload["last_command"]["text"], "Najdi stav projektu Dokumenty.")
+        self.assertEqual(pending["reason"], "codex_work")
+
+    def test_adam_voice_pending_cli_prints_waiting_command(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            pending_path = Path(temp_dir) / "pending_for_adam.json"
+            latest = Path(temp_dir) / "latest_voice_command.md"
+            write_voice_command(latest, "Zkontroluj dnešní řádky kódu.")
+            command = load_latest_voice_command(inbox_dir=Path(temp_dir))
+            save_result = build_spoken_result_for_command(command, pending_path=pending_path)
+            completed = subprocess.run(
+                [
+                    ".venv/bin/python",
+                    "scripts/adam_voice_pending.py",
+                    "--path",
+                    str(pending_path),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=8,
+                check=False,
+            )
+
+        self.assertIn("pracovní převzetí", save_result)
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertIn("ADAM VOICE PENDING", completed.stdout)
+        self.assertIn("pending: true", completed.stdout)
+        self.assertIn("Zkontroluj dnešní řádky kódu.", completed.stdout)
 
 
 if __name__ == "__main__":

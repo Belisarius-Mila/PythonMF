@@ -23,6 +23,7 @@ from app.speech.voice_inbox import (
 
 
 ADAM_VOICE_MODE_STATUS_PATH = VOICE_COMMAND_INBOX_DIR / "adam_voice_mode_status.json"
+ADAM_PENDING_COMMAND_PATH = VOICE_COMMAND_INBOX_DIR / "pending_for_adam.json"
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 DIRECT_RESPONSE_INSTRUCTIONS = """
@@ -74,11 +75,67 @@ def write_voice_mode_status(
     return payload
 
 
+def save_pending_for_adam(
+    command: VoiceCommand,
+    *,
+    reason: str,
+    message: str,
+    path: Path = ADAM_PENDING_COMMAND_PATH,
+) -> dict[str, Any]:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    now = utc_now()
+    payload: dict[str, Any] = {
+        "ok": True,
+        "pending": True,
+        "status": "pending_for_adam",
+        "reason": reason,
+        "message": message,
+        "text": command.text.strip(),
+        "command": voice_command_to_dict(command),
+        "created_at": now,
+        "updated_at": now,
+        "path": str(path),
+    }
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return payload
+
+
+def load_pending_for_adam(
+    *,
+    path: Path = ADAM_PENDING_COMMAND_PATH,
+) -> dict[str, Any]:
+    if not path.exists():
+        return {
+            "ok": True,
+            "pending": False,
+            "status": "none",
+            "message": "Žádný hlasový pokyn nečeká na Adama.",
+            "path": str(path),
+        }
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return {
+            "ok": False,
+            "pending": False,
+            "status": "error",
+            "message": f"Čekající hlasový pokyn nejde načíst: {exc}",
+            "path": str(path),
+        }
+    payload.setdefault("ok", True)
+    payload.setdefault("pending", payload.get("status") == "pending_for_adam")
+    payload.setdefault("status", "pending_for_adam" if payload.get("pending") else "unknown")
+    payload.setdefault("path", str(path))
+    return payload
+
+
 def load_voice_mode_status(
     *,
     status_path: Path = ADAM_VOICE_MODE_STATUS_PATH,
+    pending_path: Path = ADAM_PENDING_COMMAND_PATH,
     stale_after_seconds: float = 15.0,
 ) -> dict[str, Any]:
+    pending_for_adam = load_pending_for_adam(path=pending_path)
     if not status_path.exists():
         return {
             "ok": True,
@@ -86,6 +143,7 @@ def load_voice_mode_status(
             "state": "stopped",
             "message": "Adam Voice Mode watcher neběží.",
             "status_path": str(status_path),
+            "pending_for_adam": pending_for_adam,
         }
     try:
         payload = json.loads(status_path.read_text(encoding="utf-8"))
@@ -96,6 +154,7 @@ def load_voice_mode_status(
             "state": "unknown",
             "message": f"Stav Adam Voice Mode nejde načíst: {exc}",
             "status_path": str(status_path),
+            "pending_for_adam": pending_for_adam,
         }
 
     pid = int(payload.get("pid") or 0)
@@ -114,6 +173,7 @@ def load_voice_mode_status(
     payload["stale"] = not running
     payload["age_seconds"] = age_seconds
     payload["status_path"] = str(status_path)
+    payload["pending_for_adam"] = pending_for_adam
     if not running and payload.get("state") == "listening":
         payload["state"] = "stale"
         payload["message"] = "Adam Voice Mode watcher pravděpodobně neběží nebo se dlouho neozval."
@@ -151,6 +211,11 @@ def voice_command_needs_codex_work(text: str) -> bool:
         "commit",
         "push",
         "git",
+        "kód",
+        "kod",
+        "řádk",
+        "radk",
+        "napsali",
         "cockpit",
         "dokument",
         "projekt",
@@ -182,6 +247,16 @@ def voice_command_needs_codex_work(text: str) -> bool:
     return any(term in folded for term in work_terms)
 
 
+def pending_reason_for_command(command: VoiceCommand) -> str | None:
+    if not command.ok:
+        return None
+    if command.triage.risk in {"blocked", "needs_confirmation"}:
+        return "requires_confirmation"
+    if voice_command_needs_codex_work(command.text):
+        return "codex_work"
+    return None
+
+
 def generate_direct_voice_response(
     text: str,
     *,
@@ -202,19 +277,30 @@ def build_spoken_result_for_command(
     command: VoiceCommand,
     *,
     response_generator: Callable[[str], str] = generate_direct_voice_response,
+    pending_path: Path | None = ADAM_PENDING_COMMAND_PATH,
 ) -> str:
     triage = command.triage
     text = command.text.strip()
     if not command.ok:
         return "Hlasový pokyn nemá použitelný text. Zkus ho prosím nahrát znovu."
-    if triage.risk in {"blocked", "needs_confirmation"}:
-        return "Pokyn jsem přijal, ale je rizikový nebo mění data. Neprovedu ho bez výslovného potvrzení v chatu."
-    if voice_command_needs_codex_work(text):
-        return "Pokyn jsem přijal. Tohle vyžaduje pracovní převzetí Adamem v Codexu, takže ho nechávám připravený v hlasovém inboxu."
+    pending_reason = pending_reason_for_command(command)
+    if pending_reason == "requires_confirmation":
+        message = "Pokyn jsem přijal, ale je rizikový nebo mění data. Neprovedu ho bez výslovného potvrzení v chatu."
+        if pending_path is not None:
+            save_pending_for_adam(command, reason=pending_reason, message=message, path=pending_path)
+        return message
+    if pending_reason == "codex_work":
+        message = "Pokyn jsem přijal. Tohle vyžaduje pracovní převzetí Adamem v Codexu, takže ho nechávám připravený v hlasovém inboxu."
+        if pending_path is not None:
+            save_pending_for_adam(command, reason=pending_reason, message=message, path=pending_path)
+        return message
     try:
         return response_generator(text)
     except Exception:
-        return "Pokyn jsem přijal, ale automatická odpověď se nepovedla. Nechávám ho připravený Adamovi k převzetí v Codexu."
+        message = "Pokyn jsem přijal, ale automatická odpověď se nepovedla. Nechávám ho připravený Adamovi k převzetí v Codexu."
+        if pending_path is not None:
+            save_pending_for_adam(command, reason="direct_response_failed", message=message, path=pending_path)
+        return message
 
 
 def handle_voice_command(
@@ -224,13 +310,19 @@ def handle_voice_command(
     response_generator: Callable[[str], str] = generate_direct_voice_response,
     should_speak: bool = True,
     status_path: Path = ADAM_VOICE_MODE_STATUS_PATH,
+    pending_path: Path | None = ADAM_PENDING_COMMAND_PATH,
     started_at: str | None = None,
 ) -> dict[str, Any]:
-    spoken_result = build_spoken_result_for_command(command, response_generator=response_generator)
+    spoken_result = build_spoken_result_for_command(
+        command,
+        response_generator=response_generator,
+        pending_path=pending_path,
+    )
     speech_result = {"ok": True, "message": "Hlasové oznámení vypnuté.", "transport": "disabled"}
     if should_speak:
         speech_result = speak(spoken_result, allow_local_fallback=False)
-    state = "command_ready" if command.ok else "waiting"
+    pending = load_pending_for_adam(path=pending_path) if pending_path is not None else {"pending": False}
+    state = "pending_for_adam" if pending.get("pending") else "command_ready" if command.ok else "waiting"
     status = write_voice_mode_status(
         status_path=status_path,
         state=state,
@@ -245,6 +337,7 @@ def handle_voice_command(
         "command": voice_command_to_dict(command),
         "notice": spoken_result,
         "response": spoken_result,
+        "pending_for_adam": pending,
     }
 
 
@@ -252,6 +345,7 @@ def run_voice_mode(
     *,
     inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
     status_path: Path = ADAM_VOICE_MODE_STATUS_PATH,
+    pending_path: Path | None = ADAM_PENDING_COMMAND_PATH,
     since_now: bool = True,
     timeout_seconds: float = 0.0,
     poll_seconds: float = 1.0,
@@ -298,6 +392,7 @@ def run_voice_mode(
                 command,
                 should_speak=should_speak,
                 status_path=status_path,
+                pending_path=pending_path,
                 started_at=started_at,
             )
             printer(format_voice_command_for_adam(command))
@@ -329,6 +424,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Aktivní Adam Voice Mode watcher pro hlasový inbox.")
     parser.add_argument("--inbox-dir", type=Path, default=VOICE_COMMAND_INBOX_DIR)
     parser.add_argument("--status-path", type=Path, default=ADAM_VOICE_MODE_STATUS_PATH)
+    parser.add_argument("--pending-path", type=Path, default=ADAM_PENDING_COMMAND_PATH)
     parser.add_argument("--since-now", action="store_true", default=True, help="Ignorovat existující latest pokyn a čekat na nový.")
     parser.add_argument("--include-existing", action="store_true", help="Zpracovat i aktuální latest pokyn.")
     parser.add_argument("--timeout", type=float, default=0.0, help="Celkový timeout v sekundách. 0 znamená bez limitu.")
@@ -343,6 +439,7 @@ def main(argv: list[str] | None = None) -> int:
     return run_voice_mode(
         inbox_dir=args.inbox_dir,
         status_path=args.status_path,
+        pending_path=args.pending_path,
         since_now=not args.include_existing,
         timeout_seconds=args.timeout,
         poll_seconds=args.poll,
