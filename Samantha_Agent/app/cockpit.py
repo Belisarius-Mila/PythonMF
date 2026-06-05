@@ -7,6 +7,7 @@ import hashlib
 import os
 import re
 import shutil
+import signal
 import subprocess
 import tempfile
 import time
@@ -64,7 +65,11 @@ from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEm
 from app.reminders.query_tools import mark_reminder_done_text
 from app.reminders.store import DEFAULT_REMINDERS_PATH, load_reminders_store, write_reminders_store
 from app.speech import SpeechError, TranscriptionError, speak_text, transcribe_audio_base64
-from app.speech.adam_voice_mode import load_voice_mode_status
+from app.speech.adam_voice_mode import (
+    load_voice_mode_status,
+    pid_exists,
+    write_voice_mode_status,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -76,6 +81,8 @@ SCANDOCU_LOG_DIR = PROJECT_ROOT / "data" / "private" / "documents" / "scandocu"
 SCANDOCU_LOG_FILE = SCANDOCU_LOG_DIR / "server.log"
 SCANDOCU_SERVER_SCRIPT = PROJECT_ROOT / "scripts" / "scandocu_server.py"
 COCKPIT_RESTART_SCRIPT = PROJECT_ROOT / "scripts" / "restart_cockpit.py"
+ADAM_VOICE_MODE_SCRIPT = PROJECT_ROOT / "scripts" / "adam_voice_mode.py"
+ADAM_VOICE_MODE_LOG_FILE = PROJECT_ROOT / "data" / "private" / "voice_inbox" / "adam_voice_mode.log"
 EMAIL_SESSION_HANDOFF_DIR = PROJECT_ROOT / "data" / "private" / "email_session_handoffs"
 LOCAL_SEZNAM_EMAIL_DIR = PROJECT_ROOT / "data" / "private" / "email_seznam"
 EMAIL_PROCESSING_DECISIONS_FILE = EMAIL_SESSION_HANDOFF_DIR / "email_processing_decisions.json"
@@ -5951,6 +5958,99 @@ def start_cockpit_restart_action(
     }
 
 
+def start_adam_voice_mode_action(
+    *,
+    launcher: Callable[..., object] | None = None,
+    log_file: Path = ADAM_VOICE_MODE_LOG_FILE,
+) -> dict[str, Any]:
+    current = load_voice_mode_status()
+    if current.get("running"):
+        return {
+            "ok": True,
+            "status": "already_running",
+            "message": "Adam Voice Mode watcher už běží.",
+            "pid": current.get("pid"),
+            "voice_mode": current,
+        }
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+    log_handle = log_file.open("a", encoding="utf-8")
+    command_args = [
+        str(PROJECT_ROOT / ".venv" / "bin" / "python"),
+        str(ADAM_VOICE_MODE_SCRIPT),
+        "--poll",
+        "0.5",
+    ]
+    starter = launcher or subprocess.Popen
+    try:
+        process = starter(
+            command_args,
+            cwd=str(PROJECT_ROOT),
+            stdout=log_handle,
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
+        log_handle.close()
+    except OSError as exc:
+        log_handle.close()
+        return {
+            "ok": False,
+            "status": "watcher_failed",
+            "message": f"Adam Voice Mode watcher se nepodařilo spustit: {exc}",
+        }
+    pid = int(getattr(process, "pid", 0) or 0)
+    write_voice_mode_status(
+        state="starting",
+        message="Adam Voice Mode watcher se spouští.",
+        pid=pid,
+    )
+    return {
+        "ok": True,
+        "status": "started",
+        "message": "Adam Voice Mode watcher spuštěn. Teď můžeš nahrávat hlasové pokyny.",
+        "pid": pid,
+        "log": str(relative_to_project(log_file)),
+        "voice_mode": load_voice_mode_status(stale_after_seconds=60.0),
+    }
+
+
+def stop_adam_voice_mode_action() -> dict[str, Any]:
+    current = load_voice_mode_status(stale_after_seconds=60.0)
+    pid = int(current.get("pid") or 0)
+    if not current.get("running") or not pid_exists(pid):
+        write_voice_mode_status(
+            state="stopped",
+            message="Adam Voice Mode watcher neběží.",
+            pid=pid,
+        )
+        return {
+            "ok": True,
+            "status": "already_stopped",
+            "message": "Adam Voice Mode watcher neběží.",
+            "voice_mode": load_voice_mode_status(),
+        }
+    try:
+        os.kill(pid, signal.SIGTERM)
+    except OSError as exc:
+        return {
+            "ok": False,
+            "status": "stop_failed",
+            "message": f"Adam Voice Mode watcher se nepodařilo zastavit: {exc}",
+            "pid": pid,
+        }
+    write_voice_mode_status(
+        state="stopped",
+        message="Adam Voice Mode watcher byl zastaven z Cockpitu.",
+        pid=pid,
+    )
+    return {
+        "ok": True,
+        "status": "stopped",
+        "message": "Adam Voice Mode watcher zastaven.",
+        "pid": pid,
+        "voice_mode": load_voice_mode_status(),
+    }
+
+
 def open_terminal_command(command: str, label: str) -> dict[str, Any]:
     script = (
         'tell application "Terminal"\n'
@@ -6176,6 +6276,12 @@ class CockpitServer:
                 if parsed.path == "/api/speech/transcribe":
                     payload = self.read_json()
                     self.respond_json(cockpit_transcribe_voice_action(payload))
+                    return
+                if parsed.path == "/api/voice-mode/start":
+                    self.respond_json(start_adam_voice_mode_action())
+                    return
+                if parsed.path == "/api/voice-mode/stop":
+                    self.respond_json(stop_adam_voice_mode_action())
                     return
                 if parsed.path == "/api/cockpit/restart":
                     payload = self.read_json()
@@ -7932,6 +8038,8 @@ COCKPIT_HTML = """<!doctype html>
 		      <div class="body voice-command-grid">
 		        <div class="voice-command-actions">
 		          <button class="secondary" id="voiceModeToggleBtn" aria-pressed="false">Hlasový mód: vypnuto</button>
+		          <button class="secondary" id="voiceModeStartBtn">Spustit Adamův poslech</button>
+		          <button class="secondary" id="voiceModeStopBtn">Zastavit poslech</button>
 		          <button class="primary" id="voiceRecordBtn">Nahrát hlasový pokyn</button>
 		          <button class="secondary" id="voiceStopBtn" disabled>Zastavit a přepsat</button>
 		        </div>
@@ -8317,6 +8425,8 @@ COCKPIT_HTML = """<!doctype html>
 			    const dashboardRefreshBtn = document.getElementById("dashboardRefreshBtn");
     const dashboardActionHint = document.getElementById("dashboardActionHint");
     const voiceModeToggleBtn = document.getElementById("voiceModeToggleBtn");
+    const voiceModeStartBtn = document.getElementById("voiceModeStartBtn");
+    const voiceModeStopBtn = document.getElementById("voiceModeStopBtn");
     const voiceRecordBtn = document.getElementById("voiceRecordBtn");
     const voiceStopBtn = document.getElementById("voiceStopBtn");
     const voiceCommandStatus = document.getElementById("voiceCommandStatus");
@@ -8445,8 +8555,10 @@ COCKPIT_HTML = """<!doctype html>
 	        "dashboardRestartBtn",
 	        "dashboardSpeakBtn",
         "dashboardSpeakSelectionBtn",
-	        "dashboardRefreshBtn",
+        "dashboardRefreshBtn",
         "voiceModeToggleBtn",
+        "voiceModeStartBtn",
+        "voiceModeStopBtn",
         "voiceModeRuntimeStatus",
         "voiceRecordBtn",
         "voiceStopBtn",
@@ -9585,6 +9697,8 @@ COCKPIT_HTML = """<!doctype html>
           ? `Adam Voice Mode watcher běží: ${voiceMessage}`
           : `Adam Voice Mode watcher neběží: ${voiceMessage}`;
       }
+      if (voiceModeStartBtn) voiceModeStartBtn.disabled = voiceRunning;
+      if (voiceModeStopBtn) voiceModeStopBtn.disabled = !voiceRunning;
       setDashboardStatusSignal(
         "voice",
         voiceModeEnabled && !voiceRunning ? "warn" : "ok",
@@ -10407,6 +10521,40 @@ COCKPIT_HTML = """<!doctype html>
 		      voiceModeEnabled = !voiceModeEnabled;
 		      localStorage.setItem("samanthaVoiceModeEnabled", voiceModeEnabled ? "true" : "false");
 		      updateVoiceModeUi();
+		    }
+
+		    async function startVoiceModeWatcher() {
+		      voiceModeStartBtn.disabled = true;
+		      voiceCommandStatus.textContent = "Spouštím Adam Voice Mode watcher...";
+		      try {
+		        const data = await postJson("/api/voice-mode/start", {});
+		        voiceCommandStatus.textContent = data.message || "Adam Voice Mode watcher spuštěn.";
+		        if (data.ok) {
+		          voiceModeEnabled = true;
+		          localStorage.setItem("samanthaVoiceModeEnabled", "true");
+		        }
+		        await refresh({silent: true, includeSecondary: false});
+		      } catch (err) {
+		        recordFrontendError(err);
+		        voiceCommandStatus.textContent = `Adam Voice Mode watcher se nepodařilo spustit: ${err}`;
+		      } finally {
+		        updateVoiceModeUi();
+		      }
+		    }
+
+		    async function stopVoiceModeWatcher() {
+		      voiceModeStopBtn.disabled = true;
+		      voiceCommandStatus.textContent = "Zastavuji Adam Voice Mode watcher...";
+		      try {
+		        const data = await postJson("/api/voice-mode/stop", {});
+		        voiceCommandStatus.textContent = data.message || "Adam Voice Mode watcher zastaven.";
+		        await refresh({silent: true, includeSecondary: false});
+		      } catch (err) {
+		        recordFrontendError(err);
+		        voiceCommandStatus.textContent = `Adam Voice Mode watcher se nepodařilo zastavit: ${err}`;
+		      } finally {
+		        updateVoiceModeUi();
+		      }
 		    }
 
 	    async function startVoiceRecording() {
@@ -11665,6 +11813,8 @@ COCKPIT_HTML = """<!doctype html>
     dashboardSpeakBtn.addEventListener("click", speakDashboardStatus);
     dashboardSpeakSelectionBtn.addEventListener("click", speakSelectedText);
     voiceModeToggleBtn.addEventListener("click", toggleVoiceMode);
+    voiceModeStartBtn.addEventListener("click", startVoiceModeWatcher);
+    voiceModeStopBtn.addEventListener("click", stopVoiceModeWatcher);
     voiceRecordBtn.addEventListener("click", startVoiceRecording);
     voiceStopBtn.addEventListener("click", stopVoiceRecording);
     updateVoiceModeUi();

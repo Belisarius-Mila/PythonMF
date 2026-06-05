@@ -59,7 +59,9 @@ from app.cockpit import (
     save_email_processing_decision,
     search_document_index,
     set_document_reading_status_action,
+    start_adam_voice_mode_action,
     start_cockpit_restart_action,
+    stop_adam_voice_mode_action,
     urgent_reminder_done_action,
     urgent_reminders_status,
     update_document_classification_metadata_action,
@@ -992,6 +994,11 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("voiceModeToggleBtn", COCKPIT_HTML)
         self.assertIn("dashboardVoiceMode", COCKPIT_HTML)
         self.assertIn("voiceModeRuntimeStatus", COCKPIT_HTML)
+        self.assertIn("voiceModeStartBtn", COCKPIT_HTML)
+        self.assertIn("voiceModeStopBtn", COCKPIT_HTML)
+        self.assertIn("/api/voice-mode/start", COCKPIT_HTML)
+        self.assertIn("/api/voice-mode/stop", COCKPIT_HTML)
+        self.assertIn("Spustit Adamův poslech", COCKPIT_HTML)
         self.assertIn("Adam Voice Mode watcher", COCKPIT_HTML)
         self.assertIn("Hlasový mód: vypnuto", COCKPIT_HTML)
         self.assertIn("samanthaVoiceModeEnabled", COCKPIT_HTML)
@@ -1201,6 +1208,51 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("--pid", calls[0]["args"])
         self.assertIn("456", calls[0]["args"])
         self.assertTrue(calls[0]["start_new_session"])
+
+    def test_start_adam_voice_mode_action_launches_watcher_once(self) -> None:
+        calls: list[dict[str, object]] = []
+
+        def fake_launcher(args, **kwargs):
+            calls.append({"args": args, **kwargs})
+            return SimpleNamespace(pid=12345)
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            log_file = Path(temp_dir) / "adam_voice_mode.log"
+            with (
+                patch("app.cockpit.load_voice_mode_status", return_value={"running": False}),
+                patch("app.cockpit.write_voice_mode_status") as write_status,
+            ):
+                result = start_adam_voice_mode_action(launcher=fake_launcher, log_file=log_file)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "started")
+        self.assertEqual(result["pid"], 12345)
+        self.assertEqual(calls[0]["args"][1], str(cockpit_module.ADAM_VOICE_MODE_SCRIPT))
+        self.assertIn("--poll", calls[0]["args"])
+        self.assertTrue(calls[0]["start_new_session"])
+        write_status.assert_called()
+
+    def test_start_adam_voice_mode_action_reuses_running_watcher(self) -> None:
+        with patch("app.cockpit.load_voice_mode_status", return_value={"running": True, "pid": 12345}):
+            result = start_adam_voice_mode_action(launcher=lambda *args, **kwargs: self.fail("should not launch"))
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "already_running")
+        self.assertEqual(result["pid"], 12345)
+
+    def test_stop_adam_voice_mode_action_stops_running_watcher(self) -> None:
+        with (
+            patch("app.cockpit.load_voice_mode_status", return_value={"running": True, "pid": 12345}),
+            patch("app.cockpit.pid_exists", return_value=True),
+            patch("app.cockpit.os.kill") as kill,
+            patch("app.cockpit.write_voice_mode_status") as write_status,
+        ):
+            result = stop_adam_voice_mode_action()
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "stopped")
+        kill.assert_called_once_with(12345, cockpit_module.signal.SIGTERM)
+        write_status.assert_called()
 
     def test_cockpit_speak_action_returns_speech_result(self) -> None:
         with patch("app.cockpit.speak_text", return_value={"ok": True, "message": "Přečteno."}) as speak:
