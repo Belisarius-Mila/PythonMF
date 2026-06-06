@@ -79,7 +79,7 @@ PLIST
 install_service \
   "com.miloslavfalta.samantha.cockpit" \
   "8770" \
-  "cockpit_server.py" \
+  "cockpit_launchd_runner.py" \
   "$PROJECT_DIR/data/private/cockpit"
 
 install_service \
