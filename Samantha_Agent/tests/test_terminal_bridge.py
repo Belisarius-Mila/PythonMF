@@ -106,6 +106,8 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(result["status"], "delivered_vscode")
         self.assertEqual(result["terminal_status"]["status"], "terminal_delivery_failed")
+        self.assertTrue(result["verified"])
+        self.assertEqual(result["delivery_method"], "local_gui_vscode")
         self.assertEqual(len(calls), 2)
 
     def test_deliver_prompt_to_vscode_uses_osascript_arguments_without_shell(self) -> None:
@@ -127,6 +129,8 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertEqual(calls[0]["args"][0], "/usr/bin/osascript")
         self.assertEqual(calls[0]["args"][-1], "0")
         self.assertFalse(result["submitted"])
+        self.assertTrue(result["verified"])
+        self.assertEqual(result["delivery_method"], "local_gui_vscode")
 
     def test_vscode_applescript_does_not_paste_focus_command_text(self) -> None:
         script = vscode_applescript()
@@ -171,7 +175,7 @@ class TerminalBridgeTests(unittest.TestCase):
 
         def fake_tty_deliverer(tty, prompt, **kwargs):
             tty_calls.append((tty, prompt, kwargs))
-            return {"ok": True, "status": "delivered_tty", "submitted": kwargs.get("submit")}
+            return {"ok": True, "status": "delivered_tty", "submitted": kwargs.get("submit"), "verified": True}
 
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             marker = Path(temp_dir) / "current_codex_tty.json"
@@ -188,6 +192,43 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(result["status"], "delivered_tty")
         self.assertEqual(tty_calls[0][0], "ttys005")
+        self.assertEqual(runner_calls, [])
+
+    def test_deliver_prompt_does_not_use_gui_fallback_when_marked_tty_is_unverified(self) -> None:
+        runner_calls = []
+        tty_calls = []
+
+        def fake_runner(args, **kwargs):
+            runner_calls.append(args)
+            self.fail("marked tty unverified delivery must not use GUI fallback")
+
+        def fake_ps_runner(args, **kwargs):
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="100 1 ttys005 codex codex\n", stderr="")
+
+        def fake_tty_deliverer(tty, prompt, **kwargs):
+            tty_calls.append((tty, prompt, kwargs))
+            return {"ok": True, "status": "delivered_tty", "submitted": kwargs.get("submit"), "verified": False}
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker = Path(temp_dir) / "current_codex_tty.json"
+            marker.write_text('{"tty": "ttys005"}', encoding="utf-8")
+
+            result = deliver_prompt_to_terminal(
+                "Hlasový pokyn od Míly.",
+                runner=fake_runner,
+                ps_runner=fake_ps_runner,
+                script="return \"delivered\"",
+                marked_tty_path=marker,
+                tty_deliverer=fake_tty_deliverer,
+                vscode_fallback=False,
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "delivered_tty")
+        self.assertFalse(result["verified"])
+        self.assertEqual(result["delivery_method"], "marked_tty")
+        self.assertIn("nespouštím GUI fallback", result["message"])
+        self.assertEqual(len(tty_calls), 1)
         self.assertEqual(runner_calls, [])
 
     def test_deliver_prompt_reports_marked_tty_and_vscode_failures(self) -> None:

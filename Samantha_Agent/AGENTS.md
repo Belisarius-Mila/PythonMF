@@ -25,6 +25,11 @@ Tyto instrukce plati pro praci ve slozce `Samantha_Agent/`.
   Samantha Cockpit pres `scripts/start_cockpit.sh`. Cockpit bezi lokalne na
   `http://127.0.0.1:8770`. Pokud uz bezi, jen otevrit existujici adresu v
   prohlizeci; neukoncovat bezici relaci.
+- Kdyz Mila v Codex terminalu napise `Prosím převezmi voice marker` nebo podobnou
+  jasnou vetu o prevzeti voice markeru touto relaci, nejdrive odpovez presne:
+  `Mám převzít voice marker? y/n`. Teprve po odpovedi `y` nebo `ano` spust
+  `.venv/bin/python scripts/mark_current_codex_tty.py`. Pri `n` nebo `ne`
+  marker nemen.
 - Autosave nouzove obnovy ma bezet pri startu pres `samantha`: kazdych 10 minut uklada TXT/JSONL do `data/session_autosave/`.
 - Soubory v `data/session_autosave/` jsou jen nouzova obnova, nikdy je necommituj.
 

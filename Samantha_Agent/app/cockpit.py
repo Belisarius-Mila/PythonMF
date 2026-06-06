@@ -78,6 +78,11 @@ from app.speech.adam_voice_mode import (
     pid_exists,
     write_voice_mode_status,
 )
+from app.speech.terminal_bridge import (
+    CURRENT_CODEX_TTY_PATH,
+    discover_codex_ttys,
+    normalize_tty,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -2841,7 +2846,85 @@ def cockpit_status() -> dict[str, Any]:
         "urgent_reminders": urgent,
         "scandocu": probe_scandocu(),
         "voice_mode": load_voice_mode_status(),
+        "voice_bridge": adam_voice_bridge_status(),
         "git": git_status_summary(),
+    }
+
+
+def adam_voice_bridge_status(
+    *,
+    marker_path: Path = CURRENT_CODEX_TTY_PATH,
+    codex_tty_discoverer: Callable[[], list[str]] = discover_codex_ttys,
+    screen_runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+    expected_codex_session_limit: int = 3,
+) -> dict[str, Any]:
+    marker: dict[str, Any] = {}
+    try:
+        marker = json.loads(marker_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        marker = {}
+
+    marked_tty = normalize_tty(str(marker.get("tty") or ""))
+    try:
+        codex_ttys = [normalize_tty(item) for item in codex_tty_discoverer()]
+    except Exception:
+        codex_ttys = []
+    codex_ttys = [item for item in codex_ttys if item and item != "??"]
+
+    screen_status = "unknown"
+    screen_message = "screen stav nelze zjistit"
+    try:
+        completed = screen_runner(
+            ["screen", "-ls"],
+            capture_output=True,
+            text=True,
+            timeout=3,
+            check=False,
+        )
+        screen_output = f"{completed.stdout}\n{completed.stderr}".strip()
+        if completed.returncode == 0:
+            screen_status = "running"
+            screen_message = "screen běží"
+        elif "No Sockets found" in screen_output:
+            screen_status = "not_running"
+            screen_message = "screen neběží"
+        else:
+            screen_status = "unknown"
+            screen_message = screen_output or "screen stav nelze zjistit"
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        screen_message = str(exc)
+
+    warnings: list[str] = []
+    if not marked_tty:
+        warnings.append("není označené cílové TTY")
+    elif marked_tty not in codex_ttys:
+        warnings.append(f"označené TTY {marked_tty} není mezi aktivními Codex relacemi")
+    if len(codex_ttys) > expected_codex_session_limit:
+        warnings.append(f"běží {len(codex_ttys)} Codex relací, očekáváno nejvýše {expected_codex_session_limit}")
+    if screen_status == "not_running":
+        warnings.append("screen neběží")
+
+    target = marked_tty or "nezjištěno"
+    message = (
+        f"Bridge cílí na {target}. Codex relace: {len(codex_ttys)} "
+        f"(limit {expected_codex_session_limit}). {screen_message}."
+    )
+    if warnings:
+        message = f"{message} Pozor: {', '.join(warnings)}."
+
+    return {
+        "ok": True,
+        "status": "warn" if warnings else "ok",
+        "message": message,
+        "marked_tty": marked_tty,
+        "marked_at": str(marker.get("marked_at") or ""),
+        "parent_pid": marker.get("parent_pid"),
+        "codex_ttys": codex_ttys,
+        "codex_tty_count": len(codex_ttys),
+        "expected_codex_session_limit": expected_codex_session_limit,
+        "screen_status": screen_status,
+        "screen_message": screen_message,
+        "warnings": warnings,
     }
 
 
@@ -8132,6 +8215,8 @@ COCKPIT_HTML = """<!doctype html>
 		        </div>
 		        <div id="voiceCommandStatus" class="status-line">Pokyn se po přepisu automaticky uloží pro Codex. Adam reaguje jen při spuštěném watcheru.</div>
 		        <div id="voiceModeRuntimeStatus" class="status-line">Adam Voice Mode watcher: čekám na kontrolu.</div>
+		        <div id="voiceBridgeStatus" class="status-line">Terminálový bridge: čekám na kontrolu.</div>
+		        <div id="voiceBridgeSessions" class="status-line">Codex relace: čekám na kontrolu.</div>
 		        <div id="voicePendingStatus" class="status-line">Žádný hlasový pokyn nečeká na Adama.</div>
 	        <div class="voice-transcript-row">
 	          <label for="voiceTranscript">Přepis</label>
@@ -8519,6 +8604,8 @@ COCKPIT_HTML = """<!doctype html>
     const voiceStopBtn = document.getElementById("voiceStopBtn");
     const voiceCommandStatus = document.getElementById("voiceCommandStatus");
     const voiceModeRuntimeStatus = document.getElementById("voiceModeRuntimeStatus");
+    const voiceBridgeStatus = document.getElementById("voiceBridgeStatus");
+    const voiceBridgeSessions = document.getElementById("voiceBridgeSessions");
     const voicePendingStatus = document.getElementById("voicePendingStatus");
     const voiceTranscript = document.getElementById("voiceTranscript");
     const voiceTranscriptSendBtn = document.getElementById("voiceTranscriptSendBtn");
@@ -8660,6 +8747,8 @@ COCKPIT_HTML = """<!doctype html>
         "voiceModeStartBtn",
         "voiceModeStopBtn",
         "voiceModeRuntimeStatus",
+        "voiceBridgeStatus",
+        "voiceBridgeSessions",
         "voicePendingStatus",
         "voiceRecordBtn",
         "voiceStopBtn",
@@ -9787,22 +9876,48 @@ COCKPIT_HTML = """<!doctype html>
       );
 
       const voiceMode = data.voice_mode || {};
+      const voiceBridge = data.voice_bridge || {};
       latestVoiceModeRuntime = voiceMode;
       const voiceRunning = Boolean(voiceMode.running);
       const voiceState = voiceMode.state || "unknown";
       const voiceMessage = voiceMode.message || "Adam Voice Mode stav není načtený.";
+      const voiceBridgeWarn = voiceBridge.status === "warn" || voiceBridge.status === "missing";
+      const voiceBridgeMessage = voiceBridge.message || "Terminálový bridge stav není načtený.";
       const voicePending = voiceMode.pending_for_adam || {};
       const voicePendingActive = Boolean(voicePending.pending);
       const voicePendingText = String(voicePending.text || "");
       const voicePendingShort = voicePendingText.length > 160 ? `${voicePendingText.slice(0, 160)}...` : voicePendingText;
       const voicePendingDashboard = voicePendingActive ? `<br><span class="warn">čeká pokyn</span>` : "";
+      const voiceBridgeDashboard = voiceBridgeWarn ? `<br><span class="warn">${escapeHtml(voiceBridgeMessage)}</span>` : "";
       dashboardVoiceMode.innerHTML = voiceRunning
-        ? `<span class="ok">Adam poslouchá</span><br>${escapeHtml(voiceState)}${voicePendingDashboard}`
-        : `<span class="${voiceModeEnabled || voicePendingActive ? "warn" : "ok"}">${voiceModeEnabled ? "Adam neposlouchá" : "vypnuto"}</span><br>${escapeHtml(voiceState)}${voicePendingDashboard}`;
+        ? `<span class="${voiceBridgeWarn ? "warn" : "ok"}">Adam poslouchá</span><br>${escapeHtml(voiceState)}${voicePendingDashboard}${voiceBridgeDashboard}`
+        : `<span class="${voiceModeEnabled || voicePendingActive || voiceBridgeWarn ? "warn" : "ok"}">${voiceModeEnabled ? "Adam neposlouchá" : "vypnuto"}</span><br>${escapeHtml(voiceState)}${voicePendingDashboard}${voiceBridgeDashboard}`;
       if (voiceModeRuntimeStatus) {
         voiceModeRuntimeStatus.textContent = voiceRunning
           ? `Adam Voice Mode watcher běží: ${voiceMessage}`
           : `Adam Voice Mode watcher neběží: ${voiceMessage}`;
+      }
+      if (voiceBridgeStatus) {
+        voiceBridgeStatus.textContent = `Terminálový bridge: ${voiceBridgeMessage}`;
+        voiceBridgeStatus.classList.toggle("warn", voiceBridgeWarn);
+        voiceBridgeStatus.classList.toggle("ok", !voiceBridgeWarn);
+      }
+      if (voiceBridgeSessions) {
+        const markedTty = String(voiceBridge.marked_tty || "");
+        const codexTtys = Array.isArray(voiceBridge.codex_ttys)
+          ? voiceBridge.codex_ttys.map((item) => String(item || "")).filter(Boolean)
+          : [];
+        const sessionParts = codexTtys.map((tty) => (
+          tty === markedTty ? `${tty} -> voice bridge` : `${tty} -> Codex`
+        ));
+        if (markedTty && !codexTtys.includes(markedTty)) {
+          sessionParts.unshift(`${markedTty} -> voice bridge mimo běžící Codex relace`);
+        }
+        voiceBridgeSessions.textContent = sessionParts.length
+          ? `Codex relace: ${sessionParts.join(" | ")}`
+          : "Codex relace: žádná běžící relace nebyla nalezena";
+        voiceBridgeSessions.classList.toggle("warn", voiceBridgeWarn || (markedTty && !codexTtys.includes(markedTty)));
+        voiceBridgeSessions.classList.toggle("ok", !voiceBridgeWarn && (!markedTty || codexTtys.includes(markedTty)));
       }
       if (voicePendingStatus) {
         voicePendingStatus.textContent = voicePendingActive
@@ -9820,9 +9935,11 @@ COCKPIT_HTML = """<!doctype html>
       }
       setDashboardStatusSignal(
         "voice",
-        voicePendingActive || (voiceModeEnabled && !voiceRunning) ? "warn" : "ok",
+        voicePendingActive || voiceBridgeWarn || (voiceModeEnabled && !voiceRunning) ? "warn" : "ok",
         voicePendingActive
           ? "Čeká hlasový pokyn na převzetí Adamem v Codexu"
+          : voiceBridgeWarn
+          ? voiceBridgeMessage
           : voiceModeEnabled && !voiceRunning
           ? "Hlasový mód je v UI zapnutý, ale Adam Voice Mode watcher neběží"
           : voiceRunning
@@ -10803,6 +10920,7 @@ COCKPIT_HTML = """<!doctype html>
 	          const savedHint = data.latest_voice_command_path ? ` Uloženo: ${data.latest_voice_command_path}.` : "";
 	          const modeHint = voiceModeEnabled ? " Hlasový mód: čekám na Adamovo převzetí." : "";
 	          voiceCommandStatus.textContent = `${data.message || "Textový hlasový pokyn byl uložen."}${savedHint}${modeHint}`;
+	          voiceTranscript.value = "";
 	          await refresh({silent: true, includeSecondary: false});
 	        } else {
 	          voiceCommandStatus.textContent = data.message || "Textový hlasový pokyn se nepodařilo uložit.";

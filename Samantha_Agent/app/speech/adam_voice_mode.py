@@ -466,11 +466,28 @@ def build_spoken_result_for_command(
     if pending_reason == "codex_work":
         if terminal_bridge is not None:
             bridge_result = terminal_bridge(command)
-            if bridge_result.get("ok"):
+            if bridge_result.get("ok") and bridge_result.get("verified"):
                 message = "Pokyn jsem vložil do Codex terminálu. Adam ho převezme přímo tam."
                 if pending_path is not None:
                     mark_matching_pending_delivered_to_terminal(command, path=pending_path)
                 append_voice_history_turn(command, adam_response=message, route="terminal_bridge", path=history_path)
+                return message
+            if bridge_result.get("ok"):
+                bridge_status = str(bridge_result.get("status") or "terminal_delivery_unverified")
+                bridge_message = str(bridge_result.get("message") or "Terminálový bridge pokus nahlásil úspěch, ale doručení neumím ověřit.")
+                message = (
+                    "Pokusil jsem se pokyn vložit do Codex terminálu, ale neumím ověřit, že se skutečně objevil. "
+                    "Nechávám ho Adamovi připravený v hlasovém inboxu."
+                )
+                if pending_path is not None:
+                    save_pending_for_adam(
+                        command,
+                        reason="terminal_delivery_unverified",
+                        message=f"{message} Doručovací status: {bridge_status}. Detail: {bridge_message}",
+                        path=pending_path,
+                        history_path=history_path,
+                    )
+                append_voice_history_turn(command, adam_response=message, route="terminal_delivery_unverified", path=history_path)
                 return message
             bridge_status = str(bridge_result.get("status") or "terminal_bridge_failed")
             bridge_reason = str(bridge_result.get("reason") or bridge_result.get("message") or "Terminálový bridge pokyn nepřevzal.")

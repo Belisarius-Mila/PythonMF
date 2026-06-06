@@ -202,6 +202,7 @@ def deliver_prompt_to_tty(
         "message": f"Pokyn byl vložen do cílového Codex TTY {target_tty}.",
         "submitted": submit,
         "target_tty": target_tty,
+        "verified": False,
     }
 
 
@@ -303,6 +304,8 @@ def deliver_prompt_to_vscode(
         "status": "delivered_vscode",
         "message": "Pokyn byl vložen do aktivního VS Code terminálu.",
         "submitted": submit,
+        "verified": True,
+        "delivery_method": "local_gui_vscode",
     }
 
 
@@ -324,8 +327,17 @@ def deliver_prompt_to_terminal(
     marked_tty_error: dict[str, Any] | None = None
     if marked_tty:
         tty_result = tty_deliverer(marked_tty, safe_prompt, submit=submit)
-        if tty_result.get("ok"):
+        if tty_result.get("ok") and tty_result.get("verified"):
             return tty_result
+        if tty_result.get("ok"):
+            return {
+                **tty_result,
+                "message": (
+                    f"{tty_result.get('message') or 'Pokyn byl vložen do cílového TTY.'} "
+                    "Doručení do označené relace neumím ověřit, proto nespouštím GUI fallback."
+                ),
+                "delivery_method": "marked_tty",
+            }
         marked_tty_error = tty_result
 
     codex_ttys = discover_codex_ttys(runner=ps_runner)
@@ -383,6 +395,9 @@ def deliver_prompt_to_terminal(
         "message": "Pokyn byl vložen do Codex terminálu.",
         "submitted": submit,
         "target_ttys": codex_ttys,
+        "verified": True,
+        "delivery_method": "local_gui_terminal",
+        "marked_tty_status": marked_tty_error,
     }
 
 

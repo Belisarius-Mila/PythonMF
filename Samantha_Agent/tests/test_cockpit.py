@@ -14,6 +14,7 @@ from app.cockpit import (
     COCKPIT_HTML,
     EMAIL_PROCESSING_HTML,
     action_queue_status,
+    adam_voice_bridge_status,
     cancel_payment_reminder_action,
     cockpit_status,
     create_document_due_reminder_action,
@@ -1001,10 +1002,16 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("dashboardVoiceMode", COCKPIT_HTML)
         self.assertIn("voiceModeRuntimeStatus", COCKPIT_HTML)
         self.assertIn("voicePendingStatus", COCKPIT_HTML)
+        self.assertIn("voiceBridgeSessions", COCKPIT_HTML)
+        self.assertIn("-> voice bridge", COCKPIT_HTML)
+        self.assertIn("Codex relace:", COCKPIT_HTML)
         self.assertIn("Čeká hlasový pokyn na Adama", COCKPIT_HTML)
         self.assertIn("čeká pokyn", COCKPIT_HTML)
         self.assertIn("voiceModeStartBtn", COCKPIT_HTML)
         self.assertIn("voiceModeStopBtn", COCKPIT_HTML)
+        self.assertIn("voiceBridgeStatus", COCKPIT_HTML)
+        self.assertIn("Terminálový bridge", COCKPIT_HTML)
+        self.assertIn('voiceTranscript.value = "";', COCKPIT_HTML)
         self.assertIn("/api/voice-mode/start", COCKPIT_HTML)
         self.assertIn("/api/voice-mode/stop", COCKPIT_HTML)
         self.assertIn("Spustit Adamův poslech", COCKPIT_HTML)
@@ -1162,6 +1169,7 @@ class CockpitTests(unittest.TestCase):
             patch("app.cockpit.reminders_status", return_value={"ok": True, "counts": {}}),
             patch("app.cockpit.probe_scandocu", return_value={"running": False}),
             patch("app.cockpit.load_voice_mode_status", return_value={"ok": True, "running": False, "state": "stopped"}),
+            patch("app.cockpit.adam_voice_bridge_status", return_value={"ok": True, "status": "ok"}),
             patch("app.cockpit.git_status_summary", return_value={"ok": True}),
         ):
             status = cockpit_status()
@@ -1174,10 +1182,48 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("action_queue", status)
         self.assertIn("reminders", status)
         self.assertIn("voice_mode", status)
+        self.assertIn("voice_bridge", status)
         self.assertIn("git", status)
         self.assertNotIn("quantitative", status)
         self.assertNotIn("projects", status)
         self.assertNotIn("consistency", status)
+
+    def test_adam_voice_bridge_status_warns_about_multiple_codex_ttys_without_screen(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker_path = Path(temp_dir) / "current_codex_tty.json"
+            marker_path.write_text(
+                json.dumps(
+                    {
+                        "tty": "ttys002",
+                        "marked_at": "2026-06-06T05:07:45+00:00",
+                        "parent_pid": 73760,
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            def fake_screen_runner(*args, **kwargs):
+                return subprocess.CompletedProcess(
+                    args=args[0],
+                    returncode=1,
+                    stdout="",
+                    stderr="No Sockets found in /tmp/.screen.\n",
+                )
+
+            result = adam_voice_bridge_status(
+                marker_path=marker_path,
+                codex_tty_discoverer=lambda: ["ttys001", "ttys002"],
+                screen_runner=fake_screen_runner,
+                expected_codex_session_limit=1,
+            )
+
+        self.assertEqual(result["status"], "warn")
+        self.assertEqual(result["marked_tty"], "ttys002")
+        self.assertEqual(result["codex_ttys"], ["ttys001", "ttys002"])
+        self.assertEqual(result["codex_tty_count"], 2)
+        self.assertEqual(result["screen_status"], "not_running")
+        self.assertIn("běží 2 Codex relací, očekáváno nejvýše 1", result["warnings"])
+        self.assertIn("screen neběží", result["warnings"])
 
     def test_git_dirty_line_classification_separates_private_family_and_safe_changes(self) -> None:
         app_item = cockpit_module.classify_git_dirty_line(" M Samantha_Agent/app/cockpit.py")

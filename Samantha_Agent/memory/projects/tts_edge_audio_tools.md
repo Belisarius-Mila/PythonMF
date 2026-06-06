@@ -28,6 +28,15 @@ Stav k 2026-06-05:
 - Uložený hlasový pokyn má stav `transcribed_only_not_executed`: Codex/Samantha si ho může později přečíst, ale přepis sám nespouští žádnou akci.
 - Důležitý technický poznatek: přehrávání z běžné sandbox relace může selhat na `AudioQueueStart failed (-66680)`, ale stejný výstup funguje mimo sandbox / z běžícího Cockpitu.
 
+Stav k 2026-06-06:
+
+- Adam Voice Mode má praktický terminálový bridge do Codexu, private TTY marker a Edge TTS helper `scripts/speak_edge_open.py` pro přečtení stručného výsledku.
+- Cockpit ukazuje běžící Codex relace a jasně označí, která relace je cílem voice bridge.
+- Nová Codex/screen relace se ptá, zda má nastavit voice marker na sebe; ruční pokyn `Prosím převezmi voice marker` vyžaduje jednoduché potvrzení `Mám převzít voice marker? y/n`.
+- iPhone text fallback `Odeslat přepis Adamovi` po úspěšném odeslání maže textarea, aby ve vzdáleném Cockpitu nezůstával starý pokyn.
+- Bridge už při existujícím TTY markeru nepoužívá VS Code GUI fallback po neověřeném doručení, aby netvrdil falešný úspěch v jiné relaci.
+- Hlavní nový směr je remote-first provoz: odpověď se nesmí přehrávat jen na Macu, ale má být dostupná a přehratelná v iPhone Cockpitu; potvrzovací žádosti pro rizikové kroky mají chodit do Cockpitu jako approval karty.
+
 ## Cíl
 
 Cílem je mít praktický způsob, jak vytvářet české hlasové MP3 soubory pro výukové aplikace, pohádky, slovíčka a další projekty.

@@ -127,7 +127,7 @@ class AdamVoiceModeTests(unittest.TestCase):
 
         def fake_terminal_bridge(command):
             calls.append(command.text)
-            return {"ok": True, "status": "delivered"}
+            return {"ok": True, "status": "delivered", "verified": True}
 
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             inbox = Path(temp_dir)
@@ -156,7 +156,7 @@ class AdamVoiceModeTests(unittest.TestCase):
 
         def fake_terminal_bridge(command):
             calls.append(command.text)
-            return {"ok": True, "status": "delivered"}
+            return {"ok": True, "status": "delivered", "verified": True}
 
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             inbox = Path(temp_dir)
@@ -182,7 +182,7 @@ class AdamVoiceModeTests(unittest.TestCase):
 
     def test_terminal_bridge_success_clears_matching_pending_command(self) -> None:
         def fake_terminal_bridge(command):
-            return {"ok": True, "status": "delivered"}
+            return {"ok": True, "status": "delivered", "verified": True}
 
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             inbox = Path(temp_dir)
@@ -205,6 +205,33 @@ class AdamVoiceModeTests(unittest.TestCase):
         self.assertIn("vložil do Codex terminálu", response)
         self.assertFalse(pending["pending"])
         self.assertEqual(pending["status"], "processed_by_terminal_bridge")
+
+    def test_terminal_bridge_unverified_delivery_stays_pending(self) -> None:
+        def fake_terminal_bridge(command):
+            return {"ok": True, "status": "delivered_tty", "message": "TIOCSTI accepted bytes.", "verified": False}
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            inbox = Path(temp_dir)
+            latest = inbox / "latest_voice_command.md"
+            pending_path = inbox / "pending_for_adam.json"
+            history_path = inbox / "adam_voice_history.jsonl"
+            write_voice_command(latest, "Zkontroluj stav hlasového bridge.")
+            command = load_latest_voice_command(inbox_dir=inbox)
+
+            response = build_spoken_result_for_command(
+                command,
+                response_generator=lambda text: self.fail("work command should not call direct responder"),
+                pending_path=pending_path,
+                history_path=history_path,
+                terminal_bridge=fake_terminal_bridge,
+            )
+            pending = json.loads(pending_path.read_text(encoding="utf-8"))
+            history = load_voice_history(path=history_path, limit=2)
+
+        self.assertIn("neumím ověřit", response)
+        self.assertTrue(pending["pending"])
+        self.assertEqual(pending["reason"], "terminal_delivery_unverified")
+        self.assertEqual(history[0]["route"], "terminal_delivery_unverified")
 
     def test_build_spoken_result_saves_pending_when_terminal_bridge_rejects(self) -> None:
         def fake_terminal_bridge(command):

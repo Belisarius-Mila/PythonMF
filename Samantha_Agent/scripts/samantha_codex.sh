@@ -6,6 +6,7 @@ SESSION_NAME="${SAMANTHA_SCREEN_SESSION:-samantha_codex}"
 ENTRY_SCRIPT="$PROJECT_DIR/scripts/samantha_screen_entry.sh"
 NETWORK_PREFLIGHT_SCRIPT="$PROJECT_DIR/scripts/network_preflight.sh"
 BACKUP_STATUS_SCRIPT="$PROJECT_DIR/scripts/backup_status.py"
+CODEX_SESSION_REPORT_SCRIPT="$PROJECT_DIR/scripts/codex_session_report.py"
 
 export LANG="cs_CZ.UTF-8"
 export LC_ALL="cs_CZ.UTF-8"
@@ -23,6 +24,14 @@ if [[ -f "$BACKUP_STATUS_SCRIPT" ]]; then
     "$PROJECT_DIR/.venv/bin/python" "$BACKUP_STATUS_SCRIPT" || true
   else
     python3 "$BACKUP_STATUS_SCRIPT" || true
+  fi
+fi
+
+if [[ -f "$CODEX_SESSION_REPORT_SCRIPT" ]]; then
+  if [[ -x "$PROJECT_DIR/.venv/bin/python" ]]; then
+    "$PROJECT_DIR/.venv/bin/python" "$CODEX_SESSION_REPORT_SCRIPT" || true
+  else
+    python3 "$CODEX_SESSION_REPORT_SCRIPT" || true
   fi
 fi
 
