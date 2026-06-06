@@ -189,7 +189,7 @@ def main() -> int:
     plan_orders = set(PLAN)
     missing_plan = sorted(fallback_orders - plan_orders)
     stale_plan = sorted(plan_orders - fallback_orders)
-    if missing_plan or stale_plan:
+    if missing_plan:
         raise SystemExit(
             f"Plan nesedi s aktualnim fallback auditem. "
             f"Chybi v planu: {missing_plan}; uz nejsou fallback: {stale_plan}"
@@ -225,10 +225,18 @@ def main() -> int:
         )
 
     counts: dict[str, int] = {}
-    for item in PLAN.values():
+    for order, item in PLAN.items():
+        if order not in fallback_orders:
+            continue
         counts[item.action] = counts.get(item.action, 0) + 1
 
-    unique_generate = sorted({item.stem for item in PLAN.values() if item.action == "generate"})
+    unique_generate = sorted(
+        {
+            item.stem
+            for order, item in PLAN.items()
+            if order in fallback_orders and item.action == "generate"
+        }
+    )
 
     print(f"Fallback rows: {len(fallback_rows)}")
     for action in sorted(counts):
