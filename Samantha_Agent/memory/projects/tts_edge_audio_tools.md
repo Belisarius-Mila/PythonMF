@@ -36,6 +36,10 @@ Stav k 2026-06-06:
 - iPhone text fallback `Odeslat přepis Adamovi` po úspěšném odeslání maže textarea, aby ve vzdáleném Cockpitu nezůstával starý pokyn.
 - Bridge už při existujícím TTY markeru nepoužívá VS Code GUI fallback po neověřeném doručení, aby netvrdil falešný úspěch v jiné relaci.
 - Hlavní nový směr je remote-first provoz: odpověď se nesmí přehrávat jen na Macu, ale má být dostupná a přehratelná v iPhone Cockpitu; potvrzovací žádosti pro rizikové kroky mají chodit do Cockpitu jako approval karty.
+- Remote-first část má první funkční checkpoint: Cockpit umí zobrazit poslední Adamovu odpověď, přehrát ji přes browser audio a schválit/odmítnout čekající hlasový pokyn v approval kartě.
+- `scripts/adam_voice_reply.py --latest-command` dovoluje Codexu po dokončení terminálového pokynu zapsat stručný finální výsledek zpět do Cockpitu, aby uživatel neviděl jen technickou hlášku bridge.
+- Terminal bridge byl zpřesněn tak, aby preferoval označený TTY marker a read-only formulace typu `pošli odpověď` neblokoval jako rizikové, zatímco mazání, commit, push, platby, hesla a tokeny zůstávají ručně potvrzované.
+- Priorita 1 pro další práci je Cockpit read-only capability registry: pevný allowlist bezpečných lokálních schopností, approval centrum a návrat výsledku do poslední Adamovy odpovědi v Cockpitu.
 
 ## Cíl
 

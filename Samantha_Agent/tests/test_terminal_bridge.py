@@ -13,6 +13,7 @@ from app.speech.terminal_bridge import (
     deliver_prompt_to_vscode,
     deliver_voice_command_to_terminal,
     load_marked_codex_tty,
+    terminal_applescript,
     vscode_applescript,
 )
 from app.speech.voice_inbox import load_latest_voice_command
@@ -45,6 +46,8 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertIn("vyžádej si ruční potvrzení", prompt)
         self.assertIn("přečti stručnou verzi výsledku nahlas", prompt)
         self.assertIn("scripts/speak_edge_open.py", prompt)
+        self.assertIn("scripts/adam_voice_reply.py --latest-command", prompt)
+        self.assertIn("zapiš stejný stručný výsledek do Cockpitu", prompt)
 
     def test_change_command_requires_manual_terminal_prompt(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -57,6 +60,33 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertFalse(decision["ok"])
         self.assertEqual(decision["status"], "manual_required")
 
+    def test_read_only_thinking_prompt_with_send_word_is_allowed(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            latest = Path(temp_dir) / "latest_voice_command.md"
+            write_voice_command(
+                latest,
+                "Adame, vezmi to do terminálu, zkus to promyslet a pošli stručnou odpověď.",
+            )
+            command = load_latest_voice_command(inbox_dir=Path(temp_dir))
+
+        decision = assess_terminal_bridge(command)
+
+        self.assertTrue(decision["ok"])
+        self.assertEqual(decision["status"], "allowed")
+        self.assertEqual(command.triage.risk, "read_only")
+
+    def test_outbound_sms_prompt_still_requires_confirmation(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            latest = Path(temp_dir) / "latest_voice_command.md"
+            write_voice_command(latest, "Pošli SMS Janičce, jestli něco nepotřebuje.")
+            command = load_latest_voice_command(inbox_dir=Path(temp_dir))
+
+        decision = assess_terminal_bridge(command)
+
+        self.assertFalse(decision["ok"])
+        self.assertEqual(decision["status"], "manual_required")
+        self.assertEqual(command.triage.risk, "outbound_confirmation")
+
     def test_deliver_prompt_uses_osascript_arguments_without_shell(self) -> None:
         calls = []
 
@@ -67,14 +97,16 @@ class TerminalBridgeTests(unittest.TestCase):
         def fake_ps_runner(args, **kwargs):
             return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
 
-        result = deliver_prompt_to_terminal(
-            "Hlasový pokyn od Míly.",
-            submit=False,
-            runner=fake_runner,
-            ps_runner=fake_ps_runner,
-            script="return \"delivered\"",
-            vscode_fallback=False,
-        )
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            result = deliver_prompt_to_terminal(
+                "Hlasový pokyn od Míly.",
+                submit=False,
+                runner=fake_runner,
+                ps_runner=fake_ps_runner,
+                script="return \"delivered\"",
+                vscode_fallback=False,
+                marked_tty_path=Path(temp_dir) / "missing_marker.json",
+            )
 
         self.assertTrue(result["ok"])
         self.assertEqual(calls[0]["args"][0], "/usr/bin/osascript")
@@ -267,6 +299,54 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertIn("VS Code fallback: osascript nemá povoleno", result["message"])
         self.assertEqual(result["marked_tty_status"]["target_tty"], "ttys005")
         self.assertEqual(result["vscode_status"]["status"], "vscode_delivery_failed")
+
+    def test_terminal_gui_fallback_targets_marked_tty_after_direct_tty_failure(self) -> None:
+        calls = []
+
+        def fake_runner(args, **kwargs):
+            calls.append(args)
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="delivered\n", stderr="")
+
+        def fake_ps_runner(args, **kwargs):
+            return subprocess.CompletedProcess(
+                args=args,
+                returncode=0,
+                stdout=(
+                    "100 1 ttys004 node /usr/local/bin/codex -C /repo .\n"
+                    "101 1 ttys005 node /usr/local/bin/codex -C /repo .\n"
+                ),
+                stderr="",
+            )
+
+        def fake_tty_deliverer(tty, prompt, **kwargs):
+            return {"ok": False, "status": "tty_delivery_failed", "message": "Operation not permitted", "target_tty": tty}
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker = Path(temp_dir) / "current_codex_tty.json"
+            marker.write_text('{"tty": "ttys005"}', encoding="utf-8")
+
+            result = deliver_prompt_to_terminal(
+                "Hlasový pokyn od Míly.",
+                runner=fake_runner,
+                ps_runner=fake_ps_runner,
+                script="return \"delivered\"",
+                marked_tty_path=marker,
+                tty_deliverer=fake_tty_deliverer,
+                vscode_fallback=False,
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "delivered")
+        self.assertEqual(calls[0][-1], "ttys005")
+        self.assertEqual(result["target_ttys"], ["ttys004", "ttys005"])
+
+    def test_terminal_applescript_prefers_target_ttys_before_any_codex_tab(self) -> None:
+        script = terminal_applescript()
+
+        target_index = script.index("if targetTtys contains tabTty then")
+        codex_index = script.index('if tabProcesses contains "codex" then')
+
+        self.assertLess(target_index, codex_index)
 
     def test_deliver_voice_command_returns_manual_required_without_calling_runner(self) -> None:
         def fake_runner(*args, **kwargs):

@@ -26,6 +26,7 @@ from app.speech.voice_inbox import (
 ADAM_VOICE_MODE_STATUS_PATH = VOICE_COMMAND_INBOX_DIR / "adam_voice_mode_status.json"
 ADAM_PENDING_COMMAND_PATH = VOICE_COMMAND_INBOX_DIR / "pending_for_adam.json"
 ADAM_VOICE_HISTORY_PATH = VOICE_COMMAND_INBOX_DIR / "adam_voice_history.jsonl"
+ADAM_LAST_RESPONSE_PATH = VOICE_COMMAND_INBOX_DIR / "last_adam_response.json"
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 DIRECT_RESPONSE_INSTRUCTIONS = """
@@ -117,12 +118,67 @@ def format_voice_history_for_prompt(history: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
+def _last_response_path_for_history(history_path: Path) -> Path:
+    if history_path == ADAM_VOICE_HISTORY_PATH:
+        return ADAM_LAST_RESPONSE_PATH
+    return history_path.parent / "last_adam_response.json"
+
+
+def save_last_adam_response(
+    *,
+    user_text: str,
+    adam_response: str,
+    route: str,
+    path: Path = ADAM_LAST_RESPONSE_PATH,
+) -> dict[str, Any]:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    response_text = str(adam_response or "").strip()
+    payload: dict[str, Any] = {
+        "ok": True,
+        "available": bool(response_text),
+        "created_at": utc_now(),
+        "route": str(route or "").strip(),
+        "user_text": str(user_text or "").strip(),
+        "adam_response": response_text,
+        "path": str(path),
+    }
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return payload
+
+
+def load_last_adam_response(
+    *,
+    path: Path = ADAM_LAST_RESPONSE_PATH,
+) -> dict[str, Any]:
+    if not path.exists():
+        return {
+            "ok": True,
+            "available": False,
+            "message": "Zatím není uložená žádná Adamova odpověď.",
+            "path": str(path),
+        }
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return {
+            "ok": False,
+            "available": False,
+            "message": f"Poslední Adamova odpověď nejde načíst: {exc}",
+            "path": str(path),
+        }
+    payload.setdefault("ok", True)
+    payload.setdefault("available", bool(str(payload.get("adam_response") or "").strip()))
+    payload.setdefault("path", str(path))
+    return payload
+
+
 def append_manual_voice_history_turn(
     *,
     user_text: str,
     adam_response: str,
     route: str = "codex_manual",
     path: Path = ADAM_VOICE_HISTORY_PATH,
+    response_path: Path | None = None,
 ) -> dict[str, Any]:
     path.parent.mkdir(parents=True, exist_ok=True)
     payload: dict[str, Any] = {
@@ -133,6 +189,13 @@ def append_manual_voice_history_turn(
     }
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    if payload["adam_response"]:
+        save_last_adam_response(
+            user_text=payload["user_text"],
+            adam_response=payload["adam_response"],
+            route=route,
+            path=response_path or _last_response_path_for_history(path),
+        )
     return payload
 
 
@@ -142,6 +205,7 @@ def append_voice_history_turn(
     adam_response: str,
     route: str,
     path: Path = ADAM_VOICE_HISTORY_PATH,
+    response_path: Path | None = None,
 ) -> dict[str, Any]:
     path.parent.mkdir(parents=True, exist_ok=True)
     payload: dict[str, Any] = {
@@ -153,6 +217,13 @@ def append_voice_history_turn(
     }
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    if payload["adam_response"]:
+        save_last_adam_response(
+            user_text=payload["user_text"],
+            adam_response=payload["adam_response"],
+            route=route,
+            path=response_path or _last_response_path_for_history(path),
+        )
     return payload
 
 
@@ -244,6 +315,50 @@ def mark_pending_for_adam_processed(
     return pending
 
 
+def update_pending_approval(
+    *,
+    decision: str,
+    note: str = "",
+    path: Path = ADAM_PENDING_COMMAND_PATH,
+) -> dict[str, Any]:
+    normalized = str(decision or "").strip().lower()
+    if normalized not in {"approved", "rejected"}:
+        return {
+            "ok": False,
+            "status": "invalid_decision",
+            "message": "Neplatné rozhodnutí. Použij approved nebo rejected.",
+            "path": str(path),
+        }
+    pending = load_pending_for_adam(path=path)
+    if not pending.get("ok"):
+        return pending
+    if not pending.get("pending"):
+        pending["ok"] = False
+        pending["status"] = "no_pending_command"
+        pending["message"] = "Žádný hlasový pokyn nečeká na schválení."
+        return pending
+
+    now = utc_now()
+    pending["approval"] = {
+        "decision": normalized,
+        "decided_at": now,
+        "note": str(note or "").strip(),
+    }
+    pending["approval_status"] = normalized
+    pending["updated_at"] = now
+    if normalized == "approved":
+        pending["status"] = "approved_in_cockpit"
+        pending["pending"] = True
+        pending["message"] = "Žádost byla schválena v Cockpitu a čeká na převzetí Adamem."
+    else:
+        pending["status"] = "rejected_by_user"
+        pending["pending"] = False
+        pending["message"] = "Žádost byla v Cockpitu zamítnuta."
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(pending, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return pending
+
+
 def mark_matching_pending_delivered_to_terminal(
     command: VoiceCommand,
     *,
@@ -270,10 +385,26 @@ def load_voice_mode_status(
     status_path: Path = ADAM_VOICE_MODE_STATUS_PATH,
     pending_path: Path = ADAM_PENDING_COMMAND_PATH,
     history_path: Path = ADAM_VOICE_HISTORY_PATH,
+    last_response_path: Path = ADAM_LAST_RESPONSE_PATH,
     stale_after_seconds: float = 15.0,
 ) -> dict[str, Any]:
     pending_for_adam = load_pending_for_adam(path=pending_path)
     voice_history = load_voice_history(path=history_path, limit=3)
+    last_adam_response = load_last_adam_response(path=last_response_path)
+    last_voice_turn = voice_history[-1] if voice_history else None
+    if not last_adam_response.get("available") and last_voice_turn:
+        history_response = str(last_voice_turn.get("adam_response") or "").strip()
+        if history_response:
+            last_adam_response = {
+                "ok": True,
+                "available": True,
+                "created_at": last_voice_turn.get("created_at"),
+                "route": last_voice_turn.get("route"),
+                "user_text": str(last_voice_turn.get("user_text") or "").strip(),
+                "adam_response": history_response,
+                "source": "voice_history",
+                "path": str(last_response_path),
+            }
     if not status_path.exists():
         return {
             "ok": True,
@@ -283,7 +414,8 @@ def load_voice_mode_status(
             "status_path": str(status_path),
             "pending_for_adam": pending_for_adam,
             "voice_history_count": len(voice_history),
-            "last_voice_turn": voice_history[-1] if voice_history else None,
+            "last_voice_turn": last_voice_turn,
+            "last_adam_response": last_adam_response,
         }
     try:
         payload = json.loads(status_path.read_text(encoding="utf-8"))
@@ -296,7 +428,8 @@ def load_voice_mode_status(
             "status_path": str(status_path),
             "pending_for_adam": pending_for_adam,
             "voice_history_count": len(voice_history),
-            "last_voice_turn": voice_history[-1] if voice_history else None,
+            "last_voice_turn": last_voice_turn,
+            "last_adam_response": last_adam_response,
         }
 
     pid = int(payload.get("pid") or 0)
@@ -317,7 +450,8 @@ def load_voice_mode_status(
     payload["status_path"] = str(status_path)
     payload["pending_for_adam"] = pending_for_adam
     payload["voice_history_count"] = len(voice_history)
-    payload["last_voice_turn"] = voice_history[-1] if voice_history else None
+    payload["last_voice_turn"] = last_voice_turn
+    payload["last_adam_response"] = last_adam_response
     if not running and payload.get("state") == "listening":
         payload["state"] = "stale"
         payload["message"] = "Adam Voice Mode watcher pravděpodobně neběží nebo se dlouho neozval."
@@ -407,7 +541,9 @@ def voice_command_needs_codex_work(text: str) -> bool:
 def pending_reason_for_command(command: VoiceCommand) -> str | None:
     if not command.ok:
         return None
-    if command.triage.risk in {"blocked", "needs_confirmation"}:
+    if command.triage.risk == "outbound_confirmation":
+        return "outbound_confirmation"
+    if command.triage.requires_confirmation or command.triage.risk in {"blocked", "needs_confirmation"}:
         return "requires_confirmation"
     if voice_command_needs_codex_work(command.text):
         return "codex_work"
@@ -451,8 +587,15 @@ def build_spoken_result_for_command(
     if not command.ok:
         return "Hlasový pokyn nemá použitelný text. Zkus ho prosím nahrát znovu."
     pending_reason = pending_reason_for_command(command)
-    if pending_reason == "requires_confirmation":
-        message = "Pokyn jsem přijal, ale je rizikový nebo mění data. Neprovedu ho bez výslovného potvrzení v chatu."
+    if pending_reason in {"requires_confirmation", "outbound_confirmation"}:
+        if pending_reason == "outbound_confirmation":
+            message = (
+                "Pokyn jsem přijal a můžu připravit odchozí SMS nebo e-mail, "
+                "ale odeslání navenek vyžaduje samostatné potvrzení. "
+                "Nejde o blok, jen o bezpečnostní brzdu před odesláním."
+            )
+        else:
+            message = "Pokyn jsem přijal, ale je rizikový nebo mění data. Neprovedu ho bez výslovného potvrzení v chatu."
         if pending_path is not None:
             save_pending_for_adam(
                 command,

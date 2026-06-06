@@ -12,11 +12,13 @@ from app.speech.adam_voice_mode import (
     format_voice_history_for_prompt,
     generate_direct_voice_response,
     handle_voice_command,
+    load_last_adam_response,
     load_pending_for_adam,
     load_voice_history,
     load_voice_mode_status,
     mark_pending_for_adam_processed,
     spoken_notice_for_command,
+    update_pending_approval,
     voice_command_needs_codex_work,
     write_voice_mode_status,
 )
@@ -121,6 +123,30 @@ class AdamVoiceModeTests(unittest.TestCase):
         self.assertTrue(pending["pending"])
         self.assertEqual(pending["reason"], "codex_work")
         self.assertEqual(pending["text"], "Adame, najdi stav dokumentů v Cockpitu.")
+
+    def test_build_spoken_result_saves_outbound_message_for_confirmation_without_blocking(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            inbox = Path(temp_dir)
+            latest = inbox / "latest_voice_command.md"
+            pending_path = inbox / "pending_for_adam.json"
+            history_path = inbox / "adam_voice_history.jsonl"
+            write_voice_command(latest, "Pošli SMS Janičce, jestli něco nepotřebuje.")
+            command = load_latest_voice_command(inbox_dir=inbox)
+
+            response = build_spoken_result_for_command(
+                command,
+                response_generator=lambda text: self.fail("outbound command should not call direct responder"),
+                pending_path=pending_path,
+                history_path=history_path,
+            )
+            pending = json.loads(pending_path.read_text(encoding="utf-8"))
+
+        self.assertIn("můžu připravit odchozí SMS nebo e-mail", response)
+        self.assertIn("samostatné potvrzení", response)
+        self.assertNotIn("rizikový nebo mění data", response)
+        self.assertTrue(pending["pending"])
+        self.assertEqual(pending["reason"], "outbound_confirmation")
+        self.assertEqual(pending["command"]["triage"]["risk"], "outbound_confirmation")
 
     def test_build_spoken_result_can_route_safe_codex_work_to_terminal_bridge(self) -> None:
         calls = []
@@ -315,6 +341,71 @@ class AdamVoiceModeTests(unittest.TestCase):
         self.assertTrue(pending["ok"])
         self.assertFalse(pending["pending"])
         self.assertEqual(pending["status"], "none")
+
+    def test_append_history_saves_last_adam_response_for_cockpit(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            history_path = Path(temp_dir) / "adam_voice_history.jsonl"
+            response_path = Path(temp_dir) / "last_adam_response.json"
+
+            append_manual_voice_history_turn(
+                user_text="Kolik máme testů?",
+                adam_response="Máme cílenou testovací sadu pro hlasový režim.",
+                path=history_path,
+                response_path=response_path,
+            )
+            last_response = load_last_adam_response(path=response_path)
+            status = load_voice_mode_status(
+                status_path=Path(temp_dir) / "missing_status.json",
+                pending_path=Path(temp_dir) / "missing_pending.json",
+                history_path=history_path,
+                last_response_path=response_path,
+            )
+
+        self.assertTrue(last_response["available"])
+        self.assertEqual(last_response["route"], "codex_manual")
+        self.assertIn("testovací sadu", last_response["adam_response"])
+        self.assertEqual(status["last_adam_response"]["adam_response"], last_response["adam_response"])
+
+    def test_load_voice_mode_status_uses_history_as_last_response_fallback(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            history_path = Path(temp_dir) / "adam_voice_history.jsonl"
+            append_manual_voice_history_turn(
+                user_text="Co je hotovo?",
+                adam_response="Hotové je přehrání odpovědi přes Cockpit.",
+                path=history_path,
+            )
+
+            status = load_voice_mode_status(
+                status_path=Path(temp_dir) / "missing_status.json",
+                pending_path=Path(temp_dir) / "missing_pending.json",
+                history_path=history_path,
+                last_response_path=Path(temp_dir) / "missing_last_response.json",
+            )
+
+        self.assertTrue(status["last_adam_response"]["available"])
+        self.assertEqual(status["last_adam_response"]["source"], "voice_history")
+        self.assertIn("přehrání odpovědi", status["last_adam_response"]["adam_response"])
+
+    def test_update_pending_approval_can_approve_and_reject_from_cockpit(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            inbox = Path(temp_dir)
+            pending_path = inbox / "pending_for_adam.json"
+            history_path = inbox / "adam_voice_history.jsonl"
+            write_voice_command(inbox / "latest_voice_command.md", "Pošli SMS Janičce, jestli něco nepotřebuje.")
+            command = load_latest_voice_command(inbox_dir=inbox)
+            build_spoken_result_for_command(command, pending_path=pending_path, history_path=history_path)
+
+            approved = update_pending_approval(decision="approved", note="Schváleno v testu.", path=pending_path)
+            rejected = update_pending_approval(decision="rejected", path=pending_path)
+
+        self.assertTrue(approved["ok"])
+        self.assertTrue(approved["pending"])
+        self.assertEqual(approved["status"], "approved_in_cockpit")
+        self.assertEqual(approved["approval_status"], "approved")
+        self.assertTrue(rejected["ok"])
+        self.assertFalse(rejected["pending"])
+        self.assertEqual(rejected["status"], "rejected_by_user")
+        self.assertEqual(rejected["approval_status"], "rejected")
 
     def test_voice_command_needs_codex_work_keeps_greetings_direct(self) -> None:
         self.assertFalse(voice_command_needs_codex_work("Janička přijela a zdraví tě. Co jí řekneš?"))
@@ -566,6 +657,37 @@ class AdamVoiceModeTests(unittest.TestCase):
         self.assertEqual(pending["status"], "processed_by_codex")
         self.assertEqual(history[-1]["route"], "codex_manual")
         self.assertIn("uloženou historii", history[-1]["adam_response"])
+
+    def test_adam_voice_reply_cli_can_record_latest_terminal_command_without_pending(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            inbox = Path(temp_dir)
+            history_path = inbox / "adam_voice_history.jsonl"
+            write_voice_command(inbox / "latest_voice_command.md", "Zkontroluj iPhone Cockpit.")
+
+            completed = subprocess.run(
+                [
+                    ".venv/bin/python",
+                    "scripts/adam_voice_reply.py",
+                    "--latest-command",
+                    "--inbox-dir",
+                    str(inbox),
+                    "--history-path",
+                    str(history_path),
+                    "iPhone Cockpit už má novou hlasovou sekci.",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=8,
+                check=False,
+            )
+            history = load_voice_history(path=history_path, limit=3)
+            last_response = load_last_adam_response(path=inbox / "last_adam_response.json")
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertIn("recorded_latest_command_reply", completed.stdout)
+        self.assertEqual(history[-1]["route"], "codex_terminal_final")
+        self.assertEqual(history[-1]["user_text"], "Zkontroluj iPhone Cockpit.")
+        self.assertIn("novou hlasovou sekci", last_response["adam_response"])
 
 
 if __name__ == "__main__":

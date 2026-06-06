@@ -168,6 +168,19 @@ def triage_voice_command(text: str) -> VoiceCommandTriage:
         "vymaž",
         "trvale smaz",
         "trvale smaž",
+        "vytiskni",
+        "tisk",
+        "archivuj",
+        "presun",
+        "přesuň",
+        "commit",
+        "push",
+        "uloz do dokumentu",
+        "ulož do dokumentu",
+        "zmen metadata",
+        "změň metadata",
+    )
+    outbound_message_terms = (
         "posli email",
         "pošli email",
         "posli e-mail",
@@ -180,17 +193,12 @@ def triage_voice_command(text: str) -> VoiceCommandTriage:
         "pošli sms",
         "odesli sms",
         "odešli sms",
-        "vytiskni",
-        "tisk",
-        "archivuj",
-        "presun",
-        "přesuň",
-        "commit",
-        "push",
-        "uloz do dokumentu",
-        "ulož do dokumentu",
-        "zmen metadata",
-        "změň metadata",
+        "posli zpravu",
+        "pošli zprávu",
+        "odesli zpravu",
+        "odešli zprávu",
+        "napiš sms",
+        "napis sms",
     )
     draft_terms = (
         "navrhni",
@@ -209,6 +217,13 @@ def triage_voice_command(text: str) -> VoiceCommandTriage:
             risk="blocked",
             action="ask_user",
             reason="Pokyn může obsahovat platbu, tajemství nebo vysoce citlivou akci.",
+            requires_confirmation=True,
+        )
+    if any(term in folded for term in outbound_message_terms):
+        return VoiceCommandTriage(
+            risk="outbound_confirmation",
+            action="prepare_outbound_and_confirm",
+            reason="Pokyn chce odeslat SMS/e-mail nebo jinou zprávu navenek. To je povolené jen po samostatném potvrzení.",
             requires_confirmation=True,
         )
     if any(term in folded for term in confirmation_terms):

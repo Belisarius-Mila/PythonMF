@@ -76,6 +76,7 @@ from app.speech.local_tts import DEFAULT_VOICE
 from app.speech.adam_voice_mode import (
     load_voice_mode_status,
     pid_exists,
+    update_pending_approval,
     write_voice_mode_status,
 )
 from app.speech.terminal_bridge import (
@@ -6148,6 +6149,19 @@ def stop_adam_voice_mode_action() -> dict[str, Any]:
     }
 
 
+def cockpit_voice_approval_action(payload: dict[str, Any]) -> dict[str, Any]:
+    decision = str(payload.get("decision") or "").strip().lower()
+    note = safe_text(str(payload.get("note") or ""))[:500]
+    result = update_pending_approval(decision=decision, note=note)
+    return {
+        "ok": bool(result.get("ok")),
+        "status": result.get("status"),
+        "message": result.get("message") or "Rozhodnutí k hlasovému pokynu bylo uloženo.",
+        "pending_for_adam": result,
+        "voice_mode": load_voice_mode_status(stale_after_seconds=60.0),
+    }
+
+
 def open_terminal_command(command: str, label: str) -> dict[str, Any]:
     script = (
         'tell application "Terminal"\n'
@@ -6450,6 +6464,10 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/voice-mode/stop":
                     self.respond_json(stop_adam_voice_mode_action())
+                    return
+                if parsed.path == "/api/voice-mode/approval":
+                    payload = self.read_json()
+                    self.respond_json(cockpit_voice_approval_action(payload))
                     return
                 if parsed.path == "/api/cockpit/restart":
                     payload = self.read_json()
@@ -8037,6 +8055,12 @@ COCKPIT_HTML = """<!doctype html>
     .voice-command-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .voice-command-actions button.recording { background: #fee2e2; color: var(--red); }
     .voice-command-actions button:disabled { cursor: not-allowed; }
+    .voice-card { border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: #f8fafc; display: grid; gap: 8px; }
+    .voice-card.warn { border-color: #fbbf24; background: #fffbeb; }
+    .voice-card-title { font-size: 13px; font-weight: 700; color: var(--ink); }
+    .voice-card-text { color: var(--ink); font-size: 14px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .voice-card-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .voice-card.hidden { display: none; }
     .voice-transcript-row { display: grid; gap: 6px; }
     .voice-transcript-row label { color: #253047; font-size: 12px; font-weight: 750; }
     .pills { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; }
@@ -8218,6 +8242,22 @@ COCKPIT_HTML = """<!doctype html>
 		        <div id="voiceBridgeStatus" class="status-line">Terminálový bridge: čekám na kontrolu.</div>
 		        <div id="voiceBridgeSessions" class="status-line">Codex relace: čekám na kontrolu.</div>
 		        <div id="voicePendingStatus" class="status-line">Žádný hlasový pokyn nečeká na Adama.</div>
+		        <div id="voiceLastResponseCard" class="voice-card hidden">
+		          <div class="voice-card-title">Poslední Adamova odpověď</div>
+		          <div id="voiceLastResponseText" class="voice-card-text"></div>
+		          <div class="voice-card-actions">
+		            <button class="secondary" id="voiceLastResponseSpeakBtn">Přehrát Adamovu odpověď</button>
+		          </div>
+		        </div>
+		        <div id="voiceApprovalCard" class="voice-card warn hidden">
+		          <div class="voice-card-title">Schválení přes Cockpit</div>
+		          <div id="voiceApprovalReason" class="status-line"></div>
+		          <div id="voiceApprovalText" class="voice-card-text"></div>
+		          <div class="voice-card-actions">
+		            <button class="primary" id="voiceApprovalApproveBtn">Schválit</button>
+		            <button class="secondary" id="voiceApprovalRejectBtn">Zamítnout</button>
+		          </div>
+		        </div>
 	        <div class="voice-transcript-row">
 	          <label for="voiceTranscript">Přepis</label>
 	          <textarea id="voiceTranscript" placeholder="Tady se objeví přepsaný hlasový pokyn." spellcheck="true"></textarea>
@@ -8607,6 +8647,14 @@ COCKPIT_HTML = """<!doctype html>
     const voiceBridgeStatus = document.getElementById("voiceBridgeStatus");
     const voiceBridgeSessions = document.getElementById("voiceBridgeSessions");
     const voicePendingStatus = document.getElementById("voicePendingStatus");
+    const voiceLastResponseCard = document.getElementById("voiceLastResponseCard");
+    const voiceLastResponseText = document.getElementById("voiceLastResponseText");
+    const voiceLastResponseSpeakBtn = document.getElementById("voiceLastResponseSpeakBtn");
+    const voiceApprovalCard = document.getElementById("voiceApprovalCard");
+    const voiceApprovalReason = document.getElementById("voiceApprovalReason");
+    const voiceApprovalText = document.getElementById("voiceApprovalText");
+    const voiceApprovalApproveBtn = document.getElementById("voiceApprovalApproveBtn");
+    const voiceApprovalRejectBtn = document.getElementById("voiceApprovalRejectBtn");
     const voiceTranscript = document.getElementById("voiceTranscript");
     const voiceTranscriptSendBtn = document.getElementById("voiceTranscriptSendBtn");
     const urgentReminderAlert = document.getElementById("urgentReminderAlert");
@@ -8750,6 +8798,14 @@ COCKPIT_HTML = """<!doctype html>
         "voiceBridgeStatus",
         "voiceBridgeSessions",
         "voicePendingStatus",
+        "voiceLastResponseCard",
+        "voiceLastResponseText",
+        "voiceLastResponseSpeakBtn",
+        "voiceApprovalCard",
+        "voiceApprovalReason",
+        "voiceApprovalText",
+        "voiceApprovalApproveBtn",
+        "voiceApprovalRejectBtn",
         "voiceRecordBtn",
         "voiceStopBtn",
         "voiceTranscriptSendBtn",
@@ -9924,6 +9980,8 @@ COCKPIT_HTML = """<!doctype html>
           ? `Čeká hlasový pokyn na Adama: ${voicePendingShort || voicePending.message || "bez textu"}`
           : voicePending.message || "Žádný hlasový pokyn nečeká na Adama.";
       }
+      renderVoiceLastResponse(voiceMode.last_adam_response || {});
+      renderVoiceApproval(voicePending);
       if (voiceModeStartBtn) {
         voiceModeStartBtn.disabled = voiceRunning;
         voiceModeStartBtn.textContent = voiceRunning ? "Poslech běží" : "Spustit Adamův poslech";
@@ -10713,6 +10771,7 @@ COCKPIT_HTML = """<!doctype html>
 		    let voiceRecordingStartedAt = 0;
 		    let voiceModeEnabled = localStorage.getItem("samanthaVoiceModeEnabled") === "true";
 		    let latestVoiceModeRuntime = null;
+		    let latestAdamResponseText = "";
 
 	    function preferredVoiceMimeType() {
 	      if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) {
@@ -10769,6 +10828,70 @@ COCKPIT_HTML = """<!doctype html>
 		          : "Hlasový mód je zapnutý jen v UI. Adam neposlouchá, dokud neběží scripts/adam_voice_mode.py.";
 		      } else {
 		        voiceCommandStatus.textContent = "Pokyn se po přepisu automaticky uloží pro Codex. Adam reaguje jen při spuštěném watcheru.";
+		      }
+		    }
+
+		    function renderVoiceLastResponse(lastResponse) {
+		      const text = String(lastResponse && lastResponse.adam_response || "").trim();
+		      latestAdamResponseText = text;
+		      if (!voiceLastResponseCard || !voiceLastResponseText) return;
+		      voiceLastResponseCard.classList.toggle("hidden", !text);
+		      voiceLastResponseText.textContent = text || "Zatím není uložená žádná Adamova odpověď.";
+		      if (voiceLastResponseSpeakBtn) {
+		        voiceLastResponseSpeakBtn.disabled = !text;
+		      }
+		    }
+
+		    function pendingNeedsCockpitApproval(pending) {
+		      if (!pending || !pending.pending) return false;
+		      if (pending.approval_status === "approved") return false;
+		      const reason = String(pending.reason || pending.status || "");
+		      return [
+		        "requires_confirmation",
+		        "outbound_confirmation",
+		        "terminal_delivery_failed",
+		        "terminal_delivery_unverified",
+		        "direct_response_failed"
+		      ].includes(reason);
+		    }
+
+		    function renderVoiceApproval(pending) {
+		      const visible = pendingNeedsCockpitApproval(pending);
+		      if (!voiceApprovalCard) return;
+		      voiceApprovalCard.classList.toggle("hidden", !visible);
+		      if (!visible) return;
+		      const reason = String(pending.reason || pending.status || "čeká na rozhodnutí");
+		      const message = String(pending.message || "").trim();
+		      const text = String(pending.text || "").trim();
+		      if (voiceApprovalReason) {
+		        voiceApprovalReason.textContent = message ? `${reason}: ${message}` : reason;
+		      }
+		      if (voiceApprovalText) {
+		        voiceApprovalText.textContent = text || "Pokyn nemá uložený text.";
+		      }
+		    }
+
+		    async function speakLastAdamResponse() {
+		      await speakText(
+		        latestAdamResponseText,
+		        voiceLastResponseSpeakBtn,
+		        "Přehrávám poslední Adamovu odpověď v tomto prohlížeči..."
+		      );
+		    }
+
+		    async function submitVoiceApproval(decision) {
+		      const button = decision === "approved" ? voiceApprovalApproveBtn : voiceApprovalRejectBtn;
+		      if (button) button.disabled = true;
+		      try {
+		        const data = await postJson("/api/voice-mode/approval", {decision});
+		        showMessage(data.message || (data.ok ? "Rozhodnutí bylo uloženo." : "Rozhodnutí se nepodařilo uložit."));
+		        await refresh({silent: true, includeSecondary: false});
+		      } catch (err) {
+		        recordFrontendError(err);
+		        showMessage(`Schválení hlasového pokynu selhalo: ${err}`);
+		      } finally {
+		        if (voiceApprovalApproveBtn) voiceApprovalApproveBtn.disabled = false;
+		        if (voiceApprovalRejectBtn) voiceApprovalRejectBtn.disabled = false;
 		      }
 		    }
 
@@ -12101,6 +12224,9 @@ COCKPIT_HTML = """<!doctype html>
     voiceRecordBtn.addEventListener("click", startVoiceRecording);
     voiceStopBtn.addEventListener("click", stopVoiceRecording);
     voiceTranscriptSendBtn.addEventListener("click", submitVoiceTranscript);
+    voiceLastResponseSpeakBtn.addEventListener("click", speakLastAdamResponse);
+    voiceApprovalApproveBtn.addEventListener("click", () => submitVoiceApproval("approved"));
+    voiceApprovalRejectBtn.addEventListener("click", () => submitVoiceApproval("rejected"));
     updateVoiceModeUi();
 			    webAppsBtn.addEventListener("click", openWebAppsModal);
     projectsBtn.addEventListener("click", openProjectsModal);

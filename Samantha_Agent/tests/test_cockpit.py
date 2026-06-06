@@ -20,6 +20,7 @@ from app.cockpit import (
     create_document_due_reminder_action,
     document_reference,
     cockpit_edge_tts_action,
+    cockpit_voice_approval_action,
     cockpit_save_voice_text_action,
     cockpit_speak_action,
     cockpit_transcribe_voice_action,
@@ -1002,6 +1003,20 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("dashboardVoiceMode", COCKPIT_HTML)
         self.assertIn("voiceModeRuntimeStatus", COCKPIT_HTML)
         self.assertIn("voicePendingStatus", COCKPIT_HTML)
+        self.assertIn("voiceLastResponseCard", COCKPIT_HTML)
+        self.assertIn("voiceLastResponseSpeakBtn", COCKPIT_HTML)
+        self.assertIn("Přehrát Adamovu odpověď", COCKPIT_HTML)
+        self.assertIn("voiceApprovalCard", COCKPIT_HTML)
+        self.assertIn("voiceApprovalApproveBtn", COCKPIT_HTML)
+        self.assertIn("voiceApprovalRejectBtn", COCKPIT_HTML)
+        self.assertIn("Schválení přes Cockpit", COCKPIT_HTML)
+        self.assertIn("Schválit", COCKPIT_HTML)
+        self.assertIn("Zamítnout", COCKPIT_HTML)
+        self.assertIn("/api/voice-mode/approval", COCKPIT_HTML)
+        self.assertIn("renderVoiceLastResponse", COCKPIT_HTML)
+        self.assertIn("renderVoiceApproval", COCKPIT_HTML)
+        self.assertIn("speakLastAdamResponse", COCKPIT_HTML)
+        self.assertIn("submitVoiceApproval", COCKPIT_HTML)
         self.assertIn("voiceBridgeSessions", COCKPIT_HTML)
         self.assertIn("-> voice bridge", COCKPIT_HTML)
         self.assertIn("Codex relace:", COCKPIT_HTML)
@@ -1367,6 +1382,28 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["status"], "stopped")
         kill.assert_called_once_with(12345, cockpit_module.signal.SIGTERM)
         write_status.assert_called()
+
+    def test_cockpit_voice_approval_action_updates_pending_state(self) -> None:
+        with (
+            patch(
+                "app.cockpit.update_pending_approval",
+                return_value={
+                    "ok": True,
+                    "status": "approved_in_cockpit",
+                    "message": "Žádost byla schválena v Cockpitu.",
+                    "pending": True,
+                },
+            ) as update,
+            patch("app.cockpit.load_voice_mode_status", return_value={"ok": True, "running": True}) as load_status,
+        ):
+            result = cockpit_voice_approval_action({"decision": "approved", "note": "ok"})
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "approved_in_cockpit")
+        self.assertEqual(result["pending_for_adam"]["pending"], True)
+        self.assertEqual(result["voice_mode"]["running"], True)
+        update.assert_called_once_with(decision="approved", note="ok")
+        load_status.assert_called_once()
 
     def test_cockpit_speak_action_returns_speech_result(self) -> None:
         with patch("app.cockpit.speak_text", return_value={"ok": True, "message": "Přečteno."}) as speak:

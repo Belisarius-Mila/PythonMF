@@ -21,22 +21,8 @@ TERMINAL_MANUAL_TERMS = (
     "smaž",
     "vymaz",
     "vymaž",
-    "uprav",
-    "oprav",
-    "zmen",
-    "změň",
-    "prepis",
-    "přepiš",
-    "vytvor soubor",
-    "vytvoř soubor",
-    "uloz",
-    "ulož",
     "commit",
     "push",
-    "odesli",
-    "odešli",
-    "posli",
-    "pošli",
     "zaplat",
     "platbu",
     "token",
@@ -98,6 +84,8 @@ def build_codex_terminal_prompt(command: VoiceCommand) -> str:
         "odesílání, mazání, commitu, platby nebo tajemství, vyžádej si ruční potvrzení. "
         "Po dokončení napiš výsledek do chatu a přečti stručnou verzi výsledku nahlas přes "
         "`.venv/bin/python scripts/speak_edge_open.py \"STRUČNÝ VÝSLEDEK\"`. "
+        "Současně zapiš stejný stručný výsledek do Cockpitu přes "
+        "`.venv/bin/python scripts/adam_voice_reply.py --latest-command \"STRUČNÝ VÝSLEDEK\"`. "
         "Nečti nahlas tajemství, celé osobní údaje ani dlouhé citlivé texty."
     )
 
@@ -219,20 +207,35 @@ on run argv
   end if
   tell application "Terminal"
     set foundTarget to false
-    repeat with terminalWindow in windows
-      repeat with terminalTab in tabs of terminalWindow
-        set tabProcesses to processes of terminalTab
-        set tabTty to tty of terminalTab
-        if tabTty starts with "/dev/" then set tabTty to text 6 thru -1 of tabTty
-        if (tabProcesses contains "codex") or (targetTtys contains tabTty) then
-          set selected tab of terminalWindow to terminalTab
-          set index of terminalWindow to 1
-          set foundTarget to true
-          exit repeat
-        end if
+    if (count of targetTtys) > 0 then
+      repeat with terminalWindow in windows
+        repeat with terminalTab in tabs of terminalWindow
+          set tabTty to tty of terminalTab
+          if tabTty starts with "/dev/" then set tabTty to text 6 thru -1 of tabTty
+          if targetTtys contains tabTty then
+            set selected tab of terminalWindow to terminalTab
+            set index of terminalWindow to 1
+            set foundTarget to true
+            exit repeat
+          end if
+        end repeat
+        if foundTarget then exit repeat
       end repeat
-      if foundTarget then exit repeat
-    end repeat
+    end if
+    if not foundTarget then
+      repeat with terminalWindow in windows
+        repeat with terminalTab in tabs of terminalWindow
+          set tabProcesses to processes of terminalTab
+          if tabProcesses contains "codex" then
+            set selected tab of terminalWindow to terminalTab
+            set index of terminalWindow to 1
+            set foundTarget to true
+            exit repeat
+          end if
+        end repeat
+        if foundTarget then exit repeat
+      end repeat
+    end if
     if not foundTarget then error "Nenalezen Terminal tab s procesem codex ani s odpovídajícím TTY."
     activate
   end tell
@@ -341,6 +344,7 @@ def deliver_prompt_to_terminal(
         marked_tty_error = tty_result
 
     codex_ttys = discover_codex_ttys(runner=ps_runner)
+    target_ttys = [marked_tty] if marked_tty_error and marked_tty else codex_ttys
     completed = runner(
         [
             "/usr/bin/osascript",
@@ -348,7 +352,7 @@ def deliver_prompt_to_terminal(
             script or terminal_applescript(),
             safe_prompt,
             "1" if submit else "0",
-            ",".join(codex_ttys),
+            ",".join(target_ttys),
         ],
         capture_output=True,
         text=True,

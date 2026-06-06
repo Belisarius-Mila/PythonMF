@@ -45,6 +45,14 @@ class VoiceInboxTests(unittest.TestCase):
         self.assertEqual(triage.action, "prepare_and_confirm")
         self.assertTrue(triage.requires_confirmation)
 
+    def test_triage_voice_command_treats_outbound_message_as_confirmable_not_blocked(self) -> None:
+        triage = triage_voice_command("Pošli SMS Janičce, jestli něco nepotřebuje.")
+
+        self.assertEqual(triage.risk, "outbound_confirmation")
+        self.assertEqual(triage.action, "prepare_outbound_and_confirm")
+        self.assertTrue(triage.requires_confirmation)
+        self.assertIn("samostatném potvrzení", triage.reason)
+
     def test_voice_inbox_triage_cli_can_print_json(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             inbox = Path(temp_dir)
