@@ -777,11 +777,17 @@ class VocabularyTrainerApp:
         csv_dir = os.path.dirname(self.csv_path)
         code_dir = os.path.dirname(__file__)
         project_dir = os.path.dirname(code_dir)
+        support_dir = _app_support_dir()
+        portable_parent_dir = os.path.dirname(csv_dir) if csv_dir else ""
         for d in (
+            os.path.join(portable_parent_dir, "Pict"),
+            os.path.join(support_dir, "Pict"),
             os.path.join(project_dir, "Pict"),
             os.path.join(csv_dir, "Pict"),
             os.path.join(code_dir, "Pict"),
         ):
+            if not d:
+                continue
             if d not in dirs:
                 dirs.append(d)
         return dirs
