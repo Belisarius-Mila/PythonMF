@@ -7970,6 +7970,7 @@ COCKPIT_HTML = """<!doctype html>
     button { border: 0; border-radius: 6px; padding: 9px 12px; font: inherit; font-weight: 650; cursor: pointer; background: #e4e9f0; color: #172033; }
     button.primary { background: var(--blue); color: white; }
     button.secondary { background: #dfe5ec; }
+    button.janicka-button { background: #f9a8d4; color: #581c35; }
     button:disabled { opacity: .6; cursor: wait; }
     .grid { display: grid; grid-template-columns: minmax(320px, 1.15fr) minmax(320px, .85fr); gap: 16px; align-items: start; }
     .today-dashboard { display: grid; grid-template-columns: 1.05fr 1fr 1fr; gap: 12px; align-items: stretch; }
@@ -7994,6 +7995,19 @@ COCKPIT_HTML = """<!doctype html>
     .dashboard-overall-reason { color: #344054; font-size: 12px; line-height: 1.35; overflow-wrap: anywhere; }
     .quick-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-content: start; }
     .quick-actions button { width: 100%; }
+    .janicka-modal { width: min(1040px, 100%); background: #fff7fb; border-color: #fbcfe8; }
+    .janicka-modal .modal-header { background: #fce7f3; border-bottom-color: #fbcfe8; }
+    .janicka-intro { border: 1px solid #fbcfe8; border-radius: 8px; background: #fff; padding: 14px; display: grid; gap: 7px; }
+    .janicka-title { margin: 0; font-size: 22px; color: #581c35; line-height: 1.2; }
+    .janicka-subtitle { margin: 0; color: #533044; font-size: 14px; line-height: 1.45; }
+    .janicka-grid { display: grid; grid-template-columns: repeat(2, minmax(260px, 1fr)); gap: 10px; }
+    .janicka-action { border: 1px solid #fbcfe8; border-radius: 8px; padding: 12px; background: #fff; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+    .janicka-action-title { font-weight: 750; color: #581c35; }
+    .janicka-action-text { margin-top: 3px; color: #5f4052; font-size: 13px; line-height: 1.4; }
+    .janicka-action button { background: #be185d; color: white; }
+    .janicka-action button.secondary { background: #fce7f3; color: #831843; }
+    .janicka-note { border: 1px solid #fed7aa; border-radius: 8px; background: #fffbeb; color: #5f370e; padding: 11px 12px; font-size: 13px; line-height: 1.45; }
+    .janicka-return { position: fixed; right: 18px; bottom: 18px; z-index: 14; box-shadow: 0 10px 28px rgba(88, 28, 53, .22); background: #be185d; color: white; }
     .health-panel { border: 1px solid #cfd7e3; border-radius: 8px; background: #fbfcfe; padding: 10px 12px; display: grid; gap: 7px; }
     .health-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
     .health-item { border: 1px solid #edf0f4; border-radius: 7px; background: white; padding: 8px; min-width: 0; }
@@ -8039,6 +8053,7 @@ COCKPIT_HTML = """<!doctype html>
     .search-results { display: grid; gap: 9px; margin-top: 12px; }
     .search-result { border: 1px solid #edf0f4; border-radius: 8px; padding: 10px; background: #fbfcfe; display: grid; gap: 5px; }
     .search-result-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
+    .search-result-head-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
     .search-title { font-weight: 700; overflow-wrap: anywhere; }
     .search-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
     .search-detail { display: grid; gap: 5px; margin-top: 6px; padding-top: 8px; border-top: 1px solid #edf0f4; }
@@ -8157,13 +8172,14 @@ COCKPIT_HTML = """<!doctype html>
     .consistency-finding-title { font-weight: 750; overflow-wrap: anywhere; }
     .consistency-finding-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
     @media (max-width: 1050px) { .today-dashboard { grid-template-columns: 1fr; } .work-grid { grid-template-columns: 1fr; } }
-	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .recovery-grid { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
+	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .search-result-head { grid-template-columns: 1fr; } .search-result-head-actions { justify-content: flex-start; } .recovery-grid { grid-template-columns: 1fr; } .janicka-grid { grid-template-columns: 1fr; } .janicka-action { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <header>
     <h1>Samantha Cockpit</h1>
     <div class="toolbar">
+      <button class="janicka-button" id="janickaBtn">Janička</button>
       <button class="secondary" id="refreshBtn">Obnovit</button>
       <button class="secondary" id="webAppsBtn">Webové aplikace</button>
       <button class="secondary" id="projectsBtn">Projekty</button>
@@ -8393,6 +8409,84 @@ COCKPIT_HTML = """<!doctype html>
       <div class="body"><div id="consistencyText" class="consistency-panel"></div></div>
     </section>
   </main>
+  <div id="janickaModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="janickaTitle">
+    <div class="modal janicka-modal">
+      <div class="modal-header">
+        <h2 id="janickaTitle">Janička</h2>
+        <button class="secondary" id="janickaCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div class="janicka-intro">
+          <h3 class="janicka-title">Samantha bez technické vrstvy</h3>
+          <p class="janicka-subtitle">Tahle obrazovka je vstup pro Janu. Neomezuje přístup; jen převádí hotové části Samanthy do srozumitelných kroků.</p>
+        </div>
+        <div class="janicka-grid" aria-label="Janička rozcestník">
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">Najít dokument</div>
+              <div class="janicka-action-text">Vyhledat smlouvu, fakturu, dopis nebo jiný uložený dokument.</div>
+            </div>
+            <button id="janickaFindDocumentBtn" type="button">Hledat</button>
+          </div>
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">Vytisknout dokument</div>
+              <div class="janicka-action-text">Nejdřív dokument najít, pak v detailu použít tisk.</div>
+            </div>
+            <button id="janickaPrintDocumentBtn" type="button">Najít k tisku</button>
+          </div>
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">E-maily</div>
+              <div class="janicka-action-text">Otevřít pracovní přehled e-mailů a jejich příloh.</div>
+            </div>
+            <button id="janickaEmailBtn" type="button">Otevřít</button>
+          </div>
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">Lékárna</div>
+              <div class="janicka-action-text">Najít domácí léky podle názvu nebo potíží.</div>
+            </div>
+            <button id="janickaLekarnaBtn" type="button">Otevřít</button>
+          </div>
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">Rodinné projekty</div>
+              <div class="janicka-action-text">Otevřít připravené rodinné fotky a videa, například USA.</div>
+            </div>
+            <button id="janickaFamilyBtn" type="button">Otevřít</button>
+          </div>
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">Zeptat se Adama</div>
+              <div class="janicka-action-text">Napsat nebo nadiktovat běžný pokyn bez technických příkazů.</div>
+            </div>
+            <button id="janickaAskAdamBtn" type="button">Zeptat se</button>
+          </div>
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">Připomenutí</div>
+              <div class="janicka-action-text">Zobrazit důležité termíny a otevřené připomínky.</div>
+            </div>
+            <button id="janickaRemindersBtn" type="button">Zobrazit</button>
+          </div>
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">Nouzové převzetí</div>
+              <div class="janicka-action-text">Otevřít recovery přehled a odkazy na navazující pozůstalostní plán.</div>
+            </div>
+            <button class="secondary" id="janickaRecoveryBtn" type="button">Otevřít</button>
+          </div>
+        </div>
+        <div class="janicka-note">Vývoj, terminál a diagnostika zůstávají v běžném Cockpitu. Jana sem nemá chodit přes technické pojmy; má začít tím, co potřebuje udělat.</div>
+        <div class="actions">
+          <button class="secondary" id="janickaWebAppsBtn" type="button">Všechny aplikace</button>
+          <button class="secondary" id="janickaProjectsBtn" type="button">Projekty a kuchařka</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="janicka-return hidden" id="janickaReturnBtn" type="button">Zpět k Janičce</button>
   <div id="remindersModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="remindersTitle">
     <div class="modal">
       <div class="modal-header">
@@ -8566,6 +8660,20 @@ COCKPIT_HTML = """<!doctype html>
     const projectsBtn = document.getElementById("projectsBtn");
     const remindersBtn = document.getElementById("remindersBtn");
     const emailProcessingBtn = document.getElementById("emailProcessingBtn");
+    const janickaBtn = document.getElementById("janickaBtn");
+    const janickaModal = document.getElementById("janickaModal");
+    const janickaCloseBtn = document.getElementById("janickaCloseBtn");
+    const janickaFindDocumentBtn = document.getElementById("janickaFindDocumentBtn");
+    const janickaPrintDocumentBtn = document.getElementById("janickaPrintDocumentBtn");
+    const janickaEmailBtn = document.getElementById("janickaEmailBtn");
+    const janickaLekarnaBtn = document.getElementById("janickaLekarnaBtn");
+    const janickaFamilyBtn = document.getElementById("janickaFamilyBtn");
+    const janickaAskAdamBtn = document.getElementById("janickaAskAdamBtn");
+    const janickaRemindersBtn = document.getElementById("janickaRemindersBtn");
+    const janickaRecoveryBtn = document.getElementById("janickaRecoveryBtn");
+    const janickaWebAppsBtn = document.getElementById("janickaWebAppsBtn");
+    const janickaProjectsBtn = document.getElementById("janickaProjectsBtn");
+    const janickaReturnBtn = document.getElementById("janickaReturnBtn");
     const remindersModal = document.getElementById("remindersModal");
     const remindersCloseBtn = document.getElementById("remindersCloseBtn");
     const remindersStatus = document.getElementById("remindersStatus");
@@ -8774,6 +8882,19 @@ COCKPIT_HTML = """<!doctype html>
     function verifyButtonHealth() {
       const requiredIds = [
         "refreshBtn",
+        "janickaBtn",
+        "janickaCloseBtn",
+        "janickaFindDocumentBtn",
+        "janickaPrintDocumentBtn",
+        "janickaEmailBtn",
+        "janickaLekarnaBtn",
+        "janickaFamilyBtn",
+        "janickaAskAdamBtn",
+        "janickaRemindersBtn",
+        "janickaRecoveryBtn",
+        "janickaWebAppsBtn",
+        "janickaProjectsBtn",
+        "janickaReturnBtn",
         "webAppsBtn",
         "projectsBtn",
         "remindersBtn",
@@ -11099,6 +11220,14 @@ COCKPIT_HTML = """<!doctype html>
         toggle.className = "secondary";
         toggle.type = "button";
         toggle.textContent = "Rozbalit";
+        const headOpenBtn = document.createElement("button");
+        headOpenBtn.className = "primary";
+        headOpenBtn.type = "button";
+        headOpenBtn.textContent = "Otevřít / číst";
+        const headActions = document.createElement("div");
+        headActions.className = "search-result-head-actions";
+        headActions.appendChild(headOpenBtn);
+        headActions.appendChild(toggle);
         const detail = document.createElement("div");
         detail.className = "search-detail hidden";
         const id = document.createElement("div");
@@ -11133,6 +11262,10 @@ COCKPIT_HTML = """<!doctype html>
         snippet.textContent = item.snippet || "";
         const actions = document.createElement("div");
         actions.className = "actions";
+        const openBtn = document.createElement("button");
+        openBtn.className = "primary";
+        openBtn.type = "button";
+        openBtn.textContent = "Otevřít / číst PDF";
         const printBtn = document.createElement("button");
         printBtn.className = "secondary";
         printBtn.type = "button";
@@ -11145,16 +11278,19 @@ COCKPIT_HTML = """<!doctype html>
         trashBtn.className = "danger-soft";
         trashBtn.type = "button";
         trashBtn.textContent = "Do koše";
+        headOpenBtn.addEventListener("click", () => openDocumentForReading(documentRef, headOpenBtn));
+        openBtn.addEventListener("click", () => openDocumentForReading(documentRef, openBtn));
         printBtn.addEventListener("click", () => printDocument(documentRef));
         archiveBtn.addEventListener("click", () => moveDocumentLifecycle(documentRef, "archive"));
         trashBtn.addEventListener("click", () => moveDocumentLifecycle(documentRef, "trash"));
+        actions.appendChild(openBtn);
         actions.appendChild(printBtn);
         actions.appendChild(archiveBtn);
         actions.appendChild(trashBtn);
         summary.appendChild(title);
         summary.appendChild(meta);
         head.appendChild(summary);
-        head.appendChild(toggle);
+        head.appendChild(headActions);
         detail.appendChild(id);
         detail.appendChild(path);
         detail.appendChild(lifecycle);
@@ -11179,6 +11315,21 @@ COCKPIT_HTML = """<!doctype html>
         body: JSON.stringify(payload || {})
       });
       return await res.json();
+    }
+
+    async function openDocumentForReading(documentId, button) {
+      if (!documentId) return;
+      if (button) button.disabled = true;
+      documentSearchStatus.textContent = "Otevírám dokument k přečtení...";
+      try {
+        const result = await postJson("/api/documents/open", {document_id: documentId});
+        documentSearchStatus.textContent = result.message || (result.ok ? "Dokument otevřený." : "Dokument se nepodařilo otevřít.");
+      } catch (err) {
+        recordFrontendError(err);
+        documentSearchStatus.textContent = `Chyba otevření dokumentu: ${err}`;
+      } finally {
+        if (button) button.disabled = false;
+      }
     }
 
     async function printDocument(documentId) {
@@ -11296,6 +11447,7 @@ COCKPIT_HTML = """<!doctype html>
 
     function closeWebAppsModal() {
       webAppsModal.classList.add("hidden");
+      maybeReturnToJanicka("webApps");
     }
 
     async function openProjectsModal() {
@@ -11324,6 +11476,7 @@ COCKPIT_HTML = """<!doctype html>
 
     function closeProjectsModal() {
       projectsModal.classList.add("hidden");
+      maybeReturnToJanicka("projects");
     }
 
     async function openQuickNotesModal() {
@@ -11474,9 +11627,10 @@ COCKPIT_HTML = """<!doctype html>
 	      }
 	    }
 
-	    function closeRecoveryModal() {
-	      recoveryModal.classList.add("hidden");
-	    }
+    function closeRecoveryModal() {
+      recoveryModal.classList.add("hidden");
+      maybeReturnToJanicka("recovery");
+    }
 
 	    function renderRecoveryStatus(data) {
 	      const autosave = data.autosave || {};
@@ -11792,6 +11946,7 @@ COCKPIT_HTML = """<!doctype html>
 
     function closeRemindersModal() {
       remindersModal.classList.add("hidden");
+      maybeReturnToJanicka("reminders");
     }
 
     function renderReminders(data) {
@@ -12159,6 +12314,69 @@ COCKPIT_HTML = """<!doctype html>
       });
     }
 
+    function openJanickaModal() {
+      janickaReturnBtn.classList.add("hidden");
+      janickaModal.classList.remove("hidden");
+    }
+
+    function closeJanickaModal() {
+      janickaModal.classList.add("hidden");
+    }
+
+    let janickaReturnModal = "";
+
+    function armJanickaModalReturn(modalName) {
+      janickaReturnModal = modalName || "";
+    }
+
+    function maybeReturnToJanicka(modalName) {
+      if (janickaReturnModal !== modalName) return;
+      janickaReturnModal = "";
+      window.setTimeout(openJanickaModal, 0);
+    }
+
+    function showJanickaReturnButton() {
+      janickaReturnBtn.classList.remove("hidden");
+    }
+
+    function focusDocumentSearchForJanicka(message) {
+      closeJanickaModal();
+      showJanickaReturnButton();
+      documentSearchInput.scrollIntoView({behavior: "smooth", block: "center"});
+      documentSearchInput.focus();
+      if (message) {
+        documentSearchStatus.textContent = message;
+      }
+    }
+
+    function focusAdamForJanicka() {
+      closeJanickaModal();
+      showJanickaReturnButton();
+      const panel = document.getElementById("voiceCommandPanel");
+      if (panel) {
+        panel.scrollIntoView({behavior: "smooth", block: "start"});
+      }
+      voiceTranscript.focus();
+      voiceCommandStatus.textContent = "Napiš nebo nahraj běžný pokyn pro Adama.";
+    }
+
+    async function openCatalogAppById(appId) {
+      try {
+        const res = await fetch("/api/web-apps");
+        const data = await res.json();
+        const apps = Array.isArray(data.apps) ? data.apps : [];
+        const app = apps.find((item) => item && item.id === appId);
+        if (!app) {
+          showMessage(`Aplikaci ${appId} se nepodařilo najít v katalogu.`);
+          return;
+        }
+        openWebApp(app);
+      } catch (err) {
+        recordFrontendError(err);
+        showMessage(`Chyba otevření aplikace: ${err}`);
+      }
+    }
+
     function openWebApp(app) {
       if (!app || !app.url) return;
       if (app.id === "scandocu") {
@@ -12197,6 +12415,41 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
+    janickaBtn.addEventListener("click", openJanickaModal);
+    janickaCloseBtn.addEventListener("click", closeJanickaModal);
+    janickaFindDocumentBtn.addEventListener("click", () => focusDocumentSearchForJanicka("Zadej, co chceš najít. Po otevření detailu lze dokument přečíst, otevřít nebo vytisknout."));
+    janickaPrintDocumentBtn.addEventListener("click", () => focusDocumentSearchForJanicka("Najdi dokument k tisku a v jeho detailu použij tlačítko Tisknout."));
+    janickaEmailBtn.addEventListener("click", () => {
+      openEmailProcessing();
+    });
+    janickaLekarnaBtn.addEventListener("click", () => {
+      openCatalogAppById("lekarna");
+    });
+    janickaFamilyBtn.addEventListener("click", () => {
+      openCatalogAppById("family-video-organizer");
+    });
+    janickaAskAdamBtn.addEventListener("click", focusAdamForJanicka);
+    janickaRemindersBtn.addEventListener("click", () => {
+      armJanickaModalReturn("reminders");
+      closeJanickaModal();
+      openRemindersModal();
+    });
+    janickaRecoveryBtn.addEventListener("click", () => {
+      armJanickaModalReturn("recovery");
+      closeJanickaModal();
+      openRecoveryModal();
+    });
+    janickaWebAppsBtn.addEventListener("click", () => {
+      armJanickaModalReturn("webApps");
+      closeJanickaModal();
+      openWebAppsModal();
+    });
+    janickaProjectsBtn.addEventListener("click", () => {
+      armJanickaModalReturn("projects");
+      closeJanickaModal();
+      openProjectsModal();
+    });
+    janickaReturnBtn.addEventListener("click", openJanickaModal);
     refreshBtn.addEventListener("click", refresh);
     dashboardRefreshBtn.addEventListener("click", refresh);
     dashboardProcessBtn.addEventListener("click", () => openScanDocu(false));
@@ -12242,6 +12495,11 @@ COCKPIT_HTML = """<!doctype html>
     remindersModal.addEventListener("click", (event) => {
       if (event.target === remindersModal) {
         closeRemindersModal();
+      }
+    });
+    janickaModal.addEventListener("click", (event) => {
+      if (event.target === janickaModal) {
+        closeJanickaModal();
       }
     });
     quantitativeModal.addEventListener("click", (event) => {
@@ -12304,6 +12562,8 @@ COCKPIT_HTML = """<!doctype html>
 		        closeRecoveryModal();
       } else if (event.key === "Escape" && !diagnosticsModal.classList.contains("hidden")) {
         closeDiagnosticsModal();
+		      } else if (event.key === "Escape" && !janickaModal.classList.contains("hidden")) {
+		        closeJanickaModal();
 		      }
     });
     scanDocuBtn.addEventListener("click", () => openScanDocu(false));

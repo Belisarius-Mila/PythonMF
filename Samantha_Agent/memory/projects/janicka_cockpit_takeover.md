@@ -7,6 +7,31 @@ Založeno 2026-06-06 jako samostatný projekt.
 Projekt vznikl po Mílove upřesnění, že nejde o hru, demo ani omezený
 režim. Jde o vážný kontinuitní vstup do Samanthy pro Janu.
 
+Stav UI k 2026-06-06:
+
+- První MVP tlačítka `Janička` je implementované v hlavním Cockpitu.
+- Tlačítko otevírá samostatnou netechnickou obrazovku / modal, ne nové okno.
+- Obrazovka neduplikuje backendovou logiku; používá existující funkce
+  Cockpitu a jen je překládá do lidských vstupů.
+- Po skoku z Janičky je doplněná návratová cesta:
+  - vnitřní modaly jako aplikace/projekty/připomenutí/recovery se po zavření
+    vrací zpět na Janičku,
+  - skok na dokumentové hledání nebo Adama ukáže plovoucí tlačítko
+    `Zpět k Janičce`,
+  - samostatná popup okna jako Lékárna nebo Email Processing nechávají
+    Janičku otevřenou v hlavním Cockpitu.
+- Přímé vstupy v první verzi:
+  - Najít dokument,
+  - Vytisknout dokument,
+  - E-maily,
+  - Lékárna,
+  - Rodinné projekty,
+  - Zeptat se Adama,
+  - Připomenutí,
+  - Nouzové převzetí,
+  - Všechny aplikace,
+  - Projekty a kuchařka.
+
 ## Základní shoda
 
 Janička Cockpit není zvláštní omezený přístup.
@@ -157,9 +182,10 @@ Nejmenší užitečný krok:
 
 ## Další krok
 
-Po dokončení aktuální priority Adam Voice / Cockpit read-only capability
-registry navrhnout první konkrétní MVP obrazovku `Janička` v Cockpitu a
-současně založit první verzi kuchařky pro Janu.
+Ručně otestovat první MVP obrazovku `Janička` v Cockpitu a podle pocitu
+upravit pořadí, texty a první sadu vstupů.
+
+Potom založit první verzi kuchařky pro Janu.
 
 ## Bezpečnost / neukládat
 
