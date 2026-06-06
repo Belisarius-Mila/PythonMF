@@ -1178,7 +1178,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/reminders/done", COCKPIT_HTML)
         self.assertIn("/api/reminders/cancel-payment", COCKPIT_HTML)
         self.assertIn("/api/reminders/source", COCKPIT_HTML)
-        self.assertIn("/api/documents/open", COCKPIT_HTML)
+        self.assertIn("/documents/read?document_id=", COCKPIT_HTML)
         self.assertIn("markReminderDone", COCKPIT_HTML)
         self.assertIn("cancelPaymentReminder", COCKPIT_HTML)
         self.assertIn("loadReminderSource", COCKPIT_HTML)
@@ -2452,6 +2452,21 @@ Dalsi krok:
             self.assertEqual(calls[0][0], "/usr/bin/open")
             self.assertEqual(Path(calls[0][1]), pdf.resolve())
 
+    def test_document_reader_page_contains_return_controls_and_inline_pdf(self) -> None:
+        page = cockpit_module.document_reader_page_html("doc-open", "Doklad & smlouva")
+
+        self.assertIn("Tisknout", page)
+        self.assertIn("Zpět do Cockpitu", page)
+        self.assertIn("Zavřít okno", page)
+        self.assertIn("printFromReader", page)
+        self.assertIn("/api/documents/print/prepare", page)
+        self.assertIn("/api/documents/print/run", page)
+        self.assertIn("window.opener.focus", page)
+        self.assertIn("window.close()", page)
+        self.assertIn('window.location.href = "/"', page)
+        self.assertIn("/documents/pdf?document_id=doc-open", page)
+        self.assertIn("Doklad &amp; smlouva", page)
+
     def test_document_search_returns_structured_redacted_results(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             vault = Path(temp_dir) / "documents"
@@ -2551,8 +2566,10 @@ Dalsi krok:
         self.assertIn("Otevřít / číst", COCKPIT_HTML)
         self.assertIn("Otevřít / číst PDF", COCKPIT_HTML)
         self.assertIn("openDocumentForReading", COCKPIT_HTML)
+        self.assertIn("openDocumentReaderWindow", COCKPIT_HTML)
+        self.assertIn("documentReaderUrl", COCKPIT_HTML)
         self.assertIn("search-result-head-actions", COCKPIT_HTML)
-        self.assertIn("/api/documents/open", COCKPIT_HTML)
+        self.assertIn("/documents/read?document_id=", COCKPIT_HTML)
         self.assertIn("Tisknout", COCKPIT_HTML)
         self.assertIn("Archivovat", COCKPIT_HTML)
         self.assertIn("Do koše", COCKPIT_HTML)
@@ -3254,7 +3271,7 @@ Dalsi krok:
         self.assertIn("bindAttachmentPreviewButtons", EMAIL_PROCESSING_HTML)
         self.assertIn("Právě uložené přílohy", EMAIL_PROCESSING_HTML)
         self.assertIn("Otevřít uložené PDF", EMAIL_PROCESSING_HTML)
-        self.assertIn("/api/documents/open", EMAIL_PROCESSING_HTML)
+        self.assertIn("/documents/read?document_id=", EMAIL_PROCESSING_HTML)
         self.assertIn("collectImportedAttachments", EMAIL_PROCESSING_HTML)
         self.assertIn("Zpracovat dávku", EMAIL_PROCESSING_HTML)
         self.assertIn("hlavní seznam je vyprázdněný", EMAIL_PROCESSING_HTML)
@@ -3292,6 +3309,71 @@ Dalsi krok:
             self.assertEqual(result["document_id"], document_id)
             self.assertTrue((vault / "print_queue").exists())
             self.assertTrue(source.exists())
+
+    def test_document_print_preflight_warns_when_printer_is_not_visible(self) -> None:
+        def fake_runner(command: list[str], timeout: float) -> tuple[int, str]:
+            if command[0] == "networksetup":
+                return 0, "Current Wi-Fi Network: OtherWifi"
+            return 1, ""
+
+        result = cockpit_module.document_print_preflight_status(command_runner=fake_runner)
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "printer_not_visible")
+        self.assertIn("Telekom-865692", result["message"])
+        self.assertIn("HP LaserJet M110w", result["message"])
+        self.assertIn("OtherWifi", result["message"])
+
+    def test_document_print_preflight_warns_when_printer_needs_media(self) -> None:
+        def fake_runner(command: list[str], timeout: float) -> tuple[int, str]:
+            if command[0] == "networksetup":
+                return 0, "Current Wi-Fi Network: Telekom-865692"
+            if command[0] == "ippfind":
+                return 0, "ipp://NPI1CA1A9.local:631/ipp/print stopped accepting-jobs toner-low-warning,media-empty-error"
+            return 0, ""
+
+        result = cockpit_module.document_print_preflight_status(command_runner=fake_runner)
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "printer_blocked")
+        self.assertIn("papír", result["message"])
+        self.assertIn("A4", result["message"])
+
+    def test_prepare_print_action_stops_before_queue_copy_when_preflight_fails(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault, document_id, source = self.create_indexed_document(Path(temp_dir))
+
+            result = prepare_document_print_action(
+                document_id=document_id,
+                vault_dir=vault,
+                preflight_checker=lambda: {
+                    "ok": False,
+                    "status": "printer_not_visible",
+                    "message": "Pro tisk je třeba Wi‑Fi Telekom-865692.",
+                },
+            )
+
+            self.assertFalse(result["ok"])
+            self.assertIn("Telekom-865692", result["message"])
+            self.assertFalse((vault / "print_queue").exists())
+            self.assertTrue(source.exists())
+
+    def test_run_print_action_uses_preferred_hp_queue(self) -> None:
+        with patch("app.cockpit.run_document_print_job") as fake_runner:
+            fake_runner.return_value = SimpleNamespace(
+                status="printed",
+                message="ok",
+                print_job_id="print-123",
+                document_id="doc-123",
+            )
+
+            result = cockpit_module.run_document_print_action(
+                print_job_id="print-123",
+                confirmation_text="Potvrzuji, vytiskni print job print-123.",
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(fake_runner.call_args.kwargs["printer"], "HP_LaserJet_M110w__1CA1A9__20240926171754")
 
     def test_archive_action_moves_document_and_updates_index(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

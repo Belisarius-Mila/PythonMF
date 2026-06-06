@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import errno
 import base64
+import html
 import json
 import hashlib
 import os
@@ -20,7 +21,7 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, quote, urlparse
 
 from app.backup.activity_state import format_backup_activity_reminder
 from app.documents.consistency_audit import format_document_consistency_audit, run_document_consistency_audit, save_audit_decision
@@ -102,6 +103,11 @@ LOCAL_SEZNAM_EMAIL_DIR = PROJECT_ROOT / "data" / "private" / "email_seznam"
 EMAIL_PROCESSING_DECISIONS_FILE = EMAIL_SESSION_HANDOFF_DIR / "email_processing_decisions.json"
 EMAIL_WORK_QUEUE_ACTIONS_FILE = EMAIL_SESSION_HANDOFF_DIR / "email_work_queue_actions.jsonl"
 EMAIL_ATTACHMENT_PREVIEW_DIR = Path("/private/tmp/samantha_email_attachment_preview")
+DOCUMENT_PRINT_PRINTER_LABEL = "HP LaserJet M110w (1CA1A9)"
+DOCUMENT_PRINT_PREFERRED_CUPS_QUEUE = "HP_LaserJet_M110w__1CA1A9__20240926171754"
+DOCUMENT_PRINT_REQUIRED_WIFI = "Telekom-865692"
+DOCUMENT_PRINT_IPP_ID = "NPI1CA1A9.local"
+DOCUMENT_PRINT_DISCOVERY_TIMEOUT = 5.0
 GIT_ROOT = PROJECT_ROOT.parent
 ACTIVE_PROJECTS_PATH = PROJECT_ROOT / "memory" / "ACTIVE_PROJECTS.md"
 PROJECT_CAPABILITY_MAP_PATH = PROJECT_ROOT / "memory" / "technical" / "project_capability_map.md"
@@ -4178,10 +4184,9 @@ def document_stored_path_is_openable_pdf(stored_path: str, vault_dir: Path = DEF
     return target.is_file() and target.suffix.casefold() == ".pdf" and (target == root or root in target.parents)
 
 
-def open_document_pdf_action(
+def resolve_openable_document_pdf(
     document_id: str,
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
-    opener: Callable[[list[str]], object] | None = None,
 ) -> dict[str, Any]:
     documents = read_jsonl(vault_dir / "index" / "documents_index.jsonl")
     row_index = find_document_row_index_by_reference(documents, document_id)
@@ -4193,14 +4198,156 @@ def open_document_pdf_action(
         return {"ok": False, "message": "PDF není dostupné nebo neleží ve vaultu."}
 
     target = (PROJECT_ROOT / stored_path).resolve(strict=True)
+    title = safe_text(str(row.get("title", "") or row.get("filename", "") or "Dokument"))[:240]
+    document_ref = document_reference(str(row.get("document_id", "")))
+    return {
+        "ok": True,
+        "path": target,
+        "title": title,
+        "document_id": safe_text(str(row.get("document_id", ""))),
+        "document_ref": document_ref,
+    }
+
+
+def open_document_pdf_action(
+    document_id: str,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    opener: Callable[[list[str]], object] | None = None,
+) -> dict[str, Any]:
+    resolved = resolve_openable_document_pdf(document_id, vault_dir=vault_dir)
+    if not resolved.get("ok"):
+        return resolved
+    target = resolved["path"]
     runner = opener or (lambda command: subprocess.run(command, check=False))
     runner(["/usr/bin/open", str(target)])
     return {
         "ok": True,
         "message": "PDF otevřeno v lokální aplikaci.",
-        "document_id": safe_text(str(row.get("document_id", ""))),
-        "document_ref": document_reference(str(row.get("document_id", ""))),
+        "document_id": resolved["document_id"],
+        "document_ref": resolved["document_ref"],
     }
+
+
+def document_reader_page_html(document_id: str, title: str) -> str:
+    safe_title = html.escape(title or "Dokument")
+    safe_document_id = html.escape(document_id)
+    document_id_json = json.dumps(document_id, ensure_ascii=False)
+    pdf_url = f"/documents/pdf?document_id={quote(document_id, safe='')}"
+    safe_pdf_url = html.escape(pdf_url, quote=True)
+    return f"""<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Čtení dokumentu - {safe_title}</title>
+  <style>
+    :root {{ color-scheme: light; --blue: #2563eb; --ink: #172033; --muted: #667085; }}
+    * {{ box-sizing: border-box; }}
+    body {{ margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f6f8fb; color: var(--ink); }}
+    .bar {{ min-height: 58px; display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 10px; align-items: center; padding: 10px 14px; background: white; border-bottom: 1px solid #d7dee8; }}
+    .title {{ min-width: 0; }}
+    .title strong {{ display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }}
+    .title span {{ color: var(--muted); font-size: 12px; }}
+    button, a.button {{ border: 0; border-radius: 6px; padding: 9px 12px; font: inherit; font-weight: 700; cursor: pointer; background: #e4e9f0; color: #172033; text-decoration: none; white-space: nowrap; }}
+    button.primary, a.button.primary {{ background: var(--blue); color: white; }}
+    .status {{ grid-column: 1 / -1; color: var(--muted); font-size: 13px; min-height: 18px; }}
+    .viewer {{ width: 100vw; height: calc(100vh - 82px); border: 0; display: block; background: white; }}
+    .fallback {{ padding: 16px; }}
+    @media (max-width: 720px) {{
+      .bar {{ grid-template-columns: 1fr; align-items: stretch; }}
+      button, a.button {{ width: 100%; text-align: center; }}
+      .viewer {{ height: calc(100vh - 210px); }}
+    }}
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <div class="title">
+      <strong>{safe_title}</strong>
+      <span>{safe_document_id}</span>
+    </div>
+    <button type="button" class="primary" id="readerPrintBtn">Tisknout</button>
+    <button type="button" id="readerBackBtn">Zpět do Cockpitu</button>
+    <button type="button" id="readerCloseBtn">Zavřít okno</button>
+    <div class="status" id="readerStatus">Dokument je otevřený ke čtení. Po kontrole ho můžeš rovnou vytisknout.</div>
+  </div>
+  <iframe class="viewer" src="{safe_pdf_url}" title="PDF dokument"></iframe>
+  <noscript><div class="fallback"><a class="button primary" href="{safe_pdf_url}">Otevřít PDF</a></div></noscript>
+  <script>
+    const DOCUMENT_ID = {document_id_json};
+    const readerStatus = document.getElementById("readerStatus");
+    const readerPrintBtn = document.getElementById("readerPrintBtn");
+    const readerBackBtn = document.getElementById("readerBackBtn");
+    const readerCloseBtn = document.getElementById("readerCloseBtn");
+
+    async function postJson(url, payload) {{
+      const res = await fetch(url, {{
+        method: "POST",
+        headers: {{"Content-Type": "application/json"}},
+        body: JSON.stringify(payload || {{}})
+      }});
+      return await res.json();
+    }}
+
+    function focusCockpit() {{
+      if (window.opener && !window.opener.closed) {{
+        window.opener.focus();
+        readerStatus.textContent = "Vracím zpět původní Cockpit.";
+        window.close();
+        window.setTimeout(() => {{
+          window.location.href = "/";
+        }}, 350);
+        return true;
+      }}
+      window.location.href = "/";
+      return false;
+    }}
+
+    function closeReader() {{
+      if (window.opener && !window.opener.closed) {{
+        window.opener.focus();
+      }}
+      window.close();
+      window.setTimeout(() => {{
+        readerStatus.textContent = "Pokud se okno nezavřelo, použij Zpět do Cockpitu. Dokument můžeš vytisknout i odsud.";
+      }}, 300);
+    }}
+
+    async function printFromReader() {{
+      if (!DOCUMENT_ID) return;
+      readerPrintBtn.disabled = true;
+      readerStatus.textContent = "Připravuji dokument k tisku...";
+      try {{
+        const prepared = await postJson("/api/documents/print/prepare", {{document_id: DOCUMENT_ID}});
+        if (!prepared.ok) {{
+          readerStatus.textContent = prepared.message || "Příprava tisku selhala.";
+          return;
+        }}
+        const confirmation = `Potvrzuji, vytiskni print job ${{prepared.print_job_id}}.`;
+        const shouldPrint = window.confirm(`Dokument je připraven k tisku.\\n\\nPrint job: ${{prepared.print_job_id}}\\n\\nOdeslat na tiskárnu?`);
+        if (!shouldPrint) {{
+          readerStatus.textContent = "Tisk je připravený, ale nebyl odeslán na tiskárnu.";
+          return;
+        }}
+        readerStatus.textContent = "Odesílám tisk na macOS tiskovou frontu...";
+        const printed = await postJson("/api/documents/print/run", {{
+          print_job_id: prepared.print_job_id,
+          confirmation_text: confirmation
+        }});
+        readerStatus.textContent = printed.message || "Tisk dokončen.";
+      }} catch (err) {{
+        readerStatus.textContent = `Chyba tisku: ${{err}}`;
+      }} finally {{
+        readerPrintBtn.disabled = false;
+      }}
+    }}
+
+    readerPrintBtn.addEventListener("click", printFromReader);
+    readerBackBtn.addEventListener("click", focusCockpit);
+    readerCloseBtn.addEventListener("click", closeReader);
+  </script>
+</body>
+</html>"""
 
 
 def reminder_status_item(raw: dict[str, Any], today: date) -> dict[str, Any]:
@@ -5753,12 +5900,107 @@ def search_document_index(
     }
 
 
-def prepare_document_print_action(document_id: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> dict[str, Any]:
+def run_print_preflight_command(command: list[str], timeout: float = DOCUMENT_PRINT_DISCOVERY_TIMEOUT) -> tuple[int, str]:
+    try:
+        completed = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return 127, str(exc)
+    output = "\n".join(part.strip() for part in (completed.stdout, completed.stderr) if part.strip())
+    return completed.returncode, output
+
+
+def current_airport_network(
+    command_runner: Callable[[list[str], float], tuple[int, str]] = run_print_preflight_command,
+) -> str:
+    _code, output = command_runner(["networksetup", "-getairportnetwork", "en0"], 3.0)
+    if ":" not in output:
+        return ""
+    return output.split(":", 1)[1].strip()
+
+
+def document_print_preflight_status(
+    command_runner: Callable[[list[str], float], tuple[int, str]] = run_print_preflight_command,
+) -> dict[str, Any]:
+    wifi = current_airport_network(command_runner)
+    _ipp_code, ipp_output = command_runner(["ippfind", "-T", str(int(DOCUMENT_PRINT_DISCOVERY_TIMEOUT)), "-l"], DOCUMENT_PRINT_DISCOVERY_TIMEOUT + 1)
+    _dnssd_code, dnssd_output = command_runner(["lpinfo", "--include-schemes", "dnssd", "-v"], DOCUMENT_PRINT_DISCOVERY_TIMEOUT)
+    combined = f"{ipp_output}\n{dnssd_output}"
+    normalized = combined.casefold()
+    printer_visible = (
+        DOCUMENT_PRINT_IPP_ID.casefold() in normalized
+        or DOCUMENT_PRINT_PRINTER_LABEL.casefold() in normalized
+        or "1ca1a9" in normalized
+    )
+    if not printer_visible:
+        wifi_note = f" Aktuální Wi‑Fi: {wifi}." if wifi else ""
+        return {
+            "ok": False,
+            "status": "printer_not_visible",
+            "printer": DOCUMENT_PRINT_PRINTER_LABEL,
+            "required_wifi": DOCUMENT_PRINT_REQUIRED_WIFI,
+            "current_wifi": wifi,
+            "message": (
+                f"Pro tisk na tiskárně {DOCUMENT_PRINT_PRINTER_LABEL} musí být počítač připojený "
+                f"ke stejné Wi‑Fi jako tiskárna: {DOCUMENT_PRINT_REQUIRED_WIFI}.{wifi_note} "
+                "Cockpit teď tiskárnu přes IPP/Bonjour nevidí, proto tisk nespouštím."
+            ),
+        }
+
+    blocking_tokens = [
+        "media-empty-error",
+        "media-needed-error",
+        "paused",
+        "stopped accepting-jobs",
+    ]
+    if any(token in normalized for token in blocking_tokens):
+        return {
+            "ok": False,
+            "status": "printer_blocked",
+            "printer": DOCUMENT_PRINT_PRINTER_LABEL,
+            "required_wifi": DOCUMENT_PRINT_REQUIRED_WIFI,
+            "current_wifi": wifi,
+            "message": (
+                f"Tiskárna {DOCUMENT_PRINT_PRINTER_LABEL} je vidět, ale nepřijímá tisk. "
+                "Zkontroluj papír, formát A4 a případné potvrzovací okno na tiskárně "
+                "nebo tonerovou hlášku. Potom zkus tisk znovu."
+            ),
+            "detail": sanitize_output(combined)[:800],
+        }
+
+    return {
+        "ok": True,
+        "status": "printer_visible",
+        "printer": DOCUMENT_PRINT_PRINTER_LABEL,
+        "required_wifi": DOCUMENT_PRINT_REQUIRED_WIFI,
+        "current_wifi": wifi,
+        "message": f"Tiskárna {DOCUMENT_PRINT_PRINTER_LABEL} je viditelná pro macOS tisk.",
+    }
+
+
+def prepare_document_print_action(
+    document_id: str,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    preflight_checker: Callable[[], dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     documents = read_jsonl(vault_dir / "index" / "documents_index.jsonl")
     row_index = find_document_row_index_by_reference(documents, document_id)
     if row_index is None:
         return {"ok": False, "message": "Dokument nebyl nalezen v indexu."}
     resolved_document_id = str(documents[row_index].get("document_id", ""))
+    if preflight_checker is not None or vault_dir == DEFAULT_DOCUMENTS_DIR:
+        preflight = (preflight_checker or document_print_preflight_status)()
+        if not preflight.get("ok"):
+            return {
+                "ok": False,
+                "message": str(preflight.get("message", "Tiskárna není připravená.")),
+                "preflight": preflight,
+            }
     try:
         result = prepare_document_print_job(document_id=resolved_document_id, vault_dir=vault_dir)
     except ValueError as exc:
@@ -5784,6 +6026,7 @@ def run_document_print_action(
             user_confirmed=True,
             confirmation_text=confirmation_text,
             vault_dir=vault_dir,
+            printer=DOCUMENT_PRINT_PREFERRED_CUPS_QUEUE,
         )
     except ValueError as exc:
         return {"ok": False, "message": str(exc)}
@@ -6375,6 +6618,16 @@ class CockpitServer:
                 if parsed.path == "/email-processing/":
                     self.respond_html(EMAIL_PROCESSING_HTML)
                     return
+                if parsed.path == "/documents/read":
+                    params = parse_qs(parsed.query)
+                    document_id = params.get("document_id", [""])[0]
+                    self.respond_document_reader(document_id)
+                    return
+                if parsed.path == "/documents/pdf":
+                    params = parse_qs(parsed.query)
+                    document_id = params.get("document_id", [""])[0]
+                    self.respond_document_pdf(document_id)
+                    return
                 if parsed.path == "/api/status":
                     self.respond_json(cockpit_status())
                     return
@@ -6702,9 +6955,9 @@ class CockpitServer:
             def log_message(self, format: str, *args: Any) -> None:
                 return
 
-            def respond_html(self, html: str) -> None:
+            def respond_html(self, html: str, status: HTTPStatus = HTTPStatus.OK) -> None:
                 data = html.encode("utf-8")
-                self.send_response(HTTPStatus.OK)
+                self.send_response(status)
                 self.send_header("Content-Type", "text/html; charset=utf-8")
                 self.send_header("Cache-Control", "no-store, max-age=0")
                 self.send_header("Pragma", "no-cache")
@@ -6716,6 +6969,40 @@ class CockpitServer:
                 data = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
                 self.send_response(status)
                 self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Cache-Control", "no-store, max-age=0")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
+            def respond_document_reader(self, document_id: str) -> None:
+                resolved = resolve_openable_document_pdf(document_id)
+                if not resolved.get("ok"):
+                    self.respond_html(
+                        document_reader_page_html(
+                            document_id=safe_text(document_id)[:180],
+                            title=str(resolved.get("message", "Dokument není dostupný.")),
+                        ),
+                        status=HTTPStatus.NOT_FOUND,
+                    )
+                    return
+                self.respond_html(
+                    document_reader_page_html(
+                        document_id=str(resolved["document_ref"]),
+                        title=str(resolved["title"]),
+                    )
+                )
+
+            def respond_document_pdf(self, document_id: str) -> None:
+                resolved = resolve_openable_document_pdf(document_id)
+                if not resolved.get("ok"):
+                    self.respond_json({"error": "not_found", "message": resolved.get("message", "")}, status=HTTPStatus.NOT_FOUND)
+                    return
+                target = resolved["path"]
+                data = target.read_bytes()
+                filename = safe_filename(str(target.name or "document.pdf"))
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", "application/pdf")
+                self.send_header("Content-Disposition", f'inline; filename="{filename}"')
                 self.send_header("Cache-Control", "no-store, max-age=0")
                 self.send_header("Content-Length", str(len(data)))
                 self.end_headers()
@@ -7338,19 +7625,19 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
 
       function bindAttachmentOpenButtons() {
         detailPane.querySelectorAll(".attachment-open").forEach((button) => {
-          button.addEventListener("click", async () => {
+          button.addEventListener("click", () => {
             const documentId = button.dataset.documentId || "";
             if (!documentId) return;
+            const url = "/documents/read?document_id=" + encodeURIComponent(documentId);
             button.disabled = true;
-            queueStatus.textContent = "Otevírám uložené PDF z document vaultu.";
+            queueStatus.textContent = "Otevírám uložené PDF ve čtecím okně Cockpitu.";
             try {
-              const res = await fetch("/api/documents/open", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({document_id: documentId})
-              });
-              const data = await res.json();
-              queueStatus.textContent = data.message || (data.ok ? "PDF otevřeno." : "PDF se nepodařilo otevřít.");
+              const reader = window.open(url, "samanthaDocumentReader", "width=1180,height=860");
+              if (reader) {
+                reader.focus();
+              } else {
+                window.location.href = url;
+              }
             } catch (err) {
               queueStatus.textContent = "Chyba otevření PDF: " + err;
             } finally {
@@ -9684,20 +9971,8 @@ COCKPIT_HTML = """<!doctype html>
       });
     }
 
-    async function openCaseDocument(documentRef, button) {
-      const originalText = button.textContent;
-      button.disabled = true;
-      button.textContent = "Otevírám...";
-      try {
-        const result = await postJson("/api/documents/open", {document_id: documentRef});
-        documentCasesStatus.textContent = result.message || "Dokument otevřen.";
-      } catch (err) {
-        recordFrontendError(err);
-        documentCasesStatus.textContent = `Chyba otevření dokumentu: ${err}`;
-      } finally {
-        button.disabled = false;
-        button.textContent = originalText || "Otevřít PDF";
-      }
+    function openCaseDocument(documentRef, button) {
+      openDocumentReaderWindow(documentRef, documentCasesStatus, button);
     }
 
     function renderDocumentClassification(data) {
@@ -11317,19 +11592,35 @@ COCKPIT_HTML = """<!doctype html>
       return await res.json();
     }
 
-    async function openDocumentForReading(documentId, button) {
+    function documentReaderUrl(documentId) {
+      return `/documents/read?document_id=${encodeURIComponent(documentId || "")}`;
+    }
+
+    function openDocumentReaderWindow(documentId, statusNode, button) {
       if (!documentId) return;
+      const originalText = button ? button.textContent : "";
       if (button) button.disabled = true;
-      documentSearchStatus.textContent = "Otevírám dokument k přečtení...";
+      if (button) button.textContent = "Otevírám...";
+      const url = documentReaderUrl(documentId);
       try {
-        const result = await postJson("/api/documents/open", {document_id: documentId});
-        documentSearchStatus.textContent = result.message || (result.ok ? "Dokument otevřený." : "Dokument se nepodařilo otevřít.");
+        const reader = window.open(url, "samanthaDocumentReader", "width=1180,height=860");
+        if (reader) {
+          reader.focus();
+          if (statusNode) statusNode.textContent = "Dokument je otevřený ve čtecím okně Cockpitu.";
+        } else {
+          window.location.href = url;
+        }
       } catch (err) {
         recordFrontendError(err);
-        documentSearchStatus.textContent = `Chyba otevření dokumentu: ${err}`;
+        if (statusNode) statusNode.textContent = `Chyba otevření dokumentu: ${err}`;
       } finally {
         if (button) button.disabled = false;
+        if (button) button.textContent = originalText || "Otevřít PDF";
       }
+    }
+
+    function openDocumentForReading(documentId, button) {
+      openDocumentReaderWindow(documentId, documentSearchStatus, button);
     }
 
     async function printDocument(documentId) {
@@ -12229,17 +12520,8 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
-    async function openReminderDocument(documentId, button) {
-      if (!documentId) return;
-      button.disabled = true;
-      try {
-        const result = await postJson("/api/documents/open", {document_id: documentId});
-        remindersStatus.textContent = result.message || "Hotovo.";
-      } catch (err) {
-        remindersStatus.textContent = `Chyba otevření PDF: ${err}`;
-      } finally {
-        button.disabled = false;
-      }
+    function openReminderDocument(documentId, button) {
+      openDocumentReaderWindow(documentId, remindersStatus, button);
     }
 
     async function markReminderDone(reminderId, button) {

@@ -289,6 +289,11 @@ Navrzeny dalsi krok:
   faze.
 - Tiskovy workflow je implementovany jako dvoukrokovy: priprava kopie do
   `print_queue` a az potom potvrzeny systemovy tisk pres macOS `lp`.
+- Cockpit od 2026-06-07 pred tiskem dela preflight HP tiskarny
+  `HP LaserJet M110w (1CA1A9)`: pokud Mac tiskarnu nevidi pres IPP/Bonjour,
+  neodesle job a ma uzivateli rict, ze Mac musi byt na Wi-Fi
+  `Telekom-865692`. Preferovana CUPS fronta je
+  `HP_LaserJet_M110w__1CA1A9__20240926171754`.
 - Fyzicky tisk byl dodatecne overen Milou na TXT dokumentu o zkratkach; neni uz
   potreba startovni pripominka k overeni tisku. Codex stale umi technicky
   potvrdit jen predani do macOS tiskove fronty.
