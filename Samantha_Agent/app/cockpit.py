@@ -1035,6 +1035,117 @@ def projects_status(
     }
 
 
+def project_lifecycle_action(
+    *,
+    project_name: str,
+    lifecycle: str,
+    confirmed: bool,
+    path: Path = ACTIVE_PROJECTS_PATH,
+    backup_dir: Path | None = None,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    if not confirmed:
+        return {
+            "ok": False,
+            "status": "confirmation_required",
+            "message": "Změna režimu projektu nebyla potvrzena.",
+        }
+    name = safe_text(project_name).strip()
+    if not name:
+        return {"ok": False, "status": "missing_project", "message": "Chybí název projektu."}
+    target = normalize_project_lifecycle(lifecycle)
+    try:
+        result = update_project_lifecycle_in_registry(
+            project_name=name,
+            lifecycle=target,
+            path=path,
+            backup_dir=backup_dir,
+            now=now,
+        )
+    except FileNotFoundError:
+        return {"ok": False, "status": "registry_missing", "message": "Registr projektů nejde najít."}
+    except ValueError as exc:
+        return {"ok": False, "status": "registry_update_failed", "message": str(exc)}
+
+    status = projects_status(path=path)
+    return {
+        "ok": True,
+        "status": "updated",
+        "message": f"Projekt `{name}` je teď v režimu {project_lifecycle_label(target)}.",
+        "project": result,
+        "projects_status": status,
+    }
+
+
+def update_project_lifecycle_in_registry(
+    *,
+    project_name: str,
+    lifecycle: str,
+    path: Path,
+    backup_dir: Path | None = None,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    text = path.read_text(encoding="utf-8")
+    lines = text.splitlines(keepends=True)
+    headers: list[str] = []
+    target = normalize_project_lifecycle(lifecycle)
+    found = False
+    changed = False
+    previous = ""
+
+    for index, line in enumerate(lines):
+        stripped = line.strip()
+        if not stripped.startswith("|") or not stripped.endswith("|"):
+            continue
+        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+        if not cells:
+            continue
+        if set("".join(cells)) <= {"-", ":", " "}:
+            continue
+        if not headers:
+            headers = [normalize_project_header(cell) for cell in cells]
+            continue
+        row = dict(zip(headers, cells[: len(headers)], strict=False))
+        if safe_text(row.get("oblast", "")) != project_name:
+            continue
+        found = True
+        if "rezim" not in headers:
+            raise ValueError("Registr projektů nemá sloupec `Rezim`.")
+        lifecycle_index = headers.index("rezim")
+        previous = normalize_project_lifecycle(cells[lifecycle_index] if lifecycle_index < len(cells) else "")
+        if previous == target:
+            break
+        while len(cells) < len(headers):
+            cells.append("")
+        cells[lifecycle_index] = target
+        newline = "\n" if line.endswith("\n") else ""
+        lines[index] = "| " + " | ".join(cells) + " |" + newline
+        changed = True
+        break
+
+    if not found:
+        raise ValueError(f"Projekt `{project_name}` v registru není.")
+
+    backup_path = ""
+    if changed:
+        backup_root = backup_dir or PROJECT_ROOT / "data" / "private" / "cockpit" / "project_registry_backups"
+        backup_root.mkdir(parents=True, exist_ok=True)
+        stamp = (now or datetime.now(timezone.utc)).strftime("%Y%m%d_%H%M%S")
+        backup = backup_root / f"ACTIVE_PROJECTS_{stamp}.md"
+        shutil.copy2(path, backup)
+        path.write_text("".join(lines), encoding="utf-8")
+        backup_path = str(relative_to_project(backup))
+
+    return {
+        "name": project_name,
+        "previous_lifecycle": previous,
+        "lifecycle": target,
+        "lifecycle_label": project_lifecycle_label(target),
+        "changed": changed,
+        "backup": backup_path,
+    }
+
+
 def quantitative_status_overview(
     *,
     metrics_path: Path = QUANTITATIVE_STATUS_METRICS_PATH,
@@ -6811,6 +6922,16 @@ class CockpitServer:
                         )
                     )
                     return
+                if parsed.path == "/api/projects/lifecycle":
+                    payload = self.read_json()
+                    self.respond_json(
+                        project_lifecycle_action(
+                            project_name=str(payload.get("project_name", "")),
+                            lifecycle=str(payload.get("lifecycle", "")),
+                            confirmed=bool(payload.get("confirmed")),
+                        )
+                    )
+                    return
                 if parsed.path == "/api/samantha/open":
                     self.respond_json(open_samantha_chat())
                     return
@@ -11831,21 +11952,25 @@ COCKPIT_HTML = """<!doctype html>
         const data = await res.json();
         currentProjects = data.items || data.projects || [];
         renderProjects(currentProjects, currentProjectFilter);
-	        const summary = data.summary || {};
-	        const catalogSummary = data.catalog_summary || {};
-	        const management = catalogSummary.project_management || {};
-	        const lifecycle = catalogSummary.project_lifecycle || {};
-	        const flags = summary.flag_counts || {};
-	        const remind = flags["připomenout"] || 0;
-	        const needsAttention = management.needs_attention || 0;
-	        const archived = lifecycle.archived || catalogSummary.archived_projects || 0;
-	        projectsStatus.textContent = data.ok
-	          ? `${catalogSummary.projects || summary.active_total || 0} aktivních projektů, ${catalogSummary.tools || 0} toolů, ${catalogSummary.infrastructure_capabilities || 0} infrastrukturních vrstev${archived ? `; ${archived} archiv` : ""}${remind ? `; ${remind} připomenout` : ""}${needsAttention ? `; ${needsAttention} doplnit` : ""}.`
-	          : (data.message || "Projekty nejdou načíst.");
+        renderProjectsStatusLine(data);
       } catch (err) {
         recordFrontendError(err);
         projectsStatus.textContent = `Chyba načtení projektů a schopností: ${err}`;
       }
+    }
+
+    function renderProjectsStatusLine(data) {
+      const summary = data.summary || {};
+      const catalogSummary = data.catalog_summary || {};
+      const management = catalogSummary.project_management || {};
+      const lifecycle = catalogSummary.project_lifecycle || {};
+      const flags = summary.flag_counts || {};
+      const remind = flags["připomenout"] || 0;
+      const needsAttention = management.needs_attention || 0;
+      const archived = lifecycle.archived || catalogSummary.archived_projects || 0;
+      projectsStatus.textContent = data.ok
+        ? `${catalogSummary.projects || summary.active_total || 0} aktivních projektů, ${catalogSummary.tools || 0} toolů, ${catalogSummary.infrastructure_capabilities || 0} infrastrukturních vrstev${archived ? `; ${archived} archiv` : ""}${remind ? `; ${remind} připomenout` : ""}${needsAttention ? `; ${needsAttention} doplnit` : ""}.`
+        : (data.message || "Projekty nejdou načíst.");
     }
 
     function closeProjectsModal() {
@@ -12295,15 +12420,66 @@ COCKPIT_HTML = """<!doctype html>
           const hidden = detail.classList.toggle("hidden");
           toggle.textContent = hidden ? "Detail" : "Sbalit";
         });
+        const actions = document.createElement("div");
+        actions.className = "project-flags";
+        actions.appendChild(toggle);
+        if (project.category === "project") {
+          const lifecycleButton = document.createElement("button");
+          lifecycleButton.className = "secondary";
+          lifecycleButton.type = "button";
+          const archived = (project.lifecycle || "active") === "archived";
+          lifecycleButton.textContent = archived ? "Obnovit" : "Archivovat";
+          lifecycleButton.addEventListener("click", () => {
+            setProjectLifecycle(project, archived ? "active" : "archived", lifecycleButton);
+          });
+          actions.appendChild(lifecycleButton);
+        }
         card.appendChild(head);
 	        card.appendChild(status);
 	        card.appendChild(next);
 	        if (management.textContent) card.appendChild(management);
-	        if ((project.flags || []).length || (project.management_flags || []).length) card.appendChild(flags);
-        card.appendChild(toggle);
+	        if (project.lifecycle_label || (project.flags || []).length || (project.management_flags || []).length) card.appendChild(flags);
+        card.appendChild(actions);
         card.appendChild(detail);
         projectsList.appendChild(card);
       });
+    }
+
+    async function setProjectLifecycle(project, lifecycle, button) {
+      const name = project.name || "";
+      if (!name) return;
+      const archive = lifecycle === "archived";
+      const ok = window.confirm(
+        `${archive ? "Archivovat" : "Obnovit"} projekt?\n\n${name}\n\n` +
+        "Akce pouze změní sloupec Rezim v ACTIVE_PROJECTS.md a před změnou vytvoří lokální zálohu."
+      );
+      if (!ok) return;
+      const originalText = button ? button.textContent : "";
+      if (button) button.disabled = true;
+      if (button) button.textContent = "Ukládám...";
+      projectsStatus.textContent = archive ? "Archivuji projekt..." : "Obnovuji projekt...";
+      try {
+        const data = await postJson("/api/projects/lifecycle", {
+          project_name: name,
+          lifecycle,
+          confirmed: true
+        });
+        if (!data.ok) {
+          projectsStatus.textContent = data.message || "Změna režimu projektu se nepodařila.";
+          return;
+        }
+        const status = data.projects_status || {};
+        currentProjects = status.items || status.projects || [];
+        renderProjects(currentProjects, currentProjectFilter);
+        renderProjectsStatusLine(status);
+        refreshProjectsSummary();
+      } catch (err) {
+        recordFrontendError(err);
+        projectsStatus.textContent = `Chyba změny režimu projektu: ${err}`;
+      } finally {
+        if (button) button.disabled = false;
+        if (button) button.textContent = originalText || (archive ? "Archivovat" : "Obnovit");
+      }
     }
 
     function appendProjectDetail(parent, label, value) {

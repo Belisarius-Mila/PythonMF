@@ -4,7 +4,7 @@ import json
 import subprocess
 import tempfile
 import unittest
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -1591,6 +1591,43 @@ class CockpitTests(unittest.TestCase):
         self.assertFalse(items[1]["needs_attention"])
         self.assertEqual(items[1]["management_status"], "archived")
         self.assertIn('data-project-filter="archived"', COCKPIT_HTML)
+        self.assertIn("/api/projects/lifecycle", COCKPIT_HTML)
+        self.assertIn("Archivovat", COCKPIT_HTML)
+        self.assertIn("Obnovit", COCKPIT_HTML)
+
+    def test_project_lifecycle_action_archives_registry_row_with_backup(self) -> None:
+        text = """# Project Registry
+
+| Oblast | Priorita | Rezim | Stav | Memory soubor | Handoff | Dalsi krok |
+| --- | --- | --- | --- | --- | --- | --- |
+| Dokumenty | 1 | active | Rozpracovane | `projects/docs.md` | `handoffs/docs.md` | Test. |
+| VocabularyFR | 2 | archived | Archiv hotovo | `projects/vocabularyfr.md` | `handoffs/vocabularyfr.md` | Archiv. |
+"""
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            path = root / "ACTIVE_PROJECTS.md"
+            backup_dir = root / "backups"
+            path.write_text(text, encoding="utf-8")
+
+            result = cockpit_module.project_lifecycle_action(
+                project_name="Dokumenty",
+                lifecycle="archived",
+                confirmed=True,
+                path=path,
+                backup_dir=backup_dir,
+                now=datetime(2026, 6, 7, 12, 0, tzinfo=timezone.utc),
+            )
+
+            updated = path.read_text(encoding="utf-8")
+            backup_exists = (backup_dir / "ACTIVE_PROJECTS_20260607_120000.md").exists()
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["project"]["previous_lifecycle"], "active")
+        self.assertEqual(result["project"]["lifecycle"], "archived")
+        self.assertEqual(result["projects_status"]["summary"]["active_total"], 0)
+        self.assertEqual(result["projects_status"]["summary"]["archived_total"], 2)
+        self.assertIn("| Dokumenty | 1 | archived |", updated)
+        self.assertTrue(backup_exists)
 
     def test_project_capability_map_tables_are_exposed_in_projects_status(self) -> None:
         active_projects_text = """# Active Projects
