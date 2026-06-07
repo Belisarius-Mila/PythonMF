@@ -1,0 +1,979 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-06-06",
+  "language": "fr_jana",
+  "source_csv": "/Users/miloslavfalta/Library/Mobile Documents/com~apple~CloudDocs/PythonMF/PictNew/jana_vocabularyfr_fallback_review.csv",
+  "output_dir": "PictNew/generated",
+  "target_size_kb": 250,
+  "max_size_kb": 300,
+  "batch_size": 10,
+  "total_source_rows": 42,
+  "total_requests": 39,
+  "total_unique_target_images": 39,
+  "total_batches": 4,
+  "style_prompt": "Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature.",
+  "requests": [
+    {
+      "id": "fr-jana-bank",
+      "language": "fr",
+      "image_name": "bank",
+      "target_filename": "bank.webp",
+      "row_numbers": [
+        178
+      ],
+      "words": [
+        "banque"
+      ],
+      "czech_meanings": [
+        "banka"
+      ],
+      "source_entries": [
+        {
+          "row_number": 178,
+          "word": "banque",
+          "czech_meaning": "banka",
+          "note": "banque/banka chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'bank', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'banque' with Czech meaning 'banka'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a small local bank building with a discreet money symbol and a person entering with a wallet; make it clearly a financial bank, not a river bank. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-bus",
+      "language": "fr",
+      "image_name": "bus",
+      "target_filename": "bus.webp",
+      "row_numbers": [
+        214
+      ],
+      "words": [
+        "bus"
+      ],
+      "czech_meanings": [
+        "autobus"
+      ],
+      "source_entries": [
+        {
+          "row_number": 214,
+          "word": "bus",
+          "czech_meaning": "autobus",
+          "note": "autobus chybi jako samostatny obrazek"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'bus', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'bus' with Czech meaning 'autobus'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a friendly city bus stopped at a bus stop with its door open, ready for passengers. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-butter",
+      "language": "fr",
+      "image_name": "butter",
+      "target_filename": "butter.webp",
+      "row_numbers": [
+        261
+      ],
+      "words": [
+        "beurre"
+      ],
+      "czech_meanings": [
+        "máslo"
+      ],
+      "source_entries": [
+        {
+          "row_number": 261,
+          "word": "beurre",
+          "czech_meaning": "máslo",
+          "note": "beurre/maslo chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'butter', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'beurre' with Czech meaning 'máslo'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a pat of butter on a small plate next to bread on a kitchen table. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-calm",
+      "language": "fr",
+      "image_name": "calm",
+      "target_filename": "calm.webp",
+      "row_numbers": [
+        172
+      ],
+      "words": [
+        "calme"
+      ],
+      "czech_meanings": [
+        "klidný, nehybný"
+      ],
+      "source_entries": [
+        {
+          "row_number": 172,
+          "word": "calme",
+          "czech_meaning": "klidný, nehybný",
+          "note": "calme/klidny chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'calm', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'calme' with Czech meaning 'klidný, nehybný'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a quiet person sitting calmly by a window with a cup of tea, peaceful posture and no action rush. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-charger",
+      "language": "fr",
+      "image_name": "charger",
+      "target_filename": "charger.webp",
+      "row_numbers": [
+        128
+      ],
+      "words": [
+        "chargeur"
+      ],
+      "czech_meanings": [
+        "nabíječka"
+      ],
+      "source_entries": [
+        {
+          "row_number": 128,
+          "word": "chargeur",
+          "czech_meaning": "nabíječka",
+          "note": "nabijecka chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'charger', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'chargeur' with Czech meaning 'nabíječka'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a phone connected to a wall charger on a bedside table, cable and plug clearly visible. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-chinese",
+      "language": "fr",
+      "image_name": "chinese",
+      "target_filename": "chinese.webp",
+      "row_numbers": [
+        181
+      ],
+      "words": [
+        "chinois"
+      ],
+      "czech_meanings": [
+        "čínský"
+      ],
+      "source_entries": [
+        {
+          "row_number": 181,
+          "word": "chinois",
+          "czech_meaning": "čínský",
+          "note": "chinois/cinsky chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'chinese', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'chinois' with Czech meaning 'čínský'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a respectful everyday hint of Chinese culture, such as a child holding a small Chinese flag beside a red lantern; avoid stereotypes. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-comfortable",
+      "language": "fr",
+      "image_name": "comfortable",
+      "target_filename": "comfortable.webp",
+      "row_numbers": [
+        159
+      ],
+      "words": [
+        "confortable"
+      ],
+      "czech_meanings": [
+        "pohodlný"
+      ],
+      "source_entries": [
+        {
+          "row_number": 159,
+          "word": "confortable",
+          "czech_meaning": "pohodlný",
+          "note": "confortable/pohodlny chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'comfortable', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'confortable' with Czech meaning 'pohodlný'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a person relaxed in a comfortable chair with a blanket, clearly feeling cozy. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-delivery",
+      "language": "fr",
+      "image_name": "delivery",
+      "target_filename": "delivery.webp",
+      "row_numbers": [
+        232
+      ],
+      "words": [
+        "livrer"
+      ],
+      "czech_meanings": [
+        "dodávat, prozradit, vyzradit"
+      ],
+      "source_entries": [
+        {
+          "row_number": 232,
+          "word": "livrer",
+          "czech_meaning": "dodávat, prozradit, vyzradit",
+          "note": "livrer/dodavat chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'delivery', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'livrer' with Czech meaning 'dodávat, prozradit, vyzradit'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a delivery courier handing a small package to a person at a front door. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-driver",
+      "language": "fr",
+      "image_name": "driver",
+      "target_filename": "driver.webp",
+      "row_numbers": [
+        210
+      ],
+      "words": [
+        "chauffeur"
+      ],
+      "czech_meanings": [
+        "řidič"
+      ],
+      "source_entries": [
+        {
+          "row_number": 210,
+          "word": "chauffeur",
+          "czech_meaning": "řidič",
+          "note": "chauffeur/ridic chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'driver', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'chauffeur' with Czech meaning 'řidič'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a car driver seated at the wheel, hands on steering wheel, seen through the windshield. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-european",
+      "language": "fr",
+      "image_name": "european",
+      "target_filename": "european.webp",
+      "row_numbers": [
+        266
+      ],
+      "words": [
+        "européen"
+      ],
+      "czech_meanings": [
+        "evropský"
+      ],
+      "source_entries": [
+        {
+          "row_number": 266,
+          "word": "européen",
+          "czech_meaning": "evropský",
+          "note": "europeen/evropsky chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'european', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'européen' with Czech meaning 'evropský'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a simple map-like scene with Europe highlighted and small EU-style stars, not a political poster. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-fast",
+      "language": "fr",
+      "image_name": "fast",
+      "target_filename": "fast.webp",
+      "row_numbers": [
+        134,
+        154
+      ],
+      "words": [
+        "rapide",
+        "vite"
+      ],
+      "czech_meanings": [
+        "honem, rychle",
+        "rychlý, prudký, chápavý"
+      ],
+      "source_entries": [
+        {
+          "row_number": 134,
+          "word": "rapide",
+          "czech_meaning": "rychlý, prudký, chápavý",
+          "note": "rychly/rapide chybi"
+        },
+        {
+          "row_number": 154,
+          "word": "vite",
+          "czech_meaning": "honem, rychle",
+          "note": "vite/rychle bude sdilet novy fast"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'fast', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'rapide / vite' with Czech meaning 'honem, rychle / rychlý, prudký, chápavý'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a runner moving quickly with motion lines on a path, clearly fast but friendly. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-fresh",
+      "language": "fr",
+      "image_name": "fresh",
+      "target_filename": "fresh.webp",
+      "row_numbers": [
+        260
+      ],
+      "words": [
+        "frais"
+      ],
+      "czech_meanings": [
+        "čerstvý, nově vyrobený; chladivý"
+      ],
+      "source_entries": [
+        {
+          "row_number": 260,
+          "word": "frais",
+          "czech_meaning": "čerstvý, nově vyrobený; chladivý",
+          "note": "frais/cerstvy chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'fresh', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'frais' with Czech meaning 'čerstvý, nově vyrobený; chladivý'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show fresh vegetables and fruit with water droplets on a market stall. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-friend",
+      "language": "fr",
+      "image_name": "friend",
+      "target_filename": "friend.webp",
+      "row_numbers": [
+        156
+      ],
+      "words": [
+        "copain"
+      ],
+      "czech_meanings": [
+        "přítel"
+      ],
+      "source_entries": [
+        {
+          "row_number": 156,
+          "word": "copain",
+          "czech_meaning": "přítel",
+          "note": "copain/pritel chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'friend', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'copain' with Czech meaning 'přítel'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show two friends greeting each other warmly, simple everyday friendship. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-glasses",
+      "language": "fr",
+      "image_name": "glasses",
+      "target_filename": "glasses.webp",
+      "row_numbers": [
+        274
+      ],
+      "words": [
+        "les lunettes"
+      ],
+      "czech_meanings": [
+        "brýle"
+      ],
+      "source_entries": [
+        {
+          "row_number": 274,
+          "word": "les lunettes",
+          "czech_meaning": "brýle",
+          "note": "lunettes/bryle chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'glasses', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'les lunettes' with Czech meaning 'brýle'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a pair of eyeglasses on an open book, clearly glasses for seeing. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-heavy",
+      "language": "fr",
+      "image_name": "heavy",
+      "target_filename": "heavy.webp",
+      "row_numbers": [
+        133
+      ],
+      "words": [
+        "lourde"
+      ],
+      "czech_meanings": [
+        "těžká"
+      ],
+      "source_entries": [
+        {
+          "row_number": 133,
+          "word": "lourde",
+          "czech_meaning": "těžká",
+          "note": "tezka/lourde chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'heavy', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'lourde' with Czech meaning 'těžká'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a person carefully lifting a heavy suitcase, effort visible but safe. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-idea",
+      "language": "fr",
+      "image_name": "idea",
+      "target_filename": "idea.webp",
+      "row_numbers": [
+        318
+      ],
+      "words": [
+        "idée"
+      ],
+      "czech_meanings": [
+        "nápad"
+      ],
+      "source_entries": [
+        {
+          "row_number": 318,
+          "word": "idée",
+          "czech_meaning": "nápad",
+          "note": "idee/napad chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'idea', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'idée' with Czech meaning 'nápad'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a person having an idea, with a small glowing light bulb above a notebook. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-infront",
+      "language": "fr",
+      "image_name": "infront",
+      "target_filename": "infront.webp",
+      "row_numbers": [
+        229
+      ],
+      "words": [
+        "devant"
+      ],
+      "czech_meanings": [
+        "před"
+      ],
+      "source_entries": [
+        {
+          "row_number": 229,
+          "word": "devant",
+          "czech_meaning": "před",
+          "note": "devant/pred jako vztah chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'infront', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'devant' with Czech meaning 'před'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show one object clearly in front of another, for example a red ball in front of a chair. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-kitchen",
+      "language": "fr",
+      "image_name": "kitchen",
+      "target_filename": "kitchen.webp",
+      "row_numbers": [
+        136
+      ],
+      "words": [
+        "cuisine"
+      ],
+      "czech_meanings": [
+        "kuchyně"
+      ],
+      "source_entries": [
+        {
+          "row_number": 136,
+          "word": "cuisine",
+          "czech_meaning": "kuchyně",
+          "note": "kuchyne chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'kitchen', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'cuisine' with Czech meaning 'kuchyně'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a clean home kitchen with a stove, sink, and a pot on the counter. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-late",
+      "language": "fr",
+      "image_name": "late",
+      "target_filename": "late.webp",
+      "row_numbers": [
+        127
+      ],
+      "words": [
+        "retard"
+      ],
+      "czech_meanings": [
+        "zpoždění, pozdě"
+      ],
+      "source_entries": [
+        {
+          "row_number": 127,
+          "word": "retard",
+          "czech_meaning": "zpoždění, pozdě",
+          "note": "zpozdeni/pozde nema vhodny obrazek"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'late', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'retard' with Czech meaning 'zpoždění, pozdě'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a person rushing while looking at a clock, clearly late for an appointment. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-lemonade",
+      "language": "fr",
+      "image_name": "lemonade",
+      "target_filename": "lemonade.webp",
+      "row_numbers": [
+        324
+      ],
+      "words": [
+        "limonade"
+      ],
+      "czech_meanings": [
+        "limonada"
+      ],
+      "source_entries": [
+        {
+          "row_number": 324,
+          "word": "limonade",
+          "czech_meaning": "limonada",
+          "note": "limonade chybi presne"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'lemonade', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'limonade' with Czech meaning 'limonada'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a glass pitcher and glass of lemonade with lemon slices on a table. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-livingroom",
+      "language": "fr",
+      "image_name": "livingroom",
+      "target_filename": "livingroom.webp",
+      "row_numbers": [
+        137
+      ],
+      "words": [
+        "salon"
+      ],
+      "czech_meanings": [
+        "obývák"
+      ],
+      "source_entries": [
+        {
+          "row_number": 137,
+          "word": "salon",
+          "czech_meaning": "obývák",
+          "note": "obyvak/salon chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'livingroom', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'salon' with Czech meaning 'obývák'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a cozy living room with sofa, lamp, and small table. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-matchstick",
+      "language": "fr",
+      "image_name": "matchstick",
+      "target_filename": "matchstick.webp",
+      "row_numbers": [
+        275
+      ],
+      "words": [
+        "allumette"
+      ],
+      "czech_meanings": [
+        "sirka"
+      ],
+      "source_entries": [
+        {
+          "row_number": 275,
+          "word": "allumette",
+          "czech_meaning": "sirka",
+          "note": "allumette/sirka chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'matchstick', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'allumette' with Czech meaning 'sirka'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a single wooden matchstick and a small matchbox, unlit and safe. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-mobilephone",
+      "language": "fr",
+      "image_name": "mobilephone",
+      "target_filename": "mobilephone.webp",
+      "row_numbers": [
+        135
+      ],
+      "words": [
+        "portable"
+      ],
+      "czech_meanings": [
+        "mobil, nositelný, přenosný"
+      ],
+      "source_entries": [
+        {
+          "row_number": 135,
+          "word": "portable",
+          "czech_meaning": "mobil, nositelný, přenosný",
+          "note": "mobil/portable chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'mobilephone', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'portable' with Czech meaning 'mobil, nositelný, přenosný'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a smartphone in a hand with a simple home screen, clearly a mobile phone. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-moroccan",
+      "language": "fr",
+      "image_name": "moroccan",
+      "target_filename": "moroccan.webp",
+      "row_numbers": [
+        163
+      ],
+      "words": [
+        "marocain"
+      ],
+      "czech_meanings": [
+        "maročan"
+      ],
+      "source_entries": [
+        {
+          "row_number": 163,
+          "word": "marocain",
+          "czech_meaning": "maročan",
+          "note": "marocain chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'moroccan', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'marocain' with Czech meaning 'maročan'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a respectful Moroccan context, such as a small Moroccan flag and warm market architecture; avoid caricature. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-musicnotebook",
+      "language": "fr",
+      "image_name": "musicnotebook",
+      "target_filename": "musicnotebook.webp",
+      "row_numbers": [
+        271
+      ],
+      "words": [
+        "cahier de musique"
+      ],
+      "czech_meanings": [
+        "notový sešit, noty"
+      ],
+      "source_entries": [
+        {
+          "row_number": 271,
+          "word": "cahier de musique",
+          "czech_meaning": "notový sešit, noty",
+          "note": "notovy sesit chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'musicnotebook', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'cahier de musique' with Czech meaning 'notový sešit, noty'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a music notebook open on a stand with simple musical notes and a pencil. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-never",
+      "language": "fr",
+      "image_name": "never",
+      "target_filename": "never.webp",
+      "row_numbers": [
+        306
+      ],
+      "words": [
+        "jamais"
+      ],
+      "czech_meanings": [
+        "nikdy"
+      ],
+      "source_entries": [
+        {
+          "row_number": 306,
+          "word": "jamais",
+          "czech_meaning": "nikdy",
+          "note": "jamais/nikdy chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'never', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'jamais' with Czech meaning 'nikdy'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a clear 'never' idea without text if possible: a child refusing a bad habit, with a crossed-out symbol above it. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-neveragain",
+      "language": "fr",
+      "image_name": "neveragain",
+      "target_filename": "neveragain.webp",
+      "row_numbers": [
+        307
+      ],
+      "words": [
+        "jamais plus"
+      ],
+      "czech_meanings": [
+        "už nikdy"
+      ],
+      "source_entries": [
+        {
+          "row_number": 307,
+          "word": "jamais plus",
+          "czech_meaning": "už nikdy",
+          "note": "jamais plus/uz nikdy chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'neveragain', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'jamais plus' with Czech meaning 'už nikdy'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a small broken mistake being learned from, with a crossed-out repeat arrow to mean never again. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-nolonger",
+      "language": "fr",
+      "image_name": "nolonger",
+      "target_filename": "nolonger.webp",
+      "row_numbers": [
+        169,
+        183
+      ],
+      "words": [
+        "non plus"
+      ],
+      "czech_meanings": [
+        "již ne",
+        "již ne, už ne"
+      ],
+      "source_entries": [
+        {
+          "row_number": 169,
+          "word": "non plus",
+          "czech_meaning": "již ne",
+          "note": "non plus/jiz ne neni dobre pokryte"
+        },
+        {
+          "row_number": 183,
+          "word": "non plus",
+          "czech_meaning": "již ne, už ne",
+          "note": "non plus/uz ne bude sdilet nolonger"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'nolonger', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'non plus' with Czech meaning 'již ne / již ne, už ne'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show something finished or no longer happening, such as an empty chair where activity has stopped, with a gentle crossed-out repeat sign. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-notebook",
+      "language": "fr",
+      "image_name": "notebook",
+      "target_filename": "notebook.webp",
+      "row_numbers": [
+        270,
+        272
+      ],
+      "words": [
+        "cahier",
+        "cahier d' ècolier"
+      ],
+      "czech_meanings": [
+        "sešit, periodikum",
+        "školní sešit"
+      ],
+      "source_entries": [
+        {
+          "row_number": 270,
+          "word": "cahier",
+          "czech_meaning": "sešit, periodikum",
+          "note": "cahier/sesit chybi presneji"
+        },
+        {
+          "row_number": 272,
+          "word": "cahier d' ècolier",
+          "czech_meaning": "školní sešit",
+          "note": "skolni sesit muze sdilet notebook"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'notebook', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'cahier / cahier d' ècolier' with Czech meaning 'sešit, periodikum / školní sešit'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a school notebook on a desk with a pencil, clearly a notebook for writing. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-passport",
+      "language": "fr",
+      "image_name": "passport",
+      "target_filename": "passport.webp",
+      "row_numbers": [
+        238
+      ],
+      "words": [
+        "passeport"
+      ],
+      "czech_meanings": [
+        "pas"
+      ],
+      "source_entries": [
+        {
+          "row_number": 238,
+          "word": "passeport",
+          "czech_meaning": "pas",
+          "note": "passeport chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'passport', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'passeport' with Czech meaning 'pas'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a passport at an airport check desk with a boarding pass nearby; no real country data. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-pen",
+      "language": "fr",
+      "image_name": "pen",
+      "target_filename": "pen.webp",
+      "row_numbers": [
+        190
+      ],
+      "words": [
+        "stylo"
+      ],
+      "czech_meanings": [
+        "pero"
+      ],
+      "source_entries": [
+        {
+          "row_number": 190,
+          "word": "stylo",
+          "czech_meaning": "pero",
+          "note": "stylo/pero chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'pen', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'stylo' with Czech meaning 'pero'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a pen writing a simple line in a notebook. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-sad",
+      "language": "fr",
+      "image_name": "sad",
+      "target_filename": "sad.webp",
+      "row_numbers": [
+        310
+      ],
+      "words": [
+        "triste"
+      ],
+      "czech_meanings": [
+        "zarmoucený"
+      ],
+      "source_entries": [
+        {
+          "row_number": 310,
+          "word": "triste",
+          "czech_meaning": "zarmoucený",
+          "note": "triste/zarmouceny chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'sad', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'triste' with Czech meaning 'zarmoucený'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a person sitting sadly with soft expression, gentle and not dramatic. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-sofa",
+      "language": "fr",
+      "image_name": "sofa",
+      "target_filename": "sofa.webp",
+      "row_numbers": [
+        146
+      ],
+      "words": [
+        "canapé"
+      ],
+      "czech_meanings": [
+        "gauč ; jednohubka"
+      ],
+      "source_entries": [
+        {
+          "row_number": 146,
+          "word": "canapé",
+          "czech_meaning": "gauč ; jednohubka",
+          "note": "canape/gauc nema vhodny existujici obrazek"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'sofa', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'canapé' with Czech meaning 'gauč ; jednohubka'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a sofa in a living room, clearly the main object. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-student",
+      "language": "fr",
+      "image_name": "student",
+      "target_filename": "student.webp",
+      "row_numbers": [
+        187
+      ],
+      "words": [
+        "étudiant"
+      ],
+      "czech_meanings": [
+        "student"
+      ],
+      "source_entries": [
+        {
+          "row_number": 187,
+          "word": "étudiant",
+          "czech_meaning": "student",
+          "note": "student chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'student', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'étudiant' with Czech meaning 'student'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a student carrying books or sitting at a desk studying. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-suitcase",
+      "language": "fr",
+      "image_name": "suitcase",
+      "target_filename": "suitcase.webp",
+      "row_numbers": [
+        125
+      ],
+      "words": [
+        "valise"
+      ],
+      "czech_meanings": [
+        "kufr"
+      ],
+      "source_entries": [
+        {
+          "row_number": 125,
+          "word": "valise",
+          "czech_meaning": "kufr",
+          "note": "kufr nema vhodny existujici obrazek"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'suitcase', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'valise' with Czech meaning 'kufr'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a travel suitcase standing near a door, ready for a trip. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-surrender",
+      "language": "fr",
+      "image_name": "surrender",
+      "target_filename": "surrender.webp",
+      "row_numbers": [
+        233
+      ],
+      "words": [
+        "se livrer"
+      ],
+      "czech_meanings": [
+        "vzdávat se"
+      ],
+      "source_entries": [
+        {
+          "row_number": 233,
+          "word": "se livrer",
+          "czech_meaning": "vzdávat se",
+          "note": "se livrer/vzdavat se chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'surrender', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'se livrer' with Czech meaning 'vzdávat se'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a gentle symbolic surrender: a person raising both hands calmly, no weapons or danger. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-tie",
+      "language": "fr",
+      "image_name": "tie",
+      "target_filename": "tie.webp",
+      "row_numbers": [
+        117
+      ],
+      "words": [
+        "cravate"
+      ],
+      "czech_meanings": [
+        "kravata"
+      ],
+      "source_entries": [
+        {
+          "row_number": 117,
+          "word": "cravate",
+          "czech_meaning": "kravata",
+          "note": "kravata nema vhodny existujici obrazek"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'tie', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'cravate' with Czech meaning 'kravata'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a necktie laid neatly on a shirt, clearly a tie. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-university",
+      "language": "fr",
+      "image_name": "university",
+      "target_filename": "university.webp",
+      "row_numbers": [
+        192
+      ],
+      "words": [
+        "université"
+      ],
+      "czech_meanings": [
+        "universita"
+      ],
+      "source_entries": [
+        {
+          "row_number": 192,
+          "word": "université",
+          "czech_meaning": "universita",
+          "note": "universite chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'university', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'université' with Czech meaning 'universita'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a university building with students walking outside and books in hand. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    },
+    {
+      "id": "fr-jana-world",
+      "language": "fr",
+      "image_name": "world",
+      "target_filename": "world.webp",
+      "row_numbers": [
+        283
+      ],
+      "words": [
+        "monde"
+      ],
+      "czech_meanings": [
+        "svět"
+      ],
+      "source_entries": [
+        {
+          "row_number": 283,
+          "word": "monde",
+          "czech_meaning": "svět",
+          "note": "monde/svet chybi"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'world', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'monde' with Czech meaning 'svět'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a globe on a desk, clearly representing the world. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature."
+    }
+  ]
+}
