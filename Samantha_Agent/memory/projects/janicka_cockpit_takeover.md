@@ -246,15 +246,20 @@ Ručně projít obrazovku `Janička` přímo s Janou nebo z její perspektivy:
 - zapsat, která slova jsou pro Janu nejasná nebo příliš technická,
 - podle toho upravit texty v UI a kuchařce.
 
-Kuchařka už je dostupná přímo z tlačítka `Kuchařka` a `Zeptat se Adama` má
-samostatný textový chat s projektovou pamětí. Další krok je ručně ověřit chat z
-prohlížeče z pohledu Jany a potom opravit `Rodinné projekty`.
+Kuchařka už je dostupná přímo z tlačítka `Kuchařka`. `Zeptat se Adama` má
+samostatný textový chat a po reálném testu funguje jako most do běžící Adamovy
+Codex relace. Další krok je nechat kanál zatím stabilně používat a potom opravit
+`Rodinné projekty`.
 
-Poznámka z 2026-06-07: Janiččin textový chat předává dotazy spravovanému
-Adamovi přímo přes `screen` relaci `samantha_adam`, ne přes obecný
-terminálový/GUI můstek. Před vložením dotazu se do relace posílá `Ctrl-U`, aby
-se vyčistil případný rozepsaný vstup. Důvod: zabránit přepínání fokusu do VS
-Code/Terminálu a hromadění starého textu v příkazové řádce.
+Poznámka z 2026-06-07: krátce se zkoušela skrytá `screen` relace
+`samantha_adam`, aby se nepřepínal fokus z Cockpitu. Tato cesta ale uměla dotaz
+označit jako doručený, aniž by ho Codex reálně převzal. Funkční stav je proto
+viditelná VS Code/Codex cesta: před vložením se čistí vstup, po odeslání se
+fokus vrací zpět do původní aplikace a odpověď se zapisuje do Cockpitu přes
+`scripts/adam_voice_reply.py --request-id ... --route janicka_text_bridge`.
+Reálné testy dotazů `Jak funguje Najít dokument?` a `Co mi můžeš říct o
+projektu Pozůstalost?` prošly; poslední naměřené čekání bylo zhruba 44 sekund,
+což je přijatelné pro odpověď skutečnou Codex relací.
 
 ## Bezpečnost / neukládat
 
