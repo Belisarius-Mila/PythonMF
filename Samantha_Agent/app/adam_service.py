@@ -485,15 +485,9 @@ def submit_adam_text_request(
     if start_result.get("status") in {"start_requested", "restart_requested"}:
         ready_result = ready_waiter() if ready_waiter is not None else wait_for_adam_ready()
     request = save_adam_text_request(message=message, history=history, requests_dir=requests_dir)
+    ready_warning = ""
     if not ready_result.get("ready", True):
-        return {
-            "ok": False,
-            "status": "adam_not_ready",
-            "message": str(ready_result.get("message") or "Adam zatím není připravený převzít dotaz."),
-            "request_id": request["request_id"],
-            "start": start_result,
-            "ready": ready_result,
-        }
+        ready_warning = str(ready_result.get("message") or "Adam zatím není připravený k ověření, ale dotaz se zkusí doručit dál.")
     prompt = build_adam_text_prompt(request)
     delivery = deliverer(prompt, submit=True)
     path = Path(str(request.get("path") or ""))
@@ -512,12 +506,16 @@ def submit_adam_text_request(
             }
         )
         path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    message = "Dotaz byl předán Adamovi." if delivery.get("ok") else f"Dotaz se nepodařilo předat Adamovi: {delivery.get('message')}"
+    if delivery.get("ok") and ready_warning:
+        message = f"{message} Pozor: {ready_warning}"
     return {
         "ok": bool(delivery.get("ok")),
         "status": "delivered_to_adam" if delivery.get("ok") else "delivery_failed",
-        "message": "Dotaz byl předán Adamovi." if delivery.get("ok") else f"Dotaz se nepodařilo předat Adamovi: {delivery.get('message')}",
+        "message": message,
         "request_id": request["request_id"],
         "start": start_result,
         "ready": ready_result,
         "delivery": delivery,
+        "ready_warning": ready_warning,
     }

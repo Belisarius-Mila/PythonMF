@@ -93,7 +93,12 @@ def build_codex_terminal_prompt(command: VoiceCommand) -> str:
 def normalize_tty(value: str) -> str:
     text = str(value or "").strip()
     if text.startswith("/dev/"):
-        return text.removeprefix("/dev/")
+        text = text.removeprefix("/dev/")
+    match = re.match(r"^(.*?)(\d+)$", text)
+    if match:
+        prefix, digits = match.groups()
+        if len(digits) < 3:
+            return f"{prefix}{digits.zfill(3)}"
     return text
 
 

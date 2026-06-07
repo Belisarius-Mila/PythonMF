@@ -13,6 +13,7 @@ from app.speech.terminal_bridge import (
     deliver_prompt_to_vscode,
     deliver_voice_command_to_terminal,
     load_marked_codex_tty,
+    normalize_tty,
     terminal_applescript,
     vscode_applescript,
 )
@@ -195,6 +196,11 @@ class TerminalBridgeTests(unittest.TestCase):
             marker.write_text('{"tty": "/dev/ttys005"}', encoding="utf-8")
 
             self.assertEqual(load_marked_codex_tty(marker), "ttys005")
+
+    def test_normalize_tty_pads_short_numeric_suffix(self) -> None:
+        self.assertEqual(normalize_tty("ttys01"), "ttys001")
+        self.assertEqual(normalize_tty("/dev/ttys1"), "ttys001")
+        self.assertEqual(normalize_tty("ttys001"), "ttys001")
 
     def test_deliver_prompt_prefers_marked_tty_before_gui_fallback(self) -> None:
         runner_calls = []

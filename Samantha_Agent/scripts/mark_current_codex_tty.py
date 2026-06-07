@@ -14,7 +14,16 @@ MARKER_PATH = PROJECT_ROOT / "data/private/voice_inbox/current_codex_tty.json"
 def current_parent_tty() -> str:
     parent_pid = os.getppid()
     output = subprocess.check_output(["ps", "-o", "tty=", "-p", str(parent_pid)], text=True).strip()
-    return output.removeprefix("/dev/").strip()
+    tty = output.removeprefix("/dev/").strip()
+    if tty and tty != "??":
+        import re
+
+        match = re.match(r"^(.*?)(\d+)$", tty)
+        if match:
+            prefix, digits = match.groups()
+            if len(digits) < 3:
+                tty = f"{prefix}{digits.zfill(3)}"
+    return tty
 
 
 def main() -> int:

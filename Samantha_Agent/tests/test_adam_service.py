@@ -225,7 +225,7 @@ class AdamServiceTests(unittest.TestCase):
         self.assertEqual(calls, ["starter", "ready", "deliver"])
         self.assertTrue(result["ready"]["ready"])
 
-    def test_submit_adam_text_request_does_not_deliver_when_not_ready(self) -> None:
+    def test_submit_adam_text_request_warns_but_still_delivers_when_ready_is_unclear(self) -> None:
         calls = []
 
         def fake_starter():
@@ -249,9 +249,12 @@ class AdamServiceTests(unittest.TestCase):
                 deliverer=fake_deliverer,
             )
 
-        self.assertFalse(result["ok"])
-        self.assertEqual(result["status"], "adam_not_ready")
-        self.assertEqual(calls, ["starter", "ready"])
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "delivered_to_adam")
+        self.assertEqual(calls, ["starter", "ready", "deliver"])
+        self.assertIn("Pozor:", result["message"])
+        self.assertIn("Codex ještě neběží.", result["message"])
+        self.assertEqual(result["ready_warning"], "Codex ještě neběží.")
 
 
 if __name__ == "__main__":
