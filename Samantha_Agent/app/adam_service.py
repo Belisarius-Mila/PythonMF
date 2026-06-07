@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
-from app.speech.terminal_bridge import CURRENT_CODEX_TTY_PATH, deliver_prompt_to_terminal, discover_codex_ttys, load_marked_codex_tty
+from app.speech.terminal_bridge import CURRENT_CODEX_TTY_PATH, discover_codex_ttys, load_marked_codex_tty
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -19,6 +19,7 @@ ADAM_REQUESTS_DIR = ADAM_SERVICE_DIR / "requests"
 ADAM_SERVICE_SESSION = "samantha_adam"
 ADAM_SCREEN_ENTRY_SCRIPT = PROJECT_ROOT / "scripts" / "samantha_screen_entry.sh"
 ADAM_REPLY_SCRIPT = ".venv/bin/python scripts/adam_voice_reply.py"
+SCREEN_CLEAR_INPUT = "\x15"
 
 
 def utc_now() -> str:
@@ -31,6 +32,10 @@ def compact_text(value: str, *, max_chars: int = 8000) -> str:
     if len(compact) <= max_chars:
         return compact
     return compact[: max_chars - 1].rstrip() + "…"
+
+
+def screen_input_text(value: str, *, max_chars: int = 12000) -> str:
+    return " ".join(compact_text(value, max_chars=max_chars).split())
 
 
 def adam_request_path(request_id: str, *, requests_dir: Path = ADAM_REQUESTS_DIR) -> Path:
@@ -261,6 +266,57 @@ def wait_for_adam_ready(
     }
 
 
+def deliver_prompt_to_adam_screen(
+    prompt: str,
+    *,
+    submit: bool = True,
+    session_name: str = ADAM_SERVICE_SESSION,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> dict[str, Any]:
+    if not screen_session_exists(session_name=session_name, runner=runner):
+        return {
+            "ok": False,
+            "status": "screen_not_running",
+            "message": "Spravovaná Adamova screen relace neběží.",
+            "session_name": session_name,
+            "delivery_method": "managed_screen",
+        }
+    payload = SCREEN_CLEAR_INPUT + screen_input_text(prompt) + ("\n" if submit else "")
+    try:
+        completed = runner(
+            ["screen", "-S", session_name, "-X", "stuff", payload],
+            capture_output=True,
+            text=True,
+            timeout=8,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return {
+            "ok": False,
+            "status": "screen_delivery_failed",
+            "message": f"Dotaz se nepodařilo vložit do Adamovy screen relace: {exc}",
+            "session_name": session_name,
+            "delivery_method": "managed_screen",
+        }
+    if completed.returncode != 0:
+        return {
+            "ok": False,
+            "status": "screen_delivery_failed",
+            "message": (completed.stderr or completed.stdout or "Vložení dotazu do screen relace selhalo.").strip(),
+            "returncode": completed.returncode,
+            "session_name": session_name,
+            "delivery_method": "managed_screen",
+        }
+    return {
+        "ok": True,
+        "status": "delivered_screen",
+        "message": "Dotaz byl vložen přímo do spravované Adamovy relace.",
+        "session_name": session_name,
+        "delivery_method": "managed_screen",
+        "verified": True,
+    }
+
+
 def save_adam_text_request(
     *,
     message: str,
@@ -393,7 +449,7 @@ def submit_adam_text_request(
     requests_dir: Path = ADAM_REQUESTS_DIR,
     starter: Callable[..., dict[str, Any]] = start_adam_service,
     ready_waiter: Callable[[], dict[str, Any]] | None = None,
-    deliverer: Callable[..., dict[str, Any]] = deliver_prompt_to_terminal,
+    deliverer: Callable[..., dict[str, Any]] = deliver_prompt_to_adam_screen,
 ) -> dict[str, Any]:
     start_result = starter()
     if not start_result.get("ok"):

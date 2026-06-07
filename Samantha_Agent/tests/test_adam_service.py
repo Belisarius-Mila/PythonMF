@@ -9,6 +9,7 @@ from pathlib import Path
 from app.adam_service import (
     adam_service_status,
     build_adam_text_prompt,
+    deliver_prompt_to_adam_screen,
     load_adam_text_reply,
     record_adam_text_reply,
     save_adam_text_request,
@@ -69,6 +70,25 @@ class AdamServiceTests(unittest.TestCase):
         self.assertEqual(status["marked_tty"], "ttys005")
         self.assertEqual(status["pending_count"], 1)
         self.assertEqual(status["answered_count"], 1)
+
+    def test_deliver_prompt_to_adam_screen_clears_input_and_uses_managed_screen(self) -> None:
+        calls = []
+
+        def fake_runner(args, **kwargs):
+            calls.append({"args": args, "kwargs": kwargs})
+            if args == ["screen", "-ls"]:
+                return subprocess.CompletedProcess(args=args, returncode=0, stdout="\t123.samantha_adam\t(Detached)\n", stderr="")
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
+
+        result = deliver_prompt_to_adam_screen("První řádek\nDruhý řádek", runner=fake_runner)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["delivery_method"], "managed_screen")
+        self.assertEqual(calls[1]["args"][:5], ["screen", "-S", "samantha_adam", "-X", "stuff"])
+        payload = calls[1]["args"][5]
+        self.assertTrue(payload.startswith("\x15"))
+        self.assertTrue(payload.endswith("\n"))
+        self.assertIn("První řádek Druhý řádek", payload)
 
     def test_request_prompt_contains_request_id_and_reply_command(self) -> None:
         request = {

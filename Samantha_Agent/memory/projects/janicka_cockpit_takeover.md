@@ -250,6 +250,12 @@ Kuchařka už je dostupná přímo z tlačítka `Kuchařka` a `Zeptat se Adama` 
 samostatný textový chat s projektovou pamětí. Další krok je ručně ověřit chat z
 prohlížeče z pohledu Jany a potom opravit `Rodinné projekty`.
 
+Poznámka z 2026-06-07: Janiččin textový chat předává dotazy spravovanému
+Adamovi přímo přes `screen` relaci `samantha_adam`, ne přes obecný
+terminálový/GUI můstek. Před vložením dotazu se do relace posílá `Ctrl-U`, aby
+se vyčistil případný rozepsaný vstup. Důvod: zabránit přepínání fokusu do VS
+Code/Terminálu a hromadění starého textu v příkazové řádce.
+
 ## Bezpečnost / neukládat
 
 - Do tohoto git-safe projektu neukládat hesla, tokeny, recovery klíče,
