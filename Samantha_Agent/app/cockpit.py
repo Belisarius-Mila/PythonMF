@@ -112,6 +112,7 @@ GIT_ROOT = PROJECT_ROOT.parent
 ACTIVE_PROJECTS_PATH = PROJECT_ROOT / "memory" / "ACTIVE_PROJECTS.md"
 PROJECT_CAPABILITY_MAP_PATH = PROJECT_ROOT / "memory" / "technical" / "project_capability_map.md"
 JANICKA_COOKBOOK_PATH = PROJECT_ROOT / "memory" / "projects" / "janicka_cockpit_kucharka.md"
+JANICKA_TAKEOVER_PATH = PROJECT_ROOT / "memory" / "projects" / "janicka_cockpit_takeover.md"
 SESSION_AUTOSAVE_DIR = PROJECT_ROOT / "data" / "session_autosave"
 VOICE_COMMAND_INBOX_DIR = PROJECT_ROOT / "data" / "private" / "voice_inbox"
 MEMORY_INDEX_PATH = PROJECT_ROOT / "memory" / "MEMORY_INDEX.md"
@@ -6924,6 +6925,35 @@ def cockpit_save_voice_text_action(
         }
 
 
+def janicka_chat_memory_context(
+    *,
+    cookbook_path: Path = JANICKA_COOKBOOK_PATH,
+    takeover_path: Path = JANICKA_TAKEOVER_PATH,
+    active_projects_path: Path = ACTIVE_PROJECTS_PATH,
+    memory_index_path: Path = MEMORY_INDEX_PATH,
+    max_chars_per_file: int = 7000,
+) -> str:
+    sections: list[str] = []
+    for label, path in (
+        ("Kuchařka pro Janu", cookbook_path),
+        ("Projekt Janička Cockpit", takeover_path),
+        ("Aktivní projekty", active_projects_path),
+        ("Memory index", memory_index_path),
+    ):
+        try:
+            text = path.read_text(encoding="utf-8").strip()
+        except OSError:
+            continue
+        if not text:
+            continue
+        if len(text) > max_chars_per_file:
+            text = text[:max_chars_per_file].rstrip() + "\n\n[Zkráceno.]"
+        sections.append(f"## {label}\n{text}")
+    if not sections:
+        return "Projektová paměť Janičky se teď nepodařila načíst."
+    return "\n\n---\n\n".join(sections)
+
+
 def janicka_chat_action(
     payload: dict[str, Any],
     *,
@@ -6949,8 +6979,11 @@ def janicka_chat_action(
                 history_lines.append(f"{label}: {content}")
     prompt_parts = [
         "Toto je samostatný textový chat z obrazovky Janička v Cockpitu.",
+        "Vystupuj jako Adam/Samantha pro Janu a Mílu, ne jako anonymní obecná AI bez paměti.",
         "Odpovídej česky, lidsky a prakticky. Nejde o hlasový pokyn ani o automatické spuštění akce.",
+        "Použij přiloženou projektovou paměť jako hlavní kontext. Když odpověď závisí na stavu projektu, neopírej se o domněnky.",
         "Pokud uživatel žádá destruktivní, odesílací nebo citlivou akci, vysvětli bezpečný další krok a vyžádej si potvrzení podle pravidel nástroje. Běžné otázky normálně zodpověz.",
+        "Projektová paměť pro tento chat:\n" + janicka_chat_memory_context(),
     ]
     if history_lines:
         prompt_parts.append("Dosavadní krátká historie chatu:\n" + "\n".join(history_lines))

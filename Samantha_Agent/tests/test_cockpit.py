@@ -2567,6 +2567,9 @@ Dalsi krok:
         self.assertTrue(result["ok"])
         self.assertEqual(result["answer"], "Odpověď pro Janu.")
         self.assertIn("samostatný textový chat", calls[0])
+        self.assertIn("Adam/Samantha pro Janu", calls[0])
+        self.assertIn("Projektová paměť pro tento chat", calls[0])
+        self.assertIn("Janička Cockpit", calls[0])
         self.assertIn("Nejde o hlasový pokyn", calls[0])
         self.assertIn("Kde najdu dokument?", calls[0])
 
@@ -2575,6 +2578,30 @@ Dalsi krok:
 
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "empty_message")
+
+    def test_janicka_chat_memory_context_includes_project_files(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            base = Path(temp_dir)
+            cookbook = base / "cookbook.md"
+            takeover = base / "takeover.md"
+            active = base / "active.md"
+            index = base / "index.md"
+            cookbook.write_text("Kuchařka: Zeptat se Adama je textový chat.", encoding="utf-8")
+            takeover.write_text("Projekt: Janička Cockpit pro Janu.", encoding="utf-8")
+            active.write_text("Aktivní projekty: další krok Rodinné projekty.", encoding="utf-8")
+            index.write_text("Memory index: janicka_cockpit_takeover.md.", encoding="utf-8")
+
+            context = cockpit_module.janicka_chat_memory_context(
+                cookbook_path=cookbook,
+                takeover_path=takeover,
+                active_projects_path=active,
+                memory_index_path=index,
+            )
+
+        self.assertIn("Kuchařka: Zeptat se Adama", context)
+        self.assertIn("Projekt: Janička Cockpit", context)
+        self.assertIn("Aktivní projekty", context)
+        self.assertIn("Memory index", context)
 
     def test_janicka_cookbook_page_renders_markdown_safely(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

@@ -50,6 +50,12 @@ který volá běžnou textovou Samanthu přes `ask_samantha()`. Smoke test přes
 lokální API vrátil odpověď `Ano, textový chat funguje.` Rodinné projekty jsou
 zatím další část k doladění.
 
+Po Mílově testu bylo 2026-06-07 upřesněno, že odpověď nesmí působit jako
+anonymní AI bez znalosti projektu. Endpoint `/api/janicka/chat` proto před
+každou odpovědí přikládá git-safe projektový kontext z kuchařky, projektu
+Janička, aktivních projektů a memory indexu. Živý test na dotaz `co je Janička
+Cockpit` vrátil věcnou odpověď s vazbou na Samanthu a Janu.
+
 ## Základní shoda
 
 Janička Cockpit není zvláštní omezený přístup.
@@ -215,8 +221,8 @@ Ručně projít obrazovku `Janička` přímo s Janou nebo z její perspektivy:
 - podle toho upravit texty v UI a kuchařce.
 
 Kuchařka už je dostupná přímo z tlačítka `Kuchařka` a `Zeptat se Adama` má
-samostatný textový chat. Další krok je ručně ověřit chat z prohlížeče a potom
-opravit `Rodinné projekty`.
+samostatný textový chat s projektovou pamětí. Další krok je ručně ověřit chat z
+prohlížeče z pohledu Jany a potom opravit `Rodinné projekty`.
 
 ## Bezpečnost / neukládat
 
