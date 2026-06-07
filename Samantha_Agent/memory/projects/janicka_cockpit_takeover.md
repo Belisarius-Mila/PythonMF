@@ -56,6 +56,12 @@ každou odpovědí přikládá git-safe projektový kontext z kuchařky, projekt
 Janička, aktivních projektů a memory indexu. Živý test na dotaz `co je Janička
 Cockpit` vrátil věcnou odpověď s vazbou na Samanthu a Janu.
 
+Další test ukázal, že dotaz `najdi poslední QN` se nesmí nechávat na obecném
+modelu ani na starším vzestupně řazeném výpisu quick notes. Od 2026-06-07
+Janička chat pro fráze typu `poslední QN` a navazující `detail` používá přímo
+Cockpit Quick Notes status/detail. Živý test vrátil správně poslední aktivní
+poznámku `QN #37` z `2026-06-05 05:14:45`, ne starší `QN #5`.
+
 ## Základní shoda
 
 Janička Cockpit není zvláštní omezený přístup.

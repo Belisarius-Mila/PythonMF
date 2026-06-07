@@ -2579,6 +2579,61 @@ Dalsi krok:
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "empty_message")
 
+    def test_janicka_chat_action_routes_latest_qn_to_quick_notes_status(self) -> None:
+        status_payload = {
+            "ok": True,
+            "message": "37 poznámek v Quick Notes inboxu.",
+            "counts": {"active": 37, "total": 37},
+            "notes": [
+                {
+                    "note_number": 37,
+                    "created_at": "2026-06-05 05:14:45",
+                    "snippet": "Schází nám jedna velmi důležitá věc.",
+                }
+            ],
+        }
+
+        with patch("app.cockpit.quick_notes_status", return_value=status_payload) as status_mock:
+            result = cockpit_module.janicka_chat_action(
+                {"message": "Najdi mi poslední QN."},
+                asker=lambda _: "Nemá se volat.",
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "answered")
+        self.assertIn("Adam odpověděl z Quick Notes", result["message"])
+        self.assertIn("**#37**", result["answer"])
+        self.assertIn("Schází nám jedna velmi důležitá věc.", result["answer"])
+        status_mock.assert_called_once_with(limit=1)
+
+    def test_janicka_chat_action_routes_followup_qn_detail_from_history(self) -> None:
+        detail_payload = {
+            "ok": True,
+            "note_number": 37,
+            "created_at": "2026-06-05 05:14:45",
+            "body_text": "Celý text poslední poznámky.",
+            "truncated": False,
+        }
+
+        with patch("app.cockpit.quick_note_detail_status", return_value=detail_payload) as detail_mock:
+            result = cockpit_module.janicka_chat_action(
+                {
+                    "message": "Ano, detail.",
+                    "history": [
+                        {
+                            "role": "assistant",
+                            "content": "Poslední QN je **#37** z **2026-06-05 05:14:45**.",
+                        }
+                    ],
+                },
+                asker=lambda _: "Nemá se volat.",
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertIn("Detail QN **#37**", result["answer"])
+        self.assertIn("Celý text poslední poznámky.", result["answer"])
+        detail_mock.assert_called_once_with(37, max_chars=6000)
+
     def test_janicka_chat_memory_context_includes_project_files(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             base = Path(temp_dir)

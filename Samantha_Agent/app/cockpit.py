@@ -6954,6 +6954,77 @@ def janicka_chat_memory_context(
     return "\n\n---\n\n".join(sections)
 
 
+def janicka_quick_note_chat_answer(message: str, history: list[Any]) -> str | None:
+    normalized = message.casefold()
+    mentions_qn = bool(re.search(r"\bqn\b|quick\s*notes?|rychl[áa]\s+pozn", normalized))
+    wants_latest = any(term in normalized for term in ("posled", "nejnov", "latest", "last"))
+    wants_detail = any(term in normalized for term in ("detail", "cel", "přeč", "prect", "ukaž", "ukaz"))
+    explicit_match = re.search(r"(?:\bqn\b|quick\s*note)\s*#?\s*(\d+)|#\s*(\d+)", normalized)
+
+    note_number: int | None = None
+    if explicit_match:
+        note_number = int(next(group for group in explicit_match.groups() if group))
+    elif wants_detail and not mentions_qn:
+        note_number = _latest_quick_note_number_from_history(history)
+
+    if mentions_qn and wants_latest:
+        status = quick_notes_status(limit=1)
+        notes = status.get("notes", [])
+        if not status.get("ok") or not notes:
+            return str(status.get("message") or "Quick Notes se teď nepodařilo načíst.")
+        latest = notes[0]
+        note_number = int(latest.get("note_number") or 0)
+        if wants_detail and note_number > 0:
+            return _format_janicka_quick_note_detail(note_number)
+        return _format_janicka_quick_note_summary(latest, status)
+
+    if note_number is not None and (mentions_qn or wants_detail):
+        return _format_janicka_quick_note_detail(note_number)
+
+    return None
+
+
+def _latest_quick_note_number_from_history(history: list[Any]) -> int | None:
+    for item in reversed(history):
+        if not isinstance(item, dict):
+            continue
+        content = safe_text(str(item.get("content", "") or ""))
+        match = re.search(r"(?:QN|Quick Note)\s*#\s*(\d+)|#\s*(\d+)", content, flags=re.IGNORECASE)
+        if match:
+            return int(next(group for group in match.groups() if group))
+    return None
+
+
+def _format_janicka_quick_note_summary(note: dict[str, Any], status: dict[str, Any]) -> str:
+    note_number = int(note.get("note_number") or 0)
+    created_at = safe_text(str(note.get("created_at", "") or ""))[:80]
+    snippet = safe_text(str(note.get("snippet", "") or ""))[:500]
+    counts = status.get("counts", {}) if isinstance(status.get("counts"), dict) else {}
+    active_count = int(counts.get("active") or 0)
+    lines = [
+        f"Poslední QN je **#{note_number}** z **{created_at}**:",
+        snippet,
+    ]
+    if active_count:
+        lines.append(f"V aktivním QN inboxu je teď celkem {active_count} poznámek.")
+    lines.append("Chceš k ní i detail?")
+    return "\n\n".join(line for line in lines if line)
+
+
+def _format_janicka_quick_note_detail(note_number: int) -> str:
+    detail = quick_note_detail_status(note_number, max_chars=6000)
+    if not detail.get("ok"):
+        return str(detail.get("message") or f"Quick Note #{note_number} se nepodařilo načíst.")
+    created_at = safe_text(str(detail.get("created_at", "") or ""))[:80]
+    body = "\n".join(
+        safe_text(line)
+        for line in str(detail.get("body_text", "") or "").replace("\x00", " ").splitlines()
+    ).strip()
+    if detail.get("truncated"):
+        body += "\n\n[Zkráceno.]"
+    return f"Detail QN **#{note_number}** z **{created_at}**:\n\n{body}"
+
+
 def janicka_chat_action(
     payload: dict[str, Any],
     *,
@@ -6977,6 +7048,14 @@ def janicka_chat_action(
             if role in {"user", "assistant"} and content:
                 label = "Jana" if role == "user" else "Adam"
                 history_lines.append(f"{label}: {content}")
+    quick_note_answer = janicka_quick_note_chat_answer(message, history if isinstance(history, list) else [])
+    if quick_note_answer is not None:
+        return {
+            "ok": True,
+            "status": "answered",
+            "message": "Adam odpověděl z Quick Notes.",
+            "answer": quick_note_answer,
+        }
     prompt_parts = [
         "Toto je samostatný textový chat z obrazovky Janička v Cockpitu.",
         "Vystupuj jako Adam/Samantha pro Janu a Mílu, ne jako anonymní obecná AI bez paměti.",
