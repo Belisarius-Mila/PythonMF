@@ -2,7 +2,7 @@
 
 Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
-- `ACTIVE_PROJECTS.md` - registr aktualne rozpracovanych oblasti, priorit, stavu, handoffu a dalsich kroku.
+- `ACTIVE_PROJECTS.md` - registr projektu a oblasti vcetne rezimu `active` / `paused` / `archived`, priorit, stavu, handoffu a dalsich kroku.
 
 ## Core
 
@@ -103,6 +103,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `handoffs/media_image_resize_utility_done_2026_05_20.md` - Obecna utilita `app/media/image_resize.py` je hotova a overena na lekarne; dalsi krok je pri pouziti na slovniky nejdriv udelat preview a zvolit cilovou velikost.
 - `handoffs/vocabularyit_mapping_applied_2026_05_20.md` - VocabularyIT/PictNew finalni stav aktualni vlny: `Pict/mapping.json` byl po schvalenem preview aktualizovan, audit je cisty a git checkpoint existuje jako `851b347 Apply VocabularyIT picture mapping updates`.
 - `handoffs/vocabularyfr_web_trainer_checkpoint_2026_06_04.md` - VocabularyFR Web Trainer pro Janu: webový MVP prototyp je hotový a commitnutý jako `da93eba Add VocabularyFR web trainer prototype`; další krok je deploy/checklist pro předání `VocabularyFR/web/` Janě a rozhodnutí macOS helper vs. Pythonista/iCloud test.
+- `handoffs/vocabularyfr_jana_images_archive_2026_06_07.md` - VocabularyFR pro Janu archiv: macOS app/Pict opravy, 39 novych obrazku, mapping 841 zaznamu, finalni audit 346/347 konkretnich obrazku, jediny fallback `chez -> preposition` a oprava `school.PNG`/hospital.
 - `handoffs/samantha_agent_rag_search_memory_ranking_2026_05_19.md` - historicky RAG mezistav: `search_memory` ma vylepseny ranking a vystup; aktualni kanonicky stav je v `samantha_core.md`.
 - `handoffs/session_recovery_autosave_2026_05_18.txt` - handoff ke konverzaci o navazovani po vypadku, `screen`, prikazu `samantha`, `codex resume` a autosave session logu po 10 minutach.
 - `handoffs/test_kratky_handoff_2026_05_18.md` - testovaci handoff s prioritou 3 bez pripomenuti pri startu, overeni pravidla pro kratky handoff.

@@ -101,6 +101,30 @@ class HealthCheckTests(unittest.TestCase):
 
         self.assertTrue(any("ad hoc commitovy uklid" in warning for warning in result.warnings))
 
+    def test_health_check_skips_archived_project_rows(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            memory_dir = Path(temp_dir) / "memory"
+            memory_dir.mkdir()
+            (memory_dir / "ACTIVE_PROJECTS.md").write_text(
+                "| Oblast | Priorita | Rezim | Stav | Memory soubor | Handoff | Dalsi krok |\n"
+                "| --- | --- | --- | --- | --- | --- | --- |\n"
+                "| Commitove odpoledne | A1+ | active | Aktivni pravidlo | x | x | Drzet cisty stul. |\n"
+                "| Stary projekt | A1+ | archived | Hotovo | x | x | Archiv. |\n",
+                encoding="utf-8",
+            )
+            (memory_dir / "MEMORY_INDEX.md").write_text("", encoding="utf-8")
+
+            result = run_samantha_health_check(
+                mode="quick",
+                repo_root=Path(temp_dir),
+                memory_dir=memory_dir,
+                runner=_runner("## main...origin/main\n"),
+            )
+
+        self.assertEqual(len(result.a1_items), 1)
+        self.assertIn("Commitove odpoledne", result.a1_items[0])
+        self.assertNotIn("Stary projekt", " ".join(result.a1_items))
+
 
 def _memory_dir(root: Path) -> Path:
     memory_dir = root / "memory"

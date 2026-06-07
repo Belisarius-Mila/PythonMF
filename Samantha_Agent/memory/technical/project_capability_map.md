@@ -18,8 +18,9 @@ Mila potvrdil tuto taxonomii:
   varianta/vystup/podprojekt, ne automaticky novy projekt,
 - asset knihovny, sdilene skripty, `build/`, `dist/`, `tmp/`, `output/` a
   stare zalohy nejsou samostatne projekty,
-- `ACTIVE_PROJECTS.md` ma obsahovat jen aktualne zive nebo rozpracovane oblasti,
-  ne kompletni katalog vsech slozek,
+- `ACTIVE_PROJECTS.md` je prakticky registr kanonickych projektu; bezny pohled
+  ma ukazovat jen zive nebo rozpracovane oblasti a archivovane projekty maji byt
+  oznacene rezimem `archived`,
 - memory karty se maji zakladat jen pro prijate projekty, ktere budou opravdu
   zive nebo se s nimi bude aktivne pracovat.
 
@@ -226,16 +227,17 @@ Tyto oblasti jsou komponenty, sdilene zdroje, build vystupy nebo archiv.
    nemaji a budou se realne udrzovat: `VocabularyFR`, `VocabularyIT`,
    `VocabularyES`, `VocabularyLA`, `ColorsAndNumbers`, `RestauracePTKL`,
    `ToBeTraining`, `Animals`, `AnimalsFilmPY`, pripadne `Sportka`.
-3. Do `ACTIVE_PROJECTS.md` davat jen aktivni nebo rozpracovane oblasti, ne vsechny
-   existujici projekty. Archivni a hotove veci patri do `PROJECTS.md` nebo memory
-   indexu, ne do aktivnich priorit.
+3. Do `ACTIVE_PROJECTS.md` davat jen kanonicke projekty a udrzovat sloupec
+   `Rezim`: `active` pro zive oblasti, `paused` pro pozastavene a `archived`
+   pro dohledatelny archiv mimo bezny aktivni pohled Cockpitu.
 4. Pro kazdy aktivni projekt vybrat nejmensi uzitecne workflow:
    read-only audit, sync, build/test nebo otevreni aplikace.
 5. Teprve potom pridavat do `app/workflows/commands.py`; bez registrace Samantha
    nesmi z lidske vety spoustet ad hoc shell.
 
-Stav po potvrzeni: bod 1 je koncepcne potvrzeny, bod 3 je potvrzene pravidlo.
-Nejblizsi implementace ma jit pres body 4 a 5 pro `PictNew` a `VocabularyEN`.
+Stav po potvrzeni: bod 1 je koncepcne potvrzeny, bod 3 byl 2026-06-07
+upresnen na registr s rezimem `active` / `paused` / `archived`. Nejblizsi
+implementace ma jit pres body 4 a 5 pro `PictNew` a `VocabularyEN`.
 
 ## Doporučeny tvar nove schopnosti
 

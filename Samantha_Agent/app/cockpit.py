@@ -1016,10 +1016,11 @@ def projects_status(
     summary = summarize_projects(projects)
     items = build_project_catalog_items(projects, tools, infrastructure_capabilities)
     catalog_summary = summarize_project_catalog(projects, tools, infrastructure_capabilities)
+    active_total = int(summary.get("active_total", summary.get("total", 0)) or 0)
     return {
         "ok": True,
         "message": (
-            f"{summary['total']} aktivních projektů, "
+            f"{active_total} aktivních projektů, "
             f"{len(tools)} toolů a {len(infrastructure_capabilities)} infrastrukturních vrstev v paměti."
         ),
         "source": str(relative_to_project(path)),
@@ -1204,9 +1205,12 @@ def parse_active_projects_table(text: str) -> list[dict[str, Any]]:
             continue
         status = safe_text(row.get("stav", ""))
         next_step = safe_text(row.get("dalsi_krok", ""))
+        lifecycle = normalize_project_lifecycle(row.get("rezim", ""))
         project = {
             "name": name,
             "priority": safe_text(row.get("priorita", "")),
+            "lifecycle": lifecycle,
+            "lifecycle_label": project_lifecycle_label(lifecycle),
             "status": status,
             "next_step": next_step,
             "memory_file": safe_text(row.get("memory_soubor", "")),
@@ -1333,6 +1337,8 @@ def build_project_catalog_items(
             "category_label": "Project",
             "name": safe_text(project.get("name", "")),
             "priority": safe_text(project.get("priority", "")),
+            "lifecycle": safe_text(project.get("lifecycle", "active")),
+            "lifecycle_label": safe_text(project.get("lifecycle_label", "Aktivní")),
             "status": status,
             "summary": status,
             "next_step": next_step,
@@ -1346,6 +1352,7 @@ def build_project_catalog_items(
             "needs_attention": management["needs_attention"],
             "detail_fields": [
                 {"label": "Správa", "value": management["reason"]},
+                {"label": "Režim", "value": safe_text(project.get("lifecycle_label", ""))},
                 {"label": "Memory", "value": memory_file},
                 {"label": "Handoff", "value": handoff},
                 {"label": "Stav", "value": status},
@@ -1410,6 +1417,14 @@ def project_catalog_flags(category: str, *values: str) -> list[str]:
 
 
 def project_management_signals(project: dict[str, Any]) -> dict[str, Any]:
+    lifecycle = normalize_project_lifecycle(safe_text(project.get("lifecycle", "active")))
+    if lifecycle == "archived":
+        return {
+            "status": "archived",
+            "reason": "Archivní projekt bez okamžité akce.",
+            "flags": ["archiv"],
+            "needs_attention": False,
+        }
     status = safe_text(project.get("status", ""))
     next_step = safe_text(project.get("next_step", ""))
     memory_file = safe_text(project.get("memory_file", ""))
@@ -1475,21 +1490,39 @@ def summarize_project_catalog(
     infrastructure_capabilities: list[dict[str, Any]],
 ) -> dict[str, Any]:
     management_counts: dict[str, int] = {}
+    lifecycle_counts: dict[str, int] = {}
     for project in projects:
+        lifecycle = normalize_project_lifecycle(safe_text(project.get("lifecycle", "active")))
+        lifecycle_counts[lifecycle] = lifecycle_counts.get(lifecycle, 0) + 1
         signals = project_management_signals(project)
         status = safe_text(signals.get("status", ""))
         management_counts[status] = management_counts.get(status, 0) + 1
+    active_projects = [project for project in projects if normalize_project_lifecycle(safe_text(project.get("lifecycle", "active"))) != "archived"]
     return {
-        "projects": len(projects),
+        "projects": len(active_projects),
+        "projects_all": len(projects),
+        "archived_projects": lifecycle_counts.get("archived", 0),
         "tools": len(tools),
         "infrastructure_capabilities": len(infrastructure_capabilities),
-        "total": len(projects) + len(tools) + len(infrastructure_capabilities),
+        "total": len(active_projects) + len(tools) + len(infrastructure_capabilities),
+        "total_all": len(projects) + len(tools) + len(infrastructure_capabilities),
         "project_management": management_counts,
+        "project_lifecycle": lifecycle_counts,
     }
 
 
 def empty_project_catalog_summary() -> dict[str, Any]:
-    return {"projects": 0, "tools": 0, "infrastructure_capabilities": 0, "total": 0, "project_management": {}}
+    return {
+        "projects": 0,
+        "projects_all": 0,
+        "archived_projects": 0,
+        "tools": 0,
+        "infrastructure_capabilities": 0,
+        "total": 0,
+        "total_all": 0,
+        "project_management": {},
+        "project_lifecycle": {},
+    }
 
 
 def latest_date_hint(*values: str) -> str:
@@ -1505,6 +1538,11 @@ def normalize_project_header(value: str) -> str:
         "oblast": "oblast",
         "priorita": "priorita",
         "stav": "stav",
+        "rezim": "rezim",
+        "režim": "rezim",
+        "zivotni cyklus": "rezim",
+        "životní cyklus": "rezim",
+        "lifecycle": "rezim",
         "memory soubor": "memory_soubor",
         "handoff": "handoff",
         "dalsi krok": "dalsi_krok",
@@ -1512,9 +1550,32 @@ def normalize_project_header(value: str) -> str:
     }.get(value.casefold(), safe_slug(value, default="field", limit=40).replace("-", "_"))
 
 
+def normalize_project_lifecycle(value: str) -> str:
+    folded = safe_text(value).strip().casefold()
+    if folded in {"archiv", "archivni", "archivní", "archive", "archived"}:
+        return "archived"
+    if folded in {"paused", "pause", "pozastaveno", "zmrazeno", "frozen"}:
+        return "paused"
+    return "active"
+
+
+def project_lifecycle_label(value: str) -> str:
+    lifecycle = normalize_project_lifecycle(value)
+    return {
+        "active": "Aktivní",
+        "paused": "Pozastaveno",
+        "archived": "Archiv",
+    }.get(lifecycle, "Aktivní")
+
+
 def project_flags(status: str, next_step: str, row: dict[str, str]) -> list[str]:
     folded = " ".join([status, next_step, *row.values()]).casefold()
     flags: list[str] = []
+    lifecycle = normalize_project_lifecycle(row.get("rezim", ""))
+    if lifecycle == "archived":
+        flags.append("archiv")
+    elif lifecycle == "paused":
+        flags.append("pozastaveno")
     checks = (
         ("připomenout", ("[pripomenout]", "[připomenout]", "pripomenout", "připomenout")),
         ("čeká na retest", ("ceka na retest", "čeká na retest", "rucni retest", "ruční retest", "rucne otestovat", "ručně otestovat")),
@@ -1530,7 +1591,18 @@ def project_flags(status: str, next_step: str, row: dict[str, str]) -> list[str]
 def summarize_projects(projects: list[dict[str, Any]]) -> dict[str, Any]:
     summary = empty_projects_summary()
     summary["total"] = len(projects)
+    active_projects = [
+        project
+        for project in projects
+        if normalize_project_lifecycle(safe_text(project.get("lifecycle", "active"))) != "archived"
+    ]
+    summary["active_total"] = len(active_projects)
+    summary["archived_total"] = len(projects) - len(active_projects)
     for project in projects:
+        lifecycle = normalize_project_lifecycle(safe_text(project.get("lifecycle", "active")))
+        summary["lifecycle_counts"][lifecycle] = summary["lifecycle_counts"].get(lifecycle, 0) + 1
+        if lifecycle == "archived":
+            continue
         priority = str(project.get("priority", "") or "nezadáno")
         summary["priority_counts"][priority] = summary["priority_counts"].get(priority, 0) + 1
         flags = project.get("flags", [])
@@ -1541,7 +1613,14 @@ def summarize_projects(projects: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def empty_projects_summary() -> dict[str, Any]:
-    return {"total": 0, "priority_counts": {}, "flag_counts": {}}
+    return {
+        "total": 0,
+        "active_total": 0,
+        "archived_total": 0,
+        "priority_counts": {},
+        "flag_counts": {},
+        "lifecycle_counts": {},
+    }
 
 
 EMAIL_PROCESSING_CATEGORY_TITLES = {
@@ -8809,6 +8888,7 @@ COCKPIT_HTML = """<!doctype html>
         <div class="project-toolbar" aria-label="Filtr projektů a schopností">
           <button class="secondary active" type="button" data-project-filter="all">Vše</button>
           <button class="secondary" type="button" data-project-filter="projects">Projekty</button>
+          <button class="secondary" type="button" data-project-filter="archived">Archiv</button>
           <button class="secondary" type="button" data-project-filter="tools">Tooly</button>
           <button class="secondary" type="button" data-project-filter="infrastructure">Vrstvy</button>
 	          <button class="secondary" type="button" data-project-filter="priority1">Priorita 1</button>
@@ -10741,11 +10821,12 @@ COCKPIT_HTML = """<!doctype html>
         const flagCounts = projectSummary.flag_counts || {};
         const priorityOne = (priorityCounts["1"] || 0) + (priorityCounts["A1+"] || 0);
         const remindCount = flagCounts["připomenout"] || 0;
+        const activeProjects = projectSummary.active_total || catalogSummary.projects || projectSummary.total || 0;
         setDashboardValue(
           dashboardProjects,
           projects.ok === false
             ? `<span class="warn">nelze načíst</span>`
-            : `<span class="${priorityOne > 0 ? "warn" : "ok"}">${priorityOne} priorita 1</span> | ${projectSummary.total || 0} projektů | ${catalogSummary.tools || 0} toolů | ${catalogSummary.infrastructure_capabilities || 0} vrstev${remindCount ? ` | ${remindCount} připomenout` : ""}`
+            : `<span class="${priorityOne > 0 ? "warn" : "ok"}">${priorityOne} priorita 1</span> | ${activeProjects} aktivních projektů | ${catalogSummary.tools || 0} toolů | ${catalogSummary.infrastructure_capabilities || 0} vrstev${remindCount ? ` | ${remindCount} připomenout` : ""}`
         );
         setDashboardStatusSignal(
           "projects",
@@ -11753,11 +11834,13 @@ COCKPIT_HTML = """<!doctype html>
 	        const summary = data.summary || {};
 	        const catalogSummary = data.catalog_summary || {};
 	        const management = catalogSummary.project_management || {};
+	        const lifecycle = catalogSummary.project_lifecycle || {};
 	        const flags = summary.flag_counts || {};
 	        const remind = flags["připomenout"] || 0;
 	        const needsAttention = management.needs_attention || 0;
+	        const archived = lifecycle.archived || catalogSummary.archived_projects || 0;
 	        projectsStatus.textContent = data.ok
-	          ? `${catalogSummary.projects || summary.total || 0} projektů, ${catalogSummary.tools || 0} toolů, ${catalogSummary.infrastructure_capabilities || 0} infrastrukturních vrstev${remind ? `; ${remind} připomenout` : ""}${needsAttention ? `; ${needsAttention} doplnit` : ""}.`
+	          ? `${catalogSummary.projects || summary.active_total || 0} aktivních projektů, ${catalogSummary.tools || 0} toolů, ${catalogSummary.infrastructure_capabilities || 0} infrastrukturních vrstev${archived ? `; ${archived} archiv` : ""}${remind ? `; ${remind} připomenout` : ""}${needsAttention ? `; ${needsAttention} doplnit` : ""}.`
 	          : (data.message || "Projekty nejdou načíst.");
       } catch (err) {
         recordFrontendError(err);
@@ -12109,6 +12192,9 @@ COCKPIT_HTML = """<!doctype html>
       const flags = project.flags || [];
       const haystack = `${project.status || ""} ${project.next_step || ""}`.toLocaleLowerCase("cs-CZ");
       const category = project.category || "project";
+      const lifecycle = project.lifecycle || "active";
+      if (filter === "archived") return category === "project" && lifecycle === "archived";
+      if (lifecycle === "archived") return false;
       if (filter === "projects") return category === "project";
       if (filter === "tools") return category === "tool";
       if (filter === "infrastructure") return category === "infrastructure";
@@ -12177,6 +12263,12 @@ COCKPIT_HTML = """<!doctype html>
         categoryFlag.className = "project-flag";
         categoryFlag.textContent = project.category_label || project.category || "Project";
         flags.appendChild(categoryFlag);
+        if (project.lifecycle_label) {
+          const lifecycleFlag = document.createElement("span");
+          lifecycleFlag.className = "project-flag";
+          lifecycleFlag.textContent = project.lifecycle_label;
+          flags.appendChild(lifecycleFlag);
+        }
 	        (project.flags || []).forEach((flag) => {
 	          const node = document.createElement("span");
 	          node.className = "project-flag";

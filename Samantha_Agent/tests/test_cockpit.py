@@ -1554,8 +1554,43 @@ class CockpitTests(unittest.TestCase):
 
         self.assertTrue(status["ok"])
         self.assertEqual(status["summary"]["total"], 2)
+        self.assertEqual(status["summary"]["active_total"], 2)
+        self.assertEqual(status["summary"]["archived_total"], 0)
+        self.assertEqual(status["summary"]["lifecycle_counts"]["active"], 2)
         self.assertEqual(status["summary"]["priority_counts"]["1"], 1)
         self.assertEqual(status["summary"]["flag_counts"]["připomenout"], 1)
+
+    def test_archived_projects_are_hidden_from_active_project_summary(self) -> None:
+        text = """# Project Registry
+
+| Oblast | Priorita | Rezim | Stav | Memory soubor | Handoff | Dalsi krok |
+| --- | --- | --- | --- | --- | --- | --- |
+| Dokumenty | 1 | active | Rozpracovane 2026-06-04 | `projects/docs.md` | `handoffs/docs.md` | Rucne otestovat cockpit. |
+| VocabularyFR | 2 | archived | Archiv hotovo | `projects/vocabularyfr.md` | `handoffs/vocabularyfr.md` | Archiv: neukazovat mezi aktivnimi projekty. |
+"""
+        projects = parse_active_projects_table(text)
+
+        self.assertEqual(len(projects), 2)
+        self.assertEqual(projects[0]["lifecycle"], "active")
+        self.assertEqual(projects[1]["lifecycle"], "archived")
+        self.assertIn("archiv", projects[1]["flags"])
+
+        summary = cockpit_module.summarize_projects(projects)
+        self.assertEqual(summary["total"], 2)
+        self.assertEqual(summary["active_total"], 1)
+        self.assertEqual(summary["archived_total"], 1)
+        self.assertNotIn("2", summary["priority_counts"])
+
+        catalog_summary = cockpit_module.summarize_project_catalog(projects, [], [])
+        self.assertEqual(catalog_summary["projects"], 1)
+        self.assertEqual(catalog_summary["projects_all"], 2)
+        self.assertEqual(catalog_summary["archived_projects"], 1)
+        self.assertEqual(catalog_summary["project_management"]["archived"], 1)
+
+        items = cockpit_module.build_project_catalog_items(projects, [], [])
+        self.assertFalse(items[1]["needs_attention"])
+        self.assertEqual(items[1]["management_status"], "archived")
+        self.assertIn('data-project-filter="archived"', COCKPIT_HTML)
 
     def test_project_capability_map_tables_are_exposed_in_projects_status(self) -> None:
         active_projects_text = """# Active Projects

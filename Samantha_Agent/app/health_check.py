@@ -143,30 +143,49 @@ def _git_summary(repo_root: Path, runner: Runner) -> str:
 
 def _active_project_rows(active_projects_text: str) -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
+    headers: list[str] = []
     for line in active_projects_text.splitlines():
-        if not line.startswith("| ") or line.startswith("| Oblast ") or "---" in line:
+        if not line.startswith("| ") or "---" in line:
             continue
         cells = [cell.strip() for cell in line.strip("|").split("|")]
-        if len(cells) < 6:
+        if not headers:
+            headers = [_normalize_project_header(cell) for cell in cells]
             continue
-        rows.append(
-            {
-                "oblast": cells[0],
-                "priorita": cells[1],
-                "stav": cells[2],
-                "memory": cells[3],
-                "handoff": cells[4],
-                "dalsi": cells[5],
-            }
-        )
+        if len(cells) < len(headers):
+            cells.extend([""] * (len(headers) - len(cells)))
+        row = dict(zip(headers, cells[: len(headers)], strict=False))
+        if _project_lifecycle(row) == "archived":
+            continue
+        rows.append(row)
     return rows
+
+
+def _normalize_project_header(value: str) -> str:
+    return {
+        "oblast": "oblast",
+        "priorita": "priorita",
+        "stav": "stav",
+        "rezim": "rezim",
+        "režim": "rezim",
+        "memory soubor": "memory",
+        "handoff": "handoff",
+        "dalsi krok": "dalsi",
+        "další krok": "dalsi",
+    }.get(value.strip().casefold(), value.strip().casefold().replace(" ", "_"))
+
+
+def _project_lifecycle(row: dict[str, str]) -> str:
+    value = (row.get("rezim") or "").strip().casefold()
+    if value in {"archiv", "archivni", "archivní", "archive", "archived"}:
+        return "archived"
+    return "active"
 
 
 def _a1_items(rows: Sequence[dict[str, str]]) -> list[str]:
     items: list[str] = []
     for row in rows:
-        if row["priorita"] == "A1+":
-            items.append(f"{row['oblast']}: {row['dalsi']}")
+        if row.get("priorita") == "A1+":
+            items.append(f"{row.get('oblast', '')}: {row.get('dalsi', '')}")
     return items
 
 
@@ -198,9 +217,9 @@ def _pending_items(
         "owl_240526",
     )
     for row in rows:
-        text = f"{row['oblast']} {row['stav']} {row['dalsi']}"
+        text = f"{row.get('oblast', '')} {row.get('stav', '')} {row.get('dalsi', '')}"
         if any(marker.casefold() in text.casefold() for marker in markers):
-            pending.append(f"{row['oblast']}: {row['dalsi']}")
+            pending.append(f"{row.get('oblast', '')}: {row.get('dalsi', '')}")
     if include_reminder_details or not pending:
         for line in reminder_lines:
             if any(marker.casefold() in line.casefold() for marker in markers):

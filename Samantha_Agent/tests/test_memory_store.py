@@ -272,6 +272,24 @@ class MemoryStoreTests(unittest.TestCase):
         self.assertIn("[PRIPOMENOUT] otestovat stav pameti", status)
         self.assertNotIn("TTS: Pozdeji", status)
 
+    def test_format_memory_status_skips_archived_priority_projects(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            memory_dir = Path(temp_dir)
+            (memory_dir / "samantha_core.md").write_text("Core", encoding="utf-8")
+            (memory_dir / "ACTIVE_PROJECTS.md").write_text(
+                "| Oblast | Priorita | Rezim | Stav | Memory soubor | Handoff | Dalsi krok |\n"
+                "| --- | --- | --- | --- | --- | --- | --- |\n"
+                "| Dokumenty | 1 | active | Aktivni | `docs.md` | x | Test |\n"
+                "| Stary projekt | 1 | archived | Hotovo | `old.md` | x | Archiv |\n",
+                encoding="utf-8",
+            )
+            (memory_dir / "MEMORY_INDEX.md").write_text("", encoding="utf-8")
+
+            status = format_memory_status(memory_dir=memory_dir)
+
+        self.assertIn("Dokumenty: Aktivni", status)
+        self.assertNotIn("Stary projekt", status)
+
 
 if __name__ == "__main__":
     unittest.main()

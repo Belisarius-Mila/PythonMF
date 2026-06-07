@@ -457,15 +457,43 @@ def _priority_projects(memory_dir: Path) -> list[str]:
         return []
 
     projects: list[str] = []
+    headers: list[str] = []
     for line in active_projects_path.read_text(encoding="utf-8").splitlines():
-        if not line.startswith("| ") or line.startswith("| Oblast ") or "---" in line:
+        if not line.startswith("| ") or "---" in line:
             continue
         cells = [cell.strip() for cell in line.strip("|").split("|")]
-        if len(cells) < 6 or cells[1] != "1":
+        if not headers:
+            headers = [_normalize_project_header(cell) for cell in cells]
             continue
-        projects.append(f"{cells[0]}: {cells[2]}")
+        if len(cells) < len(headers):
+            cells.extend([""] * (len(headers) - len(cells)))
+        row = dict(zip(headers, cells[: len(headers)], strict=False))
+        if _project_lifecycle(row) == "archived":
+            continue
+        if row.get("priorita") != "1":
+            continue
+        projects.append(f"{row.get('oblast', '')}: {row.get('stav', '')}")
 
     return projects
+
+
+def _normalize_project_header(value: str) -> str:
+    return {
+        "oblast": "oblast",
+        "priorita": "priorita",
+        "stav": "stav",
+        "rezim": "rezim",
+        "režim": "rezim",
+        "dalsi krok": "dalsi_krok",
+        "další krok": "dalsi_krok",
+    }.get(value.strip().casefold(), value.strip().casefold().replace(" ", "_"))
+
+
+def _project_lifecycle(row: dict[str, str]) -> str:
+    value = (row.get("rezim") or "").strip().casefold()
+    if value in {"archiv", "archivni", "archivní", "archive", "archived"}:
+        return "archived"
+    return "active"
 
 
 def _compact_status_line(text: str) -> str:
