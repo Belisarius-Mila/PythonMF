@@ -4577,6 +4577,10 @@ def basic_markdown_to_html(markdown_text: str) -> str:
             close_list()
             continue
 
+        if (raw_line.startswith((" ", "\t")) and list_mode and output and output[-1].startswith("<li>")):
+            output[-1] = output[-1][:-5] + " " + markdown_inline_html(line) + "</li>"
+            continue
+
         heading_match = re.match(r"^(#{1,3})\s+(.+)$", line)
         if heading_match:
             flush_paragraph()

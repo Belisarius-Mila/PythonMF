@@ -2547,6 +2547,8 @@ Dalsi krok:
             path.write_text(
                 "# Kuchařka\n\n"
                 "Použij `Janička`.\n\n"
+                "1. Do hledání napsat běžná slova, například název firmy nebo\n"
+                "   téma.\n\n"
                 "- Najít dokument\n"
                 "- <script>alert(1)</script>\n",
                 encoding="utf-8",
@@ -2557,6 +2559,7 @@ Dalsi krok:
         self.assertIn("Janička Cockpit - kuchařka", page)
         self.assertIn("<h1>Kuchařka</h1>", page)
         self.assertIn("<code>Janička</code>", page)
+        self.assertIn("<li>Do hledání napsat běžná slova, například název firmy nebo téma.</li>", page)
         self.assertIn("<li>Najít dokument</li>", page)
         self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", page)
         self.assertNotIn("<script>alert(1)</script>", page)
