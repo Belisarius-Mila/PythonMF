@@ -40,6 +40,10 @@ První git-safe kuchařka pro Janu je založená v
 `memory/projects/janicka_cockpit_kucharka.md`. Je to provozní návod k
 aktuálnímu MVP, ne šifrovaný nouzový balík.
 
+Od 2026-06-07 je kuchařka vystavená také jako čitelná lokální HTML stránka v
+Cockpitu na `/janicka-kucharka/`. Tlačítko `Kuchařka` v modalu `Janička`
+otevírá tuto stránku v samostatném okně; stránka je read-only a umí tisk.
+
 ## Základní shoda
 
 Janička Cockpit není zvláštní omezený přístup.
@@ -204,8 +208,9 @@ Ručně projít obrazovku `Janička` přímo s Janou nebo z její perspektivy:
 - zapsat, která slova jsou pro Janu nejasná nebo příliš technická,
 - podle toho upravit texty v UI a kuchařce.
 
-Potom rozhodnout, jestli má být kuchařka dostupná přímo z tlačítka
-`Projekty a kuchařka`, nebo jako samostatná jednoduchá stránka.
+Kuchařka už je dostupná přímo z tlačítka `Kuchařka`. Další krok je ruční
+přečtení textu a úprava slov, která znějí technicky nebo nejsou pro Janu
+přirozená.
 
 ## Bezpečnost / neukládat
 

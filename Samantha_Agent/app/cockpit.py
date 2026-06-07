@@ -111,6 +111,7 @@ DOCUMENT_PRINT_DISCOVERY_TIMEOUT = 5.0
 GIT_ROOT = PROJECT_ROOT.parent
 ACTIVE_PROJECTS_PATH = PROJECT_ROOT / "memory" / "ACTIVE_PROJECTS.md"
 PROJECT_CAPABILITY_MAP_PATH = PROJECT_ROOT / "memory" / "technical" / "project_capability_map.md"
+JANICKA_COOKBOOK_PATH = PROJECT_ROOT / "memory" / "projects" / "janicka_cockpit_kucharka.md"
 SESSION_AUTOSAVE_DIR = PROJECT_ROOT / "data" / "session_autosave"
 VOICE_COMMAND_INBOX_DIR = PROJECT_ROOT / "data" / "private" / "voice_inbox"
 MEMORY_INDEX_PATH = PROJECT_ROOT / "memory" / "MEMORY_INDEX.md"
@@ -4540,6 +4541,146 @@ def document_reader_page_html(document_id: str, title: str) -> str:
 </html>"""
 
 
+def markdown_inline_html(text: str) -> str:
+    parts = re.split(r"`([^`]+)`", text)
+    rendered: list[str] = []
+    for index, part in enumerate(parts):
+        if index % 2:
+            rendered.append(f"<code>{html.escape(part)}</code>")
+        else:
+            rendered.append(html.escape(part))
+    return "".join(rendered)
+
+
+def basic_markdown_to_html(markdown_text: str) -> str:
+    lines = markdown_text.splitlines()
+    output: list[str] = []
+    paragraph: list[str] = []
+    list_mode = ""
+
+    def flush_paragraph() -> None:
+        if not paragraph:
+            return
+        output.append(f"<p>{markdown_inline_html(' '.join(paragraph))}</p>")
+        paragraph.clear()
+
+    def close_list() -> None:
+        nonlocal list_mode
+        if list_mode:
+            output.append(f"</{list_mode}>")
+            list_mode = ""
+
+    for raw_line in lines:
+        line = raw_line.strip()
+        if not line:
+            flush_paragraph()
+            close_list()
+            continue
+
+        heading_match = re.match(r"^(#{1,3})\s+(.+)$", line)
+        if heading_match:
+            flush_paragraph()
+            close_list()
+            level = len(heading_match.group(1))
+            output.append(f"<h{level}>{markdown_inline_html(heading_match.group(2).strip())}</h{level}>")
+            continue
+
+        bullet_match = re.match(r"^-\s+(.+)$", line)
+        if bullet_match:
+            flush_paragraph()
+            if list_mode != "ul":
+                close_list()
+                output.append("<ul>")
+                list_mode = "ul"
+            output.append(f"<li>{markdown_inline_html(bullet_match.group(1).strip())}</li>")
+            continue
+
+        number_match = re.match(r"^\d+\.\s+(.+)$", line)
+        if number_match:
+            flush_paragraph()
+            if list_mode != "ol":
+                close_list()
+                output.append("<ol>")
+                list_mode = "ol"
+            output.append(f"<li>{markdown_inline_html(number_match.group(1).strip())}</li>")
+            continue
+
+        close_list()
+        paragraph.append(line)
+
+    flush_paragraph()
+    close_list()
+    return "\n".join(output)
+
+
+def janicka_cookbook_page_html(path: Path = JANICKA_COOKBOOK_PATH) -> str:
+    try:
+        markdown_text = path.read_text(encoding="utf-8")
+        body_html = basic_markdown_to_html(markdown_text)
+        status = f"Zdroj: {html.escape(str(relative_to_project(path)))}"
+    except OSError as exc:
+        body_html = (
+            "<h1>Janička Cockpit - kuchařka</h1>"
+            f"<p>Kuchařku se nepodařilo načíst: {html.escape(str(exc))}</p>"
+        )
+        status = "Kuchařka není dostupná."
+    return f"""<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Janička Cockpit - kuchařka</title>
+  <style>
+    :root {{ color-scheme: light; --pink: #be185d; --ink: #271923; --muted: #705366; --line: #fbcfe8; --paper: #fff7fb; }}
+    * {{ box-sizing: border-box; }}
+    body {{ margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--paper); color: var(--ink); line-height: 1.58; }}
+    header {{ position: sticky; top: 0; z-index: 1; background: #fce7f3; border-bottom: 1px solid var(--line); padding: 12px 18px; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; }}
+    header strong {{ display: block; font-size: 18px; color: #581c35; }}
+    header span {{ display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }}
+    main {{ width: min(880px, 100%); margin: 0 auto; padding: 24px 18px 48px; }}
+    article {{ background: white; border: 1px solid var(--line); border-radius: 8px; padding: 22px; box-shadow: 0 10px 28px rgba(88, 28, 53, .08); }}
+    h1 {{ margin: 0 0 18px; color: #581c35; line-height: 1.18; font-size: 30px; }}
+    h2 {{ margin: 28px 0 10px; color: #831843; line-height: 1.25; font-size: 22px; }}
+    h3 {{ margin: 22px 0 8px; color: #9d174d; line-height: 1.25; font-size: 18px; }}
+    p {{ margin: 10px 0; }}
+    ul, ol {{ margin: 10px 0 14px; padding-left: 24px; }}
+    li {{ margin: 5px 0; }}
+    code {{ background: #fff1f2; border: 1px solid #ffe4e6; border-radius: 5px; padding: 1px 5px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .93em; }}
+    button, a.button {{ border: 0; border-radius: 6px; padding: 9px 12px; font: inherit; font-weight: 750; cursor: pointer; background: #f9a8d4; color: #581c35; text-decoration: none; white-space: nowrap; }}
+    button.primary, a.button.primary {{ background: var(--pink); color: white; }}
+    @media (max-width: 720px) {{
+      header {{ grid-template-columns: 1fr; align-items: stretch; }}
+      button, a.button {{ width: 100%; text-align: center; }}
+      article {{ padding: 18px; }}
+      h1 {{ font-size: 26px; }}
+    }}
+    @media print {{
+      header {{ position: static; }}
+      button, a.button {{ display: none; }}
+      body {{ background: white; }}
+      article {{ border: 0; box-shadow: none; padding: 0; }}
+      main {{ padding: 0; width: 100%; }}
+    }}
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <strong>Janička Cockpit - kuchařka</strong>
+      <span>{status}</span>
+    </div>
+    <a class="button" href="/">Zpět do Cockpitu</a>
+    <button class="primary" type="button" onclick="window.print()">Tisk</button>
+  </header>
+  <main>
+    <article>
+      {body_html}
+    </article>
+  </main>
+</body>
+</html>"""
+
+
 def reminder_status_item(raw: dict[str, Any], today: date) -> dict[str, Any]:
     due_date = parse_reminder_due_date(raw.get("due_date"))
     source = raw.get("source")
@@ -6808,6 +6949,9 @@ class CockpitServer:
                 if parsed.path == "/email-processing/":
                     self.respond_html(EMAIL_PROCESSING_HTML)
                     return
+                if parsed.path == "/janicka-kucharka/":
+                    self.respond_html(janicka_cookbook_page_html())
+                    return
                 if parsed.path == "/documents/read":
                     params = parse_qs(parsed.query)
                     document_id = params.get("document_id", [""])[0]
@@ -8968,7 +9112,8 @@ COCKPIT_HTML = """<!doctype html>
         <div class="janicka-note">Vývoj, terminál a diagnostika zůstávají v běžném Cockpitu. Jana sem nemá chodit přes technické pojmy; má začít tím, co potřebuje udělat.</div>
         <div class="actions">
           <button class="secondary" id="janickaWebAppsBtn" type="button">Všechny aplikace</button>
-          <button class="secondary" id="janickaProjectsBtn" type="button">Projekty a kuchařka</button>
+          <button class="secondary" id="janickaProjectsBtn" type="button">Projekty</button>
+          <button class="secondary" id="janickaCookbookBtn" type="button">Kuchařka</button>
         </div>
       </div>
     </div>
@@ -9161,6 +9306,7 @@ COCKPIT_HTML = """<!doctype html>
     const janickaRecoveryBtn = document.getElementById("janickaRecoveryBtn");
     const janickaWebAppsBtn = document.getElementById("janickaWebAppsBtn");
     const janickaProjectsBtn = document.getElementById("janickaProjectsBtn");
+    const janickaCookbookBtn = document.getElementById("janickaCookbookBtn");
     const janickaReturnBtn = document.getElementById("janickaReturnBtn");
     const remindersModal = document.getElementById("remindersModal");
     const remindersCloseBtn = document.getElementById("remindersCloseBtn");
@@ -9382,6 +9528,7 @@ COCKPIT_HTML = """<!doctype html>
         "janickaRecoveryBtn",
         "janickaWebAppsBtn",
         "janickaProjectsBtn",
+        "janickaCookbookBtn",
         "janickaReturnBtn",
         "webAppsBtn",
         "projectsBtn",
@@ -12998,6 +13145,18 @@ COCKPIT_HTML = """<!doctype html>
       armJanickaModalReturn("projects");
       closeJanickaModal();
       openProjectsModal();
+    });
+    janickaCookbookBtn.addEventListener("click", () => {
+      const cookbookWindow = window.open(
+        "/janicka-kucharka/",
+        "SamanthaJanickaCookbook",
+        "popup=yes,width=920,height=900,left=160,top=60"
+      );
+      if (cookbookWindow) {
+        cookbookWindow.focus();
+      } else {
+        window.location.href = "/janicka-kucharka/";
+      }
     });
     janickaReturnBtn.addEventListener("click", openJanickaModal);
     refreshBtn.addEventListener("click", refresh);

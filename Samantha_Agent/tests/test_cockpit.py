@@ -914,6 +914,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("janickaFamilyBtn", COCKPIT_HTML)
         self.assertIn("janickaAskAdamBtn", COCKPIT_HTML)
         self.assertIn("janickaRecoveryBtn", COCKPIT_HTML)
+        self.assertIn("janickaCookbookBtn", COCKPIT_HTML)
+        self.assertIn("/janicka-kucharka/", COCKPIT_HTML)
         self.assertIn("janickaReturnBtn", COCKPIT_HTML)
         self.assertIn("openJanickaModal", COCKPIT_HTML)
         self.assertIn("focusDocumentSearchForJanicka", COCKPIT_HTML)
@@ -2538,6 +2540,26 @@ Dalsi krok:
         self.assertIn('window.location.href = "/"', page)
         self.assertIn("/documents/pdf?document_id=doc-open", page)
         self.assertIn("Doklad &amp; smlouva", page)
+
+    def test_janicka_cookbook_page_renders_markdown_safely(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "cookbook.md"
+            path.write_text(
+                "# Kuchařka\n\n"
+                "Použij `Janička`.\n\n"
+                "- Najít dokument\n"
+                "- <script>alert(1)</script>\n",
+                encoding="utf-8",
+            )
+
+            page = cockpit_module.janicka_cookbook_page_html(path)
+
+        self.assertIn("Janička Cockpit - kuchařka", page)
+        self.assertIn("<h1>Kuchařka</h1>", page)
+        self.assertIn("<code>Janička</code>", page)
+        self.assertIn("<li>Najít dokument</li>", page)
+        self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", page)
+        self.assertNotIn("<script>alert(1)</script>", page)
 
     def test_document_search_returns_structured_redacted_results(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
