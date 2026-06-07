@@ -33,6 +33,16 @@ def build_arg_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Zapsat odpověď k poslednímu hlasovému pokynu bez změny pending záznamu.",
     )
+    parser.add_argument(
+        "--user-text",
+        default="",
+        help="Explicitní text uživatelského dotazu, ke kterému se odpověď ukládá.",
+    )
+    parser.add_argument(
+        "--route",
+        default="codex_terminal_final",
+        help="Název kanálu odpovědi pro Cockpit.",
+    )
     parser.add_argument("--json", action="store_true", help="Vypsat aktualizovaný pending záznam jako JSON.")
     return parser
 
@@ -40,12 +50,27 @@ def build_arg_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_arg_parser().parse_args(argv)
     response = " ".join(args.response).strip()
-    if args.latest_command:
+    if args.user_text.strip():
+        turn = append_manual_voice_history_turn(
+            user_text=args.user_text.strip(),
+            adam_response=response,
+            route=args.route.strip() or "codex_terminal_final",
+            path=args.history_path,
+        )
+        result = {
+            "ok": True,
+            "status": "recorded_explicit_user_text_reply",
+            "processed_at": turn.get("created_at"),
+            "response": response,
+            "user_text": args.user_text.strip(),
+            "route": args.route.strip() or "codex_terminal_final",
+        }
+    elif args.latest_command:
         command = load_latest_voice_command(inbox_dir=args.inbox_dir)
         turn = append_manual_voice_history_turn(
             user_text=command.text,
             adam_response=response,
-            route="codex_terminal_final",
+            route=args.route.strip() or "codex_terminal_final",
             path=args.history_path,
         )
         result = {
@@ -68,7 +93,7 @@ def main(argv: list[str] | None = None) -> int:
             turn = append_manual_voice_history_turn(
                 user_text=command.text,
                 adam_response=response,
-                route="codex_terminal_final",
+                route=args.route.strip() or "codex_terminal_final",
                 path=args.history_path,
             )
             result = {

@@ -111,8 +111,8 @@ Tlačítko otevře textový chat.
 
 Použít vždy, když Jana neví, kterým tlačítkem začít.
 
-Adam odpovídá s pamětí Janičky, kuchařky a aktuálního stavu Samanthy. Není to
-hlasový pokyn a nic se samo nemaže, neposílá ani nepřesouvá.
+Dotaz se předává přímo Adamovi v běžící pracovní relaci Codexu. Není to hlasový
+pokyn a nic se samo nemaže, neposílá ani nepřesouvá.
 
 Dobré věty:
 

@@ -917,7 +917,9 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("janickaChatInput", COCKPIT_HTML)
         self.assertIn("janickaChatSendBtn", COCKPIT_HTML)
         self.assertIn("/api/janicka/chat", COCKPIT_HTML)
+        self.assertIn("/api/janicka/chat/latest", COCKPIT_HTML)
         self.assertIn("submitJanickaChat", COCKPIT_HTML)
+        self.assertIn("pollJanickaCodexReply", COCKPIT_HTML)
         self.assertIn("janickaRecoveryBtn", COCKPIT_HTML)
         self.assertIn("janickaCookbookBtn", COCKPIT_HTML)
         self.assertIn("/janicka-kucharka/", COCKPIT_HTML)
@@ -2546,12 +2548,12 @@ Dalsi krok:
         self.assertIn("/documents/pdf?document_id=doc-open", page)
         self.assertIn("Doklad &amp; smlouva", page)
 
-    def test_janicka_chat_action_uses_text_agent_without_voice_inbox(self) -> None:
+    def test_janicka_chat_action_delivers_to_codex_bridge_without_agent(self) -> None:
         calls = []
 
-        def fake_asker(prompt: str) -> str:
-            calls.append(prompt)
-            return "Odpověď pro Janu."
+        def fake_bridge(prompt: str, **kwargs) -> dict[str, object]:
+            calls.append({"prompt": prompt, "kwargs": kwargs})
+            return {"ok": True, "status": "delivered", "verified": True}
 
         result = cockpit_module.janicka_chat_action(
             {
@@ -2561,17 +2563,20 @@ Dalsi krok:
                     {"role": "assistant", "content": "Dobrý den."},
                 ],
             },
-            asker=fake_asker,
+            asker=lambda _: self.fail("Janička chat must not call the separate text agent"),
+            bridge_deliverer=fake_bridge,
         )
 
         self.assertTrue(result["ok"])
-        self.assertEqual(result["answer"], "Odpověď pro Janu.")
-        self.assertIn("samostatný textový chat", calls[0])
-        self.assertIn("Adam/Samantha pro Janu", calls[0])
-        self.assertIn("Projektová paměť pro tento chat", calls[0])
-        self.assertIn("Janička Cockpit", calls[0])
-        self.assertIn("Nejde o hlasový pokyn", calls[0])
-        self.assertIn("Kde najdu dokument?", calls[0])
+        self.assertEqual(result["status"], "delivered_to_codex")
+        self.assertTrue(result["poll_latest"])
+        self.assertIn("přímo do běžícího Codexu", result["answer"])
+        self.assertEqual(calls[0]["kwargs"], {"submit": True})
+        self.assertIn("Textový dotaz z okna `Jana Adam`", calls[0]["prompt"])
+        self.assertIn("Odpovídáš ty: běžící Codex/Adam", calls[0]["prompt"])
+        self.assertIn("scripts/adam_voice_reply.py", calls[0]["prompt"])
+        self.assertIn("--route janicka_text_bridge", calls[0]["prompt"])
+        self.assertIn("Kde najdu dokument?", calls[0]["prompt"])
 
     def test_janicka_chat_action_rejects_empty_message(self) -> None:
         result = cockpit_module.janicka_chat_action({"message": "   "}, asker=lambda _: "x")
@@ -2579,60 +2584,75 @@ Dalsi krok:
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "empty_message")
 
-    def test_janicka_chat_action_routes_latest_qn_to_quick_notes_status(self) -> None:
-        status_payload = {
-            "ok": True,
-            "message": "37 poznámek v Quick Notes inboxu.",
-            "counts": {"active": 37, "total": 37},
-            "notes": [
-                {
-                    "note_number": 37,
-                    "created_at": "2026-06-05 05:14:45",
-                    "snippet": "Schází nám jedna velmi důležitá věc.",
-                }
-            ],
-        }
+    def test_janicka_chat_action_routes_latest_qn_to_codex_bridge(self) -> None:
+        calls = []
 
-        with patch("app.cockpit.quick_notes_status", return_value=status_payload) as status_mock:
-            result = cockpit_module.janicka_chat_action(
-                {"message": "Najdi mi poslední QN."},
-                asker=lambda _: "Nemá se volat.",
+        def fake_bridge(prompt: str, **kwargs) -> dict[str, object]:
+            calls.append(prompt)
+            return {"ok": True, "status": "delivered", "verified": True}
+
+        result = cockpit_module.janicka_chat_action(
+            {"message": "Najdi mi poslední QN."},
+            asker=lambda _: self.fail("Janička chat must not call the separate text agent"),
+            bridge_deliverer=fake_bridge,
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "delivered_to_codex")
+        self.assertIn("Najdi mi poslední QN.", calls[0])
+
+    def test_janicka_chat_action_routes_followup_detail_to_codex_bridge(self) -> None:
+        calls = []
+
+        def fake_bridge(prompt: str, **kwargs) -> dict[str, object]:
+            calls.append(prompt)
+            return {"ok": True, "status": "delivered", "verified": True}
+
+        result = cockpit_module.janicka_chat_action(
+            {
+                "message": "Ano, detail.",
+                "history": [
+                    {
+                        "role": "assistant",
+                        "content": "Poslední QN je **#37** z **2026-06-05 05:14:45**.",
+                    }
+                ],
+            },
+            asker=lambda _: self.fail("Janička chat must not call the separate text agent"),
+            bridge_deliverer=fake_bridge,
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "delivered_to_codex")
+        self.assertIn("Ano, detail.", calls[0])
+        self.assertIn("Poslední QN je **#37**", calls[0])
+
+    def test_janicka_latest_codex_reply_matches_text_bridge_response(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            response_path = Path(temp_dir) / "last_adam_response.json"
+            response_path.write_text(
+                json.dumps(
+                    {
+                        "ok": True,
+                        "available": True,
+                        "route": "janicka_text_bridge",
+                        "user_text": "Kde najdu dokument?",
+                        "adam_response": "Dokument najdeš přes tlačítko Najít dokument.",
+                        "created_at": "2026-06-07T10:00:00+00:00",
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            result = cockpit_module.janicka_latest_codex_reply_action(
+                {"message": "Kde najdu dokument?"},
+                response_path=response_path,
             )
 
         self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "answered")
-        self.assertIn("Adam odpověděl z Quick Notes", result["message"])
-        self.assertIn("**#37**", result["answer"])
-        self.assertIn("Schází nám jedna velmi důležitá věc.", result["answer"])
-        status_mock.assert_called_once_with(limit=1)
-
-    def test_janicka_chat_action_routes_followup_qn_detail_from_history(self) -> None:
-        detail_payload = {
-            "ok": True,
-            "note_number": 37,
-            "created_at": "2026-06-05 05:14:45",
-            "body_text": "Celý text poslední poznámky.",
-            "truncated": False,
-        }
-
-        with patch("app.cockpit.quick_note_detail_status", return_value=detail_payload) as detail_mock:
-            result = cockpit_module.janicka_chat_action(
-                {
-                    "message": "Ano, detail.",
-                    "history": [
-                        {
-                            "role": "assistant",
-                            "content": "Poslední QN je **#37** z **2026-06-05 05:14:45**.",
-                        }
-                    ],
-                },
-                asker=lambda _: "Nemá se volat.",
-            )
-
-        self.assertTrue(result["ok"])
-        self.assertIn("Detail QN **#37**", result["answer"])
-        self.assertIn("Celý text poslední poznámky.", result["answer"])
-        detail_mock.assert_called_once_with(37, max_chars=6000)
+        self.assertTrue(result["available"])
+        self.assertEqual(result["answer"], "Dokument najdeš přes tlačítko Najít dokument.")
 
     def test_janicka_chat_memory_context_includes_project_files(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

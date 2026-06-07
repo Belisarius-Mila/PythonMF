@@ -9,6 +9,7 @@ import hashlib
 import os
 import re
 import shutil
+import shlex
 import signal
 import subprocess
 import tempfile
@@ -75,7 +76,9 @@ from app.speech.edge_tts_mp3 import (
 )
 from app.speech.local_tts import DEFAULT_VOICE
 from app.speech.adam_voice_mode import (
+    ADAM_LAST_RESPONSE_PATH,
     load_voice_mode_status,
+    load_last_adam_response,
     pid_exists,
     update_pending_approval,
     write_voice_mode_status,
@@ -83,6 +86,7 @@ from app.speech.adam_voice_mode import (
 from app.speech.terminal_bridge import (
     CURRENT_CODEX_TTY_PATH,
     discover_codex_ttys,
+    deliver_prompt_to_terminal,
     normalize_tty,
 )
 
@@ -7025,10 +7029,89 @@ def _format_janicka_quick_note_detail(note_number: int) -> str:
     return f"Detail QN **#{note_number}** z **{created_at}**:\n\n{body}"
 
 
+def build_janicka_codex_bridge_prompt(message: str, history: list[Any]) -> str:
+    history_lines: list[str] = []
+    for item in history[-8:]:
+        if not isinstance(item, dict):
+            continue
+        role = safe_text(str(item.get("role", "") or ""))[:20]
+        content = safe_text(str(item.get("content", "") or "")).strip()[:1200]
+        if role in {"user", "assistant"} and content:
+            label = "Jana/Míla" if role == "user" else "Adam"
+            history_lines.append(f"{label}: {content}")
+    reply_command = (
+        ".venv/bin/python scripts/adam_voice_reply.py "
+        f"--user-text {shlex.quote(message)} "
+        "--route janicka_text_bridge "
+        "\"STRUČNÁ ODPOVĚĎ PRO OKNO JANIČKA\""
+    )
+    parts = [
+        "Textový dotaz z okna `Jana Adam` v Samantha Cockpitu.",
+        "Toto není hlasový režim a nemá odpovídat žádný separátní AI agent.",
+        "Odpovídáš ty: běžící Codex/Adam v této pracovní relaci.",
+        "Zpracuj dotaz jako běžný uživatelský pokyn od Míly nebo Jany.",
+        "Pokud je potřeba číst repo, paměť nebo lokální data, použij svoje běžné nástroje a projektová pravidla.",
+        "Pokud jde o mazání, odesílání, commit, push, platbu, tajemství nebo jinou rizikovou akci, nejdřív si v chatu vyžádej potvrzení.",
+        "Odpověz normálně do tohoto Codex chatu.",
+        "Až budeš mít stručnou finální odpověď pro okno Janička, zapiš ji také do Cockpitu příkazem:",
+        reply_command,
+    ]
+    if history_lines:
+        parts.append("Krátká historie z okna Janička:\n" + "\n".join(history_lines))
+    parts.append("Aktuální dotaz:\n" + message)
+    return "\n\n".join(parts)
+
+
+def janicka_latest_codex_reply_action(
+    payload: dict[str, Any],
+    *,
+    response_path: Path = ADAM_LAST_RESPONSE_PATH,
+) -> dict[str, Any]:
+    expected_user_text = safe_text(str(payload.get("message", "") or "")).strip()
+    response = load_last_adam_response(path=response_path)
+    if not response.get("ok"):
+        return response
+    if not response.get("available"):
+        return {
+            "ok": True,
+            "available": False,
+            "status": "no_reply",
+            "message": "Adamova odpověď z Codexu zatím není zapsaná.",
+        }
+    user_text = safe_text(str(response.get("user_text", "") or "")).strip()
+    route = safe_text(str(response.get("route", "") or "")).strip()
+    if expected_user_text and user_text != expected_user_text:
+        return {
+            "ok": True,
+            "available": False,
+            "status": "different_reply",
+            "message": "Poslední uložená odpověď patří k jinému dotazu.",
+            "route": route,
+        }
+    if route != "janicka_text_bridge":
+        return {
+            "ok": True,
+            "available": False,
+            "status": "different_route",
+            "message": "Poslední uložená odpověď není z Janička text bridge.",
+            "route": route,
+        }
+    return {
+        "ok": True,
+        "available": True,
+        "status": "reply_available",
+        "message": "Adamova odpověď z Codexu je připravená.",
+        "answer": safe_text(str(response.get("adam_response", "") or "")).strip(),
+        "created_at": response.get("created_at"),
+        "route": route,
+    }
+
+
 def janicka_chat_action(
     payload: dict[str, Any],
     *,
     asker: Callable[[str], str] | None = None,
+    bridge_deliverer: Callable[..., dict[str, Any]] = deliver_prompt_to_terminal,
 ) -> dict[str, Any]:
     message = safe_text(str(payload.get("message", "") or "")).strip()
     if not message:
@@ -7038,55 +7121,39 @@ def janicka_chat_action(
             "message": "Napiš otázku nebo pokyn pro Adama.",
         }
     history = payload.get("history", [])
-    history_lines: list[str] = []
-    if isinstance(history, list):
-        for item in history[-8:]:
-            if not isinstance(item, dict):
-                continue
-            role = safe_text(str(item.get("role", "") or ""))[:20]
-            content = safe_text(str(item.get("content", "") or "")).strip()[:1200]
-            if role in {"user", "assistant"} and content:
-                label = "Jana" if role == "user" else "Adam"
-                history_lines.append(f"{label}: {content}")
-    quick_note_answer = janicka_quick_note_chat_answer(message, history if isinstance(history, list) else [])
-    if quick_note_answer is not None:
-        return {
-            "ok": True,
-            "status": "answered",
-            "message": "Adam odpověděl z Quick Notes.",
-            "answer": quick_note_answer,
-        }
-    prompt_parts = [
-        "Toto je samostatný textový chat z obrazovky Janička v Cockpitu.",
-        "Vystupuj jako Adam/Samantha pro Janu a Mílu, ne jako anonymní obecná AI bez paměti.",
-        "Odpovídej česky, lidsky a prakticky. Nejde o hlasový pokyn ani o automatické spuštění akce.",
-        "Použij přiloženou projektovou paměť jako hlavní kontext. Když odpověď závisí na stavu projektu, neopírej se o domněnky.",
-        "Pokud uživatel žádá destruktivní, odesílací nebo citlivou akci, vysvětli bezpečný další krok a vyžádej si potvrzení podle pravidel nástroje. Běžné otázky normálně zodpověz.",
-        "Projektová paměť pro tento chat:\n" + janicka_chat_memory_context(),
-    ]
-    if history_lines:
-        prompt_parts.append("Dosavadní krátká historie chatu:\n" + "\n".join(history_lines))
-    prompt_parts.append("Aktuální zpráva:\n" + message)
-    asker_fn = asker
-    if asker_fn is None:
-        from app.samantha_agent import ask_samantha
-
-        asker_fn = ask_samantha
+    prompt = build_janicka_codex_bridge_prompt(message, history if isinstance(history, list) else [])
     try:
-        answer = str(asker_fn("\n\n".join(prompt_parts))).strip()
-    except Exception as exc:  # pragma: no cover - exact OpenAI/Agents exceptions vary.
+        delivery = bridge_deliverer(prompt, submit=True)
+    except Exception as exc:  # pragma: no cover - exact macOS/terminal exceptions vary.
         return {
             "ok": False,
-            "status": "chat_failed",
-            "message": f"Adam teď neodpověděl: {exc}",
+            "status": "codex_bridge_failed",
+            "message": f"Dotaz se nepodařilo předat běžícímu Codexu: {exc}",
         }
-    if not answer:
-        answer = "Adam nevrátil žádný text."
+    if not delivery.get("ok"):
+        return {
+            "ok": False,
+            "status": "codex_bridge_failed",
+            "message": f"Dotaz se nepodařilo předat běžícímu Codexu: {delivery.get('message') or delivery.get('status')}",
+            "bridge": delivery,
+        }
+    verified = bool(delivery.get("verified"))
+    bridge_message = (
+        "Dotaz jsem předal přímo do běžícího Codexu/Adama. "
+        "Odpověď se objeví v hlavním Codex chatu; pokud ji Adam zapíše zpět, zobrazí se i tady."
+    )
+    if not verified:
+        bridge_message = (
+            "Dotaz jsem vložil do označené Codex relace, ale technicky neumím ověřit doručení. "
+            "Zkontroluj hlavní Codex chat."
+        )
     return {
         "ok": True,
-        "status": "answered",
-        "message": "Adam odpověděl.",
-        "answer": answer,
+        "status": "delivered_to_codex",
+        "message": "Dotaz předán Adamovi v Codexu.",
+        "answer": bridge_message,
+        "bridge": delivery,
+        "poll_latest": True,
     }
 
 
@@ -7219,6 +7286,10 @@ class CockpitServer:
                 if parsed.path == "/api/janicka/chat":
                     payload = self.read_json()
                     self.respond_json(janicka_chat_action(payload))
+                    return
+                if parsed.path == "/api/janicka/chat/latest":
+                    payload = self.read_json()
+                    self.respond_json(janicka_latest_codex_reply_action(payload))
                     return
                 if parsed.path == "/api/voice-mode/start":
                     self.respond_json(start_adam_voice_mode_action())
@@ -13319,7 +13390,7 @@ COCKPIT_HTML = """<!doctype html>
       janickaChatInput.value = "";
       renderJanickaChat();
       janickaChatSendBtn.disabled = true;
-      janickaChatStatus.textContent = "Adam přemýšlí...";
+      janickaChatStatus.textContent = "Předávám dotaz Adamovi do Codexu...";
       try {
         const data = await postJson("/api/janicka/chat", {
           message,
@@ -13328,6 +13399,11 @@ COCKPIT_HTML = """<!doctype html>
         if (data.ok) {
           janickaChatHistory.push({role: "assistant", content: data.answer || ""});
           janickaChatStatus.textContent = data.message || "Adam odpověděl.";
+          if (data.status === "delivered_to_codex" && data.poll_latest) {
+            renderJanickaChat();
+            pollJanickaCodexReply(message);
+            return;
+          }
         } else {
           janickaChatHistory.push({role: "assistant", content: data.message || "Adam teď neodpověděl."});
           janickaChatStatus.textContent = data.message || "Adam teď neodpověděl.";
@@ -13342,6 +13418,26 @@ COCKPIT_HTML = """<!doctype html>
         janickaChatSendBtn.disabled = false;
         janickaChatInput.focus();
       }
+    }
+
+    async function pollJanickaCodexReply(message) {
+      const maxAttempts = 60;
+      const delayMs = 2000;
+      for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+        await new Promise((resolve) => window.setTimeout(resolve, delayMs));
+        try {
+          const data = await postJson("/api/janicka/chat/latest", {message});
+          if (data.ok && data.available && data.answer) {
+            janickaChatHistory.push({role: "assistant", content: data.answer});
+            janickaChatStatus.textContent = "Adamova odpověď z Codexu je tady.";
+            renderJanickaChat();
+            return;
+          }
+        } catch (err) {
+          recordFrontendError(err);
+        }
+      }
+      janickaChatStatus.textContent = "Odpověď se zatím nevrátila do okna. Zkontroluj hlavní Codex chat.";
     }
 
     function clearJanickaChat() {

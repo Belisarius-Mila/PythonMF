@@ -62,6 +62,14 @@ Janička chat pro fráze typu `poslední QN` a navazující `detail` používá 
 Cockpit Quick Notes status/detail. Živý test vrátil správně poslední aktivní
 poznámku `QN #37` z `2026-06-05 05:14:45`, ne starší `QN #5`.
 
+Po dalším Mílově testu bylo rozhodnuto, že to stále není správná cílová
+architektura: odpovídat nemá separátní agent ani model s přiloženou pamětí, ale
+přímo běžící Codex/Adam v pracovní relaci. Janička chat proto od 2026-06-07
+normální zprávy předává přes terminálový Codex bridge do označené Codex relace a
+nevolá `ask_samantha()`. Okno zobrazí stav předání a umí čekat na odpověď
+zapsanou zpět přes `scripts/adam_voice_reply.py --user-text ... --route
+janicka_text_bridge`.
+
 ## Základní shoda
 
 Janička Cockpit není zvláštní omezený přístup.
