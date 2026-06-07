@@ -23,6 +23,8 @@ znalostí projektu, ne separátní obecná AI bez kontextu.
 - Odpovědi se zobrazily zpět v Cockpitu.
 - Poslední pozorovaná rychlost odpovědi byla přibližně 44 sekund. To je
   realistické pro cestu přes plnohodnotnou běžící Codex relaci.
+- Od této vlny je výchozí doručení textového dotazu přes terminálový bridge,
+  ne přes VS Code GUI fallback.
 
 ## Dulezite technicke rozhodnuti
 
@@ -32,11 +34,10 @@ fokus z Cockpitu. Ukázalo se, že tato cesta uměla požadavek uložit jako
 
 Funkční stav je proto jiný:
 
-- Janička bridge cíleně používá viditelnou VS Code/Codex cestu.
-- AppleScript před vložením vyčistí vstup a po odeslání vrátí fokus zpět do
-  původní aplikace, typicky do prohlížeče s Cockpitem.
-- VS Code se může krátce aktivovat, ale má se vrátit Cockpit a dotaz má dorazit
-  do běžící Adamovy Codex relace.
+- Janička bridge cíleně používá terminálový bridge a doručuje do označené nebo
+  nalezené Codex relace.
+- AppleScript GUI helper zůstává jako explicitní fallback.
+- VS Code helper se může krátce aktivovat, ale není výchozí cesta.
 
 ## Co neni hotove
 

@@ -166,6 +166,37 @@ class AdamServiceTests(unittest.TestCase):
         self.assertIn("Ahoj Adame.", calls[1]["prompt"])
         self.assertEqual(calls[1]["kwargs"], {"submit": True})
 
+    def test_submit_adam_text_request_defaults_to_terminal_bridge(self) -> None:
+        calls = []
+        import app.adam_service as adam_service_module
+
+        def fake_starter():
+            calls.append({"starter": True})
+            return {"ok": True, "status": "already_running"}
+
+        def fake_terminal_deliverer(prompt, **kwargs):
+            calls.append({"prompt": prompt, "kwargs": kwargs})
+            return {"ok": True, "status": "delivered", "verified": True, "delivery_method": "local_gui_terminal"}
+
+        original_deliver_prompt_to_terminal = adam_service_module.deliver_prompt_to_terminal
+        try:
+            adam_service_module.deliver_prompt_to_terminal = fake_terminal_deliverer
+            with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+                result = submit_adam_text_request(
+                    message="Ahoj Adame.",
+                    history=[],
+                    requests_dir=Path(temp_dir) / "requests",
+                    starter=fake_starter,
+                    deliverer=None,
+                )
+        finally:
+            adam_service_module.deliver_prompt_to_terminal = original_deliver_prompt_to_terminal
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "delivered_to_adam")
+        self.assertIn("Ahoj Adame.", calls[1]["prompt"])
+        self.assertEqual(calls[1]["kwargs"], {"submit": True})
+
     def test_submit_adam_text_request_waits_after_start_request(self) -> None:
         calls = []
 

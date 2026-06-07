@@ -44,9 +44,8 @@ Od 2026-06-07 je kuchařka vystavená také jako čitelná lokální HTML strán
 Cockpitu na `/janicka-kucharka/`. Tlačítko `Kuchařka` v modalu `Janička`
 otevírá tuto stránku v samostatném okně; stránka je read-only a umí tisk.
 
-Od 2026-06-07 tlačítko `Zeptat se Adama` v Janičce nepoužívá hlasový inbox.
-Otevírá samostatný textový chatový modal a backend endpoint `/api/janicka/chat`,
-který volá běžnou textovou Samanthu přes `ask_samantha()`. Smoke test přes
+Od 2026-06-07 tlačítko `Zeptat se Adama` v Janičce otevírá samostatný textový
+chatový modal a backend endpoint `/api/janicka/chat`. První smoke test přes
 lokální API vrátil odpověď `Ano, textový chat funguje.` Rodinné projekty jsou
 zatím další část k doladění.
 
@@ -62,13 +61,12 @@ Janička chat pro fráze typu `poslední QN` a navazující `detail` používá 
 Cockpit Quick Notes status/detail. Živý test vrátil správně poslední aktivní
 poznámku `QN #37` z `2026-06-05 05:14:45`, ne starší `QN #5`.
 
-Po dalším Mílově testu bylo rozhodnuto, že to stále není správná cílová
-architektura: odpovídat nemá separátní agent ani model s přiloženou pamětí, ale
-přímo běžící Codex/Adam v pracovní relaci. Janička chat proto od 2026-06-07
-normální zprávy předává přes terminálový Codex bridge do označené Codex relace a
-nevolá `ask_samantha()`. Okno zobrazí stav předání a umí čekat na odpověď
-zapsanou zpět přes `scripts/adam_voice_reply.py --user-text ... --route
-janicka_text_bridge`.
+Po dalším Mílově testu bylo rozhodnuto, že odpovídat nemá separátní agent ani
+model s přiloženou pamětí, ale přímo běžící Codex/Adam v pracovní relaci.
+Janička chat proto od 2026-06-07 normální zprávy předává přes terminálový
+Codex bridge do označené Codex relace a nevolá `ask_samantha()`. Okno zobrazí
+stav předání a umí čekat na odpověď zapsanou zpět přes
+`scripts/adam_voice_reply.py --user-text ... --route janicka_text_bridge`.
 
 Následné upřesnění: Jana nebude umět spustit Codex ručně a má mít spuštěný jen
 Cockpit. Proto vzniká managed Adam service:
@@ -81,6 +79,11 @@ Cockpit. Proto vzniká managed Adam service:
   doručí prompt do managed Codex relace a čeká na odpověď podle `request_id`.
 - `scripts/adam_voice_reply.py` umí nově `--request-id`, aby Adam mohl odpověď
   zapsat zpět ke konkrétnímu dotazu z okna Janička.
+
+Od 2026-06-07 výchozí doručení textového dotazu pro `Jana Adam` používá
+terminálový bridge (`deliver_prompt_to_terminal`), ne VS Code GUI fallback.
+Explicitní helper pro viditelnou VS Code cestu zůstává k dispozici, ale není
+výchozí.
 
 ## Základní shoda
 
@@ -254,12 +257,13 @@ Codex relace. Další krok je nechat kanál zatím stabilně používat a potom 
 Poznámka z 2026-06-07: krátce se zkoušela skrytá `screen` relace
 `samantha_adam`, aby se nepřepínal fokus z Cockpitu. Tato cesta ale uměla dotaz
 označit jako doručený, aniž by ho Codex reálně převzal. Funkční stav je proto
-viditelná VS Code/Codex cesta: před vložením se čistí vstup, po odeslání se
-fokus vrací zpět do původní aplikace a odpověď se zapisuje do Cockpitu přes
+výchozí terminálový bridge: před vložením se čistí vstup, cílí na označenou
+nebo nalezenou Codex relaci a odpověď se zapisuje do Cockpitu přes
 `scripts/adam_voice_reply.py --request-id ... --route janicka_text_bridge`.
-Reálné testy dotazů `Jak funguje Najít dokument?` a `Co mi můžeš říct o
-projektu Pozůstalost?` prošly; poslední naměřené čekání bylo zhruba 44 sekund,
-což je přijatelné pro odpověď skutečnou Codex relací.
+Explicitní VS Code helper zůstává jen jako fallback/helper. Reálné testy dotazů
+`Jak funguje Najít dokument?` a `Co mi můžeš říct o projektu Pozůstalost?`
+prošly; poslední naměřené čekání bylo zhruba 44 sekund, což je přijatelné pro
+odpověď skutečnou Codex relací.
 
 ## Bezpečnost / neukládat
 
