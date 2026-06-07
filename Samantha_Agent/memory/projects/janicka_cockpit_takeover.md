@@ -7,7 +7,7 @@ Založeno 2026-06-06 jako samostatný projekt.
 Projekt vznikl po Mílove upřesnění, že nejde o hru, demo ani omezený
 režim. Jde o vážný kontinuitní vstup do Samanthy pro Janu.
 
-Stav UI k 2026-06-06:
+Stav UI k 2026-06-07 po auditu kódu:
 
 - První MVP tlačítka `Janička` je implementované v hlavním Cockpitu.
 - Tlačítko otevírá samostatnou netechnickou obrazovku / modal, ne nové okno.
@@ -31,6 +31,14 @@ Stav UI k 2026-06-06:
   - Nouzové převzetí,
   - Všechny aplikace,
   - Projekty a kuchařka.
+
+Audit potvrzen v `app/cockpit.py`: modal `Janička` existuje, tlačítka jsou
+napojená na existující Cockpit funkce a v této vrstvě nejsou uložená hesla,
+tokeny ani konkrétní citlivé údaje.
+
+První git-safe kuchařka pro Janu je založená v
+`memory/projects/janicka_cockpit_kucharka.md`. Je to provozní návod k
+aktuálnímu MVP, ne šifrovaný nouzový balík.
 
 ## Základní shoda
 
@@ -153,6 +161,9 @@ První obrazovka může mít sekce:
 
 ## První MVP
 
+Stav k 2026-06-07: MVP rozcestník je implementovaný. Následující seznam je
+původní minimální rozsah, který už byl pro první verzi splněn.
+
 Nejmenší užitečný krok:
 
 1. Přidat do Cockpitu viditelné tlačítko `Janička`.
@@ -174,18 +185,27 @@ Nejmenší užitečný krok:
 ## Otevřené otázky
 
 - Jaké konkrétní projekty mají být v první verzi nabídnuté Janě.
-- Jak oddělit běžné používání od nouzového převzetí bez strašení.
-- Jak formulovat kuchařku tak, aby byla pro Janu použitelná, ne technická.
 - Jak navázat na šifrovaný pozůstalostní balík, aniž by Cockpit ukazoval
   citlivá data v gitu nebo veřejné vrstvě.
 - Kdo může být případná další technická osoba pro pokračování vývoje.
+- Ručně ověřit s Janou, jestli názvy akcí v Janičce odpovídají tomu, co by
+  sama hledala.
+- Rozhodnout, které rodinné projekty mají být v Janičce zvýrazněné hned a
+  které stačí nechat pod `Všechny aplikace`.
 
 ## Další krok
 
-Ručně otestovat první MVP obrazovku `Janička` v Cockpitu a podle pocitu
-upravit pořadí, texty a první sadu vstupů.
+Ručně projít obrazovku `Janička` přímo s Janou nebo z její perspektivy:
 
-Potom založit první verzi kuchařky pro Janu.
+- otevřít `http://127.0.0.1:8770`,
+- kliknout na `Janička`,
+- projít postupně Dokumenty, Lékárnu, E-maily, Rodinné projekty, Adama,
+  Připomenutí a Nouzové převzetí,
+- zapsat, která slova jsou pro Janu nejasná nebo příliš technická,
+- podle toho upravit texty v UI a kuchařce.
+
+Potom rozhodnout, jestli má být kuchařka dostupná přímo z tlačítka
+`Projekty a kuchařka`, nebo jako samostatná jednoduchá stránka.
 
 ## Bezpečnost / neukládat
 

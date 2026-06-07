@@ -1,8 +1,15 @@
 Nazev: Janička Cockpit / používání a převzetí Samanthy
 Priorita: 1
-Stav: zalozeno
+Stav: historicky start, prekryto aktualnim projektovym souborem
 Pripomenout pri startu: ano
 Datum: 2026-06-06
+
+Aktualizacni poznamka 2026-06-07:
+- Tento handoff je historicky start projektu.
+- Casti o tom, ze tlacitko `Janička` jeste neni implementovane, jsou prekryte
+  aktualnim stavem v `memory/projects/janicka_cockpit_takeover.md`.
+- Prvni git-safe kucharka je zalozena v
+  `memory/projects/janicka_cockpit_kucharka.md`.
 
 Co se resilo:
 - Mila upresnil, ze `Janička` neni hracka ani omezeny uzivatelsky rezim.
@@ -18,13 +25,20 @@ Co je hotove:
 - Zapsana shoda: Jana nema mit specialne omezeny pristup; bezpecnost ma byt obecna pro cely system.
 - Zapsana hranice: `Janička Cockpit` je zivy prakticky vstup, zatimco pozustalost zustava samostatny nouzovy/vlastnicky plan.
 
-Co neni hotove:
-- Neni implementovane tlacitko `Janička` v Cockpitu.
-- Neni hotova prvni kucharka pro Janu.
-- Neni rozpracovane propojeni na private/sifrovany pozustalostni balik.
+Co nebylo hotove pri zalozeni 2026-06-06:
+- Tlacitko `Janička` v Cockpitu jeste nebylo implementovane.
+- Prvni kucharka pro Janu jeste nebyla hotova.
+- Nebylo rozpracovane propojeni na private/sifrovany pozustalostni balik.
 
-Dalsi krok:
-- Po aktualni priorite Adam Voice / Cockpit read-only capability registry navrhnout MVP obrazovku `Janička` v Cockpitu.
+Aktualni stav 2026-06-07:
+- Tlacitko `Janička` je v Cockpitu implementovane.
+- Prvni git-safe kucharka pro Janu je zalozena.
+- Propojeni na private/sifrovany pozustalostni balik zustava otevrena cast,
+  ale bez citlivych udaju v gitu.
+
+Historicky dalsi krok pri zalozeni:
+- Po tehdejsi priorite Adam Voice / Cockpit read-only capability registry
+  navrhnout MVP obrazovku `Janička` v Cockpitu.
 - Soucasne zalozit prvni verzi kucharky pro Janu:
   - jak hledat dokumenty;
   - jak cist a tisknout;
@@ -32,6 +46,10 @@ Dalsi krok:
   - jak otevrit pripravene rodinne projekty;
   - jak se zeptat Adama;
   - kdy prejit do nouzoveho prevzeti / pozustalosti.
+
+Aktualni dalsi krok:
+- Rucne projit obrazovku `Janička` z pohledu Jany a podle vysledku upravit
+  texty UI nebo kucharku.
 
 Navrhovane dalsi kroky:
 - Navrhnout UI bez technicke reci a bez infantilniho pojeti.
