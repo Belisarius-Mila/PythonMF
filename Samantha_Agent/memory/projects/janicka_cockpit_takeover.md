@@ -44,6 +44,12 @@ Od 2026-06-07 je kuchařka vystavená také jako čitelná lokální HTML strán
 Cockpitu na `/janicka-kucharka/`. Tlačítko `Kuchařka` v modalu `Janička`
 otevírá tuto stránku v samostatném okně; stránka je read-only a umí tisk.
 
+Od 2026-06-07 tlačítko `Zeptat se Adama` v Janičce nepoužívá hlasový inbox.
+Otevírá samostatný textový chatový modal a backend endpoint `/api/janicka/chat`,
+který volá běžnou textovou Samanthu přes `ask_samantha()`. Smoke test přes
+lokální API vrátil odpověď `Ano, textový chat funguje.` Rodinné projekty jsou
+zatím další část k doladění.
+
 ## Základní shoda
 
 Janička Cockpit není zvláštní omezený přístup.
@@ -208,9 +214,9 @@ Ručně projít obrazovku `Janička` přímo s Janou nebo z její perspektivy:
 - zapsat, která slova jsou pro Janu nejasná nebo příliš technická,
 - podle toho upravit texty v UI a kuchařce.
 
-Kuchařka už je dostupná přímo z tlačítka `Kuchařka`. Další krok je ruční
-přečtení textu a úprava slov, která znějí technicky nebo nejsou pro Janu
-přirozená.
+Kuchařka už je dostupná přímo z tlačítka `Kuchařka` a `Zeptat se Adama` má
+samostatný textový chat. Další krok je ručně ověřit chat z prohlížeče a potom
+opravit `Rodinné projekty`.
 
 ## Bezpečnost / neukládat
 

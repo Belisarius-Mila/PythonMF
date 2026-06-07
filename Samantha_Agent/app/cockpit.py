@@ -6924,6 +6924,60 @@ def cockpit_save_voice_text_action(
         }
 
 
+def janicka_chat_action(
+    payload: dict[str, Any],
+    *,
+    asker: Callable[[str], str] | None = None,
+) -> dict[str, Any]:
+    message = safe_text(str(payload.get("message", "") or "")).strip()
+    if not message:
+        return {
+            "ok": False,
+            "status": "empty_message",
+            "message": "Napiš otázku nebo pokyn pro Adama.",
+        }
+    history = payload.get("history", [])
+    history_lines: list[str] = []
+    if isinstance(history, list):
+        for item in history[-8:]:
+            if not isinstance(item, dict):
+                continue
+            role = safe_text(str(item.get("role", "") or ""))[:20]
+            content = safe_text(str(item.get("content", "") or "")).strip()[:1200]
+            if role in {"user", "assistant"} and content:
+                label = "Jana" if role == "user" else "Adam"
+                history_lines.append(f"{label}: {content}")
+    prompt_parts = [
+        "Toto je samostatný textový chat z obrazovky Janička v Cockpitu.",
+        "Odpovídej česky, lidsky a prakticky. Nejde o hlasový pokyn ani o automatické spuštění akce.",
+        "Pokud uživatel žádá destruktivní, odesílací nebo citlivou akci, vysvětli bezpečný další krok a vyžádej si potvrzení podle pravidel nástroje. Běžné otázky normálně zodpověz.",
+    ]
+    if history_lines:
+        prompt_parts.append("Dosavadní krátká historie chatu:\n" + "\n".join(history_lines))
+    prompt_parts.append("Aktuální zpráva:\n" + message)
+    asker_fn = asker
+    if asker_fn is None:
+        from app.samantha_agent import ask_samantha
+
+        asker_fn = ask_samantha
+    try:
+        answer = str(asker_fn("\n\n".join(prompt_parts))).strip()
+    except Exception as exc:  # pragma: no cover - exact OpenAI/Agents exceptions vary.
+        return {
+            "ok": False,
+            "status": "chat_failed",
+            "message": f"Adam teď neodpověděl: {exc}",
+        }
+    if not answer:
+        answer = "Adam nevrátil žádný text."
+    return {
+        "ok": True,
+        "status": "answered",
+        "message": "Adam odpověděl.",
+        "answer": answer,
+    }
+
+
 def shell_quote_for_applescript(value: str) -> str:
     return "'" + value.replace("'", "'\\''") + "'"
 
@@ -7049,6 +7103,10 @@ class CockpitServer:
                 if parsed.path == "/api/speech/voice-text":
                     payload = self.read_json()
                     self.respond_json(cockpit_save_voice_text_action(payload))
+                    return
+                if parsed.path == "/api/janicka/chat":
+                    payload = self.read_json()
+                    self.respond_json(janicka_chat_action(payload))
                     return
                 if parsed.path == "/api/voice-mode/start":
                     self.respond_json(start_adam_voice_mode_action())
@@ -8643,6 +8701,14 @@ COCKPIT_HTML = """<!doctype html>
     .janicka-action button.secondary { background: #fce7f3; color: #831843; }
     .janicka-note { border: 1px solid #fed7aa; border-radius: 8px; background: #fffbeb; color: #5f370e; padding: 11px 12px; font-size: 13px; line-height: 1.45; }
     .janicka-return { position: fixed; right: 18px; bottom: 18px; z-index: 14; box-shadow: 0 10px 28px rgba(88, 28, 53, .22); background: #be185d; color: white; }
+    .janicka-chat-modal { width: min(920px, 100%); background: #fff7fb; border-color: #fbcfe8; }
+    .janicka-chat-log { min-height: 320px; max-height: 48vh; overflow: auto; display: grid; gap: 10px; padding: 10px; border: 1px solid #fbcfe8; border-radius: 8px; background: white; }
+    .janicka-chat-message { border: 1px solid #edf0f4; border-radius: 8px; padding: 10px; background: #fbfcfe; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.45; }
+    .janicka-chat-message.user { background: #fce7f3; border-color: #fbcfe8; }
+    .janicka-chat-message.assistant { background: #fff; border-color: #fbcfe8; }
+    .janicka-chat-meta { font-size: 12px; font-weight: 750; color: #831843; margin-bottom: 4px; }
+    .janicka-chat-input { display: grid; gap: 8px; }
+    .janicka-chat-input textarea { width: 100%; min-height: 110px; resize: vertical; border: 1px solid #fbcfe8; border-radius: 8px; padding: 10px; font: inherit; line-height: 1.45; }
     .health-panel { border: 1px solid #cfd7e3; border-radius: 8px; background: #fbfcfe; padding: 10px 12px; display: grid; gap: 7px; }
     .health-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
     .health-item { border: 1px solid #edf0f4; border-radius: 7px; background: white; padding: 8px; min-width: 0; }
@@ -9123,6 +9189,30 @@ COCKPIT_HTML = """<!doctype html>
     </div>
   </div>
   <button class="janicka-return hidden" id="janickaReturnBtn" type="button">Zpět k Janičce</button>
+  <div id="janickaChatModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="janickaChatTitle">
+    <div class="modal janicka-chat-modal">
+      <div class="modal-header">
+        <h2 id="janickaChatTitle">Zeptat se Adama</h2>
+        <button class="secondary" id="janickaChatCloseBtn">Zpět k Janičce</button>
+      </div>
+      <div class="modal-body">
+        <div class="janicka-intro">
+          <h3 class="janicka-title">Textový chat</h3>
+          <p class="janicka-subtitle">Napiš běžnou větou, co potřebuješ. Tohle není hlasový pokyn a nic se samo nemaže, neposílá ani nepřesouvá.</p>
+        </div>
+        <div id="janickaChatLog" class="janicka-chat-log" aria-live="polite"></div>
+        <div class="janicka-chat-input">
+          <label for="janickaChatInput">Otázka nebo pokyn</label>
+          <textarea id="janickaChatInput" spellcheck="true" placeholder="Například: Najdi mi dokument k pojištění auta."></textarea>
+          <div class="actions">
+            <button class="primary" id="janickaChatSendBtn" type="button">Odeslat Adamovi</button>
+            <button class="secondary" id="janickaChatClearBtn" type="button">Vyčistit chat</button>
+          </div>
+          <div id="janickaChatStatus" class="status-line">Připraveno.</div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div id="remindersModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="remindersTitle">
     <div class="modal">
       <div class="modal-header">
@@ -9312,6 +9402,13 @@ COCKPIT_HTML = """<!doctype html>
     const janickaProjectsBtn = document.getElementById("janickaProjectsBtn");
     const janickaCookbookBtn = document.getElementById("janickaCookbookBtn");
     const janickaReturnBtn = document.getElementById("janickaReturnBtn");
+    const janickaChatModal = document.getElementById("janickaChatModal");
+    const janickaChatCloseBtn = document.getElementById("janickaChatCloseBtn");
+    const janickaChatLog = document.getElementById("janickaChatLog");
+    const janickaChatInput = document.getElementById("janickaChatInput");
+    const janickaChatSendBtn = document.getElementById("janickaChatSendBtn");
+    const janickaChatClearBtn = document.getElementById("janickaChatClearBtn");
+    const janickaChatStatus = document.getElementById("janickaChatStatus");
     const remindersModal = document.getElementById("remindersModal");
     const remindersCloseBtn = document.getElementById("remindersCloseBtn");
     const remindersStatus = document.getElementById("remindersStatus");
@@ -9534,6 +9631,10 @@ COCKPIT_HTML = """<!doctype html>
         "janickaProjectsBtn",
         "janickaCookbookBtn",
         "janickaReturnBtn",
+        "janickaChatCloseBtn",
+        "janickaChatInput",
+        "janickaChatSendBtn",
+        "janickaChatClearBtn",
         "webAppsBtn",
         "projectsBtn",
         "remindersBtn",
@@ -13052,13 +13153,90 @@ COCKPIT_HTML = """<!doctype html>
 
     function focusAdamForJanicka() {
       closeJanickaModal();
-      showJanickaReturnButton();
-      const panel = document.getElementById("voiceCommandPanel");
-      if (panel) {
-        panel.scrollIntoView({behavior: "smooth", block: "start"});
+      openJanickaChatModal();
+    }
+
+    let janickaChatHistory = [];
+
+    function openJanickaChatModal() {
+      janickaReturnBtn.classList.add("hidden");
+      janickaChatModal.classList.remove("hidden");
+      if (!janickaChatHistory.length) {
+        renderJanickaChat();
       }
-      voiceTranscript.focus();
-      voiceCommandStatus.textContent = "Napiš nebo nahraj běžný pokyn pro Adama.";
+      window.setTimeout(() => janickaChatInput.focus(), 0);
+    }
+
+    function closeJanickaChatModal() {
+      janickaChatModal.classList.add("hidden");
+      openJanickaModal();
+    }
+
+    function renderJanickaChat() {
+      janickaChatLog.innerHTML = "";
+      if (!janickaChatHistory.length) {
+        const empty = document.createElement("div");
+        empty.className = "janicka-chat-message assistant";
+        empty.innerHTML = '<div class="janicka-chat-meta">Adam</div>Napiš mi běžnou větou, co potřebuješ. Nejde o hlasový pokyn a nic se samo neprovede.';
+        janickaChatLog.appendChild(empty);
+        return;
+      }
+      janickaChatHistory.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = `janicka-chat-message ${item.role === "user" ? "user" : "assistant"}`;
+        const meta = document.createElement("div");
+        meta.className = "janicka-chat-meta";
+        meta.textContent = item.role === "user" ? "Jana" : "Adam";
+        const text = document.createElement("div");
+        text.textContent = item.content || "";
+        row.appendChild(meta);
+        row.appendChild(text);
+        janickaChatLog.appendChild(row);
+      });
+      janickaChatLog.scrollTop = janickaChatLog.scrollHeight;
+    }
+
+    async function submitJanickaChat() {
+      const message = janickaChatInput.value.trim();
+      if (!message) {
+        janickaChatStatus.textContent = "Napiš otázku nebo pokyn.";
+        janickaChatInput.focus();
+        return;
+      }
+      janickaChatHistory.push({role: "user", content: message});
+      janickaChatInput.value = "";
+      renderJanickaChat();
+      janickaChatSendBtn.disabled = true;
+      janickaChatStatus.textContent = "Adam přemýšlí...";
+      try {
+        const data = await postJson("/api/janicka/chat", {
+          message,
+          history: janickaChatHistory.slice(-10)
+        });
+        if (data.ok) {
+          janickaChatHistory.push({role: "assistant", content: data.answer || ""});
+          janickaChatStatus.textContent = data.message || "Adam odpověděl.";
+        } else {
+          janickaChatHistory.push({role: "assistant", content: data.message || "Adam teď neodpověděl."});
+          janickaChatStatus.textContent = data.message || "Adam teď neodpověděl.";
+        }
+        renderJanickaChat();
+      } catch (err) {
+        recordFrontendError(err);
+        janickaChatHistory.push({role: "assistant", content: `Adam teď neodpověděl: ${err}`});
+        janickaChatStatus.textContent = `Adam teď neodpověděl: ${err}`;
+        renderJanickaChat();
+      } finally {
+        janickaChatSendBtn.disabled = false;
+        janickaChatInput.focus();
+      }
+    }
+
+    function clearJanickaChat() {
+      janickaChatHistory = [];
+      janickaChatStatus.textContent = "Chat je vyčištěný.";
+      renderJanickaChat();
+      janickaChatInput.focus();
     }
 
     async function openCatalogAppById(appId) {
@@ -13163,6 +13341,15 @@ COCKPIT_HTML = """<!doctype html>
       }
     });
     janickaReturnBtn.addEventListener("click", openJanickaModal);
+    janickaChatCloseBtn.addEventListener("click", closeJanickaChatModal);
+    janickaChatSendBtn.addEventListener("click", submitJanickaChat);
+    janickaChatClearBtn.addEventListener("click", clearJanickaChat);
+    janickaChatInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        submitJanickaChat();
+      }
+    });
     refreshBtn.addEventListener("click", refresh);
     dashboardRefreshBtn.addEventListener("click", refresh);
     dashboardProcessBtn.addEventListener("click", () => openScanDocu(false));
@@ -13213,6 +13400,11 @@ COCKPIT_HTML = """<!doctype html>
     janickaModal.addEventListener("click", (event) => {
       if (event.target === janickaModal) {
         closeJanickaModal();
+      }
+    });
+    janickaChatModal.addEventListener("click", (event) => {
+      if (event.target === janickaChatModal) {
+        closeJanickaChatModal();
       }
     });
     quantitativeModal.addEventListener("click", (event) => {
@@ -13277,7 +13469,9 @@ COCKPIT_HTML = """<!doctype html>
         closeDiagnosticsModal();
 		      } else if (event.key === "Escape" && !janickaModal.classList.contains("hidden")) {
 		        closeJanickaModal();
-		      }
+		      } else if (event.key === "Escape" && !janickaChatModal.classList.contains("hidden")) {
+		        closeJanickaChatModal();
+      }
     });
     scanDocuBtn.addEventListener("click", () => openScanDocu(false));
     scanDocuReviewBtn.addEventListener("click", () => openScanDocu(true));

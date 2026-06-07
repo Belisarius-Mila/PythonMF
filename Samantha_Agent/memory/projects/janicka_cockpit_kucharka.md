@@ -14,7 +14,7 @@ toho, co Jana právě potřebuje udělat:
 - otevřít e-maily,
 - najít lék,
 - otevřít rodinný projekt, až bude tato část doladěná,
-- zeptat se Adama, až bude tato část doladěná,
+- zeptat se Adama textovým chatem,
 - podívat se na připomenutí,
 - najít nouzový rozcestník.
 
@@ -28,9 +28,8 @@ Když není vidět, otevře se klávesovou zkratkou:
 2. Po otevření Cockpitu kliknout nahoře na tlačítko `Janička`.
 3. Vybrat nejbližší praktickou akci.
 
-Tlačítko `Zeptat se Adama` je důležité, ale teď se ještě ladí. Než bude
-hotové, je bezpečnější použít konkrétní hotová tlačítka jako dokumenty,
-e-maily, Lékárna nebo připomenutí.
+Když Jana neví, které tlačítko použít, může kliknout na `Zeptat se Adama` a
+napsat běžnou větou, co potřebuje. Je to textový chat, ne hlasový pokyn.
 
 ## Najít dokument
 
@@ -108,9 +107,7 @@ potvrzení.
 
 ## Zeptat se Adama
 
-Tato část se teď ještě ladí.
-
-Tlačítko může být v Janičce vidět, ale zatím ho nelze brát jako hotovou cestu.
+Tlačítko otevře textový chat.
 
 Použít vždy, když Jana neví, kterým tlačítkem začít.
 

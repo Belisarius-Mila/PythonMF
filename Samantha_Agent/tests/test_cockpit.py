@@ -913,6 +913,11 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("janickaLekarnaBtn", COCKPIT_HTML)
         self.assertIn("janickaFamilyBtn", COCKPIT_HTML)
         self.assertIn("janickaAskAdamBtn", COCKPIT_HTML)
+        self.assertIn("janickaChatModal", COCKPIT_HTML)
+        self.assertIn("janickaChatInput", COCKPIT_HTML)
+        self.assertIn("janickaChatSendBtn", COCKPIT_HTML)
+        self.assertIn("/api/janicka/chat", COCKPIT_HTML)
+        self.assertIn("submitJanickaChat", COCKPIT_HTML)
         self.assertIn("janickaRecoveryBtn", COCKPIT_HTML)
         self.assertIn("janickaCookbookBtn", COCKPIT_HTML)
         self.assertIn("/janicka-kucharka/", COCKPIT_HTML)
@@ -2540,6 +2545,36 @@ Dalsi krok:
         self.assertIn('window.location.href = "/"', page)
         self.assertIn("/documents/pdf?document_id=doc-open", page)
         self.assertIn("Doklad &amp; smlouva", page)
+
+    def test_janicka_chat_action_uses_text_agent_without_voice_inbox(self) -> None:
+        calls = []
+
+        def fake_asker(prompt: str) -> str:
+            calls.append(prompt)
+            return "Odpověď pro Janu."
+
+        result = cockpit_module.janicka_chat_action(
+            {
+                "message": "Kde najdu dokument?",
+                "history": [
+                    {"role": "user", "content": "Ahoj"},
+                    {"role": "assistant", "content": "Dobrý den."},
+                ],
+            },
+            asker=fake_asker,
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["answer"], "Odpověď pro Janu.")
+        self.assertIn("samostatný textový chat", calls[0])
+        self.assertIn("Nejde o hlasový pokyn", calls[0])
+        self.assertIn("Kde najdu dokument?", calls[0])
+
+    def test_janicka_chat_action_rejects_empty_message(self) -> None:
+        result = cockpit_module.janicka_chat_action({"message": "   "}, asker=lambda _: "x")
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "empty_message")
 
     def test_janicka_cookbook_page_renders_markdown_safely(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
