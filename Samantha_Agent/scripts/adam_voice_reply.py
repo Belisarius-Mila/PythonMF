@@ -17,6 +17,7 @@ from app.speech.adam_voice_mode import (
     load_pending_for_adam,
     mark_pending_for_adam_processed,
 )
+from app.adam_service import record_adam_text_reply
 from app.speech.voice_inbox import VOICE_COMMAND_INBOX_DIR, load_latest_voice_command
 
 
@@ -39,6 +40,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Explicitní text uživatelského dotazu, ke kterému se odpověď ukládá.",
     )
     parser.add_argument(
+        "--request-id",
+        default="",
+        help="ID textového dotazu z managed Adam fronty.",
+    )
+    parser.add_argument(
         "--route",
         default="codex_terminal_final",
         help="Název kanálu odpovědi pro Cockpit.",
@@ -50,7 +56,28 @@ def build_arg_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_arg_parser().parse_args(argv)
     response = " ".join(args.response).strip()
-    if args.user_text.strip():
+    if args.request_id.strip():
+        request_result = record_adam_text_reply(
+            request_id=args.request_id.strip(),
+            response=response,
+        )
+        turn = append_manual_voice_history_turn(
+            user_text=args.user_text.strip(),
+            adam_response=response,
+            route=args.route.strip() or "codex_terminal_final",
+            path=args.history_path,
+        )
+        result = {
+            "ok": bool(request_result.get("ok")),
+            "status": "recorded_text_request_reply",
+            "processed_at": turn.get("created_at"),
+            "response": response,
+            "user_text": args.user_text.strip(),
+            "route": args.route.strip() or "codex_terminal_final",
+            "request_id": args.request_id.strip(),
+            "request": request_result,
+        }
+    elif args.user_text.strip():
         turn = append_manual_voice_history_turn(
             user_text=args.user_text.strip(),
             adam_response=response,

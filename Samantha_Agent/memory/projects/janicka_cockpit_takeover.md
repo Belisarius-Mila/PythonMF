@@ -70,6 +70,18 @@ nevolá `ask_samantha()`. Okno zobrazí stav předání a umí čekat na odpově
 zapsanou zpět přes `scripts/adam_voice_reply.py --user-text ... --route
 janicka_text_bridge`.
 
+Následné upřesnění: Jana nebude umět spustit Codex ručně a má mít spuštěný jen
+Cockpit. Proto vzniká managed Adam service:
+
+- `app/adam_service.py` spravuje screen relaci `samantha_adam`,
+  request/response frontu v `data/private/adam_text_bridge/` a prompt pro Codex.
+- Cockpit má API `/api/adam/status`, `/api/adam/start`, `/api/adam/restart` a
+  `/api/adam/stop`.
+- `Jana Adam` při odeslání dotazu zkusí Adama spustit, založí `request_id`,
+  doručí prompt do managed Codex relace a čeká na odpověď podle `request_id`.
+- `scripts/adam_voice_reply.py` umí nově `--request-id`, aby Adam mohl odpověď
+  zapsat zpět ke konkrétnímu dotazu z okna Janička.
+
 ## Základní shoda
 
 Janička Cockpit není zvláštní omezený přístup.

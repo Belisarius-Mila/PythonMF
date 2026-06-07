@@ -111,8 +111,8 @@ Tlačítko otevře textový chat.
 
 Použít vždy, když Jana neví, kterým tlačítkem začít.
 
-Dotaz se předává přímo Adamovi v běžící pracovní relaci Codexu. Není to hlasový
-pokyn a nic se samo nemaže, neposílá ani nepřesouvá.
+Dotaz se předává přímo Adamovi. Pokud Adam zrovna neběží, Cockpit ho zkusí
+spustit. Není to hlasový pokyn a nic se samo nemaže, neposílá ani nepřesouvá.
 
 Dobré věty:
 

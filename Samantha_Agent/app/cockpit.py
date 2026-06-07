@@ -9,7 +9,6 @@ import hashlib
 import os
 import re
 import shutil
-import shlex
 import signal
 import subprocess
 import tempfile
@@ -24,6 +23,14 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, quote, urlparse
 
+from app.adam_service import (
+    adam_service_status,
+    load_adam_text_reply,
+    restart_adam_service,
+    start_adam_service,
+    stop_adam_service,
+    submit_adam_text_request,
+)
 from app.backup.activity_state import format_backup_activity_reminder
 from app.documents.consistency_audit import format_document_consistency_audit, run_document_consistency_audit, save_audit_decision
 from app.documents.scandocu import DEFAULT_DOWNLOADS_DIR, scan_downloads_for_pdfs
@@ -86,7 +93,6 @@ from app.speech.adam_voice_mode import (
 from app.speech.terminal_bridge import (
     CURRENT_CODEX_TTY_PATH,
     discover_codex_ttys,
-    deliver_prompt_to_terminal,
     normalize_tty,
 )
 
@@ -7029,44 +7035,14 @@ def _format_janicka_quick_note_detail(note_number: int) -> str:
     return f"Detail QN **#{note_number}** z **{created_at}**:\n\n{body}"
 
 
-def build_janicka_codex_bridge_prompt(message: str, history: list[Any]) -> str:
-    history_lines: list[str] = []
-    for item in history[-8:]:
-        if not isinstance(item, dict):
-            continue
-        role = safe_text(str(item.get("role", "") or ""))[:20]
-        content = safe_text(str(item.get("content", "") or "")).strip()[:1200]
-        if role in {"user", "assistant"} and content:
-            label = "Jana/Míla" if role == "user" else "Adam"
-            history_lines.append(f"{label}: {content}")
-    reply_command = (
-        ".venv/bin/python scripts/adam_voice_reply.py "
-        f"--user-text {shlex.quote(message)} "
-        "--route janicka_text_bridge "
-        "\"STRUČNÁ ODPOVĚĎ PRO OKNO JANIČKA\""
-    )
-    parts = [
-        "Textový dotaz z okna `Jana Adam` v Samantha Cockpitu.",
-        "Toto není hlasový režim a nemá odpovídat žádný separátní AI agent.",
-        "Odpovídáš ty: běžící Codex/Adam v této pracovní relaci.",
-        "Zpracuj dotaz jako běžný uživatelský pokyn od Míly nebo Jany.",
-        "Pokud je potřeba číst repo, paměť nebo lokální data, použij svoje běžné nástroje a projektová pravidla.",
-        "Pokud jde o mazání, odesílání, commit, push, platbu, tajemství nebo jinou rizikovou akci, nejdřív si v chatu vyžádej potvrzení.",
-        "Odpověz normálně do tohoto Codex chatu.",
-        "Až budeš mít stručnou finální odpověď pro okno Janička, zapiš ji také do Cockpitu příkazem:",
-        reply_command,
-    ]
-    if history_lines:
-        parts.append("Krátká historie z okna Janička:\n" + "\n".join(history_lines))
-    parts.append("Aktuální dotaz:\n" + message)
-    return "\n\n".join(parts)
-
-
 def janicka_latest_codex_reply_action(
     payload: dict[str, Any],
     *,
     response_path: Path = ADAM_LAST_RESPONSE_PATH,
 ) -> dict[str, Any]:
+    request_id = safe_text(str(payload.get("request_id", "") or "")).strip()
+    if request_id:
+        return load_adam_text_reply(request_id=request_id)
     expected_user_text = safe_text(str(payload.get("message", "") or "")).strip()
     response = load_last_adam_response(path=response_path)
     if not response.get("ok"):
@@ -7111,7 +7087,7 @@ def janicka_chat_action(
     payload: dict[str, Any],
     *,
     asker: Callable[[str], str] | None = None,
-    bridge_deliverer: Callable[..., dict[str, Any]] = deliver_prompt_to_terminal,
+    service_submitter: Callable[..., dict[str, Any]] = submit_adam_text_request,
 ) -> dict[str, Any]:
     message = safe_text(str(payload.get("message", "") or "")).strip()
     if not message:
@@ -7121,38 +7097,33 @@ def janicka_chat_action(
             "message": "Napiš otázku nebo pokyn pro Adama.",
         }
     history = payload.get("history", [])
-    prompt = build_janicka_codex_bridge_prompt(message, history if isinstance(history, list) else [])
     try:
-        delivery = bridge_deliverer(prompt, submit=True)
+        result = service_submitter(message=message, history=history if isinstance(history, list) else [])
     except Exception as exc:  # pragma: no cover - exact macOS/terminal exceptions vary.
         return {
             "ok": False,
-            "status": "codex_bridge_failed",
-            "message": f"Dotaz se nepodařilo předat běžícímu Codexu: {exc}",
+            "status": "adam_service_failed",
+            "message": f"Dotaz se nepodařilo předat Adamovi: {exc}",
         }
-    if not delivery.get("ok"):
+    if not result.get("ok"):
         return {
             "ok": False,
-            "status": "codex_bridge_failed",
-            "message": f"Dotaz se nepodařilo předat běžícímu Codexu: {delivery.get('message') or delivery.get('status')}",
-            "bridge": delivery,
+            "status": str(result.get("status") or "adam_service_failed"),
+            "message": str(result.get("message") or "Dotaz se nepodařilo předat Adamovi."),
+            "request_id": result.get("request_id"),
+            "service": result,
         }
-    verified = bool(delivery.get("verified"))
     bridge_message = (
-        "Dotaz jsem předal přímo do běžícího Codexu/Adama. "
-        "Odpověď se objeví v hlavním Codex chatu; pokud ji Adam zapíše zpět, zobrazí se i tady."
+        "Dotaz jsem předal Adamovi. Pokud Adam ještě neběžel, Cockpit ho zkusil spustit. "
+        "Odpověď se zobrazí tady, až ji Adam zapíše zpět."
     )
-    if not verified:
-        bridge_message = (
-            "Dotaz jsem vložil do označené Codex relace, ale technicky neumím ověřit doručení. "
-            "Zkontroluj hlavní Codex chat."
-        )
     return {
         "ok": True,
-        "status": "delivered_to_codex",
+        "status": "delivered_to_adam",
         "message": "Dotaz předán Adamovi v Codexu.",
         "answer": bridge_message,
-        "bridge": delivery,
+        "request_id": result.get("request_id"),
+        "service": result,
         "poll_latest": True,
     }
 
@@ -7290,6 +7261,20 @@ class CockpitServer:
                 if parsed.path == "/api/janicka/chat/latest":
                     payload = self.read_json()
                     self.respond_json(janicka_latest_codex_reply_action(payload))
+                    return
+                if parsed.path == "/api/adam/status":
+                    self.respond_json(adam_service_status())
+                    return
+                if parsed.path == "/api/adam/start":
+                    self.respond_json(start_adam_service())
+                    return
+                if parsed.path == "/api/adam/restart":
+                    payload = self.read_json()
+                    self.respond_json(restart_adam_service(confirmed=bool(payload.get("confirmed"))))
+                    return
+                if parsed.path == "/api/adam/stop":
+                    payload = self.read_json()
+                    self.respond_json(stop_adam_service(confirmed=bool(payload.get("confirmed"))))
                     return
                 if parsed.path == "/api/voice-mode/start":
                     self.respond_json(start_adam_voice_mode_action())
@@ -8890,6 +8875,9 @@ COCKPIT_HTML = """<!doctype html>
     .janicka-chat-message.user { background: #fce7f3; border-color: #fbcfe8; }
     .janicka-chat-message.assistant { background: #fff; border-color: #fbcfe8; }
     .janicka-chat-meta { font-size: 12px; font-weight: 750; color: #831843; margin-bottom: 4px; }
+    .janicka-chat-runtime { display: grid; gap: 8px; padding: 10px; border: 1px solid #fbcfe8; border-radius: 8px; background: #fff; }
+    .compact-actions { gap: 8px; }
+    .compact-actions button { min-height: 34px; padding: 6px 10px; }
     .janicka-chat-input { display: grid; gap: 8px; }
     .janicka-chat-input textarea { width: 100%; min-height: 110px; resize: vertical; border: 1px solid #fbcfe8; border-radius: 8px; padding: 10px; font: inherit; line-height: 1.45; }
     .health-panel { border: 1px solid #cfd7e3; border-radius: 8px; background: #fbfcfe; padding: 10px 12px; display: grid; gap: 7px; }
@@ -9381,7 +9369,15 @@ COCKPIT_HTML = """<!doctype html>
       <div class="modal-body">
         <div class="janicka-intro">
           <h3 class="janicka-title">Textový chat</h3>
-          <p class="janicka-subtitle">Napiš běžnou větou, co potřebuješ. Tohle není hlasový pokyn a nic se samo nemaže, neposílá ani nepřesouvá.</p>
+          <p class="janicka-subtitle">Napiš běžnou větou, co potřebuješ. Cockpit Adama podle potřeby spustí a předá mu dotaz.</p>
+        </div>
+        <div class="janicka-chat-runtime">
+          <div id="janickaAdamStatus" class="status-line">Adam: čekám na kontrolu.</div>
+          <div class="actions compact-actions">
+            <button class="secondary" id="janickaAdamStartBtn" type="button">Spustit Adama</button>
+            <button class="secondary" id="janickaAdamRestartBtn" type="button">Restartovat</button>
+            <button class="secondary" id="janickaAdamStopBtn" type="button">Zastavit</button>
+          </div>
         </div>
         <div id="janickaChatLog" class="janicka-chat-log" aria-live="polite"></div>
         <div class="janicka-chat-input">
@@ -9592,6 +9588,10 @@ COCKPIT_HTML = """<!doctype html>
     const janickaChatSendBtn = document.getElementById("janickaChatSendBtn");
     const janickaChatClearBtn = document.getElementById("janickaChatClearBtn");
     const janickaChatStatus = document.getElementById("janickaChatStatus");
+    const janickaAdamStatus = document.getElementById("janickaAdamStatus");
+    const janickaAdamStartBtn = document.getElementById("janickaAdamStartBtn");
+    const janickaAdamRestartBtn = document.getElementById("janickaAdamRestartBtn");
+    const janickaAdamStopBtn = document.getElementById("janickaAdamStopBtn");
     const remindersModal = document.getElementById("remindersModal");
     const remindersCloseBtn = document.getElementById("remindersCloseBtn");
     const remindersStatus = document.getElementById("remindersStatus");
@@ -9818,6 +9818,9 @@ COCKPIT_HTML = """<!doctype html>
         "janickaChatInput",
         "janickaChatSendBtn",
         "janickaChatClearBtn",
+        "janickaAdamStartBtn",
+        "janickaAdamRestartBtn",
+        "janickaAdamStopBtn",
         "webAppsBtn",
         "projectsBtn",
         "remindersBtn",
@@ -13347,6 +13350,7 @@ COCKPIT_HTML = """<!doctype html>
       if (!janickaChatHistory.length) {
         renderJanickaChat();
       }
+      refreshJanickaAdamStatus();
       window.setTimeout(() => janickaChatInput.focus(), 0);
     }
 
@@ -13401,7 +13405,13 @@ COCKPIT_HTML = """<!doctype html>
           janickaChatStatus.textContent = data.message || "Adam odpověděl.";
           if (data.status === "delivered_to_codex" && data.poll_latest) {
             renderJanickaChat();
-            pollJanickaCodexReply(message);
+            pollJanickaCodexReply(message, data.request_id || "");
+            return;
+          }
+          if (data.status === "delivered_to_adam" && data.poll_latest) {
+            renderJanickaChat();
+            pollJanickaCodexReply(message, data.request_id || "");
+            refreshJanickaAdamStatus();
             return;
           }
         } else {
@@ -13420,13 +13430,13 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
-    async function pollJanickaCodexReply(message) {
+    async function pollJanickaCodexReply(message, requestId) {
       const maxAttempts = 60;
       const delayMs = 2000;
       for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
         await new Promise((resolve) => window.setTimeout(resolve, delayMs));
         try {
-          const data = await postJson("/api/janicka/chat/latest", {message});
+          const data = await postJson("/api/janicka/chat/latest", {message, request_id: requestId});
           if (data.ok && data.available && data.answer) {
             janickaChatHistory.push({role: "assistant", content: data.answer});
             janickaChatStatus.textContent = "Adamova odpověď z Codexu je tady.";
@@ -13438,6 +13448,61 @@ COCKPIT_HTML = """<!doctype html>
         }
       }
       janickaChatStatus.textContent = "Odpověď se zatím nevrátila do okna. Zkontroluj hlavní Codex chat.";
+    }
+
+    async function refreshJanickaAdamStatus() {
+      try {
+        const data = await postJson("/api/adam/status", {});
+        const running = Boolean(data.running);
+        const marker = data.marked_tty ? ` Cíl: ${data.marked_tty}.` : "";
+        const pending = Number(data.pending_count || 0);
+        janickaAdamStatus.textContent = `${data.message || "Adam status není dostupný."}${marker}${pending ? ` Čeká ${pending} dotazů.` : ""}`;
+        janickaAdamStatus.classList.toggle("ok", running);
+        janickaAdamStatus.classList.toggle("warn", !running);
+        janickaAdamStartBtn.disabled = running;
+      } catch (err) {
+        recordFrontendError(err);
+        janickaAdamStatus.textContent = `Adam status se nepodařilo načíst: ${err}`;
+        janickaAdamStatus.classList.add("warn");
+      }
+    }
+
+    async function startJanickaAdam() {
+      janickaAdamStatus.textContent = "Spouštím Adama...";
+      try {
+        const data = await postJson("/api/adam/start", {});
+        janickaAdamStatus.textContent = data.message || "Adam se spouští.";
+        await refreshJanickaAdamStatus();
+      } catch (err) {
+        recordFrontendError(err);
+        janickaAdamStatus.textContent = `Adama se nepodařilo spustit: ${err}`;
+      }
+    }
+
+    async function restartJanickaAdam() {
+      if (!window.confirm("Restartovat Adama? Rozpracovaná odpověď v Codexu se může přerušit.")) return;
+      janickaAdamStatus.textContent = "Restartuji Adama...";
+      try {
+        const data = await postJson("/api/adam/restart", {confirmed: true});
+        janickaAdamStatus.textContent = data.message || "Adam se restartuje.";
+        await refreshJanickaAdamStatus();
+      } catch (err) {
+        recordFrontendError(err);
+        janickaAdamStatus.textContent = `Adama se nepodařilo restartovat: ${err}`;
+      }
+    }
+
+    async function stopJanickaAdam() {
+      if (!window.confirm("Zastavit Adama? Běžně je lepší ho nechat spuštěného.")) return;
+      janickaAdamStatus.textContent = "Zastavuji Adama...";
+      try {
+        const data = await postJson("/api/adam/stop", {confirmed: true});
+        janickaAdamStatus.textContent = data.message || "Adam byl zastaven.";
+        await refreshJanickaAdamStatus();
+      } catch (err) {
+        recordFrontendError(err);
+        janickaAdamStatus.textContent = `Adama se nepodařilo zastavit: ${err}`;
+      }
     }
 
     function clearJanickaChat() {
@@ -13552,6 +13617,9 @@ COCKPIT_HTML = """<!doctype html>
     janickaChatCloseBtn.addEventListener("click", closeJanickaChatModal);
     janickaChatSendBtn.addEventListener("click", submitJanickaChat);
     janickaChatClearBtn.addEventListener("click", clearJanickaChat);
+    janickaAdamStartBtn.addEventListener("click", startJanickaAdam);
+    janickaAdamRestartBtn.addEventListener("click", restartJanickaAdam);
+    janickaAdamStopBtn.addEventListener("click", stopJanickaAdam);
     janickaChatInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();

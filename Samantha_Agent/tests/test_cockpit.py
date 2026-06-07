@@ -918,6 +918,13 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("janickaChatSendBtn", COCKPIT_HTML)
         self.assertIn("/api/janicka/chat", COCKPIT_HTML)
         self.assertIn("/api/janicka/chat/latest", COCKPIT_HTML)
+        self.assertIn("/api/adam/status", COCKPIT_HTML)
+        self.assertIn("/api/adam/start", COCKPIT_HTML)
+        self.assertIn("/api/adam/restart", COCKPIT_HTML)
+        self.assertIn("/api/adam/stop", COCKPIT_HTML)
+        self.assertIn("janickaAdamStartBtn", COCKPIT_HTML)
+        self.assertIn("janickaAdamRestartBtn", COCKPIT_HTML)
+        self.assertIn("janickaAdamStopBtn", COCKPIT_HTML)
         self.assertIn("submitJanickaChat", COCKPIT_HTML)
         self.assertIn("pollJanickaCodexReply", COCKPIT_HTML)
         self.assertIn("janickaRecoveryBtn", COCKPIT_HTML)
@@ -2548,12 +2555,12 @@ Dalsi krok:
         self.assertIn("/documents/pdf?document_id=doc-open", page)
         self.assertIn("Doklad &amp; smlouva", page)
 
-    def test_janicka_chat_action_delivers_to_codex_bridge_without_agent(self) -> None:
+    def test_janicka_chat_action_submits_managed_adam_request_without_agent(self) -> None:
         calls = []
 
-        def fake_bridge(prompt: str, **kwargs) -> dict[str, object]:
-            calls.append({"prompt": prompt, "kwargs": kwargs})
-            return {"ok": True, "status": "delivered", "verified": True}
+        def fake_submitter(**kwargs) -> dict[str, object]:
+            calls.append(kwargs)
+            return {"ok": True, "status": "delivered_to_adam", "request_id": "req-1"}
 
         result = cockpit_module.janicka_chat_action(
             {
@@ -2564,19 +2571,16 @@ Dalsi krok:
                 ],
             },
             asker=lambda _: self.fail("Janička chat must not call the separate text agent"),
-            bridge_deliverer=fake_bridge,
+            service_submitter=fake_submitter,
         )
 
         self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "delivered_to_codex")
+        self.assertEqual(result["status"], "delivered_to_adam")
         self.assertTrue(result["poll_latest"])
-        self.assertIn("přímo do běžícího Codexu", result["answer"])
-        self.assertEqual(calls[0]["kwargs"], {"submit": True})
-        self.assertIn("Textový dotaz z okna `Jana Adam`", calls[0]["prompt"])
-        self.assertIn("Odpovídáš ty: běžící Codex/Adam", calls[0]["prompt"])
-        self.assertIn("scripts/adam_voice_reply.py", calls[0]["prompt"])
-        self.assertIn("--route janicka_text_bridge", calls[0]["prompt"])
-        self.assertIn("Kde najdu dokument?", calls[0]["prompt"])
+        self.assertEqual(result["request_id"], "req-1")
+        self.assertIn("Dotaz jsem předal Adamovi", result["answer"])
+        self.assertEqual(calls[0]["message"], "Kde najdu dokument?")
+        self.assertEqual(calls[0]["history"][0]["content"], "Ahoj")
 
     def test_janicka_chat_action_rejects_empty_message(self) -> None:
         result = cockpit_module.janicka_chat_action({"message": "   "}, asker=lambda _: "x")
@@ -2584,29 +2588,30 @@ Dalsi krok:
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "empty_message")
 
-    def test_janicka_chat_action_routes_latest_qn_to_codex_bridge(self) -> None:
+    def test_janicka_chat_action_routes_latest_qn_to_managed_adam(self) -> None:
         calls = []
 
-        def fake_bridge(prompt: str, **kwargs) -> dict[str, object]:
-            calls.append(prompt)
-            return {"ok": True, "status": "delivered", "verified": True}
+        def fake_submitter(**kwargs) -> dict[str, object]:
+            calls.append(kwargs)
+            return {"ok": True, "status": "delivered_to_adam", "request_id": "req-qn"}
 
         result = cockpit_module.janicka_chat_action(
             {"message": "Najdi mi poslední QN."},
             asker=lambda _: self.fail("Janička chat must not call the separate text agent"),
-            bridge_deliverer=fake_bridge,
+            service_submitter=fake_submitter,
         )
 
         self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "delivered_to_codex")
-        self.assertIn("Najdi mi poslední QN.", calls[0])
+        self.assertEqual(result["status"], "delivered_to_adam")
+        self.assertEqual(result["request_id"], "req-qn")
+        self.assertEqual(calls[0]["message"], "Najdi mi poslední QN.")
 
-    def test_janicka_chat_action_routes_followup_detail_to_codex_bridge(self) -> None:
+    def test_janicka_chat_action_routes_followup_detail_to_managed_adam(self) -> None:
         calls = []
 
-        def fake_bridge(prompt: str, **kwargs) -> dict[str, object]:
-            calls.append(prompt)
-            return {"ok": True, "status": "delivered", "verified": True}
+        def fake_submitter(**kwargs) -> dict[str, object]:
+            calls.append(kwargs)
+            return {"ok": True, "status": "delivered_to_adam", "request_id": "req-detail"}
 
         result = cockpit_module.janicka_chat_action(
             {
@@ -2619,13 +2624,13 @@ Dalsi krok:
                 ],
             },
             asker=lambda _: self.fail("Janička chat must not call the separate text agent"),
-            bridge_deliverer=fake_bridge,
+            service_submitter=fake_submitter,
         )
 
         self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "delivered_to_codex")
-        self.assertIn("Ano, detail.", calls[0])
-        self.assertIn("Poslední QN je **#37**", calls[0])
+        self.assertEqual(result["status"], "delivered_to_adam")
+        self.assertEqual(calls[0]["message"], "Ano, detail.")
+        self.assertIn("Poslední QN je **#37**", calls[0]["history"][0]["content"])
 
     def test_janicka_latest_codex_reply_matches_text_bridge_response(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
