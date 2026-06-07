@@ -2,10 +2,6 @@
 
 Datum první verze: 2026-06-07
 
-Tento dokument je git-safe provozní kuchařka. Neobsahuje hesla, recovery klíče,
-čísla účtů, celé e-maily ani jiné citlivé údaje. Citlivé věci patří pouze do
-private/šifrovaného pozůstalostního balíku mimo git.
-
 ## K čemu je Janička
 
 Janička je jednoduchý vstup do Samanthy pro Janu.
@@ -17,19 +13,24 @@ toho, co Jana právě potřebuje udělat:
 - vytisknout dokument,
 - otevřít e-maily,
 - najít lék,
-- otevřít rodinný projekt,
-- zeptat se Adama,
+- otevřít rodinný projekt, až bude tato část doladěná,
+- zeptat se Adama, až bude tato část doladěná,
 - podívat se na připomenutí,
 - najít nouzový rozcestník.
 
 ## Jak začít
 
-1. Otevřít Samantha Cockpit.
-2. Kliknout nahoře na tlačítko `Janička`.
+Samantha Cockpit se po restartování počítače spouští sám.
+
+Když není vidět, otevře se klávesovou zkratkou:
+
+1. Stisknout současně tlačítka `Ctrl`, `Option`, `Command` a písmeno `C`.
+2. Po otevření Cockpitu kliknout nahoře na tlačítko `Janička`.
 3. Vybrat nejbližší praktickou akci.
 
-Jestli si Jana není jistá, co zvolit, má použít `Zeptat se Adama` a napsat
-běžnou větou, co potřebuje.
+Tlačítko `Zeptat se Adama` je důležité, ale teď se ještě ladí. Než bude
+hotové, je bezpečnější použít konkrétní hotová tlačítka jako dokumenty,
+e-maily, Lékárna nebo připomenutí.
 
 ## Najít dokument
 
@@ -44,7 +45,8 @@ Postup:
 3. Otevřít výsledek, který vypadá správně.
 4. Dokument si přečíst, otevřít nebo vytisknout podle potřeby.
 
-Když výsledek není jistý, Jana se má zeptat Adama a popsat, co hledá.
+Když výsledek není jistý, je lepší zatím nic nemazat ani nepřesouvat a
+požádat o pomoc Mílu nebo člověka, který Samanthu technicky spravuje.
 
 ## Vytisknout dokument
 
@@ -70,7 +72,7 @@ Postup:
 3. V něm pokračovat opatrně: čtení a ukládání je běžná práce, mazání nebo
    posílání musí být potvrzené.
 
-Když jde o důležitý e-mail, Jana má raději nejdřív požádat Adama o shrnutí.
+Když jde o důležitý e-mail, Jana ho nemá mazat ani posílat dál bez potvrzení.
 
 ## Lékárna
 
@@ -87,6 +89,10 @@ leták.
 
 ## Rodinné projekty
 
+Tato část se teď ještě ladí.
+
+Tlačítko může být v Janičce vidět, ale zatím ho nelze brát jako hotovou cestu.
+
 Použít, když Jana hledá připravené rodinné fotky, videa nebo podobné výstupy.
 
 První typický příklad je projekt USA.
@@ -101,6 +107,10 @@ Původní fotky a videa se nemažou, nepřejmenovávají a nepřesouvají bez ja
 potvrzení.
 
 ## Zeptat se Adama
+
+Tato část se teď ještě ladí.
+
+Tlačítko může být v Janičce vidět, ale zatím ho nelze brát jako hotovou cestu.
 
 Použít vždy, když Jana neví, kterým tlačítkem začít.
 
@@ -122,7 +132,8 @@ Postup:
 
 1. Kliknout na `Připomenutí`.
 2. Projít aktuální přehled.
-3. Když není jasné, co je nejdůležitější, zeptat se Adama.
+3. Když není jasné, co je nejdůležitější, raději nic neuzavírat a požádat o
+   pomoc Mílu nebo člověka, který Samanthu technicky spravuje.
 
 ## Nouzové převzetí
 
@@ -146,7 +157,7 @@ Bez jasného potvrzení nedělat tyto věci:
 - zasahovat do záloh,
 - spouštět technické příkazy, kterým Jana nerozumí.
 
-Když si Jana není jistá, má se zeptat Adama běžnou větou.
+Když si Jana není jistá, má raději zastavit a požádat o pomoc.
 
 ## Co je další zlepšení
 
