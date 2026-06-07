@@ -2,9 +2,48 @@
 
 Projekt zalozen 2026-05-19.
 
-## Aktualni stav 2026-06-03
+## Aktualni stav 2026-06-07
 
 Posledni uspesna ostra recovery zaloha je podle
+`Samantha_Agent/data/backup/activity_state.json` z 2026-06-07:
+
+```text
+/Volumes/SamanthaSecureBackup/SamanthaBackups/snapshots/20260607_092609/PythonMF
+```
+
+Zaloha probehla pres Pythonovy inkrementalni nastroj:
+
+```bash
+.venv/bin/python scripts/backup_samantha_python.py --execute --profile recovery --target /Volumes/SamanthaSecureBackup/SamanthaBackups --progress-every 5000
+```
+
+Vystup ostreho behu:
+
+```text
+files seen: 19398
+files copied: 5911
+files hard-linked: 13487
+files skipped: 0
+bytes copied: 4822566601
+```
+
+Overeni po behu:
+
+- snapshot ma `backup_manifest.txt`,
+- snapshot ma `READ_ME_FIRST_RECOVERY.md`,
+- snapshot ma `PythonMF/` a `codex_home/`,
+- `scripts/backup_status.py` hlasi, ze posledni zaloha je v 3dennim intervalu
+  `2026-06-07`,
+- restore drill obnovil `Samantha_Agent/AGENTS.md` jen do
+  `/private/tmp/samantha_restore_drill_20260607/Samantha_Agent/AGENTS.md`,
+- `cmp` a SHA-256 potvrdily shodu:
+  `6432dfe626caaac6970e981c2e193c2d855b8a98f1abc5b02eb75a53e547b0d3`.
+
+Po zaloze ma `/Volumes/SamanthaSecureBackup` zhruba `471Gi` volno.
+
+## Predchozi stav 2026-06-03
+
+Predchozi uspesna ostra recovery zaloha byla podle
 `Samantha_Agent/data/backup/activity_state.json` z 2026-06-03:
 
 ```text
