@@ -109,3 +109,18 @@ soukrome pracovni stenove prekresy, pudorys a prvni vizualni koncepty hlavni
 zapadni steny s knihovnou a zonami pro cteni, deti a spani. Dalsi prakticky krok
 je po navratu k projektu zkontrolovat posledni koncept proti pudorysu: pruchody,
 kolize s topenim/dvermi a realnou hloubku knihovny a rozkladaciho gauce.
+
+## Checkpoint 2026-06-07
+
+V soukromych konceptech pro Kacenku vznikla ladena varianta jizniho pohledu v6.
+Opraven byl vztah pricneho snizeneho stropu, sikmeho tramu smerujiciho k vychodni
+stene, komina u dveri a rozkladaciho gauce za kominem. Aktualni kandidat a
+mezivarianty jsou popsane v soukromem indexu:
+
+```text
+data/private/neuberk_interier_design/rooms/kacenka/04_navrhy/library_corner_concepts/library_corner_concepts_index.txt
+```
+
+Navazani: nejdrive rucne zkontrolovat posledni v6 proti realnym fotkam. Pokud je
+geometrie dost dobra, prejit z generovani obrazku na jednoduchy pudorysovy check
+rohu mistnosti.
