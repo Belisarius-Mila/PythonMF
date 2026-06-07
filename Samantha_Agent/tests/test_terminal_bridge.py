@@ -170,6 +170,8 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertNotIn(">workbench.action.terminal.focus", script)
         self.assertNotIn("Terminal: Focus Terminal", script)
         self.assertIn("promptText", script)
+        self.assertIn("frontAppName", script)
+        self.assertIn("tell application frontAppName to activate", script)
         self.assertRegex(script, r'keystroke "v" using command down\s+delay 0\.25\s+if shouldSubmit is "1" then key code 36')
 
     def test_discover_codex_ttys_finds_codex_process_tty(self) -> None:

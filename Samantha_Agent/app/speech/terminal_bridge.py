@@ -256,6 +256,9 @@ def vscode_applescript() -> str:
 on run argv
   set promptText to item 1 of argv
   set shouldSubmit to item 2 of argv
+  tell application "System Events"
+    set frontAppName to name of first application process whose frontmost is true
+  end tell
   tell application "Visual Studio Code"
     activate
   end tell
@@ -268,6 +271,10 @@ on run argv
     delay 0.25
     if shouldSubmit is "1" then key code 36
   end tell
+  if frontAppName is not "Visual Studio Code" and frontAppName is not "Code" then
+    delay 0.2
+    tell application frontAppName to activate
+  end if
   return "delivered_vscode"
 end run
 '''.strip()
@@ -305,7 +312,7 @@ def deliver_prompt_to_vscode(
     return {
         "ok": True,
         "status": "delivered_vscode",
-        "message": "Pokyn byl vložen do aktivního VS Code terminálu.",
+        "message": "Pokyn byl vložen do VS Code a fokus byl vrácen zpět.",
         "submitted": submit,
         "verified": True,
         "delivery_method": "local_gui_vscode",

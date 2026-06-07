@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
-from app.speech.terminal_bridge import CURRENT_CODEX_TTY_PATH, discover_codex_ttys, load_marked_codex_tty
+from app.speech.terminal_bridge import CURRENT_CODEX_TTY_PATH, deliver_prompt_to_vscode, discover_codex_ttys, load_marked_codex_tty
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -317,6 +317,18 @@ def deliver_prompt_to_adam_screen(
     }
 
 
+def deliver_prompt_to_visible_adam(
+    prompt: str,
+    *,
+    submit: bool = True,
+    deliverer: Callable[..., dict[str, Any]] = deliver_prompt_to_vscode,
+) -> dict[str, Any]:
+    return {
+        **deliverer(prompt, submit=submit),
+        "adam_delivery_target": "visible_vscode",
+    }
+
+
 def save_adam_text_request(
     *,
     message: str,
@@ -449,7 +461,7 @@ def submit_adam_text_request(
     requests_dir: Path = ADAM_REQUESTS_DIR,
     starter: Callable[..., dict[str, Any]] = start_adam_service,
     ready_waiter: Callable[[], dict[str, Any]] | None = None,
-    deliverer: Callable[..., dict[str, Any]] = deliver_prompt_to_adam_screen,
+    deliverer: Callable[..., dict[str, Any]] = deliver_prompt_to_visible_adam,
 ) -> dict[str, Any]:
     start_result = starter()
     if not start_result.get("ok"):

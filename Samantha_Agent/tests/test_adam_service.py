@@ -10,6 +10,7 @@ from app.adam_service import (
     adam_service_status,
     build_adam_text_prompt,
     deliver_prompt_to_adam_screen,
+    deliver_prompt_to_visible_adam,
     load_adam_text_reply,
     record_adam_text_reply,
     save_adam_text_request,
@@ -89,6 +90,21 @@ class AdamServiceTests(unittest.TestCase):
         self.assertTrue(payload.startswith("\x15"))
         self.assertTrue(payload.endswith("\n"))
         self.assertIn("První řádek Druhý řádek", payload)
+
+    def test_deliver_prompt_to_visible_adam_marks_vscode_target(self) -> None:
+        calls = []
+
+        def fake_deliverer(prompt, **kwargs):
+            calls.append({"prompt": prompt, "kwargs": kwargs})
+            return {"ok": True, "status": "delivered_vscode", "delivery_method": "local_gui_vscode"}
+
+        result = deliver_prompt_to_visible_adam("Ahoj", submit=True, deliverer=fake_deliverer)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "delivered_vscode")
+        self.assertEqual(result["adam_delivery_target"], "visible_vscode")
+        self.assertEqual(calls[0]["prompt"], "Ahoj")
+        self.assertEqual(calls[0]["kwargs"], {"submit": True})
 
     def test_request_prompt_contains_request_id_and_reply_command(self) -> None:
         request = {
