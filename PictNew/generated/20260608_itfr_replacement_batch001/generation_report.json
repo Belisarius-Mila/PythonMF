@@ -1,0 +1,386 @@
+[
+  {
+    "status": "generated",
+    "request_index": 1,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260608_itfr_replacement_batch001/lit.webp",
+    "output_file": "lit.webp",
+    "original_bytes": 116350,
+    "output_bytes": 92688,
+    "request": {
+      "id": "itfr-replace-lit",
+      "language": "fr",
+      "image_name": "lit",
+      "target_filename": "lit.webp",
+      "row_numbers": [
+        207
+      ],
+      "words": [
+        "lit"
+      ],
+      "czech_meanings": [
+        "postel"
+      ],
+      "source_entries": [
+        {
+          "row_number": 207,
+          "word": "lit",
+          "czech_meaning": "postel",
+          "note": "replacement after rejected schematic icon"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The image must represent the FR word(s) ['lit'] with Czech meaning ['postel']. Base the scene primarily on the Czech meaning, then use the foreign word only as context. Specific visual direction: Show a cozy bedroom scene with a real bed, pillow, blanket, bedside lamp, and a small sleeping cat on the bed; warm evening light through a window. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition, warm colors, and no empty icon-card frame. Avoid schematic icon style, outline-only graphics, logos, random text, decorative letters, watermarks, and signatures. Do not include foreign words or labels unless explicitly requested."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 2,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260608_itfr_replacement_batch001/nuit.webp",
+    "output_file": "nuit.webp",
+    "original_bytes": 108374,
+    "output_bytes": 83620,
+    "request": {
+      "id": "itfr-replace-nuit",
+      "language": "fr",
+      "image_name": "nuit",
+      "target_filename": "nuit.webp",
+      "row_numbers": [
+        208
+      ],
+      "words": [
+        "nuit"
+      ],
+      "czech_meanings": [
+        "noc"
+      ],
+      "source_entries": [
+        {
+          "row_number": 208,
+          "word": "nuit",
+          "czech_meaning": "noc",
+          "note": "replacement after rejected schematic icon"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The image must represent the FR word(s) ['nuit'] with Czech meaning ['noc']. Base the scene primarily on the Czech meaning, then use the foreign word only as context. Specific visual direction: Show a quiet night outside a home window: dark blue sky, moon, stars, softly lit bedroom interior, calm sleeping mood; make it clearly night, not just a moon icon. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition, warm colors, and no empty icon-card frame. Avoid schematic icon style, outline-only graphics, logos, random text, decorative letters, watermarks, and signatures. Do not include foreign words or labels unless explicitly requested."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 3,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260608_itfr_replacement_batch001/plusieurs.webp",
+    "output_file": "plusieurs.webp",
+    "original_bytes": 173988,
+    "output_bytes": 148656,
+    "request": {
+      "id": "itfr-replace-plusieurs",
+      "language": "fr",
+      "image_name": "plusieurs",
+      "target_filename": "plusieurs.webp",
+      "row_numbers": [
+        211
+      ],
+      "words": [
+        "plusieurs"
+      ],
+      "czech_meanings": [
+        "několik, více"
+      ],
+      "source_entries": [
+        {
+          "row_number": 211,
+          "word": "plusieurs",
+          "czech_meaning": "několik, více",
+          "note": "replacement after rejected schematic icon"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The image must represent the FR word(s) ['plusieurs'] with Czech meaning ['několik, více']. Base the scene primarily on the Czech meaning, then use the foreign word only as context. Specific visual direction: Show several different books and pencils spread on a desk while a child chooses among them; clearly communicate several/multiple items. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition, warm colors, and no empty icon-card frame. Avoid schematic icon style, outline-only graphics, logos, random text, decorative letters, watermarks, and signatures. Do not include foreign words or labels unless explicitly requested."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 4,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260608_itfr_replacement_batch001/rotto.webp",
+    "output_file": "rotto.webp",
+    "original_bytes": 126886,
+    "output_bytes": 100678,
+    "request": {
+      "id": "itfr-replace-rotto",
+      "language": "it",
+      "image_name": "rotto",
+      "target_filename": "rotto.webp",
+      "row_numbers": [
+        444
+      ],
+      "words": [
+        "rotto"
+      ],
+      "czech_meanings": [
+        "rozbitý"
+      ],
+      "source_entries": [
+        {
+          "row_number": 444,
+          "word": "rotto",
+          "czech_meaning": "rozbitý",
+          "note": "replacement after rejected schematic icon"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The image must represent the IT word(s) ['rotto'] with Czech meaning ['rozbitý']. Base the scene primarily on the Czech meaning, then use the foreign word only as context. Specific visual direction: Show a cracked smartphone on a kitchen table with a surprised person reaching toward it; make the broken state obvious but not scary. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition, warm colors, and no empty icon-card frame. Avoid schematic icon style, outline-only graphics, logos, random text, decorative letters, watermarks, and signatures. Do not include foreign words or labels unless explicitly requested."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 5,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260608_itfr_replacement_batch001/nove.webp",
+    "output_file": "nove.webp",
+    "original_bytes": 141032,
+    "output_bytes": 114080,
+    "request": {
+      "id": "itfr-replace-nove",
+      "language": "it",
+      "image_name": "nove",
+      "target_filename": "nove.webp",
+      "row_numbers": [
+        446
+      ],
+      "words": [
+        "nove"
+      ],
+      "czech_meanings": [
+        "devět"
+      ],
+      "source_entries": [
+        {
+          "row_number": 446,
+          "word": "nove",
+          "czech_meaning": "devět",
+          "note": "replacement after rejected schematic icon"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The image must represent the IT word(s) ['nove'] with Czech meaning ['devět']. Base the scene primarily on the Czech meaning, then use the foreign word only as context. Specific visual direction: Show exactly nine colorful apples arranged on a wooden table, with a child counting them; the quantity nine must be unmistakable. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition, warm colors, and no empty icon-card frame. Avoid schematic icon style, outline-only graphics, logos, random text, decorative letters, watermarks, and signatures. Do not include foreign words or labels unless explicitly requested."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 6,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260608_itfr_replacement_batch001/otto.webp",
+    "output_file": "otto.webp",
+    "original_bytes": 138984,
+    "output_bytes": 116362,
+    "request": {
+      "id": "itfr-replace-otto",
+      "language": "it",
+      "image_name": "otto",
+      "target_filename": "otto.webp",
+      "row_numbers": [
+        447
+      ],
+      "words": [
+        "otto"
+      ],
+      "czech_meanings": [
+        "osm"
+      ],
+      "source_entries": [
+        {
+          "row_number": 447,
+          "word": "otto",
+          "czech_meaning": "osm",
+          "note": "replacement after rejected schematic icon"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The image must represent the IT word(s) ['otto'] with Czech meaning ['osm']. Base the scene primarily on the Czech meaning, then use the foreign word only as context. Specific visual direction: Show exactly eight small toy cars arranged in two neat rows on a playroom floor; the quantity eight must be unmistakable. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition, warm colors, and no empty icon-card frame. Avoid schematic icon style, outline-only graphics, logos, random text, decorative letters, watermarks, and signatures. Do not include foreign words or labels unless explicitly requested."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 7,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260608_itfr_replacement_batch001/carta_di_credito.webp",
+    "output_file": "carta_di_credito.webp",
+    "original_bytes": 130432,
+    "output_bytes": 108346,
+    "request": {
+      "id": "itfr-replace-carta-di-credito",
+      "language": "it",
+      "image_name": "carta_di_credito",
+      "target_filename": "carta_di_credito.webp",
+      "row_numbers": [
+        449
+      ],
+      "words": [
+        "carta di credito"
+      ],
+      "czech_meanings": [
+        "kreditní karta"
+      ],
+      "source_entries": [
+        {
+          "row_number": 449,
+          "word": "carta di credito",
+          "czech_meaning": "kreditní karta",
+          "note": "replacement after rejected schematic icon"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The image must represent the IT word(s) ['carta di credito'] with Czech meaning ['kreditní karta']. Base the scene primarily on the Czech meaning, then use the foreign word only as context. Specific visual direction: Show a hand paying by credit card at a small shop counter with a card terminal; make the plastic payment card and terminal clear, no bank logos or readable numbers. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition, warm colors, and no empty icon-card frame. Avoid schematic icon style, outline-only graphics, logos, random text, decorative letters, watermarks, and signatures. Do not include foreign words or labels unless explicitly requested."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 8,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260608_itfr_replacement_batch001/paese.webp",
+    "output_file": "paese.webp",
+    "original_bytes": 262186,
+    "output_bytes": 239010,
+    "request": {
+      "id": "itfr-replace-paese",
+      "language": "it",
+      "image_name": "paese",
+      "target_filename": "paese.webp",
+      "row_numbers": [
+        450
+      ],
+      "words": [
+        "paese"
+      ],
+      "czech_meanings": [
+        "země; stát; vesnice; obec; kraj podle kontextu"
+      ],
+      "source_entries": [
+        {
+          "row_number": 450,
+          "word": "paese",
+          "czech_meaning": "země; stát; vesnice; obec; kraj podle kontextu",
+          "note": "replacement after rejected schematic icon"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The image must represent the IT word(s) ['paese'] with Czech meaning ['země; stát; vesnice; obec; kraj podle kontextu']. Base the scene primarily on the Czech meaning, then use the foreign word only as context. Specific visual direction: Show a small welcoming village in a countryside landscape with houses, a town square, and fields beyond; it should represent a village/country place, not a flag-only symbol. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition, warm colors, and no empty icon-card frame. Avoid schematic icon style, outline-only graphics, logos, random text, decorative letters, watermarks, and signatures. Do not include foreign words or labels unless explicitly requested."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 9,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260608_itfr_replacement_batch001/quartiere.webp",
+    "output_file": "quartiere.webp",
+    "original_bytes": 261116,
+    "output_bytes": 243764,
+    "request": {
+      "id": "itfr-replace-quartiere",
+      "language": "it",
+      "image_name": "quartiere",
+      "target_filename": "quartiere.webp",
+      "row_numbers": [
+        451
+      ],
+      "words": [
+        "quartiere"
+      ],
+      "czech_meanings": [
+        "čtvrť, městská část"
+      ],
+      "source_entries": [
+        {
+          "row_number": 451,
+          "word": "quartiere",
+          "czech_meaning": "čtvrť, městská část",
+          "note": "replacement after rejected schematic icon"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The image must represent the IT word(s) ['quartiere'] with Czech meaning ['čtvrť, městská část']. Base the scene primarily on the Czech meaning, then use the foreign word only as context. Specific visual direction: Show an urban neighborhood street with apartment buildings, trees, a corner shop, and people walking; make it clearly a city district/neighborhood. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition, warm colors, and no empty icon-card frame. Avoid schematic icon style, outline-only graphics, logos, random text, decorative letters, watermarks, and signatures. Do not include foreign words or labels unless explicitly requested."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 10,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260608_itfr_replacement_batch001/albero.webp",
+    "output_file": "albero.webp",
+    "original_bytes": 388992,
+    "output_bytes": 289750,
+    "request": {
+      "id": "itfr-replace-albero",
+      "language": "it",
+      "image_name": "albero",
+      "target_filename": "albero.webp",
+      "row_numbers": [
+        452
+      ],
+      "words": [
+        "albero"
+      ],
+      "czech_meanings": [
+        "strom"
+      ],
+      "source_entries": [
+        {
+          "row_number": 452,
+          "word": "albero",
+          "czech_meaning": "strom",
+          "note": "replacement after rejected schematic icon"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The image must represent the IT word(s) ['albero'] with Czech meaning ['strom']. Base the scene primarily on the Czech meaning, then use the foreign word only as context. Specific visual direction: Show one large leafy tree in a garden with textured bark, roots, grass, and a child sitting in its shade reading; make the tree the main subject. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition, warm colors, and no empty icon-card frame. Avoid schematic icon style, outline-only graphics, logos, random text, decorative letters, watermarks, and signatures. Do not include foreign words or labels unless explicitly requested."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 11,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260608_itfr_replacement_batch001/coinquilino.webp",
+    "output_file": "coinquilino.webp",
+    "original_bytes": 180592,
+    "output_bytes": 155646,
+    "request": {
+      "id": "itfr-replace-coinquilino",
+      "language": "it",
+      "image_name": "coinquilino",
+      "target_filename": "coinquilino.webp",
+      "row_numbers": [
+        454
+      ],
+      "words": [
+        "coinquilino"
+      ],
+      "czech_meanings": [
+        "spolubydlící"
+      ],
+      "source_entries": [
+        {
+          "row_number": 454,
+          "word": "coinquilino",
+          "czech_meaning": "spolubydlící",
+          "note": "replacement after rejected schematic icon"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The image must represent the IT word(s) ['coinquilino'] with Czech meaning ['spolubydlící']. Base the scene primarily on the Czech meaning, then use the foreign word only as context. Specific visual direction: Show two adult roommates sharing a kitchen: one cooking, one setting the table, with separate mugs and coats suggesting a shared apartment; friendly everyday scene. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition, warm colors, and no empty icon-card frame. Avoid schematic icon style, outline-only graphics, logos, random text, decorative letters, watermarks, and signatures. Do not include foreign words or labels unless explicitly requested."
+    }
+  },
+  {
+    "status": "generated",
+    "request_index": 12,
+    "output_path": "/Users/miloslavfalta/Desktop/PythonMF/PictNew/generated/20260608_itfr_replacement_batch001/animale_domestico.webp",
+    "output_file": "animale_domestico.webp",
+    "original_bytes": 177830,
+    "output_bytes": 159258,
+    "request": {
+      "id": "itfr-replace-animale-domestico",
+      "language": "it",
+      "image_name": "animale_domestico",
+      "target_filename": "animale_domestico.webp",
+      "row_numbers": [
+        455
+      ],
+      "words": [
+        "animale domestico"
+      ],
+      "czech_meanings": [
+        "domácí zvíře"
+      ],
+      "source_entries": [
+        {
+          "row_number": 455,
+          "word": "animale domestico",
+          "czech_meaning": "domácí zvíře",
+          "note": "replacement after rejected schematic icon"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The image must represent the IT word(s) ['animale domestico'] with Czech meaning ['domácí zvíře']. Base the scene primarily on the Czech meaning, then use the foreign word only as context. Specific visual direction: Show a family living room with a friendly dog and cat near a child, pet bowl and toys visible; clearly domestic pets at home, not wild animals. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition, warm colors, and no empty icon-card frame. Avoid schematic icon style, outline-only graphics, logos, random text, decorative letters, watermarks, and signatures. Do not include foreign words or labels unless explicitly requested."
+    }
+  }
+]

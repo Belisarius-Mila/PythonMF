@@ -849,7 +849,12 @@ class VocabularyTrainerApp:
 
     def _tokenize_words(self, text):
         raw = re.findall(r"[A-Za-zÀ-ÖØ-öø-ÿ'-]+", (text or "").casefold())
-        return [self._normalize_word(tok) for tok in raw if self._normalize_word(tok)]
+        tokens = []
+        for tok in raw:
+            normalized = self._normalize_word(tok)
+            if len(normalized) > 1:
+                tokens.append(normalized)
+        return tokens
 
     def _is_probable_verb(self, fr_word):
         word = self._normalize_word(fr_word)
@@ -905,20 +910,44 @@ class VocabularyTrainerApp:
         cz = (row.get("CZ") or "").strip()
         fr_norm = self._normalize_word(fr)
         cz_norm = self._normalize_word(cz)
+        exact_keys = [fr_norm, cz_norm]
         tokens = self._tokenize_words(fr) + self._tokenize_words(cz)
+        generic_tokens = (
+            FEMALE_PRONOUNS
+            | MALE_PRONOUNS
+            | AMBIGUOUS_PRONOUNS
+            | CONJUNCTION_WORDS
+            | PREPOSITION_WORDS
+            | ADJ_ADV_WORDS
+        )
 
-        # 1) Exact filename match by whole words and tokens.
-        for key in [fr_norm, cz_norm] + tokens:
+        # 1) Exact filename match for the full source/CZ terms.
+        for key in exact_keys:
             if key and key in self.picture_stems:
                 return key
 
-        # 2) Synonyms / aliases.
-        for key in [fr_norm, cz_norm] + tokens:
+        # 2) Exact aliases before token fallback; avoids short-token false hits.
+        for key in exact_keys:
             mapped = self.synonym_image_map.get(key)
             if mapped:
                 return mapped
 
-        # 3) Pronouns on/ona -> man/woman.
+        # 3) Token filename match, skipping generic grammar words.
+        for key in tokens:
+            if key in generic_tokens:
+                continue
+            if key and key in self.picture_stems:
+                return key
+
+        # 4) Token aliases, also skipping generic grammar words.
+        for key in tokens:
+            if key in generic_tokens:
+                continue
+            mapped = self.synonym_image_map.get(key)
+            if mapped:
+                return mapped
+
+        # 5) Pronouns on/ona -> man/woman.
         token_set = set(tokens)
         if token_set & FEMALE_PRONOUNS:
             return "woman"

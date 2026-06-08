@@ -40,7 +40,12 @@ def normalize_word(text: str) -> str:
 
 def tokenize_words(text: str) -> list[str]:
     raw = re.findall(r"[A-Za-zÀ-ÖØ-öø-ÿ'-]+", (text or "").casefold())
-    return [normalize_word(token) for token in raw if normalize_word(token)]
+    tokens: list[str] = []
+    for token in raw:
+        normalized = normalize_word(token)
+        if len(normalized) > 1:
+            tokens.append(normalized)
+    return tokens
 
 
 def probable_verb(fr_word: str) -> bool:
@@ -86,17 +91,37 @@ def load_mapping() -> tuple[dict[str, str], dict[str, str]]:
 def choose_picture_stem(row: dict[str, str], files: dict[str, Path], mapping: dict[str, str]) -> str:
     fr = (row.get("FR") or "").strip()
     cz = (row.get("CZ") or "").strip()
-    keys = [normalize_word(fr), normalize_word(cz), *tokenize_words(fr), *tokenize_words(cz)]
+    exact_keys = [normalize_word(fr), normalize_word(cz)]
+    tokens = tokenize_words(fr) + tokenize_words(cz)
+    generic_tokens = (
+        FEMALE_PRONOUNS
+        | MALE_PRONOUNS
+        | AMBIGUOUS_PRONOUNS
+        | CONJUNCTION_WORDS
+        | PREPOSITION_WORDS
+        | ADJ_ADV_WORDS
+    )
 
-    for key in keys:
+    for key in exact_keys:
         if key and key in files:
             return key
-    for key in keys:
+    for key in exact_keys:
+        mapped = mapping.get(key)
+        if mapped and mapped in files:
+            return mapped
+    for key in tokens:
+        if key in generic_tokens:
+            continue
+        if key and key in files:
+            return key
+    for key in tokens:
+        if key in generic_tokens:
+            continue
         mapped = mapping.get(key)
         if mapped and mapped in files:
             return mapped
 
-    token_set = set(tokenize_words(fr) + tokenize_words(cz))
+    token_set = set(tokens)
     if token_set & FEMALE_PRONOUNS:
         return "woman"
     if token_set & MALE_PRONOUNS:

@@ -774,6 +774,7 @@ class VocabularyTrainerApp:
         cz = (row.get("CZ") or "").strip()
         it_norm = self._normalize_word(it)
         cz_norm = self._normalize_word(cz)
+        exact_keys = [it_norm, cz_norm]
         term_blocked = it_norm in self.blocked_image_terms
         tokens = self._tokenize_words(it) + self._tokenize_words(cz)
         generic_tokens = (
@@ -785,17 +786,25 @@ class VocabularyTrainerApp:
             | ADJ_ADV_WORDS
         )
 
-        for index, key in enumerate([it_norm, cz_norm] + tokens):
-            if index >= 2 and key in generic_tokens:
+        for key in exact_keys:
+            if key and key in self.picture_stems:
+                return key
+
+        if not term_blocked:
+            for key in exact_keys:
+                mapped = self.synonym_image_map.get(key)
+                if mapped:
+                    return mapped
+
+        for key in tokens:
+            if key in generic_tokens:
                 continue
             if key and key in self.picture_stems:
                 return key
 
         if not term_blocked:
-            for index, key in enumerate([it_norm, cz_norm] + tokens):
-                if index >= 2 and key in generic_tokens:
-                    continue
-                if key in self.blocked_image_terms:
+            for key in tokens:
+                if key in generic_tokens or key in self.blocked_image_terms:
                     continue
                 mapped = self.synonym_image_map.get(key)
                 if mapped:

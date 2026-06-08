@@ -1,0 +1,361 @@
+NewVocabulary audit - 08.06.2026
+
+mapping.json: /Users/miloslavfalta/Desktop/PythonMF/Pict/mapping.json
+Pict: /Users/miloslavfalta/Desktop/PythonMF/Pict
+Synchronizace Pict CSV: ne
+
+================================================================================
+VocabularyFR
+================================================================================
+Vocabulary rows: 212
+Aktualni Pict CSV rows: 203
+Pict CSV rows po navrzenem doplneni: 220
+Nove radky k doplneni do Pict CSV: 17
+Uz OK: 94
+ENP ukazuje na existujici obrazek: 97
+Shoda v mapping.json + obrazek existuje: 21
+Shoda v mapping.json, ale obrazek chybi: 0
+Pravdepodobna shoda v mapping.json + obrazek existuje: 0
+Bez navrhu: 0
+
+Nove radky chybejici v Pict CSV
+-------------------------------
+sur	o
+déjà	již, už
+des	nějaký (neurčitý člen množného čísla)
+combien	kolik, jak moc
+magnifique	nádherný
+collègue	kolega, kolegyně
+beau	hezký, krásný
+légume	zelenina
+dîner	večeře
+dîner	večeřet
+supermarché	supermarket
+lit	postel
+nuit	noc
+demain	zítra
+chinois	čínský; Číňan; čínština
+plusieurs	několik, více
+langue	jazyk
+
+ENP uz ukazuje na existujici obrazek v Pict
+-------------------------------------------
+2	sur	na | ENP=on | PE=ne | PD=add | Pict: on
+6	trop	příliš, moc | ENP=toomuch | PE=ne | PD=add | Pict: toomuch
+8	fort	hlasitě (nahlas) | ENP=loud | PE=ne | PD=add - repro poskakuje? | Pict: loud
+18	Et toi?	A ty? | ENP=andyou | PE=ne | PD=add | Pict: andyou
+22	je voudrais	chtěl bych | ENP=Iwouldlike | PE=ne | PD=add | Pict: Iwouldlike
+24	oui	ano | ENP=yes | PE=ne | PD=add | Pict: yes
+25	moi	mě | ENP=me | PE=ne | PD=add | Pict: me
+26	aussi	také | ENP=also | PE=ne | PD=add | Pict: also
+29	et	a | ENP=and | PE=ne | PD=add | Pict: and
+31	d'où	odkud | ENP=fromwhere | PE=ne | PD=add | Pict: fromwhere
+33	j'ai	mám | ENP=Ihave | PE=ne | PD=add | Pict: Ihave
+35	tu as	máš | ENP=have | PE=ne | PD=add | Pict: have
+39	maintenant	teď, nyní | ENP=now | PE=ne | PD=add | Pict: now
+42	je	já | ENP=me | PE=ne | PD=add (mě) | Pict: me
+43	tu	ty | ENP=you | PE=ne | PD=add | Pict: you
+46	vous	vy | ENP=people | PE=ne | Pict: people
+47	nous	my | ENP=people | PE=ne | Pict: people
+48	ils	oni | ENP=people | PE=ne | Pict: people
+49	elles	ony | ENP=people | PE=ne | Pict: people
+50	mon	můj | ENP=mym | PE=ne | PD=add | Pict: mym
+51	ma	moje | ENP=myf | PE=ne | PD=add | Pict: myf
+52	ton	tvůj | ENP=yourm | PE=ne | PD=add | Pict: yourm
+53	ta	tvá | ENP=yourf | PE=ne | PD=add | Pict: yourf
+58	très	velmi | ENP=very | PE=ne | PD=add | Pict: very
+63	tu es	ty jsi | ENP=youare | PE=ne | PD=add | Pict: youare
+66	toujours	pořád, stále, vždy | ENP=always | PE=ne | PD=add | Pict: always
+68	mais	ale | ENP=but | PE=ne | PD=add | Pict: but
+69	voyager	cestovat | ENP=travel | PE=ne | PD=add | Pict: travel
+74	par	skrz, přes | ENP=through | PE=ne | PD=add | Pict: through
+75	par	za jednotku | ENP=per | PE=ne | PD=add (za jednotku...) | Pict: per
+76	par	od, kým | ENP=by | PE=ne | PD=add | Pict: by
+84	parfois	někdy | ENP=sometimes | PE=ne | PD=add | Pict: sometimes
+85	pause	přestávka | ENP=break | PE=ne | PD=add | Pict: break
+86	pendant	během, po dobu | ENP=during | PE=ne | PD=add | Pict: during
+87	marcher	chodit, kráčet | ENP=walk | PE=ne | PD=add | Pict: walk
+88	marcher	fungovat | ENP=workfunction | PE=ne | PD=add | Pict: workfunction
+95	excuse	omluva | ENP=excuse | PE=ne | PD=add, doplněno do json | Pict: excuse
+99	quartier	čtvrť | ENP=district | PE=ne | PD=add, doplněno do json | Pict: district
+103	clé	klíč | ENP=key | PE=ne | PD=add | Pict: key
+104	viande	maso | ENP=meat | PE=ne | PD=add | Pict: meat
+105	coûter	stát | ENP=costmoney | PE=ne | PD=add, doplněno do json | Pict: costmoney
+108	fête	oslava | ENP=party | PE=ne | PD=add | Pict: party
+110	content	spokojený | ENP=satisfied | PE=ne | PD=add, dplněno do json | Pict: satisfied
+115	cinq	pět | ENP=five | PE=ne | PD=add, doplněno do json | Pict: five
+116	journée	den | ENP=day | PE=ne | PD=add | Pict: day
+117	chez	u někoho, k někomu | ENP=atby | PE=ne | PD=add | Pict: atby
+119	pays	země | ENP=country | PE=ne | PD=add, doplněno do json | Pict: country
+120	pourquoi	proč | ENP=why | PE=ne | PD=add, doplněno do json | Pict: why
+127	adorer	zbožňovat, milovat | ENP=adore | PE=ne | PD=add, doplněno do json | Pict: adore
+128	un peu	trochu | ENP=abit | PE=ne | PD=add, doplněno do json | Pict: abit
+131	garçon	chlapec | ENP=boy | PE=ne | PD=add, doplněno do json | Pict: boy
+138	appartement	byt | ENP=apartment | PE=ne | PD=add, doplněno do json | Pict: apartment
+142	chaise	židle | ENP=chair | PE=ne | PD=add, doplněno do json | Pict: chair
+144	train	vlak | ENP=train | PE=ne | PD=add, doplněno do json | Pict: train
+146	hôtel	hotel | ENP=hotel | PE=ne | PD=add, doplněno do json | Pict: hotel
+149	couteau	nůž | ENP=knife | PE=ne | PD=add, doplněno do json | Pict: knife
+150	sucre	cukr | ENP=sugar | PE=ne | PD=add, doplněno do json | Pict: sugar
+152	placard	skříňka, kredenc | ENP=cupboard | PE=ne | PD=add, doplněno do json | Pict: cupboard
+153	cassée	rozbitý, vyřízený | ENP=broken | PE=ne | PD=add, doplněno do json | Pict: broken
+155	mince	hubený, sakra | ENP=thindarn | PE=ne | PD=add, přidáno do json | Pict: thindarn
+157	tasse	hrnek | ENP=cup | PE=ne | PD=add, přidáno do json | Pict: cup
+158	laver	mýt, prát | ENP=wash | PE=ne | PD=add, přidáno do json | Pict: wash
+160	chaud	teplý, horký | ENP=hot | PE=ne | PD=add, doplněno do json | Pict: hot
+161	fourchette	vidlička | ENP=fork | PE=ne | PD=add, doplněno do json | Pict: fork
+162	rien	nic | ENP=nothing | PE=ne | PD=add, doplněno do json | Pict: nothing
+163	vouloir	chtít | ENP=want | PE=ne | PD=add | Pict: want
+164	arriver	přijít, přijet | ENP=arrive | PE=ne | PD=add, doplněno do json | Pict: arrive
+165	inviter	pozvat | ENP=invite | PE=ne | PD=add, doplněno do json | Pict: invite
+166	invité	pozvaný host | ENP=invite | PE=ne | PD=add, doplněno do json | Pict: invite
+167	serviette	ubrousek, ručník | ENP=towelnapkin | PE=ne | PD=add, doplněno do json | Pict: towelnapkin
+168	appétit	chuť | ENP=appetite | PE=ne | PD=add, doplněno do json | Pict: appetite
+169	en espèces	v hotovosti | ENP=incash | PE=ne | PD=add, doplněno do json | Pict: incash
+170	peut-être	možná | ENP=maybe | PE=ne | PD=add, doplněno do json | Pict: maybe
+176	juste	jen, právě, správný | ENP=just | PE=ne | PD=add, doplněno do json | Pict: just
+178	vouloir	chtít | ENP=want | PE=ne | PD=add | Pict: want
+180	neuf, neuve	devět, nový | ENP=ninenew | PE=ne | PD=add, doplněno do json | Pict: ninenew
+182	vraiment	opravdu, skutečně | ENP=really | PE=ne | PD=add, doplněno do json | Pict: really
+183	que	že | ENP=that | PE=ne | PD=add, doplněno do json | Pict: that
+184	perdu	ztracený | ENP=lost | PE=ne | PD=add, doplněno do json | Pict: lost
+185	je ne sais pas	nevím | ENP=idontknow | PE=ne | PD=add, doplněno do json | Pict: idontknow
+186	préparer	připravit, připravovat | ENP=prepare | PE=ne | PD=add, doplněno do json | Pict: prepare
+187	pressé	spěchající, ve spěchu | ENP=inhurry | PE=ne | PD=add, doplněno do json | Pict: inhurry
+188	glace	zmrzlina, led, sklo | ENP=iceglass | PE=ne | PD=add, doplněno do json | Pict: iceglass
+189	autre	jiný, další | ENP=other | PE=ne | PD=add, doplněno do json | Pict: other
+190	métier	povolání, řemeslo | ENP=jobtrade | PE=ne | PD=add, doplněno do json | Pict: jobtrade
+191	docteur	doktor, lékař | ENP=doctor | PE=ne | PD=add, doplněno do json | Pict: doctor
+192	hôpital	nemocnice | ENP=hospital | PE=ne | PD=add, doplněno do json | Pict: hospital
+193	avocat	advokát | ENP=lawyer | PE=ne | PD=add, doplněno do json | Pict: lawyer
+194	avocat	avokádo | ENP=avocado | PE=ne | PD=add, doplněno do json | Pict: avocado
+195	joyeux	veselý, radostný | ENP=joyful | PE=ne | PD=add, doplněno do json | Pict: joyful
+196	quelqu’un	někdo | ENP=someone | PE=ne | PD=add, doplněno do json | Pict: someone
+197	Brésil	Brazílie | ENP=brazil | PE=ne | PD=add, doplněno do json | Pict: brazil
+198	bonne soirée	hezký večer | ENP=niceevening | PE=ne | PD=add, doplněno do json | Pict: niceevening
+199	bonne journée	hezký den | ENP=goodday | PE=ne | PD=add, doplněno do json | Pict: goodday
+200	ingénieur	inženýr | ENP=engineer | PE=ne | PD=add, doplněno do json | Pict: engineer
+201	à plus tard	později, uvidíme se později | ENP=seeyoulater | PE=ne | PD=add, doplněno do json | Pict: seeyoulater
+202	travail	práce | ENP=labour | PE=ne | PD=add, doplněno do json | Pict: labour
+
+Prima shoda v mapping.json a obrazek existuje
+---------------------------------------------
+3	sur	o | PE=ne | o -> about (obrazek existuje)
+57	grand-père	dědeček | ENP=grandfather | PE=ano | PD=Nespárovalo se  - diakritika? | dědeček -> gradfather (obrazek existuje)
+71	déjà	již, už | PE=ne | již, už -> already (obrazek existuje)
+72	à l’heure	včas, na čas | ENP=o'clock | PE=ano | PD=doplněno do json | včas, na čas -> clock (obrazek existuje)
+81	repas	jídlo | ENP=food | PE=ano | jídlo -> meal (obrazek existuje)
+106	des	nějaký (neurčitý člen množného čísla) | PE=ne | nějaký (neurčitý člen množného čísla) -> something (obrazek existuje)
+112	combien	kolik, jak moc | PE=ne | kolik -> howmuch (obrazek existuje); kolik, jak moc -> howmuch (obrazek existuje)
+121	magnifique	nádherný | PE=ne | nádherný -> magnificent (obrazek existuje)
+151	farine	mouka | PE=ne | mouka -> flour (obrazek existuje)
+159	collègue	kolega, kolegyně | PE=ne | kolega, kolegyně -> colleague (obrazek existuje)
+174	beau	hezký, krásný | PE=ne | hezký, krásný -> beautiful (obrazek existuje); krásný, hezký -> beautiful (obrazek existuje); pěkný, hezký -> beautiful (obrazek existuje)
+203	légume	zelenina | PE=ne | zelenina -> vegetable (obrazek existuje)
+204	dîner	večeře | PE=ne | večeře -> dinner (obrazek existuje)
+205	dîner	večeřet | PE=ne | večeřet -> dinner (obrazek existuje)
+206	supermarché	supermarket | PE=ne | supermarket -> store (obrazek existuje)
+207	lit	postel | PE=ne | postel -> lit (obrazek existuje)
+208	nuit	noc | PE=ne | noc -> nuit (obrazek existuje)
+209	demain	zítra | PE=ne | zítra -> tomorrow (obrazek existuje)
+210	chinois	čínský; Číňan; čínština | PE=ne | čínský -> chinese (obrazek existuje); Číňan -> chinese (obrazek existuje); čínština -> chinese (obrazek existuje)
+211	plusieurs	několik, více | PE=ne | několik, více -> plusieurs (obrazek existuje); několik -> plusieurs (obrazek existuje)
+212	langue	jazyk | PE=ne | jazyk -> language (obrazek existuje)
+
+Prima shoda v mapping.json, ale obrazek chybi
+---------------------------------------------
+Nic nenalezeno.
+
+Pravdepodobna shoda v mapping.json
+----------------------------------
+Nic nenalezeno.
+
+Bez navrhu - kandidat pro novy obrazek
+--------------------------------------
+Nic nenalezeno.
+
+================================================================================
+VocabularyIT
+================================================================================
+Vocabulary rows: 455
+Aktualni Pict CSV rows: 443
+Pict CSV rows po navrzenem doplneni: 455
+Nove radky k doplneni do Pict CSV: 12
+Uz OK: 316
+ENP ukazuje na existujici obrazek: 127
+Shoda v mapping.json + obrazek existuje: 12
+Shoda v mapping.json, ale obrazek chybi: 0
+Pravdepodobna shoda v mapping.json + obrazek existuje: 0
+Bez navrhu: 0
+
+Nove radky chybejici v Pict CSV
+-------------------------------
+rotto	rozbitý
+orologio	hodiny, hodinky
+nove	devět
+otto	osm
+in contanti	v hotovosti
+carta di credito	kreditní karta
+paese	země; stát; vesnice; obec; kraj podle kontextu
+quartiere	čtvrť, městská část
+albero	strom
+giardino	zahrada
+coinquilino	spolubydlící
+animale domestico	domácí zvíře
+
+ENP uz ukazuje na existujici obrazek v Pict
+-------------------------------------------
+51	una	jedna (neurčitý člen) | ENP=a | PE=ne | PD=add, json doplněno | Pict: a
+52	un	jeden (neurčitý člen) | ENP=a | PE=ne | PD=add, json doplněno | Pict: a
+101	per	pro | ENP=perJulia | PE=ne | PD=add, doplněno do json | Pict: perJulia
+102	per	aby | ENP=inorderto | PE=ne | PD=add, doplněno do json | Pict: inorderto
+109	allora	tak, tedy, tehdy | ENP=sothenwell | PE=ne | PD=add, doplněno json | Pict: sothenwell
+112	spesso	často | ENP=often | PE=ne | PD=add, doplněno do json | Pict: often
+120	piacere	líbit se, potěšení | ENP=tolikepleasure | PE=ne | PD=add, doplněno do json | Pict: tolikepleasure
+128	male	špatně, zle, bolest, zlo | ENP=painevil | PE=ne | PD=add, doplněno do json | Pict: painevil
+136	mese	měsíc | ENP=month | PE=ne | PD=add, json ok | Pict: month
+137	solito	obvyklý | ENP=usual | PE=ne | PD=add, json ok | Pict: usual
+143	andare	jít, jet | ENP=go | PE=ne | PD=add, json ok | Pict: go
+151	favore	laskavost | ENP=favor | PE=ne | PD=add, json ok | Pict: favor
+157	poi	potom / pak | ENP=then2 | PE=ne | PD=add, json ok | Pict: then2
+158	pregare	modlit se, prosit | ENP=pray | PE=ne | PD=add, json ok | Pict: pray
+161	ricordare	pamatovat si, připomenout si | ENP=remember | PE=ne | PD=add, json ok | Pict: remember
+163	subito	hned, okamžitě | ENP=immediately | PE=ne | PD=add, json ok | Pict: immediately
+169	di solito	obvykle | ENP=usually | PE=ne | PD=add, json ok | Pict: usually
+171	quando	kdy, když | ENP=when | PE=ne | PD=add, json ok | Pict: when
+172	nemico	nepřítel | ENP=enemy | PE=ne | PD=add, json ok | Pict: enemy
+174	occupato	obsazeno | ENP=occupied | PE=ne | PD=add, json ok | Pict: occupied
+176	permesso	dovolení, svolení | ENP=permission | PE=ne | PD=add, json ok | Pict: permission
+179	poco fa	před chvílí | ENP=beforeawhile | PE=ne | PD=add, json ok | Pict: beforeawhile
+183	quale	který | ENP=which | PE=ne | PD=add, json ok | Pict: which
+184	questo	tento | ENP=this | PE=ne | PD=add, json ok | Pict: this
+188	russo	Rus, ruský | ENP=russian | PE=ne | PD=add, json ok | Pict: russian
+191	simpatico	sympatický | ENP=likeable | PE=ne | PD=add, json ok | Pict: likeable
+194	sorpresa	překvapení | ENP=surprise | PE=ne | PD=add, json ok | Pict: surprise
+201	trovarsi	nacházet se, být | ENP=findoneself | PE=ne | PD=add, json ok | Pict: findoneself
+204	vino	víno | ENP=wine | PE=ne | PD=add, json ok | Pict: wine
+208	che	jaký, který | ENP=which | PE=ne | PD=add, json ok | Pict: which
+210	chi	kdo | ENP=who | PE=ne | PD=add, json ok | Pict: who
+211	chiamare	jmenovat se, volat, telefonovat | ENP=mynamecall | PE=ne | PD=add, json ok | Pict: mynamecall
+214	dopo	po, potom | ENP=after | PE=ne | PD=add, json ok | Pict: after
+215	ecco	tady je; tady jsou | ENP=hereyouare | PE=ne | PD=add, json ok | Pict: hereyouare
+218	fontana	kašna, fontána | ENP=fountain | PE=ne | PD=add, json ok | Pict: fountain
+220	francese	Francouz, francouzský | ENP=french | PE=ne | PD=add, json ok | Pict: french
+221	francobollo	poštovní známka | ENP=postalstamp | PE=ne | PD=add | Pict: postalstamp
+227	italiano	Ital, italský | ENP=italian | PE=ne | PD=add, json ok | Pict: italian
+232	meno	méně | ENP=less | PE=ne | PD=add | Pict: less
+233	misto	míchaný, smíšený | ENP=mixed | PE=ne | PD=add | Pict: mixed
+242	camera	pokoj | ENP=room | PE=ne | PD=add, json ok | Pict: room
+244	nuotare	plavat | ENP=swim | PE=ne | PD=add, json ok | Pict: swim
+254	fra	mezi, za | ENP=amongin | PE=ne | PD=add, json ok | Pict: amongin
+255	gli	ti, ty | ENP=menrucksacks | PE=ne | PD=add, json ok | Pict: menrucksacks
+257	porco	prase | ENP=pig | PE=ne | PD=add, json ok | Pict: pig
+258	cartolina	pohlednice | ENP=postcard | PE=ne | PD=add, json ok | Pict: postcard
+265	purtroppo	bohužel | ENP=unfortunatelly | PE=ne | PD=add, json ok | Pict: unfortunatelly
+268	malato	nemocný | ENP=sick | PE=ne | PD=add, json ok | Pict: sick
+270	debole	slabý | ENP=weak | PE=ne | PD=add, json ok | Pict: weak
+271	preferire	preferovat, dávat přednost | ENP=prefere | PE=ne | PD=add, json ok | Pict: prefere
+276	abbastanza	dost, docela | ENP=enough | PE=ne | PD=add | Pict: enough
+277	aereo	letadlo | ENP=airplane | PE=ne | PD=add | Pict: airplane
+279	ancora	ještě | ENP=still | PE=ne | PD=add | Pict: still
+284	automobilismo	automobilismus | ENP=motorsport | PE=ne | PD=add | Pict: motorsport
+286	campeggio	kemp | ENP=camping | PE=ne | PD=add | Pict: camping
+287	capire	rozumět, chápat | ENP=understand | PE=ne | PD=add | Pict: understand
+288	caro	drahý | ENP=expensive | PE=ne | PD=add | Pict: expensive
+291	chiuso	zavřený, zavřeno | ENP=closed | PE=ne | PD=add | Pict: closed
+294	cuore	srdce | ENP=heart | PE=ne | PD=add | Pict: heart
+301	elegante	elegantní | ENP=elegant | PE=ne | PD=add | Pict: elegant
+303	fermarsi	zdržet se, zastavit se | ENP=stop | PE=ne | PD=add | Pict: stop
+304	finestra	okno | ENP=window | PE=ne | PD=add | Pict: window
+307	foto	fotka, fotografie | ENP=photo | PE=ne | PD=add | Pict: photo
+308	Francia	Francie | ENP=france | PE=ne | PD=add | Pict: france
+309	freddo	studený | ENP=cold | PE=ne | PD=add | Pict: cold
+324	lungo	dlouhý | ENP=long | PE=ne | PD=add | Pict: long
+325	mano	ruka | ENP=hand | PE=ne | PD=add | Pict: hand
+327	mattina	ráno | ENP=morning | PE=ne | PD=add | Pict: morning
+329	Milano	Milán | ENP=milan | PE=ne | PD=add | Pict: milan
+330	nave	loď | ENP=ship | PE=ne | PD=add | Pict: ship
+333	Parigi	Paříž | ENP=paris | PE=ne | PD=add | Pict: paris
+336	problema	problém | ENP=problem | PE=ne | PD=add | Pict: problem
+337	programma	program | ENP=program | PE=ne | PD=add | Pict: program
+340	radio	rádio, rozhlas | ENP=radio | PE=ne | PD=add | Pict: radio
+344	sentirsi	cítit se | ENP=feel | PE=ne | PD=add | Pict: feel
+347	sole	slunce | ENP=sun | PE=ne | PD=add | Pict: sun
+350	stesso	tentýž, stejný | ENP=same | PE=ne | PD=add | Pict: same
+353	tempo	čas, počasí | ENP=time | PE=ne | PD=add | Pict: time
+354	turista	turista, turistka | ENP=tourist | PE=ne | PD=add | Pict: tourist
+357	vacanza, vacanze	dovolená, prázdniny | ENP=vacation | PE=ne | PD=add | Pict: vacation
+359	vedere	vidět | ENP=see | PE=ne | PD=add | Pict: see
+361	vero	pravý, pravdivý, opravdový | ENP=true | PE=ne | PD=add | Pict: true
+364	volo	let | ENP=flight | PE=ne | PD=add | Pict: flight
+374	ammalato	nemocný | ENP=sick | PE=ne | PD=add | Pict: sick
+376	bisogno	potřeba | ENP=need | PE=ne | PD=add | Pict: need
+377	chiudere	zavřít | ENP=close | PE=ne | PD=add | Pict: close
+378	cielo	obloha, nebe | ENP=sky | PE=ne | PD=add | Pict: sky
+380	colore	barva | ENP=color | PE=ne | PD=add | Pict: color
+382	coperto	zatažený, pokrytý | ENP=cloudy | PE=ne | PD=add | Pict: cloudy
+383	corso	kurz | ENP=course | PE=ne | PD=add | Pict: course
+385	divertimento	zábava | ENP=fun | PE=ne | PD=add | Pict: fun
+386	dizionario	slovník | ENP=dictionary | PE=ne | PD=add | Pict: dictionary
+388	fame	hlad | ENP=hunger | PE=ne | PD=add | Pict: hunger
+390	frequentare	navštěvovat | ENP=visit | PE=ne | PD=add | Pict: visit
+391	fuori	ven, venku | ENP=outside | PE=ne | PD=add | Pict: outside
+392	gita	výlet | ENP=trip | PE=ne | PD=add | Pict: trip
+393	grave	vážný, těžký | ENP=serious | PE=ne | PD=add | Pict: serious
+398	Inghilterra	Anglie | ENP=england | PE=ne | PD=add | Pict: england
+399	interprete	tlumočník | ENP=interpreter | PE=ne | PD=add | Pict: interpreter
+400	libreria	knihkupectví | ENP=bookstore | PE=ne | PD=add | Pict: bookstore
+401	lingua	jazyk | ENP=language | PE=ne | PD=add | Pict: language
+402	Londra	Londýn | ENP=london | PE=ne | PD=add | Pict: london
+404	montagna	hora, hory | ENP=mountain | PE=ne | PD=add | Pict: mountain
+406	passo	krok | ENP=step | PE=ne | PD=add | Pict: step
+407	piantina	plánek, mapka | ENP=map | PE=ne | PD=add | Pict: map
+408	piovere	pršet | ENP=rain | PE=ne | PD=add | Pict: rain
+409	pomeriggio	odpoledne | ENP=afternoon | PE=ne | PD=add | Pict: afternoon
+410	privato	soukromý | ENP=private | PE=ne | PD=add | Pict: private
+415	sete	žízeň | ENP=thirst | PE=ne | PD=add | Pict: thirst
+419	Svezia	Švédsko | ENP=sweden | PE=ne | PD=add | Pict: sweden
+420	tascabile	kapesní | ENP=pocket | PE=ne | PD=add | Pict: pocket
+421	televisione	televize | ENP=television | PE=ne | PD=add | Pict: television
+422	testa	hlava | ENP=head | PE=ne | PD=add | Pict: head
+425	lasciare stare	nechat být | ENP=leavealone | PE=ne | PD=add | Pict: leavealone
+427	fare	dělat | ENP=do | PE=ne | PD=add | Pict: do
+428	noioso	nudný | ENP=bored | PE=ne | PD=add | Pict: bored
+429	ascoltare	poslouchat | ENP=listen | PE=ne | PD=add | Pict: listen
+431	famoso	slavný, známý | ENP=famous | PE=ne | PD=add | Pict: famous
+432	comprare	koupit, kupovat | ENP=buy | PE=ne | PD=add | Pict: buy
+433	isola	ostrov | ENP=island | PE=ne | PD=add | Pict: island
+434	antico	starobylý, dávný, antický | ENP=ancient | PE=ne | PD=add | Pict: ancient
+435	ambasciata	velvyslanectví | ENP=embassy | PE=ne | PD=add | Pict: embassy
+437	marrone	hnědý | ENP=brown | PE=ne | PD=add | Pict: brown
+438	calzini	ponožky | ENP=socks | PE=ne | PD=add | Pict: socks
+440	guanti	rukavice | ENP=gloves | PE=ne | PD=add | Pict: gloves
+441	pantaloni	kalhoty | ENP=pants | PE=ne | PD=add | Pict: pants
+443	anello	prsten, kruh | ENP=ring | PE=ne | PD=add | Pict: ring
+
+Prima shoda v mapping.json a obrazek existuje
+---------------------------------------------
+444	rotto	rozbitý | PE=ne | rozbitý, vyřízený -> broken (obrazek existuje); rozbitý -> rotto (obrazek existuje)
+445	orologio	hodiny, hodinky | PE=ne | hodinky -> clock (obrazek existuje); hodiny -> clock (obrazek existuje)
+446	nove	devět | PE=ne | devět, nový -> ninenew (obrazek existuje); devět -> nove (obrazek existuje)
+447	otto	osm | PE=ne | osm -> otto (obrazek existuje)
+448	in contanti	v hotovosti | PE=ne | v hotovosti -> incash (obrazek existuje)
+449	carta di credito	kreditní karta | PE=ne | kreditní karta -> carta_di_credito (obrazek existuje)
+450	paese	země; stát; vesnice; obec; kraj podle kontextu | PE=ne | stát -> cost (obrazek existuje); země -> country (obrazek existuje); země; stát; vesnice; obec; kraj podle kontextu -> paese (obrazek existuje)
+451	quartiere	čtvrť, městská část | PE=ne | čtvrť -> district (obrazek existuje); čtvrť, městská část -> quartiere (obrazek existuje)
+452	albero	strom | PE=ne | strom -> albero (obrazek existuje)
+453	giardino	zahrada | PE=ne | zahrada -> garden (obrazek existuje)
+454	coinquilino	spolubydlící | PE=ne | spolubydlící -> coinquilino (obrazek existuje)
+455	animale domestico	domácí zvíře | PE=ne | domácí zvíře -> animale_domestico (obrazek existuje)
+
+Prima shoda v mapping.json, ale obrazek chybi
+---------------------------------------------
+Nic nenalezeno.
+
+Pravdepodobna shoda v mapping.json
+----------------------------------
+Nic nenalezeno.
+
+Bez navrhu - kandidat pro novy obrazek
+--------------------------------------
+Nic nenalezeno.

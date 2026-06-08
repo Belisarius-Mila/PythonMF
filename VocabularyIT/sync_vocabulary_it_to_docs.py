@@ -249,17 +249,27 @@ def choose_picture_stem(
         | ADJ_ADV_WORDS
     )
 
-    for index, key in enumerate([it_norm, cz_norm] + tokens):
-        if index >= 2 and key in generic_tokens:
+    exact_keys = [it_norm, cz_norm]
+
+    for key in exact_keys:
+        if key and key in picture_stems:
+            return key, "direct"
+
+    if not term_blocked:
+        for key in exact_keys:
+            mapped = synonym_image_map.get(key)
+            if mapped:
+                return mapped, "mapping"
+
+    for key in tokens:
+        if key in generic_tokens:
             continue
         if key and key in picture_stems:
             return key, "direct"
 
     if not term_blocked:
-        for index, key in enumerate([it_norm, cz_norm] + tokens):
-            if index >= 2 and key in generic_tokens:
-                continue
-            if key in blocked_terms:
+        for key in tokens:
+            if key in generic_tokens or key in blocked_terms:
                 continue
             mapped = synonym_image_map.get(key)
             if mapped:
