@@ -3002,6 +3002,7 @@ Dalsi krok:
             result = new_email_headers_overview(
                 limit_per_source=50,
                 since="2026-06-01T07:00:00+00:00",
+                known_ids={completed_id},
                 decisions_path=Path(temp_dir) / "email_processing_decisions.json",
                 actions_path=actions_path,
                 icloud_provider_factory=lambda: _FakeEmailProvider(
@@ -3026,6 +3027,63 @@ Dalsi krok:
         self.assertTrue(result["ok"])
         self.assertEqual([item["uid"] for item in result["items"]], ["11"])
         self.assertGreaterEqual(result["skipped_completed_count"], 1)
+        self.assertEqual(result["suppressed_known_ids"], [completed_id])
+
+    def test_document_intake_email_scan_reports_suppressed_known_completed_items(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            actions_path = Path(temp_dir) / "email_work_queue_actions.jsonl"
+            completed_id = email_processing_item_id("", "Seznam", "INBOX", "155808", "", "")
+            self.write_jsonl(
+                actions_path,
+                [
+                    {
+                        "action": "process_email_work_queue_batch",
+                        "items": [
+                            {
+                                "item_id": completed_id,
+                                "provider": "Seznam",
+                                "folder": "INBOX",
+                                "uid": "155808",
+                                "status": "saved",
+                            }
+                        ],
+                    }
+                ],
+            )
+
+            result = document_intake_email_scan_status(
+                limit_per_source=10,
+                since="2026-06-08T09:00:00+00:00",
+                days=0,
+                known_ids={completed_id},
+                decisions_path=Path(temp_dir) / "email_processing_decisions.json",
+                actions_path=actions_path,
+                icloud_provider_factory=lambda: _FakeEmailProvider([]),
+                seznam_provider_factory=lambda: _FakeEmailProvider(
+                    [
+                        EmailHeader(
+                            internal_id="155808",
+                            date="Mon, 8 Jun 2026 09:51:59 +0200",
+                            sender="T-Mobile <billing@example.com>",
+                            subject="Vyúčtování služeb od T-Mobile",
+                            attachments=(
+                                EmailAttachmentMeta(
+                                    filename="vyuctovani.pdf",
+                                    content_type="application/pdf",
+                                    size_bytes=300_000,
+                                    part_id="2",
+                                    content_id="",
+                                    disposition="attachment",
+                                ),
+                            ),
+                        )
+                    ]
+                ),
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["items"], [])
+        self.assertEqual(result["suppressed_known_ids"], [completed_id])
 
     def test_email_processing_id_is_stable_for_same_provider_folder_uid(self) -> None:
         first = email_processing_item_id(

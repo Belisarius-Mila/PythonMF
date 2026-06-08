@@ -2265,6 +2265,7 @@ def new_email_headers_overview(
     decided = read_email_processing_decisions(decisions_path)
     decided_keys = email_processing_decision_lookup_keys(decided)
     completed_keys = email_processing_completed_lookup_keys(actions_path)
+    suppressed_known_ids = sorted(known & (decided_keys | completed_keys))
     entries: list[dict[str, Any]] = []
     unavailable: list[str] = []
     providers: list[tuple[str, Callable[[], object], type[Exception], str]] = [
@@ -2331,6 +2332,7 @@ def new_email_headers_overview(
         "known_count": len(known),
         "skipped_decided_count": len(decided_keys),
         "skipped_completed_count": len(completed_keys),
+        "suppressed_known_ids": suppressed_known_ids,
         "items": entries,
         "unavailable": unavailable,
     }
@@ -5020,6 +5022,11 @@ def document_intake_email_scan_status(
         "raw_count": len(raw_items),
         "count": len(items),
         "filtered_out_count": filtered_out_count,
+        "suppressed_known_ids": [
+            safe_text(str(item_id))[:180]
+            for item_id in result.get("suppressed_known_ids", [])
+            if str(item_id).strip()
+        ],
         "items": items,
         "unavailable": [
             safe_text(str(item))[:180]
@@ -10168,20 +10175,27 @@ COCKPIT_HTML = """<!doctype html>
     async function runEmailIntakeMonitor() {
       try {
         const payload = lastEmailIntakeMonitor.generated_at
-          ? {limit_per_source: 10, since: lastEmailIntakeMonitor.generated_at}
-          : {limit_per_source: 10, days: 1};
+          ? {limit_per_source: 10, since: lastEmailIntakeMonitor.generated_at, known_ids: emailIntakeKnownIds()}
+          : {limit_per_source: 10, days: 1, known_ids: emailIntakeKnownIds()};
         const res = await fetch("/api/documents/intake-email-scan", {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify(payload)
         });
         const data = await res.json();
+        const suppressed = new Set(data.suppressed_known_ids || []);
+        const keptItems = (lastEmailIntakeMonitor.items || []).filter((item) => {
+          const id = item.id || "";
+          const legacyId = item.legacy_id || "";
+          return !suppressed.has(id) && !suppressed.has(legacyId);
+        });
+        const mergedItems = mergeEmailIntakeItems(keptItems, data.items || []);
         lastEmailIntakeMonitor = {
           generated_at: data.generated_at || new Date().toISOString(),
-          count: Number(data.count || 0),
+          count: mergedItems.length,
           raw_count: Number(data.raw_count || 0),
           filtered_out_count: Number(data.filtered_out_count || 0),
-          items: data.items || [],
+          items: mergedItems,
           message: data.message || "E-mailové hlavičky zkontrolované read-only.",
           unavailable: data.unavailable || []
         };
@@ -10195,6 +10209,36 @@ COCKPIT_HTML = """<!doctype html>
         };
         renderDocumentIntake(latestDocumentIntakeData || {});
       }
+    }
+
+    function emailIntakeKnownIds() {
+      const ids = [];
+      (lastEmailIntakeMonitor.items || []).forEach((item) => {
+        if (item && item.id) ids.push(item.id);
+        if (item && item.legacy_id) ids.push(item.legacy_id);
+      });
+      return ids;
+    }
+
+    function emailIntakeDateValue(item) {
+      const parsed = Date.parse(item.date || "");
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function mergeEmailIntakeItems(existing, incoming) {
+      const byId = new Map();
+      (existing || []).forEach((item) => {
+        if (!item || !item.id) return;
+        byId.set(item.id, item);
+        if (item.legacy_id) byId.set(item.legacy_id, item);
+      });
+      (incoming || []).forEach((item) => {
+        if (!item || !item.id || byId.has(item.id)) return;
+        if (item.legacy_id && byId.has(item.legacy_id)) return;
+        byId.set(item.id, item);
+        if (item.legacy_id) byId.set(item.legacy_id, item);
+      });
+      return Array.from(new Set(byId.values())).sort((a, b) => emailIntakeDateValue(b) - emailIntakeDateValue(a));
     }
 
     async function hideEmailIntakeCandidate(item, button) {
