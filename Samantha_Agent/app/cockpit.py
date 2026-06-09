@@ -31,7 +31,7 @@ from app.adam_service import (
     stop_adam_service,
     submit_adam_text_request,
 )
-from app.backup.activity_state import format_backup_activity_reminder
+from app.backup.activity_state import backup_activity_status
 from app.documents.consistency_audit import format_document_consistency_audit, run_document_consistency_audit, save_audit_decision
 from app.documents.scandocu import DEFAULT_DOWNLOADS_DIR, scan_downloads_for_pdfs
 from app.documents.vault import (
@@ -3042,6 +3042,7 @@ def cockpit_status() -> dict[str, Any]:
     document_due_candidates = document_due_candidates_status()
     reminders = reminders_status()
     urgent = urgent_reminders_status()
+    backup_status = backup_activity_status()
     return {
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "downloads": downloads,
@@ -3051,7 +3052,8 @@ def cockpit_status() -> dict[str, Any]:
         "document_classification": document_classification,
         "document_due_candidates": document_due_candidates,
         "action_queue": action_queue_status(document_work=document_work, reminders=reminders, urgent_reminders=urgent),
-        "backup": format_backup_activity_reminder(),
+        "backup": backup_status["message"],
+        "backup_status": backup_status,
         "vault": document_vault_status_summary(),
         "reminders": reminders,
         "urgent_reminders": urgent,
@@ -11102,7 +11104,7 @@ COCKPIT_HTML = """<!doctype html>
         setDashboardStatusSignal("quickNotes", "loading", "QN se načítají samostatně");
       }
 
-      const backupState = classifyBackup(data.backup || "");
+      const backupState = classifyBackup(data.backup || "", data.backup_status || null);
       setDashboardValue(dashboardBackup, `<span class="${backupState.className}">${backupState.label}</span>`);
       setDashboardStatusSignal(
         "backup",
@@ -11665,7 +11667,13 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
-    function classifyBackup(text) {
+    function classifyBackup(text, status) {
+      if (status && typeof status === "object") {
+        const raw = String(status.status || "");
+        if (raw === "ok") return {label: "v pořádku", className: "ok"};
+        if (raw === "missing" || raw === "stale") return {label: "potřebuje zálohu", className: "warn"};
+        if (raw === "error") return {label: "chyba stavu zálohy", className: "warn"};
+      }
       if (!text) return {label: "neznámý stav", className: "warn"};
       const lower = text.toLocaleLowerCase("cs-CZ");
       if (lower.includes("starsi nez 3 dny") || lower.includes("starší než 3 dny") || lower.includes("chybi") || lower.includes("chybí")) {

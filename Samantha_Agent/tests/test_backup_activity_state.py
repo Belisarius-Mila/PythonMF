@@ -7,6 +7,7 @@ from pathlib import Path
 from app import samantha_agent
 from app.backup.activity_state import (
     BackupActivityState,
+    backup_activity_status,
     format_backup_activity_reminder,
     load_backup_activity_state,
     record_backup_completed,
@@ -37,9 +38,14 @@ class BackupActivityStateTests(unittest.TestCase):
             )
 
             formatted = format_backup_activity_reminder(path=path, today="2026-05-19")
+            status = backup_activity_status(path=path, today="2026-05-19")
 
             self.assertIn("3dennim intervalu", formatted)
             self.assertNotIn("Je starsi nez 3 dny", formatted)
+            self.assertTrue(status["ok"])
+            self.assertEqual(status["status"], "ok")
+            self.assertEqual(status["last_backup_at"], "2026-05-17")
+            self.assertEqual(status["age_days"], 2)
 
     def test_old_state_warns_after_three_days(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -54,10 +60,14 @@ class BackupActivityStateTests(unittest.TestCase):
             )
 
             formatted = format_backup_activity_reminder(path=path, today="2026-05-19")
+            status = backup_activity_status(path=path, today="2026-05-19")
 
             self.assertIn("Posledni uspesna zaloha byla 2026-05-15", formatted)
             self.assertIn("Je starsi nez 3 dny", formatted)
             self.assertIn("/Volumes/Falta/SamanthaSecureBackup", formatted)
+            self.assertFalse(status["ok"])
+            self.assertEqual(status["status"], "stale")
+            self.assertEqual(status["age_days"], 4)
 
     def test_exactly_three_days_old_does_not_warn(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

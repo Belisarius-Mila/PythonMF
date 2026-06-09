@@ -1217,7 +1217,10 @@ class CockpitTests(unittest.TestCase):
             patch("app.cockpit.document_cases_status", return_value={"ok": True, "case_count": 0, "cases": []}),
             patch("app.cockpit.document_classification_status", return_value={"ok": True, "issue_count": 0, "items": []}),
             patch("app.cockpit.document_due_candidates_status", return_value={"ok": True, "actionable_count": 0, "items": []}),
-            patch("app.cockpit.format_backup_activity_reminder", return_value="backup ok"),
+            patch(
+                "app.cockpit.backup_activity_status",
+                return_value={"ok": True, "status": "ok", "message": "backup ok"},
+            ),
             patch("app.cockpit.document_vault_status_summary", return_value="vault ok"),
             patch("app.cockpit.reminders_status", return_value={"ok": True, "counts": {}}),
             patch("app.cockpit.probe_scandocu", return_value={"running": False}),
@@ -1233,6 +1236,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("document_classification", status)
         self.assertIn("document_due_candidates", status)
         self.assertIn("action_queue", status)
+        self.assertEqual(status["backup"], "backup ok")
+        self.assertEqual(status["backup_status"]["status"], "ok")
         self.assertIn("reminders", status)
         self.assertIn("voice_mode", status)
         self.assertIn("voice_bridge", status)

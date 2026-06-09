@@ -72,19 +72,36 @@ def format_backup_activity_reminder(
     path: Path = DEFAULT_BACKUP_ACTIVITY_STATE_PATH,
     today: date | str | None = None,
 ) -> str:
+    return backup_activity_status(path=path, today=today)["message"]
+
+
+def backup_activity_status(
+    path: Path = DEFAULT_BACKUP_ACTIVITY_STATE_PATH,
+    today: date | str | None = None,
+) -> dict[str, Any]:
     today_date = _parse_today(today)
     try:
         state = load_backup_activity_state(path)
     except (json.JSONDecodeError, ValueError):
-        return (
+        message = (
             "ZALOHA SAMANTHY:\n"
             "- Nelze nacist lokalni data/backup/activity_state.json. "
             "Zkontroluj soubor pred dalsi zalohou."
         )
+        return {
+            "ok": False,
+            "status": "error",
+            "message": message,
+            "last_backup_at": "",
+            "last_backup_target": "",
+            "last_backup_mode": "",
+            "age_days": None,
+            "warning_days": BACKUP_WARNING_DAYS,
+        }
 
     backup_date = _parse_optional_date(state.last_backup_at)
     if backup_date is None:
-        return "\n".join(
+        message = "\n".join(
             [
                 "ZALOHA SAMANTHY:",
                 (
@@ -94,10 +111,21 @@ def format_backup_activity_reminder(
                 "- Pripominka sama nic nekopiruje, nemaze ani necte tajemstvi.",
             ]
         )
+        return {
+            "ok": False,
+            "status": "missing",
+            "message": message,
+            "last_backup_at": "",
+            "last_backup_target": state.last_backup_target,
+            "last_backup_mode": state.last_backup_mode,
+            "age_days": None,
+            "warning_days": BACKUP_WARNING_DAYS,
+        }
 
+    age_days = (today_date - backup_date).days
     if today_date - backup_date > timedelta(days=BACKUP_WARNING_DAYS):
         target = f" na {state.last_backup_target}" if state.last_backup_target else ""
-        return "\n".join(
+        message = "\n".join(
             [
                 "ZALOHA SAMANTHY:",
                 (
@@ -107,13 +135,33 @@ def format_backup_activity_reminder(
                 "- Pripominka zustane aktivni pri startu, dokud neprobehnou nova zaloha.",
             ]
         )
+        return {
+            "ok": False,
+            "status": "stale",
+            "message": message,
+            "last_backup_at": backup_date.isoformat(),
+            "last_backup_target": state.last_backup_target,
+            "last_backup_mode": state.last_backup_mode,
+            "age_days": age_days,
+            "warning_days": BACKUP_WARNING_DAYS,
+        }
 
-    return "\n".join(
+    message = "\n".join(
         [
             "ZALOHA SAMANTHY:",
             f"- Posledni zaloha je v 3dennim intervalu ({backup_date.isoformat()}).",
         ]
     )
+    return {
+        "ok": True,
+        "status": "ok",
+        "message": message,
+        "last_backup_at": backup_date.isoformat(),
+        "last_backup_target": state.last_backup_target,
+        "last_backup_mode": state.last_backup_mode,
+        "age_days": age_days,
+        "warning_days": BACKUP_WARNING_DAYS,
+    }
 
 
 def _string_or_empty(value: Any) -> str:
