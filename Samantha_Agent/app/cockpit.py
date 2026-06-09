@@ -9090,6 +9090,7 @@ COCKPIT_HTML = """<!doctype html>
             <span id="dashboardOverallLabel" class="dashboard-overall-label">Načítám</span>
             <span id="dashboardOverallReason" class="dashboard-overall-reason">Skládám hlavní a samostatně načítané kontroly.</span>
           </div>
+          <div id="dashboardMorningSentence" class="status-line">Ranní stav se načte spolu s Cockpitem.</div>
           <div class="dashboard-row"><span class="dashboard-label">ScanDocu</span><span id="dashboardScanDocu" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Reminders</span><span id="dashboardReminders" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Hlas</span><span id="dashboardVoiceMode" class="dashboard-value"></span></div>
@@ -9659,6 +9660,7 @@ COCKPIT_HTML = """<!doctype html>
     const dashboardOverall = document.getElementById("dashboardOverall");
     const dashboardOverallLabel = document.getElementById("dashboardOverallLabel");
     const dashboardOverallReason = document.getElementById("dashboardOverallReason");
+    const dashboardMorningSentence = document.getElementById("dashboardMorningSentence");
     const dashboardProcessBtn = document.getElementById("dashboardProcessBtn");
     const dashboardReviewBtn = document.getElementById("dashboardReviewBtn");
     const dashboardTerminalBtn = document.getElementById("dashboardTerminalBtn");
@@ -9799,12 +9801,16 @@ COCKPIT_HTML = """<!doctype html>
     });
 
     let lastSelectedSpeechText = "";
-    document.addEventListener("selectionchange", () => {
+    function captureSelectedSpeechText() {
       const selected = (window.getSelection ? window.getSelection().toString() : "").trim();
       if (selected) {
         lastSelectedSpeechText = selected;
       }
-    });
+      return selected;
+    }
+    document.addEventListener("selectionchange", captureSelectedSpeechText);
+    document.addEventListener("mouseup", captureSelectedSpeechText);
+    document.addEventListener("keyup", captureSelectedSpeechText);
 
     function verifyButtonHealth() {
       const requiredIds = [
@@ -11136,7 +11142,35 @@ COCKPIT_HTML = """<!doctype html>
                 : "Git je synchronizovaný"
         );
 	      }
+      renderDashboardMorningSentence(data);
 	    }
+
+    function renderDashboardMorningSentence(data) {
+      if (!dashboardMorningSentence) return;
+      const stable = ["Cockpit odpovídá"];
+      const warnings = [];
+      const backup = data.backup_status || {};
+      const git = data.git || {};
+      const bridge = data.voice_bridge || {};
+
+      if (backup.status === "ok") {
+        stable.push("záloha je v pořádku");
+      } else {
+        warnings.push("záloha");
+      }
+      if (git.ok && !git.dirty_count && !git.ahead && !git.behind) {
+        stable.push("git je čistý");
+      } else {
+        warnings.push("git");
+      }
+      if (bridge.status && bridge.status !== "ok") {
+        warnings.push("Adam bridge");
+      }
+
+      dashboardMorningSentence.textContent = warnings.length
+        ? `Ranní stav: Samantha je vzhůru; ${stable.join(", ")}; zkontrolovat: ${warnings.join(", ")}.`
+        : `Ranní stav: Samantha je vzhůru; ${stable.join(", ")}.`;
+    }
 
 	    function renderActionQueue(queue) {
 	      const items = queue.items || [];
@@ -11847,7 +11881,7 @@ COCKPIT_HTML = """<!doctype html>
 	    }
 
 	    async function speakSelectedText() {
-	      const currentSelection = (window.getSelection ? window.getSelection().toString() : "").trim();
+	      const currentSelection = captureSelectedSpeechText();
 	      const text = currentSelection || lastSelectedSpeechText;
 	      await speakText(text, dashboardSpeakSelectionBtn, "Čtu vybraný text nahlas...");
 	    }
@@ -13698,6 +13732,8 @@ COCKPIT_HTML = """<!doctype html>
     });
     dashboardRestartBtn.addEventListener("click", restartCockpit);
     dashboardSpeakBtn.addEventListener("click", speakDashboardStatus);
+    dashboardSpeakSelectionBtn.addEventListener("pointerdown", captureSelectedSpeechText);
+    dashboardSpeakSelectionBtn.addEventListener("mousedown", captureSelectedSpeechText);
     dashboardSpeakSelectionBtn.addEventListener("click", speakSelectedText);
     voiceModeToggleBtn.addEventListener("click", toggleVoiceMode);
     voiceModeStartBtn.addEventListener("click", startVoiceModeWatcher);
