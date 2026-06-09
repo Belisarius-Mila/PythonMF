@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 
 from scripts.git_safety_check import StagedFile, check_staged, format_report, path_is_blocked
-from scripts.system_quick_check import autosave_line
+from scripts.system_quick_check import CheckLine, autosave_line, format_morning_sentence
 
 
 class GitSafetyCheckTests(unittest.TestCase):
@@ -34,6 +34,29 @@ class GitSafetyCheckTests(unittest.TestCase):
 
 
 class SystemQuickCheckTests(unittest.TestCase):
+    def test_format_morning_sentence_summarizes_ok_state(self) -> None:
+        sentence = format_morning_sentence(
+            [
+                CheckLine("git", True, "clean"),
+                CheckLine("backup", True, "ok"),
+                CheckLine("cockpit", True, "ok"),
+            ]
+        )
+
+        self.assertIn("Samantha je vzhůru", sentence)
+        self.assertIn("git je čistý", sentence)
+
+    def test_format_morning_sentence_lists_warnings(self) -> None:
+        sentence = format_morning_sentence(
+            [
+                CheckLine("git", False, "dirty"),
+                CheckLine("backup", True, "ok"),
+                CheckLine("cockpit", True, "ok"),
+            ]
+        )
+
+        self.assertIn("zkontrolovat: git", sentence)
+
     def test_autosave_line_reports_recent_file_ok(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "latest_info.txt"

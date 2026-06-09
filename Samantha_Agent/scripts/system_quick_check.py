@@ -90,10 +90,31 @@ def display_path_for(path: Path) -> str:
 
 
 def format_quick_check(lines: list[CheckLine]) -> str:
-    output = ["Samantha system quick check:"]
+    output = [format_morning_sentence(lines), "Samantha system quick check:"]
     for line in lines:
         output.append(f"- {'OK' if line.ok else 'WARN'} {line.name}: {line.message}")
     return "\n".join(output)
+
+
+def format_morning_sentence(lines: list[CheckLine]) -> str:
+    by_name = {line.name: line for line in lines}
+    cockpit_ok = by_name.get("cockpit", CheckLine("cockpit", False, "")).ok
+    backup_ok = by_name.get("backup", CheckLine("backup", False, "")).ok
+    git_ok = by_name.get("git", CheckLine("git", False, "")).ok
+    warnings = [line.name for line in lines if not line.ok]
+
+    if cockpit_ok and backup_ok and git_ok and not warnings:
+        return "Ranní stav: Samantha je vzhůru, Cockpit odpovídá, záloha je v pořádku a git je čistý."
+    stable_parts: list[str] = []
+    if cockpit_ok:
+        stable_parts.append("Cockpit odpovídá")
+    if backup_ok:
+        stable_parts.append("záloha je v pořádku")
+    if git_ok:
+        stable_parts.append("git je čistý")
+    stable_text = ", ".join(stable_parts) if stable_parts else "základní kontrola má varování"
+    warning_text = ", ".join(warnings) if warnings else "žádná varování"
+    return f"Ranní stav: Samantha je vzhůru; {stable_text}; zkontrolovat: {warning_text}."
 
 
 def main() -> int:

@@ -9,6 +9,10 @@ Janička je jednoduchý vstup do Samanthy pro Janu.
 Nemá nahrazovat celý Cockpit a není to omezený režim. Má pomoci začít podle
 toho, co Jana právě potřebuje udělat:
 
+Když si Jana není jistá, může začít tady. Běžné čtení, hledání a ptaní je
+bezpečné; mazání, posílání, placení a jiné změny se nemají dělat bez jasného
+potvrzení.
+
 - najít dokument,
 - vytisknout dokument,
 - otevřít e-maily,
