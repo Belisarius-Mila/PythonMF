@@ -88,6 +88,9 @@ pri dalsim navazani videl, kam se da rozumne pokracovat.
 ## Bezpecnost a soubory
 
 - Nikdy nemaz soubory bez vyslovneho souhlasu Mily.
+- Pro vysoce rizikove destruktivni nebo systemove akce pouzij globalni brzdu z
+  `memory/technical/global_safety_brake.md`; nestaci obycejne `ano`, je potreba
+  presna potvrzovaci veta.
 - Neupravuj soubory mimo rozsah aktualniho ukolu, pokud to neni nutne.
 - API klice, tokeny a jina tajemstvi nikdy neukladej do gitu.
 - Skutecny `OPENAI_API_KEY` patri pouze do lokalniho `.env`, ne do `.env.example`, dokumentace ani commitu.
