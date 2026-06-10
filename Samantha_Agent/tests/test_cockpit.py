@@ -19,6 +19,7 @@ from app.cockpit import (
     cockpit_status,
     create_document_due_reminder_action,
     document_reference,
+    library_archive_url_action,
     cockpit_edge_tts_action,
     cockpit_voice_approval_action,
     cockpit_save_voice_text_action,
@@ -76,6 +77,25 @@ from app.email.models import EmailAttachmentMeta, EmailHeader, EmailMessage
 
 
 class CockpitTests(unittest.TestCase):
+    def test_library_archive_url_action_passes_url_category_and_tags(self) -> None:
+        with patch("app.cockpit.archive_url") as archive_mock:
+            archive_mock.return_value = {"ok": True, "item": {"id": "article-1"}}
+
+            result = library_archive_url_action(
+                {
+                    "url": "https://example.test/clanek",
+                    "category": "recipes",
+                    "tags": "kolac, rychle",
+                }
+            )
+
+        self.assertTrue(result["ok"])
+        archive_mock.assert_called_once_with(
+            url="https://example.test/clanek",
+            category="recipes",
+            tags=["kolac", "rychle"],
+        )
+
     def test_document_work_status_groups_downloads_and_review_queue(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             vault = Path(temp_dir) / "documents"

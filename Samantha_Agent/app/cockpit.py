@@ -13,6 +13,7 @@ import signal
 import subprocess
 import tempfile
 import time
+import urllib.error
 from collections.abc import Callable
 from datetime import date, datetime, timezone
 from email import message_from_bytes
@@ -31,6 +32,7 @@ from app.adam_service import (
     stop_adam_service,
     submit_adam_text_request,
 )
+from app.article_archive import archive_url, get_article, list_articles, search_articles
 from app.backup.activity_state import backup_activity_status
 from app.documents.consistency_audit import format_document_consistency_audit, run_document_consistency_audit, save_audit_decision
 from app.documents.scandocu import DEFAULT_DOWNLOADS_DIR, scan_downloads_for_pdfs
@@ -307,6 +309,29 @@ DOCUMENT_REVIEW_GROUPS: tuple[dict[str, str], ...] = (
 
 def web_apps_catalog() -> dict[str, Any]:
     return {"ok": True, "apps": [dict(item) for item in WEB_APP_CATALOG]}
+
+
+def library_archive_url_action(payload: dict[str, Any]) -> dict[str, Any]:
+    raw_tags = payload.get("tags", [])
+    if isinstance(raw_tags, str):
+        tags = [part.strip() for part in re.split(r"[,;]", raw_tags) if part.strip()]
+    elif isinstance(raw_tags, list):
+        tags = [str(part).strip() for part in raw_tags if str(part).strip()]
+    else:
+        tags = []
+    try:
+        result = archive_url(
+            url=str(payload.get("url", "")),
+            category=str(payload.get("category", "other")),
+            tags=tags,
+        )
+    except ValueError as exc:
+        return {"ok": False, "message": str(exc), "error": "invalid_url"}
+    except urllib.error.URLError as exc:
+        return {"ok": False, "message": f"URL se nepodařilo stáhnout: {exc}", "error": "fetch_failed"}
+    except OSError as exc:
+        return {"ok": False, "message": f"Článek se nepodařilo uložit: {exc}", "error": "archive_failed"}
+    return result
 
 
 def recovery_center_status(
@@ -7209,6 +7234,30 @@ class CockpitServer:
                 if parsed.path == "/api/projects/status":
                     self.respond_json(projects_status())
                     return
+                if parsed.path == "/api/library/list":
+                    params = parse_qs(parsed.query)
+                    category = params.get("category", ["other"])[0]
+                    try:
+                        limit = int(params.get("limit", ["200"])[0])
+                    except (TypeError, ValueError):
+                        limit = 200
+                    self.respond_json(list_articles(category=category, limit=limit))
+                    return
+                if parsed.path == "/api/library/search":
+                    params = parse_qs(parsed.query)
+                    category = params.get("category", ["all"])[0]
+                    query = params.get("q", [""])[0]
+                    try:
+                        limit = int(params.get("limit", ["50"])[0])
+                    except (TypeError, ValueError):
+                        limit = 50
+                    self.respond_json(search_articles(query=query, category=category, limit=limit))
+                    return
+                if parsed.path == "/api/library/item":
+                    params = parse_qs(parsed.query)
+                    article_id = params.get("id", [""])[0]
+                    self.respond_json(get_article(article_id=article_id))
+                    return
                 if parsed.path == "/api/quantitative-status":
                     self.respond_json(quantitative_status_overview())
                     return
@@ -7393,6 +7442,10 @@ class CockpitServer:
                             note=str(payload.get("note", "")),
                         )
                     )
+                    return
+                if parsed.path == "/api/library/archive":
+                    payload = self.read_json()
+                    self.respond_json(library_archive_url_action(payload))
                     return
                 if parsed.path == "/api/documents/classification-metadata":
                     payload = self.read_json()
@@ -8984,6 +9037,23 @@ COCKPIT_HTML = """<!doctype html>
     .app-description { color: #344054; font-size: 13px; line-height: 1.4; margin-top: 3px; }
     .app-kind { color: var(--muted); font-size: 12px; margin-top: 4px; }
     .button-link { display: inline-block; border-radius: 6px; padding: 9px 12px; font-weight: 650; text-decoration: none; background: var(--blue); color: white; white-space: nowrap; }
+    .library-modal { width: min(1180px, 100%); }
+    .library-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .library-tab.active { background: var(--blue); color: white; }
+    .library-archive { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; padding: 10px; display: grid; gap: 8px; }
+    .library-archive-grid { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(140px, 180px) minmax(140px, 220px) auto; gap: 8px; align-items: center; }
+    .library-controls { display: grid; grid-template-columns: minmax(220px, 1fr) auto; gap: 10px; align-items: center; }
+    .library-layout { display: grid; grid-template-columns: minmax(260px, .85fr) minmax(320px, 1.15fr); gap: 12px; align-items: start; }
+    .library-list { display: grid; gap: 8px; max-height: 58vh; overflow: auto; padding-right: 4px; }
+    .library-item { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; padding: 10px; display: grid; gap: 5px; text-align: left; cursor: pointer; }
+    .library-item.active { border-color: #93c5fd; background: #eff6ff; }
+    .library-title { font-weight: 750; overflow-wrap: anywhere; }
+    .library-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+    .library-reader { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; min-height: 420px; display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
+    .library-reader-head { padding: 12px; border-bottom: 1px solid #edf0f4; display: grid; gap: 6px; background: white; }
+    .library-reader-title { margin: 0; font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
+    .library-reader-text { padding: 14px 16px; white-space: pre-wrap; overflow: auto; max-height: 58vh; line-height: 1.58; font-size: 15px; background: white; }
+    .library-snippet { color: #344054; font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
 	    .project-toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
 	    .project-toolbar button.active { background: var(--blue); color: white; }
 	    .voice-command-actions button.active { background: var(--blue); color: white; }
@@ -9053,7 +9123,7 @@ COCKPIT_HTML = """<!doctype html>
     .consistency-finding-title { font-weight: 750; overflow-wrap: anywhere; }
     .consistency-finding-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
     @media (max-width: 1050px) { .today-dashboard { grid-template-columns: 1fr; } .work-grid { grid-template-columns: 1fr; } }
-	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .search-result-head { grid-template-columns: 1fr; } .search-result-head-actions { justify-content: flex-start; } .recovery-grid { grid-template-columns: 1fr; } .janicka-grid { grid-template-columns: 1fr; } .janicka-action { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
+	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .search-result-head { grid-template-columns: 1fr; } .search-result-head-actions { justify-content: flex-start; } .recovery-grid { grid-template-columns: 1fr; } .janicka-grid { grid-template-columns: 1fr; } .janicka-action { grid-template-columns: 1fr; } .library-archive-grid { grid-template-columns: 1fr; } .library-controls { grid-template-columns: 1fr; } .library-layout { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -9063,6 +9133,7 @@ COCKPIT_HTML = """<!doctype html>
       <button class="janicka-button" id="janickaBtn">Janička</button>
       <button class="secondary" id="refreshBtn">Obnovit</button>
       <button class="secondary" id="webAppsBtn">Webové aplikace</button>
+      <button class="secondary" id="libraryBtn">Knihovna</button>
       <button class="secondary" id="projectsBtn">Projekty</button>
       <button class="secondary" id="remindersBtn">Reminders</button>
       <button class="secondary" id="emailProcessingBtn">Email Processing</button>
@@ -9426,6 +9497,49 @@ COCKPIT_HTML = """<!doctype html>
       </div>
     </div>
   </div>
+  <div id="libraryModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="libraryTitle">
+    <div class="modal library-modal">
+      <div class="modal-header">
+        <h2 id="libraryTitle">Knihovna</h2>
+        <button class="secondary" id="libraryCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div class="library-archive">
+          <div class="library-archive-grid">
+            <input id="libraryArchiveUrlInput" type="url" placeholder="Vložit URL článku">
+            <select id="libraryArchiveCategory">
+              <option value="recipes">Recepty</option>
+              <option value="science">Vědecké články</option>
+              <option value="other" selected>Ostatní</option>
+            </select>
+            <input id="libraryArchiveTagsInput" type="text" placeholder="Tagy, volitelné">
+            <button class="primary" id="libraryArchiveBtn" type="button">Uložit URL</button>
+          </div>
+          <div id="libraryArchiveStatus" class="status-line">Vlož URL, vyber kategorii a ulož ji do soukromé knihovny.</div>
+        </div>
+        <div class="library-tabs" aria-label="Kategorie knihovny">
+          <button class="secondary library-tab active" type="button" data-library-category="recipes">Recepty</button>
+          <button class="secondary library-tab" type="button" data-library-category="science">Vědecké články</button>
+          <button class="secondary library-tab" type="button" data-library-category="other">Ostatní</button>
+        </div>
+        <div class="library-controls">
+          <input id="librarySearchInput" type="search" placeholder="Hledat ve vybrané kategorii">
+          <button class="primary" id="librarySearchBtn" type="button">Hledat</button>
+        </div>
+        <div id="libraryStatus" class="status-line">Načítám knihovnu...</div>
+        <div class="library-layout">
+          <div id="libraryList" class="library-list"></div>
+          <div class="library-reader" aria-live="polite">
+            <div class="library-reader-head">
+              <h3 id="libraryReaderTitle" class="library-reader-title">Vyber článek</h3>
+              <div id="libraryReaderMeta" class="library-meta">Vlevo vyber položku nebo použij fulltextové hledání.</div>
+            </div>
+            <div id="libraryReaderText" class="library-reader-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div id="projectsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="projectsTitle">
     <div class="modal">
       <div class="modal-header">
@@ -9573,6 +9687,7 @@ COCKPIT_HTML = """<!doctype html>
     const processNextBtn = document.getElementById("processNextBtn");
     const reviewNextBtn = document.getElementById("reviewNextBtn");
     const webAppsBtn = document.getElementById("webAppsBtn");
+    const libraryBtn = document.getElementById("libraryBtn");
     const projectsBtn = document.getElementById("projectsBtn");
     const remindersBtn = document.getElementById("remindersBtn");
     const emailProcessingBtn = document.getElementById("emailProcessingBtn");
@@ -9610,6 +9725,20 @@ COCKPIT_HTML = """<!doctype html>
     const webAppsCloseBtn = document.getElementById("webAppsCloseBtn");
     const webAppsStatus = document.getElementById("webAppsStatus");
     const webAppsList = document.getElementById("webAppsList");
+    const libraryModal = document.getElementById("libraryModal");
+    const libraryCloseBtn = document.getElementById("libraryCloseBtn");
+    const libraryStatus = document.getElementById("libraryStatus");
+    const libraryArchiveUrlInput = document.getElementById("libraryArchiveUrlInput");
+    const libraryArchiveCategory = document.getElementById("libraryArchiveCategory");
+    const libraryArchiveTagsInput = document.getElementById("libraryArchiveTagsInput");
+    const libraryArchiveBtn = document.getElementById("libraryArchiveBtn");
+    const libraryArchiveStatus = document.getElementById("libraryArchiveStatus");
+    const librarySearchInput = document.getElementById("librarySearchInput");
+    const librarySearchBtn = document.getElementById("librarySearchBtn");
+    const libraryList = document.getElementById("libraryList");
+    const libraryReaderTitle = document.getElementById("libraryReaderTitle");
+    const libraryReaderMeta = document.getElementById("libraryReaderMeta");
+    const libraryReaderText = document.getElementById("libraryReaderText");
     const projectsModal = document.getElementById("projectsModal");
     const projectsCloseBtn = document.getElementById("projectsCloseBtn");
     const projectsStatus = document.getElementById("projectsStatus");
@@ -9738,6 +9867,8 @@ COCKPIT_HTML = """<!doctype html>
     ];
     let currentProjects = [];
     let currentProjectFilter = "all";
+    let currentLibraryCategory = "recipes";
+    let currentLibraryItems = [];
     let currentQuantitative = null;
     let frontendLastError = "";
     let frontendErrorHistory = [];
@@ -9756,6 +9887,7 @@ COCKPIT_HTML = """<!doctype html>
       ["Hlavní status", "/api/status"],
       ["Recovery", "/api/recovery/status"],
       ["Webové aplikace", "/api/web-apps"],
+      ["Knihovna", "/api/library/list?category=other&limit=1"],
       ["Projekty", "/api/projects/status"],
       ["Quick Notes", "/api/quick-notes/status"],
       ["Důležitá připomenutí", "/api/urgent-reminders/status"],
@@ -9837,6 +9969,14 @@ COCKPIT_HTML = """<!doctype html>
         "janickaAdamRestartBtn",
         "janickaAdamStopBtn",
         "webAppsBtn",
+        "libraryBtn",
+        "libraryCloseBtn",
+        "libraryArchiveUrlInput",
+        "libraryArchiveCategory",
+        "libraryArchiveTagsInput",
+        "libraryArchiveBtn",
+        "librarySearchInput",
+        "librarySearchBtn",
         "projectsBtn",
         "remindersBtn",
         "emailProcessingBtn",
@@ -12467,6 +12607,173 @@ COCKPIT_HTML = """<!doctype html>
       maybeReturnToJanicka("webApps");
     }
 
+    async function openLibraryModal() {
+      libraryModal.classList.remove("hidden");
+      await loadLibraryCategory(currentLibraryCategory);
+    }
+
+    function closeLibraryModal() {
+      libraryModal.classList.add("hidden");
+    }
+
+    async function loadLibraryCategory(category) {
+      currentLibraryCategory = category || "other";
+      setLibraryActiveTab();
+      librarySearchInput.value = "";
+      libraryStatus.textContent = "Načítám knihovnu...";
+      libraryReaderTitle.textContent = "Vyber článek";
+      libraryReaderMeta.textContent = "Vlevo vyber položku nebo použij fulltextové hledání.";
+      libraryReaderText.textContent = "";
+      try {
+        const data = await fetchJson(`/api/library/list?category=${encodeURIComponent(currentLibraryCategory)}&limit=200`);
+        currentLibraryItems = data.items || [];
+        renderLibraryItems(currentLibraryItems);
+        libraryStatus.textContent = currentLibraryItems.length
+          ? `${data.category_label || "Kategorie"}: ${currentLibraryItems.length} položek.`
+          : `${data.category_label || "Kategorie"} zatím nemá uložené položky.`;
+      } catch (err) {
+        recordFrontendError(err);
+        libraryStatus.textContent = `Chyba načtení knihovny: ${err}`;
+      }
+    }
+
+    function setLibraryActiveTab() {
+      document.querySelectorAll("[data-library-category]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.libraryCategory === currentLibraryCategory);
+      });
+    }
+
+    async function searchLibrary() {
+      const query = librarySearchInput.value.trim();
+      if (query.length < 2) {
+        await loadLibraryCategory(currentLibraryCategory);
+        return;
+      }
+      libraryStatus.textContent = "Hledám ve fulltextu...";
+      try {
+        const url = `/api/library/search?category=${encodeURIComponent(currentLibraryCategory)}&q=${encodeURIComponent(query)}&limit=80`;
+        const data = await fetchJson(url);
+        currentLibraryItems = data.items || [];
+        renderLibraryItems(currentLibraryItems);
+        libraryStatus.textContent = currentLibraryItems.length
+          ? `Nalezeno ${currentLibraryItems.length} položek pro „${query}“.`
+          : `Pro „${query}“ nic nenalezeno.`;
+      } catch (err) {
+        recordFrontendError(err);
+        libraryStatus.textContent = `Chyba hledání v knihovně: ${err}`;
+      }
+    }
+
+    async function archiveLibraryUrl() {
+      const url = libraryArchiveUrlInput.value.trim();
+      if (!url) {
+        libraryArchiveStatus.textContent = "Vlož URL článku.";
+        libraryArchiveUrlInput.focus();
+        return;
+      }
+      const category = libraryArchiveCategory.value || currentLibraryCategory || "other";
+      const tags = libraryArchiveTagsInput.value.trim();
+      libraryArchiveBtn.disabled = true;
+      libraryArchiveStatus.textContent = "Stahuji a ukládám článek do soukromé knihovny...";
+      try {
+        const data = await postJson("/api/library/archive", {url, category, tags});
+        if (!data.ok) {
+          libraryArchiveStatus.textContent = data.message || "Článek se nepodařilo uložit.";
+          return;
+        }
+        const item = data.item || {};
+        libraryArchiveStatus.textContent = data.message || "Článek uložen.";
+        libraryArchiveUrlInput.value = "";
+        libraryArchiveTagsInput.value = "";
+        currentLibraryCategory = item.category || category;
+        await loadLibraryCategory(currentLibraryCategory);
+        if (item.id) {
+          await loadLibraryItem(item.id);
+        }
+      } catch (err) {
+        recordFrontendError(err);
+        libraryArchiveStatus.textContent = `Chyba uložení URL: ${err}`;
+      } finally {
+        libraryArchiveBtn.disabled = false;
+      }
+    }
+
+    function renderLibraryItems(items) {
+      libraryList.innerHTML = "";
+      if (!items.length) {
+        const empty = document.createElement("div");
+        empty.className = "library-item";
+        empty.textContent = "Žádné položky k zobrazení.";
+        libraryList.appendChild(empty);
+        return;
+      }
+      items.forEach((item) => {
+        const row = document.createElement("button");
+        row.type = "button";
+        row.className = "library-item";
+        row.dataset.articleId = item.id || "";
+        const title = document.createElement("div");
+        title.className = "library-title";
+        title.textContent = item.one_line_title || item.title || "Bez názvu";
+        const meta = document.createElement("div");
+        meta.className = "library-meta";
+        meta.textContent = libraryItemMeta(item);
+        row.appendChild(title);
+        row.appendChild(meta);
+        if (item.snippet) {
+          const snippet = document.createElement("div");
+          snippet.className = "library-snippet";
+          snippet.textContent = item.snippet;
+          row.appendChild(snippet);
+        }
+        row.addEventListener("click", () => loadLibraryItem(item.id || ""));
+        libraryList.appendChild(row);
+      });
+    }
+
+    function libraryItemMeta(item) {
+      const parts = [];
+      const date = String(item.archived_at || "").slice(0, 10);
+      if (date) parts.push(date);
+      if (item.category_label) parts.push(item.category_label);
+      const url = item.canonical_url || item.source_url || "";
+      if (url) {
+        try {
+          parts.push(new URL(url).hostname);
+        } catch (_err) {
+          parts.push(url);
+        }
+      }
+      if (item.text_chars) parts.push(`${item.text_chars} znaků`);
+      return parts.join(" | ");
+    }
+
+    async function loadLibraryItem(articleId) {
+      if (!articleId) return;
+      document.querySelectorAll(".library-item").forEach((node) => {
+        node.classList.toggle("active", node.dataset.articleId === articleId);
+      });
+      libraryReaderTitle.textContent = "Načítám článek...";
+      libraryReaderMeta.textContent = "";
+      libraryReaderText.textContent = "";
+      try {
+        const data = await fetchJson(`/api/library/item?id=${encodeURIComponent(articleId)}`);
+        if (!data.ok) {
+          libraryReaderTitle.textContent = "Článek nelze načíst";
+          libraryReaderMeta.textContent = data.message || data.error || "";
+          return;
+        }
+        const item = data.item || {};
+        libraryReaderTitle.textContent = item.one_line_title || item.title || "Bez názvu";
+        libraryReaderMeta.textContent = libraryItemMeta(item);
+        libraryReaderText.textContent = data.text || "";
+      } catch (err) {
+        recordFrontendError(err);
+        libraryReaderTitle.textContent = "Chyba čtení";
+        libraryReaderMeta.textContent = String(err);
+      }
+    }
+
     async function openProjectsModal() {
       projectsModal.classList.remove("hidden");
       projectsStatus.textContent = "Načítám projekty a schopnosti...";
@@ -13746,6 +14053,7 @@ COCKPIT_HTML = """<!doctype html>
     voiceApprovalRejectBtn.addEventListener("click", () => submitVoiceApproval("rejected"));
     updateVoiceModeUi();
 			    webAppsBtn.addEventListener("click", openWebAppsModal);
+    libraryBtn.addEventListener("click", openLibraryModal);
     projectsBtn.addEventListener("click", openProjectsModal);
     reviewReportBtn.addEventListener("click", loadDocumentReviewReport);
     remindersBtn.addEventListener("click", openRemindersModal);
@@ -13780,6 +14088,29 @@ COCKPIT_HTML = """<!doctype html>
     webAppsModal.addEventListener("click", (event) => {
       if (event.target === webAppsModal) {
         closeWebAppsModal();
+      }
+    });
+    libraryCloseBtn.addEventListener("click", closeLibraryModal);
+    libraryArchiveBtn.addEventListener("click", archiveLibraryUrl);
+    libraryArchiveUrlInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        archiveLibraryUrl();
+      }
+    });
+    librarySearchBtn.addEventListener("click", searchLibrary);
+    librarySearchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        searchLibrary();
+      }
+    });
+    document.querySelectorAll("[data-library-category]").forEach((button) => {
+      button.addEventListener("click", () => loadLibraryCategory(button.dataset.libraryCategory || "other"));
+    });
+    libraryModal.addEventListener("click", (event) => {
+      if (event.target === libraryModal) {
+        closeLibraryModal();
       }
     });
     projectsCloseBtn.addEventListener("click", closeProjectsModal);
@@ -13821,6 +14152,8 @@ COCKPIT_HTML = """<!doctype html>
         closeQuantitativeModal();
       } else if (event.key === "Escape" && !webAppsModal.classList.contains("hidden")) {
         closeWebAppsModal();
+      } else if (event.key === "Escape" && !libraryModal.classList.contains("hidden")) {
+        closeLibraryModal();
       } else if (event.key === "Escape" && !projectsModal.classList.contains("hidden")) {
         closeProjectsModal();
 	      } else if (event.key === "Escape" && !quickNotesModal.classList.contains("hidden")) {

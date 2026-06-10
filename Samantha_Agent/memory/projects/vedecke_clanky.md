@@ -21,6 +21,13 @@ Hlavní složka:
 data/vedecke_clanky/
 ```
 
+Praktické webové články, které mohou časem zmizet z internetu, se ukládají jako
+soukromý fulltextový archiv mimo git:
+
+```text
+data/private/article_archive/
+```
+
 Základní soubory a složky:
 
 ```text
@@ -97,4 +104,16 @@ Pokud Míla hledání povolí, lze doplnit:
 
 Projekt byl založen 2026-05-18.
 
-Zatím nejsou uložené konkrétní články.
+2026-06-10 byl doplněn lehký soukromý archiv webových článků:
+
+- `scripts/archive_article_url.py` uloží URL, zdrojové HTML, prostý text a metadata.
+- `scripts/search_article_archive.py` hledá ve fulltextu uložených článků.
+- `scripts/read_article_archive.py` zkusí živou URL a při nedostupnosti použije lokální TXT fallback.
+- Cockpit má read-only okno `Knihovna` se záložkami `Recepty`, `Vědecké články`,
+  `Ostatní`, seznamem od nejnovějších položek a fulltextovým hledáním ve vybrané
+  kategorii.
+- Vstup přes Cockpit: do okna `Knihovna` lze vložit URL, vybrat kategorii, doplnit
+  volitelné tagy a uložit článek automaticky do soukromého archivu.
+
+První uložený praktický článek je návod k lepení spárovky z Nářadí Praha. Plný
+text i HTML jsou jen v `data/private/article_archive/` a nepatří do gitu.
