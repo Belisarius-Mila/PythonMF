@@ -63,6 +63,7 @@ from app.cockpit import (
     recovery_center_status,
     save_email_processing_decision,
     search_document_index,
+    set_adam_voice_bridge_marker_action,
     set_document_reading_status_action,
     start_adam_voice_mode_action,
     start_cockpit_restart_action,
@@ -1340,6 +1341,31 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["effective_tty"], "ttys002")
         self.assertEqual(result["codex_ttys"], ["ttys002"])
         self.assertIn("označené TTY ttys001 je staré; použije se jediná aktivní Codex relace ttys002", result["warnings"])
+
+    def test_set_adam_voice_bridge_marker_only_allows_active_codex_tty(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker_path = Path(temp_dir) / "current_codex_tty.json"
+
+            result = set_adam_voice_bridge_marker_action(
+                "ttys003",
+                marker_path=marker_path,
+                codex_tty_discoverer=lambda: ["ttys002", "ttys003"],
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["marked_tty"], "ttys003")
+            payload = json.loads(marker_path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["tty"], "ttys003")
+
+            rejected = set_adam_voice_bridge_marker_action(
+                "ttys004",
+                marker_path=marker_path,
+                codex_tty_discoverer=lambda: ["ttys002", "ttys003"],
+            )
+
+        self.assertFalse(rejected["ok"])
+        self.assertEqual(rejected["status"], "tty_not_active")
+        self.assertEqual(rejected["codex_ttys"], ["ttys002", "ttys003"])
 
     def test_git_dirty_line_classification_separates_private_family_and_safe_changes(self) -> None:
         app_item = cockpit_module.classify_git_dirty_line(" M Samantha_Agent/app/cockpit.py")

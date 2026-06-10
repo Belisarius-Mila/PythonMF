@@ -3174,6 +3174,56 @@ def adam_voice_bridge_status(
     }
 
 
+def set_adam_voice_bridge_marker_action(
+    tty: str,
+    *,
+    marker_path: Path = CURRENT_CODEX_TTY_PATH,
+    codex_tty_discoverer: Callable[[], list[str]] = discover_codex_ttys,
+) -> dict[str, Any]:
+    target_tty = normalize_tty(str(tty or ""))
+    if not target_tty or target_tty == "??":
+        return {
+            "ok": False,
+            "status": "missing_tty",
+            "message": "Chybí cílové TTY pro voice bridge.",
+        }
+    try:
+        codex_ttys = [normalize_tty(item) for item in codex_tty_discoverer()]
+    except Exception:
+        codex_ttys = []
+    codex_ttys = [item for item in codex_ttys if item and item != "??"]
+    if target_tty not in codex_ttys:
+        return {
+            "ok": False,
+            "status": "tty_not_active",
+            "message": f"TTY {target_tty} není mezi aktivními Codex relacemi.",
+            "target_tty": target_tty,
+            "codex_ttys": codex_ttys,
+        }
+    marker_path.parent.mkdir(parents=True, exist_ok=True)
+    marker_path.write_text(
+        json.dumps(
+            {
+                "tty": target_tty,
+                "marked_at": datetime.now(timezone.utc).isoformat(),
+                "parent_pid": os.getpid(),
+                "note": "Private runtime marker for Adam Voice Mode terminal bridge, set from Cockpit.",
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return {
+        "ok": True,
+        "status": "marker_updated",
+        "message": f"Voice bridge marker byl nastaven na {target_tty}.",
+        "marked_tty": target_tty,
+        "codex_ttys": codex_ttys,
+    }
+
+
 def action_queue_status(
     document_work: dict[str, Any] | None = None,
     reminders: dict[str, Any] | None = None,
@@ -7352,6 +7402,10 @@ class CockpitServer:
                     payload = self.read_json()
                     self.respond_json(cockpit_voice_approval_action(payload))
                     return
+                if parsed.path == "/api/voice-bridge/marker":
+                    payload = self.read_json()
+                    self.respond_json(set_adam_voice_bridge_marker_action(str(payload.get("tty", ""))))
+                    return
                 if parsed.path == "/api/cockpit/restart":
                     payload = self.read_json()
                     self.respond_json(
@@ -9218,6 +9272,11 @@ COCKPIT_HTML = """<!doctype html>
 		        <div id="voiceModeRuntimeStatus" class="status-line">Adam Voice Mode watcher: čekám na kontrolu.</div>
 		        <div id="voiceBridgeStatus" class="status-line">Terminálový bridge: čekám na kontrolu.</div>
 		        <div id="voiceBridgeSessions" class="status-line">Codex relace: čekám na kontrolu.</div>
+		        <div id="voiceBridgeSwitcher" class="voice-card hidden">
+		          <div class="voice-card-title">Voice bridge cíl</div>
+		          <div id="voiceBridgeSwitcherStatus" class="status-line">Načítám dostupné Codex relace.</div>
+		          <div id="voiceBridgeSwitcherActions" class="voice-card-actions"></div>
+		        </div>
 		        <div id="voicePendingStatus" class="status-line">Žádný hlasový pokyn nečeká na Adama.</div>
 		        <div id="voiceLastResponseCard" class="voice-card hidden">
 		          <div class="voice-card-title">Poslední Adamova odpověď</div>
@@ -9820,6 +9879,9 @@ COCKPIT_HTML = """<!doctype html>
     const voiceModeRuntimeStatus = document.getElementById("voiceModeRuntimeStatus");
     const voiceBridgeStatus = document.getElementById("voiceBridgeStatus");
     const voiceBridgeSessions = document.getElementById("voiceBridgeSessions");
+    const voiceBridgeSwitcher = document.getElementById("voiceBridgeSwitcher");
+    const voiceBridgeSwitcherStatus = document.getElementById("voiceBridgeSwitcherStatus");
+    const voiceBridgeSwitcherActions = document.getElementById("voiceBridgeSwitcherActions");
     const voicePendingStatus = document.getElementById("voicePendingStatus");
     const voiceLastResponseCard = document.getElementById("voiceLastResponseCard");
     const voiceLastResponseText = document.getElementById("voiceLastResponseText");
@@ -11195,11 +11257,16 @@ COCKPIT_HTML = """<!doctype html>
       }
       if (voiceBridgeSessions) {
         const markedTty = String(voiceBridge.marked_tty || "");
+        const effectiveTty = String(voiceBridge.effective_tty || "");
         const codexTtys = Array.isArray(voiceBridge.codex_ttys)
           ? voiceBridge.codex_ttys.map((item) => String(item || "")).filter(Boolean)
           : [];
         const sessionParts = codexTtys.map((tty) => (
-          tty === markedTty ? `${tty} -> voice bridge` : `${tty} -> Codex`
+          tty === markedTty
+            ? `${tty} -> voice marker`
+            : tty === effectiveTty
+              ? `${tty} -> voice bridge`
+              : `${tty} -> Codex`
         ));
         if (markedTty && !codexTtys.includes(markedTty)) {
           sessionParts.unshift(`${markedTty} -> voice bridge mimo běžící Codex relace`);
@@ -11210,6 +11277,7 @@ COCKPIT_HTML = """<!doctype html>
         voiceBridgeSessions.classList.toggle("warn", voiceBridgeWarn || (markedTty && !codexTtys.includes(markedTty)));
         voiceBridgeSessions.classList.toggle("ok", !voiceBridgeWarn && (!markedTty || codexTtys.includes(markedTty)));
       }
+      renderVoiceBridgeSwitcher(voiceBridge);
       if (voicePendingStatus) {
         voicePendingStatus.textContent = voicePendingActive
           ? `Čeká hlasový pokyn na Adama: ${voicePendingShort || voicePending.message || "bez textu"}`
@@ -12138,6 +12206,50 @@ COCKPIT_HTML = """<!doctype html>
 		      }
 		      if (voiceApprovalText) {
 		        voiceApprovalText.textContent = text || "Pokyn nemá uložený text.";
+		      }
+		    }
+
+		    function renderVoiceBridgeSwitcher(voiceBridge) {
+		      if (!voiceBridgeSwitcher || !voiceBridgeSwitcherStatus || !voiceBridgeSwitcherActions) return;
+		      const markedTty = String(voiceBridge.marked_tty || "");
+		      const effectiveTty = String(voiceBridge.effective_tty || "");
+		      const codexTtys = Array.isArray(voiceBridge.codex_ttys)
+		        ? voiceBridge.codex_ttys.map((item) => String(item || "")).filter(Boolean)
+		        : [];
+		      voiceBridgeSwitcher.classList.toggle("hidden", codexTtys.length === 0);
+		      if (codexTtys.length === 0) {
+		        voiceBridgeSwitcherStatus.textContent = "Není nalezená žádná aktivní Codex relace.";
+		        voiceBridgeSwitcherActions.innerHTML = "";
+		        return;
+		      }
+		      voiceBridgeSwitcherStatus.textContent = markedTty
+		        ? `Marker: ${markedTty}. Efektivní cíl: ${effectiveTty || "nezjištěno"}.`
+		        : `Marker zatím není nastavený. Efektivní cíl: ${effectiveTty || "nezjištěno"}.`;
+		      voiceBridgeSwitcherActions.innerHTML = codexTtys.map((tty) => {
+		        const active = tty === markedTty;
+		        const effective = tty === effectiveTty && tty !== markedTty;
+		        const label = active
+		          ? `${tty} ✓ marker`
+		          : effective
+		            ? `${tty} ✓ aktivní cíl`
+		            : `Nastavit ${tty}`;
+		        return `<button class="${active || effective ? "primary" : "secondary"}" data-voice-bridge-tty="${escapeHtml(tty)}">${escapeHtml(label)}</button>`;
+		      }).join("");
+		    }
+
+		    async function setVoiceBridgeMarker(tty, button) {
+		      const targetTty = String(tty || "").trim();
+		      if (!targetTty) return;
+		      if (button) button.disabled = true;
+		      try {
+		        const data = await postJson("/api/voice-bridge/marker", {tty: targetTty});
+		        showMessage(data.message || (data.ok ? `Voice bridge marker nastaven na ${targetTty}.` : "Marker se nepodařilo nastavit."));
+		        await refresh({silent: true, includeSecondary: false});
+		      } catch (err) {
+		        recordFrontendError(err);
+		        showMessage(`Nastavení voice bridge markeru selhalo: ${err}`);
+		      } finally {
+		        if (button) button.disabled = false;
 		      }
 		    }
 
@@ -14059,6 +14171,11 @@ COCKPIT_HTML = """<!doctype html>
     voiceLastResponseSpeakBtn.addEventListener("click", speakLastAdamResponse);
     voiceApprovalApproveBtn.addEventListener("click", () => submitVoiceApproval("approved"));
     voiceApprovalRejectBtn.addEventListener("click", () => submitVoiceApproval("rejected"));
+    voiceBridgeSwitcherActions.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-voice-bridge-tty]");
+      if (!button) return;
+      setVoiceBridgeMarker(button.dataset.voiceBridgeTty || "", button);
+    });
     updateVoiceModeUi();
 			    webAppsBtn.addEventListener("click", openWebAppsModal);
     libraryBtn.addEventListener("click", openLibraryModal);
