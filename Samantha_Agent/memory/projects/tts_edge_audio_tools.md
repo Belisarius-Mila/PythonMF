@@ -41,6 +41,14 @@ Stav k 2026-06-06:
 - Terminal bridge byl zpřesněn tak, aby preferoval označený TTY marker a read-only formulace typu `pošli odpověď` neblokoval jako rizikové, zatímco mazání, commit, push, platby, hesla a tokeny zůstávají ručně potvrzované.
 - Priorita 1 pro další práci je Cockpit read-only capability registry: pevný allowlist bezpečných lokálních schopností, approval centrum a návrat výsledku do poslední Adamovy odpovědi v Cockpitu.
 
+Stav k 2026-06-10:
+
+- Voice bridge lépe zachází se starým TTY markerem: pokud marker ukazuje na neaktivní TTY a existuje právě jedna aktivní Codex TTY, bridge použije tuto jedinou aktivní relaci jako bezpečný efektivní cíl.
+- Cockpit status vrací `effective_tty`, takže umí rozlišit starý marker od skutečného cíle bridge.
+- V Cockpitu vznikl MVP přepínač `Voice bridge cíl`: zobrazuje aktivní Codex relace a dovolí nastavit marker jen na TTY, kterou backend opravdu vidí jako aktivní Codex relaci.
+- Aktuální ověřený stav po restartu Cockpitu: marker i efektivní cíl jsou `ttys002`; varování zůstává jen kvůli tomu, že aktuální relace neběží přes `screen`.
+- Relevantní commity: `88f160f Use active Codex TTY when voice marker is stale`, `db1ceeb Add Cockpit voice bridge TTY switcher`.
+
 ## Cíl
 
 Cílem je mít praktický způsob, jak vytvářet české hlasové MP3 soubory pro výukové aplikace, pohádky, slovíčka a další projekty.
