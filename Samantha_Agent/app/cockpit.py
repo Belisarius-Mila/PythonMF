@@ -3133,18 +3133,25 @@ def adam_voice_bridge_status(
         screen_message = str(exc)
 
     warnings: list[str] = []
+    effective_tty = marked_tty if marked_tty in codex_ttys else ""
+    if not effective_tty and marked_tty and len(codex_ttys) == 1:
+        effective_tty = codex_ttys[0]
     if not marked_tty:
         warnings.append("není označené cílové TTY")
     elif marked_tty not in codex_ttys:
-        warnings.append(f"označené TTY {marked_tty} není mezi aktivními Codex relacemi")
+        if effective_tty:
+            warnings.append(f"označené TTY {marked_tty} je staré; použije se jediná aktivní Codex relace {effective_tty}")
+        else:
+            warnings.append(f"označené TTY {marked_tty} není mezi aktivními Codex relacemi")
     if len(codex_ttys) > expected_codex_session_limit:
         warnings.append(f"běží {len(codex_ttys)} Codex relací, očekáváno nejvýše {expected_codex_session_limit}")
     if screen_status == "not_running":
         warnings.append("screen neběží")
 
-    target = marked_tty or "nezjištěno"
+    target = effective_tty or marked_tty or "nezjištěno"
+    marker_label = marked_tty or "nezjištěno"
     message = (
-        f"Bridge cílí na {target}. Codex relace: {len(codex_ttys)} "
+        f"Bridge cílí na {target} (marker: {marker_label}). Codex relace: {len(codex_ttys)} "
         f"(limit {expected_codex_session_limit}). {screen_message}."
     )
     if warnings:
@@ -3155,6 +3162,7 @@ def adam_voice_bridge_status(
         "status": "warn" if warnings else "ok",
         "message": message,
         "marked_tty": marked_tty,
+        "effective_tty": effective_tty,
         "marked_at": str(marker.get("marked_at") or ""),
         "parent_pid": marker.get("parent_pid"),
         "codex_ttys": codex_ttys,

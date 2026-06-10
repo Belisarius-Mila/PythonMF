@@ -339,9 +339,27 @@ def deliver_prompt_to_terminal(
 ) -> dict[str, Any]:
     safe_prompt = squash_terminal_text(prompt)
     marked_tty = load_marked_codex_tty(marked_tty_path)
+    codex_ttys = discover_codex_ttys(runner=ps_runner)
+    effective_marked_tty = marked_tty if marked_tty and marked_tty in codex_ttys else ""
+    auto_target_tty = ""
+    stale_marked_tty = marked_tty if marked_tty and marked_tty not in codex_ttys else ""
+    if stale_marked_tty and len(codex_ttys) == 1:
+        auto_target_tty = codex_ttys[0]
     marked_tty_error: dict[str, Any] | None = None
-    if marked_tty:
-        tty_result = tty_deliverer(marked_tty, safe_prompt, submit=submit)
+    if effective_marked_tty or auto_target_tty:
+        target_tty = effective_marked_tty or auto_target_tty
+        tty_result = tty_deliverer(target_tty, safe_prompt, submit=submit)
+        if auto_target_tty:
+            tty_result = {
+                **tty_result,
+                "marked_tty_status": {
+                    "ok": False,
+                    "status": "stale_marked_tty",
+                    "message": f"Označené TTY {marked_tty} už nepatří aktivní Codex relaci.",
+                    "target_tty": marked_tty,
+                },
+                "auto_target_tty": auto_target_tty,
+            }
         if tty_result.get("ok") and tty_result.get("verified"):
             return tty_result
         if tty_result.get("ok"):
@@ -351,12 +369,23 @@ def deliver_prompt_to_terminal(
                     f"{tty_result.get('message') or 'Pokyn byl vložen do cílového TTY.'} "
                     "Doručení do označené relace neumím ověřit, proto nespouštím GUI fallback."
                 ),
-                "delivery_method": "marked_tty",
+                "delivery_method": "auto_single_codex_tty" if auto_target_tty else "marked_tty",
             }
         marked_tty_error = tty_result
+    elif stale_marked_tty:
+        marked_tty_error = {
+            "ok": False,
+            "status": "stale_marked_tty",
+            "message": f"Označené TTY {marked_tty} už nepatří aktivní Codex relaci.",
+            "target_tty": marked_tty,
+        }
 
-    codex_ttys = discover_codex_ttys(runner=ps_runner)
-    target_ttys = [marked_tty] if marked_tty_error and marked_tty else codex_ttys
+    if effective_marked_tty:
+        target_ttys = [effective_marked_tty]
+    elif auto_target_tty:
+        target_ttys = [auto_target_tty]
+    else:
+        target_ttys = codex_ttys
     completed = runner(
         [
             "/usr/bin/osascript",

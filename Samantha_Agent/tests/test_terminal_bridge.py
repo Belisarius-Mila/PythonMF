@@ -211,7 +211,7 @@ class TerminalBridgeTests(unittest.TestCase):
             return subprocess.CompletedProcess(args=args, returncode=0, stdout="delivered\n", stderr="")
 
         def fake_ps_runner(args, **kwargs):
-            self.fail("marked tty delivery should not need process discovery")
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="100 1 ttys005 codex codex\n", stderr="")
 
         def fake_tty_deliverer(tty, prompt, **kwargs):
             tty_calls.append((tty, prompt, kwargs))
@@ -232,6 +232,40 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(result["status"], "delivered_tty")
         self.assertEqual(tty_calls[0][0], "ttys005")
+        self.assertEqual(runner_calls, [])
+
+    def test_deliver_prompt_uses_single_active_codex_tty_when_marker_is_stale(self) -> None:
+        runner_calls = []
+        tty_calls = []
+
+        def fake_runner(args, **kwargs):
+            runner_calls.append(args)
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="delivered\n", stderr="")
+
+        def fake_ps_runner(args, **kwargs):
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="100 1 ttys002 codex codex\n", stderr="")
+
+        def fake_tty_deliverer(tty, prompt, **kwargs):
+            tty_calls.append((tty, prompt, kwargs))
+            return {"ok": True, "status": "delivered_tty", "submitted": kwargs.get("submit"), "verified": True}
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker = Path(temp_dir) / "current_codex_tty.json"
+            marker.write_text('{"tty": "ttys001"}', encoding="utf-8")
+
+            result = deliver_prompt_to_terminal(
+                "Hlasový pokyn od Míly.",
+                runner=fake_runner,
+                ps_runner=fake_ps_runner,
+                marked_tty_path=marker,
+                tty_deliverer=fake_tty_deliverer,
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "delivered_tty")
+        self.assertEqual(tty_calls[0][0], "ttys002")
+        self.assertEqual(result["auto_target_tty"], "ttys002")
+        self.assertEqual(result["marked_tty_status"]["target_tty"], "ttys001")
         self.assertEqual(runner_calls, [])
 
     def test_deliver_prompt_does_not_use_gui_fallback_when_marked_tty_is_unverified(self) -> None:
@@ -303,7 +337,7 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "terminal_delivery_failed")
         self.assertIn("No Terminal tab.", result["message"])
-        self.assertIn("TTY ttys005: Operation not permitted", result["message"])
+        self.assertIn("TTY ttys005: Označené TTY ttys005 už nepatří aktivní Codex relaci.", result["message"])
         self.assertIn("VS Code fallback: osascript nemá povoleno", result["message"])
         self.assertEqual(result["marked_tty_status"]["target_tty"], "ttys005")
         self.assertEqual(result["vscode_status"]["status"], "vscode_delivery_failed")

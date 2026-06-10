@@ -1307,6 +1307,40 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("běží 2 Codex relací, očekáváno nejvýše 1", result["warnings"])
         self.assertIn("screen neběží", result["warnings"])
 
+    def test_adam_voice_bridge_status_uses_single_active_tty_when_marker_is_stale(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker_path = Path(temp_dir) / "current_codex_tty.json"
+            marker_path.write_text(
+                json.dumps(
+                    {
+                        "tty": "ttys001",
+                        "marked_at": "2026-06-07T05:07:45+00:00",
+                        "parent_pid": 73760,
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            def fake_screen_runner(*args, **kwargs):
+                return subprocess.CompletedProcess(
+                    args=args[0],
+                    returncode=1,
+                    stdout="",
+                    stderr="No Sockets found in /tmp/.screen.\n",
+                )
+
+            result = adam_voice_bridge_status(
+                marker_path=marker_path,
+                codex_tty_discoverer=lambda: ["ttys002"],
+                screen_runner=fake_screen_runner,
+            )
+
+        self.assertEqual(result["status"], "warn")
+        self.assertEqual(result["marked_tty"], "ttys001")
+        self.assertEqual(result["effective_tty"], "ttys002")
+        self.assertEqual(result["codex_ttys"], ["ttys002"])
+        self.assertIn("označené TTY ttys001 je staré; použije se jediná aktivní Codex relace ttys002", result["warnings"])
+
     def test_git_dirty_line_classification_separates_private_family_and_safe_changes(self) -> None:
         app_item = cockpit_module.classify_git_dirty_line(" M Samantha_Agent/app/cockpit.py")
         family_item = cockpit_module.classify_git_dirty_line("?? Samantha_Agent/memory/projects/family_memory_films.md")
