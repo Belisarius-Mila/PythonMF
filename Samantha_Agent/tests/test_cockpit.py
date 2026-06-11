@@ -1843,23 +1843,39 @@ class CockpitTests(unittest.TestCase):
                 "app.cockpit.transcribe_audio_base64",
                 return_value={"ok": True, "text": "Najdi dnešní dokumenty."},
             ) as transcribe:
+                bridge_calls = []
+
+                def fake_bridge(command):
+                    bridge_calls.append(command.text)
+                    return {"ok": True, "verified": True, "status": "delivered"}
+
                 result = cockpit_transcribe_voice_action(
                     {"audio_base64": "abc", "mime_type": "audio/webm", "language": "cs"},
                     inbox_dir=Path(temp_dir),
+                    terminal_bridge=fake_bridge,
                 )
 
         self.assertTrue(result["ok"])
         self.assertEqual(result["text"], "Najdi dnešní dokumenty.")
         self.assertTrue(result["saved"])
         self.assertIn("latest_voice_command.md", result["latest_voice_command_path"])
-        self.assertIn("přepsán a uložen", result["message"])
+        self.assertEqual(result["voice_delivery_status"], "voice_command_delivered")
+        self.assertIn("předán přímo do Codexu", result["message"])
+        self.assertEqual(bridge_calls, ["Najdi dnešní dokumenty."])
         transcribe.assert_called_once_with("abc", mime_type="audio/webm", language="cs")
 
     def test_cockpit_save_voice_text_action_writes_inbox(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            bridge_calls = []
+
+            def fake_bridge(command):
+                bridge_calls.append(command.text)
+                return {"ok": True, "verified": False, "status": "delivered_tty"}
+
             result = cockpit_save_voice_text_action(
                 {"text": "Adame, spočítej dnešní handoffy."},
                 inbox_dir=Path(temp_dir),
+                terminal_bridge=fake_bridge,
             )
             latest_path = Path(temp_dir) / "latest_voice_command.md"
 
@@ -1868,6 +1884,9 @@ class CockpitTests(unittest.TestCase):
             self.assertTrue(result["saved"])
             self.assertIn("latest_voice_command.md", result["latest_voice_command_path"])
             self.assertIn("Adame, spočítej dnešní handoffy.", latest_path.read_text(encoding="utf-8"))
+            self.assertEqual(result["voice_delivery_status"], "voice_command_delivery_unverified")
+            self.assertIn("odeslán do označené Codex relace", result["message"])
+            self.assertEqual(bridge_calls, ["Adame, spočítej dnešní handoffy."])
 
     def test_cockpit_save_voice_text_action_rejects_empty_text(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

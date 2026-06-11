@@ -105,9 +105,11 @@ from app.speech.adam_voice_mode import (
 )
 from app.speech.terminal_bridge import (
     CURRENT_CODEX_TTY_PATH,
+    deliver_voice_command_to_terminal,
     discover_codex_ttys,
     normalize_tty,
 )
+from app.speech.voice_inbox import parse_voice_command_file
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -7533,10 +7535,44 @@ def save_voice_command_to_inbox(
     }
 
 
+def deliver_saved_voice_command_inline(
+    *,
+    inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
+    terminal_bridge: Callable[..., dict[str, Any]] = deliver_voice_command_to_terminal,
+) -> dict[str, Any]:
+    try:
+        command = parse_voice_command_file(inbox_dir / "latest_voice_command.md")
+    except OSError as exc:
+        return {
+            "voice_delivery_status": "voice_command_not_loaded",
+            "voice_delivery": {"ok": False, "message": str(exc)},
+            "voice_delivery_message": f"Hlasový pokyn byl uložen, ale nejde načíst pro okamžité předání: {exc}",
+        }
+
+    bridge_result = terminal_bridge(command)
+    if bridge_result.get("ok") and bridge_result.get("verified"):
+        status = "voice_command_delivered"
+        message = "Hlasový pokyn byl uložen a předán přímo do Codexu."
+    elif bridge_result.get("ok"):
+        status = "voice_command_delivery_unverified"
+        message = "Hlasový pokyn byl uložen a odeslán do označené Codex relace; doručení ale nejde technicky ověřit."
+    else:
+        bridge_status = str(bridge_result.get("status") or "voice_command_delivery_failed")
+        bridge_message = str(bridge_result.get("reason") or bridge_result.get("message") or "bez detailu")
+        status = bridge_status
+        message = f"Hlasový pokyn byl uložen, ale okamžité předání do Codexu neproběhlo: {bridge_message}"
+    return {
+        "voice_delivery_status": status,
+        "voice_delivery": bridge_result,
+        "voice_delivery_message": message,
+    }
+
+
 def cockpit_transcribe_voice_action(
     payload: dict[str, Any],
     *,
     inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
+    terminal_bridge: Callable[..., dict[str, Any]] = deliver_voice_command_to_terminal,
 ) -> dict[str, Any]:
     try:
         result = transcribe_audio_base64(
@@ -7545,7 +7581,8 @@ def cockpit_transcribe_voice_action(
             language=str(payload.get("language", "cs") or "cs"),
         )
         result.update(save_voice_command_to_inbox(result, inbox_dir=inbox_dir))
-        result["message"] = "Hlasový pokyn byl přepsán a uložen pro Codex."
+        result.update(deliver_saved_voice_command_inline(inbox_dir=inbox_dir, terminal_bridge=terminal_bridge))
+        result["message"] = result.get("voice_delivery_message") or "Hlasový pokyn byl přepsán a uložen pro Codex."
         return result
     except TranscriptionError as exc:
         return {
@@ -7571,6 +7608,7 @@ def cockpit_save_voice_text_action(
     payload: dict[str, Any],
     *,
     inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
+    terminal_bridge: Callable[..., dict[str, Any]] = deliver_voice_command_to_terminal,
 ) -> dict[str, Any]:
     text = safe_text(str(payload.get("text", "") or "")).strip()
     if not text:
@@ -7587,6 +7625,8 @@ def cockpit_save_voice_text_action(
             "status": "voice_text_saved",
         }
         result.update(save_voice_command_to_inbox({"text": text}, inbox_dir=inbox_dir))
+        result.update(deliver_saved_voice_command_inline(inbox_dir=inbox_dir, terminal_bridge=terminal_bridge))
+        result["message"] = result.get("voice_delivery_message") or result["message"]
         return result
     except OSError as exc:
         return {
