@@ -30,7 +30,7 @@ Stav k 2026-06-05:
 
 Stav k 2026-06-06:
 
-- Adam Voice Mode má praktický terminálový bridge do Codexu, private TTY marker a Edge TTS helper `scripts/speak_edge_open.py` pro přečtení stručného výsledku.
+- Adam Voice Mode má praktický terminálový bridge do Codexu, private TTY marker a TTS helper `scripts/speak_edge_open.py` pro přečtení stručného výsledku.
 - Cockpit ukazuje běžící Codex relace a jasně označí, která relace je cílem voice bridge.
 - Nová Codex/screen relace se ptá, zda má nastavit voice marker na sebe; ruční pokyn `Prosím převezmi voice marker` vyžaduje jednoduché potvrzení `Mám převzít voice marker? y/n`.
 - iPhone text fallback `Odeslat přepis Adamovi` po úspěšném odeslání maže textarea, aby ve vzdáleném Cockpitu nezůstával starý pokyn.
@@ -48,6 +48,12 @@ Stav k 2026-06-10:
 - V Cockpitu vznikl MVP přepínač `Voice bridge cíl`: zobrazuje aktivní Codex relace a dovolí nastavit marker jen na TTY, kterou backend opravdu vidí jako aktivní Codex relaci.
 - Aktuální ověřený stav po restartu Cockpitu: marker i efektivní cíl jsou `ttys002`; varování zůstává jen kvůli tomu, že aktuální relace neběží přes `screen`.
 - Relevantní commity: `88f160f Use active Codex TTY when voice marker is stale`, `db1ceeb Add Cockpit voice bridge TTY switcher`.
+
+Stav k 2026-06-11:
+
+- Mac TTY bridge byl ověřený bez `screen`: hlasový pokyn z Cockpitu dorazil přímo do aktivní Codex relace.
+- `scripts/speak_edge_open.py` má kvůli rychlosti a sandboxu výchozí lokální režim přes macOS `say`, takže běžný hlasový výsledek nevyžaduje síť ani eskalaci mimo sandbox.
+- Online Edge MP3 zůstává dostupné explicitně přes `--engine edge`; diagnostický režim `--engine edge-fallback` nejdřív zkusí Edge a při selhání použije lokální hlas.
 
 ## Cíl
 
