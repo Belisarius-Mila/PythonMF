@@ -162,7 +162,7 @@ WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
     },
     {
         "id": "email-processing",
-        "title": "Email Processing",
+        "title": "E-maily",
         "description": "Read-only pracovní přehled e-mailových kandidátů a navazující zpracování PDF.",
         "url": "/email-processing/",
         "kind": "lokální",
@@ -298,7 +298,7 @@ DOCUMENT_REVIEW_GROUPS: tuple[dict[str, str], ...] = (
     },
     {
         "id": "weak_metadata",
-        "label": "Slabá metadata",
+        "label": "Doplnit údaje",
         "empty_label": "Žádný aktivní dokument se slabými metadaty.",
         "action": "Doplnit metadata: oblast, typ, protistranu nebo související věc.",
     },
@@ -1266,7 +1266,7 @@ def quantitative_status_overview(
     diff = diff_quantitative_status(current=current, previous=previous)
     return {
         "ok": True,
-        "message": "Kvantitativní status načten.",
+        "message": "Systémový souhrn načten.",
         "metrics_path": str(relative_to_project(metrics_path)),
         "current": quantitative_result_to_json(current),
         "previous": previous,
@@ -2439,7 +2439,7 @@ def latest_email_processing_overview(root: Path = EMAIL_SESSION_HANDOFF_DIR) -> 
             "ok": False,
             "message": "Žádný uložený e-mailový přehled zatím není k dispozici.",
             "path": "",
-            "title": "Email Processing",
+            "title": "E-maily",
             "text": "",
             "updated_at": "",
         }
@@ -2488,7 +2488,7 @@ def empty_email_processing_overview() -> dict[str, Any]:
         "ok": True,
         "message": "Pracovní seznam je prázdný. Zvol rozsah a načti e-maily.",
         "path": "",
-        "title": "Email Processing",
+        "title": "E-maily",
         "text": "",
         "items": [],
         "updated_at": "",
@@ -3328,7 +3328,7 @@ def action_queue_status(
                     f"{' od ' + coverage_start if coverage_start else ''}. Nekonat platbu bez porovnání."
                 ),
                 "action": "open_reminders",
-                "action_label": "Otevřít Reminders",
+                "action_label": "Otevřít připomenutí",
             }
         )
 
@@ -3399,7 +3399,7 @@ def action_queue_status(
                     "title": title or "Otevřená připomínka",
                     "detail": " | ".join(detail_parts),
                     "action": "open_reminders",
-                    "action_label": "Otevřít Reminders",
+                    "action_label": "Otevřít připomenutí",
                 }
             )
 
@@ -5203,7 +5203,7 @@ def document_intake_unified_items(*, sources: list[dict[str, Any]], limit: int =
     source_priority = {"downloads": 10, "email": 20, "mobile": 30, "local_inbox": 40}
     action_by_source = {
         "downloads": {"kind": "open_scandocu", "label": "ScanDocu"},
-        "email": {"kind": "open_email_processing", "label": "Email Processing"},
+        "email": {"kind": "open_email_processing", "label": "E-maily"},
         "mobile": {"kind": "manual", "label": ""},
         "local_inbox": {"kind": "manual", "label": ""},
     }
@@ -7874,7 +7874,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Email Processing</title>
+  <title>E-maily</title>
   <style>
     :root { --bg: #f5f7fb; --panel: #ffffff; --ink: #162033; --muted: #667085; --line: #d9e0ea; --blue: #1f5fbf; --green: #16794c; --amber: #9a5b00; }
     * { box-sizing: border-box; }
@@ -7927,7 +7927,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
 </head>
 <body>
   <header>
-    <h1>Email Processing</h1>
+    <h1>E-maily</h1>
     <div class="toolbar">
       <button class="secondary" id="refreshBtn" disabled>Obnovit nové</button>
       <span class="days-control">
@@ -9298,6 +9298,20 @@ COCKPIT_HTML = """<!doctype html>
     .consistency-finding-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: start; }
     .consistency-finding-title { font-weight: 750; overflow-wrap: anywhere; }
     .consistency-finding-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+    .section-toggle { margin: 18px 0; }
+    .section-toggle > summary,
+    .service-panel > summary,
+    .voice-advanced > summary {
+      cursor: pointer;
+      font-weight: 750;
+      color: #172033;
+      padding: 10px 0;
+      list-style-position: inside;
+    }
+    .section-toggle > summary { font-size: 20px; }
+    .service-panel { margin-top: 12px; border-top: 1px solid var(--line); }
+    .service-actions { margin-top: 10px; }
+    .voice-advanced { margin-top: 8px; border-top: 1px solid var(--line); }
     @media (max-width: 1050px) { .today-dashboard { grid-template-columns: 1fr; } .work-grid { grid-template-columns: 1fr; } }
 	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .search-result-head { grid-template-columns: 1fr; } .search-result-head-actions { justify-content: flex-start; } .recovery-grid { grid-template-columns: 1fr; } .janicka-grid { grid-template-columns: 1fr; } .janicka-action { grid-template-columns: 1fr; } .library-archive-grid { grid-template-columns: 1fr; } .library-text-grid { grid-template-columns: 1fr; } .library-attachment-grid { grid-template-columns: 1fr; } .library-controls { grid-template-columns: 1fr; } .library-layout { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
   </style>
@@ -9311,10 +9325,10 @@ COCKPIT_HTML = """<!doctype html>
       <button class="secondary" id="webAppsBtn">Webové aplikace</button>
       <button class="secondary" id="libraryBtn">Knihovna</button>
       <button class="secondary" id="projectsBtn">Projekty</button>
-      <button class="secondary" id="remindersBtn">Reminders</button>
-      <button class="secondary" id="emailProcessingBtn">Email Processing</button>
-      <button class="primary" id="scanDocuBtn">Otevřít ScanDocu</button>
-      <button class="secondary" id="scanDocuReviewBtn">Revidovat uložené</button>
+      <button class="secondary" id="remindersBtn">Připomenutí</button>
+      <button class="secondary" id="emailProcessingBtn">E-maily</button>
+      <button class="primary" id="scanDocuBtn">ScanDocu</button>
+      <button class="secondary" id="scanDocuReviewBtn">Revidovat dokumenty</button>
     </div>
   </header>
   <main>
@@ -9339,11 +9353,11 @@ COCKPIT_HTML = """<!doctype html>
           </div>
           <div id="dashboardMorningSentence" class="status-line">Ranní stav se načte spolu s Cockpitem.</div>
           <div class="dashboard-row"><span class="dashboard-label">ScanDocu</span><span id="dashboardScanDocu" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Reminders</span><span id="dashboardReminders" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Připomenutí</span><span id="dashboardReminders" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Hlas</span><span id="dashboardVoiceMode" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Projekty</span><span id="dashboardProjects" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Kvantitativní</span><span id="dashboardQuantitative" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Audit</span><span id="dashboardConsistency" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Systém</span><span id="dashboardQuantitative" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Kontrola</span><span id="dashboardConsistency" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">QN</span><span id="dashboardQuickNotes" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Záloha</span><span id="dashboardBackup" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Git</span><span id="dashboardGit" class="dashboard-value"></span></div>
@@ -9355,17 +9369,22 @@ COCKPIT_HTML = """<!doctype html>
           <div class="quick-actions">
             <button class="primary" id="dashboardProcessBtn">Zpracovat další</button>
             <button class="secondary" id="dashboardReviewBtn">Revidovat další</button>
-	            <button class="secondary" id="dashboardTerminalBtn">Terminál v projektu</button>
-		            <button class="secondary" id="dashboardQuantitativeBtn">Kvantitativní status</button>
-		            <button class="secondary" id="dashboardQuickNotesBtn">QN přehled</button>
-		            <button class="secondary" id="dashboardUrgentRemindersBtn">Důležitá připomenutí</button>
-		            <button class="secondary" id="dashboardRecoveryBtn">Recovery centrum</button>
-		            <button class="secondary" id="dashboardDiagnosticsBtn">Diagnostika</button>
-		            <button class="secondary" id="dashboardRestartBtn">Restart Cockpitu</button>
-		            <button class="secondary" id="dashboardSpeakBtn">Přečíst stav</button>
-		            <button class="secondary" id="dashboardSpeakSelectionBtn">Přečíst výběr</button>
-		            <button class="secondary" id="dashboardRefreshBtn">Obnovit stav</button>
+		        <button class="secondary" id="dashboardUrgentRemindersBtn">Důležitá připomenutí</button>
+		        <button class="secondary" id="dashboardRefreshBtn">Obnovit stav</button>
 	          </div>
+          <details class="service-panel">
+            <summary>Servis</summary>
+            <div class="quick-actions service-actions">
+              <button class="secondary" id="dashboardTerminalBtn">Terminál v projektu</button>
+              <button class="secondary" id="dashboardQuantitativeBtn">Systémový souhrn</button>
+              <button class="secondary" id="dashboardQuickNotesBtn">Rychlé poznámky</button>
+              <button class="secondary" id="dashboardRecoveryBtn">Recovery centrum</button>
+              <button class="secondary" id="dashboardDiagnosticsBtn">Diagnostika</button>
+              <button class="secondary" id="dashboardRestartBtn">Restart Cockpitu</button>
+              <button class="secondary" id="dashboardSpeakBtn">Přečíst stav</button>
+              <button class="secondary" id="dashboardSpeakSelectionBtn">Přečíst výběr</button>
+            </div>
+          </details>
           <div id="dashboardActionHint" class="status-line"></div>
         </div>
       </section>
@@ -9383,14 +9402,17 @@ COCKPIT_HTML = """<!doctype html>
 		          <button class="primary" id="voiceTranscriptSendBtn">Odeslat přepis Adamovi</button>
 		        </div>
 		        <div id="voiceCommandStatus" class="status-line">Pokyn se po přepisu automaticky uloží pro Codex. Adam reaguje jen při spuštěném watcheru.</div>
-		        <div id="voiceModeRuntimeStatus" class="status-line">Adam Voice Mode watcher: čekám na kontrolu.</div>
-		        <div id="voiceBridgeStatus" class="status-line">Terminálový bridge: čekám na kontrolu.</div>
-		        <div id="voiceBridgeSessions" class="status-line">Codex relace: čekám na kontrolu.</div>
-		        <div id="voiceBridgeSwitcher" class="voice-card hidden">
-		          <div class="voice-card-title">Voice bridge cíl</div>
-		          <div id="voiceBridgeSwitcherStatus" class="status-line">Načítám dostupné Codex relace.</div>
-		          <div id="voiceBridgeSwitcherActions" class="voice-card-actions"></div>
-		        </div>
+            <details class="voice-advanced">
+              <summary>Pokročilé</summary>
+		          <div id="voiceModeRuntimeStatus" class="status-line">Adam Voice Mode watcher: čekám na kontrolu.</div>
+		          <div id="voiceBridgeStatus" class="status-line">Terminálový bridge: čekám na kontrolu.</div>
+		          <div id="voiceBridgeSessions" class="status-line">Codex relace: čekám na kontrolu.</div>
+		          <div id="voiceBridgeSwitcher" class="voice-card hidden">
+		            <div class="voice-card-title">Voice bridge cíl</div>
+		            <div id="voiceBridgeSwitcherStatus" class="status-line">Načítám dostupné Codex relace.</div>
+		            <div id="voiceBridgeSwitcherActions" class="voice-card-actions"></div>
+		          </div>
+            </details>
 		        <div id="voicePendingStatus" class="status-line">Žádný hlasový pokyn nečeká na Adama.</div>
 		        <div id="voiceLastResponseCard" class="voice-card hidden">
 		          <div class="voice-card-title">Poslední Adamova odpověď</div>
@@ -9414,6 +9436,8 @@ COCKPIT_HTML = """<!doctype html>
 	        </div>
 	      </div>
 	    </section>
+        <details class="service-panel">
+          <summary>Technický stav Cockpitu</summary>
 		    <div id="frontendHealthPanel" class="health-panel" aria-label="Health stav Cockpitu">
 		      <div class="health-grid">
 		        <div class="health-item"><span class="health-label">Frontend</span><span id="frontendHealthJs" class="health-value warn">JS se zatím nespustil</span></div>
@@ -9422,6 +9446,7 @@ COCKPIT_HTML = """<!doctype html>
 		        <div class="health-item"><span class="health-label">Poslední chyba</span><span id="frontendHealthError" class="health-value ok">žádná</span></div>
 		      </div>
 		    </div>
+        </details>
 		    <section id="urgentReminderAlert" class="urgent-alert hidden" aria-live="polite">
 		      <div class="urgent-alert-head">
 		        <div id="urgentReminderAlertTitle" class="urgent-alert-title">Důležitá připomenutí</div>
@@ -9436,6 +9461,8 @@ COCKPIT_HTML = """<!doctype html>
 		        <div id="actionQueueList" class="action-queue"></div>
 		      </div>
 		    </section>
+    <details id="documentsPanel" class="section-toggle">
+      <summary>Dokumenty</summary>
 		    <section>
       <h2>Práce s dokumenty</h2>
       <div class="body">
@@ -9469,7 +9496,7 @@ COCKPIT_HTML = """<!doctype html>
             <div id="documentIntakeList" class="work-list"></div>
           </div>
           <div class="work-card">
-            <h3>Vazby / cases</h3>
+            <h3>Související dokumenty</h3>
             <div id="documentCasesCount" class="work-count">0</div>
             <div id="documentCasesStatus" class="status-line">Seskupení podle věci nebo protistrany.</div>
             <div id="documentCasesList" class="work-list"></div>
@@ -9492,12 +9519,13 @@ COCKPIT_HTML = """<!doctype html>
             <div class="actions">
               <button class="secondary" id="reviewReportBtn">Načíst report</button>
             </div>
-            <div id="reviewReportStatus" class="status-line">Report zatím není načtený. Skupiny: Bez textu / OCR, Krátký text, Slabá metadata, K revizi, V pořádku.</div>
+            <div id="reviewReportStatus" class="status-line">Report zatím není načtený. Skupiny: Bez textu / OCR, Krátký text, Doplnit údaje, K revizi, V pořádku.</div>
             <div id="reviewReportList" class="work-list review-report-list"></div>
           </div>
         </div>
       </div>
     </section>
+    </details>
     <section>
       <h2>Najít dokument</h2>
       <div class="body">
@@ -9509,6 +9537,8 @@ COCKPIT_HTML = """<!doctype html>
         <div id="documentSearchResults" class="search-results"></div>
       </div>
     </section>
+    <details id="serviceOverviewPanel" class="section-toggle">
+      <summary>Servisní přehledy</summary>
     <div class="grid">
       <section>
         <h2>PDF ve Downloads za 7 dní</h2>
@@ -9539,9 +9569,10 @@ COCKPIT_HTML = """<!doctype html>
       <div class="body"><div id="vaultText" class="vault-summary"></div></div>
     </section>
     <section>
-      <h2>Consistency Audit</h2>
+      <h2>Kontrola nesrovnalostí</h2>
       <div class="body"><div id="consistencyText" class="consistency-panel"></div></div>
     </section>
+    </details>
   </main>
   <div id="janickaModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="janickaTitle">
     <div class="modal janicka-modal">
@@ -9657,7 +9688,7 @@ COCKPIT_HTML = """<!doctype html>
   <div id="remindersModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="remindersTitle">
     <div class="modal">
       <div class="modal-header">
-        <h2 id="remindersTitle">Reminders</h2>
+        <h2 id="remindersTitle">Připomenutí</h2>
         <button class="secondary" id="remindersCloseBtn">Zavřít</button>
       </div>
       <div class="modal-body">
@@ -9769,11 +9800,11 @@ COCKPIT_HTML = """<!doctype html>
 	  <div id="quickNotesModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="quickNotesTitle">
 	    <div class="modal">
 	      <div class="modal-header">
-	        <h2 id="quickNotesTitle">QN přehled</h2>
+	        <h2 id="quickNotesTitle">Rychlé poznámky</h2>
         <button class="secondary" id="quickNotesCloseBtn">Zavřít</button>
       </div>
       <div class="modal-body">
-        <div id="quickNotesStatus" class="status-line">Načítám Quick Notes...</div>
+        <div id="quickNotesStatus" class="status-line">Načítám rychlé poznámky...</div>
         <div id="quickNotesList" class="project-list"></div>
 	      </div>
 	    </div>
@@ -9853,7 +9884,7 @@ COCKPIT_HTML = """<!doctype html>
 		  <div id="quantitativeModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="quantitativeTitle">
     <div class="modal">
       <div class="modal-header">
-        <h2 id="quantitativeTitle">Kvantitativní status</h2>
+        <h2 id="quantitativeTitle">Systémový souhrn</h2>
         <button class="secondary" id="quantitativeCloseBtn">Zavřít</button>
       </div>
       <div class="modal-body quantitative-panel">
@@ -10401,13 +10432,13 @@ COCKPIT_HTML = """<!doctype html>
         main: "Hlavní status",
         consistency: "Audit",
         documents: "Dokumenty",
-        reminders: "Reminders",
+        reminders: "Připomenutí",
         backup: "Záloha",
         git: "Git",
         voice: "Hlas",
         projects: "Projekty",
         quickNotes: "QN",
-        quantitative: "Kvantitativní",
+        quantitative: "Systém",
         scandocu: "ScanDocu"
       }[key] || key || "Signál";
     }
@@ -10728,7 +10759,7 @@ COCKPIT_HTML = """<!doctype html>
             const button = document.createElement("button");
             button.className = "secondary";
             button.type = "button";
-            button.textContent = item.action_label || "Email Processing";
+            button.textContent = item.action_label || "E-maily";
             button.addEventListener("click", openEmailProcessing);
             row.appendChild(button);
           }
@@ -10759,7 +10790,7 @@ COCKPIT_HTML = """<!doctype html>
           const button = document.createElement("button");
           button.className = "secondary";
           button.type = "button";
-          button.textContent = "Email Processing";
+          button.textContent = "E-maily";
           button.addEventListener("click", openEmailProcessing);
           const hideButton = document.createElement("button");
           hideButton.className = "secondary";
@@ -11349,6 +11380,10 @@ COCKPIT_HTML = """<!doctype html>
       todayNewPdfCount.textContent = String(newCount);
       todayReviewCount.textContent = String(reviewPending);
       todayProblemCount.textContent = String(problemTotal);
+      const documentsPanelNode = document.getElementById("documentsPanel");
+      if (documentsPanelNode && (newCount > 0 || reviewPending > 0 || problemTotal > 0)) {
+        documentsPanelNode.open = true;
+      }
       todayHint.textContent = dashboardTodayHint(newCount, reviewPending, problemTotal);
       const documentSignal = problemTotal > 0
         ? {level: "warn", reason: `Dokumenty: ${problemTotal} problémů k ruční kontrole`}
@@ -11386,10 +11421,10 @@ COCKPIT_HTML = """<!doctype html>
         "reminders",
         conflictReminders > 0 ? "bad" : activeReminders > 0 ? "warn" : "ok",
         conflictReminders > 0
-          ? `Reminders: ${conflictReminders} konflikt`
+          ? `Připomenutí: ${conflictReminders} konflikt`
           : activeReminders > 0
-            ? `Reminders: ${activeReminders} aktivní připomenutí`
-            : "Reminders bez akutní akce"
+            ? `Připomenutí: ${activeReminders} aktivní`
+            : "Připomenutí bez akutní akce"
       );
 
       const voiceMode = data.voice_mode || {};
@@ -11481,7 +11516,7 @@ COCKPIT_HTML = """<!doctype html>
         setDashboardStatusSignal("projects", "loading", "Projekty se načítají samostatně");
       }
       if (dashboardValueIsPending(dashboardQuantitative)) {
-        setDashboardStatusSignal("quantitative", "loading", "Kvantitativní status se načítá samostatně");
+        setDashboardStatusSignal("quantitative", "loading", "Systémový souhrn se načítá samostatně");
       }
       if (dashboardValueIsPending(dashboardConsistency)) {
         setDashboardStatusSignal("consistency", "loading", "Audit se načítá samostatně");
@@ -11880,12 +11915,12 @@ COCKPIT_HTML = """<!doctype html>
         setDashboardStatusSignal(
           "quantitative",
           quantitative.ok === false ? "warn" : "ok",
-          quantitative.ok === false ? "Kvantitativní status: nelze zjistit" : "Kvantitativní status načten"
+          quantitative.ok === false ? "Systémový souhrn: nelze zjistit" : "Systémový souhrn načten"
         );
       } catch (err) {
         recordFrontendError(err);
         setDashboardValue(dashboardQuantitative, `<span class="warn">chyba načtení</span>`);
-        setDashboardStatusSignal("quantitative", "warn", `Kvantitativní status: chyba načtení (${err})`);
+        setDashboardStatusSignal("quantitative", "warn", `Systémový souhrn: chyba načtení (${err})`);
       }
     }
 
@@ -11948,7 +11983,7 @@ COCKPIT_HTML = """<!doctype html>
 
     async function openQuantitativeModal() {
       quantitativeModal.classList.remove("hidden");
-      quantitativeStatus.textContent = "Načítám kvantitativní status...";
+      quantitativeStatus.textContent = "Načítám systémový souhrn...";
       quantitativeCurrent.textContent = "";
       quantitativePrevious.textContent = "";
       quantitativeDiffTotals.innerHTML = "";
@@ -11959,7 +11994,7 @@ COCKPIT_HTML = """<!doctype html>
         renderQuantitativeStatus(data);
       } catch (err) {
         recordFrontendError(err);
-        quantitativeStatus.textContent = `Chyba načtení kvantitativního statusu: ${err}`;
+        quantitativeStatus.textContent = `Chyba načtení systémového souhrnu: ${err}`;
       }
     }
 
@@ -11978,7 +12013,7 @@ COCKPIT_HTML = """<!doctype html>
       const diffLocal = (diff.totals && diff.totals.local) || {files: 0, lines: 0};
       const diffGit = (diff.totals && diff.totals.git_tracked) || {files: 0, lines: 0};
 
-      quantitativeStatus.textContent = data.message || "Kvantitativní status načten.";
+      quantitativeStatus.textContent = data.message || "Systémový souhrn načten.";
       quantitativeCurrent.textContent = [
         `Created: ${current.created_at || ""}`,
         `Git: ${current.git_summary || ""}`,
@@ -13267,14 +13302,14 @@ COCKPIT_HTML = """<!doctype html>
 
     async function openQuickNotesModal() {
       quickNotesModal.classList.remove("hidden");
-      quickNotesStatus.textContent = "Načítám Quick Notes...";
+      quickNotesStatus.textContent = "Načítám rychlé poznámky...";
       quickNotesList.innerHTML = "";
       try {
         const data = await fetchJson("/api/quick-notes/status");
         renderQuickNotes(data);
       } catch (err) {
         recordFrontendError(err);
-        quickNotesStatus.textContent = `Chyba načtení Quick Notes: ${err}`;
+        quickNotesStatus.textContent = `Chyba načtení rychlých poznámek: ${err}`;
       }
     }
 

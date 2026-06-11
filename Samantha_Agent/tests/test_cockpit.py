@@ -1205,7 +1205,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("remindersBtn", COCKPIT_HTML)
         self.assertIn("dashboardReminders", COCKPIT_HTML)
         self.assertIn("dashboardConsistency", COCKPIT_HTML)
-        self.assertIn("Consistency Audit", COCKPIT_HTML)
+        self.assertIn("Kontrola nesrovnalostí", COCKPIT_HTML)
         self.assertIn("consistencyText", COCKPIT_HTML)
         self.assertIn("renderConsistencyAudit", COCKPIT_HTML)
         self.assertIn("resolveConsistencyFinding", COCKPIT_HTML)
@@ -1236,7 +1236,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Souhrn zdrojů", COCKPIT_HTML)
         self.assertIn("E-mail kandidáti", COCKPIT_HTML)
         self.assertIn("Downloads / e-mail / mobilní sken / lokální inbox", COCKPIT_HTML)
-        self.assertIn("Vazby / cases", COCKPIT_HTML)
+        self.assertIn("Související dokumenty", COCKPIT_HTML)
         self.assertIn("documentCasesCount", COCKPIT_HTML)
         self.assertIn("documentCasesList", COCKPIT_HTML)
         self.assertIn("renderDocumentCases", COCKPIT_HTML)
@@ -1270,10 +1270,10 @@ class CockpitTests(unittest.TestCase):
         self.assertIn('id="reviewReportList" class="work-list review-report-list"', COCKPIT_HTML)
         self.assertIn("Bez textu / OCR", COCKPIT_HTML)
         self.assertIn("Krátký text", COCKPIT_HTML)
-        self.assertIn("Slabá metadata", COCKPIT_HTML)
+        self.assertIn("Doplnit údaje", COCKPIT_HTML)
         self.assertIn("V pořádku", COCKPIT_HTML)
         self.assertIn("Zpracovat další dokument", COCKPIT_HTML)
-        self.assertIn("Reminders", COCKPIT_HTML)
+        self.assertIn("Připomenutí", COCKPIT_HTML)
         self.assertIn("remindersModal", COCKPIT_HTML)
         self.assertIn("/api/reminders", COCKPIT_HTML)
         self.assertIn("/api/reminders/done", COCKPIT_HTML)
@@ -3662,7 +3662,7 @@ Dalsi krok:
             )
 
     def test_email_processing_html_contains_readonly_overview_controls(self) -> None:
-        self.assertIn("Email Processing", EMAIL_PROCESSING_HTML)
+        self.assertIn("E-maily", EMAIL_PROCESSING_HTML)
         self.assertIn("/api/email-processing/overview", EMAIL_PROCESSING_HTML)
         self.assertIn("/api/email-processing/pending-work", EMAIL_PROCESSING_HTML)
         self.assertIn("/api/email-processing/decision", EMAIL_PROCESSING_HTML)
@@ -3731,7 +3731,7 @@ Dalsi krok:
         self.assertIn("pojištění/smlouvy", EMAIL_PROCESSING_HTML)
 
     def test_cockpit_html_contains_email_processing_controls(self) -> None:
-        self.assertIn("Email Processing", COCKPIT_HTML)
+        self.assertIn("E-maily", COCKPIT_HTML)
         self.assertIn("emailProcessingBtn", COCKPIT_HTML)
         self.assertIn("/email-processing/", COCKPIT_HTML)
         self.assertIn("openEmailProcessing", COCKPIT_HTML)
@@ -3742,7 +3742,7 @@ Dalsi krok:
 
         self.assertTrue(catalog["ok"])
         self.assertIn("ScanDocu", titles)
-        self.assertIn("Email Processing", titles)
+        self.assertIn("E-maily", titles)
         self.assertIn("Lékárna", titles)
         self.assertIn("Family Video Organizer", titles)
 
