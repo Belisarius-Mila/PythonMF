@@ -1347,6 +1347,9 @@ class CockpitTests(unittest.TestCase):
             r"voiceStopTimer = null;\s*}\s*}\s*function updateVoiceModeUi\(\)",
         )
         self.assertIn("Nahrát pokyn", COCKPIT_HTML)
+        self.assertIn("Diktovat text", COCKPIT_HTML)
+        self.assertIn("directVoiceRecordingSupported", COCKPIT_HTML)
+        self.assertIn("updateVoiceRecordingAvailability", COCKPIT_HTML)
         self.assertIn("voiceStopBtn", COCKPIT_HTML)
         self.assertIn("voiceTranscript", COCKPIT_HTML)
         self.assertIn("voiceTranscriptSendBtn", COCKPIT_HTML)
@@ -1356,7 +1359,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("submitVoiceTranscript", COCKPIT_HTML)
         self.assertIn("/api/speech/transcribe", COCKPIT_HTML)
         self.assertIn("/api/speech/voice-text", COCKPIT_HTML)
-        self.assertIn("Tento prohlížeč nepodporuje přímé nahrávání.", COCKPIT_HTML)
+        self.assertIn("prohlížeč nepovolí přímý mikrofon", COCKPIT_HTML)
         self.assertIn("frontendHealthPanel", COCKPIT_HTML)
         self.assertIn("frontendHealthJs", COCKPIT_HTML)
         self.assertIn("JS se zatím nespustil", COCKPIT_HTML)

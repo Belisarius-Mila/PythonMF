@@ -13034,6 +13034,29 @@ COCKPIT_HTML = """<!doctype html>
 	      return candidates.find((candidate) => MediaRecorder.isTypeSupported(candidate)) || "";
 	    }
 
+	    function directVoiceRecordingSupported() {
+	      return Boolean(
+	        window.isSecureContext &&
+	        navigator.mediaDevices &&
+	        navigator.mediaDevices.getUserMedia &&
+	        window.MediaRecorder
+	      );
+	    }
+
+	    function updateVoiceRecordingAvailability() {
+	      if (directVoiceRecordingSupported()) {
+	        voiceRecordBtn.textContent = "Nahrát pokyn";
+	        voiceRecordBtn.title = "";
+	        voiceRecordBtn.classList.remove("secondary");
+	        voiceRecordBtn.classList.add("primary");
+	        return;
+	      }
+	      voiceRecordBtn.textContent = "Diktovat text";
+	      voiceRecordBtn.title = "Na iPhonu přes HTTP prohlížeč nepustí mikrofon. Použij diktování do textového pole.";
+	      voiceRecordBtn.classList.remove("primary");
+	      voiceRecordBtn.classList.add("secondary");
+	    }
+
 	    function createVoiceRecorder(stream, mimeType) {
 	      const baseOptions = mimeType ? {mimeType} : {};
 	      try {
@@ -13282,8 +13305,9 @@ COCKPIT_HTML = """<!doctype html>
 	      if (voiceCommandDetails) {
 	        voiceCommandDetails.open = true;
 	      }
-	      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
-	        voiceCommandStatus.textContent = "Tento prohlížeč nepodporuje přímé nahrávání. Použij diktování do pole Textový pokyn a tlačítko Odeslat Adamovi.";
+	      if (!directVoiceRecordingSupported()) {
+	        voiceCommandStatus.textContent = "Na iPhonu přes tuto HTTP adresu prohlížeč nepovolí přímý mikrofon. Klepni do pole Textový pokyn, použij iOS diktování a potom Odeslat Adamovi.";
+	        voiceTranscript.focus();
 	        return;
 	      }
 	      voiceRecordBtn.disabled = true;
@@ -15321,6 +15345,7 @@ COCKPIT_HTML = """<!doctype html>
       if (!button) return;
       setVoiceBridgeMarker(button.dataset.voiceBridgeTty || "", button);
     });
+    updateVoiceRecordingAvailability();
     updateVoiceModeUi();
 			    webAppsBtn.addEventListener("click", openWebAppsModal);
     libraryBtn.addEventListener("click", openLibraryModal);
