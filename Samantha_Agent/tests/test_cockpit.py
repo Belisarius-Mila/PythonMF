@@ -1311,6 +1311,11 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("renderVoiceLastResponse", COCKPIT_HTML)
         self.assertIn("refreshVoiceLatestResponse", COCKPIT_HTML)
         self.assertIn("startVoiceReplyPolling", COCKPIT_HTML)
+        self.assertIn("normalizeVoiceText", COCKPIT_HTML)
+        self.assertIn("voiceResponseMatchesCurrentRequest", COCKPIT_HTML)
+        self.assertIn("expectedUserText: text", COCKPIT_HTML)
+        self.assertIn("expectedUserText: data.text ||", COCKPIT_HTML)
+        self.assertIn("minCreatedAt: voiceReplyMinCreatedAt", COCKPIT_HTML)
         self.assertIn("renderVoiceApproval", COCKPIT_HTML)
         self.assertIn("speakLastAdamResponse", COCKPIT_HTML)
         self.assertIn("submitVoiceApproval", COCKPIT_HTML)
@@ -1896,9 +1901,9 @@ class CockpitTests(unittest.TestCase):
             self.assertIn("odeslán do označené Codex relace", result["message"])
             self.assertEqual(bridge_calls, ["Adame, spočítej dnešní handoffy."])
 
-    def test_selected_voice_delivery_transport_defaults_to_managed_screen(self) -> None:
+    def test_selected_voice_delivery_transport_defaults_to_local_tty(self) -> None:
         with patch.dict("os.environ", {}, clear=True):
-            self.assertEqual(selected_voice_delivery_transport(), "managed_screen")
+            self.assertEqual(selected_voice_delivery_transport(), "local_tty")
 
     def test_selected_voice_delivery_transport_accepts_sshl_alias(self) -> None:
         with patch.dict("os.environ", {"ADAM_VOICE_TRANSPORT": "sslh"}):

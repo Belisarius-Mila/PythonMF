@@ -7582,7 +7582,7 @@ def deliver_saved_voice_command_inline(
 
 
 def selected_voice_delivery_transport() -> str:
-    transport = os.environ.get(VOICE_DELIVERY_TRANSPORT_ENV, "managed_screen").strip().lower()
+    transport = os.environ.get(VOICE_DELIVERY_TRANSPORT_ENV, "local_tty").strip().lower()
     if transport in {"local", "local_tty", "tty", "mac", "mac_tty", "terminal"}:
         return "local_tty"
     if transport in {"screen", "ssh", "sslh", "managed", "managed_screen"}:
@@ -13020,6 +13020,8 @@ COCKPIT_HTML = """<!doctype html>
 		    let autoSpokenAdamResponseKey = "";
 		    let voiceReplyPollTimer = null;
 		    let voiceReplyPollUntil = 0;
+		    let voiceReplyExpectedUserText = "";
+		    let voiceReplyMinCreatedAt = 0;
 
 	    function preferredVoiceMimeType() {
 	      if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) {
@@ -13110,6 +13112,28 @@ COCKPIT_HTML = """<!doctype html>
 		      return `${createdAt}|${text}`;
 		    }
 
+		    function normalizeVoiceText(value) {
+		      return String(value || "").replace(/\s+/g, " ").trim();
+		    }
+
+		    function voiceResponseMatchesCurrentRequest(lastResponse, options = {}) {
+		      const expectedUserText = normalizeVoiceText(options.expectedUserText || "");
+		      if (expectedUserText) {
+		        const actualUserText = normalizeVoiceText(lastResponse && lastResponse.user_text || "");
+		        if (actualUserText !== expectedUserText) {
+		          return false;
+		        }
+		      }
+		      const minCreatedAt = Number(options.minCreatedAt || 0);
+		      if (minCreatedAt) {
+		        const createdAtMs = Date.parse(String(lastResponse && lastResponse.created_at || ""));
+		        if (!Number.isFinite(createdAtMs) || createdAtMs < minCreatedAt) {
+		          return false;
+		        }
+		      }
+		      return true;
+		    }
+
 		    function renderVoiceLastResponse(lastResponse, options = {}) {
 		      const text = String(lastResponse && lastResponse.adam_response || "").trim();
 		      const responseKey = voiceResponseKey(lastResponse);
@@ -13138,6 +13162,9 @@ COCKPIT_HTML = """<!doctype html>
 		        const res = await fetch("/api/voice-mode/latest-response");
 		        const data = await res.json();
 		        if (data && data.available) {
+		          if (!voiceResponseMatchesCurrentRequest(data, options)) {
+		            return null;
+		          }
 		          renderVoiceLastResponse(data, {
 		            openPanel: true,
 		            autoSpeak: options.autoSpeak === true
@@ -13150,7 +13177,9 @@ COCKPIT_HTML = """<!doctype html>
 		      return null;
 		    }
 
-		    function startVoiceReplyPolling({autoSpeak = true, durationMs = 120000} = {}) {
+		    function startVoiceReplyPolling({autoSpeak = true, durationMs = 120000, expectedUserText = ""} = {}) {
+		      voiceReplyExpectedUserText = expectedUserText;
+		      voiceReplyMinCreatedAt = Date.now() - 5000;
 		      voiceReplyPollUntil = Math.max(voiceReplyPollUntil, Date.now() + durationMs);
 		      if (voiceReplyPollTimer) return;
 		      voiceReplyPollTimer = window.setInterval(async () => {
@@ -13159,9 +13188,17 @@ COCKPIT_HTML = """<!doctype html>
 		          voiceReplyPollTimer = null;
 		          return;
 		        }
-		        await refreshVoiceLatestResponse({autoSpeak});
+		        await refreshVoiceLatestResponse({
+		          autoSpeak,
+		          expectedUserText: voiceReplyExpectedUserText,
+		          minCreatedAt: voiceReplyMinCreatedAt
+		        });
 		      }, 3000);
-		      window.setTimeout(() => refreshVoiceLatestResponse({autoSpeak}), 1000);
+		      window.setTimeout(() => refreshVoiceLatestResponse({
+		        autoSpeak,
+		        expectedUserText: voiceReplyExpectedUserText,
+		        minCreatedAt: voiceReplyMinCreatedAt
+		      }), 1000);
 		    }
 
 		    function pendingNeedsCockpitApproval(pending) {
@@ -13383,7 +13420,7 @@ COCKPIT_HTML = """<!doctype html>
 	        const data = await res.json();
 		        if (data.ok) {
 		          voiceTranscript.value = data.text || "";
-	          startVoiceReplyPolling({autoSpeak: true});
+	          startVoiceReplyPolling({autoSpeak: true, expectedUserText: data.text || ""});
 	          const totalMs = Date.now() - requestStartedAt;
 	          const serverMs = data.duration_ms || 0;
 	          const openaiMs = data.timing && data.timing.openai_ms ? data.timing.openai_ms : 0;
@@ -13414,7 +13451,7 @@ COCKPIT_HTML = """<!doctype html>
 	          const savedHint = data.latest_voice_command_path ? ` Uloženo: ${data.latest_voice_command_path}.` : "";
 	          voiceCommandStatus.textContent = `${data.message || "Textový pokyn byl odeslán Adamovi."}${savedHint}`;
 	          voiceTranscript.value = "";
-	          startVoiceReplyPolling({autoSpeak: true});
+	          startVoiceReplyPolling({autoSpeak: true, expectedUserText: text});
 	          await refresh({silent: true, includeSecondary: false});
 	        } else {
 	          voiceCommandStatus.textContent = data.message || "Textový hlasový pokyn se nepodařilo uložit.";
