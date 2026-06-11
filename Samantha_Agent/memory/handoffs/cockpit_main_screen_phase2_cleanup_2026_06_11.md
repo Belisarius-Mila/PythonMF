@@ -1,6 +1,6 @@
 Nazev: Cockpit hlavni obrazovka faze 2 cleanup
 Priorita: 1
-Stav: ceka na rucni retest
+Stav: hotovo / rucni retest dobry
 Pripomenout pri startu: ne
 Datum: 2026-06-11
 
@@ -19,6 +19,7 @@ Co je hotove:
   - servisni detaily `ScanDocu`, `Projekty`, `Kontrola`, `Rychle poznamky` a `Git` jsou pod `Dalsi stav`,
   - servisni akce, technicky stav Cockpitu a servisni prehledy jsou soustredene pod jeden blok `Servis`.
 - V `tests/test_cockpit.py` jsou upravena HTML ocekavani pro nove prvky.
+- Mila po rucnim retestu napsal, ze Cockpit vypada dobre.
 
 Overeni:
 - `.venv/bin/python -m py_compile app/cockpit.py` OK.
@@ -37,21 +38,17 @@ Overeni:
   - `/api/recovery/status`
 
 Co neni hotove:
-- Mila jeste neretestoval novou podobu na iPhonu a Macu rucne.
-- Zmena neni pushnuta na GitHub.
+- Zmena zatim ceka na push v ramci navazujiciho checkpointu.
 - Nebyla delana screenshot kontrola, jen HTML/API/testy/smoke.
+- Pri zpracovani 1 e-mailu Mila narazil na problem; to brat jako samostatne navazani k e-mailovemu workflow, ne jako blokaci UI cleanupu.
 
 Dalsi krok:
-- Rucne otevrit Cockpit na iPhonu pres `http://100.89.150.6:8770/?v=20260611-phase2` a zkontrolovat:
-  - jestli je `Co ted delat` opravdu hned po rannim stavu,
-  - jestli sbaleny `Hlas` nechybi pri bezne praci,
-  - jestli je `Servis` snadno najitelny,
-  - jestli karta `Stav` neni moc osekana.
+- Navazat na konkretni problem po zpracovani 1 e-mailu: nejdriv read-only zjistit, co se stalo v Cockpitu / Email Processing, a teprve potom rozhodnout opravu.
 
 Navrhovane dalsi kroky:
-- Pokud UI sedi: ponechat fazi 2 a pripadne pozdeji pushnout checkpoint commity.
-- Pokud UI skoro sedi: doladit nazvy nebo rozbaleni bez backend zmen.
-- Pokud UI nesedi: vratit samostatne tento faze 2 commit; faze 1 muze zustat.
+- Ponechat fazi 2 UI cleanupu jako aktualni stav.
+- Pushnout lokalni checkpoint commity na GitHub.
+- Pri e-mailovem navazani zacit read-only: stav rozhodnuti, work queue, kandidati a cache, bez mazani nebo provider akcí.
 
 Zmenene nebo relevantni soubory:
 - `app/cockpit.py`
