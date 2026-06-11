@@ -3222,10 +3222,12 @@ def adam_voice_bridge_status(
     except (OSError, subprocess.TimeoutExpired) as exc:
         screen_message = str(exc)
 
-    warnings: list[str] = []
     effective_tty = marked_tty if marked_tty in codex_ttys else ""
     if not effective_tty and marked_tty and len(codex_ttys) == 1:
         effective_tty = codex_ttys[0]
+    mac_bridge_ready = bool(effective_tty)
+    warnings: list[str] = []
+    notes: list[str] = []
     if not marked_tty:
         warnings.append("není označené cílové TTY")
     elif marked_tty not in codex_ttys:
@@ -3236,14 +3238,17 @@ def adam_voice_bridge_status(
     if len(codex_ttys) > expected_codex_session_limit:
         warnings.append(f"běží {len(codex_ttys)} Codex relací, očekáváno nejvýše {expected_codex_session_limit}")
     if screen_status == "not_running":
-        warnings.append("screen neběží")
+        notes.append("screen neběží; pro lokální Mac TTY bridge to není blokující")
 
     target = effective_tty or marked_tty or "nezjištěno"
     marker_label = marked_tty or "nezjištěno"
+    readiness = "Mac TTY bridge připravený" if mac_bridge_ready else "Mac TTY bridge není připravený"
     message = (
-        f"Bridge cílí na {target} (marker: {marker_label}). Codex relace: {len(codex_ttys)} "
+        f"{readiness}. Bridge cílí na {target} (marker: {marker_label}). Codex relace: {len(codex_ttys)} "
         f"(limit {expected_codex_session_limit}). {screen_message}."
     )
+    if notes:
+        message = f"{message} Info: {', '.join(notes)}."
     if warnings:
         message = f"{message} Pozor: {', '.join(warnings)}."
 
@@ -3255,11 +3260,13 @@ def adam_voice_bridge_status(
         "effective_tty": effective_tty,
         "marked_at": str(marker.get("marked_at") or ""),
         "parent_pid": marker.get("parent_pid"),
+        "mac_bridge_ready": mac_bridge_ready,
         "codex_ttys": codex_ttys,
         "codex_tty_count": len(codex_ttys),
         "expected_codex_session_limit": expected_codex_session_limit,
         "screen_status": screen_status,
         "screen_message": screen_message,
+        "notes": notes,
         "warnings": warnings,
     }
 

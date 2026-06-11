@@ -1538,7 +1538,43 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["codex_tty_count"], 2)
         self.assertEqual(result["screen_status"], "not_running")
         self.assertIn("běží 2 Codex relací, očekáváno nejvýše 1", result["warnings"])
-        self.assertIn("screen neběží", result["warnings"])
+        self.assertNotIn("screen neběží", result["warnings"])
+        self.assertIn("screen neběží; pro lokální Mac TTY bridge to není blokující", result["notes"])
+
+    def test_adam_voice_bridge_status_is_ok_for_mac_tty_without_screen(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker_path = Path(temp_dir) / "current_codex_tty.json"
+            marker_path.write_text(
+                json.dumps(
+                    {
+                        "tty": "ttys001",
+                        "marked_at": "2026-06-11T05:07:45+00:00",
+                        "parent_pid": 73760,
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            def fake_screen_runner(*args, **kwargs):
+                return subprocess.CompletedProcess(
+                    args=args[0],
+                    returncode=1,
+                    stdout="",
+                    stderr="No Sockets found in /tmp/.screen.\n",
+                )
+
+            result = adam_voice_bridge_status(
+                marker_path=marker_path,
+                codex_tty_discoverer=lambda: ["ttys001"],
+                screen_runner=fake_screen_runner,
+            )
+
+        self.assertEqual(result["status"], "ok")
+        self.assertTrue(result["mac_bridge_ready"])
+        self.assertEqual(result["effective_tty"], "ttys001")
+        self.assertEqual(result["warnings"], [])
+        self.assertIn("Mac TTY bridge připravený", result["message"])
+        self.assertIn("pro lokální Mac TTY bridge to není blokující", result["message"])
 
     def test_adam_voice_bridge_status_uses_single_active_tty_when_marker_is_stale(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -1571,8 +1607,10 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["status"], "warn")
         self.assertEqual(result["marked_tty"], "ttys001")
         self.assertEqual(result["effective_tty"], "ttys002")
+        self.assertTrue(result["mac_bridge_ready"])
         self.assertEqual(result["codex_ttys"], ["ttys002"])
         self.assertIn("označené TTY ttys001 je staré; použije se jediná aktivní Codex relace ttys002", result["warnings"])
+        self.assertNotIn("screen neběží", result["warnings"])
 
     def test_set_adam_voice_bridge_marker_only_allows_active_codex_tty(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
