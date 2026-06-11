@@ -340,9 +340,9 @@ def deliver_prompt_to_terminal(
     safe_prompt = squash_terminal_text(prompt)
     marked_tty = load_marked_codex_tty(marked_tty_path)
     codex_ttys = discover_codex_ttys(runner=ps_runner)
-    effective_marked_tty = marked_tty if marked_tty and marked_tty in codex_ttys else ""
+    effective_marked_tty = marked_tty if marked_tty and (marked_tty in codex_ttys or not codex_ttys) else ""
     auto_target_tty = ""
-    stale_marked_tty = marked_tty if marked_tty and marked_tty not in codex_ttys else ""
+    stale_marked_tty = marked_tty if marked_tty and codex_ttys and marked_tty not in codex_ttys else ""
     if stale_marked_tty and len(codex_ttys) == 1:
         auto_target_tty = codex_ttys[0]
     marked_tty_error: dict[str, Any] | None = None

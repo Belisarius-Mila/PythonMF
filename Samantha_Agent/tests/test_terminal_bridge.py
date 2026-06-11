@@ -268,6 +268,40 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertEqual(result["marked_tty_status"]["target_tty"], "ttys001")
         self.assertEqual(runner_calls, [])
 
+    def test_deliver_prompt_uses_marked_tty_when_ps_detection_is_empty(self) -> None:
+        runner_calls = []
+        tty_calls = []
+
+        def fake_runner(args, **kwargs):
+            runner_calls.append(args)
+            self.fail("GUI fallback should not run for marked tty")
+
+        def fake_ps_runner(args, **kwargs):
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
+
+        def fake_tty_deliverer(tty, prompt, **kwargs):
+            tty_calls.append((tty, prompt, kwargs))
+            return {"ok": True, "status": "delivered_tty", "submitted": kwargs.get("submit"), "verified": False}
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker = Path(temp_dir) / "current_codex_tty.json"
+            marker.write_text('{"tty": "ttys001"}', encoding="utf-8")
+
+            result = deliver_prompt_to_terminal(
+                "Hlasový pokyn od Míly.",
+                runner=fake_runner,
+                ps_runner=fake_ps_runner,
+                marked_tty_path=marker,
+                tty_deliverer=fake_tty_deliverer,
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "delivered_tty")
+        self.assertEqual(result["delivery_method"], "marked_tty")
+        self.assertIn("nespouštím GUI fallback", result["message"])
+        self.assertEqual(tty_calls[0][0], "ttys001")
+        self.assertEqual(runner_calls, [])
+
     def test_deliver_prompt_does_not_use_gui_fallback_when_marked_tty_is_unverified(self) -> None:
         runner_calls = []
         tty_calls = []
@@ -315,7 +349,7 @@ class TerminalBridgeTests(unittest.TestCase):
             return subprocess.CompletedProcess(args=args, returncode=1, stdout="", stderr="osascript nemá povoleno posílání stisknutí kláves.")
 
         def fake_ps_runner(args, **kwargs):
-            return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="100 1 ttys006 codex codex\n101 1 ttys007 codex codex\n", stderr="")
 
         def fake_tty_deliverer(tty, prompt, **kwargs):
             return {"ok": False, "status": "tty_delivery_failed", "message": "Operation not permitted", "target_tty": tty}
