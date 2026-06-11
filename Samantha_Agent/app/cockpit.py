@@ -27,11 +27,13 @@ from urllib.parse import parse_qs, quote, urlparse
 
 from app.adam_service import (
     adam_service_status,
+    deliver_prompt_to_adam_screen,
     load_adam_text_reply,
     restart_adam_service,
     start_adam_service,
     stop_adam_service,
     submit_adam_text_request,
+    wait_for_adam_ready,
 )
 from app.article_archive import (
     archive_text_entry,
@@ -105,11 +107,13 @@ from app.speech.adam_voice_mode import (
 )
 from app.speech.terminal_bridge import (
     CURRENT_CODEX_TTY_PATH,
+    assess_terminal_bridge,
+    build_codex_terminal_prompt,
     deliver_voice_command_to_terminal,
     discover_codex_ttys,
     normalize_tty,
 )
-from app.speech.voice_inbox import parse_voice_command_file
+from app.speech.voice_inbox import VoiceCommand, parse_voice_command_file, voice_command_to_dict
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -123,6 +127,7 @@ SCANDOCU_SERVER_SCRIPT = PROJECT_ROOT / "scripts" / "scandocu_server.py"
 COCKPIT_RESTART_SCRIPT = PROJECT_ROOT / "scripts" / "restart_cockpit.py"
 ADAM_VOICE_MODE_SCRIPT = PROJECT_ROOT / "scripts" / "adam_voice_mode.py"
 ADAM_VOICE_MODE_LOG_FILE = PROJECT_ROOT / "data" / "private" / "voice_inbox" / "adam_voice_mode.log"
+VOICE_DELIVERY_TRANSPORT_ENV = "ADAM_VOICE_TRANSPORT"
 EMAIL_SESSION_HANDOFF_DIR = PROJECT_ROOT / "data" / "private" / "email_session_handoffs"
 LOCAL_SEZNAM_EMAIL_DIR = PROJECT_ROOT / "data" / "private" / "email_seznam"
 EMAIL_PROCESSING_DECISIONS_FILE = EMAIL_SESSION_HANDOFF_DIR / "email_processing_decisions.json"
@@ -7545,7 +7550,7 @@ def save_voice_command_to_inbox(
 def deliver_saved_voice_command_inline(
     *,
     inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
-    terminal_bridge: Callable[..., dict[str, Any]] = deliver_voice_command_to_terminal,
+    terminal_bridge: Callable[..., dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     try:
         command = parse_voice_command_file(inbox_dir / "latest_voice_command.md")
@@ -7556,7 +7561,8 @@ def deliver_saved_voice_command_inline(
             "voice_delivery_message": f"Hlasový pokyn byl uložen, ale nejde načíst pro okamžité předání: {exc}",
         }
 
-    bridge_result = terminal_bridge(command)
+    bridge = terminal_bridge or deliver_voice_command_by_configured_transport
+    bridge_result = bridge(command)
     if bridge_result.get("ok") and bridge_result.get("verified"):
         status = "voice_command_delivered"
         message = "Hlasový pokyn byl uložen a předán přímo do Codexu."
@@ -7575,11 +7581,78 @@ def deliver_saved_voice_command_inline(
     }
 
 
+def selected_voice_delivery_transport() -> str:
+    transport = os.environ.get(VOICE_DELIVERY_TRANSPORT_ENV, "managed_screen").strip().lower()
+    if transport in {"local", "local_tty", "tty", "mac", "mac_tty", "terminal"}:
+        return "local_tty"
+    if transport in {"screen", "ssh", "sslh", "managed", "managed_screen"}:
+        return "managed_screen"
+    return "managed_screen"
+
+
+def deliver_voice_command_via_managed_screen(
+    command: VoiceCommand,
+    *,
+    submit: bool = True,
+    starter: Callable[..., dict[str, Any]] | None = None,
+    ready_waiter: Callable[[], dict[str, Any]] | None = None,
+    screen_deliverer: Callable[..., dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    starter = starter or start_adam_service
+    ready_waiter = ready_waiter or wait_for_adam_ready
+    screen_deliverer = screen_deliverer or deliver_prompt_to_adam_screen
+    decision = assess_terminal_bridge(command)
+    if not decision.get("ok"):
+        return {
+            **decision,
+            "voice_transport": "managed_screen",
+            "command": voice_command_to_dict(command),
+        }
+    start_result = starter()
+    if not start_result.get("ok"):
+        return {
+            "ok": False,
+            "status": "managed_screen_start_failed",
+            "message": str(start_result.get("message") or "Spravovanou Adamovu screen relaci se nepodařilo spustit."),
+            "voice_transport": "managed_screen",
+            "start": start_result,
+            "decision": decision,
+            "command": voice_command_to_dict(command),
+        }
+    ready_result: dict[str, Any] = {"ready": True, "message": "Spravovaná Adamova relace už běžela."}
+    if start_result.get("status") in {"start_requested", "restart_requested"}:
+        ready_result = ready_waiter()
+    prompt = build_codex_terminal_prompt(command)
+    delivery = screen_deliverer(prompt, submit=submit)
+    message = str(delivery.get("message") or "")
+    if delivery.get("ok") and not ready_result.get("ready", True):
+        ready_message = str(ready_result.get("message") or "připravenost se nepodařilo ověřit")
+        message = f"{message} Pozor: {ready_message}"
+    return {
+        **delivery,
+        "message": message or ("Pokyn byl vložen do spravované Adamovy screen relace." if delivery.get("ok") else "Doručení do spravované Adamovy screen relace selhalo."),
+        "voice_transport": "managed_screen",
+        "prompt": prompt,
+        "decision": decision,
+        "start": start_result,
+        "ready": ready_result,
+        "command": voice_command_to_dict(command),
+    }
+
+
+def deliver_voice_command_by_configured_transport(command: VoiceCommand, *, submit: bool = True) -> dict[str, Any]:
+    transport = selected_voice_delivery_transport()
+    if transport == "local_tty":
+        result = deliver_voice_command_to_terminal(command, submit=submit)
+        return {**result, "voice_transport": "local_tty"}
+    return deliver_voice_command_via_managed_screen(command, submit=submit)
+
+
 def cockpit_transcribe_voice_action(
     payload: dict[str, Any],
     *,
     inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
-    terminal_bridge: Callable[..., dict[str, Any]] = deliver_voice_command_to_terminal,
+    terminal_bridge: Callable[..., dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     try:
         result = transcribe_audio_base64(
@@ -7615,7 +7688,7 @@ def cockpit_save_voice_text_action(
     payload: dict[str, Any],
     *,
     inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
-    terminal_bridge: Callable[..., dict[str, Any]] = deliver_voice_command_to_terminal,
+    terminal_bridge: Callable[..., dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     text = safe_text(str(payload.get("text", "") or "")).strip()
     if not text:

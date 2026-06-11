@@ -67,6 +67,7 @@ from app.cockpit import (
     search_document_index,
     set_adam_voice_bridge_marker_action,
     set_document_reading_status_action,
+    selected_voice_delivery_transport,
     start_adam_voice_mode_action,
     start_cockpit_restart_action,
     stop_adam_voice_mode_action,
@@ -1891,6 +1892,48 @@ class CockpitTests(unittest.TestCase):
             self.assertEqual(result["voice_delivery_status"], "voice_command_delivery_unverified")
             self.assertIn("odeslán do označené Codex relace", result["message"])
             self.assertEqual(bridge_calls, ["Adame, spočítej dnešní handoffy."])
+
+    def test_selected_voice_delivery_transport_defaults_to_managed_screen(self) -> None:
+        with patch.dict("os.environ", {}, clear=True):
+            self.assertEqual(selected_voice_delivery_transport(), "managed_screen")
+
+    def test_selected_voice_delivery_transport_accepts_sshl_alias(self) -> None:
+        with patch.dict("os.environ", {"ADAM_VOICE_TRANSPORT": "sslh"}):
+            self.assertEqual(selected_voice_delivery_transport(), "managed_screen")
+
+    def test_cockpit_save_voice_text_action_uses_configured_managed_screen_transport(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            starts = []
+            deliveries = []
+
+            def fake_start():
+                starts.append(True)
+                return {"ok": True, "status": "already_running"}
+
+            def fake_wait():
+                self.fail("already running service should not wait")
+
+            def fake_deliver(prompt, **kwargs):
+                deliveries.append({"prompt": prompt, "kwargs": kwargs})
+                return {"ok": True, "verified": True, "status": "delivered_screen", "message": "screen ok"}
+
+            with (
+                patch.dict("os.environ", {"ADAM_VOICE_TRANSPORT": "managed_screen"}),
+                patch("app.cockpit.start_adam_service", side_effect=fake_start),
+                patch("app.cockpit.wait_for_adam_ready", side_effect=fake_wait),
+                patch("app.cockpit.deliver_prompt_to_adam_screen", side_effect=fake_deliver),
+            ):
+                result = cockpit_save_voice_text_action(
+                    {"text": "Adame, řekni krátký stav."},
+                    inbox_dir=Path(temp_dir),
+                )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["voice_delivery_status"], "voice_command_delivered")
+        self.assertEqual(result["voice_delivery"]["voice_transport"], "managed_screen")
+        self.assertEqual(starts, [True])
+        self.assertEqual(deliveries[0]["kwargs"], {"submit": True})
+        self.assertIn("Adame, řekni krátký stav.", deliveries[0]["prompt"])
 
     def test_cockpit_save_voice_text_action_rejects_empty_text(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
