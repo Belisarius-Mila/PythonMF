@@ -12110,8 +12110,8 @@ COCKPIT_HTML = """<!doctype html>
         voiceBridgeSessions.classList.toggle("ok", !voiceBridgeWarn && (!markedTty || codexTtys.includes(markedTty)));
       }
       renderVoiceBridgeSwitcher(voiceBridge);
-      if (voiceCommandDetails) {
-        voiceCommandDetails.open = Boolean(voicePendingActionable || voiceBridgeWarn);
+      if (voiceCommandDetails && (voicePendingActionable || voiceBridgeWarn)) {
+        voiceCommandDetails.open = true;
       }
       if (voicePendingStatus) {
         voicePendingStatus.textContent = voicePendingActive
@@ -13206,6 +13206,9 @@ COCKPIT_HTML = """<!doctype html>
 		    }
 
 	    async function startVoiceRecording() {
+	      if (voiceCommandDetails) {
+	        voiceCommandDetails.open = true;
+	      }
 	      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
 	        voiceCommandStatus.textContent = "Tento prohlížeč nepodporuje přímé nahrávání. Použij diktování do pole Textový pokyn a tlačítko Odeslat Adamovi.";
 	        return;

@@ -1292,6 +1292,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("new Audio", COCKPIT_HTML)
         self.assertIn("voiceRecordBtn", COCKPIT_HTML)
         self.assertIn("voiceCommandDetails", COCKPIT_HTML)
+        self.assertNotIn("voiceCommandDetails.open = Boolean", COCKPIT_HTML)
         self.assertIn("voiceModeToggleBtn", COCKPIT_HTML)
         self.assertIn("dashboardVoiceMode", COCKPIT_HTML)
         self.assertIn("voiceModeRuntimeStatus", COCKPIT_HTML)
