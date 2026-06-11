@@ -10553,6 +10553,7 @@ COCKPIT_HTML = """<!doctype html>
     const URGENT_REMINDERS_MONITOR_MS = 30 * 1000;
     let refreshInFlight = false;
     let urgentRemindersRefreshInFlight = false;
+    let lastMainRefreshStartedAt = 0;
     let latestDocumentIntakeData = null;
     let lastEmailIntakeMonitor = {
       generated_at: "",
@@ -10567,6 +10568,7 @@ COCKPIT_HTML = """<!doctype html>
     async function refresh(options = {}) {
       if (refreshInFlight) return;
       refreshInFlight = true;
+      lastMainRefreshStartedAt = Date.now();
       const silent = options.silent === true;
       const includeSecondary = options.includeSecondary !== false;
       refreshBtn.disabled = true;
@@ -10603,6 +10605,13 @@ COCKPIT_HTML = """<!doctype html>
         refreshBtn.disabled = false;
         refreshInFlight = false;
       }
+    }
+
+    function refreshMainStatusOnReturn(minAgeMs = 5000) {
+      if (document.hidden) return;
+      const now = Date.now();
+      if (now - lastMainRefreshStartedAt < minAgeMs) return;
+      refresh({silent: true, includeSecondary: false});
     }
 
     function refreshSecondaryStatus() {
@@ -14752,6 +14761,9 @@ COCKPIT_HTML = """<!doctype html>
 	    window.setInterval(() => refresh({silent: true, includeSecondary: false}), INTAKE_LOCAL_MONITOR_MS);
       window.setInterval(refreshUrgentRemindersSummary, URGENT_REMINDERS_MONITOR_MS);
       window.setInterval(runEmailIntakeMonitor, INTAKE_EMAIL_MONITOR_MS);
+      window.addEventListener("focus", () => refreshMainStatusOnReturn());
+      window.addEventListener("pageshow", () => refreshMainStatusOnReturn(1000));
+      document.addEventListener("visibilitychange", () => refreshMainStatusOnReturn());
 	    refresh();
       window.setTimeout(refreshUrgentRemindersSummary, 3000);
       window.setTimeout(runEmailIntakeMonitor, 5000);
