@@ -613,7 +613,6 @@ def build_spoken_result_for_command(
                 message = "Pokyn jsem vložil do Codex terminálu. Adam ho převezme přímo tam."
                 if pending_path is not None:
                     mark_matching_pending_delivered_to_terminal(command, path=pending_path)
-                append_voice_history_turn(command, adam_response=message, route="terminal_bridge", path=history_path)
                 return message
             if bridge_result.get("ok"):
                 bridge_status = str(bridge_result.get("status") or "terminal_delivery_unverified")

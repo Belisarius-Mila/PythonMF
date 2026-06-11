@@ -175,7 +175,7 @@ class AdamVoiceModeTests(unittest.TestCase):
         self.assertEqual(calls, ["Kolik jsme dnes napsali řádků kódu?"])
         self.assertIn("vložil do Codex terminálu", response)
         self.assertFalse(pending_path.exists())
-        self.assertEqual(history[0]["route"], "terminal_bridge")
+        self.assertEqual(history, [])
 
     def test_build_spoken_result_routes_write_to_chat_test_to_terminal_bridge(self) -> None:
         calls = []
@@ -204,7 +204,7 @@ class AdamVoiceModeTests(unittest.TestCase):
         self.assertEqual(calls, ["Adame, napiš do chatu: test hlasového bridge jedna."])
         self.assertIn("vložil do Codex terminálu", response)
         self.assertFalse(pending_path.exists())
-        self.assertEqual(history[0]["route"], "terminal_bridge")
+        self.assertEqual(history, [])
 
     def test_terminal_bridge_success_clears_matching_pending_command(self) -> None:
         def fake_terminal_bridge(command):
