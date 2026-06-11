@@ -13308,7 +13308,9 @@ COCKPIT_HTML = """<!doctype html>
 		      return null;
 		    }
 
-		    function startVoiceReplyPolling({autoSpeak = true, durationMs = 120000, expectedUserText = ""} = {}) {
+		    const VOICE_REPLY_POLL_DURATION_MS = 600000;
+
+		    function startVoiceReplyPolling({autoSpeak = true, durationMs = VOICE_REPLY_POLL_DURATION_MS, expectedUserText = ""} = {}) {
 		      voiceReplyExpectedUserText = expectedUserText;
 		      voiceReplyMinCreatedAt = Date.now() - 5000;
 		      voiceReplyPollUntil = Math.max(voiceReplyPollUntil, Date.now() + durationMs);

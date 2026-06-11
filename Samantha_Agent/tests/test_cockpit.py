@@ -1311,6 +1311,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("renderVoiceLastResponse", COCKPIT_HTML)
         self.assertIn("refreshVoiceLatestResponse", COCKPIT_HTML)
         self.assertIn("startVoiceReplyPolling", COCKPIT_HTML)
+        self.assertIn("VOICE_REPLY_POLL_DURATION_MS = 600000", COCKPIT_HTML)
         self.assertIn("normalizeVoiceText", COCKPIT_HTML)
         self.assertIn("voiceResponseMatchesCurrentRequest", COCKPIT_HTML)
         self.assertIn("expectedUserText: text", COCKPIT_HTML)

@@ -54,6 +54,10 @@ Stav k 2026-06-11:
 - Mac TTY bridge byl ověřený bez `screen`: hlasový pokyn z Cockpitu dorazil přímo do aktivní Codex relace.
 - `scripts/speak_edge_open.py` má kvůli rychlosti a sandboxu výchozí lokální režim přes macOS `say`, takže běžný hlasový výsledek nevyžaduje síť ani eskalaci mimo sandbox.
 - Online Edge MP3 zůstává dostupné explicitně přes `--engine edge`; diagnostický režim `--engine edge-fallback` nejdřív zkusí Edge a při selhání použije lokální hlas.
+- Po obnove z autosave byl potvrzen remote-first iPhone provoz: vychozi transport je `local_tty`, odpoved se vraci do Cockpitu pres `scripts/adam_voice_reply.py --latest-command` a iPhone ji prehraje v browseru po otevreni audio kanalu.
+- `managed_screen` / SSH screen cesta zustava jen explicitni experiment, protoze umela hlasit doruceno bez prokazatelne odpovedi z Codex relace.
+- Cockpit ma v hlasovem panelu tlacitko `Otevřít audiokanál`; po prvnim skutecnem klepnuti na iPhonu se zmeni na `Audiokanál otevřený` a dalsi odpovedi se pokousi prehrat primo na iPhonu bez Mac TTS fallbacku.
+- Relevantni commity: `36ae38c Stabilize Cockpit voice reply routing`, `b9be2e0 Keep remote Cockpit speech on device`, `45b18f4 Unlock remote Cockpit voice playback`, `ed19364 Add Cockpit audio channel control`.
 
 ## Cíl
 
