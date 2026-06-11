@@ -7420,6 +7420,13 @@ def cockpit_voice_approval_action(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def cockpit_voice_latest_response_action(
+    *,
+    response_path: Path = ADAM_LAST_RESPONSE_PATH,
+) -> dict[str, Any]:
+    return load_last_adam_response(path=response_path)
+
+
 def open_terminal_command(command: str, label: str) -> dict[str, Any]:
     script = (
         'tell application "Terminal"\n'
@@ -7962,6 +7969,9 @@ class CockpitServer:
                     params = parse_qs(parsed.query)
                     case_ref = params.get("case_ref", [""])[0]
                     self.respond_json(document_case_detail_status(case_ref=case_ref))
+                    return
+                if parsed.path == "/api/voice-mode/latest-response":
+                    self.respond_json(cockpit_voice_latest_response_action())
                     return
                 if parsed.path.startswith("/local-apps/"):
                     self.respond_local_app_file(parsed.path)
@@ -12933,6 +12943,10 @@ COCKPIT_HTML = """<!doctype html>
 		    let voiceModeEnabled = localStorage.getItem("samanthaVoiceModeEnabled") === "true";
 		    let latestVoiceModeRuntime = null;
 		    let latestAdamResponseText = "";
+		    let latestAdamResponseKey = "";
+		    let autoSpokenAdamResponseKey = "";
+		    let voiceReplyPollTimer = null;
+		    let voiceReplyPollUntil = 0;
 
 	    function preferredVoiceMimeType() {
 	      if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) {
@@ -12993,15 +13007,65 @@ COCKPIT_HTML = """<!doctype html>
 		      }
 		    }
 
-		    function renderVoiceLastResponse(lastResponse) {
+		    function voiceResponseKey(lastResponse) {
 		      const text = String(lastResponse && lastResponse.adam_response || "").trim();
+		      if (!text) return "";
+		      const createdAt = String(lastResponse && lastResponse.created_at || "").trim();
+		      return `${createdAt}|${text}`;
+		    }
+
+		    function renderVoiceLastResponse(lastResponse, options = {}) {
+		      const text = String(lastResponse && lastResponse.adam_response || "").trim();
+		      const responseKey = voiceResponseKey(lastResponse);
+		      const isNewResponse = Boolean(responseKey && responseKey !== latestAdamResponseKey);
 		      latestAdamResponseText = text;
+		      if (responseKey) {
+		        latestAdamResponseKey = responseKey;
+		      }
 		      if (!voiceLastResponseCard || !voiceLastResponseText) return;
 		      voiceLastResponseCard.classList.toggle("hidden", !text);
 		      voiceLastResponseText.textContent = text || "Zatím není uložená žádná Adamova odpověď.";
 		      if (voiceLastResponseSpeakBtn) {
 		        voiceLastResponseSpeakBtn.disabled = !text;
 		      }
+		      if (text && voiceCommandDetails && (options.openPanel || isNewResponse)) {
+		        voiceCommandDetails.open = true;
+		      }
+		      if (text && options.autoSpeak && responseKey && responseKey !== autoSpokenAdamResponseKey) {
+		        autoSpokenAdamResponseKey = responseKey;
+		        speakText(text, voiceLastResponseSpeakBtn, "Čtu Adamovu odpověď nahlas...");
+		      }
+		    }
+
+		    async function refreshVoiceLatestResponse(options = {}) {
+		      try {
+		        const res = await fetch("/api/voice-mode/latest-response");
+		        const data = await res.json();
+		        if (data && data.available) {
+		          renderVoiceLastResponse(data, {
+		            openPanel: true,
+		            autoSpeak: options.autoSpeak === true
+		          });
+		          return data;
+		        }
+		      } catch (err) {
+		        recordFrontendError(err);
+		      }
+		      return null;
+		    }
+
+		    function startVoiceReplyPolling({autoSpeak = true, durationMs = 120000} = {}) {
+		      voiceReplyPollUntil = Math.max(voiceReplyPollUntil, Date.now() + durationMs);
+		      if (voiceReplyPollTimer) return;
+		      voiceReplyPollTimer = window.setInterval(async () => {
+		        if (Date.now() > voiceReplyPollUntil) {
+		          window.clearInterval(voiceReplyPollTimer);
+		          voiceReplyPollTimer = null;
+		          return;
+		        }
+		        await refreshVoiceLatestResponse({autoSpeak});
+		      }, 3000);
+		      window.setTimeout(() => refreshVoiceLatestResponse({autoSpeak}), 1000);
 		    }
 
 		    function pendingNeedsCockpitApproval(pending) {
@@ -13219,6 +13283,7 @@ COCKPIT_HTML = """<!doctype html>
 	        const data = await res.json();
 		        if (data.ok) {
 		          voiceTranscript.value = data.text || "";
+	          startVoiceReplyPolling({autoSpeak: true});
 	          const totalMs = Date.now() - requestStartedAt;
 	          const serverMs = data.duration_ms || 0;
 	          const openaiMs = data.timing && data.timing.openai_ms ? data.timing.openai_ms : 0;
@@ -13249,6 +13314,7 @@ COCKPIT_HTML = """<!doctype html>
 	          const savedHint = data.latest_voice_command_path ? ` Uloženo: ${data.latest_voice_command_path}.` : "";
 	          voiceCommandStatus.textContent = `${data.message || "Textový pokyn byl odeslán Adamovi."}${savedHint}`;
 	          voiceTranscript.value = "";
+	          startVoiceReplyPolling({autoSpeak: true});
 	          await refresh({silent: true, includeSecondary: false});
 	        } else {
 	          voiceCommandStatus.textContent = data.message || "Textový hlasový pokyn se nepodařilo uložit.";
@@ -15320,6 +15386,7 @@ COCKPIT_HTML = """<!doctype html>
       window.addEventListener("pageshow", () => refreshMainStatusOnReturn(1000));
       document.addEventListener("visibilitychange", () => refreshMainStatusOnReturn());
 	    refresh();
+      window.setTimeout(() => refreshVoiceLatestResponse({autoSpeak: false}), 2000);
       window.setTimeout(refreshUrgentRemindersSummary, 3000);
       window.setTimeout(runEmailIntakeMonitor, 5000);
 	  </script>
