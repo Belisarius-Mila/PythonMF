@@ -9804,6 +9804,7 @@ COCKPIT_HTML = """<!doctype html>
     .voice-command-actions.voice-primary-actions { justify-content: flex-start; }
     .voice-command-actions.voice-text-actions { justify-content: flex-end; }
     .voice-command-actions button.recording { background: #fee2e2; color: var(--red); }
+    .voice-command-actions button.voice-audio-unlock.active { background: var(--green); color: white; }
     .voice-command-actions button:disabled { cursor: not-allowed; }
     .voice-card { border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: #f8fafc; display: grid; gap: 8px; }
     .voice-card.warn { border-color: #fbbf24; background: #fffbeb; }
@@ -10049,6 +10050,7 @@ COCKPIT_HTML = """<!doctype html>
 	          <textarea id="voiceTranscript" placeholder="Nadiktuj nebo napiš pokyn pro Adama." spellcheck="true"></textarea>
 	        </div>
 		        <div class="voice-command-actions voice-text-actions">
+		          <button class="secondary voice-audio-unlock" id="voiceAudioUnlockBtn">Otevřít audiokanál</button>
 		          <button class="primary" id="voiceTranscriptSendBtn">Odeslat Adamovi</button>
 		        </div>
             <details class="voice-advanced">
@@ -10732,6 +10734,7 @@ COCKPIT_HTML = """<!doctype html>
     const voiceApprovalApproveBtn = document.getElementById("voiceApprovalApproveBtn");
     const voiceApprovalRejectBtn = document.getElementById("voiceApprovalRejectBtn");
     const voiceTranscript = document.getElementById("voiceTranscript");
+    const voiceAudioUnlockBtn = document.getElementById("voiceAudioUnlockBtn");
     const voiceTranscriptSendBtn = document.getElementById("voiceTranscriptSendBtn");
     const urgentReminderAlert = document.getElementById("urgentReminderAlert");
     const urgentReminderAlertTitle = document.getElementById("urgentReminderAlertTitle");
@@ -10938,6 +10941,7 @@ COCKPIT_HTML = """<!doctype html>
         "voiceApprovalRejectBtn",
         "voiceRecordBtn",
         "voiceStopBtn",
+        "voiceAudioUnlockBtn",
         "voiceTranscriptSendBtn",
         "urgentReminderAlertBtn",
         "reviewReportBtn",
@@ -12957,6 +12961,15 @@ COCKPIT_HTML = """<!doctype html>
 	    let voiceAudioContext = null;
 	    let voiceAudioUnlocked = false;
 
+	    function updateVoiceAudioUnlockUi(opened) {
+	      if (!voiceAudioUnlockBtn) return;
+	      voiceAudioUnlockBtn.classList.toggle("active", Boolean(opened));
+	      voiceAudioUnlockBtn.textContent = opened ? "Audiokanál otevřený" : "Otevřít audiokanál";
+	      voiceAudioUnlockBtn.title = opened
+	        ? "Audio v tomto prohlížeči je připravené pro Adamovy odpovědi."
+	        : "Na iPhonu jednou klepni, aby Safari dovolilo přehrávat Adamovy odpovědi.";
+	    }
+
 	    function getVoiceAudioContext() {
 	      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
 	      if (!AudioContextClass) return null;
@@ -12977,7 +12990,28 @@ COCKPIT_HTML = """<!doctype html>
 	      source.connect(context.destination);
 	      source.start(0);
 	      voiceAudioUnlocked = true;
+	      updateVoiceAudioUnlockUi(true);
 	      return true;
+	    }
+
+	    async function openVoiceAudioChannel() {
+	      if (!voiceAudioUnlockBtn) return;
+	      voiceAudioUnlockBtn.disabled = true;
+	      showMessage("Otevírám audiokanál pro odpovědi Adama...");
+	      try {
+	        const opened = await primeVoiceAudioContextFromGesture();
+	        if (opened) {
+	          showMessage("Audiokanál je otevřený. Další Adamovy odpovědi se pokusím přehrát v tomto zařízení.");
+	        } else {
+	          showMessage("Tento prohlížeč nepodporuje otevření webového audiokanálu.");
+	        }
+	      } catch (err) {
+	        recordFrontendError(err);
+	        updateVoiceAudioUnlockUi(false);
+	        showMessage(`Audiokanál se nepodařilo otevřít: ${err}`);
+	      } finally {
+	        voiceAudioUnlockBtn.disabled = false;
+	      }
 	    }
 
 	    function base64ToArrayBuffer(base64) {
@@ -13044,6 +13078,7 @@ COCKPIT_HTML = """<!doctype html>
 	          if (isRemoteCockpitClient() && voiceAudioUnlocked) {
 	            try {
 	              await playVoiceAudioBase64(edgeData);
+	              updateVoiceAudioUnlockUi(true);
 	              button.textContent = button === voiceLastResponseSpeakBtn ? "Přehrát Adamovu odpověď" : button.textContent;
 	              showMessage(edgeData.message || "Přehráno v tomto prohlížeči.");
 	              return;
@@ -15470,6 +15505,7 @@ COCKPIT_HTML = """<!doctype html>
     voiceModeStopBtn.addEventListener("click", stopVoiceModeWatcher);
     voiceRecordBtn.addEventListener("click", startVoiceRecording);
     voiceStopBtn.addEventListener("click", stopVoiceRecording);
+    voiceAudioUnlockBtn.addEventListener("click", openVoiceAudioChannel);
     voiceTranscriptSendBtn.addEventListener("click", submitVoiceTranscript);
     voiceLastResponseSpeakBtn.addEventListener("click", speakLastAdamResponse);
     voiceApprovalApproveBtn.addEventListener("click", () => submitVoiceApproval("approved"));
@@ -15480,6 +15516,7 @@ COCKPIT_HTML = """<!doctype html>
       setVoiceBridgeMarker(button.dataset.voiceBridgeTty || "", button);
     });
     updateVoiceRecordingAvailability();
+    updateVoiceAudioUnlockUi(false);
     updateVoiceModeUi();
 			    webAppsBtn.addEventListener("click", openWebAppsModal);
     libraryBtn.addEventListener("click", openLibraryModal);
