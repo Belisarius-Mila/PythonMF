@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import errno
 import base64
+import binascii
 import html
 import json
 import hashlib
@@ -32,7 +33,16 @@ from app.adam_service import (
     stop_adam_service,
     submit_adam_text_request,
 )
-from app.article_archive import archive_text_entry, archive_url, get_article, list_articles, search_articles
+from app.article_archive import (
+    archive_text_entry,
+    archive_url,
+    get_article,
+    get_article_attachment,
+    attach_article_image,
+    ATTACHMENT_CONFIRMATION_PHRASE,
+    list_articles,
+    search_articles,
+)
 from app.backup.activity_state import backup_activity_status
 from app.documents.consistency_audit import format_document_consistency_audit, run_document_consistency_audit, save_audit_decision
 from app.documents.scandocu import DEFAULT_DOWNLOADS_DIR, scan_downloads_for_pdfs
@@ -311,14 +321,16 @@ def web_apps_catalog() -> dict[str, Any]:
     return {"ok": True, "apps": [dict(item) for item in WEB_APP_CATALOG]}
 
 
-def library_archive_url_action(payload: dict[str, Any]) -> dict[str, Any]:
-    raw_tags = payload.get("tags", [])
+def parse_tag_payload(raw_tags: Any) -> list[str]:
     if isinstance(raw_tags, str):
-        tags = [part.strip() for part in re.split(r"[,;]", raw_tags) if part.strip()]
-    elif isinstance(raw_tags, list):
-        tags = [str(part).strip() for part in raw_tags if str(part).strip()]
-    else:
-        tags = []
+        return [part.strip() for part in re.split(r"[,;]", raw_tags) if part.strip()]
+    if isinstance(raw_tags, list):
+        return [str(part).strip() for part in raw_tags if str(part).strip()]
+    return []
+
+
+def library_archive_url_action(payload: dict[str, Any]) -> dict[str, Any]:
+    tags = parse_tag_payload(payload.get("tags", []))
     try:
         result = archive_url(
             url=str(payload.get("url", "")),
@@ -335,13 +347,7 @@ def library_archive_url_action(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 def library_archive_text_action(payload: dict[str, Any]) -> dict[str, Any]:
-    raw_tags = payload.get("tags", [])
-    if isinstance(raw_tags, str):
-        tags = [part.strip() for part in re.split(r"[,;]", raw_tags) if part.strip()]
-    elif isinstance(raw_tags, list):
-        tags = [str(part).strip() for part in raw_tags if str(part).strip()]
-    else:
-        tags = []
+    tags = parse_tag_payload(payload.get("tags", []))
     try:
         return archive_text_entry(
             title=str(payload.get("title", "")),
@@ -355,6 +361,42 @@ def library_archive_text_action(payload: dict[str, Any]) -> dict[str, Any]:
         return {"ok": False, "message": str(exc), "error": "invalid_text"}
     except OSError as exc:
         return {"ok": False, "message": f"Text se nepodařilo uložit: {exc}", "error": "archive_failed"}
+
+
+def library_attach_image_action(payload: dict[str, Any]) -> dict[str, Any]:
+    data_url = str(payload.get("image_data_url", "")).strip()
+    if "," not in data_url:
+        return {"ok": False, "message": "Vyber obrázek k připojení.", "error": "missing_image"}
+    header, encoded = data_url.split(",", 1)
+    mime_type = "image/jpeg"
+    match = re.match(r"data:([^;]+);base64$", header)
+    if match:
+        mime_type = match.group(1)
+    try:
+        image_bytes = base64.b64decode(encoded, validate=True)
+    except (ValueError, binascii.Error):
+        return {"ok": False, "message": "Obrázek se nepodařilo přečíst.", "error": "invalid_image"}
+    tags = parse_tag_payload(payload.get("tags", []))
+    for tag in ("rodinny-recept", "rucne-psany", "scan", "ma-obrazek", "prepis-overit"):
+        if tag not in tags:
+            tags.append(tag)
+    try:
+        return attach_article_image(
+            article_id=str(payload.get("article_id", "")),
+            image_bytes=image_bytes,
+            filename=str(payload.get("filename", "")),
+            label=str(payload.get("label", "")) or "Ručně psaný recept",
+            role=str(payload.get("role", "")) or "handwritten_recipe_scan",
+            note=str(payload.get("note", "")),
+            mime_type=mime_type,
+            tags=tags,
+            user_confirmed=True,
+            confirmation_text=ATTACHMENT_CONFIRMATION_PHRASE,
+        )
+    except ValueError as exc:
+        return {"ok": False, "message": str(exc), "error": "invalid_attachment"}
+    except OSError as exc:
+        return {"ok": False, "message": f"Obrázek se nepodařilo uložit: {exc}", "error": "archive_failed"}
 
 
 def recovery_center_status(
@@ -7339,6 +7381,13 @@ class CockpitServer:
                     article_id = params.get("id", [""])[0]
                     self.respond_json(get_article(article_id=article_id))
                     return
+                if parsed.path == "/api/library/attachment":
+                    params = parse_qs(parsed.query)
+                    article_id = params.get("id", [""])[0]
+                    attachment_id = params.get("attachment_id", [""])[0]
+                    variant = params.get("variant", ["readable"])[0]
+                    self.respond_library_attachment(article_id, attachment_id, variant)
+                    return
                 if parsed.path == "/api/quantitative-status":
                     self.respond_json(quantitative_status_overview())
                     return
@@ -7536,6 +7585,10 @@ class CockpitServer:
                     payload = self.read_json()
                     self.respond_json(library_archive_text_action(payload))
                     return
+                if parsed.path == "/api/library/attachment/add":
+                    payload = self.read_json()
+                    self.respond_json(library_attach_image_action(payload))
+                    return
                 if parsed.path == "/api/documents/classification-metadata":
                     payload = self.read_json()
                     raw_metadata = payload.get("metadata")
@@ -7727,6 +7780,30 @@ class CockpitServer:
                 filename = safe_filename(str(target.name or "document.pdf"))
                 self.send_response(HTTPStatus.OK)
                 self.send_header("Content-Type", "application/pdf")
+                self.send_header("Content-Disposition", f'inline; filename="{filename}"')
+                self.send_header("Cache-Control", "no-store, max-age=0")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
+            def respond_library_attachment(self, article_id: str, attachment_id: str, variant: str) -> None:
+                resolved = get_article_attachment(
+                    article_id=article_id,
+                    attachment_id=attachment_id,
+                    variant=variant,
+                )
+                if not resolved.get("ok"):
+                    self.respond_json(
+                        {"error": resolved.get("error", "not_found"), "message": resolved.get("message", "")},
+                        status=HTTPStatus.NOT_FOUND,
+                    )
+                    return
+                target = resolved["path"]
+                data = target.read_bytes()
+                content_type = str(resolved.get("mime_type") or content_type_for_path(target))
+                filename = safe_filename(str(resolved.get("filename") or target.name or "attachment"))
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", content_type)
                 self.send_header("Content-Disposition", f'inline; filename="{filename}"')
                 self.send_header("Cache-Control", "no-store, max-age=0")
                 self.send_header("Content-Length", str(len(data)))
@@ -9126,12 +9203,14 @@ COCKPIT_HTML = """<!doctype html>
     .app-description { color: #344054; font-size: 13px; line-height: 1.4; margin-top: 3px; }
     .app-kind { color: var(--muted); font-size: 12px; margin-top: 4px; }
     .button-link { display: inline-block; border-radius: 6px; padding: 9px 12px; font-weight: 650; text-decoration: none; background: var(--blue); color: white; white-space: nowrap; }
+    .button-link.secondary-link { background: #dfe5ec; color: #172033; }
     .library-modal { width: min(1180px, 100%); }
     .library-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
     .library-tab.active { background: var(--blue); color: white; }
     .library-archive { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; padding: 10px; display: grid; gap: 8px; }
     .library-archive-grid { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(140px, 180px) minmax(140px, 220px) auto; gap: 8px; align-items: center; }
     .library-text-grid { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(140px, 180px) minmax(160px, 220px) auto; gap: 8px; align-items: center; }
+    .library-attachment-grid { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(160px, 220px) minmax(180px, 1fr) auto; gap: 8px; align-items: center; }
     .library-text-area { min-height: 130px; resize: vertical; }
     .library-controls { display: grid; grid-template-columns: minmax(220px, 1fr) auto; gap: 10px; align-items: center; }
     .library-layout { display: grid; grid-template-columns: minmax(260px, .85fr) minmax(320px, 1.15fr); gap: 12px; align-items: start; }
@@ -9144,6 +9223,12 @@ COCKPIT_HTML = """<!doctype html>
     .library-reader-head { padding: 12px; border-bottom: 1px solid #edf0f4; display: grid; gap: 6px; background: white; }
     .library-reader-title { margin: 0; font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
     .library-reader-text { padding: 14px 16px; white-space: pre-wrap; overflow: auto; max-height: 58vh; line-height: 1.58; font-size: 15px; background: white; }
+    .library-reader-attachments { display: grid; gap: 10px; padding: 12px 16px; border-top: 1px solid #edf0f4; background: #fbfcfe; }
+    .library-reader-attachments.hidden { display: none; }
+    .library-attachment-card { border: 1px solid #edf0f4; border-radius: 8px; background: white; padding: 10px; display: grid; gap: 8px; }
+    .library-attachment-title { font-weight: 700; overflow-wrap: anywhere; }
+    .library-attachment-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+    .library-attachment-image { max-width: 100%; max-height: 420px; object-fit: contain; border: 1px solid #edf0f4; border-radius: 6px; background: #f8fafc; }
     .library-snippet { color: #344054; font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
 	    .project-toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
 	    .project-toolbar button.active { background: var(--blue); color: white; }
@@ -9214,7 +9299,7 @@ COCKPIT_HTML = """<!doctype html>
     .consistency-finding-title { font-weight: 750; overflow-wrap: anywhere; }
     .consistency-finding-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
     @media (max-width: 1050px) { .today-dashboard { grid-template-columns: 1fr; } .work-grid { grid-template-columns: 1fr; } }
-	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .search-result-head { grid-template-columns: 1fr; } .search-result-head-actions { justify-content: flex-start; } .recovery-grid { grid-template-columns: 1fr; } .janicka-grid { grid-template-columns: 1fr; } .janicka-action { grid-template-columns: 1fr; } .library-archive-grid { grid-template-columns: 1fr; } .library-text-grid { grid-template-columns: 1fr; } .library-controls { grid-template-columns: 1fr; } .library-layout { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
+	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .search-result-head { grid-template-columns: 1fr; } .search-result-head-actions { justify-content: flex-start; } .recovery-grid { grid-template-columns: 1fr; } .janicka-grid { grid-template-columns: 1fr; } .janicka-action { grid-template-columns: 1fr; } .library-archive-grid { grid-template-columns: 1fr; } .library-text-grid { grid-template-columns: 1fr; } .library-attachment-grid { grid-template-columns: 1fr; } .library-controls { grid-template-columns: 1fr; } .library-layout { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -9625,6 +9710,14 @@ COCKPIT_HTML = """<!doctype html>
           <input id="libraryTextTagsInput" type="text" placeholder="Tagy pro vložený text, volitelné">
           <textarea id="libraryTextBodyInput" class="library-text-area" placeholder="Vložit text receptu, poznámky nebo výstřižku"></textarea>
           <div id="libraryTextStatus" class="status-line">Text bez URL se uloží jako interní znalostní karta.</div>
+          <div class="library-attachment-grid">
+            <input id="libraryAttachmentFileInput" type="file" accept="image/*">
+            <input id="libraryAttachmentLabelInput" type="text" placeholder="Popisek obrázku">
+            <input id="libraryAttachmentTagsInput" type="text" placeholder="Tagy, volitelné">
+            <button class="primary" id="libraryAttachmentSaveBtn" type="button">Připojit obrázek</button>
+          </div>
+          <input id="libraryAttachmentNoteInput" type="text" placeholder="Poznámka k obrázku, volitelné">
+          <div id="libraryAttachmentStatus" class="status-line">Vyber kartu v seznamu a připoj k ní scan, fotku nebo obrázek.</div>
         </div>
         <div class="library-tabs" aria-label="Kategorie knihovny">
           <button class="secondary library-tab active" type="button" data-library-category="recipes">Recepty</button>
@@ -9644,6 +9737,7 @@ COCKPIT_HTML = """<!doctype html>
               <div id="libraryReaderMeta" class="library-meta">Vlevo vyber položku nebo použij fulltextové hledání.</div>
             </div>
             <div id="libraryReaderText" class="library-reader-text"></div>
+            <div id="libraryReaderAttachments" class="library-reader-attachments hidden"></div>
           </div>
         </div>
       </div>
@@ -9849,12 +9943,19 @@ COCKPIT_HTML = """<!doctype html>
     const libraryTextTagsInput = document.getElementById("libraryTextTagsInput");
     const libraryTextBodyInput = document.getElementById("libraryTextBodyInput");
     const libraryTextStatus = document.getElementById("libraryTextStatus");
+    const libraryAttachmentFileInput = document.getElementById("libraryAttachmentFileInput");
+    const libraryAttachmentLabelInput = document.getElementById("libraryAttachmentLabelInput");
+    const libraryAttachmentTagsInput = document.getElementById("libraryAttachmentTagsInput");
+    const libraryAttachmentNoteInput = document.getElementById("libraryAttachmentNoteInput");
+    const libraryAttachmentSaveBtn = document.getElementById("libraryAttachmentSaveBtn");
+    const libraryAttachmentStatus = document.getElementById("libraryAttachmentStatus");
     const librarySearchInput = document.getElementById("librarySearchInput");
     const librarySearchBtn = document.getElementById("librarySearchBtn");
     const libraryList = document.getElementById("libraryList");
     const libraryReaderTitle = document.getElementById("libraryReaderTitle");
     const libraryReaderMeta = document.getElementById("libraryReaderMeta");
     const libraryReaderText = document.getElementById("libraryReaderText");
+    const libraryReaderAttachments = document.getElementById("libraryReaderAttachments");
     const projectsModal = document.getElementById("projectsModal");
     const projectsCloseBtn = document.getElementById("projectsCloseBtn");
     const projectsStatus = document.getElementById("projectsStatus");
@@ -9988,6 +10089,7 @@ COCKPIT_HTML = """<!doctype html>
     let currentProjectFilter = "all";
     let currentLibraryCategory = "recipes";
     let currentLibraryItems = [];
+    let currentLibrarySelectedId = "";
     let currentQuantitative = null;
     let frontendLastError = "";
     let frontendErrorHistory = [];
@@ -10100,8 +10202,15 @@ COCKPIT_HTML = """<!doctype html>
         "libraryTextSaveBtn",
         "libraryTextTagsInput",
         "libraryTextBodyInput",
+        "libraryAttachmentFileInput",
+        "libraryAttachmentLabelInput",
+        "libraryAttachmentTagsInput",
+        "libraryAttachmentNoteInput",
+        "libraryAttachmentSaveBtn",
+        "libraryAttachmentStatus",
         "librarySearchInput",
         "librarySearchBtn",
+        "libraryReaderAttachments",
         "projectsBtn",
         "remindersBtn",
         "emailProcessingBtn",
@@ -12793,12 +12902,14 @@ COCKPIT_HTML = """<!doctype html>
 
     async function loadLibraryCategory(category) {
       currentLibraryCategory = category || "other";
+      currentLibrarySelectedId = "";
       setLibraryActiveTab();
       librarySearchInput.value = "";
       libraryStatus.textContent = "Načítám knihovnu...";
       libraryReaderTitle.textContent = "Vyber článek";
       libraryReaderMeta.textContent = "Vlevo vyber položku nebo použij fulltextové hledání.";
       libraryReaderText.textContent = "";
+      renderLibraryAttachments("", []);
       try {
         const data = await fetchJson(`/api/library/list?category=${encodeURIComponent(currentLibraryCategory)}&limit=200`);
         currentLibraryItems = data.items || [];
@@ -12917,6 +13028,57 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
+    async function attachLibraryImage() {
+      const articleId = currentLibrarySelectedId;
+      if (!articleId) {
+        libraryAttachmentStatus.textContent = "Nejdřív vyber kartu v seznamu vlevo.";
+        return;
+      }
+      const file = libraryAttachmentFileInput.files && libraryAttachmentFileInput.files[0];
+      if (!file) {
+        libraryAttachmentStatus.textContent = "Vyber obrázek k připojení.";
+        libraryAttachmentFileInput.focus();
+        return;
+      }
+      if (!String(file.type || "").startsWith("image/")) {
+        libraryAttachmentStatus.textContent = "Soubor musí být obrázek.";
+        return;
+      }
+      if (file.size > 20 * 1024 * 1024) {
+        libraryAttachmentStatus.textContent = "Obrázek je větší než 20 MB. Nejdřív ho zmenši nebo pošli menší kopii.";
+        return;
+      }
+      libraryAttachmentSaveBtn.disabled = true;
+      libraryAttachmentStatus.textContent = "Připojuji obrázek a vytvářím čitelnou kopii...";
+      try {
+        const imageDataUrl = await blobToDataUrl(file);
+        const data = await postJson("/api/library/attachment/add", {
+          article_id: articleId,
+          image_data_url: imageDataUrl,
+          filename: file.name || "attachment.jpg",
+          label: libraryAttachmentLabelInput.value.trim() || "Ručně psaný recept",
+          tags: libraryAttachmentTagsInput.value.trim(),
+          note: libraryAttachmentNoteInput.value.trim()
+        });
+        if (!data.ok) {
+          libraryAttachmentStatus.textContent = data.message || "Obrázek se nepodařilo připojit.";
+          return;
+        }
+        libraryAttachmentStatus.textContent = data.message || "Obrázek připojen.";
+        libraryAttachmentFileInput.value = "";
+        libraryAttachmentLabelInput.value = "";
+        libraryAttachmentTagsInput.value = "";
+        libraryAttachmentNoteInput.value = "";
+        await loadLibraryCategory(currentLibraryCategory);
+        await loadLibraryItem(articleId);
+      } catch (err) {
+        recordFrontendError(err);
+        libraryAttachmentStatus.textContent = `Chyba připojení obrázku: ${err}`;
+      } finally {
+        libraryAttachmentSaveBtn.disabled = false;
+      }
+    }
+
     function renderLibraryItems(items) {
       libraryList.innerHTML = "";
       if (!items.length) {
@@ -12931,6 +13093,7 @@ COCKPIT_HTML = """<!doctype html>
         row.type = "button";
         row.className = "library-item";
         row.dataset.articleId = item.id || "";
+        row.classList.toggle("active", currentLibrarySelectedId === item.id);
         const title = document.createElement("div");
         title.className = "library-title";
         title.textContent = item.one_line_title || item.title || "Bez názvu";
@@ -12965,17 +13128,88 @@ COCKPIT_HTML = """<!doctype html>
         }
       }
       if (item.text_chars) parts.push(`${item.text_chars} znaků`);
+      if (item.attachment_count) parts.push(`${item.attachment_count} příloh`);
       return parts.join(" | ");
+    }
+
+    function libraryAttachmentUrl(articleId, attachmentId, variant) {
+      return `/api/library/attachment?id=${encodeURIComponent(articleId || "")}&attachment_id=${encodeURIComponent(attachmentId || "")}&variant=${encodeURIComponent(variant || "readable")}`;
+    }
+
+    function renderLibraryAttachments(articleId, attachments) {
+      if (!libraryReaderAttachments) return;
+      libraryReaderAttachments.innerHTML = "";
+      const items = Array.isArray(attachments) ? attachments : [];
+      libraryReaderAttachments.classList.toggle("hidden", items.length === 0);
+      items.forEach((attachment) => {
+        const card = document.createElement("div");
+        card.className = "library-attachment-card";
+        const title = document.createElement("div");
+        title.className = "library-attachment-title";
+        title.textContent = attachment.label || "Příloha";
+        const meta = document.createElement("div");
+        meta.className = "library-attachment-meta";
+        const metaParts = [];
+        if (attachment.role) metaParts.push(attachment.role);
+        if (attachment.kind) metaParts.push(attachment.kind);
+        if (attachment.mime_type) metaParts.push(attachment.mime_type);
+        if (attachment.size_bytes) metaParts.push(`${Math.round(Number(attachment.size_bytes) / 1024)} kB`);
+        meta.textContent = metaParts.join(" | ");
+        card.appendChild(title);
+        card.appendChild(meta);
+        const attachmentId = attachment.id || "";
+        const imageSrc = libraryAttachmentUrl(articleId, attachmentId, attachment.has_readable ? "readable" : "original");
+        if (String(attachment.kind || "").toLowerCase().includes("image") || String(attachment.mime_type || "").startsWith("image/")) {
+          const link = document.createElement("a");
+          link.href = imageSrc;
+          link.setAttribute("target", "_blank");
+          link.rel = "noopener";
+          const image = document.createElement("img");
+          image.className = "library-attachment-image";
+          image.src = libraryAttachmentUrl(articleId, attachmentId, attachment.has_thumb ? "thumb" : "readable");
+          image.alt = attachment.label || "Příloha";
+          link.appendChild(image);
+          card.appendChild(link);
+        }
+        const actions = document.createElement("div");
+        actions.className = "actions compact-actions";
+        const readable = document.createElement("a");
+        readable.className = "button-link";
+        readable.href = imageSrc;
+        readable.setAttribute("target", "_blank");
+        readable.rel = "noopener";
+        readable.textContent = "Otevřít přílohu";
+        actions.appendChild(readable);
+        if (attachment.has_original) {
+          const original = document.createElement("a");
+          original.className = "button-link secondary-link";
+          original.href = libraryAttachmentUrl(articleId, attachmentId, "original");
+          original.setAttribute("target", "_blank");
+          original.rel = "noopener";
+          original.textContent = "Originál";
+          actions.appendChild(original);
+        }
+        card.appendChild(actions);
+        if (attachment.note) {
+          const note = document.createElement("div");
+          note.className = "library-snippet";
+          note.textContent = attachment.note;
+          card.appendChild(note);
+        }
+        libraryReaderAttachments.appendChild(card);
+      });
     }
 
     async function loadLibraryItem(articleId) {
       if (!articleId) return;
+      currentLibrarySelectedId = articleId;
       document.querySelectorAll(".library-item").forEach((node) => {
         node.classList.toggle("active", node.dataset.articleId === articleId);
       });
       libraryReaderTitle.textContent = "Načítám článek...";
       libraryReaderMeta.textContent = "";
       libraryReaderText.textContent = "";
+      renderLibraryAttachments("", []);
       try {
         const data = await fetchJson(`/api/library/item?id=${encodeURIComponent(articleId)}`);
         if (!data.ok) {
@@ -12987,10 +13221,12 @@ COCKPIT_HTML = """<!doctype html>
         libraryReaderTitle.textContent = item.one_line_title || item.title || "Bez názvu";
         libraryReaderMeta.textContent = libraryItemMeta(item);
         libraryReaderText.textContent = data.text || "";
+        renderLibraryAttachments(item.id || articleId, item.attachments || []);
       } catch (err) {
         recordFrontendError(err);
         libraryReaderTitle.textContent = "Chyba čtení";
         libraryReaderMeta.textContent = String(err);
+        renderLibraryAttachments("", []);
       }
     }
 
@@ -14318,6 +14554,7 @@ COCKPIT_HTML = """<!doctype html>
     libraryCloseBtn.addEventListener("click", closeLibraryModal);
     libraryArchiveBtn.addEventListener("click", archiveLibraryUrl);
     libraryTextSaveBtn.addEventListener("click", saveLibraryText);
+    libraryAttachmentSaveBtn.addEventListener("click", attachLibraryImage);
     libraryArchiveUrlInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         event.preventDefault();

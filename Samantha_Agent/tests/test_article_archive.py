@@ -6,10 +6,26 @@ import subprocess
 import tempfile
 import urllib.error
 import unittest
+from io import BytesIO
 from pathlib import Path
 from unittest.mock import patch
 
-from app.article_archive import archive_text_entry, archive_url, fetch_url, get_article, list_articles, search_articles
+from app.article_archive import (
+    ATTACHMENT_CONFIRMATION_PHRASE,
+    archive_text_entry,
+    archive_url,
+    attach_article_image,
+    fetch_url,
+    get_article,
+    get_article_attachment,
+    list_articles,
+    search_articles,
+)
+
+try:
+    from PIL import Image
+except ModuleNotFoundError:  # pragma: no cover - depends on local environment setup
+    Image = None
 
 
 class ArticleArchiveTests(unittest.TestCase):
@@ -101,6 +117,113 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertTrue(article["ok"])
         self.assertIn("Mouka, kakao a med", article["text"])
         self.assertEqual(article["item"]["source_note"], "Syntetizovaný recept bez původní URL.")
+
+    def test_article_attachments_are_listed_and_resolved_inside_archive(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            article_dir = archive_root / "articles" / "family-recipe"
+            attachments_dir = article_dir / "attachments" / "readable"
+            attachments_dir.mkdir(parents=True)
+            (article_dir / "article.txt").write_text("Rodinný recept\nPřepis rukopisu.", encoding="utf-8")
+            readable = attachments_dir / "recept_readable.jpg"
+            readable.write_bytes(b"fake-jpeg")
+            (archive_root / "registry.jsonl").write_text(
+                json.dumps(
+                    {
+                        "id": "family-recipe",
+                        "title": "Babiččin koláč",
+                        "one_line_title": "Babiččin koláč",
+                        "category": "recipes",
+                        "archived_at": "2026-06-11T10:00:00+00:00",
+                        "source_type": "manual_text",
+                        "source_label": "Rodinný ručně psaný recept",
+                        "source_url": "",
+                        "canonical_url": "",
+                        "text_file": "articles/family-recipe/article.txt",
+                        "html_file": "",
+                        "text_chars": "29",
+                        "tags": ["rodinny-recept", "rucne-psany", "ma-obrazek"],
+                        "attachments": [
+                            {
+                                "id": "rukopis-1",
+                                "label": "Ručně psaný originál",
+                                "kind": "image",
+                                "role": "handwritten_recipe_scan",
+                                "mime_type": "image/jpeg",
+                                "readable_file": "articles/family-recipe/attachments/readable/recept_readable.jpg",
+                                "note": "Čitelná kopie rukopisu.",
+                            }
+                        ],
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            listed = list_articles(category="recipes", archive_root=archive_root)
+            article = get_article(article_id="family-recipe", archive_root=archive_root)
+            attachment = get_article_attachment(
+                article_id="family-recipe",
+                attachment_id="rukopis-1",
+                variant="readable",
+                archive_root=archive_root,
+            )
+
+        self.assertEqual(listed["items"][0]["attachment_count"], 1)
+        self.assertEqual(listed["items"][0]["attachment_roles"], ["handwritten_recipe_scan"])
+        self.assertTrue(article["ok"])
+        self.assertEqual(article["item"]["attachments"][0]["label"], "Ručně psaný originál")
+        self.assertTrue(attachment["ok"])
+        self.assertEqual(attachment["path"].name, "recept_readable.jpg")
+
+    @unittest.skipIf(Image is None, "Pillow is not installed")
+    def test_attach_article_image_writes_original_readable_thumb_and_metadata(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            result = archive_text_entry(
+                title="Rodinný koláč",
+                text="Přepis ručně psaného receptu.",
+                category="recipes",
+                tags=["rodinny-recept"],
+                source_label="Rodinný ručně psaný recept",
+                archive_root=archive_root,
+            )
+            article_id = result["item"]["id"]
+            image_buffer = BytesIO()
+            Image.new("RGB", (900, 650), "white").save(image_buffer, format="PNG")
+
+            attached = attach_article_image(
+                article_id=article_id,
+                image_bytes=image_buffer.getvalue(),
+                filename="recept.png",
+                label="Rukopis",
+                note="Testovací scan.",
+                archive_root=archive_root,
+                user_confirmed=True,
+                confirmation_text=ATTACHMENT_CONFIRMATION_PHRASE,
+            )
+            article = get_article(article_id=article_id, archive_root=archive_root)
+            attachment_id = attached["attachment"]["id"]
+            original = get_article_attachment(
+                article_id=article_id,
+                attachment_id=attachment_id,
+                variant="original",
+                archive_root=archive_root,
+            )
+            thumb = get_article_attachment(
+                article_id=article_id,
+                attachment_id=attachment_id,
+                variant="thumb",
+                archive_root=archive_root,
+            )
+
+        self.assertTrue(attached["ok"])
+        self.assertEqual(article["item"]["attachment_count"], 1)
+        self.assertIn("ma-obrazek", article["item"]["tags"])
+        self.assertTrue(original["ok"])
+        self.assertTrue(thumb["ok"])
+        self.assertEqual(thumb["path"].suffix, ".jpg")
 
     def test_fetch_url_falls_back_to_curl_for_certificate_chain_failure(self) -> None:
         cert_error = ssl.SSLCertVerificationError("certificate verify failed")

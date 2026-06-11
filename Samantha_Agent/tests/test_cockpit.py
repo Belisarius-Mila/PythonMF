@@ -21,6 +21,7 @@ from app.cockpit import (
     document_reference,
     library_archive_text_action,
     library_archive_url_action,
+    library_attach_image_action,
     cockpit_edge_tts_action,
     cockpit_voice_approval_action,
     cockpit_save_voice_text_action,
@@ -122,6 +123,39 @@ class CockpitTests(unittest.TestCase):
             source_label="ChatGPT historický chat",
             source_note="Bez původní URL.",
         )
+
+    def test_library_attach_image_action_decodes_image_and_adds_family_tags(self) -> None:
+        with patch("app.cockpit.attach_article_image") as attach_mock:
+            attach_mock.return_value = {"ok": True, "item": {"id": "recipe-1"}, "attachment": {"id": "rukopis"}}
+
+            result = library_attach_image_action(
+                {
+                    "article_id": "recipe-1",
+                    "image_data_url": "data:image/png;base64,aW1hZ2U=",
+                    "filename": "scan.png",
+                    "label": "Babiččin rukopis",
+                    "tags": "svatky",
+                    "note": "První test.",
+                }
+            )
+
+        self.assertTrue(result["ok"])
+        kwargs = attach_mock.call_args.kwargs
+        self.assertEqual(kwargs["article_id"], "recipe-1")
+        self.assertEqual(kwargs["image_bytes"], b"image")
+        self.assertEqual(kwargs["filename"], "scan.png")
+        self.assertEqual(kwargs["label"], "Babiččin rukopis")
+        self.assertIn("svatky", kwargs["tags"])
+        self.assertIn("rodinny-recept", kwargs["tags"])
+        self.assertIn("prepis-overit", kwargs["tags"])
+
+    def test_cockpit_html_contains_library_attachment_view(self) -> None:
+        self.assertIn("libraryReaderAttachments", COCKPIT_HTML)
+        self.assertIn("/api/library/attachment", COCKPIT_HTML)
+        self.assertIn("/api/library/attachment/add", COCKPIT_HTML)
+        self.assertIn("libraryAttachmentFileInput", COCKPIT_HTML)
+        self.assertIn("attachment_count", COCKPIT_HTML)
+        self.assertIn("Otevřít přílohu", COCKPIT_HTML)
 
     def test_document_work_status_groups_downloads_and_review_queue(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

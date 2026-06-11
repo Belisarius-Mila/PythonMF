@@ -10,6 +10,7 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from io import BytesIO
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
@@ -24,6 +25,39 @@ CATEGORY_LABELS = {
     "science": "Vědecké články",
     "other": "Ostatní",
 }
+
+SUPPORTED_ATTACHMENT_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"}
+ATTACHMENT_CONFIRMATION_PHRASE = "Potvrzuji připojení obrázku"
+
+
+@dataclass(frozen=True)
+class ArticleAttachment:
+    id: str
+    label: str
+    kind: str
+    role: str
+    mime_type: str
+    original_file: str
+    readable_file: str
+    thumb_file: str
+    size_bytes: int
+    note: str
+    created_at: str
+
+    def to_summary(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "label": self.label,
+            "kind": self.kind,
+            "role": self.role,
+            "mime_type": self.mime_type,
+            "has_original": bool(self.original_file),
+            "has_readable": bool(self.readable_file),
+            "has_thumb": bool(self.thumb_file),
+            "size_bytes": self.size_bytes,
+            "note": self.note,
+            "created_at": self.created_at,
+        }
 
 
 @dataclass(frozen=True)
@@ -43,8 +77,11 @@ class ArticleArchiveItem:
     html_file: str
     text_chars: int
     tags: tuple[str, ...]
+    attachments: tuple[ArticleAttachment, ...] = ()
 
-    def to_summary(self, snippet: str = "") -> dict[str, Any]:
+    def to_summary(self, snippet: str = "", include_attachments: bool = False) -> dict[str, Any]:
+        attachment_types = sorted({attachment.kind for attachment in self.attachments if attachment.kind})
+        attachment_roles = sorted({attachment.role for attachment in self.attachments if attachment.role})
         return {
             "id": self.id,
             "title": self.title,
@@ -60,6 +97,14 @@ class ArticleArchiveItem:
             "text_chars": self.text_chars,
             "tags": list(self.tags),
             "snippet": snippet,
+            "attachment_count": len(self.attachments),
+            "attachment_types": attachment_types,
+            "attachment_roles": attachment_roles,
+            **(
+                {"attachments": [attachment.to_summary() for attachment in self.attachments]}
+                if include_attachments
+                else {}
+            ),
         }
 
 
@@ -234,6 +279,208 @@ def archive_text_entry(
         "message": "Text uložen do znalostní databáze.",
         "item": article_item_from_raw(metadata).to_summary(),
     }
+
+
+def attach_article_image(
+    *,
+    article_id: str,
+    image_path: Path | str | None = None,
+    image_bytes: bytes | None = None,
+    filename: str = "",
+    label: str = "",
+    role: str = "handwritten_recipe_scan",
+    note: str = "",
+    mime_type: str = "",
+    tags: list[str] | None = None,
+    archive_root: Path = DEFAULT_ARCHIVE_ROOT,
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+) -> dict[str, Any]:
+    if not user_confirmed or ATTACHMENT_CONFIRMATION_PHRASE.casefold() not in str(confirmation_text).casefold():
+        raise ValueError(f"Připojení obrázku vyžaduje potvrzení: {ATTACHMENT_CONFIRMATION_PHRASE}")
+    item = find_article(article_id, archive_root=archive_root)
+    if item is None:
+        raise ValueError("Článek nebyl nalezen.")
+    raw_bytes, source_name = read_attachment_input(image_path=image_path, image_bytes=image_bytes, filename=filename)
+    extension = normalized_image_extension(source_name, mime_type=mime_type)
+    now = datetime.now(timezone.utc).replace(microsecond=0)
+    attachment_id = unique_attachment_id(item, label or Path(source_name).stem or "obrazek", now)
+    item_dir = archive_root / "articles" / item.id
+    original_dir = item_dir / "attachments" / "original"
+    readable_dir = item_dir / "attachments" / "readable"
+    thumb_dir = item_dir / "attachments" / "thumbs"
+    original_dir.mkdir(parents=True, exist_ok=True)
+    readable_dir.mkdir(parents=True, exist_ok=True)
+    thumb_dir.mkdir(parents=True, exist_ok=True)
+    original_path = original_dir / f"{attachment_id}{extension}"
+    readable_path = readable_dir / f"{attachment_id}.jpg"
+    thumb_path = thumb_dir / f"{attachment_id}.jpg"
+    original_path.write_bytes(raw_bytes)
+    readable_bytes, thumb_bytes = build_readable_image_versions(raw_bytes)
+    readable_path.write_bytes(readable_bytes)
+    thumb_path.write_bytes(thumb_bytes)
+    attachment = {
+        "id": attachment_id,
+        "label": str(label or "Doprovodný obrázek").strip()[:160] or "Doprovodný obrázek",
+        "kind": "image",
+        "role": str(role or "supporting_image").strip()[:80] or "supporting_image",
+        "mime_type": mime_type_for_extension(extension),
+        "original_file": str(original_path.relative_to(archive_root)),
+        "readable_file": str(readable_path.relative_to(archive_root)),
+        "thumb_file": str(thumb_path.relative_to(archive_root)),
+        "size_bytes": len(raw_bytes),
+        "readable_size_bytes": len(readable_bytes),
+        "thumb_size_bytes": len(thumb_bytes),
+        "note": str(note or "").strip()[:1000],
+        "created_at": now.isoformat(),
+    }
+    metadata = append_attachment_metadata(
+        archive_root=archive_root,
+        item_id=item.id,
+        attachment=attachment,
+        tags=tags or [],
+    )
+    return {
+        "ok": True,
+        "message": "Obrázek připojen ke znalostní kartě.",
+        "item": article_item_from_raw(metadata).to_summary(include_attachments=True),
+        "attachment": ArticleAttachment(**{  # type: ignore[arg-type]
+            "id": str(attachment["id"]),
+            "label": str(attachment["label"]),
+            "kind": str(attachment["kind"]),
+            "role": str(attachment["role"]),
+            "mime_type": str(attachment["mime_type"]),
+            "original_file": str(attachment["original_file"]),
+            "readable_file": str(attachment["readable_file"]),
+            "thumb_file": str(attachment["thumb_file"]),
+            "size_bytes": int(attachment["size_bytes"]),
+            "note": str(attachment["note"]),
+            "created_at": str(attachment["created_at"]),
+        }).to_summary(),
+    }
+
+
+def read_attachment_input(
+    *,
+    image_path: Path | str | None,
+    image_bytes: bytes | None,
+    filename: str,
+) -> tuple[bytes, str]:
+    if image_bytes is not None:
+        if not image_bytes:
+            raise ValueError("Obrázek je prázdný.")
+        return image_bytes, filename or "attachment.jpg"
+    if image_path is None:
+        raise ValueError("Zadej cestu k obrázku nebo image_bytes.")
+    path = Path(image_path).expanduser().resolve()
+    if not path.exists() or not path.is_file():
+        raise ValueError(f"Obrázek neexistuje: {path}")
+    if path.suffix.casefold() not in SUPPORTED_ATTACHMENT_EXTENSIONS:
+        raise ValueError("Podporované přílohy jsou JPG, PNG, WEBP, HEIC/HEIF.")
+    return path.read_bytes(), path.name
+
+
+def normalized_image_extension(filename: str, *, mime_type: str = "") -> str:
+    suffix = Path(filename or "").suffix.casefold()
+    if suffix in SUPPORTED_ATTACHMENT_EXTENSIONS:
+        return ".jpg" if suffix == ".jpeg" else suffix
+    normalized_mime = str(mime_type or "").casefold()
+    if normalized_mime == "image/png":
+        return ".png"
+    if normalized_mime == "image/webp":
+        return ".webp"
+    if normalized_mime in {"image/heic", "image/heif"}:
+        return ".heic"
+    return ".jpg"
+
+
+def mime_type_for_extension(extension: str) -> str:
+    suffix = extension.casefold()
+    if suffix == ".png":
+        return "image/png"
+    if suffix == ".webp":
+        return "image/webp"
+    if suffix in {".heic", ".heif"}:
+        return "image/heic"
+    return "image/jpeg"
+
+
+def unique_attachment_id(item: ArticleArchiveItem, label: str, now: datetime) -> str:
+    base = slugify(label or "obrazek", max_length=44)
+    existing = {attachment.id for attachment in item.attachments}
+    suffix = hashlib.sha256(f"{item.id}\n{label}\n{now.isoformat()}".encode("utf-8")).hexdigest()[:6]
+    candidate = slugify(f"{base}-{suffix}", max_length=52)
+    counter = 2
+    while candidate in existing:
+        candidate = slugify(f"{base}-{suffix}-{counter}", max_length=56)
+        counter += 1
+    return candidate
+
+
+def build_readable_image_versions(raw_bytes: bytes) -> tuple[bytes, bytes]:
+    try:
+        from PIL import Image, ImageOps
+    except ModuleNotFoundError as exc:  # pragma: no cover - depends on local environment setup
+        raise ValueError("Pillow není nainstalovaný, nejde vytvořit čitelnou kopii obrázku.") from exc
+    image = Image.open(BytesIO(raw_bytes))
+    image = ImageOps.exif_transpose(image)
+    readable = prepare_image_for_jpeg(image)
+    readable.thumbnail((2600, 2600), Image.Resampling.LANCZOS)
+    thumb = prepare_image_for_jpeg(image.copy())
+    thumb.thumbnail((520, 520), Image.Resampling.LANCZOS)
+    return encode_jpeg(readable, quality=88), encode_jpeg(thumb, quality=78)
+
+
+def prepare_image_for_jpeg(image: Any) -> Any:
+    if image.mode in {"RGBA", "LA", "P"}:
+        rgba = image.convert("RGBA")
+        try:
+            from PIL import Image
+        except ModuleNotFoundError as exc:  # pragma: no cover
+            raise ValueError("Pillow není nainstalovaný.") from exc
+        background = Image.new("RGB", rgba.size, "white")
+        background.paste(rgba, mask=rgba.getchannel("A"))
+        return background
+    if image.mode != "RGB":
+        return image.convert("RGB")
+    return image
+
+
+def encode_jpeg(image: Any, *, quality: int) -> bytes:
+    buffer = BytesIO()
+    image.save(buffer, format="JPEG", quality=quality, optimize=True, progressive=True)
+    return buffer.getvalue()
+
+
+def append_attachment_metadata(
+    *,
+    archive_root: Path,
+    item_id: str,
+    attachment: dict[str, Any],
+    tags: list[str],
+) -> dict[str, Any]:
+    metadata_path = archive_root / "articles" / item_id / "metadata.json"
+    if not metadata_path.exists():
+        raise ValueError("Metadata článku nebyla nalezena.")
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    if not isinstance(metadata, dict):
+        raise ValueError("Metadata článku mají neplatný formát.")
+    attachments = metadata.get("attachments", [])
+    if not isinstance(attachments, list):
+        attachments = []
+    attachments.append(attachment)
+    metadata["attachments"] = attachments
+    existing_tags = [str(tag).strip() for tag in metadata.get("tags", []) if str(tag).strip()] if isinstance(metadata.get("tags"), list) else []
+    for tag in tags:
+        clean = str(tag).strip()
+        if clean and clean not in existing_tags:
+            existing_tags.append(clean)
+    if attachments and "ma-obrazek" not in existing_tags:
+        existing_tags.append("ma-obrazek")
+    metadata["tags"] = existing_tags
+    metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    update_registry(archive_root / "registry.jsonl", metadata)
+    return metadata
 
 
 def validate_archive_url(url: str) -> str:
@@ -448,6 +695,7 @@ def write_article_archive(
         "text_file": str(text_path.relative_to(archive_root)),
         "html_file": str(html_path.relative_to(archive_root)),
         "text_chars": str(len(article.text)),
+        "attachments": [],
     }
     metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     update_registry(archive_root / "registry.jsonl", metadata)
@@ -487,6 +735,7 @@ def write_text_archive(
         "text_file": str(text_path.relative_to(archive_root)),
         "html_file": "",
         "text_chars": str(len(clean_text)),
+        "attachments": [],
     }
     metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     update_registry(archive_root / "registry.jsonl", metadata)
@@ -544,6 +793,7 @@ def article_item_from_raw(raw: dict[str, Any]) -> ArticleArchiveItem:
         tags_tuple = tuple(str(part).strip() for part in tags if str(part).strip())
     else:
         tags_tuple = ()
+    attachments = normalize_attachments(raw.get("attachments", []))
     title = str(raw.get("title", "")).strip()
     one_line_title = str(raw.get("one_line_title", "")).strip() or compact_title(title)
     source_url = str(raw.get("source_url", "")).strip()
@@ -572,7 +822,38 @@ def article_item_from_raw(raw: dict[str, Any]) -> ArticleArchiveItem:
         html_file=str(raw.get("html_file", "")).strip(),
         text_chars=text_chars,
         tags=tags_tuple,
+        attachments=attachments,
     )
+
+
+def normalize_attachments(raw: Any) -> tuple[ArticleAttachment, ...]:
+    if not isinstance(raw, list):
+        return ()
+    attachments: list[ArticleAttachment] = []
+    for index, item in enumerate(raw, start=1):
+        if not isinstance(item, dict):
+            continue
+        attachment_id = slugify(str(item.get("id", "")).strip() or f"attachment-{index}", max_length=48)
+        try:
+            size_bytes = int(item.get("size_bytes", 0) or 0)
+        except (TypeError, ValueError):
+            size_bytes = 0
+        attachments.append(
+            ArticleAttachment(
+                id=attachment_id,
+                label=str(item.get("label", "")).strip()[:160] or f"Příloha {index}",
+                kind=str(item.get("kind", "")).strip()[:80] or "image",
+                role=str(item.get("role", "")).strip()[:80] or "supporting",
+                mime_type=str(item.get("mime_type", "")).strip()[:120] or "application/octet-stream",
+                original_file=str(item.get("original_file", "")).strip(),
+                readable_file=str(item.get("readable_file", "")).strip(),
+                thumb_file=str(item.get("thumb_file", "")).strip(),
+                size_bytes=max(0, size_bytes),
+                note=str(item.get("note", "")).strip()[:1000],
+                created_at=str(item.get("created_at", "")).strip(),
+            )
+        )
+    return tuple(attachments)
 
 
 def compact_title(title: str) -> str:
@@ -685,7 +966,7 @@ def get_article(
     text = read_article_text(item.id, archive_root=archive_root, max_chars=max_chars)
     return {
         "ok": True,
-        "item": item.to_summary(),
+        "item": item.to_summary(include_attachments=True),
         "text": text,
         "truncated": max_chars > 0 and len(text) >= max_chars,
     }
@@ -712,6 +993,56 @@ def read_article_text(article_id: str, archive_root: Path = DEFAULT_ARCHIVE_ROOT
     if max_chars > 0 and len(text) > max_chars:
         return text[:max_chars].rstrip()
     return text
+
+
+def get_article_attachment(
+    *,
+    article_id: str,
+    attachment_id: str,
+    variant: str = "readable",
+    archive_root: Path = DEFAULT_ARCHIVE_ROOT,
+) -> dict[str, Any]:
+    item = find_article(article_id, archive_root=archive_root)
+    if item is None:
+        return {"ok": False, "error": "not_found", "message": "Článek nebyl nalezen."}
+    wanted = slugify(str(attachment_id or "").strip(), max_length=48)
+    attachment = next((entry for entry in item.attachments if entry.id == wanted), None)
+    if attachment is None:
+        return {"ok": False, "error": "not_found", "message": "Příloha nebyla nalezena."}
+    variant_key = str(variant or "readable").strip().casefold()
+    candidates = {
+        "thumb": [attachment.thumb_file, attachment.readable_file, attachment.original_file],
+        "thumbnail": [attachment.thumb_file, attachment.readable_file, attachment.original_file],
+        "readable": [attachment.readable_file, attachment.original_file],
+        "original": [attachment.original_file],
+    }.get(variant_key, [attachment.readable_file, attachment.original_file])
+    for relative_path in candidates:
+        resolved = resolve_archive_relative_file(archive_root, relative_path)
+        if resolved is not None and resolved.is_file():
+            return {
+                "ok": True,
+                "path": resolved,
+                "attachment": attachment.to_summary(),
+                "mime_type": mime_type_for_extension(resolved.suffix),
+                "filename": resolved.name,
+            }
+    return {"ok": False, "error": "not_found", "message": "Soubor přílohy nebyl nalezen."}
+
+
+def resolve_archive_relative_file(archive_root: Path, relative_path: str) -> Path | None:
+    value = str(relative_path or "").strip()
+    if not value:
+        return None
+    if Path(value).is_absolute():
+        return None
+    try:
+        root = archive_root.resolve(strict=True)
+        target = (archive_root / value).resolve(strict=True)
+    except FileNotFoundError:
+        return None
+    if root != target and root not in target.parents:
+        return None
+    return target
 
 
 def make_snippet(text: str, terms: list[str], radius: int = 180) -> str:

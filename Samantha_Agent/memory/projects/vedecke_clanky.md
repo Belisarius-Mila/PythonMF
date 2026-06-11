@@ -150,10 +150,41 @@ text i HTML jsou jen v `data/private/article_archive/` a nepatří do gitu.
 - Recepty bez URL mají být označené zdrojem typu například `ChatGPT historický
   chat` a poznámkou, že jde o vložený nebo syntetizovaný text bez původní URL.
 
+2026-06-11 byl doplněn datový model pro přílohy znalostních karet:
+
+- Každá položka v `data/private/article_archive/articles/<id>/metadata.json`
+  může mít volitelné pole `attachments`.
+- Příloha je relativní cesta pod soukromým archivem, typicky:
+  `attachments/original/`, `attachments/readable/`, `attachments/thumbs/`.
+- API Knihovny vrací u položek `attachment_count`, `attachment_types` a
+  `attachment_roles`; detail položky vrací i seznam příloh.
+- Cockpit umí přílohy v detailu zobrazit a servíruje je přes bezpečný lokální
+  endpoint `/api/library/attachment`, ne přes absolutní cestu na disku.
+- První cílové použití: ručně psané rodinné recepty, kde textová karta drží
+  přepis a příloha drží čitelný scan/fotku rukopisu.
+- Doporučené tagy pro tyto položky: `rodinny-recept`, `rucne-psany`, `scan`,
+  `ma-obrazek`, případně `prepis-overit`.
+- Doporučený `source_label`: `Rodinný ručně psaný recept`.
+
+2026-06-11 byl doplněn i první zápisový průchod pro obrázkové přílohy:
+
+- Backend funkce `attach_article_image(...)` připojí obrázek k existující kartě,
+  uloží originál, vytvoří čitelnou JPEG kopii a thumbnail.
+- CLI fallback je `scripts/attach_article_image.py`.
+- Cockpit `Knihovna` má akci `Připojit obrázek`: nejdřív vybrat kartu v seznamu,
+  potom vybrat lokální obrázek, případně doplnit popisek/tagy/poznámku a uložit.
+- Při připojení přes Cockpit se automaticky přidávají tagy
+  `rodinny-recept`, `rucne-psany`, `scan`, `ma-obrazek`, `prepis-overit`.
+- Endpoint pro zápis je `/api/library/attachment/add`; pro čtení příloh zůstává
+  `/api/library/attachment`.
+
 Další krok:
 
-1. Až Míla dodá TXT s recepty, nejdřív ho uložit do knowledge inboxu nebo přes
-   nový textový vstup jako testovací položku.
-2. U většího balíku receptů udělat read-only rozbor: počet receptů, navržené
-   názvy, kategorie a tagy.
-3. Až po potvrzení rozdělit balík na jednotlivé receptové karty.
+1. Až Míla se Samanthou připraví první přepis ručně psaného receptu a fotku,
+   uložit nejdřív jednu testovací kartu.
+2. Připojit první reálnou fotku/skener přes Cockpit a ručně zkontrolovat
+   čitelnost čitelné kopie i thumbnailu.
+3. Podle výsledku doladit cílovou velikost/rozměr čitelné kopie pro rukopisy.
+4. U většího balíku receptů udělat read-only rozbor: počet receptů, navržené
+   názvy, kategorie, tagy a stav `prepis-overit`.
+5. Až po potvrzení rozdělit balík na jednotlivé receptové karty.
