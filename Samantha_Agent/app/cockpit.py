@@ -9327,6 +9327,7 @@ COCKPIT_HTML = """<!doctype html>
       <button class="secondary" id="projectsBtn">Projekty</button>
       <button class="secondary" id="remindersBtn">Připomenutí</button>
       <button class="secondary" id="emailProcessingBtn">E-maily</button>
+      <button class="secondary" id="serviceBtn">Servis</button>
       <button class="primary" id="scanDocuBtn">ScanDocu</button>
       <button class="secondary" id="scanDocuReviewBtn">Revidovat dokumenty</button>
     </div>
@@ -9352,19 +9353,25 @@ COCKPIT_HTML = """<!doctype html>
             <span id="dashboardOverallReason" class="dashboard-overall-reason">Skládám hlavní a samostatně načítané kontroly.</span>
           </div>
           <div id="dashboardMorningSentence" class="status-line">Ranní stav se načte spolu s Cockpitem.</div>
-          <div class="dashboard-row"><span class="dashboard-label">ScanDocu</span><span id="dashboardScanDocu" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Dokumenty</span><span id="dashboardDocuments" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Připomenutí</span><span id="dashboardReminders" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Hlas</span><span id="dashboardVoiceMode" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Projekty</span><span id="dashboardProjects" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Systém</span><span id="dashboardQuantitative" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Kontrola</span><span id="dashboardConsistency" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">QN</span><span id="dashboardQuickNotes" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Záloha</span><span id="dashboardBackup" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Git</span><span id="dashboardGit" class="dashboard-value"></span></div>
+          <div class="dashboard-row"><span class="dashboard-label">Systém</span><span id="dashboardQuantitative" class="dashboard-value"></span></div>
+          <details class="service-panel">
+            <summary>Další stav</summary>
+            <div class="dashboard-list">
+              <div class="dashboard-row"><span class="dashboard-label">ScanDocu</span><span id="dashboardScanDocu" class="dashboard-value"></span></div>
+              <div class="dashboard-row"><span class="dashboard-label">Projekty</span><span id="dashboardProjects" class="dashboard-value"></span></div>
+              <div class="dashboard-row"><span class="dashboard-label">Kontrola</span><span id="dashboardConsistency" class="dashboard-value"></span></div>
+              <div class="dashboard-row"><span class="dashboard-label">Rychlé poznámky</span><span id="dashboardQuickNotes" class="dashboard-value"></span></div>
+              <div class="dashboard-row"><span class="dashboard-label">Git</span><span id="dashboardGit" class="dashboard-value"></span></div>
+            </div>
+          </details>
         </div>
       </section>
       <section class="dashboard-card">
-        <h2>Akce</h2>
+        <h2>Rychlé akce</h2>
         <div class="dashboard-body">
           <div class="quick-actions">
             <button class="primary" id="dashboardProcessBtn">Zpracovat další</button>
@@ -9372,24 +9379,27 @@ COCKPIT_HTML = """<!doctype html>
 		        <button class="secondary" id="dashboardUrgentRemindersBtn">Důležitá připomenutí</button>
 		        <button class="secondary" id="dashboardRefreshBtn">Obnovit stav</button>
 	          </div>
-          <details class="service-panel">
-            <summary>Servis</summary>
-            <div class="quick-actions service-actions">
-              <button class="secondary" id="dashboardTerminalBtn">Terminál v projektu</button>
-              <button class="secondary" id="dashboardQuantitativeBtn">Systémový souhrn</button>
-              <button class="secondary" id="dashboardQuickNotesBtn">Rychlé poznámky</button>
-              <button class="secondary" id="dashboardRecoveryBtn">Recovery centrum</button>
-              <button class="secondary" id="dashboardDiagnosticsBtn">Diagnostika</button>
-              <button class="secondary" id="dashboardRestartBtn">Restart Cockpitu</button>
-              <button class="secondary" id="dashboardSpeakBtn">Přečíst stav</button>
-              <button class="secondary" id="dashboardSpeakSelectionBtn">Přečíst výběr</button>
-            </div>
-          </details>
           <div id="dashboardActionHint" class="status-line"></div>
         </div>
       </section>
 	    </div>
 	    <div id="statusLine" class="status-line">Načítám stav...</div>
+		    <section id="urgentReminderAlert" class="urgent-alert hidden" aria-live="polite">
+		      <div class="urgent-alert-head">
+		        <div id="urgentReminderAlertTitle" class="urgent-alert-title">Důležitá připomenutí</div>
+		        <button class="secondary" id="urgentReminderAlertBtn">Otevřít</button>
+		      </div>
+		      <div id="urgentReminderAlertList" class="urgent-alert-list"></div>
+		    </section>
+		    <section>
+		      <h2>Co teď dělat</h2>
+		      <div class="body">
+		        <div id="actionQueueStatus" class="status-line">Načítám doporučené akce...</div>
+		        <div id="actionQueueList" class="action-queue"></div>
+		      </div>
+		    </section>
+        <details id="voiceCommandDetails" class="section-toggle">
+          <summary>Hlas</summary>
 		    <section id="voiceCommandPanel">
 		      <h2>Hlasový pokyn</h2>
 		      <div class="body voice-command-grid">
@@ -9436,31 +9446,7 @@ COCKPIT_HTML = """<!doctype html>
 	        </div>
 	      </div>
 	    </section>
-        <details class="service-panel">
-          <summary>Technický stav Cockpitu</summary>
-		    <div id="frontendHealthPanel" class="health-panel" aria-label="Health stav Cockpitu">
-		      <div class="health-grid">
-		        <div class="health-item"><span class="health-label">Frontend</span><span id="frontendHealthJs" class="health-value warn">JS se zatím nespustil</span></div>
-		        <div class="health-item"><span class="health-label">Tlačítka</span><span id="frontendHealthButtons" class="health-value warn">čekám na napojení</span></div>
-		        <div class="health-item"><span class="health-label">API</span><span id="frontendHealthApi" class="health-value warn">čekám na kontrolu</span></div>
-		        <div class="health-item"><span class="health-label">Poslední chyba</span><span id="frontendHealthError" class="health-value ok">žádná</span></div>
-		      </div>
-		    </div>
         </details>
-		    <section id="urgentReminderAlert" class="urgent-alert hidden" aria-live="polite">
-		      <div class="urgent-alert-head">
-		        <div id="urgentReminderAlertTitle" class="urgent-alert-title">Důležitá připomenutí</div>
-		        <button class="secondary" id="urgentReminderAlertBtn">Otevřít</button>
-		      </div>
-		      <div id="urgentReminderAlertList" class="urgent-alert-list"></div>
-		    </section>
-		    <section>
-		      <h2>Co teď dělat</h2>
-		      <div class="body">
-		        <div id="actionQueueStatus" class="status-line">Načítám doporučené akce...</div>
-		        <div id="actionQueueList" class="action-queue"></div>
-		      </div>
-		    </section>
     <details id="documentsPanel" class="section-toggle">
       <summary>Dokumenty</summary>
 		    <section>
@@ -9537,8 +9523,37 @@ COCKPIT_HTML = """<!doctype html>
         <div id="documentSearchResults" class="search-results"></div>
       </div>
     </section>
-    <details id="serviceOverviewPanel" class="section-toggle">
-      <summary>Servisní přehledy</summary>
+    <details id="servicePanel" class="section-toggle">
+      <summary>Servis</summary>
+      <section>
+        <h2>Servisní akce</h2>
+        <div class="body">
+          <div class="quick-actions service-actions">
+            <button class="secondary" id="dashboardTerminalBtn">Terminál v projektu</button>
+            <button class="secondary" id="dashboardQuantitativeBtn">Systémový souhrn</button>
+            <button class="secondary" id="dashboardQuickNotesBtn">Rychlé poznámky</button>
+            <button class="secondary" id="dashboardRecoveryBtn">Recovery centrum</button>
+            <button class="secondary" id="dashboardDiagnosticsBtn">Diagnostika</button>
+            <button class="secondary" id="dashboardRestartBtn">Restart Cockpitu</button>
+            <button class="secondary" id="dashboardSpeakBtn">Přečíst stav</button>
+            <button class="secondary" id="dashboardSpeakSelectionBtn">Přečíst výběr</button>
+          </div>
+        </div>
+      </section>
+      <section>
+        <h2>Technický stav Cockpitu</h2>
+        <div class="body">
+		      <div id="frontendHealthPanel" class="health-panel" aria-label="Health stav Cockpitu">
+		        <div class="health-grid">
+		          <div class="health-item"><span class="health-label">Frontend</span><span id="frontendHealthJs" class="health-value warn">JS se zatím nespustil</span></div>
+		          <div class="health-item"><span class="health-label">Tlačítka</span><span id="frontendHealthButtons" class="health-value warn">čekám na napojení</span></div>
+		          <div class="health-item"><span class="health-label">API</span><span id="frontendHealthApi" class="health-value warn">čekám na kontrolu</span></div>
+		          <div class="health-item"><span class="health-label">Poslední chyba</span><span id="frontendHealthError" class="health-value ok">žádná</span></div>
+		        </div>
+		      </div>
+        </div>
+      </section>
+      <h2>Servisní přehledy</h2>
     <div class="grid">
       <section>
         <h2>PDF ve Downloads za 7 dní</h2>
@@ -9925,6 +9940,8 @@ COCKPIT_HTML = """<!doctype html>
     const projectsBtn = document.getElementById("projectsBtn");
     const remindersBtn = document.getElementById("remindersBtn");
     const emailProcessingBtn = document.getElementById("emailProcessingBtn");
+    const serviceBtn = document.getElementById("serviceBtn");
+    const servicePanel = document.getElementById("servicePanel");
     const janickaBtn = document.getElementById("janickaBtn");
     const janickaModal = document.getElementById("janickaModal");
     const janickaCloseBtn = document.getElementById("janickaCloseBtn");
@@ -10025,6 +10042,7 @@ COCKPIT_HTML = """<!doctype html>
     const todayReviewCount = document.getElementById("todayReviewCount");
     const todayProblemCount = document.getElementById("todayProblemCount");
     const todayHint = document.getElementById("todayHint");
+    const dashboardDocuments = document.getElementById("dashboardDocuments");
     const dashboardScanDocu = document.getElementById("dashboardScanDocu");
     const dashboardReminders = document.getElementById("dashboardReminders");
     const dashboardVoiceMode = document.getElementById("dashboardVoiceMode");
@@ -10051,6 +10069,7 @@ COCKPIT_HTML = """<!doctype html>
 			    const dashboardSpeakSelectionBtn = document.getElementById("dashboardSpeakSelectionBtn");
 			    const dashboardRefreshBtn = document.getElementById("dashboardRefreshBtn");
     const dashboardActionHint = document.getElementById("dashboardActionHint");
+    const voiceCommandDetails = document.getElementById("voiceCommandDetails");
     const voiceModeToggleBtn = document.getElementById("voiceModeToggleBtn");
     const voiceModeStartBtn = document.getElementById("voiceModeStartBtn");
     const voiceModeStopBtn = document.getElementById("voiceModeStopBtn");
@@ -10199,6 +10218,8 @@ COCKPIT_HTML = """<!doctype html>
     function verifyButtonHealth() {
       const requiredIds = [
         "refreshBtn",
+        "serviceBtn",
+        "servicePanel",
         "janickaBtn",
         "janickaCloseBtn",
         "janickaFindDocumentBtn",
@@ -10248,6 +10269,7 @@ COCKPIT_HTML = """<!doctype html>
         "scanDocuBtn",
         "scanDocuReviewBtn",
         "dashboardProcessBtn",
+        "dashboardDocuments",
         "dashboardReviewBtn",
         "dashboardTerminalBtn",
         "dashboardQuantitativeBtn",
@@ -10258,6 +10280,7 @@ COCKPIT_HTML = """<!doctype html>
 	        "dashboardSpeakBtn",
         "dashboardSpeakSelectionBtn",
         "dashboardRefreshBtn",
+        "voiceCommandDetails",
         "voiceModeToggleBtn",
         "voiceModeStartBtn",
         "voiceModeStopBtn",
@@ -11392,6 +11415,10 @@ COCKPIT_HTML = """<!doctype html>
           : reviewPending > 0
             ? {level: "warn", reason: `Dokumenty: ${reviewPending} uložených dokumentů čeká na revizi`}
             : {level: "ok", reason: "Dokumentová fronta je klidná"};
+      if (dashboardDocuments) {
+        const documentClass = documentSignal.level === "ok" ? "ok" : "warn";
+        setDashboardValue(dashboardDocuments, `<span class="${documentClass}">${documentSignal.reason}</span>`);
+      }
       setDashboardStatusSignal("documents", documentSignal.level, documentSignal.reason);
       dashboardActionHint.textContent = newCount > 0
         ? "Nejbližší akce: zpracovat další PDF přes ScanDocu."
@@ -11477,6 +11504,9 @@ COCKPIT_HTML = """<!doctype html>
         voiceBridgeSessions.classList.toggle("ok", !voiceBridgeWarn && (!markedTty || codexTtys.includes(markedTty)));
       }
       renderVoiceBridgeSwitcher(voiceBridge);
+      if (voiceCommandDetails) {
+        voiceCommandDetails.open = Boolean(voiceRunning || voicePendingActive || voiceModeEnabled || voiceBridgeWarn);
+      }
       if (voicePendingStatus) {
         voicePendingStatus.textContent = voicePendingActive
           ? `Čeká hlasový pokyn na Adama: ${voicePendingShort || voicePending.message || "bez textu"}`
@@ -14511,6 +14541,10 @@ COCKPIT_HTML = """<!doctype html>
       }
     });
     refreshBtn.addEventListener("click", refresh);
+    serviceBtn.addEventListener("click", () => {
+      servicePanel.open = true;
+      servicePanel.scrollIntoView({behavior: "smooth", block: "start"});
+    });
     dashboardRefreshBtn.addEventListener("click", refresh);
     dashboardProcessBtn.addEventListener("click", () => openScanDocu(false));
     dashboardReviewBtn.addEventListener("click", () => openScanDocu(true));
