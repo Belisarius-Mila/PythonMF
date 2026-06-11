@@ -83,6 +83,7 @@ from app.email.archive_service import DEFAULT_EMAIL_ARCHIVE_DIR, save_email_arch
 from app.email.config import EmailConfigError
 from app.email.icloud_provider import EmailProviderError, ICloudReadOnlyEmailProvider
 from app.email.models import EmailAttachmentMeta, EmailHeader, EmailMessage
+from app.email.redaction import redact_email_addresses
 from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEmailProvider
 from app.reminders.query_tools import mark_reminder_done_text
 from app.reminders.store import DEFAULT_REMINDERS_PATH, load_reminders_store, write_reminders_store
@@ -2645,9 +2646,14 @@ def process_email_work_queue_batch(
                     "provider": str(item.get("provider", "")),
                     "folder": str(item.get("folder", "")),
                     "uid": str(item.get("uid", "")),
+                    "date": str(item.get("date", "")),
+                    "sender": str(item.get("sender", "")),
+                    "subject": str(item.get("subject", "")),
                     "status": str(item.get("status", "")),
                     "archive_id": str(item.get("archive_id", "")),
                     "attachments_imported": int(item.get("attachments_imported", 0) or 0),
+                    "attachment_count": int(item.get("attachment_count", 0) or 0),
+                    "pdf_attachment_count": int(item.get("pdf_attachment_count", 0) or 0),
                 }
                 for item in processed
             ],
@@ -2815,6 +2821,11 @@ def process_email_work_queue_item(
         "provider": provider,
         "folder": folder,
         "uid": uid,
+        "date": safe_text(str(item.get("date", "")))[:120],
+        "sender": redact_email_addresses(safe_text(str(item.get("sender", ""))))[:180],
+        "subject": safe_text(str(item.get("subject", "")))[:180],
+        "attachment_count": int(item.get("attachment_count", 0) or 0),
+        "pdf_attachment_count": int(item.get("pdf_attachment_count", 0) or 0),
     }
     if not uid or not provider:
         return {**base, "ok": False, "status": "error", "message": "Položce chybí provider nebo UID."}
@@ -3778,6 +3789,8 @@ def reminder_source_detail_action(
             icloud_provider_factory=icloud_provider_factory,
             seznam_provider_factory=seznam_provider_factory,
         )
+    if source_type == "email_archive":
+        return reminder_email_archive_source_detail(base=base, source=source)
     if source_type == "private_document":
         return reminder_document_source_detail(base=base, source=source, vault_dir=vault_dir)
     return {
@@ -3867,6 +3880,55 @@ def reminder_email_source_detail(
         "ok": False,
         "kind": "email",
         "message": "Zdrojový e-mail se nepodařilo načíst read-only. " + " | ".join(attempts),
+    }
+
+
+def reminder_email_archive_source_detail(
+    *,
+    base: dict[str, Any],
+    source: dict[str, Any],
+    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+) -> dict[str, Any]:
+    archive_id = safe_text(str(source.get("uid", ""))).strip()
+    if not archive_id or "/" in archive_id or "\\" in archive_id or archive_id.startswith("."):
+        return {**base, "ok": False, "kind": "email_archive", "message": "Zdrojový e-mailový archiv nemá bezpečné ID."}
+    evidence = email_archive_evidence_summary(evidence_archive_id=archive_id, archive_directory=archive_directory)
+    if evidence is None:
+        return {**base, "ok": False, "kind": "email_archive", "message": "E-mailový archiv nebyl nalezen."}
+    attachments_path = archive_directory / archive_id / "attachments" / "attachments.json"
+    attachments: list[dict[str, Any]] = []
+    try:
+        raw_attachments = read_json_file(attachments_path).get("attachments", [])
+    except (OSError, ValueError, json.JSONDecodeError):
+        raw_attachments = []
+    if isinstance(raw_attachments, list):
+        for attachment in raw_attachments[:12]:
+            if not isinstance(attachment, dict):
+                continue
+            attachments.append(
+                {
+                    "filename": safe_text(str(attachment.get("filename", "")))[:240],
+                    "content_type": safe_text(str(attachment.get("content_type", "")))[:80],
+                    "size_bytes": attachment.get("size_bytes"),
+                    "part_id": safe_text(str(attachment.get("part_id", "")))[:40],
+                }
+            )
+    return {
+        **base,
+        "ok": True,
+        "kind": "email_archive",
+        "message": "Zdroj připomínky je uložený lokální e-mailový archiv.",
+        "email": {
+            "provider": "archive",
+            "folder": "",
+            "uid": archive_id,
+            "subject": evidence.get("subject", ""),
+            "sender": evidence.get("sender", ""),
+            "date": evidence.get("email_date", ""),
+            "body_text": "Tělo e-mailu je uložené lokálně v EmailArchiveVault; v Cockpitu se ukazují jen bezpečná metadata.",
+            "attachments": attachments,
+        },
+        "archive": evidence,
     }
 
 
@@ -4032,14 +4094,39 @@ def document_due_candidates_status(
     *,
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
     reminders_path: Path = DEFAULT_REMINDERS_PATH,
+    archive_directory: Path | None = None,
     today: date | None = None,
     limit: int = 8,
 ) -> dict[str, Any]:
     today_date = today or date.today()
-    candidates = build_document_due_candidates(
+    effective_archive_directory = (
+        archive_directory
+        if archive_directory is not None
+        else DEFAULT_EMAIL_ARCHIVE_DIR
+        if vault_dir == DEFAULT_DOCUMENTS_DIR
+        else None
+    )
+    document_candidates = build_document_due_candidates(
         vault_dir=vault_dir,
         reminders_path=reminders_path,
         today=today_date,
+    )
+    email_candidates = (
+        build_email_archive_due_candidates(
+            archive_directory=effective_archive_directory,
+            reminders_path=reminders_path,
+            today=today_date,
+        )
+        if effective_archive_directory is not None
+        else []
+    )
+    candidates = document_candidates + email_candidates
+    candidates.sort(
+        key=lambda item: (
+            0 if item["status"] == "ready" else 1 if item["status"] == "already_reminded" else 2,
+            item["date"],
+            str(item["title"]).casefold(),
+        )
     )
     actionable = [item for item in candidates if item["status"] == "ready"]
     already = [item for item in candidates if item["status"] == "already_reminded"]
@@ -4049,6 +4136,8 @@ def document_due_candidates_status(
         "ok": True,
         "today": today_date.isoformat(),
         "candidate_count": len(candidates),
+        "document_candidate_count": len(document_candidates),
+        "email_candidate_count": len(email_candidates),
         "actionable_count": len(actionable),
         "already_reminded_count": len(already),
         "past_count": len(past),
@@ -4329,8 +4418,182 @@ def public_document_due_candidate(item: dict[str, Any]) -> dict[str, Any]:
     return {
         key: value
         for key, value in item.items()
-        if key not in {"document_id", "reminder_id"}
+        if key not in {"document_id", "archive_id", "reminder_id"}
     }
+
+
+EMAIL_ARCHIVE_PAYMENT_TERMS = (
+    "splatnost",
+    "dluž",
+    "dluz",
+    "upom",
+    "k zaplacení",
+    "k zaplaceni",
+    "k úhradě",
+    "k uhrade",
+    "zaplať",
+    "zaplat",
+)
+EMAIL_ARCHIVE_DATE_PATTERN = re.compile(r"\b(\d{1,2})[.]\s*(\d{1,2})[.]\s*(20\d{2})\b")
+EMAIL_ARCHIVE_AMOUNT_PATTERN = re.compile(r"\b([0-9]{1,3}(?:[ \u00a0]\d{3})*(?:,\d{1,2})?\s*K[čc])\b")
+
+
+def build_email_archive_due_candidates(
+    *,
+    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+    reminders_path: Path = DEFAULT_REMINDERS_PATH,
+    today: date,
+    max_age_days: int = 45,
+) -> list[dict[str, Any]]:
+    try:
+        reminders = load_reminders_store(reminders_path).get("reminders", [])
+    except (OSError, ValueError):
+        reminders = []
+    reminders_by_id = {
+        str(item.get("id", "")): item
+        for item in reminders
+        if isinstance(item, dict) and str(item.get("id", "")).strip()
+    }
+
+    candidates: list[dict[str, Any]] = []
+    if not archive_directory.exists():
+        return candidates
+
+    for metadata_path in sorted(archive_directory.glob("*/metadata.json"), key=lambda path: path.stat().st_mtime, reverse=True):
+        try:
+            metadata = read_json_file(metadata_path)
+        except (OSError, ValueError, json.JSONDecodeError):
+            continue
+        archived_at = parse_email_archive_date(str(metadata.get("archived_at", "") or metadata.get("date", "")))
+        if archived_at is not None and (today - archived_at).days > max_age_days:
+            continue
+        archive_dir = metadata_path.parent
+        body_path = archive_dir / "body.txt"
+        try:
+            body_text = body_path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        subject = safe_text(str(metadata.get("subject", "")))[:180]
+        sender = redact_email_addresses(safe_text(str(metadata.get("from", ""))))[:180]
+        title_source = f"{sender} | {subject}".strip(" |") or str(metadata.get("archive_id") or archive_dir.name)
+        email_text = f"{subject}\n{sender}\n{body_text}"
+        if not email_archive_text_looks_payment_related(email_text):
+            continue
+        due = best_email_archive_due_match(email_text)
+        if due is None:
+            continue
+        due_date, context = due
+        archive_id = safe_text(str(metadata.get("archive_id") or archive_dir.name))[:180]
+        reminder_id = email_archive_due_candidate_reminder_id(
+            archive_id=archive_id,
+            due_type="payment_due",
+            due_date=due_date.isoformat(),
+        )
+        reminder = reminders_by_id.get(reminder_id)
+        status = "already_reminded" if reminder is not None else "ready"
+        amount_due = safe_text(str(reminder.get("amount_due", "")))[:80] if reminder is not None else extract_payment_amount_from_text(context)
+        amount_note = safe_text(str(reminder.get("amount_note", "")))[:240] if reminder is not None else ""
+        candidates.append(
+            {
+                "candidate_ref": email_archive_due_candidate_reference(archive_id, "payment_due", due_date.isoformat()),
+                "source_kind": "email_archive",
+                "archive_id": archive_id,
+                "title": safe_text(title_source)[:180],
+                "domain": "email",
+                "domain_label": "e-mail",
+                "document_type": "email_payment_notice",
+                "document_type_label": "platební e-mail",
+                "counterparty": sender,
+                "related_asset": "",
+                "date": due_date.isoformat(),
+                "days_until": (due_date - today).days,
+                "type": "payment_due",
+                "type_label": DOCUMENT_DUE_TYPE_LABELS.get("payment_due", "platba"),
+                "confidence": "medium",
+                "context": context,
+                "context_count": 1,
+                "amount_due": amount_due,
+                "amount_note": amount_note,
+                "status": status,
+                "status_label": "ke schválení" if status == "ready" else "už hlídáno",
+                "reminder_id": reminder_id,
+                "reminder_ref": reminder_reference(reminder_id),
+                "reminder_status": safe_text(str(reminder.get("status", "")))[:40] if reminder is not None else "",
+                "suggested_title": safe_text(f"Zaplatit podle e-mailu: {subject or archive_id}")[:160],
+                "suggested_notes": safe_text(f"Platební kandidát z uloženého e-mailu. Kontext: {context}")[:700],
+                "priority": "high",
+                "source_summary": safe_text(
+                    f"{metadata.get('provider') or 'email'} / {metadata.get('mailbox') or 'INBOX'} / UID {metadata.get('uid') or ''}"
+                )[:160],
+            }
+        )
+
+    return candidates
+
+
+def email_archive_text_looks_payment_related(text: str) -> bool:
+    folded = text.casefold()
+    return any(term in folded for term in EMAIL_ARCHIVE_PAYMENT_TERMS) and bool(EMAIL_ARCHIVE_AMOUNT_PATTERN.search(text))
+
+
+def best_email_archive_due_match(text: str) -> tuple[date, str] | None:
+    matches: list[tuple[int, date, str]] = []
+    for match in EMAIL_ARCHIVE_DATE_PATTERN.finditer(text):
+        try:
+            due_date = date(int(match.group(3)), int(match.group(2)), int(match.group(1)))
+        except ValueError:
+            continue
+        start = max(0, match.start() - 180)
+        end = min(len(text), match.end() + 180)
+        context = sanitize_output(" ".join(text[start:end].split()))[:700]
+        folded = context.casefold()
+        score = 0
+        if "dluž" in folded or "dluz" in folded:
+            score += 8
+        if "upom" in folded:
+            score += 6
+        if "splatnost" in folded:
+            score += 4
+        if EMAIL_ARCHIVE_AMOUNT_PATTERN.search(context):
+            score += 3
+        if "celkem" in folded or "k zaplac" in folded or "k úhrad" in folded or "k uhrad" in folded:
+            score += 2
+        matches.append((-score, due_date, context))
+    if not matches:
+        return None
+    matches.sort(key=lambda item: (item[0], item[1]))
+    return matches[0][1], matches[0][2]
+
+
+def extract_payment_amount_from_text(text: str) -> str:
+    amounts = [safe_text(match.group(1)).replace(" .", " ") for match in EMAIL_ARCHIVE_AMOUNT_PATTERN.finditer(text)]
+    if not amounts:
+        return ""
+    return amounts[-1][:80]
+
+
+def parse_email_archive_date(value: str) -> date | None:
+    if not value.strip():
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        try:
+            parsed = parsedate_to_datetime(value)
+        except (TypeError, ValueError, IndexError):
+            return None
+    return parsed.date()
+
+
+def email_archive_due_candidate_reference(archive_id: str, due_type: str, due_date: str) -> str:
+    digest = hashlib.sha256(f"{archive_id}|{due_type}|{due_date}".encode("utf-8")).hexdigest()[:16]
+    return f"emaildueref-{digest}"
+
+
+def email_archive_due_candidate_reminder_id(*, archive_id: str, due_type: str, due_date: str) -> str:
+    safe_archive_id = safe_slug(archive_id, default="email-archive", limit=140)
+    safe_due_type = safe_slug(due_type, default="deadline", limit=50)
+    return f"email-archive-{safe_archive_id}-{safe_due_type}-{due_date}"
 
 
 def create_document_due_reminder_action(
@@ -4342,12 +4605,20 @@ def create_document_due_reminder_action(
     confirmed: bool = False,
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
     reminders_path: Path = DEFAULT_REMINDERS_PATH,
+    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
     today: date | None = None,
 ) -> dict[str, Any]:
     if not confirmed:
         return {"ok": False, "message": "Chybí potvrzení vytvoření připomínky."}
     today_date = today or date.today()
     candidates = build_document_due_candidates(vault_dir=vault_dir, reminders_path=reminders_path, today=today_date)
+    candidates.extend(
+        build_email_archive_due_candidates(
+            archive_directory=archive_directory,
+            reminders_path=reminders_path,
+            today=today_date,
+        )
+    )
     candidate = next((item for item in candidates if item["candidate_ref"] == candidate_ref.strip()), None)
     if candidate is None:
         return {
@@ -4359,6 +4630,17 @@ def create_document_due_reminder_action(
                 today=today_date,
             ),
         }
+    if candidate.get("source_kind") == "email_archive":
+        return create_email_archive_due_reminder_action(
+            candidate=candidate,
+            title=title,
+            notes=notes,
+            priority=priority,
+            vault_dir=vault_dir,
+            reminders_path=reminders_path,
+            archive_directory=archive_directory,
+            today=today_date,
+        )
     if candidate["status"] == "already_reminded":
         return {
             "ok": False,
@@ -4407,6 +4689,81 @@ def create_document_due_reminder_action(
             today=today_date,
         ),
         "reminders": reminders_status(path=reminders_path, today=today_date),
+    }
+
+
+def create_email_archive_due_reminder_action(
+    *,
+    candidate: dict[str, Any],
+    title: str = "",
+    notes: str = "",
+    priority: str = "",
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    reminders_path: Path = DEFAULT_REMINDERS_PATH,
+    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+    today: date,
+) -> dict[str, Any]:
+    if candidate["status"] == "already_reminded":
+        return {
+            "ok": False,
+            "message": "Pro tento e-mailový termín už připomínka existuje.",
+            "document_due_candidates": document_due_candidates_status(
+                vault_dir=vault_dir,
+                reminders_path=reminders_path,
+                archive_directory=archive_directory,
+                today=today,
+            ),
+        }
+    reminder_id = str(candidate["reminder_id"])
+    reminder_title = safe_text(title.strip())[:160] or str(candidate["suggested_title"])
+    reminder_notes = safe_text(notes.strip())[:700] or str(candidate["suggested_notes"])
+    store = load_reminders_store(reminders_path)
+    if any(item.get("id") == reminder_id for item in store.get("reminders", []) if isinstance(item, dict)):
+        return {
+            "ok": False,
+            "message": "Připomínka už existuje; duplicita nebyla přidána.",
+            "document_due_candidates": document_due_candidates_status(
+                vault_dir=vault_dir,
+                reminders_path=reminders_path,
+                archive_directory=archive_directory,
+                today=today,
+            ),
+        }
+    source_sender = safe_text(str(candidate.get("counterparty", "")))[:180]
+    reminder = {
+        "id": reminder_id,
+        "title": reminder_title,
+        "notes": reminder_notes,
+        "due_date": safe_text(str(candidate.get("date", "")))[:40],
+        "priority": priority or safe_text(str(candidate.get("priority", "high")))[:40] or "high",
+        "status": "open",
+        "source": {
+            "type": "email_archive",
+            "uid": safe_text(str(candidate.get("archive_id", "")))[:180],
+            "date": safe_text(str(candidate.get("date", "")))[:120],
+            "sender": source_sender,
+        },
+        "amount_due": safe_text(str(candidate.get("amount_due", "")))[:80],
+        "amount_note": (
+            safe_text(str(candidate.get("amount_note", "")))[:240]
+            or "Částka byla odhadnuta z textu uloženého e-mailu."
+        ),
+        "archive_id": safe_text(str(candidate.get("archive_id", "")))[:180],
+        "due_date_type": safe_text(str(candidate.get("type", "payment_due")))[:80],
+    }
+    store.setdefault("reminders", []).append(reminder)
+    write_reminders_store(store, path=reminders_path)
+    return {
+        "ok": True,
+        "reminder_ref": reminder_reference(reminder_id),
+        "message": "Uloženo: připomínka z uloženého e-mailu byla vytvořena.",
+        "document_due_candidates": document_due_candidates_status(
+            vault_dir=vault_dir,
+            reminders_path=reminders_path,
+            archive_directory=archive_directory,
+            today=today,
+        ),
+        "reminders": reminders_status(path=reminders_path, today=today),
     }
 
 
@@ -11265,7 +11622,9 @@ COCKPIT_HTML = """<!doctype html>
         const meta = document.createElement("div");
         meta.className = "work-meta";
         const amount = item.amount_due ? ` | částka ${item.amount_due}` : "";
-        meta.textContent = `${item.title || "Dokument"}${amount}`;
+        const sourceLabel = item.source_kind === "email_archive" ? "E-mail" : "Dokument";
+        const sourceSummary = item.source_summary ? ` | ${item.source_summary}` : "";
+        meta.textContent = `${sourceLabel}: ${item.title || "bez názvu"}${amount}${sourceSummary}`;
         const context = document.createElement("div");
         context.className = "work-meta";
         context.textContent = item.context || "";
@@ -11305,10 +11664,10 @@ COCKPIT_HTML = """<!doctype html>
       const summary = [
         `Datum: ${item.date || ""}`,
         `Typ: ${item.type_label || item.type || ""}`,
-        `Dokument: ${item.title || ""}`,
+        `${item.source_kind === "email_archive" ? "E-mail" : "Dokument"}: ${item.title || ""}`,
         `Název: ${title.trim() || defaultTitle}`
       ].join("\\n");
-      const ok = window.confirm(`Vytvořit připomínku z dokumentu?\\n\\n${summary}`);
+      const ok = window.confirm(`Vytvořit připomínku z ${item.source_kind === "email_archive" ? "uloženého e-mailu" : "dokumentu"}?\\n\\n${summary}`);
       if (!ok) return;
       const originalText = button.textContent;
       button.disabled = true;

@@ -860,6 +860,77 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(store["reminders"][0]["amount_due"], "1 234 Kč")
         self.assertEqual(created["document_due_candidates"]["already_reminded_count"], 1)
 
+    def test_email_archive_due_candidate_detects_payment_upominka_and_creates_reminder(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            (vault / "index").mkdir(parents=True)
+            archive_dir = root / "email_archive"
+            email_dir = archive_dir / "email-155924-upozorneni-na-dluznou-castku"
+            (email_dir / "attachments").mkdir(parents=True)
+            reminders_path = root / "reminders.json"
+            (email_dir / "metadata.json").write_text(
+                json.dumps(
+                    {
+                        "archive_id": "email-155924-upozorneni-na-dluznou-castku",
+                        "uid": "155924",
+                        "date": "Thu, 11 Jun 2026 16:09:42 +0200 (CEST)",
+                        "from": "ČEZ Prodej, a.s. <upominani@example.com>",
+                        "subject": "Upozornění na dlužnou částku",
+                        "provider": "seznam",
+                        "mailbox": "INBOX",
+                        "archived_at": "2026-06-11T14:30:52+00:00",
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+            (email_dir / "body.txt").write_text(
+                (
+                    "Dlužnou částku prosím zaplaťte do uvedeného data splatnosti. "
+                    "Další případná upomínka bude již zpoplatněna. "
+                    "Splatnost K zaplacení Záloha 31. 5. 2026 1 360,00 Kč "
+                    "Celková dlužná částka 1 360,00 Kč. "
+                    "Další přehled plateb má splatnost 30. 6. 2026 1 360,00 Kč."
+                ),
+                encoding="utf-8",
+            )
+            (email_dir / "attachments" / "attachments.json").write_text(
+                json.dumps({"attachments": []}),
+                encoding="utf-8",
+            )
+
+            status = document_due_candidates_status(
+                vault_dir=vault,
+                reminders_path=reminders_path,
+                archive_directory=archive_dir,
+                today=date(2026, 6, 11),
+            )
+            candidate = status["items"][0]
+            created = create_document_due_reminder_action(
+                candidate_ref=candidate["candidate_ref"],
+                title="Zaplatit ČEZ upomínku",
+                notes="Ověřeno z uloženého e-mailu.",
+                confirmed=True,
+                vault_dir=vault,
+                reminders_path=reminders_path,
+                archive_directory=archive_dir,
+                today=date(2026, 6, 11),
+            )
+            store = json.loads(reminders_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(status["email_candidate_count"], 1)
+        self.assertEqual(candidate["source_kind"], "email_archive")
+        self.assertEqual(candidate["date"], "2026-05-31")
+        self.assertEqual(candidate["amount_due"], "1 360,00 Kč")
+        self.assertIn("ČEZ Prodej", candidate["title"])
+        self.assertNotIn("upominani@example.com", json.dumps(candidate, ensure_ascii=False))
+        self.assertTrue(created["ok"])
+        self.assertEqual(store["reminders"][0]["source"]["type"], "email_archive")
+        self.assertEqual(store["reminders"][0]["due_date"], "2026-05-31")
+        self.assertEqual(store["reminders"][0]["amount_due"], "1 360,00 Kč")
+        self.assertNotIn("upominani@example.com", json.dumps(store, ensure_ascii=False))
+
     def test_document_review_report_status_flags_safe_review_candidates(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             vault = Path(temp_dir) / "documents"
