@@ -4122,7 +4122,9 @@ def document_due_candidates_status(
         else []
     )
     candidates = document_candidates + email_candidates
-    duplicate_groups = annotate_duplicate_due_candidates(candidates)
+    candidate_groups = annotate_due_candidate_groups(candidates)
+    duplicate_groups = candidate_groups["duplicates"]
+    related_source_groups = candidate_groups["related_sources"]
     candidates.sort(
         key=lambda item: (
             0 if item["status"] == "ready" else 1 if item["status"] == "already_reminded" else 2,
@@ -4142,6 +4144,8 @@ def document_due_candidates_status(
         "email_candidate_count": len(email_candidates),
         "duplicate_group_count": len(duplicate_groups),
         "duplicate_candidate_count": sum(1 for item in candidates if item.get("duplicate_group_id")),
+        "related_source_group_count": len(related_source_groups),
+        "related_source_candidate_count": sum(1 for item in candidates if item.get("related_source_group_id")),
         "actionable_count": len(actionable),
         "already_reminded_count": len(already),
         "past_count": len(past),
@@ -4150,12 +4154,13 @@ def document_due_candidates_status(
         "message": (
             f"Termíny: {len(actionable)} ke schválení, {len(already)} už hlídáno, "
             f"{len(past)} prošlé bez nové připomínky."
+            f"{' Související zdroje: ' + str(len(related_source_groups)) + '.' if related_source_groups else ''}"
             f"{' Pravděpodobné duplicity: ' + str(len(duplicate_groups)) + '.' if duplicate_groups else ''}"
         ),
     }
 
 
-def annotate_duplicate_due_candidates(candidates: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
+def annotate_due_candidate_groups(candidates: list[dict[str, Any]]) -> dict[str, list[list[dict[str, Any]]]]:
     grouped: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
     for item in candidates:
         key = due_candidate_duplicate_key(item)
@@ -4163,7 +4168,30 @@ def annotate_duplicate_due_candidates(candidates: list[dict[str, Any]]) -> list[
             continue
         grouped.setdefault(key, []).append(item)
 
-    duplicate_groups = [items for items in grouped.values() if len(items) > 1]
+    duplicate_groups: list[list[dict[str, Any]]] = []
+    related_source_groups: list[list[dict[str, Any]]] = []
+    for items in grouped.values():
+        if len(items) <= 1:
+            continue
+        if due_candidate_items_are_same_email_with_attachment(items):
+            related_source_groups.append(items)
+        else:
+            duplicate_groups.append(items)
+
+    for items in related_source_groups:
+        source_labels = sorted({due_candidate_source_label(item) for item in items})
+        group_id = "due-src-" + hashlib.sha256(
+            "|".join(str(item.get("candidate_ref", "")) for item in items).encode("utf-8")
+        ).hexdigest()[:12]
+        note = (
+            "Související zdroje: stejný e-mail a jeho PDF příloha "
+            f"({', '.join(source_labels)}). Nejde o dvojí závazek."
+        )
+        for item in items:
+            item["related_source_group_id"] = group_id
+            item["related_source_group_size"] = len(items)
+            item["related_source_note"] = note
+
     for items in duplicate_groups:
         source_labels = sorted({due_candidate_source_label(item) for item in items})
         group_id = "due-dup-" + hashlib.sha256(
@@ -4177,7 +4205,27 @@ def annotate_duplicate_due_candidates(candidates: list[dict[str, Any]]) -> list[
             item["duplicate_group_id"] = group_id
             item["duplicate_group_size"] = len(items)
             item["duplicate_note"] = note
-    return duplicate_groups
+    return {"duplicates": duplicate_groups, "related_sources": related_source_groups}
+
+
+def due_candidate_items_are_same_email_with_attachment(items: list[dict[str, Any]]) -> bool:
+    labels = {due_candidate_source_label(item) for item in items}
+    if not {"dokument", "e-mail"}.issubset(labels):
+        return False
+    email_uids = {uid for item in items for uid in due_candidate_email_uids(item)}
+    return bool(email_uids)
+
+
+def due_candidate_email_uids(item: dict[str, Any]) -> set[str]:
+    values = [
+        str(item.get("case_id", "")),
+        str(item.get("title", "")),
+        str(item.get("source_summary", "")),
+        str(item.get("archive_id", "")),
+    ]
+    joined = " ".join(values)
+    matches = set(re.findall(r"(?:uid|email-seznam-|email-icloud-|email-)[^\d]{0,8}(\d{3,})", joined, flags=re.IGNORECASE))
+    return matches
 
 
 def due_candidate_duplicate_key(item: dict[str, Any]) -> tuple[str, str, str] | None:
@@ -4416,6 +4464,7 @@ def build_document_due_candidates(
                 "candidate_ref": document_due_candidate_reference(document_id, due_type, due_date.isoformat()),
                 "document_id": document_id,
                 "document_ref": document_reference(document_id),
+                "case_id": safe_text(str(document.get("case_id", "")))[:120],
                 "title": title,
                 "domain": safe_text(str(document.get("domain", "")))[:80],
                 "domain_label": document_domain_label(str(document.get("domain", ""))),
@@ -4470,7 +4519,7 @@ def public_document_due_candidate(item: dict[str, Any]) -> dict[str, Any]:
     return {
         key: value
         for key, value in item.items()
-        if key not in {"document_id", "archive_id", "reminder_id"}
+        if key not in {"document_id", "archive_id", "reminder_id", "case_id"}
     }
 
 
@@ -11711,6 +11760,12 @@ COCKPIT_HTML = """<!doctype html>
           duplicate.className = "work-meta warning";
           duplicate.textContent = item.duplicate_note;
           row.appendChild(duplicate);
+        }
+        if (item.related_source_note) {
+          const relatedSource = document.createElement("div");
+          relatedSource.className = "work-meta";
+          relatedSource.textContent = item.related_source_note;
+          row.appendChild(relatedSource);
         }
         row.appendChild(context);
         if (item.status === "ready") {

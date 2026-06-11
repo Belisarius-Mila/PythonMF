@@ -729,12 +729,14 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["already_reminded_count"], 1)
         self.assertEqual(result["past_count"], 1)
         self.assertEqual(result["duplicate_group_count"], 0)
+        self.assertEqual(result["related_source_group_count"], 0)
         self.assertEqual(result["items"][0]["status"], "ready")
         self.assertEqual(result["items"][0]["amount_due"], "1 234 Kč")
         self.assertNotIn("document_id", result["items"][0])
+        self.assertNotIn("case_id", result["items"][0])
         self.assertNotIn("doc-trashed", json.dumps(result, ensure_ascii=False))
 
-    def test_document_due_candidates_status_flags_document_email_duplicates(self) -> None:
+    def test_document_due_candidates_status_links_email_with_its_pdf_attachment(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
             vault = root / "documents"
@@ -753,6 +755,7 @@ class CockpitTests(unittest.TestCase):
                         "domain": "other",
                         "document_type": "email-attachment-pdf",
                         "counterparty": "T-Mobile Elektronické vyúčtování <[e-mail redigovan]>",
+                        "case_id": "email-seznam-155808",
                         "related_asset": "",
                     }
                 ],
@@ -807,10 +810,14 @@ class CockpitTests(unittest.TestCase):
             )
 
         self.assertEqual(result["candidate_count"], 2)
-        self.assertEqual(result["duplicate_group_count"], 1)
-        self.assertEqual(result["duplicate_candidate_count"], 2)
-        self.assertTrue(all(item.get("duplicate_group_id") for item in result["items"]))
-        self.assertTrue(all("Pravděpodobná duplicita" in item.get("duplicate_note", "") for item in result["items"]))
+        self.assertEqual(result["duplicate_group_count"], 0)
+        self.assertEqual(result["duplicate_candidate_count"], 0)
+        self.assertEqual(result["related_source_group_count"], 1)
+        self.assertEqual(result["related_source_candidate_count"], 2)
+        self.assertTrue(all(item.get("related_source_group_id") for item in result["items"]))
+        self.assertTrue(all("Související zdroje" in item.get("related_source_note", "") for item in result["items"]))
+        self.assertFalse(any(item.get("duplicate_group_id") for item in result["items"]))
+        self.assertNotIn("case_id", json.dumps(result, ensure_ascii=False))
         self.assertNotIn("billing@example.com", json.dumps(result, ensure_ascii=False))
 
     def test_document_due_candidate_uses_existing_reminder_amount_for_resolved_cpp_maxi_variant(self) -> None:
