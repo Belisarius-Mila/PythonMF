@@ -8,7 +8,7 @@ Posledni uspesna ostra recovery zaloha je podle
 `Samantha_Agent/data/backup/activity_state.json` z 2026-06-11:
 
 ```text
-/Volumes/SamanthaSecureBackup/SamanthaBackups/snapshots/20260611_234814/PythonMF
+/Volumes/SamanthaSecureBackup/SamanthaBackups/snapshots/20260611_235300/PythonMF
 ```
 
 Zaloha probehla pres Pythonovy inkrementalni nastroj:
@@ -20,11 +20,11 @@ Zaloha probehla pres Pythonovy inkrementalni nastroj:
 Vystup ostreho behu:
 
 ```text
-files seen: 20376
-files copied: 1108
-files hard-linked: 19268
+files seen: 20383
+files copied: 18
+files hard-linked: 20365
 files skipped: 0
-bytes copied: 487579965
+bytes copied: 4965967
 ```
 
 Overeni po behu:
@@ -35,7 +35,7 @@ Overeni po behu:
 - `scripts/backup_status.py` hlasi, ze posledni zaloha je v 3dennim intervalu
   `2026-06-11`,
 - restore drill obnovil `Samantha_Agent/AGENTS.md` jen do
-  `/private/tmp/samantha_restore_drill_20260611/Samantha_Agent/AGENTS.md`,
+  `/private/tmp/samantha_restore_drill_20260611_final/Samantha_Agent/AGENTS.md`,
 - `cmp` a SHA-256 potvrdily shodu:
   `9113ee653949eaa58c2dd83ade03607b5c93641c8127733602efbece27580dd7`.
 
