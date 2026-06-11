@@ -12,6 +12,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 ## Reports
 
 - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_11.txt` - [PRIPOMENOUT] strukturovany audit podle QN #40 a QN #13: projekty, tooly a vrstvy serazene podle priorit 1-3, odhad rozpracovanosti v %, dalsi kroky a navrh dnesniho itinerare.
+- `reports/cockpit_ui_content_audit_2026_06_11.md` - kratky read-only audit obsahu oken Cockpitu: co je denni, obcasne, servisni a archivni; duplicity, technicke nazvy a navrh prvniho UI cleanupu.
 
 ## Projects
 
