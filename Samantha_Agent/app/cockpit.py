@@ -12954,6 +12954,63 @@ COCKPIT_HTML = """<!doctype html>
 	      return Boolean(host && !["127.0.0.1", "localhost", "::1"].includes(host));
 	    }
 
+	    let voiceAudioContext = null;
+	    let voiceAudioUnlocked = false;
+
+	    function getVoiceAudioContext() {
+	      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+	      if (!AudioContextClass) return null;
+	      if (!voiceAudioContext) {
+	        voiceAudioContext = new AudioContextClass();
+	      }
+	      return voiceAudioContext;
+	    }
+
+	    async function primeVoiceAudioContextFromGesture() {
+	      const context = getVoiceAudioContext();
+	      if (!context) return false;
+	      if (context.state === "suspended") {
+	        await context.resume();
+	      }
+	      const source = context.createBufferSource();
+	      source.buffer = context.createBuffer(1, 1, 22050);
+	      source.connect(context.destination);
+	      source.start(0);
+	      voiceAudioUnlocked = true;
+	      return true;
+	    }
+
+	    function base64ToArrayBuffer(base64) {
+	      const binary = window.atob(String(base64 || ""));
+	      const bytes = new Uint8Array(binary.length);
+	      for (let index = 0; index < binary.length; index += 1) {
+	        bytes[index] = binary.charCodeAt(index);
+	      }
+	      return bytes.buffer;
+	    }
+
+	    async function playVoiceAudioBase64(edgeData) {
+	      if (!voiceAudioUnlocked || !edgeData || !edgeData.audio_base64) return false;
+	      const context = getVoiceAudioContext();
+	      if (!context) return false;
+	      if (context.state === "suspended") {
+	        await context.resume();
+	      }
+	      const audioBuffer = await context.decodeAudioData(base64ToArrayBuffer(edgeData.audio_base64));
+	      await new Promise((resolve, reject) => {
+	        const source = context.createBufferSource();
+	        source.buffer = audioBuffer;
+	        source.connect(context.destination);
+	        source.onended = resolve;
+	        try {
+	          source.start(0);
+	        } catch (err) {
+	          reject(err);
+	        }
+	      });
+	      return true;
+	    }
+
 	    function markVoiceResponseNeedsTap(message) {
 	      if (voiceLastResponseSpeakBtn) {
 	        voiceLastResponseSpeakBtn.textContent = isRemoteCockpitClient() ? "Přehrát v iPhonu" : "Přehrát Adamovu odpověď";
@@ -12970,6 +13027,9 @@ COCKPIT_HTML = """<!doctype html>
 	        return;
 	      }
 	      const allowSystemFallback = options.allowSystemFallback !== false && !isRemoteCockpitClient();
+	      if (options.userGesture && isRemoteCockpitClient()) {
+	        await primeVoiceAudioContextFromGesture();
+	      }
 	      button.disabled = true;
 	      button.classList.remove("needs-tap");
 	      showMessage(label || "Čtu nahlas...");
@@ -12981,6 +13041,16 @@ COCKPIT_HTML = """<!doctype html>
 	        });
 	        const edgeData = await edgeRes.json();
 	        if (edgeData.ok && edgeData.audio_base64) {
+	          if (isRemoteCockpitClient() && voiceAudioUnlocked) {
+	            try {
+	              await playVoiceAudioBase64(edgeData);
+	              button.textContent = button === voiceLastResponseSpeakBtn ? "Přehrát Adamovu odpověď" : button.textContent;
+	              showMessage(edgeData.message || "Přehráno v tomto prohlížeči.");
+	              return;
+	            } catch (contextPlayErr) {
+	              recordFrontendError(contextPlayErr);
+	            }
+	          }
 	          const audio = new Audio(`data:${edgeData.mime_type || "audio/mpeg"};base64,${edgeData.audio_base64}`);
 	          try {
 	            await audio.play();
@@ -13304,7 +13374,8 @@ COCKPIT_HTML = """<!doctype html>
 		      await speakText(
 		        latestAdamResponseText,
 		        voiceLastResponseSpeakBtn,
-		        "Přehrávám poslední Adamovu odpověď v tomto prohlížeči..."
+		        "Přehrávám poslední Adamovu odpověď v tomto prohlížeči...",
+		        {userGesture: true, allowSystemFallback: false}
 		      );
 		    }
 
