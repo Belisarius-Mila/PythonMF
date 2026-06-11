@@ -1370,6 +1370,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("renderReminderConflicts", COCKPIT_HTML)
         self.assertIn("Konflikt plateb", COCKPIT_HTML)
         self.assertIn("Uzavřít jako zrušené", COCKPIT_HTML)
+        self.assertIn('result.kind === "email_archive"', COCKPIT_HTML)
+        self.assertIn("EmailArchiveVault", COCKPIT_HTML)
         self.assertIn("Otevřít PDF", COCKPIT_HTML)
         self.assertIn("Splněno", COCKPIT_HTML)
         self.assertIn("Zdroj", COCKPIT_HTML)
@@ -2606,6 +2608,83 @@ Dalsi krok:
             self.assertEqual(result["kind"], "email")
             self.assertEqual(result["email"]["subject"], "Pojistka vozidla")
             self.assertEqual(provider.calls[0]["uid"], "14157")
+
+    def test_reminder_source_detail_loads_email_archive_with_redacted_sender(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            reminders_path = root / "reminders.json"
+            archive_dir = root / "email_archive"
+            archive_id = "email-155924-upozorneni-na-dluznou-castku"
+            email_dir = archive_dir / archive_id
+            (email_dir / "attachments").mkdir(parents=True)
+            (email_dir / "metadata.json").write_text(
+                json.dumps(
+                    {
+                        "archive_id": archive_id,
+                        "subject": "Upozornění na dlužnou částku",
+                        "from": "ČEZ Prodej, a.s. <upominani@example.com>",
+                        "date": "Thu, 11 Jun 2026 16:09:42 +0200 (CEST)",
+                        "archived_at": "2026-06-11T14:30:52+00:00",
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+            (email_dir / "attachments" / "attachments.json").write_text(
+                json.dumps(
+                    {
+                        "attachments": [
+                            {
+                                "filename": "upominka.pdf",
+                                "content_type": "application/pdf",
+                                "size_bytes": 12345,
+                                "part_id": "2",
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            reminders_path.write_text(
+                json.dumps(
+                    {
+                        "reminders": [
+                            {
+                                **self.reminder(
+                                    "archive-reminder",
+                                    "Zaplatit podle e-mailu: ČEZ Prodej, a.s. - Upozornění na dlužnou částku",
+                                    "2026-05-31",
+                                ),
+                                "source": {
+                                    "type": "email_archive",
+                                    "uid": archive_id,
+                                    "date": "Thu, 11 Jun 2026 16:09:42 +0200 (CEST)",
+                                    "sender": "ČEZ Prodej, a.s. <[e-mail redigovan]>",
+                                },
+                            }
+                        ]
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            result = reminder_source_detail_action(
+                "archive-reminder",
+                reminders_path=reminders_path,
+                archive_directory=archive_dir,
+            )
+
+        payload = json.dumps(result, ensure_ascii=False)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["kind"], "email_archive")
+        self.assertEqual(result["email"]["provider"], "archive")
+        self.assertEqual(result["email"]["uid"], archive_id)
+        self.assertEqual(result["email"]["subject"], "Upozornění na dlužnou částku")
+        self.assertIn("ČEZ Prodej", result["email"]["sender"])
+        self.assertIn("[e-mail redigovan]", result["email"]["sender"])
+        self.assertEqual(result["email"]["attachments"][0]["filename"], "upominka.pdf")
+        self.assertNotIn("upominani@example.com", payload)
 
     def test_reminder_source_detail_finds_private_document_context(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

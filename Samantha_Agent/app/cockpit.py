@@ -3743,7 +3743,7 @@ def email_archive_evidence_summary(
         "archive_path": str(relative_to_project(resolved_metadata.parent)),
         "metadata_path": str(relative_to_project(resolved_metadata)),
         "subject": safe_text(str(metadata.get("subject", "")))[:240],
-        "sender": safe_text(str(metadata.get("from", "")))[:180],
+        "sender": redact_email_addresses(safe_text(str(metadata.get("from", ""))))[:180],
         "email_date": safe_text(str(metadata.get("date", "")))[:120],
         "archived_at": safe_text(str(metadata.get("archived_at", "")))[:80],
     }
@@ -3760,6 +3760,7 @@ def reminder_source_detail_action(
     reminder_id: str,
     reminders_path: Path = DEFAULT_REMINDERS_PATH,
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
     icloud_provider_factory: Callable[[], object] | None = None,
     seznam_provider_factory: Callable[[], object] | None = None,
 ) -> dict[str, Any]:
@@ -3790,7 +3791,7 @@ def reminder_source_detail_action(
             seznam_provider_factory=seznam_provider_factory,
         )
     if source_type == "email_archive":
-        return reminder_email_archive_source_detail(base=base, source=source)
+        return reminder_email_archive_source_detail(base=base, source=source, archive_directory=archive_directory)
     if source_type == "private_document":
         return reminder_document_source_detail(base=base, source=source, vault_dir=vault_dir)
     return {
@@ -14479,8 +14480,8 @@ COCKPIT_HTML = """<!doctype html>
       status.className = "reminder-source-row";
       status.textContent = result.message || (result.ok ? "Zdroj načten." : "Zdroj se nepodařilo načíst.");
       detailNode.appendChild(status);
-      if (result.kind === "email" && result.email) {
-        renderReminderEmailSource(result.email, detailNode);
+      if ((result.kind === "email" || result.kind === "email_archive") && result.email) {
+        renderReminderEmailSource(result.email, detailNode, result.kind);
       } else if (result.kind === "document" && result.document) {
         renderReminderDocumentSource(result.document, detailNode);
       } else {
@@ -14503,11 +14504,15 @@ COCKPIT_HTML = """<!doctype html>
       parent.appendChild(pre);
     }
 
-    function renderReminderEmailSource(email, detailNode) {
-      appendSourceRow(detailNode, "Předmět", email.subject || "");
+    function renderReminderEmailSource(email, detailNode, kind = "email") {
+      const isArchive = kind === "email_archive" || email.provider === "archive";
+      appendSourceRow(detailNode, isArchive ? "Uložený e-mail" : "Předmět", email.subject || "");
       appendSourceRow(detailNode, "Od", email.sender || "");
       appendSourceRow(detailNode, "Datum", email.date || "");
-      appendSourceRow(detailNode, "Zdroj", `${email.provider || ""} / ${email.folder || ""} / UID ${email.uid || ""}`);
+      const sourceText = isArchive
+        ? `EmailArchiveVault / ${email.uid || ""}`
+        : `${email.provider || ""} / ${email.folder || ""} / UID ${email.uid || ""}`;
+      appendSourceRow(detailNode, "Zdroj", sourceText);
       appendSourcePre(detailNode, email.body_text || "");
       const attachments = email.attachments || [];
       if (attachments.length) {
