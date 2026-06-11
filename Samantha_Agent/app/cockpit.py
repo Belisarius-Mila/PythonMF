@@ -9718,6 +9718,8 @@ COCKPIT_HTML = """<!doctype html>
     .status-line { color: var(--muted); font-size: 13px; }
     .voice-command-grid { display: grid; gap: 10px; }
     .voice-command-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .voice-command-actions.voice-primary-actions { justify-content: flex-start; }
+    .voice-command-actions.voice-text-actions { justify-content: flex-end; }
     .voice-command-actions button.recording { background: #fee2e2; color: var(--red); }
     .voice-command-actions button:disabled { cursor: not-allowed; }
     .voice-card { border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: #f8fafc; display: grid; gap: 8px; }
@@ -9951,19 +9953,27 @@ COCKPIT_HTML = """<!doctype html>
         <details id="voiceCommandDetails" class="section-toggle">
           <summary>Hlas</summary>
 		    <section id="voiceCommandPanel">
-		      <h2>Hlasový pokyn</h2>
+		      <h2>Hlas / text pro Adama</h2>
 		      <div class="body voice-command-grid">
-		        <div class="voice-command-actions">
-		          <button class="secondary" id="voiceModeToggleBtn" aria-pressed="false">Hlasový mód: vypnuto</button>
-		          <button class="secondary" id="voiceModeStartBtn">Spustit Adamův poslech</button>
-		          <button class="secondary" id="voiceModeStopBtn">Zastavit poslech</button>
-		          <button class="primary" id="voiceRecordBtn">Nahrát hlasový pokyn</button>
-		          <button class="secondary" id="voiceStopBtn" disabled>Zastavit a přepsat</button>
-		          <button class="primary" id="voiceTranscriptSendBtn">Odeslat přepis Adamovi</button>
+		        <div class="voice-command-actions voice-primary-actions">
+		          <button class="primary" id="voiceRecordBtn">Nahrát pokyn</button>
+		          <button class="secondary hidden" id="voiceStopBtn" disabled>Zastavit</button>
 		        </div>
-		        <div id="voiceCommandStatus" class="status-line">Pokyn se po přepisu automaticky uloží pro Codex. Adam reaguje jen při spuštěném watcheru.</div>
+		        <div id="voiceCommandStatus" class="status-line">Nahraj pokyn, nebo napiš text. Cockpit ho pošle Adamovi přímo.</div>
+	        <div class="voice-transcript-row">
+	          <label for="voiceTranscript">Textový pokyn</label>
+	          <textarea id="voiceTranscript" placeholder="Nadiktuj nebo napiš pokyn pro Adama." spellcheck="true"></textarea>
+	        </div>
+		        <div class="voice-command-actions voice-text-actions">
+		          <button class="primary" id="voiceTranscriptSendBtn">Odeslat Adamovi</button>
+		        </div>
             <details class="voice-advanced">
-              <summary>Pokročilé</summary>
+              <summary>Technické nastavení</summary>
+		        <div class="voice-command-actions">
+		          <button class="secondary" id="voiceModeToggleBtn" aria-pressed="false">Starý poslech: vypnuto</button>
+		          <button class="secondary" id="voiceModeStartBtn">Spustit watcher</button>
+		          <button class="secondary" id="voiceModeStopBtn">Zastavit watcher</button>
+		        </div>
 		          <div id="voiceModeRuntimeStatus" class="status-line">Adam Voice Mode watcher: čekám na kontrolu.</div>
 		          <div id="voiceBridgeStatus" class="status-line">Terminálový bridge: čekám na kontrolu.</div>
 		          <div id="voiceBridgeSessions" class="status-line">Codex relace: čekám na kontrolu.</div>
@@ -9990,10 +10000,6 @@ COCKPIT_HTML = """<!doctype html>
 		            <button class="secondary" id="voiceApprovalRejectBtn">Zamítnout</button>
 		          </div>
 		        </div>
-	        <div class="voice-transcript-row">
-	          <label for="voiceTranscript">Přepis</label>
-	          <textarea id="voiceTranscript" placeholder="Tady se objeví přepsaný hlasový pokyn." spellcheck="true"></textarea>
-	        </div>
 	      </div>
 	    </section>
         </details>
@@ -10994,7 +11000,7 @@ COCKPIT_HTML = """<!doctype html>
         if (reason.includes("záloh")) return "zkontrolovat stav zálohy";
         if (reason.includes("audit")) return "otevřít auditní detail";
         if (reason.includes("dokument")) return "otevřít dokumentovou frontu nebo ScanDocu";
-        if (reason.includes("hlas")) return "spustit Adam Voice Mode watcher v terminálu, nebo hlasový mód vypnout";
+        if (reason.includes("hlas")) return "zkontrolovat terminálový bridge, případně poslat text znovu";
         return "otevřít detail dané oblasti a rozhodnout další krok";
       }
       return "nic akutního";
@@ -12050,13 +12056,17 @@ COCKPIT_HTML = """<!doctype html>
       const voiceBridgeMessage = voiceBridge.message || "Terminálový bridge stav není načtený.";
       const voicePending = voiceMode.pending_for_adam || {};
       const voicePendingActive = Boolean(voicePending.pending);
+      const voicePendingApprovalStatus = String(voicePending.approval_status || "");
+      const voicePendingActionable = voicePendingActive && voicePendingApprovalStatus !== "approved";
       const voicePendingText = String(voicePending.text || "");
       const voicePendingShort = voicePendingText.length > 160 ? `${voicePendingText.slice(0, 160)}...` : voicePendingText;
-      const voicePendingDashboard = voicePendingActive ? `<br><span class="warn">čeká pokyn</span>` : "";
+      const voiceReady = !voiceBridgeWarn && (voiceBridge.status === "ok" || voiceBridge.status === "unknown" || !voiceBridge.status);
       const voiceBridgeDashboard = voiceBridgeWarn ? `<br><span class="warn">${escapeHtml(voiceBridgeMessage)}</span>` : "";
-      dashboardVoiceMode.innerHTML = voiceRunning
-        ? `<span class="${voiceBridgeWarn ? "warn" : "ok"}">Adam poslouchá</span><br>${escapeHtml(voiceState)}${voicePendingDashboard}${voiceBridgeDashboard}`
-        : `<span class="${voiceModeEnabled || voicePendingActive || voiceBridgeWarn ? "warn" : "ok"}">${voiceModeEnabled ? "Adam neposlouchá" : "vypnuto"}</span><br>${escapeHtml(voiceState)}${voicePendingDashboard}${voiceBridgeDashboard}`;
+      dashboardVoiceMode.innerHTML = voicePendingActionable
+        ? `<span class="warn">čeká pokyn</span><br>${escapeHtml(voicePendingShort || voiceState)}${voiceBridgeDashboard}`
+        : voiceBridgeWarn
+          ? `<span class="warn">zkontrolovat</span><br>${escapeHtml(voiceBridgeMessage)}`
+          : `<span class="${voiceReady ? "ok" : "warn"}">${voiceReady ? "připraveno" : "nezjištěno"}</span><br>přímé odeslání z Cockpitu`;
       if (voiceModeRuntimeStatus) {
         voiceModeRuntimeStatus.textContent = voiceRunning
           ? `Adam Voice Mode watcher běží: ${voiceMessage}`
@@ -12091,36 +12101,34 @@ COCKPIT_HTML = """<!doctype html>
       }
       renderVoiceBridgeSwitcher(voiceBridge);
       if (voiceCommandDetails) {
-        voiceCommandDetails.open = Boolean(voiceRunning || voicePendingActive || voiceModeEnabled || voiceBridgeWarn);
+        voiceCommandDetails.open = Boolean(voicePendingActionable || voiceBridgeWarn);
       }
       if (voicePendingStatus) {
         voicePendingStatus.textContent = voicePendingActive
-          ? `Čeká hlasový pokyn na Adama: ${voicePendingShort || voicePending.message || "bez textu"}`
+          ? voicePendingActionable
+            ? `Čeká hlasový pokyn na Adama: ${voicePendingShort || voicePending.message || "bez textu"}`
+            : `Starší schválený pokyn je jen v technickém záznamu. Nový pokyn můžeš poslat normálně.`
           : voicePending.message || "Žádný hlasový pokyn nečeká na Adama.";
       }
       renderVoiceLastResponse(voiceMode.last_adam_response || {});
       renderVoiceApproval(voicePending);
       if (voiceModeStartBtn) {
         voiceModeStartBtn.disabled = voiceRunning;
-        voiceModeStartBtn.textContent = voiceRunning ? "Poslech běží" : "Spustit Adamův poslech";
+        voiceModeStartBtn.textContent = voiceRunning ? "Watcher běží" : "Spustit watcher";
         voiceModeStartBtn.classList.toggle("active", voiceRunning);
       }
       if (voiceModeStopBtn) {
         voiceModeStopBtn.disabled = !voiceRunning;
-        voiceModeStopBtn.textContent = voiceRunning ? "Zastavit poslech" : "Poslech neběží";
+        voiceModeStopBtn.textContent = voiceRunning ? "Zastavit watcher" : "Watcher neběží";
       }
       setDashboardStatusSignal(
         "voice",
-        voicePendingActive || voiceBridgeWarn || (voiceModeEnabled && !voiceRunning) ? "warn" : "ok",
-        voicePendingActive
-          ? "Čeká hlasový pokyn na převzetí Adamem v Codexu"
+        voicePendingActionable || voiceBridgeWarn ? "warn" : "ok",
+        voicePendingActionable
+          ? "Čeká hlasový pokyn na převzetí Adamem"
           : voiceBridgeWarn
           ? voiceBridgeMessage
-          : voiceModeEnabled && !voiceRunning
-          ? "Hlasový mód je v UI zapnutý, ale Adam Voice Mode watcher neběží"
-          : voiceRunning
-            ? "Adam Voice Mode watcher běží"
-            : "Hlasový mód je vypnutý"
+          : "Hlasový vstup v Cockpitu je připravený"
       );
       updateVoiceModeUi();
 
@@ -12964,6 +12972,7 @@ COCKPIT_HTML = """<!doctype html>
 	      voiceRecordBtn.disabled = false;
 	      voiceRecordBtn.classList.remove("recording");
 	      voiceStopBtn.disabled = true;
+	      voiceStopBtn.classList.add("hidden");
 	      if (voiceStopTimer) {
 	        window.clearTimeout(voiceStopTimer);
 	        voiceStopTimer = null;
@@ -12971,16 +12980,16 @@ COCKPIT_HTML = """<!doctype html>
 	    }
 
 		    function updateVoiceModeUi() {
-		      voiceModeToggleBtn.textContent = voiceModeEnabled ? "Hlasový mód: zapnuto" : "Hlasový mód: vypnuto";
+		      voiceModeToggleBtn.textContent = voiceModeEnabled ? "Starý poslech: zapnuto" : "Starý poslech: vypnuto";
 		      voiceModeToggleBtn.setAttribute("aria-pressed", voiceModeEnabled ? "true" : "false");
 		      voiceModeToggleBtn.classList.toggle("active", voiceModeEnabled);
 		      const watcherRunning = Boolean(latestVoiceModeRuntime && latestVoiceModeRuntime.running);
 		      if (voiceModeEnabled) {
 		        voiceCommandStatus.textContent = watcherRunning
-		          ? "Hlasový mód je zapnutý a Adam Voice Mode watcher běží. Nahrané pokyny se budou hlásit Adamovi."
-		          : "Hlasový mód je zapnutý jen v UI. Adam neposlouchá, dokud neběží scripts/adam_voice_mode.py.";
+		          ? "Nahraj pokyn, nebo napiš text. Cockpit ho pošle Adamovi přímo; starý watcher běží jen jako záloha."
+		          : "Nahraj pokyn, nebo napiš text. Cockpit ho pošle Adamovi přímo.";
 		      } else {
-		        voiceCommandStatus.textContent = "Pokyn se po přepisu automaticky uloží pro Codex. Adam reaguje jen při spuštěném watcheru.";
+		        voiceCommandStatus.textContent = "Nahraj pokyn, nebo napiš text. Cockpit ho pošle Adamovi přímo.";
 		      }
 		    }
 
@@ -13100,10 +13109,10 @@ COCKPIT_HTML = """<!doctype html>
 
 		    async function startVoiceModeWatcher() {
 		      voiceModeStartBtn.disabled = true;
-		      voiceCommandStatus.textContent = "Spouštím Adam Voice Mode watcher...";
+		      voiceCommandStatus.textContent = "Spouštím záložní Adam Voice Mode watcher...";
 		      try {
 		        const data = await postJson("/api/voice-mode/start", {});
-		        voiceCommandStatus.textContent = data.message || "Adam Voice Mode watcher spuštěn.";
+		        voiceCommandStatus.textContent = data.message || "Záložní Adam Voice Mode watcher spuštěn.";
 		        if (data.ok) {
 		          voiceModeEnabled = true;
 		          localStorage.setItem("samanthaVoiceModeEnabled", "true");
@@ -13119,10 +13128,10 @@ COCKPIT_HTML = """<!doctype html>
 
 		    async function stopVoiceModeWatcher() {
 		      voiceModeStopBtn.disabled = true;
-		      voiceCommandStatus.textContent = "Zastavuji Adam Voice Mode watcher...";
+		      voiceCommandStatus.textContent = "Zastavuji záložní Adam Voice Mode watcher...";
 		      try {
 		        const data = await postJson("/api/voice-mode/stop", {});
-		        voiceCommandStatus.textContent = data.message || "Adam Voice Mode watcher zastaven.";
+		        voiceCommandStatus.textContent = data.message || "Záložní Adam Voice Mode watcher zastaven.";
 		        await refresh({silent: true, includeSecondary: false});
 		      } catch (err) {
 		        recordFrontendError(err);
@@ -13134,7 +13143,7 @@ COCKPIT_HTML = """<!doctype html>
 
 	    async function startVoiceRecording() {
 	      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
-	        voiceCommandStatus.textContent = "Tento prohlížeč nepodporuje přímé nahrávání. Použij diktování do pole Přepis a tlačítko Odeslat přepis Adamovi.";
+	        voiceCommandStatus.textContent = "Tento prohlížeč nepodporuje přímé nahrávání. Použij diktování do pole Textový pokyn a tlačítko Odeslat Adamovi.";
 	        return;
 	      }
 	      voiceRecordBtn.disabled = true;
@@ -13161,6 +13170,7 @@ COCKPIT_HTML = """<!doctype html>
 	        voiceRecordingStartedAt = Date.now();
 	        voiceRecordBtn.classList.add("recording");
 	        voiceStopBtn.disabled = false;
+	        voiceStopBtn.classList.remove("hidden");
 	        voiceCommandStatus.textContent = "Nahrávám hlasový pokyn. Limit je 30 sekund.";
 	        voiceStopTimer = window.setTimeout(stopVoiceRecording, 30000);
 	      } catch (err) {
@@ -13214,8 +13224,7 @@ COCKPIT_HTML = """<!doctype html>
 	          const openaiMs = data.timing && data.timing.openai_ms ? data.timing.openai_ms : 0;
 	          const timing = `celkem ${Math.round(totalMs / 1000)} s, server ${Math.round(serverMs / 1000)} s, OpenAI ${Math.round(openaiMs / 1000)} s, audio ${data.audio_kb || audioKb} kB`;
 	          const savedHint = data.latest_voice_command_path ? ` Uloženo: ${data.latest_voice_command_path}.` : "";
-		          const modeHint = voiceModeEnabled ? " Hlasový mód: čekám na Adamovo převzetí nebo další nahrávku." : "";
-		          voiceCommandStatus.textContent = `${data.message || "Hlasový pokyn byl přepsán a uložen."}${savedHint}${modeHint} (${timing})`;
+		          voiceCommandStatus.textContent = `${data.message || "Hlasový pokyn byl přepsán a odeslán Adamovi."}${savedHint} (${timing})`;
 	        } else {
 	          voiceCommandStatus.textContent = data.message || "Přepis hlasu selhal.";
 	        }
@@ -13228,18 +13237,17 @@ COCKPIT_HTML = """<!doctype html>
 	    async function submitVoiceTranscript() {
 	      const text = voiceTranscript.value.trim();
 	      if (!text) {
-	        voiceCommandStatus.textContent = "Nejdřív napiš nebo nadiktuj text do pole Přepis.";
+	        voiceCommandStatus.textContent = "Nejdřív napiš nebo nadiktuj text do pole Textový pokyn.";
 	        voiceTranscript.focus();
 	        return;
 	      }
 	      voiceTranscriptSendBtn.disabled = true;
-	      voiceCommandStatus.textContent = "Ukládám přepis pro Adama...";
+	      voiceCommandStatus.textContent = "Odesílám text Adamovi...";
 	      try {
 	        const data = await postJson("/api/speech/voice-text", {text});
 	        if (data.ok) {
 	          const savedHint = data.latest_voice_command_path ? ` Uloženo: ${data.latest_voice_command_path}.` : "";
-	          const modeHint = voiceModeEnabled ? " Hlasový mód: čekám na Adamovo převzetí." : "";
-	          voiceCommandStatus.textContent = `${data.message || "Textový hlasový pokyn byl uložen."}${savedHint}${modeHint}`;
+	          voiceCommandStatus.textContent = `${data.message || "Textový pokyn byl odeslán Adamovi."}${savedHint}`;
 	          voiceTranscript.value = "";
 	          await refresh({silent: true, includeSecondary: false});
 	        } else {
