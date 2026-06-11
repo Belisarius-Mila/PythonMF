@@ -9,6 +9,10 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `samantha_core.md` - zakladni kontext: kdo je Mila, co je Samantha Agent, aktualni stav prostredi, kanonicky stav Samantha Agent/RAG a dlouhodoby cil.
 - `contacts.md` - prakticke kontakty, ktere Mila vyslovne povolil ulozit do pameti.
 
+## Reports
+
+- `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_11.txt` - [PRIPOMENOUT] strukturovany audit podle QN #40 a QN #13: projekty, tooly a vrstvy serazene podle priorit 1-3, odhad rozpracovanosti v %, dalsi kroky a navrh dnesniho itinerare.
+
 ## Projects
 
 - `projects/lekarna_domaci_leky.md` - projekt Lekarna: evidence domacich leku v `data/lekarna/`, vyhledavani podle potizi, audit lekarnicky a opakovatelny foto import workflow pres manifest.
@@ -21,7 +25,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `projects/vocabularyfr_web_trainer.md` - VocabularyFR web trainer pro Janu: webový MVP prototyp z desktopové Tkinter aplikace s CSV editací, audio cache, obrázky a auto smyčkou; checkpoint prototypu je commit `da93eba`.
 - `projects/fraška_dante_esa_concept.md` - koncept eseje o frašce, dantovské ose, egu, smíření a nově definovaných pojmech.
 - `projects/pohadkova_knizka_gpt_canva.md` - domácí dětská knížka z GPT pohádek, Canva sazba, stylová bible a workflow pro ilustrace.
-- `projects/vedecke_clanky.md` - knihovna průlomových vědeckých článků v `data/vedecke_clanky/`; od 2026-06-10 také Cockpit `Knihovna` a soukromý fulltextový archiv webových článků v `data/private/article_archive/` pro recepty, vědu a ostatní praktické texty.
+- `projects/vedecke_clanky.md` - širší znalostní databáze / knihovna článků: původně knihovna průlomových vědeckých článků v `data/vedecke_clanky/`, od 2026-06-10 Cockpit `Knihovna` a soukromý fulltextový archiv webových článků v `data/private/article_archive/`; podle korekce 2026-06-11 patří dohromady s Knowledge inboxem jako jeden směr osobní znalostní databáze.
 - `projects/matysek_english_game_concept.md` - koncept anglické hry pro pětiletého Matýska bez čtení, se scénami, hlasem a příběhem.
 - `projects/mmtx_story_hotspot_app.md` - nový směr MMTX: příběhová Pygame hotspot aplikace s houbami, barvami a dynamickým číslováním.
 - `projects/multilo_stabilization_cleanup.md` - stabilizace MultiLO návratu do kokpitu, cleanup screenů, pending after callbacky a `tk.Entry` v psacích režimech.
@@ -60,6 +64,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `handoffs/cockpit_robustness_smoke_backup_bridge_2026_06_09.md` - Cockpit robustnost v uspornem rezimu: pridany read-only `cockpit_smoke_check.py`, strukturovany `backup_status` v `/api/status` a read-only `adam_bridge_readiness_report.py`; lokalni i Tailscale Cockpit po restartu prosly smoke checkem.
 - `handoffs/system_quick_check_git_safety_2026_06_09.md` - mala infrastrukturalni robustnost: pridany `git_safety_check.py` pro staged private/autosave/env ochranu a `system_quick_check.py` pro read-only souhrn git/backup/Cockpit/Adam bridge/autosave; testy prosly.
 - `handoffs/article_archive_cockpit_library_2026_06_10.md` - Cockpit knihovna článků: URL vstup, kategorie Recepty/Vědecké články/Ostatní, soukromý TXT/HTML archiv mimo git, fulltextové hledání, čtení a HTTPS fallback přes systémový `curl` při Python certifikační chybě.
+- `handoffs/knowledge_database_text_input_and_system_audit_2026_06_11.md` - [PRIPOMENOUT] dnešní checkpoint ke znalostní databázi: systémový audit QN #40/#13, sloučení Knihovna článků + Knowledge inbox, Cockpit vstup `Uložit text` pro recepty/ChatGPT texty bez URL a CLI fallback `scripts/archive_text_entry.py`.
 - `handoffs/cockpit_email_intake_cache_fix_2026_06_08.md` - [PRIPOMENOUT] Cockpit e-mail intake cache fix: T-Mobile dokumentovy e-mail byl spravne archivovan a PDF importovane, ale hlavni Cockpit drzel stary e-mail kandidat v klientskem cache; oprava posila `known_ids`, backend vraci `suppressed_known_ids`, frontend odstrani jen rozhodnute/zpracovane kandidaty; `tests.test_cockpit` prosly a lokalni i Tailscale Cockpit byly restartovany.
 - `handoffs/cockpit_iphone_tailscale_shortcut_2026_06_05.md` - Cockpit je dostupny z iPhonu pres Tailscale adresu Macu, launchd sluzba `com.miloslavfalta.samantha.cockpit.tailscale` bezi s `RunAtLoad`/`KeepAlive`, verejny instalator je `scripts/install_cockpit_tailscale_launchd.sh` a podepsana iPhone zkratka je ulozena mimo git v iCloud Drive.
 - `handoffs/cockpit_voice_input_auto_inbox_2026_06_05.md` - Cockpit hlasovy vstup na Macu: rychly prepis pres `/api/speech/transcribe` se po nahrani automaticky uklada do private inboxu `data/private/voice_inbox/latest_voice_command.md` pro pozdejsi prevzeti Codexem/Samanthou; nic se samo nespousti.

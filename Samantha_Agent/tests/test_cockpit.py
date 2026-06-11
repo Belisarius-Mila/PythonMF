@@ -4,7 +4,7 @@ import json
 import subprocess
 import tempfile
 import unittest
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -19,6 +19,7 @@ from app.cockpit import (
     cockpit_status,
     create_document_due_reminder_action,
     document_reference,
+    library_archive_text_action,
     library_archive_url_action,
     cockpit_edge_tts_action,
     cockpit_voice_approval_action,
@@ -95,6 +96,31 @@ class CockpitTests(unittest.TestCase):
             url="https://example.test/clanek",
             category="recipes",
             tags=["kolac", "rychle"],
+        )
+
+    def test_library_archive_text_action_passes_manual_text_metadata(self) -> None:
+        with patch("app.cockpit.archive_text_entry") as archive_mock:
+            archive_mock.return_value = {"ok": True, "item": {"id": "text-1"}}
+
+            result = library_archive_text_action(
+                {
+                    "title": "Recept z chatu",
+                    "text": "Mouka a med.",
+                    "category": "recipes",
+                    "tags": "chatgpt; recept",
+                    "source_label": "ChatGPT historický chat",
+                    "source_note": "Bez původní URL.",
+                }
+            )
+
+        self.assertTrue(result["ok"])
+        archive_mock.assert_called_once_with(
+            title="Recept z chatu",
+            text="Mouka a med.",
+            category="recipes",
+            tags=["chatgpt", "recept"],
+            source_label="ChatGPT historický chat",
+            source_note="Bez původní URL.",
         )
 
     def test_document_work_status_groups_downloads_and_review_queue(self) -> None:
@@ -2313,12 +2339,13 @@ Dalsi krok:
     def test_mark_reminder_done_action_changes_selected_reminder_only(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             path = Path(temp_dir) / "reminders.json"
+            tomorrow = (date.today() + timedelta(days=1)).isoformat()
             path.write_text(
                 json.dumps(
                     {
                         "reminders": [
-                            self.reminder("mark-id", "Označit", "2026-06-10"),
-                            self.reminder("other-id", "Nechat", "2026-06-11"),
+                            self.reminder("mark-id", "Označit", date.today().isoformat()),
+                            self.reminder("other-id", "Nechat", tomorrow),
                         ]
                     }
                 ),

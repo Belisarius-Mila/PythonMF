@@ -34,6 +34,9 @@ class ArticleArchiveItem:
     category: str
     category_label: str
     archived_at: str
+    source_type: str
+    source_label: str
+    source_note: str
     source_url: str
     canonical_url: str
     text_file: str
@@ -49,6 +52,9 @@ class ArticleArchiveItem:
             "category": self.category,
             "category_label": self.category_label,
             "archived_at": self.archived_at,
+            "source_type": self.source_type,
+            "source_label": self.source_label,
+            "source_note": self.source_note,
             "source_url": self.source_url,
             "canonical_url": self.canonical_url,
             "text_chars": self.text_chars,
@@ -193,6 +199,39 @@ def archive_url(
     return {
         "ok": True,
         "message": "Článek uložen do soukromé knihovny.",
+        "item": article_item_from_raw(metadata).to_summary(),
+    }
+
+
+def archive_text_entry(
+    *,
+    title: str,
+    text: str,
+    category: str = "other",
+    tags: list[str] | None = None,
+    source_label: str = "Vložený text",
+    source_note: str = "",
+    archive_root: Path = DEFAULT_ARCHIVE_ROOT,
+) -> dict[str, Any]:
+    clean_title = compact_title(str(title or ""))
+    clean_text = normalize_manual_text(text)
+    if not clean_text:
+        raise ValueError("Vlož text, který mám uložit.")
+    if clean_title == "Bez názvu":
+        clean_title = first_text_line(clean_text) or "Vložený text"
+    metadata = write_text_archive(
+        title=clean_title,
+        text=clean_text,
+        archive_root=archive_root,
+        now=datetime.now(timezone.utc).replace(microsecond=0),
+        category=category,
+        tags=tags or [],
+        source_label=source_label,
+        source_note=source_note,
+    )
+    return {
+        "ok": True,
+        "message": "Text uložen do znalostní databáze.",
         "item": article_item_from_raw(metadata).to_summary(),
     }
 
@@ -373,6 +412,12 @@ def article_id(title: str, canonical_url: str, now: datetime) -> str:
     return f"{now.date().isoformat()}_{slugify(title)}_{digest}"
 
 
+def text_entry_id(title: str, text: str, now: datetime) -> str:
+    digest_source = f"{title}\n{text}\n{now.isoformat()}"
+    digest = hashlib.sha256(digest_source.encode("utf-8")).hexdigest()[:8]
+    return f"{now.date().isoformat()}_{slugify(title)}_{digest}"
+
+
 def write_article_archive(
     *,
     source_url: str,
@@ -403,6 +448,45 @@ def write_article_archive(
         "text_file": str(text_path.relative_to(archive_root)),
         "html_file": str(html_path.relative_to(archive_root)),
         "text_chars": str(len(article.text)),
+    }
+    metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    update_registry(archive_root / "registry.jsonl", metadata)
+    return metadata
+
+
+def write_text_archive(
+    *,
+    title: str,
+    text: str,
+    archive_root: Path,
+    now: datetime,
+    category: str,
+    tags: list[str],
+    source_label: str,
+    source_note: str,
+) -> dict[str, Any]:
+    clean_text = normalize_manual_text(text)
+    item_id = text_entry_id(title, clean_text, now)
+    item_dir = archive_root / "articles" / item_id
+    item_dir.mkdir(parents=True, exist_ok=True)
+    text_path = item_dir / "article.txt"
+    metadata_path = item_dir / "metadata.json"
+    text_path.write_text(clean_text + "\n", encoding="utf-8")
+    metadata: dict[str, Any] = {
+        "id": item_id,
+        "title": title,
+        "one_line_title": compact_title(title),
+        "category": normalize_category(category),
+        "tags": [str(tag).strip() for tag in tags if str(tag).strip()],
+        "source_type": "manual_text",
+        "source_label": str(source_label or "Vložený text").strip()[:160] or "Vložený text",
+        "source_note": str(source_note or "").strip()[:1000],
+        "source_url": "",
+        "canonical_url": "",
+        "archived_at": now.isoformat(),
+        "text_file": str(text_path.relative_to(archive_root)),
+        "html_file": "",
+        "text_chars": str(len(clean_text)),
     }
     metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     update_registry(archive_root / "registry.jsonl", metadata)
@@ -462,6 +546,12 @@ def article_item_from_raw(raw: dict[str, Any]) -> ArticleArchiveItem:
         tags_tuple = ()
     title = str(raw.get("title", "")).strip()
     one_line_title = str(raw.get("one_line_title", "")).strip() or compact_title(title)
+    source_url = str(raw.get("source_url", "")).strip()
+    canonical_url = str(raw.get("canonical_url", "")).strip()
+    source_type = str(raw.get("source_type", "")).strip() or ("url" if source_url or canonical_url else "manual_text")
+    source_label = str(raw.get("source_label", "")).strip()
+    if not source_label:
+        source_label = "URL článek" if source_type == "url" else "Vložený text"
     try:
         text_chars = int(raw.get("text_chars", 0) or 0)
     except (TypeError, ValueError):
@@ -473,8 +563,11 @@ def article_item_from_raw(raw: dict[str, Any]) -> ArticleArchiveItem:
         category=category,
         category_label=CATEGORY_LABELS[category],
         archived_at=str(raw.get("archived_at", "")).strip(),
-        source_url=str(raw.get("source_url", "")).strip(),
-        canonical_url=str(raw.get("canonical_url", "")).strip(),
+        source_type=source_type,
+        source_label=source_label,
+        source_note=str(raw.get("source_note", "")).strip(),
+        source_url=source_url,
+        canonical_url=canonical_url,
         text_file=str(raw.get("text_file", "")).strip(),
         html_file=str(raw.get("html_file", "")).strip(),
         text_chars=text_chars,
@@ -485,6 +578,25 @@ def article_item_from_raw(raw: dict[str, Any]) -> ArticleArchiveItem:
 def compact_title(title: str) -> str:
     head = title.split("|", 1)[0].strip()
     return head or title.strip() or "Bez názvu"
+
+
+def normalize_manual_text(text: str) -> str:
+    lines = []
+    for line in str(text or "").replace("\r\n", "\n").replace("\r", "\n").splitlines():
+        lines.append(line.rstrip())
+    while lines and not lines[0].strip():
+        lines.pop(0)
+    while lines and not lines[-1].strip():
+        lines.pop()
+    return "\n".join(lines).strip()
+
+
+def first_text_line(text: str) -> str:
+    for line in text.splitlines():
+        clean = line.strip()
+        if clean:
+            return compact_title(clean[:120])
+    return ""
 
 
 def article_sort_key(item: ArticleArchiveItem) -> tuple[str, str]:

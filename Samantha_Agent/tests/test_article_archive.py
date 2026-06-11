@@ -9,7 +9,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from app.article_archive import archive_url, fetch_url, get_article, list_articles, search_articles
+from app.article_archive import archive_text_entry, archive_url, fetch_url, get_article, list_articles, search_articles
 
 
 class ArticleArchiveTests(unittest.TestCase):
@@ -74,6 +74,33 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertEqual(result["item"]["category"], "science")
         self.assertEqual(listed["count"], 1)
         self.assertEqual(listed["items"][0]["canonical_url"], "https://example.test/clanek")
+
+    def test_archive_text_entry_saves_searchable_item_without_url(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            result = archive_text_entry(
+                title="Samanthin perník",
+                text="Suroviny:\nMouka, kakao a med.\nPostup:\nPeč pomalu.",
+                category="recipes",
+                tags=["recept", "chatgpt"],
+                source_label="ChatGPT historický chat",
+                source_note="Syntetizovaný recept bez původní URL.",
+                archive_root=archive_root,
+            )
+            item_id = result["item"]["id"]
+            listed = list_articles(category="recipes", archive_root=archive_root)
+            searched = search_articles(query="kakao med", category="recipes", archive_root=archive_root)
+            article = get_article(article_id=item_id, archive_root=archive_root)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["item"]["source_type"], "manual_text")
+        self.assertEqual(result["item"]["source_label"], "ChatGPT historický chat")
+        self.assertEqual(result["item"]["source_url"], "")
+        self.assertEqual(listed["count"], 1)
+        self.assertEqual(searched["count"], 1)
+        self.assertTrue(article["ok"])
+        self.assertIn("Mouka, kakao a med", article["text"])
+        self.assertEqual(article["item"]["source_note"], "Syntetizovaný recept bez původní URL.")
 
     def test_fetch_url_falls_back_to_curl_for_certificate_chain_failure(self) -> None:
         cert_error = ssl.SSLCertVerificationError("certificate verify failed")

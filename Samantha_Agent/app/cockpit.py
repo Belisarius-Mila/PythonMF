@@ -32,7 +32,7 @@ from app.adam_service import (
     stop_adam_service,
     submit_adam_text_request,
 )
-from app.article_archive import archive_url, get_article, list_articles, search_articles
+from app.article_archive import archive_text_entry, archive_url, get_article, list_articles, search_articles
 from app.backup.activity_state import backup_activity_status
 from app.documents.consistency_audit import format_document_consistency_audit, run_document_consistency_audit, save_audit_decision
 from app.documents.scandocu import DEFAULT_DOWNLOADS_DIR, scan_downloads_for_pdfs
@@ -332,6 +332,29 @@ def library_archive_url_action(payload: dict[str, Any]) -> dict[str, Any]:
     except OSError as exc:
         return {"ok": False, "message": f"Článek se nepodařilo uložit: {exc}", "error": "archive_failed"}
     return result
+
+
+def library_archive_text_action(payload: dict[str, Any]) -> dict[str, Any]:
+    raw_tags = payload.get("tags", [])
+    if isinstance(raw_tags, str):
+        tags = [part.strip() for part in re.split(r"[,;]", raw_tags) if part.strip()]
+    elif isinstance(raw_tags, list):
+        tags = [str(part).strip() for part in raw_tags if str(part).strip()]
+    else:
+        tags = []
+    try:
+        return archive_text_entry(
+            title=str(payload.get("title", "")),
+            text=str(payload.get("text", "")),
+            category=str(payload.get("category", "other")),
+            tags=tags,
+            source_label=str(payload.get("source_label", "")) or "Vložený text",
+            source_note=str(payload.get("source_note", "")),
+        )
+    except ValueError as exc:
+        return {"ok": False, "message": str(exc), "error": "invalid_text"}
+    except OSError as exc:
+        return {"ok": False, "message": f"Text se nepodařilo uložit: {exc}", "error": "archive_failed"}
 
 
 def recovery_center_status(
@@ -7509,6 +7532,10 @@ class CockpitServer:
                     payload = self.read_json()
                     self.respond_json(library_archive_url_action(payload))
                     return
+                if parsed.path == "/api/library/text":
+                    payload = self.read_json()
+                    self.respond_json(library_archive_text_action(payload))
+                    return
                 if parsed.path == "/api/documents/classification-metadata":
                     payload = self.read_json()
                     raw_metadata = payload.get("metadata")
@@ -9104,6 +9131,8 @@ COCKPIT_HTML = """<!doctype html>
     .library-tab.active { background: var(--blue); color: white; }
     .library-archive { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; padding: 10px; display: grid; gap: 8px; }
     .library-archive-grid { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(140px, 180px) minmax(140px, 220px) auto; gap: 8px; align-items: center; }
+    .library-text-grid { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(140px, 180px) minmax(160px, 220px) auto; gap: 8px; align-items: center; }
+    .library-text-area { min-height: 130px; resize: vertical; }
     .library-controls { display: grid; grid-template-columns: minmax(220px, 1fr) auto; gap: 10px; align-items: center; }
     .library-layout { display: grid; grid-template-columns: minmax(260px, .85fr) minmax(320px, 1.15fr); gap: 12px; align-items: start; }
     .library-list { display: grid; gap: 8px; max-height: 58vh; overflow: auto; padding-right: 4px; }
@@ -9185,7 +9214,7 @@ COCKPIT_HTML = """<!doctype html>
     .consistency-finding-title { font-weight: 750; overflow-wrap: anywhere; }
     .consistency-finding-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
     @media (max-width: 1050px) { .today-dashboard { grid-template-columns: 1fr; } .work-grid { grid-template-columns: 1fr; } }
-	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .search-result-head { grid-template-columns: 1fr; } .search-result-head-actions { justify-content: flex-start; } .recovery-grid { grid-template-columns: 1fr; } .janicka-grid { grid-template-columns: 1fr; } .janicka-action { grid-template-columns: 1fr; } .library-archive-grid { grid-template-columns: 1fr; } .library-controls { grid-template-columns: 1fr; } .library-layout { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
+	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .search-result-head { grid-template-columns: 1fr; } .search-result-head-actions { justify-content: flex-start; } .recovery-grid { grid-template-columns: 1fr; } .janicka-grid { grid-template-columns: 1fr; } .janicka-action { grid-template-columns: 1fr; } .library-archive-grid { grid-template-columns: 1fr; } .library-text-grid { grid-template-columns: 1fr; } .library-controls { grid-template-columns: 1fr; } .library-layout { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -9583,6 +9612,19 @@ COCKPIT_HTML = """<!doctype html>
             <button class="primary" id="libraryArchiveBtn" type="button">Uložit URL</button>
           </div>
           <div id="libraryArchiveStatus" class="status-line">Vlož URL, vyber kategorii a ulož ji do soukromé knihovny.</div>
+          <div class="library-text-grid">
+            <input id="libraryTextTitleInput" type="text" placeholder="Název vloženého textu">
+            <select id="libraryTextCategory">
+              <option value="recipes">Recepty</option>
+              <option value="science">Vědecké články</option>
+              <option value="other" selected>Ostatní</option>
+            </select>
+            <input id="libraryTextSourceInput" type="text" placeholder="Zdroj, volitelné">
+            <button class="primary" id="libraryTextSaveBtn" type="button">Uložit text</button>
+          </div>
+          <input id="libraryTextTagsInput" type="text" placeholder="Tagy pro vložený text, volitelné">
+          <textarea id="libraryTextBodyInput" class="library-text-area" placeholder="Vložit text receptu, poznámky nebo výstřižku"></textarea>
+          <div id="libraryTextStatus" class="status-line">Text bez URL se uloží jako interní znalostní karta.</div>
         </div>
         <div class="library-tabs" aria-label="Kategorie knihovny">
           <button class="secondary library-tab active" type="button" data-library-category="recipes">Recepty</button>
@@ -9800,6 +9842,13 @@ COCKPIT_HTML = """<!doctype html>
     const libraryArchiveTagsInput = document.getElementById("libraryArchiveTagsInput");
     const libraryArchiveBtn = document.getElementById("libraryArchiveBtn");
     const libraryArchiveStatus = document.getElementById("libraryArchiveStatus");
+    const libraryTextTitleInput = document.getElementById("libraryTextTitleInput");
+    const libraryTextCategory = document.getElementById("libraryTextCategory");
+    const libraryTextSourceInput = document.getElementById("libraryTextSourceInput");
+    const libraryTextSaveBtn = document.getElementById("libraryTextSaveBtn");
+    const libraryTextTagsInput = document.getElementById("libraryTextTagsInput");
+    const libraryTextBodyInput = document.getElementById("libraryTextBodyInput");
+    const libraryTextStatus = document.getElementById("libraryTextStatus");
     const librarySearchInput = document.getElementById("librarySearchInput");
     const librarySearchBtn = document.getElementById("librarySearchBtn");
     const libraryList = document.getElementById("libraryList");
@@ -10045,6 +10094,12 @@ COCKPIT_HTML = """<!doctype html>
         "libraryArchiveCategory",
         "libraryArchiveTagsInput",
         "libraryArchiveBtn",
+        "libraryTextTitleInput",
+        "libraryTextCategory",
+        "libraryTextSourceInput",
+        "libraryTextSaveBtn",
+        "libraryTextTagsInput",
+        "libraryTextBodyInput",
         "librarySearchInput",
         "librarySearchBtn",
         "projectsBtn",
@@ -12818,6 +12873,50 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
+    async function saveLibraryText() {
+      const title = libraryTextTitleInput.value.trim();
+      const text = libraryTextBodyInput.value.trim();
+      if (!text) {
+        libraryTextStatus.textContent = "Vlož text, který chceš uložit.";
+        libraryTextBodyInput.focus();
+        return;
+      }
+      const category = libraryTextCategory.value || currentLibraryCategory || "other";
+      const tags = libraryTextTagsInput.value.trim();
+      const sourceLabel = libraryTextSourceInput.value.trim() || "Vložený text";
+      libraryTextSaveBtn.disabled = true;
+      libraryTextStatus.textContent = "Ukládám text do znalostní databáze...";
+      try {
+        const data = await postJson("/api/library/text", {
+          title,
+          text,
+          category,
+          tags,
+          source_label: sourceLabel,
+          source_note: sourceLabel,
+        });
+        if (!data.ok) {
+          libraryTextStatus.textContent = data.message || "Text se nepodařilo uložit.";
+          return;
+        }
+        const item = data.item || {};
+        libraryTextStatus.textContent = data.message || "Text uložen.";
+        libraryTextTitleInput.value = "";
+        libraryTextTagsInput.value = "";
+        libraryTextBodyInput.value = "";
+        currentLibraryCategory = item.category || category;
+        await loadLibraryCategory(currentLibraryCategory);
+        if (item.id) {
+          await loadLibraryItem(item.id);
+        }
+      } catch (err) {
+        recordFrontendError(err);
+        libraryTextStatus.textContent = `Chyba uložení textu: ${err}`;
+      } finally {
+        libraryTextSaveBtn.disabled = false;
+      }
+    }
+
     function renderLibraryItems(items) {
       libraryList.innerHTML = "";
       if (!items.length) {
@@ -12856,6 +12955,7 @@ COCKPIT_HTML = """<!doctype html>
       const date = String(item.archived_at || "").slice(0, 10);
       if (date) parts.push(date);
       if (item.category_label) parts.push(item.category_label);
+      if (item.source_label) parts.push(item.source_label);
       const url = item.canonical_url || item.source_url || "";
       if (url) {
         try {
@@ -14217,6 +14317,7 @@ COCKPIT_HTML = """<!doctype html>
     });
     libraryCloseBtn.addEventListener("click", closeLibraryModal);
     libraryArchiveBtn.addEventListener("click", archiveLibraryUrl);
+    libraryTextSaveBtn.addEventListener("click", saveLibraryText);
     libraryArchiveUrlInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         event.preventDefault();

@@ -1,0 +1,642 @@
+Nazev: Systemovy audit Samanthy - projekty, tooly, vrstvy
+Datum: 2026-06-11
+Zdroj: Quick Note #40, Quick Note #13, ACTIVE_PROJECTS.md, project_capability_map.md, system reporty
+Ucel: Rychly lidsky itinerar pro vyber, na co dnes navazat.
+
+Bezpecnost:
+- Soubor je git-safe shrnuti. Neobsahuje hesla, tokeny, cele e-maily, URL s tokeny ani soukrome dokumenty.
+- Stav v procentech je prakticky odhad rozpracovanosti, ne exaktní metrika.
+- Priorita 1 = dulezite nebo nosne pro dnesni praci.
+- Priorita 2 = smysluplne, ale muze pockat.
+- Priorita 3 = udrzba, archiv, nizka naléhavost.
+
+Ranni provozni poznamka:
+- Git je cisty.
+- Posledni uspesna zaloha je z 2026-06-07 a je starsi nez 3 dny. Pri pripojenem externim disku ma smysl udelat novou recovery zalohu.
+- Quick Note #40 zada celkovy audit projektu a dalsich kroku.
+- Quick Note #13 zada mapu Samanthy pro orientaci v systemu.
+
+======================================================================
+PRIORITA 1 - HLAVNI KANDIDATI NA DNES
+======================================================================
+
+1. Sprava dokumentu / private vault
+Typ: projekt + toolova oblast
+Priorita: 1
+Rozpracovanost: 72 %
+Stav: Silny zaklad existuje. Cockpit umi frontu dokumentu, detail, klasifikaci, vazby, terminy, tisk, archiv, kos a case health. Dalsi rozumne rozhodnuti je, zda pokracovat OCR/re-review nebo sjednocenym intake panelem.
+Proc je to dulezite: Je to hlavni prakticky trezor pro rodinu, faktury, pojisteni, scan dokumenty a pozustalostni smer.
+Dalsich 5 kroku:
+1. Rucne otestovat detail case v Cockpitu na jednom realnem bezpecnem prikladu.
+2. Vypsat seznam dokumentu s nulovym nebo slabym textem a rozhodnout OCR/re-review prioritu.
+3. Navrhnout jednotny intake panel: Downloads, e-mail, mobilni sken, rucni vlozeni.
+4. Udelat read-only report "Dokumenty k revizi dnes" s pocetnim souhrnem a bez obsahu citlivych dokumentu.
+5. Teprve potom doplnit potvrzovany krok pro import/re-review, aby se nic nepresouvalo bez potvrzeni.
+
+2. Adam Voice / Remote Cockpit / textovy bridge
+Typ: projekt + infrastructure layer + toolova oblast
+Priorita: 1
+Rozpracovanost: 78 %
+Stav: Bridge, posledni odpoved v Cockpitu, TTY marker a prepinac cile existuji. Posledni system quick check ale hlasi, ze marker miri na ttys001 a nenasel aktivni Codex relaci; to je kandidat na rychly stabilizacni retest.
+Proc je to dulezite: Je to cesta k realnemu ovladani Samanthy z iPhonu a Cockpitu bez technickeho terminaloveho stresu.
+Dalsich 5 kroku:
+1. Spustit read-only readiness report Adam bridge.
+2. V Cockpitu zkontrolovat "Voice bridge cil" a sladit marker na aktualni aktivni Codex relaci.
+3. Otestovat jednoduchy read-only pokyn z Cockpitu bez rucniho Enteru.
+4. Overit, ze posledni odpoved je videt v Cockpitu a jde prehrat/otevrit.
+5. Sepsat minimalni pravidlo: co smi hlas/text provest hned a co musi jit pres globalni brzdu.
+
+3. Cockpit jako hlavni ovladaci centrum
+Typ: projekt + infrastructure layer
+Priorita: 1
+Rozpracovanost: 82 %
+Stav: Recovery centrum, health panel, diagnostika, akcni fronta, restart, Knihovna, Janička a dokumentove/e-mailove panely existuji. Dalsi hodnota je uklid UI a schopnostni registry, ne dalsi nahodne tlacitko.
+Proc je to dulezite: Cockpit je lidska vrstva nad Samanthou. Kdyz je srozumitelny, Mila a Jana nemusi znat skripty.
+Dalsich 5 kroku:
+1. Projit hlavni obrazovku a vypsat, ktera tlacitka jsou hotova, rozpracovana, rizikova nebo zastarala.
+2. Udelat v Cockpitu jednoduchou mapu "Co dnes delat" podle priority 1.
+3. Doplnit read-only capability registry: co umi dokumenty, e-mail, leky, knihovna, Adam.
+4. Sloucit duplicitni nebo historicke panely do jasnych sekci.
+5. Po kazde zmene spustit smoke check lokalniho i Tailscale Cockpitu.
+
+4. Samantha external backup
+Typ: projekt + infrastructure layer + tool
+Priorita: 1
+Rozpracovanost: 84 %
+Stav: Recovery backup nastroj je funkcni, posledni ostra zaloha a restore drill prosly 2026-06-07. Dnes je problem jen stari zalohy nad 3 dny.
+Proc je to dulezite: Je to zakladni pojistka celeho PythonMF a Samanthy.
+Doporuceni:
+- Pri pripojenem externim disku spustit novou recovery zalohu.
+- Po uspesne zaloze udelat maly restore drill jednoho git-safe souboru do /private/tmp.
+- Bez pripojeneho disku jen ponechat varovani, nic neimprovizovat.
+
+5. Mapa projektu a schopnosti
+Typ: infrastructure layer + report
+Priorita: 1
+Rozpracovanost: 60 %
+Stav: Taxonomie Project / Tool / Infrastructure capability je potvrzena. Dnesni soubor je prvni prakticky vystup QN #13 a QN #40. Zatim neni hotovy opakovatelny report generator.
+Proc je to dulezite: Bez mapy bude Samantha rust rychleji nez lidska orientace.
+Dalsich 5 kroku:
+1. Projit tento soubor s Milou a oznacit, ktere polozky jsou skutecne priorita 1 pro dnesek.
+2. Z vybraneho formatu udelat opakovatelny systemovy report.
+3. Doplnit jednoduchy stavovy model: active, paused, archived, done, blocked.
+4. Napojit report na ACTIVE_PROJECTS.md a project_capability_map.md bez cteni soukromych dat.
+5. Pozdeji pridat export do Markdown/PDF nebo vizualni mapu.
+
+6. Quick Notes jako akcni inbox
+Typ: tool + infrastructure layer
+Priorita: 1
+Rozpracovanost: 45 %
+Stav: Seznam a detail QN funguji read-only. Posledni QN #40 sama ukazuje, ze inbox je uzitecny, ale chybi triage, zpracovani a oznaceni hotovo.
+Proc je to dulezite: Je to nejrychlejsi zpusob, jak Mila zachyti napad mimo terminal.
+Dalsich 5 kroku:
+1. Pridat statusy quick notes: inbox, project_candidate, tool_candidate, reminder_candidate, done.
+2. Pridat read-only report "ukaz akcni quick notes".
+3. Umoznis pripravit navrh z QN bez automatickeho provedeni.
+4. Pridat potvrzene oznaceni QN jako zpracovane.
+5. Napojit vybrane QN na projektovy itinerar bez ukladani plnych soukromych textu do gitu.
+
+7. Pozustalost / rodinny nouzovy balik
+Typ: projekt
+Priorita: 1
+Rozpracovanost: 32 %
+Stav: Git-safe koncept existuje. Soukrome sablony jsou mimo git. Neni hotova realna naplnena struktura ani exportni postup.
+Proc je to dulezite: Je to vysoka rodinna priorita a musi navazovat na dokumentovy vault, ne vzniknout jako druhy paralelni system.
+Dalsich 5 kroku:
+1. Potvrdit minimalni MVP: mapa oblasti, kdo ma co najit, kde lezi sifrovany balik.
+2. Vyplnit jen nekriticka metadata bez cisel smluv, uctu a hesel.
+3. V dokumentovem vaultu pridat tagy nebo metadata pro pozustalostni dokumenty.
+4. Navrhnout sifrovany export mimo git.
+5. Pravni cast a realne citlive instrukce overit s notarem nebo odpovidajicim odbornikem.
+
+8. Janička Cockpit / pouzivani a prevzeti Samanthy
+Typ: projekt + family ops layer
+Priorita: 1
+Rozpracovanost: 62 %
+Stav: Tlacitko Janička a kucharka existuji. Textovy kanal "Zeptat se Adama" fungoval pres terminalovy bridge. Dalsi krok je zjednodusit pouzivani a sladit s pozustalostnim smerem bez zobrazovani citlivych dat.
+Proc je to dulezite: Jana potrebuje praktickou cestu k Samanthě bez technicke znalosti.
+Dalsich 5 kroku:
+1. Otestovat Janička rozcestnik s netechnickym pohledem.
+2. Opravit nebo zjednodusit sekci Rodinne projekty.
+3. Doplnit viditelny stav "Adam prijal dotaz / odpovida / odpoved hotova".
+4. Vytvorit kratky scenar: Jana potrebuje najit dokument, lek, pripominku nebo poslat dotaz.
+5. U pozustalostnich odkazu drzet jen bezpecny rozcestnik, ne citliva data.
+
+9. Samantha Infrastructure
+Typ: infrastructure layer
+Priorita: 1
+Rozpracovanost: 76 %
+Stav: Existuje operating model, reconnect recovery, git checkpoint protocol, global safety brake, quick check a git safety check. Dnesni varovani: Adam bridge marker, autosave stari, stale aktivni pripominky a backup.
+Proc je to dulezite: Udrzuje praci navazatelnou a bezpecnou.
+Dalsich 5 kroku:
+1. Spustit system_quick_check pri startu delsi prace.
+2. Srovnat Adam bridge marker a autosave stav, pokud se dnes pojede pres hlas/Cockpit.
+3. Pred rizikovou praci udelat tematicky git checkpoint.
+4. Snizit sum [PRIPOMENOUT], aby nezastinoval skutecne priority.
+5. Zapsat nove opakovatelne audity jako system reports, ne jako ad hoc chat ritual.
+
+10. iCloud Mail / Email Cases
+Typ: projekt + toolova oblast
+Priorita: 1
+Rozpracovanost: 80 %
+Stav: E-mailova etapa je uspokojive uzavrena. Read-only hlavicky, Work Queue, archiv, PDF import a potvrzene mazani existuji. Dalsi prace nema byt ladeni e-mailu, pokud neprijde konkretni problem.
+Proc je to dulezite: Je napojena na dokumentovy vault, ale nemá dnes ukrast pozornost.
+Doporuceni:
+- Dnes neotvirat jako hlavni smer, pokud neni konkretni e-mailovy pozadavek.
+- Pri realnem e-mailu drzet read-only hlavicky a potvrzene cteni/detail.
+- Volitelne pozdeji zlepsit filtr historicky zpracovanych e-mailu mimo Work Queue.
+
+11. Lekarna
+Typ: projekt + tool
+Priorita: 1
+Rozpracovanost: 86 %
+Stav: Prakticky funkcni. Evidence ma desitky polozek, webovy vystup funguje, fotky jsou vetsinou doplnene. Chybi Silymarin foto a dalsi upravy jen podle realnych vstupu.
+Proc je to dulezite: Prakticky rodinny tool, ale ne akutni vyvoj.
+Doporuceni:
+- Pokud dorazi fotka Silymarinu, pripojit ji pres potvrzeny photo import workflow.
+- Pri zmene dat znovu exportovat a sifrovat webovy bundle.
+- Nerozsirovat dnes, pokud neni realna potreba.
+
+12. Family Memory Films / USA 2019
+Typ: projekt
+Priorita: 1
+Rozpracovanost: 68 %
+Stav: Predstrihovy formular a Adamuv prvni rating existuji. Dalsi krok je lidska korekce ratingu, ne programovani.
+Proc je to dulezite: Rodinna hodnota je vysoka, ale potrebuje lidsky vyber.
+Dalsich 5 kroku:
+1. Otevrit film selection formular.
+2. Zkontrolovat A/B/C rating u rodinne dulezitych momentu.
+3. Povysit emocni momenty i kdyz technicky nejsou nejlepsi.
+4. Exportovat novy CSV z formularu.
+5. Pri navazani brat nejnovejsi Downloads CSV jako zdroj pravdy a originaly nemazat.
+
+13. MMTX / Matysek English
+Typ: projekt
+Priorita: 1
+Rozpracovanost: 64 %
+Stav: ForestSchool a prvni Forest Journey scena jsou rozpracovane. Posledni QN #39 pridava smer animaci pro dalsi scenu.
+Proc je to dulezite: Kreativni vyukovy projekt pro Matyska, ale muze byt casove narocny.
+Dalsich 5 kroku:
+1. Rucne otestovat prvni scenu v produkci.
+2. Potvrdit nebo upravit Sunny hlas.
+3. U dalsi sceny "cesta k jezeru" navrhnout minimalni animace mluveni: blikani/otevirani pusy, jemny pohyb hlavy, aktivni sipka.
+4. Nejdriv prototypovat animaci na jedne postave a jedne vete.
+5. Teprve po potvrzeni rozsit na dalsi zviratka.
+
+14. Automaticke opakujici se ukoly
+Typ: projekt + toolova oblast
+Priorita: 1
+Rozpracovanost: 46 %
+Stav: Jednorazove soví TTS tasky prosly, ale neni vyreseno denni zadavani textu bez rucniho JSON prepisu.
+Proc je to dulezite: Ma snizit pravidelnou rucni rezii.
+Dalsich 5 kroku:
+1. Rozhodnout, zda denni text vzniká z QN, formularu, nebo souboru ve vaultu.
+2. Navrhnout jednoduchy vstupni format pro denni sovu.
+3. Udelat read-only preview pred generovanim MP3.
+4. Pridat potvrzene generovani a sync do docs.
+5. Zkontrolovat, zda GitHub Actions nepotrebuje tajemstvi nebo citlive vstupy.
+
+15. PictNew / Vocabulary image workflow
+Typ: projekt + budoucí workflow
+Priorita: 1
+Rozpracovanost: 58 %
+Stav: Posledni VocabularyIT vlna je hotova. Kanonicky workflow je popsany, ale neni registrovany jako shell workflow.
+Proc je to dulezite: Je to potvrzeny prvni nizkorizikovy kandidat na workflow registraci.
+Dalsich 5 kroku:
+1. Zacit read-only auditem bez generovani obrazku.
+2. Vyrobit request/dry-run vystup.
+3. Pridat workflow kartu pro prepare/dry-run.
+4. Placené generovani drzet oddelene a jen po potvrzeni.
+5. Mapping apply delat az po review a samostatnem potvrzeni.
+
+======================================================================
+PRIORITA 2 - DOBRE NAVAZUJICI SMERY
+======================================================================
+
+16. Znalostni databaze / Knihovna clanku / Knowledge inbox
+Typ: projekt + infrastructure layer + tool
+Priorita: 2
+Rozpracovanost: 50 %
+Stav: Patri k sobe. Cockpit Knihovna je prvni funkcni MVP vstup do budouci znalostni databaze: umi ulozit URL, kategorii, tagy, TXT/HTML archiv, hledani a cteni. Dne 2026-06-11 pribyl i vstup `Ulozit text` pro recepty, poznamky a ChatGPT vystupy bez URL; uklada se jako `manual_text` se zdrojem a poznamkou. Knowledge inbox je sirsi private vstup pro velke podklady, chat exporty a soubory, ktere se maji nejdriv bezpecne zanalyzovat a az po potvrzeni rozdelit do temat.
+Proc je to dulezite: Cilem neni mit dve oddelene databaze, ale jeden system osobni znalosti s ruznymi vstupy: URL/clanky, velke exporty, rucni poznamky a pozdeji potvrzene tematicke knowledge karty.
+Dalsich 5 kroku:
+1. Otestovat v Cockpitu jeden vlozeny recept bez URL se zdrojem `ChatGPT historicky chat`.
+2. Otestovat Knihovnu clanku na 3 realnych URL: recept, vedecky clanek, ostatni prakticky text.
+3. Udelat jednotnou terminologii: `knowledge intake`, `article archive`, `manual_text`, `topic cards`, `source trace`.
+4. Vybrat jeden maly soubor z knowledge inboxu a udelat jen read-only navrh 5-10 temat.
+5. Teprve potom navrhnout Cockpit pohled, ktery bude ukazovat clanky, vlozene texty i znalostni temata jako jednu oblast, ne oddelene aplikace.
+
+17. iPhone Shortcuts / Mobile Input Layer
+Typ: infrastructure layer
+Priorita: 2
+Rozpracovanost: 55 %
+Stav: Najit auto, Lekarna Jana a Rychla poznamka funguji. Dalsi rozvoj je zmrazen bez vyslovneho navratu.
+Dalsich 5 kroku:
+1. Navazat jen pokud Mila chce rozvijet mobilni vstupy.
+2. Nejdriv udelat Quick Notes status.
+3. Potom mark done pro zpracovane poznamky.
+4. Dalsi mala zkratka muze byt Dokument do trezoru.
+5. Faktura/nakup do archivu az po potvrzeni bezpecnostnich hranic.
+
+18. Nakupni pruzkum a archiv nakupu
+Typ: workflow/tool koncept
+Priorita: 2
+Rozpracovanost: 20 %
+Stav: Koncept existuje, ale neni zalozen soukromy archiv ani prvni realny intake.
+Dalsich 5 kroku:
+1. Pri prvnim realnem nakupu zalozit private strukturu.
+2. Navrhnout order_summary a warranty sablonu.
+3. Research delat vzdy s aktualnim internetem a odkazy.
+4. Po objednani ulozit fakturu/potvrzeni jen mimo git.
+5. Pozdeji napojit na document vault a reminders.
+
+19. Neuberk interier design / Kacenka
+Typ: projekt
+Priorita: 2
+Rozpracovanost: 48 %
+Stav: Soukrome podklady a koncept v6 existuji. Dalsi krok je lidske porovnani geometrie s fotkami.
+Dalsich 5 kroku:
+1. Otevrit posledni kandidat v6.
+2. Porovnat snizeny strop, tram, komin a gauc s realnymi fotkami.
+3. Potvrdit nebo opravit geometrii.
+4. Udelat pudorysovy check pruchodu a dveri.
+5. Teprve potom resit vizualni styl a nabytek.
+
+20. MultiLO
+Typ: projekt
+Priorita: 2
+Rozpracovanost: 62 %
+Stav: Stabilizace probehla, ceka rucni retest.
+Dalsich 5 kroku:
+1. Spustit rucni retest navratu do kokpitu.
+2. Otestovat psaci rezimy s tk.Entry.
+3. Zkontrolovat pending after callbacky.
+4. Spustit existujici testy.
+5. Dalsi zmeny delat az podle nalezu.
+
+21. VocabularyEN web cards
+Typ: projekt / workflow kandidat
+Priorita: 2
+Rozpracovanost: 42 %
+Stav: V mapě schopností je jako druhy nizkorizikovy workflow kandidat, ale v ACTIVE_PROJECTS neni samostatne rozpracovany.
+Dalsich 5 kroku:
+1. Dohledat aktualni stav VocabularyEN.
+2. Spustit read-only audit CSV a docs vystupu.
+3. Navrhnout sync workflow do docs.
+4. Pri UI zmene testovat pres lokalni HTTP server.
+5. Teprve po stabilnim prikazu zapsat workflow registry kartu.
+
+22. TTS edge audio tools
+Typ: toolova oblast
+Priorita: 2
+Rozpracovanost: 74 %
+Stav: Generate TTS a GUI existuji, používá se i pro Adam voice. Jako samostatny tool je funkcni, dalsi prace je hlavne ergonomie a registrace workflow.
+Dalsich 5 kroku:
+1. Rozhodnout, zda chceme davkovy TTS workflow registrovat.
+2. Oddelit family/story/MMTX/Adam pouziti podle vystupnich slozek.
+3. Udelat preview textu pred generovanim.
+4. Pri vetsich davkach logovat vystupy.
+5. GUI otevirat jen na vyslovny pokyn.
+
+23. Media image resize utility
+Typ: tool
+Priorita: 2
+Rozpracovanost: 92 %
+Stav: Hotovy sdileny tool. Dalsi prace jen podle pouziti.
+Doporuceni:
+- Nechat jako hotovy.
+- Pri novem projektu vzdy nejdriv preview.
+- Pro slovniky zacit cilovou velikosti 250 kB, pokud Mila neurci jinak.
+
+24. Reminders / platebni SMS
+Typ: toolova oblast
+Priorita: 2
+Rozpracovanost: 76 %
+Stav: Workflow je hotovy, ceka dalsi realne pouziti.
+Doporuceni:
+- Pri dalsi platebni SMS overit read-only splatnost.
+- Plne URL ani tokeny nevypisovat.
+- Ulozeni pripominky jen po potvrzeni.
+
+25. Webova aplikace Lekarna
+Typ: vystup / archived projekt
+Priorita: 2
+Rozpracovanost: 95 %
+Stav: Hotovo, udrzba. Neni dnesni hlavni vyvoj.
+Doporuceni:
+- Aktivovat jen pri zmene dat Lekarny.
+- Commitovat jen encrypted bundle a bez soukromych dat.
+
+26. VocabularyFR Web Trainer
+Typ: archived projekt
+Priorita: 2
+Rozpracovanost: 90 %
+Stav: Archivovany prototyp a Janina obrazkova oprava jsou hotove.
+Doporuceni:
+- Neukazovat mezi aktivnimi projekty.
+- Pri navratu spustit audit mappingu a iCloud sync.
+
+27. FamilyVideoOrganizer / Tomik video iMovie
+Typ: projekt
+Priorita: 2
+Rozpracovanost: 72 %
+Stav: Balicek pro dceru je pripraven a podle Mily poslany. Ceka se na export JSON.
+Doporuceni:
+- Nepokracovat bez dcerina exportu.
+- Po prijeti udelat read-only kontrolu.
+- Import do vyberu az po potvrzeni.
+
+======================================================================
+PRIORITA 3 - UDRZBA, ARCHIV, NIZKA NALEHAVOST
+======================================================================
+
+28. Tax 2025
+Typ: projekt
+Priorita: 3
+Rozpracovanost: 55 %
+Stav: Existuje checklist a vypocet, ale jde o citlivou oblast a neni dnes vyzadana.
+Doporuceni:
+- Pred odeslanim overit aktualni hodnoty proti originalnim podkladum.
+- Nezapisovat citlive udaje do gitu ani memory.
+
+29. macOS sit / Tailscale recovery
+Typ: infrastructure layer
+Priorita: 3
+Rozpracovanost: 58 %
+Stav: V registru je archivovane/pending. Resit jen pri aktualnim problemu se siti.
+Doporuceni:
+- Pri potizich pouzit network recovery manual a watchdog.
+- Bez potizi dnes neotevirat.
+
+30. Sportka a mensi repo experimenty
+Typ: projekty / experimenty
+Priorita: 3
+Rozpracovanost: ruzne
+Stav: Jsou uvedene v project capability map jako oblasti bez samostatne memory karty nebo s nizkou prioritou.
+Doporuceni:
+- Nevytahovat do dnesniho itinerare.
+- Memory kartu zakladat jen pri realnem navratu.
+
+31. Pohadkova knizka GPT + Canva
+Typ: kreativni projekt
+Priorita: 3
+Rozpracovanost: 22 %
+Stav: Koncept a ulozene pohadky existuji, ale neni dnesni technicka priorita.
+Doporuceni:
+- Vratit se samostatne, az bude cas na redakci a sazbu.
+- Prvni krok by byla jedna pilotni pohadka.
+
+32. Fraska / Dante esej
+Typ: kreativni textovy projekt
+Priorita: 3
+Rozpracovanost: 20 %
+Stav: Memory koncept existuje.
+Doporuceni:
+- Nechat jako tvurci projekt mimo dnesni technicky itinerar.
+
+33. Test handoffu a historicke cleanupy
+Typ: archiv
+Priorita: 3
+Rozpracovanost: hotovo
+Stav: Jen doklad funkcnosti pravidel.
+Doporuceni:
+- Nechat v archivu.
+
+======================================================================
+TOOLY A SCHOPNOSTI - RYCHLA MAPA
+======================================================================
+
+T1. Memory/RAG tools
+Priorita: 1
+Rozpracovanost: 72 %
+Stav: search_memory a memory_status jsou funkcni, ale mapa systemu ma byt lepsi lidsky vystup.
+Kroky:
+1. Pouzit tento audit jako vstup pro report generator.
+2. Pridat filtr aktivni/archivovane.
+3. Snizit sum starych [PRIPOMENOUT].
+4. Overit live agent volbu source_type.
+5. Embeddings resit az po selhani textoveho vyhledavani.
+
+T2. System reports
+Priorita: 1
+Rozpracovanost: 68 %
+Stav: Existuji health, quantitative, capability, knowledge inbox, downloads, shortcuts a memory status. Chybi system map/report z QN #13/#40.
+Kroky:
+1. Pridat "System map / project itinerary" jako novy report.
+2. Report generovat bez private obsahu.
+3. Vystup tridit podle priority.
+4. Ukazovat procenta a dalsi kroky.
+5. Udrzovat dokumentaci v technical/system_reports.md.
+
+T3. Workflow registry
+Priorita: 1
+Rozpracovanost: 38 %
+Stav: Registrovany jsou hlavne backup workflows. PictNew a VocabularyEN jsou kandidati.
+Kroky:
+1. Vybrat prvni nizkorizikovy workflow.
+2. Zapsat presne argv do app/workflows/commands.py.
+3. Pridat preview.
+4. Pridat testy.
+5. Teprve potom routovat bezny lidsky pokyn na workflow.
+
+T4. Document vault tools
+Priorita: 1
+Rozpracovanost: 78 %
+Stav: Silna sada toolu existuje, riziko je ergonomie a lidske overeni.
+Kroky:
+1. UI retest detailu case.
+2. Read-only audit zero-text dokumentu.
+3. Schvalit OCR/re-review smer.
+4. Sjednotit intake.
+5. Zapsat opakovatelny system report.
+
+T5. Email tools
+Priorita: 2
+Rozpracovanost: 82 %
+Stav: Bohate, ale neni dnesni hlavni bottleneck.
+Doporuceni:
+- Pouzit jen pri konkretni potrebe.
+- Jinak energii presunout do dokumentu.
+
+T6. Quick Notes tools
+Priorita: 1
+Rozpracovanost: 45 %
+Stav: List/detail existuje, zpracovani chybi.
+Kroky:
+1. Stav poznamky.
+2. Detail bezpecne shrnout.
+3. Pripravit navrh akce.
+4. Potvrzene oznacit hotovo.
+5. Napojit na system mapu.
+
+T7. Backup tools
+Priorita: 1
+Rozpracovanost: 84 %
+Stav: Funkcni, dnes vyzaduje jen novou zalohu kvuli stari.
+Doporuceni:
+- Spustit pri dostupnem disku.
+- Restore drill po uspesne zaloze.
+
+T8. Lekarna tools
+Priorita: 2
+Rozpracovanost: 86 %
+Stav: Prakticky funkcni.
+Doporuceni:
+- Nerozsirovat bez realnych novych dat.
+
+T9. Article archive tools
+Priorita: 2
+Rozpracovanost: 70 %
+Stav: Nove, slibne, potrebuje realny provoz.
+Kroky:
+1. Test 3 kategorii.
+2. Hledani.
+3. Cteni.
+4. Deduplikace.
+5. Editace metadat.
+
+T10. TTS/voice tools
+Priorita: 2
+Rozpracovanost: 74 %
+Stav: Pouzitelne. Navazuje na Adam Voice.
+Kroky:
+1. Oddelit scenare pouziti.
+2. Logovat davky.
+3. Preview textu.
+4. Bezpecne vystupni slozky.
+5. Registrace workflow az pri caste potrebe.
+
+======================================================================
+VRSTVY - SYSTEMOVA ARCHITEKTURA
+======================================================================
+
+V1. Human orientation layer
+Priorita: 1
+Rozpracovanost: 35 %
+Stav: Vzniká timto souborem. Chybi automaticky aktualni mapa.
+Dalsi kroky:
+1. Odsouhlasit format.
+2. Udelat system report.
+3. Napojit na Cockpit.
+4. Zobrazovat top 5 dnesnich akci.
+5. Generovat i kratkou verzi.
+
+V2. Memory/RAG layer
+Priorita: 1
+Rozpracovanost: 72 %
+Stav: Funkcni pro dohledani kontextu, ale rucni kurace memory zustava dulezita.
+Dalsi kroky:
+1. Cistit prekryte handoffy.
+2. Sloucit stare pripominky.
+3. Zlepsit aktivni pohled.
+4. Ukladat jen shrnuti private veci.
+5. Udelat report mapy.
+
+V3. Cockpit UI layer
+Priorita: 1
+Rozpracovanost: 82 %
+Stav: Hlavni lidska plocha existuje.
+Dalsi kroky:
+1. UI uklid.
+2. Stav schopnosti.
+3. Dnesni priority.
+4. Read-only registry.
+5. Smoke check.
+
+V4. Safety / confirmation layer
+Priorita: 1
+Rozpracovanost: 70 %
+Stav: Global safety brake a potvrzovaci brany existuji, ale nejsou vsude sjednocene vizualne.
+Dalsi kroky:
+1. Rozlisit read-only, write, destructive, sensitive.
+2. Dodelat Cockpit approval centrum.
+3. Udelat jednotne texty potvrzeni.
+4. Omezit brzdu na skutecne rizikove kroky.
+5. Testovat na dokumentech/e-mailu/voice.
+
+V5. Private vault / sensitive intake layer
+Priorita: 1
+Rozpracovanost: 68 %
+Stav: Silny dokumentovy zaklad, navazujici pozustalost a nakupy jsou rozpracovane.
+Dalsi kroky:
+1. Sjednotit intake.
+2. Metadata/tagy.
+3. Due dates.
+4. Re-review/OCR.
+5. Exporty mimo git.
+
+V6. Mobile input layer
+Priorita: 2
+Rozpracovanost: 55 %
+Stav: Shortcuts a quick notes funguji, ale nejsou jeste akcni inbox.
+Dalsi kroky:
+1. Quick notes status.
+2. Mark done.
+3. Promote candidate.
+4. Document capture.
+5. Purchase capture.
+
+V7. Backup/restore layer
+Priorita: 1
+Rozpracovanost: 84 %
+Stav: Funkcni, potrebuje pravidelnost.
+Dalsi kroky:
+1. Nova zaloha.
+2. Restore drill.
+3. Stav v Cockpitu.
+4. Automaticke pripomenuti.
+5. Jasna recovery karta.
+
+V8. Workflow registry layer
+Priorita: 1
+Rozpracovanost: 38 %
+Stav: Bezpecnostni koncept je dobry, registr je zatim uzky.
+Dalsi kroky:
+1. PictNew read-only audit.
+2. VocabularyEN sync.
+3. Testy.
+4. Dokumentace.
+5. Cockpit nebo Samantha routing.
+
+V9. Family ops layer
+Priorita: 2
+Rozpracovanost: 42 %
+Stav: Jana, Lekarna, dokumenty, pozustalost, rodinne filmy a pripominky existuji jako oblasti, ale nejsou sjednocene jako jedna vrstva.
+Dalsi kroky:
+1. Janička scenare.
+2. Rodinne projekty v Cockpitu.
+3. Lekarna rodinny tok.
+4. Dokumenty a nouzove navody.
+5. Jednoduche netechnicke texty.
+
+======================================================================
+NAVRH DNESNIHO ITINERARE
+======================================================================
+
+Varianta A - nejpraktictejsi:
+1. Spustit/naplanovat backup, pokud je disk dostupny.
+2. Srovnat Adam Voice bridge marker a udelat kratky realny test.
+3. Otestovat dokumentovy case detail a rozhodnout OCR/re-review vs sjednoceny intake.
+4. Z tohoto souboru vybrat top 5 polozek pro dnes.
+5. Pokud zbyde cas, zalozit opakovatelny system report "System map".
+
+Varianta B - nejmensi technicky krok:
+1. Pridat system report pro mapu projektu.
+2. Pridat Quick Notes status / mark done.
+3. Uklidit [PRIPOMENOUT] sum v memory.
+4. Commit/push malou davku.
+5. Dalsi velkou praci otevrit az potom.
+
+Varianta C - rodinna hodnota:
+1. Dokumentovy vault.
+2. Pozustalost MVP.
+3. Janička Cockpit.
+4. Family Memory Films lidsky vyber.
+5. Lekarna jen udrzba.
+
+Moje doporuceni pro dnes:
+1. Backup, pokud je dostupny externi disk.
+2. Adam Voice bridge stabilizace, protoze ovlivni praci z Cockpitu/iPhonu.
+3. Dokumentovy vault detail case + rozhodnuti dalsiho smeru.
+4. Quick Notes akcni inbox jako mala navazujici implementace.
+5. Teprve potom system map report jako trvaly tool/report.

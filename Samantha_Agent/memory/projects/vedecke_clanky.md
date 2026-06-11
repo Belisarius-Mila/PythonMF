@@ -1,8 +1,22 @@
-# Vědecké články
+# Znalostní databáze / Knihovna článků
 
 ## Cíl
 
-Projekt slouží jako lokální knihovna průlomových nebo jinak důležitých vědeckých článků z různých oborů.
+Projekt slouží jako širší osobní znalostní databáze. První hotový vstup je
+Knihovna článků v Cockpitu; původní vědecké články zůstávají jednou kategorií
+uvnitř této oblasti.
+
+Směr potvrzený 2026-06-11:
+
+- `Knihovna článků / web article archive` a `Knowledge inbox / živá znalostní
+  databáze` patří k sobě;
+- Knihovna článků je první funkční MVP vstup pro URL a webové texty;
+- Knowledge inbox je širší bezpečný intake pro velké podklady, chat exporty a
+  soubory, které se mají nejdřív read-only zanalyzovat a až po potvrzení
+  rozdělit do tematických knowledge karet.
+
+Vědecká část slouží jako lokální knihovna průlomových nebo jinak důležitých
+vědeckých článků z různých oborů.
 
 Ukládat se sem mohou:
 
@@ -26,6 +40,12 @@ soukromý fulltextový archiv mimo git:
 
 ```text
 data/private/article_archive/
+```
+
+Velké podklady a exporty pro budoucí znalostní databázi se ukládají mimo git do:
+
+```text
+data/private/knowledge_inbox/
 ```
 
 Základní soubory a složky:
@@ -117,3 +137,23 @@ Projekt byl založen 2026-05-18.
 
 První uložený praktický článek je návod k lepení spárovky z Nářadí Praha. Plný
 text i HTML jsou jen v `data/private/article_archive/` a nepatří do gitu.
+
+2026-06-11 byla doplněna infrastruktura pro ručně vložený text bez URL:
+
+- `app/article_archive.py` umí `archive_text_entry(...)` a ukládá položky se
+  `source_type = manual_text`, `source_label`, `source_note`, kategorií a tagy.
+- Cockpit `Knihovna` má vedle `Uložit URL` také vstup `Uložit text`.
+- Ručně vložený recept nebo výstřižek se ukládá do stejného soukromého archivu
+  a je dohledatelný stejným fulltextovým hledáním jako URL články.
+- CLI fallback je `scripts/archive_text_entry.py`, použitelný pro TXT soubor od
+  historické Samanthy/ChatGPT.
+- Recepty bez URL mají být označené zdrojem typu například `ChatGPT historický
+  chat` a poznámkou, že jde o vložený nebo syntetizovaný text bez původní URL.
+
+Další krok:
+
+1. Až Míla dodá TXT s recepty, nejdřív ho uložit do knowledge inboxu nebo přes
+   nový textový vstup jako testovací položku.
+2. U většího balíku receptů udělat read-only rozbor: počet receptů, navržené
+   názvy, kategorie a tagy.
+3. Až po potvrzení rozdělit balík na jednotlivé receptové karty.
