@@ -9810,6 +9810,7 @@ COCKPIT_HTML = """<!doctype html>
     .voice-card-title { font-size: 13px; font-weight: 700; color: var(--ink); }
     .voice-card-text { color: var(--ink); font-size: 14px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
     .voice-card-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .voice-card-actions button.needs-tap { background: var(--blue); color: white; }
     .voice-card.hidden { display: none; }
     .voice-transcript-row { display: grid; gap: 6px; }
     .voice-transcript-row label { color: #253047; font-size: 12px; font-weight: 750; }
@@ -12948,13 +12949,29 @@ COCKPIT_HTML = """<!doctype html>
 	      }
 	    }
 
-	    async function speakText(text, button, label) {
+	    function isRemoteCockpitClient() {
+	      const host = String(window.location.hostname || "").toLowerCase();
+	      return Boolean(host && !["127.0.0.1", "localhost", "::1"].includes(host));
+	    }
+
+	    function markVoiceResponseNeedsTap(message) {
+	      if (voiceLastResponseSpeakBtn) {
+	        voiceLastResponseSpeakBtn.textContent = isRemoteCockpitClient() ? "Přehrát v iPhonu" : "Přehrát Adamovu odpověď";
+	        voiceLastResponseSpeakBtn.classList.add("needs-tap");
+	        voiceLastResponseSpeakBtn.disabled = false;
+	      }
+	      showMessage(message || "Prohlížeč zablokoval automatické přehrání. Klepni na tlačítko Přehrát v iPhonu.");
+	    }
+
+	    async function speakText(text, button, label, options = {}) {
 	      const cleaned = (text || "").trim();
 	      if (!cleaned) {
 	        showMessage("Nejdřív označ text, který mám přečíst.");
 	        return;
 	      }
+	      const allowSystemFallback = options.allowSystemFallback !== false && !isRemoteCockpitClient();
 	      button.disabled = true;
+	      button.classList.remove("needs-tap");
 	      showMessage(label || "Čtu nahlas...");
 	      try {
 	        const edgeRes = await fetch("/api/speech/edge-tts", {
@@ -12967,11 +12984,20 @@ COCKPIT_HTML = """<!doctype html>
 	          const audio = new Audio(`data:${edgeData.mime_type || "audio/mpeg"};base64,${edgeData.audio_base64}`);
 	          try {
 	            await audio.play();
+	            button.textContent = button === voiceLastResponseSpeakBtn ? "Přehrát Adamovu odpověď" : button.textContent;
 	            showMessage(edgeData.message || "Přečteno českým mužským hlasem.");
 	            return;
 	          } catch (playErr) {
 	            recordFrontendError(playErr);
+	            if (!allowSystemFallback) {
+	              markVoiceResponseNeedsTap("iPhone zablokoval automatické přehrání. Klepni na Přehrát v iPhonu.");
+	              return;
+	            }
 	          }
+	        }
+	        if (!allowSystemFallback) {
+	          markVoiceResponseNeedsTap("Přehrání v prohlížeči se nepodařilo. Klepni na Přehrát v iPhonu.");
+	          return;
 	        }
 	        const res = await fetch("/api/speech/speak", {
 	          method: "POST",
@@ -13153,7 +13179,7 @@ COCKPIT_HTML = """<!doctype html>
 		      }
 		      if (text && options.autoSpeak && responseKey && responseKey !== autoSpokenAdamResponseKey) {
 		        autoSpokenAdamResponseKey = responseKey;
-		        speakText(text, voiceLastResponseSpeakBtn, "Čtu Adamovu odpověď nahlas...");
+		        speakText(text, voiceLastResponseSpeakBtn, "Čtu Adamovu odpověď nahlas...", {allowSystemFallback: false});
 		      }
 		    }
 
