@@ -4475,6 +4475,7 @@ def build_email_archive_due_candidates(
             continue
         subject = safe_text(str(metadata.get("subject", "")))[:180]
         sender = redact_email_addresses(safe_text(str(metadata.get("from", ""))))[:180]
+        sender_name = email_sender_display_name(sender)
         title_source = f"{sender} | {subject}".strip(" |") or str(metadata.get("archive_id") or archive_dir.name)
         email_text = f"{subject}\n{sender}\n{body_text}"
         if not email_archive_text_looks_payment_related(email_text):
@@ -4519,7 +4520,11 @@ def build_email_archive_due_candidates(
                 "reminder_id": reminder_id,
                 "reminder_ref": reminder_reference(reminder_id),
                 "reminder_status": safe_text(str(reminder.get("status", "")))[:40] if reminder is not None else "",
-                "suggested_title": safe_text(f"Zaplatit podle e-mailu: {subject or archive_id}")[:160],
+                "suggested_title": email_archive_due_candidate_title(
+                    subject=subject,
+                    sender_name=sender_name,
+                    archive_id=archive_id,
+                ),
                 "suggested_notes": safe_text(f"Platební kandidát z uloženého e-mailu. Kontext: {context}")[:700],
                 "priority": "high",
                 "source_summary": safe_text(
@@ -4534,6 +4539,25 @@ def build_email_archive_due_candidates(
 def email_archive_text_looks_payment_related(text: str) -> bool:
     folded = text.casefold()
     return any(term in folded for term in EMAIL_ARCHIVE_PAYMENT_TERMS) and bool(EMAIL_ARCHIVE_AMOUNT_PATTERN.search(text))
+
+
+def email_sender_display_name(sender: str) -> str:
+    cleaned = redact_email_addresses(safe_text(sender)).strip()
+    if "<" in cleaned:
+        cleaned = cleaned.split("<", 1)[0].strip().strip('"')
+    return cleaned[:80]
+
+
+def email_archive_due_candidate_title(*, subject: str, sender_name: str, archive_id: str) -> str:
+    subject_text = safe_text(subject).strip()
+    sender_text = safe_text(sender_name).strip()
+    if sender_text and subject_text:
+        return safe_text(f"Zaplatit podle e-mailu: {sender_text} - {subject_text}")[:160]
+    if subject_text:
+        return safe_text(f"Zaplatit podle e-mailu: {subject_text}")[:160]
+    if sender_text:
+        return safe_text(f"Zaplatit podle e-mailu: {sender_text}")[:160]
+    return safe_text(f"Zaplatit podle e-mailu: {archive_id}")[:160]
 
 
 def best_email_archive_due_match(text: str) -> tuple[date, str] | None:

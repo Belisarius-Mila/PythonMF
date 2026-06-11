@@ -924,6 +924,10 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(candidate["date"], "2026-05-31")
         self.assertEqual(candidate["amount_due"], "1 360,00 Kč")
         self.assertIn("ČEZ Prodej", candidate["title"])
+        self.assertEqual(
+            candidate["suggested_title"],
+            "Zaplatit podle e-mailu: ČEZ Prodej, a.s. - Upozornění na dlužnou částku",
+        )
         self.assertNotIn("upominani@example.com", json.dumps(candidate, ensure_ascii=False))
         self.assertTrue(created["ok"])
         self.assertEqual(store["reminders"][0]["source"]["type"], "email_archive")
