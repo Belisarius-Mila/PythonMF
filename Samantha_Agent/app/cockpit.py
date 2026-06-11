@@ -1948,6 +1948,13 @@ def email_processing_decision_lookup_keys(decisions: dict[str, dict[str, Any]]) 
             keys.add(item_id)
         if legacy_id:
             keys.add(legacy_id)
+        stable_key = email_processing_stable_key(
+            str(item.get("provider", "")),
+            str(item.get("folder", "")),
+            str(item.get("uid", "")),
+        )
+        if stable_key:
+            keys.add(stable_key)
         computed_id = email_processing_item_id(
             str(item.get("category", "")),
             str(item.get("provider", "")),
@@ -1977,6 +1984,13 @@ def email_processing_completed_lookup_keys(actions_path: Path = EMAIL_WORK_QUEUE
             item_id = str(raw_item.get("item_id", "")).strip()
             if item_id:
                 keys.add(item_id)
+            stable_key = email_processing_stable_key(
+                str(raw_item.get("provider", "")),
+                str(raw_item.get("folder", "INBOX")),
+                str(raw_item.get("uid", "")),
+            )
+            if stable_key:
+                keys.add(stable_key)
             computed_id = email_processing_item_id(
                 "",
                 str(raw_item.get("provider", "")),
@@ -5132,6 +5146,13 @@ def document_intake_email_scan_status(
         safe_item = {
             "id": safe_text(str(item.get("id", "")))[:180],
             "legacy_id": safe_text(str(item.get("legacy_id", "")))[:180],
+            "source_key": safe_text(
+                email_processing_stable_key(
+                    str(item.get("provider", "")),
+                    str(item.get("folder", "")),
+                    str(item.get("uid", "")),
+                )
+            )[:180],
             "provider": safe_text(str(item.get("provider", "")))[:80],
             "folder": safe_text(str(item.get("folder", "")))[:80],
             "uid": safe_text(str(item.get("uid", "")))[:80],
@@ -10623,7 +10644,8 @@ COCKPIT_HTML = """<!doctype html>
         const keptItems = (lastEmailIntakeMonitor.items || []).filter((item) => {
           const id = item.id || "";
           const legacyId = item.legacy_id || "";
-          return !suppressed.has(id) && !suppressed.has(legacyId);
+          const sourceKey = emailIntakeSourceKey(item);
+          return !suppressed.has(id) && !suppressed.has(legacyId) && !suppressed.has(sourceKey);
         });
         const mergedItems = mergeEmailIntakeItems(keptItems, data.items || []);
         lastEmailIntakeMonitor = {
@@ -10652,8 +10674,20 @@ COCKPIT_HTML = """<!doctype html>
       (lastEmailIntakeMonitor.items || []).forEach((item) => {
         if (item && item.id) ids.push(item.id);
         if (item && item.legacy_id) ids.push(item.legacy_id);
+        const sourceKey = emailIntakeSourceKey(item);
+        if (sourceKey) ids.push(sourceKey);
       });
       return ids;
+    }
+
+    function emailIntakeSourceKey(item) {
+      if (!item) return "";
+      if (item.source_key) return String(item.source_key);
+      const provider = String(item.provider || "").trim().toLowerCase().replace(/\s+/g, " ");
+      const folder = String(item.folder || "INBOX").trim().toLowerCase().replace(/\s+/g, " ");
+      const uid = String(item.uid || "").trim();
+      if (!provider || !uid) return "";
+      return `${provider}|${folder || "inbox"}|${uid}`;
     }
 
     function emailIntakeDateValue(item) {

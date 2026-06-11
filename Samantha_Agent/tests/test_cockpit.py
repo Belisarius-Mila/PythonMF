@@ -3239,6 +3239,63 @@ Dalsi krok:
         self.assertEqual(result["items"], [])
         self.assertEqual(result["suppressed_known_ids"], [completed_id])
 
+    def test_document_intake_email_scan_suppresses_completed_item_by_source_key(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            actions_path = Path(temp_dir) / "email_work_queue_actions.jsonl"
+            source_key = cockpit_module.email_processing_stable_key("Seznam", "INBOX", "155924")
+            completed_id = email_processing_item_id("", "Seznam", "INBOX", "155924", "", "")
+            self.write_jsonl(
+                actions_path,
+                [
+                    {
+                        "action": "process_email_work_queue_batch",
+                        "items": [
+                            {
+                                "item_id": completed_id,
+                                "provider": "Seznam",
+                                "folder": "INBOX",
+                                "uid": "155924",
+                                "status": "saved",
+                            }
+                        ],
+                    }
+                ],
+            )
+
+            result = document_intake_email_scan_status(
+                limit_per_source=10,
+                since="2026-06-11T13:00:00+00:00",
+                days=0,
+                known_ids={source_key},
+                decisions_path=Path(temp_dir) / "email_processing_decisions.json",
+                actions_path=actions_path,
+                icloud_provider_factory=lambda: _FakeEmailProvider([]),
+                seznam_provider_factory=lambda: _FakeEmailProvider(
+                    [
+                        EmailHeader(
+                            internal_id="155924",
+                            date="Thu, 11 Jun 2026 16:09:42 +0200",
+                            sender="ČEZ Prodej <billing@example.com>",
+                            subject="Upozornění na dlužnou částku",
+                            attachments=(
+                                EmailAttachmentMeta(
+                                    filename="upominka.pdf",
+                                    content_type="application/pdf",
+                                    size_bytes=300_000,
+                                    part_id="2",
+                                    content_id="",
+                                    disposition="attachment",
+                                ),
+                            ),
+                        )
+                    ]
+                ),
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["items"], [])
+        self.assertEqual(result["suppressed_known_ids"], [source_key])
+
     def test_email_processing_id_is_stable_for_same_provider_folder_uid(self) -> None:
         first = email_processing_item_id(
             "faktury/e-shopy",
