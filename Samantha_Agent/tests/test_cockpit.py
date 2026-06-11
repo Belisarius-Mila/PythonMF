@@ -728,10 +728,90 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["actionable_count"], 1)
         self.assertEqual(result["already_reminded_count"], 1)
         self.assertEqual(result["past_count"], 1)
+        self.assertEqual(result["duplicate_group_count"], 0)
         self.assertEqual(result["items"][0]["status"], "ready")
         self.assertEqual(result["items"][0]["amount_due"], "1 234 Kč")
         self.assertNotIn("document_id", result["items"][0])
         self.assertNotIn("doc-trashed", json.dumps(result, ensure_ascii=False))
+
+    def test_document_due_candidates_status_flags_document_email_duplicates(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            index = vault / "index"
+            index.mkdir(parents=True)
+            archive_dir = root / "email_archive"
+            email_dir = archive_dir / "email-155808-vyuctovani-sluzeb"
+            (email_dir / "attachments").mkdir(parents=True)
+            reminders_path = root / "reminders.json"
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "tmobile-vyuctovani",
+                        "title": "E-mail UID 155808 příloha Vyuctovani_40580553_2606.pdf",
+                        "domain": "other",
+                        "document_type": "email-attachment-pdf",
+                        "counterparty": "T-Mobile Elektronické vyúčtování <[e-mail redigovan]>",
+                        "related_asset": "",
+                    }
+                ],
+            )
+            self.write_jsonl(
+                index / "due_dates.jsonl",
+                [
+                    {
+                        "document_id": "tmobile-vyuctovani",
+                        "date": "2026-06-20",
+                        "type": "payment_due",
+                        "confidence": "high",
+                        "create_reminder_candidate": True,
+                        "context": "Datum splatnosti 20.6.2026 Počet čísel: 5",
+                    }
+                ],
+            )
+            (email_dir / "metadata.json").write_text(
+                json.dumps(
+                    {
+                        "archive_id": "email-155808-vyuctovani-sluzeb",
+                        "uid": "155808",
+                        "date": "Thu, 11 Jun 2026 12:00:00 +0200",
+                        "from": "T-Mobile Elektronické vyúčtování <billing@example.com>",
+                        "subject": "Vyúčtování služeb od T-Mobile",
+                        "provider": "seznam",
+                        "mailbox": "INBOX",
+                        "archived_at": "2026-06-11T10:00:00+00:00",
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+            (email_dir / "body.txt").write_text(
+                (
+                    "Zaplaťte prosím bankovním převodem. "
+                    "Splatnost do: 20.6.2026. "
+                    "Částka k zaplacení 999,00 Kč."
+                ),
+                encoding="utf-8",
+            )
+            (email_dir / "attachments" / "attachments.json").write_text(
+                json.dumps({"attachments": []}),
+                encoding="utf-8",
+            )
+
+            result = document_due_candidates_status(
+                vault_dir=vault,
+                reminders_path=reminders_path,
+                archive_directory=archive_dir,
+                today=date(2026, 6, 11),
+            )
+
+        self.assertEqual(result["candidate_count"], 2)
+        self.assertEqual(result["duplicate_group_count"], 1)
+        self.assertEqual(result["duplicate_candidate_count"], 2)
+        self.assertTrue(all(item.get("duplicate_group_id") for item in result["items"]))
+        self.assertTrue(all("Pravděpodobná duplicita" in item.get("duplicate_note", "") for item in result["items"]))
+        self.assertNotIn("billing@example.com", json.dumps(result, ensure_ascii=False))
 
     def test_document_due_candidate_uses_existing_reminder_amount_for_resolved_cpp_maxi_variant(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

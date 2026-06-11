@@ -4122,6 +4122,7 @@ def document_due_candidates_status(
         else []
     )
     candidates = document_candidates + email_candidates
+    duplicate_groups = annotate_duplicate_due_candidates(candidates)
     candidates.sort(
         key=lambda item: (
             0 if item["status"] == "ready" else 1 if item["status"] == "already_reminded" else 2,
@@ -4139,6 +4140,8 @@ def document_due_candidates_status(
         "candidate_count": len(candidates),
         "document_candidate_count": len(document_candidates),
         "email_candidate_count": len(email_candidates),
+        "duplicate_group_count": len(duplicate_groups),
+        "duplicate_candidate_count": sum(1 for item in candidates if item.get("duplicate_group_id")),
         "actionable_count": len(actionable),
         "already_reminded_count": len(already),
         "past_count": len(past),
@@ -4147,8 +4150,56 @@ def document_due_candidates_status(
         "message": (
             f"Termíny: {len(actionable)} ke schválení, {len(already)} už hlídáno, "
             f"{len(past)} prošlé bez nové připomínky."
+            f"{' Pravděpodobné duplicity: ' + str(len(duplicate_groups)) + '.' if duplicate_groups else ''}"
         ),
     }
+
+
+def annotate_duplicate_due_candidates(candidates: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
+    grouped: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
+    for item in candidates:
+        key = due_candidate_duplicate_key(item)
+        if key is None:
+            continue
+        grouped.setdefault(key, []).append(item)
+
+    duplicate_groups = [items for items in grouped.values() if len(items) > 1]
+    for items in duplicate_groups:
+        source_labels = sorted({due_candidate_source_label(item) for item in items})
+        group_id = "due-dup-" + hashlib.sha256(
+            "|".join(str(item.get("candidate_ref", "")) for item in items).encode("utf-8")
+        ).hexdigest()[:12]
+        note = (
+            "Pravděpodobná duplicita: stejná protistrana, typ a datum "
+            f"v {len(items)} kandidátech ({', '.join(source_labels)})."
+        )
+        for item in items:
+            item["duplicate_group_id"] = group_id
+            item["duplicate_group_size"] = len(items)
+            item["duplicate_note"] = note
+    return duplicate_groups
+
+
+def due_candidate_duplicate_key(item: dict[str, Any]) -> tuple[str, str, str] | None:
+    due_type = safe_text(str(item.get("type", ""))).casefold()
+    due_date = safe_text(str(item.get("date", ""))).strip()
+    if not due_type or not due_date:
+        return None
+    counterparty = normalize_due_candidate_party(str(item.get("counterparty", "")))
+    if len(counterparty) < 4:
+        return None
+    return due_type, due_date, counterparty
+
+
+def normalize_due_candidate_party(value: str) -> str:
+    text = redact_email_addresses(safe_text(value)).casefold()
+    text = text.replace("[e-mail redigovan]", " ")
+    text = re.sub(r"[^0-9a-zá-ž]+", " ", text, flags=re.IGNORECASE)
+    return " ".join(text.split())[:120]
+
+
+def due_candidate_source_label(item: dict[str, Any]) -> str:
+    return "e-mail" if item.get("source_kind") == "email_archive" else "dokument"
 
 
 def document_case_asset_matches(value: str, case_assets: set[str]) -> bool:
@@ -11655,6 +11706,12 @@ COCKPIT_HTML = """<!doctype html>
         context.textContent = item.context || "";
         row.appendChild(title);
         row.appendChild(meta);
+        if (item.duplicate_note) {
+          const duplicate = document.createElement("div");
+          duplicate.className = "work-meta warning";
+          duplicate.textContent = item.duplicate_note;
+          row.appendChild(duplicate);
+        }
         row.appendChild(context);
         if (item.status === "ready") {
           const actions = document.createElement("div");
