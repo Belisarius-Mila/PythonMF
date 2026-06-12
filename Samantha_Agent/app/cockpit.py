@@ -259,6 +259,7 @@ DOCUMENT_DOMAIN_LABELS: dict[str, str] = {
     "energy": "energie",
     "employment": "práce / zaměstnání",
     "health": "zdraví",
+    "telecom": "telefon / internet",
     "warranty": "záruky",
     "other": "ostatní",
 }

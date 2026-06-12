@@ -842,6 +842,20 @@ class DocumentVaultToolsTests(unittest.TestCase):
         self.assertEqual(metadata["related_asset"], "")
         self.assertNotIn("auto", metadata["tags"])
 
+    def test_tmobile_invoice_metadata_is_telecom_not_car(self) -> None:
+        metadata = propose_metadata(
+            source=Path("Vyuctovani_40580553_2606.pdf"),
+            text=(
+                "T-Mobile Elektronické vyúčtování. Vyúčtování služeb za telefon "
+                "a mobilní služby. Variabilní symbol a splatnost platby."
+            ),
+        )
+
+        self.assertEqual(metadata["document_type"], "invoice")
+        self.assertEqual(metadata["domain"], "telecom")
+        self.assertEqual(metadata["related_asset"], "")
+        self.assertNotIn("auto", metadata["tags"])
+
     def test_lease_contract_metadata_is_home_without_year_tags(self) -> None:
         metadata = propose_metadata(
             source=Path("NajemniSmlouvaDubovaUlice.pdf"),

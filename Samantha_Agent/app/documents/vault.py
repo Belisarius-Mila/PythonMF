@@ -80,6 +80,14 @@ DOMAIN_ALIASES = {
     "cestování": "travel",
     "dovolena": "travel",
     "dovolená": "travel",
+    "telecom": "telecom",
+    "telefon": "telecom",
+    "telefonni-sluzby": "telecom",
+    "telefonní-služby": "telecom",
+    "mobil": "telecom",
+    "mobilni-sluzby": "telecom",
+    "mobilní-služby": "telecom",
+    "telekomunikace": "telecom",
     "other": "other",
     "ostatni": "other",
     "ostatní": "other",
@@ -3435,7 +3443,21 @@ def guess_domain(text: str, document_type: str) -> str:
         return "insurance"
     if any(word in text for word in ("pojist", "rixo", "pojistovna", "pojišťovna")):
         return "insurance"
-    if any(word in text for word in ("fotovolta", "fve", "elektr", "distribuc", "energie")):
+    if any(word in text for word in ("t-mobile", "telefon", "mobilni sluzby", "mobilní služby", "telekomunika")):
+        return "telecom"
+    if any(
+        word in text
+        for word in (
+            "fotovolta",
+            "fve",
+            "elektrina",
+            "elektřina",
+            "elektricke energie",
+            "elektrické energie",
+            "distribuc",
+            "energie",
+        )
+    ):
         return "energy"
     if any(word in text for word in ("kotel", "komin", "komín", "dum", "dům", "home")):
         return "home"
