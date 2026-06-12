@@ -3812,7 +3812,14 @@ Dalsi krok:
 
         self.assertIn("id", item)
         self.assertIn("legacy_id", item)
+        self.assertEqual(item["source_key"], "icloud|inbox|14157")
         self.assertNotEqual(item["id"], item["legacy_id"])
+
+    def test_cockpit_email_intake_refresh_cleans_candidates_by_source_key(self) -> None:
+        self.assertIn("if (!silent) {\n          runEmailIntakeMonitor();\n        }", COCKPIT_HTML)
+        self.assertIn("const sourceKey = emailIntakeSourceKey(item);", COCKPIT_HTML)
+        self.assertIn("if (sourceKey) byId.set(sourceKey, item);", COCKPIT_HTML)
+        self.assertIn("!suppressed.has(sourceKey)", COCKPIT_HTML)
 
     def test_read_email_processing_message_detail_reads_body_and_attachment_metadata(self) -> None:
         provider = _FakeMessageProvider(

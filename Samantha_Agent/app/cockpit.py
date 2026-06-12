@@ -1948,35 +1948,49 @@ def email_processing_item_id(category: str, provider: str, folder: str, uid: str
     return email_processing_legacy_item_id(category, provider, folder, uid, date, subject)
 
 
+def email_processing_item_lookup_keys(item: dict[str, Any]) -> set[str]:
+    keys = {
+        str(item.get("id", "")).strip(),
+        str(item.get("legacy_id", "")).strip(),
+        str(item.get("source_key", "")).strip(),
+    }
+    stable_key = email_processing_stable_key(
+        str(item.get("provider", "")),
+        str(item.get("folder", "")),
+        str(item.get("uid", "")),
+    )
+    if stable_key:
+        keys.add(stable_key)
+    computed_id = email_processing_item_id(
+        str(item.get("category", "")),
+        str(item.get("provider", "")),
+        str(item.get("folder", "")),
+        str(item.get("uid", "")),
+        str(item.get("date", "")),
+        str(item.get("subject", "")),
+    )
+    if computed_id:
+        keys.add(computed_id)
+    legacy_id = email_processing_legacy_item_id(
+        str(item.get("category", "")),
+        str(item.get("provider", "")),
+        str(item.get("folder", "")),
+        str(item.get("uid", "")),
+        str(item.get("date", "")),
+        str(item.get("subject", "")),
+    )
+    if legacy_id:
+        keys.add(legacy_id)
+    return {key for key in keys if key}
+
+
 def email_processing_decision_lookup_keys(decisions: dict[str, dict[str, Any]]) -> set[str]:
     keys = set(decisions)
     for decision in decisions.values():
         item = decision.get("item", {})
         if not isinstance(item, dict):
             continue
-        item_id = str(item.get("id", "")).strip()
-        legacy_id = str(item.get("legacy_id", "")).strip()
-        if item_id:
-            keys.add(item_id)
-        if legacy_id:
-            keys.add(legacy_id)
-        stable_key = email_processing_stable_key(
-            str(item.get("provider", "")),
-            str(item.get("folder", "")),
-            str(item.get("uid", "")),
-        )
-        if stable_key:
-            keys.add(stable_key)
-        computed_id = email_processing_item_id(
-            str(item.get("category", "")),
-            str(item.get("provider", "")),
-            str(item.get("folder", "")),
-            str(item.get("uid", "")),
-            str(item.get("date", "")),
-            str(item.get("subject", "")),
-        )
-        if computed_id:
-            keys.add(computed_id)
+        keys.update(email_processing_item_lookup_keys(item))
     return keys
 
 
@@ -2129,6 +2143,7 @@ def email_header_to_processing_item(header: EmailHeader, source: str) -> dict[st
         header.date,
         header.subject or "",
     )
+    item["source_key"] = email_processing_stable_key(source, folder, str(header.internal_id))
     item["legacy_id"] = email_processing_legacy_item_id(
         category,
         source,
@@ -2381,7 +2396,7 @@ def new_email_headers_overview(
     decided = read_email_processing_decisions(decisions_path)
     decided_keys = email_processing_decision_lookup_keys(decided)
     completed_keys = email_processing_completed_lookup_keys(actions_path)
-    suppressed_known_ids = sorted(known & (decided_keys | completed_keys))
+    suppressed_known_ids = set(known & (decided_keys | completed_keys))
     entries: list[dict[str, Any]] = []
     unavailable: list[str] = []
     providers: list[tuple[str, Callable[[], object], type[Exception], str]] = [
@@ -2413,16 +2428,12 @@ def new_email_headers_overview(
             if cutoff_ts and (not header_ts or header_ts <= cutoff_ts):
                 continue
             item = email_header_to_processing_item(header, source)
-            item_id = str(item.get("id", ""))
-            legacy_id = str(item.get("legacy_id", ""))
-            if (
-                item_id in known
-                or legacy_id in known
-                or item_id in decided_keys
-                or legacy_id in decided_keys
-                or item_id in completed_keys
-                or legacy_id in completed_keys
-            ):
+            item_keys = email_processing_item_lookup_keys(item)
+            blocked_keys = item_keys & (decided_keys | completed_keys)
+            known_item_keys = item_keys & known
+            if blocked_keys and known_item_keys:
+                suppressed_known_ids.update(known_item_keys)
+            if item_keys & known or blocked_keys:
                 continue
             entries.append(item)
 
@@ -2448,7 +2459,7 @@ def new_email_headers_overview(
         "known_count": len(known),
         "skipped_decided_count": len(decided_keys),
         "skipped_completed_count": len(completed_keys),
-        "suppressed_known_ids": suppressed_known_ids,
+        "suppressed_known_ids": sorted(suppressed_known_ids),
         "items": entries,
         "unavailable": unavailable,
     }
@@ -11464,6 +11475,9 @@ COCKPIT_HTML = """<!doctype html>
         if (includeSecondary) {
           refreshSecondaryStatus();
         }
+        if (!silent) {
+          runEmailIntakeMonitor();
+        }
       } catch (err) {
         recordFrontendError(err);
         statusLine.textContent = `Chyba načtení: ${err}`;
@@ -11577,12 +11591,17 @@ COCKPIT_HTML = """<!doctype html>
         if (!item || !item.id) return;
         byId.set(item.id, item);
         if (item.legacy_id) byId.set(item.legacy_id, item);
+        const sourceKey = emailIntakeSourceKey(item);
+        if (sourceKey) byId.set(sourceKey, item);
       });
       (incoming || []).forEach((item) => {
         if (!item || !item.id || byId.has(item.id)) return;
         if (item.legacy_id && byId.has(item.legacy_id)) return;
+        const sourceKey = emailIntakeSourceKey(item);
+        if (sourceKey && byId.has(sourceKey)) return;
         byId.set(item.id, item);
         if (item.legacy_id) byId.set(item.legacy_id, item);
+        if (sourceKey) byId.set(sourceKey, item);
       });
       return Array.from(new Set(byId.values())).sort((a, b) => emailIntakeDateValue(b) - emailIntakeDateValue(a));
     }
@@ -11599,7 +11618,12 @@ COCKPIT_HTML = """<!doctype html>
         });
         const data = await res.json();
         if (!data.ok) throw new Error(data.message || "Nepodařilo se uložit ignorování.");
-        lastEmailIntakeMonitor.items = (lastEmailIntakeMonitor.items || []).filter((candidate) => candidate.id !== itemId);
+        const itemSourceKey = emailIntakeSourceKey(item);
+        lastEmailIntakeMonitor.items = (lastEmailIntakeMonitor.items || []).filter((candidate) => {
+          if (candidate.id === itemId || candidate.legacy_id === itemId) return false;
+          if (itemSourceKey && emailIntakeSourceKey(candidate) === itemSourceKey) return false;
+          return true;
+        });
         lastEmailIntakeMonitor.count = lastEmailIntakeMonitor.items.length;
         lastEmailIntakeMonitor.message = "E-mail skrytý z Cockpitu. V dalších scanech se nebude zobrazovat.";
         renderDocumentIntake(latestDocumentIntakeData || {});
