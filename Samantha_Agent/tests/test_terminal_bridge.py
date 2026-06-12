@@ -190,6 +190,22 @@ class TerminalBridgeTests(unittest.TestCase):
 
         self.assertEqual(discover_codex_ttys(runner=fake_ps_runner), ["ttys001"])
 
+    def test_discover_codex_ttys_ignores_screen_attach_session_name(self) -> None:
+        def fake_ps_runner(args, **kwargs):
+            return subprocess.CompletedProcess(
+                args=args,
+                returncode=0,
+                stdout=(
+                    "100 1 ttys000 zsh -zsh\n"
+                    "101 100 ttys000 node /usr/local/bin/codex -C /repo .\n"
+                    "102 1 ttys003 screen screen -U -r samantha_codex\n"
+                    "103 1 ?? codex codex app-server --analytics-default-enabled\n"
+                ),
+                stderr="",
+            )
+
+        self.assertEqual(discover_codex_ttys(runner=fake_ps_runner), ["ttys000"])
+
     def test_load_marked_codex_tty_reads_private_marker(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             marker = Path(temp_dir) / "current_codex_tty.json"

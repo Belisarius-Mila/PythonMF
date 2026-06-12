@@ -30,6 +30,11 @@ Tyto instrukce plati pro praci ve slozce `Samantha_Agent/`.
   `Mám převzít voice marker? y/n`. Teprve po odpovedi `y` nebo `ano` spust
   `.venv/bin/python scripts/mark_current_codex_tty.py`. Pri `n` nebo `ne`
   marker nemen.
+- Pri praci z iPhonu/SSH nebo kdykoliv hrozi, ze Codex bude cekat na systemove
+  potvrzeni tool callu, pouzij pravidlo
+  `memory/technical/codex_remote_approval_notice.md`: pred zadosti o systemove
+  povoleni zapsat kartu do Cockpitu pres `scripts/codex_approval_notice.py set`
+  a po dokonceni nebo zruseni ji vzdy vycistit pres `clear`.
 - Autosave nouzove obnovy ma bezet pri startu pres `samantha`: kazdych 10 minut uklada TXT/JSONL do `data/session_autosave/`.
 - Soubory v `data/session_autosave/` jsou jen nouzova obnova, nikdy je necommituj.
 

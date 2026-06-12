@@ -38,6 +38,7 @@ from app.cockpit import (
     document_due_candidates_status,
     document_review_report_status,
     document_work_status,
+    discover_codex_process_sessions,
     email_header_to_processing_item,
     email_processing_item_id,
     email_processing_pending_work_items,
@@ -1405,6 +1406,9 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("voiceLastResponseCard", COCKPIT_HTML)
         self.assertIn("voiceLastResponseSpeakBtn", COCKPIT_HTML)
         self.assertIn("Přehrát Adamovu odpověď", COCKPIT_HTML)
+        self.assertIn("codexApprovalCard", COCKPIT_HTML)
+        self.assertIn("Codex čeká na potvrzení", COCKPIT_HTML)
+        self.assertIn("renderCodexApproval", COCKPIT_HTML)
         self.assertIn("voiceApprovalCard", COCKPIT_HTML)
         self.assertIn("voiceApprovalApproveBtn", COCKPIT_HTML)
         self.assertIn("voiceApprovalRejectBtn", COCKPIT_HTML)
@@ -1844,6 +1848,25 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["stale_ttys"], ["ttys003"])
         self.assertEqual(result["killed_pids"], [200])
         self.assertEqual(killed, [(200, signal.SIGTERM)])
+
+    def test_codex_session_discovery_ignores_screen_attach_name(self) -> None:
+        def fake_runner(*args, **kwargs):
+            return subprocess.CompletedProcess(
+                args=args[0],
+                returncode=0,
+                stdout=(
+                    "100 10 ttys000 node node /usr/local/bin/codex -C /repo .\n"
+                    "101 100 ttys000 codex /vendor/bin/codex -C /repo .\n"
+                    "200 20 ttys003 screen screen -U -r samantha_codex\n"
+                    "300 30 ?? codex codex app-server --analytics-default-enabled\n"
+                ),
+                stderr="",
+            )
+
+        sessions = discover_codex_process_sessions(runner=fake_runner)
+
+        self.assertEqual([session["tty"] for session in sessions], ["ttys000"])
+        self.assertEqual(sessions[0]["root_pids"], [100])
 
     def test_git_dirty_line_classification_separates_private_family_and_safe_changes(self) -> None:
         app_item = cockpit_module.classify_git_dirty_line(" M Samantha_Agent/app/cockpit.py")

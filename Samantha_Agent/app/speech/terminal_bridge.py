@@ -102,6 +102,14 @@ def normalize_tty(value: str) -> str:
     return text
 
 
+def is_codex_cli_process(comm: str, args: str) -> bool:
+    folded = f"{comm} {args}".casefold()
+    if "app-server" in folded:
+        return False
+    tokens = [comm, *str(args or "").split()]
+    return any(Path(token).name == "codex" for token in tokens if token)
+
+
 def discover_codex_ttys(
     *,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
@@ -134,8 +142,7 @@ def discover_codex_ttys(
             continue
         tty_by_pid[pid] = normalize_tty(tty)
         parent_by_pid[pid] = ppid
-        folded = f"{comm} {args}".casefold()
-        if "codex" in folded and "app-server" not in folded:
+        if is_codex_cli_process(comm, args):
             codex_pids.add(pid)
 
     result: list[str] = []

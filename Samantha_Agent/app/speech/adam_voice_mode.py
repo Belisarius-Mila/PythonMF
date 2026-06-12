@@ -27,6 +27,7 @@ ADAM_VOICE_MODE_STATUS_PATH = VOICE_COMMAND_INBOX_DIR / "adam_voice_mode_status.
 ADAM_PENDING_COMMAND_PATH = VOICE_COMMAND_INBOX_DIR / "pending_for_adam.json"
 ADAM_VOICE_HISTORY_PATH = VOICE_COMMAND_INBOX_DIR / "adam_voice_history.jsonl"
 ADAM_LAST_RESPONSE_PATH = VOICE_COMMAND_INBOX_DIR / "last_adam_response.json"
+CODEX_APPROVAL_REQUEST_PATH = VOICE_COMMAND_INBOX_DIR / "codex_approval_request.json"
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 DIRECT_RESPONSE_INSTRUCTIONS = """
@@ -380,17 +381,96 @@ def mark_matching_pending_delivered_to_terminal(
     return pending
 
 
+def save_codex_approval_request(
+    *,
+    reason: str,
+    command: str = "",
+    next_step: str = "",
+    path: Path = CODEX_APPROVAL_REQUEST_PATH,
+) -> dict[str, Any]:
+    now = utc_now()
+    payload = {
+        "ok": True,
+        "active": True,
+        "status": "waiting_for_codex_approval",
+        "reason": str(reason or "").strip()[:500],
+        "command": str(command or "").strip()[:500],
+        "next_step": str(next_step or "").strip()[:500],
+        "created_at": now,
+        "updated_at": now,
+        "path": str(path),
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return payload
+
+
+def clear_codex_approval_request(
+    *,
+    note: str = "",
+    path: Path = CODEX_APPROVAL_REQUEST_PATH,
+) -> dict[str, Any]:
+    now = utc_now()
+    previous = load_codex_approval_request(path=path)
+    payload = {
+        "ok": True,
+        "active": False,
+        "status": "cleared",
+        "note": str(note or "").strip()[:500],
+        "cleared_at": now,
+        "updated_at": now,
+        "previous": previous if previous.get("available") else {},
+        "path": str(path),
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return payload
+
+
+def load_codex_approval_request(
+    *,
+    path: Path = CODEX_APPROVAL_REQUEST_PATH,
+) -> dict[str, Any]:
+    if not path.exists():
+        return {
+            "ok": True,
+            "available": False,
+            "active": False,
+            "status": "none",
+            "message": "Codex nehlásí žádné čekání na systémové potvrzení.",
+            "path": str(path),
+        }
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return {
+            "ok": False,
+            "available": False,
+            "active": False,
+            "status": "error",
+            "message": f"Stav Codex approval nejde načíst: {exc}",
+            "path": str(path),
+        }
+    payload.setdefault("ok", True)
+    payload.setdefault("available", True)
+    payload.setdefault("active", payload.get("status") == "waiting_for_codex_approval")
+    payload.setdefault("path", str(path))
+    return payload
+
+
 def load_voice_mode_status(
     *,
     status_path: Path = ADAM_VOICE_MODE_STATUS_PATH,
     pending_path: Path = ADAM_PENDING_COMMAND_PATH,
     history_path: Path = ADAM_VOICE_HISTORY_PATH,
     last_response_path: Path = ADAM_LAST_RESPONSE_PATH,
+    codex_approval_path: Path = CODEX_APPROVAL_REQUEST_PATH,
     stale_after_seconds: float = 15.0,
 ) -> dict[str, Any]:
     pending_for_adam = load_pending_for_adam(path=pending_path)
     voice_history = load_voice_history(path=history_path, limit=3)
     last_adam_response = load_last_adam_response(path=last_response_path)
+    codex_approval = load_codex_approval_request(path=codex_approval_path)
     last_voice_turn = voice_history[-1] if voice_history else None
     if not last_adam_response.get("available") and last_voice_turn:
         history_response = str(last_voice_turn.get("adam_response") or "").strip()
@@ -416,6 +496,7 @@ def load_voice_mode_status(
             "voice_history_count": len(voice_history),
             "last_voice_turn": last_voice_turn,
             "last_adam_response": last_adam_response,
+            "codex_approval": codex_approval,
         }
     try:
         payload = json.loads(status_path.read_text(encoding="utf-8"))
@@ -430,6 +511,7 @@ def load_voice_mode_status(
             "voice_history_count": len(voice_history),
             "last_voice_turn": last_voice_turn,
             "last_adam_response": last_adam_response,
+            "codex_approval": codex_approval,
         }
 
     pid = int(payload.get("pid") or 0)
@@ -452,6 +534,7 @@ def load_voice_mode_status(
     payload["voice_history_count"] = len(voice_history)
     payload["last_voice_turn"] = last_voice_turn
     payload["last_adam_response"] = last_adam_response
+    payload["codex_approval"] = codex_approval
     if not running and payload.get("state") == "listening":
         payload["state"] = "stale"
         payload["message"] = "Adam Voice Mode watcher pravděpodobně neběží nebo se dlouho neozval."

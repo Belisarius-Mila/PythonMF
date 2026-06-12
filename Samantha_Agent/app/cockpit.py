@@ -3299,6 +3299,14 @@ def adam_voice_bridge_status(
 CODEX_SESSION_PS_COMMAND = ["ps", "-axo", "pid=,ppid=,tty=,comm=,args="]
 
 
+def is_codex_cli_process(comm: str, args: str) -> bool:
+    folded = f"{comm} {args}".casefold()
+    if "app-server" in folded:
+        return False
+    tokens = [comm, *str(args or "").split()]
+    return any(Path(token).name == "codex" for token in tokens if token)
+
+
 def discover_codex_process_sessions(
     *,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
@@ -3328,8 +3336,7 @@ def discover_codex_process_sessions(
             ppid = int(ppid_text)
         except ValueError:
             continue
-        folded = f"{comm} {args}".casefold()
-        if "codex" not in folded or "app-server" in folded:
+        if not is_codex_cli_process(comm, args):
             continue
         codex_pids.add(pid)
         rows.append(
@@ -10493,6 +10500,12 @@ COCKPIT_HTML = """<!doctype html>
 		            <button class="secondary" id="voiceLastResponseSpeakBtn">Přehrát Adamovu odpověď</button>
 		          </div>
 		        </div>
+		        <div id="codexApprovalCard" class="voice-card warn hidden">
+		          <div class="voice-card-title">Codex čeká na potvrzení</div>
+		          <div id="codexApprovalReason" class="status-line"></div>
+		          <div id="codexApprovalCommand" class="voice-card-text"></div>
+		          <div id="codexApprovalNextStep" class="status-line"></div>
+		        </div>
 		        <div id="voiceApprovalCard" class="voice-card warn hidden">
 		          <div class="voice-card-title">Schválení přes Cockpit</div>
 		          <div id="voiceApprovalReason" class="status-line"></div>
@@ -11144,6 +11157,10 @@ COCKPIT_HTML = """<!doctype html>
     const voiceLastResponseCard = document.getElementById("voiceLastResponseCard");
     const voiceLastResponseText = document.getElementById("voiceLastResponseText");
     const voiceLastResponseSpeakBtn = document.getElementById("voiceLastResponseSpeakBtn");
+    const codexApprovalCard = document.getElementById("codexApprovalCard");
+    const codexApprovalReason = document.getElementById("codexApprovalReason");
+    const codexApprovalCommand = document.getElementById("codexApprovalCommand");
+    const codexApprovalNextStep = document.getElementById("codexApprovalNextStep");
     const voiceApprovalCard = document.getElementById("voiceApprovalCard");
     const voiceApprovalReason = document.getElementById("voiceApprovalReason");
     const voiceApprovalText = document.getElementById("voiceApprovalText");
@@ -11350,6 +11367,10 @@ COCKPIT_HTML = """<!doctype html>
         "voiceLastResponseCard",
         "voiceLastResponseText",
         "voiceLastResponseSpeakBtn",
+        "codexApprovalCard",
+        "codexApprovalReason",
+        "codexApprovalCommand",
+        "codexApprovalNextStep",
         "voiceApprovalCard",
         "voiceApprovalReason",
         "voiceApprovalText",
@@ -12624,10 +12645,15 @@ COCKPIT_HTML = """<!doctype html>
       const voicePendingActionable = voicePendingActive && voicePendingApprovalStatus !== "approved";
       const voicePendingText = String(voicePending.text || "");
       const voicePendingShort = voicePendingText.length > 160 ? `${voicePendingText.slice(0, 160)}...` : voicePendingText;
+      const codexApproval = voiceMode.codex_approval || {};
+      const codexApprovalActive = Boolean(codexApproval.active);
+      const codexApprovalReasonText = String(codexApproval.reason || codexApproval.message || "Codex čeká na systémové potvrzení.");
       const voiceReady = !voiceBridgeWarn && (voiceBridge.status === "ok" || voiceBridge.status === "unknown" || !voiceBridge.status);
       const voiceBridgeDashboard = voiceBridgeWarn ? `<br><span class="warn">${escapeHtml(voiceBridgeMessage)}</span>` : "";
       dashboardVoiceMode.innerHTML = voicePendingActionable
         ? `<span class="warn">čeká pokyn</span><br>${escapeHtml(voicePendingShort || voiceState)}${voiceBridgeDashboard}`
+        : codexApprovalActive
+          ? `<span class="warn">čeká Codex</span><br>${escapeHtml(codexApprovalReasonText)}${voiceBridgeDashboard}`
         : voiceBridgeWarn
           ? `<span class="warn">zkontrolovat</span><br>${escapeHtml(voiceBridgeMessage)}`
           : `<span class="${voiceReady ? "ok" : "warn"}">${voiceReady ? "připraveno" : "nezjištěno"}</span><br>přímé odeslání z Cockpitu`;
@@ -12664,7 +12690,7 @@ COCKPIT_HTML = """<!doctype html>
         voiceBridgeSessions.classList.toggle("ok", !voiceBridgeWarn && (!markedTty || codexTtys.includes(markedTty)));
       }
       renderVoiceBridgeSwitcher(voiceBridge);
-      if (voiceCommandDetails && (voicePendingActionable || voiceBridgeWarn)) {
+      if (voiceCommandDetails && (voicePendingActionable || codexApprovalActive || voiceBridgeWarn)) {
         voiceCommandDetails.open = true;
       }
       if (voicePendingStatus) {
@@ -12675,6 +12701,7 @@ COCKPIT_HTML = """<!doctype html>
           : voicePending.message || "Žádný hlasový pokyn nečeká na Adama.";
       }
       renderVoiceLastResponse(voiceMode.last_adam_response || {});
+      renderCodexApproval(codexApproval);
       renderVoiceApproval(voicePending);
       if (voiceModeStartBtn) {
         voiceModeStartBtn.disabled = voiceRunning;
@@ -12687,9 +12714,11 @@ COCKPIT_HTML = """<!doctype html>
       }
       setDashboardStatusSignal(
         "voice",
-        voicePendingActionable || voiceBridgeWarn ? "warn" : "ok",
+        voicePendingActionable || codexApprovalActive || voiceBridgeWarn ? "warn" : "ok",
         voicePendingActionable
           ? "Čeká hlasový pokyn na převzetí Adamem"
+          : codexApprovalActive
+          ? "Codex čeká na systémové potvrzení"
           : voiceBridgeWarn
           ? voiceBridgeMessage
           : "Hlasový vstup v Cockpitu je připravený"
@@ -13846,6 +13875,25 @@ COCKPIT_HTML = """<!doctype html>
 		      }
 		      if (voiceApprovalText) {
 		        voiceApprovalText.textContent = text || "Pokyn nemá uložený text.";
+		      }
+		    }
+
+		    function renderCodexApproval(approval) {
+		      if (!codexApprovalCard) return;
+		      const active = Boolean(approval && approval.active);
+		      codexApprovalCard.classList.toggle("hidden", !active);
+		      if (!active) return;
+		      const reason = String(approval.reason || approval.message || "Codex čeká na systémové potvrzení.").trim();
+		      const command = String(approval.command || "").trim();
+		      const nextStep = String(approval.next_step || "").trim();
+		      if (codexApprovalReason) {
+		        codexApprovalReason.textContent = reason;
+		      }
+		      if (codexApprovalCommand) {
+		        codexApprovalCommand.textContent = command || "V terminálu nebo Codex UI je otevřená systémová žádost o povolení.";
+		      }
+		      if (codexApprovalNextStep) {
+		        codexApprovalNextStep.textContent = nextStep || "Otevři aktivní Codex relaci a rozhodni systémové potvrzení.";
 		      }
 		    }
 
