@@ -83,6 +83,7 @@ from app.lekarna import (
     prepare_lekarna_photo_import,
     preview_vyrazeni_leku,
     search_domaci_leky,
+    stage_lekarna_photo_import,
     validate_lekarna_photo_sources,
 )
 from app.media import apply_zmenseni_obrazku, preview_zmenseni_obrazku
@@ -650,10 +651,13 @@ kontrolni seznam polozek s chybejici expiraci, neurcenym umistenim,
 antibiotik a leku souvisejicich s redenim krve. Nikdy z toho nevyvozuj
 davkovani ani vhodnost pro konkretni osobu.
 
-Lekarna foto import pouzij, kdyz Mila prida nove fotky krabicek do
-`data/lekarna/Leky_v_Krabickach/` a chce je nacist do evidence. Postup je
-dvoukrokovy: `prepare_lekarna_photo_import` pripravi CSV manifest pro nove
-fotky `IMG_*`; po rucnim/obrazovem precteni se doplni manifest; az potom
+Lekarna foto import pouzij, kdyz Mila prida nove fotky krabicek a chce je
+nacist do evidence. Pokud jsou fotky mimo projekt, typicky ve Stazenych,
+nejdriv pouzij `stage_lekarna_photo_import`: zkopiruje vybrane zdrojove fotky
+do soukrome slozky `data/lekarna/Leky_v_Krabickach/` a pripravi CSV manifest.
+Pokud uz jsou fotky v `data/lekarna/Leky_v_Krabickach/`, pouzij
+`prepare_lekarna_photo_import`, ktery pripravi CSV manifest pro nove fotky
+`IMG_*`. Po rucnim/obrazovem precteni se doplni manifest; az potom
 `apply_lekarna_photo_import` smi po vyslovnem potvrzeni prejmenovat fotky,
 zalozit zalohu CSV a pridat radky do `data/lekarna/domaci_leky.csv`.
 Potvrzovaci veta pro apply musi obsahovat: `Potvrzuji import fotek lekarna`.
@@ -841,6 +845,7 @@ LOKALNI PAMET:
             run_document_print_job,
             propose_document_inbox_cleanup,
             resolve_document_inbox_item,
+            stage_lekarna_photo_import,
             prepare_lekarna_photo_import,
             apply_lekarna_photo_import,
             validate_lekarna_photo_sources,

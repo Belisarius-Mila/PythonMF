@@ -95,7 +95,7 @@ Evidence v `data/lekarna/domaci_leky.csv` uz obsahuje prvni import:
 - zbytky leku bez krabicek z rucnich poznamek,
 - leky prectene z fotek v `data/lekarna/Leky_v_Krabickach/`.
 
-K 2026-05-20 je v CSV 56 polozek. Z fotek krabicek byly doplneny:
+K 2026-06-12 je v CSV 69 polozek. Z fotek krabicek byly doplneny:
 
 - Diclofenac Dr. Muller Pharma gel 10 mg/g,
 - Heparin AL mast 30000 I.E. pro 100 g masti,
@@ -111,6 +111,9 @@ K 2026-05-20 je v CSV 56 polozek. Z fotek krabicek byly doplneny:
 - dalsi 4 polozky z WhatsApp JPEG fotek `WhatsApp Image 2026-05-19 at 22.11.01*.jpeg`;
   fotky byly prejmenovane na citelne nazvy a import je zdokumentovany v
   `data/lekarna/photo_import_20260520_020238.md`.
+- dalsi 2 polozky z fotek ze Stazenych: Dr.Max Zinek/Zinok Forte 25 mg a
+  Dr.Max Vitamin B12 500 mcg; import vyuzil novy staging tool a je
+  zdokumentovany v soukromem reportu `data/lekarna/photo_import_20260612_144555.md`.
 
 U fotek neni spolehlive vyctena expirace, proto je u techto polozek `expirace`
 nastavena na `nezjisteno` a `nutno_overit` na `ano`.
@@ -146,18 +149,23 @@ Od 2026-05-19 existuje opakovatelny nastroj pro nacitani novych fotek krabicek:
 
 - Python modul: `app/lekarna/photo_import.py`
 - Samantha tooly:
+  - `stage_lekarna_photo_import`
   - `prepare_lekarna_photo_import`
   - `apply_lekarna_photo_import`
   - `validate_lekarna_photo_sources`
 - CLI:
+  - `scripts/lekarna_photo_import.py stage --source <fotka> [--source <fotka>]`
   - `scripts/lekarna_photo_import.py prepare`
   - `scripts/lekarna_photo_import.py apply --manifest <manifest.csv> --confirm "Potvrzuji import fotek lekarna"`
   - `scripts/lekarna_photo_import.py validate`
 
 Postup:
 
-1. Nove fotky ulozit do `data/lekarna/Leky_v_Krabickach/` jako `IMG_*`.
-2. Spustit prepare krok; vytvori CSV manifest v `data/lekarna/photo_imports/`.
+1. Pokud jsou nove fotky mimo projekt, napr. ve Stazenych, pouzit
+   `stage_lekarna_photo_import` nebo CLI `stage`; zkopiruje vybrane fotky do
+   `data/lekarna/Leky_v_Krabickach/` a vytvori CSV manifest.
+2. Pokud uz jsou fotky v `data/lekarna/Leky_v_Krabickach/` jako `IMG_*`,
+   spustit prepare krok; vytvori CSV manifest v `data/lekarna/photo_imports/`.
 3. Prectene udaje doplnit do manifestu: `new_file`, `nazev`, `ucinna_latka`,
    `forma`, `sila`, `kategorie`, `pouziti`, `mnozstvi`, `poznamky`.
 4. Nejasne polozky nechat jako `neovereno`, `jistota_cteni=nizka` a

@@ -171,6 +171,7 @@ CAPABILITY_AREAS = (
             "audit_domaci_lekarna",
             "preview_vyrazeni_leku",
             "apply_vyrazeni_leku",
+            "stage_lekarna_photo_import",
             "prepare_lekarna_photo_import",
             "apply_lekarna_photo_import",
             "validate_lekarna_photo_sources",
