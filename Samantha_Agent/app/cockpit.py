@@ -104,6 +104,7 @@ from app.speech.adam_voice_mode import (
     ADAM_PENDING_COMMAND_PATH,
     ADAM_VOICE_HISTORY_PATH,
     append_voice_history_turn,
+    clear_codex_approval_request,
     load_voice_mode_status,
     load_last_adam_response,
     pid_exists,
@@ -7744,6 +7745,261 @@ def cockpit_voice_approval_action(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def cockpit_codex_approval_clear_action(
+    payload: dict[str, Any],
+    *,
+    clearer: Callable[..., dict[str, Any]] = clear_codex_approval_request,
+    status_loader: Callable[..., dict[str, Any]] = load_voice_mode_status,
+) -> dict[str, Any]:
+    if not bool(payload.get("confirmed")):
+        return {
+            "ok": False,
+            "status": "confirmation_required",
+            "message": "Vyčištění karty Codex potvrzení vyžaduje potvrzení v Cockpitu.",
+        }
+    note = safe_text(str(payload.get("note") or "Vyčištěno z Cockpitu po ručním vyřešení."))[:500]
+    result = clearer(note=note)
+    return {
+        "ok": bool(result.get("ok")),
+        "status": result.get("status"),
+        "message": "Karta čekání na Codex potvrzení byla vyčištěna.",
+        "codex_approval": result,
+        "voice_mode": status_loader(stale_after_seconds=60.0),
+    }
+
+
+SAFE_READONLY_CAPABILITIES: tuple[dict[str, str], ...] = (
+    {
+        "id": "codex_sessions",
+        "label": "Codex relace",
+        "summary": "Read-only kontrola aktivních Codex relací, TTY a voice bridge cíle.",
+    },
+    {
+        "id": "voice_bridge",
+        "label": "Voice bridge",
+        "summary": "Read-only kontrola markeru, efektivního cíle a připravenosti terminálového bridge.",
+    },
+    {
+        "id": "git_status",
+        "label": "Git stav",
+        "summary": "Read-only souhrn pracovního stromu bez commitování nebo pushování.",
+    },
+    {
+        "id": "backup_status",
+        "label": "Záloha",
+        "summary": "Read-only souhrn poslední lokální zálohovací aktivity.",
+    },
+)
+
+
+def cockpit_safe_readonly_capabilities_action() -> dict[str, Any]:
+    return {
+        "ok": True,
+        "status": "available",
+        "message": "Načtené jsou jen pevně povolené read-only kontroly.",
+        "capabilities": [dict(item) for item in SAFE_READONLY_CAPABILITIES],
+    }
+
+
+def safe_readonly_codex_sessions_result() -> dict[str, Any]:
+    sessions = discover_codex_process_sessions()
+    bridge = adam_voice_bridge_status()
+    safe_sessions = [
+        {
+            "tty": safe_text(str(session.get("tty") or ""))[:40],
+            "pids": [int(pid) for pid in session.get("pids", [])],
+            "root_pids": [int(pid) for pid in session.get("root_pids", [])],
+        }
+        for session in sessions
+    ]
+    return {
+        "ok": True,
+        "summary": f"Nalezeno {len(safe_sessions)} Codex relací. Efektivní voice bridge cíl: {bridge.get('effective_tty') or 'nezjištěno'}.",
+        "sessions": safe_sessions,
+        "voice_bridge": bridge,
+    }
+
+
+def safe_readonly_voice_bridge_result() -> dict[str, Any]:
+    bridge = adam_voice_bridge_status()
+    return {
+        "ok": bool(bridge.get("ok", True)),
+        "summary": str(bridge.get("message") or "Voice bridge stav načten."),
+        "voice_bridge": bridge,
+    }
+
+
+def safe_readonly_git_status_result() -> dict[str, Any]:
+    git = git_status_summary()
+    return {
+        "ok": bool(git.get("ok", True)),
+        "summary": str(git.get("message") or "Git stav načten."),
+        "git": git,
+    }
+
+
+def safe_readonly_backup_status_result() -> dict[str, Any]:
+    backup = backup_activity_status()
+    return {
+        "ok": bool(backup.get("ok", True)),
+        "summary": str(backup.get("message") or "Stav zálohy načten."),
+        "backup": backup,
+    }
+
+
+def default_safe_readonly_handlers() -> dict[str, Callable[[], dict[str, Any]]]:
+    return {
+        "codex_sessions": safe_readonly_codex_sessions_result,
+        "voice_bridge": safe_readonly_voice_bridge_result,
+        "git_status": safe_readonly_git_status_result,
+        "backup_status": safe_readonly_backup_status_result,
+    }
+
+
+def cockpit_safe_readonly_run_action(
+    payload: dict[str, Any],
+    *,
+    handlers: dict[str, Callable[[], dict[str, Any]]] | None = None,
+) -> dict[str, Any]:
+    capability_id = safe_slug(str(payload.get("capability_id") or ""), default="", limit=80).replace("-", "_")
+    meta_by_id = {item["id"]: item for item in SAFE_READONLY_CAPABILITIES}
+    if capability_id not in meta_by_id:
+        return {
+            "ok": False,
+            "status": "unknown_capability",
+            "message": "Tahle kontrola není v Cockpit allowlistu read-only schopností.",
+            "capability_id": capability_id,
+        }
+    selected_handlers = handlers or default_safe_readonly_handlers()
+    handler = selected_handlers.get(capability_id)
+    if handler is None:
+        return {
+            "ok": False,
+            "status": "handler_missing",
+            "message": "Kontrola je v allowlistu, ale nemá registrovaný handler.",
+            "capability": meta_by_id[capability_id],
+        }
+    try:
+        result = handler()
+    except Exception as exc:  # pragma: no cover - defensive boundary for UI endpoint
+        return {
+            "ok": False,
+            "status": "capability_failed",
+            "message": f"Read-only kontrola selhala: {exc}",
+            "capability": meta_by_id[capability_id],
+        }
+    return {
+        "ok": bool(result.get("ok", True)),
+        "status": "completed",
+        "message": str(result.get("summary") or "Read-only kontrola dokončena."),
+        "capability": meta_by_id[capability_id],
+        "result": result,
+    }
+
+
+DEV_RUNNER_ACTIONS: tuple[dict[str, Any], ...] = (
+    {
+        "id": "cockpit_voice_tests",
+        "label": "Testy Cockpit + voice",
+        "summary": "Spustí cílené unittesty pro Cockpit, Adam voice mode a terminal bridge.",
+        "command": [str(PROJECT_ROOT / ".venv" / "bin" / "python"), "-m", "unittest", "tests.test_cockpit", "tests.test_adam_voice_mode", "tests.test_terminal_bridge"],
+        "timeout": 90,
+    },
+    {
+        "id": "cockpit_py_compile",
+        "label": "Python syntax",
+        "summary": "Zkontroluje syntaxi hlavních Cockpit/voice Python souborů.",
+        "command": [str(PROJECT_ROOT / ".venv" / "bin" / "python"), "-m", "py_compile", "app/cockpit.py", "app/speech/adam_voice_mode.py", "app/speech/terminal_bridge.py"],
+        "timeout": 30,
+    },
+    {
+        "id": "git_diff_check",
+        "label": "Diff check",
+        "summary": "Spustí git diff --check proti celému PythonMF repozitáři.",
+        "command": ["/usr/bin/git", "-C", str(GIT_ROOT), "diff", "--check"],
+        "timeout": 30,
+    },
+)
+
+
+def cockpit_dev_runner_actions() -> dict[str, Any]:
+    return {
+        "ok": True,
+        "status": "available",
+        "message": "Načtené jsou jen pevně povolené vývojové akce.",
+        "actions": [
+            {key: item[key] for key in ("id", "label", "summary")}
+            for item in DEV_RUNNER_ACTIONS
+        ],
+    }
+
+
+def _dev_runner_output(text: str, *, limit: int = 12_000) -> str:
+    return safe_multiline_text(str(text or ""), limit=limit)
+
+
+def cockpit_dev_runner_run_action(
+    payload: dict[str, Any],
+    *,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> dict[str, Any]:
+    action_id = safe_slug(str(payload.get("action_id") or ""), default="", limit=80).replace("-", "_")
+    action_by_id = {item["id"]: item for item in DEV_RUNNER_ACTIONS}
+    action = action_by_id.get(action_id)
+    if action is None:
+        return {
+            "ok": False,
+            "status": "unknown_action",
+            "message": "Tahle vývojová akce není v Dev runner allowlistu.",
+            "action_id": action_id,
+        }
+
+    started_at = datetime.now(timezone.utc).replace(microsecond=0)
+    try:
+        completed = runner(
+            list(action["command"]),
+            cwd=str(PROJECT_ROOT),
+            capture_output=True,
+            text=True,
+            timeout=int(action["timeout"]),
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        return {
+            "ok": False,
+            "status": "timeout",
+            "message": f"Vývojová akce překročila limit {action['timeout']} s.",
+            "action": {key: action[key] for key in ("id", "label", "summary")},
+            "stdout": _dev_runner_output(exc.stdout or ""),
+            "stderr": _dev_runner_output(exc.stderr or ""),
+            "started_at": started_at.isoformat(),
+            "finished_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        }
+    except OSError as exc:
+        return {
+            "ok": False,
+            "status": "runner_failed",
+            "message": f"Vývojovou akci se nepodařilo spustit: {exc}",
+            "action": {key: action[key] for key in ("id", "label", "summary")},
+            "started_at": started_at.isoformat(),
+            "finished_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        }
+
+    ok = completed.returncode == 0
+    label = str(action["label"])
+    return {
+        "ok": ok,
+        "status": "passed" if ok else "failed",
+        "message": f"{label}: {'prošlo' if ok else 'selhalo'} (exit {completed.returncode}).",
+        "action": {key: action[key] for key in ("id", "label", "summary")},
+        "returncode": completed.returncode,
+        "stdout": _dev_runner_output(completed.stdout),
+        "stderr": _dev_runner_output(completed.stderr),
+        "started_at": started_at.isoformat(),
+        "finished_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+    }
+
+
 def cockpit_voice_latest_response_action(
     *,
     response_path: Path = ADAM_LAST_RESPONSE_PATH,
@@ -8456,6 +8712,12 @@ class CockpitServer:
                 if parsed.path == "/api/voice-mode/latest-response":
                     self.respond_json(cockpit_voice_latest_response_action())
                     return
+                if parsed.path == "/api/voice-mode/safe-readonly":
+                    self.respond_json(cockpit_safe_readonly_capabilities_action())
+                    return
+                if parsed.path == "/api/dev-runner/actions":
+                    self.respond_json(cockpit_dev_runner_actions())
+                    return
                 if parsed.path.startswith("/local-apps/"):
                     self.respond_local_app_file(parsed.path)
                     return
@@ -8516,6 +8778,18 @@ class CockpitServer:
                 if parsed.path == "/api/voice-mode/approval":
                     payload = self.read_json()
                     self.respond_json(cockpit_voice_approval_action(payload))
+                    return
+                if parsed.path == "/api/voice-mode/codex-approval/clear":
+                    payload = self.read_json()
+                    self.respond_json(cockpit_codex_approval_clear_action(payload))
+                    return
+                if parsed.path == "/api/voice-mode/safe-readonly/run":
+                    payload = self.read_json()
+                    self.respond_json(cockpit_safe_readonly_run_action(payload))
+                    return
+                if parsed.path == "/api/dev-runner/run":
+                    payload = self.read_json()
+                    self.respond_json(cockpit_dev_runner_run_action(payload))
                     return
                 if parsed.path == "/api/voice-bridge/marker":
                     payload = self.read_json()
@@ -10491,6 +10765,17 @@ COCKPIT_HTML = """<!doctype html>
 		            <div id="voiceBridgeSwitcherStatus" class="status-line">Načítám dostupné Codex relace.</div>
 		            <div id="voiceBridgeSwitcherActions" class="voice-card-actions"></div>
 		          </div>
+		          <div id="safeReadonlyCard" class="voice-card">
+		            <div class="voice-card-title">Bezpečné kontroly</div>
+		            <div class="status-line">Pevný read-only allowlist bez volného shell příkazu.</div>
+		            <div class="voice-card-actions">
+		              <button class="secondary" data-safe-readonly="codex_sessions">Codex relace</button>
+		              <button class="secondary" data-safe-readonly="voice_bridge">Voice bridge</button>
+		              <button class="secondary" data-safe-readonly="git_status">Git stav</button>
+		              <button class="secondary" data-safe-readonly="backup_status">Záloha</button>
+		            </div>
+		            <pre id="safeReadonlyResult" class="voice-card-text"></pre>
+		          </div>
             </details>
 		        <div id="voicePendingStatus" class="status-line">Žádný hlasový pokyn nečeká na Adama.</div>
 		        <div id="voiceLastResponseCard" class="voice-card hidden">
@@ -10505,6 +10790,9 @@ COCKPIT_HTML = """<!doctype html>
 		          <div id="codexApprovalReason" class="status-line"></div>
 		          <div id="codexApprovalCommand" class="voice-card-text"></div>
 		          <div id="codexApprovalNextStep" class="status-line"></div>
+		          <div class="voice-card-actions">
+		            <button class="secondary" id="codexApprovalClearBtn">Vyčistit kartu</button>
+		          </div>
 		        </div>
 		        <div id="voiceApprovalCard" class="voice-card warn hidden">
 		          <div class="voice-card-title">Schválení přes Cockpit</div>
@@ -10622,6 +10910,21 @@ COCKPIT_HTML = """<!doctype html>
 		          <div class="health-item"><span class="health-label">Poslední chyba</span><span id="frontendHealthError" class="health-value ok">žádná</span></div>
 		        </div>
 		      </div>
+        </div>
+      </section>
+      <section>
+        <h2>Vývojový runner</h2>
+        <div class="body">
+          <div id="devRunnerPanel" class="voice-card">
+            <div class="voice-card-title">Pevné vývojové akce</div>
+            <div class="status-line">Spouští jen allowlistované příkazy pro opakované ladění, ne volný shell.</div>
+            <div class="voice-card-actions">
+              <button class="secondary" data-dev-runner="cockpit_voice_tests">Testy Cockpit + voice</button>
+              <button class="secondary" data-dev-runner="cockpit_py_compile">Python syntax</button>
+              <button class="secondary" data-dev-runner="git_diff_check">Diff check</button>
+            </div>
+            <pre id="devRunnerOutput" class="voice-card-text"></pre>
+          </div>
         </div>
       </section>
       <h2>Servisní přehledy</h2>
@@ -11139,6 +11442,8 @@ COCKPIT_HTML = """<!doctype html>
 			    const dashboardSpeakBtn = document.getElementById("dashboardSpeakBtn");
 			    const dashboardSpeakSelectionBtn = document.getElementById("dashboardSpeakSelectionBtn");
 			    const dashboardRefreshBtn = document.getElementById("dashboardRefreshBtn");
+    const devRunnerPanel = document.getElementById("devRunnerPanel");
+    const devRunnerOutput = document.getElementById("devRunnerOutput");
     const dashboardActionHint = document.getElementById("dashboardActionHint");
     const voiceCommandDetails = document.getElementById("voiceCommandDetails");
     const voiceModeToggleBtn = document.getElementById("voiceModeToggleBtn");
@@ -11153,6 +11458,8 @@ COCKPIT_HTML = """<!doctype html>
     const voiceBridgeSwitcher = document.getElementById("voiceBridgeSwitcher");
     const voiceBridgeSwitcherStatus = document.getElementById("voiceBridgeSwitcherStatus");
     const voiceBridgeSwitcherActions = document.getElementById("voiceBridgeSwitcherActions");
+    const safeReadonlyCard = document.getElementById("safeReadonlyCard");
+    const safeReadonlyResult = document.getElementById("safeReadonlyResult");
     const voicePendingStatus = document.getElementById("voicePendingStatus");
     const voiceLastResponseCard = document.getElementById("voiceLastResponseCard");
     const voiceLastResponseText = document.getElementById("voiceLastResponseText");
@@ -11161,6 +11468,7 @@ COCKPIT_HTML = """<!doctype html>
     const codexApprovalReason = document.getElementById("codexApprovalReason");
     const codexApprovalCommand = document.getElementById("codexApprovalCommand");
     const codexApprovalNextStep = document.getElementById("codexApprovalNextStep");
+    const codexApprovalClearBtn = document.getElementById("codexApprovalClearBtn");
     const voiceApprovalCard = document.getElementById("voiceApprovalCard");
     const voiceApprovalReason = document.getElementById("voiceApprovalReason");
     const voiceApprovalText = document.getElementById("voiceApprovalText");
@@ -13458,6 +13766,45 @@ COCKPIT_HTML = """<!doctype html>
 	      }
 	    }
 
+	    function formatDevRunnerResult(data) {
+	      const parts = [data.message || "Vývojová akce dokončena."];
+	      const stdout = String(data.stdout || "").trim();
+	      const stderr = String(data.stderr || "").trim();
+	      if (stdout) {
+	        parts.push(`STDOUT:\\n${stdout}`);
+	      }
+	      if (stderr) {
+	        parts.push(`STDERR:\\n${stderr}`);
+	      }
+	      return parts.join("\\n\\n");
+	    }
+
+	    async function runDevRunnerAction(actionId, button) {
+	      const action = String(actionId || "").trim();
+	      if (!action) return;
+	      if (button) button.disabled = true;
+	      if (devRunnerOutput) {
+	        devRunnerOutput.textContent = "Spouštím vývojovou akci...";
+	      }
+	      showMessage("Spouštím vývojovou akci...");
+	      try {
+	        const data = await postJson("/api/dev-runner/run", {action_id: action});
+	        if (devRunnerOutput) {
+	          devRunnerOutput.textContent = formatDevRunnerResult(data);
+	        }
+	        showMessage(data.message || (data.ok ? "Vývojová akce prošla." : "Vývojová akce selhala."));
+	        await refresh({silent: true, includeSecondary: false});
+	      } catch (err) {
+	        recordFrontendError(err);
+	        if (devRunnerOutput) {
+	          devRunnerOutput.textContent = `Vývojová akce selhala: ${err}`;
+	        }
+	        showMessage(`Vývojová akce selhala: ${err}`);
+	      } finally {
+	        if (button) button.disabled = false;
+	      }
+	    }
+
 	    function isRemoteCockpitClient() {
 	      const host = String(window.location.hostname || "").toLowerCase();
 	      return Boolean(host && !["127.0.0.1", "localhost", "::1"].includes(host));
@@ -13979,6 +14326,59 @@ COCKPIT_HTML = """<!doctype html>
 		      }
 		    }
 
+		    function formatSafeReadonlyResult(data) {
+		      const capability = data.capability || {};
+		      const result = data.result || {};
+		      const lines = [
+		        `${capability.label || "Kontrola"}: ${data.message || "hotovo"}`,
+		      ];
+		      if (result.voice_bridge && result.voice_bridge.message) {
+		        lines.push(`Voice bridge: ${result.voice_bridge.message}`);
+		      }
+		      if (Array.isArray(result.sessions)) {
+		        const sessions = result.sessions.map((item) => {
+		          const pids = Array.isArray(item.pids) ? item.pids.join(",") : "";
+		          const roots = Array.isArray(item.root_pids) ? item.root_pids.join(",") : "";
+		          return `${item.tty || "?"} pids=${pids || "-"} roots=${roots || "-"}`;
+		        });
+		        lines.push(`Codex relace: ${sessions.length ? sessions.join(" | ") : "žádná"}`);
+		      }
+		      if (result.git && result.git.message) {
+		        lines.push(`Git: ${result.git.message}`);
+		      }
+		      if (result.backup && result.backup.message) {
+		        lines.push(`Záloha: ${result.backup.message}`);
+		      }
+		      return lines.join("\\n");
+		    }
+
+		    async function runSafeReadonlyCapability(capabilityId, button) {
+		      const capability = String(capabilityId || "").trim();
+		      if (!capability) return;
+		      if (button) button.disabled = true;
+		      if (safeReadonlyResult) {
+		        safeReadonlyResult.textContent = "Spouštím read-only kontrolu...";
+		      }
+		      try {
+		        const data = await postJson("/api/voice-mode/safe-readonly/run", {capability_id: capability});
+		        if (safeReadonlyResult) {
+		          safeReadonlyResult.textContent = data.ok
+		            ? formatSafeReadonlyResult(data)
+		            : (data.message || "Read-only kontrola selhala.");
+		        }
+		        showMessage(data.message || (data.ok ? "Read-only kontrola dokončena." : "Read-only kontrola selhala."));
+		        await refresh({silent: true, includeSecondary: false});
+		      } catch (err) {
+		        recordFrontendError(err);
+		        if (safeReadonlyResult) {
+		          safeReadonlyResult.textContent = `Read-only kontrola selhala: ${err}`;
+		        }
+		        showMessage(`Read-only kontrola selhala: ${err}`);
+		      } finally {
+		        if (button) button.disabled = false;
+		      }
+		    }
+
 		    async function speakLastAdamResponse() {
 		      await speakText(
 		        latestAdamResponseText,
@@ -14001,6 +14401,23 @@ COCKPIT_HTML = """<!doctype html>
 		      } finally {
 		        if (voiceApprovalApproveBtn) voiceApprovalApproveBtn.disabled = false;
 		        if (voiceApprovalRejectBtn) voiceApprovalRejectBtn.disabled = false;
+		      }
+		    }
+
+		    async function clearCodexApprovalCard() {
+		      if (codexApprovalClearBtn) codexApprovalClearBtn.disabled = true;
+		      try {
+		        const data = await postJson("/api/voice-mode/codex-approval/clear", {
+		          confirmed: true,
+		          note: "Vyčištěno z Cockpitu po ručním vyřešení nebo zrušení systémového potvrzení."
+		        });
+		        showMessage(data.message || (data.ok ? "Karta Codex potvrzení byla vyčištěna." : "Kartu se nepodařilo vyčistit."));
+		        await refresh({silent: true, includeSecondary: false});
+		      } catch (err) {
+		        recordFrontendError(err);
+		        showMessage(`Vyčištění karty Codex potvrzení selhalo: ${err}`);
+		      } finally {
+		        if (codexApprovalClearBtn) codexApprovalClearBtn.disabled = false;
 		      }
 		    }
 
@@ -16070,6 +16487,11 @@ COCKPIT_HTML = """<!doctype html>
       }
     });
     dashboardRestartBtn.addEventListener("click", restartCockpit);
+    devRunnerPanel.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-dev-runner]");
+      if (!button) return;
+      runDevRunnerAction(button.dataset.devRunner || "", button);
+    });
     dashboardSpeakBtn.addEventListener("click", speakDashboardStatus);
     dashboardSpeakSelectionBtn.addEventListener("pointerdown", captureSelectedSpeechText);
     dashboardSpeakSelectionBtn.addEventListener("mousedown", captureSelectedSpeechText);
@@ -16082,6 +16504,7 @@ COCKPIT_HTML = """<!doctype html>
     voiceAudioUnlockBtn.addEventListener("click", openVoiceAudioChannel);
     voiceTranscriptSendBtn.addEventListener("click", submitVoiceTranscript);
     voiceLastResponseSpeakBtn.addEventListener("click", speakLastAdamResponse);
+    codexApprovalClearBtn.addEventListener("click", clearCodexApprovalCard);
     voiceApprovalApproveBtn.addEventListener("click", () => submitVoiceApproval("approved"));
     voiceApprovalRejectBtn.addEventListener("click", () => submitVoiceApproval("rejected"));
     voiceBridgeSwitcherActions.addEventListener("click", (event) => {
@@ -16093,6 +16516,11 @@ COCKPIT_HTML = """<!doctype html>
       const button = event.target.closest("button[data-voice-bridge-tty]");
       if (!button) return;
       setVoiceBridgeMarker(button.dataset.voiceBridgeTty || "", button);
+    });
+    safeReadonlyCard.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-safe-readonly]");
+      if (!button) return;
+      runSafeReadonlyCapability(button.dataset.safeReadonly || "", button);
     });
     updateVoiceRecordingAvailability();
     updateVoiceAudioUnlockUi(false);

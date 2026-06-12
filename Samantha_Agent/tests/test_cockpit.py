@@ -25,6 +25,11 @@ from app.cockpit import (
     library_archive_url_action,
     library_attach_image_action,
     cockpit_edge_tts_action,
+    cockpit_codex_approval_clear_action,
+    cockpit_safe_readonly_capabilities_action,
+    cockpit_safe_readonly_run_action,
+    cockpit_dev_runner_actions,
+    cockpit_dev_runner_run_action,
     cockpit_voice_approval_action,
     cockpit_save_voice_text_action,
     cockpit_speak_action,
@@ -1380,6 +1385,12 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Restart Cockpitu", COCKPIT_HTML)
         self.assertIn("restartCockpit", COCKPIT_HTML)
         self.assertIn("/api/cockpit/restart", COCKPIT_HTML)
+        self.assertIn("devRunnerPanel", COCKPIT_HTML)
+        self.assertIn("Vývojový runner", COCKPIT_HTML)
+        self.assertIn("data-dev-runner=\"cockpit_voice_tests\"", COCKPIT_HTML)
+        self.assertIn("data-dev-runner=\"git_diff_check\"", COCKPIT_HTML)
+        self.assertIn("/api/dev-runner/run", COCKPIT_HTML)
+        self.assertIn("runDevRunnerAction", COCKPIT_HTML)
         self.assertIn("dashboardSpeakBtn", COCKPIT_HTML)
         self.assertIn("Přečíst stav", COCKPIT_HTML)
         self.assertIn("dashboardSpeakSelectionBtn", COCKPIT_HTML)
@@ -1408,7 +1419,17 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Přehrát Adamovu odpověď", COCKPIT_HTML)
         self.assertIn("codexApprovalCard", COCKPIT_HTML)
         self.assertIn("Codex čeká na potvrzení", COCKPIT_HTML)
+        self.assertIn("codexApprovalClearBtn", COCKPIT_HTML)
+        self.assertIn("Vyčistit kartu", COCKPIT_HTML)
         self.assertIn("renderCodexApproval", COCKPIT_HTML)
+        self.assertIn("/api/voice-mode/codex-approval/clear", COCKPIT_HTML)
+        self.assertIn("clearCodexApprovalCard", COCKPIT_HTML)
+        self.assertIn("safeReadonlyCard", COCKPIT_HTML)
+        self.assertIn("Bezpečné kontroly", COCKPIT_HTML)
+        self.assertIn("data-safe-readonly=\"codex_sessions\"", COCKPIT_HTML)
+        self.assertIn("data-safe-readonly=\"git_status\"", COCKPIT_HTML)
+        self.assertIn("/api/voice-mode/safe-readonly/run", COCKPIT_HTML)
+        self.assertIn("runSafeReadonlyCapability", COCKPIT_HTML)
         self.assertIn("voiceApprovalCard", COCKPIT_HTML)
         self.assertIn("voiceApprovalApproveBtn", COCKPIT_HTML)
         self.assertIn("voiceApprovalRejectBtn", COCKPIT_HTML)
@@ -1428,6 +1449,106 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("isRemoteCockpitClient", COCKPIT_HTML)
         self.assertIn("isMobileCockpitClient", COCKPIT_HTML)
         self.assertIn("shouldUseSystemSpeechFallback", COCKPIT_HTML)
+
+    def test_cockpit_codex_approval_clear_action_requires_confirmation(self) -> None:
+        result = cockpit_codex_approval_clear_action(
+            {"confirmed": False},
+            clearer=lambda **kwargs: {"ok": True, "active": False, "status": "cleared"},
+            status_loader=lambda **kwargs: {"ok": True},
+        )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "confirmation_required")
+
+    def test_cockpit_codex_approval_clear_action_clears_runtime_state(self) -> None:
+        calls = []
+
+        def fake_clearer(**kwargs):
+            calls.append(kwargs)
+            return {"ok": True, "active": False, "status": "cleared", "note": kwargs.get("note")}
+
+        result = cockpit_codex_approval_clear_action(
+            {"confirmed": True, "note": "Vyřešeno v terminálu."},
+            clearer=fake_clearer,
+            status_loader=lambda **kwargs: {"ok": True, "codex_approval": {"active": False}},
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "cleared")
+        self.assertEqual(result["codex_approval"]["note"], "Vyřešeno v terminálu.")
+        self.assertEqual(calls, [{"note": "Vyřešeno v terminálu."}])
+
+    def test_cockpit_safe_readonly_capabilities_action_lists_allowlist(self) -> None:
+        result = cockpit_safe_readonly_capabilities_action()
+        ids = {item["id"] for item in result["capabilities"]}
+
+        self.assertTrue(result["ok"])
+        self.assertIn("codex_sessions", ids)
+        self.assertIn("git_status", ids)
+
+    def test_cockpit_safe_readonly_run_action_rejects_unknown_capability(self) -> None:
+        result = cockpit_safe_readonly_run_action({"capability_id": "rm -rf"})
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "unknown_capability")
+
+    def test_cockpit_safe_readonly_run_action_runs_registered_handler(self) -> None:
+        result = cockpit_safe_readonly_run_action(
+            {"capability_id": "codex_sessions"},
+            handlers={
+                "codex_sessions": lambda: {
+                    "ok": True,
+                    "summary": "Nalezeno 1 Codex relací.",
+                    "sessions": [{"tty": "ttys000", "pids": [123], "root_pids": [123]}],
+                }
+            },
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "completed")
+        self.assertEqual(result["capability"]["id"], "codex_sessions")
+        self.assertIn("Nalezeno 1", result["message"])
+        self.assertEqual(result["result"]["sessions"][0]["tty"], "ttys000")
+
+    def test_cockpit_dev_runner_actions_lists_allowlist(self) -> None:
+        result = cockpit_dev_runner_actions()
+        ids = {item["id"] for item in result["actions"]}
+
+        self.assertTrue(result["ok"])
+        self.assertIn("cockpit_voice_tests", ids)
+        self.assertIn("git_diff_check", ids)
+
+    def test_cockpit_dev_runner_run_action_rejects_unknown_action(self) -> None:
+        result = cockpit_dev_runner_run_action({"action_id": "curl arbitrary"})
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "unknown_action")
+
+    def test_cockpit_dev_runner_run_action_runs_registered_command(self) -> None:
+        calls = []
+
+        def fake_runner(command, **kwargs):
+            calls.append((command, kwargs))
+            return subprocess.CompletedProcess(command, 0, stdout="Ran 1 test\nOK\n", stderr="")
+
+        result = cockpit_dev_runner_run_action({"action_id": "git_diff_check"}, runner=fake_runner)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "passed")
+        self.assertEqual(result["returncode"], 0)
+        self.assertIn("Ran 1 test", result["stdout"])
+        self.assertEqual(calls[0][0][-2:], ["diff", "--check"])
+        self.assertEqual(calls[0][1]["cwd"], str(cockpit_module.PROJECT_ROOT))
+
+    def test_cockpit_dev_runner_run_action_reports_failed_command(self) -> None:
+        def fake_runner(command, **kwargs):
+            return subprocess.CompletedProcess(command, 1, stdout="", stderr="bad whitespace\n")
+
+        result = cockpit_dev_runner_run_action({"action_id": "git_diff_check"}, runner=fake_runner)
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "failed")
+        self.assertIn("bad whitespace", result["stderr"])
         self.assertIn("markVoiceResponseNeedsTap", COCKPIT_HTML)
         self.assertIn("Přehrát v iPhonu", COCKPIT_HTML)
         self.assertIn("options.allowSystemFallback !== false && shouldUseSystemSpeechFallback()", COCKPIT_HTML)
