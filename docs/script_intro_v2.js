@@ -3197,11 +3197,11 @@ async function handleHouseBunnySelection(colorId) {
   }
 
   if (state.houseBunnyScore >= houseBunnyWinCount) {
-    await speakHouseBunnyLine("Great job. Let's go to forest school.");
-    if (isSceneActive("houseBunny", sequenceId)) {
-      setScene("forestSchool");
+    await speakHouseBunnyLine("Great job. Let's play again.");
+    if (!isSceneActive("houseBunny", sequenceId)) {
+      return;
     }
-    return;
+    state.houseBunnyScore = 0;
   }
 
   await queueNextHouseBunnyColor(sequenceId, 420);
