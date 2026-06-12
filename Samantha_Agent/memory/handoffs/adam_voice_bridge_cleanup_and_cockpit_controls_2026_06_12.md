@@ -30,23 +30,25 @@ Co je hotove:
   aktualni `effective_tty`.
 - Byly ukonceny zbytky starych testovacich relaci `ttys003` a `ttys005`; zustala
   jen aktualni relace `ttys001` a voice bridge hlasi `ok`.
+- Zaverencny rucni test po commitu/pushi probehl OK: Mac hlasovy pokyn prosel
+  do Codexu, iPhone pokyn prosel do Codexu, po otevreni audiokanalu se odpoved
+  prehrala na iPhonu a test otevreni nove Codex relace, zavreni krizkem a uklid
+  stare relace z Cockpitu probehl ve vsech fazich.
 
 Co neni hotove:
-- Zmeny jsou hotove a otestovane, ale je vhodne jeste udelat rucni smoke test
-  z Cockpitu po commitu/pushi: otevrit technicke nastaveni, overit stav relaci
-  a poslat kratky hlasovy/textovy pokyn.
+- Voice bridge je pro aktualni provoz uzavreny jako funkcni.
 - Pravidla pro bezny provoz vice paralelnich Codex relaci jsou domluvena, ale
-  nejsou jeste samostatne rozpracovana do uzivatelske kucharky.
+  nejsou jeste samostatne rozpracovana do uzivatelske kucharky; neni to blokujici.
 
 Dalsi krok:
-Pri dalsim testu voice bridge drzet idealni stav `Codex relace: 1`, marker i
-efektivni cil na stejnem TTY, potom z Macu nebo iPhonu poslat kratky pokyn a
-overit textovou i hlasovou odpoved v Cockpitu.
+Prejit na dokumentovy vault podle ranniho planu. Voice bridge pri dalsi praci
+drzet v idealnim stavu `Codex relace: 1`; pokud Cockpit ukaze vice relaci, pouzit
+`Ukoncit stare relace`.
 
 Navrhovane dalsi kroky:
 Okamzity:
-- Po dalsim otevreni Cockpitu zkontrolovat, ze `Voice bridge cil` ukazuje jen
-  jednu relaci nebo ze tlacitko `Ukoncit stare relace` bezpecne nabizi uklid.
+- Zacit dokumenty read-only kontrolou stavu: dokumentovy vault, inboxy a kandidati
+  k revizi bez mazani, presunu nebo tisku.
 
 Volitelne:
 - Dopsat kratkou kucharku pro Milu: jak bezpecne ukoncovat Codex (`Ctrl-C`,

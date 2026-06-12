@@ -69,6 +69,9 @@ Stav k 2026-06-12:
 - V panelu `Technicke nastaveni` / `Voice bridge cil` vzniklo tlacitko `Ukoncit stare relace`, ktere po potvrzeni ukonci jen stare Codex relace mimo aktualni `effective_tty`.
 - Pri realnem uklidu byly ukonceny zbytky testovacich relaci `ttys003` a `ttys005`; zustala aktualni relace `ttys001` a voice bridge hlasi `ok`.
 - Pro bezny provoz plati prakticke pravidlo: aktivni hlasova prace ma mit jednu hlavni Codex relaci. Vedlejsi relace ukoncovat pres `Ctrl-C` a potom `exit`; krizkem zavirat az po ukonceni procesu.
+- Zaverencny rucni smoke test probehl OK: Mac hlas prosel do Codexu, iPhone hlas
+  prosel do Codexu, odpoved po otevreni audiokanalu hrala na iPhonu a Cockpit
+  dokazal uklidit starou Codex relaci vzniklou po zavreni okna krizkem.
 
 ## Cíl
 
