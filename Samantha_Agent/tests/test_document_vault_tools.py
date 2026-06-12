@@ -815,6 +815,33 @@ class DocumentVaultToolsTests(unittest.TestCase):
         self.assertNotEqual(metadata["domain"], "car")
         self.assertNotIn("auto", metadata["tags"])
 
+    def test_povinne_text_does_not_trigger_vin_car_domain(self) -> None:
+        metadata = propose_metadata(
+            source=Path("vyuctovani.pdf"),
+            text=(
+                "Vyuctovani sluzeb. Povinne informace k platbe. "
+                "Variabilni symbol a datum splatnosti."
+            ),
+        )
+
+        self.assertEqual(metadata["document_type"], "invoice")
+        self.assertNotEqual(metadata["domain"], "car")
+        self.assertNotIn("auto", metadata["tags"])
+
+    def test_insurance_without_vehicle_data_is_not_car(self) -> None:
+        metadata = propose_metadata(
+            source=Path("pojisteni.pdf"),
+            text=(
+                "Povinne pojisteni a potvrzeni o zaplaceni. "
+                "Variabilni symbol 1234567890. Bez udaju o vozidle."
+            ),
+        )
+
+        self.assertEqual(metadata["document_type"], "invoice")
+        self.assertEqual(metadata["domain"], "insurance")
+        self.assertEqual(metadata["related_asset"], "")
+        self.assertNotIn("auto", metadata["tags"])
+
     def test_lease_contract_metadata_is_home_without_year_tags(self) -> None:
         metadata = propose_metadata(
             source=Path("NajemniSmlouvaDubovaUlice.pdf"),

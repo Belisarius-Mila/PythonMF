@@ -3427,7 +3427,8 @@ def guess_domain(text: str, document_type: str) -> str:
         return "travel"
     if document_type == "lease":
         return "home"
-    if any(word in text for word in ("volvo", "v40", "vozidlo", "spz", "vin", "technicka kontrola", "technická kontrola", "servisni prohlidka", "servisní prohlídka")) or has_stk_marker(text):
+    vehicle_signal = has_vehicle_domain_signal(text)
+    if vehicle_signal:
         if document_type in {"invoice", "service_report", "inspection_report", "green_card"}:
             return "car"
     if document_type == "insurance_policy":
@@ -3438,7 +3439,7 @@ def guess_domain(text: str, document_type: str) -> str:
         return "energy"
     if any(word in text for word in ("kotel", "komin", "komín", "dum", "dům", "home")):
         return "home"
-    if has_car_marker(text):
+    if vehicle_signal:
         return "car"
     if any(word in text for word in ("dan", "daň", "financni urad", "finanční úřad")):
         return "tax"
@@ -3467,6 +3468,31 @@ def has_car_marker(text: str) -> bool:
         or has_short_token_marker(text, "rz")
         or has_short_token_marker(text, "vin")
         or any(word in text for word in ("vozidlo", "volvo", "motocykl", "motorka"))
+    )
+
+
+def has_vehicle_domain_signal(text: str) -> bool:
+    return (
+        has_auto_marker(text)
+        or has_stk_marker(text)
+        or has_short_token_marker(text, "spz")
+        or has_short_token_marker(text, "rz")
+        or has_short_token_marker(text, "vin")
+        or any(
+            phrase in text
+            for phrase in (
+                "vozidlo",
+                "vozidla",
+                "volvo",
+                "v40",
+                "motocykl",
+                "motorka",
+                "technicka kontrola",
+                "technická kontrola",
+                "emisni kontrola",
+                "emisní kontrola",
+            )
+        )
     )
 
 
