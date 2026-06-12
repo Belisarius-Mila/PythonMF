@@ -226,7 +226,7 @@ def triage_voice_command(text: str) -> VoiceCommandTriage:
             reason="Pokyn chce odeslat SMS/e-mail nebo jinou zprávu navenek. To je povolené jen po samostatném potvrzení.",
             requires_confirmation=True,
         )
-    if any(term in folded for term in confirmation_terms):
+    if any(contains_triage_term(folded, term) for term in confirmation_terms):
         return VoiceCommandTriage(
             risk="needs_confirmation",
             action="prepare_and_confirm",
@@ -250,6 +250,14 @@ def triage_voice_command(text: str) -> VoiceCommandTriage:
 
 def normalize_for_triage(text: str) -> str:
     return " ".join(str(text or "").casefold().split())
+
+
+def contains_triage_term(text: str, term: str) -> bool:
+    """Match risky terms without false positives such as `tisk` in `stisknout`."""
+    normalized_term = normalize_for_triage(term)
+    if normalized_term == "tisk":
+        return re.search(r"(?<!\w)tisk(?!\w)", text) is not None
+    return normalized_term in text
 
 
 def voice_command_to_dict(command: VoiceCommand) -> dict[str, Any]:

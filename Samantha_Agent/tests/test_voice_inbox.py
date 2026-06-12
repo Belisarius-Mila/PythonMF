@@ -45,6 +45,21 @@ class VoiceInboxTests(unittest.TestCase):
         self.assertEqual(triage.action, "prepare_and_confirm")
         self.assertTrue(triage.requires_confirmation)
 
+    def test_triage_voice_command_does_not_treat_stisknout_as_printing(self) -> None:
+        triage = triage_voice_command(
+            "Na Macu bylo třeba stisknout potvrzení, abys mohl pokračovat dál."
+        )
+
+        self.assertEqual(triage.risk, "read_only")
+        self.assertEqual(triage.action, "execute_read_only")
+        self.assertFalse(triage.requires_confirmation)
+
+    def test_triage_voice_command_still_requires_confirmation_for_printing(self) -> None:
+        triage = triage_voice_command("Vytiskni fakturu.")
+
+        self.assertEqual(triage.risk, "needs_confirmation")
+        self.assertTrue(triage.requires_confirmation)
+
     def test_triage_voice_command_treats_outbound_message_as_confirmable_not_blocked(self) -> None:
         triage = triage_voice_command("Pošli SMS Janičce, jestli něco nepotřebuje.")
 

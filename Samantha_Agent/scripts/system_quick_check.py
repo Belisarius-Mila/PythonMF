@@ -7,7 +7,6 @@ import argparse
 import subprocess
 import sys
 from dataclasses import dataclass
-from datetime import datetime, timezone
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -15,10 +14,10 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.backup.activity_state import backup_activity_status
 from app.cockpit import adam_voice_bridge_status
+from scripts.autosave_status import autosave_status
 from scripts.cockpit_smoke_check import run_smoke_check
 
 
-AUTOSAVE_INFO_PATH = PROJECT_ROOT / "data" / "session_autosave" / "latest_info.txt"
 DEFAULT_AUTOSAVE_WARN_MINUTES = 20
 
 
@@ -68,26 +67,20 @@ def bridge_line() -> CheckLine:
     return CheckLine("adam_bridge", ok, str(status.get("message", "")))
 
 
-def autosave_line(path: Path = AUTOSAVE_INFO_PATH, warn_minutes: int = DEFAULT_AUTOSAVE_WARN_MINUTES) -> CheckLine:
-    display_path = display_path_for(path)
-    if not path.exists():
-        return CheckLine("autosave", False, f"missing {display_path}")
-    modified = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
-    age_minutes = int((datetime.now(timezone.utc) - modified).total_seconds() // 60)
-    ok = age_minutes <= warn_minutes
-    return CheckLine(
-        "autosave",
-        ok,
-        f"{display_path} modified {age_minutes} min ago (warn > {warn_minutes})",
+def autosave_line(path: Path | None = None, warn_minutes: int = DEFAULT_AUTOSAVE_WARN_MINUTES) -> CheckLine:
+    status = autosave_status(
+        latest_info_path=path or PROJECT_ROOT / "data" / "session_autosave" / "latest_info.txt",
+        warn_minutes=warn_minutes,
     )
-
-
-def display_path_for(path: Path) -> str:
-    try:
-        return str(path.relative_to(PROJECT_ROOT))
-    except ValueError:
-        return str(path)
-
+    if status.latest_age_minutes is None:
+        age_text = "age unknown"
+    else:
+        age_text = f"{status.latest_age_minutes} min ago"
+    watcher_text = "watcher running" if status.watcher_running else "watcher stopped"
+    detail = f"{status.latest_info_path} modified {age_text}; {watcher_text}"
+    if status.warning:
+        detail = f"{detail}; {status.warning}"
+    return CheckLine("autosave", status.ok, detail)
 
 def format_quick_check(lines: list[CheckLine]) -> str:
     output = [format_morning_sentence(lines), "Samantha system quick check:"]
