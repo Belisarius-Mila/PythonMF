@@ -3734,6 +3734,10 @@ def guess_related_asset(text: str) -> str:
         return "fotovoltaika"
     if "kotel" in folded:
         return "kotel"
+    if "t-mobile" in folded or "mobilní služby" in folded or "mobilni sluzby" in folded:
+        return "T-Mobile / mobilní služby"
+    if "cestovní pojištění" in folded or "cestovni pojisteni" in folded or "travel insurance" in folded:
+        return "cestovní pojištění"
     if has_car_marker(folded):
         return f"auto SPZ {registration}" if registration else "auto"
     return ""

@@ -16,6 +16,7 @@ from app.cockpit import (
     EMAIL_PROCESSING_HTML,
     action_queue_status,
     adam_voice_bridge_status,
+    accept_document_classification_suggestion_action,
     cancel_payment_reminder_action,
     cockpit_status,
     create_document_due_reminder_action,
@@ -560,6 +561,107 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Doplnit", result["items"][0]["recommended_action"])
         self.assertIn("ostatní / dokument", result["items"][0]["classification_summary"])
         self.assertNotIn("trashed-doc", json.dumps(result, ensure_ascii=False))
+
+    def test_document_classification_status_includes_accept_suggestion(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault = Path(temp_dir) / "documents"
+            index = vault / "index"
+            index.mkdir(parents=True)
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "tmobile-doc",
+                        "title": "E-mail příloha Vyuctovani_40580553_2606.pdf",
+                        "domain": "other",
+                        "document_type": "email-attachment-pdf",
+                        "counterparty": "T-Mobile Elektronické vyúčtování <[e-mail redigovan]>",
+                        "related_asset": "",
+                        "stored_path": "data/private/documents/vault/other/tmobile-doc/Vyuctovani_40580553_2606.pdf",
+                    }
+                ],
+            )
+            self.write_jsonl(
+                index / "text_index.jsonl",
+                [
+                    {
+                        "document_id": "tmobile-doc",
+                        "text": "T-Mobile Elektronické vyúčtování. Vyúčtování služeb za telefon a mobilní služby.",
+                    }
+                ],
+            )
+
+            result = document_classification_status(vault_dir=vault)
+
+        suggestion = result["items"][0]["metadata_suggestion"]
+        self.assertTrue(suggestion["can_accept"])
+        self.assertEqual(suggestion["metadata"]["domain"], "telecom")
+        self.assertEqual(suggestion["metadata"]["document_type"], "invoice")
+        self.assertEqual(suggestion["metadata"]["related_asset"], "T-Mobile / mobilní služby")
+        self.assertIn("Zkontrolovat automatický návrh", result["items"][0]["recommended_action"])
+
+    def test_accept_document_classification_suggestion_recomputes_and_updates_metadata(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault = Path(temp_dir) / "documents"
+            index = vault / "index"
+            document_dir = vault / "vault" / "other" / "tmobile-doc"
+            index.mkdir(parents=True)
+            document_dir.mkdir(parents=True)
+            stored_pdf = document_dir / "Vyuctovani_40580553_2606.pdf"
+            stored_pdf.write_bytes(b"%PDF-1.4\n")
+            (document_dir / "manifest.json").write_text(
+                json.dumps(
+                    {
+                        "document_id": "tmobile-doc",
+                        "title": "E-mail příloha Vyuctovani_40580553_2606.pdf",
+                        "domain": "other",
+                        "document_type": "email-attachment-pdf",
+                        "counterparty": "T-Mobile Elektronické vyúčtování <[e-mail redigovan]>",
+                        "related_asset": "",
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "tmobile-doc",
+                        "title": "E-mail příloha Vyuctovani_40580553_2606.pdf",
+                        "domain": "other",
+                        "document_type": "email-attachment-pdf",
+                        "counterparty": "T-Mobile Elektronické vyúčtování <[e-mail redigovan]>",
+                        "related_asset": "",
+                        "stored_path": str(stored_pdf),
+                    }
+                ],
+            )
+            self.write_jsonl(
+                index / "text_index.jsonl",
+                [
+                    {
+                        "document_id": "tmobile-doc",
+                        "text": "T-Mobile Elektronické vyúčtování. Vyúčtování služeb za telefon a mobilní služby.",
+                    }
+                ],
+            )
+            document_ref = document_classification_status(vault_dir=vault)["items"][0]["document_ref"]
+
+            result = accept_document_classification_suggestion_action(
+                document_id=document_ref,
+                confirmed=True,
+                vault_dir=vault,
+            )
+
+            docs = self.read_jsonl(index / "documents_index.jsonl")
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["missing_fields"], [])
+        self.assertEqual(result["document_classification"]["issue_count"], 0)
+        self.assertEqual(docs[0]["domain"], "telecom")
+        self.assertEqual(docs[0]["document_type"], "invoice")
+        self.assertEqual(docs[0]["related_asset"], "T-Mobile / mobilní služby")
 
     def test_update_document_classification_metadata_updates_index_manifest_and_audit(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

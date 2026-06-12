@@ -853,8 +853,20 @@ class DocumentVaultToolsTests(unittest.TestCase):
 
         self.assertEqual(metadata["document_type"], "invoice")
         self.assertEqual(metadata["domain"], "telecom")
-        self.assertEqual(metadata["related_asset"], "")
+        self.assertEqual(metadata["related_asset"], "T-Mobile / mobilní služby")
         self.assertNotIn("auto", metadata["tags"])
+
+    def test_travel_insurance_metadata_suggests_travel_asset(self) -> None:
+        metadata = propose_metadata(
+            source=Path("cestovni-pojisteni-zaplaceno.pdf"),
+            text=(
+                "Cestovní pojištění. Potvrzení o zaplacení cestovního pojištění "
+                "pro cestu do zahraničí."
+            ),
+        )
+
+        self.assertEqual(metadata["domain"], "insurance")
+        self.assertEqual(metadata["related_asset"], "cestovní pojištění")
 
     def test_lease_contract_metadata_is_home_without_year_tags(self) -> None:
         metadata = propose_metadata(

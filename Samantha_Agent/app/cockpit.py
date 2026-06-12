@@ -51,6 +51,7 @@ from app.documents.scandocu import DEFAULT_DOWNLOADS_DIR, scan_downloads_for_pdf
 from app.documents.vault import (
     DEFAULT_DOCUMENTS_DIR,
     DEFAULT_MOBILE_DOCUMENT_INBOX,
+    PROJECT_ROOT,
     apply_document_import_file,
     build_snippet,
     document_vault_status_summary,
@@ -58,6 +59,7 @@ from app.documents.vault import (
     is_pdf_encrypted,
     next_available_path,
     prepare_document_print_job,
+    propose_metadata,
     read_jsonl,
     read_json_file,
     relative_to_project,
@@ -6326,6 +6328,10 @@ def document_classification_status(
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
     limit: int = 6,
 ) -> dict[str, Any]:
+    text_by_id = {
+        str(item.get("document_id", "")): str(item.get("text", ""))
+        for item in read_jsonl(vault_dir / "index" / "text_index.jsonl")
+    }
     active_count = 0
     complete_count = 0
     field_counts = {field: 0 for field in DOCUMENT_REVIEW_FIELD_LABELS}
@@ -6360,6 +6366,15 @@ def document_classification_status(
         for field in missing_fields:
             field_counts[field] = field_counts.get(field, 0) + 1
         missing_labels = [DOCUMENT_REVIEW_FIELD_LABELS.get(field, field) for field in missing_fields]
+        metadata_suggestion = document_classification_metadata_suggestion(
+            row=row,
+            text=text_by_id.get(document_id, ""),
+        )
+        recommended_action = (
+            "Zkontrolovat automatický návrh a potvrdit zápis."
+            if metadata_suggestion.get("can_accept")
+            else f"Doplnit: {', '.join(missing_labels)}."
+        )
         items.append(
             {
                 "document_ref": document_reference(document_id),
@@ -6376,7 +6391,8 @@ def document_classification_status(
                     f"{document_domain_label(domain)} / {document_type_label(document_type)} | "
                     f"{counterparty or 'protistrana chybí'} | {related_asset or 'vazba chybí'}"
                 ),
-                "recommended_action": f"Doplnit: {', '.join(missing_labels)}.",
+                "recommended_action": recommended_action,
+                "metadata_suggestion": metadata_suggestion,
             }
         )
     items.sort(key=lambda item: (-len(item["missing_fields"]), item["title"].casefold()))
@@ -6401,6 +6417,141 @@ def document_classification_status(
             else "Klasifikace: ve vaultu nejsou aktivní dokumenty."
         ),
     }
+
+
+def document_classification_metadata_suggestion(row: dict[str, Any], text: str) -> dict[str, Any]:
+    document_id = safe_text(str(row.get("document_id", ""))).strip()
+    title = safe_text(str(row.get("title") or row.get("original_filename") or document_id))
+    stored_path = safe_text(str(row.get("stored_path", ""))).strip()
+    source = PROJECT_ROOT / stored_path if stored_path else Path(title or document_id or "document.pdf")
+    fallback_text = "\n".join(
+        value
+        for value in (
+            title,
+            safe_text(str(row.get("original_filename", ""))),
+            safe_text(str(row.get("counterparty", ""))),
+            text,
+        )
+        if value
+    )
+    proposed = propose_metadata(source=source, text=fallback_text)
+    current = {
+        "domain": safe_text(str(row.get("domain", "")))[:80],
+        "document_type": safe_text(str(row.get("document_type", "")))[:80],
+        "counterparty": safe_text(str(row.get("counterparty", "")))[:120],
+        "related_asset": safe_text(str(row.get("related_asset", "")))[:120],
+    }
+    proposed_values = {
+        "domain": safe_slug(str(proposed.get("domain", "")), default="", limit=80),
+        "document_type": safe_slug(str(proposed.get("document_type", "")), default="", limit=80),
+        "counterparty": safe_text(str(proposed.get("counterparty", "")))[:120],
+        "related_asset": safe_text(str(proposed.get("related_asset", "")))[:120],
+    }
+    changes: dict[str, dict[str, str]] = {}
+    metadata: dict[str, str] = {}
+    for field, proposed_value in proposed_values.items():
+        if not proposed_value:
+            continue
+        current_value = current.get(field, "")
+        if not document_metadata_field_needs_suggestion(field, current_value, proposed_value):
+            continue
+        changes[field] = {
+            "field": field,
+            "label": DOCUMENT_REVIEW_FIELD_LABELS.get(field, field),
+            "current": current_value,
+            "proposed": proposed_value,
+            "proposed_label": document_metadata_value_label(field, proposed_value),
+        }
+        metadata[field] = proposed_value
+    if not changes:
+        return {"can_accept": False, "changes": [], "metadata": {}, "summary": "Automat nemá dost jistý návrh."}
+    summary = "; ".join(
+        f"{change['label']}: {change['proposed_label']}"
+        for change in changes.values()
+    )
+    return {
+        "can_accept": True,
+        "confidence": document_metadata_suggestion_confidence(changes),
+        "changes": list(changes.values()),
+        "metadata": metadata,
+        "summary": summary,
+    }
+
+
+def document_metadata_field_needs_suggestion(field: str, current_value: str, proposed_value: str) -> bool:
+    current = safe_text(current_value).strip()
+    proposed = safe_text(proposed_value).strip()
+    if not proposed or current == proposed:
+        return False
+    current_slug = safe_slug(current, default="", limit=80)
+    proposed_slug = safe_slug(proposed, default="", limit=80)
+    if field == "domain":
+        return current_slug in {"", "other", "unknown"} and proposed_slug not in {"", "other", "unknown"}
+    if field == "document_type":
+        return current_slug in {"", "document", "unknown", "email-attachment-pdf"} and proposed_slug not in {
+            "",
+            "document",
+            "unknown",
+            "email-attachment-pdf",
+        }
+    if field in {"counterparty", "related_asset"}:
+        return not current and bool(proposed)
+    return False
+
+
+def document_metadata_value_label(field: str, value: str) -> str:
+    if field == "domain":
+        return document_domain_label(value)
+    if field == "document_type":
+        return document_type_label(value)
+    return value
+
+
+def document_metadata_suggestion_confidence(changes: dict[str, dict[str, str]]) -> str:
+    fields = set(changes)
+    if "domain" in fields and ("document_type" in fields or "related_asset" in fields):
+        return "high"
+    if fields:
+        return "medium"
+    return "low"
+
+
+def accept_document_classification_suggestion_action(
+    document_id: str,
+    *,
+    confirmed: bool = False,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> dict[str, Any]:
+    safe_reference = safe_slug(document_id, default="", limit=140)
+    if not safe_reference:
+        return {"ok": False, "message": "Chybí document_id."}
+    if not confirmed:
+        return {"ok": False, "message": "Přijetí návrhu nebylo potvrzeno."}
+    documents = read_jsonl(vault_dir / "index" / "documents_index.jsonl")
+    row_index = find_document_row_index_by_reference(documents, safe_reference)
+    if row_index is None:
+        return {"ok": False, "message": "Dokument nebyl nalezen v indexu."}
+    row = documents[row_index]
+    document_id_value = safe_text(str(row.get("document_id", ""))).strip()
+    text_by_id = {
+        str(item.get("document_id", "")): str(item.get("text", ""))
+        for item in read_jsonl(vault_dir / "index" / "text_index.jsonl")
+    }
+    suggestion = document_classification_metadata_suggestion(
+        row=row,
+        text=text_by_id.get(document_id_value, ""),
+    )
+    metadata = suggestion.get("metadata", {})
+    if not suggestion.get("can_accept") or not isinstance(metadata, dict) or not metadata:
+        return {"ok": False, "message": "Automatický návrh už není dostupný nebo není dost jistý."}
+    result = update_document_classification_metadata_action(
+        document_id=safe_reference,
+        metadata=metadata,
+        vault_dir=vault_dir,
+    )
+    if result.get("ok"):
+        result["accepted_suggestion"] = suggestion
+    return result
 
 
 def document_classification_missing_fields(
@@ -8485,6 +8636,15 @@ class CockpitServer:
                         update_document_classification_metadata_action(
                             document_id=str(payload.get("document_id", "")),
                             metadata=raw_metadata if isinstance(raw_metadata, dict) else {},
+                        )
+                    )
+                    return
+                if parsed.path == "/api/documents/classification-suggestion/accept":
+                    payload = self.read_json()
+                    self.respond_json(
+                        accept_document_classification_suggestion_action(
+                            document_id=str(payload.get("document_id", "")),
+                            confirmed=bool(payload.get("confirmed")),
                         )
                     )
                     return
@@ -12052,8 +12212,23 @@ COCKPIT_HTML = """<!doctype html>
         const meta = document.createElement("div");
         meta.className = "work-meta";
         meta.textContent = item.classification_summary || "";
+        const suggestion = item.metadata_suggestion || {};
+        let suggestionNode = null;
+        if (suggestion.can_accept && suggestion.summary) {
+          suggestionNode = document.createElement("div");
+          suggestionNode.className = "work-meta";
+          suggestionNode.textContent = `Návrh: ${suggestion.summary}`;
+        }
         const actions = document.createElement("div");
         actions.className = "actions";
+        if (suggestion.can_accept) {
+          const acceptBtn = document.createElement("button");
+          acceptBtn.className = "primary";
+          acceptBtn.type = "button";
+          acceptBtn.textContent = "Přijmout návrh";
+          acceptBtn.addEventListener("click", () => acceptDocumentClassificationSuggestion(item, acceptBtn));
+          actions.appendChild(acceptBtn);
+        }
         const editBtn = document.createElement("button");
         editBtn.className = "secondary";
         editBtn.type = "button";
@@ -12063,6 +12238,7 @@ COCKPIT_HTML = """<!doctype html>
         row.appendChild(title);
         row.appendChild(action);
         row.appendChild(meta);
+        if (suggestionNode) row.appendChild(suggestionNode);
         row.appendChild(actions);
         documentClassificationList.appendChild(row);
       });
@@ -12071,6 +12247,37 @@ COCKPIT_HTML = """<!doctype html>
         note.className = "status-line";
         note.textContent = "Seznam klasifikace je zkrácený.";
         documentClassificationList.appendChild(note);
+      }
+    }
+
+    async function acceptDocumentClassificationSuggestion(item, button) {
+      const documentRef = item.document_ref || item.document_id || "";
+      const suggestion = item.metadata_suggestion || {};
+      if (!documentRef || !suggestion.can_accept) return;
+      const ok = window.confirm(`Přijmout návrh metadat?\\n\\n${item.title || "Dokument"}\\n\\n${suggestion.summary || ""}`);
+      if (!ok) return;
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "Ukládám...";
+      documentClassificationStatus.textContent = "Ukládám potvrzený návrh metadat...";
+      try {
+        const result = await postJson("/api/documents/classification-suggestion/accept", {
+          document_id: documentRef,
+          confirmed: true
+        });
+        documentClassificationStatus.textContent = result.message || "Návrh uložen.";
+        if (result.ok) {
+          if (result.document_classification) {
+            renderDocumentClassification(result.document_classification);
+          }
+          await refresh({silent: true});
+        }
+      } catch (err) {
+        recordFrontendError(err);
+        documentClassificationStatus.textContent = `Chyba přijetí návrhu: ${err}`;
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText || "Přijmout návrh";
       }
     }
 
@@ -12086,7 +12293,7 @@ COCKPIT_HTML = """<!doctype html>
       const domain = promptClassificationValue(
         "Oblast dokumentu",
         item.domain || "",
-        "Např. insurance, car, home, tax, energy, employment, health, warranty, other."
+        "Např. insurance, car, home, tax, energy, telecom, employment, health, warranty, other."
       );
       if (domain === null) return;
       const documentType = promptClassificationValue(
