@@ -99,9 +99,13 @@ from app.speech.edge_tts_mp3 import (
 from app.speech.local_tts import DEFAULT_VOICE
 from app.speech.adam_voice_mode import (
     ADAM_LAST_RESPONSE_PATH,
+    ADAM_PENDING_COMMAND_PATH,
+    ADAM_VOICE_HISTORY_PATH,
+    append_voice_history_turn,
     load_voice_mode_status,
     load_last_adam_response,
     pid_exists,
+    save_pending_for_adam,
     update_pending_approval,
     write_voice_mode_status,
 )
@@ -3191,7 +3195,7 @@ def adam_voice_bridge_status(
     marker_path: Path = CURRENT_CODEX_TTY_PATH,
     codex_tty_discoverer: Callable[[], list[str]] = discover_codex_ttys,
     screen_runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
-    expected_codex_session_limit: int = 3,
+    expected_codex_session_limit: int = 1,
 ) -> dict[str, Any]:
     marker: dict[str, Any] = {}
     try:
@@ -3275,6 +3279,151 @@ def adam_voice_bridge_status(
         "screen_message": screen_message,
         "notes": notes,
         "warnings": warnings,
+    }
+
+
+CODEX_SESSION_PS_COMMAND = ["ps", "-axo", "pid=,ppid=,tty=,comm=,args="]
+
+
+def discover_codex_process_sessions(
+    *,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> list[dict[str, Any]]:
+    try:
+        completed = runner(
+            CODEX_SESSION_PS_COMMAND,
+            capture_output=True,
+            text=True,
+            timeout=4,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return []
+    if completed.returncode != 0:
+        return []
+
+    rows: list[dict[str, Any]] = []
+    codex_pids: set[int] = set()
+    for line in completed.stdout.splitlines():
+        parts = line.strip().split(None, 4)
+        if len(parts) < 5:
+            continue
+        pid_text, ppid_text, tty, comm, args = parts
+        try:
+            pid = int(pid_text)
+            ppid = int(ppid_text)
+        except ValueError:
+            continue
+        folded = f"{comm} {args}".casefold()
+        if "codex" not in folded or "app-server" in folded:
+            continue
+        codex_pids.add(pid)
+        rows.append(
+            {
+                "pid": pid,
+                "ppid": ppid,
+                "tty": normalize_tty(tty),
+                "command": str(args or comm).strip(),
+            }
+        )
+
+    sessions: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        tty = str(row.get("tty") or "")
+        if not tty or tty == "??":
+            continue
+        session = sessions.setdefault(tty, {"tty": tty, "pids": [], "root_pids": [], "commands": []})
+        pid = int(row["pid"])
+        session["pids"].append(pid)
+        session["commands"].append(row["command"])
+        if int(row["ppid"]) not in codex_pids:
+            session["root_pids"].append(pid)
+
+    result: list[dict[str, Any]] = []
+    for tty in sorted(sessions):
+        session = sessions[tty]
+        session["pids"] = sorted(set(session["pids"]))
+        session["root_pids"] = sorted(set(session["root_pids"] or session["pids"]))
+        result.append(session)
+    return result
+
+
+def terminate_stale_codex_sessions_action(
+    payload: dict[str, Any],
+    *,
+    marker_path: Path = CURRENT_CODEX_TTY_PATH,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+    screen_runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+    killer: Callable[[int, int], None] = os.kill,
+) -> dict[str, Any]:
+    confirmed = bool(payload.get("confirmed"))
+    sessions = discover_codex_process_sessions(runner=runner)
+    codex_ttys = [str(session.get("tty") or "") for session in sessions if session.get("tty")]
+    bridge = adam_voice_bridge_status(
+        marker_path=marker_path,
+        codex_tty_discoverer=lambda: codex_ttys,
+        screen_runner=screen_runner,
+        expected_codex_session_limit=1,
+    )
+    protected_tty = str(bridge.get("effective_tty") or "")
+    if not protected_tty:
+        return {
+            "ok": False,
+            "status": "no_protected_tty",
+            "message": "Neukončuji staré Codex relace: voice bridge nemá jednoznačný chráněný cíl.",
+            "voice_bridge": bridge,
+            "sessions": sessions,
+        }
+
+    stale_sessions = [session for session in sessions if session.get("tty") != protected_tty]
+    stale_ttys = [str(session.get("tty") or "") for session in stale_sessions]
+    root_pids = sorted({int(pid) for session in stale_sessions for pid in session.get("root_pids", [])})
+    if not stale_sessions:
+        return {
+            "ok": True,
+            "status": "no_stale_sessions",
+            "message": f"Žádné staré Codex relace k ukončení. Chráněný cíl je {protected_tty}.",
+            "protected_tty": protected_tty,
+            "voice_bridge": bridge,
+            "sessions": sessions,
+        }
+    if not confirmed:
+        return {
+            "ok": False,
+            "status": "confirmation_required",
+            "message": f"K ukončení jsou připravené staré Codex relace: {', '.join(stale_ttys)}. Akci je potřeba potvrdit.",
+            "protected_tty": protected_tty,
+            "stale_ttys": stale_ttys,
+            "root_pids": root_pids,
+            "voice_bridge": bridge,
+            "sessions": sessions,
+        }
+
+    killed: list[int] = []
+    errors: list[str] = []
+    for pid in root_pids:
+        try:
+            killer(pid, signal.SIGTERM)
+            killed.append(pid)
+        except OSError as exc:
+            errors.append(f"PID {pid}: {exc}")
+    if errors:
+        return {
+            "ok": False,
+            "status": "partial_or_failed",
+            "message": f"Některé staré Codex relace se nepodařilo ukončit: {' | '.join(errors)}",
+            "protected_tty": protected_tty,
+            "stale_ttys": stale_ttys,
+            "killed_pids": killed,
+            "errors": errors,
+        }
+    return {
+        "ok": True,
+        "status": "stale_sessions_terminated",
+        "message": f"Ukončil jsem staré Codex relace: {', '.join(stale_ttys)}. Chráněný cíl {protected_tty} zůstal běžet.",
+        "protected_tty": protected_tty,
+        "stale_ttys": stale_ttys,
+        "killed_pids": killed,
     }
 
 
@@ -7551,6 +7700,8 @@ def deliver_saved_voice_command_inline(
     *,
     inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
     terminal_bridge: Callable[..., dict[str, Any]] | None = None,
+    pending_path: Path = ADAM_PENDING_COMMAND_PATH,
+    history_path: Path = ADAM_VOICE_HISTORY_PATH,
 ) -> dict[str, Any]:
     try:
         command = parse_voice_command_file(inbox_dir / "latest_voice_command.md")
@@ -7574,11 +7725,82 @@ def deliver_saved_voice_command_inline(
         bridge_message = str(bridge_result.get("reason") or bridge_result.get("message") or "bez detailu")
         status = bridge_status
         message = f"Hlasový pokyn byl uložen, ale okamžité předání do Codexu neproběhlo: {bridge_message}"
+    record_voice_delivery_attempt(
+        command=command,
+        bridge_result=bridge_result,
+        delivery_status=status,
+        message=message,
+        inbox_dir=inbox_dir,
+    )
+    if status != "voice_command_delivered":
+        record_voice_delivery_issue_for_cockpit(
+            command=command,
+            bridge_result=bridge_result,
+            delivery_status=status,
+            message=message,
+            pending_path=pending_path,
+            history_path=history_path,
+        )
     return {
         "voice_delivery_status": status,
         "voice_delivery": bridge_result,
         "voice_delivery_message": message,
     }
+
+
+def record_voice_delivery_attempt(
+    *,
+    command: VoiceCommand,
+    bridge_result: dict[str, Any],
+    delivery_status: str,
+    message: str,
+    inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
+) -> None:
+    try:
+        append_jsonl(
+            inbox_dir / "delivery_attempts.jsonl",
+            {
+                "created_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+                "command_created_at": command.created_at,
+                "command_path": str(relative_to_project(Path(command.path))),
+                "text_chars": len(command.text.strip()),
+                "delivery_status": delivery_status,
+                "bridge_status": str(bridge_result.get("status") or ""),
+                "ok": bool(bridge_result.get("ok")),
+                "verified": bool(bridge_result.get("verified")),
+                "voice_transport": str(bridge_result.get("voice_transport") or ""),
+                "delivery_method": str(bridge_result.get("delivery_method") or ""),
+                "target_tty": str(bridge_result.get("target_tty") or ""),
+                "target_ttys": bridge_result.get("target_ttys") or [],
+                "message": safe_text(message)[:800],
+            },
+        )
+    except OSError:
+        return
+
+
+def record_voice_delivery_issue_for_cockpit(
+    *,
+    command: VoiceCommand,
+    bridge_result: dict[str, Any],
+    delivery_status: str,
+    message: str,
+    pending_path: Path = ADAM_PENDING_COMMAND_PATH,
+    history_path: Path = ADAM_VOICE_HISTORY_PATH,
+) -> None:
+    detail = str(bridge_result.get("reason") or bridge_result.get("message") or "").strip()
+    pending_message = message if not detail else f"{message} Detail: {detail}"
+    try:
+        save_pending_for_adam(
+            command,
+            reason=delivery_status,
+            message=pending_message,
+            path=pending_path,
+            history_path=history_path,
+        )
+        append_voice_history_turn(command, adam_response=message, route=delivery_status, path=history_path)
+    except OSError:
+        return
 
 
 def selected_voice_delivery_transport() -> str:
@@ -7653,6 +7875,8 @@ def cockpit_transcribe_voice_action(
     *,
     inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
     terminal_bridge: Callable[..., dict[str, Any]] | None = None,
+    pending_path: Path = ADAM_PENDING_COMMAND_PATH,
+    history_path: Path = ADAM_VOICE_HISTORY_PATH,
 ) -> dict[str, Any]:
     try:
         result = transcribe_audio_base64(
@@ -7661,7 +7885,14 @@ def cockpit_transcribe_voice_action(
             language=str(payload.get("language", "cs") or "cs"),
         )
         result.update(save_voice_command_to_inbox(result, inbox_dir=inbox_dir))
-        result.update(deliver_saved_voice_command_inline(inbox_dir=inbox_dir, terminal_bridge=terminal_bridge))
+        result.update(
+            deliver_saved_voice_command_inline(
+                inbox_dir=inbox_dir,
+                terminal_bridge=terminal_bridge,
+                pending_path=pending_path,
+                history_path=history_path,
+            )
+        )
         result["message"] = result.get("voice_delivery_message") or "Hlasový pokyn byl přepsán a uložen pro Codex."
         return result
     except TranscriptionError as exc:
@@ -7689,6 +7920,8 @@ def cockpit_save_voice_text_action(
     *,
     inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
     terminal_bridge: Callable[..., dict[str, Any]] | None = None,
+    pending_path: Path = ADAM_PENDING_COMMAND_PATH,
+    history_path: Path = ADAM_VOICE_HISTORY_PATH,
 ) -> dict[str, Any]:
     text = safe_text(str(payload.get("text", "") or "")).strip()
     if not text:
@@ -7705,7 +7938,14 @@ def cockpit_save_voice_text_action(
             "status": "voice_text_saved",
         }
         result.update(save_voice_command_to_inbox({"text": text}, inbox_dir=inbox_dir))
-        result.update(deliver_saved_voice_command_inline(inbox_dir=inbox_dir, terminal_bridge=terminal_bridge))
+        result.update(
+            deliver_saved_voice_command_inline(
+                inbox_dir=inbox_dir,
+                terminal_bridge=terminal_bridge,
+                pending_path=pending_path,
+                history_path=history_path,
+            )
+        )
         result["message"] = result.get("voice_delivery_message") or result["message"]
         return result
     except OSError as exc:
@@ -8110,6 +8350,10 @@ class CockpitServer:
                 if parsed.path == "/api/voice-bridge/marker":
                     payload = self.read_json()
                     self.respond_json(set_adam_voice_bridge_marker_action(str(payload.get("tty", ""))))
+                    return
+                if parsed.path == "/api/voice-bridge/terminate-stale":
+                    payload = self.read_json()
+                    self.respond_json(terminate_stale_codex_sessions_action(payload))
                     return
                 if parsed.path == "/api/cockpit/restart":
                     payload = self.read_json()
@@ -12958,6 +13202,16 @@ COCKPIT_HTML = """<!doctype html>
 	      return Boolean(host && !["127.0.0.1", "localhost", "::1"].includes(host));
 	    }
 
+	    function isMobileCockpitClient() {
+	      const userAgent = String(navigator.userAgent || "").toLowerCase();
+	      const platform = String(navigator.platform || "").toLowerCase();
+	      return /iphone|ipad|ipod|android/.test(userAgent) || /iphone|ipad|ipod/.test(platform);
+	    }
+
+	    function shouldUseSystemSpeechFallback() {
+	      return !(isRemoteCockpitClient() && isMobileCockpitClient());
+	    }
+
 	    let voiceAudioContext = null;
 	    let voiceAudioUnlocked = false;
 
@@ -13060,7 +13314,7 @@ COCKPIT_HTML = """<!doctype html>
 	        showMessage("Nejdřív označ text, který mám přečíst.");
 	        return;
 	      }
-	      const allowSystemFallback = options.allowSystemFallback !== false && !isRemoteCockpitClient();
+	      const allowSystemFallback = options.allowSystemFallback !== false && shouldUseSystemSpeechFallback();
 	      if (options.userGesture && isRemoteCockpitClient()) {
 	        await primeVoiceAudioContextFromGesture();
 	      }
@@ -13284,7 +13538,7 @@ COCKPIT_HTML = """<!doctype html>
 		      }
 		      if (text && options.autoSpeak && responseKey && responseKey !== autoSpokenAdamResponseKey) {
 		        autoSpokenAdamResponseKey = responseKey;
-		        speakText(text, voiceLastResponseSpeakBtn, "Čtu Adamovu odpověď nahlas...", {allowSystemFallback: false});
+		        speakText(text, voiceLastResponseSpeakBtn, "Čtu Adamovu odpověď nahlas...", {allowSystemFallback: shouldUseSystemSpeechFallback()});
 		      }
 		    }
 
@@ -13370,6 +13624,7 @@ COCKPIT_HTML = """<!doctype html>
 		      const codexTtys = Array.isArray(voiceBridge.codex_ttys)
 		        ? voiceBridge.codex_ttys.map((item) => String(item || "")).filter(Boolean)
 		        : [];
+		      const staleTtys = codexTtys.filter((tty) => tty !== effectiveTty);
 		      voiceBridgeSwitcher.classList.toggle("hidden", codexTtys.length === 0);
 		      if (codexTtys.length === 0) {
 		        voiceBridgeSwitcherStatus.textContent = "Není nalezená žádná aktivní Codex relace.";
@@ -13389,6 +13644,12 @@ COCKPIT_HTML = """<!doctype html>
 		            : `Nastavit ${tty}`;
 		        return `<button class="${active || effective ? "primary" : "secondary"}" data-voice-bridge-tty="${escapeHtml(tty)}">${escapeHtml(label)}</button>`;
 		      }).join("");
+		      if (effectiveTty && staleTtys.length > 0) {
+		        voiceBridgeSwitcherActions.insertAdjacentHTML(
+		          "beforeend",
+		          `<button class="secondary" data-voice-bridge-cleanup="1">Ukončit staré relace (${staleTtys.length})</button>`
+		        );
+		      }
 		    }
 
 		    async function setVoiceBridgeMarker(tty, button) {
@@ -13402,6 +13663,37 @@ COCKPIT_HTML = """<!doctype html>
 		      } catch (err) {
 		        recordFrontendError(err);
 		        showMessage(`Nastavení voice bridge markeru selhalo: ${err}`);
+		      } finally {
+		        if (button) button.disabled = false;
+		      }
+		    }
+
+		    async function terminateStaleVoiceBridgeSessions(button) {
+		      if (button) button.disabled = true;
+		      try {
+		        const preview = await postJson("/api/voice-bridge/terminate-stale", {confirmed: false});
+		        const staleTtys = Array.isArray(preview.stale_ttys) ? preview.stale_ttys.join(", ") : "";
+		        if (preview.status === "no_stale_sessions") {
+		          showMessage(preview.message || "Žádné staré Codex relace k ukončení.");
+		          await refresh({silent: true, includeSecondary: false});
+		          return;
+		        }
+		        if (preview.status !== "confirmation_required") {
+		          showMessage(preview.message || "Staré Codex relace nejde bezpečně určit.");
+		          return;
+		        }
+		        const protectedTty = preview.protected_tty || "nezjištěno";
+		        const ok = window.confirm(`Ukončit staré Codex relace ${staleTtys}? Chráněná relace ${protectedTty} zůstane běžet.`);
+		        if (!ok) {
+		          showMessage("Ukončení starých Codex relací zrušeno.");
+		          return;
+		        }
+		        const data = await postJson("/api/voice-bridge/terminate-stale", {confirmed: true});
+		        showMessage(data.message || (data.ok ? "Staré Codex relace ukončeny." : "Ukončení starých Codex relací selhalo."));
+		        await refresh({silent: true, includeSecondary: false});
+		      } catch (err) {
+		        recordFrontendError(err);
+		        showMessage(`Ukončení starých Codex relací selhalo: ${err}`);
 		      } finally {
 		        if (button) button.disabled = false;
 		      }
@@ -15513,6 +15805,11 @@ COCKPIT_HTML = """<!doctype html>
     voiceApprovalApproveBtn.addEventListener("click", () => submitVoiceApproval("approved"));
     voiceApprovalRejectBtn.addEventListener("click", () => submitVoiceApproval("rejected"));
     voiceBridgeSwitcherActions.addEventListener("click", (event) => {
+      const cleanupButton = event.target.closest("button[data-voice-bridge-cleanup]");
+      if (cleanupButton) {
+        terminateStaleVoiceBridgeSessions(cleanupButton);
+        return;
+      }
       const button = event.target.closest("button[data-voice-bridge-tty]");
       if (!button) return;
       setVoiceBridgeMarker(button.dataset.voiceBridgeTty || "", button);

@@ -7,6 +7,8 @@ import socket
 import subprocess
 import sys
 import time
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 
@@ -47,6 +49,14 @@ def port_is_busy(host: str, port: int) -> bool:
         return sock.connect_ex((host, port)) == 0
 
 
+def url_ok(host: str, port: int, *, timeout: float = 1.0) -> bool:
+    try:
+        with urllib.request.urlopen(f"http://{host}:{port}/api/status", timeout=timeout) as response:
+            return 200 <= response.status < 300
+    except (OSError, urllib.error.URLError):
+        return False
+
+
 def wait_for_exit(pid: int, host: str, port: int, timeout: float = 8.0) -> bool:
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
@@ -54,6 +64,15 @@ def wait_for_exit(pid: int, host: str, port: int, timeout: float = 8.0) -> bool:
             return True
         time.sleep(0.2)
     return not process_exists(pid) and not port_is_busy(host, port)
+
+
+def wait_for_launchd_restart(host: str, port: int, timeout: float = 5.0) -> bool:
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if url_ok(host, port):
+            return True
+        time.sleep(0.2)
+    return False
 
 
 def start_cockpit(host: str, port: int) -> subprocess.CompletedProcess[str]:
@@ -90,6 +109,9 @@ def restart_cockpit(pid: int, host: str, port: int, delay: float = 0.5) -> int:
     if not wait_for_exit(pid, host, port):
         print(f"Cockpit PID {pid} se neukončil v bezpečném limitu; nespouštím druhou instanci.", file=sys.stderr)
         return 4
+    if wait_for_launchd_restart(host, port):
+        print(f"Samantha Cockpit už znovu odpovídá na http://{host}:{port}; nespouštím druhou instanci.", flush=True)
+        return 0
     completed = start_cockpit(host, port)
     if completed.stdout.strip():
         print(completed.stdout.strip(), flush=True)

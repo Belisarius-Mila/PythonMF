@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import signal
 import subprocess
 import tempfile
 import unittest
@@ -66,6 +67,7 @@ from app.cockpit import (
     save_email_processing_decision,
     search_document_index,
     set_adam_voice_bridge_marker_action,
+    terminate_stale_codex_sessions_action,
     set_document_reading_status_action,
     selected_voice_delivery_transport,
     start_adam_voice_mode_action,
@@ -1318,9 +1320,12 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("expectedUserText: data.text ||", COCKPIT_HTML)
         self.assertIn("minCreatedAt: voiceReplyMinCreatedAt", COCKPIT_HTML)
         self.assertIn("isRemoteCockpitClient", COCKPIT_HTML)
+        self.assertIn("isMobileCockpitClient", COCKPIT_HTML)
+        self.assertIn("shouldUseSystemSpeechFallback", COCKPIT_HTML)
         self.assertIn("markVoiceResponseNeedsTap", COCKPIT_HTML)
         self.assertIn("Přehrát v iPhonu", COCKPIT_HTML)
-        self.assertIn("{allowSystemFallback: false}", COCKPIT_HTML)
+        self.assertIn("options.allowSystemFallback !== false && shouldUseSystemSpeechFallback()", COCKPIT_HTML)
+        self.assertIn("{allowSystemFallback: shouldUseSystemSpeechFallback()}", COCKPIT_HTML)
         self.assertIn("primeVoiceAudioContextFromGesture", COCKPIT_HTML)
         self.assertIn("voiceAudioUnlockBtn", COCKPIT_HTML)
         self.assertIn("Otevřít audiokanál", COCKPIT_HTML)
@@ -1343,6 +1348,9 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("voiceModeStopBtn", COCKPIT_HTML)
         self.assertIn("voiceBridgeStatus", COCKPIT_HTML)
         self.assertIn("Terminálový bridge", COCKPIT_HTML)
+        self.assertIn("Ukončit staré relace", COCKPIT_HTML)
+        self.assertIn("/api/voice-bridge/terminate-stale", COCKPIT_HTML)
+        self.assertIn("terminateStaleVoiceBridgeSessions", COCKPIT_HTML)
         self.assertIn('voiceTranscript.value = "";', COCKPIT_HTML)
         self.assertIn("/api/voice-mode/start", COCKPIT_HTML)
         self.assertIn("/api/voice-mode/stop", COCKPIT_HTML)
@@ -1664,6 +1672,77 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(rejected["status"], "tty_not_active")
         self.assertEqual(rejected["codex_ttys"], ["ttys002", "ttys003"])
 
+    def test_terminate_stale_codex_sessions_requires_confirmation(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker_path = Path(temp_dir) / "current_codex_tty.json"
+            marker_path.write_text('{"tty": "ttys001"}', encoding="utf-8")
+
+            def fake_runner(*args, **kwargs):
+                return subprocess.CompletedProcess(
+                    args=args[0],
+                    returncode=0,
+                    stdout=(
+                        "100 10 ttys001 node node /usr/local/bin/codex -C /repo .\n"
+                        "101 100 ttys001 codex /vendor/bin/codex -C /repo .\n"
+                        "200 20 ttys003 node node /usr/local/bin/codex -C /repo .\n"
+                        "201 200 ttys003 codex /vendor/bin/codex -C /repo .\n"
+                    ),
+                    stderr="",
+                )
+
+            killed: list[tuple[int, int]] = []
+            fake_screen_runner = lambda *args, **kwargs: subprocess.CompletedProcess(args=args[0], returncode=1, stdout="", stderr="No Sockets found\n")
+            result = terminate_stale_codex_sessions_action(
+                {"confirmed": False},
+                marker_path=marker_path,
+                runner=fake_runner,
+                screen_runner=fake_screen_runner,
+                killer=lambda pid, sig: killed.append((pid, sig)),
+            )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "confirmation_required")
+        self.assertEqual(result["protected_tty"], "ttys001")
+        self.assertEqual(result["stale_ttys"], ["ttys003"])
+        self.assertEqual(result["root_pids"], [200])
+        self.assertEqual(killed, [])
+
+    def test_terminate_stale_codex_sessions_kills_only_stale_roots(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker_path = Path(temp_dir) / "current_codex_tty.json"
+            marker_path.write_text('{"tty": "ttys001"}', encoding="utf-8")
+
+            def fake_runner(*args, **kwargs):
+                return subprocess.CompletedProcess(
+                    args=args[0],
+                    returncode=0,
+                    stdout=(
+                        "100 10 ttys001 node node /usr/local/bin/codex -C /repo .\n"
+                        "101 100 ttys001 codex /vendor/bin/codex -C /repo .\n"
+                        "200 20 ttys003 node node /usr/local/bin/codex -C /repo .\n"
+                        "201 200 ttys003 codex /vendor/bin/codex -C /repo .\n"
+                        "300 30 ?? codex codex app-server --analytics-default-enabled\n"
+                    ),
+                    stderr="",
+                )
+
+            killed: list[tuple[int, int]] = []
+            fake_screen_runner = lambda *args, **kwargs: subprocess.CompletedProcess(args=args[0], returncode=1, stdout="", stderr="No Sockets found\n")
+            result = terminate_stale_codex_sessions_action(
+                {"confirmed": True},
+                marker_path=marker_path,
+                runner=fake_runner,
+                screen_runner=fake_screen_runner,
+                killer=lambda pid, sig: killed.append((pid, sig)),
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "stale_sessions_terminated")
+        self.assertEqual(result["protected_tty"], "ttys001")
+        self.assertEqual(result["stale_ttys"], ["ttys003"])
+        self.assertEqual(result["killed_pids"], [200])
+        self.assertEqual(killed, [(200, signal.SIGTERM)])
+
     def test_git_dirty_line_classification_separates_private_family_and_safe_changes(self) -> None:
         app_item = cockpit_module.classify_git_dirty_line(" M Samantha_Agent/app/cockpit.py")
         family_item = cockpit_module.classify_git_dirty_line("?? Samantha_Agent/memory/projects/family_memory_films.md")
@@ -1880,7 +1959,11 @@ class CockpitTests(unittest.TestCase):
                     {"audio_base64": "abc", "mime_type": "audio/webm", "language": "cs"},
                     inbox_dir=Path(temp_dir),
                     terminal_bridge=fake_bridge,
+                    pending_path=Path(temp_dir) / "pending_for_adam.json",
+                    history_path=Path(temp_dir) / "adam_voice_history.jsonl",
                 )
+                attempts = self.read_jsonl(Path(temp_dir) / "delivery_attempts.jsonl")
+                pending_exists = (Path(temp_dir) / "pending_for_adam.json").exists()
 
         self.assertTrue(result["ok"])
         self.assertEqual(result["text"], "Najdi dnešní dokumenty.")
@@ -1890,6 +1973,9 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("předán přímo do Codexu", result["message"])
         self.assertEqual(bridge_calls, ["Najdi dnešní dokumenty."])
         transcribe.assert_called_once_with("abc", mime_type="audio/webm", language="cs")
+        self.assertEqual(attempts[0]["delivery_status"], "voice_command_delivered")
+        self.assertEqual(attempts[0]["text_chars"], len("Najdi dnešní dokumenty."))
+        self.assertFalse(pending_exists)
 
     def test_cockpit_save_voice_text_action_writes_inbox(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -1903,8 +1989,12 @@ class CockpitTests(unittest.TestCase):
                 {"text": "Adame, spočítej dnešní handoffy."},
                 inbox_dir=Path(temp_dir),
                 terminal_bridge=fake_bridge,
+                pending_path=Path(temp_dir) / "pending_for_adam.json",
+                history_path=Path(temp_dir) / "adam_voice_history.jsonl",
             )
             latest_path = Path(temp_dir) / "latest_voice_command.md"
+            pending_path = Path(temp_dir) / "pending_for_adam.json"
+            history_path = Path(temp_dir) / "adam_voice_history.jsonl"
 
             self.assertTrue(result["ok"])
             self.assertEqual(result["status"], "voice_text_saved")
@@ -1914,6 +2004,17 @@ class CockpitTests(unittest.TestCase):
             self.assertEqual(result["voice_delivery_status"], "voice_command_delivery_unverified")
             self.assertIn("odeslán do označené Codex relace", result["message"])
             self.assertEqual(bridge_calls, ["Adame, spočítej dnešní handoffy."])
+            pending = json.loads(pending_path.read_text(encoding="utf-8"))
+            self.assertTrue(pending["pending"])
+            self.assertEqual(pending["reason"], "voice_command_delivery_unverified")
+            self.assertEqual(pending["text"], "Adame, spočítej dnešní handoffy.")
+            history = self.read_jsonl(history_path)
+            self.assertEqual(history[-1]["route"], "voice_command_delivery_unverified")
+            self.assertEqual(history[-1]["adam_response"], result["message"])
+            attempts = self.read_jsonl(Path(temp_dir) / "delivery_attempts.jsonl")
+            self.assertEqual(attempts[-1]["delivery_status"], "voice_command_delivery_unverified")
+            self.assertEqual(attempts[-1]["bridge_status"], "delivered_tty")
+            self.assertNotIn("spočítej", json.dumps(attempts[-1], ensure_ascii=False))
 
     def test_selected_voice_delivery_transport_defaults_to_local_tty(self) -> None:
         with patch.dict("os.environ", {}, clear=True):
@@ -1948,6 +2049,8 @@ class CockpitTests(unittest.TestCase):
                 result = cockpit_save_voice_text_action(
                     {"text": "Adame, řekni krátký stav."},
                     inbox_dir=Path(temp_dir),
+                    pending_path=Path(temp_dir) / "pending_for_adam.json",
+                    history_path=Path(temp_dir) / "adam_voice_history.jsonl",
                 )
 
         self.assertTrue(result["ok"])

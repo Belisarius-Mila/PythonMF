@@ -59,6 +59,17 @@ Stav k 2026-06-11:
 - Cockpit ma v hlasovem panelu tlacitko `Otevřít audiokanál`; po prvnim skutecnem klepnuti na iPhonu se zmeni na `Audiokanál otevřený` a dalsi odpovedi se pokousi prehrat primo na iPhonu bez Mac TTS fallbacku.
 - Relevantni commity: `36ae38c Stabilize Cockpit voice reply routing`, `b9be2e0 Keep remote Cockpit speech on device`, `45b18f4 Unlock remote Cockpit voice playback`, `ed19364 Add Cockpit audio channel control`.
 
+Stav k 2026-06-12:
+
+- Mac/Tailscale Cockpit rozlisuje mobilni a desktopovy remote klient: Mac muze pouzit lokalni systemovy hlasovy fallback, iPhone zustava browser-first pres otevreny audiokanal.
+- Restart Cockpitu je odolnejsi proti zavodu s launchd: restart worker po ukonceni serveru nejdriv ceka, zda endpoint znovu odpovi, a pokud ano, nespousti druhou instanci.
+- Inline doruceni hlasoveho pokynu z Cockpitu uz nemlci pri selhani nebo neoverenem doruceni do Codexu. Cockpit zapise pending stav a posledni Adamovu odpoved s duvodem.
+- Dorucovaci pokusy se audituji do soukromeho `data/private/voice_inbox/delivery_attempts.jsonl` bez plneho textu pokynu.
+- Voice bridge povazuje vice nez jednu aktivni Codex relaci za varovny stav; vychozi ocekavany limit je 1 aktivni relace.
+- V panelu `Technicke nastaveni` / `Voice bridge cil` vzniklo tlacitko `Ukoncit stare relace`, ktere po potvrzeni ukonci jen stare Codex relace mimo aktualni `effective_tty`.
+- Pri realnem uklidu byly ukonceny zbytky testovacich relaci `ttys003` a `ttys005`; zustala aktualni relace `ttys001` a voice bridge hlasi `ok`.
+- Pro bezny provoz plati prakticke pravidlo: aktivni hlasova prace ma mit jednu hlavni Codex relaci. Vedlejsi relace ukoncovat pres `Ctrl-C` a potom `exit`; krizkem zavirat az po ukonceni procesu.
+
 ## Cíl
 
 Cílem je mít praktický způsob, jak vytvářet české hlasové MP3 soubory pro výukové aplikace, pohádky, slovíčka a další projekty.
