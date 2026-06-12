@@ -19,6 +19,7 @@ from app.lekarna.photo_import import (
     APPLY_CONFIRMATION_PHRASE,
     apply_lekarna_photo_import_manifest,
     prepare_lekarna_photo_import_manifest,
+    stage_lekarna_photo_import_sources,
     validate_lekarna_photo_sources,
 )
 from app.lekarna.search_tags import build_search_tags
@@ -324,6 +325,37 @@ class LekarnaServiceTests(unittest.TestCase):
             self.assertEqual(rows[0]["include"], "ano")
             self.assertEqual(rows[0]["nutno_overit"], "ano")
             self.assertEqual(rows[0]["expirace"], "nezjisteno")
+
+    def test_photo_import_stage_sources_copies_photos_and_writes_manifest(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            directory = Path(temp_dir)
+            downloads = directory / "Downloads"
+            downloads.mkdir()
+            photo_dir = directory / "Leky_v_Krabickach"
+            photo_dir.mkdir()
+            first = downloads / "IMG_2001.JPG"
+            second = downloads / "IMG_2002.png"
+            first.write_text("fake first", encoding="utf-8")
+            second.write_text("fake second", encoding="utf-8")
+            csv_path = _fake_csv(directory)
+            manifest_path = directory / "photo_imports" / "manifest.csv"
+
+            result = stage_lekarna_photo_import_sources(
+                source_paths=[first, second],
+                photo_dir=photo_dir,
+                csv_path=csv_path,
+                manifest_path=manifest_path,
+            )
+
+            self.assertEqual(result.rows, 2)
+            self.assertEqual(result.copied_count, 2)
+            self.assertTrue((photo_dir / "IMG_2001.JPG").exists())
+            self.assertTrue((photo_dir / "IMG_2002.png").exists())
+            with manifest_path.open(newline="", encoding="utf-8") as handle:
+                rows = list(csv.DictReader(handle))
+            self.assertEqual([row["source_file"] for row in rows], ["IMG_2001.JPG", "IMG_2002.png"])
+            self.assertEqual(rows[0]["include"], "ano")
+            self.assertEqual(rows[0]["zdroj"], "Leky_v_Krabickach/")
 
     def test_photo_import_apply_manifest_backs_up_renames_and_appends(self) -> None:
         with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:

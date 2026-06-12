@@ -39,6 +39,16 @@ class PhotoImportResult:
 
 
 @dataclass(frozen=True)
+class StagedPhotoImportResult:
+    manifest_path: Path
+    rows: int
+    copied_count: int
+    copied_files: tuple[str, ...]
+    warnings: tuple[str, ...]
+    message: str
+
+
+@dataclass(frozen=True)
 class AppliedPhotoImportResult:
     csv_path: Path
     backup_path: Path
@@ -105,6 +115,87 @@ def prepare_lekarna_photo_import_manifest(
     else:
         message = "Nenasla jsem zadne nove fotky k importu."
     return PhotoImportResult(manifest_path=manifest_path, rows=len(candidates), message=message)
+
+
+def stage_lekarna_photo_import_sources(
+    source_paths: list[Path],
+    photo_dir: Path = DEFAULT_PHOTO_DIR,
+    csv_path: Path = DEFAULT_DOMACI_LEKY_CSV,
+    manifest_path: Path | None = None,
+) -> StagedPhotoImportResult:
+    """Copy selected external photos into the private pharmacy photo dir and make a manifest."""
+    photo_dir = photo_dir.resolve()
+    csv_path = csv_path.resolve()
+    manifest_path = manifest_path or _default_manifest_path()
+    manifest_path = manifest_path.resolve()
+
+    _ensure_within_project(photo_dir)
+    _ensure_within_project(csv_path)
+    _ensure_within_project(manifest_path)
+
+    if not source_paths:
+        raise ValueError("Neni zadana zadna fotka k priprave importu.")
+
+    photo_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    existing_sources = _load_existing_sources(csv_path)
+    rows: list[dict[str, str]] = []
+    copied_files: list[str] = []
+    warnings: list[str] = []
+    seen_names: set[str] = set()
+
+    for raw_source in source_paths:
+        source = raw_source.expanduser().resolve()
+        if not _is_candidate_photo(source):
+            raise ValueError(f"Neni podporovana fotka: {raw_source}")
+        if source.name in seen_names:
+            raise ValueError(f"Duplicitni nazev zdrojove fotky: {source.name}")
+        seen_names.add(source.name)
+
+        csv_source = f"{photo_dir.name}/{source.name}"
+        if csv_source in existing_sources:
+            warnings.append(f"CSV uz obsahuje zdroj: {csv_source}")
+            continue
+
+        target = photo_dir / source.name
+        if target.exists():
+            warnings.append(f"Cilova fotka uz existuje, nekopiruji: {target.name}")
+        else:
+            shutil.copy2(source, target)
+            copied_files.append(target.name)
+
+        row = {field: "" for field in MANIFEST_FIELD_NAMES}
+        row.update(SAFE_DEFAULTS)
+        row["include"] = "ano"
+        row["source_file"] = source.name
+        row["zdroj"] = f"{photo_dir.name}/"
+        row["poznamky"] = (
+            "Nacteno z fotografie krabicky; pred pouzitim overit expiraci, "
+            "slozeni a vhodnost podle pribalove informace nebo lekarnika."
+        )
+        rows.append(row)
+
+    with manifest_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=MANIFEST_FIELD_NAMES)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    if rows:
+        message = (
+            f"Fotky pripravene pro kontrolu: {len(rows)} radku v manifestu {manifest_path}. "
+            "Dopln metadata a potom spust potvrzeny apply krok."
+        )
+    else:
+        message = "Zadne nove fotky nebyly pripraveny; vsechny zadane zdroje uz jsou v CSV."
+
+    return StagedPhotoImportResult(
+        manifest_path=manifest_path,
+        rows=len(rows),
+        copied_count=len(copied_files),
+        copied_files=tuple(copied_files),
+        warnings=tuple(warnings),
+        message=message,
+    )
 
 
 def apply_lekarna_photo_import_manifest(
@@ -212,6 +303,35 @@ def format_prepare_lekarna_photo_import_manifest() -> str:
         "- Nejasne polozky nechat jako `neovereno`, `jistota_cteni=nizka` a `nutno_overit=ano`.",
         "- Samotny zapis provede az potvrzeny apply krok.",
     ]
+    return "\n".join(lines)
+
+
+def format_stage_lekarna_photo_import_sources(source_paths: list[str], manifest_path: str | None = None) -> str:
+    result = stage_lekarna_photo_import_sources(
+        source_paths=[Path(path) for path in source_paths],
+        manifest_path=Path(manifest_path) if manifest_path else None,
+    )
+    lines = [
+        "Lekarna photo import - staging fotek",
+        result.message,
+        f"Zkopirovano fotek: {result.copied_count}",
+        f"Radku v manifestu: {result.rows}",
+        f"Manifest: {result.manifest_path}",
+    ]
+    if result.copied_files:
+        lines.extend(["", "Pripravene fotky:"])
+        lines.extend(f"- {name}" for name in result.copied_files)
+    if result.warnings:
+        lines.extend(["", "Upozorneni:"])
+        lines.extend(f"- {warning}" for warning in result.warnings)
+    lines.extend(
+        [
+            "",
+            "Dalsi krok:",
+            "- Zkontrolovat a doplnit metadata v manifestu.",
+            "- Samotny zapis do evidence provede az potvrzeny apply krok.",
+        ]
+    )
     return "\n".join(lines)
 
 

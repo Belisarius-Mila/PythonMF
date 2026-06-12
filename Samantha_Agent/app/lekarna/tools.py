@@ -5,6 +5,7 @@ from agents import function_tool
 from .photo_import import (
     format_apply_lekarna_photo_import_manifest,
     format_prepare_lekarna_photo_import_manifest,
+    format_stage_lekarna_photo_import_sources,
     format_validate_lekarna_photo_sources,
 )
 from .service import (
@@ -53,6 +54,15 @@ def apply_vyrazeni_leku(
 def prepare_lekarna_photo_import() -> str:
     """Prepare a CSV manifest template for newly added medicine-box photos."""
     return format_prepare_lekarna_photo_import_manifest()
+
+
+@function_tool
+def stage_lekarna_photo_import(source_paths: list[str], manifest_path: str | None = None) -> str:
+    """Copy selected external medicine photos into private storage and prepare a manifest."""
+    return format_stage_lekarna_photo_import_sources(
+        source_paths=source_paths,
+        manifest_path=manifest_path,
+    )
 
 
 @function_tool

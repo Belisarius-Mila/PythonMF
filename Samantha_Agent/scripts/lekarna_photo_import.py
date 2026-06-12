@@ -13,6 +13,7 @@ from app.lekarna.photo_import import (
     APPLY_CONFIRMATION_PHRASE,
     apply_lekarna_photo_import_manifest,
     prepare_lekarna_photo_import_manifest,
+    stage_lekarna_photo_import_sources,
     validate_lekarna_photo_sources,
 )
 
@@ -25,6 +26,18 @@ def main() -> int:
 
     prepare_parser = subparsers.add_parser("prepare", help="Create a CSV manifest for new medicine photos.")
     prepare_parser.add_argument("--manifest", help="Optional output manifest path.")
+
+    stage_parser = subparsers.add_parser(
+        "stage",
+        help="Copy selected external photos into the private medicine photo dir and create a manifest.",
+    )
+    stage_parser.add_argument(
+        "--source",
+        action="append",
+        required=True,
+        help="Source photo path. Repeat for multiple photos, e.g. --source ~/Downloads/IMG_0001.JPG.",
+    )
+    stage_parser.add_argument("--manifest", help="Optional output manifest path.")
 
     apply_parser = subparsers.add_parser("apply", help="Apply a reviewed manifest.")
     apply_parser.add_argument("--manifest", required=True, help="Path to the reviewed CSV manifest.")
@@ -43,6 +56,22 @@ def main() -> int:
         print(result.message)
         print(f"manifest={result.manifest_path}")
         print(f"rows={result.rows}")
+        return 0
+
+    if args.command == "stage":
+        manifest_path = Path(args.manifest) if args.manifest else None
+        result = stage_lekarna_photo_import_sources(
+            source_paths=[Path(source) for source in args.source],
+            manifest_path=manifest_path,
+        )
+        print(result.message)
+        print(f"manifest={result.manifest_path}")
+        print(f"rows={result.rows}")
+        print(f"copied={result.copied_count}")
+        for copied_file in result.copied_files:
+            print(f"copied_file={copied_file}")
+        for warning in result.warnings:
+            print(f"warning={warning}")
         return 0
 
     if args.command == "apply":

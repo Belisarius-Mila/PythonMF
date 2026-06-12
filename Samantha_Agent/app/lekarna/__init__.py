@@ -5,8 +5,10 @@ from .photo_import import (
     apply_lekarna_photo_import_manifest,
     format_apply_lekarna_photo_import_manifest,
     format_prepare_lekarna_photo_import_manifest,
+    format_stage_lekarna_photo_import_sources,
     format_validate_lekarna_photo_sources,
     prepare_lekarna_photo_import_manifest,
+    stage_lekarna_photo_import_sources,
     validate_lekarna_photo_sources as validate_lekarna_photo_sources_records,
 )
 from .service import (
@@ -27,6 +29,7 @@ from .tools import (
     prepare_lekarna_photo_import,
     preview_vyrazeni_leku,
     search_domaci_leky,
+    stage_lekarna_photo_import,
     validate_lekarna_photo_sources,
 )
 
@@ -45,6 +48,7 @@ __all__ = [
     "format_domaci_leky_search",
     "format_retire_domaci_lek",
     "format_prepare_lekarna_photo_import_manifest",
+    "format_stage_lekarna_photo_import_sources",
     "format_validate_lekarna_photo_sources",
     "load_domaci_leky",
     "prepare_lekarna_photo_import",
@@ -52,6 +56,8 @@ __all__ = [
     "preview_vyrazeni_leku",
     "search_domaci_leky",
     "search_domaci_leky_records",
+    "stage_lekarna_photo_import",
+    "stage_lekarna_photo_import_sources",
     "validate_lekarna_photo_sources",
     "validate_lekarna_photo_sources_records",
 ]
