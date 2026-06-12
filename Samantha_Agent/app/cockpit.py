@@ -10507,6 +10507,8 @@ COCKPIT_HTML = """<!doctype html>
     .voice-card.warn { border-color: #fbbf24; background: #fffbeb; }
     .voice-card-title { font-size: 13px; font-weight: 700; color: var(--ink); }
     .voice-card-text { color: var(--ink); font-size: 14px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .voice-card-field { display: grid; gap: 2px; }
+    .voice-card-label { color: var(--muted); font-size: 12px; font-weight: 700; }
     .voice-card-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .voice-card-actions button.needs-tap { background: var(--blue); color: white; }
     .voice-card.hidden { display: none; }
@@ -10787,9 +10789,22 @@ COCKPIT_HTML = """<!doctype html>
 		        </div>
 		        <div id="codexApprovalCard" class="voice-card warn hidden">
 		          <div class="voice-card-title">Codex čeká na potvrzení</div>
-		          <div id="codexApprovalReason" class="status-line"></div>
-		          <div id="codexApprovalCommand" class="voice-card-text"></div>
-		          <div id="codexApprovalNextStep" class="status-line"></div>
+		          <div class="voice-card-field">
+		            <div class="voice-card-label">Co chci udělat</div>
+		            <div id="codexApprovalCommand" class="voice-card-text"></div>
+		          </div>
+		          <div class="voice-card-field">
+		            <div class="voice-card-label">Proč</div>
+		            <div id="codexApprovalReason" class="voice-card-text"></div>
+		          </div>
+		          <div class="voice-card-field">
+		            <div class="voice-card-label">Riziko</div>
+		            <div id="codexApprovalRisk" class="voice-card-text"></div>
+		          </div>
+		          <div class="voice-card-field">
+		            <div class="voice-card-label">Co má Míla udělat</div>
+		            <div id="codexApprovalNextStep" class="voice-card-text"></div>
+		          </div>
 		          <div class="voice-card-actions">
 		            <button class="secondary" id="codexApprovalClearBtn">Vyčistit kartu</button>
 		          </div>
@@ -11467,6 +11482,7 @@ COCKPIT_HTML = """<!doctype html>
     const codexApprovalCard = document.getElementById("codexApprovalCard");
     const codexApprovalReason = document.getElementById("codexApprovalReason");
     const codexApprovalCommand = document.getElementById("codexApprovalCommand");
+    const codexApprovalRisk = document.getElementById("codexApprovalRisk");
     const codexApprovalNextStep = document.getElementById("codexApprovalNextStep");
     const codexApprovalClearBtn = document.getElementById("codexApprovalClearBtn");
     const voiceApprovalCard = document.getElementById("voiceApprovalCard");
@@ -11678,6 +11694,7 @@ COCKPIT_HTML = """<!doctype html>
         "codexApprovalCard",
         "codexApprovalReason",
         "codexApprovalCommand",
+        "codexApprovalRisk",
         "codexApprovalNextStep",
         "voiceApprovalCard",
         "voiceApprovalReason",
@@ -14231,16 +14248,20 @@ COCKPIT_HTML = """<!doctype html>
 		      codexApprovalCard.classList.toggle("hidden", !active);
 		      if (!active) return;
 		      const reason = String(approval.reason || approval.message || "Codex čeká na systémové potvrzení.").trim();
-		      const command = String(approval.command || "").trim();
+		      const command = String(approval.command || approval.action || "").trim();
+		      const risk = String(approval.risk || "").trim();
 		      const nextStep = String(approval.next_step || "").trim();
 		      if (codexApprovalReason) {
 		        codexApprovalReason.textContent = reason;
 		      }
 		      if (codexApprovalCommand) {
-		        codexApprovalCommand.textContent = command || "V terminálu nebo Codex UI je otevřená systémová žádost o povolení.";
+		        codexApprovalCommand.textContent = command || "V Codexu je otevřená systémová žádost o povolení.";
+		      }
+		      if (codexApprovalRisk) {
+		        codexApprovalRisk.textContent = risk || "Běžné systémové potvrzení. Před schválením se řiď textem v Codexu, pokud ukazuje vyšší riziko.";
 		      }
 		      if (codexApprovalNextStep) {
-		        codexApprovalNextStep.textContent = nextStep || "Otevři aktivní Codex relaci a rozhodni systémové potvrzení.";
+		        codexApprovalNextStep.textContent = nextStep || "Otevři aktivní Codex relaci a schval nebo zamítni systémové potvrzení podle zobrazeného textu.";
 		      }
 		    }
 

@@ -20,6 +20,7 @@ def build_parser() -> argparse.ArgumentParser:
     set_parser = subparsers.add_parser("set", help="Zapsat čekající Codex approval stav.")
     set_parser.add_argument("--reason", required=True, help="Proč Codex čeká na potvrzení.")
     set_parser.add_argument("--command", dest="command_text", default="", help="Stručný bezpečný popis příkazu nebo akce.")
+    set_parser.add_argument("--risk", default="", help="Stručné lidské shrnutí rizika, bez tajemství a dlouhých detailů.")
     set_parser.add_argument("--next-step", default="", help="Co má Míla udělat z iPhonu nebo u Macu.")
 
     clear_parser = subparsers.add_parser("clear", help="Označit Codex approval stav jako vyřešený.")
@@ -35,6 +36,7 @@ def main(argv: list[str] | None = None) -> int:
         result = save_codex_approval_request(
             reason=args.reason,
             command=args.command_text,
+            risk=args.risk,
             next_step=args.next_step,
         )
     else:

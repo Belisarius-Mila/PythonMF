@@ -351,6 +351,7 @@ class AdamVoiceModeTests(unittest.TestCase):
             saved = save_codex_approval_request(
                 reason="Codex potřebuje povolit kontrolu procesu.",
                 command="ps -o pid,command -ax",
+                risk="Read-only systémová kontrola běžících procesů.",
                 next_step="Na iPhonu otevři Codex a rozhodni systémové potvrzení.",
                 path=approval_path,
             )
@@ -366,6 +367,7 @@ class AdamVoiceModeTests(unittest.TestCase):
 
         self.assertTrue(saved["active"])
         self.assertEqual(loaded["status"], "waiting_for_codex_approval")
+        self.assertIn("Read-only", loaded["risk"])
         self.assertTrue(status["codex_approval"]["active"])
         self.assertIn("kontrolu procesu", status["codex_approval"]["reason"])
         self.assertFalse(cleared["active"])

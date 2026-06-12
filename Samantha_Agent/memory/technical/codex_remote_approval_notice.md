@@ -11,8 +11,9 @@ call, ma pred tim zapsat viditelny runtime stav do Cockpitu. Cockpit pak v
 dashboardu a v sekci `Hlas` ukaze kartu `Codex čeká na potvrzení`.
 
 Toto pravidlo neznamena, ze Cockpit umi systemove povoleni zmacknout. Zatim umi
-jen spolehlive ukazat, ze prace stoji na potvrzeni, proc stoji a co ma Mila
-udelat.
+jen spolehlive ukazat, ze prace stoji na potvrzeni. Karta musi byt psana pro
+Milu, ne pro vyvojare: co chce Codex udelat, proc, jake je riziko a co ma Mila
+ted udelat.
 
 ## Runtime soubor
 
@@ -33,8 +34,19 @@ Pred ocekavanym systemovym potvrzenim:
 .venv/bin/python scripts/codex_approval_notice.py set \
   --reason "Codex bude žádat systémové povolení." \
   --command "Stručný bezpečný popis akce." \
+  --risk "Read-only kontrola mimo sandbox; nic se nema menit." \
   --next-step "Otevři aktivní Codex relaci a rozhodni systémové potvrzení."
 ```
+
+Policka v Cockpitu:
+
+- `Co chci udelat` vychazi z `--command`.
+- `Proc` vychazi z `--reason`.
+- `Riziko` vychazi z `--risk`.
+- `Co ma Mila udelat` vychazi z `--next-step`.
+
+Neposilej do techto poli cele prikazy s tokeny, tajemstvi, cele osobni udaje ani
+dlouhe citlive texty. Kdyz je prikaz citlivy, popis jen kategorii akce.
 
 Po dokonceni nebo zruseni:
 
