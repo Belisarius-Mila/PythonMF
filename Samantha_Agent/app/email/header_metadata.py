@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from email.header import decode_header
+import re
 from typing import Any
+from urllib.parse import unquote_to_bytes
 
 from .models import EmailAttachmentMeta
 
@@ -20,40 +22,71 @@ def extract_attachment_metadata_from_bodystructure(message_data: list[object]) -
 
 
 def _extract_bodystructure_bytes(message_data: list[object]) -> bytes:
+    chunks: list[bytes] = []
+    collecting = False
     for item in message_data:
         if not (isinstance(item, tuple) and item):
             continue
         metadata = item[0]
         if not isinstance(metadata, bytes):
             continue
-        marker_index = metadata.upper().find(b"BODYSTRUCTURE")
-        if marker_index < 0:
-            continue
-        start = metadata.find(b"(", marker_index)
-        if start < 0:
-            continue
-        depth = 0
-        in_quote = False
-        escaped = False
-        for index in range(start, len(metadata)):
-            char = metadata[index]
-            if in_quote:
-                if escaped:
-                    escaped = False
-                elif char == 92:
-                    escaped = True
-                elif char == 34:
-                    in_quote = False
+        payload = item[1] if len(item) >= 2 and isinstance(item[1], bytes) else b""
+        if not collecting:
+            marker_index = metadata.upper().find(b"BODYSTRUCTURE")
+            if marker_index < 0:
                 continue
-            if char == 34:
-                in_quote = True
-            elif char == 40:
-                depth += 1
-            elif char == 41:
-                depth -= 1
-                if depth == 0:
-                    return metadata[start : index + 1]
+            start = metadata.find(b"(", marker_index)
+            if start < 0:
+                continue
+            metadata = metadata[start:]
+            collecting = True
+        chunks.append(_replace_terminal_literal(metadata, payload))
+        balanced = _balanced_bodystructure_prefix(b"".join(chunks))
+        if balanced:
+            return balanced
+    return b""
+
+
+def _replace_terminal_literal(metadata: bytes, payload: bytes) -> bytes:
+    match = re.search(rb"\{(\d+)\}\s*$", metadata)
+    if not match:
+        return metadata
+    try:
+        expected_length = int(match.group(1))
+    except ValueError:
+        return metadata
+    if len(payload) != expected_length:
+        return metadata
+    return metadata[: match.start()] + _quote_bodystructure_literal(payload)
+
+
+def _quote_bodystructure_literal(value: bytes) -> bytes:
+    return b'"' + value.replace(b"\\", b"\\\\").replace(b'"', b'\\"') + b'"'
+
+
+def _balanced_bodystructure_prefix(raw: bytes) -> bytes:
+    if not raw:
         return b""
+    depth = 0
+    in_quote = False
+    escaped = False
+    for index, char in enumerate(raw):
+        if in_quote:
+            if escaped:
+                escaped = False
+            elif char == 92:
+                escaped = True
+            elif char == 34:
+                in_quote = False
+            continue
+        if char == 34:
+            in_quote = True
+        elif char == 40:
+            depth += 1
+        elif char == 41:
+            depth -= 1
+            if depth == 0:
+                return raw[: index + 1]
     return b""
 
 
@@ -179,7 +212,11 @@ def _params(value: Any) -> dict[str, str]:
         key = _text(value[index]).lower()
         if not key:
             continue
-        params[key] = _decode_header_value(_text(value[index + 1]))
+        decoded_value = _decode_header_value(_text(value[index + 1]))
+        if key.endswith("*"):
+            key = key.rstrip("*")
+            decoded_value = _decode_rfc2231_value(decoded_value)
+        params[key] = decoded_value
     return params
 
 
@@ -206,3 +243,16 @@ def _decode_header_value(value: str | None) -> str:
         else:
             decoded_parts.append(part)
     return " ".join(" ".join(decoded_parts).split())
+
+
+def _decode_rfc2231_value(value: str) -> str:
+    if not value:
+        return ""
+    if "''" in value:
+        charset, encoded = value.split("''", 1)
+    else:
+        charset, encoded = "utf-8", value
+    try:
+        return unquote_to_bytes(encoded).decode(charset or "utf-8", errors="replace")
+    except (LookupError, ValueError):
+        return value

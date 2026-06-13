@@ -1323,6 +1323,7 @@ SCANDOCU_HTML = """<!doctype html>
     .download-result-title { font-weight: 650; overflow-wrap: anywhere; }
     .download-result-meta { color: #6b7280; margin-top: 2px; overflow-wrap: anywhere; }
     button { border: 0; border-radius: 6px; padding: 10px 13px; font: inherit; font-weight: 650; cursor: pointer; }
+    button:disabled { cursor: wait; opacity: 0.65; }
     .primary { background: #2563eb; color: white; }
     .secondary { background: #e5e7eb; color: #111827; }
     .danger { background: #fee2e2; color: #991b1b; }
@@ -1426,9 +1427,9 @@ SCANDOCU_HTML = """<!doctype html>
         <label for="tags">Tagy</label>
         <textarea id="tags"></textarea>
         <div class="actions">
-          <button class="primary" id="saveBtn">Uložit</button>
-          <button class="secondary" id="skipBtn">Přeskočit</button>
-          <button class="danger" id="stopBtn">Ukončit</button>
+          <button type="button" class="primary" id="saveBtn">Uložit</button>
+          <button type="button" class="secondary" id="skipBtn">Přeskočit</button>
+          <button type="button" class="danger" id="stopBtn">Ukončit</button>
         </div>
       </div>
     </section>
@@ -1466,9 +1467,12 @@ SCANDOCU_HTML = """<!doctype html>
       relatedAsset: document.getElementById("relatedAsset"),
       caseId: document.getElementById("caseId"),
       tags: document.getElementById("tags"),
-      pdfFrame: document.getElementById("pdfFrame")
+      pdfFrame: document.getElementById("pdfFrame"),
+      saveBtn: document.getElementById("saveBtn"),
+      skipBtn: document.getElementById("skipBtn")
     };
     let current = null;
+    let saving = false;
     const appMode = new URLSearchParams(window.location.search).get("mode") === "review" ? "review" : "downloads";
     const isReviewMode = appMode === "review";
     document.querySelector("h1").textContent = isReviewMode ? "ScanDocu Review" : "ScanDocu";
@@ -1582,41 +1586,54 @@ SCANDOCU_HTML = """<!doctype html>
     }
 
     async function saveCurrent() {
-      if (!current) return;
+      if (!current || saving) return;
       if (((current.probable_duplicates || []).length > 0 || (current.consistency_conflicts || []).length > 0) && !fields.allowDuplicate.checked) {
         fields.status.textContent = "Neuloženo: dokument má varování. Zkontroluj seznam a zaškrtni `Přesto uložit jako další dokument`, pokud ho chceš uložit.";
         fields.probableDuplicateBox.scrollIntoView({behavior: "smooth", block: "center"});
         return;
       }
-      fields.status.textContent = "Ukládám...";
-      const res = await fetch("/api/save", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          token: current.token,
-          title: fields.title.value,
-          domain: fields.domain.value,
-          document_type: fields.documentType.value,
-          counterparty: fields.counterparty.value,
-          related_asset: fields.relatedAsset.value,
-          case_id: fields.caseId.value,
-          tags: fields.tags.value,
-          allow_probable_duplicate: fields.allowDuplicate.checked
-        })
-      });
-      const data = await res.json();
-      if (!res.ok || data.error || data.status === "probable_duplicate" || data.status === "consistency_conflict") {
-        fields.status.textContent = data.message || data.error || "Uložení selhalo.";
-        current.consistency_conflicts = data.consistency_conflicts || [];
-        if (data.probable_duplicates || data.consistency_conflicts) {
-          renderImportWarnings(data.probable_duplicates || current.probable_duplicates || [], data.consistency_conflicts || []);
+      saving = true;
+      fields.saveBtn.disabled = true;
+      fields.skipBtn.disabled = true;
+      fields.saveBtn.textContent = "Ukládám...";
+      fields.status.textContent = "Ukládám dokument do vaultu. U větších PDF může krok trvat desítky sekund kvůli kopii, textové extrakci a indexu.";
+      try {
+        const res = await fetch("/api/save", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            token: current.token,
+            title: fields.title.value,
+            domain: fields.domain.value,
+            document_type: fields.documentType.value,
+            counterparty: fields.counterparty.value,
+            related_asset: fields.relatedAsset.value,
+            case_id: fields.caseId.value,
+            tags: fields.tags.value,
+            allow_probable_duplicate: fields.allowDuplicate.checked
+          })
+        });
+        const data = await res.json();
+        if (!res.ok || data.error || data.status === "probable_duplicate" || data.status === "consistency_conflict") {
+          fields.status.textContent = data.message || data.error || "Uložení selhalo.";
+          current.consistency_conflicts = data.consistency_conflicts || [];
+          if (data.probable_duplicates || data.consistency_conflicts) {
+            renderImportWarnings(data.probable_duplicates || current.probable_duplicates || [], data.consistency_conflicts || []);
+          }
+          return;
         }
-        return;
+        fields.status.textContent = `${data.status === "reviewed" ? "Aktualizováno" : "Uloženo"}: ${data.document_id}. Chceš pokračovat?`;
+        fields.formWrap.classList.add("hidden");
+        fields.completionActions.classList.remove("hidden");
+        current = null;
+      } catch (error) {
+        fields.status.textContent = `Uložení selhalo nebo server neodpověděl: ${error}`;
+      } finally {
+        saving = false;
+        fields.saveBtn.disabled = false;
+        fields.skipBtn.disabled = false;
+        fields.saveBtn.textContent = "Uložit";
       }
-      fields.status.textContent = `${data.status === "reviewed" ? "Aktualizováno" : "Uloženo"}: ${data.document_id}. Chceš pokračovat?`;
-      fields.formWrap.classList.add("hidden");
-      fields.completionActions.classList.remove("hidden");
-      current = null;
     }
 
     function renderImportWarnings(items, consistencyConflicts) {

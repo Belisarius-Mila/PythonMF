@@ -1294,6 +1294,9 @@ class DocumentVaultToolsTests(unittest.TestCase):
         self.assertIn("Revidovat z vaultu", SCANDOCU_HTML)
         self.assertIn("consistency_conflict", SCANDOCU_HTML)
         self.assertIn("renderImportWarnings", SCANDOCU_HTML)
+        self.assertIn("let saving = false", SCANDOCU_HTML)
+        self.assertIn("fields.saveBtn.disabled = true", SCANDOCU_HTML)
+        self.assertIn("U větších PDF může krok trvat desítky sekund", SCANDOCU_HTML)
 
     def test_duplicate_content_is_not_imported_twice(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

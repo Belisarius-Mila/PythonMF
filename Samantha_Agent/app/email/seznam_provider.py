@@ -319,10 +319,17 @@ class SeznamReadOnlyEmailProvider:
 
 
 def _first_bytes_payload(message_data: list[object]) -> bytes | None:
+    fallback: bytes | None = None
     for item in message_data:
-        if isinstance(item, tuple) and len(item) >= 2 and isinstance(item[1], bytes):
-            return item[1]
-    return None
+        if not (isinstance(item, tuple) and len(item) >= 2 and isinstance(item[1], bytes)):
+            continue
+        payload = item[1]
+        if fallback is None:
+            fallback = payload
+        message = message_from_bytes(payload)
+        if message.get("Date") or message.get("From") or message.get("Subject"):
+            return payload
+    return fallback
 
 
 def _first_safe_message_payload(message_data: list[object], max_bytes: int = MAX_MESSAGE_BYTES) -> bytes | None:

@@ -951,6 +951,7 @@ def apply_document_import_file(
     document_id: str = "",
     case_id: str = "",
     document_title: str = "",
+    reading_status: str = "",
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
     now: datetime | None = None,
 ) -> DocumentImportResult:
@@ -971,6 +972,9 @@ def apply_document_import_file(
     )
     if document_type.strip():
         metadata["document_type"] = safe_slug(document_type, default="document", limit=50)
+    safe_reading_status = safe_slug(reading_status, default="", limit=50)
+    if safe_reading_status and safe_reading_status not in {"ok", "needs_review", "unreadable", "superseded"}:
+        raise ValueError("Neplatny stav cteni dokumentu.")
     digest = sha256_file(source)
     duplicate = find_duplicate_by_sha(vault_dir=vault_dir, sha256=digest)
     if duplicate:
@@ -1035,6 +1039,8 @@ def apply_document_import_file(
             "private_text_index": True,
         },
     }
+    if safe_reading_status:
+        record["reading_status"] = safe_reading_status
     manifest_path = document_dir / "manifest.json"
     write_json(manifest_path, record)
 

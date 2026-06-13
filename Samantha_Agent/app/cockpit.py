@@ -3059,6 +3059,7 @@ def import_selected_email_pdf_attachments(
                     tags=f"email,email-attachment,pdf,{source.provider}",
                     case_id=f"email-{source.provider}-{source.uid}",
                     document_title=f"E-mail UID {source.uid} příloha {filename}",
+                    reading_status="needs_review",
                     vault_dir=documents_dir,
                 )
             except ValueError as exc:
