@@ -42,6 +42,7 @@ from app.documents.scandocu import SCANDOCU_HTML
 from app.documents.vault import format_document_inbox_reminder
 from app.documents.vault import has_explicit_document_import_confirmation
 from app.documents.vault import normalize_mobile_document_page
+from app.documents.vault import normalize_domain
 from app.documents.vault import parse_macos_vision_ocr_json
 from app.documents.vault import propose_metadata
 from app.documents.vault import resolve_pdftotext_binary
@@ -57,6 +58,11 @@ except ImportError:  # pragma: no cover
 
 
 class DocumentVaultToolsTests(unittest.TestCase):
+    def test_normalize_domain_preserves_custom_manual_domain(self) -> None:
+        self.assertEqual(normalize_domain("ČEZ smlouvy"), "cez-smlouvy")
+        self.assertEqual(normalize_domain("energie"), "energy")
+        self.assertEqual(normalize_domain(""), "other")
+
     def test_prepare_is_read_only_and_finds_due_date_candidates(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
@@ -1219,7 +1225,11 @@ class DocumentVaultToolsTests(unittest.TestCase):
             self.assertEqual(manifest["document_type"], "lease")
             self.assertEqual(manifest["counterparty"], "Jan Novak")
             self.assertEqual(manifest["related_asset"], "Dubova ulice")
+            self.assertEqual(manifest["reading_status"], "ok")
+            self.assertEqual(manifest["reading_status_note"], "Potvrzeno revizí ve ScanDocu.")
             self.assertIn("dubova-ulice", manifest["tags"])
+            docs = _read_jsonl(vault / "index" / "documents_index.jsonl")
+            self.assertEqual(docs[0]["reading_status"], "ok")
 
             next_candidate = prepare_next_stored_document_review(vault_dir=vault)
             self.assertIsNone(next_candidate)

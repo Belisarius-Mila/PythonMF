@@ -4077,9 +4077,16 @@ def sha256_file(path: Path) -> str:
 
 
 def normalize_domain(value: str) -> str:
-    key = value.casefold().strip()
-    key = SAFE_ID_PATTERN.sub("-", key).strip("-")
-    return DOMAIN_ALIASES.get(value.casefold().strip(), DOMAIN_ALIASES.get(key, "other"))
+    raw = value.casefold().strip()
+    alias = DOMAIN_ALIASES.get(raw)
+    if alias:
+        return alias
+    folded = unicodedata.normalize("NFKD", raw)
+    ascii_value = "".join(char for char in folded if not unicodedata.combining(char))
+    key = SAFE_ID_PATTERN.sub("-", ascii_value).strip("-")
+    if not key:
+        return "other"
+    return DOMAIN_ALIASES.get(key, key)
 
 
 def parse_tags(tags: str) -> list[str]:

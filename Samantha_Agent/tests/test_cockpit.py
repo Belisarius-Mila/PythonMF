@@ -80,6 +80,7 @@ from app.cockpit import (
     start_adam_voice_mode_action,
     start_cockpit_restart_action,
     stop_adam_voice_mode_action,
+    stored_documents_review_status,
     urgent_reminder_done_action,
     urgent_reminders_status,
     update_document_classification_metadata_action,
@@ -233,6 +234,43 @@ class CockpitTests(unittest.TestCase):
             self.assertNotIn("trashed-doc", str(status["review"]["next_items"]))
             self.assertEqual(status["problems"][0]["problem_kind"], "encrypted")
             self.assertEqual(status["problems"][1]["problem_kind"], "invalid")
+
+    def test_stored_documents_review_status_skips_already_reviewed_scandocu_items(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault = Path(temp_dir) / "documents"
+            index = vault / "index"
+            index.mkdir(parents=True)
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "stale-reviewed-doc",
+                        "title": "Už zrevidovaný",
+                        "domain": "energy",
+                        "document_type": "contract",
+                        "stored_path": "data/private/documents/vault/energy/stale-reviewed-doc/doc.pdf",
+                        "reading_status": "needs_review",
+                    },
+                    {
+                        "document_id": "pending-doc",
+                        "title": "Ještě čeká",
+                        "domain": "energy",
+                        "document_type": "contract",
+                        "stored_path": "data/private/documents/vault/energy/pending-doc/doc.pdf",
+                        "reading_status": "needs_review",
+                    },
+                ],
+            )
+            self.write_jsonl(
+                index / "scandocu_actions.jsonl",
+                [{"action": "reviewed", "document_id": "stale-reviewed-doc"}],
+            )
+
+            status = stored_documents_review_status(vault_dir=vault)
+
+        self.assertEqual(status["pending_count"], 1)
+        self.assertEqual(status["next_items"][0]["document_id"], "pending-doc")
+        self.assertNotIn("stale-reviewed-doc", json.dumps(status["next_items"], ensure_ascii=False))
 
     def test_document_intake_status_summarizes_all_document_sources_readonly(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -568,6 +606,32 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("ostatní / dokument", result["items"][0]["classification_summary"])
         self.assertNotIn("trashed-doc", json.dumps(result, ensure_ascii=False))
 
+    def test_document_classification_status_treats_email_attachment_type_as_incomplete(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault = Path(temp_dir) / "documents"
+            index = vault / "index"
+            index.mkdir(parents=True)
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "cez-doc",
+                        "title": "ČEZ smlouva",
+                        "domain": "energy",
+                        "document_type": "email-attachment-pdf",
+                        "counterparty": "ČEZ",
+                        "related_asset": "elektřina",
+                    },
+                ],
+            )
+
+            result = document_classification_status(vault_dir=vault)
+
+        self.assertEqual(result["active_documents"], 1)
+        self.assertEqual(result["complete_count"], 0)
+        self.assertEqual(result["issue_count"], 1)
+        self.assertEqual(result["items"][0]["missing_fields"], ["document_type"])
+
     def test_document_classification_status_includes_accept_suggestion(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             vault = Path(temp_dir) / "documents"
@@ -714,6 +778,7 @@ class CockpitTests(unittest.TestCase):
                     "document_type": "insurance_policy",
                     "counterparty": "ČPP",
                     "related_asset": "auto",
+                    "case_id": "ČPP Volvo 2026",
                 },
                 vault_dir=vault,
             )
@@ -729,11 +794,60 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(docs[0]["document_type"], "insurance_policy")
         self.assertEqual(docs[0]["counterparty"], "ČPP")
         self.assertEqual(docs[0]["related_asset"], "auto")
+        self.assertEqual(docs[0]["case_id"], "cpp-volvo-2026")
         self.assertEqual(manifest["domain"], "insurance")
         self.assertEqual(manifest["document_type"], "insurance_policy")
+        self.assertEqual(manifest["case_id"], "cpp-volvo-2026")
         self.assertEqual(audit[0]["action"], "update_classification_metadata")
         self.assertEqual(audit[0]["document_id"], "weak-1234567890")
+        self.assertIn("case_id", audit[0]["changed_fields"])
         self.assertIn("metadata_backups", audit[0]["backup_dir"])
+
+    def test_update_document_classification_metadata_preserves_custom_czech_domain_and_case(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault = Path(temp_dir) / "documents"
+            index = vault / "index"
+            document_dir = vault / "vault" / "other" / "cez-doc"
+            index.mkdir(parents=True)
+            document_dir.mkdir(parents=True)
+            stored_pdf = document_dir / "cez.pdf"
+            stored_pdf.write_bytes(b"%PDF-1.4\n")
+            (document_dir / "manifest.json").write_text(
+                json.dumps({"document_id": "cez-doc", "stored_path": str(stored_pdf)}, ensure_ascii=False),
+                encoding="utf-8",
+            )
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "cez-doc",
+                        "title": "ČEZ dokument",
+                        "domain": "other",
+                        "document_type": "email-attachment-pdf",
+                        "counterparty": "",
+                        "related_asset": "",
+                        "stored_path": str(stored_pdf),
+                    },
+                ],
+            )
+
+            result = update_document_classification_metadata_action(
+                document_id="cez-doc",
+                metadata={
+                    "domain": "ČEZ smlouvy",
+                    "document_type": "Dohoda o úpravě smlouvy",
+                    "counterparty": "ČEZ",
+                    "related_asset": "elektřina",
+                    "case_id": "ČEZ smlouvy 2026",
+                },
+                vault_dir=vault,
+            )
+            docs = self.read_jsonl(index / "documents_index.jsonl")
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(docs[0]["domain"], "cez-smlouvy")
+        self.assertEqual(docs[0]["document_type"], "dohoda-o-uprave-smlouvy")
+        self.assertEqual(docs[0]["case_id"], "cez-smlouvy-2026")
 
     def test_document_due_candidates_status_filters_noise_and_marks_existing_reminders(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -1214,6 +1328,40 @@ class CockpitTests(unittest.TestCase):
             self.assertIn("doplnit:", by_id["short-doc"]["review_summary"])
             self.assertIn("Čtení:", by_id["short-doc"]["reading_summary"])
             self.assertIn("protistrana", json.dumps(report, ensure_ascii=False))
+
+    def test_document_review_report_treats_email_attachment_type_as_weak_metadata(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault = Path(temp_dir) / "documents"
+            index = vault / "index"
+            index.mkdir(parents=True)
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "cez-email-pdf",
+                        "title": "ČEZ smlouva",
+                        "domain": "energy",
+                        "document_type": "email-attachment-pdf",
+                        "counterparty": "ČEZ",
+                        "related_asset": "elektřina",
+                        "reading_status": "ok",
+                        "text_extraction": {"method": "pdftotext", "indexed_chars": 1200},
+                    },
+                ],
+            )
+            self.write_jsonl(
+                index / "text_index.jsonl",
+                [{"document_id": "cez-email-pdf", "text": "x" * 1200}],
+            )
+
+            report = document_review_report_status(vault_dir=vault)
+
+        self.assertEqual(report["summary"]["candidate_count"], 1)
+        self.assertEqual(report["summary"]["reason_counts"]["weak_metadata"], 1)
+        item = report["items"][0]
+        self.assertEqual(item["decision_group"], "weak_metadata")
+        self.assertEqual(item["weak_metadata_fields"], ["document_type"])
+        self.assertIn("typ dokumentu", item["weak_metadata_labels"])
 
     def test_action_queue_prioritizes_conflicts_and_nearest_work(self) -> None:
         document_work = {

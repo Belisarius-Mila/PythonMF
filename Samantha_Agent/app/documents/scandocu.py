@@ -764,8 +764,12 @@ def update_reviewed_document_metadata(
     updated["related_asset"] = safe_text(related_asset)
     updated["case_id"] = safe_slug(case_id, default="", limit=100) if case_id else ""
     updated["tags"] = merge_tags(parse_tags(tags), [])
-    updated["reviewed_at"] = now_iso()
+    reviewed_at = now_iso()
+    updated["reviewed_at"] = reviewed_at
     updated["review_source"] = "scandocu_vault_review"
+    updated["reading_status"] = "ok"
+    updated["reading_status_updated_at"] = reviewed_at
+    updated["reading_status_note"] = "Potvrzeno revizí ve ScanDocu."
 
     backup_dir = backup_review_document_metadata(vault_dir=vault_dir, document_id=document_id, manifest_path=manifest_path)
     write_json(manifest_path, updated)

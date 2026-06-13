@@ -14,6 +14,7 @@ import signal
 import subprocess
 import tempfile
 import time
+import unicodedata
 import urllib.error
 from collections.abc import Callable
 from datetime import date, datetime, timezone
@@ -47,7 +48,7 @@ from app.article_archive import (
 )
 from app.backup.activity_state import backup_activity_status
 from app.documents.consistency_audit import format_document_consistency_audit, run_document_consistency_audit, save_audit_decision
-from app.documents.scandocu import DEFAULT_DOWNLOADS_DIR, scan_downloads_for_pdfs
+from app.documents.scandocu import DEFAULT_DOWNLOADS_DIR, reviewed_document_ids, scan_downloads_for_pdfs
 from app.documents.vault import (
     DEFAULT_DOCUMENTS_DIR,
     DEFAULT_MOBILE_DOCUMENT_INBOX,
@@ -58,6 +59,7 @@ from app.documents.vault import (
     append_jsonl,
     is_pdf_encrypted,
     next_available_path,
+    normalize_domain,
     prepare_document_print_job,
     propose_metadata,
     read_jsonl,
@@ -253,6 +255,7 @@ DOCUMENT_REVIEW_FIELD_LABELS: dict[str, str] = {
     "document_type": "typ dokumentu",
     "counterparty": "protistrana",
     "related_asset": "vazba na auto/projekt/věc",
+    "case_id": "case / souvislost",
 }
 DOCUMENT_DOMAIN_LABELS: dict[str, str] = {
     "car": "auto",
@@ -290,6 +293,7 @@ DOCUMENT_METADATA_UPDATE_FIELDS: tuple[str, ...] = (
     "document_type",
     "counterparty",
     "related_asset",
+    "case_id",
 )
 DOCUMENT_DUE_TYPE_LABELS: dict[str, str] = {
     "payment_due": "platba",
@@ -6071,6 +6075,7 @@ def document_cases_status(
         document_type = safe_text(str(row.get("document_type", "")))[:80]
         counterparty = safe_text(str(row.get("counterparty", "")))[:120]
         related_asset = safe_text(str(row.get("related_asset", "")))[:120]
+        case_id = safe_text(str(row.get("case_id", "")))[:120]
         reading_status = effective_document_reading_status(row)
         if related_asset:
             linked_count += 1
@@ -6359,6 +6364,7 @@ def document_classification_status(
         document_type = safe_text(str(row.get("document_type", "")))[:80]
         counterparty = safe_text(str(row.get("counterparty", "")))[:120]
         related_asset = safe_text(str(row.get("related_asset", "")))[:120]
+        case_id = safe_text(str(row.get("case_id", "")))[:120]
         if domain:
             domain_counts[document_domain_label(domain)] = domain_counts.get(document_domain_label(domain), 0) + 1
         if document_type:
@@ -6394,11 +6400,13 @@ def document_classification_status(
                 "document_type_label": document_type_label(document_type),
                 "counterparty": counterparty,
                 "related_asset": related_asset,
+                "case_id": case_id,
                 "missing_fields": missing_fields,
                 "missing_labels": missing_labels,
                 "classification_summary": (
                     f"{document_domain_label(domain)} / {document_type_label(document_type)} | "
                     f"{counterparty or 'protistrana chybí'} | {related_asset or 'vazba chybí'}"
+                    f"{' | case: ' + case_id if case_id else ''}"
                 ),
                 "recommended_action": recommended_action,
                 "metadata_suggestion": metadata_suggestion,
@@ -6516,6 +6524,12 @@ def document_metadata_value_label(field: str, value: str) -> str:
     return value
 
 
+def safe_manual_metadata_slug(value: str, *, limit: int = 80) -> str:
+    folded = unicodedata.normalize("NFKD", value.casefold().strip())
+    ascii_value = "".join(char for char in folded if not unicodedata.combining(char))
+    return safe_slug(ascii_value, default="", limit=limit)
+
+
 def document_metadata_suggestion_confidence(changes: dict[str, dict[str, str]]) -> str:
     fields = set(changes)
     if "domain" in fields and ("document_type" in fields or "related_asset" in fields):
@@ -6575,7 +6589,7 @@ def document_classification_missing_fields(
     type_slug = safe_slug(document_type, default="", limit=80)
     if not domain_slug or domain_slug in {"other", "unknown"}:
         missing.append("domain")
-    if not type_slug or type_slug in {"document", "unknown"}:
+    if not type_slug or type_slug in {"document", "unknown", "email-attachment-pdf"}:
         missing.append("document_type")
     if not safe_text(counterparty):
         missing.append("counterparty")
@@ -6609,8 +6623,10 @@ def update_document_classification_metadata_action(
         if field not in metadata:
             continue
         raw_value = str(metadata.get(field, "") or "").strip()
-        if field in {"domain", "document_type"}:
-            updates[field] = safe_slug(raw_value, default="", limit=80)
+        if field == "domain":
+            updates[field] = normalize_domain(raw_value) if raw_value else ""
+        elif field in {"document_type", "case_id"}:
+            updates[field] = safe_manual_metadata_slug(raw_value, limit=80)
         else:
             updates[field] = safe_text(raw_value)[:180]
     if not updates:
@@ -6748,6 +6764,7 @@ def stored_documents_review_status(vault_dir: Path = DEFAULT_DOCUMENTS_DIR, limi
         str(item.get("document_id", "")): str(item.get("text", ""))
         for item in read_jsonl(vault_dir / "index" / "text_index.jsonl")
     }
+    reviewed_ids = reviewed_document_ids(vault_dir)
     pending: list[dict[str, Any]] = []
     status_counts = {status: 0 for status in READING_STATUS_LABELS}
     for row in read_jsonl(vault_dir / "index" / "documents_index.jsonl"):
@@ -6760,6 +6777,8 @@ def stored_documents_review_status(vault_dir: Path = DEFAULT_DOCUMENTS_DIR, limi
         reading_status = effective_document_reading_status(row, text_chars=len(text_by_id.get(document_id, "")))
         status_counts[reading_status] = status_counts.get(reading_status, 0) + 1
         if reading_status != "needs_review":
+            continue
+        if safe_slug(document_id, default="", limit=140) in reviewed_ids:
             continue
         pending.append(
             {
@@ -6823,7 +6842,10 @@ def document_review_report_status(
             reasons.append("ocr_needed")
         for field, fallback in (("domain", "other"), ("document_type", "document")):
             value = safe_slug(str(row.get(field, "")), default="", limit=80)
-            if not value or value in {fallback, "unknown"}:
+            weak_values = {fallback, "unknown"}
+            if field == "document_type":
+                weak_values.add("email-attachment-pdf")
+            if not value or value in weak_values:
                 weak_fields.append(field)
         for field in ("counterparty", "related_asset"):
             if not safe_text(str(row.get(field, ""))):
@@ -12640,7 +12662,7 @@ COCKPIT_HTML = """<!doctype html>
       const domain = promptClassificationValue(
         "Oblast dokumentu",
         item.domain || "",
-        "Např. insurance, car, home, tax, energy, telecom, employment, health, warranty, other."
+        "Např. insurance, car, home, tax, energy, telecom, employment, health, warranty. Můžeš napsat i novou oblast, uloží se jako bezpečný slug."
       );
       if (domain === null) return;
       const documentType = promptClassificationValue(
@@ -12653,11 +12675,18 @@ COCKPIT_HTML = """<!doctype html>
       if (counterparty === null) return;
       const relatedAsset = promptClassificationValue("Vazba na auto/projekt/věc", item.related_asset || "", "Např. auto, Volvo V40, byt, penze, energie.");
       if (relatedAsset === null) return;
+      const caseId = promptClassificationValue(
+        "Case / souvislost",
+        item.case_id || "",
+        "Volitelné. Např. cez-smlouva-energie-2026 nebo ponech prázdné. Nový case vznikne tímto názvem."
+      );
+      if (caseId === null) return;
       const summary = [
         `Oblast: ${domain || "(prázdné)"}`,
         `Typ: ${documentType || "(prázdné)"}`,
         `Protistrana: ${counterparty || "(prázdné)"}`,
-        `Vazba: ${relatedAsset || "(prázdné)"}`
+        `Vazba: ${relatedAsset || "(prázdné)"}`,
+        `Case: ${caseId || "(prázdné)"}`
       ].join("\\n");
       const ok = window.confirm(`Uložit metadata dokumentu?\\n\\n${item.title || "Dokument"}\\n\\n${summary}`);
       if (!ok) return;
@@ -12672,7 +12701,8 @@ COCKPIT_HTML = """<!doctype html>
             domain,
             document_type: documentType,
             counterparty,
-            related_asset: relatedAsset
+            related_asset: relatedAsset,
+            case_id: caseId
           }
         });
         documentClassificationStatus.textContent = result.message || "Metadata uložena.";
