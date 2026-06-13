@@ -6,9 +6,11 @@ import unittest
 import os
 import subprocess
 from pathlib import Path
+from unittest.mock import patch
 
 from scripts.git_safety_check import StagedFile, check_staged, format_report, path_is_blocked
 from scripts.autosave_status import autosave_status, find_autosave_watchers, format_autosave_status
+from scripts.autosave_resume_prompt import autosave_resume_candidate, parse_autosave_source, startup_prompt
 from scripts.system_quick_check import CheckLine, autosave_line, format_morning_sentence
 
 
@@ -117,6 +119,47 @@ class SystemQuickCheckTests(unittest.TestCase):
 
         self.assertIn("watcher: nebezi", text)
         self.assertIn("Dalsi krok po potvrzeni", text)
+
+    def test_autosave_resume_candidate_offers_newer_autosave_than_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "rollout-test.jsonl"
+            latest_info = root / "latest_info.txt"
+            source.write_text("{}", encoding="utf-8")
+            latest_info.write_text(f"Source: {source}\n", encoding="utf-8")
+            os.utime(source, (2000, 2000))
+
+            with patch("scripts.autosave_resume_prompt.last_commit_timestamp", return_value=(1000.0, "")):
+                candidate = autosave_resume_candidate(latest_info_path=latest_info, project_root=root)
+
+        self.assertTrue(candidate.should_offer)
+        self.assertIn("novejsi nez posledni commit", candidate.reason)
+
+    def test_autosave_resume_candidate_skips_older_autosave_than_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "rollout-test.jsonl"
+            latest_info = root / "latest_info.txt"
+            source.write_text("{}", encoding="utf-8")
+            latest_info.write_text(f"Source: {source}\n", encoding="utf-8")
+            os.utime(source, (1000, 1000))
+
+            with patch("scripts.autosave_resume_prompt.last_commit_timestamp", return_value=(2000.0, "")):
+                candidate = autosave_resume_candidate(latest_info_path=latest_info, project_root=root)
+
+        self.assertFalse(candidate.should_offer)
+        self.assertIn("neni novejsi", candidate.reason)
+
+    def test_parse_autosave_source_and_startup_prompt_do_not_read_session_body(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source = Path(temp_dir) / "rollout-test.jsonl"
+            latest_info = Path(temp_dir) / "latest_info.txt"
+            latest_info.write_text(f"Saved at: test\nSource: {source}\n", encoding="utf-8")
+
+            parsed = parse_autosave_source(latest_info)
+
+        self.assertEqual(parsed, source)
+        self.assertIn("Jen cti, nic nemen", startup_prompt())
 
 
 if __name__ == "__main__":

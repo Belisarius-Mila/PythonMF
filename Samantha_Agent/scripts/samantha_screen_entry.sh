@@ -4,7 +4,9 @@ set -eu
 PROJECT_DIR="$HOME/Desktop/PythonMF/Samantha_Agent"
 CODEX_BIN="${CODEX_BIN:-/usr/local/bin/codex}"
 AUTOSAVE_SCRIPT="$PROJECT_DIR/scripts/autosave_codex_session.sh"
+AUTOSAVE_RESUME_SCRIPT="$PROJECT_DIR/scripts/autosave_resume_prompt.py"
 MARK_CURRENT_CODEX_TTY_SCRIPT="$PROJECT_DIR/scripts/mark_current_codex_tty.py"
+PYTHON_BIN="$PROJECT_DIR/.venv/bin/python"
 
 export LANG="cs_CZ.UTF-8"
 export LC_ALL="cs_CZ.UTF-8"
@@ -12,6 +14,38 @@ export LC_CTYPE="cs_CZ.UTF-8"
 export PYTHONUTF8="1"
 export PYTHONIOENCODING="utf-8"
 export LESSCHARSET="utf-8"
+
+CODEX_START_PROMPT=""
+
+offer_autosave_resume_if_relevant() {
+  if [[ "${SAMANTHA_AUTOSAVE_RESUME_CHECK:-1}" == "0" ]]; then
+    return
+  fi
+  if [[ ! -t 0 || ! -f "$AUTOSAVE_RESUME_SCRIPT" ]]; then
+    return
+  fi
+  local python_cmd="$PYTHON_BIN"
+  if [[ ! -x "$python_cmd" ]]; then
+    python_cmd="python3"
+  fi
+  if "$python_cmd" "$AUTOSAVE_RESUME_SCRIPT" --quiet; then
+    "$python_cmd" "$AUTOSAVE_RESUME_SCRIPT" || true
+    printf "Navázat na poslední autosave? [y/N] "
+    local answer normalized
+    read -r answer || answer=""
+    normalized="${answer:l}"
+    case "$normalized" in
+      y|yes|a|ano)
+        CODEX_START_PROMPT="$("$python_cmd" "$AUTOSAVE_RESUME_SCRIPT" --prompt)"
+        ;;
+      *)
+        echo "Autosave se nenačte automaticky."
+        ;;
+    esac
+  fi
+}
+
+offer_autosave_resume_if_relevant
 
 "$AUTOSAVE_SCRIPT" --watch &
 AUTOSAVE_PID=$!
@@ -69,12 +103,16 @@ mark_voice_tty_if_requested() {
     return
   fi
 
-  if [[ -x "$PROJECT_DIR/.venv/bin/python" ]]; then
-    "$PROJECT_DIR/.venv/bin/python" "$MARK_CURRENT_CODEX_TTY_SCRIPT" || true
+  if [[ -x "$PYTHON_BIN" ]]; then
+    "$PYTHON_BIN" "$MARK_CURRENT_CODEX_TTY_SCRIPT" || true
   else
     python3 "$MARK_CURRENT_CODEX_TTY_SCRIPT" || true
   fi
 }
 
 mark_voice_tty_if_requested
-"$CODEX_BIN" -C "$PROJECT_DIR" .
+if [[ -n "$CODEX_START_PROMPT" ]]; then
+  "$CODEX_BIN" -C "$PROJECT_DIR" "$CODEX_START_PROMPT"
+else
+  "$CODEX_BIN" -C "$PROJECT_DIR" .
+fi
