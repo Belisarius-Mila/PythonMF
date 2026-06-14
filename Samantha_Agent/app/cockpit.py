@@ -14,7 +14,6 @@ import signal
 import subprocess
 import tempfile
 import time
-import unicodedata
 import urllib.error
 from collections.abc import Callable
 from datetime import date, datetime, timezone
@@ -66,6 +65,7 @@ from app.documents.vault import (
     read_json_file,
     relative_to_project,
     run_document_print_job,
+    safe_ascii_slug,
     safe_filename,
     safe_text,
     safe_slug,
@@ -271,9 +271,13 @@ DOCUMENT_DOMAIN_LABELS: dict[str, str] = {
 }
 DOCUMENT_TYPE_LABELS: dict[str, str] = {
     "contract": "smlouva",
+    "danove-priznani": "daňové přiznání",
     "document": "dokument",
     "email-attachment-pdf": "PDF příloha e-mailu",
     "employment_contract": "pracovní smlouva",
+    "green_card": "zelená karta / potvrzení pojištění",
+    "insurance_assistance_card": "asistenční karta",
+    "insurance_payment_confirmation": "potvrzení o zaplacení pojistného",
     "invoice": "faktura / doklad",
     "insurance_payment_notice": "předpis platby pojistného",
     "insurance_policy": "pojistná smlouva",
@@ -6525,9 +6529,7 @@ def document_metadata_value_label(field: str, value: str) -> str:
 
 
 def safe_manual_metadata_slug(value: str, *, limit: int = 80) -> str:
-    folded = unicodedata.normalize("NFKD", value.casefold().strip())
-    ascii_value = "".join(char for char in folded if not unicodedata.combining(char))
-    return safe_slug(ascii_value, default="", limit=limit)
+    return safe_ascii_slug(value, default="", limit=limit)
 
 
 def document_metadata_suggestion_confidence(changes: dict[str, dict[str, str]]) -> str:

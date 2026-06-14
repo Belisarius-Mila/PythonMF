@@ -46,6 +46,7 @@ from app.documents.vault import normalize_domain
 from app.documents.vault import parse_macos_vision_ocr_json
 from app.documents.vault import propose_metadata
 from app.documents.vault import resolve_pdftotext_binary
+from app.documents.vault import safe_ascii_slug
 from app.documents.vault import TableExtractionResult
 from app.documents.vault import TextExtractionResult
 from app.documents.vault import enrich_pdf_text_with_tables
@@ -62,6 +63,10 @@ class DocumentVaultToolsTests(unittest.TestCase):
         self.assertEqual(normalize_domain("ČEZ smlouvy"), "cez-smlouvy")
         self.assertEqual(normalize_domain("energie"), "energy")
         self.assertEqual(normalize_domain(""), "other")
+
+    def test_safe_ascii_slug_transliterates_czech_metadata(self) -> None:
+        self.assertEqual(safe_ascii_slug("Daňové přiznání", default="document", limit=50), "danove-priznani")
+        self.assertEqual(safe_ascii_slug("ČEZ smlouvy 2026", default="", limit=100), "cez-smlouvy-2026")
 
     def test_prepare_is_read_only_and_finds_due_date_candidates(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -1201,10 +1206,11 @@ class DocumentVaultToolsTests(unittest.TestCase):
                 token=candidate.token,
                 title="Najemni smlouva Dubova",
                 domain="home",
-                document_type="lease",
+                document_type="Daňové přiznání",
                 counterparty="Jan Novak",
                 related_asset="Dubova ulice",
                 tags="home, lease, najem, bydleni, dubova-ulice",
+                case_id="Daňové přiznání 2025",
                 vault_dir=vault,
             )
             self.assertEqual(result["status"], "reviewed")
@@ -1222,14 +1228,17 @@ class DocumentVaultToolsTests(unittest.TestCase):
             )
             self.assertEqual(manifest["title"], "Najemni smlouva Dubova")
             self.assertEqual(manifest["domain"], "home")
-            self.assertEqual(manifest["document_type"], "lease")
+            self.assertEqual(manifest["document_type"], "danove-priznani")
             self.assertEqual(manifest["counterparty"], "Jan Novak")
             self.assertEqual(manifest["related_asset"], "Dubova ulice")
+            self.assertEqual(manifest["case_id"], "danove-priznani-2025")
             self.assertEqual(manifest["reading_status"], "ok")
             self.assertEqual(manifest["reading_status_note"], "Potvrzeno revizí ve ScanDocu.")
             self.assertIn("dubova-ulice", manifest["tags"])
             docs = _read_jsonl(vault / "index" / "documents_index.jsonl")
             self.assertEqual(docs[0]["reading_status"], "ok")
+            self.assertEqual(docs[0]["document_type"], "danove-priznani")
+            self.assertEqual(docs[0]["case_id"], "danove-priznani-2025")
 
             next_candidate = prepare_next_stored_document_review(vault_dir=vault)
             self.assertIsNone(next_candidate)

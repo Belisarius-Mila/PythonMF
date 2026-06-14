@@ -606,6 +606,72 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("ostatní / dokument", result["items"][0]["classification_summary"])
         self.assertNotIn("trashed-doc", json.dumps(result, ensure_ascii=False))
 
+    def test_document_classification_status_labels_tax_return_type(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault = Path(temp_dir) / "documents"
+            index = vault / "index"
+            index.mkdir(parents=True)
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "tax-return",
+                        "title": "Daňové přiznání",
+                        "domain": "tax",
+                        "document_type": "danove-priznani",
+                        "counterparty": "Finanční úřad",
+                        "related_asset": "",
+                    },
+                ],
+            )
+
+            result = document_classification_status(vault_dir=vault)
+
+        self.assertIn("daně / daňové přiznání", result["items"][0]["classification_summary"])
+
+    def test_document_classification_status_labels_insurance_attachment_types(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault = Path(temp_dir) / "documents"
+            index = vault / "index"
+            index.mkdir(parents=True)
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "assist-card",
+                        "title": "Asistenční karta",
+                        "domain": "insurance",
+                        "document_type": "insurance_assistance_card",
+                        "counterparty": "Pojišťovna",
+                        "related_asset": "cestovní pojištění",
+                    },
+                    {
+                        "document_id": "payment-confirmation",
+                        "title": "Potvrzení platby",
+                        "domain": "insurance",
+                        "document_type": "insurance_payment_confirmation",
+                        "counterparty": "Pojišťovna",
+                        "related_asset": "cestovní pojištění",
+                    },
+                    {
+                        "document_id": "green-card",
+                        "title": "Zelená karta",
+                        "domain": "insurance",
+                        "document_type": "green_card",
+                        "counterparty": "Pojišťovna",
+                        "related_asset": "auto",
+                    },
+                ],
+            )
+
+            result = document_classification_status(vault_dir=vault)
+
+        self.assertEqual(result["issue_count"], 0)
+        labels = result["document_type_counts"]
+        self.assertEqual(labels["asistenční karta"], 1)
+        self.assertEqual(labels["potvrzení o zaplacení pojistného"], 1)
+        self.assertEqual(labels["zelená karta / potvrzení pojištění"], 1)
+
     def test_document_classification_status_treats_email_attachment_type_as_incomplete(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             vault = Path(temp_dir) / "documents"

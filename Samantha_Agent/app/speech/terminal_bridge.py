@@ -84,6 +84,8 @@ def build_codex_terminal_prompt(command: VoiceCommand) -> str:
         "odesílání, mazání, commitu, platby nebo tajemství, vyžádej si ruční potvrzení. "
         "Po dokončení napiš výsledek do chatu a přečti stručnou verzi výsledku nahlas přes "
         "`.venv/bin/python scripts/speak_edge_open.py \"STRUČNÝ VÝSLEDEK\"`. "
+        "Skutečné Mac audio spouštěj mimo Codex sandbox, pokud k tomu relace vyžaduje "
+        "systémové povolení; jinak může skript hlásit úspěch bez slyšitelného zvuku. "
         "Současně zapiš stejný stručný výsledek do Cockpitu přes "
         "`.venv/bin/python scripts/adam_voice_reply.py --latest-command \"STRUČNÝ VÝSLEDEK\"`. "
         "Nečti nahlas tajemství, celé osobní údaje ani dlouhé citlivé texty."

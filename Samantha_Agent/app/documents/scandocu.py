@@ -27,6 +27,7 @@ from .vault import (
     read_json_file,
     read_jsonl,
     relative_to_project,
+    safe_ascii_slug,
     safe_filename,
     safe_slug,
     safe_text,
@@ -506,14 +507,14 @@ def import_scandocu_candidate(
 
     final_title = safe_text(title) or candidate.title
     final_domain = normalize_domain(domain or candidate.domain)
-    final_type = safe_slug(document_type or candidate.document_type, default="document", limit=50)
+    final_type = safe_ascii_slug(document_type or candidate.document_type, default="document", limit=50)
     final_tags = ", ".join(
         merge_tags(
             parse_tags(tags),
             candidate.tags,
         )
     )
-    final_case_id = safe_slug(case_id, default="", limit=100) if case_id else ""
+    final_case_id = safe_ascii_slug(case_id, default="", limit=100) if case_id else ""
     document_id = safe_slug(final_title, default="", limit=100)
     consistency_conflicts = find_import_consistency_conflicts(
         candidate=candidate,
@@ -759,10 +760,10 @@ def update_reviewed_document_metadata(
     updated = {**current, **manifest}
     updated["title"] = safe_text(title) or candidate.title
     updated["domain"] = normalize_domain(domain or candidate.domain)
-    updated["document_type"] = safe_slug(document_type or candidate.document_type, default="document", limit=50)
+    updated["document_type"] = safe_ascii_slug(document_type or candidate.document_type, default="document", limit=50)
     updated["counterparty"] = safe_text(counterparty)
     updated["related_asset"] = safe_text(related_asset)
-    updated["case_id"] = safe_slug(case_id, default="", limit=100) if case_id else ""
+    updated["case_id"] = safe_ascii_slug(case_id, default="", limit=100) if case_id else ""
     updated["tags"] = merge_tags(parse_tags(tags), [])
     reviewed_at = now_iso()
     updated["reviewed_at"] = reviewed_at
@@ -1077,8 +1078,8 @@ def update_scandocu_candidate_status(
     data["final_document_id"] = document_id
     data["title"] = safe_text(title)
     data["domain"] = normalize_domain(domain)
-    data["document_type"] = safe_slug(document_type, default="document", limit=50)
-    data["case_id"] = safe_slug(case_id, default="", limit=100) if case_id else ""
+    data["document_type"] = safe_ascii_slug(document_type, default="document", limit=50)
+    data["case_id"] = safe_ascii_slug(case_id, default="", limit=100) if case_id else ""
     write_json(candidate.metadata_path, data)
 
 

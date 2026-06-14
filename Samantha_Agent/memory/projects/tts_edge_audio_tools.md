@@ -52,7 +52,8 @@ Stav k 2026-06-10:
 Stav k 2026-06-11:
 
 - Mac TTY bridge byl ověřený bez `screen`: hlasový pokyn z Cockpitu dorazil přímo do aktivní Codex relace.
-- `scripts/speak_edge_open.py` má kvůli rychlosti a sandboxu výchozí lokální režim přes macOS `say`, takže běžný hlasový výsledek nevyžaduje síť ani eskalaci mimo sandbox.
+- `scripts/speak_edge_open.py` má kvůli rychlosti výchozí lokální režim přes macOS `say`, takže běžný hlasový výsledek nevyžaduje síť.
+- Poznatek 2026-06-14: při spuštění z Codex sandboxu může lokální TTS falešně zahlásit úspěch, ale bez slyšitelného zvuku. Pro skutečné Mac audio z Codexu spouštět `scripts/speak_edge_open.py` mimo sandbox / se systémovým povolením.
 - Online Edge MP3 zůstává dostupné explicitně přes `--engine edge`; diagnostický režim `--engine edge-fallback` nejdřív zkusí Edge a při selhání použije lokální hlas.
 - Po obnove z autosave byl potvrzen remote-first iPhone provoz: vychozi transport je `local_tty`, odpoved se vraci do Cockpitu pres `scripts/adam_voice_reply.py --latest-command` a iPhone ji prehraje v browseru po otevreni audio kanalu.
 - `managed_screen` / SSH screen cesta zustava jen explicitni experiment, protoze umela hlasit doruceno bez prokazatelne odpovedi z Codex relace.

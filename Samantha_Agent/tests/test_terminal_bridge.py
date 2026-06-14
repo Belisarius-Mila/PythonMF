@@ -47,6 +47,7 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertIn("vyžádej si ruční potvrzení", prompt)
         self.assertIn("přečti stručnou verzi výsledku nahlas", prompt)
         self.assertIn("scripts/speak_edge_open.py", prompt)
+        self.assertIn("mimo Codex sandbox", prompt)
         self.assertIn("scripts/adam_voice_reply.py --latest-command", prompt)
         self.assertIn("zapiš stejný stručný výsledek do Cockpitu", prompt)
 

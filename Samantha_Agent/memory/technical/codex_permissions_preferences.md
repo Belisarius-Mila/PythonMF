@@ -60,7 +60,10 @@ Proc:
 - `cockpit_smoke_check.py`, `adam_bridge_readiness_report.py` a
   `backup_status.py` pro opakovatelne read-only health reporty.
 - `speak_edge_open.py` po zmene 2026-06-11 defaultne pouziva lokalni macOS
-  `say`, ne sitove Edge TTS, a proto nema kvuli sandboxu padat na DNS.
+  `say`, ne sitove Edge TTS, a proto nema kvuli sandboxu padat na DNS. Realne
+  systemove audio ale z Codex sandboxu muze skoncit falesnym uspechem bez zvuku;
+  pro skutecne hlasove cteni z Codexu navrhovat spusteni mimo sandbox s prefixem
+  `.venv/bin/python scripts/speak_edge_open.py`.
 - `git status/diff/log` jsou read-only; `git add/commit/push` zustava cilene
   prefixovane na repozitar `PythonMF`, ne obecne `git add .`.
 

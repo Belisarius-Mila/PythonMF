@@ -971,7 +971,7 @@ def apply_document_import_file(
         related_asset=related_asset,
     )
     if document_type.strip():
-        metadata["document_type"] = safe_slug(document_type, default="document", limit=50)
+        metadata["document_type"] = safe_ascii_slug(document_type, default="document", limit=50)
     safe_reading_status = safe_slug(reading_status, default="", limit=50)
     if safe_reading_status and safe_reading_status not in {"ok", "needs_review", "unreadable", "superseded"}:
         raise ValueError("Neplatny stav cteni dokumentu.")
@@ -1022,7 +1022,7 @@ def apply_document_import_file(
         "document_type": metadata["document_type"],
         "counterparty": safe_text(str(metadata.get("counterparty") or "")),
         "related_asset": safe_text(str(metadata.get("related_asset") or "")),
-        "case_id": safe_slug(case_id, default="", limit=100) if case_id else "",
+        "case_id": safe_ascii_slug(case_id, default="", limit=100) if case_id else "",
         "tags": merge_tags(explicit_tags, [str(tag) for tag in suggested_tags]),
         "sha256": digest,
         "size_bytes": source.stat().st_size,
@@ -2266,7 +2266,7 @@ def choose_mobile_final_metadata(
     )
     return MobileDocumentFinalMetadata(
         domain=normalize_domain(target_domain or safe_text(str(analysis.get("domain", "other")))),
-        document_type=safe_slug(
+        document_type=safe_ascii_slug(
             document_type or safe_text(str(analysis.get("document_type", "document"))),
             default="document",
             limit=50,
@@ -2274,7 +2274,7 @@ def choose_mobile_final_metadata(
         counterparty=safe_text(counterparty or str(analysis.get("counterparty", ""))),
         related_asset=safe_text(related_asset or str(analysis.get("related_asset", ""))),
         tags=", ".join(merged_tags),
-        case_id=safe_slug(case_id, default="", limit=100) if case_id else "",
+        case_id=safe_ascii_slug(case_id, default="", limit=100) if case_id else "",
     )
 
 
@@ -4081,9 +4081,7 @@ def normalize_domain(value: str) -> str:
     alias = DOMAIN_ALIASES.get(raw)
     if alias:
         return alias
-    folded = unicodedata.normalize("NFKD", raw)
-    ascii_value = "".join(char for char in folded if not unicodedata.combining(char))
-    key = SAFE_ID_PATTERN.sub("-", ascii_value).strip("-")
+    key = safe_ascii_slug(raw, default="", limit=80)
     if not key:
         return "other"
     return DOMAIN_ALIASES.get(key, key)
@@ -4097,6 +4095,12 @@ def parse_tags(tags: str) -> list[str]:
 def safe_slug(value: str, default: str, limit: int) -> str:
     normalized = SAFE_ID_PATTERN.sub("-", value.casefold().strip()).strip("-")
     return (normalized or default)[:limit]
+
+
+def safe_ascii_slug(value: str, default: str, limit: int) -> str:
+    folded = unicodedata.normalize("NFKD", value.casefold().strip())
+    ascii_value = "".join(char for char in folded if not unicodedata.combining(char))
+    return safe_slug(ascii_value, default=default, limit=limit)
 
 
 def safe_filename(filename: str) -> str:
