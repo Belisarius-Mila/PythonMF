@@ -2351,6 +2351,49 @@ def save_email_processing_decision(
     return {"ok": True, "message": label, "item_id": item_id, "action": action}
 
 
+def email_processing_batch_groups(item: dict[str, Any]) -> list[dict[str, str]]:
+    text = " ".join(
+        [
+            str(item.get("sender", "")),
+            str(item.get("subject", "")),
+            str(item.get("reason", "")),
+            " ".join(str(tag) for tag in (item.get("worklist_tags") or []) if str(tag).strip()),
+        ]
+    ).casefold()
+    category = str(item.get("category", "")).casefold()
+    tags = {str(tag).strip() for tag in (item.get("worklist_tags") or []) if str(tag).strip()}
+    groups: list[dict[str, str]] = []
+
+    def add(group_id: str, label: str) -> None:
+        if not any(group["id"] == group_id for group in groups):
+            groups.append({"id": group_id, "label": label})
+
+    if "true_tax_office" in tags or category == "úřady/daně" or any(
+        needle in text for needle in ("daneelektronicky", "fs.mfcr.cz", "fs.gov.cz", "finanční správa")
+    ):
+        add("tax_office", "Finanční správa")
+    if "true_vak" in tags or "vakmb" in text or "vodovod" in text or "kanaliz" in text:
+        add("vak", "VAK")
+    amount_scan = item.get("amount_scan")
+    max_amount = 0.0
+    if isinstance(amount_scan, dict):
+        try:
+            max_amount = float(amount_scan.get("max_amount_czk", 0) or 0)
+        except (TypeError, ValueError):
+            max_amount = 0.0
+    if "invoice_over_2000" in tags or max_amount > 2000:
+        add("invoice_over_2000", "Faktury nad 2000 Kč")
+    if category == "faktury/e-shopy":
+        add("invoice", "Faktury / e-shopy")
+    if int(item.get("pdf_attachment_count", 0) or 0) > 0:
+        add("pdf", "S PDF přílohou")
+    if int(item.get("large_pdf_attachment_count", 0) or 0) > 0:
+        add("large_pdf", "Velké PDF")
+    if not groups:
+        add("other", "Ostatní")
+    return groups
+
+
 def email_processing_pending_work_items(
     path: Path = EMAIL_PROCESSING_DECISIONS_FILE,
 ) -> dict[str, Any]:
@@ -2376,6 +2419,9 @@ def email_processing_pending_work_items(
                 str(item.get("date", "")),
                 str(item.get("subject", "")),
             )
+        batch_groups = email_processing_batch_groups(item)
+        item["batch_groups"] = batch_groups
+        item["primary_batch_group"] = batch_groups[0]["id"] if batch_groups else "other"
         items.append(item)
 
     items.sort(key=lambda item: email_header_timestamp(str(item.get("date", ""))), reverse=True)
@@ -9673,10 +9719,13 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       const queueProcessCount = queueDoc.getElementById("queueProcessCount");
       const queueTrashCount = queueDoc.getElementById("queueTrashCount");
       const queuePurgeCount = queueDoc.getElementById("queuePurgeCount");
+      const queueVisibleCount = queueDoc.getElementById("queueVisibleCount");
+      const batchFilters = queueDoc.getElementById("batchFilters");
       const batchBtn = queueDoc.getElementById("batchBtn");
       const trashBatchBtn = queueDoc.getElementById("trashBatchBtn");
       const purgeTrashBtn = queueDoc.getElementById("purgeTrashBtn");
       let selectedId = queueItems.length ? queueItems[0].id : "";
+      let activeBatchFilter = "all";
       let permanentDeleteItems = [];
       let recentImportedAttachments = [];
 
@@ -9689,49 +9738,132 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         return "čeká na rozhodnutí";
       }
 
+      function itemBatchGroups(item) {
+        const groups = Array.isArray(item.batch_groups) ? item.batch_groups : [];
+        return groups
+          .map((group) => ({id: String(group.id || ""), label: String(group.label || group.id || "")}))
+          .filter((group) => group.id);
+      }
+
+      function itemMatchesBatchFilter(item) {
+        if (activeBatchFilter === "all") return true;
+        return itemBatchGroups(item).some((group) => group.id === activeBatchFilter);
+      }
+
+      function visibleQueueItems() {
+        return queueItems.filter((item) => itemMatchesBatchFilter(item));
+      }
+
+      function activeBatchLabel() {
+        if (activeBatchFilter === "all") return "Vše";
+        for (const item of queueItems) {
+          const found = itemBatchGroups(item).find((group) => group.id === activeBatchFilter);
+          if (found) return found.label;
+        }
+        return activeBatchFilter;
+      }
+
+      function ensureSelectedVisible() {
+        const visible = visibleQueueItems();
+        if (!visible.length) {
+          selectedId = "";
+          return null;
+        }
+        if (!visible.some((item) => item.id === selectedId)) selectedId = visible[0].id;
+        return visible.find((item) => item.id === selectedId) || visible[0];
+      }
+
       function currentItem() {
-        return queueItems.find((item) => item.id === selectedId) || queueItems[0] || null;
+        return ensureSelectedVisible();
+      }
+
+      function renderBatchFilters() {
+        const groupMap = new Map();
+        groupMap.set("all", {id: "all", label: "Vše", count: queueItems.length});
+        queueItems.forEach((item) => {
+          itemBatchGroups(item).forEach((group) => {
+            const current = groupMap.get(group.id) || {id: group.id, label: group.label, count: 0};
+            current.count += 1;
+            groupMap.set(group.id, current);
+          });
+        });
+        const priority = ["all", "tax_office", "vak", "invoice_over_2000", "invoice", "pdf", "large_pdf", "other"];
+        const groups = Array.from(groupMap.values()).sort((left, right) => {
+          const leftRank = priority.includes(left.id) ? priority.indexOf(left.id) : 99;
+          const rightRank = priority.includes(right.id) ? priority.indexOf(right.id) : 99;
+          if (leftRank !== rightRank) return leftRank - rightRank;
+          return left.label.localeCompare(right.label, "cs");
+        });
+        if (!groups.some((group) => group.id === activeBatchFilter)) activeBatchFilter = "all";
+        batchFilters.innerHTML = groups.map((group) => {
+          const active = group.id === activeBatchFilter ? " active" : "";
+          return '<button type="button" class="filter-chip' + active + '" data-filter="' + escapeHtml(group.id) + '">' +
+            escapeHtml(group.label) + ' <span>' + escapeHtml(String(group.count)) + '</span></button>';
+        }).join("");
+        batchFilters.querySelectorAll(".filter-chip").forEach((button) => {
+          button.addEventListener("click", () => {
+            activeBatchFilter = button.dataset.filter || "all";
+            selectedId = "";
+            renderQueueList();
+            const item = currentItem();
+            if (item) renderDetail(item);
+            else detailPane.innerHTML = '<div class="empty">V tomto bloku není žádný e-mail.</div>';
+          });
+        });
       }
 
       function updateSummaryCounts() {
-        const workItems = queueItems.filter((item) => item.queueDecision !== "trash_requested");
-        const trashItems = queueItems.filter((item) => item.queueDecision === "trash_requested");
+        const visible = visibleQueueItems();
+        const workItems = visible.filter((item) => item.queueDecision !== "trash_requested");
+        const trashItems = visible.filter((item) => item.queueDecision === "trash_requested");
         if (queueProcessCount) queueProcessCount.textContent = String(workItems.length);
         if (queueTrashCount) queueTrashCount.textContent = String(trashItems.length);
         if (queuePurgeCount) queuePurgeCount.textContent = String(permanentDeleteItems.length);
+        if (queueVisibleCount) queueVisibleCount.textContent = `${visible.length}/${queueItems.length}`;
       }
 
       function updateBatchState() {
-        const decided = queueItems.filter((item) => Boolean(item.queueDecision)).length;
-        const workItems = queueItems.filter((item) => item.queueDecision !== "trash_requested");
+        const visible = visibleQueueItems();
+        const decided = visible.filter((item) => Boolean(item.queueDecision)).length;
+        const workItems = visible.filter((item) => item.queueDecision !== "trash_requested");
         const workReady = workItems.filter((item) => Boolean(item.queueDecision)).length;
-        const trashItems = queueItems.filter((item) => item.queueDecision === "trash_requested");
+        const trashItems = visible.filter((item) => item.queueDecision === "trash_requested");
         updateSummaryCounts();
         batchBtn.disabled = !workItems.length || workReady < workItems.length;
         trashBatchBtn.disabled = !trashItems.length;
         purgeTrashBtn.disabled = !permanentDeleteItems.length;
-        queueStatus.textContent = queueItems.length
-          ? `Rozhodnuto ${decided}/${queueItems.length}. Koš: ${trashItems.length}. Ukládání a mazání se spouští odděleně.`
+        queueStatus.textContent = visible.length
+          ? `Blok: ${activeBatchLabel()}. Rozhodnuto ${decided}/${visible.length}. Koš: ${trashItems.length}. Dávkové akce platí jen pro aktuální blok.`
           : "Fronta je prázdná.";
       }
 
       function renderQueueList() {
-        if (!queueItems.length) {
-          queueList.innerHTML = '<div class="empty">Fronta je prázdná.</div>';
-          detailPane.innerHTML = '<div class="empty">Žádný e-mail ke zpracování.</div>';
+        renderBatchFilters();
+        const visible = visibleQueueItems();
+        ensureSelectedVisible();
+        if (!queueItems.length || !visible.length) {
+          queueList.innerHTML = !queueItems.length
+            ? '<div class="empty">Fronta je prázdná.</div>'
+            : '<div class="empty">V tomto bloku není žádný e-mail.</div>';
+          detailPane.innerHTML = '<div class="empty">Žádný e-mail ke zpracování v aktuálním bloku.</div>';
           batchBtn.disabled = true;
           trashBatchBtn.disabled = true;
           purgeTrashBtn.disabled = !permanentDeleteItems.length;
           updateSummaryCounts();
           return;
         }
-        queueList.innerHTML = queueItems.map((item) => {
+        queueList.innerHTML = visible.map((item) => {
           const active = item.id === selectedId ? " active" : "";
           const done = item.queueDecision || item.detailLoaded ? " done" : "";
           const loading = item.detailLoading ? " loading" : "";
+          const groups = itemBatchGroups(item).map((group) => group.label).slice(0, 3).join(" | ");
+          const amount = item.amount_scan && item.amount_scan.max_amount_czk
+            ? " | max " + Math.round(Number(item.amount_scan.max_amount_czk)).toLocaleString("cs-CZ") + " Kč"
+            : "";
           return '<button type="button" class="item' + active + '" data-id="' + escapeHtml(item.id) + '">' +
             '<span class="subject">' + escapeHtml(item.subject || "(bez předmětu)") + '</span>' +
             '<span class="meta">' + escapeHtml(itemMeta(item)) + '</span>' +
+            (groups ? '<span class="meta">' + escapeHtml(groups + amount) + '</span>' : "") +
             (item.reason ? '<span class="reason">Důvod: ' + escapeHtml(item.reason) + '</span>' : "") +
             '<span class="status' + done + loading + '">' + escapeHtml(decisionLabel(item)) + '</span>' +
             '</button>';
@@ -9970,12 +10102,12 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       }
 
       batchBtn.addEventListener("click", async () => {
-        const workItems = queueItems.filter((item) => item.queueDecision !== "trash_requested");
+        const workItems = visibleQueueItems().filter((item) => item.queueDecision !== "trash_requested");
         if (!workItems.length) {
           queueStatus.textContent = "V této frontě jsou jen kandidáti ke koši. Použij tlačítko Emaily určené ke smazání smazat.";
           return;
         }
-        const ok = queue.confirm("Zpracovat dávku?\\n\\nUložené e-maily půjdou do EmailArchiveVault. Vybrané PDF přílohy půjdou do private document vaultu a fulltextového indexu.");
+        const ok = queue.confirm(`Zpracovat aktuální blok "${activeBatchLabel()}" (${workItems.length} položek)?\\n\\nUložené e-maily půjdou do EmailArchiveVault. Vybrané PDF přílohy půjdou do private document vaultu a fulltextového indexu.`);
         if (!ok) return;
         batchBtn.disabled = true;
         queueStatus.textContent = "Zpracovávám dávku. U větších PDF to může chvíli trvat.";
@@ -10022,7 +10154,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       });
 
       trashBatchBtn.addEventListener("click", async () => {
-        const trashItems = queueItems.filter((item) => item.queueDecision === "trash_requested");
+        const trashItems = visibleQueueItems().filter((item) => item.queueDecision === "trash_requested");
         if (!trashItems.length) {
           queueStatus.textContent = "Žádné e-maily nejsou označené ke smazání.";
           return;
@@ -10163,6 +10295,10 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     main { padding: 18px 20px 28px; display: grid; gap: 14px; }
     .topbar { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; }
     .topbar-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .batch-filters { display: flex; flex-wrap: wrap; gap: 7px; }
+    .filter-chip { background: #eef2f7; color: #263244; border: 1px solid #d9e0ea; }
+    .filter-chip.active { background: var(--blue); color: white; border-color: var(--blue); }
+    .filter-chip span { opacity: 0.78; font-weight: 700; }
     .queue-grid { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 14px; align-items: start; }
     section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
     h2 { margin: 0; padding: 12px 14px; font-size: 14px; border-bottom: 1px solid var(--line); background: #f8fafc; }
@@ -10207,7 +10343,9 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         <div><strong>Připraveno ke zpracování:</strong> <span id="queueProcessCount">${toProcess.length}</span></div>
         <div><strong>Koš čeká na potvrzení:</strong> <span id="queueTrashCount">${toTrash.length}</span></div>
         <div><strong>Trvalé smazání v koši:</strong> <span id="queuePurgeCount">0</span></div>
+        <div><strong>Aktuální blok:</strong> <span id="queueVisibleCount">${toProcess.length + toTrash.length}/${toProcess.length + toTrash.length}</span></div>
         <div><strong>Ignorováno:</strong> ${ignored.length}</div>
+        <div class="batch-filters" id="batchFilters"></div>
         <div id="queueStatus">Klikni na e-mail vlevo. Detail se načte read-only, bez stahování příloh a bez mazání.</div>
       </div>
     </section>

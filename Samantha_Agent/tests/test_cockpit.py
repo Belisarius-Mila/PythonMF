@@ -45,6 +45,7 @@ from app.cockpit import (
     document_work_status,
     discover_codex_process_sessions,
     email_header_to_processing_item,
+    email_processing_batch_groups,
     email_processing_item_id,
     email_processing_pending_work_items,
     latest_email_processing_overview,
@@ -4361,6 +4362,39 @@ Dalsi krok:
         self.assertEqual(result["items"][0]["id"], "process-1")
         self.assertEqual(result["items"][0]["action"], "process")
         self.assertFalse(result["items"][0]["is_new_header"])
+        self.assertIn({"id": "invoice", "label": "Faktury / e-shopy"}, result["items"][0]["batch_groups"])
+
+    def test_email_processing_batch_groups_detects_reusable_blocks(self) -> None:
+        tax_groups = email_processing_batch_groups(
+            {
+                "category": "úřady/daně",
+                "sender": "Finanční správa ČR <daneelektronicky@fs.gov.cz>",
+                "subject": "Informace pro placení daně",
+                "pdf_attachment_count": 1,
+            }
+        )
+        vak_groups = email_processing_batch_groups(
+            {
+                "category": "faktury/e-shopy",
+                "sender": "vakmb <obchodni@vakmb.cz>",
+                "subject": "Faktura VS 123",
+                "worklist_tags": ["true_vak"],
+                "pdf_attachment_count": 1,
+            }
+        )
+        invoice_groups = email_processing_batch_groups(
+            {
+                "category": "faktury/e-shopy",
+                "subject": "Faktura",
+                "worklist_tags": ["invoice_over_2000"],
+                "amount_scan": {"max_amount_czk": 2500},
+                "pdf_attachment_count": 1,
+            }
+        )
+
+        self.assertIn({"id": "tax_office", "label": "Finanční správa"}, tax_groups)
+        self.assertIn({"id": "vak", "label": "VAK"}, vak_groups)
+        self.assertIn({"id": "invoice_over_2000", "label": "Faktury nad 2000 Kč"}, invoice_groups)
 
     def test_process_email_work_queue_batch_archives_email_and_imports_pdf_attachment(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
