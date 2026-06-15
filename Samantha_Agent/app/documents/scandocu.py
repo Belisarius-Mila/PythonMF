@@ -47,6 +47,20 @@ SCANDOCU_ACTIONS_FILE = "scandocu_actions.jsonl"
 SCANDOCU_CLASSIFIER_VERSION = "2026-06-03-travel-classifier-v2"
 SCANDOCU_EXTRACTOR_RETRY_VERSION = "2026-06-03-pdf-text-cache-v3"
 SCANDOCU_TOKEN_LIMIT = 80
+SCANDOCU_DOMAIN_REGISTRY_FILE = "domain_registry.json"
+SCANDOCU_BUILTIN_DOMAINS = (
+    "food",
+    "health",
+    "car",
+    "insurance",
+    "energy",
+    "home",
+    "tax",
+    "warranty",
+    "travel",
+    "telecom",
+    "other",
+)
 
 
 @dataclass(frozen=True)
@@ -107,6 +121,60 @@ def scandocu_processing_dir(vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> Path:
 
 def scandocu_actions_path(vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> Path:
     return vault_dir / "index" / SCANDOCU_ACTIONS_FILE
+
+
+def domain_registry_path(vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> Path:
+    return vault_dir / "index" / SCANDOCU_DOMAIN_REGISTRY_FILE
+
+
+def read_domain_registry(vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> dict[str, Any]:
+    path = domain_registry_path(vault_dir)
+    if not path.exists():
+        return {"domains": []}
+    data = read_json_file(path)
+    if not isinstance(data.get("domains"), list):
+        return {"domains": []}
+    return data
+
+
+def registered_document_domains(vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> list[dict[str, str]]:
+    domains: dict[str, str] = {value: value for value in SCANDOCU_BUILTIN_DOMAINS}
+    for item in read_domain_registry(vault_dir).get("domains", []):
+        if not isinstance(item, dict):
+            continue
+        value = normalize_domain(str(item.get("value", "")))
+        if value:
+            domains[value] = safe_text(str(item.get("label", ""))) or value
+    for row in read_jsonl(vault_dir / "index" / "documents_index.jsonl"):
+        value = normalize_domain(str(row.get("domain", "")))
+        if value:
+            domains.setdefault(value, value)
+    return [{"value": value, "label": domains[value]} for value in sorted(domains)]
+
+
+def register_document_domain(raw_domain: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> str:
+    value = normalize_domain(raw_domain)
+    if not value or value in {"other", *SCANDOCU_BUILTIN_DOMAINS}:
+        return value
+    label = safe_text(raw_domain).strip() or value
+    path = domain_registry_path(vault_dir)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    registry = read_domain_registry(vault_dir)
+    now = now_iso()
+    domains = registry.setdefault("domains", [])
+    for item in domains:
+        if not isinstance(item, dict):
+            continue
+        if normalize_domain(str(item.get("value", ""))) == value:
+            item["value"] = value
+            if safe_text(str(item.get("label", ""))) in {"", value} and label != value:
+                item["label"] = label
+            item["updated_at"] = now
+            write_json(path, registry)
+            return value
+    domains.append({"value": value, "label": label, "created_at": now, "updated_at": now})
+    write_json(path, registry)
+    return value
 
 
 def scan_downloads_for_pdfs(
@@ -320,9 +388,25 @@ def get_scandocu_candidate(token: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) 
         raise ValueError("chybi token dokumentu.")
     metadata_path = scandocu_processing_dir(vault_dir) / token / "candidate.json"
     if not metadata_path.exists():
+        metadata_path = find_scandocu_candidate_metadata_path(token, vault_dir)
+    if not metadata_path.exists():
         raise ValueError("ScanDocu kandidat nebyl nalezen.")
     data = read_json_file(metadata_path)
     return candidate_from_record(data, metadata_path=metadata_path)
+
+
+def find_scandocu_candidate_metadata_path(token: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> Path:
+    processing_dir = scandocu_processing_dir(vault_dir)
+    for candidate_path in processing_dir.glob("*/candidate.json"):
+        try:
+            data = read_json_file(candidate_path)
+        except (OSError, json.JSONDecodeError):
+            continue
+        record_token = safe_slug(str(data.get("token", "")), default="", limit=SCANDOCU_TOKEN_LIMIT)
+        dir_token = safe_slug(candidate_path.parent.name, default="", limit=SCANDOCU_TOKEN_LIMIT)
+        if token in {record_token, dir_token}:
+            return candidate_path
+    return processing_dir / token / "candidate.json"
 
 
 def can_reuse_scandocu_candidate(record: dict[str, Any]) -> bool:
@@ -404,7 +488,7 @@ def prepare_stored_document_review_candidate(
     validate_source_file(stored_path)
     digest = sha256_file(stored_path)
     document_id = safe_slug(str(document_record.get("document_id", "")), default=f"doc-{digest[:8]}", limit=140)
-    token = safe_slug(f"review-{document_id}-{digest[:12]}", default=f"review-{digest[:12]}", limit=SCANDOCU_TOKEN_LIMIT)
+    token = safe_slug(f"review-{document_id}-{digest[:12]}", default=f"review-{digest[:12]}", limit=SCANDOCU_TOKEN_LIMIT).strip("-")
     target_dir = scandocu_processing_dir(vault_dir) / token
     metadata_path = target_dir / "candidate.json"
     if metadata_path.exists():
@@ -507,6 +591,7 @@ def import_scandocu_candidate(
 
     final_title = safe_text(title) or candidate.title
     final_domain = normalize_domain(domain or candidate.domain)
+    register_document_domain(domain or candidate.domain, vault_dir=vault_dir)
     final_type = safe_ascii_slug(document_type or candidate.document_type, default="document", limit=50)
     final_tags = ", ".join(
         merge_tags(
@@ -575,6 +660,7 @@ def import_scandocu_candidate(
         "status": "imported" if result.created else "duplicate",
         "document_id": result.document_id,
         "created": result.created,
+        "domain": final_domain,
         "stored_path": str(relative_to_project(result.destination)),
         "manifest_path": str(relative_to_project(result.manifest)),
         "message": result.message,
@@ -760,6 +846,7 @@ def update_reviewed_document_metadata(
     updated = {**current, **manifest}
     updated["title"] = safe_text(title) or candidate.title
     updated["domain"] = normalize_domain(domain or candidate.domain)
+    register_document_domain(domain or candidate.domain, vault_dir=vault_dir)
     updated["document_type"] = safe_ascii_slug(document_type or candidate.document_type, default="document", limit=50)
     updated["counterparty"] = safe_text(counterparty)
     updated["related_asset"] = safe_text(related_asset)
@@ -799,6 +886,7 @@ def update_reviewed_document_metadata(
     return {
         "status": "reviewed",
         "document_id": document_id,
+        "domain": updated["domain"],
         "stored_path": str(relative_to_project(stored_path)),
         "manifest_path": str(relative_to_project(manifest_path)),
         "backup_dir": str(relative_to_project(backup_dir)),
@@ -1184,6 +1272,9 @@ class ScanDocuServer:
                             }
                         )
                         return
+                    if parsed.path == "/api/domains":
+                        self.respond_json({"domains": registered_document_domains(vault_dir=app.vault_dir)})
+                        return
                     if parsed.path == "/api/search-downloads":
                         params = parse_qs(parsed.query)
                         self.respond_json(
@@ -1327,6 +1418,8 @@ SCANDOCU_HTML = """<!doctype html>
     .download-result:first-child { border-top: 0; padding-top: 0; }
     .download-result-title { font-weight: 650; overflow-wrap: anywhere; }
     .download-result-meta { color: #6b7280; margin-top: 2px; overflow-wrap: anywhere; }
+    .custom-domain-wrap { margin-top: 7px; }
+    .field-help { margin-top: 5px; color: #6b7280; font-size: 12px; line-height: 1.35; }
     button { border: 0; border-radius: 6px; padding: 10px 13px; font: inherit; font-weight: 650; cursor: pointer; }
     button:disabled { cursor: wait; opacity: 0.65; }
     .primary { background: #2563eb; color: white; }
@@ -1420,7 +1513,12 @@ SCANDOCU_HTML = """<!doctype html>
           <option value="tax">tax</option>
           <option value="warranty">warranty</option>
           <option value="other">other</option>
+          <option value="__custom__">Jiná oblast...</option>
         </select>
+        <div id="domainCustomWrap" class="custom-domain-wrap hidden">
+          <input id="domainCustom" autocomplete="off" placeholder="např. ČEZ smlouvy, škola, byt Honzíkova">
+          <div class="field-help">Nová oblast se při uložení převede na bezpečný interní název, například `ČEZ smlouvy` na `cez-smlouvy`.</div>
+        </div>
         <label for="documentType">Typ dokumentu</label>
         <input id="documentType" autocomplete="off">
         <label for="counterparty">Protistrana</label>
@@ -1467,6 +1565,8 @@ SCANDOCU_HTML = """<!doctype html>
       completionActions: document.getElementById("completionActions"),
       title: document.getElementById("title"),
       domain: document.getElementById("domain"),
+      domainCustomWrap: document.getElementById("domainCustomWrap"),
+      domainCustom: document.getElementById("domainCustom"),
       documentType: document.getElementById("documentType"),
       counterparty: document.getElementById("counterparty"),
       relatedAsset: document.getElementById("relatedAsset"),
@@ -1514,13 +1614,73 @@ SCANDOCU_HTML = """<!doctype html>
       renderImportWarnings(data.probable_duplicates || [], data.consistency_conflicts || []);
       renderEncryptedHelp(data);
       fields.title.value = data.title || "";
-      fields.domain.value = data.domain || "other";
+      setDomainValue(data.domain || "other");
       fields.documentType.value = data.document_type || "document";
       fields.counterparty.value = data.counterparty || "";
       fields.relatedAsset.value = data.related_asset || "";
       fields.caseId.value = data.case_id || "";
       fields.tags.value = data.tags || "";
       fields.pdfFrame.src = data.pdf_url;
+    }
+
+    function knownDomainValues() {
+      return Array.from(fields.domain.options).map((option) => option.value);
+    }
+
+    function customDomainOption() {
+      return Array.from(fields.domain.options).find((option) => option.value === "__custom__");
+    }
+
+    function upsertDomainOption(value, label) {
+      const cleanValue = (value || "").trim();
+      if (!cleanValue || cleanValue === "__custom__") return;
+      const cleanLabel = (label || cleanValue).trim();
+      const existing = Array.from(fields.domain.options).find((option) => option.value === cleanValue);
+      if (existing) {
+        existing.textContent = cleanLabel;
+        return;
+      }
+      const option = document.createElement("option");
+      option.value = cleanValue;
+      option.textContent = cleanLabel;
+      fields.domain.insertBefore(option, customDomainOption() || null);
+    }
+
+    async function loadDomainOptions() {
+      try {
+        const res = await fetch("/api/domains");
+        const data = await res.json();
+        (data.domains || []).forEach((item) => upsertDomainOption(item.value, item.label));
+      } catch (err) {
+        // The static domain list is enough to keep ScanDocu usable if the registry endpoint fails.
+      }
+    }
+
+    function setDomainValue(value) {
+      const cleanValue = (value || "other").trim() || "other";
+      if (knownDomainValues().includes(cleanValue) && cleanValue !== "__custom__") {
+        fields.domain.value = cleanValue;
+        fields.domainCustom.value = "";
+      } else {
+        fields.domain.value = "__custom__";
+        fields.domainCustom.value = cleanValue;
+      }
+      updateCustomDomainVisibility(false);
+    }
+
+    function updateCustomDomainVisibility(focusCustom = true) {
+      const custom = fields.domain.value === "__custom__";
+      fields.domainCustomWrap.classList.toggle("hidden", !custom);
+      if (custom && focusCustom) {
+        fields.domainCustom.focus({preventScroll: true});
+      }
+    }
+
+    function selectedDomainValue() {
+      if (fields.domain.value !== "__custom__") {
+        return fields.domain.value;
+      }
+      return fields.domainCustom.value.trim();
     }
 
     async function searchDownloads() {
@@ -1597,6 +1757,13 @@ SCANDOCU_HTML = """<!doctype html>
         fields.probableDuplicateBox.scrollIntoView({behavior: "smooth", block: "center"});
         return;
       }
+      const domainValue = selectedDomainValue();
+      if (!domainValue) {
+        fields.status.textContent = "Neuloženo: zadej název nové oblasti, nebo vyber existující oblast.";
+        fields.domainCustomWrap.scrollIntoView({behavior: "smooth", block: "center"});
+        fields.domainCustom.focus();
+        return;
+      }
       saving = true;
       fields.saveBtn.disabled = true;
       fields.skipBtn.disabled = true;
@@ -1609,7 +1776,7 @@ SCANDOCU_HTML = """<!doctype html>
           body: JSON.stringify({
             token: current.token,
             title: fields.title.value,
-            domain: fields.domain.value,
+            domain: domainValue,
             document_type: fields.documentType.value,
             counterparty: fields.counterparty.value,
             related_asset: fields.relatedAsset.value,
@@ -1626,6 +1793,9 @@ SCANDOCU_HTML = """<!doctype html>
             renderImportWarnings(data.probable_duplicates || current.probable_duplicates || [], data.consistency_conflicts || []);
           }
           return;
+        }
+        if (data.domain) {
+          upsertDomainOption(data.domain, fields.domain.value === "__custom__" ? domainValue : data.domain);
         }
         fields.status.textContent = `${data.status === "reviewed" ? "Aktualizováno" : "Uloženo"}: ${data.document_id}. Chceš pokračovat?`;
         fields.formWrap.classList.add("hidden");
@@ -1743,6 +1913,7 @@ SCANDOCU_HTML = """<!doctype html>
     });
     document.getElementById("saveBtn").addEventListener("click", saveCurrent);
     document.getElementById("skipBtn").addEventListener("click", skipCurrent);
+    fields.domain.addEventListener("change", updateCustomDomainVisibility);
     document.getElementById("stopBtn").addEventListener("click", () => {
       fields.status.textContent = "ScanDocu ukončeno v prohlížeči. Server můžeš zastavit v terminálu.";
       fields.formWrap.classList.add("hidden");
@@ -1750,7 +1921,11 @@ SCANDOCU_HTML = """<!doctype html>
       fields.pdfFrame.removeAttribute("src");
       current = null;
     });
-    loadNext();
+    async function initializeScanDocu() {
+      await loadDomainOptions();
+      await loadNext();
+    }
+    initializeScanDocu();
   </script>
 </body>
 </html>

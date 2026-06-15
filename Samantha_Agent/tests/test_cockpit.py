@@ -48,6 +48,7 @@ from app.cockpit import (
     email_processing_batch_groups,
     email_processing_item_id,
     email_processing_pending_work_items,
+    classify_email_processing_category,
     latest_email_processing_overview,
     local_seznam_email_source_detail,
     mark_reminder_done_action,
@@ -4363,6 +4364,84 @@ Dalsi krok:
         self.assertEqual(result["items"][0]["action"], "process")
         self.assertFalse(result["items"][0]["is_new_header"])
         self.assertIn({"id": "invoice", "label": "Faktury / e-shopy"}, result["items"][0]["batch_groups"])
+
+    def test_email_processing_pending_work_items_skips_outbound_folders(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "email_processing_decisions.json"
+            save_email_processing_decision(
+                item_id="sent-1",
+                action="process",
+                item={
+                    "id": "sent-1",
+                    "category": "úřady/daně",
+                    "provider": "iCloud",
+                    "folder": "Sent Messages",
+                    "uid": "1652",
+                    "date": "Thu, 28 May 2026 13:32:11 +0200",
+                    "subject": "Daň z nemovitých věcí 2025 - Finanční správa",
+                },
+                path=path,
+            )
+            save_email_processing_decision(
+                item_id="inbox-1",
+                action="process",
+                item={
+                    "id": "inbox-1",
+                    "category": "úřady/daně",
+                    "provider": "iCloud",
+                    "folder": "INBOX",
+                    "uid": "14438",
+                    "date": "Thu, 28 May 2026 13:40:00 +0200",
+                    "subject": "Daň z nemovitých věcí 2025 - Finanční správa",
+                },
+                path=path,
+            )
+
+            result = email_processing_pending_work_items(path=path)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["count"], 1)
+        self.assertEqual(result["skipped_outbound_count"], 1)
+        self.assertEqual(result["items"][0]["id"], "inbox-1")
+        self.assertIn("Skryto odchozích", result["message"])
+
+    def test_email_processing_classifies_tax_receipt_as_invoice(self) -> None:
+        category = classify_email_processing_category(
+            "Daňový doklad k objednávce č. 20727185",
+            '"OPTIMTOP s.r.o." <neodpovidat@idoklad.cz>',
+        )
+
+        self.assertEqual(category, "faktury/e-shopy")
+
+    def test_email_processing_pending_work_items_normalizes_saved_invoice_category(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "email_processing_decisions.json"
+            save_email_processing_decision(
+                item_id="invoice-1",
+                action="process",
+                item={
+                    "id": "invoice-1",
+                    "category": "úřady/daně",
+                    "provider": "iCloud",
+                    "folder": "INBOX",
+                    "uid": "13549",
+                    "sender": '"OPTIMTOP s.r.o." <neodpovidat@idoklad.cz>',
+                    "subject": "Daňový doklad k objednávce č. 20727185",
+                    "date": "Wed, 01 Apr 2026 06:18:38 +0000 (UTC)",
+                    "pdf_attachment_count": 1,
+                    "worklist_tags": ["invoice_over_2000"],
+                },
+                path=path,
+            )
+
+            result = email_processing_pending_work_items(path=path)
+
+        self.assertEqual(result["count"], 1)
+        item = result["items"][0]
+        self.assertEqual(item["category"], "faktury/e-shopy")
+        self.assertEqual(item["original_category"], "úřady/daně")
+        self.assertNotIn({"id": "tax_office", "label": "Finanční správa"}, item["batch_groups"])
+        self.assertIn({"id": "invoice_over_2000", "label": "Faktury nad 2000 Kč"}, item["batch_groups"])
 
     def test_email_processing_batch_groups_detects_reusable_blocks(self) -> None:
         tax_groups = email_processing_batch_groups(

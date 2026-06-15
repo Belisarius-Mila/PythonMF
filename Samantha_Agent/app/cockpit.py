@@ -1948,6 +1948,23 @@ def email_processing_stable_key(provider: str, folder: str, uid: str) -> str:
     return "|".join([provider_key, folder_key, uid_key])
 
 
+def email_processing_is_inbound_work_folder(folder: str) -> bool:
+    folder_key = " ".join((folder or "INBOX").casefold().split())
+    outbound_folders = {
+        "sent",
+        "sent messages",
+        "sent mail",
+        "odeslané",
+        "odeslane",
+        "odeslaná pošta",
+        "odeslana posta",
+        "outbox",
+        "drafts",
+        "koncepty",
+    }
+    return folder_key not in outbound_folders
+
+
 def email_processing_legacy_item_id(category: str, provider: str, folder: str, uid: str, date: str, subject: str) -> str:
     raw = "|".join([category, provider, folder, uid, date, subject])
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
@@ -2044,27 +2061,13 @@ def email_processing_completed_lookup_keys(actions_path: Path = EMAIL_WORK_QUEUE
 
 def classify_email_processing_category(subject: str, sender: str = "") -> str:
     value = f"{subject} {sender}".casefold()
-    if any(
-        token in value
-        for token in (
-            "pojišt",
-            "pojist",
-            "smlouv",
-            "zelen",
-            "karta",
-            "generali",
-            "kooperativa",
-            "čpp",
-            "cpp",
-        )
-    ):
-        return "pojištění/smlouvy"
-    if any(token in value for token in ("úřad", "urad", "daň", "dan", "finanční", "financni", "datov", "správa")):
-        return "úřady/daně"
-    if any(
+    invoice_value = any(
         token in value
         for token in (
             "faktura",
+            "invoice",
+            "daňový doklad",
+            "danovy doklad",
             "objedn",
             "platba",
             "zaplac",
@@ -2080,8 +2083,28 @@ def classify_email_processing_category(subject: str, sender: str = "") -> str:
             "eshop",
             "e-shop",
         )
+    )
+    if any(
+        token in value
+        for token in (
+            "pojišt",
+            "pojist",
+            "smlouv",
+            "zelen",
+            "karta",
+            "generali",
+            "kooperativa",
+            "čpp",
+            "cpp",
+        )
     ):
+        return "pojištění/smlouvy"
+    if invoice_value:
         return "faktury/e-shopy"
+    if any(token in value for token in ("finanční správa", "financni sprava", "daneelektronicky", "fs.mfcr.cz", "fs.gov.cz")):
+        return "úřady/daně"
+    if any(token in value for token in ("úřad", "urad", "finanční", "financni", "datov", "správa", "sprava")):
+        return "úřady/daně"
     return "ostatní"
 
 
@@ -2368,7 +2391,7 @@ def email_processing_batch_groups(item: dict[str, Any]) -> list[dict[str, str]]:
         if not any(group["id"] == group_id for group in groups):
             groups.append({"id": group_id, "label": label})
 
-    if "true_tax_office" in tags or category == "úřady/daně" or any(
+    if "true_tax_office" in tags or any(
         needle in text for needle in ("daneelektronicky", "fs.mfcr.cz", "fs.gov.cz", "finanční správa")
     ):
         add("tax_office", "Finanční správa")
@@ -2399,6 +2422,7 @@ def email_processing_pending_work_items(
 ) -> dict[str, Any]:
     decisions = read_email_processing_decisions(path)
     items: list[dict[str, Any]] = []
+    skipped_outbound_count = 0
     for item_id, decision in decisions.items():
         action = str(decision.get("action", ""))
         if action not in {"process", "trash_requested"}:
@@ -2407,6 +2431,16 @@ def email_processing_pending_work_items(
         if not isinstance(raw_item, dict):
             continue
         item = dict(raw_item)
+        if not email_processing_is_inbound_work_folder(str(item.get("folder", ""))):
+            skipped_outbound_count += 1
+            continue
+        normalized_category = classify_email_processing_category(
+            str(item.get("subject", "")),
+            str(item.get("sender", "")),
+        )
+        if normalized_category != "ostatní" and normalized_category != str(item.get("category", "")):
+            item["original_category"] = str(item.get("category", ""))
+            item["category"] = normalized_category
         item["id"] = str(item.get("id") or item_id)
         item["action"] = action
         item["is_new_header"] = False
@@ -2425,11 +2459,15 @@ def email_processing_pending_work_items(
         items.append(item)
 
     items.sort(key=lambda item: email_header_timestamp(str(item.get("date", ""))), reverse=True)
+    message = f"Načteno rozpracovaných e-mailů: {len(items)}."
+    if skipped_outbound_count:
+        message += f" Skryto odchozích/konceptových položek: {skipped_outbound_count}."
     return {
         "ok": True,
-        "message": f"Načteno rozpracovaných e-mailů: {len(items)}.",
+        "message": message,
         "items": items,
         "count": len(items),
+        "skipped_outbound_count": skipped_outbound_count,
     }
 
 
@@ -9364,6 +9402,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
           <div id="updatedAt" class="status-line"></div>
           <button class="primary work-button" id="processEmailsBtn" disabled>Zpracovat e-maily</button>
           <div id="processEmailsStatus" class="status-line">Nejdřív přiřaď status všem viditelným e-mailům.</div>
+          <div class="status-line">Blokové přepínače jako VAK, Finanční správa nebo Faktury nad 2000 Kč jsou až v okně Work Queue po kliknutí na Zpracovat e-maily.</div>
           <div class="headers-box">
             <div id="headersBusy" class="busy-row" role="status" aria-live="polite">
               <span class="spinner" aria-hidden="true"></span>
@@ -9504,6 +9543,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       if (item.provider) parts.push(item.provider);
       if (item.folder) parts.push(item.folder);
       if (item.uid) parts.push(`UID ${item.uid}`);
+      if (item.sender) parts.push(item.sender);
       if (item.date) parts.push(item.date);
       if (item.category) parts.push(item.category);
       return parts.join(" | ");

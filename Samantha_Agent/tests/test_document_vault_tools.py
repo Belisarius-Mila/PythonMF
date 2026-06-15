@@ -36,7 +36,10 @@ from app.documents.scandocu import prepare_next_scandocu_pdf
 from app.documents.scandocu import prepare_scandocu_candidate
 from app.documents.scandocu import prepare_specific_download_pdf
 from app.documents.scandocu import prepare_next_stored_document_review
+from app.documents.scandocu import registered_document_domains
+from app.documents.scandocu import register_document_domain
 from app.documents.scandocu import scan_downloads_for_pdfs
+from app.documents.scandocu import scandocu_processing_dir
 from app.documents.scandocu import search_downloads_for_pdfs
 from app.documents.scandocu import SCANDOCU_HTML
 from app.documents.vault import format_document_inbox_reminder
@@ -1243,6 +1246,39 @@ class DocumentVaultToolsTests(unittest.TestCase):
             next_candidate = prepare_next_stored_document_review(vault_dir=vault)
             self.assertIsNone(next_candidate)
 
+    def test_scandocu_review_lookup_finds_legacy_trailing_dash_token_dir(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault = Path(temp_dir) / "documents"
+            token_with_dash = "review-doc-2026-06-15-other-email-attachment-pdf-test2025-12-09-001438-e4d14e52-"
+            token_without_dash = token_with_dash.rstrip("-")
+            candidate_dir = scandocu_processing_dir(vault) / token_with_dash
+            candidate_dir.mkdir(parents=True)
+            (candidate_dir / "candidate.json").write_text(
+                json.dumps(
+                    {
+                        "case_id": "email-seznam-150328",
+                        "counterparty": "",
+                        "document_type": "document",
+                        "domain": "other",
+                        "review_document_id": "doc-test",
+                        "source_mode": "vault_review",
+                        "source_name": "test2025-12-09-001438.pdf",
+                        "source_path": str(Path(temp_dir) / "test2025-12-09-001438.pdf"),
+                        "tags": [],
+                        "title": "E-mail UID 150328 příloha test2025-12-09-001438.pdf",
+                        "token": token_with_dash,
+                        "working_path": str(Path(temp_dir) / "test2025-12-09-001438.pdf"),
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            candidate = get_scandocu_candidate(token_without_dash, vault_dir=vault)
+
+            self.assertEqual(candidate.review_document_id, "doc-test")
+            self.assertEqual(candidate.source_path.name, "test2025-12-09-001438.pdf")
+
     def test_scandocu_review_skips_trashed_documents(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
@@ -1316,6 +1352,25 @@ class DocumentVaultToolsTests(unittest.TestCase):
         self.assertIn("let saving = false", SCANDOCU_HTML)
         self.assertIn("fields.saveBtn.disabled = true", SCANDOCU_HTML)
         self.assertIn("U větších PDF může krok trvat desítky sekund", SCANDOCU_HTML)
+
+    def test_scandocu_ui_allows_custom_document_domain(self) -> None:
+        self.assertIn('value="__custom__">Jiná oblast...', SCANDOCU_HTML)
+        self.assertIn('id="domainCustom"', SCANDOCU_HTML)
+        self.assertIn("setDomainValue", SCANDOCU_HTML)
+        self.assertIn("selectedDomainValue", SCANDOCU_HTML)
+        self.assertIn("/api/domains", SCANDOCU_HTML)
+        self.assertIn("loadDomainOptions", SCANDOCU_HTML)
+        self.assertIn("zadej název nové oblasti", SCANDOCU_HTML)
+
+    def test_scandocu_registers_custom_document_domain_for_future_selection(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault = Path(temp_dir) / "documents"
+
+            value = register_document_domain("ČEZ smlouvy", vault_dir=vault)
+            domains = registered_document_domains(vault_dir=vault)
+
+            self.assertEqual(value, "cez-smlouvy")
+            self.assertIn({"value": "cez-smlouvy", "label": "ČEZ smlouvy"}, domains)
 
     def test_duplicate_content_is_not_imported_twice(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
