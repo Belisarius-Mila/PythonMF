@@ -523,6 +523,59 @@ class DocumentVaultToolsTests(unittest.TestCase):
             self.assertEqual(loaded.token, candidate.token)
             self.assertEqual(loaded.working_path, candidate.working_path)
 
+    def test_scandocu_review_tokens_do_not_collide_for_long_similar_document_ids(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            source_older = root / "domsys-vyuctovani-2024-2025-04-25.txt"
+            source_newer = root / "domsys-vyuctovani-2024-2025-06-11.txt"
+            source_older.write_text("Vyuctovani domu Honzikova, obdobi 2024, starsi zprava.\n", encoding="utf-8")
+            source_newer.write_text("Vyuctovani domu Honzikova, obdobi 2024, novejsi zprava.\n", encoding="utf-8")
+            common_id = (
+                "doc-2026-06-15-other-email-attachment-pdf-domsys-vy-tov-n-2024-"
+                "sj-falta-miloslav-ing-a-faltov-jana-ing"
+            )
+            older_id = f"{common_id}-uid-142204"
+            newer_id = f"{common_id}-uid-143940"
+
+            for source, document_id, uid in (
+                (source_newer, newer_id, "143940"),
+                (source_older, older_id, "142204"),
+            ):
+                imported = apply_document_import_text(
+                    source_path=str(source),
+                    target_domain="other",
+                    document_type="email-attachment-pdf",
+                    document_id=document_id,
+                    document_title=f"E-mail UID {uid} příloha domsys vyúčtování.pdf",
+                    user_confirmed=True,
+                    confirmation_text=f"Potvrzuji, uloz dokument {source.name} do oblasti other.",
+                    vault_dir=vault,
+                )
+                self.assertIn("Stav: ulozeno", imported)
+                self.mark_document_needs_review(vault, document_id)
+
+            first = prepare_next_stored_document_review(vault_dir=vault)
+            self.assertIsNotNone(first)
+            assert first is not None
+            self.assertEqual(first.review_document_id, newer_id)
+            reviewed = import_scandocu_candidate(
+                token=first.token,
+                title="E-mail UID 143940 příloha domsys vyúčtování.pdf",
+                domain="real-estate",
+                document_type="invoice",
+                case_id="email-seznam-143940",
+                vault_dir=vault,
+            )
+            self.assertEqual(reviewed["status"], "reviewed")
+
+            second = prepare_next_stored_document_review(vault_dir=vault)
+            self.assertIsNotNone(second)
+            assert second is not None
+            self.assertEqual(second.review_document_id, older_id)
+            self.assertNotEqual(second.token, first.token)
+            self.assertIn("142204", second.title)
+
     def test_scandocu_retries_stale_no_text_candidate_cache(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)

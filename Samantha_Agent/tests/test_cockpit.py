@@ -1175,6 +1175,51 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["items"][0]["amount_due"], "4 512 Kč")
         self.assertEqual(result["items"][0]["amount_note"], "Platíme základ bez doplňkového MAXI.")
 
+    def test_document_due_candidates_hide_stale_historical_payment_dates(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            index = vault / "index"
+            index.mkdir(parents=True)
+            reminders_path = root / "reminders.json"
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "rekonstrukce-cejeticky-2018",
+                        "title": "Faktura Rekonstrukce RD Cejeticky 87",
+                        "domain": "home",
+                        "document_type": "invoice",
+                    }
+                ],
+            )
+            self.write_jsonl(
+                index / "due_dates.jsonl",
+                [
+                    {
+                        "document_id": "rekonstrukce-cejeticky-2018",
+                        "date": "2018-01-15",
+                        "type": "payment_due",
+                        "confidence": "high",
+                        "create_reminder_candidate": True,
+                        "context": "Faktura na 115.000 Kc, splatnost 15. 1. 2018.",
+                    }
+                ],
+            )
+
+            result = document_due_candidates_status(
+                vault_dir=vault,
+                reminders_path=reminders_path,
+                today=date(2026, 6, 15),
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["candidate_count"], 0)
+        self.assertEqual(result["actionable_count"], 0)
+        self.assertEqual(result["past_count"], 0)
+        self.assertEqual(result["stale_past_due_count"], 1)
+        self.assertEqual(result["items"], [])
+
     def test_create_document_due_reminder_requires_confirmation_and_writes_safe_reminder(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
@@ -1284,7 +1329,7 @@ class CockpitTests(unittest.TestCase):
                 vault_dir=vault,
                 reminders_path=reminders_path,
                 archive_directory=archive_dir,
-                today=date(2026, 6, 11),
+                today=date(2026, 5, 20),
             )
             candidate = status["items"][0]
             created = create_document_due_reminder_action(
@@ -1295,7 +1340,7 @@ class CockpitTests(unittest.TestCase):
                 vault_dir=vault,
                 reminders_path=reminders_path,
                 archive_directory=archive_dir,
-                today=date(2026, 6, 11),
+                today=date(2026, 5, 20),
             )
             store = json.loads(reminders_path.read_text(encoding="utf-8"))
 
@@ -1314,6 +1359,86 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(store["reminders"][0]["due_date"], "2026-05-31")
         self.assertEqual(store["reminders"][0]["amount_due"], "1 360,00 Kč")
         self.assertNotIn("upominani@example.com", json.dumps(store, ensure_ascii=False))
+
+    def test_email_archive_due_candidates_skip_old_message_even_when_archived_today(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            (vault / "index").mkdir(parents=True)
+            archive_dir = root / "email_archive"
+            email_dir = archive_dir / "email-61429-rekonstrukce-cejeticky"
+            email_dir.mkdir(parents=True)
+            reminders_path = root / "reminders.json"
+            (email_dir / "metadata.json").write_text(
+                json.dumps(
+                    {
+                        "archive_id": "email-61429-rekonstrukce-cejeticky",
+                        "uid": "61429",
+                        "date": "Mon, 15 Jan 2018 13:15:40 +0100",
+                        "from": "redigovano@example.com",
+                        "subject": "Re: Faktura: Rekonstrukce RD Cejeticky 87",
+                        "provider": "seznam",
+                        "mailbox": "INBOX",
+                        "archived_at": "2026-06-15T18:30:52+00:00",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (email_dir / "body.txt").write_text(
+                "Prosím pošlete fakturu na Rekonstrukci RD Cejeticky 87, na 115.000 Kc, "
+                "měsíční splatnost od 15. 1. 2018.",
+                encoding="utf-8",
+            )
+
+            status = document_due_candidates_status(
+                vault_dir=vault,
+                reminders_path=reminders_path,
+                archive_directory=archive_dir,
+                today=date(2026, 6, 15),
+            )
+
+        self.assertEqual(status["email_candidate_count"], 0)
+        self.assertEqual(status["actionable_count"], 0)
+
+    def test_email_archive_amount_parser_handles_dot_thousands_separator(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            (vault / "index").mkdir(parents=True)
+            archive_dir = root / "email_archive"
+            email_dir = archive_dir / "email-200000-rekonstrukce-cejeticky"
+            email_dir.mkdir(parents=True)
+            reminders_path = root / "reminders.json"
+            (email_dir / "metadata.json").write_text(
+                json.dumps(
+                    {
+                        "archive_id": "email-200000-rekonstrukce-cejeticky",
+                        "uid": "200000",
+                        "date": "Mon, 15 Jun 2026 13:15:40 +0200",
+                        "from": "dodavatel@example.com",
+                        "subject": "Faktura: Rekonstrukce RD Cejeticky 87",
+                        "provider": "seznam",
+                        "mailbox": "INBOX",
+                        "archived_at": "2026-06-15T18:30:52+00:00",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (email_dir / "body.txt").write_text(
+                "Prosím uhradit fakturu na Rekonstrukci RD Cejeticky 87, částka 115.000 Kc, "
+                "splatnost 30. 6. 2026.",
+                encoding="utf-8",
+            )
+
+            status = document_due_candidates_status(
+                vault_dir=vault,
+                reminders_path=reminders_path,
+                archive_directory=archive_dir,
+                today=date(2026, 6, 15),
+            )
+
+        self.assertEqual(status["email_candidate_count"], 1)
+        self.assertEqual(status["items"][0]["amount_due"], "115 000 Kc")
 
     def test_document_review_report_status_flags_safe_review_candidates(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

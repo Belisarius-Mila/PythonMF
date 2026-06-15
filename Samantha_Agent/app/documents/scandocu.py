@@ -287,6 +287,17 @@ def local_modified_date(path: Path) -> date:
     return datetime.fromtimestamp(path.stat().st_mtime).date()
 
 
+def build_scandocu_token(prefix: str, stable_name: str, digest: str, limit: int = SCANDOCU_TOKEN_LIMIT) -> str:
+    digest_part = safe_ascii_slug(digest[:12], default="", limit=12)
+    prefix_part = safe_ascii_slug(prefix, default="pdf", limit=20)
+    name_part = safe_slug(stable_name, default="", limit=max(20, limit))
+    return safe_slug(
+        f"{prefix_part}-{digest_part}-{name_part}",
+        default=f"{prefix_part}-{digest_part}",
+        limit=limit,
+    ).strip("-")
+
+
 def prepare_next_scandocu_pdf(
     downloads_dir: Path = DEFAULT_DOWNLOADS_DIR,
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
@@ -424,7 +435,7 @@ def prepare_scandocu_candidate(source: Path, vault_dir: Path = DEFAULT_DOCUMENTS
         raise ValueError("ScanDocu umi v teto fazi zpracovat jen PDF soubory.")
     validate_source_file(source)
     digest = sha256_file(source)
-    token = safe_slug(f"{source.stem}-{digest[:12]}", default=f"pdf-{digest[:12]}", limit=64)
+    token = build_scandocu_token("pdf", source.stem, digest, limit=64)
     target_dir = scandocu_processing_dir(vault_dir) / token
     metadata_path = target_dir / "candidate.json"
     if metadata_path.exists():
@@ -488,7 +499,7 @@ def prepare_stored_document_review_candidate(
     validate_source_file(stored_path)
     digest = sha256_file(stored_path)
     document_id = safe_slug(str(document_record.get("document_id", "")), default=f"doc-{digest[:8]}", limit=140)
-    token = safe_slug(f"review-{document_id}-{digest[:12]}", default=f"review-{digest[:12]}", limit=SCANDOCU_TOKEN_LIMIT).strip("-")
+    token = build_scandocu_token("review", document_id, digest, limit=SCANDOCU_TOKEN_LIMIT)
     target_dir = scandocu_processing_dir(vault_dir) / token
     metadata_path = target_dir / "candidate.json"
     if metadata_path.exists():
@@ -799,7 +810,7 @@ def mark_resolved_download_variants_skipped(
             continue
         if any(row.get("source_sha256") == digest for row in existing_actions):
             continue
-        token = safe_slug(f"{sibling.stem}-{digest[:12]}", default=f"pdf-{digest[:12]}", limit=64)
+        token = build_scandocu_token("pdf", sibling.stem, digest, limit=64)
         append_scandocu_action(
             vault_dir=vault_dir,
             action="skipped",

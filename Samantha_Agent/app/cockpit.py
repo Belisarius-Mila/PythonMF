@@ -4376,6 +4376,7 @@ def document_due_candidates_status(
     archive_directory: Path | None = None,
     today: date | None = None,
     limit: int = 8,
+    stale_past_due_days: int = 90,
 ) -> dict[str, Any]:
     today_date = today or date.today()
     effective_archive_directory = (
@@ -4399,7 +4400,15 @@ def document_due_candidates_status(
         if effective_archive_directory is not None
         else []
     )
-    candidates = document_candidates + email_candidates
+    all_candidates = document_candidates + email_candidates
+    stale_past_due_candidates: list[dict[str, Any]] = []
+    candidates: list[dict[str, Any]] = []
+    for item in all_candidates:
+        is_stale_past_due = item.get("status") == "past_due" and int(item.get("days_until", 0) or 0) < -abs(stale_past_due_days)
+        if is_stale_past_due:
+            stale_past_due_candidates.append(item)
+        else:
+            candidates.append(item)
     candidate_groups = annotate_due_candidate_groups(candidates)
     duplicate_groups = candidate_groups["duplicates"]
     related_source_groups = candidate_groups["related_sources"]
@@ -4418,8 +4427,10 @@ def document_due_candidates_status(
         "ok": True,
         "today": today_date.isoformat(),
         "candidate_count": len(candidates),
-        "document_candidate_count": len(document_candidates),
-        "email_candidate_count": len(email_candidates),
+        "document_candidate_count": sum(1 for item in candidates if item.get("source_kind") != "email_archive"),
+        "email_candidate_count": sum(1 for item in candidates if item.get("source_kind") == "email_archive"),
+        "stale_past_due_count": len(stale_past_due_candidates),
+        "stale_past_due_days": abs(stale_past_due_days),
         "duplicate_group_count": len(duplicate_groups),
         "duplicate_candidate_count": sum(1 for item in candidates if item.get("duplicate_group_id")),
         "related_source_group_count": len(related_source_groups),
@@ -4432,6 +4443,7 @@ def document_due_candidates_status(
         "message": (
             f"Termíny: {len(actionable)} ke schválení, {len(already)} už hlídáno, "
             f"{len(past)} prošlé bez nové připomínky."
+            f"{' Archivní prošlé skryté: ' + str(len(stale_past_due_candidates)) + '.' if stale_past_due_candidates else ''}"
             f"{' Související zdroje: ' + str(len(related_source_groups)) + '.' if related_source_groups else ''}"
             f"{' Pravděpodobné duplicity: ' + str(len(duplicate_groups)) + '.' if duplicate_groups else ''}"
         ),
@@ -4814,7 +4826,7 @@ EMAIL_ARCHIVE_PAYMENT_TERMS = (
     "zaplat",
 )
 EMAIL_ARCHIVE_DATE_PATTERN = re.compile(r"\b(\d{1,2})[.]\s*(\d{1,2})[.]\s*(20\d{2})\b")
-EMAIL_ARCHIVE_AMOUNT_PATTERN = re.compile(r"\b([0-9]{1,3}(?:[ \u00a0]\d{3})*(?:,\d{1,2})?\s*K[čc])\b")
+EMAIL_ARCHIVE_AMOUNT_PATTERN = re.compile(r"\b([0-9]{1,3}(?:[ .\u00a0]\d{3})*(?:,\d{1,2})?\s*K[čc])\b")
 
 
 def build_email_archive_due_candidates(
@@ -4843,8 +4855,10 @@ def build_email_archive_due_candidates(
             metadata = read_json_file(metadata_path)
         except (OSError, ValueError, json.JSONDecodeError):
             continue
-        archived_at = parse_email_archive_date(str(metadata.get("archived_at", "") or metadata.get("date", "")))
-        if archived_at is not None and (today - archived_at).days > max_age_days:
+        message_date = parse_email_archive_date(str(metadata.get("date", "")))
+        archived_at = parse_email_archive_date(str(metadata.get("archived_at", "")))
+        freshness_date = message_date or archived_at
+        if freshness_date is not None and (today - freshness_date).days > max_age_days:
             continue
         archive_dir = metadata_path.parent
         body_path = archive_dir / "body.txt"
@@ -4870,7 +4884,12 @@ def build_email_archive_due_candidates(
             due_date=due_date.isoformat(),
         )
         reminder = reminders_by_id.get(reminder_id)
-        status = "already_reminded" if reminder is not None else "ready"
+        if reminder is not None:
+            status = "already_reminded"
+        elif due_date < today:
+            status = "past_due"
+        else:
+            status = "ready"
         amount_due = safe_text(str(reminder.get("amount_due", "")))[:80] if reminder is not None else extract_payment_amount_from_text(context)
         amount_note = safe_text(str(reminder.get("amount_note", "")))[:240] if reminder is not None else ""
         candidates.append(
@@ -4895,7 +4914,7 @@ def build_email_archive_due_candidates(
                 "amount_due": amount_due,
                 "amount_note": amount_note,
                 "status": status,
-                "status_label": "ke schválení" if status == "ready" else "už hlídáno",
+                "status_label": document_due_candidate_status_label(status),
                 "reminder_id": reminder_id,
                 "reminder_ref": reminder_reference(reminder_id),
                 "reminder_status": safe_text(str(reminder.get("status", "")))[:40] if reminder is not None else "",
@@ -4969,7 +4988,10 @@ def best_email_archive_due_match(text: str) -> tuple[date, str] | None:
 
 
 def extract_payment_amount_from_text(text: str) -> str:
-    amounts = [safe_text(match.group(1)).replace(" .", " ") for match in EMAIL_ARCHIVE_AMOUNT_PATTERN.finditer(text)]
+    amounts = [
+        " ".join(safe_text(match.group(1)).replace(".", " ").replace("\u00a0", " ").split())
+        for match in EMAIL_ARCHIVE_AMOUNT_PATTERN.finditer(text)
+    ]
     if not amounts:
         return ""
     return amounts[-1][:80]
@@ -5110,6 +5132,17 @@ def create_email_archive_due_reminder_action(
         return {
             "ok": False,
             "message": "Pro tento e-mailový termín už připomínka existuje.",
+            "document_due_candidates": document_due_candidates_status(
+                vault_dir=vault_dir,
+                reminders_path=reminders_path,
+                archive_directory=archive_directory,
+                today=today,
+            ),
+        }
+    if candidate["status"] == "past_due":
+        return {
+            "ok": False,
+            "message": "E-mailový termín je už v minulosti; novou připomínku z něj teď nevytvářím.",
             "document_due_candidates": document_due_candidates_status(
                 vault_dir=vault_dir,
                 reminders_path=reminders_path,
