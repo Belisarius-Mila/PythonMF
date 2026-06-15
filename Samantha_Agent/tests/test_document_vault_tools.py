@@ -523,6 +523,37 @@ class DocumentVaultToolsTests(unittest.TestCase):
             self.assertEqual(loaded.token, candidate.token)
             self.assertEqual(loaded.working_path, candidate.working_path)
 
+    def test_scandocu_review_candidate_marks_non_pdf_as_download_only(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            source = root / "cenova-nabidka.doc"
+            source.write_bytes(b"Word document fallback text 270230 Kc")
+            document_id = "kanta-41610-neuberk-price-quote"
+            imported = apply_document_import_text(
+                source_path=str(source),
+                target_domain="neuberk",
+                document_type="price_quote",
+                document_id=document_id,
+                document_title="Cenova nabidka Neuberk",
+                user_confirmed=True,
+                confirmation_text="Potvrzuji, uloz dokument cenova-nabidka.doc do oblasti neuberk.",
+                vault_dir=vault,
+            )
+            self.assertIn("Stav: ulozeno", imported)
+            self.mark_document_needs_review(vault, document_id)
+
+            candidate = prepare_next_stored_document_review(vault_dir=vault)
+            self.assertIsNotNone(candidate)
+            assert candidate is not None
+            api = candidate.to_api()
+
+            self.assertEqual(api["file_extension"], ".doc")
+            self.assertFalse(api["inline_preview"])
+            self.assertEqual(api["preview_url"], "")
+            self.assertEqual(api["file_url"], f"/file/{candidate.token}")
+            self.assertIn("pdf_url", api)
+
     def test_scandocu_review_tokens_do_not_collide_for_long_similar_document_ids(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
@@ -1405,6 +1436,11 @@ class DocumentVaultToolsTests(unittest.TestCase):
         self.assertIn("let saving = false", SCANDOCU_HTML)
         self.assertIn("fields.saveBtn.disabled = true", SCANDOCU_HTML)
         self.assertIn("U větších PDF může krok trvat desítky sekund", SCANDOCU_HTML)
+        self.assertIn("Náhled není dostupný", SCANDOCU_HTML)
+        self.assertIn("data.inline_preview", SCANDOCU_HTML)
+        self.assertIn("Stáhnout soubor", SCANDOCU_HTML)
+        self.assertIn('id="previewDownload" class="preview-download" href="#" download', SCANDOCU_HTML)
+        self.assertNotIn('id="previewDownload" class="preview-download" href="#" target="_blank"', SCANDOCU_HTML)
 
     def test_scandocu_ui_allows_custom_document_domain(self) -> None:
         self.assertIn('value="__custom__">Jiná oblast...', SCANDOCU_HTML)

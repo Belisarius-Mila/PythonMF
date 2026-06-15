@@ -535,6 +535,23 @@ Dalsi prakticky krok:
 - Potom rozhodnout, zda pokracovat OCR/re-review pipeline pro zero-text dokumenty,
   nebo sjednocenym intake panelem Downloads / e-mail / mobilni sken.
 
+## ScanDocu Review a Kanta ne-PDF prilohy 2026-06-15
+
+Pri zpracovani Kanta stavebnich dokumentu se ukazal prakticky problem s ne-PDF
+prilohami ve ScanDocu Review. Stare Word/Excel dokumenty jsou ve vaultu spravne
+ulozene, ale nelze je bezpecne zobrazit v PDF iframe. Oprava v `app/documents/scandocu.py`
+proto rozlisuje inline PDF nahled a ne-PDF download:
+
+- PDF zustava v inline nahledu.
+- `.doc`, `.xls`, `.xlsx` a dalsi ne-PDF soubory ukazou panel `Nahled neni dostupny`.
+- Tlacitko `Stahnout soubor` stahuje kopii z processing slozky bez otevirani
+  nove prazdne karty.
+
+Kanta prilohy s nalezenymi castkami byly zarazene do soukromeho vaultu jako
+`needs_review`; samotne prilohy a extrakcni reporty zustavaji v `data/private/`
+mimo git. Navazujici stav je v handoffu
+`handoffs/scandocu_kanta_nonpdf_review_checkpoint_2026_06_15.md`.
+
 ## Vztah k existujicim projektum
 
 - Platebni SMS/reminders: konkretni faktury/prilohy z platebnich pripadu se mohou

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import mimetypes
 import re
 import shutil
 import unicodedata
@@ -86,6 +87,8 @@ class ScanDocuCandidate:
     probable_duplicates: list[dict[str, Any]] | None = None
 
     def to_api(self) -> dict[str, Any]:
+        extension = self.working_path.suffix.lower()
+        inline_preview = extension == ".pdf"
         return {
             "found": True,
             "source_mode": self.source_mode,
@@ -94,6 +97,10 @@ class ScanDocuCandidate:
             "source_path": str(self.source_path),
             "working_path": str(relative_to_project(self.working_path)),
             "pdf_url": f"/pdf/{self.token}",
+            "preview_url": f"/pdf/{self.token}" if inline_preview else "",
+            "file_url": f"/file/{self.token}",
+            "file_extension": extension,
+            "inline_preview": inline_preview,
             "title": self.title,
             "domain": self.domain,
             "document_type": self.document_type,
@@ -1303,7 +1310,15 @@ class ScanDocuServer:
                     if parsed.path.startswith("/pdf/"):
                         token = parsed.path.rsplit("/", 1)[-1]
                         candidate = get_scandocu_candidate(token=token, vault_dir=app.vault_dir)
+                        if candidate.working_path.suffix.lower() != ".pdf":
+                            raise ValueError("Nahled v PDF ramecku je dostupny jen pro PDF dokumenty.")
                         self.respond_file(candidate.working_path, "application/pdf")
+                        return
+                    if parsed.path.startswith("/file/"):
+                        token = parsed.path.rsplit("/", 1)[-1]
+                        candidate = get_scandocu_candidate(token=token, vault_dir=app.vault_dir)
+                        content_type = mimetypes.guess_type(candidate.working_path.name)[0] or "application/octet-stream"
+                        self.respond_file(candidate.working_path, content_type, as_attachment=True)
                         return
                     self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
                 except ValueError as exc:
@@ -1376,7 +1391,7 @@ class ScanDocuServer:
                 self.end_headers()
                 self.wfile.write(payload)
 
-            def respond_file(self, path: Path, content_type: str) -> None:
+            def respond_file(self, path: Path, content_type: str, as_attachment: bool = False) -> None:
                 root = scandocu_processing_dir(app.vault_dir).resolve()
                 resolved = path.resolve()
                 if root not in resolved.parents:
@@ -1385,6 +1400,8 @@ class ScanDocuServer:
                 self.send_response(HTTPStatus.OK)
                 self.send_header("Content-Type", content_type)
                 self.send_header("Content-Length", str(len(payload)))
+                if as_attachment:
+                    self.send_header("Content-Disposition", f'attachment; filename="{safe_filename(path.name)}"')
                 self.end_headers()
                 self.wfile.write(payload)
 
@@ -1417,6 +1434,12 @@ SCANDOCU_HTML = """<!doctype html>
     input, select, textarea { box-sizing: border-box; width: 100%; border: 1px solid #c8ced8; border-radius: 6px; padding: 10px 11px; font: inherit; background: white; color: #111827; }
     textarea { min-height: 72px; resize: vertical; }
     iframe { width: 100%; height: 100%; border: 0; background: #e5e7eb; }
+    .preview-shell { height: 100%; min-height: 420px; }
+    .preview-fallback { height: 100%; min-height: 420px; box-sizing: border-box; padding: 22px; background: #f9fafb; color: #1f2937; display: flex; align-items: center; justify-content: center; }
+    .preview-card { max-width: 520px; display: grid; gap: 11px; }
+    .preview-card h2 { margin: 0; font-size: 18px; letter-spacing: 0; }
+    .preview-card p { margin: 0; color: #4b5563; line-height: 1.45; }
+    .preview-download { justify-self: start; display: inline-block; border-radius: 6px; padding: 10px 13px; background: #2563eb; color: white; text-decoration: none; font-weight: 650; }
     .meta { display: grid; gap: 7px; margin: 10px 0 14px; font-size: 13px; color: #4b5563; }
     .meta strong { color: #111827; }
     .actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
@@ -1449,6 +1472,7 @@ SCANDOCU_HTML = """<!doctype html>
     @media (max-width: 860px) {
       main { grid-template-columns: 1fr; height: auto; }
       iframe { height: 72vh; }
+      .preview-shell, .preview-fallback { min-height: 72vh; }
       .download-search-grid { grid-template-columns: 1fr; }
     }
   </style>
@@ -1547,8 +1571,15 @@ SCANDOCU_HTML = """<!doctype html>
         </div>
       </div>
     </section>
-    <section>
+    <section class="preview-shell">
       <iframe id="pdfFrame" title="Náhled PDF"></iframe>
+      <div id="previewFallback" class="preview-fallback hidden">
+        <div class="preview-card">
+          <h2>Náhled není dostupný</h2>
+          <p id="previewFallbackText"></p>
+          <a id="previewDownload" class="preview-download" href="#" download>Stáhnout soubor</a>
+        </div>
+      </div>
     </section>
   </main>
   <script>
@@ -1584,6 +1615,9 @@ SCANDOCU_HTML = """<!doctype html>
       caseId: document.getElementById("caseId"),
       tags: document.getElementById("tags"),
       pdfFrame: document.getElementById("pdfFrame"),
+      previewFallback: document.getElementById("previewFallback"),
+      previewFallbackText: document.getElementById("previewFallbackText"),
+      previewDownload: document.getElementById("previewDownload"),
       saveBtn: document.getElementById("saveBtn"),
       skipBtn: document.getElementById("skipBtn")
     };
@@ -1599,6 +1633,8 @@ SCANDOCU_HTML = """<!doctype html>
       fields.formWrap.classList.add("hidden");
       fields.completionActions.classList.add("hidden");
       fields.pdfFrame.removeAttribute("src");
+      fields.pdfFrame.classList.remove("hidden");
+      fields.previewFallback.classList.add("hidden");
       const res = await fetch(`/api/next?mode=${appMode}`);
       const data = await res.json();
       if (!data.found) {
@@ -1611,7 +1647,7 @@ SCANDOCU_HTML = """<!doctype html>
 
     function loadCandidate(data) {
       current = data;
-      fields.status.textContent = "Zkontroluj PDF a metadata.";
+      fields.status.textContent = data.inline_preview ? "Zkontroluj PDF a metadata." : "Zkontroluj dokument a metadata. Náhled je dostupný jen pro PDF.";
       fields.formWrap.classList.remove("hidden");
       fields.completionActions.classList.add("hidden");
       fields.modeInfo.textContent = data.source_mode === "vault_review" ? "revize uloženého dokumentu" : "nový dokument z Downloads";
@@ -1631,7 +1667,19 @@ SCANDOCU_HTML = """<!doctype html>
       fields.relatedAsset.value = data.related_asset || "";
       fields.caseId.value = data.case_id || "";
       fields.tags.value = data.tags || "";
-      fields.pdfFrame.src = data.pdf_url;
+      if (data.inline_preview) {
+        fields.previewFallback.classList.add("hidden");
+        fields.pdfFrame.classList.remove("hidden");
+        fields.pdfFrame.src = data.preview_url || data.pdf_url;
+      } else {
+        fields.pdfFrame.removeAttribute("src");
+        fields.pdfFrame.classList.add("hidden");
+        fields.previewFallback.classList.remove("hidden");
+        const extension = data.file_extension || "soubor";
+        fields.previewFallbackText.textContent = `Soubor ${data.source_name || ""} má typ ${extension}. Prohlížeč ho neumí bezpečně zobrazit v PDF náhledu. Stáhni ho a otevři lokálně, metadata pak potvrď vlevo.`;
+        fields.previewDownload.href = data.file_url || "#";
+        fields.previewDownload.download = data.source_name || "";
+      }
     }
 
     function knownDomainValues() {
