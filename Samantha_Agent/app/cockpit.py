@@ -7315,6 +7315,7 @@ def search_document_index(
     terms = [term.casefold() for term in tokenize(query) if len(term) >= 2]
     if not terms:
         return {"ok": False, "message": "Zadej konkrétnější dotaz.", "results": []}
+    query_intent = document_search_query_intent(query=query, terms=terms)
 
     documents = {
         str(item.get("document_id", "")): item
@@ -7348,6 +7349,17 @@ def search_document_index(
         snippet = build_snippet(text, terms) if text else ""
         if not snippet.strip():
             snippet = "Text zatím není k dispozici; shoda je podle metadat."
+        haystack_normalized_terms = {
+            safe_ascii_slug(term, default=term, limit=80).casefold()
+            for term in tokenize(haystack)
+        }
+        score += document_search_intent_bonus(
+            metadata=metadata,
+            query_intent=query_intent,
+            haystack_normalized_terms=haystack_normalized_terms,
+        )
+        if score <= 0:
+            continue
         scored.append((score, metadata, snippet, len(text)))
 
     results: list[dict[str, Any]] = []
@@ -7380,6 +7392,93 @@ def search_document_index(
         "results": results,
         "message": "Nalezena shoda." if results else "V dokumentech jsem nenašla shodu.",
     }
+
+
+INVOICE_QUERY_TERMS = {
+    "faktura",
+    "faktury",
+    "fakturace",
+    "invoice",
+    "vyuctovani",
+    "vyúčtování",
+    "danovy",
+    "daňový",
+    "doklad",
+}
+
+INVOICE_DOCUMENT_TYPES = {
+    "invoice",
+    "tax_invoice",
+    "receipt",
+    "bill",
+}
+
+QUOTE_DOCUMENT_TYPES = {
+    "nabidka",
+    "nabídka",
+    "offer",
+    "price_quote",
+    "quotation",
+    "quote",
+}
+
+
+def document_search_query_intent(query: str, terms: list[str]) -> dict[str, Any]:
+    normalized_terms = [safe_ascii_slug(term, default=term, limit=80).casefold() for term in terms]
+    routing_terms = INVOICE_QUERY_TERMS | {"pdf"}
+    return {
+        "wants_invoice": bool(set(terms) & INVOICE_QUERY_TERMS or set(normalized_terms) & INVOICE_QUERY_TERMS),
+        "wants_pdf": "pdf" in normalized_terms,
+        "content_terms": [term for term in normalized_terms if term not in routing_terms],
+        "normalized_terms": normalized_terms,
+        "normalized_query": safe_ascii_slug(query, default="", limit=200).casefold(),
+    }
+
+
+def document_search_intent_bonus(
+    metadata: dict[str, Any],
+    query_intent: dict[str, Any],
+    haystack_normalized_terms: set[str],
+) -> int:
+    bonus = 0
+    normalized_terms = set(query_intent.get("normalized_terms", []))
+    content_terms = set(query_intent.get("content_terms", []))
+    document_type = safe_ascii_slug(str(metadata.get("document_type", "")), default="", limit=80).casefold()
+    original_filename = str(metadata.get("original_filename", "")).casefold()
+    stored_path = str(metadata.get("stored_path", "")).casefold()
+    is_pdf = original_filename.endswith(".pdf") or stored_path.endswith(".pdf")
+
+    if content_terms:
+        missing_terms = content_terms - haystack_normalized_terms
+        if not missing_terms:
+            bonus += 80
+        else:
+            bonus -= 80 * len(missing_terms)
+
+    if query_intent.get("wants_invoice"):
+        if document_type in INVOICE_DOCUMENT_TYPES or "invoice" in document_type:
+            bonus += 100
+        if document_type in QUOTE_DOCUMENT_TYPES:
+            bonus -= 80
+        if is_pdf:
+            bonus += 15
+
+    if query_intent.get("wants_pdf") and is_pdf:
+        bonus += 35
+
+    for field_name, field_bonus in (
+        ("domain", 45),
+        ("related_asset", 30),
+        ("counterparty", 20),
+    ):
+        field_slug = safe_ascii_slug(str(metadata.get(field_name, "")), default="", limit=160).casefold()
+        if not field_slug:
+            continue
+        field_parts = {part for part in field_slug.split("-") if len(part) >= 2}
+        if field_parts and field_parts.issubset(normalized_terms):
+            bonus += field_bonus
+
+    return bonus
 
 
 def run_print_preflight_command(command: list[str], timeout: float = DOCUMENT_PRINT_DISCOVERY_TIMEOUT) -> tuple[int, str]:

@@ -3973,6 +3973,72 @@ Dalsi krok:
             self.assertNotIn("641215/0987", found["snippet"])
             self.assertNotIn("https://example.com/private", found["snippet"])
 
+    def test_document_search_invoice_query_prioritizes_invoice_over_quote(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault = Path(temp_dir) / "documents"
+            index = vault / "index"
+            index.mkdir(parents=True)
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "doc-nabidka",
+                        "title": "Nabídka RD Jizerní Vtelno",
+                        "original_filename": "nabidka_jizerni_vtelno.pdf",
+                        "domain": "jizerni-vtelno",
+                        "document_type": "price_quote",
+                        "counterparty": "František Kanta",
+                        "related_asset": "RD Jizerní Vtelno",
+                        "stored_path": "data/private/documents/vault/jizerni-vtelno/doc-nabidka/nabidka.pdf",
+                    },
+                    {
+                        "document_id": "doc-faktura",
+                        "title": "Faktura RD Jizerní Vtelno",
+                        "original_filename": "faktura_jizerni_vtelno.pdf",
+                        "domain": "jizerni-vtelno",
+                        "document_type": "invoice",
+                        "counterparty": "František Kanta",
+                        "related_asset": "RD Jizerní Vtelno",
+                        "stored_path": "data/private/documents/vault/jizerni-vtelno/doc-faktura/faktura.pdf",
+                    },
+                    {
+                        "document_id": "doc-jina-faktura",
+                        "title": "Faktura servis auta",
+                        "original_filename": "faktura_auto.pdf",
+                        "domain": "car",
+                        "document_type": "invoice",
+                        "counterparty": "Servis",
+                        "related_asset": "auto",
+                        "stored_path": "data/private/documents/vault/car/doc-jina-faktura/faktura.pdf",
+                    },
+                ],
+            )
+            self.write_jsonl(
+                index / "text_index.jsonl",
+                [
+                    {
+                        "document_id": "doc-nabidka",
+                        "text": "Jizerní Vtelno " * 20,
+                    },
+                    {
+                        "document_id": "doc-faktura",
+                        "text": "Daňový doklad k domu Jizerní Vtelno.",
+                    },
+                    {
+                        "document_id": "doc-jina-faktura",
+                        "text": "Faktura za servis.",
+                    },
+                ],
+            )
+
+            result = search_document_index("faktura Jizerní Vtelno", vault_dir=vault, limit=3)
+
+            self.assertEqual(result["count"], 2)
+            self.assertEqual(result["results"][0]["document_id"], "doc-faktura")
+            self.assertEqual(result["results"][0]["document_type"], "invoice")
+            self.assertEqual(result["results"][1]["document_id"], "doc-nabidka")
+            self.assertNotIn("doc-jina-faktura", [item["document_id"] for item in result["results"]])
+
     def test_document_search_marks_metadata_only_result_as_needs_review(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             vault = Path(temp_dir) / "documents"
