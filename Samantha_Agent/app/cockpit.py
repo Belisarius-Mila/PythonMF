@@ -2934,6 +2934,13 @@ def process_email_work_queue_item(
         for part_id in item.get("saveAttachments", [])
         if safe_text(str(part_id)).strip()
     }
+    save_attachment_filenames = {
+        safe_text(str(attachment.get("filename", ""))).strip()
+        for attachment in item.get("attachment_metadata", item.get("attachments", []))
+        if isinstance(attachment, dict)
+        and safe_text(str(attachment.get("part_id", ""))).strip() in save_attachment_ids
+        and safe_text(str(attachment.get("filename", ""))).strip()
+    }
     base = {
         "item_id": item_id,
         "provider": provider,
@@ -2977,14 +2984,15 @@ def process_email_work_queue_item(
     if archive_result.created:
         record_email_archive_completed(path=activity_state_path)
 
-    attachment_results = import_selected_email_pdf_attachments(
+    attachment_results = import_selected_email_attachments(
         source=source,
         selected_part_ids=save_attachment_ids,
         documents_dir=documents_dir,
         category=safe_text(str(item.get("category", ""))),
+        selected_filenames=save_attachment_filenames,
     )
     clear_email_processing_decision(item_id=item_id, path=decisions_path)
-    ok_attachments = [result for result in attachment_results if result.get("ok")]
+    ok_attachments = [result for result in attachment_results if result.get("ok") and result.get("document_id")]
     failed_attachments = [result for result in attachment_results if not result.get("ok")]
     return {
         **base,
@@ -2996,7 +3004,7 @@ def process_email_work_queue_item(
         "attachments_imported": len(ok_attachments),
         "attachments": attachment_results,
         "message": (
-            f"E-mail uložen do EmailArchiveVault; PDF příloh uloženo: {len(ok_attachments)}."
+            f"E-mail uložen do EmailArchiveVault; příloh uloženo: {len(ok_attachments)}."
             if not failed_attachments
             else f"E-mail uložen, ale {len(failed_attachments)} příloh se nepodařilo uložit."
         ),
@@ -3032,6 +3040,7 @@ def preview_email_work_queue_attachment_action(
     folder: str,
     uid: str,
     part_id: str,
+    filename: str = "",
     preview_dir: Path = EMAIL_ATTACHMENT_PREVIEW_DIR,
     opener: Callable[[list[str]], object] | None = None,
     icloud_provider_factory: Callable[[], object] | None = None,
@@ -3055,15 +3064,22 @@ def preview_email_work_queue_attachment_action(
 
     message = message_from_bytes(source.original_eml)
     meta_by_part_id = {attachment.part_id: attachment for attachment in source.attachments}
+    safe_filename_hint = safe_text(filename).strip()
     for index, part in enumerate(message.walk() if message.is_multipart() else [message]):
         current_part_id = str(index)
-        if current_part_id != safe_part_id:
-            continue
         meta = meta_by_part_id.get(current_part_id)
-        filename = safe_filename((meta.filename if meta else part.get_filename()) or f"attachment-{current_part_id}.pdf")
+        part_filename = safe_text(str((meta.filename if meta else part.get_filename()) or "")).strip()
+        if not email_attachment_part_matches(
+            current_part_id=current_part_id,
+            requested_part_id=safe_part_id,
+            part_filename=part_filename,
+            requested_filename=safe_filename_hint,
+        ):
+            continue
+        filename = safe_filename((meta.filename if meta else part.get_filename()) or f"attachment-{current_part_id}.bin")
         content_type = (meta.content_type if meta else part.get_content_type()) or ""
-        if content_type.casefold() != "application/pdf" and not filename.casefold().endswith(".pdf"):
-            return {"ok": False, "part_id": safe_part_id, "filename": safe_text(filename), "message": "Náhled je zatím povolený jen pro PDF přílohy."}
+        if not email_attachment_is_previewable(content_type=content_type, filename=filename):
+            return {"ok": False, "part_id": safe_part_id, "filename": safe_text(filename), "message": "Náhled je zatím povolený jen pro PDF a obrázkové přílohy."}
         payload = part.get_payload(decode=True)
         if not isinstance(payload, bytes) or not payload:
             return {"ok": False, "part_id": safe_part_id, "filename": safe_text(filename), "message": "Příloha neobsahuje čitelná data."}
@@ -3077,7 +3093,7 @@ def preview_email_work_queue_attachment_action(
         runner(["/usr/bin/open", str(preview_path)])
         return {
             "ok": True,
-            "message": "PDF příloha otevřena jako dočasný náhled; nebyla uložena do document vaultu.",
+            "message": "Příloha otevřena jako dočasný náhled; nebyla uložena do document vaultu.",
             "part_id": safe_part_id,
             "filename": safe_text(filename),
             "preview_path": str(preview_path),
@@ -3086,14 +3102,16 @@ def preview_email_work_queue_attachment_action(
     return {"ok": False, "part_id": safe_part_id, "message": "Vybraná příloha nebyla v e-mailu nalezena."}
 
 
-def import_selected_email_pdf_attachments(
+def import_selected_email_attachments(
     *,
     source: EmailArchiveSource,
     selected_part_ids: set[str],
     documents_dir: Path,
     category: str,
+    selected_filenames: set[str] | None = None,
 ) -> list[dict[str, Any]]:
-    if not selected_part_ids:
+    selected_names = {safe_text(name).strip() for name in (selected_filenames or set()) if safe_text(name).strip()}
+    if not selected_part_ids and not selected_names:
         return []
     if source.original_eml is None:
         return [
@@ -3113,19 +3131,34 @@ def import_selected_email_pdf_attachments(
         temp_root = Path(temp_dir)
         for index, part in enumerate(message.walk() if message.is_multipart() else [message]):
             part_id = str(index)
-            if part_id not in selected_part_ids:
-                continue
-            found_part_ids.add(part_id)
             meta = meta_by_part_id.get(part_id)
+            part_filename = safe_text(str((meta.filename if meta else part.get_filename()) or "")).strip()
+            matching_requested_ids = {
+                requested_id
+                for requested_id in selected_part_ids
+                if email_attachment_part_matches(
+                    current_part_id=part_id,
+                    requested_part_id=requested_id,
+                    part_filename=part_filename,
+                    requested_filename="",
+                )
+            }
+            filename_matched = bool(part_filename and part_filename in selected_names)
+            if not matching_requested_ids and not filename_matched:
+                continue
+            found_part_ids.update(matching_requested_ids)
+            if filename_matched:
+                found_part_ids.update(selected_part_ids or {part_id})
             filename = safe_filename((meta.filename if meta else part.get_filename()) or f"attachment-{part_id}.pdf")
             content_type = (meta.content_type if meta else part.get_content_type()) or ""
-            if content_type.casefold() != "application/pdf" and not filename.casefold().endswith(".pdf"):
+            if not email_attachment_is_storable(content_type=content_type, filename=filename):
                 imported.append(
                     {
-                        "ok": False,
+                        "ok": True,
+                        "status": "skipped",
                         "part_id": part_id,
                         "filename": safe_text(filename),
-                        "message": "Příloha není PDF; pro dávkový import byla přeskočena.",
+                        "message": "Příloha není PDF ani podporovaný obrázek; pro dávkový import byla přeskočena.",
                     }
                 )
                 continue
@@ -3140,15 +3173,18 @@ def import_selected_email_pdf_attachments(
                     }
                 )
                 continue
+            attachment_kind = email_attachment_storage_kind(content_type=content_type, filename=filename)
+            document_type = "email-attachment-image" if attachment_kind == "image" else "email-attachment-pdf"
+            tag_kind = "image" if attachment_kind == "image" else "pdf"
             temp_path = temp_root / filename
             temp_path.write_bytes(payload)
             try:
                 result = apply_document_import_file(
                     source_path=str(temp_path),
                     target_domain=email_processing_category_to_document_domain(category),
-                    document_type="email-attachment-pdf",
+                    document_type=document_type,
                     counterparty=source.sender,
-                    tags=f"email,email-attachment,pdf,{source.provider}",
+                    tags=f"email,email-attachment,{tag_kind},{source.provider}",
                     case_id=f"email-{source.provider}-{source.uid}",
                     document_title=f"E-mail UID {source.uid} příloha {filename}",
                     reading_status="needs_review",
@@ -3186,6 +3222,43 @@ def import_selected_email_pdf_attachments(
             }
         )
     return imported
+
+
+def email_attachment_part_matches(
+    *,
+    current_part_id: str,
+    requested_part_id: str,
+    part_filename: str,
+    requested_filename: str,
+) -> bool:
+    if current_part_id == requested_part_id:
+        return True
+    if requested_filename and part_filename and part_filename == requested_filename:
+        return True
+    return False
+
+
+def email_attachment_is_previewable(*, content_type: str, filename: str) -> bool:
+    normalized_type = content_type.casefold().strip()
+    normalized_name = filename.casefold().strip()
+    previewable_extensions = (".pdf", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".tif", ".tiff")
+    if normalized_type == "application/pdf" or normalized_type.startswith("image/"):
+        return True
+    return normalized_name.endswith(previewable_extensions)
+
+
+def email_attachment_is_storable(*, content_type: str, filename: str) -> bool:
+    return email_attachment_storage_kind(content_type=content_type, filename=filename) in {"pdf", "image"}
+
+
+def email_attachment_storage_kind(*, content_type: str, filename: str) -> str:
+    normalized_type = content_type.casefold().strip()
+    normalized_name = filename.casefold().strip()
+    if normalized_type == "application/pdf" or normalized_name.endswith(".pdf"):
+        return "pdf"
+    if normalized_type.startswith("image/") or normalized_name.endswith((".png", ".jpg", ".jpeg", ".gif", ".webp", ".tif", ".tiff")):
+        return "image"
+    return ""
 
 
 def email_processing_category_to_document_domain(category: str) -> str:
@@ -9240,6 +9313,7 @@ class CockpitServer:
                             folder=str(payload.get("folder", "INBOX")),
                             uid=str(payload.get("uid", "")),
                             part_id=str(payload.get("part_id", "")),
+                            filename=str(payload.get("filename", "")),
                         )
                     )
                     return
@@ -10050,19 +10124,35 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         if (!attachments.length) return '<div class="empty">Bez příloh.</div>';
         return attachments.map((attachment, index) => {
           const partId = attachment.part_id || String(index);
-          const checked = (item.saveAttachments || []).includes(partId) ? " checked" : "";
+          const filename = attachment.filename || "";
+          const contentType = (attachment.content_type || "").toLowerCase();
+          const lowerFilename = filename.toLowerCase();
+          const canSaveToVault = contentType === "application/pdf" ||
+            contentType.startsWith("image/") ||
+            lowerFilename.endsWith(".pdf") ||
+            lowerFilename.endsWith(".png") ||
+            lowerFilename.endsWith(".jpg") ||
+            lowerFilename.endsWith(".jpeg") ||
+            lowerFilename.endsWith(".gif") ||
+            lowerFilename.endsWith(".webp") ||
+            lowerFilename.endsWith(".tif") ||
+            lowerFilename.endsWith(".tiff");
+          const checked = canSaveToVault && (item.saveAttachments || []).includes(partId) ? " checked" : "";
           const size = attachment.size_bytes === null || attachment.size_bytes === undefined
             ? "velikost neznámá"
             : Math.round(Number(attachment.size_bytes) / 1024) + " kB";
+          const saveControl = canSaveToVault
+            ? '<label><input type="checkbox" class="attachment-save" data-part-id="' + escapeHtml(partId) + '"' + checked + '> Uložit</label>'
+            : '<span class="meta">Jen náhled</span>';
           return '<div class="attachment-row" data-part-id="' + escapeHtml(partId) + '">' +
-            '<div><strong>' + escapeHtml(attachment.filename || "(bez názvu)") + '</strong></div>' +
+            '<div><strong>' + escapeHtml(filename || "(bez názvu)") + '</strong></div>' +
             '<div class="meta">' + escapeHtml(attachment.content_type || "") + " | " + escapeHtml(size) + '</div>' +
             '<div class="attachment-tools">' +
-            '<label><input type="checkbox" class="attachment-save" data-part-id="' + escapeHtml(partId) + '"' + checked + '> Uložit</label>' +
-            '<button type="button" class="secondary attachment-preview" data-part-id="' + escapeHtml(partId) + '">Náhled PDF</button>' +
+            saveControl +
+            '<button type="button" class="secondary attachment-preview" data-part-id="' + escapeHtml(partId) + '" data-filename="' + escapeHtml(filename) + '">Náhled</button>' +
             '<button type="button" class="secondary attachment-toggle">Metadata</button>' +
             '</div>' +
-            '<div class="meta hidden attachment-detail">part_id: ' + escapeHtml(partId) + '<br>dispozice: ' + escapeHtml(attachment.disposition || "") + '<br>Náhled PDF otevře dočasnou kopii; trvalé uložení do vaultu proběhne až po zaškrtnutí Uložit a zpracování dávky.</div>' +
+            '<div class="meta hidden attachment-detail">part_id: ' + escapeHtml(partId) + '<br>dispozice: ' + escapeHtml(attachment.disposition || "") + '<br>Náhled otevře dočasnou kopii PDF nebo obrázku; trvalé uložení podporované PDF/obrázkové přílohy do vaultu proběhne až po zaškrtnutí Uložit a zpracování dávky.</div>' +
             '</div>';
         }).join("");
       }
@@ -10112,6 +10202,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         detailPane.querySelectorAll(".attachment-preview").forEach((button) => {
           button.addEventListener("click", async () => {
             const partId = button.dataset.partId || "";
+            const filename = button.dataset.filename || "";
             if (!partId) return;
             button.disabled = true;
             queueStatus.textContent = "Otevírám dočasný náhled PDF přílohy. Příloha se neukládá do vaultu.";
@@ -10123,7 +10214,8 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
                   provider: item.provider,
                   folder: item.folder || "INBOX",
                   uid: item.uid,
-                  part_id: partId
+                  part_id: partId,
+                  filename: filename
                 })
               });
               const data = await res.json();

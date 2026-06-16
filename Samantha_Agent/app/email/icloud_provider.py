@@ -256,6 +256,7 @@ class ICloudReadOnlyEmailProvider:
                     message_data=message_data,
                     max_chars=safe_max_chars,
                     folder=folder,
+                    max_message_bytes=MAX_EXPLICIT_MESSAGE_BYTES,
                 )
         except EmailProviderError:
             raise
@@ -484,8 +485,9 @@ def _message_data_to_archive_source(
     message_data: list[object],
     max_chars: int,
     folder: str = "INBOX",
+    max_message_bytes: int = MAX_MESSAGE_BYTES,
 ) -> EmailArchiveSource:
-    raw_message = _first_safe_message_payload(message_data)
+    raw_message = _first_safe_message_payload(message_data, max_bytes=max_message_bytes)
     if raw_message is None:
         raise EmailProviderError("Zprava je prazdna nebo prilis velka.")
 

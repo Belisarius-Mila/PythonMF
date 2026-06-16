@@ -1330,6 +1330,53 @@ class DocumentVaultToolsTests(unittest.TestCase):
             next_candidate = prepare_next_stored_document_review(vault_dir=vault)
             self.assertIsNone(next_candidate)
 
+    def test_scandocu_review_can_be_reopened_after_manual_needs_review_status(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            source = root / "cenova-nabidka.txt"
+            source.write_text("Cenova nabidka rekonstrukce bytu.\n", encoding="utf-8")
+            vault = root / "documents"
+
+            imported = apply_document_import_text(
+                source_path=str(source),
+                target_domain="other",
+                document_type="document",
+                document_id="kanta-test-reopen",
+                user_confirmed=True,
+                confirmation_text="Potvrzuji, uloz dokument cenova-nabidka.txt do oblasti other.",
+                vault_dir=vault,
+            )
+            self.assertIn("Stav: ulozeno", imported)
+            self.mark_document_needs_review(vault, "kanta-test-reopen")
+
+            candidate = prepare_next_stored_document_review(vault_dir=vault)
+            self.assertIsNotNone(candidate)
+            assert candidate is not None
+            result = import_scandocu_candidate(
+                token=candidate.token,
+                title="Cenova nabidka",
+                domain="home",
+                document_type="price_quote",
+                vault_dir=vault,
+            )
+            self.assertEqual(result["status"], "reviewed")
+            self.assertIsNone(prepare_next_stored_document_review(vault_dir=vault))
+
+            from app.cockpit import set_document_reading_status_action
+
+            reopened = set_document_reading_status_action(
+                document_id="kanta-test-reopen",
+                reading_status="needs_review",
+                note="Vráceno k revizi v testu.",
+                vault_dir=vault,
+            )
+            self.assertTrue(reopened["ok"])
+
+            reopened_candidate = prepare_next_stored_document_review(vault_dir=vault)
+            self.assertIsNotNone(reopened_candidate)
+            assert reopened_candidate is not None
+            self.assertEqual(reopened_candidate.review_document_id, "kanta-test-reopen")
+
     def test_scandocu_review_lookup_finds_legacy_trailing_dash_token_dir(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             vault = Path(temp_dir) / "documents"

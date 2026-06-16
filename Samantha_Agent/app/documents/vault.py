@@ -2849,6 +2849,14 @@ def extract_text(source: Path) -> TextExtractionResult:
         text = source.read_text(encoding="utf-8", errors="ignore")
         return TextExtractionResult(text=text, method="plain-text", ocr_needed=False)
 
+    if suffix in {".jpg", ".jpeg", ".png", ".gif", ".webp", ".tif", ".tiff"}:
+        return TextExtractionResult(
+            text="",
+            method="image-no-text",
+            ocr_needed=True,
+            warning="Obrázková příloha byla uložena bez textové vrstvy; pro fulltext je potřeba OCR.",
+        )
+
     if suffix == ".pdf":
         has_encryption_marker = is_pdf_encrypted(source)
         pdftotext = extract_pdf_with_pdftotext(source)

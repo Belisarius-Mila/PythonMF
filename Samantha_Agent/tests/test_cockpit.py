@@ -4743,6 +4743,86 @@ Dalsi krok:
             self.assertTrue(actions_path.exists())
             self.assertTrue(activity_state_path.exists())
 
+    def test_process_email_work_queue_batch_imports_selected_pdf_and_image_attachments(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            archive_dir = root / "archive"
+            documents_dir = root / "documents"
+            decisions_path = root / "decisions.json"
+            actions_path = root / "actions.jsonl"
+            activity_state_path = root / "activity.json"
+            raw_message = _raw_email_with_pdf_and_jpeg_attachments()
+            provider = _FakeArchiveProvider(
+                EmailArchiveSource(
+                    uid="14482",
+                    date="Tue, 16 Jun 2026 11:02:29 +0000",
+                    sender="Sender <sender@example.com>",
+                    subject="Faktura FAK_226210588",
+                    body_text="Dobrý den, v příloze je faktura a fotografie.",
+                    attachments=(
+                        EmailAttachmentMeta(
+                            filename="FAK_226210588.pdf",
+                            content_type="application/octet-stream",
+                            size_bytes=62,
+                            part_id="2",
+                            content_id="",
+                            disposition="attachment",
+                        ),
+                        EmailAttachmentMeta(
+                            filename="SL_Falta1.jpeg",
+                            content_type="application/octet-stream",
+                            size_bytes=16,
+                            part_id="3",
+                            content_id="",
+                            disposition="attachment",
+                        ),
+                    ),
+                    original_eml=raw_message,
+                    provider="icloud",
+                    mailbox="INBOX",
+                )
+            )
+            save_email_processing_decision(
+                item_id="process-14482",
+                action="process",
+                item={"id": "process-14482", "provider": "iCloud", "folder": "INBOX", "uid": "14482"},
+                path=decisions_path,
+            )
+
+            result = process_email_work_queue_batch(
+                items=[
+                    {
+                        "id": "process-14482",
+                        "provider": "iCloud",
+                        "folder": "INBOX",
+                        "uid": "14482",
+                        "category": "faktury/e-shopy",
+                        "queueDecision": "save",
+                        "saveAttachments": ["2", "3"],
+                        "attachment_metadata": [
+                            {"part_id": "2", "filename": "FAK_226210588.pdf"},
+                            {"part_id": "3", "filename": "SL_Falta1.jpeg"},
+                        ],
+                    }
+                ],
+                archive_directory=archive_dir,
+                documents_dir=documents_dir,
+                decisions_path=decisions_path,
+                actions_path=actions_path,
+                activity_state_path=activity_state_path,
+                icloud_provider_factory=lambda: provider,
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["summary"]["saved"], 1)
+            self.assertEqual(result["summary"]["errors"], 0)
+            self.assertEqual(result["summary"]["attachments_imported"], 2)
+            self.assertEqual(result["items"][0]["attachments_imported"], 2)
+            self.assertEqual(read_email_processing_decisions(decisions_path), {})
+            docs = self.read_jsonl(documents_dir / "index" / "documents_index.jsonl")
+            self.assertEqual([doc["document_type"] for doc in docs], ["email-attachment-pdf", "email-attachment-image"])
+            self.assertEqual(docs[1]["reading_status"], "needs_review")
+
     def test_preview_email_work_queue_attachment_opens_temp_pdf_without_vault_import(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
@@ -4788,6 +4868,94 @@ Dalsi krok:
             self.assertTrue(Path(commands[0][1]).exists())
             self.assertTrue(str(Path(commands[0][1])).startswith(str(preview_dir)))
             self.assertFalse((root / "documents" / "index" / "documents_index.jsonl").exists())
+
+    def test_preview_email_work_queue_attachment_matches_header_part_id_by_filename(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            preview_dir = Path(temp_dir) / "preview"
+            provider = _FakeArchiveProvider(
+                EmailArchiveSource(
+                    uid="14482",
+                    date="Tue, 16 Jun 2026 11:02:29 +0000",
+                    sender="Sender <sender@example.com>",
+                    subject="Faktura FAK_226210588",
+                    body_text="Dobrý den, v příloze je faktura.",
+                    attachments=(
+                        EmailAttachmentMeta(
+                            filename="FAK_226210588.pdf",
+                            content_type="application/pdf",
+                            size_bytes=62,
+                            part_id="2",
+                            content_id="",
+                            disposition="attachment",
+                        ),
+                    ),
+                    original_eml=_raw_email_with_pdf_attachment(filename="FAK_226210588.pdf"),
+                    provider="icloud",
+                    mailbox="INBOX",
+                )
+            )
+            commands: list[list[str]] = []
+
+            result = preview_email_work_queue_attachment_action(
+                provider="iCloud",
+                folder="INBOX",
+                uid="14482",
+                part_id="1.2",
+                filename="FAK_226210588.pdf",
+                preview_dir=preview_dir,
+                opener=lambda command: commands.append(command),
+                icloud_provider_factory=lambda: provider,
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["filename"], "FAK_226210588.pdf")
+            self.assertTrue(Path(commands[0][1]).exists())
+
+    def test_preview_email_work_queue_attachment_opens_octet_stream_jpeg_by_filename(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            preview_dir = Path(temp_dir) / "preview"
+            provider = _FakeArchiveProvider(
+                EmailArchiveSource(
+                    uid="14482",
+                    date="Tue, 16 Jun 2026 11:02:29 +0000",
+                    sender="Sender <sender@example.com>",
+                    subject="Faktura FAK_226210588",
+                    body_text="Dobrý den, v příloze je faktura a fotografie.",
+                    attachments=(
+                        EmailAttachmentMeta(
+                            filename="SL_Falta1.jpeg",
+                            content_type="application/octet-stream",
+                            size_bytes=16,
+                            part_id="3",
+                            content_id="",
+                            disposition="attachment",
+                        ),
+                    ),
+                    original_eml=_raw_email_with_attachment(
+                        filename="SL_Falta1.jpeg",
+                        content_type="application/octet-stream",
+                        payload=b"\xff\xd8\xff\xe0jpeg-preview\xff\xd9",
+                    ),
+                    provider="icloud",
+                    mailbox="INBOX",
+                )
+            )
+            commands: list[list[str]] = []
+
+            result = preview_email_work_queue_attachment_action(
+                provider="iCloud",
+                folder="INBOX",
+                uid="14482",
+                part_id="1.3",
+                filename="SL_Falta1.jpeg",
+                preview_dir=preview_dir,
+                opener=lambda command: commands.append(command),
+                icloud_provider_factory=lambda: provider,
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["filename"], "SL_Falta1.jpeg")
+            self.assertTrue(Path(commands[0][1]).exists())
 
     def test_process_email_work_queue_batch_skip_clears_decision_without_provider_call(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -5025,7 +5193,10 @@ Dalsi krok:
         self.assertIn("Uložit e-mail", EMAIL_PROCESSING_HTML)
         self.assertIn("Neukládat", EMAIL_PROCESSING_HTML)
         self.assertIn("Uložit</label>", EMAIL_PROCESSING_HTML)
-        self.assertIn("Náhled PDF", EMAIL_PROCESSING_HTML)
+        self.assertIn("Jen náhled", EMAIL_PROCESSING_HTML)
+        self.assertIn(">Náhled</button>", EMAIL_PROCESSING_HTML)
+        self.assertIn("dočasnou kopii PDF nebo obrázku", EMAIL_PROCESSING_HTML)
+        self.assertIn("podporované PDF/obrázkové přílohy", EMAIL_PROCESSING_HTML)
         self.assertIn("/api/email-processing/preview-attachment", EMAIL_PROCESSING_HTML)
         self.assertIn("bindAttachmentPreviewButtons", EMAIL_PROCESSING_HTML)
         self.assertIn("Právě uložené přílohy", EMAIL_PROCESSING_HTML)
@@ -5327,8 +5498,53 @@ def _archive_source_without_attachment() -> EmailArchiveSource:
     )
 
 
-def _raw_email_with_pdf_attachment() -> bytes:
+def _raw_email_with_pdf_attachment(filename: str = "faktura.pdf") -> bytes:
     pdf_bytes = b"%PDF-1.4\n1 0 obj <<>> endobj\ntrailer <<>>\n%%EOF\n"
+    return _raw_email_with_attachment(
+        filename=filename,
+        content_type="application/pdf",
+        payload=pdf_bytes,
+        body=b"Dobry den, v priloze posilame fakturu.\r\n",
+    )
+
+
+def _raw_email_with_pdf_and_jpeg_attachments() -> bytes:
+    pdf_bytes = b"%PDF-1.4\n1 0 obj <<>> endobj\ntrailer <<>>\n%%EOF\n"
+    jpeg_bytes = b"\xff\xd8\xff\xe0jpeg-preview\xff\xd9"
+    return (
+        b"From: Sender <sender@example.com>\r\n"
+        b"Date: Tue, 16 Jun 2026 11:02:29 +0000\r\n"
+        b"Subject: Faktura FAK_226210588\r\n"
+        b"MIME-Version: 1.0\r\n"
+        b"Content-Type: multipart/mixed; boundary=\"outer\"\r\n"
+        b"\r\n"
+        b"--outer\r\n"
+        b"Content-Type: text/plain; charset=utf-8\r\n"
+        b"\r\n"
+        b"Dobry den, v priloze je faktura a fotografie.\r\n"
+        b"--outer\r\n"
+        b"Content-Type: application/octet-stream; name=\"FAK_226210588.pdf\"\r\n"
+        b"Content-Disposition: attachment; filename=\"FAK_226210588.pdf\"\r\n"
+        b"\r\n"
+        + pdf_bytes
+        + b"\r\n--outer\r\n"
+        b"Content-Type: application/octet-stream; name=\"SL_Falta1.jpeg\"\r\n"
+        b"Content-Disposition: attachment; filename=\"SL_Falta1.jpeg\"\r\n"
+        b"\r\n"
+        + jpeg_bytes
+        + b"\r\n--outer--\r\n"
+    )
+
+
+def _raw_email_with_attachment(
+    *,
+    filename: str,
+    content_type: str,
+    payload: bytes,
+    body: bytes = b"Dobry den, v priloze posilame soubor.\r\n",
+) -> bytes:
+    filename_bytes = filename.encode("utf-8")
+    content_type_bytes = content_type.encode("ascii")
     return (
         b"From: Sender <sender@example.com>\r\n"
         b"Date: Mon, 1 Jun 2026 10:00:00 +0200\r\n"
@@ -5339,12 +5555,12 @@ def _raw_email_with_pdf_attachment() -> bytes:
         b"--outer\r\n"
         b"Content-Type: text/plain; charset=utf-8\r\n"
         b"\r\n"
-        b"Dobry den, v priloze posilame fakturu.\r\n"
-        b"--outer\r\n"
-        b"Content-Type: application/pdf; name=\"faktura.pdf\"\r\n"
-        b"Content-Disposition: attachment; filename=\"faktura.pdf\"\r\n"
+        + body
+        + b"--outer\r\n"
+        b"Content-Type: " + content_type_bytes + b"; name=\"" + filename_bytes + b"\"\r\n"
+        b"Content-Disposition: attachment; filename=\"" + filename_bytes + b"\"\r\n"
         b"\r\n"
-        + pdf_bytes
+        + payload
         + b"\r\n--outer--\r\n"
     )
 

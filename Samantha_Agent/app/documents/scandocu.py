@@ -397,6 +397,18 @@ def reviewed_document_ids(vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> set[str]:
             document_id = safe_slug(str(row.get("document_id", "")), default="", limit=140)
             if document_id:
                 ids.add(document_id)
+    status_actions_path = vault_dir / "index" / "document_reading_status_actions.jsonl"
+    for row in read_jsonl(status_actions_path):
+        if row.get("action") != "set_reading_status":
+            continue
+        document_id = safe_slug(str(row.get("document_id", "")), default="", limit=140)
+        if not document_id:
+            continue
+        status = safe_slug(str(row.get("reading_status", "")), default="", limit=80)
+        if status in {"needs_review", "k-revizi", "k_revizi", "revize"}:
+            ids.discard(document_id)
+        elif status in {"ok", "unreadable", "superseded"}:
+            ids.add(document_id)
     return ids
 
 
