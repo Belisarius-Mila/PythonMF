@@ -207,6 +207,24 @@ class TerminalBridgeTests(unittest.TestCase):
 
         self.assertEqual(discover_codex_ttys(runner=fake_ps_runner), ["ttys000"])
 
+    def test_discover_codex_ttys_does_not_climb_from_duplicate_child_to_screen(self) -> None:
+        def fake_ps_runner(args, **kwargs):
+            return subprocess.CompletedProcess(
+                args=args,
+                returncode=0,
+                stdout=(
+                    "17981 74488 ttys003 screen screen -U -S samantha_codex /repo/scripts/samantha_screen_entry.sh\n"
+                    "18044 17981 ?? SCREEN SCREEN\n"
+                    "18045 18044 ttys000 login login -pflq user /repo/scripts/samantha_screen_entry.sh\n"
+                    "18046 18045 ttys000 zsh /bin/zsh /repo/scripts/samantha_screen_entry.sh\n"
+                    "18101 18046 ttys000 node node /usr/local/bin/codex -C /repo .\n"
+                    "18102 18101 ttys000 codex /vendor/bin/codex -C /repo .\n"
+                ),
+                stderr="",
+            )
+
+        self.assertEqual(discover_codex_ttys(runner=fake_ps_runner), ["ttys000"])
+
     def test_load_marked_codex_tty_reads_private_marker(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             marker = Path(temp_dir) / "current_codex_tty.json"

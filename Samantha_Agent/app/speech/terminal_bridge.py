@@ -153,9 +153,10 @@ def discover_codex_ttys(
         current = pid
         for _ in range(20):
             tty = tty_by_pid.get(current, "")
-            if tty and tty != "??" and tty not in seen:
-                seen.add(tty)
-                result.append(tty)
+            if tty and tty != "??":
+                if tty not in seen:
+                    seen.add(tty)
+                    result.append(tty)
                 break
             parent = parent_by_pid.get(current)
             if parent is None or parent == current:
