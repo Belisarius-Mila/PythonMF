@@ -22,20 +22,27 @@ Co je hotove:
   `vendor/bin/codex`.
 - Ziva kontrola po oprave vratila `ttys=['ttys000']`, `codex_tty_count=1` a
   voice bridge `status=ok`.
+- Commit `c61c259 Fix false duplicate Codex session detection` byl pushnut na
+  `origin/main`.
+- Po restartu Codexu varovani v Cockpitu stale zustavalo, protoze bezici Cockpit
+  server mel nacteny stary Python kod.
+- Bezpecne byly restartovane obe Cockpit instance: lokalni `127.0.0.1:8770` i
+  Tailscale `100.89.150.6:8770`.
+- Po restartu obe `/api/status` kontroly hlasily `status=ok`,
+  `codex_ttys=['ttys000']` a `Codex relace: 1 (limit 1)`.
+- Mila nasledne potvrdil v UI: "Uz je to ok."
 
 Co neni hotove:
-- Bežici Cockpit muze mit stary Python kod nacteny v pameti; aby se oprava
-  projevila v UI, je potreba bezpecny restart Cockpitu.
 - Cursorova testovaci CSS zmena v `MatysekANJ/web_mmtx/styles_intro_v2.css`
   zustava mimo tento commit a mimo tento handoff.
 
 Dalsi krok:
-Po commitu/pushi udelat bezpecny restart Cockpitu a v UI zkontrolovat, ze radek
-voice bridge ukazuje `Codex relace: 1 (limit 1)` bez varovani.
+Zadne dalsi kroky k tomuto incidentu nejsou potreba. Pri pristim podobnem
+varovani nejdrive rozlisit restart Codexu od restartu Cockpit serveru.
 
 Navrhovane dalsi kroky:
 Okamzity:
-- Restartovat Cockpit pres existujici bezpecny restart workflow.
+- Pokracovat v rozdelane praci; stav voice bridge je potvrzeny jako OK.
 
 Volitelne:
 - Sjednotit Cockpit status i read-only panel `Codex relace` na jednu sdilenou

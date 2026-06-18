@@ -7,6 +7,7 @@ ENTRY_SCRIPT="$PROJECT_DIR/scripts/samantha_screen_entry.sh"
 NETWORK_PREFLIGHT_SCRIPT="$PROJECT_DIR/scripts/network_preflight.sh"
 BACKUP_STATUS_SCRIPT="$PROJECT_DIR/scripts/backup_status.py"
 CODEX_SESSION_REPORT_SCRIPT="$PROJECT_DIR/scripts/codex_session_report.py"
+SCREENRC="$PROJECT_DIR/scripts/samantha_screenrc"
 
 export LANG="cs_CZ.UTF-8"
 export LC_ALL="cs_CZ.UTF-8"
@@ -14,6 +15,13 @@ export LC_CTYPE="cs_CZ.UTF-8"
 export PYTHONUTF8="1"
 export PYTHONIOENCODING="utf-8"
 export LESSCHARSET="utf-8"
+
+print_screen_scroll_hint() {
+  if [[ "${SAMANTHA_SCREEN_HINT:-1}" == "0" || ! -t 1 ]]; then
+    return
+  fi
+  echo "Tip pro režim samantha/screen: scrollback otevře Ctrl+A potom Esc; ukončí ho Esc."
+}
 
 if [[ -x "$NETWORK_PREFLIGHT_SCRIPT" ]]; then
   "$NETWORK_PREFLIGHT_SCRIPT" || true
@@ -43,8 +51,10 @@ if [[ "${SAMANTHA_RESTART_SCREEN:-0}" == "1" ]]; then
 fi
 
 if screen -list | grep -q "[.]${SESSION_NAME}[[:space:]]"; then
-  exec screen -U -r "$SESSION_NAME"
+  print_screen_scroll_hint
+  exec screen -c "$SCREENRC" -U -r "$SESSION_NAME"
 fi
 
 cd "$PROJECT_DIR"
-exec screen -U -S "$SESSION_NAME" "$ENTRY_SCRIPT"
+print_screen_scroll_hint
+exec screen -c "$SCREENRC" -U -S "$SESSION_NAME" "$ENTRY_SCRIPT"
