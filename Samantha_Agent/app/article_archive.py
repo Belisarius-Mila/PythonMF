@@ -4,6 +4,7 @@ import hashlib
 import html
 import json
 import re
+import shutil
 import ssl
 import subprocess
 import urllib.error
@@ -28,6 +29,7 @@ CATEGORY_LABELS = {
 
 SUPPORTED_ATTACHMENT_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"}
 ATTACHMENT_CONFIRMATION_PHRASE = "Potvrzuji připojení obrázku"
+DELETE_CONFIRMATION_PHRASE = "Potvrzuji vyřazení z knihovny"
 
 
 @dataclass(frozen=True)
@@ -765,6 +767,31 @@ def update_registry(path: Path, metadata: dict[str, Any]) -> None:
     )
 
 
+def remove_from_registry(path: Path, item_id: str) -> dict[str, Any] | None:
+    wanted = str(item_id or "").strip()
+    if not wanted or not path.exists():
+        return None
+    rows: list[dict[str, Any]] = []
+    removed: dict[str, Any] | None = None
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(item, dict):
+            continue
+        if str(item.get("id", "")).strip() == wanted:
+            removed = item
+            continue
+        rows.append(item)
+    if removed is not None:
+        path.write_text(
+            "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows),
+            encoding="utf-8",
+        )
+    return removed
+
+
 def load_article_registry(archive_root: Path = DEFAULT_ARCHIVE_ROOT) -> list[ArticleArchiveItem]:
     path = archive_root / "registry.jsonl"
     if not path.exists():
@@ -980,6 +1007,65 @@ def find_article(article_id: str, archive_root: Path = DEFAULT_ARCHIVE_ROOT) -> 
         if item.id == wanted:
             return item
     return None
+
+
+def delete_article(
+    *,
+    article_id: str,
+    archive_root: Path = DEFAULT_ARCHIVE_ROOT,
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+) -> dict[str, Any]:
+    if not user_confirmed or DELETE_CONFIRMATION_PHRASE.casefold() not in str(confirmation_text).casefold():
+        raise ValueError(f"Vyřazení položky vyžaduje potvrzení: {DELETE_CONFIRMATION_PHRASE}")
+    item = find_article(article_id, archive_root=archive_root)
+    if item is None:
+        raise ValueError("Článek nebyl nalezen.")
+    now = datetime.now(timezone.utc).replace(microsecond=0)
+    trash_root = archive_root / "trash" / "articles"
+    trash_root.mkdir(parents=True, exist_ok=True)
+    source_dir = archive_root / "articles" / item.id
+    trash_dir = next_trash_path(trash_root / f"{now.strftime('%Y%m%d_%H%M%S')}_{item.id}")
+    moved_to = ""
+    if source_dir.exists():
+        shutil.move(str(source_dir), str(trash_dir))
+        moved_to = str(trash_dir.relative_to(archive_root))
+
+    registry_path = archive_root / "registry.jsonl"
+    removed = remove_from_registry(registry_path, item.id)
+    if removed is None:
+        if moved_to:
+            shutil.move(str(trash_dir), str(source_dir))
+        raise ValueError("Článek nebyl nalezen v registru.")
+
+    manifest = {
+        "id": item.id,
+        "title": item.title,
+        "category": item.category,
+        "removed_at": now.isoformat(),
+        "moved_to": moved_to,
+        "registry_entry": removed,
+    }
+    manifest_path = trash_dir / "removed_from_registry.json" if moved_to else trash_root / f"{item.id}_removed_from_registry.json"
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {
+        "ok": True,
+        "message": "Položka byla vyřazena z knihovny a přesunuta do soukromého koše.",
+        "item_id": item.id,
+        "title": item.one_line_title,
+        "trash_path": moved_to,
+    }
+
+
+def next_trash_path(path: Path) -> Path:
+    if not path.exists():
+        return path
+    for index in range(2, 1000):
+        candidate = path.with_name(f"{path.name}_{index}")
+        if not candidate.exists():
+            return candidate
+    raise OSError("Nepodařilo se najít volný název v koši archivu.")
 
 
 def read_article_text(article_id: str, archive_root: Path = DEFAULT_ARCHIVE_ROOT, max_chars: int = 0) -> str:

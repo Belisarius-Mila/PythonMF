@@ -24,6 +24,7 @@ from app.cockpit import (
     library_archive_text_action,
     library_archive_url_action,
     library_attach_image_action,
+    library_delete_article_action,
     cockpit_edge_tts_action,
     cockpit_codex_approval_clear_action,
     cockpit_safe_readonly_capabilities_action,
@@ -162,10 +163,32 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("rodinny-recept", kwargs["tags"])
         self.assertIn("prepis-overit", kwargs["tags"])
 
+    def test_library_delete_article_action_passes_confirmation_gate(self) -> None:
+        with patch("app.cockpit.delete_article") as delete_mock:
+            delete_mock.return_value = {"ok": True, "item_id": "recipe-1"}
+
+            result = library_delete_article_action(
+                {
+                    "article_id": "recipe-1",
+                    "user_confirmed": True,
+                    "confirmation_text": "Potvrzuji vyřazení z knihovny",
+                }
+            )
+
+        self.assertTrue(result["ok"])
+        delete_mock.assert_called_once_with(
+            article_id="recipe-1",
+            user_confirmed=True,
+            confirmation_text="Potvrzuji vyřazení z knihovny",
+        )
+
     def test_cockpit_html_contains_library_attachment_view(self) -> None:
         self.assertIn("libraryReaderAttachments", COCKPIT_HTML)
         self.assertIn("/api/library/attachment", COCKPIT_HTML)
         self.assertIn("/api/library/attachment/add", COCKPIT_HTML)
+        self.assertIn("/api/library/delete", COCKPIT_HTML)
+        self.assertIn("libraryDeleteBtn", COCKPIT_HTML)
+        self.assertIn("Potvrzuji vyřazení z knihovny", COCKPIT_HTML)
         self.assertIn("libraryAttachmentFileInput", COCKPIT_HTML)
         self.assertIn("attachment_count", COCKPIT_HTML)
         self.assertIn("Otevřít přílohu", COCKPIT_HTML)

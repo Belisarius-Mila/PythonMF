@@ -36,12 +36,14 @@ from app.adam_service import (
     wait_for_adam_ready,
 )
 from app.article_archive import (
+    DELETE_CONFIRMATION_PHRASE,
+    ATTACHMENT_CONFIRMATION_PHRASE,
     archive_text_entry,
     archive_url,
+    delete_article,
     get_article,
     get_article_attachment,
     attach_article_image,
-    ATTACHMENT_CONFIRMATION_PHRASE,
     list_articles,
     search_articles,
 )
@@ -421,6 +423,19 @@ def library_attach_image_action(payload: dict[str, Any]) -> dict[str, Any]:
         return {"ok": False, "message": str(exc), "error": "invalid_attachment"}
     except OSError as exc:
         return {"ok": False, "message": f"Obrázek se nepodařilo uložit: {exc}", "error": "archive_failed"}
+
+
+def library_delete_article_action(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return delete_article(
+            article_id=str(payload.get("article_id", "")),
+            user_confirmed=bool(payload.get("user_confirmed")),
+            confirmation_text=str(payload.get("confirmation_text", "")),
+        )
+    except ValueError as exc:
+        return {"ok": False, "message": str(exc), "error": "invalid_delete"}
+    except OSError as exc:
+        return {"ok": False, "message": f"Položku se nepodařilo vyřadit: {exc}", "error": "archive_failed"}
 
 
 def recovery_center_status(
@@ -9224,6 +9239,10 @@ class CockpitServer:
                     payload = self.read_json()
                     self.respond_json(library_attach_image_action(payload))
                     return
+                if parsed.path == "/api/library/delete":
+                    payload = self.read_json()
+                    self.respond_json(library_delete_article_action(payload))
+                    return
                 if parsed.path == "/api/documents/classification-metadata":
                     payload = self.read_json()
                     raw_metadata = payload.get("metadata")
@@ -10985,6 +11004,7 @@ COCKPIT_HTML = """<!doctype html>
     .library-reader { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; min-height: 420px; display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
     .library-reader-head { padding: 12px; border-bottom: 1px solid #edf0f4; display: grid; gap: 6px; background: white; }
     .library-reader-title { margin: 0; font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
+    .library-reader-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
     .library-reader-text { padding: 14px 16px; white-space: pre-wrap; overflow: auto; max-height: 58vh; line-height: 1.58; font-size: 15px; background: white; }
     .library-reader-attachments { display: grid; gap: 10px; padding: 12px 16px; border-top: 1px solid #edf0f4; background: #fbfcfe; }
     .library-reader-attachments.hidden { display: none; }
@@ -11597,6 +11617,9 @@ COCKPIT_HTML = """<!doctype html>
             <div class="library-reader-head">
               <h3 id="libraryReaderTitle" class="library-reader-title">Vyber článek</h3>
               <div id="libraryReaderMeta" class="library-meta">Vlevo vyber položku nebo použij fulltextové hledání.</div>
+              <div class="library-reader-actions">
+                <button class="secondary danger" id="libraryDeleteBtn" type="button" disabled>Vyřadit z knihovny</button>
+              </div>
             </div>
             <div id="libraryReaderText" class="library-reader-text"></div>
             <div id="libraryReaderAttachments" class="library-reader-attachments hidden"></div>
@@ -11820,6 +11843,7 @@ COCKPIT_HTML = """<!doctype html>
     const libraryReaderMeta = document.getElementById("libraryReaderMeta");
     const libraryReaderText = document.getElementById("libraryReaderText");
     const libraryReaderAttachments = document.getElementById("libraryReaderAttachments");
+    const libraryDeleteBtn = document.getElementById("libraryDeleteBtn");
     const projectsModal = document.getElementById("projectsModal");
     const projectsCloseBtn = document.getElementById("projectsCloseBtn");
     const projectsStatus = document.getElementById("projectsStatus");
@@ -12090,6 +12114,7 @@ COCKPIT_HTML = """<!doctype html>
         "librarySearchInput",
         "librarySearchBtn",
         "libraryReaderAttachments",
+        "libraryDeleteBtn",
         "projectsBtn",
         "remindersBtn",
         "emailProcessingBtn",
@@ -15346,6 +15371,7 @@ COCKPIT_HTML = """<!doctype html>
       currentLibrarySelectedId = "";
       setLibraryActiveTab();
       librarySearchInput.value = "";
+      libraryDeleteBtn.disabled = true;
       libraryStatus.textContent = "Načítám knihovnu...";
       libraryReaderTitle.textContent = "Vyber článek";
       libraryReaderMeta.textContent = "Vlevo vyber položku nebo použij fulltextové hledání.";
@@ -15376,7 +15402,13 @@ COCKPIT_HTML = """<!doctype html>
         await loadLibraryCategory(currentLibraryCategory);
         return;
       }
+      currentLibrarySelectedId = "";
+      libraryDeleteBtn.disabled = true;
       libraryStatus.textContent = "Hledám ve fulltextu...";
+      libraryReaderTitle.textContent = "Vyber článek";
+      libraryReaderMeta.textContent = "Vlevo vyber položku z výsledků hledání.";
+      libraryReaderText.textContent = "";
+      renderLibraryAttachments("", []);
       try {
         const url = `/api/library/search?category=${encodeURIComponent(currentLibraryCategory)}&q=${encodeURIComponent(query)}&limit=80`;
         const data = await fetchJson(url);
@@ -15520,6 +15552,48 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
+    async function deleteSelectedLibraryItem() {
+      const articleId = currentLibrarySelectedId;
+      if (!articleId) {
+        libraryStatus.textContent = "Nejdřív vyber položku v knihovně.";
+        return;
+      }
+      const title = libraryReaderTitle.textContent || articleId;
+      const confirmed = window.confirm(`Vyřadit z knihovny: ${title}?\n\nPoložka zmizí ze seznamu a přesune se do soukromého koše.`);
+      if (!confirmed) {
+        return;
+      }
+      libraryDeleteBtn.disabled = true;
+      libraryStatus.textContent = "Vyřazuji položku z knihovny...";
+      try {
+        const data = await postJson("/api/library/delete", {
+          article_id: articleId,
+          user_confirmed: true,
+          confirmation_text: "Potvrzuji vyřazení z knihovny"
+        });
+        if (!data.ok) {
+          libraryStatus.textContent = data.message || "Položku se nepodařilo vyřadit.";
+          libraryDeleteBtn.disabled = false;
+          return;
+        }
+        currentLibrarySelectedId = "";
+        libraryReaderTitle.textContent = "Vyber článek";
+        libraryReaderMeta.textContent = data.message || "Položka byla vyřazena.";
+        libraryReaderText.textContent = "";
+        renderLibraryAttachments("", []);
+        if (librarySearchInput.value.trim().length >= 2) {
+          await searchLibrary();
+        } else {
+          await loadLibraryCategory(currentLibraryCategory);
+        }
+        libraryStatus.textContent = data.message || "Položka byla vyřazena z knihovny.";
+      } catch (err) {
+        recordFrontendError(err);
+        libraryStatus.textContent = `Chyba vyřazení položky: ${err}`;
+        libraryDeleteBtn.disabled = false;
+      }
+    }
+
     function renderLibraryItems(items) {
       libraryList.innerHTML = "";
       if (!items.length) {
@@ -15644,6 +15718,7 @@ COCKPIT_HTML = """<!doctype html>
     async function loadLibraryItem(articleId) {
       if (!articleId) return;
       currentLibrarySelectedId = articleId;
+      libraryDeleteBtn.disabled = false;
       document.querySelectorAll(".library-item").forEach((node) => {
         node.classList.toggle("active", node.dataset.articleId === articleId);
       });
@@ -15656,6 +15731,7 @@ COCKPIT_HTML = """<!doctype html>
         if (!data.ok) {
           libraryReaderTitle.textContent = "Článek nelze načíst";
           libraryReaderMeta.textContent = data.message || data.error || "";
+          libraryDeleteBtn.disabled = true;
           return;
         }
         const item = data.item || {};
@@ -15668,6 +15744,7 @@ COCKPIT_HTML = """<!doctype html>
         libraryReaderTitle.textContent = "Chyba čtení";
         libraryReaderMeta.textContent = String(err);
         renderLibraryAttachments("", []);
+        libraryDeleteBtn.disabled = true;
       }
     }
 
@@ -17023,6 +17100,7 @@ COCKPIT_HTML = """<!doctype html>
     libraryArchiveBtn.addEventListener("click", archiveLibraryUrl);
     libraryTextSaveBtn.addEventListener("click", saveLibraryText);
     libraryAttachmentSaveBtn.addEventListener("click", attachLibraryImage);
+    libraryDeleteBtn.addEventListener("click", deleteSelectedLibraryItem);
     libraryArchiveUrlInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         event.preventDefault();

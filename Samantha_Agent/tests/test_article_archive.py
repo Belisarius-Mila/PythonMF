@@ -12,9 +12,11 @@ from unittest.mock import patch
 
 from app.article_archive import (
     ATTACHMENT_CONFIRMATION_PHRASE,
+    DELETE_CONFIRMATION_PHRASE,
     archive_text_entry,
     archive_url,
     attach_article_image,
+    delete_article,
     fetch_url,
     get_article,
     get_article_attachment,
@@ -117,6 +119,40 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertTrue(article["ok"])
         self.assertIn("Mouka, kakao a med", article["text"])
         self.assertEqual(article["item"]["source_note"], "Syntetizovaný recept bez původní URL.")
+
+    def test_delete_article_requires_confirmation_and_moves_item_to_trash(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            result = archive_text_entry(
+                title="Nevhodný recept",
+                text="Toto je testovací položka k vyřazení.",
+                category="recipes",
+                tags=["test"],
+                archive_root=archive_root,
+            )
+            article_id = result["item"]["id"]
+
+            with self.assertRaises(ValueError):
+                delete_article(article_id=article_id, archive_root=archive_root)
+
+            deleted = delete_article(
+                article_id=article_id,
+                archive_root=archive_root,
+                user_confirmed=True,
+                confirmation_text=DELETE_CONFIRMATION_PHRASE,
+            )
+            listed = list_articles(category="recipes", archive_root=archive_root)
+            article = get_article(article_id=article_id, archive_root=archive_root)
+            trash_dirs = list((archive_root / "trash" / "articles").glob(f"*_{article_id}"))
+            trash_article_exists = len(trash_dirs) == 1 and (trash_dirs[0] / "article.txt").exists()
+            trash_manifest_exists = len(trash_dirs) == 1 and (trash_dirs[0] / "removed_from_registry.json").exists()
+
+        self.assertTrue(deleted["ok"])
+        self.assertEqual(listed["count"], 0)
+        self.assertFalse(article["ok"])
+        self.assertEqual(len(trash_dirs), 1)
+        self.assertTrue(trash_article_exists)
+        self.assertTrue(trash_manifest_exists)
 
     def test_article_attachments_are_listed_and_resolved_inside_archive(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
