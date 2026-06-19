@@ -28,7 +28,7 @@ from app.iphone_shortcuts import (
     format_iphone_shortcuts_status,
     prepare_iphone_shortcut_request,
 )
-from app.quick_notes import list_quick_notes_text, show_quick_note_detail_text
+from app.quick_notes import list_quick_notes_text, quick_notes_action_status_text, show_quick_note_detail_text
 from app.email import (
     archive_email_by_uid,
     build_email_action_case_from_uid,
@@ -264,6 +264,12 @@ def list_quick_notes(limit: int = 30) -> str:
 def show_quick_note_detail(note_number: int) -> str:
     """Show detail for one numbered quick note from the private quick notes index."""
     return show_quick_note_detail_text(note_number=note_number)
+
+
+@function_tool
+def quick_notes_action_status(limit: int = 30) -> str:
+    """Show Quick Notes action inbox with automatic pre-classification and no actions performed."""
+    return quick_notes_action_status_text(limit=limit)
 
 
 def build_agent(memory_text: str) -> Agent:
@@ -785,6 +791,7 @@ LOKALNI PAMET:
             prepare_iphone_shortcut,
             list_quick_notes,
             show_quick_note_detail,
+            quick_notes_action_status,
             list_recent_email_headers,
             search_email_headers,
             list_recent_seznam_email_headers,

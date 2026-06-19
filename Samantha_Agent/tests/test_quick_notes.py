@@ -5,7 +5,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from app.quick_notes import list_quick_notes_text, show_quick_note_detail_text, sync_quick_notes_index
+from app.quick_notes import (
+    classify_quick_note_text,
+    list_quick_notes_text,
+    quick_notes_action_status_text,
+    show_quick_note_detail_text,
+    sync_quick_notes_index,
+)
 
 
 class QuickNotesTests(unittest.TestCase):
@@ -57,6 +63,41 @@ class QuickNotesTests(unittest.TestCase):
             )
 
             self.assertIn("zatim neexistuje", text)
+
+    def test_rule_based_preclassification_detects_candidates(self) -> None:
+        reminder = classify_quick_note_text("Připomeň mi v pondělí zavolat do servisu.")
+        tool = classify_quick_note_text("Udělat nový report pro Quick Notes v Cockpitu.")
+        sensitive = classify_quick_note_text("Pošli e-mail a smaž staré PDF.")
+
+        self.assertEqual(reminder.kind, "reminder_candidate")
+        self.assertEqual(reminder.confidence, "high")
+        self.assertEqual(tool.kind, "tool_candidate")
+        self.assertEqual(sensitive.kind, "sensitive_action")
+        self.assertTrue(sensitive.sensitive)
+        self.assertEqual(sensitive.risk, "high")
+
+    def test_action_status_shows_preclassified_notes_without_source_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            inbox = root / "Samantha Inbox"
+            inbox.mkdir()
+            index_path = root / "private" / "index.json"
+            (inbox / "reminder.md").write_text(
+                "# Samantha inbox\n\nDatum: 2026-06-19 08:00:00\n\nPoznámka:\nPřipomeň mi zítra zavolat do servisu.\n",
+                encoding="utf-8",
+            )
+            (inbox / "sensitive.md").write_text(
+                "# Samantha inbox\n\nDatum: 2026-06-19 08:05:00\n\nPoznámka:\nSmaž staré PDF ze složky Downloads.\n",
+                encoding="utf-8",
+            )
+
+            text = quick_notes_action_status_text(inbox_dir=inbox, index_path=index_path)
+
+            self.assertIn("Quick Notes akční inbox", text)
+            self.assertIn("QN #2 - citlivá akce", text)
+            self.assertIn("Riziko: high", text)
+            self.assertIn("QN #1 - připomínka", text)
+            self.assertNotIn(str(inbox), text.split("QN #2", 1)[1])
 
 
 if __name__ == "__main__":

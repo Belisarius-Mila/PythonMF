@@ -156,6 +156,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `handoffs/iphone_shortcuts_quick_notes_continue_2026_05_23.md` - [PRIPOMENOUT] zitrejsi navazani na iPhone zkratky: quick notes zkratka funguje, Samantha umi ocislovany seznam/detail poznamek a dalsi krok je vybrat dalsi malou zkratku nebo akci z poznamky.
 - `handoffs/iphone_shortcuts_freeze_infrastructure_layer_2026_05_25.md` - aktualni zmrazovaci handoff pro iPhone Shortcuts / Mobile Input Layer: doplneny puvodni seznam 7 kandidatu na zkratky, stav hotovych zkratek, bezpecnostni hranice a pravidlo nepokracovat bez vyslovneho navratu.
 - `handoffs/quick_notes_infsystem_top3_feedback_2026_05_24.md` - doslovne ulozeny feedback k QN #13 systemova mapa, QN #10 ziva znalostni databaze a QN #4/#6 bezpecny akcni inbox; ceka na brzké zapracovani.
+- `handoffs/quick_notes_action_inbox_preclassification_2026_06_19.md` - Quick Notes akcni inbox: read-only predklasifikace QN na pripominku/projekt/tool/ukol/citlivou akci/archiv/napad, CLI `--status` a Samantha tool `quick_notes_action_status`; dalsi krok je rucne vybrat prvni potvrzovanou akci.
 - `handoffs/stories_batch_2026_05_14.md` - batch více pohádek z jednoho chatu, rozdělený do samostatných story memory souborů.
 - `handoffs/chatgpt_handoff_2026_05_14.md` - kompaktní předání po dlouhém ChatGPT vlákně, včetně promptu pro Codex a promptu pro nový ChatGPT chat.
 - `handoffs/mmtx_web_handoff_2026_05_14.md` - handoff k webové verzi MMTX v `docs/`, hotovým scénám OwlGarden a HouseBunny, audio strategii a mirroru.

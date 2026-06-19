@@ -30,6 +30,28 @@ class QuickNote:
     status: str
 
 
+@dataclass(frozen=True)
+class QuickNoteClassification:
+    kind: str
+    confidence: str
+    risk: str
+    sensitive: bool
+    safe_summary: str
+    suggested_next_step: str
+    matched_terms: tuple[str, ...] = ()
+
+
+ACTION_KIND_LABELS = {
+    "reminder_candidate": "připomínka",
+    "project_candidate": "projekt",
+    "tool_candidate": "tool/workflow",
+    "action_candidate": "úkol",
+    "sensitive_action": "citlivá akce",
+    "archive_candidate": "archiv/znalostní databáze",
+    "idea": "nápad",
+}
+
+
 def list_quick_notes_text(
     *,
     inbox_dir: Path = DEFAULT_ICLOUD_SHORTCUTS_INBOX,
@@ -68,6 +90,53 @@ def list_quick_notes_text(
     return "\n".join(lines)
 
 
+def quick_notes_action_status_text(
+    *,
+    inbox_dir: Path = DEFAULT_ICLOUD_SHORTCUTS_INBOX,
+    index_path: Path = DEFAULT_INDEX_PATH,
+    limit: int = 30,
+) -> str:
+    notes = sync_quick_notes_index(inbox_dir=inbox_dir, index_path=index_path)
+    active_notes = [note for note in notes if note.status == "inbox"]
+    if not inbox_dir.exists():
+        return (
+            "Quick Notes akční inbox zatím nejde načíst, protože iCloud složka není synchronizovaná na Mac.\n"
+            f"Očekávaná složka: `{inbox_dir}`"
+        )
+    if not active_notes:
+        return (
+            "Quick Notes akční inbox je prázdný.\n"
+            f"Složka: `{inbox_dir}`"
+        )
+
+    shown = sorted(active_notes, key=lambda note: note.note_number, reverse=True)[: max(1, limit)]
+    lines = [
+        "Quick Notes akční inbox",
+        f"- Inbox: `{inbox_dir}`",
+        f"- Soukromý index: `{index_path}`",
+        "- Režim: automatická předklasifikace bez provádění akcí",
+        "",
+    ]
+    for note in shown:
+        classification = classify_quick_note_note(note)
+        label = ACTION_KIND_LABELS.get(classification.kind, classification.kind)
+        lines.extend(
+            [
+                f"QN #{note.note_number} - {label}",
+                f"  Stav: {note.status}",
+                f"  Jistota: {classification.confidence}",
+                f"  Riziko: {classification.risk}",
+                f"  Shrnutí: {classification.safe_summary}",
+                f"  Další krok: {classification.suggested_next_step}",
+                f"  Detail: `show_quick_note_detail(note_number={note.note_number})`",
+                "",
+            ]
+        )
+    if len(active_notes) > len(shown):
+        lines.append(f"... a dalších {len(active_notes) - len(shown)} poznámek.")
+    return "\n".join(lines).rstrip()
+
+
 def show_quick_note_detail_text(
     note_number: int,
     *,
@@ -99,6 +168,168 @@ def show_quick_note_detail_text(
     if truncated:
         lines.extend(["", f"[Zkraceno na {max_chars} znaku.]"])
     return "\n".join(lines)
+
+
+def classify_quick_note_note(note: QuickNote) -> QuickNoteClassification:
+    return classify_quick_note_text(note.snippet)
+
+
+def classify_quick_note_text(text: str) -> QuickNoteClassification:
+    folded = _normalize_for_matching(text)
+    summary = _safe_summary(text)
+    rules: tuple[tuple[str, tuple[str, ...], str, str, str], ...] = (
+        (
+            "sensitive_action",
+            (
+                "smaz",
+                "vymaz",
+                "odstran",
+                "posli",
+                "odesli",
+                "email",
+                "e-mail",
+                "mail",
+                "zaplat",
+                "platbu",
+                "objedn",
+                "kup",
+                "nakup",
+                "commit",
+                "push",
+                "force",
+                "reset",
+                "heslo",
+                "token",
+                "api klic",
+                "api key",
+                "tajem",
+                "pdf",
+                "dokument",
+                "smlouv",
+                "faktura",
+            ),
+            "high",
+            "high",
+            "Jen připravit bezpečný návrh. Nic neposílat, nemazat, neplatit, necommitovat ani nepracovat s citlivými daty bez potvrzení.",
+        ),
+        (
+            "reminder_candidate",
+            (
+                "pripomen",
+                "pripom",
+                "pripominka",
+                "zitra",
+                "dnes",
+                "pondeli",
+                "utery",
+                "streda",
+                "ctvrtek",
+                "patek",
+                "sobota",
+                "nedele",
+                "termin",
+                "deadline",
+                "zavolat",
+                "zavolej",
+            ),
+            "high",
+            "low",
+            "Připravit návrh připomínky a zeptat se na potvrzení data, času a textu.",
+        ),
+        (
+            "tool_candidate",
+            (
+                "tool",
+                "skript",
+                "script",
+                "tlacitko",
+                "tlačítko",
+                "workflow",
+                "report",
+                "automatiz",
+                "cli",
+                "cockpit",
+                "kokpit",
+            ),
+            "high",
+            "medium",
+            "Připravit malý implementační návrh toolu/workflow; zatím nic neměnit bez zadání.",
+        ),
+        (
+            "project_candidate",
+            (
+                "projekt",
+                "project",
+                "handoff",
+                "rozprac",
+                "priorita",
+                "systemova mapa",
+                "systémová mapa",
+                "oblast",
+            ),
+            "high",
+            "medium",
+            "Připravit návrh projektu nebo handoffu a zařadit ho až po potvrzení.",
+        ),
+        (
+            "archive_candidate",
+            (
+                "uloz",
+                "uložit",
+                "archiv",
+                "knihovna",
+                "knowledge",
+                "znalost",
+                "recept",
+                "poznamka do databaze",
+                "poznámka do databáze",
+            ),
+            "medium",
+            "medium",
+            "Navrhnout uložení do vhodného soukromého archivu nebo znalostní databáze.",
+        ),
+        (
+            "action_candidate",
+            (
+                "udelat",
+                "udělat",
+                "oprav",
+                "zkontrol",
+                "priprav",
+                "připrav",
+                "nastav",
+                "dodelat",
+                "dodělat",
+                "vyres",
+                "vyřeš",
+            ),
+            "medium",
+            "medium",
+            "Připravit konkrétní další krok a před provedením ověřit rozsah.",
+        ),
+    )
+    for kind, needles, confidence, risk, next_step in rules:
+        matched = tuple(needle for needle in needles if needle in folded)
+        if matched:
+            return QuickNoteClassification(
+                kind=kind,
+                confidence=confidence,
+                risk=risk,
+                sensitive=kind == "sensitive_action" or risk == "high",
+                safe_summary=summary,
+                suggested_next_step=next_step,
+                matched_terms=matched[:5],
+            )
+
+    return QuickNoteClassification(
+        kind="idea",
+        confidence="low",
+        risk="low",
+        sensitive=False,
+        safe_summary=summary,
+        suggested_next_step="Přečíst detail a ručně rozhodnout, jestli z toho bude úkol, projekt, tool, připomínka nebo jen poznámka.",
+        matched_terms=(),
+    )
 
 
 def sync_quick_notes_index(
@@ -223,6 +454,34 @@ def _extract_note_datetime(text: str) -> str | None:
             value = stripped.split(":", 1)[1].strip()
             return value or None
     return None
+
+
+def _safe_summary(text: str, max_len: int = 160) -> str:
+    compact = _one_line(text, max_len=max_len)
+    return compact if compact else "(prázdná poznámka)"
+
+
+def _normalize_for_matching(text: str) -> str:
+    replacements = str.maketrans(
+        {
+            "á": "a",
+            "č": "c",
+            "ď": "d",
+            "é": "e",
+            "ě": "e",
+            "í": "i",
+            "ň": "n",
+            "ó": "o",
+            "ř": "r",
+            "š": "s",
+            "ť": "t",
+            "ú": "u",
+            "ů": "u",
+            "ý": "y",
+            "ž": "z",
+        }
+    )
+    return text.casefold().translate(replacements)
 
 
 def _format_timestamp(timestamp: float) -> str:
