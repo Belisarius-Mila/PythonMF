@@ -11573,6 +11573,7 @@ COCKPIT_HTML = """<!doctype html>
             <select id="libraryArchiveCategory">
               <option value="recipes">Recepty</option>
               <option value="science">Vědecké články</option>
+              <option value="ai_tools">Samantha / AI nástroje</option>
               <option value="other" selected>Ostatní</option>
             </select>
             <input id="libraryArchiveTagsInput" type="text" placeholder="Tagy, volitelné">
@@ -11584,6 +11585,7 @@ COCKPIT_HTML = """<!doctype html>
             <select id="libraryTextCategory">
               <option value="recipes">Recepty</option>
               <option value="science">Vědecké články</option>
+              <option value="ai_tools">Samantha / AI nástroje</option>
               <option value="other" selected>Ostatní</option>
             </select>
             <input id="libraryTextSourceInput" type="text" placeholder="Zdroj, volitelné">
@@ -11604,6 +11606,7 @@ COCKPIT_HTML = """<!doctype html>
         <div class="library-tabs" aria-label="Kategorie knihovny">
           <button class="secondary library-tab active" type="button" data-library-category="recipes">Recepty</button>
           <button class="secondary library-tab" type="button" data-library-category="science">Vědecké články</button>
+          <button class="secondary library-tab" type="button" data-library-category="ai_tools">Samantha / AI nástroje</button>
           <button class="secondary library-tab" type="button" data-library-category="other">Ostatní</button>
         </div>
         <div class="library-controls">

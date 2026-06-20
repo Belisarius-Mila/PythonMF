@@ -130,8 +130,8 @@ Projekt byl založen 2026-05-18.
 - `scripts/search_article_archive.py` hledá ve fulltextu uložených článků.
 - `scripts/read_article_archive.py` zkusí živou URL a při nedostupnosti použije lokální TXT fallback.
 - Cockpit má read-only okno `Knihovna` se záložkami `Recepty`, `Vědecké články`,
-  `Ostatní`, seznamem od nejnovějších položek a fulltextovým hledáním ve vybrané
-  kategorii.
+  `Samantha / AI nástroje`, `Ostatní`, seznamem od nejnovějších položek a
+  fulltextovým hledáním ve vybrané kategorii.
 - Vstup přes Cockpit: do okna `Knihovna` lze vložit URL, vybrat kategorii, doplnit
   volitelné tagy a uložit článek automaticky do soukromého archivu.
 
@@ -177,6 +177,17 @@ text i HTML jsou jen v `data/private/article_archive/` a nepatří do gitu.
   `rodinny-recept`, `rucne-psany`, `scan`, `ma-obrazek`, `prepis-overit`.
 - Endpoint pro zápis je `/api/library/attachment/add`; pro čtení příloh zůstává
   `/api/library/attachment`.
+
+2026-06-20 byla doplněna kategorie `Samantha / AI nástroje`:
+
+- Interní klíč kategorie je `ai_tools`.
+- Kategorie slouží pro čitelné články o Codexu, Agents SDK, OpenAI novinkách,
+  Realtime/voice směru a budoucích schopnostech Samanthy.
+- Nové funkcionality OpenAI se mají ukládat jako samostatné články s datem,
+  praktickým významem pro Samanthu a poznámkou, že před implementací je nutné
+  ověřit aktuální oficiální dokumentaci.
+- První soukromé položky jsou `Codex Cookbook: praktická kuchařka pro práci s kódem`
+  a `Agents SDK jako budoucí schopnosti Samanthy`.
 
 Další krok:
 

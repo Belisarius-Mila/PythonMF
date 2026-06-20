@@ -192,6 +192,9 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("libraryAttachmentFileInput", COCKPIT_HTML)
         self.assertIn("attachment_count", COCKPIT_HTML)
         self.assertIn("Otevřít přílohu", COCKPIT_HTML)
+        self.assertIn('value="ai_tools"', COCKPIT_HTML)
+        self.assertIn('data-library-category="ai_tools"', COCKPIT_HTML)
+        self.assertIn("Samantha / AI nástroje", COCKPIT_HTML)
 
     def test_document_work_status_groups_downloads_and_review_queue(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

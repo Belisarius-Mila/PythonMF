@@ -24,6 +24,7 @@ DEFAULT_ARCHIVE_ROOT = PROJECT_ROOT / "data" / "private" / "article_archive"
 CATEGORY_LABELS = {
     "recipes": "Recepty",
     "science": "Vědecké články",
+    "ai_tools": "Samantha / AI nástroje",
     "other": "Ostatní",
 }
 
@@ -216,6 +217,18 @@ def normalize_category(value: str) -> str:
         "veda": "science",
         "vědecké články": "science",
         "vedecke clanky": "science",
+        "ai": "ai_tools",
+        "ai tools": "ai_tools",
+        "ai_tools": "ai_tools",
+        "samantha": "ai_tools",
+        "samantha ai": "ai_tools",
+        "samantha / ai nástroje": "ai_tools",
+        "samantha / ai nastroje": "ai_tools",
+        "ai nástroje": "ai_tools",
+        "ai nastroje": "ai_tools",
+        "openai": "ai_tools",
+        "codex": "ai_tools",
+        "agents sdk": "ai_tools",
         "other": "other",
         "ostatní": "other",
         "ostatni": "other",

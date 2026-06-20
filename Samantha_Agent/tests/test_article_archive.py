@@ -120,6 +120,25 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertIn("Mouka, kakao a med", article["text"])
         self.assertEqual(article["item"]["source_note"], "Syntetizovaný recept bez původní URL.")
 
+    def test_ai_tools_category_is_supported_for_samantha_knowledge(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            result = archive_text_entry(
+                title="Codex Cookbook",
+                text="Praktická kuchařka pro práci s Codexem, commity a deployem.",
+                category="Samantha / AI nástroje",
+                tags=["samantha", "codex"],
+                source_label="ChatGPT export review",
+                archive_root=archive_root,
+            )
+            listed = list_articles(category="ai_tools", archive_root=archive_root)
+            searched = search_articles(query="Codex deployem", category="ai_tools", archive_root=archive_root)
+
+        self.assertEqual(result["item"]["category"], "ai_tools")
+        self.assertEqual(result["item"]["category_label"], "Samantha / AI nástroje")
+        self.assertEqual(listed["count"], 1)
+        self.assertEqual(searched["count"], 1)
+
     def test_delete_article_requires_confirmation_and_moves_item_to_trash(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             archive_root = Path(temp_dir)
