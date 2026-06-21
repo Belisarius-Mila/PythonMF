@@ -135,7 +135,7 @@ const appState = {
   },
 };
 
-const owlAudio = new Audio("owl_200626.mp3?v=20260620a");
+const owlAudio = new Audio("owl_210626.mp3?v=20260621a");
 owlAudio.preload = "auto";
 
 function randomChoice(items) {
