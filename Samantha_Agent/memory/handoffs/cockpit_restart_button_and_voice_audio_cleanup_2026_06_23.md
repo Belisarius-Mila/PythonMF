@@ -22,6 +22,10 @@ Co je hotove:
   obcas skoncilo na chybe `nelze se pripojit k serveru`. Frontend proto misto
   pevneho reload timeoutu opakovane kontroluje `/api/status` a stranku obnovi
   az ve chvili, kdy Cockpit znovu odpovida.
+- Finalni provozni zjisteni: lokalni Cockpit na `127.0.0.1:8770` uz mel novou
+  verzi, ale Tailscale instance na `100.89.150.6:8770` jeste servirovala starou.
+  Po restartu Tailscale Cockpitu a rucnim refreshi Safari Mila potvrdil, ze
+  restart funguje na Macu i na iPhonu.
 - `app/speech/edge_tts_open.py` uz docasne Edge TTS MP3 neotevira pres `open`,
   ale prehrava je primo pres `/usr/bin/afplay`, aby se neimportovaly do Apple Music.
 - Z Apple Music knihovny a fyzickych souboru byly po vyslovnem potvrzeni Mily
@@ -29,18 +33,15 @@ Co je hotove:
   tim neuklada zadny soukromy obsah.
 
 Co neni hotove:
-- Po prvnim commitu Míla rucne otestoval tlacitko a restart backendu probehl,
-  ale Safari obnovilo stranku moc brzy a zobrazilo chybu pripojeni; pozdejsi
-  rucni reload uz Cockpit otevrel. Tento follow-up je opraveny pollingem.
-- Nebyl proveden dalsi realny klikaci retest po polling follow-up oprave; zmeny
-  jsou overene cilenymi unit testy a syntaktickou kontrolou.
+- Nic k tomuto bloku. Po restartu Tailscale instance a refreshi stranky Mila
+  potvrdil rucni test na Macu i iPhonu jako funkcni.
 - Pokud iPhone Music stale ukazuje stare polozky, jde pravdepodobne o iCloud/iPhone
   cache/synchronizaci, protoze na Macu uz `adam*voice*` polozky v Music nejsou videt.
 
 Dalsi krok:
-- Po pristi prilezitosti rucne kliknout v Cockpitu na `Servis -> Restart Cockpitu`
-  a overit, ze UI nejdriv ukazuje `Cekam na navrat Cockpitu...` a reload udela
-  az po realnem navratu serveru, bez Safari chyby pripojeni.
+- Zadny okamzity krok; oprava je overena rucne. Pri dalsim nasazeni Cockpitu
+  pamatovat, ze lokalni a Tailscale instance jsou dva bezici procesy a po zmene
+  serveroveho HTML musi obe nacist novy kod.
 
 Navrhovane dalsi kroky:
 - Pokud se chyba vrati, precist `data/private/cockpit/restart.log` a zkontrolovat
