@@ -74,6 +74,17 @@ Stav k 2026-06-12:
   prosel do Codexu, odpoved po otevreni audiokanalu hrala na iPhonu a Cockpit
   dokazal uklidit starou Codex relaci vzniklou po zavreni okna krizkem.
 
+Stav k 2026-06-23:
+
+- Edge TTS hlasovy vystup uz neotevira docasne MP3 pres macOS `open`, protoze
+  to muze podle systemove asociace importovat soubor do Apple Music a zaneradit
+  knihovnu alb/playlistu.
+- `app/speech/edge_tts_open.py` stale vytvari docasne MP3 do `/private/tmp`, ale
+  prehrava ho primo pres `/usr/bin/afplay`.
+- Bezne cteni vysledku zustava ve vychozim rezimu pres `say`; explicitni
+  `--engine edge` je urceny jen pro online Edge hlas a nemel by uz sahat na
+  Apple Music.
+
 ## Cíl
 
 Cílem je mít praktický způsob, jak vytvářet české hlasové MP3 soubory pro výukové aplikace, pohádky, slovíčka a další projekty.

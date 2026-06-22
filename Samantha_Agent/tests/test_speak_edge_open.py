@@ -26,11 +26,11 @@ class SpeakEdgeOpenTests(unittest.TestCase):
 
         def fake_edge(text: str, **kwargs):
             calls.append({"text": text, **kwargs})
-            return {"ok": True, "message": "Edge OK", "transport": "edge_tts_open", "path": "/tmp/test.mp3"}
+            return {"ok": True, "message": "Edge OK", "transport": "edge_tts_afplay", "path": "/tmp/test.mp3"}
 
         result = speak_voice_reply("Hotovo.", engine="edge", voice=None, output_dir=Path("/tmp"), edge_speaker=fake_edge)
 
-        self.assertEqual(result["transport"], "edge_tts_open")
+        self.assertEqual(result["transport"], "edge_tts_afplay")
         self.assertEqual(calls[0]["voice"], "cs-CZ-AntoninNeural")
 
     def test_edge_fallback_uses_local_when_edge_fails(self) -> None:
@@ -49,7 +49,7 @@ class SpeakEdgeOpenTests(unittest.TestCase):
         )
 
         self.assertEqual(result["transport"], "local_tts")
-        self.assertEqual(result["fallback_from"], "edge_tts_open")
+        self.assertEqual(result["fallback_from"], "edge_tts_afplay")
         self.assertIn("síť není dostupná", result["fallback_reason"])
 
 

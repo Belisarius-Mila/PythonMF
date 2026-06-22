@@ -28,15 +28,15 @@ def speak_edge_tts_open(
     audio_path = output_dir / f"adam_voice_report_{digest}.mp3"
     audio_path.write_bytes(audio)
 
-    opened = opener(["open", str(audio_path)], capture_output=True, text=True, timeout=10, check=False)
+    opened = opener(["/usr/bin/afplay", str(audio_path)], capture_output=True, text=True, timeout=45, check=False)
     if opened.returncode != 0:
         detail = (opened.stderr or opened.stdout or "").strip()
-        raise SpeechError(detail or "MP3 se nepodařilo otevřít v macOS přehrávači.")
+        raise SpeechError(detail or "MP3 se nepodařilo přehrát přes macOS afplay.")
 
     return {
         "ok": True,
-        "message": "Edge TTS MP3 bylo otevřeno v macOS přehrávači.",
-        "transport": "edge_tts_open",
+        "message": "Edge TTS MP3 bylo přehráno přes macOS afplay.",
+        "transport": "edge_tts_afplay",
         "path": str(audio_path),
         "voice": voice,
         "chars": len(spoken_text),

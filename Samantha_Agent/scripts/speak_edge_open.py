@@ -33,7 +33,7 @@ def parse_args() -> argparse.Namespace:
         "--engine",
         choices=sorted(ENGINES),
         default=default_engine(),
-        help="TTS engine: local = rychlý macOS say, edge = online MP3, edge-fallback = Edge a při selhání local.",
+        help="TTS engine: local = rychlý macOS say, edge = online MP3 přehrané přes afplay, edge-fallback = Edge a při selhání local.",
     )
     parser.add_argument("--voice", default=None, help="Hlas pro vybraný engine. Default: Zuzana pro local, AntoninNeural pro Edge.")
     parser.add_argument("--rate", default=DEFAULT_EDGE_TTS_RATE, help=f"Rychlost řeči (default: {DEFAULT_EDGE_TTS_RATE}).")
@@ -65,7 +65,7 @@ def speak_voice_reply(
             return {
                 **result,
                 "transport": "local_tts",
-                "fallback_from": "edge_tts_open",
+                "fallback_from": "edge_tts_afplay",
                 "fallback_reason": str(exc),
             }
     raise SpeechError(f"Nepodporovaný TTS engine: {engine}")

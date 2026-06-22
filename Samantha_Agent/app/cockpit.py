@@ -8742,6 +8742,8 @@ def start_cockpit_restart_action(
         host,
         "--port",
         str(port),
+        "--delay",
+        "2.0",
     ]
     starter = launcher or subprocess.Popen
     try:
@@ -15152,8 +15154,10 @@ COCKPIT_HTML = """<!doctype html>
 	        }
 	      } catch (err) {
 	        recordFrontendError(err);
-	        showMessage(`Chyba restartu Cockpitu: ${err}`);
-	        dashboardRestartBtn.disabled = false;
+	        showMessage("Spojení se při restartu přerušilo. Za pár sekund stránku obnovím.");
+	        window.setTimeout(() => {
+	          window.location.reload();
+	        }, 5500);
 	      }
 	    }
 

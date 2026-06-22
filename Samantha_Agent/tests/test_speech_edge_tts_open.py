@@ -9,7 +9,7 @@ from app.speech.edge_tts_open import speak_edge_tts_open
 
 
 class EdgeTtsOpenTests(unittest.TestCase):
-    def test_speak_edge_tts_open_writes_mp3_and_opens_it(self) -> None:
+    def test_speak_edge_tts_open_writes_mp3_and_plays_it_with_afplay(self) -> None:
         calls = []
 
         def fake_synthesizer(text, **kwargs):
@@ -33,10 +33,10 @@ class EdgeTtsOpenTests(unittest.TestCase):
             self.assertEqual(audio_path.read_bytes(), b"MP3")
 
         self.assertTrue(result["ok"])
-        self.assertEqual(result["transport"], "edge_tts_open")
+        self.assertEqual(result["transport"], "edge_tts_afplay")
         self.assertEqual(calls[0][0], "synth")
         self.assertEqual(calls[1][0], "open")
-        self.assertEqual(calls[1][1][0], "open")
+        self.assertEqual(calls[1][1][0], "/usr/bin/afplay")
 
 
 if __name__ == "__main__":

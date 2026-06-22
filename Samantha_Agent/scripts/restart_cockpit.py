@@ -60,10 +60,10 @@ def url_ok(host: str, port: int, *, timeout: float = 1.0) -> bool:
 def wait_for_exit(pid: int, host: str, port: int, timeout: float = 8.0) -> bool:
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
-        if not process_exists(pid) and not port_is_busy(host, port):
+        if not process_exists(pid):
             return True
         time.sleep(0.2)
-    return not process_exists(pid) and not port_is_busy(host, port)
+    return not process_exists(pid)
 
 
 def wait_for_launchd_restart(host: str, port: int, timeout: float = 5.0) -> bool:

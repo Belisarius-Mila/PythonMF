@@ -5,6 +5,18 @@ from scripts import restart_cockpit
 
 
 class RestartCockpitTests(unittest.TestCase):
+    def test_wait_for_exit_allows_launchd_to_reuse_port_immediately(self) -> None:
+        calls = [True, False]
+
+        def fake_process_exists(pid: int) -> bool:
+            return calls.pop(0)
+
+        with (
+            patch.object(restart_cockpit, "process_exists", side_effect=fake_process_exists),
+            patch.object(restart_cockpit, "port_is_busy", return_value=True),
+        ):
+            self.assertTrue(restart_cockpit.wait_for_exit(123, "127.0.0.1", 8770, timeout=1.0))
+
     def test_restart_returns_without_manual_start_when_launchd_revives_server(self) -> None:
         starts = []
 

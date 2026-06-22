@@ -2592,6 +2592,8 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(calls[0]["args"][1], str(cockpit_module.COCKPIT_RESTART_SCRIPT))
         self.assertIn("--pid", calls[0]["args"])
         self.assertIn("456", calls[0]["args"])
+        self.assertIn("--delay", calls[0]["args"])
+        self.assertIn("2.0", calls[0]["args"])
         self.assertTrue(calls[0]["start_new_session"])
 
     def test_start_adam_voice_mode_action_launches_watcher_with_terminal_bridge_by_default(self) -> None:
