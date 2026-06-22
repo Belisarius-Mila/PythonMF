@@ -3789,6 +3789,59 @@ Dalsi krok:
             self.assertEqual(calls[0][0], "/usr/bin/open")
             self.assertEqual(Path(calls[0][1]), pdf.resolve())
 
+    def test_resolve_openable_purchase_pdf_uses_purchase_archive_only(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            purchases = root / "purchases" / "2026" / "2026-05-23_dolphin-e20"
+            documents = purchases / "documents"
+            documents.mkdir(parents=True)
+            pdf = documents / "invoice.pdf"
+            pdf.write_bytes(b"%PDF-1.4\n")
+            (purchases / "invoice_manifest.json").write_text(
+                json.dumps(
+                    {
+                        "subject": "Faktura a expedice zboží",
+                        "attachments": [{"filename": "invoice.pdf", "stored_path": str(pdf)}],
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+            purchase_id = "purchase-2026-2026-05-23_dolphin-e20"
+            purchase_ref = cockpit_module.purchase_reference(purchase_id)
+
+            result = cockpit_module.resolve_openable_purchase_pdf(purchase_ref, purchases_dir=root / "purchases")
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["purchase_ref"], purchase_ref)
+            self.assertEqual(result["path"], pdf.resolve())
+
+    def test_resolve_openable_purchase_pdf_rejects_pdf_outside_archive(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            outside = root / "outside.pdf"
+            outside.write_bytes(b"%PDF-1.4\n")
+            purchases = root / "purchases" / "2026" / "2026-05-23_dolphin-e20"
+            purchases.mkdir(parents=True)
+            (purchases / "invoice_manifest.json").write_text(
+                json.dumps(
+                    {
+                        "subject": "Faktura",
+                        "attachments": [{"filename": "invoice.pdf", "stored_path": str(outside)}],
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            result = cockpit_module.resolve_openable_purchase_pdf(
+                "purchase-2026-2026-05-23_dolphin-e20",
+                purchases_dir=root / "purchases",
+            )
+
+            self.assertFalse(result["ok"])
+            self.assertIn("nákupním archivu", result["message"])
+
     def test_document_reader_page_contains_return_controls_and_inline_pdf(self) -> None:
         page = cockpit_module.document_reader_page_html("doc-open", "Doklad & smlouva")
 
@@ -3803,6 +3856,14 @@ Dalsi krok:
         self.assertIn('window.location.href = "/"', page)
         self.assertIn("/documents/pdf?document_id=doc-open", page)
         self.assertIn("Doklad &amp; smlouva", page)
+
+    def test_purchase_reader_page_contains_inline_purchase_pdf(self) -> None:
+        page = cockpit_module.purchase_reader_page_html("purref-test", "Faktura & záruka")
+
+        self.assertIn("Nákup / záruka", page)
+        self.assertIn("Zpět do Cockpitu", page)
+        self.assertIn("/purchases/pdf?purchase_id=purref-test", page)
+        self.assertIn("Faktura &amp; záruka", page)
 
     def test_janicka_chat_action_submits_managed_adam_request_without_agent(self) -> None:
         calls = []
@@ -4180,6 +4241,9 @@ Dalsi krok:
         self.assertIn("search-detail hidden", COCKPIT_HTML)
         self.assertIn("Otevřít / číst", COCKPIT_HTML)
         self.assertIn("Otevřít / číst PDF", COCKPIT_HTML)
+        self.assertIn("Otevřít nákupní PDF", COCKPIT_HTML)
+        self.assertIn("openPurchaseForReading", COCKPIT_HTML)
+        self.assertIn("/purchases/read?purchase_id=", COCKPIT_HTML)
         self.assertIn("openDocumentForReading", COCKPIT_HTML)
         self.assertIn("openDocumentReaderWindow", COCKPIT_HTML)
         self.assertIn("documentReaderUrl", COCKPIT_HTML)
@@ -4355,6 +4419,42 @@ Dalsi krok:
         self.assertNotIn("body_text", serialized)
         self.assertNotIn("PDFDATA", serialized)
 
+    def test_document_intake_email_scan_skips_library_exports(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            result = document_intake_email_scan_status(
+                limit_per_source=10,
+                since="2026-06-01T07:00:00+00:00",
+                days=0,
+                decisions_path=Path(temp_dir) / "email_processing_decisions.json",
+                actions_path=Path(temp_dir) / "email_work_queue_actions.jsonl",
+                icloud_provider_factory=lambda: _FakeEmailProvider(
+                    [
+                        EmailHeader(
+                            internal_id="18001",
+                            date="Sun, 21 Jun 2026 10:00:00 +0200",
+                            sender="Míla <mila@example.com>",
+                            subject="[SamanthaLibraryExport] Testovací článek",
+                            attachments=(
+                                EmailAttachmentMeta(
+                                    filename="article_export.pdf",
+                                    content_type="application/pdf",
+                                    size_bytes=42_000,
+                                    part_id="2",
+                                    content_id="",
+                                    disposition="attachment",
+                                ),
+                            ),
+                        )
+                    ]
+                ),
+                seznam_provider_factory=lambda: _FakeEmailProvider([]),
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["raw_count"], 0)
+        self.assertEqual(result["count"], 0)
+        self.assertEqual(result["skipped_library_export_count"], 1)
+
     def test_new_email_headers_overview_skips_completed_work_queue_items(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             actions_path = Path(temp_dir) / "email_work_queue_actions.jsonl"
@@ -4406,6 +4506,30 @@ Dalsi krok:
         self.assertEqual([item["uid"] for item in result["items"]], ["11"])
         self.assertGreaterEqual(result["skipped_completed_count"], 1)
         self.assertEqual(result["suppressed_known_ids"], [completed_id])
+
+    def test_new_email_headers_overview_skips_library_exports(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            result = new_email_headers_overview(
+                limit_per_source=50,
+                since="2026-06-01T07:00:00+00:00",
+                decisions_path=Path(temp_dir) / "email_processing_decisions.json",
+                actions_path=Path(temp_dir) / "email_work_queue_actions.jsonl",
+                icloud_provider_factory=lambda: _FakeEmailProvider(
+                    [
+                        EmailHeader(
+                            internal_id="18001",
+                            date="Sun, 21 Jun 2026 10:00:00 +0200",
+                            sender="Míla <mila@example.com>",
+                            subject="[SamanthaLibraryExport] Testovací článek",
+                        )
+                    ]
+                ),
+                seznam_provider_factory=lambda: _FakeEmailProvider([]),
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["items"], [])
+        self.assertEqual(result["skipped_library_export_count"], 1)
 
     def test_document_intake_email_scan_reports_suppressed_known_completed_items(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -4565,6 +4689,30 @@ Dalsi krok:
         self.assertEqual(item["source_key"], "icloud|inbox|14157")
         self.assertNotEqual(item["id"], item["legacy_id"])
 
+    def test_email_header_processing_item_marks_library_export(self) -> None:
+        item = email_header_to_processing_item(
+            EmailHeader(
+                internal_id="18001",
+                date="Sun, 21 Jun 2026 10:00:00 +0200",
+                sender="Míla <mila@example.com>",
+                subject="[SamanthaLibraryExport] Testovací článek",
+                attachments=(
+                    EmailAttachmentMeta(
+                        filename="article_export.pdf",
+                        content_type="application/pdf",
+                        size_bytes=42_000,
+                        part_id="2",
+                        content_id="",
+                        disposition="attachment",
+                    ),
+                ),
+            ),
+            "iCloud",
+        )
+
+        self.assertTrue(item["samantha_library_export"])
+        self.assertTrue(cockpit_module.email_processing_item_is_library_export(item))
+
     def test_cockpit_email_intake_refresh_cleans_candidates_by_source_key(self) -> None:
         self.assertIn("if (!silent) {\n          runEmailIntakeMonitor();\n        }", COCKPIT_HTML)
         self.assertIn("const sourceKey = emailIntakeSourceKey(item);", COCKPIT_HTML)
@@ -4689,6 +4837,32 @@ Dalsi krok:
         self.assertEqual(result["skipped_outbound_count"], 1)
         self.assertEqual(result["items"][0]["id"], "inbox-1")
         self.assertIn("Skryto odchozích", result["message"])
+
+    def test_email_processing_pending_work_items_skips_library_exports(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "email_processing_decisions.json"
+            save_email_processing_decision(
+                item_id="library-export-1",
+                action="process",
+                item={
+                    "id": "library-export-1",
+                    "category": "faktury/e-shopy",
+                    "provider": "iCloud",
+                    "folder": "INBOX",
+                    "uid": "18001",
+                    "date": "Sun, 21 Jun 2026 10:00:00 +0200",
+                    "subject": "[SamanthaLibraryExport] Testovací článek",
+                    "pdf_attachment_count": 1,
+                },
+                path=path,
+            )
+
+            result = email_processing_pending_work_items(path=path)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["count"], 0)
+        self.assertEqual(result["skipped_library_export_count"], 1)
+        self.assertIn("Skryto exportů Knihovny", result["message"])
 
     def test_email_processing_classifies_tax_receipt_as_invoice(self) -> None:
         category = classify_email_processing_category(

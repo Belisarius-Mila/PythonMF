@@ -38,6 +38,8 @@ from app.adam_service import (
 from app.article_archive import (
     DELETE_CONFIRMATION_PHRASE,
     ATTACHMENT_CONFIRMATION_PHRASE,
+    LIBRARY_EXPORT_EMAIL_MARKER,
+    LIBRARY_EXPORT_SUBJECT_PREFIX,
     archive_text_entry,
     archive_url,
     delete_article,
@@ -2234,10 +2236,43 @@ def email_header_to_processing_item(header: EmailHeader, source: str) -> dict[st
         header.date,
         header.subject or "",
     )
+    item["samantha_library_export"] = email_processing_item_is_library_export(item)
     return item
 
 
+def email_processing_item_is_library_export(item: dict[str, Any]) -> bool:
+    values = [
+        str(item.get("subject", "")),
+        str(item.get("reason", "")),
+        str(item.get("original_subject", "")),
+        str(item.get("headers", "")),
+        str(item.get("raw_headers", "")),
+    ]
+    for key in (LIBRARY_EXPORT_EMAIL_MARKER, "X-Samantha-Article-ID"):
+        value = item.get(key)
+        if value is not None:
+            values.append(str(value))
+    for attachment in item.get("attachments", []) if isinstance(item.get("attachments", []), list) else []:
+        if isinstance(attachment, dict):
+            values.append(str(attachment.get("filename", "")))
+            values.append(str(attachment.get("content_type", "")))
+    text = " ".join(values).casefold()
+    return (
+        LIBRARY_EXPORT_SUBJECT_PREFIX.casefold() in text
+        or LIBRARY_EXPORT_EMAIL_MARKER.casefold() in text
+    )
+
+
 def document_intake_email_candidate_filter(item: dict[str, Any]) -> dict[str, Any]:
+    if email_processing_item_is_library_export(item):
+        return {
+            "include": False,
+            "score": -100,
+            "label": "Potlačeno: export Knihovny",
+            "reasons": ["PDF export z Knihovny se záměrně neimportuje zpět"],
+            "matched_positive": [],
+            "matched_negative": [],
+        }
     subject = str(item.get("subject", ""))
     sender = str(item.get("sender", ""))
     category = str(item.get("category", ""))
@@ -2470,6 +2505,7 @@ def email_processing_pending_work_items(
     decisions = read_email_processing_decisions(path)
     items: list[dict[str, Any]] = []
     skipped_outbound_count = 0
+    skipped_library_export_count = 0
     for item_id, decision in decisions.items():
         action = str(decision.get("action", ""))
         if action not in {"process", "trash_requested"}:
@@ -2480,6 +2516,9 @@ def email_processing_pending_work_items(
         item = dict(raw_item)
         if not email_processing_is_inbound_work_folder(str(item.get("folder", ""))):
             skipped_outbound_count += 1
+            continue
+        if email_processing_item_is_library_export(item):
+            skipped_library_export_count += 1
             continue
         normalized_category = classify_email_processing_category(
             str(item.get("subject", "")),
@@ -2509,12 +2548,15 @@ def email_processing_pending_work_items(
     message = f"Načteno rozpracovaných e-mailů: {len(items)}."
     if skipped_outbound_count:
         message += f" Skryto odchozích/konceptových položek: {skipped_outbound_count}."
+    if skipped_library_export_count:
+        message += f" Skryto exportů Knihovny: {skipped_library_export_count}."
     return {
         "ok": True,
         "message": message,
         "items": items,
         "count": len(items),
         "skipped_outbound_count": skipped_outbound_count,
+        "skipped_library_export_count": skipped_library_export_count,
     }
 
 
@@ -2542,6 +2584,7 @@ def new_email_headers_overview(
     suppressed_known_ids = set(known & (decided_keys | completed_keys))
     entries: list[dict[str, Any]] = []
     unavailable: list[str] = []
+    skipped_library_export_count = 0
     providers: list[tuple[str, Callable[[], object], type[Exception], str]] = [
         (
             "iCloud",
@@ -2571,6 +2614,9 @@ def new_email_headers_overview(
             if cutoff_ts and (not header_ts or header_ts <= cutoff_ts):
                 continue
             item = email_header_to_processing_item(header, source)
+            if email_processing_item_is_library_export(item):
+                skipped_library_export_count += 1
+                continue
             item_keys = email_processing_item_lookup_keys(item)
             blocked_keys = item_keys & (decided_keys | completed_keys)
             known_item_keys = item_keys & known
@@ -2602,6 +2648,7 @@ def new_email_headers_overview(
         "known_count": len(known),
         "skipped_decided_count": len(decided_keys),
         "skipped_completed_count": len(completed_keys),
+        "skipped_library_export_count": skipped_library_export_count,
         "suppressed_known_ids": sorted(suppressed_known_ids),
         "items": entries,
         "unavailable": unavailable,
@@ -2644,7 +2691,11 @@ def latest_email_processing_overview(root: Path = EMAIL_SESSION_HANDOFF_DIR) -> 
             break
     updated_at = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).replace(microsecond=0).isoformat()
     decisions = read_email_processing_decisions(root / EMAIL_PROCESSING_DECISIONS_FILE.name)
-    items = parse_email_processing_items(text)
+    items = [
+        item
+        for item in parse_email_processing_items(text)
+        if not email_processing_item_is_library_export(item)
+    ]
     for item in items:
         decision = (
             decisions.get(str(item.get("id", "")), {})
@@ -5459,7 +5510,18 @@ def document_payment_options(text: str) -> list[dict[str, str]]:
 def document_stored_path_is_openable_pdf(stored_path: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> bool:
     try:
         root = vault_dir.resolve(strict=True)
-        target = (PROJECT_ROOT / stored_path).resolve(strict=True)
+        raw_target = Path(stored_path)
+        target = (raw_target if raw_target.is_absolute() else PROJECT_ROOT / raw_target).resolve(strict=True)
+    except (OSError, RuntimeError):
+        return False
+    return target.is_file() and target.suffix.casefold() == ".pdf" and (target == root or root in target.parents)
+
+
+def purchase_stored_path_is_openable_pdf(stored_path: str, purchases_dir: Path = DEFAULT_PURCHASES_DIR) -> bool:
+    try:
+        root = purchases_dir.resolve(strict=True)
+        raw_target = Path(stored_path)
+        target = (raw_target if raw_target.is_absolute() else PROJECT_ROOT / raw_target).resolve(strict=True)
     except (OSError, RuntimeError):
         return False
     return target.is_file() and target.suffix.casefold() == ".pdf" and (target == root or root in target.parents)
@@ -5488,6 +5550,41 @@ def resolve_openable_document_pdf(
         "document_id": safe_text(str(row.get("document_id", ""))),
         "document_ref": document_ref,
     }
+
+
+def resolve_openable_purchase_pdf(
+    purchase_id: str,
+    purchases_dir: Path = DEFAULT_PURCHASES_DIR,
+) -> dict[str, Any]:
+    safe_reference = safe_slug(purchase_id, default="", limit=180)
+    if not safe_reference or not purchases_dir.exists():
+        return {"ok": False, "message": "Nákup nebyl nalezen v nákupním archivu."}
+    for manifest_path in purchases_dir.glob("*/*/invoice_manifest.json"):
+        current_purchase_id = f"purchase-{manifest_path.parent.parent.name}-{manifest_path.parent.name}"
+        current_ref = purchase_reference(current_purchase_id)
+        if safe_reference not in {safe_slug(current_purchase_id, default="", limit=180), current_ref}:
+            continue
+        try:
+            manifest = read_json_file(manifest_path)
+        except ValueError:
+            return {"ok": False, "message": "Manifest nákupu nejde přečíst."}
+        attachments = [item for item in manifest.get("attachments", []) if isinstance(item, dict)]
+        for attachment in attachments:
+            stored_path = str(attachment.get("stored_path", ""))
+            if not stored_path or not purchase_stored_path_is_openable_pdf(stored_path, purchases_dir=purchases_dir):
+                continue
+            raw_target = Path(stored_path)
+            target = (raw_target if raw_target.is_absolute() else PROJECT_ROOT / raw_target).resolve(strict=True)
+            title = safe_text(str(manifest.get("subject", "") or attachment.get("filename", "") or "Nákup / faktura"))[:240]
+            return {
+                "ok": True,
+                "path": target,
+                "title": title,
+                "purchase_id": safe_text(current_purchase_id),
+                "purchase_ref": current_ref,
+            }
+        return {"ok": False, "message": "PDF nákupu není dostupné nebo neleží v nákupním archivu."}
+    return {"ok": False, "message": "Nákup nebyl nalezen v nákupním archivu."}
 
 
 def open_document_pdf_action(
@@ -5627,6 +5724,49 @@ def document_reader_page_html(document_id: str, title: str) -> str:
     readerBackBtn.addEventListener("click", focusCockpit);
     readerCloseBtn.addEventListener("click", closeReader);
   </script>
+</body>
+</html>"""
+
+
+def purchase_reader_page_html(purchase_id: str, title: str) -> str:
+    safe_title = html.escape(title or "Nákup / faktura")
+    safe_purchase_id = html.escape(purchase_id)
+    pdf_url = f"/purchases/pdf?purchase_id={quote(purchase_id, safe='')}"
+    safe_pdf_url = html.escape(pdf_url, quote=True)
+    return f"""<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nákup / záruka - {safe_title}</title>
+  <style>
+    :root {{ color-scheme: light; --blue: #2563eb; --ink: #172033; --muted: #667085; }}
+    body {{ margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--ink); background: #f6f7fb; }}
+    header {{ display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 14px 18px; background: #fff; border-bottom: 1px solid #d8deea; }}
+    h1 {{ margin: 0; font-size: 18px; }}
+    .meta {{ color: var(--muted); font-size: 13px; margin-top: 3px; }}
+    .actions {{ display: flex; gap: 8px; flex-wrap: wrap; }}
+    button, a.button {{ border: 1px solid #b9c4d6; background: #fff; color: var(--ink); border-radius: 7px; padding: 8px 11px; font-size: 14px; text-decoration: none; cursor: pointer; }}
+    a.primary {{ background: var(--blue); color: #fff; border-color: var(--blue); }}
+    main {{ height: calc(100vh - 70px); }}
+    iframe {{ width: 100%; height: 100%; border: 0; background: #fff; }}
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>{safe_title}</h1>
+      <div class="meta">Nákupní evidence: {safe_purchase_id}</div>
+    </div>
+    <div class="actions">
+      <a class="button primary" href="{safe_pdf_url}" target="_blank" rel="noopener">Otevřít PDF</a>
+      <button type="button" onclick="window.opener && window.opener.focus ? window.opener.focus() : null">Zpět do Cockpitu</button>
+      <button type="button" onclick="window.close()">Zavřít okno</button>
+    </div>
+  </header>
+  <main>
+    <iframe title="PDF nákupní faktury" src="{safe_pdf_url}"></iframe>
+  </main>
 </body>
 </html>"""
 
@@ -6106,6 +6246,7 @@ def document_intake_email_scan_status(
         "raw_count": len(raw_items),
         "count": len(items),
         "filtered_out_count": filtered_out_count,
+        "skipped_library_export_count": int(result.get("skipped_library_export_count", 0) or 0),
         "suppressed_known_ids": [
             safe_text(str(item_id))[:180]
             for item_id in result.get("suppressed_known_ids", [])
@@ -9085,6 +9226,16 @@ class CockpitServer:
                     document_id = params.get("document_id", [""])[0]
                     self.respond_document_pdf(document_id)
                     return
+                if parsed.path == "/purchases/read":
+                    params = parse_qs(parsed.query)
+                    purchase_id = params.get("purchase_id", [""])[0]
+                    self.respond_purchase_reader(purchase_id)
+                    return
+                if parsed.path == "/purchases/pdf":
+                    params = parse_qs(parsed.query)
+                    purchase_id = params.get("purchase_id", [""])[0]
+                    self.respond_purchase_pdf(purchase_id)
+                    return
                 if parsed.path == "/api/status":
                     self.respond_json(cockpit_status())
                     return
@@ -9583,6 +9734,40 @@ class CockpitServer:
                 target = resolved["path"]
                 data = target.read_bytes()
                 filename = safe_filename(str(target.name or "document.pdf"))
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", "application/pdf")
+                self.send_header("Content-Disposition", f'inline; filename="{filename}"')
+                self.send_header("Cache-Control", "no-store, max-age=0")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
+            def respond_purchase_reader(self, purchase_id: str) -> None:
+                resolved = resolve_openable_purchase_pdf(purchase_id)
+                if not resolved.get("ok"):
+                    self.respond_html(
+                        purchase_reader_page_html(
+                            purchase_id=safe_text(purchase_id)[:180],
+                            title=str(resolved.get("message", "Nákup není dostupný.")),
+                        ),
+                        status=HTTPStatus.NOT_FOUND,
+                    )
+                    return
+                self.respond_html(
+                    purchase_reader_page_html(
+                        purchase_id=str(resolved["purchase_ref"]),
+                        title=str(resolved["title"]),
+                    )
+                )
+
+            def respond_purchase_pdf(self, purchase_id: str) -> None:
+                resolved = resolve_openable_purchase_pdf(purchase_id)
+                if not resolved.get("ok"):
+                    self.respond_json({"error": "not_found", "message": resolved.get("message", "")}, status=HTTPStatus.NOT_FOUND)
+                    return
+                target = resolved["path"]
+                data = target.read_bytes()
+                filename = safe_filename(str(target.name or "purchase.pdf"))
                 self.send_response(HTTPStatus.OK)
                 self.send_header("Content-Type", "application/pdf")
                 self.send_header("Content-Disposition", f'inline; filename="{filename}"')
@@ -15271,8 +15456,7 @@ COCKPIT_HTML = """<!doctype html>
         const headOpenBtn = document.createElement("button");
         headOpenBtn.className = "primary";
         headOpenBtn.type = "button";
-        headOpenBtn.textContent = isPurchase ? "Soukromá cesta" : "Otevřít / číst";
-        headOpenBtn.disabled = isPurchase;
+        headOpenBtn.textContent = isPurchase ? "Otevřít PDF" : "Otevřít / číst";
         const headActions = document.createElement("div");
         headActions.className = "search-result-head-actions";
         headActions.appendChild(headOpenBtn);
@@ -15316,8 +15500,7 @@ COCKPIT_HTML = """<!doctype html>
         const openBtn = document.createElement("button");
         openBtn.className = "primary";
         openBtn.type = "button";
-        openBtn.textContent = isPurchase ? "Uloženo v private archivu" : "Otevřít / číst PDF";
-        openBtn.disabled = isPurchase;
+        openBtn.textContent = isPurchase ? "Otevřít nákupní PDF" : "Otevřít / číst PDF";
         const printBtn = document.createElement("button");
         printBtn.className = "secondary";
         printBtn.type = "button";
@@ -15340,6 +15523,10 @@ COCKPIT_HTML = """<!doctype html>
           actions.appendChild(printBtn);
           actions.appendChild(archiveBtn);
           actions.appendChild(trashBtn);
+        } else {
+          headOpenBtn.addEventListener("click", () => openPurchaseForReading(documentRef, headOpenBtn));
+          openBtn.addEventListener("click", () => openPurchaseForReading(documentRef, openBtn));
+          actions.appendChild(openBtn);
         }
         summary.appendChild(title);
         summary.appendChild(meta);
@@ -15377,6 +15564,10 @@ COCKPIT_HTML = """<!doctype html>
       return `/documents/read?document_id=${encodeURIComponent(documentId || "")}`;
     }
 
+    function purchaseReaderUrl(purchaseId) {
+      return `/purchases/read?purchase_id=${encodeURIComponent(purchaseId || "")}`;
+    }
+
     function openDocumentReaderWindow(documentId, statusNode, button) {
       if (!documentId) return;
       const originalText = button ? button.textContent : "";
@@ -15402,6 +15593,33 @@ COCKPIT_HTML = """<!doctype html>
 
     function openDocumentForReading(documentId, button) {
       openDocumentReaderWindow(documentId, documentSearchStatus, button);
+    }
+
+    function openPurchaseReaderWindow(purchaseId, statusNode, button) {
+      if (!purchaseId) return;
+      const originalText = button ? button.textContent : "";
+      if (button) button.disabled = true;
+      if (button) button.textContent = "Otevírám...";
+      const url = purchaseReaderUrl(purchaseId);
+      try {
+        const reader = window.open(url, "samanthaPurchaseReader", "width=1180,height=860");
+        if (reader) {
+          reader.focus();
+          if (statusNode) statusNode.textContent = "Nákupní PDF je otevřené ve čtecím okně Cockpitu.";
+        } else {
+          window.location.href = url;
+        }
+      } catch (err) {
+        recordFrontendError(err);
+        if (statusNode) statusNode.textContent = `Chyba otevření nákupního PDF: ${err}`;
+      } finally {
+        if (button) button.disabled = false;
+        if (button) button.textContent = originalText || "Otevřít PDF";
+      }
+    }
+
+    function openPurchaseForReading(purchaseId, button) {
+      openPurchaseReaderWindow(purchaseId, documentSearchStatus, button);
     }
 
     async function printDocument(documentId) {

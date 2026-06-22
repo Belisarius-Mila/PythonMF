@@ -37,4 +37,4 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
-- 2026-06-22: `Znalostni databaze / Knihovna clanku / Knowledge inbox` ma novy handoff `handoffs/knowledge_database_library_pdf_export_cleanup_2026_06_22.md` s pripomenutim pri startu. Stav: necommitnute kodove zmeny pro PDF export clanku, potvrzovane e-mail odeslani, automaticke cisteni balastu pri URL importu a CLI cleanup tool. Soukromy archiv byl upraven jen v `data/private/article_archive/` a nepatri do gitu. Dalsi krok: git safety kontrola a tematicky commit pouze kodu/testu bez private dat.
+- 2026-06-22: Cockpit / Knihovna / e-mail intake ma hotovy checkpoint `handoffs/cockpit_purchase_pdf_and_library_export_email_filter_2026_06_22.md`. Stav: hledani dokumentu umi najit soukromy nakupni archiv `data/private/purchases`, nakupni vysledek ma vlastni PDF ctecku `/purchases/read`/`/purchases/pdf` a exporty z Knihovny s prefixem `[SamanthaLibraryExport]` se uz nenabizeji ve fronte e-mailoveho/document intake zpracovani. Dalsi krok: commit + push jen kodu/testu/memory bez private dat, potom rucne overit v Cockpitu `dolphin` a e-mailovy refresh.
