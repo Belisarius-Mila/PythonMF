@@ -132,6 +132,7 @@ from app.speech.voice_inbox import VoiceCommand, parse_voice_command_file, voice
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 COCKPIT_PORT = 8770
 COCKPIT_URL = f"http://127.0.0.1:{COCKPIT_PORT}"
+DEFAULT_PURCHASES_DIR = PROJECT_ROOT / "data" / "private" / "purchases"
 SCANDOCU_URL = "http://127.0.0.1:8766"
 SCANDOCU_PORT = 8766
 SCANDOCU_LOG_DIR = PROJECT_ROOT / "data" / "private" / "documents" / "scandocu"
@@ -7281,6 +7282,11 @@ def document_reference(document_id: str) -> str:
     return f"docref-{digest}"
 
 
+def purchase_reference(purchase_id: str) -> str:
+    digest = hashlib.sha256(purchase_id.encode("utf-8")).hexdigest()[:16]
+    return f"purref-{digest}"
+
+
 def reminder_reference(reminder_id: str) -> str:
     digest = hashlib.sha256(reminder_id.encode("utf-8")).hexdigest()[:16]
     return f"remref-{digest}"
@@ -7429,6 +7435,7 @@ def with_problem_label(item: dict[str, Any]) -> dict[str, Any]:
 def search_document_index(
     query: str,
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+    purchases_dir: Path | None = None,
     limit: int = 8,
 ) -> dict[str, Any]:
     terms = [term.casefold() for term in tokenize(query) if len(term) >= 2]
@@ -7482,13 +7489,13 @@ def search_document_index(
         scored.append((score, metadata, snippet, len(text)))
 
     results: list[dict[str, Any]] = []
-    for score, metadata, snippet, text_chars in sorted(scored, key=lambda row: row[0], reverse=True)[
-        : max(1, min(limit, 20))
-    ]:
+    for score, metadata, snippet, text_chars in sorted(scored, key=lambda row: row[0], reverse=True):
         reading_status = effective_document_reading_status(metadata, text_chars=text_chars)
         results.append(
             {
                 "score": score,
+                "source_type": "document",
+                "source_label": "Dokument",
                 "document_ref": document_reference(str(metadata.get("document_id", ""))),
                 "document_id": safe_text(str(metadata.get("document_id", ""))),
                 "title": safe_text(str(metadata.get("title") or metadata.get("original_filename") or "")),
@@ -7504,12 +7511,107 @@ def search_document_index(
                 "snippet": sanitize_output(snippet),
             }
         )
+    resolved_purchases_dir = purchases_dir
+    if resolved_purchases_dir is None:
+        resolved_purchases_dir = DEFAULT_PURCHASES_DIR if vault_dir == DEFAULT_DOCUMENTS_DIR else vault_dir.parent / "purchases"
+    results.extend(search_purchase_manifests(query=query, terms=terms, purchases_dir=resolved_purchases_dir))
+    limited_results = sorted(results, key=lambda row: int(row.get("score", 0)), reverse=True)[
+        : max(1, min(limit, 20))
+    ]
     return {
         "ok": True,
         "query": query,
-        "count": len(results),
-        "results": results,
-        "message": "Nalezena shoda." if results else "V dokumentech jsem nenašla shodu.",
+        "count": len(limited_results),
+        "results": limited_results,
+        "message": "Nalezena shoda." if limited_results else "V dokumentech ani nákupech jsem nenašla shodu.",
+    }
+
+
+def search_purchase_manifests(
+    query: str,
+    terms: list[str],
+    purchases_dir: Path = DEFAULT_PURCHASES_DIR,
+) -> list[dict[str, Any]]:
+    if not purchases_dir.exists():
+        return []
+    scored: list[tuple[int, dict[str, Any]]] = []
+    query_slug_terms = {safe_ascii_slug(term, default=term, limit=80).casefold() for term in terms}
+    for manifest_path in purchases_dir.glob("*/*/invoice_manifest.json"):
+        try:
+            manifest = read_json_file(manifest_path)
+        except ValueError:
+            continue
+        haystack = purchase_manifest_haystack(manifest=manifest, manifest_path=manifest_path)
+        folded = haystack.casefold()
+        slug_terms = {safe_ascii_slug(term, default=term, limit=80).casefold() for term in tokenize(haystack)}
+        score = sum(folded.count(term) for term in terms)
+        score += sum(1 for term in query_slug_terms if term and term in slug_terms)
+        if score <= 0:
+            continue
+        scored.append((score, purchase_manifest_result(manifest=manifest, manifest_path=manifest_path, score=score)))
+    return [result for _, result in sorted(scored, key=lambda row: row[0], reverse=True)]
+
+
+def purchase_manifest_haystack(manifest: dict[str, Any], manifest_path: Path) -> str:
+    parts = [
+        str(manifest_path.parent.name),
+        str(manifest_path.parent.parent.name),
+        str(manifest.get("uid", "")),
+        str(manifest.get("date", "")),
+        str(manifest.get("sender", "")),
+        str(manifest.get("subject", "")),
+        "nákup nakup nákupy nakupy záruka zaruka faktura invoice účtenka uctenka objednávka objednavka",
+    ]
+    for attachment in manifest.get("attachments", []):
+        if not isinstance(attachment, dict):
+            continue
+        parts.extend(
+            [
+                str(attachment.get("filename", "")),
+                str(attachment.get("stored_path", "")),
+                str(attachment.get("content_type", "")),
+            ]
+        )
+    joined = " ".join(parts)
+    if "dolphin" in joined.casefold():
+        joined += " bazén bazen bazénový bazenovy robot vysavač vysavac čistič cistic bazénu bazenu"
+    return joined
+
+
+def purchase_manifest_result(manifest: dict[str, Any], manifest_path: Path, score: int) -> dict[str, Any]:
+    purchase_id = f"purchase-{manifest_path.parent.parent.name}-{manifest_path.parent.name}"
+    attachments = [item for item in manifest.get("attachments", []) if isinstance(item, dict)]
+    primary_attachment = attachments[0] if attachments else {}
+    stored_path = str(primary_attachment.get("stored_path", ""))
+    filename = str(primary_attachment.get("filename", "")) or manifest_path.name
+    seller = redact_email_addresses(str(manifest.get("sender", "")))
+    subject = str(manifest.get("subject", "")) or "Nákup / faktura"
+    title = f"Nákup / záruka: {subject}"
+    date_text = str(manifest.get("date", ""))
+    snippet_parts = [
+        f"Uložený nákup v private archivu: {manifest_path.parent.name}.",
+        f"Datum e-mailu: {date_text}." if date_text else "",
+        f"Prodejce: {seller}." if seller else "",
+        f"Příloha: {filename}." if filename else "",
+    ]
+    snippet = " ".join(part for part in snippet_parts if part)
+    return {
+        "score": score,
+        "source_type": "purchase",
+        "source_label": "Nákup / záruka",
+        "document_ref": purchase_reference(purchase_id),
+        "document_id": safe_text(purchase_id),
+        "title": safe_text(title),
+        "original_filename": safe_text(filename),
+        "domain": "purchases",
+        "document_type": "purchase_invoice",
+        "counterparty": safe_text(seller),
+        "related_asset": safe_text(manifest_path.parent.name),
+        "stored_path": safe_text(stored_path or str(relative_to_project(manifest_path))),
+        "lifecycle_status": "active",
+        "reading_status": "metadata_only",
+        "reading_status_label": "metadata",
+        "snippet": sanitize_output(snippet),
     }
 
 
@@ -15148,6 +15250,8 @@ COCKPIT_HTML = """<!doctype html>
       }
       results.forEach((item) => {
         const documentRef = item.document_ref || item.document_id;
+        const sourceType = item.source_type || "document";
+        const isPurchase = sourceType === "purchase";
         const card = document.createElement("div");
         card.className = "search-result";
         const head = document.createElement("div");
@@ -15158,7 +15262,8 @@ COCKPIT_HTML = """<!doctype html>
         title.textContent = item.title || item.original_filename || item.document_id || "Dokument bez názvu";
         const meta = document.createElement("div");
         meta.className = "search-meta";
-        meta.textContent = `Čtení: ${item.reading_status_label || "k revizi"} | ${item.domain || "other"} / ${item.document_type || "document"} | ${item.counterparty || "protistrana nezjištěna"} | ${item.related_asset || "věc nezjištěna"}`;
+        const sourceLabel = item.source_label || (isPurchase ? "Nákup / záruka" : "Dokument");
+        meta.textContent = `${sourceLabel} | ${item.domain || "other"} / ${item.document_type || "document"} | ${item.counterparty || "protistrana nezjištěna"} | ${item.related_asset || "věc nezjištěna"}`;
         const toggle = document.createElement("button");
         toggle.className = "secondary";
         toggle.type = "button";
@@ -15166,7 +15271,8 @@ COCKPIT_HTML = """<!doctype html>
         const headOpenBtn = document.createElement("button");
         headOpenBtn.className = "primary";
         headOpenBtn.type = "button";
-        headOpenBtn.textContent = "Otevřít / číst";
+        headOpenBtn.textContent = isPurchase ? "Soukromá cesta" : "Otevřít / číst";
+        headOpenBtn.disabled = isPurchase;
         const headActions = document.createElement("div");
         headActions.className = "search-result-head-actions";
         headActions.appendChild(headOpenBtn);
@@ -15184,7 +15290,7 @@ COCKPIT_HTML = """<!doctype html>
         lifecycle.textContent = `Stav: ${item.lifecycle_status || "active"}`;
         const readingStatus = document.createElement("div");
         readingStatus.className = "search-meta";
-        readingStatus.textContent = `Stav čtení: ${item.reading_status_label || "k revizi"}`;
+        readingStatus.textContent = isPurchase ? "Stav: nákupní evidence" : `Stav čtení: ${item.reading_status_label || "k revizi"}`;
         const statusRow = document.createElement("div");
         statusRow.className = "status-select-row";
         const statusLabel = document.createElement("label");
@@ -15197,9 +15303,11 @@ COCKPIT_HTML = """<!doctype html>
           option.selected = value === (item.reading_status || "needs_review");
           statusSelect.appendChild(option);
         });
-        statusSelect.addEventListener("change", () => setDocumentReadingStatus(documentRef, statusSelect.value));
-        statusRow.appendChild(statusLabel);
-        statusRow.appendChild(statusSelect);
+        if (!isPurchase) {
+          statusSelect.addEventListener("change", () => setDocumentReadingStatus(documentRef, statusSelect.value));
+          statusRow.appendChild(statusLabel);
+          statusRow.appendChild(statusSelect);
+        }
         const snippet = document.createElement("div");
         snippet.className = "search-snippet";
         snippet.textContent = item.snippet || "";
@@ -15208,7 +15316,8 @@ COCKPIT_HTML = """<!doctype html>
         const openBtn = document.createElement("button");
         openBtn.className = "primary";
         openBtn.type = "button";
-        openBtn.textContent = "Otevřít / číst PDF";
+        openBtn.textContent = isPurchase ? "Uloženo v private archivu" : "Otevřít / číst PDF";
+        openBtn.disabled = isPurchase;
         const printBtn = document.createElement("button");
         printBtn.className = "secondary";
         printBtn.type = "button";
@@ -15221,15 +15330,17 @@ COCKPIT_HTML = """<!doctype html>
         trashBtn.className = "danger-soft";
         trashBtn.type = "button";
         trashBtn.textContent = "Do koše";
-        headOpenBtn.addEventListener("click", () => openDocumentForReading(documentRef, headOpenBtn));
-        openBtn.addEventListener("click", () => openDocumentForReading(documentRef, openBtn));
-        printBtn.addEventListener("click", () => printDocument(documentRef));
-        archiveBtn.addEventListener("click", () => moveDocumentLifecycle(documentRef, "archive"));
-        trashBtn.addEventListener("click", () => moveDocumentLifecycle(documentRef, "trash"));
-        actions.appendChild(openBtn);
-        actions.appendChild(printBtn);
-        actions.appendChild(archiveBtn);
-        actions.appendChild(trashBtn);
+        if (!isPurchase) {
+          headOpenBtn.addEventListener("click", () => openDocumentForReading(documentRef, headOpenBtn));
+          openBtn.addEventListener("click", () => openDocumentForReading(documentRef, openBtn));
+          printBtn.addEventListener("click", () => printDocument(documentRef));
+          archiveBtn.addEventListener("click", () => moveDocumentLifecycle(documentRef, "archive"));
+          trashBtn.addEventListener("click", () => moveDocumentLifecycle(documentRef, "trash"));
+          actions.appendChild(openBtn);
+          actions.appendChild(printBtn);
+          actions.appendChild(archiveBtn);
+          actions.appendChild(trashBtn);
+        }
         summary.appendChild(title);
         summary.appendChild(meta);
         head.appendChild(summary);
@@ -15238,7 +15349,9 @@ COCKPIT_HTML = """<!doctype html>
         detail.appendChild(path);
         detail.appendChild(lifecycle);
         detail.appendChild(readingStatus);
-        detail.appendChild(statusRow);
+        if (!isPurchase) {
+          detail.appendChild(statusRow);
+        }
         detail.appendChild(snippet);
         detail.appendChild(actions);
         toggle.addEventListener("click", () => {

@@ -4110,6 +4110,67 @@ Dalsi krok:
             self.assertEqual(result["results"][0]["reading_status"], "needs_review")
             self.assertEqual(result["results"][0]["reading_status_label"], "k revizi")
 
+    def test_document_search_includes_private_purchase_manifests(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            (vault / "index").mkdir(parents=True)
+            purchases = root / "purchases" / "2026" / "2026-05-23_dolphin-e20"
+            purchases.mkdir(parents=True)
+            manifest = {
+                "uid": "14095",
+                "date": "Mon, 25 May 2026 14:59:16 +0200",
+                "sender": "ROBOT WORLD <info@robotworld.example>",
+                "subject": "Faktura a expedice zboží",
+                "attachments": [
+                    {
+                        "filename": "inv_7026008712.pdf",
+                        "content_type": "application/pdf",
+                        "stored_path": "data/private/purchases/2026/2026-05-23_dolphin-e20/documents/inv.pdf",
+                    }
+                ],
+            }
+            (purchases / "invoice_manifest.json").write_text(
+                json.dumps(manifest, ensure_ascii=False),
+                encoding="utf-8",
+            )
+
+            result = search_document_index("dolphin", vault_dir=vault, purchases_dir=root / "purchases")
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["count"], 1)
+            found = result["results"][0]
+            self.assertEqual(found["source_type"], "purchase")
+            self.assertEqual(found["source_label"], "Nákup / záruka")
+            self.assertEqual(found["domain"], "purchases")
+            self.assertEqual(found["document_type"], "purchase_invoice")
+            self.assertIn("2026-05-23_dolphin-e20", found["related_asset"])
+            self.assertIn("[e-mail redigovan]", found["counterparty"])
+            self.assertNotIn("robotworld.example", found["counterparty"])
+
+    def test_document_search_purchase_alias_finds_pool_robot(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            (vault / "index").mkdir(parents=True)
+            purchases = root / "purchases" / "2026" / "2026-05-23_dolphin-e20"
+            purchases.mkdir(parents=True)
+            (purchases / "invoice_manifest.json").write_text(
+                json.dumps(
+                    {
+                        "subject": "Faktura a expedice zboží",
+                        "attachments": [{"filename": "invoice.pdf"}],
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            result = search_document_index("bazénový robot", vault_dir=vault, purchases_dir=root / "purchases")
+
+            self.assertEqual(result["count"], 1)
+            self.assertEqual(result["results"][0]["source_type"], "purchase")
+
     def test_cockpit_html_contains_document_search_controls(self) -> None:
         self.assertIn("Najít dokument", COCKPIT_HTML)
         self.assertIn("documentSearchInput", COCKPIT_HTML)
@@ -4130,6 +4191,8 @@ Dalsi krok:
         self.assertIn("Stav čtení", COCKPIT_HTML)
         self.assertIn("/api/documents/reading-status", COCKPIT_HTML)
         self.assertIn("nahrazeno lepší kopií", COCKPIT_HTML)
+        self.assertIn("Nákup / záruka", COCKPIT_HTML)
+        self.assertIn("source_type", COCKPIT_HTML)
 
     def test_cockpit_html_contains_web_apps_modal(self) -> None:
         self.assertIn("Webové aplikace", COCKPIT_HTML)
