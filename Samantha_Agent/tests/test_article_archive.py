@@ -6,28 +6,48 @@ import subprocess
 import tempfile
 import urllib.error
 import unittest
+from email import message_from_bytes
 from io import BytesIO
 from pathlib import Path
 from unittest.mock import patch
 
 from app.article_archive import (
     ATTACHMENT_CONFIRMATION_PHRASE,
+    CLEANUP_CONFIRMATION_PHRASE,
     DELETE_CONFIRMATION_PHRASE,
+    LIBRARY_EXPORT_EMAIL_MARKER,
+    LIBRARY_EXPORT_EMAIL_MARKER_VALUE,
+    LIBRARY_EXPORT_SUBJECT_PREFIX,
     archive_text_entry,
     archive_url,
+    article_text_cleanup_report,
     attach_article_image,
+    cleanup_article_text,
     delete_article,
     fetch_url,
     get_article,
     get_article_attachment,
+    library_export_confirmation_text,
     list_articles,
+    prepare_article_pdf_export,
     search_articles,
+    send_article_pdf_export,
+    trim_to_article_body,
 )
+from app.email.config import OutgoingMailConfig
+from app.email.outbound import SentCopyResult
 
 try:
     from PIL import Image
 except ModuleNotFoundError:  # pragma: no cover - depends on local environment setup
     Image = None
+
+try:
+    import reportlab  # noqa: F401
+except ModuleNotFoundError:  # pragma: no cover - depends on local environment setup
+    HAS_REPORTLAB = False
+else:
+    HAS_REPORTLAB = True
 
 
 class ArticleArchiveTests(unittest.TestCase):
@@ -138,6 +158,161 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertEqual(result["item"]["category_label"], "Samantha / AI nástroje")
         self.assertEqual(listed["count"], 1)
         self.assertEqual(searched["count"], 1)
+
+    def test_trim_to_article_body_removes_recommendations_and_tail_without_losing_article(self) -> None:
+        raw_text = "\n".join(
+            [
+                "Průlom, který oživuje baterie elektromobilů.",
+                "Jeden",
+                "Báo An Giang•13/06/2026",
+                "Sledujte Vietnam.vn na",
+                "Google",
+                "News",
+                "0",
+                "Životní cyklus baterií elektromobilů obvykle zahrnuje uzavřený a náročný proces.",
+                "Podle webu Interesting Engineering vyvinuli vědci z Cornell University novou metodu.",
+                "Profesor Vibha Kalra uvedl, že baterii opraví bez drcení.",
+                "Mohlo by vás zajímat",
+                "Důležitá kritéria při výběru elektrické motorky pro studenty.",
+                "Třicetiletá studie odhaluje zlatý čas pro silový trénink.",
+                "Quang Ninh otevřela továrnu na lithium-iontové baterie.",
+                "Slibné řešení pro recyklaci baterií elektromobilů.",
+                "Metoda DEER umožňuje inženýrům vyjmout elektrody bez poškození.",
+                "Tento nový průlom je pozoruhodný vzhledem k rostoucí poptávce po bateriích.",
+                "Metoda DEER snižuje náklady a může probíhat lokálně.",
+                "Mohlo by vás zajímat",
+                "Hovězí rýže s charakteristickým jménem Chau Phong.",
+                "Superkondenzátory a technologie nabíjení autobusů.",
+                "Hanoj zužuje okruh osob s nárokem na podporu.",
+                "Podle Thanhnien.vn",
+                "Zdroj: https://example.test/article",
+                "Sledujte Vietnam.vn na",
+                "Google",
+                "News",
+                "0",
+                "Štítek:Cornellova univerzitaNoviny An Giang",
+                "Komentář (0)",
+                "Previous",
+                "Trendy podle kategorie",
+                "Nesouvisející nabídka za článkem.",
+            ]
+        )
+
+        cleaned = trim_to_article_body(raw_text, "Průlom, který oživuje baterie elektromobilů.")
+
+        self.assertIn("Životní cyklus baterií elektromobilů", cleaned)
+        self.assertIn("Metoda DEER umožňuje", cleaned)
+        self.assertIn("Metoda DEER snižuje náklady", cleaned)
+        self.assertIn("Zdroj: https://example.test/article", cleaned)
+        self.assertNotIn("\nJeden\n", f"\n{cleaned}\n")
+        self.assertNotIn("Důležitá kritéria při výběru", cleaned)
+        self.assertNotIn("Hovězí rýže", cleaned)
+        self.assertNotIn("Sledujte Vietnam.vn", cleaned)
+        self.assertNotIn("Štítek:", cleaned)
+        self.assertNotIn("Komentář", cleaned)
+        self.assertNotIn("Nesouvisející nabídka", cleaned)
+
+    def test_trim_to_article_body_keeps_legitimate_commentary_sentence(self) -> None:
+        raw_text = "\n".join(
+            [
+                "Nadpis vědeckého článku",
+                "Úvodní odstavec s delším vědeckým obsahem, který vypadá jako skutečný text článku.",
+                "Další odstavec s vysvětlením experimentu a výsledků.",
+                "Komentář na webu časopisu Nature dal slovo kritikům výzkumu.",
+                "Závěrečný odstavec článku, který musí zůstat zachovaný.",
+                "Komentář (0)",
+                "Previous",
+                "Nesouvisející navigace webu.",
+            ]
+        )
+
+        cleaned = trim_to_article_body(raw_text, "Nadpis vědeckého článku")
+
+        self.assertIn("Komentář na webu časopisu Nature", cleaned)
+        self.assertIn("Závěrečný odstavec článku", cleaned)
+        self.assertNotIn("Komentář (0)", cleaned)
+        self.assertNotIn("Nesouvisející navigace", cleaned)
+
+    def test_cleanup_article_text_rewrites_noisy_saved_article_with_backup(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            article_dir = archive_root / "articles" / "science-noisy"
+            article_dir.mkdir(parents=True)
+            clean_html = """<!doctype html>
+<html><head><title>Čistý vědecký článek</title><link rel="canonical" href="https://example.test/science"></head>
+<body>
+<main>
+<h1>Čistý vědecký článek</h1>
+<p>První skutečný odstavec vědeckého článku s dostatečně dlouhým obsahem.</p>
+<p>Druhý skutečný odstavec popisuje experiment a jeho hlavní výsledky.</p>
+<p>Mohlo by vás zajímat</p>
+<p>Nesouvisející doporučení jedna.</p>
+<p>Nesouvisející doporučení dvě.</p>
+<p>Nesouvisející doporučení tři.</p>
+<p>Třetí skutečný odstavec musí po čištění zůstat zachovaný.</p>
+<p>Zdroj: https://example.test/source</p>
+<p>Komentář (0)</p>
+<p>Trendy podle kategorie</p>
+<p>Balast za článkem.</p>
+</main>
+</body></html>"""
+            noisy_text = "\n".join(
+                [
+                    "Čistý vědecký článek",
+                    "První skutečný odstavec vědeckého článku s dostatečně dlouhým obsahem.",
+                    "Druhý skutečný odstavec popisuje experiment a jeho hlavní výsledky.",
+                    "Mohlo by vás zajímat",
+                    "Nesouvisející doporučení jedna.",
+                    "Nesouvisející doporučení dvě.",
+                    "Nesouvisející doporučení tři.",
+                    "Třetí skutečný odstavec musí po čištění zůstat zachovaný.",
+                    "Zdroj: https://example.test/source",
+                    "Komentář (0)",
+                    "Trendy podle kategorie",
+                    "Balast za článkem.",
+                    "Další balast navíc " * 80,
+                ]
+            )
+            (article_dir / "source.html").write_text(clean_html, encoding="utf-8")
+            (article_dir / "article.txt").write_text(noisy_text + "\n", encoding="utf-8")
+            metadata = {
+                "id": "science-noisy",
+                "title": "Čistý vědecký článek",
+                "one_line_title": "Čistý vědecký článek",
+                "category": "science",
+                "archived_at": "2026-06-22T10:00:00+00:00",
+                "source_url": "https://example.test/science",
+                "canonical_url": "https://example.test/science",
+                "text_file": "articles/science-noisy/article.txt",
+                "html_file": "articles/science-noisy/source.html",
+                "text_chars": str(len(noisy_text)),
+                "tags": [],
+                "attachments": [],
+            }
+            (article_dir / "metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            (archive_root / "registry.jsonl").write_text(json.dumps(metadata, ensure_ascii=False) + "\n", encoding="utf-8")
+
+            report = article_text_cleanup_report(category="science", archive_root=archive_root)
+            cleaned = cleanup_article_text(
+                article_id="science-noisy",
+                archive_root=archive_root,
+                user_confirmed=True,
+                confirmation_text=CLEANUP_CONFIRMATION_PHRASE,
+            )
+            article_text = (article_dir / "article.txt").read_text(encoding="utf-8")
+            updated_metadata = json.loads((article_dir / "metadata.json").read_text(encoding="utf-8"))
+            registry = json.loads((archive_root / "registry.jsonl").read_text(encoding="utf-8").splitlines()[0])
+            backups = list(article_dir.glob("article_before_cleanup_*.txt"))
+
+        self.assertEqual(report["candidate_count"], 1)
+        self.assertTrue(cleaned["changed"])
+        self.assertEqual(len(backups), 1)
+        self.assertIn("Třetí skutečný odstavec", article_text)
+        self.assertNotIn("Nesouvisející doporučení", article_text)
+        self.assertNotIn("Balast za článkem", article_text)
+        self.assertEqual(updated_metadata["text_chars"], registry["text_chars"])
+        self.assertEqual(updated_metadata["last_cleanup"]["old_text_chars"], len(noisy_text.strip()))
+        self.assertGreater(updated_metadata["last_cleanup"]["removed_chars"], 1000)
 
     def test_delete_article_requires_confirmation_and_moves_item_to_trash(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -280,6 +455,92 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertTrue(thumb["ok"])
         self.assertEqual(thumb["path"].suffix, ".jpg")
 
+    @unittest.skipIf(not HAS_REPORTLAB, "ReportLab is not installed")
+    def test_prepare_article_pdf_export_writes_pdf_email_and_marker(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            result = archive_text_entry(
+                title="Samanthin perník",
+                text="Suroviny:\nMouka, kakao a med.\n\nPostup:\nPeč pomalu.",
+                category="recipes",
+                tags=["recept"],
+                archive_root=archive_root,
+            )
+            article_id = result["item"]["id"]
+
+            prepared = prepare_article_pdf_export(
+                article_id=article_id,
+                archive_root=archive_root,
+                smtp_config_loader=_smtp_config,
+            )
+            export = prepared["export"]
+            pdf_path = Path(export["pdf_path"])
+            message_path = Path(export["message_path"])
+            metadata_path = Path(export["metadata_path"])
+            pdf_exists = pdf_path.exists()
+            pdf_size = pdf_path.stat().st_size if pdf_exists else 0
+            message_exists = message_path.exists()
+            message = message_from_bytes(message_path.read_bytes())
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+
+        self.assertTrue(prepared["ok"])
+        self.assertTrue(pdf_exists)
+        self.assertGreater(pdf_size, 1000)
+        self.assertTrue(message_exists)
+        self.assertEqual(message["To"], "sender@example.com")
+        self.assertTrue(str(message["Subject"]).startswith(LIBRARY_EXPORT_SUBJECT_PREFIX))
+        self.assertEqual(message[LIBRARY_EXPORT_EMAIL_MARKER], LIBRARY_EXPORT_EMAIL_MARKER_VALUE)
+        self.assertEqual(metadata["status"], "draft")
+        self.assertTrue(metadata["library_export_marker"])
+        self.assertIn(export["export_id"], export["confirmation_text"])
+
+    @unittest.skipIf(not HAS_REPORTLAB, "ReportLab is not installed")
+    def test_send_article_pdf_export_requires_confirmation_then_uses_smtp(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            result = archive_text_entry(
+                title="Knihovní poznámka",
+                text="Krátký text pro export.",
+                category="other",
+                archive_root=archive_root,
+            )
+            prepared = prepare_article_pdf_export(
+                article_id=result["item"]["id"],
+                archive_root=archive_root,
+                smtp_config_loader=_smtp_config,
+            )
+            export_id = prepared["export"]["export_id"]
+            smtp = _FakeSMTP()
+
+            with self.assertRaises(ValueError):
+                send_article_pdf_export(
+                    export_id=export_id,
+                    archive_root=archive_root,
+                    user_confirmed=False,
+                    confirmation_text="",
+                    smtp_config_loader=_smtp_config,
+                    smtp_factory=lambda *args, **kwargs: smtp,
+                    sent_copy_saver=_sent_copy_saved,
+                )
+
+            sent = send_article_pdf_export(
+                export_id=export_id,
+                archive_root=archive_root,
+                user_confirmed=True,
+                confirmation_text=library_export_confirmation_text(export_id),
+                smtp_config_loader=_smtp_config,
+                smtp_factory=lambda *args, **kwargs: smtp,
+                sent_copy_saver=_sent_copy_saved,
+            )
+            metadata_path = Path(prepared["export"]["metadata_path"])
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(len(smtp.sent_messages), 1)
+        self.assertTrue(sent["ok"])
+        self.assertEqual(metadata["status"], "sent")
+        self.assertEqual(metadata["delivery_status"], "smtp_sent")
+        self.assertEqual(metadata["sent_copy_status"], "saved")
+
     def test_fetch_url_falls_back_to_curl_for_certificate_chain_failure(self) -> None:
         cert_error = ssl.SSLCertVerificationError("certificate verify failed")
         curl_result = subprocess.CompletedProcess(
@@ -306,6 +567,51 @@ class ArticleArchiveTests(unittest.TestCase):
                     fetch_url("https://example.test/clanek", timeout=5)
 
         run.assert_not_called()
+
+
+class _FakeSMTP:
+    def __init__(self) -> None:
+        self.sent_messages: list[object] = []
+        self.logged_in = False
+
+    def __enter__(self) -> "_FakeSMTP":
+        return self
+
+    def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:
+        return None
+
+    def starttls(self) -> None:
+        return None
+
+    def login(self, address: str, password: str) -> None:
+        self.logged_in = (address, password) == ("sender@example.com", "secret")
+
+    def send_message(self, message: object) -> None:
+        self.sent_messages.append(message)
+
+
+def _smtp_config(provider: str) -> OutgoingMailConfig:
+    return OutgoingMailConfig(
+        address="sender@example.com",
+        password="secret",
+        host="smtp.example.com",
+        port=587,
+        security="starttls",
+        provider=provider,
+    )
+
+
+def _sent_copy_saved(
+    message_bytes: bytes,
+    smtp_config: OutgoingMailConfig,
+    sent_timestamp: object,
+) -> SentCopyResult:
+    return SentCopyResult(
+        status="saved",
+        provider="icloud",
+        folder="Sent Messages",
+        detail="test saver",
+    )
 
 
 if __name__ == "__main__":

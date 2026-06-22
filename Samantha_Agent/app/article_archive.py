@@ -11,15 +11,20 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from email import message_from_bytes
+from email.message import EmailMessage
+from email.utils import formatdate
 from io import BytesIO
 from html.parser import HTMLParser
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 from urllib.parse import urlparse, urlunparse
+from xml.sax.saxutils import escape
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ARCHIVE_ROOT = PROJECT_ROOT / "data" / "private" / "article_archive"
+DEFAULT_LIBRARY_EXPORT_DIR = DEFAULT_ARCHIVE_ROOT / "exports"
 
 CATEGORY_LABELS = {
     "recipes": "Recepty",
@@ -31,6 +36,11 @@ CATEGORY_LABELS = {
 SUPPORTED_ATTACHMENT_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"}
 ATTACHMENT_CONFIRMATION_PHRASE = "Potvrzuji připojení obrázku"
 DELETE_CONFIRMATION_PHRASE = "Potvrzuji vyřazení z knihovny"
+CLEANUP_CONFIRMATION_PHRASE = "Potvrzuji vyčištění článků knihovny"
+LIBRARY_EXPORT_EMAIL_MARKER = "X-Samantha-Library-Export"
+LIBRARY_EXPORT_EMAIL_MARKER_VALUE = "true"
+LIBRARY_EXPORT_SUBJECT_PREFIX = "[SamanthaLibraryExport]"
+LIBRARY_EXPORT_SEND_CONFIRMATION_PREFIX = "Potvrzuji odeslání exportu knihovny"
 
 
 @dataclass(frozen=True)
@@ -116,6 +126,59 @@ class ExtractedArticle:
     title: str
     text: str
     canonical_url: str
+
+
+@dataclass(frozen=True)
+class ArticlePdfExportResult:
+    export_id: str
+    article_id: str
+    title: str
+    category: str
+    pdf_path: Path
+    message_path: Path
+    metadata_path: Path
+    recipient: str
+    subject: str
+    size_bytes: int
+
+    def to_summary(self) -> dict[str, Any]:
+        return {
+            "export_id": self.export_id,
+            "article_id": self.article_id,
+            "title": self.title,
+            "category": self.category,
+            "pdf_path": str(self.pdf_path),
+            "message_path": str(self.message_path),
+            "metadata_path": str(self.metadata_path),
+            "recipient": self.recipient,
+            "subject": self.subject,
+            "size_bytes": self.size_bytes,
+            "confirmation_text": library_export_confirmation_text(self.export_id),
+        }
+
+
+@dataclass(frozen=True)
+class ArticlePdfExportSendResult:
+    export_id: str
+    recipient: str
+    subject: str
+    sent_at: str
+    sent_copy_status: str
+    sent_copy_provider: str
+    sent_copy_folder: str
+    sent_copy_detail: str = ""
+
+    def to_summary(self) -> dict[str, Any]:
+        return {
+            "export_id": self.export_id,
+            "recipient": self.recipient,
+            "subject": self.subject,
+            "sent_at": self.sent_at,
+            "sent_copy_status": self.sent_copy_status,
+            "sent_copy_provider": self.sent_copy_provider,
+            "sent_copy_folder": self.sent_copy_folder,
+            "sent_copy_detail": self.sent_copy_detail,
+        }
 
 
 class ReadableTextParser(HTMLParser):
@@ -588,28 +651,8 @@ def trim_to_article_body(text: str, title: str) -> str:
     if not lines:
         return ""
     start = detect_article_start(lines, title)
-    stop_markers = (
-        "Související produkty",
-        "Diskuze",
-        "Přidat komentář",
-        "Newsletter",
-        "Naposledy navštívené",
-        "Hlídací pes",
-        "Podobné produkty",
-        "Mohlo by se vám hodit",
-        "Související články",
-        "Předchozí článek",
-        "Zápatí",
-        "Sector 31",
-        "Vytvořil Shoptet",
-        "Copyright",
-    )
-    end = len(lines)
-    for index in range(start + 1, len(lines)):
-        if any(marker.casefold() in lines[index].casefold() for marker in stop_markers):
-            end = index
-            break
-    body_lines = clean_article_lines(lines[start:end])
+    body_lines = clean_article_lines(lines[start:])
+    body_lines = remove_article_boilerplate(body_lines)
     return "\n".join(body_lines).strip()
 
 
@@ -619,6 +662,119 @@ def clean_article_lines(lines: list[str]) -> list[str]:
     while cleaned and cleaned[0].strip().casefold() in ignored_lines:
         cleaned.pop(0)
     return cleaned
+
+
+HARD_TAIL_MARKERS = (
+    "Související produkty",
+    "Diskuze",
+    "Přidat komentář",
+    "Komentář (",
+    "Komentáře",
+    "Newsletter",
+    "Naposledy navštívené",
+    "Hlídací pes",
+    "Podobné produkty",
+    "Související články",
+    "Předchozí článek",
+    "Previous",
+    "Trendy podle kategorie",
+    "Nejčtenější",
+    "Google Trends",
+    "Aktuální události",
+    "Politický systém",
+    "Místní",
+    "Zobrazit více",
+    "Domovská stránka",
+    "Centrum nápovědy",
+    "Odeslat zpětnou vazbu",
+    "Zápatí",
+    "Sector 31",
+    "Vytvořil Shoptet",
+    "Copyright",
+)
+
+INLINE_RECOMMENDATION_MARKERS = (
+    "Mohlo by vás zajímat",
+    "Mohlo by vas zajimat",
+    "Mohlo by se vám hodit",
+    "Mohlo by se vam hodit",
+)
+
+
+def remove_article_boilerplate(lines: list[str]) -> list[str]:
+    without_inline_recommendations = remove_inline_recommendation_blocks(lines)
+    without_share_blocks = remove_social_share_blocks(without_inline_recommendations)
+    without_metadata_noise = remove_translated_metadata_noise(without_share_blocks)
+    without_labels = [
+        line
+        for line in without_metadata_noise
+        if not line.strip().casefold().startswith(("štítek:", "stitek:"))
+    ]
+    tail_start = detect_article_tail_start(without_labels)
+    return without_labels[:tail_start]
+
+
+def remove_inline_recommendation_blocks(lines: list[str]) -> list[str]:
+    cleaned: list[str] = []
+    skip_recommendation_lines = 0
+    for line in lines:
+        folded = line.strip().casefold()
+        if any(marker.casefold() in folded for marker in INLINE_RECOMMENDATION_MARKERS):
+            skip_recommendation_lines = 3
+            continue
+        if skip_recommendation_lines > 0:
+            skip_recommendation_lines -= 1
+            continue
+        cleaned.append(line)
+    return cleaned
+
+
+def remove_social_share_blocks(lines: list[str]) -> list[str]:
+    cleaned: list[str] = []
+    index = 0
+    while index < len(lines):
+        line = lines[index].strip()
+        folded = line.casefold()
+        if folded.startswith("sledujte ") and " na" in folded:
+            index += 1
+            while index < len(lines) and lines[index].strip().casefold() in {"google", "news", "0"}:
+                index += 1
+            continue
+        cleaned.append(lines[index])
+        index += 1
+    return cleaned
+
+
+def remove_translated_metadata_noise(lines: list[str]) -> list[str]:
+    if len(lines) >= 3 and lines[1].strip().casefold() in {"jeden", "one"} and looks_like_byline(lines[2]):
+        return [lines[0], *lines[2:]]
+    return lines
+
+
+def looks_like_byline(line: str) -> bool:
+    folded = line.strip().casefold()
+    return "•" in folded or bool(re.search(r"\b\d{1,2}[./-]\d{1,2}[./-]\d{2,4}\b", folded))
+
+
+def detect_article_tail_start(lines: list[str]) -> int:
+    source_seen = False
+    content_like_lines = 0
+    for index, line in enumerate(lines):
+        clean = line.strip()
+        folded = clean.casefold()
+        if not clean:
+            continue
+        if folded.startswith(("zdroj:", "podle ")):
+            source_seen = True
+        if len(clean) > 90:
+            content_like_lines += 1
+        if source_seen and folded.startswith("sledujte "):
+            return index
+        if index >= 5 and any(marker.casefold() == folded or folded.startswith(marker.casefold()) for marker in HARD_TAIL_MARKERS):
+            return index
+        if content_like_lines >= 3 and folded in {"next", "další", "dalsi"}:
+            return index
+    return len(lines)
 
 
 def detect_article_start(lines: list[str], title: str) -> int:
@@ -1012,6 +1168,422 @@ def get_article(
     }
 
 
+def prepare_article_pdf_export(
+    *,
+    article_id: str,
+    recipient_email: str = "",
+    archive_root: Path = DEFAULT_ARCHIVE_ROOT,
+    export_root: Path | None = None,
+    smtp_config_loader: Callable[[str], Any] | None = None,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    from app.email.config import load_smtp_config
+    from app.email.outbound import validate_email_address
+
+    item = find_article(article_id, archive_root=archive_root)
+    if item is None:
+        raise ValueError("Článek nebyl nalezen.")
+    smtp_config = (smtp_config_loader or load_smtp_config)("icloud")
+    recipient = validate_email_address(recipient_email or smtp_config.address)
+    prepared_at = (now or datetime.now(timezone.utc)).replace(microsecond=0)
+    root = resolve_export_root(archive_root=archive_root, export_root=export_root)
+    export_id = build_library_export_id(item, prepared_at)
+    target_dir = next_export_path(root / export_id)
+    if target_dir.name != export_id:
+        export_id = target_dir.name
+    target_dir.mkdir(parents=True, exist_ok=False)
+
+    text = read_article_text(item.id, archive_root=archive_root, max_chars=0)
+    pdf_path = target_dir / "article_export.pdf"
+    message_path = target_dir / "library_export.eml"
+    metadata_path = target_dir / "metadata.json"
+    title_prefix = article_pdf_kind(item)
+    pdf_title = f"{title_prefix}: {item.one_line_title}" if title_prefix else item.one_line_title
+    build_article_pdf(
+        item=item,
+        text=text,
+        pdf_path=pdf_path,
+        title=pdf_title,
+        prepared_at=prepared_at,
+    )
+
+    subject = f"{LIBRARY_EXPORT_SUBJECT_PREFIX} {item.one_line_title}"
+    message = build_library_export_message(
+        item=item,
+        smtp_address=smtp_config.address,
+        recipient=recipient,
+        subject=subject,
+        pdf_path=pdf_path,
+        prepared_at=prepared_at,
+    )
+    message_path.write_bytes(message.as_bytes())
+    metadata = {
+        "export_id": export_id,
+        "status": "draft",
+        "provider": smtp_config.provider,
+        "article_id": item.id,
+        "title": item.one_line_title,
+        "category": item.category,
+        "recipient": recipient,
+        "subject": subject,
+        "prepared_at": prepared_at.isoformat(),
+        "pdf_path": str(pdf_path),
+        "message_path": str(message_path),
+        "library_export_marker": True,
+        "email_marker_header": LIBRARY_EXPORT_EMAIL_MARKER,
+        "email_marker_value": LIBRARY_EXPORT_EMAIL_MARKER_VALUE,
+        "do_not_commit": True,
+        "local_sensitive_export": True,
+    }
+    metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    result = ArticlePdfExportResult(
+        export_id=export_id,
+        article_id=item.id,
+        title=item.one_line_title,
+        category=item.category,
+        pdf_path=pdf_path,
+        message_path=message_path,
+        metadata_path=metadata_path,
+        recipient=recipient,
+        subject=subject,
+        size_bytes=pdf_path.stat().st_size,
+    )
+    return {
+        "ok": True,
+        "message": "PDF export je připravený lokálně. E-mail zatím nebyl odeslán.",
+        "export": result.to_summary(),
+    }
+
+
+def send_article_pdf_export(
+    *,
+    export_id: str,
+    archive_root: Path = DEFAULT_ARCHIVE_ROOT,
+    export_root: Path | None = None,
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+    smtp_config_loader: Callable[[str], Any] | None = None,
+    smtp_factory: Callable[..., Any] | None = None,
+    sent_copy_saver: Callable[[bytes, Any, datetime], Any] | None = None,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    from app.email.config import load_smtp_config
+    from app.email.outbound import save_sent_copy_best_effort, send_message_via_smtp
+
+    if not has_explicit_library_export_send_confirmation(export_id, confirmation_text, user_confirmed=user_confirmed):
+        raise ValueError(f"Odeslání vyžaduje přesnou potvrzovací větu: {library_export_confirmation_text(export_id)}")
+    export_dir = resolve_library_export_dir(
+        export_id=export_id,
+        archive_root=archive_root,
+        export_root=export_root,
+    )
+    metadata_path = export_dir / "metadata.json"
+    message_path = export_dir / "library_export.eml"
+    if not metadata_path.exists() or not message_path.exists():
+        raise ValueError("Export nebyl nalezen nebo je neúplný.")
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    if str(metadata.get("status", "")).strip() == "sent":
+        raise ValueError("Tento export už byl odeslán.")
+    if metadata.get("library_export_marker") is not True:
+        raise ValueError("Export nemá bezpečnostní marker Knihovny.")
+
+    provider = str(metadata.get("provider", "icloud") or "icloud")
+    smtp_config = (smtp_config_loader or load_smtp_config)(provider)
+    message_bytes = message_path.read_bytes()
+    parsed = message_from_bytes(message_bytes)
+    if str(parsed.get(LIBRARY_EXPORT_EMAIL_MARKER, "")).strip().casefold() != LIBRARY_EXPORT_EMAIL_MARKER_VALUE:
+        raise ValueError("E-mail exportu nemá marker pro potlačení dalšího ukládání.")
+    sent_at = (now or datetime.now(timezone.utc)).replace(microsecond=0)
+    send_message_via_smtp(parsed, smtp_config=smtp_config, smtp_factory=smtp_factory)
+    saver = sent_copy_saver or save_sent_copy_best_effort
+    sent_copy = saver(message_bytes, smtp_config, sent_at)
+    metadata.update(
+        {
+            "status": "sent",
+            "delivery_status": "smtp_sent",
+            "sent_at": sent_at.isoformat(),
+            "sent_copy_status": getattr(sent_copy, "status", "unknown"),
+            "sent_copy_provider": getattr(sent_copy, "provider", ""),
+            "sent_copy_folder": getattr(sent_copy, "folder", ""),
+            "sent_copy_detail": getattr(sent_copy, "detail", ""),
+        }
+    )
+    metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    result = ArticlePdfExportSendResult(
+        export_id=str(metadata.get("export_id", export_id)),
+        recipient=str(metadata.get("recipient", "")),
+        subject=str(metadata.get("subject", "")),
+        sent_at=sent_at.isoformat(),
+        sent_copy_status=str(metadata.get("sent_copy_status", "")),
+        sent_copy_provider=str(metadata.get("sent_copy_provider", "")),
+        sent_copy_folder=str(metadata.get("sent_copy_folder", "")),
+        sent_copy_detail=str(metadata.get("sent_copy_detail", "")),
+    )
+    return {
+        "ok": True,
+        "message": "PDF export byl odeslán e-mailem.",
+        "sent": result.to_summary(),
+    }
+
+
+def has_explicit_library_export_send_confirmation(
+    export_id: str,
+    confirmation_text: str,
+    *,
+    user_confirmed: bool = False,
+) -> bool:
+    if not user_confirmed:
+        return False
+    folded = normalize_confirmation_text(confirmation_text)
+    prefix = normalize_confirmation_text(LIBRARY_EXPORT_SEND_CONFIRMATION_PREFIX)
+    wanted_id = str(export_id or "").strip().casefold()
+    return bool(wanted_id and prefix in folded and wanted_id in folded)
+
+
+def library_export_confirmation_text(export_id: str) -> str:
+    return f"{LIBRARY_EXPORT_SEND_CONFIRMATION_PREFIX} {export_id}."
+
+
+def normalize_confirmation_text(value: str) -> str:
+    table = str.maketrans(
+        "áčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ",
+        "acdeeinorstuuyzACDEEINORSTUUYZ",
+    )
+    return str(value or "").translate(table).casefold()
+
+
+def resolve_export_root(*, archive_root: Path, export_root: Path | None) -> Path:
+    if export_root is not None:
+        return Path(export_root)
+    if archive_root == DEFAULT_ARCHIVE_ROOT:
+        return DEFAULT_LIBRARY_EXPORT_DIR
+    return archive_root / "exports"
+
+
+def build_library_export_id(item: ArticleArchiveItem, prepared_at: datetime) -> str:
+    digest = hashlib.sha256(f"{item.id}\n{prepared_at.isoformat()}".encode("utf-8")).hexdigest()[:8]
+    return f"{prepared_at.strftime('%Y%m%d-%H%M%S')}-{slugify(item.one_line_title, max_length=48)}-{digest}"
+
+
+def next_export_path(path: Path) -> Path:
+    if not path.exists():
+        return path
+    for index in range(2, 1000):
+        candidate = path.with_name(f"{path.name}_{index}")
+        if not candidate.exists():
+            return candidate
+    raise OSError("Nepodařilo se najít volný název exportu.")
+
+
+def resolve_library_export_dir(
+    *,
+    export_id: str,
+    archive_root: Path,
+    export_root: Path | None,
+) -> Path:
+    safe_id = slugify(str(export_id or "").strip(), max_length=140)
+    if safe_id != str(export_id or "").strip():
+        raise ValueError("Neplatné ID exportu.")
+    root = resolve_export_root(archive_root=archive_root, export_root=export_root).resolve()
+    target = (root / safe_id).resolve()
+    if root != target and root not in target.parents:
+        raise ValueError("Neplatná cesta exportu.")
+    return target
+
+
+def article_pdf_kind(item: ArticleArchiveItem) -> str:
+    if item.category == "recipes":
+        return "Recept"
+    if item.category == "science":
+        return "Vědecký článek"
+    if item.category == "ai_tools":
+        return "Samantha / AI nástroje"
+    return "Znalostní karta"
+
+
+def build_article_pdf(
+    *,
+    item: ArticleArchiveItem,
+    text: str,
+    pdf_path: Path,
+    title: str,
+    prepared_at: datetime,
+) -> None:
+    try:
+        from reportlab.lib import colors
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+        from reportlab.lib.units import mm
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.ttfonts import TTFont
+        from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
+    except ModuleNotFoundError as exc:  # pragma: no cover - depends on local environment setup
+        raise ValueError("ReportLab není nainstalovaný, nejde vytvořit PDF export.") from exc
+
+    font_name = register_pdf_font(pdfmetrics, TTFont)
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        "LibraryTitle",
+        parent=styles["Title"],
+        fontName=font_name,
+        fontSize=18,
+        leading=23,
+        spaceAfter=8 * mm,
+    )
+    heading_style = ParagraphStyle(
+        "LibraryHeading",
+        parent=styles["Heading2"],
+        fontName=font_name,
+        fontSize=12,
+        leading=16,
+        textColor=colors.HexColor("#1f2937"),
+        spaceBefore=6 * mm,
+        spaceAfter=3 * mm,
+    )
+    body_style = ParagraphStyle(
+        "LibraryBody",
+        parent=styles["BodyText"],
+        fontName=font_name,
+        fontSize=10,
+        leading=14,
+        spaceAfter=3 * mm,
+    )
+    meta_style = ParagraphStyle(
+        "LibraryMeta",
+        parent=body_style,
+        fontSize=8,
+        leading=11,
+        textColor=colors.HexColor("#4b5563"),
+    )
+    doc = SimpleDocTemplate(
+        str(pdf_path),
+        pagesize=A4,
+        leftMargin=18 * mm,
+        rightMargin=18 * mm,
+        topMargin=18 * mm,
+        bottomMargin=18 * mm,
+        title=title,
+        author="Samantha Agent",
+    )
+    story: list[Any] = [Paragraph(escape(title), title_style)]
+    for line in article_metadata_lines(item=item, prepared_at=prepared_at):
+        story.append(Paragraph(escape(line), meta_style))
+    story.append(Spacer(1, 5 * mm))
+    story.append(Paragraph("Obsah", heading_style))
+    for block in text_to_pdf_blocks(text):
+        story.append(Paragraph(block, body_style))
+    if item.attachments:
+        story.append(Paragraph("Přílohy", heading_style))
+        for attachment in item.attachments:
+            details = [
+                attachment.label,
+                f"typ: {attachment.kind}",
+                f"role: {attachment.role}",
+            ]
+            if attachment.note:
+                details.append(f"poznámka: {attachment.note}")
+            story.append(Paragraph(escape(" | ".join(details)), meta_style))
+    doc.build(story)
+
+
+def register_pdf_font(pdfmetrics: Any, TTFont: Any) -> str:
+    candidates = [
+        Path("/System/Library/Fonts/Supplemental/Arial.ttf"),
+        Path("/System/Library/Fonts/Supplemental/Verdana.ttf"),
+        Path("/Library/Fonts/Arial.ttf"),
+    ]
+    for path in candidates:
+        if not path.exists():
+            continue
+        try:
+            pdfmetrics.registerFont(TTFont("SamanthaArchiveFont", str(path)))
+            return "SamanthaArchiveFont"
+        except Exception:
+            continue
+    return "Helvetica"
+
+
+def article_metadata_lines(*, item: ArticleArchiveItem, prepared_at: datetime) -> list[str]:
+    tags = ", ".join(item.tags) if item.tags else "bez tagů"
+    lines = [
+        f"ID článku: {item.id}",
+        f"Kategorie: {item.category_label}",
+        f"Archivováno: {item.archived_at or 'neuvedeno'}",
+        f"Exportováno: {prepared_at.isoformat()}",
+        f"Zdroj: {item.source_label or item.source_type or 'neuvedeno'}",
+        f"Tagy: {tags}",
+        f"Počet znaků: {item.text_chars}",
+    ]
+    if item.source_url:
+        lines.append(f"URL: {item.source_url}")
+    if item.canonical_url and item.canonical_url != item.source_url:
+        lines.append(f"Kanonická URL: {item.canonical_url}")
+    if item.source_note:
+        lines.append(f"Poznámka ke zdroji: {item.source_note}")
+    if item.attachments:
+        lines.append(f"Přílohy: {len(item.attachments)}")
+    return lines
+
+
+def text_to_pdf_blocks(text: str) -> list[str]:
+    blocks: list[str] = []
+    current: list[str] = []
+    for line in str(text or "").replace("\r\n", "\n").replace("\r", "\n").splitlines():
+        if line.strip():
+            current.append(line.rstrip())
+            continue
+        if current:
+            blocks.append(lines_to_pdf_paragraph(current))
+            current = []
+    if current:
+        blocks.append(lines_to_pdf_paragraph(current))
+    return blocks or [escape("(Prázdný obsah článku.)")]
+
+
+def lines_to_pdf_paragraph(lines: list[str]) -> str:
+    return "<br/>".join(escape(line) for line in lines)
+
+
+def build_library_export_message(
+    *,
+    item: ArticleArchiveItem,
+    smtp_address: str,
+    recipient: str,
+    subject: str,
+    pdf_path: Path,
+    prepared_at: datetime,
+) -> EmailMessage:
+    message = EmailMessage()
+    message["From"] = smtp_address
+    message["To"] = recipient
+    message["Subject"] = subject
+    message["Date"] = formatdate(localtime=True)
+    message[LIBRARY_EXPORT_EMAIL_MARKER] = LIBRARY_EXPORT_EMAIL_MARKER_VALUE
+    message["X-Samantha-Article-ID"] = item.id
+    message.set_content(
+        "\n".join(
+            [
+                "Toto je PDF export z Knihovny Samanthy.",
+                "E-mail má příznak, aby se nenabízel k dalšímu uložení/importu.",
+                "",
+                f"Název: {item.one_line_title}",
+                f"Kategorie: {item.category_label}",
+                f"ID článku: {item.id}",
+                f"Exportováno: {prepared_at.isoformat()}",
+            ]
+        ),
+        subtype="plain",
+        charset="utf-8",
+    )
+    message.add_attachment(
+        pdf_path.read_bytes(),
+        maintype="application",
+        subtype="pdf",
+        filename=f"{slugify(item.one_line_title, max_length=60)}.pdf",
+    )
+    return message
+
+
 def find_article(article_id: str, archive_root: Path = DEFAULT_ARCHIVE_ROOT) -> ArticleArchiveItem | None:
     wanted = str(article_id or "").strip()
     if not wanted:
@@ -1069,6 +1641,167 @@ def delete_article(
         "title": item.one_line_title,
         "trash_path": moved_to,
     }
+
+
+def article_text_cleanup_report(
+    *,
+    category: str = "science",
+    archive_root: Path = DEFAULT_ARCHIVE_ROOT,
+    min_removed_chars: int = 1000,
+    max_cleaned_ratio: float = 0.85,
+) -> dict[str, Any]:
+    wanted = normalize_category(category) if category != "all" else "all"
+    items: list[dict[str, Any]] = []
+    for item in load_article_registry(archive_root):
+        if wanted != "all" and item.category != wanted:
+            continue
+        analysis = analyze_article_text_cleanup(
+            item,
+            archive_root=archive_root,
+            min_removed_chars=min_removed_chars,
+            max_cleaned_ratio=max_cleaned_ratio,
+        )
+        if analysis is not None:
+            items.append(analysis)
+    candidates = [item for item in items if item["needs_cleanup"]]
+    return {
+        "ok": True,
+        "category": wanted,
+        "count": len(items),
+        "candidate_count": len(candidates),
+        "items": items,
+    }
+
+
+def cleanup_article_text(
+    *,
+    article_id: str,
+    archive_root: Path = DEFAULT_ARCHIVE_ROOT,
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    if not user_confirmed or CLEANUP_CONFIRMATION_PHRASE.casefold() not in str(confirmation_text).casefold():
+        raise ValueError(f"Vyčištění článku vyžaduje potvrzení: {CLEANUP_CONFIRMATION_PHRASE}")
+    item = find_article(article_id, archive_root=archive_root)
+    if item is None:
+        raise ValueError("Článek nebyl nalezen.")
+    cleaned = cleaned_text_from_source_html(item, archive_root=archive_root)
+    if not cleaned:
+        raise ValueError("Článek nemá dostupné source.html pro bezpečné přegenerování.")
+    article_path = archive_root / item.text_file
+    if not article_path.exists():
+        raise ValueError("Soubor article.txt nebyl nalezen.")
+    current = article_path.read_text(encoding="utf-8", errors="replace").strip()
+    if normalize_text_for_cleanup_compare(current) == normalize_text_for_cleanup_compare(cleaned):
+        return {
+            "ok": True,
+            "message": "Článek už odpovídá nové čisté extrakci.",
+            "item_id": item.id,
+            "changed": False,
+            "old_chars": len(current),
+            "new_chars": len(cleaned),
+        }
+    cleaned_at = (now or datetime.now(timezone.utc)).replace(microsecond=0)
+    backup_path = next_cleanup_backup_path(article_path.with_name(f"article_before_cleanup_{cleaned_at.strftime('%Y%m%d_%H%M%S')}.txt"))
+    backup_path.write_text(current + "\n", encoding="utf-8")
+    article_path.write_text(cleaned.rstrip() + "\n", encoding="utf-8")
+    metadata_path = archive_root / "articles" / item.id / "metadata.json"
+    if not metadata_path.exists():
+        raise ValueError("Metadata článku nebyla nalezena.")
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    old_chars = len(current)
+    new_chars = len(cleaned.rstrip())
+    metadata["text_chars"] = str(new_chars)
+    metadata["last_cleaned_at"] = cleaned_at.isoformat()
+    metadata["last_cleanup"] = {
+        "tool": "article_text_cleanup",
+        "old_text_chars": old_chars,
+        "new_text_chars": new_chars,
+        "removed_chars": max(0, old_chars - new_chars),
+        "backup_file": str(backup_path.relative_to(archive_root)),
+    }
+    metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    update_registry(archive_root / "registry.jsonl", metadata)
+    return {
+        "ok": True,
+        "message": "Článek byl přegenerován čistou extrakcí a původní text je uložený jako soukromá záloha.",
+        "item_id": item.id,
+        "title": item.one_line_title,
+        "changed": True,
+        "old_chars": old_chars,
+        "new_chars": new_chars,
+        "removed_chars": max(0, old_chars - new_chars),
+        "backup_file": str(backup_path.relative_to(archive_root)),
+    }
+
+
+def analyze_article_text_cleanup(
+    item: ArticleArchiveItem,
+    *,
+    archive_root: Path,
+    min_removed_chars: int,
+    max_cleaned_ratio: float,
+) -> dict[str, Any] | None:
+    article_path = archive_root / item.text_file
+    if not article_path.exists():
+        return None
+    current = article_path.read_text(encoding="utf-8", errors="replace").strip()
+    cleaned = cleaned_text_from_source_html(item, archive_root=archive_root)
+    if not cleaned:
+        return None
+    old_chars = len(current)
+    new_chars = len(cleaned.rstrip())
+    removed_chars = max(0, old_chars - new_chars)
+    cleaned_ratio = (new_chars / old_chars) if old_chars else 1.0
+    marker_count = article_boilerplate_marker_count(current)
+    changed = normalize_text_for_cleanup_compare(current) != normalize_text_for_cleanup_compare(cleaned)
+    needs_cleanup = changed and marker_count > 0 and removed_chars >= min_removed_chars and cleaned_ratio <= max_cleaned_ratio
+    return {
+        "id": item.id,
+        "title": item.one_line_title,
+        "category": item.category,
+        "old_chars": old_chars,
+        "new_chars": new_chars,
+        "removed_chars": removed_chars,
+        "cleaned_ratio": round(cleaned_ratio, 3),
+        "marker_count": marker_count,
+        "needs_cleanup": needs_cleanup,
+    }
+
+
+def cleaned_text_from_source_html(item: ArticleArchiveItem, *, archive_root: Path) -> str:
+    html_path = resolve_archive_relative_file(archive_root, item.html_file)
+    if html_path is None or not html_path.exists():
+        return ""
+    return extract_article(html_path.read_bytes(), item.source_url or item.canonical_url).text.strip()
+
+
+def article_boilerplate_marker_count(text: str) -> int:
+    folded = text.casefold()
+    markers = (
+        *HARD_TAIL_MARKERS,
+        *INLINE_RECOMMENDATION_MARKERS,
+        "google trends",
+        "nejčtenější",
+        "nejctenejsi",
+        "trendy podle kategorie",
+    )
+    return sum(folded.count(marker.casefold()) for marker in markers if marker)
+
+
+def normalize_text_for_cleanup_compare(text: str) -> str:
+    return "\n".join(line.rstrip() for line in str(text or "").strip().splitlines()).strip()
+
+
+def next_cleanup_backup_path(path: Path) -> Path:
+    if not path.exists():
+        return path
+    for index in range(2, 1000):
+        candidate = path.with_name(f"{path.stem}_{index}{path.suffix}")
+        if not candidate.exists():
+            return candidate
+    raise OSError("Nepodařilo se najít volný název zálohy článku.")
 
 
 def next_trash_path(path: Path) -> Path:

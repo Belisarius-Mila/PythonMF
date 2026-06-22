@@ -45,7 +45,9 @@ from app.article_archive import (
     get_article_attachment,
     attach_article_image,
     list_articles,
+    prepare_article_pdf_export,
     search_articles,
+    send_article_pdf_export,
 )
 from app.backup.activity_state import backup_activity_status
 from app.documents.consistency_audit import format_document_consistency_audit, run_document_consistency_audit, save_audit_decision
@@ -436,6 +438,35 @@ def library_delete_article_action(payload: dict[str, Any]) -> dict[str, Any]:
         return {"ok": False, "message": str(exc), "error": "invalid_delete"}
     except OSError as exc:
         return {"ok": False, "message": f"Položku se nepodařilo vyřadit: {exc}", "error": "archive_failed"}
+
+
+def library_prepare_pdf_export_action(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return prepare_article_pdf_export(
+            article_id=str(payload.get("article_id", "")),
+            recipient_email=str(payload.get("recipient_email", "")),
+        )
+    except ValueError as exc:
+        return {"ok": False, "message": str(exc), "error": "invalid_export"}
+    except OSError as exc:
+        return {"ok": False, "message": f"PDF export se nepodařilo připravit: {exc}", "error": "export_failed"}
+    except Exception as exc:
+        return {"ok": False, "message": f"PDF export se nepodařilo připravit: {exc}", "error": "export_failed"}
+
+
+def library_send_pdf_export_action(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return send_article_pdf_export(
+            export_id=str(payload.get("export_id", "")),
+            user_confirmed=bool(payload.get("user_confirmed")),
+            confirmation_text=str(payload.get("confirmation_text", "")),
+        )
+    except ValueError as exc:
+        return {"ok": False, "message": str(exc), "error": "invalid_send"}
+    except OSError as exc:
+        return {"ok": False, "message": f"PDF export se nepodařilo odeslat: {exc}", "error": "send_failed"}
+    except Exception as exc:
+        return {"ok": False, "message": f"PDF export se nepodařilo odeslat: {exc}", "error": "send_failed"}
 
 
 def recovery_center_status(
@@ -9243,6 +9274,14 @@ class CockpitServer:
                     payload = self.read_json()
                     self.respond_json(library_delete_article_action(payload))
                     return
+                if parsed.path == "/api/library/export/prepare":
+                    payload = self.read_json()
+                    self.respond_json(library_prepare_pdf_export_action(payload))
+                    return
+                if parsed.path == "/api/library/export/send":
+                    payload = self.read_json()
+                    self.respond_json(library_send_pdf_export_action(payload))
+                    return
                 if parsed.path == "/api/documents/classification-metadata":
                     payload = self.read_json()
                     raw_metadata = payload.get("metadata")
@@ -11621,8 +11660,11 @@ COCKPIT_HTML = """<!doctype html>
               <h3 id="libraryReaderTitle" class="library-reader-title">Vyber článek</h3>
               <div id="libraryReaderMeta" class="library-meta">Vlevo vyber položku nebo použij fulltextové hledání.</div>
               <div class="library-reader-actions">
+                <button class="secondary" id="libraryExportPrepareBtn" type="button" disabled>Připravit PDF</button>
+                <button class="primary" id="libraryExportSendBtn" type="button" disabled>Odeslat export</button>
                 <button class="secondary danger" id="libraryDeleteBtn" type="button" disabled>Vyřadit z knihovny</button>
               </div>
+              <div id="libraryExportStatus" class="status-line">Export PDF se připraví lokálně a odešle až po potvrzení.</div>
             </div>
             <div id="libraryReaderText" class="library-reader-text"></div>
             <div id="libraryReaderAttachments" class="library-reader-attachments hidden"></div>
@@ -11846,6 +11888,9 @@ COCKPIT_HTML = """<!doctype html>
     const libraryReaderMeta = document.getElementById("libraryReaderMeta");
     const libraryReaderText = document.getElementById("libraryReaderText");
     const libraryReaderAttachments = document.getElementById("libraryReaderAttachments");
+    const libraryExportPrepareBtn = document.getElementById("libraryExportPrepareBtn");
+    const libraryExportSendBtn = document.getElementById("libraryExportSendBtn");
+    const libraryExportStatus = document.getElementById("libraryExportStatus");
     const libraryDeleteBtn = document.getElementById("libraryDeleteBtn");
     const projectsModal = document.getElementById("projectsModal");
     const projectsCloseBtn = document.getElementById("projectsCloseBtn");
@@ -11994,6 +12039,7 @@ COCKPIT_HTML = """<!doctype html>
     let currentLibraryCategory = "recipes";
     let currentLibraryItems = [];
     let currentLibrarySelectedId = "";
+    let currentLibraryExport = null;
     let currentQuantitative = null;
     let frontendLastError = "";
     let frontendErrorHistory = [];
@@ -12117,6 +12163,9 @@ COCKPIT_HTML = """<!doctype html>
         "librarySearchInput",
         "librarySearchBtn",
         "libraryReaderAttachments",
+        "libraryExportPrepareBtn",
+        "libraryExportSendBtn",
+        "libraryExportStatus",
         "libraryDeleteBtn",
         "projectsBtn",
         "remindersBtn",
@@ -15369,12 +15418,20 @@ COCKPIT_HTML = """<!doctype html>
       libraryModal.classList.add("hidden");
     }
 
+    function resetLibraryExportState(message) {
+      currentLibraryExport = null;
+      libraryExportPrepareBtn.disabled = !currentLibrarySelectedId;
+      libraryExportSendBtn.disabled = true;
+      libraryExportStatus.textContent = message || "Export PDF se připraví lokálně a odešle až po potvrzení.";
+    }
+
     async function loadLibraryCategory(category) {
       currentLibraryCategory = category || "other";
       currentLibrarySelectedId = "";
       setLibraryActiveTab();
       librarySearchInput.value = "";
       libraryDeleteBtn.disabled = true;
+      resetLibraryExportState();
       libraryStatus.textContent = "Načítám knihovnu...";
       libraryReaderTitle.textContent = "Vyber článek";
       libraryReaderMeta.textContent = "Vlevo vyber položku nebo použij fulltextové hledání.";
@@ -15407,6 +15464,7 @@ COCKPIT_HTML = """<!doctype html>
       }
       currentLibrarySelectedId = "";
       libraryDeleteBtn.disabled = true;
+      resetLibraryExportState();
       libraryStatus.textContent = "Hledám ve fulltextu...";
       libraryReaderTitle.textContent = "Vyber článek";
       libraryReaderMeta.textContent = "Vlevo vyber položku z výsledků hledání.";
@@ -15577,9 +15635,11 @@ COCKPIT_HTML = """<!doctype html>
         if (!data.ok) {
           libraryStatus.textContent = data.message || "Položku se nepodařilo vyřadit.";
           libraryDeleteBtn.disabled = false;
+          libraryExportPrepareBtn.disabled = false;
           return;
         }
         currentLibrarySelectedId = "";
+        resetLibraryExportState(data.message || "Položka byla vyřazena.");
         libraryReaderTitle.textContent = "Vyber článek";
         libraryReaderMeta.textContent = data.message || "Položka byla vyřazena.";
         libraryReaderText.textContent = "";
@@ -15594,6 +15654,75 @@ COCKPIT_HTML = """<!doctype html>
         recordFrontendError(err);
         libraryStatus.textContent = `Chyba vyřazení položky: ${err}`;
         libraryDeleteBtn.disabled = false;
+        libraryExportPrepareBtn.disabled = false;
+      }
+    }
+
+    async function prepareSelectedLibraryPdfExport() {
+      const articleId = currentLibrarySelectedId;
+      if (!articleId) {
+        libraryExportStatus.textContent = "Nejdřív vyber položku v knihovně.";
+        return;
+      }
+      libraryExportPrepareBtn.disabled = true;
+      libraryExportSendBtn.disabled = true;
+      libraryExportStatus.textContent = "Připravuji PDF a e-mailový draft lokálně...";
+      try {
+        const data = await postJson("/api/library/export/prepare", {article_id: articleId});
+        if (!data.ok) {
+          libraryExportStatus.textContent = data.message || "PDF export se nepodařilo připravit.";
+          libraryExportPrepareBtn.disabled = false;
+          return;
+        }
+        currentLibraryExport = data.export || null;
+        const sizeKb = currentLibraryExport && currentLibraryExport.size_bytes
+          ? `${Math.max(1, Math.round(Number(currentLibraryExport.size_bytes) / 1024))} kB`
+          : "neznámá velikost";
+        const confirmation = currentLibraryExport && currentLibraryExport.confirmation_text
+          ? currentLibraryExport.confirmation_text
+          : "";
+        libraryExportStatus.textContent = `${data.message || "Export připraven."} PDF: ${sizeKb}. Potvrzení pro odeslání: ${confirmation}`;
+        libraryExportSendBtn.disabled = !currentLibraryExport || !currentLibraryExport.export_id;
+      } catch (err) {
+        recordFrontendError(err);
+        libraryExportStatus.textContent = `Chyba přípravy PDF exportu: ${err}`;
+      } finally {
+        libraryExportPrepareBtn.disabled = false;
+      }
+    }
+
+    async function sendSelectedLibraryPdfExport() {
+      if (!currentLibraryExport || !currentLibraryExport.export_id) {
+        libraryExportStatus.textContent = "Nejdřív připrav PDF export.";
+        return;
+      }
+      const confirmation = currentLibraryExport.confirmation_text || "";
+      const typed = window.prompt(`Pro odeslání PDF exportu opiš přesně:\n\n${confirmation}`, "");
+      if (typed === null) {
+        return;
+      }
+      libraryExportSendBtn.disabled = true;
+      libraryExportPrepareBtn.disabled = true;
+      libraryExportStatus.textContent = "Odesílám PDF export e-mailem...";
+      try {
+        const data = await postJson("/api/library/export/send", {
+          export_id: currentLibraryExport.export_id,
+          user_confirmed: true,
+          confirmation_text: typed
+        });
+        if (!data.ok) {
+          libraryExportStatus.textContent = data.message || "PDF export se nepodařilo odeslat.";
+          libraryExportSendBtn.disabled = false;
+          return;
+        }
+        currentLibraryExport = null;
+        libraryExportStatus.textContent = data.message || "PDF export byl odeslán.";
+      } catch (err) {
+        recordFrontendError(err);
+        libraryExportStatus.textContent = `Chyba odeslání PDF exportu: ${err}`;
+        libraryExportSendBtn.disabled = false;
+      } finally {
+        libraryExportPrepareBtn.disabled = !currentLibrarySelectedId;
       }
     }
 
@@ -15722,6 +15851,7 @@ COCKPIT_HTML = """<!doctype html>
       if (!articleId) return;
       currentLibrarySelectedId = articleId;
       libraryDeleteBtn.disabled = false;
+      resetLibraryExportState();
       document.querySelectorAll(".library-item").forEach((node) => {
         node.classList.toggle("active", node.dataset.articleId === articleId);
       });
@@ -15735,6 +15865,8 @@ COCKPIT_HTML = """<!doctype html>
           libraryReaderTitle.textContent = "Článek nelze načíst";
           libraryReaderMeta.textContent = data.message || data.error || "";
           libraryDeleteBtn.disabled = true;
+          currentLibrarySelectedId = "";
+          resetLibraryExportState(data.message || "Článek nelze načíst.");
           return;
         }
         const item = data.item || {};
@@ -15748,6 +15880,8 @@ COCKPIT_HTML = """<!doctype html>
         libraryReaderMeta.textContent = String(err);
         renderLibraryAttachments("", []);
         libraryDeleteBtn.disabled = true;
+        currentLibrarySelectedId = "";
+        resetLibraryExportState(`Chyba čtení: ${err}`);
       }
     }
 
@@ -17103,6 +17237,8 @@ COCKPIT_HTML = """<!doctype html>
     libraryArchiveBtn.addEventListener("click", archiveLibraryUrl);
     libraryTextSaveBtn.addEventListener("click", saveLibraryText);
     libraryAttachmentSaveBtn.addEventListener("click", attachLibraryImage);
+    libraryExportPrepareBtn.addEventListener("click", prepareSelectedLibraryPdfExport);
+    libraryExportSendBtn.addEventListener("click", sendSelectedLibraryPdfExport);
     libraryDeleteBtn.addEventListener("click", deleteSelectedLibraryItem);
     libraryArchiveUrlInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
