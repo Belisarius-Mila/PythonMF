@@ -18,6 +18,10 @@ Co je hotove:
   aby HTTP odpoved stihla odejit do UI pred ukoncenim serveru.
 - Frontend restart tlacitka uz pri prerusenem fetch spojeni behem restartu
   nezobrazi tvrdou chybu; oznami preruseni spojeni a po chvili stranku obnovi.
+- Follow-up po rucnim testu: jednorazovy reload byl stale prilis brzy a Safari
+  obcas skoncilo na chybe `nelze se pripojit k serveru`. Frontend proto misto
+  pevneho reload timeoutu opakovane kontroluje `/api/status` a stranku obnovi
+  az ve chvili, kdy Cockpit znovu odpovida.
 - `app/speech/edge_tts_open.py` uz docasne Edge TTS MP3 neotevira pres `open`,
   ale prehrava je primo pres `/usr/bin/afplay`, aby se neimportovaly do Apple Music.
 - Z Apple Music knihovny a fyzickych souboru byly po vyslovnem potvrzeni Mily
@@ -25,14 +29,18 @@ Co je hotove:
   tim neuklada zadny soukromy obsah.
 
 Co neni hotove:
-- Nebyl proveden realny klikaci retest tlacitka `Restart Cockpitu` po aktualnim
-  commitu; zmeny jsou overene cilenymi unit testy a syntaktickou kontrolou.
+- Po prvnim commitu Míla rucne otestoval tlacitko a restart backendu probehl,
+  ale Safari obnovilo stranku moc brzy a zobrazilo chybu pripojeni; pozdejsi
+  rucni reload uz Cockpit otevrel. Tento follow-up je opraveny pollingem.
+- Nebyl proveden dalsi realny klikaci retest po polling follow-up oprave; zmeny
+  jsou overene cilenymi unit testy a syntaktickou kontrolou.
 - Pokud iPhone Music stale ukazuje stare polozky, jde pravdepodobne o iCloud/iPhone
   cache/synchronizaci, protoze na Macu uz `adam*voice*` polozky v Music nejsou videt.
 
 Dalsi krok:
 - Po pristi prilezitosti rucne kliknout v Cockpitu na `Servis -> Restart Cockpitu`
-  a overit, ze stranka po par sekundach znovu nabehne bez chybove hlasky.
+  a overit, ze UI nejdriv ukazuje `Cekam na navrat Cockpitu...` a reload udela
+  az po realnem navratu serveru, bez Safari chyby pripojeni.
 
 Navrhovane dalsi kroky:
 - Pokud se chyba vrati, precist `data/private/cockpit/restart.log` a zkontrolovat

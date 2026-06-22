@@ -15137,6 +15137,25 @@ COCKPIT_HTML = """<!doctype html>
 	      if (!ok) return;
 	      dashboardRestartBtn.disabled = true;
 	      showMessage("Spouštím bezpečný restart Cockpitu...");
+	      const waitForCockpitAndReload = async () => {
+	        await new Promise((resolve) => window.setTimeout(resolve, 2500));
+	        for (let attempt = 1; attempt <= 45; attempt += 1) {
+	          try {
+	            const probe = await fetch("/api/status", {cache: "no-store"});
+	            if (probe.ok) {
+	              showMessage("Cockpit znovu běží. Obnovuji stránku...");
+	              window.location.reload();
+	              return;
+	            }
+	          } catch (probeErr) {
+	            // Cockpit se prave restartuje; dalsi pokus probehne za chvili.
+	          }
+	          showMessage(`Čekám na návrat Cockpitu... pokus ${attempt}/45`);
+	          await new Promise((resolve) => window.setTimeout(resolve, 1000));
+	        }
+	        showMessage("Cockpit se restartoval pomaleji než čekám. Zkus stránku obnovit ručně.");
+	        dashboardRestartBtn.disabled = false;
+	      };
 	      try {
 	        const res = await fetch("/api/cockpit/restart", {
 	          method: "POST",
@@ -15146,18 +15165,14 @@ COCKPIT_HTML = """<!doctype html>
 	        const data = await res.json();
 	        showMessage(data.message || (data.ok ? "Restart zahájen." : "Restart se nepodařilo zahájit."));
 	        if (data.ok) {
-	          window.setTimeout(() => {
-	            window.location.reload();
-	          }, 4500);
+	          await waitForCockpitAndReload();
 	        } else {
 	          dashboardRestartBtn.disabled = false;
 	        }
 	      } catch (err) {
 	        recordFrontendError(err);
-	        showMessage("Spojení se při restartu přerušilo. Za pár sekund stránku obnovím.");
-	        window.setTimeout(() => {
-	          window.location.reload();
-	        }, 5500);
+	        showMessage("Spojení se při restartu přerušilo. Počkám, až Cockpit znovu odpoví.");
+	        await waitForCockpitAndReload();
 	      }
 	    }
 
