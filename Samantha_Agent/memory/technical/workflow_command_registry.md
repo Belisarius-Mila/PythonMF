@@ -113,6 +113,8 @@ Rucni CLI spusteni existuje hlavne pro testovani a lidsky provoz:
 | Kvantitativni status | `.venv/bin/python scripts/samantha_quantitative_status.py` | `samantha_quantitative_status(save=False)` |
 | Kvantitativni snapshot | `.venv/bin/python scripts/samantha_quantitative_status.py --save` | `samantha_quantitative_status(save=True)` |
 | Capability audit | `.venv/bin/python scripts/samantha_capability_audit.py` | `samantha_capability_audit()` |
+| Systemovy audit projektu/toolu/vrstev | `.venv/bin/python scripts/samantha_project_audit.py --mode quick` | `samantha_project_audit(mode="quick", save=False)` |
+| Ulozeny systemovy audit projektu/toolu/vrstev | `.venv/bin/python scripts/samantha_project_audit.py --mode full --save` | `samantha_project_audit(mode="full", save=True)` |
 | Knowledge inbox inventory | `.venv/bin/python scripts/samantha_knowledge_inbox.py` | `samantha_knowledge_inbox_inventory()` |
 | Downloads inventory | `.venv/bin/python scripts/samantha_downloads_to_knowledge_inbox.py --list` | `samantha_downloads_inventory()` |
 | iPhone shortcuts status | `.venv/bin/python scripts/samantha_iphone_shortcuts.py --status` | `iphone_shortcuts_playground_status()` |

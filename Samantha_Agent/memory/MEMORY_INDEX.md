@@ -11,7 +11,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Reports
 
-- `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_11.txt` - [PRIPOMENOUT] strukturovany audit podle QN #40 a QN #13: projekty, tooly a vrstvy serazene podle priorit 1-3, odhad rozpracovanosti v %, dalsi kroky a navrh dnesniho itinerare.
+- `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_23.txt` - [PRIPOMENOUT] aktualni systemovy audit: projekty, tooly, vrstvy, dnesni priority, provozni stav, capability gaps a navrh nejmensiho dalsiho kroku.
+- `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_11.txt` - historicky strukturovany audit podle QN #40 a QN #13: projekty, tooly a vrstvy serazene podle priorit 1-3, odhad rozpracovanosti v %, dalsi kroky a navrh tehdejsiho itinerare.
 - `reports/cockpit_ui_content_audit_2026_06_11.md` - kratky read-only audit obsahu oken Cockpitu: co je denni, obcasne, servisni a archivni; duplicity, technicke nazvy a navrh prvniho UI cleanupu.
 - `reports/cockpit_main_screen_daily_audit_2026_06_11.md` - faze 2 Cockpit auditu: rozdeleni hlavni obrazovky na `denne`, `obcas`, `servis`, `archiv` a navrh, co ma byt rano videt bez klikani.
 - `reports/git_branch_audit_cursor_matysek_scene02_2026_06_26.md` - audit smesne neintegrovane vetve `cursor/matysek-scene02-mossy-stump-prototype`: co uz bylo prevedeno na `main`, co jeste prenest samostatne a co archivovat; vzniklo po regresi `Lekarna - sprava`.
@@ -71,6 +72,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `handoffs/cockpit_codex_session_false_duplicate_fix_2026_06_17.md` - Cockpit/voice bridge oprava falešného varování `Codex relace: 2`: detekce už neleze od duplicitního child Codex procesu ke `screen` rodiči na jiném TTY; po bezpečném restartu lokální i Tailscale instance Cockpit hlásí jednu relaci `ttys000`, bridge `ok` a Míla potvrdil UI stav jako OK.
 - `handoffs/samantha_screen_scrollback_fix_2026_06_18.md` - Samantha start pres `screen`: pridan projektovy `scripts/samantha_screenrc`, vetsi scrollback, vypnuti alternate screenu a startovni napoveda `Ctrl+A` potom `Esc`; dalsi krok je rucni retest noveho startu `samantha`.
 - `handoffs/system_quick_check_git_safety_2026_06_09.md` - mala infrastrukturalni robustnost: pridany `git_safety_check.py` pro staged private/autosave/env ochranu a `system_quick_check.py` pro read-only souhrn git/backup/Cockpit/Adam bridge/autosave; testy prosly.
+- `handoffs/system_project_audit_generator_done_2026_06_23.md` - opakovatelny generator systemoveho auditu projektu/toolu/vrstev je hotovy jako CLI, Samantha tool a registrovany system report; `--save` uklada git-safe report bez private dat a neprepisuje existujici denni audit.
 - `handoffs/autosave_status_and_voice_triage_fix_2026_06_12.md` - Autosave/auto-safe checkpoint: pridany read-only `scripts/autosave_status.py`, `system_quick_check.py` hlasi watcher i stari snapshotu a voice triage uz neblokuje slovo `stisknout` jako `tisk`.
 - `handoffs/article_archive_cockpit_library_2026_06_10.md` - Cockpit knihovna článků: URL vstup, kategorie Recepty/Vědecké články/Ostatní, soukromý TXT/HTML archiv mimo git, fulltextové hledání, čtení a HTTPS fallback přes systémový `curl` při Python certifikační chybě.
 - `handoffs/knowledge_database_text_input_and_system_audit_2026_06_11.md` - [PRIPOMENOUT] dnešní checkpoint ke znalostní databázi: systémový audit QN #40/#13, sloučení Knihovna článků + Knowledge inbox, Cockpit vstup `Uložit text` pro recepty/ChatGPT texty bez URL a CLI fallback `scripts/archive_text_entry.py`.
@@ -172,6 +174,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 ## Technical Rules
 
 - `technical/naming_conventions.md` - názvosloví: Samantha je běžný ChatGPT, Codex je pracovní agent v projektu, Codex CLI je terminálový nástroj.
+- `technical/system_project_audit_generator_design.md` - navrh opakovatelneho generatoru systemoveho auditu projektu, toolu a vrstev: vstupy, bezpecnostni hranice, MVP sekce, datovy model, registrace a testy.
 - `technical/samantha_growth_rules.md` - [PRIPOMENOUT] A1+ deset preventivnich pravidel pro rust Samanthy, tri maximalne prioritni body po commitovem uklidu a handoff compression per project; po velkem commitu nabidnout cisty stul, pouceni z uklidu a jasnejsi rezim vyvoje.
 - `technical/samantha_cultural_metaphors.md` - kulturni/prakticke metafory pro Samanthu, vcetne `samyce/samice`: agent ma hledat lidsky zamer i pri preklepu nebo nepresnem vstupu.
 - `technical/story_memory_rules.md` - pravidla pro ukládání pohádek do memory: ukládat plný finální text, ne jen shrnutí, a sledovat clean verzi pro předčítání.

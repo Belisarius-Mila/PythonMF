@@ -18,6 +18,7 @@ from app.health_check import format_samantha_health_check
 from app.quantitative_status import format_samantha_quantitative_status
 from app.system_reports import format_system_reports_overview
 from app.capability_audit import format_samantha_capability_audit
+from app.project_audit_report import format_samantha_project_audit
 from app.knowledge_inbox import (
     copy_downloads_to_knowledge_inbox,
     ensure_knowledge_inbox_dirs,
@@ -204,6 +205,12 @@ def samantha_capability_audit() -> str:
 
 
 @function_tool
+def samantha_project_audit(mode: str = "quick", save: bool = False) -> str:
+    """Generate a git-safe project/tool/layer audit; optionally save it to memory/reports."""
+    return format_samantha_project_audit(mode=mode, save=save)
+
+
+@function_tool
 def samantha_knowledge_inbox_inventory() -> str:
     """List safe metadata for private large-context inbox files without reading content."""
     ensure_knowledge_inbox_dirs()
@@ -303,6 +310,12 @@ nebo aby na zadny report nezapomnel, pouzij samantha_system_reports.
 Kdyz se Mila pta na audit schopnosti, capability registry, co Samantha umi,
 co je read-only, co vyzaduje potvrzeni, nebo kde jsou rezervy ve workflow,
 pouzij samantha_capability_audit.
+Kdyz se Mila pta na aktualni systemovy audit projektu/toolu/vrstev, na cem
+dnes navazat, nebo chce ulozit aktualni audit podobny rucnimu reportu, pouzij
+samantha_project_audit. Vychozi `mode="quick", save=False` jen vypise git-safe
+itinerar. `save=True` pouzij jen kdyz Mila chce audit ulozit; tool uklada pouze
+git-safe text do `memory/reports/` a nesmi cist private vault, cela tela e-mailu,
+soukrome dokumenty ani fulltexty clanku.
 Kdyz se Mila pta na velke podklady, knowledge inbox, archiv chatu k prostudovani,
 nebo co je ve slozce `data/private/knowledge_inbox`, pouzij
 samantha_knowledge_inbox_inventory. Tento tool smi vypsat jen metadata souboru
@@ -784,6 +797,7 @@ LOKALNI PAMET:
             samantha_quantitative_status,
             samantha_system_reports,
             samantha_capability_audit,
+            samantha_project_audit,
             samantha_knowledge_inbox_inventory,
             samantha_downloads_inventory,
             copy_downloads_files_to_knowledge_inbox,

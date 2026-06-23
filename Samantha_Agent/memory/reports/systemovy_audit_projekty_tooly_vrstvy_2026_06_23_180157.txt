@@ -1,0 +1,277 @@
+Nazev: Systemovy audit Samanthy - projekty, tooly, vrstvy
+Datum: 2026-06-23
+Mode: full
+Zdroj: ACTIVE_PROJECTS.md, MEMORY_INDEX.md, health check, backup status, quantitative status, capability audit
+Ucel: Opakovatelny lidsky itinerar pro vyber, na co navazat.
+
+Bezpecnost:
+- Report je git-safe souhrn. Necetl private vault, cela tela e-mailu, soukrome dokumenty ani fulltexty clanku.
+- Vystup rediguje soukrome cesty a webove URL.
+- Stav priorit je odvozeny z registru projektu a systemovych reportu; neni to pravni, financni ani zdravotni doporuceni.
+
+======================================================================
+RANNI PROVOZNI POZNAMKA
+======================================================================
+
+- Git: dirty (27 changed/untracked), ## cursor/matysek-scene02-mossy-stump-prototype...origin/cursor/matysek-scene02-mossy-stump-prototype [ahead 1]
+- Zaloha: ZALOHA SAMANTHY: - Posledni zaloha je v 3dennim intervalu (2026-06-23).
+- Aktivnich `[PRIPOMENOUT]`: 59
+- Kvantitativne: lokalne 1390 souboru / 125223 radku; git tracked 607 souboru / 114029 radku.
+- Capability audit: 81 agent toolu, 81 namapovanych, 0 nemapovanych, 2 shell workflow.
+
+Varovani:
+- Repo ma 27 rozpracovane/zmenene soubory; vhodny je ad hoc commitovy uklid.
+- Historicky/prekrity handoff zustal aktivni: `handoffs/email_processing_cleanup_and_documents_next_2026_06_03.md` - [PRIPOMENOUT] Email Processing v Cockpitu je uspokojive uzavreny: Work Queue ma oddelene zpracovani, presun do kose a trvale smazani z kose, nove nacitani filtruje historicky dokoncene polozky a priste se ma pokracovat obecnym zpracovanim dokumentu.
+- MEMORY_INDEX.md:14 obsahuje relativni nebo git-stavovou formulaci: - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_23.txt` - [PRIPOMENOUT] aktualni systemovy audit: projekty, tooly, vrstvy, dnesni priority, provozni stav, capability gaps a navrh nejmensiho dalsiho kroku.
+- MEMORY_INDEX.md:141 obsahuje relativni nebo git-stavovou formulaci: - `handoffs/cockpit_dashboard_terminal_launch_checkpoint_2026_05_29.md` - Samantha Cockpit: dashboard Dnes/Stav/Akce, git status, tlacitka Samantha chat a Codex CLI; puvodni stav branch ahead 6 je prekryty, Cockpit commity jsou podle `git log` na `origin/main` a aktualni `HEAD` i `origin/main` jsou `e123d52 Add emotion management tool notes`.
+
+======================================================================
+RYCHLE DOPORUCENI PRO DNES
+======================================================================
+
+1. Nejdriv rozhodnout git stav: oddelit hotove commity od rozpracovanych zmen a pred pushem spustit safety check.
+2. Zmensit sum v pameti: vybrat malou davku zastaralych `[PRIPOMENOUT]` a presunout je mimo startovni pozornost.
+3. Jako vecny smer vybrat jednu prioritu 1: MMTX. Dalsi krok: Po pushi rucne otestovat webovy tok: rozcesti -> Scene 1 -> dvere -> Scene 2 -> `↩` zpet na rozcesti. Potom pripravit Scene 3 jako dalsi linearni modul za Scene 2.
+4. Nemichat dnes vice velkych smeru; generator ma byt podklad pro vyber jedne konkretni navaznosti.
+
+======================================================================
+PRIORITA 1 - HLAVNI KANDIDATI
+======================================================================
+
+1. MMTX
+Typ: toolova / technicka oblast
+Priorita: 1
+Rezim: active
+Stav: Aktivni vyukova aplikace pro Matyska; hlavni web je `MatysekANJ/web_mmtx/`. Forest Journey ma linearny tok: rozcesti v lese (`intro4`) -> Scene 1 `clearingMeeting` -> Scene 2 `Sunny's Lost Nuts`. Scene 2 je od 2026-06-23 integrovana jako `web_mmtx/scene02_sunnys_lost_nuts/`, dvere po dokonceni Scene 1 ji oteviraji a tlacitko `↩` ve Scene 2 zatim vraci na `index.html?scene=intro4`. Dalsi sceny maji pozdeji navazova...
+Dalsi krok: Po pushi rucne otestovat webovy tok: rozcesti -> Scene 1 -> dvere -> Scene 2 -> `↩` zpet na rozcesti. Potom pripravit Scene 3 jako dalsi linearni modul za Scene 2.
+
+2. Samantha external backup
+Typ: infrastructure layer
+Priorita: 1
+Rezim: active
+Stav: Uspesna ostra recovery zaloha celeho `PythonMF` do sifrovaneho kontejneru probehla 2026-06-23 pres Pythonovy inkrementalni nastroj bez `rsync/mmap`: `snapshots/20260623_121901`. Snapshot ma manifest, recovery navod, `PythonMF/` i `codex_home/`; `backup_status.py` hlasi 3denni interval. Restore drill 2026-06-23 obnovil `Samantha_Agent/AGENTS.md` jen do `/private/tmp/samantha_restore_drill_20260623/`; `cmp` a SHA-25...
+Dalsi krok: Zadna okamzita akce; pri dalsi recovery zaloze znovu udelat maly restore drill po uspesnem snapshotu.
+
+3. Janička Cockpit / používání a převzetí Samanthy
+Typ: projekt + UI vrstva
+Priorita: 1
+Rezim: active
+Stav: [PRIPOMENOUT] Zalozeno 2026-06-06 jako samostatny projekt pro dva rezimy: Jana pouziva zivou Samanthu, kdyz Mila docasne nemuze, a Jana ma cestu k plnemu prevzeti Samanthy pri Milove smrti. Nejde o omezeny pristup pro Janu; bezpecnost ma byt obecna pro cely system. Prvni MVP tlacitko `Janička` je v Cockpitu implementovane jako netechnicky rozcestnik k dokumentum, e-mailum, tisku, Lekarne, rodinnym projektum, Adamo...
+Dalsi krok: Nechat funkcni textovy kanal zatim stabilne pouzivat; pri dalsim rozvoji opravit `Rodinné projekty` a pripadne doplnit UI stav `Adam čte / odpovídá`.
+
+4. Pozustalost / rodinny nouzovy balik
+Typ: projekt
+Priorita: 1
+Rezim: active
+Stav: Zalozeno 2026-05-30 jako git-safe navrh bez citlivych dat. Technicke pravidlo 2026-05-31: nestavet druhy dokumentovy system; pouzit Document Management jako hlavni trezor, pridat pozustalostni metadata/tagy a finalni balik drzet jako samostatny sifrovany export. Soukrome prazdne sablony jsou zalozene mimo git v `[private data]`.
+Dalsi krok: Projit soukrome sablony a vyplnit nejdrive jen mapu oblasti bez cisel smluv, uctu, hesel a recovery klicu; konkretni citliva data ukladat jen do sifrovaneho uloziste mimo git.
+
+5. Samantha Agent/RAG
+Typ: projekt
+Priorita: 1
+Rezim: active
+Stav: Prvni mala verze agenta nad OpenAI Agents SDK existuje. Agent ma kompakni startup kontext, lokalni RAG-like vrstvu nad markdown pameti, tooly `search_memory` a `memory_status`, in-memory index/cache a vylepseny ranking/vystup `search_memory`. `search_memory` nově ukazuje typ zdroje a podporuje filtr `source_type`; lokalni smoke test 2026-05-23 bez OpenAI API prosel pro RAG, `core`, `projects` i `handoffs`.
+Dalsi krok: Pri dalsim realnem/live pouziti pres Samanthu overit, jestli agent sam spravne voli `source_type`; embeddings resit az pokud textove vyhledavani s filtrem nestaci.
+
+6. Reminders / platebni SMS
+Typ: toolova / technicka oblast
+Priorita: 1
+Rezim: active
+Stav: Hotovy workflow: `inspect_payment_page_for_reminder` read-only overi splatnost z HTTPS platebni stranky/API bez opisovani plne URL/tokenu; `save_payment_sms_reminder` ulozi overovaci nebo ostrou platebni pripominku; `save_payment_case_document` ulozi lokalni fakturu/prilohu do `[private data]`.
+Dalsi krok: Pri dalsi realne SMS overit live pres Samanthu. Pozdeji zvazit extrakci textu z PDF faktur nebo podporu JS/login stranek, ale jen read-only a s potvrzovaci branou.
+
+7. Sprava dokumentu / private vault
+Typ: toolova / technicka oblast
+Priorita: 1
+Rezim: active
+Stav: [PRIPOMENOUT] Hlavni cesta je ScanDocu pro PDF z Downloads a Cockpit na `[URL]` jako lokalni ovladaci vrstva. Cockpit umi pracovni dokumentovou frontu, hledani, detail, potvrzovane akce tisk / archiv / kos, `Dokumenty k revizi`, cases/vazby, klasifikaci, terminy a detail case v2 s `case_health`. Dne 2026-06-13 byl opraven workflow e-mailovych PDF priloh: technicky typ `email-attachment-pdf` se bere jako slaba meta...
+Dalsi krok: Otestovat v Cockpitu jeden realny e-mail s PDF + JPEG prilohami: nahled, ulozeni do vaultu a doplneni metadat ve ScanDocu Review. OCR pro obrazkove prilohy resit az samostatnym potvrzenym krokem.
+
+8. Cockpit Recovery centrum
+Typ: infrastructure layer
+Priorita: 1
+Rezim: active
+Stav: [PRIPOMENOUT] Recovery/health/diagnostika/akcni fronta/bezpecny restart Cockpitu jsou hotove MVP a smoke check 2026-06-09 prosel lokalne i pres Tailscale. Dne 2026-06-11 vznikl read-only audit obsahu oken Cockpitu (`reports/cockpit_ui_content_audit_2026_06_11.md`), faze 1 mirny UI cleanup a faze 2 audit hlavni obrazovky (`reports/cockpit_main_screen_daily_audit_2026_06_11.md`). Faze 2 implementace je nasazena: `Co...
+Dalsi krok: Pri pristi prilezitosti rucne kliknout `Servis -> Restart Cockpitu`; pokud projde, pokracovat samostatnym e-mail workflow read-only kontrolou rozhodnuti/work queue/cache bez mazani a provider akci.
+
+9. Mapovani projektu a schopnosti
+Typ: toolova / technicka oblast
+Priorita: 1
+Rezim: active
+Stav: Taxonomie potvrzena Milou: projekty jsou jen kanonicke zive oblasti, varianty/vystupy nejsou samostatne projekty a asset knihovny/build/tmp/archivy nejsou projekty. Od 2026-06-07 je `ACTIVE_PROJECTS.md` prakticky registr projektu se sloupcem `Rezim`; archivovane projekty zustavaji dohledatelne, ale Cockpit je skryva z aktivniho pohledu.
+Dalsi krok: Implementovat prvni nizkorizikove workflow kandidaty: `PictNew` read-only audit a `VocabularyEN` sync do `docs/`.
+
+10. Samantha Infrastructure
+Typ: infrastructure layer
+Priorita: 1
+Rezim: active
+Stav: Current infrastructure stack: macOS, VS Code, Codex CLI, GitHub, SSH, Tailscale a OpenAI/GPT workflow. Kriticka operacni znalost je rozdelena do `memory/infrastructure/`: operating model, macOS network recovery, Codex reconnect recovery, Git checkpoint protocol, SSH setup a Tailscale setup. Sitovy reconnect stav ma samostatny aktivni radek `macOS sit / Tailscale recovery`. Od 2026-06-09 existuje rucni `scripts/git...
+Dalsi krok: Bezny start nove Codex relace: `samantha`, ne holy `codex`, aby bezely screen, autosave, preflight, session report a voice marker flow. Po scrollback uprave rucne otestovat novy start; kdyz bezne scrollovani nestaci, pouzit `Ctrl+A`, potom `Esc`. Pri reconn...
+
+11. Automaticke opakujici se ukoly
+Typ: projekt
+Priorita: 1
+Rezim: active
+Stav: GitHub Actions soví TTS pro 2026-05-23 uspel: commit `c8647de Update ColorsAndNumbers owl audio` pridal `owl_230526.mp3` a prepnul `app.js`. Navazujici jednorazovy ukol pro 2026-05-24 je splneny: `ColorsAndNumbers/web_colors_numbers/owl_240526.mp3` i `docs/colors-numbers/owl_240526.mp3` existuji a `app.js` miri na `owl_240526.mp3?v=20260524a`.
+Dalsi krok: Rozhodnout, jak automatizovat denni zadavani sovich textu bez rucniho prepisovani jednoho JSON configu.
+
+12. iCloud Mail read-only / Email Cases
+Typ: projekt
+Priorita: 1
+Rezim: active
+Stav: Rozpracovany projekt, aktualni e-mailova etapa je uspokojive uzavrena. iCloud/Seznam read-only workflow je hotovy pro hlavicky, potvrzene cteni, triage, archive/case vrstvy a dvoukrokovy outbound. Cockpit ma okno `Email Processing`, ktere z prehledu dela rozhodovaci karty po sekcich s volbami `Zpracovat`, `Ignorovat` a `Kos`; navazujici `Email Work Queue` nacita detail read-only, uklada e-maily do EmailArchiveVaul...
+Dalsi krok: V Cockpitu otevrit `Email Work Queue`, zvolit blok `Finanční správa`, potom `VAK`, rucne nacitat detail, vybrat PDF prilohy a zpracovat jen aktualni blok; faktury nad 2000 Kč jet az potom po mensich davkach podle castky. Mazani, odesilani, presun do kose a...
+
+13. Lekarna
+Typ: projekt
+Priorita: 1
+Rezim: active
+Stav: Evidence ma 69 polozek. Foto import ma novy staging tool `stage_lekarna_photo_import` pro fotky ze Stazenych: staging zkopiruje fotky do soukrome slozky a vytvori manifest, zapis do CSV zustava potvrzovany pres `apply_lekarna_photo_import`. Dne 2026-06-12 byly importovane Dr.Max Zinek/Zinok Forte 25 mg a Dr.Max Vitamin B12 500 mcg. Webova aplikace Lekarna je archivovany vystup/varianta hlavni Lekarny, ne samostatn...
+Dalsi krok: Pri dalsim doplnovani fotek ze Stazenych pouzit `stage_lekarna_photo_import`, potom doplnit manifest a po potvrzeni `Potvrzuji import fotek lekarna` spustit apply. Pri zmene dat pro web znovu spustit export + sifrovani podle archivovaneho handoffu webove Le...
+
+14. Tomik video iMovie / FamilyVideoOrganizer
+Typ: projekt
+Priorita: 1
+Rezim: active
+Stav: Realny lehky balicek pro dcerino rozhodovani je pripraven mimo git a podle Mily byl 2026-05-29 uz dceri poslany: generator `scripts/tomik_family_video_package.py` vytvari `videos-data.js`, 651 nahledu a ZIP bez MP4; UI umi Safari fallback pro vyber MP4, zelene tlacitko `Slozka s videi`, zamykani radku kliknutim, autosave a export JSON.
+Dalsi krok: Cekat na dcerin export JSON rozhodnuti/poznamek; po prijeti udelat read-only kontrolu a import do short/family vyberu delat az po samostatnem potvrzeni.
+
+15. Family Memory Films / USA 2019
+Typ: projekt
+Priorita: 1
+Rezim: active
+Stav: Cisty seznam 15 filmu pouzitelnych dnu je odsouhlaseny; `2019-08-05` neni samostatny den filmu, ale smesny zdroj podle item-level review. Master prehled ve stylu `Tomik 2` je ulozen mimo git v `03_overview/usa_2019_tomik2_overview.md`. Predstrihovy formular `03_overview/film_selection_form.html` ma 2688 polozek, denni filtr, rating `A/B/C/skip`, volby pro kratky/dlouhy film, autosave, CSV export a prehravani videi...
+Dalsi krok: Otevrit `[URL]`, rucne zkontrolovat Adamuv rating, povysit rodinne/emocni momenty podle potreby a stahnout `film_selection_review.csv`; pri navazani brat nejnovejsi `[Downloads]`.csv` jako zdroj pravdy. Originaly nemazat, neprejmenovavat ani nepresouvat bez...
+
+16. Media image resize utility
+Typ: projekt
+Priorita: 1
+Rezim: active
+Stav: Obecna utilita pro zmensovani obrazku podle cilove velikosti v kB je hotova, otestovana a prvne pouzita na lekarne. Vychozi cil je 250 kB, preset `lekarna` je 100 kB.
+Dalsi krok: Pri dalsim projektu se nejdriv zeptat na cilovou velikost, pokud neni dana; pro slovniky pravdepodobne zacit preview s 250 kB.
+
+17. TTS / Adam Voice Remote Cockpit
+Typ: toolova / technicka oblast
+Priorita: 1
+Rezim: active
+Stav: [PRIPOMENOUT] Existuji nastroje `scripts/generate_tts.py` a `scripts/tts_gui.py` pro ceske MP3 pres `edge-tts`; od 2026-06-05 existuje lokalni hlasovy vystup, Cockpit hlasovy vstup, Adam Voice Mode watcher, terminal bridge do Codexu, private TTY marker a hlasove cteni vysledku pres helper `scripts/speak_edge_open.py`. Dne 2026-06-06 byl doplnen iPhone text fallback `Odeslat přepis Adamovi`, prehled Codex relaci v...
+Dalsi krok: Zmrazeno. Nevracet se k dalsimu ladeni voice bridge bez konkretniho bloku z realneho provozu; pro skutecne hlasove cteni na Macu spoustet `scripts/speak_edge_open.py` mimo Codex sandbox.
+
+18. Tax
+Typ: projekt
+Priorita: 3
+Rezim: active
+Stav: Danove priznani 2025 ma pripraveny vypocet, checklist a pravidla pro neukladani citlivych udaju.
+Dalsi krok: Pred odeslanim overit aktualni adresu, specialni danove situace a finalni hodnoty proti originalnim podkladum.
+
+======================================================================
+PRIORITA 2 - DOBRE NAVAZUJICI SMERY
+======================================================================
+
+1. Neuberk interier design / Kacenka
+Typ: projekt
+Priorita: 2
+Rezim: active
+Stav: Designova prace je docasne prerusena. Soukromy projekt pro pudni hostovskou mistnost ma v `[private data]` aktualni stenove prekresy, pudorys a vizualni koncepty. Dne 2026-06-07 se ladil jizni pohled v6: opraveny pricny snizeny strop, sikmy tram smerujici k vychodni stene, komin u dveri a rozkladaci gauc za kominem. Aktualni soukromy kandidat je zapsany v indexu konceptu; git-safe stav je ulozeny bez soukromych ro...
+Dalsi krok: Po navratu otevrit posledni soukromy kandidat v6 a porovnat ho s realnymi fotkami. Pokud Mila potvrdi geometrii, prejit na jednoduchy pudorysovy check: vejde se gauc za komin, zustane pruchod a nekoliduji dvere, topeni ani snizeny strop.
+
+2. Znalostni databaze / Knihovna clanku / Knowledge inbox
+Typ: toolova / technicka oblast
+Priorita: 2
+Rezim: active
+Stav: Sloucena oblast podle Milovy korekce 2026-06-11: Knihovna clanku neni samostatny dlouhodoby projekt, ale prvni funkcni MVP vstup do sirsi zive znalostni databaze. Dne 2026-06-10 vznikl lehky soukromy archiv webovych clanku pro recepty, vedecke clanky a ostatni prakticke texty; Cockpit modal `Knihovna` umi vlozeni URL, vyber kategorie, tagy, ulozeni do `[private data]`, fulltextove hledani a cteni TXT. Dne 2026-06-...
+Dalsi krok: Pokracovat ChatGPT exportem mimo recepty: dalsi vhodny krok je rozpracovat Codex Cookbook / Agents SDK do stabilnich git-safe pravidel a prubezne ukladat nove OpenAI funkcionality jako clanky v `Samantha / AI nástroje`.
+
+3. iPhone Shortcuts / Mobile Input Layer
+Typ: toolova / technicka oblast
+Priorita: 2
+Rezim: active
+Stav: Zmrazeno jako funkcni Infrastructure capability: `Najit auto v3.shortcut` funguje u Mily i Jany, `Lékárna Jana.shortcut` funguje a `Rychlá poznámka pro Samanthu.shortcut` uklada poznamky. Samantha umi Quick Notes nacist jako ocislovany seznam/detail a od 2026-06-19 ma read-only akcni inbox s automatickou predklasifikaci na pripominku, projekt, tool/workflow, ukol, citlivou akci, archiv/znalostni databazi nebo napa...
+Dalsi krok: Nepokracovat bez vyslovneho navratu. Pri navratu pouzit read-only `quick_notes_action_status`, rucne vybrat jednu QN a teprve pak implementovat jednu potvrzovanou akci: mark done, navrh pripominky, projektovy handoff, dokument do trezoru nebo archiv nakupu.
+
+4. Nakupni pruzkum a archiv nakupu
+Typ: toolova / technicka oblast
+Priorita: 2
+Rezim: active
+Stav: Koncept ulozen jako lehky workflow/tool: Mila zada konkretni produkt nebo varianty, Adam/Samantha najde kamenne prodejce do 100 km od Mlade Boleslavi a overene e-shopy, vrati prime odkazy na produkt a po Milove objednani ulozi potvrzeni/fakturu do soukromeho archivu mimo git.
+Dalsi krok: Pri prvnim realnem navazani zalozit soukromy `[private data]`, sablony `order_summary.md`/`warranty.md` a az po realnem pouziti zvazit intake z Downloads a systemovy report nakupni evidence.
+
+5. MultiLO
+Typ: projekt
+Priorita: 2
+Rezim: active
+Stav: Stabilizace navratu do kokpitu probehla; cleanup screenu a nahrazeni rizikovych `CTkEntry` za `tk.Entry` jsou popsane, dalsi prace ceka na rucni retest.
+Dalsi krok: Provest rucni retest navratu do kokpitu podle checklistu a dalsi zmeny delat az po potvrzeni stability.
+
+6. PictNew / Vocabulary image workflow
+Typ: toolova / technicka oblast
+Priorita: 2
+Rezim: active
+Stav: Aktuální VocabularyIT vlna je hotová: batche 001 až 013 jsou v `Pict/`, `Pict/mapping.json` byl po potvrzeném preview aktualizován, audit po aplikaci nehlásí nevyřešené položky a git checkpoint existuje jako `851b347 Apply VocabularyIT picture mapping updates`.
+Dalsi krok: Další nové obrázky řešit až novým read-only auditem podle `technical/vocabulary_image_generation_workflow.md`; nevolat placené generování ani neupravovat mapping bez samostatného potvrzení.
+
+======================================================================
+PRIORITA 3 - UDRZBA, ARCHIV, NIZKA NALEHAVOST
+======================================================================
+
+- Zadna polozka v teto sekci.
+
+======================================================================
+TOOLY A SCHOPNOSTI - RYCHLA MAPA
+======================================================================
+
+- Capability audit: 81 agent toolu, 81 namapovanych, 0 nemapovanych, 2 shell workflow.
+Registry gaps:
+- No unmapped agent tools.
+
+======================================================================
+VRSTVY - SYSTEMOVA ARCHITEKTURA
+======================================================================
+
+1. Lidska orientacni vrstva
+Stav: funkcni, ale hluk `[PRIPOMENOUT]` je 59
+Dalsi krok: cistit po malych davkach a drzet aktualni report v indexu
+
+2. Provozni a recovery vrstva
+Stav: backup OK
+Dalsi krok: pred rizikovou praci overit backup a git stav
+
+3. Git checkpoint vrstva
+Stav: dirty (27 changed/untracked), ## cursor/matysek-scene02-mossy-stump-prototype...origin/cursor/matysek-scene02-mossy-stump-prototype [ahead 1]
+Dalsi krok: oddělit hotove a rozpracovane veci do tematickych commitu
+
+4. Cockpit UI vrstva
+Stav: silna, pokud je Cockpit aktualne dostupny; overit manualnim smoke testem po zmenach
+Dalsi krok: manualni smoke test po zmenach
+
+5. Private data vrstva
+Stav: oddelená od reportu
+Dalsi krok: pokracovat jen pres potvrzene tooly
+
+6. Knowledge vrstva
+Stav: stabilni
+Dalsi krok: sloucit orientaci clanku, receptu, AI nastroju a inboxu
+
+7. Mobile/voice vrstva
+Stav: pouzitelna, ale resit jen pri realnem provoznim bloku
+Dalsi krok: pred approval z iPhonu pouzit cockpit notice pravidlo
+
+8. Workflow registry vrstva
+Stav: dobra zakladna
+Dalsi krok: dopsat mezery pred dalsim routovanim lidskych pokynu na shell
+
+======================================================================
+ZAVER
+======================================================================
+
+Silne stranky:
+- System ma registrovane reporty, health check, capability audit a backup status.
+- Cockpit a knowledge/document vrstvy jsou napojene na projektovou pamet.
+- Report lze opakovat bez cteni private dat.
+
+Rizika:
+- Git/provozni stav: dirty (27 changed/untracked), ## cursor/matysek-scene02-mossy-stump-prototype...origin/cursor/matysek-scene02-mossy-stump-prototype [ahead 1].
+- Pocet aktivnich `[PRIPOMENOUT]`: 59.
+- Automaticky report sklada fakta; konecny vyber priority porad potvrzuje Mila.
+
+Nejmensi dalsi krok: Nejdriv rozhodnout git stav: oddelit hotove commity od rozpracovanych zmen a pred pushem spustit safety check.

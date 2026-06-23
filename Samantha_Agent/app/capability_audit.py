@@ -32,6 +32,7 @@ CAPABILITY_AREAS = (
             "samantha_quantitative_status",
             "samantha_system_reports",
             "samantha_capability_audit",
+            "samantha_project_audit",
         ),
         next_gap="Keep new repeated audits registered as system reports.",
     ),
@@ -63,8 +64,9 @@ CAPABILITY_AREAS = (
         tools=(
             "list_quick_notes",
             "show_quick_note_detail",
+            "quick_notes_action_status",
         ),
-        next_gap="Convert selected quick notes to explicit project actions only after Mila chooses them.",
+        next_gap="Convert selected quick notes to explicit confirmed actions only after Mila chooses them.",
     ),
     CapabilityArea(
         name="Email read-only and cases",

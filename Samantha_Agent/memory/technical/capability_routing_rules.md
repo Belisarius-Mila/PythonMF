@@ -56,6 +56,8 @@ Aktualni registrovane reporty:
 | "Uloz kvantitativni snapshot" | `samantha_quantitative_status(save=True)` | ulozi jen agregovanou JSONL datovou vetu bez nazvu souboru a soukromeho obsahu |
 | "Jake mame systemove reporty?" | `samantha_system_reports()` | vypise registr reportu; nezapisuje |
 | "Co Samantha umi?", "audit schopnosti", "kde jsou workflow rezervy?" | `samantha_capability_audit()` | cte registr toolu a workflow; nezapisuje |
+| "Udelej aktualni systemovy audit", "audit projektu/toolu/vrstev", "na cem dnes navazat?" | `samantha_project_audit(mode="quick", save=False)` | cte jen git-safe pametove registry a systemove reporty; necte private vault, e-maily ani soukrome dokumenty |
+| "Uloz aktualni systemovy audit" | `samantha_project_audit(mode="full", save=True)` | zapise git-safe textovy report do `memory/reports/`; bez private obsahu |
 | "Co je v knowledge inboxu?", "velke podklady", "archiv chatu k prostudovani" | `samantha_knowledge_inbox_inventory()` | vypise jen metadata souboru v private inboxu; necte obsah |
 | "Co mam ve Stazenych pro knowledge inbox?", "najdi podklady v Downloads" | `samantha_downloads_inventory()` | vypise jen metadata top-level souboru ve Stazenych; necte obsah |
 | "Prekopiruj vybrane soubory ze Stazenych do knowledge inboxu" | `copy_downloads_files_to_knowledge_inbox(...)` | kopiruje jen vybrane relativni soubory z Downloads do private inboxu az po potvrzeni |

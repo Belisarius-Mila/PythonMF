@@ -39,6 +39,14 @@ SYSTEM_REPORTS = (
         saves_data="ne",
     ),
     SystemReport(
+        name="Systemovy audit projektu, toolu a vrstev",
+        when_to_use="aktualni lidsky itinerar: projekty, provozni rizika, schopnosti, vrstvy a nejmensi dalsi krok",
+        output="git-safe report podobny rucnimu systemovemu auditu; `--mode full --save` ulozi kopii do memory/reports",
+        command=".venv/bin/python scripts/samantha_project_audit.py --mode quick",
+        samantha_tool="samantha_project_audit(mode='quick', save=False)",
+        saves_data="jen s `--save` jako git-safe textovy report v memory/reports",
+    ),
+    SystemReport(
         name="Knowledge inbox inventory",
         when_to_use="bezpecny inventar velkych podkladu ve private knowledge inboxu",
         output="nazvy souboru, typy, velikosti a cas zmeny; necte obsah",
