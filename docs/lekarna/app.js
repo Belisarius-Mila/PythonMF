@@ -49,6 +49,12 @@ let privateDataLoadPromise = null;
 let unlockPassword = "";
 let previousDrawerView = null;
 
+function sortMedicineNames(names) {
+  return [...new Set(names || [])].sort((left, right) =>
+    String(left).localeCompare(String(right), "cs-CZ", { sensitivity: "base" })
+  );
+}
+
 const symptomIntents = [
   {
     label: "Bolest hlavy / horečka",
@@ -273,11 +279,12 @@ function openBox(key) {
   }
   drawerKicker.textContent = box.kicker;
   drawerTitle.textContent = box.title;
+  const medicineNames = sortMedicineNames(box.medicines);
   drawerContent.innerHTML = `
     <p>${box.text}</p>
     ${renderBoxExtraActions(key)}
     <div class="medicine-list">
-      ${box.medicines.map((name) => `<button type="button" data-medicine="${escapeHtml(name)}">${escapeHtml(name)}</button>`).join("")}
+      ${medicineNames.map((name) => `<button type="button" data-medicine="${escapeHtml(name)}">${escapeHtml(name)}</button>`).join("")}
     </div>
   `;
   drawerContent.querySelectorAll("[data-panel-action]").forEach((button) => {
@@ -438,15 +445,21 @@ function prepareBoxData(rawBoxes, rawMedicines) {
   if (!supplementNames.length) {
     supplementNames.push(...defaultBoxData.supplements.medicines);
   }
-  boxes.supplements.medicines = supplementNames;
+  boxes.supplements.medicines = sortMedicineNames(supplementNames);
 
   if (boxes.home && Array.isArray(boxes.home.medicines)) {
     const supplementSet = new Set(supplementNames);
     boxes.home = {
       ...boxes.home,
-      medicines: boxes.home.medicines.filter((name) => !supplementSet.has(name)),
+      medicines: sortMedicineNames(boxes.home.medicines.filter((name) => !supplementSet.has(name))),
     };
   }
+
+  Object.values(boxes).forEach((box) => {
+    if (Array.isArray(box.medicines)) {
+      box.medicines = sortMedicineNames(box.medicines);
+    }
+  });
 
   return boxes;
 }
