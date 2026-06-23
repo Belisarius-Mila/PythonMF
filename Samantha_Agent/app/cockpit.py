@@ -12553,6 +12553,7 @@ COCKPIT_HTML = """<!doctype html>
               <h3 id="libraryReaderTitle" class="library-reader-title">Vyber článek</h3>
               <div id="libraryReaderMeta" class="library-meta">Vlevo vyber položku nebo použij fulltextové hledání.</div>
               <div class="library-reader-actions">
+                <button class="secondary" id="libraryOpenSourceBtn" type="button" disabled>Otevřít na webu</button>
                 <button class="secondary" id="libraryExportPrepareBtn" type="button" disabled>Připravit PDF</button>
                 <button class="primary" id="libraryExportSendBtn" type="button" disabled>Odeslat export</button>
                 <button class="secondary" id="libraryToReadBtn" type="button" disabled>K přečtení</button>
@@ -12784,6 +12785,7 @@ COCKPIT_HTML = """<!doctype html>
     const libraryReaderMeta = document.getElementById("libraryReaderMeta");
     const libraryReaderText = document.getElementById("libraryReaderText");
     const libraryReaderAttachments = document.getElementById("libraryReaderAttachments");
+    const libraryOpenSourceBtn = document.getElementById("libraryOpenSourceBtn");
     const libraryExportPrepareBtn = document.getElementById("libraryExportPrepareBtn");
     const libraryExportSendBtn = document.getElementById("libraryExportSendBtn");
     const libraryExportStatus = document.getElementById("libraryExportStatus");
@@ -12940,6 +12942,7 @@ COCKPIT_HTML = """<!doctype html>
     let currentLibraryItems = [];
     let currentLibrarySelectedId = "";
     let currentLibrarySelectedItem = null;
+    let currentLibrarySourceUrl = "";
     let currentLibraryExport = null;
     let currentQuantitative = null;
     let frontendLastError = "";
@@ -16397,6 +16400,32 @@ COCKPIT_HTML = """<!doctype html>
       libraryToReadBtn.disabled = !selected || state === "to_read";
       libraryDoneBtn.disabled = !selected || state === "done";
       libraryClearReadStateBtn.disabled = !selected || state === "normal";
+      currentLibrarySourceUrl = selected && item ? librarySourceUrl(item) : "";
+      libraryOpenSourceBtn.disabled = !currentLibrarySourceUrl;
+    }
+
+    function librarySourceUrl(item) {
+      const url = String((item && (item.canonical_url || item.source_url)) || "").trim();
+      if (!url) return "";
+      try {
+        const parsed = new URL(url);
+        return parsed.protocol === "http:" || parsed.protocol === "https:" ? parsed.href : "";
+      } catch (_err) {
+        return "";
+      }
+    }
+
+    function openSelectedLibrarySource() {
+      if (!currentLibrarySourceUrl) {
+        libraryStatus.textContent = "Vybraná položka nemá původní webovou URL.";
+        return;
+      }
+      const opened = window.open(currentLibrarySourceUrl, "_blank", "noopener");
+      if (!opened) {
+        libraryStatus.textContent = `Prohlížeč zablokoval nové okno. Otevři ručně: ${currentLibrarySourceUrl}`;
+        return;
+      }
+      libraryStatus.textContent = "Otevírám původní článek na webu.";
     }
 
     async function loadLibraryCategory(category, readState = "") {
@@ -18290,6 +18319,7 @@ COCKPIT_HTML = """<!doctype html>
     libraryArchiveBtn.addEventListener("click", archiveLibraryUrl);
     libraryTextSaveBtn.addEventListener("click", saveLibraryText);
     libraryAttachmentSaveBtn.addEventListener("click", attachLibraryImage);
+    libraryOpenSourceBtn.addEventListener("click", openSelectedLibrarySource);
     libraryExportPrepareBtn.addEventListener("click", prepareSelectedLibraryPdfExport);
     libraryExportSendBtn.addEventListener("click", sendSelectedLibraryPdfExport);
     libraryToReadBtn.addEventListener("click", () => setSelectedLibraryReadState("to_read"));
