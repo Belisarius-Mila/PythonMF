@@ -3199,7 +3199,7 @@ Dalsi krok:
         self.assertEqual(result["counts"]["active"], 2)
         self.assertEqual(result["notes"][0]["note_number"], 2)
         self.assertEqual(result["notes"][0]["snippet"], "Novější QN.")
-        self.assertEqual(result["notes"][0]["triage"]["classification"], "Nezařazeno")
+        self.assertEqual(result["notes"][0]["triage"]["classification"], "nápad")
         self.assertNotIn("source_path", result["notes"][0])
 
     def test_urgent_reminders_status_is_separate_from_quick_notes(self) -> None:
@@ -3488,6 +3488,25 @@ Dalsi krok:
         self.assertIn("Cockpit", result["notes"][0]["triage"]["suggested_next_step"])
         self.assertFalse(result["notes"][0]["triage"]["sensitive"])
         self.assertEqual(detail["triage"]["classification"], "Cockpit / správa projektů")
+
+    def test_quick_notes_status_falls_back_to_action_preclassification(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            inbox = root / "Shortcuts"
+            inbox.mkdir()
+            index_path = root / "private" / "quick_notes" / "index.json"
+            (inbox / "library_url_note.md").write_text(
+                "# Samantha inbox\n\nDatum: 2026-06-22 19:44:26\n\nPoznámka:\nJe třeba opravit knihovnu, aby při načítání URL článku automaticky uložila článek.\n",
+                encoding="utf-8",
+            )
+
+            result = quick_notes_status(inbox_dir=inbox, index_path=index_path)
+            detail = quick_note_detail_status(note_number=1, inbox_dir=inbox, index_path=index_path)
+
+        self.assertEqual(result["notes"][0]["triage"]["classification"], "archiv/znalostní databáze")
+        self.assertEqual(result["notes"][0]["triage"]["confidence"], "medium")
+        self.assertEqual(result["notes"][0]["triage"]["risk"], "medium")
+        self.assertEqual(detail["triage"]["classification"], "archiv/znalostní databáze")
 
     def test_quick_note_detail_status_reads_full_body_without_source_path(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

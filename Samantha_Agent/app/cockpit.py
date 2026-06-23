@@ -105,6 +105,7 @@ from app.quantitative_status import DEFAULT_METRICS_PATH as QUANTITATIVE_STATUS_
 from app.quantitative_status import ExtensionStats as QuantitativeExtensionStats
 from app.quantitative_status import run_samantha_quantitative_status
 from app.quick_notes import DEFAULT_ICLOUD_SHORTCUTS_INBOX, DEFAULT_INDEX_PATH as QUICK_NOTES_INDEX_PATH
+from app.quick_notes import ACTION_KIND_LABELS, classify_quick_note_text
 from app.quick_notes import sync_quick_notes_index
 from app.urgent_reminders import DEFAULT_INDEX_PATH as URGENT_REMINDERS_INDEX_PATH
 from app.urgent_reminders import mark_urgent_reminder_done
@@ -1265,11 +1266,14 @@ def quick_note_triage_hint(text: str) -> dict[str, Any]:
                 "sensitive": sensitive,
                 "safety_note": "Zobrazit jen bezpečný souhrn v přehledu." if sensitive else "Bez tiché akce; nejdřív návrh nebo potvrzení.",
             }
+    classification = classify_quick_note_text(text)
     return {
-        "classification": "Nezařazeno",
-        "suggested_next_step": "Přečíst detail a ručně rozhodnout, jestli z toho bude projekt, tool, reminder nebo jen poznámka.",
-        "sensitive": False,
-        "safety_note": "Bez tiché akce; jen návrh klasifikace.",
+        "classification": ACTION_KIND_LABELS.get(classification.kind, classification.kind),
+        "suggested_next_step": classification.suggested_next_step,
+        "sensitive": classification.sensitive,
+        "safety_note": "Zobrazit jen bezpečný souhrn v přehledu." if classification.sensitive else "Bez tiché akce; jen návrh klasifikace.",
+        "confidence": classification.confidence,
+        "risk": classification.risk,
     }
 
 
