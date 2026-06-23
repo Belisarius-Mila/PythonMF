@@ -14809,7 +14809,7 @@ COCKPIT_HTML = """<!doctype html>
     }
 
     async function fetchJson(url) {
-      const res = await fetch(url);
+      const res = await fetch(url, {cache: "no-store"});
       if (!res.ok) {
         const error = new Error(`${url} returned ${res.status}`);
         recordFrontendError(error);
@@ -17464,10 +17464,10 @@ COCKPIT_HTML = """<!doctype html>
       remindersStatus.textContent = "Načítám připomínky...";
       remindersList.innerHTML = "";
       try {
-        const res = await fetch("/api/reminders");
-        const data = await res.json();
+        const data = await fetchJson("/api/reminders");
         renderReminders(data);
       } catch (err) {
+        recordFrontendError(err);
         remindersStatus.textContent = `Chyba načtení připomínek: ${err}`;
       }
     }
@@ -17774,10 +17774,9 @@ COCKPIT_HTML = """<!doctype html>
       remindersStatus.textContent = "Označuji připomínku jako splněnou...";
       try {
         const result = await postJson("/api/reminders/done", {reminder_id: reminderId});
-        if (result.reminders) {
-          renderReminders(result.reminders);
-        }
         remindersStatus.textContent = result.message || "Hotovo.";
+        const fresh = await fetchJson("/api/reminders");
+        renderReminders(fresh);
         await refresh();
       } catch (err) {
         remindersStatus.textContent = `Chyba uložení připomínky: ${err}`;
@@ -17795,11 +17794,10 @@ COCKPIT_HTML = """<!doctype html>
       urgentRemindersStatus.textContent = "Označuji důležité připomenutí jako splněné...";
       try {
         const result = await postJson("/api/urgent-reminders/done", {reminder_number: reminderNumber});
-        if (result.urgent_reminders) {
-          renderUrgentReminders(result.urgent_reminders);
-          renderUrgentReminderAlert(result.urgent_reminders);
-        }
         urgentRemindersStatus.textContent = result.message || "Hotovo.";
+        const fresh = await fetchJson("/api/urgent-reminders/status");
+        renderUrgentReminders(fresh);
+        renderUrgentReminderAlert(fresh);
         await refresh({silent: true, includeSecondary: false});
       } catch (err) {
         urgentRemindersStatus.textContent = `Chyba uložení důležité připomínky: ${err}`;
