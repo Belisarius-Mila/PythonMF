@@ -56,6 +56,7 @@ from app.article_archive import (
     prepare_article_pdf_export,
     search_articles,
     send_article_pdf_export,
+    set_article_read_state,
 )
 from app.backup.activity_state import backup_activity_status
 from app.documents.consistency_audit import format_document_consistency_audit, run_document_consistency_audit, save_audit_decision
@@ -733,6 +734,19 @@ def _lekarna_match_to_dict(match: Any) -> dict[str, Any]:
         "reasons": [safe_text(str(reason)) for reason in match.reasons],
         "warnings": [safe_text(str(warning)) for warning in match.warnings],
     }
+
+
+def library_read_state_action(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return set_article_read_state(
+            article_id=str(payload.get("article_id", "")),
+            read_state=str(payload.get("read_state", "normal")),
+            note=str(payload.get("note", "")),
+        )
+    except ValueError as exc:
+        return {"ok": False, "message": str(exc), "error": "invalid_read_state"}
+    except OSError as exc:
+        return {"ok": False, "message": f"Stav článku se nepodařilo uložit: {exc}", "error": "archive_failed"}
 
 
 def library_prepare_pdf_export_action(payload: dict[str, Any]) -> dict[str, Any]:
@@ -9821,21 +9835,23 @@ class CockpitServer:
                 if parsed.path == "/api/library/list":
                     params = parse_qs(parsed.query)
                     category = params.get("category", ["other"])[0]
+                    read_state = params.get("read_state", [""])[0]
                     try:
                         limit = int(params.get("limit", ["200"])[0])
                     except (TypeError, ValueError):
                         limit = 200
-                    self.respond_json(list_articles(category=category, limit=limit))
+                    self.respond_json(list_articles(category=category, read_state=read_state, limit=limit))
                     return
                 if parsed.path == "/api/library/search":
                     params = parse_qs(parsed.query)
                     category = params.get("category", ["all"])[0]
+                    read_state = params.get("read_state", [""])[0]
                     query = params.get("q", [""])[0]
                     try:
                         limit = int(params.get("limit", ["50"])[0])
                     except (TypeError, ValueError):
                         limit = 50
-                    self.respond_json(search_articles(query=query, category=category, limit=limit))
+                    self.respond_json(search_articles(query=query, category=category, read_state=read_state, limit=limit))
                     return
                 if parsed.path == "/api/lekarna/search":
                     params = parse_qs(parsed.query)
@@ -10107,6 +10123,10 @@ class CockpitServer:
                 if parsed.path == "/api/lekarna/import/apply":
                     payload = self.read_json()
                     self.respond_json(lekarna_auto_import_apply_action(payload))
+                    return
+                if parsed.path == "/api/library/read-state":
+                    payload = self.read_json()
+                    self.respond_json(library_read_state_action(payload))
                     return
                 if parsed.path == "/api/library/export/prepare":
                     payload = self.read_json()
@@ -12515,6 +12535,7 @@ COCKPIT_HTML = """<!doctype html>
           <button class="secondary library-tab" type="button" data-library-category="science">Vědecké články</button>
           <button class="secondary library-tab" type="button" data-library-category="ai_tools">Samantha / AI nástroje</button>
           <button class="secondary library-tab" type="button" data-library-category="other">Ostatní</button>
+          <button class="secondary library-tab" type="button" data-library-category="all" data-library-read-state="to_read">K přečtení</button>
         </div>
         <div class="library-controls">
           <input id="librarySearchInput" type="search" placeholder="Hledat ve vybrané kategorii">
@@ -12530,6 +12551,9 @@ COCKPIT_HTML = """<!doctype html>
               <div class="library-reader-actions">
                 <button class="secondary" id="libraryExportPrepareBtn" type="button" disabled>Připravit PDF</button>
                 <button class="primary" id="libraryExportSendBtn" type="button" disabled>Odeslat export</button>
+                <button class="secondary" id="libraryToReadBtn" type="button" disabled>K přečtení</button>
+                <button class="secondary" id="libraryDoneBtn" type="button" disabled>Hotovo</button>
+                <button class="secondary" id="libraryClearReadStateBtn" type="button" disabled>Zrušit příznak</button>
                 <button class="secondary danger" id="libraryDeleteBtn" type="button" disabled>Vyřadit z knihovny</button>
               </div>
               <div id="libraryExportStatus" class="status-line">Export PDF se připraví lokálně a odešle až po potvrzení.</div>
@@ -12759,6 +12783,9 @@ COCKPIT_HTML = """<!doctype html>
     const libraryExportPrepareBtn = document.getElementById("libraryExportPrepareBtn");
     const libraryExportSendBtn = document.getElementById("libraryExportSendBtn");
     const libraryExportStatus = document.getElementById("libraryExportStatus");
+    const libraryToReadBtn = document.getElementById("libraryToReadBtn");
+    const libraryDoneBtn = document.getElementById("libraryDoneBtn");
+    const libraryClearReadStateBtn = document.getElementById("libraryClearReadStateBtn");
     const libraryDeleteBtn = document.getElementById("libraryDeleteBtn");
     const projectsModal = document.getElementById("projectsModal");
     const projectsCloseBtn = document.getElementById("projectsCloseBtn");
@@ -12905,8 +12932,10 @@ COCKPIT_HTML = """<!doctype html>
     let currentProjects = [];
     let currentProjectFilter = "all";
     let currentLibraryCategory = "recipes";
+    let currentLibraryReadStateFilter = "";
     let currentLibraryItems = [];
     let currentLibrarySelectedId = "";
+    let currentLibrarySelectedItem = null;
     let currentLibraryExport = null;
     let currentQuantitative = null;
     let frontendLastError = "";
@@ -13034,6 +13063,9 @@ COCKPIT_HTML = """<!doctype html>
         "libraryExportPrepareBtn",
         "libraryExportSendBtn",
         "libraryExportStatus",
+        "libraryToReadBtn",
+        "libraryDoneBtn",
+        "libraryClearReadStateBtn",
         "libraryDeleteBtn",
         "projectsBtn",
         "remindersBtn",
@@ -16354,9 +16386,20 @@ COCKPIT_HTML = """<!doctype html>
       libraryExportStatus.textContent = message || "Export PDF se připraví lokálně a odešle až po potvrzení.";
     }
 
-    async function loadLibraryCategory(category) {
+    function updateLibraryReadStateButtons(item) {
+      currentLibrarySelectedItem = item || null;
+      const selected = Boolean(currentLibrarySelectedId);
+      const state = selected && item ? String(item.read_state || "normal") : "normal";
+      libraryToReadBtn.disabled = !selected || state === "to_read";
+      libraryDoneBtn.disabled = !selected || state === "done";
+      libraryClearReadStateBtn.disabled = !selected || state === "normal";
+    }
+
+    async function loadLibraryCategory(category, readState = "") {
       currentLibraryCategory = category || "other";
+      currentLibraryReadStateFilter = readState || "";
       currentLibrarySelectedId = "";
+      updateLibraryReadStateButtons(null);
       setLibraryActiveTab();
       librarySearchInput.value = "";
       libraryDeleteBtn.disabled = true;
@@ -16367,12 +16410,14 @@ COCKPIT_HTML = """<!doctype html>
       libraryReaderText.textContent = "";
       renderLibraryAttachments("", []);
       try {
-        const data = await fetchJson(`/api/library/list?category=${encodeURIComponent(currentLibraryCategory)}&limit=200`);
+        const url = `/api/library/list?category=${encodeURIComponent(currentLibraryCategory)}&read_state=${encodeURIComponent(currentLibraryReadStateFilter)}&limit=200`;
+        const data = await fetchJson(url);
         currentLibraryItems = data.items || [];
         renderLibraryItems(currentLibraryItems);
+        const label = currentLibraryReadStateFilter ? (data.read_state_label || "K přečtení") : (data.category_label || "Kategorie");
         libraryStatus.textContent = currentLibraryItems.length
-          ? `${data.category_label || "Kategorie"}: ${currentLibraryItems.length} položek.`
-          : `${data.category_label || "Kategorie"} zatím nemá uložené položky.`;
+          ? `${label}: ${currentLibraryItems.length} položek.`
+          : `${label} zatím nemá uložené položky.`;
       } catch (err) {
         recordFrontendError(err);
         libraryStatus.textContent = `Chyba načtení knihovny: ${err}`;
@@ -16381,17 +16426,20 @@ COCKPIT_HTML = """<!doctype html>
 
     function setLibraryActiveTab() {
       document.querySelectorAll("[data-library-category]").forEach((button) => {
-        button.classList.toggle("active", button.dataset.libraryCategory === currentLibraryCategory);
+        const category = button.dataset.libraryCategory || "other";
+        const readState = button.dataset.libraryReadState || "";
+        button.classList.toggle("active", category === currentLibraryCategory && readState === currentLibraryReadStateFilter);
       });
     }
 
     async function searchLibrary() {
       const query = librarySearchInput.value.trim();
       if (query.length < 2) {
-        await loadLibraryCategory(currentLibraryCategory);
+        await loadLibraryCategory(currentLibraryCategory, currentLibraryReadStateFilter);
         return;
       }
       currentLibrarySelectedId = "";
+      updateLibraryReadStateButtons(null);
       libraryDeleteBtn.disabled = true;
       resetLibraryExportState();
       libraryStatus.textContent = "Hledám ve fulltextu...";
@@ -16400,7 +16448,7 @@ COCKPIT_HTML = """<!doctype html>
       libraryReaderText.textContent = "";
       renderLibraryAttachments("", []);
       try {
-        const url = `/api/library/search?category=${encodeURIComponent(currentLibraryCategory)}&q=${encodeURIComponent(query)}&limit=80`;
+        const url = `/api/library/search?category=${encodeURIComponent(currentLibraryCategory)}&read_state=${encodeURIComponent(currentLibraryReadStateFilter)}&q=${encodeURIComponent(query)}&limit=80`;
         const data = await fetchJson(url);
         currentLibraryItems = data.items || [];
         renderLibraryItems(currentLibraryItems);
@@ -16572,11 +16620,12 @@ COCKPIT_HTML = """<!doctype html>
         libraryReaderTitle.textContent = "Vyber článek";
         libraryReaderMeta.textContent = data.message || "Položka byla vyřazena.";
         libraryReaderText.textContent = "";
+        updateLibraryReadStateButtons(null);
         renderLibraryAttachments("", []);
         if (librarySearchInput.value.trim().length >= 2) {
           await searchLibrary();
         } else {
-          await loadLibraryCategory(currentLibraryCategory);
+          await loadLibraryCategory(currentLibraryCategory, currentLibraryReadStateFilter);
         }
         libraryStatus.textContent = data.message || "Položka byla vyřazena z knihovny.";
       } catch (err) {
@@ -16655,6 +16704,48 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
+    async function setSelectedLibraryReadState(readState) {
+      const articleId = currentLibrarySelectedId;
+      if (!articleId) {
+        libraryStatus.textContent = "Nejdřív vyber položku v knihovně.";
+        return;
+      }
+      let note = "";
+      if (readState === "to_read") {
+        note = window.prompt("Volitelná poznámka k přečtení:", currentLibrarySelectedItem && currentLibrarySelectedItem.read_note ? currentLibrarySelectedItem.read_note : "") || "";
+      }
+      libraryToReadBtn.disabled = true;
+      libraryDoneBtn.disabled = true;
+      libraryClearReadStateBtn.disabled = true;
+      libraryStatus.textContent = "Ukládám stav článku...";
+      try {
+        const data = await postJson("/api/library/read-state", {
+          article_id: articleId,
+          read_state: readState,
+          note
+        });
+        if (!data.ok) {
+          libraryStatus.textContent = data.message || "Stav článku se nepodařilo uložit.";
+          updateLibraryReadStateButtons(currentLibrarySelectedItem);
+          return;
+        }
+        const item = data.item || {};
+        libraryStatus.textContent = data.message || "Stav článku uložen.";
+        libraryReaderMeta.textContent = libraryItemMeta(item);
+        updateLibraryReadStateButtons(item);
+        const targetCategory = currentLibraryReadStateFilter ? "all" : (item.category || currentLibraryCategory);
+        const targetReadState = currentLibraryReadStateFilter || "";
+        await loadLibraryCategory(targetCategory, targetReadState);
+        if (item.id) {
+          await loadLibraryItem(item.id);
+        }
+      } catch (err) {
+        recordFrontendError(err);
+        libraryStatus.textContent = `Chyba uložení stavu článku: ${err}`;
+        updateLibraryReadStateButtons(currentLibrarySelectedItem);
+      }
+    }
+
     function renderLibraryItems(items) {
       libraryList.innerHTML = "";
       if (!items.length) {
@@ -16691,6 +16782,9 @@ COCKPIT_HTML = """<!doctype html>
 
     function libraryItemMeta(item) {
       const parts = [];
+      if (item.read_state && item.read_state !== "normal") {
+        parts.push(item.read_state_label || item.read_state);
+      }
       const date = String(item.archived_at || "").slice(0, 10);
       if (date) parts.push(date);
       if (item.category_label) parts.push(item.category_label);
@@ -16705,6 +16799,7 @@ COCKPIT_HTML = """<!doctype html>
       }
       if (item.text_chars) parts.push(`${item.text_chars} znaků`);
       if (item.attachment_count) parts.push(`${item.attachment_count} příloh`);
+      if (item.read_note) parts.push(item.read_note);
       return parts.join(" | ");
     }
 
@@ -16795,6 +16890,7 @@ COCKPIT_HTML = """<!doctype html>
           libraryReaderMeta.textContent = data.message || data.error || "";
           libraryDeleteBtn.disabled = true;
           currentLibrarySelectedId = "";
+          updateLibraryReadStateButtons(null);
           resetLibraryExportState(data.message || "Článek nelze načíst.");
           return;
         }
@@ -16802,6 +16898,7 @@ COCKPIT_HTML = """<!doctype html>
         libraryReaderTitle.textContent = item.one_line_title || item.title || "Bez názvu";
         libraryReaderMeta.textContent = libraryItemMeta(item);
         libraryReaderText.textContent = data.text || "";
+        updateLibraryReadStateButtons(item);
         renderLibraryAttachments(item.id || articleId, item.attachments || []);
       } catch (err) {
         recordFrontendError(err);
@@ -16810,6 +16907,7 @@ COCKPIT_HTML = """<!doctype html>
         renderLibraryAttachments("", []);
         libraryDeleteBtn.disabled = true;
         currentLibrarySelectedId = "";
+        updateLibraryReadStateButtons(null);
         resetLibraryExportState(`Chyba čtení: ${err}`);
       }
     }
@@ -18185,6 +18283,9 @@ COCKPIT_HTML = """<!doctype html>
     libraryAttachmentSaveBtn.addEventListener("click", attachLibraryImage);
     libraryExportPrepareBtn.addEventListener("click", prepareSelectedLibraryPdfExport);
     libraryExportSendBtn.addEventListener("click", sendSelectedLibraryPdfExport);
+    libraryToReadBtn.addEventListener("click", () => setSelectedLibraryReadState("to_read"));
+    libraryDoneBtn.addEventListener("click", () => setSelectedLibraryReadState("done"));
+    libraryClearReadStateBtn.addEventListener("click", () => setSelectedLibraryReadState("normal"));
     libraryDeleteBtn.addEventListener("click", deleteSelectedLibraryItem);
     libraryArchiveUrlInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
@@ -18200,7 +18301,7 @@ COCKPIT_HTML = """<!doctype html>
       }
     });
     document.querySelectorAll("[data-library-category]").forEach((button) => {
-      button.addEventListener("click", () => loadLibraryCategory(button.dataset.libraryCategory || "other"));
+      button.addEventListener("click", () => loadLibraryCategory(button.dataset.libraryCategory || "other", button.dataset.libraryReadState || ""));
     });
     libraryModal.addEventListener("click", (event) => {
       if (event.target === libraryModal) {

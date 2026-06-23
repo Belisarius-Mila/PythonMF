@@ -32,6 +32,7 @@ from app.cockpit import (
     lekarna_retire_apply_action,
     lekarna_retire_preview_action,
     lekarna_search_action,
+    library_read_state_action,
     cockpit_edge_tts_action,
     cockpit_codex_approval_clear_action,
     cockpit_safe_readonly_capabilities_action,
@@ -188,6 +189,25 @@ class CockpitTests(unittest.TestCase):
             article_id="recipe-1",
             user_confirmed=True,
             confirmation_text="Potvrzuji vyřazení z knihovny",
+        )
+
+    def test_library_read_state_action_updates_article_state(self) -> None:
+        with patch("app.cockpit.set_article_read_state") as read_state_mock:
+            read_state_mock.return_value = {"ok": True, "item": {"id": "article-1", "read_state": "to_read"}}
+
+            result = library_read_state_action(
+                {
+                    "article_id": "article-1",
+                    "read_state": "to_read",
+                    "note": "Vrátit se k tomu.",
+                }
+            )
+
+        self.assertTrue(result["ok"])
+        read_state_mock.assert_called_once_with(
+            article_id="article-1",
+            read_state="to_read",
+            note="Vrátit se k tomu.",
         )
 
     def test_lekarna_retire_preview_action_returns_confirmation_phrase(self) -> None:
@@ -367,9 +387,13 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/library/attachment", COCKPIT_HTML)
         self.assertIn("/api/library/attachment/add", COCKPIT_HTML)
         self.assertIn("/api/library/delete", COCKPIT_HTML)
+        self.assertIn("/api/library/read-state", COCKPIT_HTML)
         self.assertIn("/api/library/export/prepare", COCKPIT_HTML)
         self.assertIn("/api/library/export/send", COCKPIT_HTML)
         self.assertIn("libraryDeleteBtn", COCKPIT_HTML)
+        self.assertIn("libraryToReadBtn", COCKPIT_HTML)
+        self.assertIn("libraryDoneBtn", COCKPIT_HTML)
+        self.assertIn("libraryClearReadStateBtn", COCKPIT_HTML)
         self.assertIn("libraryExportPrepareBtn", COCKPIT_HTML)
         self.assertIn("libraryExportSendBtn", COCKPIT_HTML)
         self.assertIn("libraryExportStatus", COCKPIT_HTML)
@@ -380,6 +404,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn('value="ai_tools"', COCKPIT_HTML)
         self.assertIn('data-library-category="ai_tools"', COCKPIT_HTML)
         self.assertIn("Samantha / AI nástroje", COCKPIT_HTML)
+        self.assertIn('data-library-read-state="to_read"', COCKPIT_HTML)
+        self.assertIn("K přečtení", COCKPIT_HTML)
 
     def test_document_work_status_groups_downloads_and_review_queue(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

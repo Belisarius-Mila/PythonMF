@@ -41,6 +41,12 @@ LIBRARY_EXPORT_EMAIL_MARKER = "X-Samantha-Library-Export"
 LIBRARY_EXPORT_EMAIL_MARKER_VALUE = "true"
 LIBRARY_EXPORT_SUBJECT_PREFIX = "[SamanthaLibraryExport]"
 LIBRARY_EXPORT_SEND_CONFIRMATION_PREFIX = "Potvrzuji odeslání exportu knihovny"
+READ_STATES = {"normal", "to_read", "done"}
+READ_STATE_LABELS = {
+    "normal": "běžné",
+    "to_read": "k přečtení",
+    "done": "hotovo",
+}
 
 
 @dataclass(frozen=True)
@@ -90,6 +96,10 @@ class ArticleArchiveItem:
     html_file: str
     text_chars: int
     tags: tuple[str, ...]
+    read_state: str = "normal"
+    read_state_label: str = "běžné"
+    read_note: str = ""
+    read_state_updated_at: str = ""
     attachments: tuple[ArticleAttachment, ...] = ()
 
     def to_summary(self, snippet: str = "", include_attachments: bool = False) -> dict[str, Any]:
@@ -110,6 +120,10 @@ class ArticleArchiveItem:
             "text_chars": self.text_chars,
             "tags": list(self.tags),
             "snippet": snippet,
+            "read_state": self.read_state,
+            "read_state_label": self.read_state_label,
+            "read_note": self.read_note,
+            "read_state_updated_at": self.read_state_updated_at,
             "attachment_count": len(self.attachments),
             "attachment_types": attachment_types,
             "attachment_roles": attachment_roles,
@@ -778,6 +792,10 @@ def detect_article_tail_start(lines: list[str]) -> int:
 
 
 def detect_article_start(lines: list[str], title: str) -> int:
+    main_content_start = detect_main_content_start(lines)
+    if main_content_start >= 0:
+        return main_content_start
+
     title_head = title.split("|", 1)[0].strip()
     title_words = significant_words(title_head)
     candidates: list[tuple[int, int]] = []
@@ -803,6 +821,14 @@ def detect_article_start(lines: list[str], title: str) -> int:
         if index > 10 and title_head and title_head.casefold() in line.casefold():
             return index
     return 0
+
+
+def detect_main_content_start(lines: list[str]) -> int:
+    for index, line in enumerate(lines):
+        folded = line.strip().casefold()
+        if folded in {"hlavní obsah", "hlavni obsah", "main content"}:
+            return min(index + 1, len(lines) - 1)
+    return -1
 
 
 def significant_words(value: str) -> list[str]:
@@ -866,6 +892,9 @@ def write_article_archive(
         "text_file": str(text_path.relative_to(archive_root)),
         "html_file": str(html_path.relative_to(archive_root)),
         "text_chars": str(len(article.text)),
+        "read_state": "normal",
+        "read_note": "",
+        "read_state_updated_at": "",
         "attachments": [],
     }
     metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -906,6 +935,9 @@ def write_text_archive(
         "text_file": str(text_path.relative_to(archive_root)),
         "html_file": "",
         "text_chars": str(len(clean_text)),
+        "read_state": "normal",
+        "read_note": "",
+        "read_state_updated_at": "",
         "attachments": [],
     }
     metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -1002,6 +1034,7 @@ def article_item_from_raw(raw: dict[str, Any]) -> ArticleArchiveItem:
         text_chars = int(raw.get("text_chars", 0) or 0)
     except (TypeError, ValueError):
         text_chars = 0
+    read_state = normalize_read_state(str(raw.get("read_state", "normal")))
     return ArticleArchiveItem(
         id=str(raw.get("id", "")).strip(),
         title=title,
@@ -1018,8 +1051,34 @@ def article_item_from_raw(raw: dict[str, Any]) -> ArticleArchiveItem:
         html_file=str(raw.get("html_file", "")).strip(),
         text_chars=text_chars,
         tags=tags_tuple,
+        read_state=read_state,
+        read_state_label=READ_STATE_LABELS[read_state],
+        read_note=str(raw.get("read_note", "")).strip(),
+        read_state_updated_at=str(raw.get("read_state_updated_at", "")).strip(),
         attachments=attachments,
     )
+
+
+def normalize_read_state(value: str) -> str:
+    state = str(value or "").strip().casefold().replace("-", "_")
+    aliases = {
+        "read": "to_read",
+        "todo": "to_read",
+        "to-read": "to_read",
+        "k_precteni": "to_read",
+        "k přečtení": "to_read",
+        "k precteni": "to_read",
+        "prectist": "to_read",
+        "přečíst": "to_read",
+        "done": "done",
+        "hotovo": "done",
+        "read_done": "done",
+        "normal": "normal",
+        "none": "normal",
+        "bezne": "normal",
+        "běžné": "normal",
+    }
+    return aliases.get(state, state if state in READ_STATES else "normal")
 
 
 def normalize_attachments(raw: Any) -> tuple[ArticleAttachment, ...]:
@@ -1092,19 +1151,24 @@ def normalized_datetime(value: str) -> str:
 def list_articles(
     *,
     category: str = "other",
+    read_state: str = "",
     archive_root: Path = DEFAULT_ARCHIVE_ROOT,
     limit: int = 200,
 ) -> dict[str, Any]:
-    wanted = normalize_category(category)
+    wanted = "all" if str(category or "").strip().casefold() == "all" else normalize_category(category)
+    wanted_read_state = normalize_read_state(read_state) if str(read_state or "").strip() else ""
     items = [
         item.to_summary()
         for item in load_article_registry(archive_root)
-        if item.category == wanted
+        if (wanted == "all" or item.category == wanted)
+        and (not wanted_read_state or item.read_state == wanted_read_state)
     ]
     return {
         "ok": True,
         "category": wanted,
-        "category_label": CATEGORY_LABELS[wanted],
+        "category_label": CATEGORY_LABELS[wanted] if wanted != "all" else "Vše",
+        "read_state": wanted_read_state,
+        "read_state_label": READ_STATE_LABELS[wanted_read_state] if wanted_read_state else "",
         "items": items[: max(1, min(limit, 500))],
         "count": len(items),
     }
@@ -1114,6 +1178,7 @@ def search_articles(
     *,
     query: str,
     category: str = "all",
+    read_state: str = "",
     archive_root: Path = DEFAULT_ARCHIVE_ROOT,
     limit: int = 50,
 ) -> dict[str, Any]:
@@ -1121,9 +1186,12 @@ def search_articles(
     if not terms:
         return {"ok": True, "query": query, "items": [], "count": 0}
     wanted = normalize_category(category) if category != "all" else "all"
+    wanted_read_state = normalize_read_state(read_state) if str(read_state or "").strip() else ""
     results: list[tuple[int, ArticleArchiveItem, str]] = []
     for item in load_article_registry(archive_root):
         if wanted != "all" and item.category != wanted:
+            continue
+        if wanted_read_state and item.read_state != wanted_read_state:
             continue
         text = read_article_text(item.id, archive_root=archive_root, max_chars=0)
         folded = text.casefold()
@@ -1139,6 +1207,8 @@ def search_articles(
         "ok": True,
         "query": query,
         "category": wanted,
+        "read_state": wanted_read_state,
+        "read_state_label": READ_STATE_LABELS[wanted_read_state] if wanted_read_state else "",
         "items": [
             {
                 **item.to_summary(snippet=snippet),
@@ -1166,6 +1236,54 @@ def get_article(
         "text": text,
         "truncated": max_chars > 0 and len(text) >= max_chars,
     }
+
+
+def set_article_read_state(
+    *,
+    article_id: str,
+    read_state: str,
+    note: str = "",
+    archive_root: Path = DEFAULT_ARCHIVE_ROOT,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    item = find_article(article_id, archive_root=archive_root)
+    if item is None:
+        raise ValueError("Článek nebyl nalezen.")
+    normalized_state = normalize_read_state(read_state)
+    clean_note = str(note or "").strip()[:1000]
+    if normalized_state == "normal":
+        clean_note = ""
+    metadata_path = article_metadata_path(item, archive_root=archive_root)
+    if not metadata_path.exists():
+        raise ValueError("Metadata článku nebyla nalezena.")
+    raw = json.loads(metadata_path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise ValueError("Metadata článku mají neplatný formát.")
+    updated_at = (now or datetime.now(timezone.utc)).replace(microsecond=0).isoformat()
+    raw["read_state"] = normalized_state
+    raw["read_note"] = clean_note
+    raw["read_state_updated_at"] = updated_at
+    metadata_path.write_text(json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    update_registry(archive_root / "registry.jsonl", raw)
+    updated_item = article_item_from_raw(raw)
+    return {
+        "ok": True,
+        "message": article_read_state_message(updated_item),
+        "item": updated_item.to_summary(include_attachments=True),
+    }
+
+
+def article_metadata_path(item: ArticleArchiveItem, archive_root: Path = DEFAULT_ARCHIVE_ROOT) -> Path:
+    text_path = archive_root / item.text_file
+    return text_path.parent / "metadata.json"
+
+
+def article_read_state_message(item: ArticleArchiveItem) -> str:
+    if item.read_state == "to_read":
+        return "Článek je označený k přečtení."
+    if item.read_state == "done":
+        return "Článek je označený jako hotový."
+    return "Příznak k přečtení je zrušený."
 
 
 def prepare_article_pdf_export(

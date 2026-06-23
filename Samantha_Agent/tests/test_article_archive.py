@@ -24,6 +24,7 @@ from app.article_archive import (
     attach_article_image,
     cleanup_article_text,
     delete_article,
+    extract_article,
     fetch_url,
     get_article,
     get_article_attachment,
@@ -32,6 +33,7 @@ from app.article_archive import (
     prepare_article_pdf_export,
     search_articles,
     send_article_pdf_export,
+    set_article_read_state,
     trim_to_article_body,
 )
 from app.email.config import OutgoingMailConfig
@@ -113,6 +115,27 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertEqual(listed["count"], 1)
         self.assertEqual(listed["items"][0]["canonical_url"], "https://example.test/clanek")
 
+    def test_extract_article_prefers_main_content_over_footer_title_duplicate(self) -> None:
+        html = """<!doctype html>
+<html>
+<head><title>Krátký titulek z metadat</title></head>
+<body>
+<nav>Hlavní stránka</nav>
+<div>Hlavní obsah</div>
+<h1>Skutečný nadpis článku</h1>
+<p>První skutečný odstavec článku s důležitým obsahem.</p>
+<p>Druhý skutečný odstavec článku.</p>
+<h2>Diskuze</h2>
+<footer>Krátký titulek z metadat</footer>
+</body>
+</html>"""
+
+        article = extract_article(html.encode("utf-8"), "https://example.test/clanek")
+
+        self.assertIn("První skutečný odstavec článku", article.text)
+        self.assertIn("Druhý skutečný odstavec článku", article.text)
+        self.assertNotEqual(article.text, "Krátký titulek z metadat")
+
     def test_archive_text_entry_saves_searchable_item_without_url(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             archive_root = Path(temp_dir)
@@ -139,6 +162,41 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertTrue(article["ok"])
         self.assertIn("Mouka, kakao a med", article["text"])
         self.assertEqual(article["item"]["source_note"], "Syntetizovaný recept bez původní URL.")
+
+    def test_set_article_read_state_updates_metadata_and_registry(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            result = archive_text_entry(
+                title="Důležitý článek",
+                text="Text článku, ke kterému se chci vrátit.",
+                category="health_info",
+                archive_root=archive_root,
+            )
+            item_id = result["item"]["id"]
+
+            marked = set_article_read_state(
+                article_id=item_id,
+                read_state="to_read",
+                note="Vrátit se k tomu.",
+                archive_root=archive_root,
+            )
+            listed = list_articles(category="health_info", archive_root=archive_root)
+            to_read = list_articles(category="all", read_state="to_read", archive_root=archive_root)
+            cleared = set_article_read_state(
+                article_id=item_id,
+                read_state="normal",
+                note="Tahle poznámka se má zahodit.",
+                archive_root=archive_root,
+            )
+
+        self.assertTrue(marked["ok"])
+        self.assertEqual(marked["item"]["read_state"], "to_read")
+        self.assertEqual(marked["item"]["read_note"], "Vrátit se k tomu.")
+        self.assertEqual(listed["items"][0]["read_state"], "to_read")
+        self.assertEqual(to_read["count"], 1)
+        self.assertEqual(to_read["items"][0]["id"], item_id)
+        self.assertEqual(cleared["item"]["read_state"], "normal")
+        self.assertEqual(cleared["item"]["read_note"], "")
 
     def test_ai_tools_category_is_supported_for_samantha_knowledge(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
