@@ -11916,6 +11916,8 @@ COCKPIT_HTML = """<!doctype html>
     .library-modal { width: min(1180px, 100%); }
     .library-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
     .library-tab.active { background: var(--blue); color: white; }
+    .library-tab.read-queue { border-color: #f59e0b; background: #fffbeb; color: #92400e; font-weight: 750; }
+    .library-tab.read-queue.active { background: #f59e0b; color: #172033; }
     .library-archive { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; padding: 10px; display: grid; gap: 8px; }
     .library-archive-grid { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(140px, 180px) minmax(140px, 220px) auto; gap: 8px; align-items: center; }
     .library-text-grid { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(140px, 180px) minmax(160px, 220px) auto; gap: 8px; align-items: center; }
@@ -11926,13 +11928,15 @@ COCKPIT_HTML = """<!doctype html>
     .library-list { display: grid; gap: 8px; max-height: 58vh; overflow: auto; padding-right: 4px; }
     .library-item { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; padding: 10px; display: grid; gap: 5px; text-align: left; cursor: pointer; }
     .library-item.active { border-color: #93c5fd; background: #eff6ff; }
+    .library-item.to-read { border-color: #f59e0b; background: #fffbeb; box-shadow: inset 3px 0 0 #f59e0b; }
     .library-title { font-weight: 750; overflow-wrap: anywhere; }
+    .library-read-badge { justify-self: start; border: 1px solid #f59e0b; border-radius: 999px; padding: 2px 7px; background: #fff7ed; color: #92400e; font-size: 12px; font-weight: 750; }
     .library-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
-    .library-reader { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; min-height: 420px; display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
+    .library-reader { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; min-height: 420px; display: grid; grid-template-rows: auto 1fr; overflow: visible; }
     .library-reader-head { padding: 12px; border-bottom: 1px solid #edf0f4; display: grid; gap: 6px; background: white; }
     .library-reader-title { margin: 0; font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
     .library-reader-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
-    .library-reader-text { padding: 14px 16px; white-space: pre-wrap; overflow: auto; max-height: 58vh; line-height: 1.58; font-size: 15px; background: white; }
+    .library-reader-text { padding: 14px 16px; white-space: pre-wrap; overflow: visible; line-height: 1.58; font-size: 15px; background: white; }
     .library-reader-attachments { display: grid; gap: 10px; padding: 12px 16px; border-top: 1px solid #edf0f4; background: #fbfcfe; }
     .library-reader-attachments.hidden { display: none; }
     .library-attachment-card { border: 1px solid #edf0f4; border-radius: 8px; background: white; padding: 10px; display: grid; gap: 8px; }
@@ -12535,7 +12539,7 @@ COCKPIT_HTML = """<!doctype html>
           <button class="secondary library-tab" type="button" data-library-category="science">Vědecké články</button>
           <button class="secondary library-tab" type="button" data-library-category="ai_tools">Samantha / AI nástroje</button>
           <button class="secondary library-tab" type="button" data-library-category="other">Ostatní</button>
-          <button class="secondary library-tab" type="button" data-library-category="all" data-library-read-state="to_read">K přečtení</button>
+          <button class="secondary library-tab read-queue" type="button" data-library-category="all" data-library-read-state="to_read">K přečtení</button>
         </div>
         <div class="library-controls">
           <input id="librarySearchInput" type="search" placeholder="Hledat ve vybrané kategorii">
@@ -16761,6 +16765,7 @@ COCKPIT_HTML = """<!doctype html>
         row.className = "library-item";
         row.dataset.articleId = item.id || "";
         row.classList.toggle("active", currentLibrarySelectedId === item.id);
+        row.classList.toggle("to-read", item.read_state === "to_read");
         const title = document.createElement("div");
         title.className = "library-title";
         title.textContent = item.one_line_title || item.title || "Bez názvu";
@@ -16768,6 +16773,12 @@ COCKPIT_HTML = """<!doctype html>
         meta.className = "library-meta";
         meta.textContent = libraryItemMeta(item);
         row.appendChild(title);
+        if (item.read_state === "to_read") {
+          const badge = document.createElement("div");
+          badge.className = "library-read-badge";
+          badge.textContent = item.read_state_label || "k přečtení";
+          row.appendChild(badge);
+        }
         row.appendChild(meta);
         if (item.snippet) {
           const snippet = document.createElement("div");

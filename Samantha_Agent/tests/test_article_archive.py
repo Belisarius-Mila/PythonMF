@@ -291,6 +291,30 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertNotIn("Komentář (0)", cleaned)
         self.assertNotIn("Nesouvisející navigace", cleaned)
 
+    def test_trim_to_article_body_removes_inline_related_article_cards(self) -> None:
+        raw_text = "\n".join(
+            [
+                "Nová technologie brýlových čoček",
+                "Úvodní odstavec článku s delším obsahem o krátkozrakosti u dětí, který má dost slov na to, aby působil jako skutečný obsah článku.",
+                "Další odstavec vysvětluje rizika a proč je vhodné vývoj vady sledovat, včetně dopadů na školu, soustředění a běžný život.",
+                "Související titulek o jiné rodinné zdravotní situaci",
+                "Dítě a rodina",
+                "Třetí odstavec hlavního článku musí zůstat zachovaný.",
+                "Jiný související titulek po hlavním textu",
+                "Dítě a rodina",
+                "Diskuze",
+                "Výběr článků",
+            ]
+        )
+
+        cleaned = trim_to_article_body(raw_text, "Nová technologie brýlových čoček")
+
+        self.assertIn("Úvodní odstavec článku", cleaned)
+        self.assertIn("Třetí odstavec hlavního článku", cleaned)
+        self.assertNotIn("Související titulek", cleaned)
+        self.assertNotIn("Dítě a rodina", cleaned)
+        self.assertNotIn("Výběr článků", cleaned)
+
     def test_cleanup_article_text_rewrites_noisy_saved_article_with_backup(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             archive_root = Path(temp_dir)

@@ -406,6 +406,10 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Samantha / AI nástroje", COCKPIT_HTML)
         self.assertIn('data-library-read-state="to_read"', COCKPIT_HTML)
         self.assertIn("K přečtení", COCKPIT_HTML)
+        self.assertIn("library-tab read-queue", COCKPIT_HTML)
+        self.assertIn("library-read-badge", COCKPIT_HTML)
+        self.assertIn('row.classList.toggle("to-read"', COCKPIT_HTML)
+        self.assertIn("box-shadow: inset 3px 0 0 #f59e0b", COCKPIT_HTML)
 
     def test_document_work_status_groups_downloads_and_review_queue(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

@@ -714,10 +714,39 @@ INLINE_RECOMMENDATION_MARKERS = (
     "Mohlo by se vam hodit",
 )
 
+INLINE_RELATED_CATEGORY_MARKERS = {
+    "auto moto",
+    "cestování",
+    "cestovani",
+    "dítě a rodina",
+    "dite a rodina",
+    "domácí",
+    "domaci",
+    "ekonomika",
+    "finance",
+    "internet a pc",
+    "koktejl",
+    "kultura",
+    "muži",
+    "muzi",
+    "novinky",
+    "reality",
+    "sport",
+    "věda a školy",
+    "veda a skoly",
+    "zahraniční",
+    "zahranicni",
+    "zdraví",
+    "zdravi",
+    "žena",
+    "zena",
+}
+
 
 def remove_article_boilerplate(lines: list[str]) -> list[str]:
     without_inline_recommendations = remove_inline_recommendation_blocks(lines)
-    without_share_blocks = remove_social_share_blocks(without_inline_recommendations)
+    without_related_cards = remove_inline_related_article_cards(without_inline_recommendations)
+    without_share_blocks = remove_social_share_blocks(without_related_cards)
     without_metadata_noise = remove_translated_metadata_noise(without_share_blocks)
     without_labels = [
         line
@@ -740,6 +769,28 @@ def remove_inline_recommendation_blocks(lines: list[str]) -> list[str]:
             skip_recommendation_lines -= 1
             continue
         cleaned.append(line)
+    return cleaned
+
+
+def remove_inline_related_article_cards(lines: list[str]) -> list[str]:
+    cleaned: list[str] = []
+    content_like_lines = 0
+    index = 0
+    while index < len(lines):
+        line = lines[index].strip()
+        next_line = lines[index + 1].strip() if index + 1 < len(lines) else ""
+        folded_next = next_line.casefold()
+        if len(line) > 90:
+            content_like_lines += 1
+        if (
+            content_like_lines >= 2
+            and 35 <= len(line) <= 180
+            and folded_next in INLINE_RELATED_CATEGORY_MARKERS
+        ):
+            index += 2
+            continue
+        cleaned.append(lines[index])
+        index += 1
     return cleaned
 
 
@@ -784,7 +835,9 @@ def detect_article_tail_start(lines: list[str]) -> int:
             content_like_lines += 1
         if source_seen and folded.startswith("sledujte "):
             return index
-        if index >= 5 and any(marker.casefold() == folded or folded.startswith(marker.casefold()) for marker in HARD_TAIL_MARKERS):
+        if (index >= 5 or content_like_lines >= 2) and any(
+            marker.casefold() == folded or folded.startswith(marker.casefold()) for marker in HARD_TAIL_MARKERS
+        ):
             return index
         if content_like_lines >= 3 and folded in {"next", "další", "dalsi"}:
             return index
