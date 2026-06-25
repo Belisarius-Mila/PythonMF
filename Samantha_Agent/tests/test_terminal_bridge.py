@@ -115,6 +115,8 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertEqual(calls[0]["args"][-2], "0")
         self.assertEqual(calls[0]["args"][-1], "")
         self.assertFalse(result["submitted"])
+        self.assertFalse(result["verified"])
+        self.assertEqual(result["status"], "terminal_delivery_unverified")
 
     def test_deliver_prompt_falls_back_to_vscode_when_terminal_is_missing(self) -> None:
         calls = []
@@ -126,7 +128,12 @@ class TerminalBridgeTests(unittest.TestCase):
             return subprocess.CompletedProcess(args=args, returncode=0, stdout="delivered_vscode\n", stderr="")
 
         def fake_ps_runner(args, **kwargs):
-            return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
+            return subprocess.CompletedProcess(
+                args=args,
+                returncode=0,
+                stdout="100 1 ttys000 codex codex\n",
+                stderr="",
+            )
 
         result = deliver_prompt_to_terminal(
             "Hlasový pokyn od Míly.",
@@ -143,6 +150,32 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertTrue(result["verified"])
         self.assertEqual(result["delivery_method"], "local_gui_vscode")
         self.assertEqual(len(calls), 2)
+
+    def test_deliver_prompt_does_not_use_vscode_fallback_without_active_codex_session(self) -> None:
+        calls = []
+
+        def fake_runner(args, **kwargs):
+            calls.append(args)
+            if len(calls) == 1:
+                return subprocess.CompletedProcess(args=args, returncode=1, stdout="", stderr="No Terminal tab.")
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="delivered_vscode\n", stderr="")
+
+        def fake_ps_runner(args, **kwargs):
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
+
+        result = deliver_prompt_to_terminal(
+            "Hlasový pokyn od Míly.",
+            submit=True,
+            runner=fake_runner,
+            ps_runner=fake_ps_runner,
+            script="error \"No Terminal tab.\"",
+            vscode_script="return \"delivered_vscode\"",
+        )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "no_active_codex_session")
+        self.assertIn("VS Code fallback nehlásím jako doručení", result["message"])
+        self.assertEqual(len(calls), 1)
 
     def test_deliver_prompt_to_vscode_uses_osascript_arguments_without_shell(self) -> None:
         calls = []
@@ -224,6 +257,21 @@ class TerminalBridgeTests(unittest.TestCase):
             )
 
         self.assertEqual(discover_codex_ttys(runner=fake_ps_runner), ["ttys000"])
+
+    def test_discover_codex_ttys_ignores_stale_codex_processes(self) -> None:
+        def fake_ps_runner(args, **kwargs):
+            return subprocess.CompletedProcess(
+                args=args,
+                returncode=0,
+                stdout=(
+                    "100 1 ttys000 2-01:00:00 node /usr/local/bin/codex -C /repo .\n"
+                    "101 100 ttys000 2-01:00:00 codex /vendor/bin/codex -C /repo .\n"
+                    "200 1 ttys001 00:05:00 node /usr/local/bin/codex -C /repo .\n"
+                ),
+                stderr="",
+            )
+
+        self.assertEqual(discover_codex_ttys(runner=fake_ps_runner), ["ttys001"])
 
     def test_load_marked_codex_tty_reads_private_marker(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

@@ -12,9 +12,10 @@ from app.speech.voice_inbox import VoiceCommand, normalize_for_triage, voice_com
 
 
 MAX_TERMINAL_PROMPT_CHARS = 1200
-PS_COMMAND = ["ps", "-axo", "pid=,ppid=,tty=,comm=,args="]
+PS_COMMAND = ["ps", "-axo", "pid=,ppid=,tty=,etime=,comm=,args="]
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CURRENT_CODEX_TTY_PATH = PROJECT_ROOT / "data/private/voice_inbox/current_codex_tty.json"
+DEFAULT_STALE_CODEX_SECONDS = 36 * 60 * 60
 
 TERMINAL_MANUAL_TERMS = (
     "smaz",
@@ -112,9 +113,39 @@ def is_codex_cli_process(comm: str, args: str) -> bool:
     return any(Path(token).name == "codex" for token in tokens if token)
 
 
+def parse_ps_etime_seconds(value: str) -> int:
+    text = str(value or "").strip()
+    if not text:
+        return 0
+    days = 0
+    if "-" in text:
+        day_text, text = text.split("-", 1)
+        try:
+            days = int(day_text)
+        except ValueError:
+            days = 0
+    parts = text.split(":")
+    try:
+        if len(parts) == 3:
+            hours, minutes, seconds = [int(part) for part in parts]
+        elif len(parts) == 2:
+            hours = 0
+            minutes, seconds = [int(part) for part in parts]
+        elif len(parts) == 1:
+            hours = 0
+            minutes = 0
+            seconds = int(parts[0])
+        else:
+            return 0
+    except ValueError:
+        return 0
+    return days * 86400 + hours * 3600 + minutes * 60 + seconds
+
+
 def discover_codex_ttys(
     *,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+    stale_after_seconds: int = DEFAULT_STALE_CODEX_SECONDS,
 ) -> list[str]:
     try:
         completed = runner(
@@ -133,14 +164,21 @@ def discover_codex_ttys(
     parent_by_pid: dict[int, int] = {}
     codex_pids: set[int] = set()
     for line in completed.stdout.splitlines():
-        parts = line.strip().split(None, 4)
+        parts = line.strip().split(None, 5)
         if len(parts) < 5:
             continue
-        pid_text, ppid_text, tty, comm, args = parts
+        elapsed_seconds = 0
+        if len(parts) >= 6:
+            pid_text, ppid_text, tty, etime, comm, args = parts
+            elapsed_seconds = parse_ps_etime_seconds(etime)
+        else:
+            pid_text, ppid_text, tty, comm, args = parts
         try:
             pid = int(pid_text)
             ppid = int(ppid_text)
         except ValueError:
+            continue
+        if stale_after_seconds > 0 and elapsed_seconds > stale_after_seconds:
             continue
         tty_by_pid[pid] = normalize_tty(tty)
         parent_by_pid[pid] = ppid
@@ -350,6 +388,7 @@ def deliver_prompt_to_terminal(
     safe_prompt = squash_terminal_text(prompt)
     marked_tty = load_marked_codex_tty(marked_tty_path)
     codex_ttys = discover_codex_ttys(runner=ps_runner)
+    codex_session_seen = bool(codex_ttys)
     effective_marked_tty = marked_tty if marked_tty and (marked_tty in codex_ttys or not codex_ttys) else ""
     auto_target_tty = ""
     stale_marked_tty = marked_tty if marked_tty and codex_ttys and marked_tty not in codex_ttys else ""
@@ -411,16 +450,22 @@ def deliver_prompt_to_terminal(
         check=False,
     )
     if completed.returncode != 0:
+        fallback_blocked_message = (
+            "Nebyla nalezena aktivní Codex CLI relace, proto VS Code fallback nehlásím jako doručení."
+        )
         terminal_error = {
             "ok": False,
-            "status": "terminal_delivery_failed",
-            "message": (completed.stderr or completed.stdout or "Terminálový bridge selhal.").strip(),
+            "status": "no_active_codex_session" if not codex_session_seen else "terminal_delivery_failed",
+            "message": (
+                f"{(completed.stderr or completed.stdout or 'Terminálový bridge selhal.').strip()} "
+                f"{fallback_blocked_message if not codex_session_seen else ''}"
+            ).strip(),
             "returncode": completed.returncode,
             "target_ttys": codex_ttys,
         }
         if marked_tty_error:
             terminal_error["marked_tty_status"] = marked_tty_error
-        if vscode_fallback:
+        if vscode_fallback and codex_session_seen:
             vscode_result = deliver_prompt_to_vscode(
                 safe_prompt,
                 submit=submit,
@@ -444,6 +489,20 @@ def deliver_prompt_to_terminal(
                 "vscode_status": vscode_result,
             }
         return terminal_error
+    if not codex_session_seen:
+        return {
+            "ok": True,
+            "status": "terminal_delivery_unverified",
+            "message": (
+                "Pokyn byl vložen do terminálu, ale nebyla nalezena aktivní Codex CLI relace. "
+                "Doručení proto neoznačuji jako ověřené."
+            ),
+            "submitted": submit,
+            "target_ttys": codex_ttys,
+            "verified": False,
+            "delivery_method": "local_gui_terminal",
+            "marked_tty_status": marked_tty_error,
+        }
     return {
         "ok": True,
         "status": "delivered",
