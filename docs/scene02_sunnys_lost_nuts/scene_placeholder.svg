@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 559" role="img" aria-label="Scene 2 Mossy Stump Rest placeholder">
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#d8f0ff"/>
+      <stop offset="55%" stop-color="#b8e4c8"/>
+      <stop offset="100%" stop-color="#7cb86a"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="78%" cy="12%" r="28%">
+      <stop offset="0%" stop-color="#fff8c8" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#fff8c8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="stump" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#8b6a45"/>
+      <stop offset="100%" stop-color="#5f452d"/>
+    </linearGradient>
+    <linearGradient id="moss" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#6ecf5d"/>
+      <stop offset="100%" stop-color="#3f8f3a"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="559" fill="url(#sky)"/>
+  <rect width="1024" height="559" fill="url(#sunGlow)"/>
+
+  <g opacity="0.22" fill="#3f6a3d">
+    <rect x="30" y="0" width="70" height="559" rx="35"/>
+    <rect x="180" y="0" width="54" height="559" rx="27"/>
+    <rect x="820" y="0" width="78" height="559" rx="39"/>
+    <rect x="940" y="0" width="58" height="559" rx="29"/>
+  </g>
+
+  <ellipse cx="180" cy="120" rx="150" ry="70" fill="#5d9a4f" opacity="0.75"/>
+  <ellipse cx="500" cy="95" rx="210" ry="85" fill="#6aaa58" opacity="0.8"/>
+  <ellipse cx="860" cy="115" rx="180" ry="78" fill="#5d9a4f" opacity="0.75"/>
+
+  <ellipse cx="512" cy="520" rx="430" ry="55" fill="#4f7d42" opacity="0.35"/>
+
+  <g transform="translate(395 285)">
+    <ellipse cx="115" cy="175" rx="125" ry="38" fill="#000" opacity="0.12"/>
+    <path d="M55 175 C55 120, 95 70, 115 70 C135 70, 175 120, 175 175 Z" fill="url(#stump)"/>
+    <ellipse cx="115" cy="72" rx="62" ry="18" fill="url(#moss)"/>
+    <ellipse cx="88" cy="78" rx="22" ry="12" fill="#7ed86f"/>
+    <ellipse cx="132" cy="66" rx="28" ry="14" fill="#8fe67f"/>
+    <ellipse cx="108" cy="58" rx="16" ry="10" fill="#9cf08d"/>
+  </g>
+
+  <g transform="translate(62 250)">
+    <ellipse cx="118" cy="250" rx="95" ry="28" fill="#000" opacity="0.1"/>
+    <ellipse cx="118" cy="95" rx="58" ry="72" fill="#c9854f"/>
+    <ellipse cx="118" cy="205" rx="52" ry="78" fill="#c9854f"/>
+    <ellipse cx="95" cy="82" rx="18" ry="28" fill="#ffe8d0"/>
+    <ellipse cx="141" cy="82" rx="18" ry="28" fill="#ffe8d0"/>
+    <circle cx="96" cy="78" r="7" fill="#2d2015"/>
+    <circle cx="141" cy="78" r="7" fill="#2d2015"/>
+    <text x="118" y="18" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#2d4a35">Benji</text>
+  </g>
+
+  <g transform="translate(285 268)">
+    <ellipse cx="68" cy="220" rx="58" ry="22" fill="#000" opacity="0.1"/>
+    <ellipse cx="68" cy="88" rx="42" ry="52" fill="#f2b8d0"/>
+    <ellipse cx="68" cy="175" rx="38" ry="58" fill="#f2b8d0"/>
+    <ellipse cx="52" cy="78" rx="14" ry="22" fill="#fff0f5"/>
+    <ellipse cx="84" cy="78" rx="14" ry="22" fill="#fff0f5"/>
+    <circle cx="53" cy="74" r="5" fill="#2d2015"/>
+    <circle cx="84" cy="74" r="5" fill="#2d2015"/>
+    <ellipse cx="68" cy="52" rx="10" ry="18" fill="#f2b8d0"/>
+    <text x="68" y="12" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#2d4a35">Bunny</text>
+  </g>
+
+  <g transform="translate(440 210)">
+    <ellipse cx="112" cy="285" rx="105" ry="32" fill="#000" opacity="0.1"/>
+    <ellipse cx="112" cy="105" rx="68" ry="82" fill="#6b4a32"/>
+    <ellipse cx="112" cy="230" rx="62" ry="92" fill="#6b4a32"/>
+    <ellipse cx="88" cy="92" rx="20" ry="30" fill="#e8d2bc"/>
+    <ellipse cx="136" cy="92" rx="20" ry="30" fill="#e8d2bc"/>
+    <circle cx="89" cy="88" r="7" fill="#2d2015"/>
+    <circle cx="136" cy="88" r="7" fill="#2d2015"/>
+    <text x="112" y="18" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#2d4a35">Bruno</text>
+  </g>
+
+  <g transform="translate(660 255)">
+    <ellipse cx="88" cy="235" rx="72" ry="26" fill="#000" opacity="0.1"/>
+    <ellipse cx="88" cy="95" rx="50" ry="62" fill="#d4a574"/>
+    <ellipse cx="88" cy="195" rx="46" ry="72" fill="#d4a574"/>
+    <ellipse cx="70" cy="84" rx="15" ry="24" fill="#fff0e0"/>
+    <ellipse cx="106" cy="84" rx="15" ry="24" fill="#fff0e0"/>
+    <circle cx="71" cy="80" r="6" fill="#2d2015"/>
+    <circle cx="106" cy="80" r="6" fill="#2d2015"/>
+    <text x="88" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#2d4a35">Fiona</text>
+  </g>
+
+  <g transform="translate(820 270)">
+    <ellipse cx="82" cy="215" rx="68" ry="24" fill="#000" opacity="0.1"/>
+    <ellipse cx="82" cy="88" rx="48" ry="58" fill="#f4c542"/>
+    <ellipse cx="82" cy="178" rx="44" ry="68" fill="#f4c542"/>
+    <ellipse cx="66" cy="78" rx="14" ry="22" fill="#fff8dc"/>
+    <ellipse cx="98" cy="78" rx="14" ry="22" fill="#fff8dc"/>
+    <circle cx="67" cy="74" r="5" fill="#2d2015"/>
+    <circle cx="98" cy="74" r="5" fill="#2d2015"/>
+    <text x="82" y="12" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#2d4a35">Sunny</text>
+  </g>
+
+  <text x="512" y="42" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" font-weight="700" fill="#2d4a35" opacity="0.55">Scene 2  Mossy Stump Rest (placeholder)</text>
+</svg>

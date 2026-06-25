@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Scene 2 — Sunny's Lost Nuts</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <button class="ui-button" id="backButton" type="button" aria-label="Zpět na rozcestí">
+          <span class="btn-icon" aria-hidden="true">↩</span>
+        </button>
+        <button class="ui-button" id="repeatButton" type="button" aria-label="Znovu" disabled>
+          <span class="btn-icon" aria-hidden="true">↺</span>
+        </button>
+        <div class="title-card">
+          <h1>Sunny's Lost Nuts</h1>
+        </div>
+        <button class="ui-button" id="dictionaryButton" type="button" aria-label="Slovníček" disabled>
+          <span class="btn-icon" aria-hidden="true">📖</span>
+        </button>
+        <button class="ui-button" id="helpButton" type="button" aria-label="Nápověda" disabled>
+          <span class="btn-icon" aria-hidden="true">🎤</span>
+        </button>
+      </header>
+
+      <section class="scene-card">
+        <div class="scene" id="scene">
+          <img
+            class="scene-image"
+            id="sceneImage"
+            src="scene_02_sunnys_lost_nuts_before.png"
+            alt="Sunny hledá ztracené oříšky u mechového pařezu"
+          >
+          <div class="scene-overlay" id="overlay"></div>
+          <div class="speech-bubble hidden" id="speechBubble">
+            <span class="bubble-emoji" id="bubbleEmoji" aria-hidden="true"></span>
+            <span class="bubble-text" id="bubbleText"></span>
+            <span class="bubble-translation" id="bubbleTranslation"></span>
+          </div>
+          <div class="task-prompt hidden" id="taskPrompt" aria-hidden="true">
+            <span class="task-emoji" id="taskEmoji" aria-hidden="true">🐶</span>
+            <span class="task-prompt-lines">
+              <span class="task-prompt-text" id="taskPromptText">Tap Benji.</span>
+              <span class="task-prompt-translation" id="taskPromptTranslation">Klepni na Benjiho.</span>
+            </span>
+          </div>
+          <div class="nuts-reveal hidden" id="nutsReveal" aria-hidden="true">
+            <img class="nuts-reveal-image hidden" id="nutsRevealImage" alt="" hidden>
+            <div class="nuts-reveal-fallback" id="nutsRevealFallback"></div>
+          </div>
+          <div class="map-fragment hidden" id="mapFragment" aria-hidden="true">
+            <span class="map-fragment-icon" aria-hidden="true">🗺️</span>
+          </div>
+          <div class="complete-banner hidden" id="completeBanner" aria-live="polite">
+            <span class="complete-emoji" aria-hidden="true">🎉</span>
+            <span class="complete-text"></span>
+          </div>
+          <div class="dictionary-panel hidden" id="dictionaryPanel" aria-label="Slovníček">
+            <div class="dictionary-title">Slovníček</div>
+            <div class="dictionary-list" id="dictionaryList"></div>
+          </div>
+          <div class="start-screen" id="startScreen">
+            <button class="start-button" id="startButton" type="button" aria-label="Spustit hru">
+              <span class="start-icon" aria-hidden="true">▶</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <footer class="bottom-panel">
+        <p class="bottom-hint" id="bottomHint">Klepni na velké tlačítko a poslouchej.</p>
+      </footer>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

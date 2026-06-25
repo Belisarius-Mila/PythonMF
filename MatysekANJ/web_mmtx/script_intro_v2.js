@@ -1366,12 +1366,12 @@ function createBenjiBunnyDebugSkipButton() {
   button.style.top = `${benjiBunnyDebugSkipRect.y}%`;
   button.style.width = `${benjiBunnyDebugSkipRect.w}%`;
   button.style.height = `${benjiBunnyDebugSkipRect.h}%`;
-  button.setAttribute("aria-label", "Debug skip to owl garden");
+  button.setAttribute("aria-label", "Debug skip to lake path");
   button.addEventListener("click", async (event) => {
     event.stopPropagation();
     await primeAudio();
     if (state.currentScene === "benjiBunny") {
-      setScene("owlGarden");
+      setScene("clearingMeeting");
     }
   });
   return button;
@@ -2492,9 +2492,9 @@ dialogueDoorButton.addEventListener("click", async (event) => {
   event.stopPropagation();
   await primeAudio();
   if (state.currentScene === "benjiBunny" && state.dialogueDoorState === "green") {
-    setScene("owlGarden");
+    setScene("clearingMeeting");
   } else if (state.currentScene === "clearingMeeting" && state.clearingPhase === "complete") {
-    setScene("owlGarden");
+    window.location.href = "scene02_sunnys_lost_nuts/index.html";
   }
 });
 
@@ -3308,4 +3308,4 @@ window.addEventListener("keydown", () => {
 window.speechSynthesis?.addEventListener?.("voiceschanged", () => {});
 
 const requestedScene = new URLSearchParams(window.location.search).get("scene");
-setScene(requestedScene === "forestSchool" ? "forestSchool" : requestedScene === "clearingMeeting" ? "clearingMeeting" : "intro1");
+setScene(requestedScene === "forestSchool" ? "forestSchool" : requestedScene === "clearingMeeting" ? "clearingMeeting" : requestedScene === "intro4" ? "intro4" : "intro1");
