@@ -25,6 +25,12 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, quote, urlparse
 
+try:
+    from dotenv import load_dotenv
+except ImportError:  # pragma: no cover - optional local convenience dependency
+    def load_dotenv(*_args: object, **_kwargs: object) -> bool:
+        return False
+
 from app.adam_service import (
     adam_service_status,
     deliver_prompt_to_adam_screen,
@@ -80,6 +86,20 @@ from app.documents.vault import (
     tokenize,
     write_json,
     write_jsonl,
+)
+from app.lekarna.auto_import import (
+    OPENAI_DRAFT_CONFIRMATION_PHRASE,
+    apply_auto_import_manifest_from_downloads,
+    build_auto_import_draft,
+)
+from app.lekarna.download_intake import find_recent_download_photos
+from app.lekarna.openai_vision import DEFAULT_OPENAI_VISION_MODEL
+from app.lekarna.photo_import import APPLY_CONFIRMATION_PHRASE
+from app.lekarna.service import (
+    RETIRE_CONFIRMATION_PHRASE,
+    format_domaci_lek_retire_preview,
+    format_retire_domaci_lek,
+    search_domaci_leky_records,
 )
 from app.quantitative_status import DEFAULT_METRICS_PATH as QUANTITATIVE_STATUS_METRICS_PATH
 from app.quantitative_status import ExtensionStats as QuantitativeExtensionStats
@@ -169,6 +189,24 @@ RECOVERY_HANDOFF_PATHS = (
 LOCAL_WEB_APPS = {
     "family-video-organizer": PROJECT_ROOT / "docs" / "family-video-organizer",
 }
+DESKTOP_APP_CATALOG: tuple[dict[str, Any], ...] = (
+    {
+        "id": "vocabulary-it-trainer",
+        "title": "Vocabulary IT trainer",
+        "description": "Desktopový italský slovníkový trenažér s obrázky a lokálními CSV daty.",
+        "kind": "desktopová aplikace",
+        "working_dir": GIT_ROOT / "VocabularyIT",
+        "script": GIT_ROOT / "VocabularyIT" / "vocab_trainer_it.py",
+    },
+    {
+        "id": "vocabulary-fr-trainer",
+        "title": "Vocabulary FR trainer",
+        "description": "Desktopový francouzský slovníkový trenažér s obrázky a lokálními CSV daty.",
+        "kind": "desktopová aplikace",
+        "working_dir": GIT_ROOT / "VocabularyFR",
+        "script": GIT_ROOT / "VocabularyFR" / "vocab_trainer_fr.py",
+    },
+)
 WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
     {
         "id": "scandocu",
@@ -199,6 +237,13 @@ WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
         "kind": "GitHub Pages",
     },
     {
+        "id": "lekarna-admin",
+        "title": "Lékárna - správa",
+        "description": "Lokální bezpečná správa položek v domácí lékárně včetně potvrzovaného vyřazení a importu fotek.",
+        "url": "/lekarna-admin/",
+        "kind": "lokální",
+    },
+    {
         "id": "matysek-mmtx",
         "title": "Matýsek MMTX",
         "description": "Příběhová dětská výuková aplikace se scénami, obrázky, hlasem a lekcemi Forest School.",
@@ -218,6 +263,22 @@ WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
         "description": "Obrazové kartičky pro anglická slovíčka, připravené z lokální slovníkové evidence.",
         "url": "https://belisarius-mila.github.io/PythonMF/vocabulary-en/",
         "kind": "GitHub Pages",
+    },
+    {
+        "id": "vocabulary-it-trainer",
+        "title": "Vocabulary IT trainer",
+        "description": "Desktopový italský slovníkový trenažér s obrázky a lokálními CSV daty.",
+        "url": "",
+        "kind": "desktopová aplikace",
+        "launch_type": "desktop",
+    },
+    {
+        "id": "vocabulary-fr-trainer",
+        "title": "Vocabulary FR trainer",
+        "description": "Desktopový francouzský slovníkový trenažér s obrázky a lokálními CSV daty.",
+        "url": "",
+        "kind": "desktopová aplikace",
+        "launch_type": "desktop",
     },
     {
         "id": "family-video-organizer",
@@ -352,6 +413,67 @@ def web_apps_catalog() -> dict[str, Any]:
     return {"ok": True, "apps": [dict(item) for item in WEB_APP_CATALOG]}
 
 
+def desktop_app_by_id(app_id: str) -> dict[str, Any] | None:
+    safe_id = safe_slug(str(app_id or ""), default="", limit=80)
+    return {item["id"]: item for item in DESKTOP_APP_CATALOG}.get(safe_id)
+
+
+def open_desktop_app_action(
+    payload: dict[str, Any],
+    *,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> dict[str, Any]:
+    app = desktop_app_by_id(str(payload.get("app_id", "")))
+    if app is None:
+        return {
+            "ok": False,
+            "status": "unknown_desktop_app",
+            "message": "Tahle desktopová aplikace není v Cockpit allowlistu.",
+        }
+    working_dir = Path(app["working_dir"])
+    script_path = Path(app["script"])
+    if not working_dir.exists() or not script_path.is_file():
+        return {
+            "ok": False,
+            "status": "missing_app_file",
+            "message": f"{app['title']} nejde spustit, chybí lokální soubor aplikace.",
+            "app": {key: app[key] for key in ("id", "title", "description", "kind")},
+        }
+    shell_command = (
+        f"cd {shell_quote_for_applescript(str(working_dir))}; "
+        f"python3 {shell_quote_for_applescript(str(script_path))}"
+    )
+    script = (
+        'tell application "Terminal"\n'
+        "  activate\n"
+        f'  do script "{shell_command}"\n'
+        "end tell\n"
+    )
+    try:
+        completed = runner(
+            ["/usr/bin/osascript", "-e", script],
+            capture_output=True,
+            text=True,
+            timeout=8,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return {
+            "ok": False,
+            "status": "launch_failed",
+            "message": f"{app['title']} se nepodařilo spustit: {exc}",
+            "app": {key: app[key] for key in ("id", "title", "description", "kind")},
+        }
+    detail = completed.stderr.strip() or completed.stdout.strip()
+    return {
+        "ok": completed.returncode == 0,
+        "status": "launched" if completed.returncode == 0 else "launch_failed",
+        "message": detail or f"{app['title']} se spouští v novém Terminal okně.",
+        "returncode": completed.returncode,
+        "app": {key: app[key] for key in ("id", "title", "description", "kind")},
+    }
+
+
 def parse_tag_payload(raw_tags: Any) -> list[str]:
     if isinstance(raw_tags, str):
         return [part.strip() for part in re.split(r"[,;]", raw_tags) if part.strip()]
@@ -441,6 +563,175 @@ def library_delete_article_action(payload: dict[str, Any]) -> dict[str, Any]:
         return {"ok": False, "message": str(exc), "error": "invalid_delete"}
     except OSError as exc:
         return {"ok": False, "message": f"Položku se nepodařilo vyřadit: {exc}", "error": "archive_failed"}
+
+
+def lekarna_retire_preview_action(payload: dict[str, Any]) -> dict[str, Any]:
+    query = str(payload.get("query", "")).strip()
+    reason = str(payload.get("reason", "")).strip()
+    if not query:
+        return {"ok": False, "message": "Zadej název nebo část názvu léku.", "error": "missing_query"}
+    try:
+        return {
+            "ok": True,
+            "mode": "preview",
+            "confirmation_phrase": RETIRE_CONFIRMATION_PHRASE,
+            "message": format_domaci_lek_retire_preview(query=query, reason=reason),
+        }
+    except OSError as exc:
+        return {"ok": False, "message": f"Náhled vyřazení se nepodařilo načíst: {exc}", "error": "preview_failed"}
+
+
+def lekarna_search_action(query: str, limit: int = 25) -> dict[str, Any]:
+    query = str(query or "").strip()
+    if not query:
+        return {"ok": True, "query": query, "items": [], "message": "Zadej název, potíž nebo část názvu léku."}
+    try:
+        matches = search_domaci_leky_records(query=query, limit=max(1, min(limit, 50)))
+    except OSError as exc:
+        return {"ok": False, "message": f"Lékárnu se nepodařilo načíst: {exc}", "error": "search_failed"}
+    return {"ok": True, "query": query, "items": [_lekarna_match_to_dict(match) for match in matches]}
+
+
+def lekarna_retire_apply_action(payload: dict[str, Any]) -> dict[str, Any]:
+    query = str(payload.get("query", "")).strip()
+    reason = str(payload.get("reason", "")).strip()
+    confirmation_text = str(payload.get("confirmation_text", "")).strip()
+    if not query:
+        return {"ok": False, "message": "Zadej název nebo část názvu léku.", "error": "missing_query"}
+    try:
+        return {
+            "ok": True,
+            "mode": "apply",
+            "message": format_retire_domaci_lek(
+                query=query,
+                reason=reason,
+                user_confirmed=bool(payload.get("user_confirmed")),
+                confirmation_text=confirmation_text,
+            ),
+        }
+    except ValueError as exc:
+        return {
+            "ok": False,
+            "message": str(exc),
+            "error": "invalid_retire_request",
+            "confirmation_phrase": RETIRE_CONFIRMATION_PHRASE,
+        }
+    except OSError as exc:
+        return {"ok": False, "message": f"Lék se nepodařilo vyřadit: {exc}", "error": "retire_failed"}
+
+
+def lekarna_import_photos_status(limit: int = 12) -> dict[str, Any]:
+    try:
+        safe_limit = max(1, min(int(limit), 25))
+    except (TypeError, ValueError):
+        safe_limit = 12
+    photos = find_recent_download_photos(downloads_dir=Path.home() / "Downloads", limit=safe_limit)
+    return {
+        "ok": True,
+        "photos": [
+            {"name": photo.path.name, "bytes": photo.bytes_size, "modified_at": photo.modified_at}
+            for photo in photos
+        ],
+    }
+
+
+def lekarna_auto_import_draft_action(payload: dict[str, Any]) -> dict[str, Any]:
+    backend = str(payload.get("ocr_backend", "openai") or "openai").strip().casefold()
+    confirmation_text = str(payload.get("confirmation_text", "") or "").strip()
+    if backend == "openai" and OPENAI_DRAFT_CONFIRMATION_PHRASE.casefold() not in confirmation_text.casefold():
+        return {
+            "ok": False,
+            "message": "OpenAI Vision draft odesílá fotky do API a vyžaduje potvrzení.",
+            "error": "confirmation_required",
+            "confirmation_phrase": OPENAI_DRAFT_CONFIRMATION_PHRASE,
+        }
+    try:
+        limit = max(1, min(int(payload.get("limit", 3) or 3), 10))
+    except (TypeError, ValueError):
+        limit = 3
+    photo_names_payload = payload.get("photo_names", [])
+    photo_names = (
+        [Path(str(name)).name for name in photo_names_payload if str(name).strip()]
+        if isinstance(photo_names_payload, list)
+        else []
+    )
+    try:
+        load_dotenv(PROJECT_ROOT / ".env", override=True)
+        result = build_auto_import_draft(
+            downloads_dir=Path.home() / "Downloads",
+            limit=limit,
+            photo_names=photo_names,
+            ocr_backend=backend,
+            ocr_model=str(payload.get("model", DEFAULT_OPENAI_VISION_MODEL) or DEFAULT_OPENAI_VISION_MODEL),
+        )
+    except Exception as exc:
+        return {"ok": False, "message": f"Návrh importu se nepodařilo připravit: {exc}", "error": "draft_failed"}
+    return {
+        "ok": True,
+        "message": "Návrh importu z Downloads je připravený.",
+        "manifest_path": str(result.manifest_path),
+        "report_path": str(result.report_path),
+        "photos": result.photos,
+        "new_candidates": result.new_candidates,
+        "duplicate_existing": result.duplicate_existing,
+        "needs_review": result.needs_review,
+    }
+
+
+def lekarna_auto_import_apply_action(payload: dict[str, Any]) -> dict[str, Any]:
+    manifest_path = str(payload.get("manifest_path", "") or "").strip()
+    confirmation_text = str(payload.get("confirmation_text", "") or "").strip()
+    location = str(payload.get("location", "") or "").strip() or "Horní koupelna"
+    if not manifest_path:
+        return {"ok": False, "message": "Chybí cesta k manifestu z posledního návrhu.", "error": "missing_manifest"}
+    if APPLY_CONFIRMATION_PHRASE.casefold() not in confirmation_text.casefold():
+        return {
+            "ok": False,
+            "message": "Přijetí na sklad zapisuje do CSV a vyžaduje potvrzení.",
+            "error": "confirmation_required",
+            "confirmation_phrase": APPLY_CONFIRMATION_PHRASE,
+        }
+    try:
+        result = apply_auto_import_manifest_from_downloads(
+            manifest_path=Path(manifest_path),
+            downloads_dir=Path.home() / "Downloads",
+            location=location,
+            user_confirmed=True,
+            confirmation_text=confirmation_text,
+        )
+    except Exception as exc:
+        return {"ok": False, "message": f"Návrh se nepodařilo přijmout na sklad: {exc}", "error": "apply_failed"}
+    return {
+        "ok": True,
+        "message": "Návrh byl přijat na sklad.",
+        "copied": result.copied_count,
+        "renamed": result.renamed_count,
+        "appended": result.appended_count,
+        "backup_path": str(result.backup_path),
+        "report_path": str(result.report_path),
+    }
+
+
+def _lekarna_match_to_dict(match: Any) -> dict[str, Any]:
+    lek = match.lek
+    return {
+        "query": safe_text(str(lek.nazev)),
+        "nazev": safe_text(str(lek.nazev)),
+        "ucinna_latka": safe_text(str(lek.ucinna_latka)),
+        "sila": safe_text(str(lek.sila)),
+        "forma": safe_text(str(lek.forma)),
+        "kategorie": safe_text(str(lek.kategorie)),
+        "pouziti": safe_text(str(lek.pouziti)),
+        "mnozstvi": safe_text(str(lek.mnozstvi)),
+        "umisteni": safe_text(str(lek.umisteni)),
+        "expirace": safe_text(str(lek.expirace)),
+        "poznamka": safe_text(str(lek.poznamky)),
+        "pil_short": safe_text(str(lek.PIL_Short)),
+        "zdroj": safe_text(str(lek.zdroj)),
+        "score": int(match.score),
+        "reasons": [safe_text(str(reason)) for reason in match.reasons],
+        "warnings": [safe_text(str(warning)) for warning in match.warnings],
+    }
 
 
 def library_prepare_pdf_export_action(payload: dict[str, Any]) -> dict[str, Any]:
@@ -5847,6 +6138,250 @@ def basic_markdown_to_html(markdown_text: str) -> str:
     return "\n".join(output)
 
 
+def lekarna_admin_page_html() -> str:
+    retire_phrase = html.escape(RETIRE_CONFIRMATION_PHRASE)
+    openai_phrase = html.escape(OPENAI_DRAFT_CONFIRMATION_PHRASE)
+    import_phrase = html.escape(APPLY_CONFIRMATION_PHRASE)
+    return f"""<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lékárna - správa</title>
+  <style>
+    * {{ box-sizing: border-box; }}
+    body {{ margin: 0; padding: 22px; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f6f8fb; color: #172033; }}
+    main {{ max-width: 1120px; margin: 0 auto; }}
+    h1 {{ margin: 0 0 8px; font-size: 30px; letter-spacing: 0; }}
+    h2 {{ margin: 0 0 12px; font-size: 20px; letter-spacing: 0; }}
+    p {{ line-height: 1.5; }}
+    .layout {{ display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr); gap: 18px; margin-top: 20px; }}
+    section {{ background: white; border: 1px solid #d8dee8; border-radius: 8px; padding: 18px; }}
+    label {{ display: block; font-weight: 650; margin-top: 12px; }}
+    input, textarea {{ width: 100%; margin-top: 6px; border: 1px solid #b9c2d0; border-radius: 6px; padding: 10px 12px; font: inherit; background: white; }}
+    button {{ border: 0; border-radius: 6px; padding: 10px 14px; font: inherit; font-weight: 700; cursor: pointer; background: #1f5f8f; color: white; margin: 12px 8px 0 0; }}
+    button.secondary {{ background: #4b5563; }}
+    button.danger {{ background: #9f2d2d; }}
+    button:disabled {{ opacity: 0.55; cursor: wait; }}
+    .muted {{ color: #5d6778; font-size: 14px; }}
+    .result {{ white-space: pre-wrap; background: #f2f5f8; border: 1px solid #d8dee8; border-radius: 8px; padding: 12px; min-height: 44px; margin-top: 12px; }}
+    .items {{ display: grid; gap: 10px; margin-top: 12px; }}
+    .item {{ border: 1px solid #d8dee8; border-radius: 8px; padding: 12px; background: #fbfcfd; }}
+    .item strong {{ display: block; margin-bottom: 4px; }}
+    .row {{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }}
+    @media (max-width: 840px) {{ body {{ padding: 14px; }} .layout, .row {{ grid-template-columns: 1fr; }} }}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Lékárna - správa</h1>
+    <p class="muted">Lokální bezpečná správa položek v domácí lékárně. Vyhledávání je read-only; vyřazení a příjem fotek zapisují až po opsání potvrzovací věty.</p>
+    <div class="layout">
+      <section>
+        <h2>Vyhledání a vyřazení</h2>
+        <label for="searchInput">Název, potíž nebo část názvu</label>
+        <input id="searchInput" placeholder="např. heparin, kašel, rýma">
+        <button id="searchBtn">Hledat</button>
+        <div id="searchResults" class="items"></div>
+
+        <label for="retireReason">Důvod vyřazení</label>
+        <input id="retireReason" placeholder="např. spotřebováno, prošlá expirace">
+        <button id="previewRetireBtn" class="secondary">Náhled vyřazení</button>
+        <div id="retirePreview" class="result">Nejdřív vyhledej položku nebo napiš přesný název.</div>
+        <label for="retireConfirm">Potvrzení pro zápis: {retire_phrase}</label>
+        <input id="retireConfirm" placeholder="{retire_phrase}">
+        <button id="applyRetireBtn" class="danger">Potvrzeně vyřadit</button>
+      </section>
+
+      <section>
+        <h2>Import fotek z Downloads</h2>
+        <p class="muted">OpenAI návrh může odeslat vybrané fotky do API. Přijetí návrhu zapisuje do CSV a kopíruje nebo přejmenovává fotky.</p>
+        <button id="refreshPhotosBtn" class="secondary">Obnovit seznam fotek</button>
+        <div id="photoList" class="items"></div>
+        <div class="row">
+          <label for="importLimit">Limit fotek
+            <input id="importLimit" type="number" min="1" max="10" value="3">
+          </label>
+          <label for="importLocation">Umístění
+            <input id="importLocation" value="Horní koupelna" placeholder="Vlastní umístění">
+          </label>
+        </div>
+        <label for="openaiConfirm">Potvrzení pro OpenAI návrh: {openai_phrase}</label>
+        <input id="openaiConfirm" placeholder="{openai_phrase}">
+        <button id="draftImportBtn">Připravit OpenAI návrh</button>
+        <div id="draftResult" class="result">Návrh zatím není připravený.</div>
+        <label for="manifestPath">Manifest z posledního návrhu</label>
+        <input id="manifestPath" readonly>
+        <label for="importConfirm">Potvrzení pro příjem na sklad: {import_phrase}</label>
+        <input id="importConfirm" placeholder="{import_phrase}">
+        <button id="applyImportBtn" class="danger">Přijmout návrh na sklad</button>
+        <div id="applyResult" class="result">Příjem zatím nebyl spuštěný.</div>
+      </section>
+    </div>
+  </main>
+  <script>
+    const searchInput = document.getElementById("searchInput");
+    const searchBtn = document.getElementById("searchBtn");
+    const searchResults = document.getElementById("searchResults");
+    const retireReason = document.getElementById("retireReason");
+    const previewRetireBtn = document.getElementById("previewRetireBtn");
+    const retirePreview = document.getElementById("retirePreview");
+    const retireConfirm = document.getElementById("retireConfirm");
+    const applyRetireBtn = document.getElementById("applyRetireBtn");
+    const refreshPhotosBtn = document.getElementById("refreshPhotosBtn");
+    const photoList = document.getElementById("photoList");
+    const importLimit = document.getElementById("importLimit");
+    const importLocation = document.getElementById("importLocation");
+    const openaiConfirm = document.getElementById("openaiConfirm");
+    const draftImportBtn = document.getElementById("draftImportBtn");
+    const draftResult = document.getElementById("draftResult");
+    const manifestPath = document.getElementById("manifestPath");
+    const importConfirm = document.getElementById("importConfirm");
+    const applyImportBtn = document.getElementById("applyImportBtn");
+
+    async function postJson(url, payload) {{
+      const res = await fetch(url, {{
+        method: "POST",
+        headers: {{"Content-Type": "application/json"}},
+        body: JSON.stringify(payload || {{}})
+      }});
+      return res.json();
+    }}
+
+    function selectedPhotoNames() {{
+      return Array.from(photoList.querySelectorAll("input[type=checkbox]:checked")).map((input) => input.value);
+    }}
+
+    function escapeText(value) {{
+      return String(value || "").replace(/[&<>"']/g, (char) => ({{"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}}[char]));
+    }}
+
+    function renderItems(items) {{
+      searchResults.innerHTML = "";
+      if (!items.length) {{
+        searchResults.innerHTML = '<div class="muted">Nic nenalezeno.</div>';
+        return;
+      }}
+      for (const item of items) {{
+        const card = document.createElement("div");
+        card.className = "item";
+        card.innerHTML = `
+          <strong>${{escapeText(item.nazev || "Název neuveden")}}</strong>
+          <div>${{escapeText(item.ucinna_latka)}} ${{escapeText(item.sila)}} ${{escapeText(item.forma)}}</div>
+          <div>Kde je: ${{escapeText(item.umisteni || "neuvedeno")}} | Expirace: ${{escapeText(item.expirace || "neuvedena")}}</div>
+          <div class="muted">Proč se našlo: ${{escapeText((item.reasons || []).join(", "))}}</div>
+        `;
+        card.addEventListener("click", () => {{
+          searchInput.value = item.nazev || "";
+          retirePreview.textContent = `Vybráno: ${{item.nazev || ""}}`;
+        }});
+        searchResults.appendChild(card);
+      }}
+    }}
+
+    async function searchLekarna() {{
+      const query = searchInput.value.trim();
+      const res = await fetch(`/api/lekarna/search?q=${{encodeURIComponent(query)}}&limit=25`);
+      const data = await res.json();
+      if (!data.ok) {{
+        searchResults.innerHTML = `<div class="result">${{escapeText(data.message || "Vyhledání selhalo.")}}</div>`;
+        return;
+      }}
+      renderItems(Array.isArray(data.items) ? data.items : []);
+    }}
+
+    async function previewRetire() {{
+      previewRetireBtn.disabled = true;
+      try {{
+        const data = await postJson("/api/lekarna/retire/preview", {{query: searchInput.value, reason: retireReason.value}});
+        retirePreview.textContent = data.message || "Náhled není dostupný.";
+      }} finally {{
+        previewRetireBtn.disabled = false;
+      }}
+    }}
+
+    async function applyRetire() {{
+      applyRetireBtn.disabled = true;
+      try {{
+        const data = await postJson("/api/lekarna/retire/apply", {{
+          query: searchInput.value,
+          reason: retireReason.value,
+          user_confirmed: true,
+          confirmation_text: retireConfirm.value
+        }});
+        retirePreview.textContent = data.message || "Vyřazení doběhlo.";
+      }} finally {{
+        applyRetireBtn.disabled = false;
+      }}
+    }}
+
+    async function refreshPhotos() {{
+      const res = await fetch("/api/lekarna/import/photos?limit=12");
+      const data = await res.json();
+      const photos = Array.isArray(data.photos) ? data.photos : [];
+      photoList.innerHTML = "";
+      if (!photos.length) {{
+        photoList.innerHTML = '<div class="muted">V Downloads nejsou nalezené podporované fotky.</div>';
+        return;
+      }}
+      for (const photo of photos) {{
+        const row = document.createElement("label");
+        row.className = "item";
+        row.innerHTML = `<input type="checkbox" value="${{escapeText(photo.name)}}"> <strong>${{escapeText(photo.name)}}</strong><div class="muted">${{Number(photo.bytes || 0)}} B</div>`;
+        photoList.appendChild(row);
+      }}
+    }}
+
+    async function draftImport() {{
+      draftImportBtn.disabled = true;
+      try {{
+        const data = await postJson("/api/lekarna/import/draft", {{
+          limit: Number(importLimit.value || 3),
+          ocr_backend: "openai",
+          photo_names: selectedPhotoNames(),
+          confirmation_text: openaiConfirm.value
+        }});
+        draftResult.textContent = data.message || "Návrh doběhl.";
+        if (data.manifest_path) manifestPath.value = data.manifest_path;
+        if (data.ok) {{
+          draftResult.textContent += `\\nFotky: ${{data.photos}} | nové: ${{data.new_candidates}} | duplicity: ${{data.duplicate_existing}} | revize: ${{data.needs_review}}`;
+        }}
+      }} finally {{
+        draftImportBtn.disabled = false;
+      }}
+    }}
+
+    async function applyImport() {{
+      applyImportBtn.disabled = true;
+      try {{
+        const data = await postJson("/api/lekarna/import/apply", {{
+          manifest_path: manifestPath.value,
+          location: importLocation.value,
+          confirmation_text: importConfirm.value
+        }});
+        applyResult.textContent = data.message || "Příjem doběhl.";
+        if (data.ok) {{
+          applyResult.textContent += `\\nZapsáno: ${{data.appended}} | kopie: ${{data.copied}} | přejmenováno: ${{data.renamed}}\\nZáloha: ${{data.backup_path}}`;
+        }}
+      }} finally {{
+        applyImportBtn.disabled = false;
+      }}
+    }}
+
+    searchBtn.addEventListener("click", searchLekarna);
+    searchInput.addEventListener("keydown", (event) => {{ if (event.key === "Enter") {{ event.preventDefault(); searchLekarna(); }} }});
+    previewRetireBtn.addEventListener("click", previewRetire);
+    applyRetireBtn.addEventListener("click", applyRetire);
+    refreshPhotosBtn.addEventListener("click", refreshPhotos);
+    draftImportBtn.addEventListener("click", draftImport);
+    applyImportBtn.addEventListener("click", applyImport);
+    refreshPhotos();
+  </script>
+</body>
+</html>
+"""
+
+
 def janicka_cookbook_page_html(path: Path = JANICKA_COOKBOOK_PATH) -> str:
     try:
         markdown_text = path.read_text(encoding="utf-8")
@@ -9216,6 +9751,9 @@ class CockpitServer:
                 if parsed.path == "/janicka-kucharka/":
                     self.respond_html(janicka_cookbook_page_html())
                     return
+                if parsed.path == "/lekarna-admin/":
+                    self.respond_html(lekarna_admin_page_html())
+                    return
                 if parsed.path == "/documents/read":
                     params = parse_qs(parsed.query)
                     document_id = params.get("document_id", [""])[0]
@@ -9244,6 +9782,14 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/web-apps":
                     self.respond_json(web_apps_catalog())
+                    return
+                if parsed.path == "/api/lekarna/import/photos":
+                    params = parse_qs(parsed.query)
+                    try:
+                        limit = int(params.get("limit", ["12"])[0])
+                    except (TypeError, ValueError):
+                        limit = 12
+                    self.respond_json(lekarna_import_photos_status(limit=limit))
                     return
                 if parsed.path == "/api/recovery/status":
                     self.respond_json(recovery_center_status())
@@ -9284,6 +9830,15 @@ class CockpitServer:
                     except (TypeError, ValueError):
                         limit = 50
                     self.respond_json(search_articles(query=query, category=category, limit=limit))
+                    return
+                if parsed.path == "/api/lekarna/search":
+                    params = parse_qs(parsed.query)
+                    query = params.get("q", [""])[0]
+                    try:
+                        limit = int(params.get("limit", ["25"])[0])
+                    except (TypeError, ValueError):
+                        limit = 25
+                    self.respond_json(lekarna_search_action(query=query, limit=limit))
                     return
                 if parsed.path == "/api/library/item":
                     params = parse_qs(parsed.query)
@@ -9403,6 +9958,10 @@ class CockpitServer:
                 if parsed.path == "/api/dev-runner/run":
                     payload = self.read_json()
                     self.respond_json(cockpit_dev_runner_run_action(payload))
+                    return
+                if parsed.path == "/api/desktop-apps/open":
+                    payload = self.read_json()
+                    self.respond_json(open_desktop_app_action(payload))
                     return
                 if parsed.path == "/api/voice-bridge/marker":
                     payload = self.read_json()
@@ -9526,6 +10085,22 @@ class CockpitServer:
                 if parsed.path == "/api/library/delete":
                     payload = self.read_json()
                     self.respond_json(library_delete_article_action(payload))
+                    return
+                if parsed.path == "/api/lekarna/retire/preview":
+                    payload = self.read_json()
+                    self.respond_json(lekarna_retire_preview_action(payload))
+                    return
+                if parsed.path == "/api/lekarna/retire/apply":
+                    payload = self.read_json()
+                    self.respond_json(lekarna_retire_apply_action(payload))
+                    return
+                if parsed.path == "/api/lekarna/import/draft":
+                    payload = self.read_json()
+                    self.respond_json(lekarna_auto_import_draft_action(payload))
+                    return
+                if parsed.path == "/api/lekarna/import/apply":
+                    payload = self.read_json()
+                    self.respond_json(lekarna_auto_import_apply_action(payload))
                     return
                 if parsed.path == "/api/library/export/prepare":
                     payload = self.read_json()
@@ -17368,8 +17943,25 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
+    async function openDesktopApp(app) {
+      if (!app || !app.id) return;
+      showMessage(`Spouštím ${app.title || "desktopovou aplikaci"}...`);
+      try {
+        const data = await postJson("/api/desktop-apps/open", {app_id: app.id});
+        showMessage(data.message || (data.ok ? "Aplikace se spouští." : "Aplikaci se nepodařilo spustit."));
+      } catch (err) {
+        recordFrontendError(err);
+        showMessage(`Chyba spuštění aplikace: ${err}`);
+      }
+    }
+
     function openWebApp(app) {
-      if (!app || !app.url) return;
+      if (!app) return;
+      if (app.launch_type === "desktop") {
+        openDesktopApp(app);
+        return;
+      }
+      if (!app.url) return;
       if (app.id === "scandocu") {
         openScanDocu(false);
         return;

@@ -175,6 +175,22 @@ Postup:
 6. Apply krok zalozi zalohu CSV, prejmenuje fotky, prida radky do CSV, vytvori
    report a validuje, ze foto zdroje v CSV existuji.
 
+Od 2026-06-23 existuje i rutinni Cockpit workflow pro import jedne nebo vice
+fotek z Downloads:
+
+- lokalni stranka: `/lekarna-admin/`,
+- fotky lze pred OpenAI krokem vybrat checkboxem,
+- OpenAI Vision draft vyzaduje presnou vetu:
+  `Potvrzuji OpenAI vision draft lekarna`,
+- prijem navrhu na sklad vyzaduje presnou vetu:
+  `Potvrzuji import fotek lekarna`,
+- pred prijmem se voli umisteni; vychozi je `Horní koupelna`, dalsi volby jsou
+  Jana, Mila, vitaminy/prvky nebo vlastni text,
+- apply krok pouziva jen lokalni manifesty z `data/lekarna/photo_imports/` a
+  kopiruje vybrane fotky z Downloads do `data/lekarna/Leky_v_Krabickach/`,
+- lokalni CSV zmena se nepublikuje automaticky na GitHub Pages; pro web je
+  nutny samostatny export a sifrovani podle weboveho handoffu.
+
 Bezpecnost:
 
 - Foto import je inventar, ne zdravotni doporuceni.
@@ -222,3 +238,6 @@ projektovy soubor, `technical/lekarna_photo_import_intake.md`,
   prirodnich pripravku; prekryto dodatecnym importem a stavovym handoffem.
 - `handoffs/lekarna_dodatecny_import_2026_05_21.md` - dodatecny import dvou
   fotek, pregenerovani exportu/bundle a zalozeni foto intake checklistu.
+- `handoffs/lekarna_cockpit_auto_import_openai_checkpoint_2026_06_23.md` -
+  Cockpit admin workflow pro vyber fotek z Downloads, OpenAI Vision draft,
+  potvrzovany prijem na sklad a volbu umisteni pred zapisem do CSV.

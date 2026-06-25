@@ -22,6 +22,22 @@ from app.lekarna.photo_import import (
     stage_lekarna_photo_import_sources,
     validate_lekarna_photo_sources,
 )
+from app.lekarna.download_intake import (
+    build_download_photo_intake,
+    build_download_photo_intake_markdown,
+    find_download_photos_by_names,
+    find_recent_download_photos,
+)
+from app.lekarna.auto_import import (
+    ImageOcrResult,
+    apply_auto_import_manifest_from_downloads,
+    build_auto_import_draft,
+    suggest_metadata_from_ocr,
+)
+from app.lekarna.openai_vision import (
+    openai_vision_label,
+    openai_vision_to_inventory_suggestion,
+)
 from app.lekarna.search_tags import build_search_tags
 
 
@@ -472,6 +488,250 @@ class LekarnaServiceTests(unittest.TestCase):
             self.assertTrue((photo_dir / "IMG_1004.HEIC").exists())
             self.assertFalse((photo_dir / "first_valid.heic").exists())
             self.assertEqual(list(directory.glob("domaci_leky.backup_before_photo_import_*.csv")), [])
+
+    def test_download_intake_finds_recent_photos_and_detects_duplicates(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            directory = Path(temp_dir)
+            downloads = directory / "Downloads"
+            downloads.mkdir()
+            older = downloads / "IMG_0001.JPG"
+            newer = downloads / "IMG_0002.JPG"
+            older.write_text("older", encoding="utf-8")
+            newer.write_text("newer", encoding="utf-8")
+            csv_path = _fake_csv(directory)
+
+            photos = find_recent_download_photos(downloads_dir=downloads, limit=1)
+            intake = build_download_photo_intake(
+                photos=photos,
+                observed_labels={"IMG_0002.JPG": "Heparin AL mast"},
+                csv_path=csv_path,
+            )
+
+        self.assertEqual(len(photos), 1)
+        self.assertEqual(photos[0].path.name, "IMG_0002.JPG")
+        self.assertEqual(intake["summary"]["action_counts"], {"duplicate_existing": 1})
+        self.assertEqual(intake["items"][0]["matches"][0]["nazev"], "HEPARIN AL")
+
+    def test_download_intake_markdown_is_readable(self) -> None:
+        intake = {
+            "generated_at": "2026-06-23T00:00:00+00:00",
+            "summary": {"photos": 1, "action_counts": {"needs_label": 1}},
+            "items": [
+                {
+                    "photo": {"name": "IMG_0001.JPG", "path": "/tmp/IMG_0001.JPG", "bytes": 123},
+                    "observed_label": "",
+                    "suggested_slug": "img_0001",
+                    "action": "needs_label",
+                    "matches": [],
+                }
+            ],
+        }
+
+        markdown = build_download_photo_intake_markdown(intake)
+
+        self.assertIn("# Lékárna - Downloads photo intake", markdown)
+        self.assertIn("IMG_0001.JPG", markdown)
+        self.assertIn("needs_label", markdown)
+
+    def test_download_intake_selects_photos_by_safe_names(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            directory = Path(temp_dir)
+            downloads = directory / "Downloads"
+            downloads.mkdir()
+            selected = downloads / "IMG_0002.JPG"
+            other = downloads / "IMG_0003.JPG"
+            selected.write_text("selected", encoding="utf-8")
+            other.write_text("other", encoding="utf-8")
+            outside = directory / "outside.JPG"
+            outside.write_text("outside", encoding="utf-8")
+
+            photos = find_download_photos_by_names(
+                downloads_dir=downloads,
+                names=["../outside.JPG", "IMG_0002.JPG", "missing.JPG", "IMG_0002.JPG"],
+            )
+
+        self.assertEqual([photo.path.name for photo in photos], ["IMG_0002.JPG"])
+
+    def test_auto_import_draft_can_use_selected_photo_names(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            directory = Path(temp_dir)
+            downloads = directory / "Downloads"
+            downloads.mkdir()
+            skipped_photo = downloads / "IMG_0001.JPG"
+            selected_photo = downloads / "IMG_0002.JPG"
+            skipped_photo.write_text("skip", encoding="utf-8")
+            selected_photo.write_text("new", encoding="utf-8")
+            csv_path = _fake_csv(directory)
+            manifest_path = directory / "manifest.csv"
+            report_path = directory / "report.md"
+
+            def fake_ocr(path: Path) -> ImageOcrResult:
+                self.assertEqual(path.name, "IMG_0002.JPG")
+                return ImageOcrResult(
+                    text="Dr.Max Vitamin C 500 mg 100 tablet",
+                    lines=("Dr.Max Vitamin C", "500 mg", "100 tablet"),
+                    method="fake",
+                )
+
+            result = build_auto_import_draft(
+                downloads_dir=downloads,
+                limit=3,
+                photo_names=["IMG_0002.JPG"],
+                manifest_path=manifest_path,
+                report_path=report_path,
+                csv_path=csv_path,
+                ocr_runner=fake_ocr,
+            )
+
+            with manifest_path.open("r", encoding="utf-8", newline="") as handle:
+                rows = list(csv.DictReader(handle))
+
+        self.assertEqual(result.photos, 1)
+        self.assertEqual(result.new_candidates, 1)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["source_file"], "IMG_0002.JPG")
+
+    def test_auto_import_apply_copies_download_photo_then_imports(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            directory = Path(temp_dir)
+            downloads = directory / "Downloads"
+            downloads.mkdir()
+            photo_dir = directory / "Leky_v_Krabickach"
+            photo_dir.mkdir()
+            source_photo = downloads / "IMG_0004.JPG"
+            source_photo.write_text("photo", encoding="utf-8")
+            csv_path = _fake_csv(directory)
+            manifest_dir = Path("data/lekarna/photo_imports")
+            manifest_dir.mkdir(parents=True, exist_ok=True)
+            manifest_path = manifest_dir / "lekarna_auto_import_manifest_test.csv"
+            _write_manifest(
+                manifest_path,
+                [
+                    {
+                        "include": "ano",
+                        "source_file": "IMG_0004.JPG",
+                        "new_file": "novy_lek_sirup.jpg",
+                        "nazev": "Novy Lek",
+                        "forma": "sirup",
+                        "mnozstvi": "100 ml",
+                    }
+                ],
+            )
+            try:
+                result = apply_auto_import_manifest_from_downloads(
+                    manifest_path=manifest_path,
+                    downloads_dir=downloads,
+                    photo_dir=photo_dir,
+                    csv_path=csv_path,
+                    report_dir=directory,
+                    location="Pils Jana",
+                    user_confirmed=True,
+                    confirmation_text=APPLY_CONFIRMATION_PHRASE,
+                )
+            finally:
+                manifest_path.unlink(missing_ok=True)
+
+            records = load_domaci_leky(csv_path)
+            target_exists = (photo_dir / "novy_lek_sirup.jpg").exists()
+
+        self.assertEqual(result.copied_count, 1)
+        self.assertEqual(result.renamed_count, 1)
+        self.assertEqual(result.appended_count, 1)
+        self.assertTrue(target_exists)
+        imported = next(record for record in records if record.zdroj == "Leky_v_Krabickach/novy_lek_sirup.jpg")
+        self.assertEqual(imported.zdroj, "Leky_v_Krabickach/novy_lek_sirup.jpg")
+        self.assertEqual(imported.umisteni, "Pils Jana")
+
+    def test_auto_import_suggests_metadata_from_ocr(self) -> None:
+        suggestion = suggest_metadata_from_ocr(
+            (
+                "Dr.Max Vitamin C",
+                "500 mg",
+                "100 tablet",
+                "doplněk stravy",
+            )
+        )
+
+        self.assertEqual(suggestion["nazev"], "Dr.Max Vitamin C")
+        self.assertEqual(suggestion["sila"], "500 mg")
+        self.assertEqual(suggestion["mnozstvi"], "100 tablet")
+        self.assertEqual(suggestion["forma"], "tablety")
+        self.assertEqual(suggestion["kategorie"], "vitaminy_mineraly_doplnky")
+        self.assertTrue(suggestion["new_file"].endswith(".jpg"))
+
+    def test_openai_vision_suggestion_keeps_name_and_match_label_separate(self) -> None:
+        result = {
+            "product_name": "Vitamin B12",
+            "manufacturer_or_brand": "DrMax",
+            "product_type": "doplněk_stravy",
+            "active_ingredients_or_composition": ["Vitamin B12"],
+            "strength": "500 μg",
+            "form": "tablety",
+            "quantity": "100 tablet",
+            "visible_expiration": "",
+            "suggested_category": "vitamíny",
+            "suggested_use_inventory_only": "",
+            "suggested_filename_slug": "",
+            "confidence": 0.8,
+            "uncertainties": [],
+            "visible_text": [],
+            "safety_note": "",
+        }
+
+        suggestion = openai_vision_to_inventory_suggestion(result)
+
+        self.assertEqual(suggestion["nazev"], "Dr.Max Vitamin B12")
+        self.assertEqual(openai_vision_label(result), "Dr.Max Vitamin B12 500 μg 100 tablet")
+        self.assertIn("500_ug", suggestion["new_file"])
+        self.assertNotIn("500_g", suggestion["new_file"])
+        self.assertNotIn("100_tablet_500", suggestion["new_file"])
+
+    def test_auto_import_draft_writes_manifest_only_for_new_candidates(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            directory = Path(temp_dir)
+            downloads = directory / "Downloads"
+            downloads.mkdir()
+            duplicate_photo = downloads / "IMG_0001.JPG"
+            new_photo = downloads / "IMG_0002.JPG"
+            duplicate_photo.write_text("duplicate", encoding="utf-8")
+            new_photo.write_text("new", encoding="utf-8")
+            csv_path = _fake_csv(directory)
+            manifest_path = directory / "manifest.csv"
+            report_path = directory / "report.md"
+
+            def fake_ocr(path: Path) -> ImageOcrResult:
+                if path.name == "IMG_0001.JPG":
+                    return ImageOcrResult(
+                        text="HEPARIN AL mast",
+                        lines=("HEPARIN AL", "mast"),
+                        method="fake",
+                    )
+                return ImageOcrResult(
+                    text="Dr.Max Vitamin C 500 mg 100 tablet",
+                    lines=("Dr.Max Vitamin C", "500 mg", "100 tablet"),
+                    method="fake",
+                )
+
+            result = build_auto_import_draft(
+                downloads_dir=downloads,
+                limit=2,
+                manifest_path=manifest_path,
+                report_path=report_path,
+                csv_path=csv_path,
+                ocr_runner=fake_ocr,
+            )
+
+            with manifest_path.open("r", encoding="utf-8", newline="") as handle:
+                rows = list(csv.DictReader(handle))
+            report_text = report_path.read_text(encoding="utf-8")
+
+        self.assertEqual(result.photos, 2)
+        self.assertEqual(result.duplicate_existing, 1)
+        self.assertEqual(result.new_candidates, 1)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["source_file"], "IMG_0002.JPG")
+        self.assertEqual(rows[0]["nazev"], "Dr.Max Vitamin C")
+        self.assertIn("new_candidate: 1", report_text)
 
 
 def _fake_csv(directory: Path) -> Path:

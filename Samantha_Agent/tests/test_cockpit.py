@@ -25,6 +25,13 @@ from app.cockpit import (
     library_archive_url_action,
     library_attach_image_action,
     library_delete_article_action,
+    lekarna_admin_page_html,
+    lekarna_auto_import_apply_action,
+    lekarna_auto_import_draft_action,
+    lekarna_import_photos_status,
+    lekarna_retire_apply_action,
+    lekarna_retire_preview_action,
+    lekarna_search_action,
     cockpit_edge_tts_action,
     cockpit_codex_approval_clear_action,
     cockpit_safe_readonly_capabilities_action,
@@ -55,6 +62,7 @@ from app.cockpit import (
     mark_reminder_done_action,
     move_document_lifecycle_action,
     new_email_headers_overview,
+    open_desktop_app_action,
     open_document_pdf_action,
     parse_active_projects_table,
     parse_global_tools_table,
@@ -181,6 +189,178 @@ class CockpitTests(unittest.TestCase):
             user_confirmed=True,
             confirmation_text="Potvrzuji vyřazení z knihovny",
         )
+
+    def test_lekarna_retire_preview_action_returns_confirmation_phrase(self) -> None:
+        with patch("app.cockpit.format_domaci_lek_retire_preview") as preview_mock:
+            preview_mock.return_value = "Vyrazeni leku - navrh zmeny"
+
+            result = lekarna_retire_preview_action(
+                {
+                    "query": "HEPARIN AL",
+                    "reason": "spotrebovano",
+                }
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["mode"], "preview")
+        self.assertIn("Potvrzuji vyrazeni leku", result["confirmation_phrase"])
+        self.assertIn("navrh zmeny", result["message"])
+        preview_mock.assert_called_once_with(query="HEPARIN AL", reason="spotrebovano")
+
+    def test_lekarna_retire_apply_action_requires_confirmation(self) -> None:
+        with patch("app.cockpit.format_retire_domaci_lek") as apply_mock:
+            apply_mock.side_effect = ValueError("Vyrazeni leku zapisuje do CSV a vyzaduje potvrzeni")
+
+            result = lekarna_retire_apply_action(
+                {
+                    "query": "HEPARIN AL",
+                    "reason": "spotrebovano",
+                    "user_confirmed": False,
+                    "confirmation_text": "",
+                }
+            )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["error"], "invalid_retire_request")
+        self.assertIn("Potvrzuji vyrazeni leku", result["confirmation_phrase"])
+        apply_mock.assert_called_once_with(
+            query="HEPARIN AL",
+            reason="spotrebovano",
+            user_confirmed=False,
+            confirmation_text="",
+        )
+
+    def test_lekarna_search_action_returns_structured_rows(self) -> None:
+        lek = SimpleNamespace(
+            nazev="HEPARIN AL",
+            ucinna_latka="heparin",
+            sila="",
+            forma="mast",
+            kategorie="modriny",
+            pouziti="modriny a otoky",
+            mnozstvi="1 tuba",
+            umisteni="horni police",
+            expirace="2027-01",
+            poznamky="",
+            PIL_Short="",
+            zdroj="Leky_v_Krabickach/heparin.jpg",
+        )
+        match = SimpleNamespace(lek=lek, score=12, reasons=("nazev: heparin",), warnings=("nutno_overit=ano",))
+        with patch("app.cockpit.search_domaci_leky_records", return_value=[match]) as search_mock:
+            result = lekarna_search_action("heparin", limit=5)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["items"][0]["nazev"], "HEPARIN AL")
+        self.assertEqual(result["items"][0]["query"], "HEPARIN AL")
+        self.assertEqual(result["items"][0]["warnings"], ["nutno_overit=ano"])
+        search_mock.assert_called_once_with(query="heparin", limit=5)
+
+    def test_lekarna_admin_page_contains_safe_controls(self) -> None:
+        page = lekarna_admin_page_html()
+
+        self.assertIn("/api/lekarna/search", page)
+        self.assertIn("/api/lekarna/retire/preview", page)
+        self.assertIn("/api/lekarna/retire/apply", page)
+        self.assertIn("/api/lekarna/import/photos", page)
+        self.assertIn("/api/lekarna/import/draft", page)
+        self.assertIn("/api/lekarna/import/apply", page)
+        self.assertIn("Náhled vyřazení", page)
+        self.assertIn("Připravit OpenAI návrh", page)
+        self.assertIn("Přijmout návrh na sklad", page)
+        self.assertIn("Obnovit seznam fotek", page)
+        self.assertIn("Vlastní umístění", page)
+        self.assertIn("Potvrzuji vyrazeni leku", page)
+        self.assertIn("Potvrzuji OpenAI vision draft lekarna", page)
+        self.assertIn("Potvrzuji import fotek lekarna", page)
+
+    def test_lekarna_auto_import_draft_action_requires_openai_confirmation(self) -> None:
+        result = lekarna_auto_import_draft_action(
+            {
+                "limit": 3,
+                "ocr_backend": "openai",
+                "confirmation_text": "",
+            }
+        )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["error"], "confirmation_required")
+        self.assertIn("Potvrzuji OpenAI vision draft lekarna", result["confirmation_phrase"])
+
+    def test_lekarna_import_photos_status_lists_recent_download_photos(self) -> None:
+        fake_photo = SimpleNamespace(
+            path=Path("/tmp/IMG_0001.JPG"),
+            bytes_size=123,
+            modified_at="2026-06-23T00:00:00+00:00",
+        )
+        with patch("app.cockpit.find_recent_download_photos", return_value=(fake_photo,)) as photos_mock:
+            result = lekarna_import_photos_status(limit=8)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["photos"][0]["name"], "IMG_0001.JPG")
+        self.assertEqual(result["photos"][0]["bytes"], 123)
+        photos_mock.assert_called_once()
+
+    def test_lekarna_auto_import_draft_action_runs_confirmed_backend(self) -> None:
+        fake_result = SimpleNamespace(
+            manifest_path=Path("/tmp/manifest.csv"),
+            report_path=Path("/tmp/report.md"),
+            photos=3,
+            new_candidates=1,
+            duplicate_existing=2,
+            needs_review=0,
+        )
+        with patch("app.cockpit.build_auto_import_draft", return_value=fake_result) as draft_mock:
+            result = lekarna_auto_import_draft_action(
+                {
+                    "limit": 3,
+                    "ocr_backend": "openai",
+                    "photo_names": ["IMG_9456.JPG"],
+                    "confirmation_text": "Potvrzuji OpenAI vision draft lekarna",
+                }
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["duplicate_existing"], 2)
+        self.assertEqual(result["new_candidates"], 1)
+        draft_mock.assert_called_once()
+        self.assertEqual(draft_mock.call_args.kwargs["ocr_backend"], "openai")
+        self.assertEqual(draft_mock.call_args.kwargs["photo_names"], ["IMG_9456.JPG"])
+
+    def test_lekarna_auto_import_apply_action_requires_confirmation(self) -> None:
+        result = lekarna_auto_import_apply_action(
+            {
+                "manifest_path": "/tmp/manifest.csv",
+                "confirmation_text": "",
+            }
+        )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["error"], "confirmation_required")
+        self.assertIn("Potvrzuji import fotek lekarna", result["confirmation_phrase"])
+
+    def test_lekarna_auto_import_apply_action_runs_confirmed_apply(self) -> None:
+        fake_result = SimpleNamespace(
+            backup_path=Path("/tmp/backup.csv"),
+            report_path=Path("/tmp/report.md"),
+            copied_count=1,
+            renamed_count=1,
+            appended_count=1,
+            warnings=(),
+        )
+        with patch("app.cockpit.apply_auto_import_manifest_from_downloads", return_value=fake_result) as apply_mock:
+            result = lekarna_auto_import_apply_action(
+                {
+                    "manifest_path": "/tmp/manifest.csv",
+                    "location": "Pils Jana",
+                    "confirmation_text": "Potvrzuji import fotek lekarna",
+                }
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["appended"], 1)
+        apply_mock.assert_called_once()
+        self.assertEqual(apply_mock.call_args.kwargs["manifest_path"], Path("/tmp/manifest.csv"))
+        self.assertEqual(apply_mock.call_args.kwargs["location"], "Pils Jana")
 
     def test_cockpit_html_contains_library_attachment_view(self) -> None:
         self.assertIn("libraryReaderAttachments", COCKPIT_HTML)
@@ -4262,10 +4442,44 @@ Dalsi krok:
         self.assertIn("Webové aplikace", COCKPIT_HTML)
         self.assertIn("webAppsModal", COCKPIT_HTML)
         self.assertIn("/api/web-apps", COCKPIT_HTML)
+        self.assertIn("/api/desktop-apps/open", COCKPIT_HTML)
         self.assertIn("openWebApp(app)", COCKPIT_HTML)
+        self.assertIn("openDesktopApp(app)", COCKPIT_HTML)
         self.assertIn("SamanthaWebApp_", COCKPIT_HTML)
         self.assertNotIn('target = "_blank"', COCKPIT_HTML)
         self.assertIn("Zavřít", COCKPIT_HTML)
+
+    def test_web_apps_catalog_contains_vocabulary_desktop_trainers(self) -> None:
+        apps = {item["id"]: item for item in web_apps_catalog()["apps"]}
+
+        self.assertEqual(apps["vocabulary-it-trainer"]["launch_type"], "desktop")
+        self.assertEqual(apps["vocabulary-fr-trainer"]["launch_type"], "desktop")
+        self.assertIn("Vocabulary IT", apps["vocabulary-it-trainer"]["title"])
+        self.assertIn("Vocabulary FR", apps["vocabulary-fr-trainer"]["title"])
+
+    def test_open_desktop_app_action_uses_allowlisted_terminal_command(self) -> None:
+        calls: list[list[str]] = []
+
+        def fake_runner(args, **kwargs):
+            calls.append(args)
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
+
+        result = open_desktop_app_action({"app_id": "vocabulary-it-trainer"}, runner=fake_runner)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "launched")
+        self.assertEqual(calls[0][0], "/usr/bin/osascript")
+        self.assertIn("VocabularyIT", calls[0][2])
+        self.assertIn("vocab_trainer_it.py", calls[0][2])
+
+    def test_open_desktop_app_action_rejects_unknown_app(self) -> None:
+        result = open_desktop_app_action(
+            {"app_id": "not-allowed"},
+            runner=lambda *args, **kwargs: self.fail("should not launch"),
+        )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "unknown_desktop_app")
 
     def test_email_processing_overview_reads_latest_private_resume(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -5495,6 +5709,7 @@ Dalsi krok:
         self.assertIn("ScanDocu", titles)
         self.assertIn("E-maily", titles)
         self.assertIn("Lékárna", titles)
+        self.assertIn("Lékárna - správa", titles)
         self.assertIn("Family Video Organizer", titles)
 
     def test_prepare_print_action_creates_queue_copy(self) -> None:
