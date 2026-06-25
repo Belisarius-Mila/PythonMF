@@ -14397,7 +14397,7 @@ COCKPIT_HTML = """<!doctype html>
           ? voicePendingActionable
             ? `Čeká hlasový pokyn na Adama: ${voicePendingShort || voicePending.message || "bez textu"}`
             : `Starší schválený pokyn je jen v technickém záznamu. Nový pokyn můžeš poslat normálně.`
-          : voicePending.message || "Žádný hlasový pokyn nečeká na Adama.";
+          : "Žádný hlasový pokyn nečeká na Adama.";
       }
       renderVoiceLastResponse(voiceMode.last_adam_response || {});
       renderCodexApproval(codexApproval);

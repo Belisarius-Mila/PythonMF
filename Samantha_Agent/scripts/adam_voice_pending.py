@@ -35,13 +35,18 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if pending.get("ok") else 1
 
     print("ADAM VOICE PENDING")
-    print(f"- pending: {str(bool(pending.get('pending'))).lower()}")
+    is_pending = bool(pending.get("pending"))
+    print(f"- pending: {str(is_pending).lower()}")
     print(f"- status: {pending.get('status') or 'unknown'}")
-    print(f"- reason: {pending.get('reason') or '-'}")
+    print(f"- reason: {pending.get('reason') if is_pending else '-'}")
     print(f"- created_at: {pending.get('created_at') or '-'}")
     print("")
     print("TEXT:")
-    print(str(pending.get("text") or pending.get("message") or "Žádný hlasový pokyn nečeká na Adama."))
+    if is_pending:
+        print(str(pending.get("text") or pending.get("message") or "Čekající hlasový pokyn nemá text."))
+    else:
+        print("Žádný hlasový pokyn nečeká na Adama.")
+        return 0 if pending.get("ok") else 1
     history = load_voice_history(path=args.history_path, limit=3)
     if history:
         print("")

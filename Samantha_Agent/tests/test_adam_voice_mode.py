@@ -556,6 +556,49 @@ class AdamVoiceModeTests(unittest.TestCase):
         self.assertIn("pending: true", completed.stdout)
         self.assertIn("Zkontroluj dnešní řádky kódu.", completed.stdout)
 
+    def test_adam_voice_pending_cli_hides_processed_stale_error_text(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            pending_path = Path(temp_dir) / "pending_for_adam.json"
+            history_path = Path(temp_dir) / "adam_voice_history.jsonl"
+            pending_path.write_text(
+                json.dumps(
+                    {
+                        "ok": True,
+                        "pending": False,
+                        "status": "processed_by_codex",
+                        "reason": "manual_required",
+                        "message": "Triage hlasového pokynu vyžaduje ruční potvrzení.",
+                        "text": "Starý už vyřízený hlasový pokyn.",
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            completed = subprocess.run(
+                [
+                    ".venv/bin/python",
+                    "scripts/adam_voice_pending.py",
+                    "--path",
+                    str(pending_path),
+                    "--history-path",
+                    str(history_path),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=8,
+                check=False,
+            )
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertIn("pending: false", completed.stdout)
+        self.assertIn("reason: -", completed.stdout)
+        self.assertIn("Žádný hlasový pokyn nečeká na Adama.", completed.stdout)
+        self.assertNotIn("Triage hlasového pokynu", completed.stdout)
+        self.assertNotIn("Starý už vyřízený", completed.stdout)
+        self.assertNotIn("KONTEXT", completed.stdout)
+
     def test_direct_response_prompt_includes_recent_voice_history(self) -> None:
         captured = {}
 
