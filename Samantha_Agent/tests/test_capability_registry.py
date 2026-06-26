@@ -17,7 +17,7 @@ class CapabilityRegistryTests(unittest.TestCase):
         records = all_capabilities()
         ids = [record.capability_id for record in records]
 
-        self.assertGreaterEqual(len(records), 75)
+        self.assertGreaterEqual(len(records), 84)
         self.assertEqual(len(ids), len(set(ids)))
         self.assertEqual(validate_registry(), ())
 
@@ -114,6 +114,31 @@ class CapabilityRegistryTests(unittest.TestCase):
             "audit_domaci_lekarna",
             "preview_vyrazeni_leku",
             "validate_lekarna_photo_sources",
+        ):
+            with self.subTest(capability_id=capability_id):
+                record = get_capability(capability_id)
+                self.assertEqual(record.risk, RiskLevel.READ_ONLY)
+                self.assertFalse(record.requires_confirmation)
+
+    def test_read_only_reminder_and_media_previews_do_not_require_confirmation(self) -> None:
+        for capability_id in (
+            "list_open_reminders",
+            "show_reminder_detail",
+            "preview_zmenseni_obrazku",
+        ):
+            with self.subTest(capability_id=capability_id):
+                record = get_capability(capability_id)
+                self.assertEqual(record.risk, RiskLevel.READ_ONLY)
+                self.assertFalse(record.requires_confirmation)
+
+    def test_read_only_document_vault_tools_do_not_require_confirmation(self) -> None:
+        for capability_id in (
+            "scan_document_inbox",
+            "scan_downloaded_pdfs",
+            "preview_document_reindex",
+            "scan_mobile_document_inbox",
+            "document_vault_status",
+            "search_private_documents",
         ):
             with self.subTest(capability_id=capability_id):
                 record = get_capability(capability_id)
