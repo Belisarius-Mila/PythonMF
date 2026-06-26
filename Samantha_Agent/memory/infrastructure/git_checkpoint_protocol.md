@@ -69,6 +69,35 @@ Push:
 git push origin main
 ```
 
+Od 2026-06-26 plati osobni low-friction pravidlo pro Mílu:
+
+```text
+push na main po commitu smi probehnout bez dalsiho dotazu, pokud projde guard.
+```
+
+Pred rutinnim pushem spustit:
+
+```bash
+.venv/bin/python scripts/git_push_guard.py
+```
+
+Kdyz guard hlasi `OK routine push allowed: git push origin main`, muze Codex pri
+bezne hotove praci pushnout `origin main` bez dalsiho rucniho potvrzeni. Je to
+zamerne osobni rychly rezim, ne firemni compliance: ma neotravovat u beznych
+checkpointu a brzdit jen veci, ktere se spatne vraci zpet.
+
+Push bez dalsiho dotazu je zakazany a je potreba se zeptat, kdyz:
+
+- nejde o vetev `main`,
+- upstream neni `origin/main`,
+- working tree neni cisty po commitu,
+- vetev je za upstreamem,
+- bezi merge/rebase/cherry-pick/revert,
+- existuji nevyresene neintegrovane vetve mimo `main`,
+- posledni commit obsahuje `data/private/`, `data/session_autosave/`, `.env`
+  nebo podobne zakazane cesty,
+- jde o force push, mazani vetve/tagu nebo prepis historie.
+
 ## Kdy checkpointovat
 
 - Pred operaci, ktera prejmenovava nebo hromadne upravuje soubory.

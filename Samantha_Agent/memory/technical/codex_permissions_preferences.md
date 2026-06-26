@@ -66,6 +66,11 @@ Proc:
   `.venv/bin/python scripts/speak_edge_open.py`.
 - `git status/diff/log` jsou read-only; `git add/commit/push` zustava cilene
   prefixovane na repozitar `PythonMF`, ne obecne `git add .`.
+- Od 2026-06-26 je pro Milu potvrzene pravidlo, ze `git push origin main` smi
+  po commitu probehnout bez dalsiho dotazu, pokud predtim projde
+  `.venv/bin/python scripts/git_push_guard.py`. Guard musi blokovat jinou vetev,
+  necisty strom, spatny upstream, vetve mimo `main`, zakazane private/autosave/env
+  cesty v poslednim commitu a jakykoli force/destruktivni push.
 
 Tento soubor sam o sobe nezmeni sandbox. Skutecne rozsireni probiha tim, ze
 Codex pri prvnim pouziti navrhne prefix rule a Mila zvoli trvale povoleni.
