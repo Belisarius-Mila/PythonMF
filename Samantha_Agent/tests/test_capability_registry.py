@@ -17,7 +17,7 @@ class CapabilityRegistryTests(unittest.TestCase):
         records = all_capabilities()
         ids = [record.capability_id for record in records]
 
-        self.assertGreaterEqual(len(records), 25)
+        self.assertGreaterEqual(len(records), 28)
         self.assertEqual(len(ids), len(set(ids)))
         self.assertEqual(validate_registry(), ())
 
@@ -52,6 +52,7 @@ class CapabilityRegistryTests(unittest.TestCase):
             "apply_document_import",
             "apply_document_reindex",
             "apply_mobile_document_final_import",
+            "copy_downloads_files_to_knowledge_inbox",
             "apply_vyrazeni_leku",
             "apply_zmenseni_obrazku",
             "apply_lekarna_photo_import",
@@ -62,11 +63,16 @@ class CapabilityRegistryTests(unittest.TestCase):
                 self.assertTrue(record.requires_confirmation)
                 self.assertEqual(record.confirmation_policy, ConfirmationPolicy.EXACT_CURRENT_MESSAGE)
 
-    def test_mobile_processing_describes_unconfirmed_local_write(self) -> None:
-        record = get_capability("process_mobile_document_inbox")
-
-        self.assertEqual(record.risk, RiskLevel.LOCAL_WRITE)
-        self.assertFalse(record.requires_confirmation)
+    def test_unconfirmed_local_write_capabilities_match_existing_safe_workflows(self) -> None:
+        for capability_id in (
+            "process_mobile_document_inbox",
+            "run_email_triage_session",
+            "run_unified_email_triage_session",
+        ):
+            with self.subTest(capability_id=capability_id):
+                record = get_capability(capability_id)
+                self.assertEqual(record.risk, RiskLevel.LOCAL_WRITE)
+                self.assertFalse(record.requires_confirmation)
 
     def test_print_and_inbox_resolution_are_strictly_confirmed(self) -> None:
         expected = {
