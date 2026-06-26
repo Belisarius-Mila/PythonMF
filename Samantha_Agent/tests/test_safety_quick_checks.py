@@ -14,6 +14,7 @@ from scripts.git_safety_check import (
     check_staged,
     format_branch_guard,
     format_report,
+    parse_archived_branches,
     parse_unmerged_branches_output,
     path_is_blocked,
 )
@@ -74,6 +75,37 @@ class GitSafetyCheckTests(unittest.TestCase):
         self.assertIn("branches not merged", text)
         self.assertIn("cursor/matysek", text)
         self.assertIn("audit/cherry-pick/archive", text)
+
+    def test_branch_guard_acknowledges_archived_work(self) -> None:
+        lines = format_branch_guard(
+            BranchGuardStatus(
+                current_branch="main",
+                base_branch="main",
+                unmerged_branches=(),
+                archived_branches=("remotes/origin/cursor/matysek-scene02-mossy-stump-prototype",),
+            )
+        )
+
+        text = "\n".join(lines)
+        self.assertIn("archived unmerged branches acknowledged", text)
+        self.assertNotIn("WARN branches not merged", text)
+
+    def test_parse_archived_branches_reads_markdown_registry(self) -> None:
+        branches = parse_archived_branches(
+            """
+            - `cursor/matysek-scene02-mossy-stump-prototype`
+            - not a branch line
+            - `remotes/origin/cursor/matysek-scene02-mossy-stump-prototype`
+            """
+        )
+
+        self.assertEqual(
+            branches,
+            (
+                "cursor/matysek-scene02-mossy-stump-prototype",
+                "remotes/origin/cursor/matysek-scene02-mossy-stump-prototype",
+            ),
+        )
 
     def test_format_report_includes_branch_guard(self) -> None:
         report = format_report(

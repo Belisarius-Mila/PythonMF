@@ -12,6 +12,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = PROJECT_ROOT.parent
+ARCHIVED_BRANCHES_PATH = PROJECT_ROOT / "memory" / "infrastructure" / "git_branch_archive.md"
 DEFAULT_LARGE_FILE_BYTES = 5 * 1024 * 1024
 BLOCKED_PATH_PARTS = (
     "/data/private/",
@@ -55,6 +56,7 @@ class BranchGuardStatus:
     current_branch: str
     base_branch: str
     unmerged_branches: tuple[str, ...]
+    archived_branches: tuple[str, ...] = ()
     warning: str = ""
 
 
@@ -106,6 +108,28 @@ def parse_unmerged_branches_output(output: str) -> tuple[str, ...]:
     return tuple(branches)
 
 
+def parse_archived_branches(text: str) -> tuple[str, ...]:
+    branches: list[str] = []
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line.startswith("- `"):
+            continue
+        end = line.find("`", 3)
+        if end == -1:
+            continue
+        branch = line[3:end].strip()
+        if branch:
+            branches.append(branch)
+    return tuple(branches)
+
+
+def archived_unmerged_branches(path: Path = ARCHIVED_BRANCHES_PATH) -> tuple[str, ...]:
+    try:
+        return parse_archived_branches(path.read_text(encoding="utf-8"))
+    except OSError:
+        return ()
+
+
 def branch_guard_status(base_branch: str = "main") -> BranchGuardStatus:
     branch = current_branch()
     completed = run_git(["branch", "--no-merged", base_branch, "--all"])
@@ -117,10 +141,15 @@ def branch_guard_status(base_branch: str = "main") -> BranchGuardStatus:
             unmerged_branches=(),
             warning=f"branch guard nelze spustit: {detail}",
         )
+    branches = parse_unmerged_branches_output(completed.stdout)
+    archived_set = set(archived_unmerged_branches())
+    archived = tuple(item for item in branches if item in archived_set)
+    active = tuple(item for item in branches if item not in archived_set)
     return BranchGuardStatus(
         current_branch=branch,
         base_branch=base_branch,
-        unmerged_branches=parse_unmerged_branches_output(completed.stdout),
+        unmerged_branches=active,
+        archived_branches=archived,
     )
 
 
@@ -176,6 +205,8 @@ def format_branch_guard(status: BranchGuardStatus) -> list[str]:
         lines.append(f"- WARN branches not merged into `{status.base_branch}`:")
         lines.extend(f"  - {branch}" for branch in status.unmerged_branches)
         lines.append("- Next: audit/cherry-pick/archive branch work before assuming main has everything.")
+    elif status.archived_branches:
+        lines.append(f"- OK archived unmerged branches acknowledged: {len(status.archived_branches)}")
     elif not status.warning:
         lines.append(f"- OK no branches outside `{status.base_branch}`")
     return lines

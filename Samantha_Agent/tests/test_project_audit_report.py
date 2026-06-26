@@ -3,6 +3,7 @@ from __future__ import annotations
 import subprocess
 import tempfile
 import unittest
+from datetime import datetime
 from pathlib import Path
 
 from app.backup.activity_state import record_backup_completed
@@ -124,7 +125,8 @@ class ProjectAuditReportTests(unittest.TestCase):
             memory_dir = project_root / "memory"
             reports_dir = memory_dir / "reports"
             reports_dir.mkdir(parents=True)
-            existing = reports_dir / "systemovy_audit_projekty_tooly_vrstvy_2026_06_23.txt"
+            date_stamp = datetime.now().astimezone().strftime("%Y_%m_%d")
+            existing = reports_dir / f"systemovy_audit_projekty_tooly_vrstvy_{date_stamp}.txt"
             existing.write_text("manual report\n", encoding="utf-8")
             (memory_dir / "ACTIVE_PROJECTS.md").write_text(ACTIVE_PROJECTS_SAMPLE, encoding="utf-8")
             (memory_dir / "MEMORY_INDEX.md").write_text(MEMORY_INDEX_SAMPLE, encoding="utf-8")
