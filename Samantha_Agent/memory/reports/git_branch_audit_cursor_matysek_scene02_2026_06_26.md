@@ -18,7 +18,7 @@ PTKL, Knihovnu a Quick Notes.
 ## Stav podle gitu
 
 - `main` byl pri auditu cisty a zarovnany s `origin/main`.
-- Neintegrovana zustava lokalni i remote varianta:
+- Pri prvnim auditu zustavala lokalni i remote varianta:
   - `cursor/matysek-scene02-mossy-stump-prototype`
   - `remotes/origin/cursor/matysek-scene02-mossy-stump-prototype`
 - Lokalni vetev ma navic commit `4fdd9f2 Publish MMTX lake path fix`.
@@ -27,6 +27,8 @@ PTKL, Knihovnu a Quick Notes.
   - `6b7a5ce Update encrypted pharmacy web bundle`
   - `94a2a4e Sort pharmacy medicine lists alphabetically`
   - `a39ecd2 Bump ColorsAndNumbers app cache for June 25 owl`
+- Po selektivnim prevodu bezpecnych casti a archivnim rozhodnuti byly 2026-06-26
+  lokalni i remote vetev smazane.
 
 ## Uz prevedeno na main
 
@@ -121,9 +123,9 @@ Neznamena fyzicky smazat bez souhlasu. Znamena neprebirat automaticky do
 ## Navrhovany dalsi krok
 
 1. Nemergovat celou vetev.
-2. Vetev ponechat jako historicky zdroj v `memory/infrastructure/git_branch_archive.md`.
+2. Vetev byla po auditu a selektivnim prevodu smazana lokalne i na `origin`.
 3. `scripts/git_safety_check.py` ma branch guard s archivnim registrem:
    - nezname neintegrovane vetve dal hlasi jako riziko,
-   - tuto auditovanou vetev bere jako vedome archivovanou.
+   - aktivni archivovane vetve umi brat jako vedome osetrene, pokud je nekdy bude potreba docasne ponechat.
 4. Pokud se bude nekdy vracet PTKL, MMTX prototyp nebo Lekarna UX, zalozit novou
    cistou tematickou vetev a netahat znovu celou smichanou historii.
