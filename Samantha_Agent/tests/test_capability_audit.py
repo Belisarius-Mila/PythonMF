@@ -15,6 +15,10 @@ class CapabilityAuditTests(unittest.TestCase):
         self.assertIn("Memory and system reports", text)
         self.assertIn("Document vault", text)
         self.assertIn("No unmapped agent tools.", text)
+        self.assertIn("Capability registry records: 5", text)
+        self.assertIn("High-risk capability records: 1", text)
+        self.assertIn("Capability registry: OK", text)
+        self.assertIn("Capability registry validation:\n- OK", text)
 
 
 if __name__ == "__main__":

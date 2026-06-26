@@ -4,6 +4,8 @@ import ast
 from dataclasses import dataclass
 from pathlib import Path
 
+from app.capabilities import all_capabilities, validate_registry
+from app.capabilities.models import STRICT_CONFIRMATION_RISKS
 from app.workflows.commands import WORKFLOW_COMMANDS
 
 
@@ -195,6 +197,9 @@ def format_samantha_capability_audit() -> str:
     mapped_tools = _mapped_tool_names()
     unmapped_tools = tuple(tool for tool in tool_names if tool not in mapped_tools)
     missing_registered_tools = tuple(tool for tool in mapped_tools if tool not in tool_names)
+    registry_records = all_capabilities()
+    registry_errors = validate_registry()
+    high_risk_capabilities = tuple(record for record in registry_records if record.risk in STRICT_CONFIRMATION_RISKS)
 
     lines = [
         "Samantha Capability Audit",
@@ -202,6 +207,9 @@ def format_samantha_capability_audit() -> str:
         f"- Mapped tools: {len(tool_names) - len(unmapped_tools)}",
         f"- Unmapped tools: {len(unmapped_tools)}",
         f"- Registered shell workflows: {len(WORKFLOW_COMMANDS)}",
+        f"- Capability registry records: {len(registry_records)}",
+        f"- High-risk capability records: {len(high_risk_capabilities)}",
+        f"- Capability registry: {'OK' if not registry_errors else 'WARN'}",
         "",
         "Capability areas:",
         "| Area | Level | Tools present | Safety | Next gap |",
@@ -221,6 +229,12 @@ def format_samantha_capability_audit() -> str:
 
     if missing_registered_tools:
         lines.extend(f"- Mapped but missing from agent tools: `{tool}`" for tool in missing_registered_tools)
+
+    lines.extend(["", "Capability registry validation:"])
+    if registry_errors:
+        lines.extend(f"- {error}" for error in registry_errors)
+    else:
+        lines.append("- OK")
 
     lines.extend(
         [
