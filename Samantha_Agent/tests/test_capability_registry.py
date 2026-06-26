@@ -17,7 +17,7 @@ class CapabilityRegistryTests(unittest.TestCase):
         records = all_capabilities()
         ids = [record.capability_id for record in records]
 
-        self.assertGreaterEqual(len(records), 28)
+        self.assertGreaterEqual(len(records), 42)
         self.assertEqual(len(ids), len(set(ids)))
         self.assertEqual(validate_registry(), ())
 
@@ -53,6 +53,7 @@ class CapabilityRegistryTests(unittest.TestCase):
             "apply_document_reindex",
             "apply_mobile_document_final_import",
             "copy_downloads_files_to_knowledge_inbox",
+            "prepare_iphone_shortcut",
             "apply_vyrazeni_leku",
             "apply_zmenseni_obrazku",
             "apply_lekarna_photo_import",
@@ -66,6 +67,10 @@ class CapabilityRegistryTests(unittest.TestCase):
     def test_unconfirmed_local_write_capabilities_match_existing_safe_workflows(self) -> None:
         for capability_id in (
             "process_mobile_document_inbox",
+            "prepare_mobile_document_batch",
+            "prepare_next_scandocu_document",
+            "prepare_document_print_job",
+            "prepare_lekarna_photo_import",
             "run_email_triage_session",
             "run_unified_email_triage_session",
         ):
@@ -73,6 +78,32 @@ class CapabilityRegistryTests(unittest.TestCase):
                 record = get_capability(capability_id)
                 self.assertEqual(record.risk, RiskLevel.LOCAL_WRITE)
                 self.assertFalse(record.requires_confirmation)
+
+    def test_read_only_action_previews_do_not_require_confirmation(self) -> None:
+        for capability_id in (
+            "prepare_document_import",
+            "inspect_document_text",
+            "prepare_mobile_document_final_import",
+            "propose_document_inbox_cleanup",
+        ):
+            with self.subTest(capability_id=capability_id):
+                record = get_capability(capability_id)
+                self.assertEqual(record.risk, RiskLevel.READ_ONLY)
+                self.assertFalse(record.requires_confirmation)
+
+    def test_private_export_capabilities_are_strictly_confirmed(self) -> None:
+        for capability_id in (
+            "build_email_case_from_uid",
+            "build_email_action_case_from_uid",
+            "build_rixo_insurance_case_from_uids",
+            "show_email_case_links",
+            "inspect_payment_page_for_reminder",
+        ):
+            with self.subTest(capability_id=capability_id):
+                record = get_capability(capability_id)
+                self.assertEqual(record.risk, RiskLevel.PRIVATE_EXPORT)
+                self.assertTrue(record.requires_confirmation)
+                self.assertEqual(record.confirmation_policy, ConfirmationPolicy.EXACT_CURRENT_MESSAGE)
 
     def test_print_and_inbox_resolution_are_strictly_confirmed(self) -> None:
         expected = {
