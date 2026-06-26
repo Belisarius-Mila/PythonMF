@@ -17,7 +17,7 @@ class CapabilityRegistryTests(unittest.TestCase):
         records = all_capabilities()
         ids = [record.capability_id for record in records]
 
-        self.assertGreaterEqual(len(records), 20)
+        self.assertGreaterEqual(len(records), 25)
         self.assertEqual(len(ids), len(set(ids)))
         self.assertEqual(validate_registry(), ())
 
@@ -52,6 +52,9 @@ class CapabilityRegistryTests(unittest.TestCase):
             "apply_document_import",
             "apply_document_reindex",
             "apply_mobile_document_final_import",
+            "apply_vyrazeni_leku",
+            "apply_zmenseni_obrazku",
+            "apply_lekarna_photo_import",
         ):
             with self.subTest(capability_id=capability_id):
                 record = get_capability(capability_id)
@@ -67,6 +70,8 @@ class CapabilityRegistryTests(unittest.TestCase):
 
     def test_print_and_inbox_resolution_are_strictly_confirmed(self) -> None:
         expected = {
+            "restore_path_from_backup": RiskLevel.DESTRUCTIVE,
+            "run_workflow_command": RiskLevel.SYSTEM_CHANGE,
             "run_document_print_job": RiskLevel.SYSTEM_CHANGE,
             "resolve_document_inbox_item": RiskLevel.DESTRUCTIVE,
         }
