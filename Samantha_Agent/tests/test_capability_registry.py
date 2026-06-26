@@ -17,7 +17,7 @@ class CapabilityRegistryTests(unittest.TestCase):
         records = all_capabilities()
         ids = [record.capability_id for record in records]
 
-        self.assertGreaterEqual(len(records), 15)
+        self.assertGreaterEqual(len(records), 20)
         self.assertEqual(len(ids), len(set(ids)))
         self.assertEqual(validate_registry(), ())
 
@@ -50,10 +50,30 @@ class CapabilityRegistryTests(unittest.TestCase):
             "save_payment_sms_reminder",
             "save_document_due_reminder",
             "apply_document_import",
+            "apply_document_reindex",
+            "apply_mobile_document_final_import",
         ):
             with self.subTest(capability_id=capability_id):
                 record = get_capability(capability_id)
                 self.assertEqual(record.risk, RiskLevel.LOCAL_WRITE)
+                self.assertTrue(record.requires_confirmation)
+                self.assertEqual(record.confirmation_policy, ConfirmationPolicy.EXACT_CURRENT_MESSAGE)
+
+    def test_mobile_processing_describes_unconfirmed_local_write(self) -> None:
+        record = get_capability("process_mobile_document_inbox")
+
+        self.assertEqual(record.risk, RiskLevel.LOCAL_WRITE)
+        self.assertFalse(record.requires_confirmation)
+
+    def test_print_and_inbox_resolution_are_strictly_confirmed(self) -> None:
+        expected = {
+            "run_document_print_job": RiskLevel.SYSTEM_CHANGE,
+            "resolve_document_inbox_item": RiskLevel.DESTRUCTIVE,
+        }
+        for capability_id, risk in expected.items():
+            with self.subTest(capability_id=capability_id):
+                record = get_capability(capability_id)
+                self.assertEqual(record.risk, risk)
                 self.assertTrue(record.requires_confirmation)
                 self.assertEqual(record.confirmation_policy, ConfirmationPolicy.EXACT_CURRENT_MESSAGE)
 
