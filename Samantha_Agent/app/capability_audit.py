@@ -204,6 +204,14 @@ def format_samantha_capability_audit() -> str:
     registry_covered_tools = tuple(tool for tool in tool_names if tool in registry_tool_names)
     missing_registry_tools = tuple(tool for tool in tool_names if tool not in registry_tool_names)
     priority_missing_registry_tools = _priority_missing_registry_tools(missing_registry_tools)
+    action_missing_registry_tools = _action_review_missing_registry_tools(
+        missing_registry_tools,
+        exclude=priority_missing_registry_tools,
+    )
+    low_risk_missing_registry_tools = _remaining_missing_registry_tools(
+        missing_registry_tools,
+        exclude=priority_missing_registry_tools + action_missing_registry_tools,
+    )
 
     lines = [
         "Samantha Capability Audit",
@@ -215,6 +223,9 @@ def format_samantha_capability_audit() -> str:
         f"- High-risk capability records: {len(high_risk_capabilities)}",
         f"- Registry-covered agent tools: {len(registry_covered_tools)}/{len(tool_names)}",
         f"- Capability registry: {'OK' if not registry_errors else 'WARN'}",
+        f"- Critical/action-write missing records: {len(priority_missing_registry_tools)}",
+        f"- Action/review missing records: {len(action_missing_registry_tools)}",
+        f"- Read-only or low-risk missing records: {len(low_risk_missing_registry_tools)}",
         "",
         "Capability areas:",
         "| Area | Level | Tools present | Safety | Next gap |",
@@ -241,15 +252,33 @@ def format_samantha_capability_audit() -> str:
     else:
         lines.append("- OK")
 
-    lines.extend(["", "Priority missing capability records:"])
-    if priority_missing_registry_tools:
-        preview_limit = 15
-        lines.extend(f"- `{tool}`" for tool in priority_missing_registry_tools[:preview_limit])
-        remaining = len(priority_missing_registry_tools) - preview_limit
-        if remaining > 0:
-            lines.append(f"- ... and {remaining} more.")
-    else:
-        lines.append("- None.")
+    lines.extend(["", "Missing capability records by risk tier:"])
+    lines.extend(
+        [
+            f"- Critical/action-write: {len(priority_missing_registry_tools)}",
+            f"- Action/review: {len(action_missing_registry_tools)}",
+            f"- Read-only or low-risk: {len(low_risk_missing_registry_tools)}",
+        ]
+    )
+
+    _append_tool_section(
+        lines,
+        "Priority missing capability records:",
+        priority_missing_registry_tools,
+        preview_limit=15,
+    )
+    _append_tool_section(
+        lines,
+        "Action/review missing capability records:",
+        action_missing_registry_tools,
+        preview_limit=15,
+    )
+    _append_tool_section(
+        lines,
+        "Read-only or low-risk missing capability records:",
+        low_risk_missing_registry_tools,
+        preview_limit=20,
+    )
 
     lines.extend(["", "Agent tools missing capability records:"])
     if missing_registry_tools:
@@ -319,3 +348,46 @@ def _priority_missing_registry_tools(missing_tools: tuple[str, ...]) -> tuple[st
         "send_",
     )
     return tuple(tool for tool in missing_tools if tool.startswith(priority_prefixes))
+
+
+def _action_review_missing_registry_tools(
+    missing_tools: tuple[str, ...],
+    exclude: tuple[str, ...] = (),
+) -> tuple[str, ...]:
+    excluded = set(exclude)
+    action_prefixes = (
+        "build_",
+        "prepare_",
+        "propose_",
+        "inspect_",
+        "show_email_case_links",
+    )
+    return tuple(
+        tool
+        for tool in missing_tools
+        if tool not in excluded and tool.startswith(action_prefixes)
+    )
+
+
+def _remaining_missing_registry_tools(
+    missing_tools: tuple[str, ...],
+    exclude: tuple[str, ...] = (),
+) -> tuple[str, ...]:
+    excluded = set(exclude)
+    return tuple(tool for tool in missing_tools if tool not in excluded)
+
+
+def _append_tool_section(
+    lines: list[str],
+    title: str,
+    tools: tuple[str, ...],
+    preview_limit: int,
+) -> None:
+    lines.extend(["", title])
+    if not tools:
+        lines.append("- None.")
+        return
+    lines.extend(f"- `{tool}`" for tool in tools[:preview_limit])
+    remaining = len(tools) - preview_limit
+    if remaining > 0:
+        lines.append(f"- ... and {remaining} more.")
