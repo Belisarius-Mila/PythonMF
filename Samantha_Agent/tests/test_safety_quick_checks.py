@@ -8,7 +8,15 @@ import subprocess
 from pathlib import Path
 from unittest.mock import patch
 
-from scripts.git_safety_check import StagedFile, check_staged, format_report, path_is_blocked
+from scripts.git_safety_check import (
+    BranchGuardStatus,
+    StagedFile,
+    check_staged,
+    format_branch_guard,
+    format_report,
+    parse_unmerged_branches_output,
+    path_is_blocked,
+)
 from scripts.autosave_status import autosave_status, find_autosave_watchers, format_autosave_status
 from scripts.autosave_resume_prompt import autosave_resume_candidate, parse_autosave_source, startup_prompt
 from scripts.system_quick_check import CheckLine, autosave_line, format_morning_sentence
@@ -35,6 +43,52 @@ class GitSafetyCheckTests(unittest.TestCase):
 
         self.assertEqual(errors, [])
         self.assertIn("binary/media staged file: docs/colors-numbers/owl.mp3", warnings)
+
+    def test_branch_guard_parses_unmerged_branches(self) -> None:
+        branches = parse_unmerged_branches_output(
+            """
+              cursor/matysek-scene02-mossy-stump-prototype
+              remotes/origin/cursor/matysek-scene02-mossy-stump-prototype
+              remotes/origin/HEAD -> origin/main
+            """
+        )
+
+        self.assertEqual(
+            branches,
+            (
+                "cursor/matysek-scene02-mossy-stump-prototype",
+                "remotes/origin/cursor/matysek-scene02-mossy-stump-prototype",
+            ),
+        )
+
+    def test_branch_guard_warns_about_unmerged_work(self) -> None:
+        lines = format_branch_guard(
+            BranchGuardStatus(
+                current_branch="main",
+                base_branch="main",
+                unmerged_branches=("remotes/origin/cursor/matysek-scene02-mossy-stump-prototype",),
+            )
+        )
+
+        text = "\n".join(lines)
+        self.assertIn("branches not merged", text)
+        self.assertIn("cursor/matysek", text)
+        self.assertIn("audit/cherry-pick/archive", text)
+
+    def test_format_report_includes_branch_guard(self) -> None:
+        report = format_report(
+            [StagedFile(status="M", path="Samantha_Agent/app/cockpit.py")],
+            [],
+            [],
+            BranchGuardStatus(
+                current_branch="feature/mixed",
+                base_branch="main",
+                unmerged_branches=(),
+            ),
+        )
+
+        self.assertIn("Branch guard", report)
+        self.assertIn("current branch is `feature/mixed`", report)
 
 
 class SystemQuickCheckTests(unittest.TestCase):

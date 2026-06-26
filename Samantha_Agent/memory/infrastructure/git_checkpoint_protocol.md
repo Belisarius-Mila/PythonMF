@@ -28,14 +28,26 @@ principy.
 git status --short --branch
 ```
 
-2. Pokud jsou zmeny, rozlisit:
+2. Spustit rutinni safety check:
+
+```bash
+.venv/bin/python scripts/git_safety_check.py
+```
+
+Tento check hlida nejen staged private/autosave/env soubory a velke binarni
+soubory, ale nově i branch guard: vypise aktualni vetev a vetve, ktere nejsou
+sloucene do `main`. Pokud ukaze smesnou nebo neintegrovanou vetev, nepokracovat
+s predpokladem, ze `main` obsahuje vsechnu hotovou praci; nejdriv udelat audit,
+samostatny cherry-pick nebo archivacni rozhodnuti.
+
+3. Pokud jsou zmeny, rozlisit:
 
 - vlastni zmeny aktualniho ukolu,
 - starsi zmeny uzivatele,
 - generovane nebo docasne soubory,
 - citliva data, ktera nesmi do gitu.
 
-3. Nepouzivat `git add .`.
+4. Nepouzivat `git add .`.
 
 Vyjimka: `git add .` pouzit jen tehdy, kdyz byl tesne predtim zkontrolovan
 `git status --short --untracked-files=all` a je jasne, ze workspace neobsahuje

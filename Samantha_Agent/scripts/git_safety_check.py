@@ -50,6 +50,14 @@ class StagedFile:
     path: str
 
 
+@dataclass(frozen=True)
+class BranchGuardStatus:
+    current_branch: str
+    base_branch: str
+    unmerged_branches: tuple[str, ...]
+    warning: str = ""
+
+
 def run_git(args: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         ["/usr/bin/git", "-C", str(REPO_ROOT), *args],
@@ -73,6 +81,47 @@ def staged_files() -> list[StagedFile]:
         path = parts[-1]
         files.append(StagedFile(status=status, path=path))
     return files
+
+
+def current_branch() -> str:
+    completed = run_git(["branch", "--show-current"])
+    if completed.returncode != 0:
+        return ""
+    return completed.stdout.strip()
+
+
+def parse_unmerged_branches_output(output: str) -> tuple[str, ...]:
+    branches: list[str] = []
+    for raw_line in output.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        if line.startswith("*"):
+            line = line[1:].strip()
+        if line.startswith("+"):
+            line = line[1:].strip()
+        if " -> " in line:
+            continue
+        branches.append(line)
+    return tuple(branches)
+
+
+def branch_guard_status(base_branch: str = "main") -> BranchGuardStatus:
+    branch = current_branch()
+    completed = run_git(["branch", "--no-merged", base_branch, "--all"])
+    if completed.returncode != 0:
+        detail = (completed.stderr or completed.stdout).strip()
+        return BranchGuardStatus(
+            current_branch=branch,
+            base_branch=base_branch,
+            unmerged_branches=(),
+            warning=f"branch guard nelze spustit: {detail}",
+        )
+    return BranchGuardStatus(
+        current_branch=branch,
+        base_branch=base_branch,
+        unmerged_branches=parse_unmerged_branches_output(completed.stdout),
+    )
 
 
 def staged_file_size(path: str) -> int | None:
@@ -113,10 +162,37 @@ def check_staged(files: list[StagedFile], large_file_bytes: int) -> tuple[list[s
     return errors, warnings
 
 
-def format_report(files: list[StagedFile], errors: list[str], warnings: list[str]) -> str:
+def format_branch_guard(status: BranchGuardStatus) -> list[str]:
+    lines: list[str] = []
+    current = status.current_branch or "(detached HEAD)"
+    if status.warning:
+        lines.append(f"- WARN {status.warning}")
+    elif current != status.base_branch:
+        lines.append(f"- WARN current branch is `{current}`, expected `{status.base_branch}` for mainline commits")
+    else:
+        lines.append(f"- OK current branch: {current}")
+
+    if status.unmerged_branches:
+        lines.append(f"- WARN branches not merged into `{status.base_branch}`:")
+        lines.extend(f"  - {branch}" for branch in status.unmerged_branches)
+        lines.append("- Next: audit/cherry-pick/archive branch work before assuming main has everything.")
+    elif not status.warning:
+        lines.append(f"- OK no branches outside `{status.base_branch}`")
+    return lines
+
+
+def format_report(
+    files: list[StagedFile],
+    errors: list[str],
+    warnings: list[str],
+    branch_status: BranchGuardStatus | None = None,
+) -> str:
     lines = ["Git safety check:"]
     if not files:
         lines.append("- OK no staged files")
+        if branch_status is not None:
+            lines.append("Branch guard:")
+            lines.extend(format_branch_guard(branch_status))
         return "\n".join(lines)
 
     lines.append(f"- staged files: {len(files)}")
@@ -130,22 +206,41 @@ def format_report(files: list[StagedFile], errors: list[str], warnings: list[str
         lines.extend(f"  - {item}" for item in warnings)
     else:
         lines.append("- OK no large or obvious binary/media staged files")
+    if branch_status is not None:
+        lines.append("Branch guard:")
+        lines.extend(format_branch_guard(branch_status))
     return "\n".join(lines)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Check staged files for private/autosave/env and large binary risks.")
     parser.add_argument("--large-file-bytes", type=int, default=DEFAULT_LARGE_FILE_BYTES)
+    parser.add_argument("--base-branch", default="main")
+    parser.add_argument("--no-branch-guard", action="store_true", help="Skip warning about branches not merged into base branch.")
+    parser.add_argument(
+        "--fail-on-branch-risk",
+        action="store_true",
+        help="Return non-zero when current branch is not base or unmerged branches exist.",
+    )
     args = parser.parse_args()
 
     try:
         files = staged_files()
         errors, warnings = check_staged(files, args.large_file_bytes)
+        branch_status = None if args.no_branch_guard else branch_guard_status(args.base_branch)
     except RuntimeError as exc:
         print(f"Git safety check:\n- FAIL {exc}", file=sys.stderr)
         return 2
-    print(format_report(files, errors, warnings))
-    return 1 if errors else 0
+    print(format_report(files, errors, warnings, branch_status))
+    branch_risk = bool(
+        branch_status
+        and (
+            branch_status.warning
+            or branch_status.unmerged_branches
+            or (branch_status.current_branch and branch_status.current_branch != branch_status.base_branch)
+        )
+    )
+    return 1 if errors or (args.fail_on_branch_risk and branch_risk) else 0
 
 
 if __name__ == "__main__":
