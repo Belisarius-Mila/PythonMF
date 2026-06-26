@@ -5,6 +5,7 @@ PROJECT_DIR="$HOME/Desktop/PythonMF/Samantha_Agent"
 CODEX_BIN="${CODEX_BIN:-/usr/local/bin/codex}"
 AUTOSAVE_SCRIPT="$PROJECT_DIR/scripts/autosave_codex_session.sh"
 AUTOSAVE_RESUME_SCRIPT="$PROJECT_DIR/scripts/autosave_resume_prompt.py"
+WORK_CONTEXT_GUARD_SCRIPT="$PROJECT_DIR/scripts/work_context_guard.py"
 MARK_CURRENT_CODEX_TTY_SCRIPT="$PROJECT_DIR/scripts/mark_current_codex_tty.py"
 PYTHON_BIN="$PROJECT_DIR/.venv/bin/python"
 
@@ -16,6 +17,18 @@ export PYTHONIOENCODING="utf-8"
 export LESSCHARSET="utf-8"
 
 CODEX_START_PROMPT=""
+
+append_codex_start_prompt() {
+  local extra="$1"
+  if [[ -z "$extra" ]]; then
+    return
+  fi
+  if [[ -n "$CODEX_START_PROMPT" ]]; then
+    CODEX_START_PROMPT="${CODEX_START_PROMPT}"$'\n\n'"${extra}"
+  else
+    CODEX_START_PROMPT="$extra"
+  fi
+}
 
 offer_autosave_resume_if_relevant() {
   if [[ "${SAMANTHA_AUTOSAVE_RESUME_CHECK:-1}" == "0" ]]; then
@@ -36,7 +49,7 @@ offer_autosave_resume_if_relevant() {
     normalized="${answer:l}"
     case "$normalized" in
       y|yes|a|ano)
-        CODEX_START_PROMPT="$("$python_cmd" "$AUTOSAVE_RESUME_SCRIPT" --prompt)"
+        append_codex_start_prompt "$("$python_cmd" "$AUTOSAVE_RESUME_SCRIPT" --prompt)"
         ;;
       *)
         echo "Autosave se nenačte automaticky."
@@ -57,6 +70,32 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 cd "$PROJECT_DIR"
+
+run_work_context_guard_on_start() {
+  if [[ "${SAMANTHA_WORK_CONTEXT_GUARD:-1}" == "0" ]]; then
+    return
+  fi
+  if [[ ! -f "$WORK_CONTEXT_GUARD_SCRIPT" ]]; then
+    echo "Work context guard nelze spustit: chybí $WORK_CONTEXT_GUARD_SCRIPT"
+    return
+  fi
+  local python_cmd="$PYTHON_BIN"
+  if [[ ! -x "$python_cmd" ]]; then
+    python_cmd="python3"
+  fi
+  local output status
+  set +e
+  output="$("$python_cmd" "$WORK_CONTEXT_GUARD_SCRIPT" 2>&1)"
+  status=$?
+  set -e
+  echo "$output"
+  if [[ "$status" != "0" ]]; then
+    append_codex_start_prompt "STARTUP WORK CONTEXT GUARD:
+$output
+
+Nezačínej nové téma, dokud není vyřešený checkpoint: commit/push hotové práce, WIP větev nebo handoff s dalším krokem."
+  fi
+}
 
 mark_voice_tty_if_requested() {
   local answer="${SAMANTHA_MARK_VOICE_TTY:-}"
@@ -110,6 +149,7 @@ mark_voice_tty_if_requested() {
   fi
 }
 
+run_work_context_guard_on_start
 mark_voice_tty_if_requested
 if [[ -n "$CODEX_START_PROMPT" ]]; then
   "$CODEX_BIN" -C "$PROJECT_DIR" "$CODEX_START_PROMPT"
