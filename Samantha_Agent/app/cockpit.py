@@ -11811,6 +11811,8 @@ COCKPIT_HTML = """<!doctype html>
     .compact-actions button { min-height: 34px; padding: 6px 10px; }
     .janicka-chat-input { display: grid; gap: 8px; }
     .janicka-chat-input textarea { width: 100%; min-height: 110px; resize: vertical; border: 1px solid #fbcfe8; border-radius: 8px; padding: 10px; font: inherit; line-height: 1.45; }
+    .janicka-family-modal { width: min(860px, 100%); background: #fff7fb; border-color: #fbcfe8; }
+    .janicka-family-list { display: grid; gap: 10px; }
     .health-panel { border: 1px solid #cfd7e3; border-radius: 8px; background: #fbfcfe; padding: 10px 12px; display: grid; gap: 7px; }
     .health-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
     .health-item { border: 1px solid #edf0f4; border-radius: 7px; background: white; padding: 8px; min-width: 0; }
@@ -12467,6 +12469,37 @@ COCKPIT_HTML = """<!doctype html>
       </div>
     </div>
   </div>
+  <div id="janickaFamilyModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="janickaFamilyTitle">
+    <div class="modal janicka-family-modal">
+      <div class="modal-header">
+        <h2 id="janickaFamilyTitle">Rodinné projekty</h2>
+        <button class="secondary" id="janickaFamilyCloseBtn">Zpět k Janičce</button>
+      </div>
+      <div class="modal-body">
+        <div class="janicka-intro">
+          <h3 class="janicka-title">Fotky, videa a rodinné výstupy</h3>
+          <p class="janicka-subtitle">Tady jsou bezpečné vstupy k připraveným rodinným věcem. Původní fotky a videa se odsud nemažou ani nepřesouvají.</p>
+        </div>
+        <div class="janicka-family-list">
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">Rodinný výběr videí a fotek</div>
+              <div class="janicka-action-text">Otevřít lokální přehled pro třídění rodinných videí, výběr záběrů a přípravu sestřihu.</div>
+            </div>
+            <button id="janickaFamilyOrganizerBtn" type="button">Otevřít</button>
+          </div>
+          <div class="janicka-action">
+            <div>
+              <div class="janicka-action-title">Přehled projektů</div>
+              <div class="janicka-action-text">Zobrazit aktivní rodinné projekty a další kroky, když není jasné, co otevřít.</div>
+            </div>
+            <button class="secondary" id="janickaFamilyProjectsBtn" type="button">Zobrazit</button>
+          </div>
+        </div>
+        <div id="janickaFamilyStatus" class="status-line">Vyber, co chceš otevřít.</div>
+      </div>
+    </div>
+  </div>
   <div id="remindersModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="remindersTitle">
     <div class="modal">
       <div class="modal-header">
@@ -12745,6 +12778,11 @@ COCKPIT_HTML = """<!doctype html>
     const janickaChatSendBtn = document.getElementById("janickaChatSendBtn");
     const janickaChatClearBtn = document.getElementById("janickaChatClearBtn");
     const janickaChatStatus = document.getElementById("janickaChatStatus");
+    const janickaFamilyModal = document.getElementById("janickaFamilyModal");
+    const janickaFamilyCloseBtn = document.getElementById("janickaFamilyCloseBtn");
+    const janickaFamilyOrganizerBtn = document.getElementById("janickaFamilyOrganizerBtn");
+    const janickaFamilyProjectsBtn = document.getElementById("janickaFamilyProjectsBtn");
+    const janickaFamilyStatus = document.getElementById("janickaFamilyStatus");
     const janickaAdamStatus = document.getElementById("janickaAdamStatus");
     const janickaAdamStartBtn = document.getElementById("janickaAdamStartBtn");
     const janickaAdamRestartBtn = document.getElementById("janickaAdamRestartBtn");
@@ -13042,6 +13080,9 @@ COCKPIT_HTML = """<!doctype html>
         "janickaChatInput",
         "janickaChatSendBtn",
         "janickaChatClearBtn",
+        "janickaFamilyCloseBtn",
+        "janickaFamilyOrganizerBtn",
+        "janickaFamilyProjectsBtn",
         "janickaAdamStartBtn",
         "janickaAdamRestartBtn",
         "janickaAdamStopBtn",
@@ -17932,6 +17973,28 @@ COCKPIT_HTML = """<!doctype html>
       openJanickaModal();
     }
 
+    function openJanickaFamilyModal() {
+      closeJanickaModal();
+      janickaFamilyStatus.textContent = "Vyber, co chceš otevřít.";
+      janickaFamilyModal.classList.remove("hidden");
+    }
+
+    function closeJanickaFamilyModal() {
+      janickaFamilyModal.classList.add("hidden");
+      openJanickaModal();
+    }
+
+    function openJanickaFamilyOrganizer() {
+      janickaFamilyStatus.textContent = "Otevírám rodinný výběr videí a fotek...";
+      openCatalogAppById("family-video-organizer");
+    }
+
+    function openJanickaFamilyProjects() {
+      janickaFamilyModal.classList.add("hidden");
+      armJanickaModalReturn("projects");
+      openProjectsModal();
+    }
+
     function renderJanickaChat() {
       janickaChatLog.innerHTML = "";
       if (!janickaChatHistory.length) {
@@ -18167,9 +18230,7 @@ COCKPIT_HTML = """<!doctype html>
     janickaLekarnaBtn.addEventListener("click", () => {
       openCatalogAppById("lekarna");
     });
-    janickaFamilyBtn.addEventListener("click", () => {
-      openCatalogAppById("family-video-organizer");
-    });
+    janickaFamilyBtn.addEventListener("click", openJanickaFamilyModal);
     janickaAskAdamBtn.addEventListener("click", focusAdamForJanicka);
     janickaRemindersBtn.addEventListener("click", () => {
       armJanickaModalReturn("reminders");
@@ -18207,6 +18268,9 @@ COCKPIT_HTML = """<!doctype html>
     janickaChatCloseBtn.addEventListener("click", closeJanickaChatModal);
     janickaChatSendBtn.addEventListener("click", submitJanickaChat);
     janickaChatClearBtn.addEventListener("click", clearJanickaChat);
+    janickaFamilyCloseBtn.addEventListener("click", closeJanickaFamilyModal);
+    janickaFamilyOrganizerBtn.addEventListener("click", openJanickaFamilyOrganizer);
+    janickaFamilyProjectsBtn.addEventListener("click", openJanickaFamilyProjects);
     janickaAdamStartBtn.addEventListener("click", startJanickaAdam);
     janickaAdamRestartBtn.addEventListener("click", restartJanickaAdam);
     janickaAdamStopBtn.addEventListener("click", stopJanickaAdam);
@@ -18302,6 +18366,11 @@ COCKPIT_HTML = """<!doctype html>
     janickaChatModal.addEventListener("click", (event) => {
       if (event.target === janickaChatModal) {
         closeJanickaChatModal();
+      }
+    });
+    janickaFamilyModal.addEventListener("click", (event) => {
+      if (event.target === janickaFamilyModal) {
+        closeJanickaFamilyModal();
       }
     });
     quantitativeModal.addEventListener("click", (event) => {
@@ -18402,6 +18471,8 @@ COCKPIT_HTML = """<!doctype html>
 		        closeJanickaModal();
 		      } else if (event.key === "Escape" && !janickaChatModal.classList.contains("hidden")) {
 		        closeJanickaChatModal();
+		      } else if (event.key === "Escape" && !janickaFamilyModal.classList.contains("hidden")) {
+		        closeJanickaFamilyModal();
       }
     });
     scanDocuBtn.addEventListener("click", () => openScanDocu(false));
