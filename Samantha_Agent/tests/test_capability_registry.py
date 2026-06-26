@@ -17,7 +17,7 @@ class CapabilityRegistryTests(unittest.TestCase):
         records = all_capabilities()
         ids = [record.capability_id for record in records]
 
-        self.assertGreaterEqual(len(records), 70)
+        self.assertGreaterEqual(len(records), 75)
         self.assertEqual(len(ids), len(set(ids)))
         self.assertEqual(validate_registry(), ())
 
@@ -74,6 +74,7 @@ class CapabilityRegistryTests(unittest.TestCase):
             "show_quick_note_detail",
             "quick_notes_action_status",
             "preview_workflow_command",
+            "stage_lekarna_photo_import",
             "prepare_mobile_document_batch",
             "prepare_next_scandocu_document",
             "prepare_document_print_job",
@@ -101,6 +102,18 @@ class CapabilityRegistryTests(unittest.TestCase):
             "list_backup_snapshots",
             "preview_backup_restore",
             "list_workflow_commands",
+        ):
+            with self.subTest(capability_id=capability_id):
+                record = get_capability(capability_id)
+                self.assertEqual(record.risk, RiskLevel.READ_ONLY)
+                self.assertFalse(record.requires_confirmation)
+
+    def test_read_only_lekarna_tools_do_not_require_confirmation(self) -> None:
+        for capability_id in (
+            "search_domaci_leky",
+            "audit_domaci_lekarna",
+            "preview_vyrazeni_leku",
+            "validate_lekarna_photo_sources",
         ):
             with self.subTest(capability_id=capability_id):
                 record = get_capability(capability_id)
