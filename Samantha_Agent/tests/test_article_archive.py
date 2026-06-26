@@ -217,6 +217,25 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertEqual(listed["count"], 1)
         self.assertEqual(searched["count"], 1)
 
+    def test_travel_places_category_is_supported_for_destinations(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            result = archive_text_entry(
+                title="Méně známé místo k návštěvě",
+                text="Krátká cestovní poznámka o zajímavém místě mimo masovou turistiku.",
+                category="Cestování / místa",
+                tags=["cestování", "destinace"],
+                source_label="ChatGPT export review",
+                archive_root=archive_root,
+            )
+            listed = list_articles(category="travel_places", archive_root=archive_root)
+            searched = search_articles(query="masovou turistiku", category="travel_places", archive_root=archive_root)
+
+        self.assertEqual(result["item"]["category"], "travel_places")
+        self.assertEqual(result["item"]["category_label"], "Cestování / místa")
+        self.assertEqual(listed["count"], 1)
+        self.assertEqual(searched["count"], 1)
+
     def test_trim_to_article_body_removes_recommendations_and_tail_without_losing_article(self) -> None:
         raw_text = "\n".join(
             [

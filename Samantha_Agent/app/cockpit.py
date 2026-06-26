@@ -12538,6 +12538,7 @@ COCKPIT_HTML = """<!doctype html>
               <option value="recipes">Recepty</option>
               <option value="science">Vědecké články</option>
               <option value="ai_tools">Samantha / AI nástroje</option>
+              <option value="travel_places">Cestování / místa</option>
               <option value="other" selected>Ostatní</option>
             </select>
             <input id="libraryArchiveTagsInput" type="text" placeholder="Tagy, volitelné">
@@ -12550,6 +12551,7 @@ COCKPIT_HTML = """<!doctype html>
               <option value="recipes">Recepty</option>
               <option value="science">Vědecké články</option>
               <option value="ai_tools">Samantha / AI nástroje</option>
+              <option value="travel_places">Cestování / místa</option>
               <option value="other" selected>Ostatní</option>
             </select>
             <input id="libraryTextSourceInput" type="text" placeholder="Zdroj, volitelné">
@@ -12571,6 +12573,7 @@ COCKPIT_HTML = """<!doctype html>
           <button class="secondary library-tab active" type="button" data-library-category="recipes">Recepty</button>
           <button class="secondary library-tab" type="button" data-library-category="science">Vědecké články</button>
           <button class="secondary library-tab" type="button" data-library-category="ai_tools">Samantha / AI nástroje</button>
+          <button class="secondary library-tab" type="button" data-library-category="travel_places">Cestování / místa</button>
           <button class="secondary library-tab" type="button" data-library-category="other">Ostatní</button>
           <button class="secondary library-tab read-queue" type="button" data-library-category="all" data-library-read-state="to_read">K přečtení</button>
         </div>
