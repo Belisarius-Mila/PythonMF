@@ -4,28 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Scene 2 — Sunny's Lost Nuts</title>
-    <link rel="stylesheet" href="styles.css?v=20260626a">
+    <link rel="stylesheet" href="styles.css?v=20260626b">
   </head>
   <body>
     <main class="app-shell">
-      <header class="topbar">
-        <button class="ui-button" id="backButton" type="button" aria-label="Zpět na rozcestí">
-          <span class="btn-icon" aria-hidden="true">↩</span>
-        </button>
-        <button class="ui-button" id="repeatButton" type="button" aria-label="Znovu" disabled>
-          <span class="btn-icon" aria-hidden="true">↺</span>
-        </button>
-        <div class="title-card">
-          <h1>Sunny's Lost Nuts</h1>
-        </div>
-        <button class="ui-button" id="dictionaryButton" type="button" aria-label="Slovníček" disabled>
-          <span class="btn-icon" aria-hidden="true">📖</span>
-        </button>
-        <button class="ui-button" id="helpButton" type="button" aria-label="Nápověda" disabled>
-          <span class="btn-icon" aria-hidden="true">🎤</span>
-        </button>
-      </header>
-
       <section class="scene-card">
         <div class="scene" id="scene">
           <img
@@ -34,6 +16,22 @@
             src="scene_02_sunnys_lost_nuts_before.png"
             alt="Sunny hledá ztracené oříšky u mechového pařezu"
           >
+          <div class="scene-hud" id="sceneHud">
+            <button class="ui-button" id="backButton" type="button" aria-label="Zpět na rozcestí">
+              <span class="btn-icon" aria-hidden="true">↩</span>
+            </button>
+            <div class="scene-hud-actions">
+              <button class="ui-button" id="repeatButton" type="button" aria-label="Znovu" disabled>
+                <span class="btn-icon" aria-hidden="true">↺</span>
+              </button>
+              <button class="ui-button" id="dictionaryButton" type="button" aria-label="Slovníček" disabled>
+                <span class="btn-icon" aria-hidden="true">📖</span>
+              </button>
+              <button class="ui-button" id="helpButton" type="button" aria-label="Nápověda" disabled>
+                <span class="btn-icon" aria-hidden="true">🎤</span>
+              </button>
+            </div>
+          </div>
           <div class="scene-overlay" id="overlay"></div>
           <div class="speech-bubble hidden" id="speechBubble">
             <span class="bubble-emoji" id="bubbleEmoji" aria-hidden="true"></span>
@@ -62,14 +60,11 @@
             <div class="dictionary-title">Slovníček</div>
             <div class="dictionary-list" id="dictionaryList"></div>
           </div>
+          <div class="audio-gate" id="audioGate" aria-hidden="true">Klepni do scény a poslouchej.</div>
         </div>
       </section>
-
-      <footer class="bottom-panel">
-        <p class="bottom-hint" id="bottomHint">Scéna se spouští. Poslouchej nápovědu.</p>
-      </footer>
     </main>
 
-    <script src="script.js?v=20260626a"></script>
+    <script src="script.js?v=20260626b"></script>
   </body>
 </html>

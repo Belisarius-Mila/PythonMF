@@ -22,17 +22,19 @@ const nutsReveal = document.getElementById("nutsReveal");
 const nutsRevealImage = document.getElementById("nutsRevealImage");
 const nutsRevealFallback = document.getElementById("nutsRevealFallback");
 const mapFragment = document.getElementById("mapFragment");
+const scene = document.getElementById("scene");
+const audioGate = document.getElementById("audioGate");
 const backButton = document.getElementById("backButton");
 const repeatButton = document.getElementById("repeatButton");
 const dictionaryButton = document.getElementById("dictionaryButton");
 const dictionaryPanel = document.getElementById("dictionaryPanel");
 const dictionaryList = document.getElementById("dictionaryList");
 const helpButton = document.getElementById("helpButton");
-const bottomHint = document.getElementById("bottomHint");
 const completeBanner = document.getElementById("completeBanner");
 
 const SCENE_STATES = {
   idle: "idle",
+  waitingAudio: "waitingAudio",
   playing: "playing",
   promptingTap: "promptingTap",
   waitingTap: "waitingTap",
@@ -600,8 +602,8 @@ function hideDictionary() {
 }
 
 function setBottomHint(text, parentOnly = false) {
-  bottomHint.textContent = text;
-  bottomHint.classList.toggle("parent-only", parentOnly);
+  void text;
+  void parentOnly;
 }
 
 function updateTaskPrompt(step) {
@@ -760,13 +762,20 @@ function renderHotspots() {
 }
 
 function renderHud() {
+  audioGate?.classList.toggle("hidden", state.sceneState !== SCENE_STATES.waitingAudio);
+
   const busy = state.sceneState === SCENE_STATES.playing
     || state.sceneState === SCENE_STATES.promptingTap
     || state.sceneState === SCENE_STATES.resolvingTap;
 
-  repeatButton.disabled = state.sceneState === SCENE_STATES.idle || busy;
-  dictionaryButton.disabled = state.sceneState === SCENE_STATES.idle || busy;
+  repeatButton.disabled = state.sceneState === SCENE_STATES.idle
+    || state.sceneState === SCENE_STATES.waitingAudio
+    || busy;
+  dictionaryButton.disabled = state.sceneState === SCENE_STATES.idle
+    || state.sceneState === SCENE_STATES.waitingAudio
+    || busy;
   helpButton.disabled = state.sceneState === SCENE_STATES.idle
+    || state.sceneState === SCENE_STATES.waitingAudio
     || state.sceneState === SCENE_STATES.promptingTap
     || state.sceneState === SCENE_STATES.resolvingTap;
 
@@ -1027,6 +1036,7 @@ async function startGame() {
 
   if (
     state.sceneState === SCENE_STATES.idle
+    || state.sceneState === SCENE_STATES.waitingAudio
     || state.sceneState === SCENE_STATES.complete
   ) {
     setBottomHint("Nejdřív poslouchej českou nápovědu.", true);
@@ -1101,6 +1111,14 @@ helpButton.addEventListener("click", () => {
     playHelp();
   }
 });
+scene.addEventListener("click", (event) => {
+  if (event.target.closest(".ui-button")) {
+    return;
+  }
+  if (state.sceneState === SCENE_STATES.waitingAudio) {
+    startGame();
+  }
+});
 
 window.speechSynthesis?.addEventListener?.("voiceschanged", loadVoices);
 
@@ -1108,6 +1126,6 @@ setupSceneImage();
 setupNutsReveal();
 renderDictionary();
 loadVoices();
+state.sceneState = SCENE_STATES.waitingAudio;
+setBottomHint("Klepni do scény a poslouchej.", true);
 renderHud();
-setBottomHint("Scéna se spouští. Poslouchej nápovědu.", true);
-startGame();
