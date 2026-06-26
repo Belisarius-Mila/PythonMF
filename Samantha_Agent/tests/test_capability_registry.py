@@ -17,7 +17,7 @@ class CapabilityRegistryTests(unittest.TestCase):
         records = all_capabilities()
         ids = [record.capability_id for record in records]
 
-        self.assertGreaterEqual(len(records), 5)
+        self.assertGreaterEqual(len(records), 10)
         self.assertEqual(len(ids), len(set(ids)))
         self.assertEqual(validate_registry(), ())
 
@@ -31,6 +31,26 @@ class CapabilityRegistryTests(unittest.TestCase):
         self.assertEqual(record.risk, RiskLevel.EXTERNAL_SEND)
         self.assertTrue(record.requires_confirmation)
         self.assertEqual(record.confirmation_policy, ConfirmationPolicy.EXACT_CURRENT_MESSAGE)
+
+    def test_send_confirmed_sms_rcs_is_external_send_with_exact_confirmation(self) -> None:
+        record = get_capability("send_confirmed_sms_rcs")
+
+        self.assertEqual(record.risk, RiskLevel.EXTERNAL_SEND)
+        self.assertTrue(record.requires_confirmation)
+        self.assertEqual(record.confirmation_policy, ConfirmationPolicy.EXACT_CURRENT_MESSAGE)
+
+    def test_confirmed_local_write_capabilities_require_confirmation(self) -> None:
+        for capability_id in (
+            "archive_email_by_uid",
+            "save_selected_email_cases_from_uids",
+            "prepare_forward_email_by_uid",
+            "mark_reminder_done",
+        ):
+            with self.subTest(capability_id=capability_id):
+                record = get_capability(capability_id)
+                self.assertEqual(record.risk, RiskLevel.LOCAL_WRITE)
+                self.assertTrue(record.requires_confirmation)
+                self.assertEqual(record.confirmation_policy, ConfirmationPolicy.EXACT_CURRENT_MESSAGE)
 
     def test_git_push_main_after_guard_requires_green_guard_metadata(self) -> None:
         record = get_capability("git_push_main_after_guard")
