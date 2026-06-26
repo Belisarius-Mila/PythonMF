@@ -17,7 +17,7 @@ class CapabilityRegistryTests(unittest.TestCase):
         records = all_capabilities()
         ids = [record.capability_id for record in records]
 
-        self.assertGreaterEqual(len(records), 49)
+        self.assertGreaterEqual(len(records), 61)
         self.assertEqual(len(ids), len(set(ids)))
         self.assertEqual(validate_registry(), ())
 
@@ -94,6 +94,22 @@ class CapabilityRegistryTests(unittest.TestCase):
                 self.assertEqual(record.risk, RiskLevel.READ_ONLY)
                 self.assertFalse(record.requires_confirmation)
 
+    def test_read_only_email_headers_and_archive_summaries_do_not_require_confirmation(self) -> None:
+        for capability_id in (
+            "list_recent_email_headers",
+            "search_email_headers",
+            "list_recent_seznam_email_headers",
+            "search_seznam_email_headers",
+            "list_unified_email_headers",
+            "show_new_email_overview",
+            "list_email_archives",
+            "show_email_archive_summary",
+        ):
+            with self.subTest(capability_id=capability_id):
+                record = get_capability(capability_id)
+                self.assertEqual(record.risk, RiskLevel.READ_ONLY)
+                self.assertFalse(record.requires_confirmation)
+
     def test_read_only_action_previews_do_not_require_confirmation(self) -> None:
         for capability_id in (
             "prepare_document_import",
@@ -111,6 +127,10 @@ class CapabilityRegistryTests(unittest.TestCase):
             "build_email_case_from_uid",
             "build_email_action_case_from_uid",
             "build_rixo_insurance_case_from_uids",
+            "search_email_text_year",
+            "read_email_body_by_uid",
+            "read_seznam_email_body_by_uid",
+            "show_email_archive_links",
             "show_email_case_links",
             "inspect_payment_page_for_reminder",
         ):
