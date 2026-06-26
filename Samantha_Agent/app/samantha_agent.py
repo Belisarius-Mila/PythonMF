@@ -18,6 +18,7 @@ from app.health_check import format_samantha_health_check
 from app.quantitative_status import format_samantha_quantitative_status
 from app.system_reports import format_system_reports_overview
 from app.capability_audit import format_samantha_capability_audit
+from app.capabilities.runtime_policy import format_runtime_capability_policy
 from app.project_audit_report import format_samantha_project_audit
 from app.knowledge_inbox import (
     copy_downloads_to_knowledge_inbox,
@@ -280,6 +281,7 @@ def quick_notes_action_status(limit: int = 30) -> str:
 
 
 def build_agent(memory_text: str) -> Agent:
+    capability_runtime_policy = format_runtime_capability_policy()
     instructions = f"""
 Jsi Samantha, osobni AI agent pro Milu.
 
@@ -782,6 +784,8 @@ SMS/RCS workflow:
 3. Po odeslani povinne reportuj stav z Messages databaze: is_sent,
    is_delivered a error. Pokud tool stav nenajde nebo error neni nula,
    nepovazuj zpravu za potvrzene dorucenou.
+
+{capability_runtime_policy}
 
 LOKALNI PAMET:
 {memory_text}
