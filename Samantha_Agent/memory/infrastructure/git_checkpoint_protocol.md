@@ -86,10 +86,16 @@ Kdyz Mila rekne neco jako `zaparkuj soucasnou praci`, `ted odskocime na...`,
 .venv/bin/python scripts/work_context_guard.py
 ```
 
-Guard je read-only a od 2026-06-26 se spousti automaticky pri startu nove
-Codex session pres `scripts/samantha_screen_entry.sh`. Pokud pri startu najde
-rozpracovanou praci, jeho vystup se preda i jako startovni prompt Codexu, aby
-nova session nezacala nove tema bez checkpointu.
+Guard je read-only a od 2026-06-26 se spousti automaticky pri startu Samanthy:
+
+- ve vnejsim launcheru `scripts/samantha_codex.sh` jeste pred pripojenim do
+  existujici `screen` session,
+- uvnitr nove Codex session pres `scripts/samantha_screen_entry.sh`.
+
+Pokud vnejsi launcher najde rozpracovanou praci, v interaktivnim terminalu pred
+attachnutim vypise varovani a nabidne session zastavit. Pokud vnitrek nove Codex
+session najde rozpracovanou praci, jeho vystup se preda i jako startovni prompt
+Codexu, aby nova session nezacala nove tema bez checkpointu.
 
 Guard hleda:
 

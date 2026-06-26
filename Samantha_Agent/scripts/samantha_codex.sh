@@ -7,6 +7,7 @@ ENTRY_SCRIPT="$PROJECT_DIR/scripts/samantha_screen_entry.sh"
 NETWORK_PREFLIGHT_SCRIPT="$PROJECT_DIR/scripts/network_preflight.sh"
 BACKUP_STATUS_SCRIPT="$PROJECT_DIR/scripts/backup_status.py"
 CODEX_SESSION_REPORT_SCRIPT="$PROJECT_DIR/scripts/codex_session_report.py"
+WORK_CONTEXT_GUARD_SCRIPT="$PROJECT_DIR/scripts/work_context_guard.py"
 SCREENRC="$PROJECT_DIR/scripts/samantha_screenrc"
 
 export LANG="cs_CZ.UTF-8"
@@ -21,6 +22,42 @@ print_screen_scroll_hint() {
     return
   fi
   echo "Tip pro režim samantha/screen: scrollback otevře Ctrl+A potom Esc; ukončí ho Esc."
+}
+
+run_work_context_guard_before_attach() {
+  if [[ "${SAMANTHA_WORK_CONTEXT_GUARD:-1}" == "0" ]]; then
+    return
+  fi
+  if [[ ! -f "$WORK_CONTEXT_GUARD_SCRIPT" ]]; then
+    echo "Work context guard nelze spustit: chybí $WORK_CONTEXT_GUARD_SCRIPT"
+    return
+  fi
+
+  local python_cmd="$PROJECT_DIR/.venv/bin/python"
+  if [[ ! -x "$python_cmd" ]]; then
+    python_cmd="python3"
+  fi
+
+  local output status
+  set +e
+  output="$("$python_cmd" "$WORK_CONTEXT_GUARD_SCRIPT" 2>&1)"
+  status=$?
+  set -e
+  echo "$output"
+
+  if [[ "$status" != "0" && -t 0 && "${SAMANTHA_WORK_CONTEXT_GUARD_CONFIRM:-1}" != "0" ]]; then
+    echo "Guard hlásí rozpracovanou práci. Před změnou tématu je potřeba checkpoint."
+    printf "Pokračovat do Samantha session? [Y/n] "
+    local answer normalized
+    read -r answer || answer=""
+    normalized="${answer:l}"
+    case "$normalized" in
+      n|no|ne|0|false)
+        echo "Start session zastaven kvůli work context guardu."
+        exit 1
+        ;;
+    esac
+  fi
 }
 
 if [[ -x "$NETWORK_PREFLIGHT_SCRIPT" ]]; then
@@ -42,6 +79,8 @@ if [[ -f "$CODEX_SESSION_REPORT_SCRIPT" ]]; then
     python3 "$CODEX_SESSION_REPORT_SCRIPT" || true
   fi
 fi
+
+run_work_context_guard_before_attach
 
 if [[ "${SAMANTHA_RESTART_SCREEN:-0}" == "1" ]]; then
   if screen -list | grep -q "[.]${SESSION_NAME}[[:space:]]"; then
