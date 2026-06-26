@@ -21,6 +21,7 @@ from scripts.git_safety_check import (
 from scripts.autosave_status import autosave_status, find_autosave_watchers, format_autosave_status
 from scripts.autosave_resume_prompt import autosave_resume_candidate, parse_autosave_source, startup_prompt
 from scripts.system_quick_check import CheckLine, autosave_line, format_morning_sentence
+from scripts.work_context_guard import WorkContextStatus, format_work_context_guard, parse_porcelain_status
 
 
 class GitSafetyCheckTests(unittest.TestCase):
@@ -246,6 +247,66 @@ class SystemQuickCheckTests(unittest.TestCase):
 
         self.assertEqual(parsed, source)
         self.assertIn("Jen cti, nic nemen", startup_prompt())
+
+
+class WorkContextGuardTests(unittest.TestCase):
+    def test_parse_porcelain_status_counts_pending_work(self) -> None:
+        branch, ahead, behind, staged, unstaged, untracked = parse_porcelain_status(
+            "\n".join(
+                [
+                    "## feature/demo...origin/feature/demo [ahead 2, behind 1]",
+                    "M  Samantha_Agent/app/cockpit.py",
+                    " M Samantha_Agent/tests/test_cockpit.py",
+                    "?? Samantha_Agent/tmp.txt",
+                ]
+            )
+        )
+
+        self.assertEqual(branch, "feature/demo")
+        self.assertEqual(ahead, 2)
+        self.assertEqual(behind, 1)
+        self.assertEqual(staged, 1)
+        self.assertEqual(unstaged, 1)
+        self.assertEqual(untracked, 1)
+
+    def test_work_context_guard_reports_safe_switch(self) -> None:
+        text = format_work_context_guard(
+            WorkContextStatus(
+                current_branch="main",
+                base_branch="main",
+                ahead=0,
+                behind=0,
+                staged_count=0,
+                unstaged_count=0,
+                untracked_count=0,
+                git_operation="",
+                unmerged_branches=(),
+            )
+        )
+
+        self.assertIn("safe to switch topic", text)
+        self.assertIn("OK no staged", text)
+
+    def test_work_context_guard_blocks_mixed_pending_work(self) -> None:
+        status = WorkContextStatus(
+            current_branch="feature/demo",
+            base_branch="main",
+            ahead=1,
+            behind=0,
+            staged_count=2,
+            unstaged_count=1,
+            untracked_count=1,
+            git_operation="cherry-pick",
+            unmerged_branches=("feature/other",),
+        )
+
+        text = format_work_context_guard(status)
+
+        self.assertFalse(status.clean)
+        self.assertIn("current branch is `feature/demo`", text)
+        self.assertIn("pending changes", text)
+        self.assertIn("git operation in progress: cherry-pick", text)
+        self.assertIn("checkpoint current work", text)
 
 
 if __name__ == "__main__":

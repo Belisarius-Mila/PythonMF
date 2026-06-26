@@ -75,6 +75,28 @@ git push origin main
 - Pred spustenim workflow, ktere zapisuje do dat.
 - Po dokonceni funkcniho mezikroku.
 - Pred resenim reconnect/padove situace, pokud je workspace cisty nebo jasny.
+- Pred zmenou tematu, kdyz Mila chce odskocit na dulezitejsi problem nebo napad.
+
+## Pred zmenou tematu
+
+Kdyz Mila rekne neco jako `zaparkuj soucasnou praci`, `ted odskocime na...`,
+`nejdriv vyresime neco jineho` nebo se zjevne meni oblast prace, spustit:
+
+```bash
+.venv/bin/python scripts/work_context_guard.py
+```
+
+Guard je read-only. Hleda:
+
+- jinou vetev nez `main`,
+- staged, unstaged nebo untracked zmeny,
+- nepushnute nebo chybejici upstream commity,
+- rozbehnuty merge/rebase/cherry-pick/revert,
+- neintegrovane vetve mimo `main`.
+
+Pokud guard nehlasi cisty stav, nejdriv udelat maly checkpoint: commit/push hotove
+casti, WIP vetev pro rozpracovanou praci, nebo handoff s presnym dalsim krokem.
+Teprve potom menit tema.
 
 ## Zakazy
 
