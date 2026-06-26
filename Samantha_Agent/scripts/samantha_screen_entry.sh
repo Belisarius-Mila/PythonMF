@@ -59,6 +59,10 @@ offer_autosave_resume_if_relevant() {
 }
 
 offer_autosave_resume_if_relevant
+if [[ -n "${SAMANTHA_START_REQUEST:-}" ]]; then
+  append_codex_start_prompt "STARTOVNÍ POKYN OD MÍLY:
+$SAMANTHA_START_REQUEST"
+fi
 
 "$AUTOSAVE_SCRIPT" --watch &
 AUTOSAVE_PID=$!
@@ -83,13 +87,18 @@ run_work_context_guard_on_start() {
   if [[ ! -x "$python_cmd" ]]; then
     python_cmd="python3"
   fi
-  local output status
+  local output guard_status
   set +e
   output="$("$python_cmd" "$WORK_CONTEXT_GUARD_SCRIPT" 2>&1)"
-  status=$?
+  guard_status=$?
   set -e
   echo "$output"
-  if [[ "$status" != "0" ]]; then
+  if [[ "$guard_status" == "0" ]]; then
+    append_codex_start_prompt "STARTUP WORK CONTEXT GUARD:
+$output
+
+Guard je čistý. Pokud je ve startovním pokynu změna tématu, můžeš navázat."
+  else
     append_codex_start_prompt "STARTUP WORK CONTEXT GUARD:
 $output
 

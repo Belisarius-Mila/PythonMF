@@ -9,6 +9,7 @@ BACKUP_STATUS_SCRIPT="$PROJECT_DIR/scripts/backup_status.py"
 CODEX_SESSION_REPORT_SCRIPT="$PROJECT_DIR/scripts/codex_session_report.py"
 WORK_CONTEXT_GUARD_SCRIPT="$PROJECT_DIR/scripts/work_context_guard.py"
 SCREENRC="$PROJECT_DIR/scripts/samantha_screenrc"
+START_REQUEST="$*"
 
 export LANG="cs_CZ.UTF-8"
 export LC_ALL="cs_CZ.UTF-8"
@@ -16,6 +17,9 @@ export LC_CTYPE="cs_CZ.UTF-8"
 export PYTHONUTF8="1"
 export PYTHONIOENCODING="utf-8"
 export LESSCHARSET="utf-8"
+if [[ -n "$START_REQUEST" ]]; then
+  export SAMANTHA_START_REQUEST="$START_REQUEST"
+fi
 
 print_screen_scroll_hint() {
   if [[ "${SAMANTHA_SCREEN_HINT:-1}" == "0" || ! -t 1 ]]; then
@@ -38,14 +42,14 @@ run_work_context_guard_before_attach() {
     python_cmd="python3"
   fi
 
-  local output status
+  local output guard_status
   set +e
   output="$("$python_cmd" "$WORK_CONTEXT_GUARD_SCRIPT" 2>&1)"
-  status=$?
+  guard_status=$?
   set -e
   echo "$output"
 
-  if [[ "$status" != "0" && -t 0 && "${SAMANTHA_WORK_CONTEXT_GUARD_CONFIRM:-1}" != "0" ]]; then
+  if [[ "$guard_status" != "0" && -t 0 && "${SAMANTHA_WORK_CONTEXT_GUARD_CONFIRM:-1}" != "0" ]]; then
     echo "Guard hlásí rozpracovanou práci. Před změnou tématu je potřeba checkpoint."
     printf "Pokračovat do Samantha session? [Y/n] "
     local answer normalized
@@ -90,6 +94,14 @@ if [[ "${SAMANTHA_RESTART_SCREEN:-0}" == "1" ]]; then
 fi
 
 if screen -list | grep -q "[.]${SESSION_NAME}[[:space:]]"; then
+  if [[ -n "$START_REQUEST" ]]; then
+    echo "Startovní pokyn od Míly:"
+    echo "$START_REQUEST"
+    echo
+    echo "Poznámka: připojuji existující screen session; pokyn se do běžícího Codexu nevloží automaticky."
+    echo "Po připojení ho vlož do Codexu ručně, pokud už tam není."
+    echo
+  fi
   print_screen_scroll_hint
   exec screen -c "$SCREENRC" -U -r "$SESSION_NAME"
 fi

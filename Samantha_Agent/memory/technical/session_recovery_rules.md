@@ -18,6 +18,19 @@ Pro beznou praci pouzit:
 samantha
 ```
 
+Pokud chce Mila rovnou predat nove relaci startovni pokyn, lze ho napsat za
+prikaz:
+
+```bash
+samantha "Nyni prechazime k tematu voice bridge."
+```
+
+Pri vzniku nove `screen` relace se tento text vlozi do startovniho promptu Codexu.
+Pokud uz `screen` relace bezi a prikaz se jen pripojuje, wrapper pokyn vypise pred
+attachnutim, ale nevklada ho automaticky do beziciho Codexu, aby omylem neposlal
+text do spatneho terminaloveho stavu. V takovem pripade ho Mila po pripojeni vlozi
+rucne.
+
 V novem SSH terminalu, pokud prikaz `samantha` jeste neni znamy, nejdriv nacist
 shell konfiguraci a pak spustit Samanthu:
 
@@ -36,6 +49,7 @@ Skript:
 
 - pripoji existujici `screen` relaci `samantha_codex`, pokud uz bezi,
 - jinak zalozi novou `screen` relaci,
+- prevezme volitelny startovni pokyn z prikazu `samantha "..."`,
 - pred predanim rizeni vypise kratky read-only report bezicich Codex relaci pres
   `scripts/codex_session_report.py`, vcetne aktualniho TTY, bridge markeru, stari
   relaci a kandidatu na rucni ukonceni,
