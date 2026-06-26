@@ -17,7 +17,7 @@ class CapabilityRegistryTests(unittest.TestCase):
         records = all_capabilities()
         ids = [record.capability_id for record in records]
 
-        self.assertGreaterEqual(len(records), 42)
+        self.assertGreaterEqual(len(records), 49)
         self.assertEqual(len(ids), len(set(ids)))
         self.assertEqual(validate_registry(), ())
 
@@ -67,6 +67,8 @@ class CapabilityRegistryTests(unittest.TestCase):
     def test_unconfirmed_local_write_capabilities_match_existing_safe_workflows(self) -> None:
         for capability_id in (
             "process_mobile_document_inbox",
+            "samantha_quantitative_status",
+            "samantha_project_audit",
             "prepare_mobile_document_batch",
             "prepare_next_scandocu_document",
             "prepare_document_print_job",
@@ -77,6 +79,19 @@ class CapabilityRegistryTests(unittest.TestCase):
             with self.subTest(capability_id=capability_id):
                 record = get_capability(capability_id)
                 self.assertEqual(record.risk, RiskLevel.LOCAL_WRITE)
+                self.assertFalse(record.requires_confirmation)
+
+    def test_read_only_memory_and_report_capabilities_do_not_require_confirmation(self) -> None:
+        for capability_id in (
+            "search_memory",
+            "memory_status",
+            "samantha_health_check",
+            "samantha_system_reports",
+            "samantha_capability_audit",
+        ):
+            with self.subTest(capability_id=capability_id):
+                record = get_capability(capability_id)
+                self.assertEqual(record.risk, RiskLevel.READ_ONLY)
                 self.assertFalse(record.requires_confirmation)
 
     def test_read_only_action_previews_do_not_require_confirmation(self) -> None:
