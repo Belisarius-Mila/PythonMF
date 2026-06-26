@@ -200,6 +200,10 @@ def format_samantha_capability_audit() -> str:
     registry_records = all_capabilities()
     registry_errors = validate_registry()
     high_risk_capabilities = tuple(record for record in registry_records if record.risk in STRICT_CONFIRMATION_RISKS)
+    registry_tool_names = _registry_tool_names()
+    registry_covered_tools = tuple(tool for tool in tool_names if tool in registry_tool_names)
+    missing_registry_tools = tuple(tool for tool in tool_names if tool not in registry_tool_names)
+    priority_missing_registry_tools = _priority_missing_registry_tools(missing_registry_tools)
 
     lines = [
         "Samantha Capability Audit",
@@ -209,6 +213,7 @@ def format_samantha_capability_audit() -> str:
         f"- Registered shell workflows: {len(WORKFLOW_COMMANDS)}",
         f"- Capability registry records: {len(registry_records)}",
         f"- High-risk capability records: {len(high_risk_capabilities)}",
+        f"- Registry-covered agent tools: {len(registry_covered_tools)}/{len(tool_names)}",
         f"- Capability registry: {'OK' if not registry_errors else 'WARN'}",
         "",
         "Capability areas:",
@@ -235,6 +240,26 @@ def format_samantha_capability_audit() -> str:
         lines.extend(f"- {error}" for error in registry_errors)
     else:
         lines.append("- OK")
+
+    lines.extend(["", "Priority missing capability records:"])
+    if priority_missing_registry_tools:
+        preview_limit = 15
+        lines.extend(f"- `{tool}`" for tool in priority_missing_registry_tools[:preview_limit])
+        remaining = len(priority_missing_registry_tools) - preview_limit
+        if remaining > 0:
+            lines.append(f"- ... and {remaining} more.")
+    else:
+        lines.append("- None.")
+
+    lines.extend(["", "Agent tools missing capability records:"])
+    if missing_registry_tools:
+        preview_limit = 25
+        lines.extend(f"- `{tool}`" for tool in missing_registry_tools[:preview_limit])
+        remaining = len(missing_registry_tools) - preview_limit
+        if remaining > 0:
+            lines.append(f"- ... and {remaining} more.")
+    else:
+        lines.append("- None.")
 
     lines.extend(
         [
@@ -268,3 +293,29 @@ def _agent_tool_names(path: Path) -> tuple[str, ...]:
 
 def _mapped_tool_names() -> set[str]:
     return {tool for area in CAPABILITY_AREAS for tool in area.tools}
+
+
+def _registry_tool_names() -> set[str]:
+    names: set[str] = set()
+    for record in all_capabilities():
+        names.add(record.capability_id)
+        if record.tool and record.tool.replace("_", "").isalnum():
+            names.add(record.tool)
+    return names
+
+
+def _priority_missing_registry_tools(missing_tools: tuple[str, ...]) -> tuple[str, ...]:
+    priority_prefixes = (
+        "apply_",
+        "archive_",
+        "copy_",
+        "mark_",
+        "prepare_forward",
+        "process_",
+        "resolve_",
+        "restore_",
+        "run_",
+        "save_",
+        "send_",
+    )
+    return tuple(tool for tool in missing_tools if tool.startswith(priority_prefixes))

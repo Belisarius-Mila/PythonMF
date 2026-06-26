@@ -17,8 +17,14 @@ class CapabilityAuditTests(unittest.TestCase):
         self.assertIn("No unmapped agent tools.", text)
         self.assertIn("Capability registry records: 5", text)
         self.assertIn("High-risk capability records: 1", text)
+        self.assertIn("Registry-covered agent tools: 2/", text)
         self.assertIn("Capability registry: OK", text)
         self.assertIn("Capability registry validation:\n- OK", text)
+        self.assertIn("Priority missing capability records:", text)
+        self.assertIn("- `send_confirmed_sms_rcs`", text)
+        self.assertIn("Agent tools missing capability records:", text)
+        self.assertIn("- `search_memory`", text)
+        self.assertNotIn("- `send_prepared_email_draft`", text)
 
 
 if __name__ == "__main__":
