@@ -17,7 +17,7 @@ class CapabilityRegistryTests(unittest.TestCase):
         records = all_capabilities()
         ids = [record.capability_id for record in records]
 
-        self.assertGreaterEqual(len(records), 10)
+        self.assertGreaterEqual(len(records), 15)
         self.assertEqual(len(ids), len(set(ids)))
         self.assertEqual(validate_registry(), ())
 
@@ -45,6 +45,11 @@ class CapabilityRegistryTests(unittest.TestCase):
             "save_selected_email_cases_from_uids",
             "prepare_forward_email_by_uid",
             "mark_reminder_done",
+            "save_email_action_case_reminder",
+            "save_payment_case_document",
+            "save_payment_sms_reminder",
+            "save_document_due_reminder",
+            "apply_document_import",
         ):
             with self.subTest(capability_id=capability_id):
                 record = get_capability(capability_id)
