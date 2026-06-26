@@ -22,8 +22,6 @@ const nutsReveal = document.getElementById("nutsReveal");
 const nutsRevealImage = document.getElementById("nutsRevealImage");
 const nutsRevealFallback = document.getElementById("nutsRevealFallback");
 const mapFragment = document.getElementById("mapFragment");
-const startScreen = document.getElementById("startScreen");
-const startButton = document.getElementById("startButton");
 const backButton = document.getElementById("backButton");
 const repeatButton = document.getElementById("repeatButton");
 const dictionaryButton = document.getElementById("dictionaryButton");
@@ -106,7 +104,6 @@ const scene02Config = {
   ],
   mainHelp: {
     textCz: "Poslouchej anglické věty. Když se objeví žlutá nápověda, klepni na správnou postavu nebo na brašnu.",
-    textEn: "Listen. When the yellow helper appears, tap the right friend or the bag.",
   },
   props: [
     {
@@ -1010,7 +1007,6 @@ function playHelp() {
   return queueSpeech(async () => {
     if (!step || step.type !== "tap") {
       await speakCzechTranslation(scene02Config.mainHelp.textCz);
-      await speakLine({ text: scene02Config.mainHelp.textEn, lang: "en", rate: 0.84 });
       return;
     }
     const playedCz = await playAudioIfExists(step.helpAudioCz);
@@ -1028,12 +1024,14 @@ function playHelp() {
 
 async function startGame() {
   await primeAudio();
-  startScreen.classList.add("hidden");
 
   if (
     state.sceneState === SCENE_STATES.idle
     || state.sceneState === SCENE_STATES.complete
   ) {
+    setBottomHint("Nejdřív poslouchej českou nápovědu.", true);
+    renderHud();
+    await playHelp();
     restartScene();
   }
 }
@@ -1076,7 +1074,6 @@ function handleRepeat() {
   }
 }
 
-startButton.addEventListener("click", startGame);
 backButton.addEventListener("click", goBackToForestSignpost);
 repeatButton.addEventListener("click", handleRepeat);
 dictionaryButton.addEventListener("click", () => {
@@ -1112,4 +1109,5 @@ setupNutsReveal();
 renderDictionary();
 loadVoices();
 renderHud();
-setBottomHint("Klepni na velké tlačítko a poslouchej.");
+setBottomHint("Scéna se spouští. Poslouchej nápovědu.", true);
+startGame();

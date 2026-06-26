@@ -43,7 +43,6 @@ body {
 .ui-button,
 .scene-card,
 .speech-bubble,
-.start-button,
 .task-prompt,
 .complete-banner,
 .map-fragment {
@@ -433,38 +432,6 @@ body {
   font-size: 0.86rem;
   color: #4a6354;
   line-height: 1.1;
-}
-
-.start-screen {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: rgba(232, 245, 236, 0.72);
-  z-index: 7;
-}
-
-.start-screen.hidden {
-  display: none;
-}
-
-.start-button {
-  appearance: none;
-  width: clamp(110px, 18vw, 150px);
-  height: clamp(110px, 18vw, 150px);
-  border-radius: 50%;
-  background: #fff;
-  cursor: pointer;
-  transition: transform 160ms ease;
-}
-
-.start-button:hover {
-  transform: scale(1.04);
-}
-
-.start-icon {
-  font-size: clamp(2.8rem, 6vw, 3.6rem);
-  color: #3d7a52;
 }
 
 .bottom-panel {
