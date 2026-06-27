@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import signal
 import subprocess
 import tempfile
@@ -13,6 +14,7 @@ from unittest.mock import patch
 import app.cockpit as cockpit_module
 from app.cockpit import (
     COCKPIT_HTML,
+    COCKPIT_POST_ACTIONS,
     EMAIL_PROCESSING_HTML,
     action_queue_status,
     adam_voice_bridge_status,
@@ -103,6 +105,46 @@ from app.email.models import EmailAttachmentMeta, EmailHeader, EmailMessage
 
 
 class CockpitTests(unittest.TestCase):
+    def cockpit_do_post_routes(self) -> list[str]:
+        source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
+        start = source.index("def do_POST(self) -> None:")
+        end = source.index("def read_json(self) -> dict[str, Any]:", start)
+        do_post_source = source[start:end]
+        return re.findall(r'if parsed\.path == "([^"]+)":', do_post_source)
+
+    def test_cockpit_post_action_registry_matches_do_post_routes(self) -> None:
+        registered_paths = [item["path"] for item in COCKPIT_POST_ACTIONS]
+        routed_paths = self.cockpit_do_post_routes()
+
+        self.assertEqual(len(registered_paths), len(set(registered_paths)))
+        self.assertEqual(registered_paths, routed_paths)
+
+    def test_cockpit_post_action_registry_has_required_metadata(self) -> None:
+        allowed_risks = {
+            "delete_or_purge",
+            "dev_runner",
+            "external_ai",
+            "external_send",
+            "local_open",
+            "local_service",
+            "print",
+            "private_write",
+            "read_only_via_post",
+            "voice_local_outbound",
+        }
+        allowed_test_levels = {"direct", "indirect", "ui_presence", "voice_tests"}
+        required_keys = {"path", "label", "risk", "confirmation", "handler_name", "test_level"}
+
+        for item in COCKPIT_POST_ACTIONS:
+            self.assertEqual(required_keys, set(item))
+            self.assertTrue(item["path"].startswith("/api/"))
+            self.assertIn(item["risk"], allowed_risks)
+            self.assertIn(item["test_level"], allowed_test_levels)
+            self.assertTrue(item["label"].strip())
+            self.assertTrue(item["confirmation"].strip())
+            self.assertTrue(item["handler_name"].strip())
+            self.assertTrue(hasattr(cockpit_module, item["handler_name"]), item["handler_name"])
+
     def test_library_archive_url_action_passes_url_category_and_tags(self) -> None:
         with patch("app.cockpit.archive_url") as archive_mock:
             archive_mock.return_value = {"ok": True, "item": {"id": "article-1"}}
