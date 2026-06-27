@@ -3206,10 +3206,12 @@ def process_email_work_queue_purge_trash_batch(
         return {"ok": False, "message": "Dávka pro trvalé smazání je prázdná.", "items": []}
 
     safe_items = [item for item in items if isinstance(item, dict)]
-    if not confirmed and confirmation_text.strip() != "yes":
+    required_confirmation = purge_trash_confirmation_phrase(len(safe_items))
+    if not confirmed or confirmation_text.strip() != required_confirmation:
         return {
             "ok": True,
-            "message": "Trvalé smazání čeká na potvrzení tlačítkem.",
+            "message": f"Trvalé smazání čeká na přesné potvrzení: {required_confirmation}",
+            "required_confirmation": required_confirmation,
             "summary": {"purge_pending": len(safe_items), "purged": 0, "errors": 0},
             "items": [
                 {
@@ -3218,6 +3220,7 @@ def process_email_work_queue_purge_trash_batch(
                     "uid": safe_text(str(item.get("uid", ""))),
                     "status": "purge_pending",
                     "ok": True,
+                    "required_confirmation": required_confirmation,
                 }
                 for item in safe_items
             ],
@@ -3260,6 +3263,17 @@ def process_email_work_queue_purge_trash_batch(
     )
     message = "Trvalé smazání skončilo s chybami." if has_error else "E-maily v koši byly trvale smazány."
     return {"ok": not has_error, "message": message, "summary": summary, "items": processed}
+
+
+def purge_trash_confirmation_phrase(count: int) -> str:
+    safe_count = max(1, int(count or 1))
+    if safe_count == 1:
+        noun = "e-mail"
+    elif safe_count in {2, 3, 4}:
+        noun = "e-maily"
+    else:
+        noun = "e-mailů"
+    return f"Potvrzuji, trvale smaž {safe_count} {noun} z koše."
 
 
 def email_processing_message_id_ref(value: object) -> str:
@@ -10180,7 +10194,7 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "path": "/api/email-processing/purge-trash",
         "label": "Trvale smazat e-maily z kose",
         "risk": "delete_or_purge",
-        "confirmation": "ui_confirm_boolean",
+        "confirmation": "exact_phrase",
         "handler_name": "process_email_work_queue_purge_trash_batch",
         "test_level": "direct",
     },
@@ -11887,14 +11901,38 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         );
         if (!ok) return;
         purgeTrashBtn.disabled = true;
-        queueStatus.textContent = "Trvale mažu e-maily z koše.";
+        queueStatus.textContent = "Připravuji přesné potvrzení pro trvalé smazání.";
         try {
+          const previewRes = await fetch("/api/email-processing/purge-trash", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+              items: permanentDeleteItems,
+              confirmed: false
+            })
+          });
+          const preview = await previewRes.json();
+          const required = preview.required_confirmation || "";
+          if (!required) {
+            queueStatus.textContent = preview.message || "Backend nevrátil potvrzovací větu pro trvalé smazání.";
+            return;
+          }
+          const typed = queue.prompt(
+            "Pro trvalé smazání opiš přesně potvrzovací větu:\\n\\n" + required,
+            ""
+          );
+          if (typed !== required) {
+            queueStatus.textContent = "Trvalé smazání z koše nebylo potvrzeno přesnou větou.";
+            return;
+          }
+          queueStatus.textContent = "Trvale mažu e-maily z koše.";
           const res = await fetch("/api/email-processing/purge-trash", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
               items: permanentDeleteItems,
-              confirmed: true
+              confirmed: true,
+              confirmation_text: typed
             })
           });
           const data = await res.json();

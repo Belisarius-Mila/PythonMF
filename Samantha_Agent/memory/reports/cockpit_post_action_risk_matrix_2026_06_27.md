@@ -36,7 +36,7 @@ Bezpecnost:
 | `external_ai` | 1 | ma presnou potvrzovaci frazi pro OpenAI backend |
 | `external_send` | 1 | ma presnou potvrzovaci frazi z pripraveneho exportu |
 | `print` | 2 | prepare je bezpecny mezikrok; run ma presnou frazi |
-| `delete_or_purge` | 3 | vetsinou silna fraze; e-mail purge ma slabsi payload branu |
+| `delete_or_purge` | 3 | silnejsi brany; e-mail purge byl zpevnen na presnou potvrzovaci frazi |
 | `dev_runner` | 1 | dobry allowlistovy vzor |
 
 Celkem: 56 POST endpointu.
@@ -99,7 +99,7 @@ Celkem: 56 POST endpointu.
 | `/api/email-processing/read-message` | `read_only_via_post` | nacte telo vybraneho e-mailu read-only | provider/UID/max chars limit | prime detail tests |
 | `/api/email-processing/preview-attachment` | `read_only_via_post` | nacte preview prilohy read-only | provider/UID/part id | UI pritomnost |
 | `/api/email-processing/process-batch` | `private_write` | uklada e-maily/PDF lokalne; u kose muze presunout e-mail do kose | davkovy UI confirm; pro trash presna potvrzovaci veta | prime batch/trash tests |
-| `/api/email-processing/purge-trash` | `delete_or_purge` | trvale maze e-maily z kose provideru | `confirmed` boolean; kod akceptuje i `confirmation_text == yes` | prime purge tests |
+| `/api/email-processing/purge-trash` | `delete_or_purge` | trvale maze e-maily z kose provideru | presna potvrzovaci veta podle poctu e-mailu v davce | prime purge tests |
 | `/api/email-processing/new-headers` | `read_only_via_post` | nacte nove hlavicky e-mailu | read-only limity/days/known ids | prime header tests |
 
 ## Silne ochrany
@@ -133,12 +133,9 @@ Celkem: 56 POST endpointu.
    - `/api/voice-mode/codex-approval/clear`
    - `/api/documents/classification-suggestion/accept`
    - `/api/documents/due-reminder`
-4. `/api/email-processing/purge-trash` je nejcitlivejsi delete endpoint. Ma testy a UI confirm,
-   ale backend potvrzeni je slabsi nez u dokumentu nebo e-mail trash batch, protoze staci
-   boolean `confirmed`; kod navic akceptuje historicke `confirmation_text == yes`.
-5. Voice input routy nemaji potvrzeni primo v Cockpitu; bezpecnost stoji na terminal bridge
+4. Voice input routy nemaji potvrzeni primo v Cockpitu; bezpecnost stoji na terminal bridge
    triage. To je prijatelne, ale melo by to byt explicitne uvedene v budouci capability registry.
-6. `local_service` start/stop akce maji rozdilnou uroven bran. Start bez confirmu je prakticky,
+5. `local_service` start/stop akce maji rozdilnou uroven bran. Start bez confirmu je prakticky,
    ale restart/stop by mely mit sjednoceny audit zaznam.
 
 ## Doporučení pro bod 3
@@ -155,8 +152,8 @@ Celkem: 56 POST endpointu.
    - `ui_confirm_only`
    - `allowlist_only`
    - `none_readonly`
-5. Prvni konkretni kandidat na zpevneni: `/api/email-processing/purge-trash` - nahradit
-   boolean potvrzeni presnou frazi podle poctu e-mailu nebo podle souhrnu purge batch.
+5. `/api/email-processing/purge-trash` uz byl zpevnen: ostrou akci povoli jen
+   `confirmed: true` spolecne s presnou frazi podle poctu e-mailu v davce.
 
 ## Navazujici krok
 

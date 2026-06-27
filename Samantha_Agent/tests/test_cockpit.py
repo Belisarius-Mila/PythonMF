@@ -73,6 +73,7 @@ from app.cockpit import (
     parse_email_processing_items,
     prepare_document_print_action,
     projects_status,
+    purge_trash_confirmation_phrase,
     quick_note_detail_status,
     quick_notes_status,
     quantitative_status_overview,
@@ -5748,7 +5749,38 @@ Dalsi krok:
             self.assertTrue(result["ok"])
             self.assertEqual(result["summary"]["purge_pending"], 1)
             self.assertFalse(provider.purge_calls)
-            self.assertIn("čeká na potvrzení tlačítkem", result["message"])
+            self.assertEqual(result["required_confirmation"], "Potvrzuji, trvale smaž 1 e-mail z koše.")
+            self.assertIn("čeká na přesné potvrzení", result["message"])
+            self.assertEqual(result["items"][0]["required_confirmation"], result["required_confirmation"])
+
+    def test_process_email_work_queue_purge_trash_rejects_boolean_without_exact_phrase(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            provider = _FakeArchiveProvider(_archive_source_without_attachment())
+
+            result = process_email_work_queue_purge_trash_batch(
+                items=[
+                    {
+                        "id": "trash-1",
+                        "provider": "iCloud",
+                        "uid": "14157",
+                        "trash_folder": "Deleted Messages",
+                        "trash_uid": "914157",
+                    }
+                ],
+                confirmed=True,
+                actions_path=Path(temp_dir) / "actions.jsonl",
+                icloud_provider_factory=lambda: provider,
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["summary"]["purge_pending"], 1)
+            self.assertFalse(provider.purge_calls)
+            self.assertEqual(result["required_confirmation"], "Potvrzuji, trvale smaž 1 e-mail z koše.")
+
+    def test_process_email_work_queue_purge_trash_confirmation_phrase_handles_counts(self) -> None:
+        self.assertEqual(purge_trash_confirmation_phrase(1), "Potvrzuji, trvale smaž 1 e-mail z koše.")
+        self.assertEqual(purge_trash_confirmation_phrase(2), "Potvrzuji, trvale smaž 2 e-maily z koše.")
+        self.assertEqual(purge_trash_confirmation_phrase(5), "Potvrzuji, trvale smaž 5 e-mailů z koše.")
 
     def test_process_email_work_queue_purge_trash_confirmed_uses_provider_expunge(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -5766,6 +5798,7 @@ Dalsi krok:
                     }
                 ],
                 confirmed=True,
+                confirmation_text="Potvrzuji, trvale smaž 1 e-mail z koše.",
                 actions_path=Path(temp_dir) / "actions.jsonl",
                 icloud_provider_factory=lambda: provider,
             )
@@ -5797,8 +5830,8 @@ Dalsi krok:
         self.assertIn("Emaily určené ke smazání smazat", EMAIL_PROCESSING_HTML)
         self.assertIn("Trvale smazat e-maily v koši", EMAIL_PROCESSING_HTML)
         self.assertIn("confirmed: true", EMAIL_PROCESSING_HTML)
-        self.assertNotIn("Potvrzuji, trvale smaž", EMAIL_PROCESSING_HTML)
-        self.assertNotIn("opiš přesně potvrzovací větu", EMAIL_PROCESSING_HTML)
+        self.assertIn("confirmation_text: typed", EMAIL_PROCESSING_HTML)
+        self.assertIn("opiš přesně potvrzovací větu", EMAIL_PROCESSING_HTML)
         self.assertIn("read-only", EMAIL_PROCESSING_HTML)
         self.assertIn("Obnovit nové", EMAIL_PROCESSING_HTML)
         self.assertIn('id="refreshBtn" disabled', EMAIL_PROCESSING_HTML)
