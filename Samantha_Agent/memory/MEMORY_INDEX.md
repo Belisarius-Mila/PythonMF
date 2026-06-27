@@ -16,6 +16,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `reports/cockpit_ui_content_audit_2026_06_11.md` - kratky read-only audit obsahu oken Cockpitu: co je denni, obcasne, servisni a archivni; duplicity, technicke nazvy a navrh prvniho UI cleanupu.
 - `reports/cockpit_main_screen_daily_audit_2026_06_11.md` - faze 2 Cockpit auditu: rozdeleni hlavni obrazovky na `denne`, `obcas`, `servis`, `archiv` a navrh, co ma byt rano videt bez klikani.
 - `reports/cockpit_function_inventory_audit_2026_06_27.md` - Cockpit audit bod 1: git-safe inventura endpointu, UI ploch, internich registru, servisnich skriptu a testoveho pokryti; Cockpit je provozne zeleny, hlavni riziko je monoliticky `app/cockpit.py`, dalsi krok je rizikova matice POST akci.
+- `reports/cockpit_post_action_risk_matrix_2026_06_27.md` - Cockpit audit bod 2: rizikova matice 56 POST endpointu podle trid read-only, local-open/service, private-write, print, send, delete/purge, external-AI a dev-runner; hlavni dalsi krok je kodovy registr `COCKPIT_POST_ACTIONS` a test, ze kazda POST cesta ma rizikovou kartu.
 - `reports/git_branch_audit_cursor_matysek_scene02_2026_06_26.md` - audit smesne neintegrovane vetve `cursor/matysek-scene02-mossy-stump-prototype`: co uz bylo prevedeno na `main`, co jeste prenest samostatne a co archivovat; vzniklo po regresi `Lekarna - sprava`.
 
 ## Projects
