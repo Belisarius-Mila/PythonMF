@@ -112,6 +112,39 @@ class CockpitTests(unittest.TestCase):
         do_post_source = source[start:end]
         return re.findall(r'if parsed\.path == "([^"]+)":', do_post_source)
 
+    def cockpit_do_get_routes(self) -> list[str]:
+        source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
+        start = source.index("def do_GET(self) -> None:")
+        end = source.index("def do_POST(self) -> None:", start)
+        do_get_source = source[start:end]
+        return re.findall(r'if parsed\.path == "([^"]+)":', do_get_source)
+
+    def cockpit_do_get_prefix_routes(self) -> list[str]:
+        source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
+        start = source.index("def do_GET(self) -> None:")
+        end = source.index("def do_POST(self) -> None:", start)
+        do_get_source = source[start:end]
+        return re.findall(r'if parsed\.path\.startswith\("([^"]+)"\):', do_get_source)
+
+    def frontend_literal_routes(self) -> list[tuple[str, str]]:
+        html_sources = {
+            "cockpit": COCKPIT_HTML,
+            "email_processing": EMAIL_PROCESSING_HTML,
+            "lekarna_admin": cockpit_module.lekarna_admin_page_html(),
+            "document_reader": cockpit_module.document_reader_page_html("doc-test", "Test document"),
+            "purchase_reader": cockpit_module.purchase_reader_page_html("purchase-test", "Test purchase"),
+        }
+        routes: list[tuple[str, str]] = []
+        for source_name, html_text in html_sources.items():
+            for raw_path in re.findall(
+                r'/(?:api|documents|purchases|email-processing|janicka-kucharka|lekarna-admin|local-apps)[^"\'`\s<)]*',
+                html_text,
+            ):
+                route = raw_path.split("?", 1)[0].split("${", 1)[0]
+                if route:
+                    routes.append((source_name, route))
+        return sorted(set(routes))
+
     def test_cockpit_post_action_registry_matches_do_post_routes(self) -> None:
         registered_paths = [item["path"] for item in COCKPIT_POST_ACTIONS]
         routed_paths = self.cockpit_do_post_routes()
@@ -144,6 +177,18 @@ class CockpitTests(unittest.TestCase):
             self.assertTrue(item["confirmation"].strip())
             self.assertTrue(item["handler_name"].strip())
             self.assertTrue(hasattr(cockpit_module, item["handler_name"]), item["handler_name"])
+
+    def test_frontend_literal_routes_exist_in_backend(self) -> None:
+        exact_backend_routes = set(self.cockpit_do_get_routes()) | set(self.cockpit_do_post_routes())
+        prefix_backend_routes = self.cockpit_do_get_prefix_routes()
+        missing = [
+            (source_name, route)
+            for source_name, route in self.frontend_literal_routes()
+            if route not in exact_backend_routes
+            and not any(route.startswith(prefix) for prefix in prefix_backend_routes)
+        ]
+
+        self.assertEqual([], missing)
 
     def test_library_archive_url_action_passes_url_category_and_tags(self) -> None:
         with patch("app.cockpit.archive_url") as archive_mock:
