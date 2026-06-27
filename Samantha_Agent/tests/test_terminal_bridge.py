@@ -273,6 +273,22 @@ class TerminalBridgeTests(unittest.TestCase):
 
         self.assertEqual(discover_codex_ttys(runner=fake_ps_runner), ["ttys001"])
 
+    def test_discover_codex_ttys_keeps_foreground_long_running_screen_codex(self) -> None:
+        def fake_ps_runner(args, **kwargs):
+            return subprocess.CompletedProcess(
+                args=args,
+                returncode=0,
+                stdout=(
+                    "53943 53941 ttys000 Ss+ 2-01:00:00 login login -pflq user /repo/scripts/samantha_screen_entry.sh\n"
+                    "53945 53943 ttys000 S+ 2-01:00:00 zsh /bin/zsh /repo/scripts/samantha_screen_entry.sh\n"
+                    "54094 53945 ttys000 S+ 2-01:00:00 node node /usr/local/bin/codex -C /repo .\n"
+                    "54105 54094 ttys000 S+ 2-01:00:00 codex /vendor/bin/codex -C /repo .\n"
+                ),
+                stderr="",
+            )
+
+        self.assertEqual(discover_codex_ttys(runner=fake_ps_runner), ["ttys000"])
+
     def test_load_marked_codex_tty_reads_private_marker(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             marker = Path(temp_dir) / "current_codex_tty.json"

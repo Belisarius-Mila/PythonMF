@@ -12,7 +12,7 @@ from app.speech.voice_inbox import VoiceCommand, normalize_for_triage, voice_com
 
 
 MAX_TERMINAL_PROMPT_CHARS = 1200
-PS_COMMAND = ["ps", "-axo", "pid=,ppid=,tty=,etime=,comm=,args="]
+PS_COMMAND = ["ps", "-axo", "pid=,ppid=,tty=,stat=,etime=,comm=,args="]
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CURRENT_CODEX_TTY_PATH = PROJECT_ROOT / "data/private/voice_inbox/current_codex_tty.json"
 DEFAULT_STALE_CODEX_SECONDS = 36 * 60 * 60
@@ -142,6 +142,14 @@ def parse_ps_etime_seconds(value: str) -> int:
     return days * 86400 + hours * 3600 + minutes * 60 + seconds
 
 
+def looks_like_ps_etime(value: str) -> bool:
+    return bool(re.fullmatch(r"(?:\d+-)?\d+(?::\d+){0,2}", str(value or "").strip()))
+
+
+def looks_like_ps_stat(value: str) -> bool:
+    return bool(re.fullmatch(r"[A-Za-z+<NsS]+", str(value or "").strip()))
+
+
 def discover_codex_ttys(
     *,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
@@ -162,45 +170,66 @@ def discover_codex_ttys(
 
     tty_by_pid: dict[int, str] = {}
     parent_by_pid: dict[int, int] = {}
+    stat_by_pid: dict[int, str] = {}
+    elapsed_by_pid: dict[int, int] = {}
     codex_pids: set[int] = set()
     for line in completed.stdout.splitlines():
-        parts = line.strip().split(None, 5)
+        parts = line.strip().split(None, 6)
         if len(parts) < 5:
             continue
         elapsed_seconds = 0
-        if len(parts) >= 6:
+        stat = ""
+        if len(parts) >= 7 and looks_like_ps_stat(parts[3]) and looks_like_ps_etime(parts[4]):
+            pid_text, ppid_text, tty, stat, etime, comm, args = parts
+            elapsed_seconds = parse_ps_etime_seconds(etime)
+        elif len(parts) >= 6 and looks_like_ps_etime(parts[3]):
+            parts = line.strip().split(None, 5)
             pid_text, ppid_text, tty, etime, comm, args = parts
             elapsed_seconds = parse_ps_etime_seconds(etime)
         else:
+            parts = line.strip().split(None, 4)
+            if len(parts) < 5:
+                continue
             pid_text, ppid_text, tty, comm, args = parts
         try:
             pid = int(pid_text)
             ppid = int(ppid_text)
         except ValueError:
             continue
-        if stale_after_seconds > 0 and elapsed_seconds > stale_after_seconds:
-            continue
         tty_by_pid[pid] = normalize_tty(tty)
         parent_by_pid[pid] = ppid
+        stat_by_pid[pid] = stat
+        elapsed_by_pid[pid] = elapsed_seconds
         if is_codex_cli_process(comm, args):
             codex_pids.add(pid)
 
-    result: list[str] = []
-    seen: set[str] = set()
+    fresh_result: list[str] = []
+    foreground_stale_result: list[str] = []
+    fresh_seen: set[str] = set()
+    stale_seen: set[str] = set()
     for pid in sorted(codex_pids):
         current = pid
+        foreground_terminal = False
         for _ in range(20):
+            if "+" in stat_by_pid.get(current, ""):
+                foreground_terminal = True
             tty = tty_by_pid.get(current, "")
             if tty and tty != "??":
-                if tty not in seen:
-                    seen.add(tty)
-                    result.append(tty)
+                elapsed_seconds = elapsed_by_pid.get(pid, 0)
+                is_fresh = stale_after_seconds <= 0 or elapsed_seconds <= stale_after_seconds
+                if is_fresh:
+                    if tty not in fresh_seen:
+                        fresh_seen.add(tty)
+                        fresh_result.append(tty)
+                elif foreground_terminal and tty not in stale_seen:
+                    stale_seen.add(tty)
+                    foreground_stale_result.append(tty)
                 break
             parent = parent_by_pid.get(current)
             if parent is None or parent == current:
                 break
             current = parent
-    return result
+    return fresh_result or foreground_stale_result
 
 
 def load_marked_codex_tty(path: Path = CURRENT_CODEX_TTY_PATH) -> str:
