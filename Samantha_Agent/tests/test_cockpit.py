@@ -2397,6 +2397,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/documents/due-reminder", COCKPIT_HTML)
         self.assertIn("Dokumenty k revizi", COCKPIT_HTML)
         self.assertIn("reviewReportBtn", COCKPIT_HTML)
+        self.assertIn('<div id="reviewReportCount" class="work-count">?</div>', COCKPIT_HTML)
+        self.assertIn('<button class="secondary" id="reviewReportBtn">Načti report</button>', COCKPIT_HTML)
         self.assertIn("/api/documents/review-report", COCKPIT_HTML)
         self.assertIn("loadDocumentReviewReport", COCKPIT_HTML)
         self.assertIn("renderDocumentReviewReportItem", COCKPIT_HTML)

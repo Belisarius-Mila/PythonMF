@@ -12807,9 +12807,9 @@ COCKPIT_HTML = """<!doctype html>
           </div>
           <div class="work-card">
             <h3>Dokumenty k revizi</h3>
-            <div id="reviewReportCount" class="work-count">0</div>
+            <div id="reviewReportCount" class="work-count">?</div>
             <div class="actions">
-              <button class="secondary" id="reviewReportBtn">Načíst report</button>
+              <button class="secondary" id="reviewReportBtn">Načti report</button>
             </div>
             <div id="reviewReportStatus" class="status-line">Report zatím není načtený. Skupiny: Bez textu / OCR, Krátký text, Doplnit údaje, K revizi, V pořádku.</div>
             <div id="reviewReportList" class="work-list review-report-list"></div>
