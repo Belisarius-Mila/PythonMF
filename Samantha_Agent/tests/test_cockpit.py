@@ -2438,6 +2438,21 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Auditní historie inboxu", COCKPIT_HTML)
         self.assertIn('const marker = "\\n- Inbox audit";', COCKPIT_HTML)
 
+    def test_document_work_cards_are_ordered_by_daily_workflow_columns(self) -> None:
+        headings = [
+            "Nová PDF ve Downloads za 7 dní",
+            "Uložené dokumenty k revizi",
+            "Problémy",
+            "Dokumentový intake",
+            "Dokumenty k revizi",
+            "Klasifikace",
+            "Termíny v dokumentech",
+            "Související dokumenty",
+        ]
+        positions = [COCKPIT_HTML.index(f"<h3>{heading}</h3>") for heading in headings]
+
+        self.assertEqual(positions, sorted(positions))
+
     def test_cockpit_status_keeps_heavy_reports_out_of_main_refresh(self) -> None:
         with (
             patch("app.cockpit.safe_downloads_status", return_value={"ok": True, "items": []}),

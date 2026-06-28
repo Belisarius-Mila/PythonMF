@@ -12806,10 +12806,13 @@ COCKPIT_HTML = """<!doctype html>
             <div id="documentIntakeList" class="work-list"></div>
           </div>
           <div class="work-card">
-            <h3>Související dokumenty</h3>
-            <div id="documentCasesCount" class="work-count">0</div>
-            <div id="documentCasesStatus" class="status-line">Seskupení podle věci nebo protistrany.</div>
-            <div id="documentCasesList" class="work-list"></div>
+            <h3>Dokumenty k revizi</h3>
+            <div id="reviewReportCount" class="work-count">0</div>
+            <div class="actions">
+              <button class="secondary" id="reviewReportBtn">Načíst report</button>
+            </div>
+            <div id="reviewReportStatus" class="status-line">Report zatím není načtený. Skupiny: Bez textu / OCR, Krátký text, Doplnit údaje, K revizi, V pořádku.</div>
+            <div id="reviewReportList" class="work-list review-report-list"></div>
           </div>
           <div class="work-card">
             <h3>Klasifikace</h3>
@@ -12824,13 +12827,10 @@ COCKPIT_HTML = """<!doctype html>
             <div id="documentDueList" class="work-list"></div>
           </div>
           <div class="work-card">
-            <h3>Dokumenty k revizi</h3>
-            <div id="reviewReportCount" class="work-count">0</div>
-            <div class="actions">
-              <button class="secondary" id="reviewReportBtn">Načíst report</button>
-            </div>
-            <div id="reviewReportStatus" class="status-line">Report zatím není načtený. Skupiny: Bez textu / OCR, Krátký text, Doplnit údaje, K revizi, V pořádku.</div>
-            <div id="reviewReportList" class="work-list review-report-list"></div>
+            <h3>Související dokumenty</h3>
+            <div id="documentCasesCount" class="work-count">0</div>
+            <div id="documentCasesStatus" class="status-line">Seskupení podle věci nebo protistrany.</div>
+            <div id="documentCasesList" class="work-list"></div>
           </div>
         </div>
       </div>
