@@ -10,10 +10,12 @@ Kdykoliv Codex predpoklada, ze bude zadat systemove povoleni pro prikaz nebo too
 call, ma pred tim zapsat viditelny runtime stav do Cockpitu. Cockpit pak v
 dashboardu a v sekci `Hlas` ukaze kartu `Codex čeká na potvrzení`.
 
-Toto pravidlo neznamena, ze Cockpit umi systemove povoleni zmacknout. Zatim umi
-jen spolehlive ukazat, ze prace stoji na potvrzeni. Karta musi byt psana pro
-Milu, ne pro vyvojare: co chce Codex udelat, proc, jake je riziko a co ma Mila
-ted udelat.
+Toto pravidlo neznamena, ze Cockpit umi systemove povoleni zmacknout. Umi ale
+spolehlive ukazat, ze prace stoji na potvrzeni, a od 2026-06-28 umi volitelne
+zobrazit presnou textovou potvrzovaci vetu, kterou lze z Cockpitu poslat zpet
+Adamovi/Codexu pres hlasovy textovy bridge. Karta musi byt psana pro Milu, ne
+pro vyvojare: co chce Codex udelat, proc, jake je riziko a co ma Mila ted
+udelat.
 
 ## Runtime soubor
 
@@ -38,12 +40,20 @@ Pred ocekavanym systemovym potvrzenim:
   --next-step "Otevři aktivní Codex relaci a rozhodni systémové potvrzení."
 ```
 
+Pokud jde o textovou potvrzovaci vetu, kterou ma jit poslat z Cockpitu nebo
+iPhonu, pridej:
+
+```bash
+  --confirmation-text "Potvrzuji presne zneni konkretni akce."
+```
+
 Policka v Cockpitu:
 
 - `Co chci udelat` vychazi z `--command`.
 - `Proc` vychazi z `--reason`.
 - `Riziko` vychazi z `--risk`.
 - `Co ma Mila udelat` vychazi z `--next-step`.
+- `Přesná potvrzovací věta` vychazi z `--confirmation-text`, pokud je vyplnena.
 
 Neposilej do techto poli cele prikazy s tokeny, tajemstvi, cele osobni udaje ani
 dlouhe citlive texty. Kdyz je prikaz citlivy, popis jen kategorii akce.
@@ -76,10 +86,12 @@ Nepouzivej pro bezne sandboxovane read-only prikazy, ktere necekaji na povoleni.
 
 ## Stav
 
-MVP je hotove k 2026-06-12:
+MVP je hotove k 2026-06-12, rozsirené k 2026-06-28:
 
 - runtime stav se uklada a cte,
 - `/api/status` ho vraci v `voice_mode.codex_approval`,
 - Cockpit dashboard a sekce `Hlas` kartu zobrazuji,
+- karta umi zobrazit a zkopirovat presnou potvrzovaci vetu,
+- karta umi odeslat presnou potvrzovaci vetu Adamovi pres existujici `/api/speech/voice-text`,
 - lokalni i Tailscale Cockpit byly live otestovane,
 - skutecne vzdalené zmacknuti interniho Codex potvrzeni zatim hotove neni.

@@ -12675,7 +12675,14 @@ COCKPIT_HTML = """<!doctype html>
 		            <div class="voice-card-label">Co má Míla udělat</div>
 		            <div id="codexApprovalNextStep" class="voice-card-text"></div>
 		          </div>
+		          <div id="codexApprovalConfirmationBlock" class="voice-card-field hidden">
+		            <div class="voice-card-label">Přesná potvrzovací věta</div>
+		            <div id="codexApprovalConfirmationText" class="voice-card-text"></div>
+		            <textarea id="codexApprovalConfirmationInput" spellcheck="false"></textarea>
+		          </div>
 		          <div class="voice-card-actions">
+		            <button class="primary hidden" id="codexApprovalSendConfirmationBtn">Odeslat potvrzení Adamovi</button>
+		            <button class="secondary hidden" id="codexApprovalCopyConfirmationBtn">Kopírovat větu</button>
 		            <button class="secondary" id="codexApprovalClearBtn">Vyčistit kartu</button>
 		          </div>
 		        </div>
@@ -13415,6 +13422,11 @@ COCKPIT_HTML = """<!doctype html>
     const codexApprovalCommand = document.getElementById("codexApprovalCommand");
     const codexApprovalRisk = document.getElementById("codexApprovalRisk");
     const codexApprovalNextStep = document.getElementById("codexApprovalNextStep");
+    const codexApprovalConfirmationBlock = document.getElementById("codexApprovalConfirmationBlock");
+    const codexApprovalConfirmationText = document.getElementById("codexApprovalConfirmationText");
+    const codexApprovalConfirmationInput = document.getElementById("codexApprovalConfirmationInput");
+    const codexApprovalSendConfirmationBtn = document.getElementById("codexApprovalSendConfirmationBtn");
+    const codexApprovalCopyConfirmationBtn = document.getElementById("codexApprovalCopyConfirmationBtn");
     const codexApprovalClearBtn = document.getElementById("codexApprovalClearBtn");
     const voiceApprovalCard = document.getElementById("voiceApprovalCard");
     const voiceApprovalReason = document.getElementById("voiceApprovalReason");
@@ -16221,6 +16233,7 @@ COCKPIT_HTML = """<!doctype html>
 		      const command = String(approval.command || approval.action || "").trim();
 		      const risk = String(approval.risk || "").trim();
 		      const nextStep = String(approval.next_step || "").trim();
+		      const confirmationText = String(approval.confirmation_text || "").trim();
 		      if (codexApprovalReason) {
 		        codexApprovalReason.textContent = reason;
 		      }
@@ -16232,6 +16245,23 @@ COCKPIT_HTML = """<!doctype html>
 		      }
 		      if (codexApprovalNextStep) {
 		        codexApprovalNextStep.textContent = nextStep || "Otevři aktivní Codex relaci a schval nebo zamítni systémové potvrzení podle zobrazeného textu.";
+		      }
+		      if (codexApprovalConfirmationBlock) {
+		        codexApprovalConfirmationBlock.classList.toggle("hidden", !confirmationText);
+		      }
+		      if (codexApprovalConfirmationText) {
+		        codexApprovalConfirmationText.textContent = confirmationText;
+		      }
+		      if (codexApprovalConfirmationInput && confirmationText && codexApprovalConfirmationInput.value.trim() !== confirmationText) {
+		        codexApprovalConfirmationInput.value = confirmationText;
+		      }
+		      if (codexApprovalSendConfirmationBtn) {
+		        codexApprovalSendConfirmationBtn.classList.toggle("hidden", !confirmationText);
+		        codexApprovalSendConfirmationBtn.disabled = !confirmationText;
+		      }
+		      if (codexApprovalCopyConfirmationBtn) {
+		        codexApprovalCopyConfirmationBtn.classList.toggle("hidden", !confirmationText);
+		        codexApprovalCopyConfirmationBtn.disabled = !confirmationText;
 		      }
 		    }
 
@@ -16409,6 +16439,59 @@ COCKPIT_HTML = """<!doctype html>
 		        showMessage(`Vyčištění karty Codex potvrzení selhalo: ${err}`);
 		      } finally {
 		        if (codexApprovalClearBtn) codexApprovalClearBtn.disabled = false;
+		      }
+		    }
+
+		    async function copyCodexApprovalConfirmation() {
+		      const text = String((codexApprovalConfirmationInput && codexApprovalConfirmationInput.value) || (codexApprovalConfirmationText && codexApprovalConfirmationText.textContent) || "").trim();
+		      if (!text) return;
+		      if (codexApprovalCopyConfirmationBtn) codexApprovalCopyConfirmationBtn.disabled = true;
+		      try {
+		        if (navigator.clipboard && navigator.clipboard.writeText) {
+		          await navigator.clipboard.writeText(text);
+		          showMessage("Potvrzovací věta je zkopírovaná.");
+		        } else {
+		          if (codexApprovalConfirmationInput) {
+		            codexApprovalConfirmationInput.focus();
+		            codexApprovalConfirmationInput.select();
+		          }
+		          showMessage("Větu nejde automaticky kopírovat, ale je označená v poli.");
+		        }
+		      } catch (err) {
+		        recordFrontendError(err);
+		        showMessage(`Kopírování potvrzovací věty selhalo: ${err}`);
+		      } finally {
+		        if (codexApprovalCopyConfirmationBtn) codexApprovalCopyConfirmationBtn.disabled = false;
+		      }
+		    }
+
+		    async function sendCodexApprovalConfirmation() {
+		      const text = String((codexApprovalConfirmationInput && codexApprovalConfirmationInput.value) || "").trim();
+		      if (!text) {
+		        showMessage("Nejdřív zkontroluj nebo opiš potvrzovací větu.");
+		        if (codexApprovalConfirmationInput) codexApprovalConfirmationInput.focus();
+		        return;
+		      }
+		      if (codexApprovalSendConfirmationBtn) codexApprovalSendConfirmationBtn.disabled = true;
+		      if (voiceCommandStatus) voiceCommandStatus.textContent = "Odesílám potvrzovací větu Adamovi...";
+		      try {
+		        const data = await postJson("/api/speech/voice-text", {text});
+		        if (data.ok) {
+		          const savedHint = data.latest_voice_command_path ? ` Uloženo: ${data.latest_voice_command_path}.` : "";
+		          showMessage(`${data.message || "Potvrzovací věta byla odeslána Adamovi."}${savedHint}`);
+		          if (voiceCommandStatus) voiceCommandStatus.textContent = `${data.message || "Potvrzovací věta byla odeslána Adamovi."}${savedHint}`;
+		          startVoiceReplyPolling({autoSpeak: true, expectedUserText: text});
+		          await refresh({silent: true, includeSecondary: false});
+		        } else {
+		          showMessage(data.message || "Potvrzovací větu se nepodařilo odeslat.");
+		          if (voiceCommandStatus) voiceCommandStatus.textContent = data.message || "Potvrzovací větu se nepodařilo odeslat.";
+		        }
+		      } catch (err) {
+		        recordFrontendError(err);
+		        showMessage(`Odeslání potvrzovací věty selhalo: ${err}`);
+		        if (voiceCommandStatus) voiceCommandStatus.textContent = `Odeslání potvrzovací věty selhalo: ${err}`;
+		      } finally {
+		        if (codexApprovalSendConfirmationBtn) codexApprovalSendConfirmationBtn.disabled = false;
 		      }
 		    }
 
@@ -18813,6 +18896,8 @@ COCKPIT_HTML = """<!doctype html>
     voiceAudioUnlockBtn.addEventListener("click", openVoiceAudioChannel);
     voiceTranscriptSendBtn.addEventListener("click", submitVoiceTranscript);
     voiceLastResponseSpeakBtn.addEventListener("click", speakLastAdamResponse);
+    codexApprovalSendConfirmationBtn.addEventListener("click", sendCodexApprovalConfirmation);
+    codexApprovalCopyConfirmationBtn.addEventListener("click", copyCodexApprovalConfirmation);
     codexApprovalClearBtn.addEventListener("click", clearCodexApprovalCard);
     voiceApprovalApproveBtn.addEventListener("click", () => submitVoiceApproval("approved"));
     voiceApprovalRejectBtn.addEventListener("click", () => submitVoiceApproval("rejected"));

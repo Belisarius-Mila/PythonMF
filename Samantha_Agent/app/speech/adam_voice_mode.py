@@ -387,6 +387,7 @@ def save_codex_approval_request(
     command: str = "",
     next_step: str = "",
     risk: str = "",
+    confirmation_text: str = "",
     path: Path = CODEX_APPROVAL_REQUEST_PATH,
 ) -> dict[str, Any]:
     now = utc_now()
@@ -398,6 +399,7 @@ def save_codex_approval_request(
         "command": str(command or "").strip()[:500],
         "next_step": str(next_step or "").strip()[:500],
         "risk": str(risk or "").strip()[:500],
+        "confirmation_text": str(confirmation_text or "").strip()[:1000],
         "created_at": now,
         "updated_at": now,
         "path": str(path),

@@ -22,6 +22,7 @@ def build_parser() -> argparse.ArgumentParser:
     set_parser.add_argument("--command", dest="command_text", default="", help="Stručný bezpečný popis příkazu nebo akce.")
     set_parser.add_argument("--risk", default="", help="Stručné lidské shrnutí rizika, bez tajemství a dlouhých detailů.")
     set_parser.add_argument("--next-step", default="", help="Co má Míla udělat z iPhonu nebo u Macu.")
+    set_parser.add_argument("--confirmation-text", default="", help="Přesná potvrzovací věta, kterou má Cockpit zobrazit a umět odeslat.")
 
     clear_parser = subparsers.add_parser("clear", help="Označit Codex approval stav jako vyřešený.")
     clear_parser.add_argument("--note", default="", help="Stručná poznámka k vyřešení.")
@@ -38,6 +39,7 @@ def main(argv: list[str] | None = None) -> int:
             command=args.command_text,
             risk=args.risk,
             next_step=args.next_step,
+            confirmation_text=args.confirmation_text,
         )
     else:
         result = clear_codex_approval_request(note=args.note)
