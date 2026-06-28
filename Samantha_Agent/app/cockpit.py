@@ -7841,12 +7841,24 @@ def document_review_report_status(
         weak_fields: list[str] = []
         if reading_status == "needs_review":
             reasons.append("needs_review")
-        if text_chars == 0:
-            reasons.append("zero_text")
-        elif text_chars < short_text_threshold:
-            reasons.append("short_text")
-        if extraction.get("ocr_needed") is True:
-            reasons.append("ocr_needed")
+        explicit_reading_status = str(row.get("reading_status", "") or row.get("document_reading_status", ""))
+        explicit_reading_status_resolved = False
+        if explicit_reading_status:
+            try:
+                explicit_reading_status_resolved = normalize_reading_status(explicit_reading_status) in {
+                    "ok",
+                    "unreadable",
+                    "superseded",
+                }
+            except ValueError:
+                explicit_reading_status_resolved = False
+        if not explicit_reading_status_resolved:
+            if text_chars == 0:
+                reasons.append("zero_text")
+            elif text_chars < short_text_threshold:
+                reasons.append("short_text")
+            if extraction.get("ocr_needed") is True:
+                reasons.append("ocr_needed")
         for field, fallback in (("domain", "other"), ("document_type", "document")):
             value = safe_slug(str(row.get(field, "")), default="", limit=80)
             weak_values = {fallback, "unknown"}

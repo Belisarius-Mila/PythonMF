@@ -1811,6 +1811,16 @@ class CockpitTests(unittest.TestCase):
                         "text_extraction": {"method": "pdftotext", "indexed_chars": 20},
                     },
                     {
+                        "document_id": "reviewed-image-doc",
+                        "title": "Reviewed image",
+                        "domain": "insurance",
+                        "document_type": "policy",
+                        "counterparty": "Generali",
+                        "related_asset": "Volvo",
+                        "reading_status": "ok",
+                        "text_extraction": {"method": "image-no-text", "ocr_needed": True, "indexed_chars": 0},
+                    },
+                    {
                         "document_id": "trashed-doc",
                         "title": "Trashed",
                         "domain": "other",
@@ -1825,13 +1835,14 @@ class CockpitTests(unittest.TestCase):
                     {"document_id": "clean-doc", "text": "x" * 1200},
                     {"document_id": "zero-doc", "text": ""},
                     {"document_id": "short-doc", "text": "secret content that must not be returned"},
+                    {"document_id": "reviewed-image-doc", "text": ""},
                 ],
             )
 
             report = document_review_report_status(vault_dir=vault)
 
-            self.assertEqual(report["summary"]["total_indexed"], 4)
-            self.assertEqual(report["summary"]["active_documents"], 3)
+            self.assertEqual(report["summary"]["total_indexed"], 5)
+            self.assertEqual(report["summary"]["active_documents"], 4)
             self.assertEqual(report["summary"]["candidate_count"], 2)
             self.assertEqual(report["summary"]["reason_counts"]["zero_text"], 1)
             self.assertEqual(report["summary"]["reason_counts"]["short_text"], 1)
@@ -1840,7 +1851,7 @@ class CockpitTests(unittest.TestCase):
             self.assertEqual(groups["zero_text"]["count"], 1)
             self.assertEqual(groups["short_text"]["count"], 1)
             self.assertEqual(groups["weak_metadata"]["count"], 0)
-            self.assertEqual(groups["ok"]["count"], 1)
+            self.assertEqual(groups["ok"]["count"], 2)
             self.assertIn("OCR", groups["zero_text"]["recommended_action"])
             self.assertIn("metadata", groups["weak_metadata"]["recommended_action"])
             self.assertNotIn("secret content", json.dumps(report, ensure_ascii=False))
@@ -1848,6 +1859,7 @@ class CockpitTests(unittest.TestCase):
             self.assertIn("zero-doc", by_id)
             self.assertIn("short-doc", by_id)
             self.assertNotIn("clean-doc", by_id)
+            self.assertNotIn("reviewed-image-doc", by_id)
             self.assertNotIn("trashed-doc", by_id)
             self.assertEqual(by_id["zero-doc"]["decision_group"], "zero_text")
             self.assertEqual(by_id["short-doc"]["decision_group"], "short_text")
