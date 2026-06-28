@@ -7,6 +7,7 @@ import binascii
 import html
 import json
 import hashlib
+import mimetypes
 import os
 import re
 import shutil
@@ -5830,14 +5831,25 @@ def document_payment_options(text: str) -> list[dict[str, str]]:
     return options
 
 
-def document_stored_path_is_openable_pdf(stored_path: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> bool:
+OPENABLE_DOCUMENT_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".tif", ".tiff"}
+IMAGE_DOCUMENT_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".tif", ".tiff"}
+
+
+def resolve_document_stored_path(stored_path: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> Path | None:
     try:
         root = vault_dir.resolve(strict=True)
         raw_target = Path(stored_path)
         target = (raw_target if raw_target.is_absolute() else PROJECT_ROOT / raw_target).resolve(strict=True)
     except (OSError, RuntimeError):
-        return False
-    return target.is_file() and target.suffix.casefold() == ".pdf" and (target == root or root in target.parents)
+        return None
+    if target.is_file() and (target == root or root in target.parents):
+        return target
+    return None
+
+
+def document_stored_path_is_openable_pdf(stored_path: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) -> bool:
+    target = resolve_document_stored_path(stored_path, vault_dir=vault_dir)
+    return bool(target and target.suffix.casefold() == ".pdf")
 
 
 def purchase_stored_path_is_openable_pdf(stored_path: str, purchases_dir: Path = DEFAULT_PURCHASES_DIR) -> bool:
@@ -5854,16 +5866,43 @@ def resolve_openable_document_pdf(
     document_id: str,
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
 ) -> dict[str, Any]:
+    resolved = resolve_openable_document_file(document_id, vault_dir=vault_dir)
+    if not resolved.get("ok"):
+        if str(resolved.get("message", "")).startswith("Soubor dokumentu"):
+            return {"ok": False, "message": "PDF není dostupné nebo neleží ve vaultu."}
+        return resolved
+    if resolved.get("viewer_kind") != "pdf":
+        return {"ok": False, "message": "PDF není dostupné nebo neleží ve vaultu."}
+    return resolved
+
+
+def resolve_openable_document_file(
+    document_id: str,
+    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> dict[str, Any]:
     documents = read_jsonl(vault_dir / "index" / "documents_index.jsonl")
     row_index = find_document_row_index_by_reference(documents, document_id)
     if row_index is None:
         return {"ok": False, "message": "Dokument nebyl nalezen ve vault indexu."}
     row = documents[row_index]
     stored_path = str(row.get("stored_path", ""))
-    if not document_stored_path_is_openable_pdf(stored_path, vault_dir=vault_dir):
-        return {"ok": False, "message": "PDF není dostupné nebo neleží ve vaultu."}
+    target = resolve_document_stored_path(stored_path, vault_dir=vault_dir)
+    if target is None:
+        return {"ok": False, "message": "Soubor dokumentu není dostupný nebo neleží ve vaultu."}
+    extension = target.suffix.casefold()
+    if extension not in OPENABLE_DOCUMENT_EXTENSIONS:
+        return {"ok": False, "message": "Soubor dokumentu není podporovaný pro čtení v Cockpitu."}
 
-    target = (PROJECT_ROOT / stored_path).resolve(strict=True)
+    guessed_content_type = mimetypes.guess_type(target.name)[0]
+    if extension == ".pdf":
+        content_type = "application/pdf"
+        viewer_kind = "pdf"
+    elif extension in IMAGE_DOCUMENT_EXTENSIONS:
+        content_type = guessed_content_type or "application/octet-stream"
+        viewer_kind = "image"
+    else:
+        content_type = guessed_content_type or "application/octet-stream"
+        viewer_kind = "download"
     title = safe_text(str(row.get("title", "") or row.get("filename", "") or "Dokument"))[:240]
     document_ref = document_reference(str(row.get("document_id", "")))
     return {
@@ -5872,6 +5911,9 @@ def resolve_openable_document_pdf(
         "title": title,
         "document_id": safe_text(str(row.get("document_id", ""))),
         "document_ref": document_ref,
+        "extension": extension,
+        "content_type": content_type,
+        "viewer_kind": viewer_kind,
     }
 
 
@@ -5915,26 +5957,42 @@ def open_document_pdf_action(
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
     opener: Callable[[list[str]], object] | None = None,
 ) -> dict[str, Any]:
-    resolved = resolve_openable_document_pdf(document_id, vault_dir=vault_dir)
+    resolved = resolve_openable_document_file(document_id, vault_dir=vault_dir)
     if not resolved.get("ok"):
         return resolved
     target = resolved["path"]
     runner = opener or (lambda command: subprocess.run(command, check=False))
     runner(["/usr/bin/open", str(target)])
+    message = "PDF otevřeno v lokální aplikaci."
+    if resolved.get("viewer_kind") != "pdf":
+        message = "Dokument otevřen v lokální aplikaci."
     return {
         "ok": True,
-        "message": "PDF otevřeno v lokální aplikaci.",
+        "message": message,
         "document_id": resolved["document_id"],
         "document_ref": resolved["document_ref"],
     }
 
 
-def document_reader_page_html(document_id: str, title: str) -> str:
+def document_reader_page_html(document_id: str, title: str, viewer_kind: str = "pdf") -> str:
     safe_title = html.escape(title or "Dokument")
     safe_document_id = html.escape(document_id)
     document_id_json = json.dumps(document_id, ensure_ascii=False)
     pdf_url = f"/documents/pdf?document_id={quote(document_id, safe='')}"
     safe_pdf_url = html.escape(pdf_url, quote=True)
+    if viewer_kind == "image":
+        viewer_html = (
+            f'<main class="image-viewer"><img class="document-image" src="{safe_pdf_url}" '
+            f'alt="Náhled dokumentu"></main>\n'
+            f'  <noscript><div class="fallback"><a class="button primary" href="{safe_pdf_url}">'
+            f"Otevřít obrázek</a></div></noscript>"
+        )
+    else:
+        viewer_html = (
+            f'<iframe class="viewer" src="{safe_pdf_url}" title="PDF dokument"></iframe>\n'
+            f'  <noscript><div class="fallback"><a class="button primary" href="{safe_pdf_url}">'
+            f"Otevřít PDF</a></div></noscript>"
+        )
     return f"""<!doctype html>
 <html lang="cs">
 <head>
@@ -5953,11 +6011,14 @@ def document_reader_page_html(document_id: str, title: str) -> str:
     button.primary, a.button.primary {{ background: var(--blue); color: white; }}
     .status {{ grid-column: 1 / -1; color: var(--muted); font-size: 13px; min-height: 18px; }}
     .viewer {{ width: 100vw; height: calc(100vh - 82px); border: 0; display: block; background: white; }}
+    .image-viewer {{ width: 100vw; min-height: calc(100vh - 82px); overflow: auto; display: grid; place-items: start center; padding: 16px; background: #0f172a; }}
+    .document-image {{ max-width: 100%; height: auto; background: white; box-shadow: 0 18px 42px rgba(15, 23, 42, 0.28); }}
     .fallback {{ padding: 16px; }}
     @media (max-width: 720px) {{
       .bar {{ grid-template-columns: 1fr; align-items: stretch; }}
       button, a.button {{ width: 100%; text-align: center; }}
       .viewer {{ height: calc(100vh - 210px); }}
+      .image-viewer {{ min-height: calc(100vh - 210px); padding: 10px; }}
     }}
   </style>
 </head>
@@ -5972,8 +6033,7 @@ def document_reader_page_html(document_id: str, title: str) -> str:
     <button type="button" id="readerCloseBtn">Zavřít okno</button>
     <div class="status" id="readerStatus">Dokument je otevřený ke čtení. Po kontrole ho můžeš rovnou vytisknout.</div>
   </div>
-  <iframe class="viewer" src="{safe_pdf_url}" title="PDF dokument"></iframe>
-  <noscript><div class="fallback"><a class="button primary" href="{safe_pdf_url}">Otevřít PDF</a></div></noscript>
+  {viewer_html}
   <script>
     const DOCUMENT_ID = {document_id_json};
     const readerStatus = document.getElementById("readerStatus");
@@ -10776,7 +10836,7 @@ class CockpitServer:
                 self.wfile.write(data)
 
             def respond_document_reader(self, document_id: str) -> None:
-                resolved = resolve_openable_document_pdf(document_id)
+                resolved = resolve_openable_document_file(document_id)
                 if not resolved.get("ok"):
                     self.respond_html(
                         document_reader_page_html(
@@ -10790,11 +10850,12 @@ class CockpitServer:
                     document_reader_page_html(
                         document_id=str(resolved["document_ref"]),
                         title=str(resolved["title"]),
+                        viewer_kind=str(resolved.get("viewer_kind", "pdf")),
                     )
                 )
 
             def respond_document_pdf(self, document_id: str) -> None:
-                resolved = resolve_openable_document_pdf(document_id)
+                resolved = resolve_openable_document_file(document_id)
                 if not resolved.get("ok"):
                     self.respond_json({"error": "not_found", "message": resolved.get("message", "")}, status=HTTPStatus.NOT_FOUND)
                     return
@@ -10802,7 +10863,7 @@ class CockpitServer:
                 data = target.read_bytes()
                 filename = safe_filename(str(target.name or "document.pdf"))
                 self.send_response(HTTPStatus.OK)
-                self.send_header("Content-Type", "application/pdf")
+                self.send_header("Content-Type", str(resolved.get("content_type") or "application/octet-stream"))
                 self.send_header("Content-Disposition", f'inline; filename="{filename}"')
                 self.send_header("Cache-Control", "no-store, max-age=0")
                 self.send_header("Content-Length", str(len(data)))

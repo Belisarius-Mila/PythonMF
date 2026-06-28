@@ -4133,6 +4133,34 @@ Dalsi krok:
             self.assertEqual(calls[0][0], "/usr/bin/open")
             self.assertEqual(Path(calls[0][1]), pdf.resolve())
 
+    def test_resolve_openable_document_file_allows_indexed_vault_image(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            index = vault / "index"
+            stored_dir = vault / "vault" / "insurance" / "doc-image"
+            stored_dir.mkdir(parents=True)
+            image = stored_dir / "scan.jpeg"
+            image.write_bytes(b"\xff\xd8\xff\xe0test")
+            index.mkdir(parents=True)
+            self.write_jsonl(
+                index / "documents_index.jsonl",
+                [
+                    {
+                        "document_id": "doc-image",
+                        "title": "Sken",
+                        "stored_path": str(image),
+                    }
+                ],
+            )
+
+            result = cockpit_module.resolve_openable_document_file("doc-image", vault_dir=vault)
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["path"], image.resolve())
+            self.assertEqual(result["viewer_kind"], "image")
+            self.assertEqual(result["content_type"], "image/jpeg")
+
     def test_resolve_openable_purchase_pdf_uses_purchase_archive_only(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
@@ -4200,6 +4228,14 @@ Dalsi krok:
         self.assertIn('window.location.href = "/"', page)
         self.assertIn("/documents/pdf?document_id=doc-open", page)
         self.assertIn("Doklad &amp; smlouva", page)
+
+    def test_document_reader_page_can_show_inline_image(self) -> None:
+        page = cockpit_module.document_reader_page_html("doc-image", "Sken", viewer_kind="image")
+
+        self.assertIn('class="document-image"', page)
+        self.assertIn("/documents/pdf?document_id=doc-image", page)
+        self.assertIn("Otevřít obrázek", page)
+        self.assertNotIn("<iframe", page)
 
     def test_purchase_reader_page_contains_inline_purchase_pdf(self) -> None:
         page = cockpit_module.purchase_reader_page_html("purref-test", "Faktura & záruka")
