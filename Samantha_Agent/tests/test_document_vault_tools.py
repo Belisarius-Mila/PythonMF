@@ -554,6 +554,37 @@ class DocumentVaultToolsTests(unittest.TestCase):
             self.assertEqual(api["file_url"], f"/file/{candidate.token}")
             self.assertIn("pdf_url", api)
 
+    def test_scandocu_review_candidate_shows_image_inline(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            source = root / "scan.jpeg"
+            source.write_bytes(b"\xff\xd8\xff\xe0test")
+            document_id = "email-attachment-image-scan"
+            imported = apply_document_import_text(
+                source_path=str(source),
+                target_domain="other",
+                document_type="email-attachment-image",
+                document_id=document_id,
+                document_title="E-mail příloha scan.jpeg",
+                user_confirmed=True,
+                confirmation_text="Potvrzuji, uloz dokument scan.jpeg do oblasti other.",
+                vault_dir=vault,
+            )
+            self.assertIn("Stav: ulozeno", imported)
+            self.mark_document_needs_review(vault, document_id)
+
+            candidate = prepare_next_stored_document_review(vault_dir=vault)
+            self.assertIsNotNone(candidate)
+            assert candidate is not None
+            api = candidate.to_api()
+
+            self.assertEqual(api["file_extension"], ".jpeg")
+            self.assertTrue(api["inline_preview"])
+            self.assertEqual(api["preview_kind"], "image")
+            self.assertEqual(api["preview_url"], f"/preview/{candidate.token}")
+            self.assertEqual(api["file_url"], f"/file/{candidate.token}")
+
     def test_scandocu_review_tokens_do_not_collide_for_long_similar_document_ids(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
@@ -1485,6 +1516,9 @@ class DocumentVaultToolsTests(unittest.TestCase):
         self.assertIn("U větších PDF může krok trvat desítky sekund", SCANDOCU_HTML)
         self.assertIn("Náhled není dostupný", SCANDOCU_HTML)
         self.assertIn("data.inline_preview", SCANDOCU_HTML)
+        self.assertIn("data.preview_kind", SCANDOCU_HTML)
+        self.assertIn('id="imagePreview"', SCANDOCU_HTML)
+        self.assertIn('class="image-preview"', SCANDOCU_HTML)
         self.assertIn("Stáhnout soubor", SCANDOCU_HTML)
         self.assertIn('id="previewDownload" class="preview-download" href="#" download', SCANDOCU_HTML)
         self.assertNotIn('id="previewDownload" class="preview-download" href="#" target="_blank"', SCANDOCU_HTML)

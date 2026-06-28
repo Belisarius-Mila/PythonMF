@@ -49,6 +49,7 @@ SCANDOCU_CLASSIFIER_VERSION = "2026-06-03-travel-classifier-v2"
 SCANDOCU_EXTRACTOR_RETRY_VERSION = "2026-06-03-pdf-text-cache-v3"
 SCANDOCU_TOKEN_LIMIT = 80
 SCANDOCU_DOMAIN_REGISTRY_FILE = "domain_registry.json"
+SCANDOCU_IMAGE_PREVIEW_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
 SCANDOCU_BUILTIN_DOMAINS = (
     "food",
     "health",
@@ -88,7 +89,16 @@ class ScanDocuCandidate:
 
     def to_api(self) -> dict[str, Any]:
         extension = self.working_path.suffix.lower()
-        inline_preview = extension == ".pdf"
+        if extension == ".pdf":
+            preview_kind = "pdf"
+            preview_url = f"/pdf/{self.token}"
+        elif extension in SCANDOCU_IMAGE_PREVIEW_EXTENSIONS:
+            preview_kind = "image"
+            preview_url = f"/preview/{self.token}"
+        else:
+            preview_kind = "none"
+            preview_url = ""
+        inline_preview = preview_kind != "none"
         return {
             "found": True,
             "source_mode": self.source_mode,
@@ -97,10 +107,11 @@ class ScanDocuCandidate:
             "source_path": str(self.source_path),
             "working_path": str(relative_to_project(self.working_path)),
             "pdf_url": f"/pdf/{self.token}",
-            "preview_url": f"/pdf/{self.token}" if inline_preview else "",
+            "preview_url": preview_url,
             "file_url": f"/file/{self.token}",
             "file_extension": extension,
             "inline_preview": inline_preview,
+            "preview_kind": preview_kind,
             "title": self.title,
             "domain": self.domain,
             "document_type": self.document_type,
@@ -1326,6 +1337,18 @@ class ScanDocuServer:
                             raise ValueError("Nahled v PDF ramecku je dostupny jen pro PDF dokumenty.")
                         self.respond_file(candidate.working_path, "application/pdf")
                         return
+                    if parsed.path.startswith("/preview/"):
+                        token = parsed.path.rsplit("/", 1)[-1]
+                        candidate = get_scandocu_candidate(token=token, vault_dir=app.vault_dir)
+                        extension = candidate.working_path.suffix.lower()
+                        if extension == ".pdf":
+                            self.respond_file(candidate.working_path, "application/pdf")
+                            return
+                        if extension not in SCANDOCU_IMAGE_PREVIEW_EXTENSIONS:
+                            raise ValueError("Nahled je dostupny jen pro PDF nebo obrazkove dokumenty.")
+                        content_type = mimetypes.guess_type(candidate.working_path.name)[0] or "application/octet-stream"
+                        self.respond_file(candidate.working_path, content_type)
+                        return
                     if parsed.path.startswith("/file/"):
                         token = parsed.path.rsplit("/", 1)[-1]
                         candidate = get_scandocu_candidate(token=token, vault_dir=app.vault_dir)
@@ -1447,6 +1470,8 @@ SCANDOCU_HTML = """<!doctype html>
     textarea { min-height: 72px; resize: vertical; }
     iframe { width: 100%; height: 100%; border: 0; background: #e5e7eb; }
     .preview-shell { height: 100%; min-height: 420px; }
+    .image-preview-wrap { height: 100%; min-height: 420px; overflow: auto; background: #111827; display: grid; place-items: start center; padding: 14px; box-sizing: border-box; }
+    .image-preview { max-width: 100%; height: auto; background: white; box-shadow: 0 18px 38px rgba(17, 24, 39, 0.34); }
     .preview-fallback { height: 100%; min-height: 420px; box-sizing: border-box; padding: 22px; background: #f9fafb; color: #1f2937; display: flex; align-items: center; justify-content: center; }
     .preview-card { max-width: 520px; display: grid; gap: 11px; }
     .preview-card h2 { margin: 0; font-size: 18px; letter-spacing: 0; }
@@ -1484,7 +1509,7 @@ SCANDOCU_HTML = """<!doctype html>
     @media (max-width: 860px) {
       main { grid-template-columns: 1fr; height: auto; }
       iframe { height: 72vh; }
-      .preview-shell, .preview-fallback { min-height: 72vh; }
+      .preview-shell, .preview-fallback, .image-preview-wrap { min-height: 72vh; }
       .download-search-grid { grid-template-columns: 1fr; }
     }
   </style>
@@ -1585,6 +1610,9 @@ SCANDOCU_HTML = """<!doctype html>
     </section>
     <section class="preview-shell">
       <iframe id="pdfFrame" title="Náhled PDF"></iframe>
+      <div id="imagePreviewWrap" class="image-preview-wrap hidden">
+        <img id="imagePreview" class="image-preview" alt="Náhled dokumentu">
+      </div>
       <div id="previewFallback" class="preview-fallback hidden">
         <div class="preview-card">
           <h2>Náhled není dostupný</h2>
@@ -1627,6 +1655,8 @@ SCANDOCU_HTML = """<!doctype html>
       caseId: document.getElementById("caseId"),
       tags: document.getElementById("tags"),
       pdfFrame: document.getElementById("pdfFrame"),
+      imagePreviewWrap: document.getElementById("imagePreviewWrap"),
+      imagePreview: document.getElementById("imagePreview"),
       previewFallback: document.getElementById("previewFallback"),
       previewFallbackText: document.getElementById("previewFallbackText"),
       previewDownload: document.getElementById("previewDownload"),
@@ -1646,6 +1676,8 @@ SCANDOCU_HTML = """<!doctype html>
       fields.completionActions.classList.add("hidden");
       fields.pdfFrame.removeAttribute("src");
       fields.pdfFrame.classList.remove("hidden");
+      fields.imagePreview.removeAttribute("src");
+      fields.imagePreviewWrap.classList.add("hidden");
       fields.previewFallback.classList.add("hidden");
       const res = await fetch(`/api/next?mode=${appMode}`);
       const data = await res.json();
@@ -1659,7 +1691,10 @@ SCANDOCU_HTML = """<!doctype html>
 
     function loadCandidate(data) {
       current = data;
-      fields.status.textContent = data.inline_preview ? "Zkontroluj PDF a metadata." : "Zkontroluj dokument a metadata. Náhled je dostupný jen pro PDF.";
+      const previewKind = data.preview_kind || (data.inline_preview ? "pdf" : "none");
+      fields.status.textContent = previewKind === "image"
+        ? "Zkontroluj obrázek a metadata."
+        : (previewKind === "pdf" ? "Zkontroluj PDF a metadata." : "Zkontroluj dokument a metadata. Náhled je dostupný jen pro PDF a obrázky.");
       fields.formWrap.classList.remove("hidden");
       fields.completionActions.classList.add("hidden");
       fields.modeInfo.textContent = data.source_mode === "vault_review" ? "revize uloženého dokumentu" : "nový dokument z Downloads";
@@ -1679,13 +1714,23 @@ SCANDOCU_HTML = """<!doctype html>
       fields.relatedAsset.value = data.related_asset || "";
       fields.caseId.value = data.case_id || "";
       fields.tags.value = data.tags || "";
-      if (data.inline_preview) {
+      if (previewKind === "pdf") {
         fields.previewFallback.classList.add("hidden");
+        fields.imagePreview.removeAttribute("src");
+        fields.imagePreviewWrap.classList.add("hidden");
         fields.pdfFrame.classList.remove("hidden");
         fields.pdfFrame.src = data.preview_url || data.pdf_url;
+      } else if (previewKind === "image") {
+        fields.previewFallback.classList.add("hidden");
+        fields.pdfFrame.removeAttribute("src");
+        fields.pdfFrame.classList.add("hidden");
+        fields.imagePreviewWrap.classList.remove("hidden");
+        fields.imagePreview.src = data.preview_url || data.file_url;
       } else {
         fields.pdfFrame.removeAttribute("src");
         fields.pdfFrame.classList.add("hidden");
+        fields.imagePreview.removeAttribute("src");
+        fields.imagePreviewWrap.classList.add("hidden");
         fields.previewFallback.classList.remove("hidden");
         const extension = data.file_extension || "soubor";
         fields.previewFallbackText.textContent = `Soubor ${data.source_name || ""} má typ ${extension}. Prohlížeč ho neumí bezpečně zobrazit v PDF náhledu. Stáhni ho a otevři lokálně, metadata pak potvrď vlevo.`;
