@@ -14840,6 +14840,7 @@ COCKPIT_HTML = """<!doctype html>
     function renderDocumentReviewReportItem(item) {
         const row = document.createElement("div");
         row.className = "work-item";
+        const documentRef = item.document_ref || item.document_id || "";
         const title = document.createElement("div");
         title.className = "work-title";
         title.textContent = item.title || item.document_id || "Dokument bez názvu";
@@ -14852,10 +14853,44 @@ COCKPIT_HTML = """<!doctype html>
         const reasons = document.createElement("div");
         reasons.className = "work-meta";
         reasons.textContent = (item.reasons || []).map((reason) => reason.label || reason.id || "").filter(Boolean).join(", ");
+        const id = document.createElement("div");
+        id.className = "work-meta";
+        id.textContent = `ID: ${item.document_id || ""}`;
+        const actions = document.createElement("div");
+        actions.className = "actions";
+        const openBtn = document.createElement("button");
+        openBtn.className = "primary";
+        openBtn.type = "button";
+        openBtn.textContent = "Otevřít / číst";
+        openBtn.addEventListener("click", () => openDocumentForReading(documentRef, openBtn, reviewReportStatus));
+        const statusRow = document.createElement("div");
+        statusRow.className = "status-select-row";
+        const statusLabel = document.createElement("label");
+        statusLabel.textContent = "Stav čtení";
+        const statusSelect = document.createElement("select");
+        readingStatusOptions.forEach(([value, label]) => {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = label;
+          option.selected = value === (item.reading_status || "needs_review");
+          statusSelect.appendChild(option);
+        });
+        statusSelect.addEventListener("change", async () => {
+          await setDocumentReadingStatus(documentRef, statusSelect.value, {
+            statusNode: reviewReportStatus,
+            afterSave: loadDocumentReviewReport
+          });
+        });
+        statusRow.appendChild(statusLabel);
+        statusRow.appendChild(statusSelect);
+        actions.appendChild(openBtn);
         row.appendChild(title);
         row.appendChild(recommendation);
         row.appendChild(meta);
         if (reasons.textContent) row.appendChild(reasons);
+        row.appendChild(id);
+        row.appendChild(actions);
+        row.appendChild(statusRow);
         return row;
     }
 
@@ -16845,8 +16880,8 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
-    function openDocumentForReading(documentId, button) {
-      openDocumentReaderWindow(documentId, documentSearchStatus, button);
+    function openDocumentForReading(documentId, button, statusNode = documentSearchStatus) {
+      openDocumentReaderWindow(documentId, statusNode, button);
     }
 
     function openPurchaseReaderWindow(purchaseId, statusNode, button) {
@@ -16920,18 +16955,22 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
-    async function setDocumentReadingStatus(documentId, readingStatus) {
+    async function setDocumentReadingStatus(documentId, readingStatus, options = {}) {
       if (!documentId) return;
-      documentSearchStatus.textContent = "Ukládám stav čtení dokumentu...";
+      const statusNode = options.statusNode || documentSearchStatus;
+      if (statusNode) statusNode.textContent = "Ukládám stav čtení dokumentu...";
       const result = await postJson("/api/documents/reading-status", {
         document_id: documentId,
         reading_status: readingStatus
       });
-      documentSearchStatus.textContent = result.message || "Stav uložen.";
+      if (statusNode) statusNode.textContent = result.message || "Stav uložen.";
       if (result.ok) {
         await refresh();
         if (documentSearchInput.value.trim().length >= 2) {
           await searchDocuments();
+        }
+        if (typeof options.afterSave === "function") {
+          await options.afterSave();
         }
       }
     }
