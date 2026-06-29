@@ -166,6 +166,7 @@ SCANDOCU_SERVER_SCRIPT = PROJECT_ROOT / "scripts" / "scandocu_server.py"
 COCKPIT_RESTART_SCRIPT = PROJECT_ROOT / "scripts" / "restart_cockpit.py"
 ADAM_VOICE_MODE_SCRIPT = PROJECT_ROOT / "scripts" / "adam_voice_mode.py"
 ADAM_VOICE_MODE_LOG_FILE = PROJECT_ROOT / "data" / "private" / "voice_inbox" / "adam_voice_mode.log"
+ADAM_RESPONSE_AUTOREAD_CLAIMS_PATH = PROJECT_ROOT / "data" / "private" / "voice_inbox" / "adam_response_autoread_claims.json"
 VOICE_DELIVERY_TRANSPORT_ENV = "ADAM_VOICE_TRANSPORT"
 EMAIL_SESSION_HANDOFF_DIR = PROJECT_ROOT / "data" / "private" / "email_session_handoffs"
 LOCAL_SEZNAM_EMAIL_DIR = PROJECT_ROOT / "data" / "private" / "email_seznam"
@@ -9330,6 +9331,79 @@ def cockpit_voice_latest_response_action(
     return load_last_adam_response(path=response_path)
 
 
+def cockpit_voice_autoread_claim_action(
+    payload: dict[str, Any],
+    *,
+    claims_path: Path = ADAM_RESPONSE_AUTOREAD_CLAIMS_PATH,
+    now: Callable[[], datetime] | None = None,
+) -> dict[str, Any]:
+    response_key = str(payload.get("response_key") or "").strip()
+    client_id = safe_ascii_slug(str(payload.get("client_id") or "").strip(), default="", limit=80)
+    if not response_key:
+        return {
+            "ok": False,
+            "claimed": False,
+            "status": "missing_response_key",
+            "message": "Chybí klíč Adamovy odpovědi pro automatické přečtení.",
+        }
+
+    current_time = now() if now is not None else datetime.now(timezone.utc)
+    if current_time.tzinfo is None:
+        current_time = current_time.replace(tzinfo=timezone.utc)
+    current_iso = current_time.replace(microsecond=0).isoformat()
+    cutoff = current_time.timestamp() - (24 * 60 * 60)
+
+    claims: dict[str, Any] = {}
+    if claims_path.exists():
+        try:
+            loaded = json.loads(claims_path.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict):
+                claims = loaded
+        except (OSError, json.JSONDecodeError):
+            claims = {}
+
+    cleaned_claims: dict[str, Any] = {}
+    for key, value in claims.items():
+        if not isinstance(value, dict):
+            continue
+        claimed_at = str(value.get("claimed_at") or "")
+        try:
+            claimed_ts = datetime.fromisoformat(claimed_at).timestamp()
+        except ValueError:
+            continue
+        if claimed_ts >= cutoff:
+            cleaned_claims[str(key)] = value
+
+    existing = cleaned_claims.get(response_key)
+    if existing:
+        claims_path.parent.mkdir(parents=True, exist_ok=True)
+        claims_path.write_text(json.dumps(cleaned_claims, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        return {
+            "ok": True,
+            "claimed": False,
+            "status": "already_claimed",
+            "message": "Tuto Adamovu odpověď už automaticky přehrává jiný otevřený Cockpit.",
+            "claimed_by": existing.get("client_id") or "",
+            "claimed_at": existing.get("claimed_at") or "",
+            "path": str(claims_path),
+        }
+
+    cleaned_claims[response_key] = {
+        "client_id": client_id or "unknown",
+        "claimed_at": current_iso,
+    }
+    claims_path.parent.mkdir(parents=True, exist_ok=True)
+    claims_path.write_text(json.dumps(cleaned_claims, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {
+        "ok": True,
+        "claimed": True,
+        "status": "claimed",
+        "message": "Automatické přečtení Adamovy odpovědi je rezervované pro tento Cockpit.",
+        "claimed_at": current_iso,
+        "path": str(claims_path),
+    }
+
+
 def open_terminal_command(command: str, label: str) -> dict[str, Any]:
     script = (
         'tell application "Terminal"\n'
@@ -10038,6 +10112,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "voice_tests",
     },
     {
+        "path": "/api/voice-mode/autoread-claim",
+        "label": "Rezervovat automaticke precteni Adamovy odpovedi",
+        "risk": "private_write",
+        "confirmation": "response_key_dedupe_only",
+        "handler_name": "cockpit_voice_autoread_claim_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/voice-mode/codex-approval/clear",
         "label": "Vycistit Codex approval kartu",
         "risk": "private_write",
@@ -10593,6 +10675,10 @@ class CockpitServer:
                 if parsed.path == "/api/voice-mode/approval":
                     payload = self.read_json()
                     self.respond_json(cockpit_voice_approval_action(payload))
+                    return
+                if parsed.path == "/api/voice-mode/autoread-claim":
+                    payload = self.read_json()
+                    self.respond_json(cockpit_voice_autoread_claim_action(payload))
                     return
                 if parsed.path == "/api/voice-mode/codex-approval/clear":
                     payload = self.read_json()
@@ -16220,6 +16306,22 @@ COCKPIT_HTML = """<!doctype html>
 		    let voiceReplyPollUntil = 0;
 		    let voiceReplyExpectedUserText = "";
 		    let voiceReplyMinCreatedAt = 0;
+		    let voiceAutoreadClientId = "";
+
+		    function getVoiceAutoreadClientId() {
+		      if (voiceAutoreadClientId) return voiceAutoreadClientId;
+		      const storageKey = "samanthaVoiceAutoreadClientId";
+		      let value = localStorage.getItem(storageKey) || "";
+		      if (!value) {
+		        const randomPart = window.crypto && window.crypto.randomUUID
+		          ? window.crypto.randomUUID()
+		          : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+		        value = `cockpit-${randomPart}`;
+		        localStorage.setItem(storageKey, value);
+		      }
+		      voiceAutoreadClientId = value;
+		      return value;
+		    }
 
 	    function preferredVoiceMimeType() {
 	      if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) {
@@ -16332,6 +16434,27 @@ COCKPIT_HTML = """<!doctype html>
 		      return true;
 		    }
 
+		    async function claimVoiceAutoread(responseKey) {
+		      try {
+		        const data = await postJson("/api/voice-mode/autoread-claim", {
+		          response_key: responseKey,
+		          client_id: getVoiceAutoreadClientId()
+		        });
+		        return Boolean(data && data.ok && data.claimed);
+		      } catch (err) {
+		        recordFrontendError(err);
+		        return false;
+		      }
+		    }
+
+		    async function autoSpeakVoiceLastResponse(text, responseKey) {
+		      const claimed = await claimVoiceAutoread(responseKey);
+		      if (!claimed) {
+		        return;
+		      }
+		      await speakText(text, voiceLastResponseSpeakBtn, "Čtu Adamovu odpověď nahlas...", {allowSystemFallback: shouldUseSystemSpeechFallback()});
+		    }
+
 		    function renderVoiceLastResponse(lastResponse, options = {}) {
 		      const text = String(lastResponse && lastResponse.adam_response || "").trim();
 		      const responseKey = voiceResponseKey(lastResponse);
@@ -16352,7 +16475,7 @@ COCKPIT_HTML = """<!doctype html>
 		      const allowRenderedAutoSpeak = options.allowAlreadyRenderedAutoSpeak === true;
 		      if (text && options.autoSpeak && responseKey && responseKey !== autoSpokenAdamResponseKey && (isNewResponse || allowRenderedAutoSpeak)) {
 		        autoSpokenAdamResponseKey = responseKey;
-		        speakText(text, voiceLastResponseSpeakBtn, "Čtu Adamovu odpověď nahlas...", {allowSystemFallback: shouldUseSystemSpeechFallback()});
+		        autoSpeakVoiceLastResponse(text, responseKey);
 		      }
 		    }
 

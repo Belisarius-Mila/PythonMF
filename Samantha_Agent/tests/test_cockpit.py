@@ -36,6 +36,7 @@ from app.cockpit import (
     lekarna_search_action,
     library_read_state_action,
     cockpit_edge_tts_action,
+    cockpit_voice_autoread_claim_action,
     cockpit_codex_approval_clear_action,
     cockpit_safe_readonly_capabilities_action,
     cockpit_safe_readonly_run_action,
@@ -2143,6 +2144,9 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("renderVoiceLastResponse", COCKPIT_HTML)
         self.assertIn("refreshVoiceLatestResponse", COCKPIT_HTML)
         self.assertIn("startVoiceReplyPolling", COCKPIT_HTML)
+        self.assertIn("/api/voice-mode/autoread-claim", COCKPIT_HTML)
+        self.assertIn("claimVoiceAutoread", COCKPIT_HTML)
+        self.assertIn("autoSpeakVoiceLastResponse", COCKPIT_HTML)
         self.assertIn("autoSpeak: voiceAudioUnlocked && Boolean(latestAdamResponseKey)", COCKPIT_HTML)
         self.assertIn("allowAlreadyRenderedAutoSpeak", COCKPIT_HTML)
         self.assertIn("VOICE_REPLY_POLL_DURATION_MS = 600000", COCKPIT_HTML)
@@ -4504,6 +4508,31 @@ Dalsi krok:
         self.assertTrue(result["ok"])
         self.assertTrue(result["available"])
         self.assertEqual(result["answer"], "Dokument najdeš přes tlačítko Najít dokument.")
+
+    def test_voice_autoread_claim_allows_only_first_cockpit_client(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            claims_path = Path(temp_dir) / "claims.json"
+            first = cockpit_voice_autoread_claim_action(
+                {"response_key": "2026-06-29T20:00:00+00:00|Hotovo.", "client_id": "iphone"},
+                claims_path=claims_path,
+                now=lambda: datetime(2026, 6, 29, 20, 0, tzinfo=timezone.utc),
+            )
+            second = cockpit_voice_autoread_claim_action(
+                {"response_key": "2026-06-29T20:00:00+00:00|Hotovo.", "client_id": "mac"},
+                claims_path=claims_path,
+                now=lambda: datetime(2026, 6, 29, 20, 1, tzinfo=timezone.utc),
+            )
+            missing = cockpit_voice_autoread_claim_action({}, claims_path=claims_path)
+
+        self.assertTrue(first["ok"])
+        self.assertTrue(first["claimed"])
+        self.assertEqual(first["status"], "claimed")
+        self.assertTrue(second["ok"])
+        self.assertFalse(second["claimed"])
+        self.assertEqual(second["status"], "already_claimed")
+        self.assertEqual(second["claimed_by"], "iphone")
+        self.assertFalse(missing["ok"])
+        self.assertFalse(missing["claimed"])
 
     def test_janicka_chat_memory_context_includes_project_files(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
