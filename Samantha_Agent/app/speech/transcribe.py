@@ -5,6 +5,7 @@ import binascii
 import argparse
 import json
 import os
+import subprocess
 import tempfile
 import time
 from pathlib import Path
@@ -16,6 +17,7 @@ from openai import OpenAI
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_TRANSCRIBE_MODEL = "gpt-4o-mini-transcribe"
+OPENAI_TRANSCRIPTIONS_URL = "https://api.openai.com/v1/audio/transcriptions"
 MAX_AUDIO_BYTES = 6 * 1024 * 1024
 MIME_EXTENSIONS = {
     "audio/webm": ".webm",
@@ -62,6 +64,107 @@ def openai_api_key_available(env_path: Path | str | None = None) -> bool:
         return True
     load_dotenv(env_path or PROJECT_ROOT / ".env", override=True)
     return bool(os.environ.get("OPENAI_API_KEY"))
+
+
+def load_openai_api_key(env_path: Path | str | None = None) -> str:
+    if not openai_api_key_available(env_path=env_path):
+        raise TranscriptionError("Chybí OPENAI_API_KEY v prostředí nebo lokálním .env.")
+    return str(os.environ.get("OPENAI_API_KEY") or "").strip()
+
+
+def curl_config_quote(value: str) -> str:
+    text = str(value)
+    if "\n" in text or "\r" in text:
+        raise TranscriptionError("Neplatná hodnota pro OpenAI transkripci.")
+    return text.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def transcribe_audio_file_with_curl(
+    audio_file: Path | str,
+    *,
+    mime_type: str,
+    language: str = "cs",
+    model: str = DEFAULT_TRANSCRIBE_MODEL,
+    runner: Any = subprocess.run,
+    timeout_seconds: int = 90,
+) -> dict[str, Any]:
+    started = time.monotonic()
+    safe_mime_type = normalize_mime_type(mime_type)
+    path = Path(audio_file)
+    try:
+        size = path.stat().st_size
+    except OSError as exc:
+        raise TranscriptionError(f"Audio soubor nejde načíst: {exc}") from exc
+    if size <= 0:
+        raise TranscriptionError("Audio nahrávka je prázdná.")
+    if size > MAX_AUDIO_BYTES:
+        raise TranscriptionError("Audio nahrávka je příliš velká; zkus kratší pokyn.")
+
+    api_key = load_openai_api_key()
+    config = "\n".join(
+        [
+            f'url = "{OPENAI_TRANSCRIPTIONS_URL}"',
+            'request = "POST"',
+            f'header = "Authorization: Bearer {curl_config_quote(api_key)}"',
+            f'form = "model={curl_config_quote(model)}"',
+            f'form = "language={curl_config_quote(language)}"',
+            f'form = "file=@{curl_config_quote(str(path))};type={curl_config_quote(safe_mime_type)}"',
+            "",
+        ]
+    )
+    curl_started = time.monotonic()
+    try:
+        completed = runner(
+            [
+                "/usr/bin/curl",
+                "--silent",
+                "--show-error",
+                "--fail-with-body",
+                "--max-time",
+                str(timeout_seconds),
+                "--config",
+                "-",
+            ],
+            input=config,
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds + 5,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise TranscriptionError("OpenAI přepis přes curl překročil časový limit.") from exc
+    except OSError as exc:
+        raise TranscriptionError(f"OpenAI přepis přes curl se nepodařilo spustit: {exc}") from exc
+    curl_ms = int((time.monotonic() - curl_started) * 1000)
+
+    stdout = (completed.stdout or "").strip()
+    stderr = (completed.stderr or "").strip()
+    try:
+        data = json.loads(stdout) if stdout else {}
+    except json.JSONDecodeError as exc:
+        detail = stderr or stdout[:500] or f"exit {completed.returncode}"
+        raise TranscriptionError(f"OpenAI přepis přes curl vrátil nečitelný výsledek: {detail}") from exc
+    if completed.returncode != 0:
+        message = str(data.get("error", {}).get("message") or stderr or f"exit {completed.returncode}")
+        raise TranscriptionError(f"OpenAI přepis přes curl selhal: {message}")
+
+    text = str(data.get("text") or "").strip()
+    if not text:
+        raise TranscriptionError("Přepis je prázdný; zkus mluvit blíž k mikrofonu.")
+    return {
+        "ok": True,
+        "message": "Hlasový pokyn byl přepsán.",
+        "text": text,
+        "model": model,
+        "language": language,
+        "audio_bytes": size,
+        "audio_kb": round(size / 1024, 1),
+        "duration_ms": int((time.monotonic() - started) * 1000),
+        "timing": {
+            "curl_ms": curl_ms,
+            "openai_ms": curl_ms,
+        },
+    }
 
 
 def transcribe_audio_bytes(
@@ -158,6 +261,13 @@ def transcribe_audio_file(
     client: Any | None = None,
 ) -> dict[str, Any]:
     path = Path(audio_file)
+    if client is None:
+        return transcribe_audio_file_with_curl(
+            path,
+            mime_type=mime_type,
+            language=language,
+            model=model,
+        )
     try:
         audio_bytes = path.read_bytes()
     except OSError as exc:

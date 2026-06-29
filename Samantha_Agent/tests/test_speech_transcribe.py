@@ -4,6 +4,7 @@ import base64
 import io
 import json
 import os
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -19,6 +20,7 @@ from app.speech.transcribe import (
     transcribe_audio_base64,
     transcribe_audio_bytes,
     transcribe_audio_file,
+    transcribe_audio_file_with_curl,
     main,
 )
 
@@ -103,6 +105,54 @@ class SpeechTranscribeTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(result["text"], "Najdi dnešní dokumenty.")
         self.assertEqual(result["audio_bytes"], 10)
+
+    def test_transcribe_audio_file_with_curl_posts_audio_without_secret_in_args(self) -> None:
+        seen = {}
+
+        def fake_runner(args, **kwargs):
+            seen["args"] = args
+            seen["input"] = kwargs["input"]
+            self.assertNotIn("test-secret-key", " ".join(args))
+            self.assertIn("Authorization: Bearer test-secret-key", kwargs["input"])
+            self.assertIn("form = \"model=gpt-4o-mini-transcribe\"", kwargs["input"])
+            self.assertIn("form = \"language=cs\"", kwargs["input"])
+            self.assertIn(";type=audio/webm", kwargs["input"])
+            return subprocess.CompletedProcess(
+                args,
+                0,
+                stdout=json.dumps({"text": "Najdi dnešní dokumenty."}),
+                stderr="",
+            )
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            audio_path = Path(temp_dir) / "voice.webm"
+            audio_path.write_bytes(b"fake audio")
+            with patch.dict(os.environ, {"OPENAI_API_KEY": "test-secret-key"}, clear=False):
+                result = transcribe_audio_file_with_curl(audio_path, mime_type="audio/webm", runner=fake_runner)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["text"], "Najdi dnešní dokumenty.")
+        self.assertEqual(result["audio_bytes"], 10)
+        self.assertEqual(seen["args"][0], "/usr/bin/curl")
+        self.assertIn("--config", seen["args"])
+
+    def test_transcribe_audio_file_with_curl_reports_openai_error(self) -> None:
+        def fake_runner(args, **kwargs):
+            return subprocess.CompletedProcess(
+                args,
+                22,
+                stdout=json.dumps({"error": {"message": "bad request"}}),
+                stderr="",
+            )
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            audio_path = Path(temp_dir) / "voice.webm"
+            audio_path.write_bytes(b"fake audio")
+            with patch.dict(os.environ, {"OPENAI_API_KEY": "test-secret-key"}, clear=False):
+                with self.assertRaises(TranscriptionError) as cm:
+                    transcribe_audio_file_with_curl(audio_path, mime_type="audio/webm", runner=fake_runner)
+
+        self.assertIn("bad request", str(cm.exception))
 
     def test_transcribe_cli_main_outputs_json(self) -> None:
         fake_result = {
