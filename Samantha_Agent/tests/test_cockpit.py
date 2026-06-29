@@ -2261,6 +2261,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Otevřít audiokanál", COCKPIT_HTML)
         self.assertIn("Audiokanál otevřený", COCKPIT_HTML)
         self.assertIn("openVoiceAudioChannel", COCKPIT_HTML)
+        self.assertIn("ensureVoiceModeWatcherRunningFromAudioChannel", COCKPIT_HTML)
+        self.assertIn('startVoiceModeWatcher({source: "audio_channel"})', COCKPIT_HTML)
         self.assertIn("voice-audio-unlock.active", COCKPIT_HTML)
         self.assertIn("playVoiceAudioBase64", COCKPIT_HTML)
         self.assertIn("voiceAudioUnlocked", COCKPIT_HTML)

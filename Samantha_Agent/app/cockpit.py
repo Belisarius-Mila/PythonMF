@@ -16003,7 +16003,8 @@ COCKPIT_HTML = """<!doctype html>
 	      try {
 	        const opened = await primeVoiceAudioContextFromGesture();
 	        if (opened) {
-	          showMessage("Audiokanál je otevřený. Další Adamovy odpovědi se pokusím přehrát v tomto zařízení.");
+	          showMessage("Audiokanál je otevřený. Spouštím watcher pro hlasové pokyny...");
+	          await ensureVoiceModeWatcherRunningFromAudioChannel();
 	        } else {
 	          showMessage("Tento prohlížeč nepodporuje otevření webového audiokanálu.");
 	        }
@@ -16642,12 +16643,34 @@ COCKPIT_HTML = """<!doctype html>
 		      updateVoiceModeUi();
 		    }
 
-		    async function startVoiceModeWatcher() {
-		      voiceModeStartBtn.disabled = true;
-		      voiceCommandStatus.textContent = "Spouštím záložní Adam Voice Mode watcher...";
+		    function isVoiceModeWatcherRunning() {
+		      return Boolean(latestVoiceModeRuntime && latestVoiceModeRuntime.running);
+		    }
+
+		    async function ensureVoiceModeWatcherRunningFromAudioChannel() {
+		      if (isVoiceModeWatcherRunning()) {
+		        showMessage("Audiokanál je otevřený a watcher už běží.");
+		        return;
+		      }
+		      await startVoiceModeWatcher({source: "audio_channel"});
+		    }
+
+		    async function startVoiceModeWatcher(options = {}) {
+		      const fromAudioChannel = options.source === "audio_channel";
+		      if (isVoiceModeWatcherRunning()) {
+		        if (voiceCommandStatus) voiceCommandStatus.textContent = "Adam Voice Mode watcher už běží.";
+		        updateVoiceModeUi();
+		        return;
+		      }
+		      if (voiceModeStartBtn) voiceModeStartBtn.disabled = true;
+		      if (voiceCommandStatus) {
+		        voiceCommandStatus.textContent = fromAudioChannel
+		          ? "Audiokanál otevřený. Spouštím záložní Adam Voice Mode watcher..."
+		          : "Spouštím záložní Adam Voice Mode watcher...";
+		      }
 		      try {
 		        const data = await postJson("/api/voice-mode/start", {});
-		        voiceCommandStatus.textContent = data.message || "Záložní Adam Voice Mode watcher spuštěn.";
+		        if (voiceCommandStatus) voiceCommandStatus.textContent = data.message || "Záložní Adam Voice Mode watcher spuštěn.";
 		        if (data.ok) {
 		          voiceModeEnabled = true;
 		          localStorage.setItem("samanthaVoiceModeEnabled", "true");
@@ -16655,7 +16678,7 @@ COCKPIT_HTML = """<!doctype html>
 		        await refresh({silent: true, includeSecondary: false});
 		      } catch (err) {
 		        recordFrontendError(err);
-		        voiceCommandStatus.textContent = `Adam Voice Mode watcher se nepodařilo spustit: ${err}`;
+		        if (voiceCommandStatus) voiceCommandStatus.textContent = `Adam Voice Mode watcher se nepodařilo spustit: ${err}`;
 		      } finally {
 		        updateVoiceModeUi();
 		      }
