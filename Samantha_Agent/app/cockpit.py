@@ -346,6 +346,8 @@ DOCUMENT_TYPE_LABELS: dict[str, str] = {
     "document": "dokument",
     "email-attachment-pdf": "PDF příloha e-mailu",
     "employment_contract": "pracovní smlouva",
+    "gift_contract": "darovací smlouva",
+    "gift_contract_draft": "návrh darovací smlouvy",
     "green_card": "zelená karta / potvrzení pojištění",
     "insurance_assistance_card": "asistenční karta",
     "insurance_payment_confirmation": "potvrzení o zaplacení pojistného",
@@ -3596,8 +3598,15 @@ def import_selected_email_attachments(
                 )
                 continue
             attachment_kind = email_attachment_storage_kind(content_type=content_type, filename=filename)
-            document_type = "email-attachment-image" if attachment_kind == "image" else "email-attachment-pdf"
-            tag_kind = "image" if attachment_kind == "image" else "pdf"
+            if attachment_kind == "image":
+                document_type = "email-attachment-image"
+                tag_kind = "image"
+            elif attachment_kind == "pdf":
+                document_type = "email-attachment-pdf"
+                tag_kind = "pdf"
+            else:
+                document_type = ""
+                tag_kind = "office"
             temp_path = temp_root / filename
             temp_path.write_bytes(payload)
             try:
@@ -3670,7 +3679,7 @@ def email_attachment_is_previewable(*, content_type: str, filename: str) -> bool
 
 
 def email_attachment_is_storable(*, content_type: str, filename: str) -> bool:
-    return email_attachment_storage_kind(content_type=content_type, filename=filename) in {"pdf", "image"}
+    return email_attachment_storage_kind(content_type=content_type, filename=filename) in {"pdf", "image", "office"}
 
 
 def email_attachment_storage_kind(*, content_type: str, filename: str) -> str:
@@ -3680,6 +3689,20 @@ def email_attachment_storage_kind(*, content_type: str, filename: str) -> str:
         return "pdf"
     if normalized_type.startswith("image/") or normalized_name.endswith((".png", ".jpg", ".jpeg", ".gif", ".webp", ".tif", ".tiff")):
         return "image"
+    office_types = {
+        "application/msword",
+        "application/rtf",
+        "application/vnd.ms-excel",
+        "application/vnd.ms-powerpoint",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "application/vnd.oasis.opendocument.text",
+        "application/vnd.oasis.opendocument.spreadsheet",
+        "application/vnd.oasis.opendocument.presentation",
+    }
+    if normalized_type in office_types or normalized_name.endswith((".doc", ".docx", ".rtf", ".odt", ".xls", ".xlsx", ".ods", ".ppt", ".pptx", ".odp")):
+        return "office"
     return ""
 
 

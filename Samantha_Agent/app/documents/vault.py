@@ -3415,6 +3415,20 @@ def propose_metadata(
 
 
 def guess_document_type(text: str) -> str:
+    if any(
+        phrase in text
+        for phrase in (
+            "darovaci smlouva",
+            "darovaci smlouvy",
+            "darovací smlouva",
+            "darovací smlouvy",
+            "smlouva darovaci",
+            "smlouva darovací",
+        )
+    ):
+        if any(word in text for word in ("navrh", "návrh", "navrhu", "návrhu")):
+            return "gift_contract_draft"
+        return "gift_contract"
     if any(word in text for word in ("zelena karta", "zelená karta", "green card")):
         return "green_card"
     if any(word in text for word in ("faktura", "invoice", "danovy doklad", "daňový doklad", "vyuctovani", "vyúčtování", "variabilni symbol", "variabilní symbol")):

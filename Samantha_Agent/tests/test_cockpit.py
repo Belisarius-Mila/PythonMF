@@ -5661,6 +5661,80 @@ Dalsi krok:
             self.assertEqual([doc["document_type"] for doc in docs], ["email-attachment-pdf", "email-attachment-image"])
             self.assertEqual(docs[1]["reading_status"], "needs_review")
 
+    def test_process_email_work_queue_batch_imports_selected_word_attachment_with_specific_type(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            archive_dir = root / "archive"
+            documents_dir = root / "documents"
+            decisions_path = root / "decisions.json"
+            actions_path = root / "actions.jsonl"
+            activity_state_path = root / "activity.json"
+            raw_message = _raw_email_with_attachment(
+                filename="dar - Faltovi.doc",
+                content_type="application/msword",
+                payload=b"Navrh darovaci smlouvy k nemovitosti Petkovy 56.",
+            )
+            provider = _FakeArchiveProvider(
+                EmailArchiveSource(
+                    uid="3331",
+                    date="Wed, 15 Jun 2022 10:00:00 +0200",
+                    sender="JUDr. Ludmila Purslova <sender@example.com>",
+                    subject="RE: Darovaci smlouva parcela 181, Petkovy 56",
+                    body_text="Posilam navrh darovaci smlouvy.",
+                    attachments=(
+                        EmailAttachmentMeta(
+                            filename="dar - Faltovi.doc",
+                            content_type="application/msword",
+                            size_bytes=52,
+                            part_id="2",
+                            content_id="",
+                            disposition="attachment",
+                        ),
+                    ),
+                    original_eml=raw_message,
+                    provider="icloud",
+                    mailbox="INBOX",
+                )
+            )
+            save_email_processing_decision(
+                item_id="process-3331",
+                action="process",
+                item={"id": "process-3331", "provider": "iCloud", "folder": "INBOX", "uid": "3331"},
+                path=decisions_path,
+            )
+
+            result = process_email_work_queue_batch(
+                items=[
+                    {
+                        "id": "process-3331",
+                        "provider": "iCloud",
+                        "folder": "INBOX",
+                        "uid": "3331",
+                        "category": "ostatní",
+                        "queueDecision": "save",
+                        "saveAttachments": ["2"],
+                        "attachment_metadata": [
+                            {"part_id": "2", "filename": "dar - Faltovi.doc"},
+                        ],
+                    }
+                ],
+                archive_directory=archive_dir,
+                documents_dir=documents_dir,
+                decisions_path=decisions_path,
+                actions_path=actions_path,
+                activity_state_path=activity_state_path,
+                icloud_provider_factory=lambda: provider,
+            )
+
+            docs = self.read_jsonl(documents_dir / "index" / "documents_index.jsonl")
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["summary"]["saved"], 1)
+        self.assertEqual(result["summary"]["attachments_imported"], 1)
+        self.assertEqual(docs[0]["document_type"], "gift_contract_draft")
+        self.assertEqual(docs[0]["reading_status"], "needs_review")
+        self.assertIn("dar", docs[0]["original_filename"])
+
     def test_preview_email_work_queue_attachment_opens_temp_pdf_without_vault_import(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
