@@ -9663,8 +9663,7 @@ def transcribe_audio_base64_isolated(
         completed = runner(
             [
                 str(PROJECT_ROOT / ".venv" / "bin" / "python"),
-                "-m",
-                "app.speech.transcribe",
+                str(PROJECT_ROOT / "app" / "speech" / "transcribe.py"),
                 "--audio-file",
                 str(temp_path),
                 "--mime-type",
@@ -9702,6 +9701,30 @@ def transcribe_audio_base64_isolated(
     return result
 
 
+def record_voice_transcription_failure(
+    *,
+    message: str,
+    status: str = "transcription_failed",
+    events_path: Path | None = None,
+) -> None:
+    try:
+        append_jsonl(
+            events_path or VOICE_FRONTEND_EVENTS_PATH,
+            {
+                "created_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+                "kind": "backend_transcribe_failed",
+                "detail": {
+                    "ok": False,
+                    "status": status,
+                    "step": "transcribe",
+                    "error": safe_text(message)[:500],
+                },
+            },
+        )
+    except OSError:
+        return
+
+
 def cockpit_transcribe_voice_action(
     payload: dict[str, Any],
     *,
@@ -9729,6 +9752,7 @@ def cockpit_transcribe_voice_action(
         result["message"] = result.get("voice_delivery_message") or "Hlasový pokyn byl přepsán a uložen pro Codex."
         return result
     except TranscriptionError as exc:
+        record_voice_transcription_failure(message=str(exc))
         return {
             "ok": False,
             "message": f"Přepis hlasu selhal: {exc}",
@@ -17010,6 +17034,7 @@ COCKPIT_HTML = """<!doctype html>
 	          step: "transcribe",
 	          ok: Boolean(data.ok),
 	          status: data.status || "",
+	          error: data.ok ? "" : (data.message || ""),
 	          audio_kb: data.audio_kb || audioKb,
 	          recorded_seconds: recordedSeconds
 	        });

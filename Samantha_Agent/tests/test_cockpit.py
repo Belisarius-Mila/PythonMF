@@ -3122,7 +3122,13 @@ class CockpitTests(unittest.TestCase):
             seen_temp_paths.append(audio_path)
             self.assertTrue(audio_path.exists())
             self.assertEqual(audio_path.read_bytes(), b"fake audio")
-            self.assertEqual(args[:3], [str(cockpit_module.PROJECT_ROOT / ".venv" / "bin" / "python"), "-m", "app.speech.transcribe"])
+            self.assertEqual(
+                args[:2],
+                [
+                    str(cockpit_module.PROJECT_ROOT / ".venv" / "bin" / "python"),
+                    str(cockpit_module.PROJECT_ROOT / "app" / "speech" / "transcribe.py"),
+                ],
+            )
             self.assertEqual(args[args.index("--mime-type") + 1], "audio/webm")
             self.assertEqual(args[args.index("--language") + 1], "cs")
             self.assertEqual(kwargs["cwd"], str(cockpit_module.PROJECT_ROOT))
@@ -3328,14 +3334,20 @@ class CockpitTests(unittest.TestCase):
         def fail(*args, **kwargs):
             raise cockpit_module.TranscriptionError("Chybí OPENAI_API_KEY")
 
-        result = cockpit_transcribe_voice_action(
-            {"audio_base64": "", "mime_type": "audio/webm"},
-            transcriber=fail,
-        )
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            events_path = Path(temp_dir) / "frontend_events.jsonl"
+            with patch("app.cockpit.VOICE_FRONTEND_EVENTS_PATH", events_path):
+                result = cockpit_transcribe_voice_action(
+                    {"audio_base64": "", "mime_type": "audio/webm"},
+                    transcriber=fail,
+                )
+            events = self.read_jsonl(events_path)
 
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "transcription_failed")
         self.assertIn("Chybí OPENAI_API_KEY", result["message"])
+        self.assertEqual(events[-1]["kind"], "backend_transcribe_failed")
+        self.assertIn("Chybí OPENAI_API_KEY", events[-1]["detail"]["error"])
 
     def test_parse_active_projects_table_and_summary(self) -> None:
         text = """# Active Projects
