@@ -45,11 +45,11 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertEqual(decision["status"], "allowed")
         self.assertIn("Kolik jsme dnes napsali řádků kódu?", prompt)
         self.assertIn("vyžádej si ruční potvrzení", prompt)
-        self.assertIn("přečti stručnou verzi výsledku nahlas", prompt)
-        self.assertIn("scripts/speak_edge_open.py", prompt)
-        self.assertIn("mimo Codex sandbox", prompt)
-        self.assertIn("scripts/adam_voice_reply.py --latest-command", prompt)
         self.assertIn("zapiš stejný stručný výsledek do Cockpitu", prompt)
+        self.assertIn("scripts/speak_edge_open.py", prompt)
+        self.assertIn("Nespouštěj zároveň Mac TTS", prompt)
+        self.assertIn("Cockpit audiokanál odpověď přehraje", prompt)
+        self.assertIn("scripts/adam_voice_reply.py --latest-command", prompt)
 
     def test_change_command_requires_manual_terminal_prompt(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
