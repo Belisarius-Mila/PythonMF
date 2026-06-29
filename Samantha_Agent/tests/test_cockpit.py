@@ -3118,6 +3118,54 @@ class CockpitTests(unittest.TestCase):
             self.assertEqual(attempts[-1]["bridge_status"], "delivered_tty")
             self.assertNotIn("spočítej", json.dumps(attempts[-1], ensure_ascii=False))
 
+    def test_cockpit_save_voice_text_action_leaves_delivery_to_running_watcher(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            bridge_calls = []
+
+            def fake_bridge(command):
+                bridge_calls.append(command.text)
+                return {"ok": True, "verified": True, "status": "delivered"}
+
+            with patch(
+                "app.cockpit.load_voice_mode_status",
+                return_value={"ok": True, "running": True, "pid": 12345},
+            ):
+                result = cockpit_save_voice_text_action(
+                    {"text": "Adame, zpracuj jeden test."},
+                    inbox_dir=Path(temp_dir),
+                    terminal_bridge=None,
+                    pending_path=Path(temp_dir) / "pending_for_adam.json",
+                    history_path=Path(temp_dir) / "adam_voice_history.jsonl",
+                )
+
+            latest_path = Path(temp_dir) / "latest_voice_command.md"
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["voice_delivery_status"], "watcher_will_deliver")
+            self.assertIn("Běžící watcher", result["message"])
+            self.assertEqual(bridge_calls, [])
+            self.assertIn("Adame, zpracuj jeden test.", latest_path.read_text(encoding="utf-8"))
+            self.assertFalse((Path(temp_dir) / "delivery_attempts.jsonl").exists())
+
+    def test_cockpit_save_voice_text_action_uses_inline_fallback_without_watcher(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            bridge_calls = []
+
+            def fake_bridge(command):
+                bridge_calls.append(command.text)
+                return {"ok": True, "verified": True, "status": "delivered"}
+
+            result = cockpit_save_voice_text_action(
+                {"text": "Adame, zpracuj fallback."},
+                inbox_dir=Path(temp_dir),
+                terminal_bridge=fake_bridge,
+                pending_path=Path(temp_dir) / "pending_for_adam.json",
+                history_path=Path(temp_dir) / "adam_voice_history.jsonl",
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["voice_delivery_status"], "voice_command_delivered")
+            self.assertEqual(bridge_calls, ["Adame, zpracuj fallback."])
+
     def test_selected_voice_delivery_transport_defaults_to_local_tty(self) -> None:
         with patch.dict("os.environ", {}, clear=True):
             self.assertEqual(selected_voice_delivery_transport(), "local_tty")
@@ -3144,6 +3192,7 @@ class CockpitTests(unittest.TestCase):
 
             with (
                 patch.dict("os.environ", {"ADAM_VOICE_TRANSPORT": "managed_screen"}),
+                patch("app.cockpit.load_voice_mode_status", return_value={"ok": True, "running": False}),
                 patch("app.cockpit.start_adam_service", side_effect=fake_start),
                 patch("app.cockpit.wait_for_adam_ready", side_effect=fake_wait),
                 patch("app.cockpit.deliver_prompt_to_adam_screen", side_effect=fake_deliver),

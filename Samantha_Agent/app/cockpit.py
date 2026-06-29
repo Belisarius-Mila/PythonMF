@@ -9672,6 +9672,25 @@ def cockpit_save_voice_text_action(
             "status": "voice_text_saved",
         }
         result.update(save_voice_command_to_inbox({"text": text}, inbox_dir=inbox_dir))
+        voice_mode = load_voice_mode_status()
+        if terminal_bridge is None and voice_mode.get("running"):
+            result.update(
+                {
+                    "voice_delivery_status": "watcher_will_deliver",
+                    "voice_delivery": {
+                        "ok": True,
+                        "status": "watcher_running",
+                        "message": "Běžící Adam Voice Mode watcher pokyn převezme z hlasového inboxu.",
+                    },
+                    "voice_delivery_message": (
+                        "Zpráva byla vložena do hlasového inboxu. "
+                        "Běžící watcher ji předá Adamovi."
+                    ),
+                    "voice_mode": voice_mode,
+                }
+            )
+            result["message"] = result["voice_delivery_message"]
+            return result
         result.update(
             deliver_saved_voice_command_inline(
                 inbox_dir=inbox_dir,
