@@ -3171,6 +3171,31 @@ class CockpitTests(unittest.TestCase):
 
         self.assertIn("Resource deadlock avoided", str(cm.exception))
 
+    def test_cockpit_transcribe_voice_action_leaves_delivery_to_running_watcher(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            def fake_transcriber(*args, **kwargs):
+                return {"ok": True, "text": "Najdi dnešní dokumenty."}
+
+            with patch(
+                "app.cockpit.load_voice_mode_status",
+                return_value={"ok": True, "running": True, "pid": 12345},
+            ):
+                result = cockpit_transcribe_voice_action(
+                    {"audio_base64": "abc", "mime_type": "audio/webm", "language": "cs"},
+                    inbox_dir=Path(temp_dir),
+                    terminal_bridge=None,
+                    pending_path=Path(temp_dir) / "pending_for_adam.json",
+                    history_path=Path(temp_dir) / "adam_voice_history.jsonl",
+                    transcriber=fake_transcriber,
+                )
+            attempts_exists = (Path(temp_dir) / "delivery_attempts.jsonl").exists()
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["voice_delivery_status"], "watcher_will_deliver")
+        self.assertIn("Běžící watcher", result["message"])
+        self.assertIn("latest_voice_command.md", result["latest_voice_command_path"])
+        self.assertFalse(attempts_exists)
+
     def test_cockpit_save_voice_text_action_writes_inbox(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             bridge_calls = []

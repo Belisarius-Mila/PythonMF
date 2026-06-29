@@ -9512,6 +9512,22 @@ def deliver_saved_voice_command_inline(
     }
 
 
+def voice_watcher_will_deliver_result(voice_mode: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "voice_delivery_status": "watcher_will_deliver",
+        "voice_delivery": {
+            "ok": True,
+            "status": "watcher_running",
+            "message": "Běžící Adam Voice Mode watcher pokyn převezme z hlasového inboxu.",
+        },
+        "voice_delivery_message": (
+            "Zpráva byla vložena do hlasového inboxu. "
+            "Běžící watcher ji předá Adamovi."
+        ),
+        "voice_mode": voice_mode,
+    }
+
+
 def record_voice_delivery_attempt(
     *,
     command: VoiceCommand,
@@ -9741,6 +9757,12 @@ def cockpit_transcribe_voice_action(
             language=str(payload.get("language", "cs") or "cs"),
         )
         result.update(save_voice_command_to_inbox(result, inbox_dir=inbox_dir))
+        if terminal_bridge is None:
+            voice_mode = load_voice_mode_status()
+            if voice_mode.get("running"):
+                result.update(voice_watcher_will_deliver_result(voice_mode))
+                result["message"] = result["voice_delivery_message"]
+                return result
         result.update(
             deliver_saved_voice_command_inline(
                 inbox_dir=inbox_dir,
@@ -9797,21 +9819,7 @@ def cockpit_save_voice_text_action(
         result.update(save_voice_command_to_inbox({"text": text}, inbox_dir=inbox_dir))
         voice_mode = load_voice_mode_status()
         if terminal_bridge is None and voice_mode.get("running"):
-            result.update(
-                {
-                    "voice_delivery_status": "watcher_will_deliver",
-                    "voice_delivery": {
-                        "ok": True,
-                        "status": "watcher_running",
-                        "message": "Běžící Adam Voice Mode watcher pokyn převezme z hlasového inboxu.",
-                    },
-                    "voice_delivery_message": (
-                        "Zpráva byla vložena do hlasového inboxu. "
-                        "Běžící watcher ji předá Adamovi."
-                    ),
-                    "voice_mode": voice_mode,
-                }
-            )
+            result.update(voice_watcher_will_deliver_result(voice_mode))
             result["message"] = result["voice_delivery_message"]
             return result
         result.update(
