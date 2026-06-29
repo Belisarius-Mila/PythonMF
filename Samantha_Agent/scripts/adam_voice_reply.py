@@ -15,6 +15,7 @@ from app.speech.adam_voice_mode import (
     ADAM_VOICE_HISTORY_PATH,
     append_manual_voice_history_turn,
     load_pending_for_adam,
+    mark_pending_for_adam_processing_started,
     mark_pending_for_adam_processed,
 )
 from app.adam_service import record_adam_text_reply
@@ -25,7 +26,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Zapíše odpověď Adama k čekajícímu hlasovému pokynu a označí ho jako vyřízený."
     )
-    parser.add_argument("response", nargs="+", help="Odpověď, kterou Adam po zpracování v Codexu vrátil.")
+    parser.add_argument("response", nargs="*", help="Odpověď, kterou Adam po zpracování v Codexu vrátil.")
     parser.add_argument("--path", type=Path, default=ADAM_PENDING_COMMAND_PATH)
     parser.add_argument("--history-path", type=Path, default=ADAM_VOICE_HISTORY_PATH)
     parser.add_argument("--inbox-dir", type=Path, default=VOICE_COMMAND_INBOX_DIR)
@@ -33,6 +34,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--latest-command",
         action="store_true",
         help="Zapsat odpověď k poslednímu hlasovému pokynu bez změny pending záznamu.",
+    )
+    parser.add_argument(
+        "--processing-started",
+        action="store_true",
+        help="Zapsat jen textový mezistav, že Codex pokyn převzal a začal ho zpracovávat.",
     )
     parser.add_argument(
         "--user-text",
@@ -56,7 +62,16 @@ def build_arg_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_arg_parser().parse_args(argv)
     response = " ".join(args.response).strip()
-    if args.request_id.strip():
+    if args.processing_started:
+        result = mark_pending_for_adam_processing_started(
+            message=response or "Zpráva vložena do chatu a zahájeno zpracování.",
+            path=args.path,
+        )
+        result["response"] = result.get("message") or response
+    elif not response:
+        print("Chybí text odpovědi.", file=sys.stderr)
+        return 2
+    elif args.request_id.strip():
         request_result = record_adam_text_reply(
             request_id=args.request_id.strip(),
             response=response,
@@ -94,19 +109,28 @@ def main(argv: list[str] | None = None) -> int:
         }
     elif args.latest_command:
         command = load_latest_voice_command(inbox_dir=args.inbox_dir)
-        turn = append_manual_voice_history_turn(
-            user_text=command.text,
-            adam_response=response,
-            route=args.route.strip() or "codex_terminal_final",
-            path=args.history_path,
-        )
-        result = {
-            "ok": True,
-            "status": "recorded_latest_command_reply",
-            "processed_at": turn.get("created_at"),
-            "response": response,
-            "latest_command_path": str(command.path),
-        }
+        pending = load_pending_for_adam(path=args.path)
+        if pending.get("pending") and str(pending.get("text") or "").strip() == command.text.strip():
+            result = mark_pending_for_adam_processed(
+                adam_response=response,
+                path=args.path,
+                history_path=args.history_path,
+            )
+            result["latest_command_path"] = str(command.path)
+        else:
+            turn = append_manual_voice_history_turn(
+                user_text=command.text,
+                adam_response=response,
+                route=args.route.strip() or "codex_terminal_final",
+                path=args.history_path,
+            )
+            result = {
+                "ok": True,
+                "status": "recorded_latest_command_reply",
+                "processed_at": turn.get("created_at"),
+                "response": response,
+                "latest_command_path": str(command.path),
+            }
     else:
         pending = load_pending_for_adam(path=args.path)
         if pending.get("pending"):

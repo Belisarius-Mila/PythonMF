@@ -5,6 +5,7 @@ import re
 import subprocess
 import termios
 import fcntl
+import time
 from pathlib import Path
 from typing import Any, Callable
 
@@ -18,6 +19,7 @@ CURRENT_CODEX_TTY_PATH = PROJECT_ROOT / "data/private/voice_inbox/current_codex_
 DEFAULT_STALE_CODEX_SECONDS = 36 * 60 * 60
 DEFAULT_CODEX_SCREEN_SESSION = "samantha_codex"
 SCREEN_CLEAR_INPUT = "\x15"
+SCREEN_SUBMIT_INPUT = "\r"
 
 TERMINAL_MANUAL_TERMS = (
     "smaz",
@@ -85,6 +87,8 @@ def build_codex_terminal_prompt(command: VoiceCommand) -> str:
         f"{text} "
         "Zpracuj ho jako běžný uživatelský pokyn; pokud zjistíš riziko změny dat, "
         "odesílání, mazání, commitu, platby nebo tajemství, vyžádej si ruční potvrzení. "
+        "Nejdřív bez čtení nahlas zapiš textový mezistav do Cockpitu přes "
+        "`.venv/bin/python scripts/adam_voice_reply.py --processing-started`. "
         "Po dokončení napiš výsledek do chatu a zapiš stejný stručný výsledek do Cockpitu přes "
         "`.venv/bin/python scripts/adam_voice_reply.py --latest-command \"STRUČNÝ VÝSLEDEK\"`. "
         "Nespouštěj zároveň Mac TTS přes `scripts/speak_edge_open.py`, protože otevřený "
@@ -296,6 +300,7 @@ def deliver_prompt_to_screen_session(
     submit: bool = True,
     session_name: str = DEFAULT_CODEX_SCREEN_SESSION,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+    sleeper: Callable[[float], None] = time.sleep,
 ) -> dict[str, Any]:
     if not screen_session_exists(session_name=session_name, runner=runner):
         return {
@@ -305,15 +310,25 @@ def deliver_prompt_to_screen_session(
             "session_name": session_name,
             "delivery_method": "screen_stuff",
         }
-    payload = SCREEN_CLEAR_INPUT + squash_terminal_text(prompt) + ("\n" if submit else "")
+    payload = SCREEN_CLEAR_INPUT + squash_terminal_text(prompt)
     try:
-        completed = runner(
-            ["screen", "-S", session_name, "-X", "stuff", payload],
+        insert_completed = runner(
+            ["screen", "-S", session_name, "-p", "0", "-X", "stuff", payload],
             capture_output=True,
             text=True,
             timeout=8,
             check=False,
         )
+        completed = insert_completed
+        if submit and insert_completed.returncode == 0:
+            sleeper(0.2)
+            completed = runner(
+                ["screen", "-S", session_name, "-p", "0", "-X", "stuff", SCREEN_SUBMIT_INPUT],
+                capture_output=True,
+                text=True,
+                timeout=8,
+                check=False,
+            )
     except (OSError, subprocess.TimeoutExpired) as exc:
         return {
             "ok": False,
@@ -338,7 +353,7 @@ def deliver_prompt_to_screen_session(
         "submitted": submit,
         "session_name": session_name,
         "delivery_method": "screen_stuff",
-        "verified": True,
+        "verified": False,
     }
 
 

@@ -47,6 +47,7 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertIn("Kolik jsme dnes napsali řádků kódu?", prompt)
         self.assertIn("vyžádej si ruční potvrzení", prompt)
         self.assertIn("zapiš stejný stručný výsledek do Cockpitu", prompt)
+        self.assertIn("scripts/adam_voice_reply.py --processing-started", prompt)
         self.assertIn("scripts/speak_edge_open.py", prompt)
         self.assertIn("Nespouštěj zároveň Mac TTS", prompt)
         self.assertIn("Cockpit audiokanál odpověď přehraje", prompt)
@@ -211,16 +212,21 @@ class TerminalBridgeTests(unittest.TestCase):
                 return subprocess.CompletedProcess(args=args, returncode=0, stdout="\t93159.samantha_codex\t(Attached)\n", stderr="")
             return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
 
-        result = deliver_prompt_to_screen_session("První řádek\nDruhý řádek", runner=fake_runner)
+        sleeps = []
+
+        result = deliver_prompt_to_screen_session("První řádek\nDruhý řádek", runner=fake_runner, sleeper=sleeps.append)
 
         self.assertTrue(result["ok"])
         self.assertEqual(result["status"], "delivered_screen")
         self.assertEqual(result["delivery_method"], "screen_stuff")
-        self.assertEqual(calls[1]["args"][:5], ["screen", "-S", "samantha_codex", "-X", "stuff"])
-        payload = calls[1]["args"][5]
+        self.assertEqual(calls[1]["args"][:7], ["screen", "-S", "samantha_codex", "-p", "0", "-X", "stuff"])
+        payload = calls[1]["args"][-1]
         self.assertTrue(payload.startswith("\x15"))
-        self.assertTrue(payload.endswith("\n"))
+        self.assertFalse(payload.endswith("\r"))
         self.assertIn("První řádek Druhý řádek", payload)
+        self.assertEqual(calls[2]["args"], ["screen", "-S", "samantha_codex", "-p", "0", "-X", "stuff", "\r"])
+        self.assertEqual(sleeps, [0.2])
+        self.assertFalse(result["verified"])
 
     def test_vscode_applescript_does_not_paste_focus_command_text(self) -> None:
         script = vscode_applescript()

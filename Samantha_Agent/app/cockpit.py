@@ -9422,7 +9422,10 @@ def deliver_saved_voice_command_inline(
         message = "Hlasový pokyn byl uložen a předán přímo do Codexu."
     elif bridge_result.get("ok"):
         status = "voice_command_delivery_unverified"
-        message = "Hlasový pokyn byl uložen a odeslán do označené Codex relace; doručení ale nejde technicky ověřit."
+        message = (
+            "Zpráva byla vložena do hlasového inboxu. "
+            "Čekám na Adamovu odpověď."
+        )
     else:
         bridge_status = str(bridge_result.get("status") or "voice_command_delivery_failed")
         bridge_message = str(bridge_result.get("reason") or bridge_result.get("message") or "bez detailu")
@@ -9493,15 +9496,20 @@ def record_voice_delivery_issue_for_cockpit(
 ) -> None:
     detail = str(bridge_result.get("reason") or bridge_result.get("message") or "").strip()
     pending_message = message if not detail else f"{message} Detail: {detail}"
+    pending_reason = (
+        "terminal_delivery_pending_reply"
+        if delivery_status == "voice_command_delivery_unverified"
+        else delivery_status
+    )
     try:
         save_pending_for_adam(
             command,
-            reason=delivery_status,
+            reason=pending_reason,
             message=pending_message,
             path=pending_path,
             history_path=history_path,
         )
-        append_voice_history_turn(command, adam_response=message, route=delivery_status, path=history_path)
+        append_voice_history_turn(command, adam_response=message, route=pending_reason, path=history_path)
     except OSError:
         return
 
@@ -15073,16 +15081,18 @@ COCKPIT_HTML = """<!doctype html>
       const voicePending = voiceMode.pending_for_adam || {};
       const voicePendingActive = Boolean(voicePending.pending);
       const voicePendingApprovalStatus = String(voicePending.approval_status || "");
-      const voicePendingActionable = voicePendingActive && voicePendingApprovalStatus !== "approved";
+      const voicePendingNeedsApproval = pendingNeedsCockpitApproval(voicePending);
+      const voicePendingActionable = voicePendingActive && voicePendingNeedsApproval && voicePendingApprovalStatus !== "approved";
       const voicePendingText = String(voicePending.text || "");
+      const voicePendingMessage = String(voicePending.message || "").trim();
       const voicePendingShort = voicePendingText.length > 160 ? `${voicePendingText.slice(0, 160)}...` : voicePendingText;
       const codexApproval = voiceMode.codex_approval || {};
       const codexApprovalActive = Boolean(codexApproval.active);
       const codexApprovalReasonText = String(codexApproval.reason || codexApproval.message || "Codex čeká na systémové potvrzení.");
       const voiceReady = !voiceBridgeWarn && (voiceBridge.status === "ok" || voiceBridge.status === "unknown" || !voiceBridge.status);
       const voiceBridgeDashboard = voiceBridgeWarn ? `<br><span class="warn">${escapeHtml(voiceBridgeMessage)}</span>` : "";
-      dashboardVoiceMode.innerHTML = voicePendingActionable
-        ? `<span class="warn">čeká pokyn</span><br>${escapeHtml(voicePendingShort || voiceState)}${voiceBridgeDashboard}`
+      dashboardVoiceMode.innerHTML = voicePendingActive
+        ? `<span class="warn">${voicePendingActionable ? "čeká potvrzení" : "hlasový pokyn"}</span><br>${escapeHtml(voicePendingMessage || voicePendingShort || voiceState)}${voiceBridgeDashboard}`
         : codexApprovalActive
           ? `<span class="warn">čeká Codex</span><br>${escapeHtml(codexApprovalReasonText)}${voiceBridgeDashboard}`
         : voiceBridgeWarn
@@ -15121,14 +15131,14 @@ COCKPIT_HTML = """<!doctype html>
         voiceBridgeSessions.classList.toggle("ok", !voiceBridgeWarn && (!markedTty || codexTtys.includes(markedTty)));
       }
       renderVoiceBridgeSwitcher(voiceBridge);
-      if (voiceCommandDetails && (voicePendingActionable || codexApprovalActive || voiceBridgeWarn)) {
+      if (voiceCommandDetails && (voicePendingActive || codexApprovalActive || voiceBridgeWarn)) {
         voiceCommandDetails.open = true;
       }
       if (voicePendingStatus) {
         voicePendingStatus.textContent = voicePendingActive
           ? voicePendingActionable
-            ? `Čeká hlasový pokyn na Adama: ${voicePendingShort || voicePending.message || "bez textu"}`
-            : `Starší schválený pokyn je jen v technickém záznamu. Nový pokyn můžeš poslat normálně.`
+            ? `Čeká potvrzení: ${voicePendingMessage || voicePendingShort || "bez textu"}`
+            : voicePendingMessage || `Čeká hlasový pokyn na Adama: ${voicePendingShort || "bez textu"}`
           : "Žádný hlasový pokyn nečeká na Adama.";
       }
       renderVoiceLastResponse(voiceMode.last_adam_response || {});
@@ -16343,10 +16353,7 @@ COCKPIT_HTML = """<!doctype html>
 		      const reason = String(pending.reason || pending.status || "");
 		      return [
 		        "requires_confirmation",
-		        "outbound_confirmation",
-		        "terminal_delivery_failed",
-		        "terminal_delivery_unverified",
-		        "direct_response_failed"
+		        "outbound_confirmation"
 		      ].includes(reason);
 		    }
 

@@ -29,6 +29,12 @@ ADAM_VOICE_HISTORY_PATH = VOICE_COMMAND_INBOX_DIR / "adam_voice_history.jsonl"
 ADAM_LAST_RESPONSE_PATH = VOICE_COMMAND_INBOX_DIR / "last_adam_response.json"
 CODEX_APPROVAL_REQUEST_PATH = VOICE_COMMAND_INBOX_DIR / "codex_approval_request.json"
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+NON_FINAL_VOICE_RESPONSE_ROUTES = {
+    "codex_work",
+    "terminal_delivery_pending_reply",
+    "terminal_delivery_unverified",
+    "voice_command_delivery_unverified",
+}
 
 DIRECT_RESPONSE_INSTRUCTIONS = """
 Jsi Adam v hlasovém režimu Samantha Cockpitu.
@@ -125,6 +131,17 @@ def _last_response_path_for_history(history_path: Path) -> Path:
     return history_path.parent / "last_adam_response.json"
 
 
+def is_final_voice_response_route(route: str) -> bool:
+    return str(route or "").strip() not in NON_FINAL_VOICE_RESPONSE_ROUTES
+
+
+def should_speak_voice_result(*, pending: dict[str, Any]) -> bool:
+    if not pending.get("pending"):
+        return True
+    reason = str(pending.get("reason") or pending.get("status") or "").strip()
+    return is_final_voice_response_route(reason)
+
+
 def save_last_adam_response(
     *,
     user_text: str,
@@ -190,7 +207,7 @@ def append_manual_voice_history_turn(
     }
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
-    if payload["adam_response"]:
+    if payload["adam_response"] and is_final_voice_response_route(payload["route"]):
         save_last_adam_response(
             user_text=payload["user_text"],
             adam_response=payload["adam_response"],
@@ -218,7 +235,7 @@ def append_voice_history_turn(
     }
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
-    if payload["adam_response"]:
+    if payload["adam_response"] and is_final_voice_response_route(payload["route"]):
         save_last_adam_response(
             user_text=payload["user_text"],
             adam_response=payload["adam_response"],
@@ -313,6 +330,29 @@ def mark_pending_for_adam_processed(
         route="codex_manual",
         path=history_path,
     )
+    return pending
+
+
+def mark_pending_for_adam_processing_started(
+    *,
+    message: str = "Zpráva vložena do chatu a zahájeno zpracování.",
+    path: Path = ADAM_PENDING_COMMAND_PATH,
+) -> dict[str, Any]:
+    pending = load_pending_for_adam(path=path)
+    if not pending.get("ok"):
+        return pending
+    if not pending.get("pending"):
+        pending["ok"] = False
+        pending["message"] = "Žádný čekající hlasový pokyn není připravený k označení jako převzatý."
+        return pending
+
+    now = utc_now()
+    pending["status"] = "processing_by_codex"
+    pending["processing_started_at"] = now
+    pending["updated_at"] = now
+    pending["message"] = str(message or "").strip() or "Zpráva vložena do chatu a zahájeno zpracování."
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(pending, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return pending
 
 
@@ -476,7 +516,7 @@ def load_voice_mode_status(
     last_adam_response = load_last_adam_response(path=last_response_path)
     codex_approval = load_codex_approval_request(path=codex_approval_path)
     last_voice_turn = voice_history[-1] if voice_history else None
-    if not last_adam_response.get("available") and last_voice_turn:
+    if not last_adam_response.get("available") and last_voice_turn and is_final_voice_response_route(str(last_voice_turn.get("route") or "")):
         history_response = str(last_voice_turn.get("adam_response") or "").strip()
         if history_response:
             last_adam_response = {
@@ -705,18 +745,18 @@ def build_spoken_result_for_command(
                 bridge_status = str(bridge_result.get("status") or "terminal_delivery_unverified")
                 bridge_message = str(bridge_result.get("message") or "Terminálový bridge pokus nahlásil úspěch, ale doručení neumím ověřit.")
                 message = (
-                    "Pokusil jsem se pokyn vložit do Codex terminálu, ale neumím ověřit, že se skutečně objevil. "
-                    "Nechávám ho Adamovi připravený v hlasovém inboxu."
+                    "Zpráva byla vložena do hlasového inboxu. "
+                    "Čekám na Adamovu odpověď; pokud dlouho nepřijde, zkontroluj Cockpit nebo Codex ručně."
                 )
                 if pending_path is not None:
                     save_pending_for_adam(
                         command,
-                        reason="terminal_delivery_unverified",
+                        reason="terminal_delivery_pending_reply",
                         message=f"{message} Doručovací status: {bridge_status}. Detail: {bridge_message}",
                         path=pending_path,
                         history_path=history_path,
                     )
-                append_voice_history_turn(command, adam_response=message, route="terminal_delivery_unverified", path=history_path)
+                append_voice_history_turn(command, adam_response=message, route="terminal_delivery_pending_reply", path=history_path)
                 return message
             bridge_status = str(bridge_result.get("status") or "terminal_bridge_failed")
             bridge_reason = str(bridge_result.get("reason") or bridge_result.get("message") or "Terminálový bridge pokyn nepřevzal.")
@@ -791,10 +831,10 @@ def handle_voice_command(
         history_path=history_path,
         terminal_bridge=terminal_bridge,
     )
-    speech_result = {"ok": True, "message": "Hlasové oznámení vypnuté.", "transport": "disabled"}
-    if should_speak:
-        speech_result = speak(spoken_result, allow_local_fallback=False)
     pending = load_pending_for_adam(path=pending_path) if pending_path is not None else {"pending": False}
+    speech_result = {"ok": True, "message": "Hlasové oznámení vypnuté.", "transport": "disabled"}
+    if should_speak and should_speak_voice_result(pending=pending):
+        speech_result = speak(spoken_result, allow_local_fallback=False)
     state = "pending_for_adam" if pending.get("pending") else "command_ready" if command.ok else "waiting"
     status = write_voice_mode_status(
         status_path=status_path,
