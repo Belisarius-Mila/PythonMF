@@ -13899,6 +13899,17 @@ COCKPIT_HTML = """<!doctype html>
       setHealthValue(frontendHealthError, text.slice(0, 220), "bad");
     }
 
+    function recordFrontendBlockingError(label, error) {
+      const detail = String(error && (error.message || error.reason || error) || "").trim();
+      const text = detail ? `${label}: ${detail}` : String(label || "blokující chyba frontendu");
+      frontendLastError = text;
+      frontendErrorHistory = [
+        {createdAt: new Date().toISOString(), text},
+        ...frontendErrorHistory
+      ].slice(0, 8);
+      setHealthValue(frontendHealthError, text.slice(0, 220), "bad");
+    }
+
     function isExpectedBrowserAudioPermissionError(error) {
       const text = String(error && (error.message || error.reason || error) || "").toLowerCase();
       return (
@@ -13921,7 +13932,7 @@ COCKPIT_HTML = """<!doctype html>
     }
 
     function isExpectedFrontendNoticeError(error) {
-      return isExpectedBrowserAudioPermissionError(error) || isTransientBrowserFetchError(error);
+      return isTransientBrowserFetchError(error);
     }
 
     function friendlyFrontendNoticeText(error) {
@@ -13944,6 +13955,15 @@ COCKPIT_HTML = """<!doctype html>
       if (!frontendLastError) {
         setHealthValue(frontendHealthError, message.slice(0, 220), "warn");
       }
+    }
+
+    function recordFrontendDiagnostic(text) {
+      const message = String(text || "").trim();
+      if (!message) return;
+      frontendErrorHistory = [
+        {createdAt: new Date().toISOString(), text: message},
+        ...frontendErrorHistory
+      ].slice(0, 8);
     }
 
     function clearFrontendErrorsMatching(matchText) {
@@ -17159,7 +17179,7 @@ COCKPIT_HTML = """<!doctype html>
 	        voiceCommandStatus.textContent = "Nahrávám hlasový pokyn. Limit je 30 sekund.";
 	        voiceStopTimer = window.setTimeout(stopVoiceRecording, 30000);
 	      } catch (err) {
-	        recordFrontendError(err);
+	        recordFrontendBlockingError("Mikrofon pro hlasový pokyn je blokovaný", err);
 	        voiceCommandStatus.textContent = `Mikrofon se nepodařilo spustit: ${err}`;
 	        resetVoiceRecordingUi();
 	      }
@@ -17227,7 +17247,7 @@ COCKPIT_HTML = """<!doctype html>
 	        voiceTranscript.focus();
 	        return;
 	      }
-	      recordFrontendNotice(`Klik na odeslání textového pokynu zaznamenán (${text.length} znaků).`);
+	      recordFrontendDiagnostic(`Klik na odeslání textového pokynu zaznamenán (${text.length} znaků).`);
 	      voiceTranscriptSendBtn.disabled = true;
 	      voiceCommandStatus.textContent = "Klik zaznamenán. Odesílám text Adamovi...";
 	      try {
@@ -17244,7 +17264,7 @@ COCKPIT_HTML = """<!doctype html>
 	          voiceCommandStatus.textContent = data.message || "Textový hlasový pokyn se nepodařilo uložit.";
 	        }
 	      } catch (err) {
-	        recordFrontendError(err);
+	        recordFrontendBlockingError("Odeslání textového pokynu do Cockpitu selhalo", err);
 	        safeStoreVoiceTranscriptDraft(text);
 	        voiceCommandStatus.textContent = `Textový hlasový pokyn se nepodařilo uložit: ${err}`;
 	      } finally {
