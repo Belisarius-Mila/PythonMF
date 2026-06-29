@@ -15141,7 +15141,9 @@ COCKPIT_HTML = """<!doctype html>
             : voicePendingMessage || `Čeká hlasový pokyn na Adama: ${voicePendingShort || "bez textu"}`
           : "Žádný hlasový pokyn nečeká na Adama.";
       }
-      renderVoiceLastResponse(voiceMode.last_adam_response || {});
+      renderVoiceLastResponse(voiceMode.last_adam_response || {}, {
+        autoSpeak: voiceAudioUnlocked && Boolean(latestAdamResponseKey)
+      });
       renderCodexApproval(codexApproval);
       renderVoiceApproval(voicePending);
       if (voiceModeStartBtn) {
@@ -16295,7 +16297,8 @@ COCKPIT_HTML = """<!doctype html>
 		      if (text && voiceCommandDetails && (options.openPanel || isNewResponse)) {
 		        voiceCommandDetails.open = true;
 		      }
-		      if (text && options.autoSpeak && responseKey && responseKey !== autoSpokenAdamResponseKey) {
+		      const allowRenderedAutoSpeak = options.allowAlreadyRenderedAutoSpeak === true;
+		      if (text && options.autoSpeak && responseKey && responseKey !== autoSpokenAdamResponseKey && (isNewResponse || allowRenderedAutoSpeak)) {
 		        autoSpokenAdamResponseKey = responseKey;
 		        speakText(text, voiceLastResponseSpeakBtn, "Čtu Adamovu odpověď nahlas...", {allowSystemFallback: shouldUseSystemSpeechFallback()});
 		      }
@@ -16311,7 +16314,8 @@ COCKPIT_HTML = """<!doctype html>
 		          }
 		          renderVoiceLastResponse(data, {
 		            openPanel: true,
-		            autoSpeak: options.autoSpeak === true
+		            autoSpeak: options.autoSpeak === true,
+		            allowAlreadyRenderedAutoSpeak: true
 		          });
 		          return data;
 		        }
