@@ -17,7 +17,7 @@ import tempfile
 import time
 import urllib.error
 from collections.abc import Callable
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timezone
 from email import message_from_bytes
 from email.utils import parsedate_to_datetime
 from http import HTTPStatus
@@ -166,13 +166,6 @@ SCANDOCU_SERVER_SCRIPT = PROJECT_ROOT / "scripts" / "scandocu_server.py"
 COCKPIT_RESTART_SCRIPT = PROJECT_ROOT / "scripts" / "restart_cockpit.py"
 ADAM_VOICE_MODE_SCRIPT = PROJECT_ROOT / "scripts" / "adam_voice_mode.py"
 ADAM_VOICE_MODE_LOG_FILE = PROJECT_ROOT / "data" / "private" / "voice_inbox" / "adam_voice_mode.log"
-ADAM_RESPONSE_AUTOREAD_CLAIMS_PATH = PROJECT_ROOT / "data" / "private" / "voice_inbox" / "adam_response_autoread_claims.json"
-ADAM_VOICE_MODE_SOURCE_PATHS = (
-    ADAM_VOICE_MODE_SCRIPT,
-    PROJECT_ROOT / "app" / "speech" / "adam_voice_mode.py",
-    PROJECT_ROOT / "app" / "speech" / "terminal_bridge.py",
-    PROJECT_ROOT / "app" / "speech" / "voice_inbox.py",
-)
 VOICE_DELIVERY_TRANSPORT_ENV = "ADAM_VOICE_TRANSPORT"
 EMAIL_SESSION_HANDOFF_DIR = PROJECT_ROOT / "data" / "private" / "email_session_handoffs"
 LOCAL_SEZNAM_EMAIL_DIR = PROJECT_ROOT / "data" / "private" / "email_seznam"
@@ -353,8 +346,6 @@ DOCUMENT_TYPE_LABELS: dict[str, str] = {
     "document": "dokument",
     "email-attachment-pdf": "PDF příloha e-mailu",
     "employment_contract": "pracovní smlouva",
-    "gift_contract": "darovací smlouva",
-    "gift_contract_draft": "návrh darovací smlouvy",
     "green_card": "zelená karta / potvrzení pojištění",
     "insurance_assistance_card": "asistenční karta",
     "insurance_payment_confirmation": "potvrzení o zaplacení pojistného",
@@ -3605,15 +3596,8 @@ def import_selected_email_attachments(
                 )
                 continue
             attachment_kind = email_attachment_storage_kind(content_type=content_type, filename=filename)
-            if attachment_kind == "image":
-                document_type = "email-attachment-image"
-                tag_kind = "image"
-            elif attachment_kind == "pdf":
-                document_type = "email-attachment-pdf"
-                tag_kind = "pdf"
-            else:
-                document_type = ""
-                tag_kind = "office"
+            document_type = "email-attachment-image" if attachment_kind == "image" else "email-attachment-pdf"
+            tag_kind = "image" if attachment_kind == "image" else "pdf"
             temp_path = temp_root / filename
             temp_path.write_bytes(payload)
             try:
@@ -3686,7 +3670,7 @@ def email_attachment_is_previewable(*, content_type: str, filename: str) -> bool
 
 
 def email_attachment_is_storable(*, content_type: str, filename: str) -> bool:
-    return email_attachment_storage_kind(content_type=content_type, filename=filename) in {"pdf", "image", "office"}
+    return email_attachment_storage_kind(content_type=content_type, filename=filename) in {"pdf", "image"}
 
 
 def email_attachment_storage_kind(*, content_type: str, filename: str) -> str:
@@ -3696,20 +3680,6 @@ def email_attachment_storage_kind(*, content_type: str, filename: str) -> str:
         return "pdf"
     if normalized_type.startswith("image/") or normalized_name.endswith((".png", ".jpg", ".jpeg", ".gif", ".webp", ".tif", ".tiff")):
         return "image"
-    office_types = {
-        "application/msword",
-        "application/rtf",
-        "application/vnd.ms-excel",
-        "application/vnd.ms-powerpoint",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-        "application/vnd.oasis.opendocument.text",
-        "application/vnd.oasis.opendocument.spreadsheet",
-        "application/vnd.oasis.opendocument.presentation",
-    }
-    if normalized_type in office_types or normalized_name.endswith((".doc", ".docx", ".rtf", ".odt", ".xls", ".xlsx", ".ods", ".ppt", ".pptx", ".odp")):
-        return "office"
     return ""
 
 
@@ -8940,35 +8910,6 @@ def start_cockpit_restart_action(
     }
 
 
-def adam_voice_mode_watcher_needs_restart(
-    current: dict[str, Any],
-    *,
-    source_paths: tuple[Path, ...] | None = None,
-) -> bool:
-    if not current.get("running"):
-        return False
-    started_raw = str(current.get("started_at") or "").strip()
-    if not started_raw:
-        return False
-    try:
-        started_at = datetime.fromisoformat(started_raw.replace("Z", "+00:00"))
-    except ValueError:
-        return False
-    if started_at.tzinfo is None:
-        started_at = started_at.replace(tzinfo=timezone.utc)
-    latest_source_mtime: datetime | None = None
-    for path in source_paths or ADAM_VOICE_MODE_SOURCE_PATHS:
-        try:
-            source_mtime = datetime.fromtimestamp(path.stat().st_mtime, timezone.utc)
-        except OSError:
-            continue
-        if latest_source_mtime is None or source_mtime > latest_source_mtime:
-            latest_source_mtime = source_mtime
-    if latest_source_mtime is None:
-        return False
-    return latest_source_mtime > started_at + timedelta(seconds=1)
-
-
 def start_adam_voice_mode_action(
     *,
     launcher: Callable[..., object] | None = None,
@@ -8976,43 +8917,14 @@ def start_adam_voice_mode_action(
     terminal_bridge: bool | None = None,
 ) -> dict[str, Any]:
     current = load_voice_mode_status()
-    bridge_env = os.environ.get("ADAM_VOICE_TERMINAL_BRIDGE", "").strip().lower()
-    bridge_enabled = terminal_bridge if terminal_bridge is not None else bridge_env not in {"0", "false", "no", "ne"}
     if current.get("running"):
-        pid = int(current.get("pid") or 0)
-        if adam_voice_mode_watcher_needs_restart(current):
-            try:
-                os.kill(pid, signal.SIGTERM)
-            except OSError as exc:
-                return {
-                    "ok": False,
-                    "status": "restart_old_watcher_failed",
-                    "message": f"Adam Voice Mode watcher běží ze staršího kódu, ale nepodařilo se ho zastavit: {exc}",
-                    "pid": pid,
-                    "voice_mode": current,
-                }
-            write_voice_mode_status(
-                state="stopped",
-                message="Adam Voice Mode watcher běžel ze staršího kódu a byl zastaven před restartem.",
-                pid=pid,
-            )
-            time.sleep(0.5)
-            if pid_exists(pid):
-                return {
-                    "ok": False,
-                    "status": "restart_old_watcher_waiting",
-                    "message": "Adam Voice Mode watcher ze staršího kódu se ještě ukončuje. Zkus start audiokanálu za chvíli znovu.",
-                    "pid": pid,
-                    "voice_mode": load_voice_mode_status(),
-                }
-        else:
-            return {
-                "ok": True,
-                "status": "already_running",
-                "message": "Adam Voice Mode watcher už běží.",
-                "pid": current.get("pid"),
-                "voice_mode": current,
-            }
+        return {
+            "ok": True,
+            "status": "already_running",
+            "message": "Adam Voice Mode watcher už běží.",
+            "pid": current.get("pid"),
+            "voice_mode": current,
+        }
     log_file.parent.mkdir(parents=True, exist_ok=True)
     log_handle = log_file.open("a", encoding="utf-8")
     command_args = [
@@ -9021,6 +8933,8 @@ def start_adam_voice_mode_action(
         "--poll",
         "0.5",
     ]
+    bridge_env = os.environ.get("ADAM_VOICE_TERMINAL_BRIDGE", "").strip().lower()
+    bridge_enabled = terminal_bridge if terminal_bridge is not None else bridge_env not in {"0", "false", "no", "ne"}
     if bridge_enabled:
         command_args.append("--terminal-bridge")
     starter = launcher or subprocess.Popen
@@ -9391,79 +9305,6 @@ def cockpit_voice_latest_response_action(
     response_path: Path = ADAM_LAST_RESPONSE_PATH,
 ) -> dict[str, Any]:
     return load_last_adam_response(path=response_path)
-
-
-def cockpit_voice_autoread_claim_action(
-    payload: dict[str, Any],
-    *,
-    claims_path: Path = ADAM_RESPONSE_AUTOREAD_CLAIMS_PATH,
-    now: Callable[[], datetime] | None = None,
-) -> dict[str, Any]:
-    response_key = str(payload.get("response_key") or "").strip()
-    client_id = safe_ascii_slug(str(payload.get("client_id") or "").strip(), default="", limit=80)
-    if not response_key:
-        return {
-            "ok": False,
-            "claimed": False,
-            "status": "missing_response_key",
-            "message": "Chybí klíč Adamovy odpovědi pro automatické přečtení.",
-        }
-
-    current_time = now() if now is not None else datetime.now(timezone.utc)
-    if current_time.tzinfo is None:
-        current_time = current_time.replace(tzinfo=timezone.utc)
-    current_iso = current_time.replace(microsecond=0).isoformat()
-    cutoff = current_time.timestamp() - (24 * 60 * 60)
-
-    claims: dict[str, Any] = {}
-    if claims_path.exists():
-        try:
-            loaded = json.loads(claims_path.read_text(encoding="utf-8"))
-            if isinstance(loaded, dict):
-                claims = loaded
-        except (OSError, json.JSONDecodeError):
-            claims = {}
-
-    cleaned_claims: dict[str, Any] = {}
-    for key, value in claims.items():
-        if not isinstance(value, dict):
-            continue
-        claimed_at = str(value.get("claimed_at") or "")
-        try:
-            claimed_ts = datetime.fromisoformat(claimed_at).timestamp()
-        except ValueError:
-            continue
-        if claimed_ts >= cutoff:
-            cleaned_claims[str(key)] = value
-
-    existing = cleaned_claims.get(response_key)
-    if existing:
-        claims_path.parent.mkdir(parents=True, exist_ok=True)
-        claims_path.write_text(json.dumps(cleaned_claims, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        return {
-            "ok": True,
-            "claimed": False,
-            "status": "already_claimed",
-            "message": "Tuto Adamovu odpověď už automaticky přehrává jiný otevřený Cockpit.",
-            "claimed_by": existing.get("client_id") or "",
-            "claimed_at": existing.get("claimed_at") or "",
-            "path": str(claims_path),
-        }
-
-    cleaned_claims[response_key] = {
-        "client_id": client_id or "unknown",
-        "claimed_at": current_iso,
-    }
-    claims_path.parent.mkdir(parents=True, exist_ok=True)
-    claims_path.write_text(json.dumps(cleaned_claims, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return {
-        "ok": True,
-        "claimed": True,
-        "status": "claimed",
-        "message": "Automatické přečtení Adamovy odpovědi je rezervované pro tento Cockpit.",
-        "claimed_at": current_iso,
-        "path": str(claims_path),
-    }
 
 
 def open_terminal_command(command: str, label: str) -> dict[str, Any]:
@@ -10174,14 +10015,6 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "voice_tests",
     },
     {
-        "path": "/api/voice-mode/autoread-claim",
-        "label": "Rezervovat automaticke precteni Adamovy odpovedi",
-        "risk": "private_write",
-        "confirmation": "response_key_dedupe_only",
-        "handler_name": "cockpit_voice_autoread_claim_action",
-        "test_level": "direct",
-    },
-    {
         "path": "/api/voice-mode/codex-approval/clear",
         "label": "Vycistit Codex approval kartu",
         "risk": "private_write",
@@ -10737,10 +10570,6 @@ class CockpitServer:
                 if parsed.path == "/api/voice-mode/approval":
                     payload = self.read_json()
                     self.respond_json(cockpit_voice_approval_action(payload))
-                    return
-                if parsed.path == "/api/voice-mode/autoread-claim":
-                    payload = self.read_json()
-                    self.respond_json(cockpit_voice_autoread_claim_action(payload))
                     return
                 if parsed.path == "/api/voice-mode/codex-approval/clear":
                     payload = self.read_json()
@@ -16368,22 +16197,6 @@ COCKPIT_HTML = """<!doctype html>
 		    let voiceReplyPollUntil = 0;
 		    let voiceReplyExpectedUserText = "";
 		    let voiceReplyMinCreatedAt = 0;
-		    let voiceAutoreadClientId = "";
-
-		    function getVoiceAutoreadClientId() {
-		      if (voiceAutoreadClientId) return voiceAutoreadClientId;
-		      const storageKey = "samanthaVoiceAutoreadClientId";
-		      let value = localStorage.getItem(storageKey) || "";
-		      if (!value) {
-		        const randomPart = window.crypto && window.crypto.randomUUID
-		          ? window.crypto.randomUUID()
-		          : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-		        value = `cockpit-${randomPart}`;
-		        localStorage.setItem(storageKey, value);
-		      }
-		      voiceAutoreadClientId = value;
-		      return value;
-		    }
 
 	    function preferredVoiceMimeType() {
 	      if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) {
@@ -16496,27 +16309,6 @@ COCKPIT_HTML = """<!doctype html>
 		      return true;
 		    }
 
-		    async function claimVoiceAutoread(responseKey) {
-		      try {
-		        const data = await postJson("/api/voice-mode/autoread-claim", {
-		          response_key: responseKey,
-		          client_id: getVoiceAutoreadClientId()
-		        });
-		        return Boolean(data && data.ok && data.claimed);
-		      } catch (err) {
-		        recordFrontendError(err);
-		        return false;
-		      }
-		    }
-
-		    async function autoSpeakVoiceLastResponse(text, responseKey) {
-		      const claimed = await claimVoiceAutoread(responseKey);
-		      if (!claimed) {
-		        return;
-		      }
-		      await speakText(text, voiceLastResponseSpeakBtn, "Čtu Adamovu odpověď nahlas...", {allowSystemFallback: shouldUseSystemSpeechFallback()});
-		    }
-
 		    function renderVoiceLastResponse(lastResponse, options = {}) {
 		      const text = String(lastResponse && lastResponse.adam_response || "").trim();
 		      const responseKey = voiceResponseKey(lastResponse);
@@ -16537,7 +16329,7 @@ COCKPIT_HTML = """<!doctype html>
 		      const allowRenderedAutoSpeak = options.allowAlreadyRenderedAutoSpeak === true;
 		      if (text && options.autoSpeak && responseKey && responseKey !== autoSpokenAdamResponseKey && (isNewResponse || allowRenderedAutoSpeak)) {
 		        autoSpokenAdamResponseKey = responseKey;
-		        autoSpeakVoiceLastResponse(text, responseKey);
+		        speakText(text, voiceLastResponseSpeakBtn, "Čtu Adamovu odpověď nahlas...", {allowSystemFallback: shouldUseSystemSpeechFallback()});
 		      }
 		    }
 

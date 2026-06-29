@@ -1,8 +1,0 @@
-#!/bin/zsh
-PROJECT_DIR="${SAMANTHA_PROJECT_DIR:-$HOME/Desktop/PythonMF/Samantha_Agent}"
-PYTHON_BIN="$PROJECT_DIR/.venv/bin/python"
-if [[ ! -x "$PYTHON_BIN" ]]; then
-  PYTHON_BIN="python3"
-fi
-"$PYTHON_BIN" "$PROJECT_DIR/scripts/destructive_command_guard.py" --tool mv -- "$@" || exit $?
-exec /bin/mv "$@"

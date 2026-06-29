@@ -733,53 +733,53 @@ def build_spoken_result_for_command(
             )
         append_voice_history_turn(command, adam_response=message, route=pending_reason, path=history_path)
         return message
-    if terminal_bridge is not None:
-        bridge_result = terminal_bridge(command)
-        if bridge_result.get("ok") and bridge_result.get("verified"):
-            message = "Pokyn jsem vložil do Codex terminálu. Adam ho převezme přímo tam."
-            if pending_path is not None:
-                mark_matching_pending_delivered_to_terminal(command, path=pending_path)
-            return message
-        if bridge_result.get("ok"):
-            bridge_status = str(bridge_result.get("status") or "terminal_delivery_unverified")
-            bridge_message = str(bridge_result.get("message") or "Terminálový bridge pokus nahlásil úspěch, ale doručení neumím ověřit.")
-            message = (
-                "Zpráva byla vložena do hlasového inboxu. "
-                "Předání do Codex terminálu ale není ověřené. Čekám na Adamovu odpověď."
-            )
+    if pending_reason == "codex_work":
+        if terminal_bridge is not None:
+            bridge_result = terminal_bridge(command)
+            if bridge_result.get("ok") and bridge_result.get("verified"):
+                message = "Pokyn jsem vložil do Codex terminálu. Adam ho převezme přímo tam."
+                if pending_path is not None:
+                    mark_matching_pending_delivered_to_terminal(command, path=pending_path)
+                return message
+            if bridge_result.get("ok"):
+                bridge_status = str(bridge_result.get("status") or "terminal_delivery_unverified")
+                bridge_message = str(bridge_result.get("message") or "Terminálový bridge pokus nahlásil úspěch, ale doručení neumím ověřit.")
+                message = (
+                    "Zpráva byla vložena do hlasového inboxu. "
+                    "Předání do Codex terminálu ale není ověřené. Čekám na Adamovu odpověď."
+                )
+                if pending_path is not None:
+                    save_pending_for_adam(
+                        command,
+                        reason="terminal_delivery_pending_reply",
+                        message=f"{message} Doručovací status: {bridge_status}. Detail: {bridge_message}",
+                        path=pending_path,
+                        history_path=history_path,
+                    )
+                append_voice_history_turn(command, adam_response=message, route="terminal_delivery_pending_reply", path=history_path)
+                return message
+            bridge_status = str(bridge_result.get("status") or "terminal_bridge_failed")
+            bridge_reason = str(bridge_result.get("reason") or bridge_result.get("message") or "Terminálový bridge pokyn nepřevzal.")
+            if bridge_status == "terminal_delivery_failed":
+                message = (
+                    "Pokyn jsem bezpečnostně pustil, ale technicky se mi ho nepodařilo vložit do Codex terminálu. "
+                    "Nechávám ho Adamovi připravený v hlasovém inboxu."
+                )
+            else:
+                message = (
+                    "Pokyn jsem do terminálu nevložil, protože vyžaduje ruční přesnou formulaci v Codex terminálu. "
+                    "Nechávám ho Adamovi připravený v hlasovém inboxu."
+                )
             if pending_path is not None:
                 save_pending_for_adam(
                     command,
-                    reason="terminal_delivery_pending_reply",
-                    message=f"{message} Doručovací status: {bridge_status}. Detail: {bridge_message}",
+                    reason=bridge_status,
+                    message=f"{message} Důvod: {bridge_reason}",
                     path=pending_path,
                     history_path=history_path,
                 )
-            append_voice_history_turn(command, adam_response=message, route="terminal_delivery_pending_reply", path=history_path)
+            append_voice_history_turn(command, adam_response=message, route=bridge_status, path=history_path)
             return message
-        bridge_status = str(bridge_result.get("status") or "terminal_bridge_failed")
-        bridge_reason = str(bridge_result.get("reason") or bridge_result.get("message") or "Terminálový bridge pokyn nepřevzal.")
-        if bridge_status == "terminal_delivery_failed":
-            message = (
-                "Pokyn jsem bezpečnostně pustil, ale technicky se mi ho nepodařilo vložit do Codex terminálu. "
-                "Nechávám ho Adamovi připravený v hlasovém inboxu."
-            )
-        else:
-            message = (
-                "Pokyn jsem do terminálu nevložil, protože vyžaduje ruční přesnou formulaci v Codex terminálu. "
-                "Nechávám ho Adamovi připravený v hlasovém inboxu."
-            )
-        if pending_path is not None:
-            save_pending_for_adam(
-                command,
-                reason=bridge_status,
-                message=f"{message} Důvod: {bridge_reason}",
-                path=pending_path,
-                history_path=history_path,
-            )
-        append_voice_history_turn(command, adam_response=message, route=bridge_status, path=history_path)
-        return message
-    if pending_reason == "codex_work":
         message = "Pokyn jsem přijal. Tohle vyžaduje pracovní převzetí Adamem v Codexu, takže ho nechávám připravený v hlasovém inboxu."
         if pending_path is not None:
             save_pending_for_adam(

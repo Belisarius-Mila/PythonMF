@@ -18,7 +18,6 @@ from app.cockpit import (
     EMAIL_PROCESSING_HTML,
     action_queue_status,
     adam_voice_bridge_status,
-    adam_voice_mode_watcher_needs_restart,
     accept_document_classification_suggestion_action,
     cancel_payment_reminder_action,
     cockpit_status,
@@ -37,7 +36,6 @@ from app.cockpit import (
     lekarna_search_action,
     library_read_state_action,
     cockpit_edge_tts_action,
-    cockpit_voice_autoread_claim_action,
     cockpit_codex_approval_clear_action,
     cockpit_safe_readonly_capabilities_action,
     cockpit_safe_readonly_run_action,
@@ -2145,9 +2143,6 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("renderVoiceLastResponse", COCKPIT_HTML)
         self.assertIn("refreshVoiceLatestResponse", COCKPIT_HTML)
         self.assertIn("startVoiceReplyPolling", COCKPIT_HTML)
-        self.assertIn("/api/voice-mode/autoread-claim", COCKPIT_HTML)
-        self.assertIn("claimVoiceAutoread", COCKPIT_HTML)
-        self.assertIn("autoSpeakVoiceLastResponse", COCKPIT_HTML)
         self.assertIn("autoSpeak: voiceAudioUnlocked && Boolean(latestAdamResponseKey)", COCKPIT_HTML)
         self.assertIn("allowAlreadyRenderedAutoSpeak", COCKPIT_HTML)
         self.assertIn("VOICE_REPLY_POLL_DURATION_MS = 600000", COCKPIT_HTML)
@@ -2976,52 +2971,6 @@ class CockpitTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(result["status"], "already_running")
         self.assertEqual(result["pid"], 12345)
-
-    def test_adam_voice_mode_watcher_needs_restart_when_source_is_newer(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            source = Path(temp_dir) / "adam_voice_mode.py"
-            source.write_text("new code\n", encoding="utf-8")
-            os_mtime = datetime(2026, 6, 29, 20, 0, tzinfo=timezone.utc).timestamp()
-            source.touch()
-            cockpit_module.os.utime(source, (os_mtime, os_mtime))
-            current = {
-                "running": True,
-                "pid": 12345,
-                "started_at": "2026-06-29T19:59:00+00:00",
-            }
-
-            self.assertTrue(adam_voice_mode_watcher_needs_restart(current, source_paths=(source,)))
-
-    def test_start_adam_voice_mode_action_restarts_running_watcher_from_old_code(self) -> None:
-        calls: list[dict[str, object]] = []
-
-        def fake_launcher(args, **kwargs):
-            calls.append({"args": args, **kwargs})
-            return SimpleNamespace(pid=67890)
-
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            log_file = Path(temp_dir) / "adam_voice_mode.log"
-            source = Path(temp_dir) / "adam_voice_mode.py"
-            source.write_text("new code\n", encoding="utf-8")
-            os_mtime = datetime(2026, 6, 29, 20, 0, tzinfo=timezone.utc).timestamp()
-            cockpit_module.os.utime(source, (os_mtime, os_mtime))
-            current = {"running": True, "pid": 12345, "started_at": "2026-06-29T19:59:00+00:00"}
-            with (
-                patch("app.cockpit.ADAM_VOICE_MODE_SOURCE_PATHS", (source,)),
-                patch("app.cockpit.load_voice_mode_status", return_value=current),
-                patch("app.cockpit.write_voice_mode_status") as write_status,
-                patch("app.cockpit.os.kill") as kill,
-                patch("app.cockpit.pid_exists", return_value=False),
-                patch("app.cockpit.time.sleep"),
-            ):
-                result = start_adam_voice_mode_action(launcher=fake_launcher, log_file=log_file)
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "started")
-        self.assertEqual(result["pid"], 67890)
-        kill.assert_called_once_with(12345, cockpit_module.signal.SIGTERM)
-        self.assertIn("--terminal-bridge", calls[0]["args"])
-        write_status.assert_called()
 
     def test_stop_adam_voice_mode_action_stops_running_watcher(self) -> None:
         with (
@@ -4556,31 +4505,6 @@ Dalsi krok:
         self.assertTrue(result["available"])
         self.assertEqual(result["answer"], "Dokument najdeš přes tlačítko Najít dokument.")
 
-    def test_voice_autoread_claim_allows_only_first_cockpit_client(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            claims_path = Path(temp_dir) / "claims.json"
-            first = cockpit_voice_autoread_claim_action(
-                {"response_key": "2026-06-29T20:00:00+00:00|Hotovo.", "client_id": "iphone"},
-                claims_path=claims_path,
-                now=lambda: datetime(2026, 6, 29, 20, 0, tzinfo=timezone.utc),
-            )
-            second = cockpit_voice_autoread_claim_action(
-                {"response_key": "2026-06-29T20:00:00+00:00|Hotovo.", "client_id": "mac"},
-                claims_path=claims_path,
-                now=lambda: datetime(2026, 6, 29, 20, 1, tzinfo=timezone.utc),
-            )
-            missing = cockpit_voice_autoread_claim_action({}, claims_path=claims_path)
-
-        self.assertTrue(first["ok"])
-        self.assertTrue(first["claimed"])
-        self.assertEqual(first["status"], "claimed")
-        self.assertTrue(second["ok"])
-        self.assertFalse(second["claimed"])
-        self.assertEqual(second["status"], "already_claimed")
-        self.assertEqual(second["claimed_by"], "iphone")
-        self.assertFalse(missing["ok"])
-        self.assertFalse(missing["claimed"])
-
     def test_janicka_chat_memory_context_includes_project_files(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             base = Path(temp_dir)
@@ -5736,80 +5660,6 @@ Dalsi krok:
             docs = self.read_jsonl(documents_dir / "index" / "documents_index.jsonl")
             self.assertEqual([doc["document_type"] for doc in docs], ["email-attachment-pdf", "email-attachment-image"])
             self.assertEqual(docs[1]["reading_status"], "needs_review")
-
-    def test_process_email_work_queue_batch_imports_selected_word_attachment_with_specific_type(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            root = Path(temp_dir)
-            archive_dir = root / "archive"
-            documents_dir = root / "documents"
-            decisions_path = root / "decisions.json"
-            actions_path = root / "actions.jsonl"
-            activity_state_path = root / "activity.json"
-            raw_message = _raw_email_with_attachment(
-                filename="dar - Faltovi.doc",
-                content_type="application/msword",
-                payload=b"Navrh darovaci smlouvy k nemovitosti Petkovy 56.",
-            )
-            provider = _FakeArchiveProvider(
-                EmailArchiveSource(
-                    uid="3331",
-                    date="Wed, 15 Jun 2022 10:00:00 +0200",
-                    sender="JUDr. Ludmila Purslova <sender@example.com>",
-                    subject="RE: Darovaci smlouva parcela 181, Petkovy 56",
-                    body_text="Posilam navrh darovaci smlouvy.",
-                    attachments=(
-                        EmailAttachmentMeta(
-                            filename="dar - Faltovi.doc",
-                            content_type="application/msword",
-                            size_bytes=52,
-                            part_id="2",
-                            content_id="",
-                            disposition="attachment",
-                        ),
-                    ),
-                    original_eml=raw_message,
-                    provider="icloud",
-                    mailbox="INBOX",
-                )
-            )
-            save_email_processing_decision(
-                item_id="process-3331",
-                action="process",
-                item={"id": "process-3331", "provider": "iCloud", "folder": "INBOX", "uid": "3331"},
-                path=decisions_path,
-            )
-
-            result = process_email_work_queue_batch(
-                items=[
-                    {
-                        "id": "process-3331",
-                        "provider": "iCloud",
-                        "folder": "INBOX",
-                        "uid": "3331",
-                        "category": "ostatní",
-                        "queueDecision": "save",
-                        "saveAttachments": ["2"],
-                        "attachment_metadata": [
-                            {"part_id": "2", "filename": "dar - Faltovi.doc"},
-                        ],
-                    }
-                ],
-                archive_directory=archive_dir,
-                documents_dir=documents_dir,
-                decisions_path=decisions_path,
-                actions_path=actions_path,
-                activity_state_path=activity_state_path,
-                icloud_provider_factory=lambda: provider,
-            )
-
-            docs = self.read_jsonl(documents_dir / "index" / "documents_index.jsonl")
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["summary"]["saved"], 1)
-        self.assertEqual(result["summary"]["attachments_imported"], 1)
-        self.assertEqual(docs[0]["document_type"], "gift_contract_draft")
-        self.assertEqual(docs[0]["reading_status"], "needs_review")
-        self.assertIn("dar", docs[0]["original_filename"])
 
     def test_preview_email_work_queue_attachment_opens_temp_pdf_without_vault_import(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
