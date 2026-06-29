@@ -79,17 +79,20 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertEqual(decision["status"], "allowed")
         self.assertEqual(command.triage.risk, "read_only")
 
-    def test_outbound_sms_prompt_still_requires_confirmation(self) -> None:
+    def test_outbound_sms_prompt_is_routed_to_codex_with_send_confirmation_warning(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             latest = Path(temp_dir) / "latest_voice_command.md"
             write_voice_command(latest, "Pošli SMS Janičce, jestli něco nepotřebuje.")
             command = load_latest_voice_command(inbox_dir=Path(temp_dir))
 
         decision = assess_terminal_bridge(command)
+        prompt = build_codex_terminal_prompt(command)
 
-        self.assertFalse(decision["ok"])
-        self.assertEqual(decision["status"], "manual_required")
+        self.assertTrue(decision["ok"])
+        self.assertEqual(decision["status"], "allowed")
         self.assertEqual(command.triage.risk, "outbound_confirmation")
+        self.assertIn("smíš připravit návrh/draft", prompt)
+        self.assertIn("samostatné přesné potvrzovací větě", prompt)
 
     def test_deliver_prompt_uses_osascript_arguments_without_shell(self) -> None:
         calls = []
@@ -148,9 +151,9 @@ class TerminalBridgeTests(unittest.TestCase):
         )
 
         self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "delivered_vscode")
+        self.assertEqual(result["status"], "vscode_delivery_unverified")
         self.assertEqual(result["terminal_status"]["status"], "terminal_delivery_failed")
-        self.assertTrue(result["verified"])
+        self.assertFalse(result["verified"])
         self.assertEqual(result["delivery_method"], "local_gui_vscode")
         self.assertEqual(len(calls), 2)
 
@@ -196,11 +199,11 @@ class TerminalBridgeTests(unittest.TestCase):
         )
 
         self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "delivered_vscode")
+        self.assertEqual(result["status"], "vscode_delivery_unverified")
         self.assertEqual(calls[0]["args"][0], "/usr/bin/osascript")
         self.assertEqual(calls[0]["args"][-1], "0")
         self.assertFalse(result["submitted"])
-        self.assertTrue(result["verified"])
+        self.assertFalse(result["verified"])
         self.assertEqual(result["delivery_method"], "local_gui_vscode")
 
     def test_deliver_prompt_to_screen_session_uses_screen_stuff_with_submit(self) -> None:
@@ -217,7 +220,7 @@ class TerminalBridgeTests(unittest.TestCase):
         result = deliver_prompt_to_screen_session("První řádek\nDruhý řádek", runner=fake_runner, sleeper=sleeps.append)
 
         self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "delivered_screen")
+        self.assertEqual(result["status"], "screen_delivery_unverified")
         self.assertEqual(result["delivery_method"], "screen_stuff")
         self.assertEqual(calls[1]["args"][:7], ["screen", "-S", "samantha_codex", "-p", "0", "-X", "stuff"])
         payload = calls[1]["args"][-1]
@@ -227,6 +230,46 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertEqual(calls[2]["args"], ["screen", "-S", "samantha_codex", "-p", "0", "-X", "stuff", "\r"])
         self.assertEqual(sleeps, [0.2])
         self.assertFalse(result["verified"])
+
+    def test_deliver_prompt_continues_after_unverified_screen_delivery(self) -> None:
+        calls = []
+
+        def fake_runner(args, **kwargs):
+            calls.append(args)
+            if args == ["screen", "-ls"]:
+                return subprocess.CompletedProcess(args=args, returncode=0, stdout="\t93159.samantha_codex\t(Attached)\n", stderr="")
+            if args[:6] == ["screen", "-S", "samantha_codex", "-p", "0", "-X"]:
+                return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="delivered\n", stderr="")
+
+        def fake_ps_runner(args, **kwargs):
+            return subprocess.CompletedProcess(
+                args=args,
+                returncode=0,
+                stdout="100 1 ttys000 codex codex\n",
+                stderr="",
+            )
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            result = deliver_prompt_to_terminal(
+                "Hlasový pokyn od Míly.",
+                submit=True,
+                runner=fake_runner,
+                ps_runner=fake_ps_runner,
+                tty_deliverer=lambda *args, **kwargs: {
+                    "ok": False,
+                    "status": "tty_delivery_failed",
+                    "message": "TIOCSTI blocked",
+                },
+                script="return \"delivered\"",
+                marked_tty_path=Path(temp_dir) / "missing_marker.json",
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "terminal_delivery_unverified")
+        self.assertEqual(result["screen_status"]["status"], "screen_delivery_unverified")
+        self.assertFalse(result["verified"])
+        self.assertTrue(any(call and call[0] == "/usr/bin/osascript" for call in calls))
 
     def test_vscode_applescript_does_not_paste_focus_command_text(self) -> None:
         script = vscode_applescript()
@@ -539,10 +582,11 @@ class TerminalBridgeTests(unittest.TestCase):
                 tty_deliverer=fake_tty_deliverer,
                 vscode_fallback=False,
                 screen_session_name="",
-            )
+        )
 
         self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "delivered")
+        self.assertEqual(result["status"], "terminal_delivery_unverified")
+        self.assertFalse(result["verified"])
         self.assertEqual(calls[0][-1], "ttys005")
         self.assertEqual(result["target_ttys"], ["ttys004", "ttys005"])
 

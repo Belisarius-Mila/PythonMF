@@ -28,21 +28,27 @@ Co je hotove:
   - zjisteno, ze dlouho bezici `screen` relace muze byt ziva a pritom ji sandboxovane `ps`/PID overeni neumi potvrdit;
   - `adam_voice_bridge_status` uz v takovem pripade nehlasi zavadejici `Codex relace: 0`, ale pouzije oznaceny marker jako neovereny fallback, pokud bezi `screen` a marker ma ulozeny `parent_pid`;
   - mrtvy marker bez ziveho nebo aspon neoveritelneho screen kontextu zustava nepripraveny.
+- 2026-06-29 blok VoiceBridge po full-access relaci je uspokojive uzavren:
+  - mezistavy jsou textove, finalni odpoved se cte pres Cockpit browser audio;
+  - neoverene GUI doruceni se uz nehlasi jako jiste vlozeni do Codexu;
+  - start watcheru detekuje rychly pad procesu;
+  - tokenove potvrzovaci karty pro e-mailove drafty prosly realnym testem bez ukladani citlivych detailu do memory.
 
 Co neni hotove:
-- Audit Cockpitu jako celek neni uzavreny; zatim probehly hlavne VoiceBridge/potvrzovaci karta a dokumentovy panel.
+- Audit Cockpitu jako celek neni uzavreny; uzavren je blok VoiceBridge/potvrzovaci karta a dokumentovy panel je po predchozim bloku opraveny.
 - Nejsou kompletne projite vsechny Cockpit plochy a tlacitka z pohledu Mac/iPhone/SSH.
 - Neni hotovy samostatny finalni auditni report po rucnych testech.
 - Neni rozhodnuto, zda `Dokumenty k revizi` ma report nacitat automaticky, nebo zustat rucni kvuli rychlosti hlavniho refreshu.
-- Po oprave VoiceBridge fallbacku je potreba restartovat Cockpit a rucne overit Mac/iPhone hlasovy pokyn do teto dlouho bezici `screen` relace.
+- Dalsi Cockpit blok neni vybran; Mila chce pred Guardem jeste hledat nejake informace.
 
 Dalsi krok:
-- Pokracovat rucnim auditem Cockpitu po blocich: nejdrive dokumenty a ScanDocu po realnem provozu, potom VoiceBridge/potvrzovaci karty, potom e-mail/Work Queue a nakonec servis/diagnostika.
+- Cockpit audit docasne prerusit. Navazujici plan: kratke hledani informaci podle Milova dalsiho pokynu a potom Guard proti mazani.
 
 Navrhovane dalsi kroky:
 - Pri kazdem dalsim bloku drzet rytmus: rucni test -> konkretni nalez -> mala oprava -> test -> commit/push -> aktualizace tohoto handoffu.
 - Pro kazdou matoucí kartu nebo tlacitko zapsat, jestli je problem text, vychozi stav, poradi, nebo backendova logika.
 - Po dokonceni rucniho kola vytvorit kratky finalni report `memory/reports/cockpit_live_audit_2026_06_28.md` nebo novejsi datum.
+- Pokud se VoiceBridge v normalnim provozu znovu rozbije, navazat z `handoffs/voicebridge_full_access_email_confirmation_closed_2026_06_29.md`.
 
 Zmenene nebo relevantni soubory:
 - `app/cockpit.py`
@@ -52,6 +58,7 @@ Zmenene nebo relevantni soubory:
 - `memory/reports/cockpit_function_inventory_audit_2026_06_27.md`
 - `memory/reports/cockpit_post_action_risk_matrix_2026_06_27.md`
 - `memory/handoffs/cockpit_remote_exact_confirmation_cards_2026_06_27.md`
+- `memory/handoffs/voicebridge_full_access_email_confirmation_closed_2026_06_29.md`
 
 Bezpecnost / neukladat:
 - Do handoffu neukladat obsah soukromych dokumentu, e-mailu, priloh ani identifikatory, ktere nejsou nutne pro git-safe navazani.

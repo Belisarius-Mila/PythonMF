@@ -161,7 +161,13 @@ class AdamVoiceModeTests(unittest.TestCase):
         self.assertEqual(pending["reason"], "codex_work")
         self.assertEqual(pending["text"], "Adame, najdi stav dokumentů v Cockpitu.")
 
-    def test_build_spoken_result_saves_outbound_message_for_confirmation_without_blocking(self) -> None:
+    def test_build_spoken_result_routes_outbound_message_to_terminal_bridge(self) -> None:
+        calls = []
+
+        def fake_terminal_bridge(command):
+            calls.append(command.text)
+            return {"ok": True, "status": "delivered", "verified": True}
+
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             inbox = Path(temp_dir)
             latest = inbox / "latest_voice_command.md"
@@ -175,15 +181,12 @@ class AdamVoiceModeTests(unittest.TestCase):
                 response_generator=lambda text: self.fail("outbound command should not call direct responder"),
                 pending_path=pending_path,
                 history_path=history_path,
+                terminal_bridge=fake_terminal_bridge,
             )
-            pending = json.loads(pending_path.read_text(encoding="utf-8"))
 
-        self.assertIn("můžu připravit odchozí SMS nebo e-mail", response)
-        self.assertIn("samostatné potvrzení", response)
-        self.assertNotIn("rizikový nebo mění data", response)
-        self.assertTrue(pending["pending"])
-        self.assertEqual(pending["reason"], "outbound_confirmation")
-        self.assertEqual(pending["command"]["triage"]["risk"], "outbound_confirmation")
+        self.assertEqual(calls, ["Pošli SMS Janičce, jestli něco nepotřebuje."])
+        self.assertIn("vložil do Codex terminálu", response)
+        self.assertFalse(pending_path.exists())
 
     def test_build_spoken_result_can_route_safe_codex_work_to_terminal_bridge(self) -> None:
         calls = []

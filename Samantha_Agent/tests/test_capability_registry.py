@@ -43,7 +43,6 @@ class CapabilityRegistryTests(unittest.TestCase):
         for capability_id in (
             "archive_email_by_uid",
             "save_selected_email_cases_from_uids",
-            "prepare_forward_email_by_uid",
             "mark_reminder_done",
             "save_email_action_case_reminder",
             "save_payment_case_document",
@@ -79,6 +78,7 @@ class CapabilityRegistryTests(unittest.TestCase):
             "prepare_next_scandocu_document",
             "prepare_document_print_job",
             "prepare_lekarna_photo_import",
+            "prepare_forward_email_by_uid",
             "run_email_triage_session",
             "run_unified_email_triage_session",
         ):

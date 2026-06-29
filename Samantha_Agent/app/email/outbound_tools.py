@@ -14,7 +14,8 @@ from .outbound import (
     DEFAULT_OUTBOX_DRAFT_DIR,
     OutboundEmailError,
     SentCopyResult,
-    has_explicit_forward_prepare_confirmation,
+    build_send_confirmation_phrase,
+    has_forward_prepare_authorization,
     prepare_forward_draft,
     redacted_send_summary,
     save_sent_copy_best_effort,
@@ -34,7 +35,7 @@ def prepare_forward_email_by_uid(
     user_confirmed: bool = False,
     confirmation_text: str = "",
 ) -> str:
-    """Prepare a local forward draft from one confirmed email UID; does not send."""
+    """Prepare a local forward draft from one clear send/forward request; does not send."""
     return prepare_forward_email_by_uid_text(
         provider=provider,
         uid=uid,
@@ -79,16 +80,16 @@ def prepare_forward_email_by_uid_text(
     except OutboundEmailError as exc:
         return f"Priprava preposlani byla odmitnuta: {exc}"
 
-    if not user_confirmed or not has_explicit_forward_prepare_confirmation(
+    if not user_confirmed or not has_forward_prepare_authorization(
         uid=uid,
         recipient_email=recipient,
-        confirmation_text=confirmation_text,
+        request_text=confirmation_text,
     ):
         return (
-            "Nejdrive potrebuji vyslovne potvrzeni od Mily v aktualni zprave. "
-            f"Potvrzeni musi obsahovat UID {uid}, prijemce {recipient} a jasny "
-            "souhlas s pripravenim preposlani. Bez toho e-mail nectu ani "
-            "nevytvarim draft."
+            "Nejdrive potrebuji jasny aktualni pokyn od Mily, ze chce tento "
+            "e-mail pripravit k preposlani nebo odeslani. Bez toho e-mail "
+            "nectu ani nevytvarim draft. Skutecne odeslani bude mit jeste "
+            "samostatnou presnou potvrzovaci vetu."
         )
 
     try:
@@ -117,8 +118,8 @@ def prepare_forward_email_by_uid_text(
         f"- Komu: {redact_email_addresses(result.recipient)}\n"
         f"- Predmet: {result.subject}\n"
         f"- Lokalni draft: `{result.message_path}`\n"
-        "Pro odeslani pouzij samostatne potvrzeni: "
-        f"`Potvrzuji, odeslat draft {result.draft_id} na {result.recipient}.`"
+        "Pokud chces opravdu odeslat, posli presne tuto vetu: "
+        f"`{build_send_confirmation_phrase(result.draft_id, result.send_confirmation_token)}`"
     )
 
 

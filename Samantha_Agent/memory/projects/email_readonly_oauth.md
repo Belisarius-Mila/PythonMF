@@ -73,11 +73,11 @@ Prvni verze nesmi:
 - automaticky archivovat nebo stitkovat,
 - automaticky zapisovat obsah nebo citlive detaily do pameti.
 
-Poznamka 2026-05-26: read-only pravidla stale plati pro hledani, triage,
-cteni, archivaci a praci s prilohami. Vyjimkou je nove samostatne outbound
-workflow pro preposlani e-mailu, ktere neni automaticke: nejdrive se po
-vyslovnem potvrzeni vytvori lokalni draft v `data/email/outbox_drafts/`, a az
-po druhem samostatnem potvrzeni se draft odesle pres SMTP.
+Poznamka 2026-05-26, upraveno 2026-06-29: read-only pravidla stale plati pro
+hledani, triage, cteni, archivaci a praci s prilohami. Vyjimkou je samostatne
+outbound workflow pro preposlani e-mailu, ktere neni automaticke: po jasnem
+Milove pokynu se muze vytvorit lokalni draft v `data/email/outbox_drafts/`, ale
+az po samostatnem presnem potvrzeni se draft odesle pres SMTP.
 
 ## Provozni pripominka: tydenni kontrola a zaloha
 
@@ -174,11 +174,12 @@ Hotove schopnosti:
   - `list_unified_email_headers` rozlisuje zdroj schranky.
 - Potvrzene preposilani e-mailu:
   - `prepare_forward_email_by_uid` vytvori lokalni draft z jednoho konkretniho
-    iCloud nebo Seznam UID; draft se uklada do ignorovane slozky
+    iCloud nebo Seznam UID po jasnem Milove pokynu; draft se uklada do ignorovane slozky
     `data/email/outbox_drafts/` a obsahuje puvodni zpravu jako `.eml`, pokud je
     dostupna,
   - `send_prepared_email_draft` odesle az existujici draft a vyzaduje druhe
-    samostatne potvrzeni s `draft_id`, prijemcem a souhlasem s odeslanim,
+    samostatne potvrzeni s `draft_id`, odesilacim tokenem z draftu a souhlasem
+    s odeslanim; potvrzeni s plnym prijemcem zustava jen kompatibilni fallback,
   - iCloud SMTP pouziva `smtp.mail.me.com:587` se STARTTLS, Seznam SMTP pouziva
     `smtp.seznam.cz:465` se SSL/TLS; udaje zustavaji jen v lokalnim `.env`,
   - outbound workflow nesmi byt spojeno do jednoho kroku se ctenim e-mailu.
@@ -218,6 +219,23 @@ Aktualni dalsi krok:
   vypis plnych URL bez samostatneho potvrzeni.
 - Preposilani delat pouze dvoukrokove: pripravit draft, ukazat `draft_id`, a
   teprve po dalsim potvrzeni odeslat. Nikdy neposilat rovnou po prvnim dotazu.
+- Potvrzeni nemusi byt fyzicky u Macu. Pokud Mila pracuje pres iPhone, SSH nebo
+  Cockpit, Samantha/Adam ma pro potvrzovany odesilaci krok vzdy vypsat presnou
+  potvrzovaci vetu, kterou lze textove poslat zpatky. Takove vzdalené potvrzeni
+  je platne, pokud je v aktualni zprave, obsahuje vsechny povinne identifikatory
+  a nejde jen o neurcite `ano`.
+- U preposlani e-mailu je preferovany lidsky tok jednokrokovy z pohledu
+  potvrzeni: po jasnem pokynu typu "najdi a posli/preposli X Jane" Samantha
+  pripravi lokalni draft/navrh, ale nic neodesle. Potom napise:
+  `Pripravil jsem navrh. Pokud chces opravdu odeslat, zapiš tuto vetu: ...`.
+  Presna veta pro odeslani ma preferovane obsahovat `draft_id`, odesilaci token
+  ulozeny u draftu a jasny souhlas s odeslanim, napr.
+  `Potvrzuji, odeslat draft <draft_id> kódem <token>.` Tento tvar neobsahuje
+  plnou adresu a funguje pres VoiceBridge i tam, kde se osobni udaje rediguji.
+- Potvrzeni s plnou e-mailovou adresou prijemce zustava kompatibilni fallback,
+  ale nema se preferovat v hlasovem kanalu. Pokud potvrzovaci veta obsahuje
+  osobni e-mailovou adresu nebo jiny citlivy udaj, ma se zobrazit/poslat textove
+  pres SSH nebo Cockpit; nema se cist nahlas.
 - Po incidentu 2026-05-28 s rodinnym preposlanim plati: SMTP uspech sam o sobe
   nestaci jako dohledatelny dukaz v klientovi. `send_prepared_email_draft`
   uklada po odeslani best-effort kopii do IMAP Odeslanych, vychozi provider je

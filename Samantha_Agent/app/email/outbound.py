@@ -5,6 +5,7 @@ import imaplib
 import os
 import re
 import smtplib
+import secrets
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from email.message import EmailMessage as StdEmailMessage
@@ -34,6 +35,8 @@ SAFE_ID_PATTERN = re.compile(r"[^a-z0-9_.-]+")
 FORWARD_WORDS = ("prepos", "přepoš", "přepos", "forward")
 SEND_WORDS = ("odesli", "odešli", "odeslat", "pošli", "posli", "send")
 CONFIRM_WORDS = ("potvrzuji", "souhlasim", "souhlasím", "ano")
+FORWARD_PREPARE_INTENT_WORDS = FORWARD_WORDS + SEND_WORDS
+SEND_CONFIRMATION_TOKEN_BYTES = 4
 
 
 class OutboundEmailError(RuntimeError):
@@ -50,6 +53,7 @@ class ForwardDraftResult:
     subject: str
     provider: str
     source_uid: str
+    send_confirmation_token: str = ""
 
 
 @dataclass(frozen=True)
@@ -99,6 +103,7 @@ def prepare_forward_draft(
         subject=source.subject,
         prepared_at=prepared_at,
     )
+    send_confirmation_token = generate_send_confirmation_token()
     target_dir = draft_dir / draft_id
     if target_dir.exists():
         raise OutboundEmailError(f"Draft {draft_id} uz existuje.")
@@ -127,6 +132,7 @@ def prepare_forward_draft(
             "subject": str(message["Subject"] or ""),
             "prepared_at": prepared_at.isoformat(),
             "message_path": str(relative_to_project(message_path)),
+            "send_confirmation_token": send_confirmation_token,
             "contains_original_eml": source.original_eml is not None,
             "do_not_commit": True,
             "local_sensitive_draft": True,
@@ -141,6 +147,7 @@ def prepare_forward_draft(
         subject=str(message["Subject"] or ""),
         provider=smtp_config.provider,
         source_uid=source.uid,
+        send_confirmation_token=send_confirmation_token,
     )
 
 
@@ -217,16 +224,18 @@ def send_forward_draft(
     metadata = read_json(metadata_path)
     if metadata.get("status") == "sent":
         raise OutboundEmailError(f"Draft {safe_draft_id} uz byl odeslan.")
+    send_confirmation_token = ensure_send_confirmation_token(metadata_path, metadata)
 
     recipient = validate_email_address(str(metadata.get("recipient", "")))
     if not user_confirmed or not has_explicit_send_confirmation(
         draft_id=safe_draft_id,
         recipient_email=recipient,
         confirmation_text=confirmation_text,
+        send_confirmation_token=send_confirmation_token,
     ):
         raise OutboundEmailError(
             "Pro odeslani potrebuji samostatne potvrzeni v aktualni zprave. "
-            f"Pouzij: Potvrzuji, odeslat draft {safe_draft_id} na {recipient}."
+            f"Pouzij tokenovou vetu: {build_send_confirmation_phrase(safe_draft_id, send_confirmation_token)}"
         )
 
     provider = safe_provider(str(metadata.get("provider", "")))
@@ -384,18 +393,67 @@ def has_explicit_forward_prepare_confirmation(
     )
 
 
+def has_forward_prepare_authorization(
+    uid: str,
+    recipient_email: str,
+    request_text: str,
+) -> bool:
+    """Allow draft preparation after a clear forward/send request.
+
+    This does not authorize sending. Sending still requires an exact current
+    confirmation with the generated draft_id.
+    """
+    normalized = normalize_confirmation_text(request_text)
+    if has_explicit_forward_prepare_confirmation(
+        uid=uid,
+        recipient_email=recipient_email,
+        confirmation_text=request_text,
+    ):
+        return True
+    return any(word in normalized for word in FORWARD_PREPARE_INTENT_WORDS)
+
+
 def has_explicit_send_confirmation(
     draft_id: str,
     recipient_email: str,
     confirmation_text: str,
+    send_confirmation_token: str = "",
 ) -> bool:
     normalized = normalize_confirmation_text(confirmation_text)
-    return (
+    has_base_confirmation = (
         normalize_confirmation_text(draft_id) in normalized
-        and validate_email_address(recipient_email).casefold() in normalized
         and any(word in normalized for word in SEND_WORDS)
         and any(word in normalized for word in CONFIRM_WORDS)
     )
+    if not has_base_confirmation:
+        return False
+
+    token = normalize_confirmation_text(send_confirmation_token)
+    if token and token in normalized:
+        return True
+
+    return validate_email_address(recipient_email).casefold() in normalized
+
+
+def generate_send_confirmation_token() -> str:
+    return secrets.token_hex(SEND_CONFIRMATION_TOKEN_BYTES)
+
+
+def ensure_send_confirmation_token(metadata_path: Path, metadata: dict[str, Any]) -> str:
+    existing = safe_slug(str(metadata.get("send_confirmation_token", "")), default="", limit=32)
+    if existing:
+        return existing
+    token = generate_send_confirmation_token()
+    updated = dict(metadata)
+    updated["send_confirmation_token"] = token
+    write_json(metadata_path, updated)
+    metadata.clear()
+    metadata.update(updated)
+    return token
+
+
+def build_send_confirmation_phrase(draft_id: str, send_confirmation_token: str) -> str:
+    return f"Potvrzuji, odeslat draft {draft_id} kódem {send_confirmation_token}."
 
 
 def validate_email_address(value: str) -> str:

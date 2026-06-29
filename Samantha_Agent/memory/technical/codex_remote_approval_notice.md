@@ -1,8 +1,9 @@
 # Codex remote approval notice
 
 Toto pravidlo resi prakticky problem pri praci z iPhonu nebo pres SSH: Codex muze
-cekat na systemove potvrzeni tool callu v Codex UI/terminalu, ale Mila to nemusi
-videt v Cockpitu.
+cekat na systemove potvrzeni tool callu v Codex UI/terminalu nebo na presnou
+textovou potvrzovaci vetu pro rizikovy workflow krok, ale Mila to nemusi videt
+v Cockpitu.
 
 ## Cil
 
@@ -40,8 +41,8 @@ Pred ocekavanym systemovym potvrzenim:
   --next-step "Otevři aktivní Codex relaci a rozhodni systémové potvrzení."
 ```
 
-Pokud jde o textovou potvrzovaci vetu, kterou ma jit poslat z Cockpitu nebo
-iPhonu, pridej:
+Pokud jde o textovou potvrzovaci vetu, kterou ma jit poslat z Cockpitu, iPhonu
+nebo SSH, pridej:
 
 ```bash
   --confirmation-text "Potvrzuji presne zneni konkretni akce."
@@ -72,10 +73,14 @@ Pouzij pred:
 - prikazem spoustenym s Codex `require_escalated`,
 - systemovou diagnostikou mimo sandbox, napriklad `ps`,
 - prikazem, ktery typicky vyvola dotaz na povoleni,
+- workflow krokem, ktery ceka na presnou textovou potvrzovaci vetu pro
+  odeslani, mazani, presun, tisk, cteni citliveho obsahu nebo zapis do
+  soukromych dat,
 - delsim vzdalenym ukolem, kde Mila nemusi byt u Macu a mohl by cekat bez
   informace, proc prace stoji.
 
-Nepouzivej pro bezne sandboxovane read-only prikazy, ktere necekaji na povoleni.
+Nepouzivej pro bezne read-only prikazy, ktere necekaji na povoleni ani na
+textovou potvrzovaci vetu.
 
 ## Minimalni postup Codexu
 

@@ -50,7 +50,10 @@ def assess_terminal_bridge(command: VoiceCommand) -> dict[str, Any]:
             "status": "empty_command",
             "reason": "Hlasový pokyn nemá použitelný text.",
         }
-    if command.triage.requires_confirmation or command.triage.risk in {"blocked", "needs_confirmation"}:
+    if (
+        command.triage.risk != "outbound_confirmation"
+        and (command.triage.requires_confirmation or command.triage.risk in {"blocked", "needs_confirmation"})
+    ):
         return {
             "ok": False,
             "status": "manual_required",
@@ -87,6 +90,8 @@ def build_codex_terminal_prompt(command: VoiceCommand) -> str:
         f"{text} "
         "Zpracuj ho jako běžný uživatelský pokyn; pokud zjistíš riziko změny dat, "
         "odesílání, mazání, commitu, platby nebo tajemství, vyžádej si ruční potvrzení. "
+        "U odchozího e-mailu nebo SMS smíš připravit návrh/draft, ale skutečné "
+        "odeslání proveď až po samostatné přesné potvrzovací větě od Míly. "
         "Nejdřív bez čtení nahlas zapiš textový mezistav do Cockpitu přes "
         "`.venv/bin/python scripts/adam_voice_reply.py --processing-started`. "
         "Po dokončení napiš výsledek do chatu a zapiš stejný stručný výsledek do Cockpitu přes "
@@ -348,8 +353,11 @@ def deliver_prompt_to_screen_session(
         }
     return {
         "ok": True,
-        "status": "delivered_screen",
-        "message": f"Pokyn byl vložen přímo do screen relace {session_name}.",
+        "status": "screen_delivery_unverified",
+        "message": (
+            f"Screen relace {session_name} přijala příkaz `stuff`, ale doručení do Codex chatu "
+            "nejde ověřit. Nepovažuji to za jisté vložení."
+        ),
         "submitted": submit,
         "session_name": session_name,
         "delivery_method": "screen_stuff",
@@ -474,10 +482,13 @@ def deliver_prompt_to_vscode(
         }
     return {
         "ok": True,
-        "status": "delivered_vscode",
-        "message": "Pokyn byl vložen do VS Code a fokus byl vrácen zpět.",
+        "status": "vscode_delivery_unverified",
+        "message": (
+            "VS Code AppleScript proběhl, ale neumím ověřit, že se text dostal "
+            "do aktivního Codex chatu. Nepovažuji to za jisté doručení."
+        ),
         "submitted": submit,
-        "verified": True,
+        "verified": False,
         "delivery_method": "local_gui_vscode",
     }
 
@@ -507,6 +518,7 @@ def deliver_prompt_to_terminal(
     if stale_marked_tty and len(codex_ttys) == 1:
         auto_target_tty = codex_ttys[0]
     marked_tty_error: dict[str, Any] | None = None
+    screen_unverified_status: dict[str, Any] | None = None
     if effective_marked_tty or auto_target_tty:
         target_tty = effective_marked_tty or auto_target_tty
         tty_result = tty_deliverer(target_tty, safe_prompt, submit=submit)
@@ -543,7 +555,7 @@ def deliver_prompt_to_terminal(
 
     if screen_session_name and (marked_tty or codex_ttys):
         screen_result = screen_deliverer(safe_prompt, submit=submit, session_name=screen_session_name, runner=runner)
-        if screen_result.get("ok"):
+        if screen_result.get("ok") and screen_result.get("verified"):
             if marked_tty_error:
                 screen_result["marked_tty_status"] = marked_tty_error
             if auto_target_tty:
@@ -552,6 +564,15 @@ def deliver_prompt_to_terminal(
                 **screen_result,
                 "target_ttys": codex_ttys,
             }
+        if screen_result.get("ok"):
+            screen_unverified_status = {
+                **screen_result,
+                "target_ttys": codex_ttys,
+            }
+            if marked_tty_error:
+                screen_unverified_status["marked_tty_status"] = marked_tty_error
+            if auto_target_tty:
+                screen_unverified_status["auto_target_tty"] = auto_target_tty
 
     if effective_marked_tty:
         target_ttys = [effective_marked_tty]
@@ -587,6 +608,8 @@ def deliver_prompt_to_terminal(
             "returncode": completed.returncode,
             "target_ttys": codex_ttys,
         }
+        if screen_unverified_status:
+            terminal_error["screen_status"] = screen_unverified_status
         if marked_tty_error:
             terminal_error["marked_tty_status"] = marked_tty_error
         if vscode_fallback and codex_session_seen:
@@ -629,13 +652,17 @@ def deliver_prompt_to_terminal(
         }
     return {
         "ok": True,
-        "status": "delivered",
-        "message": "Pokyn byl vložen do Codex terminálu.",
+        "status": "terminal_delivery_unverified",
+        "message": (
+            "Terminálový AppleScript proběhl, ale neumím ověřit, že se text dostal "
+            "do aktivního Codex chatu. Nepovažuji to za jisté doručení."
+        ),
         "submitted": submit,
         "target_ttys": codex_ttys,
-        "verified": True,
+        "verified": False,
         "delivery_method": "local_gui_terminal",
         "marked_tty_status": marked_tty_error,
+        "screen_status": screen_unverified_status,
     }
 
 

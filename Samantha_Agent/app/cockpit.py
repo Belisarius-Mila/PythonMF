@@ -8955,6 +8955,29 @@ def start_adam_voice_mode_action(
             "message": f"Adam Voice Mode watcher se nepodařilo spustit: {exc}",
         }
     pid = int(getattr(process, "pid", 0) or 0)
+    poll = getattr(process, "poll", None)
+    if callable(poll):
+        time.sleep(0.35)
+        returncode = poll()
+        if returncode is not None:
+            write_voice_mode_status(
+                state="stopped",
+                message=f"Adam Voice Mode watcher po startu hned skončil (exit {returncode}).",
+                pid=pid,
+            )
+            try:
+                recent_log = "\n".join(log_file.read_text(encoding="utf-8").splitlines()[-20:])
+            except OSError:
+                recent_log = ""
+            return {
+                "ok": False,
+                "status": "watcher_exited",
+                "message": "Adam Voice Mode watcher po startu hned skončil. Zkontroluj log v Cockpitu.",
+                "pid": pid,
+                "returncode": returncode,
+                "log": str(relative_to_project(log_file)),
+                "recent_log": recent_log,
+            }
     write_voice_mode_status(
         state="starting",
         message="Adam Voice Mode watcher se spouští.",
@@ -14007,9 +14030,11 @@ COCKPIT_HTML = """<!doctype html>
     const INTAKE_LOCAL_MONITOR_MS = 10 * 60 * 1000;
     const INTAKE_EMAIL_MONITOR_MS = 30 * 60 * 1000;
     const URGENT_REMINDERS_MONITOR_MS = 30 * 1000;
+    const VOICE_STATUS_MONITOR_MS = 3000;
     let refreshInFlight = false;
     let urgentRemindersRefreshInFlight = false;
     let lastMainRefreshStartedAt = 0;
+    let lastCodexApprovalActive = false;
     let latestDocumentIntakeData = null;
     let lastEmailIntakeMonitor = {
       generated_at: "",
@@ -16008,26 +16033,30 @@ COCKPIT_HTML = """<!doctype html>
 	      return true;
 	    }
 
-	    async function openVoiceAudioChannel() {
-	      if (!voiceAudioUnlockBtn) return;
-	      voiceAudioUnlockBtn.disabled = true;
-	      showMessage("Otevírám audiokanál pro odpovědi Adama...");
-	      try {
-	        const opened = await primeVoiceAudioContextFromGesture();
-	        if (opened) {
-	          showMessage("Audiokanál je otevřený. Spouštím watcher pro hlasové pokyny...");
-	          await ensureVoiceModeWatcherRunningFromAudioChannel();
-	        } else {
-	          showMessage("Tento prohlížeč nepodporuje otevření webového audiokanálu.");
-	        }
-	      } catch (err) {
-	        recordFrontendError(err);
-	        updateVoiceAudioUnlockUi(false);
-	        showMessage(`Audiokanál se nepodařilo otevřít: ${err}`);
-	      } finally {
-	        voiceAudioUnlockBtn.disabled = false;
-	      }
-	    }
+		    async function openVoiceAudioChannel() {
+		      if (!voiceAudioUnlockBtn) return;
+		      voiceAudioUnlockBtn.disabled = true;
+		      showMessage("Otevírám audiokanál pro odpovědi Adama...");
+		      if (voiceCommandStatus) voiceCommandStatus.textContent = "Otevírám audiokanál pro odpovědi Adama...";
+		      try {
+		        const opened = await primeVoiceAudioContextFromGesture();
+		        if (opened) {
+		          showMessage("Audiokanál je otevřený. Spouštím watcher pro hlasové pokyny...");
+		          if (voiceCommandStatus) voiceCommandStatus.textContent = "Audiokanál je otevřený. Watcher kontroluji nebo spouštím...";
+		          await ensureVoiceModeWatcherRunningFromAudioChannel();
+		        } else {
+		          showMessage("Tento prohlížeč nepodporuje otevření webového audiokanálu.");
+		          if (voiceCommandStatus) voiceCommandStatus.textContent = "Tento prohlížeč nepodporuje otevření webového audiokanálu.";
+		        }
+		      } catch (err) {
+		        recordFrontendError(err);
+		        updateVoiceAudioUnlockUi(false);
+		        showMessage(`Audiokanál se nepodařilo otevřít: ${err}`);
+		        if (voiceCommandStatus) voiceCommandStatus.textContent = `Audiokanál se nepodařilo otevřít: ${err}`;
+		      } finally {
+		        voiceAudioUnlockBtn.disabled = false;
+		      }
+		    }
 
 	    function base64ToArrayBuffer(base64) {
 	      const binary = window.atob(String(base64 || ""));
@@ -16335,21 +16364,25 @@ COCKPIT_HTML = """<!doctype html>
 		      voiceReplyPollTimer = window.setInterval(async () => {
 		        if (Date.now() > voiceReplyPollUntil) {
 		          window.clearInterval(voiceReplyPollTimer);
-		          voiceReplyPollTimer = null;
-		          return;
-		        }
-		        await refreshVoiceLatestResponse({
-		          autoSpeak,
-		          expectedUserText: voiceReplyExpectedUserText,
-		          minCreatedAt: voiceReplyMinCreatedAt
-		        });
-		      }, 3000);
-		      window.setTimeout(() => refreshVoiceLatestResponse({
-		        autoSpeak,
-		        expectedUserText: voiceReplyExpectedUserText,
-		        minCreatedAt: voiceReplyMinCreatedAt
-		      }), 1000);
-		    }
+			          voiceReplyPollTimer = null;
+			          return;
+			        }
+			        await refresh({silent: true, includeSecondary: false});
+			        await refreshVoiceLatestResponse({
+			          autoSpeak,
+			          expectedUserText: voiceReplyExpectedUserText,
+			          minCreatedAt: voiceReplyMinCreatedAt
+			        });
+			      }, 3000);
+			      window.setTimeout(async () => {
+			        await refresh({silent: true, includeSecondary: false});
+			        await refreshVoiceLatestResponse({
+			          autoSpeak,
+			          expectedUserText: voiceReplyExpectedUserText,
+			          minCreatedAt: voiceReplyMinCreatedAt
+			        });
+			      }, 1000);
+			    }
 
 		    function pendingNeedsCockpitApproval(pending) {
 		      if (!pending || !pending.pending) return false;
@@ -16379,9 +16412,14 @@ COCKPIT_HTML = """<!doctype html>
 
 		    function renderCodexApproval(approval) {
 		      if (!codexApprovalCard) return;
-		      const active = Boolean(approval && approval.active);
-		      codexApprovalCard.classList.toggle("hidden", !active);
-		      if (!active) return;
+			      const active = Boolean(approval && approval.active);
+			      codexApprovalCard.classList.toggle("hidden", !active);
+			      if (!active) {
+			        lastCodexApprovalActive = false;
+			        return;
+			      }
+			      const becameActive = !lastCodexApprovalActive;
+			      lastCodexApprovalActive = true;
 		      const reason = String(approval.reason || approval.message || "Codex čeká na systémové potvrzení.").trim();
 		      const command = String(approval.command || approval.action || "").trim();
 		      const risk = String(approval.risk || "").trim();
@@ -16412,11 +16450,25 @@ COCKPIT_HTML = """<!doctype html>
 		        codexApprovalSendConfirmationBtn.classList.toggle("hidden", !confirmationText);
 		        codexApprovalSendConfirmationBtn.disabled = !confirmationText;
 		      }
-		      if (codexApprovalCopyConfirmationBtn) {
-		        codexApprovalCopyConfirmationBtn.classList.toggle("hidden", !confirmationText);
-		        codexApprovalCopyConfirmationBtn.disabled = !confirmationText;
-		      }
-		    }
+			      if (codexApprovalCopyConfirmationBtn) {
+			        codexApprovalCopyConfirmationBtn.classList.toggle("hidden", !confirmationText);
+			        codexApprovalCopyConfirmationBtn.disabled = !confirmationText;
+			      }
+			      if (becameActive) {
+			        if (voiceCommandDetails) voiceCommandDetails.open = true;
+			        showMessage(confirmationText
+			          ? "Codex čeká na potvrzení. Přesná potvrzovací věta je v kartě Hlas."
+			          : "Codex čeká na potvrzení. Karta je v sekci Hlas."
+			        );
+			        window.setTimeout(() => {
+			          try {
+			            codexApprovalCard.scrollIntoView({block: "center", behavior: "smooth"});
+			          } catch (_err) {
+			            codexApprovalCard.scrollIntoView();
+			          }
+			        }, 100);
+			      }
+			    }
 
 		    function renderVoiceBridgeSwitcher(voiceBridge) {
 		      if (!voiceBridgeSwitcher || !voiceBridgeSwitcherStatus || !voiceBridgeSwitcherActions) return;
@@ -16658,13 +16710,14 @@ COCKPIT_HTML = """<!doctype html>
 		      return Boolean(latestVoiceModeRuntime && latestVoiceModeRuntime.running);
 		    }
 
-		    async function ensureVoiceModeWatcherRunningFromAudioChannel() {
-		      if (isVoiceModeWatcherRunning()) {
-		        showMessage("Audiokanál je otevřený a watcher už běží.");
-		        return;
-		      }
-		      await startVoiceModeWatcher({source: "audio_channel"});
-		    }
+			    async function ensureVoiceModeWatcherRunningFromAudioChannel() {
+			      if (isVoiceModeWatcherRunning()) {
+			        showMessage("Audiokanál je otevřený a watcher už běží.");
+			        if (voiceCommandStatus) voiceCommandStatus.textContent = "Audiokanál je otevřený a watcher už běží.";
+			        return;
+			      }
+			      await startVoiceModeWatcher({source: "audio_channel"});
+			    }
 
 		    async function startVoiceModeWatcher(options = {}) {
 		      const fromAudioChannel = options.source === "audio_channel";
@@ -19246,6 +19299,11 @@ COCKPIT_HTML = """<!doctype html>
 	    runFrontendHealthCheck();
 	    window.setInterval(runFrontendHealthCheck, 60000);
 	    window.setInterval(() => refresh({silent: true, includeSecondary: false}), INTAKE_LOCAL_MONITOR_MS);
+	    window.setInterval(() => {
+	      if (!document.hidden) {
+	        refresh({silent: true, includeSecondary: false});
+	      }
+	    }, VOICE_STATUS_MONITOR_MS);
       window.setInterval(refreshUrgentRemindersSummary, URGENT_REMINDERS_MONITOR_MS);
       window.setInterval(runEmailIntakeMonitor, INTAKE_EMAIL_MONITOR_MS);
       window.addEventListener("focus", () => refreshMainStatusOnReturn());

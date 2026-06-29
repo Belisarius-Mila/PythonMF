@@ -669,7 +669,7 @@ def pending_reason_for_command(command: VoiceCommand) -> str | None:
     if not command.ok:
         return None
     if command.triage.risk == "outbound_confirmation":
-        return "outbound_confirmation"
+        return "codex_work"
     if command.triage.requires_confirmation or command.triage.risk in {"blocked", "needs_confirmation"}:
         return "requires_confirmation"
     if voice_command_needs_codex_work(command.text):
@@ -746,7 +746,7 @@ def build_spoken_result_for_command(
                 bridge_message = str(bridge_result.get("message") or "Terminálový bridge pokus nahlásil úspěch, ale doručení neumím ověřit.")
                 message = (
                     "Zpráva byla vložena do hlasového inboxu. "
-                    "Čekám na Adamovu odpověď; pokud dlouho nepřijde, zkontroluj Cockpit nebo Codex ručně."
+                    "Předání do Codex terminálu ale není ověřené. Čekám na Adamovu odpověď."
                 )
                 if pending_path is not None:
                     save_pending_for_adam(

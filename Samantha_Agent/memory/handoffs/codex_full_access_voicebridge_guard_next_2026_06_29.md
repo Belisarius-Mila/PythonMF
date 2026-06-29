@@ -19,21 +19,19 @@ Co je hotove:
 - Pred touto zmenou byla pushnuta oprava VoiceBridge statusu pro dlouho bezici `screen` relace:
   - commit `1c073ba Fix VoiceBridge status for long-running screen sessions`
   - Cockpit po restartu hlasil: Mac TTY bridge pripraveny, cil `ttys000`, Codex relace 1, screen bezi.
+- V nove full-access relaci probehl 2026-06-29 prakticky VoiceBridge audit vcetne iPhone/Mac Cockpitu, textovych mezistavu, browser autoreadu a tokenovych potvrzovacich karet pro e-mailove drafty.
+- Mila oznacil Cockpit oddil VoiceBridge za zatim uzavreny a uspokojivy.
 
 Co neni hotove:
-- Neni hotovy finalni end-to-end VoiceBridge test v nove full-access relaci.
-- Audit Cockpitu zustava rozpracovany, ale ma byt na chvili pozastaven po dokonceni VoiceBridge.
+- Finalni end-to-end VoiceBridge test v nove full-access relaci je pro aktualni potrebu hotovy.
+- Audit Cockpitu zustava rozpracovany jako celek, ale blok VoiceBridge je uzavren a audit se ma na chvili pozastavit.
 - Projekt `Guard proti mazani` jeste neni zalozeny/implementovany.
 
 Dalsi krok:
-- Spustit novou Codex/Samantha relaci, aby nacetla `danger-full-access`.
-- V nove relaci overit bez sandboxu:
-  - `.venv/bin/python scripts/adam_bridge_readiness_report.py`
-  - Cockpit `voice_bridge` stav
-  - kratky realny hlasovy/textovy pokyn Cockpit -> Codex -> odpoved zpet do Cockpitu.
+- Nejdrive podle Milova dalsiho pokynu hledat potrebne informace.
+- Potom zalozit Guard proti mazani pro full-access rezim.
 
 Navrhovane dalsi kroky:
-- Po uspesnem VoiceBridge testu docasne prerusit Cockpit audit.
 - Zalozit projekt `Guard proti mazani`:
   - blokovat nebo vyzadovat presnou potvrzovaci vetu pro `rm -rf` na projektove koreny;
   - hlidat mazani vetsiho adresare nebo podezrele mnozstvi souboru;
@@ -48,6 +46,7 @@ Zmenene nebo relevantni soubory:
 - `scripts/adam_bridge_readiness_report.py`
 - `tests/test_cockpit.py`
 - budoucí projekt: Guard proti mazani
+- `handoffs/voicebridge_full_access_email_confirmation_closed_2026_06_29.md`
 
 Bezpecnost / neukladat:
 - Neukladat zadna hesla, tokeny ani soukroma data do memory nebo gitu.

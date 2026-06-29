@@ -30,8 +30,26 @@ class EmailOutboundToolsTests(unittest.TestCase):
             smtp_config_loader=_smtp_config,
         )
 
-        self.assertIn("potvrzeni", result)
+        self.assertIn("jasny aktualni pokyn", result)
         self.assertIn("Bez toho e-mail nectu", result)
+
+    def test_prepare_accepts_clear_send_request_without_exact_prepare_phrase(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            result = prepare_forward_email_by_uid_text(
+                provider="icloud",
+                uid="123",
+                recipient_email="target@example.com",
+                note="Prosím o kontrolu.",
+                user_confirmed=True,
+                confirmation_text="Najdi tu fakturu a pošli ji Janě.",
+                draft_dir=Path(temp_dir),
+                provider_factory=lambda: _Provider(),
+                smtp_config_loader=_smtp_config,
+            )
+
+            self.assertIn("Draft ID:", result)
+            self.assertIn("nebyl odeslan", result)
+            self.assertIn("Pokud chces opravdu odeslat", result)
 
     def test_prepare_creates_local_draft_without_sending(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -53,6 +71,7 @@ class EmailOutboundToolsTests(unittest.TestCase):
             metadata = json.loads((Path(temp_dir) / draft_id / "metadata.json").read_text(encoding="utf-8"))
             self.assertEqual(metadata["status"], "draft")
             self.assertEqual(metadata["recipient"], "target@example.com")
+            self.assertRegex(metadata["send_confirmation_token"], r"^[0-9a-f]{8}$")
             self.assertTrue(metadata["contains_original_eml"])
 
             raw = (Path(temp_dir) / draft_id / "forward.eml").read_bytes()
@@ -86,11 +105,13 @@ class EmailOutboundToolsTests(unittest.TestCase):
             )
             self.assertIn("Odeslani bylo odmitnuto", denied)
             self.assertEqual(len(smtp.sent_messages), 0)
+            metadata = json.loads((Path(temp_dir) / draft_id / "metadata.json").read_text(encoding="utf-8"))
+            token = metadata["send_confirmation_token"]
 
             sent = send_prepared_email_draft_text(
                 draft_id=draft_id,
                 user_confirmed=True,
-                confirmation_text=f"Potvrzuji, odeslat draft {draft_id} na target@example.com.",
+                confirmation_text=f"Potvrzuji, odeslat draft {draft_id} kódem {token}.",
                 draft_dir=Path(temp_dir),
                 smtp_config_loader=_smtp_config,
                 smtp_factory=lambda *args, **kwargs: smtp,
@@ -106,6 +127,61 @@ class EmailOutboundToolsTests(unittest.TestCase):
             self.assertEqual(metadata["sent_copy_status"], "saved")
             self.assertEqual(metadata["sent_copy_provider"], "icloud")
             self.assertEqual(metadata["sent_copy_folder"], "Sent Messages")
+
+    def test_send_rejection_uses_token_phrase_without_leaking_recipient(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            prepare = prepare_forward_email_by_uid_text(
+                provider="icloud",
+                uid="123",
+                recipient_email="target@example.com",
+                user_confirmed=True,
+                confirmation_text="Přepošli UID 123 na target@example.com přes icloud.",
+                draft_dir=Path(temp_dir),
+                provider_factory=lambda: _Provider(),
+                smtp_config_loader=_smtp_config,
+            )
+            draft_id = _draft_id_from_result(prepare)
+
+            denied = send_prepared_email_draft_text(
+                draft_id=draft_id,
+                user_confirmed=True,
+                confirmation_text=f"Potvrzuji, odeslat draft {draft_id} na [e-mail redigovan].",
+                draft_dir=Path(temp_dir),
+                smtp_config_loader=_smtp_config,
+                smtp_factory=lambda *args, **kwargs: _FakeSMTP(),
+                sent_copy_saver=_sent_copy_saved,
+            )
+
+            self.assertIn("tokenovou vetu", denied)
+            self.assertNotIn("target@example.com", denied)
+
+    def test_send_still_accepts_full_address_confirmation_for_backward_compatibility(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            prepare = prepare_forward_email_by_uid_text(
+                provider="icloud",
+                uid="123",
+                recipient_email="target@example.com",
+                user_confirmed=True,
+                confirmation_text="Přepošli UID 123 na target@example.com přes icloud.",
+                draft_dir=Path(temp_dir),
+                provider_factory=lambda: _Provider(),
+                smtp_config_loader=_smtp_config,
+            )
+            draft_id = _draft_id_from_result(prepare)
+            smtp = _FakeSMTP()
+
+            sent = send_prepared_email_draft_text(
+                draft_id=draft_id,
+                user_confirmed=True,
+                confirmation_text=f"Potvrzuji, odeslat draft {draft_id} na target@example.com.",
+                draft_dir=Path(temp_dir),
+                smtp_config_loader=_smtp_config,
+                smtp_factory=lambda *args, **kwargs: smtp,
+                sent_copy_saver=_sent_copy_saved,
+            )
+
+            self.assertIn("Odeslano", sent)
+            self.assertEqual(len(smtp.sent_messages), 1)
 
 
 class _Provider:

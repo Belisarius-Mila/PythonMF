@@ -2146,6 +2146,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("autoSpeak: voiceAudioUnlocked && Boolean(latestAdamResponseKey)", COCKPIT_HTML)
         self.assertIn("allowAlreadyRenderedAutoSpeak", COCKPIT_HTML)
         self.assertIn("VOICE_REPLY_POLL_DURATION_MS = 600000", COCKPIT_HTML)
+        self.assertIn("VOICE_STATUS_MONITOR_MS = 3000", COCKPIT_HTML)
+        self.assertIn("if (!document.hidden)", COCKPIT_HTML)
         self.assertIn("normalizeVoiceText", COCKPIT_HTML)
         self.assertIn("voiceResponseMatchesCurrentRequest", COCKPIT_HTML)
         self.assertIn("expectedUserText: text", COCKPIT_HTML)
@@ -2938,6 +2940,29 @@ class CockpitTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertTrue(result["terminal_bridge"])
         self.assertIn("--terminal-bridge", calls[0]["args"])
+
+    def test_start_adam_voice_mode_action_reports_immediate_exit(self) -> None:
+        class ExitedProcess:
+            pid = 12345
+
+            def poll(self) -> int:
+                return 2
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            log_file = Path(temp_dir) / "adam_voice_mode.log"
+            log_file.write_text("traceback line\n", encoding="utf-8")
+            with (
+                patch("app.cockpit.load_voice_mode_status", return_value={"running": False}),
+                patch("app.cockpit.write_voice_mode_status") as write_status,
+                patch("app.cockpit.time.sleep"),
+            ):
+                result = start_adam_voice_mode_action(launcher=lambda *args, **kwargs: ExitedProcess(), log_file=log_file)
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "watcher_exited")
+        self.assertEqual(result["returncode"], 2)
+        self.assertIn("traceback line", result["recent_log"])
+        write_status.assert_called()
 
     def test_start_adam_voice_mode_action_reuses_running_watcher(self) -> None:
         with patch("app.cockpit.load_voice_mode_status", return_value={"running": True, "pid": 12345}):
