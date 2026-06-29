@@ -192,6 +192,9 @@ JANICKA_TAKEOVER_PATH = PROJECT_ROOT / "memory" / "projects" / "janicka_cockpit_
 SESSION_AUTOSAVE_DIR = PROJECT_ROOT / "data" / "session_autosave"
 VOICE_COMMAND_INBOX_DIR = PROJECT_ROOT / "data" / "private" / "voice_inbox"
 VOICE_TEXT_DIAGNOSTICS_PATH = VOICE_COMMAND_INBOX_DIR / "voice_text_diagnostics.json"
+COCKPIT_FRONTEND_EVENTS_PATH = PROJECT_ROOT / "data" / "private" / "cockpit" / "frontend_events.jsonl"
+COCKPIT_FRONTEND_EVENTS_LATEST_PATH = PROJECT_ROOT / "data" / "private" / "cockpit" / "frontend_events_latest.json"
+COCKPIT_FRONTEND_VERSION = "2026-06-30-voice-frontend-events-v1"
 MEMORY_INDEX_PATH = PROJECT_ROOT / "memory" / "MEMORY_INDEX.md"
 RECOVERY_HANDOFF_PATHS = (
     PROJECT_ROOT / "memory" / "handoffs" / "cockpit_recovery_center_priority_2026_06_03.md",
@@ -9624,6 +9627,59 @@ def voice_text_diagnostics_status(
     }
 
 
+def record_cockpit_frontend_event_action(
+    payload: dict[str, Any],
+    *,
+    events_path: Path = COCKPIT_FRONTEND_EVENTS_PATH,
+    latest_path: Path = COCKPIT_FRONTEND_EVENTS_LATEST_PATH,
+) -> dict[str, Any]:
+    event = {
+        "created_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "event": safe_text(str(payload.get("event", "") or ""))[:80],
+        "level": safe_text(str(payload.get("level", "") or ""))[:40],
+        "message": safe_text(str(payload.get("message", "") or ""))[:500],
+        "frontend_version": safe_text(str(payload.get("frontend_version", "") or ""))[:80],
+        "location_host": safe_text(str(payload.get("location_host", "") or ""))[:120],
+        "visibility": safe_text(str(payload.get("visibility", "") or ""))[:40],
+        "text_chars": int(payload.get("text_chars") or 0),
+        "audio_unlocked": bool(payload.get("audio_unlocked")),
+        "remote_client": bool(payload.get("remote_client")),
+        "mobile_client": bool(payload.get("mobile_client")),
+        "platform": safe_text(str(payload.get("platform", "") or ""))[:120],
+    }
+    events_path.parent.mkdir(parents=True, exist_ok=True)
+    append_jsonl(events_path, event)
+    write_json(latest_path, event)
+    return {
+        "ok": True,
+        "status": "frontend_event_recorded",
+        "message": "Frontend událost Cockpitu byla zaznamenána.",
+        "event": {
+            key: value
+            for key, value in event.items()
+            if key not in {"message"}
+        },
+    }
+
+
+def cockpit_frontend_events_status(
+    *,
+    latest_path: Path = COCKPIT_FRONTEND_EVENTS_LATEST_PATH,
+) -> dict[str, Any]:
+    try:
+        latest = read_json_file(latest_path)
+    except (OSError, ValueError, json.JSONDecodeError):
+        latest = {}
+    if not isinstance(latest, dict):
+        latest = {}
+    return {
+        "ok": True,
+        "status": "frontend_events_available",
+        "message": "Frontend události Cockpitu jsou dostupné.",
+        "latest_event": latest,
+    }
+
+
 def deliver_saved_voice_command_inline(
     *,
     inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
@@ -10154,6 +10210,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "voice_tests",
     },
     {
+        "path": "/api/frontend-event",
+        "label": "Zaznamenat frontend diagnostiku",
+        "risk": "private_write",
+        "confirmation": "diagnostic_no_prompt_text",
+        "handler_name": "record_cockpit_frontend_event_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/janicka/chat",
         "label": "Janička chat s Adamem",
         "risk": "voice_local_outbound",
@@ -10638,6 +10702,9 @@ class CockpitServer:
                 if parsed.path == "/api/speech/voice-text-diagnostics":
                     self.respond_json(voice_text_diagnostics_status())
                     return
+                if parsed.path == "/api/frontend-events/latest":
+                    self.respond_json(cockpit_frontend_events_status())
+                    return
                 if parsed.path == "/api/quick-notes/status":
                     self.respond_json(quick_notes_status())
                     return
@@ -10760,6 +10827,10 @@ class CockpitServer:
                 if parsed.path == "/api/speech/voice-text":
                     payload = self.read_json()
                     self.respond_json(cockpit_save_voice_text_action(payload))
+                    return
+                if parsed.path == "/api/frontend-event":
+                    payload = self.read_json()
+                    self.respond_json(record_cockpit_frontend_event_action(payload))
                     return
                 if parsed.path == "/api/janicka/chat":
                     payload = self.read_json()
@@ -13852,6 +13923,7 @@ COCKPIT_HTML = """<!doctype html>
     let currentLibraryExport = null;
     let currentQuantitative = null;
     const VOICE_TRANSCRIPT_DRAFT_KEY = "samanthaVoiceTranscriptDraft";
+    const COCKPIT_FRONTEND_VERSION = "2026-06-30-voice-frontend-events-v1";
     let frontendLastError = "";
     let frontendErrorHistory = [];
     let dashboardStatusSignals = {};
@@ -13869,6 +13941,7 @@ COCKPIT_HTML = """<!doctype html>
       ["Hlavní status", "/api/status"],
       ["Recovery", "/api/recovery/status"],
       ["Textový hlasový pokyn", "/api/speech/voice-text-diagnostics"],
+      ["Frontend události", "/api/frontend-events/latest"],
       ["Webové aplikace", "/api/web-apps"],
       ["Knihovna", "/api/library/list?category=other&limit=1"],
       ["Projekty", "/api/projects/status"],
@@ -13885,12 +13958,57 @@ COCKPIT_HTML = """<!doctype html>
       node.className = `health-value ${className || ""}`.trim();
     }
 
+    function frontendEventContext(extra = {}) {
+      let audioUnlocked = false;
+      try {
+        audioUnlocked = Boolean(voiceAudioUnlocked);
+      } catch (_err) {
+        audioUnlocked = false;
+      }
+      return {
+        frontend_version: COCKPIT_FRONTEND_VERSION,
+        location_host: String(window.location && window.location.host || ""),
+        visibility: String(document.visibilityState || ""),
+        audio_unlocked: audioUnlocked,
+        remote_client: isRemoteCockpitClient(),
+        mobile_client: isMobileCockpitClient(),
+        platform: String(navigator.platform || ""),
+        ...extra
+      };
+    }
+
+    function sendFrontendEvent(level, message, extra = {}) {
+      try {
+        const payload = frontendEventContext({
+          level,
+          message: String(message || "").slice(0, 500),
+          event: String(extra.event || level || "frontend_event").slice(0, 80),
+          text_chars: Number(extra.text_chars || 0)
+        });
+        const body = JSON.stringify(payload);
+        if (navigator.sendBeacon) {
+          const blob = new Blob([body], {type: "application/json"});
+          if (navigator.sendBeacon("/api/frontend-event", blob)) return;
+        }
+        fetch("/api/frontend-event", {
+          method: "POST",
+          cache: "no-store",
+          keepalive: true,
+          headers: {"Content-Type": "application/json"},
+          body
+        }).catch(() => {});
+      } catch (_err) {
+        // Diagnostika frontendu nesmi rozbit Cockpit.
+      }
+    }
+
     function recordFrontendError(error) {
       const text = String(error && (error.message || error.reason || error) || "neznámá chyba");
       if (isExpectedFrontendNoticeError(text)) {
         recordFrontendNotice(friendlyFrontendNoticeText(text));
         return;
       }
+      sendFrontendEvent("error", text, {event: "frontend_error"});
       frontendLastError = text;
       frontendErrorHistory = [
         {createdAt: new Date().toISOString(), text},
@@ -13902,6 +14020,7 @@ COCKPIT_HTML = """<!doctype html>
     function recordFrontendBlockingError(label, error) {
       const detail = String(error && (error.message || error.reason || error) || "").trim();
       const text = detail ? `${label}: ${detail}` : String(label || "blokující chyba frontendu");
+      sendFrontendEvent("blocking_error", text, {event: "frontend_blocking_error"});
       frontendLastError = text;
       frontendErrorHistory = [
         {createdAt: new Date().toISOString(), text},
@@ -13948,6 +14067,7 @@ COCKPIT_HTML = """<!doctype html>
     function recordFrontendNotice(text) {
       const message = String(text || "").trim();
       if (!message) return;
+      sendFrontendEvent("notice", message, {event: "frontend_notice"});
       frontendErrorHistory = [
         {createdAt: new Date().toISOString(), text: message},
         ...frontendErrorHistory
@@ -13960,6 +14080,7 @@ COCKPIT_HTML = """<!doctype html>
     function recordFrontendDiagnostic(text) {
       const message = String(text || "").trim();
       if (!message) return;
+      sendFrontendEvent("diagnostic", message, {event: "frontend_diagnostic", text_chars: voiceTranscriptCharCount()});
       frontendErrorHistory = [
         {createdAt: new Date().toISOString(), text: message},
         ...frontendErrorHistory
@@ -16329,6 +16450,7 @@ COCKPIT_HTML = """<!doctype html>
 
 	    let voiceAudioContext = null;
 	    let voiceAudioUnlocked = false;
+	    sendFrontendEvent("info", "Cockpit frontend načten.", {event: "frontend_loaded"});
 
 	    function updateVoiceAudioUnlockUi(opened) {
 	      if (!voiceAudioUnlockBtn) return;

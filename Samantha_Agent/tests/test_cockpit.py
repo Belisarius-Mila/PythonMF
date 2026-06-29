@@ -48,6 +48,8 @@ from app.cockpit import (
     cockpit_speak_action,
     cockpit_transcribe_voice_action,
     record_voice_text_diagnostic,
+    record_cockpit_frontend_event_action,
+    cockpit_frontend_events_status,
     voice_text_diagnostics_status,
     save_voice_command_to_inbox,
     document_intake_email_scan_status,
@@ -2269,6 +2271,9 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("recordFrontendNotice", COCKPIT_HTML)
         self.assertIn("recordFrontendDiagnostic", COCKPIT_HTML)
         self.assertIn("recordFrontendBlockingError", COCKPIT_HTML)
+        self.assertIn("sendFrontendEvent", COCKPIT_HTML)
+        self.assertIn("frontend_loaded", COCKPIT_HTML)
+        self.assertIn("COCKPIT_FRONTEND_VERSION", COCKPIT_HTML)
         self.assertIn("isExpectedFrontendNoticeError", COCKPIT_HTML)
         self.assertIn("return isTransientBrowserFetchError(error);", COCKPIT_HTML)
         self.assertIn("isTransientBrowserFetchError", COCKPIT_HTML)
@@ -2344,6 +2349,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Klik zaznamenán. Odesílám text Adamovi", COCKPIT_HTML)
         self.assertIn("Odeslání textového pokynu do Cockpitu selhalo", COCKPIT_HTML)
         self.assertIn("/api/speech/voice-text-diagnostics", COCKPIT_HTML)
+        self.assertIn("/api/frontend-event", COCKPIT_HTML)
+        self.assertIn("/api/frontend-events/latest", COCKPIT_HTML)
         self.assertIn("restoreVoiceTranscriptDraft", COCKPIT_HTML)
         self.assertIn("Našel jsem neodeslaný textový pokyn", COCKPIT_HTML)
         self.assertIn("Odeslat Adamovi", COCKPIT_HTML)
@@ -3264,6 +3271,37 @@ class CockpitTests(unittest.TestCase):
             self.assertEqual(event["status"], "voice_command_delivered")
             self.assertEqual(event["text_chars"], len("Citlivý text pokynu nesmí být uložen."))
             self.assertNotIn("Citlivý text", json.dumps(event, ensure_ascii=False))
+
+    def test_record_cockpit_frontend_event_action_writes_latest_event(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            events_path = Path(temp_dir) / "frontend_events.jsonl"
+            latest_path = Path(temp_dir) / "frontend_events_latest.json"
+
+            result = record_cockpit_frontend_event_action(
+                {
+                    "event": "frontend_loaded",
+                    "level": "info",
+                    "message": "Cockpit frontend načten.",
+                    "frontend_version": "test-version",
+                    "location_host": "127.0.0.1:8770",
+                    "visibility": "visible",
+                    "text_chars": 0,
+                    "audio_unlocked": False,
+                    "remote_client": False,
+                    "mobile_client": False,
+                    "platform": "MacIntel",
+                },
+                events_path=events_path,
+                latest_path=latest_path,
+            )
+            status = cockpit_frontend_events_status(latest_path=latest_path)
+
+            self.assertTrue(result["ok"])
+            self.assertTrue(events_path.exists())
+            self.assertTrue(latest_path.exists())
+            self.assertEqual(status["latest_event"]["event"], "frontend_loaded")
+            self.assertEqual(status["latest_event"]["frontend_version"], "test-version")
+            self.assertEqual(status["latest_event"]["text_chars"], 0)
 
     def test_save_voice_command_to_inbox_writes_latest_and_index(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
