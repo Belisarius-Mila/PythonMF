@@ -17,7 +17,7 @@ import tempfile
 import time
 import urllib.error
 from collections.abc import Callable
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from email import message_from_bytes
 from email.utils import parsedate_to_datetime
 from http import HTTPStatus
@@ -167,6 +167,12 @@ COCKPIT_RESTART_SCRIPT = PROJECT_ROOT / "scripts" / "restart_cockpit.py"
 ADAM_VOICE_MODE_SCRIPT = PROJECT_ROOT / "scripts" / "adam_voice_mode.py"
 ADAM_VOICE_MODE_LOG_FILE = PROJECT_ROOT / "data" / "private" / "voice_inbox" / "adam_voice_mode.log"
 ADAM_RESPONSE_AUTOREAD_CLAIMS_PATH = PROJECT_ROOT / "data" / "private" / "voice_inbox" / "adam_response_autoread_claims.json"
+ADAM_VOICE_MODE_SOURCE_PATHS = (
+    ADAM_VOICE_MODE_SCRIPT,
+    PROJECT_ROOT / "app" / "speech" / "adam_voice_mode.py",
+    PROJECT_ROOT / "app" / "speech" / "terminal_bridge.py",
+    PROJECT_ROOT / "app" / "speech" / "voice_inbox.py",
+)
 VOICE_DELIVERY_TRANSPORT_ENV = "ADAM_VOICE_TRANSPORT"
 EMAIL_SESSION_HANDOFF_DIR = PROJECT_ROOT / "data" / "private" / "email_session_handoffs"
 LOCAL_SEZNAM_EMAIL_DIR = PROJECT_ROOT / "data" / "private" / "email_seznam"
@@ -8934,6 +8940,35 @@ def start_cockpit_restart_action(
     }
 
 
+def adam_voice_mode_watcher_needs_restart(
+    current: dict[str, Any],
+    *,
+    source_paths: tuple[Path, ...] | None = None,
+) -> bool:
+    if not current.get("running"):
+        return False
+    started_raw = str(current.get("started_at") or "").strip()
+    if not started_raw:
+        return False
+    try:
+        started_at = datetime.fromisoformat(started_raw.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    if started_at.tzinfo is None:
+        started_at = started_at.replace(tzinfo=timezone.utc)
+    latest_source_mtime: datetime | None = None
+    for path in source_paths or ADAM_VOICE_MODE_SOURCE_PATHS:
+        try:
+            source_mtime = datetime.fromtimestamp(path.stat().st_mtime, timezone.utc)
+        except OSError:
+            continue
+        if latest_source_mtime is None or source_mtime > latest_source_mtime:
+            latest_source_mtime = source_mtime
+    if latest_source_mtime is None:
+        return False
+    return latest_source_mtime > started_at + timedelta(seconds=1)
+
+
 def start_adam_voice_mode_action(
     *,
     launcher: Callable[..., object] | None = None,
@@ -8941,14 +8976,43 @@ def start_adam_voice_mode_action(
     terminal_bridge: bool | None = None,
 ) -> dict[str, Any]:
     current = load_voice_mode_status()
+    bridge_env = os.environ.get("ADAM_VOICE_TERMINAL_BRIDGE", "").strip().lower()
+    bridge_enabled = terminal_bridge if terminal_bridge is not None else bridge_env not in {"0", "false", "no", "ne"}
     if current.get("running"):
-        return {
-            "ok": True,
-            "status": "already_running",
-            "message": "Adam Voice Mode watcher už běží.",
-            "pid": current.get("pid"),
-            "voice_mode": current,
-        }
+        pid = int(current.get("pid") or 0)
+        if adam_voice_mode_watcher_needs_restart(current):
+            try:
+                os.kill(pid, signal.SIGTERM)
+            except OSError as exc:
+                return {
+                    "ok": False,
+                    "status": "restart_old_watcher_failed",
+                    "message": f"Adam Voice Mode watcher běží ze staršího kódu, ale nepodařilo se ho zastavit: {exc}",
+                    "pid": pid,
+                    "voice_mode": current,
+                }
+            write_voice_mode_status(
+                state="stopped",
+                message="Adam Voice Mode watcher běžel ze staršího kódu a byl zastaven před restartem.",
+                pid=pid,
+            )
+            time.sleep(0.5)
+            if pid_exists(pid):
+                return {
+                    "ok": False,
+                    "status": "restart_old_watcher_waiting",
+                    "message": "Adam Voice Mode watcher ze staršího kódu se ještě ukončuje. Zkus start audiokanálu za chvíli znovu.",
+                    "pid": pid,
+                    "voice_mode": load_voice_mode_status(),
+                }
+        else:
+            return {
+                "ok": True,
+                "status": "already_running",
+                "message": "Adam Voice Mode watcher už běží.",
+                "pid": current.get("pid"),
+                "voice_mode": current,
+            }
     log_file.parent.mkdir(parents=True, exist_ok=True)
     log_handle = log_file.open("a", encoding="utf-8")
     command_args = [
@@ -8957,8 +9021,6 @@ def start_adam_voice_mode_action(
         "--poll",
         "0.5",
     ]
-    bridge_env = os.environ.get("ADAM_VOICE_TERMINAL_BRIDGE", "").strip().lower()
-    bridge_enabled = terminal_bridge if terminal_bridge is not None else bridge_env not in {"0", "false", "no", "ne"}
     if bridge_enabled:
         command_args.append("--terminal-bridge")
     starter = launcher or subprocess.Popen

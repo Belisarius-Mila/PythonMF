@@ -18,6 +18,7 @@ from app.cockpit import (
     EMAIL_PROCESSING_HTML,
     action_queue_status,
     adam_voice_bridge_status,
+    adam_voice_mode_watcher_needs_restart,
     accept_document_classification_suggestion_action,
     cancel_payment_reminder_action,
     cockpit_status,
@@ -2975,6 +2976,52 @@ class CockpitTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(result["status"], "already_running")
         self.assertEqual(result["pid"], 12345)
+
+    def test_adam_voice_mode_watcher_needs_restart_when_source_is_newer(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            source = Path(temp_dir) / "adam_voice_mode.py"
+            source.write_text("new code\n", encoding="utf-8")
+            os_mtime = datetime(2026, 6, 29, 20, 0, tzinfo=timezone.utc).timestamp()
+            source.touch()
+            cockpit_module.os.utime(source, (os_mtime, os_mtime))
+            current = {
+                "running": True,
+                "pid": 12345,
+                "started_at": "2026-06-29T19:59:00+00:00",
+            }
+
+            self.assertTrue(adam_voice_mode_watcher_needs_restart(current, source_paths=(source,)))
+
+    def test_start_adam_voice_mode_action_restarts_running_watcher_from_old_code(self) -> None:
+        calls: list[dict[str, object]] = []
+
+        def fake_launcher(args, **kwargs):
+            calls.append({"args": args, **kwargs})
+            return SimpleNamespace(pid=67890)
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            log_file = Path(temp_dir) / "adam_voice_mode.log"
+            source = Path(temp_dir) / "adam_voice_mode.py"
+            source.write_text("new code\n", encoding="utf-8")
+            os_mtime = datetime(2026, 6, 29, 20, 0, tzinfo=timezone.utc).timestamp()
+            cockpit_module.os.utime(source, (os_mtime, os_mtime))
+            current = {"running": True, "pid": 12345, "started_at": "2026-06-29T19:59:00+00:00"}
+            with (
+                patch("app.cockpit.ADAM_VOICE_MODE_SOURCE_PATHS", (source,)),
+                patch("app.cockpit.load_voice_mode_status", return_value=current),
+                patch("app.cockpit.write_voice_mode_status") as write_status,
+                patch("app.cockpit.os.kill") as kill,
+                patch("app.cockpit.pid_exists", return_value=False),
+                patch("app.cockpit.time.sleep"),
+            ):
+                result = start_adam_voice_mode_action(launcher=fake_launcher, log_file=log_file)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "started")
+        self.assertEqual(result["pid"], 67890)
+        kill.assert_called_once_with(12345, cockpit_module.signal.SIGTERM)
+        self.assertIn("--terminal-bridge", calls[0]["args"])
+        write_status.assert_called()
 
     def test_stop_adam_voice_mode_action_stops_running_watcher(self) -> None:
         with (
