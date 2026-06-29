@@ -18,7 +18,10 @@ def main() -> int:
     print("Adam Voice bridge readiness:")
     print(f"- stav: {status.get('status')}")
     print(f"- cíl markeru: {status.get('marked_tty') or 'nezjištěno'}")
-    print(f"- aktivní Codex TTY: {', '.join(status.get('codex_ttys') or []) or 'žádné'}")
+    if status.get("marker_pid_fallback") and not status.get("codex_ttys"):
+        print(f"- aktivní Codex TTY: neověřeno přes ps; používá se marker {status.get('effective_tty') or 'nezjištěno'}")
+    else:
+        print(f"- aktivní Codex TTY: {', '.join(status.get('codex_ttys') or []) or 'žádné'}")
     print(f"- screen: {status.get('screen_status')} ({status.get('screen_message')})")
     if warnings:
         print("- varování:")

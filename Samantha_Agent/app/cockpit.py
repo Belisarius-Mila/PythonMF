@@ -3798,6 +3798,7 @@ def adam_voice_bridge_status(
     marker_path: Path = CURRENT_CODEX_TTY_PATH,
     codex_tty_discoverer: Callable[[], list[str]] = discover_codex_ttys,
     screen_runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+    marker_pid_checker: Callable[[int], bool] | None = None,
     expected_codex_session_limit: int = 1,
 ) -> dict[str, Any]:
     marker: dict[str, Any] = {}
@@ -3807,6 +3808,18 @@ def adam_voice_bridge_status(
         marker = {}
 
     marked_tty = normalize_tty(str(marker.get("tty") or ""))
+    parent_pid = marker.get("parent_pid")
+    marker_parent_pid_active = False
+    marker_parent_pid_unverified = False
+    if marker_pid_checker is None:
+        marker_pid_checker = lambda pid: os.kill(pid, 0) is None
+    if isinstance(parent_pid, int) and parent_pid > 0:
+        try:
+            marker_parent_pid_active = bool(marker_pid_checker(parent_pid))
+        except PermissionError:
+            marker_parent_pid_unverified = True
+        except (OSError, ValueError):
+            marker_parent_pid_active = False
     try:
         codex_ttys = [normalize_tty(item) for item in codex_tty_discoverer()]
     except Exception:
@@ -3824,7 +3837,7 @@ def adam_voice_bridge_status(
             check=False,
         )
         screen_output = f"{completed.stdout}\n{completed.stderr}".strip()
-        if completed.returncode == 0:
+        if completed.returncode == 0 or "There is a screen on" in screen_output or "samantha_codex" in screen_output:
             screen_status = "running"
             screen_message = "screen běží"
         elif "No Sockets found" in screen_output:
@@ -3839,13 +3852,28 @@ def adam_voice_bridge_status(
     effective_tty = marked_tty if marked_tty in codex_ttys else ""
     if not effective_tty and marked_tty and len(codex_ttys) == 1:
         effective_tty = codex_ttys[0]
+    marker_pid_fallback = False
+    if not effective_tty and marked_tty and not codex_ttys and (
+        marker_parent_pid_active or (marker_parent_pid_unverified and screen_status == "running")
+    ):
+        effective_tty = marked_tty
+        marker_pid_fallback = True
     mac_bridge_ready = bool(effective_tty)
     warnings: list[str] = []
     notes: list[str] = []
     if not marked_tty:
         warnings.append("není označené cílové TTY")
     elif marked_tty not in codex_ttys:
-        if effective_tty:
+        if marker_pid_fallback:
+            if marker_parent_pid_active:
+                warnings.append(
+                    f"aktivní Codex relaci nelze ověřit přes ps, ale marker {marked_tty} má živý Codex PID {parent_pid}"
+                )
+            else:
+                warnings.append(
+                    f"aktivní Codex relaci nelze ověřit přes ps ani PID kvůli oprávnění, ale screen běží a marker míří na {marked_tty}"
+                )
+        elif effective_tty:
             warnings.append(f"označené TTY {marked_tty} je staré; použije se jediná aktivní Codex relace {effective_tty}")
         else:
             warnings.append(f"označené TTY {marked_tty} není mezi aktivními Codex relacemi")
@@ -3857,8 +3885,9 @@ def adam_voice_bridge_status(
     target = effective_tty or marked_tty or "nezjištěno"
     marker_label = marked_tty or "nezjištěno"
     readiness = "Mac TTY bridge připravený" if mac_bridge_ready else "Mac TTY bridge není připravený"
+    codex_count_label = "neověřeno přes ps" if marker_pid_fallback and not codex_ttys else str(len(codex_ttys))
     message = (
-        f"{readiness}. Bridge cílí na {target} (marker: {marker_label}). Codex relace: {len(codex_ttys)} "
+        f"{readiness}. Bridge cílí na {target} (marker: {marker_label}). Codex relace: {codex_count_label} "
         f"(limit {expected_codex_session_limit}). {screen_message}."
     )
     if notes:
@@ -3873,10 +3902,14 @@ def adam_voice_bridge_status(
         "marked_tty": marked_tty,
         "effective_tty": effective_tty,
         "marked_at": str(marker.get("marked_at") or ""),
-        "parent_pid": marker.get("parent_pid"),
+        "parent_pid": parent_pid,
+        "marker_parent_pid_active": marker_parent_pid_active,
+        "marker_parent_pid_unverified": marker_parent_pid_unverified,
+        "marker_pid_fallback": marker_pid_fallback,
         "mac_bridge_ready": mac_bridge_ready,
         "codex_ttys": codex_ttys,
         "codex_tty_count": len(codex_ttys),
+        "codex_tty_count_label": codex_count_label,
         "expected_codex_session_limit": expected_codex_session_limit,
         "screen_status": screen_status,
         "screen_message": screen_message,

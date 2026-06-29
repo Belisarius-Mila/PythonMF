@@ -24,12 +24,17 @@ Co je hotove:
   - pravy sloupec: problemy, klasifikace.
 - Cockpit a ScanDocu byly po opravach restartovane a overene lokalnimi HTTP kontrolami.
 - Vsechny souvisejici zmeny byly testovane (`tests.test_cockpit`, podle potreby `tests.test_document_vault_tools`) a pushnute na `main`.
+- 2026-06-29 VoiceBridge/Codex session diagnostika:
+  - zjisteno, ze dlouho bezici `screen` relace muze byt ziva a pritom ji sandboxovane `ps`/PID overeni neumi potvrdit;
+  - `adam_voice_bridge_status` uz v takovem pripade nehlasi zavadejici `Codex relace: 0`, ale pouzije oznaceny marker jako neovereny fallback, pokud bezi `screen` a marker ma ulozeny `parent_pid`;
+  - mrtvy marker bez ziveho nebo aspon neoveritelneho screen kontextu zustava nepripraveny.
 
 Co neni hotove:
 - Audit Cockpitu jako celek neni uzavreny; zatim probehly hlavne VoiceBridge/potvrzovaci karta a dokumentovy panel.
 - Nejsou kompletne projite vsechny Cockpit plochy a tlacitka z pohledu Mac/iPhone/SSH.
 - Neni hotovy samostatny finalni auditni report po rucnych testech.
 - Neni rozhodnuto, zda `Dokumenty k revizi` ma report nacitat automaticky, nebo zustat rucni kvuli rychlosti hlavniho refreshu.
+- Po oprave VoiceBridge fallbacku je potreba restartovat Cockpit a rucne overit Mac/iPhone hlasovy pokyn do teto dlouho bezici `screen` relace.
 
 Dalsi krok:
 - Pokracovat rucnim auditem Cockpitu po blocich: nejdrive dokumenty a ScanDocu po realnem provozu, potom VoiceBridge/potvrzovaci karty, potom e-mail/Work Queue a nakonec servis/diagnostika.

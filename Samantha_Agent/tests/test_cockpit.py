@@ -2601,6 +2601,102 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("označené TTY ttys001 je staré; použije se jediná aktivní Codex relace ttys002", result["warnings"])
         self.assertNotIn("screen neběží", result["warnings"])
 
+    def test_adam_voice_bridge_status_keeps_marked_tty_when_ps_is_unavailable_but_marker_pid_is_alive(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker_path = Path(temp_dir) / "current_codex_tty.json"
+            marker_path.write_text(
+                json.dumps(
+                    {
+                        "tty": "ttys000",
+                        "marked_at": "2026-06-25T11:50:47+00:00",
+                        "parent_pid": 54105,
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = adam_voice_bridge_status(
+                marker_path=marker_path,
+                codex_tty_discoverer=lambda: [],
+                screen_runner=lambda *args, **kwargs: subprocess.CompletedProcess(
+                    args=args[0],
+                    returncode=0,
+                    stdout="There is a screen on:\n\t53941.samantha_codex\t(Attached)\n",
+                    stderr="",
+                ),
+                marker_pid_checker=lambda pid: pid == 54105,
+            )
+
+        self.assertEqual(result["status"], "warn")
+        self.assertTrue(result["mac_bridge_ready"])
+        self.assertEqual(result["effective_tty"], "ttys000")
+        self.assertTrue(result["marker_parent_pid_active"])
+        self.assertTrue(result["marker_pid_fallback"])
+        self.assertEqual(result["codex_ttys"], [])
+        self.assertIn("marker ttys000 má živý Codex PID 54105", result["warnings"][0])
+
+    def test_adam_voice_bridge_status_rejects_marked_tty_when_ps_is_empty_and_marker_pid_is_dead(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker_path = Path(temp_dir) / "current_codex_tty.json"
+            marker_path.write_text(
+                json.dumps(
+                    {
+                        "tty": "ttys000",
+                        "marked_at": "2026-06-25T11:50:47+00:00",
+                        "parent_pid": 54105,
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = adam_voice_bridge_status(
+                marker_path=marker_path,
+                codex_tty_discoverer=lambda: [],
+                screen_runner=lambda *args, **kwargs: subprocess.CompletedProcess(args=args[0], returncode=0, stdout="", stderr=""),
+                marker_pid_checker=lambda _pid: False,
+            )
+
+        self.assertEqual(result["status"], "warn")
+        self.assertFalse(result["mac_bridge_ready"])
+        self.assertEqual(result["effective_tty"], "")
+        self.assertFalse(result["marker_parent_pid_active"])
+        self.assertFalse(result["marker_pid_fallback"])
+        self.assertIn("označené TTY ttys000 není mezi aktivními Codex relacemi", result["warnings"])
+
+    def test_adam_voice_bridge_status_uses_screen_marker_when_pid_check_is_permission_denied(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker_path = Path(temp_dir) / "current_codex_tty.json"
+            marker_path.write_text(
+                json.dumps(
+                    {
+                        "tty": "ttys000",
+                        "marked_at": "2026-06-25T11:50:47+00:00",
+                        "parent_pid": 54105,
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = adam_voice_bridge_status(
+                marker_path=marker_path,
+                codex_tty_discoverer=lambda: [],
+                screen_runner=lambda *args, **kwargs: subprocess.CompletedProcess(
+                    args=args[0],
+                    returncode=1,
+                    stdout="There is a screen on:\n\t53941.samantha_codex\t(Attached)\n",
+                    stderr="",
+                ),
+                marker_pid_checker=lambda _pid: (_ for _ in ()).throw(PermissionError("operation not permitted")),
+            )
+
+        self.assertEqual(result["screen_status"], "running")
+        self.assertTrue(result["mac_bridge_ready"])
+        self.assertEqual(result["effective_tty"], "ttys000")
+        self.assertFalse(result["marker_parent_pid_active"])
+        self.assertTrue(result["marker_parent_pid_unverified"])
+        self.assertTrue(result["marker_pid_fallback"])
+        self.assertIn("screen běží", result["message"])
+
     def test_set_adam_voice_bridge_marker_only_allows_active_codex_tty(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             marker_path = Path(temp_dir) / "current_codex_tty.json"
