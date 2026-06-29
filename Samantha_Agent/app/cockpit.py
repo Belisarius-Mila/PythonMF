@@ -13796,6 +13796,7 @@ COCKPIT_HTML = """<!doctype html>
     let currentLibrarySourceUrl = "";
     let currentLibraryExport = null;
     let currentQuantitative = null;
+    const VOICE_TRANSCRIPT_DRAFT_KEY = "samanthaVoiceTranscriptDraft";
     let frontendLastError = "";
     let frontendErrorHistory = [];
     let dashboardStatusSignals = {};
@@ -17147,16 +17148,28 @@ COCKPIT_HTML = """<!doctype html>
 	          const savedHint = data.latest_voice_command_path ? ` Uloženo: ${data.latest_voice_command_path}.` : "";
 	          voiceCommandStatus.textContent = `${data.message || "Textový pokyn byl odeslán Adamovi."}${savedHint}`;
 	          voiceTranscript.value = "";
+	          sessionStorage.removeItem(VOICE_TRANSCRIPT_DRAFT_KEY);
 	          startVoiceReplyPolling({autoSpeak: true, expectedUserText: text});
 	          await refresh({silent: true, includeSecondary: false});
 	        } else {
+	          sessionStorage.setItem(VOICE_TRANSCRIPT_DRAFT_KEY, text);
 	          voiceCommandStatus.textContent = data.message || "Textový hlasový pokyn se nepodařilo uložit.";
 	        }
 	      } catch (err) {
 	        recordFrontendError(err);
+	        sessionStorage.setItem(VOICE_TRANSCRIPT_DRAFT_KEY, text);
 	        voiceCommandStatus.textContent = `Textový hlasový pokyn se nepodařilo uložit: ${err}`;
 	      } finally {
 	        voiceTranscriptSendBtn.disabled = false;
+	      }
+	    }
+
+	    function restoreVoiceTranscriptDraft() {
+	      const draft = String(sessionStorage.getItem(VOICE_TRANSCRIPT_DRAFT_KEY) || "").trim();
+	      if (!draft || voiceTranscript.value.trim()) return;
+	      voiceTranscript.value = draft;
+	      if (voiceCommandStatus) {
+	        voiceCommandStatus.textContent = "Našel jsem neodeslaný textový pokyn z posledního selhání. Zkontroluj ho a klepni znovu na Odeslat Adamovi.";
 	      }
 	    }
 
@@ -19398,6 +19411,7 @@ COCKPIT_HTML = """<!doctype html>
     voiceStopBtn.addEventListener("click", stopVoiceRecording);
     voiceAudioUnlockBtn.addEventListener("click", openVoiceAudioChannel);
     voiceTranscriptSendBtn.addEventListener("click", submitVoiceTranscript);
+    restoreVoiceTranscriptDraft();
     voiceLastResponseSpeakBtn.addEventListener("click", speakLastAdamResponse);
     codexApprovalSendConfirmationBtn.addEventListener("click", sendCodexApprovalConfirmation);
     codexApprovalCopyConfirmationBtn.addEventListener("click", copyCodexApprovalConfirmation);
