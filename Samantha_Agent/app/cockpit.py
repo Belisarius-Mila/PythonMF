@@ -13830,6 +13830,10 @@ COCKPIT_HTML = """<!doctype html>
 
     function recordFrontendError(error) {
       const text = String(error && (error.message || error.reason || error) || "neznámá chyba");
+      if (isExpectedFrontendNoticeError(text)) {
+        recordFrontendNotice(friendlyFrontendNoticeText(text));
+        return;
+      }
       frontendLastError = text;
       frontendErrorHistory = [
         {createdAt: new Date().toISOString(), text},
@@ -13847,6 +13851,30 @@ COCKPIT_HTML = """<!doctype html>
         text.includes("play() failed because the user didn't interact") ||
         text.includes("user didn't interact with the document")
       );
+    }
+
+    function isTransientBrowserFetchError(error) {
+      const text = String(error && (error.message || error.reason || error) || "").trim().toLowerCase();
+      return (
+        text === "load failed" ||
+        text === "failed to fetch" ||
+        text.includes("networkerror") ||
+        text.includes("network request failed")
+      );
+    }
+
+    function isExpectedFrontendNoticeError(error) {
+      return isExpectedBrowserAudioPermissionError(error) || isTransientBrowserFetchError(error);
+    }
+
+    function friendlyFrontendNoticeText(error) {
+      if (isExpectedBrowserAudioPermissionError(error)) {
+        return "Prohlížeč zablokoval audio. Není to chyba serveru; zkus klepnout znovu nebo povolit audio pro stránku.";
+      }
+      if (isTransientBrowserFetchError(error)) {
+        return "Dočasně selhalo načtení ze serveru. Pokud API health projde, Cockpit je v pořádku.";
+      }
+      return String(error || "Frontend upozornění");
     }
 
     function recordFrontendNotice(text) {
@@ -14040,7 +14068,7 @@ COCKPIT_HTML = """<!doctype html>
       } else {
         const slowest = Math.max(...results.map((item) => item.elapsed || 0));
         setHealthValue(frontendHealthApi, `OK, max ${slowest} ms`, "ok");
-        if (frontendLastError.startsWith("API health selhal:")) {
+        if (frontendLastError.startsWith("API health selhal:") || isTransientBrowserFetchError(frontendLastError)) {
           frontendLastError = "";
           setHealthValue(frontendHealthError, "žádná", "ok");
         } else if (!frontendLastError) {
