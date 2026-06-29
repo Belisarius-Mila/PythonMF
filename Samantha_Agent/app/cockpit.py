@@ -191,10 +191,6 @@ JANICKA_COOKBOOK_PATH = PROJECT_ROOT / "memory" / "projects" / "janicka_cockpit_
 JANICKA_TAKEOVER_PATH = PROJECT_ROOT / "memory" / "projects" / "janicka_cockpit_takeover.md"
 SESSION_AUTOSAVE_DIR = PROJECT_ROOT / "data" / "session_autosave"
 VOICE_COMMAND_INBOX_DIR = PROJECT_ROOT / "data" / "private" / "voice_inbox"
-VOICE_TEXT_DIAGNOSTICS_PATH = VOICE_COMMAND_INBOX_DIR / "voice_text_diagnostics.json"
-COCKPIT_FRONTEND_EVENTS_PATH = PROJECT_ROOT / "data" / "private" / "cockpit" / "frontend_events.jsonl"
-COCKPIT_FRONTEND_EVENTS_LATEST_PATH = PROJECT_ROOT / "data" / "private" / "cockpit" / "frontend_events_latest.json"
-COCKPIT_FRONTEND_VERSION = "2026-06-30-voice-frontend-events-v1"
 MEMORY_INDEX_PATH = PROJECT_ROOT / "memory" / "MEMORY_INDEX.md"
 RECOVERY_HANDOFF_PATHS = (
     PROJECT_ROOT / "memory" / "handoffs" / "cockpit_recovery_center_priority_2026_06_03.md",
@@ -9585,101 +9581,6 @@ def save_voice_command_to_inbox(
     }
 
 
-def record_voice_text_diagnostic(
-    *,
-    event: str,
-    status: str,
-    text: str = "",
-    error: str = "",
-    path: Path = VOICE_TEXT_DIAGNOSTICS_PATH,
-) -> None:
-    try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        write_json(
-            path,
-            {
-                "updated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-                "event": safe_text(event)[:80],
-                "status": safe_text(status)[:120],
-                "text_chars": len(safe_text(text).strip()),
-                "error": safe_text(error)[:500],
-            },
-        )
-    except OSError:
-        return
-
-
-def voice_text_diagnostics_status(
-    *,
-    path: Path = VOICE_TEXT_DIAGNOSTICS_PATH,
-) -> dict[str, Any]:
-    try:
-        data = read_json_file(path)
-    except (OSError, ValueError, json.JSONDecodeError):
-        data = {}
-    if not isinstance(data, dict):
-        data = {}
-    return {
-        "ok": True,
-        "message": "Diagnostika textového hlasového pokynu je dostupná.",
-        "status": "voice_text_diagnostics_available",
-        "last_voice_text_event": data,
-    }
-
-
-def record_cockpit_frontend_event_action(
-    payload: dict[str, Any],
-    *,
-    events_path: Path = COCKPIT_FRONTEND_EVENTS_PATH,
-    latest_path: Path = COCKPIT_FRONTEND_EVENTS_LATEST_PATH,
-) -> dict[str, Any]:
-    event = {
-        "created_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-        "event": safe_text(str(payload.get("event", "") or ""))[:80],
-        "level": safe_text(str(payload.get("level", "") or ""))[:40],
-        "message": safe_text(str(payload.get("message", "") or ""))[:500],
-        "frontend_version": safe_text(str(payload.get("frontend_version", "") or ""))[:80],
-        "location_host": safe_text(str(payload.get("location_host", "") or ""))[:120],
-        "visibility": safe_text(str(payload.get("visibility", "") or ""))[:40],
-        "text_chars": int(payload.get("text_chars") or 0),
-        "audio_unlocked": bool(payload.get("audio_unlocked")),
-        "remote_client": bool(payload.get("remote_client")),
-        "mobile_client": bool(payload.get("mobile_client")),
-        "platform": safe_text(str(payload.get("platform", "") or ""))[:120],
-    }
-    events_path.parent.mkdir(parents=True, exist_ok=True)
-    append_jsonl(events_path, event)
-    write_json(latest_path, event)
-    return {
-        "ok": True,
-        "status": "frontend_event_recorded",
-        "message": "Frontend událost Cockpitu byla zaznamenána.",
-        "event": {
-            key: value
-            for key, value in event.items()
-            if key not in {"message"}
-        },
-    }
-
-
-def cockpit_frontend_events_status(
-    *,
-    latest_path: Path = COCKPIT_FRONTEND_EVENTS_LATEST_PATH,
-) -> dict[str, Any]:
-    try:
-        latest = read_json_file(latest_path)
-    except (OSError, ValueError, json.JSONDecodeError):
-        latest = {}
-    if not isinstance(latest, dict):
-        latest = {}
-    return {
-        "ok": True,
-        "status": "frontend_events_available",
-        "message": "Frontend události Cockpitu jsou dostupné.",
-        "latest_event": latest,
-    }
-
-
 def deliver_saved_voice_command_inline(
     *,
     inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
@@ -9916,9 +9817,7 @@ def cockpit_save_voice_text_action(
     history_path: Path = ADAM_VOICE_HISTORY_PATH,
 ) -> dict[str, Any]:
     text = safe_text(str(payload.get("text", "") or "")).strip()
-    record_voice_text_diagnostic(event="server_received", status="received", text=text)
     if not text:
-        record_voice_text_diagnostic(event="server_rejected", status="empty_voice_text")
         return {
             "ok": False,
             "message": "Chybí text hlasového pokynu.",
@@ -9941,21 +9840,14 @@ def cockpit_save_voice_text_action(
             )
         )
         result["message"] = result.get("voice_delivery_message") or result["message"]
-        record_voice_text_diagnostic(
-            event="server_completed",
-            status=str(result.get("voice_delivery_status") or result.get("status") or "voice_text_saved"),
-            text=text,
-        )
         return result
     except OSError as exc:
-        record_voice_text_diagnostic(event="server_failed", status="voice_inbox_save_failed", text=text, error=str(exc))
         return {
             "ok": False,
             "message": f"Uložení textového hlasového pokynu selhalo: {exc}",
             "status": "voice_inbox_save_failed",
         }
     except ValueError as exc:
-        record_voice_text_diagnostic(event="server_failed", status="voice_inbox_save_failed", text=text, error=str(exc))
         return {
             "ok": False,
             "message": f"Textový hlasový pokyn nejde uložit: {exc}",
@@ -10208,14 +10100,6 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "confirmation": "terminal_bridge_triage",
         "handler_name": "cockpit_save_voice_text_action",
         "test_level": "voice_tests",
-    },
-    {
-        "path": "/api/frontend-event",
-        "label": "Zaznamenat frontend diagnostiku",
-        "risk": "private_write",
-        "confirmation": "diagnostic_no_prompt_text",
-        "handler_name": "record_cockpit_frontend_event_action",
-        "test_level": "direct",
     },
     {
         "path": "/api/janicka/chat",
@@ -10699,12 +10583,6 @@ class CockpitServer:
                 if parsed.path == "/api/recovery/status":
                     self.respond_json(recovery_center_status())
                     return
-                if parsed.path == "/api/speech/voice-text-diagnostics":
-                    self.respond_json(voice_text_diagnostics_status())
-                    return
-                if parsed.path == "/api/frontend-events/latest":
-                    self.respond_json(cockpit_frontend_events_status())
-                    return
                 if parsed.path == "/api/quick-notes/status":
                     self.respond_json(quick_notes_status())
                     return
@@ -10827,10 +10705,6 @@ class CockpitServer:
                 if parsed.path == "/api/speech/voice-text":
                     payload = self.read_json()
                     self.respond_json(cockpit_save_voice_text_action(payload))
-                    return
-                if parsed.path == "/api/frontend-event":
-                    payload = self.read_json()
-                    self.respond_json(record_cockpit_frontend_event_action(payload))
                     return
                 if parsed.path == "/api/janicka/chat":
                     payload = self.read_json()
@@ -13922,8 +13796,6 @@ COCKPIT_HTML = """<!doctype html>
     let currentLibrarySourceUrl = "";
     let currentLibraryExport = null;
     let currentQuantitative = null;
-    const VOICE_TRANSCRIPT_DRAFT_KEY = "samanthaVoiceTranscriptDraft";
-    const COCKPIT_FRONTEND_VERSION = "2026-06-30-voice-frontend-events-v1";
     let frontendLastError = "";
     let frontendErrorHistory = [];
     let dashboardStatusSignals = {};
@@ -13940,8 +13812,6 @@ COCKPIT_HTML = """<!doctype html>
     const diagnosticsEndpoints = [
       ["Hlavní status", "/api/status"],
       ["Recovery", "/api/recovery/status"],
-      ["Textový hlasový pokyn", "/api/speech/voice-text-diagnostics"],
-      ["Frontend události", "/api/frontend-events/latest"],
       ["Webové aplikace", "/api/web-apps"],
       ["Knihovna", "/api/library/list?category=other&limit=1"],
       ["Projekty", "/api/projects/status"],
@@ -13958,133 +13828,14 @@ COCKPIT_HTML = """<!doctype html>
       node.className = `health-value ${className || ""}`.trim();
     }
 
-    function frontendEventContext(extra = {}) {
-      let audioUnlocked = false;
-      try {
-        audioUnlocked = Boolean(voiceAudioUnlocked);
-      } catch (_err) {
-        audioUnlocked = false;
-      }
-      return {
-        frontend_version: COCKPIT_FRONTEND_VERSION,
-        location_host: String(window.location && window.location.host || ""),
-        visibility: String(document.visibilityState || ""),
-        audio_unlocked: audioUnlocked,
-        remote_client: isRemoteCockpitClient(),
-        mobile_client: isMobileCockpitClient(),
-        platform: String(navigator.platform || ""),
-        ...extra
-      };
-    }
-
-    function sendFrontendEvent(level, message, extra = {}) {
-      try {
-        const payload = frontendEventContext({
-          level,
-          message: String(message || "").slice(0, 500),
-          event: String(extra.event || level || "frontend_event").slice(0, 80),
-          text_chars: Number(extra.text_chars || 0)
-        });
-        const body = JSON.stringify(payload);
-        if (navigator.sendBeacon) {
-          const blob = new Blob([body], {type: "application/json"});
-          if (navigator.sendBeacon("/api/frontend-event", blob)) return;
-        }
-        fetch("/api/frontend-event", {
-          method: "POST",
-          cache: "no-store",
-          keepalive: true,
-          headers: {"Content-Type": "application/json"},
-          body
-        }).catch(() => {});
-      } catch (_err) {
-        // Diagnostika frontendu nesmi rozbit Cockpit.
-      }
-    }
-
     function recordFrontendError(error) {
       const text = String(error && (error.message || error.reason || error) || "neznámá chyba");
-      if (isExpectedFrontendNoticeError(text)) {
-        recordFrontendNotice(friendlyFrontendNoticeText(text));
-        return;
-      }
-      sendFrontendEvent("error", text, {event: "frontend_error"});
       frontendLastError = text;
       frontendErrorHistory = [
         {createdAt: new Date().toISOString(), text},
         ...frontendErrorHistory
       ].slice(0, 8);
       setHealthValue(frontendHealthError, text.slice(0, 220), "bad");
-    }
-
-    function recordFrontendBlockingError(label, error) {
-      const detail = String(error && (error.message || error.reason || error) || "").trim();
-      const text = detail ? `${label}: ${detail}` : String(label || "blokující chyba frontendu");
-      sendFrontendEvent("blocking_error", text, {event: "frontend_blocking_error"});
-      frontendLastError = text;
-      frontendErrorHistory = [
-        {createdAt: new Date().toISOString(), text},
-        ...frontendErrorHistory
-      ].slice(0, 8);
-      setHealthValue(frontendHealthError, text.slice(0, 220), "bad");
-    }
-
-    function isExpectedBrowserAudioPermissionError(error) {
-      const text = String(error && (error.message || error.reason || error) || "").toLowerCase();
-      return (
-        text.includes("request is not allowed by the user agent") ||
-        text.includes("platform in the current context") ||
-        text.includes("notallowederror") ||
-        text.includes("play() failed because the user didn't interact") ||
-        text.includes("user didn't interact with the document")
-      );
-    }
-
-    function isTransientBrowserFetchError(error) {
-      const text = String(error && (error.message || error.reason || error) || "").trim().toLowerCase();
-      return (
-        text === "load failed" ||
-        text === "failed to fetch" ||
-        text.includes("networkerror") ||
-        text.includes("network request failed")
-      );
-    }
-
-    function isExpectedFrontendNoticeError(error) {
-      return isTransientBrowserFetchError(error);
-    }
-
-    function friendlyFrontendNoticeText(error) {
-      if (isExpectedBrowserAudioPermissionError(error)) {
-        return "Prohlížeč zablokoval audio. Není to chyba serveru; zkus klepnout znovu nebo povolit audio pro stránku.";
-      }
-      if (isTransientBrowserFetchError(error)) {
-        return "Dočasně selhalo načtení ze serveru. Pokud API health projde, Cockpit je v pořádku.";
-      }
-      return String(error || "Frontend upozornění");
-    }
-
-    function recordFrontendNotice(text) {
-      const message = String(text || "").trim();
-      if (!message) return;
-      sendFrontendEvent("notice", message, {event: "frontend_notice"});
-      frontendErrorHistory = [
-        {createdAt: new Date().toISOString(), text: message},
-        ...frontendErrorHistory
-      ].slice(0, 8);
-      if (!frontendLastError) {
-        setHealthValue(frontendHealthError, message.slice(0, 220), "warn");
-      }
-    }
-
-    function recordFrontendDiagnostic(text) {
-      const message = String(text || "").trim();
-      if (!message) return;
-      sendFrontendEvent("diagnostic", message, {event: "frontend_diagnostic", text_chars: voiceTranscriptCharCount()});
-      frontendErrorHistory = [
-        {createdAt: new Date().toISOString(), text: message},
-        ...frontendErrorHistory
-      ].slice(0, 8);
     }
 
     function clearFrontendErrorsMatching(matchText) {
@@ -14095,37 +13846,6 @@ COCKPIT_HTML = """<!doctype html>
       }
       if (!frontendLastError) {
         setHealthValue(frontendHealthError, "žádná", "ok");
-      }
-    }
-
-    function voiceTranscriptCharCount() {
-      return voiceTranscript ? voiceTranscript.value.trim().length : 0;
-    }
-
-    function safeStoreVoiceTranscriptDraft(text) {
-      try {
-        sessionStorage.setItem(VOICE_TRANSCRIPT_DRAFT_KEY, text);
-        return true;
-      } catch (err) {
-        recordFrontendNotice(`Nejde uložit lokální kopii textového pokynu: ${err}`);
-        return false;
-      }
-    }
-
-    function safeRemoveVoiceTranscriptDraft() {
-      try {
-        sessionStorage.removeItem(VOICE_TRANSCRIPT_DRAFT_KEY);
-      } catch (err) {
-        recordFrontendNotice(`Nejde vyčistit lokální kopii textového pokynu: ${err}`);
-      }
-    }
-
-    function safeReadVoiceTranscriptDraft() {
-      try {
-        return String(sessionStorage.getItem(VOICE_TRANSCRIPT_DRAFT_KEY) || "").trim();
-      } catch (err) {
-        recordFrontendNotice(`Nejde načíst lokální kopii textového pokynu: ${err}`);
-        return "";
       }
     }
 
@@ -14297,7 +14017,7 @@ COCKPIT_HTML = """<!doctype html>
       } else {
         const slowest = Math.max(...results.map((item) => item.elapsed || 0));
         setHealthValue(frontendHealthApi, `OK, max ${slowest} ms`, "ok");
-        if (frontendLastError.startsWith("API health selhal:") || isTransientBrowserFetchError(frontendLastError)) {
+        if (frontendLastError.startsWith("API health selhal:")) {
           frontendLastError = "";
           setHealthValue(frontendHealthError, "žádná", "ok");
         } else if (!frontendLastError) {
@@ -16450,10 +16170,6 @@ COCKPIT_HTML = """<!doctype html>
 
 	    let voiceAudioContext = null;
 	    let voiceAudioUnlocked = false;
-	    sendFrontendEvent("info", "Cockpit frontend načten.", {event: "frontend_loaded"});
-	    document.addEventListener("visibilitychange", () => {
-	      sendFrontendEvent("diagnostic", `Viditelnost Cockpitu: ${document.visibilityState || "neznámá"}.`, {event: "frontend_visibility"});
-	    });
 
 	    function updateVoiceAudioUnlockUi(opened) {
 	      if (!voiceAudioUnlockBtn) return;
@@ -16504,11 +16220,7 @@ COCKPIT_HTML = """<!doctype html>
 		          if (voiceCommandStatus) voiceCommandStatus.textContent = "Tento prohlížeč nepodporuje otevření webového audiokanálu.";
 		        }
 		      } catch (err) {
-		        if (isExpectedBrowserAudioPermissionError(err)) {
-		          recordFrontendNotice("Prohlížeč zablokoval audiokanál. Není to chyba serveru; zkus klepnout znovu nebo povolit audio pro stránku.");
-		        } else {
-		          recordFrontendError(err);
-		        }
+		        recordFrontendError(err);
 		        updateVoiceAudioUnlockUi(false);
 		        showMessage(`Audiokanál se nepodařilo otevřít: ${err}`);
 		        if (voiceCommandStatus) voiceCommandStatus.textContent = `Audiokanál se nepodařilo otevřít: ${err}`;
@@ -16586,11 +16298,7 @@ COCKPIT_HTML = """<!doctype html>
 	              showMessage(edgeData.message || "Přehráno v tomto prohlížeči.");
 	              return;
 	            } catch (contextPlayErr) {
-	              if (isExpectedBrowserAudioPermissionError(contextPlayErr)) {
-	                recordFrontendNotice("Prohlížeč zablokoval automatické přehrání. Klepni na Přehrát v iPhonu nebo znovu otevři audiokanál.");
-	              } else {
-	                recordFrontendError(contextPlayErr);
-	              }
+	              recordFrontendError(contextPlayErr);
 	            }
 	          }
 	          const audio = new Audio(`data:${edgeData.mime_type || "audio/mpeg"};base64,${edgeData.audio_base64}`);
@@ -16600,11 +16308,7 @@ COCKPIT_HTML = """<!doctype html>
 	            showMessage(edgeData.message || "Přečteno českým mužským hlasem.");
 	            return;
 	          } catch (playErr) {
-	            if (isExpectedBrowserAudioPermissionError(playErr)) {
-	              recordFrontendNotice("Prohlížeč zablokoval automatické přehrání. Klepni na Přehrát v iPhonu nebo znovu otevři audiokanál.");
-	            } else {
-	              recordFrontendError(playErr);
-	            }
+	            recordFrontendError(playErr);
 	            if (!allowSystemFallback) {
 	              markVoiceResponseNeedsTap("iPhone zablokoval automatické přehrání. Klepni na Přehrát v iPhonu.");
 	              return;
@@ -17267,21 +16971,11 @@ COCKPIT_HTML = """<!doctype html>
 		      }
 		    }
 
-	    function markVoiceRecordPointer() {
-	      recordFrontendDiagnostic("Stisk tlačítka nahrávání hlasového pokynu zachycen.");
-	    }
-
-	    function markVoiceStopPointer() {
-	      recordFrontendDiagnostic("Stisk tlačítka stop nahrávání zachycen.");
-	    }
-
 	    async function startVoiceRecording() {
-	      sendFrontendEvent("diagnostic", "Start hlasového nahrávání zahájen.", {event: "voice_record_start"});
 	      if (voiceCommandDetails) {
 	        voiceCommandDetails.open = true;
 	      }
 	      if (!directVoiceRecordingSupported()) {
-	        sendFrontendEvent("blocking_error", "Prohlížeč nepodporuje přímé nahrávání hlasového pokynu.", {event: "voice_record_unsupported"});
 	        voiceCommandStatus.textContent = "Na iPhonu přes tuto HTTP adresu prohlížeč nepovolí přímý mikrofon. Klepni do pole Textový pokyn, použij iOS diktování a potom Odeslat Adamovi.";
 	        voiceTranscript.focus();
 	        return;
@@ -17297,7 +16991,6 @@ COCKPIT_HTML = """<!doctype html>
 	            autoGainControl: true
 	          }
 	        });
-	        sendFrontendEvent("diagnostic", "Mikrofon pro hlasový pokyn povolen.", {event: "voice_microphone_granted"});
 	        voiceChunks = [];
 	        const mimeType = preferredVoiceMimeType();
 	        voiceRecorder = createVoiceRecorder(voiceStream, mimeType);
@@ -17315,14 +17008,13 @@ COCKPIT_HTML = """<!doctype html>
 	        voiceCommandStatus.textContent = "Nahrávám hlasový pokyn. Limit je 30 sekund.";
 	        voiceStopTimer = window.setTimeout(stopVoiceRecording, 30000);
 	      } catch (err) {
-	        recordFrontendBlockingError("Mikrofon pro hlasový pokyn je blokovaný", err);
+	        recordFrontendError(err);
 	        voiceCommandStatus.textContent = `Mikrofon se nepodařilo spustit: ${err}`;
 	        resetVoiceRecordingUi();
 	      }
 	    }
 
 	    function stopVoiceRecording() {
-	      sendFrontendEvent("diagnostic", "Stop hlasového nahrávání volán.", {event: "voice_record_stop"});
 	      if (voiceRecorder && voiceRecorder.state === "recording") {
 	        voiceCommandStatus.textContent = "Zastavuji nahrávání a připravuji přepis...";
 	        voiceRecorder.stop();
@@ -17331,7 +17023,6 @@ COCKPIT_HTML = """<!doctype html>
 	    }
 
 	    async function transcribeVoiceRecording() {
-	      sendFrontendEvent("diagnostic", "Přepis hlasového pokynu zahájen.", {event: "voice_transcribe_start"});
 	      if (voiceStream) {
 	        voiceStream.getTracks().forEach((track) => track.stop());
 	        voiceStream = null;
@@ -17340,7 +17031,6 @@ COCKPIT_HTML = """<!doctype html>
 	      voiceRecorder = null;
 	      voiceChunks = [];
 	      if (!blob.size) {
-	        sendFrontendEvent("blocking_error", "Nahrávka hlasového pokynu je prázdná.", {event: "voice_record_empty"});
 	        voiceCommandStatus.textContent = "Nahrávka je prázdná. Zkus to znovu.";
 	        return;
 	      }
@@ -17362,7 +17052,6 @@ COCKPIT_HTML = """<!doctype html>
 	        });
 	        const data = await res.json();
 		        if (data.ok) {
-		          sendFrontendEvent("diagnostic", "Přepis hlasového pokynu dokončen.", {event: "voice_transcribe_ok", text_chars: String(data.text || "").trim().length});
 		          voiceTranscript.value = data.text || "";
 	          startVoiceReplyPolling({autoSpeak: true, expectedUserText: data.text || ""});
 	          const totalMs = Date.now() - requestStartedAt;
@@ -17372,11 +17061,9 @@ COCKPIT_HTML = """<!doctype html>
 	          const savedHint = data.latest_voice_command_path ? ` Uloženo: ${data.latest_voice_command_path}.` : "";
 		          voiceCommandStatus.textContent = `${data.message || "Hlasový pokyn byl přepsán a odeslán Adamovi."}${savedHint} (${timing})`;
 	        } else {
-	          sendFrontendEvent("blocking_error", data.message || "Přepis hlasu selhal.", {event: "voice_transcribe_failed"});
 	          voiceCommandStatus.textContent = data.message || "Přepis hlasu selhal.";
 	        }
 	      } catch (err) {
-	        sendFrontendEvent("blocking_error", String(err), {event: "voice_transcribe_exception"});
 	        recordFrontendError(err);
 	        voiceCommandStatus.textContent = `Přepis hlasu selhal: ${err}`;
 	      }
@@ -17389,46 +17076,25 @@ COCKPIT_HTML = """<!doctype html>
 	        voiceTranscript.focus();
 	        return;
 	      }
-	      recordFrontendDiagnostic(`Klik na odeslání textového pokynu zaznamenán (${text.length} znaků).`);
 	      voiceTranscriptSendBtn.disabled = true;
-	      voiceCommandStatus.textContent = "Klik zaznamenán. Odesílám text Adamovi...";
+	      voiceCommandStatus.textContent = "Odesílám text Adamovi...";
 	      try {
 	        const data = await postJson("/api/speech/voice-text", {text});
 	        if (data.ok) {
-	          sendFrontendEvent("diagnostic", data.voice_delivery_status || data.status || "Textový pokyn odeslán.", {event: "voice_text_post_ok", text_chars: text.length});
 	          const savedHint = data.latest_voice_command_path ? ` Uloženo: ${data.latest_voice_command_path}.` : "";
 	          voiceCommandStatus.textContent = `${data.message || "Textový pokyn byl odeslán Adamovi."}${savedHint}`;
 	          voiceTranscript.value = "";
-	          safeRemoveVoiceTranscriptDraft();
 	          startVoiceReplyPolling({autoSpeak: true, expectedUserText: text});
 	          await refresh({silent: true, includeSecondary: false});
 	        } else {
-	          sendFrontendEvent("blocking_error", data.message || "Textový hlasový pokyn se nepodařilo uložit.", {event: "voice_text_post_failed", text_chars: text.length});
-	          safeStoreVoiceTranscriptDraft(text);
 	          voiceCommandStatus.textContent = data.message || "Textový hlasový pokyn se nepodařilo uložit.";
 	        }
 	      } catch (err) {
-	        recordFrontendBlockingError("Odeslání textového pokynu do Cockpitu selhalo", err);
-	        safeStoreVoiceTranscriptDraft(text);
+	        recordFrontendError(err);
 	        voiceCommandStatus.textContent = `Textový hlasový pokyn se nepodařilo uložit: ${err}`;
 	      } finally {
 	        voiceTranscriptSendBtn.disabled = false;
 	      }
-	    }
-
-	    function restoreVoiceTranscriptDraft() {
-	      const draft = safeReadVoiceTranscriptDraft();
-	      if (!draft || voiceTranscript.value.trim()) return;
-	      voiceTranscript.value = draft;
-	      if (voiceCommandStatus) {
-	        voiceCommandStatus.textContent = "Našel jsem neodeslaný textový pokyn z posledního selhání. Zkontroluj ho a klepni znovu na Odeslat Adamovi.";
-	      }
-	    }
-
-	    function markVoiceTranscriptSendPointer() {
-	      const chars = voiceTranscriptCharCount();
-	      if (!chars || !voiceCommandStatus) return;
-	      voiceCommandStatus.textContent = `Stisk tlačítka zachycen (${chars} znaků). Čekám na odeslání...`;
 	    }
 
 	    async function searchDocuments() {
@@ -17578,7 +17244,6 @@ COCKPIT_HTML = """<!doctype html>
     async function postJson(url, payload) {
       const res = await fetch(url, {
         method: "POST",
-        cache: "no-store",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(payload || {})
       });
@@ -19666,14 +19331,10 @@ COCKPIT_HTML = """<!doctype html>
     voiceModeToggleBtn.addEventListener("click", toggleVoiceMode);
     voiceModeStartBtn.addEventListener("click", startVoiceModeWatcher);
     voiceModeStopBtn.addEventListener("click", stopVoiceModeWatcher);
-    voiceRecordBtn.addEventListener("pointerdown", markVoiceRecordPointer);
     voiceRecordBtn.addEventListener("click", startVoiceRecording);
-    voiceStopBtn.addEventListener("pointerdown", markVoiceStopPointer);
     voiceStopBtn.addEventListener("click", stopVoiceRecording);
     voiceAudioUnlockBtn.addEventListener("click", openVoiceAudioChannel);
-    voiceTranscriptSendBtn.addEventListener("pointerdown", markVoiceTranscriptSendPointer);
     voiceTranscriptSendBtn.addEventListener("click", submitVoiceTranscript);
-    restoreVoiceTranscriptDraft();
     voiceLastResponseSpeakBtn.addEventListener("click", speakLastAdamResponse);
     codexApprovalSendConfirmationBtn.addEventListener("click", sendCodexApprovalConfirmation);
     codexApprovalCopyConfirmationBtn.addEventListener("click", copyCodexApprovalConfirmation);

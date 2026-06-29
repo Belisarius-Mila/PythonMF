@@ -47,10 +47,6 @@ from app.cockpit import (
     cockpit_save_voice_text_action,
     cockpit_speak_action,
     cockpit_transcribe_voice_action,
-    record_voice_text_diagnostic,
-    record_cockpit_frontend_event_action,
-    cockpit_frontend_events_status,
-    voice_text_diagnostics_status,
     save_voice_command_to_inbox,
     document_intake_email_scan_status,
     document_intake_status,
@@ -2267,22 +2263,6 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("bad whitespace", result["stderr"])
         self.assertIn("markVoiceResponseNeedsTap", COCKPIT_HTML)
         self.assertIn("Přehrát v iPhonu", COCKPIT_HTML)
-        self.assertIn("isExpectedBrowserAudioPermissionError", COCKPIT_HTML)
-        self.assertIn("recordFrontendNotice", COCKPIT_HTML)
-        self.assertIn("recordFrontendDiagnostic", COCKPIT_HTML)
-        self.assertIn("recordFrontendBlockingError", COCKPIT_HTML)
-        self.assertIn("sendFrontendEvent", COCKPIT_HTML)
-        self.assertIn("frontend_loaded", COCKPIT_HTML)
-        self.assertIn("frontend_visibility", COCKPIT_HTML)
-        self.assertIn("COCKPIT_FRONTEND_VERSION", COCKPIT_HTML)
-        self.assertIn("isExpectedFrontendNoticeError", COCKPIT_HTML)
-        self.assertIn("return isTransientBrowserFetchError(error);", COCKPIT_HTML)
-        self.assertIn("isTransientBrowserFetchError", COCKPIT_HTML)
-        self.assertIn('text === "load failed"', COCKPIT_HTML)
-        self.assertIn("Dočasně selhalo načtení ze serveru", COCKPIT_HTML)
-        self.assertIn("Prohlížeč zablokoval automatické přehrání", COCKPIT_HTML)
-        self.assertIn("Prohlížeč zablokoval audiokanál", COCKPIT_HTML)
-        self.assertIn("Mikrofon pro hlasový pokyn je blokovaný", COCKPIT_HTML)
         self.assertIn("options.allowSystemFallback !== false && shouldUseSystemSpeechFallback()", COCKPIT_HTML)
         self.assertIn("{allowSystemFallback: shouldUseSystemSpeechFallback()}", COCKPIT_HTML)
         self.assertIn("primeVoiceAudioContextFromGesture", COCKPIT_HTML)
@@ -2341,29 +2321,6 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("voiceStopBtn", COCKPIT_HTML)
         self.assertIn("voiceTranscript", COCKPIT_HTML)
         self.assertIn("voiceTranscriptSendBtn", COCKPIT_HTML)
-        self.assertIn("VOICE_TRANSCRIPT_DRAFT_KEY", COCKPIT_HTML)
-        self.assertIn("safeStoreVoiceTranscriptDraft", COCKPIT_HTML)
-        self.assertIn("safeRemoveVoiceTranscriptDraft", COCKPIT_HTML)
-        self.assertIn("safeReadVoiceTranscriptDraft", COCKPIT_HTML)
-        self.assertIn("markVoiceTranscriptSendPointer", COCKPIT_HTML)
-        self.assertIn("markVoiceRecordPointer", COCKPIT_HTML)
-        self.assertIn("markVoiceStopPointer", COCKPIT_HTML)
-        self.assertIn("voice_record_start", COCKPIT_HTML)
-        self.assertIn("voice_record_unsupported", COCKPIT_HTML)
-        self.assertIn("voice_microphone_granted", COCKPIT_HTML)
-        self.assertIn("voice_record_stop", COCKPIT_HTML)
-        self.assertIn("voice_transcribe_start", COCKPIT_HTML)
-        self.assertIn("voice_transcribe_ok", COCKPIT_HTML)
-        self.assertIn("voice_text_post_ok", COCKPIT_HTML)
-        self.assertIn('addEventListener("pointerdown", markVoiceTranscriptSendPointer)', COCKPIT_HTML)
-        self.assertIn('voiceRecordBtn.addEventListener("pointerdown", markVoiceRecordPointer)', COCKPIT_HTML)
-        self.assertIn("Klik zaznamenán. Odesílám text Adamovi", COCKPIT_HTML)
-        self.assertIn("Odeslání textového pokynu do Cockpitu selhalo", COCKPIT_HTML)
-        self.assertIn("/api/speech/voice-text-diagnostics", COCKPIT_HTML)
-        self.assertIn("/api/frontend-event", COCKPIT_HTML)
-        self.assertIn("/api/frontend-events/latest", COCKPIT_HTML)
-        self.assertIn("restoreVoiceTranscriptDraft", COCKPIT_HTML)
-        self.assertIn("Našel jsem neodeslaný textový pokyn", COCKPIT_HTML)
         self.assertIn("Odeslat Adamovi", COCKPIT_HTML)
         self.assertIn("startVoiceRecording", COCKPIT_HTML)
         self.assertIn("transcribeVoiceRecording", COCKPIT_HTML)
@@ -3263,56 +3220,6 @@ class CockpitTests(unittest.TestCase):
             self.assertFalse(result["ok"])
             self.assertEqual(result["status"], "empty_voice_text")
             self.assertFalse((Path(temp_dir) / "latest_voice_command.md").exists())
-
-    def test_voice_text_diagnostics_status_does_not_store_prompt_text(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            path = Path(temp_dir) / "voice_text_diagnostics.json"
-
-            record_voice_text_diagnostic(
-                event="server_completed",
-                status="voice_command_delivered",
-                text="Citlivý text pokynu nesmí být uložen.",
-                path=path,
-            )
-            result = voice_text_diagnostics_status(path=path)
-
-            self.assertTrue(result["ok"])
-            event = result["last_voice_text_event"]
-            self.assertEqual(event["event"], "server_completed")
-            self.assertEqual(event["status"], "voice_command_delivered")
-            self.assertEqual(event["text_chars"], len("Citlivý text pokynu nesmí být uložen."))
-            self.assertNotIn("Citlivý text", json.dumps(event, ensure_ascii=False))
-
-    def test_record_cockpit_frontend_event_action_writes_latest_event(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            events_path = Path(temp_dir) / "frontend_events.jsonl"
-            latest_path = Path(temp_dir) / "frontend_events_latest.json"
-
-            result = record_cockpit_frontend_event_action(
-                {
-                    "event": "frontend_loaded",
-                    "level": "info",
-                    "message": "Cockpit frontend načten.",
-                    "frontend_version": "test-version",
-                    "location_host": "127.0.0.1:8770",
-                    "visibility": "visible",
-                    "text_chars": 0,
-                    "audio_unlocked": False,
-                    "remote_client": False,
-                    "mobile_client": False,
-                    "platform": "MacIntel",
-                },
-                events_path=events_path,
-                latest_path=latest_path,
-            )
-            status = cockpit_frontend_events_status(latest_path=latest_path)
-
-            self.assertTrue(result["ok"])
-            self.assertTrue(events_path.exists())
-            self.assertTrue(latest_path.exists())
-            self.assertEqual(status["latest_event"]["event"], "frontend_loaded")
-            self.assertEqual(status["latest_event"]["frontend_version"], "test-version")
-            self.assertEqual(status["latest_event"]["text_chars"], 0)
 
     def test_save_voice_command_to_inbox_writes_latest_and_index(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
