@@ -191,6 +191,7 @@ JANICKA_COOKBOOK_PATH = PROJECT_ROOT / "memory" / "projects" / "janicka_cockpit_
 JANICKA_TAKEOVER_PATH = PROJECT_ROOT / "memory" / "projects" / "janicka_cockpit_takeover.md"
 SESSION_AUTOSAVE_DIR = PROJECT_ROOT / "data" / "session_autosave"
 VOICE_COMMAND_INBOX_DIR = PROJECT_ROOT / "data" / "private" / "voice_inbox"
+VOICE_TEXT_DIAGNOSTICS_PATH = VOICE_COMMAND_INBOX_DIR / "voice_text_diagnostics.json"
 MEMORY_INDEX_PATH = PROJECT_ROOT / "memory" / "MEMORY_INDEX.md"
 RECOVERY_HANDOFF_PATHS = (
     PROJECT_ROOT / "memory" / "handoffs" / "cockpit_recovery_center_priority_2026_06_03.md",
@@ -9581,6 +9582,48 @@ def save_voice_command_to_inbox(
     }
 
 
+def record_voice_text_diagnostic(
+    *,
+    event: str,
+    status: str,
+    text: str = "",
+    error: str = "",
+    path: Path = VOICE_TEXT_DIAGNOSTICS_PATH,
+) -> None:
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        write_json(
+            path,
+            {
+                "updated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+                "event": safe_text(event)[:80],
+                "status": safe_text(status)[:120],
+                "text_chars": len(safe_text(text).strip()),
+                "error": safe_text(error)[:500],
+            },
+        )
+    except OSError:
+        return
+
+
+def voice_text_diagnostics_status(
+    *,
+    path: Path = VOICE_TEXT_DIAGNOSTICS_PATH,
+) -> dict[str, Any]:
+    try:
+        data = read_json_file(path)
+    except (OSError, ValueError, json.JSONDecodeError):
+        data = {}
+    if not isinstance(data, dict):
+        data = {}
+    return {
+        "ok": True,
+        "message": "Diagnostika textového hlasového pokynu je dostupná.",
+        "status": "voice_text_diagnostics_available",
+        "last_voice_text_event": data,
+    }
+
+
 def deliver_saved_voice_command_inline(
     *,
     inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
@@ -9817,7 +9860,9 @@ def cockpit_save_voice_text_action(
     history_path: Path = ADAM_VOICE_HISTORY_PATH,
 ) -> dict[str, Any]:
     text = safe_text(str(payload.get("text", "") or "")).strip()
+    record_voice_text_diagnostic(event="server_received", status="received", text=text)
     if not text:
+        record_voice_text_diagnostic(event="server_rejected", status="empty_voice_text")
         return {
             "ok": False,
             "message": "Chybí text hlasového pokynu.",
@@ -9840,14 +9885,21 @@ def cockpit_save_voice_text_action(
             )
         )
         result["message"] = result.get("voice_delivery_message") or result["message"]
+        record_voice_text_diagnostic(
+            event="server_completed",
+            status=str(result.get("voice_delivery_status") or result.get("status") or "voice_text_saved"),
+            text=text,
+        )
         return result
     except OSError as exc:
+        record_voice_text_diagnostic(event="server_failed", status="voice_inbox_save_failed", text=text, error=str(exc))
         return {
             "ok": False,
             "message": f"Uložení textového hlasového pokynu selhalo: {exc}",
             "status": "voice_inbox_save_failed",
         }
     except ValueError as exc:
+        record_voice_text_diagnostic(event="server_failed", status="voice_inbox_save_failed", text=text, error=str(exc))
         return {
             "ok": False,
             "message": f"Textový hlasový pokyn nejde uložit: {exc}",
@@ -10582,6 +10634,9 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/recovery/status":
                     self.respond_json(recovery_center_status())
+                    return
+                if parsed.path == "/api/speech/voice-text-diagnostics":
+                    self.respond_json(voice_text_diagnostics_status())
                     return
                 if parsed.path == "/api/quick-notes/status":
                     self.respond_json(quick_notes_status())
@@ -13813,6 +13868,7 @@ COCKPIT_HTML = """<!doctype html>
     const diagnosticsEndpoints = [
       ["Hlavní status", "/api/status"],
       ["Recovery", "/api/recovery/status"],
+      ["Textový hlasový pokyn", "/api/speech/voice-text-diagnostics"],
       ["Webové aplikace", "/api/web-apps"],
       ["Knihovna", "/api/library/list?category=other&limit=1"],
       ["Projekty", "/api/projects/status"],
@@ -13898,6 +13954,37 @@ COCKPIT_HTML = """<!doctype html>
       }
       if (!frontendLastError) {
         setHealthValue(frontendHealthError, "žádná", "ok");
+      }
+    }
+
+    function voiceTranscriptCharCount() {
+      return voiceTranscript ? voiceTranscript.value.trim().length : 0;
+    }
+
+    function safeStoreVoiceTranscriptDraft(text) {
+      try {
+        sessionStorage.setItem(VOICE_TRANSCRIPT_DRAFT_KEY, text);
+        return true;
+      } catch (err) {
+        recordFrontendNotice(`Nejde uložit lokální kopii textového pokynu: ${err}`);
+        return false;
+      }
+    }
+
+    function safeRemoveVoiceTranscriptDraft() {
+      try {
+        sessionStorage.removeItem(VOICE_TRANSCRIPT_DRAFT_KEY);
+      } catch (err) {
+        recordFrontendNotice(`Nejde vyčistit lokální kopii textového pokynu: ${err}`);
+      }
+    }
+
+    function safeReadVoiceTranscriptDraft() {
+      try {
+        return String(sessionStorage.getItem(VOICE_TRANSCRIPT_DRAFT_KEY) || "").trim();
+      } catch (err) {
+        recordFrontendNotice(`Nejde načíst lokální kopii textového pokynu: ${err}`);
+        return "";
       }
     }
 
@@ -17140,24 +17227,25 @@ COCKPIT_HTML = """<!doctype html>
 	        voiceTranscript.focus();
 	        return;
 	      }
+	      recordFrontendNotice(`Klik na odeslání textového pokynu zaznamenán (${text.length} znaků).`);
 	      voiceTranscriptSendBtn.disabled = true;
-	      voiceCommandStatus.textContent = "Odesílám text Adamovi...";
+	      voiceCommandStatus.textContent = "Klik zaznamenán. Odesílám text Adamovi...";
 	      try {
 	        const data = await postJson("/api/speech/voice-text", {text});
 	        if (data.ok) {
 	          const savedHint = data.latest_voice_command_path ? ` Uloženo: ${data.latest_voice_command_path}.` : "";
 	          voiceCommandStatus.textContent = `${data.message || "Textový pokyn byl odeslán Adamovi."}${savedHint}`;
 	          voiceTranscript.value = "";
-	          sessionStorage.removeItem(VOICE_TRANSCRIPT_DRAFT_KEY);
+	          safeRemoveVoiceTranscriptDraft();
 	          startVoiceReplyPolling({autoSpeak: true, expectedUserText: text});
 	          await refresh({silent: true, includeSecondary: false});
 	        } else {
-	          sessionStorage.setItem(VOICE_TRANSCRIPT_DRAFT_KEY, text);
+	          safeStoreVoiceTranscriptDraft(text);
 	          voiceCommandStatus.textContent = data.message || "Textový hlasový pokyn se nepodařilo uložit.";
 	        }
 	      } catch (err) {
 	        recordFrontendError(err);
-	        sessionStorage.setItem(VOICE_TRANSCRIPT_DRAFT_KEY, text);
+	        safeStoreVoiceTranscriptDraft(text);
 	        voiceCommandStatus.textContent = `Textový hlasový pokyn se nepodařilo uložit: ${err}`;
 	      } finally {
 	        voiceTranscriptSendBtn.disabled = false;
@@ -17165,12 +17253,18 @@ COCKPIT_HTML = """<!doctype html>
 	    }
 
 	    function restoreVoiceTranscriptDraft() {
-	      const draft = String(sessionStorage.getItem(VOICE_TRANSCRIPT_DRAFT_KEY) || "").trim();
+	      const draft = safeReadVoiceTranscriptDraft();
 	      if (!draft || voiceTranscript.value.trim()) return;
 	      voiceTranscript.value = draft;
 	      if (voiceCommandStatus) {
 	        voiceCommandStatus.textContent = "Našel jsem neodeslaný textový pokyn z posledního selhání. Zkontroluj ho a klepni znovu na Odeslat Adamovi.";
 	      }
+	    }
+
+	    function markVoiceTranscriptSendPointer() {
+	      const chars = voiceTranscriptCharCount();
+	      if (!chars || !voiceCommandStatus) return;
+	      voiceCommandStatus.textContent = `Stisk tlačítka zachycen (${chars} znaků). Čekám na odeslání...`;
 	    }
 
 	    async function searchDocuments() {
@@ -17320,6 +17414,7 @@ COCKPIT_HTML = """<!doctype html>
     async function postJson(url, payload) {
       const res = await fetch(url, {
         method: "POST",
+        cache: "no-store",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(payload || {})
       });
@@ -19410,6 +19505,7 @@ COCKPIT_HTML = """<!doctype html>
     voiceRecordBtn.addEventListener("click", startVoiceRecording);
     voiceStopBtn.addEventListener("click", stopVoiceRecording);
     voiceAudioUnlockBtn.addEventListener("click", openVoiceAudioChannel);
+    voiceTranscriptSendBtn.addEventListener("pointerdown", markVoiceTranscriptSendPointer);
     voiceTranscriptSendBtn.addEventListener("click", submitVoiceTranscript);
     restoreVoiceTranscriptDraft();
     voiceLastResponseSpeakBtn.addEventListener("click", speakLastAdamResponse);

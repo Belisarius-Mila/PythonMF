@@ -47,6 +47,8 @@ from app.cockpit import (
     cockpit_save_voice_text_action,
     cockpit_speak_action,
     cockpit_transcribe_voice_action,
+    record_voice_text_diagnostic,
+    voice_text_diagnostics_status,
     save_voice_command_to_inbox,
     document_intake_email_scan_status,
     document_intake_status,
@@ -2330,7 +2332,13 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("voiceTranscript", COCKPIT_HTML)
         self.assertIn("voiceTranscriptSendBtn", COCKPIT_HTML)
         self.assertIn("VOICE_TRANSCRIPT_DRAFT_KEY", COCKPIT_HTML)
-        self.assertIn("sessionStorage.setItem(VOICE_TRANSCRIPT_DRAFT_KEY, text)", COCKPIT_HTML)
+        self.assertIn("safeStoreVoiceTranscriptDraft", COCKPIT_HTML)
+        self.assertIn("safeRemoveVoiceTranscriptDraft", COCKPIT_HTML)
+        self.assertIn("safeReadVoiceTranscriptDraft", COCKPIT_HTML)
+        self.assertIn("markVoiceTranscriptSendPointer", COCKPIT_HTML)
+        self.assertIn('addEventListener("pointerdown", markVoiceTranscriptSendPointer)', COCKPIT_HTML)
+        self.assertIn("Klik zaznamenán. Odesílám text Adamovi", COCKPIT_HTML)
+        self.assertIn("/api/speech/voice-text-diagnostics", COCKPIT_HTML)
         self.assertIn("restoreVoiceTranscriptDraft", COCKPIT_HTML)
         self.assertIn("Našel jsem neodeslaný textový pokyn", COCKPIT_HTML)
         self.assertIn("Odeslat Adamovi", COCKPIT_HTML)
@@ -3232,6 +3240,25 @@ class CockpitTests(unittest.TestCase):
             self.assertFalse(result["ok"])
             self.assertEqual(result["status"], "empty_voice_text")
             self.assertFalse((Path(temp_dir) / "latest_voice_command.md").exists())
+
+    def test_voice_text_diagnostics_status_does_not_store_prompt_text(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "voice_text_diagnostics.json"
+
+            record_voice_text_diagnostic(
+                event="server_completed",
+                status="voice_command_delivered",
+                text="Citlivý text pokynu nesmí být uložen.",
+                path=path,
+            )
+            result = voice_text_diagnostics_status(path=path)
+
+            self.assertTrue(result["ok"])
+            event = result["last_voice_text_event"]
+            self.assertEqual(event["event"], "server_completed")
+            self.assertEqual(event["status"], "voice_command_delivered")
+            self.assertEqual(event["text_chars"], len("Citlivý text pokynu nesmí být uložen."))
+            self.assertNotIn("Citlivý text", json.dumps(event, ensure_ascii=False))
 
     def test_save_voice_command_to_inbox_writes_latest_and_index(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
