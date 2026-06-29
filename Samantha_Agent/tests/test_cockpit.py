@@ -42,6 +42,7 @@ from app.cockpit import (
     cockpit_dev_runner_actions,
     cockpit_dev_runner_run_action,
     cockpit_voice_approval_action,
+    cockpit_voice_frontend_event_action,
     cockpit_save_voice_text_action,
     cockpit_speak_action,
     cockpit_transcribe_voice_action,
@@ -2143,6 +2144,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("renderVoiceLastResponse", COCKPIT_HTML)
         self.assertIn("refreshVoiceLatestResponse", COCKPIT_HTML)
         self.assertIn("startVoiceReplyPolling", COCKPIT_HTML)
+        self.assertIn("/api/voice-bridge/frontend-event", COCKPIT_HTML)
+        self.assertIn("recordVoiceFrontendEvent", COCKPIT_HTML)
         self.assertIn("autoSpeak: voiceAudioUnlocked && Boolean(latestAdamResponseKey)", COCKPIT_HTML)
         self.assertIn("allowAlreadyRenderedAutoSpeak", COCKPIT_HTML)
         self.assertIn("VOICE_REPLY_POLL_DURATION_MS = 600000", COCKPIT_HTML)
@@ -3007,6 +3010,30 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["voice_mode"]["running"], True)
         update.assert_called_once_with(decision="approved", note="ok")
         load_status.assert_called_once()
+
+    def test_cockpit_voice_frontend_event_action_records_technical_detail_only(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            events_path = Path(temp_dir) / "frontend_events.jsonl"
+            result = cockpit_voice_frontend_event_action(
+                {
+                    "kind": "voice_text_post_failed",
+                    "detail": {
+                        "text": "tajný obsah se nesmí zapsat",
+                        "text_chars": 25,
+                        "status": "Load failed",
+                        "error": "TypeError: Load failed",
+                    },
+                },
+                events_path=events_path,
+                now=datetime(2026, 6, 30, 1, 0, tzinfo=timezone.utc),
+            )
+            events = self.read_jsonl(events_path)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(events[0]["kind"], "voice_text_post_failed")
+        self.assertEqual(events[0]["detail"]["text_chars"], 25)
+        self.assertEqual(events[0]["detail"]["status"], "Load failed")
+        self.assertNotIn("tajný obsah", json.dumps(events[0], ensure_ascii=False))
 
     def test_cockpit_speak_action_returns_speech_result(self) -> None:
         with patch("app.cockpit.speak_text", return_value={"ok": True, "message": "Přečteno."}) as speak:
