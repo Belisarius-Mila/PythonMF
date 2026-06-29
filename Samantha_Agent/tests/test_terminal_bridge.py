@@ -10,6 +10,7 @@ from app.speech.terminal_bridge import (
     build_codex_terminal_prompt,
     discover_codex_ttys,
     deliver_prompt_to_terminal,
+    deliver_prompt_to_screen_session,
     deliver_prompt_to_vscode,
     deliver_voice_command_to_terminal,
     load_marked_codex_tty,
@@ -142,6 +143,7 @@ class TerminalBridgeTests(unittest.TestCase):
             ps_runner=fake_ps_runner,
             script="error \"No Terminal tab.\"",
             vscode_script="return \"delivered_vscode\"",
+            screen_session_name="",
         )
 
         self.assertTrue(result["ok"])
@@ -170,6 +172,7 @@ class TerminalBridgeTests(unittest.TestCase):
             ps_runner=fake_ps_runner,
             script="error \"No Terminal tab.\"",
             vscode_script="return \"delivered_vscode\"",
+            screen_session_name="",
         )
 
         self.assertFalse(result["ok"])
@@ -198,6 +201,26 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertFalse(result["submitted"])
         self.assertTrue(result["verified"])
         self.assertEqual(result["delivery_method"], "local_gui_vscode")
+
+    def test_deliver_prompt_to_screen_session_uses_screen_stuff_with_submit(self) -> None:
+        calls = []
+
+        def fake_runner(args, **kwargs):
+            calls.append({"args": args, **kwargs})
+            if args == ["screen", "-ls"]:
+                return subprocess.CompletedProcess(args=args, returncode=0, stdout="\t93159.samantha_codex\t(Attached)\n", stderr="")
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
+
+        result = deliver_prompt_to_screen_session("První řádek\nDruhý řádek", runner=fake_runner)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "delivered_screen")
+        self.assertEqual(result["delivery_method"], "screen_stuff")
+        self.assertEqual(calls[1]["args"][:5], ["screen", "-S", "samantha_codex", "-X", "stuff"])
+        payload = calls[1]["args"][5]
+        self.assertTrue(payload.startswith("\x15"))
+        self.assertTrue(payload.endswith("\n"))
+        self.assertIn("První řádek Druhý řádek", payload)
 
     def test_vscode_applescript_does_not_paste_focus_command_text(self) -> None:
         script = vscode_applescript()
@@ -465,6 +488,7 @@ class TerminalBridgeTests(unittest.TestCase):
                 vscode_script="error \"osascript nemá povoleno posílání stisknutí kláves.\"",
                 marked_tty_path=marker,
                 tty_deliverer=fake_tty_deliverer,
+                screen_session_name="",
             )
 
         self.assertFalse(result["ok"])
@@ -508,12 +532,57 @@ class TerminalBridgeTests(unittest.TestCase):
                 marked_tty_path=marker,
                 tty_deliverer=fake_tty_deliverer,
                 vscode_fallback=False,
+                screen_session_name="",
             )
 
         self.assertTrue(result["ok"])
         self.assertEqual(result["status"], "delivered")
         self.assertEqual(calls[0][-1], "ttys005")
         self.assertEqual(result["target_ttys"], ["ttys004", "ttys005"])
+
+    def test_deliver_prompt_uses_screen_session_after_direct_tty_failure(self) -> None:
+        runner_calls = []
+        screen_calls = []
+
+        def fake_runner(args, **kwargs):
+            runner_calls.append(args)
+            self.fail("GUI fallback should not run when screen delivery succeeds")
+
+        def fake_ps_runner(args, **kwargs):
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="100 1 ttys005 codex codex\n", stderr="")
+
+        def fake_tty_deliverer(tty, prompt, **kwargs):
+            return {"ok": False, "status": "tty_delivery_failed", "message": "Operation not permitted", "target_tty": tty}
+
+        def fake_screen_deliverer(prompt, **kwargs):
+            screen_calls.append({"prompt": prompt, "kwargs": kwargs})
+            return {
+                "ok": True,
+                "status": "delivered_screen",
+                "message": "screen ok",
+                "delivery_method": "screen_stuff",
+                "verified": True,
+            }
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker = Path(temp_dir) / "current_codex_tty.json"
+            marker.write_text('{"tty": "ttys005"}', encoding="utf-8")
+
+            result = deliver_prompt_to_terminal(
+                "Hlasový pokyn od Míly.",
+                runner=fake_runner,
+                ps_runner=fake_ps_runner,
+                marked_tty_path=marker,
+                tty_deliverer=fake_tty_deliverer,
+                screen_deliverer=fake_screen_deliverer,
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "delivered_screen")
+        self.assertEqual(result["delivery_method"], "screen_stuff")
+        self.assertEqual(result["marked_tty_status"]["status"], "tty_delivery_failed")
+        self.assertEqual(screen_calls[0]["kwargs"]["session_name"], "samantha_codex")
+        self.assertEqual(runner_calls, [])
 
     def test_terminal_applescript_prefers_target_ttys_before_any_codex_tab(self) -> None:
         script = terminal_applescript()

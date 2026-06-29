@@ -16,6 +16,8 @@ PS_COMMAND = ["ps", "-axo", "pid=,ppid=,tty=,stat=,etime=,comm=,args="]
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CURRENT_CODEX_TTY_PATH = PROJECT_ROOT / "data/private/voice_inbox/current_codex_tty.json"
 DEFAULT_STALE_CODEX_SECONDS = 36 * 60 * 60
+DEFAULT_CODEX_SCREEN_SESSION = "samantha_codex"
+SCREEN_CLEAR_INPUT = "\x15"
 
 TERMINAL_MANUAL_TERMS = (
     "smaz",
@@ -275,6 +277,71 @@ def deliver_prompt_to_tty(
     }
 
 
+def screen_session_exists(
+    session_name: str = DEFAULT_CODEX_SCREEN_SESSION,
+    *,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> bool:
+    try:
+        completed = runner(["screen", "-ls"], capture_output=True, text=True, timeout=4, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    output = f"{completed.stdout}\n{completed.stderr}"
+    return f".{session_name}" in output
+
+
+def deliver_prompt_to_screen_session(
+    prompt: str,
+    *,
+    submit: bool = True,
+    session_name: str = DEFAULT_CODEX_SCREEN_SESSION,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> dict[str, Any]:
+    if not screen_session_exists(session_name=session_name, runner=runner):
+        return {
+            "ok": False,
+            "status": "screen_not_running",
+            "message": f"Screen relace {session_name} neběží.",
+            "session_name": session_name,
+            "delivery_method": "screen_stuff",
+        }
+    payload = SCREEN_CLEAR_INPUT + squash_terminal_text(prompt) + ("\n" if submit else "")
+    try:
+        completed = runner(
+            ["screen", "-S", session_name, "-X", "stuff", payload],
+            capture_output=True,
+            text=True,
+            timeout=8,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return {
+            "ok": False,
+            "status": "screen_delivery_failed",
+            "message": f"Pokyn se nepodařilo vložit do screen relace: {exc}",
+            "session_name": session_name,
+            "delivery_method": "screen_stuff",
+        }
+    if completed.returncode != 0:
+        return {
+            "ok": False,
+            "status": "screen_delivery_failed",
+            "message": (completed.stderr or completed.stdout or "Vložení pokynu do screen relace selhalo.").strip(),
+            "returncode": completed.returncode,
+            "session_name": session_name,
+            "delivery_method": "screen_stuff",
+        }
+    return {
+        "ok": True,
+        "status": "delivered_screen",
+        "message": f"Pokyn byl vložen přímo do screen relace {session_name}.",
+        "submitted": submit,
+        "session_name": session_name,
+        "delivery_method": "screen_stuff",
+        "verified": True,
+    }
+
+
 def terminal_applescript() -> str:
     return r'''
 on run argv
@@ -411,6 +478,8 @@ def deliver_prompt_to_terminal(
     vscode_fallback: bool = True,
     marked_tty_path: Path = CURRENT_CODEX_TTY_PATH,
     tty_deliverer: Callable[..., dict[str, Any]] = deliver_prompt_to_tty,
+    screen_session_name: str = DEFAULT_CODEX_SCREEN_SESSION,
+    screen_deliverer: Callable[..., dict[str, Any]] = deliver_prompt_to_screen_session,
     timeout: float = 8.0,
 ) -> dict[str, Any]:
     safe_prompt = squash_terminal_text(prompt)
@@ -456,6 +525,18 @@ def deliver_prompt_to_terminal(
             "message": f"Označené TTY {marked_tty} už nepatří aktivní Codex relaci.",
             "target_tty": marked_tty,
         }
+
+    if screen_session_name and (marked_tty or codex_ttys):
+        screen_result = screen_deliverer(safe_prompt, submit=submit, session_name=screen_session_name, runner=runner)
+        if screen_result.get("ok"):
+            if marked_tty_error:
+                screen_result["marked_tty_status"] = marked_tty_error
+            if auto_target_tty:
+                screen_result["auto_target_tty"] = auto_target_tty
+            return {
+                **screen_result,
+                "target_ttys": codex_ttys,
+            }
 
     if effective_marked_tty:
         target_ttys = [effective_marked_tty]
