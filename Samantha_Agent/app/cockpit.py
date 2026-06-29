@@ -13838,6 +13838,29 @@ COCKPIT_HTML = """<!doctype html>
       setHealthValue(frontendHealthError, text.slice(0, 220), "bad");
     }
 
+    function isExpectedBrowserAudioPermissionError(error) {
+      const text = String(error && (error.message || error.reason || error) || "").toLowerCase();
+      return (
+        text.includes("request is not allowed by the user agent") ||
+        text.includes("platform in the current context") ||
+        text.includes("notallowederror") ||
+        text.includes("play() failed because the user didn't interact") ||
+        text.includes("user didn't interact with the document")
+      );
+    }
+
+    function recordFrontendNotice(text) {
+      const message = String(text || "").trim();
+      if (!message) return;
+      frontendErrorHistory = [
+        {createdAt: new Date().toISOString(), text: message},
+        ...frontendErrorHistory
+      ].slice(0, 8);
+      if (!frontendLastError) {
+        setHealthValue(frontendHealthError, message.slice(0, 220), "warn");
+      }
+    }
+
     function clearFrontendErrorsMatching(matchText) {
       if (!matchText) return;
       frontendErrorHistory = frontendErrorHistory.filter((item) => !String(item.text || "").includes(matchText));
@@ -16220,7 +16243,11 @@ COCKPIT_HTML = """<!doctype html>
 		          if (voiceCommandStatus) voiceCommandStatus.textContent = "Tento prohlížeč nepodporuje otevření webového audiokanálu.";
 		        }
 		      } catch (err) {
-		        recordFrontendError(err);
+		        if (isExpectedBrowserAudioPermissionError(err)) {
+		          recordFrontendNotice("Prohlížeč zablokoval audiokanál. Není to chyba serveru; zkus klepnout znovu nebo povolit audio pro stránku.");
+		        } else {
+		          recordFrontendError(err);
+		        }
 		        updateVoiceAudioUnlockUi(false);
 		        showMessage(`Audiokanál se nepodařilo otevřít: ${err}`);
 		        if (voiceCommandStatus) voiceCommandStatus.textContent = `Audiokanál se nepodařilo otevřít: ${err}`;
@@ -16298,7 +16325,11 @@ COCKPIT_HTML = """<!doctype html>
 	              showMessage(edgeData.message || "Přehráno v tomto prohlížeči.");
 	              return;
 	            } catch (contextPlayErr) {
-	              recordFrontendError(contextPlayErr);
+	              if (isExpectedBrowserAudioPermissionError(contextPlayErr)) {
+	                recordFrontendNotice("Prohlížeč zablokoval automatické přehrání. Klepni na Přehrát v iPhonu nebo znovu otevři audiokanál.");
+	              } else {
+	                recordFrontendError(contextPlayErr);
+	              }
 	            }
 	          }
 	          const audio = new Audio(`data:${edgeData.mime_type || "audio/mpeg"};base64,${edgeData.audio_base64}`);
@@ -16308,7 +16339,11 @@ COCKPIT_HTML = """<!doctype html>
 	            showMessage(edgeData.message || "Přečteno českým mužským hlasem.");
 	            return;
 	          } catch (playErr) {
-	            recordFrontendError(playErr);
+	            if (isExpectedBrowserAudioPermissionError(playErr)) {
+	              recordFrontendNotice("Prohlížeč zablokoval automatické přehrání. Klepni na Přehrát v iPhonu nebo znovu otevři audiokanál.");
+	            } else {
+	              recordFrontendError(playErr);
+	            }
 	            if (!allowSystemFallback) {
 	              markVoiceResponseNeedsTap("iPhone zablokoval automatické přehrání. Klepni na Přehrát v iPhonu.");
 	              return;
