@@ -303,6 +303,37 @@ class AdamVoiceModeTests(unittest.TestCase):
         self.assertEqual(history[0]["route"], "terminal_delivery_pending_reply")
         self.assertFalse(last_response["available"])
 
+    def test_terminal_bridge_handles_safe_non_work_command_without_direct_response(self) -> None:
+        calls = []
+
+        def fake_terminal_bridge(command):
+            calls.append(command.text)
+            return {"ok": True, "status": "delivered_screen", "verified": False}
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            inbox = Path(temp_dir)
+            latest = inbox / "latest_voice_command.md"
+            pending_path = inbox / "pending_for_adam.json"
+            history_path = inbox / "adam_voice_history.jsonl"
+            write_voice_command(latest, "Krátká poznámka bez dalšího úkolu.")
+            command = load_latest_voice_command(inbox_dir=inbox)
+
+            response = build_spoken_result_for_command(
+                command,
+                response_generator=lambda text: self.fail("terminal bridge mode should not call direct responder"),
+                pending_path=pending_path,
+                history_path=history_path,
+                terminal_bridge=fake_terminal_bridge,
+            )
+            pending = json.loads(pending_path.read_text(encoding="utf-8"))
+            history = load_voice_history(path=history_path, limit=2)
+
+        self.assertEqual(calls, ["Krátká poznámka bez dalšího úkolu."])
+        self.assertIn("vložena do hlasového inboxu", response)
+        self.assertTrue(pending["pending"])
+        self.assertEqual(pending["reason"], "terminal_delivery_pending_reply")
+        self.assertEqual([item["route"] for item in history], ["terminal_delivery_pending_reply"])
+
     def test_build_spoken_result_saves_pending_when_terminal_bridge_rejects(self) -> None:
         def fake_terminal_bridge(command):
             return {"ok": False, "status": "manual_required", "reason": "Změnový pokyn."}
