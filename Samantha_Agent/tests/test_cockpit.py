@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import json
 import re
 import signal
@@ -47,6 +48,7 @@ from app.cockpit import (
     cockpit_speak_action,
     cockpit_transcribe_voice_action,
     save_voice_command_to_inbox,
+    transcribe_audio_base64_isolated,
     document_intake_email_scan_status,
     document_intake_status,
     document_cases_status,
@@ -3072,10 +3074,13 @@ class CockpitTests(unittest.TestCase):
 
     def test_cockpit_transcribe_voice_action_returns_transcript(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            with patch(
-                "app.cockpit.transcribe_audio_base64",
-                return_value={"ok": True, "text": "Najdi dnešní dokumenty."},
-            ) as transcribe:
+            transcribe_calls = []
+
+            def fake_transcriber(*args, **kwargs):
+                transcribe_calls.append({"args": args, "kwargs": kwargs})
+                return {"ok": True, "text": "Najdi dnešní dokumenty."}
+
+            with self.subTest("isolated transcriber"):
                 bridge_calls = []
 
                 def fake_bridge(command):
@@ -3088,6 +3093,7 @@ class CockpitTests(unittest.TestCase):
                     terminal_bridge=fake_bridge,
                     pending_path=Path(temp_dir) / "pending_for_adam.json",
                     history_path=Path(temp_dir) / "adam_voice_history.jsonl",
+                    transcriber=fake_transcriber,
                 )
                 attempts = self.read_jsonl(Path(temp_dir) / "delivery_attempts.jsonl")
                 pending_exists = (Path(temp_dir) / "pending_for_adam.json").exists()
@@ -3099,10 +3105,65 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["voice_delivery_status"], "voice_command_delivered")
         self.assertIn("předán přímo do Codexu", result["message"])
         self.assertEqual(bridge_calls, ["Najdi dnešní dokumenty."])
-        transcribe.assert_called_once_with("abc", mime_type="audio/webm", language="cs")
+        self.assertEqual(
+            transcribe_calls,
+            [{"args": ("abc",), "kwargs": {"mime_type": "audio/webm", "language": "cs"}}],
+        )
         self.assertEqual(attempts[0]["delivery_status"], "voice_command_delivered")
         self.assertEqual(attempts[0]["text_chars"], len("Najdi dnešní dokumenty."))
         self.assertFalse(pending_exists)
+
+    def test_transcribe_audio_base64_isolated_runs_subprocess_and_cleans_temp_file(self) -> None:
+        encoded = base64.b64encode(b"fake audio").decode("ascii")
+        seen_temp_paths: list[Path] = []
+
+        def fake_runner(args, **kwargs):
+            audio_path = Path(args[args.index("--audio-file") + 1])
+            seen_temp_paths.append(audio_path)
+            self.assertTrue(audio_path.exists())
+            self.assertEqual(audio_path.read_bytes(), b"fake audio")
+            self.assertEqual(args[:3], [str(cockpit_module.PROJECT_ROOT / ".venv" / "bin" / "python"), "-m", "app.speech.transcribe"])
+            self.assertEqual(args[args.index("--mime-type") + 1], "audio/webm")
+            self.assertEqual(args[args.index("--language") + 1], "cs")
+            self.assertEqual(kwargs["cwd"], str(cockpit_module.PROJECT_ROOT))
+            self.assertTrue(kwargs["capture_output"])
+            self.assertTrue(kwargs["text"])
+            self.assertFalse(kwargs["check"])
+            return subprocess.CompletedProcess(
+                args,
+                0,
+                stdout=json.dumps({"ok": True, "text": "Najdi dnešní dokumenty."}),
+                stderr="",
+            )
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            result = transcribe_audio_base64_isolated(
+                encoded,
+                mime_type="audio/webm",
+                runner=fake_runner,
+                temp_dir=temp_dir,
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["text"], "Najdi dnešní dokumenty.")
+        self.assertEqual(len(seen_temp_paths), 1)
+        self.assertFalse(seen_temp_paths[0].exists())
+
+    def test_transcribe_audio_base64_isolated_reports_subprocess_failure(self) -> None:
+        encoded = base64.b64encode(b"fake audio").decode("ascii")
+
+        def fake_runner(args, **kwargs):
+            return subprocess.CompletedProcess(
+                args,
+                1,
+                stdout=json.dumps({"ok": False, "message": "Resource deadlock avoided"}),
+                stderr="",
+            )
+
+        with self.assertRaises(cockpit_module.TranscriptionError) as cm:
+            transcribe_audio_base64_isolated(encoded, mime_type="audio/webm", runner=fake_runner)
+
+        self.assertIn("Resource deadlock avoided", str(cm.exception))
 
     def test_cockpit_save_voice_text_action_writes_inbox(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -3264,11 +3325,13 @@ class CockpitTests(unittest.TestCase):
             self.assertIn("latest_voice_command.md", result["latest_voice_command_path"])
 
     def test_cockpit_transcribe_voice_action_reports_error(self) -> None:
-        with patch(
-            "app.cockpit.transcribe_audio_base64",
-            side_effect=cockpit_module.TranscriptionError("Chybí OPENAI_API_KEY"),
-        ):
-            result = cockpit_transcribe_voice_action({"audio_base64": "", "mime_type": "audio/webm"})
+        def fail(*args, **kwargs):
+            raise cockpit_module.TranscriptionError("Chybí OPENAI_API_KEY")
+
+        result = cockpit_transcribe_voice_action(
+            {"audio_base64": "", "mime_type": "audio/webm"},
+            transcriber=fail,
+        )
 
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "transcription_failed")

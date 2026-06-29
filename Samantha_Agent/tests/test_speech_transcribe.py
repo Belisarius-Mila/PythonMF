@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import base64
+import io
+import json
 import os
 import tempfile
 import unittest
@@ -16,6 +18,8 @@ from app.speech.transcribe import (
     openai_api_key_available,
     transcribe_audio_base64,
     transcribe_audio_bytes,
+    transcribe_audio_file,
+    main,
 )
 
 
@@ -87,6 +91,60 @@ class SpeechTranscribeTests(unittest.TestCase):
 
         self.assertTrue(result["ok"])
         self.assertEqual(result["text"], "Najdi dnešní dokumenty.")
+
+    def test_transcribe_audio_file_reads_file_and_uses_client(self) -> None:
+        client = FakeOpenAIClient()
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            audio_path = Path(temp_dir) / "voice.webm"
+            audio_path.write_bytes(b"fake audio")
+
+            result = transcribe_audio_file(audio_path, mime_type="audio/webm", client=client)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["text"], "Najdi dnešní dokumenty.")
+        self.assertEqual(result["audio_bytes"], 10)
+
+    def test_transcribe_cli_main_outputs_json(self) -> None:
+        fake_result = {
+            "ok": True,
+            "text": "Najdi dnešní dokumenty.",
+            "model": "test-model",
+            "language": "cs",
+        }
+        with (
+            patch("app.speech.transcribe.transcribe_audio_file", return_value=fake_result) as transcribe,
+            patch("sys.stdout", new_callable=io.StringIO) as stdout,
+        ):
+            code = main([
+                "--audio-file",
+                "/private/tmp/voice.webm",
+                "--mime-type",
+                "audio/webm",
+                "--language",
+                "cs",
+                "--model",
+                "test-model",
+            ])
+
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(stdout.getvalue()), fake_result)
+        transcribe.assert_called_once()
+
+    def test_transcribe_cli_main_reports_transcription_error(self) -> None:
+        with (
+            patch(
+                "app.speech.transcribe.transcribe_audio_file",
+                side_effect=TranscriptionError("Chybí OPENAI_API_KEY"),
+            ),
+            patch("sys.stdout", new_callable=io.StringIO) as stdout,
+        ):
+            code = main(["--audio-file", "/private/tmp/voice.webm", "--mime-type", "audio/webm"])
+
+        self.assertEqual(code, 1)
+        result = json.loads(stdout.getvalue())
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "transcription_failed")
+        self.assertIn("Chybí OPENAI_API_KEY", result["message"])
 
 
 if __name__ == "__main__":

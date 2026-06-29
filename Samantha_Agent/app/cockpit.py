@@ -122,7 +122,8 @@ from app.email.redaction import redact_email_addresses
 from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEmailProvider
 from app.reminders.query_tools import mark_reminder_done_text
 from app.reminders.store import DEFAULT_REMINDERS_PATH, load_reminders_store, write_reminders_store
-from app.speech import SpeechError, TranscriptionError, speak_text, transcribe_audio_base64
+from app.speech import SpeechError, TranscriptionError, speak_text
+from app.speech.transcribe import MIME_EXTENSIONS, decode_audio_base64, normalize_mime_type
 from app.speech.edge_tts_mp3 import (
     DEFAULT_EDGE_TTS_RATE,
     DEFAULT_EDGE_TTS_VOICE,
@@ -9638,6 +9639,69 @@ def deliver_voice_command_by_configured_transport(command: VoiceCommand, *, subm
     return deliver_voice_command_via_managed_screen(command, submit=submit)
 
 
+def transcribe_audio_base64_isolated(
+    audio_base64: str,
+    *,
+    mime_type: str,
+    language: str = "cs",
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+    timeout_seconds: int = 90,
+    temp_dir: Path | str = "/private/tmp",
+) -> dict[str, Any]:
+    safe_mime_type = normalize_mime_type(mime_type)
+    audio_bytes = decode_audio_base64(audio_base64)
+    temp_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            prefix="samantha_cockpit_voice_",
+            suffix=MIME_EXTENSIONS[safe_mime_type],
+            dir=str(temp_dir),
+            delete=False,
+        ) as temp_file:
+            temp_path = Path(temp_file.name)
+            temp_file.write(audio_bytes)
+        completed = runner(
+            [
+                str(PROJECT_ROOT / ".venv" / "bin" / "python"),
+                "-m",
+                "app.speech.transcribe",
+                "--audio-file",
+                str(temp_path),
+                "--mime-type",
+                safe_mime_type,
+                "--language",
+                language,
+            ],
+            cwd=str(PROJECT_ROOT),
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise TranscriptionError("Přepis hlasu překročil časový limit.") from exc
+    except OSError as exc:
+        raise TranscriptionError(f"Izolovaný přepis hlasu se nepodařilo spustit: {exc}") from exc
+    finally:
+        if temp_path is not None:
+            try:
+                temp_path.unlink(missing_ok=True)
+            except OSError:
+                pass
+
+    stdout = (completed.stdout or "").strip()
+    stderr = (completed.stderr or "").strip()
+    try:
+        result = json.loads(stdout) if stdout else {}
+    except json.JSONDecodeError as exc:
+        detail = stderr or stdout[:500] or f"exit {completed.returncode}"
+        raise TranscriptionError(f"Izolovaný přepis vrátil nečitelný výsledek: {detail}") from exc
+    if completed.returncode != 0 or not result.get("ok"):
+        message = str(result.get("message") or stderr or f"exit {completed.returncode}")
+        raise TranscriptionError(message)
+    return result
+
+
 def cockpit_transcribe_voice_action(
     payload: dict[str, Any],
     *,
@@ -9645,9 +9709,10 @@ def cockpit_transcribe_voice_action(
     terminal_bridge: Callable[..., dict[str, Any]] | None = None,
     pending_path: Path = ADAM_PENDING_COMMAND_PATH,
     history_path: Path = ADAM_VOICE_HISTORY_PATH,
+    transcriber: Callable[..., dict[str, Any]] = transcribe_audio_base64_isolated,
 ) -> dict[str, Any]:
     try:
-        result = transcribe_audio_base64(
+        result = transcriber(
             str(payload.get("audio_base64", "")),
             mime_type=str(payload.get("mime_type", "")),
             language=str(payload.get("language", "cs") or "cs"),

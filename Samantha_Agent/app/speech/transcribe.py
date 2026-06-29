@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import base64
 import binascii
+import argparse
+import json
 import os
 import tempfile
 import time
@@ -145,3 +147,51 @@ def transcribe_audio_base64(
         model=model,
         client=client,
     )
+
+
+def transcribe_audio_file(
+    audio_file: Path | str,
+    *,
+    mime_type: str,
+    language: str = "cs",
+    model: str = DEFAULT_TRANSCRIBE_MODEL,
+    client: Any | None = None,
+) -> dict[str, Any]:
+    path = Path(audio_file)
+    try:
+        audio_bytes = path.read_bytes()
+    except OSError as exc:
+        raise TranscriptionError(f"Audio soubor nejde načíst: {exc}") from exc
+    return transcribe_audio_bytes(
+        audio_bytes,
+        mime_type=mime_type,
+        language=language,
+        model=model,
+        client=client,
+    )
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Transcribe a local voice command audio file.")
+    parser.add_argument("--audio-file", type=Path, required=True)
+    parser.add_argument("--mime-type", required=True)
+    parser.add_argument("--language", default="cs")
+    parser.add_argument("--model", default=DEFAULT_TRANSCRIBE_MODEL)
+    args = parser.parse_args(argv)
+
+    try:
+        result = transcribe_audio_file(
+            args.audio_file,
+            mime_type=args.mime_type,
+            language=args.language,
+            model=args.model,
+        )
+    except TranscriptionError as exc:
+        print(json.dumps({"ok": False, "status": "transcription_failed", "message": str(exc)}, ensure_ascii=False))
+        return 1
+    print(json.dumps(result, ensure_ascii=False))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
