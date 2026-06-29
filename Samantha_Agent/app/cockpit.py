@@ -16451,6 +16451,9 @@ COCKPIT_HTML = """<!doctype html>
 	    let voiceAudioContext = null;
 	    let voiceAudioUnlocked = false;
 	    sendFrontendEvent("info", "Cockpit frontend načten.", {event: "frontend_loaded"});
+	    document.addEventListener("visibilitychange", () => {
+	      sendFrontendEvent("diagnostic", `Viditelnost Cockpitu: ${document.visibilityState || "neznámá"}.`, {event: "frontend_visibility"});
+	    });
 
 	    function updateVoiceAudioUnlockUi(opened) {
 	      if (!voiceAudioUnlockBtn) return;
@@ -17264,11 +17267,21 @@ COCKPIT_HTML = """<!doctype html>
 		      }
 		    }
 
+	    function markVoiceRecordPointer() {
+	      recordFrontendDiagnostic("Stisk tlačítka nahrávání hlasového pokynu zachycen.");
+	    }
+
+	    function markVoiceStopPointer() {
+	      recordFrontendDiagnostic("Stisk tlačítka stop nahrávání zachycen.");
+	    }
+
 	    async function startVoiceRecording() {
+	      sendFrontendEvent("diagnostic", "Start hlasového nahrávání zahájen.", {event: "voice_record_start"});
 	      if (voiceCommandDetails) {
 	        voiceCommandDetails.open = true;
 	      }
 	      if (!directVoiceRecordingSupported()) {
+	        sendFrontendEvent("blocking_error", "Prohlížeč nepodporuje přímé nahrávání hlasového pokynu.", {event: "voice_record_unsupported"});
 	        voiceCommandStatus.textContent = "Na iPhonu přes tuto HTTP adresu prohlížeč nepovolí přímý mikrofon. Klepni do pole Textový pokyn, použij iOS diktování a potom Odeslat Adamovi.";
 	        voiceTranscript.focus();
 	        return;
@@ -17284,6 +17297,7 @@ COCKPIT_HTML = """<!doctype html>
 	            autoGainControl: true
 	          }
 	        });
+	        sendFrontendEvent("diagnostic", "Mikrofon pro hlasový pokyn povolen.", {event: "voice_microphone_granted"});
 	        voiceChunks = [];
 	        const mimeType = preferredVoiceMimeType();
 	        voiceRecorder = createVoiceRecorder(voiceStream, mimeType);
@@ -17308,6 +17322,7 @@ COCKPIT_HTML = """<!doctype html>
 	    }
 
 	    function stopVoiceRecording() {
+	      sendFrontendEvent("diagnostic", "Stop hlasového nahrávání volán.", {event: "voice_record_stop"});
 	      if (voiceRecorder && voiceRecorder.state === "recording") {
 	        voiceCommandStatus.textContent = "Zastavuji nahrávání a připravuji přepis...";
 	        voiceRecorder.stop();
@@ -17316,6 +17331,7 @@ COCKPIT_HTML = """<!doctype html>
 	    }
 
 	    async function transcribeVoiceRecording() {
+	      sendFrontendEvent("diagnostic", "Přepis hlasového pokynu zahájen.", {event: "voice_transcribe_start"});
 	      if (voiceStream) {
 	        voiceStream.getTracks().forEach((track) => track.stop());
 	        voiceStream = null;
@@ -17324,6 +17340,7 @@ COCKPIT_HTML = """<!doctype html>
 	      voiceRecorder = null;
 	      voiceChunks = [];
 	      if (!blob.size) {
+	        sendFrontendEvent("blocking_error", "Nahrávka hlasového pokynu je prázdná.", {event: "voice_record_empty"});
 	        voiceCommandStatus.textContent = "Nahrávka je prázdná. Zkus to znovu.";
 	        return;
 	      }
@@ -17345,6 +17362,7 @@ COCKPIT_HTML = """<!doctype html>
 	        });
 	        const data = await res.json();
 		        if (data.ok) {
+		          sendFrontendEvent("diagnostic", "Přepis hlasového pokynu dokončen.", {event: "voice_transcribe_ok", text_chars: String(data.text || "").trim().length});
 		          voiceTranscript.value = data.text || "";
 	          startVoiceReplyPolling({autoSpeak: true, expectedUserText: data.text || ""});
 	          const totalMs = Date.now() - requestStartedAt;
@@ -17354,9 +17372,11 @@ COCKPIT_HTML = """<!doctype html>
 	          const savedHint = data.latest_voice_command_path ? ` Uloženo: ${data.latest_voice_command_path}.` : "";
 		          voiceCommandStatus.textContent = `${data.message || "Hlasový pokyn byl přepsán a odeslán Adamovi."}${savedHint} (${timing})`;
 	        } else {
+	          sendFrontendEvent("blocking_error", data.message || "Přepis hlasu selhal.", {event: "voice_transcribe_failed"});
 	          voiceCommandStatus.textContent = data.message || "Přepis hlasu selhal.";
 	        }
 	      } catch (err) {
+	        sendFrontendEvent("blocking_error", String(err), {event: "voice_transcribe_exception"});
 	        recordFrontendError(err);
 	        voiceCommandStatus.textContent = `Přepis hlasu selhal: ${err}`;
 	      }
@@ -17375,6 +17395,7 @@ COCKPIT_HTML = """<!doctype html>
 	      try {
 	        const data = await postJson("/api/speech/voice-text", {text});
 	        if (data.ok) {
+	          sendFrontendEvent("diagnostic", data.voice_delivery_status || data.status || "Textový pokyn odeslán.", {event: "voice_text_post_ok", text_chars: text.length});
 	          const savedHint = data.latest_voice_command_path ? ` Uloženo: ${data.latest_voice_command_path}.` : "";
 	          voiceCommandStatus.textContent = `${data.message || "Textový pokyn byl odeslán Adamovi."}${savedHint}`;
 	          voiceTranscript.value = "";
@@ -17382,6 +17403,7 @@ COCKPIT_HTML = """<!doctype html>
 	          startVoiceReplyPolling({autoSpeak: true, expectedUserText: text});
 	          await refresh({silent: true, includeSecondary: false});
 	        } else {
+	          sendFrontendEvent("blocking_error", data.message || "Textový hlasový pokyn se nepodařilo uložit.", {event: "voice_text_post_failed", text_chars: text.length});
 	          safeStoreVoiceTranscriptDraft(text);
 	          voiceCommandStatus.textContent = data.message || "Textový hlasový pokyn se nepodařilo uložit.";
 	        }
@@ -19644,7 +19666,9 @@ COCKPIT_HTML = """<!doctype html>
     voiceModeToggleBtn.addEventListener("click", toggleVoiceMode);
     voiceModeStartBtn.addEventListener("click", startVoiceModeWatcher);
     voiceModeStopBtn.addEventListener("click", stopVoiceModeWatcher);
+    voiceRecordBtn.addEventListener("pointerdown", markVoiceRecordPointer);
     voiceRecordBtn.addEventListener("click", startVoiceRecording);
+    voiceStopBtn.addEventListener("pointerdown", markVoiceStopPointer);
     voiceStopBtn.addEventListener("click", stopVoiceRecording);
     voiceAudioUnlockBtn.addEventListener("click", openVoiceAudioChannel);
     voiceTranscriptSendBtn.addEventListener("pointerdown", markVoiceTranscriptSendPointer);
