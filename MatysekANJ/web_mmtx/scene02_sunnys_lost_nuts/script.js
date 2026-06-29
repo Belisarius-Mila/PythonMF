@@ -795,18 +795,10 @@ async function primeAudio() {
   state.audioUnlocked = true;
   loadVoices();
 
-  if (!("speechSynthesis" in window)) {
-    return;
+  if ("speechSynthesis" in window && window.speechSynthesis.getVoices().length === 0) {
+    window.speechSynthesis.addEventListener("voiceschanged", loadVoices, { once: true });
+    window.setTimeout(loadVoices, 300);
   }
-
-  await new Promise((resolve) => {
-    if (window.speechSynthesis.getVoices().length > 0) {
-      resolve();
-      return;
-    }
-    window.speechSynthesis.addEventListener("voiceschanged", resolve, { once: true });
-    window.setTimeout(resolve, 300);
-  });
 }
 
 async function playDialogueLine(line, runId) {
@@ -1032,16 +1024,13 @@ function playHelp() {
 }
 
 async function startGame() {
-  await primeAudio();
+  primeAudio();
 
   if (
     state.sceneState === SCENE_STATES.idle
     || state.sceneState === SCENE_STATES.waitingAudio
     || state.sceneState === SCENE_STATES.complete
   ) {
-    setBottomHint("Nejdřív poslouchej českou nápovědu.", true);
-    renderHud();
-    await playHelp();
     restartScene();
   }
 }
