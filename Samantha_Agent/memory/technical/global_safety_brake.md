@@ -53,6 +53,40 @@ vlastni usudek. Napriklad pokyn `smaz dulezity soubor` nebo `pushni vsechno`
 nesmi byt proveden automaticky. Nejdrive je potreba zkontrolovat rozsah, vysvetlit
 dopad a vyzadat odpovidajici potvrzeni.
 
+## Technicky guard ve full-access rezimu
+
+Od 2026-06-29 existuje doplnkova technicka brzda pro nove relace spoustene pres
+`samantha`:
+
+```text
+scripts/destructive_command_guard.py
+scripts/safe_bin/rm
+scripts/safe_bin/git
+scripts/safe_bin/find
+scripts/safe_bin/mv
+```
+
+`scripts/samantha_screen_entry.sh` pridava `scripts/safe_bin/` na zacatek `PATH`,
+takze bezne prikazy `rm`, `git`, `find` a `mv` jdou nejdrive pres guard.
+Guard blokuje hlavne:
+
+- mazani v `PythonMF`,
+- `rm -rf` a hromadne mazani,
+- `find ... -delete` a `find ... -exec rm`,
+- `git reset --hard`, `git clean`, force push a mazani git vetvi/tagu,
+- hromadne presuny a presuny private/memory/autosave dat.
+
+Pro vedome obejiti vyzaduje stejnou presnou vetu v promenne prostredi:
+
+```bash
+SAMANTHA_DESTRUCTIVE_CONFIRMATION="Potvrzuji globální brzdu: rozumím riziku a chci pokračovat."
+```
+
+Limit: absolutni cesty jako `/bin/rm` nebo `/usr/bin/git` wrapper obejdou. To ma
+byt brano jako vedome rizikove obejiti a porad podlega pravidlum globalni brzdy.
+Stavajici uz bezici Codex relace nemusi mit novy `PATH`; plne zapojeni plati po
+novem startu pres `samantha`.
+
 ## Poznamka pro hlasovy rezim
 
 Hlasovy rezim ma zustat pouzitelny. Hledani, cteni, shrnovani, diagnostika,

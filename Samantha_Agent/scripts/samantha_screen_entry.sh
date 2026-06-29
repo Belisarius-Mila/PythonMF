@@ -8,6 +8,7 @@ AUTOSAVE_RESUME_SCRIPT="$PROJECT_DIR/scripts/autosave_resume_prompt.py"
 WORK_CONTEXT_GUARD_SCRIPT="$PROJECT_DIR/scripts/work_context_guard.py"
 MARK_CURRENT_CODEX_TTY_SCRIPT="$PROJECT_DIR/scripts/mark_current_codex_tty.py"
 PYTHON_BIN="$PROJECT_DIR/.venv/bin/python"
+SAFE_BIN_DIR="$PROJECT_DIR/scripts/safe_bin"
 
 export LANG="cs_CZ.UTF-8"
 export LC_ALL="cs_CZ.UTF-8"
@@ -15,6 +16,10 @@ export LC_CTYPE="cs_CZ.UTF-8"
 export PYTHONUTF8="1"
 export PYTHONIOENCODING="utf-8"
 export LESSCHARSET="utf-8"
+export SAMANTHA_PROJECT_DIR="$PROJECT_DIR"
+if [[ -d "$SAFE_BIN_DIR" ]]; then
+  export PATH="$SAFE_BIN_DIR:$PATH"
+fi
 
 CODEX_START_PROMPT=""
 

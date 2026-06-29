@@ -22,6 +22,12 @@ from scripts.autosave_status import autosave_status, find_autosave_watchers, for
 from scripts.autosave_resume_prompt import autosave_resume_candidate, parse_autosave_source, startup_prompt
 from scripts.system_quick_check import CheckLine, autosave_line, format_morning_sentence
 from scripts.work_context_guard import WorkContextStatus, format_work_context_guard, parse_porcelain_status
+from scripts.destructive_command_guard import (
+    PROJECT_ROOT,
+    REPO_ROOT,
+    check_command,
+    git_subcommand_args,
+)
 
 
 class GitSafetyCheckTests(unittest.TestCase):
@@ -122,6 +128,62 @@ class GitSafetyCheckTests(unittest.TestCase):
 
         self.assertIn("Branch guard", report)
         self.assertIn("current branch is `feature/mixed`", report)
+
+
+class DestructiveCommandGuardTests(unittest.TestCase):
+    def test_blocks_rm_inside_python_workspace(self) -> None:
+        decision = check_command("rm", ["Samantha_Agent/tmp.txt"], cwd=REPO_ROOT)
+
+        self.assertFalse(decision.allowed)
+        self.assertIn("delete in PythonMF workspace: Samantha_Agent/tmp.txt", decision.reasons)
+
+    def test_blocks_recursive_rm_even_outside_workspace(self) -> None:
+        decision = check_command("rm", ["-rf", "/tmp/demo-delete"])
+
+        self.assertFalse(decision.allowed)
+        self.assertIn("recursive rm", decision.reasons)
+
+    def test_blocks_private_move_and_bulk_move(self) -> None:
+        private_file = PROJECT_ROOT / "data" / "private" / "demo.txt"
+        decision = check_command("mv", [str(private_file), "/tmp/demo.txt"])
+        bulk = check_command("mv", ["a", "b", "c", "d", "e", "f", "target"], cwd=PROJECT_ROOT)
+
+        self.assertFalse(decision.allowed)
+        self.assertTrue(any("private data" in reason for reason in decision.reasons))
+        self.assertFalse(bulk.allowed)
+        self.assertIn("bulk move: 6 sources", bulk.reasons)
+
+    def test_blocks_dangerous_git_commands(self) -> None:
+        reset = check_command("git", ["reset", "--hard"])
+        clean = check_command("git", ["clean", "-fd"])
+        force = check_command("git", ["push", "--force", "origin", "main"])
+        reset_with_global_options = check_command("git", ["-C", str(REPO_ROOT), "reset", "--hard"])
+
+        self.assertFalse(reset.allowed)
+        self.assertIn("git reset --hard", reset.reasons)
+        self.assertFalse(clean.allowed)
+        self.assertIn("git clean", clean.reasons)
+        self.assertFalse(force.allowed)
+        self.assertIn("force push", force.reasons)
+        self.assertFalse(reset_with_global_options.allowed)
+        self.assertIn("git reset --hard", reset_with_global_options.reasons)
+
+    def test_git_subcommand_parser_skips_global_options(self) -> None:
+        parsed = git_subcommand_args(["-C", str(REPO_ROOT), "-c", "core.quotepath=false", "push", "-f"])
+
+        self.assertEqual(parsed, ["push", "-f"])
+
+    def test_allows_routine_git_status(self) -> None:
+        decision = check_command("git", ["status", "--short"])
+
+        self.assertTrue(decision.allowed)
+        self.assertEqual(decision.reasons, ())
+
+    def test_blocks_destructive_find(self) -> None:
+        decision = check_command("find", [str(PROJECT_ROOT), "-name", "*.tmp", "-delete"])
+
+        self.assertFalse(decision.allowed)
+        self.assertIn("find -delete", decision.reasons)
 
 
 class SystemQuickCheckTests(unittest.TestCase):
