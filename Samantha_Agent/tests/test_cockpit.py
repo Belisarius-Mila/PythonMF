@@ -79,6 +79,9 @@ from app.cockpit import (
     purge_trash_confirmation_phrase,
     quick_note_detail_status,
     quick_notes_status,
+    project_audit_recent_reports,
+    project_audit_report_file_status,
+    project_audit_report_status,
     quantitative_status_overview,
     preview_email_work_queue_attachment_action,
     process_email_work_queue_batch,
@@ -2037,6 +2040,18 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("dashboardQuantitativeBtn", COCKPIT_HTML)
         self.assertIn("quantitativeModal", COCKPIT_HTML)
         self.assertIn("/api/quantitative-status", COCKPIT_HTML)
+        self.assertIn("dashboardProjectAuditBtn", COCKPIT_HTML)
+        self.assertIn("projectAuditModal", COCKPIT_HTML)
+        self.assertIn("projectAuditSaveBtn", COCKPIT_HTML)
+        self.assertIn("projectAuditRecentList", COCKPIT_HTML)
+        self.assertIn("/api/project-audit?mode=quick", COCKPIT_HTML)
+        self.assertIn("/api/project-audit/recent?limit=5", COCKPIT_HTML)
+        self.assertIn("/api/project-audit/report?name=", COCKPIT_HTML)
+        self.assertIn("/api/project-audit/save", COCKPIT_HTML)
+        self.assertIn("openProjectAuditModal", COCKPIT_HTML)
+        self.assertIn("loadRecentProjectAuditReports", COCKPIT_HTML)
+        self.assertIn("loadProjectAuditReport", COCKPIT_HTML)
+        self.assertIn("saveProjectAuditReport", COCKPIT_HTML)
         self.assertIn("dashboardQuickNotesBtn", COCKPIT_HTML)
         self.assertIn("dashboardQuickNotes", COCKPIT_HTML)
         self.assertIn("refreshQuickNotesSummary", COCKPIT_HTML)
@@ -3648,6 +3663,71 @@ Dalsi krok:
         self.assertEqual(result["diff"]["local"][0]["extension"], ".txt")
         self.assertEqual(result["diff"]["local"][0]["delta_lines"], 1)
         self.assertEqual(result["diff"]["git_tracked"], [])
+
+    def test_project_audit_report_status_returns_report_without_saving_by_default(self) -> None:
+        fake_result = SimpleNamespace(mode="quick", saved_path=None)
+        with (
+            patch("app.cockpit.run_samantha_project_audit", return_value=fake_result) as run_mock,
+            patch("app.cockpit.format_project_audit_result", return_value="REPORT TEXT") as format_mock,
+        ):
+            result = project_audit_report_status(mode="quick", save=False)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["message"], "Systémový audit načten.")
+        self.assertEqual(result["mode"], "quick")
+        self.assertEqual(result["saved_path"], "")
+        self.assertEqual(result["report"], "REPORT TEXT")
+        run_mock.assert_called_once_with(mode="quick", save=False)
+        format_mock.assert_called_once_with(fake_result)
+
+    def test_project_audit_report_status_can_save_full_report(self) -> None:
+        fake_result = SimpleNamespace(
+            mode="full",
+            saved_path=Path("memory/reports/systemovy_audit_projekty_tooly_vrstvy_20260623_180000.txt"),
+        )
+        with (
+            patch("app.cockpit.run_samantha_project_audit", return_value=fake_result) as run_mock,
+            patch("app.cockpit.format_project_audit_result", return_value="FULL REPORT"),
+        ):
+            result = project_audit_report_status(mode="full", save=True)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["mode"], "full")
+        self.assertIn("systemovy_audit_projekty_tooly_vrstvy_20260623_180000.txt", result["saved_path"])
+        self.assertIn("Systémový audit uložen", result["message"])
+        self.assertEqual(result["report"], "FULL REPORT")
+        run_mock.assert_called_once_with(mode="full", save=True)
+
+    def test_project_audit_recent_reports_lists_audit_files(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            reports_dir = Path(temp_dir)
+            valid_names = [
+                "systemovy_audit_projekty_tooly_vrstvy_20260623_180000.txt",
+                "systemovy_audit_projekty_tooly_vrstvy_20260623_181000.txt",
+            ]
+            for name in valid_names:
+                (reports_dir / name).write_text("audit\n", encoding="utf-8")
+            (reports_dir / "jiny_report.txt").write_text("ignore\n", encoding="utf-8")
+
+            result = project_audit_recent_reports(limit=10, reports_dir=reports_dir)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual({item["name"] for item in result["reports"]}, set(valid_names))
+        self.assertTrue(all(item["size"] > 0 for item in result["reports"]))
+
+    def test_project_audit_report_file_status_reads_only_whitelisted_report_names(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            reports_dir = Path(temp_dir)
+            valid_name = "systemovy_audit_projekty_tooly_vrstvy_20260623_180000.txt"
+            (reports_dir / valid_name).write_text("bezpecny report\n", encoding="utf-8")
+
+            valid = project_audit_report_file_status(name=valid_name, reports_dir=reports_dir)
+            invalid = project_audit_report_file_status(name="../secret.txt", reports_dir=reports_dir)
+
+        self.assertTrue(valid["ok"])
+        self.assertEqual(valid["report"], "bezpecny report\n")
+        self.assertFalse(invalid["ok"])
+        self.assertEqual(invalid["message"], "Neplatny nazev reportu.")
 
     def test_quick_notes_status_returns_numbered_overview(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

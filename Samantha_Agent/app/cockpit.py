@@ -106,6 +106,8 @@ from app.lekarna.service import (
 from app.quantitative_status import DEFAULT_METRICS_PATH as QUANTITATIVE_STATUS_METRICS_PATH
 from app.quantitative_status import ExtensionStats as QuantitativeExtensionStats
 from app.quantitative_status import run_samantha_quantitative_status
+from app.project_audit_report import REPORTS_DIR as PROJECT_AUDIT_REPORTS_DIR
+from app.project_audit_report import format_project_audit_result, run_samantha_project_audit
 from app.quick_notes import DEFAULT_ICLOUD_SHORTCUTS_INBOX, DEFAULT_INDEX_PATH as QUICK_NOTES_INDEX_PATH
 from app.quick_notes import ACTION_KIND_LABELS, classify_quick_note_text
 from app.quick_notes import sync_quick_notes_index
@@ -1656,6 +1658,82 @@ def quantitative_status_overview(
         "current": quantitative_result_to_json(current),
         "previous": previous,
         "diff": diff,
+    }
+
+
+def project_audit_report_status(*, mode: str = "quick", save: bool = False) -> dict[str, Any]:
+    normalized_mode = mode if mode in {"quick", "full"} else "quick"
+    try:
+        result = run_samantha_project_audit(mode=normalized_mode, save=save)
+    except Exception as exc:  # pragma: no cover - defensive UI boundary
+        return {
+            "ok": False,
+            "message": f"Systémový audit se nepodařilo vygenerovat: {exc}",
+            "mode": normalized_mode,
+            "saved_path": "",
+            "report": "",
+        }
+    saved_path = str(relative_to_project(result.saved_path)) if result.saved_path else ""
+    return {
+        "ok": True,
+        "message": f"Systémový audit uložen: {saved_path}" if saved_path else "Systémový audit načten.",
+        "mode": result.mode,
+        "saved_path": saved_path,
+        "report": format_project_audit_result(result),
+    }
+
+
+def project_audit_recent_reports(*, limit: int = 5, reports_dir: Path = PROJECT_AUDIT_REPORTS_DIR) -> dict[str, Any]:
+    safe_limit = max(1, min(int(limit or 5), 20))
+    try:
+        paths = sorted(
+            reports_dir.glob("systemovy_audit_projekty_tooly_vrstvy_*.txt"),
+            key=lambda path: path.stat().st_mtime,
+            reverse=True,
+        )
+    except OSError as exc:
+        return {"ok": False, "message": f"Nelze nacist ulozene audity: {exc}", "reports": []}
+    return {
+        "ok": True,
+        "message": f"Načteno posledních {min(len(paths), safe_limit)} systémových auditů.",
+        "reports": [_project_audit_report_file_summary(path) for path in paths[:safe_limit]],
+    }
+
+
+def project_audit_report_file_status(*, name: str, reports_dir: Path = PROJECT_AUDIT_REPORTS_DIR) -> dict[str, Any]:
+    safe_name = Path(str(name or "")).name
+    if not safe_name.startswith("systemovy_audit_projekty_tooly_vrstvy_") or not safe_name.endswith(".txt"):
+        return {"ok": False, "message": "Neplatny nazev reportu.", "report": "", "name": safe_name}
+    path = reports_dir / safe_name
+    try:
+        resolved = path.resolve()
+        if not resolved.is_relative_to(reports_dir.resolve()):
+            return {"ok": False, "message": "Report musi byt v adresari memory/reports.", "report": "", "name": safe_name}
+        text = resolved.read_text(encoding="utf-8")
+    except OSError as exc:
+        return {"ok": False, "message": f"Report nelze nacist: {exc}", "report": "", "name": safe_name}
+    return {
+        "ok": True,
+        "message": f"Systémový audit načten: {safe_name}",
+        "name": safe_name,
+        "path": str(relative_to_project(resolved)),
+        "report": text,
+    }
+
+
+def _project_audit_report_file_summary(path: Path) -> dict[str, Any]:
+    try:
+        stat = path.stat()
+        modified_at = datetime.fromtimestamp(stat.st_mtime, timezone.utc).astimezone().isoformat(timespec="seconds")
+        size = stat.st_size
+    except OSError:
+        modified_at = ""
+        size = 0
+    return {
+        "name": path.name,
+        "path": str(relative_to_project(path)),
+        "modified_at": modified_at,
+        "size": size,
     }
 
 
@@ -10477,6 +10555,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "ui_presence",
     },
     {
+        "path": "/api/project-audit/save",
+        "label": "Ulozit systemovy audit",
+        "risk": "private_write",
+        "confirmation": "none_backend",
+        "handler_name": "project_audit_report_status",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/email-processing/process-batch",
         "label": "Zpracovat davku e-mailu",
         "risk": "private_write",
@@ -10636,6 +10722,24 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/quantitative-status":
                     self.respond_json(quantitative_status_overview())
+                    return
+                if parsed.path == "/api/project-audit":
+                    params = parse_qs(parsed.query)
+                    mode = params.get("mode", ["quick"])[0]
+                    self.respond_json(project_audit_report_status(mode=mode, save=False))
+                    return
+                if parsed.path == "/api/project-audit/recent":
+                    params = parse_qs(parsed.query)
+                    try:
+                        limit = int(params.get("limit", ["5"])[0])
+                    except (TypeError, ValueError):
+                        limit = 5
+                    self.respond_json(project_audit_recent_reports(limit=limit))
+                    return
+                if parsed.path == "/api/project-audit/report":
+                    params = parse_qs(parsed.query)
+                    name = params.get("name", [""])[0]
+                    self.respond_json(project_audit_report_file_status(name=name))
                     return
                 if parsed.path == "/api/consistency-status":
                     self.respond_json(document_consistency_status())
@@ -10992,6 +11096,11 @@ class CockpitServer:
                             filename=str(payload.get("filename", "")),
                         )
                     )
+                    return
+                if parsed.path == "/api/project-audit/save":
+                    payload = self.read_json()
+                    mode = str(payload.get("mode", "full"))
+                    self.respond_json(project_audit_report_status(mode=mode, save=True))
                     return
                 if parsed.path == "/api/email-processing/process-batch":
                     payload = self.read_json()
@@ -12758,6 +12867,7 @@ COCKPIT_HTML = """<!doctype html>
     .quantitative-card { border: 1px solid #edf0f4; border-radius: 8px; padding: 10px; background: #fbfcfe; display: grid; gap: 5px; }
     .quantitative-card h3 { margin: 0; font-size: 13px; color: #253047; }
     .quantitative-card pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .project-audit-report { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 70vh; overflow: auto; margin: 0; }
 	    .quantitative-diff-list { display: grid; gap: 8px; }
 	    .quantitative-diff-item { border-top: 1px solid #edf0f4; padding-top: 8px; display: grid; gap: 4px; }
 	    .quantitative-diff-item:first-child { border-top: 0; padding-top: 0; }
@@ -13081,6 +13191,7 @@ COCKPIT_HTML = """<!doctype html>
           <div class="quick-actions service-actions">
             <button class="secondary" id="dashboardTerminalBtn">Terminál v projektu</button>
             <button class="secondary" id="dashboardQuantitativeBtn">Systémový souhrn</button>
+            <button class="secondary" id="dashboardProjectAuditBtn">Systémový audit</button>
             <button class="secondary" id="dashboardQuickNotesBtn">Rychlé poznámky</button>
             <button class="secondary" id="dashboardRecoveryBtn">Recovery centrum</button>
             <button class="secondary" id="dashboardDiagnosticsBtn">Diagnostika</button>
@@ -13535,6 +13646,28 @@ COCKPIT_HTML = """<!doctype html>
       </div>
     </div>
   </div>
+  <div id="projectAuditModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="projectAuditTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="projectAuditTitle">Systémový audit</h2>
+        <div class="quick-actions">
+          <button class="secondary" id="projectAuditSaveBtn">Uložit full audit</button>
+          <button class="secondary" id="projectAuditCloseBtn">Zavřít</button>
+        </div>
+      </div>
+      <div class="modal-body quantitative-panel">
+        <div id="projectAuditStatus" class="status-line">Načítám systémový audit...</div>
+        <div class="quantitative-card">
+          <h3>Poslední uložené audity</h3>
+          <div id="projectAuditRecentList" class="project-list"></div>
+        </div>
+        <div class="quantitative-card">
+          <h3>Aktuální report</h3>
+          <pre id="projectAuditText" class="project-audit-report"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
   <script>
     const statusLine = document.getElementById("statusLine");
     const downloadsBody = document.getElementById("downloadsBody");
@@ -13664,6 +13797,12 @@ COCKPIT_HTML = """<!doctype html>
     const quantitativePrevious = document.getElementById("quantitativePrevious");
     const quantitativeDiffTotals = document.getElementById("quantitativeDiffTotals");
     const quantitativeDiffList = document.getElementById("quantitativeDiffList");
+    const projectAuditModal = document.getElementById("projectAuditModal");
+    const projectAuditCloseBtn = document.getElementById("projectAuditCloseBtn");
+    const projectAuditSaveBtn = document.getElementById("projectAuditSaveBtn");
+    const projectAuditStatus = document.getElementById("projectAuditStatus");
+    const projectAuditRecentList = document.getElementById("projectAuditRecentList");
+    const projectAuditText = document.getElementById("projectAuditText");
     const todayNewPdfCount = document.getElementById("todayNewPdfCount");
     const todayReviewCount = document.getElementById("todayReviewCount");
     const todayProblemCount = document.getElementById("todayProblemCount");
@@ -13686,6 +13825,7 @@ COCKPIT_HTML = """<!doctype html>
     const dashboardReviewBtn = document.getElementById("dashboardReviewBtn");
     const dashboardTerminalBtn = document.getElementById("dashboardTerminalBtn");
 		    const dashboardQuantitativeBtn = document.getElementById("dashboardQuantitativeBtn");
+    const dashboardProjectAuditBtn = document.getElementById("dashboardProjectAuditBtn");
 		    const dashboardQuickNotesBtn = document.getElementById("dashboardQuickNotesBtn");
     const dashboardUrgentRemindersBtn = document.getElementById("dashboardUrgentRemindersBtn");
     const dashboardRecoveryBtn = document.getElementById("dashboardRecoveryBtn");
@@ -13809,6 +13949,7 @@ COCKPIT_HTML = """<!doctype html>
       ["Quick Notes", "/api/quick-notes/status"],
       ["Důležitá připomenutí", "/api/urgent-reminders/status"],
       ["Kvantitativní", "/api/quantitative-status"],
+      ["Systémový audit", "/api/project-audit?mode=quick"],
       ["Consistency audit", "/api/consistency-status"],
       ["Dokumenty k revizi", "/api/documents/review-report"]
     ];
@@ -15873,6 +16014,100 @@ COCKPIT_HTML = """<!doctype html>
 
     function closeQuantitativeModal() {
       quantitativeModal.classList.add("hidden");
+    }
+
+    async function openProjectAuditModal() {
+      projectAuditModal.classList.remove("hidden");
+      projectAuditStatus.textContent = "Načítám systémový audit...";
+      projectAuditText.textContent = "";
+      await Promise.all([
+        fetchJson("/api/project-audit?mode=quick")
+          .then((data) => renderProjectAuditReport(data))
+          .catch((err) => {
+            recordFrontendError(err);
+            projectAuditStatus.textContent = `Chyba načtení systémového auditu: ${err}`;
+          }),
+        loadRecentProjectAuditReports(),
+      ]);
+    }
+
+    function closeProjectAuditModal() {
+      projectAuditModal.classList.add("hidden");
+    }
+
+    function renderProjectAuditReport(data) {
+      projectAuditStatus.textContent = data.message || "Systémový audit načten.";
+      projectAuditText.textContent = data.report || "Report je prázdný.";
+    }
+
+    async function loadRecentProjectAuditReports() {
+      try {
+        const data = await fetchJson("/api/project-audit/recent?limit=5");
+        renderRecentProjectAuditReports(data.reports || []);
+      } catch (err) {
+        recordFrontendError(err);
+        projectAuditRecentList.innerHTML = `<div class="muted">Nelze načíst uložené audity: ${escapeHtml(err.message || String(err))}</div>`;
+      }
+    }
+
+    function renderRecentProjectAuditReports(reports) {
+      projectAuditRecentList.innerHTML = "";
+      if (!reports.length) {
+        projectAuditRecentList.innerHTML = '<div class="muted">Zatím není uložený žádný audit.</div>';
+        return;
+      }
+      reports.forEach((report) => {
+        const item = document.createElement("div");
+        item.className = "project-row";
+        item.innerHTML = `
+          <div>
+            <strong>${escapeHtml(report.name || "")}</strong>
+            <div class="project-meta">${escapeHtml(report.modified_at || "")} · ${Number(report.size || 0)} B</div>
+            <div class="project-meta">${escapeHtml(report.path || "")}</div>
+          </div>
+          <button class="secondary" type="button">Načíst</button>
+        `;
+        item.querySelector("button").addEventListener("click", () => loadProjectAuditReport(report.name || ""));
+        projectAuditRecentList.appendChild(item);
+      });
+    }
+
+    async function loadProjectAuditReport(name) {
+      if (!name) return;
+      projectAuditStatus.textContent = "Načítám uložený audit...";
+      try {
+        const data = await fetchJson(`/api/project-audit/report?name=${encodeURIComponent(name)}`);
+        renderProjectAuditReport(data);
+      } catch (err) {
+        recordFrontendError(err);
+        projectAuditStatus.textContent = `Chyba načtení uloženého auditu: ${err}`;
+      }
+    }
+
+    async function saveProjectAuditReport() {
+      const original = projectAuditSaveBtn.textContent;
+      projectAuditSaveBtn.disabled = true;
+      projectAuditSaveBtn.textContent = "Ukládám...";
+      projectAuditStatus.textContent = "Generuji a ukládám full systémový audit...";
+      try {
+        const res = await fetch("/api/project-audit/save", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({mode: "full"}),
+        });
+        if (!res.ok) {
+          throw new Error(`/api/project-audit/save returned ${res.status}`);
+        }
+        const data = await res.json();
+        renderProjectAuditReport(data);
+        await loadRecentProjectAuditReports();
+      } catch (err) {
+        recordFrontendError(err);
+        projectAuditStatus.textContent = `Chyba uložení systémového auditu: ${err}`;
+      } finally {
+        projectAuditSaveBtn.disabled = false;
+        projectAuditSaveBtn.textContent = original;
+      }
     }
 
     function renderQuantitativeStatus(data) {
@@ -19312,6 +19547,7 @@ COCKPIT_HTML = """<!doctype html>
     dashboardReviewBtn.addEventListener("click", () => openScanDocu(true));
 	    dashboardTerminalBtn.addEventListener("click", () => postAction("/api/terminal/open", dashboardTerminalBtn));
 		    dashboardQuantitativeBtn.addEventListener("click", openQuantitativeModal);
+    dashboardProjectAuditBtn.addEventListener("click", openProjectAuditModal);
 		    dashboardQuickNotesBtn.addEventListener("click", openQuickNotesModal);
     dashboardUrgentRemindersBtn.addEventListener("click", openUrgentRemindersModal);
     urgentReminderAlertBtn.addEventListener("click", openUrgentRemindersModal);
@@ -19377,6 +19613,8 @@ COCKPIT_HTML = """<!doctype html>
 		    recoveryCloseBtn.addEventListener("click", closeRecoveryModal);
     diagnosticsCloseBtn.addEventListener("click", closeDiagnosticsModal);
 		    quantitativeCloseBtn.addEventListener("click", closeQuantitativeModal);
+    projectAuditCloseBtn.addEventListener("click", closeProjectAuditModal);
+    projectAuditSaveBtn.addEventListener("click", saveProjectAuditReport);
     remindersModal.addEventListener("click", (event) => {
       if (event.target === remindersModal) {
         closeRemindersModal();
@@ -19400,6 +19638,11 @@ COCKPIT_HTML = """<!doctype html>
     quantitativeModal.addEventListener("click", (event) => {
       if (event.target === quantitativeModal) {
         closeQuantitativeModal();
+      }
+    });
+    projectAuditModal.addEventListener("click", (event) => {
+      if (event.target === projectAuditModal) {
+        closeProjectAuditModal();
       }
     });
     webAppsCloseBtn.addEventListener("click", closeWebAppsModal);
@@ -19477,6 +19720,8 @@ COCKPIT_HTML = """<!doctype html>
         closeRemindersModal();
       } else if (event.key === "Escape" && !quantitativeModal.classList.contains("hidden")) {
         closeQuantitativeModal();
+      } else if (event.key === "Escape" && !projectAuditModal.classList.contains("hidden")) {
+        closeProjectAuditModal();
       } else if (event.key === "Escape" && !webAppsModal.classList.contains("hidden")) {
         closeWebAppsModal();
       } else if (event.key === "Escape" && !libraryModal.classList.contains("hidden")) {
