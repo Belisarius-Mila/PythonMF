@@ -13,16 +13,16 @@ Bezpecnost:
 RANNI PROVOZNI POZNAMKA
 ======================================================================
 
-- Git: clean, ## main...origin/main
+- Git: dirty (2 changed/untracked), ## main...origin/main
 - Zaloha: ZALOHA SAMANTHY: - Posledni zaloha je v 3dennim intervalu (2026-06-27).
 - Aktivnich `[PRIPOMENOUT]`: 64
-- Kvantitativne: lokalne 1441 souboru / 132719 radku; git tracked 646 souboru / 124565 radku.
+- Kvantitativne: lokalne 1444 souboru / 133911 radku; git tracked 648 souboru / 125185 radku.
 - Capability audit: 81 agent toolu, 81 namapovanych, 0 nemapovanych, 2 shell workflow.
 
 Varovani:
 - Historicky/prekrity handoff zustal aktivni: `handoffs/email_processing_cleanup_and_documents_next_2026_06_03.md` - [PRIPOMENOUT] Email Processing v Cockpitu je uspokojive uzavreny: Work Queue ma oddelene zpracovani, presun do kose a trvale smazani z kose, nove nacitani filtruje historicky dokoncene polozky a priste se ma pokracovat obecnym zpracovanim dokumentu.
-- MEMORY_INDEX.md:14 obsahuje relativni nebo git-stavovou formulaci: - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_23.txt` - [PRIPOMENOUT] aktualni systemovy audit: projekty, tooly, vrstvy, dnesni priority, provozni stav, capability gaps a navrh nejmensiho dalsiho kroku.
-- MEMORY_INDEX.md:156 obsahuje relativni nebo git-stavovou formulaci: - `handoffs/cockpit_dashboard_terminal_launch_checkpoint_2026_05_29.md` - Samantha Cockpit: dashboard Dnes/Stav/Akce, git status, tlacitka Samantha chat a Codex CLI; puvodni stav branch ahead 6 je prekryty, Cockpit commity jsou podle `git log` na `origin/main` a aktualni `HEAD` i `origin/main` jsou `e123d52 Add emotion management tool notes`.
+- MEMORY_INDEX.md:14 obsahuje relativni nebo git-stavovou formulaci: - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_133949.txt` - [PRIPOMENOUT] aktualni systemovy audit: projekty, tooly, vrstvy, dnesni priority, provozni stav, capability gaps a navrh nejmensiho dalsiho kroku.
+- MEMORY_INDEX.md:157 obsahuje relativni nebo git-stavovou formulaci: - `handoffs/cockpit_dashboard_terminal_launch_checkpoint_2026_05_29.md` - Samantha Cockpit: dashboard Dnes/Stav/Akce, git status, tlacitka Samantha chat a Codex CLI; puvodni stav branch ahead 6 je prekryty, Cockpit commity jsou podle `git log` na `origin/main` a aktualni `HEAD` i `origin/main` jsou `e123d52 Add emotion management tool notes`.
 
 ======================================================================
 RYCHLE DOPORUCENI PRO DNES
@@ -132,7 +132,7 @@ Typ: projekt
 Priorita: 1
 Rezim: active
 Stav: Rozpracovany projekt, aktualni e-mailova etapa je uspokojive uzavrena. iCloud/Seznam read-only workflow je hotovy pro hlavicky, potvrzene cteni, triage, archive/case vrstvy a dvoukrokovy outbound. Cockpit ma okno `Email Processing`, ktere z prehledu dela rozhodovaci karty po sekcich s volbami `Zpracovat`, `Ignorovat` a `Kos`; navazujici `Email Work Queue` nacita detail read-only, uklada e-maily do EmailArchiveVaul...
-Dalsi krok: Nevracet pojistnou e-mailovou davku z 2026-06-30 ani obecne Work Queue bloky jako automaticky dalsi krok. Dalsi e-mailovou praci otevirat az pri konkretnim novem zadani nebo pri samostatnem auditu fronty; mazani, odesilani, presun do kose a ukladani obsahu zustavaji potvrzovane.
+Dalsi krok: Nevracet pojistnou e-mailovou davku z 2026-06-30 ani obecne Work Queue bloky jako automaticky dalsi krok. Dalsi e-mailovou praci otevirat az pri konkretnim novem zadani nebo pri samostatnem auditu fronty; mazani, odesilani, presun do kose a ukladani obsahu...
 
 15. Lekarna
 Typ: projekt
@@ -249,7 +249,7 @@ Stav: backup OK
 Dalsi krok: pred rizikovou praci overit backup a git stav
 
 3. Git checkpoint vrstva
-Stav: clean, ## main...origin/main
+Stav: dirty (2 changed/untracked), ## main...origin/main
 Dalsi krok: oddělit hotove a rozpracovane veci do tematickych commitu
 
 4. Cockpit UI vrstva
@@ -282,7 +282,7 @@ Silne stranky:
 - Report lze opakovat bez cteni private dat.
 
 Rizika:
-- Git/provozni stav: clean, ## main...origin/main.
+- Git/provozni stav: dirty (2 changed/untracked), ## main...origin/main.
 - Pocet aktivnich `[PRIPOMENOUT]`: 64.
 - Automaticky report sklada fakta; konecny vyber priority porad potvrzuje Mila.
 

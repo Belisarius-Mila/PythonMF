@@ -132,7 +132,7 @@ Typ: projekt
 Priorita: 1
 Rezim: active
 Stav: Rozpracovany projekt, aktualni e-mailova etapa je uspokojive uzavrena. iCloud/Seznam read-only workflow je hotovy pro hlavicky, potvrzene cteni, triage, archive/case vrstvy a dvoukrokovy outbound. Cockpit ma okno `Email Processing`, ktere z prehledu dela rozhodovaci karty po sekcich s volbami `Zpracovat`, `Ignorovat` a `Kos`; navazujici `Email Work Queue` nacita detail read-only, uklada e-maily do EmailArchiveVaul...
-Dalsi krok: V Cockpitu otevrit `Email Work Queue`, zvolit blok `Finanční správa`, potom `VAK`, rucne nacitat detail, vybrat PDF prilohy a zpracovat jen aktualni blok; faktury nad 2000 Kč jet az potom po mensich davkach podle castky. Mazani, odesilani, presun do kose a...
+Dalsi krok: Nevracet pojistnou e-mailovou davku z 2026-06-30 ani obecne Work Queue bloky jako automaticky dalsi krok. Dalsi e-mailovou praci otevirat az pri konkretnim novem zadani nebo pri samostatnem auditu fronty; mazani, odesilani, presun do kose a ukladani obsahu zustavaji potvrzovane.
 
 15. Lekarna
 Typ: projekt

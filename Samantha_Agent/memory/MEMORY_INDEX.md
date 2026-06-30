@@ -11,7 +11,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Reports
 
-- `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_133949.txt` - [PRIPOMENOUT] aktualni systemovy audit: projekty, tooly, vrstvy, dnesni priority, provozni stav, capability gaps a navrh nejmensiho dalsiho kroku.
+- `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_151531.txt` - [PRIPOMENOUT] aktualni systemovy audit k 2026-06-30 15:15: projekty, tooly, vrstvy, priority, provozni stav, capability gaps a navrh nejmensiho dalsiho kroku.
 - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_23.txt` - historicky systemovy audit: projekty, tooly, vrstvy, tehdejsi priority, provozni stav, capability gaps a navrh tehdejsiho nejmensiho dalsiho kroku.
 - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_11.txt` - historicky strukturovany audit podle QN #40 a QN #13: projekty, tooly a vrstvy serazene podle priorit 1-3, odhad rozpracovanosti v %, dalsi kroky a navrh tehdejsiho itinerare.
 - `reports/cockpit_ui_content_audit_2026_06_11.md` - kratky read-only audit obsahu oken Cockpitu: co je denni, obcasne, servisni a archivni; duplicity, technicke nazvy a navrh prvniho UI cleanupu.
