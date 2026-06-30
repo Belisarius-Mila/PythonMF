@@ -5,6 +5,7 @@ import time
 import unittest
 import os
 import subprocess
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -20,6 +21,7 @@ from scripts.git_safety_check import (
 )
 from scripts.autosave_status import autosave_status, find_autosave_watchers, format_autosave_status
 from scripts.autosave_resume_prompt import autosave_resume_candidate, parse_autosave_source, startup_prompt
+from scripts.cleanup_session_autosave import build_cleanup_plan, format_plan
 from scripts.system_quick_check import CheckLine, autosave_line, format_morning_sentence
 from scripts.work_context_guard import WorkContextStatus, format_work_context_guard, parse_porcelain_status
 
@@ -247,6 +249,64 @@ class SystemQuickCheckTests(unittest.TestCase):
 
         self.assertEqual(parsed, source)
         self.assertIn("Jen cti, nic nemen", startup_prompt())
+
+
+class AutosaveCleanupTests(unittest.TestCase):
+    def test_cleanup_plan_deletes_only_old_timestamped_snapshots(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            old_jsonl = root / "session_20260620_120000.jsonl"
+            old_txt = root / "session_20260620_120000.txt"
+            recent_jsonl = root / "session_20260629_120000.jsonl"
+            latest_jsonl = root / "latest_session.jsonl"
+            for path in (old_jsonl, old_txt, recent_jsonl, latest_jsonl):
+                path.write_text("x" * 10, encoding="utf-8")
+
+            plan = build_cleanup_plan(
+                autosave_dir=root,
+                retention_days=3,
+                keep_latest_snapshots=0,
+                now=datetime(2026, 6, 30, 12, 0, 0),
+            )
+
+        self.assertEqual(plan.delete_count, 2)
+        self.assertEqual({Path(item.path).name for item in plan.delete_files}, {old_jsonl.name, old_txt.name})
+        self.assertEqual(plan.reclaim_bytes, 20)
+
+    def test_cleanup_plan_keeps_latest_snapshots_even_when_old(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            newest_old = root / "session_20260620_130000.jsonl"
+            older = root / "session_20260620_120000.jsonl"
+            newest_old.write_text("newest", encoding="utf-8")
+            older.write_text("older", encoding="utf-8")
+
+            plan = build_cleanup_plan(
+                autosave_dir=root,
+                retention_days=3,
+                keep_latest_snapshots=1,
+                now=datetime(2026, 6, 30, 12, 0, 0),
+            )
+
+        self.assertEqual(plan.delete_count, 1)
+        self.assertEqual(Path(plan.delete_files[0].path).name, older.name)
+
+    def test_format_plan_is_dry_run_by_default(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            old_jsonl = root / "session_20260620_120000.jsonl"
+            old_jsonl.write_text("x", encoding="utf-8")
+
+            plan = build_cleanup_plan(
+                autosave_dir=root,
+                retention_days=3,
+                keep_latest_snapshots=0,
+                now=datetime(2026, 6, 30, 12, 0, 0),
+            )
+            text = format_plan(plan)
+
+        self.assertIn("dry-run", text)
+        self.assertIn("--apply --confirm", text)
 
 
 class WorkContextGuardTests(unittest.TestCase):

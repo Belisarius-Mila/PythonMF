@@ -94,6 +94,7 @@ from app.cockpit import (
     recovery_center_status,
     save_email_processing_decision,
     search_document_index,
+    session_autosave_cleanup_action,
     set_adam_voice_bridge_marker_action,
     terminate_stale_codex_sessions_action,
     set_document_reading_status_action,
@@ -2080,6 +2081,11 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("recoveryModal", COCKPIT_HTML)
         self.assertIn("/api/recovery/status", COCKPIT_HTML)
         self.assertIn("openRecoveryModal", COCKPIT_HTML)
+        self.assertIn("dashboardAutosaveCleanupBtn", COCKPIT_HTML)
+        self.assertIn("autosaveCleanupApplyBtn", COCKPIT_HTML)
+        self.assertIn("/api/session-autosave/cleanup", COCKPIT_HTML)
+        self.assertIn("previewAutosaveCleanup", COCKPIT_HTML)
+        self.assertIn("applyAutosaveCleanup", COCKPIT_HTML)
         self.assertIn("dashboardDiagnosticsBtn", COCKPIT_HTML)
         self.assertIn("diagnosticsModal", COCKPIT_HTML)
         self.assertIn("diagnosticsStatusSignals", COCKPIT_HTML)
@@ -3607,6 +3613,60 @@ Dalsi krok:
         self.assertEqual(result["active_project"]["name"], "Cockpit Recovery centrum")
         self.assertEqual(result["handoffs"][0]["title"], "Recovery test")
         self.assertIn("codex resume --last", [item["command"] for item in result["commands"]])
+
+    def test_session_autosave_cleanup_action_requires_confirmation_to_delete(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            old_snapshot = root / "session_20000101_120000.jsonl"
+            old_snapshot.write_text("citlivy obsah autosave se nesmi cist\n", encoding="utf-8")
+
+            preview = session_autosave_cleanup_action(
+                {"retention_days": 3, "keep_latest_snapshots": 0},
+                autosave_dir=root,
+            )
+            blocked = session_autosave_cleanup_action(
+                {
+                    "retention_days": 3,
+                    "keep_latest_snapshots": 0,
+                    "apply": True,
+                    "confirmation_text": "spatne",
+                },
+                autosave_dir=root,
+            )
+
+            self.assertTrue(preview["ok"])
+            self.assertEqual(preview["status"], "dry_run")
+            self.assertEqual(preview["plan"]["delete_count"], 1)
+            self.assertEqual(preview["plan"]["delete_files"], [])
+            self.assertEqual(len(preview["plan"]["delete_files_sample"]), 1)
+            self.assertFalse(blocked["ok"])
+            self.assertEqual(blocked["status"], "confirmation_required")
+            self.assertTrue(old_snapshot.exists())
+            self.assertNotIn("citlivy obsah", json.dumps(preview, ensure_ascii=False))
+
+    def test_session_autosave_cleanup_action_deletes_old_snapshots_after_confirmation(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            old_snapshot = root / "session_20000101_120000.jsonl"
+            latest = root / "latest_session.jsonl"
+            old_snapshot.write_text("old", encoding="utf-8")
+            latest.write_text("latest", encoding="utf-8")
+
+            result = session_autosave_cleanup_action(
+                {
+                    "retention_days": 3,
+                    "keep_latest_snapshots": 0,
+                    "apply": True,
+                    "confirmation_text": "SMAZAT STARE AUTOSAVE",
+                },
+                autosave_dir=root,
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["status"], "applied")
+            self.assertEqual(result["removed"], 1)
+            self.assertFalse(old_snapshot.exists())
+            self.assertTrue(latest.exists())
 
     def test_quantitative_status_overview_reports_diff_against_previous_snapshot(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

@@ -17,6 +17,7 @@ import tempfile
 import time
 import urllib.error
 from collections.abc import Callable
+from dataclasses import asdict
 from datetime import date, datetime, timezone
 from email import message_from_bytes
 from email.utils import parsedate_to_datetime
@@ -155,6 +156,11 @@ from app.speech.terminal_bridge import (
     normalize_tty,
 )
 from app.speech.voice_inbox import VoiceCommand, parse_voice_command_file, voice_command_to_dict
+from scripts.cleanup_session_autosave import (
+    CONFIRM_TEXT as AUTOSAVE_CLEANUP_CONFIRM_TEXT,
+    apply_cleanup as apply_session_autosave_cleanup,
+    build_cleanup_plan as build_session_autosave_cleanup_plan,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -870,6 +876,73 @@ def latest_autosave_metadata(path: Path) -> dict[str, Any]:
         "latest_modified_at": datetime.fromtimestamp(modified).isoformat(timespec="seconds"),
         "latest_age_seconds": age_seconds,
     }
+
+
+def session_autosave_cleanup_action(
+    payload: dict[str, Any],
+    *,
+    autosave_dir: Path = SESSION_AUTOSAVE_DIR,
+) -> dict[str, Any]:
+    try:
+        retention_days = int(payload.get("retention_days", 3))
+    except (TypeError, ValueError):
+        retention_days = 3
+    try:
+        keep_latest_snapshots = int(payload.get("keep_latest_snapshots", 12))
+    except (TypeError, ValueError):
+        keep_latest_snapshots = 12
+    retention_days = max(0, min(retention_days, 30))
+    keep_latest_snapshots = max(0, min(keep_latest_snapshots, 200))
+    plan = build_session_autosave_cleanup_plan(
+        autosave_dir=autosave_dir,
+        retention_days=retention_days,
+        keep_latest_snapshots=keep_latest_snapshots,
+    )
+    plan_dict = cockpit_session_autosave_cleanup_plan_dict(plan)
+    apply_requested = bool(payload.get("apply"))
+    if not apply_requested:
+        return {
+            "ok": True,
+            "status": "dry_run",
+            "applied": False,
+            "message": (
+                f"Dry-run: ke smazání {plan.delete_count} autosave souborů, "
+                f"odhad uvolnění {plan_dict['reclaim_gib']} GiB."
+            ),
+            "confirmation_text": AUTOSAVE_CLEANUP_CONFIRM_TEXT,
+            "plan": plan_dict,
+            "safety_note": "Obsah autosave logů se nečetl; kontrolují se jen názvy a velikosti.",
+        }
+    confirmation_text = str(payload.get("confirmation_text", ""))
+    if confirmation_text != AUTOSAVE_CLEANUP_CONFIRM_TEXT:
+        return {
+            "ok": False,
+            "status": "confirmation_required",
+            "applied": False,
+            "message": "Úklid autosave vyžaduje potvrzení v Cockpitu.",
+            "confirmation_text": AUTOSAVE_CLEANUP_CONFIRM_TEXT,
+            "plan": plan_dict,
+        }
+    removed = apply_session_autosave_cleanup(plan)
+    return {
+        "ok": True,
+        "status": "applied",
+        "applied": True,
+        "removed": removed,
+        "message": f"Úklid autosave hotov: smazáno {removed} starých snapshotů.",
+        "plan": plan_dict,
+        "safety_note": "Ponechané jsou aktuální latest soubory, poslední 3 dny a pojistka nejnovějších snapshotů.",
+    }
+
+
+def cockpit_session_autosave_cleanup_plan_dict(plan: Any) -> dict[str, Any]:
+    plan_dict = asdict(plan)
+    delete_files = plan_dict.get("delete_files", [])
+    plan_dict["delete_files_sample"] = delete_files[:12]
+    plan_dict["delete_files_omitted"] = max(0, len(delete_files) - 12)
+    plan_dict["delete_files"] = []
+    plan_dict["reclaim_gib"] = round(int(plan_dict.get("reclaim_bytes", 0)) / 1024 / 1024 / 1024, 2)
+    return plan_dict
 
 
 def recovery_active_project(path: Path = ACTIVE_PROJECTS_PATH) -> dict[str, Any]:
@@ -10307,6 +10380,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/session-autosave/cleanup",
+        "label": "Uklidit stare autosave snapshoty",
+        "risk": "delete_or_purge",
+        "confirmation": "ui_confirm_plus_exact_phrase",
+        "handler_name": "session_autosave_cleanup_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/projects/lifecycle",
         "label": "Zmenit stav projektu",
         "risk": "private_write",
@@ -10870,6 +10951,10 @@ class CockpitServer:
                             port=cockpit_port,
                         )
                     )
+                    return
+                if parsed.path == "/api/session-autosave/cleanup":
+                    payload = self.read_json()
+                    self.respond_json(session_autosave_cleanup_action(payload))
                     return
                 if parsed.path == "/api/projects/lifecycle":
                     payload = self.read_json()
@@ -13194,10 +13279,25 @@ COCKPIT_HTML = """<!doctype html>
             <button class="secondary" id="dashboardProjectAuditBtn">Systémový audit</button>
             <button class="secondary" id="dashboardQuickNotesBtn">Rychlé poznámky</button>
             <button class="secondary" id="dashboardRecoveryBtn">Recovery centrum</button>
+            <button class="secondary" id="dashboardAutosaveCleanupBtn">Autosave úklid</button>
             <button class="secondary" id="dashboardDiagnosticsBtn">Diagnostika</button>
             <button class="secondary" id="dashboardRestartBtn">Restart Cockpitu</button>
             <button class="secondary" id="dashboardSpeakBtn">Přečíst stav</button>
             <button class="secondary" id="dashboardSpeakSelectionBtn">Přečíst výběr</button>
+          </div>
+        </div>
+      </section>
+      <section>
+        <h2>Autosave úklid</h2>
+        <div class="body">
+          <div class="voice-card">
+            <div class="voice-card-title">Staré session snapshoty</div>
+            <div id="autosaveCleanupStatus" class="status-line">Dry-run zatím nebyl spuštěný.</div>
+            <div class="voice-card-actions">
+              <button class="secondary" id="autosaveCleanupPreviewBtn" type="button">Spočítat úklid</button>
+              <button class="secondary danger" id="autosaveCleanupApplyBtn" type="button" disabled>Vyčistit staré autosave</button>
+            </div>
+            <pre id="autosaveCleanupOutput" class="voice-card-text"></pre>
           </div>
         </div>
       </section>
@@ -13829,6 +13929,11 @@ COCKPIT_HTML = """<!doctype html>
 		    const dashboardQuickNotesBtn = document.getElementById("dashboardQuickNotesBtn");
     const dashboardUrgentRemindersBtn = document.getElementById("dashboardUrgentRemindersBtn");
     const dashboardRecoveryBtn = document.getElementById("dashboardRecoveryBtn");
+    const dashboardAutosaveCleanupBtn = document.getElementById("dashboardAutosaveCleanupBtn");
+    const autosaveCleanupPreviewBtn = document.getElementById("autosaveCleanupPreviewBtn");
+    const autosaveCleanupApplyBtn = document.getElementById("autosaveCleanupApplyBtn");
+    const autosaveCleanupStatus = document.getElementById("autosaveCleanupStatus");
+    const autosaveCleanupOutput = document.getElementById("autosaveCleanupOutput");
     const dashboardDiagnosticsBtn = document.getElementById("dashboardDiagnosticsBtn");
     const dashboardRestartBtn = document.getElementById("dashboardRestartBtn");
 			    const dashboardSpeakBtn = document.getElementById("dashboardSpeakBtn");
@@ -13927,6 +14032,7 @@ COCKPIT_HTML = """<!doctype html>
     let currentLibrarySourceUrl = "";
     let currentLibraryExport = null;
     let currentQuantitative = null;
+    let currentAutosaveCleanupPlan = null;
     let frontendLastError = "";
     let frontendErrorHistory = [];
     let dashboardStatusSignals = {};
@@ -14096,11 +14202,16 @@ COCKPIT_HTML = """<!doctype html>
         "dashboardReviewBtn",
         "dashboardTerminalBtn",
         "dashboardQuantitativeBtn",
-	        "dashboardQuickNotesBtn",
+        "dashboardQuickNotesBtn",
         "dashboardUrgentRemindersBtn",
-	        "dashboardRecoveryBtn",
-	        "dashboardRestartBtn",
-	        "dashboardSpeakBtn",
+        "dashboardRecoveryBtn",
+        "dashboardAutosaveCleanupBtn",
+        "autosaveCleanupPreviewBtn",
+        "autosaveCleanupApplyBtn",
+        "autosaveCleanupStatus",
+        "autosaveCleanupOutput",
+        "dashboardRestartBtn",
+        "dashboardSpeakBtn",
         "dashboardSpeakSelectionBtn",
         "dashboardRefreshBtn",
         "voiceCommandDetails",
@@ -16363,6 +16474,94 @@ COCKPIT_HTML = """<!doctype html>
 	        recordFrontendError(err);
 	        showMessage("Spojení se při restartu přerušilo. Počkám, až Cockpit znovu odpoví.");
 	        await waitForCockpitAndReload();
+	      }
+	    }
+
+	    function formatAutosaveCleanupPlan(data) {
+	      const plan = data.plan || {};
+	      const reclaim = Number(plan.reclaim_gib || 0);
+	      return [
+	        data.message || "Autosave úklid spočítán.",
+	        "",
+	        `Retence: ponechat posledních ${plan.retention_days || 3} dní`,
+	        `Pojistka: ponechat nejnovějších ${plan.keep_latest_snapshots || 12} časových snapshotů`,
+	        `Timestampované soubory: ${plan.scanned_timestamped_files || 0}`,
+	        `Chráněné soubory: ${plan.protected_timestamped_files || 0}`,
+	        `Ke smazání: ${plan.delete_count || 0}`,
+	        `Odhad uvolnění: ${reclaim.toFixed(2)} GiB`,
+	        "",
+	        data.safety_note || "Obsah autosave logů se nečte."
+	      ].join("\\n");
+	    }
+
+	    async function previewAutosaveCleanup(button) {
+	      const targetButton = button || autosaveCleanupPreviewBtn || dashboardAutosaveCleanupBtn;
+	      targetButton.disabled = true;
+	      if (autosaveCleanupStatus) autosaveCleanupStatus.textContent = "Počítám autosave úklid...";
+	      if (autosaveCleanupOutput) autosaveCleanupOutput.textContent = "";
+	      try {
+	        const data = await postJson("/api/session-autosave/cleanup", {
+	          retention_days: 3,
+	          keep_latest_snapshots: 12,
+	          apply: false
+	        });
+	        currentAutosaveCleanupPlan = data.plan || null;
+	        if (autosaveCleanupStatus) autosaveCleanupStatus.textContent = data.message || "Dry-run hotov.";
+	        if (autosaveCleanupOutput) autosaveCleanupOutput.textContent = formatAutosaveCleanupPlan(data);
+	        if (autosaveCleanupApplyBtn) autosaveCleanupApplyBtn.disabled = !((data.plan || {}).delete_count > 0);
+	        servicePanel.open = true;
+	        showMessage(data.message || "Autosave úklid spočítán.");
+	      } catch (err) {
+	        recordFrontendError(err);
+	        if (autosaveCleanupStatus) autosaveCleanupStatus.textContent = `Chyba autosave dry-runu: ${err}`;
+	        if (autosaveCleanupApplyBtn) autosaveCleanupApplyBtn.disabled = true;
+	        showMessage(`Chyba autosave dry-runu: ${err}`);
+	      } finally {
+	        targetButton.disabled = false;
+	      }
+	    }
+
+	    async function applyAutosaveCleanup() {
+	      if (!currentAutosaveCleanupPlan) {
+	        await previewAutosaveCleanup(autosaveCleanupPreviewBtn);
+	      }
+	      const plan = currentAutosaveCleanupPlan || {};
+	      const deleteCount = Number(plan.delete_count || 0);
+	      const reclaim = Number(plan.reclaim_gib || 0);
+	      if (!deleteCount) {
+	        if (autosaveCleanupStatus) autosaveCleanupStatus.textContent = "Není co mazat.";
+	        return;
+	      }
+	      const ok = window.confirm(
+	        "Vyčistit staré autosave snapshoty?\\n\\n" +
+	        `Smazat se má ${deleteCount} starých timestampovaných souborů.\\n` +
+	        `Odhad uvolnění: ${reclaim.toFixed(2)} GiB.\\n\\n` +
+	        "Zůstanou latest soubory, poslední 3 dny a nejnovější pojistné snapshoty."
+	      );
+	      if (!ok) return;
+	      autosaveCleanupApplyBtn.disabled = true;
+	      if (autosaveCleanupPreviewBtn) autosaveCleanupPreviewBtn.disabled = true;
+	      if (autosaveCleanupStatus) autosaveCleanupStatus.textContent = "Mažu staré autosave snapshoty...";
+	      try {
+	        const data = await postJson("/api/session-autosave/cleanup", {
+	          retention_days: 3,
+	          keep_latest_snapshots: 12,
+	          apply: true,
+	          confirmation_text: "SMAZAT STARE AUTOSAVE"
+	        });
+	        currentAutosaveCleanupPlan = null;
+	        if (autosaveCleanupStatus) autosaveCleanupStatus.textContent = data.message || "Autosave úklid hotov.";
+	        if (autosaveCleanupOutput) autosaveCleanupOutput.textContent = formatAutosaveCleanupPlan(data);
+	        showMessage(data.message || "Autosave úklid hotov.");
+	        await refresh({silent: true, includeSecondary: false});
+	        await previewAutosaveCleanup(autosaveCleanupPreviewBtn);
+	      } catch (err) {
+	        recordFrontendError(err);
+	        if (autosaveCleanupStatus) autosaveCleanupStatus.textContent = `Chyba autosave úklidu: ${err}`;
+	        showMessage(`Chyba autosave úklidu: ${err}`);
+	      } finally {
+	        if (autosaveCleanupPreviewBtn) autosaveCleanupPreviewBtn.disabled = false;
+	        if (autosaveCleanupApplyBtn) autosaveCleanupApplyBtn.disabled = !currentAutosaveCleanupPlan || !(currentAutosaveCleanupPlan.delete_count > 0);
 	      }
 	    }
 
@@ -19552,6 +19751,11 @@ COCKPIT_HTML = """<!doctype html>
     dashboardUrgentRemindersBtn.addEventListener("click", openUrgentRemindersModal);
     urgentReminderAlertBtn.addEventListener("click", openUrgentRemindersModal);
 		    dashboardRecoveryBtn.addEventListener("click", openRecoveryModal);
+    dashboardAutosaveCleanupBtn.addEventListener("click", () => {
+      servicePanel.open = true;
+      previewAutosaveCleanup(dashboardAutosaveCleanupBtn);
+      autosaveCleanupStatus.scrollIntoView({behavior: "smooth", block: "center"});
+    });
     dashboardDiagnosticsBtn.addEventListener("click", openDiagnosticsModal);
     dashboardOverall.addEventListener("click", openDiagnosticsModal);
     dashboardOverall.addEventListener("keydown", (event) => {
@@ -19561,6 +19765,8 @@ COCKPIT_HTML = """<!doctype html>
       }
     });
     dashboardRestartBtn.addEventListener("click", restartCockpit);
+    autosaveCleanupPreviewBtn.addEventListener("click", () => previewAutosaveCleanup(autosaveCleanupPreviewBtn));
+    autosaveCleanupApplyBtn.addEventListener("click", applyAutosaveCleanup);
     devRunnerPanel.addEventListener("click", (event) => {
       const button = event.target.closest("button[data-dev-runner]");
       if (!button) return;

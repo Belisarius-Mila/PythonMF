@@ -330,6 +330,35 @@ Dulezite: tyto soubory mohou obsahovat citlive udaje z konverzace. Proto jsou
 ignorovane v `.gitignore` a nemaji se commitovat ani kopirovat do `memory/` bez
 rucni kontroly.
 
+## Retence a uklid autosave
+
+`data/session_autosave/` je jen nouzova lokalni obnova, ne archiv historie.
+Proto se ma pravidelne redukovat timestampovana kopie starych snapshotu.
+
+Bezpecny dry-run:
+
+```bash
+.venv/bin/python scripts/cleanup_session_autosave.py
+```
+
+Vychozi pravidlo:
+
+- ponechat vsechny timestampovane snapshoty za posledni 3 dny,
+- jako pojistku ponechat nejnovejsich 12 casovych snapshotu, i kdyby byly starsi,
+- nikdy nemazat `latest_session.jsonl`, `latest_session.txt`, `latest_info.txt`
+  ani jine soubory, ktere neodpovidaji tvaru `session_YYYYMMDD_HHMMSS.jsonl/txt`,
+- necist obsah autosave souboru, jen nazvy a velikosti.
+
+Ostre provedeni vyzaduje explicitni potvrzeni:
+
+```bash
+.venv/bin/python scripts/cleanup_session_autosave.py --apply --confirm 'SMAZAT STARE AUTOSAVE'
+```
+
+Pokud Mila zada uklid autosave obecne, nejdrive spustit dry-run a ukazat pocet
+souboru a odhad uvolneneho mista. Ostry `--apply` spustit az po jasnem souhlasu,
+protoze jde o mazani lokalnich nouzovych logu.
+
 ## Povinnost pri dulezite praci
 
 Po dulezitem ukolu nebo pred ukoncenim dlouhe prace ulozit kratky handoff do:
