@@ -469,6 +469,28 @@ body {
   pointer-events: auto;
 }
 
+.adult-quick-skip,
+.scene-quick-skip {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 16%;
+  height: 24%;
+  z-index: 12;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.adult-quick-skip:focus-visible,
+.scene-quick-skip:focus-visible {
+  outline: 3px solid rgba(255, 216, 107, 0.82);
+  outline-offset: -6px;
+}
+
 .owl-garden-word,
 .owl-garden-thumb {
   cursor: pointer;

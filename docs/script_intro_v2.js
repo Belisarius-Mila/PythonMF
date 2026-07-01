@@ -6,6 +6,7 @@ const mushroomPortalButton = document.getElementById("mushroomPortalButton");
 const bunnyPortalButton = document.getElementById("bunnyPortalButton");
 const forestSchoolPortalButton = document.getElementById("forestSchoolPortalButton");
 const forestJourneyPortalButton = document.getElementById("forestJourneyPortalButton");
+const adultQuickSkipButton = document.getElementById("adultQuickSkipButton");
 const mushroomHud = document.getElementById("mushroomHud");
 const backToSignpostButton = document.getElementById("backToSignpostButton");
 const mushroomHelpButton = document.getElementById("mushroomHelpButton");
@@ -2366,6 +2367,63 @@ async function primeAudio() {
   await resumeAudioContext();
 }
 
+async function quickAdvanceSceneOne() {
+  await primeAudio();
+
+  if (state.currentScene === "intro1") {
+    setScene("intro2");
+    return;
+  }
+  if (state.currentScene === "intro2" || state.currentScene === "intro3") {
+    setScene("intro4");
+    return;
+  }
+  if (state.currentScene === "intro4") {
+    resetClearingMeeting();
+    setScene("clearingMeeting");
+    return;
+  }
+  if (state.currentScene === "benjiBunny") {
+    setScene("clearingMeeting");
+    return;
+  }
+  if (state.currentScene === "clearingMeeting") {
+    window.location.href = "scene02_sunnys_lost_nuts/index.html";
+    return;
+  }
+  if (state.currentScene === "owlGarden") {
+    debugSkipOwlGarden();
+    return;
+  }
+  if (state.currentScene === "houseBunny") {
+    setScene("forestSchool");
+    return;
+  }
+  if (state.currentScene === "forestSchool") {
+    resetClearingMeeting();
+    setScene("clearingMeeting");
+  }
+}
+
+function isQuickSkipCornerClick(event, container) {
+  const rect = container.getBoundingClientRect();
+  if (!rect.width || !rect.height) {
+    return false;
+  }
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  return x >= 0 && y >= 0 && x <= rect.width * 0.16 && y >= rect.height * 0.76;
+}
+
+storyStage.addEventListener("click", (event) => {
+  if (!isQuickSkipCornerClick(event, storyStage)) {
+    return;
+  }
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  quickAdvanceSceneOne();
+}, true);
+
 storyStage.addEventListener("click", async (event) => {
   const wasLocked = !state.audioUnlocked;
   await primeAudio();
@@ -2450,6 +2508,11 @@ forestJourneyPortalButton.addEventListener("click", async (event) => {
     resetClearingMeeting();
     setScene("clearingMeeting");
   }
+});
+
+adultQuickSkipButton?.addEventListener("click", async (event) => {
+  event.stopPropagation();
+  await quickAdvanceSceneOne();
 });
 
 backToSignpostButton.addEventListener("click", (event) => {

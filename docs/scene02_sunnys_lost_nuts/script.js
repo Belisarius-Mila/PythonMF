@@ -749,8 +749,21 @@ function createBagHotspot(prop) {
   return button;
 }
 
+function createQuickSkipButton() {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "scene-quick-skip";
+  button.setAttribute("aria-label", "Rychlý posun scény");
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    quickAdvanceScene();
+  });
+  return button;
+}
+
 function renderHotspots() {
   overlay.innerHTML = "";
+  overlay.appendChild(createQuickSkipButton());
   scene02Config.characters.forEach((character) => {
     overlay.appendChild(createCharacterHotspot(character));
   });
@@ -1071,6 +1084,41 @@ function restartScene() {
   runScene();
 }
 
+function quickAdvanceScene() {
+  if (state.sceneState === SCENE_STATES.waitingAudio) {
+    startGame();
+    return;
+  }
+  if (state.sceneState === SCENE_STATES.complete) {
+    goToScene03();
+    return;
+  }
+
+  const step = currentStep();
+  state.sequenceId += 1;
+  cancelSpeech();
+  state.speechQueue = Promise.resolve();
+  hideBubble();
+  state.activeCharacterId = "";
+  state.activeLine = null;
+  if (step?.type === "tap" && step.revealNuts) {
+    revealNutsEffect();
+  }
+  state.stepIndex = Math.min(state.stepIndex + 1, scene02Config.steps.length);
+  state.sceneState = SCENE_STATES.playing;
+  advanceScene(state.sequenceId);
+}
+
+function isQuickSkipCornerClick(event, container) {
+  const rect = container.getBoundingClientRect();
+  if (!rect.width || !rect.height) {
+    return false;
+  }
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  return x >= 0 && y >= 0 && x <= rect.width * 0.16 && y >= rect.height * 0.76;
+}
+
 function handleRepeat() {
   if (isWaitingForTap()) {
     const step = currentStep();
@@ -1133,6 +1181,15 @@ scene.addEventListener("click", (event) => {
     startGame();
   }
 });
+
+scene.addEventListener("click", (event) => {
+  if (!isQuickSkipCornerClick(event, scene)) {
+    return;
+  }
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  quickAdvanceScene();
+}, true);
 
 window.speechSynthesis?.addEventListener?.("voiceschanged", loadVoices);
 

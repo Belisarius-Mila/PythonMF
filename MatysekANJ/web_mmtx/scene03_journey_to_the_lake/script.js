@@ -720,8 +720,21 @@ function createHotspot(targetId, target) {
   return button;
 }
 
+function createQuickSkipButton() {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "scene-quick-skip";
+  button.setAttribute("aria-label", "Rychlý posun scény");
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    quickAdvanceScene();
+  });
+  return button;
+}
+
 function renderHotspots() {
   overlay.innerHTML = "";
+  overlay.appendChild(createQuickSkipButton());
   Object.entries(currentPhase().hotspots).forEach(([targetId, target]) => {
     if (targetId === "all" && !isWaitingForTap() && state.activeTargetId !== "all") {
       return;
@@ -964,6 +977,36 @@ function replayCurrentImage() {
   advanceScene(state.sequenceId);
 }
 
+function quickAdvanceScene() {
+  if (state.sceneState === SCENE_STATES.waitingAudio) {
+    startGame();
+    return;
+  }
+  if (state.sceneState === SCENE_STATES.complete) {
+    return;
+  }
+
+  state.sequenceId += 1;
+  cancelSpeech();
+  state.speechQueue = Promise.resolve();
+  hideBubble();
+  state.activeTargetId = "";
+  state.wrongTapCount = 0;
+  state.stepIndex = Math.min(state.stepIndex + 1, scene03Config.steps.length);
+  state.sceneState = SCENE_STATES.playing;
+  advanceScene(state.sequenceId);
+}
+
+function isQuickSkipCornerClick(event, container) {
+  const rect = container.getBoundingClientRect();
+  if (!rect.width || !rect.height) {
+    return false;
+  }
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  return x >= 0 && y >= 0 && x <= rect.width * 0.16 && y >= rect.height * 0.76;
+}
+
 function playHelp() {
   return queueSpeech(async () => {
     const step = currentStep();
@@ -1018,6 +1061,15 @@ scene.addEventListener("click", (event) => {
     startGame();
   }
 });
+
+scene.addEventListener("click", (event) => {
+  if (!isQuickSkipCornerClick(event, scene)) {
+    return;
+  }
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  quickAdvanceScene();
+}, true);
 
 window.speechSynthesis?.addEventListener?.("voiceschanged", loadVoices);
 
