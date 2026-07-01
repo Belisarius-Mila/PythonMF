@@ -188,3 +188,127 @@ Ověřeno 2026-05-26:
 Další krok:
 
 - ručně otevřít `http://127.0.0.1:8011/index.html?scene=forestSchool` a ověřit poslední vizuální umístění mochomůrek, paprsku, tlačítek a audia v reálném prohlížeči.
+
+## Web MMTX - Forest Journey Scene 3 2026-06-30
+
+Treti produkcni webova scena Forest Journey je zalozena jako samostatny modul:
+
+```text
+docs/scene03_journey_to_the_lake/
+MatysekANJ/web_mmtx/scene03_journey_to_the_lake/
+```
+
+Scena navazuje ze `Scene 2 - Sunny's Lost Nuts`: dokoncovaci bublina
+`Next: Journey to the Lake` ve scene 2 otevre novy modul.
+
+Obrazove faze:
+
+- `journey_lake_3a.png` - rozcesti pod dubem,
+- `journey_lake_3b.png` - havran radi z vetve,
+- `journey_lake_3c.png` - kun na ceste pred statkem,
+- `journey_lake_3d.png` - Benji mluvi s konem,
+- `journey_lake_3e.png` - prazdne vedro u pumpy,
+- `journey_lake_3f.png` - Sunny a Bruno pumpuji vodu.
+
+Interakcni beaty:
+
+- klik na havrana spusti radu jit vlevo,
+- klik na levou cestu pokracuje ke statku; prava cesta jen jemne vrati zpet,
+- u pumpy Matysek hleda, kdo vi jak ziskat vodu,
+- spatne kliky na Bunny/Benji/Bruno/Sunny jsou neutralni,
+- klik na Fionu spusti reseni, pumpovani a finalni odmenu.
+
+Nova slovni zasoba: `left`, `right`, `way`, `bears`, `scared`, `friendly`,
+`dog`, `careful`, `water`, `jump`, `push`.
+
+Ověřeno 2026-06-30:
+
+- vsech sest PNG ma rozmer 1672 x 941,
+- `node --check` prosel pro scene 2 i scene 3,
+- lokalni server `python3 -m http.server 8011` v `docs/` vracel novy modul,
+  JS, CSS a vsech sest PNG pres HTTP 200,
+- mirror `docs/scene03_journey_to_the_lake/` a
+  `MatysekANJ/web_mmtx/scene03_journey_to_the_lake/` je shodny.
+
+Další krok:
+
+- ručně otevřít `http://127.0.0.1:8011/scene03_journey_to_the_lake/` a projít
+  celý tok: havran -> leva cesta -> kun -> pumpa -> Fiona -> voda.
+
+## Web MMTX - Forest Journey voice lock 2026-06-30
+
+Mila po poslechu starsi PTKL To Be / To Have castingove palety rozhodl pro
+rychlejsi produkcni MP3 generovani pouzit hotove Edge Neural hlasy pro vetsinu
+MMTX postav. Zdrojova paleta byla historicky v commitu `8200d58` a docasne byla
+vytažena pro poslech na Plochu jako `ptkl_voice_casting_8200d58`.
+
+Aktualni zamceni pro nove Forest Journey MP3:
+
+| Postava | Hlas | Puvod v castingu | Poznamka |
+| --- | --- | --- | --- |
+| Bunny | `en-US-AnaNeural` | `cast_b_child_plus_clear`, Kate sample | Mila ho bere jako jasny Bunny kandidat. |
+| Sunny | `en-US-MichelleNeural` | `cast_selected_ptkl`, Lucy | Novy Sunny lock misto narocneho lokalniho F5 generovani. |
+| Benji | `en-US-BrianNeural` / korekce Scene 3: `en-US-AndrewNeural` | `cast_selected_ptkl`, Tom; dodatecny Scene 3 retest | Brian byl vybran pri castingu, ale ve Scene 3 pusobil prilis brucive / jako Bruno, proto je v teto scene nahrazen Andrewem. |
+| Fiona | `en-US-JennyNeural` | `cast_selected_ptkl`, Kate | Novy Fiona lock. |
+| Bruno | puvodni brucivy hlas | Forest Journey F5/Onyx reference | Bruno zustava jedina vyjimka se starym brucivym charakterem. |
+
+Prakticky dopad:
+
+- pro nove dialogy scen 2+3 nejdrive generovat MP3 pres Edge TTS podle tohoto
+  locku, protoze je to radove rychlejsi nez lokalni F5-TTS na Macu Intel,
+- F5 workflow drzet jako zalozni nebo specialni cestu pro Bruna a pripadne
+  finalni precizni recast,
+- pred hromadnym prepisem produkcniho audia udelat malou poslechovou sadu pro
+  sceny 2+3 a az po Milove potvrzeni ji napojit do `docs/` i mirroru.
+
+Nasazeni 2026-06-30:
+
+- Mila rozhodl risknout prime nasazeni novych hlasu do Scene 3.
+- V `docs/scene03_journey_to_the_lake/audio/english/` a mirroru je
+  vygenerovano 60 anglickych MP3 pro puvodni sadu anglickych dialogu, UI instrukci,
+  napovedy a slovnicek.
+- `script.js` preferuje MP3 pred `speechSynthesis`; kdyz soubor chybi nebo nejde
+  prehrat, scenar zustava funkcni pres fallback.
+- Doplnena oprava po Milove hlášení, ze nektere anglicke MP3 se nectou: puvodne
+  mely MP3 jen Bunny, Sunny, Benji a Fiona; nyni maji MP3 i Bruno, havran, kun,
+  skupinove vety, UI instrukce a slovnicek.
+- Ceske napovedy a preklady zustavaji pres fallback.
+- Overeno tehdy: `node --check` prosel, kontrola proti `script.js` hlasila
+  `required=60 all_mp3=60 missing=0 extra=0`, vsech 60 MP3 vraci pres lokalni
+  server HTTP 200 a mirror Scene 3 je shodny s `docs`.
+
+Dodatecna oprava 2026-07-01:
+
+- `journey_lake_3a.png` byl opakovane pregenerovan, protoze Benji v prvni
+  obrazove fazi porad pusobil jako sestinohy. Finalni nasazena verze
+  `20260701fix8` drzi rozmer 1672 x 941 a Benji je kresleny tak, aby ctyri
+  nohy byly vizualne jednoznacne.
+- Kruhová sipka ve Scene 3 uz neopakuje automaticky celou scenu; po kliknuti
+  znovu spusti aktualni obrazovou fazi od jejiho zacatku a je dostupna i behem
+  prehravani.
+- Benjiho Edge MP3 byly ve Scene 3 preobsazene z `en-US-BrianNeural` na
+  `en-US-AndrewNeural`, protoze prvni replika pusobila jako Bruno. Bunnyho
+  repliky jsou znovu vygenerovane jako `en-US-AnaNeural` a Brunovy repliky
+  jsou prepnute z Edge `Guy` na lokalni hlubsi hlas `Daniel`.
+- Havrani ceske citoslovce je aktualne `Krá krá`, hotspot havrana je mensi,
+  hotspot leve cesty je mimo Benjiho, pred prechodem ke studni je pridany
+  pulzujici hotspot dveri statku, Fionina bublina u pumpy je posunuta a ceska
+  instrukce u hadanky je rozsirena na kliknuti na kamarada.
+- `playAudioElement()` ve Scene 3 uz nebere neuspesne `audio.play()` jako
+  prehrany anglicky zvuk, takze se prvni obrazova faze nema tise prepnout jen
+  na cesky fallback, kdyz prohlizec MP3 nepovoli nebo nestihne.
+- `primeHtmlAudio()` a `preloadOpeningAudio()` pri prvnim klepnuti probudi a
+  prednactou HTML audio vrstvu pred prvnimi replikami Benji/Bunny; cache verze
+  jsou zvednute na `20260701fix8` / `20260701voice5`.
+- Slovnicek Scene 3 je rozsireny na 35 polozek vcetne `look`, `path`, `crow`,
+  `bad`, `deep`, `valley`, `maybe`, `but`, `horse`, `me too`, `live`,
+  `warning`, `farm`, `door`, `stranger`, `come`, `drink`, `pump`, `get`,
+  `bucket`, `empty`, `I don't know`, `forest` a `handle`; pro vsechny polozky
+  existuje `scene03_ui_*_en.mp3` v `docs/` i mirroru. Audio soubor pro `live`
+  je zamerne vygenerovany z vyslovnostniho textu `liv`, aby neznel jako `lajv`.
+- Pumpovaci hadanka uz predem nezvyraznuje Fionu jako spravnou odpoved; prompt
+  pouziva neutralni ikonu a Fionin hotspot se zvyrazni az po kliknuti.
+- Overeno: Scene 3 `docs/` a mirror jsou shodne, `node --check` prosel,
+  kontrola proti `script.js` nema chybejici MP3 a
+  `journey_lake_3a.png?v=20260701fix8` i nove Benji/Bunny/Bruno MP3 vraci pres
+  lokalni server HTTP 200.

@@ -413,6 +413,10 @@ function goBackToForestSignpost() {
   window.location.href = "../index.html?scene=intro4";
 }
 
+function goToScene03() {
+  window.location.href = "../scene03_journey_to_the_lake/index.html";
+}
+
 async function audioFileExists(src) {
   if (!src) {
     return false;
@@ -780,7 +784,12 @@ function renderHud() {
     || state.sceneState === SCENE_STATES.resolvingTap;
 
   taskPrompt.classList.toggle("pulse", isWaitingForTap());
-  completeBanner.classList.add("hidden");
+  if (state.sceneState === SCENE_STATES.complete) {
+    completeBanner.classList.remove("hidden");
+    completeBanner.querySelector(".complete-text").textContent = "Next: Journey to the Lake";
+  } else {
+    completeBanner.classList.add("hidden");
+  }
   nutsReveal.classList.toggle("hidden", !state.nutsRevealed);
   mapFragment.classList.toggle("hidden", !mapFragment.classList.contains("reveal"));
 
@@ -1007,7 +1016,7 @@ function finishScene() {
   hideBubble();
   revealMapEffect();
   renderHud();
-  setBottomHint("Hotovo! Zatím se vrať šipkou ↩ na lesní rozcestí.", true);
+  setBottomHint("Hotovo! Klepni na spodní bublinu a pokračuj k jezeru.", true);
 }
 
 function playHelp() {
@@ -1085,6 +1094,11 @@ function handleRepeat() {
 }
 
 backButton.addEventListener("click", goBackToForestSignpost);
+completeBanner.addEventListener("click", () => {
+  if (state.sceneState === SCENE_STATES.complete) {
+    goToScene03();
+  }
+});
 repeatButton.addEventListener("click", handleRepeat);
 dictionaryButton.addEventListener("click", () => {
   if (dictionaryButton.disabled) {

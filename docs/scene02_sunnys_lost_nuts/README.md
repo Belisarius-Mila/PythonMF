@@ -14,8 +14,9 @@ Aktuální tok: rozcestí v lese → Scene 1 → Scene 2. Další scény budou p
 4. Fiona se ptá Bunny → **Krok 2:** *Tap Bunny. Does he have nuts?* → Bunny: *No. I have a carrot.*
 5. Bruno nabídne brašnu → **Krok 3:** *Tap the bag.* → oříšky vyskočí jako overlay.
 6. Sunny: *My nuts! I am so happy!* → Fiona: *Good. Now we are ready.* → mapa se rozsvítí.
-7. Špatný klik = jen jemná nápověda (*Try again.* / *Not yet. Tap Benji.* / *Look at the bag.*), bez spoilerů.
-8. Ikona knihy otevře malý slovníček. Klik na položku přečte anglické slovo a potom český význam.
+7. Dokončovací bublina `Next: Journey to the Lake` otevře Scene 3.
+8. Špatný klik = jen jemná nápověda (*Try again.* / *Not yet. Tap Benji.* / *Look at the bag.*), bez spoilerů.
+9. Ikona knihy otevře malý slovníček. Klik na položku přečte anglické slovo a potom český význam.
 
 Výukové fráze: *I don't have*, *Do you have?*, *I have a map*, *I have a carrot*, *I have a bag*, *Look inside!*
 
@@ -89,7 +90,7 @@ Oříšky po nálezu: overlay na pozici **53 % / 52 %** (emoji, později nahradi
 
 - Hlavní web: `../index.html`
 - Vstup: dveře po dokončení Scene 1 (`clearingMeeting`)
-- Dočasný výstup: `../index.html?scene=intro4`
+- Výstup po dokončení: `../scene03_journey_to_the_lake/index.html`
 
 ## Ruční test checklist
 

@@ -38,6 +38,32 @@ Aktualni presety:
 
 Poznamka 2026-06-03: Benji, Bruno a Fiona uz nemaji puvodni velmi kratke reference. Bruno byl prepnuty z kovoveho `macOS Daniel` na `onyx`. Sunny byl po odmítnutí `Junior` a poslechu F5 testu zamknuty na `young_nova`.
 
+## Edge Neural voice lock z 2026-06-30
+
+Pro nove produkcni MP3 ve Forest Journey Mila rozhodl pouzit rychlejsi hotove
+Edge Neural hlasy z drivejsi PTKL To Be / To Have castingove palety. Lokalni
+F5-TTS zustava dulezity kontext a zalozni/specialni cesta, ale neni vychozi
+pro kazdou novou vetu, protoze je na Macu Intel casove narocny.
+
+Aktualni rozhodnuti:
+
+| Postava | Hlas | Poznamka |
+| --- | --- | --- |
+| Bunny | `en-US-AnaNeural` | `cast_b_child_plus_clear`; jasny Bunny kandidat podle Mily. |
+| Sunny | `en-US-MichelleNeural` | Z PTKL selected castu, puvodne Lucy. |
+| Benji | `en-US-BrianNeural` / korekce Scene 3: `en-US-AndrewNeural` | Brian byl vybran v PTKL castingu, ale pri Scene 3 retestu znel prilis brucive / jako Bruno; v teto scene je nahrazen Andrewem. |
+| Fiona | `en-US-JennyNeural` | Z PTKL selected castu, puvodne Kate. |
+| Bruno | puvodni brucivy/F5 hlas | Bruno zustava vyjimka, drzet stary charakter. |
+
+Pravidlo pro dalsi MP3:
+
+- nejdrive generovat male davky pres Edge TTS podle teto tabulky,
+- Bruno generovat nebo doplnovat opatrne podle puvodni brucive reference,
+- pred prepisem produkcniho audia udelat kratky poslechovy balicek a nechat
+  Mílu potvrdit.
+- Brian nebrat jako definitivni Benji lock bez noveho poslechoveho potvrzeni;
+  pro Scene 3 je aktualni prakticka korekce `en-US-AndrewNeural`.
+
 Sunny recast historie:
 
 - `data/matysek_english/voice_references/sunny_reference_young_nova_together_20260603.mp3` je aktualni zamceny zdroj pro `locked_forest_journey_20260603/sunny_reference.mp3`.

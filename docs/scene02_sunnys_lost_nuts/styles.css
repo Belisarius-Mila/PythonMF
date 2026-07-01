@@ -360,6 +360,7 @@ body {
   padding: 14px 24px;
   z-index: 5;
   animation: pulse-soft 1.8s ease-in-out infinite;
+  cursor: pointer;
 }
 
 .complete-banner.hidden {
