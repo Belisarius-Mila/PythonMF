@@ -80,10 +80,21 @@ Cockpit. Proto vzniká managed Adam service:
 - `scripts/adam_voice_reply.py` umí nově `--request-id`, aby Adam mohl odpověď
   zapsat zpět ke konkrétnímu dotazu z okna Janička.
 
-Od 2026-06-07 výchozí doručení textového dotazu pro `Jana Adam` používá
-terminálový bridge (`deliver_prompt_to_terminal`), ne VS Code GUI fallback.
-Explicitní helper pro viditelnou VS Code cestu zůstává k dispozici, ale není
-výchozí.
+Od 2026-07-01 po reálném testu zavření VS Code/Codexu je výchozí doručení
+textového dotazu pro `Jana Adam` spravovaná screen relace `samantha_adam`, ne
+viditelný Terminal/VS Code tab. Oprava řeší tři konkrétní body:
+
+- start `samantha_adam` vypíná autosave resume prompt a work-context guard, aby
+  se skrytá relace nezasekla před spuštěním Codexu,
+- stav Adama se počítá podle skutečného Codex procesu uvnitř `samantha_adam`,
+  ne jen podle existence screen relace nebo obecného voice markeru,
+- dotaz se doručuje přes `screen -S samantha_adam -p 0 -X stuff`, s krátkou
+  pauzou a samostatným Enterem; ověřený test vrátil odpověď do Cockpitu bez
+  ručního zásahu.
+
+Globální voice marker se při startu Janička Adama nepřepisuje; zůstává pro
+běžný Mílův hlasový bridge. Explicitní helper pro viditelnou VS Code cestu
+zůstává k dispozici, ale není výchozí.
 
 ## Základní shoda
 

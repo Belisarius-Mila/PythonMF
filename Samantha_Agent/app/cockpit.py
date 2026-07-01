@@ -19547,18 +19547,21 @@ COCKPIT_HTML = """<!doctype html>
           recordFrontendError(err);
         }
       }
-      janickaChatStatus.textContent = "Odpověď se zatím nevrátila do okna. Zkontroluj hlavní Codex chat.";
+      janickaChatStatus.textContent = "Odpověď se zatím nevrátila do okna. Adam může ještě odpovídat ve své spravované relaci.";
     }
 
     async function refreshJanickaAdamStatus() {
       try {
         const data = await postJson("/api/adam/status", {});
         const running = Boolean(data.running);
-        const marker = data.marked_tty ? ` Cíl: ${data.marked_tty}.` : "";
+        const managedTtys = Array.isArray(data.managed_codex_ttys) ? data.managed_codex_ttys.filter(Boolean) : [];
+        const managedTarget = managedTtys.length ? ` Adam relace: ${managedTtys.join(", ")}.` : "";
+        const marker = data.marked_tty ? ` Hlasový marker: ${data.marked_tty}.` : "";
         const pending = Number(data.pending_count || 0);
-        janickaAdamStatus.textContent = `${data.message || "Adam status není dostupný."}${marker}${pending ? ` Čeká ${pending} dotazů.` : ""}`;
-        janickaAdamStatus.classList.toggle("ok", running);
-        janickaAdamStatus.classList.toggle("warn", !running);
+        const ready = running && managedTtys.length > 0;
+        janickaAdamStatus.textContent = `${data.message || "Adam status není dostupný."}${managedTarget}${marker}${pending ? ` Čeká ${pending} dotazů.` : ""}`;
+        janickaAdamStatus.classList.toggle("ok", ready);
+        janickaAdamStatus.classList.toggle("warn", !ready);
         janickaAdamStartBtn.disabled = running;
       } catch (err) {
         recordFrontendError(err);

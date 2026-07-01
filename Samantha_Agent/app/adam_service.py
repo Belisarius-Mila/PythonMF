@@ -16,6 +16,7 @@ from app.speech.terminal_bridge import (
     deliver_prompt_to_vscode,
     discover_codex_ttys,
     load_marked_codex_tty,
+    normalize_tty,
 )
 
 
@@ -26,6 +27,7 @@ ADAM_SERVICE_SESSION = "samantha_adam"
 ADAM_SCREEN_ENTRY_SCRIPT = PROJECT_ROOT / "scripts" / "samantha_screen_entry.sh"
 ADAM_REPLY_SCRIPT = ".venv/bin/python scripts/adam_voice_reply.py"
 SCREEN_CLEAR_INPUT = "\x15"
+SCREEN_SUBMIT_INPUT = "\r"
 
 
 def utc_now() -> str:
@@ -67,11 +69,89 @@ def screen_session_exists(
     return f".{session_name}" in output
 
 
+def _ps_rows(
+    *,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> list[dict[str, Any]]:
+    try:
+        completed = runner(
+            ["ps", "-axo", "pid=,ppid=,tty=,command="],
+            capture_output=True,
+            text=True,
+            timeout=4,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return []
+    if completed.returncode != 0:
+        return []
+    rows: list[dict[str, Any]] = []
+    for line in completed.stdout.splitlines():
+        parts = line.strip().split(None, 3)
+        if len(parts) < 4:
+            continue
+        try:
+            pid = int(parts[0])
+            ppid = int(parts[1])
+        except ValueError:
+            continue
+        rows.append(
+            {
+                "pid": pid,
+                "ppid": ppid,
+                "tty": normalize_tty(parts[2].removeprefix("/dev/")),
+                "command": parts[3],
+            }
+        )
+    return rows
+
+
+def discover_managed_adam_codex_ttys(
+    session_name: str = ADAM_SERVICE_SESSION,
+    *,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> list[str]:
+    rows = _ps_rows(runner=runner)
+    if not rows:
+        return []
+    session_pids = {
+        int(row["pid"])
+        for row in rows
+        if session_name in str(row.get("command") or "")
+        and re.search(r"\b(?:SCREEN|screen)\b", str(row.get("command") or ""))
+    }
+    if not session_pids:
+        return []
+    children_by_parent: dict[int, list[dict[str, Any]]] = {}
+    for row in rows:
+        children_by_parent.setdefault(int(row["ppid"]), []).append(row)
+    descendants: set[int] = set()
+    stack = list(session_pids)
+    while stack:
+        pid = stack.pop()
+        for child in children_by_parent.get(pid, []):
+            child_pid = int(child["pid"])
+            if child_pid in descendants:
+                continue
+            descendants.add(child_pid)
+            stack.append(child_pid)
+    ttys: list[str] = []
+    for row in rows:
+        if int(row["pid"]) not in descendants:
+            continue
+        command = str(row.get("command") or "")
+        tty = str(row.get("tty") or "")
+        if tty and tty != "??" and "codex" in command:
+            ttys.append(tty)
+    return sorted(set(ttys))
+
+
 def adam_service_status(
     *,
     session_name: str = ADAM_SERVICE_SESSION,
     screen_runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
     codex_tty_discoverer: Callable[[], list[str]] = discover_codex_ttys,
+    managed_codex_tty_discoverer: Callable[[], list[str]] = discover_managed_adam_codex_ttys,
     marker_path: Path = CURRENT_CODEX_TTY_PATH,
     requests_dir: Path = ADAM_REQUESTS_DIR,
 ) -> dict[str, Any]:
@@ -80,6 +160,10 @@ def adam_service_status(
         codex_ttys = codex_tty_discoverer()
     except Exception:
         codex_ttys = []
+    try:
+        managed_codex_ttys = managed_codex_tty_discoverer()
+    except Exception:
+        managed_codex_ttys = []
     marked_tty = load_marked_codex_tty(marker_path)
     pending = 0
     answered = 0
@@ -93,12 +177,12 @@ def adam_service_status(
                 answered += 1
             elif payload.get("status") in {"queued", "delivered"}:
                 pending += 1
-    if running and marked_tty:
+    if running and managed_codex_ttys:
         state = "running"
-        message = "Adam běží a má označenou Codex relaci."
+        message = "Adam běží ve spravované Codex relaci."
     elif running:
-        state = "running_without_marker"
-        message = "Adam běží, ale nemá ověřený marker cílové Codex relace."
+        state = "running_without_codex"
+        message = "Adamova screen relace běží, ale Codex v ní neběží."
     else:
         state = "stopped"
         message = "Adam zatím neběží."
@@ -110,6 +194,7 @@ def adam_service_status(
         "session_name": session_name,
         "marked_tty": marked_tty,
         "codex_ttys": codex_ttys,
+        "managed_codex_ttys": managed_codex_ttys,
         "pending_count": pending,
         "answered_count": answered,
     }
@@ -120,12 +205,31 @@ def start_adam_service(
     session_name: str = ADAM_SERVICE_SESSION,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
     entry_script: Path = ADAM_SCREEN_ENTRY_SCRIPT,
+    managed_codex_tty_discoverer: Callable[[], list[str]] = discover_managed_adam_codex_ttys,
 ) -> dict[str, Any]:
     if screen_session_exists(session_name=session_name, runner=runner):
+        try:
+            managed_codex_ttys = managed_codex_tty_discoverer()
+        except Exception:
+            managed_codex_ttys = []
+        if not managed_codex_ttys:
+            try:
+                runner(["screen", "-S", session_name, "-X", "quit"], capture_output=True, text=True, timeout=8, check=False)
+            except (OSError, subprocess.TimeoutExpired):
+                pass
+        else:
+            return {
+                "ok": True,
+                "status": "already_running",
+                "message": "Adam už běží.",
+                "session_name": session_name,
+                "managed_codex_ttys": managed_codex_ttys,
+            }
+    if screen_session_exists(session_name=session_name, runner=runner):
         return {
-            "ok": True,
-            "status": "already_running",
-            "message": "Adam už běží.",
+            "ok": False,
+            "status": "stale_screen_still_running",
+            "message": "Adamova screen relace běží, ale Codex v ní neběží a nepodařilo se ji obnovit.",
             "session_name": session_name,
         }
     if not entry_script.exists():
@@ -138,8 +242,14 @@ def start_adam_service(
     env = os.environ.copy()
     env.update(
         {
-            "SAMANTHA_MARK_VOICE_TTY": "1",
+            "SAMANTHA_MARK_VOICE_TTY": "0",
             "SAMANTHA_MANAGED_ADAM": "1",
+            "SAMANTHA_AUTOSAVE_RESUME_CHECK": "0",
+            "SAMANTHA_WORK_CONTEXT_GUARD": "0",
+            "SAMANTHA_START_REQUEST": (
+                "Jsi spravovaná Adam/Codex relace pro okno Janička v Samantha Cockpitu. "
+                "Čekej na textové dotazy vložené do této screen relace a odpovídej podle instrukcí v dotazu."
+            ),
             "LANG": "cs_CZ.UTF-8",
             "LC_ALL": "cs_CZ.UTF-8",
             "PYTHONUTF8": "1",
@@ -258,7 +368,7 @@ def wait_for_adam_ready(
     last_status: dict[str, Any] = status_getter()
     while time.monotonic() <= deadline:
         last_status = status_getter()
-        if last_status.get("running") and (last_status.get("marked_tty") or last_status.get("codex_ttys")):
+        if last_status.get("running") and last_status.get("managed_codex_ttys"):
             return {
                 **last_status,
                 "ready": True,
@@ -278,6 +388,8 @@ def deliver_prompt_to_adam_screen(
     submit: bool = True,
     session_name: str = ADAM_SERVICE_SESSION,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+    managed_codex_tty_discoverer: Callable[[], list[str]] = discover_managed_adam_codex_ttys,
+    sleeper: Callable[[float], None] = time.sleep,
 ) -> dict[str, Any]:
     if not screen_session_exists(session_name=session_name, runner=runner):
         return {
@@ -287,15 +399,37 @@ def deliver_prompt_to_adam_screen(
             "session_name": session_name,
             "delivery_method": "managed_screen",
         }
-    payload = SCREEN_CLEAR_INPUT + screen_input_text(prompt) + ("\n" if submit else "")
     try:
-        completed = runner(
-            ["screen", "-S", session_name, "-X", "stuff", payload],
+        managed_codex_ttys = managed_codex_tty_discoverer()
+    except Exception:
+        managed_codex_ttys = []
+    if not managed_codex_ttys:
+        return {
+            "ok": False,
+            "status": "managed_codex_not_running",
+            "message": "Spravovaná Adamova screen relace běží, ale Codex v ní neběží. Zkus Adama restartovat.",
+            "session_name": session_name,
+            "delivery_method": "managed_screen",
+        }
+    payload = SCREEN_CLEAR_INPUT + screen_input_text(prompt)
+    try:
+        insert_completed = runner(
+            ["screen", "-S", session_name, "-p", "0", "-X", "stuff", payload],
             capture_output=True,
             text=True,
             timeout=8,
             check=False,
         )
+        completed = insert_completed
+        if submit and insert_completed.returncode == 0:
+            sleeper(0.2)
+            completed = runner(
+                ["screen", "-S", session_name, "-p", "0", "-X", "stuff", SCREEN_SUBMIT_INPUT],
+                capture_output=True,
+                text=True,
+                timeout=8,
+                check=False,
+            )
     except (OSError, subprocess.TimeoutExpired) as exc:
         return {
             "ok": False,
@@ -319,6 +453,7 @@ def deliver_prompt_to_adam_screen(
         "message": "Dotaz byl vložen přímo do spravované Adamovy relace.",
         "session_name": session_name,
         "delivery_method": "managed_screen",
+        "managed_codex_ttys": managed_codex_ttys,
         "verified": True,
     }
 
@@ -470,7 +605,7 @@ def submit_adam_text_request(
     deliverer: Callable[..., dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     if deliverer is None:
-        deliverer = deliver_prompt_to_terminal
+        deliverer = deliver_prompt_to_adam_screen
     start_result = starter()
     if not start_result.get("ok"):
         request = save_adam_text_request(message=message, history=history, requests_dir=requests_dir)
