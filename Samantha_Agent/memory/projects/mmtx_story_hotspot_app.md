@@ -232,8 +232,8 @@ Ověřeno 2026-06-30:
 
 Další krok:
 
-- ručně otevřít `http://127.0.0.1:8011/scene03_journey_to_the_lake/` a projít
-  celý tok: havran -> leva cesta -> kun -> pumpa -> Fiona -> voda.
+- historicky bod z 2026-06-30 je splneny; aktualni stav sceny 3 je nize v
+  sekcich po rucnim retestu a publikaci.
 
 ## Web MMTX - Forest Journey voice lock 2026-06-30
 
@@ -312,3 +312,15 @@ Dodatecna oprava 2026-07-01:
   kontrola proti `script.js` nema chybejici MP3 a
   `journey_lake_3a.png?v=20260701fix8` i nove Benji/Bunny/Bruno MP3 vraci pres
   lokalni server HTTP 200.
+
+Rucni webovy retest 2026-07-01:
+
+- Mila potvrdil, ze Scene 3 je na webu rucne projita; auditni bod "otestovat
+  MMTX na webu" je splneny.
+- Scena je funkcne v poradku. Zname zbytkove tema je jen kvalita Benjiho hlasu:
+  ma rezervy, ale neblokuje pouziti sceny.
+- Soucasny stav kodu drzi Benjiho Scene 3 pres pripravené MP3 a fallback vzor
+  `andrew|evan|alex|samantha|ava|fable`; nejde o otevrenou chybu typu "Benji
+  mluvi Brunem".
+- Pri dalsi male MMTX davce lze udelat Benji-only poslechovy recast, ale nema
+  se z toho automaticky delat podminka pro dalsi Forest Journey scenu.

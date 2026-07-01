@@ -20,15 +20,24 @@ Co je hotove:
 - Scene 2 ma dokoncovaci bublinu, ktera otevre Scene 3.
 
 Co neni hotove:
-- Neni jeste rucne overena public GitHub Pages URL po pushi a dobehnuti Pages deploye.
 - Dalsi Forest Journey scena zatim neni zalozena.
+- Benjiho hlas ma podle Mily jeste rezervy, ale je to volitelne poslechove doladeni,
+  ne blokace sceny.
 
 Dalsi krok:
-- Po pushi otevrit verejnou GitHub Pages verzi a projit tok Scene 2 -> Scene 3: havran -> leva cesta -> kun -> dvere -> pumpa -> Fiona -> voda.
+- Pri dalsi male MMTX davce bud udelat Benji-only poslechovy recast, nebo prejit
+  na dalsi Forest Journey scenu podle noveho zadani.
 
 Navrhovane dalsi kroky:
-- Pokud verejny retest projde, zalozit dalsi Forest Journey scenu podle dalsiho zadani.
-- Pokud se objevi zvukova chyba, nejdrive zkontrolovat HTTP 200 pro konkretni MP3 a cache verze `script.js`.
+- Pokud se objevi konkretni zvukova chyba, nejdrive zkontrolovat HTTP 200 pro
+  konkretni MP3 a cache verze `script.js`.
+- Pokud jde jen o charakter Benjiho hlasu, pripravit kratkou sadu kandidatu a
+  nemenit zbytek sceny.
+
+Aktualizace po webovem retestu 2026-07-01:
+- Mila potvrdil, ze Scene 3 na webu rucne otestoval; hlas Benjiho ma rezervy,
+  ale jinak je scena OK. Stary auditni dalsi krok "rucne otestovat MMTX na webu"
+  je splneny a nema se vracet jako aktualni prace.
 
 Zmenene nebo relevantni soubory:
 - `docs/scene02_sunnys_lost_nuts/`
