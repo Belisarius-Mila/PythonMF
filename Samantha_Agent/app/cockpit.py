@@ -18009,14 +18009,22 @@ COCKPIT_HTML = """<!doctype html>
           return;
         }
         const item = data.item || {};
-        libraryArchiveStatus.textContent = data.message || "Článek uložen.";
+        const savedTitle = item.one_line_title || item.title || "uložený článek";
+        const savedMessage = `${data.message || "Článek uložen."} Otevřeno: ${savedTitle}`;
+        libraryArchiveStatus.textContent = savedMessage;
         libraryArchiveUrlInput.value = "";
         libraryArchiveTagsInput.value = "";
         currentLibraryCategory = item.category || category;
-        await loadLibraryCategory(currentLibraryCategory);
+        await loadLibraryCategory(currentLibraryCategory, "");
         if (item.id) {
           await loadLibraryItem(item.id);
+          document.querySelectorAll(".library-item").forEach((node) => {
+            if (node.dataset.articleId === item.id) {
+              node.scrollIntoView({block: "nearest"});
+            }
+          });
         }
+        libraryStatus.textContent = savedMessage;
       } catch (err) {
         recordFrontendError(err);
         libraryArchiveStatus.textContent = `Chyba uložení URL: ${err}`;

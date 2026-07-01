@@ -267,6 +267,78 @@ class ReadableTextParser(HTMLParser):
         return "\n".join(collapse_repeated_lines(lines))
 
 
+class PreferredReadableTextParser(HTMLParser):
+    BLOCK_TAGS = ReadableTextParser.BLOCK_TAGS
+    SKIP_TAGS = ReadableTextParser.SKIP_TAGS
+
+    def __init__(self, target: tuple[str, str, str]) -> None:
+        super().__init__()
+        self.target_tag, self.target_attr, self.target_value = target
+        self.parts: list[str] = []
+        self.skip_depth = 0
+        self.target_depth = 0
+        self.found = False
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        normalized_tag = tag.casefold()
+        normalized_attrs = {name.casefold(): str(value or "") for name, value in attrs}
+        if self.target_depth == 0:
+            if (
+                normalized_tag == self.target_tag
+                and (
+                    not self.target_attr
+                    or normalized_attrs.get(self.target_attr, "").casefold() == self.target_value
+                )
+            ):
+                self.target_depth = 1
+                self.found = True
+                if normalized_tag in self.BLOCK_TAGS:
+                    self.parts.append("\n")
+            return
+
+        if normalized_tag == self.target_tag:
+            self.target_depth += 1
+        if normalized_tag in self.SKIP_TAGS:
+            self.skip_depth += 1
+            return
+        if self.skip_depth:
+            return
+        if normalized_tag in self.BLOCK_TAGS:
+            self.parts.append("\n")
+
+    def handle_endtag(self, tag: str) -> None:
+        if self.target_depth == 0:
+            return
+        normalized_tag = tag.casefold()
+        if normalized_tag in self.SKIP_TAGS and self.skip_depth:
+            self.skip_depth -= 1
+            return
+        if self.skip_depth:
+            return
+        if normalized_tag in self.BLOCK_TAGS:
+            self.parts.append("\n")
+        if normalized_tag == self.target_tag:
+            self.target_depth -= 1
+
+    def handle_data(self, data: str) -> None:
+        if self.target_depth == 0 or self.skip_depth:
+            return
+        text = html.unescape(data)
+        if text.strip():
+            self.parts.append(text)
+
+    def text(self) -> str:
+        if not self.found:
+            return ""
+        raw = "".join(self.parts)
+        lines = []
+        for line in raw.splitlines():
+            cleaned = " ".join(line.split())
+            if cleaned:
+                lines.append(cleaned)
+        return "\n".join(collapse_repeated_lines(lines))
+
+
 def collapse_repeated_lines(lines: list[str]) -> list[str]:
     result: list[str] = []
     previous = ""
@@ -639,13 +711,67 @@ def fetch_url_with_curl(url: str, timeout: float = 25.0) -> bytes:
 
 
 def extract_article(html_bytes: bytes, source_url: str) -> ExtractedArticle:
-    html_text = html_bytes.decode("utf-8", errors="replace")
+    html_text = decode_html_document(html_bytes)
     title = extract_title(html_text) or urlparse(source_url).netloc or "article"
     canonical = extract_canonical_url(html_text) or strip_tracking_query(source_url)
-    parser = ReadableTextParser()
-    parser.feed(html_text)
-    text = trim_to_article_body(parser.text(), title)
+    text = extract_preferred_readable_text(html_text)
+    if not text:
+        parser = ReadableTextParser()
+        parser.feed(html_text)
+        text = parser.text()
+    text = trim_to_article_body(text, title)
     return ExtractedArticle(title=title, text=text, canonical_url=canonical)
+
+
+def decode_html_document(html_bytes: bytes) -> str:
+    if html_bytes.startswith(b"\xef\xbb\xbf"):
+        return html_bytes.decode("utf-8-sig", errors="replace")
+
+    declared_encoding = detect_html_declared_encoding(html_bytes)
+    candidates = [declared_encoding, "utf-8", "windows-1250", "iso-8859-2"]
+    tried: set[str] = set()
+    for encoding in candidates:
+        if not encoding:
+            continue
+        normalized = encoding.strip().lower()
+        if normalized in tried:
+            continue
+        tried.add(normalized)
+        try:
+            return html_bytes.decode(normalized)
+        except (LookupError, UnicodeDecodeError):
+            continue
+    return html_bytes.decode("utf-8", errors="replace")
+
+
+def detect_html_declared_encoding(html_bytes: bytes) -> str:
+    head = html_bytes[:4096].decode("ascii", errors="ignore")
+    match = re.search(r"<meta[^>]+charset=[\"']?\s*([a-zA-Z0-9._:-]+)", head, flags=re.I)
+    if match:
+        return match.group(1).strip()
+    match = re.search(
+        r"<meta[^>]+http-equiv=[\"']content-type[\"'][^>]+content=[\"'][^\"']*charset=([a-zA-Z0-9._:-]+)",
+        head,
+        flags=re.I,
+    )
+    if match:
+        return match.group(1).strip()
+    return ""
+
+
+def extract_preferred_readable_text(html_text: str) -> str:
+    preferred_targets = (
+        ("div", "id", "clanek"),
+        ("article", "", ""),
+        ("main", "", ""),
+    )
+    for target in preferred_targets:
+        parser = PreferredReadableTextParser(target)
+        parser.feed(html_text)
+        text = parser.text().strip()
+        if text:
+            return text
+    return ""
 
 
 def extract_title(html_text: str) -> str:

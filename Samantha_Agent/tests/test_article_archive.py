@@ -136,6 +136,33 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertIn("Druhý skutečný odstavec článku", article.text)
         self.assertNotEqual(article.text, "Krátký titulek z metadat")
 
+    def test_extract_article_respects_declared_windows_1250_and_prefers_clanek_block(self) -> None:
+        html = """<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1250">
+<title>GVT: Jak zvýšit velikost svalů německým objemovým tréninkem</title>
+</head>
+<body>
+<div class="sidebar">NOVÉ INZERÁTY Osobní trenér do fitness.</div>
+<div id=clanek>
+<p>Chcete vyzkoušet trénink, který prověří Vaši disciplínu i výkonnost?</p>
+<h2>Co je GVT?</h2>
+<p>German Volume Training je silově-tréninková metoda pro růst svalové hmoty.</p>
+</div>
+<div>Diskuse k článku: reklama a komentáře.</div>
+</body>
+</html>""".encode("windows-1250")
+
+        article = extract_article(html, "https://kulturistika.example.test/clanek")
+
+        self.assertEqual(article.title, "GVT: Jak zvýšit velikost svalů německým objemovým tréninkem")
+        self.assertIn("prověří Vaši disciplínu", article.text)
+        self.assertIn("Co je GVT?", article.text)
+        self.assertIn("silově-tréninková metoda", article.text)
+        self.assertNotIn("NOVÉ INZERÁTY", article.text)
+        self.assertNotIn("Diskuse k článku", article.text)
+
     def test_archive_text_entry_saves_searchable_item_without_url(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             archive_root = Path(temp_dir)

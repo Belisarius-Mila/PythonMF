@@ -189,6 +189,20 @@ text i HTML jsou jen v `data/private/article_archive/` a nepatří do gitu.
 - První soukromé položky jsou `Codex Cookbook: praktická kuchařka pro práci s kódem`
   a `Agents SDK jako budoucí schopnosti Samanthy`.
 
+2026-07-01 byla opravena archivace webových článků se starším českým kódováním:
+
+- `app/article_archive.py` nově respektuje deklarované HTML kódování a fallbacky
+  `utf-8`, `windows-1250`, `iso-8859-2`.
+- Extrakce preferuje hlavní obsah v blocích jako `div#clanek`, `article` a
+  `main`, aby se do textu nedostávaly navigace, reklamy a související bloky.
+- Cockpit po uložení URL jasně otevře uloženou položku a ukáže status
+  `Otevřeno: ...`, aby opakované uložení stejné URL nevypadalo jako nečinnost.
+- Rozbité soukromé položky z testu GVT článku byly podle Milova pokynu
+  odstraněny natvrdo mimo git; čistý záznam byl znovu uložen do soukromého
+  archivu se správnou češtinou.
+- Položka `Špagety ala carbonara` byla v soukromé knihovně přesunuta z
+  `Ostatní` do `Recepty`.
+
 Další krok:
 
 1. Až Míla se Samanthou připraví první přepis ručně psaného receptu a fotku,
