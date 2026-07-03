@@ -2555,6 +2555,7 @@ class CockpitTests(unittest.TestCase):
             result = adam_voice_bridge_status(
                 marker_path=marker_path,
                 codex_tty_discoverer=lambda: ["ttys001", "ttys002"],
+                managed_codex_tty_labeler=lambda: {},
                 screen_runner=fake_screen_runner,
                 expected_codex_session_limit=1,
             )
@@ -2564,7 +2565,7 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["codex_ttys"], ["ttys001", "ttys002"])
         self.assertEqual(result["codex_tty_count"], 2)
         self.assertEqual(result["screen_status"], "not_running")
-        self.assertIn("běží 2 Codex relací, očekáváno nejvýše 1", result["warnings"])
+        self.assertIn("běží 2 běžných Codex relací, očekáváno nejvýše 1", result["warnings"])
         self.assertNotIn("screen neběží", result["warnings"])
         self.assertIn("screen neběží; pro lokální Mac TTY bridge to není blokující", result["notes"])
 
@@ -2593,6 +2594,7 @@ class CockpitTests(unittest.TestCase):
             result = adam_voice_bridge_status(
                 marker_path=marker_path,
                 codex_tty_discoverer=lambda: ["ttys001"],
+                managed_codex_tty_labeler=lambda: {},
                 screen_runner=fake_screen_runner,
             )
 
@@ -2602,6 +2604,30 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["warnings"], [])
         self.assertIn("Mac TTY bridge připravený", result["message"])
         self.assertIn("pro lokální Mac TTY bridge to není blokující", result["message"])
+
+    def test_adam_voice_bridge_status_does_not_warn_for_managed_janicka_session(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker_path = Path(temp_dir) / "current_codex_tty.json"
+            marker_path.write_text('{"tty": "ttys001"}', encoding="utf-8")
+
+            def fake_screen_runner(*args, **kwargs):
+                return subprocess.CompletedProcess(args=args[0], returncode=1, stdout="", stderr="No Sockets found\n")
+
+            result = adam_voice_bridge_status(
+                marker_path=marker_path,
+                codex_tty_discoverer=lambda: ["ttys001", "ttys004"],
+                managed_codex_tty_labeler=lambda: {"ttys004": "Janička light"},
+                screen_runner=fake_screen_runner,
+                expected_codex_session_limit=1,
+            )
+
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["codex_tty_count"], 2)
+        self.assertEqual(result["human_codex_tty_count"], 1)
+        self.assertEqual(result["managed_codex_ttys"], ["ttys004"])
+        self.assertEqual(result["managed_codex_labels"], {"ttys004": "Janička light"})
+        self.assertNotIn("běží 2 Codex relací", result["warnings"])
+        self.assertIn("spravované relace mimo limit", result["notes"][0])
 
     def test_adam_voice_bridge_status_uses_single_active_tty_when_marker_is_stale(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -2628,6 +2654,7 @@ class CockpitTests(unittest.TestCase):
             result = adam_voice_bridge_status(
                 marker_path=marker_path,
                 codex_tty_discoverer=lambda: ["ttys002"],
+                managed_codex_tty_labeler=lambda: {},
                 screen_runner=fake_screen_runner,
             )
 
@@ -2656,6 +2683,7 @@ class CockpitTests(unittest.TestCase):
             result = adam_voice_bridge_status(
                 marker_path=marker_path,
                 codex_tty_discoverer=lambda: [],
+                managed_codex_tty_labeler=lambda: {},
                 screen_runner=lambda *args, **kwargs: subprocess.CompletedProcess(
                     args=args[0],
                     returncode=0,
@@ -2690,6 +2718,7 @@ class CockpitTests(unittest.TestCase):
             result = adam_voice_bridge_status(
                 marker_path=marker_path,
                 codex_tty_discoverer=lambda: [],
+                managed_codex_tty_labeler=lambda: {},
                 screen_runner=lambda *args, **kwargs: subprocess.CompletedProcess(args=args[0], returncode=0, stdout="", stderr=""),
                 marker_pid_checker=lambda _pid: False,
             )
@@ -2718,6 +2747,7 @@ class CockpitTests(unittest.TestCase):
             result = adam_voice_bridge_status(
                 marker_path=marker_path,
                 codex_tty_discoverer=lambda: [],
+                managed_codex_tty_labeler=lambda: {},
                 screen_runner=lambda *args, **kwargs: subprocess.CompletedProcess(
                     args=args[0],
                     returncode=1,
@@ -2828,6 +2858,44 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["status"], "stale_sessions_terminated")
         self.assertEqual(result["protected_tty"], "ttys001")
         self.assertEqual(result["stale_ttys"], ["ttys003"])
+        self.assertEqual(result["killed_pids"], [200])
+        self.assertEqual(killed, [(200, signal.SIGTERM)])
+
+    def test_terminate_stale_codex_sessions_preserves_managed_janicka_session(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker_path = Path(temp_dir) / "current_codex_tty.json"
+            marker_path.write_text('{"tty": "ttys001"}', encoding="utf-8")
+
+            def fake_runner(*args, **kwargs):
+                return subprocess.CompletedProcess(
+                    args=args[0],
+                    returncode=0,
+                    stdout=(
+                        "100 10 ttys001 node node /usr/local/bin/codex -C /repo .\n"
+                        "101 100 ttys001 codex /vendor/bin/codex -C /repo .\n"
+                        "200 20 ttys003 node node /usr/local/bin/codex -C /repo .\n"
+                        "201 200 ttys003 codex /vendor/bin/codex -C /repo .\n"
+                        "400 40 ttys004 node node /usr/local/bin/codex -C /repo .\n"
+                        "401 400 ttys004 codex /vendor/bin/codex -C /repo .\n"
+                    ),
+                    stderr="",
+                )
+
+            killed: list[tuple[int, int]] = []
+            fake_screen_runner = lambda *args, **kwargs: subprocess.CompletedProcess(args=args[0], returncode=1, stdout="", stderr="No Sockets found\n")
+            result = terminate_stale_codex_sessions_action(
+                {"confirmed": True},
+                marker_path=marker_path,
+                runner=fake_runner,
+                screen_runner=fake_screen_runner,
+                managed_codex_tty_labeler=lambda: {"ttys004": "Janička light"},
+                killer=lambda pid, sig: killed.append((pid, sig)),
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["stale_ttys"], ["ttys003"])
+        self.assertEqual(result["managed_codex_ttys"], ["ttys004"])
+        self.assertEqual(result["protected_ttys"], ["ttys001", "ttys004"])
         self.assertEqual(result["killed_pids"], [200])
         self.assertEqual(killed, [(200, signal.SIGTERM)])
 

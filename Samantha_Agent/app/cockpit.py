@@ -34,8 +34,11 @@ except ImportError:  # pragma: no cover - optional local convenience dependency
         return False
 
 from app.adam_service import (
+    ADAM_SERVICE_SESSION,
+    JANICKA_LIGHT_SESSION,
     adam_service_status,
     deliver_prompt_to_adam_screen,
+    discover_managed_adam_codex_ttys,
     janicka_light_status,
     load_adam_text_reply,
     restart_adam_service,
@@ -3953,6 +3956,7 @@ def adam_voice_bridge_status(
     *,
     marker_path: Path = CURRENT_CODEX_TTY_PATH,
     codex_tty_discoverer: Callable[[], list[str]] = discover_codex_ttys,
+    managed_codex_tty_labeler: Callable[[], dict[str, str]] | None = None,
     screen_runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
     marker_pid_checker: Callable[[int], bool] | None = None,
     expected_codex_session_limit: int = 1,
@@ -3981,6 +3985,17 @@ def adam_voice_bridge_status(
     except Exception:
         codex_ttys = []
     codex_ttys = [item for item in codex_ttys if item and item != "??"]
+    try:
+        managed_codex_labels = managed_codex_tty_labeler() if managed_codex_tty_labeler else managed_codex_session_tty_labels()
+    except Exception:
+        managed_codex_labels = {}
+    managed_codex_labels = {
+        normalize_tty(str(tty)): safe_text(str(label))[:80]
+        for tty, label in managed_codex_labels.items()
+        if normalize_tty(str(tty)) in codex_ttys
+    }
+    managed_codex_ttys = sorted(managed_codex_labels)
+    human_codex_ttys = [tty for tty in codex_ttys if tty not in managed_codex_labels]
 
     screen_status = "unknown"
     screen_message = "screen stav nelze zjistit"
@@ -4033,15 +4048,20 @@ def adam_voice_bridge_status(
             warnings.append(f"označené TTY {marked_tty} je staré; použije se jediná aktivní Codex relace {effective_tty}")
         else:
             warnings.append(f"označené TTY {marked_tty} není mezi aktivními Codex relacemi")
-    if len(codex_ttys) > expected_codex_session_limit:
-        warnings.append(f"běží {len(codex_ttys)} Codex relací, očekáváno nejvýše {expected_codex_session_limit}")
+    if len(human_codex_ttys) > expected_codex_session_limit:
+        warnings.append(f"běží {len(human_codex_ttys)} běžných Codex relací, očekáváno nejvýše {expected_codex_session_limit}")
+    if managed_codex_ttys:
+        notes.append(
+            "spravované relace mimo limit: "
+            + ", ".join(f"{tty}={managed_codex_labels[tty]}" for tty in managed_codex_ttys)
+        )
     if screen_status == "not_running":
         notes.append("screen neběží; pro lokální Mac TTY bridge to není blokující")
 
     target = effective_tty or marked_tty or "nezjištěno"
     marker_label = marked_tty or "nezjištěno"
     readiness = "Mac TTY bridge připravený" if mac_bridge_ready else "Mac TTY bridge není připravený"
-    codex_count_label = "neověřeno přes ps" if marker_pid_fallback and not codex_ttys else str(len(codex_ttys))
+    codex_count_label = "neověřeno přes ps" if marker_pid_fallback and not codex_ttys else str(len(human_codex_ttys))
     message = (
         f"{readiness}. Bridge cílí na {target} (marker: {marker_label}). Codex relace: {codex_count_label} "
         f"(limit {expected_codex_session_limit}). {screen_message}."
@@ -4065,6 +4085,10 @@ def adam_voice_bridge_status(
         "mac_bridge_ready": mac_bridge_ready,
         "codex_ttys": codex_ttys,
         "codex_tty_count": len(codex_ttys),
+        "human_codex_ttys": human_codex_ttys,
+        "human_codex_tty_count": len(human_codex_ttys),
+        "managed_codex_ttys": managed_codex_ttys,
+        "managed_codex_labels": managed_codex_labels,
         "codex_tty_count_label": codex_count_label,
         "expected_codex_session_limit": expected_codex_session_limit,
         "screen_status": screen_status,
@@ -4072,6 +4096,19 @@ def adam_voice_bridge_status(
         "notes": notes,
         "warnings": warnings,
     }
+
+
+def managed_codex_session_tty_labels() -> dict[str, str]:
+    labels: dict[str, str] = {}
+    for session_name, label in (
+        (ADAM_SERVICE_SESSION, "Adam managed"),
+        (JANICKA_LIGHT_SESSION, "Janička light"),
+    ):
+        for tty in discover_managed_adam_codex_ttys(session_name=session_name):
+            normalized = normalize_tty(tty)
+            if normalized:
+                labels[normalized] = label
+    return labels
 
 
 CODEX_SESSION_PS_COMMAND = ["ps", "-axo", "pid=,ppid=,tty=,comm=,args="]
@@ -4153,6 +4190,7 @@ def terminate_stale_codex_sessions_action(
     marker_path: Path = CURRENT_CODEX_TTY_PATH,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
     screen_runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+    managed_codex_tty_labeler: Callable[[], dict[str, str]] | None = None,
     killer: Callable[[int, int], None] = os.kill,
 ) -> dict[str, Any]:
     confirmed = bool(payload.get("confirmed"))
@@ -4161,6 +4199,7 @@ def terminate_stale_codex_sessions_action(
     bridge = adam_voice_bridge_status(
         marker_path=marker_path,
         codex_tty_discoverer=lambda: codex_ttys,
+        managed_codex_tty_labeler=managed_codex_tty_labeler,
         screen_runner=screen_runner,
         expected_codex_session_limit=1,
     )
@@ -4174,7 +4213,8 @@ def terminate_stale_codex_sessions_action(
             "sessions": sessions,
         }
 
-    stale_sessions = [session for session in sessions if session.get("tty") != protected_tty]
+    protected_ttys = {protected_tty, *[str(tty) for tty in bridge.get("managed_codex_ttys", []) if tty]}
+    stale_sessions = [session for session in sessions if session.get("tty") not in protected_ttys]
     stale_ttys = [str(session.get("tty") or "") for session in stale_sessions]
     root_pids = sorted({int(pid) for session in stale_sessions for pid in session.get("root_pids", [])})
     if not stale_sessions:
@@ -4183,6 +4223,8 @@ def terminate_stale_codex_sessions_action(
             "status": "no_stale_sessions",
             "message": f"Žádné staré Codex relace k ukončení. Chráněný cíl je {protected_tty}.",
             "protected_tty": protected_tty,
+            "protected_ttys": sorted(protected_ttys),
+            "managed_codex_ttys": bridge.get("managed_codex_ttys", []),
             "voice_bridge": bridge,
             "sessions": sessions,
         }
@@ -4192,6 +4234,8 @@ def terminate_stale_codex_sessions_action(
             "status": "confirmation_required",
             "message": f"K ukončení jsou připravené staré Codex relace: {', '.join(stale_ttys)}. Akci je potřeba potvrdit.",
             "protected_tty": protected_tty,
+            "protected_ttys": sorted(protected_ttys),
+            "managed_codex_ttys": bridge.get("managed_codex_ttys", []),
             "stale_ttys": stale_ttys,
             "root_pids": root_pids,
             "voice_bridge": bridge,
@@ -4212,6 +4256,8 @@ def terminate_stale_codex_sessions_action(
             "status": "partial_or_failed",
             "message": f"Některé staré Codex relace se nepodařilo ukončit: {' | '.join(errors)}",
             "protected_tty": protected_tty,
+            "protected_ttys": sorted(protected_ttys),
+            "managed_codex_ttys": bridge.get("managed_codex_ttys", []),
             "stale_ttys": stale_ttys,
             "killed_pids": killed,
             "errors": errors,
@@ -4221,6 +4267,8 @@ def terminate_stale_codex_sessions_action(
         "status": "stale_sessions_terminated",
         "message": f"Ukončil jsem staré Codex relace: {', '.join(stale_ttys)}. Chráněný cíl {protected_tty} zůstal běžet.",
         "protected_tty": protected_tty,
+        "protected_ttys": sorted(protected_ttys),
+        "managed_codex_ttys": bridge.get("managed_codex_ttys", []),
         "stale_ttys": stale_ttys,
         "killed_pids": killed,
     }
@@ -15624,11 +15672,16 @@ COCKPIT_HTML = """<!doctype html>
       if (voiceBridgeSessions) {
         const markedTty = String(voiceBridge.marked_tty || "");
         const effectiveTty = String(voiceBridge.effective_tty || "");
+        const managedLabels = voiceBridge.managed_codex_labels && typeof voiceBridge.managed_codex_labels === "object"
+          ? voiceBridge.managed_codex_labels
+          : {};
         const codexTtys = Array.isArray(voiceBridge.codex_ttys)
           ? voiceBridge.codex_ttys.map((item) => String(item || "")).filter(Boolean)
           : [];
         const sessionParts = codexTtys.map((tty) => (
-          tty === markedTty
+          managedLabels[tty]
+            ? `${tty} -> ${managedLabels[tty]}`
+            : tty === markedTty
             ? `${tty} -> voice marker`
             : tty === effectiveTty
               ? `${tty} -> voice bridge`
@@ -17144,20 +17197,27 @@ COCKPIT_HTML = """<!doctype html>
 		      if (!voiceBridgeSwitcher || !voiceBridgeSwitcherStatus || !voiceBridgeSwitcherActions) return;
 		      const markedTty = String(voiceBridge.marked_tty || "");
 		      const effectiveTty = String(voiceBridge.effective_tty || "");
+		      const managedLabels = voiceBridge.managed_codex_labels && typeof voiceBridge.managed_codex_labels === "object"
+		        ? voiceBridge.managed_codex_labels
+		        : {};
 		      const codexTtys = Array.isArray(voiceBridge.codex_ttys)
 		        ? voiceBridge.codex_ttys.map((item) => String(item || "")).filter(Boolean)
 		        : [];
-		      const staleTtys = codexTtys.filter((tty) => tty !== effectiveTty);
+		      const bridgeTtys = codexTtys.filter((tty) => !managedLabels[tty]);
+		      const staleTtys = bridgeTtys.filter((tty) => tty !== effectiveTty);
 		      voiceBridgeSwitcher.classList.toggle("hidden", codexTtys.length === 0);
 		      if (codexTtys.length === 0) {
 		        voiceBridgeSwitcherStatus.textContent = "Není nalezená žádná aktivní Codex relace.";
 		        voiceBridgeSwitcherActions.innerHTML = "";
 		        return;
 		      }
+		      const managedText = Object.keys(managedLabels).length
+		        ? ` Spravované relace: ${Object.keys(managedLabels).map((tty) => `${tty}=${managedLabels[tty]}`).join(", ")}.`
+		        : "";
 		      voiceBridgeSwitcherStatus.textContent = markedTty
-		        ? `Marker: ${markedTty}. Efektivní cíl: ${effectiveTty || "nezjištěno"}.`
-		        : `Marker zatím není nastavený. Efektivní cíl: ${effectiveTty || "nezjištěno"}.`;
-		      voiceBridgeSwitcherActions.innerHTML = codexTtys.map((tty) => {
+		        ? `Marker: ${markedTty}. Efektivní cíl: ${effectiveTty || "nezjištěno"}.${managedText}`
+		        : `Marker zatím není nastavený. Efektivní cíl: ${effectiveTty || "nezjištěno"}.${managedText}`;
+		      voiceBridgeSwitcherActions.innerHTML = bridgeTtys.map((tty) => {
 		        const active = tty === markedTty;
 		        const effective = tty === effectiveTty && tty !== markedTty;
 		        const label = active
