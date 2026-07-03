@@ -36,11 +36,14 @@ except ImportError:  # pragma: no cover - optional local convenience dependency
 from app.adam_service import (
     adam_service_status,
     deliver_prompt_to_adam_screen,
+    janicka_light_status,
     load_adam_text_reply,
     restart_adam_service,
     start_adam_service,
+    start_janicka_light_session,
     stop_adam_service,
-    submit_adam_text_request,
+    stop_janicka_light_session,
+    submit_janicka_text_request,
     wait_for_adam_ready,
 )
 from app.article_archive import (
@@ -10149,7 +10152,7 @@ def janicka_chat_action(
     payload: dict[str, Any],
     *,
     asker: Callable[[str], str] | None = None,
-    service_submitter: Callable[..., dict[str, Any]] = submit_adam_text_request,
+    service_submitter: Callable[..., dict[str, Any]] = submit_janicka_text_request,
 ) -> dict[str, Any]:
     message = safe_text(str(payload.get("message", "") or "")).strip()
     if not message:
@@ -10176,7 +10179,7 @@ def janicka_chat_action(
             "service": result,
         }
     bridge_message = (
-        "Dotaz jsem předal Adamovi. Pokud Adam ještě neběžel, Cockpit ho zkusil spustit. "
+        "Dotaz jsem předal Adamovi v light Samantha relaci. Pokud ještě neběžela, Cockpit ji zkusil spustit. "
         "Odpověď se zobrazí tady, až ji Adam zapíše zpět."
     )
     return {
@@ -10297,6 +10300,30 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "risk": "local_service",
         "confirmation": "ui_confirm_boolean",
         "handler_name": "stop_adam_service",
+        "test_level": "ui_presence",
+    },
+    {
+        "path": "/api/janicka/light/status",
+        "label": "Janička light Samantha status",
+        "risk": "read_only_via_post",
+        "confirmation": "none_readonly",
+        "handler_name": "janicka_light_status",
+        "test_level": "ui_presence",
+    },
+    {
+        "path": "/api/janicka/light/start",
+        "label": "Spustit Janička light Samantha",
+        "risk": "local_service",
+        "confirmation": "fixed_workflow",
+        "handler_name": "start_janicka_light_session",
+        "test_level": "ui_presence",
+    },
+    {
+        "path": "/api/janicka/light/stop",
+        "label": "Zastavit Janička light Samantha",
+        "risk": "local_service",
+        "confirmation": "ui_confirm_boolean",
+        "handler_name": "stop_janicka_light_session",
         "test_level": "ui_presence",
     },
     {
@@ -10907,6 +10934,16 @@ class CockpitServer:
                 if parsed.path == "/api/adam/stop":
                     payload = self.read_json()
                     self.respond_json(stop_adam_service(confirmed=bool(payload.get("confirmed"))))
+                    return
+                if parsed.path == "/api/janicka/light/status":
+                    self.respond_json(janicka_light_status())
+                    return
+                if parsed.path == "/api/janicka/light/start":
+                    self.respond_json(start_janicka_light_session())
+                    return
+                if parsed.path == "/api/janicka/light/stop":
+                    payload = self.read_json()
+                    self.respond_json(stop_janicka_light_session(confirmed=bool(payload.get("confirmed"))))
                     return
                 if parsed.path == "/api/voice-mode/start":
                     self.respond_json(start_adam_voice_mode_action())
@@ -13462,6 +13499,11 @@ COCKPIT_HTML = """<!doctype html>
             <button class="secondary" id="janickaAdamRestartBtn" type="button">Restartovat</button>
             <button class="secondary" id="janickaAdamStopBtn" type="button">Zastavit</button>
           </div>
+          <div id="janickaLightStatus" class="status-line">Janička light: čekám na kontrolu.</div>
+          <div class="actions compact-actions">
+            <button class="secondary" id="janickaLightStartBtn" type="button">Spustit light Samanthu</button>
+            <button class="secondary" id="janickaLightStopBtn" type="button">Zastavit light</button>
+          </div>
         </div>
         <div id="janickaChatLog" class="janicka-chat-log" aria-live="polite"></div>
         <div class="janicka-chat-input">
@@ -13819,6 +13861,9 @@ COCKPIT_HTML = """<!doctype html>
     const janickaAdamStartBtn = document.getElementById("janickaAdamStartBtn");
     const janickaAdamRestartBtn = document.getElementById("janickaAdamRestartBtn");
     const janickaAdamStopBtn = document.getElementById("janickaAdamStopBtn");
+    const janickaLightStatus = document.getElementById("janickaLightStatus");
+    const janickaLightStartBtn = document.getElementById("janickaLightStartBtn");
+    const janickaLightStopBtn = document.getElementById("janickaLightStopBtn");
     const remindersModal = document.getElementById("remindersModal");
     const remindersCloseBtn = document.getElementById("remindersCloseBtn");
     const remindersStatus = document.getElementById("remindersStatus");
@@ -14163,6 +14208,9 @@ COCKPIT_HTML = """<!doctype html>
         "janickaAdamStartBtn",
         "janickaAdamRestartBtn",
         "janickaAdamStopBtn",
+        "janickaLightStatus",
+        "janickaLightStartBtn",
+        "janickaLightStopBtn",
         "webAppsBtn",
         "libraryBtn",
         "libraryCloseBtn",
@@ -19429,6 +19477,7 @@ COCKPIT_HTML = """<!doctype html>
         renderJanickaChat();
       }
       refreshJanickaAdamStatus();
+      refreshJanickaLightStatus();
       window.setTimeout(() => janickaChatInput.focus(), 0);
     }
 
@@ -19494,7 +19543,7 @@ COCKPIT_HTML = """<!doctype html>
       janickaChatInput.value = "";
       renderJanickaChat();
       janickaChatSendBtn.disabled = true;
-      janickaChatStatus.textContent = "Předávám dotaz Adamovi do Codexu...";
+      janickaChatStatus.textContent = "Předávám dotaz light Samanthě do Codexu...";
       try {
         const data = await postJson("/api/janicka/chat", {
           message,
@@ -19512,6 +19561,7 @@ COCKPIT_HTML = """<!doctype html>
             renderJanickaChat();
             pollJanickaCodexReply(message, data.request_id || "");
             refreshJanickaAdamStatus();
+            refreshJanickaLightStatus();
             return;
           }
         } else {
@@ -19605,6 +19655,49 @@ COCKPIT_HTML = """<!doctype html>
       } catch (err) {
         recordFrontendError(err);
         janickaAdamStatus.textContent = `Adama se nepodařilo zastavit: ${err}`;
+      }
+    }
+
+    async function refreshJanickaLightStatus() {
+      try {
+        const data = await postJson("/api/janicka/light/status", {});
+        const running = Boolean(data.running);
+        const managedTtys = Array.isArray(data.managed_codex_ttys) ? data.managed_codex_ttys.filter(Boolean) : [];
+        const managedTarget = managedTtys.length ? ` Relace: ${managedTtys.join(", ")}.` : "";
+        const ready = running && managedTtys.length > 0;
+        janickaLightStatus.textContent = `${data.message || "Janička light status není dostupný."}${managedTarget}`;
+        janickaLightStatus.classList.toggle("ok", ready);
+        janickaLightStatus.classList.toggle("warn", !ready);
+        janickaLightStartBtn.disabled = running;
+      } catch (err) {
+        recordFrontendError(err);
+        janickaLightStatus.textContent = `Janička light status se nepodařilo načíst: ${err}`;
+        janickaLightStatus.classList.add("warn");
+      }
+    }
+
+    async function startJanickaLight() {
+      janickaLightStatus.textContent = "Spouštím light Samanthu...";
+      try {
+        const data = await postJson("/api/janicka/light/start", {});
+        janickaLightStatus.textContent = data.message || "Light Samantha se spouští.";
+        await refreshJanickaLightStatus();
+      } catch (err) {
+        recordFrontendError(err);
+        janickaLightStatus.textContent = `Light Samanthu se nepodařilo spustit: ${err}`;
+      }
+    }
+
+    async function stopJanickaLight() {
+      if (!window.confirm("Zastavit Janička light Samanthu?")) return;
+      janickaLightStatus.textContent = "Zastavuji light Samanthu...";
+      try {
+        const data = await postJson("/api/janicka/light/stop", {confirmed: true});
+        janickaLightStatus.textContent = data.message || "Light Samantha byla zastavena.";
+        await refreshJanickaLightStatus();
+      } catch (err) {
+        recordFrontendError(err);
+        janickaLightStatus.textContent = `Light Samanthu se nepodařilo zastavit: ${err}`;
       }
     }
 
@@ -19741,6 +19834,8 @@ COCKPIT_HTML = """<!doctype html>
     janickaAdamStartBtn.addEventListener("click", startJanickaAdam);
     janickaAdamRestartBtn.addEventListener("click", restartJanickaAdam);
     janickaAdamStopBtn.addEventListener("click", stopJanickaAdam);
+    janickaLightStartBtn.addEventListener("click", startJanickaLight);
+    janickaLightStopBtn.addEventListener("click", stopJanickaLight);
     janickaChatInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();

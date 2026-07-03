@@ -276,6 +276,28 @@ Explicitní VS Code helper zůstává jen jako fallback/helper. Reálné testy d
 prošly; poslední naměřené čekání bylo zhruba 44 sekund, což je přijatelné pro
 odpověď skutečnou Codex relací.
 
+## Aktuální checkpoint 2026-07-03
+
+Po reálných testech z Janička Cockpitu se ukázalo, že samotná `screen` cesta
+umí první dotaz doručit a vrátit odpověď, ale druhý dotaz se opakovaně ztrácel
+nebo nebyl převzat Codexem. Aktuální implementace proto odděluje Janička chat
+do light relace `samantha_janicka` a přidává více vrstev doručení:
+
+- start light relace přečte jen projektová pravidla a relevantní memory, potom
+  čeká bez vlastních návrhů,
+- doručení přes `screen` se považuje za úspěšné až po ověření `Request ID`
+  v hardcopy výstupu relace,
+- při neověřeném screen doručení se zkusí přímý managed Codex TTY fallback,
+- pokud macOS TTY vložení odmítne, dotaz zpracuje read-only `codex exec`
+  worker a odpověď zapíše zpět do Janička request/reply store,
+- Cockpit má servisní ovládání light relace přes
+  `/api/janicka/light/status`, `/api/janicka/light/start` a
+  `/api/janicka/light/stop`.
+
+Tento stav je checkpointnutý v
+`memory/handoffs/janicka_light_samantha_bridge_checkpoint_2026_07_03.md`.
+Další krok je ruční retest více navazujících dotazů přímo z okna `Janička`.
+
 ## Bezpečnost / neukládat
 
 - Do tohoto git-safe projektu neukládat hesla, tokeny, recovery klíče,
