@@ -12875,6 +12875,9 @@ COCKPIT_HTML = """<!doctype html>
     .janicka-chat-message.assistant { background: #fff; border-color: #fbcfe8; }
     .janicka-chat-meta { font-size: 12px; font-weight: 750; color: #831843; margin-bottom: 4px; }
     .janicka-chat-runtime { display: grid; gap: 8px; padding: 10px; border: 1px solid #fbcfe8; border-radius: 8px; background: #fff; }
+    .janicka-service-details { border-top: 1px solid #f3f4f6; padding-top: 8px; }
+    .janicka-service-details summary { cursor: pointer; color: var(--muted); font-size: 13px; font-weight: 700; }
+    .janicka-service-details[open] { display: grid; gap: 8px; }
     .compact-actions { gap: 8px; }
     .compact-actions button { min-height: 34px; padding: 6px 10px; }
     .janicka-chat-input { display: grid; gap: 8px; }
@@ -13541,17 +13544,20 @@ COCKPIT_HTML = """<!doctype html>
           <p class="janicka-subtitle">Napiš běžnou větou, co potřebuješ. Cockpit Adama podle potřeby spustí a předá mu dotaz.</p>
         </div>
         <div class="janicka-chat-runtime">
-          <div id="janickaAdamStatus" class="status-line">Adam: čekám na kontrolu.</div>
+          <div id="janickaLightStatus" class="status-line">Janička chat: čekám na kontrolu.</div>
           <div class="actions compact-actions">
-            <button class="secondary" id="janickaAdamStartBtn" type="button">Spustit Adama</button>
-            <button class="secondary" id="janickaAdamRestartBtn" type="button">Restartovat</button>
-            <button class="secondary" id="janickaAdamStopBtn" type="button">Zastavit</button>
+            <button class="secondary" id="janickaLightStartBtn" type="button">Spustit Janičku</button>
+            <button class="secondary" id="janickaLightStopBtn" type="button">Zastavit Janičku</button>
           </div>
-          <div id="janickaLightStatus" class="status-line">Janička light: čekám na kontrolu.</div>
-          <div class="actions compact-actions">
-            <button class="secondary" id="janickaLightStartBtn" type="button">Spustit light Samanthu</button>
-            <button class="secondary" id="janickaLightStopBtn" type="button">Zastavit light</button>
-          </div>
+          <details class="janicka-service-details">
+            <summary>Servisní fallback</summary>
+            <div id="janickaAdamStatus" class="status-line">Starý Adam fallback: čekám na kontrolu.</div>
+            <div class="actions compact-actions">
+              <button class="secondary" id="janickaAdamStartBtn" type="button">Spustit fallback</button>
+              <button class="secondary" id="janickaAdamRestartBtn" type="button">Restartovat fallback</button>
+              <button class="secondary" id="janickaAdamStopBtn" type="button">Zastavit fallback</button>
+            </div>
+          </details>
         </div>
         <div id="janickaChatLog" class="janicka-chat-log" aria-live="polite"></div>
         <div class="janicka-chat-input">
@@ -19665,56 +19671,59 @@ COCKPIT_HTML = """<!doctype html>
         const data = await postJson("/api/adam/status", {});
         const running = Boolean(data.running);
         const managedTtys = Array.isArray(data.managed_codex_ttys) ? data.managed_codex_ttys.filter(Boolean) : [];
-        const managedTarget = managedTtys.length ? ` Adam relace: ${managedTtys.join(", ")}.` : "";
-        const marker = data.marked_tty ? ` Hlasový marker: ${data.marked_tty}.` : "";
+        const managedTarget = managedTtys.length ? ` Relace: ${managedTtys.join(", ")}.` : "";
+        const marker = data.marked_tty ? ` Mílův hlasový bridge: ${data.marked_tty}.` : "";
         const pending = Number(data.pending_count || 0);
         const ready = running && managedTtys.length > 0;
-        janickaAdamStatus.textContent = `${data.message || "Adam status není dostupný."}${managedTarget}${marker}${pending ? ` Čeká ${pending} dotazů.` : ""}`;
+        const stateText = ready
+          ? `Starý Adam fallback běží.${managedTarget}${marker}`
+          : `Starý Adam fallback neběží nebo není připravený.${marker}`;
+        janickaAdamStatus.textContent = `${stateText}${pending ? ` Starých nevyřízených dotazů: ${pending}.` : ""}`;
         janickaAdamStatus.classList.toggle("ok", ready);
         janickaAdamStatus.classList.toggle("warn", !ready);
         janickaAdamStartBtn.disabled = running;
       } catch (err) {
         recordFrontendError(err);
-        janickaAdamStatus.textContent = `Adam status se nepodařilo načíst: ${err}`;
+        janickaAdamStatus.textContent = `Fallback status se nepodařilo načíst: ${err}`;
         janickaAdamStatus.classList.add("warn");
       }
     }
 
     async function startJanickaAdam() {
-      janickaAdamStatus.textContent = "Spouštím Adama...";
+      janickaAdamStatus.textContent = "Spouštím fallback...";
       try {
         const data = await postJson("/api/adam/start", {});
-        janickaAdamStatus.textContent = data.message || "Adam se spouští.";
+        janickaAdamStatus.textContent = data.message || "Fallback se spouští.";
         await refreshJanickaAdamStatus();
       } catch (err) {
         recordFrontendError(err);
-        janickaAdamStatus.textContent = `Adama se nepodařilo spustit: ${err}`;
+        janickaAdamStatus.textContent = `Fallback se nepodařilo spustit: ${err}`;
       }
     }
 
     async function restartJanickaAdam() {
-      if (!window.confirm("Restartovat Adama? Rozpracovaná odpověď v Codexu se může přerušit.")) return;
-      janickaAdamStatus.textContent = "Restartuji Adama...";
+      if (!window.confirm("Restartovat starý Adam fallback? Rozpracovaná odpověď ve fallback relaci se může přerušit.")) return;
+      janickaAdamStatus.textContent = "Restartuji fallback...";
       try {
         const data = await postJson("/api/adam/restart", {confirmed: true});
-        janickaAdamStatus.textContent = data.message || "Adam se restartuje.";
+        janickaAdamStatus.textContent = data.message || "Fallback se restartuje.";
         await refreshJanickaAdamStatus();
       } catch (err) {
         recordFrontendError(err);
-        janickaAdamStatus.textContent = `Adama se nepodařilo restartovat: ${err}`;
+        janickaAdamStatus.textContent = `Fallback se nepodařilo restartovat: ${err}`;
       }
     }
 
     async function stopJanickaAdam() {
-      if (!window.confirm("Zastavit Adama? Běžně je lepší ho nechat spuštěného.")) return;
-      janickaAdamStatus.textContent = "Zastavuji Adama...";
+      if (!window.confirm("Zastavit starý Adam fallback? Běžně není potřeba na něj sahat.")) return;
+      janickaAdamStatus.textContent = "Zastavuji fallback...";
       try {
         const data = await postJson("/api/adam/stop", {confirmed: true});
-        janickaAdamStatus.textContent = data.message || "Adam byl zastaven.";
+        janickaAdamStatus.textContent = data.message || "Fallback byl zastaven.";
         await refreshJanickaAdamStatus();
       } catch (err) {
         recordFrontendError(err);
-        janickaAdamStatus.textContent = `Adama se nepodařilo zastavit: ${err}`;
+        janickaAdamStatus.textContent = `Fallback se nepodařilo zastavit: ${err}`;
       }
     }
 
@@ -19725,39 +19734,41 @@ COCKPIT_HTML = """<!doctype html>
         const managedTtys = Array.isArray(data.managed_codex_ttys) ? data.managed_codex_ttys.filter(Boolean) : [];
         const managedTarget = managedTtys.length ? ` Relace: ${managedTtys.join(", ")}.` : "";
         const ready = running && managedTtys.length > 0;
-        janickaLightStatus.textContent = `${data.message || "Janička light status není dostupný."}${managedTarget}`;
+        janickaLightStatus.textContent = ready
+          ? `Janička chat běží.${managedTarget}`
+          : `Janička chat není připravený.${managedTarget}`;
         janickaLightStatus.classList.toggle("ok", ready);
         janickaLightStatus.classList.toggle("warn", !ready);
         janickaLightStartBtn.disabled = running;
       } catch (err) {
         recordFrontendError(err);
-        janickaLightStatus.textContent = `Janička light status se nepodařilo načíst: ${err}`;
+        janickaLightStatus.textContent = `Janička chat status se nepodařilo načíst: ${err}`;
         janickaLightStatus.classList.add("warn");
       }
     }
 
     async function startJanickaLight() {
-      janickaLightStatus.textContent = "Spouštím light Samanthu...";
+      janickaLightStatus.textContent = "Spouštím Janička chat...";
       try {
         const data = await postJson("/api/janicka/light/start", {});
-        janickaLightStatus.textContent = data.message || "Light Samantha se spouští.";
+        janickaLightStatus.textContent = data.message || "Janička chat se spouští.";
         await refreshJanickaLightStatus();
       } catch (err) {
         recordFrontendError(err);
-        janickaLightStatus.textContent = `Light Samanthu se nepodařilo spustit: ${err}`;
+        janickaLightStatus.textContent = `Janička chat se nepodařilo spustit: ${err}`;
       }
     }
 
     async function stopJanickaLight() {
-      if (!window.confirm("Zastavit Janička light Samanthu?")) return;
-      janickaLightStatus.textContent = "Zastavuji light Samanthu...";
+      if (!window.confirm("Zastavit Janička chat?")) return;
+      janickaLightStatus.textContent = "Zastavuji Janička chat...";
       try {
         const data = await postJson("/api/janicka/light/stop", {confirmed: true});
-        janickaLightStatus.textContent = data.message || "Light Samantha byla zastavena.";
+        janickaLightStatus.textContent = data.message || "Janička chat byl zastaven.";
         await refreshJanickaLightStatus();
       } catch (err) {
         recordFrontendError(err);
-        janickaLightStatus.textContent = `Light Samanthu se nepodařilo zastavit: ${err}`;
+        janickaLightStatus.textContent = `Janička chat se nepodařilo zastavit: ${err}`;
       }
     }
 
