@@ -572,6 +572,12 @@ def normalized_image_extension(filename: str, *, mime_type: str = "") -> str:
 
 def mime_type_for_extension(extension: str) -> str:
     suffix = extension.casefold()
+    if suffix == ".pdf":
+        return "application/pdf"
+    if suffix == ".txt":
+        return "text/plain; charset=utf-8"
+    if suffix == ".docx":
+        return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     if suffix == ".png":
         return "image/png"
     if suffix == ".webp":

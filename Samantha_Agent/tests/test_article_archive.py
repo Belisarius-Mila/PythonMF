@@ -481,10 +481,14 @@ class ArticleArchiveTests(unittest.TestCase):
             archive_root = Path(temp_dir)
             article_dir = archive_root / "articles" / "family-recipe"
             attachments_dir = article_dir / "attachments" / "readable"
+            pdf_dir = article_dir / "attachments" / "original"
             attachments_dir.mkdir(parents=True)
+            pdf_dir.mkdir(parents=True)
             (article_dir / "article.txt").write_text("Rodinný recept\nPřepis rukopisu.", encoding="utf-8")
             readable = attachments_dir / "recept_readable.jpg"
             readable.write_bytes(b"fake-jpeg")
+            original_pdf = pdf_dir / "recept.pdf"
+            original_pdf.write_bytes(b"%PDF-1.4\n")
             (archive_root / "registry.jsonl").write_text(
                 json.dumps(
                     {
@@ -510,6 +514,17 @@ class ArticleArchiveTests(unittest.TestCase):
                                 "mime_type": "image/jpeg",
                                 "readable_file": "articles/family-recipe/attachments/readable/recept_readable.jpg",
                                 "note": "Čitelná kopie rukopisu.",
+                            },
+                            {
+                                "id": "pdf-1",
+                                "label": "PDF originál",
+                                "kind": "pdf",
+                                "role": "original_pdf",
+                                "mime_type": "application/pdf",
+                                "original_file": "articles/family-recipe/attachments/original/recept.pdf",
+                                "readable_file": "",
+                                "thumb_file": "",
+                                "note": "PDF příloha.",
                             }
                         ],
                     },
@@ -527,13 +542,21 @@ class ArticleArchiveTests(unittest.TestCase):
                 variant="readable",
                 archive_root=archive_root,
             )
+            pdf_attachment = get_article_attachment(
+                article_id="family-recipe",
+                attachment_id="pdf-1",
+                variant="original",
+                archive_root=archive_root,
+            )
 
-        self.assertEqual(listed["items"][0]["attachment_count"], 1)
-        self.assertEqual(listed["items"][0]["attachment_roles"], ["handwritten_recipe_scan"])
+        self.assertEqual(listed["items"][0]["attachment_count"], 2)
+        self.assertEqual(listed["items"][0]["attachment_roles"], ["handwritten_recipe_scan", "original_pdf"])
         self.assertTrue(article["ok"])
         self.assertEqual(article["item"]["attachments"][0]["label"], "Ručně psaný originál")
         self.assertTrue(attachment["ok"])
         self.assertEqual(attachment["path"].name, "recept_readable.jpg")
+        self.assertTrue(pdf_attachment["ok"])
+        self.assertEqual(pdf_attachment["mime_type"], "application/pdf")
 
     @unittest.skipIf(Image is None, "Pillow is not installed")
     def test_attach_article_image_writes_original_readable_thumb_and_metadata(self) -> None:
