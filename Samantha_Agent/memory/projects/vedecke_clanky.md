@@ -203,6 +203,17 @@ text i HTML jsou jen v `data/private/article_archive/` a nepatří do gitu.
 - Položka `Špagety ala carbonara` byla v soukromé knihovně přesunuta z
   `Ostatní` do `Recepty`.
 
+2026-07-05 byl ručně zpracován vědecký článek Science Advances o Wnt/DVL3:
+
+- DOI: `10.1126/sciadv.aed8899`.
+- V soukromé Knihovně vznikla jedna hlavní karta ve `Vědecké články`, ne více
+  samostatných duplicitních článků.
+- Fulltext karty tvoří české rozšířené komentované zpracování `Bod zlomu v
+  buňce`; originální anglický článek a obě české PDF verze jsou uložené jako
+  soukromé PDF přílohy stejné karty.
+- Kód Knihovny nově správně servíruje PDF přílohy jako `application/pdf`; oprava
+  je v commitu `3f1f470`.
+
 Další krok:
 
 1. Až Míla se Samanthou připraví první přepis ručně psaného receptu a fotku,
