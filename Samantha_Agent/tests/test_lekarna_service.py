@@ -628,6 +628,7 @@ class LekarnaServiceTests(unittest.TestCase):
                     location="Pils Jana",
                     user_confirmed=True,
                     confirmation_text=APPLY_CONFIRMATION_PHRASE,
+                    refresh_web=False,
                 )
             finally:
                 manifest_path.unlink(missing_ok=True)
@@ -642,6 +643,40 @@ class LekarnaServiceTests(unittest.TestCase):
         imported = next(record for record in records if record.zdroj == "Leky_v_Krabickach/novy_lek_sirup.jpg")
         self.assertEqual(imported.zdroj, "Leky_v_Krabickach/novy_lek_sirup.jpg")
         self.assertEqual(imported.umisteni, "Pils Jana")
+
+    def test_auto_import_draft_prefills_safe_pil_short(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            directory = Path(temp_dir)
+            downloads = directory / "Downloads"
+            downloads.mkdir()
+            photo = downloads / "IMG_0100.JPG"
+            photo.write_text("new", encoding="utf-8")
+            csv_path = _fake_csv(directory)
+            manifest_path = directory / "manifest.csv"
+            report_path = directory / "report.md"
+
+            def fake_ocr(path: Path) -> ImageOcrResult:
+                return ImageOcrResult(
+                    text="Sinupret akut obalené tablety 20 tablet",
+                    lines=("Sinupret", "akut obalené tablety", "20 tablet"),
+                    method="fake",
+                )
+
+            build_auto_import_draft(
+                downloads_dir=downloads,
+                limit=1,
+                manifest_path=manifest_path,
+                report_path=report_path,
+                csv_path=csv_path,
+                ocr_runner=fake_ocr,
+            )
+
+            with manifest_path.open("r", encoding="utf-8", newline="") as handle:
+                rows = list(csv.DictReader(handle))
+
+        self.assertEqual(len(rows), 1)
+        self.assertIn("Rostlinny lecivy pripravek", rows[0]["PIL_Short"])
+        self.assertEqual(rows[0]["PIL_Match_Status"], "pravdepodobne_sparovano_pil_z_fotky")
 
     def test_auto_import_suggests_metadata_from_ocr(self) -> None:
         suggestion = suggest_metadata_from_ocr(

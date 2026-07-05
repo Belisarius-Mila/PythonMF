@@ -35,6 +35,7 @@ from .photo_import import (
     apply_lekarna_photo_import_manifest,
 )
 from .service import DEFAULT_DOMACI_LEKY_CSV, FIELD_NAMES, load_domaci_leky
+from .web_bundle import refresh_lekarna_web_bundle
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -71,6 +72,8 @@ class AutoImportApplyResult:
     copied_count: int
     renamed_count: int
     appended_count: int
+    web_export_path: Path | None
+    encrypted_bundle_path: Path | None
     warnings: tuple[str, ...]
 
 
@@ -167,6 +170,7 @@ def apply_auto_import_manifest_from_downloads(
     location: str = "",
     user_confirmed: bool = False,
     confirmation_text: str = "",
+    refresh_web: bool = True,
 ) -> AutoImportApplyResult:
     if not user_confirmed or APPLY_CONFIRMATION_PHRASE.casefold() not in confirmation_text.casefold():
         raise ValueError(
@@ -192,6 +196,7 @@ def apply_auto_import_manifest_from_downloads(
         user_confirmed=True,
         confirmation_text=confirmation_text,
     )
+    web_refresh = refresh_lekarna_web_bundle() if refresh_web else None
     return AutoImportApplyResult(
         csv_path=applied.csv_path,
         backup_path=applied.backup_path,
@@ -199,7 +204,9 @@ def apply_auto_import_manifest_from_downloads(
         copied_count=copied,
         renamed_count=applied.renamed_count,
         appended_count=applied.appended_count,
-        warnings=applied.warnings,
+        web_export_path=web_refresh.export_path if web_refresh else None,
+        encrypted_bundle_path=web_refresh.encrypted_path if web_refresh else None,
+        warnings=(*applied.warnings, *(web_refresh.warnings if web_refresh else ())),
     )
 
 
@@ -410,13 +417,17 @@ def _manifest_row_from_suggestion(source_file: str, suggestion: dict[str, str], 
     row = {field: "" for field in MANIFEST_FIELD_NAMES}
     row.update(SAFE_DEFAULTS)
     row.update({field: suggestion.get(field, "") for field in FIELD_NAMES if field in suggestion})
+    pil_defaults = _pil_defaults_from_suggestion(suggestion, ocr)
+    for field, value in pil_defaults.items():
+        if field in row and not row.get(field):
+            row[field] = value
     row["include"] = "ano"
     row["source_file"] = source_file
     row["new_file"] = suggestion.get("new_file", "")
     row["zdroj"] = DEFAULT_PHOTO_PREFIX
     row["jistota_cteni"] = "stredni" if ocr.lines else "nizka"
     row["nutno_overit"] = "ano"
-    row["PIL_Match_Status"] = "nedohledano"
+    row["PIL_Match_Status"] = row.get("PIL_Match_Status") or "nedohledano"
     row["poznamky"] = (
         "Automaticky navrh z fotografie krabicky; pred importem zkontrolovat OCR, "
         "nazev, silu, mnozstvi, umisteni a zdroj informaci."
@@ -424,6 +435,43 @@ def _manifest_row_from_suggestion(source_file: str, suggestion: dict[str, str], 
     if ocr.warning:
         row["poznamky"] = f"{row['poznamky']} OCR upozorneni: {_short_warning(ocr.warning)}"
     return row
+
+
+def _pil_defaults_from_suggestion(suggestion: dict[str, str], ocr: ImageOcrResult) -> dict[str, str]:
+    name = str(suggestion.get("nazev", "") or "").strip()
+    normalized_name = normalize_for_match(name)
+    if "sinupret" in normalized_name:
+        return {
+            "PIL_Short": (
+                "Rostlinny lecivy pripravek pro dospele k lecbe akutnich nekomplikovanych zanetu "
+                "vedlejsich nosnich dutin s priznaky jako ryma, ucpany nos, bolest hlavy, bolest "
+                "tvare nebo tlak v obliceji. Neuzivat pri alergii na slozky pripravku nebo pri "
+                "zaludecnim/dvanactnikovem vredu; pri tehotenstvi, kojeni, citlivem zaludku, "
+                "zavaznych priznacich nebo potizich trvajicich ci horsicich se 7-14 dni overit "
+                "lekare/lekarnika a ridit se pribalovou informaci."
+            ),
+            "PIL_Source": "PIL Sinupret akut obalene tablety, sp.zn. sukls158429/2025; overit aktualni pribalovou informaci.",
+            "PIL_Checked_Date": datetime.now().strftime("%Y-%m-%d"),
+            "PIL_Match_Status": "pravdepodobne_sparovano_pil_z_fotky",
+        }
+
+    use = str(suggestion.get("pouziti", "") or "").strip()
+    form = str(suggestion.get("forma", "") or "").strip()
+    quantity = str(suggestion.get("mnozstvi", "") or "").strip()
+    visible = ", ".join(value for value in (name, form, quantity) if value)
+    if not visible:
+        visible = "novy pripravek z fotografie"
+    use_text = f" Viditelny/odhadnuty ucel: {use}." if use else ""
+    return {
+        "PIL_Short": (
+            f"Automaticky inventarni zaznam z fotografie: {visible}.{use_text} "
+            "Nejde o plne overeny vytah z pribalove informace; pred pouzitim fyzicky overit "
+            "obal, expiraci, slozeni, vhodnost a pribalovou informaci nebo lekarnika/lekare."
+        ),
+        "PIL_Source": f"Fotografie obalu ({ocr.method}); PIL zatim nedohledan.",
+        "PIL_Checked_Date": datetime.now().strftime("%Y-%m-%d"),
+        "PIL_Match_Status": "ceka_na_pil_overeni",
+    }
 
 
 def _write_manifest(path: Path, rows: list[dict[str, str]]) -> None:

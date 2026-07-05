@@ -728,6 +728,9 @@ def lekarna_auto_import_apply_action(payload: dict[str, Any]) -> dict[str, Any]:
         "appended": result.appended_count,
         "backup_path": str(result.backup_path),
         "report_path": str(result.report_path),
+        "web_export_path": str(result.web_export_path) if getattr(result, "web_export_path", None) else "",
+        "encrypted_bundle_path": str(result.encrypted_bundle_path) if getattr(result, "encrypted_bundle_path", None) else "",
+        "warnings": [safe_text(str(warning)) for warning in getattr(result, "warnings", ())],
     }
 
 
@@ -6691,6 +6694,11 @@ def lekarna_admin_page_html() -> str:
         applyResult.textContent = data.message || "Příjem doběhl.";
         if (data.ok) {{
           applyResult.textContent += `\\nZapsáno: ${{data.appended}} | kopie: ${{data.copied}} | přejmenováno: ${{data.renamed}}\\nZáloha: ${{data.backup_path}}`;
+          if (data.web_export_path) applyResult.textContent += `\\nWeb export: ${{data.web_export_path}}`;
+          if (data.encrypted_bundle_path) applyResult.textContent += `\\nŠifrovaný balíček: ${{data.encrypted_bundle_path}}`;
+          if (Array.isArray(data.warnings) && data.warnings.length) {{
+            applyResult.textContent += `\\nUpozornění:\\n- ${{data.warnings.join("\\n- ")}}`;
+          }}
         }}
       }} finally {{
         applyImportBtn.disabled = false;
