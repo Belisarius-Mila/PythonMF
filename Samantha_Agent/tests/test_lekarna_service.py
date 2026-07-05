@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 from app.lekarna.service import (
@@ -40,6 +41,7 @@ from app.lekarna.openai_vision import (
     openai_vision_to_inventory_suggestion,
 )
 from app.lekarna.search_tags import build_search_tags
+from app.lekarna.sukl_dlp import match_sukl_dlp
 
 
 FIELD_NAMES = [
@@ -644,6 +646,26 @@ class LekarnaServiceTests(unittest.TestCase):
         self.assertEqual(imported.zdroj, "Leky_v_Krabickach/novy_lek_sirup.jpg")
         self.assertEqual(imported.umisteni, "Pils Jana")
 
+    def test_sukl_dlp_matches_sinupret_akut_package_and_pil(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            dlp_zip = _fake_sukl_dlp_zip(Path(temp_dir))
+
+            match = match_sukl_dlp(
+                {
+                    "nazev": "Bionorica Sinupret",
+                    "forma": "obalene tablety",
+                    "mnozstvi": "20 tablet",
+                },
+                ocr_text="Sinupret akut obalene tablety 20 obalenych tablet",
+                dlp_zip_path=dlp_zip,
+            )
+
+        self.assertIsNotNone(match)
+        assert match is not None
+        self.assertEqual(match.kod_sukl, "0197843")
+        self.assertEqual(match.pil, "PI223751.pdf")
+        self.assertEqual(match.match_status, "overeno_sukl_dlp_pil")
+
     def test_auto_import_draft_prefills_safe_pil_short(self) -> None:
         with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
             directory = Path(temp_dir)
@@ -652,6 +674,7 @@ class LekarnaServiceTests(unittest.TestCase):
             photo = downloads / "IMG_0100.JPG"
             photo.write_text("new", encoding="utf-8")
             csv_path = _fake_csv(directory)
+            dlp_zip = _fake_sukl_dlp_zip(directory)
             manifest_path = directory / "manifest.csv"
             report_path = directory / "report.md"
 
@@ -669,6 +692,7 @@ class LekarnaServiceTests(unittest.TestCase):
                 report_path=report_path,
                 csv_path=csv_path,
                 ocr_runner=fake_ocr,
+                dlp_zip_path=dlp_zip,
             )
 
             with manifest_path.open("r", encoding="utf-8", newline="") as handle:
@@ -676,7 +700,9 @@ class LekarnaServiceTests(unittest.TestCase):
 
         self.assertEqual(len(rows), 1)
         self.assertIn("Rostlinny lecivy pripravek", rows[0]["PIL_Short"])
-        self.assertEqual(rows[0]["PIL_Match_Status"], "pravdepodobne_sparovano_pil_z_fotky")
+        self.assertEqual(rows[0]["PIL_Match_Status"], "overeno_sukl_dlp_pil")
+        self.assertIn("kod 0197843", rows[0]["PIL_Source"])
+        self.assertIn("PIL PI223751.pdf", rows[0]["PIL_Source"])
 
     def test_auto_import_suggests_metadata_from_ocr(self) -> None:
         suggestion = suggest_metadata_from_ocr(
@@ -926,6 +952,30 @@ def _write_manifest(path: Path, rows: list[dict[str, str]]) -> None:
         writer.writeheader()
         for row in rows:
             writer.writerow({field: row.get(field, "") for field in MANIFEST_FIELD_NAMES})
+
+
+def _fake_sukl_dlp_zip(directory: Path) -> Path:
+    path = directory / "DLP20260701.zip"
+    products = "\n".join(
+        [
+            "KOD_SUKL;NAZEV;SILA;FORMA;BALENI;DOPLNEK;REG;RC;VYDEJ;DODAVKY;TYP_LP",
+            "0197843;SINUPRET AKUT;;TBL OBD;20;TBL OBD 20;R;94/219/15-C;F;1;HE",
+            "0197844;SINUPRET AKUT;;TBL OBD;40;TBL OBD 40;R;94/219/15-C;F;0;HE",
+            "0047711;SINUPRET;;POR GTT SOL;100;POR GTT SOL 1X100ML;R;94/219/15-C;F;1;HE",
+        ]
+    )
+    documents = "\n".join(
+        [
+            "KOD_SUKL;PIL;DAT_ROZ_PIL;SPC;DAT_ROZ_SPC",
+            "0197843;PI223751.pdf;24.06.2025;SPC166977.pdf;19.01.2021",
+            "0197844;PI223751.pdf;24.06.2025;SPC166977.pdf;19.01.2021",
+            "0047711;PI111111.pdf;01.01.2025;SPC111111.pdf;01.01.2025",
+        ]
+    )
+    with zipfile.ZipFile(path, "w") as archive:
+        archive.writestr("dlp_lecivepripravky.csv", products.encode("cp1250"))
+        archive.writestr("dlp_nazvydokumentu.csv", documents.encode("cp1250"))
+    return path
 
 
 def _names(records) -> list[str]:

@@ -35,6 +35,7 @@ from .photo_import import (
     apply_lekarna_photo_import_manifest,
 )
 from .service import DEFAULT_DOMACI_LEKY_CSV, FIELD_NAMES, load_domaci_leky
+from .sukl_dlp import format_sukl_dlp_source, match_sukl_dlp
 from .web_bundle import refresh_lekarna_web_bundle
 
 
@@ -89,6 +90,7 @@ def build_auto_import_draft(
     ocr_backend: str = "macos",
     ocr_model: str = DEFAULT_OPENAI_VISION_MODEL,
     ocr_runner: Any | None = None,
+    dlp_zip_path: Path | None = None,
 ) -> AutoImportDraftResult:
     if photo_names:
         photos = find_download_photos_by_names(downloads_dir=downloads_dir, names=photo_names, limit=limit)
@@ -129,7 +131,7 @@ def build_auto_import_draft(
             risk = "draft_ready"
 
         if action == "new_candidate" and ocr.lines:
-            manifest_rows.append(_manifest_row_from_suggestion(photo_name, suggestion, ocr))
+            manifest_rows.append(_manifest_row_from_suggestion(photo_name, suggestion, ocr, dlp_zip_path=dlp_zip_path))
 
         report_items.append(
             {
@@ -413,11 +415,17 @@ def suggest_metadata_from_ocr(lines: tuple[str, ...], *, fallback_name: str = ""
     }
 
 
-def _manifest_row_from_suggestion(source_file: str, suggestion: dict[str, str], ocr: ImageOcrResult) -> dict[str, str]:
+def _manifest_row_from_suggestion(
+    source_file: str,
+    suggestion: dict[str, str],
+    ocr: ImageOcrResult,
+    *,
+    dlp_zip_path: Path | None = None,
+) -> dict[str, str]:
     row = {field: "" for field in MANIFEST_FIELD_NAMES}
     row.update(SAFE_DEFAULTS)
     row.update({field: suggestion.get(field, "") for field in FIELD_NAMES if field in suggestion})
-    pil_defaults = _pil_defaults_from_suggestion(suggestion, ocr)
+    pil_defaults = _pil_defaults_from_suggestion(suggestion, ocr, dlp_zip_path=dlp_zip_path)
     for field, value in pil_defaults.items():
         if field in row and not row.get(field):
             row[field] = value
@@ -437,11 +445,17 @@ def _manifest_row_from_suggestion(source_file: str, suggestion: dict[str, str], 
     return row
 
 
-def _pil_defaults_from_suggestion(suggestion: dict[str, str], ocr: ImageOcrResult) -> dict[str, str]:
+def _pil_defaults_from_suggestion(
+    suggestion: dict[str, str],
+    ocr: ImageOcrResult,
+    *,
+    dlp_zip_path: Path | None = None,
+) -> dict[str, str]:
     name = str(suggestion.get("nazev", "") or "").strip()
     normalized_name = normalize_for_match(name)
+    dlp_match = match_sukl_dlp(suggestion, ocr_text=ocr.text, dlp_zip_path=dlp_zip_path)
     if "sinupret" in normalized_name:
-        return {
+        defaults = {
             "PIL_Short": (
                 "Rostlinny lecivy pripravek pro dospele k lecbe akutnich nekomplikovanych zanetu "
                 "vedlejsich nosnich dutin s priznaky jako ryma, ucpany nos, bolest hlavy, bolest "
@@ -454,6 +468,10 @@ def _pil_defaults_from_suggestion(suggestion: dict[str, str], ocr: ImageOcrResul
             "PIL_Checked_Date": datetime.now().strftime("%Y-%m-%d"),
             "PIL_Match_Status": "pravdepodobne_sparovano_pil_z_fotky",
         }
+        if dlp_match:
+            defaults["PIL_Source"] = format_sukl_dlp_source(dlp_match)
+            defaults["PIL_Match_Status"] = dlp_match.match_status
+        return defaults
 
     use = str(suggestion.get("pouziti", "") or "").strip()
     form = str(suggestion.get("forma", "") or "").strip()
@@ -462,7 +480,7 @@ def _pil_defaults_from_suggestion(suggestion: dict[str, str], ocr: ImageOcrResul
     if not visible:
         visible = "novy pripravek z fotografie"
     use_text = f" Viditelny/odhadnuty ucel: {use}." if use else ""
-    return {
+    defaults = {
         "PIL_Short": (
             f"Automaticky inventarni zaznam z fotografie: {visible}.{use_text} "
             "Nejde o plne overeny vytah z pribalove informace; pred pouzitim fyzicky overit "
@@ -472,6 +490,10 @@ def _pil_defaults_from_suggestion(suggestion: dict[str, str], ocr: ImageOcrResul
         "PIL_Checked_Date": datetime.now().strftime("%Y-%m-%d"),
         "PIL_Match_Status": "ceka_na_pil_overeni",
     }
+    if dlp_match:
+        defaults["PIL_Source"] = format_sukl_dlp_source(dlp_match)
+        defaults["PIL_Match_Status"] = dlp_match.match_status
+    return defaults
 
 
 def _write_manifest(path: Path, rows: list[dict[str, str]]) -> None:
