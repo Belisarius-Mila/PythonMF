@@ -34,6 +34,7 @@ from app.lekarna.auto_import import (
     build_auto_import_draft,
     suggest_metadata_from_ocr,
 )
+import app.lekarna.auto_import as auto_import
 from app.lekarna.openai_vision import (
     openai_vision_label,
     openai_vision_to_inventory_suggestion,
@@ -732,6 +733,56 @@ class LekarnaServiceTests(unittest.TestCase):
         self.assertEqual(rows[0]["source_file"], "IMG_0002.JPG")
         self.assertEqual(rows[0]["nazev"], "Dr.Max Vitamin C")
         self.assertIn("new_candidate: 1", report_text)
+
+    def test_auto_import_draft_falls_back_to_macos_ocr_when_openai_fails(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            directory = Path(temp_dir)
+            downloads = directory / "Downloads"
+            downloads.mkdir()
+            photo = downloads / "IMG_9553.JPG"
+            photo.write_text("fake image", encoding="utf-8")
+            csv_path = _fake_csv(directory)
+            manifest_path = directory / "manifest.csv"
+            report_path = directory / "report.md"
+
+            original_openai = auto_import.analyze_image_with_openai_vision
+            original_macos = auto_import.ocr_image_with_macos_vision
+
+            def fake_openai(path: Path, *, model: str) -> ImageOcrResult:
+                return ImageOcrResult("", (), "openai-vision-failed", "[Errno 11] Resource deadlock avoided")
+
+            def fake_macos(path: Path) -> ImageOcrResult:
+                return ImageOcrResult(
+                    text="Bionorica\nSinupret\nakut obalené tablety\n20 obalenych tablet",
+                    lines=("Bionorica", "Sinupret", "akut obalené tablety", "20 obalenych tablet"),
+                    method="macos-vision",
+                )
+
+            try:
+                auto_import.analyze_image_with_openai_vision = fake_openai
+                auto_import.ocr_image_with_macos_vision = fake_macos
+                result = build_auto_import_draft(
+                    downloads_dir=downloads,
+                    limit=1,
+                    manifest_path=manifest_path,
+                    report_path=report_path,
+                    csv_path=csv_path,
+                    ocr_backend="openai",
+                )
+            finally:
+                auto_import.analyze_image_with_openai_vision = original_openai
+                auto_import.ocr_image_with_macos_vision = original_macos
+
+            with manifest_path.open("r", encoding="utf-8", newline="") as handle:
+                rows = list(csv.DictReader(handle))
+            report_text = report_path.read_text(encoding="utf-8")
+
+        self.assertEqual(result.new_candidates, 1)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["include"], "ano")
+        self.assertEqual(rows[0]["source_file"], "IMG_9553.JPG")
+        self.assertIn("Sinupret", rows[0]["nazev"])
+        self.assertIn("OpenAI Vision selhalo", report_text)
 
 
 def _fake_csv(directory: Path) -> Path:

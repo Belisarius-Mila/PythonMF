@@ -236,7 +236,25 @@ def _run_ocr_backend(
         return ImageOcrResult("", (), "disabled")
     normalized_backend = ocr_backend.strip().casefold()
     if normalized_backend == "openai":
-        return analyze_image_with_openai_vision(image_path, model=ocr_model)
+        openai_result = analyze_image_with_openai_vision(image_path, model=ocr_model)
+        if openai_result.lines or openai_result.method != "openai-vision-failed":
+            return openai_result
+        fallback = ocr_image_with_macos_vision(image_path)
+        if not fallback.lines:
+            return openai_result
+        warning_parts = [
+            f"OpenAI Vision selhalo: {_short_warning(openai_result.warning)}",
+            "pouzit macOS Vision fallback",
+        ]
+        if fallback.warning:
+            warning_parts.append(f"fallback upozorneni: {_short_warning(fallback.warning)}")
+        return ImageOcrResult(
+            text=fallback.text,
+            lines=fallback.lines,
+            method="macos-vision-fallback-after-openai-failed",
+            warning="; ".join(part for part in warning_parts if part),
+            metadata=fallback.metadata,
+        )
     return ocr_image_with_macos_vision(image_path)
 
 
