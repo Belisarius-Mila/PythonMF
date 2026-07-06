@@ -11,9 +11,10 @@ const startGate = document.getElementById("startGate");
 const completeBanner = document.getElementById("completeBanner");
 const characterGlow = document.getElementById("characterGlow");
 
-const assetVersion = "20260706a";
+const assetVersion = "20260706c";
 
 const characterPositions = {
+  All: { x: 50, y: 67 },
   Benji: { x: 19, y: 70 },
   Bunny: { x: 34, y: 68 },
   Bruno: { x: 50, y: 66 },
@@ -94,9 +95,17 @@ const dialogue = [
   },
 ];
 
+const birthdaySong = {
+  speaker: "All friends",
+  en: "Kate, it is your special day.\nSmile and laugh and dance and play.\nWe wish you joy in all you do.\nYour forest friends are cheering for you.",
+  cz: "Katko, dnes je tvůj výjimečný den.\nUsmívej se, směj se, tancuj a hraj si.\nPřejeme ti radost ve všem, co děláš.\nTvoji lesní kamarádi ti fandí.",
+  audioEn: `audio/english/kate_birthday_11_song_en.mp3?v=${assetVersion}`,
+};
+
 const sleep = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
 let currentAudio = null;
+let currentMusicContext = null;
 let runToken = 0;
 
 function stopAudio() {
@@ -104,6 +113,10 @@ function stopAudio() {
     currentAudio.pause();
     currentAudio.currentTime = 0;
     currentAudio = null;
+  }
+  if (currentMusicContext) {
+    currentMusicContext.close().catch(() => {});
+    currentMusicContext = null;
   }
 }
 
@@ -133,6 +146,49 @@ function playAudio(src) {
   });
 }
 
+function playBirthdayTune(token) {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return sleep(0);
+
+  const context = new AudioContext();
+  currentMusicContext = context;
+  const masterGain = context.createGain();
+  masterGain.gain.value = 0.045;
+  masterGain.connect(context.destination);
+
+  const notes = [
+    [523.25, 0.25], [587.33, 0.25], [659.25, 0.38], [783.99, 0.38],
+    [659.25, 0.3], [587.33, 0.3], [523.25, 0.48],
+    [659.25, 0.25], [698.46, 0.25], [783.99, 0.42], [880.0, 0.42],
+    [783.99, 0.3], [659.25, 0.3], [587.33, 0.56],
+    [523.25, 0.26], [659.25, 0.26], [783.99, 0.5], [1046.5, 0.68],
+  ];
+
+  let time = context.currentTime + 0.08;
+  for (const [frequency, duration] of notes) {
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    oscillator.type = "triangle";
+    oscillator.frequency.value = frequency;
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(0.9, time + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+    oscillator.connect(gain).connect(masterGain);
+    oscillator.start(time);
+    oscillator.stop(time + duration + 0.04);
+    time += duration + 0.055;
+  }
+
+  const totalMs = Math.max(0, (time - context.currentTime) * 1000);
+  return sleep(totalMs).then(() => {
+    if (token === runToken && currentMusicContext === context) {
+      currentMusicContext = null;
+      return context.close().catch(() => {});
+    }
+    return undefined;
+  });
+}
+
 async function playEntry(entry, token) {
   setLine(entry, false);
   await playAudio(entry.audioEn);
@@ -142,6 +198,23 @@ async function playEntry(entry, token) {
   await playAudio(entry.audioCz);
   if (token !== runToken) return;
   await sleep(360);
+}
+
+async function playSong(token) {
+  speakerName.textContent = birthdaySong.speaker;
+  lineText.textContent = birthdaySong.en;
+  lineTranslation.textContent = birthdaySong.cz;
+  speechBubble.classList.remove("hidden");
+  showSpeaker("All");
+
+  const audioPromise = playAudio(birthdaySong.audioEn);
+  await sleep(160);
+  const tunePromise = playBirthdayTune(token);
+  await audioPromise;
+  if (token !== runToken) return;
+  await tunePromise;
+  if (token !== runToken) return;
+  await sleep(500);
 }
 
 async function startScene() {
@@ -156,6 +229,9 @@ async function startScene() {
     if (token !== runToken) return;
     await playEntry(entry, token);
   }
+
+  if (token !== runToken) return;
+  await playSong(token);
 
   if (token !== runToken) return;
   stopAudio();

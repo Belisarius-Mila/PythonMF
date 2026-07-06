@@ -161,6 +161,7 @@ body {
   line-height: 1.15;
   font-weight: 900;
   text-align: center;
+  white-space: pre-line;
 }
 
 .line-cz {
@@ -170,6 +171,7 @@ body {
   font-weight: 800;
   color: #59675c;
   text-align: center;
+  white-space: pre-line;
 }
 
 .start-gate {
