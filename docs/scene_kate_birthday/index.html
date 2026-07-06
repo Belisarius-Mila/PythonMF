@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kate - birthday</title>
+    <link rel="stylesheet" href="styles.css?v=20260706a">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="scene-card" aria-label="Kate birthday forest scene">
+        <div class="scene" id="scene">
+          <img class="scene-image" src="kate_birthday_clearing.svg?v=20260706a" alt="Benji, Bunny, Bruno, Fiona and Sunny on a forest clearing">
+          <div class="scene-hud">
+            <button class="ui-button" id="backButton" type="button" aria-label="Back">
+              <span aria-hidden="true">↩</span>
+            </button>
+            <div class="scene-hud-actions">
+              <button class="ui-button" id="replayButton" type="button" aria-label="Replay">
+                <span aria-hidden="true">↺</span>
+              </button>
+              <button class="ui-button primary" id="startButton" type="button" aria-label="Start birthday greeting">
+                <span aria-hidden="true">▶</span>
+              </button>
+            </div>
+          </div>
+          <div class="character-glow" id="characterGlow"></div>
+          <div class="speech-bubble hidden" id="speechBubble" aria-live="polite">
+            <span class="speaker" id="speakerName"></span>
+            <span class="line-en" id="lineText"></span>
+            <span class="line-cz" id="lineTranslation"></span>
+          </div>
+          <div class="start-gate" id="startGate">
+            <span class="start-title">Kate - birthday</span>
+            <span class="start-subtitle">Tap play and listen.</span>
+          </div>
+          <div class="complete-banner hidden" id="completeBanner">
+            <span>Happy birthday, Kate!</span>
+            <button class="next-button" id="nextButton" type="button">Forest paths</button>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="script.js?v=20260706a"></script>
+  </body>
+</html>

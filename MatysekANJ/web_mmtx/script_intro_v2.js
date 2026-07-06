@@ -6,6 +6,7 @@ const mushroomPortalButton = document.getElementById("mushroomPortalButton");
 const bunnyPortalButton = document.getElementById("bunnyPortalButton");
 const forestSchoolPortalButton = document.getElementById("forestSchoolPortalButton");
 const forestJourneyPortalButton = document.getElementById("forestJourneyPortalButton");
+const kateBirthdayPortalButton = document.getElementById("kateBirthdayPortalButton");
 const adultQuickSkipButton = document.getElementById("adultQuickSkipButton");
 const mushroomHud = document.getElementById("mushroomHud");
 const backToSignpostButton = document.getElementById("backToSignpostButton");
@@ -945,6 +946,7 @@ function renderScene() {
   bunnyPortalButton.classList.toggle("hidden", state.currentScene !== "intro4");
   forestSchoolPortalButton.classList.toggle("hidden", state.currentScene !== "intro4");
   forestJourneyPortalButton.classList.toggle("hidden", state.currentScene !== "intro4");
+  kateBirthdayPortalButton.classList.toggle("hidden", state.currentScene !== "intro4");
   mushroomHud.classList.toggle("hidden", state.currentScene !== "mushrooms");
   mushroomOverlay.classList.toggle("hidden", state.currentScene !== "mushrooms");
   dialogueHud.classList.toggle("hidden", state.currentScene !== "benjiBunny" && !clearingScene);
@@ -2454,6 +2456,10 @@ storyStage.addEventListener("click", async (event) => {
     setScene("clearingMeeting");
     return;
   }
+  if (state.currentScene === "intro4" && event.target === kateBirthdayPortalButton) {
+    window.location.href = "scene_kate_birthday/index.html";
+    return;
+  }
   if (wasLocked && (state.currentScene === "intro2" || state.currentScene === "intro3")) {
     setScene(state.currentScene);
     return;
@@ -2507,6 +2513,14 @@ forestJourneyPortalButton.addEventListener("click", async (event) => {
   if (state.currentScene === "intro4") {
     resetClearingMeeting();
     setScene("clearingMeeting");
+  }
+});
+
+kateBirthdayPortalButton.addEventListener("click", async (event) => {
+  event.stopPropagation();
+  await primeAudio();
+  if (state.currentScene === "intro4") {
+    window.location.href = "scene_kate_birthday/index.html";
   }
 });
 

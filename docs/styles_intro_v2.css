@@ -68,6 +68,7 @@ body {
 .mushroom-portal.hidden,
 .bunny-portal.hidden,
 .forest-school-portal.hidden,
+.kate-birthday-portal.hidden,
 .mushroom-hud.hidden,
 .dialogue-hud.hidden,
 .owl-garden-hud.hidden,
@@ -143,6 +144,7 @@ body {
 .bunny-portal,
 .forest-school-portal,
 .forest-journey-portal,
+.kate-birthday-portal,
 .hud-button,
 .hotspot,
 .number-tag,
@@ -154,7 +156,8 @@ body {
 .mushroom-portal,
 .bunny-portal,
 .forest-school-portal,
-.forest-journey-portal {
+.forest-journey-portal,
+.kate-birthday-portal {
   position: absolute;
   width: min(8vw, 98px);
   min-width: 72px;
@@ -194,10 +197,18 @@ body {
   border-color: #6d9565;
 }
 
+.kate-birthday-portal {
+  right: 8.8%;
+  top: 47.2%;
+  background: rgba(255, 248, 226, 0.97);
+  border-color: #d3a83b;
+}
+
 .mushroom-portal:hover,
 .bunny-portal:hover,
 .forest-school-portal:hover,
 .forest-journey-portal:hover,
+.kate-birthday-portal:hover,
 .hud-button:hover,
 .hotspot:hover {
   transform: scale(1.04);
@@ -206,7 +217,8 @@ body {
 .mushroom-portal-icon,
 .bunny-portal-icon,
 .forest-school-portal-icon,
-.forest-journey-portal-icon {
+.forest-journey-portal-icon,
+.kate-birthday-portal-icon {
   font-size: clamp(1.35rem, 2.3vw, 2.2rem);
   line-height: 1;
 }
@@ -277,6 +289,22 @@ body {
   font-size: clamp(0.68rem, 0.9vw, 0.88rem);
   font-weight: 900;
   line-height: 1;
+  text-align: center;
+}
+
+.kate-birthday-portal-spark {
+  position: absolute;
+  right: 12%;
+  top: 10%;
+  font-size: clamp(0.78rem, 1.15vw, 1rem);
+  line-height: 1;
+}
+
+.kate-birthday-portal-label {
+  color: #6a4b1e;
+  font-size: clamp(0.58rem, 0.8vw, 0.82rem);
+  font-weight: 900;
+  line-height: 1.04;
   text-align: center;
 }
 
