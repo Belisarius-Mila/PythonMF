@@ -104,6 +104,7 @@ from app.lekarna.auto_import import (
 from app.lekarna.download_intake import find_recent_download_photos
 from app.lekarna.openai_vision import DEFAULT_OPENAI_VISION_MODEL
 from app.lekarna.photo_import import APPLY_CONFIRMATION_PHRASE
+from app.lekarna.photo_import import MANIFEST_FIELD_NAMES as LEKARNA_MANIFEST_FIELD_NAMES
 from app.lekarna.service import (
     RETIRE_CONFIRMATION_PHRASE,
     format_domaci_lek_retire_preview,
@@ -711,6 +712,17 @@ def lekarna_auto_import_apply_action(payload: dict[str, Any]) -> dict[str, Any]:
             "confirmation_phrase": APPLY_CONFIRMATION_PHRASE,
         }
     try:
+        quality_warnings = _lekarna_manifest_quality_warnings(Path(manifest_path), effective_location=location)
+    except Exception as exc:
+        return {"ok": False, "message": f"Manifest se před příjmem nepodařilo zkontrolovat: {exc}", "error": "manifest_invalid"}
+    if quality_warnings:
+        return {
+            "ok": False,
+            "message": "Návrh není připravený k přijetí. Oprav kontrolu návrhu a znovu ji ulož.",
+            "error": "manifest_needs_review",
+            "warnings": quality_warnings,
+        }
+    try:
         result = apply_auto_import_manifest_from_downloads(
             manifest_path=Path(manifest_path),
             downloads_dir=Path.home() / "Downloads",
@@ -731,6 +743,169 @@ def lekarna_auto_import_apply_action(payload: dict[str, Any]) -> dict[str, Any]:
         "web_export_path": str(result.web_export_path) if getattr(result, "web_export_path", None) else "",
         "encrypted_bundle_path": str(result.encrypted_bundle_path) if getattr(result, "encrypted_bundle_path", None) else "",
         "warnings": [safe_text(str(warning)) for warning in getattr(result, "warnings", ())],
+    }
+
+
+LEKARNA_MANIFEST_REVIEW_FIELDS = (
+    "include",
+    "source_file",
+    "new_file",
+    "nazev",
+    "ucinna_latka",
+    "forma",
+    "sila",
+    "kategorie",
+    "pouziti",
+    "pro_koho",
+    "nevhodne_pro_koho",
+    "expirace",
+    "mnozstvi",
+    "umisteni",
+    "overeno_z_letaku",
+    "stav_obalu",
+    "jistota_cteni",
+    "nutno_overit",
+    "poznamky",
+    "PIL_Short",
+    "PIL_Source",
+    "PIL_Checked_Date",
+    "PIL_Match_Status",
+    "Search_Tags",
+)
+
+
+def _safe_lekarna_auto_import_manifest_path(manifest_path: str) -> Path:
+    raw_path = str(manifest_path or "").strip()
+    if not raw_path:
+        raise ValueError("Chybí cesta k manifestu.")
+    path = Path(raw_path).expanduser().resolve()
+    allowed_dir = (PROJECT_ROOT / "data" / "lekarna" / "photo_imports").resolve()
+    try:
+        path.relative_to(allowed_dir)
+    except ValueError as exc:
+        raise ValueError("Manifest musí být ve složce data/lekarna/photo_imports.") from exc
+    if not path.name.startswith("lekarna_auto_import_manifest_") or path.suffix.casefold() != ".csv":
+        raise ValueError("Manifest nevypadá jako automatický návrh importu Lékárny.")
+    return path
+
+
+def _read_lekarna_manifest_rows(manifest_path: Path) -> tuple[list[str], list[dict[str, str]]]:
+    if not manifest_path.exists():
+        raise ValueError(f"Manifest neexistuje: {manifest_path}")
+    with manifest_path.open("r", encoding="utf-8-sig", newline="") as handle:
+        reader = csv.DictReader(handle)
+        fieldnames = list(reader.fieldnames or [])
+        missing = sorted(set(LEKARNA_MANIFEST_FIELD_NAMES) - set(fieldnames))
+        if missing:
+            raise ValueError(f"Manifest nemá povinná pole: {', '.join(missing)}")
+        rows = [{field: str(row.get(field, "") or "") for field in fieldnames} for row in reader]
+    return fieldnames, rows
+
+
+def _lekarna_manifest_quality_warnings(manifest_path: Path, *, effective_location: str = "") -> list[str]:
+    _, rows = _read_lekarna_manifest_rows(_safe_lekarna_auto_import_manifest_path(str(manifest_path)))
+    included_rows = [
+        row
+        for row in rows
+        if str(row.get("include", "")).strip().casefold() in {"ano", "yes", "true", "1"}
+    ]
+    if not included_rows:
+        return ["Manifest neobsahuje žádný řádek s include=ano."]
+
+    warnings: list[str] = []
+    weak_statuses = {"", "ceka_na_pil_overeni", "nedohledano"}
+    placeholder_values = {"", "nezarazeno", "leky v krabickach - umisteni nezadano"}
+    for index, row in enumerate(included_rows, start=1):
+        label = str(row.get("nazev") or row.get("source_file") or f"řádek {index}").strip()
+        prefix = f"{label}: "
+        for field in ("new_file", "nazev", "forma", "kategorie", "pouziti", "mnozstvi"):
+            value = str(row.get(field, "")).strip()
+            if not value or value.casefold() in placeholder_values:
+                warnings.append(f"{prefix}chybí nebo je neurčené pole `{field}`.")
+        if not str(row.get("sila", "")).strip():
+            warnings.append(f"{prefix}chybí pole `sila`; pokud přípravek sílu nemá, vyplň `nezjisteno` nebo věcnou hodnotu.")
+        location = str(row.get("umisteni", "") or "").strip()
+        effective = str(effective_location or "").strip()
+        if (not location or location.casefold() in placeholder_values) and not effective:
+            warnings.append(f"{prefix}chybí konkrétní umístění.")
+
+        pil_short = str(row.get("PIL_Short", "") or "").strip()
+        if (
+            not pil_short
+            or "automaticky inventarni zaznam" in pil_short.casefold()
+            or "nejde o plne overeny vytah" in pil_short.casefold()
+        ):
+            warnings.append(f"{prefix}`PIL_Short` pořád vypadá jako automatický fallback, ne zkontrolovaný stručný výtah.")
+        pil_source = str(row.get("PIL_Source", "") or "").strip()
+        if not pil_source or "pil zatim nedohledan" in pil_source.casefold():
+            warnings.append(f"{prefix}chybí věcný `PIL_Source`.")
+        pil_status = str(row.get("PIL_Match_Status", "") or "").strip().casefold()
+        if pil_status in weak_statuses:
+            warnings.append(f"{prefix}`PIL_Match_Status` není zkontrolovaný.")
+        if not str(row.get("Search_Tags", "") or "").strip():
+            warnings.append(f"{prefix}chybí `Search_Tags` pro dohledání v Lékárně.")
+    return warnings
+
+
+def lekarna_import_manifest_load_action(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        manifest_path = _safe_lekarna_auto_import_manifest_path(str(payload.get("manifest_path", "") or ""))
+        fieldnames, rows = _read_lekarna_manifest_rows(manifest_path)
+    except Exception as exc:
+        return {"ok": False, "message": f"Manifest se nepodařilo načíst: {exc}", "error": "manifest_load_failed"}
+
+    review_fields = [field for field in LEKARNA_MANIFEST_REVIEW_FIELDS if field in fieldnames]
+    return {
+        "ok": True,
+        "message": "Manifest načtený ke kontrole.",
+        "manifest_path": str(manifest_path),
+        "fields": review_fields,
+        "rows": [
+            {field: safe_text(str(row.get(field, ""))) for field in review_fields}
+            for row in rows
+        ],
+    }
+
+
+def lekarna_import_manifest_save_action(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        manifest_path = _safe_lekarna_auto_import_manifest_path(str(payload.get("manifest_path", "") or ""))
+        fieldnames, existing_rows = _read_lekarna_manifest_rows(manifest_path)
+        incoming_rows = payload.get("rows", [])
+        if not isinstance(incoming_rows, list):
+            raise ValueError("Řádky manifestu musí být seznam.")
+        if len(incoming_rows) != len(existing_rows):
+            raise ValueError("Počet řádků nesouhlasí s manifestem.")
+
+        editable = set(LEKARNA_MANIFEST_REVIEW_FIELDS)
+        saved_rows: list[dict[str, str]] = []
+        for existing, incoming in zip(existing_rows, incoming_rows, strict=True):
+            if not isinstance(incoming, dict):
+                raise ValueError("Každý řádek manifestu musí být objekt.")
+            row = {field: str(existing.get(field, "") or "") for field in fieldnames}
+            for field, value in incoming.items():
+                if field in editable and field in fieldnames:
+                    row[field] = safe_text(str(value or "")).strip()
+            saved_rows.append(row)
+
+        with manifest_path.open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(saved_rows)
+    except Exception as exc:
+        return {"ok": False, "message": f"Manifest se nepodařilo uložit: {exc}", "error": "manifest_save_failed"}
+
+    included_count = sum(
+        1
+        for row in saved_rows
+        if str(row.get("include", "")).strip().casefold() in {"ano", "yes", "true", "1"}
+    )
+    return {
+        "ok": True,
+        "message": f"Manifest uložený. Řádky k importu: {included_count}.",
+        "manifest_path": str(manifest_path),
+        "rows": len(saved_rows),
+        "included": included_count,
     }
 
 
@@ -6501,6 +6676,10 @@ def lekarna_admin_page_html() -> str:
     .item {{ border: 1px solid #d8dee8; border-radius: 8px; padding: 12px; background: #fbfcfd; }}
     .item strong {{ display: block; margin-bottom: 4px; }}
     .row {{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }}
+    .review-row {{ border: 1px solid #d8dee8; border-radius: 8px; padding: 12px; margin-top: 12px; background: #fbfcfd; }}
+    .review-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }}
+    .review-grid .wide {{ grid-column: 1 / -1; }}
+    .review-grid textarea {{ min-height: 86px; resize: vertical; }}
     @media (max-width: 840px) {{ body {{ padding: 14px; }} .layout, .row {{ grid-template-columns: 1fr; }} }}
   </style>
 </head>
@@ -6544,6 +6723,11 @@ def lekarna_admin_page_html() -> str:
         <div id="draftResult" class="result">Návrh zatím není připravený.</div>
         <label for="manifestPath">Manifest z posledního návrhu</label>
         <input id="manifestPath" readonly>
+        <div class="row">
+          <button id="reloadManifestBtn" class="secondary">Načíst kontrolu návrhu</button>
+          <button id="saveManifestBtn" class="secondary">Uložit opravy návrhu</button>
+        </div>
+        <div id="manifestEditor" class="items"></div>
         <label for="importConfirm">Potvrzení pro příjem na sklad: {import_phrase}</label>
         <input id="importConfirm" placeholder="{import_phrase}">
         <button id="applyImportBtn" class="danger">Přijmout návrh na sklad</button>
@@ -6568,8 +6752,12 @@ def lekarna_admin_page_html() -> str:
     const draftImportBtn = document.getElementById("draftImportBtn");
     const draftResult = document.getElementById("draftResult");
     const manifestPath = document.getElementById("manifestPath");
+    const reloadManifestBtn = document.getElementById("reloadManifestBtn");
+    const saveManifestBtn = document.getElementById("saveManifestBtn");
+    const manifestEditor = document.getElementById("manifestEditor");
     const importConfirm = document.getElementById("importConfirm");
     const applyImportBtn = document.getElementById("applyImportBtn");
+    let currentManifestFields = [];
 
     async function postJson(url, payload) {{
       const res = await fetch(url, {{
@@ -6608,6 +6796,90 @@ def lekarna_admin_page_html() -> str:
           retirePreview.textContent = `Vybráno: ${{item.nazev || ""}}`;
         }});
         searchResults.appendChild(card);
+      }}
+    }}
+
+    function isLongManifestField(field) {{
+      return ["pouziti", "pro_koho", "nevhodne_pro_koho", "poznamky", "PIL_Short", "PIL_Source", "Search_Tags"].includes(field);
+    }}
+
+    function renderManifestEditor(data) {{
+      currentManifestFields = Array.isArray(data.fields) ? data.fields : [];
+      const rows = Array.isArray(data.rows) ? data.rows : [];
+      manifestEditor.innerHTML = "";
+      if (!rows.length) {{
+        manifestEditor.innerHTML = '<div class="muted">Manifest nemá žádné řádky ke kontrole.</div>';
+        return;
+      }}
+      rows.forEach((row, rowIndex) => {{
+        const card = document.createElement("div");
+        card.className = "review-row";
+        const title = document.createElement("strong");
+        title.textContent = `Kontrola návrhu #${{rowIndex + 1}}`;
+        card.appendChild(title);
+        const grid = document.createElement("div");
+        grid.className = "review-grid";
+        currentManifestFields.forEach((field) => {{
+          const label = document.createElement("label");
+          if (isLongManifestField(field)) label.className = "wide";
+          label.textContent = field;
+          const control = isLongManifestField(field) ? document.createElement("textarea") : document.createElement("input");
+          control.value = row[field] || "";
+          control.dataset.rowIndex = String(rowIndex);
+          control.dataset.field = field;
+          label.appendChild(control);
+          grid.appendChild(label);
+        }});
+        card.appendChild(grid);
+        manifestEditor.appendChild(card);
+      }});
+    }}
+
+    function collectManifestRows() {{
+      const rowCount = manifestEditor.querySelectorAll(".review-row").length;
+      const rows = Array.from({{length: rowCount}}, () => ({{}}));
+      manifestEditor.querySelectorAll("input[data-field], textarea[data-field]").forEach((control) => {{
+        const rowIndex = Number(control.dataset.rowIndex || 0);
+        const field = control.dataset.field || "";
+        if (rows[rowIndex] && field) rows[rowIndex][field] = control.value;
+      }});
+      return rows;
+    }}
+
+    async function loadManifest() {{
+      if (!manifestPath.value.trim()) {{
+        manifestEditor.innerHTML = '<div class="muted">Nejdřív připrav návrh importu.</div>';
+        return;
+      }}
+      reloadManifestBtn.disabled = true;
+      try {{
+        const data = await postJson("/api/lekarna/import/manifest/load", {{
+          manifest_path: manifestPath.value
+        }});
+        if (!data.ok) {{
+          manifestEditor.innerHTML = `<div class="result">${{escapeText(data.message || "Manifest se nepodařilo načíst.")}}</div>`;
+          return;
+        }}
+        renderManifestEditor(data);
+      }} finally {{
+        reloadManifestBtn.disabled = false;
+      }}
+    }}
+
+    async function saveManifest() {{
+      if (!manifestPath.value.trim()) {{
+        return {{ok: false, message: "Chybí manifest."}};
+      }}
+      saveManifestBtn.disabled = true;
+      try {{
+        const data = await postJson("/api/lekarna/import/manifest/save", {{
+          manifest_path: manifestPath.value,
+          rows: collectManifestRows()
+        }});
+        draftResult.textContent = data.message || "Manifest uložený.";
+        return data;
+      }} finally {{
+        saveManifestBtn.disabled = false;
       }}
     }}
 
@@ -6677,6 +6949,7 @@ def lekarna_admin_page_html() -> str:
         if (data.manifest_path) manifestPath.value = data.manifest_path;
         if (data.ok) {{
           draftResult.textContent += `\\nFotky: ${{data.photos}} | nové: ${{data.new_candidates}} | duplicity: ${{data.duplicate_existing}} | revize: ${{data.needs_review}}`;
+          await loadManifest();
         }}
       }} finally {{
         draftImportBtn.disabled = false;
@@ -6686,6 +6959,13 @@ def lekarna_admin_page_html() -> str:
     async function applyImport() {{
       applyImportBtn.disabled = true;
       try {{
+        if (manifestEditor.querySelector(".review-row")) {{
+          const saveData = await saveManifest();
+          if (!saveData.ok) {{
+            applyResult.textContent = saveData.message || "Manifest se před příjmem nepodařilo uložit.";
+            return;
+          }}
+        }}
         const data = await postJson("/api/lekarna/import/apply", {{
           manifest_path: manifestPath.value,
           location: importLocation.value,
@@ -6711,6 +6991,8 @@ def lekarna_admin_page_html() -> str:
     applyRetireBtn.addEventListener("click", applyRetire);
     refreshPhotosBtn.addEventListener("click", refreshPhotos);
     draftImportBtn.addEventListener("click", draftImport);
+    reloadManifestBtn.addEventListener("click", loadManifest);
+    saveManifestBtn.addEventListener("click", saveManifest);
     applyImportBtn.addEventListener("click", applyImport);
     refreshPhotos();
   </script>
@@ -10631,6 +10913,22 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/lekarna/import/manifest/load",
+        "label": "Nacist lekarna import manifest ke kontrole",
+        "risk": "read_only_via_post",
+        "confirmation": "none_readonly",
+        "handler_name": "lekarna_import_manifest_load_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/lekarna/import/manifest/save",
+        "label": "Ulozit opraveny lekarna import manifest",
+        "risk": "private_write",
+        "confirmation": "none_backend_draft_only",
+        "handler_name": "lekarna_import_manifest_save_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/lekarna/import/apply",
         "label": "Prijmout lekarna import na sklad",
         "risk": "private_write",
@@ -11165,6 +11463,14 @@ class CockpitServer:
                 if parsed.path == "/api/lekarna/import/draft":
                     payload = self.read_json()
                     self.respond_json(lekarna_auto_import_draft_action(payload))
+                    return
+                if parsed.path == "/api/lekarna/import/manifest/load":
+                    payload = self.read_json()
+                    self.respond_json(lekarna_import_manifest_load_action(payload))
+                    return
+                if parsed.path == "/api/lekarna/import/manifest/save":
+                    payload = self.read_json()
+                    self.respond_json(lekarna_import_manifest_save_action(payload))
                     return
                 if parsed.path == "/api/lekarna/import/apply":
                     payload = self.read_json()

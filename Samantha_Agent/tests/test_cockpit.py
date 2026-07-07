@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import csv
 import json
 import re
 import signal
@@ -31,6 +32,8 @@ from app.cockpit import (
     lekarna_admin_page_html,
     lekarna_auto_import_apply_action,
     lekarna_auto_import_draft_action,
+    lekarna_import_manifest_load_action,
+    lekarna_import_manifest_save_action,
     lekarna_import_photos_status,
     lekarna_retire_apply_action,
     lekarna_retire_preview_action,
@@ -378,9 +381,13 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/lekarna/retire/apply", page)
         self.assertIn("/api/lekarna/import/photos", page)
         self.assertIn("/api/lekarna/import/draft", page)
+        self.assertIn("/api/lekarna/import/manifest/load", page)
+        self.assertIn("/api/lekarna/import/manifest/save", page)
         self.assertIn("/api/lekarna/import/apply", page)
         self.assertIn("Náhled vyřazení", page)
         self.assertIn("Připravit OpenAI návrh", page)
+        self.assertIn("Načíst kontrolu návrhu", page)
+        self.assertIn("Uložit opravy návrhu", page)
         self.assertIn("Přijmout návrh na sklad", page)
         self.assertIn("Obnovit seznam fotek", page)
         self.assertIn("Vlastní umístění", page)
@@ -441,6 +448,75 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(draft_mock.call_args.kwargs["ocr_backend"], "openai")
         self.assertEqual(draft_mock.call_args.kwargs["photo_names"], ["IMG_9456.JPG"])
 
+    def test_lekarna_import_manifest_load_and_save_review_fields(self) -> None:
+        manifest_dir = Path("data/lekarna/photo_imports")
+        manifest_dir.mkdir(parents=True, exist_ok=True)
+        manifest_path = manifest_dir / "lekarna_auto_import_manifest_test_review.csv"
+        fieldnames = [
+            "include",
+            "source_file",
+            "new_file",
+            "nazev",
+            "ucinna_latka",
+            "forma",
+            "sila",
+            "kategorie",
+            "pouziti",
+            "pro_koho",
+            "nevhodne_pro_koho",
+            "expirace",
+            "mnozstvi",
+            "umisteni",
+            "overeno_z_letaku",
+            "stav_obalu",
+            "jistota_cteni",
+            "nutno_overit",
+            "zdroj",
+            "poznamky",
+            "PIL_Short",
+            "PIL_Source",
+            "PIL_Checked_Date",
+            "PIL_Match_Status",
+            "Search_Tags",
+        ]
+        row = {field: "" for field in fieldnames}
+        row.update(
+            {
+                "include": "ano",
+                "source_file": "IMG_9560.JPG",
+                "new_file": "peroxid_vodiku_100_ml.jpg",
+                "nazev": "PEROXID VODÍKU",
+                "sila": "100 ml",
+                "mnozstvi": "",
+                "zdroj": "Leky_v_Krabickach/",
+                "PIL_Short": "fallback",
+            }
+        )
+        try:
+            with manifest_path.open("w", encoding="utf-8", newline="") as handle:
+                writer = csv.DictWriter(handle, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerow(row)
+
+            loaded = lekarna_import_manifest_load_action({"manifest_path": str(manifest_path.resolve())})
+            self.assertTrue(loaded["ok"])
+            self.assertEqual(loaded["rows"][0]["sila"], "100 ml")
+
+            loaded["rows"][0]["sila"] = "3%"
+            loaded["rows"][0]["mnozstvi"] = "100 ml"
+            loaded["rows"][0]["forma"] = "kožní roztok"
+            saved = lekarna_import_manifest_save_action(
+                {"manifest_path": str(manifest_path.resolve()), "rows": loaded["rows"]}
+            )
+
+            self.assertTrue(saved["ok"])
+            reloaded = lekarna_import_manifest_load_action({"manifest_path": str(manifest_path.resolve())})
+            self.assertEqual(reloaded["rows"][0]["sila"], "3%")
+            self.assertEqual(reloaded["rows"][0]["mnozstvi"], "100 ml")
+            self.assertEqual(reloaded["rows"][0]["forma"], "kožní roztok")
+        finally:
+            manifest_path.unlink(missing_ok=True)
+
     def test_lekarna_auto_import_apply_action_requires_confirmation(self) -> None:
         result = lekarna_auto_import_apply_action(
             {
@@ -453,6 +529,73 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["error"], "confirmation_required")
         self.assertIn("Potvrzuji import fotek lekarna", result["confirmation_phrase"])
 
+    def test_lekarna_auto_import_apply_action_blocks_weak_manifest(self) -> None:
+        manifest_dir = Path("data/lekarna/photo_imports")
+        manifest_dir.mkdir(parents=True, exist_ok=True)
+        manifest_path = manifest_dir / "lekarna_auto_import_manifest_test_weak.csv"
+        fieldnames = [
+            "include",
+            "source_file",
+            "new_file",
+            "nazev",
+            "ucinna_latka",
+            "forma",
+            "sila",
+            "kategorie",
+            "pouziti",
+            "pro_koho",
+            "nevhodne_pro_koho",
+            "expirace",
+            "mnozstvi",
+            "umisteni",
+            "overeno_z_letaku",
+            "stav_obalu",
+            "jistota_cteni",
+            "nutno_overit",
+            "zdroj",
+            "poznamky",
+            "PIL_Short",
+            "PIL_Source",
+            "PIL_Checked_Date",
+            "PIL_Match_Status",
+            "Search_Tags",
+        ]
+        row = {field: "" for field in fieldnames}
+        row.update(
+            {
+                "include": "ano",
+                "source_file": "IMG_9560.JPG",
+                "new_file": "peroxid_vodiku_100_ml.jpg",
+                "nazev": "PEROXID VODÍKU",
+                "sila": "100 ml",
+                "kategorie": "nezarazeno",
+                "PIL_Short": "Automaticky inventarni zaznam z fotografie.",
+                "PIL_Source": "Fotografie obalu; PIL zatim nedohledan.",
+                "PIL_Match_Status": "ceka_na_pil_overeni",
+            }
+        )
+        try:
+            with manifest_path.open("w", encoding="utf-8", newline="") as handle:
+                writer = csv.DictWriter(handle, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerow(row)
+
+            with patch("app.cockpit.apply_auto_import_manifest_from_downloads") as apply_mock:
+                result = lekarna_auto_import_apply_action(
+                    {
+                        "manifest_path": str(manifest_path.resolve()),
+                        "location": "Horní koupelna",
+                        "confirmation_text": "Potvrzuji import fotek lekarna",
+                    }
+                )
+
+            self.assertFalse(result["ok"])
+            self.assertEqual(result["error"], "manifest_needs_review")
+            self.assertTrue(any("PIL_Short" in warning for warning in result["warnings"]))
+            apply_mock.assert_not_called()
+        finally:
+            manifest_path.unlink(missing_ok=True)
+
     def test_lekarna_auto_import_apply_action_runs_confirmed_apply(self) -> None:
         fake_result = SimpleNamespace(
             backup_path=Path("/tmp/backup.csv"),
@@ -462,7 +605,9 @@ class CockpitTests(unittest.TestCase):
             appended_count=1,
             warnings=(),
         )
-        with patch("app.cockpit.apply_auto_import_manifest_from_downloads", return_value=fake_result) as apply_mock:
+        with patch("app.cockpit._lekarna_manifest_quality_warnings", return_value=[]), patch(
+            "app.cockpit.apply_auto_import_manifest_from_downloads", return_value=fake_result
+        ) as apply_mock:
             result = lekarna_auto_import_apply_action(
                 {
                     "manifest_path": "/tmp/manifest.csv",
