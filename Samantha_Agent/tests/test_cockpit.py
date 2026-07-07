@@ -487,8 +487,8 @@ class CockpitTests(unittest.TestCase):
             {
                 "include": "ano",
                 "source_file": "IMG_9560.JPG",
-                "new_file": "peroxid_vodiku_100_ml.jpg",
-                "nazev": "PEROXID VODÍKU",
+                "new_file": "testovaci_roztok_100_ml.jpg",
+                "nazev": "TESTOVACÍ ROZTOK",
                 "sila": "100 ml",
                 "mnozstvi": "",
                 "zdroj": "Leky_v_Krabickach/",
@@ -573,8 +573,8 @@ class CockpitTests(unittest.TestCase):
             {
                 "include": "ano",
                 "source_file": "IMG_9560.JPG",
-                "new_file": "peroxid_vodiku_100_ml.jpg",
-                "nazev": "PEROXID VODÍKU",
+                "new_file": "testovaci_roztok_100_ml.jpg",
+                "nazev": "TESTOVACÍ ROZTOK",
                 "sila": "100 ml",
                 "kategorie": "nezarazeno",
                 "PIL_Short": "Automaticky inventarni zaznam z fotografie.",

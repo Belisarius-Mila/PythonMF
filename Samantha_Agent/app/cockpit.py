@@ -776,7 +776,7 @@ LEKARNA_MANIFEST_REVIEW_FIELDS = (
 LEKARNA_MANIFEST_FIELD_HELP = {
     "include": "ano = tento řádek se přijme na sklad; ne = řádek se přeskočí.",
     "source_file": "Původní název fotky z Downloads. Slouží ke kontrole zdroje.",
-    "new_file": "Cílový bezpečný název fotky v Lékárně, například peroxid_vodiku_100_ml.jpg.",
+    "new_file": "Cílový bezpečný název fotky v Lékárně, například testovaci_roztok_100_ml.jpg.",
     "nazev": "Krátký název léku nebo přípravku tak, jak ho chceš vidět v seznamu.",
     "ucinna_latka": "Účinná látka, pokud je z obalu nebo příbalového letáku jasná. Jinak nech prázdné nebo napiš nezjištěno.",
     "forma": "Léková forma: tablety, kapsle, kapky, sirup, mast, gel, kožní roztok apod.",

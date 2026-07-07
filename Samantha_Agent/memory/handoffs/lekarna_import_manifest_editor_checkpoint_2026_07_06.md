@@ -1,11 +1,11 @@
-Nazev: Lekarna import - editor manifestu a Peroxid checkpoint
+Nazev: Lekarna import - editor manifestu a cleanup testovaciho prijmu
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ne
 Datum: 2026-07-06
 
 Co se resilo:
-- Rucni integracni test Spravy Lekarny nad fotkou `IMG_9560.JPG` z Downloads.
+- Rucni integracni test Spravy Lekarny nad novou fotkou z Downloads.
 - OpenAI Vision draft vyzadoval potvrzeni a pri behu selhal na `Resource deadlock avoided`, proto se pouzil macOS Vision fallback.
 - Ukazalo se, ze workflow umelo vytvorit manifest a hned ho prijmout, ale nemelo lidsky editovatelny mezikrok.
 
@@ -18,31 +18,24 @@ Co je hotove:
 - Do apply kroku byla doplnena validacni brzda kvality: slaby OCR fallback se uz nema prijmout na sklad.
 - Testy `tests.test_cockpit` prosly.
 - Cockpit byl restartovan lokalne i pres Tailscale.
-- Peroxid byl rucne prijat do lokalni evidence: CSV ma 73 radku, foto zdroj existuje a `scripts/lekarna_photo_import.py validate` vratil `missing_sources=0`.
-- Lokalni export a sifrovany webovy bundle byly pregenerovane.
+- Testovaci prijem byl pozdeji podle Milova potvrzeni odstranen z lokalni evidence i z weboveho exportu.
+- Lokalni export a sifrovany webovy bundle byly po cleanupu pregenerovane.
 
 Co neni hotove:
-- Prijaty radek Peroxidu zustal obsahove slabsi:
-  - `mnozstvi` prazdne,
-  - `PIL_Short` fallback,
-  - `PIL_Source` fallback,
-  - `PIL_Match_Status=ceka_na_pil_overeni`,
-  - `Search_Tags` prazdne.
-- Sifrovany bundle neni pushnuty na GitHub Pages.
-- Kod Cockpitu a testy nejsou commitnute.
+- Pro dalsi realny test je potreba vzit jiny lek z ciste nove fotky a projit tok od zacatku.
+- Overit, ze povinna cervena pole a napovedy v editoru manifestu vedou k lepsimu rucnimu doplneni pred prijmem.
 
 Dalsi krok:
-- Po navratu opravit radek Peroxidu v lokalnim CSV, znovu pregenerovat sifrovany bundle, commitnout/pushnout jen verejne bezpecne soubory.
+- Otestovat Spravu Lekarny na jinem leku: pripravit navrh, zkontrolovat cervena pole, ulozit opravy, prijmout na sklad a overit web export + sifrovany bundle.
 
 Navrhovane dalsi kroky:
-- Okamzite: dokoncit urgentni MMTX narozeninovou scenu.
-- Potom: opravit Peroxid, zkontrolovat Spravu Lekarny na dalsi fotce a publikovat az cisty sifrovany bundle.
+- Okamzite: vybrat novou fotku jineho leku a spustit cisty end-to-end test.
+- Potom: podle vysledku upravit automatiku tak, aby bez rucne doplnenych povinnych poli neslo prijmout slaby navrh.
 
 Zmenene nebo relevantni soubory:
 - `app/cockpit.py`
 - `tests/test_cockpit.py`
 - `data/lekarna/domaci_leky.csv` lokalni soukrome, necommitovat
-- `data/lekarna/Leky_v_Krabickach/peroxid_vodiku_100_ml.jpg` lokalni soukrome, necommitovat
 - `docs/lekarna/encrypted-data/lekarna.enc.json`
 
 Bezpecnost / neukladat:
