@@ -33,6 +33,7 @@ TTS_LOG_FILE = BASE_DIR / 'tts_fr_debug.log'
 SOURCES_FILE = BASE_DIR / 'datafresh_sources.json'
 FORCE_MANUAL_DATAFRESH_MAPPING = False
 FAST_DATAFRESH_ONLY = True
+MIN_EXPECTED_VOCAB_ROWS = 367
 
 
 class VocabTrainer(ui.View):
@@ -62,7 +63,9 @@ class VocabTrainer(ui.View):
         self._av_synth = None
         self._last_utterance = None
         self.sync_files = [CSV_FILE.name]
-        self.sync_dir_hints = ('PythonMF/VocabularyFR', 'PythonMF', 'VocabularyFR')
+        # Canonical source: iCloud Drive / PythonMF / VocabularyFR / VocabularyFR.csv.
+        # Do not fall back to older PythonMF/VocabularyFR.csv copies.
+        self.sync_dir_hints = ('PythonMF/VocabularyFR',)
         self.source_overrides = self._load_source_overrides()
         self._tts_log('init.start')
         self._tts_recover('init')
@@ -706,6 +709,33 @@ class VocabTrainer(ui.View):
                 cleaned_rows.append(cleaned)
             return cleaned_rows
 
+    def _csv_row_count(self, path):
+        try:
+            return len(self._read_csv_rows(path))
+        except Exception:
+            return 0
+
+    def _restore_csv_backup(self, backup_bytes):
+        if backup_bytes is None:
+            return
+        try:
+            with open(CSV_FILE, 'wb') as f:
+                f.write(backup_bytes)
+        except Exception as e:
+            self._tts_log('datafresh.restore_backup.error', error=repr(e))
+
+    def _reject_stale_vocab_csv_if_needed(self, result, backup_bytes):
+        count = self._csv_row_count(CSV_FILE)
+        if count >= MIN_EXPECTED_VOCAB_ROWS:
+            return False
+        self._restore_csv_backup(backup_bytes)
+        failed = result.setdefault('failed', [])
+        failed.append(
+            f'{CSV_FILE.name}: odmítnut starý zdroj ({count} řádků, čekám aspoň {MIN_EXPECTED_VOCAB_ROWS})'
+        )
+        self._tts_log('datafresh.reject_stale_csv', rows=count, minimum=MIN_EXPECTED_VOCAB_ROWS)
+        return True
+
     def _reload_words(self):
         if not CSV_FILE.exists():
             self.words = []
@@ -714,6 +744,13 @@ class VocabTrainer(ui.View):
 
     def refresh_data(self, sender):
         self.stop_auto(None)
+        csv_backup = None
+        try:
+            if CSV_FILE.exists():
+                with open(CSV_FILE, 'rb') as f:
+                    csv_backup = f.read()
+        except Exception as e:
+            self._tts_log('datafresh.backup_csv.error', error=repr(e))
 
         if FORCE_MANUAL_DATAFRESH_MAPPING:
             missing_pins = self._source_mapping_missing()
@@ -765,6 +802,8 @@ class VocabTrainer(ui.View):
                         existing.append(r)
                 merged_diag[k] = existing
             result["diagnostics"] = merged_diag
+
+        self._reject_stale_vocab_csv_if_needed(result, csv_backup)
 
         try:
             # Always reload after DataFresh; file may have changed even when source
@@ -818,6 +857,7 @@ class VocabTrainer(ui.View):
         # Automaticky spustíme druhý refresh po 2s — iCloud mezitím stáhne nový soubor.
         def _second_refresh():
             result2 = _run_refresh_once()
+            self._reject_stale_vocab_csv_if_needed(result2, csv_backup)
             try:
                 self._reload_words()
                 self.selection_signature = None

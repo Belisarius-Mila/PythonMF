@@ -238,6 +238,9 @@ def _find_source_file(filename, app_dir_hints, local_dir=None, strict=False):
             return picked, scanned_roots
 
     if strict:
+        if not allow_recursive:
+            return None, scanned_roots
+
         # Fallback 1: broaden relative dirs but still without recursion.
         picked = _best_candidate(_collect_exact([filename], False), app_dir_hints)
         if picked:

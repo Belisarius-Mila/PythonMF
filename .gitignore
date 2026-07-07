@@ -41,3 +41,6 @@ docs/lekarna/private-data/
 *.app/
 *.app.zip
 *.code-workspace
+
+# Local one-off source dumps shared with Codex during mobile/Pythonista debugging
+Samantha_Agent/JanaFRMobil*.txt
