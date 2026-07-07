@@ -1,0 +1,329 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-07-05",
+  "language": "fr_jana_new_vocab",
+  "source_csv": "/Users/miloslavfalta/Library/Mobile Documents/com~apple~CloudDocs/PythonMF/VocabularyFR/VocabularyFR.csv",
+  "output_dir": "PictNew/generated",
+  "target_size_kb": 250,
+  "max_size_kb": 300,
+  "batch_size": 13,
+  "total_source_rows": 13,
+  "total_requests": 13,
+  "total_unique_target_images": 13,
+  "total_batches": 1,
+  "style_prompt": "Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition and warm friendly colors. Avoid random text, foreign words, decorative letters, labels, watermarks, signatures, logos, and brand names.",
+  "requests": [
+    {
+      "id": "fr-jana-20260705-femalelawyer",
+      "language": "fr",
+      "image_name": "femalelawyer",
+      "target_filename": "femalelawyer.webp",
+      "row_numbers": [
+        349
+      ],
+      "words": [
+        "avocate"
+      ],
+      "czech_meanings": [
+        "advokátka"
+      ],
+      "source_entries": [
+        {
+          "row_number": 349,
+          "word": "avocate",
+          "czech_meaning": "advokátka",
+          "note": "new Jana VocabularyFR row; generated into PictNew for review"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'femalelawyer', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'avocate' with Czech meaning 'advokátka'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a confident female lawyer in a modest office, wearing professional clothes, holding a folder beside a desk with books and a simple balance-of-justice ornament. Make it clearly a lawyer, not a judge; no readable text. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition and warm friendly colors. Avoid random text, foreign words, decorative letters, labels, watermarks, signatures, logos, and brand names."
+    },
+    {
+      "id": "fr-jana-20260705-profession",
+      "language": "fr",
+      "image_name": "profession",
+      "target_filename": "profession.webp",
+      "row_numbers": [
+        350
+      ],
+      "words": [
+        "métier"
+      ],
+      "czech_meanings": [
+        "povolání, řemeslo"
+      ],
+      "source_entries": [
+        {
+          "row_number": 350,
+          "word": "métier",
+          "czech_meaning": "povolání, řemeslo",
+          "note": "new Jana VocabularyFR row; generated into PictNew for review"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'profession', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'métier' with Czech meaning 'povolání, řemeslo'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show several everyday professions together in one friendly scene: a doctor, a cook, an engineer with a hard hat, and a teacher with books. Make the idea of profession/job instantly clear without labels. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition and warm friendly colors. Avoid random text, foreign words, decorative letters, labels, watermarks, signatures, logos, and brand names."
+    },
+    {
+      "id": "fr-jana-20260705-company",
+      "language": "fr",
+      "image_name": "company",
+      "target_filename": "company.webp",
+      "row_numbers": [
+        351
+      ],
+      "words": [
+        "entreprise"
+      ],
+      "czech_meanings": [
+        "společnost, podnik"
+      ],
+      "source_entries": [
+        {
+          "row_number": 351,
+          "word": "entreprise",
+          "czech_meaning": "společnost, podnik",
+          "note": "new Jana VocabularyFR row; generated into PictNew for review"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'company', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'entreprise' with Czech meaning 'společnost, podnik'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a small modern company office from outside and inside at once: a simple business building with people working at desks and one person entering with a laptop bag. No brand names, no readable signs. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition and warm friendly colors. Avoid random text, foreign words, decorative letters, labels, watermarks, signatures, logos, and brand names."
+    },
+    {
+      "id": "fr-jana-20260705-femaleengineer",
+      "language": "fr",
+      "image_name": "femaleengineer",
+      "target_filename": "femaleengineer.webp",
+      "row_numbers": [
+        353
+      ],
+      "words": [
+        "ingénieure"
+      ],
+      "czech_meanings": [
+        "inženýrka"
+      ],
+      "source_entries": [
+        {
+          "row_number": 353,
+          "word": "ingénieure",
+          "czech_meaning": "inženýrka",
+          "note": "new Jana VocabularyFR row; generated into PictNew for review"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'femaleengineer', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'ingénieure' with Czech meaning 'inženýrka'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a female engineer reviewing a simple blueprint at a work table, with a model bridge or machine part nearby and a yellow hard hat. Make it clear she is an engineer, not a construction worker only. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition and warm friendly colors. Avoid random text, foreign words, decorative letters, labels, watermarks, signatures, logos, and brand names."
+    },
+    {
+      "id": "fr-jana-20260705-bed",
+      "language": "fr",
+      "image_name": "bed",
+      "target_filename": "bed.webp",
+      "row_numbers": [
+        354
+      ],
+      "words": [
+        "lit"
+      ],
+      "czech_meanings": [
+        "postel"
+      ],
+      "source_entries": [
+        {
+          "row_number": 354,
+          "word": "lit",
+          "czech_meaning": "postel",
+          "note": "new Jana VocabularyFR row; generated into PictNew for review"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'bed', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'lit' with Czech meaning 'postel'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a cozy bedroom scene with a real bed as the main subject: pillow, blanket, bedside lamp, and calm evening light. The bed should be central and easy to recognize. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition and warm friendly colors. Avoid random text, foreign words, decorative letters, labels, watermarks, signatures, logos, and brand names."
+    },
+    {
+      "id": "fr-jana-20260705-work",
+      "language": "fr",
+      "image_name": "work",
+      "target_filename": "work.webp",
+      "row_numbers": [
+        357
+      ],
+      "words": [
+        "travail"
+      ],
+      "czech_meanings": [
+        "práce (činnost), zaměstnání"
+      ],
+      "source_entries": [
+        {
+          "row_number": 357,
+          "word": "travail",
+          "czech_meaning": "práce (činnost), zaměstnání",
+          "note": "new Jana VocabularyFR row; generated into PictNew for review"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'work', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'travail' with Czech meaning 'práce (činnost), zaměstnání'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a person focused at work at a desk with a notebook and laptop, plus small task papers neatly arranged. Make it a general idea of work/employment, not just school homework. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition and warm friendly colors. Avoid random text, foreign words, decorative letters, labels, watermarks, signatures, logos, and brand names."
+    },
+    {
+      "id": "fr-jana-20260705-swimmingpool",
+      "language": "fr",
+      "image_name": "swimmingpool",
+      "target_filename": "swimmingpool.webp",
+      "row_numbers": [
+        359
+      ],
+      "words": [
+        "piscine"
+      ],
+      "czech_meanings": [
+        "bazén"
+      ],
+      "source_entries": [
+        {
+          "row_number": 359,
+          "word": "piscine",
+          "czech_meaning": "bazén",
+          "note": "new Jana VocabularyFR row; generated into PictNew for review"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'swimmingpool', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'piscine' with Czech meaning 'bazén'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a clean outdoor swimming pool with blue water, lane markings, a ladder, and one child safely swimming with an adult nearby. Make it clearly a pool, not a lake or sea. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition and warm friendly colors. Avoid random text, foreign words, decorative letters, labels, watermarks, signatures, logos, and brand names."
+    },
+    {
+      "id": "fr-jana-20260705-vegetables",
+      "language": "fr",
+      "image_name": "vegetables",
+      "target_filename": "vegetables.webp",
+      "row_numbers": [
+        360
+      ],
+      "words": [
+        "légumes"
+      ],
+      "czech_meanings": [
+        "zelenina"
+      ],
+      "source_entries": [
+        {
+          "row_number": 360,
+          "word": "légumes",
+          "czech_meaning": "zelenina",
+          "note": "new Jana VocabularyFR row; generated into PictNew for review"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'vegetables', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'légumes' with Czech meaning 'zelenina'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a basket of fresh vegetables on a kitchen table: carrots, tomatoes, lettuce, cucumber, peppers, and broccoli. Make vegetables the main subject, bright and appetizing. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition and warm friendly colors. Avoid random text, foreign words, decorative letters, labels, watermarks, signatures, logos, and brand names."
+    },
+    {
+      "id": "fr-jana-20260705-supermarket",
+      "language": "fr",
+      "image_name": "supermarket",
+      "target_filename": "supermarket.webp",
+      "row_numbers": [
+        362
+      ],
+      "words": [
+        "supermarché"
+      ],
+      "czech_meanings": [
+        "supermarket"
+      ],
+      "source_entries": [
+        {
+          "row_number": 362,
+          "word": "supermarché",
+          "czech_meaning": "supermarket",
+          "note": "new Jana VocabularyFR row; generated into PictNew for review"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'supermarket', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'supermarché' with Czech meaning 'supermarket'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a family shopping in a supermarket aisle with shelves, a shopping cart, fruit and packaged goods. Make it clearly a supermarket interior, no brand names or readable labels. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition and warm friendly colors. Avoid random text, foreign words, decorative letters, labels, watermarks, signatures, logos, and brand names."
+    },
+    {
+      "id": "fr-jana-20260705-night",
+      "language": "fr",
+      "image_name": "night",
+      "target_filename": "night.webp",
+      "row_numbers": [
+        363
+      ],
+      "words": [
+        "nuit"
+      ],
+      "czech_meanings": [
+        "noc"
+      ],
+      "source_entries": [
+        {
+          "row_number": 363,
+          "word": "nuit",
+          "czech_meaning": "noc",
+          "note": "new Jana VocabularyFR row; generated into PictNew for review"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'night', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'nuit' with Czech meaning 'noc'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a quiet night scene seen through a bedroom window: dark sky, moon and stars, soft lamp light inside, and a calm sleeping mood. Make it clearly night, not just a moon symbol. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition and warm friendly colors. Avoid random text, foreign words, decorative letters, labels, watermarks, signatures, logos, and brand names."
+    },
+    {
+      "id": "fr-jana-20260705-tonight",
+      "language": "fr",
+      "image_name": "tonight",
+      "target_filename": "tonight.webp",
+      "row_numbers": [
+        364
+      ],
+      "words": [
+        "ce soir"
+      ],
+      "czech_meanings": [
+        "dnes večer"
+      ],
+      "source_entries": [
+        {
+          "row_number": 364,
+          "word": "ce soir",
+          "czech_meaning": "dnes večer",
+          "note": "new Jana VocabularyFR row; generated into PictNew for review"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'tonight', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'ce soir' with Czech meaning 'dnes večer'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show an evening plan for tonight: a small calendar page marked for the current evening, a clock near early evening, and a family preparing dinner under warm dusk light. Avoid readable dates or text. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition and warm friendly colors. Avoid random text, foreign words, decorative letters, labels, watermarks, signatures, logos, and brand names."
+    },
+    {
+      "id": "fr-jana-20260705-made",
+      "language": "fr",
+      "image_name": "made",
+      "target_filename": "made.webp",
+      "row_numbers": [
+        365
+      ],
+      "words": [
+        "fait"
+      ],
+      "czech_meanings": [
+        "vytvořený, udělaný, vykonaný"
+      ],
+      "source_entries": [
+        {
+          "row_number": 365,
+          "word": "fait",
+          "czech_meaning": "vytvořený, udělaný, vykonaný",
+          "note": "new Jana VocabularyFR row; generated into PictNew for review"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'made', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'fait' with Czech meaning 'vytvořený, udělaný, vykonaný'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a child proudly presenting a finished handmade craft on a table, with tools put aside and the object clearly completed. The visual idea is made/done/created, not active making. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition and warm friendly colors. Avoid random text, foreign words, decorative letters, labels, watermarks, signatures, logos, and brand names."
+    },
+    {
+      "id": "fr-jana-20260705-clevergirl",
+      "language": "fr",
+      "image_name": "clevergirl",
+      "target_filename": "clevergirl.webp",
+      "row_numbers": [
+        366
+      ],
+      "words": [
+        "maligne"
+      ],
+      "czech_meanings": [
+        "mazaná, chytrá"
+      ],
+      "source_entries": [
+        {
+          "row_number": 366,
+          "word": "maligne",
+          "czech_meaning": "mazaná, chytrá",
+          "note": "new Jana VocabularyFR row; generated into PictNew for review"
+        }
+      ],
+      "prompt": "Create one square image for a vocabulary card. The file name will be 'clevergirl', but do not illustrate the file name literally unless it matches the meaning. The image must represent the French word(s) 'maligne' with Czech meaning 'mazaná, chytrá'. Base the scene primarily on the Czech meaning, then use the French word only as context. If the concept is abstract, use a concrete everyday visual metaphor that a child can understand. Specific visual direction: Show a clever girl solving a small puzzle at a desk with a thoughtful smile and a subtle light-bulb idea symbol. Make her look smart and kind, not sneaky or mean. Warm vocabulary-card illustration for a child learner, but not babyish. Create a polished square scene illustration, not a flat icon, not a symbol, not a pictogram. Use a clear everyday scene with natural details, soft shadows, depth, and a small visual story or action. Keep the main idea instantly readable at small size. Use rich but simple composition and warm friendly colors. Avoid random text, foreign words, decorative letters, labels, watermarks, signatures, logos, and brand names."
+    }
+  ]
+}
