@@ -388,6 +388,9 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Připravit OpenAI návrh", page)
         self.assertIn("Načíst kontrolu návrhu", page)
         self.assertIn("Uložit opravy návrhu", page)
+        self.assertIn("Co je nutné doplnit", page)
+        self.assertIn("field_help", page)
+        self.assertIn("needs-review", page)
         self.assertIn("Přijmout návrh na sklad", page)
         self.assertIn("Obnovit seznam fotek", page)
         self.assertIn("Vlastní umístění", page)
@@ -501,15 +504,20 @@ class CockpitTests(unittest.TestCase):
             loaded = lekarna_import_manifest_load_action({"manifest_path": str(manifest_path.resolve())})
             self.assertTrue(loaded["ok"])
             self.assertEqual(loaded["rows"][0]["sila"], "100 ml")
+            self.assertIn("PIL_Short", loaded["field_help"])
+            self.assertTrue(any("mnozstvi" in warning for warning in loaded["warnings"]))
+            self.assertIn("mnozstvi", loaded["row_issues"][0])
 
             loaded["rows"][0]["sila"] = "3%"
             loaded["rows"][0]["mnozstvi"] = "100 ml"
             loaded["rows"][0]["forma"] = "kožní roztok"
             saved = lekarna_import_manifest_save_action(
-                {"manifest_path": str(manifest_path.resolve()), "rows": loaded["rows"]}
+                {"manifest_path": str(manifest_path.resolve()), "effective_location": "Horní koupelna", "rows": loaded["rows"]}
             )
 
             self.assertTrue(saved["ok"])
+            self.assertIn("warnings", saved)
+            self.assertIn("row_issues", saved)
             reloaded = lekarna_import_manifest_load_action({"manifest_path": str(manifest_path.resolve())})
             self.assertEqual(reloaded["rows"][0]["sila"], "3%")
             self.assertEqual(reloaded["rows"][0]["mnozstvi"], "100 ml")
