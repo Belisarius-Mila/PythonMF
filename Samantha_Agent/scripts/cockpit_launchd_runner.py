@@ -27,9 +27,13 @@ def url_ok(host: str, port: int, *, timeout: float = 2.0) -> bool:
 
 
 def port_is_busy(host: str, port: int) -> bool:
+    """Return True when a new local server cannot bind this port."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.settimeout(0.5)
-        return sock.connect_ex((host, port)) == 0
+        try:
+            sock.bind((host, port))
+        except OSError:
+            return True
+        return False
 
 
 def start_cockpit(host: str, port: int) -> subprocess.Popen[str]:
