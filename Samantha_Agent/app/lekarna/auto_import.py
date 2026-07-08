@@ -132,6 +132,8 @@ def build_auto_import_draft(
 
         if action == "new_candidate" and ocr.lines:
             manifest_rows.append(_manifest_row_from_suggestion(photo_name, suggestion, ocr, dlp_zip_path=dlp_zip_path))
+        elif action == "needs_label":
+            manifest_rows.append(_manifest_row_from_suggestion(photo_name, suggestion, ocr, dlp_zip_path=dlp_zip_path))
 
         report_items.append(
             {

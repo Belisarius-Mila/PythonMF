@@ -795,6 +795,44 @@ class LekarnaServiceTests(unittest.TestCase):
         self.assertEqual(rows[0]["nazev"], "Dr.Max Vitamin C")
         self.assertIn("new_candidate: 1", report_text)
 
+    def test_auto_import_draft_writes_review_row_when_ocr_has_no_label(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            directory = Path(temp_dir)
+            downloads = directory / "Downloads"
+            downloads.mkdir()
+            photo = downloads / "IMG_0003.JPG"
+            photo.write_text("needs label", encoding="utf-8")
+            csv_path = _fake_csv(directory)
+            manifest_path = directory / "manifest.csv"
+            report_path = directory / "report.md"
+
+            def fake_ocr(path: Path) -> ImageOcrResult:
+                return ImageOcrResult("", (), "openai-vision-failed", "[Errno 11] Resource deadlock avoided")
+
+            result = build_auto_import_draft(
+                downloads_dir=downloads,
+                limit=1,
+                manifest_path=manifest_path,
+                report_path=report_path,
+                csv_path=csv_path,
+                ocr_runner=fake_ocr,
+            )
+
+            with manifest_path.open("r", encoding="utf-8", newline="") as handle:
+                rows = list(csv.DictReader(handle))
+            report_text = report_path.read_text(encoding="utf-8")
+
+        self.assertEqual(result.photos, 1)
+        self.assertEqual(result.new_candidates, 0)
+        self.assertEqual(result.needs_review, 1)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["include"], "ano")
+        self.assertEqual(rows[0]["source_file"], "IMG_0003.JPG")
+        self.assertEqual(rows[0]["new_file"], "img_0003.jpg")
+        self.assertEqual(rows[0]["jistota_cteni"], "nizka")
+        self.assertEqual(rows[0]["nutno_overit"], "ano")
+        self.assertIn("needs_label: 1", report_text)
+
     def test_auto_import_draft_falls_back_to_macos_ocr_when_openai_fails(self) -> None:
         with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
             directory = Path(temp_dir)
