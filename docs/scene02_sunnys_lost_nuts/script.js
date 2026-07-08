@@ -754,10 +754,14 @@ function createQuickSkipButton() {
   button.type = "button";
   button.className = "scene-quick-skip";
   button.setAttribute("aria-label", "Přeskočit na cestu k jezeru");
-  button.addEventListener("click", (event) => {
+  const skipToLake = (event) => {
+    event.preventDefault();
     event.stopPropagation();
     goToScene03();
-  });
+  };
+  button.addEventListener("pointerdown", skipToLake);
+  button.addEventListener("touchstart", skipToLake, { passive: false });
+  button.addEventListener("click", skipToLake);
   return button;
 }
 
@@ -1085,28 +1089,7 @@ function restartScene() {
 }
 
 function quickAdvanceScene() {
-  if (state.sceneState === SCENE_STATES.waitingAudio) {
-    startGame();
-    return;
-  }
-  if (state.sceneState === SCENE_STATES.complete) {
-    goToScene03();
-    return;
-  }
-
-  const step = currentStep();
-  state.sequenceId += 1;
-  cancelSpeech();
-  state.speechQueue = Promise.resolve();
-  hideBubble();
-  state.activeCharacterId = "";
-  state.activeLine = null;
-  if (step?.type === "tap" && step.revealNuts) {
-    revealNutsEffect();
-  }
-  state.stepIndex = Math.min(state.stepIndex + 1, scene02Config.steps.length);
-  state.sceneState = SCENE_STATES.playing;
-  advanceScene(state.sequenceId);
+  goToScene03();
 }
 
 function isQuickSkipCornerClick(event, container) {
@@ -1182,14 +1165,18 @@ scene.addEventListener("click", (event) => {
   }
 });
 
-scene.addEventListener("click", (event) => {
+function handleQuickSkipCorner(event) {
   if (!isQuickSkipCornerClick(event, scene)) {
     return;
   }
   event.preventDefault();
   event.stopImmediatePropagation();
   goToScene03();
-}, true);
+}
+
+scene.addEventListener("pointerdown", handleQuickSkipCorner, true);
+scene.addEventListener("touchstart", handleQuickSkipCorner, { capture: true, passive: false });
+scene.addEventListener("click", handleQuickSkipCorner, true);
 
 window.speechSynthesis?.addEventListener?.("voiceschanged", loadVoices);
 
