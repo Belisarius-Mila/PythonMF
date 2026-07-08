@@ -641,11 +641,11 @@ def lekarna_retire_apply_action(payload: dict[str, Any]) -> dict[str, Any]:
         return {"ok": False, "message": f"Lék se nepodařilo vyřadit: {exc}", "error": "retire_failed"}
 
 
-def lekarna_import_photos_status(limit: int = 12) -> dict[str, Any]:
+def lekarna_import_photos_status(limit: int = 3) -> dict[str, Any]:
     try:
         safe_limit = max(1, min(int(limit), 25))
     except (TypeError, ValueError):
-        safe_limit = 12
+        safe_limit = 3
     photos = find_recent_download_photos(downloads_dir=Path.home() / "Downloads", limit=safe_limit)
     return {
         "ok": True,
@@ -6919,8 +6919,8 @@ def lekarna_admin_page_html() -> str:
       </section>
 
       <section>
-        <h2>Import fotek z Downloads</h2>
-        <p class="muted">OpenAI návrh může odeslat vybrané fotky do API. Přijetí návrhu zapisuje do CSV a kopíruje nebo přejmenovává fotky.</p>
+        <h2>Příjem léku z fotky</h2>
+        <p class="muted">Návrh přečte vybrané fotky přes OpenAI Vision, spáruje lék se SÚKL DLP a stáhne konkrétní příbalový leták. Na sklad se zapisuje až posledním potvrzeným krokem.</p>
         <button id="refreshPhotosBtn" class="secondary">Obnovit seznam fotek</button>
         <div id="photoList" class="items"></div>
         <div class="row">
@@ -6931,10 +6931,10 @@ def lekarna_admin_page_html() -> str:
             <input id="importLocation" value="Horní koupelna" placeholder="Vlastní umístění">
           </label>
         </div>
-        <label for="openaiConfirm">Potvrzení pro OpenAI návrh: {openai_phrase}</label>
+        <label for="openaiConfirm">Potvrzení pro zpracování fotek přes OpenAI: {openai_phrase}</label>
         <input id="openaiConfirm" placeholder="{openai_phrase}">
-        <button id="draftImportBtn">Připravit OpenAI návrh</button>
-        <div id="draftResult" class="result">Návrh zatím není připravený.</div>
+        <button id="draftImportBtn">Připravit návrh z fotek</button>
+        <div id="draftResult" class="result">Vyber fotku nebo ponech nejnovější fotky podle limitu. Návrh zatím není připravený.</div>
         <label for="manifestPath">Manifest z posledního návrhu</label>
         <input id="manifestPath" readonly>
         <div class="row">
@@ -7341,7 +7341,8 @@ def lekarna_admin_page_html() -> str:
     }}
 
     async function refreshPhotos() {{
-      const res = await fetch("/api/lekarna/import/photos?limit=12");
+      const visibleLimit = Math.max(1, Math.min(Number(importLimit.value || 3), 10));
+      const res = await fetch(`/api/lekarna/import/photos?limit=${{encodeURIComponent(String(visibleLimit))}}`);
       const data = await res.json();
       const photos = Array.isArray(data.photos) ? data.photos : [];
       photoList.innerHTML = "";
@@ -7349,10 +7350,14 @@ def lekarna_admin_page_html() -> str:
         photoList.innerHTML = '<div class="muted">V Downloads nejsou nalezené podporované fotky.</div>';
         return;
       }}
+      const note = document.createElement("div");
+      note.className = "muted";
+      note.textContent = `Zobrazuji nejnovější fotky podle limitu: ${{visibleLimit}}. Zaškrtnuté fotky půjdou do návrhu.`;
+      photoList.appendChild(note);
       for (const photo of photos) {{
         const row = document.createElement("label");
         row.className = "item";
-        row.innerHTML = `<input type="checkbox" value="${{escapeText(photo.name)}}"> <strong>${{escapeText(photo.name)}}</strong><div class="muted">${{Number(photo.bytes || 0)}} B</div>`;
+        row.innerHTML = `<input type="checkbox" checked value="${{escapeText(photo.name)}}"> <strong>${{escapeText(photo.name)}}</strong><div class="muted">${{Number(photo.bytes || 0)}} B</div>`;
         photoList.appendChild(row);
       }}
     }}
@@ -7412,6 +7417,7 @@ def lekarna_admin_page_html() -> str:
     previewRetireBtn.addEventListener("click", previewRetire);
     applyRetireBtn.addEventListener("click", applyRetire);
     refreshPhotosBtn.addEventListener("click", refreshPhotos);
+    importLimit.addEventListener("change", refreshPhotos);
     draftImportBtn.addEventListener("click", draftImport);
     reloadManifestBtn.addEventListener("click", loadManifest);
     saveManifestBtn.addEventListener("click", saveManifest);
