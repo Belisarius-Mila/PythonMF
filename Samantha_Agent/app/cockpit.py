@@ -111,6 +111,7 @@ from app.lekarna.service import (
     format_retire_domaci_lek,
     search_domaci_leky_records,
 )
+from app.lekarna.sukl_pil_archive import build_pil_short_from_text, resolve_sukl_pil_document
 from app.quantitative_status import DEFAULT_METRICS_PATH as QUANTITATIVE_STATUS_METRICS_PATH
 from app.quantitative_status import ExtensionStats as QuantitativeExtensionStats
 from app.quantitative_status import run_samantha_quantitative_status
@@ -1014,6 +1015,87 @@ def lekarna_import_manifest_save_action(payload: dict[str, Any]) -> dict[str, An
             for row_issue in row_issues
         ],
     }
+
+
+def lekarna_import_manifest_retry_pil_action(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        raw_manifest_path = str(payload.get("manifest_path", "") or "")
+        manifest_path = (
+            _safe_lekarna_auto_import_manifest_path(raw_manifest_path)
+            if raw_manifest_path.strip()
+            else _latest_lekarna_auto_import_manifest_path()
+        )
+        effective_location = str(payload.get("effective_location", "") or "").strip()
+        fieldnames, rows = _read_lekarna_manifest_rows(manifest_path)
+        changed = 0
+        attempted = 0
+        failed: list[str] = []
+        for row in rows:
+            if str(row.get("include", "")).strip().casefold() not in {"ano", "yes", "true", "1"}:
+                continue
+            pil_name = _extract_lekarna_pil_filename(str(row.get("PIL_Source", "") or ""))
+            if not pil_name:
+                continue
+            if str(row.get("PIL_Match_Status", "")).strip().casefold() == "overeno" and "pil dokument" in str(
+                row.get("PIL_Source", "")
+            ).casefold():
+                continue
+            attempted += 1
+            document = resolve_sukl_pil_document(pil_name, allow_online_download=True)
+            if not document:
+                failed.append(pil_name)
+                continue
+            product_name = str(row.get("nazev", "") or Path(pil_name).stem).strip()
+            pil_short = build_pil_short_from_text(product_name, document.text)
+            if not pil_short:
+                failed.append(pil_name)
+                continue
+            source = str(row.get("PIL_Source", "") or "").strip()
+            row["PIL_Short"] = pil_short
+            row["PIL_Source"] = (
+                f"{source}; PIL dokument {document.source_path.name}; soubor {document.member_name}; "
+                f"zdroj {document.source_kind}; extrakce {document.extraction_method}"
+            )
+            row["PIL_Checked_Date"] = datetime.now().strftime("%Y-%m-%d")
+            row["PIL_Match_Status"] = "overeno"
+            row["overeno_z_letaku"] = "ano"
+            changed += 1
+
+        if changed:
+            with manifest_path.open("w", encoding="utf-8", newline="") as handle:
+                writer = csv.DictWriter(handle, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerows(rows)
+    except Exception as exc:
+        return {"ok": False, "message": f"PIL se nepodařilo znovu načíst: {exc}", "error": "pil_retry_failed"}
+
+    warnings, row_issues = _lekarna_manifest_review(rows, effective_location=effective_location)
+    review_fields = [field for field in LEKARNA_MANIFEST_REVIEW_FIELDS if field in fieldnames]
+    return {
+        "ok": True,
+        "message": (
+            f"PIL znovu načtený: opraveno {changed} z {attempted} pokusů."
+            if attempted
+            else "Není tu žádný neověřený PIL k opakování."
+        ),
+        "manifest_path": str(manifest_path),
+        "changed": changed,
+        "attempted": attempted,
+        "failed": [safe_text(value) for value in failed],
+        "fields": review_fields,
+        "field_help": {field: safe_text(LEKARNA_MANIFEST_FIELD_HELP.get(field, "")) for field in review_fields},
+        "warnings": [safe_text(warning) for warning in warnings],
+        "rows": [{field: safe_text(str(row.get(field, ""))) for field in review_fields} for row in rows],
+        "row_issues": [
+            {field: [safe_text(issue) for issue in issues] for field, issues in row_issue.items()}
+            for row_issue in row_issues
+        ],
+    }
+
+
+def _extract_lekarna_pil_filename(source: str) -> str:
+    match = re.search(r"\b(PI\d+\.(?:pdf|docx?|rtf|txt))\b", str(source or ""), flags=re.IGNORECASE)
+    return match.group(1) if match else ""
 
 
 def _lekarna_match_to_dict(match: Any) -> dict[str, Any]:
@@ -6792,6 +6874,14 @@ def lekarna_admin_page_html() -> str:
     .quick-review-item strong {{ color: #334155; font-size: 12px; text-transform: uppercase; }}
     .quick-review-item div {{ margin-top: 3px; overflow-wrap: anywhere; }}
     .quick-review-item.wide {{ grid-column: 1 / -1; }}
+    .status-pill {{ display: inline-flex; align-items: center; min-height: 26px; border-radius: 999px; padding: 3px 10px; font-size: 13px; font-weight: 800; }}
+    .status-pill.ok {{ background: #e4f7eb; color: #176334; }}
+    .status-pill.warn {{ background: #fff4d8; color: #875200; }}
+    .status-pill.bad {{ background: #ffe5e5; color: #9f2d2d; }}
+    .pipeline {{ display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }}
+    .pipeline-step {{ border: 1px solid #d8dee8; border-radius: 8px; padding: 9px; background: #f8fafc; }}
+    .pipeline-step strong {{ display: block; font-size: 13px; }}
+    .pipeline-step span {{ display: block; margin-top: 3px; color: #5d6778; font-size: 13px; }}
     details.advanced-review {{ margin-top: 12px; }}
     details.advanced-review summary {{ cursor: pointer; font-weight: 800; color: #334155; }}
     .review-summary {{ border: 1px solid #b7d5c1; border-radius: 8px; padding: 12px; background: #effaf2; color: #1f5630; }}
@@ -6804,7 +6894,7 @@ def lekarna_admin_page_html() -> str:
     .field-warning {{ margin-top: 6px; color: #9f2d2d; font-size: 13px; font-weight: 750; }}
     label.needs-review input, label.needs-review textarea {{ border-color: #d04444; background: #fff8f8; box-shadow: 0 0 0 2px rgba(208, 68, 68, 0.12); }}
     label.needs-review .field-heading span::after {{ content: " - doplnit"; color: #9f2d2d; font-weight: 800; }}
-    @media (max-width: 840px) {{ body {{ padding: 14px; }} .layout, .row {{ grid-template-columns: 1fr; }} }}
+    @media (max-width: 840px) {{ body {{ padding: 14px; }} .layout, .row, .pipeline {{ grid-template-columns: 1fr; }} }}
   </style>
 </head>
 <body>
@@ -6851,6 +6941,7 @@ def lekarna_admin_page_html() -> str:
           <button id="reloadManifestBtn" class="secondary">Načíst kontrolu návrhu</button>
           <button id="saveManifestBtn" class="secondary">Uložit opravy návrhu</button>
         </div>
+        <button id="retryPilBtn" class="secondary">Zkusit PIL znovu</button>
         <div id="manifestEditor" class="items"></div>
         <label for="importConfirm">Potvrzení pro příjem na sklad: {import_phrase}</label>
         <input id="importConfirm" placeholder="{import_phrase}">
@@ -6878,6 +6969,7 @@ def lekarna_admin_page_html() -> str:
     const manifestPath = document.getElementById("manifestPath");
     const reloadManifestBtn = document.getElementById("reloadManifestBtn");
     const saveManifestBtn = document.getElementById("saveManifestBtn");
+    const retryPilBtn = document.getElementById("retryPilBtn");
     const manifestEditor = document.getElementById("manifestEditor");
     const importConfirm = document.getElementById("importConfirm");
     const applyImportBtn = document.getElementById("applyImportBtn");
@@ -6967,6 +7059,61 @@ def lekarna_admin_page_html() -> str:
       parent.appendChild(item);
     }}
 
+    function pilStatusInfo(row) {{
+      const status = quickReviewValue(row, "PIL_Match_Status");
+      const source = quickReviewValue(row, "PIL_Source").toLowerCase();
+      if (status === "overeno" && source.includes("pil dokument")) {{
+        return {{className: "ok", text: "PIL ověřený z dokumentu"}};
+      }}
+      if (status === "overeno_z_dlp") {{
+        return {{className: "warn", text: "PIL čeká na stažení"}};
+      }}
+      if (status === "ceka_na_pil_overeni" || status === "nedohledano") {{
+        return {{className: "bad", text: "PIL není ověřený"}};
+      }}
+      return {{className: "warn", text: status}};
+    }}
+
+    function appendPilStatusItem(parent, row) {{
+      const item = document.createElement("div");
+      item.className = "quick-review-item";
+      const label = document.createElement("strong");
+      label.textContent = "Stav PIL";
+      const pill = document.createElement("span");
+      const info = pilStatusInfo(row);
+      pill.className = `status-pill ${{info.className}}`;
+      pill.textContent = info.text;
+      item.appendChild(label);
+      item.appendChild(pill);
+      parent.appendChild(item);
+    }}
+
+    function renderPipeline(data) {{
+      const rows = Array.isArray(data.rows) ? data.rows : [];
+      const hasRows = rows.length > 0;
+      const pilVerified = rows.some((row) => pilStatusInfo(row).className === "ok");
+      const hasWarnings = Array.isArray(data.warnings) && data.warnings.length > 0;
+      const pipeline = document.createElement("div");
+      pipeline.className = "pipeline";
+      const steps = [
+        ["OCR", hasRows ? "text z fotky načtený" : "čeká na návrh"],
+        ["SÚKL DLP", hasRows ? "lékový záznam spárovaný" : "čeká na OCR"],
+        ["PIL", pilVerified ? "příbalový leták ověřený" : hasWarnings ? "vyžaduje opakování" : "není vyžadovaná akce"]
+      ];
+      steps.forEach(([title, detail]) => {{
+        const step = document.createElement("div");
+        step.className = "pipeline-step";
+        const strong = document.createElement("strong");
+        strong.textContent = title;
+        const span = document.createElement("span");
+        span.textContent = detail;
+        step.appendChild(strong);
+        step.appendChild(span);
+        pipeline.appendChild(step);
+      }});
+      return pipeline;
+    }}
+
     function renderQuickReview(row, rowIndex) {{
       const card = document.createElement("div");
       card.className = "quick-review";
@@ -6985,7 +7132,7 @@ def lekarna_admin_page_html() -> str:
         false
       );
       appendQuickReviewItem(grid, "Účinná látka", quickReviewValue(row, "ucinna_latka"), false);
-      appendQuickReviewItem(grid, "Stav PIL", quickReviewValue(row, "PIL_Match_Status"), false);
+      appendPilStatusItem(grid, row);
       appendQuickReviewItem(grid, "Použití / klasifikace", quickReviewValue(row, "pouziti"), true);
       appendQuickReviewItem(grid, "PIL short", quickReviewValue(row, "PIL_Short"), true);
       appendQuickReviewItem(grid, "Zdroj", quickReviewValue(row, "PIL_Source"), true);
@@ -7000,6 +7147,7 @@ def lekarna_admin_page_html() -> str:
       const rowIssues = Array.isArray(data.row_issues) ? data.row_issues : [];
       manifestEditor.innerHTML = "";
       manifestEditor.appendChild(renderManifestSummary(data.warnings || []));
+      manifestEditor.appendChild(renderPipeline(data));
       if (!rows.length) {{
         const empty = document.createElement("div");
         empty.className = "muted";
@@ -7133,6 +7281,29 @@ def lekarna_admin_page_html() -> str:
       }}
     }}
 
+    async function retryPil() {{
+      retryPilBtn.disabled = true;
+      try {{
+        draftResult.textContent = "Zkouším znovu stáhnout a přečíst konkrétní PIL dokument pro aktuální návrh.";
+        const data = await postJson("/api/lekarna/import/manifest/retry-pil", {{
+          manifest_path: manifestPath.value,
+          effective_location: importLocation.value
+        }});
+        draftResult.textContent = data.message || "PIL kontrola doběhla.";
+        if (Array.isArray(data.failed) && data.failed.length) {{
+          draftResult.textContent += `\\nNepodařilo se: ${{data.failed.join(", ")}}`;
+        }}
+        if (!data.ok) {{
+          manifestEditor.innerHTML = `<div class="result">${{escapeText(data.message || "PIL se nepodařilo znovu načíst.")}}</div>`;
+          return;
+        }}
+        if (data.manifest_path) manifestPath.value = data.manifest_path;
+        renderManifestEditor(data);
+      }} finally {{
+        retryPilBtn.disabled = false;
+      }}
+    }}
+
     async function searchLekarna() {{
       const query = searchInput.value.trim();
       const res = await fetch(`/api/lekarna/search?q=${{encodeURIComponent(query)}}&limit=25`);
@@ -7189,6 +7360,7 @@ def lekarna_admin_page_html() -> str:
     async function draftImport() {{
       draftImportBtn.disabled = true;
       try {{
+        draftResult.textContent = "Připravuji návrh: OCR z fotky, párování SÚKL DLP a stažení konkrétního příbalového letáku.";
         const data = await postJson("/api/lekarna/import/draft", {{
           limit: Number(importLimit.value || 3),
           ocr_backend: "openai",
@@ -7243,6 +7415,7 @@ def lekarna_admin_page_html() -> str:
     draftImportBtn.addEventListener("click", draftImport);
     reloadManifestBtn.addEventListener("click", loadManifest);
     saveManifestBtn.addEventListener("click", saveManifest);
+    retryPilBtn.addEventListener("click", retryPil);
     applyImportBtn.addEventListener("click", applyImport);
     refreshPhotos();
   </script>
@@ -11179,6 +11352,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/lekarna/import/manifest/retry-pil",
+        "label": "Zkusit znovu nacist PIL pro lekarna import",
+        "risk": "private_write",
+        "confirmation": "none_backend_draft_only",
+        "handler_name": "lekarna_import_manifest_retry_pil_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/lekarna/import/apply",
         "label": "Prijmout lekarna import na sklad",
         "risk": "private_write",
@@ -11721,6 +11902,10 @@ class CockpitServer:
                 if parsed.path == "/api/lekarna/import/manifest/save":
                     payload = self.read_json()
                     self.respond_json(lekarna_import_manifest_save_action(payload))
+                    return
+                if parsed.path == "/api/lekarna/import/manifest/retry-pil":
+                    payload = self.read_json()
+                    self.respond_json(lekarna_import_manifest_retry_pil_action(payload))
                     return
                 if parsed.path == "/api/lekarna/import/apply":
                     payload = self.read_json()

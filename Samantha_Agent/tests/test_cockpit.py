@@ -33,6 +33,7 @@ from app.cockpit import (
     lekarna_auto_import_apply_action,
     lekarna_auto_import_draft_action,
     lekarna_import_manifest_load_action,
+    lekarna_import_manifest_retry_pil_action,
     lekarna_import_manifest_save_action,
     lekarna_import_photos_status,
     lekarna_retire_apply_action,
@@ -600,6 +601,60 @@ class CockpitTests(unittest.TestCase):
             self.assertTrue(loaded["ok"])
             self.assertTrue(any("příbalový leták" in warning for warning in loaded["warnings"]))
             self.assertIn("PIL_Match_Status", loaded["row_issues"][0])
+        finally:
+            manifest_path.unlink(missing_ok=True)
+
+    def test_lekarna_import_manifest_retry_pil_updates_review_row(self) -> None:
+        manifest_dir = Path("data/lekarna/photo_imports")
+        manifest_dir.mkdir(parents=True, exist_ok=True)
+        manifest_path = manifest_dir / "lekarna_auto_import_manifest_test_retry_pil.csv"
+        fieldnames = list(cockpit_module.LEKARNA_MANIFEST_FIELD_NAMES)
+        row = {field: "" for field in fieldnames}
+        row.update(
+            {
+                "include": "ano",
+                "source_file": "IMG_9570.JPG",
+                "new_file": "sertivan.jpg",
+                "nazev": "SERTIVAN",
+                "forma": "TBL FLM",
+                "sila": "50MG",
+                "kategorie": "ANTIDEPRESIVA",
+                "pouziti": "SUKL DLP/ATC: ANTIDEPRESIVA / SERTRALIN",
+                "mnozstvi": "30",
+                "PIL_Short": "Registrovany lecivy pripravek SERTIVAN. Ucinna latka: SERTRALIN.",
+                "PIL_Source": "SUKL DLP 2026-07-01; kod 0162868; SERTIVAN; PIL PI229834.pdf (20.01.2026)",
+                "PIL_Match_Status": "overeno_z_dlp",
+                "Search_Tags": "SERTIVAN, SERTRALIN",
+            }
+        )
+        fake_document = SimpleNamespace(
+            source_path=Path("PI229834.pdf"),
+            member_name="PI229834.pdf",
+            source_kind="cached-document",
+            extraction_method="text",
+            text=(
+                "1. Co je přípravek SERTIVAN a k čemu se používá. "
+                "Sertivan se používá k léčbě deprese a úzkostných poruch. "
+                "2. Čemu musíte věnovat pozornost. Neužívejte při alergii na sertralin."
+            ),
+        )
+        try:
+            with manifest_path.open("w", encoding="utf-8", newline="") as handle:
+                writer = csv.DictWriter(handle, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerow(row)
+
+            with patch("app.cockpit.resolve_sukl_pil_document", return_value=fake_document):
+                result = lekarna_import_manifest_retry_pil_action(
+                    {"manifest_path": str(manifest_path.resolve()), "effective_location": "Horní koupelna"}
+                )
+
+            self.assertTrue(result["ok"])
+            self.assertEqual(result["changed"], 1)
+            self.assertFalse(result["warnings"])
+            self.assertEqual(result["rows"][0]["PIL_Match_Status"], "overeno")
+            self.assertEqual(result["rows"][0]["overeno_z_letaku"], "ano")
+            self.assertIn("deprese", result["rows"][0]["PIL_Short"])
         finally:
             manifest_path.unlink(missing_ok=True)
 
