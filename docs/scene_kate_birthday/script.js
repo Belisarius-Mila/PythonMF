@@ -10,8 +10,10 @@ const lineTranslation = document.getElementById("lineTranslation");
 const startGate = document.getElementById("startGate");
 const completeBanner = document.getElementById("completeBanner");
 const characterGlow = document.getElementById("characterGlow");
+const friendsLayer = document.getElementById("friendsLayer");
+const musicButton = document.getElementById("musicButton");
 
-const assetVersion = "20260706c";
+const assetVersion = "20260708a";
 
 const characterPositions = {
   All: { x: 50, y: 67 },
@@ -21,6 +23,8 @@ const characterPositions = {
   Fiona: { x: 66, y: 68 },
   Sunny: { x: 81, y: 71 },
 };
+
+const friendOrder = ["Benji", "Bunny", "Bruno", "Fiona", "Sunny"];
 
 const dialogue = [
   {
@@ -107,6 +111,17 @@ const sleep = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
 let currentAudio = null;
 let currentMusicContext = null;
 let runToken = 0;
+let sceneActive = false;
+let isBusy = false;
+let activeSpeaker = "";
+let completedSpeakers = new Set();
+const hotspotButtons = new Map();
+
+const dialogueBySpeaker = dialogue.reduce((groups, entry) => {
+  if (!groups.has(entry.speaker)) groups.set(entry.speaker, []);
+  groups.get(entry.speaker).push(entry);
+  return groups;
+}, new Map());
 
 function stopAudio() {
   if (currentAudio) {
@@ -125,6 +140,43 @@ function showSpeaker(speaker) {
   characterGlow.style.left = `${position.x}%`;
   characterGlow.style.top = `${position.y}%`;
   characterGlow.classList.add("visible");
+}
+
+function buildHotspots() {
+  for (const speaker of friendOrder) {
+    const position = characterPositions[speaker];
+    const button = document.createElement("button");
+    const mark = document.createElement("span");
+    button.type = "button";
+    button.className = "character-hotspot";
+    button.style.left = `${position.x}%`;
+    button.style.top = `${position.y}%`;
+    button.setAttribute("aria-label", `${speaker} birthday wish`);
+    mark.className = "hotspot-mark";
+    mark.setAttribute("aria-hidden", "true");
+    mark.textContent = "♡";
+    button.appendChild(mark);
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      playFriendWish(speaker);
+    });
+    hotspotButtons.set(speaker, button);
+    friendsLayer.appendChild(button);
+  }
+}
+
+function updateHotspots() {
+  for (const [speaker, button] of hotspotButtons.entries()) {
+    const mark = button.querySelector(".hotspot-mark");
+    button.disabled = !sceneActive || isBusy;
+    button.classList.toggle("active", speaker === activeSpeaker);
+    button.classList.toggle("done", completedSpeakers.has(speaker));
+    mark.textContent = completedSpeakers.has(speaker) ? "✓" : "♡";
+  }
+}
+
+function allWishesDone() {
+  return friendOrder.every((speaker) => completedSpeakers.has(speaker));
 }
 
 function setLine(entry, translationVisible) {
@@ -217,26 +269,75 @@ async function playSong(token) {
   await sleep(500);
 }
 
-async function startScene() {
+function startScene() {
   runToken += 1;
-  const token = runToken;
+  stopAudio();
+  sceneActive = true;
+  isBusy = false;
+  activeSpeaker = "";
+  completedSpeakers = new Set();
   startButton.disabled = true;
-  replayButton.disabled = true;
+  replayButton.disabled = false;
   startGate.classList.add("hidden");
   completeBanner.classList.add("hidden");
+  characterGlow.classList.remove("visible");
+  speechBubble.classList.add("hidden");
+  musicButton.classList.add("hidden");
+  musicButton.disabled = true;
+  scene.classList.add("ready");
+  updateHotspots();
+}
 
-  for (const entry of dialogue) {
+async function playFriendWish(speaker) {
+  if (!sceneActive || isBusy) return;
+
+  const entries = dialogueBySpeaker.get(speaker) || [];
+  const token = runToken;
+  isBusy = true;
+  activeSpeaker = speaker;
+  musicButton.disabled = true;
+  musicButton.classList.add("hidden");
+  updateHotspots();
+
+  for (const entry of entries) {
     if (token !== runToken) return;
     await playEntry(entry, token);
   }
 
   if (token !== runToken) return;
+  completedSpeakers.add(speaker);
+  activeSpeaker = "";
+  isBusy = false;
+  updateHotspots();
+
+  if (allWishesDone()) {
+    characterGlow.classList.remove("visible");
+    speechBubble.classList.add("hidden");
+    musicButton.disabled = false;
+    musicButton.classList.remove("hidden");
+  }
+}
+
+async function playFinalSong() {
+  if (!sceneActive || isBusy || !allWishesDone()) return;
+
+  const token = runToken;
+  isBusy = true;
+  musicButton.disabled = true;
+  activeSpeaker = "";
+  updateHotspots();
+
   await playSong(token);
 
   if (token !== runToken) return;
   stopAudio();
+  isBusy = false;
+  sceneActive = false;
   characterGlow.classList.remove("visible");
   speechBubble.classList.add("hidden");
+  musicButton.classList.add("hidden");
+  scene.classList.remove("ready");
+  updateHotspots();
   completeBanner.classList.remove("hidden");
   startButton.disabled = false;
   replayButton.disabled = false;
@@ -245,12 +346,20 @@ async function startScene() {
 function resetScene() {
   runToken += 1;
   stopAudio();
+  sceneActive = false;
+  isBusy = false;
+  activeSpeaker = "";
+  completedSpeakers = new Set();
   speechBubble.classList.add("hidden");
   characterGlow.classList.remove("visible");
   completeBanner.classList.add("hidden");
+  musicButton.classList.add("hidden");
+  musicButton.disabled = true;
+  scene.classList.remove("ready");
   startGate.classList.remove("hidden");
   startButton.disabled = false;
   replayButton.disabled = false;
+  updateHotspots();
 }
 
 startButton.addEventListener("click", (event) => {
@@ -261,7 +370,6 @@ startButton.addEventListener("click", (event) => {
 replayButton.addEventListener("click", (event) => {
   event.stopPropagation();
   resetScene();
-  startScene();
 });
 
 scene.addEventListener("click", () => {
@@ -279,3 +387,11 @@ nextButton.addEventListener("click", (event) => {
   event.stopPropagation();
   window.location.href = "../scene02_sunnys_lost_nuts/index.html";
 });
+
+musicButton.addEventListener("click", (event) => {
+  event.stopPropagation();
+  playFinalSong();
+});
+
+buildHotspots();
+updateHotspots();

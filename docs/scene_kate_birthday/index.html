@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Kate - birthday</title>
-    <link rel="stylesheet" href="styles.css?v=20260706c">
+    <link rel="stylesheet" href="styles.css?v=20260708a">
   </head>
   <body>
     <main class="app-shell">
@@ -25,6 +25,10 @@
             </div>
           </div>
           <div class="character-glow" id="characterGlow"></div>
+          <div class="friends-layer" id="friendsLayer" aria-label="Birthday friends"></div>
+          <button class="music-button hidden" id="musicButton" type="button" aria-label="Play birthday song">
+            <span aria-hidden="true">🎵</span>
+          </button>
           <div class="speech-bubble hidden" id="speechBubble" aria-live="polite">
             <span class="speaker" id="speakerName"></span>
             <span class="line-en" id="lineText"></span>
@@ -32,7 +36,7 @@
           </div>
           <div class="start-gate" id="startGate">
             <span class="start-title">Kate - birthday</span>
-            <span class="start-subtitle">Tap play and listen.</span>
+            <span class="start-subtitle">Tap a friend.</span>
           </div>
           <div class="complete-banner hidden" id="completeBanner">
             <span>Happy birthday, Kate!</span>
@@ -41,6 +45,6 @@
         </div>
       </section>
     </main>
-    <script src="script.js?v=20260706c"></script>
+    <script src="script.js?v=20260708a"></script>
   </body>
 </html>
