@@ -753,10 +753,10 @@ function createQuickSkipButton() {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "scene-quick-skip";
-  button.setAttribute("aria-label", "Rychlý posun scény");
+  button.setAttribute("aria-label", "Přeskočit na cestu k jezeru");
   button.addEventListener("click", (event) => {
     event.stopPropagation();
-    quickAdvanceScene();
+    goToScene03();
   });
   return button;
 }
@@ -1188,7 +1188,7 @@ scene.addEventListener("click", (event) => {
   }
   event.preventDefault();
   event.stopImmediatePropagation();
-  quickAdvanceScene();
+  goToScene03();
 }, true);
 
 window.speechSynthesis?.addEventListener?.("voiceschanged", loadVoices);

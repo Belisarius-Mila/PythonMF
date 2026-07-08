@@ -17,6 +17,7 @@ Aktuální tok: rozcestí v lese → Scene 1 → Scene 2. Další scény budou p
 7. Dokončovací bublina `Next: Journey to the Lake` otevře Scene 3.
 8. Špatný klik = jen jemná nápověda (*Try again.* / *Not yet. Tap Benji.* / *Look at the bag.*), bez spoilerů.
 9. Ikona knihy otevře malý slovníček. Klik na položku přečte anglické slovo a potom český význam.
+10. Skrytý levý dolní roh scény přeskočí rovnou do Scene 3 pro rychlé testování.
 
 Výukové fráze: *I don't have*, *Do you have?*, *I have a map*, *I have a carrot*, *I have a bag*, *Look inside!*
 
@@ -102,6 +103,7 @@ Oříšky po nálezu: overlay na pozici **53 % / 52 %** (emoji, později nahradi
 - [ ] Klik na brašnu odhalí oříšky (overlay)
 - [ ] Sunny se zaraduje, Fiona řekne *Good. Now we are ready.*
 - [ ] Mapa a complete banner se zobrazí
+- [ ] Skrytý levý dolní roh otevře Scene 3
 - [ ] ↺ a 🎤 fungují během úkolu
 - [ ] 📖 otevře slovníček a položky se dají přehrát
 - [ ] Chybějící MP3 nerozbije scénu (TTS fallback)
