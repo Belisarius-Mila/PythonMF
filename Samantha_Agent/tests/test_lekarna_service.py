@@ -42,6 +42,7 @@ from app.lekarna.openai_vision import (
 )
 from app.lekarna.search_tags import build_search_tags
 from app.lekarna.sukl_dlp import match_sukl_dlp
+from app.lekarna.sukl_pil_archive import build_pil_short_from_text, resolve_sukl_pil_document
 
 
 FIELD_NAMES = [
@@ -747,6 +748,62 @@ class LekarnaServiceTests(unittest.TestCase):
         self.assertIn("SERTIVAN", rows[0]["Search_Tags"])
         self.assertIn("SERTRALIN", rows[0]["Search_Tags"])
 
+    def test_sukl_pil_archive_resolves_text_member_and_builds_short(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            archive_path = _fake_sukl_pil_archive(Path(temp_dir))
+
+            document = resolve_sukl_pil_document("PI229834.pdf", pil_archive_path=archive_path)
+
+        self.assertIsNotNone(document)
+        assert document is not None
+        self.assertEqual(document.member_name, "PIL/PI229834.txt")
+        self.assertIn("k čemu se používá", document.text)
+        short = build_pil_short_from_text("SERTIVAN", document.text)
+        self.assertIn("SERTIVAN", short)
+        self.assertIn("deprese", short)
+        self.assertIn("Neužívejte", short)
+
+    def test_auto_import_draft_uses_cached_pil_archive_when_available(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            directory = Path(temp_dir)
+            downloads = directory / "Downloads"
+            downloads.mkdir()
+            photo = downloads / "IMG_0201.JPG"
+            photo.write_text("new", encoding="utf-8")
+            csv_path = _fake_csv(directory)
+            dlp_zip = _fake_sukl_dlp_zip(directory)
+            pil_archive = _fake_sukl_pil_archive(directory)
+            manifest_path = directory / "manifest.csv"
+            report_path = directory / "report.md"
+
+            def fake_ocr(path: Path) -> ImageOcrResult:
+                return ImageOcrResult(
+                    text="Sertivan 50 mg potahovane tablety 30",
+                    lines=("Sertivan", "50 mg", "30 tablet"),
+                    method="fake",
+                )
+
+            build_auto_import_draft(
+                downloads_dir=downloads,
+                limit=1,
+                manifest_path=manifest_path,
+                report_path=report_path,
+                csv_path=csv_path,
+                ocr_runner=fake_ocr,
+                dlp_zip_path=dlp_zip,
+                pil_archive_path=pil_archive,
+            )
+
+            with manifest_path.open("r", encoding="utf-8", newline="") as handle:
+                rows = list(csv.DictReader(handle))
+
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["PIL_Match_Status"], "overeno")
+        self.assertEqual(rows[0]["overeno_z_letaku"], "ano")
+        self.assertIn("deprese", rows[0]["PIL_Short"])
+        self.assertIn("PIL archiv", rows[0]["PIL_Source"])
+        self.assertIn("PI229834.pdf", rows[0]["PIL_Source"])
+
     def test_auto_import_suggests_metadata_from_ocr(self) -> None:
         suggestion = suggest_metadata_from_ocr(
             (
@@ -1098,6 +1155,23 @@ def _fake_sukl_dlp_zip(directory: Path) -> Path:
         archive.writestr("dlp_latky.csv", substances.encode("cp1250"))
         archive.writestr("dlp_atc.csv", atc.encode("cp1250"))
         archive.writestr("dlp_vydej.csv", dispensing.encode("cp1250"))
+    return path
+
+
+def _fake_sukl_pil_archive(directory: Path) -> Path:
+    path = directory / "PIL20260701.zip"
+    pil_text = (
+        "Příbalová informace: informace pro pacienta. "
+        "1. Co je přípravek SERTIVAN a k čemu se používá. "
+        "Přípravek SERTIVAN obsahuje sertralin a používá se k léčbě deprese a úzkostných poruch. "
+        "Patří do skupiny selektivních inhibitorů zpětného vychytávání serotoninu. "
+        "2. Čemu musíte věnovat pozornost, než začnete přípravek SERTIVAN užívat. "
+        "Neužívejte přípravek při alergii na sertralin nebo na kteroukoli další složku. "
+        "Poraďte se s lékařem nebo lékárníkem, pokud užíváte jiné léky nebo se příznaky zhorší. "
+        "3. Jak se přípravek užívá. Užívejte podle pokynů lékaře."
+    )
+    with zipfile.ZipFile(path, "w") as archive:
+        archive.writestr("PIL/PI229834.txt", pil_text.encode("utf-8"))
     return path
 
 

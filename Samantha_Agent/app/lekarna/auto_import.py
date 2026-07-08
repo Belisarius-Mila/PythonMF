@@ -36,6 +36,7 @@ from .photo_import import (
 )
 from .service import DEFAULT_DOMACI_LEKY_CSV, FIELD_NAMES, load_domaci_leky
 from .sukl_dlp import format_sukl_dlp_source, match_sukl_dlp
+from .sukl_pil_archive import build_pil_short_from_text, resolve_sukl_pil_document
 from .web_bundle import refresh_lekarna_web_bundle
 
 
@@ -91,6 +92,7 @@ def build_auto_import_draft(
     ocr_model: str = DEFAULT_OPENAI_VISION_MODEL,
     ocr_runner: Any | None = None,
     dlp_zip_path: Path | None = None,
+    pil_archive_path: Path | None = None,
 ) -> AutoImportDraftResult:
     if photo_names:
         photos = find_download_photos_by_names(downloads_dir=downloads_dir, names=photo_names, limit=limit)
@@ -131,16 +133,38 @@ def build_auto_import_draft(
             risk = "draft_ready"
 
         if action == "new_candidate" and ocr.lines:
-            manifest_rows.append(_manifest_row_from_suggestion(photo_name, suggestion, ocr, dlp_zip_path=dlp_zip_path))
+            manifest_rows.append(
+                _manifest_row_from_suggestion(
+                    photo_name,
+                    suggestion,
+                    ocr,
+                    dlp_zip_path=dlp_zip_path,
+                    pil_archive_path=pil_archive_path,
+                )
+            )
         elif action == "duplicate_existing" and ocr.lines:
-            row = _manifest_row_from_suggestion(photo_name, suggestion, ocr, dlp_zip_path=dlp_zip_path)
+            row = _manifest_row_from_suggestion(
+                photo_name,
+                suggestion,
+                ocr,
+                dlp_zip_path=dlp_zip_path,
+                pil_archive_path=pil_archive_path,
+            )
             row["poznamky"] = (
                 f"{row['poznamky']} Automatika nasla mozne shody v evidenci; pred importem rucne overit, "
                 "zda nejde o duplicitu."
             )
             manifest_rows.append(row)
         elif action == "needs_label":
-            manifest_rows.append(_manifest_row_from_suggestion(photo_name, suggestion, ocr, dlp_zip_path=dlp_zip_path))
+            manifest_rows.append(
+                _manifest_row_from_suggestion(
+                    photo_name,
+                    suggestion,
+                    ocr,
+                    dlp_zip_path=dlp_zip_path,
+                    pil_archive_path=pil_archive_path,
+                )
+            )
 
         report_items.append(
             {
@@ -430,11 +454,17 @@ def _manifest_row_from_suggestion(
     ocr: ImageOcrResult,
     *,
     dlp_zip_path: Path | None = None,
+    pil_archive_path: Path | None = None,
 ) -> dict[str, str]:
     row = {field: "" for field in MANIFEST_FIELD_NAMES}
     row.update(SAFE_DEFAULTS)
     row.update({field: suggestion.get(field, "") for field in FIELD_NAMES if field in suggestion})
-    pil_defaults = _pil_defaults_from_suggestion(suggestion, ocr, dlp_zip_path=dlp_zip_path)
+    pil_defaults = _pil_defaults_from_suggestion(
+        suggestion,
+        ocr,
+        dlp_zip_path=dlp_zip_path,
+        pil_archive_path=pil_archive_path,
+    )
     authoritative_dlp_fields = {
         "nazev",
         "ucinna_latka",
@@ -443,6 +473,7 @@ def _manifest_row_from_suggestion(
         "mnozstvi",
         "kategorie",
         "pouziti",
+        "overeno_z_letaku",
         "PIL_Short",
         "PIL_Source",
         "PIL_Checked_Date",
@@ -478,6 +509,7 @@ def _pil_defaults_from_suggestion(
     ocr: ImageOcrResult,
     *,
     dlp_zip_path: Path | None = None,
+    pil_archive_path: Path | None = None,
 ) -> dict[str, str]:
     name = str(suggestion.get("nazev", "") or "").strip()
     normalized_name = normalize_for_match(name)
@@ -519,11 +551,11 @@ def _pil_defaults_from_suggestion(
         "PIL_Match_Status": "ceka_na_pil_overeni",
     }
     if dlp_match:
-        defaults.update(_dlp_inventory_defaults(dlp_match))
+        defaults.update(_dlp_inventory_defaults(dlp_match, pil_archive_path=pil_archive_path))
     return defaults
 
 
-def _dlp_inventory_defaults(dlp_match: Any) -> dict[str, str]:
+def _dlp_inventory_defaults(dlp_match: Any, *, pil_archive_path: Path | None = None) -> dict[str, str]:
     substances = ", ".join(dlp_match.active_substances)
     atc_parts = [part for part in (dlp_match.atc_group, dlp_match.atc_name) if part]
     atc_text = " / ".join(atc_parts)
@@ -547,7 +579,7 @@ def _dlp_inventory_defaults(dlp_match: Any) -> dict[str, str]:
         "Pred pouzitim se ridit aktualni pribalovou informaci, obalem a pokyny lekare nebo lekarnika; "
         "tento text neni osobni davkovaci doporuceni."
     )
-    return {
+    defaults = {
         "nazev": dlp_match.nazev,
         "ucinna_latka": substances,
         "forma": dlp_match.forma,
@@ -561,6 +593,19 @@ def _dlp_inventory_defaults(dlp_match: Any) -> dict[str, str]:
         "PIL_Match_Status": dlp_match.match_status,
         "Search_Tags": tags,
     }
+    if dlp_match.pil:
+        pil_document = resolve_sukl_pil_document(dlp_match.pil, pil_archive_path=pil_archive_path)
+        if pil_document:
+            pil_short_from_archive = build_pil_short_from_text(dlp_match.nazev, pil_document.text)
+            if pil_short_from_archive:
+                defaults["PIL_Short"] = pil_short_from_archive
+                defaults["PIL_Source"] = (
+                    f"{source}; PIL archiv {pil_document.archive_path.name}; soubor {pil_document.member_name}; "
+                    f"extrakce {pil_document.extraction_method}"
+                )
+                defaults["PIL_Match_Status"] = "overeno"
+                defaults["overeno_z_letaku"] = "ano"
+    return defaults
 
 
 def _search_tags(*values: str) -> str:
