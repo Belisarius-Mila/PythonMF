@@ -819,6 +819,18 @@ def _safe_lekarna_auto_import_manifest_path(manifest_path: str) -> Path:
     return path
 
 
+def _latest_lekarna_auto_import_manifest_path() -> Path:
+    manifest_dir = (PROJECT_ROOT / "data" / "lekarna" / "photo_imports").resolve()
+    manifests = sorted(
+        manifest_dir.glob("lekarna_auto_import_manifest_*.csv"),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    if not manifests:
+        raise ValueError("Nejdřív připrav návrh importu.")
+    return _safe_lekarna_auto_import_manifest_path(str(manifests[0]))
+
+
 def _read_lekarna_manifest_rows(manifest_path: Path) -> tuple[list[str], list[dict[str, str]]]:
     if not manifest_path.exists():
         raise ValueError(f"Manifest neexistuje: {manifest_path}")
@@ -902,7 +914,12 @@ def _lekarna_manifest_quality_warnings(manifest_path: Path, *, effective_locatio
 
 def lekarna_import_manifest_load_action(payload: dict[str, Any]) -> dict[str, Any]:
     try:
-        manifest_path = _safe_lekarna_auto_import_manifest_path(str(payload.get("manifest_path", "") or ""))
+        raw_manifest_path = str(payload.get("manifest_path", "") or "")
+        manifest_path = (
+            _safe_lekarna_auto_import_manifest_path(raw_manifest_path)
+            if raw_manifest_path.strip()
+            else _latest_lekarna_auto_import_manifest_path()
+        )
         effective_location = str(payload.get("effective_location", "") or "").strip()
         fieldnames, rows = _read_lekarna_manifest_rows(manifest_path)
     except Exception as exc:
@@ -6997,10 +7014,6 @@ def lekarna_admin_page_html() -> str:
     }}
 
     async function loadManifest() {{
-      if (!manifestPath.value.trim()) {{
-        manifestEditor.innerHTML = '<div class="muted">Nejdřív připrav návrh importu.</div>';
-        return;
-      }}
       reloadManifestBtn.disabled = true;
       try {{
         const data = await postJson("/api/lekarna/import/manifest/load", {{
@@ -7011,6 +7024,7 @@ def lekarna_admin_page_html() -> str:
           manifestEditor.innerHTML = `<div class="result">${{escapeText(data.message || "Manifest se nepodařilo načíst.")}}</div>`;
           return;
         }}
+        if (data.manifest_path) manifestPath.value = data.manifest_path;
         renderManifestEditor(data);
       }} finally {{
         reloadManifestBtn.disabled = false;

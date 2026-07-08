@@ -525,6 +525,44 @@ class CockpitTests(unittest.TestCase):
         finally:
             manifest_path.unlink(missing_ok=True)
 
+    def test_lekarna_import_manifest_load_uses_latest_manifest_when_path_missing(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            project_root = Path(temp_dir)
+            manifest_dir = project_root / "data" / "lekarna" / "photo_imports"
+            manifest_dir.mkdir(parents=True)
+            manifest_path = manifest_dir / "lekarna_auto_import_manifest_20260708_154907.csv"
+            fieldnames = list(cockpit_module.LEKARNA_MANIFEST_FIELD_NAMES)
+            row = {field: "" for field in fieldnames}
+            row.update(
+                {
+                    "include": "ano",
+                    "source_file": "IMG_9570.JPG",
+                    "new_file": "img_9570.jpg",
+                    "nazev": "Testovací položka",
+                    "forma": "nezjisteno",
+                    "sila": "nezjisteno",
+                    "kategorie": "test",
+                    "pouziti": "test",
+                    "mnozstvi": "1",
+                    "PIL_Short": "Testovací výtah pro kontrolu importu.",
+                    "PIL_Source": "test",
+                    "PIL_Match_Status": "overeno",
+                    "Search_Tags": "test",
+                }
+            )
+            with manifest_path.open("w", encoding="utf-8", newline="") as handle:
+                writer = csv.DictWriter(handle, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerow(row)
+
+            with patch.object(cockpit_module, "PROJECT_ROOT", project_root):
+                loaded = lekarna_import_manifest_load_action({"manifest_path": ""})
+
+            self.assertTrue(loaded["ok"])
+            self.assertEqual(loaded["manifest_path"], str(manifest_path.resolve()))
+            self.assertEqual(len(loaded["rows"]), 1)
+            self.assertEqual(loaded["rows"][0]["include"], "ano")
+
     def test_lekarna_auto_import_apply_action_requires_confirmation(self) -> None:
         result = lekarna_auto_import_apply_action(
             {
