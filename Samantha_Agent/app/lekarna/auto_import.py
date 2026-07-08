@@ -435,8 +435,27 @@ def _manifest_row_from_suggestion(
     row.update(SAFE_DEFAULTS)
     row.update({field: suggestion.get(field, "") for field in FIELD_NAMES if field in suggestion})
     pil_defaults = _pil_defaults_from_suggestion(suggestion, ocr, dlp_zip_path=dlp_zip_path)
+    authoritative_dlp_fields = {
+        "nazev",
+        "ucinna_latka",
+        "forma",
+        "sila",
+        "mnozstvi",
+        "kategorie",
+        "pouziti",
+        "PIL_Short",
+        "PIL_Source",
+        "PIL_Checked_Date",
+        "PIL_Match_Status",
+        "Search_Tags",
+    }
     for field, value in pil_defaults.items():
-        if field in row and not row.get(field):
+        current = str(row.get(field, "") or "").strip()
+        if field in row and (
+            field in authoritative_dlp_fields
+            or not current
+            or current.casefold() in {"nezarazeno", "leky v krabickach - umisteni nezadano"}
+        ):
             row[field] = value
     row["include"] = "ano"
     row["source_file"] = source_file
@@ -500,9 +519,60 @@ def _pil_defaults_from_suggestion(
         "PIL_Match_Status": "ceka_na_pil_overeni",
     }
     if dlp_match:
-        defaults["PIL_Source"] = format_sukl_dlp_source(dlp_match)
-        defaults["PIL_Match_Status"] = dlp_match.match_status
+        defaults.update(_dlp_inventory_defaults(dlp_match))
     return defaults
+
+
+def _dlp_inventory_defaults(dlp_match: Any) -> dict[str, str]:
+    substances = ", ".join(dlp_match.active_substances)
+    atc_parts = [part for part in (dlp_match.atc_group, dlp_match.atc_name) if part]
+    atc_text = " / ".join(atc_parts)
+    package = " ".join(value for value in (dlp_match.sila, dlp_match.forma, dlp_match.baleni) if value)
+    use_text = atc_text or dlp_match.atc_code or "SUKL DLP klasifikace nedoplnena"
+    substance_text = substances or "ucinna latka podle DLP nedoplnena"
+    source = format_sukl_dlp_source(dlp_match)
+    tags = _search_tags(
+        dlp_match.nazev,
+        substances,
+        dlp_match.atc_name,
+        dlp_match.atc_group,
+        dlp_match.sila,
+        dlp_match.forma,
+    )
+    pil_short = (
+        f"Registrovany lecivy pripravek {dlp_match.nazev}"
+        f"{f' ({package})' if package else ''}. "
+        f"Ucinna latka: {substance_text}. "
+        f"SUKL DLP klasifikace: {use_text}. "
+        "Pred pouzitim se ridit aktualni pribalovou informaci, obalem a pokyny lekare nebo lekarnika; "
+        "tento text neni osobni davkovaci doporuceni."
+    )
+    return {
+        "nazev": dlp_match.nazev,
+        "ucinna_latka": substances,
+        "forma": dlp_match.forma,
+        "sila": dlp_match.sila,
+        "mnozstvi": dlp_match.baleni,
+        "kategorie": dlp_match.atc_group or dlp_match.atc_name or "registrovany_lek",
+        "pouziti": f"SUKL DLP/ATC: {use_text}",
+        "PIL_Short": pil_short,
+        "PIL_Source": source,
+        "PIL_Checked_Date": datetime.now().strftime("%Y-%m-%d"),
+        "PIL_Match_Status": dlp_match.match_status,
+        "Search_Tags": tags,
+    }
+
+
+def _search_tags(*values: str) -> str:
+    tags: list[str] = []
+    for value in values:
+        for raw_part in re.split(r"[,;/()]+|\s{2,}", str(value or "")):
+            part = re.sub(r"\s+", " ", raw_part.strip())
+            if len(part) < 3:
+                continue
+            if part.casefold() not in {tag.casefold() for tag in tags}:
+                tags.append(part)
+    return ", ".join(tags[:16])
 
 
 def _write_manifest(path: Path, rows: list[dict[str, str]]) -> None:

@@ -796,7 +796,7 @@ LEKARNA_MANIFEST_FIELD_HELP = {
     "PIL_Short": "Krátký, věcný výtah z příbalové informace: na co přípravek je, hlavní omezení a bezpečné upozornění bez osobního dávkování.",
     "PIL_Source": "Zdroj výtahu: například SÚKL DLP, příbalová informace, fotografie obalu, URL nebo nedohledáno.",
     "PIL_Checked_Date": "Datum kontroly příbalové informace ve formátu RRRR-MM-DD.",
-    "PIL_Match_Status": "Stav párování příbalové informace: overeno, overeno_z_obalu, ceka_na_pil_overeni, nedohledano.",
+    "PIL_Match_Status": "Stav párování příbalové informace: overeno, overeno_z_dlp, overeno_z_obalu, ceka_na_pil_overeni, nedohledano.",
     "Search_Tags": "Vyhledávací slova oddělená čárkou: název, účel, potíž, účinná látka, běžné překlepy.",
 }
 
@@ -6774,6 +6774,13 @@ def lekarna_admin_page_html() -> str:
     .review-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }}
     .review-grid .wide {{ grid-column: 1 / -1; }}
     .review-grid textarea {{ min-height: 86px; resize: vertical; }}
+    .quick-review {{ border: 1px solid #cfd8e3; border-radius: 8px; padding: 12px; margin-top: 12px; background: #ffffff; }}
+    .quick-review-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin-top: 10px; }}
+    .quick-review-item strong {{ color: #334155; font-size: 12px; text-transform: uppercase; }}
+    .quick-review-item div {{ margin-top: 3px; overflow-wrap: anywhere; }}
+    .quick-review-item.wide {{ grid-column: 1 / -1; }}
+    details.advanced-review {{ margin-top: 12px; }}
+    details.advanced-review summary {{ cursor: pointer; font-weight: 800; color: #334155; }}
     .review-summary {{ border: 1px solid #b7d5c1; border-radius: 8px; padding: 12px; background: #effaf2; color: #1f5630; }}
     .review-summary.alert {{ border-color: #f0a8a8; background: #fff2f2; color: #842323; }}
     .review-summary ul {{ margin: 8px 0 0; padding-left: 20px; }}
@@ -6930,6 +6937,49 @@ def lekarna_admin_page_html() -> str:
       return summary;
     }}
 
+    function quickReviewValue(row, field) {{
+      const value = String((row && row[field]) || "").trim();
+      return value || "nedoplněno";
+    }}
+
+    function appendQuickReviewItem(parent, labelText, value, wide) {{
+      const item = document.createElement("div");
+      item.className = wide ? "quick-review-item wide" : "quick-review-item";
+      const label = document.createElement("strong");
+      label.textContent = labelText;
+      const content = document.createElement("div");
+      content.textContent = value;
+      item.appendChild(label);
+      item.appendChild(content);
+      parent.appendChild(item);
+    }}
+
+    function renderQuickReview(row, rowIndex) {{
+      const card = document.createElement("div");
+      card.className = "quick-review";
+      const title = document.createElement("strong");
+      title.textContent = `Rychlá kontrola #${{rowIndex + 1}}`;
+      card.appendChild(title);
+      const grid = document.createElement("div");
+      grid.className = "quick-review-grid";
+      appendQuickReviewItem(grid, "Název", quickReviewValue(row, "nazev"), false);
+      appendQuickReviewItem(
+        grid,
+        "Balení",
+        [quickReviewValue(row, "sila"), quickReviewValue(row, "forma"), quickReviewValue(row, "mnozstvi")]
+          .filter((value) => value !== "nedoplněno")
+          .join(" | ") || "nedoplněno",
+        false
+      );
+      appendQuickReviewItem(grid, "Účinná látka", quickReviewValue(row, "ucinna_latka"), false);
+      appendQuickReviewItem(grid, "Stav PIL", quickReviewValue(row, "PIL_Match_Status"), false);
+      appendQuickReviewItem(grid, "Použití / klasifikace", quickReviewValue(row, "pouziti"), true);
+      appendQuickReviewItem(grid, "PIL short", quickReviewValue(row, "PIL_Short"), true);
+      appendQuickReviewItem(grid, "Zdroj", quickReviewValue(row, "PIL_Source"), true);
+      card.appendChild(grid);
+      return card;
+    }}
+
     function renderManifestEditor(data) {{
       currentManifestFields = Array.isArray(data.fields) ? data.fields : [];
       currentManifestFieldHelp = data.field_help && typeof data.field_help === "object" ? data.field_help : currentManifestFieldHelp;
@@ -6944,6 +6994,15 @@ def lekarna_admin_page_html() -> str:
         manifestEditor.appendChild(empty);
         return;
       }}
+      rows.forEach((row, rowIndex) => {{
+        manifestEditor.appendChild(renderQuickReview(row, rowIndex));
+      }});
+      const advanced = document.createElement("details");
+      advanced.className = "advanced-review";
+      advanced.open = Array.isArray(data.warnings) && data.warnings.length > 0;
+      const advancedSummary = document.createElement("summary");
+      advancedSummary.textContent = "Pokročilé úpravy návrhu";
+      advanced.appendChild(advancedSummary);
       rows.forEach((row, rowIndex) => {{
         const card = document.createElement("div");
         card.className = "review-row";
@@ -6998,8 +7057,9 @@ def lekarna_admin_page_html() -> str:
           grid.appendChild(label);
         }});
         card.appendChild(grid);
-        manifestEditor.appendChild(card);
+        advanced.appendChild(card);
       }});
+      manifestEditor.appendChild(advanced);
     }}
 
     function collectManifestRows() {{

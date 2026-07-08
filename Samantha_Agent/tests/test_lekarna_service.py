@@ -664,7 +664,7 @@ class LekarnaServiceTests(unittest.TestCase):
         assert match is not None
         self.assertEqual(match.kod_sukl, "0197843")
         self.assertEqual(match.pil, "PI223751.pdf")
-        self.assertEqual(match.match_status, "overeno_sukl_dlp_pil")
+        self.assertEqual(match.match_status, "overeno_z_dlp")
 
     def test_auto_import_draft_prefills_safe_pil_short(self) -> None:
         with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
@@ -700,9 +700,52 @@ class LekarnaServiceTests(unittest.TestCase):
 
         self.assertEqual(len(rows), 1)
         self.assertIn("Rostlinny lecivy pripravek", rows[0]["PIL_Short"])
-        self.assertEqual(rows[0]["PIL_Match_Status"], "overeno_sukl_dlp_pil")
+        self.assertEqual(rows[0]["PIL_Match_Status"], "overeno_z_dlp")
         self.assertIn("kod 0197843", rows[0]["PIL_Source"])
         self.assertIn("PIL PI223751.pdf", rows[0]["PIL_Source"])
+
+    def test_auto_import_draft_prefills_dlp_summary_for_regular_match(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            directory = Path(temp_dir)
+            downloads = directory / "Downloads"
+            downloads.mkdir()
+            photo = downloads / "IMG_0200.JPG"
+            photo.write_text("new", encoding="utf-8")
+            csv_path = _fake_csv(directory)
+            dlp_zip = _fake_sukl_dlp_zip(directory)
+            manifest_path = directory / "manifest.csv"
+            report_path = directory / "report.md"
+
+            def fake_ocr(path: Path) -> ImageOcrResult:
+                return ImageOcrResult(
+                    text="Sertivan 50 mg potahovane tablety 30",
+                    lines=("Sertivan", "50 mg", "30 tablet"),
+                    method="fake",
+                )
+
+            build_auto_import_draft(
+                downloads_dir=downloads,
+                limit=1,
+                manifest_path=manifest_path,
+                report_path=report_path,
+                csv_path=csv_path,
+                ocr_runner=fake_ocr,
+                dlp_zip_path=dlp_zip,
+            )
+
+            with manifest_path.open("r", encoding="utf-8", newline="") as handle:
+                rows = list(csv.DictReader(handle))
+
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["nazev"], "SERTIVAN")
+        self.assertEqual(rows[0]["ucinna_latka"], "SERTRALIN")
+        self.assertIn("SEROTONINU", rows[0]["kategorie"])
+        self.assertIn("SUKL DLP/ATC", rows[0]["pouziti"])
+        self.assertIn("Registrovany lecivy pripravek SERTIVAN", rows[0]["PIL_Short"])
+        self.assertIn("SERTRALIN", rows[0]["PIL_Short"])
+        self.assertEqual(rows[0]["PIL_Match_Status"], "overeno_z_dlp")
+        self.assertIn("SERTIVAN", rows[0]["Search_Tags"])
+        self.assertIn("SERTRALIN", rows[0]["Search_Tags"])
 
     def test_auto_import_suggests_metadata_from_ocr(self) -> None:
         suggestion = suggest_metadata_from_ocr(
@@ -999,10 +1042,11 @@ def _fake_sukl_dlp_zip(directory: Path) -> Path:
     path = directory / "DLP20260701.zip"
     products = "\n".join(
         [
-            "KOD_SUKL;NAZEV;SILA;FORMA;BALENI;DOPLNEK;REG;RC;VYDEJ;DODAVKY;TYP_LP",
-            "0197843;SINUPRET AKUT;;TBL OBD;20;TBL OBD 20;R;94/219/15-C;F;1;HE",
-            "0197844;SINUPRET AKUT;;TBL OBD;40;TBL OBD 40;R;94/219/15-C;F;0;HE",
-            "0047711;SINUPRET;;POR GTT SOL;100;POR GTT SOL 1X100ML;R;94/219/15-C;F;1;HE",
+            "KOD_SUKL;NAZEV;SILA;FORMA;BALENI;DOPLNEK;REG;RC;VYDEJ;DODAVKY;TYP_LP;ATC_WHO",
+            "0197843;SINUPRET AKUT;;TBL OBD;20;TBL OBD 20;R;94/219/15-C;F;1;HE;R05X",
+            "0197844;SINUPRET AKUT;;TBL OBD;40;TBL OBD 40;R;94/219/15-C;F;0;HE;R05X",
+            "0047711;SINUPRET;;POR GTT SOL;100;POR GTT SOL 1X100ML;R;94/219/15-C;F;1;HE;R05X",
+            "0162868;SERTIVAN;50MG;TBL FLM;30;50MG TBL FLM 30;R;30/179/04-C;R;1;CH;N06AB06",
         ]
     )
     documents = "\n".join(
@@ -1011,11 +1055,49 @@ def _fake_sukl_dlp_zip(directory: Path) -> Path:
             "0197843;PI223751.pdf;24.06.2025;SPC166977.pdf;19.01.2021",
             "0197844;PI223751.pdf;24.06.2025;SPC166977.pdf;19.01.2021",
             "0047711;PI111111.pdf;01.01.2025;SPC111111.pdf;01.01.2025",
+            "0162868;PI229834.pdf;20.01.2026;SPC229834.pdf;20.01.2026",
+        ]
+    )
+    composition = "\n".join(
+        [
+            "KOD_SUKL;KOD_LATKY;SQ;S;AMNT_OD;AMNT;UN",
+            "0197843;5001;1;O;;;",
+            "0162868;9116;1;O;;50;MG",
+            "0162868;13950;2;L;;55,95;MG",
+        ]
+    )
+    substances = "\n".join(
+        [
+            "KOD_LATKY;ZDROJ;NAZEV_INN;NAZEV_EN;NAZEV;ZAV;DOP;NARVLA",
+            "5001;INN;;;SINUPRET LATKA;;;",
+            "9116;INN;SERTRALINUM;SERTRALINE;SERTRALIN;;;",
+            "13950;C18;SERTRALINI HYDROCHLORIDUM;SERTRALINE HYDROCHLORIDE;SERTRALIN-HYDROCHLORID;;;",
+        ]
+    )
+    atc = "\n".join(
+        [
+            "ATC;NT;NAZEV;NAZEV_EN",
+            "N;N;NERVOVÁ SOUSTAVA;NERVOUS SYSTEM",
+            "N06;N;PSYCHOANALEPTIKA;PSYCHOANALEPTICS",
+            "N06A;N;ANTIDEPRESIVA;ANTIDEPRESSANTS",
+            "N06AB;N;SELEKTIVNÍ INHIBITORY ZPĚTNÉHO VYCHYTÁVÁNÍ SEROTONINU;SELECTIVE SEROTONIN REUPTAKE INHIBITORS",
+            "N06AB06;N;SERTRALIN;SERTRALINE",
+        ]
+    )
+    dispensing = "\n".join(
+        [
+            "VYDEJ;NAZEV",
+            "F;volně prodejný léčivý přípravek",
+            "R;výdej léčivého přípravku vázán na lékařský předpis",
         ]
     )
     with zipfile.ZipFile(path, "w") as archive:
         archive.writestr("dlp_lecivepripravky.csv", products.encode("cp1250"))
         archive.writestr("dlp_nazvydokumentu.csv", documents.encode("cp1250"))
+        archive.writestr("dlp_slozeni.csv", composition.encode("cp1250"))
+        archive.writestr("dlp_latky.csv", substances.encode("cp1250"))
+        archive.writestr("dlp_atc.csv", atc.encode("cp1250"))
+        archive.writestr("dlp_vydej.csv", dispensing.encode("cp1250"))
     return path
 
 

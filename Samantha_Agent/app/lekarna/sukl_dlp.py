@@ -26,6 +26,11 @@ class SuklDlpMatch:
     vydej: str
     typ_lp: str
     dodavky: str
+    atc_code: str
+    atc_name: str
+    atc_group: str
+    vydej_name: str
+    active_substances: tuple[str, ...]
     pil: str
     dat_roz_pil: str
     spc: str
@@ -36,10 +41,8 @@ class SuklDlpMatch:
 
     @property
     def match_status(self) -> str:
-        if self.confidence == "exact" and self.pil:
-            return "overeno_sukl_dlp_pil"
         if self.confidence in {"exact", "probable"} and self.pil:
-            return "pravdepodobne_sparovano_sukl_pil"
+            return "overeno_z_dlp"
         return "nejista_varianta_sukl"
 
 
@@ -67,6 +70,9 @@ def match_sukl_dlp(
         for row in _read_csv_from_zip(source_zip, "dlp_nazvydokumentu.csv")
         if str(row.get("KOD_SUKL", "")).strip()
     }
+    substances_by_product = _substances_by_product(source_zip)
+    atc_names = _atc_names(source_zip)
+    vydej_names = _vydej_names(source_zip)
 
     query_text = " ".join(
         str(value or "")
@@ -152,6 +158,11 @@ def match_sukl_dlp(
         vydej=str(best.get("VYDEJ", "")).strip(),
         typ_lp=str(best.get("TYP_LP", "")).strip(),
         dodavky=str(best.get("DODAVKY", "")).strip(),
+        atc_code=str(best.get("ATC_WHO", "")).strip(),
+        atc_name=atc_names.get(str(best.get("ATC_WHO", "")).strip(), ""),
+        atc_group=_best_atc_group(str(best.get("ATC_WHO", "")).strip(), atc_names),
+        vydej_name=vydej_names.get(str(best.get("VYDEJ", "")).strip(), ""),
+        active_substances=substances_by_product.get(code, ()),
         pil=str(doc.get("PIL", "")).strip(),
         dat_roz_pil=str(doc.get("DAT_ROZ_PIL", "")).strip(),
         spc=str(doc.get("SPC", "")).strip(),
@@ -188,6 +199,76 @@ def _read_csv_from_zip(zip_path: Path, member_name: str) -> list[dict[str, str]]
     text = _decode_sukl_csv(data)
     reader = csv.DictReader(io.StringIO(text), delimiter=";")
     return [dict(row) for row in reader]
+
+
+def _read_csv_from_zip_optional(zip_path: Path, member_name: str) -> list[dict[str, str]]:
+    try:
+        return _read_csv_from_zip(zip_path, member_name)
+    except KeyError:
+        return []
+
+
+def _substances_by_product(zip_path: Path) -> dict[str, tuple[str, ...]]:
+    substances = {
+        str(row.get("KOD_LATKY", "")).strip(): str(
+            row.get("NAZEV") or row.get("NAZEV_INN") or row.get("NAZEV_EN") or ""
+        ).strip()
+        for row in _read_csv_from_zip_optional(zip_path, "dlp_latky.csv")
+        if str(row.get("KOD_LATKY", "")).strip()
+    }
+    grouped: dict[str, list[tuple[int, str]]] = {}
+    for row in _read_csv_from_zip_optional(zip_path, "dlp_slozeni.csv"):
+        code = str(row.get("KOD_SUKL", "")).strip()
+        substance_code = str(row.get("KOD_LATKY", "")).strip()
+        if not code or not substance_code:
+            continue
+        name = substances.get(substance_code, "")
+        if not name or name in {"OR:", "NEBO:"}:
+            continue
+        kind = str(row.get("S", "")).strip().upper()
+        priority = 0 if kind == "O" else 1 if kind == "L" else 2
+        grouped.setdefault(code, []).append((priority, name))
+
+    result: dict[str, tuple[str, ...]] = {}
+    for code, values in grouped.items():
+        ordered: list[str] = []
+        for _, name in sorted(values, key=lambda item: (item[0], item[1].casefold())):
+            if name not in ordered:
+                ordered.append(name)
+        if any(priority == 0 for priority, _ in values):
+            preferred = {
+                name
+                for priority, name in values
+                if priority == 0
+            }
+            ordered = [name for name in ordered if name in preferred]
+        result[code] = tuple(ordered[:4])
+    return result
+
+
+def _atc_names(zip_path: Path) -> dict[str, str]:
+    return {
+        str(row.get("ATC", "")).strip(): str(row.get("NAZEV", "") or row.get("NAZEV_EN", "")).strip()
+        for row in _read_csv_from_zip_optional(zip_path, "dlp_atc.csv")
+        if str(row.get("ATC", "")).strip()
+    }
+
+
+def _vydej_names(zip_path: Path) -> dict[str, str]:
+    return {
+        str(row.get("VYDEJ", "")).strip(): str(row.get("NAZEV", "")).strip()
+        for row in _read_csv_from_zip_optional(zip_path, "dlp_vydej.csv")
+        if str(row.get("VYDEJ", "")).strip()
+    }
+
+
+def _best_atc_group(atc_code: str, atc_names: dict[str, str]) -> str:
+    code = str(atc_code or "").strip()
+    for length in (5, 4, 3, 1):
+        group_code = code[:length]
+        if group_code in atc_names and group_code != code:
+            return atc_names[group_code]
+    return ""
 
 
 def _decode_sukl_csv(data: bytes) -> str:
