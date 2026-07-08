@@ -748,7 +748,7 @@ class LekarnaServiceTests(unittest.TestCase):
         self.assertNotIn("500_g", suggestion["new_file"])
         self.assertNotIn("100_tablet_500", suggestion["new_file"])
 
-    def test_auto_import_draft_writes_manifest_only_for_new_candidates(self) -> None:
+    def test_auto_import_draft_writes_review_rows_for_new_and_duplicate_candidates(self) -> None:
         with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
             directory = Path(temp_dir)
             downloads = directory / "Downloads"
@@ -790,10 +790,13 @@ class LekarnaServiceTests(unittest.TestCase):
         self.assertEqual(result.photos, 2)
         self.assertEqual(result.duplicate_existing, 1)
         self.assertEqual(result.new_candidates, 1)
-        self.assertEqual(len(rows), 1)
-        self.assertEqual(rows[0]["source_file"], "IMG_0002.JPG")
-        self.assertEqual(rows[0]["nazev"], "Dr.Max Vitamin C")
+        self.assertEqual(len(rows), 2)
+        by_source = {row["source_file"]: row for row in rows}
+        self.assertEqual(by_source["IMG_0002.JPG"]["nazev"], "Dr.Max Vitamin C")
+        self.assertEqual(by_source["IMG_0001.JPG"]["include"], "ano")
+        self.assertIn("mozne shody", by_source["IMG_0001.JPG"]["poznamky"])
         self.assertIn("new_candidate: 1", report_text)
+        self.assertIn("duplicate_existing: 1", report_text)
 
     def test_auto_import_draft_writes_review_row_when_ocr_has_no_label(self) -> None:
         with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:

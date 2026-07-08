@@ -132,6 +132,13 @@ def build_auto_import_draft(
 
         if action == "new_candidate" and ocr.lines:
             manifest_rows.append(_manifest_row_from_suggestion(photo_name, suggestion, ocr, dlp_zip_path=dlp_zip_path))
+        elif action == "duplicate_existing" and ocr.lines:
+            row = _manifest_row_from_suggestion(photo_name, suggestion, ocr, dlp_zip_path=dlp_zip_path)
+            row["poznamky"] = (
+                f"{row['poznamky']} Automatika nasla mozne shody v evidenci; pred importem rucne overit, "
+                "zda nejde o duplicitu."
+            )
+            manifest_rows.append(row)
         elif action == "needs_label":
             manifest_rows.append(_manifest_row_from_suggestion(photo_name, suggestion, ocr, dlp_zip_path=dlp_zip_path))
 
