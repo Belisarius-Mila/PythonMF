@@ -563,6 +563,46 @@ class CockpitTests(unittest.TestCase):
             self.assertEqual(len(loaded["rows"]), 1)
             self.assertEqual(loaded["rows"][0]["include"], "ano")
 
+    def test_lekarna_import_manifest_blocks_dlp_pil_without_downloaded_text(self) -> None:
+        manifest_dir = Path("data/lekarna/photo_imports")
+        manifest_dir.mkdir(parents=True, exist_ok=True)
+        manifest_path = manifest_dir / "lekarna_auto_import_manifest_test_dlp_only.csv"
+        fieldnames = list(cockpit_module.LEKARNA_MANIFEST_FIELD_NAMES)
+        row = {field: "" for field in fieldnames}
+        row.update(
+            {
+                "include": "ano",
+                "source_file": "IMG_9570.JPG",
+                "new_file": "sertivan.jpg",
+                "nazev": "SERTIVAN",
+                "forma": "TBL FLM",
+                "sila": "50MG",
+                "kategorie": "ANTIDEPRESIVA",
+                "pouziti": "SUKL DLP/ATC: ANTIDEPRESIVA / SERTRALIN",
+                "mnozstvi": "30",
+                "PIL_Short": "Registrovany lecivy pripravek SERTIVAN. Ucinna latka: SERTRALIN.",
+                "PIL_Source": (
+                    "SUKL DLP 2026-07-01; kod 0162868; SERTIVAN; "
+                    "PIL PI229834.pdf (20.01.2026)"
+                ),
+                "PIL_Match_Status": "overeno_z_dlp",
+                "Search_Tags": "SERTIVAN, SERTRALIN",
+            }
+        )
+        try:
+            with manifest_path.open("w", encoding="utf-8", newline="") as handle:
+                writer = csv.DictWriter(handle, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerow(row)
+
+            loaded = lekarna_import_manifest_load_action({"manifest_path": str(manifest_path.resolve())})
+
+            self.assertTrue(loaded["ok"])
+            self.assertTrue(any("příbalový leták" in warning for warning in loaded["warnings"]))
+            self.assertIn("PIL_Match_Status", loaded["row_issues"][0])
+        finally:
+            manifest_path.unlink(missing_ok=True)
+
     def test_lekarna_auto_import_apply_action_requires_confirmation(self) -> None:
         result = lekarna_auto_import_apply_action(
             {

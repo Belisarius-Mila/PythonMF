@@ -42,7 +42,11 @@ from app.lekarna.openai_vision import (
 )
 from app.lekarna.search_tags import build_search_tags
 from app.lekarna.sukl_dlp import match_sukl_dlp
-from app.lekarna.sukl_pil_archive import build_pil_short_from_text, resolve_sukl_pil_document
+from app.lekarna.sukl_pil_archive import (
+    build_pil_short_from_text,
+    download_sukl_pil_document,
+    resolve_sukl_pil_document,
+)
 
 
 FIELD_NAMES = [
@@ -752,7 +756,7 @@ class LekarnaServiceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
             archive_path = _fake_sukl_pil_archive(Path(temp_dir))
 
-            document = resolve_sukl_pil_document("PI229834.pdf", pil_archive_path=archive_path)
+            document = resolve_sukl_pil_document("PI229834.pdf", pil_archive_path=archive_path, use_doc_cache=False)
 
         self.assertIsNotNone(document)
         assert document is not None
@@ -762,6 +766,34 @@ class LekarnaServiceTests(unittest.TestCase):
         self.assertIn("SERTIVAN", short)
         self.assertIn("deprese", short)
         self.assertIn("Neužívejte", short)
+
+    def test_sukl_pil_archive_downloads_single_document_to_cache(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            directory = Path(temp_dir)
+            source_dir = directory / "source"
+            source_dir.mkdir()
+            source = source_dir / "PI999999.txt"
+            source.write_text(
+                "1. Co je přípravek TEST a k čemu se používá. TEST se používá pro ověření importu. "
+                "2. Čemu musíte věnovat pozornost. Neužívejte při alergii.",
+                encoding="utf-8",
+            )
+            cache_dir = directory / "cache"
+
+            downloaded = download_sukl_pil_document(
+                "PI999999.txt",
+                doc_cache_dir=cache_dir,
+                online_base_urls=(source_dir.resolve().as_uri() + "/",),
+            )
+            document = resolve_sukl_pil_document("PI999999.txt", doc_cache_dir=cache_dir)
+
+        self.assertIsNotNone(downloaded)
+        assert downloaded is not None
+        self.assertEqual(downloaded.name, "PI999999.txt")
+        self.assertIsNotNone(document)
+        assert document is not None
+        self.assertEqual(document.source_kind, "cached-document")
+        self.assertIn("ověření importu", document.text)
 
     def test_auto_import_draft_uses_cached_pil_archive_when_available(self) -> None:
         with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:

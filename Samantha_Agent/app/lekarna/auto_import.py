@@ -93,6 +93,7 @@ def build_auto_import_draft(
     ocr_runner: Any | None = None,
     dlp_zip_path: Path | None = None,
     pil_archive_path: Path | None = None,
+    allow_online_pil_download: bool = False,
 ) -> AutoImportDraftResult:
     if photo_names:
         photos = find_download_photos_by_names(downloads_dir=downloads_dir, names=photo_names, limit=limit)
@@ -140,6 +141,7 @@ def build_auto_import_draft(
                     ocr,
                     dlp_zip_path=dlp_zip_path,
                     pil_archive_path=pil_archive_path,
+                    allow_online_pil_download=allow_online_pil_download,
                 )
             )
         elif action == "duplicate_existing" and ocr.lines:
@@ -149,6 +151,7 @@ def build_auto_import_draft(
                 ocr,
                 dlp_zip_path=dlp_zip_path,
                 pil_archive_path=pil_archive_path,
+                allow_online_pil_download=allow_online_pil_download,
             )
             row["poznamky"] = (
                 f"{row['poznamky']} Automatika nasla mozne shody v evidenci; pred importem rucne overit, "
@@ -163,6 +166,7 @@ def build_auto_import_draft(
                     ocr,
                     dlp_zip_path=dlp_zip_path,
                     pil_archive_path=pil_archive_path,
+                    allow_online_pil_download=allow_online_pil_download,
                 )
             )
 
@@ -455,6 +459,7 @@ def _manifest_row_from_suggestion(
     *,
     dlp_zip_path: Path | None = None,
     pil_archive_path: Path | None = None,
+    allow_online_pil_download: bool = False,
 ) -> dict[str, str]:
     row = {field: "" for field in MANIFEST_FIELD_NAMES}
     row.update(SAFE_DEFAULTS)
@@ -464,6 +469,7 @@ def _manifest_row_from_suggestion(
         ocr,
         dlp_zip_path=dlp_zip_path,
         pil_archive_path=pil_archive_path,
+        allow_online_pil_download=allow_online_pil_download,
     )
     authoritative_dlp_fields = {
         "nazev",
@@ -510,6 +516,7 @@ def _pil_defaults_from_suggestion(
     *,
     dlp_zip_path: Path | None = None,
     pil_archive_path: Path | None = None,
+    allow_online_pil_download: bool = False,
 ) -> dict[str, str]:
     name = str(suggestion.get("nazev", "") or "").strip()
     normalized_name = normalize_for_match(name)
@@ -551,11 +558,22 @@ def _pil_defaults_from_suggestion(
         "PIL_Match_Status": "ceka_na_pil_overeni",
     }
     if dlp_match:
-        defaults.update(_dlp_inventory_defaults(dlp_match, pil_archive_path=pil_archive_path))
+        defaults.update(
+            _dlp_inventory_defaults(
+                dlp_match,
+                pil_archive_path=pil_archive_path,
+                allow_online_pil_download=allow_online_pil_download,
+            )
+        )
     return defaults
 
 
-def _dlp_inventory_defaults(dlp_match: Any, *, pil_archive_path: Path | None = None) -> dict[str, str]:
+def _dlp_inventory_defaults(
+    dlp_match: Any,
+    *,
+    pil_archive_path: Path | None = None,
+    allow_online_pil_download: bool = False,
+) -> dict[str, str]:
     substances = ", ".join(dlp_match.active_substances)
     atc_parts = [part for part in (dlp_match.atc_group, dlp_match.atc_name) if part]
     atc_text = " / ".join(atc_parts)
@@ -594,14 +612,19 @@ def _dlp_inventory_defaults(dlp_match: Any, *, pil_archive_path: Path | None = N
         "Search_Tags": tags,
     }
     if dlp_match.pil:
-        pil_document = resolve_sukl_pil_document(dlp_match.pil, pil_archive_path=pil_archive_path)
+        pil_document = resolve_sukl_pil_document(
+            dlp_match.pil,
+            pil_archive_path=pil_archive_path,
+            allow_online_download=allow_online_pil_download,
+            use_doc_cache=allow_online_pil_download,
+        )
         if pil_document:
             pil_short_from_archive = build_pil_short_from_text(dlp_match.nazev, pil_document.text)
             if pil_short_from_archive:
                 defaults["PIL_Short"] = pil_short_from_archive
                 defaults["PIL_Source"] = (
-                    f"{source}; PIL archiv {pil_document.archive_path.name}; soubor {pil_document.member_name}; "
-                    f"extrakce {pil_document.extraction_method}"
+                    f"{source}; PIL dokument {pil_document.source_path.name}; soubor {pil_document.member_name}; "
+                    f"zdroj {pil_document.source_kind}; extrakce {pil_document.extraction_method}"
                 )
                 defaults["PIL_Match_Status"] = "overeno"
                 defaults["overeno_z_letaku"] = "ano"

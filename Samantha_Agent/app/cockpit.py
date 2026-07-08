@@ -683,6 +683,7 @@ def lekarna_auto_import_draft_action(payload: dict[str, Any]) -> dict[str, Any]:
             photo_names=photo_names,
             ocr_backend=backend,
             ocr_model=str(payload.get("model", DEFAULT_OPENAI_VISION_MODEL) or DEFAULT_OPENAI_VISION_MODEL),
+            allow_online_pil_download=True,
         )
     except Exception as exc:
         return {"ok": False, "message": f"Návrh importu se nepodařilo připravit: {exc}", "error": "draft_failed"}
@@ -901,6 +902,18 @@ def _lekarna_manifest_review(
         pil_status = str(row.get("PIL_Match_Status", "") or "").strip().casefold()
         if pil_status in LEKARNA_MANIFEST_WEAK_PIL_STATUSES:
             add_issue(row_index, row, "PIL_Match_Status", "`PIL_Match_Status` není zkontrolovaný.")
+        pil_source_lower = pil_source.casefold()
+        has_dlp_pil = "sukl dlp" in pil_source_lower and "pil " in pil_source_lower
+        has_verified_pil_text = pil_status == "overeno" and (
+            "pil dokument" in pil_source_lower or "pil archiv" in pil_source_lower
+        )
+        if has_dlp_pil and not has_verified_pil_text:
+            add_issue(
+                row_index,
+                row,
+                "PIL_Match_Status",
+                "DLP uvádí konkrétní PIL dokument; před příjmem musí být stažený a přečtený příbalový leták.",
+            )
         if not str(row.get("Search_Tags", "") or "").strip():
             add_issue(row_index, row, "Search_Tags", "chybí `Search_Tags` pro dohledání v Lékárně.")
     return warnings, row_issues
