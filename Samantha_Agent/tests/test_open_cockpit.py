@@ -1,11 +1,55 @@
 import sys
+import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from scripts import open_cockpit
 
 
 class OpenCockpitTests(unittest.TestCase):
+    def test_cockpit_code_stamp_changes_with_file_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "cockpit.py"
+            path.write_text("one", encoding="utf-8")
+            first = open_cockpit.cockpit_code_stamp((path,))
+            path.write_text("two-two", encoding="utf-8")
+            second = open_cockpit.cockpit_code_stamp((path,))
+
+        self.assertNotEqual(first, second)
+
+    def test_server_is_current_requires_matching_stamp(self) -> None:
+        payload = {"server": {"code_stamp": "abc123"}}
+
+        self.assertTrue(open_cockpit.server_is_current(payload, "abc123"))
+        self.assertFalse(open_cockpit.server_is_current(payload, "different"))
+        self.assertFalse(open_cockpit.server_is_current({"downloads": {}}, "abc123"))
+
+    def test_main_opens_running_server_only_after_current_check(self) -> None:
+        with (
+            patch.object(sys, "argv", ["open_cockpit.py"]),
+            patch.object(open_cockpit, "url_ok", return_value=True),
+            patch.object(open_cockpit, "ensure_current_server", return_value=True) as ensure_current_server,
+            patch.object(open_cockpit, "open_browser") as open_browser,
+        ):
+            result = open_cockpit.main()
+
+        self.assertEqual(result, 0)
+        ensure_current_server.assert_called_once_with("127.0.0.1", 8770)
+        open_browser.assert_called_once_with("http://127.0.0.1:8770")
+
+    def test_main_does_not_open_running_server_when_current_check_fails(self) -> None:
+        with (
+            patch.object(sys, "argv", ["open_cockpit.py"]),
+            patch.object(open_cockpit, "url_ok", return_value=True),
+            patch.object(open_cockpit, "ensure_current_server", return_value=False),
+            patch.object(open_cockpit, "open_browser") as open_browser,
+        ):
+            result = open_cockpit.main()
+
+        self.assertEqual(result, 1)
+        open_browser.assert_not_called()
+
     def test_main_starts_fallback_when_default_port_is_busy_and_unresponsive(self) -> None:
         with (
             patch.object(sys, "argv", ["open_cockpit.py", "--no-open"]),
@@ -25,6 +69,18 @@ class OpenCockpitTests(unittest.TestCase):
     def test_main_does_not_fallback_for_explicit_non_default_port(self) -> None:
         with (
             patch.object(sys, "argv", ["open_cockpit.py", "--port", "8899", "--no-open"]),
+            patch.object(open_cockpit, "url_ok", return_value=False),
+            patch.object(open_cockpit, "port_is_busy", return_value=True),
+            patch.object(open_cockpit, "open_or_start_fallback") as open_or_start_fallback,
+        ):
+            result = open_cockpit.main()
+
+        self.assertEqual(result, 1)
+        open_or_start_fallback.assert_not_called()
+
+    def test_main_does_not_fallback_when_disabled(self) -> None:
+        with (
+            patch.object(sys, "argv", ["open_cockpit.py", "--no-open", "--no-fallback"]),
             patch.object(open_cockpit, "url_ok", return_value=False),
             patch.object(open_cockpit, "port_is_busy", return_value=True),
             patch.object(open_cockpit, "open_or_start_fallback") as open_or_start_fallback,

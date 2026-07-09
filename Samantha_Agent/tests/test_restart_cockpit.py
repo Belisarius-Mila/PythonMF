@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from scripts import restart_cockpit
@@ -54,6 +55,21 @@ class RestartCockpitTests(unittest.TestCase):
 
         self.assertEqual(result, 0)
         start.assert_called_once_with("127.0.0.1", 8770)
+
+    def test_start_cockpit_disables_fallback_for_targeted_restart(self) -> None:
+        class Completed:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+
+        with patch.object(restart_cockpit.subprocess, "run", return_value=Completed()) as run:
+            result = restart_cockpit.start_cockpit("127.0.0.1", 8770)
+
+        self.assertEqual(result.returncode, 0)
+        command = run.call_args.args[0]
+        self.assertEqual(Path(command[1]).name, "open_cockpit.py")
+        self.assertIn("--no-open", command)
+        self.assertIn("--no-fallback", command)
 
 
 if __name__ == "__main__":

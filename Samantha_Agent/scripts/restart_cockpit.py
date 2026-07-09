@@ -85,6 +85,7 @@ def start_cockpit(host: str, port: int) -> subprocess.CompletedProcess[str]:
             "--port",
             str(port),
             "--no-open",
+            "--no-fallback",
         ],
         cwd=str(PROJECT_DIR),
         capture_output=True,
