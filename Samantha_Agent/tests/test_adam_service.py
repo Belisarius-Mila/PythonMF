@@ -51,6 +51,8 @@ class AdamServiceTests(unittest.TestCase):
         self.assertEqual(start_call["kwargs"]["env"]["SAMANTHA_MARK_VOICE_TTY"], "0")
         self.assertEqual(start_call["kwargs"]["env"]["SAMANTHA_AUTOSAVE_RESUME_CHECK"], "0")
         self.assertEqual(start_call["kwargs"]["env"]["SAMANTHA_WORK_CONTEXT_GUARD"], "0")
+        self.assertIn("/usr/local/bin", start_call["kwargs"]["env"]["PATH"])
+        self.assertEqual(start_call["kwargs"]["env"]["CODEX_BIN"], start_adam_service.__globals__["CODEX_BIN"])
         self.assertIn("spravovaná Adam/Codex relace", start_call["kwargs"]["env"]["SAMANTHA_START_REQUEST"])
 
     def test_start_janicka_light_session_uses_separate_screen_and_light_prompt(self) -> None:
@@ -76,6 +78,8 @@ class AdamServiceTests(unittest.TestCase):
         self.assertEqual(env["SAMANTHA_MARK_VOICE_TTY"], "0")
         self.assertEqual(env["SAMANTHA_AUTOSAVE_RESUME_CHECK"], "0")
         self.assertEqual(env["SAMANTHA_WORK_CONTEXT_GUARD"], "0")
+        self.assertIn("/usr/local/bin", env["PATH"])
+        self.assertEqual(env["CODEX_BIN"], start_janicka_light_session.__globals__["CODEX_BIN"])
         self.assertIn("lehká Samantha/Adam relace", env["SAMANTHA_START_REQUEST"])
         self.assertIn("memory/projects/janicka_cockpit_kucharka.md", env["SAMANTHA_START_REQUEST"])
 

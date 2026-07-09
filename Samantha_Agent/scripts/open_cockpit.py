@@ -23,6 +23,7 @@ SERVER_HEALTH_PATH = "/api/server/health"
 READY_PATHS = ("/", SERVER_HEALTH_PATH, "/api/recovery/status", "/api/web-apps")
 CODE_STAMP_PATHS = (
     PROJECT_DIR / "app" / "cockpit.py",
+    PROJECT_DIR / "app" / "adam_service.py",
     PROJECT_DIR / "scripts" / "cockpit_server.py",
 )
 

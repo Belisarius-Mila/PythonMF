@@ -338,6 +338,9 @@ def start_adam_service(
             "session_name": session_name,
         }
     env = os.environ.copy()
+    inherited_path = env.get("PATH", "")
+    path_parts = [item for item in CODEX_EXEC_PATH_PREFIXES if item]
+    path_parts.extend(item for item in inherited_path.split(os.pathsep) if item and item not in path_parts)
     env.update(
         {
             "SAMANTHA_MARK_VOICE_TTY": "0",
@@ -349,6 +352,8 @@ def start_adam_service(
             "LC_ALL": "cs_CZ.UTF-8",
             "PYTHONUTF8": "1",
             "PYTHONIOENCODING": "utf-8",
+            "PATH": os.pathsep.join(path_parts),
+            "CODEX_BIN": CODEX_BIN,
         }
     )
     if extra_env:

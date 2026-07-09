@@ -3205,6 +3205,7 @@ class CockpitTests(unittest.TestCase):
                 marker_path=marker_path,
                 runner=fake_runner,
                 screen_runner=fake_screen_runner,
+                managed_codex_tty_labeler=lambda: {},
                 killer=lambda pid, sig: killed.append((pid, sig)),
             )
 
@@ -3241,6 +3242,7 @@ class CockpitTests(unittest.TestCase):
                 marker_path=marker_path,
                 runner=fake_runner,
                 screen_runner=fake_screen_runner,
+                managed_codex_tty_labeler=lambda: {},
                 killer=lambda pid, sig: killed.append((pid, sig)),
             )
 

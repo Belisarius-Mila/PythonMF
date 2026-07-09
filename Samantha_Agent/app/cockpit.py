@@ -177,6 +177,7 @@ COCKPIT_PORT = 8770
 COCKPIT_URL = f"http://127.0.0.1:{COCKPIT_PORT}"
 COCKPIT_CODE_STAMP_PATHS = (
     Path(__file__).resolve(),
+    PROJECT_ROOT / "app" / "adam_service.py",
     PROJECT_ROOT / "scripts" / "cockpit_server.py",
 )
 DEFAULT_PURCHASES_DIR = PROJECT_ROOT / "data" / "private" / "purchases"
