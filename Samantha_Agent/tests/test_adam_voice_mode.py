@@ -10,6 +10,7 @@ from app.speech.adam_voice_mode import (
     append_manual_voice_history_turn,
     build_spoken_result_for_command,
     clear_codex_approval_request,
+    format_automatic_watcher_response,
     format_voice_history_for_prompt,
     generate_direct_voice_response,
     handle_voice_command,
@@ -101,7 +102,13 @@ class AdamVoiceModeTests(unittest.TestCase):
                 history_path=history_path,
             )
 
-        self.assertEqual(spoken, ["Ahoj Janičko, rád tě poznávám. Můžu pro tebe něco udělat?"])
+        self.assertEqual(
+            spoken,
+            [
+                "Automatická odpověď watcheru, ne převzetí v Codex chatu: "
+                "Ahoj Janičko, rád tě poznávám. Můžu pro tebe něco udělat?"
+            ],
+        )
         self.assertEqual(result["response"], spoken[0])
         self.assertNotIn("Janička přijela", spoken[0])
 
@@ -714,8 +721,40 @@ class AdamVoiceModeTests(unittest.TestCase):
         self.assertEqual(len(history), 1)
         self.assertEqual(history[0]["route"], "direct_response")
         self.assertEqual(history[0]["user_text"], "Co jí řekneš?")
-        self.assertEqual(history[0]["adam_response"], "Ahoj, rád tě poznávám.")
+        self.assertEqual(
+            history[0]["adam_response"],
+            "Automatická odpověď watcheru, ne převzetí v Codex chatu: Ahoj, rád tě poznávám.",
+        )
         self.assertIn("Míla: Co jí řekneš?", format_voice_history_for_prompt(history))
+
+    def test_format_automatic_watcher_response_marks_non_codex_chat(self) -> None:
+        self.assertEqual(
+            format_automatic_watcher_response("OK"),
+            "Automatická odpověď watcheru, ne převzetí v Codex chatu: OK",
+        )
+
+    def test_direct_response_failure_records_safe_error_detail(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            inbox = Path(temp_dir)
+            pending_path = inbox / "pending_for_adam.json"
+            history_path = inbox / "adam_voice_history.jsonl"
+            write_voice_command(inbox / "latest_voice_command.md", "Ahoj, jsi tam?")
+            command = load_latest_voice_command(inbox_dir=inbox)
+
+            def failing_response(_text: str) -> str:
+                raise RuntimeError("temporary provider failure")
+
+            response = build_spoken_result_for_command(
+                command,
+                response_generator=failing_response,
+                pending_path=pending_path,
+                history_path=history_path,
+            )
+            pending = json.loads(pending_path.read_text(encoding="utf-8"))
+
+        self.assertIn("automatická odpověď se nepovedla", response)
+        self.assertEqual(pending["reason"], "direct_response_failed")
+        self.assertIn("Technický detail: RuntimeError: temporary provider failure", pending["message"])
 
     def test_pending_command_carries_recent_voice_history(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

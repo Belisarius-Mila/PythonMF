@@ -4422,7 +4422,10 @@ def cockpit_status() -> dict[str, Any]:
     vault = timed_section("vault", document_vault_status_summary)
     scandocu = timed_section("scandocu", probe_scandocu)
     voice_mode = timed_section("voice_mode", load_voice_mode_status)
-    voice_bridge = timed_section("voice_bridge", adam_voice_bridge_status)
+    voice_bridge = timed_section(
+        "voice_bridge",
+        lambda: adam_voice_bridge_status(orphaned_janicka_reporter=janicka_orphaned_codex_session_report),
+    )
     git_status = timed_section("git", git_status_summary)
     total_ms = round((time.perf_counter() - started_at) * 1000, 2)
     slowest_sections = [
@@ -4465,6 +4468,7 @@ def adam_voice_bridge_status(
     marker_path: Path = CURRENT_CODEX_TTY_PATH,
     codex_tty_discoverer: Callable[[], list[str]] = discover_codex_ttys,
     managed_codex_tty_labeler: Callable[[], dict[str, str]] | None = None,
+    orphaned_janicka_reporter: Callable[[], dict[str, Any]] | None = None,
     screen_runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
     marker_pid_checker: Callable[[int], bool] | None = None,
     expected_codex_session_limit: int = 1,
@@ -4503,7 +4507,23 @@ def adam_voice_bridge_status(
         if normalize_tty(str(tty)) in codex_ttys
     }
     managed_codex_ttys = sorted(managed_codex_labels)
-    human_codex_ttys = [tty for tty in codex_ttys if tty not in managed_codex_labels]
+    try:
+        orphan_report = orphaned_janicka_reporter() if orphaned_janicka_reporter else {}
+    except Exception:
+        orphan_report = {}
+    orphaned_janicka_ttys = sorted(
+        {
+            normalize_tty(str(tty))
+            for tty in orphan_report.get("orphaned_ttys", [])
+            if normalize_tty(str(tty)) in codex_ttys and normalize_tty(str(tty)) not in managed_codex_labels
+        }
+    )
+    orphaned_janicka_labels = {tty: "stará Janička mimo správu" for tty in orphaned_janicka_ttys}
+    human_codex_ttys = [
+        tty
+        for tty in codex_ttys
+        if tty not in managed_codex_labels and tty not in orphaned_janicka_labels
+    ]
 
     screen_status = "unknown"
     screen_message = "screen stav nelze zjistit"
@@ -4563,6 +4583,12 @@ def adam_voice_bridge_status(
             "spravované relace mimo limit: "
             + ", ".join(f"{tty}={managed_codex_labels[tty]}" for tty in managed_codex_ttys)
         )
+    if orphaned_janicka_ttys:
+        warnings.append(
+            "stará Janička relace mimo správu: "
+            + ", ".join(orphaned_janicka_ttys)
+            + "; uklidit v okně Janička"
+        )
     if screen_status == "not_running":
         notes.append("screen neběží; pro lokální Mac TTY bridge to není blokující")
 
@@ -4597,6 +4623,9 @@ def adam_voice_bridge_status(
         "human_codex_tty_count": len(human_codex_ttys),
         "managed_codex_ttys": managed_codex_ttys,
         "managed_codex_labels": managed_codex_labels,
+        "orphaned_janicka_ttys": orphaned_janicka_ttys,
+        "orphaned_janicka_labels": orphaned_janicka_labels,
+        "orphaned_janicka_count": len(orphaned_janicka_ttys),
         "codex_tty_count_label": codex_count_label,
         "expected_codex_session_limit": expected_codex_session_limit,
         "screen_status": screen_status,
@@ -10194,7 +10223,7 @@ def cockpit_safe_readonly_capabilities_action() -> dict[str, Any]:
 
 def safe_readonly_codex_sessions_result() -> dict[str, Any]:
     sessions = discover_codex_process_sessions()
-    bridge = adam_voice_bridge_status()
+    bridge = adam_voice_bridge_status(orphaned_janicka_reporter=janicka_orphaned_codex_session_report)
     safe_sessions = [
         {
             "tty": safe_text(str(session.get("tty") or ""))[:40],
@@ -10212,7 +10241,7 @@ def safe_readonly_codex_sessions_result() -> dict[str, Any]:
 
 
 def safe_readonly_voice_bridge_result() -> dict[str, Any]:
-    bridge = adam_voice_bridge_status()
+    bridge = adam_voice_bridge_status(orphaned_janicka_reporter=janicka_orphaned_codex_session_report)
     return {
         "ok": bool(bridge.get("ok", True)),
         "summary": str(bridge.get("message") or "Voice bridge stav načten."),
@@ -11128,6 +11157,183 @@ def janicka_chat_action(
     }
 
 
+JANICKA_ORPHAN_SIGNATURES = (
+    "Jsi lehká Samantha/Adam relace pro okno Janička",
+    "jen čekej na textové dotazy z Janičky",
+)
+
+
+def janicka_orphaned_codex_session_report(
+    *,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+    managed_codex_tty_labeler: Callable[[], dict[str, str]] | None = None,
+) -> dict[str, Any]:
+    sessions = discover_codex_process_sessions(runner=runner)
+    try:
+        managed_labels = managed_codex_tty_labeler() if managed_codex_tty_labeler else managed_codex_session_tty_labels()
+    except Exception:
+        managed_labels = {}
+    managed_ttys = {normalize_tty(str(tty)) for tty in managed_labels if normalize_tty(str(tty))}
+    orphaned: list[dict[str, Any]] = []
+    for session in sessions:
+        tty = normalize_tty(str(session.get("tty") or ""))
+        if not tty or tty in managed_ttys:
+            continue
+        command_text = "\n".join(str(command or "") for command in session.get("commands", []))
+        folded_command = command_text.casefold()
+        if not all(signature.casefold() in folded_command for signature in JANICKA_ORPHAN_SIGNATURES):
+            continue
+        orphaned.append(
+            {
+                "tty": tty,
+                "pids": [int(pid) for pid in session.get("pids", [])],
+                "root_pids": [int(pid) for pid in session.get("root_pids", [])],
+            }
+        )
+    return {
+        "ok": True,
+        "status": "orphaned_found" if orphaned else "none",
+        "message": (
+            "Nalezené staré Janička Codex relace mimo správu: "
+            + ", ".join(item["tty"] for item in orphaned)
+            if orphaned
+            else "Žádné staré Janička Codex relace mimo správu nejsou nalezené."
+        ),
+        "orphaned_ttys": [item["tty"] for item in orphaned],
+        "orphaned_count": len(orphaned),
+        "orphaned_sessions": orphaned,
+        "managed_codex_ttys": sorted(managed_ttys),
+    }
+
+
+def janicka_light_status_action(
+    *,
+    status_getter: Callable[[], dict[str, Any]] = janicka_light_status,
+    orphan_reporter: Callable[[], dict[str, Any]] = janicka_orphaned_codex_session_report,
+) -> dict[str, Any]:
+    status = status_getter()
+    try:
+        orphan_report = orphan_reporter()
+    except Exception as exc:
+        return {
+            **status,
+            "orphaned_janicka_check_ok": False,
+            "orphaned_janicka_message": f"Kontrola starých Janička relací selhala: {exc}",
+            "orphaned_janicka_ttys": [],
+            "orphaned_janicka_count": 0,
+        }
+    orphaned_ttys = [safe_text(str(tty))[:40] for tty in orphan_report.get("orphaned_ttys", [])]
+    if orphaned_ttys:
+        base_message = str(status.get("message") or "").rstrip()
+        status["message"] = (
+            f"{base_message} Pozor: staré Janička relace mimo správu: {', '.join(orphaned_ttys)}."
+            if base_message
+            else f"Pozor: staré Janička relace mimo správu: {', '.join(orphaned_ttys)}."
+        )
+    return {
+        **status,
+        "orphaned_janicka_check_ok": bool(orphan_report.get("ok", True)),
+        "orphaned_janicka_message": str(orphan_report.get("message") or ""),
+        "orphaned_janicka_ttys": orphaned_ttys,
+        "orphaned_janicka_count": int(orphan_report.get("orphaned_count") or 0),
+    }
+
+
+def terminate_orphaned_janicka_sessions_action(
+    payload: dict[str, Any],
+    *,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+    managed_codex_tty_labeler: Callable[[], dict[str, str]] | None = None,
+    marker_path: Path = CURRENT_CODEX_TTY_PATH,
+    killer: Callable[[int, int], None] = os.kill,
+) -> dict[str, Any]:
+    confirmed = bool(payload.get("confirmed"))
+    report = janicka_orphaned_codex_session_report(
+        runner=runner,
+        managed_codex_tty_labeler=managed_codex_tty_labeler,
+    )
+    orphaned_sessions = list(report.get("orphaned_sessions", []))
+    if not orphaned_sessions:
+        return {
+            **report,
+            "ok": True,
+            "status": "no_orphaned_janicka_sessions",
+            "message": "Žádné staré Janička relace mimo správu k ukončení.",
+        }
+
+    protected_ttys = set(report.get("managed_codex_ttys", []))
+    try:
+        marker = json.loads(marker_path.read_text(encoding="utf-8"))
+        marked_tty = normalize_tty(str(marker.get("tty") or ""))
+        if marked_tty:
+            protected_ttys.add(marked_tty)
+    except (OSError, json.JSONDecodeError):
+        marked_tty = ""
+
+    killable_sessions = [session for session in orphaned_sessions if session.get("tty") not in protected_ttys]
+    protected_orphaned_ttys = [
+        str(session.get("tty") or "")
+        for session in orphaned_sessions
+        if session.get("tty") in protected_ttys
+    ]
+    if protected_orphaned_ttys and not killable_sessions:
+        return {
+            **report,
+            "ok": False,
+            "status": "protected_by_voice_marker",
+            "message": (
+                "Staré Janička relace jsou teď chráněné voice markerem. "
+                "Nejdřív nastav VoiceBridge na hlavního Adama, potom cleanup zopakuj."
+            ),
+            "protected_ttys": sorted(protected_ttys),
+            "protected_orphaned_ttys": protected_orphaned_ttys,
+        }
+
+    stale_ttys = [str(session.get("tty") or "") for session in killable_sessions]
+    root_pids = sorted({int(pid) for session in killable_sessions for pid in session.get("root_pids", [])})
+    if not confirmed:
+        return {
+            **report,
+            "ok": False,
+            "status": "confirmation_required",
+            "message": f"K ukončení jsou připravené staré Janička relace: {', '.join(stale_ttys)}.",
+            "stale_ttys": stale_ttys,
+            "root_pids": root_pids,
+            "protected_ttys": sorted(protected_ttys),
+            "protected_orphaned_ttys": protected_orphaned_ttys,
+        }
+
+    killed: list[int] = []
+    errors: list[str] = []
+    for pid in root_pids:
+        try:
+            killer(pid, signal.SIGTERM)
+            killed.append(pid)
+        except OSError as exc:
+            errors.append(f"PID {pid}: {exc}")
+    if errors:
+        return {
+            **report,
+            "ok": False,
+            "status": "partial_or_failed",
+            "message": f"Některé staré Janička relace se nepodařilo ukončit: {' | '.join(errors)}",
+            "stale_ttys": stale_ttys,
+            "killed_pids": killed,
+            "errors": errors,
+            "protected_ttys": sorted(protected_ttys),
+        }
+    return {
+        **report,
+        "ok": True,
+        "status": "orphaned_janicka_sessions_terminated",
+        "message": f"Ukončil jsem staré Janička relace mimo správu: {', '.join(stale_ttys)}.",
+        "stale_ttys": stale_ttys,
+        "killed_pids": killed,
+        "protected_ttys": sorted(protected_ttys),
+        "protected_orphaned_ttys": protected_orphaned_ttys,
+    }
+
+
 def shell_quote_for_applescript(value: str) -> str:
     return "'" + value.replace("'", "'\\''") + "'"
 
@@ -11242,7 +11448,7 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "label": "Janička light Samantha status",
         "risk": "read_only_via_post",
         "confirmation": "none_readonly",
-        "handler_name": "janicka_light_status",
+        "handler_name": "janicka_light_status_action",
         "test_level": "ui_presence",
     },
     {
@@ -11259,6 +11465,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "risk": "local_service",
         "confirmation": "ui_confirm_boolean",
         "handler_name": "stop_janicka_light_session",
+        "test_level": "ui_presence",
+    },
+    {
+        "path": "/api/janicka/light/cleanup-orphans",
+        "label": "Ukoncit stare Janicka relace mimo spravu",
+        "risk": "local_service",
+        "confirmation": "ui_confirm_boolean",
+        "handler_name": "terminate_orphaned_janicka_sessions_action",
         "test_level": "ui_presence",
     },
     {
@@ -11898,7 +12112,7 @@ class CockpitServer:
                     self.respond_json(stop_adam_service(confirmed=bool(payload.get("confirmed"))))
                     return
                 if parsed.path == "/api/janicka/light/status":
-                    self.respond_json(janicka_light_status())
+                    self.respond_json(janicka_light_status_action())
                     return
                 if parsed.path == "/api/janicka/light/start":
                     self.respond_json(start_janicka_light_session())
@@ -11906,6 +12120,10 @@ class CockpitServer:
                 if parsed.path == "/api/janicka/light/stop":
                     payload = self.read_json()
                     self.respond_json(stop_janicka_light_session(confirmed=bool(payload.get("confirmed"))))
+                    return
+                if parsed.path == "/api/janicka/light/cleanup-orphans":
+                    payload = self.read_json()
+                    self.respond_json(terminate_orphaned_janicka_sessions_action(payload))
                     return
                 if parsed.path == "/api/voice-mode/start":
                     self.respond_json(start_adam_voice_mode_action())
@@ -14474,6 +14692,7 @@ COCKPIT_HTML = """<!doctype html>
           <div class="actions compact-actions">
             <button class="secondary" id="janickaLightStartBtn" type="button">Spustit Janičku</button>
             <button class="secondary" id="janickaLightStopBtn" type="button">Zastavit Janičku</button>
+            <button class="secondary hidden" id="janickaLightCleanupOrphansBtn" type="button">Uklidit staré relace</button>
           </div>
           <details class="janicka-service-details">
             <summary>Servisní fallback</summary>
@@ -14844,6 +15063,7 @@ COCKPIT_HTML = """<!doctype html>
     const janickaLightStatus = document.getElementById("janickaLightStatus");
     const janickaLightStartBtn = document.getElementById("janickaLightStartBtn");
     const janickaLightStopBtn = document.getElementById("janickaLightStopBtn");
+    const janickaLightCleanupOrphansBtn = document.getElementById("janickaLightCleanupOrphansBtn");
     const remindersModal = document.getElementById("remindersModal");
     const remindersCloseBtn = document.getElementById("remindersCloseBtn");
     const remindersStatus = document.getElementById("remindersStatus");
@@ -15139,6 +15359,25 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
+    function frontendErrorLooksRecoverableNetwork(text) {
+      const value = String(text || "").toLowerCase();
+      return value.includes("load failed")
+        || value.includes("failed to fetch")
+        || value.includes("networkerror")
+        || value.includes("network error")
+        || value.includes("api health selhal:");
+    }
+
+    function clearRecoverableFrontendNetworkErrors() {
+      frontendErrorHistory = frontendErrorHistory.filter((item) => !frontendErrorLooksRecoverableNetwork(item.text));
+      if (frontendErrorLooksRecoverableNetwork(frontendLastError)) {
+        frontendLastError = "";
+      }
+      if (!frontendLastError) {
+        setHealthValue(frontendHealthError, "žádná", "ok");
+      }
+    }
+
     window.addEventListener("error", (event) => {
       recordFrontendError(event.error || event.message || "frontend error");
       setHealthValue(frontendHealthJs, "chyba ve frontendu", "bad");
@@ -15315,10 +15554,8 @@ COCKPIT_HTML = """<!doctype html>
       } else {
         const slowest = Math.max(...results.map((item) => item.elapsed || 0));
         setHealthValue(frontendHealthApi, `OK, max ${slowest} ms`, "ok");
-        if (frontendLastError.startsWith("API health selhal:")) {
-          frontendLastError = "";
-          setHealthValue(frontendHealthError, "žádná", "ok");
-        } else if (!frontendLastError) {
+        clearRecoverableFrontendNetworkErrors();
+        if (!frontendLastError) {
           setHealthValue(frontendHealthError, "žádná", "ok");
         }
       }
@@ -16608,12 +16845,16 @@ COCKPIT_HTML = """<!doctype html>
         const managedLabels = voiceBridge.managed_codex_labels && typeof voiceBridge.managed_codex_labels === "object"
           ? voiceBridge.managed_codex_labels
           : {};
+        const orphanedLabels = voiceBridge.orphaned_janicka_labels && typeof voiceBridge.orphaned_janicka_labels === "object"
+          ? voiceBridge.orphaned_janicka_labels
+          : {};
+        const sessionLabels = {...managedLabels, ...orphanedLabels};
         const codexTtys = Array.isArray(voiceBridge.codex_ttys)
           ? voiceBridge.codex_ttys.map((item) => String(item || "")).filter(Boolean)
           : [];
         const sessionParts = codexTtys.map((tty) => (
-          managedLabels[tty]
-            ? `${tty} -> ${managedLabels[tty]}`
+          sessionLabels[tty]
+            ? `${tty} -> ${sessionLabels[tty]}`
             : tty === markedTty
             ? `${tty} -> voice marker`
             : tty === effectiveTty
@@ -18133,10 +18374,14 @@ COCKPIT_HTML = """<!doctype html>
 		      const managedLabels = voiceBridge.managed_codex_labels && typeof voiceBridge.managed_codex_labels === "object"
 		        ? voiceBridge.managed_codex_labels
 		        : {};
+		      const orphanedLabels = voiceBridge.orphaned_janicka_labels && typeof voiceBridge.orphaned_janicka_labels === "object"
+		        ? voiceBridge.orphaned_janicka_labels
+		        : {};
+		      const nonTargetLabels = {...managedLabels, ...orphanedLabels};
 		      const codexTtys = Array.isArray(voiceBridge.codex_ttys)
 		        ? voiceBridge.codex_ttys.map((item) => String(item || "")).filter(Boolean)
 		        : [];
-		      const bridgeTtys = codexTtys.filter((tty) => !managedLabels[tty]);
+		      const bridgeTtys = codexTtys.filter((tty) => !nonTargetLabels[tty]);
 		      const staleTtys = bridgeTtys.filter((tty) => tty !== effectiveTty);
 		      voiceBridgeSwitcher.classList.toggle("hidden", codexTtys.length === 0);
 		      if (codexTtys.length === 0) {
@@ -18147,9 +18392,12 @@ COCKPIT_HTML = """<!doctype html>
 		      const managedText = Object.keys(managedLabels).length
 		        ? ` Spravované relace: ${Object.keys(managedLabels).map((tty) => `${tty}=${managedLabels[tty]}`).join(", ")}.`
 		        : "";
+		      const orphanedText = Object.keys(orphanedLabels).length
+		        ? ` Staré Janička relace: ${Object.keys(orphanedLabels).map((tty) => `${tty}=${orphanedLabels[tty]}`).join(", ")}.`
+		        : "";
 		      voiceBridgeSwitcherStatus.textContent = markedTty
-		        ? `Marker: ${markedTty}. Efektivní cíl: ${effectiveTty || "nezjištěno"}.${managedText}`
-		        : `Marker zatím není nastavený. Efektivní cíl: ${effectiveTty || "nezjištěno"}.${managedText}`;
+		        ? `Marker: ${markedTty}. Efektivní cíl: ${effectiveTty || "nezjištěno"}.${managedText}${orphanedText}`
+		        : `Marker zatím není nastavený. Efektivní cíl: ${effectiveTty || "nezjištěno"}.${managedText}${orphanedText}`;
 		      voiceBridgeSwitcherActions.innerHTML = bridgeTtys.map((tty) => {
 		        const active = tty === markedTty;
 		        const effective = tty === effectiveTty && tty !== markedTty;
@@ -20659,18 +20907,24 @@ COCKPIT_HTML = """<!doctype html>
         const data = await postJson("/api/janicka/light/status", {});
         const running = Boolean(data.running);
         const managedTtys = Array.isArray(data.managed_codex_ttys) ? data.managed_codex_ttys.filter(Boolean) : [];
+        const orphanedTtys = Array.isArray(data.orphaned_janicka_ttys) ? data.orphaned_janicka_ttys.filter(Boolean) : [];
         const managedTarget = managedTtys.length ? ` Relace: ${managedTtys.join(", ")}.` : "";
+        const orphanedText = orphanedTtys.length ? ` Staré relace mimo správu: ${orphanedTtys.join(", ")}.` : "";
         const ready = running && managedTtys.length > 0;
         janickaLightStatus.textContent = ready
-          ? `Janička chat běží.${managedTarget}`
-          : `Janička chat není připravený.${managedTarget}`;
-        janickaLightStatus.classList.toggle("ok", ready);
-        janickaLightStatus.classList.toggle("warn", !ready);
+          ? `Janička chat běží.${managedTarget}${orphanedText}`
+          : `Janička chat není připravený.${managedTarget}${orphanedText}`;
+        janickaLightStatus.classList.toggle("ok", ready && !orphanedTtys.length);
+        janickaLightStatus.classList.toggle("warn", !ready || orphanedTtys.length > 0);
         janickaLightStartBtn.disabled = running;
+        janickaLightCleanupOrphansBtn.classList.toggle("hidden", orphanedTtys.length === 0);
+        janickaLightCleanupOrphansBtn.disabled = orphanedTtys.length === 0;
       } catch (err) {
         recordFrontendError(err);
         janickaLightStatus.textContent = `Janička chat status se nepodařilo načíst: ${err}`;
         janickaLightStatus.classList.add("warn");
+        janickaLightCleanupOrphansBtn.classList.add("hidden");
+        janickaLightCleanupOrphansBtn.disabled = true;
       }
     }
 
@@ -20696,6 +20950,38 @@ COCKPIT_HTML = """<!doctype html>
       } catch (err) {
         recordFrontendError(err);
         janickaLightStatus.textContent = `Janička chat se nepodařilo zastavit: ${err}`;
+      }
+    }
+
+    async function cleanupJanickaLightOrphans() {
+      janickaLightCleanupOrphansBtn.disabled = true;
+      try {
+        const preview = await postJson("/api/janicka/light/cleanup-orphans", {confirmed: false});
+        const staleTtys = Array.isArray(preview.stale_ttys) ? preview.stale_ttys.join(", ") : "";
+        if (preview.status === "no_orphaned_janicka_sessions") {
+          janickaLightStatus.textContent = preview.message || "Žádné staré Janička relace k úklidu.";
+          await refreshJanickaLightStatus();
+          return;
+        }
+        if (preview.status !== "confirmation_required") {
+          janickaLightStatus.textContent = preview.message || "Staré Janička relace nejde bezpečně určit.";
+          await refreshJanickaLightStatus();
+          return;
+        }
+        const ok = window.confirm(`Ukončit staré Janička relace mimo správu ${staleTtys}? Aktuální Janička i hlavní Adam zůstanou běžet.`);
+        if (!ok) {
+          janickaLightStatus.textContent = "Úklid starých Janička relací zrušen.";
+          await refreshJanickaLightStatus();
+          return;
+        }
+        const data = await postJson("/api/janicka/light/cleanup-orphans", {confirmed: true});
+        janickaLightStatus.textContent = data.message || "Staré Janička relace byly uklizeny.";
+        await refreshJanickaLightStatus();
+      } catch (err) {
+        recordFrontendError(err);
+        janickaLightStatus.textContent = `Úklid starých Janička relací selhal: ${err}`;
+      } finally {
+        janickaLightCleanupOrphansBtn.disabled = false;
       }
     }
 
@@ -20834,6 +21120,7 @@ COCKPIT_HTML = """<!doctype html>
     janickaAdamStopBtn.addEventListener("click", stopJanickaAdam);
     janickaLightStartBtn.addEventListener("click", startJanickaLight);
     janickaLightStopBtn.addEventListener("click", stopJanickaLight);
+    janickaLightCleanupOrphansBtn.addEventListener("click", cleanupJanickaLightOrphans);
     janickaChatInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();

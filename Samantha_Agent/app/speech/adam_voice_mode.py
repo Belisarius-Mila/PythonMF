@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -701,6 +702,19 @@ def generate_direct_voice_response(
     return response or "Slyším tě. Tady Adam, jsem připravený pomoct."
 
 
+def safe_exception_summary(exc: Exception, *, max_chars: int = 240) -> str:
+    text = re.sub(r"[\x00-\x1f\x7f]", " ", str(exc or ""))
+    text = " ".join(text.split())
+    if len(text) > max_chars:
+        text = text[: max_chars - 1].rstrip() + "…"
+    return f"{type(exc).__name__}: {text}" if text else type(exc).__name__
+
+
+def format_automatic_watcher_response(response: str) -> str:
+    text = str(response or "").strip() or "Slyším tě. Tady Adam, jsem připravený pomoct."
+    return f"Automatická odpověď watcheru, ne převzetí v Codex chatu: {text}"
+
+
 def build_spoken_result_for_command(
     command: VoiceCommand,
     *,
@@ -796,15 +810,17 @@ def build_spoken_result_for_command(
             response = generate_direct_voice_response(text, history_path=history_path)
         else:
             response = response_generator(text)
-        append_voice_history_turn(command, adam_response=response, route="direct_response", path=history_path)
-        return response
-    except Exception:
+        message = format_automatic_watcher_response(response)
+        append_voice_history_turn(command, adam_response=message, route="direct_response", path=history_path)
+        return message
+    except Exception as exc:
+        detail = safe_exception_summary(exc)
         message = "Pokyn jsem přijal, ale automatická odpověď se nepovedla. Nechávám ho připravený Adamovi k převzetí v Codexu."
         if pending_path is not None:
             save_pending_for_adam(
                 command,
                 reason="direct_response_failed",
-                message=message,
+                message=f"{message} Technický detail: {detail}",
                 path=pending_path,
                 history_path=history_path,
             )

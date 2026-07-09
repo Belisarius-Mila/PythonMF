@@ -52,6 +52,9 @@ from app.cockpit import (
     cockpit_save_voice_text_action,
     cockpit_speak_action,
     cockpit_transcribe_voice_action,
+    janicka_light_status_action,
+    janicka_orphaned_codex_session_report,
+    terminate_orphaned_janicka_sessions_action,
     save_voice_command_to_inbox,
     transcribe_audio_base64_isolated,
     document_intake_email_scan_status,
@@ -2341,12 +2344,14 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/janicka/light/status", COCKPIT_HTML)
         self.assertIn("/api/janicka/light/start", COCKPIT_HTML)
         self.assertIn("/api/janicka/light/stop", COCKPIT_HTML)
+        self.assertIn("/api/janicka/light/cleanup-orphans", COCKPIT_HTML)
         self.assertIn("janickaAdamStartBtn", COCKPIT_HTML)
         self.assertIn("janickaAdamRestartBtn", COCKPIT_HTML)
         self.assertIn("janickaAdamStopBtn", COCKPIT_HTML)
         self.assertIn("janickaLightStatus", COCKPIT_HTML)
         self.assertIn("janickaLightStartBtn", COCKPIT_HTML)
         self.assertIn("janickaLightStopBtn", COCKPIT_HTML)
+        self.assertIn("janickaLightCleanupOrphansBtn", COCKPIT_HTML)
         self.assertIn("Janička chat: čekám na kontrolu.", COCKPIT_HTML)
         self.assertIn("Servisní fallback", COCKPIT_HTML)
         self.assertIn("Spustit Janičku", COCKPIT_HTML)
@@ -2679,6 +2684,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("voiceBridgeSessions", COCKPIT_HTML)
         self.assertIn("-> voice bridge", COCKPIT_HTML)
         self.assertIn("Codex relace:", COCKPIT_HTML)
+        self.assertIn("orphaned_janicka_labels", COCKPIT_HTML)
+        self.assertIn("Staré Janička relace", COCKPIT_HTML)
         self.assertIn("Čeká hlasový pokyn na Adama", COCKPIT_HTML)
         self.assertIn("hlasový pokyn", COCKPIT_HTML)
         self.assertIn("voiceModeStartBtn", COCKPIT_HTML)
@@ -2688,6 +2695,9 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Ukončit staré relace", COCKPIT_HTML)
         self.assertIn("/api/voice-bridge/terminate-stale", COCKPIT_HTML)
         self.assertIn("terminateStaleVoiceBridgeSessions", COCKPIT_HTML)
+        self.assertIn("frontendErrorLooksRecoverableNetwork", COCKPIT_HTML)
+        self.assertIn("clearRecoverableFrontendNetworkErrors", COCKPIT_HTML)
+        self.assertIn('value.includes("load failed")', COCKPIT_HTML)
         self.assertIn('voiceTranscript.value = "";', COCKPIT_HTML)
         self.assertIn("/api/voice-mode/start", COCKPIT_HTML)
         self.assertIn("/api/voice-mode/stop", COCKPIT_HTML)
@@ -3018,6 +3028,31 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["managed_codex_labels"], {"ttys004": "Janička light"})
         self.assertNotIn("běží 2 Codex relací", result["warnings"])
         self.assertIn("spravované relace mimo limit", result["notes"][0])
+
+    def test_adam_voice_bridge_status_labels_orphaned_janicka_session(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker_path = Path(temp_dir) / "current_codex_tty.json"
+            marker_path.write_text('{"tty": "ttys001"}', encoding="utf-8")
+
+            def fake_screen_runner(*args, **kwargs):
+                return subprocess.CompletedProcess(args=args[0], returncode=1, stdout="", stderr="No Sockets found\n")
+
+            result = adam_voice_bridge_status(
+                marker_path=marker_path,
+                codex_tty_discoverer=lambda: ["ttys001", "ttys003", "ttys004"],
+                managed_codex_tty_labeler=lambda: {"ttys004": "Janička light"},
+                orphaned_janicka_reporter=lambda: {"orphaned_ttys": ["ttys003"]},
+                screen_runner=fake_screen_runner,
+                expected_codex_session_limit=1,
+            )
+
+        self.assertEqual(result["status"], "warn")
+        self.assertEqual(result["human_codex_ttys"], ["ttys001"])
+        self.assertEqual(result["orphaned_janicka_ttys"], ["ttys003"])
+        self.assertEqual(result["orphaned_janicka_labels"], {"ttys003": "stará Janička mimo správu"})
+        self.assertEqual(result["managed_codex_ttys"], ["ttys004"])
+        self.assertTrue(any("stará Janička relace mimo správu: ttys003" in warning for warning in result["warnings"]))
+        self.assertNotIn("běží 2 běžných Codex relací", result["warnings"])
 
     def test_adam_voice_bridge_status_uses_single_active_tty_when_marker_is_stale(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -5310,6 +5345,88 @@ Dalsi krok:
         self.assertIn("Projekt: Janička Cockpit", context)
         self.assertIn("Aktivní projekty", context)
         self.assertIn("Memory index", context)
+
+    def test_janicka_orphaned_codex_session_report_detects_only_unmanaged_janicka(self) -> None:
+        def fake_runner(*args, **kwargs):
+            stdout = (
+                "100 10 ttys000 node node /usr/local/bin/codex -C /repo běžný Adam\n"
+                "101 100 ttys000 codex /vendor/bin/codex -C /repo běžný Adam\n"
+                "200 20 ttys003 node node /usr/local/bin/codex -C /repo Jsi lehká Samantha/Adam relace pro okno Janička v Samantha Cockpitu. jen čekej na textové dotazy z Janičky.\n"
+                "201 200 ttys003 codex /vendor/bin/codex -C /repo Jsi lehká Samantha/Adam relace pro okno Janička v Samantha Cockpitu. jen čekej na textové dotazy z Janičky.\n"
+                "300 30 ttys004 node node /usr/local/bin/codex -C /repo Jsi lehká Samantha/Adam relace pro okno Janička v Samantha Cockpitu. jen čekej na textové dotazy z Janičky.\n"
+                "301 300 ttys004 codex /vendor/bin/codex -C /repo Jsi lehká Samantha/Adam relace pro okno Janička v Samantha Cockpitu. jen čekej na textové dotazy z Janičky.\n"
+            )
+            return subprocess.CompletedProcess(args=args[0], returncode=0, stdout=stdout, stderr="")
+
+        report = janicka_orphaned_codex_session_report(
+            runner=fake_runner,
+            managed_codex_tty_labeler=lambda: {"ttys004": "Janička light"},
+        )
+
+        self.assertEqual(report["status"], "orphaned_found")
+        self.assertEqual(report["orphaned_ttys"], ["ttys003"])
+        self.assertEqual(report["orphaned_sessions"][0]["root_pids"], [200])
+
+    def test_janicka_light_status_action_surfaces_orphan_cleanup_hint(self) -> None:
+        result = janicka_light_status_action(
+            status_getter=lambda: {
+                "ok": True,
+                "running": True,
+                "state": "running",
+                "message": "Janička light Samantha běží ve spravované Codex relaci.",
+                "managed_codex_ttys": ["ttys004"],
+            },
+            orphan_reporter=lambda: {
+                "ok": True,
+                "orphaned_ttys": ["ttys003"],
+                "orphaned_count": 1,
+                "message": "Nalezené staré Janička Codex relace mimo správu: ttys003",
+            },
+        )
+
+        self.assertEqual(result["orphaned_janicka_ttys"], ["ttys003"])
+        self.assertEqual(result["orphaned_janicka_count"], 1)
+        self.assertIn("staré Janička relace mimo správu: ttys003", result["message"])
+
+    def test_terminate_orphaned_janicka_sessions_requires_confirmation_and_kills_only_orphan_root(self) -> None:
+        def fake_runner(*args, **kwargs):
+            stdout = (
+                "100 10 ttys000 node node /usr/local/bin/codex -C /repo běžný Adam\n"
+                "101 100 ttys000 codex /vendor/bin/codex -C /repo běžný Adam\n"
+                "200 20 ttys003 node node /usr/local/bin/codex -C /repo Jsi lehká Samantha/Adam relace pro okno Janička v Samantha Cockpitu. jen čekej na textové dotazy z Janičky.\n"
+                "201 200 ttys003 codex /vendor/bin/codex -C /repo Jsi lehká Samantha/Adam relace pro okno Janička v Samantha Cockpitu. jen čekej na textové dotazy z Janičky.\n"
+                "300 30 ttys004 node node /usr/local/bin/codex -C /repo Jsi lehká Samantha/Adam relace pro okno Janička v Samantha Cockpitu. jen čekej na textové dotazy z Janičky.\n"
+                "301 300 ttys004 codex /vendor/bin/codex -C /repo Jsi lehká Samantha/Adam relace pro okno Janička v Samantha Cockpitu. jen čekej na textové dotazy z Janičky.\n"
+            )
+            return subprocess.CompletedProcess(args=args[0], returncode=0, stdout=stdout, stderr="")
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            marker = Path(temp_dir) / "current_codex_tty.json"
+            marker.write_text('{"tty": "ttys000"}', encoding="utf-8")
+            killed: list[tuple[int, int]] = []
+
+            preview = terminate_orphaned_janicka_sessions_action(
+                {"confirmed": False},
+                runner=fake_runner,
+                managed_codex_tty_labeler=lambda: {"ttys004": "Janička light"},
+                marker_path=marker,
+                killer=lambda pid, sig: killed.append((pid, sig)),
+            )
+            result = terminate_orphaned_janicka_sessions_action(
+                {"confirmed": True},
+                runner=fake_runner,
+                managed_codex_tty_labeler=lambda: {"ttys004": "Janička light"},
+                marker_path=marker,
+                killer=lambda pid, sig: killed.append((pid, sig)),
+            )
+
+        self.assertEqual(preview["status"], "confirmation_required")
+        self.assertEqual(preview["stale_ttys"], ["ttys003"])
+        self.assertEqual(preview["root_pids"], [200])
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "orphaned_janicka_sessions_terminated")
+        self.assertEqual(result["killed_pids"], [200])
+        self.assertEqual(killed, [(200, signal.SIGTERM)])
 
     def test_janicka_cookbook_page_renders_markdown_safely(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

@@ -64,6 +64,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `handoffs/cockpit_voice_janicka_stability_checkpoint_2026_07_09.md` - [PRIPOMENOUT] Cockpit / VoiceBridge / Janicka stabilita: hlavni VoiceBridge rozlisuje Adam relaci, managed relace a orphaned Janicka relace, Janicka okno umi nabidnout cleanup starych relaci, recoverable `Load failed` se po health checku cisti a automaticka watcher odpoved je jasne oznacena jako automaticka; dalsi krok je retest Janicka bez VS Code po commitu/pushi.
 - `handoffs/cockpit_startup_health_voicebridge_verified_2026_07_09.md` - Cockpit stabilita overena: start/restart/launchd pouzivaji rychly `/api/server/health`, `/api/status` ma timing sekci, hotkey `Ctrl+Option+Command+C` otevrel `127.0.0.1:8770` bez `Load failed`, diagnostika byla OK a zaverecny VoiceBridge test z Cockpitu prosel end-to-end bez Mac TTS.
 - `handoffs/lekarna_photo_import_pil_publish_retire_verified_2026_07_09.md` - Lekarna foto import end-to-end overen: OpenAI OCR, SUKL DLP, online PIL, `PIL_Short`, prijem na sklad, automaticky encrypted bundle commit/push, testovaci SERTIVAN prijat a vyrazen; export uz vynechava radky `vyradeno`.
 - `handoffs/git_commit_cleanup_a1_2026_05_23.md` - A1+ commitovy uklid: velka memory/RAG davka je commitnuta a pushnuta jako `ef15589`; pravidlo do odvolani je navrhovat tematicke commity pri dalsich vetsich rozpracovanych zmenach.
