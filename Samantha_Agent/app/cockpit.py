@@ -719,6 +719,62 @@ def lekarna_auto_import_draft_action(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def publish_lekarna_encrypted_bundle(
+    encrypted_bundle_path: Path | None,
+    *,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> dict[str, Any]:
+    if encrypted_bundle_path is None:
+        return {"ok": True, "status": "skipped", "message": "Šifrovaný balíček nebyl vytvořený; publikace přeskočena."}
+    git_root = GIT_ROOT.resolve()
+    expected_path = (git_root / "docs" / "lekarna" / "encrypted-data" / "lekarna.enc.json").resolve()
+    try:
+        bundle_path = encrypted_bundle_path.resolve()
+    except OSError as exc:
+        return {"ok": False, "status": "invalid_path", "message": f"Šifrovaný balíček nejde ověřit: {exc}"}
+    if bundle_path != expected_path:
+        return {"ok": False, "status": "unexpected_path", "message": "Šifrovaný balíček není na očekávané produkční cestě."}
+    if not bundle_path.exists():
+        return {"ok": False, "status": "missing_file", "message": "Šifrovaný produkční balíček neexistuje."}
+
+    relative_path = bundle_path.relative_to(git_root)
+
+    def run_git(args: list[str]) -> subprocess.CompletedProcess[str]:
+        return runner(
+            ["/usr/bin/git", "-C", str(git_root), *args],
+            capture_output=True,
+            text=True,
+            timeout=45,
+            check=False,
+        )
+
+    try:
+        diff = run_git(["diff", "--quiet", "--", str(relative_path)])
+        staged_diff = run_git(["diff", "--cached", "--quiet", "--", str(relative_path)])
+        if diff.returncode == 0 and staged_diff.returncode == 0:
+            return {"ok": True, "status": "no_changes", "message": "Produkční šifrovaný balíček už je beze změny."}
+        add = run_git(["add", "--", str(relative_path)])
+        if add.returncode != 0:
+            return {"ok": False, "status": "git_add_failed", "message": "Balíček se nepodařilo připravit pro commit."}
+        commit = run_git(["commit", "--only", "-m", "Update Lekarna encrypted data bundle", "--", str(relative_path)])
+        if commit.returncode != 0:
+            return {"ok": False, "status": "git_commit_failed", "message": "Balíček se nepodařilo commitnout."}
+        push = run_git(["push"])
+        if push.returncode != 0:
+            return {"ok": False, "status": "git_push_failed", "message": "Balíček je commitnutý lokálně, ale push na GitHub se nepodařil."}
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return {"ok": False, "status": "git_failed", "message": f"Publikace na produkci se nepodařila: {exc}"}
+
+    commit_line = next((line.strip() for line in commit.stdout.splitlines() if line.strip().startswith("[") and "]" in line), "")
+    return {
+        "ok": True,
+        "status": "published",
+        "message": "Produkční šifrovaný balíček byl commitnutý a pushnutý.",
+        "commit": commit_line,
+        "path": str(relative_path),
+    }
+
+
 def lekarna_auto_import_apply_action(payload: dict[str, Any]) -> dict[str, Any]:
     manifest_path = str(payload.get("manifest_path", "") or "").strip()
     confirmation_text = str(payload.get("confirmation_text", "") or "").strip()
@@ -753,6 +809,7 @@ def lekarna_auto_import_apply_action(payload: dict[str, Any]) -> dict[str, Any]:
         )
     except Exception as exc:
         return {"ok": False, "message": f"Návrh se nepodařilo přijmout na sklad: {exc}", "error": "apply_failed"}
+    publish_result = publish_lekarna_encrypted_bundle(getattr(result, "encrypted_bundle_path", None))
     return {
         "ok": True,
         "message": "Návrh byl přijat na sklad.",
@@ -763,6 +820,7 @@ def lekarna_auto_import_apply_action(payload: dict[str, Any]) -> dict[str, Any]:
         "report_path": str(result.report_path),
         "web_export_path": str(result.web_export_path) if getattr(result, "web_export_path", None) else "",
         "encrypted_bundle_path": str(result.encrypted_bundle_path) if getattr(result, "encrypted_bundle_path", None) else "",
+        "production_publish": publish_result,
         "warnings": [safe_text(str(warning)) for warning in getattr(result, "warnings", ())],
     }
 
@@ -7440,6 +7498,9 @@ def lekarna_admin_page_html() -> str:
           applyResult.textContent += `\\nZapsáno: ${{data.appended}} | kopie: ${{data.copied}} | přejmenováno: ${{data.renamed}}\\nZáloha: ${{data.backup_path}}`;
           if (data.web_export_path) applyResult.textContent += `\\nWeb export: ${{data.web_export_path}}`;
           if (data.encrypted_bundle_path) applyResult.textContent += `\\nŠifrovaný balíček: ${{data.encrypted_bundle_path}}`;
+          if (data.production_publish && data.production_publish.message) {{
+            applyResult.textContent += `\\nProdukce: ${{data.production_publish.message}}`;
+          }}
           if (Array.isArray(data.warnings) && data.warnings.length) {{
             applyResult.textContent += `\\nUpozornění:\\n- ${{data.warnings.join("\\n- ")}}`;
           }}

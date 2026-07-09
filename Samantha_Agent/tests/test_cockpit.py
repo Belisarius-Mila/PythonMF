@@ -39,6 +39,7 @@ from app.cockpit import (
     lekarna_retire_apply_action,
     lekarna_retire_preview_action,
     lekarna_search_action,
+    publish_lekarna_encrypted_bundle,
     library_read_state_action,
     cockpit_edge_tts_action,
     cockpit_codex_approval_clear_action,
@@ -746,11 +747,16 @@ class CockpitTests(unittest.TestCase):
             copied_count=1,
             renamed_count=1,
             appended_count=1,
+            web_export_path=Path("/tmp/lekarna.json"),
+            encrypted_bundle_path=Path("/tmp/lekarna.enc.json"),
             warnings=(),
         )
         with patch("app.cockpit._lekarna_manifest_quality_warnings", return_value=[]), patch(
             "app.cockpit.apply_auto_import_manifest_from_downloads", return_value=fake_result
-        ) as apply_mock:
+        ) as apply_mock, patch(
+            "app.cockpit.publish_lekarna_encrypted_bundle",
+            return_value={"ok": True, "status": "published", "message": "publikováno"},
+        ) as publish_mock:
             result = lekarna_auto_import_apply_action(
                 {
                     "manifest_path": "/tmp/manifest.csv",
@@ -764,6 +770,44 @@ class CockpitTests(unittest.TestCase):
         apply_mock.assert_called_once()
         self.assertEqual(apply_mock.call_args.kwargs["manifest_path"], Path("/tmp/manifest.csv"))
         self.assertEqual(apply_mock.call_args.kwargs["location"], "Pils Jana")
+        publish_mock.assert_called_once_with(Path("/tmp/lekarna.enc.json"))
+        self.assertEqual(result["production_publish"]["status"], "published")
+
+    def test_publish_lekarna_encrypted_bundle_commits_only_expected_bundle(self) -> None:
+        calls: list[list[str]] = []
+
+        def fake_runner(command, **kwargs):
+            calls.append(command)
+            git_args = command[3:]
+            if git_args[:3] == ["diff", "--quiet", "--"]:
+                return subprocess.CompletedProcess(command, 1, "", "")
+            if git_args[:4] == ["diff", "--cached", "--quiet", "--"]:
+                return subprocess.CompletedProcess(command, 0, "", "")
+            if git_args[:2] == ["add", "--"]:
+                return subprocess.CompletedProcess(command, 0, "", "")
+            if git_args[:2] == ["commit", "--only"]:
+                return subprocess.CompletedProcess(command, 0, "[main abc123] Update Lekarna encrypted data bundle\n", "")
+            if git_args == ["push"]:
+                return subprocess.CompletedProcess(command, 0, "", "")
+            raise AssertionError(f"unexpected git command: {git_args}")
+
+        with tempfile.TemporaryDirectory() as tmp_dir, patch.object(cockpit_module, "GIT_ROOT", Path(tmp_dir)):
+            expected = Path(tmp_dir) / "docs" / "lekarna" / "encrypted-data" / "lekarna.enc.json"
+            expected.parent.mkdir(parents=True, exist_ok=True)
+            expected.write_text("test-bundle", encoding="utf-8")
+            result = publish_lekarna_encrypted_bundle(expected, runner=fake_runner)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "published")
+        commit_command = next(command for command in calls if "commit" in command)
+        self.assertIn("--only", commit_command)
+        self.assertEqual(commit_command[-1], "docs/lekarna/encrypted-data/lekarna.enc.json")
+
+    def test_publish_lekarna_encrypted_bundle_rejects_unexpected_path(self) -> None:
+        result = publish_lekarna_encrypted_bundle(Path("/tmp/other.enc.json"), runner=lambda *_args, **_kwargs: None)
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "unexpected_path")
 
     def test_cockpit_html_contains_library_attachment_view(self) -> None:
         self.assertIn("libraryReaderAttachments", COCKPIT_HTML)
