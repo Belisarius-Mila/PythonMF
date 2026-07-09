@@ -257,6 +257,13 @@ WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
         "kind": "lokální",
     },
     {
+        "id": "email-archive",
+        "title": "Archiv e-mailů",
+        "description": "Read-only prohlížeč lokálně uložených e-mailů z EmailArchiveVault.",
+        "url": "/email-archive/",
+        "kind": "lokální",
+    },
+    {
         "id": "lekarna",
         "title": "Lékárna",
         "description": "Šifrovaná webová evidence domácí lékárny s vyhledáním léků a stručnými pokyny.",
@@ -5546,6 +5553,284 @@ def local_email_attachment_details(path: Path) -> list[dict[str, Any]]:
             }
         )
     return attachments
+
+
+EMAIL_ARCHIVE_OPENABLE_FILES: dict[str, tuple[Path, str]] = {
+    "body_html": (Path("body.html"), "text/html; charset=utf-8"),
+    "body_txt": (Path("body.txt"), "text/plain; charset=utf-8"),
+    "original_eml": (Path("original.eml"), "message/rfc822"),
+    "metadata": (Path("metadata.json"), "application/json; charset=utf-8"),
+    "attachments": (Path("attachments") / "attachments.json", "application/json; charset=utf-8"),
+}
+
+
+def email_archive_list_status(
+    query: str = "",
+    *,
+    limit: int = 120,
+    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+) -> dict[str, Any]:
+    safe_query = safe_text(query).casefold().strip()
+    safe_limit = min(max(1, int(limit)), 500)
+    archives: list[dict[str, Any]] = []
+    if not archive_directory.exists():
+        return {
+            "ok": True,
+            "count": 0,
+            "items": [],
+            "message": "EmailArchiveVault zatím neexistuje.",
+        }
+
+    for metadata_path in sorted(
+        archive_directory.glob("*/metadata.json"),
+        key=lambda path: path.stat().st_mtime if path.exists() else 0,
+        reverse=True,
+    ):
+        try:
+            metadata = read_json_file(metadata_path)
+        except (OSError, ValueError, json.JSONDecodeError):
+            continue
+        archive_dir = metadata_path.parent
+        archive_id = safe_text(str(metadata.get("archive_id") or archive_dir.name)).strip()
+        if not archive_id:
+            continue
+        subject = safe_text(str(metadata.get("subject", "")))[:260]
+        sender = redact_email_addresses(safe_text(str(metadata.get("from", ""))))[:220]
+        uid = safe_text(str(metadata.get("uid", "")))[:80]
+        date_text = safe_text(str(metadata.get("date", "")))[:160]
+        archived_at = safe_text(str(metadata.get("archived_at", "")))[:120]
+        haystack = " ".join([archive_id, uid, subject, sender, date_text]).casefold()
+        if safe_query and safe_query not in haystack:
+            continue
+        archives.append(
+            {
+                "archive_id": archive_id,
+                "uid": uid,
+                "subject": subject,
+                "sender": sender,
+                "date": date_text,
+                "archived_at": archived_at,
+                "links_count": int(metadata.get("links_count", 0) or 0),
+                "attachments_count": int(metadata.get("attachments_count", 0) or 0),
+                "relative_path": safe_text(str(relative_to_project(archive_dir)))[:500],
+            }
+        )
+        if len(archives) >= safe_limit:
+            break
+
+    return {
+        "ok": True,
+        "count": len(archives),
+        "items": archives,
+        "message": f"Nalezeno archivovaných e-mailů: {len(archives)}.",
+    }
+
+
+def email_archive_detail_status(
+    archive_id: str,
+    *,
+    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+    documents_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> dict[str, Any]:
+    resolved = resolve_email_archive_dir(archive_id, archive_directory=archive_directory)
+    if not resolved.get("ok"):
+        return resolved
+    archive_dir = resolved["path"]
+    metadata_path = archive_dir / "metadata.json"
+    try:
+        metadata = read_json_file(metadata_path)
+    except (OSError, ValueError, json.JSONDecodeError):
+        return {"ok": False, "message": "Archiv nemá čitelná metadata."}
+
+    safe_archive_id = safe_text(str(metadata.get("archive_id") or archive_dir.name))
+    uid = safe_text(str(metadata.get("uid", ""))).strip()
+    files = []
+    for key, (relative, content_type) in EMAIL_ARCHIVE_OPENABLE_FILES.items():
+        path = archive_dir / relative
+        if not path.is_file():
+            continue
+        files.append(
+            {
+                "key": key,
+                "label": email_archive_file_label(key),
+                "filename": safe_text(path.name)[:180],
+                "content_type": content_type,
+                "size_bytes": path.stat().st_size,
+                "url": f"/email-archive/file?archive_id={quote(safe_archive_id)}&file={quote(key)}",
+            }
+        )
+
+    attachments = read_email_archive_attachment_metadata(archive_dir)
+    downloaded = downloaded_email_archive_attachments(uid=uid, documents_dir=documents_dir)
+
+    return {
+        "ok": True,
+        "archive_id": safe_archive_id,
+        "uid": uid,
+        "subject": safe_text(str(metadata.get("subject", "")))[:260],
+        "sender": redact_email_addresses(safe_text(str(metadata.get("from", ""))))[:220],
+        "date": safe_text(str(metadata.get("date", "")))[:160],
+        "archived_at": safe_text(str(metadata.get("archived_at", "")))[:120],
+        "relative_path": safe_text(str(relative_to_project(archive_dir)))[:500],
+        "files": files,
+        "attachments": attachments,
+        "downloaded_attachments": downloaded,
+        "message": "Archiv e-mailu načten read-only.",
+    }
+
+
+def email_archive_file_label(key: str) -> str:
+    return {
+        "body_html": "Otevřít HTML",
+        "body_txt": "Otevřít text",
+        "original_eml": "Otevřít původní .eml",
+        "metadata": "Metadata",
+        "attachments": "Metadata příloh",
+    }.get(key, key)
+
+
+def read_email_archive_attachment_metadata(archive_dir: Path) -> list[dict[str, Any]]:
+    attachments_path = archive_dir / "attachments" / "attachments.json"
+    if not attachments_path.is_file():
+        return []
+    try:
+        payload = read_json_file(attachments_path)
+    except (OSError, ValueError, json.JSONDecodeError):
+        return []
+    raw_attachments = payload.get("attachments", [])
+    if not isinstance(raw_attachments, list):
+        return []
+    result: list[dict[str, Any]] = []
+    for item in raw_attachments:
+        if not isinstance(item, dict):
+            continue
+        result.append(
+            {
+                "filename": safe_text(str(item.get("filename", "")))[:240],
+                "content_type": safe_text(str(item.get("content_type", "")))[:120],
+                "size_bytes": int(item.get("size_bytes", 0) or 0),
+                "saved": bool(item.get("saved")),
+            }
+        )
+    return result
+
+
+def downloaded_email_archive_attachments(
+    *,
+    uid: str,
+    documents_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> list[dict[str, Any]]:
+    if not uid or not uid.isdigit():
+        return []
+    incoming = documents_dir / "inbox" / "incoming"
+    if not incoming.is_dir():
+        return []
+    result: list[dict[str, Any]] = []
+    for path in sorted(incoming.glob(f"icloud_uid_{uid}_*")):
+        if not path.is_file():
+            continue
+        try:
+            size = path.stat().st_size
+        except OSError:
+            size = 0
+        result.append(
+            {
+                "filename": safe_text(path.name)[:240],
+                "content_type": content_type_for_path(path),
+                "size_bytes": size,
+                "relative_path": safe_text(str(relative_to_project(path)))[:500],
+                "url": f"/email-archive/incoming?name={quote(path.name)}",
+            }
+        )
+    return result
+
+
+def resolve_email_archive_dir(
+    archive_id: str,
+    *,
+    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+) -> dict[str, Any]:
+    safe_archive_id = str(archive_id or "").strip()
+    if (
+        not safe_archive_id
+        or "/" in safe_archive_id
+        or "\\" in safe_archive_id
+        or safe_archive_id.startswith(".")
+    ):
+        return {"ok": False, "message": "Neplatné ID archivu."}
+    archive_dir = archive_directory / safe_archive_id
+    try:
+        root = archive_directory.resolve(strict=True)
+        resolved = archive_dir.resolve(strict=True)
+    except OSError:
+        return {"ok": False, "message": "Archiv nebyl nalezen."}
+    if root != resolved and root not in resolved.parents:
+        return {"ok": False, "message": "Archiv je mimo povolenou složku."}
+    if not (resolved / "metadata.json").is_file():
+        return {"ok": False, "message": "Archiv nemá metadata."}
+    return {"ok": True, "path": resolved}
+
+
+def resolve_email_archive_file(
+    archive_id: str,
+    file_key: str,
+    *,
+    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+) -> dict[str, Any]:
+    if file_key not in EMAIL_ARCHIVE_OPENABLE_FILES:
+        return {"ok": False, "message": "Soubor archivu není povolený."}
+    resolved = resolve_email_archive_dir(archive_id, archive_directory=archive_directory)
+    if not resolved.get("ok"):
+        return resolved
+    archive_dir = resolved["path"]
+    relative, content_type = EMAIL_ARCHIVE_OPENABLE_FILES[file_key]
+    try:
+        target = (archive_dir / relative).resolve(strict=True)
+    except OSError:
+        return {"ok": False, "message": "Soubor archivu nebyl nalezen."}
+    if archive_dir != target and archive_dir not in target.parents:
+        return {"ok": False, "message": "Soubor archivu je mimo povolenou složku."}
+    if not target.is_file():
+        return {"ok": False, "message": "Soubor archivu není soubor."}
+    return {
+        "ok": True,
+        "path": target,
+        "content_type": content_type,
+        "filename": safe_filename(target.name),
+    }
+
+
+def resolve_email_archive_incoming_file(
+    name: str,
+    *,
+    documents_dir: Path = DEFAULT_DOCUMENTS_DIR,
+) -> dict[str, Any]:
+    safe_name = str(name or "").strip()
+    if (
+        not safe_name
+        or "/" in safe_name
+        or "\\" in safe_name
+        or safe_name.startswith(".")
+        or not safe_name.startswith("icloud_uid_")
+    ):
+        return {"ok": False, "message": "Neplatný název přílohy."}
+    incoming = documents_dir / "inbox" / "incoming"
+    target = incoming / safe_name
+    try:
+        root = incoming.resolve(strict=True)
+        resolved = target.resolve(strict=True)
+    except OSError:
+        return {"ok": False, "message": "Příloha nebyla nalezena."}
+    if root != resolved and root not in resolved.parents:
+        return {"ok": False, "message": "Příloha je mimo povolenou složku."}
+    if not resolved.is_file():
+        return {"ok": False, "message": "Příloha není soubor."}
+    return {
+        "ok": True,
+        "path": resolved,
+        "content_type": content_type_for_path(resolved),
+        "filename": safe_filename(resolved.name),
+    }
 
 
 def reminder_document_source_detail(
@@ -11895,6 +12180,9 @@ class CockpitServer:
                 if parsed.path == "/email-processing/":
                     self.respond_html(EMAIL_PROCESSING_HTML)
                     return
+                if parsed.path == "/email-archive/":
+                    self.respond_html(EMAIL_ARCHIVE_HTML)
+                    return
                 if parsed.path == "/janicka-kucharka/":
                     self.respond_html(janicka_cookbook_page_html())
                     return
@@ -12033,6 +12321,31 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/email-processing/pending-work":
                     self.respond_json(email_processing_pending_work_items())
+                    return
+                if parsed.path == "/api/email-archive/list":
+                    params = parse_qs(parsed.query)
+                    query = params.get("q", [""])[0]
+                    try:
+                        limit = int(params.get("limit", ["120"])[0])
+                    except (TypeError, ValueError):
+                        limit = 120
+                    self.respond_json(email_archive_list_status(query=query, limit=limit))
+                    return
+                if parsed.path == "/api/email-archive/detail":
+                    params = parse_qs(parsed.query)
+                    archive_id = params.get("archive_id", [""])[0]
+                    self.respond_json(email_archive_detail_status(archive_id=archive_id))
+                    return
+                if parsed.path == "/email-archive/file":
+                    params = parse_qs(parsed.query)
+                    archive_id = params.get("archive_id", [""])[0]
+                    file_key = params.get("file", [""])[0]
+                    self.respond_email_archive_file(archive_id=archive_id, file_key=file_key)
+                    return
+                if parsed.path == "/email-archive/incoming":
+                    params = parse_qs(parsed.query)
+                    name = params.get("name", [""])[0]
+                    self.respond_email_archive_incoming_file(name=name)
                     return
                 if parsed.path == "/api/documents/search":
                     params = parse_qs(parsed.query)
@@ -12565,6 +12878,44 @@ class CockpitServer:
                 self.end_headers()
                 self.wfile.write(data)
 
+            def respond_email_archive_file(self, archive_id: str, file_key: str) -> None:
+                resolved = resolve_email_archive_file(archive_id=archive_id, file_key=file_key)
+                if not resolved.get("ok"):
+                    self.respond_json(
+                        {"error": "not_found", "message": resolved.get("message", "")},
+                        status=HTTPStatus.NOT_FOUND,
+                    )
+                    return
+                self.respond_local_file_bytes(
+                    target=resolved["path"],
+                    content_type=str(resolved.get("content_type") or "application/octet-stream"),
+                    filename=str(resolved.get("filename") or "email-archive"),
+                )
+
+            def respond_email_archive_incoming_file(self, name: str) -> None:
+                resolved = resolve_email_archive_incoming_file(name=name)
+                if not resolved.get("ok"):
+                    self.respond_json(
+                        {"error": "not_found", "message": resolved.get("message", "")},
+                        status=HTTPStatus.NOT_FOUND,
+                    )
+                    return
+                self.respond_local_file_bytes(
+                    target=resolved["path"],
+                    content_type=str(resolved.get("content_type") or "application/octet-stream"),
+                    filename=str(resolved.get("filename") or "attachment"),
+                )
+
+            def respond_local_file_bytes(self, *, target: Path, content_type: str, filename: str) -> None:
+                data = target.read_bytes()
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", content_type)
+                self.send_header("Content-Disposition", f'inline; filename="{filename}"')
+                self.send_header("Cache-Control", "no-store, max-age=0")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
             def respond_library_attachment(self, article_id: str, attachment_id: str, variant: str) -> None:
                 resolved = get_article_attachment(
                     article_id=article_id,
@@ -12633,12 +12984,22 @@ def content_type_for_path(path: Path) -> str:
     suffix = path.suffix.casefold()
     if suffix == ".html":
         return "text/html; charset=utf-8"
+    if suffix == ".txt":
+        return "text/plain; charset=utf-8"
     if suffix == ".css":
         return "text/css; charset=utf-8"
     if suffix == ".js":
         return "text/javascript; charset=utf-8"
     if suffix == ".json":
         return "application/json; charset=utf-8"
+    if suffix == ".eml":
+        return "message/rfc822"
+    if suffix == ".pdf":
+        return "application/pdf"
+    if suffix == ".doc":
+        return "application/msword"
+    if suffix == ".docx":
+        return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     if suffix in {".png"}:
         return "image/png"
     if suffix in {".jpg", ".jpeg"}:
@@ -12646,6 +13007,200 @@ def content_type_for_path(path: Path) -> str:
     if suffix == ".webp":
         return "image/webp"
     return "application/octet-stream"
+
+
+EMAIL_ARCHIVE_HTML = """<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Archiv e-mailů</title>
+  <style>
+    :root { --bg: #f5f7fb; --panel: #fff; --ink: #162033; --muted: #667085; --line: #d9e0ea; --blue: #1f5fbf; --green: #16794c; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    header { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 16px 20px; background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 2; }
+    h1 { margin: 0; font-size: 20px; }
+    button, a.button { border: 0; border-radius: 6px; padding: 8px 11px; font: inherit; font-weight: 650; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; color: inherit; }
+    button.primary, a.button.primary { background: var(--blue); color: white; }
+    button.secondary, a.button.secondary { background: #e8eef8; color: #1d3b74; }
+    input { min-width: min(420px, 100%); border: 1px solid var(--line); border-radius: 7px; padding: 9px 10px; font: inherit; background: #fff; color: var(--ink); }
+    main { padding: 18px 20px 28px; display: grid; grid-template-columns: 410px minmax(0, 1fr); gap: 14px; align-items: start; }
+    section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    h2 { margin: 0; padding: 12px 14px; font-size: 14px; border-bottom: 1px solid var(--line); background: #f8fafc; }
+    .body { padding: 13px 14px; display: grid; gap: 10px; }
+    .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .status, .meta, .empty, .note { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+    .list { display: grid; gap: 8px; }
+    .item { border: 1px solid #edf0f4; border-radius: 8px; padding: 10px; background: #fbfcfe; display: grid; gap: 5px; text-align: left; width: 100%; color: inherit; }
+    .item.active { border-color: #8eb1ed; background: #f4f8ff; }
+    .subject { font-weight: 750; overflow-wrap: anywhere; }
+    .actions, .files { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .pill { border: 1px solid var(--line); border-radius: 999px; padding: 4px 8px; font-size: 12px; background: #f8fafc; color: #344054; }
+    .attachment { border: 1px solid #edf0f4; border-radius: 7px; padding: 9px; display: grid; gap: 5px; background: #fbfcfe; }
+    .ok { color: var(--green); font-weight: 700; }
+    @media (max-width: 900px) { main { grid-template-columns: 1fr; } input { min-width: 0; width: 100%; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Archiv e-mailů</h1>
+    <div class="actions">
+      <button class="secondary" id="returnBtn">Zpět do Cockpitu</button>
+      <button class="primary" id="refreshBtn">Obnovit</button>
+    </div>
+  </header>
+  <main>
+    <section>
+      <h2>Hledání</h2>
+      <div class="body">
+        <div class="toolbar">
+          <input id="searchInput" placeholder="UID, předmět, odesílatel...">
+          <button class="primary" id="searchBtn">Hledat</button>
+        </div>
+        <div class="status" id="status">Načítám archiv...</div>
+        <div class="list" id="archiveList"></div>
+      </div>
+    </section>
+    <section>
+      <h2>Detail</h2>
+      <div class="body" id="detailPane">
+        <div class="empty">Vyber e-mail ze seznamu.</div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const listNode = document.getElementById("archiveList");
+    const detailPane = document.getElementById("detailPane");
+    const statusNode = document.getElementById("status");
+    const searchInput = document.getElementById("searchInput");
+    const searchBtn = document.getElementById("searchBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const returnBtn = document.getElementById("returnBtn");
+    let selectedArchiveId = "";
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (ch) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[ch]));
+    }
+
+    function fileSize(bytes) {
+      const value = Number(bytes || 0);
+      if (value >= 1024 * 1024) return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+      if (value >= 1024) return `${Math.round(value / 1024)} kB`;
+      return `${value} B`;
+    }
+
+    function renderList(items) {
+      if (!items.length) {
+        listNode.innerHTML = '<div class="empty">Nic nenalezeno.</div>';
+        return;
+      }
+      listNode.innerHTML = items.map((item) => `
+        <button class="item ${item.archive_id === selectedArchiveId ? "active" : ""}" data-archive-id="${escapeHtml(item.archive_id)}">
+          <div class="subject">${escapeHtml(item.subject || item.archive_id)}</div>
+          <div class="meta">UID ${escapeHtml(item.uid || "")} | ${escapeHtml(item.date || "")}</div>
+          <div class="meta">${escapeHtml(item.sender || "")}</div>
+          <div class="actions">
+            <span class="pill">odkazy: ${Number(item.links_count || 0)}</span>
+            <span class="pill">přílohy: ${Number(item.attachments_count || 0)}</span>
+          </div>
+        </button>
+      `).join("");
+      listNode.querySelectorAll("[data-archive-id]").forEach((button) => {
+        button.addEventListener("click", () => loadDetail(button.dataset.archiveId || ""));
+      });
+    }
+
+    function renderDetail(data) {
+      if (!data.ok) {
+        detailPane.innerHTML = `<div class="empty">${escapeHtml(data.message || "Archiv se nepodařilo načíst.")}</div>`;
+        return;
+      }
+      const files = data.files || [];
+      const attachments = data.attachments || [];
+      const downloaded = data.downloaded_attachments || [];
+      detailPane.innerHTML = `
+        <div class="subject">${escapeHtml(data.subject || data.archive_id)}</div>
+        <div class="meta">Archive ID: ${escapeHtml(data.archive_id || "")}</div>
+        <div class="meta">UID: ${escapeHtml(data.uid || "")}</div>
+        <div class="meta">Datum: ${escapeHtml(data.date || "")}</div>
+        <div class="meta">Odesílatel: ${escapeHtml(data.sender || "")}</div>
+        <div class="meta">Složka: ${escapeHtml(data.relative_path || "")}</div>
+        <div class="files">
+          ${files.map((file) => `<a class="button secondary" target="_blank" href="${escapeHtml(file.url)}">${escapeHtml(file.label)} (${fileSize(file.size_bytes)})</a>`).join("")}
+        </div>
+        <h2>Stažené přílohy v document inboxu</h2>
+        ${downloaded.length ? downloaded.map((item) => `
+          <div class="attachment">
+            <div class="subject">${escapeHtml(item.filename)}</div>
+            <div class="meta">${escapeHtml(item.content_type)} | ${fileSize(item.size_bytes)}</div>
+            <div class="meta">${escapeHtml(item.relative_path || "")}</div>
+            <div><a class="button secondary" target="_blank" href="${escapeHtml(item.url)}">Otevřít přílohu</a></div>
+          </div>
+        `).join("") : '<div class="empty">Žádná fyzicky stažená příloha nenalezena.</div>'}
+        <h2>Metadata příloh z e-mailu</h2>
+        ${attachments.length ? attachments.map((item) => `
+          <div class="attachment">
+            <div class="subject">${escapeHtml(item.filename || "(bez názvu)")}</div>
+            <div class="meta">${escapeHtml(item.content_type || "")} | ${fileSize(item.size_bytes)} | saved=${item.saved ? "ano" : "ne"}</div>
+          </div>
+        `).join("") : '<div class="empty">Bez metadat příloh.</div>'}
+        <div class="note">Bezpečnost: stránka čte jen lokální archiv. Nevolá e-mailový provider, neotevírá externí odkazy a nic nemaže ani neposílá.</div>
+      `;
+    }
+
+    async function loadList() {
+      statusNode.textContent = "Načítám...";
+      try {
+        const params = new URLSearchParams({q: searchInput.value || "", limit: "160"});
+        const res = await fetch(`/api/email-archive/list?${params.toString()}`);
+        const data = await res.json();
+        statusNode.textContent = data.message || "";
+        renderList(data.items || []);
+      } catch (err) {
+        statusNode.textContent = `Chyba načtení archivu: ${err}`;
+      }
+    }
+
+    async function loadDetail(archiveId) {
+      selectedArchiveId = archiveId;
+      detailPane.innerHTML = '<div class="empty">Načítám detail...</div>';
+      try {
+        const params = new URLSearchParams({archive_id: archiveId});
+        const res = await fetch(`/api/email-archive/detail?${params.toString()}`);
+        const data = await res.json();
+        renderDetail(data);
+        await loadList();
+      } catch (err) {
+        detailPane.innerHTML = `<div class="empty">Chyba načtení: ${escapeHtml(err)}</div>`;
+      }
+    }
+
+    function returnToCockpit() {
+      if (window.opener && !window.opener.closed) {
+        window.opener.focus();
+        window.close();
+        return;
+      }
+      window.location.href = "/";
+    }
+
+    searchBtn.addEventListener("click", loadList);
+    refreshBtn.addEventListener("click", loadList);
+    returnBtn.addEventListener("click", returnToCockpit);
+    searchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") loadList();
+    });
+    loadList();
+  </script>
+</body>
+</html>"""
 
 
 EMAIL_PROCESSING_HTML = """<!doctype html>
