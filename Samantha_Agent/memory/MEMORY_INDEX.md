@@ -11,6 +11,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Reports
 
+- `reports/systemovy_audit_projekty_tooly_vrstvy_2026_07_09.txt` - systemovy audit k 2026-07-09: projekty, tooly, vrstvy, provozni poznamka, backup warning, capability audit a doporuceni pro vyber dalsi prace; report je git-safe a necetl private vault/fulltexty.
 - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_161548.txt` - [PRIPOMENOUT] aktualni systemovy audit k 2026-06-30 16:15: projekty, tooly, vrstvy, priority, provozni stav, capability gaps a navrh nejmensiho dalsiho kroku; audit vznikl z cisteho gitu a bez hlavních health varovani.
 - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_151531.txt` - historicky systemovy audit k 2026-06-30 15:15: projekty, tooly, vrstvy, priority, provozni stav, capability gaps a tehdejsi navrh nejmensiho dalsiho kroku.
 - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_23.txt` - historicky systemovy audit: projekty, tooly, vrstvy, tehdejsi priority, provozni stav, capability gaps a navrh tehdejsiho nejmensiho dalsiho kroku.
@@ -63,6 +64,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `handoffs/lekarna_photo_import_pil_publish_retire_verified_2026_07_09.md` - Lekarna foto import end-to-end overen: OpenAI OCR, SUKL DLP, online PIL, `PIL_Short`, prijem na sklad, automaticky encrypted bundle commit/push, testovaci SERTIVAN prijat a vyrazen; export uz vynechava radky `vyradeno`.
 - `handoffs/git_commit_cleanup_a1_2026_05_23.md` - A1+ commitovy uklid: velka memory/RAG davka je commitnuta a pushnuta jako `ef15589`; pravidlo do odvolani je navrhovat tematicke commity pri dalsich vetsich rozpracovanych zmenach.
 - `handoffs/cockpit_recovery_center_priority_2026_06_03.md` - historicky Cockpit Recovery centrum MVP: read-only navazani po padu Samanthy/Codexu s poslednim `session_*` autosave timestampem, git statusem, handoffem a postupem `samantha` / `codex resume --last`; prekryto aktualnim radkem `Cockpit Recovery centrum` v `ACTIVE_PROJECTS.md`.
 - `handoffs/cockpit_development_priorities_2026_06_03.md` - historicky seznam 6 priorit vyvoje Cockpitu; vsech 6 MVP bodu je hotovych a prekrytych aktualnim radkem `Cockpit Recovery centrum` v `ACTIVE_PROJECTS.md`.
