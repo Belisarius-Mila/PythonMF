@@ -298,6 +298,32 @@ Tento stav je checkpointnutý v
 `memory/handoffs/janicka_light_samantha_bridge_checkpoint_2026_07_03.md`.
 Další krok je ruční retest více navazujících dotazů přímo z okna `Janička`.
 
+## Aktuální checkpoint 2026-07-09 - nouzová záloha bez VS Code
+
+Reálný test bez VS Code ukázal, že Janička light je použitelná pro běžné
+odpovědi, ale při složitější práci může narazit na timeout nebo omezený rozsah.
+Proto byla doplněna samostatná nouzová cesta:
+
+- v Janičce je jako první karta `Když Adam light nestačí`,
+- tlačítko `Otevřít plného Adama` volá pevný endpoint
+  `/api/janicka/full-adam/open`,
+- endpoint otevře Terminal s přímým interaktivním
+  `codex --no-alt-screen -C ...`,
+- startovní prompt říká Janě, že má psát normální větou a nemusí znát příkazy,
+- bez potvrzení se nemá nic posílat, mazat, přesouvat, platit ani měnit,
+- UI zobrazuje i ruční fallback pro případ, že automatické otevření Terminalu
+  selže.
+
+Na Macu jsou mimo git připravené viditelné launchery pro otevření Cockpitu a
+podepsaná iPhone zkratka `Janička SOS.shortcut` je připravená k nasdílení Janě.
+Zkratka sama Mac nespouští na dálku; je to navigační karta s kroky.
+
+Checkpoint je uložený v
+`memory/handoffs/janicka_full_adam_cockpit_recovery_ios_card_2026_07_09.md`.
+Další krok je nasdílet/importovat zkratku na Janin iPhone a společně projít
+celou cestu: iPhone karta -> Mac `Aplikace` -> `JANIČKA OTEVŘÍT COCKPIT`
+-> `Janička` -> `Otevřít plného Adama`.
+
 ## Bezpečnost / neukládat
 
 - Do tohoto git-safe projektu neukládat hesla, tokeny, recovery klíče,

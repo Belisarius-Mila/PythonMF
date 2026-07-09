@@ -54,6 +54,7 @@ from app.cockpit import (
     cockpit_transcribe_voice_action,
     janicka_light_status_action,
     janicka_orphaned_codex_session_report,
+    open_janicka_full_adam_action,
     terminate_orphaned_janicka_sessions_action,
     save_voice_command_to_inbox,
     transcribe_audio_base64_isolated,
@@ -2430,6 +2431,11 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("janickaFamilyOrganizerBtn", COCKPIT_HTML)
         self.assertIn("janickaFamilyProjectsBtn", COCKPIT_HTML)
         self.assertIn("janickaAskAdamBtn", COCKPIT_HTML)
+        self.assertIn("janickaFullAdamBtn", COCKPIT_HTML)
+        self.assertIn("janickaFullAdamStatus", COCKPIT_HTML)
+        self.assertIn("Když Adam light nestačí", COCKPIT_HTML)
+        self.assertIn("/api/janicka/full-adam/open", COCKPIT_HTML)
+        self.assertIn("openFullAdamForJanicka", COCKPIT_HTML)
         self.assertIn("janickaChatModal", COCKPIT_HTML)
         self.assertIn("janickaChatInput", COCKPIT_HTML)
         self.assertIn("janickaChatSendBtn", COCKPIT_HTML)
@@ -5548,6 +5554,27 @@ Dalsi krok:
         self.assertIn("<li>Najít dokument</li>", page)
         self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", page)
         self.assertNotIn("<script>alert(1)</script>", page)
+
+    def test_open_janicka_full_adam_action_uses_fixed_terminal_command(self) -> None:
+        calls: list[list[str]] = []
+
+        def fake_runner(args, **kwargs):
+            calls.append(args)
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
+
+        result = open_janicka_full_adam_action(runner=fake_runner)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "terminal_opened")
+        self.assertEqual(calls[0][0], "/usr/bin/osascript")
+        self.assertIn("Terminal", calls[0][2])
+        self.assertIn("codex", calls[0][2])
+        self.assertIn("--no-alt-screen", calls[0][2])
+        self.assertIn("plný Adam/Codex pro Janu", calls[0][2])
+        self.assertIn("Jana nemusí znát žádnou syntaxi", calls[0][2])
+        self.assertIn("manual_steps", result)
+        self.assertIn("cd ", result["manual_command"])
+        self.assertIn("codex --no-alt-screen", result["manual_command"])
 
     def test_document_search_returns_structured_redacted_results(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

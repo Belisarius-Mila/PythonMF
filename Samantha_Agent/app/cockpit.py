@@ -10745,7 +10745,12 @@ def cockpit_voice_frontend_event_action(
     }
 
 
-def open_terminal_command(command: str, label: str) -> dict[str, Any]:
+def open_terminal_command(
+    command: str,
+    label: str,
+    *,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> dict[str, Any]:
     script = (
         'tell application "Terminal"\n'
         "  activate\n"
@@ -10753,7 +10758,7 @@ def open_terminal_command(command: str, label: str) -> dict[str, Any]:
         "end tell\n"
     )
     try:
-        completed = subprocess.run(
+        completed = runner(
             ["/usr/bin/osascript", "-e", script],
             capture_output=True,
             text=True,
@@ -10773,6 +10778,54 @@ def open_samantha_chat() -> dict[str, Any]:
 
 def open_codex_cli() -> dict[str, Any]:
     return open_terminal_command("source ~/.zshrc; codex resume --last || codex", "Codex CLI")
+
+
+def janicka_full_adam_prompt() -> str:
+    return """Jsi plný Adam/Codex pro Janu, otevřený z nouzového tlačítka `Janička`.
+
+Odpovídej česky, jednoduše a prakticky. Jana nemusí znát žádnou syntaxi příkazů.
+Když Jana napíše běžnou větou, co potřebuje, nejdřív vysvětli nejbližší bezpečný krok a pak ho podle možností proveď.
+
+Bezpečnost:
+- Čtení a hledání dokumentů/e-mailů je v pořádku.
+- Nic neposílej, nemaž, nepřesouvej, neplať a neměň účty bez jasného potvrzení.
+- Pokud je potřeba technický příkaz, nečekej, že ho Jana zná; navrhni ho sám a vysvětli, co udělá.
+- Citlivé texty neopisuj zbytečně do chatu ani do gitu.
+
+Začni krátkou větou pro Janu: `Jano, jsem plný Adam. Piš normální větou, co potřebuješ; příkazy znát nemusíš.`"""
+
+
+def open_janicka_full_adam_action(
+    *,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> dict[str, Any]:
+    codex_bin = shutil.which("codex") or "/usr/local/bin/codex"
+    prompt = janicka_full_adam_prompt()
+    command = (
+        "source ~/.zshrc; "
+        "echo 'Oteviram plneho Adama pro Janu.'; "
+        "echo 'Az se Adam ozve, pis normalni vetou. Prikazy znat nemusis.'; "
+        f"{shell_quote_for_applescript(codex_bin)} --no-alt-screen -C {shell_quote_for_applescript(str(PROJECT_ROOT))} "
+        f"{shell_quote_for_applescript(prompt)}"
+    )
+    result = open_terminal_command(command, "Nouzový plný Adam", runner=runner)
+    manual_steps = [
+        "Když se okno neotevře, otevři aplikaci Terminal.",
+        f"Do Terminalu napiš: cd {PROJECT_ROOT}",
+        "Potom napiš: codex --no-alt-screen",
+        "Až se Adam spustí, napiš běžnou větou, co potřebuješ. Příkazy znát nemusíš.",
+    ]
+    return {
+        **result,
+        "status": "terminal_opened" if result.get("ok") else "terminal_open_failed",
+        "manual_command": f"cd {PROJECT_ROOT} && codex --no-alt-screen",
+        "manual_steps": manual_steps,
+        "message": (
+            "Otevřel jsem plného Adama. Do nového okna může Jana psát normální větou; příkazy znát nemusí."
+            if result.get("ok")
+            else f"{result.get('message', 'Terminál se nepodařilo otevřít')} Ruční postup je zobrazený v Janičce."
+        ),
+    }
 
 
 def cockpit_speak_action(text: str, *, voice: str = DEFAULT_VOICE) -> dict[str, Any]:
@@ -11873,6 +11926,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "indirect",
     },
     {
+        "path": "/api/janicka/full-adam/open",
+        "label": "Janička nouzove otevrit plneho Adama",
+        "risk": "local_open",
+        "confirmation": "fixed_terminal_command",
+        "handler_name": "open_janicka_full_adam_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/reminders/done",
         "label": "Oznacit pripominku jako splnenou",
         "risk": "private_write",
@@ -12501,6 +12562,9 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/codex/open":
                     self.respond_json(open_codex_cli())
+                    return
+                if parsed.path == "/api/janicka/full-adam/open":
+                    self.respond_json(open_janicka_full_adam_action())
                     return
                 if parsed.path == "/api/reminders/done":
                     payload = self.read_json()
@@ -14561,10 +14625,13 @@ COCKPIT_HTML = """<!doctype html>
     .janicka-subtitle { margin: 0; color: #533044; font-size: 14px; line-height: 1.45; }
     .janicka-grid { display: grid; grid-template-columns: repeat(2, minmax(260px, 1fr)); gap: 10px; }
     .janicka-action { border: 1px solid #fbcfe8; border-radius: 8px; padding: 12px; background: #fff; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+    .janicka-action.emergency { grid-column: 1 / -1; border-color: #fecaca; background: #fff7f7; }
     .janicka-action-title { font-weight: 750; color: #581c35; }
+    .janicka-action.emergency .janicka-action-title { color: #991b1b; }
     .janicka-action-text { margin-top: 3px; color: #5f4052; font-size: 13px; line-height: 1.4; }
     .janicka-action button { background: #be185d; color: white; }
     .janicka-action button.secondary { background: #fce7f3; color: #831843; }
+    .janicka-action button.emergency { background: #b91c1c; color: white; }
     .janicka-note { border: 1px solid #fed7aa; border-radius: 8px; background: #fffbeb; color: #5f370e; padding: 11px 12px; font-size: 13px; line-height: 1.45; }
     .janicka-return { position: fixed; right: 18px; bottom: 18px; z-index: 14; box-shadow: 0 10px 28px rgba(88, 28, 53, .22); background: #be185d; color: white; }
     .janicka-chat-modal { width: min(920px, 100%); background: #fff7fb; border-color: #fbcfe8; }
@@ -15164,6 +15231,13 @@ COCKPIT_HTML = """<!doctype html>
           <p class="janicka-subtitle">Tahle obrazovka je vstup pro Janu. Neomezuje přístup; jen převádí hotové části Samanthy do srozumitelných kroků.</p>
         </div>
         <div class="janicka-grid" aria-label="Janička rozcestník">
+          <div class="janicka-action emergency">
+            <div>
+              <div class="janicka-action-title">Když Adam light nestačí</div>
+              <div class="janicka-action-text">Otevře plného Adama, kde Jana píše normální větou. Není potřeba znát příkazy.</div>
+            </div>
+            <button class="emergency" id="janickaFullAdamBtn" type="button">Otevřít plného Adama</button>
+          </div>
           <div class="janicka-action">
             <div>
               <div class="janicka-action-title">Najít dokument</div>
@@ -15221,7 +15295,7 @@ COCKPIT_HTML = """<!doctype html>
             <button class="secondary" id="janickaRecoveryBtn" type="button">Otevřít</button>
           </div>
         </div>
-        <div class="janicka-note">Vývoj, terminál a diagnostika zůstávají v běžném Cockpitu. Jana sem nemá chodit přes technické pojmy; má začít tím, co potřebuje udělat.</div>
+        <div id="janickaFullAdamStatus" class="janicka-note">Když běžný chat nestačí, tlačítko otevře plného Adama v Terminalu. Jana potom píše normální větou. Kdyby automatika selhala: otevřít aplikaci Terminal, napsat <code>cd /Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent</code>, stisknout Enter, potom napsat <code>codex --no-alt-screen</code>.</div>
         <div class="actions">
           <button class="secondary" id="janickaWebAppsBtn" type="button">Všechny aplikace</button>
           <button class="secondary" id="janickaProjectsBtn" type="button">Projekty</button>
@@ -15593,6 +15667,8 @@ COCKPIT_HTML = """<!doctype html>
     const janickaLekarnaBtn = document.getElementById("janickaLekarnaBtn");
     const janickaFamilyBtn = document.getElementById("janickaFamilyBtn");
     const janickaAskAdamBtn = document.getElementById("janickaAskAdamBtn");
+    const janickaFullAdamBtn = document.getElementById("janickaFullAdamBtn");
+    const janickaFullAdamStatus = document.getElementById("janickaFullAdamStatus");
     const janickaRemindersBtn = document.getElementById("janickaRemindersBtn");
     const janickaRecoveryBtn = document.getElementById("janickaRecoveryBtn");
     const janickaWebAppsBtn = document.getElementById("janickaWebAppsBtn");
@@ -15967,6 +16043,8 @@ COCKPIT_HTML = """<!doctype html>
         "janickaLekarnaBtn",
         "janickaFamilyBtn",
         "janickaAskAdamBtn",
+        "janickaFullAdamBtn",
+        "janickaFullAdamStatus",
         "janickaRemindersBtn",
         "janickaRecoveryBtn",
         "janickaWebAppsBtn",
@@ -21264,6 +21342,25 @@ COCKPIT_HTML = """<!doctype html>
       openJanickaChatModal();
     }
 
+    async function openFullAdamForJanicka() {
+      janickaFullAdamBtn.disabled = true;
+      janickaFullAdamStatus.textContent = "Otevírám plného Adama v Terminalu...";
+      try {
+        const data = await postJson("/api/janicka/full-adam/open", {});
+        const steps = Array.isArray(data.manual_steps) ? data.manual_steps.filter(Boolean) : [];
+        const manual = data.manual_command ? `\\n\\nRuční příkaz: ${data.manual_command}` : "";
+        const stepsText = steps.length ? `\\n\\nKdyž se okno neotevře:\\n- ${steps.join("\\n- ")}` : "";
+        janickaFullAdamStatus.textContent = `${data.message || "Hotovo."}${manual}${stepsText}`;
+      } catch (err) {
+        recordFrontendError(err);
+        janickaFullAdamStatus.textContent =
+          `Plného Adama se nepodařilo otevřít: ${err}\n\n` +
+          "Ruční postup: otevři aplikaci Terminal, napiš cd /Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent, stiskni Enter a potom napiš codex --no-alt-screen.";
+      } finally {
+        janickaFullAdamBtn.disabled = false;
+      }
+    }
+
     let janickaChatHistory = [];
 
     function openJanickaChatModal() {
@@ -21631,6 +21728,7 @@ COCKPIT_HTML = """<!doctype html>
     });
     janickaFamilyBtn.addEventListener("click", openJanickaFamilyModal);
     janickaAskAdamBtn.addEventListener("click", focusAdamForJanicka);
+    janickaFullAdamBtn.addEventListener("click", openFullAdamForJanicka);
     janickaRemindersBtn.addEventListener("click", () => {
       armJanickaModalReturn("reminders");
       closeJanickaModal();

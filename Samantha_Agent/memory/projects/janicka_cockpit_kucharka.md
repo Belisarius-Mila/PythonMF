@@ -127,6 +127,28 @@ Dobré věty:
 
 Není potřeba psát technické příkazy.
 
+## Když běžný Adam nestačí
+
+Použít, když Jana potřebuje plnější pomoc než běžný chat v Janičce, například
+když je potřeba déle hledat, číst více podezřelých položek nebo krok po kroku
+řešit složitější věc.
+
+Postup:
+
+1. V Janičce kliknout na `Otevřít plného Adama`.
+2. Otevře se nové okno Terminalu.
+3. Až se Adam ozve, psát normální větou, co Jana potřebuje.
+
+Jana nemusí znát příkazy. Má popsat cíl lidsky, například:
+
+- `Potřebuji najít starší e-mail k hlášení nájemníků.`
+- `Nevím, co je urgentní, pomoz mi zkontrolovat připomenutí.`
+- `Najdi dokument jen pro čtení, nic neposílej a nemaž.`
+
+Když se nové okno neotevře, Janička ukazuje ruční postup. Základ je otevřít
+aplikaci Terminal, přejít do projektu Samanthy a spustit plného Adama. Pokud
+si Jana není jistá, má raději zavolat technickou pomoc.
+
 ## Připomenutí
 
 Použít, když Jana potřebuje zjistit otevřené termíny, úkoly nebo důležité
