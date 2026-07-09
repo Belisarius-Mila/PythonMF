@@ -6961,9 +6961,10 @@ def lekarna_admin_page_html() -> str:
         <label for="manifestPath">Manifest z posledního návrhu</label>
         <input id="manifestPath" readonly>
         <div class="row">
-          <button id="reloadManifestBtn" class="secondary">Načíst kontrolu návrhu</button>
+          <button id="reloadManifestBtn" class="secondary">Znovu načíst kontrolu</button>
           <button id="saveManifestBtn" class="secondary">Uložit opravy návrhu</button>
         </div>
+        <div id="manifestLoadStatus" class="muted">Kontrola návrhu se po přípravě načte automaticky. Tlačítko ji jen znovu přenačte.</div>
         <button id="retryPilBtn" class="secondary">Zkusit PIL znovu</button>
         <div id="manifestEditor" class="items"></div>
         <label for="importConfirm">Potvrzení pro příjem na sklad: {import_phrase}</label>
@@ -6992,6 +6993,7 @@ def lekarna_admin_page_html() -> str:
     const manifestPath = document.getElementById("manifestPath");
     const reloadManifestBtn = document.getElementById("reloadManifestBtn");
     const saveManifestBtn = document.getElementById("saveManifestBtn");
+    const manifestLoadStatus = document.getElementById("manifestLoadStatus");
     const retryPilBtn = document.getElementById("retryPilBtn");
     const manifestEditor = document.getElementById("manifestEditor");
     const importConfirm = document.getElementById("importConfirm");
@@ -7257,8 +7259,15 @@ def lekarna_admin_page_html() -> str:
       return rows;
     }}
 
-    async function loadManifest() {{
+    function setManifestLoadStatus(message) {{
+      if (manifestLoadStatus) manifestLoadStatus.textContent = message;
+    }}
+
+    async function loadManifest(source = "manual") {{
       reloadManifestBtn.disabled = true;
+      const originalText = reloadManifestBtn.textContent;
+      reloadManifestBtn.textContent = "Načítám kontrolu...";
+      setManifestLoadStatus("Načítám aktuální kontrolu návrhu z manifestu.");
       try {{
         const data = await postJson("/api/lekarna/import/manifest/load", {{
           manifest_path: manifestPath.value,
@@ -7266,12 +7275,17 @@ def lekarna_admin_page_html() -> str:
         }});
         if (!data.ok) {{
           manifestEditor.innerHTML = `<div class="result">${{escapeText(data.message || "Manifest se nepodařilo načíst.")}}</div>`;
+          setManifestLoadStatus(data.message || "Kontrolu návrhu se nepodařilo načíst.");
           return;
         }}
         if (data.manifest_path) manifestPath.value = data.manifest_path;
         renderManifestEditor(data);
+        const loadedAt = new Date().toLocaleTimeString("cs-CZ", {{hour: "2-digit", minute: "2-digit", second: "2-digit"}});
+        const prefix = source === "auto" ? "Kontrola návrhu načtena automaticky" : "Kontrola návrhu znovu načtena";
+        setManifestLoadStatus(`${{prefix}} v ${{loadedAt}}.`);
       }} finally {{
         reloadManifestBtn.disabled = false;
+        reloadManifestBtn.textContent = originalText || "Znovu načíst kontrolu";
       }}
     }}
 
@@ -7399,7 +7413,7 @@ def lekarna_admin_page_html() -> str:
         if (data.manifest_path) manifestPath.value = data.manifest_path;
         if (data.ok) {{
           draftResult.textContent += `\\nFotky: ${{data.photos}} | nové: ${{data.new_candidates}} | duplicity: ${{data.duplicate_existing}} | revize: ${{data.needs_review}}`;
-          await loadManifest();
+          await loadManifest("auto");
         }}
       }} finally {{
         draftImportBtn.disabled = false;
