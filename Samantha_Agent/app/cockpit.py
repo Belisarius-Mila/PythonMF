@@ -4396,20 +4396,49 @@ def clear_email_processing_decision(*, item_id: str, path: Path) -> None:
 
 
 def cockpit_status() -> dict[str, Any]:
-    downloads = safe_downloads_status()
-    document_work = document_work_status(downloads=downloads)
-    document_intake = document_intake_status(downloads=downloads)
-    document_cases = document_cases_status()
-    document_classification = document_classification_status()
-    document_due_candidates = document_due_candidates_status()
-    reminders = reminders_status()
-    urgent = urgent_reminders_status()
-    backup_status = backup_activity_status()
+    started_at = time.perf_counter()
+    section_timings: dict[str, float] = {}
+
+    def timed_section(name: str, callback: Callable[[], Any]) -> Any:
+        section_started_at = time.perf_counter()
+        value = callback()
+        section_timings[name] = round((time.perf_counter() - section_started_at) * 1000, 2)
+        return value
+
+    downloads = timed_section("downloads", safe_downloads_status)
+    document_work = timed_section("document_work", lambda: document_work_status(downloads=downloads))
+    document_intake = timed_section("document_intake", lambda: document_intake_status(downloads=downloads))
+    document_cases = timed_section("document_cases", document_cases_status)
+    document_classification = timed_section("document_classification", document_classification_status)
+    document_due_candidates = timed_section("document_due_candidates", document_due_candidates_status)
+    reminders = timed_section("reminders", reminders_status)
+    urgent = timed_section("urgent_reminders", urgent_reminders_status)
+    backup_status = timed_section("backup_status", backup_activity_status)
+    action_queue = timed_section(
+        "action_queue",
+        lambda: action_queue_status(document_work=document_work, reminders=reminders, urgent_reminders=urgent),
+    )
+    vault = timed_section("vault", document_vault_status_summary)
+    scandocu = timed_section("scandocu", probe_scandocu)
+    voice_mode = timed_section("voice_mode", load_voice_mode_status)
+    voice_bridge = timed_section("voice_bridge", adam_voice_bridge_status)
+    git_status = timed_section("git", git_status_summary)
+    total_ms = round((time.perf_counter() - started_at) * 1000, 2)
+    slowest_sections = [
+        {"name": name, "ms": ms}
+        for name, ms in sorted(section_timings.items(), key=lambda item: item[1], reverse=True)[:3]
+    ]
+
     return {
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "server": {
             "code_stamp": COCKPIT_CODE_STAMP,
             "pid": os.getpid(),
+        },
+        "status_timing": {
+            "total_ms": total_ms,
+            "sections_ms": section_timings,
+            "slowest_sections": slowest_sections,
         },
         "downloads": downloads,
         "document_work": document_work,
@@ -4417,16 +4446,16 @@ def cockpit_status() -> dict[str, Any]:
         "document_cases": document_cases,
         "document_classification": document_classification,
         "document_due_candidates": document_due_candidates,
-        "action_queue": action_queue_status(document_work=document_work, reminders=reminders, urgent_reminders=urgent),
+        "action_queue": action_queue,
         "backup": backup_status["message"],
         "backup_status": backup_status,
-        "vault": document_vault_status_summary(),
+        "vault": vault,
         "reminders": reminders,
         "urgent_reminders": urgent,
-        "scandocu": probe_scandocu(),
-        "voice_mode": load_voice_mode_status(),
-        "voice_bridge": adam_voice_bridge_status(),
-        "git": git_status_summary(),
+        "scandocu": scandocu,
+        "voice_mode": voice_mode,
+        "voice_bridge": voice_bridge,
+        "git": git_status,
     }
 
 

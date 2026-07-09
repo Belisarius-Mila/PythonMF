@@ -2895,6 +2895,17 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("voice_mode", status)
         self.assertIn("voice_bridge", status)
         self.assertIn("git", status)
+        self.assertIn("status_timing", status)
+        timing = status["status_timing"]
+        self.assertIsInstance(timing["total_ms"], float)
+        self.assertIn("sections_ms", timing)
+        self.assertIn("document_work", timing["sections_ms"])
+        self.assertIn("voice_bridge", timing["sections_ms"])
+        self.assertIn("slowest_sections", timing)
+        self.assertLessEqual(len(timing["slowest_sections"]), 3)
+        self.assertNotIn("quantitative", status)
+        self.assertNotIn("projects", status)
+        self.assertNotIn("consistency", status)
 
     def test_server_health_status_is_lightweight(self) -> None:
         with patch("app.cockpit.cockpit_status") as cockpit_status_mock:
