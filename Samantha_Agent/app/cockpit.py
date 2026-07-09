@@ -112,6 +112,7 @@ from app.lekarna.service import (
     search_domaci_leky_records,
 )
 from app.lekarna.sukl_pil_archive import build_pil_short_from_text, resolve_sukl_pil_document
+from app.lekarna.web_bundle import refresh_lekarna_web_bundle
 from app.quantitative_status import DEFAULT_METRICS_PATH as QUANTITATIVE_STATUS_METRICS_PATH
 from app.quantitative_status import ExtensionStats as QuantitativeExtensionStats
 from app.quantitative_status import run_samantha_quantitative_status
@@ -639,15 +640,18 @@ def lekarna_retire_apply_action(payload: dict[str, Any]) -> dict[str, Any]:
     if not query:
         return {"ok": False, "message": "Zadej název nebo část názvu léku.", "error": "missing_query"}
     try:
+        message = format_retire_domaci_lek(
+            query=query,
+            reason=reason,
+            user_confirmed=bool(payload.get("user_confirmed")),
+            confirmation_text=confirmation_text,
+        )
+        web_publish = refresh_and_publish_lekarna_web_bundle()
         return {
             "ok": True,
             "mode": "apply",
-            "message": format_retire_domaci_lek(
-                query=query,
-                reason=reason,
-                user_confirmed=bool(payload.get("user_confirmed")),
-                confirmation_text=confirmation_text,
-            ),
+            "message": message,
+            **web_publish,
         }
     except ValueError as exc:
         return {
@@ -772,6 +776,17 @@ def publish_lekarna_encrypted_bundle(
         "message": "Produkční šifrovaný balíček byl commitnutý a pushnutý.",
         "commit": commit_line,
         "path": str(relative_path),
+    }
+
+
+def refresh_and_publish_lekarna_web_bundle() -> dict[str, Any]:
+    refresh = refresh_lekarna_web_bundle()
+    publish = publish_lekarna_encrypted_bundle(refresh.encrypted_path)
+    return {
+        "web_export_path": str(refresh.export_path) if refresh.export_path else "",
+        "encrypted_bundle_path": str(refresh.encrypted_path) if refresh.encrypted_path else "",
+        "production_publish": publish,
+        "warnings": [safe_text(str(warning)) for warning in refresh.warnings],
     }
 
 
@@ -7430,6 +7445,16 @@ def lekarna_admin_page_html() -> str:
           confirmation_text: retireConfirm.value
         }});
         retirePreview.textContent = data.message || "Vyřazení doběhlo.";
+        if (data.ok) {{
+          if (data.web_export_path) retirePreview.textContent += `\\nWeb export: ${{data.web_export_path}}`;
+          if (data.encrypted_bundle_path) retirePreview.textContent += `\\nŠifrovaný balíček: ${{data.encrypted_bundle_path}}`;
+          if (data.production_publish && data.production_publish.message) {{
+            retirePreview.textContent += `\\nProdukce: ${{data.production_publish.message}}`;
+          }}
+          if (Array.isArray(data.warnings) && data.warnings.length) {{
+            retirePreview.textContent += `\\nUpozornění:\\n- ${{data.warnings.join("\\n- ")}}`;
+          }}
+        }}
       }} finally {{
         applyRetireBtn.disabled = false;
       }}

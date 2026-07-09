@@ -350,6 +350,36 @@ class CockpitTests(unittest.TestCase):
             confirmation_text="",
         )
 
+    def test_lekarna_retire_apply_action_refreshes_and_publishes_web_bundle(self) -> None:
+        with patch("app.cockpit.format_retire_domaci_lek", return_value="Vyrazeni leku - hotovo") as apply_mock, patch(
+            "app.cockpit.refresh_and_publish_lekarna_web_bundle",
+            return_value={
+                "web_export_path": "/tmp/lekarna.json",
+                "encrypted_bundle_path": "/tmp/lekarna.enc.json",
+                "production_publish": {"ok": True, "status": "published", "message": "publikováno"},
+                "warnings": [],
+            },
+        ) as publish_mock:
+            result = lekarna_retire_apply_action(
+                {
+                    "query": "SERTIVAN",
+                    "reason": "test",
+                    "user_confirmed": True,
+                    "confirmation_text": "Potvrzuji vyrazeni leku",
+                }
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["mode"], "apply")
+        self.assertEqual(result["production_publish"]["status"], "published")
+        apply_mock.assert_called_once_with(
+            query="SERTIVAN",
+            reason="test",
+            user_confirmed=True,
+            confirmation_text="Potvrzuji vyrazeni leku",
+        )
+        publish_mock.assert_called_once()
+
     def test_lekarna_search_action_returns_structured_rows(self) -> None:
         lek = SimpleNamespace(
             nazev="HEPARIN AL",

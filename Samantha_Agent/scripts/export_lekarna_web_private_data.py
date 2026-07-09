@@ -37,6 +37,8 @@ def main() -> None:
         name = (row.get("nazev") or "").strip()
         if not name:
             continue
+        if _is_retired_row(row):
+            continue
         box_key = _box_key(row)
         boxes[box_key]["medicines"].append(name)
         medicines[name] = _medicine_payload(row, export_photo(row, name))
@@ -124,6 +126,14 @@ def _is_supplement_row(row: dict[str, str]) -> bool:
     )
     return any(term in searchable_haystack for term in include_terms) and not any(
         term in exclusion_haystack for term in exclude_terms
+    )
+
+
+def _is_retired_row(row: dict[str, str]) -> bool:
+    return (
+        _normalize(row.get("mnozstvi") or "") == "vyradeno"
+        or _normalize(row.get("umisteni") or "") == "vyradeno"
+        or "vyradeno" in _normalize(row.get("poznamky") or "")
     )
 
 
