@@ -9,12 +9,14 @@ import sys
 import time
 import urllib.error
 import urllib.request
+import urllib.parse
 from pathlib import Path
 
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_PORT = 8770
 FALLBACK_PORTS = range(DEFAULT_PORT + 1, DEFAULT_PORT + 10)
+READY_PATHS = ("/", "/api/status", "/api/recovery/status", "/api/web-apps")
 CODE_STAMP_PATHS = (
     PROJECT_DIR / "app" / "cockpit.py",
     PROJECT_DIR / "scripts" / "cockpit_server.py",
@@ -39,6 +41,18 @@ def url_ok(url: str, *, timeout: float = 1.5) -> bool:
             return 200 <= response.status < 300
     except (OSError, urllib.error.URLError):
         return False
+
+
+def endpoint_ok(host: str, port: int, path: str, *, timeout: float = 4.0) -> bool:
+    try:
+        with urllib.request.urlopen(f"http://{host}:{port}{path}", timeout=timeout) as response:
+            return 200 <= response.status < 300
+    except (OSError, urllib.error.URLError):
+        return False
+
+
+def server_ready(host: str, port: int) -> bool:
+    return all(endpoint_ok(host, port, path) for path in READY_PATHS)
 
 
 def status_payload(host: str, port: int, *, timeout: float = 1.5) -> dict[str, object] | None:
@@ -190,8 +204,15 @@ def port_is_busy(host: str, port: int) -> bool:
         return False
 
 
+def fresh_url(url: str) -> str:
+    parsed = urllib.parse.urlsplit(url)
+    query = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True)
+    query.append(("cockpit_launch", str(int(time.time()))))
+    return urllib.parse.urlunsplit(parsed._replace(query=urllib.parse.urlencode(query)))
+
+
 def open_browser(url: str) -> None:
-    subprocess.run(["/usr/bin/open", url], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.run(["/usr/bin/open", fresh_url(url)], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 def start_server(host: str, port: int, log_file: Path) -> None:
@@ -221,6 +242,19 @@ def wait_until_ok(url: str, *, attempts: int = 40, delay: float = 0.2) -> bool:
     return False
 
 
+def wait_until_ready(host: str, port: int, *, attempts: int = 30, delay: float = 0.5) -> bool:
+    stable_hits = 0
+    for _ in range(attempts):
+        if server_ready(host, port):
+            stable_hits += 1
+            if stable_hits >= 2:
+                return True
+        else:
+            stable_hits = 0
+        time.sleep(delay)
+    return False
+
+
 def open_or_start_fallback(host: str, *, no_open: bool) -> int:
     for port in FALLBACK_PORTS:
         url = f"http://{host}:{port}"
@@ -228,6 +262,9 @@ def open_or_start_fallback(host: str, *, no_open: bool) -> int:
 
         if url_ok(url):
             if not ensure_current_server(host, port):
+                return 1
+            if not wait_until_ready(host, port):
+                print(f"Nouzový Cockpit na portu {port} odpovídá neúplně; neotvírám nestabilní stránku.", file=sys.stderr)
                 return 1
             if not no_open:
                 open_browser(url)
@@ -238,7 +275,7 @@ def open_or_start_fallback(host: str, *, no_open: bool) -> int:
             continue
 
         start_server(host, port, log_file)
-        if wait_until_ok(url):
+        if wait_until_ready(host, port):
             if not no_open:
                 open_browser(url)
             print(f"Nouzový Samantha Cockpit spuštěn: {url}")
@@ -268,6 +305,9 @@ def main() -> int:
     if url_ok(url):
         if not ensure_current_server(args.host, args.port):
             return 1
+        if not wait_until_ready(args.host, args.port):
+            print(f"Samantha Cockpit na {url} odpovídá neúplně; neotvírám nestabilní stránku.", file=sys.stderr)
+            return 1
         if not args.no_open:
             open_browser(url)
         print(f"Samantha Cockpit už běží: {url}")
@@ -282,7 +322,7 @@ def main() -> int:
         return 1
 
     start_server(args.host, args.port, log_file)
-    if wait_until_ok(url):
+    if wait_until_ready(args.host, args.port):
         if not args.no_open:
             open_browser(url)
         print(f"Samantha Cockpit spuštěn: {url}")

@@ -30,12 +30,14 @@ class OpenCockpitTests(unittest.TestCase):
             patch.object(sys, "argv", ["open_cockpit.py"]),
             patch.object(open_cockpit, "url_ok", return_value=True),
             patch.object(open_cockpit, "ensure_current_server", return_value=True) as ensure_current_server,
+            patch.object(open_cockpit, "wait_until_ready", return_value=True) as wait_until_ready,
             patch.object(open_cockpit, "open_browser") as open_browser,
         ):
             result = open_cockpit.main()
 
         self.assertEqual(result, 0)
         ensure_current_server.assert_called_once_with("127.0.0.1", 8770)
+        wait_until_ready.assert_called_once_with("127.0.0.1", 8770)
         open_browser.assert_called_once_with("http://127.0.0.1:8770")
 
     def test_main_does_not_open_running_server_when_current_check_fails(self) -> None:
@@ -43,6 +45,21 @@ class OpenCockpitTests(unittest.TestCase):
             patch.object(sys, "argv", ["open_cockpit.py"]),
             patch.object(open_cockpit, "url_ok", return_value=True),
             patch.object(open_cockpit, "ensure_current_server", return_value=False),
+            patch.object(open_cockpit, "wait_until_ready") as wait_until_ready,
+            patch.object(open_cockpit, "open_browser") as open_browser,
+        ):
+            result = open_cockpit.main()
+
+        self.assertEqual(result, 1)
+        wait_until_ready.assert_not_called()
+        open_browser.assert_not_called()
+
+    def test_main_does_not_open_running_server_until_ready(self) -> None:
+        with (
+            patch.object(sys, "argv", ["open_cockpit.py"]),
+            patch.object(open_cockpit, "url_ok", return_value=True),
+            patch.object(open_cockpit, "ensure_current_server", return_value=True),
+            patch.object(open_cockpit, "wait_until_ready", return_value=False),
             patch.object(open_cockpit, "open_browser") as open_browser,
         ):
             result = open_cockpit.main()
@@ -57,7 +74,7 @@ class OpenCockpitTests(unittest.TestCase):
             patch.object(open_cockpit, "url_ok", return_value=False),
             patch.object(open_cockpit, "port_is_busy", side_effect=[True, False]),
             patch.object(open_cockpit, "start_server") as start_server,
-            patch.object(open_cockpit, "wait_until_ok", return_value=True),
+            patch.object(open_cockpit, "wait_until_ready", return_value=True),
         ):
             result = open_cockpit.main()
 
@@ -89,6 +106,13 @@ class OpenCockpitTests(unittest.TestCase):
 
         self.assertEqual(result, 1)
         open_or_start_fallback.assert_not_called()
+
+    def test_open_browser_adds_cache_buster(self) -> None:
+        with patch.object(open_cockpit.subprocess, "run") as run:
+            open_cockpit.open_browser("http://127.0.0.1:8770")
+
+        opened_url = run.call_args.args[0][1]
+        self.assertTrue(opened_url.startswith("http://127.0.0.1:8770?cockpit_launch="))
 
 
 if __name__ == "__main__":
