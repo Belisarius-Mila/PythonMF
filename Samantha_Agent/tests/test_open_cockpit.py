@@ -25,6 +25,24 @@ class OpenCockpitTests(unittest.TestCase):
         self.assertFalse(open_cockpit.server_is_current(payload, "different"))
         self.assertFalse(open_cockpit.server_is_current({"downloads": {}}, "abc123"))
 
+    def test_current_status_payload_retries_before_restart_decision(self) -> None:
+        payload = {"server": {"code_stamp": "abc123"}}
+        with (
+            patch.object(open_cockpit, "status_payload", side_effect=[None, payload]) as status_payload,
+            patch.object(open_cockpit.time, "sleep") as sleep,
+        ):
+            result = open_cockpit.current_status_payload(
+                "127.0.0.1",
+                8770,
+                expected_stamp="abc123",
+                attempts=2,
+                delay=0.01,
+            )
+
+        self.assertEqual(result, payload)
+        self.assertEqual(status_payload.call_count, 2)
+        sleep.assert_called_once_with(0.01)
+
     def test_main_opens_running_server_only_after_current_check(self) -> None:
         with (
             patch.object(sys, "argv", ["open_cockpit.py"]),

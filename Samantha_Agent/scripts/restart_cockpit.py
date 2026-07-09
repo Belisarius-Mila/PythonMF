@@ -57,7 +57,7 @@ def url_ok(host: str, port: int, *, timeout: float = 1.0) -> bool:
         return False
 
 
-def wait_for_exit(pid: int, host: str, port: int, timeout: float = 8.0) -> bool:
+def wait_for_exit(pid: int, host: str, port: int, timeout: float = 20.0) -> bool:
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         if not process_exists(pid):
@@ -66,7 +66,7 @@ def wait_for_exit(pid: int, host: str, port: int, timeout: float = 8.0) -> bool:
     return not process_exists(pid)
 
 
-def wait_for_launchd_restart(host: str, port: int, timeout: float = 5.0) -> bool:
+def wait_for_launchd_restart(host: str, port: int, timeout: float = 12.0) -> bool:
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         if url_ok(host, port):
@@ -90,7 +90,7 @@ def start_cockpit(host: str, port: int) -> subprocess.CompletedProcess[str]:
         cwd=str(PROJECT_DIR),
         capture_output=True,
         text=True,
-        timeout=20,
+        timeout=45,
         check=False,
     )
 

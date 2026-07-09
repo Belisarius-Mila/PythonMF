@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
 import sys
 import urllib.error
@@ -46,7 +47,7 @@ def check_endpoint(
         status_code, body = fetch_url(url, timeout)
     except urllib.error.URLError as exc:
         return SmokeResult(name, path, False, None, str(exc.reason if hasattr(exc, "reason") else exc))
-    except TimeoutError as exc:
+    except (TimeoutError, http.client.RemoteDisconnected) as exc:
         return SmokeResult(name, path, False, None, str(exc))
 
     if status_code < 200 or status_code >= 300:

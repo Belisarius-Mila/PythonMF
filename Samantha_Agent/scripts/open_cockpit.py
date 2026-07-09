@@ -16,6 +16,9 @@ from pathlib import Path
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_PORT = 8770
 FALLBACK_PORTS = range(DEFAULT_PORT + 1, DEFAULT_PORT + 10)
+STATUS_TIMEOUT_SECONDS = 8.0
+CURRENT_CHECK_ATTEMPTS = 3
+CURRENT_CHECK_DELAY_SECONDS = 1.0
 READY_PATHS = ("/", "/api/status", "/api/recovery/status", "/api/web-apps")
 CODE_STAMP_PATHS = (
     PROJECT_DIR / "app" / "cockpit.py",
@@ -55,7 +58,7 @@ def server_ready(host: str, port: int) -> bool:
     return all(endpoint_ok(host, port, path) for path in READY_PATHS)
 
 
-def status_payload(host: str, port: int, *, timeout: float = 1.5) -> dict[str, object] | None:
+def status_payload(host: str, port: int, *, timeout: float = STATUS_TIMEOUT_SECONDS) -> dict[str, object] | None:
     try:
         with urllib.request.urlopen(f"http://{host}:{port}/api/status", timeout=timeout) as response:
             if not 200 <= response.status < 300:
@@ -78,6 +81,27 @@ def server_code_stamp(payload: dict[str, object] | None) -> str:
 
 def server_is_current(payload: dict[str, object] | None, expected_stamp: str | None = None) -> bool:
     return bool(server_code_stamp(payload) and server_code_stamp(payload) == (expected_stamp or cockpit_code_stamp()))
+
+
+def current_status_payload(
+    host: str,
+    port: int,
+    *,
+    expected_stamp: str | None = None,
+    attempts: int = CURRENT_CHECK_ATTEMPTS,
+    delay: float = CURRENT_CHECK_DELAY_SECONDS,
+) -> dict[str, object] | None:
+    expected = expected_stamp or cockpit_code_stamp()
+    last_payload: dict[str, object] | None = None
+    for attempt in range(max(1, attempts)):
+        payload = status_payload(host, port)
+        if isinstance(payload, dict):
+            last_payload = payload
+            if server_is_current(payload, expected):
+                return payload
+        if attempt < attempts - 1:
+            time.sleep(delay)
+    return last_payload
 
 
 def process_command(pid: int) -> str:
@@ -170,7 +194,7 @@ def wait_until_current(host: str, port: int, *, attempts: int = 40, delay: float
 
 def ensure_current_server(host: str, port: int) -> bool:
     expected_stamp = cockpit_code_stamp()
-    payload = status_payload(host, port)
+    payload = current_status_payload(host, port, expected_stamp=expected_stamp)
     if server_is_current(payload, expected_stamp):
         return True
 
