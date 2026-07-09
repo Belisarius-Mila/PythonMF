@@ -64,6 +64,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `handoffs/cockpit_startup_health_voicebridge_verified_2026_07_09.md` - Cockpit stabilita overena: start/restart/launchd pouzivaji rychly `/api/server/health`, `/api/status` ma timing sekci, hotkey `Ctrl+Option+Command+C` otevrel `127.0.0.1:8770` bez `Load failed`, diagnostika byla OK a zaverecny VoiceBridge test z Cockpitu prosel end-to-end bez Mac TTS.
 - `handoffs/lekarna_photo_import_pil_publish_retire_verified_2026_07_09.md` - Lekarna foto import end-to-end overen: OpenAI OCR, SUKL DLP, online PIL, `PIL_Short`, prijem na sklad, automaticky encrypted bundle commit/push, testovaci SERTIVAN prijat a vyrazen; export uz vynechava radky `vyradeno`.
 - `handoffs/git_commit_cleanup_a1_2026_05_23.md` - A1+ commitovy uklid: velka memory/RAG davka je commitnuta a pushnuta jako `ef15589`; pravidlo do odvolani je navrhovat tematicke commity pri dalsich vetsich rozpracovanych zmenach.
 - `handoffs/cockpit_recovery_center_priority_2026_06_03.md` - historicky Cockpit Recovery centrum MVP: read-only navazani po padu Samanthy/Codexu s poslednim `session_*` autosave timestampem, git statusem, handoffem a postupem `samantha` / `codex resume --last`; prekryto aktualnim radkem `Cockpit Recovery centrum` v `ACTIVE_PROJECTS.md`.
