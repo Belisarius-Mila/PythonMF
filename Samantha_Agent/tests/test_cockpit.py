@@ -100,6 +100,7 @@ from app.cockpit import (
     save_email_processing_decision,
     search_document_index,
     session_autosave_cleanup_action,
+    server_health_status,
     set_adam_voice_bridge_marker_action,
     terminate_stale_codex_sessions_action,
     set_document_reading_status_action,
@@ -2473,13 +2474,14 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("openDiagnosticsModal", COCKPIT_HTML)
         self.assertIn("renderDiagnosticsEndpointRows", COCKPIT_HTML)
         self.assertIn("diagnosticsEndpoints", COCKPIT_HTML)
+        self.assertIn("/api/server/health", COCKPIT_HTML)
         self.assertIn("/api/web-apps", COCKPIT_HTML)
         self.assertIn("dashboardRestartBtn", COCKPIT_HTML)
         self.assertIn("Restart Cockpitu", COCKPIT_HTML)
         self.assertIn("restartCockpit", COCKPIT_HTML)
         self.assertIn("/api/cockpit/restart", COCKPIT_HTML)
         self.assertIn("waitForCockpitAndReload", COCKPIT_HTML)
-        self.assertIn('fetch("/api/status", {cache: "no-store"})', COCKPIT_HTML)
+        self.assertIn('fetch("/api/server/health", {cache: "no-store"})', COCKPIT_HTML)
         self.assertIn("Čekám na návrat Cockpitu", COCKPIT_HTML)
         self.assertNotIn("Za pár sekund stránku obnovím", COCKPIT_HTML)
         self.assertIn("devRunnerPanel", COCKPIT_HTML)
@@ -2893,6 +2895,16 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("voice_mode", status)
         self.assertIn("voice_bridge", status)
         self.assertIn("git", status)
+
+    def test_server_health_status_is_lightweight(self) -> None:
+        with patch("app.cockpit.cockpit_status") as cockpit_status_mock:
+            status = server_health_status(host="127.0.0.1", port=8770)
+
+        cockpit_status_mock.assert_not_called()
+        self.assertTrue(status["ok"])
+        self.assertEqual(status["server"]["code_stamp"], cockpit_module.COCKPIT_CODE_STAMP)
+        self.assertEqual(status["server"]["port"], 8770)
+        self.assertIn("generated_at", status)
         self.assertNotIn("quantitative", status)
         self.assertNotIn("projects", status)
         self.assertNotIn("consistency", status)

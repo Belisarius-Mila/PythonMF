@@ -19,7 +19,8 @@ FALLBACK_PORTS = range(DEFAULT_PORT + 1, DEFAULT_PORT + 10)
 STATUS_TIMEOUT_SECONDS = 8.0
 CURRENT_CHECK_ATTEMPTS = 3
 CURRENT_CHECK_DELAY_SECONDS = 1.0
-READY_PATHS = ("/", "/api/status", "/api/recovery/status", "/api/web-apps")
+SERVER_HEALTH_PATH = "/api/server/health"
+READY_PATHS = ("/", SERVER_HEALTH_PATH, "/api/recovery/status", "/api/web-apps")
 CODE_STAMP_PATHS = (
     PROJECT_DIR / "app" / "cockpit.py",
     PROJECT_DIR / "scripts" / "cockpit_server.py",
@@ -60,7 +61,7 @@ def server_ready(host: str, port: int) -> bool:
 
 def status_payload(host: str, port: int, *, timeout: float = STATUS_TIMEOUT_SECONDS) -> dict[str, object] | None:
     try:
-        with urllib.request.urlopen(f"http://{host}:{port}/api/status", timeout=timeout) as response:
+        with urllib.request.urlopen(f"http://{host}:{port}{SERVER_HEALTH_PATH}", timeout=timeout) as response:
             if not 200 <= response.status < 300:
                 return None
             payload = json.loads(response.read().decode("utf-8"))

@@ -15,6 +15,7 @@ from pathlib import Path
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8770
+SERVER_HEALTH_PATH = "/api/server/health"
 
 
 def process_command(pid: int) -> str:
@@ -51,7 +52,7 @@ def port_is_busy(host: str, port: int) -> bool:
 
 def url_ok(host: str, port: int, *, timeout: float = 1.0) -> bool:
     try:
-        with urllib.request.urlopen(f"http://{host}:{port}/api/status", timeout=timeout) as response:
+        with urllib.request.urlopen(f"http://{host}:{port}{SERVER_HEALTH_PATH}", timeout=timeout) as response:
             return 200 <= response.status < 300
     except (OSError, urllib.error.URLError):
         return False

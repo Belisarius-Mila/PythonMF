@@ -352,6 +352,21 @@ READING_STATUS_ALIASES: dict[str, str] = {
     "nahrazeno-lepsi-kopii": "superseded",
     "nahrazeno_lepsi_kopii": "superseded",
 }
+
+
+def server_health_status(*, host: str = "127.0.0.1", port: int = COCKPIT_PORT) -> dict[str, Any]:
+    return {
+        "ok": True,
+        "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "server": {
+            "code_stamp": COCKPIT_CODE_STAMP,
+            "pid": os.getpid(),
+            "host": host,
+            "port": port,
+        },
+    }
+
+
 DOCUMENT_REVIEW_REASON_LABELS: dict[str, str] = {
     "needs_review": "stav čtení k revizi",
     "zero_text": "bez textové vrstvy",
@@ -11665,6 +11680,9 @@ class CockpitServer:
                 if parsed.path == "/api/status":
                     self.respond_json(cockpit_status())
                     return
+                if parsed.path == "/api/server/health":
+                    self.respond_json(server_health_status(host=cockpit_host, port=cockpit_port))
+                    return
                 if parsed.path == "/api/reminders":
                     self.respond_json(reminders_status())
                     return
@@ -15024,6 +15042,7 @@ COCKPIT_HTML = """<!doctype html>
     }
 
     const diagnosticsEndpoints = [
+      ["Server health", "/api/server/health"],
       ["Hlavní status", "/api/status"],
       ["Recovery", "/api/recovery/status"],
       ["Webové aplikace", "/api/web-apps"],
@@ -15256,7 +15275,7 @@ COCKPIT_HTML = """<!doctype html>
       verifyButtonHealth();
       setHealthValue(frontendHealthApi, "kontroluji...", "warn");
       const results = await Promise.all([
-        checkEndpointHealth("/api/status"),
+        checkEndpointHealth("/api/server/health"),
         checkEndpointHealth("/api/recovery/status")
       ]);
       const failed = results.filter((item) => !item.ok);
@@ -17427,7 +17446,7 @@ COCKPIT_HTML = """<!doctype html>
 	        await new Promise((resolve) => window.setTimeout(resolve, 2500));
 	        for (let attempt = 1; attempt <= 45; attempt += 1) {
 	          try {
-	            const probe = await fetch("/api/status", {cache: "no-store"});
+	            const probe = await fetch("/api/server/health", {cache: "no-store"});
 	            if (probe.ok) {
 	              showMessage("Cockpit znovu běží. Obnovuji stránku...");
 	              window.location.reload();

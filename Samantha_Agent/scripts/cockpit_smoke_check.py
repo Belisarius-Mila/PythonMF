@@ -16,6 +16,7 @@ from typing import Any
 DEFAULT_BASE_URL = "http://127.0.0.1:8770"
 DEFAULT_CHECKS = (
     ("home", "/"),
+    ("server_health", "/api/server/health"),
     ("status", "/api/status"),
     ("recovery", "/api/recovery/status"),
 )
@@ -60,6 +61,10 @@ def check_endpoint(
             return SmokeResult(name, path, False, status_code, f"invalid JSON: {exc}")
         if not isinstance(payload, dict):
             return SmokeResult(name, path, False, status_code, "JSON response is not an object")
+        if path == "/api/server/health":
+            server = payload.get("server")
+            if not isinstance(server, dict) or not server.get("code_stamp"):
+                return SmokeResult(name, path, False, status_code, "invalid server health")
         if path == "/api/status":
             for required_key in ("generated_at", "backup_status", "voice_bridge"):
                 if required_key not in payload:

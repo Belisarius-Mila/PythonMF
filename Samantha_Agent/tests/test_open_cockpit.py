@@ -25,6 +25,10 @@ class OpenCockpitTests(unittest.TestCase):
         self.assertFalse(open_cockpit.server_is_current(payload, "different"))
         self.assertFalse(open_cockpit.server_is_current({"downloads": {}}, "abc123"))
 
+    def test_startup_readiness_uses_lightweight_server_health(self) -> None:
+        self.assertIn("/api/server/health", open_cockpit.READY_PATHS)
+        self.assertNotIn("/api/status", open_cockpit.READY_PATHS)
+
     def test_current_status_payload_retries_before_restart_decision(self) -> None:
         payload = {"server": {"code_stamp": "abc123"}}
         with (

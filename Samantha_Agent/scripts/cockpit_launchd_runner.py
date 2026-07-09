@@ -12,11 +12,12 @@ from pathlib import Path
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 PYTHON_BIN = PROJECT_DIR / ".venv" / "bin" / "python"
+SERVER_HEALTH_PATH = "/api/server/health"
 
 
 def url_ok(host: str, port: int, *, timeout: float = 2.0) -> bool:
     try:
-        with urllib.request.urlopen(f"http://{host}:{port}/api/status", timeout=timeout) as response:
+        with urllib.request.urlopen(f"http://{host}:{port}{SERVER_HEALTH_PATH}", timeout=timeout) as response:
             return 200 <= response.status < 300
     except (OSError, urllib.error.URLError):
         try:
