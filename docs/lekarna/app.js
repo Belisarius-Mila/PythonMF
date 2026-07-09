@@ -283,6 +283,7 @@ function openBox(key) {
   drawerContent.innerHTML = `
     <p>${box.text}</p>
     ${renderBoxExtraActions(key)}
+    ${renderBoxFilter(medicineNames.length)}
     <div class="medicine-list">
       ${medicineNames.map((name) => `<button type="button" data-medicine="${escapeHtml(name)}">${escapeHtml(name)}</button>`).join("")}
     </div>
@@ -297,7 +298,50 @@ function openBox(key) {
   drawerContent.querySelectorAll("[data-medicine]").forEach((button) => {
     button.addEventListener("click", () => openMedicine(button.dataset.medicine));
   });
+  bindBoxFilter(medicineNames.length);
   openDrawer();
+}
+
+function renderBoxFilter(totalCount) {
+  if (totalCount < 12) return "";
+  return `
+    <div class="box-filter">
+      <label for="boxMedicineFilter">Filtrovat seznam</label>
+      <input id="boxMedicineFilter" type="search" placeholder="např. SERTIVAN nebo sertralin">
+      <p id="boxFilterStatus">${totalCount} položek v seznamu.</p>
+    </div>
+  `;
+}
+
+function bindBoxFilter(totalCount) {
+  const input = drawerContent.querySelector("#boxMedicineFilter");
+  if (!input) return;
+  const status = drawerContent.querySelector("#boxFilterStatus");
+  const buttons = Array.from(drawerContent.querySelectorAll("[data-medicine]"));
+  input.addEventListener("input", () => {
+    const searchTerms = expandSearchTerms(normalize(input.value));
+    let visibleCount = 0;
+    buttons.forEach((button) => {
+      const name = button.dataset.medicine || "";
+      const medicine = medicineData[name] || {};
+      const haystack = normalize([
+        name,
+        medicine.category,
+        medicine.use,
+        medicine.form,
+        medicine.searchTags,
+        medicine.pilShort,
+      ].filter(Boolean).join(" "));
+      const visible = !searchTerms.length || searchTerms.some((term) => haystack.includes(term));
+      button.hidden = !visible;
+      if (visible) visibleCount += 1;
+    });
+    if (status) {
+      status.textContent = searchTerms.length
+        ? `Zobrazeno ${visibleCount} z ${totalCount} položek.`
+        : `${totalCount} položek v seznamu.`;
+    }
+  });
 }
 
 function renderBoxExtraActions(key) {
@@ -718,6 +762,7 @@ function expandSearchTerms(query) {
     ["kasel", ["kasel", "suchy kasel", "drazdivy kasel", "hlen"]],
     ["nachlazeni", ["nachlazeni", "ryma", "kasel", "ucpany nos"]],
     ["chripka", ["chripka", "nachlazeni", "kasel", "ryma"]],
+    ["setralin", ["sertralin", "sertivan"]],
   ];
   aliases.forEach(([needle, values]) => {
     if (query.includes(needle)) {

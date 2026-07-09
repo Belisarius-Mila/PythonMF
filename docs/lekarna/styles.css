@@ -333,6 +333,36 @@ input {
   margin: 14px 0 0;
 }
 
+.box-filter {
+  display: grid;
+  gap: 7px;
+  margin: 16px 0 0;
+}
+
+.box-filter label {
+  color: #f1d99d;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.box-filter input {
+  min-height: 42px;
+  border: 1px solid rgba(216, 177, 92, 0.42);
+  border-radius: 6px;
+  background: rgba(12, 15, 18, 0.42);
+  color: #fff6da;
+  font: inherit;
+  padding: 10px 12px;
+}
+
+.box-filter p {
+  margin: 0;
+  color: #c7b27f;
+  font-size: 0.85rem;
+}
+
 .compact-list {
   margin-top: 10px;
 }
