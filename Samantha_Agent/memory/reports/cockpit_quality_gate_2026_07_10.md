@@ -86,6 +86,9 @@ nebo pull request.
   `tests.test_document_persistence` v test manifestu. Lokální gate po převodu
   dokumentového JSON/JSONL/appendu na sdílenou persistence vrstvu prošel všech
   466 testů.
+- GitHub Actions běh číslo 8 pro document persistence commit `1196076` skončil
+  úspěšně:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29110559953`.
 
 ## Co gate zatím neřeší
 

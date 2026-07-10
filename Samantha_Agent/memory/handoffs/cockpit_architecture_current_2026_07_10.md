@@ -276,6 +276,9 @@ Rucni retest po prvnim vykonovem kroku:
 - Po read-only nasazeni bez importu/reindexu/lifecycle akce prosly lokalni i
   Tailscale smoke checky. Obe adresy maji PID 10943 a code stamp
   `567cce4d18f9ea56`; private dokumentovy obsah se necetl ani nemigroval.
+- Implementace je pushnuta v commitu `1196076`. GitHub Actions Cockpit Quality
+  Gate beh cislo 8 skoncil uspesne:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29110559953`.
 - Hranice: jednotlive zapisy jsou crash-safe a append-safe, ale domenovy
   read-modify-write muze stale ztratit soubeznou zmenu, protoze cteni nekterych
   funkci probiha pred lockem. Index, manifest, backup a audit log zatim nejsou

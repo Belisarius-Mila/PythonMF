@@ -153,6 +153,9 @@ Existující soukromá data se nepřesouvají, nepřepisují dávkově ani nemig
   gate prošel 466 testy; lokální i Tailscale smoke check jsou zelené a obě
   adresy ukazují PID 10943 a code stamp `567cce4d18f9ea56`.
 - Živý test nespouštěl import, reindex ani lifecycle akci a nečetl private obsah.
+- Implementace je pushnutá v commitu `1196076`. GitHub Actions Cockpit Quality
+  Gate běh č. 8 skončil úspěšně:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29110559953`.
 
 Tato dávka chrání před částečným souborem a promíchaným appendem. **Neřeší ještě
 ztracený read-modify-write update**, protože některé doménové funkce čtou index
