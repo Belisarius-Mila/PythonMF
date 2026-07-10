@@ -50,11 +50,18 @@ nebo pull request.
 
 - Lokální quality gate prošel kompletně.
 - Nový test ověřuje manifest cest/modulů a architektonickou metriku.
-- Celkem prošlo 423 testů.
+- Celkem prošlo 424 testů.
 - Gate při prvním běhu odhalil tři ekvivalentní JavaScript regex escape zápisy
   uvnitř Python HTML řetězce. Byly opraveny bez změny výsledného JavaScriptu a
   syntax kontrola nyní podobný `SyntaxWarning` odmítne.
-- YAML workflow prošel lokálním parserem. Skutečný GitHub běh se ověří po pushi.
+- YAML workflow prošel lokálním parserem.
+- První vzdálený běh správně odhalil, že osm VoiceBridge CLI testů natvrdo
+  používalo lokální `.venv/bin/python`. Testy nyní používají `sys.executable`,
+  tedy interpreter aktuálního prostředí.
+- Gate umí při vzdáleném selhání vytvořit bezpečnou GitHub anotaci s koncem
+  testovacího tracebacku, takže diagnostika nevyžaduje hádání ani soukromá data.
+- Třetí GitHub Actions běh pro commit `3ba9d59` skončil úspěšně za 1 minutu
+  19 sekund. Lokální a vzdálená pojistka jsou tím ověřené.
 
 ## Co gate zatím neřeší
 
@@ -67,7 +74,7 @@ nebo pull request.
 
 ## Další krok
 
-Po ověření prvního GitHub běhu pokračovat malou datově bezpečnostní dávkou:
-zmapovat reminders/Quick Notes read-modify-write cesty a převést jednu nejmenší
-registry na zamčenou transakci s dvouprocesovým testem. Poté vytvořit read-only
-inventuru kandidátů mrtvého kódu bez mazání.
+Pokračovat malou datově bezpečnostní dávkou: zmapovat reminders/Quick Notes
+read-modify-write cesty a převést jednu nejmenší registry na zamčenou transakci
+s dvouprocesovým testem. Poté vytvořit read-only inventuru kandidátů mrtvého
+kódu bez mazání.

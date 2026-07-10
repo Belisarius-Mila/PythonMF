@@ -182,13 +182,16 @@ Rucni retest po prvnim vykonovem kroku:
   nic neceka a lokalni i Tailscale smoke check prosly kompletne.
 - Pred rozdelenim monolitu vznikl kanonicky
   `scripts/cockpit_quality_gate.py`: kontroluje whitespace, striktni syntax bez
-  `SyntaxWarning`, 423 relevantnich testu a vypisuje informativni metriku
+  `SyntaxWarning`, 424 relevantnich testu a vypisuje informativni metriku
   monolitu. Vychozi `app/cockpit.py` ma 22 465 radku, 332 top-level funkci a
   2 tridy; dalsi rust vyvola varovani, ne krehky hard fail.
 - Korenovy GitHub Actions workflow `.github/workflows/cockpit-quality-gate.yml`
   bezi na `macos-14`, ma pouze read-only contents opravneni, zadna tajemstvi ani
-  private data a path filtry pro relevantni Cockpit zmeny. Lokalni gate i YAML
-  parser prosly; skutecny GitHub beh se overi po pushi.
+  private data a path filtry pro relevantni Cockpit zmeny.
+- Prvni vzdaleny beh odhalil osm VoiceBridge CLI testu vazanych na lokalni
+  `.venv/bin/python`. Nyni pouzivaji `sys.executable`; gate navic pri chybe
+  publikuje bezpecnou anotaci s koncem tracebacku. Treti GitHub beh pro commit
+  `3ba9d59` skoncil uspesne za 1 minutu 19 sekund.
 - Prvni striktni syntax beh odhalil tri JavaScript regex escape zapisy uvnitr
   Python HTML retezce. Byly ekvivalentne opraveny bez zmeny runtime JavaScriptu.
 
@@ -201,16 +204,14 @@ Co neni hotove:
   status, posledni odpoved, pending transakce i hlasova JSONL historie jsou
   zamcene. Reminders, dokumenty a e-maily jeste prevedene nejsou.
 - `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem.
-- GitHub quality gate je pripraveny, ale jeho prvni vzdaleny beh je nutne po
-  pushi overit. Zavislosti zatim nejsou pripnute na konkretni verze.
+- Python zavislosti zatim nejsou pripnute na konkretni verze.
 - VoiceBridge nema jeden explicitni stavovy model prikazu.
 - Dokumentove a e-mailove workflow nemaji jednotnou repository/transakcni
   vrstvu.
 
 Dalsi krok:
 
-Po pushi overit prvni GitHub Actions `Cockpit Quality Gate`. Pokud projde,
-zmapovat konkretni read-modify-write cesty reminders/Quick Notes a prevest jednu
+Zmapovat konkretni read-modify-write cesty reminders/Quick Notes a prevest jednu
 nejmensi registry na explicitni zamcenou transakci s dvouprocesovym testem.
 Potom vytvorit read-only inventuru kandidatu mrtveho kodu bez mazani. PDF browser
 a post-call audio retest zustavaji odlozene.
