@@ -13,6 +13,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+from app.file_persistence import append_jsonl_locked, atomic_write_json, atomic_write_text
 from app.reminders.store import DEFAULT_REMINDERS_PATH, save_reminder_draft
 from app.reminders.tools import has_explicit_reminder_save_confirmation
 
@@ -1367,11 +1368,8 @@ def backup_reindex_targets(vault_dir: Path, proposals: list[DocumentReindexPropo
 
 
 def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as handle:
-        for row in rows:
-            json.dump(row, handle, ensure_ascii=False, sort_keys=True)
-            handle.write("\n")
+    payload = "".join(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n" for row in rows)
+    atomic_write_text(path, payload)
 
 
 def has_explicit_reindex_confirmation(user_confirmed: bool, confirmation_text: str) -> bool:
@@ -4040,10 +4038,7 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def append_jsonl(path: Path, data: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as handle:
-        json.dump(data, handle, ensure_ascii=False, sort_keys=True)
-        handle.write("\n")
+    append_jsonl_locked(path, data, sort_keys=True)
 
 
 def append_inbox_action(
@@ -4070,10 +4065,7 @@ def append_inbox_action(
 
 
 def write_json(path: Path, data: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as handle:
-        json.dump(data, handle, ensure_ascii=False, indent=2, sort_keys=True)
-        handle.write("\n")
+    atomic_write_json(path, data, sort_keys=True)
 
 
 def sha256_file(path: Path) -> str:

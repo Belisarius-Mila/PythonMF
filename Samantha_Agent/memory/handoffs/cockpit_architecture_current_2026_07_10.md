@@ -265,6 +265,21 @@ Rucni retest po prvnim vykonovem kroku:
 - Implementace je pushnuta v commitu `6e6dc5c`. GitHub Actions Cockpit Quality
   Gate beh cislo 7 skoncil uspesne:
   `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29109790245`.
+- Prvni dokumentova persistence davka zamerne nezamykala napul vice-souborovou
+  operaci. Tri existujici helpery v `app/documents/vault.py` nyni pouzivaji
+  sdilenou vrstvu: JSON a cely JSONL atomicky replace pod lockem, JSONL append
+  zamceny append s fsync. Signatury, cesty a payload formaty zustaly stejne.
+- Dva procesy zapsaly 60 dokumentovych eventu bez promichani nebo ztraty radku.
+  Simulovane selhani replace zachovalo puvodni JSONL registry i JSON manifest a
+  uklidilo temp soubory. Spravne adresovany dokumentovy balicek ma 81 testu OK;
+  kanonicky quality gate ma 466 testu OK.
+- Po read-only nasazeni bez importu/reindexu/lifecycle akce prosly lokalni i
+  Tailscale smoke checky. Obe adresy maji PID 10943 a code stamp
+  `567cce4d18f9ea56`; private dokumentovy obsah se necetl ani nemigroval.
+- Hranice: jednotlive zapisy jsou crash-safe a append-safe, ale domenovy
+  read-modify-write muze stale ztratit soubeznou zmenu, protoze cteni nekterych
+  funkci probiha pred lockem. Index, manifest, backup a audit log zatim nejsou
+  jedna vice-souborova transakce.
 
 Co neni hotove:
 
@@ -273,7 +288,8 @@ Co neni hotove:
   rucni retest; ani jedno neni blokujici pro dalsi architekturu.
 - Sdilena persistence, zakladni VoiceBridge persistence, hlavni reminders store
   a Quick Notes i urgent-reminders index jsou zamcene. Dokumenty a e-maily
-  jeste prevedene nejsou.
+  jeste nejsou plne transakcni; prvni dokumentove persistence primitivy jsou
+  atomicke/zamcene, ale vice-souborovy RMW invariant zustava otevreny.
 - `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem.
 - Cleanup R1 je hotovy. Stary e-mailovy parser, lokalni Janicka vetev a pet
   podezrelych API cest zustavaji beze zmeny; u API cest chybi registr externich
@@ -285,15 +301,16 @@ Co neni hotove:
 
 Dalsi krok:
 
-Pokracovat malou skupinou dokumentovych registru s concurrency/consistency
-testem a bez migrace private dat. Stary e-mailovy parser, lokalni Janicka vetev
-a pet podezrelych API cest zatim nemenit bez prislusneho rucniho, recovery nebo
-externiho klient testu. PDF browser a post-call audio retest jsou odlozene.
+Navrhnout skutecnou dokumentovou transakci pro `documents_index.jsonl`, navazany
+manifest, backup a audit; potom jako prvni klienty prevest metadata a reading
+status s concurrency/consistency testy a bez migrace private dat. Stary
+e-mailovy parser, lokalni Janicka vetev a pet podezrelych API cest zatim nemenit.
+PDF browser a post-call audio retest jsou odlozene.
 
 Navrhovane dalsi kroky:
 
-1. Vybrat prvni malou skupinu dokumentovych registry/lifecycle zapisu a pridat
-   concurrency/consistency test.
+1. Navrhnout vice-souborovou dokumentovou transakci a nejdriv na ni prevest
+   metadata + reading status s concurrency/consistency testy.
 2. Janicka a stary e-mailovy parser mazat az po popsanem rucnim/recovery overeni.
 3. Podezrele API cesty proverit proti Shortcuts a servisnim klientum.
 4. Po dokumentech prejit nakonec na e-mail metadata.

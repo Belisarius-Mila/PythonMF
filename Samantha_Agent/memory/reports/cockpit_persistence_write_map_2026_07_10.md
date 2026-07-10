@@ -137,11 +137,37 @@ Existující soukromá data se nepřesouvají, nepřepisují dávkově ani nemig
   Gate běh č. 7 skončil úspěšně:
   `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29109790245`.
 
+## Document persistence primitives rollout
+
+- Tři existující helpery v `app/documents/vault.py` zachovávají stejné signatury
+  a formáty, ale používají sdílenou persistence vrstvu:
+  - `write_json` zapisuje manifesty atomickým zamčeným JSON replace,
+  - `write_jsonl` zapisuje celý registry soubor atomickým zamčeným replace,
+  - `append_jsonl` přidává každý event pod stabilním sidecar lockem a s `fsync`.
+- Změna se automaticky vztahuje na stávající dokumentové/ScanDocu volající bez
+  změny jejich doménové logiky, cest nebo payloadů.
+- Dva procesy zapsaly 60 dokumentových eventů jako 60 samostatných validních
+  řádků. Simulované selhání `os.replace` zachovalo původní celý JSONL registry
+  soubor i JSON manifest a uklidilo temp soubory.
+- Správně adresovaný cílený dokumentový balík má 81 zelených testů. Celý quality
+  gate prošel 466 testy; lokální i Tailscale smoke check jsou zelené a obě
+  adresy ukazují PID 10943 a code stamp `567cce4d18f9ea56`.
+- Živý test nespouštěl import, reindex ani lifecycle akci a nečetl private obsah.
+
+Tato dávka chrání před částečným souborem a promíchaným appendem. **Neřeší ještě
+ztracený read-modify-write update**, protože některé doménové funkce čtou index
+před získáním write locku. Stejně tak index, manifest, backup a audit log ještě
+nejsou jedna více-souborová transakce. Tyto dva invarianty musí dostat samostatný
+návrh a consistency test; nesmí se vydávat za hotové jen proto, že jednotlivé
+replace operace jsou atomické.
+
 ## Doporučené další pořadí rolloutů
 
-1. Dokumentové registry a lifecycle JSONL po menších skupinách s consistency
-   testem po každé skupině.
-2. E-mail activity/case/archive metadata; outbound a mazací workflow až nakonec.
+1. Navrhnout explicitní dokumentovou transakci pro `documents_index.jsonl` a
+   navázaný manifest/backup/audit. Začít metadata + reading status a testovat
+   souběh dvou změn nad různými dokumenty i konzistenci indexu s manifestem.
+2. Potom převést ScanDocu review, reindex a lifecycle po samostatných dávkách.
+3. E-mail activity/case/archive metadata; outbound a mazací workflow až nakonec.
 
 Každý rollout má zachovat formát i cestu existujícího souboru, přidat cílený
 regresní/concurrency test a nemigrovat obsah bez samostatného rozhodnutí.

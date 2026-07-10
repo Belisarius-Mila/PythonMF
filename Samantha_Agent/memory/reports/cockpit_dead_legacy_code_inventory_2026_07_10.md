@@ -287,10 +287,11 @@ nikoli jednorázový přepis.
 4. **API deprecation kontrola:** výslovně projít externí Shortcuts a servisní
    launchery pro pět podezřelých endpointů. Teprve poté odstranit cestu, registry
    kartu, handler a test jako jeden atomický balík.
-5. **Navazující persistence krok — hotovo:** samostatný urgent-reminders index
-   je zamčený a krytý dvouprocesovými testy. Cleanup R2/R3 a API deprecation
-   mohou počkat na příslušné ruční nebo recovery rozhodnutí; další persistence
-   oblastí jsou dokumentové registry po malých skupinách.
+5. **Navazující persistence — rozpracováno po malých dávkách:** samostatný
+   urgent-reminders index je zamčený a dokumentový JSON, celý JSONL a JSONL
+   append mají atomickou/lock vrstvu. Cleanup R2/R3 a API deprecation mohou
+   počkat; další krok je skutečný index + manifest transakční návrh, nikoli
+   pouhé další obalení write operace.
 
 ## Rizika a hranice závěru
 

@@ -50,8 +50,8 @@ nebo pull request.
 
 - Lokální quality gate prošel kompletně.
 - Nový test ověřuje manifest cest/modulů a architektonickou metriku.
-- Po rozšíření o samostatné reminders, Quick Notes, urgent reminders a launcher
-  moduly prochází 463 testů.
+- Po rozšíření o samostatné reminders, Quick Notes, urgent reminders,
+  dokumentové persistence primitivy a launcher moduly prochází 466 testů.
 - Gate při prvním běhu odhalil tři ekvivalentní JavaScript regex escape zápisy
   uvnitř Python HTML řetězce. Byly opraveny bez změny výsledného JavaScriptu a
   syntax kontrola nyní podobný `SyntaxWarning` odmítne.
@@ -82,6 +82,10 @@ nebo pull request.
 - GitHub Actions běh číslo 7 pro urgent-reminders commit `6e6dc5c` skončil
   úspěšně:
   `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29109790245`.
+- `app/documents/vault.py` je nově přímo v syntax manifestu a samostatný
+  `tests.test_document_persistence` v test manifestu. Lokální gate po převodu
+  dokumentového JSON/JSONL/appendu na sdílenou persistence vrstvu prošel všech
+  466 testů.
 
 ## Co gate zatím neřeší
 
@@ -94,6 +98,7 @@ nebo pull request.
 
 ## Další krok
 
-Quality gate, read-only inventura, Cleanup R1 a zamčené reminders/Quick Notes/
-urgent reminders jsou hotové. Další persistence rollout má pokračovat malou
-skupinou dokumentových registrů a po každé skupině consistency testem.
+Quality gate, read-only inventura, Cleanup R1, zamčené reminders/Quick Notes/
+urgent reminders a první dokumentové persistence primitivy jsou hotové. Další
+rollout má nejdřív navrhnout skutečnou více-souborovou transakci index + manifest
+a teprve potom převést metadata a reading status s concurrency/consistency testy.
