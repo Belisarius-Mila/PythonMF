@@ -4003,6 +4003,38 @@ class CockpitTests(unittest.TestCase):
             self.assertIn("Adame, zpracuj jeden test.", latest_path.read_text(encoding="utf-8"))
             self.assertFalse((Path(temp_dir) / "delivery_attempts.jsonl").exists())
 
+    def test_running_watcher_prevents_inline_delivery_for_text_and_recording(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            inbox = Path(temp_dir)
+            voice_mode = {"ok": True, "running": True, "pid": 12345}
+            with (
+                patch("app.cockpit.load_voice_mode_status", return_value=voice_mode),
+                patch(
+                    "app.cockpit.deliver_saved_voice_command_inline",
+                    side_effect=AssertionError("inline delivery must not run while watcher is active"),
+                ) as inline_delivery,
+            ):
+                text_result = cockpit_save_voice_text_action(
+                    {"text": "Adame, ověř textovou cestu."},
+                    inbox_dir=inbox,
+                    terminal_bridge=None,
+                    pending_path=inbox / "pending_for_adam.json",
+                    history_path=inbox / "adam_voice_history.jsonl",
+                )
+                recording_result = cockpit_transcribe_voice_action(
+                    {"audio_base64": "abc", "mime_type": "audio/webm", "language": "cs"},
+                    inbox_dir=inbox,
+                    terminal_bridge=None,
+                    pending_path=inbox / "pending_for_adam.json",
+                    history_path=inbox / "adam_voice_history.jsonl",
+                    transcriber=lambda *args, **kwargs: {"ok": True, "text": "Adame, ověř nahranou cestu."},
+                )
+
+            self.assertEqual(text_result["voice_delivery_status"], "watcher_will_deliver")
+            self.assertEqual(recording_result["voice_delivery_status"], "watcher_will_deliver")
+            inline_delivery.assert_not_called()
+            self.assertFalse((inbox / "delivery_attempts.jsonl").exists())
+
     def test_cockpit_save_voice_text_action_uses_inline_fallback_without_watcher(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             bridge_calls = []

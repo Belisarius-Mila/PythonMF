@@ -678,11 +678,84 @@ print(json.dumps({"ok": result.get("ok"), "status": result.get("status"), "respo
                 history_path=history_path,
                 last_response_path=response_path,
             )
+            history_lock_exists = lock_path_for(history_path).exists()
 
         self.assertTrue(last_response["available"])
         self.assertEqual(last_response["route"], "codex_manual")
         self.assertIn("testovací sadu", last_response["adam_response"])
         self.assertEqual(status["last_adam_response"]["adam_response"], last_response["adam_response"])
+        self.assertTrue(history_lock_exists)
+
+    def test_two_processes_append_complete_voice_history_and_non_final_never_replaces_response(self) -> None:
+        script = """
+import sys
+import time
+from pathlib import Path
+from app.speech.adam_voice_mode import append_manual_voice_history_turn
+
+history_path = Path(sys.argv[1])
+response_path = Path(sys.argv[2])
+start_path = Path(sys.argv[3])
+worker = sys.argv[4]
+route = sys.argv[5]
+while not start_path.exists():
+    time.sleep(0.01)
+for index in range(30):
+    append_manual_voice_history_turn(
+        user_text=f"{worker}-{index}",
+        adam_response=f"Odpověď {worker}-{index}",
+        route=route,
+        path=history_path,
+        response_path=response_path,
+    )
+"""
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            history_path = root / "adam_voice_history.jsonl"
+            response_path = root / "last_adam_response.json"
+            start_path = root / "start"
+            workers = (
+                ("final", "codex_manual"),
+                ("transport", "terminal_delivery_pending_reply"),
+            )
+            processes = [
+                subprocess.Popen(
+                    [
+                        sys.executable,
+                        "-c",
+                        script,
+                        str(history_path),
+                        str(response_path),
+                        str(start_path),
+                        worker,
+                        route,
+                    ],
+                    cwd=PROJECT_ROOT,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
+                for worker, route in workers
+            ]
+            start_path.write_text("start\n", encoding="utf-8")
+            outputs = [process.communicate(timeout=20) for process in processes]
+
+            for process, (_stdout, stderr) in zip(processes, outputs, strict=True):
+                self.assertEqual(process.returncode, 0, stderr)
+            records = [json.loads(line) for line in history_path.read_text(encoding="utf-8").splitlines()]
+            last_response = load_last_adam_response(path=response_path)
+
+        self.assertEqual(len(records), 60)
+        self.assertEqual(
+            {item["user_text"] for item in records},
+            {f"{worker}-{index}" for worker, _route in workers for index in range(30)},
+        )
+        self.assertEqual(
+            {item["route"] for item in records},
+            {"codex_manual", "terminal_delivery_pending_reply"},
+        )
+        self.assertEqual(last_response["route"], "codex_manual")
+        self.assertTrue(last_response["user_text"].startswith("final-"))
 
     def test_load_voice_mode_status_uses_history_as_last_response_fallback(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

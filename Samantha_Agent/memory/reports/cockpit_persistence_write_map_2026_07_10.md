@@ -57,6 +57,10 @@ První integrace je záměrně nízkoriziková:
    `pending_for_adam.json` na jednu zamčenou read-validate-modify-write
    transakci. Jiný aktivní pokyn vrací `pending_conflict`, stejná operace je
    idempotentní a historii zapisuje jen proces, který přechod skutečně provedl.
+5. Třetí VoiceBridge rollout převádí oba zápisy
+   `adam_voice_history.jsonl` na společný zamčený append. Seznam finálních a
+   nefinálních rout zůstává beze změny; transportní mezistav proto nikdy
+   neaktualizuje `last_adam_response.json`.
 
 Existující soukromá data se nepřesouvají, nepřepisují dávkově ani nemigrují.
 
@@ -82,15 +86,21 @@ Existující soukromá data se nepřesouvají, nepřepisují dávkově ani nemig
 - Živá idempotentní transakce nad skutečným zpracovaným pending stavem vytvořila
   stabilní lock a SHA-256 obsahu zůstal beze změny. Po tomto rolloutu prošlo 418
   relevantních testů, watcher `listening` a oba smoke checky.
+- Dva skutečné procesy souběžně zapsaly 60 VoiceBridge history událostí jako 60
+  samostatných validních řádků. Současná finální a transportní větev zachovala
+  poslední odpověď z finální routy. Zamčení zajišťuje integritu řádků; samo o
+  sobě není náhradou idempotentní pending transakce.
+- Výslovný regresní test obou Cockpit vstupů potvrzuje invariant
+  `watcher running => no inline delivery`. Po nasazení prošlo 420 relevantních
+  testů, watcher se vrátil do `listening` a lokální i Tailscale smoke check byly
+  kompletně zelené.
 
 ## Doporučené další pořadí rolloutů
 
-1. Převést VoiceBridge historii JSONL na zamčený append; zachovat rozhodnutí,
-   které routy smějí aktualizovat poslední finální odpověď.
-2. Reminders a Quick Notes registry s explicitní zamčenou transakcí.
-3. Dokumentové registry a lifecycle JSONL po menších skupinách s consistency
+1. Reminders a Quick Notes registry s explicitní zamčenou transakcí.
+2. Dokumentové registry a lifecycle JSONL po menších skupinách s consistency
    testem po každé skupině.
-4. E-mail activity/case/archive metadata; outbound a mazací workflow až nakonec.
+3. E-mail activity/case/archive metadata; outbound a mazací workflow až nakonec.
 
 Každý rollout má zachovat formát i cestu existujícího souboru, přidat cílený
 regresní/concurrency test a nemigrovat obsah bez samostatného rozhodnutí.

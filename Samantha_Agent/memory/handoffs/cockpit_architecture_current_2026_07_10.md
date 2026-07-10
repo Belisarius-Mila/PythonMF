@@ -169,15 +169,26 @@ Rucni retest po prvnim vykonovem kroku:
 - Po nasazeni se watcher vratil do `listening`, terminalovy bridge zustal
   zapnuty a idempotentni ziva transakce vytvorila pending lock bez zmeny SHA-256
   obsahu. Lokalni i Tailscale smoke check prosly.
+- Oba zapisy `adam_voice_history.jsonl` nyni pouzivaji sdileny zamceny JSONL
+  append. Format ani cesty se nezmenily a seznam finalnich/nefinalnich rout
+  zustal stejny, takze transportni mezistav neprepisuje posledni finalni odpoved.
+- Dvouprocesovy test zapsal 60 soubeznych history udalosti jako 60 validnich
+  samostatnych radku a potvrdil, ze posledni odpoved zustala z finalni routy.
+  Lock chrani integritu radku; exactly-once dokonceni dale zajistuje predchozi
+  idempotentni pending transakce.
+- Novy souhrnny regresni test pro textovy i nahravany vstup tvrde hlida invariant
+  `watcher running => no inline delivery` a absenci delivery attempts.
+- Po nasazeni proslo 420 relevantnich testu, watcher se vratil do `listening`,
+  nic neceka a lokalni i Tailscale smoke check prosly kompletne.
 
 Co neni hotove:
 
 - Zakladni stabilizace, HTTP hranice a iPhone hlas jsou funkcne potvrzene; PDF
   browser retest Mila vedome odlozil a post-call audio recovery ceka na pozdejsi
   rucni retest; ani jedno neni blokujici pro dalsi architekturu.
-- Sdilena persistence vrstva, prvni nizkorizikova integrace, dva ciste
-  VoiceBridge JSON prepisy a pending transakce jsou hotove. Hlasova historie
-  JSONL, reminders, dokumenty a e-maily jeste prevedene nejsou.
+- Sdilena persistence vrstva a zakladni VoiceBridge persistence jsou hotove:
+  status, posledni odpoved, pending transakce i hlasova JSONL historie jsou
+  zamcene. Reminders, dokumenty a e-maily jeste prevedene nejsou.
 - `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem.
 - VoiceBridge nema jeden explicitni stavovy model prikazu.
 - Dokumentove a e-mailove workflow nemaji jednotnou repository/transakcni
@@ -185,20 +196,17 @@ Co neni hotove:
 
 Dalsi krok:
 
-V dalsi oddelene davce prevest VoiceBridge historii JSONL na zamceny append.
-Zachovat seznam finalnich a nefinalnich rout, aby transportni mezistav nikdy
-neprepsal posledni Adamovu odpoved. Pridat dvouprocesovy append test a regresni
-test `watcher running => no inline delivery`. PDF browser a post-call audio
-retest zustavaji odlozene.
+VoiceBridge persistence zaklad je uzavreny. V dalsi oddelene davce nejdrive
+zmapovat konkretni read-modify-write cesty reminders/Quick Notes a prevest jednu
+nejmensi registry na explicitni zamcenou transakci s dvouprocesovym testem.
+PDF browser a post-call audio retest zustavaji odlozene.
 
 Navrhovane dalsi kroky:
 
-1. Samostatne prevest hlasovou JSONL historii na zamceny append.
-2. Doplnit automatizovany invariant `watcher running => no inline delivery`.
-3. Po malych davkach prejit na reminders, dokumenty a nakonec e-mail metadata.
-4. Postupne rozdelit monolit pri zachovani endpointu:
+1. Po malych davkach prejit na reminders, dokumenty a nakonec e-mail metadata.
+2. Postupne rozdelit monolit pri zachovani endpointu:
    status/health -> voice -> documents -> email -> staticky frontend.
-5. Zavadet explicitni stavove modely a repository vrstvy po oblastech, ne
+3. Zavadet explicitni stavove modely a repository vrstvy po oblastech, ne
    jednim velkym prepisem.
 
 Handoff strategie pro tento program:

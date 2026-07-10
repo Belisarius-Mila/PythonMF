@@ -12,7 +12,12 @@ from typing import Any, Callable
 from agents import Agent, Runner
 from dotenv import load_dotenv
 
-from app.file_persistence import FilePersistenceError, atomic_write_json, update_json_file
+from app.file_persistence import (
+    FilePersistenceError,
+    append_jsonl_locked,
+    atomic_write_json,
+    update_json_file,
+)
 from app.speech.report import speak_report
 from app.speech.terminal_bridge import deliver_voice_command_to_terminal
 from app.speech.voice_inbox import (
@@ -266,15 +271,13 @@ def append_manual_voice_history_turn(
     path: Path = ADAM_VOICE_HISTORY_PATH,
     response_path: Path | None = None,
 ) -> dict[str, Any]:
-    path.parent.mkdir(parents=True, exist_ok=True)
     payload: dict[str, Any] = {
         "created_at": utc_now(),
         "route": route,
         "user_text": str(user_text or "").strip(),
         "adam_response": str(adam_response or "").strip(),
     }
-    with path.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    append_jsonl_locked(path, payload)
     if payload["adam_response"] and is_final_voice_response_route(payload["route"]):
         save_last_adam_response(
             user_text=payload["user_text"],
@@ -293,7 +296,6 @@ def append_voice_history_turn(
     path: Path = ADAM_VOICE_HISTORY_PATH,
     response_path: Path | None = None,
 ) -> dict[str, Any]:
-    path.parent.mkdir(parents=True, exist_ok=True)
     payload: dict[str, Any] = {
         "created_at": utc_now(),
         "route": route,
@@ -301,8 +303,7 @@ def append_voice_history_turn(
         "adam_response": str(adam_response or "").strip(),
         "command": voice_command_to_dict(command),
     }
-    with path.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    append_jsonl_locked(path, payload)
     if payload["adam_response"] and is_final_voice_response_route(payload["route"]):
         save_last_adam_response(
             user_text=payload["user_text"],
