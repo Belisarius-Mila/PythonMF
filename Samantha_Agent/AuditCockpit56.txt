@@ -295,3 +295,25 @@ Kontrolni mereni po nasazeni:
 - kontrolni plny status priblizne 1 070 ms.
 
 Relevantni regresni sada po zmene: 374 testu, vsechny OK.
+
+
+STAV DRUHEHO KROKU PO AUDITU
+
+Dne 10. 7. 2026 byl dokoncen prechod na jednu bezici Python instanci Cockpitu:
+- lokalni Cockpit zustava na 127.0.0.1:8770,
+- vzdaleny Tailscale pristup zachovava dosavadni IP adresu a port,
+- Tailscale Serve TCP proxy pouze predava spojeni do lokalni instance,
+- druhy Tailscale cockpit_server.py a jeho launchd runner uz nebezi,
+- puvodni Tailscale launchd plist zustal zachovany pro rychly rollback,
+- migracni nastroj umi status, apply a rollback a pri neuspechu se pokusi
+  puvodni sluzbu automaticky obnovit.
+
+Kontrola po migraci:
+- lokalni i vzdaleny health vraceji stejny PID a stejny code stamp,
+- lokalni i vzdaleny smoke check prosly,
+- restart vyvolany pres vzdalenou adresu prosel a proxy se pripojila k novemu
+  lokalnimu PID,
+- relevantni regresni sada po doplneni migracnich testu: 378 testu, vsechny OK.
+
+Rollback zustava dostupny pres:
+`.venv/bin/python scripts/migrate_cockpit_single_instance.py --rollback`

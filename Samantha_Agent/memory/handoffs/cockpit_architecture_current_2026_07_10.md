@@ -29,7 +29,36 @@ Co je hotove:
 - Lokalni i Tailscale Cockpit po nasazeni prosly smoke checkem.
 - Kontrolni mereni ukazalo priblizne 2-6 ms pro cachovany live status oproti
   priblizne 1,07 s pro kontrolni plny status.
-- `main` a `origin/main` jsou na commitu `23abbaa` synchronizovane.
+- Vychozi handoff checkpoint byl pushnuty v commitu `25cc522`; aktualni
+  migracni zmeny zatim cekaji na novy tematicky commit.
+
+Rucni retest po prvnim vykonovem kroku:
+
+- Mac cast rucniho testu Mila provedl 2026-07-10.
+- Cockpit se uspesne otevrel pres globalni klavesovou zkratku.
+- `Restart Cockpitu` funkcne prosel; restart trval priblizne 20-30 sekund.
+- Behem ocekavaneho preruseni spojeni se ve stavovem radku objevilo `Load failed`,
+  ale po obnoveni serveru vse zmizelo a nezustala zadna cervena chyba.
+- VoiceBridge z Macu prosel end-to-end a odpoved se vratila do Cockpitu.
+- Rucni `Obnovit` z horni listy prosel; plny status se nacital priblizne dve
+  sekundy.
+- Funkcne je Mac retest uspesny. Neprivetive `Load failed` pri zamerne provadenem
+  restartu je neblokujici UX nalez pro pozdejsi zlepseni stavove hlasky.
+- Tailscale/iPhone klient se nacetl funkcne a hlasovy pokyn z iPhonu dorazil
+  end-to-end do Codexu; odpoved byla zapsana zpet do Cockpitu.
+- Prvni vykonovy krok je tim rucne potvrzeny na Macu i iPhonu.
+- Druhy P0 krok je implementovany: lokalni i Tailscale adresa jsou obsluhovane
+  jedinym `cockpit_server.py` procesem na `127.0.0.1:8770`.
+- Tailscale Serve TCP proxy zachovava dosavadni vzdalenou IP adresu a port, ale
+  pouze predava spojeni do lokalni instance.
+- Puvodni Tailscale launchd plist zustal zachovany a neni nacteny; slouzi jako
+  rychly rollback bez mazani puvodni konfigurace.
+- `scripts/migrate_cockpit_single_instance.py` umi read-only status, `--apply`
+  a `--rollback`; neuspesna migrace se pokusi automaticky obnovit puvodni sluzbu.
+- Po migraci lokalni i vzdaleny health vratily stejny PID a code stamp.
+- Lokalni i vzdaleny smoke check prosly pred i po restartu vyvolanem pres
+  vzdalenou adresu. Proxy po restartu ukazala novy lokalni PID na obou adresach.
+- Po doplneni migracnich testu proslo 378 relevantnich testu.
 
 Co neni hotove:
 
@@ -38,7 +67,6 @@ Co neni hotove:
   - jednotne zpracovani chybneho JSON a neocekavanych vyjimek,
   - bezpecnostni HTTP hlavicky a kontrola Host/Origin,
   - bezpecny provozni log bez citlivych payloadu.
-- Stale bezi dve samostatne Cockpit instance nad stejnymi file-based daty.
 - Prime JSON/JSONL zapisy nemaji jednotny file lock a atomicky zapis.
 - `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem.
 - VoiceBridge nema jeden explicitni stavovy model prikazu.
@@ -47,10 +75,12 @@ Co neni hotove:
 
 Dalsi krok:
 
-Pripravit a implementovat dalsi maly balicek faze stabilizace: centralni HTTP
-request boundary pro `CockpitServer` - omezeni velikosti JSON tela, rizene 400
-pro chybny payload, jednotna bezpecna 500 odpoved, zakladni bezpecnostni hlavicky
-a testy. Nemenit pri tom business logiku dokumentu, e-mailu ani VoiceBridge.
+Mila ma kratce rucne overit, ze Cockpit a hlasovy pokyn po migraci stale funguji
+z iPhonu na dosavadni adrese. Pokud retest projde, pokracovat dalsim malym
+balickem faze stabilizace: centralni HTTP request boundary pro `CockpitServer` -
+limit JSON tela, rizena 400 pro chybny payload, bezpecna 500 odpoved, zakladni
+bezpecnostni hlavicky a testy. Nemenit business logiku dokumentu, e-mailu ani
+VoiceBridge.
 
 Navrhovane dalsi kroky:
 
@@ -85,6 +115,8 @@ Zmenene nebo relevantni soubory:
 - `tests/test_cockpit.py`
 - `scripts/install_cockpit_local_launchd.sh`
 - `scripts/install_cockpit_tailscale_launchd.sh`
+- `scripts/migrate_cockpit_single_instance.py`
+- `tests/test_migrate_cockpit_single_instance.py`
 - `reports/cockpit_function_inventory_audit_2026_06_27.md`
 - `reports/cockpit_post_action_risk_matrix_2026_06_27.md`
 - `handoffs/voicebridge_operational_contract_2026_06_30.md`
@@ -97,5 +129,8 @@ Bezpecnost / neukladat:
   pravidlo jedineho vlastnika doruceni.
 - Prechod na jednu instanci nesmi prerusit lokalni ani iPhone pristup; musi mit
   predem popsany rollback a smoke check.
+- Aktualni rollback prikaz je
+  `.venv/bin/python scripts/migrate_cockpit_single_instance.py --rollback`;
+  nepouzivat ho bez duvodu, pokud jedna instance a Tailscale proxy funguji.
 - Existujici dokumenty pri budouci migraci nepresouvat ani nemazat bez
   samostatneho potvrzeni.
