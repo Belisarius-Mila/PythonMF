@@ -12,6 +12,7 @@ from typing import Any, Callable
 from agents import Agent, Runner
 from dotenv import load_dotenv
 
+from app.file_persistence import atomic_write_json
 from app.speech.report import speak_report
 from app.speech.terminal_bridge import deliver_voice_command_to_terminal
 from app.speech.voice_inbox import (
@@ -72,7 +73,6 @@ def write_voice_mode_status(
     pid: int | None = None,
     started_at: str | None = None,
 ) -> dict[str, Any]:
-    status_path.parent.mkdir(parents=True, exist_ok=True)
     payload: dict[str, Any] = {
         "ok": True,
         "state": state,
@@ -83,7 +83,7 @@ def write_voice_mode_status(
     }
     if last_command is not None:
         payload["last_command"] = voice_command_to_dict(last_command)
-    status_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    atomic_write_json(status_path, payload)
     return payload
 
 
@@ -150,7 +150,6 @@ def save_last_adam_response(
     route: str,
     path: Path = ADAM_LAST_RESPONSE_PATH,
 ) -> dict[str, Any]:
-    path.parent.mkdir(parents=True, exist_ok=True)
     response_text = str(adam_response or "").strip()
     payload: dict[str, Any] = {
         "ok": True,
@@ -161,7 +160,7 @@ def save_last_adam_response(
         "adam_response": response_text,
         "path": str(path),
     }
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    atomic_write_json(path, payload)
     return payload
 
 

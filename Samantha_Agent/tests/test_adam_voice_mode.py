@@ -5,7 +5,9 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
+from app.file_persistence import lock_path_for
 from app.speech.adam_voice_mode import (
     append_manual_voice_history_turn,
     build_spoken_result_for_command,
@@ -20,6 +22,7 @@ from app.speech.adam_voice_mode import (
     load_voice_history,
     load_voice_mode_status,
     mark_pending_for_adam_processed,
+    save_last_adam_response,
     save_codex_approval_request,
     spoken_notice_for_command,
     update_pending_approval,
@@ -41,6 +44,52 @@ def write_voice_command(path: Path, text: str) -> None:
 
 
 class AdamVoiceModeTests(unittest.TestCase):
+    def test_voice_status_uses_atomic_locked_json_write(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            status_path = Path(temp_dir) / "adam_voice_mode_status.json"
+
+            payload = write_voice_mode_status(
+                status_path=status_path,
+                state="listening",
+                message="Watcher běží.",
+            )
+
+            self.assertEqual(json.loads(status_path.read_text(encoding="utf-8")), payload)
+            self.assertTrue(lock_path_for(status_path).exists())
+            self.assertEqual(list(status_path.parent.glob(f".{status_path.name}.*.tmp")), [])
+
+    def test_last_response_uses_atomic_locked_json_write(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            response_path = Path(temp_dir) / "last_adam_response.json"
+
+            payload = save_last_adam_response(
+                user_text="Bezpečný test.",
+                adam_response="Hotovo.",
+                route="codex_manual",
+                path=response_path,
+            )
+
+            self.assertEqual(json.loads(response_path.read_text(encoding="utf-8")), payload)
+            self.assertTrue(lock_path_for(response_path).exists())
+            self.assertEqual(list(response_path.parent.glob(f".{response_path.name}.*.tmp")), [])
+
+    def test_voice_status_failed_replace_preserves_previous_json(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            status_path = Path(temp_dir) / "adam_voice_mode_status.json"
+            previous = {"ok": True, "state": "listening", "message": "Původní stav."}
+            status_path.write_text(json.dumps(previous, ensure_ascii=False) + "\n", encoding="utf-8")
+
+            with patch("app.file_persistence.os.replace", side_effect=OSError("replace failed")):
+                with self.assertRaises(OSError):
+                    write_voice_mode_status(
+                        status_path=status_path,
+                        state="stopped",
+                        message="Nový stav.",
+                    )
+
+            self.assertEqual(json.loads(status_path.read_text(encoding="utf-8")), previous)
+            self.assertEqual(list(status_path.parent.glob(f".{status_path.name}.*.tmp")), [])
+
     def test_spoken_notice_describes_read_only_command(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             latest = Path(temp_dir) / "latest_voice_command.md"

@@ -182,6 +182,7 @@ COCKPIT_CODE_STAMP_PATHS = (
     Path(__file__).resolve(),
     PROJECT_ROOT / "app" / "adam_service.py",
     PROJECT_ROOT / "app" / "file_persistence.py",
+    PROJECT_ROOT / "app" / "speech" / "adam_voice_mode.py",
     PROJECT_ROOT / "scripts" / "cockpit_server.py",
 )
 DEFAULT_PURCHASES_DIR = PROJECT_ROOT / "data" / "private" / "purchases"

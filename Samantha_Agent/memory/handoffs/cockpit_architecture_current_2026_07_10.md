@@ -148,15 +148,24 @@ Rucni retest po prvnim vykonovem kroku:
   Simulovane selhani `os.replace` zachovalo puvodni soubor a uklidilo temp.
 - Cely relevantni balicek Cockpit, VoiceBridge, dokumenty, e-maily a backup
   prosel: 409 testu OK.
+- Prvni cista VoiceBridge persistence davka prevadi pouze
+  `adam_voice_mode_status.json` a `last_adam_response.json` na sdileny atomicky
+  zamceny JSON zapis. Pending stav, approval karty, historie JSONL a doruceni
+  zustaly beze zmeny.
+- Integracni testy overuji lock a uklid temp souboru u obou VoiceBridge souboru;
+  simulovane selhani `os.replace` zachova predchozi status JSON.
+- Po nasazeni byl Voice Mode watcher restartovan bez cekajiciho pokynu, vratil
+  se do `listening`, terminalovy bridge zustal zapnuty a zivy statusovy lock
+  vznikl. Lokalni i Tailscale smoke check a 413 relevantnich testu prosly.
 
 Co neni hotove:
 
 - Zakladni stabilizace, HTTP hranice a iPhone hlas jsou funkcne potvrzene; PDF
   browser retest Mila vedome odlozil a post-call audio recovery ceka na pozdejsi
   rucni retest; ani jedno neni blokujici pro dalsi architekturu.
-- Sdilena persistence vrstva a prvni nizkorizikova integrace jsou hotove, ale
-  prime JSON/JSONL zapisy VoiceBridge, reminders, dokumentu a e-mailu na ni
-  jeste nejsou prevedene.
+- Sdilena persistence vrstva, prvni nizkorizikova integrace a dva ciste
+  VoiceBridge JSON prepisy jsou hotove. Pending read-modify-write, hlasova
+  historie JSONL, reminders, dokumenty a e-maily jeste prevedene nejsou.
 - `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem.
 - VoiceBridge nema jeden explicitni stavovy model prikazu.
 - Dokumentove a e-mailove workflow nemaji jednotnou repository/transakcni
@@ -164,16 +173,16 @@ Co neni hotove:
 
 Dalsi krok:
 
-Po potvrzeni prvniho persistence rezu pokracovat dalsi malou davkou ve
-VoiceBridge: nejdrive prevest pouze samostatne JSON stavove prepisy, ktere
-neprovadeji read-modify-write. Zachovat cesty i format, pridat cilene regresni
-testy a test selhani zapisu. Pending workflow, historie JSONL a vlastnictvi
-doruceni nemenit ve stejne davce. PDF browser retest zustava odlozeny.
+Pred dalsi zmenou navrhnout samostatnou zamcenou transakci pro VoiceBridge
+`pending_for_adam.json`: nacist, overit ocekavany stav/prikaz, zmenit a atomicky
+ulozit pod jednim lockem. Nejdrive testovat konflikt dvou procesu a stale
+zachovat jednoho vlastnika doruceni. Historii JSONL resit az v dalsi oddelene
+davce. PDF browser a post-call audio retest zustavaji odlozene.
 
 Navrhovane dalsi kroky:
 
-1. Prevest samostatne VoiceBridge JSON stavove prepisy na sdilenou vrstvu.
-2. Samostatne resit pending read-modify-write a hlasovou JSONL historii.
+1. Navrhnout a otestovat VoiceBridge pending read-modify-write transakci.
+2. Samostatne resit hlasovou JSONL historii.
 3. Po malych davkach prejit na reminders, dokumenty a nakonec e-mail metadata.
 4. Postupne rozdelit monolit pri zachovani endpointu:
    status/health -> voice -> documents -> email -> staticky frontend.

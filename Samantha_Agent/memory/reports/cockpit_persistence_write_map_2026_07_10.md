@@ -50,6 +50,9 @@ První integrace je záměrně nízkoriziková:
 1. `app/backup/activity_state.py` používá atomický zamčený JSON zápis.
 2. Cockpit HTTP technický event log používá zamčený JSONL append s krátkým
    timeoutem; log zůstává best-effort a nikdy neobsahuje request payloady.
+3. První VoiceBridge rollout převádí pouze čisté přepisy
+   `adam_voice_mode_status.json` a `last_adam_response.json` na atomický zamčený
+   JSON zápis. Pending stav, schvalování, historie JSONL a doručování se nemění.
 
 Existující soukromá data se nepřesouvají, nepřepisují dávkově ani nemigrují.
 
@@ -63,11 +66,16 @@ Existující soukromá data se nepřesouvají, nepřepisují dávkově ani nemig
   dočasný soubor.
 - Integrační testy ověřují použití stabilního locku v backup state a Cockpit
   HTTP event logu.
+- VoiceBridge testy ověřují lock i absenci temp souboru pro status a poslední
+  odpověď; simulované selhání replace zachová předchozí status JSON.
+- Po nasazení byl Voice Mode watcher bezpečně restartován bez pending pokynu,
+  vrátil se do `listening`, zachoval terminálový bridge a živě vytvořil status
+  lock. Relevantní sada má 413 testů OK.
 
 ## Doporučené další pořadí rolloutů
 
-1. VoiceBridge jednotlivé JSON stavové soubory; nejprve čisté přepisy, až potom
-   historie a pending read-modify-write operace.
+1. Navrhnout samostatnou VoiceBridge transakci pro pending read-modify-write;
+   historii JSONL řešit odděleně a zachovat vlastnictví doručení.
 2. Reminders a Quick Notes registry s explicitní zamčenou transakcí.
 3. Dokumentové registry a lifecycle JSONL po menších skupinách s consistency
    testem po každé skupině.
