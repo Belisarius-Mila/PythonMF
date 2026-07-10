@@ -97,12 +97,22 @@ Rucni retest po prvnim vykonovem kroku:
 - Po oprave prosla JavaScript syntax kontrola, novy regresni test a 390
   relevantnich testu. Nasazena verze prosla lokalnim i Tailscale smoke checkem
   a obe adresy dal obsluhuje stejny novy serverovy PID.
+- Navazujici iPhone retest ukazal, ze odpoved se zapisovala, ale iPhone zustal
+  tichy. Po reloadu byl webovy audiokanal znovu zamceny a bez samostatneho
+  klepnuti na `Otevrit audiokanal` nevznikl ani pokus o prehrani.
+- Tlacitko `Odeslat Adamovi` proto na vzdalenem mobilnim klientu nyni v ramci
+  stejneho uzivatelskeho gesta automaticky otevira tichy Web Audio kanal jeste
+  pred odeslanim pokynu. Samostatne tlacitko zustava jako rucni fallback.
+  Doruceni pokynu, mikrofonni vetev ani VoiceBridge se nezmenily.
+- Po iPhone audio oprave prosla JavaScript kontrola a 391 relevantnich testu.
+  Nasazena verze prosla lokalnim i Tailscale smoke checkem; prvni vzdaleny plny
+  status po restartu jednou vyprsel na timeoutu, opakovani s rezervou proslo.
 
 Co neni hotove:
 
 - Faze stabilizace neni uzavrena. HTTP hranice je hotova, ale zbyva rucni
   prohlizecovy retest CSP/hlavicek na Macu a iPhonu a kratky retest opravy
-  autoplay hlasky.
+  automatickeho otevreni iPhone audiokanalu.
 - Prime JSON/JSONL zapisy nemaji jednotny file lock a atomicky zapis.
 - `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem.
 - VoiceBridge nema jeden explicitni stavovy model prikazu.
@@ -111,18 +121,19 @@ Co neni hotove:
 
 Dalsi krok:
 
-Mila ma ponechat Mac Cockpit otevreny a z iPhonu poslat jeden kratky nerizikovy
-hlasovy pokyn. Na Macu se uz nesmi sama objevit cervena browserova chyba o
-nepovolenem pozadavku; pripadny blok autoplay se ma vyridit fallbackem nebo
-rucnim prehranim. Dale kratce overit otevreni jednoho bezpecneho dokumentoveho
-PDF. Pokud CSP ani Host/Origin kontrola nic nerozbila, dalsi P0
+Mila ma na iPhonu jednou obnovit Cockpit a bez samostatneho otevirani
+audiokanalu poslat kratky nerizikovy pokyn tlacitkem `Odeslat Adamovi`. Tlacitko
+ma soucasne odemknout audio a nova odpoved se ma na iPhonu prehrat. Safari musi
+zustat v popredi a displej odemceny; prehravani weboveho audia na zamcene
+obrazovce iOS negarantuje. PDF retest lze podle Milova rozhodnuti odlozit.
+Pokud hlas projde, dalsi P0
 implementacni blok je spolecna atomicka file persistence a zamky. Nejdrive
 zmapovat konkretni zapisove helpery a zavest malou sdilenou vrstvu; nemenit ani
 nemigrovat existujici private data.
 
 Navrhovane dalsi kroky:
 
-1. Rucne potvrdit autoplay/PDF retest po HTTP ochrane a uzavrit stabilizaci.
+1. Rucne potvrdit iPhone audio retest; PDF retest muze zustat odlozeny.
 2. Zmapovat zapisove helpery a navrhnout nejmensi sdilenou atomickou persistence
    vrstvu bez migrace existujicich private dat.
 3. Zavest atomicke file zapisy a zamky po male oblasti; doplnit concurrency test.

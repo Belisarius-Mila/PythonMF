@@ -2704,6 +2704,19 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("if (autoplayBlocked)", source)
         self.assertIn("} else {\n\t              recordFrontendError(playErr);", source)
 
+    def test_mobile_voice_submit_opens_audio_channel_from_same_gesture(self) -> None:
+        start = COCKPIT_HTML.index("async function submitVoiceTranscript()")
+        end = COCKPIT_HTML.index("async function searchDocuments()", start)
+        source = COCKPIT_HTML[start:end]
+
+        self.assertIn("async function primeMobileVoiceAudioForCommandGesture", COCKPIT_HTML)
+        self.assertIn('await primeMobileVoiceAudioForCommandGesture("voice_text_submit")', source)
+        self.assertLess(
+            source.index('await primeMobileVoiceAudioForCommandGesture("voice_text_submit")'),
+            source.index('postJson("/api/speech/voice-text"'),
+        )
+        self.assertIn('recordVoiceFrontendEvent(opened ? "audio_channel_auto_opened"', COCKPIT_HTML)
+
     def test_cockpit_codex_approval_clear_action_clears_runtime_state(self) -> None:
         calls = []
 

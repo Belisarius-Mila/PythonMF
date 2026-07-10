@@ -18909,6 +18909,21 @@ COCKPIT_HTML = """<!doctype html>
 	      return true;
 	    }
 
+	    async function primeMobileVoiceAudioForCommandGesture(source = "voice_command") {
+	      if (!isRemoteCockpitClient() || !isMobileCockpitClient() || voiceAudioUnlocked) {
+	        return voiceAudioUnlocked;
+	      }
+	      try {
+	        const opened = await primeVoiceAudioContextFromGesture();
+	        recordVoiceFrontendEvent(opened ? "audio_channel_auto_opened" : "audio_channel_auto_open_unavailable", {source});
+	        return opened;
+	      } catch (err) {
+	        updateVoiceAudioUnlockUi(false);
+	        recordVoiceFrontendEvent("audio_channel_auto_open_failed", {source, error: String(err)});
+	        return false;
+	      }
+	    }
+
 		    async function openVoiceAudioChannel() {
 		      if (!voiceAudioUnlockBtn) return;
 		      voiceAudioUnlockBtn.disabled = true;
@@ -19798,6 +19813,7 @@ COCKPIT_HTML = """<!doctype html>
 	        voiceTranscript.focus();
 	        return;
 	      }
+	      await primeMobileVoiceAudioForCommandGesture("voice_text_submit");
 	      voiceTranscriptSendBtn.disabled = true;
 	      voiceCommandStatus.textContent = "Odesílám text Adamovi...";
 	      recordVoiceFrontendEvent("voice_text_post_start", {step: "voice_text", text_chars: text.length});
