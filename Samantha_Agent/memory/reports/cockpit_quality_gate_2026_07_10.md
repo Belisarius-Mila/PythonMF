@@ -50,8 +50,8 @@ nebo pull request.
 
 - Lokální quality gate prošel kompletně.
 - Nový test ověřuje manifest cest/modulů a architektonickou metriku.
-- Po rozšíření o samostatné reminders, Quick Notes a launcher moduly prošlo 458
-  testů.
+- Po rozšíření o samostatné reminders, Quick Notes, urgent reminders a launcher
+  moduly prochází 463 testů.
 - Gate při prvním běhu odhalil tři ekvivalentní JavaScript regex escape zápisy
   uvnitř Python HTML řetězce. Byly opraveny bez změny výsledného JavaScriptu a
   syntax kontrola nyní podobný `SyntaxWarning` odmítne.
@@ -76,6 +76,9 @@ nebo pull request.
   funkcí, tedy 11 řádků a jednu funkci pod výchozí baseline.
 - GitHub Actions běh číslo 5 pro commit `17729ec` skončil úspěšně za 1 minutu
   29 sekund.
+- `app/urgent_reminders.py` a jeho nový samostatný dvouprocesový test jsou nyní
+  přímo v lokálním gate i v GitHub Actions path filtrech. Lokální běh po zamčení
+  urgent indexu prošel všech 463 testů.
 
 ## Co gate zatím neřeší
 
@@ -88,6 +91,6 @@ nebo pull request.
 
 ## Další krok
 
-Vytvořit read-only inventuru kandidátů mrtvého a legacy kódu bez mazání. První
-malá extrakce sdíleného code stampu už snížila monolit pod baseline; další
-status/health extrakce má pokračovat stejným způsobem až po inventuře.
+Quality gate, read-only inventura, Cleanup R1 a zamčené reminders/Quick Notes/
+urgent reminders jsou hotové. Další persistence rollout má pokračovat malou
+skupinou dokumentových registrů a po každé skupině consistency testem.

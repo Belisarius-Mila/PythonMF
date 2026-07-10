@@ -252,6 +252,16 @@ Rucni retest po prvnim vykonovem kroku:
 - `app/cockpit.py` ma po R1 22 439 radku a 330 top-level funkci. Ze 255 radku
   puvodnich funkcnich kandidatu zbyva 227 radku starych e-mailovych a Janicka
   vetvi, ktere vyzaduji samostatne rozhodnuti nebo rucni overeni.
+- Samostatny urgent-reminders index nyni skenuje iCloud soubory mimo lock, ale
+  slouceni, stabilni cislovani, zachovani `done` a zapis provadi v jedne
+  `update_json_file` transakci. Oznaceni `done` pouziva stejnou zamcenou cestu.
+- Dva procesy sloucily 40 ruznych urgentnich pripomenuti s jedinecnymi cisly
+  1 az 40. Deterministicky sync-vs-done test potvrdil, ze soubezny sync nevrati
+  hotovou polozku na `open`; selhani `os.replace` zachovalo puvodni index.
+- Cilenych 25 testu a cely quality gate se samostatnym urgent modulem prosly:
+  463 testu OK. Lokalni i Tailscale smoke check jsou zelene, obe adresy maji
+  PID 9179 a code stamp `7898101b0363b08f`; zivy sidecar lock existuje.
+- Cesta ani JSON format se nemenily, private obsah se nemigroval ani nevypisoval.
 
 Co neni hotove:
 
@@ -259,8 +269,8 @@ Co neni hotove:
   browser retest Mila vedome odlozil a post-call audio recovery ceka na pozdejsi
   rucni retest; ani jedno neni blokujici pro dalsi architekturu.
 - Sdilena persistence, zakladni VoiceBridge persistence, hlavni reminders store
-  a Quick Notes index jsou zamcene. Samostatny urgent-reminders index,
-  dokumenty a e-maily jeste prevedene nejsou.
+  a Quick Notes i urgent-reminders index jsou zamcene. Dokumenty a e-maily
+  jeste prevedene nejsou.
 - `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem.
 - Cleanup R1 je hotovy. Stary e-mailovy parser, lokalni Janicka vetev a pet
   podezrelych API cest zustavaji beze zmeny; u API cest chybi registr externich
@@ -272,17 +282,18 @@ Co neni hotove:
 
 Dalsi krok:
 
-Zamknout samostatny urgent-reminders index jako dalsi malou persistence davku.
-Stary e-mailovy parser, lokalni Janicka vetev a pet podezrelych API cest zatim
-nemenit bez prislusneho rucniho, recovery nebo externiho klient testu. PDF
-browser a post-call audio retest jsou odlozene.
+Pokracovat malou skupinou dokumentovych registru s concurrency/consistency
+testem a bez migrace private dat. Stary e-mailovy parser, lokalni Janicka vetev
+a pet podezrelych API cest zatim nemenit bez prislusneho rucniho, recovery nebo
+externiho klient testu. PDF browser a post-call audio retest jsou odlozene.
 
 Navrhovane dalsi kroky:
 
-1. Zamknout urgent-reminders index.
+1. Vybrat prvni malou skupinu dokumentovych registry/lifecycle zapisu a pridat
+   concurrency/consistency test.
 2. Janicka a stary e-mailovy parser mazat az po popsanem rucnim/recovery overeni.
 3. Podezrele API cesty proverit proti Shortcuts a servisnim klientum.
-4. Po malych davkach prejit na dokumenty a nakonec e-mail metadata.
+4. Po dokumentech prejit nakonec na e-mail metadata.
 5. Postupne rozdelit monolit pri zachovani endpointu:
    status/health -> voice -> documents -> email -> staticky frontend.
 6. Zavadet explicitni stavove modely a repository vrstvy po oblastech, ne

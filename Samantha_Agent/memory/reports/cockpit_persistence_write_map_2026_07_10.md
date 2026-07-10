@@ -113,15 +113,32 @@ Existující soukromá data se nepřesouvají, nepřepisují dávkově ani nemig
   úspěšně za 1 minutu 15 sekund.
 - Míla ručně potvrdil, že nová Quick Note z iPhonu doputovala do Cockpitu právě
   jednou. Stejný test vytvořil i nové důležité připomenutí; jeho samostatný
-  urgent index nebyl touto dávkou měněn a zůstává dalším persistence krokem.
+  urgent index tehdy ještě nebyl touto dávkou měněn.
+
+## Urgent reminders rollout
+
+- Samostatný `urgent_reminders/index.json` nyní používá stejnou stabilní
+  sidecar lock a atomickou read-modify-write vrstvu jako Quick Notes.
+- Sken iCloud souborů probíhá mimo zámek. Sloučení, přidělení stabilního čísla,
+  zachování stavu `done` a zápis indexu proběhnou v jedné transakci.
+- Označení `done` je také jedna zamčená transakce; neexistující číslo index
+  zbytečně nepřepisuje.
+- Dva procesy sloučily 40 různých urgentních připomenutí bez ztráty a s
+  unikátními čísly 1 až 40.
+- Deterministický souběh pozastavil sync po načtení zdrojového souboru, mezitím
+  označil existující položku jako `done` a potvrdil, že dokončený sync tento stav
+  nepřepsal zpět na `open`.
+- Simulované selhání `os.replace` zachovalo původní index a uklidilo dočasný
+  soubor. Formát ani cesta JSON se nezměnily a private obsah se nemigroval.
+- Cílených 25 urgent/reminders/Quick Notes/Cockpit testů a celý quality gate s
+  463 testy prošly. Lokální i Tailscale smoke check jsou zelené; obě adresy
+  ukazují stejný serverový PID a code stamp. Živý sidecar lock existuje.
 
 ## Doporučené další pořadí rolloutů
 
-1. Samostatný `urgent_reminders/index.json`, který není totožný s hlavním
-   reminders store ani Quick Notes indexem.
-2. Dokumentové registry a lifecycle JSONL po menších skupinách s consistency
+1. Dokumentové registry a lifecycle JSONL po menších skupinách s consistency
    testem po každé skupině.
-3. E-mail activity/case/archive metadata; outbound a mazací workflow až nakonec.
+2. E-mail activity/case/archive metadata; outbound a mazací workflow až nakonec.
 
 Každý rollout má zachovat formát i cestu existujícího souboru, přidat cílený
 regresní/concurrency test a nemigrovat obsah bez samostatného rozhodnutí.

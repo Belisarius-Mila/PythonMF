@@ -287,9 +287,10 @@ nikoli jednorázový přepis.
 4. **API deprecation kontrola:** výslovně projít externí Shortcuts a servisní
    launchery pro pět podezřelých endpointů. Teprve poté odstranit cestu, registry
    kartu, handler a test jako jeden atomický balík.
-5. **Další doporučený implementační krok:** zamknout samostatný
-   urgent-reminders index. Cleanup R2/R3 a API deprecation mohou počkat na
-   příslušné ruční nebo recovery rozhodnutí.
+5. **Navazující persistence krok — hotovo:** samostatný urgent-reminders index
+   je zamčený a krytý dvouprocesovými testy. Cleanup R2/R3 a API deprecation
+   mohou počkat na příslušné ruční nebo recovery rozhodnutí; další persistence
+   oblastí jsou dokumentové registry po malých skupinách.
 
 ## Rizika a hranice závěru
 

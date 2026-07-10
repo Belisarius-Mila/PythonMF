@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from app.file_persistence import update_json_file
 from app.quick_notes import DEFAULT_ICLOUD_SHORTCUTS_INBOX, SUPPORTED_SUFFIXES
 
 
@@ -29,49 +30,69 @@ class UrgentReminder:
     status: str
 
 
+class _UrgentReminderNotFound(RuntimeError):
+    pass
+
+
 def sync_urgent_reminders_index(
     *,
     inbox_dir: Path = DEFAULT_ICLOUD_SHORTCUTS_INBOX,
     index_path: Path = DEFAULT_INDEX_PATH,
 ) -> list[UrgentReminder]:
-    records = _load_index(index_path)
-    by_path = {str(record.get("source_path", "")): record for record in records}
-    next_number = _next_reminder_number(records)
-
+    observed: list[dict[str, Any]] = []
+    now = _now_iso()
     for source_path in _iter_reminder_files(inbox_dir):
-        source_key = str(source_path)
         stat = source_path.stat()
-        existing = by_path.get(source_key)
-        if existing is None:
-            existing = {
-                "reminder_number": next_number,
-                "source_path": source_key,
-                "priority": "urgent",
-                "status": "open",
-                "first_seen_at": _now_iso(),
-            }
-            next_number += 1
-            records.append(existing)
-            by_path[source_key] = existing
-
         text = _read_text(source_path)
-        existing.update(
+        observed.append(
             {
-                "source_path": source_key,
+                "source_path": str(source_path),
                 "title": _extract_title(text, source_path),
                 "summary": _extract_summary(text),
                 "body_text": _extract_body_text(text),
                 "created_at": _extract_datetime(text) or _format_timestamp(stat.st_mtime),
                 "modified_at": _format_timestamp(stat.st_mtime),
                 "size_bytes": stat.st_size,
-                "priority": _extract_field(text, "priorita") or existing.get("priority") or "urgent",
-                "status": existing.get("status") or "open",
-                "last_seen_at": _now_iso(),
+                "priority": _extract_field(text, "priorita"),
+                "last_seen_at": now,
             }
         )
 
-    if records:
-        _write_index(index_path, records)
+    if not observed:
+        records = _load_index(index_path)
+    else:
+        def merge_observed(current: Any) -> dict[str, list[dict[str, Any]]]:
+            records = _index_records(current)
+            by_path = {str(record.get("source_path", "")): record for record in records}
+            next_number = _next_reminder_number(records)
+            for snapshot in observed:
+                source_key = str(snapshot["source_path"])
+                existing = by_path.get(source_key)
+                if existing is None:
+                    existing = {
+                        "reminder_number": next_number,
+                        "source_path": source_key,
+                        "priority": "urgent",
+                        "status": "open",
+                        "first_seen_at": now,
+                    }
+                    next_number += 1
+                    records.append(existing)
+                    by_path[source_key] = existing
+                status = existing.get("status") or "open"
+                priority = snapshot.get("priority") or existing.get("priority") or "urgent"
+                existing.update(snapshot)
+                existing["status"] = status
+                existing["priority"] = priority
+            return {"reminders": records}
+
+        updated = update_json_file(
+            index_path,
+            merge_observed,
+            default={"reminders": []},
+            sort_keys=True,
+        )
+        records = _index_records(updated)
 
     return [
         _record_to_reminder(record)
@@ -85,42 +106,53 @@ def mark_urgent_reminder_done(
     *,
     index_path: Path = DEFAULT_INDEX_PATH,
 ) -> UrgentReminder | None:
-    records = _load_index(index_path)
     now = _now_iso()
     matched: dict[str, Any] | None = None
-    for record in records:
-        try:
-            number = int(record.get("reminder_number", 0) or 0)
-        except (TypeError, ValueError):
-            number = 0
-        if number == reminder_number:
-            matched = record
+
+    def mark_matching(current: Any) -> dict[str, list[dict[str, Any]]]:
+        nonlocal matched
+        records = _index_records(current)
+        for record in records:
+            try:
+                number = int(record.get("reminder_number", 0) or 0)
+            except (TypeError, ValueError):
+                number = 0
+            if number != reminder_number:
+                continue
             record["status"] = "done"
             record["completed_at"] = now
             record["last_seen_at"] = now
-            break
-    if matched is None:
+            matched = dict(record)
+            return {"reminders": records}
+        raise _UrgentReminderNotFound
+
+    try:
+        update_json_file(
+            index_path,
+            mark_matching,
+            default={"reminders": []},
+            sort_keys=True,
+        )
+    except _UrgentReminderNotFound:
         return None
-    _write_index(index_path, records)
+    if matched is None:  # pragma: no cover - defensive invariant.
+        return None
     return _record_to_reminder(matched)
 
 
 def _load_index(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
-    data = json.loads(path.read_text(encoding="utf-8"))
+    return _index_records(json.loads(path.read_text(encoding="utf-8")))
+
+
+def _index_records(data: Any) -> list[dict[str, Any]]:
+    if not isinstance(data, dict):
+        raise ValueError("Urgent reminders index musi byt JSON objekt.")
     records = data.get("reminders", [])
     if not isinstance(records, list) or not all(isinstance(item, dict) for item in records):
         raise ValueError("Urgent reminders index musi obsahovat pole reminders se slovniky.")
     return records
-
-
-def _write_index(path: Path, records: list[dict[str, Any]]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps({"reminders": records}, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
 
 
 def _iter_reminder_files(inbox_dir: Path) -> list[Path]:
