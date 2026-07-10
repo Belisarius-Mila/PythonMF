@@ -298,6 +298,9 @@ Rucni retest po prvnim vykonovem kroku:
 - Read-only nasazeni bez skutecne mutace proslo obema smoke checky. Lokalni i
   Tailscale adresa maji PID 15800 a code stamp `e935ee8cf87c3168`; v zivem
   vaultu neni transaction marker a private obsah se necetl ani nemigroval.
+- Implementace je pushnuta v commitu `64ce395`. GitHub Actions Cockpit Quality
+  Gate beh cislo 9 skoncil uspesne:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29115015113`.
 - Hranice: ScanDocu review, reindex, lifecycle a nektere importni writery jeste
   nepouzivaji primarni RMW protokol a mohou se se soubeznou transakci krizit.
 

@@ -192,6 +192,9 @@ replace operace jsou atomické.
 - Read-only nasazení bez skutečné dokumentové mutace prošlo lokálním i Tailscale
   smoke checkem. Obě adresy mají PID 15800 a code stamp `e935ee8cf87c3168`;
   živý transaction marker neexistuje.
+- Implementace je v commitu `64ce395`. GitHub Actions Cockpit Quality Gate běh
+  číslo 9 skončil úspěšně:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29115015113`.
 
 Hranice rolloutu: metadata a reading status jsou serializované mezi sebou.
 ScanDocu review, reindex, lifecycle a některé importní writery zatím stejný

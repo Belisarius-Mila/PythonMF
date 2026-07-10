@@ -94,6 +94,9 @@ nebo pull request.
   `tests.test_document_transactions` v test manifestu. Šest nových testů kryje
   concurrency, rollback, dvě crash-recovery fáze a idempotentní no-change.
   Lokální gate prošel všech 472 testů.
+- GitHub Actions běh číslo 9 pro document-record transaction commit `64ce395`
+  skončil úspěšně:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29115015113`.
 
 ## Co gate zatím neřeší
 
