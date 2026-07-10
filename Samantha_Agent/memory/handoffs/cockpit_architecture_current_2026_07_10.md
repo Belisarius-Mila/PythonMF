@@ -314,6 +314,9 @@ Rucni retest po prvnim vykonovem kroku:
 - Read-only nasazeni proslo lokalnim i Tailscale smoke checkem. Obe adresy maji
   PID 19613 a code stamp `8b947c4304e2cd95`; live marker neexistuje a na portu
   8771 nebezi zalozni instance.
+- Implementace je pushnuta v commitu `a11e263`. GitHub Actions Cockpit Quality
+  Gate beh cislo 10 skoncil uspesne:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29117003749`.
 - Hranice: reindex, lifecycle a nektere importni writery jeste nepouzivaji
   primarni RMW protokol a mohou se se soubeznou transakci krizit.
 

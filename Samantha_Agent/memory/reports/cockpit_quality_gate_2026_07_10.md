@@ -101,6 +101,9 @@ nebo pull request.
   testy ověřují, že ScanDocu review atomicky spojí index, manifest, candidate
   status a action audit, při selhání či pádu vše obnoví a s Cockpit metadata
   transakcí sdílí primární lock. Lokální gate prošel všech 476 testů.
+- GitHub Actions běh číslo 10 pro ScanDocu review transaction commit `a11e263`
+  skončil úspěšně:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29117003749`.
 
 ## Co gate zatím neřeší
 
