@@ -869,7 +869,7 @@ for index in range(30):
             write_voice_command(inbox / "latest_voice_command.md", "Najdi stav projektu Dokumenty.")
             completed = subprocess.run(
                 [
-                    ".venv/bin/python",
+                    sys.executable,
                     "scripts/adam_voice_mode.py",
                     "--inbox-dir",
                     str(inbox),
@@ -918,7 +918,7 @@ for index in range(30):
             )
             completed = subprocess.run(
                 [
-                    ".venv/bin/python",
+                    sys.executable,
                     "scripts/adam_voice_pending.py",
                     "--path",
                     str(pending_path),
@@ -959,7 +959,7 @@ for index in range(30):
             )
             completed = subprocess.run(
                 [
-                    ".venv/bin/python",
+                    sys.executable,
                     "scripts/adam_voice_pending.py",
                     "--path",
                     str(pending_path),
@@ -1122,7 +1122,7 @@ for index in range(30):
 
             completed = subprocess.run(
                 [
-                    ".venv/bin/python",
+                    sys.executable,
                     "scripts/adam_voice_reply.py",
                     "--path",
                     str(pending_path),
@@ -1156,7 +1156,7 @@ for index in range(30):
 
             completed = subprocess.run(
                 [
-                    ".venv/bin/python",
+                    sys.executable,
                     "scripts/adam_voice_reply.py",
                     "--processing-started",
                     "--path",
@@ -1187,7 +1187,7 @@ for index in range(30):
 
             completed = subprocess.run(
                 [
-                    ".venv/bin/python",
+                    sys.executable,
                     "scripts/adam_voice_reply.py",
                     "--latest-command",
                     "--inbox-dir",
@@ -1221,7 +1221,7 @@ for index in range(30):
 
             completed = subprocess.run(
                 [
-                    ".venv/bin/python",
+                    sys.executable,
                     "scripts/adam_voice_reply.py",
                     "--latest-command",
                     "--path",
@@ -1253,7 +1253,7 @@ for index in range(30):
 
             completed = subprocess.run(
                 [
-                    ".venv/bin/python",
+                    sys.executable,
                     "scripts/adam_voice_reply.py",
                     "--inbox-dir",
                     str(inbox),
