@@ -12,6 +12,7 @@ from typing import Iterator
 from unittest.mock import MagicMock, patch
 
 from app.cockpit import COCKPIT_SECURITY_HEADERS, MAX_JSON_BODY_BYTES, CockpitServer, log_cockpit_http_event
+from app.file_persistence import lock_path_for
 from app.speech.transcribe import MAX_AUDIO_BYTES
 
 
@@ -189,6 +190,7 @@ class CockpitHttpSecurityTests(unittest.TestCase):
                 path=path,
             )
             record = json.loads(path.read_text(encoding="utf-8"))
+            self.assertTrue(lock_path_for(path).exists())
 
         self.assertEqual(record["path"], "/api/example")
         self.assertNotIn("private", json.dumps(record))

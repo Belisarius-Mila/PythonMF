@@ -134,6 +134,7 @@ from app.email.icloud_provider import EmailProviderError, ICloudReadOnlyEmailPro
 from app.email.models import EmailAttachmentMeta, EmailHeader, EmailMessage
 from app.email.redaction import redact_email_addresses
 from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEmailProvider
+from app.file_persistence import FilePersistenceError, append_jsonl_locked
 from app.reminders.query_tools import mark_reminder_done_text
 from app.reminders.store import DEFAULT_REMINDERS_PATH, load_reminders_store, write_reminders_store
 from app.speech import SpeechError, TranscriptionError, speak_text
@@ -180,6 +181,7 @@ COCKPIT_URL = f"http://127.0.0.1:{COCKPIT_PORT}"
 COCKPIT_CODE_STAMP_PATHS = (
     Path(__file__).resolve(),
     PROJECT_ROOT / "app" / "adam_service.py",
+    PROJECT_ROOT / "app" / "file_persistence.py",
     PROJECT_ROOT / "scripts" / "cockpit_server.py",
 )
 DEFAULT_PURCHASES_DIR = PROJECT_ROOT / "data" / "private" / "purchases"
@@ -441,10 +443,9 @@ def log_cockpit_http_event(
         "detail": safe_text(detail)[:120],
     }
     try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with _COCKPIT_HTTP_EVENT_LOG_LOCK, path.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
-    except OSError:
+        with _COCKPIT_HTTP_EVENT_LOG_LOCK:
+            append_jsonl_locked(path, record, sort_keys=True, timeout=0.25)
+    except (FilePersistenceError, OSError):
         return
 
 READING_STATUS_LABELS: dict[str, str] = {

@@ -13,6 +13,7 @@ from app.backup.activity_state import (
     record_backup_completed,
     save_backup_activity_state,
 )
+from app.file_persistence import lock_path_for
 
 
 class BackupActivityStateTests(unittest.TestCase):
@@ -96,6 +97,8 @@ class BackupActivityStateTests(unittest.TestCase):
             self.assertEqual(state.last_backup_at, "2026-05-19")
             self.assertEqual(state.last_backup_target, "/Volumes/Falta/SamanthaSecureBackup")
             self.assertEqual(state.last_backup_mode, "manual")
+            self.assertTrue(lock_path_for(path).exists())
+            self.assertEqual(list(path.parent.glob(f".{path.name}.*.tmp")), [])
 
     def test_load_memory_appends_backup_activity_section(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

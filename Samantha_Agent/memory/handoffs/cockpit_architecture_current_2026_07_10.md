@@ -120,13 +120,35 @@ Rucni retest po prvnim vykonovem kroku:
   textu odpovedi.
 - Po teto oprave prosla JavaScript kontrola a 392 relevantnich testu. Lokalni i
   Tailscale smoke check po nasazeni prosly kompletne.
+- Rucni iPhone test 3785 nasledne potvrdil automaticke cteni. Bezpecna technicka
+  stopa zaznamenala `voice_autospeak_requested` a dokoncene
+  `audio_play_succeeded`; puvodni ticho bylo v poslednim pokusu zpusobene
+  tichym rezimem telefonu, ne dalsi chybou Cockpitu.
+- Zapisova mista runtime casti `app/` jsou zmapovana v git-safe reportu
+  `reports/cockpit_persistence_write_map_2026_07_10.md`. Inventura necetla
+  private obsahy a potvrzuje roztristene prime JSON/JSONL zapisy ve VoiceBridge,
+  dokumentech, e-mailech, pripominkach a provoznich stavech.
+- Nova sdilena vrstva `app/file_persistence.py` poskytuje stabilni sidecar
+  `.lock`, `fcntl.flock` s timeoutem, atomicky zapis pres temp soubor ve stejne
+  slozce, `fsync`, `os.replace`, zamcenou read-modify-write JSON transakci a
+  zamceny JSONL append.
+- Prvni nizkorizikova integrace je nasazena do backup activity state a Cockpit
+  HTTP technickeho event logu. HTTP log ma kratky timeout a zustava best-effort,
+  aby diagnostika nikdy nezdrzela odpoved serveru. Cesty ani formaty dat se
+  nemenily a zadna private data se nemigrovala.
+- Testy spousteji dva skutecne Python procesy: 60 soubeznych JSON aktualizaci
+  probehlo bez ztraty a 60 JSONL udalosti zustalo samostatnymi validnimi radky.
+  Simulovane selhani `os.replace` zachovalo puvodni soubor a uklidilo temp.
+- Cely relevantni balicek Cockpit, VoiceBridge, dokumenty, e-maily a backup
+  prosel: 409 testu OK.
 
 Co neni hotove:
 
-- Faze stabilizace neni uzavrena. HTTP hranice je hotova, ale zbyva rucni
-  prohlizecovy retest CSP/hlavicek na Macu a iPhonu a kratky retest opravy
-  automatickeho precteni prvni nove iPhone odpovedi.
-- Prime JSON/JSONL zapisy nemaji jednotny file lock a atomicky zapis.
+- Zakladni stabilizace, HTTP hranice a iPhone hlas jsou funkcne potvrzene; PDF
+  browser retest Mila vedome odlozil a neni blokujici pro dalsi architekturu.
+- Sdilena persistence vrstva a prvni nizkorizikova integrace jsou hotove, ale
+  prime JSON/JSONL zapisy VoiceBridge, reminders, dokumentu a e-mailu na ni
+  jeste nejsou prevedene.
 - `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem.
 - VoiceBridge nema jeden explicitni stavovy model prikazu.
 - Dokumentove a e-mailove workflow nemaji jednotnou repository/transakcni
@@ -134,22 +156,17 @@ Co neni hotove:
 
 Dalsi krok:
 
-Mila ma na iPhonu jednou obnovit Cockpit a bez samostatneho otevirani
-audiokanalu poslat kratky nerizikovy pokyn tlacitkem `Odeslat Adamovi`. Tlacitko
-ma soucasne odemknout audio a nova odpoved se ma na iPhonu prehrat. Safari musi
-zustat v popredi a displej odemceny; prehravani weboveho audia na zamcene
-obrazovce iOS negarantuje. PDF retest lze podle Milova rozhodnuti odlozit.
-Pokud hlas projde, dalsi P0
-implementacni blok je spolecna atomicka file persistence a zamky. Nejdrive
-zmapovat konkretni zapisove helpery a zavest malou sdilenou vrstvu; nemenit ani
-nemigrovat existujici private data.
+Po potvrzeni prvniho persistence rezu pokracovat dalsi malou davkou ve
+VoiceBridge: nejdrive prevest pouze samostatne JSON stavove prepisy, ktere
+neprovadeji read-modify-write. Zachovat cesty i format, pridat cilene regresni
+testy a test selhani zapisu. Pending workflow, historie JSONL a vlastnictvi
+doruceni nemenit ve stejne davce. PDF browser retest zustava odlozeny.
 
 Navrhovane dalsi kroky:
 
-1. Rucne potvrdit iPhone audio retest; PDF retest muze zustat odlozeny.
-2. Zmapovat zapisove helpery a navrhnout nejmensi sdilenou atomickou persistence
-   vrstvu bez migrace existujicich private dat.
-3. Zavest atomicke file zapisy a zamky po male oblasti; doplnit concurrency test.
+1. Prevest samostatne VoiceBridge JSON stavove prepisy na sdilenou vrstvu.
+2. Samostatne resit pending read-modify-write a hlasovou JSONL historii.
+3. Po malych davkach prejit na reminders, dokumenty a nakonec e-mail metadata.
 4. Postupne rozdelit monolit pri zachovani endpointu:
    status/health -> voice -> documents -> email -> staticky frontend.
 5. Zavadet explicitni stavove modely a repository vrstvy po oblastech, ne
@@ -173,13 +190,17 @@ Zmenene nebo relevantni soubory:
 
 - `AuditCockpit56.txt`
 - `app/cockpit.py`
+- `app/file_persistence.py`
+- `app/backup/activity_state.py`
 - `scripts/cockpit_smoke_check.py`
 - `tests/test_cockpit.py`
+- `tests/test_file_persistence.py`
 - `scripts/install_cockpit_local_launchd.sh`
 - `scripts/install_cockpit_tailscale_launchd.sh`
 - `scripts/migrate_cockpit_single_instance.py`
 - `tests/test_migrate_cockpit_single_instance.py`
 - `tests/test_cockpit_http_security.py`
+- `reports/cockpit_persistence_write_map_2026_07_10.md`
 - `reports/cockpit_function_inventory_audit_2026_06_27.md`
 - `reports/cockpit_post_action_risk_matrix_2026_06_27.md`
 - `handoffs/voicebridge_operational_contract_2026_06_30.md`

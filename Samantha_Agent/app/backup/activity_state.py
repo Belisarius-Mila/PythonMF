@@ -6,6 +6,8 @@ from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
+from app.file_persistence import atomic_write_json
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_BACKUP_ACTIVITY_STATE_PATH = PROJECT_ROOT / "data" / "backup" / "activity_state.json"
@@ -42,15 +44,12 @@ def save_backup_activity_state(
     state: BackupActivityState,
     path: Path = DEFAULT_BACKUP_ACTIVITY_STATE_PATH,
 ) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
     data = {
         "last_backup_at": state.last_backup_at,
         "last_backup_target": state.last_backup_target,
         "last_backup_mode": state.last_backup_mode,
     }
-    with path.open("w", encoding="utf-8") as handle:
-        json.dump(data, handle, ensure_ascii=False, indent=2)
-        handle.write("\n")
+    atomic_write_json(path, data)
 
 
 def record_backup_completed(
