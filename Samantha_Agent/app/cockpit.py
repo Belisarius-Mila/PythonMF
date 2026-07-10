@@ -203,7 +203,12 @@ from app.voice_bridge_coordinator import (
     selected_voice_delivery_transport,
     watcher_will_deliver_result as voice_watcher_will_deliver_result,
 )
-from app.voice_bridge_runtime import voice_bridge_status as build_voice_bridge_status
+from app.voice_bridge_runtime import (
+    set_voice_bridge_marker,
+    start_voice_mode_watcher,
+    stop_voice_mode_watcher,
+    voice_bridge_status as build_voice_bridge_status,
+)
 from scripts.autosave_status import autosave_status as read_autosave_runtime_status
 
 
@@ -4657,50 +4662,11 @@ def set_adam_voice_bridge_marker_action(
     marker_path: Path = CURRENT_CODEX_TTY_PATH,
     codex_tty_discoverer: Callable[[], list[str]] = discover_codex_ttys,
 ) -> dict[str, Any]:
-    target_tty = normalize_tty(str(tty or ""))
-    if not target_tty or target_tty == "??":
-        return {
-            "ok": False,
-            "status": "missing_tty",
-            "message": "Chybí cílové TTY pro voice bridge.",
-        }
-    try:
-        codex_ttys = [normalize_tty(item) for item in codex_tty_discoverer()]
-    except Exception:
-        codex_ttys = []
-    codex_ttys = [item for item in codex_ttys if item and item != "??"]
-    if target_tty not in codex_ttys:
-        return {
-            "ok": False,
-            "status": "tty_not_active",
-            "message": f"TTY {target_tty} není mezi aktivními Codex relacemi.",
-            "target_tty": target_tty,
-            "codex_ttys": codex_ttys,
-        }
-    marker_path.parent.mkdir(parents=True, exist_ok=True)
-    marker_path.write_text(
-        json.dumps(
-            {
-                "tty": target_tty,
-                "marked_at": datetime.now(timezone.utc).isoformat(),
-                "parent_pid": os.getpid(),
-                "note": "Private runtime marker for Adam Voice Mode terminal bridge, set from Cockpit.",
-            },
-            ensure_ascii=False,
-            indent=2,
-        )
-        + "\n",
-        encoding="utf-8",
+    return set_voice_bridge_marker(
+        tty,
+        marker_path=marker_path,
+        codex_tty_discoverer=codex_tty_discoverer,
     )
-    return {
-        "ok": True,
-        "status": "marker_updated",
-        "message": f"Voice bridge marker byl nastaven na {target_tty}.",
-        "marked_tty": target_tty,
-        "codex_ttys": codex_ttys,
-    }
-
-
 def action_queue_status(
     document_work: dict[str, Any] | None = None,
     reminders: dict[str, Any] | None = None,
@@ -10155,122 +10121,24 @@ def start_adam_voice_mode_action(
     log_file: Path = ADAM_VOICE_MODE_LOG_FILE,
     terminal_bridge: bool | None = None,
 ) -> dict[str, Any]:
-    current = load_voice_mode_status()
-    if current.get("running"):
-        return {
-            "ok": True,
-            "status": "already_running",
-            "message": "Adam Voice Mode watcher už běží.",
-            "pid": current.get("pid"),
-            "voice_mode": current,
-        }
-    log_file.parent.mkdir(parents=True, exist_ok=True)
-    log_handle = log_file.open("a", encoding="utf-8")
-    command_args = [
-        str(PROJECT_ROOT / ".venv" / "bin" / "python"),
-        str(ADAM_VOICE_MODE_SCRIPT),
-        "--poll",
-        "0.5",
-    ]
-    bridge_env = os.environ.get("ADAM_VOICE_TERMINAL_BRIDGE", "").strip().lower()
-    bridge_enabled = terminal_bridge if terminal_bridge is not None else bridge_env not in {"0", "false", "no", "ne"}
-    if bridge_enabled:
-        command_args.append("--terminal-bridge")
-    starter = launcher or subprocess.Popen
-    try:
-        process = starter(
-            command_args,
-            cwd=str(PROJECT_ROOT),
-            stdout=log_handle,
-            stderr=subprocess.STDOUT,
-            start_new_session=True,
-        )
-        log_handle.close()
-    except OSError as exc:
-        log_handle.close()
-        return {
-            "ok": False,
-            "status": "watcher_failed",
-            "message": f"Adam Voice Mode watcher se nepodařilo spustit: {exc}",
-        }
-    pid = int(getattr(process, "pid", 0) or 0)
-    poll = getattr(process, "poll", None)
-    if callable(poll):
-        time.sleep(0.35)
-        returncode = poll()
-        if returncode is not None:
-            write_voice_mode_status(
-                state="stopped",
-                message=f"Adam Voice Mode watcher po startu hned skončil (exit {returncode}).",
-                pid=pid,
-            )
-            try:
-                recent_log = "\n".join(log_file.read_text(encoding="utf-8").splitlines()[-20:])
-            except OSError:
-                recent_log = ""
-            return {
-                "ok": False,
-                "status": "watcher_exited",
-                "message": "Adam Voice Mode watcher po startu hned skončil. Zkontroluj log v Cockpitu.",
-                "pid": pid,
-                "returncode": returncode,
-                "log": str(relative_to_project(log_file)),
-                "recent_log": recent_log,
-            }
-    write_voice_mode_status(
-        state="starting",
-        message="Adam Voice Mode watcher se spouští.",
-        pid=pid,
+    return start_voice_mode_watcher(
+        status_loader=load_voice_mode_status,
+        status_writer=write_voice_mode_status,
+        launcher=launcher or subprocess.Popen,
+        log_file=log_file,
+        project_root=PROJECT_ROOT,
+        script_path=ADAM_VOICE_MODE_SCRIPT,
+        path_formatter=relative_to_project,
+        terminal_bridge=terminal_bridge,
+        sleeper=time.sleep,
     )
-    return {
-        "ok": True,
-        "status": "started",
-        "message": "Adam Voice Mode watcher spuštěn. Teď můžeš nahrávat hlasové pokyny.",
-        "pid": pid,
-        "log": str(relative_to_project(log_file)),
-        "terminal_bridge": bridge_enabled,
-        "voice_mode": load_voice_mode_status(stale_after_seconds=60.0),
-    }
-
-
 def stop_adam_voice_mode_action() -> dict[str, Any]:
-    current = load_voice_mode_status(stale_after_seconds=60.0)
-    pid = int(current.get("pid") or 0)
-    if not current.get("running") or not pid_exists(pid):
-        write_voice_mode_status(
-            state="stopped",
-            message="Adam Voice Mode watcher neběží.",
-            pid=pid,
-        )
-        return {
-            "ok": True,
-            "status": "already_stopped",
-            "message": "Adam Voice Mode watcher neběží.",
-            "voice_mode": load_voice_mode_status(),
-        }
-    try:
-        os.kill(pid, signal.SIGTERM)
-    except OSError as exc:
-        return {
-            "ok": False,
-            "status": "stop_failed",
-            "message": f"Adam Voice Mode watcher se nepodařilo zastavit: {exc}",
-            "pid": pid,
-        }
-    write_voice_mode_status(
-        state="stopped",
-        message="Adam Voice Mode watcher byl zastaven z Cockpitu.",
-        pid=pid,
+    return stop_voice_mode_watcher(
+        status_loader=load_voice_mode_status,
+        status_writer=write_voice_mode_status,
+        pid_checker=pid_exists,
+        killer=os.kill,
     )
-    return {
-        "ok": True,
-        "status": "stopped",
-        "message": "Adam Voice Mode watcher zastaven.",
-        "pid": pid,
-        "voice_mode": load_voice_mode_status(),
-    }
-
-
 def cockpit_voice_approval_action(payload: dict[str, Any]) -> dict[str, Any]:
     decision = str(payload.get("decision") or "").strip().lower()
     note = safe_text(str(payload.get("note") or ""))[:500]
