@@ -31,6 +31,29 @@ Statická analýza sama nedokáže prokázat, že endpoint nepoužívá externí
 starý bookmark nebo ruční API klient. Proto se níže oddělují přímé kandidáty
 Python kódu od API tras, které potřebují poslední provozní ověření.
 
+## Aktualizace po Cleanup R1
+
+Cleanup R1 byl 2026-07-10 opatrně realizován přesně v auditovaném rozsahu:
+
+- odstraněn nepoužívaný `resolve_openable_document_pdf`,
+- odstraněn nepoužívaný launcher helper `wait_until_ok`,
+- odstraněny `write_reminders_store` a `_write_reminders_store`, které obcházely
+  novou transakční cestu a neměly klienta,
+- odstraněny dva původně nalezené nepoužívané importy z `app/cockpit.py` a
+  následně osiřelý import `atomic_write_json` z reminders store.
+
+Výsledný diff aplikačního kódu má 2 upravené importní řádky a 39 odstraněných
+řádků. Přímé hledání nepotvrdilo žádnou zbývající referenci. Syntax, cílených
+20 launcher/reminders testů a celý Cockpit quality gate s 458 testy prošly.
+Po kontrolovaném restartu mají lokální i Tailscale adresa stejný PID a code
+stamp; oba pětibodové smoke checky prošly.
+
+Aktuální `app/cockpit.py` má 22 439 řádků a 330 top-level funkcí. Starý
+e-mailový parser, lokální Janička větev, pět podezřelých API cest a veškeré
+explicitně zachované kompatibilní vrstvy zůstaly beze změny. Z původních 255
+řádků funkčních kandidátů tak zůstává 227 řádků, které vyžadují samostatné
+rozhodnutí nebo ruční ověření.
+
 ## Jak byla inventura provedena
 
 1. Python AST mapa top-level funkcí, volání, importů a duplicit.
@@ -250,10 +273,8 @@ nikoli jednorázový přepis.
 
 ## Doporučené pořadí případné realizace
 
-1. **Cleanup R1 bez změny chování:** odstranit dva nepoužité importy,
-   `resolve_openable_document_pdf`, `wait_until_ok` a dvojici
-   `write_reminders_store` / `_write_reminders_store`; přidat regresní kontroly
-   a spustit celý quality gate.
+1. **Cleanup R1 bez změny chování — hotovo:** odstraněny auditované helpery a
+   tři nepoužívané importy; quality gate i oba smoke checky prošly.
 2. **Cleanup R2 s ručním retestem:** ověřit Janička light chat + Quick Notes a
    odstranit pětifunkční lokální Janička větev, pokud služba záměr pokryje.
 3. **Cleanup R3 po rozhodnutí o recovery:** potvrdit, zda se ruší import starého
@@ -262,8 +283,9 @@ nikoli jednorázový přepis.
 4. **API deprecation kontrola:** výslovně projít externí Shortcuts a servisní
    launchery pro pět podezřelých endpointů. Teprve poté odstranit cestu, registry
    kartu, handler a test jako jeden atomický balík.
-5. **Až potom pokračovat architekturou:** zamknout samostatný urgent-reminders
-   index a následně začít malou extrakci status/health nebo GET route manifestem.
+5. **Další doporučený implementační krok:** zamknout samostatný
+   urgent-reminders index. Cleanup R2/R3 a API deprecation mohou počkat na
+   příslušné ruční nebo recovery rozhodnutí.
 
 ## Rizika a hranice závěru
 

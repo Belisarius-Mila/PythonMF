@@ -10,7 +10,7 @@ from typing import Any, Callable
 from app.email.action_case_models import ReminderDraft
 from app.email.action_case_service import reminder_draft_to_dict
 from app.email.redaction import EMAIL_PATTERN
-from app.file_persistence import atomic_write_json, update_json_file
+from app.file_persistence import update_json_file
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -156,20 +156,6 @@ def enrich_reminder_record(
         changes["amount_due"] = amount_due
         changes["amount_note"] = amount_note
     return patch_reminder_record(reminder_id, changes, path=path)
-
-
-def write_reminders_store(
-    store: dict[str, list[dict[str, Any]]],
-    path: Path = DEFAULT_REMINDERS_PATH,
-) -> None:
-    _write_reminders_store(path=path, store=store)
-
-
-def _write_reminders_store(
-    path: Path,
-    store: dict[str, list[dict[str, Any]]],
-) -> None:
-    atomic_write_json(path, _normalize_reminders_store(store))
 
 
 def _normalize_reminders_store(data: Any) -> ReminderStore:

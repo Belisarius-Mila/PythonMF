@@ -52,7 +52,6 @@ from app.adam_service import (
     wait_for_adam_ready,
 )
 from app.article_archive import (
-    DELETE_CONFIRMATION_PHRASE,
     ATTACHMENT_CONFIRMATION_PHRASE,
     LIBRARY_EXPORT_EMAIL_MARKER,
     LIBRARY_EXPORT_SUBJECT_PREFIX,
@@ -135,7 +134,7 @@ from app.email.models import EmailAttachmentMeta, EmailHeader, EmailMessage
 from app.email.redaction import redact_email_addresses
 from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEmailProvider
 from app.file_persistence import FilePersistenceError, append_jsonl_locked
-from app.cockpit_code_stamp import COCKPIT_CODE_STAMP_PATHS, cockpit_code_stamp
+from app.cockpit_code_stamp import cockpit_code_stamp
 from app.reminders.query_tools import mark_reminder_done_text
 from app.reminders.store import (
     DEFAULT_REMINDERS_PATH,
@@ -7071,20 +7070,6 @@ def purchase_stored_path_is_openable_pdf(stored_path: str, purchases_dir: Path =
     except (OSError, RuntimeError):
         return False
     return target.is_file() and target.suffix.casefold() == ".pdf" and (target == root or root in target.parents)
-
-
-def resolve_openable_document_pdf(
-    document_id: str,
-    vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
-) -> dict[str, Any]:
-    resolved = resolve_openable_document_file(document_id, vault_dir=vault_dir)
-    if not resolved.get("ok"):
-        if str(resolved.get("message", "")).startswith("Soubor dokumentu"):
-            return {"ok": False, "message": "PDF není dostupné nebo neleží ve vaultu."}
-        return resolved
-    if resolved.get("viewer_kind") != "pdf":
-        return {"ok": False, "message": "PDF není dostupné nebo neleží ve vaultu."}
-    return resolved
 
 
 def resolve_openable_document_file(

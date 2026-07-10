@@ -246,14 +246,6 @@ def start_server(host: str, port: int, log_file: Path) -> None:
     )
 
 
-def wait_until_ok(url: str, *, attempts: int = 40, delay: float = 0.2) -> bool:
-    for _ in range(attempts):
-        if url_ok(url):
-            return True
-        time.sleep(delay)
-    return False
-
-
 def wait_until_ready(host: str, port: int, *, attempts: int = 30, delay: float = 0.5) -> bool:
     stable_hits = 0
     for _ in range(attempts):
