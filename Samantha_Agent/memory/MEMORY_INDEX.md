@@ -12,6 +12,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 ## Reports
 
 - `../AuditCockpit56.txt` - [PRIPOMENOUT] hlavni hluboky audit architektury Samantha Cockpitu, VoiceBridge, dokumentu a e-mailu z 2026-07-10; obsahuje prioritizovana rizika, cilovou architekturu a fazovy implementacni plan. Prvni krok s lehkym `/api/live-status` je hotovy v commitu `23abbaa`.
+- `reports/cockpit_quality_gate_2026_07_10.md` - git-safe popis kanonicke lokalni a GitHub Actions pojistky pred rozdelenim Cockpit monolitu; obsahuje vychozi metriku, rozsah 423 testu, bezpecnost CI a omezeni bez private dat.
 - `reports/cockpit_persistence_write_map_2026_07_10.md` - git-safe mapa runtime JSON/JSONL zapisu Cockpitu a navazujicich oblasti; popisuje sdilenou atomickou/lock vrstvu, prvni nizkorizikovou integraci do backup state a HTTP event logu, dvouprocesove testy a doporucene poradi dalsich rolloutů bez migrace private dat.
 - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_07_09.txt` - systemovy audit k 2026-07-09: projekty, tooly, vrstvy, provozni poznamka, backup warning, capability audit a doporuceni pro vyber dalsi prace; report je git-safe a necetl private vault/fulltexty.
 - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_161548.txt` - [PRIPOMENOUT] aktualni systemovy audit k 2026-06-30 16:15: projekty, tooly, vrstvy, priority, provozni stav, capability gaps a navrh nejmensiho dalsiho kroku; audit vznikl z cisteho gitu a bez hlavních health varovani.

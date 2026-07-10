@@ -1,0 +1,84 @@
+name: Cockpit Quality Gate
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/cockpit-quality-gate.yml"
+      - "Samantha_Agent/requirements.txt"
+      - "Samantha_Agent/app/cockpit.py"
+      - "Samantha_Agent/app/file_persistence.py"
+      - "Samantha_Agent/app/backup/**"
+      - "Samantha_Agent/app/speech/**"
+      - "Samantha_Agent/app/documents/**"
+      - "Samantha_Agent/app/email/**"
+      - "Samantha_Agent/scripts/cockpit_*.py"
+      - "Samantha_Agent/scripts/migrate_cockpit_single_instance.py"
+      - "Samantha_Agent/tests/test_cockpit*.py"
+      - "Samantha_Agent/tests/test_file_persistence.py"
+      - "Samantha_Agent/tests/test_backup*.py"
+      - "Samantha_Agent/tests/test_project_audit_report.py"
+      - "Samantha_Agent/tests/test_terminal_bridge.py"
+      - "Samantha_Agent/tests/test_adam_voice_mode.py"
+      - "Samantha_Agent/tests/test_speech_transcribe.py"
+      - "Samantha_Agent/tests/test_email_outbound_tools.py"
+      - "Samantha_Agent/tests/test_document*.py"
+      - "Samantha_Agent/tests/test_migrate_cockpit_single_instance.py"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/cockpit-quality-gate.yml"
+      - "Samantha_Agent/requirements.txt"
+      - "Samantha_Agent/app/cockpit.py"
+      - "Samantha_Agent/app/file_persistence.py"
+      - "Samantha_Agent/app/backup/**"
+      - "Samantha_Agent/app/speech/**"
+      - "Samantha_Agent/app/documents/**"
+      - "Samantha_Agent/app/email/**"
+      - "Samantha_Agent/scripts/cockpit_*.py"
+      - "Samantha_Agent/scripts/migrate_cockpit_single_instance.py"
+      - "Samantha_Agent/tests/test_cockpit*.py"
+      - "Samantha_Agent/tests/test_file_persistence.py"
+      - "Samantha_Agent/tests/test_backup*.py"
+      - "Samantha_Agent/tests/test_project_audit_report.py"
+      - "Samantha_Agent/tests/test_terminal_bridge.py"
+      - "Samantha_Agent/tests/test_adam_voice_mode.py"
+      - "Samantha_Agent/tests/test_speech_transcribe.py"
+      - "Samantha_Agent/tests/test_email_outbound_tools.py"
+      - "Samantha_Agent/tests/test_document*.py"
+      - "Samantha_Agent/tests/test_migrate_cockpit_single_instance.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cockpit-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality-gate:
+    runs-on: macos-14
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: Samantha_Agent
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: Samantha_Agent/requirements.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Run Cockpit quality gate
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python scripts/cockpit_quality_gate.py

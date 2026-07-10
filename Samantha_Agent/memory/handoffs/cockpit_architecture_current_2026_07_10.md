@@ -180,6 +180,17 @@ Rucni retest po prvnim vykonovem kroku:
   `watcher running => no inline delivery` a absenci delivery attempts.
 - Po nasazeni proslo 420 relevantnich testu, watcher se vratil do `listening`,
   nic neceka a lokalni i Tailscale smoke check prosly kompletne.
+- Pred rozdelenim monolitu vznikl kanonicky
+  `scripts/cockpit_quality_gate.py`: kontroluje whitespace, striktni syntax bez
+  `SyntaxWarning`, 423 relevantnich testu a vypisuje informativni metriku
+  monolitu. Vychozi `app/cockpit.py` ma 22 465 radku, 332 top-level funkci a
+  2 tridy; dalsi rust vyvola varovani, ne krehky hard fail.
+- Korenovy GitHub Actions workflow `.github/workflows/cockpit-quality-gate.yml`
+  bezi na `macos-14`, ma pouze read-only contents opravneni, zadna tajemstvi ani
+  private data a path filtry pro relevantni Cockpit zmeny. Lokalni gate i YAML
+  parser prosly; skutecny GitHub beh se overi po pushi.
+- Prvni striktni syntax beh odhalil tri JavaScript regex escape zapisy uvnitr
+  Python HTML retezce. Byly ekvivalentne opraveny bez zmeny runtime JavaScriptu.
 
 Co neni hotove:
 
@@ -190,23 +201,27 @@ Co neni hotove:
   status, posledni odpoved, pending transakce i hlasova JSONL historie jsou
   zamcene. Reminders, dokumenty a e-maily jeste prevedene nejsou.
 - `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem.
+- GitHub quality gate je pripraveny, ale jeho prvni vzdaleny beh je nutne po
+  pushi overit. Zavislosti zatim nejsou pripnute na konkretni verze.
 - VoiceBridge nema jeden explicitni stavovy model prikazu.
 - Dokumentove a e-mailove workflow nemaji jednotnou repository/transakcni
   vrstvu.
 
 Dalsi krok:
 
-VoiceBridge persistence zaklad je uzavreny. V dalsi oddelene davce nejdrive
+Po pushi overit prvni GitHub Actions `Cockpit Quality Gate`. Pokud projde,
 zmapovat konkretni read-modify-write cesty reminders/Quick Notes a prevest jednu
 nejmensi registry na explicitni zamcenou transakci s dvouprocesovym testem.
-PDF browser a post-call audio retest zustavaji odlozene.
+Potom vytvorit read-only inventuru kandidatu mrtveho kodu bez mazani. PDF browser
+a post-call audio retest zustavaji odlozene.
 
 Navrhovane dalsi kroky:
 
 1. Po malych davkach prejit na reminders, dokumenty a nakonec e-mail metadata.
-2. Postupne rozdelit monolit pri zachovani endpointu:
+2. Udelat read-only inventuru mrtveho/legacy kodu a nic nemazat bez vice dukazu.
+3. Postupne rozdelit monolit pri zachovani endpointu:
    status/health -> voice -> documents -> email -> staticky frontend.
-3. Zavadet explicitni stavove modely a repository vrstvy po oblastech, ne
+4. Zavadet explicitni stavove modely a repository vrstvy po oblastech, ne
    jednim velkym prepisem.
 
 Handoff strategie pro tento program:

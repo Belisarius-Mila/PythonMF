@@ -16859,8 +16859,8 @@ COCKPIT_HTML = """<!doctype html>
     function emailIntakeSourceKey(item) {
       if (!item) return "";
       if (item.source_key) return String(item.source_key);
-      const provider = String(item.provider || "").trim().toLowerCase().replace(/\s+/g, " ");
-      const folder = String(item.folder || "INBOX").trim().toLowerCase().replace(/\s+/g, " ");
+      const provider = String(item.provider || "").trim().toLowerCase().replace(/\\s+/g, " ");
+      const folder = String(item.folder || "INBOX").trim().toLowerCase().replace(/\\s+/g, " ");
       const uid = String(item.uid || "").trim();
       if (!provider || !uid) return "";
       return `${provider}|${folder || "inbox"}|${uid}`;
@@ -19238,7 +19238,7 @@ COCKPIT_HTML = """<!doctype html>
 		    }
 
 		    function normalizeVoiceText(value) {
-		      return String(value || "").replace(/\s+/g, " ").trim();
+		      return String(value || "").replace(/\\s+/g, " ").trim();
 		    }
 
 		    function voiceResponseMatchesCurrentRequest(lastResponse, options = {}) {
