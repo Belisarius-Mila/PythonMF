@@ -18884,24 +18884,48 @@ COCKPIT_HTML = """<!doctype html>
 	      voiceAudioUnlockBtn.textContent = opened ? "Audiokanál otevřený" : "Otevřít audiokanál";
 	      voiceAudioUnlockBtn.title = opened
 	        ? "Audio v tomto prohlížeči je připravené pro Adamovy odpovědi."
-	        : "Na iPhonu jednou klepni, aby Safari dovolilo přehrávat Adamovy odpovědi.";
+	        : "Na iPhonu jednou klepni, aby prohlížeč dovolil přehrávat Adamovy odpovědi.";
 	    }
 
 	    function getVoiceAudioContext() {
 	      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
 	      if (!AudioContextClass) return null;
+	      if (voiceAudioContext && voiceAudioContext.state === "closed") {
+	        voiceAudioContext = null;
+	        voiceAudioUnlocked = false;
+	        updateVoiceAudioUnlockUi(false);
+	      }
 	      if (!voiceAudioContext) {
 	        voiceAudioContext = new AudioContextClass();
+	        const observedContext = voiceAudioContext;
+	        observedContext.addEventListener("statechange", () => {
+	          if (voiceAudioContext !== observedContext) return;
+	          const state = String(observedContext.state || "unknown");
+	          const running = state === "running";
+	          if (!running) voiceAudioUnlocked = false;
+	          updateVoiceAudioUnlockUi(running && voiceAudioUnlocked);
+	          recordVoiceFrontendEvent("audio_context_state_changed", {state});
+	        });
 	      }
 	      return voiceAudioContext;
+	    }
+
+	    async function ensureVoiceAudioContextRunning(context) {
+	      if (!context) return false;
+	      const state = String(context.state || "unknown");
+	      if (["suspended", "interrupted"].includes(state)) {
+	        await context.resume();
+	      }
+	      if (context.state !== "running") {
+	        throw new Error(`Audiokanal zustal ve stavu ${context.state || "unknown"}.`);
+	      }
+	      return true;
 	    }
 
 	    async function primeVoiceAudioContextFromGesture() {
 	      const context = getVoiceAudioContext();
 	      if (!context) return false;
-	      if (context.state === "suspended") {
-	        await context.resume();
-	      }
+	      await ensureVoiceAudioContextRunning(context);
 	      const source = context.createBufferSource();
 	      source.buffer = context.createBuffer(1, 1, 22050);
 	      source.connect(context.destination);
@@ -18915,9 +18939,9 @@ COCKPIT_HTML = """<!doctype html>
 	    }
 
 	    async function primeMobileVoiceAudioForCommandGesture(source = "voice_command") {
-	      if (!isRemoteCockpitClient() || !isMobileCockpitClient() || voiceAudioUnlocked) {
-	        return voiceAudioUnlocked;
-	      }
+	      if (!isRemoteCockpitClient() || !isMobileCockpitClient()) return voiceAudioUnlocked;
+	      const contextState = voiceAudioContext ? String(voiceAudioContext.state || "unknown") : "missing";
+	      if (voiceAudioUnlocked && contextState === "running") return true;
 	      try {
 	        const opened = await primeVoiceAudioContextFromGesture();
 	        recordVoiceFrontendEvent(opened ? "audio_channel_auto_opened" : "audio_channel_auto_open_unavailable", {source});
@@ -18967,9 +18991,7 @@ COCKPIT_HTML = """<!doctype html>
 	      if (!voiceAudioUnlocked || !edgeData || !edgeData.audio_base64) return false;
 	      const context = getVoiceAudioContext();
 	      if (!context) return false;
-	      if (context.state === "suspended") {
-	        await context.resume();
-	      }
+	      await ensureVoiceAudioContextRunning(context);
 	      const audioBuffer = await context.decodeAudioData(base64ToArrayBuffer(edgeData.audio_base64));
 	      await new Promise((resolve, reject) => {
 	        const source = context.createBufferSource();
@@ -19010,13 +19032,20 @@ COCKPIT_HTML = """<!doctype html>
 	        return;
 	      }
 	      const allowSystemFallback = options.allowSystemFallback !== false && shouldUseSystemSpeechFallback();
-	      if (options.userGesture && isRemoteCockpitClient()) {
-	        await primeVoiceAudioContextFromGesture();
-	      }
 	      button.disabled = true;
 	      button.classList.remove("needs-tap");
 	      showMessage(label || "Čtu nahlas...");
 	      try {
+	        if (options.userGesture && isRemoteCockpitClient()) {
+	          try {
+	            const recovered = await primeVoiceAudioContextFromGesture();
+	            recordVoiceFrontendEvent(recovered ? "audio_context_recovered_from_gesture" : "audio_context_recovery_unavailable", {source: "manual_play"});
+	          } catch (audioPrimeErr) {
+	            voiceAudioUnlocked = false;
+	            updateVoiceAudioUnlockUi(false);
+	            recordVoiceFrontendEvent("audio_context_recovery_failed", {source: "manual_play", error: String(audioPrimeErr)});
+	          }
+	        }
 	        const edgeRes = await fetch("/api/speech/edge-tts", {
 	          method: "POST",
 	          headers: {"Content-Type": "application/json"},

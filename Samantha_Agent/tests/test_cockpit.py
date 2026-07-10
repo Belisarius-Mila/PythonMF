@@ -2730,6 +2730,19 @@ class CockpitTests(unittest.TestCase):
         self.assertIn('recordVoiceFrontendEvent("voice_autospeak_requested"', COCKPIT_HTML)
         self.assertIn('recordVoiceFrontendEvent("audio_play_succeeded"', COCKPIT_HTML)
 
+    def test_iphone_audio_context_recovers_after_call_interruption(self) -> None:
+        self.assertIn('voiceAudioContext.state === "closed"', COCKPIT_HTML)
+        self.assertIn('["suspended", "interrupted"].includes(state)', COCKPIT_HTML)
+        self.assertIn("await ensureVoiceAudioContextRunning(context)", COCKPIT_HTML)
+        self.assertIn('recordVoiceFrontendEvent("audio_context_state_changed"', COCKPIT_HTML)
+        self.assertIn('"audio_context_recovered_from_gesture"', COCKPIT_HTML)
+        self.assertIn('recordVoiceFrontendEvent("audio_context_recovery_failed"', COCKPIT_HTML)
+        self.assertIn('if (voiceAudioUnlocked && contextState === "running") return true', COCKPIT_HTML)
+        start = COCKPIT_HTML.index("async function speakText(")
+        end = COCKPIT_HTML.index("async function speakDashboardStatus()", start)
+        source = COCKPIT_HTML[start:end]
+        self.assertLess(source.index("try {"), source.index("primeVoiceAudioContextFromGesture()"))
+
     def test_cockpit_codex_approval_clear_action_clears_runtime_state(self) -> None:
         calls = []
 

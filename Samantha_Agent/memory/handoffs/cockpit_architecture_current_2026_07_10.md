@@ -124,6 +124,13 @@ Rucni retest po prvnim vykonovem kroku:
   stopa zaznamenala `voice_autospeak_requested` a dokoncene
   `audio_play_succeeded`; puvodni ticho bylo v poslednim pokusu zpusobene
   tichym rezimem telefonu, ne dalsi chybou Cockpitu.
+- Pozdejsi telefonni hovor prerusil iPhone Web AudioContext: text zaverecneho
+  shrnuti dorazil, ale chybel `audio_play_succeeded` a rucni prehrani nedokazalo
+  obnovit kontext, prestoze UI stale hlasilo otevreny kanal. Oprava obnovuje
+  stavy `suspended` i iOS `interrupted`, zahazuje `closed` kontext, overuje
+  skutecny stav `running` a drzi rucni recovery uvnitr diagnosticke obalky.
+- Po audio recovery oprave proslo 410 relevantnich testu a lokalni i Tailscale
+  smoke check. Rucni retest po realnem telefonatu muze probehnout pozdeji.
 - Zapisova mista runtime casti `app/` jsou zmapovana v git-safe reportu
   `reports/cockpit_persistence_write_map_2026_07_10.md`. Inventura necetla
   private obsahy a potvrzuje roztristene prime JSON/JSONL zapisy ve VoiceBridge,
@@ -145,7 +152,8 @@ Rucni retest po prvnim vykonovem kroku:
 Co neni hotove:
 
 - Zakladni stabilizace, HTTP hranice a iPhone hlas jsou funkcne potvrzene; PDF
-  browser retest Mila vedome odlozil a neni blokujici pro dalsi architekturu.
+  browser retest Mila vedome odlozil a post-call audio recovery ceka na pozdejsi
+  rucni retest; ani jedno neni blokujici pro dalsi architekturu.
 - Sdilena persistence vrstva a prvni nizkorizikova integrace jsou hotove, ale
   prime JSON/JSONL zapisy VoiceBridge, reminders, dokumentu a e-mailu na ni
   jeste nejsou prevedene.
