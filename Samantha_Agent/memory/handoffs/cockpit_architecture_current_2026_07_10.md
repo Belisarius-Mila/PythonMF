@@ -354,6 +354,9 @@ Rucni retest po prvnim vykonovem kroku:
   pod baseline.
 - Po jednorazovem nasazovacim restartu prosly lokalni i Tailscale smoke checky
   vsech peti cest. Obe adresy obsluhuje jedina serverova instance PID 27653.
+- Implementace Faze 1.1 je pushnuta v commitu `a8857f0`. GitHub Actions Cockpit
+  Quality Gate beh cislo 12 skoncil uspesne:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29121176082`.
 
 Co neni hotove:
 

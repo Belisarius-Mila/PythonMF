@@ -124,6 +124,9 @@ nebo pull request.
 - Po jednorázovém restartu nové verze prošly lokální i Tailscale smoke checky
   pro `/`, `/api/server/health`, `/api/live-status`, `/api/status` a recovery;
   obě adresy obsluhovala jedna instance PID 27653.
+- Implementace Fáze 1.1 je v commitu `a8857f0`. GitHub Actions Cockpit Quality
+  Gate běh číslo 12 skončil úspěšně:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29121176082`.
 
 ## Co gate zatím neřeší
 
