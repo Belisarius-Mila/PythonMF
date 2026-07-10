@@ -18974,6 +18974,15 @@ COCKPIT_HTML = """<!doctype html>
 	      showMessage(message || "Prohlížeč zablokoval automatické přehrání. Klepni na tlačítko Přehrát v iPhonu.");
 	    }
 
+	    function isExpectedAudioAutoplayBlock(error) {
+	      const name = String(error && error.name || "").toLowerCase();
+	      const message = String(error && error.message || error || "").toLowerCase();
+	      return name === "notallowederror"
+	        || message.includes("not allowed by the user agent")
+	        || message.includes("user denied permission")
+	        || message.includes("play() failed because the user didn't interact");
+	    }
+
 	    async function speakText(text, button, label, options = {}) {
 	      const cleaned = (text || "").trim();
 	      if (!cleaned) {
@@ -19003,7 +19012,13 @@ COCKPIT_HTML = """<!doctype html>
 	              showMessage(edgeData.message || "Přehráno v tomto prohlížeči.");
 	              return;
 	            } catch (contextPlayErr) {
-	              recordFrontendError(contextPlayErr);
+	              if (isExpectedAudioAutoplayBlock(contextPlayErr)) {
+	                voiceAudioUnlocked = false;
+	                updateVoiceAudioUnlockUi(false);
+	                recordVoiceFrontendEvent("audio_autoplay_blocked", {player: "audio_context"});
+	              } else {
+	                recordFrontendError(contextPlayErr);
+	              }
 	            }
 	          }
 	          const audio = new Audio(`data:${edgeData.mime_type || "audio/mpeg"};base64,${edgeData.audio_base64}`);
@@ -19013,9 +19028,16 @@ COCKPIT_HTML = """<!doctype html>
 	            showMessage(edgeData.message || "Přečteno českým mužským hlasem.");
 	            return;
 	          } catch (playErr) {
-	            recordFrontendError(playErr);
+	            const autoplayBlocked = isExpectedAudioAutoplayBlock(playErr);
+	            if (autoplayBlocked) {
+	              recordVoiceFrontendEvent("audio_autoplay_blocked", {player: "html_audio"});
+	            } else {
+	              recordFrontendError(playErr);
+	            }
 	            if (!allowSystemFallback) {
-	              markVoiceResponseNeedsTap("iPhone zablokoval automatické přehrání. Klepni na Přehrát v iPhonu.");
+	              markVoiceResponseNeedsTap(autoplayBlocked
+	                ? "iPhone zablokoval automatické přehrání. Klepni na Přehrát v iPhonu."
+	                : "Přehrání v prohlížeči se nepodařilo. Klepni na Přehrát v iPhonu.");
 	              return;
 	            }
 	          }

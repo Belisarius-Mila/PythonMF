@@ -2691,6 +2691,19 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("function renderVoiceStatus(data)", COCKPIT_HTML)
         self.assertIn("renderVoiceStatus(data);", COCKPIT_HTML)
 
+    def test_expected_audio_autoplay_block_is_not_a_frontend_error(self) -> None:
+        start = COCKPIT_HTML.index("async function speakText(")
+        end = COCKPIT_HTML.index("async function speakDashboardStatus()", start)
+        source = COCKPIT_HTML[start:end]
+
+        self.assertIn("function isExpectedAudioAutoplayBlock(error)", COCKPIT_HTML)
+        self.assertIn('name === "notallowederror"', COCKPIT_HTML)
+        self.assertIn("if (isExpectedAudioAutoplayBlock(contextPlayErr))", source)
+        self.assertIn("const autoplayBlocked = isExpectedAudioAutoplayBlock(playErr)", source)
+        self.assertIn('recordVoiceFrontendEvent("audio_autoplay_blocked"', source)
+        self.assertIn("if (autoplayBlocked)", source)
+        self.assertIn("} else {\n\t              recordFrontendError(playErr);", source)
+
     def test_cockpit_codex_approval_clear_action_clears_runtime_state(self) -> None:
         calls = []
 

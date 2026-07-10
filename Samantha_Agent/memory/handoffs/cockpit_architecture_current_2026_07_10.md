@@ -85,11 +85,24 @@ Rucni retest po prvnim vykonovem kroku:
 - JavaScript syntax check, novy regresni test, 389 relevantnich testu a lokalni
   i vzdaleny smoke check prosly. Nasazena HTML obsahuje pouze
   `renderVoiceStatus(latestMainStatusData)` v live refreshi.
+- Pri navazujicim hlasovem testu z iPhonu se na otevrenem Mac Cockpitu sama
+  objevila browserova hlaska o nepovolenem pozadavku. Doruceni pokynu,
+  VoiceBridge i server zustaly funkcni; pricina byla ve vystupni audio vrstve:
+  Mac prohlizec zablokoval automaticke `audio.play()` bez cerstveho kliknuti a
+  Cockpit ocekavany autoplay blok chybne zapsal jako cervenou frontendovou chybu.
+- Oprava rozlisuje ocekavany autoplay `NotAllowedError` pouze uvnitr prehravaci
+  vetve. Na Macu tise pokracuje k systemovemu hlasovemu fallbacku, na vzdalenem
+  mobilu ponecha tlacitko pro rucni prehrani; jine chyby audia, mikrofonu a
+  VoiceBridge zustavaji viditelne.
+- Po oprave prosla JavaScript syntax kontrola, novy regresni test a 390
+  relevantnich testu. Nasazena verze prosla lokalnim i Tailscale smoke checkem
+  a obe adresy dal obsluhuje stejny novy serverovy PID.
 
 Co neni hotove:
 
 - Faze stabilizace neni uzavrena. HTTP hranice je hotova, ale zbyva rucni
-  prohlizecovy retest CSP/hlavicek na Macu a iPhonu.
+  prohlizecovy retest CSP/hlavicek na Macu a iPhonu a kratky retest opravy
+  autoplay hlasky.
 - Prime JSON/JSONL zapisy nemaji jednotny file lock a atomicky zapis.
 - `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem.
 - VoiceBridge nema jeden explicitni stavovy model prikazu.
@@ -98,17 +111,18 @@ Co neni hotove:
 
 Dalsi krok:
 
-Mila ma po opravene live-render regresi nechat Mac Cockpit 15-20 sekund otevreny
-a potvrdit, ze `Obnovit` uz neproblikava. Dale kratce overit na Macu a iPhonu
-nacteni hlavni stranky, otevreni jednoho bezpecneho dokumentoveho PDF a hlasovy
-pokyn. Pokud CSP ani Host/Origin kontrola nic nerozbila, dalsi P0
+Mila ma ponechat Mac Cockpit otevreny a z iPhonu poslat jeden kratky nerizikovy
+hlasovy pokyn. Na Macu se uz nesmi sama objevit cervena browserova chyba o
+nepovolenem pozadavku; pripadny blok autoplay se ma vyridit fallbackem nebo
+rucnim prehranim. Dale kratce overit otevreni jednoho bezpecneho dokumentoveho
+PDF. Pokud CSP ani Host/Origin kontrola nic nerozbila, dalsi P0
 implementacni blok je spolecna atomicka file persistence a zamky. Nejdrive
 zmapovat konkretni zapisove helpery a zavest malou sdilenou vrstvu; nemenit ani
 nemigrovat existujici private data.
 
 Navrhovane dalsi kroky:
 
-1. Rucne potvrdit browser/PDF/voice retest po HTTP ochrane a uzavrit stabilizaci.
+1. Rucne potvrdit autoplay/PDF retest po HTTP ochrane a uzavrit stabilizaci.
 2. Zmapovat zapisove helpery a navrhnout nejmensi sdilenou atomickou persistence
    vrstvu bez migrace existujicich private dat.
 3. Zavest atomicke file zapisy a zamky po male oblasti; doplnit concurrency test.
