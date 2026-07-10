@@ -17911,9 +17911,10 @@ COCKPIT_HTML = """<!doctype html>
             : voicePendingMessage || `Čeká hlasový pokyn na Adama: ${voicePendingShort || "bez textu"}`
           : "Žádný hlasový pokyn nečeká na Adama.";
       }
-      renderVoiceLastResponse(voiceMode.last_adam_response || {}, {
-        autoSpeak: voiceAudioUnlocked && Boolean(latestAdamResponseKey)
-      });
+	      renderVoiceLastResponse(voiceMode.last_adam_response || {}, {
+	        autoSpeak: voiceAudioUnlocked,
+	        allowAlreadyRenderedAutoSpeak: true
+	      });
       renderCodexApproval(codexApproval);
       renderVoiceApproval(voicePending);
       if (voiceModeStartBtn) {
@@ -18904,6 +18905,9 @@ COCKPIT_HTML = """<!doctype html>
 	      source.buffer = context.createBuffer(1, 1, 22050);
 	      source.connect(context.destination);
 	      source.start(0);
+	      if (!voiceAudioUnlocked) {
+	        autoSpokenAdamResponseKey = latestAdamResponseKey;
+	      }
 	      voiceAudioUnlocked = true;
 	      updateVoiceAudioUnlockUi(true);
 	      return true;
@@ -19024,6 +19028,7 @@ COCKPIT_HTML = """<!doctype html>
 	              await playVoiceAudioBase64(edgeData);
 	              updateVoiceAudioUnlockUi(true);
 	              button.textContent = button === voiceLastResponseSpeakBtn ? "Přehrát Adamovu odpověď" : button.textContent;
+	              recordVoiceFrontendEvent("audio_play_succeeded", {player: "audio_context"});
 	              showMessage(edgeData.message || "Přehráno v tomto prohlížeči.");
 	              return;
 	            } catch (contextPlayErr) {
@@ -19040,6 +19045,7 @@ COCKPIT_HTML = """<!doctype html>
 	          try {
 	            await audio.play();
 	            button.textContent = button === voiceLastResponseSpeakBtn ? "Přehrát Adamovu odpověď" : button.textContent;
+	            recordVoiceFrontendEvent("audio_play_succeeded", {player: "html_audio"});
 	            showMessage(edgeData.message || "Přečteno českým mužským hlasem.");
 	            return;
 	          } catch (playErr) {
@@ -19239,11 +19245,12 @@ COCKPIT_HTML = """<!doctype html>
 		      if (text && voiceCommandDetails && (options.openPanel || isNewResponse)) {
 		        voiceCommandDetails.open = true;
 		      }
-		      const allowRenderedAutoSpeak = options.allowAlreadyRenderedAutoSpeak === true;
-		      if (text && options.autoSpeak && responseKey && responseKey !== autoSpokenAdamResponseKey && (isNewResponse || allowRenderedAutoSpeak)) {
-		        autoSpokenAdamResponseKey = responseKey;
-		        speakText(text, voiceLastResponseSpeakBtn, "Čtu Adamovu odpověď nahlas...", {allowSystemFallback: shouldUseSystemSpeechFallback()});
-		      }
+	      const allowRenderedAutoSpeak = options.allowAlreadyRenderedAutoSpeak === true;
+	      if (text && options.autoSpeak && responseKey && responseKey !== autoSpokenAdamResponseKey && (isNewResponse || allowRenderedAutoSpeak)) {
+	        autoSpokenAdamResponseKey = responseKey;
+	        recordVoiceFrontendEvent("voice_autospeak_requested", {response_created_at: String(lastResponse && lastResponse.created_at || "")});
+	        speakText(text, voiceLastResponseSpeakBtn, "Čtu Adamovu odpověď nahlas...", {allowSystemFallback: shouldUseSystemSpeechFallback()});
+	      }
 		    }
 
 		    async function refreshVoiceLatestResponse(options = {}) {

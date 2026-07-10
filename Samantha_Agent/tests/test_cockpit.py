@@ -2654,7 +2654,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("startVoiceReplyPolling", COCKPIT_HTML)
         self.assertIn("/api/voice-bridge/frontend-event", COCKPIT_HTML)
         self.assertIn("recordVoiceFrontendEvent", COCKPIT_HTML)
-        self.assertIn("autoSpeak: voiceAudioUnlocked && Boolean(latestAdamResponseKey)", COCKPIT_HTML)
+        self.assertIn("autoSpeak: voiceAudioUnlocked", COCKPIT_HTML)
+        self.assertIn("allowAlreadyRenderedAutoSpeak: true", COCKPIT_HTML)
         self.assertIn("allowAlreadyRenderedAutoSpeak", COCKPIT_HTML)
         self.assertIn("VOICE_REPLY_POLL_DURATION_MS = 600000", COCKPIT_HTML)
         self.assertIn("VOICE_STATUS_MONITOR_MS = 3000", COCKPIT_HTML)
@@ -2716,6 +2717,18 @@ class CockpitTests(unittest.TestCase):
             source.index('postJson("/api/speech/voice-text"'),
         )
         self.assertIn('recordVoiceFrontendEvent(opened ? "audio_channel_auto_opened"', COCKPIT_HTML)
+
+    def test_live_voice_status_autospeaks_first_new_response_after_unlock(self) -> None:
+        start = COCKPIT_HTML.index("function renderVoiceStatus(data)")
+        end = COCKPIT_HTML.index("function renderVoiceBridgeSwitcher", start)
+        source = COCKPIT_HTML[start:end]
+
+        self.assertIn("autoSpeak: voiceAudioUnlocked", source)
+        self.assertIn("allowAlreadyRenderedAutoSpeak: true", source)
+        self.assertNotIn("Boolean(latestAdamResponseKey)", source)
+        self.assertIn("autoSpokenAdamResponseKey = latestAdamResponseKey", COCKPIT_HTML)
+        self.assertIn('recordVoiceFrontendEvent("voice_autospeak_requested"', COCKPIT_HTML)
+        self.assertIn('recordVoiceFrontendEvent("audio_play_succeeded"', COCKPIT_HTML)
 
     def test_cockpit_codex_approval_clear_action_clears_runtime_state(self) -> None:
         calls = []

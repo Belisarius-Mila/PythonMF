@@ -107,12 +107,25 @@ Rucni retest po prvnim vykonovem kroku:
 - Po iPhone audio oprave prosla JavaScript kontrola a 391 relevantnich testu.
   Nasazena verze prosla lokalnim i Tailscale smoke checkem; prvni vzdaleny plny
   status po restartu jednou vyprsel na timeoutu, opakovani s rezervou proslo.
+- Rucni retest potvrdil stav `Audiokanal otevreny`, ale dalsi odpoved se presto
+  neprehrala. Server, zapis odpovedi i zobrazeni na iPhonu byly funkcni.
+- Druha pricina byla v rozhodovani o automatickem cteni: prvni nova odpoved po
+  reloadu se mohla zobrazit pres lehky live status, ktery automaticke cteni
+  podminoval existenci starsiho response klice. Pokud presne pollingove
+  sparovani nasledne neprobehlo, prehravac nebyl vubec zavolan.
+- Otevreni audiokanalu nyni oznaci prave zobrazenou starou odpoved jako vyrizenou
+  a live status muze automaticky precist kazdou skutecne novou odpoved i jako
+  prvni odpoved po reloadu. Bezpecna frontend diagnostika navic uklada pouze
+  technicke udalosti `voice_autospeak_requested` a `audio_play_succeeded` bez
+  textu odpovedi.
+- Po teto oprave prosla JavaScript kontrola a 392 relevantnich testu. Lokalni i
+  Tailscale smoke check po nasazeni prosly kompletne.
 
 Co neni hotove:
 
 - Faze stabilizace neni uzavrena. HTTP hranice je hotova, ale zbyva rucni
   prohlizecovy retest CSP/hlavicek na Macu a iPhonu a kratky retest opravy
-  automatickeho otevreni iPhone audiokanalu.
+  automatickeho precteni prvni nove iPhone odpovedi.
 - Prime JSON/JSONL zapisy nemaji jednotny file lock a atomicky zapis.
 - `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem.
 - VoiceBridge nema jeden explicitni stavovy model prikazu.
