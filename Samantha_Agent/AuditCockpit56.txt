@@ -1,0 +1,297 @@
+AUDIT HLAVNI ARCHITEKTURY SAMANTHA COCKPITU
+Verze auditu: 5.6
+Datum: 10. 7. 2026
+
+ROZSAH
+
+Audit se soustredi na jadro Samantha Agentu:
+- Samantha Cockpit,
+- VoiceBridge a hlasovy provoz,
+- dokumentovy vault a ScanDocu,
+- zpracovani a archivaci e-mailu,
+- provozni bezpecnost, vykon a testovani.
+
+Zamerne nejsou hodnoceny jednotlive rodinne projekty, pozustalost, jazykove
+aplikace, lekarna ani dalsi samostatne webove aplikace.
+
+Projekt byl pri auditu pouze cten. Citlive obsahy dokumentu, e-mailu a hlasovych
+pokynu nejsou v tomto souboru uvedeny.
+
+
+HLAVNI ZAVER
+
+Cockpit je funkcni a ma dobrou testovaci zakladnu, ale vyrostl za hranici
+bezpecne udrzitelneho prototypu. Nejvetsi problem neni jedna konkretni chyba.
+HTTP server, uzivatelske rozhrani, VoiceBridge, dokumenty, e-maily, diagnostika
+i servisni operace jsou soustredene v jednom souboru a pracuji nad sdilenymi
+JSON/JSONL daty bez jednotne transakcni vrstvy.
+
+Nedoporucuje se prepis od nuly. Spravny postup je nejdrive stabilizovat vykon,
+soubezne zapisy a pristupovou bezpecnost, potom po castech rozdelit monolit pri
+zachovani stavajicich URL a provoznich pravidel.
+
+
+SOUCASNA ARCHITEKTURA
+
+Prohlizec na Macu nebo iPhonu
+  -> app/cockpit.py
+       -> vlozene HTML, CSS a JavaScript
+       -> rucni GET/POST router
+       -> dashboard a diagnostika
+       -> dokumentove workflow
+       -> e-mailove workflow
+       -> VoiceBridge orchestrace
+       -> spousteni procesu
+       -> prime zapisy JSON/JSONL
+  -> document vault a ScanDocu
+  -> e-mailovi provideři a archivy
+  -> voice inbox, watcher, Terminal a screen
+  -> launchd a dalsi lokalni procesy
+
+Zakladni rozmery:
+- app/cockpit.py ma pres 22 000 radku a vice nez 300 funkci.
+- Cockpit obsluhuje 67 POST a priblizne 41 GET cest.
+- Hlavni vlozena stranka ma priblizne 7 500 radku, 117 tlacitek a stovky
+  JavaScriptovych funkci.
+- Dokumentovy vault ma dalsich vice nez 4 200 radku.
+- E-mailova oblast je rozdelena do mnoha mensich modulu, ale velka cast
+  orchestrace zustava v Cockpitu.
+- Lokalni a Tailscale Cockpit bezi jako dva samostatne procesy nad stejnymi daty.
+
+
+CO JE POSTAVENE DOBRE
+
+- Pri auditu proslo 373 relevantnich testu bez chyby.
+- Zivy read-only smoke test hlavni stranky, health, statusu a recovery prosel.
+- Registr COCKPIT_POST_ACTIONS pokryva vsechny POST cesty a hlida jejich soulad
+  s frontendem.
+- Rizikove operace maji na mnoha mistech dvoukrokove nebo textove potvrzeni.
+- VoiceBridge dodrzuje dulezite pravidlo jednoho vlastnika doruceni prikazu.
+- Lehky /api/server/health spravne oddeluje kontrolu startu od plneho statusu.
+- Cesty k dokumentum a archivum maji ochrany proti opusteni povoleneho adresare.
+- Soukroma data jsou drzena mimo git.
+
+
+NEJVYSSI PRIORITA P0
+
+1. Trisekundova obnova spoustela cely tezky /api/status
+
+Otevreny Cockpit v kratkem intervalu opakoval kontroly dokumentu, terminu,
+ScanDocu, zalohy, pripominek, gitu, VoiceBridge, TTY a screen relaci. Jedno zive
+mereni trvalo priblizne 1,6 sekundy a nejpomalejsi casti byly VoiceBridge a
+dokumentove kontroly. Pri vice otevrenych klientech a dvou serverech se prace
+nasobila.
+
+Prvni doporucena oprava:
+- samostatny lehky /api/live-status pro hlasovy stav,
+- plny /api/status pouze pri otevreni, rucni obnove a v dlouhem intervalu,
+- kratka cache drahe procesni diagnostiky VoiceBridge.
+
+2. Dva servery zapisuji do spolecnych souboru bez koordinace
+
+Dokumenty, e-mailove stavy i hlasove fronty casto pouzivaji prime write_text,
+open("w") nebo open("a") bez spolecneho zamku a bez atomickeho prejmenovani.
+To vytvari riziko ztraceneho zapisu, castecneho JSON, nekompletniho archivu nebo
+nesouladu manifestu a indexu.
+
+Doporuceni:
+- provozovat jednu instanci Cockpitu,
+- vzdaleny pristup vest pres Tailscale proxy k teto instanci,
+- zavest repository vrstvu, file lock a atomicke zapisy,
+- pozdeji prevest pracovni metadata do SQLite; puvodni dokumenty ponechat ve
+  vaultu beze zmeny.
+
+3. Vzdaleny Cockpit nema aplikacni autentizaci
+
+Server nema prihlaseni, session, CSRF token ani centralni kontrolu Host a Origin.
+Tailscale omezuje sitovy pristup, ale neni nahradou za ochranu aplikace, ktera
+umi soukrome zapisy, spousteni procesu a destruktivni operace.
+
+Chybi take:
+- horni limit velikosti requestu,
+- jednotne odpovedi na chybny JSON a neocekavane vyjimky,
+- bezpecny provozni log bez citlivych payloadu,
+- bezpecnostni HTTP hlavicky,
+- centralni vynuceni potvrzovacich pravidel z registru POST akci.
+
+
+MONOLIT COCKPITU - PRIORITA P1
+
+V jednom souboru jsou HTTP infrastruktura, business logika, procesni management,
+tri cele HTML aplikace, CSS, JavaScript, dokumenty, e-maily i VoiceBridge. To
+zvysuje riziko regresi a ztezuje samostatne testovani.
+
+Doporucena cilova struktura:
+
+app/cockpit/
+  server.py
+  routes/status.py
+  routes/voice.py
+  routes/documents.py
+  routes/email.py
+  routes/service.py
+  services/status_service.py
+  services/voice_coordinator.py
+  services/document_service.py
+  services/email_service.py
+  repositories/
+  static/
+
+Nejdrive pouze extrahovat moduly pri zachovani stavajicich endpointu. Zmena
+frameworku sama o sobe problem nevyresi a nema byt prvnim krokem.
+
+
+VOICEBRIDGE
+
+VoiceBridge je provozne funkcni, ale jeho stav je rozlozen mezi Cockpit, voice
+inbox, watcher, Terminal bridge, screen, TTY marker a soubory odpovedi.
+
+Doporucuje se jednotna obalka prikazu:
+- command_id,
+- created_at,
+- source,
+- owner,
+- state,
+- attempt,
+- confirmation_level,
+- last_error.
+
+Navrhovane prechody:
+received -> transcribed -> queued -> claimed -> delivered
+                                     -> approval_required
+                                     -> failed_retryable
+                                     -> failed_final
+
+Zachovat stavajici prepis a pravidlo jedineho vlastnika doruceni. Doplneny maji
+byt testy soubehu, obnovy po padu, stareho pending prikazu a presne jednoho
+doruceni.
+
+
+DOKUMENTY
+
+Dokumentovy system ma soubor ve vaultu, manifest, hlavni index, textovy index,
+terminy, cases, reminder vazby, ScanDocu stav a historii akci. Nad temito kroky
+neni jedna transakce, takze operace muze uspet pouze castecne.
+
+Navrhovany intake model:
+discovered -> previewed -> needs_review -> approved -> indexed -> archived
+Vedlejsi stavy: rejected, duplicate, failed.
+
+Downloads, e-mailove prilohy a mobilni inbox maji byt pouze ruzne vstupni
+adaptery do stejne fronty.
+
+Postup:
+1. Read-only DocumentRepository nad dnesnimi JSON/JSONL soubory.
+2. Pres repository postupne vest vsechny zapisy.
+3. Atomicke zapisy, zamky a idempotency klice.
+4. SQLite katalog a fulltextovy index.
+5. Existujici dokumenty pri prvni migraci nepresouvat ani nemazat.
+
+
+E-MAILY
+
+E-mailova oblast je pojmove roztristena mezi triage, work mode, work session,
+processing decision, work queue, action case, case vault a archive vault.
+
+Doporucena stabilni identita zpravy:
+provider + account + folder + uid + message_id
+
+Doporuceny pracovni stav:
+new -> reviewed -> action_selected -> archived_local -> attachments_imported
+    -> trash_requested -> trashed -> purged
+Vedlejsi stavy: skipped, retry, error.
+
+Archivace e-mailu, import priloh a presun u poskytovatele maji pouzivat
+idempotency klic a jednoduchy outbox. Sitove a davkove operace maji bezet jako
+background job, nikoliv uvnitr dlouheho HTTP requestu.
+
+
+UZIVATELSKE ROZHRANI
+
+Hlavni obrazovka je dnes spise mapa celeho systemu nez denni kokpit. Schopnosti
+neni treba odstranit, ale rozdelit:
+- Dnes: tri az pet aktualnich ukolu, varovani a globalni hledani.
+- Dokumenty: intake, revize, terminy, cases a hledani.
+- E-maily: nove, k rozhodnuti, zpracovane, kos a archiv.
+- Adam / hlas: posledni pokyn, stav a cekajici potvrzeni.
+- Servis: zaloha, git, diagnostika, recovery a relace.
+- Pokrocile: skryte, dokud nejsou potreba.
+
+HTML, CSS a JavaScript postupne presunout do samostatnych statickych souboru.
+Nedelat soucasne uplny redesign a backendovou migraci.
+
+
+TESTOVANI A PROVOZ
+
+Chybi predevsim:
+- browser end-to-end testy,
+- test soubezneho zapisu dvou procesu,
+- vykonovy limit /api/status,
+- testy bezpecnostnich hlavicek a puvodu requestu,
+- VoiceBridge presne-jednou end-to-end,
+- e-mail -> archiv -> priloha -> document vault,
+- simulace padu uprostred vicekrokove operace.
+
+GitHub workflow nespousti obecnou testovaci sadu a Python zavislosti nejsou
+pripnute na konkretni verze. Doporucuje se samostatne CI pro testy, syntax check,
+zakladni lint a kontrolu reprodukovatelnosti zavislosti.
+
+
+DOPORUCENE PORADI IMPLEMENTACE
+
+Faze 0 - stabilizace:
+1. Oddelit trisekundovy live status od plneho /api/status.
+2. Pridat limity requestu, jednotne chyby a bezpecnostni hlavicky.
+3. Zapnout bezpecny provozni log bez soukromych obsahu.
+4. Zavest atomicky JSON zapis a spolecny file lock.
+5. Doplnit test soubezneho zapisu.
+6. Prejit na jednu serverovou instanci pro lokalni i Tailscale pristup.
+
+Faze 1 - rozdeleni monolitu:
+1. Vyjmout status a health sluzbu.
+2. Vyjmout VoiceBridge coordinator.
+3. Vyjmout dokumentove routy a service vrstvu.
+4. Vyjmout e-mailove routy a service vrstvu.
+5. Presunout frontend do statickych souboru.
+
+Faze 2 - sjednoceni stavu:
+1. Explicitni VoiceBridge state machine.
+2. Jednotny dokumentovy intake model.
+3. Jednotny e-mailovy pracovni model.
+4. Repository rozhrani, idempotency a outbox.
+
+Faze 3 - odolna persistence:
+1. SQLite pro pracovni stavy a metadata.
+2. Fulltext dokumentu.
+3. Migracni a konzistencni audit.
+4. JSON/JSONL docasne ponechat jako export, auditni stopu nebo fallback.
+
+
+DOPORUCENY PRVNI BALIK
+
+1. Lehky live status.
+2. Jedna serverova instance.
+3. Atomicke a zamcene zapisy.
+
+Tyto tri kroky maji nejvyssi pomer prinosu k riziku a vytvori bezpecny zaklad
+pro pozdejsi rozdeleni monolitu. VoiceBridge ani dokumentova data se pri nich
+nemaji funkcne menit.
+
+
+STAV PRVNIHO KROKU PO AUDITU
+
+Dne 10. 7. 2026 byl prvni vykonovy krok implementovan:
+- vznikl GET /api/live-status,
+- trisekundovy interval uz nevola plny /api/status,
+- hlasovy watcher a cekajici potvrzeni se nacitaji cerstve,
+- draha procesni diagnostika VoiceBridge ma patnactisekundovou cache,
+- plny /api/status se automaticky obnovuje jednou za pet minut,
+- rucni obnova nadale pouziva plny status,
+- smoke check nove kontroluje take lehky live status.
+
+Kontrolni mereni po nasazeni:
+- prvni nenacachovany live status priblizne 640 ms,
+- dalsi cachovane live statusy priblizne 2 az 6 ms,
+- kontrolni plny status priblizne 1 070 ms.
+
+Relevantni regresni sada po zmene: 374 testu, vsechny OK.

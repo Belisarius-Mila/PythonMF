@@ -14,6 +14,7 @@ import shutil
 import signal
 import subprocess
 import tempfile
+import threading
 import time
 import urllib.error
 from collections.abc import Callable
@@ -337,6 +338,9 @@ def cockpit_code_stamp(paths: tuple[Path, ...] = COCKPIT_CODE_STAMP_PATHS) -> st
 
 
 COCKPIT_CODE_STAMP = cockpit_code_stamp()
+LIVE_STATUS_BRIDGE_CACHE_TTL_SECONDS = 15.0
+_LIVE_STATUS_BRIDGE_CACHE: dict[str, Any] = {}
+_LIVE_STATUS_BRIDGE_CACHE_LOCK = threading.Lock()
 
 READING_STATUS_LABELS: dict[str, str] = {
     "ok": "OK",
@@ -4467,6 +4471,58 @@ def cockpit_status() -> dict[str, Any]:
         "voice_mode": voice_mode,
         "voice_bridge": voice_bridge,
         "git": git_status,
+    }
+
+
+def cockpit_live_status(
+    *,
+    voice_mode_loader: Callable[..., dict[str, Any]] | None = None,
+    voice_bridge_loader: Callable[[], dict[str, Any]] | None = None,
+    monotonic_clock: Callable[[], float] | None = None,
+    bridge_cache: dict[str, Any] | None = None,
+    bridge_cache_ttl_seconds: float = LIVE_STATUS_BRIDGE_CACHE_TTL_SECONDS,
+) -> dict[str, Any]:
+    """Return frequently changing voice state without rebuilding the full Cockpit status."""
+    started_at = time.perf_counter()
+    load_voice_mode = voice_mode_loader or load_voice_mode_status
+    load_voice_bridge = voice_bridge_loader or (
+        lambda: adam_voice_bridge_status(orphaned_janicka_reporter=janicka_orphaned_codex_session_report)
+    )
+    clock = monotonic_clock or time.monotonic
+    cache = bridge_cache if bridge_cache is not None else _LIVE_STATUS_BRIDGE_CACHE
+
+    voice_mode_started_at = time.perf_counter()
+    voice_mode = load_voice_mode()
+    voice_mode_ms = round((time.perf_counter() - voice_mode_started_at) * 1000, 2)
+
+    now_value = clock()
+    with _LIVE_STATUS_BRIDGE_CACHE_LOCK:
+        cached_bridge = cache.get("value")
+        refreshed_at = float(cache.get("refreshed_at", 0.0) or 0.0)
+        cache_age_seconds = max(0.0, now_value - refreshed_at)
+        cache_hit = isinstance(cached_bridge, dict) and cache_age_seconds < max(0.0, bridge_cache_ttl_seconds)
+        voice_bridge_started_at = time.perf_counter()
+        if cache_hit:
+            voice_bridge = cached_bridge
+        else:
+            voice_bridge = load_voice_bridge()
+            cache["value"] = voice_bridge
+            cache["refreshed_at"] = now_value
+            cache_age_seconds = 0.0
+        voice_bridge_ms = round((time.perf_counter() - voice_bridge_started_at) * 1000, 2)
+
+    return {
+        "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "voice_mode": voice_mode,
+        "voice_bridge": voice_bridge,
+        "live_status_timing": {
+            "total_ms": round((time.perf_counter() - started_at) * 1000, 2),
+            "voice_mode_ms": voice_mode_ms,
+            "voice_bridge_ms": voice_bridge_ms,
+            "voice_bridge_cache_hit": cache_hit,
+            "voice_bridge_cache_age_seconds": round(cache_age_seconds, 2),
+            "voice_bridge_cache_ttl_seconds": bridge_cache_ttl_seconds,
+        },
     }
 
 
@@ -12273,6 +12329,9 @@ class CockpitServer:
                 if parsed.path == "/api/status":
                     self.respond_json(cockpit_status())
                     return
+                if parsed.path == "/api/live-status":
+                    self.respond_json(cockpit_live_status())
+                    return
                 if parsed.path == "/api/server/health":
                     self.respond_json(server_health_status(host=cockpit_host, port=cockpit_port))
                     return
@@ -16366,14 +16425,16 @@ COCKPIT_HTML = """<!doctype html>
       actionMessage.classList.toggle("hidden", !text);
     }
 
-    const INTAKE_LOCAL_MONITOR_MS = 10 * 60 * 1000;
+    const FULL_STATUS_MONITOR_MS = 5 * 60 * 1000;
     const INTAKE_EMAIL_MONITOR_MS = 30 * 60 * 1000;
     const URGENT_REMINDERS_MONITOR_MS = 30 * 1000;
     const VOICE_STATUS_MONITOR_MS = 3000;
     let refreshInFlight = false;
+    let liveStatusRefreshInFlight = false;
     let urgentRemindersRefreshInFlight = false;
     let lastMainRefreshStartedAt = 0;
     let lastCodexApprovalActive = false;
+    let latestMainStatusData = null;
     let latestDocumentIntakeData = null;
     let lastEmailIntakeMonitor = {
       generated_at: "",
@@ -16398,6 +16459,7 @@ COCKPIT_HTML = """<!doctype html>
       try {
         const res = await fetch("/api/status");
         const data = await res.json();
+        latestMainStatusData = data;
         statusLine.textContent = `Aktualizováno: ${data.generated_at || ""}`;
         scanDocuState.innerHTML = data.scandocu && data.scandocu.running
           ? `<span class="ok">ScanDocu běží</span> | ${data.scandocu.url}`
@@ -16430,7 +16492,29 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
-    function refreshMainStatusOnReturn(minAgeMs = 5000) {
+    async function refreshLiveStatus() {
+      if (liveStatusRefreshInFlight) return;
+      liveStatusRefreshInFlight = true;
+      try {
+        const res = await fetch("/api/live-status", {cache: "no-store"});
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!latestMainStatusData) return;
+        latestMainStatusData = {
+          ...latestMainStatusData,
+          voice_mode: data.voice_mode || {},
+          voice_bridge: data.voice_bridge || {}
+        };
+        renderDashboard(latestMainStatusData);
+      } catch (err) {
+        recordFrontendError(err);
+        setDashboardStatusSignal("voice", "warn", `Živý stav hlasu: ${err}`);
+      } finally {
+        liveStatusRefreshInFlight = false;
+      }
+    }
+
+    function refreshMainStatusOnReturn(minAgeMs = FULL_STATUS_MONITOR_MS) {
       if (document.hidden) return;
       const now = Date.now();
       if (now - lastMainRefreshStartedAt < minAgeMs) return;
@@ -22007,17 +22091,28 @@ COCKPIT_HTML = """<!doctype html>
 	    });
 	    runFrontendHealthCheck();
 	    window.setInterval(runFrontendHealthCheck, 60000);
-	    window.setInterval(() => refresh({silent: true, includeSecondary: false}), INTAKE_LOCAL_MONITOR_MS);
+	    window.setInterval(() => refresh({silent: true, includeSecondary: false}), FULL_STATUS_MONITOR_MS);
 	    window.setInterval(() => {
 	      if (!document.hidden) {
-	        refresh({silent: true, includeSecondary: false});
+	        refreshLiveStatus();
 	      }
 	    }, VOICE_STATUS_MONITOR_MS);
       window.setInterval(refreshUrgentRemindersSummary, URGENT_REMINDERS_MONITOR_MS);
       window.setInterval(runEmailIntakeMonitor, INTAKE_EMAIL_MONITOR_MS);
-      window.addEventListener("focus", () => refreshMainStatusOnReturn());
-      window.addEventListener("pageshow", () => refreshMainStatusOnReturn(1000));
-      document.addEventListener("visibilitychange", () => refreshMainStatusOnReturn());
+      window.addEventListener("focus", () => {
+        refreshLiveStatus();
+        refreshMainStatusOnReturn();
+      });
+      window.addEventListener("pageshow", () => {
+        refreshLiveStatus();
+        refreshMainStatusOnReturn();
+      });
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+          refreshLiveStatus();
+          refreshMainStatusOnReturn();
+        }
+      });
 	    refresh();
       window.setTimeout(() => refreshVoiceLatestResponse({autoSpeak: false}), 2000);
       window.setTimeout(refreshUrgentRemindersSummary, 3000);

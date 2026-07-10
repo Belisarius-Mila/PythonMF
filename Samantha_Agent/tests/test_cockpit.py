@@ -22,6 +22,7 @@ from app.cockpit import (
     adam_voice_bridge_status,
     accept_document_classification_suggestion_action,
     cancel_payment_reminder_action,
+    cockpit_live_status,
     cockpit_status,
     create_document_due_reminder_action,
     document_reference,
@@ -2657,6 +2658,9 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("allowAlreadyRenderedAutoSpeak", COCKPIT_HTML)
         self.assertIn("VOICE_REPLY_POLL_DURATION_MS = 600000", COCKPIT_HTML)
         self.assertIn("VOICE_STATUS_MONITOR_MS = 3000", COCKPIT_HTML)
+        self.assertIn('fetch("/api/live-status", {cache: "no-store"})', COCKPIT_HTML)
+        self.assertIn("refreshLiveStatus();", COCKPIT_HTML)
+        self.assertNotIn("refresh({silent: true, includeSecondary: false});\n\t      }\n\t    }, VOICE_STATUS_MONITOR_MS", COCKPIT_HTML)
         self.assertIn("if (!document.hidden)", COCKPIT_HTML)
         self.assertIn("normalizeVoiceText", COCKPIT_HTML)
         self.assertIn("voiceResponseMatchesCurrentRequest", COCKPIT_HTML)
@@ -2846,7 +2850,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("actionQueueList", COCKPIT_HTML)
         self.assertIn("renderActionQueue", COCKPIT_HTML)
         self.assertIn("actionQueueButton", COCKPIT_HTML)
-        self.assertIn("INTAKE_LOCAL_MONITOR_MS = 10 * 60 * 1000", COCKPIT_HTML)
+        self.assertIn("FULL_STATUS_MONITOR_MS = 5 * 60 * 1000", COCKPIT_HTML)
         self.assertIn("INTAKE_EMAIL_MONITOR_MS = 30 * 60 * 1000", COCKPIT_HTML)
         self.assertIn("runEmailIntakeMonitor", COCKPIT_HTML)
         self.assertIn("hideEmailIntakeCandidate", COCKPIT_HTML)
@@ -3033,6 +3037,52 @@ class CockpitTests(unittest.TestCase):
         self.assertNotIn("quantitative", status)
         self.assertNotIn("projects", status)
         self.assertNotIn("consistency", status)
+
+    def test_cockpit_live_status_refreshes_voice_mode_and_caches_expensive_bridge(self) -> None:
+        voice_mode_calls = 0
+        voice_bridge_calls = 0
+        cache: dict[str, object] = {}
+        clock_values = iter((100.0, 101.0, 116.0))
+
+        def voice_mode_loader() -> dict[str, object]:
+            nonlocal voice_mode_calls
+            voice_mode_calls += 1
+            return {"ok": True, "running": False, "sequence": voice_mode_calls}
+
+        def voice_bridge_loader() -> dict[str, object]:
+            nonlocal voice_bridge_calls
+            voice_bridge_calls += 1
+            return {"ok": True, "status": "ok", "sequence": voice_bridge_calls}
+
+        first = cockpit_live_status(
+            voice_mode_loader=voice_mode_loader,
+            voice_bridge_loader=voice_bridge_loader,
+            monotonic_clock=lambda: next(clock_values),
+            bridge_cache=cache,
+        )
+        second = cockpit_live_status(
+            voice_mode_loader=voice_mode_loader,
+            voice_bridge_loader=voice_bridge_loader,
+            monotonic_clock=lambda: next(clock_values),
+            bridge_cache=cache,
+        )
+        third = cockpit_live_status(
+            voice_mode_loader=voice_mode_loader,
+            voice_bridge_loader=voice_bridge_loader,
+            monotonic_clock=lambda: next(clock_values),
+            bridge_cache=cache,
+        )
+
+        self.assertEqual(voice_mode_calls, 3)
+        self.assertEqual(voice_bridge_calls, 2)
+        self.assertFalse(first["live_status_timing"]["voice_bridge_cache_hit"])
+        self.assertTrue(second["live_status_timing"]["voice_bridge_cache_hit"])
+        self.assertFalse(third["live_status_timing"]["voice_bridge_cache_hit"])
+        self.assertEqual(second["voice_mode"]["sequence"], 2)
+        self.assertEqual(second["voice_bridge"]["sequence"], 1)
+        self.assertNotIn("document_work", second)
+        self.assertNotIn("backup_status", second)
+        self.assertNotIn("git", second)
 
     def test_adam_voice_bridge_status_warns_about_multiple_codex_ttys_without_screen(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

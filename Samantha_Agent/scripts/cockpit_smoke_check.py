@@ -17,6 +17,7 @@ DEFAULT_BASE_URL = "http://127.0.0.1:8770"
 DEFAULT_CHECKS = (
     ("home", "/"),
     ("server_health", "/api/server/health"),
+    ("live_status", "/api/live-status"),
     ("status", "/api/status"),
     ("recovery", "/api/recovery/status"),
 )
@@ -72,6 +73,12 @@ def check_endpoint(
             backup_status = payload.get("backup_status")
             if not isinstance(backup_status, dict) or "status" not in backup_status:
                 return SmokeResult(name, path, False, status_code, "invalid backup_status")
+        if path == "/api/live-status":
+            for required_key in ("generated_at", "voice_mode", "voice_bridge", "live_status_timing"):
+                if required_key not in payload:
+                    return SmokeResult(name, path, False, status_code, f"missing {required_key}")
+            if any(key in payload for key in ("document_work", "backup_status", "git")):
+                return SmokeResult(name, path, False, status_code, "live status contains heavy sections")
     elif not body:
         return SmokeResult(name, path, False, status_code, "empty response body")
 
