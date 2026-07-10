@@ -1,7 +1,9 @@
 # Cockpit: read-only inventura mrtvého a legacy kódu
 
-Datum: 2026-07-10  
-Rozsah: Samantha Cockpit, launcher, VoiceBridge, reminders a Quick Notes  
+Datum: 2026-07-10
+
+Rozsah: Samantha Cockpit, launcher, VoiceBridge, reminders a Quick Notes
+
 Režim: statická read-only analýza; bez změny aplikačního kódu a bez čtení private obsahů
 
 ## Výsledek
