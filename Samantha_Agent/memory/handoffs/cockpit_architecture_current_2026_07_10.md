@@ -337,6 +337,9 @@ Rucni retest po prvnim vykonovem kroku:
   / 325 top-level funkci, tedy 96 radku pod baseline.
 - Nasazeny Cockpit prosly lokalnim i Tailscale smoke checkem; obe adresy vidi
   PID 24877 a code stamp `8f5b6b65b7426805`.
+- Implementace je pushnuta v commitu `67ba77e`. GitHub Actions Cockpit Quality
+  Gate beh cislo 11 skoncil uspesne:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29119991977`.
 
 Co neni hotove:
 

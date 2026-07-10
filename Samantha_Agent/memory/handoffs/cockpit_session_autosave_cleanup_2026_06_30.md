@@ -70,3 +70,7 @@ Bezpecnost / neukladat:
 
 Dalsi krok: pouze sledovat rust. Cleanup znovu nabidne kandidaty az po prekroceni
 tridenni retence; ostry cleanup zustava potvrzovana mazaci akce.
+
+Implementace je v commitu `67ba77e`; GitHub Actions Cockpit Quality Gate beh
+cislo 11 skoncil uspesne:
+`https://github.com/Belisarius-Mila/PythonMF/actions/runs/29119991977`.

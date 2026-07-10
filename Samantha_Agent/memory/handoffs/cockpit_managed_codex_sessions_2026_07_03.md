@@ -52,3 +52,6 @@ data. Cleanup relaci musi dal chranit aktivni hlasovy cil a managed sluzby.
   po nasazeni bezet, ale jeji nadbytecny watcher byl setrne ukoncen.
 - Cockpit dashboard, detail Hlas, Recovery centrum a Autosave uklid nyni davaji
   dohromady viditelny prehled relaci a watcheru.
+- Implementace je v commitu `67ba77e`; GitHub Actions Cockpit Quality Gate beh
+  cislo 11 skoncil uspesne:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29119991977`.
