@@ -127,6 +127,16 @@ nebo pull request.
 - Implementace Fáze 1.1 je v commitu `a8857f0`. GitHub Actions Cockpit Quality
   Gate běh číslo 12 skončil úspěšně:
   `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29121176082`.
+- Fáze 1.2 přidala `app/voice_bridge_coordinator.py`. Coordinator rozhoduje
+  jediného vlastníka doručení pro textovou i nahrávanou větev: při běžícím
+  watcheru pouze uloží pokyn a inline adapter vůbec nezavolá; explicitně
+  předaný inline adapter zůstává testovacím/fallbackovým kontraktem.
+- HTTP routy, přepis audia, TTY/screen transport, pending transakce, historie a
+  potvrzovací pravidla zůstaly beze změny. Čtyři přímé testy rozšířily gate na
+  539 testů. Monolit klesl na 22 230 řádků / 324 top-level funkcí, tedy 235
+  řádků pod baseline.
+- Po nasazení prošly lokální i Tailscale smoke checky všech pěti cest. Obě
+  adresy obsluhovala jedna instance PID 32168 a port 8771 byl volný.
 
 ## Co gate zatím neřeší
 
@@ -142,7 +152,7 @@ nebo pull request.
 Quality gate, read-only inventura, Cleanup R1, zamčené reminders/Quick Notes/
 urgent reminders, dokumentové persistence primitivy, metadata/reading-status
 transakce, ScanDocu review a životní cyklus autosave/managed relací jsou hotové.
-Fáze 1.1 status/health je hotová. Hlavní roadmapa pokračuje Fází 1.2: nejdříve
-zmapovat a potom vyjmout VoiceBridge coordinator bez změny API, vlastnictví
-doručení a potvrzovacích pravidel. Reindex zůstává samostatný další krok
-dokumentové persistence.
+Fáze 1.1 status/health je hotová a Fáze 1.2 command ownership coordinator je
+implementovaný. Po jednom ručním end-to-end hlasovém retestu pokračuje hlavní
+roadmapa Fází 1.3: dokumentové routy a service vrstva. Reindex zůstává
+samostatný další krok dokumentové persistence.

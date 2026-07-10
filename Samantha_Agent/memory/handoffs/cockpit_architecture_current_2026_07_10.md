@@ -357,6 +357,20 @@ Rucni retest po prvnim vykonovem kroku:
 - Implementace Faze 1.1 je pushnuta v commitu `a8857f0`. GitHub Actions Cockpit
   Quality Gate beh cislo 12 skoncil uspesne:
   `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29121176082`.
+- Faze 1.2 ma implementovany prvni a hlavni bezpecny rez: novy
+  `app/voice_bridge_coordinator.py` rozhoduje, zda ma ulozeny textovy nebo
+  prepsany hlasovy pokyn vlastnit bezici watcher, nebo explicitni inline
+  fallback. Pri bezicim watcheru coordinator inline doruceni vubec nezavola.
+- HTTP routy, prepis audia, TTY/screen transporty, `pending_for_adam.json`,
+  historie, approval pravidla a potvrzovaci bezpecnost zustaly ve stavajicich
+  vrstvach. `app/cockpit.py` je pro obe vstupni akce kompatibilni adapter.
+- Ctyri prime kontraktni testy hlidaji shodny ownership pro text i nahravku,
+  explicitni inline adapter, chybu prepisu bez doruceni a prazdny vstup bez
+  persistence. Kanonicky gate ma 539 testu OK; `app/cockpit.py` klesl na
+  22 230 radku / 324 top-level funkci, tedy 235 radku pod baseline.
+- Nova verze prosla lokalnim i Tailscale smoke checkem vsech peti cest. Obe
+  adresy obsluhuje jedina instance PID 32168 a na nouzovem portu 8771 nic
+  neposloucha.
 
 Co neni hotove:
 
@@ -369,34 +383,38 @@ Co neni hotove:
   uz maji recovery transakci, ale dalsi document-index writery na ni nejsou
   prevedene.
 - `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem;
-  status/health orchestrace je uz vyjmuta, dalsi hranice je VoiceBridge.
+  status/health a VoiceBridge command ownership jsou uz vyjmuty, dalsi hranice
+  jsou dokumentove routy a service vrstva.
 - Cleanup R1 je hotovy. Stary e-mailovy parser, lokalni Janicka vetev a pet
   podezrelych API cest zustavaji beze zmeny; u API cest chybi registr externich
   klientu.
 - Python zavislosti zatim nejsou pripnute na konkretni verze.
-- VoiceBridge nema jeden explicitni stavovy model prikazu.
+- VoiceBridge command ownership ma samostatny coordinator, ale jeste nema jeden
+  explicitni stavovy model prikazu; Faze 2 state machine zustava pozdejsi krok.
 - Dokumentove a e-mailove workflow nemaji jednotnou repository/transakcni
   vrstvu.
 
 Dalsi krok:
 
-Hlavni roadmapa: Faze 1.1 je hotova; dalsi je Faze 1.2, opatrne vyjmout
-VoiceBridge coordinator bez zmeny dorucovaciho vlastnictvi, endpointu nebo
-potvrzovacich pravidel. Pred upravou znovu precist provozni kontrakt a nejdrive
-zmapovat stavove prechody. Dokumentovy reindex zustava vedlejsi persistence
-roadmapou. Stary e-mailovy parser, lokalni Janicka vetev a pet podezrelych API
-cest zatim nemenit. PDF browser a post-call audio retest jsou odlozene.
+Faze 1.2 command ownership coordinator je implementovany a automaticky overeny.
+Pred uzavrenim baliku chybi jeden rucni end-to-end hlasovy test z Cockpitu po
+nasazeni: jeden pokyn v chatu, jedna finalni odpoved a zadna duplicita. Potom
+hlavni roadmapa prejde na Fazi 1.3, dokumentove routy/service vrstvu.
+Dokumentovy reindex zustava vedlejsi persistence roadmapou. Stary e-mailovy
+parser, lokalni Janicka vetev a pet podezrelych API cest zatim nemenit. PDF
+browser a post-call audio retest jsou odlozene.
 
 Navrhovane dalsi kroky:
 
-1. Faze 1.2: zmapovat a vyjmout VoiceBridge coordinator bez zmeny API a
-   provozniho kontraktu.
-2. Janicka a stary e-mailovy parser mazat az po popsanem rucnim/recovery overeni.
-3. Podezrele API cesty proverit proti Shortcuts a servisnim klientum.
-4. Ve vedlejsi persistence roadmapě pozdeji prevest reindex a potom e-mail metadata.
-5. Postupne rozdelit monolit pri zachovani endpointu:
+1. Rucne otestovat jeden kratky hlasovy pokyn po nasazeni Faze 1.2 a potvrdit,
+   ze dorazil prave jednou.
+2. Faze 1.3: vyjmout dokumentove routy a service vrstvu po malych balicich.
+3. Janicka a stary e-mailovy parser mazat az po popsanem rucnim/recovery overeni.
+4. Podezrele API cesty proverit proti Shortcuts a servisnim klientum.
+5. Ve vedlejsi persistence roadmapě pozdeji prevest reindex a potom e-mail metadata.
+6. Postupne rozdelit monolit pri zachovani endpointu:
    status/health -> voice -> documents -> email -> staticky frontend.
-6. Zavadet explicitni stavove modely a repository vrstvy po oblastech, ne
+7. Zavadet explicitni stavove modely a repository vrstvy po oblastech, ne
    jednim velkym prepisem.
 
 Handoff strategie pro tento program:
@@ -418,11 +436,13 @@ Zmenene nebo relevantni soubory:
 - `AuditCockpit56.txt`
 - `app/cockpit.py`
 - `app/cockpit_status_service.py`
+- `app/voice_bridge_coordinator.py`
 - `app/file_persistence.py`
 - `app/backup/activity_state.py`
 - `scripts/cockpit_smoke_check.py`
 - `tests/test_cockpit.py`
 - `tests/test_cockpit_status_service.py`
+- `tests/test_voice_bridge_coordinator.py`
 - `tests/test_file_persistence.py`
 - `scripts/install_cockpit_local_launchd.sh`
 - `scripts/install_cockpit_tailscale_launchd.sh`

@@ -21,6 +21,7 @@ COMPILE_PATHS = (
     "app/cockpit.py",
     "app/cockpit_code_stamp.py",
     "app/cockpit_status_service.py",
+    "app/voice_bridge_coordinator.py",
     "app/adam_service.py",
     "app/autosave_service.py",
     "app/file_persistence.py",
@@ -49,6 +50,7 @@ SHELL_PATHS = (
 TEST_MODULES = (
     "tests.test_cockpit_quality_gate",
     "tests.test_cockpit_status_service",
+    "tests.test_voice_bridge_coordinator",
     "tests.test_file_persistence",
     "tests.test_backup_activity_state",
     "tests.test_backup_incremental",

@@ -192,6 +192,12 @@ from app.speech.terminal_bridge import (
     normalize_tty,
 )
 from app.speech.voice_inbox import VoiceCommand, parse_voice_command_file, voice_command_to_dict
+from app.voice_bridge_coordinator import (
+    VoiceBridgeCommandDependencies,
+    coordinate_text_voice_command,
+    coordinate_transcribed_voice_command,
+    watcher_will_deliver_result as voice_watcher_will_deliver_result,
+)
 from scripts.autosave_status import autosave_status as read_autosave_runtime_status
 
 
@@ -10947,22 +10953,6 @@ def deliver_saved_voice_command_inline(
     }
 
 
-def voice_watcher_will_deliver_result(voice_mode: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "voice_delivery_status": "watcher_will_deliver",
-        "voice_delivery": {
-            "ok": True,
-            "status": "watcher_running",
-            "message": "Běžící Adam Voice Mode watcher pokyn převezme z hlasového inboxu.",
-        },
-        "voice_delivery_message": (
-            "Zpráva byla vložena do hlasového inboxu. "
-            "Běžící watcher ji předá Adamovi."
-        ),
-        "voice_mode": voice_mode,
-    }
-
-
 def record_voice_delivery_attempt(
     *,
     command: VoiceCommand,
@@ -11185,48 +11175,22 @@ def cockpit_transcribe_voice_action(
     history_path: Path = ADAM_VOICE_HISTORY_PATH,
     transcriber: Callable[..., dict[str, Any]] = transcribe_audio_base64_isolated,
 ) -> dict[str, Any]:
-    try:
-        result = transcriber(
-            str(payload.get("audio_base64", "")),
-            mime_type=str(payload.get("mime_type", "")),
-            language=str(payload.get("language", "cs") or "cs"),
-        )
-        result.update(save_voice_command_to_inbox(result, inbox_dir=inbox_dir))
-        if terminal_bridge is None:
-            voice_mode = load_voice_mode_status()
-            if voice_mode.get("running"):
-                result.update(voice_watcher_will_deliver_result(voice_mode))
-                result["message"] = result["voice_delivery_message"]
-                return result
-        result.update(
-            deliver_saved_voice_command_inline(
-                inbox_dir=inbox_dir,
-                terminal_bridge=terminal_bridge,
-                pending_path=pending_path,
-                history_path=history_path,
-            )
-        )
-        result["message"] = result.get("voice_delivery_message") or "Hlasový pokyn byl přepsán a uložen pro Codex."
-        return result
-    except TranscriptionError as exc:
-        record_voice_transcription_failure(message=str(exc))
-        return {
-            "ok": False,
-            "message": f"Přepis hlasu selhal: {exc}",
-            "status": "transcription_failed",
-        }
-    except OSError as exc:
-        return {
-            "ok": False,
-            "message": f"Přepis se povedl, ale uložení hlasového pokynu selhalo: {exc}",
-            "status": "voice_inbox_save_failed",
-        }
-    except ValueError as exc:
-        return {
-            "ok": False,
-            "message": f"Přepis se povedl, ale hlasový pokyn nejde uložit: {exc}",
-            "status": "voice_inbox_save_failed",
-        }
+    dependencies = VoiceBridgeCommandDependencies(
+        save_command=save_voice_command_to_inbox,
+        load_voice_mode=load_voice_mode_status,
+        deliver_inline=deliver_saved_voice_command_inline,
+        record_transcription_failure=record_voice_transcription_failure,
+        sanitize_text=safe_text,
+    )
+    return coordinate_transcribed_voice_command(
+        payload,
+        dependencies=dependencies,
+        inbox_dir=inbox_dir,
+        terminal_bridge=terminal_bridge,
+        pending_path=pending_path,
+        history_path=history_path,
+        transcriber=transcriber,
+    )
 
 
 def cockpit_save_voice_text_action(
@@ -11237,48 +11201,21 @@ def cockpit_save_voice_text_action(
     pending_path: Path = ADAM_PENDING_COMMAND_PATH,
     history_path: Path = ADAM_VOICE_HISTORY_PATH,
 ) -> dict[str, Any]:
-    text = safe_text(str(payload.get("text", "") or "")).strip()
-    if not text:
-        return {
-            "ok": False,
-            "message": "Chybí text hlasového pokynu.",
-            "status": "empty_voice_text",
-        }
-    try:
-        result = {
-            "ok": True,
-            "text": text,
-            "message": "Textový hlasový pokyn byl uložen pro Codex.",
-            "status": "voice_text_saved",
-        }
-        result.update(save_voice_command_to_inbox({"text": text}, inbox_dir=inbox_dir))
-        voice_mode = load_voice_mode_status()
-        if terminal_bridge is None and voice_mode.get("running"):
-            result.update(voice_watcher_will_deliver_result(voice_mode))
-            result["message"] = result["voice_delivery_message"]
-            return result
-        result.update(
-            deliver_saved_voice_command_inline(
-                inbox_dir=inbox_dir,
-                terminal_bridge=terminal_bridge,
-                pending_path=pending_path,
-                history_path=history_path,
-            )
-        )
-        result["message"] = result.get("voice_delivery_message") or result["message"]
-        return result
-    except OSError as exc:
-        return {
-            "ok": False,
-            "message": f"Uložení textového hlasového pokynu selhalo: {exc}",
-            "status": "voice_inbox_save_failed",
-        }
-    except ValueError as exc:
-        return {
-            "ok": False,
-            "message": f"Textový hlasový pokyn nejde uložit: {exc}",
-            "status": "voice_inbox_save_failed",
-        }
+    dependencies = VoiceBridgeCommandDependencies(
+        save_command=save_voice_command_to_inbox,
+        load_voice_mode=load_voice_mode_status,
+        deliver_inline=deliver_saved_voice_command_inline,
+        record_transcription_failure=record_voice_transcription_failure,
+        sanitize_text=safe_text,
+    )
+    return coordinate_text_voice_command(
+        payload,
+        dependencies=dependencies,
+        inbox_dir=inbox_dir,
+        terminal_bridge=terminal_bridge,
+        pending_path=pending_path,
+        history_path=history_path,
+    )
 
 
 def janicka_chat_memory_context(
