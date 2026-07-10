@@ -246,6 +246,9 @@ Rucni retest po prvnim vykonovem kroku:
 - Cilenych 20 launcher/reminders testu a cely quality gate s 458 testy prosly.
   Po kontrolovanem restartu maji lokalni i Tailscale adresa stejny PID 5700 a
   code stamp `4035402f842a33dc`; oba petibodove smoke checky prosly.
+- Cleanup R1 je pushnuty v commitu `9192e53`. GitHub Actions Cockpit Quality
+  Gate beh cislo 6 pro tento commit skoncil uspesne:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29107547605`.
 - `app/cockpit.py` ma po R1 22 439 radku a 330 top-level funkci. Ze 255 radku
   puvodnich funkcnich kandidatu zbyva 227 radku starych e-mailovych a Janicka
   vetvi, ktere vyzaduji samostatne rozhodnuti nebo rucni overeni.

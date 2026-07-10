@@ -48,6 +48,10 @@ Výsledný diff aplikačního kódu má 2 upravené importní řádky a 39 odstr
 Po kontrolovaném restartu mají lokální i Tailscale adresa stejný PID a code
 stamp; oba pětibodové smoke checky prošly.
 
+Kód je pushnutý v commitu `9192e53`. GitHub Actions Cockpit Quality Gate běh
+č. 6 pro tento commit skončil úspěšně:
+`https://github.com/Belisarius-Mila/PythonMF/actions/runs/29107547605`.
+
 Aktuální `app/cockpit.py` má 22 439 řádků a 330 top-level funkcí. Starý
 e-mailový parser, lokální Janička větev, pět podezřelých API cest a veškeré
 explicitně zachované kompatibilní vrstvy zůstaly beze změny. Z původních 255
