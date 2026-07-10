@@ -7,6 +7,7 @@ import binascii
 import html
 import json
 import hashlib
+import ipaddress
 import mimetypes
 import os
 import re
@@ -341,6 +342,110 @@ COCKPIT_CODE_STAMP = cockpit_code_stamp()
 LIVE_STATUS_BRIDGE_CACHE_TTL_SECONDS = 15.0
 _LIVE_STATUS_BRIDGE_CACHE: dict[str, Any] = {}
 _LIVE_STATUS_BRIDGE_CACHE_LOCK = threading.Lock()
+MAX_JSON_BODY_BYTES = 10 * 1024 * 1024
+COCKPIT_HTTP_EVENT_LOG = PROJECT_ROOT / "data" / "private" / "cockpit" / "http_events.jsonl"
+_COCKPIT_HTTP_EVENT_LOG_LOCK = threading.Lock()
+TAILSCALE_IPV4_NETWORK = ipaddress.ip_network("100.64.0.0/10")
+TAILSCALE_IPV6_NETWORK = ipaddress.ip_network("fd7a:115c:a1e0::/48")
+COCKPIT_SECURITY_HEADERS: tuple[tuple[str, str], ...] = (
+    ("X-Content-Type-Options", "nosniff"),
+    ("X-Frame-Options", "SAMEORIGIN"),
+    ("Referrer-Policy", "no-referrer"),
+    ("Cross-Origin-Resource-Policy", "same-origin"),
+    ("Permissions-Policy", "camera=(), geolocation=(), microphone=(self)"),
+    (
+        "Content-Security-Policy",
+        "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'self'; "
+        "script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self'; "
+        "frame-src 'self'; form-action 'self'",
+    ),
+)
+
+
+class CockpitHttpError(RuntimeError):
+    def __init__(
+        self,
+        *,
+        status: HTTPStatus,
+        error: str,
+        message: str,
+        close_connection: bool = False,
+    ) -> None:
+        super().__init__(message)
+        self.status = status
+        self.error = error
+        self.message = message
+        self.close_connection = close_connection
+
+
+def cockpit_request_hostname(host_header: str) -> str:
+    raw = str(host_header or "").strip()
+    if not raw or any(character in raw for character in ("/", "\\", "\r", "\n")):
+        return ""
+    try:
+        return str(urlparse(f"//{raw}").hostname or "").rstrip(".").casefold()
+    except ValueError:
+        return ""
+
+
+def cockpit_host_is_allowed(host_header: str) -> bool:
+    hostname = cockpit_request_hostname(host_header)
+    if not hostname:
+        return False
+    if hostname in {"localhost", "127.0.0.1", "::1"} or hostname.endswith(".ts.net"):
+        return True
+    try:
+        address = ipaddress.ip_address(hostname)
+    except ValueError:
+        return False
+    return bool(
+        address.is_loopback
+        or (address.version == 4 and address in TAILSCALE_IPV4_NETWORK)
+        or (address.version == 6 and address in TAILSCALE_IPV6_NETWORK)
+    )
+
+
+def cockpit_origin_matches_host(origin_or_referer: str, host_header: str) -> bool:
+    raw = str(origin_or_referer or "").strip()
+    if not raw or raw.casefold() == "null":
+        return False
+    try:
+        parsed = urlparse(raw)
+    except ValueError:
+        return False
+    if parsed.scheme.casefold() not in {"http", "https"} or not parsed.netloc:
+        return False
+    return parsed.netloc.rstrip(".").casefold() == str(host_header or "").strip().rstrip(".").casefold()
+
+
+def log_cockpit_http_event(
+    *,
+    event: str,
+    method: str,
+    request_path: str,
+    status: int,
+    detail: str = "",
+    path: Path = COCKPIT_HTTP_EVENT_LOG,
+) -> None:
+    try:
+        safe_request_path = urlparse(str(request_path or "")).path
+    except ValueError:
+        safe_request_path = "[invalid-path]"
+    record = {
+        "created_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "event": safe_text(event)[:80],
+        "method": safe_text(method).upper()[:12],
+        "path": safe_text(safe_request_path)[:240],
+        "status": int(status),
+        "detail": safe_text(detail)[:120],
+    }
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with _COCKPIT_HTTP_EVENT_LOG_LOCK, path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
+    except OSError:
+        return
 
 READING_STATUS_LABELS: dict[str, str] = {
     "ok": "OK",
@@ -12287,9 +12392,86 @@ class CockpitServer:
         cockpit_port = self.port
 
         class Handler(BaseHTTPRequestHandler):
-            server_version = "SamanthaCockpit/0.1"
+            server_version = "SamanthaCockpit/0.2"
+            sys_version = ""
+
+            def handle_one_request(self) -> None:
+                self._response_started = False
+                self._security_headers_sent = False
+                try:
+                    super().handle_one_request()
+                except CockpitHttpError as exc:
+                    log_cockpit_http_event(
+                        event=exc.error,
+                        method=getattr(self, "command", ""),
+                        request_path=getattr(self, "path", ""),
+                        status=int(exc.status),
+                        detail=exc.error,
+                    )
+                    if exc.close_connection:
+                        self.close_connection = True
+                    self.respond_request_error(exc)
+                except (BrokenPipeError, ConnectionResetError):
+                    self.close_connection = True
+                except Exception as exc:  # noqa: BLE001 - central HTTP safety boundary
+                    log_cockpit_http_event(
+                        event="internal_error",
+                        method=getattr(self, "command", ""),
+                        request_path=getattr(self, "path", ""),
+                        status=int(HTTPStatus.INTERNAL_SERVER_ERROR),
+                        detail=type(exc).__name__,
+                    )
+                    self.close_connection = True
+                    self.respond_request_error(
+                        CockpitHttpError(
+                            status=HTTPStatus.INTERNAL_SERVER_ERROR,
+                            error="internal_error",
+                            message="Cockpit narazil na vnitřní chybu. Citlivé podrobnosti nebyly zveřejněny.",
+                            close_connection=True,
+                        )
+                    )
+
+            def respond_request_error(self, error: CockpitHttpError) -> None:
+                if getattr(self, "_response_started", False):
+                    return
+                try:
+                    self.respond_json(
+                        {"ok": False, "error": error.error, "message": error.message},
+                        status=error.status,
+                    )
+                except (BrokenPipeError, ConnectionResetError, OSError):
+                    self.close_connection = True
+
+            def validate_request_access(self, *, require_origin: bool) -> None:
+                host_header = str(self.headers.get("Host", "") or "")
+                if not cockpit_host_is_allowed(host_header):
+                    raise CockpitHttpError(
+                        status=HTTPStatus.BAD_REQUEST,
+                        error="invalid_host",
+                        message="Požadavek nemá povolenou adresu Cockpitu.",
+                        close_connection=True,
+                    )
+                if not require_origin:
+                    return
+                origin = str(self.headers.get("Origin", "") or "").strip()
+                referer = str(self.headers.get("Referer", "") or "").strip()
+                if origin and not cockpit_origin_matches_host(origin, host_header):
+                    raise CockpitHttpError(
+                        status=HTTPStatus.FORBIDDEN,
+                        error="origin_forbidden",
+                        message="Původ požadavku není pro Cockpit povolený.",
+                        close_connection=True,
+                    )
+                if not origin and referer and not cockpit_origin_matches_host(referer, host_header):
+                    raise CockpitHttpError(
+                        status=HTTPStatus.FORBIDDEN,
+                        error="referer_forbidden",
+                        message="Zdroj požadavku není pro Cockpit povolený.",
+                        close_connection=True,
+                    )
 
             def do_GET(self) -> None:  # noqa: N802
+                self.validate_request_access(require_origin=False)
                 parsed = urlparse(self.path)
                 if parsed.path == "/":
                     self.respond_html(COCKPIT_HTML)
@@ -12495,6 +12677,7 @@ class CockpitServer:
                 self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
 
             def do_POST(self) -> None:  # noqa: N802
+                self.validate_request_access(require_origin=True)
                 parsed = urlparse(self.path)
                 if parsed.path == "/api/scandocu/open":
                     self.respond_json(start_scandocu())
@@ -12903,12 +13086,87 @@ class CockpitServer:
                 self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
 
             def read_json(self) -> dict[str, Any]:
-                length = int(self.headers.get("Content-Length", "0") or "0")
-                raw = self.rfile.read(length).decode("utf-8") if length else "{}"
-                data = json.loads(raw or "{}")
+                transfer_encoding = str(self.headers.get("Transfer-Encoding", "") or "").strip()
+                if transfer_encoding and transfer_encoding.casefold() != "identity":
+                    raise CockpitHttpError(
+                        status=HTTPStatus.BAD_REQUEST,
+                        error="unsupported_transfer_encoding",
+                        message="Cockpit nepodporuje tento způsob přenosu JSON těla.",
+                        close_connection=True,
+                    )
+                raw_length = str(self.headers.get("Content-Length", "0") or "0").strip()
+                try:
+                    length = int(raw_length)
+                except ValueError as exc:
+                    raise CockpitHttpError(
+                        status=HTTPStatus.BAD_REQUEST,
+                        error="invalid_content_length",
+                        message="Neplatná délka požadavku.",
+                        close_connection=True,
+                    ) from exc
+                if length < 0:
+                    raise CockpitHttpError(
+                        status=HTTPStatus.BAD_REQUEST,
+                        error="invalid_content_length",
+                        message="Neplatná délka požadavku.",
+                        close_connection=True,
+                    )
+                if length > MAX_JSON_BODY_BYTES:
+                    raise CockpitHttpError(
+                        status=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+                        error="request_too_large",
+                        message="JSON požadavek je příliš velký.",
+                        close_connection=True,
+                    )
+                if length and self.headers.get_content_type().casefold() != "application/json":
+                    raise CockpitHttpError(
+                        status=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+                        error="json_content_type_required",
+                        message="Cockpit očekává JSON s Content-Type application/json.",
+                        close_connection=True,
+                    )
+                raw_bytes = self.rfile.read(length) if length else b"{}"
+                if len(raw_bytes) != length and length:
+                    raise CockpitHttpError(
+                        status=HTTPStatus.BAD_REQUEST,
+                        error="incomplete_request_body",
+                        message="JSON tělo požadavku nebylo přijato celé.",
+                        close_connection=True,
+                    )
+                try:
+                    raw = raw_bytes.decode("utf-8")
+                except UnicodeDecodeError as exc:
+                    raise CockpitHttpError(
+                        status=HTTPStatus.BAD_REQUEST,
+                        error="invalid_json_encoding",
+                        message="JSON požadavek musí být v UTF-8.",
+                    ) from exc
+                try:
+                    data = json.loads(raw or "{}")
+                except json.JSONDecodeError as exc:
+                    raise CockpitHttpError(
+                        status=HTTPStatus.BAD_REQUEST,
+                        error="invalid_json",
+                        message="JSON požadavek není platný.",
+                    ) from exc
                 if not isinstance(data, dict):
-                    raise ValueError("JSON payload musí být objekt.")
+                    raise CockpitHttpError(
+                        status=HTTPStatus.BAD_REQUEST,
+                        error="json_object_required",
+                        message="JSON požadavek musí být objekt.",
+                    )
                 return data
+
+            def send_response(self, code: int, message: str | None = None) -> None:
+                self._response_started = True
+                super().send_response(code, message)
+
+            def end_headers(self) -> None:
+                if not getattr(self, "_security_headers_sent", False):
+                    for name, value in COCKPIT_SECURITY_HEADERS:
+                        self.send_header(name, value)
+                    self._security_headers_sent = True
+                super().end_headers()
 
             def log_message(self, format: str, *args: Any) -> None:
                 return

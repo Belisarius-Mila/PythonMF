@@ -32,9 +32,10 @@ class SmokeResult:
     message: str
 
 
-def fetch_url(url: str, timeout: float) -> tuple[int, bytes]:
+def fetch_url(url: str, timeout: float) -> tuple[int, bytes, dict[str, str]]:
     with urllib.request.urlopen(url, timeout=timeout) as response:
-        return response.status, response.read()
+        headers = {name.casefold(): value for name, value in response.headers.items()}
+        return response.status, response.read(), headers
 
 
 def check_endpoint(
@@ -46,7 +47,7 @@ def check_endpoint(
 ) -> SmokeResult:
     url = base_url.rstrip("/") + path
     try:
-        status_code, body = fetch_url(url, timeout)
+        status_code, body, headers = fetch_url(url, timeout)
     except urllib.error.URLError as exc:
         return SmokeResult(name, path, False, None, str(exc.reason if hasattr(exc, "reason") else exc))
     except (TimeoutError, http.client.RemoteDisconnected) as exc:
@@ -54,6 +55,17 @@ def check_endpoint(
 
     if status_code < 200 or status_code >= 300:
         return SmokeResult(name, path, False, status_code, f"HTTP {status_code}")
+
+    required_security_headers = {
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN",
+        "referrer-policy": "no-referrer",
+    }
+    for header_name, expected_value in required_security_headers.items():
+        if headers.get(header_name) != expected_value:
+            return SmokeResult(name, path, False, status_code, f"missing or invalid {header_name}")
+    if "default-src 'self'" not in headers.get("content-security-policy", ""):
+        return SmokeResult(name, path, False, status_code, "missing content-security-policy")
 
     if path.startswith("/api/"):
         try:

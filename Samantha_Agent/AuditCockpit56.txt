@@ -317,3 +317,28 @@ Kontrola po migraci:
 
 Rollback zustava dostupny pres:
 `.venv/bin/python scripts/migrate_cockpit_single_instance.py --rollback`
+
+
+STAV TRETIHO KROKU PO AUDITU
+
+Dne 10. 7. 2026 byla doplnena centralni HTTP ochranna vrstva Cockpitu:
+- JSON telo ma globalni limit 10 MiB; limit zachovava rezervu pro maximalni
+  sestimegabajtovou hlasovou nahravku po base64 prevodu,
+- chybny JSON vraci rizenou 400 odpoved,
+- prilis velky JSON vraci 413 bez nacteni tela,
+- nespravny Content-Type vraci 415,
+- nepodporovany prenos tela je odmitnut,
+- Host je povolen jen pro lokalni nebo Tailscale adresy,
+- cizi Origin/Referer u POST pozadavku vraci 403,
+- neocekavana vyjimka vraci obecnou 500 bez zverejneni vnitrniho textu,
+- vsechny odpovedi maji bezpecnostni hlavicky vcetne CSP, nosniff,
+  SAMEORIGIN, Referrer-Policy a Permissions-Policy,
+- chybove udalosti se ukladaji do private logu bez query, payloadu, hlavicek,
+  e-mailu a hlasoveho textu.
+
+Kontrola po nasazeni:
+- 388 relevantnich testu, vsechny OK,
+- lokalni i vzdaleny smoke check prosly,
+- rizenou 400 odpoved pro chybny JSON overil i zivy server,
+- POST se shodnym Tailscale Origin prosel,
+- lokalni a vzdaleny health nadale vraceji stejny PID jedine instance.

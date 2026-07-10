@@ -29,8 +29,8 @@ Co je hotove:
 - Lokalni i Tailscale Cockpit po nasazeni prosly smoke checkem.
 - Kontrolni mereni ukazalo priblizne 2-6 ms pro cachovany live status oproti
   priblizne 1,07 s pro kontrolni plny status.
-- Vychozi handoff checkpoint byl pushnuty v commitu `25cc522`; aktualni
-  migracni zmeny zatim cekaji na novy tematicky commit.
+- Vychozi handoff checkpoint byl pushnuty v `25cc522` a jedna instance v
+  `d65fa23`; aktualni HTTP zmeny cekaji na novy tematicky commit.
 
 Rucni retest po prvnim vykonovem kroku:
 
@@ -59,14 +59,28 @@ Rucni retest po prvnim vykonovem kroku:
 - Lokalni i vzdaleny smoke check prosly pred i po restartu vyvolanem pres
   vzdalenou adresu. Proxy po restartu ukazala novy lokalni PID na obou adresach.
 - Po doplneni migracnich testu proslo 378 relevantnich testu.
+- Mila po migraci rucne poslal hlasovy pokyn z iPhonu na dosavadni adrese;
+  pokyn dorazil a odpoved se vratila do Cockpitu. Jedna instance je tim rucne
+  potvrzena end-to-end.
+- Treti P0 krok je implementovany a nasazeny: centralni HTTP ochranna vrstva.
+- JSON tela maji limit 10 MiB, ktery zachovava rezervu pro sestimegabajtove
+  hlasove audio po base64 prevodu.
+- Chybny JSON, prilis velke telo a nespravny Content-Type vraceji rizene
+  400/413/415 odpovedi; cizi webovy Origin/Referer vraci 403.
+- Host kontrola povoluje pouze loopback a Tailscale adresy/jmena.
+- Neocekavana vyjimka vraci obecnou 500 bez textu vnitrni vyjimky.
+- Vsechny odpovedi maji CSP, nosniff, SAMEORIGIN, Referrer-Policy,
+  Cross-Origin-Resource-Policy a Permissions-Policy. SAMEORIGIN zachovava
+  vestavenou PDF ctecku.
+- Private HTTP event log uklada jen cas, udalost, metodu, cestu bez query,
+  status a tridu chyby; neuklada payloady, hlavicky ani soukrome texty.
+- Po HTTP zmene proslo 388 relevantnich testu, lokalni i vzdaleny smoke check,
+  zivy invalid-JSON test a Tailscale same-origin POST.
 
 Co neni hotove:
 
-- Faze stabilizace neni uzavrena. Zbyva zejmena:
-  - centralni limit velikosti requestu,
-  - jednotne zpracovani chybneho JSON a neocekavanych vyjimek,
-  - bezpecnostni HTTP hlavicky a kontrola Host/Origin,
-  - bezpecny provozni log bez citlivych payloadu.
+- Faze stabilizace neni uzavrena. HTTP hranice je hotova, ale zbyva rucni
+  prohlizecovy retest CSP/hlavicek na Macu a iPhonu.
 - Prime JSON/JSONL zapisy nemaji jednotny file lock a atomicky zapis.
 - `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem.
 - VoiceBridge nema jeden explicitni stavovy model prikazu.
@@ -75,19 +89,19 @@ Co neni hotove:
 
 Dalsi krok:
 
-Mila ma kratce rucne overit, ze Cockpit a hlasovy pokyn po migraci stale funguji
-z iPhonu na dosavadni adrese. Pokud retest projde, pokracovat dalsim malym
-balickem faze stabilizace: centralni HTTP request boundary pro `CockpitServer` -
-limit JSON tela, rizena 400 pro chybny payload, bezpecna 500 odpoved, zakladni
-bezpecnostni hlavicky a testy. Nemenit business logiku dokumentu, e-mailu ani
-VoiceBridge.
+Mila ma po HTTP ochrane kratce rucne overit na Macu a iPhonu: nacteni hlavni
+stranky, tlacitko `Obnovit`, otevreni jednoho bezpecneho dokumentoveho PDF a
+hlasovy pokyn. Pokud CSP ani Host/Origin kontrola nic nerozbila, dalsi P0
+implementacni blok je spolecna atomicka file persistence a zamky. Nejdrive
+zmapovat konkretni zapisove helpery a zavest malou sdilenou vrstvu; nemenit ani
+nemigrovat existujici private data.
 
 Navrhovane dalsi kroky:
 
-1. Dokoncit stabilizaci HTTP vrstvy a uzavrit ji samostatnym commitem.
-2. Navrhnout prechod ze dvou serveru na jednu instanci s Tailscale proxy,
-   rollbackem a zachovanim iPhone pristupu.
-3. Zavest spolecnou atomickou file persistence a zamky; doplnit concurrency test.
+1. Rucne potvrdit browser/PDF/voice retest po HTTP ochrane a uzavrit stabilizaci.
+2. Zmapovat zapisove helpery a navrhnout nejmensi sdilenou atomickou persistence
+   vrstvu bez migrace existujicich private dat.
+3. Zavest atomicke file zapisy a zamky po male oblasti; doplnit concurrency test.
 4. Postupne rozdelit monolit pri zachovani endpointu:
    status/health -> voice -> documents -> email -> staticky frontend.
 5. Zavadet explicitni stavove modely a repository vrstvy po oblastech, ne
@@ -117,6 +131,7 @@ Zmenene nebo relevantni soubory:
 - `scripts/install_cockpit_tailscale_launchd.sh`
 - `scripts/migrate_cockpit_single_instance.py`
 - `tests/test_migrate_cockpit_single_instance.py`
+- `tests/test_cockpit_http_security.py`
 - `reports/cockpit_function_inventory_audit_2026_06_27.md`
 - `reports/cockpit_post_action_risk_matrix_2026_06_27.md`
 - `handoffs/voicebridge_operational_contract_2026_06_30.md`
@@ -134,3 +149,5 @@ Bezpecnost / neukladat:
   nepouzivat ho bez duvodu, pokud jedna instance a Tailscale proxy funguji.
 - Existujici dokumenty pri budouci migraci nepresouvat ani nemazat bez
   samostatneho potvrzeni.
+- HTTP event log je private provozni diagnostika; nikdy do nej nepridavat JSON
+  payloady, query parametry, request hlavicky ani texty hlasu/e-mailu/dokumentu.
