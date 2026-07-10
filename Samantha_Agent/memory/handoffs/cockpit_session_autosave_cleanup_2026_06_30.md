@@ -47,3 +47,26 @@ Bezpecnost / neukladat:
 - Autosave logy mohou obsahovat citliva data; skript ani Cockpit endpoint necistou jejich obsah.
 - Necommitovat `data/session_autosave/`.
 - Nespoustet ostry cleanup bez potvrzeni, protoze jde o mazani lokalnich nouzovych snapshotu.
+
+## Provozni oprava 2026-07-10
+
+- Puvodnich cca 16 GiB uz v adresari neni; read-only kontrola namerila cca
+  1,29 GiB. Dry-run spravne vratil nula kandidatu, protoze vsechny zbyvajici
+  snapshoty byly mladsi nez tri dny.
+- Nalezena skutecna pricina noveho rychleho rustu: hlavni `samantha_codex` a
+  spravovana `samantha_janicka` spoustely kazda vlastni globalni watcher a oba
+  kopirovaly posledni Codex session.
+- Managed Adam/Janička relace nyni dostavaji `SAMANTHA_AUTOSAVE_WATCH=0`.
+  `autosave_codex_session.sh --watch` navic pouziva singleton lock, takze druhy
+  watcher se sam odmitne spustit.
+- Ukonceni watcheru prerusi i jeho cekajici `sleep`, uklidi lock a skutecne
+  skonci. Tim je opravena pricina osireleho watcheru po ukonceni Janičky.
+- `autosave_status.py`, Recovery centrum i Autosave uklid ukazuji watcher count
+  a vice nez jeden watcher je varovani.
+- Zivy nadbytecny watcher patrici Janičce byl setrne ukoncen; Janička light
+  zustala bez preruseni bezet. Zivy stav je jeden watcher a dry-run nula souboru
+  ke smazani. Zadny autosave snapshot se pri oprave nemazal.
+- Backend autosave logika je vyjmuta z monolitu do `app/autosave_service.py`.
+
+Dalsi krok: pouze sledovat rust. Cleanup znovu nabidne kandidaty az po prekroceni
+tridenni retence; ostry cleanup zustava potvrzovana mazaci akce.

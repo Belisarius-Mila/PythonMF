@@ -39,3 +39,16 @@ Zmenene nebo relevantni soubory:
 Bezpecnost / neukladat:
 Neukladat soukrome texty z relaci, tokeny ani cele prikazy obsahujici citliva
 data. Cleanup relaci musi dal chranit aktivni hlasovy cil a managed sluzby.
+
+## Provozni oprava 2026-07-10
+
+- Backend celou dobu videl dve relace, ale hlavni shrnuti ukazovalo jen pocet
+  beznych relaci. Nyni zobrazuje celkem / bezne / spravovane, tedy aktualne
+  `2 / 1 / 1`, a Janičku dal nepovazuje za starou relaci k automatickemu uklidu.
+- Tlacitko `Zastavit Janičku` zustava v textovem chatu, je aktivni jen kdyz
+  relace bezi a backend po `screen quit` overi, ze relace skutecne zmizela.
+  Pokud screen prezije, vrati pravdivy stav `stop_incomplete`.
+- Managed relace uz nespousteji vlastni autosave watcher. Janička light zustala
+  po nasazeni bezet, ale jeji nadbytecny watcher byl setrne ukoncen.
+- Cockpit dashboard, detail Hlas, Recovery centrum a Autosave uklid nyni davaji
+  dohromady viditelny prehled relaci a watcheru.

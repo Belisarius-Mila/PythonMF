@@ -27,6 +27,7 @@ class AutosaveStatus:
     latest_age_minutes: int | None
     latest_modified_at: str
     watcher_running: bool
+    watcher_count: int
     watcher_pids: tuple[int, ...]
     warning: str
 
@@ -55,6 +56,8 @@ def autosave_status(
         warnings.append(ps_warning)
     if not watcher_pids:
         warnings.append("autosave watcher nebezi")
+    elif len(watcher_pids) > 1:
+        warnings.append(f"bezi {len(watcher_pids)} autosave watchery, ocekavan je prave jeden")
 
     return AutosaveStatus(
         ok=not warnings,
@@ -62,6 +65,7 @@ def autosave_status(
         latest_age_minutes=latest_age_minutes,
         latest_modified_at=latest_modified_at,
         watcher_running=bool(watcher_pids),
+        watcher_count=len(watcher_pids),
         watcher_pids=tuple(watcher_pids),
         warning="; ".join(warnings),
     )
@@ -111,6 +115,7 @@ def format_autosave_status(status: AutosaveStatus) -> str:
     else:
         lines.append(f"- latest age: {status.latest_age_minutes} min")
     lines.append(f"- watcher: {'bezi' if status.watcher_running else 'nebezi'}")
+    lines.append(f"- watcher count: {status.watcher_count}")
     if status.watcher_pids:
         lines.append(f"- watcher pids: {', '.join(str(pid) for pid in status.watcher_pids)}")
     if status.warning:

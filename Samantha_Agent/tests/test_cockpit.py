@@ -2854,8 +2854,11 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("voiceBridgeSessions", COCKPIT_HTML)
         self.assertIn("-> voice bridge", COCKPIT_HTML)
         self.assertIn("Codex relace:", COCKPIT_HTML)
+        self.assertIn("relace ${totalCodexSessions}: běžné ${humanCodexSessions}, spravované ${managedCodexSessions}", COCKPIT_HTML)
         self.assertIn("orphaned_janicka_labels", COCKPIT_HTML)
         self.assertIn("Staré Janička relace", COCKPIT_HTML)
+        self.assertIn("janickaLightStopBtn.disabled = !running", COCKPIT_HTML)
+        self.assertIn("Autosave watchery:", COCKPIT_HTML)
         self.assertIn("Čeká hlasový pokyn na Adama", COCKPIT_HTML)
         self.assertIn("hlasový pokyn", COCKPIT_HTML)
         self.assertIn("voiceModeStartBtn", COCKPIT_HTML)
@@ -3244,6 +3247,9 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["managed_codex_labels"], {"ttys004": "Janička light"})
         self.assertNotIn("běží 2 Codex relací", result["warnings"])
         self.assertIn("spravované relace mimo limit", result["notes"][0])
+        self.assertIn("Codex relace celkem: 2", result["message"])
+        self.assertIn("běžné: 1", result["message"])
+        self.assertIn("spravované: 1", result["message"])
 
     def test_adam_voice_bridge_status_labels_orphaned_janicka_session(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -4353,11 +4359,20 @@ Dalsi krok:
                     "dirty_count": 1,
                     "dirty_files": ["M app/cockpit.py"],
                 },
+                autosave_runtime_getter=lambda **_kwargs: SimpleNamespace(
+                    ok=False,
+                    watcher_running=True,
+                    watcher_count=2,
+                    watcher_pids=(111, 222),
+                    warning="bezi 2 autosave watchery",
+                ),
             )
 
         self.assertTrue(result["ok"])
         self.assertTrue(result["autosave"]["ok"])
         self.assertEqual(result["autosave"]["latest_file"], autosave_file.name)
+        self.assertEqual(result["autosave"]["runtime"]["watcher_count"], 2)
+        self.assertIn("2 autosave watchery", result["autosave"]["runtime"]["warning"])
         self.assertNotIn("citlivy obsah", json.dumps(result, ensure_ascii=False))
         self.assertEqual(result["active_project"]["name"], "Cockpit Recovery centrum")
         self.assertEqual(result["handoffs"][0]["title"], "Recovery test")
@@ -4372,6 +4387,13 @@ Dalsi krok:
             preview = session_autosave_cleanup_action(
                 {"retention_days": 3, "keep_latest_snapshots": 0},
                 autosave_dir=root,
+                autosave_runtime_getter=lambda **_kwargs: SimpleNamespace(
+                    ok=False,
+                    watcher_running=True,
+                    watcher_count=2,
+                    watcher_pids=(111, 222),
+                    warning="bezi 2 autosave watchery",
+                ),
             )
             blocked = session_autosave_cleanup_action(
                 {
@@ -4386,6 +4408,8 @@ Dalsi krok:
             self.assertTrue(preview["ok"])
             self.assertEqual(preview["status"], "dry_run")
             self.assertEqual(preview["plan"]["delete_count"], 1)
+            self.assertEqual(preview["runtime"]["watcher_count"], 2)
+            self.assertIn("očekáván je právě jeden", preview["message"])
             self.assertEqual(preview["plan"]["delete_files"], [])
             self.assertEqual(len(preview["plan"]["delete_files_sample"]), 1)
             self.assertFalse(blocked["ok"])

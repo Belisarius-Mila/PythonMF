@@ -319,6 +319,24 @@ Rucni retest po prvnim vykonovem kroku:
   `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29117003749`.
 - Hranice: reindex, lifecycle a nektere importni writery jeste nepouzivaji
   primarni RMW protokol a mohou se se soubeznou transakci krizit.
+- Oprava prehledu relaci nyni ukazuje celkem / bezne / spravovane; zivy stav je
+  dve Codex relace, z toho jedna bezna Milova a jedna spravovana Janička light.
+  Managed relace zustava chranena pred cleanupem, ale je viditelna a ma vlastni
+  ovladani Start/Stop.
+- Stop Janičky po `screen quit` overuje, ze screen opravdu zmizel. Pokud ne,
+  vrati `stop_incomplete` misto falesneho uspechu.
+- Dva autosave watchery byly skutecny provozni problem: Janička i hlavni relace
+  spoustely globalni kopirovani a watcher mohl po ukonceni screen zustat ve
+  `sleep`. Managed relace nyni watcher nespousteji, watcher ma singleton lock a
+  signal prerusi i cekajici sleep.
+- Zivy nadbytecny Janička watcher byl ukoncen bez zastaveni Janičky. Autosave
+  status, Recovery centrum i cleanup panel potvrzuji jeden watcher; zadny
+  autosave snapshot se pri oprave nemazal.
+- Autosave backend je vyjmuty do `app/autosave_service.py`. Kanonicky gate ma
+  532 testu a kontroluje i shell syntax; `app/cockpit.py` klesl na 22 369 radku
+  / 325 top-level funkci, tedy 96 radku pod baseline.
+- Nasazeny Cockpit prosly lokalnim i Tailscale smoke checkem; obe adresy vidi
+  PID 24877 a code stamp `8f5b6b65b7426805`.
 
 Co neni hotove:
 
@@ -341,19 +359,18 @@ Co neni hotove:
 
 Dalsi krok:
 
-Prevest reindex na stejny document transaction marker/lock protokol a zahrnout
-jeho index/text/due-date invarianty do failure a concurrency testu. Lifecycle a
-importni writery resit az dalsimi samostatnymi davkami. Stary e-mailovy parser,
+Hlavni roadmapa: zacit Fazi 1.1 a vyjmout status/health sluzbu z monolitu pri
+zachovani endpointu a 532testoveho gate. Dokumentovy reindex zustava dalsim
+krokem vedlejsi persistence roadmapy, ne hlavni faze. Stary e-mailovy parser,
 lokalni Janicka vetev a pet podezrelych API cest zatim nemenit. PDF browser a
 post-call audio retest jsou odlozene.
 
 Navrhovane dalsi kroky:
 
-1. Prevest reindex na existujici document transaction protokol a otestovat
-   rollback i soubeh s metadata/ScanDocu transakci.
+1. Faze 1.1: vyjmout status/health sluzbu z `app/cockpit.py` bez zmeny API.
 2. Janicka a stary e-mailovy parser mazat az po popsanem rucnim/recovery overeni.
 3. Podezrele API cesty proverit proti Shortcuts a servisnim klientum.
-4. Po dokumentech prejit nakonec na e-mail metadata.
+4. Ve vedlejsi persistence roadmapě pozdeji prevest reindex a potom e-mail metadata.
 5. Postupne rozdelit monolit pri zachovani endpointu:
    status/health -> voice -> documents -> email -> staticky frontend.
 6. Zavadet explicitni stavove modely a repository vrstvy po oblastech, ne

@@ -49,6 +49,7 @@ class AdamServiceTests(unittest.TestCase):
         self.assertEqual(result["status"], "start_requested")
         start_call = next(call for call in calls if call["args"][:3] == ["screen", "-dmS", "samantha_adam"])
         self.assertEqual(start_call["kwargs"]["env"]["SAMANTHA_MARK_VOICE_TTY"], "0")
+        self.assertEqual(start_call["kwargs"]["env"]["SAMANTHA_AUTOSAVE_WATCH"], "0")
         self.assertEqual(start_call["kwargs"]["env"]["SAMANTHA_AUTOSAVE_RESUME_CHECK"], "0")
         self.assertEqual(start_call["kwargs"]["env"]["SAMANTHA_WORK_CONTEXT_GUARD"], "0")
         self.assertIn("/usr/local/bin", start_call["kwargs"]["env"]["PATH"])
@@ -76,6 +77,7 @@ class AdamServiceTests(unittest.TestCase):
         env = start_call["kwargs"]["env"]
         self.assertEqual(env["SAMANTHA_JANICKA_LIGHT"], "1")
         self.assertEqual(env["SAMANTHA_MARK_VOICE_TTY"], "0")
+        self.assertEqual(env["SAMANTHA_AUTOSAVE_WATCH"], "0")
         self.assertEqual(env["SAMANTHA_AUTOSAVE_RESUME_CHECK"], "0")
         self.assertEqual(env["SAMANTHA_WORK_CONTEXT_GUARD"], "0")
         self.assertIn("/usr/local/bin", env["PATH"])
@@ -184,6 +186,47 @@ class AdamServiceTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "confirmation_required")
         self.assertIn("Janička light Samantha", result["message"])
+
+    def test_stop_janicka_light_session_verifies_screen_is_gone(self) -> None:
+        running = True
+
+        def fake_runner(args, **kwargs):
+            nonlocal running
+            if args == ["screen", "-ls"]:
+                output = "\t123.samantha_janicka\t(Detached)\n" if running else "No Sockets found.\n"
+                return subprocess.CompletedProcess(args=args, returncode=0 if running else 1, stdout=output, stderr="")
+            if args == ["screen", "-S", "samantha_janicka", "-X", "quit"]:
+                running = False
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
+
+        result = stop_janicka_light_session(confirmed=True, runner=fake_runner, sleeper=lambda _delay: None)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "stopped")
+        self.assertTrue(result["stop_verified"])
+        self.assertFalse(running)
+
+    def test_stop_adam_service_reports_incomplete_when_screen_survives(self) -> None:
+        def fake_runner(args, **kwargs):
+            if args == ["screen", "-ls"]:
+                return subprocess.CompletedProcess(
+                    args=args,
+                    returncode=0,
+                    stdout="\t123.samantha_adam\t(Detached)\n",
+                    stderr="",
+                )
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
+
+        result = stop_adam_service(
+            confirmed=True,
+            runner=fake_runner,
+            sleeper=lambda _delay: None,
+            verify_attempts=2,
+        )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "stop_incomplete")
+        self.assertFalse(result["stop_verified"])
 
     def test_deliver_prompt_to_adam_screen_clears_input_and_uses_managed_screen(self) -> None:
         calls = []

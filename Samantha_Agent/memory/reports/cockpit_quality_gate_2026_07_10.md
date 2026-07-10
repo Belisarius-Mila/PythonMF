@@ -51,8 +51,8 @@ nebo pull request.
 - Lokální quality gate prošel kompletně.
 - Nový test ověřuje manifest cest/modulů a architektonickou metriku.
 - Po rozšíření o samostatné reminders, Quick Notes, urgent reminders,
-  dokumentové persistence primitivy/transakce, ScanDocu a launcher moduly
-  prochází 476 testů.
+  dokumentové persistence primitivy/transakce, ScanDocu, managed relace,
+  autosave a launcher moduly prochází 532 testů.
 - Gate při prvním běhu odhalil tři ekvivalentní JavaScript regex escape zápisy
   uvnitř Python HTML řetězce. Byly opraveny bez změny výsledného JavaScriptu a
   syntax kontrola nyní podobný `SyntaxWarning` odmítne.
@@ -104,6 +104,15 @@ nebo pull request.
 - GitHub Actions běh číslo 10 pro ScanDocu review transaction commit `a11e263`
   skončil úspěšně:
   `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29117003749`.
+- `tests.test_adam_service` a `tests.test_safety_quick_checks` jsou nově přímo
+  v kanonickém gate. Gate navíc kontroluje `zsh -n` pro oba autosave/screen
+  skripty a přímo kompiluje `app/adam_service.py`, `app/autosave_service.py` a
+  `scripts/autosave_status.py`. Celkem prošlo 532 testů.
+- Testy kryjí singleton watcher lock, varování při dvou watcherech, zákaz
+  watcheru v managed relaci, rychlé ukončení čekajícího watcheru, ověřený stop
+  Janičky a pravdivý `stop_incomplete` při přeživším screenu.
+- Extrakce autosave backendu do `app/autosave_service.py` snížila Cockpit
+  monolit na 22 369 řádků / 325 top-level funkcí, tedy 96 řádků pod baseline.
 
 ## Co gate zatím neřeší
 
@@ -118,5 +127,6 @@ nebo pull request.
 
 Quality gate, read-only inventura, Cleanup R1, zamčené reminders/Quick Notes/
 urgent reminders, dokumentové persistence primitivy, metadata/reading-status
-transakce a ScanDocu review jsou hotové. Další rollout má převést reindex na
-stejný marker/lock protokol; lifecycle až v další samostatné dávce.
+transakce, ScanDocu review a životní cyklus autosave/managed relací jsou hotové.
+Hlavní roadmapa se nyní vrací k Fázi 1.1: vyjmout status/health službu z
+monolitu. Reindex zůstává samostatný další krok dokumentové persistence.

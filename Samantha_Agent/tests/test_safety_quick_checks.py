@@ -4,6 +4,7 @@ import tempfile
 import time
 import unittest
 import os
+import signal
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -194,6 +195,84 @@ class SystemQuickCheckTests(unittest.TestCase):
 
         self.assertEqual(pids, [111])
         self.assertEqual(warning, "")
+
+    def test_autosave_status_warns_when_multiple_watchers_run(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "latest_info.txt"
+            path.write_text("Saved at: test\n", encoding="utf-8")
+
+            def fake_runner(*args, **kwargs):
+                return subprocess.CompletedProcess(
+                    args[0],
+                    0,
+                    "\n".join(
+                        [
+                            "111 1 00:10 zsh scripts/autosave_codex_session.sh --watch",
+                            "222 1 00:05 zsh scripts/autosave_codex_session.sh --watch",
+                        ]
+                    ),
+                    "",
+                )
+
+            status = autosave_status(latest_info_path=path, runner=fake_runner)
+
+        self.assertFalse(status.ok)
+        self.assertEqual(status.watcher_count, 2)
+        self.assertIn("ocekavan je prave jeden", status.warning)
+
+    def test_autosave_watcher_lock_rejects_second_process(self) -> None:
+        script = Path(__file__).resolve().parents[1] / "scripts" / "autosave_codex_session.sh"
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            out_dir = root / "autosave"
+            sessions_dir = root / "sessions"
+            sessions_dir.mkdir()
+            (sessions_dir / "rollout-test.jsonl").write_text(
+                '{"timestamp":"2026-07-10T00:00:00Z","type":"event_msg","payload":{"type":"agent_message","message":"test"}}\n',
+                encoding="utf-8",
+            )
+            env = os.environ.copy()
+            env.update(
+                {
+                    "SAMANTHA_AUTOSAVE_OUT_DIR": str(out_dir),
+                    "SAMANTHA_CODEX_SESSIONS_DIR": str(sessions_dir),
+                    "SAMANTHA_AUTOSAVE_SECONDS": "60",
+                }
+            )
+            first = subprocess.Popen(
+                ["/bin/zsh", str(script), "--watch"],
+                env=env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                start_new_session=True,
+            )
+            try:
+                lock_pid = out_dir / ".watcher.lock" / "pid"
+                deadline = time.monotonic() + 5
+                while not lock_pid.exists() and time.monotonic() < deadline:
+                    if first.poll() is not None:
+                        break
+                    time.sleep(0.02)
+                self.assertTrue(lock_pid.exists(), "První autosave watcher nezískal singleton lock.")
+                second = subprocess.run(
+                    ["/bin/zsh", str(script), "--watch"],
+                    env=env,
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                    check=False,
+                )
+                self.assertEqual(second.returncode, 0, second.stderr)
+                self.assertIn("druhou kopii nespouštím", second.stdout)
+                self.assertIsNone(first.poll())
+            finally:
+                os.killpg(first.pid, signal.SIGTERM)
+                try:
+                    first.communicate(timeout=5)
+                except subprocess.TimeoutExpired:
+                    os.killpg(first.pid, signal.SIGKILL)
+                    first.communicate(timeout=5)
 
     def test_format_autosave_status_suggests_confirmed_restart_when_stopped(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -19,7 +19,6 @@ import threading
 import time
 import urllib.error
 from collections.abc import Callable
-from dataclasses import asdict
 from datetime import date, datetime, timezone
 from email import message_from_bytes
 from email.utils import parsedate_to_datetime
@@ -66,6 +65,12 @@ from app.article_archive import (
     search_articles,
     send_article_pdf_export,
     set_article_read_state,
+)
+from app.autosave_service import (
+    SESSION_AUTOSAVE_DIR,
+    autosave_runtime_dict as cockpit_autosave_runtime_dict,
+    latest_autosave_metadata,
+    session_autosave_cleanup_action,
 )
 from app.backup.activity_state import backup_activity_status
 from app.documents.consistency_audit import format_document_consistency_audit, run_document_consistency_audit, save_audit_decision
@@ -180,11 +185,7 @@ from app.speech.terminal_bridge import (
     normalize_tty,
 )
 from app.speech.voice_inbox import VoiceCommand, parse_voice_command_file, voice_command_to_dict
-from scripts.cleanup_session_autosave import (
-    CONFIRM_TEXT as AUTOSAVE_CLEANUP_CONFIRM_TEXT,
-    apply_cleanup as apply_session_autosave_cleanup,
-    build_cleanup_plan as build_session_autosave_cleanup_plan,
-)
+from scripts.autosave_status import autosave_status as read_autosave_runtime_status
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -216,7 +217,6 @@ ACTIVE_PROJECTS_PATH = PROJECT_ROOT / "memory" / "ACTIVE_PROJECTS.md"
 PROJECT_CAPABILITY_MAP_PATH = PROJECT_ROOT / "memory" / "technical" / "project_capability_map.md"
 JANICKA_COOKBOOK_PATH = PROJECT_ROOT / "memory" / "projects" / "janicka_cockpit_kucharka.md"
 JANICKA_TAKEOVER_PATH = PROJECT_ROOT / "memory" / "projects" / "janicka_cockpit_takeover.md"
-SESSION_AUTOSAVE_DIR = PROJECT_ROOT / "data" / "session_autosave"
 VOICE_COMMAND_INBOX_DIR = PROJECT_ROOT / "data" / "private" / "voice_inbox"
 MEMORY_INDEX_PATH = PROJECT_ROOT / "memory" / "MEMORY_INDEX.md"
 RECOVERY_HANDOFF_PATHS = (
@@ -1388,13 +1388,18 @@ def recovery_center_status(
     memory_index_path: Path = MEMORY_INDEX_PATH,
     handoff_paths: tuple[Path, ...] = RECOVERY_HANDOFF_PATHS,
     git_status: Callable[[], dict[str, Any]] | None = None,
+    autosave_runtime_getter: Callable[..., Any] = read_autosave_runtime_status,
 ) -> dict[str, Any]:
     git = git_status() if git_status is not None else git_status_summary()
+    autosave = latest_autosave_metadata(autosave_dir)
+    autosave["runtime"] = cockpit_autosave_runtime_dict(
+        autosave_runtime_getter(latest_info_path=autosave_dir / "latest_info.txt")
+    )
     return {
         "ok": True,
         "message": "Recovery centrum je read-only a nic neprepisuje.",
         "generated_at": datetime.now().isoformat(timespec="seconds"),
-        "autosave": latest_autosave_metadata(autosave_dir),
+        "autosave": autosave,
         "git": git,
         "active_project": recovery_active_project(active_projects_path),
         "handoffs": recovery_handoff_summaries(handoff_paths),
@@ -1426,115 +1431,6 @@ def recovery_center_status(
         ],
         "safety_note": "Autosave logy jsou jen nouzova lokalni obnova; panel ukazuje metadata, ne obsah logu.",
     }
-
-
-def latest_autosave_metadata(path: Path) -> dict[str, Any]:
-    if not path.exists() or not path.is_dir():
-        return {
-            "ok": False,
-            "message": "Autosave slozka zatim neexistuje.",
-            "dir": str(relative_to_project(path)),
-            "file_count": 0,
-            "latest_file": "",
-            "latest_modified_at": "",
-            "latest_age_seconds": None,
-        }
-    files = [
-        item
-        for item in path.iterdir()
-        if item.is_file()
-        and item.name.startswith("session_")
-        and item.suffix.lower() in {".txt", ".jsonl"}
-    ]
-    if not files:
-        return {
-            "ok": False,
-            "message": "V autosave slozce nejsou zadne TXT/JSONL snapshoty.",
-            "dir": str(relative_to_project(path)),
-            "file_count": 0,
-            "latest_file": "",
-            "latest_modified_at": "",
-            "latest_age_seconds": None,
-        }
-    latest = max(files, key=lambda item: item.stat().st_mtime)
-    modified = latest.stat().st_mtime
-    age_seconds = max(0, int(time.time() - modified))
-    return {
-        "ok": True,
-        "message": "Autosave metadata nactena bez cteni obsahu logu.",
-        "dir": str(relative_to_project(path)),
-        "file_count": len(files),
-        "latest_file": latest.name,
-        "latest_modified_at": datetime.fromtimestamp(modified).isoformat(timespec="seconds"),
-        "latest_age_seconds": age_seconds,
-    }
-
-
-def session_autosave_cleanup_action(
-    payload: dict[str, Any],
-    *,
-    autosave_dir: Path = SESSION_AUTOSAVE_DIR,
-) -> dict[str, Any]:
-    try:
-        retention_days = int(payload.get("retention_days", 3))
-    except (TypeError, ValueError):
-        retention_days = 3
-    try:
-        keep_latest_snapshots = int(payload.get("keep_latest_snapshots", 12))
-    except (TypeError, ValueError):
-        keep_latest_snapshots = 12
-    retention_days = max(0, min(retention_days, 30))
-    keep_latest_snapshots = max(0, min(keep_latest_snapshots, 200))
-    plan = build_session_autosave_cleanup_plan(
-        autosave_dir=autosave_dir,
-        retention_days=retention_days,
-        keep_latest_snapshots=keep_latest_snapshots,
-    )
-    plan_dict = cockpit_session_autosave_cleanup_plan_dict(plan)
-    apply_requested = bool(payload.get("apply"))
-    if not apply_requested:
-        return {
-            "ok": True,
-            "status": "dry_run",
-            "applied": False,
-            "message": (
-                f"Dry-run: ke smazání {plan.delete_count} autosave souborů, "
-                f"odhad uvolnění {plan_dict['reclaim_gib']} GiB."
-            ),
-            "confirmation_text": AUTOSAVE_CLEANUP_CONFIRM_TEXT,
-            "plan": plan_dict,
-            "safety_note": "Obsah autosave logů se nečetl; kontrolují se jen názvy a velikosti.",
-        }
-    confirmation_text = str(payload.get("confirmation_text", ""))
-    if confirmation_text != AUTOSAVE_CLEANUP_CONFIRM_TEXT:
-        return {
-            "ok": False,
-            "status": "confirmation_required",
-            "applied": False,
-            "message": "Úklid autosave vyžaduje potvrzení v Cockpitu.",
-            "confirmation_text": AUTOSAVE_CLEANUP_CONFIRM_TEXT,
-            "plan": plan_dict,
-        }
-    removed = apply_session_autosave_cleanup(plan)
-    return {
-        "ok": True,
-        "status": "applied",
-        "applied": True,
-        "removed": removed,
-        "message": f"Úklid autosave hotov: smazáno {removed} starých snapshotů.",
-        "plan": plan_dict,
-        "safety_note": "Ponechané jsou aktuální latest soubory, poslední 3 dny a pojistka nejnovějších snapshotů.",
-    }
-
-
-def cockpit_session_autosave_cleanup_plan_dict(plan: Any) -> dict[str, Any]:
-    plan_dict = asdict(plan)
-    delete_files = plan_dict.get("delete_files", [])
-    plan_dict["delete_files_sample"] = delete_files[:12]
-    plan_dict["delete_files_omitted"] = max(0, len(delete_files) - 12)
-    plan_dict["delete_files"] = []
-    plan_dict["reclaim_gib"] = round(int(plan_dict.get("reclaim_bytes", 0)) / 1024 / 1024 / 1024, 2)
-    return plan_dict
 
 
 def recovery_active_project(path: Path = ACTIVE_PROJECTS_PATH) -> dict[str, Any]:
@@ -4760,8 +4656,10 @@ def adam_voice_bridge_status(
     readiness = "Mac TTY bridge připravený" if mac_bridge_ready else "Mac TTY bridge není připravený"
     codex_count_label = "neověřeno přes ps" if marker_pid_fallback and not codex_ttys else str(len(human_codex_ttys))
     message = (
-        f"{readiness}. Bridge cílí na {target} (marker: {marker_label}). Codex relace: {codex_count_label} "
-        f"(limit {expected_codex_session_limit}). {screen_message}."
+        f"{readiness}. Bridge cílí na {target} (marker: {marker_label}). "
+        f"Codex relace celkem: {len(codex_ttys)} "
+        f"(běžné: {codex_count_label}, limit {expected_codex_session_limit}; "
+        f"spravované: {len(managed_codex_ttys)}). {screen_message}."
     )
     if notes:
         message = f"{message} Info: {', '.join(notes)}."
@@ -17835,6 +17733,12 @@ COCKPIT_HTML = """<!doctype html>
       const voiceMessage = voiceMode.message || "Adam Voice Mode stav není načtený.";
       const voiceBridgeWarn = voiceBridge.status === "warn" || voiceBridge.status === "missing";
       const voiceBridgeMessage = voiceBridge.message || "Terminálový bridge stav není načtený.";
+      const totalCodexSessions = Number(voiceBridge.codex_tty_count || 0);
+      const humanCodexSessions = Number(voiceBridge.human_codex_tty_count || 0);
+      const managedCodexSessions = Array.isArray(voiceBridge.managed_codex_ttys)
+        ? voiceBridge.managed_codex_ttys.length
+        : 0;
+      const codexSessionOverview = `relace ${totalCodexSessions}: běžné ${humanCodexSessions}, spravované ${managedCodexSessions}`;
       const voicePending = voiceMode.pending_for_adam || {};
       const voicePendingActive = Boolean(voicePending.pending);
       const voicePendingApprovalStatus = String(voicePending.approval_status || "");
@@ -17854,7 +17758,7 @@ COCKPIT_HTML = """<!doctype html>
           ? `<span class="warn">čeká Codex</span><br>${escapeHtml(codexApprovalReasonText)}${voiceBridgeDashboard}`
         : voiceBridgeWarn
           ? `<span class="warn">zkontrolovat</span><br>${escapeHtml(voiceBridgeMessage)}`
-          : `<span class="${voiceReady ? "ok" : "warn"}">${voiceReady ? "připraveno" : "nezjištěno"}</span><br>přímé odeslání z Cockpitu`;
+          : `<span class="${voiceReady ? "ok" : "warn"}">${voiceReady ? "připraveno" : "nezjištěno"}</span><br>přímé odeslání z Cockpitu | ${escapeHtml(codexSessionOverview)}`;
       if (voiceModeRuntimeStatus) {
         voiceModeRuntimeStatus.textContent = voiceRunning
           ? `Adam Voice Mode watcher běží: ${voiceMessage}`
@@ -18730,6 +18634,7 @@ COCKPIT_HTML = """<!doctype html>
 
 	    function formatAutosaveCleanupPlan(data) {
 	      const plan = data.plan || {};
+	      const runtime = data.runtime || {};
 	      const reclaim = Number(plan.reclaim_gib || 0);
 	      return [
 	        data.message || "Autosave úklid spočítán.",
@@ -18740,6 +18645,8 @@ COCKPIT_HTML = """<!doctype html>
 	        `Chráněné soubory: ${plan.protected_timestamped_files || 0}`,
 	        `Ke smazání: ${plan.delete_count || 0}`,
 	        `Odhad uvolnění: ${reclaim.toFixed(2)} GiB`,
+	        `Autosave watchery: ${Number(runtime.watcher_count || 0)} (očekáván 1)`,
+	        runtime.warning ? `Varování: ${runtime.warning}` : "Autosave watcher stav: OK",
 	        "",
 	        data.safety_note || "Obsah autosave logů se nečte."
 	      ].join("\\n");
@@ -20985,11 +20892,12 @@ COCKPIT_HTML = """<!doctype html>
 
 	    function renderRecoveryStatus(data) {
 	      const autosave = data.autosave || {};
+	      const autosaveRuntime = autosave.runtime || {};
 	      const git = data.git || {};
 	      const project = data.active_project || {};
 	      recoveryStatus.textContent = `${data.message || "Recovery centrum načteno."} ${data.safety_note || ""}`;
 	      recoveryAutosave.textContent = autosave.ok
-	        ? `Poslední: ${autosave.latest_file || ""} | ${autosave.latest_modified_at || ""} | ${formatAge(autosave.latest_age_seconds)} | souborů: ${autosave.file_count || 0}`
+	        ? `Poslední: ${autosave.latest_file || ""} | ${autosave.latest_modified_at || ""} | ${formatAge(autosave.latest_age_seconds)} | souborů: ${autosave.file_count || 0} | watchery: ${Number(autosaveRuntime.watcher_count || 0)} (očekáván 1)${autosaveRuntime.warning ? ` | ${autosaveRuntime.warning}` : ""}`
 	        : (autosave.message || "Autosave metadata nejsou dostupná.");
 	      recoveryGit.textContent = git.ok
 	        ? `${git.message || ""} | ${git.branch || ""}${git.dirty_count ? ` | ukázka: ${(git.dirty_files || []).join("; ")}` : ""}`
@@ -21985,12 +21893,14 @@ COCKPIT_HTML = """<!doctype html>
         janickaLightStatus.classList.toggle("ok", ready && !orphanedTtys.length);
         janickaLightStatus.classList.toggle("warn", !ready || orphanedTtys.length > 0);
         janickaLightStartBtn.disabled = running;
+        janickaLightStopBtn.disabled = !running;
         janickaLightCleanupOrphansBtn.classList.toggle("hidden", orphanedTtys.length === 0);
         janickaLightCleanupOrphansBtn.disabled = orphanedTtys.length === 0;
       } catch (err) {
         recordFrontendError(err);
         janickaLightStatus.textContent = `Janička chat status se nepodařilo načíst: ${err}`;
         janickaLightStatus.classList.add("warn");
+        janickaLightStopBtn.disabled = true;
         janickaLightCleanupOrphansBtn.classList.add("hidden");
         janickaLightCleanupOrphansBtn.disabled = true;
       }

@@ -345,6 +345,7 @@ def start_adam_service(
         {
             "SAMANTHA_MARK_VOICE_TTY": "0",
             "SAMANTHA_MANAGED_ADAM": "1",
+            "SAMANTHA_AUTOSAVE_WATCH": "0",
             "SAMANTHA_AUTOSAVE_RESUME_CHECK": "0",
             "SAMANTHA_WORK_CONTEXT_GUARD": "0",
             "SAMANTHA_START_REQUEST": start_request,
@@ -397,6 +398,8 @@ def stop_adam_service(
     session_name: str = ADAM_SERVICE_SESSION,
     service_label: str = "Adam",
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+    sleeper: Callable[[float], None] = time.sleep,
+    verify_attempts: int = 20,
 ) -> dict[str, Any]:
     if not confirmed:
         return {
@@ -428,11 +431,22 @@ def stop_adam_service(
             "returncode": completed.returncode,
             "session_name": session_name,
         }
+    for _attempt in range(max(1, verify_attempts)):
+        if not screen_session_exists(session_name=session_name, runner=runner):
+            return {
+                "ok": True,
+                "status": "stopped",
+                "message": f"{service_label} byl zastaven a ukončení je ověřené.",
+                "session_name": session_name,
+                "stop_verified": True,
+            }
+        sleeper(0.1)
     return {
-        "ok": True,
-        "status": "stopped",
-        "message": f"{service_label} byl zastaven.",
+        "ok": False,
+        "status": "stop_incomplete",
+        "message": f"{service_label} dostal pokyn k zastavení, ale screen relace stále běží.",
         "session_name": session_name,
+        "stop_verified": False,
     }
 
 
@@ -499,12 +513,14 @@ def stop_janicka_light_session(
     *,
     confirmed: bool,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+    sleeper: Callable[[float], None] = time.sleep,
 ) -> dict[str, Any]:
     return stop_adam_service(
         confirmed=confirmed,
         session_name=JANICKA_LIGHT_SESSION,
         service_label="Janička light Samantha",
         runner=runner,
+        sleeper=sleeper,
     )
 
 

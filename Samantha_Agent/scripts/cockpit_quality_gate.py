@@ -20,6 +20,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 COMPILE_PATHS = (
     "app/cockpit.py",
     "app/cockpit_code_stamp.py",
+    "app/adam_service.py",
+    "app/autosave_service.py",
     "app/file_persistence.py",
     "app/backup/activity_state.py",
     "app/documents/scandocu.py",
@@ -34,7 +36,13 @@ COMPILE_PATHS = (
     "scripts/cockpit_server.py",
     "scripts/open_cockpit.py",
     "scripts/cockpit_smoke_check.py",
+    "scripts/autosave_status.py",
     "scripts/migrate_cockpit_single_instance.py",
+)
+
+SHELL_PATHS = (
+    "scripts/autosave_codex_session.sh",
+    "scripts/samantha_screen_entry.sh",
 )
 
 TEST_MODULES = (
@@ -50,6 +58,8 @@ TEST_MODULES = (
     "tests.test_reminders_query_tools",
     "tests.test_cockpit",
     "tests.test_cockpit_http_security",
+    "tests.test_adam_service",
+    "tests.test_safety_quick_checks",
     "tests.test_terminal_bridge",
     "tests.test_adam_voice_mode",
     "tests.test_speech_transcribe",
@@ -154,6 +164,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "syntax",
         [sys.executable, "-W", "error::SyntaxWarning", "-m", "py_compile", *COMPILE_PATHS],
     )
+    run_checked("shell syntax", ["/bin/zsh", "-n", *SHELL_PATHS])
     if not args.skip_unit_tests:
         run_checked("unit tests", [sys.executable, "-m", "unittest", *TEST_MODULES])
 
