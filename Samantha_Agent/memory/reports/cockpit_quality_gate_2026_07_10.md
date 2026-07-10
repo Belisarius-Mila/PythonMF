@@ -151,6 +151,9 @@ nebo pull request.
 - Po nasazení audio opravy prošly oba smoke checky na jediné instanci PID
   35158. Mila ručně potvrdil přehrání do sluchátek a technický log zaznamenal
   pouze `audio_play_succeeded`, bez obsahu odpovědi.
+- Závěrečná audio oprava je v commitu `18b9f63`. GitHub Actions Cockpit Quality
+  Gate běh číslo 14 skončil úspěšně:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29123726588`.
 
 ## Co gate zatím neřeší
 

@@ -388,6 +388,9 @@ Rucni retest po prvnim vykonovem kroku:
 - Po nasazeni opravy prosly lokalni i Tailscale smoke checky na jedine instanci
   PID 35158. Mila po znovuotevreni Cockpitu rucne potvrdil prehrani do sluchatek
   a technicka stopa zaznamenala `audio_play_succeeded` bez obsahu odpovedi.
+- Zaverecna audio oprava je pushnuta v commitu `18b9f63`. GitHub Actions
+  Cockpit Quality Gate beh cislo 14 skoncil uspesne:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29123726588`.
 
 Co neni hotove:
 
