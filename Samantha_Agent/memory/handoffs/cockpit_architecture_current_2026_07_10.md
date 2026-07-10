@@ -206,6 +206,8 @@ Rucni retest po prvnim vykonovem kroku:
   transakcni logika je v reminders modulu, ne v monolitu.
 - Po nasazeni prosly lokalni i Tailscale smoke check. Private obsahy se necetly,
   format/cesty dat se nemenily a zadna davkova migrace neprobehla.
+- GitHub Actions quality gate beh cislo 4 pro commit `507734f` skoncil uspesne
+  za 1 minutu 15 sekund.
 
 Co neni hotove:
 
