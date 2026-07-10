@@ -50,7 +50,8 @@ nebo pull request.
 
 - Lokální quality gate prošel kompletně.
 - Nový test ověřuje manifest cest/modulů a architektonickou metriku.
-- Po rozšíření o samostatné reminders a Quick Notes moduly prošlo 445 testů.
+- Po rozšíření o samostatné reminders, Quick Notes a launcher moduly prošlo 458
+  testů.
 - Gate při prvním běhu odhalil tři ekvivalentní JavaScript regex escape zápisy
   uvnitř Python HTML řetězce. Byly opraveny bez změny výsledného JavaScriptu a
   syntax kontrola nyní podobný `SyntaxWarning` odmítne.
@@ -62,6 +63,17 @@ nebo pull request.
   testovacího tracebacku, takže diagnostika nevyžaduje hádání ani soukromá data.
 - Třetí GitHub Actions běh pro commit `3ba9d59` skončil úspěšně za 1 minutu
   19 sekund. Lokální a vzdálená pojistka jsou tím ověřené.
+- Ruční otevření přes `Ctrl+Option+Command+C` odhalilo rozdílný code-stamp
+  manifest serveru a launcheru. Zdravý server byl proto chybně označen jako
+  starý a launcher ho restartoval.
+- Nový `app/cockpit_code_stamp.py` je jediný zdroj manifestu pro server i
+  launcher. Manifest automaticky zahrnuje Python moduly v `app/` a
+  `scripts/cockpit_server.py`; regresní test hlídá shodu obou spotřebitelů.
+- První běh po změně záměrně provedl jediný restart a trval 42,47 s. Následující
+  běžné ověření `open_cockpit.py --no-open` trvalo 0,89 s a server/launcher měly
+  shodný stamp. Lokální i Tailscale smoke check byly zelené.
+- Přesun výpočtu stampu snížil `app/cockpit.py` na 22 454 řádků a 331 top-level
+  funkcí, tedy 11 řádků a jednu funkci pod výchozí baseline.
 
 ## Co gate zatím neřeší
 
@@ -74,7 +86,6 @@ nebo pull request.
 
 ## Další krok
 
-Vytvořit read-only inventuru kandidátů mrtvého a legacy kódu bez mazání. Gate
-při reminders transakční dávce transparentně ukázal růst `app/cockpit.py` o
-7 přechodových řádků; vlastní transakční logika je mimo monolit a plánovaná
-extrakce status/health musí začít celkový počet výrazně snižovat.
+Vytvořit read-only inventuru kandidátů mrtvého a legacy kódu bez mazání. První
+malá extrakce sdíleného code stampu už snížila monolit pod baseline; další
+status/health extrakce má pokračovat stejným způsobem až po inventuře.

@@ -208,6 +208,18 @@ Rucni retest po prvnim vykonovem kroku:
   format/cesty dat se nemenily a zadna davkova migrace neprobehla.
 - GitHub Actions quality gate beh cislo 4 pro commit `507734f` skoncil uspesne
   za 1 minutu 15 sekund.
+- Mila rucne potvrdil novou Quick Note z iPhonu v Cockpitu. Nove dulezite
+  pripomenuti take doputovalo; pouziva vsak samostatny urgent index, ktery tato
+  davka nemenila.
+- Pri rucnim otevreni pres `Ctrl+Option+Command+C` se Cockpit oteviral neobvykle
+  dlouho. Pricina byla potvrzena: launcher a server pocitaly code stamp z jineho
+  seznamu souboru, takze zdravy server byl falesne restartovan.
+- `app/cockpit_code_stamp.py` je nyni jediny zdroj manifestu pro server i
+  launcher a automaticky zahrnuje `app/**/*.py` plus `cockpit_server.py`.
+  Regresni test hlida shodu obou stran a quality gate ma 458 testu.
+- Prvni opravny beh provedl ocekavany jednorazovy restart za 42,47 s; druhy
+  bezny `--no-open` beh trval 0,89 s a stampy se shodovaly. Oba smoke checky
+  prosly. Monolit klesl na 22 454 radku a 331 funkci, tedy pod baseline.
 
 Co neni hotove:
 

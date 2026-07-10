@@ -19,6 +19,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 COMPILE_PATHS = (
     "app/cockpit.py",
+    "app/cockpit_code_stamp.py",
     "app/file_persistence.py",
     "app/backup/activity_state.py",
     "app/quick_notes.py",
@@ -27,6 +28,7 @@ COMPILE_PATHS = (
     "app/speech/adam_voice_mode.py",
     "app/speech/terminal_bridge.py",
     "scripts/cockpit_server.py",
+    "scripts/open_cockpit.py",
     "scripts/cockpit_smoke_check.py",
     "scripts/migrate_cockpit_single_instance.py",
 )
@@ -37,6 +39,7 @@ TEST_MODULES = (
     "tests.test_backup_activity_state",
     "tests.test_backup_incremental",
     "tests.test_project_audit_report",
+    "tests.test_open_cockpit",
     "tests.test_quick_notes",
     "tests.test_reminders_store",
     "tests.test_reminders_query_tools",

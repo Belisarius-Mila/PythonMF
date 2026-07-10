@@ -111,6 +111,9 @@ Existující soukromá data se nepřesouvají, nepřepisují dávkově ani nemig
   jejich obsah nebyl dávkově migrován.
 - GitHub Actions `Cockpit Quality Gate` běh číslo 4 pro commit `507734f` skončil
   úspěšně za 1 minutu 15 sekund.
+- Míla ručně potvrdil, že nová Quick Note z iPhonu doputovala do Cockpitu právě
+  jednou. Stejný test vytvořil i nové důležité připomenutí; jeho samostatný
+  urgent index nebyl touto dávkou měněn a zůstává dalším persistence krokem.
 
 ## Doporučené další pořadí rolloutů
 

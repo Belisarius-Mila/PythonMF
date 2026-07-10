@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import socket
 import subprocess
@@ -12,8 +11,14 @@ import urllib.request
 import urllib.parse
 from pathlib import Path
 
-
 PROJECT_DIR = Path(__file__).resolve().parents[1]
+if str(PROJECT_DIR) not in sys.path:
+    sys.path.insert(0, str(PROJECT_DIR))
+
+from app.cockpit_code_stamp import COCKPIT_CODE_STAMP_PATHS as CODE_STAMP_PATHS
+from app.cockpit_code_stamp import cockpit_code_stamp
+
+
 DEFAULT_PORT = 8770
 FALLBACK_PORTS = range(DEFAULT_PORT + 1, DEFAULT_PORT + 10)
 STATUS_TIMEOUT_SECONDS = 8.0
@@ -21,25 +26,6 @@ CURRENT_CHECK_ATTEMPTS = 3
 CURRENT_CHECK_DELAY_SECONDS = 1.0
 SERVER_HEALTH_PATH = "/api/server/health"
 READY_PATHS = ("/", SERVER_HEALTH_PATH, "/api/recovery/status", "/api/web-apps")
-CODE_STAMP_PATHS = (
-    PROJECT_DIR / "app" / "cockpit.py",
-    PROJECT_DIR / "app" / "adam_service.py",
-    PROJECT_DIR / "scripts" / "cockpit_server.py",
-)
-
-
-def cockpit_code_stamp(paths: tuple[Path, ...] = CODE_STAMP_PATHS) -> str:
-    digest = hashlib.sha256()
-    for path in paths:
-        try:
-            stat = path.stat()
-        except OSError:
-            digest.update(f"{path}:missing\n".encode("utf-8"))
-            continue
-        digest.update(f"{path.resolve()}:{stat.st_mtime_ns}:{stat.st_size}\n".encode("utf-8"))
-    return digest.hexdigest()[:16]
-
-
 def url_ok(url: str, *, timeout: float = 1.5) -> bool:
     try:
         with urllib.request.urlopen(url, timeout=timeout) as response:

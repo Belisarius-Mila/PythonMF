@@ -4,10 +4,26 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from app.cockpit_code_stamp import COCKPIT_CODE_STAMP_PATHS, default_cockpit_code_stamp_paths
 from scripts import open_cockpit
 
 
 class OpenCockpitTests(unittest.TestCase):
+    def test_launcher_uses_shared_code_stamp_manifest(self) -> None:
+        self.assertEqual(open_cockpit.CODE_STAMP_PATHS, COCKPIT_CODE_STAMP_PATHS)
+        relative_paths = {str(path.relative_to(open_cockpit.PROJECT_DIR)) for path in COCKPIT_CODE_STAMP_PATHS}
+        self.assertIn("app/cockpit.py", relative_paths)
+        self.assertIn("app/quick_notes.py", relative_paths)
+        self.assertIn("app/reminders/store.py", relative_paths)
+        self.assertIn("app/urgent_reminders.py", relative_paths)
+        self.assertIn("scripts/cockpit_server.py", relative_paths)
+
+    def test_default_code_stamp_manifest_is_stable_and_unique(self) -> None:
+        paths = default_cockpit_code_stamp_paths(open_cockpit.PROJECT_DIR)
+
+        self.assertEqual(paths, default_cockpit_code_stamp_paths(open_cockpit.PROJECT_DIR))
+        self.assertEqual(len(paths), len(set(paths)))
+
     def test_cockpit_code_stamp_changes_with_file_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             path = Path(tmp_dir) / "cockpit.py"

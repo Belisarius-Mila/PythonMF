@@ -135,6 +135,7 @@ from app.email.models import EmailAttachmentMeta, EmailHeader, EmailMessage
 from app.email.redaction import redact_email_addresses
 from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEmailProvider
 from app.file_persistence import FilePersistenceError, append_jsonl_locked
+from app.cockpit_code_stamp import COCKPIT_CODE_STAMP_PATHS, cockpit_code_stamp
 from app.reminders.query_tools import mark_reminder_done_text
 from app.reminders.store import (
     DEFAULT_REMINDERS_PATH,
@@ -184,13 +185,6 @@ from scripts.cleanup_session_autosave import (
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 COCKPIT_PORT = 8770
 COCKPIT_URL = f"http://127.0.0.1:{COCKPIT_PORT}"
-COCKPIT_CODE_STAMP_PATHS = (
-    Path(__file__).resolve(),
-    PROJECT_ROOT / "app" / "adam_service.py",
-    PROJECT_ROOT / "app" / "file_persistence.py",
-    PROJECT_ROOT / "app" / "speech" / "adam_voice_mode.py",
-    PROJECT_ROOT / "scripts" / "cockpit_server.py",
-)
 DEFAULT_PURCHASES_DIR = PROJECT_ROOT / "data" / "private" / "purchases"
 SCANDOCU_URL = "http://127.0.0.1:8766"
 SCANDOCU_PORT = 8766
@@ -333,18 +327,6 @@ WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
         "kind": "lokální prototyp",
     },
 )
-
-
-def cockpit_code_stamp(paths: tuple[Path, ...] = COCKPIT_CODE_STAMP_PATHS) -> str:
-    digest = hashlib.sha256()
-    for path in paths:
-        try:
-            stat = path.stat()
-        except OSError:
-            digest.update(f"{path}:missing\n".encode("utf-8"))
-            continue
-        digest.update(f"{path.resolve()}:{stat.st_mtime_ns}:{stat.st_size}\n".encode("utf-8"))
-    return digest.hexdigest()[:16]
 
 
 COCKPIT_CODE_STAMP = cockpit_code_stamp()
