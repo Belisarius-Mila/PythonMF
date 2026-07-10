@@ -196,16 +196,41 @@ replace operace jsou atomické.
   číslo 9 skončil úspěšně:
   `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29115015113`.
 
-Hranice rolloutu: metadata a reading status jsou serializované mezi sebou.
-ScanDocu review, reindex, lifecycle a některé importní writery zatím stejný
-primární RMW protokol nepoužívají, takže globální ochrana celého document indexu
-ještě není dokončená.
+## ScanDocu review transaction rollout
+
+- Review existujícího dokumentu nyní používá stejný primární index lock a jeden
+  recovery marker jako metadata a reading status.
+- Jedna transakce zahrnuje index, manifest, `candidate.json`, pre-image backup a
+  finální řádek `scandocu_actions.jsonl` s unikátním `transaction_id`.
+- ScanDocu action audit je poslední commit point. Selhání před auditem vrátí
+  index, manifest i candidate status; pád po auditu se při dalším vstupu
+  rozpozná jako dokončený commit.
+- Transakční vrstva umí bezpečně zálohovat další JSON soubory uvnitř private
+  vaultu. Pokud starý dokument manifest neměl, ScanDocu jej smí vytvořit, ale
+  neúspěšný commit nově vytvořený manifest zase uklidí.
+- Deterministický dvouprocesový test pozastavil ScanDocu pod primárním lockem a
+  potvrdil, že souběžná Cockpit metadata transakce počká a neztratí změnu jiného
+  dokumentu.
+- Čtyři nové testy kryjí úspěšný candidate/action commit, audit failure rollback,
+  crash recovery candidate statusu a společný lock. Dokumentové moduly mají 87
+  testů OK a celý quality gate 476 testů OK. `app/cockpit.py` zůstal beze změny
+  na 22 459 řádcích / 328 top-level funkcích.
+- Testy používaly pouze dočasné trezory v `/private/tmp`; skutečný document
+  vault se nemutoval ani nemigroval.
+- Read-only nasazení prošlo lokálním i Tailscale smoke checkem. Obě adresy mají
+  PID 19613 a code stamp `8b947c4304e2cd95`; živý transaction marker
+  neexistuje a na portu 8771 neběží záložní instance.
+
+Hranice rolloutu: metadata, reading status a ScanDocu review jsou serializované
+mezi sebou. Reindex, lifecycle a některé importní writery zatím stejný primární
+RMW protokol nepoužívají, takže globální ochrana celého document indexu ještě
+není dokončená.
 
 ## Doporučené další pořadí rolloutů
 
-1. Převést ScanDocu review na stejný transaction marker/lock protokol a zahrnout
-   jeho candidate-status/audit invariant do failure testu.
-2. Potom převést reindex, lifecycle a nové document-index append writery po
+1. Převést reindex na stejný transaction marker/lock protokol a otestovat
+   souběh s metadata/ScanDocu transakcí.
+2. Potom převést lifecycle a nové document-index append writery po
    samostatných dávkách.
 3. E-mail activity/case/archive metadata; outbound a mazací workflow až nakonec.
 

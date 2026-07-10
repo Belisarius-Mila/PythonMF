@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
+import sys
 import tempfile
 import time
 import unittest
@@ -42,6 +44,7 @@ from app.documents.scandocu import scan_downloads_for_pdfs
 from app.documents.scandocu import scandocu_processing_dir
 from app.documents.scandocu import search_downloads_for_pdfs
 from app.documents.scandocu import SCANDOCU_HTML
+from app.documents.transactions import DOCUMENT_TRANSACTION_MARKER
 from app.documents.vault import format_document_inbox_reminder
 from app.documents.vault import has_explicit_document_import_confirmation
 from app.documents.vault import normalize_mobile_document_page
@@ -59,6 +62,10 @@ try:
     from PIL import Image
 except ImportError:  # pragma: no cover
     Image = None
+
+
+class SimulatedScanDocuCrash(BaseException):
+    pass
 
 
 class DocumentVaultToolsTests(unittest.TestCase):
@@ -1357,9 +1364,226 @@ class DocumentVaultToolsTests(unittest.TestCase):
             self.assertEqual(docs[0]["reading_status"], "ok")
             self.assertEqual(docs[0]["document_type"], "danove-priznani")
             self.assertEqual(docs[0]["case_id"], "danove-priznani-2025")
+            candidate_state = json.loads(candidate.metadata_path.read_text(encoding="utf-8"))
+            actions = _read_jsonl(vault / "index" / "scandocu_actions.jsonl")
+            self.assertEqual(candidate_state["status"], "reviewed")
+            self.assertEqual(candidate_state["final_document_id"], "stary-dokument-review")
+            self.assertEqual(len(actions), 1)
+            self.assertEqual(actions[0]["action"], "reviewed")
+            self.assertTrue(actions[0]["transaction_id"])
+            self.assertEqual(actions[0]["backup_dir"], result["backup_dir"])
+            backup_dir = Path(result["backup_dir"])
+            self.assertTrue((backup_dir / "documents_index.jsonl").is_file())
+            self.assertTrue((backup_dir / "manifest.json").is_file())
+            self.assertTrue((backup_dir / "related_000.json").is_file())
+            self.assertFalse((vault / "index" / DOCUMENT_TRANSACTION_MARKER).exists())
 
             next_candidate = prepare_next_stored_document_review(vault_dir=vault)
             self.assertIsNone(next_candidate)
+
+    def test_scandocu_review_audit_failure_rolls_back_document_and_candidate(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault, candidate = self.prepare_scandocu_review_fixture(root, "review-audit-failure")
+            index_path = vault / "index" / "documents_index.jsonl"
+            manifest_path = Path(_read_jsonl(index_path)[0]["stored_path"]).parent / "manifest.json"
+            original_index = index_path.read_bytes()
+            original_manifest = manifest_path.read_bytes()
+            original_candidate = candidate.metadata_path.read_bytes()
+
+            with patch("app.documents.transactions._append_audit", side_effect=OSError("audit failed")):
+                with self.assertRaises(OSError):
+                    import_scandocu_candidate(
+                        token=candidate.token,
+                        title="Bezpecna revize",
+                        domain="home",
+                        document_type="contract",
+                        vault_dir=vault,
+                    )
+
+            self.assertEqual(index_path.read_bytes(), original_index)
+            self.assertEqual(manifest_path.read_bytes(), original_manifest)
+            self.assertEqual(candidate.metadata_path.read_bytes(), original_candidate)
+            self.assertFalse((vault / "index" / "scandocu_actions.jsonl").exists())
+            self.assertFalse((vault / "index" / DOCUMENT_TRANSACTION_MARKER).exists())
+
+    def test_scandocu_review_failure_removes_manifest_created_by_failed_transaction(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault, candidate = self.prepare_scandocu_review_fixture(root, "review-missing-manifest")
+            index_path = vault / "index" / "documents_index.jsonl"
+            manifest_path = Path(_read_jsonl(index_path)[0]["stored_path"]).parent / "manifest.json"
+            original_index = index_path.read_bytes()
+            original_candidate = candidate.metadata_path.read_bytes()
+            manifest_path.unlink()
+
+            with patch("app.documents.transactions._append_audit", side_effect=OSError("audit failed")):
+                with self.assertRaises(OSError):
+                    import_scandocu_candidate(
+                        token=candidate.token,
+                        title="Revize bez puvodniho manifestu",
+                        domain="home",
+                        document_type="contract",
+                        vault_dir=vault,
+                    )
+
+            self.assertEqual(index_path.read_bytes(), original_index)
+            self.assertEqual(candidate.metadata_path.read_bytes(), original_candidate)
+            self.assertFalse(manifest_path.exists())
+            self.assertFalse((vault / "index" / "scandocu_actions.jsonl").exists())
+            self.assertFalse((vault / "index" / DOCUMENT_TRANSACTION_MARKER).exists())
+
+    def test_next_document_transaction_recovers_crashed_scandocu_candidate_status(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault, candidate = self.prepare_scandocu_review_fixture(root, "review-crash-recovery")
+            marker_path = vault / "index" / DOCUMENT_TRANSACTION_MARKER
+
+            with patch(
+                "app.documents.transactions._append_audit",
+                side_effect=SimulatedScanDocuCrash("crash before ScanDocu audit"),
+            ):
+                with self.assertRaises(SimulatedScanDocuCrash):
+                    import_scandocu_candidate(
+                        token=candidate.token,
+                        title="Nedokoncena revize",
+                        domain="home",
+                        document_type="contract",
+                        vault_dir=vault,
+                    )
+
+            self.assertTrue(marker_path.exists())
+            crashed_candidate = json.loads(candidate.metadata_path.read_text(encoding="utf-8"))
+            self.assertEqual(crashed_candidate["status"], "reviewed")
+
+            from app.cockpit import set_document_reading_status_action
+
+            recovered = set_document_reading_status_action(
+                "review-crash-recovery",
+                "unreadable",
+                vault_dir=vault,
+            )
+            records = _read_jsonl(vault / "index" / "documents_index.jsonl")
+            restored_candidate = json.loads(candidate.metadata_path.read_text(encoding="utf-8"))
+
+            self.assertTrue(recovered["ok"])
+            self.assertEqual(records[0]["reading_status"], "unreadable")
+            self.assertNotIn("review_source", records[0])
+            self.assertEqual(restored_candidate["status"], "prepared")
+            self.assertFalse((vault / "index" / "scandocu_actions.jsonl").exists())
+            self.assertFalse(marker_path.exists())
+
+    def test_scandocu_review_and_cockpit_metadata_update_share_primary_index_lock(self) -> None:
+        review_script = """
+import json
+import sys
+import time
+from pathlib import Path
+from unittest.mock import patch
+from app.documents import transactions
+from app.documents.scandocu import import_scandocu_candidate
+
+vault = Path(sys.argv[1]); token = sys.argv[2]; acquired = Path(sys.argv[3]); release = Path(sys.argv[4])
+original_write = transactions._write_index_under_lock
+def paused_write(path, rows):
+    acquired.write_text("locked\\n", encoding="utf-8")
+    while not release.exists():
+        time.sleep(0.01)
+    original_write(path, rows)
+with patch("app.documents.transactions._write_index_under_lock", side_effect=paused_write):
+    result = import_scandocu_candidate(
+        token=token,
+        title="Zamcena ScanDocu revize",
+        domain="home",
+        document_type="contract",
+        vault_dir=vault,
+    )
+print(json.dumps(result, ensure_ascii=False))
+"""
+        metadata_script = """
+import json
+import sys
+from pathlib import Path
+from app.cockpit import update_document_classification_metadata_action
+result = update_document_classification_metadata_action(
+    "concurrent-metadata-document",
+    {"domain": "energy"},
+    vault_dir=Path(sys.argv[1]),
+)
+print(json.dumps(result, ensure_ascii=False))
+"""
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault, candidate = self.prepare_scandocu_review_fixture(root, "concurrent-review-document")
+            second_source = root / "concurrent-metadata-document.txt"
+            second_source.write_text("Druhy testovaci dokument.\n", encoding="utf-8")
+            imported = apply_document_import_text(
+                source_path=str(second_source),
+                target_domain="other",
+                document_type="document",
+                document_id="concurrent-metadata-document",
+                user_confirmed=True,
+                confirmation_text=(
+                    "Potvrzuji, uloz dokument concurrent-metadata-document.txt do oblasti other."
+                ),
+                vault_dir=vault,
+            )
+            self.assertIn("Stav: ulozeno", imported)
+            acquired = root / "transaction-acquired"
+            release = root / "transaction-release"
+            review_process = subprocess.Popen(
+                [
+                    sys.executable,
+                    "-c",
+                    review_script,
+                    str(vault),
+                    candidate.token,
+                    str(acquired),
+                    str(release),
+                ],
+                cwd=Path(__file__).resolve().parents[1],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            deadline = time.monotonic() + 15
+            while not acquired.exists() and time.monotonic() < deadline:
+                if review_process.poll() is not None:
+                    break
+                time.sleep(0.01)
+            if not acquired.exists():
+                release.write_text("abort\n", encoding="utf-8")
+                review_stdout, review_stderr = review_process.communicate(timeout=5)
+                self.fail(
+                    "ScanDocu transaction did not acquire the primary lock. "
+                    f"stdout={review_stdout!r} stderr={review_stderr!r}"
+                )
+            metadata_process = subprocess.Popen(
+                [sys.executable, "-c", metadata_script, str(vault)],
+                cwd=Path(__file__).resolve().parents[1],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            time.sleep(0.2)
+            self.assertIsNone(metadata_process.poll(), "Cockpit update bypassed the primary document lock.")
+            release.write_text("continue\n", encoding="utf-8")
+            review_stdout, review_stderr = review_process.communicate(timeout=30)
+            metadata_stdout, metadata_stderr = metadata_process.communicate(timeout=30)
+
+            self.assertEqual(review_process.returncode, 0, review_stderr)
+            self.assertEqual(metadata_process.returncode, 0, metadata_stderr)
+            self.assertEqual(json.loads(review_stdout)["status"], "reviewed")
+            self.assertTrue(json.loads(metadata_stdout)["ok"])
+            records = {
+                row["document_id"]: row
+                for row in _read_jsonl(vault / "index" / "documents_index.jsonl")
+            }
+
+            self.assertEqual(records["concurrent-review-document"]["domain"], "home")
+            self.assertEqual(records["concurrent-review-document"]["reading_status"], "ok")
+            self.assertEqual(records["concurrent-metadata-document"]["domain"], "energy")
+            self.assertFalse((vault / "index" / DOCUMENT_TRANSACTION_MARKER).exists())
 
     def test_scandocu_review_can_be_reopened_after_manual_needs_review_status(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -1493,6 +1717,26 @@ class DocumentVaultToolsTests(unittest.TestCase):
             "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows),
             encoding="utf-8",
         )
+
+    def prepare_scandocu_review_fixture(self, root: Path, document_id: str):
+        source = root / f"{document_id}.txt"
+        source.write_text("Testovaci dokument pro bezpecnou revizi.\n", encoding="utf-8")
+        vault = root / "documents"
+        imported = apply_document_import_text(
+            source_path=str(source),
+            target_domain="other",
+            document_type="document",
+            document_id=document_id,
+            user_confirmed=True,
+            confirmation_text=f"Potvrzuji, uloz dokument {source.name} do oblasti other.",
+            vault_dir=vault,
+        )
+        self.assertIn("Stav: ulozeno", imported)
+        self.mark_document_needs_review(vault, document_id)
+        candidate = prepare_next_stored_document_review(vault_dir=vault)
+        self.assertIsNotNone(candidate)
+        assert candidate is not None
+        return vault, candidate
 
     def test_scandocu_ui_contains_encrypted_pdf_guidance(self) -> None:
         self.assertIn("PDF je šifrované nebo zamčené", SCANDOCU_HTML)

@@ -22,6 +22,7 @@ COMPILE_PATHS = (
     "app/cockpit_code_stamp.py",
     "app/file_persistence.py",
     "app/backup/activity_state.py",
+    "app/documents/scandocu.py",
     "app/documents/vault.py",
     "app/documents/transactions.py",
     "app/quick_notes.py",

@@ -35,10 +35,17 @@ class DocumentTransactionRecoveryError(DocumentTransactionError):
 
 
 @dataclass(frozen=True)
+class DocumentRelatedJsonMutation:
+    path: Path
+    record: dict[str, Any]
+
+
+@dataclass(frozen=True)
 class DocumentRecordMutation:
     index_record: dict[str, Any]
     manifest_record: dict[str, Any] | None
     audit_record: dict[str, Any]
+    related_json_files: tuple[DocumentRelatedJsonMutation, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -67,6 +74,7 @@ def transact_document_record(
     audit_path: Path,
     backup_group: str,
     backup_path_labeler: BackupPathLabeler = lambda path: str(path),
+    allow_manifest_create: bool = False,
 ) -> DocumentRecordTransactionResult:
     vault_root = Path(vault_dir).resolve()
     index_path = vault_root / "index" / "documents_index.jsonl"
@@ -102,7 +110,24 @@ def transact_document_record(
                 updated_record=previous_record,
                 recovered_status=recovered_status,
             )
-        _validate_mutation(previous_record, mutation, manifest_record)
+        if mutation.manifest_record is not None and safe_manifest_path is None:
+            raise DocumentTransactionError("Manifest mutation has no safe manifest path.")
+        _validate_mutation(
+            previous_record,
+            mutation,
+            manifest_record,
+            allow_manifest_create=allow_manifest_create,
+        )
+        related_json_files = _prepare_related_json_files(
+            vault_root=vault_root,
+            mutation=mutation,
+            protected_paths={
+                index_path,
+                marker_path,
+                safe_audit_path,
+                *([safe_manifest_path] if safe_manifest_path is not None else []),
+            },
+        )
 
         transaction_id = uuid.uuid4().hex
         document_id = str(previous_record.get("document_id", "") or "document")
@@ -113,6 +138,7 @@ def transact_document_record(
             backup_group=safe_backup_group,
             document_id=document_id,
             transaction_id=transaction_id,
+            related_json_paths=[path for path, _record in related_json_files],
         )
         audit_record = dict(mutation.audit_record)
         audit_record["transaction_id"] = transaction_id
@@ -123,12 +149,20 @@ def transact_document_record(
             "created_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
             "manifest_path": _relative_path(vault_root, safe_manifest_path) if safe_manifest_path else "",
             "manifest_existed": bool(manifest_record is not None),
+            "manifest_will_create": bool(manifest_record is None and mutation.manifest_record is not None),
             "backup_index_path": _relative_path(vault_root, backup_dir / "documents_index.jsonl"),
             "backup_manifest_path": (
                 _relative_path(vault_root, backup_dir / "manifest.json") if manifest_record is not None else ""
             ),
             "audit_path": _relative_path(vault_root, safe_audit_path),
             "audit_record": audit_record,
+            "related_json_files": [
+                {
+                    "path": _relative_path(vault_root, path),
+                    "backup_path": _relative_path(vault_root, backup_dir / f"related_{index:03d}.json"),
+                }
+                for index, (path, _record) in enumerate(related_json_files)
+            ],
         }
         _write_marker(marker_path, marker)
 
@@ -148,6 +182,8 @@ def transact_document_record(
                 if safe_manifest_path is None:
                     raise DocumentTransactionError("Manifest mutation has no safe manifest path.")
                 _write_manifest(safe_manifest_path, mutation.manifest_record)
+            for related_path, related_record in related_json_files:
+                _write_related_json_file(related_path, related_record)
             marker = _set_marker_phase(marker_path, marker, "files_written")
             _append_audit(safe_audit_path, audit_record)
             _set_marker_phase(marker_path, marker, "committed")
@@ -213,6 +249,7 @@ def _create_backup(
     backup_group: str,
     document_id: str,
     transaction_id: str,
+    related_json_paths: list[Path],
 ) -> Path:
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
     backup_dir = vault_root / "index" / backup_group / f"{stamp}_{_safe_component(document_id)}_{transaction_id[:8]}"
@@ -222,6 +259,8 @@ def _create_backup(
     shutil.copy2(index_path, backup_dir / "documents_index.jsonl")
     if manifest_path is not None and manifest_path.exists():
         shutil.copy2(manifest_path, backup_dir / "manifest.json")
+    for index, related_path in enumerate(related_json_paths):
+        shutil.copy2(related_path, backup_dir / f"related_{index:03d}.json")
     return backup_dir
 
 
@@ -236,12 +275,31 @@ def _rollback_from_marker(*, vault_root: Path, index_path: Path, marker: dict[st
         if not backup_manifest.is_file():
             raise DocumentTransactionRecoveryError("Document transaction manifest backup is missing.")
         atomic_write_text(manifest_path, backup_manifest.read_text(encoding="utf-8"))
+    elif bool(marker.get("manifest_will_create")):
+        manifest_path = _resolve_relative_path(vault_root, str(marker.get("manifest_path", "") or ""))
+        try:
+            manifest_path.unlink()
+        except FileNotFoundError:
+            pass
+    related_json_files = marker.get("related_json_files", [])
+    if not isinstance(related_json_files, list):
+        raise DocumentTransactionRecoveryError("Document transaction related files marker is invalid.")
+    for item in related_json_files:
+        if not isinstance(item, dict):
+            raise DocumentTransactionRecoveryError("Document transaction related file marker is invalid.")
+        related_path = _resolve_relative_path(vault_root, str(item.get("path", "") or ""))
+        backup_path = _resolve_relative_path(vault_root, str(item.get("backup_path", "") or ""))
+        if not backup_path.is_file():
+            raise DocumentTransactionRecoveryError("Document transaction related file backup is missing.")
+        atomic_write_text(related_path, backup_path.read_text(encoding="utf-8"))
 
 
 def _validate_mutation(
     previous_record: dict[str, Any],
     mutation: DocumentRecordMutation,
     previous_manifest: dict[str, Any] | None,
+    *,
+    allow_manifest_create: bool,
 ) -> None:
     if not isinstance(mutation.index_record, dict) or not isinstance(mutation.audit_record, dict):
         raise DocumentTransactionError("Document mutation must contain dictionary records.")
@@ -249,10 +307,35 @@ def _validate_mutation(
     updated_id = str(mutation.index_record.get("document_id", "") or "")
     if not previous_id or updated_id != previous_id:
         raise DocumentTransactionError("Document mutation cannot change document_id.")
-    if previous_manifest is None and mutation.manifest_record is not None:
+    if previous_manifest is None and mutation.manifest_record is not None and not allow_manifest_create:
         raise DocumentTransactionError("Document transaction cannot create a previously missing manifest.")
     if mutation.manifest_record is not None and not isinstance(mutation.manifest_record, dict):
         raise DocumentTransactionError("Document manifest mutation must be a dictionary.")
+    if not isinstance(mutation.related_json_files, tuple):
+        raise DocumentTransactionError("Document related JSON mutations must be a tuple.")
+    for item in mutation.related_json_files:
+        if not isinstance(item, DocumentRelatedJsonMutation) or not isinstance(item.record, dict):
+            raise DocumentTransactionError("Document related JSON mutation is invalid.")
+
+
+def _prepare_related_json_files(
+    *,
+    vault_root: Path,
+    mutation: DocumentRecordMutation,
+    protected_paths: set[Path],
+) -> list[tuple[Path, dict[str, Any]]]:
+    prepared: list[tuple[Path, dict[str, Any]]] = []
+    seen: set[Path] = set()
+    for item in mutation.related_json_files:
+        path = _require_within(vault_root, item.path)
+        if path in protected_paths or path in seen:
+            raise DocumentTransactionError("Document related JSON path is duplicated or reserved.")
+        if not path.is_file():
+            raise DocumentTransactionError("Document related JSON file is missing.")
+        _read_json_object(path)
+        prepared.append((path, dict(item.record)))
+        seen.add(path)
+    return prepared
 
 
 def _read_jsonl_strict(path: Path) -> list[dict[str, Any]]:
@@ -288,6 +371,10 @@ def _write_index_under_lock(path: Path, rows: list[dict[str, Any]]) -> None:
 
 
 def _write_manifest(path: Path, payload: dict[str, Any]) -> None:
+    atomic_write_json(path, payload, sort_keys=True)
+
+
+def _write_related_json_file(path: Path, payload: dict[str, Any]) -> None:
     atomic_write_json(path, payload, sort_keys=True)
 
 

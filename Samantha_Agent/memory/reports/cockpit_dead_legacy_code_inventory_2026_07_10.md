@@ -288,10 +288,10 @@ nikoli jednorázový přepis.
    launchery pro pět podezřelých endpointů. Teprve poté odstranit cestu, registry
    kartu, handler a test jako jeden atomický balík.
 5. **Navazující persistence — rozpracováno po malých dávkách:** urgent reminders
-   jsou zamčené, dokumentové JSON/JSONL primitivy atomické a metadata + reading
-   status používají recovery transakci index + manifest + backup + audit.
-   Cleanup R2/R3 a API deprecation mohou počkat; další krok je převést ScanDocu
-   review a potom další staré document-index writery na tentýž protokol.
+   jsou zamčené, dokumentové JSON/JSONL primitivy atomické a metadata, reading
+   status i ScanDocu review používají recovery transakci včetně candidate/action
+   invariantu. Cleanup R2/R3 a API deprecation mohou počkat; další krok je
+   převést reindex a potom další staré document-index writery na tentýž protokol.
 
 ## Rizika a hranice závěru
 

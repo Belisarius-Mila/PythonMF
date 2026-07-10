@@ -14,6 +14,13 @@ from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from .consistency_audit import AuditFact, best_asset_label, document_row_to_fact, primary_amount
+from .transactions import (
+    DocumentRecordMutation,
+    DocumentRecordNotFoundError,
+    DocumentRelatedJsonMutation,
+    DocumentTransactionError,
+    transact_document_record,
+)
 from .vault import (
     DEFAULT_DOCUMENTS_DIR,
     PROJECT_ROOT,
@@ -36,7 +43,6 @@ from .vault import (
     tokenize,
     validate_source_file,
     write_json,
-    write_jsonl,
     append_jsonl,
 )
 
@@ -877,74 +883,105 @@ def update_reviewed_document_metadata(
     document_id = safe_slug(candidate.review_document_id, default="", limit=140)
     if not document_id:
         raise ValueError("review kandidat nema document_id.")
-    documents = read_jsonl(vault_dir / "index" / "documents_index.jsonl")
-    current = next((row for row in documents if str(row.get("document_id", "")) == document_id), None)
-    if current is None:
-        raise ValueError("puvodni dokument nebyl nalezen v indexu.")
-    stored_path = PROJECT_ROOT / str(current.get("stored_path", ""))
-    manifest_path = stored_path.parent / "manifest.json"
-    manifest = read_json_file(manifest_path) if manifest_path.exists() else {}
-    updated = {**current, **manifest}
-    updated["title"] = safe_text(title) or candidate.title
-    updated["domain"] = normalize_domain(domain or candidate.domain)
-    register_document_domain(domain or candidate.domain, vault_dir=vault_dir)
-    updated["document_type"] = safe_ascii_slug(document_type or candidate.document_type, default="document", limit=50)
-    updated["counterparty"] = safe_text(counterparty)
-    updated["related_asset"] = safe_text(related_asset)
-    updated["case_id"] = safe_ascii_slug(case_id, default="", limit=100) if case_id else ""
-    updated["tags"] = merge_tags(parse_tags(tags), [])
+    final_title = safe_text(title) or candidate.title
+    final_domain = normalize_domain(domain or candidate.domain)
+    final_document_type = safe_ascii_slug(
+        document_type or candidate.document_type,
+        default="document",
+        limit=50,
+    )
+    final_counterparty = safe_text(counterparty)
+    final_related_asset = safe_text(related_asset)
+    final_case_id = safe_ascii_slug(case_id, default="", limit=100) if case_id else ""
+    final_tags = merge_tags(parse_tags(tags), [])
     reviewed_at = now_iso()
-    updated["reviewed_at"] = reviewed_at
-    updated["review_source"] = "scandocu_vault_review"
-    updated["reading_status"] = "ok"
-    updated["reading_status_updated_at"] = reviewed_at
-    updated["reading_status_note"] = "Potvrzeno revizí ve ScanDocu."
+    source_sha256 = sha256_file(candidate.working_path)
+    register_document_domain(domain or candidate.domain, vault_dir=vault_dir)
 
-    backup_dir = backup_review_document_metadata(vault_dir=vault_dir, document_id=document_id, manifest_path=manifest_path)
-    write_json(manifest_path, updated)
-    write_jsonl(
-        vault_dir / "index" / "documents_index.jsonl",
-        [updated if str(row.get("document_id", "")) == document_id else row for row in documents],
-    )
-    update_scandocu_candidate_status(
-        candidate=candidate,
-        status="reviewed",
-        document_id=document_id,
-        domain=updated["domain"],
-        document_type=updated["document_type"],
-        title=updated["title"],
-        case_id=updated["case_id"],
-        vault_dir=vault_dir,
-    )
-    append_scandocu_action(
-        vault_dir=vault_dir,
-        action="reviewed",
-        token=candidate.token,
-        source_path=candidate.source_path,
-        source_sha256=sha256_file(candidate.working_path),
-        document_id=document_id,
-    )
+    def select_document(rows: list[dict[str, Any]], reference: str) -> int | None:
+        return next(
+            (index for index, row in enumerate(rows) if str(row.get("document_id", "")) == reference),
+            None,
+        )
+
+    def manifest_path_for(current: dict[str, Any]) -> Path | None:
+        stored_path_value = str(current.get("stored_path", "") or "")
+        return (PROJECT_ROOT / stored_path_value).parent / "manifest.json" if stored_path_value else None
+
+    def build_mutation(
+        current: dict[str, Any],
+        manifest: dict[str, Any] | None,
+    ) -> DocumentRecordMutation:
+        updated = {**current, **(manifest or {})}
+        updated["title"] = final_title
+        updated["domain"] = final_domain
+        updated["document_type"] = final_document_type
+        updated["counterparty"] = final_counterparty
+        updated["related_asset"] = final_related_asset
+        updated["case_id"] = final_case_id
+        updated["tags"] = final_tags
+        updated["reviewed_at"] = reviewed_at
+        updated["review_source"] = "scandocu_vault_review"
+        updated["reading_status"] = "ok"
+        updated["reading_status_updated_at"] = reviewed_at
+        updated["reading_status_note"] = "Potvrzeno revizí ve ScanDocu."
+        candidate_status = build_scandocu_candidate_status_record(
+            candidate=candidate,
+            status="reviewed",
+            document_id=document_id,
+            domain=final_domain,
+            document_type=final_document_type,
+            title=final_title,
+            case_id=final_case_id,
+            updated_at=reviewed_at,
+        )
+        return DocumentRecordMutation(
+            index_record=updated,
+            manifest_record=updated,
+            audit_record={
+                "action": "reviewed",
+                "action_at": reviewed_at,
+                "token": candidate.token,
+                "source_name": candidate.source_path.name,
+                "source_path": str(candidate.source_path),
+                "source_sha256": source_sha256,
+                "document_id": document_id,
+                "do_not_commit": True,
+            },
+            related_json_files=(
+                DocumentRelatedJsonMutation(path=candidate.metadata_path, record=candidate_status),
+            ),
+        )
+
+    try:
+        transaction = transact_document_record(
+            vault_dir=vault_dir,
+            reference=document_id,
+            row_selector=select_document,
+            manifest_path_resolver=manifest_path_for,
+            mutation_builder=build_mutation,
+            audit_path=scandocu_actions_path(vault_dir),
+            backup_group="review_backups",
+            backup_path_labeler=lambda path: str(relative_to_project(path)),
+            allow_manifest_create=True,
+        )
+    except DocumentRecordNotFoundError as exc:
+        raise ValueError("puvodni dokument nebyl nalezen v indexu.") from exc
+    except DocumentTransactionError as exc:
+        raise OSError("Revizi dokumentu se nepodařilo bezpečně uložit.") from exc
+
+    updated = transaction.updated_record
+    stored_path = PROJECT_ROOT / str(updated.get("stored_path", ""))
+    manifest_path = stored_path.parent / "manifest.json"
     return {
         "status": "reviewed",
         "document_id": document_id,
         "domain": updated["domain"],
         "stored_path": str(relative_to_project(stored_path)),
         "manifest_path": str(relative_to_project(manifest_path)),
-        "backup_dir": str(relative_to_project(backup_dir)),
+        "backup_dir": str(relative_to_project(transaction.backup_dir)) if transaction.backup_dir else "",
         "message": "Metadata existujiciho dokumentu byla potvrzene aktualizovana.",
     }
-
-
-def backup_review_document_metadata(vault_dir: Path, document_id: str, manifest_path: Path) -> Path:
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    backup_dir = vault_dir / "index" / "review_backups" / f"{stamp}_{document_id}"
-    backup_dir.mkdir(parents=True, exist_ok=True)
-    index_path = vault_dir / "index" / "documents_index.jsonl"
-    if index_path.exists():
-        shutil.copy2(index_path, backup_dir / "documents_index.jsonl")
-    if manifest_path.exists():
-        shutil.copy2(manifest_path, backup_dir / "manifest.json")
-    return backup_dir
 
 
 def skip_scandocu_candidate(
@@ -1201,15 +1238,38 @@ def update_scandocu_candidate_status(
     case_id: str,
     vault_dir: Path,
 ) -> None:
+    data = build_scandocu_candidate_status_record(
+        candidate=candidate,
+        status=status,
+        document_id=document_id,
+        domain=domain,
+        document_type=document_type,
+        title=title,
+        case_id=case_id,
+    )
+    write_json(candidate.metadata_path, data)
+
+
+def build_scandocu_candidate_status_record(
+    *,
+    candidate: ScanDocuCandidate,
+    status: str,
+    document_id: str,
+    domain: str,
+    document_type: str,
+    title: str,
+    case_id: str,
+    updated_at: str = "",
+) -> dict[str, Any]:
     data = read_json_file(candidate.metadata_path)
     data["status"] = status
-    data["updated_at"] = now_iso()
+    data["updated_at"] = updated_at or now_iso()
     data["final_document_id"] = document_id
     data["title"] = safe_text(title)
     data["domain"] = normalize_domain(domain)
     data["document_type"] = safe_ascii_slug(document_type, default="document", limit=50)
     data["case_id"] = safe_ascii_slug(case_id, default="", limit=100) if case_id else ""
-    write_json(candidate.metadata_path, data)
+    return data
 
 
 def append_scandocu_action(
