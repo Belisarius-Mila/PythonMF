@@ -220,6 +220,8 @@ Rucni retest po prvnim vykonovem kroku:
 - Prvni opravny beh provedl ocekavany jednorazovy restart za 42,47 s; druhy
   bezny `--no-open` beh trval 0,89 s a stampy se shodovaly. Oba smoke checky
   prosly. Monolit klesl na 22 454 radku a 331 funkci, tedy pod baseline.
+- GitHub Actions quality gate beh cislo 5 pro commit `17729ec` skoncil uspesne
+  za 1 minutu 29 sekund.
 
 Co neni hotove:
 
