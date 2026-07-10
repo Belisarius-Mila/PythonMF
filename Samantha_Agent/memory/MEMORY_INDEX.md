@@ -11,6 +11,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Reports
 
+- `../AuditCockpit56.txt` - [PRIPOMENOUT] hlavni hluboky audit architektury Samantha Cockpitu, VoiceBridge, dokumentu a e-mailu z 2026-07-10; obsahuje prioritizovana rizika, cilovou architekturu a fazovy implementacni plan. Prvni krok s lehkym `/api/live-status` je hotovy v commitu `23abbaa`.
 - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_07_09.txt` - systemovy audit k 2026-07-09: projekty, tooly, vrstvy, provozni poznamka, backup warning, capability audit a doporuceni pro vyber dalsi prace; report je git-safe a necetl private vault/fulltexty.
 - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_161548.txt` - [PRIPOMENOUT] aktualni systemovy audit k 2026-06-30 16:15: projekty, tooly, vrstvy, priority, provozni stav, capability gaps a navrh nejmensiho dalsiho kroku; audit vznikl z cisteho gitu a bez hlavních health varovani.
 - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_151531.txt` - historicky systemovy audit k 2026-06-30 15:15: projekty, tooly, vrstvy, priority, provozni stav, capability gaps a tehdejsi navrh nejmensiho dalsiho kroku.
@@ -64,6 +65,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `handoffs/cockpit_architecture_current_2026_07_10.md` - [PRIPOMENOUT] jediny prubezny handoff programu modernizace Cockpitu: audit je hotovy, lehky live status je pushnuty v `23abbaa`, dalsi maly krok je centralni HTTP request boundary; handoff se ma behem faze aktualizovat a novy checkpoint vzniknout az pri jejim uzavreni.
 - `handoffs/janicka_full_adam_cockpit_recovery_ios_card_2026_07_09.md` - [PRIPOMENOUT] Janička nouzova zaloha: tlacitko `Otevřít plného Adama` spousti primy interaktivni Codex v Terminalu bez VS Code/samantha wrapperu, Mac ma viditelne launchery pro Cockpit a iPhone zkratka `Janička SOS` zobrazuje Jane kartu postupu; dalsi krok je zkratku nasdilet/importovat na Janin iPhone a spolecne projit celou cestu.
 - `handoffs/cockpit_email_archive_browser_2026_07_09.md` - Cockpit Archiv e-mailu: read-only prohlizec EmailArchiveVault na `/email-archive/`, katalog Webove aplikace, bezpecne otevreni lokalniho HTML/textu/originalniho EML, metadat a stazenych priloh; dalsi krok je rucni UI retest na znamych archivovanych UID.
 - `handoffs/cockpit_voice_janicka_stability_checkpoint_2026_07_09.md` - [PRIPOMENOUT] Cockpit / VoiceBridge / Janicka stabilita: hlavni VoiceBridge rozlisuje Adam relaci, managed relace a orphaned Janicka relace, Janicka okno umi nabidnout cleanup starych relaci, recoverable `Load failed` se po health checku cisti a automaticka watcher odpoved je jasne oznacena jako automaticka; dalsi krok je retest Janicka bez VS Code po commitu/pushi.
