@@ -146,6 +146,13 @@ from app.email.redaction import redact_email_addresses
 from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEmailProvider
 from app.file_persistence import FilePersistenceError, append_jsonl_locked
 from app.cockpit_code_stamp import cockpit_code_stamp
+from app.cockpit_status_service import (
+    LIVE_STATUS_BRIDGE_CACHE_TTL_SECONDS,
+    CockpitStatusLoaders,
+    build_cockpit_live_status,
+    build_cockpit_status,
+    build_server_health_status,
+)
 from app.reminders.query_tools import mark_reminder_done_text
 from app.reminders.store import (
     DEFAULT_REMINDERS_PATH,
@@ -335,9 +342,6 @@ WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
 
 
 COCKPIT_CODE_STAMP = cockpit_code_stamp()
-LIVE_STATUS_BRIDGE_CACHE_TTL_SECONDS = 15.0
-_LIVE_STATUS_BRIDGE_CACHE: dict[str, Any] = {}
-_LIVE_STATUS_BRIDGE_CACHE_LOCK = threading.Lock()
 MAX_JSON_BODY_BYTES = 10 * 1024 * 1024
 COCKPIT_HTTP_EVENT_LOG = PROJECT_ROOT / "data" / "private" / "cockpit" / "http_events.jsonl"
 _COCKPIT_HTTP_EVENT_LOG_LOCK = threading.Lock()
@@ -467,16 +471,7 @@ READING_STATUS_ALIASES: dict[str, str] = {
 
 
 def server_health_status(*, host: str = "127.0.0.1", port: int = COCKPIT_PORT) -> dict[str, Any]:
-    return {
-        "ok": True,
-        "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-        "server": {
-            "code_stamp": COCKPIT_CODE_STAMP,
-            "pid": os.getpid(),
-            "host": host,
-            "port": port,
-        },
-    }
+    return build_server_health_status(code_stamp=COCKPIT_CODE_STAMP, host=host, port=port)
 
 
 DOCUMENT_REVIEW_REASON_LABELS: dict[str, str] = {
@@ -4404,70 +4399,30 @@ def clear_email_processing_decision(*, item_id: str, path: Path) -> None:
 
 
 def cockpit_status() -> dict[str, Any]:
-    started_at = time.perf_counter()
-    section_timings: dict[str, float] = {}
-
-    def timed_section(name: str, callback: Callable[[], Any]) -> Any:
-        section_started_at = time.perf_counter()
-        value = callback()
-        section_timings[name] = round((time.perf_counter() - section_started_at) * 1000, 2)
-        return value
-
-    downloads = timed_section("downloads", safe_downloads_status)
-    document_work = timed_section("document_work", lambda: document_work_status(downloads=downloads))
-    document_intake = timed_section("document_intake", lambda: document_intake_status(downloads=downloads))
-    document_cases = timed_section("document_cases", document_cases_status)
-    document_classification = timed_section("document_classification", document_classification_status)
-    document_due_candidates = timed_section("document_due_candidates", document_due_candidates_status)
-    reminders = timed_section("reminders", reminders_status)
-    urgent = timed_section("urgent_reminders", urgent_reminders_status)
-    backup_status = timed_section("backup_status", backup_activity_status)
-    action_queue = timed_section(
-        "action_queue",
-        lambda: action_queue_status(document_work=document_work, reminders=reminders, urgent_reminders=urgent),
+    loaders = CockpitStatusLoaders(
+        downloads=safe_downloads_status,
+        document_work=lambda downloads: document_work_status(downloads=downloads),
+        document_intake=lambda downloads: document_intake_status(downloads=downloads),
+        document_cases=document_cases_status,
+        document_classification=document_classification_status,
+        document_due_candidates=document_due_candidates_status,
+        reminders=reminders_status,
+        urgent_reminders=urgent_reminders_status,
+        backup_status=backup_activity_status,
+        action_queue=lambda document_work, reminders, urgent: action_queue_status(
+            document_work=document_work,
+            reminders=reminders,
+            urgent_reminders=urgent,
+        ),
+        vault=document_vault_status_summary,
+        scandocu=probe_scandocu,
+        voice_mode=load_voice_mode_status,
+        voice_bridge=lambda: adam_voice_bridge_status(
+            orphaned_janicka_reporter=janicka_orphaned_codex_session_report
+        ),
+        git=git_status_summary,
     )
-    vault = timed_section("vault", document_vault_status_summary)
-    scandocu = timed_section("scandocu", probe_scandocu)
-    voice_mode = timed_section("voice_mode", load_voice_mode_status)
-    voice_bridge = timed_section(
-        "voice_bridge",
-        lambda: adam_voice_bridge_status(orphaned_janicka_reporter=janicka_orphaned_codex_session_report),
-    )
-    git_status = timed_section("git", git_status_summary)
-    total_ms = round((time.perf_counter() - started_at) * 1000, 2)
-    slowest_sections = [
-        {"name": name, "ms": ms}
-        for name, ms in sorted(section_timings.items(), key=lambda item: item[1], reverse=True)[:3]
-    ]
-
-    return {
-        "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-        "server": {
-            "code_stamp": COCKPIT_CODE_STAMP,
-            "pid": os.getpid(),
-        },
-        "status_timing": {
-            "total_ms": total_ms,
-            "sections_ms": section_timings,
-            "slowest_sections": slowest_sections,
-        },
-        "downloads": downloads,
-        "document_work": document_work,
-        "document_intake": document_intake,
-        "document_cases": document_cases,
-        "document_classification": document_classification,
-        "document_due_candidates": document_due_candidates,
-        "action_queue": action_queue,
-        "backup": backup_status["message"],
-        "backup_status": backup_status,
-        "vault": vault,
-        "reminders": reminders,
-        "urgent_reminders": urgent,
-        "scandocu": scandocu,
-        "voice_mode": voice_mode,
-        "voice_bridge": voice_bridge,
-        "git": git_status,
-    }
+    return build_cockpit_status(loaders=loaders, code_stamp=COCKPIT_CODE_STAMP)
 
 
 def cockpit_live_status(
@@ -4479,47 +4434,16 @@ def cockpit_live_status(
     bridge_cache_ttl_seconds: float = LIVE_STATUS_BRIDGE_CACHE_TTL_SECONDS,
 ) -> dict[str, Any]:
     """Return frequently changing voice state without rebuilding the full Cockpit status."""
-    started_at = time.perf_counter()
-    load_voice_mode = voice_mode_loader or load_voice_mode_status
     load_voice_bridge = voice_bridge_loader or (
         lambda: adam_voice_bridge_status(orphaned_janicka_reporter=janicka_orphaned_codex_session_report)
     )
-    clock = monotonic_clock or time.monotonic
-    cache = bridge_cache if bridge_cache is not None else _LIVE_STATUS_BRIDGE_CACHE
-
-    voice_mode_started_at = time.perf_counter()
-    voice_mode = load_voice_mode()
-    voice_mode_ms = round((time.perf_counter() - voice_mode_started_at) * 1000, 2)
-
-    now_value = clock()
-    with _LIVE_STATUS_BRIDGE_CACHE_LOCK:
-        cached_bridge = cache.get("value")
-        refreshed_at = float(cache.get("refreshed_at", 0.0) or 0.0)
-        cache_age_seconds = max(0.0, now_value - refreshed_at)
-        cache_hit = isinstance(cached_bridge, dict) and cache_age_seconds < max(0.0, bridge_cache_ttl_seconds)
-        voice_bridge_started_at = time.perf_counter()
-        if cache_hit:
-            voice_bridge = cached_bridge
-        else:
-            voice_bridge = load_voice_bridge()
-            cache["value"] = voice_bridge
-            cache["refreshed_at"] = now_value
-            cache_age_seconds = 0.0
-        voice_bridge_ms = round((time.perf_counter() - voice_bridge_started_at) * 1000, 2)
-
-    return {
-        "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-        "voice_mode": voice_mode,
-        "voice_bridge": voice_bridge,
-        "live_status_timing": {
-            "total_ms": round((time.perf_counter() - started_at) * 1000, 2),
-            "voice_mode_ms": voice_mode_ms,
-            "voice_bridge_ms": voice_bridge_ms,
-            "voice_bridge_cache_hit": cache_hit,
-            "voice_bridge_cache_age_seconds": round(cache_age_seconds, 2),
-            "voice_bridge_cache_ttl_seconds": bridge_cache_ttl_seconds,
-        },
-    }
+    return build_cockpit_live_status(
+        voice_mode_loader=voice_mode_loader or load_voice_mode_status,
+        voice_bridge_loader=load_voice_bridge,
+        monotonic_clock=monotonic_clock or time.monotonic,
+        bridge_cache=bridge_cache,
+        bridge_cache_ttl_seconds=bridge_cache_ttl_seconds,
+    )
 
 
 def adam_voice_bridge_status(

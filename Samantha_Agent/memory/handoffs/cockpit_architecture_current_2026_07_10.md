@@ -340,6 +340,20 @@ Rucni retest po prvnim vykonovem kroku:
 - Implementace je pushnuta v commitu `67ba77e`. GitHub Actions Cockpit Quality
   Gate beh cislo 11 skoncil uspesne:
   `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29119991977`.
+- Mila rucne overil lifecycle Janičky: spustil ji na nove managed TTY a znovu
+  zastavil. Managed screen i TTY zmizely, hlavni relace a jediny autosave
+  watcher zustaly zachovane; Janička je nyni zastavena.
+- Faze 1.1 je implementovana: novy `app/cockpit_status_service.py` prevzal
+  sestaveni `/api/server/health`, `/api/live-status` a `/api/status`, mereni
+  sekci i zamcenou patnactisekundovou live cache. `app/cockpit.py` zustal
+  kompatibilnim adapterem, takze routy, nazvy funkci a JSON payloady se
+  nezmenily.
+- Prime kontraktni testy nove sluzby overuji health identitu, poradi a vazby
+  plnych statusovych sekci i live cache. Kanonicky gate ma 535 testu OK a
+  `app/cockpit.py` klesl na 22 293 radku / 325 top-level funkci, tedy 172 radku
+  pod baseline.
+- Po jednorazovem nasazovacim restartu prosly lokalni i Tailscale smoke checky
+  vsech peti cest. Obe adresy obsluhuje jedina serverova instance PID 27653.
 
 Co neni hotove:
 
@@ -351,7 +365,8 @@ Co neni hotove:
   jeste nejsou globalne transakcni; metadata, reading status a ScanDocu review
   uz maji recovery transakci, ale dalsi document-index writery na ni nejsou
   prevedene.
-- `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem.
+- `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem;
+  status/health orchestrace je uz vyjmuta, dalsi hranice je VoiceBridge.
 - Cleanup R1 je hotovy. Stary e-mailovy parser, lokalni Janicka vetev a pet
   podezrelych API cest zustavaji beze zmeny; u API cest chybi registr externich
   klientu.
@@ -362,15 +377,17 @@ Co neni hotove:
 
 Dalsi krok:
 
-Hlavni roadmapa: zacit Fazi 1.1 a vyjmout status/health sluzbu z monolitu pri
-zachovani endpointu a 532testoveho gate. Dokumentovy reindex zustava dalsim
-krokem vedlejsi persistence roadmapy, ne hlavni faze. Stary e-mailovy parser,
-lokalni Janicka vetev a pet podezrelych API cest zatim nemenit. PDF browser a
-post-call audio retest jsou odlozene.
+Hlavni roadmapa: Faze 1.1 je hotova; dalsi je Faze 1.2, opatrne vyjmout
+VoiceBridge coordinator bez zmeny dorucovaciho vlastnictvi, endpointu nebo
+potvrzovacich pravidel. Pred upravou znovu precist provozni kontrakt a nejdrive
+zmapovat stavove prechody. Dokumentovy reindex zustava vedlejsi persistence
+roadmapou. Stary e-mailovy parser, lokalni Janicka vetev a pet podezrelych API
+cest zatim nemenit. PDF browser a post-call audio retest jsou odlozene.
 
 Navrhovane dalsi kroky:
 
-1. Faze 1.1: vyjmout status/health sluzbu z `app/cockpit.py` bez zmeny API.
+1. Faze 1.2: zmapovat a vyjmout VoiceBridge coordinator bez zmeny API a
+   provozniho kontraktu.
 2. Janicka a stary e-mailovy parser mazat az po popsanem rucnim/recovery overeni.
 3. Podezrele API cesty proverit proti Shortcuts a servisnim klientum.
 4. Ve vedlejsi persistence roadmapě pozdeji prevest reindex a potom e-mail metadata.
@@ -397,10 +414,12 @@ Zmenene nebo relevantni soubory:
 
 - `AuditCockpit56.txt`
 - `app/cockpit.py`
+- `app/cockpit_status_service.py`
 - `app/file_persistence.py`
 - `app/backup/activity_state.py`
 - `scripts/cockpit_smoke_check.py`
 - `tests/test_cockpit.py`
+- `tests/test_cockpit_status_service.py`
 - `tests/test_file_persistence.py`
 - `scripts/install_cockpit_local_launchd.sh`
 - `scripts/install_cockpit_tailscale_launchd.sh`

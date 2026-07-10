@@ -116,6 +116,14 @@ nebo pull request.
 - Implementace je v commitu `67ba77e`. GitHub Actions Cockpit Quality Gate běh
   číslo 11 skončil úspěšně:
   `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29119991977`.
+- Fáze 1.1 přidala `app/cockpit_status_service.py`, který samostatně skládá
+  health, live a plný status, včetně timingů a zamčené live cache. Veřejné
+  funkce a HTTP routy v `app/cockpit.py` zůstaly kompatibilní adaptéry.
+- Tři přímé kontraktní testy nové služby rozšířily gate na 535 testů. Monolit
+  klesl na 22 293 řádků / 325 top-level funkcí, tedy 172 řádků pod baseline.
+- Po jednorázovém restartu nové verze prošly lokální i Tailscale smoke checky
+  pro `/`, `/api/server/health`, `/api/live-status`, `/api/status` a recovery;
+  obě adresy obsluhovala jedna instance PID 27653.
 
 ## Co gate zatím neřeší
 
@@ -131,5 +139,7 @@ nebo pull request.
 Quality gate, read-only inventura, Cleanup R1, zamčené reminders/Quick Notes/
 urgent reminders, dokumentové persistence primitivy, metadata/reading-status
 transakce, ScanDocu review a životní cyklus autosave/managed relací jsou hotové.
-Hlavní roadmapa se nyní vrací k Fázi 1.1: vyjmout status/health službu z
-monolitu. Reindex zůstává samostatný další krok dokumentové persistence.
+Fáze 1.1 status/health je hotová. Hlavní roadmapa pokračuje Fází 1.2: nejdříve
+zmapovat a potom vyjmout VoiceBridge coordinator bez změny API, vlastnictví
+doručení a potvrzovacích pravidel. Reindex zůstává samostatný další krok
+dokumentové persistence.
