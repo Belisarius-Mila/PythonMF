@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import os
 import subprocess
 import sys
 import time
@@ -88,9 +89,23 @@ def architecture_messages() -> list[str]:
 def run_checked(label: str, command: Sequence[str]) -> None:
     print(f"\n[{label}] {' '.join(command)}", flush=True)
     started = time.monotonic()
-    completed = subprocess.run(command, cwd=PROJECT_ROOT, check=False)
+    completed = subprocess.run(
+        command,
+        cwd=PROJECT_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
     elapsed = time.monotonic() - started
+    if completed.stdout:
+        print(completed.stdout, end="" if completed.stdout.endswith("\n") else "\n", flush=True)
+    if completed.stderr:
+        print(completed.stderr, end="" if completed.stderr.endswith("\n") else "\n", file=sys.stderr, flush=True)
     if completed.returncode != 0:
+        if os.environ.get("GITHUB_ACTIONS", "").lower() == "true":
+            detail = (completed.stderr or completed.stdout or "No subprocess output.")[-6_000:]
+            escaped = detail.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+            print(f"::error title={label} failed::{escaped}", flush=True)
         raise SystemExit(f"{label} failed with exit code {completed.returncode} after {elapsed:.1f}s")
     print(f"{label}: OK ({elapsed:.1f}s)", flush=True)
 

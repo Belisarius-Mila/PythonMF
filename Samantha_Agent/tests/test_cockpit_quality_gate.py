@@ -3,6 +3,7 @@ from __future__ import annotations
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from scripts.cockpit_quality_gate import (
     ARCHITECTURE_BASELINES,
@@ -12,6 +13,7 @@ from scripts.cockpit_quality_gate import (
     SourceMetrics,
     architecture_messages,
     source_metrics,
+    run_checked,
 )
 
 
@@ -50,6 +52,24 @@ async def second():
         self.assertEqual(len(ARCHITECTURE_BASELINES), 2)
         self.assertTrue(any("app/cockpit.py" in message for message in messages))
         self.assertTrue(any("app/speech/adam_voice_mode.py" in message for message in messages))
+
+    def test_failed_ci_command_emits_safe_github_annotation(self) -> None:
+        completed = type(
+            "Completed",
+            (),
+            {"returncode": 1, "stdout": "", "stderr": "failure line one\nfailure 100%\n"},
+        )()
+        with (
+            patch.dict("os.environ", {"GITHUB_ACTIONS": "true"}),
+            patch("scripts.cockpit_quality_gate.subprocess.run", return_value=completed),
+            patch("builtins.print") as printer,
+            self.assertRaises(SystemExit),
+        ):
+            run_checked("unit tests", ["python", "-m", "unittest"])
+
+        rendered = "\n".join(str(call.args[0]) for call in printer.call_args_list if call.args)
+        self.assertIn("::error title=unit tests failed::", rendered)
+        self.assertIn("failure 100%25%0A", rendered)
 
 
 if __name__ == "__main__":
