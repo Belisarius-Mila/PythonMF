@@ -2681,6 +2681,16 @@ class CockpitTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "confirmation_required")
 
+    def test_live_status_refresh_renders_only_voice_area(self) -> None:
+        start = COCKPIT_HTML.index("async function refreshLiveStatus()")
+        end = COCKPIT_HTML.index("function refreshMainStatusOnReturn", start)
+        live_refresh_source = COCKPIT_HTML[start:end]
+
+        self.assertIn("renderVoiceStatus(latestMainStatusData);", live_refresh_source)
+        self.assertNotIn("renderDashboard(", live_refresh_source)
+        self.assertIn("function renderVoiceStatus(data)", COCKPIT_HTML)
+        self.assertIn("renderVoiceStatus(data);", COCKPIT_HTML)
+
     def test_cockpit_codex_approval_clear_action_clears_runtime_state(self) -> None:
         calls = []
 

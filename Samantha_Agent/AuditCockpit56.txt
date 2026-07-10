@@ -296,6 +296,15 @@ Kontrolni mereni po nasazeni:
 
 Relevantni regresni sada po zmene: 374 testu, vsechny OK.
 
+Navazujici frontendova regrese a oprava:
+- Pri rucnim Mac retestu se ukazalo, ze trisekundovy live monitor sice pouzival
+  lehky endpoint, ale po odpovedi znovu volal cely `renderDashboard(...)`.
+- To zpusobovalo viditelne problikavani horniho panelu u tlacitka `Obnovit`.
+- Live monitor po oprave vola jen `renderVoiceStatus(...)`; dokumenty, zaloha,
+  git, hlavni stav a horni panel se prekresluji pouze pri plnem refreshi.
+- Regresni test vyslovne zakazuje `renderDashboard(...)` uvnitr
+  `refreshLiveStatus()`.
+
 
 STAV DRUHEHO KROKU PO AUDITU
 

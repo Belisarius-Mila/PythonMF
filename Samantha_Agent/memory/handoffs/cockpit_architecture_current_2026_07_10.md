@@ -76,6 +76,15 @@ Rucni retest po prvnim vykonovem kroku:
   status a tridu chyby; neuklada payloady, hlavicky ani soukrome texty.
 - Po HTTP zmene proslo 388 relevantnich testu, lokalni i vzdaleny smoke check,
   zivy invalid-JSON test a Tailscale same-origin POST.
+- Pri rucnim Mac testu Mila odhalil frontendovou regresi: horni `Obnovit`
+  problikavalo v trisekundovem live intervalu.
+- Pricina byla potvrzena: `refreshLiveStatus()` po lehkem fetchi stale volal
+  cely `renderDashboard(...)`.
+- Oprava vyjmula hlasove vykresleni do `renderVoiceStatus(...)`; live interval
+  nyni meni jen hlas, bridge a potvrzovaci karty. Plny dashboard se neprekresluje.
+- JavaScript syntax check, novy regresni test, 389 relevantnich testu a lokalni
+  i vzdaleny smoke check prosly. Nasazena HTML obsahuje pouze
+  `renderVoiceStatus(latestMainStatusData)` v live refreshi.
 
 Co neni hotove:
 
@@ -89,9 +98,10 @@ Co neni hotove:
 
 Dalsi krok:
 
-Mila ma po HTTP ochrane kratce rucne overit na Macu a iPhonu: nacteni hlavni
-stranky, tlacitko `Obnovit`, otevreni jednoho bezpecneho dokumentoveho PDF a
-hlasovy pokyn. Pokud CSP ani Host/Origin kontrola nic nerozbila, dalsi P0
+Mila ma po opravene live-render regresi nechat Mac Cockpit 15-20 sekund otevreny
+a potvrdit, ze `Obnovit` uz neproblikava. Dale kratce overit na Macu a iPhonu
+nacteni hlavni stranky, otevreni jednoho bezpecneho dokumentoveho PDF a hlasovy
+pokyn. Pokud CSP ani Host/Origin kontrola nic nerozbila, dalsi P0
 implementacni blok je spolecna atomicka file persistence a zamky. Nejdrive
 zmapovat konkretni zapisove helpery a zavest malou sdilenou vrstvu; nemenit ani
 nemigrovat existujici private data.

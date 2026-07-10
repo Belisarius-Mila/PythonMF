@@ -16763,7 +16763,7 @@ COCKPIT_HTML = """<!doctype html>
           voice_mode: data.voice_mode || {},
           voice_bridge: data.voice_bridge || {}
         };
-        renderDashboard(latestMainStatusData);
+        renderVoiceStatus(latestMainStatusData);
       } catch (err) {
         recordFrontendError(err);
         setDashboardStatusSignal("voice", "warn", `Živý stav hlasu: ${err}`);
@@ -17776,6 +17776,61 @@ COCKPIT_HTML = """<!doctype html>
             : "Připomenutí bez akutní akce"
       );
 
+      renderVoiceStatus(data);
+
+      setDashboardPendingIfEmpty(dashboardProjects, "načítám samostatně");
+      setDashboardPendingIfEmpty(dashboardQuantitative, "načítám samostatně");
+      setDashboardPendingIfEmpty(dashboardConsistency, "načítám samostatně");
+      setDashboardPendingIfEmpty(dashboardQuickNotes, "načítám samostatně");
+      if (dashboardValueIsPending(dashboardProjects)) {
+        setDashboardStatusSignal("projects", "loading", "Projekty se načítají samostatně");
+      }
+      if (dashboardValueIsPending(dashboardQuantitative)) {
+        setDashboardStatusSignal("quantitative", "loading", "Systémový souhrn se načítá samostatně");
+      }
+      if (dashboardValueIsPending(dashboardConsistency)) {
+        setDashboardStatusSignal("consistency", "loading", "Audit se načítá samostatně");
+      }
+      if (dashboardValueIsPending(dashboardQuickNotes)) {
+        setDashboardStatusSignal("quickNotes", "loading", "QN se načítají samostatně");
+      }
+
+      const backupState = classifyBackup(data.backup || "", data.backup_status || null);
+      setDashboardValue(dashboardBackup, `<span class="${backupState.className}">${backupState.label}</span>`);
+      setDashboardStatusSignal(
+        "backup",
+        backupState.className === "ok" ? "ok" : "warn",
+        `Záloha: ${backupState.label}`
+      );
+
+      const git = data.git || {};
+      if (!git.ok) {
+        dashboardGit.innerHTML = `<span class="warn">nelze zjistit</span>`;
+        setDashboardStatusSignal("git", "warn", "Git: nelze zjistit stav");
+      } else {
+        const gitClass = git.dirty_count ? "warn" : "ok";
+        const sync = git.ahead ? " | čeká push" : git.behind ? " | čeká pull" : "";
+        const reviewCount = Math.max(0, Number(git.dirty_count || 0) - Number(git.safe_commit_count || 0) - Number(git.excluded_private_count || 0));
+        const gitBreakdown = git.dirty_count
+          ? `<br>git-safe ${git.safe_commit_count || 0} | zkontrolovat ${reviewCount} | private/family mimo ${git.excluded_private_count || 0}`
+          : "";
+        dashboardGit.innerHTML = `<span class="${gitClass}">${git.message || ""}</span>${sync}<br>${git.branch || ""}${gitBreakdown}`;
+        setDashboardStatusSignal(
+          "git",
+          git.dirty_count || git.ahead || git.behind ? "warn" : "ok",
+          git.dirty_count
+            ? `Git: ${git.message || `${git.dirty_count} změn v pracovní kopii`} | git-safe ${git.safe_commit_count || 0}, private/family mimo ${git.excluded_private_count || 0}`
+            : git.ahead
+              ? "Git: lokální změny čekají na push"
+              : git.behind
+                ? "Git: vzdálené změny čekají na pull"
+                : "Git je synchronizovaný"
+        );
+	      }
+	      renderDashboardMorningSentence(data);
+	    }
+
+    function renderVoiceStatus(data) {
       const voiceMode = data.voice_mode || {};
       const voiceBridge = data.voice_bridge || {};
       latestVoiceModeRuntime = voiceMode;
@@ -17882,60 +17937,9 @@ COCKPIT_HTML = """<!doctype html>
           : "Hlasový vstup v Cockpitu je připravený"
       );
       updateVoiceModeUi();
+    }
 
-      setDashboardPendingIfEmpty(dashboardProjects, "načítám samostatně");
-      setDashboardPendingIfEmpty(dashboardQuantitative, "načítám samostatně");
-      setDashboardPendingIfEmpty(dashboardConsistency, "načítám samostatně");
-      setDashboardPendingIfEmpty(dashboardQuickNotes, "načítám samostatně");
-      if (dashboardValueIsPending(dashboardProjects)) {
-        setDashboardStatusSignal("projects", "loading", "Projekty se načítají samostatně");
-      }
-      if (dashboardValueIsPending(dashboardQuantitative)) {
-        setDashboardStatusSignal("quantitative", "loading", "Systémový souhrn se načítá samostatně");
-      }
-      if (dashboardValueIsPending(dashboardConsistency)) {
-        setDashboardStatusSignal("consistency", "loading", "Audit se načítá samostatně");
-      }
-      if (dashboardValueIsPending(dashboardQuickNotes)) {
-        setDashboardStatusSignal("quickNotes", "loading", "QN se načítají samostatně");
-      }
-
-      const backupState = classifyBackup(data.backup || "", data.backup_status || null);
-      setDashboardValue(dashboardBackup, `<span class="${backupState.className}">${backupState.label}</span>`);
-      setDashboardStatusSignal(
-        "backup",
-        backupState.className === "ok" ? "ok" : "warn",
-        `Záloha: ${backupState.label}`
-      );
-
-      const git = data.git || {};
-      if (!git.ok) {
-        dashboardGit.innerHTML = `<span class="warn">nelze zjistit</span>`;
-        setDashboardStatusSignal("git", "warn", "Git: nelze zjistit stav");
-      } else {
-        const gitClass = git.dirty_count ? "warn" : "ok";
-        const sync = git.ahead ? " | čeká push" : git.behind ? " | čeká pull" : "";
-        const reviewCount = Math.max(0, Number(git.dirty_count || 0) - Number(git.safe_commit_count || 0) - Number(git.excluded_private_count || 0));
-        const gitBreakdown = git.dirty_count
-          ? `<br>git-safe ${git.safe_commit_count || 0} | zkontrolovat ${reviewCount} | private/family mimo ${git.excluded_private_count || 0}`
-          : "";
-        dashboardGit.innerHTML = `<span class="${gitClass}">${git.message || ""}</span>${sync}<br>${git.branch || ""}${gitBreakdown}`;
-        setDashboardStatusSignal(
-          "git",
-          git.dirty_count || git.ahead || git.behind ? "warn" : "ok",
-          git.dirty_count
-            ? `Git: ${git.message || `${git.dirty_count} změn v pracovní kopii`} | git-safe ${git.safe_commit_count || 0}, private/family mimo ${git.excluded_private_count || 0}`
-            : git.ahead
-              ? "Git: lokální změny čekají na push"
-              : git.behind
-                ? "Git: vzdálené změny čekají na pull"
-                : "Git je synchronizovaný"
-        );
-	      }
-      renderDashboardMorningSentence(data);
-	    }
-
-    function renderDashboardMorningSentence(data) {
+	    function renderDashboardMorningSentence(data) {
       if (!dashboardMorningSentence) return;
       const stable = ["Cockpit odpovídá"];
       const warnings = [];
