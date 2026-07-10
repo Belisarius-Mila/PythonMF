@@ -371,6 +371,23 @@ Rucni retest po prvnim vykonovem kroku:
 - Nova verze prosla lokalnim i Tailscale smoke checkem vsech peti cest. Obe
   adresy obsluhuje jedina instance PID 32168 a na nouzovem portu 8771 nic
   neposloucha.
+- Rucni iPhone test potvrdil command ownership: pokyn dorazil do chatu prave
+  jednou, watcher byl jedinym vlastnikem a `delivery_attempts.jsonl` zustal od
+  drivejska beze zmeny. GitHub Actions gate pro commit `0beebbc` s 539 testy
+  skoncil uspesne:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29122979483`.
+- Prvni odpoved dorazila jako text, ale se sluchatky se neprehrala. Technicka
+  stopa ukazala obnovu iOS AudioContextu bez uspechu nebo chyby prehrani;
+  backend Edge TTS samostatne i ve trech soubeznych pozadavcich vracel MP3 za
+  1-2 sekundy. Problem byl omezeny na posledni Web Audio vrstvu.
+- iPhone prehravac ma nyni petisekundovy timeout dekodovani, casove omezeny
+  playback, automaticky fallback na HTML Audio a lokalni zamek proti
+  soubeznemu spusteni. JavaScript syntax, 225 Cockpit testu a cely gate s 539
+  testy prosly; `app/cockpit.py` ma 22 263 radku / 324 top-level funkci, tedy
+  202 radku pod baseline.
+- Po nasazeni opravy prosly lokalni i Tailscale smoke checky na jedine instanci
+  PID 35158. Mila po znovuotevreni Cockpitu rucne potvrdil prehrani do sluchatek
+  a technicka stopa zaznamenala `audio_play_succeeded` bez obsahu odpovedi.
 
 Co neni hotove:
 
@@ -396,25 +413,23 @@ Co neni hotove:
 
 Dalsi krok:
 
-Faze 1.2 command ownership coordinator je implementovany a automaticky overeny.
-Pred uzavrenim baliku chybi jeden rucni end-to-end hlasovy test z Cockpitu po
-nasazeni: jeden pokyn v chatu, jedna finalni odpoved a zadna duplicita. Potom
-hlavni roadmapa prejde na Fazi 1.3, dokumentove routy/service vrstvu.
+Faze 1.2 command ownership coordinator i iPhone audio fallback jsou
+implementovane a rucne overene end-to-end: jeden pokyn, jedna odpoved, zadna
+duplicita a uspesne prehrani do sluchatek. Hlavni roadmapa prechazi na Fazi 1.3,
+dokumentove routy/service vrstvu.
 Dokumentovy reindex zustava vedlejsi persistence roadmapou. Stary e-mailovy
 parser, lokalni Janicka vetev a pet podezrelych API cest zatim nemenit. PDF
 browser a post-call audio retest jsou odlozene.
 
 Navrhovane dalsi kroky:
 
-1. Rucne otestovat jeden kratky hlasovy pokyn po nasazeni Faze 1.2 a potvrdit,
-   ze dorazil prave jednou.
-2. Faze 1.3: vyjmout dokumentove routy a service vrstvu po malych balicich.
-3. Janicka a stary e-mailovy parser mazat az po popsanem rucnim/recovery overeni.
-4. Podezrele API cesty proverit proti Shortcuts a servisnim klientum.
-5. Ve vedlejsi persistence roadmapě pozdeji prevest reindex a potom e-mail metadata.
-6. Postupne rozdelit monolit pri zachovani endpointu:
+1. Faze 1.3: vyjmout dokumentove routy a service vrstvu po malych balicich.
+2. Janicka a stary e-mailovy parser mazat az po popsanem rucnim/recovery overeni.
+3. Podezrele API cesty proverit proti Shortcuts a servisnim klientum.
+4. Ve vedlejsi persistence roadmapě pozdeji prevest reindex a potom e-mail metadata.
+5. Postupne rozdelit monolit pri zachovani endpointu:
    status/health -> voice -> documents -> email -> staticky frontend.
-7. Zavadet explicitni stavove modely a repository vrstvy po oblastech, ne
+6. Zavadet explicitni stavove modely a repository vrstvy po oblastech, ne
    jednim velkym prepisem.
 
 Handoff strategie pro tento program:

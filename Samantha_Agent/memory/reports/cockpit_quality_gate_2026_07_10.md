@@ -137,6 +137,20 @@ nebo pull request.
   řádků pod baseline.
 - Po nasazení prošly lokální i Tailscale smoke checky všech pěti cest. Obě
   adresy obsluhovala jedna instance PID 32168 a port 8771 byl volný.
+- Ruční iPhone ownership test potvrdil jeden doručený pokyn, jednu odpověď a
+  žádný nový inline delivery attempt. GitHub Actions gate pro commit `0beebbc`
+  skončil úspěšně:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29122979483`.
+- První audio pokus se sluchátky uvízl po úspěšné obnově AudioContextu bez
+  success/error události, zatímco Edge TTS backend vracel MP3 za 1-2 sekundy i
+  při třech souběžných požadavcích. Frontend nyní omezuje dekódování na pět
+  sekund, playback podle délky audia, při selhání přejde na HTML Audio a v
+  jednom klientu nepustí více čtení současně.
+- JavaScript syntax, 225 Cockpit testů a celý gate s 539 testy prošly. Monolit
+  má 22 263 řádků / 324 top-level funkcí, tedy 202 řádků pod baseline.
+- Po nasazení audio opravy prošly oba smoke checky na jediné instanci PID
+  35158. Mila ručně potvrdil přehrání do sluchátek a technický log zaznamenal
+  pouze `audio_play_succeeded`, bez obsahu odpovědi.
 
 ## Co gate zatím neřeší
 
@@ -152,7 +166,7 @@ nebo pull request.
 Quality gate, read-only inventura, Cleanup R1, zamčené reminders/Quick Notes/
 urgent reminders, dokumentové persistence primitivy, metadata/reading-status
 transakce, ScanDocu review a životní cyklus autosave/managed relací jsou hotové.
-Fáze 1.1 status/health je hotová a Fáze 1.2 command ownership coordinator je
-implementovaný. Po jednom ručním end-to-end hlasovém retestu pokračuje hlavní
-roadmapa Fází 1.3: dokumentové routy a service vrstva. Reindex zůstává
-samostatný další krok dokumentové persistence.
+Fáze 1.1 status/health i Fáze 1.2 VoiceBridge command ownership a iPhone audio
+fallback jsou hotové a ručně ověřené. Hlavní roadmapa pokračuje Fází 1.3:
+dokumentové routy a service vrstva. Reindex zůstává samostatný další krok
+dokumentové persistence.

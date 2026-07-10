@@ -18640,6 +18640,8 @@ COCKPIT_HTML = """<!doctype html>
 
 	    let voiceAudioContext = null;
 	    let voiceAudioUnlocked = false;
+	    let voiceSpeechInProgress = false;
+	    const VOICE_AUDIO_DECODE_TIMEOUT_MS = 5000;
 
 	    function updateVoiceAudioUnlockUi(opened) {
 	      if (!voiceAudioUnlockBtn) return;
@@ -18750,13 +18752,38 @@ COCKPIT_HTML = """<!doctype html>
 	      return bytes.buffer;
 	    }
 
+	    function withVoiceAudioTimeout(promise, timeoutMs, stage) {
+	      return new Promise((resolve, reject) => {
+	        const timer = window.setTimeout(() => {
+	          const error = new Error(`${stage} překročilo časový limit.`);
+	          error.name = "VoiceAudioTimeoutError";
+	          reject(error);
+	        }, timeoutMs);
+	        Promise.resolve(promise).then(
+	          (value) => {
+	            window.clearTimeout(timer);
+	            resolve(value);
+	          },
+	          (error) => {
+	            window.clearTimeout(timer);
+	            reject(error);
+	          }
+	        );
+	      });
+	    }
+
 	    async function playVoiceAudioBase64(edgeData) {
 	      if (!voiceAudioUnlocked || !edgeData || !edgeData.audio_base64) return false;
 	      const context = getVoiceAudioContext();
 	      if (!context) return false;
 	      await ensureVoiceAudioContextRunning(context);
-	      const audioBuffer = await context.decodeAudioData(base64ToArrayBuffer(edgeData.audio_base64));
-	      await new Promise((resolve, reject) => {
+	      const audioBuffer = await withVoiceAudioTimeout(
+	        context.decodeAudioData(base64ToArrayBuffer(edgeData.audio_base64)),
+	        VOICE_AUDIO_DECODE_TIMEOUT_MS,
+	        "Dekódování zvuku"
+	      );
+	      const playbackTimeoutMs = Math.max(15000, Math.ceil(Number(audioBuffer.duration || 0) * 1000) + 5000);
+	      await withVoiceAudioTimeout(new Promise((resolve, reject) => {
 	        const source = context.createBufferSource();
 	        source.buffer = audioBuffer;
 	        source.connect(context.destination);
@@ -18766,7 +18793,7 @@ COCKPIT_HTML = """<!doctype html>
 	        } catch (err) {
 	          reject(err);
 	        }
-	      });
+	      }), playbackTimeoutMs, "Přehrávání zvuku");
 	      return true;
 	    }
 
@@ -18794,6 +18821,11 @@ COCKPIT_HTML = """<!doctype html>
 	        showMessage("Nejdřív označ text, který mám přečíst.");
 	        return;
 	      }
+	      if (voiceSpeechInProgress) {
+	        recordVoiceFrontendEvent("audio_speak_skipped_in_progress", {source: options.userGesture ? "manual" : "automatic"});
+	        return;
+	      }
+	      voiceSpeechInProgress = true;
 	      const allowSystemFallback = options.allowSystemFallback !== false && shouldUseSystemSpeechFallback();
 	      button.disabled = true;
 	      button.classList.remove("needs-tap");
@@ -18830,7 +18862,7 @@ COCKPIT_HTML = """<!doctype html>
 	                updateVoiceAudioUnlockUi(false);
 	                recordVoiceFrontendEvent("audio_autoplay_blocked", {player: "audio_context"});
 	              } else {
-	                recordFrontendError(contextPlayErr);
+	                recordVoiceFrontendEvent("audio_context_fallback", {error: String(contextPlayErr)});
 	              }
 	            }
 	          }
@@ -18873,6 +18905,7 @@ COCKPIT_HTML = """<!doctype html>
 	        showMessage(`Chyba hlasového výstupu: ${err}`);
 	      } finally {
 	        button.disabled = false;
+	        voiceSpeechInProgress = false;
 	      }
 	    }
 
