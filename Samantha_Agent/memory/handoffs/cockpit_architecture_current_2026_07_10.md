@@ -222,6 +222,19 @@ Rucni retest po prvnim vykonovem kroku:
   prosly. Monolit klesl na 22 454 radku a 331 funkci, tedy pod baseline.
 - GitHub Actions quality gate beh cislo 5 pro commit `17729ec` skoncil uspesne
   za 1 minutu 29 sekund.
+- Read-only inventura mrtveho a legacy kodu je hotova v
+  `reports/cockpit_dead_legacy_code_inventory_2026_07_10.md`; necetla private
+  obsahy a nemenila aplikacni kod.
+- Vsech 67 POST cest ma presnou registry kartu a spravny handler. Ve trech
+  hlavnich HTML dokumentech nebyla nalezena duplicitni nebo definition-only
+  JavaScript funkce, duplicitni ID ani chybejici DOM cil.
+- Z 331 top-level funkci monolitu je 323 staticky dosazitelnych z produkcnich
+  vstupu. Osm nedosazitelnych funkci tvori stary e-mailovy Markdown prehled,
+  nahrazeny PDF resolver a starou lokalni Janicka vetev.
+- Spolu s nepouzitym launcher helperem a full-replacement reminders wrapperem
+  tvori silni kandidati 255 radku funkci. Nic nebylo odstraneno.
+- Pet API cest bez aktivni UI vazby potrebuje pred pripadnym odstranenim
+  kontrolu externich Shortcuts, bookmarku a servisnich klientu.
 
 Co neni hotove:
 
@@ -232,6 +245,8 @@ Co neni hotove:
   a Quick Notes index jsou zamcene. Samostatny urgent-reminders index,
   dokumenty a e-maily jeste prevedene nejsou.
 - `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem.
+- Cleanup kandidati jsou pouze zdokumentovani; zadny kod ani endpoint nebyl
+  odstranen. U peti podezrelych API cest chybi registr externich klientu.
 - Python zavislosti zatim nejsou pripnute na konkretni verze.
 - VoiceBridge nema jeden explicitni stavovy model prikazu.
 - Dokumentove a e-mailove workflow nemaji jednotnou repository/transakcni
@@ -239,18 +254,21 @@ Co neni hotove:
 
 Dalsi krok:
 
-Vytvorit read-only inventuru kandidatu mrtveho a legacy kodu bez mazani. U kazde
-polozky oddelit staticky dukaz, endpoint/JavaScript vazbu, testove kryti a
-bezpecnou provozni stopu. Samostatny urgent-reminders index zustava evidovany
-pro dalsi persistence davku. PDF browser a post-call audio retest jsou odlozene.
+Mila rozhodne mezi dvema malymi bezpecnymi davkami: cleanup R1 bez zmeny chovani
+(dva importy, nahrazeny PDF resolver, nepouzity launcher helper a nepouzity
+full-replacement reminders wrapper), nebo zamcena transakce pro samostatny
+urgent-reminders index. Pet podezrelych API cest zatim nemazat bez kontroly
+externich klientu. PDF browser a post-call audio retest jsou odlozene.
 
 Navrhovane dalsi kroky:
 
-1. Udelat read-only inventuru mrtveho/legacy kodu a nic nemazat bez vice dukazu.
-2. Po malych davkach prejit na urgent reminders, dokumenty a nakonec e-mail metadata.
-3. Postupne rozdelit monolit pri zachovani endpointu:
+1. Po Milove volbe udelat cleanup R1, nebo zamknout urgent-reminders index.
+2. Janicka a stary e-mailovy parser mazat az po popsanem rucnim/recovery overeni.
+3. Podezrele API cesty proverit proti Shortcuts a servisnim klientum.
+4. Po malych davkach prejit na dokumenty a nakonec e-mail metadata.
+5. Postupne rozdelit monolit pri zachovani endpointu:
    status/health -> voice -> documents -> email -> staticky frontend.
-4. Zavadet explicitni stavove modely a repository vrstvy po oblastech, ne
+6. Zavadet explicitni stavove modely a repository vrstvy po oblastech, ne
    jednim velkym prepisem.
 
 Handoff strategie pro tento program:
