@@ -53,6 +53,10 @@ První integrace je záměrně nízkoriziková:
 3. První VoiceBridge rollout převádí pouze čisté přepisy
    `adam_voice_mode_status.json` a `last_adam_response.json` na atomický zamčený
    JSON zápis. Pending stav, schvalování, historie JSONL a doručování se nemění.
+4. Druhý VoiceBridge rollout převádí všechny přechody
+   `pending_for_adam.json` na jednu zamčenou read-validate-modify-write
+   transakci. Jiný aktivní pokyn vrací `pending_conflict`, stejná operace je
+   idempotentní a historii zapisuje jen proces, který přechod skutečně provedl.
 
 Existující soukromá data se nepřesouvají, nepřepisují dávkově ani nemigrují.
 
@@ -71,11 +75,18 @@ Existující soukromá data se nepřesouvají, nepřepisují dávkově ani nemig
 - Po nasazení byl Voice Mode watcher bezpečně restartován bez pending pokynu,
   vrátil se do `listening`, zachoval terminálový bridge a živě vytvořil status
   lock. Relevantní sada má 413 testů OK.
+- Dva procesy souběžně zakládající rozdílný pending mají právě jednoho vítěze;
+  druhý aktivní pokyn nepřepíše. Dva procesy dokončující jeden pending vytvoří
+  právě jednu finální historii a opakované stejné save/approval neprovede druhý
+  replace.
+- Živá idempotentní transakce nad skutečným zpracovaným pending stavem vytvořila
+  stabilní lock a SHA-256 obsahu zůstal beze změny. Po tomto rolloutu prošlo 418
+  relevantních testů, watcher `listening` a oba smoke checky.
 
 ## Doporučené další pořadí rolloutů
 
-1. Navrhnout samostatnou VoiceBridge transakci pro pending read-modify-write;
-   historii JSONL řešit odděleně a zachovat vlastnictví doručení.
+1. Převést VoiceBridge historii JSONL na zamčený append; zachovat rozhodnutí,
+   které routy smějí aktualizovat poslední finální odpověď.
 2. Reminders a Quick Notes registry s explicitní zamčenou transakcí.
 3. Dokumentové registry a lifecycle JSONL po menších skupinách s consistency
    testem po každé skupině.

@@ -12,7 +12,7 @@ from typing import Any, Callable
 from agents import Agent, Runner
 from dotenv import load_dotenv
 
-from app.file_persistence import atomic_write_json
+from app.file_persistence import FilePersistenceError, atomic_write_json, update_json_file
 from app.speech.report import speak_report
 from app.speech.terminal_bridge import deliver_voice_command_to_terminal
 from app.speech.voice_inbox import (
@@ -143,6 +143,74 @@ def should_speak_voice_result(*, pending: dict[str, Any]) -> bool:
     return is_final_voice_response_route(reason)
 
 
+class _PendingTransactionSkipped(RuntimeError):
+    def __init__(self, result: Any):
+        super().__init__("Pending transaction skipped.")
+        self.result = result
+
+
+def _pending_missing_payload(path: Path) -> dict[str, Any]:
+    return {
+        "ok": True,
+        "pending": False,
+        "status": "none",
+        "message": "Žádný hlasový pokyn nečeká na Adama.",
+        "path": str(path),
+    }
+
+
+def _pending_error_payload(path: Path, message: str) -> dict[str, Any]:
+    return {
+        "ok": False,
+        "pending": False,
+        "status": "error",
+        "message": message,
+        "path": str(path),
+    }
+
+
+def _normalized_pending_payload(current: Any, path: Path) -> dict[str, Any]:
+    if current is None:
+        return _pending_missing_payload(path)
+    if not isinstance(current, dict):
+        return _pending_error_payload(path, "Čekající hlasový pokyn není JSON objekt.")
+    payload = dict(current)
+    payload.setdefault("ok", True)
+    payload.setdefault("pending", payload.get("status") == "pending_for_adam")
+    payload.setdefault("status", "pending_for_adam" if payload.get("pending") else "unknown")
+    payload.setdefault("path", str(path))
+    return payload
+
+
+def _skip_pending_transaction(result: Any) -> None:
+    raise _PendingTransactionSkipped(result)
+
+
+def _run_pending_transaction(
+    path: Path,
+    updater: Callable[[Any], dict[str, Any]],
+) -> tuple[Any, bool]:
+    try:
+        updated = update_json_file(path, updater, default=None)
+        return updated, True
+    except _PendingTransactionSkipped as exc:
+        return exc.result, False
+    except (FilePersistenceError, OSError, json.JSONDecodeError) as exc:
+        return _pending_error_payload(
+            path,
+            f"Čekající hlasový pokyn nejde bezpečně aktualizovat: {type(exc).__name__}.",
+        ), False
+
+
+def _pending_command_identity(payload: dict[str, Any]) -> tuple[str, str, str]:
+    command = payload.get("command") if isinstance(payload.get("command"), dict) else {}
+    return (
+        str(command.get("created_at") or "").strip(),
+        str(command.get("path") or "").strip(),
+        str(command.get("text") or payload.get("text") or "").strip(),
+    )
+
+
 def save_last_adam_response(
     *,
     user_text: str,
@@ -253,8 +321,8 @@ def save_pending_for_adam(
     path: Path = ADAM_PENDING_COMMAND_PATH,
     history_path: Path = ADAM_VOICE_HISTORY_PATH,
 ) -> dict[str, Any]:
-    path.parent.mkdir(parents=True, exist_ok=True)
     now = utc_now()
+    command_payload = voice_command_to_dict(command)
     payload: dict[str, Any] = {
         "ok": True,
         "pending": True,
@@ -262,14 +330,37 @@ def save_pending_for_adam(
         "reason": reason,
         "message": message,
         "text": command.text.strip(),
-        "command": voice_command_to_dict(command),
+        "command": command_payload,
         "voice_history": load_voice_history(path=history_path, limit=6),
         "created_at": now,
         "updated_at": now,
         "path": str(path),
     }
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return payload
+    incoming_identity = _pending_command_identity(payload)
+
+    def save_if_available(current: Any) -> dict[str, Any]:
+        existing = _normalized_pending_payload(current, path)
+        if not existing.get("ok"):
+            _skip_pending_transaction(existing)
+        if existing.get("pending"):
+            if _pending_command_identity(existing) == incoming_identity:
+                _skip_pending_transaction(existing)
+            _skip_pending_transaction(
+                {
+                    "ok": False,
+                    "pending": True,
+                    "status": "pending_conflict",
+                    "message": (
+                        "Předchozí hlasový pokyn stále čeká na Adama. "
+                        "Nový pokyn ho nepřepsal; dokonči nebo zamítni nejdřív předchozí pokyn."
+                    ),
+                    "path": str(path),
+                }
+            )
+        return payload
+
+    result, _changed = _run_pending_transaction(path, save_if_available)
+    return result
 
 
 def load_pending_for_adam(
@@ -277,28 +368,12 @@ def load_pending_for_adam(
     path: Path = ADAM_PENDING_COMMAND_PATH,
 ) -> dict[str, Any]:
     if not path.exists():
-        return {
-            "ok": True,
-            "pending": False,
-            "status": "none",
-            "message": "Žádný hlasový pokyn nečeká na Adama.",
-            "path": str(path),
-        }
+        return _pending_missing_payload(path)
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        return {
-            "ok": False,
-            "pending": False,
-            "status": "error",
-            "message": f"Čekající hlasový pokyn nejde načíst: {exc}",
-            "path": str(path),
-        }
-    payload.setdefault("ok", True)
-    payload.setdefault("pending", payload.get("status") == "pending_for_adam")
-    payload.setdefault("status", "pending_for_adam" if payload.get("pending") else "unknown")
-    payload.setdefault("path", str(path))
-    return payload
+        return _pending_error_payload(path, f"Čekající hlasový pokyn nejde načíst: {exc}")
+    return _normalized_pending_payload(payload, path)
 
 
 def mark_pending_for_adam_processed(
@@ -307,30 +382,39 @@ def mark_pending_for_adam_processed(
     path: Path = ADAM_PENDING_COMMAND_PATH,
     history_path: Path = ADAM_VOICE_HISTORY_PATH,
 ) -> dict[str, Any]:
-    pending = load_pending_for_adam(path=path)
-    if not pending.get("ok"):
-        return pending
-    if not pending.get("pending"):
-        pending["ok"] = False
-        pending["message"] = "Žádný čekající hlasový pokyn není připravený k označení jako vyřízený."
+    response_text = str(adam_response or "").strip()
+
+    def mark_processed(current: Any) -> dict[str, Any]:
+        pending = _normalized_pending_payload(current, path)
+        if not pending.get("ok"):
+            _skip_pending_transaction(pending)
+        if not pending.get("pending"):
+            if (
+                pending.get("status") == "processed_by_codex"
+                and str(pending.get("response") or "").strip() == response_text
+            ):
+                _skip_pending_transaction(pending)
+            rejected = dict(pending)
+            rejected["ok"] = False
+            rejected["message"] = "Žádný čekající hlasový pokyn není připravený k označení jako vyřízený."
+            _skip_pending_transaction(rejected)
+        now = utc_now()
+        pending["pending"] = False
+        pending["status"] = "processed_by_codex"
+        pending["response"] = response_text
+        pending["processed_at"] = now
+        pending["updated_at"] = now
         return pending
 
-    now = utc_now()
-    response_text = str(adam_response or "").strip()
-    pending["pending"] = False
-    pending["status"] = "processed_by_codex"
-    pending["response"] = response_text
-    pending["processed_at"] = now
-    pending["updated_at"] = now
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(pending, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    append_manual_voice_history_turn(
-        user_text=str(pending.get("text") or ""),
-        adam_response=response_text,
-        route="codex_manual",
-        path=history_path,
-    )
-    return pending
+    result, changed = _run_pending_transaction(path, mark_processed)
+    if changed:
+        append_manual_voice_history_turn(
+            user_text=str(result.get("text") or ""),
+            adam_response=response_text,
+            route="codex_manual",
+            path=history_path,
+        )
+    return result
 
 
 def mark_pending_for_adam_processing_started(
@@ -338,22 +422,31 @@ def mark_pending_for_adam_processing_started(
     message: str = "Zpráva vložena do chatu a zahájeno zpracování.",
     path: Path = ADAM_PENDING_COMMAND_PATH,
 ) -> dict[str, Any]:
-    pending = load_pending_for_adam(path=path)
-    if not pending.get("ok"):
-        return pending
-    if not pending.get("pending"):
-        pending["ok"] = False
-        pending["message"] = "Žádný čekající hlasový pokyn není připravený k označení jako převzatý."
+    normalized_message = (
+        str(message or "").strip()
+        or "Zpráva vložena do chatu a zahájeno zpracování."
+    )
+
+    def mark_processing(current: Any) -> dict[str, Any]:
+        pending = _normalized_pending_payload(current, path)
+        if not pending.get("ok"):
+            _skip_pending_transaction(pending)
+        if pending.get("pending") and pending.get("status") == "processing_by_codex":
+            _skip_pending_transaction(pending)
+        if not pending.get("pending"):
+            rejected = dict(pending)
+            rejected["ok"] = False
+            rejected["message"] = "Žádný čekající hlasový pokyn není připravený k označení jako převzatý."
+            _skip_pending_transaction(rejected)
+        now = utc_now()
+        pending["status"] = "processing_by_codex"
+        pending["processing_started_at"] = now
+        pending["updated_at"] = now
+        pending["message"] = normalized_message
         return pending
 
-    now = utc_now()
-    pending["status"] = "processing_by_codex"
-    pending["processing_started_at"] = now
-    pending["updated_at"] = now
-    pending["message"] = str(message or "").strip() or "Zpráva vložena do chatu a zahájeno zpracování."
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(pending, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return pending
+    result, _changed = _run_pending_transaction(path, mark_processing)
+    return result
 
 
 def update_pending_approval(
@@ -370,34 +463,41 @@ def update_pending_approval(
             "message": "Neplatné rozhodnutí. Použij approved nebo rejected.",
             "path": str(path),
         }
-    pending = load_pending_for_adam(path=path)
-    if not pending.get("ok"):
-        return pending
-    if not pending.get("pending"):
-        pending["ok"] = False
-        pending["status"] = "no_pending_command"
-        pending["message"] = "Žádný hlasový pokyn nečeká na schválení."
+    normalized_note = str(note or "").strip()
+
+    def apply_approval(current: Any) -> dict[str, Any]:
+        pending = _normalized_pending_payload(current, path)
+        if not pending.get("ok"):
+            _skip_pending_transaction(pending)
+        approval = pending.get("approval") if isinstance(pending.get("approval"), dict) else {}
+        if pending.get("approval_status") == normalized and str(approval.get("note") or "").strip() == normalized_note:
+            _skip_pending_transaction(pending)
+        if not pending.get("pending"):
+            rejected = dict(pending)
+            rejected["ok"] = False
+            rejected["status"] = "no_pending_command"
+            rejected["message"] = "Žádný hlasový pokyn nečeká na schválení."
+            _skip_pending_transaction(rejected)
+        now = utc_now()
+        pending["approval"] = {
+            "decision": normalized,
+            "decided_at": now,
+            "note": normalized_note,
+        }
+        pending["approval_status"] = normalized
+        pending["updated_at"] = now
+        if normalized == "approved":
+            pending["status"] = "approved_in_cockpit"
+            pending["pending"] = True
+            pending["message"] = "Žádost byla schválena v Cockpitu a čeká na převzetí Adamem."
+        else:
+            pending["status"] = "rejected_by_user"
+            pending["pending"] = False
+            pending["message"] = "Žádost byla v Cockpitu zamítnuta."
         return pending
 
-    now = utc_now()
-    pending["approval"] = {
-        "decision": normalized,
-        "decided_at": now,
-        "note": str(note or "").strip(),
-    }
-    pending["approval_status"] = normalized
-    pending["updated_at"] = now
-    if normalized == "approved":
-        pending["status"] = "approved_in_cockpit"
-        pending["pending"] = True
-        pending["message"] = "Žádost byla schválena v Cockpitu a čeká na převzetí Adamem."
-    else:
-        pending["status"] = "rejected_by_user"
-        pending["pending"] = False
-        pending["message"] = "Žádost byla v Cockpitu zamítnuta."
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(pending, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return pending
+    result, _changed = _run_pending_transaction(path, apply_approval)
+    return result
 
 
 def mark_matching_pending_delivered_to_terminal(
@@ -405,20 +505,24 @@ def mark_matching_pending_delivered_to_terminal(
     *,
     path: Path = ADAM_PENDING_COMMAND_PATH,
 ) -> dict[str, Any] | None:
-    pending = load_pending_for_adam(path=path)
-    if not pending.get("ok") or not pending.get("pending"):
-        return None
-    if str(pending.get("text") or "").strip() != command.text.strip():
-        return None
+    def mark_delivered(current: Any) -> dict[str, Any]:
+        pending = _normalized_pending_payload(current, path)
+        matches = str(pending.get("text") or "").strip() == command.text.strip()
+        if not pending.get("ok") or not matches:
+            _skip_pending_transaction(None)
+        if not pending.get("pending"):
+            if pending.get("status") == "processed_by_terminal_bridge":
+                _skip_pending_transaction(pending)
+            _skip_pending_transaction(None)
+        now = utc_now()
+        pending["pending"] = False
+        pending["status"] = "processed_by_terminal_bridge"
+        pending["terminal_delivered_at"] = now
+        pending["updated_at"] = now
+        return pending
 
-    now = utc_now()
-    pending["pending"] = False
-    pending["status"] = "processed_by_terminal_bridge"
-    pending["terminal_delivered_at"] = now
-    pending["updated_at"] = now
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(pending, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return pending
+    result, _changed = _run_pending_transaction(path, mark_delivered)
+    return result
 
 
 def save_codex_approval_request(
@@ -727,6 +831,29 @@ def build_spoken_result_for_command(
     if not command.ok:
         return "Hlasový pokyn nemá použitelný text. Zkus ho prosím nahrát znovu."
     pending_reason = pending_reason_for_command(command)
+
+    def persist_pending_or_report_conflict(
+        reason: str,
+        message: str,
+        *,
+        stored_message: str | None = None,
+    ) -> tuple[str, str]:
+        if pending_path is None:
+            return message, reason
+        saved = save_pending_for_adam(
+            command,
+            reason=reason,
+            message=stored_message if stored_message is not None else message,
+            path=pending_path,
+            history_path=history_path,
+        )
+        if saved.get("ok"):
+            return message, reason
+        return (
+            str(saved.get("message") or "Nový hlasový pokyn se nepodařilo bezpečně uložit."),
+            str(saved.get("status") or "pending_write_failed"),
+        )
+
     if pending_reason in {"requires_confirmation", "outbound_confirmation"}:
         if pending_reason == "outbound_confirmation":
             message = (
@@ -736,15 +863,8 @@ def build_spoken_result_for_command(
             )
         else:
             message = "Pokyn jsem přijal, ale je rizikový nebo mění data. Neprovedu ho bez výslovného potvrzení v chatu."
-        if pending_path is not None:
-            save_pending_for_adam(
-                command,
-                reason=pending_reason,
-                message=message,
-                path=pending_path,
-                history_path=history_path,
-            )
-        append_voice_history_turn(command, adam_response=message, route=pending_reason, path=history_path)
+        message, history_route = persist_pending_or_report_conflict(pending_reason, message)
+        append_voice_history_turn(command, adam_response=message, route=history_route, path=history_path)
         return message
     if pending_reason == "codex_work":
         if terminal_bridge is not None:
@@ -761,15 +881,13 @@ def build_spoken_result_for_command(
                     "Zpráva byla vložena do hlasového inboxu. "
                     "Předání do Codex terminálu ale není ověřené. Čekám na Adamovu odpověď."
                 )
-                if pending_path is not None:
-                    save_pending_for_adam(
-                        command,
-                        reason="terminal_delivery_pending_reply",
-                        message=f"{message} Doručovací status: {bridge_status}. Detail: {bridge_message}",
-                        path=pending_path,
-                        history_path=history_path,
-                    )
-                append_voice_history_turn(command, adam_response=message, route="terminal_delivery_pending_reply", path=history_path)
+                pending_message = f"{message} Doručovací status: {bridge_status}. Detail: {bridge_message}"
+                message, history_route = persist_pending_or_report_conflict(
+                    "terminal_delivery_pending_reply",
+                    message,
+                    stored_message=pending_message,
+                )
+                append_voice_history_turn(command, adam_response=message, route=history_route, path=history_path)
                 return message
             bridge_status = str(bridge_result.get("status") or "terminal_bridge_failed")
             bridge_reason = str(bridge_result.get("reason") or bridge_result.get("message") or "Terminálový bridge pokyn nepřevzal.")
@@ -783,26 +901,16 @@ def build_spoken_result_for_command(
                     "Pokyn jsem do terminálu nevložil, protože vyžaduje ruční přesnou formulaci v Codex terminálu. "
                     "Nechávám ho Adamovi připravený v hlasovém inboxu."
                 )
-            if pending_path is not None:
-                save_pending_for_adam(
-                    command,
-                    reason=bridge_status,
-                    message=f"{message} Důvod: {bridge_reason}",
-                    path=pending_path,
-                    history_path=history_path,
-                )
-            append_voice_history_turn(command, adam_response=message, route=bridge_status, path=history_path)
+            message, history_route = persist_pending_or_report_conflict(
+                bridge_status,
+                message,
+                stored_message=f"{message} Důvod: {bridge_reason}",
+            )
+            append_voice_history_turn(command, adam_response=message, route=history_route, path=history_path)
             return message
         message = "Pokyn jsem přijal. Tohle vyžaduje pracovní převzetí Adamem v Codexu, takže ho nechávám připravený v hlasovém inboxu."
-        if pending_path is not None:
-            save_pending_for_adam(
-                command,
-                reason=pending_reason,
-                message=message,
-                path=pending_path,
-                history_path=history_path,
-            )
-        append_voice_history_turn(command, adam_response=message, route=pending_reason, path=history_path)
+        message, history_route = persist_pending_or_report_conflict(pending_reason, message)
+        append_voice_history_turn(command, adam_response=message, route=history_route, path=history_path)
         return message
     try:
         if response_generator is generate_direct_voice_response:
@@ -815,15 +923,12 @@ def build_spoken_result_for_command(
     except Exception as exc:
         detail = safe_exception_summary(exc)
         message = "Pokyn jsem přijal, ale automatická odpověď se nepovedla. Nechávám ho připravený Adamovi k převzetí v Codexu."
-        if pending_path is not None:
-            save_pending_for_adam(
-                command,
-                reason="direct_response_failed",
-                message=f"{message} Technický detail: {detail}",
-                path=pending_path,
-                history_path=history_path,
-            )
-        append_voice_history_turn(command, adam_response=message, route="direct_response_failed", path=history_path)
+        message, history_route = persist_pending_or_report_conflict(
+            "direct_response_failed",
+            message,
+            stored_message=f"{message} Technický detail: {detail}",
+        )
+        append_voice_history_turn(command, adam_response=message, route=history_route, path=history_path)
         return message
 
 

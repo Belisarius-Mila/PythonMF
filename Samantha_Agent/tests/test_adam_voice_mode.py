@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -22,6 +23,7 @@ from app.speech.adam_voice_mode import (
     load_voice_history,
     load_voice_mode_status,
     mark_pending_for_adam_processed,
+    save_pending_for_adam,
     save_last_adam_response,
     save_codex_approval_request,
     spoken_notice_for_command,
@@ -29,7 +31,10 @@ from app.speech.adam_voice_mode import (
     voice_command_needs_codex_work,
     write_voice_mode_status,
 )
-from app.speech.voice_inbox import load_latest_voice_command
+from app.speech.voice_inbox import load_latest_voice_command, parse_voice_command_file
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 def write_voice_command(path: Path, text: str) -> None:
@@ -44,6 +49,188 @@ def write_voice_command(path: Path, text: str) -> None:
 
 
 class AdamVoiceModeTests(unittest.TestCase):
+    def test_same_pending_command_save_is_idempotent_without_replace(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            inbox = Path(temp_dir)
+            pending_path = inbox / "pending_for_adam.json"
+            write_voice_command(inbox / "latest_voice_command.md", "Zkontroluj stav Cockpitu.")
+            command = load_latest_voice_command(inbox_dir=inbox)
+            first = save_pending_for_adam(
+                command,
+                reason="codex_work",
+                message="Čeká na Adama.",
+                path=pending_path,
+                history_path=inbox / "history.jsonl",
+            )
+
+            with patch("app.file_persistence.os.replace", side_effect=OSError("must not replace")):
+                second = save_pending_for_adam(
+                    command,
+                    reason="codex_work",
+                    message="Čeká na Adama.",
+                    path=pending_path,
+                    history_path=inbox / "history.jsonl",
+                )
+
+            self.assertEqual(second, first)
+            self.assertTrue(second["pending"])
+            self.assertEqual(second["status"], "pending_for_adam")
+
+    def test_same_pending_approval_is_idempotent_without_replace(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            pending_path = root / "pending_for_adam.json"
+            write_voice_command(root / "latest_voice_command.md", "Potvrď bezpečný test.")
+            command = load_latest_voice_command(inbox_dir=root)
+            save_pending_for_adam(
+                command,
+                reason="requires_confirmation",
+                message="Čeká na potvrzení.",
+                path=pending_path,
+                history_path=root / "history.jsonl",
+            )
+            first = update_pending_approval(decision="approved", note="Schváleno.", path=pending_path)
+
+            with patch("app.file_persistence.os.replace", side_effect=OSError("must not replace")):
+                second = update_pending_approval(decision="approved", note="Schváleno.", path=pending_path)
+
+            self.assertEqual(second, first)
+            self.assertEqual(second["status"], "approved_in_cockpit")
+            self.assertTrue(second["pending"])
+
+    def test_two_processes_cannot_overwrite_different_pending_commands(self) -> None:
+        script = """
+import json
+import sys
+import time
+from pathlib import Path
+from app.speech.adam_voice_mode import save_pending_for_adam
+from app.speech.voice_inbox import VoiceCommand, VoiceCommandTriage
+
+pending_path = Path(sys.argv[1])
+start_path = Path(sys.argv[2])
+worker = sys.argv[3]
+while not start_path.exists():
+    time.sleep(0.01)
+triage = VoiceCommandTriage(risk="read_only", action="execute_read_only", reason="test", requires_confirmation=False)
+command = VoiceCommand(ok=True, path=f"/tmp/{worker}.md", created_at=f"2026-07-10T14:00:0{worker}+00:00", status="transcribed_only_not_executed", text=f"Pokyn {worker}", triage=triage, message="test")
+result = save_pending_for_adam(command, reason="codex_work", message="Čeká na Adama.", path=pending_path, history_path=pending_path.parent / "history.jsonl")
+print(json.dumps({"ok": result.get("ok"), "status": result.get("status")}, ensure_ascii=False))
+"""
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            pending_path = root / "pending_for_adam.json"
+            start_path = root / "start"
+            processes = [
+                subprocess.Popen(
+                    [sys.executable, "-c", script, str(pending_path), str(start_path), worker],
+                    cwd=PROJECT_ROOT,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
+                for worker in ("1", "2")
+            ]
+            start_path.write_text("start\n", encoding="utf-8")
+            outputs = [process.communicate(timeout=20) for process in processes]
+            results = []
+            for process, (stdout, stderr) in zip(processes, outputs, strict=True):
+                self.assertEqual(process.returncode, 0, stderr)
+                results.append(json.loads(stdout))
+            pending = json.loads(pending_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(sum(1 for item in results if item["ok"]), 1)
+        self.assertEqual(sum(1 for item in results if item["status"] == "pending_conflict"), 1)
+        self.assertIn(pending["text"], {"Pokyn 1", "Pokyn 2"})
+        self.assertTrue(pending["pending"])
+
+    def test_two_processes_complete_pending_exactly_once(self) -> None:
+        script = """
+import json
+import sys
+import time
+from pathlib import Path
+from app.speech.adam_voice_mode import mark_pending_for_adam_processed
+
+pending_path = Path(sys.argv[1])
+history_path = Path(sys.argv[2])
+start_path = Path(sys.argv[3])
+worker = sys.argv[4]
+while not start_path.exists():
+    time.sleep(0.01)
+result = mark_pending_for_adam_processed(adam_response=f"Odpověď {worker}", path=pending_path, history_path=history_path)
+print(json.dumps({"ok": result.get("ok"), "status": result.get("status"), "response": result.get("response")}, ensure_ascii=False))
+"""
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            pending_path = root / "pending_for_adam.json"
+            history_path = root / "history.jsonl"
+            start_path = root / "start"
+            write_voice_command(root / "latest_voice_command.md", "Dokonči test.")
+            command = load_latest_voice_command(inbox_dir=root)
+            save_pending_for_adam(
+                command,
+                reason="codex_work",
+                message="Čeká na Adama.",
+                path=pending_path,
+                history_path=history_path,
+            )
+            processes = [
+                subprocess.Popen(
+                    [sys.executable, "-c", script, str(pending_path), str(history_path), str(start_path), worker],
+                    cwd=PROJECT_ROOT,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
+                for worker in ("1", "2")
+            ]
+            start_path.write_text("start\n", encoding="utf-8")
+            outputs = [process.communicate(timeout=20) for process in processes]
+            results = []
+            for process, (stdout, stderr) in zip(processes, outputs, strict=True):
+                self.assertEqual(process.returncode, 0, stderr)
+                results.append(json.loads(stdout))
+            pending = json.loads(pending_path.read_text(encoding="utf-8"))
+            history = [json.loads(line) for line in history_path.read_text(encoding="utf-8").splitlines()]
+
+        self.assertEqual(sum(1 for item in results if item["ok"]), 1)
+        self.assertEqual(len(history), 1)
+        self.assertEqual(pending["status"], "processed_by_codex")
+        self.assertEqual(pending["response"], history[0]["adam_response"])
+
+    def test_pending_conflict_is_reported_without_replacing_first_command(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            pending_path = root / "pending_for_adam.json"
+            history_path = root / "history.jsonl"
+            first_path = root / "first.md"
+            second_path = root / "second.md"
+            write_voice_command(first_path, "První pracovní pokyn.")
+            write_voice_command(second_path, "Druhý pracovní pokyn.")
+            first = parse_voice_command_file(first_path)
+            second = parse_voice_command_file(second_path)
+            save_pending_for_adam(
+                first,
+                reason="codex_work",
+                message="První čeká.",
+                path=pending_path,
+                history_path=history_path,
+            )
+
+            response = build_spoken_result_for_command(
+                second,
+                response_generator=lambda text: self.fail("work command should not call direct responder"),
+                pending_path=pending_path,
+                history_path=history_path,
+            )
+            pending = json.loads(pending_path.read_text(encoding="utf-8"))
+            history = load_voice_history(path=history_path, limit=3)
+
+        self.assertIn("Předchozí hlasový pokyn stále čeká", response)
+        self.assertEqual(pending["text"], "První pracovní pokyn.")
+        self.assertEqual(history[-1]["route"], "pending_conflict")
+
     def test_voice_status_uses_atomic_locked_json_write(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             status_path = Path(temp_dir) / "adam_voice_mode_status.json"

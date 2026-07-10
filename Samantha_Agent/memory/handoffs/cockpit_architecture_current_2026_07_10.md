@@ -157,15 +157,27 @@ Rucni retest po prvnim vykonovem kroku:
 - Po nasazeni byl Voice Mode watcher restartovan bez cekajiciho pokynu, vratil
   se do `listening`, terminalovy bridge zustal zapnuty a zivy statusovy lock
   vznikl. Lokalni i Tailscale smoke check a 413 relevantnich testu prosly.
+- Vsechny prechody `pending_for_adam.json` nyni pouzivaji jeden zamceny
+  read-validate-modify-write cyklus. Dva ruzne aktivni pokyny se neprepisou:
+  prvni vyhraje a druhy dostane `pending_conflict`; stejny save, approval,
+  processing nebo finalni odpoved jsou idempotentni.
+- Watcher pri pending konfliktu vrati pravdivou zpravu a historii oznaci routou
+  `pending_conflict`, misto aby tvrdil, ze novy pokyn ulozil. Pri soubeznem
+  dokonceni historie vznikne jen procesu, ktery zmenu skutecne provedl.
+- Nove dvouprocesove testy potvrdily jednoho viteze pri zalozeni i dokonceni.
+  Cely relevantni balicek ma 418 testu OK.
+- Po nasazeni se watcher vratil do `listening`, terminalovy bridge zustal
+  zapnuty a idempotentni ziva transakce vytvorila pending lock bez zmeny SHA-256
+  obsahu. Lokalni i Tailscale smoke check prosly.
 
 Co neni hotove:
 
 - Zakladni stabilizace, HTTP hranice a iPhone hlas jsou funkcne potvrzene; PDF
   browser retest Mila vedome odlozil a post-call audio recovery ceka na pozdejsi
   rucni retest; ani jedno neni blokujici pro dalsi architekturu.
-- Sdilena persistence vrstva, prvni nizkorizikova integrace a dva ciste
-  VoiceBridge JSON prepisy jsou hotove. Pending read-modify-write, hlasova
-  historie JSONL, reminders, dokumenty a e-maily jeste prevedene nejsou.
+- Sdilena persistence vrstva, prvni nizkorizikova integrace, dva ciste
+  VoiceBridge JSON prepisy a pending transakce jsou hotove. Hlasova historie
+  JSONL, reminders, dokumenty a e-maily jeste prevedene nejsou.
 - `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem.
 - VoiceBridge nema jeden explicitni stavovy model prikazu.
 - Dokumentove a e-mailove workflow nemaji jednotnou repository/transakcni
@@ -173,16 +185,16 @@ Co neni hotove:
 
 Dalsi krok:
 
-Pred dalsi zmenou navrhnout samostatnou zamcenou transakci pro VoiceBridge
-`pending_for_adam.json`: nacist, overit ocekavany stav/prikaz, zmenit a atomicky
-ulozit pod jednim lockem. Nejdrive testovat konflikt dvou procesu a stale
-zachovat jednoho vlastnika doruceni. Historii JSONL resit az v dalsi oddelene
-davce. PDF browser a post-call audio retest zustavaji odlozene.
+V dalsi oddelene davce prevest VoiceBridge historii JSONL na zamceny append.
+Zachovat seznam finalnich a nefinalnich rout, aby transportni mezistav nikdy
+neprepsal posledni Adamovu odpoved. Pridat dvouprocesovy append test a regresni
+test `watcher running => no inline delivery`. PDF browser a post-call audio
+retest zustavaji odlozene.
 
 Navrhovane dalsi kroky:
 
-1. Navrhnout a otestovat VoiceBridge pending read-modify-write transakci.
-2. Samostatne resit hlasovou JSONL historii.
+1. Samostatne prevest hlasovou JSONL historii na zamceny append.
+2. Doplnit automatizovany invariant `watcher running => no inline delivery`.
 3. Po malych davkach prejit na reminders, dokumenty a nakonec e-mail metadata.
 4. Postupne rozdelit monolit pri zachovani endpointu:
    status/health -> voice -> documents -> email -> staticky frontend.
