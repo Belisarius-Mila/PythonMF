@@ -154,6 +154,15 @@ nebo pull request.
 - Závěrečná audio oprava je v commitu `18b9f63`. GitHub Actions Cockpit Quality
   Gate běh číslo 14 skončil úspěšně:
   `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29123726588`.
+- Fáze 1.2 byla po korekci rozsahu dokončena třemi dalšími řezy: commity
+  `b663589`, `9279fc0` a `561034a` vyjmuly transportní coordinator, delivery
+  persistence, runtime status, marker a watcher lifecycle. Monolit klesl z
+  22 263 na 21 786 řádků, tedy o 477 řádků.
+- Přímé coordinator/runtime testy rozšířily gate na 547 testů. Finální GitHub
+  Actions běh uspěl:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29125107857`.
+- Finální iPhone test potvrdil jediného watcher vlastníka, žádný inline attempt,
+  jednu odpověď a úspěšné přehrání do sluchátek.
 
 ## Co gate zatím neřeší
 

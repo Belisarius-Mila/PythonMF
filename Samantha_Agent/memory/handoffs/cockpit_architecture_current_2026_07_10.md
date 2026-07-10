@@ -391,6 +391,21 @@ Rucni retest po prvnim vykonovem kroku:
 - Zaverecna audio oprava je pushnuta v commitu `18b9f63`. GitHub Actions
   Cockpit Quality Gate beh cislo 14 skoncil uspesne:
   `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29123726588`.
+- Po Milove korekci rozsahu nebyla Faze 1.2 uzavrena po pouhem 30radkovem
+  cistem poklesu. Navazujici tri rezy vyjmuly inbox/delivery persistence,
+  transportni coordinator, runtime status, marker a start/stop watcheru do
+  `app/voice_bridge_coordinator.py` a `app/voice_bridge_runtime.py`.
+- `app/cockpit.py` klesl z 22 263 na 21 786 radku, tedy o 477 radku. Z
+  VoiceBridge backendu v nem zustaly tenke kompatibilni adaptery a frontend,
+  nikoli vlastni transportni nebo provozni orchestrace.
+- Prime testy coordinatoru/runtime hlidaji ownership, transport, managed screen,
+  rozdeleni relaci, marker a watcher lifecycle. Kanonicky gate ma 547 testu.
+- Implementacni commity jsou `b663589`, `9279fc0` a `561034a`. GitHub Actions
+  Cockpit Quality Gate finalniho kodu skoncil uspesne:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29125107857`.
+- Finalni iPhone test potvrdil jeden pokyn, watcher jako jedineho vlastnika,
+  zadny inline pokus, jednu odpoved a uspesne prehrani do sluchatek. Faze 1.2
+  je tim skutecne uzavrena.
 
 Co neni hotove:
 
