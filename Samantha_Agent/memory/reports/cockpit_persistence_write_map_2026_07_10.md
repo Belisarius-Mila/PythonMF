@@ -133,6 +133,9 @@ Existující soukromá data se nepřesouvají, nepřepisují dávkově ani nemig
 - Cílených 25 urgent/reminders/Quick Notes/Cockpit testů a celý quality gate s
   463 testy prošly. Lokální i Tailscale smoke check jsou zelené; obě adresy
   ukazují stejný serverový PID a code stamp. Živý sidecar lock existuje.
+- Implementace je pushnutá v commitu `6e6dc5c`. GitHub Actions Cockpit Quality
+  Gate běh č. 7 skončil úspěšně:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29109790245`.
 
 ## Doporučené další pořadí rolloutů
 

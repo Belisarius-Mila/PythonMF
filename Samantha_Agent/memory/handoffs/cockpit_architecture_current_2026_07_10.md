@@ -262,6 +262,9 @@ Rucni retest po prvnim vykonovem kroku:
   463 testu OK. Lokalni i Tailscale smoke check jsou zelene, obe adresy maji
   PID 9179 a code stamp `7898101b0363b08f`; zivy sidecar lock existuje.
 - Cesta ani JSON format se nemenily, private obsah se nemigroval ani nevypisoval.
+- Implementace je pushnuta v commitu `6e6dc5c`. GitHub Actions Cockpit Quality
+  Gate beh cislo 7 skoncil uspesne:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29109790245`.
 
 Co neni hotove:
 

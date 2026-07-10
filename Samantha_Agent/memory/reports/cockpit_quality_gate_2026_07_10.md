@@ -79,6 +79,9 @@ nebo pull request.
 - `app/urgent_reminders.py` a jeho nový samostatný dvouprocesový test jsou nyní
   přímo v lokálním gate i v GitHub Actions path filtrech. Lokální běh po zamčení
   urgent indexu prošel všech 463 testů.
+- GitHub Actions běh číslo 7 pro urgent-reminders commit `6e6dc5c` skončil
+  úspěšně:
+  `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29109790245`.
 
 ## Co gate zatím neřeší
 
