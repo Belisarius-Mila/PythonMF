@@ -4,14 +4,35 @@ import unittest
 from pathlib import Path
 
 from app.speech import TranscriptionError
+from app.speech.voice_inbox import VoiceCommand, VoiceCommandTriage
 from app.voice_bridge_coordinator import (
     VoiceBridgeCommandDependencies,
     coordinate_text_voice_command,
     coordinate_transcribed_voice_command,
+    deliver_voice_command_by_configured_transport,
+    deliver_voice_command_via_managed_screen,
+    selected_voice_delivery_transport,
 )
 
 
 class VoiceBridgeCoordinatorTests(unittest.TestCase):
+    @staticmethod
+    def safe_command() -> VoiceCommand:
+        return VoiceCommand(
+            ok=True,
+            path="/tmp/latest_voice_command.md",
+            created_at="2026-07-10T12:00:00+00:00",
+            status="transcribed_only_not_executed",
+            text="Ověř bezpečný stav.",
+            triage=VoiceCommandTriage(
+                risk="read_only",
+                action="codex_work",
+                reason="Bezpečný test.",
+                requires_confirmation=False,
+            ),
+            message="Načteno.",
+        )
+
     def test_running_watcher_is_the_only_owner_for_text_and_recording(self) -> None:
         saved_commands: list[dict[str, object]] = []
         inline_calls: list[dict[str, object]] = []
@@ -140,6 +161,43 @@ class VoiceBridgeCoordinatorTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "empty_voice_text")
         self.assertEqual(calls, [])
+
+    def test_transport_selector_keeps_local_aliases_and_safe_managed_default(self) -> None:
+        self.assertEqual(selected_voice_delivery_transport(environ={}), "local_tty")
+        self.assertEqual(selected_voice_delivery_transport(environ={"ADAM_VOICE_TRANSPORT": "sshl"}), "managed_screen")
+        self.assertEqual(selected_voice_delivery_transport(environ={"ADAM_VOICE_TRANSPORT": "unexpected"}), "managed_screen")
+
+    def test_managed_screen_delivery_uses_injected_runtime_adapters(self) -> None:
+        deliveries: list[tuple[str, bool]] = []
+
+        result = deliver_voice_command_via_managed_screen(
+            self.safe_command(),
+            starter=lambda: {"ok": True, "status": "already_running"},
+            ready_waiter=lambda: self.fail("already running service must not wait"),
+            screen_deliverer=lambda prompt, submit: deliveries.append((prompt, submit))
+            or {"ok": True, "verified": True, "status": "delivered_screen", "message": "screen ok"},
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["voice_transport"], "managed_screen")
+        self.assertEqual(len(deliveries), 1)
+        self.assertTrue(deliveries[0][1])
+        self.assertIn("Ověř bezpečný stav.", deliveries[0][0])
+
+    def test_configured_transport_delegates_to_exactly_one_adapter(self) -> None:
+        calls: list[str] = []
+        command = self.safe_command()
+
+        result = deliver_voice_command_by_configured_transport(
+            command,
+            transport="local_tty",
+            local_deliverer=lambda current, submit: calls.append("local")
+            or {"ok": True, "verified": True, "status": "delivered"},
+            managed_deliverer=lambda current, submit: calls.append("managed") or {},
+        )
+
+        self.assertEqual(calls, ["local"])
+        self.assertEqual(result["voice_transport"], "local_tty")
 
 
 if __name__ == "__main__":

@@ -174,28 +174,33 @@ from app.speech.adam_voice_mode import (
     ADAM_LAST_RESPONSE_PATH,
     ADAM_PENDING_COMMAND_PATH,
     ADAM_VOICE_HISTORY_PATH,
-    append_voice_history_turn,
     clear_codex_approval_request,
     load_voice_mode_status,
     load_last_adam_response,
     pid_exists,
-    save_pending_for_adam,
     update_pending_approval,
     write_voice_mode_status,
 )
 from app.speech.terminal_bridge import (
     CURRENT_CODEX_TTY_PATH,
-    assess_terminal_bridge,
-    build_codex_terminal_prompt,
     deliver_voice_command_to_terminal,
     discover_codex_ttys,
     normalize_tty,
 )
-from app.speech.voice_inbox import VoiceCommand, parse_voice_command_file, voice_command_to_dict
+from app.speech.voice_inbox import VoiceCommand
 from app.voice_bridge_coordinator import (
+    VOICE_FRONTEND_EVENTS_PATH,
     VoiceBridgeCommandDependencies,
     coordinate_text_voice_command,
     coordinate_transcribed_voice_command,
+    deliver_saved_voice_command_inline as coordinate_inline_voice_delivery,
+    deliver_voice_command_by_configured_transport as coordinate_configured_voice_delivery,
+    deliver_voice_command_via_managed_screen as coordinate_managed_screen_voice_delivery,
+    record_voice_delivery_attempt,
+    record_voice_delivery_issue_for_cockpit,
+    record_voice_transcription_failure as record_coordinator_transcription_failure,
+    save_voice_command_to_inbox,
+    selected_voice_delivery_transport,
     watcher_will_deliver_result as voice_watcher_will_deliver_result,
 )
 from scripts.autosave_status import autosave_status as read_autosave_runtime_status
@@ -213,8 +218,6 @@ SCANDOCU_SERVER_SCRIPT = PROJECT_ROOT / "scripts" / "scandocu_server.py"
 COCKPIT_RESTART_SCRIPT = PROJECT_ROOT / "scripts" / "restart_cockpit.py"
 ADAM_VOICE_MODE_SCRIPT = PROJECT_ROOT / "scripts" / "adam_voice_mode.py"
 ADAM_VOICE_MODE_LOG_FILE = PROJECT_ROOT / "data" / "private" / "voice_inbox" / "adam_voice_mode.log"
-VOICE_FRONTEND_EVENTS_PATH = PROJECT_ROOT / "data" / "private" / "voice_inbox" / "frontend_events.jsonl"
-VOICE_DELIVERY_TRANSPORT_ENV = "ADAM_VOICE_TRANSPORT"
 EMAIL_SESSION_HANDOFF_DIR = PROJECT_ROOT / "data" / "private" / "email_session_handoffs"
 LOCAL_SEZNAM_EMAIL_DIR = PROJECT_ROOT / "data" / "private" / "email_seznam"
 EMAIL_PROCESSING_DECISIONS_FILE = EMAIL_SESSION_HANDOFF_DIR / "email_processing_decisions.json"
@@ -10852,52 +10855,6 @@ def cockpit_edge_tts_action(
     }
 
 
-def save_voice_command_to_inbox(
-    transcription: dict[str, Any],
-    *,
-    inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
-    now: datetime | None = None,
-) -> dict[str, Any]:
-    text = safe_text(str(transcription.get("text", "") or "")).strip()
-    if not text:
-        raise ValueError("Chybí přepsaný text hlasového pokynu.")
-
-    created_at = (now or datetime.now(timezone.utc)).replace(microsecond=0)
-    stamp = created_at.strftime("%Y%m%d_%H%M%S")
-    inbox_dir.mkdir(parents=True, exist_ok=True)
-    command_path = inbox_dir / f"voice_command_{stamp}.md"
-    counter = 2
-    while command_path.exists():
-        command_path = inbox_dir / f"voice_command_{stamp}_{counter}.md"
-        counter += 1
-
-    content = (
-        "# Voice command\n\n"
-        f"Created at: {created_at.isoformat()}\n"
-        "Source: Samantha Cockpit / Hlasový pokyn\n"
-        "Status: transcribed_only_not_executed\n\n"
-        "## Text\n\n"
-        f"{text}\n"
-    )
-    command_path.write_text(content, encoding="utf-8")
-    latest_path = inbox_dir / "latest_voice_command.md"
-    latest_path.write_text(content, encoding="utf-8")
-
-    record = {
-        "created_at": created_at.isoformat(),
-        "path": str(relative_to_project(command_path)),
-        "latest_path": str(relative_to_project(latest_path)),
-        "text_chars": len(text),
-        "status": "transcribed_only_not_executed",
-    }
-    append_jsonl(inbox_dir / "index.jsonl", record)
-    return {
-        "saved": True,
-        "voice_command_path": str(relative_to_project(command_path)),
-        "latest_voice_command_path": str(relative_to_project(latest_path)),
-    }
-
-
 def deliver_saved_voice_command_inline(
     *,
     inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
@@ -10905,121 +10862,15 @@ def deliver_saved_voice_command_inline(
     pending_path: Path = ADAM_PENDING_COMMAND_PATH,
     history_path: Path = ADAM_VOICE_HISTORY_PATH,
 ) -> dict[str, Any]:
-    try:
-        command = parse_voice_command_file(inbox_dir / "latest_voice_command.md")
-    except OSError as exc:
-        return {
-            "voice_delivery_status": "voice_command_not_loaded",
-            "voice_delivery": {"ok": False, "message": str(exc)},
-            "voice_delivery_message": f"Hlasový pokyn byl uložen, ale nejde načíst pro okamžité předání: {exc}",
-        }
-
-    bridge = terminal_bridge or deliver_voice_command_by_configured_transport
-    bridge_result = bridge(command)
-    if bridge_result.get("ok") and bridge_result.get("verified"):
-        status = "voice_command_delivered"
-        message = "Hlasový pokyn byl uložen a předán přímo do Codexu."
-    elif bridge_result.get("ok"):
-        status = "voice_command_delivery_unverified"
-        message = (
-            "Zpráva byla vložena do hlasového inboxu. "
-            "Čekám na Adamovu odpověď."
-        )
-    else:
-        bridge_status = str(bridge_result.get("status") or "voice_command_delivery_failed")
-        bridge_message = str(bridge_result.get("reason") or bridge_result.get("message") or "bez detailu")
-        status = bridge_status
-        message = f"Hlasový pokyn byl uložen, ale okamžité předání do Codexu neproběhlo: {bridge_message}"
-    record_voice_delivery_attempt(
-        command=command,
-        bridge_result=bridge_result,
-        delivery_status=status,
-        message=message,
+    return coordinate_inline_voice_delivery(
         inbox_dir=inbox_dir,
+        configured_bridge=deliver_voice_command_by_configured_transport,
+        terminal_bridge=terminal_bridge,
+        pending_path=pending_path,
+        history_path=history_path,
+        attempt_recorder=record_voice_delivery_attempt,
+        issue_recorder=record_voice_delivery_issue_for_cockpit,
     )
-    if status != "voice_command_delivered":
-        record_voice_delivery_issue_for_cockpit(
-            command=command,
-            bridge_result=bridge_result,
-            delivery_status=status,
-            message=message,
-            pending_path=pending_path,
-            history_path=history_path,
-        )
-    return {
-        "voice_delivery_status": status,
-        "voice_delivery": bridge_result,
-        "voice_delivery_message": message,
-    }
-
-
-def record_voice_delivery_attempt(
-    *,
-    command: VoiceCommand,
-    bridge_result: dict[str, Any],
-    delivery_status: str,
-    message: str,
-    inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
-) -> None:
-    try:
-        append_jsonl(
-            inbox_dir / "delivery_attempts.jsonl",
-            {
-                "created_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-                "command_created_at": command.created_at,
-                "command_path": str(relative_to_project(Path(command.path))),
-                "text_chars": len(command.text.strip()),
-                "delivery_status": delivery_status,
-                "bridge_status": str(bridge_result.get("status") or ""),
-                "ok": bool(bridge_result.get("ok")),
-                "verified": bool(bridge_result.get("verified")),
-                "voice_transport": str(bridge_result.get("voice_transport") or ""),
-                "delivery_method": str(bridge_result.get("delivery_method") or ""),
-                "target_tty": str(bridge_result.get("target_tty") or ""),
-                "target_ttys": bridge_result.get("target_ttys") or [],
-                "message": safe_text(message)[:800],
-            },
-        )
-    except OSError:
-        return
-
-
-def record_voice_delivery_issue_for_cockpit(
-    *,
-    command: VoiceCommand,
-    bridge_result: dict[str, Any],
-    delivery_status: str,
-    message: str,
-    pending_path: Path = ADAM_PENDING_COMMAND_PATH,
-    history_path: Path = ADAM_VOICE_HISTORY_PATH,
-) -> None:
-    detail = str(bridge_result.get("reason") or bridge_result.get("message") or "").strip()
-    pending_message = message if not detail else f"{message} Detail: {detail}"
-    pending_reason = (
-        "terminal_delivery_pending_reply"
-        if delivery_status == "voice_command_delivery_unverified"
-        else delivery_status
-    )
-    try:
-        save_pending_for_adam(
-            command,
-            reason=pending_reason,
-            message=pending_message,
-            path=pending_path,
-            history_path=history_path,
-        )
-        append_voice_history_turn(command, adam_response=message, route=pending_reason, path=history_path)
-    except OSError:
-        return
-
-
-def selected_voice_delivery_transport() -> str:
-    transport = os.environ.get(VOICE_DELIVERY_TRANSPORT_ENV, "local_tty").strip().lower()
-    if transport in {"local", "local_tty", "tty", "mac", "mac_tty", "terminal"}:
-        return "local_tty"
-    if transport in {"screen", "ssh", "sslh", "managed", "managed_screen"}:
-        return "managed_screen"
-    return "managed_screen"
 
 
 def deliver_voice_command_via_managed_screen(
@@ -11030,54 +10881,23 @@ def deliver_voice_command_via_managed_screen(
     ready_waiter: Callable[[], dict[str, Any]] | None = None,
     screen_deliverer: Callable[..., dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
-    starter = starter or start_adam_service
-    ready_waiter = ready_waiter or wait_for_adam_ready
-    screen_deliverer = screen_deliverer or deliver_prompt_to_adam_screen
-    decision = assess_terminal_bridge(command)
-    if not decision.get("ok"):
-        return {
-            **decision,
-            "voice_transport": "managed_screen",
-            "command": voice_command_to_dict(command),
-        }
-    start_result = starter()
-    if not start_result.get("ok"):
-        return {
-            "ok": False,
-            "status": "managed_screen_start_failed",
-            "message": str(start_result.get("message") or "Spravovanou Adamovu screen relaci se nepodařilo spustit."),
-            "voice_transport": "managed_screen",
-            "start": start_result,
-            "decision": decision,
-            "command": voice_command_to_dict(command),
-        }
-    ready_result: dict[str, Any] = {"ready": True, "message": "Spravovaná Adamova relace už běžela."}
-    if start_result.get("status") in {"start_requested", "restart_requested"}:
-        ready_result = ready_waiter()
-    prompt = build_codex_terminal_prompt(command)
-    delivery = screen_deliverer(prompt, submit=submit)
-    message = str(delivery.get("message") or "")
-    if delivery.get("ok") and not ready_result.get("ready", True):
-        ready_message = str(ready_result.get("message") or "připravenost se nepodařilo ověřit")
-        message = f"{message} Pozor: {ready_message}"
-    return {
-        **delivery,
-        "message": message or ("Pokyn byl vložen do spravované Adamovy screen relace." if delivery.get("ok") else "Doručení do spravované Adamovy screen relace selhalo."),
-        "voice_transport": "managed_screen",
-        "prompt": prompt,
-        "decision": decision,
-        "start": start_result,
-        "ready": ready_result,
-        "command": voice_command_to_dict(command),
-    }
+    return coordinate_managed_screen_voice_delivery(
+        command,
+        submit=submit,
+        starter=starter or start_adam_service,
+        ready_waiter=ready_waiter or wait_for_adam_ready,
+        screen_deliverer=screen_deliverer or deliver_prompt_to_adam_screen,
+    )
 
 
 def deliver_voice_command_by_configured_transport(command: VoiceCommand, *, submit: bool = True) -> dict[str, Any]:
-    transport = selected_voice_delivery_transport()
-    if transport == "local_tty":
-        result = deliver_voice_command_to_terminal(command, submit=submit)
-        return {**result, "voice_transport": "local_tty"}
-    return deliver_voice_command_via_managed_screen(command, submit=submit)
+    return coordinate_configured_voice_delivery(
+        command,
+        transport=selected_voice_delivery_transport(),
+        local_deliverer=deliver_voice_command_to_terminal,
+        managed_deliverer=deliver_voice_command_via_managed_screen,
+        submit=submit,
+    )
 
 
 def transcribe_audio_base64_isolated(
@@ -11148,22 +10968,11 @@ def record_voice_transcription_failure(
     status: str = "transcription_failed",
     events_path: Path | None = None,
 ) -> None:
-    try:
-        append_jsonl(
-            events_path or VOICE_FRONTEND_EVENTS_PATH,
-            {
-                "created_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-                "kind": "backend_transcribe_failed",
-                "detail": {
-                    "ok": False,
-                    "status": status,
-                    "step": "transcribe",
-                    "error": safe_text(message)[:500],
-                },
-            },
-        )
-    except OSError:
-        return
+    record_coordinator_transcription_failure(
+        message=message,
+        status=status,
+        events_path=events_path or VOICE_FRONTEND_EVENTS_PATH,
+    )
 
 
 def cockpit_transcribe_voice_action(
