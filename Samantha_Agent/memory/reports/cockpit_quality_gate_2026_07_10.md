@@ -51,7 +51,8 @@ nebo pull request.
 - Lokální quality gate prošel kompletně.
 - Nový test ověřuje manifest cest/modulů a architektonickou metriku.
 - Po rozšíření o samostatné reminders, Quick Notes, urgent reminders,
-  dokumentové persistence primitivy a launcher moduly prochází 466 testů.
+  dokumentové persistence primitivy/transakce a launcher moduly prochází 472
+  testů.
 - Gate při prvním běhu odhalil tři ekvivalentní JavaScript regex escape zápisy
   uvnitř Python HTML řetězce. Byly opraveny bez změny výsledného JavaScriptu a
   syntax kontrola nyní podobný `SyntaxWarning` odmítne.
@@ -89,6 +90,10 @@ nebo pull request.
 - GitHub Actions běh číslo 8 pro document persistence commit `1196076` skončil
   úspěšně:
   `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29110559953`.
+- `app/documents/transactions.py` je v syntax manifestu a
+  `tests.test_document_transactions` v test manifestu. Šest nových testů kryje
+  concurrency, rollback, dvě crash-recovery fáze a idempotentní no-change.
+  Lokální gate prošel všech 472 testů.
 
 ## Co gate zatím neřeší
 
@@ -102,6 +107,6 @@ nebo pull request.
 ## Další krok
 
 Quality gate, read-only inventura, Cleanup R1, zamčené reminders/Quick Notes/
-urgent reminders a první dokumentové persistence primitivy jsou hotové. Další
-rollout má nejdřív navrhnout skutečnou více-souborovou transakci index + manifest
-a teprve potom převést metadata a reading status s concurrency/consistency testy.
+urgent reminders, dokumentové persistence primitivy a metadata/reading-status
+transakce jsou hotové. Další rollout má převést ScanDocu review na stejný
+marker/lock protokol; reindex a lifecycle až v dalších samostatných dávkách.

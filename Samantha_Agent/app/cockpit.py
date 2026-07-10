@@ -70,6 +70,12 @@ from app.article_archive import (
 from app.backup.activity_state import backup_activity_status
 from app.documents.consistency_audit import format_document_consistency_audit, run_document_consistency_audit, save_audit_decision
 from app.documents.scandocu import DEFAULT_DOWNLOADS_DIR, reviewed_document_ids, scan_downloads_for_pdfs
+from app.documents.transactions import (
+    DocumentRecordMutation,
+    DocumentRecordNotFoundError,
+    DocumentTransactionError,
+    transact_document_record,
+)
 from app.documents.vault import (
     DEFAULT_DOCUMENTS_DIR,
     DEFAULT_MOBILE_DOCUMENT_INBOX,
@@ -9192,14 +9198,6 @@ def update_document_classification_metadata_action(
     if not isinstance(metadata, dict):
         return {"ok": False, "message": "Chybí metadata dokumentu."}
 
-    documents_path = vault_dir / "index" / "documents_index.jsonl"
-    documents = read_jsonl(documents_path)
-    row_index = find_document_row_index_by_reference(documents, safe_reference)
-    if row_index is None:
-        return {"ok": False, "message": "Dokument nebyl nalezen v indexu."}
-
-    current = dict(documents[row_index])
-    resolved_document_id = str(current.get("document_id", ""))
     updates: dict[str, str] = {}
     for field in DOCUMENT_METADATA_UPDATE_FIELDS:
         if field not in metadata:
@@ -9214,13 +9212,78 @@ def update_document_classification_metadata_action(
     if not updates:
         return {"ok": False, "message": "Není co uložit; nebylo předáno žádné podporované metadata pole."}
 
-    previous = {field: safe_text(str(current.get(field, "") or "")) for field in DOCUMENT_METADATA_UPDATE_FIELDS}
+    now_value = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+    def manifest_path_for(current: dict[str, Any]) -> Path | None:
+        stored_path_value = str(current.get("stored_path", "") or "")
+        return (PROJECT_ROOT / stored_path_value).parent / "manifest.json" if stored_path_value else None
+
+    def build_mutation(
+        current: dict[str, Any],
+        manifest: dict[str, Any] | None,
+    ) -> DocumentRecordMutation | None:
+        previous = {
+            field: safe_text(str(current.get(field, "") or ""))
+            for field in DOCUMENT_METADATA_UPDATE_FIELDS
+        }
+        changed = {
+            field: value
+            for field, value in updates.items()
+            if safe_text(str(current.get(field, "") or "")) != value
+        }
+        if not changed:
+            return None
+        updated = dict(current)
+        updated.update(changed)
+        updated["metadata_updated_at"] = now_value
+        updated_manifest = None
+        if manifest is not None:
+            updated_manifest = dict(manifest)
+            updated_manifest.update(updated)
+        return DocumentRecordMutation(
+            index_record=updated,
+            manifest_record=updated_manifest,
+            audit_record={
+                "action": "update_classification_metadata",
+                "document_id": str(current.get("document_id", "")),
+                "previous": previous,
+                "updated": {
+                    field: safe_text(str(updated.get(field, "") or ""))
+                    for field in DOCUMENT_METADATA_UPDATE_FIELDS
+                },
+                "changed_fields": sorted(changed),
+                "created_at": now_value,
+                "do_not_commit": True,
+            },
+        )
+
+    try:
+        transaction = transact_document_record(
+            vault_dir=vault_dir,
+            reference=safe_reference,
+            row_selector=find_document_row_index_by_reference,
+            manifest_path_resolver=manifest_path_for,
+            mutation_builder=build_mutation,
+            audit_path=vault_dir / "index" / "document_metadata_actions.jsonl",
+            backup_group="metadata_backups",
+            backup_path_labeler=lambda path: str(relative_to_project(path)),
+        )
+    except DocumentRecordNotFoundError:
+        return {"ok": False, "message": "Dokument nebyl nalezen v indexu."}
+    except DocumentTransactionError as exc:
+        return {"ok": False, "message": f"Metadata dokumentu se nepodařilo bezpečně uložit: {exc}"}
+    except OSError:
+        return {"ok": False, "message": "Metadata dokumentu se nepodařilo bezpečně uložit kvůli I/O chybě."}
+
+    current = transaction.previous_record
+    updated = transaction.updated_record
+    resolved_document_id = str(updated.get("document_id", ""))
     changed = {
         field: value
         for field, value in updates.items()
         if safe_text(str(current.get(field, "") or "")) != value
     }
-    if not changed:
+    if not transaction.changed:
         return {
             "ok": True,
             "document_id": safe_text(resolved_document_id),
@@ -9229,34 +9292,6 @@ def update_document_classification_metadata_action(
             "document_classification": document_classification_status(vault_dir=vault_dir),
         }
 
-    stored_path_value = str(current.get("stored_path", "") or "")
-    manifest_path = (PROJECT_ROOT / stored_path_value).parent / "manifest.json" if stored_path_value else None
-    now_value = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
-    backup_dir = backup_document_metadata(vault_dir=vault_dir, document_id=resolved_document_id, manifest_path=manifest_path)
-
-    updated = dict(current)
-    updated.update(changed)
-    updated["metadata_updated_at"] = now_value
-    documents[row_index] = updated
-    write_jsonl(documents_path, documents)
-    if manifest_path is not None and manifest_path.exists():
-        manifest = read_json_file(manifest_path)
-        manifest.update(updated)
-        write_json(manifest_path, manifest)
-
-    append_jsonl(
-        vault_dir / "index" / "document_metadata_actions.jsonl",
-        {
-            "action": "update_classification_metadata",
-            "document_id": resolved_document_id,
-            "previous": previous,
-            "updated": {field: safe_text(str(updated.get(field, "") or "")) for field in DOCUMENT_METADATA_UPDATE_FIELDS},
-            "changed_fields": sorted(changed),
-            "created_at": now_value,
-            "backup_dir": str(relative_to_project(backup_dir)),
-            "do_not_commit": True,
-        },
-    )
     missing_fields = document_classification_missing_fields(
         domain=str(updated.get("domain", "")),
         document_type=str(updated.get("document_type", "")),
@@ -9275,18 +9310,6 @@ def update_document_classification_metadata_action(
         ),
         "document_classification": document_classification_status(vault_dir=vault_dir),
     }
-
-
-def backup_document_metadata(vault_dir: Path, document_id: str, manifest_path: Path | None) -> Path:
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    backup_dir = vault_dir / "index" / "metadata_backups" / f"{stamp}_{document_id}"
-    backup_dir.mkdir(parents=True, exist_ok=True)
-    index_path = vault_dir / "index" / "documents_index.jsonl"
-    if index_path.exists():
-        shutil.copy2(index_path, backup_dir / "documents_index.jsonl")
-    if manifest_path is not None and manifest_path.exists():
-        shutil.copy2(manifest_path, backup_dir / "manifest.json")
-    return backup_dir
 
 
 def document_case_reference(group_key: str) -> str:
@@ -9700,48 +9723,57 @@ def set_document_reading_status_action(
     except ValueError as exc:
         return {"ok": False, "message": str(exc)}
 
-    documents_path = vault_dir / "index" / "documents_index.jsonl"
-    documents = read_jsonl(documents_path)
-    row_index = find_document_row_index_by_reference(documents, safe_document_id)
-    if row_index is None:
-        return {"ok": False, "message": "Dokument nebyl nalezen v indexu."}
-
-    current = dict(documents[row_index])
-    resolved_document_id = str(current.get("document_id", ""))
-    stored_path = PROJECT_ROOT / str(current.get("stored_path", ""))
-    manifest_path = stored_path.parent / "manifest.json"
-    manifest = read_json_file(manifest_path) if manifest_path.exists() else {}
-    updated = {**current, **manifest}
-    previous_status = effective_document_reading_status(updated)
     now_value = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
-    updated["reading_status"] = normalized_status
-    updated["reading_status_updated_at"] = now_value
-    if note.strip():
-        updated["reading_status_note"] = safe_text(note.strip())
+    safe_note = safe_text(note.strip())
 
-    backup_dir = backup_document_reading_status_metadata(
-        vault_dir=vault_dir,
-        document_id=resolved_document_id,
-        manifest_path=manifest_path,
-    )
-    documents[row_index] = updated
-    write_jsonl(documents_path, documents)
-    if manifest_path.exists():
-        write_json(manifest_path, updated)
-    append_jsonl(
-        vault_dir / "index" / "document_reading_status_actions.jsonl",
-        {
-            "action": "set_reading_status",
-            "document_id": resolved_document_id,
-            "previous_status": previous_status,
-            "reading_status": normalized_status,
-            "reading_status_label": READING_STATUS_LABELS[normalized_status],
-            "note": safe_text(note.strip()),
-            "created_at": now_value,
-            "backup_dir": str(relative_to_project(backup_dir)),
-            "do_not_commit": True,
-        },
-    )
+    def manifest_path_for(current: dict[str, Any]) -> Path | None:
+        stored_path_value = str(current.get("stored_path", "") or "")
+        return (PROJECT_ROOT / stored_path_value).parent / "manifest.json" if stored_path_value else None
+
+    def build_mutation(
+        current: dict[str, Any],
+        manifest: dict[str, Any] | None,
+    ) -> DocumentRecordMutation:
+        updated = {**current, **(manifest or {})}
+        previous_status = effective_document_reading_status(updated)
+        updated["reading_status"] = normalized_status
+        updated["reading_status_updated_at"] = now_value
+        if safe_note:
+            updated["reading_status_note"] = safe_note
+        return DocumentRecordMutation(
+            index_record=updated,
+            manifest_record=dict(updated) if manifest is not None else None,
+            audit_record={
+                "action": "set_reading_status",
+                "document_id": str(current.get("document_id", "")),
+                "previous_status": previous_status,
+                "reading_status": normalized_status,
+                "reading_status_label": READING_STATUS_LABELS[normalized_status],
+                "note": safe_note,
+                "created_at": now_value,
+                "do_not_commit": True,
+            },
+        )
+
+    try:
+        transaction = transact_document_record(
+            vault_dir=vault_dir,
+            reference=safe_document_id,
+            row_selector=find_document_row_index_by_reference,
+            manifest_path_resolver=manifest_path_for,
+            mutation_builder=build_mutation,
+            audit_path=vault_dir / "index" / "document_reading_status_actions.jsonl",
+            backup_group="status_backups",
+            backup_path_labeler=lambda path: str(relative_to_project(path)),
+        )
+    except DocumentRecordNotFoundError:
+        return {"ok": False, "message": "Dokument nebyl nalezen v indexu."}
+    except DocumentTransactionError as exc:
+        return {"ok": False, "message": f"Stav dokumentu se nepodařilo bezpečně uložit: {exc}"}
+    except OSError:
+        return {"ok": False, "message": "Stav dokumentu se nepodařilo bezpečně uložit kvůli I/O chybě."}
+
+    resolved_document_id = str(transaction.updated_record.get("document_id", ""))
     return {
         "ok": True,
         "document_id": safe_text(resolved_document_id),
@@ -9750,18 +9782,6 @@ def set_document_reading_status_action(
         "reading_status_label": READING_STATUS_LABELS[normalized_status],
         "message": f"Stav dokumentu uložen: {READING_STATUS_LABELS[normalized_status]}.",
     }
-
-
-def backup_document_reading_status_metadata(vault_dir: Path, document_id: str, manifest_path: Path) -> Path:
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    backup_dir = vault_dir / "index" / "status_backups" / f"{stamp}_{document_id}"
-    backup_dir.mkdir(parents=True, exist_ok=True)
-    index_path = vault_dir / "index" / "documents_index.jsonl"
-    if index_path.exists():
-        shutil.copy2(index_path, backup_dir / "documents_index.jsonl")
-    if manifest_path.exists():
-        shutil.copy2(manifest_path, backup_dir / "manifest.json")
-    return backup_dir
 
 
 def download_problem_kind(item: dict[str, Any]) -> str:

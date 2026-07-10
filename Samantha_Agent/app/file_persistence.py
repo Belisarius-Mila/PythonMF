@@ -80,6 +80,17 @@ def atomic_write_text(
         _atomic_write_bytes_unlocked(target, payload)
 
 
+def atomic_replace_text_under_external_lock(
+    path: Path,
+    text: str,
+    *,
+    encoding: str = "utf-8",
+) -> None:
+    """Atomically replace a file while the caller holds its transaction lock."""
+
+    _atomic_write_bytes_unlocked(Path(path), str(text).encode(encoding))
+
+
 def atomic_write_json(
     path: Path,
     payload: Any,

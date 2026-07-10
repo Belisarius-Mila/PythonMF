@@ -283,6 +283,23 @@ Rucni retest po prvnim vykonovem kroku:
   read-modify-write muze stale ztratit soubeznou zmenu, protoze cteni nekterych
   funkci probiha pred lockem. Index, manifest, backup a audit log zatim nejsou
   jedna vice-souborova transakce.
+- `app/documents/transactions.py` nyni poskytuje fazovou recovery transakci pro
+  metadata a reading status: primarni index lock pred strict readem, pre-image
+  backup indexu/manifestu, atomicky marker, index + manifest, auditni
+  `transaction_id`, committed faze a uklid markeru.
+- Selhani pred auditem vrati index i manifest. Pri padu po auditu dalsi vstup
+  rozpozna transaction ID a zachova uz commitnutou zmenu. Nezmenena metadata
+  nevytvori backup, audit ani marker.
+- Dva procesy nad ruznymi dokumenty zachovaly oba update; metadata a reading
+  status stejneho dokumentu zachovaly obe pole v indexu i manifestu. Sest novych
+  testu kryje concurrency, manifest failure, dve crash faze a no-change.
+- Cileny dokumentovy balicek ma 87 testu OK a cely quality gate 472 testu OK.
+  Monolit ma 22 459 radku / 328 top-level funkci, stale pod baseline.
+- Read-only nasazeni bez skutecne mutace proslo obema smoke checky. Lokalni i
+  Tailscale adresa maji PID 15800 a code stamp `e935ee8cf87c3168`; v zivem
+  vaultu neni transaction marker a private obsah se necetl ani nemigroval.
+- Hranice: ScanDocu review, reindex, lifecycle a nektere importni writery jeste
+  nepouzivaji primarni RMW protokol a mohou se se soubeznou transakci krizit.
 
 Co neni hotove:
 
@@ -291,8 +308,8 @@ Co neni hotove:
   rucni retest; ani jedno neni blokujici pro dalsi architekturu.
 - Sdilena persistence, zakladni VoiceBridge persistence, hlavni reminders store
   a Quick Notes i urgent-reminders index jsou zamcene. Dokumenty a e-maily
-  jeste nejsou plne transakcni; prvni dokumentove persistence primitivy jsou
-  atomicke/zamcene, ale vice-souborovy RMW invariant zustava otevreny.
+  jeste nejsou globalne transakcni; metadata + reading status uz maji recovery
+  transakci, ale dalsi document-index writery na ni nejsou prevedene.
 - `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem.
 - Cleanup R1 je hotovy. Stary e-mailovy parser, lokalni Janicka vetev a pet
   podezrelych API cest zustavaji beze zmeny; u API cest chybi registr externich
@@ -304,16 +321,16 @@ Co neni hotove:
 
 Dalsi krok:
 
-Navrhnout skutecnou dokumentovou transakci pro `documents_index.jsonl`, navazany
-manifest, backup a audit; potom jako prvni klienty prevest metadata a reading
-status s concurrency/consistency testy a bez migrace private dat. Stary
-e-mailovy parser, lokalni Janicka vetev a pet podezrelych API cest zatim nemenit.
-PDF browser a post-call audio retest jsou odlozene.
+Prevest ScanDocu review na stejny document transaction marker/lock protokol a
+zahrnout candidate-status/audit invariant do failure testu. Reindex, lifecycle
+a importni writery resit az dalsimi samostatnymi davkami. Stary e-mailovy parser,
+lokalni Janicka vetev a pet podezrelych API cest zatim nemenit. PDF browser a
+post-call audio retest jsou odlozene.
 
 Navrhovane dalsi kroky:
 
-1. Navrhnout vice-souborovou dokumentovou transakci a nejdriv na ni prevest
-   metadata + reading status s concurrency/consistency testy.
+1. Prevest ScanDocu review na existujici document transaction protokol a
+   otestovat rollback i candidate-status/audit konzistenci.
 2. Janicka a stary e-mailovy parser mazat az po popsanem rucnim/recovery overeni.
 3. Podezrele API cesty proverit proti Shortcuts a servisnim klientum.
 4. Po dokumentech prejit nakonec na e-mail metadata.

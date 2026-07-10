@@ -164,12 +164,46 @@ nejsou jedna více-souborová transakce. Tyto dva invarianty musí dostat samost
 návrh a consistency test; nesmí se vydávat za hotové jen proto, že jednotlivé
 replace operace jsou atomické.
 
+## Document index + manifest transaction rollout
+
+- Nový `app/documents/transactions.py` drží primární sidecar lock
+  `documents_index.jsonl` ještě před striktním načtením indexu.
+- Metadata a reading status používají jeden protokol:
+  1. dokončit nebo vrátit předchozí nedokončený marker,
+  2. pod index lockem znovu načíst aktuální řádek a manifest,
+  3. vytvořit unikátní pre-image zálohu indexu a existujícího manifestu,
+  4. atomicky zapsat recovery marker ve fázi `prepared`,
+  5. atomicky zapsat index a manifest s průběžnou změnou fáze,
+  6. přidat audit s unikátním `transaction_id`,
+  7. označit commit a uklidit marker.
+- Pokud zápis manifestu nebo jiný krok před auditem selže, index i manifest se
+  obnoví ze zálohy. Pokud proces skončí po auditu, další transakce auditní ID
+  rozpozná a již dokončenou změnu nevrátí.
+- Nezměněná metadata nevytvoří backup, audit ani marker.
+- Dva procesy měnící různé dokumenty zachovaly oba update. Souběžná změna
+  klasifikace a reading statusu stejného dokumentu zachovala obě pole v indexu
+  i manifestu.
+- Testy simulují selhání manifestu, pád po indexu před manifestem a pád po
+  auditu před committed markerem. Rollback/recovery ve všech případech zachoval
+  očekávaný index, manifest, audit a uklidil marker.
+- Nových transakčních testů je 6; správně cílený dokumentový balík má 87 testů
+  a celý quality gate 472 testů. Monolit zůstává pod baseline: 22 459 řádků,
+  328 top-level funkcí.
+- Read-only nasazení bez skutečné dokumentové mutace prošlo lokálním i Tailscale
+  smoke checkem. Obě adresy mají PID 15800 a code stamp `e935ee8cf87c3168`;
+  živý transaction marker neexistuje.
+
+Hranice rolloutu: metadata a reading status jsou serializované mezi sebou.
+ScanDocu review, reindex, lifecycle a některé importní writery zatím stejný
+primární RMW protokol nepoužívají, takže globální ochrana celého document indexu
+ještě není dokončená.
+
 ## Doporučené další pořadí rolloutů
 
-1. Navrhnout explicitní dokumentovou transakci pro `documents_index.jsonl` a
-   navázaný manifest/backup/audit. Začít metadata + reading status a testovat
-   souběh dvou změn nad různými dokumenty i konzistenci indexu s manifestem.
-2. Potom převést ScanDocu review, reindex a lifecycle po samostatných dávkách.
+1. Převést ScanDocu review na stejný transaction marker/lock protokol a zahrnout
+   jeho candidate-status/audit invariant do failure testu.
+2. Potom převést reindex, lifecycle a nové document-index append writery po
+   samostatných dávkách.
 3. E-mail activity/case/archive metadata; outbound a mazací workflow až nakonec.
 
 Každý rollout má zachovat formát i cestu existujícího souboru, přidat cílený
