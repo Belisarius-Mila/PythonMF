@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import re
 from datetime import date, timedelta
 from pathlib import Path
@@ -10,7 +9,7 @@ from agents import function_tool
 
 from app.email.redaction import EMAIL_PATTERN
 
-from .store import DEFAULT_REMINDERS_PATH, URL_PATTERN, load_reminders_store
+from .store import DEFAULT_REMINDERS_PATH, URL_PATTERN, load_reminders_store, transact_reminders_store
 
 
 DUE_SOON_DAYS = 14
@@ -153,17 +152,22 @@ def mark_reminder_done_text(
             "s oznacenim jako hotove. Bez toho na disk nic nezapisuji."
         )
 
-    store = load_reminders_store(path)
-    for reminder in store["reminders"]:
-        if reminder.get("id") == reminder_id:
-            reminder["status"] = "done"
-            _write_reminders_store(path=path, store=store)
-            return (
-                f"Oznaceno jako hotove: {safe_id}. "
-                "Byl zmenen pouze status pripominky; e-mail nebyl cten, odkazy nebyly "
-                "otevreny, prilohy nebyly stazeny a nic nebylo ulozeno do memory."
-            )
+    def mark_matching(store: dict[str, list[dict[str, Any]]]) -> tuple[bool, bool]:
+        for reminder in store["reminders"]:
+            if reminder.get("id") == reminder_id:
+                if reminder.get("status") == "done":
+                    return False, True
+                reminder["status"] = "done"
+                return True, True
+        return False, False
 
+    found = transact_reminders_store(mark_matching, path=path)
+    if found:
+        return (
+            f"Oznaceno jako hotove: {safe_id}. "
+            "Byl zmenen pouze status pripominky; e-mail nebyl cten, odkazy nebyly "
+            "otevreny, prilohy nebyly stazeny a nic nebylo ulozeno do memory."
+        )
     return f"Pripominka nenalezena: {safe_id}. Nic nebylo zapsano."
 
 
@@ -181,13 +185,6 @@ def _find_reminder(reminder_id: str, path: Path) -> dict[str, Any] | None:
         if reminder.get("id") == reminder_id:
             return reminder
     return None
-
-
-def _write_reminders_store(path: Path, store: dict[str, list[dict[str, Any]]]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as handle:
-        json.dump(store, handle, ensure_ascii=False, indent=2)
-        handle.write("\n")
 
 
 def _source_dict(reminder: dict[str, Any]) -> dict[str, Any]:

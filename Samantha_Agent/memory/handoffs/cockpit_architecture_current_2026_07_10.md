@@ -194,15 +194,27 @@ Rucni retest po prvnim vykonovem kroku:
   `3ba9d59` skoncil uspesne za 1 minutu 19 sekund.
 - Prvni striktni syntax beh odhalil tri JavaScript regex escape zapisy uvnitr
   Python HTML retezce. Byly ekvivalentne opraveny bez zmeny runtime JavaScriptu.
+- Hlavni `reminders.json` nyni pouziva jednu zamcenou transakcni funkci pro
+  vytvoreni bez duplicit, zmenu statusu, zruseni platebni pripominky a doplneni
+  dokumentovych metadat. Dva procesy pridaly 40 ruznych pripominek bez ztraty;
+  pri stejnem ID vznikl prave jeden zaznam bez druheho replace.
+- Quick Notes sync nyni scanuje vstupy mimo lock, ale slouceni, prideleni cisla
+  a zapis indexu provede v jednom zamcenem read-modify-write cyklu. Dva procesy
+  sloucily 40 poznamek s jedinecnymi cisly 1 az 40 a bez ztracenych cest.
+- Quality gate byl rozsiren o samostatne reminders/Quick Notes moduly a ma 445
+  testu. Transparentne ukazuje 7 prechodovych radku navic v `app/cockpit.py`;
+  transakcni logika je v reminders modulu, ne v monolitu.
+- Po nasazeni prosly lokalni i Tailscale smoke check. Private obsahy se necetly,
+  format/cesty dat se nemenily a zadna davkova migrace neprobehla.
 
 Co neni hotove:
 
 - Zakladni stabilizace, HTTP hranice a iPhone hlas jsou funkcne potvrzene; PDF
   browser retest Mila vedome odlozil a post-call audio recovery ceka na pozdejsi
   rucni retest; ani jedno neni blokujici pro dalsi architekturu.
-- Sdilena persistence vrstva a zakladni VoiceBridge persistence jsou hotove:
-  status, posledni odpoved, pending transakce i hlasova JSONL historie jsou
-  zamcene. Reminders, dokumenty a e-maily jeste prevedene nejsou.
+- Sdilena persistence, zakladni VoiceBridge persistence, hlavni reminders store
+  a Quick Notes index jsou zamcene. Samostatny urgent-reminders index,
+  dokumenty a e-maily jeste prevedene nejsou.
 - `app/cockpit.py` zustava monolit s backendem, HTML, CSS a JavaScriptem.
 - Python zavislosti zatim nejsou pripnute na konkretni verze.
 - VoiceBridge nema jeden explicitni stavovy model prikazu.
@@ -211,15 +223,15 @@ Co neni hotove:
 
 Dalsi krok:
 
-Zmapovat konkretni read-modify-write cesty reminders/Quick Notes a prevest jednu
-nejmensi registry na explicitni zamcenou transakci s dvouprocesovym testem.
-Potom vytvorit read-only inventuru kandidatu mrtveho kodu bez mazani. PDF browser
-a post-call audio retest zustavaji odlozene.
+Vytvorit read-only inventuru kandidatu mrtveho a legacy kodu bez mazani. U kazde
+polozky oddelit staticky dukaz, endpoint/JavaScript vazbu, testove kryti a
+bezpecnou provozni stopu. Samostatny urgent-reminders index zustava evidovany
+pro dalsi persistence davku. PDF browser a post-call audio retest jsou odlozene.
 
 Navrhovane dalsi kroky:
 
-1. Po malych davkach prejit na reminders, dokumenty a nakonec e-mail metadata.
-2. Udelat read-only inventuru mrtveho/legacy kodu a nic nemazat bez vice dukazu.
+1. Udelat read-only inventuru mrtveho/legacy kodu a nic nemazat bez vice dukazu.
+2. Po malych davkach prejit na urgent reminders, dokumenty a nakonec e-mail metadata.
 3. Postupne rozdelit monolit pri zachovani endpointu:
    status/health -> voice -> documents -> email -> staticky frontend.
 4. Zavadet explicitni stavove modely a repository vrstvy po oblastech, ne

@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from app.file_persistence import update_json_file
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ICLOUD_SHORTCUTS_INBOX = (
@@ -337,43 +339,53 @@ def sync_quick_notes_index(
     inbox_dir: Path = DEFAULT_ICLOUD_SHORTCUTS_INBOX,
     index_path: Path = DEFAULT_INDEX_PATH,
 ) -> list[QuickNote]:
-    records = _load_index(index_path)
-    by_path = {str(record.get("source_path", "")): record for record in records}
-    next_number = _next_note_number(records)
-
+    observed: list[dict[str, Any]] = []
+    now = _now_iso()
     for source_path in _iter_note_files(inbox_dir):
-        source_key = str(source_path)
         stat = source_path.stat()
-        existing = by_path.get(source_key)
-        if existing is None:
-            existing = {
-                "note_number": next_number,
-                "source_path": source_key,
-                "category": "inbox",
-                "status": "inbox",
-                "first_seen_at": _now_iso(),
-            }
-            next_number += 1
-            records.append(existing)
-            by_path[source_key] = existing
-
         text = _read_text(source_path)
-        existing.update(
+        observed.append(
             {
-                "source_path": source_key,
+                "source_path": str(source_path),
                 "title": _extract_title(text, source_path),
                 "snippet": _extract_snippet(text),
                 "created_at": _extract_note_datetime(text) or _format_timestamp(stat.st_mtime),
                 "modified_at": _format_timestamp(stat.st_mtime),
                 "size_bytes": stat.st_size,
-                "status": existing.get("status") or "inbox",
-                "category": existing.get("category") or "inbox",
-                "last_seen_at": _now_iso(),
+                "last_seen_at": now,
             }
         )
 
-    if records:
-        _write_index(index_path, records)
+    if not observed:
+        records = _load_index(index_path)
+    else:
+        def merge_observed(current: Any) -> dict[str, list[dict[str, Any]]]:
+            records = _index_records(current)
+            by_path = {str(record.get("source_path", "")): record for record in records}
+            next_number = _next_note_number(records)
+            for snapshot in observed:
+                source_key = str(snapshot["source_path"])
+                existing = by_path.get(source_key)
+                if existing is None:
+                    existing = {
+                        "note_number": next_number,
+                        "source_path": source_key,
+                        "category": "inbox",
+                        "status": "inbox",
+                        "first_seen_at": now,
+                    }
+                    next_number += 1
+                    records.append(existing)
+                    by_path[source_key] = existing
+                status = existing.get("status") or "inbox"
+                category = existing.get("category") or "inbox"
+                existing.update(snapshot)
+                existing["status"] = status
+                existing["category"] = category
+            return {"notes": records}
+
+        updated = update_json_file(index_path, merge_observed, default={"notes": []}, sort_keys=True)
+        records = _index_records(updated)
 
     return [
         _record_to_note(record)
@@ -385,19 +397,16 @@ def sync_quick_notes_index(
 def _load_index(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
-    data = json.loads(path.read_text(encoding="utf-8"))
+    return _index_records(json.loads(path.read_text(encoding="utf-8")))
+
+
+def _index_records(data: Any) -> list[dict[str, Any]]:
+    if not isinstance(data, dict):
+        raise ValueError("Quick notes index musi byt JSON objekt.")
     records = data.get("notes", [])
     if not isinstance(records, list) or not all(isinstance(item, dict) for item in records):
         raise ValueError("Quick notes index musi obsahovat pole notes se slovniky.")
     return records
-
-
-def _write_index(path: Path, records: list[dict[str, Any]]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps({"notes": records}, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
 
 
 def _iter_note_files(inbox_dir: Path) -> list[Path]:

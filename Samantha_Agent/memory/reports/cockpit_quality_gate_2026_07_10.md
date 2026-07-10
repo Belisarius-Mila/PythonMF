@@ -50,7 +50,7 @@ nebo pull request.
 
 - Lokální quality gate prošel kompletně.
 - Nový test ověřuje manifest cest/modulů a architektonickou metriku.
-- Celkem prošlo 424 testů.
+- Po rozšíření o samostatné reminders a Quick Notes moduly prošlo 445 testů.
 - Gate při prvním běhu odhalil tři ekvivalentní JavaScript regex escape zápisy
   uvnitř Python HTML řetězce. Byly opraveny bez změny výsledného JavaScriptu a
   syntax kontrola nyní podobný `SyntaxWarning` odmítne.
@@ -74,7 +74,7 @@ nebo pull request.
 
 ## Další krok
 
-Pokračovat malou datově bezpečnostní dávkou: zmapovat reminders/Quick Notes
-read-modify-write cesty a převést jednu nejmenší registry na zamčenou transakci
-s dvouprocesovým testem. Poté vytvořit read-only inventuru kandidátů mrtvého
-kódu bez mazání.
+Vytvořit read-only inventuru kandidátů mrtvého a legacy kódu bez mazání. Gate
+při reminders transakční dávce transparentně ukázal růst `app/cockpit.py` o
+7 přechodových řádků; vlastní transakční logika je mimo monolit a plánovaná
+extrakce status/health musí začít celkový počet výrazně snižovat.

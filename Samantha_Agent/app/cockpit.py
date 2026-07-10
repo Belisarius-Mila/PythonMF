@@ -136,7 +136,13 @@ from app.email.redaction import redact_email_addresses
 from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEmailProvider
 from app.file_persistence import FilePersistenceError, append_jsonl_locked
 from app.reminders.query_tools import mark_reminder_done_text
-from app.reminders.store import DEFAULT_REMINDERS_PATH, load_reminders_store, write_reminders_store
+from app.reminders.store import (
+    DEFAULT_REMINDERS_PATH,
+    cancel_reminder_record,
+    enrich_reminder_record,
+    load_reminders_store,
+    save_reminder_draft,
+)
 from app.speech import SpeechError, TranscriptionError, speak_text
 from app.speech.transcribe import MIME_EXTENSIONS, decode_audio_base64, normalize_mime_type
 from app.speech.edge_tts_mp3 import (
@@ -5392,19 +5398,24 @@ def cancel_payment_reminder_action(
     resolution_reason = safe_text(reason).strip() or (
         "Pojišťovna akceptovala odstoupení od duplicitní nebo nevýhodné smlouvy."
     )
-    reminder["status"] = "cancelled"
-    reminder["resolution"] = {
-        "status": "cancelled",
-        "reason": resolution_reason,
-        "resolved_at": now,
-        "resolved_by": "samantha_cockpit",
-    }
-    reminder["evidence"] = evidence
-    write_reminders_store(store, path=reminders_path)
+    resolved_id = str(reminder.get("id", ""))
+    updated = cancel_reminder_record(
+        resolved_id,
+        reason=resolution_reason,
+        resolved_at=now,
+        evidence=evidence,
+        path=reminders_path,
+    )
+    if not updated:
+        return {
+            "ok": False,
+            "message": "Připomínka se během zpracování změnila; nic nebylo zapsáno.",
+            "reminders": reminders_status(path=reminders_path),
+        }
     return {
         "ok": True,
-        "reminder_id": safe_text(str(reminder.get("id", ""))),
-        "reminder_ref": reminder_reference(str(reminder.get("id", ""))),
+        "reminder_id": safe_text(resolved_id),
+        "reminder_ref": reminder_reference(resolved_id),
         "evidence": evidence,
         "message": "Platební připomínka byla uzavřena jako zrušená a e-mail byl připojen jako důkaz.",
         "reminders": reminders_status(path=reminders_path),
@@ -6870,18 +6881,6 @@ def create_email_archive_due_reminder_action(
     reminder_id = str(candidate["reminder_id"])
     reminder_title = safe_text(title.strip())[:160] or str(candidate["suggested_title"])
     reminder_notes = safe_text(notes.strip())[:700] or str(candidate["suggested_notes"])
-    store = load_reminders_store(reminders_path)
-    if any(item.get("id") == reminder_id for item in store.get("reminders", []) if isinstance(item, dict)):
-        return {
-            "ok": False,
-            "message": "Připomínka už existuje; duplicita nebyla přidána.",
-            "document_due_candidates": document_due_candidates_status(
-                vault_dir=vault_dir,
-                reminders_path=reminders_path,
-                archive_directory=archive_directory,
-                today=today,
-            ),
-        }
     source_sender = safe_text(str(candidate.get("counterparty", "")))[:180]
     reminder = {
         "id": reminder_id,
@@ -6904,8 +6903,18 @@ def create_email_archive_due_reminder_action(
         "archive_id": safe_text(str(candidate.get("archive_id", "")))[:180],
         "due_date_type": safe_text(str(candidate.get("type", "payment_due")))[:80],
     }
-    store.setdefault("reminders", []).append(reminder)
-    write_reminders_store(store, path=reminders_path)
+    save_result = save_reminder_draft(reminder, path=reminders_path)
+    if not save_result.created:
+        return {
+            "ok": False,
+            "message": "Připomínka už existuje; duplicita nebyla přidána.",
+            "document_due_candidates": document_due_candidates_status(
+                vault_dir=vault_dir,
+                reminders_path=reminders_path,
+                archive_directory=archive_directory,
+                today=today,
+            ),
+        }
     return {
         "ok": True,
         "reminder_ref": reminder_reference(reminder_id),
@@ -6921,21 +6930,19 @@ def create_email_archive_due_reminder_action(
 
 
 def enrich_document_due_reminder(*, reminder_id: str, candidate: dict[str, Any], reminders_path: Path) -> None:
-    store = load_reminders_store(reminders_path)
-    reminder = next((item for item in store.get("reminders", []) if item.get("id") == reminder_id), None)
-    if reminder is None:
-        return
-    if candidate.get("related_asset"):
-        reminder["related_asset"] = safe_text(str(candidate.get("related_asset", "")))[:180]
-    if candidate.get("amount_due"):
-        reminder["amount_due"] = safe_text(str(candidate.get("amount_due", "")))[:80]
-        reminder["amount_note"] = (
+    amount_due = safe_text(str(candidate.get("amount_due", "")))[:80]
+    enrich_reminder_record(
+        reminder_id,
+        related_asset=safe_text(str(candidate.get("related_asset", "")))[:180],
+        amount_due=amount_due,
+        amount_note=(
             safe_text(str(candidate.get("amount_note", "")))[:240]
-            or "Částka byla odhadnuta z krátkého kontextu termínu v dokumentu."
-        )
-    reminder["document_ref"] = safe_text(str(candidate.get("document_ref", "")))[:80]
-    reminder["due_date_type"] = safe_text(str(candidate.get("type", "")))[:80]
-    write_reminders_store(store, path=reminders_path)
+            or ("Částka byla odhadnuta z krátkého kontextu termínu v dokumentu." if amount_due else "")
+        ),
+        document_ref=safe_text(str(candidate.get("document_ref", "")))[:80],
+        due_date_type=safe_text(str(candidate.get("type", "")))[:80],
+        path=reminders_path,
+    )
 
 
 def document_due_candidate_reference(document_id: str, due_type: str, due_date: str) -> str:

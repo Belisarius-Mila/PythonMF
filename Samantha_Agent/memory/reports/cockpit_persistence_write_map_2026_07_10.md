@@ -61,6 +61,13 @@ První integrace je záměrně nízkoriziková:
    `adam_voice_history.jsonl` na společný zamčený append. Seznam finálních a
    nefinálních rout zůstává beze změny; transportní mezistav proto nikdy
    neaktualizuje `last_adam_response.json`.
+6. Hlavní `data/reminders/reminders.json` používá jednu zamčenou transakční
+   funkci pro create-if-missing, změnu statusu, zrušení platební připomínky a
+   doplnění dokumentových metadat. Duplicitní ID je idempotentní bez druhého
+   replace.
+7. Quick Notes `index.json` slučuje aktuálně pozorované soubory se stavem indexu
+   uvnitř jednoho zamčeného read-modify-write cyklu. Dva refresh procesy proto
+   neztratí záznam a nepřidělí stejné číslo různým poznámkám.
 
 Existující soukromá data se nepřesouvají, nepřepisují dávkově ani nemigrují.
 
@@ -94,10 +101,19 @@ Existující soukromá data se nepřesouvají, nepřepisují dávkově ani nemig
   `watcher running => no inline delivery`. Po nasazení prošlo 420 relevantních
   testů, watcher se vrátil do `listening` a lokální i Tailscale smoke check byly
   kompletně zelené.
+- Dva procesy současně přidaly 40 různých hlavních připomínek bez ztraceného
+  záznamu. Při souběžném vytvoření stejného ID vyhrál právě jeden proces a druhý
+  skončil idempotentně bez druhého replace.
+- Dva procesy synchronizovaly dva Quick Notes inboxy do společného indexu:
+  vzniklo 40 záznamů, 40 různých source cest a přesně čísla 1 až 40.
+- Rozšířený quality gate má 445 testů. Po nasazení prošel lokální i Tailscale
+  smoke check. Formát ani cesta existujících private JSON souborů se neměnily a
+  jejich obsah nebyl dávkově migrován.
 
 ## Doporučené další pořadí rolloutů
 
-1. Reminders a Quick Notes registry s explicitní zamčenou transakcí.
+1. Samostatný `urgent_reminders/index.json`, který není totožný s hlavním
+   reminders store ani Quick Notes indexem.
 2. Dokumentové registry a lifecycle JSONL po menších skupinách s consistency
    testem po každé skupině.
 3. E-mail activity/case/archive metadata; outbound a mazací workflow až nakonec.
