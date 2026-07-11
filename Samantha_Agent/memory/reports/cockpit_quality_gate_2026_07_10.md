@@ -180,6 +180,13 @@ nebo pull request.
   gate na 557 testů a monolit klesl z 21 060 na 20 519 řádků.
 - Lokální i Tailscale smoke check po nasazení prošly na jediné instanci PID
   50626 se shodným code stampem `e2a2b6fed6cd6ff6`.
+- Čtvrtý read-only dokumentový řez přidal `app/documents/due_date_service.py`
+  pro termíny z vaultu i uložených e-mailů, filtrování starých nálezů,
+  související zdroje, duplicity a redigovaný výstup. Potvrzený zápis připomínky
+  zůstal oddělený. Čtyři přímé testy rozšířily gate na 561 testů a monolit
+  klesl z 20 519 na 19 915 řádků.
+- Lokální i Tailscale smoke check po nasazení prošly na jediné instanci PID
+  51970 se shodným code stampem `28394cc55992a99b`.
 
 ## Co gate zatím neřeší
 
@@ -197,7 +204,7 @@ urgent reminders, dokumentové persistence primitivy, metadata/reading-status
 transakce, ScanDocu review a životní cyklus autosave/managed relací jsou hotové.
 Fáze 1.1 status/health i Fáze 1.2 VoiceBridge command ownership a iPhone audio
 fallback jsou hotové a ručně ověřené. Fáze 1.3 je rozpracovaná: read-only
-document search, case/detail i classification/review/work service jsou venku.
-Další vhodný read-only řez jsou dokumentové termíny při zachování oddělené
-potvrzované tvorby připomínek.
+document search, case/detail, classification/review/work i due-date service
+jsou venku. Další vhodný read-only řez je jednotný document intake pro
+Downloads, e-mailovou frontu, mobilní a lokální inbox.
 Reindex zůstává samostatný další krok dokumentové persistence.
