@@ -224,6 +224,14 @@ nebo pull request.
   mazací i outbound operace se nezměnily. Gate má 593 testů. Skutečný private
   decision soubor nebyl testem mutován; oba smoke checky prošly na jediné
   instanci PID 67447.
+- Druhý řez Fáze 2.4 doplnil atomický outbox `lease -> retry -> ack` s expirací,
+  počítadlem pokusů a fencing tokenem. Souběžní workeři nezískají stejnou
+  událost; po reclaimu expirovaného lease starý token nesmí ack/retry.
+- Ack/retry replay se stejným aktuálním tokenem je idempotentní. Retry čeká do
+  `available_at` a přijímá jen krátký technický error code. Pád replace při
+  lease či ack zachová předchozí stav. Gate má 599 testů.
+- Testy pracovaly pouze v `/private/tmp`; runtime producent/konzument stále
+  není zapojený. Oba smoke checky prošly na jediné instanci PID 69869.
 
 ## Co gate zatím neřeší
 
@@ -243,6 +251,7 @@ Fáze 1.1 status/health i Fáze 1.2 VoiceBridge command ownership a iPhone audio
 fallback jsou hotové a ručně ověřené. Fáze 1.3 je rozpracovaná: read-only
 document search, case/detail, classification/review/work, due-date i jednotný
 intake service jsou venku a Fáze 2.1, 2.2 i 2.3 jsou ověřené. Fáze 2.4 je
-rozpracovaná: repository kontrakt a první e-mailový decision adaptér jsou
-hotové; další řez je lease/retry/ack protokol outboxu bez providerových nebo
-mazacích akcí. Reindex zůstává samostatný další krok dokumentové persistence.
+rozpracovaná: repository kontrakt, první e-mailový decision adaptér a
+lease/retry/ack protokol jsou hotové. Další řez je samostatný výběr prvního
+nedestruktivního technického runtime pilota. Reindex zůstává samostatný další
+krok dokumentové persistence.

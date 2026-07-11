@@ -501,6 +501,15 @@ Rucni retest po prvnim vykonovem kroku:
 - Zivy adapter outbox udalosti zatim negeneruje. E-mailove providery, archiv,
   prilohy, kos, purge a odesilani se nezmenily. Gate ma 593 testu; oba smoke
   checky prosly na jedine instanci PID 67447.
+- Druhy rez Faze 2.4 doplnil `lease -> retry -> ack`: atomicky vyber dostupne
+  udalosti, expiraci, pocitadlo pokusu a fencing token. Dva procesy nemohou
+  ziskat stejnou udalost; po prevzeti expirovaneho lease novym workerem je stary
+  token odmitnut pro ack i retry.
+- Ack i retry jsou idempotentni pri opakovani se stejnym aktualnim tokenem.
+  Retry ma odlozene `available_at` a uklada jen kratky technicky error code.
+  Simulovany pad replace pri lease/ack zachoval predchozi soubor.
+- Gate ma 599 testu. Outbox testy pouzily pouze `/private/tmp`; zivy producent
+  ani konzument nevznikl. Oba smoke checky prosly na PID 69869.
 
 Co neni hotove:
 
@@ -523,16 +532,17 @@ Co neni hotove:
   budouci rozsireni ma smysl jen pokud bude potreba outbox/idempotency pres
   restart procesu, ne jako dalsi ad-hoc sada status stringu.
 - Dokumentove a e-mailove workflow maji jednotne read-only pracovni modely.
-  Repository zaklad a prvni e-mailovy decision adapter existuji, ale zapisovaci
-  workflow jeste nejsou plosne prevedena a outbox nema delivery protokol.
+  Repository zaklad, prvni e-mailovy decision adapter a outbox delivery protokol
+  existuji, ale zapisovaci workflow nejsou plosne prevedena a outbox nema zivy
+  runtime pilot.
 
 Dalsi krok:
 
-Faze 2.1, 2.2 i 2.3 jsou uzavrene a overene. Faze 2.4 je rozpracovana: zakladni
-repository/outbox kontrakt a prvni e-mailovy decision adapter jsou hotove.
-Dalsi rez ma doplnit lease/retry/ack protokol na docasnych datech a teprve potom
-vybrat prvni nedestruktivni runtime udalost. Dokumentovy reindex a dalsi writery
-zustavaji oddelenou persistence roadmapou.
+Faze 2.1, 2.2 i 2.3 jsou uzavrene a overene. Faze 2.4 je rozpracovana:
+repository/outbox kontrakt, prvni e-mailovy decision adapter i lease/retry/ack
+protokol jsou hotove. Dalsi rez ma nejdriv vybrat a popsat jednu
+nedestruktivni technickou runtime udalost; az potom ji zapojit jako pilot.
+Dokumentovy reindex a dalsi writery zustavaji oddelenou persistence roadmapou.
 Dokumentovy reindex zustava vedlejsi persistence roadmapou. Stary e-mailovy
 parser, lokalni Janicka vetev a pet podezrelych API cest zatim nemenit. PDF
 browser a post-call audio retest jsou odlozene.

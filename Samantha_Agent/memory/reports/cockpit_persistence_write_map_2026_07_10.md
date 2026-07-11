@@ -262,6 +262,26 @@ regresní/concurrency test a nemigrovat obsah bez samostatného rozhodnutí.
   nemutoval. Lokální i Tailscale smoke check prošly na jediné instanci PID
   67447.
 
-Další řez 2.4 má doplnit bezpečný outbox delivery protokol s lease/retry/ack nad
-dočasným úložištěm. Teprve potom lze samostatně vybrat první nedestruktivní
-runtime událost; providerové a mazací akce nesmí být první konzument.
+## Outbox lease / retry / ack — druhý řez Fáze 2.4
+
+- `lease_outbox` vybírá dostupnou pending nebo expirovanou leased událost pod
+  stejným repository lockem. Každý lease má vlastní náhodný fencing token,
+  vlastníka, expiraci a počítadlo pokusů.
+- Dva procesy nemohou pronajmout stejnou událost současně. Po expiraci ji smí
+  převzít nový worker s novým tokenem; starý token už nesmí provést `ack` ani
+  `retry`.
+- `retry_outbox` vrátí událost do pending stavu s `available_at`. Do té doby ji
+  další worker nezíská. Ukládá se pouze krátký technický `error_code`, nikoli
+  text výjimky nebo pracovní payload.
+- `acknowledge_outbox` přepne událost do delivered stavu. Opakovaný `ack` nebo
+  `retry` po ztracené HTTP/procesní odpovědi je se stejným fencing tokenem
+  idempotentní; po novém lease je starý token odmítnut.
+- Simulované selhání atomického replace při lease i ack zachová předchozí stav.
+  Deset přímých outbox testů včetně dvouprocesového závodu je zelených a celý
+  gate má 599 testů. Testy používaly pouze `/private/tmp`.
+- Runtime producent ani konzument stále není zapojený. Cockpit po nasazení
+  prošel lokálním i Tailscale smoke checkem na jediné instanci PID 69869.
+
+Další řez 2.4 má nejdřív samostatně vybrat jednu nedestruktivní technickou
+runtime událost a popsat její recovery/rollback. Providerové, mazací, outbound
+a dokumentové importní akce nesmí být první pilot.
