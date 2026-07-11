@@ -311,6 +311,10 @@ print(json.dumps({"ok": result.get("ok"), "status": result.get("status"), "respo
         self.assertTrue(result["ok"])
         self.assertEqual(result["speech"]["transport"], "disabled")
         self.assertEqual(payload["state"], "command_ready")
+        self.assertEqual(payload["command_state"]["state"], "completed")
+        self.assertEqual(payload["command_state"]["delivery_owner"], "watcher")
+        self.assertEqual(result["voice_state"]["state"], "completed")
+        self.assertNotIn("Návrh odpovědi", json.dumps(payload["command_state"], ensure_ascii=False))
         self.assertEqual(payload["last_command"]["text"], "Připrav návrh odpovědi.")
 
     def test_handle_voice_command_speaks_generated_response_not_input_text(self) -> None:
@@ -617,6 +621,9 @@ print(json.dumps({"ok": result.get("ok"), "status": result.get("status"), "respo
             status = json.loads(status_path.read_text(encoding="utf-8"))
 
         self.assertEqual(status["state"], "pending_for_adam")
+        self.assertEqual(status["command_state"]["state"], "awaiting_adam")
+        self.assertEqual(status["command_state"]["delivery_owner"], "watcher")
+        self.assertEqual(result["voice_state"]["state"], "awaiting_adam")
         self.assertTrue(result["pending_for_adam"]["pending"])
         self.assertEqual(result["pending_for_adam"]["reason"], "codex_work")
         self.assertIn("řádků kódu", result["pending_for_adam"]["text"])

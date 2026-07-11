@@ -73,6 +73,11 @@ class VoiceBridgeCoordinatorTests(unittest.TestCase):
 
         self.assertEqual(text_result["voice_delivery_status"], "watcher_will_deliver")
         self.assertEqual(recording_result["voice_delivery_status"], "watcher_will_deliver")
+        self.assertEqual(text_result["voice_state"]["state"], "watcher_queued")
+        self.assertEqual(text_result["voice_state"]["delivery_owner"], "watcher")
+        self.assertEqual(recording_result["voice_state"]["state"], "watcher_queued")
+        self.assertEqual(recording_result["voice_state"]["delivery_owner"], "watcher")
+        self.assertNotIn("text", str(text_result["voice_state"]).casefold())
         self.assertEqual(inline_calls, [])
         self.assertEqual(
             [command["text"] for command in saved_commands],
@@ -108,6 +113,8 @@ class VoiceBridgeCoordinatorTests(unittest.TestCase):
         )
 
         self.assertEqual(result["voice_delivery_status"], "voice_command_delivered")
+        self.assertEqual(result["voice_state"]["state"], "delivered")
+        self.assertEqual(result["voice_state"]["delivery_owner"], "inline")
         self.assertEqual(len(inline_calls), 1)
         self.assertIs(inline_calls[0]["terminal_bridge"], explicit_bridge)
 
@@ -137,6 +144,8 @@ class VoiceBridgeCoordinatorTests(unittest.TestCase):
 
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "transcription_failed")
+        self.assertEqual(result["voice_state"]["state"], "transcription_failed")
+        self.assertEqual(result["voice_state"]["delivery_owner"], "none")
         self.assertEqual(failures, ["testovací chyba přepisu"])
         self.assertEqual(inline_calls, [])
 
@@ -160,6 +169,7 @@ class VoiceBridgeCoordinatorTests(unittest.TestCase):
 
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "empty_voice_text")
+        self.assertEqual(result["voice_state"]["state"], "rejected")
         self.assertEqual(calls, [])
 
     def test_transport_selector_keeps_local_aliases_and_safe_managed_default(self) -> None:

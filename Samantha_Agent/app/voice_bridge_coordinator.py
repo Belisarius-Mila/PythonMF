@@ -23,6 +23,12 @@ from app.speech.voice_inbox import (
     parse_voice_command_file,
     voice_command_to_dict,
 )
+from app.voice_bridge_state import (
+    VoiceCommandState,
+    VoiceCommandStateMachine,
+    VoiceDeliveryOwner,
+    inline_delivery_state,
+)
 
 
 VoiceResult = dict[str, Any]
@@ -318,6 +324,19 @@ def watcher_will_deliver_result(voice_mode: VoiceResult) -> VoiceResult:
     }
 
 
+def _result_with_voice_state(result: VoiceResult, machine: VoiceCommandStateMachine) -> VoiceResult:
+    return {**result, "voice_state": machine.snapshot()}
+
+
+def _record_coordinator_failure(machine: VoiceCommandStateMachine, *, event: str) -> None:
+    target = (
+        VoiceCommandState.DELIVERY_FAILED
+        if machine.state in {VoiceCommandState.PERSISTED, VoiceCommandState.INLINE_DELIVERING}
+        else VoiceCommandState.PERSISTENCE_FAILED
+    )
+    machine.transition(target, event=event)
+
+
 def coordinate_transcribed_voice_command(
     payload: VoiceResult,
     *,
@@ -329,19 +348,33 @@ def coordinate_transcribed_voice_command(
     terminal_bridge: Callable[..., VoiceResult] | None = None,
 ) -> VoiceResult:
     """Transcribe, persist and select exactly one owner for command delivery."""
+    machine = VoiceCommandStateMachine()
+    machine.transition(VoiceCommandState.TRANSCRIBING, event="transcription_started")
     try:
         result = transcriber(
             str(payload.get("audio_base64", "")),
             mime_type=str(payload.get("mime_type", "")),
             language=str(payload.get("language", "cs") or "cs"),
         )
+        machine.transition(VoiceCommandState.TRANSCRIBED, event="transcription_completed")
         result.update(dependencies.save_command(result, inbox_dir=inbox_dir))
+        machine.transition(VoiceCommandState.PERSISTED, event="command_persisted")
         if terminal_bridge is None:
             voice_mode = dependencies.load_voice_mode()
             if voice_mode.get("running"):
+                machine.transition(
+                    VoiceCommandState.WATCHER_QUEUED,
+                    event="watcher_selected",
+                    owner=VoiceDeliveryOwner.WATCHER,
+                )
                 result.update(watcher_will_deliver_result(voice_mode))
                 result["message"] = result["voice_delivery_message"]
-                return result
+                return _result_with_voice_state(result, machine)
+        machine.transition(
+            VoiceCommandState.INLINE_DELIVERING,
+            event="inline_selected",
+            owner=VoiceDeliveryOwner.INLINE,
+        )
         result.update(
             dependencies.deliver_inline(
                 inbox_dir=inbox_dir,
@@ -350,27 +383,35 @@ def coordinate_transcribed_voice_command(
                 history_path=history_path,
             )
         )
+        delivery_status = str(result.get("voice_delivery_status") or "")
+        machine.transition(
+            inline_delivery_state(delivery_status),
+            event="inline_delivery_result",
+        )
         result["message"] = result.get("voice_delivery_message") or "Hlasový pokyn byl přepsán a uložen pro Codex."
-        return result
+        return _result_with_voice_state(result, machine)
     except TranscriptionError as exc:
+        machine.transition(VoiceCommandState.TRANSCRIPTION_FAILED, event="transcription_failed")
         dependencies.record_transcription_failure(message=str(exc))
-        return {
+        return _result_with_voice_state({
             "ok": False,
             "message": f"Přepis hlasu selhal: {exc}",
             "status": "transcription_failed",
-        }
+        }, machine)
     except OSError as exc:
-        return {
+        _record_coordinator_failure(machine, event="io_failure")
+        return _result_with_voice_state({
             "ok": False,
             "message": f"Přepis se povedl, ale uložení hlasového pokynu selhalo: {exc}",
             "status": "voice_inbox_save_failed",
-        }
+        }, machine)
     except ValueError as exc:
-        return {
+        _record_coordinator_failure(machine, event="validation_failure")
+        return _result_with_voice_state({
             "ok": False,
             "message": f"Přepis se povedl, ale hlasový pokyn nejde uložit: {exc}",
             "status": "voice_inbox_save_failed",
-        }
+        }, machine)
 
 
 def coordinate_text_voice_command(
@@ -383,13 +424,15 @@ def coordinate_text_voice_command(
     terminal_bridge: Callable[..., VoiceResult] | None = None,
 ) -> VoiceResult:
     """Persist a text command and select watcher or inline delivery ownership."""
+    machine = VoiceCommandStateMachine()
     text = dependencies.sanitize_text(str(payload.get("text", "") or "")).strip()
     if not text:
-        return {
+        machine.transition(VoiceCommandState.REJECTED, event="empty_text")
+        return _result_with_voice_state({
             "ok": False,
             "message": "Chybí text hlasového pokynu.",
             "status": "empty_voice_text",
-        }
+        }, machine)
     try:
         result = {
             "ok": True,
@@ -398,11 +441,22 @@ def coordinate_text_voice_command(
             "status": "voice_text_saved",
         }
         result.update(dependencies.save_command({"text": text}, inbox_dir=inbox_dir))
+        machine.transition(VoiceCommandState.PERSISTED, event="command_persisted")
         voice_mode = dependencies.load_voice_mode()
         if terminal_bridge is None and voice_mode.get("running"):
+            machine.transition(
+                VoiceCommandState.WATCHER_QUEUED,
+                event="watcher_selected",
+                owner=VoiceDeliveryOwner.WATCHER,
+            )
             result.update(watcher_will_deliver_result(voice_mode))
             result["message"] = result["voice_delivery_message"]
-            return result
+            return _result_with_voice_state(result, machine)
+        machine.transition(
+            VoiceCommandState.INLINE_DELIVERING,
+            event="inline_selected",
+            owner=VoiceDeliveryOwner.INLINE,
+        )
         result.update(
             dependencies.deliver_inline(
                 inbox_dir=inbox_dir,
@@ -411,17 +465,24 @@ def coordinate_text_voice_command(
                 history_path=history_path,
             )
         )
+        delivery_status = str(result.get("voice_delivery_status") or "")
+        machine.transition(
+            inline_delivery_state(delivery_status),
+            event="inline_delivery_result",
+        )
         result["message"] = result.get("voice_delivery_message") or result["message"]
-        return result
+        return _result_with_voice_state(result, machine)
     except OSError as exc:
-        return {
+        _record_coordinator_failure(machine, event="io_failure")
+        return _result_with_voice_state({
             "ok": False,
             "message": f"Uložení textového hlasového pokynu selhalo: {exc}",
             "status": "voice_inbox_save_failed",
-        }
+        }, machine)
     except ValueError as exc:
-        return {
+        _record_coordinator_failure(machine, event="validation_failure")
+        return _result_with_voice_state({
             "ok": False,
             "message": f"Textový hlasový pokyn nejde uložit: {exc}",
             "status": "voice_inbox_save_failed",
-        }
+        }, machine)

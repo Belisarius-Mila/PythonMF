@@ -28,6 +28,11 @@ from app.speech.voice_inbox import (
     voice_command_to_dict,
     wait_for_latest_voice_command,
 )
+from app.voice_bridge_state import (
+    is_final_voice_response_route,
+    should_speak_voice_result,
+    watcher_command_state,
+)
 
 
 ADAM_VOICE_MODE_STATUS_PATH = VOICE_COMMAND_INBOX_DIR / "adam_voice_mode_status.json"
@@ -36,13 +41,6 @@ ADAM_VOICE_HISTORY_PATH = VOICE_COMMAND_INBOX_DIR / "adam_voice_history.jsonl"
 ADAM_LAST_RESPONSE_PATH = VOICE_COMMAND_INBOX_DIR / "last_adam_response.json"
 CODEX_APPROVAL_REQUEST_PATH = VOICE_COMMAND_INBOX_DIR / "codex_approval_request.json"
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-NON_FINAL_VOICE_RESPONSE_ROUTES = {
-    "codex_work",
-    "terminal_delivery_pending_reply",
-    "terminal_delivery_unverified",
-    "voice_command_delivery_unverified",
-}
-
 DIRECT_RESPONSE_INSTRUCTIONS = """
 Jsi Adam v hlasovém režimu Samantha Cockpitu.
 Odpovídej česky, krátce, lidsky a přímo.
@@ -77,6 +75,7 @@ def write_voice_mode_status(
     last_command: VoiceCommand | None = None,
     pid: int | None = None,
     started_at: str | None = None,
+    command_state: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "ok": True,
@@ -88,6 +87,8 @@ def write_voice_mode_status(
     }
     if last_command is not None:
         payload["last_command"] = voice_command_to_dict(last_command)
+    if command_state is not None:
+        payload["command_state"] = dict(command_state)
     atomic_write_json(status_path, payload)
     return payload
 
@@ -135,17 +136,6 @@ def _last_response_path_for_history(history_path: Path) -> Path:
     if history_path == ADAM_VOICE_HISTORY_PATH:
         return ADAM_LAST_RESPONSE_PATH
     return history_path.parent / "last_adam_response.json"
-
-
-def is_final_voice_response_route(route: str) -> bool:
-    return str(route or "").strip() not in NON_FINAL_VOICE_RESPONSE_ROUTES
-
-
-def should_speak_voice_result(*, pending: dict[str, Any]) -> bool:
-    if not pending.get("pending"):
-        return True
-    reason = str(pending.get("reason") or pending.get("status") or "").strip()
-    return is_final_voice_response_route(reason)
 
 
 class _PendingTransactionSkipped(RuntimeError):
@@ -956,6 +946,7 @@ def handle_voice_command(
     speech_result = {"ok": True, "message": "Hlasové oznámení vypnuté.", "transport": "disabled"}
     if should_speak and should_speak_voice_result(pending=pending):
         speech_result = speak(spoken_result, allow_local_fallback=False)
+    command_state = watcher_command_state(pending=pending, command_ok=command.ok)
     state = "pending_for_adam" if pending.get("pending") else "command_ready" if command.ok else "waiting"
     status = write_voice_mode_status(
         status_path=status_path,
@@ -963,6 +954,7 @@ def handle_voice_command(
         message=spoken_result,
         last_command=command,
         started_at=started_at,
+        command_state=command_state,
     )
     return {
         "ok": command.ok,
@@ -972,6 +964,7 @@ def handle_voice_command(
         "notice": spoken_result,
         "response": spoken_result,
         "pending_for_adam": pending,
+        "voice_state": command_state,
     }
 
 
