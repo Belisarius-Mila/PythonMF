@@ -457,6 +457,20 @@ Rucni retest po prvnim vykonovem kroku:
   celkem o 2 083 radku.
 - Lokalni i Tailscale smoke check po nasazeni prosly na jedine instanci PID
   53444 se shodnym code stampem `eeba05331cde14eb`.
+- Faze 2.1 pridala `app/voice_bridge_state.py`: explicitni stavy prijeti,
+  prepisu, persistence, volby vlastnika, watcher fronty/zpracovani, cekani na
+  Adama nebo potvrzeni a finalnich vysledku. Coordinator i watcher pouzivaji
+  stejny model; prechod na jineho vlastnika po volbe je zakazany.
+- Stavova stopa je technicka a neobsahuje text pokynu. Watcher ji uklada do
+  existujiciho private status JSON; heartbeat zachovava posledni `command_state`
+  misto jeho prepsani. Stara UI pole zustala kompatibilni.
+- Gate ma 573 testu. Implementacni commity jsou `9417056` a `46ca297`.
+  `app/speech/adam_voice_mode.py` zustal na baseline 1 105 radku a stavovy model
+  je samostatny modul.
+- Finalni zivy test po restartu watcheru PID 60230 potvrdil prave jeden history
+  zaznam, nula inline pokusu a zachovanou stopu
+  `watcher_queued -> watcher_processing -> awaiting_adam`. Text pokynu ani
+  private logy se do checkpointu neukladaji.
 
 Co neni hotove:
 
@@ -475,18 +489,18 @@ Co neni hotove:
   podezrelych API cest zustavaji beze zmeny; u API cest chybi registr externich
   klientu.
 - Python zavislosti zatim nejsou pripnute na konkretni verze.
-- VoiceBridge command ownership ma samostatny coordinator, ale jeste nema jeden
-  explicitni stavovy model prikazu; Faze 2 state machine zustava pozdejsi krok.
+- VoiceBridge ma explicitni stavovy model pro coordinator i watcher. Dalsi
+  budouci rozsireni ma smysl jen pokud bude potreba outbox/idempotency pres
+  restart procesu, ne jako dalsi ad-hoc sada status stringu.
 - Dokumentove a e-mailove workflow nemaji jednotnou repository/transakcni
   vrstvu.
 
 Dalsi krok:
 
-Faze 1.2 je uzavrena a dokumentova read-only cast Faze 1.3 ma vyjmuty search,
-case/detail, classification/review/work, due-date i jednotny intake service.
-Dalsi hlavni krok roadmapy je zacit po malych read-only rezech e-mailovou service
-vrstvu; dokumentovy reindex a dalsi writery zustavaji oddelenou persistence
-roadmapou.
+Faze 2.1 je uzavrena a rucne overena. Dalsi volba podle roadmapy je bud 2.2
+jednotny dokumentovy intake model, nebo navrat k dosud nehotove e-mailove
+service vrstve z Faze 1. Dokumentovy reindex a dalsi writery zustavaji oddelenou
+persistence roadmapou.
 Dokumentovy reindex zustava vedlejsi persistence roadmapou. Stary e-mailovy
 parser, lokalni Janicka vetev a pet podezrelych API cest zatim nemenit. PDF
 browser a post-call audio retest jsou odlozene.
@@ -527,6 +541,7 @@ Zmenene nebo relevantni soubory:
 - `app/documents/review_service.py`
 - `app/documents/search_service.py`
 - `app/voice_bridge_coordinator.py`
+- `app/voice_bridge_state.py`
 - `app/file_persistence.py`
 - `app/backup/activity_state.py`
 - `scripts/cockpit_smoke_check.py`
@@ -538,6 +553,7 @@ Zmenene nebo relevantni soubory:
 - `tests/test_document_review_service.py`
 - `tests/test_document_search_service.py`
 - `tests/test_voice_bridge_coordinator.py`
+- `tests/test_voice_bridge_state.py`
 - `tests/test_file_persistence.py`
 - `scripts/install_cockpit_local_launchd.sh`
 - `scripts/install_cockpit_tailscale_launchd.sh`

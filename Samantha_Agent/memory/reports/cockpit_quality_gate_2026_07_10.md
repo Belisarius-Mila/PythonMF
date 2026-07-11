@@ -193,6 +193,13 @@ nebo pull request.
   564 testů a monolit klesl z 19 915 na 19 703 řádků.
 - Lokální i Tailscale smoke check po nasazení prošly na jediné instanci PID
   53444 se shodným code stampem `eeba05331cde14eb`.
+- Fáze 2.1 přidala `app/voice_bridge_state.py` s explicitními přechody a
+  vynuceným jediným vlastníkem doručení. Coordinator i watcher zapisují pouze
+  technický snapshot bez textu pokynu; watcher heartbeat poslední stav
+  zachovává. Gate má 573 testů a `adam_voice_mode.py` zůstal na baseline.
+- Finální živý test na watcheru PID 60230 potvrdil jeden history záznam, nula
+  inline pokusů a stav `watcher_queued -> watcher_processing -> awaiting_adam`.
+  Implementační commity jsou `9417056` a `46ca297`.
 
 ## Co gate zatím neřeší
 
@@ -211,6 +218,7 @@ transakce, ScanDocu review a životní cyklus autosave/managed relací jsou hoto
 Fáze 1.1 status/health i Fáze 1.2 VoiceBridge command ownership a iPhone audio
 fallback jsou hotové a ručně ověřené. Fáze 1.3 je rozpracovaná: read-only
 document search, case/detail, classification/review/work, due-date i jednotný
-intake service jsou venku. Další hlavní krok je e-mailová service vrstva po
-malých read-only řezech.
+intake service jsou venku a Fáze 2.1 explicitního VoiceBridge state machine je
+ručně ověřená. Další rozhodnutí je 2.2 jednotný document intake model, nebo
+návrat k e-mailové service vrstvě z Fáze 1.
 Reindex zůstává samostatný další krok dokumentové persistence.
