@@ -426,6 +426,16 @@ Rucni retest po prvnim vykonovem kroku:
   47655 se shodnym code stampem `72bd182745b34cc5`. Restart mel kratke
   prechodove okno, ve kterem launchd jeste nezacal odpovidat, ale sam obnovil
   jednu standardni instanci; zadny druhy server nezustal bezet.
+- Treti read-only dokumentovy rez, pracovne oznaceny jako 1.4, pridal
+  `app/documents/review_service.py`. Sluzba prevzala klasifikacni prehled a
+  automaticke navrhy, frontu dokumentu k revizi, strukturovany review report a
+  souhrn document work. Potvrzene zapisovaci transakce metadat a reading statusu
+  zustaly v Cockpitu beze zmeny.
+- Ctyri prime testy nove sluzby rozsiruji gate na 557 testu. `app/cockpit.py`
+  klesl z 21 060 na 20 519 radku, tedy o dalsich 541 radku; od zacatku Faze 1.3
+  celkem o 1 267 radku.
+- Lokalni i Tailscale smoke check po nasazeni prosly na jedine instanci PID
+  50626 se shodnym code stampem `e2a2b6fed6cd6ff6`.
 
 Co neni hotove:
 
@@ -451,10 +461,10 @@ Co neni hotove:
 
 Dalsi krok:
 
-Faze 1.2 je uzavrena a Faze 1.3 je rozpracovana. Read-only search i case/detail
-service jsou vyjmuty. Dalsi dokumentovy rez ma oddelit souvisly read-only blok
-klasifikace, review a pracovniho statusu bez zmeny API a bez mutace private
-vaultu; terminy a pripominky zatim zustanou samostatna budouci vrstva.
+Faze 1.2 je uzavrena a Faze 1.3 je rozpracovana. Read-only search, case/detail
+i classification/review/work service jsou vyjmuty. Dalsi vhodny rez je
+samostatna read-only vrstva terminu dokumentu; zapis pripominek a potvrzovaci
+hranice musi zustat oddelene a beze zmeny.
 Dokumentovy reindex zustava vedlejsi persistence roadmapou. Stary e-mailovy
 parser, lokalni Janicka vetev a pet podezrelych API cest zatim nemenit. PDF
 browser a post-call audio retest jsou odlozene.
@@ -490,6 +500,7 @@ Zmenene nebo relevantni soubory:
 - `app/cockpit.py`
 - `app/cockpit_status_service.py`
 - `app/documents/case_service.py`
+- `app/documents/review_service.py`
 - `app/documents/search_service.py`
 - `app/voice_bridge_coordinator.py`
 - `app/file_persistence.py`
@@ -498,6 +509,7 @@ Zmenene nebo relevantni soubory:
 - `tests/test_cockpit.py`
 - `tests/test_cockpit_status_service.py`
 - `tests/test_document_case_service.py`
+- `tests/test_document_review_service.py`
 - `tests/test_document_search_service.py`
 - `tests/test_voice_bridge_coordinator.py`
 - `tests/test_file_persistence.py`

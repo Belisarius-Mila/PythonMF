@@ -174,6 +174,12 @@ nebo pull request.
   21 060 řádků, tedy o dalších 457 řádků.
 - Po nasazení prošly lokální i Tailscale smoke checky na jediné instanci PID
   47655 se shodným code stampem `72bd182745b34cc5`.
+- Třetí read-only dokumentový řez přidal `app/documents/review_service.py` pro
+  klasifikaci, návrhy metadat, review frontu/report a document work souhrn.
+  Potvrzené zapisovací akce zůstaly beze změny. Čtyři přímé testy rozšířily
+  gate na 557 testů a monolit klesl z 21 060 na 20 519 řádků.
+- Lokální i Tailscale smoke check po nasazení prošly na jediné instanci PID
+  50626 se shodným code stampem `e2a2b6fed6cd6ff6`.
 
 ## Co gate zatím neřeší
 
@@ -191,6 +197,7 @@ urgent reminders, dokumentové persistence primitivy, metadata/reading-status
 transakce, ScanDocu review a životní cyklus autosave/managed relací jsou hotové.
 Fáze 1.1 status/health i Fáze 1.2 VoiceBridge command ownership a iPhone audio
 fallback jsou hotové a ručně ověřené. Fáze 1.3 je rozpracovaná: read-only
-document search i case/detail service jsou venku, další je souvislý blok
-klasifikace, review a pracovního statusu dokumentů.
+document search, case/detail i classification/review/work service jsou venku.
+Další vhodný read-only řez jsou dokumentové termíny při zachování oddělené
+potvrzované tvorby připomínek.
 Reindex zůstává samostatný další krok dokumentové persistence.
