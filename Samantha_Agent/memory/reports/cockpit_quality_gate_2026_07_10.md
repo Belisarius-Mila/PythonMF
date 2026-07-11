@@ -232,6 +232,17 @@ nebo pull request.
   lease či ack zachová předchozí stav. Gate má 599 testů.
 - Testy pracovaly pouze v `/private/tmp`; runtime producent/konzument stále
   není zapojený. Oba smoke checky prošly na jediné instanci PID 69869.
+- Finální pilot Fáze 2.4 atomicky produkuje redigované e-mailové decision
+  události a idempotentní konzument je ukládá do technického auditu před ACK.
+  Pád po auditu před ACK nevytvořil při replayi duplicitní záznam.
+- Reálný test potvrdil 22 auditů, 22 delivered a 0 pending. Současně proběhlo
+  5 přesunů do koše, 1 archivace a 1 import přílohy bez chyby; providerové akce
+  nejsou součástí auditního konzumenta.
+- Zavření Work Queue odhalilo ztrátu transientního purge seznamu. Budoucí trash
+  dávky persistují technickou košovou identitu a UI ji po otevření obnoví.
+  Staré neúplné záznamy se pouze hlásí a nikdy se nepoužijí k purge.
+- Gate má 606 testů, Cockpit 19 602 řádků / 258 top-level funkcí. Oba smoke
+  checky prošly na jediné instanci PID 85842.
 
 ## Co gate zatím neřeší
 
@@ -250,8 +261,7 @@ transakce, ScanDocu review a životní cyklus autosave/managed relací jsou hoto
 Fáze 1.1 status/health i Fáze 1.2 VoiceBridge command ownership a iPhone audio
 fallback jsou hotové a ručně ověřené. Fáze 1.3 je rozpracovaná: read-only
 document search, case/detail, classification/review/work, due-date i jednotný
-intake service jsou venku a Fáze 2.1, 2.2 i 2.3 jsou ověřené. Fáze 2.4 je
-rozpracovaná: repository kontrakt, první e-mailový decision adaptér a
-lease/retry/ack protokol jsou hotové. Další řez je samostatný výběr prvního
-nedestruktivního technického runtime pilota. Reindex zůstává samostatný další
-krok dokumentové persistence.
+intake service jsou venku a Fáze 2.1 až 2.4 jsou ověřené včetně reálného
+nedestruktivního outbox pilota. Další doporučený krok je Fáze 1.4: vyjmout
+e-mailovou service vrstvu před zahájením SQLite Fáze 3. Reindex zůstává
+samostatný další krok dokumentové persistence.

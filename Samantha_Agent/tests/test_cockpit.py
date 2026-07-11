@@ -74,6 +74,7 @@ from app.cockpit import (
     email_processing_batch_groups,
     email_processing_item_id,
     email_processing_pending_work_items,
+    email_processing_pending_purge_items,
     resolve_email_archive_file,
     resolve_email_archive_incoming_file,
     classify_email_processing_category,
@@ -7113,6 +7114,39 @@ Dalsi krok:
             self.assertEqual(result["items"][0]["trash_folder"], "Deleted Messages")
             self.assertEqual(result["items"][0]["trash_uid"], "914157")
             self.assertEqual(result["items"][0]["message_id"], "<14157@example.com>")
+            action = json.loads((Path(temp_dir) / "actions.jsonl").read_text(encoding="utf-8").splitlines()[-1])
+            self.assertEqual(action["items"][0]["trash_folder"], "Deleted Messages")
+            self.assertEqual(action["items"][0]["trash_uid"], "914157")
+            self.assertEqual(action["items"][0]["message_id"], "<14157@example.com>")
+
+    def test_email_pending_purge_status_recovers_without_message_content(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "actions.jsonl"
+            path.write_text(
+                json.dumps({
+                    "action": "process_email_work_queue_batch",
+                    "items": [{
+                        "item_id": "trash-1",
+                        "provider": "iCloud",
+                        "trash_folder": "Deleted Messages",
+                        "trash_uid": "914157",
+                        "message_id": "<14157@example.com>",
+                        "status": "trashed",
+                        "subject": "Private subject",
+                    }],
+                }) + "\n",
+                encoding="utf-8",
+            )
+
+            result = email_processing_pending_purge_items(path)
+
+            self.assertEqual(result["count"], 1)
+            self.assertNotIn("subject", result["items"][0])
+
+    def test_email_work_queue_can_reopen_durable_purge_candidates(self) -> None:
+        self.assertIn('fetch("/api/email-processing/pending-purge")', EMAIL_PROCESSING_HTML)
+        self.assertIn("initialPermanentDeleteItems = []", EMAIL_PROCESSING_HTML)
+        self.assertIn("Otevřít koš (", EMAIL_PROCESSING_HTML)
 
     def test_process_email_work_queue_batch_confirmed_bulk_trash_uses_one_confirmation(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

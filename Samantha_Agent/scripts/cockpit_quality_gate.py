@@ -28,6 +28,7 @@ COMPILE_PATHS = (
     "app/autosave_service.py",
     "app/file_persistence.py",
     "app/work_repository.py",
+    "app/email/work_outbox.py",
     "app/email/work_repository.py",
     "app/email/work_models.py",
     "app/backup/activity_state.py",
@@ -49,6 +50,7 @@ COMPILE_PATHS = (
     "scripts/cockpit_server.py",
     "scripts/open_cockpit.py",
     "scripts/cockpit_smoke_check.py",
+    "scripts/email_work_outbox_pilot.py",
     "scripts/autosave_status.py",
     "scripts/migrate_cockpit_single_instance.py",
 )
@@ -81,6 +83,7 @@ TEST_MODULES = (
     "tests.test_adam_voice_mode",
     "tests.test_speech_transcribe",
     "tests.test_email_outbound_tools",
+    "tests.test_email_work_outbox",
     "tests.test_work_repository",
     "tests.test_email_work_repository",
     "tests.test_email_work_models",

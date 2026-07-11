@@ -510,6 +510,19 @@ Rucni retest po prvnim vykonovem kroku:
   Simulovany pad replace pri lease/ack zachoval predchozi soubor.
 - Gate ma 599 testu. Outbox testy pouzily pouze `/private/tmp`; zivy producent
   ani konzument nevznikl. Oba smoke checky prosly na PID 69869.
+- Finalni pilot Faze 2.4 pridal redigovanou e-mailovou decision udalost a
+  idempotentni technicky auditni konzument. Udalost obsahuje pouze hashovanou
+  referenci a akci. Pad po auditu pred ACK nevytvoril pri replayi duplicitu.
+- Realny provoz overil 22 udalosti, 22 auditu, 22 delivered a 0 pending. Ve
+  stejne rucni davce proslo 5 presunu do kose, 1 archivace a 1 import prilohy
+  bez chyby; providerove akce nebyly soucasti auditniho konzumenta.
+- Test odhalil transientni purge seznam v browseru. Soucasnych 5 polozek po
+  zavreni okna nelze bezpecne identifikovat pro trvaly purge a zustavaji v
+  kosi. Budouci trash log persistuje kosove UID/Message-ID a Work Queue umi po
+  otevreni obnovit jen bezpecne identifikovatelne nepurgovane polozky. Stare
+  nekompletni zaznamy se nikdy nehádají ani automaticky nemazou.
+- Gate ma 606 testu, monolit 19 602 radku a oba smoke checky prosly na jedine
+  instanci PID 85842. Faze 2.4 je uzavrena.
 
 Co neni hotove:
 
@@ -532,17 +545,16 @@ Co neni hotove:
   budouci rozsireni ma smysl jen pokud bude potreba outbox/idempotency pres
   restart procesu, ne jako dalsi ad-hoc sada status stringu.
 - Dokumentove a e-mailove workflow maji jednotne read-only pracovni modely.
-  Repository zaklad, prvni e-mailovy decision adapter a outbox delivery protokol
-  existuji, ale zapisovaci workflow nejsou plosne prevedena a outbox nema zivy
-  runtime pilot.
+  Repository zaklad, prvni e-mailovy decision adapter, delivery protokol i
+  nedestruktivni runtime pilot jsou hotove. Ostatni zapisovaci workflow nejsou
+  plosne prevedena.
 
 Dalsi krok:
 
-Faze 2.1, 2.2 i 2.3 jsou uzavrene a overene. Faze 2.4 je rozpracovana:
-repository/outbox kontrakt, prvni e-mailovy decision adapter i lease/retry/ack
-protokol jsou hotove. Dalsi rez ma nejdriv vybrat a popsat jednu
-nedestruktivni technickou runtime udalost; az potom ji zapojit jako pilot.
-Dokumentovy reindex a dalsi writery zustavaji oddelenou persistence roadmapou.
+Faze 2.1 az 2.4 jsou uzavrene a overene. Pred Fazi 3 je doporuceny navrat k
+Fazi 1.4: vyjmout e-mailove routy a service vrstvu z Cockpit monolitu s vyuzitim
+hotoveho work modelu a repository adapteru. Dokumentovy reindex a dalsi writery
+zustavaji oddelenou persistence roadmapou.
 Dokumentovy reindex zustava vedlejsi persistence roadmapou. Stary e-mailovy
 parser, lokalni Janicka vetev a pet podezrelych API cest zatim nemenit. PDF
 browser a post-call audio retest jsou odlozene.
@@ -585,6 +597,7 @@ Zmenene nebo relevantni soubory:
 - `app/documents/search_service.py`
 - `app/email/work_models.py`
 - `app/email/work_repository.py`
+- `app/email/work_outbox.py`
 - `app/work_repository.py`
 - `app/voice_bridge_coordinator.py`
 - `app/voice_bridge_state.py`
@@ -601,7 +614,9 @@ Zmenene nebo relevantni soubory:
 - `tests/test_document_search_service.py`
 - `tests/test_email_work_models.py`
 - `tests/test_email_work_repository.py`
+- `tests/test_email_work_outbox.py`
 - `tests/test_work_repository.py`
+- `scripts/email_work_outbox_pilot.py`
 - `tests/test_voice_bridge_coordinator.py`
 - `tests/test_voice_bridge_state.py`
 - `tests/test_file_persistence.py`

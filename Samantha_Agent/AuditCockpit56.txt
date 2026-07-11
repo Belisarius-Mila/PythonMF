@@ -259,7 +259,7 @@ Faze 2 - sjednoceni stavu:
 1. Explicitni VoiceBridge state machine.
 2. Jednotny dokumentovy intake model.
 3. Jednotny e-mailovy pracovni model. [HOTOVO 11. 7. 2026]
-4. Repository rozhrani, idempotency a outbox. [ROZPRACOVANO: repository adapter + lease/retry/ack hotovy 11. 7. 2026]
+4. Repository rozhrani, idempotency a outbox. [HOTOVO 11. 7. 2026: realny e-mailovy audit pilot]
 
 Faze 3 - odolna persistence:
 1. SQLite pro pracovni stavy a metadata.

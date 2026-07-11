@@ -177,6 +177,7 @@ from app.email.models import EmailAttachmentMeta, EmailHeader, EmailMessage
 from app.email.redaction import redact_email_addresses
 from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEmailProvider
 from app.email.work_repository import (
+    pending_email_purge_items,
     read_email_work_decisions,
     save_email_work_decision as repository_save_email_work_decision,
 )
@@ -3618,6 +3619,9 @@ def process_email_work_queue_batch(
                     "attachments_imported": int(item.get("attachments_imported", 0) or 0),
                     "attachment_count": int(item.get("attachment_count", 0) or 0),
                     "pdf_attachment_count": int(item.get("pdf_attachment_count", 0) or 0),
+                    "trash_folder": str(item.get("trash_folder", "")),
+                    "trash_uid": str(item.get("trash_uid", "")),
+                    "message_id": str(item.get("message_id", "")),
                 }
                 for item in processed
             ],
@@ -3702,6 +3706,18 @@ def process_email_work_queue_purge_trash_batch(
     )
     message = "Trvalé smazání skončilo s chybami." if has_error else "E-maily v koši byly trvale smazány."
     return {"ok": not has_error, "message": message, "summary": summary, "items": processed}
+
+
+def email_processing_pending_purge_items(
+    actions_path: Path = EMAIL_WORK_QUEUE_ACTIONS_FILE,
+) -> dict[str, Any]:
+    result = pending_email_purge_items(actions_path)
+    count = int(result.get("count", 0) or 0)
+    unrecoverable = int(result.get("unrecoverable_count", 0) or 0)
+    result["message"] = f"Obnoveno položek připravených k trvalému smazání: {count}."
+    if unrecoverable:
+        result["message"] += f" Starších neregenerovatelných záznamů: {unrecoverable}."
+    return result
 
 
 def purge_trash_confirmation_phrase(count: int) -> str:
@@ -9665,6 +9681,9 @@ class CockpitServer:
                 if parsed.path == "/api/email-processing/pending-work":
                     self.respond_json(email_processing_pending_work_items())
                     return
+                if parsed.path == "/api/email-processing/pending-purge":
+                    self.respond_json(email_processing_pending_purge_items())
+                    return
                 if parsed.path == "/api/email-archive/list":
                     params = parse_qs(parsed.query)
                     query = params.get("q", [""])[0]
@@ -10756,6 +10775,8 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     let headersBusyTimer = null;
     let emailItems = [];
     let overviewSince = "";
+    let recoveredPermanentDeleteItems = [];
+    let unrecoverablePurgeCount = 0;
 
     function categoryTitle(raw) {
       return raw.replace(/^#+\\s*/, "").trim();
@@ -10840,9 +10861,17 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       updateRefreshButtonState();
       const actionable = counts.process + counts.trash;
       if (!counts.total) {
-        processEmailsBtn.disabled = true;
-        processEmailsBtn.textContent = "Zpracovat e-maily";
-        processEmailsStatus.textContent = "Zatím není načtený žádný e-mailový seznam.";
+        if (recoveredPermanentDeleteItems.length) {
+          processEmailsBtn.disabled = false;
+          processEmailsBtn.textContent = `Otevřít koš (${recoveredPermanentDeleteItems.length})`;
+          processEmailsStatus.textContent = "Obnovené položky v koši čekají na samostatné přesné potvrzení trvalého smazání.";
+        } else {
+          processEmailsBtn.disabled = true;
+          processEmailsBtn.textContent = "Zpracovat e-maily";
+          processEmailsStatus.textContent = unrecoverablePurgeCount
+            ? `Starší košové záznamy bez bezpečné obnovovací identity: ${unrecoverablePurgeCount}. Nebudou automaticky mazány.`
+            : "Zatím není načtený žádný e-mailový seznam.";
+        }
         return;
       }
       if (counts.decided < counts.total) {
@@ -11072,7 +11101,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         .replaceAll("'", "&#39;");
     }
 
-    function initializeWorkQueueWindow(queue, queueItems) {
+    function initializeWorkQueueWindow(queue, queueItems, initialPermanentDeleteItems = []) {
       const queueDoc = queue.document;
       const queueList = queueDoc.getElementById("queueList");
       const detailPane = queueDoc.getElementById("detailPane");
@@ -11087,7 +11116,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       const purgeTrashBtn = queueDoc.getElementById("purgeTrashBtn");
       let selectedId = queueItems.length ? queueItems[0].id : "";
       let activeBatchFilter = "all";
-      let permanentDeleteItems = [];
+      let permanentDeleteItems = initialPermanentDeleteItems.map((item) => ({...item}));
       let recentImportedAttachments = [];
 
       function decisionLabel(item) {
@@ -11577,6 +11606,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
                 trash_uid: result.trash_uid || "",
                 message_id: result.message_id || ""
               });
+              recoveredPermanentDeleteItems = permanentDeleteItems.map((candidate) => ({...candidate}));
             }
             if (!result || !result.ok || result.status === "trash_pending") remaining.push(item);
           });
@@ -11646,6 +11676,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
             item.purgeResult = result || {};
             return !result || !result.ok || result.status !== "purged";
           });
+          recoveredPermanentDeleteItems = permanentDeleteItems.map((candidate) => ({...candidate}));
           updateBatchState();
         } catch (err) {
           queueStatus.textContent = "Chyba trvalého smazání z koše: " + err;
@@ -11659,7 +11690,11 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
 
     function openWorkQueueWindow() {
       const counts = decisionCounts(emailItems);
-      if (!counts.total || counts.decided < counts.total) {
+      if (!counts.total && !recoveredPermanentDeleteItems.length) {
+        window.alert("Není připravený žádný e-mail ani bezpečně obnovená položka v koši.");
+        return;
+      }
+      if (counts.total && counts.decided < counts.total) {
         window.alert("Nejdřív přiřaď status všem viditelným e-mailům.");
         return;
       }
@@ -11745,7 +11780,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       <div class="body note">
         <div><strong>Připraveno ke zpracování:</strong> <span id="queueProcessCount">${toProcess.length}</span></div>
         <div><strong>Koš čeká na potvrzení:</strong> <span id="queueTrashCount">${toTrash.length}</span></div>
-        <div><strong>Trvalé smazání v koši:</strong> <span id="queuePurgeCount">0</span></div>
+        <div><strong>Trvalé smazání v koši:</strong> <span id="queuePurgeCount">${recoveredPermanentDeleteItems.length}</span></div>
         <div><strong>Aktuální blok:</strong> <span id="queueVisibleCount">${toProcess.length + toTrash.length}/${toProcess.length + toTrash.length}</span></div>
         <div><strong>Ignorováno:</strong> ${ignored.length}</div>
         <div class="batch-filters" id="batchFilters"></div>
@@ -11768,7 +11803,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
 </body>
 </html>`);
       queue.document.close();
-      initializeWorkQueueWindow(queue, queueItems);
+      initializeWorkQueueWindow(queue, queueItems, recoveredPermanentDeleteItems);
       queue.focus();
       emailItems = [];
       window.lastOverviewText = "";
@@ -11863,6 +11898,19 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       }
     }
 
+    async function loadPendingPurgeItems() {
+      try {
+        const res = await fetch("/api/email-processing/pending-purge");
+        const data = await res.json();
+        recoveredPermanentDeleteItems = Array.isArray(data.items) ? data.items : [];
+        unrecoverablePurgeCount = Number(data.unrecoverable_count || 0);
+        updateWorkQueueState();
+      } catch (_err) {
+        recoveredPermanentDeleteItems = [];
+        unrecoverablePurgeCount = 0;
+      }
+    }
+
     async function loadOverview() {
       refreshBtn.disabled = true;
       loadPendingBtn.disabled = true;
@@ -11920,6 +11968,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     loadPendingBtn.addEventListener("click", loadPendingWork);
     processEmailsBtn.addEventListener("click", openWorkQueueWindow);
     cockpitBtn.addEventListener("click", returnToCockpit);
+    loadPendingPurgeItems();
     loadOverview();
   </script>
 </body>

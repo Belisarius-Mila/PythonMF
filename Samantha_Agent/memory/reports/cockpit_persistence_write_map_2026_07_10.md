@@ -285,3 +285,31 @@ regresní/concurrency test a nemigrovat obsah bez samostatného rozhodnutí.
 Další řez 2.4 má nejdřív samostatně vybrat jednu nedestruktivní technickou
 runtime událost a popsat její recovery/rollback. Providerové, mazací, outbound
 a dokumentové importní akce nesmí být první pilot.
+
+## Reálný e-mailový audit pilot a uzavření Fáze 2.4
+
+- Změna pracovního e-mailového rozhodnutí atomicky vytváří outbox událost
+  `email.work_decision.changed`. Payload obsahuje pouze akci a hashovanou
+  aggregate referenci; neobsahuje předmět, odesílatele, UID ani tělo zprávy.
+- `app/email/work_outbox.py` je první nedestruktivní konzument. Událost zapisuje
+  idempotentně do private technického auditu a až potom provede ACK. Pád po
+  auditu před ACK byl nasimulován; po expiraci lease nevznikl duplicitní audit.
+- `scripts/email_work_outbox_pilot.py` zpracuje právě jednu událost a vypíše jen
+  technický souhrn. Nespouští providery, archivaci, import ani mazání.
+- Reálný test vytvořil nejprve 16 decision událostí a po zpracování 6 clear
+  událostí. Celkem je 22 unikátních auditů, 22 delivered a 0 pending.
+- Doménový test souběžně potvrdil 5 úspěšných přesunů do koše, 1 archivovaný
+  e-mail a 1 importovanou přílohu bez chyb. Tyto providerové akce zůstávají
+  oddělené od auditního konzumenta.
+- Test odhalil, že identita pro pozdější trvalý purge žila jen v otevřeném
+  browser okně. Po jeho zavření současných pět zpráv nelze bezpečně obnovit a
+  zůstávají v koši; systém je nebude hádat podle předmětu nebo původního UID.
+- Budoucí trash dávky nově persistují `trash_folder`, `trash_uid` a Message-ID
+  v private action logu. Read-only recovery endpoint vrací pouze bezpečně
+  identifikovatelné nepurgované položky; úspěšný purge je z registru odstraní.
+  Staré neúplné záznamy pouze spočítá a nikdy automaticky nemaže.
+- Gate má 606 testů. Lokální i Tailscale smoke check prošly na jediné instanci
+  PID 85842. Fáze 2.4 je tím uzavřená.
+
+Další doporučený architektonický krok je Fáze 1.4: vyjmout e-mailovou service
+vrstvu z Cockpit monolitu před zahájením SQLite Fáze 3.
