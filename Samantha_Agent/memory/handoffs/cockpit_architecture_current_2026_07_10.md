@@ -482,6 +482,15 @@ Rucni retest po prvnim vykonovem kroku:
   aktualnich sjednocenych polozek, vsechny reference platne a unikatni.
   Lokalni i Tailscale smoke check prosly na jedine instanci PID 63621 se
   shodnym code stampem `b960ddd3a4e6552f`.
+- Faze 2.3 pridala `app/email/work_models.py`: jednotnou stabilni identitu,
+  stav a akci pro nove e-mailove hlavicky i polozky pracovni fronty. Zachovava
+  puvodni `id`, `legacy_id` a `source_key`, takze stare decision zaznamy zustaly
+  kompatibilni. Do modulu se z monolitu presunula take klasifikace a batch
+  skupiny; provider, archivace, odesilani a potvrzovaci brany se nezmenily.
+- Gate ma 583 testu a `app/cockpit.py` klesl na 19 547 radku. Zivy read-only
+  test bez vypisu obsahu vratil dve nove polozky od dvou provideru; obe mely
+  platnou `emailworkref-...` referenci a stav `new`. Pracovni fronta byla
+  prazdna. Lokalni i Tailscale smoke check prosly na jedine instanci PID 65307.
 
 Co neni hotove:
 
@@ -503,15 +512,15 @@ Co neni hotove:
 - VoiceBridge ma explicitni stavovy model pro coordinator i watcher. Dalsi
   budouci rozsireni ma smysl jen pokud bude potreba outbox/idempotency pres
   restart procesu, ne jako dalsi ad-hoc sada status stringu.
-- Dokumentove a e-mailove workflow nemaji jednotnou repository/transakcni
-  vrstvu.
+- Dokumentove a e-mailove workflow maji jednotne read-only pracovni modely,
+  ale jeste nemaji jednotnou repository/transakcni vrstvu.
 
 Dalsi krok:
 
-Faze 2.1 i 2.2 jsou uzavrene a overene. Dalsi bod roadmapy je 2.3 jednotny
-e-mailovy pracovni model; ma zacit read-only typy a adaptery bez zmeny provideru,
-archivace, odesilani nebo potvrzovacich bran. Dokumentovy reindex a dalsi
-writery zustavaji oddelenou persistence roadmapou.
+Faze 2.1, 2.2 i 2.3 jsou uzavrene a overene. Dalsi bod roadmapy je 2.4:
+repository rozhrani, idempotency a outbox. Ma zacit navrhem hranice a jednim
+uzkym adapterem; ne plosnou migraci dokumentu a e-mailu. Dokumentovy reindex a
+dalsi writery zustavaji oddelenou persistence roadmapou.
 Dokumentovy reindex zustava vedlejsi persistence roadmapou. Stary e-mailovy
 parser, lokalni Janicka vetev a pet podezrelych API cest zatim nemenit. PDF
 browser a post-call audio retest jsou odlozene.
@@ -552,6 +561,7 @@ Zmenene nebo relevantni soubory:
 - `app/documents/intake_models.py`
 - `app/documents/review_service.py`
 - `app/documents/search_service.py`
+- `app/email/work_models.py`
 - `app/voice_bridge_coordinator.py`
 - `app/voice_bridge_state.py`
 - `app/file_persistence.py`
@@ -565,6 +575,7 @@ Zmenene nebo relevantni soubory:
 - `tests/test_document_intake_models.py`
 - `tests/test_document_review_service.py`
 - `tests/test_document_search_service.py`
+- `tests/test_email_work_models.py`
 - `tests/test_voice_bridge_coordinator.py`
 - `tests/test_voice_bridge_state.py`
 - `tests/test_file_persistence.py`

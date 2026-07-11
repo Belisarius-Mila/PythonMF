@@ -207,6 +207,14 @@ nebo pull request.
 - Živý status bez výpisu obsahu potvrdil 4 zdroje, 5 položek, platné unikátní
   reference a jednu instanci PID 63621 se shodným lokálním/Tailscale code
   stampem `b960ddd3a4e6552f`.
+- Fáze 2.3 přidala `app/email/work_models.py` se společnou identitou, stavem a
+  akcí pro nové hlavičky i položky Email Work Queue. Původní identifikátory
+  zůstaly kompatibilní; provider, těla zpráv, archivace, odesílání a potvrzovací
+  brány se nezměnily. Klasifikace a batch skupiny se přesunuly z monolitu.
+- Gate má 583 testů a monolit klesl na 19 547 řádků / 257 top-level funkcí.
+  Read-only live test bez výpisu obsahu ověřil dvě nové položky s platnou
+  `emailworkref-...` referencí. Lokální i Tailscale smoke check prošly na jediné
+  instanci PID 65307.
 
 ## Co gate zatím neřeší
 
@@ -225,6 +233,6 @@ transakce, ScanDocu review a životní cyklus autosave/managed relací jsou hoto
 Fáze 1.1 status/health i Fáze 1.2 VoiceBridge command ownership a iPhone audio
 fallback jsou hotové a ručně ověřené. Fáze 1.3 je rozpracovaná: read-only
 document search, case/detail, classification/review/work, due-date i jednotný
-intake service jsou venku a Fáze 2.1 i 2.2 jsou ověřené. Další bod je 2.3
-jednotný e-mailový pracovní model po malých read-only typech a adaptérech.
-Reindex zůstává samostatný další krok dokumentové persistence.
+intake service jsou venku a Fáze 2.1, 2.2 i 2.3 jsou ověřené. Další bod je 2.4:
+repository rozhraní, idempotency a outbox po jednom úzkém adaptéru. Reindex
+zůstává samostatný další krok dokumentové persistence.

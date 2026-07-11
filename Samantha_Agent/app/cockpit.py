@@ -176,6 +176,16 @@ from app.email.icloud_provider import EmailProviderError, ICloudReadOnlyEmailPro
 from app.email.models import EmailAttachmentMeta, EmailHeader, EmailMessage
 from app.email.redaction import redact_email_addresses
 from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEmailProvider
+from app.email.work_models import (
+    classify_email_processing_category,
+    email_processing_batch_groups,
+    email_processing_is_inbound_work_folder,
+    email_processing_item_id,
+    email_processing_item_lookup_keys,
+    email_processing_legacy_item_id,
+    email_processing_stable_key,
+    normalize_email_work_item,
+)
 from app.file_persistence import FilePersistenceError, append_jsonl_locked
 from app.cockpit_code_stamp import cockpit_code_stamp
 from app.cockpit_status_service import (
@@ -2890,80 +2900,6 @@ DOCUMENT_INTAKE_EMAIL_NEGATIVE_TERMS = (
 )
 
 
-def email_processing_stable_key(provider: str, folder: str, uid: str) -> str:
-    provider_key = " ".join(provider.casefold().split())
-    folder_key = " ".join((folder or "INBOX").casefold().split())
-    uid_key = str(uid).strip()
-    if not provider_key or not uid_key:
-        return ""
-    return "|".join([provider_key, folder_key, uid_key])
-
-
-def email_processing_is_inbound_work_folder(folder: str) -> bool:
-    folder_key = " ".join((folder or "INBOX").casefold().split())
-    outbound_folders = {
-        "sent",
-        "sent messages",
-        "sent mail",
-        "odeslané",
-        "odeslane",
-        "odeslaná pošta",
-        "odeslana posta",
-        "outbox",
-        "drafts",
-        "koncepty",
-    }
-    return folder_key not in outbound_folders
-
-
-def email_processing_legacy_item_id(category: str, provider: str, folder: str, uid: str, date: str, subject: str) -> str:
-    raw = "|".join([category, provider, folder, uid, date, subject])
-    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
-
-
-def email_processing_item_id(category: str, provider: str, folder: str, uid: str, date: str, subject: str) -> str:
-    stable_key = email_processing_stable_key(provider, folder, uid)
-    if stable_key:
-        return hashlib.sha256(stable_key.encode("utf-8")).hexdigest()[:16]
-    return email_processing_legacy_item_id(category, provider, folder, uid, date, subject)
-
-
-def email_processing_item_lookup_keys(item: dict[str, Any]) -> set[str]:
-    keys = {
-        str(item.get("id", "")).strip(),
-        str(item.get("legacy_id", "")).strip(),
-        str(item.get("source_key", "")).strip(),
-    }
-    stable_key = email_processing_stable_key(
-        str(item.get("provider", "")),
-        str(item.get("folder", "")),
-        str(item.get("uid", "")),
-    )
-    if stable_key:
-        keys.add(stable_key)
-    computed_id = email_processing_item_id(
-        str(item.get("category", "")),
-        str(item.get("provider", "")),
-        str(item.get("folder", "")),
-        str(item.get("uid", "")),
-        str(item.get("date", "")),
-        str(item.get("subject", "")),
-    )
-    if computed_id:
-        keys.add(computed_id)
-    legacy_id = email_processing_legacy_item_id(
-        str(item.get("category", "")),
-        str(item.get("provider", "")),
-        str(item.get("folder", "")),
-        str(item.get("uid", "")),
-        str(item.get("date", "")),
-        str(item.get("subject", "")),
-    )
-    if legacy_id:
-        keys.add(legacy_id)
-    return {key for key in keys if key}
-
-
 def email_processing_decision_lookup_keys(decisions: dict[str, dict[str, Any]]) -> set[str]:
     keys = set(decisions)
     for decision in decisions.values():
@@ -3008,55 +2944,6 @@ def email_processing_completed_lookup_keys(actions_path: Path = EMAIL_WORK_QUEUE
             if computed_id:
                 keys.add(computed_id)
     return keys
-
-
-def classify_email_processing_category(subject: str, sender: str = "") -> str:
-    value = f"{subject} {sender}".casefold()
-    invoice_value = any(
-        token in value
-        for token in (
-            "faktura",
-            "invoice",
-            "daňový doklad",
-            "danovy doklad",
-            "objedn",
-            "platba",
-            "zaplac",
-            "booking",
-            "temu",
-            "apple",
-            "doruč",
-            "doruc",
-            "balík",
-            "balicek",
-            "zásilk",
-            "zasilk",
-            "eshop",
-            "e-shop",
-        )
-    )
-    if any(
-        token in value
-        for token in (
-            "pojišt",
-            "pojist",
-            "smlouv",
-            "zelen",
-            "karta",
-            "generali",
-            "kooperativa",
-            "čpp",
-            "cpp",
-        )
-    ):
-        return "pojištění/smlouvy"
-    if invoice_value:
-        return "faktury/e-shopy"
-    if any(token in value for token in ("finanční správa", "financni sprava", "daneelektronicky", "fs.mfcr.cz", "fs.gov.cz")):
-        return "úřady/daně"
-    if any(token in value for token in ("úřad", "urad", "finanční", "financni", "datov", "správa", "sprava")):
-        return "úřady/daně"
-    return "ostatní"
 
 
 def email_header_timestamp(value: str) -> float:
@@ -3139,7 +3026,7 @@ def email_header_to_processing_item(header: EmailHeader, source: str) -> dict[st
         header.subject or "",
     )
     item["samantha_library_export"] = email_processing_item_is_library_export(item)
-    return item
+    return normalize_email_work_item(item)
 
 
 def email_processing_item_is_library_export(item: dict[str, Any]) -> bool:
@@ -3358,49 +3245,6 @@ def save_email_processing_decision(
     return {"ok": True, "message": label, "item_id": item_id, "action": action}
 
 
-def email_processing_batch_groups(item: dict[str, Any]) -> list[dict[str, str]]:
-    text = " ".join(
-        [
-            str(item.get("sender", "")),
-            str(item.get("subject", "")),
-            str(item.get("reason", "")),
-            " ".join(str(tag) for tag in (item.get("worklist_tags") or []) if str(tag).strip()),
-        ]
-    ).casefold()
-    category = str(item.get("category", "")).casefold()
-    tags = {str(tag).strip() for tag in (item.get("worklist_tags") or []) if str(tag).strip()}
-    groups: list[dict[str, str]] = []
-
-    def add(group_id: str, label: str) -> None:
-        if not any(group["id"] == group_id for group in groups):
-            groups.append({"id": group_id, "label": label})
-
-    if "true_tax_office" in tags or any(
-        needle in text for needle in ("daneelektronicky", "fs.mfcr.cz", "fs.gov.cz", "finanční správa")
-    ):
-        add("tax_office", "Finanční správa")
-    if "true_vak" in tags or "vakmb" in text or "vodovod" in text or "kanaliz" in text:
-        add("vak", "VAK")
-    amount_scan = item.get("amount_scan")
-    max_amount = 0.0
-    if isinstance(amount_scan, dict):
-        try:
-            max_amount = float(amount_scan.get("max_amount_czk", 0) or 0)
-        except (TypeError, ValueError):
-            max_amount = 0.0
-    if "invoice_over_2000" in tags or max_amount > 2000:
-        add("invoice_over_2000", "Faktury nad 2000 Kč")
-    if category == "faktury/e-shopy":
-        add("invoice", "Faktury / e-shopy")
-    if int(item.get("pdf_attachment_count", 0) or 0) > 0:
-        add("pdf", "S PDF přílohou")
-    if int(item.get("large_pdf_attachment_count", 0) or 0) > 0:
-        add("large_pdf", "Velké PDF")
-    if not groups:
-        add("other", "Ostatní")
-    return groups
-
-
 def email_processing_pending_work_items(
     path: Path = EMAIL_PROCESSING_DECISIONS_FILE,
 ) -> dict[str, Any]:
@@ -3444,7 +3288,7 @@ def email_processing_pending_work_items(
         batch_groups = email_processing_batch_groups(item)
         item["batch_groups"] = batch_groups
         item["primary_batch_group"] = batch_groups[0]["id"] if batch_groups else "other"
-        items.append(item)
+        items.append(normalize_email_work_item(item))
 
     items.sort(key=lambda item: email_header_timestamp(str(item.get("date", ""))), reverse=True)
     message = f"Načteno rozpracovaných e-mailů: {len(items)}."

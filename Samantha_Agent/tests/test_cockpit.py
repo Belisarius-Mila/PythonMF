@@ -6455,6 +6455,9 @@ Dalsi krok:
         self.assertIn("legacy_id", item)
         self.assertEqual(item["source_key"], "icloud|inbox|14157")
         self.assertNotEqual(item["id"], item["legacy_id"])
+        self.assertTrue(item["work_ref"].startswith("emailworkref-"))
+        self.assertEqual(item["work_state"], "new")
+        self.assertEqual(item["work_action"], "")
 
     def test_email_header_processing_item_marks_library_export(self) -> None:
         item = email_header_to_processing_item(
@@ -6563,6 +6566,9 @@ Dalsi krok:
         self.assertEqual(result["items"][0]["id"], "process-1")
         self.assertEqual(result["items"][0]["action"], "process")
         self.assertFalse(result["items"][0]["is_new_header"])
+        self.assertTrue(result["items"][0]["work_ref"].startswith("emailworkref-"))
+        self.assertEqual(result["items"][0]["work_state"], "queued")
+        self.assertEqual(result["items"][0]["work_action"], "process")
         self.assertIn({"id": "invoice", "label": "Faktury / e-shopy"}, result["items"][0]["batch_groups"])
 
     def test_email_processing_pending_work_items_skips_outbound_folders(self) -> None:
