@@ -447,6 +447,16 @@ Rucni retest po prvnim vykonovem kroku:
   celkem o 1 871 radku.
 - Lokalni i Tailscale smoke check po nasazeni prosly na jedine instanci PID
   51970 se shodnym code stampem `28394cc55992a99b`.
+- Paty read-only dokumentovy rez 1.6 pridal
+  `app/documents/intake_service.py`. Sluzba sjednocuje cekajici PDF z Downloads,
+  oznacene polozky e-mailove fronty, mobilni scan batch a lokalni inbox do
+  jednoho prehledu a stabilniho poradi akci. Sama neskenuje e-mailova tela,
+  nestahuje prilohy a nic neimportuje ani nezapisuje.
+- Tri prime testy nove sluzby rozsiruji gate na 564 testu. `app/cockpit.py`
+  klesl z 19 915 na 19 703 radku, tedy o dalsich 212 radku; od zacatku Faze 1.3
+  celkem o 2 083 radku.
+- Lokalni i Tailscale smoke check po nasazeni prosly na jedine instanci PID
+  53444 se shodnym code stampem `eeba05331cde14eb`.
 
 Co neni hotove:
 
@@ -472,10 +482,11 @@ Co neni hotove:
 
 Dalsi krok:
 
-Faze 1.2 je uzavrena a Faze 1.3 je rozpracovana. Read-only search, case/detail,
-classification/review/work i due-date service jsou vyjmuty. Dalsi vhodny rez
-je jednotny read-only document intake pro Downloads, e-mailovou frontu, mobilni
-a lokalni inbox; importni a zapisovaci akce zustanou oddelene.
+Faze 1.2 je uzavrena a dokumentova read-only cast Faze 1.3 ma vyjmuty search,
+case/detail, classification/review/work, due-date i jednotny intake service.
+Dalsi hlavni krok roadmapy je zacit po malych read-only rezech e-mailovou service
+vrstvu; dokumentovy reindex a dalsi writery zustavaji oddelenou persistence
+roadmapou.
 Dokumentovy reindex zustava vedlejsi persistence roadmapou. Stary e-mailovy
 parser, lokalni Janicka vetev a pet podezrelych API cest zatim nemenit. PDF
 browser a post-call audio retest jsou odlozene.
@@ -512,6 +523,7 @@ Zmenene nebo relevantni soubory:
 - `app/cockpit_status_service.py`
 - `app/documents/case_service.py`
 - `app/documents/due_date_service.py`
+- `app/documents/intake_service.py`
 - `app/documents/review_service.py`
 - `app/documents/search_service.py`
 - `app/voice_bridge_coordinator.py`
@@ -522,6 +534,7 @@ Zmenene nebo relevantni soubory:
 - `tests/test_cockpit_status_service.py`
 - `tests/test_document_case_service.py`
 - `tests/test_document_due_date_service.py`
+- `tests/test_document_intake_service.py`
 - `tests/test_document_review_service.py`
 - `tests/test_document_search_service.py`
 - `tests/test_voice_bridge_coordinator.py`
