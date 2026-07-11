@@ -523,6 +523,10 @@ Rucni retest po prvnim vykonovem kroku:
   nekompletni zaznamy se nikdy nehádají ani automaticky nemazou.
 - Gate ma 606 testu, monolit 19 602 radku a oba smoke checky prosly na jedine
   instanci PID 85842. Faze 2.4 je uzavrena.
+- Navazujici e-mailovy UI fix prejmenoval hlavni navigaci na `Zpet do Cockpitu`
+  a pridal do Work Queue samostatne `Zpet na e-maily` i `Zpet do Cockpitu`.
+  Vsechny cesty maji fallback na primou URL, kdyz prohlizec odmitne zavrit nebo
+  fokusovat popup. Gate ma 607 testu; oba smoke checky prosly na PID 87379.
 
 Co neni hotove:
 

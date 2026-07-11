@@ -10713,7 +10713,7 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       </span>
       <button class="primary" id="loadHeadersBtn">Načti emaily</button>
       <button class="secondary" id="loadPendingBtn">Načti rozpracované</button>
-      <button class="secondary" id="cockpitBtn">Otevřít Cockpit</button>
+      <button class="secondary" id="cockpitBtn">← Zpět do Cockpitu</button>
     </div>
   </header>
   <main>
@@ -11114,6 +11114,8 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       const batchBtn = queueDoc.getElementById("batchBtn");
       const trashBatchBtn = queueDoc.getElementById("trashBatchBtn");
       const purgeTrashBtn = queueDoc.getElementById("purgeTrashBtn");
+      const backToEmailsBtn = queueDoc.getElementById("backToEmailsBtn");
+      const backToCockpitBtn = queueDoc.getElementById("backToCockpitBtn");
       let selectedId = queueItems.length ? queueItems[0].id : "";
       let activeBatchFilter = "all";
       let permanentDeleteItems = initialPermanentDeleteItems.map((item) => ({...item}));
@@ -11684,6 +11686,32 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
         }
       });
 
+      backToEmailsBtn.addEventListener("click", () => {
+        const emailWindow = queue.opener;
+        if (emailWindow && !emailWindow.closed) {
+          emailWindow.focus();
+          queue.close();
+          return;
+        }
+        queue.location.href = "/email-processing/";
+      });
+
+      backToCockpitBtn.addEventListener("click", () => {
+        const emailWindow = queue.opener;
+        const cockpitWindow = emailWindow && !emailWindow.closed ? emailWindow.opener : null;
+        if (cockpitWindow && !cockpitWindow.closed) {
+          cockpitWindow.focus();
+          try {
+            emailWindow.close();
+          } catch (_err) {
+            // The queue can still close and return focus to the known Cockpit window.
+          }
+          queue.close();
+          return;
+        }
+        queue.location.href = "/";
+      });
+
       renderQueueList();
       if (selectedId) selectItem(selectedId);
     }
@@ -11768,6 +11796,8 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     <div class="topbar">
       <h1>Email Work Queue</h1>
       <div class="topbar-actions">
+        <button class="secondary" id="backToEmailsBtn">← Zpět na e-maily</button>
+        <button class="secondary" id="backToCockpitBtn">← Zpět do Cockpitu</button>
         <button class="danger" id="purgeTrashBtn" disabled>Trvale smazat e-maily v koši</button>
         <button class="danger" id="trashBatchBtn" disabled>Emaily určené ke smazání smazat</button>
         <button class="primary" id="batchBtn" disabled>Zpracovat dávku</button>
@@ -11951,6 +11981,9 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
           // Focus can fail across browser contexts; closing this popup still avoids duplicate Cockpit windows.
         }
         window.close();
+        window.setTimeout(() => {
+          if (!window.closed) window.location.href = cockpitUrl;
+        }, 250);
         return;
       }
       const cockpit = window.open(cockpitUrl, "SamanthaCockpit", "popup=yes,width=1280,height=880,left=90,top=60");

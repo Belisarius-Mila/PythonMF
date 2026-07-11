@@ -7148,6 +7148,14 @@ Dalsi krok:
         self.assertIn("initialPermanentDeleteItems = []", EMAIL_PROCESSING_HTML)
         self.assertIn("Otevřít koš (", EMAIL_PROCESSING_HTML)
 
+    def test_email_windows_have_explicit_safe_return_navigation(self) -> None:
+        self.assertIn("← Zpět do Cockpitu", EMAIL_PROCESSING_HTML)
+        self.assertIn('id="backToEmailsBtn"', EMAIL_PROCESSING_HTML)
+        self.assertIn('id="backToCockpitBtn"', EMAIL_PROCESSING_HTML)
+        self.assertIn('queue.location.href = "/email-processing/"', EMAIL_PROCESSING_HTML)
+        self.assertIn('queue.location.href = "/"', EMAIL_PROCESSING_HTML)
+        self.assertIn("if (!window.closed) window.location.href = cockpitUrl", EMAIL_PROCESSING_HTML)
+
     def test_process_email_work_queue_batch_confirmed_bulk_trash_uses_one_confirmation(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             provider = _FakeArchiveProvider(_archive_source_without_attachment())

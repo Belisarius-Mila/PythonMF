@@ -243,6 +243,10 @@ nebo pull request.
   Staré neúplné záznamy se pouze hlásí a nikdy se nepoužijí k purge.
 - Gate má 606 testů, Cockpit 19 602 řádků / 258 top-level funkcí. Oba smoke
   checky prošly na jediné instanci PID 85842.
+- E-mailová navigace má po opravě explicitní návrat z hlavního přehledu do
+  Cockpitu a z Work Queue buď na e-maily, nebo přímo do Cockpitu. Fallback
+  přesměruje aktuální okno, pokud browser odmítne popup zavřít. Gate má 607
+  testů a oba smoke checky prošly na PID 87379.
 
 ## Co gate zatím neřeší
 
