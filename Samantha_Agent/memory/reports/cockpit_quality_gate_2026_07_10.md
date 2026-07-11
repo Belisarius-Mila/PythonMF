@@ -163,6 +163,11 @@ nebo pull request.
   `https://github.com/Belisarius-Mila/PythonMF/actions/runs/29125107857`.
 - Finální iPhone test potvrdil jediného watcher vlastníka, žádný inline attempt,
   jednu odpověď a úspěšné přehrání do sluchátek.
+- První řez Fáze 1.3 přidal `app/documents/search_service.py` pro read-only
+  dokumentové/nákupní hledání a intent scoring. Tři přímé testy rozšířily gate
+  na 550 testů a monolit klesl z 21 786 na 21 517 řádků.
+- Lokální i Tailscale smoke check po nasazení prošly na jediné instanci PID
+  44394; skutečný private vault se při ověření nečetl ani nemutoval.
 
 ## Co gate zatím neřeší
 
@@ -179,6 +184,6 @@ Quality gate, read-only inventura, Cleanup R1, zamčené reminders/Quick Notes/
 urgent reminders, dokumentové persistence primitivy, metadata/reading-status
 transakce, ScanDocu review a životní cyklus autosave/managed relací jsou hotové.
 Fáze 1.1 status/health i Fáze 1.2 VoiceBridge command ownership a iPhone audio
-fallback jsou hotové a ručně ověřené. Hlavní roadmapa pokračuje Fází 1.3:
-dokumentové routy a service vrstva. Reindex zůstává samostatný další krok
-dokumentové persistence.
+fallback jsou hotové a ručně ověřené. Fáze 1.3 je rozpracovaná: read-only
+document search service je venku, další je souvislý status/case service blok.
+Reindex zůstává samostatný další krok dokumentové persistence.

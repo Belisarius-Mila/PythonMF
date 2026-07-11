@@ -406,6 +406,14 @@ Rucni retest po prvnim vykonovem kroku:
 - Finalni iPhone test potvrdil jeden pokyn, watcher jako jedineho vlastnika,
   zadny inline pokus, jednu odpoved a uspesne prehrani do sluchatek. Faze 1.2
   je tim skutecne uzavrena.
+- Faze 1.3 zacala prvnim read-only rezem: `app/documents/search_service.py`
+  prevzal dokumentove a nakupni hledani, intent scoring, redigovane vysledky a
+  metadata-only reading status. GET `/api/documents/search` zustal beze zmeny.
+- Tri prime service testy a sest existujicich Cockpit search scenaru prosly;
+  kanonicky gate ma 550 testu. `app/cockpit.py` klesl z 21 786 na 21 517 radku,
+  tedy o dalsich 269 radku.
+- Nasazena verze prosla lokalnim i Tailscale smoke checkem na jedine instanci
+  PID 44394. Zivy private vault se pri rezu necetl ani nemenil.
 
 Co neni hotove:
 
@@ -431,10 +439,9 @@ Co neni hotove:
 
 Dalsi krok:
 
-Faze 1.2 command ownership coordinator i iPhone audio fallback jsou
-implementovane a rucne overene end-to-end: jeden pokyn, jedna odpoved, zadna
-duplicita a uspesne prehrani do sluchatek. Hlavni roadmapa prechazi na Fazi 1.3,
-dokumentove routy/service vrstvu.
+Faze 1.2 je uzavrena a Faze 1.3 je rozpracovana. Prvni read-only search service
+je vyjmuty; dalsi dokumentovy rez ma vzit souvisly status/case blok bez zmeny
+API a bez mutace private vaultu.
 Dokumentovy reindex zustava vedlejsi persistence roadmapou. Stary e-mailovy
 parser, lokalni Janicka vetev a pet podezrelych API cest zatim nemenit. PDF
 browser a post-call audio retest jsou odlozene.
