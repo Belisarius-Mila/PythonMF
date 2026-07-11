@@ -176,6 +176,10 @@ from app.email.icloud_provider import EmailProviderError, ICloudReadOnlyEmailPro
 from app.email.models import EmailAttachmentMeta, EmailHeader, EmailMessage
 from app.email.redaction import redact_email_addresses
 from app.email.seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEmailProvider
+from app.email.work_repository import (
+    read_email_work_decisions,
+    save_email_work_decision as repository_save_email_work_decision,
+)
 from app.email.work_models import (
     classify_email_processing_category,
     email_processing_batch_groups,
@@ -3200,16 +3204,7 @@ def parse_email_processing_items(text: str) -> list[dict[str, Any]]:
 
 
 def read_email_processing_decisions(path: Path = EMAIL_PROCESSING_DECISIONS_FILE) -> dict[str, dict[str, Any]]:
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
-    if not isinstance(data, dict):
-        return {}
-    decisions = data.get("decisions", {})
-    if not isinstance(decisions, dict):
-        return {}
-    return {str(key): value for key, value in decisions.items() if isinstance(value, dict)}
+    return read_email_work_decisions(path)
 
 
 def save_email_processing_decision(
@@ -3218,6 +3213,7 @@ def save_email_processing_decision(
     action: str,
     item: dict[str, Any] | None = None,
     path: Path = EMAIL_PROCESSING_DECISIONS_FILE,
+    operation_id: str = "",
 ) -> dict[str, Any]:
     item_id = item_id.strip()
     action = action.strip()
@@ -3226,23 +3222,29 @@ def save_email_processing_decision(
     if action not in EMAIL_PROCESSING_ACTIONS:
         return {"ok": False, "message": "Neznámá akce."}
 
-    decisions = read_email_processing_decisions(path)
-    if action:
-        decisions[item_id] = {
-            "action": action,
-            "updated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-            "item": item if isinstance(item, dict) else {},
-        }
-    else:
-        decisions.pop(item_id, None)
-    write_json(path, {"decisions": decisions})
+    repository_result = repository_save_email_work_decision(
+        path=path,
+        item_id=item_id,
+        action=action,
+        item=item if isinstance(item, dict) else {},
+        operation_id=operation_id,
+    )
+    resolved_action = str(repository_result.result.get("action", action))
+    resolved_item_id = str(repository_result.result.get("item_id", item_id))
     label = {
         "process": "označeno ke zpracování",
         "ignore": "označeno k ignorování",
         "trash_requested": "označeno ke smazání po potvrzení",
         "": "rozhodnutí zrušeno",
-    }[action]
-    return {"ok": True, "message": label, "item_id": item_id, "action": action}
+    }[resolved_action]
+    return {
+        "ok": True,
+        "message": label,
+        "item_id": resolved_item_id,
+        "action": resolved_action,
+        "changed": repository_result.changed,
+        "idempotent_replay": repository_result.idempotent_replay,
+    }
 
 
 def email_processing_pending_work_items(
@@ -4191,11 +4193,11 @@ def process_email_work_queue_trash_item(
 def clear_email_processing_decision(*, item_id: str, path: Path) -> None:
     if not item_id:
         return
-    decisions = read_email_processing_decisions(path)
-    if item_id not in decisions:
-        return
-    decisions.pop(item_id, None)
-    write_json(path, {"decisions": decisions})
+    repository_save_email_work_decision(
+        path=path,
+        item_id=item_id,
+        action="",
+    )
 
 
 def cockpit_status() -> dict[str, Any]:
@@ -10038,6 +10040,7 @@ class CockpitServer:
                             item_id=str(payload.get("item_id", "")),
                             action=str(payload.get("action", "")),
                             item=item if isinstance(item, dict) else {},
+                            operation_id=str(payload.get("operation_id", "")),
                         )
                     )
                     return
@@ -11038,10 +11041,13 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       if (!item || !item.id) return;
       decisionNode.textContent = "Ukládám...";
       try {
+        const operationId = (window.crypto && typeof window.crypto.randomUUID === "function")
+          ? window.crypto.randomUUID()
+          : "email-decision-" + Date.now() + "-" + Math.random().toString(16).slice(2);
         const res = await fetch("/api/email-processing/decision", {
           method: "POST",
           headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({item_id: item.id, action, item})
+          body: JSON.stringify({item_id: item.id, action, item, operation_id: operationId})
         });
         const data = await res.json();
         if (!data.ok) {

@@ -215,6 +215,15 @@ nebo pull request.
   Read-only live test bez výpisu obsahu ověřil dvě nové položky s platnou
   `emailworkref-...` referencí. Lokální i Tailscale smoke check prošly na jediné
   instanci PID 65307.
+- První řez Fáze 2.4 přidal obecný zamčený JSON repository kontrakt s
+  `operation_id` replay ochranou a atomickým outbox zápisem. První runtime
+  adaptér převádí pouze save/clear e-mailových pracovních rozhodnutí; dva
+  procesy neztratí navzájem své položky a opakovaný request neprovede druhou
+  mutaci.
+- E-mailový adaptér outbox zatím neprodukuje a providerové, archivní, přílohové,
+  mazací i outbound operace se nezměnily. Gate má 593 testů. Skutečný private
+  decision soubor nebyl testem mutován; oba smoke checky prošly na jediné
+  instanci PID 67447.
 
 ## Co gate zatím neřeší
 
@@ -233,6 +242,7 @@ transakce, ScanDocu review a životní cyklus autosave/managed relací jsou hoto
 Fáze 1.1 status/health i Fáze 1.2 VoiceBridge command ownership a iPhone audio
 fallback jsou hotové a ručně ověřené. Fáze 1.3 je rozpracovaná: read-only
 document search, case/detail, classification/review/work, due-date i jednotný
-intake service jsou venku a Fáze 2.1, 2.2 i 2.3 jsou ověřené. Další bod je 2.4:
-repository rozhraní, idempotency a outbox po jednom úzkém adaptéru. Reindex
-zůstává samostatný další krok dokumentové persistence.
+intake service jsou venku a Fáze 2.1, 2.2 i 2.3 jsou ověřené. Fáze 2.4 je
+rozpracovaná: repository kontrakt a první e-mailový decision adaptér jsou
+hotové; další řez je lease/retry/ack protokol outboxu bez providerových nebo
+mazacích akcí. Reindex zůstává samostatný další krok dokumentové persistence.

@@ -239,3 +239,29 @@ není dokončená.
 
 Každý rollout má zachovat formát i cestu existujícího souboru, přidat cílený
 regresní/concurrency test a nemigrovat obsah bez samostatného rozhodnutí.
+
+## Repository / idempotency / outbox — první řez Fáze 2.4
+
+- `app/work_repository.py` zavádí malý souborový repository kontrakt: jednu
+  zamčenou atomickou mutaci JSON objektu, omezený ledger `operation_id` a
+  volitelnou outbox událost ve stejném commitu.
+- Opakování stejného `operation_id` nevolá doménový updater podruhé a vrátí
+  původní výsledek i původní ID outbox událostí. Idempotency záznam se
+  neodstraňuje, dokud k němu existuje čekající outbox událost.
+- První živý adaptér je pouze `email_processing_decisions.json`. Načtení,
+  uložení i odebrání rozhodnutí používají jeden lock-protected read-modify-write
+  cyklus; dva procesy proto neztratí navzájem své položky. Stejné rozhodnutí se
+  zbytečně nepřepisuje.
+- Email Processing frontend posílá pro každý pracovní zápis `operation_id`.
+  Stávající `decisions` struktura a neznámá top-level pole zůstávají zachované.
+- E-mailový adaptér zatím outbox události nevytváří. Archivace, import příloh,
+  přesun do koše, purge a odesílání zůstaly mimo tento řez a beze změny.
+- Gate má 593 testů. Testy kryjí atomický document+outbox commit, replay,
+  selhání replace, zachování ledgeru, semantickou idempotenci a dvouprocesový
+  zápis bez lost update. Skutečný private decision soubor se při testu
+  nemutoval. Lokální i Tailscale smoke check prošly na jediné instanci PID
+  67447.
+
+Další řez 2.4 má doplnit bezpečný outbox delivery protokol s lease/retry/ack nad
+dočasným úložištěm. Teprve potom lze samostatně vybrat první nedestruktivní
+runtime událost; providerové a mazací akce nesmí být první konzument.

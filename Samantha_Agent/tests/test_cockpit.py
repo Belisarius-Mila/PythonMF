@@ -6093,8 +6093,36 @@ Dalsi krok:
 
             decisions = read_email_processing_decisions(path)
             self.assertTrue(result["ok"])
+            self.assertTrue(result["changed"])
+            self.assertFalse(result["idempotent_replay"])
             self.assertEqual(decisions["abc123"]["action"], "process")
             self.assertEqual(decisions["abc123"]["item"]["uid"], "14157")
+
+    def test_email_decision_frontend_sends_repository_operation_id(self) -> None:
+        self.assertIn("window.crypto.randomUUID", EMAIL_PROCESSING_HTML)
+        self.assertIn("operation_id: operationId", EMAIL_PROCESSING_HTML)
+
+    def test_email_decision_operation_replay_returns_original_action(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "email_processing_decisions.json"
+            first = save_email_processing_decision(
+                item_id="abc123",
+                action="process",
+                item={"uid": "14157"},
+                path=path,
+                operation_id="request-one",
+            )
+            replay = save_email_processing_decision(
+                item_id="abc123",
+                action="trash_requested",
+                item={"uid": "14157"},
+                path=path,
+                operation_id="request-one",
+            )
+
+            self.assertEqual(first["action"], "process")
+            self.assertEqual(replay["action"], "process")
+            self.assertTrue(replay["idempotent_replay"])
 
     def test_new_email_headers_overview_wraps_readonly_unified_text(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

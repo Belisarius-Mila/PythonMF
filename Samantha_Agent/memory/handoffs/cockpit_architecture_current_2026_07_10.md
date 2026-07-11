@@ -491,6 +491,16 @@ Rucni retest po prvnim vykonovem kroku:
   test bez vypisu obsahu vratil dve nove polozky od dvou provideru; obe mely
   platnou `emailworkref-...` referenci a stav `new`. Pracovni fronta byla
   prazdna. Lokalni i Tailscale smoke check prosly na jedine instanci PID 65307.
+- Prvni rez Faze 2.4 pridal `app/work_repository.py` s atomickou repository
+  mutaci, `operation_id` ledgerem a volitelnym outbox zaznamem v jednom JSON
+  commitu. `app/email/work_repository.py` je prvni adapter pro pracovni
+  e-mailova rozhodnuti; save i clear uz nemaji read pred ziskanim locku.
+- Dva procesy ulozily dve ruzna rozhodnuti bez lost update. Stejny request nebo
+  stejny semanticky stav se neprepise podruhe. Frontend posila `operation_id`,
+  stary `decisions` format i nezname top-level hodnoty zustavaji kompatibilni.
+- Zivy adapter outbox udalosti zatim negeneruje. E-mailove providery, archiv,
+  prilohy, kos, purge a odesilani se nezmenily. Gate ma 593 testu; oba smoke
+  checky prosly na jedine instanci PID 67447.
 
 Co neni hotove:
 
@@ -512,15 +522,17 @@ Co neni hotove:
 - VoiceBridge ma explicitni stavovy model pro coordinator i watcher. Dalsi
   budouci rozsireni ma smysl jen pokud bude potreba outbox/idempotency pres
   restart procesu, ne jako dalsi ad-hoc sada status stringu.
-- Dokumentove a e-mailove workflow maji jednotne read-only pracovni modely,
-  ale jeste nemaji jednotnou repository/transakcni vrstvu.
+- Dokumentove a e-mailove workflow maji jednotne read-only pracovni modely.
+  Repository zaklad a prvni e-mailovy decision adapter existuji, ale zapisovaci
+  workflow jeste nejsou plosne prevedena a outbox nema delivery protokol.
 
 Dalsi krok:
 
-Faze 2.1, 2.2 i 2.3 jsou uzavrene a overene. Dalsi bod roadmapy je 2.4:
-repository rozhrani, idempotency a outbox. Ma zacit navrhem hranice a jednim
-uzkym adapterem; ne plosnou migraci dokumentu a e-mailu. Dokumentovy reindex a
-dalsi writery zustavaji oddelenou persistence roadmapou.
+Faze 2.1, 2.2 i 2.3 jsou uzavrene a overene. Faze 2.4 je rozpracovana: zakladni
+repository/outbox kontrakt a prvni e-mailovy decision adapter jsou hotove.
+Dalsi rez ma doplnit lease/retry/ack protokol na docasnych datech a teprve potom
+vybrat prvni nedestruktivni runtime udalost. Dokumentovy reindex a dalsi writery
+zustavaji oddelenou persistence roadmapou.
 Dokumentovy reindex zustava vedlejsi persistence roadmapou. Stary e-mailovy
 parser, lokalni Janicka vetev a pet podezrelych API cest zatim nemenit. PDF
 browser a post-call audio retest jsou odlozene.
@@ -562,6 +574,8 @@ Zmenene nebo relevantni soubory:
 - `app/documents/review_service.py`
 - `app/documents/search_service.py`
 - `app/email/work_models.py`
+- `app/email/work_repository.py`
+- `app/work_repository.py`
 - `app/voice_bridge_coordinator.py`
 - `app/voice_bridge_state.py`
 - `app/file_persistence.py`
@@ -576,6 +590,8 @@ Zmenene nebo relevantni soubory:
 - `tests/test_document_review_service.py`
 - `tests/test_document_search_service.py`
 - `tests/test_email_work_models.py`
+- `tests/test_email_work_repository.py`
+- `tests/test_work_repository.py`
 - `tests/test_voice_bridge_coordinator.py`
 - `tests/test_voice_bridge_state.py`
 - `tests/test_file_persistence.py`
