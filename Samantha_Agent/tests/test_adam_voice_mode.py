@@ -317,6 +317,31 @@ print(json.dumps({"ok": result.get("ok"), "status": result.get("status"), "respo
         self.assertNotIn("Návrh odpovědi", json.dumps(payload["command_state"], ensure_ascii=False))
         self.assertEqual(payload["last_command"]["text"], "Připrav návrh odpovědi.")
 
+    def test_voice_mode_heartbeat_preserves_last_command_state(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            status_path = Path(temp_dir) / "adam_voice_mode_status.json"
+            command_state = {
+                "state": "awaiting_adam",
+                "delivery_owner": "watcher",
+                "terminal": False,
+                "transitions": [],
+            }
+            write_voice_mode_status(
+                status_path=status_path,
+                state="pending_for_adam",
+                message="Čeká.",
+                command_state=command_state,
+            )
+
+            heartbeat = write_voice_mode_status(
+                status_path=status_path,
+                state="listening",
+                message="Poslouchám.",
+            )
+
+        self.assertEqual(heartbeat["state"], "listening")
+        self.assertEqual(heartbeat["command_state"], command_state)
+
     def test_handle_voice_command_speaks_generated_response_not_input_text(self) -> None:
         spoken = []
 

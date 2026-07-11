@@ -89,8 +89,15 @@ def write_voice_mode_status(
         payload["last_command"] = voice_command_to_dict(last_command)
     if command_state is not None:
         payload["command_state"] = dict(command_state)
-    atomic_write_json(status_path, payload)
-    return payload
+
+    def preserve_last_command_state(current: Any) -> dict[str, Any]:
+        merged = dict(payload)
+        if command_state is None and isinstance(current, dict) and isinstance(current.get("command_state"), dict):
+            merged["command_state"] = dict(current["command_state"])
+        return merged
+
+    updated = update_json_file(status_path, preserve_last_command_state, default={})
+    return dict(updated)
 
 
 def load_voice_history(
