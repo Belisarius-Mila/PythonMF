@@ -253,6 +253,7 @@ Faze 1 - rozdeleni monolitu:
 3. Vyjmout dokumentove routy a service vrstvu.
 4. Vyjmout e-mailove routy a service vrstvu.
 5. Presunout frontend do statickych souboru.
+1.6: jednotný read-only document intake pro Downloads, e-mailovou frontu, mobilní a lokální inbox.
 
 Faze 2 - sjednoceni stavu:
 1. Explicitni VoiceBridge state machine.
