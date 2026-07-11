@@ -414,6 +414,18 @@ Rucni retest po prvnim vykonovem kroku:
   tedy o dalsich 269 radku.
 - Nasazena verze prosla lokalnim i Tailscale smoke checkem na jedine instanci
   PID 44394. Zivy private vault se pri rezu necetl ani nemenil.
+- Druhy read-only rez Faze 1.3 pridal `app/documents/case_service.py`. Sluzba
+  prevzala seskupeni dokumentu do cases, detail case, vazbu na otevrene
+  pripominky a terminy, redigovani internich ID a vypocet `case_health`.
+  Verejne funkce v `app/cockpit.py` zustaly tenke kompatibilni adaptery a
+  endpointy se nezmenily.
+- Tri prime testy nove sluzby rozsiruji kanonicky gate na 553 testu.
+  `app/cockpit.py` klesl z 21 517 na 21 060 radku, tedy o dalsich 457 radku;
+  od zacatku Faze 1.3 celkem o 726 radku.
+- Lokalni i Tailscale smoke check po nasazeni prosly na jedine instanci PID
+  47655 se shodnym code stampem `72bd182745b34cc5`. Restart mel kratke
+  prechodove okno, ve kterem launchd jeste nezacal odpovidat, ale sam obnovil
+  jednu standardni instanci; zadny druhy server nezustal bezet.
 
 Co neni hotove:
 
@@ -439,9 +451,10 @@ Co neni hotove:
 
 Dalsi krok:
 
-Faze 1.2 je uzavrena a Faze 1.3 je rozpracovana. Prvni read-only search service
-je vyjmuty; dalsi dokumentovy rez ma vzit souvisly status/case blok bez zmeny
-API a bez mutace private vaultu.
+Faze 1.2 je uzavrena a Faze 1.3 je rozpracovana. Read-only search i case/detail
+service jsou vyjmuty. Dalsi dokumentovy rez ma oddelit souvisly read-only blok
+klasifikace, review a pracovniho statusu bez zmeny API a bez mutace private
+vaultu; terminy a pripominky zatim zustanou samostatna budouci vrstva.
 Dokumentovy reindex zustava vedlejsi persistence roadmapou. Stary e-mailovy
 parser, lokalni Janicka vetev a pet podezrelych API cest zatim nemenit. PDF
 browser a post-call audio retest jsou odlozene.
@@ -476,12 +489,16 @@ Zmenene nebo relevantni soubory:
 - `AuditCockpit56.txt`
 - `app/cockpit.py`
 - `app/cockpit_status_service.py`
+- `app/documents/case_service.py`
+- `app/documents/search_service.py`
 - `app/voice_bridge_coordinator.py`
 - `app/file_persistence.py`
 - `app/backup/activity_state.py`
 - `scripts/cockpit_smoke_check.py`
 - `tests/test_cockpit.py`
 - `tests/test_cockpit_status_service.py`
+- `tests/test_document_case_service.py`
+- `tests/test_document_search_service.py`
 - `tests/test_voice_bridge_coordinator.py`
 - `tests/test_file_persistence.py`
 - `scripts/install_cockpit_local_launchd.sh`
