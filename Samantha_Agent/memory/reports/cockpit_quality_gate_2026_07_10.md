@@ -200,6 +200,13 @@ nebo pull request.
 - Finální živý test na watcheru PID 60230 potvrdil jeden history záznam, nula
   inline pokusů a stav `watcher_queued -> watcher_processing -> awaiting_adam`.
   Implementační commity jsou `9417056` a `46ca297`.
+- Fáze 2.2 přidala `app/documents/intake_models.py` se společnými typy zdroje,
+  stavu, akce, položky a snapshotu. Všechny čtyři intake zdroje používají stejný
+  model a hashovanou veřejnou `intake_ref`, aniž by zveřejňovaly interní klíč.
+  Gate má 578 testů.
+- Živý status bez výpisu obsahu potvrdil 4 zdroje, 5 položek, platné unikátní
+  reference a jednu instanci PID 63621 se shodným lokálním/Tailscale code
+  stampem `b960ddd3a4e6552f`.
 
 ## Co gate zatím neřeší
 
@@ -218,7 +225,6 @@ transakce, ScanDocu review a životní cyklus autosave/managed relací jsou hoto
 Fáze 1.1 status/health i Fáze 1.2 VoiceBridge command ownership a iPhone audio
 fallback jsou hotové a ručně ověřené. Fáze 1.3 je rozpracovaná: read-only
 document search, case/detail, classification/review/work, due-date i jednotný
-intake service jsou venku a Fáze 2.1 explicitního VoiceBridge state machine je
-ručně ověřená. Další rozhodnutí je 2.2 jednotný document intake model, nebo
-návrat k e-mailové service vrstvě z Fáze 1.
+intake service jsou venku a Fáze 2.1 i 2.2 jsou ověřené. Další bod je 2.3
+jednotný e-mailový pracovní model po malých read-only typech a adaptérech.
 Reindex zůstává samostatný další krok dokumentové persistence.

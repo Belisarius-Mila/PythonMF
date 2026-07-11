@@ -47,6 +47,9 @@ class DocumentIntakeServiceTests(unittest.TestCase):
         self.assertEqual(result["count"], 4)
         self.assertEqual([source["id"] for source in result["sources"]], ["downloads", "email", "mobile", "local_inbox"])
         self.assertEqual(len(result["unified_items"]), 4)
+        refs = [item["intake_ref"] for item in result["unified_items"]]
+        self.assertEqual(len(set(refs)), 4)
+        self.assertTrue(all(ref.startswith("intakeref-") for ref in refs))
         self.assertNotIn("image", json.dumps(result, ensure_ascii=False))
 
     def test_missing_mobile_and_local_sources_are_reported_readonly(self) -> None:

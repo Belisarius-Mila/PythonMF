@@ -471,6 +471,17 @@ Rucni retest po prvnim vykonovem kroku:
   zaznam, nula inline pokusu a zachovanou stopu
   `watcher_queued -> watcher_processing -> awaiting_adam`. Text pokynu ani
   private logy se do checkpointu neukladaji.
+- Faze 2.2 pridala `app/documents/intake_models.py`: jednotne enumy zdroje,
+  stavu a akce, `DocumentIntakeItem` a `DocumentIntakeSourceSnapshot`.
+  Downloads, e-mailova fronta, mobilni scan i lokalni inbox jsou adaptovane do
+  stejneho kontraktu pod stavajicim API.
+- Kazda polozka ma stabilni hashovanou `intake_ref`; filename/UID/batch klic se
+  pouzije jen pro hash a neni soucasti verejneho modelu. Invarianty zakazuji
+  polozku pod nespravnym zdrojem a nesouhlas viditelneho a celkoveho poctu.
+- Gate ma 578 testu. Zive overeni bez vypisu obsahu potvrdilo 4 zdroje, 5
+  aktualnich sjednocenych polozek, vsechny reference platne a unikatni.
+  Lokalni i Tailscale smoke check prosly na jedine instanci PID 63621 se
+  shodnym code stampem `b960ddd3a4e6552f`.
 
 Co neni hotove:
 
@@ -497,10 +508,10 @@ Co neni hotove:
 
 Dalsi krok:
 
-Faze 2.1 je uzavrena a rucne overena. Dalsi volba podle roadmapy je bud 2.2
-jednotny dokumentovy intake model, nebo navrat k dosud nehotove e-mailove
-service vrstve z Faze 1. Dokumentovy reindex a dalsi writery zustavaji oddelenou
-persistence roadmapou.
+Faze 2.1 i 2.2 jsou uzavrene a overene. Dalsi bod roadmapy je 2.3 jednotny
+e-mailovy pracovni model; ma zacit read-only typy a adaptery bez zmeny provideru,
+archivace, odesilani nebo potvrzovacich bran. Dokumentovy reindex a dalsi
+writery zustavaji oddelenou persistence roadmapou.
 Dokumentovy reindex zustava vedlejsi persistence roadmapou. Stary e-mailovy
 parser, lokalni Janicka vetev a pet podezrelych API cest zatim nemenit. PDF
 browser a post-call audio retest jsou odlozene.
@@ -538,6 +549,7 @@ Zmenene nebo relevantni soubory:
 - `app/documents/case_service.py`
 - `app/documents/due_date_service.py`
 - `app/documents/intake_service.py`
+- `app/documents/intake_models.py`
 - `app/documents/review_service.py`
 - `app/documents/search_service.py`
 - `app/voice_bridge_coordinator.py`
@@ -550,6 +562,7 @@ Zmenene nebo relevantni soubory:
 - `tests/test_document_case_service.py`
 - `tests/test_document_due_date_service.py`
 - `tests/test_document_intake_service.py`
+- `tests/test_document_intake_models.py`
 - `tests/test_document_review_service.py`
 - `tests/test_document_search_service.py`
 - `tests/test_voice_bridge_coordinator.py`
