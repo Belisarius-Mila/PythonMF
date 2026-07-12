@@ -10,7 +10,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.tvbcp import append_tvbcp_entry, start_tvbcp, tvbcp_status
+from app.tvbcp import append_tvbcp_entry, start_tvbcp, tvbcp_status, update_tvbcp_contract
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -20,12 +20,15 @@ def build_parser() -> argparse.ArgumentParser:
     start = subparsers.add_parser("start", help="Založit TVBCP bez přepsání existujícího protokolu.")
     start.add_argument("--title", required=True)
 
-    append = subparsers.add_parser("append", help="Přidat stručný strukturovaný záznam.")
+    append = subparsers.add_parser("append", help="Přidat plný věcný obsah bez provozních mezistavů.")
+    append.add_argument("--mila", default="")
+    append.add_argument("--adam", default="")
     append.add_argument("--discussed", default="")
     append.add_argument("--conclusion", default="")
     append.add_argument("--open-question", default="")
     append.add_argument("--next-step", default="")
 
+    subparsers.add_parser("contract", help="Aktualizovat pravidla protokolu bez ztráty obsahu.")
     subparsers.add_parser("status", help="Vypsat pouze technický stav bez obsahu.")
     return parser
 
@@ -37,11 +40,15 @@ def main(argv: list[str] | None = None) -> int:
             result = start_tvbcp(title=args.title)
         elif args.command == "append":
             result = append_tvbcp_entry(
+                mila=args.mila,
+                adam=args.adam,
                 discussed=args.discussed,
                 conclusion=args.conclusion,
                 open_question=args.open_question,
                 next_step=args.next_step,
             )
+        elif args.command == "contract":
+            result = update_tvbcp_contract()
         else:
             status = tvbcp_status()
             result = {key: status[key] for key in ("ok", "active", "updated_at", "chars")}

@@ -248,10 +248,11 @@ nebo pull request.
   přesměruje aktuální okno, pokud browser odmítne popup zavřít. Gate má 607
   testů a oba smoke checky prošly na PID 87379.
 - TVBCP přidal soukromý dočasný TXT protokol pro VoiceBridge brainstorming,
-  samostatnou read-only stránku s bezpečným textovým renderem a zamčený CLI
-  append bez automatického mazání či přesunu. Doménová logika je v
-  `app/tvbcp.py`; monolit narostl jen o UI a HTTP adaptéry. Gate má 611 testů
-  a lokální i Tailscale smoke check prošly na jediné instanci PID 91732.
+  read-only panel přímo uvnitř Cockpitu a zamčený CLI append bez automatického
+  mazání či přesunu. Protokol uchovává plné věcné znění návrhů Míly a Adama,
+  nikoli technické mezistavy nebo kopii VoiceBridge chatu. Doménová logika je
+  v `app/tvbcp.py`; gate má 611 testů a lokální i Tailscale smoke check prošly
+  na jediné instanci PID 93185.
 
 ## Co gate zatím neřeší
 

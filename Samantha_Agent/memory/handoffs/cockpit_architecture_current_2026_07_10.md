@@ -565,10 +565,12 @@ browser a post-call audio retest jsou odlozene.
 
 Vedle roadmapy vznikl 2026-07-12 maly TVBCP nastroj pro docasny VoiceBridge
 brainstorming. Soukromy `data/private/voice_bridge/TVBCP_current.txt` je mimo
-git, Cockpit jej pouze cte v samostatnem okne a `scripts/tvbcp.py append`
-pridava zamcene strukturovane zaznamy. Neuklada plne prepisy ani citlive
-krizove pribehy a nic automaticky nemaze nebo nepresouva. Gate ma 611 testu;
-lokalni i Tailscale smoke check prosly na jedine instanci PID 91732.
+git, Cockpit jej pouze cte v panelu uvnitr hlavni stranky a
+`scripts/tvbcp.py append` pridava zamcene zaznamy. Uchovava plne vecne zneni
+podstatnych navrhu a myslenek Mily i Adama, ale vynechava technicke mezistavy,
+testy, prikazy a provozni hlaseni. Nic automaticky nemaze nebo nepresouva.
+Gate ma 611 testu; lokalni i Tailscale smoke check prosly na jedine instanci
+PID 93185.
 
 Navrhovane dalsi kroky:
 

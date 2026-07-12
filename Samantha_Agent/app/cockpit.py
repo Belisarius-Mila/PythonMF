@@ -256,7 +256,7 @@ from app.voice_bridge_runtime import (
     stop_voice_mode_watcher,
     voice_bridge_status as build_voice_bridge_status,
 )
-from app.tvbcp import TVBCP_PAGE_HTML, tvbcp_status
+from app.tvbcp import tvbcp_status
 from scripts.autosave_status import autosave_status as read_autosave_runtime_status
 
 
@@ -9534,9 +9534,6 @@ class CockpitServer:
                 if parsed.path == "/":
                     self.respond_html(COCKPIT_HTML)
                     return
-                if parsed.path == "/voice-bridge/tvbcp/":
-                    self.respond_html(TVBCP_PAGE_HTML)
-                    return
                 if parsed.path == "/email-processing/":
                     self.respond_html(EMAIL_PROCESSING_HTML)
                     return
@@ -12196,6 +12193,8 @@ COCKPIT_HTML = """<!doctype html>
     .modal-header { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 13px 14px; border-bottom: 1px solid var(--line); background: #f8fafc; }
     .modal-header h2 { margin: 0; padding: 0; border: 0; background: transparent; }
     .modal-body { padding: 13px 14px; display: grid; gap: 10px; }
+    .tvbcp-modal { width: min(980px, 100%); }
+    .tvbcp-content { min-height: 55vh; max-height: calc(100vh - 220px); overflow: auto; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: #fbfcfe; white-space: pre-wrap; overflow-wrap: anywhere; font: 14px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
     .app-list { display: grid; gap: 9px; }
     .app-card { border: 1px solid #edf0f4; border-radius: 8px; padding: 11px; background: #fbfcfe; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; }
     .app-title { font-weight: 750; }
@@ -13090,6 +13089,21 @@ COCKPIT_HTML = """<!doctype html>
       </div>
     </div>
   </div>
+  <div id="tvbcpModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="tvbcpTitle">
+    <div class="modal tvbcp-modal">
+      <div class="modal-header">
+        <h2 id="tvbcpTitle">TVBCP – pracovní protokol</h2>
+        <div class="quick-actions">
+          <button class="secondary" id="tvbcpRefreshBtn">Obnovit</button>
+          <button class="secondary" id="tvbcpCloseBtn">Zavřít panel</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div id="tvbcpStatus" class="status-line">Načítám protokol…</div>
+        <pre id="tvbcpContent" class="tvbcp-content">Načítám protokol…</pre>
+      </div>
+    </div>
+  </div>
   <script>
     const statusLine = document.getElementById("statusLine");
     const downloadsBody = document.getElementById("downloadsBody");
@@ -13231,6 +13245,11 @@ COCKPIT_HTML = """<!doctype html>
     const projectAuditStatus = document.getElementById("projectAuditStatus");
     const projectAuditRecentList = document.getElementById("projectAuditRecentList");
     const projectAuditText = document.getElementById("projectAuditText");
+    const tvbcpModal = document.getElementById("tvbcpModal");
+    const tvbcpCloseBtn = document.getElementById("tvbcpCloseBtn");
+    const tvbcpRefreshBtn = document.getElementById("tvbcpRefreshBtn");
+    const tvbcpStatus = document.getElementById("tvbcpStatus");
+    const tvbcpContent = document.getElementById("tvbcpContent");
     const todayNewPdfCount = document.getElementById("todayNewPdfCount");
     const todayReviewCount = document.getElementById("todayReviewCount");
     const todayProblemCount = document.getElementById("todayProblemCount");
@@ -15541,6 +15560,29 @@ COCKPIT_HTML = """<!doctype html>
 
     function closeProjectAuditModal() {
       projectAuditModal.classList.add("hidden");
+    }
+
+    async function refreshTvbcpModal() {
+      tvbcpStatus.textContent = "Načítám pracovní protokol…";
+      try {
+        const data = await fetchJson("/api/voice-bridge/tvbcp");
+        tvbcpContent.textContent = data.content || "TVBCP je prázdný.";
+        tvbcpStatus.textContent = data.active
+          ? `Aktivní · naposledy změněno ${data.updated_at || "neznámo"} · ${Number(data.chars || 0)} znaků`
+          : "TVBCP není aktivní.";
+      } catch (err) {
+        recordFrontendError(err);
+        tvbcpStatus.textContent = `TVBCP se nepodařilo načíst: ${err}`;
+      }
+    }
+
+    async function openTvbcpModal() {
+      tvbcpModal.classList.remove("hidden");
+      await refreshTvbcpModal();
+    }
+
+    function closeTvbcpModal() {
+      tvbcpModal.classList.add("hidden");
     }
 
     function renderProjectAuditReport(data) {
@@ -19428,9 +19470,7 @@ COCKPIT_HTML = """<!doctype html>
     voiceStopBtn.addEventListener("click", stopVoiceRecording);
     voiceAudioUnlockBtn.addEventListener("click", openVoiceAudioChannel);
     voiceTranscriptSendBtn.addEventListener("click", submitVoiceTranscript);
-    tvbcpOpenBtn.addEventListener("click", () => {
-      window.open("/voice-bridge/tvbcp/", "samantha_tvbcp");
-    });
+    tvbcpOpenBtn.addEventListener("click", openTvbcpModal);
     voiceLastResponseSpeakBtn.addEventListener("click", speakLastAdamResponse);
     codexApprovalSendConfirmationBtn.addEventListener("click", sendCodexApprovalConfirmation);
     codexApprovalCopyConfirmationBtn.addEventListener("click", copyCodexApprovalConfirmation);
@@ -19468,6 +19508,8 @@ COCKPIT_HTML = """<!doctype html>
     diagnosticsCloseBtn.addEventListener("click", closeDiagnosticsModal);
 		    quantitativeCloseBtn.addEventListener("click", closeQuantitativeModal);
     projectAuditCloseBtn.addEventListener("click", closeProjectAuditModal);
+    tvbcpCloseBtn.addEventListener("click", closeTvbcpModal);
+    tvbcpRefreshBtn.addEventListener("click", refreshTvbcpModal);
     projectAuditSaveBtn.addEventListener("click", saveProjectAuditReport);
     remindersModal.addEventListener("click", (event) => {
       if (event.target === remindersModal) {
@@ -19497,6 +19539,11 @@ COCKPIT_HTML = """<!doctype html>
     projectAuditModal.addEventListener("click", (event) => {
       if (event.target === projectAuditModal) {
         closeProjectAuditModal();
+      }
+    });
+    tvbcpModal.addEventListener("click", (event) => {
+      if (event.target === tvbcpModal) {
+        closeTvbcpModal();
       }
     });
     webAppsCloseBtn.addEventListener("click", closeWebAppsModal);
@@ -19576,6 +19623,8 @@ COCKPIT_HTML = """<!doctype html>
         closeQuantitativeModal();
       } else if (event.key === "Escape" && !projectAuditModal.classList.contains("hidden")) {
         closeProjectAuditModal();
+      } else if (event.key === "Escape" && !tvbcpModal.classList.contains("hidden")) {
+        closeTvbcpModal();
       } else if (event.key === "Escape" && !webAppsModal.classList.contains("hidden")) {
         closeWebAppsModal();
       } else if (event.key === "Escape" && !libraryModal.classList.contains("hidden")) {
