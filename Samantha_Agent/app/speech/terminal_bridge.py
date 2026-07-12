@@ -304,6 +304,64 @@ def screen_session_exists(
     return f".{session_name}" in output
 
 
+def tty_belongs_to_screen_session(
+    tty: str,
+    session_name: str = DEFAULT_CODEX_SCREEN_SESSION,
+    *,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> bool:
+    """Return true only when the target TTY descends from the named screen process."""
+    target_tty = normalize_tty(tty)
+    if not target_tty or not session_name:
+        return False
+    try:
+        completed = runner(PS_COMMAND, capture_output=True, text=True, timeout=4, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    if completed.returncode != 0:
+        return False
+
+    parent_by_pid: dict[int, int] = {}
+    tty_by_pid: dict[int, str] = {}
+    screen_pids: set[int] = set()
+    for line in completed.stdout.splitlines():
+        parts = line.strip().split(None, 6)
+        if len(parts) >= 7 and looks_like_ps_stat(parts[3]) and looks_like_ps_etime(parts[4]):
+            pid_text, ppid_text, process_tty, _stat, _etime, comm, args = parts
+        elif len(parts) >= 6 and looks_like_ps_etime(parts[3]):
+            pid_text, ppid_text, process_tty, _etime, comm, args = line.strip().split(None, 5)
+        else:
+            compact = line.strip().split(None, 4)
+            if len(compact) < 5:
+                continue
+            pid_text, ppid_text, process_tty, comm, args = compact
+        try:
+            pid = int(pid_text)
+            ppid = int(ppid_text)
+        except ValueError:
+            continue
+        parent_by_pid[pid] = ppid
+        tty_by_pid[pid] = normalize_tty(process_tty)
+        process_name = Path(str(comm)).name.casefold()
+        if process_name == "screen" and re.search(rf"(?:^|\s)-S\s+{re.escape(session_name)}(?:\s|$)", args):
+            screen_pids.add(pid)
+
+    if not screen_pids:
+        return False
+    for pid, process_tty in tty_by_pid.items():
+        if process_tty != target_tty:
+            continue
+        current = pid
+        for _ in range(30):
+            if current in screen_pids:
+                return True
+            parent = parent_by_pid.get(current)
+            if parent is None or parent == current:
+                break
+            current = parent
+    return False
+
+
 def deliver_prompt_to_screen_session(
     prompt: str,
     *,
@@ -585,6 +643,32 @@ def deliver_prompt_to_terminal(
             "message": f"Označené TTY {marked_tty} už nepatří aktivní Codex relaci.",
             "target_tty": marked_tty,
         }
+
+    if (
+        marked_tty
+        and screen_session_name
+        and tty_belongs_to_screen_session(marked_tty, screen_session_name, runner=ps_runner)
+    ):
+        screen_result = screen_deliverer(
+            safe_prompt,
+            submit=submit,
+            session_name=screen_session_name,
+            runner=runner,
+        )
+        if screen_result.get("ok"):
+            return {
+                **screen_result,
+                "status": "delivered_screen",
+                "message": (
+                    f"Pokyn byl vložen do ověřené hlavní screen relace {screen_session_name}. "
+                    "Za skutečnou odpověď se považuje až výsledek vrácený živým Codex chatem."
+                ),
+                "verified": True,
+                "target_tty": marked_tty,
+                "target_ttys": codex_ttys,
+                "marked_tty_status": marked_tty_error,
+                "delivery_method": "validated_screen_stuff",
+            }
 
     if effective_marked_tty:
         target_ttys = [effective_marked_tty]

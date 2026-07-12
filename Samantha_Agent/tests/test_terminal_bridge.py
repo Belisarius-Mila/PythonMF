@@ -591,7 +591,7 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertEqual(calls[0][-1], "ttys005")
         self.assertEqual(result["target_ttys"], ["ttys004", "ttys005"])
 
-    def test_deliver_prompt_never_uses_screen_session_after_direct_tty_failure(self) -> None:
+    def test_deliver_prompt_uses_only_validated_main_screen_after_direct_tty_failure(self) -> None:
         runner_calls = []
         screen_calls = []
 
@@ -600,7 +600,16 @@ class TerminalBridgeTests(unittest.TestCase):
             return subprocess.CompletedProcess(args=args, returncode=0, stdout="delivered\n", stderr="")
 
         def fake_ps_runner(args, **kwargs):
-            return subprocess.CompletedProcess(args=args, returncode=0, stdout="100 1 ttys005 codex codex\n", stderr="")
+            return subprocess.CompletedProcess(
+                args=args,
+                returncode=0,
+                stdout=(
+                    "100 1 ?? Ss 00:10:00 screen screen -S samantha_codex /repo/scripts/samantha_screen_entry.sh\n"
+                    "101 100 ttys005 Ss+ 00:10:00 login login -pflq user /repo/scripts/samantha_screen_entry.sh\n"
+                    "102 101 ttys005 S+ 00:10:00 codex codex -C /repo .\n"
+                ),
+                stderr="",
+            )
 
         def fake_tty_deliverer(tty, prompt, **kwargs):
             return {"ok": False, "status": "tty_delivery_failed", "message": "Operation not permitted", "target_tty": tty}
@@ -629,11 +638,12 @@ class TerminalBridgeTests(unittest.TestCase):
             )
 
         self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "terminal_delivery_unverified")
-        self.assertEqual(result["delivery_method"], "local_gui_terminal")
+        self.assertEqual(result["status"], "delivered_screen")
+        self.assertEqual(result["delivery_method"], "validated_screen_stuff")
+        self.assertTrue(result["verified"])
         self.assertEqual(result["marked_tty_status"]["status"], "tty_delivery_failed")
-        self.assertEqual(screen_calls, [])
-        self.assertEqual(runner_calls[0][0], "/usr/bin/osascript")
+        self.assertEqual(screen_calls[0]["kwargs"]["session_name"], "samantha_codex")
+        self.assertEqual(runner_calls, [])
 
     def test_terminal_applescript_prefers_target_ttys_before_any_codex_tab(self) -> None:
         script = terminal_applescript()
