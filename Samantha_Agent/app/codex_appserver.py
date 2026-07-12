@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import queue
 import re
 import subprocess
@@ -20,6 +21,14 @@ LAB_DEVELOPER_INSTRUCTIONS = (
     "Nikdy nevolej nástroje, nečti soubory, neměň data a neprováděj žádné akce. "
     "Jde pouze o test spolehlivého textového chatu a návaznosti konverzace."
 )
+CODEX_PATH_PREFIXES = (
+    "/usr/local/bin",
+    "/opt/homebrew/bin",
+    "/usr/bin",
+    "/bin",
+    "/usr/sbin",
+    "/sbin",
+)
 
 
 def utc_now() -> str:
@@ -36,6 +45,21 @@ class AppServerTimeout(AppServerError):
 
 class AppServerContractError(AppServerError):
     """Raised when the server response violates the expected protocol contract."""
+
+
+def codex_environment(base_env: dict[str, str] | None = None) -> dict[str, str]:
+    env = dict(base_env or os.environ)
+    existing = [part for part in str(env.get("PATH") or "").split(os.pathsep) if part]
+    ordered: list[str] = []
+    for part in (*CODEX_PATH_PREFIXES, *existing):
+        if part not in ordered:
+            ordered.append(part)
+    env["PATH"] = os.pathsep.join(ordered)
+    env.setdefault("LANG", "cs_CZ.UTF-8")
+    env.setdefault("LC_ALL", "cs_CZ.UTF-8")
+    env.setdefault("PYTHONUTF8", "1")
+    env.setdefault("PYTHONIOENCODING", "utf-8")
+    return env
 
 
 @dataclass(frozen=True)
@@ -94,6 +118,7 @@ def read_codex_version(
             text=True,
             timeout=8,
             check=False,
+            env=codex_environment(),
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
         raise AppServerError(f"Codex verzi nelze zjistit: {exc}") from exc
@@ -119,6 +144,7 @@ class StdioAppServerTransport:
                 text=True,
                 encoding="utf-8",
                 bufsize=1,
+                env=codex_environment(),
             )
         except OSError as exc:
             raise AppServerError(f"Codex app-server nelze spustit: {exc}") from exc

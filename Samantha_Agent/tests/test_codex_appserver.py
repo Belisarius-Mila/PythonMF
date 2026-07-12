@@ -8,6 +8,7 @@ from app.codex_appserver import (
     AppServerContractError,
     CodexVersion,
     TurnReceipt,
+    codex_environment,
 )
 from app.codex_appserver_lab import AppServerLabService, normalize_client_timestamp
 
@@ -87,6 +88,14 @@ class CodexContractTests(unittest.TestCase):
     def test_client_timestamp_is_normalized_or_rejected(self) -> None:
         self.assertEqual(normalize_client_timestamp("2026-07-12T22:30:00+02:00"), "2026-07-12T20:30:00+00:00")
         self.assertEqual(normalize_client_timestamp("not-a-time"), "")
+
+    def test_codex_environment_adds_service_runtime_paths(self) -> None:
+        env = codex_environment({"PATH": "/custom/bin", "HOME": "/tmp/home"})
+        parts = env["PATH"].split(":")
+        self.assertEqual(parts[0], "/usr/local/bin")
+        self.assertIn("/usr/bin", parts)
+        self.assertIn("/custom/bin", parts)
+        self.assertEqual(env["HOME"], "/tmp/home")
 
 
 class AppServerLabServiceTests(unittest.TestCase):
