@@ -214,6 +214,72 @@ class CockpitTests(unittest.TestCase):
 
         self.assertEqual([], missing)
 
+    def test_appserver_lab_ui_is_isolated_and_shows_delivery_timestamps(self) -> None:
+        required_ids = (
+            "appserverLabOpenBtn",
+            "appserverLabModal",
+            "appserverLabNewBtn",
+            "appserverLabResumeBtn",
+            "appserverLabDisconnectBtn",
+            "appserverLabRestartBtn",
+            "appserverLabInput",
+            "appserverLabSendBtn",
+        )
+        for element_id in required_ids:
+            self.assertIn(f'id="{element_id}"', COCKPIT_HTML)
+        self.assertIn("Kliknutí v zařízení", COCKPIT_HTML)
+        self.assertIn("Přijato Cockpitem", COCKPIT_HTML)
+        self.assertIn("Přijato app-serverem", COCKPIT_HTML)
+        self.assertIn("Odpověď dokončena", COCKPIT_HTML)
+        self.assertIn("Nepoužívá VoiceBridge, watcher, TTY ani screen doručování", COCKPIT_HTML)
+
+    def test_appserver_lab_actions_delegate_without_voice_bridge(self) -> None:
+        calls: list[tuple[str, object]] = []
+
+        class FakeService:
+            def status(self):
+                calls.append(("status", None))
+                return {"ok": True, "thread_ready": False}
+
+            def new_thread(self):
+                calls.append(("new", None))
+                return {"ok": True, "thread_id": "thread-1"}
+
+            def resume(self):
+                calls.append(("resume", None))
+                return {"ok": True}
+
+            def disconnect(self):
+                calls.append(("disconnect", None))
+                return {"ok": True}
+
+            def restart(self):
+                calls.append(("restart", None))
+                return {"ok": True}
+
+            def send(self, **kwargs):
+                calls.append(("send", kwargs))
+                return {"ok": True, "status": "completed"}
+
+        service = FakeService()
+        self.assertTrue(cockpit_module.appserver_lab_status_action(service=service)["ok"])
+        self.assertTrue(cockpit_module.appserver_lab_new_thread_action(service=service)["ok"])
+        self.assertTrue(cockpit_module.appserver_lab_resume_action(service=service)["ok"])
+        self.assertTrue(cockpit_module.appserver_lab_disconnect_action(service=service)["ok"])
+        self.assertTrue(cockpit_module.appserver_lab_restart_action(service=service)["ok"])
+        sent = cockpit_module.appserver_lab_send_action(
+            {
+                "message": "Test",
+                "client_message_id": "appserver-lab-abcdefgh",
+                "client_sent_at": "2026-07-12T20:00:00Z",
+            },
+            service=service,
+        )
+
+        self.assertTrue(sent["ok"])
+        self.assertEqual([item[0] for item in calls], ["status", "new", "resume", "disconnect", "restart", "send"])
+        self.assertEqual(calls[-1][1]["client_message_id"], "appserver-lab-abcdefgh")
+
     def test_library_archive_url_action_passes_url_category_and_tags(self) -> None:
         with patch("app.cockpit.archive_url") as archive_mock:
             archive_mock.return_value = {"ok": True, "item": {"id": "article-1"}}

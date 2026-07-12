@@ -27,6 +27,8 @@ COMPILE_PATHS = (
     "app/tvbcp.py",
     "app/adam_service.py",
     "app/autosave_service.py",
+    "app/codex_appserver.py",
+    "app/codex_appserver_lab.py",
     "app/file_persistence.py",
     "app/work_repository.py",
     "app/email/work_outbox.py",
@@ -55,6 +57,7 @@ COMPILE_PATHS = (
     "scripts/autosave_status.py",
     "scripts/migrate_cockpit_single_instance.py",
     "scripts/tvbcp.py",
+    "scripts/codex_appserver_reliability_probe.py",
 )
 
 SHELL_PATHS = (
@@ -65,6 +68,8 @@ SHELL_PATHS = (
 TEST_MODULES = (
     "tests.test_cockpit_quality_gate",
     "tests.test_cockpit_status_service",
+    "tests.test_codex_appserver",
+    "tests.test_codex_appserver_reliability_probe",
     "tests.test_voice_bridge_coordinator",
     "tests.test_voice_bridge_runtime",
     "tests.test_voice_bridge_state",
