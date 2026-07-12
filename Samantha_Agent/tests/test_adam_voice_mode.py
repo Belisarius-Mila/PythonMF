@@ -300,7 +300,7 @@ print(json.dumps({"ok": result.get("ok"), "status": result.get("status"), "respo
 
             result = handle_voice_command(
                 command,
-                response_generator=lambda text: "Návrh odpovědi je připravený.",
+                response_generator=lambda text: self.fail("watcher must not generate a draft response"),
                 should_speak=False,
                 status_path=status_path,
                 pending_path=pending_path,
@@ -310,10 +310,10 @@ print(json.dumps({"ok": result.get("ok"), "status": result.get("status"), "respo
 
         self.assertTrue(result["ok"])
         self.assertEqual(result["speech"]["transport"], "disabled")
-        self.assertEqual(payload["state"], "command_ready")
-        self.assertEqual(payload["command_state"]["state"], "completed")
+        self.assertEqual(payload["state"], "pending_for_adam")
+        self.assertEqual(payload["command_state"]["state"], "awaiting_adam")
         self.assertEqual(payload["command_state"]["delivery_owner"], "watcher")
-        self.assertEqual(result["voice_state"]["state"], "completed")
+        self.assertEqual(result["voice_state"]["state"], "awaiting_adam")
         self.assertNotIn("Návrh odpovědi", json.dumps(payload["command_state"], ensure_ascii=False))
         self.assertEqual(payload["last_command"]["text"], "Připrav návrh odpovědi.")
 
@@ -342,7 +342,7 @@ print(json.dumps({"ok": result.get("ok"), "status": result.get("status"), "respo
         self.assertEqual(heartbeat["state"], "listening")
         self.assertEqual(heartbeat["command_state"], command_state)
 
-    def test_handle_voice_command_speaks_generated_response_not_input_text(self) -> None:
+    def test_handle_voice_command_routes_conversation_to_codex_instead_of_answering(self) -> None:
         spoken = []
 
         def fake_speak(text, **kwargs):
@@ -361,21 +361,14 @@ print(json.dumps({"ok": result.get("ok"), "status": result.get("status"), "respo
             result = handle_voice_command(
                 command,
                 speak=fake_speak,
-                response_generator=lambda text: "Ahoj Janičko, rád tě poznávám. Můžu pro tebe něco udělat?",
+                response_generator=lambda text: self.fail("watcher must not generate a conversational answer"),
                 status_path=status_path,
                 pending_path=pending_path,
                 history_path=history_path,
             )
 
-        self.assertEqual(
-            spoken,
-            [
-                "Automatická odpověď watcheru, ne převzetí v Codex chatu: "
-                "Ahoj Janičko, rád tě poznávám. Můžu pro tebe něco udělat?"
-            ],
-        )
-        self.assertEqual(result["response"], spoken[0])
-        self.assertNotIn("Janička přijela", spoken[0])
+        self.assertEqual(spoken, [])
+        self.assertIn("převzetí Adamem v Codexu", result["response"])
 
     def test_handle_voice_command_does_not_speak_pending_terminal_delivery_status(self) -> None:
         spoken = []
@@ -1040,7 +1033,7 @@ for index in range(30):
         self.assertIn("Kolik jsme dnes napsali řádků kódu?", captured["prompt"])
         self.assertIn("Co jsem se ptal minule?", captured["prompt"])
 
-    def test_handle_voice_command_records_direct_response_history(self) -> None:
+    def test_handle_voice_command_records_conversation_as_pending_for_codex(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             inbox = Path(temp_dir)
             latest = inbox / "latest_voice_command.md"
@@ -1051,30 +1044,27 @@ for index in range(30):
 
             handle_voice_command(
                 command,
-                response_generator=lambda text: "Ahoj, rád tě poznávám.",
+                response_generator=lambda text: self.fail("watcher must not generate a direct response"),
                 should_speak=False,
                 status_path=status_path,
-                pending_path=None,
+                pending_path=inbox / "pending_for_adam.json",
                 history_path=history_path,
             )
             history = load_voice_history(path=history_path, limit=2)
 
         self.assertEqual(len(history), 1)
-        self.assertEqual(history[0]["route"], "direct_response")
+        self.assertEqual(history[0]["route"], "codex_work")
         self.assertEqual(history[0]["user_text"], "Co jí řekneš?")
-        self.assertEqual(
-            history[0]["adam_response"],
-            "Automatická odpověď watcheru, ne převzetí v Codex chatu: Ahoj, rád tě poznávám.",
-        )
+        self.assertIn("převzetí Adamem v Codexu", history[0]["adam_response"])
         self.assertIn("Míla: Co jí řekneš?", format_voice_history_for_prompt(history))
 
     def test_format_automatic_watcher_response_marks_non_codex_chat(self) -> None:
         self.assertEqual(
             format_automatic_watcher_response("OK"),
-            "Automatická odpověď watcheru, ne převzetí v Codex chatu: OK",
+            "Zpráva byla přijata watcherem, ale nebyla potvrzena jako převzatá živým Codex chatem.",
         )
 
-    def test_direct_response_failure_records_safe_error_detail(self) -> None:
+    def test_conversational_command_never_calls_direct_response_generator(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             inbox = Path(temp_dir)
             pending_path = inbox / "pending_for_adam.json"
@@ -1082,20 +1072,17 @@ for index in range(30):
             write_voice_command(inbox / "latest_voice_command.md", "Ahoj, jsi tam?")
             command = load_latest_voice_command(inbox_dir=inbox)
 
-            def failing_response(_text: str) -> str:
-                raise RuntimeError("temporary provider failure")
-
             response = build_spoken_result_for_command(
                 command,
-                response_generator=failing_response,
+                response_generator=lambda text: self.fail("watcher must not call a direct responder"),
                 pending_path=pending_path,
                 history_path=history_path,
             )
             pending = json.loads(pending_path.read_text(encoding="utf-8"))
 
-        self.assertIn("automatická odpověď se nepovedla", response)
-        self.assertEqual(pending["reason"], "direct_response_failed")
-        self.assertIn("Technický detail: RuntimeError: temporary provider failure", pending["message"])
+        self.assertIn("převzetí Adamem v Codexu", response)
+        self.assertEqual(pending["reason"], "codex_work")
+        self.assertNotIn("Technický detail", pending["message"])
 
     def test_pending_command_carries_recent_voice_history(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

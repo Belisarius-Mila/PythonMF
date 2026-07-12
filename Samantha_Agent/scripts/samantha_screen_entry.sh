@@ -165,8 +165,29 @@ mark_voice_tty_if_requested() {
 
 run_work_context_guard_on_start
 mark_voice_tty_if_requested
-if [[ -n "$CODEX_START_PROMPT" ]]; then
-  "$CODEX_BIN" -C "$PROJECT_DIR" "$CODEX_START_PROMPT"
-else
-  "$CODEX_BIN" -C "$PROJECT_DIR" .
-fi
+
+while true; do
+  set +e
+  if [[ -n "$CODEX_START_PROMPT" ]]; then
+    "$CODEX_BIN" -C "$PROJECT_DIR" "$CODEX_START_PROMPT"
+  else
+    "$CODEX_BIN" -C "$PROJECT_DIR" .
+  fi
+  CODEX_EXIT_STATUS=$?
+  set -e
+
+  echo
+  echo "Codex skončil (návratový kód $CODEX_EXIT_STATUS). Screen relace zůstává otevřená."
+  printf "Znovu spustit Codex v této screen relaci? [Y/n] "
+  read -r answer || answer="n"
+  normalized="${answer:l}"
+  case "$normalized" in
+    n|no|ne|0|false)
+      echo "Codex zůstává vypnutý. Screen přechází do shellu; znovu se připojíš příkazem samantha."
+      exec /bin/zsh -l
+      ;;
+  esac
+
+  CODEX_START_PROMPT=""
+  echo "Spouštím nový Codex v zachované screen relaci. Voice marker se automaticky nemění."
+done

@@ -13841,7 +13841,6 @@ COCKPIT_HTML = """<!doctype html>
     const FULL_STATUS_MONITOR_MS = 5 * 60 * 1000;
     const INTAKE_EMAIL_MONITOR_MS = 30 * 60 * 1000;
     const URGENT_REMINDERS_MONITOR_MS = 30 * 1000;
-    const VOICE_STATUS_MONITOR_MS = 3000;
     let refreshInFlight = false;
     let liveStatusRefreshInFlight = false;
     let urgentRemindersRefreshInFlight = false;
@@ -14880,10 +14879,6 @@ COCKPIT_HTML = """<!doctype html>
       todayNewPdfCount.textContent = String(newCount);
       todayReviewCount.textContent = String(reviewPending);
       todayProblemCount.textContent = String(problemTotal);
-      const documentsPanelNode = document.getElementById("documentsPanel");
-      if (documentsPanelNode && (newCount > 0 || reviewPending > 0 || problemTotal > 0)) {
-        documentsPanelNode.open = true;
-      }
       todayHint.textContent = dashboardTodayHint(newCount, reviewPending, problemTotal);
       const documentSignal = problemTotal > 0
         ? {level: "warn", reason: `Dokumenty: ${problemTotal} problémů k ruční kontrole`}
@@ -15062,9 +15057,6 @@ COCKPIT_HTML = """<!doctype html>
         voiceBridgeSessions.classList.toggle("ok", !voiceBridgeWarn && (!markedTty || codexTtys.includes(markedTty)));
       }
       renderVoiceBridgeSwitcher(voiceBridge);
-      if (voiceCommandDetails && (voicePendingActive || codexApprovalActive || voiceBridgeWarn)) {
-        voiceCommandDetails.open = true;
-      }
       if (voicePendingStatus) {
         voicePendingStatus.textContent = voicePendingActive
           ? voicePendingActionable
@@ -16152,9 +16144,8 @@ COCKPIT_HTML = """<!doctype html>
 		      try {
 		        const opened = await primeVoiceAudioContextFromGesture();
 		        if (opened) {
-		          showMessage("Audiokanál je otevřený. Spouštím watcher pro hlasové pokyny...");
-		          if (voiceCommandStatus) voiceCommandStatus.textContent = "Audiokanál je otevřený. Watcher kontroluji nebo spouštím...";
-		          await ensureVoiceModeWatcherRunningFromAudioChannel();
+		          showMessage("Audiokanál je otevřený. Stav watcheru se nemění.");
+		          if (voiceCommandStatus) voiceCommandStatus.textContent = "Audiokanál je otevřený. Watcher zůstává v dosavadním stavu.";
 		        } else {
 		          showMessage("Tento prohlížeč nepodporuje otevření webového audiokanálu.");
 		          if (voiceCommandStatus) voiceCommandStatus.textContent = "Tento prohlížeč nepodporuje otevření webového audiokanálu.";
@@ -16539,7 +16530,6 @@ COCKPIT_HTML = """<!doctype html>
 			          voiceReplyPollTimer = null;
 			          return;
 			        }
-			        await refresh({silent: true, includeSecondary: false});
 			        await refreshVoiceLatestResponse({
 			          autoSpeak,
 			          expectedUserText: voiceReplyExpectedUserText,
@@ -16547,7 +16537,6 @@ COCKPIT_HTML = """<!doctype html>
 			        });
 			      }, 3000);
 			      window.setTimeout(async () => {
-			        await refresh({silent: true, includeSecondary: false});
 			        await refreshVoiceLatestResponse({
 			          autoSpeak,
 			          expectedUserText: voiceReplyExpectedUserText,
@@ -16896,17 +16885,7 @@ COCKPIT_HTML = """<!doctype html>
 		      return Boolean(latestVoiceModeRuntime && latestVoiceModeRuntime.running);
 		    }
 
-			    async function ensureVoiceModeWatcherRunningFromAudioChannel() {
-			      if (isVoiceModeWatcherRunning()) {
-			        showMessage("Audiokanál je otevřený a watcher už běží.");
-			        if (voiceCommandStatus) voiceCommandStatus.textContent = "Audiokanál je otevřený a watcher už běží.";
-			        return;
-			      }
-			      await startVoiceModeWatcher({source: "audio_channel"});
-			    }
-
-		    async function startVoiceModeWatcher(options = {}) {
-		      const fromAudioChannel = options.source === "audio_channel";
+		    async function startVoiceModeWatcher() {
 		      if (isVoiceModeWatcherRunning()) {
 		        if (voiceCommandStatus) voiceCommandStatus.textContent = "Adam Voice Mode watcher už běží.";
 		        updateVoiceModeUi();
@@ -16914,9 +16893,7 @@ COCKPIT_HTML = """<!doctype html>
 		      }
 		      if (voiceModeStartBtn) voiceModeStartBtn.disabled = true;
 		      if (voiceCommandStatus) {
-		        voiceCommandStatus.textContent = fromAudioChannel
-		          ? "Audiokanál otevřený. Spouštím záložní Adam Voice Mode watcher..."
-		          : "Spouštím záložní Adam Voice Mode watcher...";
+		        voiceCommandStatus.textContent = "Spouštím záložní Adam Voice Mode watcher na výslovný pokyn...";
 		      }
 		      try {
 		        const data = await postJson("/api/voice-mode/start", {});
@@ -19664,11 +19641,6 @@ COCKPIT_HTML = """<!doctype html>
 	    runFrontendHealthCheck();
 	    window.setInterval(runFrontendHealthCheck, 60000);
 	    window.setInterval(() => refresh({silent: true, includeSecondary: false}), FULL_STATUS_MONITOR_MS);
-	    window.setInterval(() => {
-	      if (!document.hidden) {
-	        refreshLiveStatus();
-	      }
-	    }, VOICE_STATUS_MONITOR_MS);
       window.setInterval(refreshUrgentRemindersSummary, URGENT_REMINDERS_MONITOR_MS);
       window.setInterval(runEmailIntakeMonitor, INTAKE_EMAIL_MONITOR_MS);
       window.addEventListener("focus", () => {

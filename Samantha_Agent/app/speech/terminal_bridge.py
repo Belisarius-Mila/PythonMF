@@ -400,7 +400,7 @@ on run argv
         if foundTarget then exit repeat
       end repeat
     end if
-    if not foundTarget then
+    if not foundTarget and (count of targetTtys) is 0 then
       repeat with terminalWindow in windows
         repeat with terminalTab in tabs of terminalWindow
           set tabProcesses to processes of terminalTab
@@ -513,7 +513,7 @@ def deliver_prompt_to_terminal(
     ps_runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
     script: str | None = None,
     vscode_script: str | None = None,
-    vscode_fallback: bool = True,
+    vscode_fallback: bool = False,
     marked_tty_path: Path = CURRENT_CODEX_TTY_PATH,
     tty_deliverer: Callable[..., dict[str, Any]] = deliver_prompt_to_tty,
     screen_session_name: str = DEFAULT_CODEX_SCREEN_SESSION,
@@ -524,11 +524,32 @@ def deliver_prompt_to_terminal(
     marked_tty = load_marked_codex_tty(marked_tty_path)
     codex_ttys = discover_codex_ttys(runner=ps_runner)
     codex_session_seen = bool(codex_ttys)
-    effective_marked_tty = marked_tty if marked_tty and (marked_tty in codex_ttys or not codex_ttys) else ""
-    auto_target_tty = ""
-    stale_marked_tty = marked_tty if marked_tty and codex_ttys and marked_tty not in codex_ttys else ""
-    if stale_marked_tty and len(codex_ttys) == 1:
-        auto_target_tty = codex_ttys[0]
+    if marked_tty and marked_tty not in codex_ttys:
+        return {
+            "ok": False,
+            "status": "stale_marked_tty" if codex_ttys else "no_active_codex_session",
+            "message": (
+                f"Označené TTY {marked_tty} už nepatří aktivní Codex relaci. "
+                "Z bezpečnostních důvodů nevybírám jiný chat automaticky."
+            ),
+            "target_tty": marked_tty,
+            "target_ttys": codex_ttys,
+            "verified": False,
+        }
+    if not marked_tty and len(codex_ttys) != 1:
+        return {
+            "ok": False,
+            "status": "ambiguous_codex_session" if codex_ttys else "no_active_codex_session",
+            "message": (
+                "Voice marker není nastavený a aktivní Codex relaci nelze určit jednoznačně. "
+                "Zprávu nikam neposílám."
+            ),
+            "target_ttys": codex_ttys,
+            "verified": False,
+        }
+    effective_marked_tty = marked_tty or codex_ttys[0]
+    auto_target_tty = codex_ttys[0] if not marked_tty else ""
+    stale_marked_tty = ""
     marked_tty_error: dict[str, Any] | None = None
     screen_unverified_status: dict[str, Any] | None = None
     if effective_marked_tty or auto_target_tty:
@@ -564,27 +585,6 @@ def deliver_prompt_to_terminal(
             "message": f"Označené TTY {marked_tty} už nepatří aktivní Codex relaci.",
             "target_tty": marked_tty,
         }
-
-    if screen_session_name and (marked_tty or codex_ttys):
-        screen_result = screen_deliverer(safe_prompt, submit=submit, session_name=screen_session_name, runner=runner)
-        if screen_result.get("ok") and screen_result.get("verified"):
-            if marked_tty_error:
-                screen_result["marked_tty_status"] = marked_tty_error
-            if auto_target_tty:
-                screen_result["auto_target_tty"] = auto_target_tty
-            return {
-                **screen_result,
-                "target_ttys": codex_ttys,
-            }
-        if screen_result.get("ok"):
-            screen_unverified_status = {
-                **screen_result,
-                "target_ttys": codex_ttys,
-            }
-            if marked_tty_error:
-                screen_unverified_status["marked_tty_status"] = marked_tty_error
-            if auto_target_tty:
-                screen_unverified_status["auto_target_tty"] = auto_target_tty
 
     if effective_marked_tty:
         target_ttys = [effective_marked_tty]
@@ -624,29 +624,6 @@ def deliver_prompt_to_terminal(
             terminal_error["screen_status"] = screen_unverified_status
         if marked_tty_error:
             terminal_error["marked_tty_status"] = marked_tty_error
-        if vscode_fallback and codex_session_seen:
-            vscode_result = deliver_prompt_to_vscode(
-                safe_prompt,
-                submit=submit,
-                runner=runner,
-                script=vscode_script,
-                timeout=timeout,
-            )
-            if vscode_result.get("ok"):
-                return {
-                    **vscode_result,
-                    "terminal_status": terminal_error,
-                    "target_ttys": codex_ttys,
-                }
-            detail_parts = [terminal_error["message"]]
-            if marked_tty_error:
-                detail_parts.append(f"TTY {marked_tty_error.get('target_tty')}: {marked_tty_error.get('message')}")
-            detail_parts.append(f"VS Code fallback: {vscode_result.get('message')}")
-            terminal_error["message"] = " | ".join(part for part in detail_parts if part)
-            return {
-                **terminal_error,
-                "vscode_status": vscode_result,
-            }
         return terminal_error
     if not codex_session_seen:
         return {
