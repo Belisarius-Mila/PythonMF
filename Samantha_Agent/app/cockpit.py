@@ -263,6 +263,7 @@ from scripts.autosave_status import autosave_status as read_autosave_runtime_sta
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 COCKPIT_PORT = 8770
 COCKPIT_URL = f"http://127.0.0.1:{COCKPIT_PORT}"
+VOICE_BRIDGE_FROZEN = True
 DEFAULT_PURCHASES_DIR = PROJECT_ROOT / "data" / "private" / "purchases"
 SCANDOCU_URL = "http://127.0.0.1:8766"
 SCANDOCU_PORT = 8766
@@ -8477,7 +8478,10 @@ def cockpit_transcribe_voice_action(
     pending_path: Path = ADAM_PENDING_COMMAND_PATH,
     history_path: Path = ADAM_VOICE_HISTORY_PATH,
     transcriber: Callable[..., dict[str, Any]] = transcribe_audio_base64_isolated,
+    frozen: bool = False,
 ) -> dict[str, Any]:
+    if frozen:
+        return voice_bridge_frozen_result()
     dependencies = VoiceBridgeCommandDependencies(
         save_command=save_voice_command_to_inbox,
         load_voice_mode=load_voice_mode_status,
@@ -8503,7 +8507,10 @@ def cockpit_save_voice_text_action(
     terminal_bridge: Callable[..., dict[str, Any]] | None = None,
     pending_path: Path = ADAM_PENDING_COMMAND_PATH,
     history_path: Path = ADAM_VOICE_HISTORY_PATH,
+    frozen: bool = False,
 ) -> dict[str, Any]:
+    if frozen:
+        return voice_bridge_frozen_result()
     dependencies = VoiceBridgeCommandDependencies(
         save_command=save_voice_command_to_inbox,
         load_voice_mode=load_voice_mode_status,
@@ -8519,6 +8526,19 @@ def cockpit_save_voice_text_action(
         pending_path=pending_path,
         history_path=history_path,
     )
+
+
+def voice_bridge_frozen_result() -> dict[str, Any]:
+    return {
+        "ok": False,
+        "saved": False,
+        "status": "voice_bridge_frozen",
+        "voice_delivery_status": "voice_bridge_frozen",
+        "message": (
+            "VoiceBridge je dočasně pozastavený, protože předání do živého Codex chatu není spolehlivé. "
+            "Pokyn nebyl uložen ani odeslán. Pro komunikaci použij aktivní samantha/SSH relaci."
+        ),
+    }
 
 
 def janicka_chat_memory_context(
@@ -9759,11 +9779,11 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/speech/transcribe":
                     payload = self.read_json()
-                    self.respond_json(cockpit_transcribe_voice_action(payload))
+                    self.respond_json(cockpit_transcribe_voice_action(payload, frozen=VOICE_BRIDGE_FROZEN))
                     return
                 if parsed.path == "/api/speech/voice-text":
                     payload = self.read_json()
-                    self.respond_json(cockpit_save_voice_text_action(payload))
+                    self.respond_json(cockpit_save_voice_text_action(payload, frozen=VOICE_BRIDGE_FROZEN))
                     return
                 if parsed.path == "/api/voice-bridge/frontend-event":
                     payload = self.read_json()
@@ -9806,7 +9826,7 @@ class CockpitServer:
                     self.respond_json(terminate_orphaned_janicka_sessions_action(payload))
                     return
                 if parsed.path == "/api/voice-mode/start":
-                    self.respond_json(start_adam_voice_mode_action())
+                    self.respond_json(voice_bridge_frozen_result() if VOICE_BRIDGE_FROZEN else start_adam_voice_mode_action())
                     return
                 if parsed.path == "/api/voice-mode/stop":
                     self.respond_json(stop_adam_voice_mode_action())
@@ -12408,24 +12428,24 @@ COCKPIT_HTML = """<!doctype html>
 		      <h2>Hlas / text pro Adama</h2>
 		      <div class="body voice-command-grid">
 		        <div class="voice-command-actions voice-primary-actions">
-		          <button class="primary" id="voiceRecordBtn">Nahrát pokyn</button>
+		          <button class="primary" id="voiceRecordBtn" disabled>Nahrávání pozastaveno</button>
 		          <button class="secondary hidden" id="voiceStopBtn" disabled>Zastavit</button>
 		        </div>
-		        <div id="voiceCommandStatus" class="status-line">Nahraj pokyn, nebo napiš text. Cockpit ho pošle Adamovi přímo.</div>
+		        <div id="voiceCommandStatus" class="status-line warn">VoiceBridge je pozastavený. Pro komunikaci použij aktivní samantha/SSH relaci.</div>
 	        <div class="voice-transcript-row">
 	          <label for="voiceTranscript">Textový pokyn</label>
-	          <textarea id="voiceTranscript" placeholder="Nadiktuj nebo napiš pokyn pro Adama." spellcheck="true"></textarea>
+	          <textarea id="voiceTranscript" placeholder="VoiceBridge je dočasně pozastavený." spellcheck="true" disabled></textarea>
 	        </div>
 		        <div class="voice-command-actions voice-text-actions">
 		          <button class="secondary voice-audio-unlock" id="voiceAudioUnlockBtn">Otevřít audiokanál</button>
-		          <button class="primary" id="voiceTranscriptSendBtn">Odeslat Adamovi</button>
+		          <button class="primary" id="voiceTranscriptSendBtn" disabled>Odesílání pozastaveno</button>
 		          <button class="secondary" id="tvbcpOpenBtn">TVBCP – pracovní protokol</button>
 		        </div>
             <details class="voice-advanced">
               <summary>Technické nastavení</summary>
 		        <div class="voice-command-actions">
-		          <button class="secondary" id="voiceModeToggleBtn" aria-pressed="false">Starý poslech: vypnuto</button>
-		          <button class="secondary" id="voiceModeStartBtn">Spustit watcher</button>
+		          <button class="secondary" id="voiceModeToggleBtn" aria-pressed="false" disabled>Starý poslech: vypnuto</button>
+		          <button class="secondary" id="voiceModeStartBtn" disabled>Watcher pozastaven</button>
 		          <button class="secondary" id="voiceModeStopBtn">Zastavit watcher</button>
 		        </div>
 		          <div id="voiceModeRuntimeStatus" class="status-line">Adam Voice Mode watcher: čekám na kontrolu.</div>
@@ -13839,6 +13859,7 @@ COCKPIT_HTML = """<!doctype html>
     }
 
     const FULL_STATUS_MONITOR_MS = 5 * 60 * 1000;
+    const VOICE_BRIDGE_FROZEN = true;
     const INTAKE_EMAIL_MONITOR_MS = 30 * 60 * 1000;
     const URGENT_REMINDERS_MONITOR_MS = 30 * 1000;
     let refreshInFlight = false;
@@ -16429,6 +16450,13 @@ COCKPIT_HTML = """<!doctype html>
 	    }
 
 		    function updateVoiceModeUi() {
+		      if (VOICE_BRIDGE_FROZEN) {
+		        voiceModeToggleBtn.disabled = true;
+		        voiceModeStartBtn.disabled = true;
+		        voiceModeStartBtn.textContent = "Watcher pozastaven";
+		        voiceCommandStatus.textContent = "VoiceBridge je pozastavený. Pro komunikaci použij aktivní samantha/SSH relaci.";
+		        return;
+		      }
 		      voiceModeToggleBtn.textContent = voiceModeEnabled ? "Starý poslech: zapnuto" : "Starý poslech: vypnuto";
 		      voiceModeToggleBtn.setAttribute("aria-pressed", voiceModeEnabled ? "true" : "false");
 		      voiceModeToggleBtn.classList.toggle("active", voiceModeEnabled);

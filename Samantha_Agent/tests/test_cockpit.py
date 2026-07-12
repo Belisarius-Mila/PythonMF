@@ -4143,6 +4143,28 @@ class CockpitTests(unittest.TestCase):
             self.assertEqual(result["status"], "empty_voice_text")
             self.assertFalse((Path(temp_dir) / "latest_voice_command.md").exists())
 
+    def test_frozen_voice_bridge_rejects_text_before_saving(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            result = cockpit_save_voice_text_action(
+                {"text": "Tento text se nesmí uložit."},
+                inbox_dir=Path(temp_dir),
+                frozen=True,
+            )
+
+            self.assertFalse(result["ok"])
+            self.assertFalse(result["saved"])
+            self.assertEqual(result["status"], "voice_bridge_frozen")
+            self.assertFalse((Path(temp_dir) / "latest_voice_command.md").exists())
+
+    def test_cockpit_html_exposes_frozen_voice_bridge_controls(self) -> None:
+        self.assertIn('id="voiceRecordBtn" disabled', COCKPIT_HTML)
+        self.assertIn('id="voiceTranscript" placeholder="VoiceBridge je dočasně pozastavený." spellcheck="true" disabled', COCKPIT_HTML)
+        self.assertIn('id="voiceTranscriptSendBtn" disabled', COCKPIT_HTML)
+        self.assertIn('id="voiceModeStartBtn" disabled', COCKPIT_HTML)
+        self.assertIn("const VOICE_BRIDGE_FROZEN = true", COCKPIT_HTML)
+        self.assertIn("if (VOICE_BRIDGE_FROZEN)", COCKPIT_HTML)
+        self.assertIn("VoiceBridge je pozastavený", COCKPIT_HTML)
+
     def test_save_voice_command_to_inbox_writes_latest_and_index(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             result = save_voice_command_to_inbox(
