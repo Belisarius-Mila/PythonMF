@@ -20,6 +20,8 @@ DEFAULT_STALE_CODEX_SECONDS = 36 * 60 * 60
 DEFAULT_CODEX_SCREEN_SESSION = "samantha_codex"
 SCREEN_CLEAR_INPUT = "\x15"
 SCREEN_SUBMIT_INPUT = "\r"
+SCREEN_PASTE_START = "\x1b[200~"
+SCREEN_PASTE_END = "\x1b[201~"
 
 TERMINAL_MANUAL_TERMS = (
     "smaz",
@@ -378,7 +380,7 @@ def deliver_prompt_to_screen_session(
             "session_name": session_name,
             "delivery_method": "screen_stuff",
         }
-    payload = SCREEN_CLEAR_INPUT + squash_terminal_text(prompt)
+    payload = SCREEN_CLEAR_INPUT + SCREEN_PASTE_START + squash_terminal_text(prompt) + SCREEN_PASTE_END
     try:
         insert_completed = runner(
             ["screen", "-S", session_name, "-p", "0", "-X", "stuff", payload],
@@ -389,7 +391,10 @@ def deliver_prompt_to_screen_session(
         )
         completed = insert_completed
         if submit and insert_completed.returncode == 0:
-            sleeper(0.2)
+            # Codex TUI first has to close its paste-burst transaction. Sending
+            # Enter immediately can dismiss the temporary paste placeholder
+            # without creating a user turn.
+            sleeper(1.0)
             completed = runner(
                 ["screen", "-S", session_name, "-p", "0", "-X", "stuff", SCREEN_SUBMIT_INPUT],
                 capture_output=True,
@@ -658,12 +663,12 @@ def deliver_prompt_to_terminal(
         if screen_result.get("ok"):
             return {
                 **screen_result,
-                "status": "delivered_screen",
+                "status": "screen_delivery_unverified",
                 "message": (
                     f"Pokyn byl vložen do ověřené hlavní screen relace {screen_session_name}. "
                     "Za skutečnou odpověď se považuje až výsledek vrácený živým Codex chatem."
                 ),
-                "verified": True,
+                "verified": False,
                 "target_tty": marked_tty,
                 "target_ttys": codex_ttys,
                 "marked_tty_status": marked_tty_error,

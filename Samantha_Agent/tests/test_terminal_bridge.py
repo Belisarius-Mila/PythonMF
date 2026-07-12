@@ -232,10 +232,12 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertEqual(calls[1]["args"][:7], ["screen", "-S", "samantha_codex", "-p", "0", "-X", "stuff"])
         payload = calls[1]["args"][-1]
         self.assertTrue(payload.startswith("\x15"))
+        self.assertIn("\x1b[200~", payload)
+        self.assertTrue(payload.endswith("\x1b[201~"))
         self.assertFalse(payload.endswith("\r"))
         self.assertIn("První řádek Druhý řádek", payload)
         self.assertEqual(calls[2]["args"], ["screen", "-S", "samantha_codex", "-p", "0", "-X", "stuff", "\r"])
-        self.assertEqual(sleeps, [0.2])
+        self.assertEqual(sleeps, [1.0])
         self.assertFalse(result["verified"])
 
     def test_deliver_prompt_skips_screen_fallback_and_targets_single_codex_tab(self) -> None:
@@ -638,9 +640,9 @@ class TerminalBridgeTests(unittest.TestCase):
             )
 
         self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "delivered_screen")
+        self.assertEqual(result["status"], "screen_delivery_unverified")
         self.assertEqual(result["delivery_method"], "validated_screen_stuff")
-        self.assertTrue(result["verified"])
+        self.assertFalse(result["verified"])
         self.assertEqual(result["marked_tty_status"]["status"], "tty_delivery_failed")
         self.assertEqual(screen_calls[0]["kwargs"]["session_name"], "samantha_codex")
         self.assertEqual(runner_calls, [])
