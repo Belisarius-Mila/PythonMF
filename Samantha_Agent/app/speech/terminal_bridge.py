@@ -99,7 +99,10 @@ def build_codex_terminal_prompt(command: VoiceCommand) -> str:
         "Nespouštěj zároveň Mac TTS přes `scripts/speak_edge_open.py`, protože otevřený "
         "Cockpit audiokanál odpověď přehraje v prohlížeči; Mac TTS použij jen při výslovném "
         "požadavku nebo jako fallback, když Cockpit audio není k dispozici. "
-        "Nečti nahlas tajemství, celé osobní údaje ani dlouhé citlivé texty."
+        "Nečti nahlas tajemství, celé osobní údaje ani dlouhé citlivé texty. "
+        "Pokud je aktivní TVBCP a pokyn souvisí s probíhajícím brainstormingem, po odpovědi "
+        "přidej přes `scripts/tvbcp.py append` jen stručné necitlivé shrnutí, závěr, otevřenou "
+        "otázku nebo další krok; nikdy neukládej plný přepis ani osobní krizový příběh."
     )
 
 

@@ -24,6 +24,7 @@ COMPILE_PATHS = (
     "app/voice_bridge_coordinator.py",
     "app/voice_bridge_runtime.py",
     "app/voice_bridge_state.py",
+    "app/tvbcp.py",
     "app/adam_service.py",
     "app/autosave_service.py",
     "app/file_persistence.py",
@@ -53,6 +54,7 @@ COMPILE_PATHS = (
     "scripts/email_work_outbox_pilot.py",
     "scripts/autosave_status.py",
     "scripts/migrate_cockpit_single_instance.py",
+    "scripts/tvbcp.py",
 )
 
 SHELL_PATHS = (
@@ -66,6 +68,7 @@ TEST_MODULES = (
     "tests.test_voice_bridge_coordinator",
     "tests.test_voice_bridge_runtime",
     "tests.test_voice_bridge_state",
+    "tests.test_tvbcp",
     "tests.test_file_persistence",
     "tests.test_backup_activity_state",
     "tests.test_backup_incremental",

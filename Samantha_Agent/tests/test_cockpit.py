@@ -2906,6 +2906,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("voiceStopBtn", COCKPIT_HTML)
         self.assertIn("voiceTranscript", COCKPIT_HTML)
         self.assertIn("voiceTranscriptSendBtn", COCKPIT_HTML)
+        self.assertIn("tvbcpOpenBtn", COCKPIT_HTML)
+        self.assertIn("/voice-bridge/tvbcp/", COCKPIT_HTML)
         self.assertIn("Odeslat Adamovi", COCKPIT_HTML)
         self.assertIn("startVoiceRecording", COCKPIT_HTML)
         self.assertIn("transcribeVoiceRecording", COCKPIT_HTML)

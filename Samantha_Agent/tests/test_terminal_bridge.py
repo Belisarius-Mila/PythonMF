@@ -52,6 +52,8 @@ class TerminalBridgeTests(unittest.TestCase):
         self.assertIn("Nespouštěj zároveň Mac TTS", prompt)
         self.assertIn("Cockpit audiokanál odpověď přehraje", prompt)
         self.assertIn("scripts/adam_voice_reply.py --latest-command", prompt)
+        self.assertIn("scripts/tvbcp.py append", prompt)
+        self.assertIn("nikdy neukládej plný přepis", prompt)
 
     def test_change_command_requires_manual_terminal_prompt(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

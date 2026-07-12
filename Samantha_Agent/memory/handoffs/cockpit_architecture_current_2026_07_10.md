@@ -563,6 +563,13 @@ Dokumentovy reindex zustava vedlejsi persistence roadmapou. Stary e-mailovy
 parser, lokalni Janicka vetev a pet podezrelych API cest zatim nemenit. PDF
 browser a post-call audio retest jsou odlozene.
 
+Vedle roadmapy vznikl 2026-07-12 maly TVBCP nastroj pro docasny VoiceBridge
+brainstorming. Soukromy `data/private/voice_bridge/TVBCP_current.txt` je mimo
+git, Cockpit jej pouze cte v samostatnem okne a `scripts/tvbcp.py append`
+pridava zamcene strukturovane zaznamy. Neuklada plne prepisy ani citlive
+krizove pribehy a nic automaticky nemaze nebo nepresouva. Gate ma 611 testu;
+lokalni i Tailscale smoke check prosly na jedine instanci PID 91732.
+
 Navrhovane dalsi kroky:
 
 1. Faze 1.3: vyjmout dokumentove routy a service vrstvu po malych balicich.
@@ -605,9 +612,11 @@ Zmenene nebo relevantni soubory:
 - `app/work_repository.py`
 - `app/voice_bridge_coordinator.py`
 - `app/voice_bridge_state.py`
+- `app/tvbcp.py`
 - `app/file_persistence.py`
 - `app/backup/activity_state.py`
 - `scripts/cockpit_smoke_check.py`
+- `scripts/tvbcp.py`
 - `tests/test_cockpit.py`
 - `tests/test_cockpit_status_service.py`
 - `tests/test_document_case_service.py`
@@ -623,6 +632,7 @@ Zmenene nebo relevantni soubory:
 - `scripts/email_work_outbox_pilot.py`
 - `tests/test_voice_bridge_coordinator.py`
 - `tests/test_voice_bridge_state.py`
+- `tests/test_tvbcp.py`
 - `tests/test_file_persistence.py`
 - `scripts/install_cockpit_local_launchd.sh`
 - `scripts/install_cockpit_tailscale_launchd.sh`

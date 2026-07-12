@@ -256,6 +256,7 @@ from app.voice_bridge_runtime import (
     stop_voice_mode_watcher,
     voice_bridge_status as build_voice_bridge_status,
 )
+from app.tvbcp import TVBCP_PAGE_HTML, tvbcp_status
 from scripts.autosave_status import autosave_status as read_autosave_runtime_status
 
 
@@ -9533,6 +9534,9 @@ class CockpitServer:
                 if parsed.path == "/":
                     self.respond_html(COCKPIT_HTML)
                     return
+                if parsed.path == "/voice-bridge/tvbcp/":
+                    self.respond_html(TVBCP_PAGE_HTML)
+                    return
                 if parsed.path == "/email-processing/":
                     self.respond_html(EMAIL_PROCESSING_HTML)
                     return
@@ -9570,6 +9574,9 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/live-status":
                     self.respond_json(cockpit_live_status())
+                    return
+                if parsed.path == "/api/voice-bridge/tvbcp":
+                    self.respond_json(tvbcp_status())
                     return
                 if parsed.path == "/api/server/health":
                     self.respond_json(server_health_status(host=cockpit_host, port=cockpit_port))
@@ -12413,6 +12420,7 @@ COCKPIT_HTML = """<!doctype html>
 		        <div class="voice-command-actions voice-text-actions">
 		          <button class="secondary voice-audio-unlock" id="voiceAudioUnlockBtn">Otevřít audiokanál</button>
 		          <button class="primary" id="voiceTranscriptSendBtn">Odeslat Adamovi</button>
+		          <button class="secondary" id="tvbcpOpenBtn">TVBCP – pracovní protokol</button>
 		        </div>
             <details class="voice-advanced">
               <summary>Technické nastavení</summary>
@@ -13300,6 +13308,7 @@ COCKPIT_HTML = """<!doctype html>
     const voiceTranscript = document.getElementById("voiceTranscript");
     const voiceAudioUnlockBtn = document.getElementById("voiceAudioUnlockBtn");
     const voiceTranscriptSendBtn = document.getElementById("voiceTranscriptSendBtn");
+    const tvbcpOpenBtn = document.getElementById("tvbcpOpenBtn");
     const urgentReminderAlert = document.getElementById("urgentReminderAlert");
     const urgentReminderAlertTitle = document.getElementById("urgentReminderAlertTitle");
     const urgentReminderAlertList = document.getElementById("urgentReminderAlertList");
@@ -19419,6 +19428,9 @@ COCKPIT_HTML = """<!doctype html>
     voiceStopBtn.addEventListener("click", stopVoiceRecording);
     voiceAudioUnlockBtn.addEventListener("click", openVoiceAudioChannel);
     voiceTranscriptSendBtn.addEventListener("click", submitVoiceTranscript);
+    tvbcpOpenBtn.addEventListener("click", () => {
+      window.open("/voice-bridge/tvbcp/", "samantha_tvbcp");
+    });
     voiceLastResponseSpeakBtn.addEventListener("click", speakLastAdamResponse);
     codexApprovalSendConfirmationBtn.addEventListener("click", sendCodexApprovalConfirmation);
     codexApprovalCopyConfirmationBtn.addEventListener("click", copyCodexApprovalConfirmation);
