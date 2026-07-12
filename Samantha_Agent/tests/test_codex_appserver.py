@@ -23,9 +23,13 @@ class FakeVersion:
 class FakeClient:
     instances: list["FakeClient"] = []
     next_thread = 1
+    next_process = 1000
 
     def __init__(self, **_kwargs: object):
         self.running = True
+        self.process_id = self.__class__.next_process
+        self.__class__.next_process += 1
+        self.connection_id = f"connection-{self.process_id}"
         self.thread_id = ""
         self.sent = 0
         self.__class__.instances.append(self)
@@ -102,6 +106,7 @@ class AppServerLabServiceTests(unittest.TestCase):
     def setUp(self) -> None:
         FakeClient.instances = []
         FakeClient.next_thread = 1
+        FakeClient.next_process = 1000
 
     def make_service(self, root: Path) -> AppServerLabService:
         return AppServerLabService(
@@ -151,11 +156,27 @@ class AppServerLabServiceTests(unittest.TestCase):
             thread_id = created["thread_id"]
             disconnected = service.disconnect()
             resumed = service.resume()
+            restarted = service.restart()
 
         self.assertEqual(disconnected["connection_state"], "disconnected")
         self.assertEqual(resumed["connection_state"], "connected")
         self.assertEqual(resumed["thread_id"], thread_id)
-        self.assertEqual(len(FakeClient.instances), 2)
+        self.assertEqual(restarted["thread_id"], thread_id)
+        self.assertEqual(restarted["connection_generation"], 3)
+        self.assertEqual(len(FakeClient.instances), 3)
+        events = restarted["lifecycle_events"]
+        self.assertEqual(
+            [event["action"] for event in events],
+            ["thread_created", "disconnected", "thread_resumed", "appserver_restarted"],
+        )
+        self.assertEqual(events[0]["process_pid"], 1000)
+        self.assertEqual(events[1]["previous_process_pid"], 1000)
+        self.assertEqual(events[1]["process_pid"], 0)
+        self.assertEqual(events[2]["process_pid"], 1001)
+        self.assertEqual(events[3]["previous_process_pid"], 1001)
+        self.assertEqual(events[3]["process_pid"], 1002)
+        self.assertTrue(all(event["thread_id"] == thread_id for event in events))
+        self.assertTrue(all("user_text" not in event and "answer" not in event for event in events))
 
 
 if __name__ == "__main__":

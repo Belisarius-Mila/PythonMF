@@ -12341,6 +12341,8 @@ COCKPIT_HTML = """<!doctype html>
     .appserver-lab-message-meta { color: var(--muted); font-size: 12px; line-height: 1.5; }
     .appserver-lab-compose { display: grid; gap: 8px; }
     .appserver-lab-compose textarea { min-height: 92px; resize: vertical; }
+    .appserver-lab-lifecycle { display: grid; gap: 6px; max-height: 210px; overflow: auto; }
+    .appserver-lab-lifecycle-event { border: 1px solid #dbe3ee; border-radius: 7px; padding: 8px; background: #fbfcfe; display: grid; gap: 3px; }
     .app-list { display: grid; gap: 9px; }
     .app-card { border: 1px solid #edf0f4; border-radius: 8px; padding: 11px; background: #fbfcfe; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; }
     .app-title { font-weight: 750; }
@@ -13253,6 +13255,10 @@ COCKPIT_HTML = """<!doctype html>
           <button class="secondary" id="appserverLabDisconnectBtn">Simulovat odpojení</button>
           <button class="secondary" id="appserverLabRestartBtn">Restartovat LAB app-server</button>
         </div>
+        <div>
+          <h3>Lifecycle důkazy</h3>
+          <div id="appserverLabLifecycle" class="appserver-lab-lifecycle"></div>
+        </div>
         <div id="appserverLabLog" class="appserver-lab-log" aria-live="polite"></div>
         <div class="appserver-lab-compose">
           <label for="appserverLabInput">Testovací otázka nebo pokyn</label>
@@ -13428,6 +13434,7 @@ COCKPIT_HTML = """<!doctype html>
     const appserverLabResumeBtn = document.getElementById("appserverLabResumeBtn");
     const appserverLabDisconnectBtn = document.getElementById("appserverLabDisconnectBtn");
     const appserverLabRestartBtn = document.getElementById("appserverLabRestartBtn");
+    const appserverLabLifecycle = document.getElementById("appserverLabLifecycle");
     const appserverLabLog = document.getElementById("appserverLabLog");
     const appserverLabInput = document.getElementById("appserverLabInput");
     const appserverLabSendBtn = document.getElementById("appserverLabSendBtn");
@@ -15814,6 +15821,42 @@ COCKPIT_HTML = """<!doctype html>
       });
     }
 
+    function renderAppserverLabLifecycle(events) {
+      appserverLabLifecycle.innerHTML = "";
+      const rows = Array.isArray(events) ? events.slice(-10).reverse() : [];
+      if (!rows.length) {
+        const empty = document.createElement("div");
+        empty.className = "muted";
+        empty.textContent = "Lifecycle události zatím nejsou zaznamenané.";
+        appserverLabLifecycle.appendChild(empty);
+        return;
+      }
+      const labels = {
+        thread_created: "Nový thread",
+        disconnected: "Odpojeno",
+        thread_resumed: "Thread obnoven",
+        appserver_restarted: "App-server restartován",
+        auto_resumed_before_send: "Automaticky obnoveno před odesláním",
+      };
+      rows.forEach((event) => {
+        const row = document.createElement("div");
+        row.className = "appserver-lab-lifecycle-event";
+        const title = document.createElement("strong");
+        title.textContent = `${event.ok ? "✓" : "✗"} ${labels[event.action] || event.action || "Lifecycle"} · ${appserverLabLocalTime(event.completed_at)}`;
+        const meta = document.createElement("div");
+        meta.className = "appserver-lab-message-meta";
+        meta.textContent = [
+          `thread ${appserverLabShortId(event.thread_id)}`,
+          `generation ${Number(event.previous_generation || 0)} → ${Number(event.connection_generation || 0)}`,
+          `PID ${Number(event.previous_process_pid || 0) || "—"} → ${Number(event.process_pid || 0) || "—"}`,
+          `connection ${appserverLabShortId(event.previous_connection_id)} → ${appserverLabShortId(event.connection_id)}`,
+        ].join(" · ");
+        row.appendChild(title);
+        row.appendChild(meta);
+        appserverLabLifecycle.appendChild(row);
+      });
+    }
+
     function renderAppserverLabStatus(data) {
       appserverLabMessages = Array.isArray(data.messages) ? data.messages : appserverLabMessages;
       const version = data.version || {};
@@ -15828,6 +15871,7 @@ COCKPIT_HTML = """<!doctype html>
       appserverLabDisconnectBtn.disabled = !connected;
       appserverLabRestartBtn.disabled = !data.thread_ready;
       appserverLabSendBtn.disabled = !data.thread_ready;
+      renderAppserverLabLifecycle(data.lifecycle_events || []);
       renderAppserverLabMessages();
     }
 

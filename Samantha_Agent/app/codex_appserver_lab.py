@@ -27,6 +27,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_LAB_STATE_PATH = PROJECT_ROOT / "data" / "private" / "appserver_lab" / "state.json"
 DEFAULT_CODEX_BIN = os.environ.get("CODEX_BIN") or shutil.which("codex") or "/usr/local/bin/codex"
 MAX_LAB_MESSAGES = 40
+MAX_LIFECYCLE_EVENTS = 40
 CLIENT_MESSAGE_ID_RE = re.compile(r"^appserver-lab-[A-Za-z0-9_-]{8,96}$")
 
 
@@ -49,6 +50,10 @@ def empty_lab_state() -> dict[str, Any]:
         "created_at": "",
         "updated_at": "",
         "connection_state": "disconnected",
+        "connection_generation": 0,
+        "connection_id": "",
+        "process_pid": 0,
+        "lifecycle_events": [],
         "messages": [],
     }
 
@@ -72,6 +77,8 @@ class AppServerLabService:
         self._lock = threading.RLock()
         self._state = self._load_state()
         self._state["connection_state"] = "disconnected"
+        self._state["connection_id"] = ""
+        self._state["process_pid"] = 0
 
     def _load_state(self) -> dict[str, Any]:
         if not self.state_path.exists():
@@ -86,6 +93,10 @@ class AppServerLabService:
             return empty_lab_state()
         messages = loaded.get("messages")
         loaded["messages"] = messages[-MAX_LAB_MESSAGES:] if isinstance(messages, list) else []
+        lifecycle_events = loaded.get("lifecycle_events")
+        loaded["lifecycle_events"] = (
+            lifecycle_events[-MAX_LIFECYCLE_EVENTS:] if isinstance(lifecycle_events, list) else []
+        )
         for key, default in empty_lab_state().items():
             loaded.setdefault(key, default)
         return loaded
@@ -118,6 +129,10 @@ class AppServerLabService:
                 "connection_state": self._state["connection_state"],
                 "thread_id": str(self._state.get("thread_id") or ""),
                 "thread_ready": bool(self._state.get("thread_id")),
+                "connection_generation": int(self._state.get("connection_generation") or 0),
+                "connection_id": str(self._state.get("connection_id") or ""),
+                "process_pid": int(self._state.get("process_pid") or 0),
+                "lifecycle_events": list(self._state.get("lifecycle_events") or []),
                 "created_at": str(self._state.get("created_at") or ""),
                 "updated_at": str(self._state.get("updated_at") or ""),
                 "messages": list(self._state.get("messages") or []),
@@ -134,9 +149,54 @@ class AppServerLabService:
             self._client.close()
         self._client = None
         self._state["connection_state"] = "disconnected"
+        self._state["connection_id"] = ""
+        self._state["process_pid"] = 0
+
+    def _connection_evidence(self) -> dict[str, Any]:
+        return {
+            "generation": int(self._state.get("connection_generation") or 0),
+            "connection_id": str(self._state.get("connection_id") or ""),
+            "process_pid": int(self._state.get("process_pid") or 0),
+        }
+
+    def _activate_client(self, client: CodexAppServerClient) -> None:
+        self._client = client
+        self._state["connection_state"] = "connected"
+        self._state["connection_generation"] = int(self._state.get("connection_generation") or 0) + 1
+        self._state["connection_id"] = str(client.connection_id)
+        self._state["process_pid"] = int(client.process_id)
+
+    def _append_lifecycle_event(
+        self,
+        *,
+        action: str,
+        started_at: str,
+        previous: dict[str, Any],
+        ok: bool = True,
+    ) -> None:
+        current = self._connection_evidence()
+        event = {
+            "event_id": uuid.uuid4().hex,
+            "action": action,
+            "started_at": started_at,
+            "completed_at": utc_now(),
+            "ok": bool(ok),
+            "thread_id": str(self._state.get("thread_id") or ""),
+            "previous_generation": int(previous.get("generation") or 0),
+            "connection_generation": int(current.get("generation") or 0),
+            "previous_connection_id": str(previous.get("connection_id") or ""),
+            "connection_id": str(current.get("connection_id") or ""),
+            "previous_process_pid": int(previous.get("process_pid") or 0),
+            "process_pid": int(current.get("process_pid") or 0),
+        }
+        events = list(self._state.get("lifecycle_events") or [])
+        events.append(event)
+        self._state["lifecycle_events"] = events[-MAX_LIFECYCLE_EVENTS:]
 
     def new_thread(self) -> dict[str, Any]:
         with self._lock:
+            started_at = utc_now()
+            previous = self._connection_evidence()
             self._close_client()
             client = self.client_factory(codex_binary=self.codex_binary)
             try:
@@ -148,21 +208,23 @@ class AppServerLabService:
             except Exception:
                 client.close()
                 raise
-            self._client = client
             self._state = {
                 **empty_lab_state(),
                 "thread_id": thread_id,
                 "created_at": utc_now(),
                 "updated_at": utc_now(),
-                "connection_state": "connected",
             }
+            self._activate_client(client)
+            self._append_lifecycle_event(action="thread_created", started_at=started_at, previous=previous)
             self._save()
             return self.status()
 
-    def _connect_existing(self) -> None:
+    def _connect_existing(self, *, action: str) -> None:
         thread_id = str(self._state.get("thread_id") or "")
         if not thread_id:
             raise AppServerError("LAB ještě nemá testovací thread.")
+        started_at = utc_now()
+        previous = self._connection_evidence()
         self._close_client()
         client = self.client_factory(codex_binary=self.codex_binary)
         try:
@@ -174,18 +236,21 @@ class AppServerLabService:
         except Exception:
             client.close()
             raise
-        self._client = client
-        self._state["connection_state"] = "connected"
+        self._activate_client(client)
+        self._append_lifecycle_event(action=action, started_at=started_at, previous=previous)
         self._save()
 
     def resume(self) -> dict[str, Any]:
         with self._lock:
-            self._connect_existing()
+            self._connect_existing(action="thread_resumed")
             return self.status()
 
     def disconnect(self) -> dict[str, Any]:
         with self._lock:
+            started_at = utc_now()
+            previous = self._connection_evidence()
             self._close_client()
+            self._append_lifecycle_event(action="disconnected", started_at=started_at, previous=previous)
             self._save()
             return self.status()
 
@@ -195,7 +260,7 @@ class AppServerLabService:
 
     def restart(self) -> dict[str, Any]:
         with self._lock:
-            self._connect_existing()
+            self._connect_existing(action="appserver_restarted")
             result = self.status()
             result["message"] = "LAB app-server byl restartován a stejný thread byl obnoven."
             result["restarted"] = True
@@ -226,7 +291,7 @@ class AppServerLabService:
                     "duplicate_prevented": True,
                 }
             if self._client is None or not self._client.running:
-                self._connect_existing()
+                self._connect_existing(action="auto_resumed_before_send")
 
             entry: dict[str, Any] = {
                 "client_message_id": clean_id,

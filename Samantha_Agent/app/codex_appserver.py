@@ -158,6 +158,10 @@ class StdioAppServerTransport:
     def running(self) -> bool:
         return self._process.poll() is None
 
+    @property
+    def process_id(self) -> int:
+        return int(self._process.pid)
+
     def _read_stdout(self) -> None:
         assert self._process.stdout is not None
         try:
@@ -249,8 +253,10 @@ class CodexAppServerClient:
         transport_factory: Callable[..., StdioAppServerTransport] = StdioAppServerTransport,
     ):
         self.codex_binary = codex_binary
+        self.connection_id = uuid.uuid4().hex
         self.version = read_codex_version(codex_binary)
         self.transport = transport_factory(codex_binary=codex_binary, timeout=timeout)
+        self.process_id = self.transport.process_id
         try:
             self.transport.request(
                 "initialize",

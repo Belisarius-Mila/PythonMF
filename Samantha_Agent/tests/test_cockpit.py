@@ -222,6 +222,7 @@ class CockpitTests(unittest.TestCase):
             "appserverLabResumeBtn",
             "appserverLabDisconnectBtn",
             "appserverLabRestartBtn",
+            "appserverLabLifecycle",
             "appserverLabInput",
             "appserverLabSendBtn",
         )
@@ -232,6 +233,9 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Přijato app-serverem", COCKPIT_HTML)
         self.assertIn("Odpověď dokončena", COCKPIT_HTML)
         self.assertIn("Nepoužívá VoiceBridge, watcher, TTY ani screen doručování", COCKPIT_HTML)
+        self.assertIn("Lifecycle důkazy", COCKPIT_HTML)
+        self.assertIn("App-server restartován", COCKPIT_HTML)
+        self.assertIn("generation ${Number(event.previous_generation", COCKPIT_HTML)
 
     def test_appserver_lab_actions_delegate_without_voice_bridge(self) -> None:
         calls: list[tuple[str, object]] = []
