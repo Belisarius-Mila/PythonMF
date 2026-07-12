@@ -23,7 +23,7 @@ class FakeClient:
     instances: list["FakeClient"] = []
     next_thread = 1
 
-    def __init__(self):
+    def __init__(self, **_kwargs: object):
         self.running = True
         self.thread_id = ""
         self.sent = 0
@@ -99,7 +99,7 @@ class AppServerLabServiceTests(unittest.TestCase):
             state_path=root / "state.json",
             project_root=root,
             client_factory=FakeClient,
-            version_getter=lambda: FakeVersion(),
+            version_getter=lambda *_args: FakeVersion(),
         )
 
     def test_status_does_not_start_appserver(self) -> None:

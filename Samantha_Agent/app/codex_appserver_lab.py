@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import atexit
+import os
 import re
+import shutil
 import threading
 import uuid
 from datetime import datetime, timezone
@@ -23,6 +25,7 @@ from app.file_persistence import atomic_write_json
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_LAB_STATE_PATH = PROJECT_ROOT / "data" / "private" / "appserver_lab" / "state.json"
+DEFAULT_CODEX_BIN = os.environ.get("CODEX_BIN") or shutil.which("codex") or "/usr/local/bin/codex"
 MAX_LAB_MESSAGES = 40
 CLIENT_MESSAGE_ID_RE = re.compile(r"^appserver-lab-[A-Za-z0-9_-]{8,96}$")
 
@@ -58,11 +61,13 @@ class AppServerLabService:
         project_root: Path = PROJECT_ROOT,
         client_factory: Callable[..., CodexAppServerClient] = CodexAppServerClient,
         version_getter: Callable[..., Any] = read_codex_version,
+        codex_binary: str = DEFAULT_CODEX_BIN,
     ):
         self.state_path = Path(state_path)
         self.project_root = Path(project_root)
         self.client_factory = client_factory
         self.version_getter = version_getter
+        self.codex_binary = codex_binary
         self._client: CodexAppServerClient | None = None
         self._lock = threading.RLock()
         self._state = self._load_state()
@@ -91,7 +96,7 @@ class AppServerLabService:
 
     def _version_payload(self) -> dict[str, Any]:
         try:
-            version = self.version_getter()
+            version = self.version_getter(self.codex_binary)
         except AppServerError as exc:
             return {"ok": False, "raw": "", "message": str(exc)}
         return {
@@ -133,7 +138,7 @@ class AppServerLabService:
     def new_thread(self) -> dict[str, Any]:
         with self._lock:
             self._close_client()
-            client = self.client_factory()
+            client = self.client_factory(codex_binary=self.codex_binary)
             try:
                 thread_id = client.start_thread(
                     cwd=self.project_root,
@@ -159,7 +164,7 @@ class AppServerLabService:
         if not thread_id:
             raise AppServerError("LAB ještě nemá testovací thread.")
         self._close_client()
-        client = self.client_factory()
+        client = self.client_factory(codex_binary=self.codex_binary)
         try:
             client.resume_thread(
                 thread_id,
