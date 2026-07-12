@@ -646,6 +646,15 @@ class TerminalBridgeTests(unittest.TestCase):
 
         self.assertLess(target_index, codex_index)
 
+    def test_terminal_applescript_submits_directly_to_selected_target_tab(self) -> None:
+        script = terminal_applescript()
+
+        self.assertIn("set targetTab to terminalTab", script)
+        self.assertIn('if shouldSubmit is "1" then', script)
+        self.assertIn("do script promptText in targetTab", script)
+        self.assertIn("do script (ASCII character 13) in targetTab", script)
+        self.assertNotIn("key code 36", script)
+
     def test_deliver_voice_command_returns_manual_required_without_calling_runner(self) -> None:
         def fake_runner(*args, **kwargs):
             self.fail("manual command must not call osascript")

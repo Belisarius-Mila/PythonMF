@@ -376,6 +376,7 @@ on run argv
   set promptText to item 1 of argv
   set shouldSubmit to item 2 of argv
   set targetTtys to {}
+  set targetTab to missing value
   if (count of argv) >= 3 then
     set AppleScript's text item delimiters to ","
     set targetTtys to text items of (item 3 of argv)
@@ -391,6 +392,7 @@ on run argv
           if targetTtys contains tabTty then
             set selected tab of terminalWindow to terminalTab
             set index of terminalWindow to 1
+            set targetTab to terminalTab
             set foundTarget to true
             exit repeat
           end if
@@ -405,6 +407,7 @@ on run argv
           if tabProcesses contains "codex" then
             set selected tab of terminalWindow to terminalTab
             set index of terminalWindow to 1
+            set targetTab to terminalTab
             set foundTarget to true
             exit repeat
           end if
@@ -413,16 +416,20 @@ on run argv
       end repeat
     end if
     if not foundTarget then error "Nenalezen Terminal tab s procesem codex ani s odpovídajícím TTY."
+    if shouldSubmit is "1" then
+      do script promptText in targetTab
+      delay 0.2
+      do script (ASCII character 13) in targetTab
+      return "delivered"
+    end if
     activate
   end tell
   delay 0.2
   tell application "System Events"
     set the clipboard to promptText
     keystroke "v" using command down
-    delay 0.25
-    if shouldSubmit is "1" then key code 36
   end tell
-  return "delivered"
+  return "inserted_without_submit"
 end run
 '''.strip()
 
