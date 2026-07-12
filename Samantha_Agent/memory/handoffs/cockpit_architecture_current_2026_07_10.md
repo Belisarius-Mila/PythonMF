@@ -570,7 +570,8 @@ git, Cockpit jej pouze cte v panelu uvnitr hlavni stranky a
 podstatnych navrhu a myslenek Mily i Adama, ale vynechava technicke mezistavy,
 testy, prikazy a provozni hlaseni. Nic automaticky nemaze nebo nepresouva.
 Gate ma 611 testu; lokalni i Tailscale smoke check prosly na jedine instanci
-PID 93185.
+PID 94652. Panel se po otevreni nebo rucnim obnoveni posune na nejcerstvejsi
+konec protokolu.
 
 Navrhovane dalsi kroky:
 

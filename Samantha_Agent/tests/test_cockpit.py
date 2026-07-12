@@ -2912,6 +2912,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("openTvbcpModal", COCKPIT_HTML)
         self.assertIn("closeTvbcpModal", COCKPIT_HTML)
         self.assertIn('tvbcpContent.textContent = data.content', COCKPIT_HTML)
+        self.assertIn('tvbcpContent.scrollTop = tvbcpContent.scrollHeight', COCKPIT_HTML)
         self.assertNotIn('window.open("/voice-bridge/tvbcp/"', COCKPIT_HTML)
         self.assertIn("Odeslat Adamovi", COCKPIT_HTML)
         self.assertIn("startVoiceRecording", COCKPIT_HTML)

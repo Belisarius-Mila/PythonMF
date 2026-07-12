@@ -252,7 +252,8 @@ nebo pull request.
   mazání či přesunu. Protokol uchovává plné věcné znění návrhů Míly a Adama,
   nikoli technické mezistavy nebo kopii VoiceBridge chatu. Doménová logika je
   v `app/tvbcp.py`; gate má 611 testů a lokální i Tailscale smoke check prošly
-  na jediné instanci PID 93185.
+  na jediné instanci. Panel se po otevření nebo ručním obnovení posune na
+  nejnovější konec protokolu; živý retest prošel na PID 94652.
 
 ## Co gate zatím neřeší
 

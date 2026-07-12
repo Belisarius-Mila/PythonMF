@@ -15567,6 +15567,9 @@ COCKPIT_HTML = """<!doctype html>
       try {
         const data = await fetchJson("/api/voice-bridge/tvbcp");
         tvbcpContent.textContent = data.content || "TVBCP je prázdný.";
+        window.requestAnimationFrame(() => {
+          tvbcpContent.scrollTop = tvbcpContent.scrollHeight;
+        });
         tvbcpStatus.textContent = data.active
           ? `Aktivní · naposledy změněno ${data.updated_at || "neznámo"} · ${Number(data.chars || 0)} znaků`
           : "TVBCP není aktivní.";
