@@ -91,6 +91,19 @@ Bezpecnost / neukladat:
 kratce oddel okamzity dalsi krok od volitelnych navazujicich zlepseni, aby Mila
 pri dalsim navazani videl, kam se da rozumne pokracovat.
 
+## Projektove TVBCP
+
+- TVBCP je prubezny human-machine rozhodovaci dokument vetsiho projektu nebo
+  ucelene vyvojove ulohy; neni to kopie chatu ani nahrada handoffu.
+- Novy TVBCP zakladej jen po vyslovne dohode Mily a Adama. Mala funkce, drobna
+  oprava nebo kratky test ho mit nemusi.
+- Aktivni git-safe TVBCP patri do `memory/tvbcp/` a ma byt dohledatelny z
+  `memory/MEMORY_INDEX.md` a prislusne polozky v `memory/ACTIVE_PROJECTS.md`.
+- Prubezne do nej zapisuj jen podstatne navrhy, kanonicka rozhodnuti, milniky,
+  dulezite testy, otevrene kroky a rizika; vynechavej provozni mezistavy a omacku.
+- Citlive nebo private texty do gitoveho TVBCP nepatri.
+- Podrobny kontrakt je v `memory/technical/project_tvbcp_rules.md`.
+
 ## Bezpecnost a soubory
 
 - Nikdy nemaz soubory bez vyslovneho souhlasu Mily.

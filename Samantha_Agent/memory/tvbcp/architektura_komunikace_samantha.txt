@@ -1,0 +1,254 @@
+# TVBCP – Architektura komunikace Samantha
+
+Stav: aktivní kanonická smlouva o vývoji
+Formát: průběžný textový human–machine dokument
+Priorita: 1
+Založeno: 2026-07-13
+Vlastníci dohody: Míla a Adam
+Související oblast: App-server rozhraní / nový Adam; Cockpit hlavní architektura
+
+## Účel dokumentu
+
+Tento TVBCP je průběžný human–machine dokument pro vývoj komunikačního
+rozhraní Samanthy. Uchovává podstatné návrhy Míly a Adama, společná rozhodnutí,
+kanonická pravidla, milníky, výsledky důležitých testů, rizika a další kroky.
+
+Není kopií celého chatu ani náhradou handoffu:
+
+- TVBCP drží po celou dobu projektu zhuštěné myšlenkové a rozhodovací vlákno.
+- Handoff zachycuje stav potřebný pro přerušení, obnovu nebo předání práce.
+- Autosave zůstává nouzovou obnovou relace.
+- Projektová paměť drží dlouhodobě platný kontext.
+- TVBCP nesmí obsahovat hesla, tokeny, API klíče ani zbytečné citlivé texty.
+
+## Kanonická dohoda
+
+1. Samantha bude mít jednoho kanonického Adama: jeden trvalý Codex app-server a
+   jedno aktivní konverzační vlákno.
+2. Cockpit na Macu a iPhonu a Codex v terminálu budou za normálního provozu
+   rovnocennými klienty stejného vlákna.
+3. Cockpit bude hlavním rozhraním pro běžnou práci. Terminál bude hlavním
+   vývojovým, diagnostickým, opravárenským a nouzovým rozhraním.
+4. VS Code není podmínkou provozu. Terminál musí fungovat také v macOS Terminalu
+   nebo přes SSH.
+5. Cockpit se nebude napojovat na živý terminál vkládáním textu přes TTY.
+   VoiceBridge/TTY cesta není základem nové architektury.
+6. Při pádu Cockpitu nebo app-serveru musí příkaz `samantha` umožnit spuštění
+   plnohodnotného samostatného Codex CLI a obnovu z autosave, handoffu, TVBCP,
+   projektové paměti a stavu gitu.
+7. App-server nebude přímo vystaven přes Tailscale. V cílové variantě zůstane
+   lokální a klienti k němu přistoupí přes řízenou vrstvu Cockpitu nebo lokální
+   socket.
+8. Běžná práce z Macu i iPhonu má podporovat textový a později hlasový vstup i
+   výstup. Hlas bude další vstupní/výstupní vrstva stejného app-server vlákna,
+   nikoli samostatný komunikační systém.
+9. V jednom okamžiku smí probíhat jen jeden pracovní tah. Klienti musí zabránit
+   souběžnému nebo duplicitnímu odeslání a po reconnectu obnovit ověřený stav.
+10. Jedna relace běží, dokud je přesná a provozně zdravá. Její výměna je řízená:
+    dokončit tah, uložit autosave, aktualizovat TVBCP, vytvořit Capsule/handoff,
+    ověřit git a teprve poté předat práci nové relaci.
+11. Capsule nebude sloužit k běžnému předávání mezi Cockpitem a terminálem,
+    protože oba sdílejí stejné vlákno. Zůstane recovery a rotačním souhrnem.
+12. TVBCP zůstává lidsky čitelnou smlouvou a rozhodovacím protokolem.
+13. `app/cockpit.py` má zůstat kompaktním kompozičním jádrem. Nová doménová
+    logika patří do samostatných služeb a modulů pro relaci, chat, TVBCP, hlas,
+    recovery, bezpečnost a frontend.
+14. Handoff, autosave, `screen`, projektová paměť a nouzové spuštění se zachovají,
+    dokud nová cesta opakovanými automatickými i ručními testy neprokáže stejnou
+    nebo vyšší spolehlivost.
+15. Po prokázání nové komunikace se staré nepoužívané komunikační větve včetně
+    watcheru řízeně odstraní z runtime, UI, startovacích mechanismů, testů i těla
+    Cockpitu. Samantha nemá dlouhodobě udržovat fallbacky fallbacků.
+16. Nepoužívaný kód lze zachovat jen po výslovné dohodě, že má samostatnou
+    historickou nebo znovupoužitelnou hodnotu. V takovém případě se uloží
+    inteligentně mimo runtime a mimo tělo Cockpitu, jasně označený jako
+    neaktivní. Git historie zůstává základním archivem odstraněného kódu.
+
+## Zakládající konverzace
+
+Následuje věcný záznam dohody od okamžiku, který Míla určil jako začátek tohoto
+TVBCP. Jsou vynechány pouze provozní mezistavy nástrojů.
+
+### Adam – návrh jednotné relace
+
+Ano — tvoje úvaha je správná. VS Code samotný nepotřebujeme. Terminál bych ale
+neopouštěl: zůstane jako plnohodnotné servisní a nouzové rozhraní Adama.
+
+Důležitá je jedna technická změna: nepřipojovat Cockpit k běžícímu terminálu přes
+TTY. To byla právě nespolehlivá cesta VoiceBridge. Místo toho musí terminál i
+Cockpit obsluhovat jediný trvalý Codex app-server a jedinou konverzační relaci.
+
+```text
+             Jeden trvalý Adam
+          app-server + jedno vlákno
+                    │
+          ┌─────────┴─────────┐
+          │                   │
+  Cockpit iPhone/Mac      Codex TUI
+                         VS / Terminal / SSH
+```
+
+Z toho plyne:
+
+- VS Code je volitelný. Stejný Adam může běžet v obyčejném Terminalu nebo přes
+  SSH.
+- Terminál zůstává velmi užitečný pro hlubší práci, diffy, schvalování a záchranu
+  při poruše Cockpitu.
+- Cockpit dostane inteligentní chat nad stejnou relací – nebude mluvit s jiným
+  „Remote Adamem“.
+- Nebude potřeba Capsule pro předávání mezi Cockpitem a terminálem. Oba uvidí
+  tentýž kontext.
+- Capsule může zůstat jen jako stručný checkpoint pro havárii, kompaktaci nebo
+  záměrné založení nové relace.
+- TVBCP zůstává lidsky čitelným záznamem rozhodnutí.
+- Jedna relace nesmí znamenat nekonečný neupravený přepis: Codex bude kontext
+  průběžně kompaktovat a dlouhodobá fakta zůstanou v projektové paměti.
+
+Aktuálně jsou plný terminálový Adam, Cockpit Remote, LAB a VS Code extension
+oddělené světy. Proto je dnes potřebné předávání přes Capsule. Správné pořadí je
+opačné: nejdřív trvalý app-server, potom k němu připojit Cockpit i terminál.
+
+App-server nemá být přímo vystaven přes Tailscale. Má běžet pouze lokálně přes
+Unix socket a přes Tailscale zůstane dostupný zabezpečený Cockpit. Izolovaný
+pracovní checkout se zatím zachová, aby vzdálený iPhone nedostal neomezený zápis
+do živého `main`.
+
+Nejbližší navržený důkaz:
+
+1. Spustit spravovaný app-server přes lokální socket nad testovacím vláknem.
+2. Připojit testovací Cockpit a běžný Codex terminál.
+3. Ověřit společnou historii, restart, reconnect a pokračování stejného vlákna.
+4. Doplnit zámek jednoho tahu, aby se odpovědi nekřížily.
+5. Teprve po úspěchu ukončit současný samostatný terminál a pokusit se jeho relaci
+   obnovit pod trvalým serverem.
+
+Současná práce není zbytečná. Klient app-serveru, lifecycle registr, ochrana
+proti duplicitnímu odeslání, Cockpit, TVBCP i synchronizace se použijí. Změní se
+hlavně vlastník relace.
+
+Závěr Adama: opustit závislost na VS Code, nikoli terminál. Zrušit dva oddělené
+Adamy a postavit jednoho trvalého Adama se dvěma rovnocennými rozhraními.
+
+### Míla – provozní a vývojové požadavky
+
+A) Terminál VS Code musí být funkční. Kdyby Cockpit, app-server či cokoli v
+architektuře Samanthy zkolabovalo, musí být v případě potřeby či nutnosti plně
+funkční.
+
+B) Běžnou práci v Samanthě přesuneme maximálně pod funkce Cockpitu bez účasti
+Adama v terminálu. Ten bude sloužit vývoji, optimalizaci, fixaci bugů atd.
+Požadavek: maximální robustnost, ale zároveň inteligentní strukturovanost kódu
+Cockpitu. Jádro `cockpit.py` udržovat kompaktní, ale štíhlé.
+
+C) Běžná vývojová práce přes Cockpit Macu s využitím TVBCP. Pro každou větší
+úlohu by se založil nový a zde by se drželo vlákno zhuštěně po celou dobu vývoje.
+V textovém okně Human by se psalo a odesílalo s možností hlasového vstupu a
+výstupu.
+
+D) Cockpit na iPhonu by sloužil jako pracovní nástroj v Samanthě, ale zároveň s
+možností vyvíjet v případě potřeby dálkově, opět textově i hlasem.
+
+E) Běžela by stále jedna relace, která by se buď po ad hoc dohodě, či po naplnění
+určitých kritérií ukončila a otevřela by se nová s předáním všech relevantních
+informací. Nutné je zachovat handoff, autosave a vše, co dnes spolehlivě slouží v
+projektu.
+
+### Adam – potvrzení a upřesnění smlouvy
+
+Požadavky A–E jsou přijatelné, pochopitelné a architektonicky soudržné.
+
+Terminál potřebuje dva režimy:
+
+- Za normálního provozu je klientem stejného kanonického app-server vlákna jako
+  Cockpit.
+- Při selhání Cockpitu nebo app-serveru se přes `samantha` spustí plnohodnotný
+  samostatný Codex CLI. Nemusí vidět poslední neuložené sekundy původního vlákna,
+  ale obnoví práci z autosave, handoffu, projektové paměti, TVBCP a stavu gitu.
+
+Cockpit na Macu bude hlavním rozhraním pro běžnou práci, vývojové zadávání,
+TVBCP, text, hlas, průběh, potvrzení a výsledky testů. Cockpit na iPhonu bude
+pracovat se stejnou relací a historií, umožní vzdálené zadávání a zachová
+bezpečnostní brány. Terminál zůstane pro vývoj Cockpitu, opravy, testy, audity,
+Git, diagnostiku a nouzový plný provoz.
+
+Pro větší úlohu vznikne vlastní TVBCP s cílem, hranicemi, rozhodnutími, důležitými
+výsledky, otevřenými kroky, testy a riziky. Nebude kopírovat celý chat.
+
+Relace se vymění při ztrátě přesnosti, opakovaných kompaktacích, dokončení
+významného celku, potřebě jiného bezpečnostního režimu nebo technické poruše.
+Před výměnou se dokončí aktuální tah, uloží autosave, uzavře TVBCP, vytvoří
+kompaktní Capsule/handoff a ověří git. Nová relace musí potvrdit převzetí ještě
+před zrušením staré.
+
+`cockpit.py` bude pouze kompoziční jádro pro konfiguraci, start, registraci rout a
+spojení služeb. Logika bude rozdělena do vrstev pro správu relace a app-serveru,
+chat a doručování, TVBCP, hlas, autosave/recovery, bezpečnost a frontend.
+
+Závěr dohody: toto je závazná cílová architektura. Nejbližším krokem je izolovaný
+důkaz jednoho app-serveru, jednoho vlákna a dvou klientů bez zásahu do současné
+nouzové terminálové cesty.
+
+### Míla – pravidlo projektových TVBCP
+
+Od 2026-07-13 má každý větší projekt nebo větší ucelená vývojová úloha budovat
+vlastní TVBCP, pokud se Míla s Adamem výslovně dohodnou, že je pro danou práci
+potřeba. Malá funkce, drobná oprava nebo krátký snadno obnovitelný zásah vlastní
+TVBCP mít nemusí.
+
+### Míla – pravidlo odstranění staré komunikace
+
+Pokud se podaří etablovat novou spolehlivou a efektivní komunikaci, všechno staré
+a nepotřebné počínaje watcherem se bez nostalgie odstraní. Samantha nemá mít
+fallbacky fallbacků. Pokud se některý nepoužívaný kód po společné dohodě ukáže
+jako cenný, může být inteligentně uložen, ale mimo tělo Cockpitu a mimo aktivní
+runtime.
+
+### Adam – přijatý decommission kontrakt
+
+Staré komunikační vrstvy se neodstraní předčasně. Nejdřív musí nová cesta projít
+automatickými testy, ručním Mac/iPhone testem, restart/reconnect testem a
+terminálovým failover testem. Po splnění těchto bran vznikne explicitní inventura
+starých větví a jeden řízený odstranovací krok. Zachová se pouze skutečně používaná
+recovery cesta; nepoužívané watchery, TTY bridge, duplicitní LAB/Remote větve a
+jejich UI/startovací/testovací kód se nemají ponechávat jako trvalé zálohy.
+
+## Milníky
+
+| Datum | Milník | Důkaz / stav |
+| --- | --- | --- |
+| 2026-07-13 | Založena cílová smlouva jednotného Adama | Tento TVBCP; dohoda Míly a Adama |
+| 2026-07-13 | Odděleny role TVBCP, handoffu, autosave a Capsule | Kanonická dohoda výše |
+| 2026-07-13 | Přijato pravidlo projektových TVBCP | `memory/technical/project_tvbcp_rules.md` |
+| 2026-07-13 | Přijat decommission kontrakt staré komunikace | Po ověření nové cesty odstranit nepoužívaný watcher, TTY bridge a duplicitní komunikační větve |
+
+## Otevřené kroky
+
+1. Navrhnout izolovaný test trvalého app-server daemonu přes lokální socket.
+2. Připojit dva testovací klienty ke stejnému testovacímu vláknu.
+3. Ověřit historii, reconnect, restart, resume, ochranu proti duplicitám a zámek
+   jednoho aktivního tahu.
+4. Prokázat nouzový samostatný start terminálového Adama bez Cockpitu a
+   app-serveru.
+5. Teprve po úspěšném důkazu navrhnout řízenou migraci kanonické relace.
+6. Postupně navrhovat nové moduly tak, aby `app/cockpit.py` nerostl o doménovou
+   logiku.
+7. Po přijetí nové cesty vytvořit přesnou inventuru legacy komunikačního kódu a
+   připravit jeho řízené odstranění z runtime, UI, startu a testů.
+
+## Rizika a hranice
+
+- Nepokoušet se připojit Cockpit k současnému CLI přes TTY injection.
+- Nevystavovat app-server přímo do Tailscale sítě.
+- Nepřipojovat dva klienty bez vlastnictví tahu, idempotence a replay pravidel.
+- Nezrušit současnou terminálovou recovery cestu před dokončením automatických i
+  ručních failover testů.
+- Po úspěšném přechodu nenechat staré větve trvale žít jako vícevrstvé fallbacky;
+  zvyšovaly by složitost, nejasné vlastnictví a pravděpodobnost regresí.
+- Nezaměnit jedno konverzační vlákno za neomezeně dlouhý nekompaktovaný přepis.
+- Nezapisovat do tohoto gitového TVBCP tajemství ani citlivé soukromé texty.
+
+## Další kanonický krok
+
+Připravit a provést nejmenší izolovaný důkaz: jeden lokální app-server, jedno
+testovací vlákno a dva klienti, přičemž současná terminálová relace, Cockpit i
+nouzové mechanismy zůstanou nedotčené.

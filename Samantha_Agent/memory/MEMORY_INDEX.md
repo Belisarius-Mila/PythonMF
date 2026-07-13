@@ -66,8 +66,21 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `infrastructure/ssh_setup.md` - SSH/screen workflow pro vzdalenou praci se Samanthou bez ukladani privatnich SSH tajemstvi.
 - `infrastructure/tailscale_setup.md` - Tailscale provozni poznamky, opatrny start po sitovem incidentu a odkazy na macOS network recovery.
 
+## Project TVBCP
+
+- `tvbcp/architektura_komunikace_samantha.txt` - [PRIPOMENOUT] aktivni kanonicka
+  smlouva Mily a Adama pro jednoho trvaleho Adama, sdilene app-server vlakno,
+  role Cockpitu Mac/iPhone a terminalu, failover, rotaci relace, stihly
+  `cockpit.py`, hlas, TVBCP, handoff, autosave a nejblizsi izolovany dukaz dvou
+  klientu nad jednim testovacim vlaknem.
+
 ## Handoffs
 
+- `handoffs/samantha_communication_architecture_checkpoint_2026_07_13.md` - [PRIPOMENOUT]
+  priorita 1 checkpoint nove kanonicke komunikace: jeden trvaly Adam a app-server
+  thread, Cockpit Mac/iPhone pro beznou praci, terminal pro vyvoj a nezavisly
+  failover, projektovy TVBCP a pravidlo po prijeti nove cesty odstranit legacy
+  watcher/TTY/duplicitni komunikacni vetve misto udrzovani fallbacku fallbacku.
 - `handoffs/appserver_remote_work_cell_v0_2026_07_13.md` - [PRIPOMENOUT] zapisujici Adam Remote v0: samostatny lokalni clone `main` bez private/nezařazenych dat a bez Git remote, runtime model `GPT-5.6-Sol`, reasoning `high`, `workspace-write`, sit vypnuta, TVBCP a lokalni checkpoint. `Aktualizovat z main` umi pouze potvrzeny lokalni fast-forward cisteho workspace a odmita dirty/diverged/mazaci/private scenare. Je nasazeno, zive syncy prosly, thread je connected, Capsule revize 2 ma skutecny cil a gate ma 651 testu vcetne JS. Dalsi krok je maly realny iPhone ukol a kontrola diffu pred checkpointem.
 - `handoffs/colors_numbers_private_photo_gallery_proposal_2026_07_13.md` - pozastaveny navrh tlacitka `Foto` a lokalni galerie nejvyse tri fotografii v obrazovce `Numbers`; kvuli verejnemu repozitari/GitHub Pages se doporucuje pouze lokalni `IndexedDB`, komprese a odstraneni EXIF/GPS, bez commitovani rodinnych fotografii. Nic neimplementovat bez noveho rozhodnuti Mily.
 - `handoffs/appserver_lab_thread_registry_context_capsule_2026_07_13.md` - [PRIPOMENOUT] read-only App-server LAB ma private registr vice oddelenych threadu a nedestruktivni migraci. iPhone test registru i opravene turn-based capsule prosel. Pomalost cca 40 s nebyla Tailscale transportem, ale TIME_WAIT port probe/restart cyklem; probe je opraveny pres `SO_REUSEADDR`, restart limit zvysen a LAB cacheuje Codex verzi. Nasazeny plny restart trval 2,58 s a zahraty LAB status pres Tailscale 0,0036 s. Dokoncena LAB vymena se da explicitnim idempotentnim tlacitkem ulozit do private TVBCP; automaticky zapis je vypnuty. Gate ma 637 testu. Dalsi krok je kratky iPhone retest rychlosti a jednoho TVBCP zapisu.
@@ -212,6 +225,11 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `handoffs/mmtx_web_handoff_2026_05_14.md` - handoff k webové verzi MMTX v `docs/`, hotovým scénám OwlGarden a HouseBunny, audio strategii a mirroru.
 
 ## Technical Rules
+
+- `technical/project_tvbcp_rules.md` - kanonicke pravidlo projektovych TVBCP:
+  zalozit jen po dohode Mily a Adama pro vetsi projekt nebo ulohu; drzet
+  rozhodnuti, milniky, testy a rizika, ne plny chat; male opravy vlastni TVBCP
+  nepotrebuji.
 
 - `technical/naming_conventions.md` - názvosloví: Samantha je běžný ChatGPT, Codex je pracovní agent v projektu, Codex CLI je terminálový nástroj.
 - `technical/system_project_audit_generator_design.md` - navrh opakovatelneho generatoru systemoveho auditu projektu, toolu a vrstev: vstupy, bezpecnostni hranice, MVP sekce, datovy model, registrace a testy.
