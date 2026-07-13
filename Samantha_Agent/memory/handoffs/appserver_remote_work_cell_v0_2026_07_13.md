@@ -43,6 +43,12 @@ Co je hotove:
   dostupna lokalne i pres Tailscale a ulozeny thread se uspesne znovu pripojil.
 - Nasazeny status znovu potvrdil `GPT-5.6-Sol`, reasoning `high`,
   `workspace-write`, vypnutou sit, cisty workspace a prazdny seznam Git remote.
+- Pri prvnim iPhone retestu Mila nahlasil neukoncene opakovane nacitani. Server
+  ani Tailscale nebyly spadle, ale frontend nemel timeout hlavniho ani Remote
+  statusu a start mohl soubezne spustit dva e-mailove intake scany bez timeoutu.
+- Stabilizacni oprava nastavuje hlavni status na 15 s, Remote status na 12 s,
+  e-mailovy scan na 30 s a deduplikuje soubezny Remote refresh i e-mailovy scan.
+  Plna Cockpit quality gate po oprave znovu prosla vsech 644 testu.
 
 Co neni hotove:
 - Chybi kratky rucni iPhone retest nasazeneho Cockpit rozhrani a prvni maly

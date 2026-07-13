@@ -369,6 +369,11 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/appserver-remote/checkpoint", COCKPIT_HTML)
         self.assertIn("/api/appserver-remote/tvbcp/append", COCKPIT_HTML)
         self.assertIn("saveRemoteWorkMessageToTvbcp", COCKPIT_HTML)
+        self.assertIn("let remoteWorkStatusRefreshPromise = null", COCKPIT_HTML)
+        self.assertIn(
+            'fetchJsonWithTimeout("/api/appserver-remote/status", 12000)',
+            COCKPIT_HTML,
+        )
 
     def test_remote_work_cell_actions_delegate_and_require_prepare_confirmation(self) -> None:
         calls: list[tuple[str, object]] = []
@@ -6801,6 +6806,12 @@ Dalsi krok:
 
     def test_cockpit_email_intake_refresh_cleans_candidates_by_source_key(self) -> None:
         self.assertIn("if (!silent) {\n          runEmailIntakeMonitor();\n        }", COCKPIT_HTML)
+        self.assertIn("if (emailIntakeMonitorInFlight) return", COCKPIT_HTML)
+        self.assertIn(
+            'fetchJsonWithTimeout("/api/documents/intake-email-scan", 30000',
+            COCKPIT_HTML,
+        )
+        self.assertIn('fetchJsonWithTimeout("/api/status", 15000)', COCKPIT_HTML)
         self.assertIn("const sourceKey = emailIntakeSourceKey(item);", COCKPIT_HTML)
         self.assertIn("if (sourceKey) byId.set(sourceKey, item);", COCKPIT_HTML)
         self.assertIn("!suppressed.has(sourceKey)", COCKPIT_HTML)

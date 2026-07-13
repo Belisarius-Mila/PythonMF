@@ -14512,6 +14512,8 @@ COCKPIT_HTML = """<!doctype html>
     let refreshInFlight = false;
     let liveStatusRefreshInFlight = false;
     let urgentRemindersRefreshInFlight = false;
+    let emailIntakeMonitorInFlight = false;
+    let remoteWorkStatusRefreshPromise = null;
     let lastMainRefreshStartedAt = 0;
     let lastCodexApprovalActive = false;
     let latestMainStatusData = null;
@@ -14537,8 +14539,7 @@ COCKPIT_HTML = """<!doctype html>
         statusLine.textContent = "Načítám stav...";
       }
       try {
-        const res = await fetch("/api/status");
-        const data = await res.json();
+        const data = await fetchJsonWithTimeout("/api/status", 15000);
         latestMainStatusData = data;
         statusLine.textContent = `Aktualizováno: ${data.generated_at || ""}`;
         scanDocuState.innerHTML = data.scandocu && data.scandocu.running
@@ -14626,16 +14627,17 @@ COCKPIT_HTML = """<!doctype html>
     }
 
     async function runEmailIntakeMonitor() {
+      if (emailIntakeMonitorInFlight) return;
+      emailIntakeMonitorInFlight = true;
       try {
         const payload = lastEmailIntakeMonitor.generated_at
           ? {limit_per_source: 10, since: lastEmailIntakeMonitor.generated_at, known_ids: emailIntakeKnownIds()}
           : {limit_per_source: 10, days: 1, known_ids: emailIntakeKnownIds()};
-        const res = await fetch("/api/documents/intake-email-scan", {
+        const data = await fetchJsonWithTimeout("/api/documents/intake-email-scan", 30000, {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify(payload)
         });
-        const data = await res.json();
         const suppressed = new Set(data.suppressed_known_ids || []);
         const keptItems = (lastEmailIntakeMonitor.items || []).filter((item) => {
           const id = item.id || "";
@@ -14662,6 +14664,8 @@ COCKPIT_HTML = """<!doctype html>
           unavailable: []
         };
         renderDocumentIntake(latestDocumentIntakeData || {});
+      } finally {
+        emailIntakeMonitorInFlight = false;
       }
     }
 
@@ -16065,6 +16069,23 @@ COCKPIT_HTML = """<!doctype html>
       return await res.json();
     }
 
+    async function fetchJsonWithTimeout(url, timeoutMs, options = {}) {
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const res = await fetch(url, {...options, cache: "no-store", signal: controller.signal});
+        if (!res.ok) throw new Error(`${url} returned ${res.status}`);
+        return await res.json();
+      } catch (err) {
+        if (err && err.name === "AbortError") {
+          throw new Error(`${url} timeout po ${timeoutMs} ms`);
+        }
+        throw err;
+      } finally {
+        window.clearTimeout(timer);
+      }
+    }
+
     async function refreshProjectsSummary() {
       setDashboardPendingIfEmpty(dashboardProjects, "načítám...");
       try {
@@ -16691,12 +16712,18 @@ COCKPIT_HTML = """<!doctype html>
     }
 
     async function refreshRemoteWorkStatus() {
-      try {
-        renderRemoteWorkStatus(await fetchJson("/api/appserver-remote/status"));
-      } catch (err) {
-        recordFrontendError(err);
-        remoteWorkStatus.textContent = `Remote Work Cell status selhal: ${err}`;
-      }
+      if (remoteWorkStatusRefreshPromise) return remoteWorkStatusRefreshPromise;
+      remoteWorkStatusRefreshPromise = (async () => {
+        try {
+          renderRemoteWorkStatus(await fetchJsonWithTimeout("/api/appserver-remote/status", 12000));
+        } catch (err) {
+          recordFrontendError(err);
+          remoteWorkStatus.textContent = `Remote Work Cell status selhal: ${err}`;
+        } finally {
+          remoteWorkStatusRefreshPromise = null;
+        }
+      })();
+      return remoteWorkStatusRefreshPromise;
     }
 
     async function openRemoteWorkModal() {
