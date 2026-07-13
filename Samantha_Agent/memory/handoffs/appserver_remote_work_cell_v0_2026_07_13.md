@@ -59,6 +59,9 @@ Co je hotove:
 - Escapovani je opravene a quality gate nove kontroluje primo kompletni
   renderovany JavaScript prikazem `node --check -`. Gate po teto oprave prosla
   645 testu a samostatne hlasi `javascript syntax: OK`.
+- Oprava je nasazena s code stampem `a493500b971eb5de`; stejna JavaScript
+  kontrola prosla i nad HTML zive stazenym z Tailscale adresy. Remote thread je
+  pripojeny, workspace cisty a bez Git remote. Ceka se na novy iPhone retest.
 
 Co neni hotove:
 - Chybi kratky rucni iPhone retest nasazeneho Cockpit rozhrani a prvni maly
