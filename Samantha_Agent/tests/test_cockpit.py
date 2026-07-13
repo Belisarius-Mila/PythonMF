@@ -214,6 +214,76 @@ class CockpitTests(unittest.TestCase):
 
         self.assertEqual([], missing)
 
+    def test_appserver_lab_ui_is_isolated_and_shows_delivery_timestamps(self) -> None:
+        required_ids = (
+            "appserverLabOpenBtn",
+            "appserverLabModal",
+            "appserverLabNewBtn",
+            "appserverLabResumeBtn",
+            "appserverLabDisconnectBtn",
+            "appserverLabRestartBtn",
+            "appserverLabLifecycle",
+            "appserverLabInput",
+            "appserverLabSendBtn",
+        )
+        for element_id in required_ids:
+            self.assertIn(f'id="{element_id}"', COCKPIT_HTML)
+        self.assertIn("Kliknutí v zařízení", COCKPIT_HTML)
+        self.assertIn("Přijato Cockpitem", COCKPIT_HTML)
+        self.assertIn("Přijato app-serverem", COCKPIT_HTML)
+        self.assertIn("Odpověď dokončena", COCKPIT_HTML)
+        self.assertIn("Nepoužívá VoiceBridge, watcher, TTY ani screen doručování", COCKPIT_HTML)
+        self.assertIn("Lifecycle důkazy", COCKPIT_HTML)
+        self.assertIn("App-server restartován", COCKPIT_HTML)
+        self.assertIn("generation ${Number(event.previous_generation", COCKPIT_HTML)
+
+    def test_appserver_lab_actions_delegate_without_voice_bridge(self) -> None:
+        calls: list[tuple[str, object]] = []
+
+        class FakeService:
+            def status(self):
+                calls.append(("status", None))
+                return {"ok": True, "thread_ready": False}
+
+            def new_thread(self):
+                calls.append(("new", None))
+                return {"ok": True, "thread_id": "thread-1"}
+
+            def resume(self):
+                calls.append(("resume", None))
+                return {"ok": True}
+
+            def disconnect(self):
+                calls.append(("disconnect", None))
+                return {"ok": True}
+
+            def restart(self):
+                calls.append(("restart", None))
+                return {"ok": True}
+
+            def send(self, **kwargs):
+                calls.append(("send", kwargs))
+                return {"ok": True, "status": "completed"}
+
+        service = FakeService()
+        self.assertTrue(cockpit_module.appserver_lab_status_action(service=service)["ok"])
+        self.assertTrue(cockpit_module.appserver_lab_new_thread_action(service=service)["ok"])
+        self.assertTrue(cockpit_module.appserver_lab_resume_action(service=service)["ok"])
+        self.assertTrue(cockpit_module.appserver_lab_disconnect_action(service=service)["ok"])
+        self.assertTrue(cockpit_module.appserver_lab_restart_action(service=service)["ok"])
+        sent = cockpit_module.appserver_lab_send_action(
+            {
+                "message": "Test",
+                "client_message_id": "appserver-lab-abcdefgh",
+                "client_sent_at": "2026-07-12T20:00:00Z",
+            },
+            service=service,
+        )
+
+        self.assertTrue(sent["ok"])
+        self.assertEqual([item[0] for item in calls], ["status", "new", "resume", "disconnect", "restart", "send"])
+        self.assertEqual(calls[-1][1]["client_message_id"], "appserver-lab-abcdefgh")
+
     def test_library_archive_url_action_passes_url_category_and_tags(self) -> None:
         with patch("app.cockpit.archive_url") as archive_mock:
             archive_mock.return_value = {"ok": True, "item": {"id": "article-1"}}
@@ -2620,6 +2690,7 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("voiceRecordBtn", COCKPIT_HTML)
         self.assertIn("voiceCommandDetails", COCKPIT_HTML)
         self.assertNotIn("voiceCommandDetails.open = Boolean", COCKPIT_HTML)
+        self.assertNotIn("documentsPanelNode.open = true", COCKPIT_HTML)
         self.assertIn("voiceModeToggleBtn", COCKPIT_HTML)
         self.assertIn("dashboardVoiceMode", COCKPIT_HTML)
         self.assertIn("voiceModeRuntimeStatus", COCKPIT_HTML)
@@ -2659,9 +2730,10 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("allowAlreadyRenderedAutoSpeak: true", COCKPIT_HTML)
         self.assertIn("allowAlreadyRenderedAutoSpeak", COCKPIT_HTML)
         self.assertIn("VOICE_REPLY_POLL_DURATION_MS = 600000", COCKPIT_HTML)
-        self.assertIn("VOICE_STATUS_MONITOR_MS = 3000", COCKPIT_HTML)
+        self.assertNotIn("VOICE_STATUS_MONITOR_MS", COCKPIT_HTML)
         self.assertIn('fetch("/api/live-status", {cache: "no-store"})', COCKPIT_HTML)
         self.assertIn("refreshLiveStatus();", COCKPIT_HTML)
+        self.assertNotIn("window.setInterval(() => {\n\t      if (!document.hidden) {\n\t        refreshLiveStatus();", COCKPIT_HTML)
         self.assertNotIn("refresh({silent: true, includeSecondary: false});\n\t      }\n\t    }, VOICE_STATUS_MONITOR_MS", COCKPIT_HTML)
         self.assertIn("if (!document.hidden)", COCKPIT_HTML)
         self.assertIn("normalizeVoiceText", COCKPIT_HTML)
@@ -2692,6 +2764,18 @@ class CockpitTests(unittest.TestCase):
         self.assertNotIn("renderDashboard(", live_refresh_source)
         self.assertIn("function renderVoiceStatus(data)", COCKPIT_HTML)
         self.assertIn("renderVoiceStatus(data);", COCKPIT_HTML)
+
+        voice_start = COCKPIT_HTML.index("function renderVoiceStatus(data)")
+        voice_end = COCKPIT_HTML.index("function renderDashboardMorningSentence", voice_start)
+        self.assertNotIn("voiceCommandDetails.open = true", COCKPIT_HTML[voice_start:voice_end])
+
+        dashboard_start = COCKPIT_HTML.index("function renderDashboard(data)")
+        dashboard_end = COCKPIT_HTML.index("function renderDashboardMorningSentence", dashboard_start)
+        self.assertNotIn("documentsPanelNode.open = true", COCKPIT_HTML[dashboard_start:dashboard_end])
+
+        poll_start = COCKPIT_HTML.index("function startVoiceReplyPolling")
+        poll_end = COCKPIT_HTML.index("function pendingNeedsCockpitApproval", poll_start)
+        self.assertNotIn("await refresh({silent: true", COCKPIT_HTML[poll_start:poll_end])
 
     def test_expected_audio_autoplay_block_is_not_a_frontend_error(self) -> None:
         start = COCKPIT_HTML.index("async function speakText(")
@@ -2842,8 +2926,9 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Otevřít audiokanál", COCKPIT_HTML)
         self.assertIn("Audiokanál otevřený", COCKPIT_HTML)
         self.assertIn("openVoiceAudioChannel", COCKPIT_HTML)
-        self.assertIn("ensureVoiceModeWatcherRunningFromAudioChannel", COCKPIT_HTML)
-        self.assertIn('startVoiceModeWatcher({source: "audio_channel"})', COCKPIT_HTML)
+        self.assertNotIn("ensureVoiceModeWatcherRunningFromAudioChannel", COCKPIT_HTML)
+        self.assertNotIn('startVoiceModeWatcher({source: "audio_channel"})', COCKPIT_HTML)
+        self.assertIn("Watcher zůstává v dosavadním stavu", COCKPIT_HTML)
         self.assertIn("voice-audio-unlock.active", COCKPIT_HTML)
         self.assertIn("playVoiceAudioBase64", COCKPIT_HTML)
         self.assertIn("voiceAudioUnlocked", COCKPIT_HTML)
@@ -4127,6 +4212,28 @@ class CockpitTests(unittest.TestCase):
             self.assertFalse(result["ok"])
             self.assertEqual(result["status"], "empty_voice_text")
             self.assertFalse((Path(temp_dir) / "latest_voice_command.md").exists())
+
+    def test_frozen_voice_bridge_rejects_text_before_saving(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            result = cockpit_save_voice_text_action(
+                {"text": "Tento text se nesmí uložit."},
+                inbox_dir=Path(temp_dir),
+                frozen=True,
+            )
+
+            self.assertFalse(result["ok"])
+            self.assertFalse(result["saved"])
+            self.assertEqual(result["status"], "voice_bridge_frozen")
+            self.assertFalse((Path(temp_dir) / "latest_voice_command.md").exists())
+
+    def test_cockpit_html_exposes_frozen_voice_bridge_controls(self) -> None:
+        self.assertIn('id="voiceRecordBtn" disabled', COCKPIT_HTML)
+        self.assertIn('id="voiceTranscript" placeholder="VoiceBridge je dočasně pozastavený." spellcheck="true" disabled', COCKPIT_HTML)
+        self.assertIn('id="voiceTranscriptSendBtn" disabled', COCKPIT_HTML)
+        self.assertIn('id="voiceModeStartBtn" disabled', COCKPIT_HTML)
+        self.assertIn("const VOICE_BRIDGE_FROZEN = true", COCKPIT_HTML)
+        self.assertIn("if (VOICE_BRIDGE_FROZEN)", COCKPIT_HTML)
+        self.assertIn("VoiceBridge je pozastavený", COCKPIT_HTML)
 
     def test_save_voice_command_to_inbox_writes_latest_and_index(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

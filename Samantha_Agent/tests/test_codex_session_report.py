@@ -81,6 +81,16 @@ class CodexSessionReportTests(unittest.TestCase):
         self.assertIn("scripts/mark_current_codex_tty.py", script)
         self.assertIn('""|1|true|yes|y|ano|a', script)
 
+    def test_screen_entry_keeps_screen_alive_when_codex_exits(self) -> None:
+        script = (REPO_ROOT / "scripts" / "samantha_screen_entry.sh").read_text(encoding="utf-8")
+
+        self.assertIn("while true; do", script)
+        self.assertIn("CODEX_EXIT_STATUS=$?", script)
+        self.assertIn("Screen relace zůstává otevřená", script)
+        self.assertIn("Znovu spustit Codex v této screen relaci? [Y/n]", script)
+        self.assertIn("Voice marker se automaticky nemění", script)
+        self.assertIn("exec /bin/zsh -l", script)
+
     def test_manual_voice_marker_takeover_requires_confirmation(self) -> None:
         agents = (REPO_ROOT / "AGENTS.md").read_text(encoding="utf-8")
         rules = (REPO_ROOT / "memory" / "technical" / "session_recovery_rules.md").read_text(encoding="utf-8")

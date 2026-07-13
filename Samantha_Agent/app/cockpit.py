@@ -72,6 +72,8 @@ from app.autosave_service import (
     latest_autosave_metadata,
     session_autosave_cleanup_action,
 )
+from app.codex_appserver import AppServerError
+from app.codex_appserver_lab import APP_SERVER_LAB, AppServerLabService
 from app.backup.activity_state import backup_activity_status
 from app.documents.case_service import (
     DocumentCaseDependencies,
@@ -263,6 +265,7 @@ from scripts.autosave_status import autosave_status as read_autosave_runtime_sta
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 COCKPIT_PORT = 8770
 COCKPIT_URL = f"http://127.0.0.1:{COCKPIT_PORT}"
+VOICE_BRIDGE_FROZEN = True
 DEFAULT_PURCHASES_DIR = PROJECT_ROOT / "data" / "private" / "purchases"
 SCANDOCU_URL = "http://127.0.0.1:8766"
 SCANDOCU_PORT = 8766
@@ -8477,7 +8480,10 @@ def cockpit_transcribe_voice_action(
     pending_path: Path = ADAM_PENDING_COMMAND_PATH,
     history_path: Path = ADAM_VOICE_HISTORY_PATH,
     transcriber: Callable[..., dict[str, Any]] = transcribe_audio_base64_isolated,
+    frozen: bool = False,
 ) -> dict[str, Any]:
+    if frozen:
+        return voice_bridge_frozen_result()
     dependencies = VoiceBridgeCommandDependencies(
         save_command=save_voice_command_to_inbox,
         load_voice_mode=load_voice_mode_status,
@@ -8503,7 +8509,10 @@ def cockpit_save_voice_text_action(
     terminal_bridge: Callable[..., dict[str, Any]] | None = None,
     pending_path: Path = ADAM_PENDING_COMMAND_PATH,
     history_path: Path = ADAM_VOICE_HISTORY_PATH,
+    frozen: bool = False,
 ) -> dict[str, Any]:
+    if frozen:
+        return voice_bridge_frozen_result()
     dependencies = VoiceBridgeCommandDependencies(
         save_command=save_voice_command_to_inbox,
         load_voice_mode=load_voice_mode_status,
@@ -8518,6 +8527,72 @@ def cockpit_save_voice_text_action(
         terminal_bridge=terminal_bridge,
         pending_path=pending_path,
         history_path=history_path,
+    )
+
+
+def voice_bridge_frozen_result() -> dict[str, Any]:
+    return {
+        "ok": False,
+        "saved": False,
+        "status": "voice_bridge_frozen",
+        "voice_delivery_status": "voice_bridge_frozen",
+        "message": (
+            "VoiceBridge je dočasně pozastavený, protože předání do živého Codex chatu není spolehlivé. "
+            "Pokyn nebyl uložen ani odeslán. Pro komunikaci použij aktivní samantha/SSH relaci."
+        ),
+    }
+
+
+def appserver_lab_status_action(*, service: AppServerLabService = APP_SERVER_LAB) -> dict[str, Any]:
+    return service.status()
+
+
+def appserver_lab_new_thread_action(*, service: AppServerLabService = APP_SERVER_LAB) -> dict[str, Any]:
+    try:
+        return service.new_thread()
+    except AppServerError:
+        return {
+            "ok": False,
+            "status": "appserver_start_failed",
+            "message": "LAB app-server nebo testovací thread se nepodařilo spustit.",
+        }
+
+
+def appserver_lab_resume_action(*, service: AppServerLabService = APP_SERVER_LAB) -> dict[str, Any]:
+    try:
+        return service.resume()
+    except AppServerError:
+        return {
+            "ok": False,
+            "status": "appserver_resume_failed",
+            "message": "LAB app-server nepotvrdil obnovení testovacího threadu.",
+        }
+
+
+def appserver_lab_disconnect_action(*, service: AppServerLabService = APP_SERVER_LAB) -> dict[str, Any]:
+    return service.disconnect()
+
+
+def appserver_lab_restart_action(*, service: AppServerLabService = APP_SERVER_LAB) -> dict[str, Any]:
+    try:
+        return service.restart()
+    except AppServerError:
+        return {
+            "ok": False,
+            "status": "appserver_restart_failed",
+            "message": "LAB app-server nepotvrdil restart a obnovení stejného threadu.",
+        }
+
+
+def appserver_lab_send_action(
+    payload: dict[str, Any],
+    *,
+    service: AppServerLabService = APP_SERVER_LAB,
+) -> dict[str, Any]:
+    return service.send(
+        text=safe_text(str(payload.get("message", "") or "")),
+        client_message_id=safe_text(str(payload.get("client_message_id", "") or "")),
+        client_sent_at=safe_text(str(payload.get("client_sent_at", "") or "")),
     )
 
 
@@ -8950,6 +9025,46 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "risk": "private_write",
         "confirmation": "technical_event_no_content",
         "handler_name": "cockpit_voice_frontend_event_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/appserver-lab/thread/new",
+        "label": "Zalozit read-only App-server LAB thread",
+        "risk": "local_service",
+        "confirmation": "explicit_lab_button",
+        "handler_name": "appserver_lab_new_thread_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/appserver-lab/thread/resume",
+        "label": "Obnovit App-server LAB thread",
+        "risk": "local_service",
+        "confirmation": "explicit_lab_button",
+        "handler_name": "appserver_lab_resume_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/appserver-lab/disconnect",
+        "label": "Simulovat odpojeni App-server LAB",
+        "risk": "local_service",
+        "confirmation": "explicit_lab_button",
+        "handler_name": "appserver_lab_disconnect_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/appserver-lab/restart",
+        "label": "Restartovat App-server LAB a obnovit thread",
+        "risk": "local_service",
+        "confirmation": "explicit_lab_button",
+        "handler_name": "appserver_lab_restart_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/appserver-lab/send",
+        "label": "Odeslat read-only App-server LAB zpravu",
+        "risk": "read_only_via_post",
+        "confirmation": "protocol_ids_required",
+        "handler_name": "appserver_lab_send_action",
         "test_level": "direct",
     },
     {
@@ -9575,6 +9690,9 @@ class CockpitServer:
                 if parsed.path == "/api/voice-bridge/tvbcp":
                     self.respond_json(tvbcp_status())
                     return
+                if parsed.path == "/api/appserver-lab/status":
+                    self.respond_json(appserver_lab_status_action())
+                    return
                 if parsed.path == "/api/server/health":
                     self.respond_json(server_health_status(host=cockpit_host, port=cockpit_port))
                     return
@@ -9759,15 +9877,31 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/speech/transcribe":
                     payload = self.read_json()
-                    self.respond_json(cockpit_transcribe_voice_action(payload))
+                    self.respond_json(cockpit_transcribe_voice_action(payload, frozen=VOICE_BRIDGE_FROZEN))
                     return
                 if parsed.path == "/api/speech/voice-text":
                     payload = self.read_json()
-                    self.respond_json(cockpit_save_voice_text_action(payload))
+                    self.respond_json(cockpit_save_voice_text_action(payload, frozen=VOICE_BRIDGE_FROZEN))
                     return
                 if parsed.path == "/api/voice-bridge/frontend-event":
                     payload = self.read_json()
                     self.respond_json(cockpit_voice_frontend_event_action(payload))
+                    return
+                if parsed.path == "/api/appserver-lab/thread/new":
+                    self.respond_json(appserver_lab_new_thread_action())
+                    return
+                if parsed.path == "/api/appserver-lab/thread/resume":
+                    self.respond_json(appserver_lab_resume_action())
+                    return
+                if parsed.path == "/api/appserver-lab/disconnect":
+                    self.respond_json(appserver_lab_disconnect_action())
+                    return
+                if parsed.path == "/api/appserver-lab/restart":
+                    self.respond_json(appserver_lab_restart_action())
+                    return
+                if parsed.path == "/api/appserver-lab/send":
+                    payload = self.read_json()
+                    self.respond_json(appserver_lab_send_action(payload))
                     return
                 if parsed.path == "/api/janicka/chat":
                     payload = self.read_json()
@@ -9806,7 +9940,7 @@ class CockpitServer:
                     self.respond_json(terminate_orphaned_janicka_sessions_action(payload))
                     return
                 if parsed.path == "/api/voice-mode/start":
-                    self.respond_json(start_adam_voice_mode_action())
+                    self.respond_json(voice_bridge_frozen_result() if VOICE_BRIDGE_FROZEN else start_adam_voice_mode_action())
                     return
                 if parsed.path == "/api/voice-mode/stop":
                     self.respond_json(stop_adam_voice_mode_action())
@@ -12195,6 +12329,20 @@ COCKPIT_HTML = """<!doctype html>
     .modal-body { padding: 13px 14px; display: grid; gap: 10px; }
     .tvbcp-modal { width: min(980px, 100%); }
     .tvbcp-content { min-height: 55vh; max-height: calc(100vh - 220px); overflow: auto; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: #fbfcfe; white-space: pre-wrap; overflow-wrap: anywhere; font: 14px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .appserver-lab-modal { width: min(900px, 100%); }
+    .appserver-lab-banner { border: 1px solid #f59e0b; border-radius: 8px; padding: 10px; background: #fffbeb; color: #78350f; font-size: 13px; line-height: 1.45; }
+    .appserver-lab-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+    .appserver-lab-log { display: grid; gap: 10px; max-height: 46vh; overflow: auto; padding: 4px; }
+    .appserver-lab-message { border: 1px solid #dbe3ee; border-radius: 9px; padding: 10px; background: #f8fafc; display: grid; gap: 8px; }
+    .appserver-lab-message.pending { border-color: #f59e0b; background: #fffbeb; }
+    .appserver-lab-message.failed { border-color: #ef4444; background: #fef2f2; }
+    .appserver-lab-message-user { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .appserver-lab-message-answer { border-top: 1px solid #dbe3ee; padding-top: 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .appserver-lab-message-meta { color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .appserver-lab-compose { display: grid; gap: 8px; }
+    .appserver-lab-compose textarea { min-height: 92px; resize: vertical; }
+    .appserver-lab-lifecycle { display: grid; gap: 6px; max-height: 210px; overflow: auto; }
+    .appserver-lab-lifecycle-event { border: 1px solid #dbe3ee; border-radius: 7px; padding: 8px; background: #fbfcfe; display: grid; gap: 3px; }
     .app-list { display: grid; gap: 9px; }
     .app-card { border: 1px solid #edf0f4; border-radius: 8px; padding: 11px; background: #fbfcfe; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; }
     .app-title { font-weight: 750; }
@@ -12325,6 +12473,7 @@ COCKPIT_HTML = """<!doctype html>
     <h1>Samantha Cockpit</h1>
     <div class="toolbar">
       <button class="janicka-button" id="janickaBtn">Janička</button>
+      <button class="secondary" id="appserverLabOpenBtn">App-server LAB</button>
       <button class="secondary" id="refreshBtn">Obnovit</button>
       <button class="secondary" id="webAppsBtn">Webové aplikace</button>
       <button class="secondary" id="libraryBtn">Knihovna</button>
@@ -12408,24 +12557,24 @@ COCKPIT_HTML = """<!doctype html>
 		      <h2>Hlas / text pro Adama</h2>
 		      <div class="body voice-command-grid">
 		        <div class="voice-command-actions voice-primary-actions">
-		          <button class="primary" id="voiceRecordBtn">Nahrát pokyn</button>
+		          <button class="primary" id="voiceRecordBtn" disabled>Nahrávání pozastaveno</button>
 		          <button class="secondary hidden" id="voiceStopBtn" disabled>Zastavit</button>
 		        </div>
-		        <div id="voiceCommandStatus" class="status-line">Nahraj pokyn, nebo napiš text. Cockpit ho pošle Adamovi přímo.</div>
+		        <div id="voiceCommandStatus" class="status-line warn">VoiceBridge je pozastavený. Pro komunikaci použij aktivní samantha/SSH relaci.</div>
 	        <div class="voice-transcript-row">
 	          <label for="voiceTranscript">Textový pokyn</label>
-	          <textarea id="voiceTranscript" placeholder="Nadiktuj nebo napiš pokyn pro Adama." spellcheck="true"></textarea>
+	          <textarea id="voiceTranscript" placeholder="VoiceBridge je dočasně pozastavený." spellcheck="true" disabled></textarea>
 	        </div>
 		        <div class="voice-command-actions voice-text-actions">
 		          <button class="secondary voice-audio-unlock" id="voiceAudioUnlockBtn">Otevřít audiokanál</button>
-		          <button class="primary" id="voiceTranscriptSendBtn">Odeslat Adamovi</button>
+		          <button class="primary" id="voiceTranscriptSendBtn" disabled>Odesílání pozastaveno</button>
 		          <button class="secondary" id="tvbcpOpenBtn">TVBCP – pracovní protokol</button>
 		        </div>
             <details class="voice-advanced">
               <summary>Technické nastavení</summary>
 		        <div class="voice-command-actions">
-		          <button class="secondary" id="voiceModeToggleBtn" aria-pressed="false">Starý poslech: vypnuto</button>
-		          <button class="secondary" id="voiceModeStartBtn">Spustit watcher</button>
+		          <button class="secondary" id="voiceModeToggleBtn" aria-pressed="false" disabled>Starý poslech: vypnuto</button>
+		          <button class="secondary" id="voiceModeStartBtn" disabled>Watcher pozastaven</button>
 		          <button class="secondary" id="voiceModeStopBtn">Zastavit watcher</button>
 		        </div>
 		          <div id="voiceModeRuntimeStatus" class="status-line">Adam Voice Mode watcher: čekám na kontrolu.</div>
@@ -13089,6 +13238,38 @@ COCKPIT_HTML = """<!doctype html>
       </div>
     </div>
   </div>
+  <div id="appserverLabModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="appserverLabTitle">
+    <div class="modal appserver-lab-modal">
+      <div class="modal-header">
+        <h2 id="appserverLabTitle">App-server LAB</h2>
+        <button class="secondary" id="appserverLabCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div class="appserver-lab-banner">
+          Izolovaný read-only test nového rozhraní. Nepoužívá VoiceBridge, watcher, TTY ani screen doručování a není napojený na Janičku.
+        </div>
+        <div id="appserverLabStatus" class="status-line">LAB se načte až po otevření panelu.</div>
+        <div class="appserver-lab-controls">
+          <button class="primary" id="appserverLabNewBtn">Nová testovací relace</button>
+          <button class="secondary" id="appserverLabResumeBtn">Obnovit relaci</button>
+          <button class="secondary" id="appserverLabDisconnectBtn">Simulovat odpojení</button>
+          <button class="secondary" id="appserverLabRestartBtn">Restartovat LAB app-server</button>
+        </div>
+        <div>
+          <h3>Lifecycle důkazy</h3>
+          <div id="appserverLabLifecycle" class="appserver-lab-lifecycle"></div>
+        </div>
+        <div id="appserverLabLog" class="appserver-lab-log" aria-live="polite"></div>
+        <div class="appserver-lab-compose">
+          <label for="appserverLabInput">Testovací otázka nebo pokyn</label>
+          <textarea id="appserverLabInput" spellcheck="true" placeholder="Například: Zapamatuj si pro další otázku slovo modrá."></textarea>
+          <div class="appserver-lab-controls">
+            <button class="primary" id="appserverLabSendBtn">Odeslat do LAB</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div id="tvbcpModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="tvbcpTitle">
     <div class="modal tvbcp-modal">
       <div class="modal-header">
@@ -13245,6 +13426,18 @@ COCKPIT_HTML = """<!doctype html>
     const projectAuditStatus = document.getElementById("projectAuditStatus");
     const projectAuditRecentList = document.getElementById("projectAuditRecentList");
     const projectAuditText = document.getElementById("projectAuditText");
+    const appserverLabOpenBtn = document.getElementById("appserverLabOpenBtn");
+    const appserverLabModal = document.getElementById("appserverLabModal");
+    const appserverLabCloseBtn = document.getElementById("appserverLabCloseBtn");
+    const appserverLabStatus = document.getElementById("appserverLabStatus");
+    const appserverLabNewBtn = document.getElementById("appserverLabNewBtn");
+    const appserverLabResumeBtn = document.getElementById("appserverLabResumeBtn");
+    const appserverLabDisconnectBtn = document.getElementById("appserverLabDisconnectBtn");
+    const appserverLabRestartBtn = document.getElementById("appserverLabRestartBtn");
+    const appserverLabLifecycle = document.getElementById("appserverLabLifecycle");
+    const appserverLabLog = document.getElementById("appserverLabLog");
+    const appserverLabInput = document.getElementById("appserverLabInput");
+    const appserverLabSendBtn = document.getElementById("appserverLabSendBtn");
     const tvbcpModal = document.getElementById("tvbcpModal");
     const tvbcpCloseBtn = document.getElementById("tvbcpCloseBtn");
     const tvbcpRefreshBtn = document.getElementById("tvbcpRefreshBtn");
@@ -13839,9 +14032,9 @@ COCKPIT_HTML = """<!doctype html>
     }
 
     const FULL_STATUS_MONITOR_MS = 5 * 60 * 1000;
+    const VOICE_BRIDGE_FROZEN = true;
     const INTAKE_EMAIL_MONITOR_MS = 30 * 60 * 1000;
     const URGENT_REMINDERS_MONITOR_MS = 30 * 1000;
-    const VOICE_STATUS_MONITOR_MS = 3000;
     let refreshInFlight = false;
     let liveStatusRefreshInFlight = false;
     let urgentRemindersRefreshInFlight = false;
@@ -14880,10 +15073,6 @@ COCKPIT_HTML = """<!doctype html>
       todayNewPdfCount.textContent = String(newCount);
       todayReviewCount.textContent = String(reviewPending);
       todayProblemCount.textContent = String(problemTotal);
-      const documentsPanelNode = document.getElementById("documentsPanel");
-      if (documentsPanelNode && (newCount > 0 || reviewPending > 0 || problemTotal > 0)) {
-        documentsPanelNode.open = true;
-      }
       todayHint.textContent = dashboardTodayHint(newCount, reviewPending, problemTotal);
       const documentSignal = problemTotal > 0
         ? {level: "warn", reason: `Dokumenty: ${problemTotal} problémů k ruční kontrole`}
@@ -15062,9 +15251,6 @@ COCKPIT_HTML = """<!doctype html>
         voiceBridgeSessions.classList.toggle("ok", !voiceBridgeWarn && (!markedTty || codexTtys.includes(markedTty)));
       }
       renderVoiceBridgeSwitcher(voiceBridge);
-      if (voiceCommandDetails && (voicePendingActive || codexApprovalActive || voiceBridgeWarn)) {
-        voiceCommandDetails.open = true;
-      }
       if (voicePendingStatus) {
         voicePendingStatus.textContent = voicePendingActive
           ? voicePendingActionable
@@ -15560,6 +15746,228 @@ COCKPIT_HTML = """<!doctype html>
 
     function closeProjectAuditModal() {
       projectAuditModal.classList.add("hidden");
+    }
+
+    let appserverLabMessages = [];
+
+    function appserverLabLocalTime(value) {
+      if (!value) return "—";
+      const parsed = new Date(value);
+      if (Number.isNaN(parsed.getTime())) return "—";
+      return parsed.toLocaleTimeString("cs-CZ", {hour: "2-digit", minute: "2-digit", second: "2-digit"});
+    }
+
+    function appserverLabShortId(value) {
+      const text = String(value || "");
+      if (text.length <= 16) return text || "—";
+      return `${text.slice(0, 8)}…${text.slice(-4)}`;
+    }
+
+    function appserverLabMessageId() {
+      const nonce = globalThis.crypto && typeof globalThis.crypto.randomUUID === "function"
+        ? globalThis.crypto.randomUUID().replaceAll("-", "")
+        : `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
+      return `appserver-lab-${nonce}`;
+    }
+
+    function renderAppserverLabMessages() {
+      appserverLabLog.innerHTML = "";
+      if (!appserverLabMessages.length) {
+        const empty = document.createElement("div");
+        empty.className = "muted";
+        empty.textContent = "Zatím nebyla odeslána žádná LAB zpráva.";
+        appserverLabLog.appendChild(empty);
+        return;
+      }
+      appserverLabMessages.forEach((entry) => {
+        const card = document.createElement("div");
+        const status = String(entry.status || "");
+        card.className = `appserver-lab-message ${status === "failed" ? "failed" : status !== "completed" ? "pending" : ""}`.trim();
+
+        const user = document.createElement("div");
+        user.className = "appserver-lab-message-user";
+        user.textContent = entry.user_text || "";
+
+        const meta = document.createElement("div");
+        meta.className = "appserver-lab-message-meta";
+        const proof = [
+          `Kliknutí v zařízení: ${appserverLabLocalTime(entry.client_sent_at)}`,
+          `Přijato Cockpitem: ${appserverLabLocalTime(entry.cockpit_received_at)}`,
+          `Přijato app-serverem: ${appserverLabLocalTime(entry.adam_accepted_at)}`,
+          `Turn potvrzen: ${appserverLabLocalTime(entry.turn_started_at)}`,
+          `Odpověď dokončena: ${appserverLabLocalTime(entry.completed_at)}`,
+          `Stav: ${status || "odesílám"}`,
+        ];
+        meta.textContent = proof.join(" · ");
+        card.appendChild(user);
+        card.appendChild(meta);
+
+        if (entry.answer) {
+          const answer = document.createElement("div");
+          answer.className = "appserver-lab-message-answer";
+          answer.textContent = entry.answer;
+          card.appendChild(answer);
+        }
+        if (entry.error) {
+          const error = document.createElement("div");
+          error.className = "bad appserver-lab-message-meta";
+          error.textContent = `Nedoručeno: ${entry.error}`;
+          card.appendChild(error);
+        }
+        appserverLabLog.appendChild(card);
+      });
+      window.requestAnimationFrame(() => {
+        appserverLabLog.scrollTop = appserverLabLog.scrollHeight;
+      });
+    }
+
+    function renderAppserverLabLifecycle(events) {
+      appserverLabLifecycle.innerHTML = "";
+      const rows = Array.isArray(events) ? events.slice(-10).reverse() : [];
+      if (!rows.length) {
+        const empty = document.createElement("div");
+        empty.className = "muted";
+        empty.textContent = "Lifecycle události zatím nejsou zaznamenané.";
+        appserverLabLifecycle.appendChild(empty);
+        return;
+      }
+      const labels = {
+        thread_created: "Nový thread",
+        disconnected: "Odpojeno",
+        thread_resumed: "Thread obnoven",
+        appserver_restarted: "App-server restartován",
+        auto_resumed_before_send: "Automaticky obnoveno před odesláním",
+      };
+      rows.forEach((event) => {
+        const row = document.createElement("div");
+        row.className = "appserver-lab-lifecycle-event";
+        const title = document.createElement("strong");
+        title.textContent = `${event.ok ? "✓" : "✗"} ${labels[event.action] || event.action || "Lifecycle"} · ${appserverLabLocalTime(event.completed_at)}`;
+        const meta = document.createElement("div");
+        meta.className = "appserver-lab-message-meta";
+        meta.textContent = [
+          `thread ${appserverLabShortId(event.thread_id)}`,
+          `generation ${Number(event.previous_generation || 0)} → ${Number(event.connection_generation || 0)}`,
+          `PID ${Number(event.previous_process_pid || 0) || "—"} → ${Number(event.process_pid || 0) || "—"}`,
+          `connection ${appserverLabShortId(event.previous_connection_id)} → ${appserverLabShortId(event.connection_id)}`,
+        ].join(" · ");
+        row.appendChild(title);
+        row.appendChild(meta);
+        appserverLabLifecycle.appendChild(row);
+      });
+    }
+
+    function renderAppserverLabStatus(data) {
+      appserverLabMessages = Array.isArray(data.messages) ? data.messages : appserverLabMessages;
+      const version = data.version || {};
+      const connected = data.connection_state === "connected";
+      appserverLabStatus.textContent = [
+        connected ? "Připojeno" : "Odpojeno",
+        `Codex ${version.raw || "verze nezjištěna"}`,
+        `thread ${appserverLabShortId(data.thread_id)}`,
+        "read-only",
+      ].join(" · ");
+      appserverLabResumeBtn.disabled = !data.thread_ready || connected;
+      appserverLabDisconnectBtn.disabled = !connected;
+      appserverLabRestartBtn.disabled = !data.thread_ready;
+      appserverLabSendBtn.disabled = !data.thread_ready;
+      renderAppserverLabLifecycle(data.lifecycle_events || []);
+      renderAppserverLabMessages();
+    }
+
+    async function refreshAppserverLabStatus() {
+      try {
+        renderAppserverLabStatus(await fetchJson("/api/appserver-lab/status"));
+      } catch (err) {
+        recordFrontendError(err);
+        appserverLabStatus.textContent = `LAB status se nepodařilo načíst: ${err}`;
+      }
+    }
+
+    async function openAppserverLabModal() {
+      appserverLabModal.classList.remove("hidden");
+      await refreshAppserverLabStatus();
+      window.setTimeout(() => appserverLabInput.focus(), 0);
+    }
+
+    function closeAppserverLabModal() {
+      appserverLabModal.classList.add("hidden");
+    }
+
+    async function runAppserverLabControl(path, button, pendingText) {
+      const original = button.textContent;
+      button.disabled = true;
+      button.textContent = pendingText;
+      appserverLabStatus.textContent = pendingText;
+      try {
+        const data = await postJson(path, {});
+        if (!data.ok) throw new Error(data.message || "LAB operace nebyla potvrzena.");
+        renderAppserverLabStatus(data);
+      } catch (err) {
+        recordFrontendError(err);
+        appserverLabStatus.textContent = `LAB operace selhala: ${err}`;
+        await refreshAppserverLabStatus();
+      } finally {
+        button.textContent = original;
+        await refreshAppserverLabStatus();
+        if (button === appserverLabNewBtn) button.disabled = false;
+      }
+    }
+
+    async function createAppserverLabThread() {
+      if (!window.confirm("Založit novou izolovanou LAB relaci? Dosavadní LAB historie zůstane v private datech, ale panel začne nový thread.")) return;
+      await runAppserverLabControl("/api/appserver-lab/thread/new", appserverLabNewBtn, "Zakládám relaci…");
+    }
+
+    async function submitAppserverLabMessage() {
+      const text = appserverLabInput.value.trim();
+      if (!text) {
+        appserverLabStatus.textContent = "Napiš testovací otázku nebo pokyn.";
+        appserverLabInput.focus();
+        return;
+      }
+      const clientSentAt = new Date().toISOString();
+      const clientMessageId = appserverLabMessageId();
+      const pendingEntry = {
+        client_message_id: clientMessageId,
+        user_text: text,
+        client_sent_at: clientSentAt,
+        cockpit_received_at: "",
+        adam_accepted_at: "",
+        turn_started_at: "",
+        completed_at: "",
+        status: "sending",
+        answer: "",
+      };
+      appserverLabMessages.push(pendingEntry);
+      appserverLabInput.value = "";
+      appserverLabSendBtn.disabled = true;
+      appserverLabStatus.textContent = `Kliknutí zaznamenáno ${appserverLabLocalTime(clientSentAt)} · odesílám do Cockpitu…`;
+      renderAppserverLabMessages();
+      try {
+        const data = await postJson("/api/appserver-lab/send", {
+          message: text,
+          client_message_id: clientMessageId,
+          client_sent_at: clientSentAt,
+        });
+        if (data.entry) {
+          appserverLabMessages = appserverLabMessages.map((item) =>
+            item.client_message_id === clientMessageId ? data.entry : item
+          );
+        }
+        if (!data.ok) throw new Error(data.message || "App-server nepotvrdil doručení.");
+        appserverLabStatus.textContent = data.message || "LAB odpověď dokončena.";
+      } catch (err) {
+        recordFrontendError(err);
+        pendingEntry.status = "failed";
+        pendingEntry.completed_at = new Date().toISOString();
+        pendingEntry.error = String(err);
+        appserverLabStatus.textContent = `Nedoručeno: ${err}`;
+      } finally {
+        renderAppserverLabMessages();
+        appserverLabSendBtn.disabled = false;
+        appserverLabInput.focus();
+      }
     }
 
     async function refreshTvbcpModal() {
@@ -16152,9 +16560,8 @@ COCKPIT_HTML = """<!doctype html>
 		      try {
 		        const opened = await primeVoiceAudioContextFromGesture();
 		        if (opened) {
-		          showMessage("Audiokanál je otevřený. Spouštím watcher pro hlasové pokyny...");
-		          if (voiceCommandStatus) voiceCommandStatus.textContent = "Audiokanál je otevřený. Watcher kontroluji nebo spouštím...";
-		          await ensureVoiceModeWatcherRunningFromAudioChannel();
+		          showMessage("Audiokanál je otevřený. Stav watcheru se nemění.");
+		          if (voiceCommandStatus) voiceCommandStatus.textContent = "Audiokanál je otevřený. Watcher zůstává v dosavadním stavu.";
 		        } else {
 		          showMessage("Tento prohlížeč nepodporuje otevření webového audiokanálu.");
 		          if (voiceCommandStatus) voiceCommandStatus.textContent = "Tento prohlížeč nepodporuje otevření webového audiokanálu.";
@@ -16438,6 +16845,13 @@ COCKPIT_HTML = """<!doctype html>
 	    }
 
 		    function updateVoiceModeUi() {
+		      if (VOICE_BRIDGE_FROZEN) {
+		        voiceModeToggleBtn.disabled = true;
+		        voiceModeStartBtn.disabled = true;
+		        voiceModeStartBtn.textContent = "Watcher pozastaven";
+		        voiceCommandStatus.textContent = "VoiceBridge je pozastavený. Pro komunikaci použij aktivní samantha/SSH relaci.";
+		        return;
+		      }
 		      voiceModeToggleBtn.textContent = voiceModeEnabled ? "Starý poslech: zapnuto" : "Starý poslech: vypnuto";
 		      voiceModeToggleBtn.setAttribute("aria-pressed", voiceModeEnabled ? "true" : "false");
 		      voiceModeToggleBtn.classList.toggle("active", voiceModeEnabled);
@@ -16539,7 +16953,6 @@ COCKPIT_HTML = """<!doctype html>
 			          voiceReplyPollTimer = null;
 			          return;
 			        }
-			        await refresh({silent: true, includeSecondary: false});
 			        await refreshVoiceLatestResponse({
 			          autoSpeak,
 			          expectedUserText: voiceReplyExpectedUserText,
@@ -16547,7 +16960,6 @@ COCKPIT_HTML = """<!doctype html>
 			        });
 			      }, 3000);
 			      window.setTimeout(async () => {
-			        await refresh({silent: true, includeSecondary: false});
 			        await refreshVoiceLatestResponse({
 			          autoSpeak,
 			          expectedUserText: voiceReplyExpectedUserText,
@@ -16896,17 +17308,7 @@ COCKPIT_HTML = """<!doctype html>
 		      return Boolean(latestVoiceModeRuntime && latestVoiceModeRuntime.running);
 		    }
 
-			    async function ensureVoiceModeWatcherRunningFromAudioChannel() {
-			      if (isVoiceModeWatcherRunning()) {
-			        showMessage("Audiokanál je otevřený a watcher už běží.");
-			        if (voiceCommandStatus) voiceCommandStatus.textContent = "Audiokanál je otevřený a watcher už běží.";
-			        return;
-			      }
-			      await startVoiceModeWatcher({source: "audio_channel"});
-			    }
-
-		    async function startVoiceModeWatcher(options = {}) {
-		      const fromAudioChannel = options.source === "audio_channel";
+		    async function startVoiceModeWatcher() {
 		      if (isVoiceModeWatcherRunning()) {
 		        if (voiceCommandStatus) voiceCommandStatus.textContent = "Adam Voice Mode watcher už běží.";
 		        updateVoiceModeUi();
@@ -16914,9 +17316,7 @@ COCKPIT_HTML = """<!doctype html>
 		      }
 		      if (voiceModeStartBtn) voiceModeStartBtn.disabled = true;
 		      if (voiceCommandStatus) {
-		        voiceCommandStatus.textContent = fromAudioChannel
-		          ? "Audiokanál otevřený. Spouštím záložní Adam Voice Mode watcher..."
-		          : "Spouštím záložní Adam Voice Mode watcher...";
+		        voiceCommandStatus.textContent = "Spouštím záložní Adam Voice Mode watcher na výslovný pokyn...";
 		      }
 		      try {
 		        const data = await postJson("/api/voice-mode/start", {});
@@ -19426,6 +19826,19 @@ COCKPIT_HTML = """<!doctype html>
         submitJanickaChat();
       }
     });
+    appserverLabOpenBtn.addEventListener("click", openAppserverLabModal);
+    appserverLabCloseBtn.addEventListener("click", closeAppserverLabModal);
+    appserverLabNewBtn.addEventListener("click", createAppserverLabThread);
+    appserverLabResumeBtn.addEventListener("click", () => runAppserverLabControl("/api/appserver-lab/thread/resume", appserverLabResumeBtn, "Obnovuji relaci…"));
+    appserverLabDisconnectBtn.addEventListener("click", () => runAppserverLabControl("/api/appserver-lab/disconnect", appserverLabDisconnectBtn, "Odpojuji LAB…"));
+    appserverLabRestartBtn.addEventListener("click", () => runAppserverLabControl("/api/appserver-lab/restart", appserverLabRestartBtn, "Restartuji LAB…"));
+    appserverLabSendBtn.addEventListener("click", submitAppserverLabMessage);
+    appserverLabInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        submitAppserverLabMessage();
+      }
+    });
     refreshBtn.addEventListener("click", refresh);
     serviceBtn.addEventListener("click", () => {
       servicePanel.open = true;
@@ -19511,6 +19924,9 @@ COCKPIT_HTML = """<!doctype html>
     diagnosticsCloseBtn.addEventListener("click", closeDiagnosticsModal);
 		    quantitativeCloseBtn.addEventListener("click", closeQuantitativeModal);
     projectAuditCloseBtn.addEventListener("click", closeProjectAuditModal);
+    appserverLabModal.addEventListener("click", (event) => {
+      if (event.target === appserverLabModal) closeAppserverLabModal();
+    });
     tvbcpCloseBtn.addEventListener("click", closeTvbcpModal);
     tvbcpRefreshBtn.addEventListener("click", refreshTvbcpModal);
     projectAuditSaveBtn.addEventListener("click", saveProjectAuditReport);
@@ -19626,6 +20042,8 @@ COCKPIT_HTML = """<!doctype html>
         closeQuantitativeModal();
       } else if (event.key === "Escape" && !projectAuditModal.classList.contains("hidden")) {
         closeProjectAuditModal();
+      } else if (event.key === "Escape" && !appserverLabModal.classList.contains("hidden")) {
+        closeAppserverLabModal();
       } else if (event.key === "Escape" && !tvbcpModal.classList.contains("hidden")) {
         closeTvbcpModal();
       } else if (event.key === "Escape" && !webAppsModal.classList.contains("hidden")) {
@@ -19664,11 +20082,6 @@ COCKPIT_HTML = """<!doctype html>
 	    runFrontendHealthCheck();
 	    window.setInterval(runFrontendHealthCheck, 60000);
 	    window.setInterval(() => refresh({silent: true, includeSecondary: false}), FULL_STATUS_MONITOR_MS);
-	    window.setInterval(() => {
-	      if (!document.hidden) {
-	        refreshLiveStatus();
-	      }
-	    }, VOICE_STATUS_MONITOR_MS);
       window.setInterval(refreshUrgentRemindersSummary, URGENT_REMINDERS_MONITOR_MS);
       window.setInterval(runEmailIntakeMonitor, INTAKE_EMAIL_MONITOR_MS);
       window.addEventListener("focus", () => {

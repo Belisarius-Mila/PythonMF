@@ -20,6 +20,8 @@ DEFAULT_STALE_CODEX_SECONDS = 36 * 60 * 60
 DEFAULT_CODEX_SCREEN_SESSION = "samantha_codex"
 SCREEN_CLEAR_INPUT = "\x15"
 SCREEN_SUBMIT_INPUT = "\r"
+SCREEN_PASTE_START = "\x1b[200~"
+SCREEN_PASTE_END = "\x1b[201~"
 
 TERMINAL_MANUAL_TERMS = (
     "smaz",
@@ -304,6 +306,64 @@ def screen_session_exists(
     return f".{session_name}" in output
 
 
+def tty_belongs_to_screen_session(
+    tty: str,
+    session_name: str = DEFAULT_CODEX_SCREEN_SESSION,
+    *,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> bool:
+    """Return true only when the target TTY descends from the named screen process."""
+    target_tty = normalize_tty(tty)
+    if not target_tty or not session_name:
+        return False
+    try:
+        completed = runner(PS_COMMAND, capture_output=True, text=True, timeout=4, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    if completed.returncode != 0:
+        return False
+
+    parent_by_pid: dict[int, int] = {}
+    tty_by_pid: dict[int, str] = {}
+    screen_pids: set[int] = set()
+    for line in completed.stdout.splitlines():
+        parts = line.strip().split(None, 6)
+        if len(parts) >= 7 and looks_like_ps_stat(parts[3]) and looks_like_ps_etime(parts[4]):
+            pid_text, ppid_text, process_tty, _stat, _etime, comm, args = parts
+        elif len(parts) >= 6 and looks_like_ps_etime(parts[3]):
+            pid_text, ppid_text, process_tty, _etime, comm, args = line.strip().split(None, 5)
+        else:
+            compact = line.strip().split(None, 4)
+            if len(compact) < 5:
+                continue
+            pid_text, ppid_text, process_tty, comm, args = compact
+        try:
+            pid = int(pid_text)
+            ppid = int(ppid_text)
+        except ValueError:
+            continue
+        parent_by_pid[pid] = ppid
+        tty_by_pid[pid] = normalize_tty(process_tty)
+        process_name = Path(str(comm)).name.casefold()
+        if process_name == "screen" and re.search(rf"(?:^|\s)-S\s+{re.escape(session_name)}(?:\s|$)", args):
+            screen_pids.add(pid)
+
+    if not screen_pids:
+        return False
+    for pid, process_tty in tty_by_pid.items():
+        if process_tty != target_tty:
+            continue
+        current = pid
+        for _ in range(30):
+            if current in screen_pids:
+                return True
+            parent = parent_by_pid.get(current)
+            if parent is None or parent == current:
+                break
+            current = parent
+    return False
+
+
 def deliver_prompt_to_screen_session(
     prompt: str,
     *,
@@ -320,7 +380,7 @@ def deliver_prompt_to_screen_session(
             "session_name": session_name,
             "delivery_method": "screen_stuff",
         }
-    payload = SCREEN_CLEAR_INPUT + squash_terminal_text(prompt)
+    payload = SCREEN_CLEAR_INPUT + SCREEN_PASTE_START + squash_terminal_text(prompt) + SCREEN_PASTE_END
     try:
         insert_completed = runner(
             ["screen", "-S", session_name, "-p", "0", "-X", "stuff", payload],
@@ -331,7 +391,10 @@ def deliver_prompt_to_screen_session(
         )
         completed = insert_completed
         if submit and insert_completed.returncode == 0:
-            sleeper(0.2)
+            # Codex TUI first has to close its paste-burst transaction. Sending
+            # Enter immediately can dismiss the temporary paste placeholder
+            # without creating a user turn.
+            sleeper(1.0)
             completed = runner(
                 ["screen", "-S", session_name, "-p", "0", "-X", "stuff", SCREEN_SUBMIT_INPUT],
                 capture_output=True,
@@ -376,6 +439,7 @@ on run argv
   set promptText to item 1 of argv
   set shouldSubmit to item 2 of argv
   set targetTtys to {}
+  set targetTab to missing value
   if (count of argv) >= 3 then
     set AppleScript's text item delimiters to ","
     set targetTtys to text items of (item 3 of argv)
@@ -391,6 +455,7 @@ on run argv
           if targetTtys contains tabTty then
             set selected tab of terminalWindow to terminalTab
             set index of terminalWindow to 1
+            set targetTab to terminalTab
             set foundTarget to true
             exit repeat
           end if
@@ -398,13 +463,14 @@ on run argv
         if foundTarget then exit repeat
       end repeat
     end if
-    if not foundTarget then
+    if not foundTarget and (count of targetTtys) is 0 then
       repeat with terminalWindow in windows
         repeat with terminalTab in tabs of terminalWindow
           set tabProcesses to processes of terminalTab
           if tabProcesses contains "codex" then
             set selected tab of terminalWindow to terminalTab
             set index of terminalWindow to 1
+            set targetTab to terminalTab
             set foundTarget to true
             exit repeat
           end if
@@ -413,16 +479,20 @@ on run argv
       end repeat
     end if
     if not foundTarget then error "Nenalezen Terminal tab s procesem codex ani s odpovídajícím TTY."
+    if shouldSubmit is "1" then
+      do script promptText in targetTab
+      delay 0.2
+      do script (ASCII character 13) in targetTab
+      return "delivered"
+    end if
     activate
   end tell
   delay 0.2
   tell application "System Events"
     set the clipboard to promptText
     keystroke "v" using command down
-    delay 0.25
-    if shouldSubmit is "1" then key code 36
   end tell
-  return "delivered"
+  return "inserted_without_submit"
 end run
 '''.strip()
 
@@ -506,7 +576,7 @@ def deliver_prompt_to_terminal(
     ps_runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
     script: str | None = None,
     vscode_script: str | None = None,
-    vscode_fallback: bool = True,
+    vscode_fallback: bool = False,
     marked_tty_path: Path = CURRENT_CODEX_TTY_PATH,
     tty_deliverer: Callable[..., dict[str, Any]] = deliver_prompt_to_tty,
     screen_session_name: str = DEFAULT_CODEX_SCREEN_SESSION,
@@ -517,11 +587,32 @@ def deliver_prompt_to_terminal(
     marked_tty = load_marked_codex_tty(marked_tty_path)
     codex_ttys = discover_codex_ttys(runner=ps_runner)
     codex_session_seen = bool(codex_ttys)
-    effective_marked_tty = marked_tty if marked_tty and (marked_tty in codex_ttys or not codex_ttys) else ""
-    auto_target_tty = ""
-    stale_marked_tty = marked_tty if marked_tty and codex_ttys and marked_tty not in codex_ttys else ""
-    if stale_marked_tty and len(codex_ttys) == 1:
-        auto_target_tty = codex_ttys[0]
+    if marked_tty and marked_tty not in codex_ttys:
+        return {
+            "ok": False,
+            "status": "stale_marked_tty" if codex_ttys else "no_active_codex_session",
+            "message": (
+                f"Označené TTY {marked_tty} už nepatří aktivní Codex relaci. "
+                "Z bezpečnostních důvodů nevybírám jiný chat automaticky."
+            ),
+            "target_tty": marked_tty,
+            "target_ttys": codex_ttys,
+            "verified": False,
+        }
+    if not marked_tty and len(codex_ttys) != 1:
+        return {
+            "ok": False,
+            "status": "ambiguous_codex_session" if codex_ttys else "no_active_codex_session",
+            "message": (
+                "Voice marker není nastavený a aktivní Codex relaci nelze určit jednoznačně. "
+                "Zprávu nikam neposílám."
+            ),
+            "target_ttys": codex_ttys,
+            "verified": False,
+        }
+    effective_marked_tty = marked_tty or codex_ttys[0]
+    auto_target_tty = codex_ttys[0] if not marked_tty else ""
+    stale_marked_tty = ""
     marked_tty_error: dict[str, Any] | None = None
     screen_unverified_status: dict[str, Any] | None = None
     if effective_marked_tty or auto_target_tty:
@@ -558,26 +649,31 @@ def deliver_prompt_to_terminal(
             "target_tty": marked_tty,
         }
 
-    if screen_session_name and (marked_tty or codex_ttys):
-        screen_result = screen_deliverer(safe_prompt, submit=submit, session_name=screen_session_name, runner=runner)
-        if screen_result.get("ok") and screen_result.get("verified"):
-            if marked_tty_error:
-                screen_result["marked_tty_status"] = marked_tty_error
-            if auto_target_tty:
-                screen_result["auto_target_tty"] = auto_target_tty
+    if (
+        marked_tty
+        and screen_session_name
+        and tty_belongs_to_screen_session(marked_tty, screen_session_name, runner=ps_runner)
+    ):
+        screen_result = screen_deliverer(
+            safe_prompt,
+            submit=submit,
+            session_name=screen_session_name,
+            runner=runner,
+        )
+        if screen_result.get("ok"):
             return {
                 **screen_result,
+                "status": "screen_delivery_unverified",
+                "message": (
+                    f"Pokyn byl vložen do ověřené hlavní screen relace {screen_session_name}. "
+                    "Za skutečnou odpověď se považuje až výsledek vrácený živým Codex chatem."
+                ),
+                "verified": False,
+                "target_tty": marked_tty,
                 "target_ttys": codex_ttys,
+                "marked_tty_status": marked_tty_error,
+                "delivery_method": "validated_screen_stuff",
             }
-        if screen_result.get("ok"):
-            screen_unverified_status = {
-                **screen_result,
-                "target_ttys": codex_ttys,
-            }
-            if marked_tty_error:
-                screen_unverified_status["marked_tty_status"] = marked_tty_error
-            if auto_target_tty:
-                screen_unverified_status["auto_target_tty"] = auto_target_tty
 
     if effective_marked_tty:
         target_ttys = [effective_marked_tty]
@@ -617,29 +713,6 @@ def deliver_prompt_to_terminal(
             terminal_error["screen_status"] = screen_unverified_status
         if marked_tty_error:
             terminal_error["marked_tty_status"] = marked_tty_error
-        if vscode_fallback and codex_session_seen:
-            vscode_result = deliver_prompt_to_vscode(
-                safe_prompt,
-                submit=submit,
-                runner=runner,
-                script=vscode_script,
-                timeout=timeout,
-            )
-            if vscode_result.get("ok"):
-                return {
-                    **vscode_result,
-                    "terminal_status": terminal_error,
-                    "target_ttys": codex_ttys,
-                }
-            detail_parts = [terminal_error["message"]]
-            if marked_tty_error:
-                detail_parts.append(f"TTY {marked_tty_error.get('target_tty')}: {marked_tty_error.get('message')}")
-            detail_parts.append(f"VS Code fallback: {vscode_result.get('message')}")
-            terminal_error["message"] = " | ".join(part for part in detail_parts if part)
-            return {
-                **terminal_error,
-                "vscode_status": vscode_result,
-            }
         return terminal_error
     if not codex_session_seen:
         return {

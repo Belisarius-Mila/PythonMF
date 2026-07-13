@@ -774,9 +774,10 @@ def pending_reason_for_command(command: VoiceCommand) -> str | None:
         return "codex_work"
     if command.triage.requires_confirmation or command.triage.risk in {"blocked", "needs_confirmation"}:
         return "requires_confirmation"
-    if voice_command_needs_codex_work(command.text):
-        return "codex_work"
-    return None
+    # Watcher is transport only. Even a conversational prompt must be handled
+    # by the live Codex chat; generating a parallel answer here creates a false
+    # impression that the chat received and processed the command.
+    return "codex_work"
 
 
 def generate_direct_voice_response(
@@ -812,8 +813,7 @@ def safe_exception_summary(exc: Exception, *, max_chars: int = 240) -> str:
 
 
 def format_automatic_watcher_response(response: str) -> str:
-    text = str(response or "").strip() or "Slyším tě. Tady Adam, jsem připravený pomoct."
-    return f"Automatická odpověď watcheru, ne převzetí v Codex chatu: {text}"
+    return "Zpráva byla přijata watcherem, ale nebyla potvrzena jako převzatá živým Codex chatem."
 
 
 def build_spoken_result_for_command(
