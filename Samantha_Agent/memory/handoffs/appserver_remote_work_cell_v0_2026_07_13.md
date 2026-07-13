@@ -1,6 +1,6 @@
 Nazev: App-server Adam Remote - izolovana zapisujici Work Cell v0
 Priorita: 1
-Stav: ceka na live canary a rucni retest
+Stav: ceka na rucni iPhone retest
 Pripomenout pri startu: ano
 Datum: 2026-07-13
 
@@ -33,20 +33,24 @@ Co je hotove:
 - App-server klient ma obecny execution profil; vychozi parametry stareho LAB
   zustaly zpetne kompatibilni.
 - Cileny blok dokoncil 263 testu a plna Cockpit quality gate 644 testu bez chyby.
+- Zivy canary pres skutecny app-server uspesne dokoncil zapis s profilem
+  `gpt-5.6-sol`, reasoning `high`, `workspace-write` a vypnutou siti.
+- Kontrolni soubor vznikl pouze v ignorovanem private prostoru izolovane kopie,
+  mel presny ocekavany obsah a v hlavnim projektu nevznikl.
+- Po canary zustala izolovana Git kopie cista, bez Git remote; zdrojovy HEAD se
+  nezmenil a odpovidal zakladnimu commitu kopie.
 
 Co neni hotove:
-- Skutecna lokalni Remote Work Cell se zalozi az z commitnuteho/pushnuteho stavu,
-  aby neklonovala starsi implementaci.
-- Zivy `GPT-5.6-Sol` canary musi potvrdit nastrojovy zapis pouze uvnitr izolovane
-  kopie a nulovou zmenu hlavniho stromu.
+- Chybi kratky rucni iPhone retest nasazeneho Cockpit rozhrani a prvni maly
+  realny ukol, pri kterem se zkontroluje viditelny diff pred checkpointem.
 - Cockpit zatim nezobrazuje jednotlive tool eventy ani nema interaktivni approval
   round-trip. Proto v0 nema sit ani opravneni mimo izolovany workspace.
 - Automaticky prenos WIP commitu z kopie na hlavni `main` zatim neni povoleny;
   nejdrive se ma zobrazit diff a predani ma zkontrolovat hlavni Adam.
 
 Dalsi krok:
-- Commitnout a pushnout git-safe implementaci, pripravit skutecnou Remote Work
-  Cell, zalozit prvni thread a provest bezpecny zapisovy canary bez citlivych dat.
+- Nasadit novy Cockpit, obnovit Adam Remote thread a z iPhonu provest maly
+  nedestruktivni ukol; pred checkpointem rucne zkontrolovat seznam zmen a diff.
 
 Navrhovane dalsi kroky:
 - Rucne z iPhonu zadat prvni maly realny kodovy ukol a overit zmeny/testy/TVBCP.
