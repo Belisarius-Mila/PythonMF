@@ -401,7 +401,7 @@ def run_colors_numbers_owl_csv_task(
         if not script_path.exists():
             raise DailyTaskError(f"ColorsAndNumbers script is missing: {script_path}")
 
-    if all(output_path.exists() for output_path, _ in targets) and all(
+    if not context.force and all(output_path.exists() for output_path, _ in targets) and all(
         audio_src in script_path.read_text(encoding="utf-8") for _, script_path in targets
     ):
         return {

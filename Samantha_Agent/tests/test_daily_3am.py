@@ -329,6 +329,60 @@ class Daily3AmTests(unittest.TestCase):
                 ],
             )
 
+    def test_colors_numbers_owl_task_force_regenerates_existing_daily_audio(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            project_dir = repo_root / "Samantha_Agent"
+            app_dir = repo_root / "ColorsAndNumbers" / "web_colors_numbers"
+            docs_dir = repo_root / "docs" / "colors-numbers"
+            project_dir.mkdir()
+            app_dir.mkdir(parents=True)
+            docs_dir.mkdir(parents=True)
+            audio_src = "owl_280526.mp3?v=20260528a"
+            for target_dir in (app_dir, docs_dir):
+                (target_dir / "app.js").write_text(
+                    f'const owlAudio = new Audio("{audio_src}");\n',
+                    encoding="utf-8",
+                )
+                (target_dir / "owl_280526.mp3").write_bytes(b"old")
+            csv_path = project_dir / "OwlSpeech.csv"
+            csv_path.write_text(
+                "\n".join(
+                    [
+                        "date,part_a,part_b,part_c,full_text",
+                        '2026-05-28,A,B,C,"Replacement text"',
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            context = daily_3am.DailyContext(
+                project_dir=project_dir,
+                log_file=project_dir / "logs" / "daily_3am.log",
+                state_dir=project_dir / "data" / "daily_3am",
+                run_date="2026-05-28",
+                started_at=datetime.now(daily_3am.PRAGUE_TZ).isoformat(),
+                dry_run=False,
+                force=True,
+            )
+
+            result = daily_3am.run_colors_numbers_owl_task(
+                context,
+                speech_csv_path=csv_path,
+                audio_generator=lambda text, output, voice, rate: output.write_bytes(text.encode("utf-8")),
+            )
+
+            self.assertEqual(result["status"], "completed")
+            self.assertEqual((app_dir / "owl_280526.mp3").read_bytes(), b"Replacement text")
+            self.assertEqual((docs_dir / "owl_280526.mp3").read_bytes(), b"Replacement text")
+            self.assertEqual(
+                result["changed_files"],
+                [
+                    "ColorsAndNumbers/web_colors_numbers/owl_280526.mp3",
+                    "docs/colors-numbers/owl_280526.mp3",
+                ],
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

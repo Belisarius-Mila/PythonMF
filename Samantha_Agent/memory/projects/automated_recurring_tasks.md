@@ -5,6 +5,19 @@
 Zalozeno 2026-05-20 jako obecna infrastruktura pro bezpecne automaticke
 spousteni opakujicich se ukolu v projektu `Samantha_Agent`.
 
+## Aktualni navazani 2026-07-13
+
+- Dnesni automaticky vytvorene `owl_130726.mp3` bylo na Miluv pokyn nahrazeno
+  novou promluvou a cache verze aplikace se zvedla z `20260713a` na
+  `20260713b`, aby klienti nestahovali starsi zvuk.
+- `--force` u CSV sovího workflow nově skutecne regeneruje i existujici denni
+  MP3; bez `--force` zustava idempotentni no-op.
+- Navrh male soukrome galerie nejvyse tri fotografii byl odlozen bez
+  implementace. Bezpecny navrh je v
+  `handoffs/colors_numbers_private_photo_gallery_proposal_2026_07_13.md`.
+- Rodinne fotografie nesmi jit do verejneho repozitare ani GitHub Pages;
+  doporucena prvni verze je lokalni `IndexedDB` bez synchronizace.
+
 ## Aktualni kanonicky stav 2026-05-26
 
 Automaticke opakujici se ukoly maji dve vrstvy:
