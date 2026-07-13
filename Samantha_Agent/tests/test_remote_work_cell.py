@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from app.codex_appserver import AppServerError
-from app.remote_work_cell import RemoteWorkspaceManager
+from app.remote_work_cell import RemoteWorkCellService, RemoteWorkspaceManager
 
 
 def git(cwd: Path, *args: str) -> str:
@@ -43,6 +43,45 @@ def make_source(root: Path) -> Path:
 
 
 class RemoteWorkspaceManagerTests(unittest.TestCase):
+    def test_service_sync_response_preserves_connected_thread_status(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+
+            class FakeWorkspace:
+                project_root = root
+
+                def status(self):
+                    return {
+                        "ok": True,
+                        "prepared": True,
+                        "dirty": False,
+                        "remotes": [],
+                        "head": "new-head",
+                    }
+
+                def sync_from_main(self, *, confirmed: bool):
+                    self.confirmed = confirmed
+                    return {**self.status(), "synced": True}
+
+            class FakeLab:
+                def status(self):
+                    return {"ok": True, "connection_state": "connected", "thread_ready": True}
+
+            workspace = FakeWorkspace()
+            service = RemoteWorkCellService(
+                workspace=workspace,
+                state_path=root / "state.json",
+                profile_getter=lambda **_kwargs: {"model": "test-model"},
+            )
+            service._lab = FakeLab()
+
+            result = service.sync_from_main(confirmed=True)
+
+            self.assertTrue(workspace.confirmed)
+            self.assertTrue(result["synced"])
+            self.assertEqual(result["connection_state"], "connected")
+            self.assertTrue(result["thread_ready"])
+
     def test_prepare_creates_independent_main_clone_without_private_untracked_or_remote(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

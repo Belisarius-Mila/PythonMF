@@ -72,9 +72,14 @@ Co je hotove:
   behem pripravy, private/env/media cestu a vsechny mazaci, prejmenovaci nebo
   netypicke Git zmeny. Po aktualizaci overi shodu HEAD, cisty strom a zadny
   remote. Pracovni turn je pri zastaralem zakladu v UI zablokovany.
-- Osm realnych Git testu pokryva fast-forward i odmitnuti nepotvrzeneho, dirty,
+- Devet realnych Git/service testu pokryva fast-forward i odmitnuti nepotvrzeneho, dirty,
   diverged a mazaciho scenare; HTTP/UI testy pokryvaji novou routu a tlacitko.
-  Plna gate ma 650 testu a `javascript syntax: OK`.
+  Plna gate ma 651 testu a `javascript syntax: OK`.
+- Prvni ziva synchronizace pres nasazene HTTP API uspesne posunula izolovany
+  workspace z `dc9c3e0` na `94a807b` za 2,34 s; prevzala deset povolenych uprav,
+  vysledny HEAD odpovidal source main, strom byl cisty a Git remote prazdny.
+- Synchronizacni odpoved zachovava i skutecny connection/thread status, aby UI
+  pred naslednym refreshem neprobliklo jako odpojene.
 
 Co neni hotove:
 - Chybi kratky rucni iPhone retest nasazeneho Cockpit rozhrani a prvni maly

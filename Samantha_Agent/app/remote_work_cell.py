@@ -551,7 +551,8 @@ class RemoteWorkCellService:
     def sync_from_main(self, *, confirmed: bool) -> dict[str, Any]:
         with self._lock:
             result = self.workspace.sync_from_main(confirmed=confirmed)
-            return self._merge_status({"ok": True, **result})
+            lab_status = self._lab.status() if self._lab is not None else {}
+            return self._merge_status({**lab_status, **result, "ok": True})
 
     def new_thread(self, *, label: str = "") -> dict[str, Any]:
         return self._merge_status(self._service().new_thread(label=label, role="Adam Remote"))
