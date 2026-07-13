@@ -52,6 +52,13 @@ Co je hotove:
 - Oprava je nasazena s code stampem `6402cd5e478fab4a`; Tailscale mereni po
   restartu: HTML 0,03 s, health 0,005 s, hlavni status 1,65 s a Remote status
   1,09 s. Ulozeny Remote thread je znovu pripojeny.
+- Nasledny retest na Macu i iPhonu ukazal, ze timeouty nebyly hlavni pricinou:
+  novy Remote UI blok mel v renderovanem JavaScriptu neescapovany novy radek,
+  ktery zpusobil syntaktickou chybu celeho Cockpit skriptu. Serverove endpointy
+  proto odpovidaly, ale frontend se vubec nespustil.
+- Escapovani je opravene a quality gate nove kontroluje primo kompletni
+  renderovany JavaScript prikazem `node --check -`. Gate po teto oprave prosla
+  645 testu a samostatne hlasi `javascript syntax: OK`.
 
 Co neni hotove:
 - Chybi kratky rucni iPhone retest nasazeneho Cockpit rozhrani a prvni maly

@@ -16689,7 +16689,7 @@ COCKPIT_HTML = """<!doctype html>
       ].filter(Boolean).join(" · ");
       const changes = Array.isArray(workspace.changes) ? workspace.changes : [];
       remoteWorkChanges.textContent = changes.length
-        ? changes.map((row) => `${row.status || "??"} ${row.path || ""}`).join("\n")
+        ? changes.map((row) => `${row.status || "??"} ${row.path || ""}`).join("\\n")
         : "Bez změn.";
       const activeId = String(data.active_registry_id || "");
       remoteWorkActiveRegistryId = activeId;
@@ -16698,7 +16698,7 @@ COCKPIT_HTML = """<!doctype html>
         remoteWorkCapsuleObjective.value = capsule.objective || "";
         remoteWorkCapsuleState.value = capsule.current_state || "";
         remoteWorkCapsuleNext.value = capsule.next_step || "";
-        remoteWorkCapsuleConstraints.value = Array.isArray(capsule.constraints) ? capsule.constraints.join("\n") : "";
+        remoteWorkCapsuleConstraints.value = Array.isArray(capsule.constraints) ? capsule.constraints.join("\\n") : "";
         remoteWorkCapsuleLoadedFor = activeId;
       }
       remoteWorkPrepareBtn.disabled = prepared;
@@ -16781,7 +16781,7 @@ COCKPIT_HTML = """<!doctype html>
 
     async function saveRemoteWorkCapsule() {
       if (!remoteWorkActiveRegistryId) return;
-      const constraints = remoteWorkCapsuleConstraints.value.split("\n").map((item) => item.trim()).filter(Boolean);
+      const constraints = remoteWorkCapsuleConstraints.value.split("\\n").map((item) => item.trim()).filter(Boolean);
       if (constraints.length > 6) {
         remoteWorkStatus.textContent = "Context Capsule smí mít nejvýše 6 řádků omezení.";
         return;

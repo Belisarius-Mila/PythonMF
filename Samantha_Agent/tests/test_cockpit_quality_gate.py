@@ -12,6 +12,7 @@ from scripts.cockpit_quality_gate import (
     TEST_MODULES,
     SourceMetrics,
     architecture_messages,
+    cockpit_javascript_source,
     source_metrics,
     run_checked,
 )
@@ -52,6 +53,13 @@ async def second():
         self.assertEqual(len(ARCHITECTURE_BASELINES), 2)
         self.assertTrue(any("app/cockpit.py" in message for message in messages))
         self.assertTrue(any("app/speech/adam_voice_mode.py" in message for message in messages))
+
+    def test_cockpit_javascript_source_extracts_rendered_script(self) -> None:
+        source = cockpit_javascript_source()
+
+        self.assertIn("async function refresh(", source)
+        self.assertIn('join("\\n")', source)
+        self.assertNotIn("</script>", source)
 
     def test_failed_ci_command_emits_safe_github_annotation(self) -> None:
         completed = type(

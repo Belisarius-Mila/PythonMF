@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import ast
 import os
+import re
 import subprocess
 import sys
 import time
@@ -154,7 +155,7 @@ def architecture_messages() -> list[str]:
     return messages
 
 
-def run_checked(label: str, command: Sequence[str]) -> None:
+def run_checked(label: str, command: Sequence[str], *, input_text: str | None = None) -> None:
     print(f"\n[{label}] {' '.join(command)}", flush=True)
     started = time.monotonic()
     completed = subprocess.run(
@@ -163,6 +164,7 @@ def run_checked(label: str, command: Sequence[str]) -> None:
         check=False,
         capture_output=True,
         text=True,
+        input=input_text,
     )
     elapsed = time.monotonic() - started
     if completed.stdout:
@@ -176,6 +178,18 @@ def run_checked(label: str, command: Sequence[str]) -> None:
             print(f"::error title={label} failed::{escaped}", flush=True)
         raise SystemExit(f"{label} failed with exit code {completed.returncode} after {elapsed:.1f}s")
     print(f"{label}: OK ({elapsed:.1f}s)", flush=True)
+
+
+def cockpit_javascript_source() -> str:
+    project_root = str(PROJECT_ROOT)
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
+    from app.cockpit import COCKPIT_HTML
+
+    scripts = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script>", COCKPIT_HTML, flags=re.DOTALL)
+    if not scripts:
+        raise SystemExit("javascript syntax failed: Cockpit HTML neobsahuje script blok")
+    return "\n".join(scripts)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -205,6 +219,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     run_checked(
         "syntax",
         [sys.executable, "-W", "error::SyntaxWarning", "-m", "py_compile", *COMPILE_PATHS],
+    )
+    run_checked(
+        "javascript syntax",
+        ["node", "--check", "-"],
+        input_text=cockpit_javascript_source(),
     )
     run_checked("shell syntax", ["/bin/zsh", "-n", *SHELL_PATHS])
     if not args.skip_unit_tests:
