@@ -133,6 +133,29 @@ class AppServerLabServiceTests(unittest.TestCase):
         self.assertEqual(status["connection_state"], "disconnected")
         self.assertEqual(FakeClient.instances, [])
 
+    def test_status_caches_immutable_codex_version(self) -> None:
+        calls = 0
+
+        def version_getter(*_args: object) -> FakeVersion:
+            nonlocal calls
+            calls += 1
+            return FakeVersion()
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            service = AppServerLabService(
+                state_path=root / "state.json",
+                project_root=root,
+                client_factory=FakeClient,
+                version_getter=version_getter,
+            )
+            first = service.status()
+            second = service.status()
+
+        self.assertEqual(calls, 1)
+        self.assertEqual(first["version"], second["version"])
+        self.assertEqual(FakeClient.instances, [])
+
     def test_new_thread_send_and_duplicate_are_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

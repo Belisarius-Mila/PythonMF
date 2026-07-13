@@ -30,6 +30,9 @@ def url_ok(host: str, port: int, *, timeout: float = 2.0) -> bool:
 def port_is_busy(host: str, port: int) -> bool:
     """Return True when a new local server cannot bind this port."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        # Cockpit server uses address reuse. Match it here so a closed listener
+        # in TIME_WAIT is not mistaken for a live process holding the port.
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             sock.bind((host, port))
         except OSError:

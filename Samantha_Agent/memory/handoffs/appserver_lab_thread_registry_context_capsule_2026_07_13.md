@@ -28,6 +28,9 @@ Co je hotove:
   primo k jednomu textovemu user itemu kazdeho dalsiho `turn/start`. V lokalni
   historii a UI zustava jen puvodni Milova zprava; nepridava se druhy user item,
   skryty turn ani chatovy fulltext.
+- Nasazeny rucni retest opravene varianty z iPhonu vratil spravny kontrolni kod
+  z capsule misto starsiho kontrolniho slova. Predani Context Capsule je timto
+  funkcne potvrzene.
 - Izolovany Cockpit LAB panel umi zobrazit registr, zalozit pojmenovanou relaci,
   explicitne prepnout relaci a upravit/ulozit capsule.
 - Vyber relace pouziva app-server `threadId`; stale plati sandbox `read-only` a
@@ -35,7 +38,7 @@ Co je hotove:
 - Automaticke testy overuji oddeleni dvou relaci, idempotenci, lifecycle,
   migraci stareho stavu, limity capsule, jeji revizi v odchozim turnu a prave
   jednu user polozku.
-- Cockpit quality gate dokoncil 630 testu bez chyby. Samostatny Node syntax check
+- Cockpit quality gate dokoncil 636 testu bez chyby. Samostatny Node syntax check
   overil vysledny JavaScript.
 - HTTP smoke test na docasnem portu nacetl nove ovladaci prvky a stavajici
   private stav jako schema v2. Neodeslal zpravu, nevytvoril novy realny thread a
@@ -45,21 +48,28 @@ Co neni hotove:
 - Mila rucne overil z iPhonu zachovani puvodni historie, zalozeni druhe relace,
   navaznost, oddeleni relaci, pet casu, prepinani, disconnect a resume. Tyto
   casti prosly.
-- Ceka se na jediny rucni retest opraveneho primeho predani capsule v dalsim
-  turnu; restart LAB app-serveru uz k aplikaci capsule neni potreba.
-- Pri kontrolovanem plnem restartu Cockpitu se stary proces bezpecne ukoncil,
-  ale automaticky start se kvuli prechodne obsazenemu portu nedokoncil. Standardni
-  start Cockpit obnovil. Toto male restart/port race riziko zustava k pozdejsi
-  samostatne oprave; netyka se tlacitka `Restartovat LAB app-server`.
+- Mila pri retestu hlasil pomaly start Cockpitu pres Tailscale, priblizne 40 s,
+  a pomale otevreni LAB panelu. Mereni ukazalo, ze Tailscale transport byl rychly
+  (spojeni radove 2 ms, hlavni HTML kolem 10 ms); zdrzeni bylo v lokalnim
+  lifecycle/status kodu.
+- Supervisor po ukonceni serveru testoval port bez `SO_REUSEADDR`, a proto mohl
+  `TIME_WAIT` povazovat za zivy obsazeny port a cekat v 10s cyklech. Port probe
+  v supervisoru i launcheru je opraveny, restart health limit zvysen z 12 na
+  25 s a testy nove zahrnuji i restart modul.
+- LAB status opakovane spoustel `codex --version`, coz stabilne stalo asi 0,33 s.
+  Nemenna verze se nyni po prvnim uspesnem zjisteni cacheuje.
+- Hlavni `/api/status` stale trva priblizne 1,1-1,4 s; nejpomalejsi byla zmrazena
+  VoiceBridge status vetev kolem 0,7 s. V teto davce nebyla menena, aby zustal
+  dodrzeny freeze mimo novy LAB a presne ohranicenou lifecycle opravu.
 - Zatim neni editace nazvu, archivace ani mazani relaci. Nic se nema mazat bez
   noveho vyslovneho rozhodnuti.
 - LAB stale neni finalni plnohodnotny chat Janicky. Hlas a TVBCP zustavaji
   samostatne pozdejsi vrstvy.
 
 Dalsi krok:
-- Po nasazeni opraveneho kodu v existujici `LAB B` polozit jednu jednoznacnou
-  otazku na kontrolni kod z capsule. Karta zpravy ma ukazat revizi capsule a
-  odpoved ma pouzit capsule, ne starsi kontrolni slovo z historie.
+- Po nasazeni port/cache opravy provest jeden mereny plny restart Cockpitu a
+  overit novy code stamp lokalne i pres Tailscale. Potom z iPhonu subjektivne
+  overit rychlost otevreni hlavniho Cockpitu a LAB panelu.
 
 Navrhovane dalsi kroky:
 - Po uspesnem rucnim testu doplnit maly restart-Mac/Cockpit recovery test.

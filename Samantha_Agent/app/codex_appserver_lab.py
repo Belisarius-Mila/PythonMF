@@ -177,6 +177,7 @@ class AppServerLabService:
         self.version_getter = version_getter
         self.codex_binary = codex_binary
         self._client: CodexAppServerClient | None = None
+        self._version_cache: dict[str, Any] | None = None
         self._lock = threading.RLock()
         self._state = self._load_state()
         self._state["connection_state"] = "disconnected"
@@ -312,17 +313,21 @@ class AppServerLabService:
         }
 
     def _version_payload(self) -> dict[str, Any]:
+        if self._version_cache is not None:
+            return dict(self._version_cache)
         try:
             version = self.version_getter(self.codex_binary)
         except AppServerError as exc:
             return {"ok": False, "raw": "", "message": str(exc)}
-        return {
+        payload = {
             "ok": True,
             "raw": version.raw,
             "major": version.major,
             "minor": version.minor,
             "patch": version.patch,
         }
+        self._version_cache = payload
+        return dict(payload)
 
     def status(self) -> dict[str, Any]:
         with self._lock:

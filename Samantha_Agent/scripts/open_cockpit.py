@@ -209,6 +209,9 @@ def port_is_busy(host: str, port: int) -> bool:
     can bind, so test the actual bind operation.
     """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        # Match ThreadingHTTPServer's reuse behavior; TIME_WAIT alone must not
+        # force a fallback port or block a controlled restart.
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             sock.bind((host, port))
         except OSError:

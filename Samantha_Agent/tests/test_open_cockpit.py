@@ -5,10 +5,37 @@ from pathlib import Path
 from unittest.mock import patch
 
 from app.cockpit_code_stamp import COCKPIT_CODE_STAMP_PATHS, default_cockpit_code_stamp_paths
-from scripts import open_cockpit
+from scripts import cockpit_launchd_runner, open_cockpit
 
 
 class OpenCockpitTests(unittest.TestCase):
+    def test_port_probes_allow_address_reuse_after_server_restart(self) -> None:
+        class FakeSocket:
+            def __init__(self):
+                self.options: list[tuple[int, int, int]] = []
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+            def setsockopt(self, level: int, option: int, value: int) -> None:
+                self.options.append((level, option, value))
+
+            def bind(self, _address: tuple[str, int]) -> None:
+                return None
+
+        for module in (open_cockpit, cockpit_launchd_runner):
+            with self.subTest(module=module.__name__):
+                fake = FakeSocket()
+                with patch.object(module.socket, "socket", return_value=fake):
+                    self.assertFalse(module.port_is_busy("127.0.0.1", 8770))
+                self.assertIn(
+                    (module.socket.SOL_SOCKET, module.socket.SO_REUSEADDR, 1),
+                    fake.options,
+                )
+
     def test_launcher_uses_shared_code_stamp_manifest(self) -> None:
         self.assertEqual(open_cockpit.CODE_STAMP_PATHS, COCKPIT_CODE_STAMP_PATHS)
         relative_paths = {str(path.relative_to(open_cockpit.PROJECT_DIR)) for path in COCKPIT_CODE_STAMP_PATHS}
