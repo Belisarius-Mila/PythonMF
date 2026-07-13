@@ -39,6 +39,10 @@ Co je hotove:
   mel presny ocekavany obsah a v hlavnim projektu nevznikl.
 - Po canary zustala izolovana Git kopie cista, bez Git remote; zdrojovy HEAD se
   nezmenil a odpovidal zakladnimu commitu kopie.
+- Cockpit byl pote restartovan s aktualnim code stampem, karta `Adam Remote` je
+  dostupna lokalne i pres Tailscale a ulozeny thread se uspesne znovu pripojil.
+- Nasazeny status znovu potvrdil `GPT-5.6-Sol`, reasoning `high`,
+  `workspace-write`, vypnutou sit, cisty workspace a prazdny seznam Git remote.
 
 Co neni hotove:
 - Chybi kratky rucni iPhone retest nasazeneho Cockpit rozhrani a prvni maly
@@ -49,8 +53,8 @@ Co neni hotove:
   nejdrive se ma zobrazit diff a predani ma zkontrolovat hlavni Adam.
 
 Dalsi krok:
-- Nasadit novy Cockpit, obnovit Adam Remote thread a z iPhonu provest maly
-  nedestruktivni ukol; pred checkpointem rucne zkontrolovat seznam zmen a diff.
+- Z iPhonu provest maly nedestruktivni ukol; pred checkpointem rucne
+  zkontrolovat seznam zmen a diff.
 
 Navrhovane dalsi kroky:
 - Rucne z iPhonu zadat prvni maly realny kodovy ukol a overit zmeny/testy/TVBCP.
