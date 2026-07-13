@@ -74,6 +74,7 @@ from app.autosave_service import (
 )
 from app.codex_appserver import AppServerError
 from app.codex_appserver_lab import APP_SERVER_LAB, AppServerLabService
+from app.remote_work_cell import REMOTE_WORK_CELL, RemoteWorkCellService
 from app.backup.activity_state import backup_activity_status
 from app.documents.case_service import (
     DocumentCaseDependencies,
@@ -8663,6 +8664,124 @@ def appserver_lab_tvbcp_append_action(
         }
 
 
+def remote_work_cell_status_action(
+    *, service: RemoteWorkCellService = REMOTE_WORK_CELL,
+) -> dict[str, Any]:
+    try:
+        return service.status()
+    except AppServerError as exc:
+        return {"ok": False, "status": "remote_status_failed", "message": str(exc)}
+
+
+def remote_work_cell_prepare_action(
+    payload: dict[str, Any],
+    *,
+    service: RemoteWorkCellService = REMOTE_WORK_CELL,
+) -> dict[str, Any]:
+    if payload.get("confirmed") is not True:
+        return {
+            "ok": False,
+            "status": "confirmation_required",
+            "message": "Vytvoření izolované lokální pracovní kopie vyžaduje potvrzení.",
+        }
+    try:
+        return service.prepare()
+    except AppServerError as exc:
+        return {"ok": False, "status": "remote_prepare_failed", "message": str(exc)}
+
+
+def remote_work_cell_new_thread_action(
+    payload: dict[str, Any],
+    *,
+    service: RemoteWorkCellService = REMOTE_WORK_CELL,
+) -> dict[str, Any]:
+    try:
+        return service.new_thread(label=safe_text(str(payload.get("label", "") or "")))
+    except AppServerError as exc:
+        return {"ok": False, "status": "remote_thread_start_failed", "message": str(exc)}
+
+
+def remote_work_cell_resume_action(
+    *, service: RemoteWorkCellService = REMOTE_WORK_CELL,
+) -> dict[str, Any]:
+    try:
+        return service.resume()
+    except AppServerError as exc:
+        return {"ok": False, "status": "remote_resume_failed", "message": str(exc)}
+
+
+def remote_work_cell_restart_action(
+    *, service: RemoteWorkCellService = REMOTE_WORK_CELL,
+) -> dict[str, Any]:
+    try:
+        return service.restart()
+    except AppServerError as exc:
+        return {"ok": False, "status": "remote_restart_failed", "message": str(exc)}
+
+
+def remote_work_cell_capsule_update_action(
+    payload: dict[str, Any],
+    *,
+    service: RemoteWorkCellService = REMOTE_WORK_CELL,
+) -> dict[str, Any]:
+    raw_constraints = payload.get("constraints", [])
+    constraints = raw_constraints if isinstance(raw_constraints, list) else []
+    try:
+        return service.update_capsule(
+            registry_id=safe_text(str(payload.get("registry_id", "") or "")),
+            capsule={
+                "objective": safe_text(str(payload.get("objective", "") or "")),
+                "current_state": safe_text(str(payload.get("current_state", "") or "")),
+                "next_step": safe_text(str(payload.get("next_step", "") or "")),
+                "constraints": [safe_text(str(item or "")) for item in constraints],
+            },
+        )
+    except AppServerError as exc:
+        return {"ok": False, "status": "remote_capsule_failed", "message": str(exc)}
+
+
+def remote_work_cell_send_action(
+    payload: dict[str, Any],
+    *,
+    service: RemoteWorkCellService = REMOTE_WORK_CELL,
+) -> dict[str, Any]:
+    try:
+        return service.send(
+            text=safe_text(str(payload.get("message", "") or "")),
+            client_message_id=safe_text(str(payload.get("client_message_id", "") or "")),
+            client_sent_at=safe_text(str(payload.get("client_sent_at", "") or "")),
+        )
+    except AppServerError as exc:
+        return {"ok": False, "status": "remote_send_failed", "message": str(exc)}
+
+
+def remote_work_cell_tvbcp_append_action(
+    payload: dict[str, Any],
+    *,
+    service: RemoteWorkCellService = REMOTE_WORK_CELL,
+) -> dict[str, Any]:
+    try:
+        return service.save_message_to_tvbcp(
+            client_message_id=safe_text(str(payload.get("client_message_id", "") or "")),
+        )
+    except AppServerError as exc:
+        return {"ok": False, "status": "remote_tvbcp_failed", "message": str(exc)}
+
+
+def remote_work_cell_checkpoint_action(
+    payload: dict[str, Any],
+    *,
+    service: RemoteWorkCellService = REMOTE_WORK_CELL,
+) -> dict[str, Any]:
+    try:
+        return service.checkpoint(
+            confirmed=payload.get("confirmed") is True,
+            message=safe_text(str(payload.get("message", "") or "")),
+        )
+    except AppServerError as exc:
+        return {"ok": False, "status": "remote_checkpoint_failed", "message": str(exc)}
+
+
 def janicka_chat_memory_context(
     *,
     cookbook_path: Path = JANICKA_COOKBOOK_PATH,
@@ -9156,6 +9275,70 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "risk": "private_write",
         "confirmation": "explicit_lab_button",
         "handler_name": "appserver_lab_tvbcp_append_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/appserver-remote/prepare",
+        "label": "Pripravit izolovanou Remote Work Cell",
+        "risk": "private_write",
+        "confirmation": "explicit_remote_button",
+        "handler_name": "remote_work_cell_prepare_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/appserver-remote/thread/new",
+        "label": "Zalozit zapisujici Adam Remote thread",
+        "risk": "local_service",
+        "confirmation": "explicit_remote_button",
+        "handler_name": "remote_work_cell_new_thread_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/appserver-remote/thread/resume",
+        "label": "Obnovit Adam Remote thread",
+        "risk": "local_service",
+        "confirmation": "explicit_remote_button",
+        "handler_name": "remote_work_cell_resume_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/appserver-remote/restart",
+        "label": "Restartovat Adam Remote app-server",
+        "risk": "local_service",
+        "confirmation": "explicit_remote_button",
+        "handler_name": "remote_work_cell_restart_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/appserver-remote/capsule/update",
+        "label": "Ulozit Adam Remote Context Capsule",
+        "risk": "private_write",
+        "confirmation": "explicit_remote_button",
+        "handler_name": "remote_work_cell_capsule_update_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/appserver-remote/send",
+        "label": "Odeslat zapisujici Adam Remote turn",
+        "risk": "workspace_write",
+        "confirmation": "explicit_remote_send",
+        "handler_name": "remote_work_cell_send_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/appserver-remote/tvbcp/append",
+        "label": "Ulozit Adam Remote vymenu do TVBCP",
+        "risk": "private_write",
+        "confirmation": "explicit_remote_button",
+        "handler_name": "remote_work_cell_tvbcp_append_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/appserver-remote/checkpoint",
+        "label": "Vytvorit lokalni Adam Remote WIP checkpoint",
+        "risk": "workspace_write",
+        "confirmation": "explicit_remote_checkpoint",
+        "handler_name": "remote_work_cell_checkpoint_action",
         "test_level": "direct",
     },
     {
@@ -9784,6 +9967,9 @@ class CockpitServer:
                 if parsed.path == "/api/appserver-lab/status":
                     self.respond_json(appserver_lab_status_action())
                     return
+                if parsed.path == "/api/appserver-remote/status":
+                    self.respond_json(remote_work_cell_status_action())
+                    return
                 if parsed.path == "/api/server/health":
                     self.respond_json(server_health_status(host=cockpit_host, port=cockpit_port))
                     return
@@ -10006,6 +10192,36 @@ class CockpitServer:
                 if parsed.path == "/api/appserver-lab/tvbcp/append":
                     payload = self.read_json()
                     self.respond_json(appserver_lab_tvbcp_append_action(payload))
+                    return
+                if parsed.path == "/api/appserver-remote/prepare":
+                    payload = self.read_json()
+                    self.respond_json(remote_work_cell_prepare_action(payload))
+                    return
+                if parsed.path == "/api/appserver-remote/thread/new":
+                    payload = self.read_json()
+                    self.respond_json(remote_work_cell_new_thread_action(payload))
+                    return
+                if parsed.path == "/api/appserver-remote/thread/resume":
+                    self.respond_json(remote_work_cell_resume_action())
+                    return
+                if parsed.path == "/api/appserver-remote/restart":
+                    self.respond_json(remote_work_cell_restart_action())
+                    return
+                if parsed.path == "/api/appserver-remote/capsule/update":
+                    payload = self.read_json()
+                    self.respond_json(remote_work_cell_capsule_update_action(payload))
+                    return
+                if parsed.path == "/api/appserver-remote/send":
+                    payload = self.read_json()
+                    self.respond_json(remote_work_cell_send_action(payload))
+                    return
+                if parsed.path == "/api/appserver-remote/tvbcp/append":
+                    payload = self.read_json()
+                    self.respond_json(remote_work_cell_tvbcp_append_action(payload))
+                    return
+                if parsed.path == "/api/appserver-remote/checkpoint":
+                    payload = self.read_json()
+                    self.respond_json(remote_work_cell_checkpoint_action(payload))
                     return
                 if parsed.path == "/api/janicka/chat":
                     payload = self.read_json()
@@ -12454,6 +12670,11 @@ COCKPIT_HTML = """<!doctype html>
     .appserver-lab-compose textarea { min-height: 92px; resize: vertical; }
     .appserver-lab-lifecycle { display: grid; gap: 6px; max-height: 210px; overflow: auto; }
     .appserver-lab-lifecycle-event { border: 1px solid #dbe3ee; border-radius: 7px; padding: 8px; background: #fbfcfe; display: grid; gap: 3px; }
+    .remote-work-modal { width: min(960px, 100%); }
+    .remote-work-banner { border: 1px solid #60a5fa; border-radius: 8px; padding: 10px; background: #eff6ff; color: #1e3a8a; font-size: 13px; line-height: 1.45; }
+    .remote-work-profile { display: flex; flex-wrap: wrap; gap: 7px; }
+    .remote-work-changes { border: 1px solid #dbe3ee; border-radius: 8px; padding: 10px; background: #fbfcfe; display: grid; gap: 6px; }
+    .remote-work-changes pre { max-height: 180px; overflow: auto; }
     @media (max-width: 760px) { .appserver-lab-registry, .appserver-lab-capsule-grid { grid-template-columns: 1fr; } }
     .app-list { display: grid; gap: 9px; }
     .app-card { border: 1px solid #edf0f4; border-radius: 8px; padding: 11px; background: #fbfcfe; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; }
@@ -12586,6 +12807,7 @@ COCKPIT_HTML = """<!doctype html>
     <div class="toolbar">
       <button class="janicka-button" id="janickaBtn">Janička</button>
       <button class="secondary" id="appserverLabOpenBtn">App-server LAB</button>
+      <button class="primary" id="remoteWorkOpenBtn">Adam Remote</button>
       <button class="secondary" id="refreshBtn">Obnovit</button>
       <button class="secondary" id="webAppsBtn">Webové aplikace</button>
       <button class="secondary" id="libraryBtn">Knihovna</button>
@@ -13417,6 +13639,81 @@ COCKPIT_HTML = """<!doctype html>
       </div>
     </div>
   </div>
+  <div id="remoteWorkModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="remoteWorkTitle">
+    <div class="modal remote-work-modal">
+      <div class="modal-header">
+        <h2 id="remoteWorkTitle">Adam Remote – pracovní buňka</h2>
+        <button class="secondary" id="remoteWorkCloseBtn">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div class="remote-work-banner">
+          Skutečná zapisující práce v izolované lokální kopii: reasoning high, workspace-write, síť vypnutá, bez private dat a bez Git remote. Hlavní pracovní strom ani GitHub se nemění.
+        </div>
+        <div id="remoteWorkStatus" class="status-line">Remote Work Cell se načte až po otevření panelu.</div>
+        <div id="remoteWorkProfile" class="remote-work-profile"></div>
+        <div class="appserver-lab-registry">
+          <div class="appserver-lab-field">
+            <label for="remoteWorkNewLabel">Název pracovní relace</label>
+            <input id="remoteWorkNewLabel" maxlength="60" placeholder="Například: Nové rozhraní aplikace">
+          </div>
+          <button class="secondary" id="remoteWorkPrepareBtn">Připravit izolovanou kopii</button>
+          <button class="primary" id="remoteWorkNewBtn">Nová pracovní relace</button>
+        </div>
+        <div class="appserver-lab-controls">
+          <button class="secondary" id="remoteWorkResumeBtn">Obnovit relaci</button>
+          <button class="secondary" id="remoteWorkRestartBtn">Restartovat app-server</button>
+          <button class="secondary" id="remoteWorkRefreshBtn">Obnovit stav</button>
+        </div>
+        <div class="remote-work-changes">
+          <strong>Izolovaný pracovní strom</strong>
+          <div id="remoteWorkWorkspaceStatus" class="appserver-lab-message-meta">Zatím nenačteno.</div>
+          <pre id="remoteWorkChanges">Bez změn.</pre>
+        </div>
+        <div class="appserver-lab-capsule">
+          <strong>Context Capsule / aktivní předání</strong>
+          <div class="appserver-lab-capsule-grid">
+            <div class="appserver-lab-field">
+              <label for="remoteWorkCapsuleObjective">Cíl</label>
+              <textarea id="remoteWorkCapsuleObjective" maxlength="600"></textarea>
+            </div>
+            <div class="appserver-lab-field">
+              <label for="remoteWorkCapsuleState">Aktuální stav</label>
+              <textarea id="remoteWorkCapsuleState" maxlength="600"></textarea>
+            </div>
+            <div class="appserver-lab-field">
+              <label for="remoteWorkCapsuleNext">Další krok</label>
+              <textarea id="remoteWorkCapsuleNext" maxlength="600"></textarea>
+            </div>
+          </div>
+          <div class="appserver-lab-field">
+            <label for="remoteWorkCapsuleConstraints">Omezení – nejvýše 6 řádků</label>
+            <textarea id="remoteWorkCapsuleConstraints" maxlength="1206"></textarea>
+          </div>
+          <div class="appserver-lab-controls">
+            <button class="secondary" id="remoteWorkCapsuleSaveBtn">Uložit capsule</button>
+          </div>
+        </div>
+        <div id="remoteWorkLog" class="appserver-lab-log" aria-live="polite"></div>
+        <div class="appserver-lab-compose">
+          <label for="remoteWorkInput">Pracovní pokyn</label>
+          <textarea id="remoteWorkInput" spellcheck="true" placeholder="Popiš konkrétní změnu, kterou má Adam Remote provést a otestovat."></textarea>
+          <div class="appserver-lab-controls">
+            <button class="primary" id="remoteWorkSendBtn">Provést v izolované kopii</button>
+          </div>
+        </div>
+        <div class="remote-work-changes">
+          <strong>Lokální WIP checkpoint</strong>
+          <div class="appserver-lab-field">
+            <label for="remoteWorkCheckpointMessage">Krátký popis checkpointu</label>
+            <input id="remoteWorkCheckpointMessage" maxlength="120" placeholder="WIP Remote Adam checkpoint">
+          </div>
+          <div class="appserver-lab-controls">
+            <button class="secondary" id="remoteWorkCheckpointBtn">Checkpoint bez pushnutí</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div id="tvbcpModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="tvbcpTitle">
     <div class="modal tvbcp-modal">
       <div class="modal-header">
@@ -13592,6 +13889,29 @@ COCKPIT_HTML = """<!doctype html>
     const appserverLabCapsuleSaveBtn = document.getElementById("appserverLabCapsuleSaveBtn");
     const appserverLabInput = document.getElementById("appserverLabInput");
     const appserverLabSendBtn = document.getElementById("appserverLabSendBtn");
+    const remoteWorkOpenBtn = document.getElementById("remoteWorkOpenBtn");
+    const remoteWorkModal = document.getElementById("remoteWorkModal");
+    const remoteWorkCloseBtn = document.getElementById("remoteWorkCloseBtn");
+    const remoteWorkStatus = document.getElementById("remoteWorkStatus");
+    const remoteWorkProfile = document.getElementById("remoteWorkProfile");
+    const remoteWorkNewLabel = document.getElementById("remoteWorkNewLabel");
+    const remoteWorkPrepareBtn = document.getElementById("remoteWorkPrepareBtn");
+    const remoteWorkNewBtn = document.getElementById("remoteWorkNewBtn");
+    const remoteWorkResumeBtn = document.getElementById("remoteWorkResumeBtn");
+    const remoteWorkRestartBtn = document.getElementById("remoteWorkRestartBtn");
+    const remoteWorkRefreshBtn = document.getElementById("remoteWorkRefreshBtn");
+    const remoteWorkWorkspaceStatus = document.getElementById("remoteWorkWorkspaceStatus");
+    const remoteWorkChanges = document.getElementById("remoteWorkChanges");
+    const remoteWorkCapsuleObjective = document.getElementById("remoteWorkCapsuleObjective");
+    const remoteWorkCapsuleState = document.getElementById("remoteWorkCapsuleState");
+    const remoteWorkCapsuleNext = document.getElementById("remoteWorkCapsuleNext");
+    const remoteWorkCapsuleConstraints = document.getElementById("remoteWorkCapsuleConstraints");
+    const remoteWorkCapsuleSaveBtn = document.getElementById("remoteWorkCapsuleSaveBtn");
+    const remoteWorkLog = document.getElementById("remoteWorkLog");
+    const remoteWorkInput = document.getElementById("remoteWorkInput");
+    const remoteWorkSendBtn = document.getElementById("remoteWorkSendBtn");
+    const remoteWorkCheckpointMessage = document.getElementById("remoteWorkCheckpointMessage");
+    const remoteWorkCheckpointBtn = document.getElementById("remoteWorkCheckpointBtn");
     const tvbcpModal = document.getElementById("tvbcpModal");
     const tvbcpCloseBtn = document.getElementById("tvbcpCloseBtn");
     const tvbcpRefreshBtn = document.getElementById("tvbcpRefreshBtn");
@@ -16250,6 +16570,285 @@ COCKPIT_HTML = """<!doctype html>
         button.textContent = original;
         appserverLabStatus.textContent = `TVBCP uložení selhalo: ${err}`;
       }
+    }
+
+    let remoteWorkMessages = [];
+    let remoteWorkActiveRegistryId = "";
+    let remoteWorkCapsuleLoadedFor = "";
+
+    function renderRemoteWorkProfile(data) {
+      remoteWorkProfile.innerHTML = "";
+      const profile = data.runtime_profile || data.execution_profile || {};
+      const workspace = data.workspace || {};
+      const labels = [
+        `Model: ${profile.display_name || profile.model || "nezjištěn"}`,
+        `Reasoning: ${profile.reasoning_effort || "—"}`,
+        `Sandbox: ${profile.sandbox_mode || "—"}`,
+        `Síť: ${profile.network_access === false ? "vypnutá" : "—"}`,
+        `Git remote: ${Array.isArray(workspace.remotes) && workspace.remotes.length ? "VAROVÁNÍ" : "žádný"}`,
+      ];
+      labels.forEach((label) => {
+        const pill = document.createElement("span");
+        pill.className = "pill";
+        pill.textContent = label;
+        remoteWorkProfile.appendChild(pill);
+      });
+    }
+
+    function renderRemoteWorkMessages() {
+      remoteWorkLog.innerHTML = "";
+      if (!remoteWorkMessages.length) {
+        const empty = document.createElement("div");
+        empty.className = "muted";
+        empty.textContent = "Zatím nebyl proveden žádný vzdálený pracovní turn.";
+        remoteWorkLog.appendChild(empty);
+        return;
+      }
+      remoteWorkMessages.forEach((entry) => {
+        const card = document.createElement("div");
+        const status = String(entry.status || "");
+        card.className = `appserver-lab-message ${status === "failed" ? "failed" : status !== "completed" ? "pending" : ""}`.trim();
+        const user = document.createElement("div");
+        user.className = "appserver-lab-message-user";
+        user.textContent = entry.user_text || "";
+        const meta = document.createElement("div");
+        meta.className = "appserver-lab-message-meta";
+        meta.textContent = [
+          `Kliknutí: ${appserverLabLocalTime(entry.client_sent_at)}`,
+          `Dokončeno: ${appserverLabLocalTime(entry.completed_at)}`,
+          `Stav: ${status || "odesílám"}`,
+          entry.capsule_attached ? `Capsule revize ${Number(entry.capsule_revision_sent || 0)}` : "bez capsule",
+        ].join(" · ");
+        card.appendChild(user);
+        card.appendChild(meta);
+        if (entry.answer) {
+          const answer = document.createElement("div");
+          answer.className = "appserver-lab-message-answer";
+          answer.textContent = entry.answer;
+          card.appendChild(answer);
+          const tvbcpButton = document.createElement("button");
+          tvbcpButton.className = "secondary";
+          tvbcpButton.type = "button";
+          tvbcpButton.textContent = entry.tvbcp_saved_at ? "Uloženo v TVBCP" : "Uložit do TVBCP";
+          tvbcpButton.disabled = Boolean(entry.tvbcp_saved_at);
+          tvbcpButton.addEventListener("click", () => saveRemoteWorkMessageToTvbcp(entry.client_message_id, tvbcpButton));
+          card.appendChild(tvbcpButton);
+        }
+        if (entry.error) {
+          const error = document.createElement("div");
+          error.className = "bad appserver-lab-message-meta";
+          error.textContent = `Nedokončeno: ${entry.error}`;
+          card.appendChild(error);
+        }
+        remoteWorkLog.appendChild(card);
+      });
+      window.requestAnimationFrame(() => {
+        remoteWorkLog.scrollTop = remoteWorkLog.scrollHeight;
+      });
+    }
+
+    function renderRemoteWorkStatus(data) {
+      const workspace = data.workspace || {};
+      const connected = data.connection_state === "connected";
+      const active = data.active_thread || {};
+      const prepared = Boolean(data.prepared || workspace.prepared);
+      if (Array.isArray(data.messages)) remoteWorkMessages = data.messages;
+      remoteWorkStatus.textContent = [
+        prepared ? "Buňka připravena" : "Buňka nepřipravena",
+        connected ? "app-server připojen" : "app-server odpojen",
+        active.label || "bez pracovní relace",
+        workspace.dirty ? `${Number(workspace.change_count || 0)} změn` : "čistý pracovní strom",
+      ].join(" · ");
+      renderRemoteWorkProfile(data);
+      remoteWorkWorkspaceStatus.textContent = [
+        workspace.message || "",
+        workspace.branch ? `větev ${workspace.branch}` : "",
+        workspace.head ? `HEAD ${appserverLabShortId(workspace.head)}` : "",
+        Number(workspace.source_pending_changes || 0) ? `hlavní strom má ${Number(workspace.source_pending_changes)} nezařazenou změnu` : "hlavní strom čistý",
+      ].filter(Boolean).join(" · ");
+      const changes = Array.isArray(workspace.changes) ? workspace.changes : [];
+      remoteWorkChanges.textContent = changes.length
+        ? changes.map((row) => `${row.status || "??"} ${row.path || ""}`).join("\n")
+        : "Bez změn.";
+      const activeId = String(data.active_registry_id || "");
+      remoteWorkActiveRegistryId = activeId;
+      if (activeId && activeId !== remoteWorkCapsuleLoadedFor) {
+        const capsule = active.capsule || {};
+        remoteWorkCapsuleObjective.value = capsule.objective || "";
+        remoteWorkCapsuleState.value = capsule.current_state || "";
+        remoteWorkCapsuleNext.value = capsule.next_step || "";
+        remoteWorkCapsuleConstraints.value = Array.isArray(capsule.constraints) ? capsule.constraints.join("\n") : "";
+        remoteWorkCapsuleLoadedFor = activeId;
+      }
+      remoteWorkPrepareBtn.disabled = prepared;
+      remoteWorkNewBtn.disabled = !prepared;
+      remoteWorkResumeBtn.disabled = !data.thread_ready || connected;
+      remoteWorkRestartBtn.disabled = !data.thread_ready;
+      remoteWorkCapsuleSaveBtn.disabled = !activeId;
+      remoteWorkSendBtn.disabled = !data.thread_ready;
+      remoteWorkCheckpointBtn.disabled = !prepared || !workspace.dirty;
+      renderRemoteWorkMessages();
+    }
+
+    async function refreshRemoteWorkStatus() {
+      try {
+        renderRemoteWorkStatus(await fetchJson("/api/appserver-remote/status"));
+      } catch (err) {
+        recordFrontendError(err);
+        remoteWorkStatus.textContent = `Remote Work Cell status selhal: ${err}`;
+      }
+    }
+
+    async function openRemoteWorkModal() {
+      remoteWorkModal.classList.remove("hidden");
+      await refreshRemoteWorkStatus();
+      window.setTimeout(() => remoteWorkInput.focus(), 0);
+    }
+
+    function closeRemoteWorkModal() {
+      remoteWorkModal.classList.add("hidden");
+    }
+
+    async function runRemoteWorkControl(path, button, pendingText, payload = {}) {
+      const original = button.textContent;
+      let completedMessage = "";
+      button.disabled = true;
+      button.textContent = pendingText;
+      remoteWorkStatus.textContent = pendingText;
+      try {
+        const data = await postJson(path, payload);
+        if (!data.ok) throw new Error(data.message || "Remote Work Cell operace nebyla potvrzena.");
+        completedMessage = data.message || "Remote Work Cell operace dokončena.";
+        renderRemoteWorkStatus(data);
+      } catch (err) {
+        recordFrontendError(err);
+        remoteWorkStatus.textContent = `Remote Work Cell operace selhala: ${err}`;
+      } finally {
+        button.textContent = original;
+        await refreshRemoteWorkStatus();
+        if (completedMessage) remoteWorkStatus.textContent = completedMessage;
+      }
+    }
+
+    async function prepareRemoteWorkCell() {
+      if (!window.confirm("Vytvořit izolovanou lokální kopii main bez private dat a bez Git remote? Nic se nemaže ani nepushuje.")) return;
+      await runRemoteWorkControl(
+        "/api/appserver-remote/prepare",
+        remoteWorkPrepareBtn,
+        "Připravuji izolovanou kopii…",
+        {confirmed: true},
+      );
+    }
+
+    async function createRemoteWorkThread() {
+      if (!window.confirm("Založit novou zapisující relaci Adam Remote v izolované kopii?")) return;
+      await runRemoteWorkControl(
+        "/api/appserver-remote/thread/new",
+        remoteWorkNewBtn,
+        "Zakládám Adam Remote…",
+        {label: remoteWorkNewLabel.value.trim()},
+      );
+      remoteWorkNewLabel.value = "";
+      remoteWorkCapsuleLoadedFor = "";
+    }
+
+    async function saveRemoteWorkCapsule() {
+      if (!remoteWorkActiveRegistryId) return;
+      const constraints = remoteWorkCapsuleConstraints.value.split("\n").map((item) => item.trim()).filter(Boolean);
+      if (constraints.length > 6) {
+        remoteWorkStatus.textContent = "Context Capsule smí mít nejvýše 6 řádků omezení.";
+        return;
+      }
+      await runRemoteWorkControl(
+        "/api/appserver-remote/capsule/update",
+        remoteWorkCapsuleSaveBtn,
+        "Ukládám capsule…",
+        {
+          registry_id: remoteWorkActiveRegistryId,
+          objective: remoteWorkCapsuleObjective.value,
+          current_state: remoteWorkCapsuleState.value,
+          next_step: remoteWorkCapsuleNext.value,
+          constraints,
+        },
+      );
+      remoteWorkCapsuleLoadedFor = "";
+    }
+
+    async function submitRemoteWorkMessage() {
+      const text = remoteWorkInput.value.trim();
+      if (!text) {
+        remoteWorkStatus.textContent = "Napiš konkrétní pracovní pokyn.";
+        remoteWorkInput.focus();
+        return;
+      }
+      const clientSentAt = new Date().toISOString();
+      const clientMessageId = appserverLabMessageId();
+      const pendingEntry = {
+        client_message_id: clientMessageId,
+        user_text: text,
+        client_sent_at: clientSentAt,
+        completed_at: "",
+        status: "sending",
+        answer: "",
+      };
+      remoteWorkMessages.push(pendingEntry);
+      remoteWorkInput.value = "";
+      remoteWorkSendBtn.disabled = true;
+      remoteWorkStatus.textContent = `Pracovní turn přijat ${appserverLabLocalTime(clientSentAt)} · Adam Remote pracuje…`;
+      renderRemoteWorkMessages();
+      try {
+        const data = await postJson("/api/appserver-remote/send", {
+          message: text,
+          client_message_id: clientMessageId,
+          client_sent_at: clientSentAt,
+        });
+        if (data.entry) {
+          remoteWorkMessages = remoteWorkMessages.map((item) => item.client_message_id === clientMessageId ? data.entry : item);
+        }
+        if (!data.ok) throw new Error(data.message || "Adam Remote turn nebyl potvrzen.");
+        remoteWorkStatus.textContent = data.message || "Adam Remote turn dokončen.";
+      } catch (err) {
+        recordFrontendError(err);
+        pendingEntry.status = "failed";
+        pendingEntry.completed_at = new Date().toISOString();
+        pendingEntry.error = String(err);
+        remoteWorkStatus.textContent = `Adam Remote nedokončil turn: ${err}`;
+      } finally {
+        renderRemoteWorkMessages();
+        await refreshRemoteWorkStatus();
+        remoteWorkInput.focus();
+      }
+    }
+
+    async function saveRemoteWorkMessageToTvbcp(clientMessageId, button) {
+      const original = button.textContent;
+      button.disabled = true;
+      button.textContent = "Ukládám do TVBCP…";
+      try {
+        const data = await postJson("/api/appserver-remote/tvbcp/append", {client_message_id: clientMessageId});
+        if (!data.ok) throw new Error(data.message || "TVBCP uložení nebylo potvrzeno.");
+        if (data.entry) {
+          remoteWorkMessages = remoteWorkMessages.map((item) => item.client_message_id === clientMessageId ? data.entry : item);
+        }
+        remoteWorkStatus.textContent = data.message || "Výměna byla uložena do TVBCP.";
+        renderRemoteWorkMessages();
+      } catch (err) {
+        recordFrontendError(err);
+        button.disabled = false;
+        button.textContent = original;
+        remoteWorkStatus.textContent = `TVBCP uložení selhalo: ${err}`;
+      }
+    }
+
+    async function checkpointRemoteWorkCell() {
+      if (!window.confirm("Vytvořit lokální WIP commit pouze v izolované kopii? Nic se nebude pushovat ani přenášet do hlavního stromu.")) return;
+      await runRemoteWorkControl(
+        "/api/appserver-remote/checkpoint",
+        remoteWorkCheckpointBtn,
+        "Vytvářím lokální checkpoint…",
+        {confirmed: true, message: remoteWorkCheckpointMessage.value.trim()},
+      );
+      remoteWorkCheckpointMessage.value = "";
     }
 
     async function refreshTvbcpModal() {
@@ -20123,6 +20722,22 @@ COCKPIT_HTML = """<!doctype html>
         submitAppserverLabMessage();
       }
     });
+    remoteWorkOpenBtn.addEventListener("click", openRemoteWorkModal);
+    remoteWorkCloseBtn.addEventListener("click", closeRemoteWorkModal);
+    remoteWorkPrepareBtn.addEventListener("click", prepareRemoteWorkCell);
+    remoteWorkNewBtn.addEventListener("click", createRemoteWorkThread);
+    remoteWorkResumeBtn.addEventListener("click", () => runRemoteWorkControl("/api/appserver-remote/thread/resume", remoteWorkResumeBtn, "Obnovuji Adam Remote…"));
+    remoteWorkRestartBtn.addEventListener("click", () => runRemoteWorkControl("/api/appserver-remote/restart", remoteWorkRestartBtn, "Restartuji Adam Remote…"));
+    remoteWorkRefreshBtn.addEventListener("click", refreshRemoteWorkStatus);
+    remoteWorkCapsuleSaveBtn.addEventListener("click", saveRemoteWorkCapsule);
+    remoteWorkSendBtn.addEventListener("click", submitRemoteWorkMessage);
+    remoteWorkCheckpointBtn.addEventListener("click", checkpointRemoteWorkCell);
+    remoteWorkInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        submitRemoteWorkMessage();
+      }
+    });
     refreshBtn.addEventListener("click", refresh);
     serviceBtn.addEventListener("click", () => {
       servicePanel.open = true;
@@ -20210,6 +20825,9 @@ COCKPIT_HTML = """<!doctype html>
     projectAuditCloseBtn.addEventListener("click", closeProjectAuditModal);
     appserverLabModal.addEventListener("click", (event) => {
       if (event.target === appserverLabModal) closeAppserverLabModal();
+    });
+    remoteWorkModal.addEventListener("click", (event) => {
+      if (event.target === remoteWorkModal) closeRemoteWorkModal();
     });
     tvbcpCloseBtn.addEventListener("click", closeTvbcpModal);
     tvbcpRefreshBtn.addEventListener("click", refreshTvbcpModal);
@@ -20328,6 +20946,8 @@ COCKPIT_HTML = """<!doctype html>
         closeProjectAuditModal();
       } else if (event.key === "Escape" && !appserverLabModal.classList.contains("hidden")) {
         closeAppserverLabModal();
+      } else if (event.key === "Escape" && !remoteWorkModal.classList.contains("hidden")) {
+        closeRemoteWorkModal();
       } else if (event.key === "Escape" && !tvbcpModal.classList.contains("hidden")) {
         closeTvbcpModal();
       } else if (event.key === "Escape" && !webAppsModal.classList.contains("hidden")) {

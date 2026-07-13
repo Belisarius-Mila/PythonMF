@@ -171,12 +171,26 @@ class AppServerLabService:
         client_factory: Callable[..., CodexAppServerClient] = CodexAppServerClient,
         version_getter: Callable[..., Any] = read_codex_version,
         codex_binary: str = DEFAULT_CODEX_BIN,
+        developer_instructions: str = LAB_DEVELOPER_INSTRUCTIONS,
+        sandbox_mode: str = "read-only",
+        sandbox_policy: dict[str, Any] | None = None,
+        approval_policy: str = "never",
+        reasoning_effort: str = "low",
+        model: str = "",
+        default_role: str = "read-only LAB",
     ):
         self.state_path = Path(state_path)
         self.project_root = Path(project_root)
         self.client_factory = client_factory
         self.version_getter = version_getter
         self.codex_binary = codex_binary
+        self.developer_instructions = str(developer_instructions)
+        self.sandbox_mode = str(sandbox_mode)
+        self.sandbox_policy = dict(sandbox_policy or {"type": "readOnly"})
+        self.approval_policy = str(approval_policy)
+        self.reasoning_effort = str(reasoning_effort)
+        self.model = str(model or "")
+        self.default_role = str(default_role or "read-only LAB")
         self._client: CodexAppServerClient | None = None
         self._version_cache: dict[str, Any] | None = None
         self._lock = threading.RLock()
@@ -339,7 +353,14 @@ class AppServerLabService:
             return {
                 "ok": True,
                 "lab": True,
-                "read_only": True,
+                "read_only": self.sandbox_mode == "read-only",
+                "execution_profile": {
+                    "model": self.model or "inherited",
+                    "reasoning_effort": self.reasoning_effort,
+                    "sandbox_mode": self.sandbox_mode,
+                    "sandbox_policy": dict(self.sandbox_policy),
+                    "approval_policy": self.approval_policy,
+                },
                 "connection_state": self._state["connection_state"],
                 "schema_version": LAB_STATE_SCHEMA_VERSION,
                 "active_registry_id": str(self._state.get("active_registry_id") or ""),
@@ -419,7 +440,7 @@ class AppServerLabService:
         self,
         *,
         label: str = "",
-        role: str = "read-only LAB",
+        role: str = "",
         capsule: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         with self._lock:
@@ -432,7 +453,7 @@ class AppServerLabService:
             ) or f"LAB relace {len(self._threads()) + 1}"
             clean_role = _bounded_text(
                 role, field="role relace", max_chars=MAX_THREAD_ROLE_CHARS
-            ) or "read-only LAB"
+            ) or self.default_role
             clean_capsule = (
                 normalize_context_capsule(capsule) if capsule else empty_context_capsule()
             )
@@ -444,7 +465,10 @@ class AppServerLabService:
                 thread_id = client.start_thread(
                     cwd=self.project_root,
                     ephemeral=False,
-                    developer_instructions=LAB_DEVELOPER_INSTRUCTIONS,
+                    developer_instructions=self.developer_instructions,
+                    sandbox=self.sandbox_mode,
+                    approval_policy=self.approval_policy,
+                    model=self.model or None,
                 )
             except Exception:
                 client.close()
@@ -493,7 +517,10 @@ class AppServerLabService:
                 # threadId je podle lokálního schématu 0.144.1 preferovaná identita pro resume.
                 thread_id,
                 cwd=self.project_root,
-                developer_instructions=LAB_DEVELOPER_INSTRUCTIONS,
+                developer_instructions=self.developer_instructions,
+                sandbox=self.sandbox_mode,
+                approval_policy=self.approval_policy,
+                model=self.model or None,
             )
         except Exception:
             client.close()
@@ -678,6 +705,10 @@ class AppServerLabService:
                     thread_id=entry["thread_id"],
                     text=model_text,
                     client_message_id=clean_id,
+                    effort=self.reasoning_effort,
+                    sandbox_policy=self.sandbox_policy,
+                    approval_policy=self.approval_policy,
+                    model=self.model or None,
                 )
             except AppServerError as exc:
                 entry.update({"status": "failed", "completed_at": utc_now(), "error": str(exc)})

@@ -36,6 +36,7 @@ class FakeClient:
         self.thread_id = ""
         self.sent = 0
         self.sent_texts: list[str] = []
+        self.sent_kwargs: list[dict[str, object]] = []
         self.started_kwargs: dict[str, object] = {}
         self.resumed_kwargs: dict[str, object] = {}
         self.__class__.instances.append(self)
@@ -51,9 +52,17 @@ class FakeClient:
         self.thread_id = thread_id
         return thread_id
 
-    def send_text(self, *, thread_id: str, text: str, client_message_id: str) -> TurnReceipt:
+    def send_text(
+        self,
+        *,
+        thread_id: str,
+        text: str,
+        client_message_id: str,
+        **kwargs: object,
+    ) -> TurnReceipt:
         self.sent += 1
         self.sent_texts.append(text)
+        self.sent_kwargs.append(kwargs)
         return TurnReceipt(
             client_message_id=client_message_id,
             thread_id=thread_id,
@@ -155,6 +164,42 @@ class AppServerLabServiceTests(unittest.TestCase):
         self.assertEqual(calls, 1)
         self.assertEqual(first["version"], second["version"])
         self.assertEqual(FakeClient.instances, [])
+
+    def test_write_profile_is_passed_to_thread_resume_and_turn(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            service = AppServerLabService(
+                state_path=root / "state.json",
+                project_root=root,
+                client_factory=FakeClient,
+                version_getter=lambda *_args: FakeVersion(),
+                developer_instructions="Adam Remote instructions",
+                sandbox_mode="workspace-write",
+                sandbox_policy={"type": "workspaceWrite", "networkAccess": False},
+                approval_policy="never",
+                reasoning_effort="high",
+                model="gpt-test",
+                default_role="Adam Remote",
+            )
+            created = service.new_thread(label="Remote")
+            service.send(text="Uprav test", client_message_id="appserver-lab-remote001")
+            service.disconnect()
+            service.resume()
+
+        first = FakeClient.instances[0]
+        resumed = FakeClient.instances[1]
+        self.assertFalse(created["read_only"])
+        self.assertEqual(created["active_thread"]["role"], "Adam Remote")
+        self.assertEqual(first.started_kwargs["sandbox"], "workspace-write")
+        self.assertEqual(first.started_kwargs["model"], "gpt-test")
+        self.assertEqual(first.started_kwargs["developer_instructions"], "Adam Remote instructions")
+        self.assertEqual(first.sent_kwargs[0]["effort"], "high")
+        self.assertEqual(
+            first.sent_kwargs[0]["sandbox_policy"],
+            {"type": "workspaceWrite", "networkAccess": False},
+        )
+        self.assertEqual(resumed.resumed_kwargs["sandbox"], "workspace-write")
+        self.assertEqual(resumed.resumed_kwargs["model"], "gpt-test")
 
     def test_new_thread_send_and_duplicate_are_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

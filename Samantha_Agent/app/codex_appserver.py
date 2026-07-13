@@ -284,17 +284,20 @@ class CodexAppServerClient:
         cwd: Path,
         ephemeral: bool = False,
         developer_instructions: str = LAB_DEVELOPER_INSTRUCTIONS,
+        sandbox: str = "read-only",
+        approval_policy: str = "never",
+        model: str | None = None,
     ) -> str:
-        result = self.transport.request(
-            "thread/start",
-            {
-                "cwd": str(cwd.resolve()),
-                "ephemeral": ephemeral,
-                "sandbox": "read-only",
-                "approvalPolicy": "never",
-                "developerInstructions": developer_instructions,
-            },
-        )
+        params: dict[str, Any] = {
+            "cwd": str(cwd.resolve()),
+            "ephemeral": ephemeral,
+            "sandbox": sandbox,
+            "approvalPolicy": approval_policy,
+            "developerInstructions": developer_instructions,
+        }
+        if model:
+            params["model"] = model
+        result = self.transport.request("thread/start", params)
         return self._thread_id(result, operation="thread/start")
 
     def resume_thread(
@@ -303,20 +306,23 @@ class CodexAppServerClient:
         *,
         cwd: Path,
         developer_instructions: str = LAB_DEVELOPER_INSTRUCTIONS,
+        sandbox: str = "read-only",
+        approval_policy: str = "never",
+        model: str | None = None,
     ) -> str:
         expected = str(thread_id or "").strip()
         if not expected:
             raise AppServerContractError("Chybí threadId pro obnovení.")
-        result = self.transport.request(
-            "thread/resume",
-            {
-                "threadId": expected,
-                "cwd": str(cwd.resolve()),
-                "sandbox": "read-only",
-                "approvalPolicy": "never",
-                "developerInstructions": developer_instructions,
-            },
-        )
+        params: dict[str, Any] = {
+            "threadId": expected,
+            "cwd": str(cwd.resolve()),
+            "sandbox": sandbox,
+            "approvalPolicy": approval_policy,
+            "developerInstructions": developer_instructions,
+        }
+        if model:
+            params["model"] = model
+        result = self.transport.request("thread/resume", params)
         resumed = self._thread_id(result, operation="thread/resume")
         if resumed != expected:
             raise AppServerContractError("App-server obnovil jiné vlákno.")
@@ -337,6 +343,9 @@ class CodexAppServerClient:
         text: str,
         client_message_id: str | None = None,
         effort: str = "low",
+        sandbox_policy: dict[str, Any] | None = None,
+        approval_policy: str = "never",
+        model: str | None = None,
     ) -> TurnReceipt:
         clean_text = str(text or "").strip()
         if not clean_text:
@@ -344,17 +353,17 @@ class CodexAppServerClient:
         message_id = str(client_message_id or f"appserver-lab-{uuid.uuid4().hex}").strip()
         requested_at = utc_now()
         started_monotonic = time.monotonic()
-        result = self.transport.request(
-            "turn/start",
-            {
-                "threadId": thread_id,
-                "clientUserMessageId": message_id,
-                "input": [{"type": "text", "text": clean_text}],
-                "effort": effort,
-                "sandboxPolicy": {"type": "readOnly"},
-                "approvalPolicy": "never",
-            },
-        )
+        params: dict[str, Any] = {
+            "threadId": thread_id,
+            "clientUserMessageId": message_id,
+            "input": [{"type": "text", "text": clean_text}],
+            "effort": effort,
+            "sandboxPolicy": dict(sandbox_policy or {"type": "readOnly"}),
+            "approvalPolicy": approval_policy,
+        }
+        if model:
+            params["model"] = model
+        result = self.transport.request("turn/start", params)
         accepted_at = utc_now()
         turn = result.get("turn")
         turn_id = turn.get("id") if isinstance(turn, dict) else None
@@ -426,6 +435,33 @@ class CodexAppServerClient:
         if not receipt.delivered:
             raise AppServerContractError("Turn nebyl jednoznačně potvrzen jako doručený a dokončený.")
         return receipt
+
+    def read_effective_config(self, *, cwd: Path) -> dict[str, Any]:
+        result = self.transport.request(
+            "config/read",
+            {"cwd": str(cwd.resolve()), "includeLayers": False},
+        )
+        config = result.get("config")
+        if not isinstance(config, dict):
+            raise AppServerContractError("config/read nevrátil efektivní konfiguraci.")
+        return config
+
+    def list_models(self, *, include_hidden: bool = True) -> list[dict[str, Any]]:
+        models: list[dict[str, Any]] = []
+        cursor: str | None = None
+        while True:
+            params: dict[str, Any] = {"includeHidden": include_hidden, "limit": 100}
+            if cursor:
+                params["cursor"] = cursor
+            result = self.transport.request("model/list", params)
+            page = result.get("data")
+            if not isinstance(page, list):
+                raise AppServerContractError("model/list nevrátil seznam modelů.")
+            models.extend(item for item in page if isinstance(item, dict))
+            raw_cursor = result.get("nextCursor")
+            cursor = str(raw_cursor) if raw_cursor else None
+            if not cursor:
+                return models
 
     @staticmethod
     def _belongs_to_turn(message: dict[str, Any], *, thread_id: str, turn_id: str) -> bool:
