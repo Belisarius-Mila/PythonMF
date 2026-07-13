@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import atexit
+import json
 import os
 import re
 import shutil
@@ -124,30 +125,40 @@ def normalize_context_capsule(
     }
 
 
-def developer_instructions_for_capsule(capsule: dict[str, Any] | None) -> str:
+def turn_text_with_context_capsule(
+    user_text: str,
+    capsule: dict[str, Any] | None,
+) -> tuple[str, int]:
     capsule = capsule or {}
-    lines = [LAB_DEVELOPER_INSTRUCTIONS]
-    context_lines: list[str] = []
-    for label, key in (
-        ("Cíl", "objective"),
-        ("Aktuální stav", "current_state"),
-        ("Další krok", "next_step"),
-    ):
-        value = str(capsule.get(key) or "").strip()
-        if value:
-            context_lines.append(f"{label}: {value}")
-    constraints = capsule.get("constraints")
-    if isinstance(constraints, list):
-        context_lines.extend(f"Omezení: {item}" for item in constraints if str(item).strip())
-    if context_lines:
-        lines.extend(
-            [
-                "",
-                "Kompaktní Context Capsule pro tuto LAB relaci (pracovní kontext, ne chatový fulltext):",
-                *context_lines,
-            ]
-        )
-    return "\n".join(lines)
+    context = {
+        "objective": str(capsule.get("objective") or "").strip(),
+        "current_state": str(capsule.get("current_state") or "").strip(),
+        "next_step": str(capsule.get("next_step") or "").strip(),
+        "constraints": [
+            str(item).strip()
+            for item in capsule.get("constraints", [])
+            if str(item).strip()
+        ]
+        if isinstance(capsule.get("constraints"), list)
+        else [],
+    }
+    if not any((context["objective"], context["current_state"], context["next_step"], context["constraints"])):
+        return user_text, 0
+    revision = max(1, int(capsule.get("revision") or 0))
+    envelope = {
+        "application_context": {
+            "type": "samantha_context_capsule",
+            "revision": revision,
+            **context,
+        },
+        "user_message": user_text,
+    }
+    prefix = (
+        "Následující JSON obsahuje aktuální aplikační Context Capsule a vlastní zprávu uživatele. "
+        "Odpověz na user_message. Capsule je autoritativní pro údaje, které výslovně uvádí; "
+        "při rozporu s dřívější historií použij aktuální capsule.\n"
+    )
+    return prefix + json.dumps(envelope, ensure_ascii=False, separators=(",", ":")), revision
 
 
 class AppServerLabService:
@@ -176,8 +187,6 @@ class AppServerLabService:
         if not self.state_path.exists():
             return empty_lab_state()
         try:
-            import json
-
             loaded = json.loads(self.state_path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             return empty_lab_state()
@@ -429,7 +438,7 @@ class AppServerLabService:
                 thread_id = client.start_thread(
                     cwd=self.project_root,
                     ephemeral=False,
-                    developer_instructions=developer_instructions_for_capsule(clean_capsule),
+                    developer_instructions=LAB_DEVELOPER_INSTRUCTIONS,
                 )
             except Exception:
                 client.close()
@@ -478,7 +487,7 @@ class AppServerLabService:
                 # threadId je podle lokálního schématu 0.144.1 preferovaná identita pro resume.
                 thread_id,
                 cwd=self.project_root,
-                developer_instructions=developer_instructions_for_capsule(active.get("capsule")),
+                developer_instructions=LAB_DEVELOPER_INSTRUCTIONS,
             )
         except Exception:
             client.close()
@@ -522,8 +531,7 @@ class AppServerLabService:
             self._save()
             result = self.status()
             result["message"] = (
-                "Context Capsule byla uložena do private dat. Do Adama se promítne při příštím obnovení "
-                "nebo restartu této relace."
+                "Context Capsule byla uložena do private dat a připojí se k příštímu LAB turnu."
             )
             return result
 
@@ -578,6 +586,10 @@ class AppServerLabService:
                 self._connect_existing(action="auto_resumed_before_send")
             active = self._active_thread(required=True)
             assert active is not None
+            model_text, capsule_revision = turn_text_with_context_capsule(
+                clean_text,
+                active.get("capsule") if isinstance(active.get("capsule"), dict) else None,
+            )
 
             entry: dict[str, Any] = {
                 "client_message_id": clean_id,
@@ -593,6 +605,8 @@ class AppServerLabService:
                 "thread_id": str(active.get("thread_id") or ""),
                 "turn_id": "",
                 "duration_ms": 0,
+                "capsule_attached": capsule_revision > 0,
+                "capsule_revision_sent": capsule_revision,
             }
             messages = list(active.get("messages") or [])
             messages.append(entry)
@@ -603,7 +617,7 @@ class AppServerLabService:
                 assert self._client is not None
                 receipt: TurnReceipt = self._client.send_text(
                     thread_id=entry["thread_id"],
-                    text=clean_text,
+                    text=model_text,
                     client_message_id=clean_id,
                 )
             except AppServerError as exc:

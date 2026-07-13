@@ -243,6 +243,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Lifecycle důkazy", COCKPIT_HTML)
         self.assertIn("App-server restartován", COCKPIT_HTML)
         self.assertIn("Context Capsule", COCKPIT_HTML)
+        self.assertIn("restart není potřeba", COCKPIT_HTML)
+        self.assertIn("Context Capsule: revize", COCKPIT_HTML)
         self.assertIn("Vybrán jiný thread", COCKPIT_HTML)
         self.assertIn("generation ${Number(event.previous_generation", COCKPIT_HTML)
 

@@ -13350,7 +13350,7 @@ COCKPIT_HTML = """<!doctype html>
         </div>
         <div class="appserver-lab-capsule">
           <strong>Context Capsule</strong>
-          <div class="appserver-lab-message-meta">Krátký soukromý kontext bez chatového fulltextu. Uplatní se při příštím obnovení nebo restartu vybrané relace.</div>
+          <div class="appserver-lab-message-meta">Krátký soukromý kontext bez chatového fulltextu. Připojí se jako aplikační kontext ke každému dalšímu LAB turnu; restart není potřeba.</div>
           <div class="appserver-lab-capsule-grid">
             <div class="appserver-lab-field">
               <label for="appserverLabCapsuleObjective">Cíl</label>
@@ -15959,6 +15959,9 @@ COCKPIT_HTML = """<!doctype html>
           `Turn potvrzen: ${appserverLabLocalTime(entry.turn_started_at)}`,
           `Odpověď dokončena: ${appserverLabLocalTime(entry.completed_at)}`,
           `Stav: ${status || "odesílám"}`,
+          entry.capsule_attached
+            ? `Context Capsule: revize ${Number(entry.capsule_revision_sent || 0)}`
+            : "Context Capsule: bez obsahu",
         ];
         meta.textContent = proof.join(" · ");
         card.appendChild(user);

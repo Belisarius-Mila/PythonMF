@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 
 from app.codex_appserver import (
+    LAB_DEVELOPER_INSTRUCTIONS,
     AppServerContractError,
     AppServerError,
     CodexVersion,
@@ -34,6 +35,7 @@ class FakeClient:
         self.connection_id = f"connection-{self.process_id}"
         self.thread_id = ""
         self.sent = 0
+        self.sent_texts: list[str] = []
         self.started_kwargs: dict[str, object] = {}
         self.resumed_kwargs: dict[str, object] = {}
         self.__class__.instances.append(self)
@@ -51,6 +53,7 @@ class FakeClient:
 
     def send_text(self, *, thread_id: str, text: str, client_message_id: str) -> TurnReceipt:
         self.sent += 1
+        self.sent_texts.append(text)
         return TurnReceipt(
             client_message_id=client_message_id,
             thread_id=thread_id,
@@ -60,7 +63,7 @@ class FakeClient:
             started_at="2026-07-12T20:00:03+00:00",
             completed_at="2026-07-12T20:00:04+00:00",
             status="completed",
-            answer=f"Odpověď: {text}",
+            answer="Odpověď",
             turn_started_confirmed=True,
             user_item_count=1,
             duration_ms=3000,
@@ -154,6 +157,8 @@ class AppServerLabServiceTests(unittest.TestCase):
         self.assertTrue(duplicate["duplicate_prevented"])
         self.assertEqual(len(persisted["messages"]), 1)
         self.assertEqual(FakeClient.instances[0].sent, 1)
+        self.assertEqual(FakeClient.instances[0].sent_texts, ["Test návaznosti"])
+        self.assertFalse(first["entry"]["capsule_attached"])
 
     def test_disconnect_and_resume_keep_same_thread(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -184,7 +189,7 @@ class AppServerLabServiceTests(unittest.TestCase):
         self.assertTrue(all(event["thread_id"] == thread_id for event in events))
         self.assertTrue(all("user_text" not in event and "answer" not in event for event in events))
 
-    def test_registry_keeps_two_threads_separate_and_capsule_applies_on_resume(self) -> None:
+    def test_registry_keeps_threads_separate_and_attaches_capsule_to_turn(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             service = self.make_service(Path(temp_dir))
             first = service.new_thread(label="Relace A")
@@ -205,6 +210,11 @@ class AppServerLabServiceTests(unittest.TestCase):
                     "constraints": ["Bez zápisu mimo private data"],
                 },
             )
+            capsule_turn = service.send(
+                text="Dotaz B2",
+                client_message_id="appserver-lab-cccccccc",
+            )
+            capsule_turn_text = FakeClient.instances[1].sent_texts[-1]
             service.restart()
             second_resume_instructions = str(FakeClient.instances[-1].resumed_kwargs["developer_instructions"])
 
@@ -217,9 +227,16 @@ class AppServerLabServiceTests(unittest.TestCase):
         self.assertNotEqual(first_thread_id, second_thread_id)
         self.assertEqual(first_messages[0]["user_text"], "Zpráva A")
         self.assertEqual(second_messages[0]["user_text"], "Zpráva B")
-        self.assertTrue(all(item["turn_count"] == 1 for item in selected_second["threads"]))
-        self.assertIn("Ověřit návaznost B", second_resume_instructions)
-        self.assertNotIn("Zpráva B", second_resume_instructions)
+        self.assertEqual(second_messages[1]["user_text"], "Dotaz B2")
+        counts = {item["registry_id"]: item["turn_count"] for item in selected_second["threads"]}
+        self.assertEqual(counts[first_registry_id], 1)
+        self.assertEqual(counts[second_registry_id], 2)
+        self.assertTrue(capsule_turn["entry"]["capsule_attached"])
+        self.assertEqual(capsule_turn["entry"]["capsule_revision_sent"], 1)
+        self.assertIn('"current_state":"Druhý thread je aktivní"', capsule_turn_text)
+        self.assertIn('"user_message":"Dotaz B2"', capsule_turn_text)
+        self.assertNotIn("Zpráva B", capsule_turn_text)
+        self.assertEqual(second_resume_instructions, LAB_DEVELOPER_INSTRUCTIONS)
 
     def test_legacy_single_thread_state_migrates_without_losing_history(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
