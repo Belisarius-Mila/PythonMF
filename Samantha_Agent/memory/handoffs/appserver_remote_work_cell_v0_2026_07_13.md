@@ -49,6 +49,9 @@ Co je hotove:
 - Stabilizacni oprava nastavuje hlavni status na 15 s, Remote status na 12 s,
   e-mailovy scan na 30 s a deduplikuje soubezny Remote refresh i e-mailovy scan.
   Plna Cockpit quality gate po oprave znovu prosla vsech 644 testu.
+- Oprava je nasazena s code stampem `6402cd5e478fab4a`; Tailscale mereni po
+  restartu: HTML 0,03 s, health 0,005 s, hlavni status 1,65 s a Remote status
+  1,09 s. Ulozeny Remote thread je znovu pripojeny.
 
 Co neni hotove:
 - Chybi kratky rucni iPhone retest nasazeneho Cockpit rozhrani a prvni maly
