@@ -22,6 +22,7 @@ from app.codex_appserver import (
     utc_now,
 )
 from app.file_persistence import atomic_write_json
+from app.tvbcp import append_tvbcp_entry
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -539,6 +540,59 @@ class AppServerLabService:
                 "Context Capsule byla uložena do private dat a připojí se k příštímu LAB turnu."
             )
             return result
+
+    def save_message_to_tvbcp(
+        self,
+        *,
+        client_message_id: str,
+        appender: Callable[..., dict[str, Any]] = append_tvbcp_entry,
+    ) -> dict[str, Any]:
+        """Explicitly append one completed LAB exchange to the private TVBCP file."""
+        with self._lock:
+            clean_id = str(client_message_id or "").strip()
+            if not CLIENT_MESSAGE_ID_RE.fullmatch(clean_id):
+                raise AppServerError("LAB zpráva nemá platný client message ID.")
+            active = self._active_thread(required=True)
+            assert active is not None
+            entry = next(
+                (
+                    item
+                    for item in active.get("messages") or []
+                    if item.get("client_message_id") == clean_id
+                ),
+                None,
+            )
+            if entry is None:
+                raise AppServerError("Vybraná LAB zpráva v aktivní relaci neexistuje.")
+            if entry.get("status") != "completed" or not entry.get("answer"):
+                raise AppServerError("Do TVBCP lze uložit jen dokončenou výměnu s odpovědí.")
+            if entry.get("tvbcp_saved_at"):
+                return {
+                    "ok": True,
+                    "status": "already_saved_to_tvbcp",
+                    "message": "Tato výměna už je v TVBCP uložená.",
+                    "entry": dict(entry),
+                    "duplicate_prevented": True,
+                }
+            try:
+                appender(
+                    mila=str(entry.get("user_text") or ""),
+                    adam=str(entry.get("answer") or ""),
+                    discussed=str(active.get("label") or "App-server LAB"),
+                )
+            except (FileNotFoundError, OSError, ValueError) as exc:
+                raise AppServerError("Výměnu se nepodařilo uložit do aktivního TVBCP.") from exc
+            saved_at = utc_now()
+            entry["tvbcp_saved_at"] = saved_at
+            active["updated_at"] = saved_at
+            self._save()
+            return {
+                "ok": True,
+                "status": "saved_to_tvbcp",
+                "message": "Vybraná LAB výměna byla uložena do TVBCP.",
+                "entry": dict(entry),
+                "duplicate_prevented": False,
+            }
 
     def disconnect(self) -> dict[str, Any]:
         with self._lock:

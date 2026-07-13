@@ -63,6 +63,11 @@ Co neni hotove:
   0,356 s a druhy po naplneni cache 0,0016 s. Pres aktualni Tailscale listener
   trvalo nacteni hlavniho HTML 0,011 s, health 0,0031 s a zahraty LAB status
   0,0036 s. Porty 8771 a 8877 zustaly volne.
+- Pro cestovni brainstorming vznikla oddelena private LAB relace s Context
+  Capsule a TVBCP strukturou odpovedi. Kazda dokoncena vymena ma explicitni
+  tlacitko `Ulozit do TVBCP`; server uklada otazku, odpoved a tema z vlastni LAB
+  historie do stavajiciho private TXT. Opakovany klik je idempotentni a nic se
+  neuklada automaticky. VoiceBridge ani watcher se tim nezapina.
 - Hlavni `/api/status` stale trva priblizne 1,1-1,4 s; nejpomalejsi byla zmrazena
   VoiceBridge status vetev kolem 0,7 s. V teto davce nebyla menena, aby zustal
   dodrzeny freeze mimo novy LAB a presne ohranicenou lifecycle opravu.
@@ -72,8 +77,8 @@ Co neni hotove:
   samostatne pozdejsi vrstvy.
 
 Dalsi krok:
-- Z iPhonu subjektivne overit rychlost otevreni hlavniho Cockpitu a LAB panelu
-  po nasazene lifecycle/cache oprave.
+- Z iPhonu overit rychlost Cockpitu/LAB a u jedne vecne vymeny tlacitko
+  `Ulozit do TVBCP`, nasledne otevrit TVBCP panel a potvrdit novy zaznam.
 
 Navrhovane dalsi kroky:
 - Po uspesnem rucnim testu doplnit maly restart-Mac/Cockpit recovery test.

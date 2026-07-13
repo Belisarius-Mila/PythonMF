@@ -8646,6 +8646,23 @@ def appserver_lab_send_action(
     )
 
 
+def appserver_lab_tvbcp_append_action(
+    payload: dict[str, Any],
+    *,
+    service: AppServerLabService = APP_SERVER_LAB,
+) -> dict[str, Any]:
+    try:
+        return service.save_message_to_tvbcp(
+            client_message_id=safe_text(str(payload.get("client_message_id", "") or "")),
+        )
+    except AppServerError:
+        return {
+            "ok": False,
+            "status": "appserver_tvbcp_save_failed",
+            "message": "Dokončenou LAB výměnu se nepodařilo uložit do aktivního TVBCP.",
+        }
+
+
 def janicka_chat_memory_context(
     *,
     cookbook_path: Path = JANICKA_COOKBOOK_PATH,
@@ -9131,6 +9148,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "risk": "read_only_via_post",
         "confirmation": "protocol_ids_required",
         "handler_name": "appserver_lab_send_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/appserver-lab/tvbcp/append",
+        "label": "Ulozit dokoncenou LAB vymenu do TVBCP",
+        "risk": "private_write",
+        "confirmation": "explicit_lab_button",
+        "handler_name": "appserver_lab_tvbcp_append_action",
         "test_level": "direct",
     },
     {
@@ -9977,6 +10002,10 @@ class CockpitServer:
                 if parsed.path == "/api/appserver-lab/send":
                     payload = self.read_json()
                     self.respond_json(appserver_lab_send_action(payload))
+                    return
+                if parsed.path == "/api/appserver-lab/tvbcp/append":
+                    payload = self.read_json()
+                    self.respond_json(appserver_lab_tvbcp_append_action(payload))
                     return
                 if parsed.path == "/api/janicka/chat":
                     payload = self.read_json()
@@ -15972,6 +16001,16 @@ COCKPIT_HTML = """<!doctype html>
           answer.className = "appserver-lab-message-answer";
           answer.textContent = entry.answer;
           card.appendChild(answer);
+
+          const tvbcpButton = document.createElement("button");
+          tvbcpButton.className = "secondary";
+          tvbcpButton.type = "button";
+          tvbcpButton.textContent = entry.tvbcp_saved_at ? "Uloženo v TVBCP" : "Uložit do TVBCP";
+          tvbcpButton.disabled = Boolean(entry.tvbcp_saved_at);
+          tvbcpButton.addEventListener("click", () =>
+            saveAppserverLabMessageToTvbcp(entry.client_message_id, tvbcpButton)
+          );
+          card.appendChild(tvbcpButton);
         }
         if (entry.error) {
           const error = document.createElement("div");
@@ -16185,6 +16224,31 @@ COCKPIT_HTML = """<!doctype html>
         renderAppserverLabMessages();
         appserverLabSendBtn.disabled = false;
         appserverLabInput.focus();
+      }
+    }
+
+    async function saveAppserverLabMessageToTvbcp(clientMessageId, button) {
+      const original = button.textContent;
+      button.disabled = true;
+      button.textContent = "Ukládám do TVBCP…";
+      try {
+        const data = await postJson("/api/appserver-lab/tvbcp/append", {
+          client_message_id: clientMessageId,
+        });
+        if (!data.ok) throw new Error(data.message || "TVBCP uložení nebylo potvrzeno.");
+        if (data.entry) {
+          appserverLabMessages = appserverLabMessages.map((item) =>
+            item.client_message_id === clientMessageId ? data.entry : item
+          );
+        }
+        appserverLabStatus.textContent = data.message || "LAB výměna byla uložena do TVBCP.";
+        renderAppserverLabMessages();
+        if (!tvbcpModal.classList.contains("hidden")) await refreshTvbcpModal();
+      } catch (err) {
+        recordFrontendError(err);
+        button.disabled = false;
+        button.textContent = original;
+        appserverLabStatus.textContent = `TVBCP uložení selhalo: ${err}`;
       }
     }
 

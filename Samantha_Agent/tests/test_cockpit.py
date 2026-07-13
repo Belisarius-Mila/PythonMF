@@ -247,6 +247,10 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Context Capsule: revize", COCKPIT_HTML)
         self.assertIn("Vybrán jiný thread", COCKPIT_HTML)
         self.assertIn("generation ${Number(event.previous_generation", COCKPIT_HTML)
+        self.assertIn("Uložit do TVBCP", COCKPIT_HTML)
+        self.assertIn("Uloženo v TVBCP", COCKPIT_HTML)
+        self.assertIn("/api/appserver-lab/tvbcp/append", COCKPIT_HTML)
+        self.assertIn("saveAppserverLabMessageToTvbcp", COCKPIT_HTML)
 
     def test_appserver_lab_actions_delegate_without_voice_bridge(self) -> None:
         calls: list[tuple[str, object]] = []
@@ -284,6 +288,10 @@ class CockpitTests(unittest.TestCase):
                 calls.append(("send", kwargs))
                 return {"ok": True, "status": "completed"}
 
+            def save_message_to_tvbcp(self, **kwargs):
+                calls.append(("tvbcp", kwargs))
+                return {"ok": True, "status": "saved_to_tvbcp"}
+
         service = FakeService()
         self.assertTrue(cockpit_module.appserver_lab_status_action(service=service)["ok"])
         self.assertTrue(cockpit_module.appserver_lab_new_thread_action({"label": "Test A"}, service=service)["ok"])
@@ -315,11 +323,16 @@ class CockpitTests(unittest.TestCase):
             },
             service=service,
         )
+        saved = cockpit_module.appserver_lab_tvbcp_append_action(
+            {"client_message_id": "appserver-lab-abcdefgh"},
+            service=service,
+        )
 
         self.assertTrue(sent["ok"])
+        self.assertTrue(saved["ok"])
         self.assertEqual(
             [item[0] for item in calls],
-            ["status", "new", "select", "capsule", "resume", "disconnect", "restart", "send"],
+            ["status", "new", "select", "capsule", "resume", "disconnect", "restart", "send", "tvbcp"],
         )
         self.assertEqual(calls[1][1]["label"], "Test A")
         self.assertEqual(calls[2][1]["registry_id"], "registry-1")

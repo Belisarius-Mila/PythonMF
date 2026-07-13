@@ -183,6 +183,37 @@ class AppServerLabServiceTests(unittest.TestCase):
         self.assertEqual(FakeClient.instances[0].sent_texts, ["Test návaznosti"])
         self.assertFalse(first["entry"]["capsule_attached"])
 
+    def test_completed_message_can_be_explicitly_saved_to_tvbcp_once(self) -> None:
+        appended: list[dict[str, str]] = []
+
+        def appender(**kwargs: str) -> dict[str, object]:
+            appended.append(kwargs)
+            return {"ok": True}
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            service = self.make_service(root)
+            service.new_thread(label="Cestovní brainstorming")
+            service.send(text="Návrh aplikace", client_message_id="appserver-lab-tvbcp001")
+            saved = service.save_message_to_tvbcp(
+                client_message_id="appserver-lab-tvbcp001",
+                appender=appender,
+            )
+            duplicate = service.save_message_to_tvbcp(
+                client_message_id="appserver-lab-tvbcp001",
+                appender=appender,
+            )
+            persisted = self.make_service(root).status()["messages"][0]
+
+        self.assertTrue(saved["ok"])
+        self.assertFalse(saved["duplicate_prevented"])
+        self.assertTrue(duplicate["duplicate_prevented"])
+        self.assertEqual(len(appended), 1)
+        self.assertEqual(appended[0]["mila"], "Návrh aplikace")
+        self.assertEqual(appended[0]["adam"], "Odpověď")
+        self.assertEqual(appended[0]["discussed"], "Cestovní brainstorming")
+        self.assertTrue(persisted["tvbcp_saved_at"])
+
     def test_disconnect_and_resume_keep_same_thread(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             service = self.make_service(Path(temp_dir))
