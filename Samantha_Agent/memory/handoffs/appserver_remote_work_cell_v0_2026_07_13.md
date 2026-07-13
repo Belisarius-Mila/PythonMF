@@ -80,6 +80,12 @@ Co je hotove:
   vysledny HEAD odpovidal source main, strom byl cisty a Git remote prazdny.
 - Synchronizacni odpoved zachovava i skutecny connection/thread status, aby UI
   pred naslednym refreshem neprobliklo jako odpojene.
+- Finalni implementace je nasazena s code stampem `7fb5cb81db45d97a` a druhy
+  zivy sync posunul workspace na `d74a11e`; API rovnou potvrdilo `connected`,
+  shodu workspace/source HEAD, cisty strom a prazdny seznam remote.
+- Zastarala canary Capsule byla nahrazena revizi 2 se skutecnym cilem vyvoje
+  rozhrani, aktualnim stavem, prvnim malym iPhone ukolem a sesti bezpecnostnimi
+  omezenimi. Zivy Tailscale HTML obsahuje nove tlacitko a prosel Node kontrolou.
 
 Co neni hotove:
 - Chybi kratky rucni iPhone retest nasazeneho Cockpit rozhrani a prvni maly
@@ -90,9 +96,8 @@ Co neni hotove:
   nejdrive se ma zobrazit diff a predani ma zkontrolovat hlavni Adam.
 
 Dalsi krok:
-- Nasadit `Aktualizovat z main`, synchronizovat cisty workspace, aktualizovat
-  Context Capsule a z iPhonu provest maly nedestruktivni ukol; pred checkpointem
-  rucne zkontrolovat seznam zmen a diff.
+- Z iPhonu obnovit Cockpit, otevrit `Adam Remote` a provest jeden maly skutecny
+  nedestruktivni ukol. Pred checkpointem rucne zkontrolovat seznam zmen a diff.
 
 Navrhovane dalsi kroky:
 - Rucne z iPhonu zadat prvni maly realny kodovy ukol a overit zmeny/testy/TVBCP.
