@@ -58,6 +58,11 @@ Co neni hotove:
   25 s a testy nove zahrnuji i restart modul.
 - LAB status opakovane spoustel `codex --version`, coz stabilne stalo asi 0,33 s.
   Nemenna verze se nyni po prvnim uspesnem zjisteni cacheuje.
+- Oprava je nasazena vcetne noveho launchd supervisoru. Cisty plny restart vratil
+  Cockpit se spravnym code stampem za 2,58 s. Prvni LAB status po restartu trval
+  0,356 s a druhy po naplneni cache 0,0016 s. Pres aktualni Tailscale listener
+  trvalo nacteni hlavniho HTML 0,011 s, health 0,0031 s a zahraty LAB status
+  0,0036 s. Porty 8771 a 8877 zustaly volne.
 - Hlavni `/api/status` stale trva priblizne 1,1-1,4 s; nejpomalejsi byla zmrazena
   VoiceBridge status vetev kolem 0,7 s. V teto davce nebyla menena, aby zustal
   dodrzeny freeze mimo novy LAB a presne ohranicenou lifecycle opravu.
@@ -67,9 +72,8 @@ Co neni hotove:
   samostatne pozdejsi vrstvy.
 
 Dalsi krok:
-- Po nasazeni port/cache opravy provest jeden mereny plny restart Cockpitu a
-  overit novy code stamp lokalne i pres Tailscale. Potom z iPhonu subjektivne
-  overit rychlost otevreni hlavniho Cockpitu a LAB panelu.
+- Z iPhonu subjektivne overit rychlost otevreni hlavniho Cockpitu a LAB panelu
+  po nasazene lifecycle/cache oprave.
 
 Navrhovane dalsi kroky:
 - Po uspesnem rucnim testu doplnit maly restart-Mac/Cockpit recovery test.
