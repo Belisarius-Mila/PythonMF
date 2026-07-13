@@ -62,6 +62,19 @@ Co je hotove:
 - Oprava je nasazena s code stampem `a493500b971eb5de`; stejna JavaScript
   kontrola prosla i nad HTML zive stazenym z Tailscale adresy. Remote thread je
   pripojeny, workspace cisty a bez Git remote. Ceka se na novy iPhone retest.
+- Mila pote z iPhonu uspesne dokoncil nekolik Remote turnu a tri rucne ulozil do
+  TVBCP. Dulezity navod k ovladani a rozhodnuti o dalsim vyvoji byly doplneny do
+  private TVBCP; protokol se necommitoval.
+- Nova potvrzovana akce `Aktualizovat z main` synchronizuje pouze cisty
+  izolovany workspace z commitnuteho lokalniho `main` pres fast-forward a bez
+  trvaleho Git remote, site, merge commitu nebo pushnuti.
+- Akce fail-closed odmita dirty workspace, jinou vetev, divergenci, zmenu main
+  behem pripravy, private/env/media cestu a vsechny mazaci, prejmenovaci nebo
+  netypicke Git zmeny. Po aktualizaci overi shodu HEAD, cisty strom a zadny
+  remote. Pracovni turn je pri zastaralem zakladu v UI zablokovany.
+- Osm realnych Git testu pokryva fast-forward i odmitnuti nepotvrzeneho, dirty,
+  diverged a mazaciho scenare; HTTP/UI testy pokryvaji novou routu a tlacitko.
+  Plna gate ma 650 testu a `javascript syntax: OK`.
 
 Co neni hotove:
 - Chybi kratky rucni iPhone retest nasazeneho Cockpit rozhrani a prvni maly
@@ -72,8 +85,9 @@ Co neni hotove:
   nejdrive se ma zobrazit diff a predani ma zkontrolovat hlavni Adam.
 
 Dalsi krok:
-- Z iPhonu provest maly nedestruktivni ukol; pred checkpointem rucne
-  zkontrolovat seznam zmen a diff.
+- Nasadit `Aktualizovat z main`, synchronizovat cisty workspace, aktualizovat
+  Context Capsule a z iPhonu provest maly nedestruktivni ukol; pred checkpointem
+  rucne zkontrolovat seznam zmen a diff.
 
 Navrhovane dalsi kroky:
 - Rucne z iPhonu zadat prvni maly realny kodovy ukol a overit zmeny/testy/TVBCP.

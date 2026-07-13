@@ -8690,6 +8690,23 @@ def remote_work_cell_prepare_action(
         return {"ok": False, "status": "remote_prepare_failed", "message": str(exc)}
 
 
+def remote_work_cell_sync_action(
+    payload: dict[str, Any],
+    *,
+    service: RemoteWorkCellService = REMOTE_WORK_CELL,
+) -> dict[str, Any]:
+    if payload.get("confirmed") is not True:
+        return {
+            "ok": False,
+            "status": "confirmation_required",
+            "message": "Aktualizace izolovaného workspace z main vyžaduje potvrzení.",
+        }
+    try:
+        return service.sync_from_main(confirmed=True)
+    except AppServerError as exc:
+        return {"ok": False, "status": "remote_sync_failed", "message": str(exc)}
+
+
 def remote_work_cell_new_thread_action(
     payload: dict[str, Any],
     *,
@@ -9283,6 +9300,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "risk": "private_write",
         "confirmation": "explicit_remote_button",
         "handler_name": "remote_work_cell_prepare_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/appserver-remote/sync",
+        "label": "Aktualizovat cisty Adam Remote workspace z lokalniho main",
+        "risk": "workspace_write",
+        "confirmation": "explicit_remote_sync",
+        "handler_name": "remote_work_cell_sync_action",
         "test_level": "direct",
     },
     {
@@ -10196,6 +10221,10 @@ class CockpitServer:
                 if parsed.path == "/api/appserver-remote/prepare":
                     payload = self.read_json()
                     self.respond_json(remote_work_cell_prepare_action(payload))
+                    return
+                if parsed.path == "/api/appserver-remote/sync":
+                    payload = self.read_json()
+                    self.respond_json(remote_work_cell_sync_action(payload))
                     return
                 if parsed.path == "/api/appserver-remote/thread/new":
                     payload = self.read_json()
@@ -13657,6 +13686,7 @@ COCKPIT_HTML = """<!doctype html>
             <input id="remoteWorkNewLabel" maxlength="60" placeholder="Například: Nové rozhraní aplikace">
           </div>
           <button class="secondary" id="remoteWorkPrepareBtn">Připravit izolovanou kopii</button>
+          <button class="secondary" id="remoteWorkSyncBtn">Aktualizovat z main</button>
           <button class="primary" id="remoteWorkNewBtn">Nová pracovní relace</button>
         </div>
         <div class="appserver-lab-controls">
@@ -13896,6 +13926,7 @@ COCKPIT_HTML = """<!doctype html>
     const remoteWorkProfile = document.getElementById("remoteWorkProfile");
     const remoteWorkNewLabel = document.getElementById("remoteWorkNewLabel");
     const remoteWorkPrepareBtn = document.getElementById("remoteWorkPrepareBtn");
+    const remoteWorkSyncBtn = document.getElementById("remoteWorkSyncBtn");
     const remoteWorkNewBtn = document.getElementById("remoteWorkNewBtn");
     const remoteWorkResumeBtn = document.getElementById("remoteWorkResumeBtn");
     const remoteWorkRestartBtn = document.getElementById("remoteWorkRestartBtn");
@@ -16685,6 +16716,9 @@ COCKPIT_HTML = """<!doctype html>
         workspace.message || "",
         workspace.branch ? `větev ${workspace.branch}` : "",
         workspace.head ? `HEAD ${appserverLabShortId(workspace.head)}` : "",
+        prepared
+          ? (workspace.sync_available ? `main ${appserverLabShortId(workspace.source_head)} čeká na převzetí` : "základ odpovídá main")
+          : "",
         Number(workspace.source_pending_changes || 0) ? `hlavní strom má ${Number(workspace.source_pending_changes)} nezařazenou změnu` : "hlavní strom čistý",
       ].filter(Boolean).join(" · ");
       const changes = Array.isArray(workspace.changes) ? workspace.changes : [];
@@ -16702,11 +16736,12 @@ COCKPIT_HTML = """<!doctype html>
         remoteWorkCapsuleLoadedFor = activeId;
       }
       remoteWorkPrepareBtn.disabled = prepared;
+      remoteWorkSyncBtn.disabled = !prepared || !workspace.sync_allowed;
       remoteWorkNewBtn.disabled = !prepared;
       remoteWorkResumeBtn.disabled = !data.thread_ready || connected;
       remoteWorkRestartBtn.disabled = !data.thread_ready;
       remoteWorkCapsuleSaveBtn.disabled = !activeId;
-      remoteWorkSendBtn.disabled = !data.thread_ready;
+      remoteWorkSendBtn.disabled = !data.thread_ready || Boolean(workspace.sync_available);
       remoteWorkCheckpointBtn.disabled = !prepared || !workspace.dirty;
       renderRemoteWorkMessages();
     }
@@ -16763,6 +16798,16 @@ COCKPIT_HTML = """<!doctype html>
         "/api/appserver-remote/prepare",
         remoteWorkPrepareBtn,
         "Připravuji izolovanou kopii…",
+        {confirmed: true},
+      );
+    }
+
+    async function syncRemoteWorkCell() {
+      if (!window.confirm("Aktualizovat čistou izolovanou kopii z commitnutého lokálního main? Povoleny jsou jen bezpečné přidané a upravené soubory; žádná síť, mazání, merge ani push.")) return;
+      await runRemoteWorkControl(
+        "/api/appserver-remote/sync",
+        remoteWorkSyncBtn,
+        "Aktualizuji izolovaný základ z main…",
         {confirmed: true},
       );
     }
@@ -20752,6 +20797,7 @@ COCKPIT_HTML = """<!doctype html>
     remoteWorkOpenBtn.addEventListener("click", openRemoteWorkModal);
     remoteWorkCloseBtn.addEventListener("click", closeRemoteWorkModal);
     remoteWorkPrepareBtn.addEventListener("click", prepareRemoteWorkCell);
+    remoteWorkSyncBtn.addEventListener("click", syncRemoteWorkCell);
     remoteWorkNewBtn.addEventListener("click", createRemoteWorkThread);
     remoteWorkResumeBtn.addEventListener("click", () => runRemoteWorkControl("/api/appserver-remote/thread/resume", remoteWorkResumeBtn, "Obnovuji Adam Remote…"));
     remoteWorkRestartBtn.addEventListener("click", () => runRemoteWorkControl("/api/appserver-remote/restart", remoteWorkRestartBtn, "Restartuji Adam Remote…"));

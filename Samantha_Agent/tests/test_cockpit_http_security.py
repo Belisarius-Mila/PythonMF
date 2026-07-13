@@ -152,6 +152,28 @@ class CockpitHttpSecurityTests(unittest.TestCase):
         self.assertEqual(response.status, 200)
         self.assertTrue(payload["ok"])
 
+    def test_remote_sync_route_requires_json_and_reaches_registered_action(self) -> None:
+        with running_cockpit_server() as (host, port, _logger):
+            with patch(
+                "app.cockpit.remote_work_cell_sync_action",
+                return_value={"ok": True, "synced": True},
+            ) as action:
+                status, payload, _headers = request_json(
+                    host,
+                    port,
+                    "POST",
+                    "/api/appserver-remote/sync",
+                    body=json.dumps({"confirmed": True}),
+                    headers={
+                        "Content-Type": "application/json",
+                        "Origin": f"http://{host}:{port}",
+                    },
+                )
+
+        self.assertEqual(status, 200)
+        self.assertTrue(payload["synced"])
+        action.assert_called_once_with({"confirmed": True})
+
     def test_invalid_host_is_rejected(self) -> None:
         with running_cockpit_server() as (host, port, _logger):
             connection = http.client.HTTPConnection(host, port, timeout=5.0)

@@ -111,6 +111,104 @@ class RemoteWorkspaceManagerTests(unittest.TestCase):
             self.assertTrue((manager.workspace_root / ".env").exists())
             self.assertEqual(git(manager.workspace_root, "log", "-1", "--pretty=%s"), "Initial")
 
+    def test_sync_from_main_fast_forwards_clean_clone_without_remote(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            manager = RemoteWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            prepared = manager.prepare()
+            (source / "Samantha_Agent" / "tracked.py").write_text("VALUE = 2\n", encoding="utf-8")
+            git(source, "add", "Samantha_Agent/tracked.py")
+            git(source, "commit", "-m", "Update tracked")
+            source_head = git(source, "rev-parse", "HEAD")
+
+            with self.assertRaises(AppServerError):
+                manager.sync_from_main(confirmed=False)
+            self.assertEqual(git(manager.workspace_root, "rev-parse", "HEAD"), prepared["head"])
+
+            synced = manager.sync_from_main(confirmed=True)
+
+            self.assertTrue(synced["synced"])
+            self.assertEqual(synced["from_head"], prepared["head"])
+            self.assertEqual(synced["to_head"], source_head)
+            self.assertEqual(synced["head"], source_head)
+            self.assertFalse(synced["dirty"])
+            self.assertFalse(synced["sync_available"])
+            self.assertEqual(synced["remotes"], [])
+            self.assertEqual((manager.project_root / "tracked.py").read_text(), "VALUE = 2\n")
+            self.assertFalse((manager.workspace_root / "AuditCockpit56_M.txt").exists())
+
+    def test_sync_from_main_rejects_dirty_workspace_without_overwrite(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            manager = RemoteWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            manager.prepare()
+            clone_file = manager.project_root / "tracked.py"
+            clone_file.write_text("LOCAL WIP\n", encoding="utf-8")
+            (source / "Samantha_Agent" / "tracked.py").write_text("SOURCE UPDATE\n", encoding="utf-8")
+            git(source, "add", "Samantha_Agent/tracked.py")
+            git(source, "commit", "-m", "Source update")
+
+            with self.assertRaises(AppServerError):
+                manager.sync_from_main(confirmed=True)
+
+            self.assertEqual(clone_file.read_text(), "LOCAL WIP\n")
+            self.assertTrue(manager.status()["dirty"])
+            self.assertEqual(git(manager.workspace_root, "remote"), "")
+
+    def test_sync_from_main_rejects_diverged_checkpoint(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            manager = RemoteWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            manager.prepare()
+            clone_file = manager.project_root / "tracked.py"
+            clone_file.write_text("REMOTE COMMIT\n", encoding="utf-8")
+            manager.checkpoint(confirmed=True, message="Remote WIP")
+            remote_head = git(manager.workspace_root, "rev-parse", "HEAD")
+            (source / "Samantha_Agent" / "tracked.py").write_text("SOURCE COMMIT\n", encoding="utf-8")
+            git(source, "add", "Samantha_Agent/tracked.py")
+            git(source, "commit", "-m", "Source diverged")
+
+            with self.assertRaises(AppServerError):
+                manager.sync_from_main(confirmed=True)
+
+            self.assertEqual(git(manager.workspace_root, "rev-parse", "HEAD"), remote_head)
+            self.assertEqual(clone_file.read_text(), "REMOTE COMMIT\n")
+            self.assertEqual(git(manager.workspace_root, "remote"), "")
+
+    def test_sync_from_main_rejects_incoming_deletion(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            manager = RemoteWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            manager.prepare()
+            git(source, "update-index", "--force-remove", "Samantha_Agent/tracked.py")
+            git(source, "commit", "-m", "Delete tracked")
+
+            with self.assertRaises(AppServerError):
+                manager.sync_from_main(confirmed=True)
+
+            self.assertTrue((manager.project_root / "tracked.py").exists())
+            self.assertEqual(git(manager.workspace_root, "remote"), "")
+
     def test_prepare_never_overwrites_unknown_existing_directory(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

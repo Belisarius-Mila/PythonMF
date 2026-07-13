@@ -344,6 +344,7 @@ class CockpitTests(unittest.TestCase):
             "remoteWorkOpenBtn",
             "remoteWorkModal",
             "remoteWorkPrepareBtn",
+            "remoteWorkSyncBtn",
             "remoteWorkNewBtn",
             "remoteWorkResumeBtn",
             "remoteWorkRestartBtn",
@@ -365,10 +366,15 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("workspace-write", COCKPIT_HTML)
         self.assertIn("bez Git remote", COCKPIT_HTML)
         self.assertIn("/api/appserver-remote/status", COCKPIT_HTML)
+        self.assertIn("/api/appserver-remote/sync", COCKPIT_HTML)
         self.assertIn("/api/appserver-remote/send", COCKPIT_HTML)
         self.assertIn("/api/appserver-remote/checkpoint", COCKPIT_HTML)
         self.assertIn("/api/appserver-remote/tvbcp/append", COCKPIT_HTML)
         self.assertIn("saveRemoteWorkMessageToTvbcp", COCKPIT_HTML)
+        self.assertIn(
+            "remoteWorkSendBtn.disabled = !data.thread_ready || Boolean(workspace.sync_available)",
+            COCKPIT_HTML,
+        )
         self.assertIn("let remoteWorkStatusRefreshPromise = null", COCKPIT_HTML)
         self.assertIn(
             'fetchJsonWithTimeout("/api/appserver-remote/status", 12000)',
@@ -385,6 +391,10 @@ class CockpitTests(unittest.TestCase):
 
             def prepare(self):
                 calls.append(("prepare", None))
+                return {"ok": True}
+
+            def sync_from_main(self, **kwargs):
+                calls.append(("sync", kwargs))
                 return {"ok": True}
 
             def new_thread(self, **kwargs):
@@ -420,6 +430,8 @@ class CockpitTests(unittest.TestCase):
         self.assertFalse(denied["ok"])
         self.assertTrue(cockpit_module.remote_work_cell_status_action(service=service)["ok"])
         self.assertTrue(cockpit_module.remote_work_cell_prepare_action({"confirmed": True}, service=service)["ok"])
+        self.assertFalse(cockpit_module.remote_work_cell_sync_action({"confirmed": False}, service=service)["ok"])
+        self.assertTrue(cockpit_module.remote_work_cell_sync_action({"confirmed": True}, service=service)["ok"])
         self.assertTrue(cockpit_module.remote_work_cell_new_thread_action({"label": "Práce"}, service=service)["ok"])
         self.assertTrue(cockpit_module.remote_work_cell_resume_action(service=service)["ok"])
         self.assertTrue(cockpit_module.remote_work_cell_restart_action(service=service)["ok"])
@@ -457,7 +469,7 @@ class CockpitTests(unittest.TestCase):
         )
         self.assertEqual(
             [item[0] for item in calls],
-            ["status", "prepare", "new", "resume", "restart", "capsule", "send", "tvbcp", "checkpoint"],
+            ["status", "prepare", "sync", "new", "resume", "restart", "capsule", "send", "tvbcp", "checkpoint"],
         )
         self.assertEqual(calls[-1][1], {"confirmed": True, "message": "WIP"})
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import atexit
+import json
 import subprocess
 import threading
 from datetime import datetime, timezone
@@ -179,26 +180,46 @@ class RemoteWorkspaceManager:
                 "branch": branch,
                 "head": head,
                 "base_head": self._metadata_base_head(),
+                "sync_available": head != source_head,
+                "sync_allowed": bool(
+                    head != source_head
+                    and branch == "main"
+                    and not changes
+                    and not remotes
+                ),
                 "dirty": bool(changes),
                 "changes": changes[:80],
                 "change_count": len(changes),
                 "remotes": remotes,
                 "project_ready": self.project_root.is_dir(),
                 "message": (
-                    "Remote Work Cell je připravená a nemá Git remote."
+                    (
+                        "Remote Work Cell je připravená, ale její základ čeká na aktualizaci z main."
+                        if head != source_head
+                        else "Remote Work Cell je připravená, aktuální a nemá Git remote."
+                    )
                     if not remotes
                     else "Remote Work Cell má neočekávaný Git remote; pracovní turny jsou zablokované."
                 ),
             }
 
-    def _metadata_base_head(self) -> str:
+    def _metadata(self) -> dict[str, Any]:
         try:
-            import json
-
             raw = json.loads(self.metadata_path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
-            return ""
-        return str(raw.get("base_head") or "") if isinstance(raw, dict) else ""
+            return {}
+        return dict(raw) if isinstance(raw, dict) else {}
+
+    def _metadata_base_head(self) -> str:
+        return str(self._metadata().get("base_head") or "")
+
+    def _write_metadata(self, values: dict[str, Any]) -> None:
+        atomic_write_json(
+            self.metadata_path,
+            values,
+            ensure_ascii=False,
+            indent=2,
+        )
 
     def prepare(self) -> dict[str, Any]:
         with self._lock:
@@ -236,20 +257,118 @@ class RemoteWorkspaceManager:
             _git_output(self.workspace_root, ["remote", "remove", "origin"])
             if _git_output(self.workspace_root, ["remote"]):
                 raise AppServerError("Git remote se z pracovní kopie nepodařilo odstranit.")
-            atomic_write_json(
-                self.metadata_path,
+            self._write_metadata(
                 {
                     "schema_version": 1,
                     "created_at": _now(),
                     "base_head": base_head,
                     "source_branch": source_branch,
                     "project_dir_name": self.project_dir_name,
-                },
-                ensure_ascii=False,
-                indent=2,
+                }
             )
             result = self.status()
             return {**result, "created": True}
+
+    def sync_from_main(self, *, confirmed: bool) -> dict[str, Any]:
+        """Fast-forward a clean isolated clone from committed local main only."""
+        with self._lock:
+            if not confirmed:
+                raise AppServerError("Aktualizace z main vyžaduje výslovné potvrzení v Cockpitu.")
+            current = self.status()
+            if not current.get("prepared") or not current.get("ok"):
+                raise AppServerError("Remote Work Cell není v bezpečném stavu pro aktualizaci.")
+            if current.get("remotes"):
+                raise AppServerError("Remote Work Cell má Git remote; aktualizace je zablokovaná.")
+            if current.get("branch") != "main":
+                raise AppServerError("Remote Work Cell lze aktualizovat pouze na větvi main.")
+            if current.get("dirty"):
+                raise AppServerError("Nejdřív zkontroluj a checkpointuj rozpracované změny; workspace není čistý.")
+            if current.get("source_branch") != "main":
+                raise AppServerError("Zdrojový projekt není na větvi main; aktualizace je zablokovaná.")
+
+            old_head = str(current.get("head") or "")
+            source_head = str(current.get("source_head") or "")
+            if old_head == source_head:
+                return {
+                    **current,
+                    "synced": False,
+                    "from_head": old_head,
+                    "to_head": source_head,
+                    "incoming_change_count": 0,
+                    "message": "Izolovaný workspace už odpovídá aktuálnímu commitnutému main.",
+                }
+
+            _git_output(
+                self.workspace_root,
+                ["fetch", "--no-tags", str(self.source_repo), "refs/heads/main"],
+                timeout=120,
+            )
+            if _git_output(self.workspace_root, ["remote"]):
+                raise AppServerError("Lokální fetch neočekávaně vytvořil Git remote; nic neaktualizuji.")
+            fetched_head = _git_output(self.workspace_root, ["rev-parse", "FETCH_HEAD"])
+            source_head_after_fetch = _git_output(self.source_repo, ["rev-parse", "HEAD"])
+            source_branch_after_fetch = _git_output(self.source_repo, ["branch", "--show-current"])
+            if fetched_head != source_head or source_head_after_fetch != source_head:
+                raise AppServerError("Main se během přípravy změnil; aktualizaci zopakuj nad stabilním stavem.")
+            if source_branch_after_fetch != "main":
+                raise AppServerError("Zdrojový projekt během přípravy opustil main; nic neaktualizuji.")
+
+            ancestor = _run_git(
+                self.workspace_root,
+                ["merge-base", "--is-ancestor", "HEAD", "FETCH_HEAD"],
+            )
+            if ancestor.returncode != 0:
+                raise AppServerError(
+                    "Izolovaný workspace a main se rozešly; automatický merge ani přepis nejsou povolené."
+                )
+
+            incoming_text = _git_output(
+                self.workspace_root,
+                ["diff", "--name-status", "--find-renames", "HEAD", "FETCH_HEAD"],
+            )
+            incoming_rows: list[tuple[str, list[str]]] = []
+            for line in incoming_text.splitlines():
+                parts = line.split("\t")
+                if len(parts) >= 2:
+                    incoming_rows.append((parts[0], parts[1:]))
+            unsafe_types = [status for status, _ in incoming_rows if status[:1] not in {"A", "M"}]
+            if unsafe_types:
+                raise AppServerError(
+                    "Main obsahuje mazání, přejmenování nebo netypickou změnu; automatický update je odmítnutý."
+                )
+            incoming_paths = [path for _, paths in incoming_rows for path in paths]
+            if any(self._blocked_checkpoint_path(path) for path in incoming_paths):
+                raise AppServerError("Main obsahuje pro Remote Work Cell blokovaný private, env nebo mediální soubor.")
+
+            _git_output(self.workspace_root, ["diff", "--check", "HEAD", "FETCH_HEAD"])
+            _git_output(
+                self.workspace_root,
+                ["merge", "--ff-only", "--no-edit", "FETCH_HEAD"],
+                timeout=120,
+            )
+            result = self.status()
+            if result.get("head") != source_head or result.get("dirty") or result.get("remotes"):
+                raise AppServerError("Kontrola po aktualizaci nepotvrdila čistý workspace bez Git remote.")
+            metadata = self._metadata()
+            metadata.update(
+                {
+                    "schema_version": 1,
+                    "base_head": source_head,
+                    "source_branch": "main",
+                    "project_dir_name": self.project_dir_name,
+                    "last_synced_at": _now(),
+                }
+            )
+            self._write_metadata(metadata)
+            result = self.status()
+            return {
+                **result,
+                "synced": True,
+                "from_head": old_head,
+                "to_head": source_head,
+                "incoming_change_count": len(incoming_rows),
+                "message": "Izolovaný workspace byl bezpečně fast-forwardován z lokálního main.",
+            }
 
     @staticmethod
     def _blocked_checkpoint_path(path_text: str) -> bool:
@@ -429,6 +548,11 @@ class RemoteWorkCellService:
             )
             return result
 
+    def sync_from_main(self, *, confirmed: bool) -> dict[str, Any]:
+        with self._lock:
+            result = self.workspace.sync_from_main(confirmed=confirmed)
+            return self._merge_status({"ok": True, **result})
+
     def new_thread(self, *, label: str = "") -> dict[str, Any]:
         return self._merge_status(self._service().new_thread(label=label, role="Adam Remote"))
 
@@ -447,15 +571,16 @@ class RemoteWorkCellService:
         )
 
     def send(self, *, text: str, client_message_id: str, client_sent_at: str = "") -> dict[str, Any]:
-        result = self._service().send(
-            text=text,
-            client_message_id=client_message_id,
-            client_sent_at=client_sent_at,
-        )
-        result["workspace"] = self.workspace.status()
-        result["runtime_profile"] = self._runtime_profile()
-        result["remote_work_cell"] = True
-        return result
+        with self._lock:
+            result = self._service().send(
+                text=text,
+                client_message_id=client_message_id,
+                client_sent_at=client_sent_at,
+            )
+            result["workspace"] = self.workspace.status()
+            result["runtime_profile"] = self._runtime_profile()
+            result["remote_work_cell"] = True
+            return result
 
     def save_message_to_tvbcp(self, *, client_message_id: str) -> dict[str, Any]:
         return self._service().save_message_to_tvbcp(client_message_id=client_message_id)
