@@ -10,8 +10,19 @@ Zadne.
 
 ## Smazane vetve
 
+- smazano 2026-07-13: `wip/voicebridge-freeze-2026-07-12`
+- smazano 2026-07-13: `origin/wip/voicebridge-freeze-2026-07-12`
 - smazano 2026-06-26: `cursor/matysek-scene02-mossy-stump-prototype`
 - smazano 2026-06-26: `origin/cursor/matysek-scene02-mossy-stump-prototype`
+
+Rozhodnuti 2026-07-13:
+
+- WIP vetev obsahovala fail-closed zmrazeni stareho VoiceBridge a overeny
+  read-only zaklad noveho app-server LABu.
+- Cela jeji historie byla sloucena do `main` merge commitem `581f985` a
+  `main` byl pred smazanim overen proti `origin/main`.
+- Lokalni i vzdaleny WIP ref byly po vyslovnem potvrzeni globalni brzdy smazany;
+  zadne soubory, tagy ani commity se nemazaly.
 
 Audit:
 
