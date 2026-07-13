@@ -8547,14 +8547,64 @@ def appserver_lab_status_action(*, service: AppServerLabService = APP_SERVER_LAB
     return service.status()
 
 
-def appserver_lab_new_thread_action(*, service: AppServerLabService = APP_SERVER_LAB) -> dict[str, Any]:
+def appserver_lab_new_thread_action(
+    payload: dict[str, Any] | None = None,
+    *,
+    service: AppServerLabService = APP_SERVER_LAB,
+) -> dict[str, Any]:
+    payload = payload or {}
     try:
-        return service.new_thread()
+        return service.new_thread(
+            label=safe_text(str(payload.get("label", "") or "")),
+            role="read-only LAB",
+        )
     except AppServerError:
         return {
             "ok": False,
             "status": "appserver_start_failed",
             "message": "LAB app-server nebo testovací thread se nepodařilo spustit.",
+        }
+
+
+def appserver_lab_select_thread_action(
+    payload: dict[str, Any],
+    *,
+    service: AppServerLabService = APP_SERVER_LAB,
+) -> dict[str, Any]:
+    try:
+        return service.select_thread(
+            registry_id=safe_text(str(payload.get("registry_id", "") or "")),
+        )
+    except AppServerError:
+        return {
+            "ok": False,
+            "status": "appserver_select_failed",
+            "message": "Vybranou LAB relaci se nepodařilo jednoznačně obnovit.",
+        }
+
+
+def appserver_lab_capsule_update_action(
+    payload: dict[str, Any],
+    *,
+    service: AppServerLabService = APP_SERVER_LAB,
+) -> dict[str, Any]:
+    raw_constraints = payload.get("constraints", [])
+    constraints = raw_constraints if isinstance(raw_constraints, list) else []
+    try:
+        return service.update_capsule(
+            registry_id=safe_text(str(payload.get("registry_id", "") or "")),
+            capsule={
+                "objective": safe_text(str(payload.get("objective", "") or "")),
+                "current_state": safe_text(str(payload.get("current_state", "") or "")),
+                "next_step": safe_text(str(payload.get("next_step", "") or "")),
+                "constraints": [safe_text(str(item or "")) for item in constraints],
+            },
+        )
+    except AppServerError:
+        return {
+            "ok": False,
+            "status": "appserver_capsule_invalid",
+            "message": "Context Capsule se nepodařilo uložit; zkontroluj délku a počet polí.",
         }
 
 
@@ -9041,6 +9091,22 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "risk": "local_service",
         "confirmation": "explicit_lab_button",
         "handler_name": "appserver_lab_resume_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/appserver-lab/thread/select",
+        "label": "Vybrat registrovany App-server LAB thread",
+        "risk": "local_service",
+        "confirmation": "explicit_lab_selection",
+        "handler_name": "appserver_lab_select_thread_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/appserver-lab/capsule/update",
+        "label": "Ulozit private Context Capsule pro LAB thread",
+        "risk": "private_write",
+        "confirmation": "explicit_lab_button",
+        "handler_name": "appserver_lab_capsule_update_action",
         "test_level": "direct",
     },
     {
@@ -9888,10 +9954,19 @@ class CockpitServer:
                     self.respond_json(cockpit_voice_frontend_event_action(payload))
                     return
                 if parsed.path == "/api/appserver-lab/thread/new":
-                    self.respond_json(appserver_lab_new_thread_action())
+                    payload = self.read_json()
+                    self.respond_json(appserver_lab_new_thread_action(payload))
                     return
                 if parsed.path == "/api/appserver-lab/thread/resume":
                     self.respond_json(appserver_lab_resume_action())
+                    return
+                if parsed.path == "/api/appserver-lab/thread/select":
+                    payload = self.read_json()
+                    self.respond_json(appserver_lab_select_thread_action(payload))
+                    return
+                if parsed.path == "/api/appserver-lab/capsule/update":
+                    payload = self.read_json()
+                    self.respond_json(appserver_lab_capsule_update_action(payload))
                     return
                 if parsed.path == "/api/appserver-lab/disconnect":
                     self.respond_json(appserver_lab_disconnect_action())
@@ -12332,6 +12407,13 @@ COCKPIT_HTML = """<!doctype html>
     .appserver-lab-modal { width: min(900px, 100%); }
     .appserver-lab-banner { border: 1px solid #f59e0b; border-radius: 8px; padding: 10px; background: #fffbeb; color: #78350f; font-size: 13px; line-height: 1.45; }
     .appserver-lab-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+    .appserver-lab-registry { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto; gap: 8px; align-items: end; }
+    .appserver-lab-field { display: grid; gap: 5px; }
+    .appserver-lab-field label { font-size: 12px; color: var(--muted); }
+    .appserver-lab-field input, .appserver-lab-field select, .appserver-lab-field textarea { width: 100%; min-width: 0; border: 1px solid var(--line); border-radius: 7px; padding: 8px 9px; font: inherit; background: white; color: var(--ink); }
+    .appserver-lab-capsule { border: 1px solid #dbe3ee; border-radius: 9px; padding: 10px; background: #fbfcfe; display: grid; gap: 8px; }
+    .appserver-lab-capsule-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .appserver-lab-capsule textarea { min-height: 72px; resize: vertical; }
     .appserver-lab-log { display: grid; gap: 10px; max-height: 46vh; overflow: auto; padding: 4px; }
     .appserver-lab-message { border: 1px solid #dbe3ee; border-radius: 9px; padding: 10px; background: #f8fafc; display: grid; gap: 8px; }
     .appserver-lab-message.pending { border-color: #f59e0b; background: #fffbeb; }
@@ -12343,6 +12425,7 @@ COCKPIT_HTML = """<!doctype html>
     .appserver-lab-compose textarea { min-height: 92px; resize: vertical; }
     .appserver-lab-lifecycle { display: grid; gap: 6px; max-height: 210px; overflow: auto; }
     .appserver-lab-lifecycle-event { border: 1px solid #dbe3ee; border-radius: 7px; padding: 8px; background: #fbfcfe; display: grid; gap: 3px; }
+    @media (max-width: 760px) { .appserver-lab-registry, .appserver-lab-capsule-grid { grid-template-columns: 1fr; } }
     .app-list { display: grid; gap: 9px; }
     .app-card { border: 1px solid #edf0f4; border-radius: 8px; padding: 11px; background: #fbfcfe; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; }
     .app-title { font-weight: 750; }
@@ -13249,11 +13332,46 @@ COCKPIT_HTML = """<!doctype html>
           Izolovaný read-only test nového rozhraní. Nepoužívá VoiceBridge, watcher, TTY ani screen doručování a není napojený na Janičku.
         </div>
         <div id="appserverLabStatus" class="status-line">LAB se načte až po otevření panelu.</div>
+        <div class="appserver-lab-registry">
+          <div class="appserver-lab-field">
+            <label for="appserverLabThreadSelect">Registrovaná relace</label>
+            <select id="appserverLabThreadSelect" aria-label="Vybrat LAB relaci"></select>
+          </div>
+          <div class="appserver-lab-field">
+            <label for="appserverLabNewLabel">Název nové relace</label>
+            <input id="appserverLabNewLabel" maxlength="60" placeholder="Například: Test A – modrá">
+          </div>
+          <button class="primary" id="appserverLabNewBtn">Nová relace</button>
+        </div>
         <div class="appserver-lab-controls">
-          <button class="primary" id="appserverLabNewBtn">Nová testovací relace</button>
           <button class="secondary" id="appserverLabResumeBtn">Obnovit relaci</button>
           <button class="secondary" id="appserverLabDisconnectBtn">Simulovat odpojení</button>
           <button class="secondary" id="appserverLabRestartBtn">Restartovat LAB app-server</button>
+        </div>
+        <div class="appserver-lab-capsule">
+          <strong>Context Capsule</strong>
+          <div class="appserver-lab-message-meta">Krátký soukromý kontext bez chatového fulltextu. Uplatní se při příštím obnovení nebo restartu vybrané relace.</div>
+          <div class="appserver-lab-capsule-grid">
+            <div class="appserver-lab-field">
+              <label for="appserverLabCapsuleObjective">Cíl</label>
+              <textarea id="appserverLabCapsuleObjective" maxlength="600"></textarea>
+            </div>
+            <div class="appserver-lab-field">
+              <label for="appserverLabCapsuleState">Aktuální stav</label>
+              <textarea id="appserverLabCapsuleState" maxlength="600"></textarea>
+            </div>
+            <div class="appserver-lab-field">
+              <label for="appserverLabCapsuleNext">Další krok</label>
+              <textarea id="appserverLabCapsuleNext" maxlength="600"></textarea>
+            </div>
+          </div>
+          <div class="appserver-lab-field">
+            <label for="appserverLabCapsuleConstraints">Omezení – nejvýše 6 řádků</label>
+            <textarea id="appserverLabCapsuleConstraints" maxlength="1206" placeholder="Jedno krátké omezení na řádek"></textarea>
+          </div>
+          <div class="appserver-lab-controls">
+            <button class="secondary" id="appserverLabCapsuleSaveBtn">Uložit capsule</button>
+          </div>
         </div>
         <div>
           <h3>Lifecycle důkazy</h3>
@@ -13430,12 +13548,19 @@ COCKPIT_HTML = """<!doctype html>
     const appserverLabModal = document.getElementById("appserverLabModal");
     const appserverLabCloseBtn = document.getElementById("appserverLabCloseBtn");
     const appserverLabStatus = document.getElementById("appserverLabStatus");
+    const appserverLabThreadSelect = document.getElementById("appserverLabThreadSelect");
+    const appserverLabNewLabel = document.getElementById("appserverLabNewLabel");
     const appserverLabNewBtn = document.getElementById("appserverLabNewBtn");
     const appserverLabResumeBtn = document.getElementById("appserverLabResumeBtn");
     const appserverLabDisconnectBtn = document.getElementById("appserverLabDisconnectBtn");
     const appserverLabRestartBtn = document.getElementById("appserverLabRestartBtn");
     const appserverLabLifecycle = document.getElementById("appserverLabLifecycle");
     const appserverLabLog = document.getElementById("appserverLabLog");
+    const appserverLabCapsuleObjective = document.getElementById("appserverLabCapsuleObjective");
+    const appserverLabCapsuleState = document.getElementById("appserverLabCapsuleState");
+    const appserverLabCapsuleNext = document.getElementById("appserverLabCapsuleNext");
+    const appserverLabCapsuleConstraints = document.getElementById("appserverLabCapsuleConstraints");
+    const appserverLabCapsuleSaveBtn = document.getElementById("appserverLabCapsuleSaveBtn");
     const appserverLabInput = document.getElementById("appserverLabInput");
     const appserverLabSendBtn = document.getElementById("appserverLabSendBtn");
     const tvbcpModal = document.getElementById("tvbcpModal");
@@ -15749,6 +15874,8 @@ COCKPIT_HTML = """<!doctype html>
     }
 
     let appserverLabMessages = [];
+    let appserverLabActiveRegistryId = "";
+    let appserverLabCapsuleLoadedFor = "";
 
     function appserverLabLocalTime(value) {
       if (!value) return "—";
@@ -15768,6 +15895,41 @@ COCKPIT_HTML = """<!doctype html>
         ? globalThis.crypto.randomUUID().replaceAll("-", "")
         : `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
       return `appserver-lab-${nonce}`;
+    }
+
+    function renderAppserverLabRegistry(data) {
+      const threads = Array.isArray(data.threads) ? data.threads : [];
+      const activeId = String(data.active_registry_id || "");
+      appserverLabActiveRegistryId = activeId;
+      appserverLabThreadSelect.innerHTML = "";
+      if (!threads.length) {
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "Zatím žádná LAB relace";
+        appserverLabThreadSelect.appendChild(option);
+      } else {
+        threads.forEach((thread, index) => {
+          const option = document.createElement("option");
+          option.value = String(thread.registry_id || "");
+          option.textContent = `${thread.label || `LAB relace ${index + 1}`} · ${Number(thread.turn_count || 0)} turnů`;
+          option.selected = option.value === activeId;
+          appserverLabThreadSelect.appendChild(option);
+        });
+      }
+      appserverLabThreadSelect.disabled = !threads.length;
+
+      const active = data.active_thread || null;
+      if (activeId !== appserverLabCapsuleLoadedFor) {
+        const capsule = (active && active.capsule) || {};
+        appserverLabCapsuleObjective.value = capsule.objective || "";
+        appserverLabCapsuleState.value = capsule.current_state || "";
+        appserverLabCapsuleNext.value = capsule.next_step || "";
+        appserverLabCapsuleConstraints.value = Array.isArray(capsule.constraints)
+          ? capsule.constraints.join("\\n")
+          : "";
+        appserverLabCapsuleLoadedFor = activeId;
+      }
+      appserverLabCapsuleSaveBtn.disabled = !activeId;
     }
 
     function renderAppserverLabMessages() {
@@ -15835,6 +15997,7 @@ COCKPIT_HTML = """<!doctype html>
         thread_created: "Nový thread",
         disconnected: "Odpojeno",
         thread_resumed: "Thread obnoven",
+        thread_selected: "Vybrán jiný thread",
         appserver_restarted: "App-server restartován",
         auto_resumed_before_send: "Automaticky obnoveno před odesláním",
       };
@@ -15859,10 +16022,13 @@ COCKPIT_HTML = """<!doctype html>
 
     function renderAppserverLabStatus(data) {
       appserverLabMessages = Array.isArray(data.messages) ? data.messages : appserverLabMessages;
+      renderAppserverLabRegistry(data);
       const version = data.version || {};
       const connected = data.connection_state === "connected";
+      const active = data.active_thread || {};
       appserverLabStatus.textContent = [
         connected ? "Připojeno" : "Odpojeno",
+        active.label || "bez vybrané relace",
         `Codex ${version.raw || "verze nezjištěna"}`,
         `thread ${appserverLabShortId(data.thread_id)}`,
         "read-only",
@@ -15894,29 +16060,78 @@ COCKPIT_HTML = """<!doctype html>
       appserverLabModal.classList.add("hidden");
     }
 
-    async function runAppserverLabControl(path, button, pendingText) {
+    async function runAppserverLabControl(path, button, pendingText, payload = {}) {
       const original = button.textContent;
+      const relabel = button.tagName === "BUTTON";
+      let completedMessage = "";
       button.disabled = true;
-      button.textContent = pendingText;
+      if (relabel) button.textContent = pendingText;
       appserverLabStatus.textContent = pendingText;
       try {
-        const data = await postJson(path, {});
+        const data = await postJson(path, payload);
         if (!data.ok) throw new Error(data.message || "LAB operace nebyla potvrzena.");
+        completedMessage = data.message || "LAB operace byla potvrzena.";
         renderAppserverLabStatus(data);
       } catch (err) {
         recordFrontendError(err);
         appserverLabStatus.textContent = `LAB operace selhala: ${err}`;
         await refreshAppserverLabStatus();
       } finally {
-        button.textContent = original;
+        if (relabel) button.textContent = original;
         await refreshAppserverLabStatus();
+        if (completedMessage) appserverLabStatus.textContent = completedMessage;
         if (button === appserverLabNewBtn) button.disabled = false;
       }
     }
 
     async function createAppserverLabThread() {
       if (!window.confirm("Založit novou izolovanou LAB relaci? Dosavadní LAB historie zůstane v private datech, ale panel začne nový thread.")) return;
-      await runAppserverLabControl("/api/appserver-lab/thread/new", appserverLabNewBtn, "Zakládám relaci…");
+      const label = appserverLabNewLabel.value.trim();
+      await runAppserverLabControl(
+        "/api/appserver-lab/thread/new",
+        appserverLabNewBtn,
+        "Zakládám relaci…",
+        {label},
+      );
+      appserverLabNewLabel.value = "";
+      appserverLabCapsuleLoadedFor = "";
+    }
+
+    async function selectAppserverLabThread() {
+      const registryId = appserverLabThreadSelect.value;
+      if (!registryId || registryId === appserverLabActiveRegistryId) return;
+      await runAppserverLabControl(
+        "/api/appserver-lab/thread/select",
+        appserverLabThreadSelect,
+        "Přepínám relaci…",
+        {registry_id: registryId},
+      );
+      appserverLabCapsuleLoadedFor = "";
+    }
+
+    async function saveAppserverLabCapsule() {
+      if (!appserverLabActiveRegistryId) return;
+      const constraints = appserverLabCapsuleConstraints.value
+        .split("\\n")
+        .map((item) => item.trim())
+        .filter(Boolean);
+      if (constraints.length > 6) {
+        appserverLabStatus.textContent = "Context Capsule smí mít nejvýše 6 řádků omezení.";
+        return;
+      }
+      await runAppserverLabControl(
+        "/api/appserver-lab/capsule/update",
+        appserverLabCapsuleSaveBtn,
+        "Ukládám Context Capsule…",
+        {
+          registry_id: appserverLabActiveRegistryId,
+          objective: appserverLabCapsuleObjective.value,
+          current_state: appserverLabCapsuleState.value,
+          next_step: appserverLabCapsuleNext.value,
+          constraints,
+        },
+      );
+      appserverLabCapsuleLoadedFor = "";
     }
 
     async function submitAppserverLabMessage() {
@@ -19828,10 +20043,12 @@ COCKPIT_HTML = """<!doctype html>
     });
     appserverLabOpenBtn.addEventListener("click", openAppserverLabModal);
     appserverLabCloseBtn.addEventListener("click", closeAppserverLabModal);
+    appserverLabThreadSelect.addEventListener("change", selectAppserverLabThread);
     appserverLabNewBtn.addEventListener("click", createAppserverLabThread);
     appserverLabResumeBtn.addEventListener("click", () => runAppserverLabControl("/api/appserver-lab/thread/resume", appserverLabResumeBtn, "Obnovuji relaci…"));
     appserverLabDisconnectBtn.addEventListener("click", () => runAppserverLabControl("/api/appserver-lab/disconnect", appserverLabDisconnectBtn, "Odpojuji LAB…"));
     appserverLabRestartBtn.addEventListener("click", () => runAppserverLabControl("/api/appserver-lab/restart", appserverLabRestartBtn, "Restartuji LAB…"));
+    appserverLabCapsuleSaveBtn.addEventListener("click", saveAppserverLabCapsule);
     appserverLabSendBtn.addEventListener("click", submitAppserverLabMessage);
     appserverLabInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {

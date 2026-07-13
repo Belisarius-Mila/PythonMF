@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import json
 import tempfile
 import unittest
 from pathlib import Path
 
 from app.codex_appserver import (
     AppServerContractError,
+    AppServerError,
     CodexVersion,
     TurnReceipt,
     codex_environment,
@@ -32,14 +34,18 @@ class FakeClient:
         self.connection_id = f"connection-{self.process_id}"
         self.thread_id = ""
         self.sent = 0
+        self.started_kwargs: dict[str, object] = {}
+        self.resumed_kwargs: dict[str, object] = {}
         self.__class__.instances.append(self)
 
-    def start_thread(self, **_kwargs: object) -> str:
+    def start_thread(self, **kwargs: object) -> str:
+        self.started_kwargs = kwargs
         self.thread_id = f"thread-{self.__class__.next_thread}"
         self.__class__.next_thread += 1
         return self.thread_id
 
-    def resume_thread(self, thread_id: str, **_kwargs: object) -> str:
+    def resume_thread(self, thread_id: str, **kwargs: object) -> str:
+        self.resumed_kwargs = kwargs
         self.thread_id = thread_id
         return thread_id
 
@@ -177,6 +183,82 @@ class AppServerLabServiceTests(unittest.TestCase):
         self.assertEqual(events[3]["process_pid"], 1002)
         self.assertTrue(all(event["thread_id"] == thread_id for event in events))
         self.assertTrue(all("user_text" not in event and "answer" not in event for event in events))
+
+    def test_registry_keeps_two_threads_separate_and_capsule_applies_on_resume(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service = self.make_service(Path(temp_dir))
+            first = service.new_thread(label="Relace A")
+            first_registry_id = first["active_registry_id"]
+            first_thread_id = first["thread_id"]
+            service.send(text="Zpráva A", client_message_id="appserver-lab-aaaaaaaa")
+
+            second = service.new_thread(label="Relace B")
+            second_registry_id = second["active_registry_id"]
+            second_thread_id = second["thread_id"]
+            service.send(text="Zpráva B", client_message_id="appserver-lab-bbbbbbbb")
+            service.update_capsule(
+                registry_id=second_registry_id,
+                capsule={
+                    "objective": "Ověřit návaznost B",
+                    "current_state": "Druhý thread je aktivní",
+                    "next_step": "Obnovit relaci",
+                    "constraints": ["Bez zápisu mimo private data"],
+                },
+            )
+            service.restart()
+            second_resume_instructions = str(FakeClient.instances[-1].resumed_kwargs["developer_instructions"])
+
+            selected_first = service.select_thread(registry_id=first_registry_id)
+            first_messages = selected_first["messages"]
+            selected_second = service.select_thread(registry_id=second_registry_id)
+            second_messages = selected_second["messages"]
+
+        self.assertEqual(len(second["threads"]), 2)
+        self.assertNotEqual(first_thread_id, second_thread_id)
+        self.assertEqual(first_messages[0]["user_text"], "Zpráva A")
+        self.assertEqual(second_messages[0]["user_text"], "Zpráva B")
+        self.assertTrue(all(item["turn_count"] == 1 for item in selected_second["threads"]))
+        self.assertIn("Ověřit návaznost B", second_resume_instructions)
+        self.assertNotIn("Zpráva B", second_resume_instructions)
+
+    def test_legacy_single_thread_state_migrates_without_losing_history(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            state_path = root / "state.json"
+            state_path.write_text(
+                json.dumps(
+                    {
+                        "thread_id": "legacy-thread",
+                        "created_at": "2026-07-12T20:00:00+00:00",
+                        "updated_at": "2026-07-12T20:01:00+00:00",
+                        "connection_generation": 3,
+                        "messages": [{"status": "completed", "user_text": "Historie"}],
+                        "lifecycle_events": [{"action": "thread_created", "thread_id": "legacy-thread"}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            service = self.make_service(root)
+            migrated = service.status()
+            service.disconnect()
+            persisted = json.loads(state_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(migrated["schema_version"], 2)
+        self.assertEqual(migrated["thread_id"], "legacy-thread")
+        self.assertEqual(migrated["messages"][0]["user_text"], "Historie")
+        self.assertEqual(len(persisted["threads"]), 1)
+        self.assertNotIn("thread_id", persisted)
+        self.assertNotIn("messages", persisted)
+
+    def test_capsule_rejects_more_than_six_constraints(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service = self.make_service(Path(temp_dir))
+            created = service.new_thread(label="Limit")
+            with self.assertRaises(AppServerError):
+                service.update_capsule(
+                    registry_id=created["active_registry_id"],
+                    capsule={"constraints": [str(index) for index in range(7)]},
+                )
 
 
 if __name__ == "__main__":

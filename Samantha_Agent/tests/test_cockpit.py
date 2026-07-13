@@ -219,10 +219,17 @@ class CockpitTests(unittest.TestCase):
             "appserverLabOpenBtn",
             "appserverLabModal",
             "appserverLabNewBtn",
+            "appserverLabThreadSelect",
+            "appserverLabNewLabel",
             "appserverLabResumeBtn",
             "appserverLabDisconnectBtn",
             "appserverLabRestartBtn",
             "appserverLabLifecycle",
+            "appserverLabCapsuleObjective",
+            "appserverLabCapsuleState",
+            "appserverLabCapsuleNext",
+            "appserverLabCapsuleConstraints",
+            "appserverLabCapsuleSaveBtn",
             "appserverLabInput",
             "appserverLabSendBtn",
         )
@@ -235,6 +242,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Nepoužívá VoiceBridge, watcher, TTY ani screen doručování", COCKPIT_HTML)
         self.assertIn("Lifecycle důkazy", COCKPIT_HTML)
         self.assertIn("App-server restartován", COCKPIT_HTML)
+        self.assertIn("Context Capsule", COCKPIT_HTML)
+        self.assertIn("Vybrán jiný thread", COCKPIT_HTML)
         self.assertIn("generation ${Number(event.previous_generation", COCKPIT_HTML)
 
     def test_appserver_lab_actions_delegate_without_voice_bridge(self) -> None:
@@ -245,9 +254,17 @@ class CockpitTests(unittest.TestCase):
                 calls.append(("status", None))
                 return {"ok": True, "thread_ready": False}
 
-            def new_thread(self):
-                calls.append(("new", None))
+            def new_thread(self, **kwargs):
+                calls.append(("new", kwargs))
                 return {"ok": True, "thread_id": "thread-1"}
+
+            def select_thread(self, **kwargs):
+                calls.append(("select", kwargs))
+                return {"ok": True}
+
+            def update_capsule(self, **kwargs):
+                calls.append(("capsule", kwargs))
+                return {"ok": True}
 
             def resume(self):
                 calls.append(("resume", None))
@@ -267,7 +284,24 @@ class CockpitTests(unittest.TestCase):
 
         service = FakeService()
         self.assertTrue(cockpit_module.appserver_lab_status_action(service=service)["ok"])
-        self.assertTrue(cockpit_module.appserver_lab_new_thread_action(service=service)["ok"])
+        self.assertTrue(cockpit_module.appserver_lab_new_thread_action({"label": "Test A"}, service=service)["ok"])
+        self.assertTrue(
+            cockpit_module.appserver_lab_select_thread_action(
+                {"registry_id": "registry-1"}, service=service
+            )["ok"]
+        )
+        self.assertTrue(
+            cockpit_module.appserver_lab_capsule_update_action(
+                {
+                    "registry_id": "registry-1",
+                    "objective": "Cíl",
+                    "current_state": "Stav",
+                    "next_step": "Krok",
+                    "constraints": ["Omezení"],
+                },
+                service=service,
+            )["ok"]
+        )
         self.assertTrue(cockpit_module.appserver_lab_resume_action(service=service)["ok"])
         self.assertTrue(cockpit_module.appserver_lab_disconnect_action(service=service)["ok"])
         self.assertTrue(cockpit_module.appserver_lab_restart_action(service=service)["ok"])
@@ -281,7 +315,12 @@ class CockpitTests(unittest.TestCase):
         )
 
         self.assertTrue(sent["ok"])
-        self.assertEqual([item[0] for item in calls], ["status", "new", "resume", "disconnect", "restart", "send"])
+        self.assertEqual(
+            [item[0] for item in calls],
+            ["status", "new", "select", "capsule", "resume", "disconnect", "restart", "send"],
+        )
+        self.assertEqual(calls[1][1]["label"], "Test A")
+        self.assertEqual(calls[2][1]["registry_id"], "registry-1")
         self.assertEqual(calls[-1][1]["client_message_id"], "appserver-lab-abcdefgh")
 
     def test_library_archive_url_action_passes_url_category_and_tags(self) -> None:
