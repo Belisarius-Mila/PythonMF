@@ -71,18 +71,20 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `tvbcp/architektura_komunikace_samantha.txt` - [PRIPOMENOUT] aktivni kanonicka
   smlouva Mily a Adama pro jednoho trvaleho Adama, sdilene app-server vlakno,
   role Cockpitu Mac/iPhone a terminalu, failover, rotaci relace, stihly
-  `cockpit.py`, hlas, TVBCP, handoff a autosave. Prvni textove Human–Adam UI s
-  privátním Unix controllerem je hotove a Mac test potvrzen. Read-only panel
-  zobrazuje pevny projektovy TVBCP z izolovaneho workspace. Panel `Prace`
-  ukazuje cesty zmen a umi potvrzovany lokalni WIP checkpoint bez pushnuti.
-  Prvni vzdaleny zapis byl jako presny commit `7a6673a` overen a fast-forwardem
-  prevzat do `main`; iPhone restart/resume i prvni vzdaleny UI cyklus prosly.
-  Commit `01673b0` s casovanym TVBCP a rolovanim na konec je rucne potvrzeny.
-  Panel `Prace` ma implementovany audit token, plnou branu, potvrzene nasazeni a
-  rizeny restart; 688 testu proslo, dalsi je jeden zivy end-to-end iPhone cyklus.
+  `cockpit.py`, hlas, TVBCP, handoff a autosave. Textove Human–Adam UI, projektovy
+  TVBCP, panel `Prace`, izolovany WIP a samoobsluzne nasazeni jsou opakovane
+  overene z iPhonu. Audit token, plna fail-closed brana, fast-forward, push,
+  rizeny restart, navazani stejneho vlakna a trvala uctenka `deployed` funguji.
+  Posledni bod je `5bac508`, gate ma 703 testu. Dalsi funkcni krok po recovery
+  zaloze je casomira dlouheho tahu a potom hlasovy vstup stejneho app-server toku.
 
 ## Handoffs
 
+- `handoffs/appserver_human_adam_text_remote_verified_restart_backup_2026_07_14.md` - [PRIPOMENOUT]
+  priorita 1 před restartem Macu: vzdálená textová práce a samoobslužné nasazení
+  jsou opakovaně ověřené až po sticky účtenku, bod `5bac508` a 703 testů. Po
+  startu přes `samantha` nejdřív ověřit externí disk a provést zastaralou recovery
+  zálohu; potom pokračovat časomírou dlouhého tahu a hlasovým vstupem.
 - `handoffs/samantha_communication_architecture_checkpoint_2026_07_13.md` - [PRIPOMENOUT]
   priorita 1 checkpoint nove kanonicke komunikace: jeden trvaly Adam a app-server
   thread, Cockpit Mac/iPhone pro beznou praci, terminal pro vyvoj a nezavisly
