@@ -168,6 +168,11 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertIn("na konec souboru", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
         self.assertIn("YYYY-MM-DD HH:MM TZ", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
 
+    def test_developer_instructions_prefer_short_file_names_in_user_answers(self) -> None:
+        self.assertIn("jen samotny nazev bez cele cesty", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
+        self.assertIn("pouze pri shodnych nazvech", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
+        self.assertIn("absolutni cestu do textoveho okna nevypisuj", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
+
     def test_status_has_no_process_start_side_effect(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             service, runtime, _workspace, _hub = self.make_service(Path(temp_dir))

@@ -601,3 +601,55 @@ převzetím.
 
 Další krok: amendovat existující WIP, terminálově zkontrolovat audit, po přesné
 potvrzovací větě převzít checkpoint do `main`, pushnout a řízeně restartovat.
+
+### 2026-07-14 22:01 CEST – Krátké názvy souborů v odpovědích Human–Adam
+
+Požadavek Míly: v běžných odpovědích nezobrazovat celé cesty k souborům, protože
+v textovém okně zabírají mnoho místa a snižují přehlednost.
+
+Provedená implementace:
+
+- Human–Adam má přímou developer instrukci uvádět pouze samotný název souboru;
+- stejné pravidlo je v projektovém `AGENTS.md`, aby platilo i při navázání nové
+  relace;
+- nejkratší nutná relativní cesta se použije pouze při shodných názvech nebo na
+  Mílovo výslovné přání;
+- absolutní cesta se do běžného textového okna nevypisuje. Interní práce nástrojů
+  a bezpečnostní kontroly cest se tím nemění.
+
+Důkaz: 12 cílených testů Human–Adam service prošlo; nový test kontroluje basename,
+výjimku pro kolize a zákaz absolutní cesty v textovém okně. `git diff --check`
+prošel.
+
+Riziko: jde o instrukční pravidlo, ne destruktivní přepis odpovědi. Model může při
+nezvyklém technickém kontextu stále potřebovat relativní cestu k rozlišení dvou
+stejně pojmenovaných souborů.
+
+Další krok: zkontrolovat čtyři změněné soubory v panelu `Práce`; commit ani
+checkpoint nevytvářet bez samostatného Mílova potvrzení.
+
+### 2026-07-14 22:15 CEST – Node.js dostupný i z omezeného prostředí Cockpitu
+
+První samoobslužné nasazení checkpointu s krátkými názvy souborů bezpečně
+skončilo před převzetím. Cockpit spuštěný systémovou službou měl pouze omezený
+`PATH`, a kanonická quality gate proto nenašla příkaz `node`. `main`, GitHub ani
+běžící Cockpit se nezměnily a checkpoint zůstal zachovaný.
+
+Provedená oprava:
+
+- quality gate hledá Node postupně přes volitelný `NODE_BINARY`, aktuální `PATH`
+  a standardní macOS umístění `/opt/homebrew/bin/node` a
+  `/usr/local/bin/node`;
+- nenalezení Node skončí s přímou a srozumitelnou instrukcí;
+- nové testy ověřují explicitní spustitelný soubor i fail-closed stav bez
+  jediného dostupného kandidáta.
+
+Důkaz: 19 cílených testů prošlo. Celá nasazovací brána prošla i při záměrně
+omezeném `PATH=/usr/bin:/bin`: 696 testů, Python syntaxe, oba JavaScripty přes
+skutečný `/usr/local/bin/node`, shell syntaxe a `git diff --check` jsou OK.
+
+Riziko: oprava ještě musí být amendována do původního čekajícího checkpointu;
+starý audit token po změně záměrně nesmí platit.
+
+Další krok: amendovat WIP `476e18e`, potom v Cockpitu provést nový audit a znovu
+použít `Ověřit a nasadit`.

@@ -138,4 +138,7 @@ pri dalsim navazani videl, kam se da rozumne pokracovat.
 - Nejdriv si ujasni cil ukolu a dostupny kontext.
 - Potom navrhni nebo proved nejmensi uzitecny krok.
 - Pri zmenach souboru popis, co menis a proc.
+- V bezne odpovedi Milovi uvadej u souboru jen samotny nazev bez cele cesty.
+  Nejkratsi nutnou relativni cestu pouzij pouze pri shodnych nazvech souboru
+  nebo kdyz si ji Mila vyslovne vyzada; absolutni cestu do textoveho okna nevypisuj.
 - Po dokonceni shrn vysledek a pripadne dalsi prakticky krok.

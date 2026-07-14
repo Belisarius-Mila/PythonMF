@@ -41,7 +41,10 @@ HUMAN_ADAM_DEVELOPER_INSTRUCTIONS = REMOTE_DEVELOPER_INSTRUCTIONS.replace(
     "Kazdy novy chronologicky zaznam pridej na konec souboru a oznac ho lokalnim "
     "datem, casem a casovou zonou ve formatu YYYY-MM-DD HH:MM TZ."
     " Private backup metadata v izolovane kopii zamerne nejsou; z jejich absence "
-    "nikdy nevyvozuj, ze hlavni projekt nema zalohu."
+    "nikdy nevyvozuj, ze hlavni projekt nema zalohu. V bezne odpovedi Milovi "
+    "uvadej u souboru jen samotny nazev bez cele cesty. Nejkratsi nutnou relativni "
+    "cestu pouzij pouze pri shodnych nazvech nebo na Milovu vyslovnou zadost; "
+    "absolutni cestu do textoveho okna nevypisuj."
 )
 MAX_MESSAGE_CHARS = 12_000
 MAX_TVBCP_CHARS = 500_000

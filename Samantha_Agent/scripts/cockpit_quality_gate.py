@@ -7,6 +7,7 @@ import argparse
 import ast
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -17,6 +18,10 @@ from typing import Sequence
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+NODE_FALLBACK_PATHS = (
+    Path("/opt/homebrew/bin/node"),
+    Path("/usr/local/bin/node"),
+)
 
 COMPILE_PATHS = (
     "app/cockpit.py",
@@ -169,6 +174,26 @@ def architecture_messages() -> list[str]:
     return messages
 
 
+def node_binary() -> str:
+    """Find Node even when launchd supplies only the system PATH."""
+    candidates: list[str] = []
+    configured = str(os.environ.get("NODE_BINARY") or "").strip()
+    if configured:
+        candidates.append(configured)
+    discovered = shutil.which("node")
+    if discovered:
+        candidates.append(discovered)
+    candidates.extend(str(path) for path in NODE_FALLBACK_PATHS)
+    for candidate in candidates:
+        path = Path(candidate).expanduser()
+        if path.is_file() and os.access(path, os.X_OK):
+            return str(path)
+    raise SystemExit(
+        "javascript syntax failed: Node.js nebyl nalezen; nastav NODE_BINARY "
+        "nebo nainstaluj node do /opt/homebrew/bin ci /usr/local/bin"
+    )
+
+
 def run_checked(label: str, command: Sequence[str], *, input_text: str | None = None) -> None:
     print(f"\n[{label}] {' '.join(command)}", flush=True)
     started = time.monotonic()
@@ -248,12 +273,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     run_checked(
         "javascript syntax",
-        ["node", "--check", "-"],
+        [node_binary(), "--check", "-"],
         input_text=cockpit_javascript_source(),
     )
     run_checked(
         "Human–Adam javascript syntax",
-        ["node", "--check", "-"],
+        [node_binary(), "--check", "-"],
         input_text=human_adam_javascript_source(),
     )
     run_checked("shell syntax", ["/bin/zsh", "-n", *SHELL_PATHS])

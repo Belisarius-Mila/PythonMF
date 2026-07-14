@@ -13,6 +13,7 @@ from scripts.cockpit_quality_gate import (
     SourceMetrics,
     architecture_messages,
     cockpit_javascript_source,
+    node_binary,
     source_metrics,
     run_checked,
 )
@@ -60,6 +61,28 @@ async def second():
         self.assertIn("async function refresh(", source)
         self.assertIn('join("\\n")', source)
         self.assertNotIn("</script>", source)
+
+    def test_node_binary_uses_explicit_executable_without_shell_path(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            executable = Path(temp_dir) / "node"
+            executable.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+            executable.chmod(0o755)
+            with (
+                patch.dict("os.environ", {"NODE_BINARY": str(executable)}, clear=True),
+                patch("scripts.cockpit_quality_gate.shutil.which", return_value=None),
+            ):
+                resolved = node_binary()
+
+        self.assertEqual(resolved, str(executable))
+
+    def test_node_binary_fails_clearly_when_no_candidate_exists(self) -> None:
+        with (
+            patch.dict("os.environ", {}, clear=True),
+            patch("scripts.cockpit_quality_gate.shutil.which", return_value=None),
+            patch("scripts.cockpit_quality_gate.NODE_FALLBACK_PATHS", ()),
+            self.assertRaisesRegex(SystemExit, "NODE_BINARY"),
+        ):
+            node_binary()
 
     def test_failed_ci_command_emits_safe_github_annotation(self) -> None:
         completed = type(
