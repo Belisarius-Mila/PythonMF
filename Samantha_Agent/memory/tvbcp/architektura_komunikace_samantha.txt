@@ -229,6 +229,8 @@ jejich UI/startovací/testovací kód se nemají ponechávat jako trvalé záloh
 | 2026-07-14 | Human–Adam přečetl TVBCP v reálném tahu | Mílův pokyn proběhl bez změn, odpověď správně uvedla čistý workspace a commit `b6c8dde`; doručení potvrzeno, historie i po restartu zachována |
 | 2026-07-14 | Nasazen přehled práce a lokální WIP checkpoint | Panel ukazuje pouze cesty a Git stavy; checkpoint vyžaduje potvrzení, nic nepushuje a lokální commit před main nezablokuje další tahy; živé GET a odmítavé POST ověřeny, brána 677 testů |
 | 2026-07-14 | Uzavřen první vzdálený vývojový cyklus až do main | Human–Adam změnil jediný TVBCP soubor, Míla ověřil panely a vytvořil WIP; terminál ověřil rodiče/cesty/diff a převzal přesný commit `7a6673a` čistým fast-forwardem, push proběhl bez merge/cherry-pick kopie |
+| 2026-07-14 | Míla potvrdil iPhone restart/resume test | Stejný thread a historie po restartu pokračovaly z iPhonu bez hlášené chyby |
+| 2026-07-14 | Terminálové převzetí je registrovaný workflow | Read-only audit a potvrzované `--ff-only` převzetí/push mají pevné argv, přesnou potvrzovací větu a fail-closed kontroly; plná brána 682 testů |
 
 ## Vývojový záznam 2026-07-14 – transport a Session Hub
 
@@ -344,13 +346,32 @@ První úplný vzdálený cyklus následně prokázal zápis, kontrolu i návrat
 pushovací tlačítko v mobilním UI se nepřidává bez samostatného bezpečnostního
 návrhu; vzdálená práce se bezpečně ukládá lokálním WIP checkpointem.
 
+Terminálové převzetí už není ad hoc sada Git příkazů. Skript
+`scripts/human_adam_takeover.py` má výchozí read-only audit a potvrzovaný apply
+režim. Ověřuje přesně jeden lokální commit, přímého rodiče aktuálního `main`,
+shodu s lokální referencí `origin/main`, čisté tracked změny živého repozitáře,
+čistý clone bez remote, pouze `A/M` cesty, zákaz private/env/médií a `diff
+--check`. Převzetí používá výhradně `merge --ff-only`; push nikdy nepoužívá
+force a po úspěchu srovná metadata izolovaného workspace.
+
+Workflow registry obsahuje dvě pevné karty:
+
+- `human_adam_takeover_audit` – read-only náhled, bez potvrzení;
+- `human_adam_takeover_apply` – fast-forward a push až po uloženém náhledu a
+  potvrzení workflow; samotný skript navíc vyžaduje přesnou větu
+  `POTVRZUJI PREVZETI HUMAN-ADAM WIP DO MAIN`.
+
+Přímé převzetí z mobilního UI se nadále nepovoluje. Terminálový workflow je
+záměrná kontrolní hranice mezi izolovanou vzdálenou prací a živým `main`.
+
 ## Otevřené kroky
 
-1. Ověřit restart Cockpitu a resume stejného threadu z iPhonu jedním kontrolním
-   tahem bez změn a bez duplicity.
-2. Ověřit zámek souběžného tahu a idempotentní opakování stejného message ID.
-3. Formalizovat terminálové převzetí checkpointu jako kontrolovaný workflow;
-   nepřidávat zatím přímý mobilní push do `main`.
+1. Použít Human–Adam pro první skutečný malý vzdálený vývojový úkol a uložit jej
+   lokálním WIP checkpointem.
+2. Po návratu spustit registrovaný audit převzetí a až po kontrole potvrzený
+   takeover workflow.
+3. Ověřit ručně zámek souběžného tahu a idempotentní opakování stejného message
+   ID; automatické testy těchto stavů už existují.
 4. Prokázat nouzový samostatný start terminálového Adama bez Cockpitu a
    app-serveru.
 5. Teprve po úspěšném důkazu navrhnout řízenou migraci kanonické relace.
@@ -373,7 +394,7 @@ návrhu; vzdálená práce se bezpečně ukládá lokálním WIP checkpointem.
 
 ## Další kanonický krok
 
-Po restartu Cockpitu z iPhonu obnovit stejný thread a poslat jediný kontrolní tah
-bez změn. Potom formalizovat už živě prokázané terminálové převzetí WIP
-checkpointu do `main`. Současná terminálová relace a nouzové mechanismy zůstávají
-nedotčené.
+Použít dnešní vzdálenou relaci pro malý skutečný vývojový úkol, zkontrolovat
+TVBCP a panel `Práce` a vytvořit lokální WIP checkpoint. Převzetí do `main` po
+návratu provést pouze registrovaným audit/apply workflow. Současná terminálová
+relace a nouzové mechanismy zůstávají nedotčené.

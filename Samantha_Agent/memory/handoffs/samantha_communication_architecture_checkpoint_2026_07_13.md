@@ -76,12 +76,17 @@ Aktualizace 2026-07-14:
   GitHub bez merge nebo cherry-pick kopie.
 - Oprava `2056210` obnovuje při shodném HEAD také interní `base_head`; 12 cílených
   Remote Work Cell testů prošlo a clone je znovu aligned/čistý/bez remote.
+- Míla potvrdil iPhone restart/resume test jako úspěšný.
+- `scripts/human_adam_takeover.py` formalizuje read-only audit a potvrzené
+  fast-forward/push převzetí. Oba přesné příkazy jsou v shell workflow registru;
+  apply má workflow potvrzení i vlastní přesnou větu, nikdy neforce-pushuje.
+- Plná Cockpit brána po doplnění workflow prošla: 682 testů.
 
 Dalsi krok:
 
-- Restartovat Cockpit na nejnovější kód a z iPhonu ověřit resume stejného threadu
-  jedním tahem bez změn. Potom formalizovat prokázané terminálové převzetí jako
-  workflow; přímý mobilní push zatím nepřidávat.
+- Dnes z iPhonu zadat malý skutečný vývojový úkol a uložit jej lokálním WIP
+  checkpointem. Po návratu použít registrovaný audit a potvrzený takeover;
+  přímý mobilní push nepřidávat.
 
 Navrhovane dalsi kroky:
 
@@ -110,6 +115,9 @@ Zmenene nebo relevantni soubory:
 - `tests/test_human_adam_service.py`
 - `tests/test_human_adam_ui.py`
 - `tests/test_local_appserver_runtime.py`
+- `scripts/human_adam_takeover.py`
+- `tests/test_human_adam_takeover.py`
+- `app/workflows/commands.py`
 - `tests/test_codex_appserver_shared_thread_probe.py`
 - `app/cockpit.py`
 - `scripts/samantha_codex.sh`

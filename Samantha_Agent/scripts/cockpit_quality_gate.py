@@ -67,6 +67,7 @@ COMPILE_PATHS = (
     "scripts/tvbcp.py",
     "scripts/codex_appserver_reliability_probe.py",
     "scripts/codex_appserver_shared_thread_probe.py",
+    "scripts/human_adam_takeover.py",
 )
 
 SHELL_PATHS = (
@@ -83,6 +84,7 @@ TEST_MODULES = (
     "tests.test_communication_session_hub",
     "tests.test_human_adam_service",
     "tests.test_human_adam_ui",
+    "tests.test_human_adam_takeover",
     "tests.test_local_appserver_runtime",
     "tests.test_remote_work_cell",
     "tests.test_voice_bridge_coordinator",

@@ -76,7 +76,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   zobrazuje pevny projektovy TVBCP z izolovaneho workspace. Panel `Prace`
   ukazuje cesty zmen a umi potvrzovany lokalni WIP checkpoint bez pushnuti.
   Prvni vzdaleny zapis byl jako presny commit `7a6673a` overen a fast-forwardem
-  prevzat do `main`; dalsi je iPhone restart/resume test stejneho threadu.
+  prevzat do `main`; iPhone restart/resume prosel. Audit i potvrzene prevzeti jsou
+  registrovany workflow, dalsi je skutecny maly vzdaleny vyvojovy ukol.
 
 ## Handoffs
 
@@ -85,6 +86,10 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   thread, Cockpit Mac/iPhone pro beznou praci, terminal pro vyvoj a nezavisly
   failover, projektovy TVBCP a pravidlo po prijeti nove cesty odstranit legacy
   watcher/TTY/duplicitni komunikacni vetve misto udrzovani fallbacku fallbacku.
+- `handoffs/external_backup_disk_usb_not_detected_2026_07_14.md` - [PRIPOMENOUT]
+  externi recovery disk se 2026-07-14 neenumeroval na USB/Thunderbolt ani jako
+  disk; neprovadet First Aid, dokud jej macOS neuvidi. Posledni zaloha je z
+  2026-07-09; dalsi krok je jiny datovy kabel, primy jiny port a napajeni.
 - `handoffs/appserver_remote_work_cell_v0_2026_07_13.md` - [PRIPOMENOUT] zapisujici Adam Remote v0: samostatny lokalni clone `main` bez private/nezařazenych dat a bez Git remote, runtime model `GPT-5.6-Sol`, reasoning `high`, `workspace-write`, sit vypnuta, TVBCP a lokalni checkpoint. `Aktualizovat z main` umi pouze potvrzeny lokalni fast-forward cisteho workspace a odmita dirty/diverged/mazaci/private scenare. Je nasazeno, zive syncy prosly, thread je connected, Capsule revize 2 ma skutecny cil a gate ma 651 testu vcetne JS. Dalsi krok je maly realny iPhone ukol a kontrola diffu pred checkpointem.
 - `handoffs/colors_numbers_private_photo_gallery_proposal_2026_07_13.md` - pozastaveny navrh tlacitka `Foto` a lokalni galerie nejvyse tri fotografii v obrazovce `Numbers`; kvuli verejnemu repozitari/GitHub Pages se doporucuje pouze lokalni `IndexedDB`, komprese a odstraneni EXIF/GPS, bez commitovani rodinnych fotografii. Nic neimplementovat bez noveho rozhodnuti Mily.
 - `handoffs/appserver_lab_thread_registry_context_capsule_2026_07_13.md` - [PRIPOMENOUT] read-only App-server LAB ma private registr vice oddelenych threadu a nedestruktivni migraci. iPhone test registru i opravene turn-based capsule prosel. Pomalost cca 40 s nebyla Tailscale transportem, ale TIME_WAIT port probe/restart cyklem; probe je opraveny pres `SO_REUSEADDR`, restart limit zvysen a LAB cacheuje Codex verzi. Nasazeny plny restart trval 2,58 s a zahraty LAB status pres Tailscale 0,0036 s. Dokoncena LAB vymena se da explicitnim idempotentnim tlacitkem ulozit do private TVBCP; automaticky zapis je vypnuty. Gate ma 637 testu. Dalsi krok je kratky iPhone retest rychlosti a jednoho TVBCP zapisu.

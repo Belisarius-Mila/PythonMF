@@ -16,6 +16,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SAMANTHA_DIR = PROJECT_ROOT / "Samantha_Agent"
 PYTHON_BIN = SAMANTHA_DIR / ".venv" / "bin" / "python"
 BACKUP_SCRIPT = SAMANTHA_DIR / "scripts" / "backup_samantha_python.py"
+HUMAN_ADAM_TAKEOVER_SCRIPT = SAMANTHA_DIR / "scripts" / "human_adam_takeover.py"
+HUMAN_ADAM_TAKEOVER_CONFIRMATION = "POTVRZUJI PREVZETI HUMAN-ADAM WIP DO MAIN"
 SECURE_BACKUP_ROOT = Path("/Volumes/SamanthaSecureBackup/SamanthaBackups")
 DEFAULT_PENDING_COMMAND_PATH = SAMANTHA_DIR / "data" / "workflows" / "pending_command.json"
 
@@ -146,6 +148,56 @@ WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
             ("zaloha", "backup", "projekt", "samantha", "pythonmf"),
         ),
         preflight=lambda command: _preflight_secure_backup(command, dry_run=True),
+    ),
+    WorkflowCommand(
+        command_id="human_adam_takeover_audit",
+        title="Kontrola Human–Adam WIP checkpointu",
+        purpose="Read-only ověří, zda lze jeden izolovaný WIP převzít přesným fast-forwardem.",
+        aliases=(
+            "zkontroluj human adam checkpoint",
+            "zkontroluj vzdaleny wip",
+            "nahled prevzeti vzdalenych zmen",
+            "audit remote checkpointu",
+        ),
+        argv=(str(PYTHON_BIN), str(HUMAN_ADAM_TAKEOVER_SCRIPT), "audit"),
+        cwd=SAMANTHA_DIR,
+        risk="read_only_preview",
+        writes="nic, pouze Git metadata a cesty změn",
+        requires_confirmation=False,
+        intent_keywords=("kontrola", "zkontroluj", "audit", "nahled", "prevzeti", "human adam", "wip", "checkpoint"),
+        required_keyword_groups=(
+            ("kontrola", "zkontroluj", "audit", "nahled"),
+            ("human adam", "wip", "checkpoint", "vzdaleny"),
+        ),
+    ),
+    WorkflowCommand(
+        command_id="human_adam_takeover_apply",
+        title="Převzetí Human–Adam WIP do main a push",
+        purpose="Po potvrzení převezme přesně jeden ověřený WIP fast-forwardem a pushne main bez přepisu historie.",
+        aliases=(
+            "prevezmi human adam checkpoint do main",
+            "prevezmi vzdaleny wip do main",
+            "aplikuj remote checkpoint",
+            "pushni overeny human adam wip",
+        ),
+        argv=(
+            str(PYTHON_BIN),
+            str(HUMAN_ADAM_TAKEOVER_SCRIPT),
+            "apply",
+            "--push",
+            "--confirm",
+            HUMAN_ADAM_TAKEOVER_CONFIRMATION,
+        ),
+        cwd=SAMANTHA_DIR,
+        risk="git_fast_forward_push",
+        writes="lokální main, origin/main a base metadata izolovaného workspace",
+        requires_confirmation=True,
+        intent_keywords=("prevezmi", "aplikuj", "pushni", "main", "human adam", "wip", "checkpoint", "vzdaleny"),
+        required_keyword_groups=(
+            ("prevezmi", "aplikuj", "pushni"),
+            ("human adam", "wip", "checkpoint", "vzdaleny"),
+        ),
+        preflight=lambda command: _preflight_human_adam_takeover(command),
     ),
 )
 
@@ -412,6 +464,23 @@ def _preflight_secure_backup(command: WorkflowCommand, dry_run: bool = False) ->
     ):
         return "recovery zaloha nema bezpecny cil SamanthaSecureBackup"
     return ""
+
+
+def _preflight_human_adam_takeover(_command: WorkflowCommand) -> str:
+    if not HUMAN_ADAM_TAKEOVER_SCRIPT.is_file():
+        return f"chybi takeover skript {HUMAN_ADAM_TAKEOVER_SCRIPT}"
+    completed = subprocess.run(
+        [str(PYTHON_BIN), str(HUMAN_ADAM_TAKEOVER_SCRIPT), "audit"],
+        cwd=str(SAMANTHA_DIR),
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    if completed.returncode == 0:
+        return ""
+    detail = (completed.stderr or completed.stdout).strip().splitlines()
+    return detail[-1] if detail else "Human–Adam WIP audit není připravený"
 
 
 def _has_command_confirmation(
