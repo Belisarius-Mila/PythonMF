@@ -225,6 +225,7 @@ jejich UI/startovací/testovací kód se nemají ponechávat jako trvalé záloh
 | 2026-07-14 | Nasazen první textový Human–Adam řez | Privátní Unix proces controller, samostatné responzivní UI, izolovaný workspace; živě potvrzen `KANON-14` a resume stejného threadu po restartu; Cockpit restartován, plná brána 672 testů |
 | 2026-07-14 | Míla potvrdil první ruční Mac test Human–Adam | Textové UI podle Mílova hlášení funguje a vypadá správně; kanonická relace má dvě dokončené výměny, workspace zůstal čistý |
 | 2026-07-14 | Nasazen čtecí panel projektového TVBCP | Zavřený boční list bez automatického refresh; čte jediný pevný TVBCP z izolovaného workspace a ukazuje stav pracovních změn; živý HTTP endpoint ověřen, brána 673 testů |
+| 2026-07-14 | První řízený vzdálený zápis z Human–Adam | změněn pouze TVBCP, bez commitu |
 | 2026-07-14 | Human–Adam přečetl TVBCP v reálném tahu | Mílův pokyn proběhl bez změn, odpověď správně uvedla čistý workspace a commit `b6c8dde`; doručení potvrzeno, historie i po restartu zachována |
 | 2026-07-14 | Nasazen přehled práce a lokální WIP checkpoint | Panel ukazuje pouze cesty a Git stavy; checkpoint vyžaduje potvrzení, nic nepushuje a lokální commit před main nezablokuje další tahy; živé GET a odmítavé POST ověřeny, brána 677 testů |
 
