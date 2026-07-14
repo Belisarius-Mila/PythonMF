@@ -701,3 +701,7 @@ zápisem účtenky raději skrýt úspěšné nasazení; nesmí je odhadovat z m
 
 Další krok: ručně ověřit až následující řízené nasazení; commit ani checkpoint
 nevytvářet bez samostatného Mílova potvrzení.
+
+### 2026-07-14 23:04 CEST – Ověření trvalé účtenky nasazení
+
+Cíl: otestovat zobrazení potvrzení po restartu Cockpitu.
