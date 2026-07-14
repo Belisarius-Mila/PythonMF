@@ -83,6 +83,10 @@ from app.communication.human_adam_service import (
     human_adam_tvbcp_action,
     human_adam_work_review_action,
 )
+from app.communication.human_adam_deploy import (
+    human_adam_deploy_action,
+    human_adam_deploy_audit_action,
+)
 from app.communication.human_adam_ui import HUMAN_ADAM_HTML
 from app.remote_work_cell import REMOTE_WORK_CELL, RemoteWorkCellService
 from app.backup.activity_state import backup_activity_status
@@ -9265,6 +9269,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/human-adam/deploy",
+        "label": "Overit a nasadit Human-Adam WIP checkpoint",
+        "risk": "git_fast_forward_push_restart",
+        "confirmation": "audit_token_plus_exact_phrase",
+        "handler_name": "human_adam_deploy_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/appserver-lab/thread/new",
         "label": "Zalozit read-only App-server LAB thread",
         "risk": "local_service",
@@ -10035,6 +10047,9 @@ class CockpitServer:
                 if parsed.path == "/api/human-adam/workspace":
                     self.respond_json(human_adam_work_review_action(service=HUMAN_ADAM))
                     return
+                if parsed.path == "/api/human-adam/deploy-audit":
+                    self.respond_json(human_adam_deploy_audit_action(service=HUMAN_ADAM))
+                    return
                 if parsed.path == "/api/appserver-lab/status":
                     self.respond_json(appserver_lab_status_action())
                     return
@@ -10245,6 +10260,17 @@ class CockpitServer:
                 if parsed.path == "/api/human-adam/checkpoint":
                     payload = self.read_json()
                     self.respond_json(human_adam_checkpoint_action(payload, service=HUMAN_ADAM))
+                    return
+                if parsed.path == "/api/human-adam/deploy":
+                    payload = self.read_json()
+                    result = human_adam_deploy_action(payload, service=HUMAN_ADAM)
+                    if result.get("ok") and result.get("restart_required"):
+                        result["restart"] = start_cockpit_restart_action(
+                            confirmed=True,
+                            host=cockpit_host,
+                            port=cockpit_port,
+                        )
+                    self.respond_json(result)
                     return
                 if parsed.path == "/api/appserver-lab/thread/new":
                     payload = self.read_json()

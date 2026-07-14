@@ -232,6 +232,8 @@ jejich UI/startovací/testovací kód se nemají ponechávat jako trvalé záloh
 | 2026-07-14 | Míla potvrdil iPhone restart/resume test | Stejný thread a historie po restartu pokračovaly z iPhonu bez hlášené chyby |
 | 2026-07-14 | Terminálové převzetí je registrovaný workflow | Read-only audit a potvrzované `--ff-only` převzetí/push mají pevné argv, přesnou potvrzovací větu a fail-closed kontroly; plná brána 682 testů |
 | 2026-07-14 | Upraveno a Mílou potvrzeno záhlaví Human–Adam | `Připojit` je vlevo, `← Cockpit` vpravo a mobilní nástroje jsou ve druhém řádku; Míla potvrdil, že grafika je skvělá; commit `261e627` je nasazený v `main`, 4 cílené UI testy, JavaScript a `git diff --check` prošly |
+| 2026-07-14 | První skutečný vzdálený UI cyklus uzavřen | Commit `01673b0` s časovaným TVBCP a koncovou kotvou byl auditovaně převzat, Míla potvrdil rolování na konec; tichý fallback prázdného názvu checkpointu je odstraněn |
+| 2026-07-14 | Implementováno potvrzované nasazení z panelu Práce | Audit token a přesné cesty → přesná věta → plná brána → stávající fast-forward/push → ověřený restart; při chybě brány se `main` nemění; automatická brána 688 testů, živý vzdálený cyklus ještě čeká |
 
 ## Vývojový záznam 2026-07-14 – transport a Session Hub
 
@@ -367,18 +369,16 @@ záměrná kontrolní hranice mezi izolovanou vzdálenou prací a živým `main`
 
 ## Otevřené kroky
 
-1. Použít Human–Adam pro první skutečný malý vzdálený vývojový úkol a uložit jej
-   lokálním WIP checkpointem.
-2. Po návratu spustit registrovaný audit převzetí a až po kontrole potvrzený
-   takeover workflow.
-3. Ověřit ručně zámek souběžného tahu a idempotentní opakování stejného message
+1. Nasadit aktuální tlačítka `Audit nasazení` a `Ověřit a nasadit` a provést
+   jeden malý živý vzdálený cyklus až po restart a zachovaný thread.
+2. Ověřit ručně zámek souběžného tahu a idempotentní opakování stejného message
    ID; automatické testy těchto stavů už existují.
-4. Prokázat nouzový samostatný start terminálového Adama bez Cockpitu a
+3. Prokázat nouzový samostatný start terminálového Adama bez Cockpitu a
    app-serveru.
-5. Teprve po úspěšném důkazu navrhnout řízenou migraci kanonické relace.
-6. Postupně navrhovat nové moduly tak, aby `app/cockpit.py` nerostl o doménovou
+4. Teprve po úspěšném důkazu navrhnout řízenou migraci kanonické relace.
+5. Postupně navrhovat nové moduly tak, aby `app/cockpit.py` nerostl o doménovou
    logiku.
-7. Po přijetí nové cesty vytvořit přesnou inventuru legacy komunikačního kódu a
+6. Po přijetí nové cesty vytvořit přesnou inventuru legacy komunikačního kódu a
    připravit jeho řízené odstranění z runtime, UI, startu a testů.
 
 ## Rizika a hranice
@@ -395,10 +395,10 @@ záměrná kontrolní hranice mezi izolovanou vzdálenou prací a živým `main`
 
 ## Další kanonický krok
 
-Použít dnešní vzdálenou relaci pro malý skutečný vývojový úkol, zkontrolovat
-TVBCP a panel `Práce` a vytvořit lokální WIP checkpoint. Převzetí do `main` po
-návratu provést pouze registrovaným audit/apply workflow. Současná terminálová
-relace a nouzové mechanismy zůstávají nedotčené.
+Nasadit novou potvrzovanou deploy cestu a v jednom malém vzdáleném úkolu ověřit
+celý cyklus: změna, testy, pojmenovaný checkpoint, audit cest, plná brána,
+fast-forward/push, restart a navázání stejného threadu. Terminálový Adam zůstává
+servisní a vývojovou cestou, ale běžný vzdálený cyklus jím nesmí být blokován.
 
 ## Chronologický protokol
 
@@ -484,3 +484,36 @@ Izolovaný workspace je na nasazeném základu `261e627`, nemá lokální commit
 a sedm necheckpointovaných souborů lze uložit jako jediný nový WIP checkpoint. Po
 auditu, převzetí a restartu Cockpitu načíst novou stránku Human–Adam a teprve potom
 zopakovat ruční test TVBCP.
+
+### 2026-07-14 19:42 CEST – Potvrzované nasazení z panelu Práce
+
+Výsledek předchozího cyklu: checkpoint `01673b0` byl přesným fast-forwardem
+nasazen a Míla na iPhonu potvrdil, že TVBCP se otevírá a obnovuje na konci podle
+zadání. Současně byl opraven bug, kdy iPhone mohl po potvrzovacím dialogu odeslat
+prázdný název checkpointu a backend jej tiše nahradil výchozím textem.
+
+Rozhodnutí Míly a Adama: samostatný preview Cockpit se zatím nebude stavět.
+Terminálový Adam zůstává nutný jako servisní, vývojová a nouzová cesta, ale
+běžný vzdálený vývoj nesmí blokovat ruční terminálové převzetí.
+
+Implementace:
+
+- panel `Práce` po WIP checkpointu nabízí read-only `Audit nasazení`, který
+  zobrazí commit, předmět a přesné cesty bez obsahu souborů;
+- `Ověřit a nasadit` vyžaduje stejný plný audit token a přesnou potvrzovací
+  větu; prázdné nebo zastaralé potvrzení nic neprovede;
+- důvěryhodné hostitelské Python prostředí spustí plnou Cockpit quality gate
+  nad checkpointem; její neúspěch ponechá `main` i GitHub beze změny;
+- po bráně se stav znovu audituje a teprve potom se použije existující
+  `apply_takeover` s fast-forwardem, normálním pushem a bez přepisu historie;
+- dosud běžící důvěryhodný Cockpit naplánuje vlastní ověřený restart a UI
+  čeká na skutečnou změnu PID, potom obnoví stejné Human–Adam vlákno;
+- doménová logika je v `app/communication/human_adam_deploy.py`, ne v monolitu.
+
+Důkaz: izolované Git testy prokázaly úspěšný audit/gate/fast-forward/push i
+fail-closed chybný token a neúspěšnou bránu. Plná Cockpit brána prošla: 688
+testů, Python syntaxe, oba JavaScripty, shell syntaxe a `git diff --check` jsou OK.
+
+Další krok: nasadit tuto implementaci terminálově naposledy jako zavedení nové
+cesty. Potom z iPhonu provést malý skutečný vývojový checkpoint a použít audit i
+`Ověřit a nasadit` až po automatický restart a navázání stejného threadu.

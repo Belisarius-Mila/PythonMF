@@ -182,6 +182,7 @@ class CockpitTests(unittest.TestCase):
             "dev_runner",
             "external_ai",
             "external_send",
+            "git_fast_forward_push_restart",
             "local_open",
             "local_service",
             "print",

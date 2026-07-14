@@ -30,6 +30,9 @@ class HumanAdamUiTests(unittest.TestCase):
             "workChanges",
             "checkpointMessage",
             "checkpointBtn",
+            "deployMeta",
+            "deployAuditBtn",
+            "deployBtn",
         ):
             self.assertIn(f'id="{element_id}"', HUMAN_ADAM_HTML)
         self.assertIn("Odesláno", HUMAN_ADAM_HTML)
@@ -43,7 +46,11 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Workspace: ${workspace.change_count} změn", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/workspace", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/checkpoint", HUMAN_ADAM_HTML)
+        self.assertIn("/api/human-adam/deploy-audit", HUMAN_ADAM_HTML)
+        self.assertIn("/api/human-adam/deploy", HUMAN_ADAM_HTML)
         self.assertIn("Checkpoint bez pushnutí", HUMAN_ADAM_HTML)
+        self.assertIn("Audit nasazení", HUMAN_ADAM_HTML)
+        self.assertIn("Ověřit a nasadit", HUMAN_ADAM_HTML)
         self.assertIn("window.confirm", HUMAN_ADAM_HTML)
         self.assertIn("checkpointMessage.blur();", HUMAN_ADAM_HTML)
         self.assertIn("const checkpointTitle = checkpointMessage.value.trim();", HUMAN_ADAM_HTML)
@@ -53,6 +60,9 @@ class HumanAdamUiTests(unittest.TestCase):
             HUMAN_ADAM_HTML.index("const checkpointTitle = checkpointMessage.value.trim();"),
             HUMAN_ADAM_HTML.index("window.confirm", HUMAN_ADAM_HTML.index("async function createCheckpoint()")),
         )
+        self.assertIn("checkpoint_token:deploymentAudit.checkpoint_token", HUMAN_ADAM_HTML)
+        self.assertIn("confirmation.trim() !== required", HUMAN_ADAM_HTML)
+        self.assertIn("await waitForCockpitAndReload(Number(payload.restart.pid || previousPid));", HUMAN_ADAM_HTML)
 
     def test_ui_is_manual_refresh_only_and_uses_safe_dom_text(self) -> None:
         self.assertNotIn("setInterval", HUMAN_ADAM_HTML)

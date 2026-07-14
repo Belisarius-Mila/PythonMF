@@ -49,6 +49,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #workChanges li { margin-bottom:8px; overflow-wrap:anywhere; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:14px; }
     .checkpoint-box { padding:12px 16px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); display:grid; gap:8px; }
     .checkpoint-box input { width:100%; border:1px solid #bac7d8; border-radius:11px; padding:10px 12px; font:inherit; }
+    #deployMeta { color:var(--muted); font-size:13px; line-height:1.4; }
     @media (max-width:620px) { .head { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .head h1 { text-align:center; } .head-tools { grid-column:1/-1; grid-row:2; justify-content:center; } .back { padding:8px 10px; } .bubble { max-width:94%; } .hint { display:none; } #chat { padding-left:12px; padding-right:12px; } }
   </style>
 </head>
@@ -103,6 +104,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     <div class="checkpoint-box">
       <input id="checkpointMessage" maxlength="120" placeholder="Krátký popis WIP checkpointu">
       <button class="primary" id="checkpointBtn" type="button" disabled>Checkpoint bez pushnutí</button>
+      <div id="deployMeta">Nasazení je dostupné až po lokálním WIP checkpointu.</div>
+      <button id="deployAuditBtn" type="button" disabled>Audit nasazení</button>
+      <button class="primary" id="deployBtn" type="button" disabled>Ověřit a nasadit</button>
     </div>
   </aside>
 </main>
@@ -134,8 +138,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const workChanges = document.getElementById("workChanges");
   const checkpointMessage = document.getElementById("checkpointMessage");
   const checkpointBtn = document.getElementById("checkpointBtn");
+  const deployMeta = document.getElementById("deployMeta");
+  const deployAuditBtn = document.getElementById("deployAuditBtn");
+  const deployBtn = document.getElementById("deployBtn");
   let busy = false;
   let lastSession = null;
+  let deploymentAudit = null;
 
   function messageId() {
     if (window.crypto && crypto.randomUUID) return `human-adam-${crypto.randomUUID()}`;
@@ -273,6 +281,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   function renderWork(payload) {
+    deploymentAudit = null;
     workChanges.replaceChildren();
     const pending = Array.isArray(payload.changes) ? payload.changes : [];
     const checkpointed = Array.isArray(payload.checkpoint_changes) ? payload.checkpoint_changes : [];
@@ -291,6 +300,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     else if (payload.local_checkpoint_ahead) workMeta.textContent = `Lokální WIP checkpoint: ${payload.local_commit_count} commitů · ${payload.checkpoint_change_count} souborů · bez pushnutí`;
     else workMeta.textContent = "Workspace je čistý a odpovídá main.";
     checkpointBtn.disabled = !payload.dirty;
+    deployAuditBtn.disabled = Boolean(payload.dirty) || !payload.local_checkpoint_ahead;
+    deployBtn.disabled = true;
+    if (payload.dirty) deployMeta.textContent = "Nejdřív vytvoř jeden lokální WIP checkpoint.";
+    else if (payload.local_checkpoint_ahead) deployMeta.textContent = "Checkpoint čeká na read-only audit cest.";
+    else deployMeta.textContent = "Není připravený žádný WIP checkpoint k nasazení.";
   }
 
   async function loadWork() {
@@ -344,6 +358,101 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     if (failure) workMeta.textContent = failure;
   }
 
+  function renderDeploymentAudit(payload) {
+    deploymentAudit = payload;
+    workChanges.replaceChildren();
+    for (const item of payload.changes || []) {
+      const row = document.createElement("li");
+      row.textContent = `${item.status || "?"} · ${item.path || ""}`;
+      workChanges.appendChild(row);
+    }
+    deployMeta.textContent = `Audit OK · ${payload.checkpoint_head} · ${payload.checkpoint_subject} · ${payload.change_count} souborů`;
+    deployBtn.disabled = false;
+  }
+
+  async function auditDeployment() {
+    deployAuditBtn.disabled = true;
+    deployBtn.disabled = true;
+    deployMeta.textContent = "Ověřuji commit, rodiče, cesty a Git stav…";
+    try {
+      const payload = await api("/api/human-adam/deploy-audit");
+      if (!payload.ok || !payload.ready) throw new Error(payload.message || "Audit nasazení neprošel.");
+      renderDeploymentAudit(payload);
+    } catch (error) {
+      deploymentAudit = null;
+      deployMeta.textContent = `Audit nasazení selhal: ${error.message}`;
+      deployAuditBtn.disabled = false;
+    }
+  }
+
+  async function waitForCockpitAndReload(previousPid) {
+    for (let attempt = 1; attempt <= 60; attempt += 1) {
+      try {
+        const response = await fetch("/api/server/health", {cache:"no-store"});
+        if (response.ok) {
+          const health = await response.json();
+          const currentPid = health && health.server ? health.server.pid : 0;
+          if (currentPid && currentPid !== previousPid) {
+            window.location.reload();
+            return;
+          }
+        }
+      } catch (_error) {
+        // Očekávané krátké odpojení během restartu Cockpitu.
+      }
+      deployMeta.textContent = `Nasazeno · čekám na Cockpit ${attempt}/60…`;
+      await new Promise((resolve) => window.setTimeout(resolve, 1000));
+    }
+    deployMeta.textContent = "Checkpoint je nasazený, ale Cockpit se nevrátil v limitu. Použij terminálový fallback.";
+  }
+
+  async function deployCheckpoint() {
+    if (deployBtn.disabled || !deploymentAudit) return;
+    const required = deploymentAudit.confirmation_text || "";
+    const confirmation = window.prompt(`Plná brána může trvat několik minut. Pro nasazení napiš přesně:\n\n${required}`, "");
+    if (confirmation === null) return;
+    if (confirmation.trim() !== required) {
+      deployMeta.textContent = "Potvrzovací věta nesouhlasí; nic nebylo nasazeno.";
+      return;
+    }
+    deployAuditBtn.disabled = true;
+    deployBtn.disabled = true;
+    checkpointBtn.disabled = true;
+    deployMeta.textContent = "Spouštím plnou bránu nad přesným checkpointem…";
+    let previousPid = 0;
+    try {
+      const healthResponse = await fetch("/api/server/health", {cache:"no-store"});
+      if (healthResponse.ok) {
+        const health = await healthResponse.json();
+        previousPid = health && health.server ? health.server.pid : 0;
+      }
+      const payload = await api("/api/human-adam/deploy", {
+        method:"POST",
+        body:JSON.stringify({confirmation,checkpoint_token:deploymentAudit.checkpoint_token}),
+      });
+      if (!payload.ok) {
+        deployMeta.textContent = `Nic nebylo nasazeno: ${payload.message || "plná brána nebo audit selhaly."}`;
+        await loadWork();
+        return;
+      }
+      const tests = payload.gate && payload.gate.test_count ? `${payload.gate.test_count} testů` : "plná brána";
+      if (!payload.restart || !payload.restart.ok) {
+        deployMeta.textContent = `Checkpoint je nasazený (${tests}), ale automatický restart nezačal. Použij Restart Cockpitu nebo terminálový fallback.`;
+        return;
+      }
+      deployMeta.textContent = `Nasazeno · ${tests} · Cockpit se restartuje…`;
+      await waitForCockpitAndReload(Number(payload.restart.pid || previousPid));
+    } catch (error) {
+      if (previousPid) {
+        deployMeta.textContent = "Spojení se přerušilo; ověřuji, zda probíhá restart po nasazení…";
+        await waitForCockpitAndReload(previousPid);
+      } else {
+        deployMeta.textContent = `Nasazení nebylo potvrzeno: ${error.message}`;
+        await loadWork();
+      }
+    }
+  }
+
   async function sendMessage(event) {
     event.preventDefault();
     if (busy) return;
@@ -377,6 +486,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   workCloseBtn.addEventListener("click", closeWork);
   workRefreshBtn.addEventListener("click", loadWork);
   checkpointBtn.addEventListener("click", createCheckpoint);
+  deployAuditBtn.addEventListener("click", auditDeployment);
+  deployBtn.addEventListener("click", deployCheckpoint);
   composer.addEventListener("submit", sendMessage);
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) sendMessage(event);

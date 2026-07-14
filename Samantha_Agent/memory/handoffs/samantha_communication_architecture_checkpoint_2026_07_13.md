@@ -81,12 +81,18 @@ Aktualizace 2026-07-14:
   fast-forward/push převzetí. Oba přesné příkazy jsou v shell workflow registru;
   apply má workflow potvrzení i vlastní přesnou větu, nikdy neforce-pushuje.
 - Plná Cockpit brána po doplnění workflow prošla: 682 testů.
+- Commit `01673b0` uzavřel první skutečný vzdálený UI cyklus; Míla ručně
+  potvrdil rolování TVBCP na konec. Prázdný název checkpointu už UI/backend
+  fail-closed odmítají.
+- `app/communication/human_adam_deploy.py` a panel `Práce` implementují audit
+  tokenu/cest, přesnou větu, plnou bránu, stávající takeover a ověřený restart.
+  Neúspěšná brána nemění `main`; plná sada má 688 testů.
 
 Dalsi krok:
 
-- Dnes z iPhonu zadat malý skutečný vývojový úkol a uložit jej lokálním WIP
-  checkpointem. Po návratu použít registrovaný audit a potvrzený takeover;
-  přímý mobilní push nepřidávat.
+- Terminálově nasadit novou deploy cestu a potom z iPhonu provést jeden malý
+  skutečný checkpoint přes `Audit nasazení` a `Ověřit a nasadit` až po restart
+  a zachovaný thread. Model nikdy nepouští sám; akci potvrzuje Míla.
 
 Navrhovane dalsi kroky:
 
@@ -110,6 +116,7 @@ Zmenene nebo relevantni soubory:
 - `app/communication/local_runtime.py`
 - `app/communication/human_adam_service.py`
 - `app/communication/human_adam_ui.py`
+- `app/communication/human_adam_deploy.py`
 - `scripts/codex_appserver_shared_thread_probe.py`
 - `tests/test_communication_session_hub.py`
 - `tests/test_human_adam_service.py`

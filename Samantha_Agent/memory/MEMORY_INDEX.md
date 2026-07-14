@@ -76,8 +76,10 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   zobrazuje pevny projektovy TVBCP z izolovaneho workspace. Panel `Prace`
   ukazuje cesty zmen a umi potvrzovany lokalni WIP checkpoint bez pushnuti.
   Prvni vzdaleny zapis byl jako presny commit `7a6673a` overen a fast-forwardem
-  prevzat do `main`; iPhone restart/resume prosel. Audit i potvrzene prevzeti jsou
-  registrovany workflow, dalsi je skutecny maly vzdaleny vyvojovy ukol.
+  prevzat do `main`; iPhone restart/resume i prvni vzdaleny UI cyklus prosly.
+  Commit `01673b0` s casovanym TVBCP a rolovanim na konec je rucne potvrzeny.
+  Panel `Prace` ma implementovany audit token, plnou branu, potvrzene nasazeni a
+  rizeny restart; 688 testu proslo, dalsi je jeden zivy end-to-end iPhone cyklus.
 
 ## Handoffs
 
