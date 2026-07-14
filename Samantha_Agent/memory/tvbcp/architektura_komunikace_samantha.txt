@@ -222,7 +222,7 @@ jejich UI/startovací/testovací kód se nemají ponechávat jako trvalé záloh
 | 2026-07-13 | Přijat decommission kontrakt staré komunikace | Po ověření nové cesty odstranit nepoužívaný watcher, TTY bridge a duplicitní komunikační větve |
 | 2026-07-14 | Prokázán Unix-socket transport a dva klienti nad jedním threadem | Živý izolovaný probe: dvě odlišná connection ID, stejné thread ID, zachovaný kontext, dvě potvrzená doručení, testovací thread archivován |
 | 2026-07-14 | Dokončen základ Canonical Session Hubu | Persistované thread ID, reconnect, jeden aktivní tah, idempotence a fail-closed `delivery_unknown`; 34 cílených regresních testů |
-| 2026-07-14 | Hotový první textový Human–Adam řez | Privátní Unix proces controller, samostatné responzivní UI, izolovaný workspace; živě potvrzen `KANON-14` a resume stejného threadu po restartu; plná brána 672 testů |
+| 2026-07-14 | Nasazen první textový Human–Adam řez | Privátní Unix proces controller, samostatné responzivní UI, izolovaný workspace; živě potvrzen `KANON-14` a resume stejného threadu po restartu; Cockpit restartován, plná brána 672 testů |
 
 ## Vývojový záznam 2026-07-14 – transport a Session Hub
 
@@ -313,6 +313,6 @@ nenahradí a zůstane fail-closed.
 
 ## Další kanonický krok
 
-Nasadit nový kód restartem Cockpitu a ručně otestovat textové Human–Adam UI na
-Macu. Potom zopakovat základní test na iPhonu a ověřit UI restart/resume. Současná
-terminálová relace a nouzové mechanismy zůstávají nedotčené.
+Ručně otestovat textové Human–Adam UI na Macu. Potom zopakovat základní test na
+iPhonu a ověřit UI restart/resume. Současná terminálová relace a nouzové
+mechanismy zůstávají nedotčené.

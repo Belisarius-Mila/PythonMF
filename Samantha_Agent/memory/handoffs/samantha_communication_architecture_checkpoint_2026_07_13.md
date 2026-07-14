@@ -56,8 +56,9 @@ Aktualizace 2026-07-14:
 
 Dalsi krok:
 
-- Restartovat Cockpit, ručně otestovat Human–Adam nejprve na Macu a potom na
-  iPhonu; ověřit čas odeslání, průběh, odpověď a resume stejné relace.
+- Ručně otestovat Human–Adam nejprve na Macu a potom na iPhonu; ověřit čas
+  odeslání, průběh, odpověď a resume stejné relace. Cockpit už je restartovaný
+  s novým kódem.
 
 Navrhovane dalsi kroky:
 
