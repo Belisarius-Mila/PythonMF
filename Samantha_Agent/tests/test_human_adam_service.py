@@ -7,6 +7,7 @@ from pathlib import Path
 from app.codex_appserver import AppServerError
 from app.communication.human_adam_service import (
     CANONICAL_TVBCP_RELATIVE_PATH,
+    HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
     HumanAdamService,
     human_adam_checkpoint_action,
     human_adam_connect_action,
@@ -48,6 +49,7 @@ class FakeWorkspace:
         self.sync_available = False
         self.dirty = False
         self.local_checkpoint_ahead = False
+        self.last_checkpoint_message = ""
 
     def status(self) -> dict[str, object]:
         return {
@@ -85,6 +87,7 @@ class FakeWorkspace:
     def checkpoint(self, *, confirmed: bool, message: str = "") -> dict[str, object]:
         if not confirmed:
             raise AppServerError("confirmation")
+        self.last_checkpoint_message = message
         self.dirty = False
         self.local_checkpoint_ahead = True
         return {**self.status(), "checkpoint_created": True, "message": message or "WIP"}
@@ -145,6 +148,10 @@ class HumanAdamServiceTests(unittest.TestCase):
             hub=hub,  # type: ignore[arg-type]
         )
         return service, runtime, workspace, hub
+
+    def test_developer_instructions_require_timestamped_tvbcp_append(self) -> None:
+        self.assertIn("na konec souboru", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
+        self.assertIn("YYYY-MM-DD HH:MM TZ", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
 
     def test_status_has_no_process_start_side_effect(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -235,14 +242,20 @@ class HumanAdamServiceTests(unittest.TestCase):
             service, _runtime, workspace, _hub = self.make_service(Path(temp_dir))
             workspace.dirty = True
             rejected = human_adam_checkpoint_action({"confirmed": False}, service=service)
+            missing_name = human_adam_checkpoint_action(
+                {"confirmed": True, "message": "   "},
+                service=service,
+            )
             created = human_adam_checkpoint_action(
-                {"confirmed": True, "message": "Remote UI WIP"},
+                {"confirmed": True, "message": "  Remote   UI WIP  "},
                 service=service,
             )
 
         self.assertEqual(rejected["status"], "confirmation_required")
+        self.assertEqual(missing_name["status"], "human_adam_checkpoint_failed")
         self.assertTrue(created["ok"])
         self.assertTrue(created["checkpoint_created"])
+        self.assertEqual(workspace.last_checkpoint_message, "Remote UI WIP")
         self.assertTrue(created["work"]["local_checkpoint_ahead"])
         self.assertTrue(created["status"]["ok"])
 

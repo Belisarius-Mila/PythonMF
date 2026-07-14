@@ -36,7 +36,9 @@ HUMAN_ADAM_DEVELOPER_INSTRUCTIONS = REMOTE_DEVELOPER_INSTRUCTIONS.replace(
     " Pro projekt komunikacni architektury pred vetsi praci precti "
     "Samantha_Agent/memory/tvbcp/architektura_komunikace_samantha.txt. "
     "Tento TVBCP aktualizuj jen na Miluv pokyn nebo pri skutecnem milniku; zapisuj "
-    "rozhodnuti, dukazy, rizika a dalsi krok, nikdy ne plny chat ani citlive texty."
+    "rozhodnuti, dukazy, rizika a dalsi krok, nikdy ne plny chat ani citlive texty. "
+    "Kazdy novy chronologicky zaznam pridej na konec souboru a oznac ho lokalnim "
+    "datem, casem a casovou zonou ve formatu YYYY-MM-DD HH:MM TZ."
     " Private backup metadata v izolovane kopii zamerne nejsou; z jejich absence "
     "nikdy nevyvozuj, ze hlavni projekt nema zalohu."
 )
@@ -210,7 +212,10 @@ class HumanAdamService:
     def checkpoint(self, *, confirmed: bool, message: str = "") -> dict[str, Any]:
         if self.hub.snapshot().get("turn_busy"):
             raise SessionBusyError("Checkpoint nelze vytvořit během aktivního tahu.")
-        result = self.workspace.checkpoint(confirmed=confirmed, message=message)
+        safe_message = " ".join(str(message or "").split())[:120]
+        if not safe_message:
+            raise AppServerError("Zadej krátký název WIP checkpointu.")
+        result = self.workspace.checkpoint(confirmed=confirmed, message=safe_message)
         return {
             "ok": True,
             "checkpoint_created": bool(result.get("checkpoint_created")),

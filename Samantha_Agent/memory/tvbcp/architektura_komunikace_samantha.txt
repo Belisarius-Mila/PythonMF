@@ -231,6 +231,7 @@ jejich UI/startovací/testovací kód se nemají ponechávat jako trvalé záloh
 | 2026-07-14 | Uzavřen první vzdálený vývojový cyklus až do main | Human–Adam změnil jediný TVBCP soubor, Míla ověřil panely a vytvořil WIP; terminál ověřil rodiče/cesty/diff a převzal přesný commit `7a6673a` čistým fast-forwardem, push proběhl bez merge/cherry-pick kopie |
 | 2026-07-14 | Míla potvrdil iPhone restart/resume test | Stejný thread a historie po restartu pokračovaly z iPhonu bez hlášené chyby |
 | 2026-07-14 | Terminálové převzetí je registrovaný workflow | Read-only audit a potvrzované `--ff-only` převzetí/push mají pevné argv, přesnou potvrzovací větu a fail-closed kontroly; plná brána 682 testů |
+| 2026-07-14 | Upraveno a Mílou potvrzeno záhlaví Human–Adam | `Připojit` je vlevo, `← Cockpit` vpravo a mobilní nástroje jsou ve druhém řádku; Míla potvrdil, že grafika je skvělá; commit `261e627` je nasazený v `main`, 4 cílené UI testy, JavaScript a `git diff --check` prošly |
 
 ## Vývojový záznam 2026-07-14 – transport a Session Hub
 
@@ -398,3 +399,88 @@ Použít dnešní vzdálenou relaci pro malý skutečný vývojový úkol, zkont
 TVBCP a panel `Práce` a vytvořit lokální WIP checkpoint. Převzetí do `main` po
 návratu provést pouze registrovaným audit/apply workflow. Současná terminálová
 relace a nouzové mechanismy zůstávají nedotčené.
+
+## Chronologický protokol
+
+### 2026-07-14 13:13 CEST – Časované záznamy na konci TVBCP
+
+Požadavek Míly:
+
+- Nejnovější zápis musí být snadno dohledatelný na konci souboru.
+- Každý nový záznam musí obsahovat místní datum, čas a časovou zónu.
+
+Provedená implementace:
+
+- Projektový kontrakt TVBCP nově vyžaduje chronologické záznamy na konci souboru
+  ve formátu `YYYY-MM-DD HH:MM TZ`.
+- Stejné pravidlo je v `AGENTS.md` a v developer instrukci kanonické relace
+  Human–Adam; cílený test kontroluje, že instrukce obsahuje konec souboru i
+  časový formát.
+- Předchozí skutečný UI krok je tímto dohledatelný i zde na konci: tlačítko
+  `Připojit` bylo přesunuto vlevo, `← Cockpit` vpravo a mobilní nástroje do
+  druhého řádku. Míla potvrdil, že grafika je skvělá; commit `261e627` je
+  nasazený v `main`.
+
+Důkaz: 13 cílených testů Human–Adam včetně nového pravidla prošlo; kontrola
+JavaScriptu UI a `git diff --check` jsou také v pořádku.
+
+Další krok: v panelu TVBCP stisknout `Obnovit` a ověřit, že nejnovější časovaný
+záznam je vidět úplně dole.
+
+### 2026-07-14 13:36 CEST – TVBCP se otevírá na nejnovějším záznamu
+
+Požadavek Míly: po otevření TVBCP zobrazit rovnou konec textu, aby nebylo nutné
+ručně listovat celým protokolem.
+
+Provedená implementace: po otevření i po stisku `Obnovit` nastaví Human–Adam
+pozici panelu na skutečný konec načteného obsahu. Automatický periodický refresh
+se nepřidává.
+
+Důkaz: 4 cílené UI testy, kontrola JavaScriptu a `git diff --check` prošly.
+
+Další krok: ručně otevřít TVBCP na Macu nebo iPhonu a potvrdit, že panel začíná
+na tomto nejnovějším záznamu.
+
+### 2026-07-14 13:50 CEST – Oprava posunu TVBCP po neúspěšném ručním testu
+
+Výsledek ručního testu Míly: protokol se načetl, ale viditelná pozice zůstala na
+začátku. První implementace tedy nebyla provozně potvrzená.
+
+Provedená oprava:
+
+- textový TVBCP prvek má nyní `min-height: 0`, takže je ve flex panelu skutečným
+  vnitřním scroll kontejnerem;
+- posun na `scrollHeight` proběhne až po dvou vykreslovacích snímcích přes
+  `requestAnimationFrame`, tedy po dokončení layoutu dlouhého textu;
+- stejné chování platí při otevření i ručním obnovení panelu.
+
+Důkaz: 4 cílené UI testy, kontrola JavaScriptu a `git diff --check` prošly.
+
+Další krok: zopakovat ruční test otevření TVBCP. Teprve Mílovo potvrzení uzavře
+tuto opravu jako provozně funkční.
+
+### 2026-07-14 14:10 CEST – Koncová kotva TVBCP po druhém neúspěšném retestu
+
+Výsledek Mílova druhého ručního testu: TVBCP se tvrdošíjně vracel na začátek.
+Současně bylo ověřeno, že opravy posunu jsou stále necheckpointované v izolovaném
+workspace nad nasazeným základem `main` v commitu `261e627`; běžící Cockpit proto
+obsluhuje starší kód a samotné obnovení stránky není důkazem nasazení nové opravy.
+
+Provedená implementace v3:
+
+- obsah TVBCP je v samostatném scroll kontejneru `tvbcpScroll`;
+- za textem je fyzická koncová kotva `tvbcpEnd`;
+- po načtení se použije současně `scrollTop = scrollHeight` a
+  `scrollIntoView` na koncovou kotvu;
+- dvojité `requestAnimationFrame` čeká na layout a opožděná pojistka po 120 ms
+  zachytí pozdní přepočet dlouhého textu v Safari;
+- HTML nese diagnostický marker `end-anchor-v3`, aby bylo možné rozlišit novou
+  stránku od starší načtené verze.
+
+Důkaz: 4 cílené UI testy, kontrola JavaScriptu a `git diff --check` prošly.
+
+Další krok: v panelu `Práce` zkontrolovat současných sedm změněných souborů.
+Izolovaný workspace je na nasazeném základu `261e627`, nemá lokální commit napřed
+a sedm necheckpointovaných souborů lze uložit jako jediný nový WIP checkpoint. Po
+auditu, převzetí a restartu Cockpitu načíst novou stránku Human–Adam a teprve potom
+zopakovat ruční test TVBCP.

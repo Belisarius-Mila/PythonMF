@@ -41,7 +41,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .tvbcp-head { display:flex; align-items:center; gap:8px; padding:14px max(16px,env(safe-area-inset-right)) 14px 16px; border-bottom:1px solid var(--line); }
     .tvbcp-head h2 { flex:1; margin:0; font-size:18px; }
     #tvbcpMeta { padding:10px 16px; color:var(--muted); font-size:13px; border-bottom:1px solid var(--line); }
-    #tvbcpContent { flex:1; overflow:auto; margin:0; padding:16px max(16px,env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) 16px; white-space:pre-wrap; overflow-wrap:anywhere; font:14px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace; }
+    #tvbcpScroll { flex:1; min-height:0; overflow:auto; }
+    #tvbcpContent { margin:0; padding:16px max(16px,env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) 16px; white-space:pre-wrap; overflow-wrap:anywhere; font:14px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace; }
+    #tvbcpEnd { height:1px; }
     #workMeta { padding:10px 16px; color:var(--muted); font-size:13px; border-bottom:1px solid var(--line); }
     #workChanges { flex:1; overflow:auto; margin:0; padding:16px 34px; }
     #workChanges li { margin-bottom:8px; overflow-wrap:anywhere; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:14px; }
@@ -85,7 +87,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <button id="tvbcpCloseBtn" type="button">Zavřít</button>
     </div>
     <div id="tvbcpMeta">TVBCP se načte až po otevření.</div>
-    <pre id="tvbcpContent"></pre>
+    <div id="tvbcpScroll" data-scroll-mode="end-anchor-v3">
+      <pre id="tvbcpContent"></pre>
+      <div id="tvbcpEnd" aria-hidden="true"></div>
+    </div>
   </aside>
   <aside class="tvbcp-panel" id="workPanel" hidden aria-label="Pracovní změny">
     <div class="tvbcp-head">
@@ -118,7 +123,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const tvbcpRefreshBtn = document.getElementById("tvbcpRefreshBtn");
   const tvbcpTitle = document.getElementById("tvbcpTitle");
   const tvbcpMeta = document.getElementById("tvbcpMeta");
+  const tvbcpScroll = document.getElementById("tvbcpScroll");
   const tvbcpContent = document.getElementById("tvbcpContent");
+  const tvbcpEnd = document.getElementById("tvbcpEnd");
   const workOpenBtn = document.getElementById("workOpenBtn");
   const workPanel = document.getElementById("workPanel");
   const workCloseBtn = document.getElementById("workCloseBtn");
@@ -226,6 +233,17 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     finally { setBusy(false); }
   }
 
+  function scrollTvbcpToEnd() {
+    const applyEndPosition = () => {
+      tvbcpScroll.scrollTop = tvbcpScroll.scrollHeight;
+      tvbcpEnd.scrollIntoView({block:"end",inline:"nearest",behavior:"auto"});
+    };
+    requestAnimationFrame(() => {
+      requestAnimationFrame(applyEndPosition);
+    });
+    window.setTimeout(applyEndPosition, 120);
+  }
+
   async function loadTvbcp() {
     tvbcpRefreshBtn.disabled = true;
     tvbcpMeta.textContent = "Načítám pracovní TVBCP…";
@@ -237,7 +255,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       const workState = payload.workspace_dirty ? `pracovní kopie má ${payload.workspace_change_count} změn` : "pracovní kopie je čistá";
       const syncState = payload.sync_available ? " · čeká na aktualizaci z main" : "";
       tvbcpMeta.textContent = `Pracovní TVBCP · ${workState}${syncState} · změněno ${formatTime(payload.modified_at)}`;
-      tvbcpContent.scrollTop = 0;
+      scrollTvbcpToEnd();
     } catch (error) {
       tvbcpContent.textContent = "";
       tvbcpMeta.textContent = `TVBCP nelze načíst: ${error.message}`;
@@ -301,12 +319,20 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
   async function createCheckpoint() {
     if (checkpointBtn.disabled) return;
-    if (!window.confirm("Vytvořit lokální WIP checkpoint v izolované kopii bez pushnutí?")) return;
+    checkpointMessage.blur();
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+    const checkpointTitle = checkpointMessage.value.trim();
+    if (!checkpointTitle) {
+      workMeta.textContent = "Zadej krátký název WIP checkpointu.";
+      checkpointMessage.focus();
+      return;
+    }
+    if (!window.confirm(`Vytvořit lokální WIP checkpoint bez pushnutí?\n\n${checkpointTitle}`)) return;
     checkpointBtn.disabled = true;
     workMeta.textContent = "Vytvářím bezpečný lokální checkpoint…";
     let failure = "";
     try {
-      const payload = await api("/api/human-adam/checkpoint", {method:"POST", body:JSON.stringify({confirmed:true,message:checkpointMessage.value.trim()})});
+      const payload = await api("/api/human-adam/checkpoint", {method:"POST", body:JSON.stringify({confirmed:true,message:checkpointTitle})});
       if (!payload.ok) throw new Error(payload.message || "Checkpoint selhal.");
       checkpointMessage.value = "";
       renderWork(payload.work);

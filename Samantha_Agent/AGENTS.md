@@ -101,6 +101,9 @@ pri dalsim navazani videl, kam se da rozumne pokracovat.
   `memory/MEMORY_INDEX.md` a prislusne polozky v `memory/ACTIVE_PROJECTS.md`.
 - Prubezne do nej zapisuj jen podstatne navrhy, kanonicka rozhodnuti, milniky,
   dulezite testy, otevrene kroky a rizika; vynechavej provozni mezistavy a omacku.
+- Kazdy novy chronologicky zaznam pridej na konec TVBCP a oznac lokalnim datem,
+  casem a casovou zonou ve formatu `YYYY-MM-DD HH:MM TZ`, aby byl nejnovejsi
+  zapis vzdy dohledatelny dole. Souhrnne sekce lze prubezne aktualizovat.
 - Citlive nebo private texty do gitoveho TVBCP nepatri.
 - Podrobny kontrakt je v `memory/technical/project_tvbcp_rules.md`.
 

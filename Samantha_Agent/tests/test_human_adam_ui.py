@@ -20,7 +20,9 @@ class HumanAdamUiTests(unittest.TestCase):
             "tvbcpPanel",
             "tvbcpCloseBtn",
             "tvbcpRefreshBtn",
+            "tvbcpScroll",
             "tvbcpContent",
+            "tvbcpEnd",
             "workOpenBtn",
             "workPanel",
             "workCloseBtn",
@@ -43,12 +45,29 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("/api/human-adam/checkpoint", HUMAN_ADAM_HTML)
         self.assertIn("Checkpoint bez pushnutí", HUMAN_ADAM_HTML)
         self.assertIn("window.confirm", HUMAN_ADAM_HTML)
+        self.assertIn("checkpointMessage.blur();", HUMAN_ADAM_HTML)
+        self.assertIn("const checkpointTitle = checkpointMessage.value.trim();", HUMAN_ADAM_HTML)
+        self.assertIn("Zadej krátký název WIP checkpointu.", HUMAN_ADAM_HTML)
+        self.assertIn("message:checkpointTitle", HUMAN_ADAM_HTML)
+        self.assertLess(
+            HUMAN_ADAM_HTML.index("const checkpointTitle = checkpointMessage.value.trim();"),
+            HUMAN_ADAM_HTML.index("window.confirm", HUMAN_ADAM_HTML.index("async function createCheckpoint()")),
+        )
 
     def test_ui_is_manual_refresh_only_and_uses_safe_dom_text(self) -> None:
         self.assertNotIn("setInterval", HUMAN_ADAM_HTML)
         self.assertNotIn("innerHTML", HUMAN_ADAM_HTML)
         self.assertIn("textContent", HUMAN_ADAM_HTML)
         self.assertIn("replaceChildren", HUMAN_ADAM_HTML)
+        self.assertIn("#tvbcpScroll { flex:1; min-height:0; overflow:auto;", HUMAN_ADAM_HTML)
+        self.assertIn('data-scroll-mode="end-anchor-v3"', HUMAN_ADAM_HTML)
+        self.assertIn("function scrollTvbcpToEnd()", HUMAN_ADAM_HTML)
+        self.assertGreaterEqual(HUMAN_ADAM_HTML.count("requestAnimationFrame"), 2)
+        self.assertIn("tvbcpScroll.scrollTop = tvbcpScroll.scrollHeight;", HUMAN_ADAM_HTML)
+        self.assertIn('tvbcpEnd.scrollIntoView({block:"end",inline:"nearest",behavior:"auto"});', HUMAN_ADAM_HTML)
+        self.assertIn("window.setTimeout(applyEndPosition, 120);", HUMAN_ADAM_HTML)
+        self.assertIn("scrollTvbcpToEnd();", HUMAN_ADAM_HTML)
+        self.assertNotIn("scrollTop = 0;", HUMAN_ADAM_HTML)
 
     def test_header_places_connect_left_and_cockpit_right(self) -> None:
         connect = HUMAN_ADAM_HTML.index('id="connectBtn"')

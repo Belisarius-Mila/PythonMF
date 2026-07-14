@@ -32,6 +32,18 @@ ucelené vývojové úlohy. Drží zhuštěné pracovní vlákno po celou dobu v
 TVBCP není úplný přepis chatu. Vynechává provozní mezistavy, běžné tool výstupy,
 opakování a textovou omáčku.
 
+## Chronologické záznamy
+
+- Každý nový průběžný záznam se přidává na konec souboru, ne doprostřed staršího
+  protokolu.
+- Nadpis záznamu vždy obsahuje místní datum, čas a časovou zónu ve formátu
+  `YYYY-MM-DD HH:MM TZ`, například `2026-07-14 13:13 CEST`.
+- Souhrnné sekce, tabulky milníků a otevřené kroky lze aktualizovat na jejich
+  místě, ale odpovídající nový vývojový záznam musí být současně dohledatelný na
+  konci dokumentu.
+- Jeden časovaný záznam stručně oddělí požadavek nebo rozhodnutí, provedenou
+  implementaci, důkaz testu a další krok. Nekopíruje celý chat.
+
 ## Vztah k ostatním vrstvám paměti
 
 - TVBCP: průběžná smlouva, rozhodnutí a vývojové vlákno.
