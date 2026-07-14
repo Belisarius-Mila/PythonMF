@@ -20,6 +20,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     h1 { margin:0; font-size:21px; flex:1; }
     button,.back { border:1px solid var(--line); border-radius:11px; padding:10px 13px; background:#fff; color:var(--ink); font:inherit; font-weight:700; text-decoration:none; cursor:pointer; }
     button.primary { background:var(--blue); color:#fff; border-color:var(--blue); }
+    button.audit-action { background:#fbbf24; color:#422006; border-color:#d97706; }
+    button.deploy-action { background:var(--ok); color:#fff; border-color:var(--ok); }
     button:disabled { opacity:.55; cursor:wait; }
     .statusline { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; color:var(--muted); font-size:13px; }
     .badge { padding:4px 8px; border-radius:999px; background:var(--soft); }
@@ -108,9 +110,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <input id="checkpointMessage" maxlength="120" placeholder="Krátký popis WIP checkpointu">
       <button class="primary" id="checkpointBtn" type="button" disabled>Checkpoint bez pushnutí</button>
       <div id="deployMeta">Nasazení je dostupné až po lokálním WIP checkpointu.</div>
-      <button id="deployAuditBtn" type="button" disabled>Audit nasazení</button>
+      <button class="audit-action" id="deployAuditBtn" type="button" disabled>Audit nasazení</button>
       <input id="deployConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Po auditu sem vlož potvrzovací větu" hidden disabled>
-      <button class="primary" id="deployBtn" type="button" disabled>Ověřit a nasadit</button>
+      <button class="deploy-action" id="deployBtn" type="button" disabled>Ověřit a nasadit</button>
     </div>
   </aside>
 </main>

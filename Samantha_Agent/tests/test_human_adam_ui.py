@@ -100,6 +100,18 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("header { position:sticky;", HUMAN_ADAM_HTML)
         self.assertIn("#deploymentReceipt { margin:8px 0 0; padding:6px 10px;", HUMAN_ADAM_HTML)
 
+    def test_deployment_actions_have_distinct_audit_and_apply_colors(self) -> None:
+        self.assertIn(
+            '<button class="audit-action" id="deployAuditBtn" type="button" disabled>',
+            HUMAN_ADAM_HTML,
+        )
+        self.assertIn(
+            '<button class="deploy-action" id="deployBtn" type="button" disabled>',
+            HUMAN_ADAM_HTML,
+        )
+        self.assertIn("button.audit-action { background:#fbbf24;", HUMAN_ADAM_HTML)
+        self.assertIn("button.deploy-action { background:var(--ok);", HUMAN_ADAM_HTML)
+
     def test_ui_is_manual_refresh_only_and_uses_safe_dom_text(self) -> None:
         self.assertNotIn("setInterval", HUMAN_ADAM_HTML)
         self.assertNotIn("innerHTML", HUMAN_ADAM_HTML)
