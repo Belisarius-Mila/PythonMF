@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-TRUSTED_PYTHON = Path(sys.executable).resolve()
+TRUSTED_PYTHON = Path(sys.executable)
 DEFAULT_GATE_LOG = PROJECT_ROOT / "data" / "private" / "communication" / "human_adam_deploy_gate.log"
 DEPLOYMENT_LOCK = threading.Lock()
 MAX_GATE_LOG_CHARS = 2_000_000

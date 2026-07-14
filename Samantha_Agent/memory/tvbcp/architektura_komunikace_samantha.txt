@@ -548,3 +548,56 @@ souborů, takže model zná stav a počty, nikoli obsah rozpracované práce.
 
 Další krok: v panelu `Práce` zkontrolovat pět změněných souborů. Checkpoint ani
 nasazení nevytvářet bez samostatného Mílova potvrzení.
+
+### 2026-07-14 21:05 CEST – Okamžité vyčištění vstupu po odeslání
+
+Požadavek Míly: po stisku `Odeslat` musí textové pole okamžitě zůstat prázdné,
+zatímco zachycený text zůstane v historii. Safari nesmí po obnovení nebo
+`pageshow` vrátit starou hodnotu a při nejistém doručení se text nesmí
+automaticky vložit zpět, aby nehrozila duplicita.
+
+Provedená implementace:
+
+- původní text se nejprve zachytí do lokální proměnné a vstup se vymaže ještě
+  před vytvořením API požadavku;
+- optimistická bublina historie používá zachycený text, nikoli hodnotu pole;
+- úspěch ani chyba už text do vstupu nevracejí;
+- formulář i textarea mají vypnuté automatické doplňování a společná funkce
+  čistí `value` i `defaultValue` při inicializaci a Safari `pageshow`.
+
+Důkaz: 5 cílených UI testů prošlo. Nový test přímo ověřuje pořadí zachycení,
+vymazání a API volání, zachování optimistické historie, zákaz reinzerce a
+ochrany proti Safari obnově; kontrola JavaScriptu a `git diff --check` prošly.
+
+Riziko: chování zatím nebylo ručně ověřeno na skutečném iPhonu při nejistém
+doručení nebo návratu stránky z BFCache.
+
+Další krok: v panelu `Práce` zkontrolovat tři změněné soubory. Checkpoint ani
+nasazení nevytvářet bez samostatného Mílova potvrzení.
+
+### 2026-07-14 21:20 CEST – Fail-closed první pokus o samoobslužné nasazení
+
+První skutečný pokus z iPhonu bezpečně skončil v plné bráně před převzetím
+checkpointu. `main`, GitHub ani běžící Cockpit se nezměnily. Příčinou bylo
+rozbalení cesty `.venv/bin/python` na systémový Python, kterému chyběl balíček
+`python-dotenv`. Současně UI po chybě obnovilo panel `Práce` a tím přepsalo
+užitečnou chybovou zprávu, takže Míla neviděl žádnou odezvu.
+
+Provedená oprava:
+
+- nasazovací brána zachovává přesnou cestu aktivního projektového Pythonu a
+  nepřevádí ji na systémový interpreter;
+- neúspěch se po obnovení panelu znovu zobrazí a zůstane čitelný;
+- regresní testy hlídají jak zachování `.venv` vstupního bodu, tak viditelnost
+  zprávy po neúspěšném nasazení.
+
+Důkaz: 10/10 cílených testů prošlo. Stejná plná nasazovací brána následně
+prošla nad checkpointem: 693 testů, Python syntaxe, oba JavaScripty, shell
+syntaxe a `git diff --check` jsou OK.
+
+Riziko: oprava je zatím pouze v izolovaném WIP; běžící Cockpit stále používá
+bezpečnou starší verzi a nový pokus se nemá opakovat před terminálovým
+převzetím.
+
+Další krok: amendovat existující WIP, terminálově zkontrolovat audit, po přesné
+potvrzovací větě převzít checkpoint do `main`, pushnout a řízeně restartovat.

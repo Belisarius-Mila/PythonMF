@@ -74,8 +74,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   </header>
   <div id="notice" role="status" aria-live="polite"></div>
   <section id="chat" aria-label="Konverzace Human–Adam"></section>
-  <form class="composer" id="composer">
-    <textarea id="messageInput" maxlength="12000" placeholder="Napiš Adamovi…" aria-label="Zpráva pro Adama"></textarea>
+  <form class="composer" id="composer" autocomplete="off">
+    <textarea id="messageInput" maxlength="12000" autocomplete="off" placeholder="Napiš Adamovi…" aria-label="Zpráva pro Adama"></textarea>
     <div class="compose-actions">
       <span class="hint">⌘/Ctrl + Enter odešle · Enter píše nový řádek</span>
       <button class="primary" id="sendBtn" type="submit">Odeslat</button>
@@ -164,6 +164,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     refreshBtn.disabled = value;
     sendBtn.disabled = value;
     if (text) notice.textContent = text;
+  }
+
+  function clearMessageInput() {
+    input.value = "";
+    input.defaultValue = "";
   }
 
   function bubble(text, className, meta) {
@@ -438,8 +443,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         body:JSON.stringify({confirmation,checkpoint_token:deploymentAudit.checkpoint_token}),
       });
       if (!payload.ok) {
-        deployMeta.textContent = `Nic nebylo nasazeno: ${payload.message || "plná brána nebo audit selhaly."}`;
+        const deploymentFailure = `Nic nebylo nasazeno: ${payload.message || "plná brána nebo audit selhaly."}`;
         await loadWork();
+        deployMeta.textContent = deploymentFailure;
         return;
       }
       const tests = payload.gate && payload.gate.test_count ? `${payload.gate.test_count} testů` : "plná brána";
@@ -465,6 +471,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     if (busy) return;
     const text = input.value.trim();
     if (!text) { notice.textContent = "Napiš nejdřív zprávu."; return; }
+    clearMessageInput();
     const sentAt = new Date().toISOString();
     const clientId = messageId();
     const optimistic = lastSession ? {...lastSession, messages:[...(lastSession.messages || []), {user_text:text,client_sent_at:sentAt,received_at:sentAt,status:"pending",answer:""}]} : {messages:[{user_text:text,client_sent_at:sentAt,received_at:sentAt,status:"pending",answer:""}]};
@@ -474,7 +481,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     try {
       const payload = await api("/api/human-adam/send", {method:"POST", body:JSON.stringify({message:text,client_message_id:clientId,client_sent_at:sentAt})});
       if (!payload.ok) throw new Error(payload.message || "Odeslání selhalo.");
-      input.value = "";
       renderSession(payload.session);
       notice.textContent = "Odpověď doručena a potvrzena.";
     } catch (error) {
@@ -503,6 +509,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) sendMessage(event);
   });
+  clearMessageInput();
+  window.addEventListener("pageshow", clearMessageInput);
   loadStatus();
 </script>
 </body>

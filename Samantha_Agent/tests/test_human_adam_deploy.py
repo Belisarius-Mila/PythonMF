@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 from app.communication.human_adam_deploy import (
     HumanAdamDeployError,
+    TRUSTED_PYTHON,
     audit_checkpoint,
     deploy_checkpoint,
 )
@@ -44,6 +46,9 @@ def prepare_checkpoint(root: Path):
 
 
 class HumanAdamDeployTests(unittest.TestCase):
+    def test_trusted_python_preserves_the_active_venv_entrypoint(self) -> None:
+        self.assertEqual(TRUSTED_PYTHON, Path(sys.executable))
+
     def test_audit_returns_exact_token_and_safe_paths(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             _source, manager, checkpoint = prepare_checkpoint(Path(temp_dir))

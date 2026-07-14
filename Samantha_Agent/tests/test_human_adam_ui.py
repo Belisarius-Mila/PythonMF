@@ -69,6 +69,10 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("const confirmation = deployConfirmation.value.trim();", HUMAN_ADAM_HTML)
         self.assertIn('deployConfirmation.addEventListener("input"', HUMAN_ADAM_HTML)
         self.assertNotIn("window.prompt", HUMAN_ADAM_HTML)
+        failure = HUMAN_ADAM_HTML.index("const deploymentFailure =")
+        refresh = HUMAN_ADAM_HTML.index("await loadWork();", failure)
+        restore = HUMAN_ADAM_HTML.index("deployMeta.textContent = deploymentFailure;", refresh)
+        self.assertLess(refresh, restore)
         self.assertIn("await waitForCockpitAndReload(Number(payload.restart.pid || previousPid));", HUMAN_ADAM_HTML)
 
     def test_ui_is_manual_refresh_only_and_uses_safe_dom_text(self) -> None:
@@ -96,6 +100,24 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertLess(tools, cockpit)
         self.assertIn("grid-template-columns:auto minmax(0,1fr) auto", HUMAN_ADAM_HTML)
         self.assertIn(".head-tools { grid-column:1/-1; grid-row:2; justify-content:center; }", HUMAN_ADAM_HTML)
+
+    def test_submit_clears_input_before_api_and_blocks_safari_restore(self) -> None:
+        send_start = HUMAN_ADAM_HTML.index("async function sendMessage(event)")
+        send_end = HUMAN_ADAM_HTML.index('connectBtn.addEventListener("click", connect);', send_start)
+        send_source = HUMAN_ADAM_HTML[send_start:send_end]
+        capture = send_source.index("const text = input.value.trim();")
+        clear = send_source.index("clearMessageInput();")
+        api_call = send_source.index('await api("/api/human-adam/send"')
+
+        self.assertLess(capture, clear)
+        self.assertLess(clear, api_call)
+        self.assertIn("renderSession(optimistic);", send_source)
+        self.assertNotIn("input.value = text", send_source)
+        self.assertNotIn('input.value = ""', send_source)
+        self.assertIn('function clearMessageInput() {\n    input.value = "";\n    input.defaultValue = "";', HUMAN_ADAM_HTML)
+        self.assertIn('<form class="composer" id="composer" autocomplete="off">', HUMAN_ADAM_HTML)
+        self.assertIn('id="messageInput" maxlength="12000" autocomplete="off"', HUMAN_ADAM_HTML)
+        self.assertIn('window.addEventListener("pageshow", clearMessageInput);', HUMAN_ADAM_HTML)
 
     def test_ui_does_not_depend_on_legacy_delivery_paths(self) -> None:
         lowered = HUMAN_ADAM_HTML.lower()
