@@ -70,12 +70,18 @@ Aktualizace 2026-07-14:
 - Souběžný veřejný Colors & Numbers audio commit byl bezpečně převzat. Source
   sync má úzký allowlist do 8 MiB jen pro dvě veřejné webové asset cesty; ostatní
   média a private/env zůstávají blokované. Plná brána má 677 testů.
+- První zapisující cyklus prošel celý: Human–Adam změnil jediný TVBCP, Míla v UI
+  ověřil jednu cestu a vytvořil WIP checkpoint. Terminál zkontroloval rodiče,
+  čistotu a cestu a převzal přesný commit `7a6673a` fast-forwardem do `main` a na
+  GitHub bez merge nebo cherry-pick kopie.
+- Oprava `2056210` obnovuje při shodném HEAD také interní `base_head`; 12 cílených
+  Remote Work Cell testů prošlo a clone je znovu aligned/čistý/bez remote.
 
 Dalsi krok:
 
-- Z iPhonu nebo Macu provést první omezený zápis pouze do TVBCP, ověřit jeden
-  změněný soubor a vytvořit lokální WIP checkpoint. Další implementační krok je
-  řízené převzetí zkontrolovaného checkpointu do `main`.
+- Restartovat Cockpit na nejnovější kód a z iPhonu ověřit resume stejného threadu
+  jedním tahem bez změn. Potom formalizovat prokázané terminálové převzetí jako
+  workflow; přímý mobilní push zatím nepřidávat.
 
 Navrhovane dalsi kroky:
 

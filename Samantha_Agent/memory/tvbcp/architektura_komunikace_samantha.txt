@@ -228,6 +228,7 @@ jejich UI/startovací/testovací kód se nemají ponechávat jako trvalé záloh
 | 2026-07-14 | První řízený vzdálený zápis z Human–Adam | změněn pouze TVBCP, bez commitu |
 | 2026-07-14 | Human–Adam přečetl TVBCP v reálném tahu | Mílův pokyn proběhl bez změn, odpověď správně uvedla čistý workspace a commit `b6c8dde`; doručení potvrzeno, historie i po restartu zachována |
 | 2026-07-14 | Nasazen přehled práce a lokální WIP checkpoint | Panel ukazuje pouze cesty a Git stavy; checkpoint vyžaduje potvrzení, nic nepushuje a lokální commit před main nezablokuje další tahy; živé GET a odmítavé POST ověřeny, brána 677 testů |
+| 2026-07-14 | Uzavřen první vzdálený vývojový cyklus až do main | Human–Adam změnil jediný TVBCP soubor, Míla ověřil panely a vytvořil WIP; terminál ověřil rodiče/cesty/diff a převzal přesný commit `7a6673a` čistým fast-forwardem, push proběhl bez merge/cherry-pick kopie |
 
 ## Vývojový záznam 2026-07-14 – transport a Session Hub
 
@@ -328,13 +329,28 @@ Poznámka z reálného tahu: private metadata o záloze v izolovaném clone zám
 nejsou. Jejich absence není důkazem chybějící zálohy hlavního projektu a
 kanonický Adam z ní už nesmí vyvozovat provozní závěr.
 
+První úplný vzdálený cyklus následně prokázal zápis, kontrolu i návrat práce:
+
+- Human–Adam změnil pouze kanonický TVBCP a provedl `git diff --check`.
+- Míla v UI viděl právě jednu cestu a potvrdil lokální WIP checkpoint.
+- Terminálový Adam ověřil čistý clone bez remote, jediný commit, přesného rodiče
+  aktuálního `main`, jedinou povolenou cestu a čistý diff.
+- Hlavní repozitář převzal přímo tentýž commit `7a6673a` přes `--ff-only` a
+  pushnul jej; nevznikl merge commit ani cherry-pick kopie.
+- Následná oprava `2056210` zajistila, že shodný workspace při syncu obnoví i
+  interní `base_head`. Izolovaný workspace je znovu `aligned`, čistý a bez remote.
+
+Řízené převzetí do `main` zatím zůstává terminálovou kontrolní operací. Přímé
+pushovací tlačítko v mobilním UI se nepřidává bez samostatného bezpečnostního
+návrhu; vzdálená práce se bezpečně ukládá lokálním WIP checkpointem.
+
 ## Otevřené kroky
 
-1. Ručně otevřít panel `Práce` a ověřit čistý stav.
-2. Z iPhonu nebo Macu zadat první přesně omezený zápis pouze do tohoto TVBCP.
-3. Ověřit jeden změněný soubor v panelu, nový text přes ruční refresh TVBCP a
-   vytvořit lokální WIP checkpoint bez pushnutí.
-4. Ověřit restart Cockpitu a resume stejného threadu z iPhonu.
+1. Ověřit restart Cockpitu a resume stejného threadu z iPhonu jedním kontrolním
+   tahem bez změn a bez duplicity.
+2. Ověřit zámek souběžného tahu a idempotentní opakování stejného message ID.
+3. Formalizovat terminálové převzetí checkpointu jako kontrolovaný workflow;
+   nepřidávat zatím přímý mobilní push do `main`.
 4. Prokázat nouzový samostatný start terminálového Adama bez Cockpitu a
    app-serveru.
 5. Teprve po úspěšném důkazu navrhnout řízenou migraci kanonické relace.
@@ -357,7 +373,7 @@ kanonický Adam z ní už nesmí vyvozovat provozní závěr.
 
 ## Další kanonický krok
 
-Z iPhonu nebo Macu provést první řízený zápis pouze do tohoto TVBCP, ověřit jej v
-panelu `TVBCP` i `Práce` a vytvořit lokální WIP checkpoint bez pushnutí. Potom
-zůstává doplnit řízené převzetí takového checkpointu do `main`. Současná
-terminálová relace a nouzové mechanismy zůstávají nedotčené.
+Po restartu Cockpitu z iPhonu obnovit stejný thread a poslat jediný kontrolní tah
+bez změn. Potom formalizovat už živě prokázané terminálové převzetí WIP
+checkpointu do `main`. Současná terminálová relace a nouzové mechanismy zůstávají
+nedotčené.

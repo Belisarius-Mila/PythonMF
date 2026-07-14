@@ -74,8 +74,9 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   `cockpit.py`, hlas, TVBCP, handoff a autosave. Prvni textove Human–Adam UI s
   privátním Unix controllerem je hotove a Mac test potvrzen. Read-only panel
   zobrazuje pevny projektovy TVBCP z izolovaneho workspace. Panel `Prace`
-  ukazuje cesty zmen a umi potvrzovany lokalni WIP checkpoint bez pushnuti;
-  dalsi je prvni omezeny zapis do TVBCP a nasledne rizene prevzeti do `main`.
+  ukazuje cesty zmen a umi potvrzovany lokalni WIP checkpoint bez pushnuti.
+  Prvni vzdaleny zapis byl jako presny commit `7a6673a` overen a fast-forwardem
+  prevzat do `main`; dalsi je iPhone restart/resume test stejneho threadu.
 
 ## Handoffs
 
