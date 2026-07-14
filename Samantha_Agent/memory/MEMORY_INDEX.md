@@ -72,8 +72,9 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   smlouva Mily a Adama pro jednoho trvaleho Adama, sdilene app-server vlakno,
   role Cockpitu Mac/iPhone a terminalu, failover, rotaci relace, stihly
   `cockpit.py`, hlas, TVBCP, handoff a autosave. Prvni textove Human–Adam UI s
-  privátním Unix controllerem je hotove; zivy test potvrdil doruceni a resume
-  stejneho threadu, dalsi je rucni Mac/iPhone test.
+  privátním Unix controllerem je hotove a Mac test potvrzen. Read-only panel
+  zobrazuje pevny projektovy TVBCP z izolovaneho workspace; dalsi je Mac panel
+  test a prvni neinvazivni iPhone vyvojovy pokyn.
 
 ## Handoffs
 

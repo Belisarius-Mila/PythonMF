@@ -6,9 +6,11 @@ from pathlib import Path
 
 from app.codex_appserver import AppServerError
 from app.communication.human_adam_service import (
+    CANONICAL_TVBCP_RELATIVE_PATH,
     HumanAdamService,
     human_adam_connect_action,
     human_adam_send_action,
+    human_adam_tvbcp_action,
 )
 
 
@@ -97,6 +99,9 @@ def fake_profile(**_kwargs: object) -> dict[str, object]:
 
 class HumanAdamServiceTests(unittest.TestCase):
     def make_service(self, root: Path) -> tuple[HumanAdamService, FakeRuntime, FakeWorkspace, FakeHub]:
+        tvbcp_path = root / CANONICAL_TVBCP_RELATIVE_PATH
+        tvbcp_path.parent.mkdir(parents=True, exist_ok=True)
+        tvbcp_path.write_text("Kanonická smlouva\nBez citlivých textů.\n", encoding="utf-8")
         runtime = FakeRuntime(root)
         workspace = FakeWorkspace(root)
         hub = FakeHub()
@@ -170,6 +175,17 @@ class HumanAdamServiceTests(unittest.TestCase):
                 service.connect()
 
         self.assertEqual(runtime.started, 0)
+
+    def test_tvbcp_reads_only_the_fixed_file_from_isolated_workspace(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service, _runtime, _workspace, _hub = self.make_service(Path(temp_dir))
+            result = human_adam_tvbcp_action(service=service)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["source"], "isolated_workspace")
+        self.assertEqual(result["relative_path"], CANONICAL_TVBCP_RELATIVE_PATH.as_posix())
+        self.assertIn("Kanonická smlouva", result["content"])
+        self.assertFalse(result["workspace_dirty"])
 
 
 if __name__ == "__main__":

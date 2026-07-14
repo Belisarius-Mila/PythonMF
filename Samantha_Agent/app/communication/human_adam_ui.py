@@ -35,6 +35,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     textarea { width:100%; min-height:86px; max-height:230px; resize:vertical; border:1px solid #bac7d8; border-radius:13px; padding:12px; font:inherit; color:var(--ink); }
     .compose-actions { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:8px; }
     .hint { color:var(--muted); font-size:12px; }
+    .tvbcp-panel { position:fixed; z-index:5; inset:0 0 0 auto; width:min(680px,100%); display:flex; flex-direction:column; background:#fff; border-left:1px solid var(--line); box-shadow:-12px 0 40px rgba(15,23,42,.18); }
+    .tvbcp-panel[hidden] { display:none; }
+    .tvbcp-head { display:flex; align-items:center; gap:8px; padding:14px max(16px,env(safe-area-inset-right)) 14px 16px; border-bottom:1px solid var(--line); }
+    .tvbcp-head h2 { flex:1; margin:0; font-size:18px; }
+    #tvbcpMeta { padding:10px 16px; color:var(--muted); font-size:13px; border-bottom:1px solid var(--line); }
+    #tvbcpContent { flex:1; overflow:auto; margin:0; padding:16px max(16px,env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) 16px; white-space:pre-wrap; overflow-wrap:anywhere; font:14px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace; }
     @media (max-width:620px) { .back { padding:8px 10px; } .bubble { max-width:94%; } .hint { display:none; } #chat { padding-left:12px; padding-right:12px; } }
   </style>
 </head>
@@ -44,6 +50,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     <div class="head">
       <a class="back" href="/">← Cockpit</a>
       <h1>Human–Adam</h1>
+      <button id="tvbcpOpenBtn" type="button">TVBCP</button>
       <button id="refreshBtn" type="button">Stav</button>
       <button class="primary" id="connectBtn" type="button">Připojit</button>
     </div>
@@ -62,6 +69,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <button class="primary" id="sendBtn" type="submit">Odeslat</button>
     </div>
   </form>
+  <aside class="tvbcp-panel" id="tvbcpPanel" hidden aria-label="Projektový TVBCP">
+    <div class="tvbcp-head">
+      <h2 id="tvbcpTitle">Projektový TVBCP</h2>
+      <button id="tvbcpRefreshBtn" type="button">Obnovit</button>
+      <button id="tvbcpCloseBtn" type="button">Zavřít</button>
+    </div>
+    <div id="tvbcpMeta">TVBCP se načte až po otevření.</div>
+    <pre id="tvbcpContent"></pre>
+  </aside>
 </main>
 <script>
   const chat = document.getElementById("chat");
@@ -74,6 +90,13 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const composer = document.getElementById("composer");
   const input = document.getElementById("messageInput");
   const sendBtn = document.getElementById("sendBtn");
+  const tvbcpOpenBtn = document.getElementById("tvbcpOpenBtn");
+  const tvbcpPanel = document.getElementById("tvbcpPanel");
+  const tvbcpCloseBtn = document.getElementById("tvbcpCloseBtn");
+  const tvbcpRefreshBtn = document.getElementById("tvbcpRefreshBtn");
+  const tvbcpTitle = document.getElementById("tvbcpTitle");
+  const tvbcpMeta = document.getElementById("tvbcpMeta");
+  const tvbcpContent = document.getElementById("tvbcpContent");
   let busy = false;
   let lastSession = null;
 
@@ -137,8 +160,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     const thread = session && session.thread_id ? session.thread_id : "";
     threadBadge.textContent = `Relace: ${thread ? thread.slice(0,8) : "—"}`;
     const workspace = payload && payload.workspace ? payload.workspace : {};
-    workspaceBadge.textContent = workspace.has_git_remote ? "POZOR: Git remote" : (workspace.sync_available ? "Workspace čeká na sync" : "Izolovaný workspace");
-    workspaceBadge.className = workspace.has_git_remote || workspace.sync_available ? "badge warn" : "badge";
+    workspaceBadge.textContent = workspace.has_git_remote ? "POZOR: Git remote" : (workspace.sync_available ? "Workspace čeká na sync" : (workspace.dirty ? `Workspace: ${workspace.change_count} změn` : "Workspace čistý"));
+    workspaceBadge.className = workspace.has_git_remote || workspace.sync_available || workspace.dirty ? "badge warn" : "badge";
     renderSession(session);
   }
 
@@ -173,6 +196,33 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     finally { setBusy(false); }
   }
 
+  async function loadTvbcp() {
+    tvbcpRefreshBtn.disabled = true;
+    tvbcpMeta.textContent = "Načítám pracovní TVBCP…";
+    try {
+      const payload = await api("/api/human-adam/tvbcp");
+      if (!payload.ok) throw new Error(payload.message || "TVBCP nelze načíst.");
+      tvbcpTitle.textContent = payload.title || "Projektový TVBCP";
+      tvbcpContent.textContent = payload.content || "";
+      const workState = payload.workspace_dirty ? `pracovní kopie má ${payload.workspace_change_count} změn` : "pracovní kopie je čistá";
+      const syncState = payload.sync_available ? " · čeká na aktualizaci z main" : "";
+      tvbcpMeta.textContent = `Pracovní TVBCP · ${workState}${syncState} · změněno ${formatTime(payload.modified_at)}`;
+      tvbcpContent.scrollTop = 0;
+    } catch (error) {
+      tvbcpContent.textContent = "";
+      tvbcpMeta.textContent = `TVBCP nelze načíst: ${error.message}`;
+    } finally { tvbcpRefreshBtn.disabled = false; }
+  }
+
+  function openTvbcp() {
+    tvbcpPanel.hidden = false;
+    loadTvbcp();
+  }
+
+  function closeTvbcp() {
+    tvbcpPanel.hidden = true;
+  }
+
   async function sendMessage(event) {
     event.preventDefault();
     if (busy) return;
@@ -199,6 +249,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
   connectBtn.addEventListener("click", connect);
   refreshBtn.addEventListener("click", loadStatus);
+  tvbcpOpenBtn.addEventListener("click", openTvbcp);
+  tvbcpCloseBtn.addEventListener("click", closeTvbcp);
+  tvbcpRefreshBtn.addEventListener("click", loadTvbcp);
   composer.addEventListener("submit", sendMessage);
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) sendMessage(event);

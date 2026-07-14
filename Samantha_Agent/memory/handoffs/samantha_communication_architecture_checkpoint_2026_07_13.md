@@ -53,12 +53,17 @@ Aktualizace 2026-07-14:
 - Opraven je bezpečný lifecycle prázdného threadu, který Codex před prvním tahem
   ještě nepersistuje. Thread s historií se při resume chybě nikdy nenahrazuje.
 - Plná Cockpit quality gate prošla: 672 testů včetně obou JavaScript syntaxí.
+- Míla následně potvrdil první ruční Mac test textového Human–Adam UI jako
+  úspěšný; kanonická relace zůstala připojená a izolovaný workspace čistý.
+- Připraven je ručně otevíraný read-only panel kanonického projektového TVBCP z
+  izolovaného workspace; neumožňuje libovolnou cestu ani automatický refresh.
+- Horní badge ukazuje počet pracovních změn. Brána po doplnění panelu má 673
+  úspěšných testů.
 
 Dalsi krok:
 
-- Ručně otestovat Human–Adam nejprve na Macu a potom na iPhonu; ověřit čas
-  odeslání, průběh, odpověď a resume stejné relace. Cockpit už je restartovaný
-  s novým kódem.
+- Nasadit TVBCP panel, ručně jej ověřit na Macu a potom na iPhonu zkusit první
+  neinvazivní vzdálený vývojový pokyn s přečtením TVBCP bez změny souborů.
 
 Navrhovane dalsi kroky:
 

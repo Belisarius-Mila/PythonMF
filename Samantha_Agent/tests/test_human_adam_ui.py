@@ -16,6 +16,11 @@ class HumanAdamUiTests(unittest.TestCase):
             "chat",
             "messageInput",
             "sendBtn",
+            "tvbcpOpenBtn",
+            "tvbcpPanel",
+            "tvbcpCloseBtn",
+            "tvbcpRefreshBtn",
+            "tvbcpContent",
         ):
             self.assertIn(f'id="{element_id}"', HUMAN_ADAM_HTML)
         self.assertIn("Odesláno", HUMAN_ADAM_HTML)
@@ -24,6 +29,9 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("/api/human-adam/status", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/connect", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/send", HUMAN_ADAM_HTML)
+        self.assertIn("/api/human-adam/tvbcp", HUMAN_ADAM_HTML)
+        self.assertIn("TVBCP se načte až po otevření.", HUMAN_ADAM_HTML)
+        self.assertIn("Workspace: ${workspace.change_count} změn", HUMAN_ADAM_HTML)
 
     def test_ui_is_manual_refresh_only_and_uses_safe_dom_text(self) -> None:
         self.assertNotIn("setInterval", HUMAN_ADAM_HTML)

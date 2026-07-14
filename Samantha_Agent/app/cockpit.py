@@ -79,6 +79,7 @@ from app.communication.human_adam_service import (
     human_adam_connect_action,
     human_adam_send_action,
     human_adam_status_action,
+    human_adam_tvbcp_action,
 )
 from app.communication.human_adam_ui import HUMAN_ADAM_HTML
 from app.remote_work_cell import REMOTE_WORK_CELL, RemoteWorkCellService
@@ -10017,6 +10018,9 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/human-adam/status":
                     self.respond_json(human_adam_status_action(service=HUMAN_ADAM))
+                    return
+                if parsed.path == "/api/human-adam/tvbcp":
+                    self.respond_json(human_adam_tvbcp_action(service=HUMAN_ADAM))
                     return
                 if parsed.path == "/api/appserver-lab/status":
                     self.respond_json(appserver_lab_status_action())

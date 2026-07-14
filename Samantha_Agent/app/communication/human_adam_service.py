@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import atexit
+from datetime import datetime, timezone
 from functools import partial
 from pathlib import Path
 from typing import Any, Callable
@@ -31,8 +32,15 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SESSION_STATE_PATH = PROJECT_ROOT / "data" / "private" / "communication" / "canonical_session.json"
 HUMAN_ADAM_DEVELOPER_INSTRUCTIONS = REMOTE_DEVELOPER_INSTRUCTIONS.replace(
     "Jsi Adam Remote,", "Jsi Adam v kanonické relaci Human–Adam,"
+) + (
+    " Pro projekt komunikacni architektury pred vetsi praci precti "
+    "Samantha_Agent/memory/tvbcp/architektura_komunikace_samantha.txt. "
+    "Tento TVBCP aktualizuj jen na Miluv pokyn nebo pri skutecnem milniku; zapisuj "
+    "rozhodnuti, dukazy, rizika a dalsi krok, nikdy ne plny chat ani citlive texty."
 )
 MAX_MESSAGE_CHARS = 12_000
+MAX_TVBCP_CHARS = 500_000
+CANONICAL_TVBCP_RELATIVE_PATH = Path("memory/tvbcp/architektura_komunikace_samantha.txt")
 
 
 class HumanAdamService:
@@ -159,6 +167,37 @@ class HumanAdamService:
         )
         return {**result, "session": self.hub.snapshot()}
 
+    def tvbcp(self) -> dict[str, Any]:
+        workspace = self.workspace.status()
+        if not workspace.get("prepared") or not workspace.get("project_ready"):
+            raise AppServerError("Izolovaný workspace s projektovým TVBCP není připravený.")
+        if not workspace.get("ok") or workspace.get("remotes"):
+            raise AppServerError("TVBCP nelze číst z workspace s neočekávaným Git remote.")
+        project_root = self.workspace.project_root.resolve()
+        path = (project_root / CANONICAL_TVBCP_RELATIVE_PATH).resolve()
+        if project_root not in path.parents or not path.is_file():
+            raise AppServerError("Kanonický projektový TVBCP nebyl nalezen.")
+        try:
+            content = path.read_text(encoding="utf-8")
+            modified_at = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).replace(
+                microsecond=0
+            ).isoformat()
+        except OSError as exc:
+            raise AppServerError("Kanonický projektový TVBCP nelze bezpečně přečíst.") from exc
+        if len(content) > MAX_TVBCP_CHARS:
+            raise AppServerError("Kanonický projektový TVBCP překročil bezpečný limit zobrazení.")
+        return {
+            "ok": True,
+            "title": "Architektura komunikace Samantha",
+            "content": content,
+            "modified_at": modified_at,
+            "source": "isolated_workspace",
+            "relative_path": CANONICAL_TVBCP_RELATIVE_PATH.as_posix(),
+            "workspace_dirty": bool(workspace.get("dirty")),
+            "workspace_change_count": int(workspace.get("change_count") or 0),
+            "sync_available": bool(workspace.get("sync_available")),
+        }
+
     def close(self) -> None:
         if self._hub is None:
             self.runtime.close()
@@ -172,6 +211,13 @@ class HumanAdamService:
 
 def human_adam_status_action(*, service: HumanAdamService) -> dict[str, Any]:
     return service.status()
+
+
+def human_adam_tvbcp_action(*, service: HumanAdamService) -> dict[str, Any]:
+    try:
+        return service.tvbcp()
+    except (AppServerError, OSError, ValueError) as exc:
+        return {"ok": False, "status": "human_adam_tvbcp_failed", "message": str(exc)}
 
 
 def human_adam_connect_action(*, service: HumanAdamService) -> dict[str, Any]:

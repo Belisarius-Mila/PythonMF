@@ -223,6 +223,8 @@ jejich UI/startovací/testovací kód se nemají ponechávat jako trvalé záloh
 | 2026-07-14 | Prokázán Unix-socket transport a dva klienti nad jedním threadem | Živý izolovaný probe: dvě odlišná connection ID, stejné thread ID, zachovaný kontext, dvě potvrzená doručení, testovací thread archivován |
 | 2026-07-14 | Dokončen základ Canonical Session Hubu | Persistované thread ID, reconnect, jeden aktivní tah, idempotence a fail-closed `delivery_unknown`; 34 cílených regresních testů |
 | 2026-07-14 | Nasazen první textový Human–Adam řez | Privátní Unix proces controller, samostatné responzivní UI, izolovaný workspace; živě potvrzen `KANON-14` a resume stejného threadu po restartu; Cockpit restartován, plná brána 672 testů |
+| 2026-07-14 | Míla potvrdil první ruční Mac test Human–Adam | Textové UI podle Mílova hlášení funguje a vypadá správně; kanonická relace má dvě dokončené výměny, workspace zůstal čistý |
+| 2026-07-14 | Připraven čtecí panel projektového TVBCP | Zavřený boční list bez automatického refresh; čte jediný pevný TVBCP z izolovaného workspace a ukazuje stav pracovních změn; brána 673 testů |
 
 ## Vývojový záznam 2026-07-14 – transport a Session Hub
 
@@ -285,11 +287,25 @@ ještě fyzicky nepersistuje. Session Hub proto smí nahradit neobnovitelné pr�
 thread ID, ale thread s jediným lokálně evidovaným tahem při selhání resume nikdy
 nenahradí a zůstane fail-closed.
 
+## Vývojový záznam 2026-07-14 – projektový TVBCP v Human–Adam
+
+Human–Adam má tlačítko `TVBCP`, které otevře samostatný boční list; na iPhonu
+zabere dostupnou obrazovku. Panel je po vstupu zavřený, načítá se jen výslovně a
+nemá periodické obnovování. Čte pouze pevně určený soubor
+`memory/tvbcp/architektura_komunikace_samantha.txt` z izolovaného workspace,
+ve kterém kanonický Adam pracuje. Neumožňuje volit cestu, procházet jiné soubory
+ani zapisovat.
+
+Panel ukazuje, zda je pracovní kopie čistá, kolik má změn a zda čeká na sync z
+`main`. Stejný počet změn je viditelný i v horním stavovém badge. Kanonický Adam
+dostal pravidlo TVBCP před větší prací přečíst a aktualizovat jej pouze na Mílův
+pokyn nebo při skutečném milníku; plný chat ani citlivé texty do něj nepatří.
+
 ## Otevřené kroky
 
-1. Ručně otestovat Human–Adam na Macu: připojení, čas odeslání, odpověď a ruční
-   obnovení stránky.
-2. Ručně zopakovat stejný základní test na iPhonu přes současnou privátní cestu.
+1. Ručně otestovat nový TVBCP panel na Macu: zavřený výchozí stav, otevření,
+   čitelnost a ruční obnovení.
+2. Zopakovat textový a TVBCP test na iPhonu přes současnou privátní cestu.
 3. Ověřit restart Cockpitu a resume stejného threadu z UI.
 4. Prokázat nouzový samostatný start terminálového Adama bez Cockpitu a
    app-serveru.
@@ -313,6 +329,7 @@ nenahradí a zůstane fail-closed.
 
 ## Další kanonický krok
 
-Ručně otestovat textové Human–Adam UI na Macu. Potom zopakovat základní test na
-iPhonu a ověřit UI restart/resume. Současná terminálová relace a nouzové
-mechanismy zůstávají nedotčené.
+Nasadit a ručně otestovat TVBCP panel na Macu. Potom na iPhonu poslat první
+neinvazivní vzdálený vývojový pokyn, který přečte TVBCP, zkontroluje stav a pouze
+navrhne nejmenší další krok bez změny souborů. Současná terminálová relace a
+nouzové mechanismy zůstávají nedotčené.
