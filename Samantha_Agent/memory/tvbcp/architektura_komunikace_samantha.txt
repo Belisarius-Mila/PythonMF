@@ -224,7 +224,7 @@ jejich UI/startovací/testovací kód se nemají ponechávat jako trvalé záloh
 | 2026-07-14 | Dokončen základ Canonical Session Hubu | Persistované thread ID, reconnect, jeden aktivní tah, idempotence a fail-closed `delivery_unknown`; 34 cílených regresních testů |
 | 2026-07-14 | Nasazen první textový Human–Adam řez | Privátní Unix proces controller, samostatné responzivní UI, izolovaný workspace; živě potvrzen `KANON-14` a resume stejného threadu po restartu; Cockpit restartován, plná brána 672 testů |
 | 2026-07-14 | Míla potvrdil první ruční Mac test Human–Adam | Textové UI podle Mílova hlášení funguje a vypadá správně; kanonická relace má dvě dokončené výměny, workspace zůstal čistý |
-| 2026-07-14 | Připraven čtecí panel projektového TVBCP | Zavřený boční list bez automatického refresh; čte jediný pevný TVBCP z izolovaného workspace a ukazuje stav pracovních změn; brána 673 testů |
+| 2026-07-14 | Nasazen čtecí panel projektového TVBCP | Zavřený boční list bez automatického refresh; čte jediný pevný TVBCP z izolovaného workspace a ukazuje stav pracovních změn; živý HTTP endpoint ověřen, brána 673 testů |
 
 ## Vývojový záznam 2026-07-14 – transport a Session Hub
 
@@ -329,7 +329,7 @@ pokyn nebo při skutečném milníku; plný chat ani citlivé texty do něj nepa
 
 ## Další kanonický krok
 
-Nasadit a ručně otestovat TVBCP panel na Macu. Potom na iPhonu poslat první
-neinvazivní vzdálený vývojový pokyn, který přečte TVBCP, zkontroluje stav a pouze
-navrhne nejmenší další krok bez změny souborů. Současná terminálová relace a
-nouzové mechanismy zůstávají nedotčené.
+Ručně otestovat TVBCP panel na Macu. Potom na iPhonu poslat první neinvazivní
+vzdálený vývojový pokyn, který přečte TVBCP, zkontroluje stav a pouze navrhne
+nejmenší další krok bez změny souborů. Současná terminálová relace a nouzové
+mechanismy zůstávají nedotčené.

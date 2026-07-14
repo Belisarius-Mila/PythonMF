@@ -55,15 +55,16 @@ Aktualizace 2026-07-14:
 - Plná Cockpit quality gate prošla: 672 testů včetně obou JavaScript syntaxí.
 - Míla následně potvrdil první ruční Mac test textového Human–Adam UI jako
   úspěšný; kanonická relace zůstala připojená a izolovaný workspace čistý.
-- Připraven je ručně otevíraný read-only panel kanonického projektového TVBCP z
-  izolovaného workspace; neumožňuje libovolnou cestu ani automatický refresh.
+- Nasazen je ručně otevíraný read-only panel kanonického projektového TVBCP z
+  izolovaného workspace; neumožňuje libovolnou cestu ani automatický refresh a
+  jeho živý HTTP endpoint byl ověřen.
 - Horní badge ukazuje počet pracovních změn. Brána po doplnění panelu má 673
   úspěšných testů.
 
 Dalsi krok:
 
-- Nasadit TVBCP panel, ručně jej ověřit na Macu a potom na iPhonu zkusit první
-  neinvazivní vzdálený vývojový pokyn s přečtením TVBCP bez změny souborů.
+- Ručně ověřit TVBCP panel na Macu a potom na iPhonu zkusit první neinvazivní
+  vzdálený vývojový pokyn s přečtením TVBCP bez změny souborů.
 
 Navrhovane dalsi kroky:
 
