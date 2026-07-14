@@ -26,7 +26,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .badge.ok { color:var(--ok); background:#ecfdf3; }
     .badge.warn { color:var(--warn); background:#fff7ed; }
     #notice { min-height:24px; padding:8px 18px 0; color:var(--muted); font-size:14px; }
-    #deploymentReceipt { margin:8px 18px 0; padding:8px 12px; border-radius:10px; color:var(--ok); background:#ecfdf3; font-size:14px; }
+    #deploymentReceipt { margin:8px 0 0; padding:6px 10px; border-radius:10px; color:var(--ok); background:#ecfdf3; font-size:13px; }
     #deploymentReceipt[hidden] { display:none; }
     #chat { flex:1; padding:14px 18px 180px; display:flex; flex-direction:column; gap:14px; }
     .exchange { display:grid; gap:8px; }
@@ -73,9 +73,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <span class="badge" id="threadBadge">Relace: —</span>
       <span class="badge" id="workspaceBadge">Izolovaný workspace</span>
     </div>
+    <div id="deploymentReceipt" role="status" aria-live="polite" hidden></div>
   </header>
   <div id="notice" role="status" aria-live="polite"></div>
-  <div id="deploymentReceipt" role="status" aria-live="polite" hidden></div>
   <section id="chat" aria-label="Konverzace Human–Adam"></section>
   <form class="composer" id="composer" autocomplete="off">
     <textarea id="messageInput" maxlength="12000" autocomplete="off" placeholder="Napiš Adamovi…" aria-label="Zpráva pro Adama"></textarea>

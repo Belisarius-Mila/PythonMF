@@ -705,3 +705,15 @@ nevytvářet bez samostatného Mílova potvrzení.
 ### 2026-07-14 23:04 CEST – Ověření trvalé účtenky nasazení
 
 Cíl: otestovat zobrazení potvrzení po restartu Cockpitu.
+
+### 2026-07-14 23:12 CEST – Účtenka nasazení ve sticky hlavičce
+
+Ruční ověření odhalilo, že správně vrácenou účtenku po vykreslení historie skryl
+automatický posun dokumentu na konec. Kompaktní účtenka je proto nově uvnitř
+sticky hlavičky přímo pod stavovými badge; backend ani fail-closed logika se
+nezměnily.
+
+Důkaz: 7 UI testů a samostatná kontrola JavaScriptové syntaxe prošly.
+
+Další krok: po nasazení ručně ověřit viditelnost účtenky po restartu i při
+rolování dlouhou historií.

@@ -86,6 +86,20 @@ class HumanAdamUiTests(unittest.TestCase):
         )
         self.assertIn("deploymentReceipt.hidden = !showConfirmation;", HUMAN_ADAM_HTML)
 
+    def test_deployment_confirmation_stays_inside_sticky_header_below_badges(self) -> None:
+        header = HUMAN_ADAM_HTML.index("<header>")
+        badges = HUMAN_ADAM_HTML.index('<div class="statusline">', header)
+        receipt = HUMAN_ADAM_HTML.index('id="deploymentReceipt"', badges)
+        header_end = HUMAN_ADAM_HTML.index("</header>", receipt)
+        notice = HUMAN_ADAM_HTML.index('id="notice"', header_end)
+
+        self.assertLess(header, badges)
+        self.assertLess(badges, receipt)
+        self.assertLess(receipt, header_end)
+        self.assertLess(header_end, notice)
+        self.assertIn("header { position:sticky;", HUMAN_ADAM_HTML)
+        self.assertIn("#deploymentReceipt { margin:8px 0 0; padding:6px 10px;", HUMAN_ADAM_HTML)
+
     def test_ui_is_manual_refresh_only_and_uses_safe_dom_text(self) -> None:
         self.assertNotIn("setInterval", HUMAN_ADAM_HTML)
         self.assertNotIn("innerHTML", HUMAN_ADAM_HTML)
