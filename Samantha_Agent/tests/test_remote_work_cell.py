@@ -256,6 +256,53 @@ class RemoteWorkspaceManagerTests(unittest.TestCase):
             self.assertTrue((manager.project_root / "tracked.py").exists())
             self.assertEqual(git(manager.workspace_root, "remote"), "")
 
+    def test_sync_from_main_allows_small_versioned_public_web_media(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            manager = RemoteWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            manager.prepare()
+            media = source / "ColorsAndNumbers" / "web_colors_numbers" / "public-test.mp3"
+            media.parent.mkdir(parents=True)
+            media.write_bytes(b"public-test-audio")
+            git(source, "add", "ColorsAndNumbers/web_colors_numbers/public-test.mp3")
+            git(source, "commit", "-m", "Add public audio")
+
+            synced = manager.sync_from_main(confirmed=True)
+
+            self.assertTrue(synced["synced"])
+            self.assertEqual(
+                (manager.workspace_root / "ColorsAndNumbers" / "web_colors_numbers" / "public-test.mp3").read_bytes(),
+                b"public-test-audio",
+            )
+            self.assertEqual(synced["remotes"], [])
+
+    def test_sync_from_main_still_rejects_media_outside_public_allowlist(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            manager = RemoteWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            prepared = manager.prepare()
+            media = source / "Samantha_Agent" / "public-test.mp3"
+            media.write_bytes(b"not-allowlisted")
+            git(source, "add", "Samantha_Agent/public-test.mp3")
+            git(source, "commit", "-m", "Add blocked audio")
+
+            with self.assertRaises(AppServerError):
+                manager.sync_from_main(confirmed=True)
+
+            self.assertEqual(git(manager.workspace_root, "rev-parse", "HEAD"), prepared["head"])
+            self.assertFalse((manager.workspace_root / "Samantha_Agent" / "public-test.mp3").exists())
+            self.assertEqual(git(manager.workspace_root, "remote"), "")
+
     def test_prepare_never_overwrites_unknown_existing_directory(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

@@ -65,6 +65,11 @@ BLOCKED_CHECKPOINT_SUFFIXES = {
     ".webp",
     ".zip",
 }
+PUBLIC_SOURCE_MEDIA_PREFIXES = (
+    "ColorsAndNumbers/web_colors_numbers/",
+    "docs/colors-numbers/",
+)
+MAX_PUBLIC_SOURCE_MEDIA_BYTES = 8 * 1024 * 1024
 
 
 def _now() -> str:
@@ -369,7 +374,10 @@ class RemoteWorkspaceManager:
                     "Main obsahuje mazání, přejmenování nebo netypickou změnu; automatický update je odmítnutý."
                 )
             incoming_paths = [path for _, paths in incoming_rows for path in paths]
-            if any(self._blocked_checkpoint_path(path) for path in incoming_paths):
+            if any(
+                not self._source_sync_path_allowed(path, fetched_head=fetched_head)
+                for path in incoming_paths
+            ):
                 raise AppServerError("Main obsahuje pro Remote Work Cell blokovaný private, env nebo mediální soubor.")
 
             _git_output(self.workspace_root, ["diff", "--check", "HEAD", "FETCH_HEAD"])
@@ -411,6 +419,27 @@ class RemoteWorkspaceManager:
             or path.suffix.lower() in BLOCKED_CHECKPOINT_SUFFIXES
             or any(part in normalized for part in BLOCKED_CHECKPOINT_PARTS)
         )
+
+    def _source_sync_path_allowed(self, path_text: str, *, fetched_head: str) -> bool:
+        if not self._blocked_checkpoint_path(path_text):
+            return True
+        normalized = path_text.replace("\\", "/").strip('"')
+        path = Path(normalized)
+        if (
+            path.suffix.lower() not in BLOCKED_CHECKPOINT_SUFFIXES
+            or not any(normalized.startswith(prefix) for prefix in PUBLIC_SOURCE_MEDIA_PREFIXES)
+        ):
+            return False
+        try:
+            size = int(
+                _git_output(
+                    self.workspace_root,
+                    ["cat-file", "-s", f"{fetched_head}:{normalized}"],
+                )
+            )
+        except (AppServerError, ValueError):
+            return False
+        return 0 <= size <= MAX_PUBLIC_SOURCE_MEDIA_BYTES
 
     def review(self) -> dict[str, Any]:
         """Return path-level work evidence without exposing file contents."""
