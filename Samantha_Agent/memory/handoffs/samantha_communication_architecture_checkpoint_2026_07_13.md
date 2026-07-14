@@ -37,11 +37,22 @@ Co neni hotove:
   zmrazené, nikoli rozvíjené.
 - Projektové TVBCP zatím nemají vlastní registr a výběr v novém Cockpit UI.
 
+Aktualizace 2026-07-14:
+
+- Přímý Unix WebSocket transport je implementovaný s `/rpc` a vypnutou
+  kompresí, jak vyžaduje lokální `codex-cli 0.144.1`.
+- Živý izolovaný probe prokázal dva klienty nad jedním persistovaným threadem,
+  zachování kontextu, potvrzené doručení a následnou archivaci testovacího
+  threadu.
+- `app/communication/session_hub.py` drží kanonické thread ID, reconnect, jeden
+  aktivní tah, idempotenci a fail-closed `delivery_unknown`.
+- 34 cílených testů app-server/LAB/Remote/Session Hub prošlo.
+- Není ještě hotový daemon controller ani nové textové Human–Adam UI.
+
 Dalsi krok:
 
-- Připravit nejmenší izolovaný důkaz jednoho lokálního app-serveru, jednoho
-  testovacího vlákna a dvou klientů bez zásahu do současné relace a recovery
-  cesty.
+- Doplnit řízený daemon controller a první minimální textové Human–Adam UI nad
+  hotovým Session Hubem bez přesunu doménové logiky do `cockpit.py`.
 
 Navrhovane dalsi kroky:
 
@@ -61,6 +72,10 @@ Zmenene nebo relevantni soubory:
 - `memory/ACTIVE_PROJECTS.md`
 - `AGENTS.md`
 - `app/codex_appserver.py`
+- `app/communication/session_hub.py`
+- `scripts/codex_appserver_shared_thread_probe.py`
+- `tests/test_communication_session_hub.py`
+- `tests/test_codex_appserver_shared_thread_probe.py`
 - `app/cockpit.py`
 - `scripts/samantha_codex.sh`
 

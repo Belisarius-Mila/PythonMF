@@ -220,13 +220,52 @@ jejich UI/startovací/testovací kód se nemají ponechávat jako trvalé záloh
 | 2026-07-13 | Odděleny role TVBCP, handoffu, autosave a Capsule | Kanonická dohoda výše |
 | 2026-07-13 | Přijato pravidlo projektových TVBCP | `memory/technical/project_tvbcp_rules.md` |
 | 2026-07-13 | Přijat decommission kontrakt staré komunikace | Po ověření nové cesty odstranit nepoužívaný watcher, TTY bridge a duplicitní komunikační větve |
+| 2026-07-14 | Prokázán Unix-socket transport a dva klienti nad jedním threadem | Živý izolovaný probe: dvě odlišná connection ID, stejné thread ID, zachovaný kontext, dvě potvrzená doručení, testovací thread archivován |
+| 2026-07-14 | Dokončen základ Canonical Session Hubu | Persistované thread ID, reconnect, jeden aktivní tah, idempotence a fail-closed `delivery_unknown`; 34 cílených regresních testů |
+
+## Vývojový záznam 2026-07-14 – transport a Session Hub
+
+Oficiální app-server dokumentace a schéma instalovaného `codex-cli 0.144.1`
+potvrdily podporu Unix socketu, `thread/start`, `thread/resume`, `turn/start` a
+`thread/archive`. Praktický test zároveň odhalil dva přesné transportní požadavky
+této verze:
+
+- WebSocket handshake nad Unix socketem používá cestu `/rpc`.
+- Klient musí vypnout WebSocket kompresi; automatická hlavička
+  `Sec-WebSocket-Extensions` byla serverem odmítnuta.
+
+První pokus použít `codex app-server proxy --sock` jako JSONL převodník byl
+správně zastaven a jeho kód odstraněn. Proxy přenáší celý WebSocket handshake a
+rámce a patří k daemon/SSH transportu, nikoli jako JSONL adaptér. V aktivním kódu
+zůstala jediná přímá Unix WebSocket cesta.
+
+Živý izolovaný probe následně prokázal:
+
+- jeden dočasný app-server proces bez zásahu do současného Cockpitu a terminálu;
+- dvě samostatná klientská spojení;
+- vytvoření persistovaného testovacího threadu prvním klientem;
+- obnovení přesně stejného threadu druhým klientem;
+- zachování kontrolního kódu z prvního tahu ve druhém klientovi;
+- jednoznačné potvrzení obou doručení bez duplicity;
+- explicitní archivaci testovacího threadu a odstranění socketu/procesů.
+
+Nový `app/communication/session_hub.py` je samostatná služba mimo `cockpit.py`.
+Drží jedno kanonické thread ID, atomicky persistuje lifecycle zpráv, povoluje jen
+jeden aktivní Cockpit tah a dokončený `client_message_id` neposílá podruhé. Pokud
+spojení selže po možném přijetí tahu, stav se označí `delivery_unknown` a
+automatické opakování se fail-closed zablokuje. Stejně se obnoví záznam, který po
+pádu zůstal ve stavu `pending`.
+
+Další krok této etapy je řízený daemon controller a minimální textové
+Human–Adam UI napojené na Session Hub. Do UI se zatím nepřidává hlas ani legacy
+fallback.
 
 ## Otevřené kroky
 
-1. Navrhnout izolovaný test trvalého app-server daemonu přes lokální socket.
-2. Připojit dva testovací klienty ke stejnému testovacímu vláknu.
-3. Ověřit historii, reconnect, restart, resume, ochranu proti duplicitám a zámek
-   jednoho aktivního tahu.
+1. Doplnit řízený daemon controller nad lokálním app-server socketem.
+2. Napojit minimální textové Human–Adam UI na Canonical Session Hub bez růstu
+   doménové logiky v `cockpit.py`.
+3. Ověřit restart/resume Session Hubu a viditelné průběžné události v UI.
 4. Prokázat nouzový samostatný start terminálového Adama bez Cockpitu a
    app-serveru.
 5. Teprve po úspěšném důkazu navrhnout řízenou migraci kanonické relace.
@@ -249,6 +288,6 @@ jejich UI/startovací/testovací kód se nemají ponechávat jako trvalé záloh
 
 ## Další kanonický krok
 
-Připravit a provést nejmenší izolovaný důkaz: jeden lokální app-server, jedno
-testovací vlákno a dva klienti, přičemž současná terminálová relace, Cockpit i
-nouzové mechanismy zůstanou nedotčené.
+Doplnit řízený lokální daemon controller a první minimální textové Human–Adam UI
+nad hotovým Canonical Session Hubem. Současná terminálová relace a nouzové
+mechanismy zůstávají nedotčené.

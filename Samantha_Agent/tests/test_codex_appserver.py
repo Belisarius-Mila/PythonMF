@@ -11,6 +11,7 @@ from app.codex_appserver import (
     AppServerError,
     CodexVersion,
     TurnReceipt,
+    UnixSocketAppServerTransport,
     codex_environment,
 )
 from app.codex_appserver_lab import AppServerLabService, normalize_client_timestamp
@@ -118,6 +119,10 @@ class CodexContractTests(unittest.TestCase):
         self.assertIn("/usr/bin", parts)
         self.assertIn("/custom/bin", parts)
         self.assertEqual(env["HOME"], "/tmp/home")
+
+    def test_unix_transport_rejects_relative_socket_before_connecting(self) -> None:
+        with self.assertRaises(AppServerContractError):
+            UnixSocketAppServerTransport(socket_path=Path("relative.sock"))
 
 
 class AppServerLabServiceTests(unittest.TestCase):

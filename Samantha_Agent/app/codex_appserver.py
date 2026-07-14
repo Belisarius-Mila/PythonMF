@@ -242,6 +242,88 @@ class StdioAppServerTransport:
             process.wait(timeout=5)
 
 
+class UnixSocketAppServerTransport(StdioAppServerTransport):
+    """Direct WebSocket client connection over a local Unix domain socket."""
+
+    def __init__(
+        self,
+        *,
+        socket_path: Path,
+        codex_binary: str = "codex",
+        timeout: float = 120.0,
+    ):
+        del codex_binary  # The external app-server process owns its executable.
+        target = Path(socket_path).expanduser()
+        if not target.is_absolute():
+            raise AppServerContractError("Cesta k app-server socketu musí být absolutní.")
+        try:
+            from websockets.sync.client import unix_connect
+            from websockets.exceptions import WebSocketException
+        except ImportError as exc:
+            raise AppServerError("Pro Unix app-server transport chybí knihovna websockets.") from exc
+
+        self.socket_path = target
+        self.timeout = timeout
+        self._next_request_id = 1
+        self._messages: queue.Queue[dict[str, Any] | BaseException] = queue.Queue()
+        self._deferred: list[dict[str, Any]] = []
+        self._send_lock = threading.Lock()
+        self._closed = False
+        try:
+            self._connection = unix_connect(
+                path=str(target),
+                uri="ws://localhost/rpc",
+                open_timeout=timeout,
+                close_timeout=5,
+                compression=None,
+            )
+        except (OSError, TimeoutError, WebSocketException) as exc:
+            raise AppServerError(f"K Unix app-server socketu se nelze připojit: {exc}") from exc
+        self._reader = threading.Thread(target=self._read_websocket, daemon=True)
+        self._reader.start()
+
+    @property
+    def running(self) -> bool:
+        return not self._closed
+
+    @property
+    def process_id(self) -> int:
+        return 0
+
+    def _read_websocket(self) -> None:
+        try:
+            for raw_message in self._connection:
+                if isinstance(raw_message, bytes):
+                    raw_message = raw_message.decode("utf-8")
+                parsed = json.loads(raw_message)
+                if not isinstance(parsed, dict):
+                    raise AppServerContractError("App-server vrátil neobjektovou JSON zprávu.")
+                self._messages.put(parsed)
+        except BaseException as exc:
+            if not self._closed:
+                self._messages.put(exc)
+        finally:
+            self._closed = True
+
+    def _send(self, message: dict[str, Any]) -> None:
+        if not self.running:
+            raise AppServerError("Unix app-server spojení je uzavřené.")
+        try:
+            with self._send_lock:
+                self._connection.send(json.dumps(message, ensure_ascii=False))
+        except Exception as exc:
+            raise AppServerError(f"Zápis do Unix app-serveru selhal: {exc}") from exc
+
+    def close(self) -> None:
+        if self._closed:
+            return
+        self._closed = True
+        try:
+            self._connection.close()
+        except OSError:
+            pass
+
+
 class CodexAppServerClient:
     """Typed minimal client for start/resume/turn operations."""
 
@@ -327,6 +409,12 @@ class CodexAppServerClient:
         if resumed != expected:
             raise AppServerContractError("App-server obnovil jiné vlákno.")
         return resumed
+
+    def archive_thread(self, thread_id: str) -> None:
+        target = str(thread_id or "").strip()
+        if not target:
+            raise AppServerContractError("Chybí threadId pro archivaci.")
+        self.transport.request("thread/archive", {"threadId": target})
 
     @staticmethod
     def _thread_id(result: dict[str, Any], *, operation: str) -> str:
