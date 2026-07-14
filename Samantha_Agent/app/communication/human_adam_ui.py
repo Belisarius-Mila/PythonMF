@@ -26,6 +26,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .badge.ok { color:var(--ok); background:#ecfdf3; }
     .badge.warn { color:var(--warn); background:#fff7ed; }
     #notice { min-height:24px; padding:8px 18px 0; color:var(--muted); font-size:14px; }
+    #deploymentReceipt { margin:8px 18px 0; padding:8px 12px; border-radius:10px; color:var(--ok); background:#ecfdf3; font-size:14px; }
+    #deploymentReceipt[hidden] { display:none; }
     #chat { flex:1; padding:14px 18px 180px; display:flex; flex-direction:column; gap:14px; }
     .exchange { display:grid; gap:8px; }
     .bubble { max-width:86%; padding:12px 14px; border-radius:16px; white-space:pre-wrap; overflow-wrap:anywhere; }
@@ -73,6 +75,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     </div>
   </header>
   <div id="notice" role="status" aria-live="polite"></div>
+  <div id="deploymentReceipt" role="status" aria-live="polite" hidden></div>
   <section id="chat" aria-label="Konverzace Human–Adam"></section>
   <form class="composer" id="composer" autocomplete="off">
     <textarea id="messageInput" maxlength="12000" autocomplete="off" placeholder="Napiš Adamovi…" aria-label="Zpráva pro Adama"></textarea>
@@ -114,6 +117,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 <script>
   const chat = document.getElementById("chat");
   const notice = document.getElementById("notice");
+  const deploymentReceipt = document.getElementById("deploymentReceipt");
   const connectionBadge = document.getElementById("connectionBadge");
   const threadBadge = document.getElementById("threadBadge");
   const workspaceBadge = document.getElementById("workspaceBadge");
@@ -214,6 +218,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     const workspace = payload && payload.workspace ? payload.workspace : {};
     workspaceBadge.textContent = workspace.has_git_remote ? "POZOR: Git remote" : (workspace.sync_available ? "Workspace čeká na sync" : (workspace.dirty ? `Workspace: ${workspace.change_count} změn` : (workspace.local_checkpoint_ahead ? `WIP checkpoint: ${workspace.local_commit_count}` : "Workspace čistý")));
     workspaceBadge.className = workspace.has_git_remote || workspace.sync_available || workspace.dirty || workspace.local_checkpoint_ahead ? "badge warn" : "badge";
+    const confirmation = payload && payload.deployment_confirmation ? payload.deployment_confirmation : null;
+    const shortCommit = confirmation ? String(confirmation.checkpoint_short || "") : "";
+    const completedAt = confirmation ? String(confirmation.completed_at || "") : "";
+    const completedTime = completedAt ? formatTime(completedAt) : "";
+    const showConfirmation = Boolean(
+      confirmation && confirmation.gate_passed === true && /^[0-9a-f]{7}$/.test(shortCommit) && completedTime
+    );
+    deploymentReceipt.textContent = showConfirmation ? `Nasazeno ${shortCommit} · plná brána prošla · ${completedTime}` : "";
+    deploymentReceipt.hidden = !showConfirmation;
     renderSession(session);
   }
 

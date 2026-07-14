@@ -34,6 +34,7 @@ class HumanAdamUiTests(unittest.TestCase):
             "deployAuditBtn",
             "deployConfirmation",
             "deployBtn",
+            "deploymentReceipt",
         ):
             self.assertIn(f'id="{element_id}"', HUMAN_ADAM_HTML)
         self.assertIn("Odesláno", HUMAN_ADAM_HTML)
@@ -74,6 +75,16 @@ class HumanAdamUiTests(unittest.TestCase):
         restore = HUMAN_ADAM_HTML.index("deployMeta.textContent = deploymentFailure;", refresh)
         self.assertLess(refresh, restore)
         self.assertIn("await waitForCockpitAndReload(Number(payload.restart.pid || previousPid));", HUMAN_ADAM_HTML)
+
+    def test_ui_renders_persistent_safe_deployment_confirmation(self) -> None:
+        self.assertIn("payload.deployment_confirmation", HUMAN_ADAM_HTML)
+        self.assertIn("confirmation.gate_passed === true", HUMAN_ADAM_HTML)
+        self.assertIn("/^[0-9a-f]{7}$/.test(shortCommit)", HUMAN_ADAM_HTML)
+        self.assertIn(
+            "`Nasazeno ${shortCommit} · plná brána prošla · ${completedTime}`",
+            HUMAN_ADAM_HTML,
+        )
+        self.assertIn("deploymentReceipt.hidden = !showConfirmation;", HUMAN_ADAM_HTML)
 
     def test_ui_is_manual_refresh_only_and_uses_safe_dom_text(self) -> None:
         self.assertNotIn("setInterval", HUMAN_ADAM_HTML)

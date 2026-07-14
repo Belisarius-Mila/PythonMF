@@ -653,3 +653,51 @@ starý audit token po změně záměrně nesmí platit.
 
 Další krok: amendovat WIP `476e18e`, potom v Cockpitu provést nový audit a znovu
 použít `Ověřit a nasadit`.
+
+### 2026-07-14 22:36 CEST – Trvalé potvrzení úspěšného nasazení
+
+Požadavek Míly: po restartu Cockpitu a návratu do stejného Human–Adam vlákna
+zobrazit stručný důkaz posledního úspěšného nasazení.
+
+Provedená implementace:
+
+- po průchodu plné brány se před převzetím atomicky uloží bezpečný mezistav a po
+  úspěšném převzetí se dokončí trvalá účtenka;
+- účtenka obsahuje jen stav, commit, časy a jednosměrný otisk vlákna, nikdy
+  obsah souborů, soukromé cesty ani původní identifikátor vlákna;
+- stav stejného vlákna po restartu zveřejní pouze krátký commit, výsledek brány
+  a čas; UI zobrazí `Nasazeno <krátký commit> · plná brána prošla · <čas>`;
+- pokud restart nastane mezi převzetím a dokončením účtenky, potvrzení se obnoví
+  jen tehdy, když mezistav odpovídá skutečnému `source_head` a stejnému vláknu.
+
+Důkaz: 25 cílených testů nasazení, Human–Adam service a UI prošlo. Prošla také
+kontrola JavaScriptové syntaxe, Python kompilace a `git diff --check`.
+
+Riziko: nasazení checkpointu, který tuto funkci teprve zavede do běžícího
+Cockpitu, ještě nemůže samo vytvořit novou účtenku; trvalé potvrzení bude plně
+fungovat od následujícího řízeného nasazení.
+
+Další krok: zkontrolovat sedm změněných souborů v panelu `Práce`; commit ani
+checkpoint nevytvářet bez samostatného Mílova potvrzení.
+
+### 2026-07-14 22:49 CEST – Deployment receipt zpřísněn fail-closed
+
+Kanonické rozhodnutí: zpráva `Nasazeno` smí vzniknout výhradně z trvalé účtenky
+ve stavu `deployed`. Interní mezistav `gate_passed_pending_apply` nikdy není
+veřejným důkazem nasazení, ani když jeho commit odpovídá lokálnímu
+`source_head`.
+
+Implementace před zápisem stavu `deployed` explicitně vyžaduje důkaz převzetí,
+pushnutí a zarovnání workspace: oba HEAD musí odpovídat checkpointu, relace musí
+být `aligned` a workspace čistý bez Git remote. Při neúplném důkazu zůstane jen
+neveřejný mezistav a UI nic úspěšného nezobrazí.
+
+Důkaz: 27 cílených testů prošlo, včetně regresí pro shodný `source_head` u
+mezistavu a neúplný výsledek převzetí. Prošla JavaScriptová syntaxe, Python
+kompilace a `git diff --check`.
+
+Riziko: fail-closed pravidlo může po výpadku mezi skutečným zarovnáním a finálním
+zápisem účtenky raději skrýt úspěšné nasazení; nesmí je odhadovat z mezistavu.
+
+Další krok: ručně ověřit až následující řízené nasazení; commit ani checkpoint
+nevytvářet bez samostatného Mílova potvrzení.

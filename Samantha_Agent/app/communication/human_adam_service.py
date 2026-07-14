@@ -10,6 +10,10 @@ from pathlib import Path
 from typing import Any, Callable
 
 from app.codex_appserver import AppServerError, CodexAppServerClient, UnixSocketAppServerTransport
+from app.communication.human_adam_deploy import (
+    DEFAULT_DEPLOYMENT_RECEIPT,
+    load_deployment_confirmation,
+)
 from app.communication.local_runtime import LocalAppServerProcessController
 from app.communication.session_hub import (
     CanonicalSessionHub,
@@ -95,6 +99,7 @@ class HumanAdamService:
         runtime: LocalAppServerProcessController | None = None,
         workspace: RemoteWorkspaceManager | None = None,
         state_path: Path = DEFAULT_SESSION_STATE_PATH,
+        deployment_receipt_path: Path = DEFAULT_DEPLOYMENT_RECEIPT,
         codex_binary: str = DEFAULT_CODEX_BIN,
         profile_getter: Callable[..., dict[str, Any]] = read_remote_runtime_profile,
         hub: CanonicalSessionHub | None = None,
@@ -105,6 +110,7 @@ class HumanAdamService:
         self.profile_getter = profile_getter
         self._profile: dict[str, Any] = {}
         self.state_path = Path(state_path)
+        self.deployment_receipt_path = Path(deployment_receipt_path)
         self._hub = hub
 
     @property
@@ -158,6 +164,11 @@ class HumanAdamService:
                 and not workspace.get("source_update_available")
                 and workspace.get("workspace_relation") != "diverged"
             )
+            session = self.hub.snapshot()
+            deployment_confirmation = load_deployment_confirmation(
+                self.deployment_receipt_path,
+                thread_id=str(session.get("thread_id") or ""),
+            )
             return {
                 "ok": workspace_ready,
                 "runtime": self.runtime.status(),
@@ -174,7 +185,8 @@ class HumanAdamService:
                     "label": "Izolovaný lokální workspace bez Git remote",
                 },
                 "profile": dict(self._profile),
-                "session": self.hub.snapshot(),
+                "session": session,
+                "deployment_confirmation": deployment_confirmation,
             }
         except (AppServerError, SessionHubError, OSError, ValueError) as exc:
             return {"ok": False, "status": "human_adam_status_failed", "message": str(exc)}

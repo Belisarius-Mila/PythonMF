@@ -5,6 +5,11 @@ import unittest
 from pathlib import Path
 
 from app.codex_appserver import AppServerError
+from app.communication.human_adam_deploy import (
+    DEPLOYMENT_COMPLETE,
+    DEPLOYMENT_PENDING,
+    write_deployment_receipt,
+)
 from app.communication.human_adam_service import (
     CANONICAL_TVBCP_RELATIVE_PATH,
     HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
@@ -159,10 +164,55 @@ class HumanAdamServiceTests(unittest.TestCase):
             runtime=runtime,  # type: ignore[arg-type]
             workspace=workspace,  # type: ignore[arg-type]
             state_path=root / "state.json",
+            deployment_receipt_path=root / "deployment_receipt.json",
             profile_getter=fake_profile,
             hub=hub,  # type: ignore[arg-type]
         )
         return service, runtime, workspace, hub
+
+    def test_status_exposes_persistent_confirmation_only_for_same_thread(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            service, _runtime, workspace, _hub = self.make_service(root)
+            write_deployment_receipt(
+                service.deployment_receipt_path,
+                checkpoint_head=workspace.source_head,
+                thread_id="canonical-thread",
+                state=DEPLOYMENT_COMPLETE,
+                recorded_at="2026-07-14T20:30:00+00:00",
+                deployed_at="2026-07-14T20:31:00+00:00",
+            )
+
+            restarted_service, _runtime, _workspace, _hub = self.make_service(root)
+            confirmation = restarted_service.status()["deployment_confirmation"]
+
+        self.assertEqual(
+            confirmation,
+            {
+                "checkpoint_short": "aaaaaaa",
+                "gate_passed": True,
+                "completed_at": "2026-07-14T20:31:00+00:00",
+            },
+        )
+        self.assertNotIn("canonical-thread", str(confirmation))
+        self.assertNotIn("private", str(confirmation))
+
+    def test_status_rejects_pending_receipt_even_when_source_head_matches(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            service, _runtime, workspace, _hub = self.make_service(root)
+            write_deployment_receipt(
+                service.deployment_receipt_path,
+                checkpoint_head=workspace.source_head,
+                thread_id="canonical-thread",
+                state=DEPLOYMENT_PENDING,
+                recorded_at="2026-07-14T20:31:00+00:00",
+            )
+
+            restarted_service, _runtime, _workspace, _hub = self.make_service(root)
+            confirmation = restarted_service.status()["deployment_confirmation"]
+
+        self.assertIsNone(confirmation)
 
     def test_developer_instructions_require_timestamped_tvbcp_append(self) -> None:
         self.assertIn("na konec souboru", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
