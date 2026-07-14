@@ -129,8 +129,16 @@ class RemoteWorkspaceManagerTests(unittest.TestCase):
             self.assertTrue(checkpoint["checkpoint_created"])
             self.assertNotEqual(before, after)
             self.assertFalse(checkpoint["dirty"])
+            self.assertTrue(checkpoint["local_checkpoint_ahead"])
+            self.assertEqual(checkpoint["workspace_relation"], "local_ahead")
+            self.assertEqual(checkpoint["local_commit_count"], 1)
+            self.assertFalse(checkpoint["sync_available"])
             self.assertEqual(git(manager.workspace_root, "remote"), "")
             self.assertEqual((source / "Samantha_Agent" / "tracked.py").read_text(), "VALUE = 1\n")
+
+            review = manager.review()
+            self.assertEqual(review["checkpoint_change_count"], 1)
+            self.assertEqual(review["checkpoint_changes"][0]["path"], "Samantha_Agent/tracked.py")
 
     def test_checkpoint_rejects_env_file(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

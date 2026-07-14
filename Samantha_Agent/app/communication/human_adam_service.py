@@ -37,6 +37,8 @@ HUMAN_ADAM_DEVELOPER_INSTRUCTIONS = REMOTE_DEVELOPER_INSTRUCTIONS.replace(
     "Samantha_Agent/memory/tvbcp/architektura_komunikace_samantha.txt. "
     "Tento TVBCP aktualizuj jen na Miluv pokyn nebo pri skutecnem milniku; zapisuj "
     "rozhodnuti, dukazy, rizika a dalsi krok, nikdy ne plny chat ani citlive texty."
+    " Private backup metadata v izolovane kopii zamerne nejsou; z jejich absence "
+    "nikdy nevyvozuj, ze hlavni projekt nema zalohu."
 )
 MAX_MESSAGE_CHARS = 12_000
 MAX_TVBCP_CHARS = 500_000
@@ -100,7 +102,7 @@ class HumanAdamService:
             raise AppServerError("Izolovaný workspace Human–Adam není připravený.")
         if not status.get("ok") or status.get("remotes"):
             raise AppServerError("Izolovaný workspace není v bezpečném stavu bez Git remote.")
-        if status.get("sync_available"):
+        if status.get("source_update_available") or status.get("workspace_relation") == "diverged":
             raise AppServerError("Izolovaný workspace čeká na bezpečnou aktualizaci z main.")
         return status
 
@@ -112,7 +114,8 @@ class HumanAdamService:
                 and workspace.get("prepared")
                 and workspace.get("project_ready")
                 and not workspace.get("remotes")
-                and not workspace.get("sync_available")
+                and not workspace.get("source_update_available")
+                and workspace.get("workspace_relation") != "diverged"
             )
             return {
                 "ok": workspace_ready,
@@ -122,7 +125,10 @@ class HumanAdamService:
                     "ready": bool(workspace.get("project_ready")),
                     "dirty": bool(workspace.get("dirty")),
                     "change_count": int(workspace.get("change_count") or 0),
-                    "sync_available": bool(workspace.get("sync_available")),
+                    "sync_available": bool(workspace.get("source_update_available")),
+                    "workspace_relation": str(workspace.get("workspace_relation") or "unknown"),
+                    "local_checkpoint_ahead": bool(workspace.get("local_checkpoint_ahead")),
+                    "local_commit_count": int(workspace.get("local_commit_count") or 0),
                     "has_git_remote": bool(workspace.get("remotes")),
                     "label": "Izolovaný lokální workspace bez Git remote",
                 },
@@ -195,7 +201,22 @@ class HumanAdamService:
             "relative_path": CANONICAL_TVBCP_RELATIVE_PATH.as_posix(),
             "workspace_dirty": bool(workspace.get("dirty")),
             "workspace_change_count": int(workspace.get("change_count") or 0),
-            "sync_available": bool(workspace.get("sync_available")),
+            "sync_available": bool(workspace.get("source_update_available")),
+        }
+
+    def work_review(self) -> dict[str, Any]:
+        return self.workspace.review()
+
+    def checkpoint(self, *, confirmed: bool, message: str = "") -> dict[str, Any]:
+        if self.hub.snapshot().get("turn_busy"):
+            raise SessionBusyError("Checkpoint nelze vytvořit během aktivního tahu.")
+        result = self.workspace.checkpoint(confirmed=confirmed, message=message)
+        return {
+            "ok": True,
+            "checkpoint_created": bool(result.get("checkpoint_created")),
+            "message": str(result.get("message") or ""),
+            "work": self.workspace.review(),
+            "status": self.status(),
         }
 
     def close(self) -> None:
@@ -218,6 +239,29 @@ def human_adam_tvbcp_action(*, service: HumanAdamService) -> dict[str, Any]:
         return service.tvbcp()
     except (AppServerError, OSError, ValueError) as exc:
         return {"ok": False, "status": "human_adam_tvbcp_failed", "message": str(exc)}
+
+
+def human_adam_work_review_action(*, service: HumanAdamService) -> dict[str, Any]:
+    try:
+        return service.work_review()
+    except (AppServerError, OSError, ValueError) as exc:
+        return {"ok": False, "status": "human_adam_work_review_failed", "message": str(exc)}
+
+
+def human_adam_checkpoint_action(payload: dict[str, Any], *, service: HumanAdamService) -> dict[str, Any]:
+    if payload.get("confirmed") is not True:
+        return {
+            "ok": False,
+            "status": "confirmation_required",
+            "message": "Lokální WIP checkpoint vyžaduje výslovné potvrzení.",
+        }
+    try:
+        return service.checkpoint(
+            confirmed=True,
+            message=str(payload.get("message") or ""),
+        )
+    except (AppServerError, SessionHubError, OSError, ValueError) as exc:
+        return {"ok": False, "status": "human_adam_checkpoint_failed", "message": str(exc)}
 
 
 def human_adam_connect_action(*, service: HumanAdamService) -> dict[str, Any]:

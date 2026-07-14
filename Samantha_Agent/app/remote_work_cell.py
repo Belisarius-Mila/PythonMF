@@ -170,6 +170,42 @@ class RemoteWorkspaceManager:
             head = _git_output(self.workspace_root, ["rev-parse", "HEAD"])
             branch = _git_output(self.workspace_root, ["branch", "--show-current"])
             remotes = [item for item in _git_output(self.workspace_root, ["remote"]).splitlines() if item]
+            base_head = self._metadata_base_head()
+            relation = "aligned"
+            local_commit_count = 0
+            if head != source_head:
+                if base_head and base_head == source_head:
+                    ancestor = _run_git(
+                        self.workspace_root,
+                        ["merge-base", "--is-ancestor", source_head, head],
+                    )
+                    if ancestor.returncode == 0:
+                        relation = "local_ahead"
+                        local_commit_count = int(
+                            _git_output(
+                                self.workspace_root,
+                                ["rev-list", "--count", f"{source_head}..{head}"],
+                            )
+                            or 0
+                        )
+                    else:
+                        relation = "diverged"
+                elif base_head and head == base_head:
+                    relation = "source_ahead"
+                else:
+                    relation = "diverged"
+            source_update_available = relation == "source_ahead"
+            local_checkpoint_ahead = relation == "local_ahead"
+            if remotes:
+                message = "Remote Work Cell má neočekávaný Git remote; pracovní turny jsou zablokované."
+            elif relation == "source_ahead":
+                message = "Remote Work Cell je čistá, ale její základ čeká na aktualizaci z main."
+            elif relation == "local_ahead":
+                message = "Remote Work Cell má lokální WIP checkpoint bez pushnutí."
+            elif relation == "diverged":
+                message = "Remote Work Cell a main se rozešly; automatický sync je zablokovaný."
+            else:
+                message = "Remote Work Cell je připravená, aktuální a nemá Git remote."
             return {
                 "ok": not remotes,
                 "prepared": True,
@@ -179,10 +215,14 @@ class RemoteWorkspaceManager:
                 "source_pending_changes": source_pending,
                 "branch": branch,
                 "head": head,
-                "base_head": self._metadata_base_head(),
-                "sync_available": head != source_head,
+                "base_head": base_head,
+                "workspace_relation": relation,
+                "local_checkpoint_ahead": local_checkpoint_ahead,
+                "local_commit_count": local_commit_count,
+                "source_update_available": source_update_available,
+                "sync_available": source_update_available,
                 "sync_allowed": bool(
-                    head != source_head
+                    source_update_available
                     and branch == "main"
                     and not changes
                     and not remotes
@@ -192,15 +232,7 @@ class RemoteWorkspaceManager:
                 "change_count": len(changes),
                 "remotes": remotes,
                 "project_ready": self.project_root.is_dir(),
-                "message": (
-                    (
-                        "Remote Work Cell je připravená, ale její základ čeká na aktualizaci z main."
-                        if head != source_head
-                        else "Remote Work Cell je připravená, aktuální a nemá Git remote."
-                    )
-                    if not remotes
-                    else "Remote Work Cell má neočekávaný Git remote; pracovní turny jsou zablokované."
-                ),
+                "message": message,
             }
 
     def _metadata(self) -> dict[str, Any]:
@@ -379,6 +411,42 @@ class RemoteWorkspaceManager:
             or path.suffix.lower() in BLOCKED_CHECKPOINT_SUFFIXES
             or any(part in normalized for part in BLOCKED_CHECKPOINT_PARTS)
         )
+
+    def review(self) -> dict[str, Any]:
+        """Return path-level work evidence without exposing file contents."""
+        with self._lock:
+            current = self.status()
+            if not current.get("prepared") or not current.get("ok"):
+                raise AppServerError("Remote Work Cell není v bezpečném stavu pro kontrolu změn.")
+            checkpoint_changes: list[dict[str, str]] = []
+            if current.get("local_checkpoint_ahead"):
+                base_head = str(current.get("base_head") or "")
+                diff_text = _git_output(
+                    self.workspace_root,
+                    ["diff", "--name-status", "--find-renames", f"{base_head}..HEAD"],
+                )
+                for line in diff_text.splitlines():
+                    parts = line.split("\t")
+                    if len(parts) >= 2:
+                        checkpoint_changes.append(
+                            {
+                                "status": parts[0],
+                                "path": " → ".join(parts[1:]),
+                            }
+                        )
+            return {
+                "ok": True,
+                "dirty": bool(current.get("dirty")),
+                "changes": list(current.get("changes") or []),
+                "change_count": int(current.get("change_count") or 0),
+                "checkpoint_changes": checkpoint_changes[:120],
+                "checkpoint_change_count": len(checkpoint_changes),
+                "local_checkpoint_ahead": bool(current.get("local_checkpoint_ahead")),
+                "local_commit_count": int(current.get("local_commit_count") or 0),
+                "workspace_relation": str(current.get("workspace_relation") or "unknown"),
+                "source_update_available": bool(current.get("source_update_available")),
+                "has_git_remote": bool(current.get("remotes")),
+            }
 
     def checkpoint(self, *, confirmed: bool, message: str = "") -> dict[str, Any]:
         with self._lock:

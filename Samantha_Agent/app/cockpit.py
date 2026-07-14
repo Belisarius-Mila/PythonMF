@@ -76,10 +76,12 @@ from app.codex_appserver import AppServerError
 from app.codex_appserver_lab import APP_SERVER_LAB, AppServerLabService
 from app.communication.human_adam_service import (
     HUMAN_ADAM,
+    human_adam_checkpoint_action,
     human_adam_connect_action,
     human_adam_send_action,
     human_adam_status_action,
     human_adam_tvbcp_action,
+    human_adam_work_review_action,
 )
 from app.communication.human_adam_ui import HUMAN_ADAM_HTML
 from app.remote_work_cell import REMOTE_WORK_CELL, RemoteWorkCellService
@@ -9255,6 +9257,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/human-adam/checkpoint",
+        "label": "Vytvorit lokalni Human-Adam WIP checkpoint",
+        "risk": "workspace_write",
+        "confirmation": "explicit_human_adam_checkpoint",
+        "handler_name": "human_adam_checkpoint_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/appserver-lab/thread/new",
         "label": "Zalozit read-only App-server LAB thread",
         "risk": "local_service",
@@ -10022,6 +10032,9 @@ class CockpitServer:
                 if parsed.path == "/api/human-adam/tvbcp":
                     self.respond_json(human_adam_tvbcp_action(service=HUMAN_ADAM))
                     return
+                if parsed.path == "/api/human-adam/workspace":
+                    self.respond_json(human_adam_work_review_action(service=HUMAN_ADAM))
+                    return
                 if parsed.path == "/api/appserver-lab/status":
                     self.respond_json(appserver_lab_status_action())
                     return
@@ -10228,6 +10241,10 @@ class CockpitServer:
                 if parsed.path == "/api/human-adam/send":
                     payload = self.read_json()
                     self.respond_json(human_adam_send_action(payload, service=HUMAN_ADAM))
+                    return
+                if parsed.path == "/api/human-adam/checkpoint":
+                    payload = self.read_json()
+                    self.respond_json(human_adam_checkpoint_action(payload, service=HUMAN_ADAM))
                     return
                 if parsed.path == "/api/appserver-lab/thread/new":
                     payload = self.read_json()

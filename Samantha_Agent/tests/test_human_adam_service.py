@@ -8,9 +8,11 @@ from app.codex_appserver import AppServerError
 from app.communication.human_adam_service import (
     CANONICAL_TVBCP_RELATIVE_PATH,
     HumanAdamService,
+    human_adam_checkpoint_action,
     human_adam_connect_action,
     human_adam_send_action,
     human_adam_tvbcp_action,
+    human_adam_work_review_action,
 )
 
 
@@ -44,18 +46,48 @@ class FakeWorkspace:
     def __init__(self, root: Path) -> None:
         self.project_root = root
         self.sync_available = False
+        self.dirty = False
+        self.local_checkpoint_ahead = False
 
     def status(self) -> dict[str, object]:
         return {
             "ok": True,
             "prepared": True,
             "project_ready": True,
-            "dirty": False,
-            "change_count": 0,
+            "dirty": self.dirty,
+            "change_count": 1 if self.dirty else 0,
+            "changes": ([{"status": " M", "path": "Samantha_Agent/test.py"}] if self.dirty else []),
             "sync_available": self.sync_available,
+            "source_update_available": self.sync_available,
+            "workspace_relation": "local_ahead" if self.local_checkpoint_ahead else ("source_ahead" if self.sync_available else "aligned"),
+            "local_checkpoint_ahead": self.local_checkpoint_ahead,
+            "local_commit_count": 1 if self.local_checkpoint_ahead else 0,
             "remotes": [],
             "head": "abc123",
         }
+
+    def review(self) -> dict[str, object]:
+        status = self.status()
+        return {
+            "ok": True,
+            "dirty": self.dirty,
+            "changes": status["changes"],
+            "change_count": status["change_count"],
+            "checkpoint_changes": ([{"status": "M", "path": "Samantha_Agent/test.py"}] if self.local_checkpoint_ahead else []),
+            "checkpoint_change_count": 1 if self.local_checkpoint_ahead else 0,
+            "local_checkpoint_ahead": self.local_checkpoint_ahead,
+            "local_commit_count": 1 if self.local_checkpoint_ahead else 0,
+            "workspace_relation": status["workspace_relation"],
+            "source_update_available": self.sync_available,
+            "has_git_remote": False,
+        }
+
+    def checkpoint(self, *, confirmed: bool, message: str = "") -> dict[str, object]:
+        if not confirmed:
+            raise AppServerError("confirmation")
+        self.dirty = False
+        self.local_checkpoint_ahead = True
+        return {**self.status(), "checkpoint_created": True, "message": message or "WIP"}
 
 
 class FakeHub:
@@ -186,6 +218,33 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertEqual(result["relative_path"], CANONICAL_TVBCP_RELATIVE_PATH.as_posix())
         self.assertIn("Kanonická smlouva", result["content"])
         self.assertFalse(result["workspace_dirty"])
+
+    def test_work_review_lists_paths_without_file_contents(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service, _runtime, workspace, _hub = self.make_service(Path(temp_dir))
+            workspace.dirty = True
+            result = human_adam_work_review_action(service=service)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["change_count"], 1)
+        self.assertEqual(result["changes"][0]["path"], "Samantha_Agent/test.py")
+        self.assertNotIn("content", result["changes"][0])
+
+    def test_checkpoint_requires_confirmation_and_keeps_local_wip_usable(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service, _runtime, workspace, _hub = self.make_service(Path(temp_dir))
+            workspace.dirty = True
+            rejected = human_adam_checkpoint_action({"confirmed": False}, service=service)
+            created = human_adam_checkpoint_action(
+                {"confirmed": True, "message": "Remote UI WIP"},
+                service=service,
+            )
+
+        self.assertEqual(rejected["status"], "confirmation_required")
+        self.assertTrue(created["ok"])
+        self.assertTrue(created["checkpoint_created"])
+        self.assertTrue(created["work"]["local_checkpoint_ahead"])
+        self.assertTrue(created["status"]["ok"])
 
 
 if __name__ == "__main__":

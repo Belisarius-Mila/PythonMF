@@ -41,6 +41,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .tvbcp-head h2 { flex:1; margin:0; font-size:18px; }
     #tvbcpMeta { padding:10px 16px; color:var(--muted); font-size:13px; border-bottom:1px solid var(--line); }
     #tvbcpContent { flex:1; overflow:auto; margin:0; padding:16px max(16px,env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) 16px; white-space:pre-wrap; overflow-wrap:anywhere; font:14px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace; }
+    #workMeta { padding:10px 16px; color:var(--muted); font-size:13px; border-bottom:1px solid var(--line); }
+    #workChanges { flex:1; overflow:auto; margin:0; padding:16px 34px; }
+    #workChanges li { margin-bottom:8px; overflow-wrap:anywhere; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:14px; }
+    .checkpoint-box { padding:12px 16px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); display:grid; gap:8px; }
+    .checkpoint-box input { width:100%; border:1px solid #bac7d8; border-radius:11px; padding:10px 12px; font:inherit; }
     @media (max-width:620px) { .back { padding:8px 10px; } .bubble { max-width:94%; } .hint { display:none; } #chat { padding-left:12px; padding-right:12px; } }
   </style>
 </head>
@@ -51,6 +56,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <a class="back" href="/">← Cockpit</a>
       <h1>Human–Adam</h1>
       <button id="tvbcpOpenBtn" type="button">TVBCP</button>
+      <button id="workOpenBtn" type="button">Práce</button>
       <button id="refreshBtn" type="button">Stav</button>
       <button class="primary" id="connectBtn" type="button">Připojit</button>
     </div>
@@ -78,6 +84,19 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     <div id="tvbcpMeta">TVBCP se načte až po otevření.</div>
     <pre id="tvbcpContent"></pre>
   </aside>
+  <aside class="tvbcp-panel" id="workPanel" hidden aria-label="Pracovní změny">
+    <div class="tvbcp-head">
+      <h2>Pracovní změny</h2>
+      <button id="workRefreshBtn" type="button">Obnovit</button>
+      <button id="workCloseBtn" type="button">Zavřít</button>
+    </div>
+    <div id="workMeta">Stav se načte až po otevření.</div>
+    <ul id="workChanges"></ul>
+    <div class="checkpoint-box">
+      <input id="checkpointMessage" maxlength="120" placeholder="Krátký popis WIP checkpointu">
+      <button class="primary" id="checkpointBtn" type="button" disabled>Checkpoint bez pushnutí</button>
+    </div>
+  </aside>
 </main>
 <script>
   const chat = document.getElementById("chat");
@@ -97,6 +116,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const tvbcpTitle = document.getElementById("tvbcpTitle");
   const tvbcpMeta = document.getElementById("tvbcpMeta");
   const tvbcpContent = document.getElementById("tvbcpContent");
+  const workOpenBtn = document.getElementById("workOpenBtn");
+  const workPanel = document.getElementById("workPanel");
+  const workCloseBtn = document.getElementById("workCloseBtn");
+  const workRefreshBtn = document.getElementById("workRefreshBtn");
+  const workMeta = document.getElementById("workMeta");
+  const workChanges = document.getElementById("workChanges");
+  const checkpointMessage = document.getElementById("checkpointMessage");
+  const checkpointBtn = document.getElementById("checkpointBtn");
   let busy = false;
   let lastSession = null;
 
@@ -160,8 +187,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     const thread = session && session.thread_id ? session.thread_id : "";
     threadBadge.textContent = `Relace: ${thread ? thread.slice(0,8) : "—"}`;
     const workspace = payload && payload.workspace ? payload.workspace : {};
-    workspaceBadge.textContent = workspace.has_git_remote ? "POZOR: Git remote" : (workspace.sync_available ? "Workspace čeká na sync" : (workspace.dirty ? `Workspace: ${workspace.change_count} změn` : "Workspace čistý"));
-    workspaceBadge.className = workspace.has_git_remote || workspace.sync_available || workspace.dirty ? "badge warn" : "badge";
+    workspaceBadge.textContent = workspace.has_git_remote ? "POZOR: Git remote" : (workspace.sync_available ? "Workspace čeká na sync" : (workspace.dirty ? `Workspace: ${workspace.change_count} změn` : (workspace.local_checkpoint_ahead ? `WIP checkpoint: ${workspace.local_commit_count}` : "Workspace čistý")));
+    workspaceBadge.className = workspace.has_git_remote || workspace.sync_available || workspace.dirty || workspace.local_checkpoint_ahead ? "badge warn" : "badge";
     renderSession(session);
   }
 
@@ -215,12 +242,77 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   function openTvbcp() {
+    workPanel.hidden = true;
     tvbcpPanel.hidden = false;
     loadTvbcp();
   }
 
   function closeTvbcp() {
     tvbcpPanel.hidden = true;
+  }
+
+  function renderWork(payload) {
+    workChanges.replaceChildren();
+    const pending = Array.isArray(payload.changes) ? payload.changes : [];
+    const checkpointed = Array.isArray(payload.checkpoint_changes) ? payload.checkpoint_changes : [];
+    const rows = pending.length ? pending : checkpointed;
+    for (const item of rows) {
+      const row = document.createElement("li");
+      row.textContent = `${item.status || "?"} · ${item.path || ""}`;
+      workChanges.appendChild(row);
+    }
+    if (!rows.length) {
+      const row = document.createElement("li");
+      row.textContent = "Žádné pracovní změny.";
+      workChanges.appendChild(row);
+    }
+    if (payload.dirty) workMeta.textContent = `Necheckpointované změny: ${payload.change_count}`;
+    else if (payload.local_checkpoint_ahead) workMeta.textContent = `Lokální WIP checkpoint: ${payload.local_commit_count} commitů · ${payload.checkpoint_change_count} souborů · bez pushnutí`;
+    else workMeta.textContent = "Workspace je čistý a odpovídá main.";
+    checkpointBtn.disabled = !payload.dirty;
+  }
+
+  async function loadWork() {
+    workRefreshBtn.disabled = true;
+    workMeta.textContent = "Načítám pracovní stav…";
+    try {
+      const payload = await api("/api/human-adam/workspace");
+      if (!payload.ok) throw new Error(payload.message || "Pracovní stav nelze načíst.");
+      renderWork(payload);
+    } catch (error) {
+      workChanges.replaceChildren();
+      workMeta.textContent = `Pracovní stav nelze načíst: ${error.message}`;
+      checkpointBtn.disabled = true;
+    } finally { workRefreshBtn.disabled = false; }
+  }
+
+  function openWork() {
+    tvbcpPanel.hidden = true;
+    workPanel.hidden = false;
+    loadWork();
+  }
+
+  function closeWork() {
+    workPanel.hidden = true;
+  }
+
+  async function createCheckpoint() {
+    if (checkpointBtn.disabled) return;
+    if (!window.confirm("Vytvořit lokální WIP checkpoint v izolované kopii bez pushnutí?")) return;
+    checkpointBtn.disabled = true;
+    workMeta.textContent = "Vytvářím bezpečný lokální checkpoint…";
+    let failure = "";
+    try {
+      const payload = await api("/api/human-adam/checkpoint", {method:"POST", body:JSON.stringify({confirmed:true,message:checkpointMessage.value.trim()})});
+      if (!payload.ok) throw new Error(payload.message || "Checkpoint selhal.");
+      checkpointMessage.value = "";
+      renderWork(payload.work);
+      renderStatus(payload.status);
+    } catch (error) {
+      failure = `Checkpoint selhal: ${error.message}`;
+      await loadWork();
+    }
+    if (failure) workMeta.textContent = failure;
   }
 
   async function sendMessage(event) {
@@ -252,6 +344,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   tvbcpOpenBtn.addEventListener("click", openTvbcp);
   tvbcpCloseBtn.addEventListener("click", closeTvbcp);
   tvbcpRefreshBtn.addEventListener("click", loadTvbcp);
+  workOpenBtn.addEventListener("click", openWork);
+  workCloseBtn.addEventListener("click", closeWork);
+  workRefreshBtn.addEventListener("click", loadWork);
+  checkpointBtn.addEventListener("click", createCheckpoint);
   composer.addEventListener("submit", sendMessage);
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) sendMessage(event);
