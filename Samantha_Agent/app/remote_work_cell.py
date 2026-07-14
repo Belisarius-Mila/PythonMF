@@ -326,6 +326,18 @@ class RemoteWorkspaceManager:
             old_head = str(current.get("head") or "")
             source_head = str(current.get("source_head") or "")
             if old_head == source_head:
+                metadata = self._metadata()
+                metadata.update(
+                    {
+                        "schema_version": 1,
+                        "base_head": source_head,
+                        "source_branch": "main",
+                        "project_dir_name": self.project_dir_name,
+                        "last_synced_at": _now(),
+                    }
+                )
+                self._write_metadata(metadata)
+                current = self.status()
                 return {
                     **current,
                     "synced": False,

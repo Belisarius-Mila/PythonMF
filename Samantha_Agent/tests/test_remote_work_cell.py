@@ -189,6 +189,28 @@ class RemoteWorkspaceManagerTests(unittest.TestCase):
             self.assertEqual((manager.project_root / "tracked.py").read_text(), "VALUE = 2\n")
             self.assertFalse((manager.workspace_root / "AuditCockpit56_M.txt").exists())
 
+    def test_equal_head_sync_repairs_stale_base_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            metadata_path = root / "meta.json"
+            manager = RemoteWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=metadata_path,
+            )
+            prepared = manager.prepare()
+            metadata_path.write_text(
+                '{"schema_version": 1, "base_head": "stale"}\n',
+                encoding="utf-8",
+            )
+
+            synced = manager.sync_from_main(confirmed=True)
+
+            self.assertFalse(synced["synced"])
+            self.assertEqual(synced["base_head"], prepared["head"])
+            self.assertEqual(synced["workspace_relation"], "aligned")
+
     def test_sync_from_main_rejects_dirty_workspace_without_overwrite(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
