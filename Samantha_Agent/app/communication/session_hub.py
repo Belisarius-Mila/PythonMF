@@ -115,15 +115,22 @@ class CanonicalSessionHub:
             client = self.client_factory()
             thread_id = str(self._state.get("thread_id") or "")
             if thread_id:
-                client.resume_thread(
-                    thread_id,
-                    cwd=self.workspace,
-                    developer_instructions=self.developer_instructions,
-                    sandbox=self.sandbox,
-                    approval_policy=self.approval_policy,
-                    model=self.model,
-                )
-            else:
+                try:
+                    client.resume_thread(
+                        thread_id,
+                        cwd=self.workspace,
+                        developer_instructions=self.developer_instructions,
+                        sandbox=self.sandbox,
+                        approval_policy=self.approval_policy,
+                        model=self.model,
+                    )
+                except AppServerError:
+                    if self._state["messages"]:
+                        raise
+                    # Codex doesn't materialize a new persistent thread until its
+                    # first turn. Replacing an empty, non-resumable ID loses no work.
+                    thread_id = ""
+            if not thread_id:
                 thread_id = client.start_thread(
                     cwd=self.workspace,
                     ephemeral=False,

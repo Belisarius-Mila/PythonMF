@@ -30,6 +30,9 @@ COMPILE_PATHS = (
     "app/autosave_service.py",
     "app/codex_appserver.py",
     "app/codex_appserver_lab.py",
+    "app/communication/human_adam_service.py",
+    "app/communication/human_adam_ui.py",
+    "app/communication/local_runtime.py",
     "app/communication/session_hub.py",
     "app/remote_work_cell.py",
     "app/file_persistence.py",
@@ -78,6 +81,9 @@ TEST_MODULES = (
     "tests.test_codex_appserver_reliability_probe",
     "tests.test_codex_appserver_shared_thread_probe",
     "tests.test_communication_session_hub",
+    "tests.test_human_adam_service",
+    "tests.test_human_adam_ui",
+    "tests.test_local_appserver_runtime",
     "tests.test_remote_work_cell",
     "tests.test_voice_bridge_coordinator",
     "tests.test_voice_bridge_runtime",
@@ -196,6 +202,18 @@ def cockpit_javascript_source() -> str:
     return "\n".join(scripts)
 
 
+def human_adam_javascript_source() -> str:
+    project_root = str(PROJECT_ROOT)
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
+    from app.communication.human_adam_ui import HUMAN_ADAM_HTML
+
+    scripts = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script>", HUMAN_ADAM_HTML, flags=re.DOTALL)
+    if not scripts:
+        raise SystemExit("Human–Adam javascript syntax failed: stránka neobsahuje script blok")
+    return "\n".join(scripts)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the canonical Samantha Cockpit quality gate.")
     parser.add_argument(
@@ -228,6 +246,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         "javascript syntax",
         ["node", "--check", "-"],
         input_text=cockpit_javascript_source(),
+    )
+    run_checked(
+        "Human–Adam javascript syntax",
+        ["node", "--check", "-"],
+        input_text=human_adam_javascript_source(),
     )
     run_checked("shell syntax", ["/bin/zsh", "-n", *SHELL_PATHS])
     if not args.skip_unit_tests:

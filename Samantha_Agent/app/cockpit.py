@@ -74,6 +74,13 @@ from app.autosave_service import (
 )
 from app.codex_appserver import AppServerError
 from app.codex_appserver_lab import APP_SERVER_LAB, AppServerLabService
+from app.communication.human_adam_service import (
+    HUMAN_ADAM,
+    human_adam_connect_action,
+    human_adam_send_action,
+    human_adam_status_action,
+)
+from app.communication.human_adam_ui import HUMAN_ADAM_HTML
 from app.remote_work_cell import REMOTE_WORK_CELL, RemoteWorkCellService
 from app.backup.activity_state import backup_activity_status
 from app.documents.case_service import (
@@ -9231,6 +9238,22 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/human-adam/connect",
+        "label": "Pripojit kanonickou relaci Human-Adam",
+        "risk": "local_service",
+        "confirmation": "explicit_human_adam_button",
+        "handler_name": "human_adam_connect_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/human-adam/send",
+        "label": "Odeslat zapisujici tah Human-Adam",
+        "risk": "workspace_write",
+        "confirmation": "protocol_ids_required",
+        "handler_name": "human_adam_send_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/appserver-lab/thread/new",
         "label": "Zalozit read-only App-server LAB thread",
         "risk": "local_service",
@@ -9948,6 +9971,9 @@ class CockpitServer:
                 if parsed.path == "/":
                     self.respond_html(COCKPIT_HTML)
                     return
+                if parsed.path == "/human-adam/":
+                    self.respond_html(HUMAN_ADAM_HTML)
+                    return
                 if parsed.path == "/email-processing/":
                     self.respond_html(EMAIL_PROCESSING_HTML)
                     return
@@ -9988,6 +10014,9 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/voice-bridge/tvbcp":
                     self.respond_json(tvbcp_status())
+                    return
+                if parsed.path == "/api/human-adam/status":
+                    self.respond_json(human_adam_status_action(service=HUMAN_ADAM))
                     return
                 if parsed.path == "/api/appserver-lab/status":
                     self.respond_json(appserver_lab_status_action())
@@ -10188,6 +10217,13 @@ class CockpitServer:
                 if parsed.path == "/api/voice-bridge/frontend-event":
                     payload = self.read_json()
                     self.respond_json(cockpit_voice_frontend_event_action(payload))
+                    return
+                if parsed.path == "/api/human-adam/connect":
+                    self.respond_json(human_adam_connect_action(service=HUMAN_ADAM))
+                    return
+                if parsed.path == "/api/human-adam/send":
+                    payload = self.read_json()
+                    self.respond_json(human_adam_send_action(payload, service=HUMAN_ADAM))
                     return
                 if parsed.path == "/api/appserver-lab/thread/new":
                     payload = self.read_json()
@@ -12835,6 +12871,7 @@ COCKPIT_HTML = """<!doctype html>
     <h1>Samantha Cockpit</h1>
     <div class="toolbar">
       <button class="janicka-button" id="janickaBtn">Janička</button>
+      <button class="primary" id="humanAdamOpenBtn">Human–Adam</button>
       <button class="secondary" id="appserverLabOpenBtn">App-server LAB</button>
       <button class="primary" id="remoteWorkOpenBtn">Adam Remote</button>
       <button class="secondary" id="refreshBtn">Obnovit</button>
@@ -13900,6 +13937,7 @@ COCKPIT_HTML = """<!doctype html>
     const projectAuditStatus = document.getElementById("projectAuditStatus");
     const projectAuditRecentList = document.getElementById("projectAuditRecentList");
     const projectAuditText = document.getElementById("projectAuditText");
+    const humanAdamOpenBtn = document.getElementById("humanAdamOpenBtn");
     const appserverLabOpenBtn = document.getElementById("appserverLabOpenBtn");
     const appserverLabModal = document.getElementById("appserverLabModal");
     const appserverLabCloseBtn = document.getElementById("appserverLabCloseBtn");
@@ -20779,6 +20817,7 @@ COCKPIT_HTML = """<!doctype html>
         submitJanickaChat();
       }
     });
+    humanAdamOpenBtn.addEventListener("click", () => { window.location.href = "/human-adam/"; });
     appserverLabOpenBtn.addEventListener("click", openAppserverLabModal);
     appserverLabCloseBtn.addEventListener("click", closeAppserverLabModal);
     appserverLabThreadSelect.addEventListener("change", selectAppserverLabThread);

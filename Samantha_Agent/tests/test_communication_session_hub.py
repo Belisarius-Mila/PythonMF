@@ -19,6 +19,7 @@ class FakeClient:
     block_started: threading.Event | None = None
     block_release: threading.Event | None = None
     fail_send = False
+    fail_resume = False
 
     def __init__(self) -> None:
         self.running = True
@@ -32,6 +33,8 @@ class FakeClient:
         return "canonical-thread"
 
     def resume_thread(self, thread_id: str, **_kwargs: object) -> str:
+        if self.__class__.fail_resume:
+            raise AppServerError("missing thread")
         self.resumed_thread_id = thread_id
         return thread_id
 
@@ -68,6 +71,7 @@ class CanonicalSessionHubTests(unittest.TestCase):
         FakeClient.block_started = None
         FakeClient.block_release = None
         FakeClient.fail_send = False
+        FakeClient.fail_resume = False
 
     def make_hub(self, root: Path) -> CanonicalSessionHub:
         return CanonicalSessionHub(
@@ -104,6 +108,30 @@ class CanonicalSessionHubTests(unittest.TestCase):
         self.assertTrue(first["entry"]["delivery_confirmed"])
         self.assertTrue(duplicate["duplicate_prevented"])
         self.assertEqual(FakeClient.instances[0].sent, 1)
+
+    def test_empty_unmaterialized_thread_can_be_replaced_without_losing_work(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            first = self.make_hub(root)
+            first.connect()
+            first.close()
+            FakeClient.fail_resume = True
+            replacement = self.make_hub(root).connect()
+
+        self.assertEqual(replacement["thread_id"], "canonical-thread")
+        self.assertEqual(replacement["messages"], [])
+
+    def test_nonempty_thread_is_never_replaced_when_resume_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            first = self.make_hub(root)
+            first.send(text="Ahoj", client_message_id="message-0001")
+            first.close()
+            FakeClient.fail_resume = True
+            with self.assertRaises(AppServerError):
+                self.make_hub(root).connect()
+
+        self.assertEqual(len(FakeClient.instances), 2)
 
     def test_parallel_turn_is_rejected_instead_of_queued_silently(self) -> None:
         FakeClient.block_started = threading.Event()

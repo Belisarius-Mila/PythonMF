@@ -30,8 +30,7 @@ Co je hotove:
 
 Co neni hotove:
 
-- Trvalý app-server daemon a dva klienti zatím nejsou implementované ani
-  otestované jako jeden kanonický systém.
+- Nové textové UI zatím neprošlo ručním Mac/iPhone testem ani restartem Cockpitu.
 - Současná terminálová relace nebyla migrována.
 - Staré komunikační vrstvy nebyly odstraněny; do přijetí nové cesty zůstávají
   zmrazené, nikoli rozvíjené.
@@ -47,16 +46,22 @@ Aktualizace 2026-07-14:
 - `app/communication/session_hub.py` drží kanonické thread ID, reconnect, jeden
   aktivní tah, idempotenci a fail-closed `delivery_unknown`.
 - 34 cílených testů app-server/LAB/Remote/Session Hub prošlo.
-- Není ještě hotový daemon controller ani nové textové Human–Adam UI.
+- První Human–Adam řez je hotový: privátní Unix proces controller, samostatné
+  responzivní UI a kanonická relace v izolovaném workspace bez Git remote a sítě.
+- Živý test s modelem `gpt-5.6-sol`, reasoning `high` potvrdil přesnou odpověď
+  `KANON-14`, potvrzené doručení a resume stejného threadu po restartu app-serveru.
+- Opraven je bezpečný lifecycle prázdného threadu, který Codex před prvním tahem
+  ještě nepersistuje. Thread s historií se při resume chybě nikdy nenahrazuje.
+- Plná Cockpit quality gate prošla: 672 testů včetně obou JavaScript syntaxí.
 
 Dalsi krok:
 
-- Doplnit řízený daemon controller a první minimální textové Human–Adam UI nad
-  hotovým Session Hubem bez přesunu doménové logiky do `cockpit.py`.
+- Restartovat Cockpit, ručně otestovat Human–Adam nejprve na Macu a potom na
+  iPhonu; ověřit čas odeslání, průběh, odpověď a resume stejné relace.
 
 Navrhovane dalsi kroky:
 
-1. Ověřit společnou historii, reconnect, restart/resume a replay událostí.
+1. Ručně ověřit společnou historii a restart/resume přes nové UI.
 2. Ověřit zámek jednoho aktivního tahu a idempotentní odesílání.
 3. Ověřit plnohodnotný samostatný terminálový failover bez Cockpitu/app-serveru.
 4. Po automatických a ručních Mac/iPhone testech rozhodnout o migraci kanonické
@@ -73,8 +78,14 @@ Zmenene nebo relevantni soubory:
 - `AGENTS.md`
 - `app/codex_appserver.py`
 - `app/communication/session_hub.py`
+- `app/communication/local_runtime.py`
+- `app/communication/human_adam_service.py`
+- `app/communication/human_adam_ui.py`
 - `scripts/codex_appserver_shared_thread_probe.py`
 - `tests/test_communication_session_hub.py`
+- `tests/test_human_adam_service.py`
+- `tests/test_human_adam_ui.py`
+- `tests/test_local_appserver_runtime.py`
 - `tests/test_codex_appserver_shared_thread_probe.py`
 - `app/cockpit.py`
 - `scripts/samantha_codex.sh`

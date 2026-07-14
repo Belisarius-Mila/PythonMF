@@ -71,8 +71,9 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `tvbcp/architektura_komunikace_samantha.txt` - [PRIPOMENOUT] aktivni kanonicka
   smlouva Mily a Adama pro jednoho trvaleho Adama, sdilene app-server vlakno,
   role Cockpitu Mac/iPhone a terminalu, failover, rotaci relace, stihly
-  `cockpit.py`, hlas, TVBCP, handoff, autosave a nejblizsi izolovany dukaz dvou
-  klientu nad jednim testovacim vlaknem.
+  `cockpit.py`, hlas, TVBCP, handoff a autosave. Prvni textove Human–Adam UI s
+  privátním Unix controllerem je hotove; zivy test potvrdil doruceni a resume
+  stejneho threadu, dalsi je rucni Mac/iPhone test.
 
 ## Handoffs
 
