@@ -225,6 +225,8 @@ jejich UI/startovací/testovací kód se nemají ponechávat jako trvalé záloh
 | 2026-07-14 | Nasazen první textový Human–Adam řez | Privátní Unix proces controller, samostatné responzivní UI, izolovaný workspace; živě potvrzen `KANON-14` a resume stejného threadu po restartu; Cockpit restartován, plná brána 672 testů |
 | 2026-07-14 | Míla potvrdil první ruční Mac test Human–Adam | Textové UI podle Mílova hlášení funguje a vypadá správně; kanonická relace má dvě dokončené výměny, workspace zůstal čistý |
 | 2026-07-14 | Nasazen čtecí panel projektového TVBCP | Zavřený boční list bez automatického refresh; čte jediný pevný TVBCP z izolovaného workspace a ukazuje stav pracovních změn; živý HTTP endpoint ověřen, brána 673 testů |
+| 2026-07-14 | Human–Adam přečetl TVBCP v reálném tahu | Mílův pokyn proběhl bez změn, odpověď správně uvedla čistý workspace a commit `b6c8dde`; doručení potvrzeno, historie i po restartu zachována |
+| 2026-07-14 | Nasazen přehled práce a lokální WIP checkpoint | Panel ukazuje pouze cesty a Git stavy; checkpoint vyžaduje potvrzení, nic nepushuje a lokální commit před main nezablokuje další tahy; živé GET a odmítavé POST ověřeny, brána 677 testů |
 
 ## Vývojový záznam 2026-07-14 – transport a Session Hub
 
@@ -301,12 +303,37 @@ Panel ukazuje, zda je pracovní kopie čistá, kolik má změn a zda čeká na s
 dostal pravidlo TVBCP před větší prací přečíst a aktualizovat jej pouze na Mílův
 pokyn nebo při skutečném milníku; plný chat ani citlivé texty do něj nepatří.
 
+## Vývojový záznam 2026-07-14 – pracovní změny a WIP checkpoint
+
+Human–Adam má vedle TVBCP tlačítko `Práce`. Panel čte jen názvy změněných cest a
+jejich Git stav, nikoli obsah souborů. Rozlišuje necheckpointované změny, lokální
+WIP commit bez pushnutí, novější zdrojový `main` a skutečné rozvětvení. Tím je
+opravená starší nejasnost Remote Work Cell, kde se bezpečný lokální checkpoint
+tvářil stejně jako zastaralý základ a UI po něm blokovalo další tahy.
+
+`Checkpoint bez pushnutí` je dostupný jen při skutečných změnách, vyžaduje
+další potvrzovací dialog a používá existující ochrany proti private/env/médiím.
+Checkpoint zůstane pouze v izolovaném clone a musí být později zkontrolován a
+převzat do `main` řízeným terminálovým krokem.
+
+Při pushi tohoto milníku přibyl souběžně legitimní commit veřejného sovího audia.
+Bezpečný rebase proběhl bez konfliktu. Sync izolovaného workspace byl rozšířen o
+úzkou výjimku pro malé verzované mediální assety pouze v adresářích
+`ColorsAndNumbers/web_colors_numbers/` a `docs/colors-numbers/`, maximálně 8 MiB.
+Média mimo tento allowlist, private/env cesty, mazání a rozvětvení zůstávají
+fail-closed blokované.
+
+Poznámka z reálného tahu: private metadata o záloze v izolovaném clone záměrně
+nejsou. Jejich absence není důkazem chybějící zálohy hlavního projektu a
+kanonický Adam z ní už nesmí vyvozovat provozní závěr.
+
 ## Otevřené kroky
 
-1. Ručně otestovat nový TVBCP panel na Macu: zavřený výchozí stav, otevření,
-   čitelnost a ruční obnovení.
-2. Zopakovat textový a TVBCP test na iPhonu přes současnou privátní cestu.
-3. Ověřit restart Cockpitu a resume stejného threadu z UI.
+1. Ručně otevřít panel `Práce` a ověřit čistý stav.
+2. Z iPhonu nebo Macu zadat první přesně omezený zápis pouze do tohoto TVBCP.
+3. Ověřit jeden změněný soubor v panelu, nový text přes ruční refresh TVBCP a
+   vytvořit lokální WIP checkpoint bez pushnutí.
+4. Ověřit restart Cockpitu a resume stejného threadu z iPhonu.
 4. Prokázat nouzový samostatný start terminálového Adama bez Cockpitu a
    app-serveru.
 5. Teprve po úspěšném důkazu navrhnout řízenou migraci kanonické relace.
@@ -329,7 +356,7 @@ pokyn nebo při skutečném milníku; plný chat ani citlivé texty do něj nepa
 
 ## Další kanonický krok
 
-Ručně otestovat TVBCP panel na Macu. Potom na iPhonu poslat první neinvazivní
-vzdálený vývojový pokyn, který přečte TVBCP, zkontroluje stav a pouze navrhne
-nejmenší další krok bez změny souborů. Současná terminálová relace a nouzové
-mechanismy zůstávají nedotčené.
+Z iPhonu nebo Macu provést první řízený zápis pouze do tohoto TVBCP, ověřit jej v
+panelu `TVBCP` i `Práce` a vytvořit lokální WIP checkpoint bez pushnutí. Potom
+zůstává doplnit řízené převzetí takového checkpointu do `main`. Současná
+terminálová relace a nouzové mechanismy zůstávají nedotčené.

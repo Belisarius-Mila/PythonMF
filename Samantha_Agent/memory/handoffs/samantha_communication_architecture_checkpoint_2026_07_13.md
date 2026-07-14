@@ -60,11 +60,22 @@ Aktualizace 2026-07-14:
   jeho živý HTTP endpoint byl ověřen.
 - Horní badge ukazuje počet pracovních změn. Brána po doplnění panelu má 673
   úspěšných testů.
+- Reálný Human–Adam tah z TVBCP proběhl bez změn a s potvrzeným doručením;
+  správně poznal čistý workspace a základní commit. Absence private backup
+  metadat v izolovaném clone je nově výslovně označená jako záměrná, ne jako
+  důkaz chybějící zálohy.
+- Nasazen je panel `Práce`, který ukazuje pouze změněné cesty a Git stavy, a
+  potvrzovaný lokální WIP checkpoint bez pushnutí. Workspace rozlišuje lokální
+  commit před main od novějšího main a od skutečného rozvětvení.
+- Souběžný veřejný Colors & Numbers audio commit byl bezpečně převzat. Source
+  sync má úzký allowlist do 8 MiB jen pro dvě veřejné webové asset cesty; ostatní
+  média a private/env zůstávají blokované. Plná brána má 677 testů.
 
 Dalsi krok:
 
-- Ručně ověřit TVBCP panel na Macu a potom na iPhonu zkusit první neinvazivní
-  vzdálený vývojový pokyn s přečtením TVBCP bez změny souborů.
+- Z iPhonu nebo Macu provést první omezený zápis pouze do TVBCP, ověřit jeden
+  změněný soubor a vytvořit lokální WIP checkpoint. Další implementační krok je
+  řízené převzetí zkontrolovaného checkpointu do `main`.
 
 Navrhovane dalsi kroky:
 
