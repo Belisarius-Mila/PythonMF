@@ -27,6 +27,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .badge { padding:4px 8px; border-radius:999px; background:var(--soft); }
     .badge.ok { color:var(--ok); background:#ecfdf3; }
     .badge.warn { color:var(--warn); background:#fff7ed; }
+    #turnActivity { margin:8px 0 0; padding:6px 10px; border-radius:10px; color:var(--warn); background:#fff7ed; font-size:13px; font-weight:700; }
+    #turnActivity[hidden] { display:none; }
     #notice { min-height:24px; padding:8px 18px 0; color:var(--muted); font-size:14px; }
     #deploymentReceipt { margin:8px 0 0; padding:6px 10px; border-radius:10px; color:var(--ok); background:#ecfdf3; font-size:13px; }
     #deploymentReceipt[hidden] { display:none; }
@@ -75,6 +77,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <span class="badge" id="threadBadge">Relace: —</span>
       <span class="badge" id="workspaceBadge">Izolovaný workspace</span>
     </div>
+    <div id="turnActivity" role="status" aria-live="polite" hidden></div>
     <div id="deploymentReceipt" role="status" aria-live="polite" hidden></div>
   </header>
   <div id="notice" role="status" aria-live="polite"></div>
@@ -123,6 +126,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const connectionBadge = document.getElementById("connectionBadge");
   const threadBadge = document.getElementById("threadBadge");
   const workspaceBadge = document.getElementById("workspaceBadge");
+  const turnActivity = document.getElementById("turnActivity");
   const connectBtn = document.getElementById("connectBtn");
   const refreshBtn = document.getElementById("refreshBtn");
   const composer = document.getElementById("composer");
@@ -150,6 +154,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const deployConfirmation = document.getElementById("deployConfirmation");
   const deployBtn = document.getElementById("deployBtn");
   let busy = false;
+  let sendInFlight = false;
+  let sessionTurnBusy = false;
+  let turnTimerId = null;
+  let activeTurnStartedAt = "";
   let lastSession = null;
   let deploymentAudit = null;
 
@@ -164,12 +172,70 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString("cs-CZ", {hour:"2-digit",minute:"2-digit",second:"2-digit",day:"2-digit",month:"2-digit"});
   }
 
+  function syncControls() {
+    connectBtn.disabled = busy;
+    refreshBtn.disabled = busy;
+    sendBtn.disabled = busy || sendInFlight || sessionTurnBusy;
+  }
+
   function setBusy(value, text="") {
     busy = value;
-    connectBtn.disabled = value;
-    refreshBtn.disabled = value;
-    sendBtn.disabled = value;
+    syncControls();
     if (text) notice.textContent = text;
+  }
+
+  function elapsedClock(startedAt) {
+    const startedMs = new Date(startedAt).getTime();
+    if (!Number.isFinite(startedMs)) return "čas neznámý";
+    const elapsedSeconds = Math.max(0, Math.floor((Date.now() - startedMs) / 1000));
+    const minutes = String(Math.floor(elapsedSeconds / 60)).padStart(2, "0");
+    const seconds = String(elapsedSeconds % 60).padStart(2, "0");
+    return `${minutes}:${seconds}`;
+  }
+
+  function stopTurnTimer() {
+    if (turnTimerId !== null) window.clearTimeout(turnTimerId);
+    turnTimerId = null;
+    activeTurnStartedAt = "";
+  }
+
+  function updateTurnTimer() {
+    if (!activeTurnStartedAt) return;
+    turnActivity.textContent = `Adam pracuje · ${elapsedClock(activeTurnStartedAt)} · pokyn neposílej znovu`;
+    turnTimerId = window.setTimeout(updateTurnTimer, 1000);
+  }
+
+  function startTurnTimer(startedAt) {
+    const parsed = new Date(startedAt);
+    const normalized = Number.isNaN(parsed.getTime()) ? "" : parsed.toISOString();
+    if (!normalized) {
+      stopTurnTimer();
+      turnActivity.textContent = "Adam pracuje · čas neznámý · pokyn neposílej znovu";
+      return;
+    }
+    if (activeTurnStartedAt === normalized && turnTimerId !== null) return;
+    stopTurnTimer();
+    activeTurnStartedAt = normalized;
+    updateTurnTimer();
+  }
+
+  function renderTurnState(session) {
+    const messages = session && Array.isArray(session.messages) ? session.messages : [];
+    const latest = messages.length ? messages[messages.length - 1] : null;
+    sessionTurnBusy = Boolean(session && session.turn_busy);
+    if (sessionTurnBusy) {
+      const activeTurn = session && session.active_turn ? session.active_turn : {};
+      startTurnTimer(activeTurn.started_at || "");
+      turnActivity.hidden = false;
+    } else {
+      stopTurnTimer();
+      const deliveryUnknown = Boolean(latest && latest.status === "delivery_unknown");
+      turnActivity.textContent = deliveryUnknown
+        ? "Stav doručení je nejistý · obnov stav · pokyn neposílej znovu"
+        : "";
+      turnActivity.hidden = !deliveryUnknown;
+    }
+    syncControls();
   }
 
   function clearMessageInput() {
@@ -229,6 +295,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     );
     deploymentReceipt.textContent = showConfirmation ? `Nasazeno ${shortCommit} · plná brána prošla · ${completedTime}` : "";
     deploymentReceipt.hidden = !showConfirmation;
+    renderTurnState(session);
     renderSession(session);
   }
 
@@ -483,24 +550,33 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
   async function sendMessage(event) {
     event.preventDefault();
-    if (busy) return;
+    if (busy || sendInFlight || sessionTurnBusy) return;
     const text = input.value.trim();
     if (!text) { notice.textContent = "Napiš nejdřív zprávu."; return; }
     clearMessageInput();
     const sentAt = new Date().toISOString();
     const clientId = messageId();
-    const optimistic = lastSession ? {...lastSession, messages:[...(lastSession.messages || []), {user_text:text,client_sent_at:sentAt,received_at:sentAt,status:"pending",answer:""}]} : {messages:[{user_text:text,client_sent_at:sentAt,received_at:sentAt,status:"pending",answer:""}]};
+    const pendingMessage = {user_text:text,client_sent_at:sentAt,received_at:sentAt,status:"pending",answer:""};
+    const optimistic = lastSession
+      ? {...lastSession, turn_busy:true, active_turn:{client_message_id:clientId,started_at:sentAt}, messages:[...(lastSession.messages || []), pendingMessage]}
+      : {turn_busy:true, active_turn:{client_message_id:clientId,started_at:sentAt}, messages:[pendingMessage]};
+    sendInFlight = true;
     renderSession(optimistic);
-    setBusy(true, `Odesláno ${formatTime(sentAt)} · Adam pracuje…`);
+    renderTurnState(optimistic);
+    notice.textContent = `Odesláno ${formatTime(sentAt)} · Adam pracuje…`;
     let failure = "";
     try {
       const payload = await api("/api/human-adam/send", {method:"POST", body:JSON.stringify({message:text,client_message_id:clientId,client_sent_at:sentAt})});
       if (!payload.ok) throw new Error(payload.message || "Odeslání selhalo.");
       renderSession(payload.session);
+      renderTurnState(payload.session);
       notice.textContent = "Odpověď doručena a potvrzena.";
     } catch (error) {
       failure = `Odeslání není potvrzené: ${error.message}`;
-    } finally { setBusy(false); }
+    } finally {
+      sendInFlight = false;
+      syncControls();
+    }
     await loadStatus();
     if (failure) notice.textContent = failure;
   }

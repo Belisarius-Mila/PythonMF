@@ -717,3 +717,32 @@ Důkaz: 7 UI testů a samostatná kontrola JavaScriptové syntaxe prošly.
 
 Další krok: po nasazení ručně ověřit viditelnost účtenky po restartu i při
 rolování dlouhou historií.
+
+### 2026-07-15 00:15 CEST – Klientská časomíra aktivního tahu
+
+Požadavek: ve sticky stavové části jednoznačně ukázat probíhající Human–Adam tah,
+jeho délku a zákaz opakovaného odeslání; po obnovení stránky navázat na skutečný
+čas začátku a při nejistém doručení zobrazit bezpečný pokyn k ručnímu obnovení.
+
+Implementace:
+
+- okamžitě po odeslání vznikne klientský aktivní stav se stejnými poli
+  `turn_busy` a `active_turn.started_at`, ještě před API voláním;
+- stav načtený ze serveru obnoví časomíru ze skutečného `started_at`; lokální
+  sekundový callback mění pouze text `Adam pracuje · MM:SS · pokyn neposílej
+  znovu` a nevolá žádné API;
+- dokončený tah časomíru zastaví a historie zobrazí existující potvrzenou
+  odpověď; stav zprávy `delivery_unknown` zobrazí `Stav doručení je nejistý ·
+  obnov stav · pokyn neposílej znovu`;
+- aktivní tah blokuje jen nové odeslání. Ruční tlačítko `Stav` zůstává dostupné;
+  nevznikl polling, automatické opakování, watcher, VoiceBridge ani TTY cesta.
+
+Testy: 12 cílených UI testů prošlo, včetně okamžitého startu před API, navázání
+ze serverového `started_at`, zákazu dalšího odeslání při dostupném ručním stavu
+a zastavení po dokončení. Prošla JavaScriptová syntaxe a `git diff --check`.
+
+Riziko: zobrazený čas používá hodiny klientského zařízení; jejich výrazná
+odchylka může zkreslit údaj MM:SS, ale nemění serverový stav ani doručení.
+
+Další krok: po nasazení ručně zahájit delší tah, během něj obnovit stránku a
+ověřit pokračující čas, dostupnost tlačítka `Stav` a zastavení po odpovědi.

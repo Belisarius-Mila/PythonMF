@@ -35,6 +35,7 @@ class HumanAdamUiTests(unittest.TestCase):
             "deployConfirmation",
             "deployBtn",
             "deploymentReceipt",
+            "turnActivity",
         ):
             self.assertIn(f'id="{element_id}"', HUMAN_ADAM_HTML)
         self.assertIn("Odesláno", HUMAN_ADAM_HTML)
@@ -111,6 +112,81 @@ class HumanAdamUiTests(unittest.TestCase):
         )
         self.assertIn("button.audit-action { background:#fbbf24;", HUMAN_ADAM_HTML)
         self.assertIn("button.deploy-action { background:var(--ok);", HUMAN_ADAM_HTML)
+
+    def test_turn_timer_starts_immediately_before_send_api_call(self) -> None:
+        send_start = HUMAN_ADAM_HTML.index("async function sendMessage(event)")
+        send_end = HUMAN_ADAM_HTML.index('connectBtn.addEventListener("click", connect);', send_start)
+        send_source = HUMAN_ADAM_HTML[send_start:send_end]
+
+        self.assertIn("turn_busy:true", send_source)
+        self.assertIn("active_turn:{client_message_id:clientId,started_at:sentAt}", send_source)
+        self.assertLess(send_source.index("sendInFlight = true;"), send_source.index("renderTurnState(optimistic);"))
+        self.assertLess(
+            send_source.index("renderTurnState(optimistic);"),
+            send_source.index('await api("/api/human-adam/send"'),
+        )
+        self.assertIn(
+            "`Adam pracuje · ${elapsedClock(activeTurnStartedAt)} · pokyn neposílej znovu`",
+            HUMAN_ADAM_HTML,
+        )
+
+    def test_turn_timer_resumes_from_session_started_at_after_page_reload(self) -> None:
+        render_start = HUMAN_ADAM_HTML.index("function renderTurnState(session)")
+        render_end = HUMAN_ADAM_HTML.index("function clearMessageInput()", render_start)
+        render_source = HUMAN_ADAM_HTML[render_start:render_end]
+        status_start = HUMAN_ADAM_HTML.index("function renderStatus(payload)")
+        status_end = HUMAN_ADAM_HTML.index("async function api(", status_start)
+        status_source = HUMAN_ADAM_HTML[status_start:status_end]
+        header = HUMAN_ADAM_HTML.index("<header>")
+        activity = HUMAN_ADAM_HTML.index('id="turnActivity"', header)
+        header_end = HUMAN_ADAM_HTML.index("</header>", activity)
+
+        self.assertIn("session && session.active_turn", render_source)
+        self.assertIn('startTurnTimer(activeTurn.started_at || "");', render_source)
+        self.assertIn("renderTurnState(session);", status_source)
+        self.assertIn("Date.now() - startedMs", HUMAN_ADAM_HTML)
+        self.assertIn('padStart(2, "0")', HUMAN_ADAM_HTML)
+        self.assertNotIn("elapsedSeconds = 0", HUMAN_ADAM_HTML)
+        self.assertLess(header, activity)
+        self.assertLess(activity, header_end)
+
+    def test_active_turn_disables_only_new_send_and_keeps_manual_status_available(self) -> None:
+        controls_start = HUMAN_ADAM_HTML.index("function syncControls()")
+        controls_end = HUMAN_ADAM_HTML.index("function setBusy(", controls_start)
+        controls_source = HUMAN_ADAM_HTML[controls_start:controls_end]
+        send_start = HUMAN_ADAM_HTML.index("async function sendMessage(event)")
+        send_end = HUMAN_ADAM_HTML.index('connectBtn.addEventListener("click", connect);', send_start)
+        send_source = HUMAN_ADAM_HTML[send_start:send_end]
+
+        self.assertIn("sendBtn.disabled = busy || sendInFlight || sessionTurnBusy;", controls_source)
+        self.assertIn("refreshBtn.disabled = busy;", controls_source)
+        self.assertNotIn("refreshBtn.disabled = sessionTurnBusy", controls_source)
+        self.assertIn("if (busy || sendInFlight || sessionTurnBusy) return;", send_source)
+
+    def test_turn_timer_stops_after_completion_and_marks_delivery_unknown(self) -> None:
+        render_start = HUMAN_ADAM_HTML.index("function renderTurnState(session)")
+        render_end = HUMAN_ADAM_HTML.index("function clearMessageInput()", render_start)
+        render_source = HUMAN_ADAM_HTML[render_start:render_end]
+        send_start = HUMAN_ADAM_HTML.index("async function sendMessage(event)")
+        send_end = HUMAN_ADAM_HTML.index('connectBtn.addEventListener("click", connect);', send_start)
+        send_source = HUMAN_ADAM_HTML[send_start:send_end]
+        timer_start = HUMAN_ADAM_HTML.index("function updateTurnTimer()")
+        timer_end = HUMAN_ADAM_HTML.index("function startTurnTimer(", timer_start)
+        timer_source = HUMAN_ADAM_HTML[timer_start:timer_end]
+
+        self.assertIn("} else {\n      stopTurnTimer();", render_source)
+        self.assertIn("window.clearTimeout(turnTimerId);", HUMAN_ADAM_HTML)
+        self.assertIn('latest.status === "delivery_unknown"', render_source)
+        self.assertIn(
+            "Stav doručení je nejistý · obnov stav · pokyn neposílej znovu",
+            render_source,
+        )
+        self.assertLess(
+            send_source.index("renderSession(payload.session);"),
+            send_source.index("renderTurnState(payload.session);"),
+        )
+        self.assertNotIn("api(", timer_source)
+        self.assertNotIn("loadStatus", timer_source)
 
     def test_ui_is_manual_refresh_only_and_uses_safe_dom_text(self) -> None:
         self.assertNotIn("setInterval", HUMAN_ADAM_HTML)
