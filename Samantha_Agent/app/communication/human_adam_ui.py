@@ -16,6 +16,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     main { width:min(920px,100%); min-height:100vh; margin:0 auto; background:#fff; display:flex; flex-direction:column; }
     header { position:sticky; top:0; z-index:2; padding:14px max(16px,env(safe-area-inset-left)); border-bottom:1px solid var(--line); background:rgba(255,255,255,.96); }
     .head { display:flex; align-items:center; gap:10px; }
+    .head-tools { display:flex; align-items:center; gap:10px; }
     h1 { margin:0; font-size:21px; flex:1; }
     button,.back { border:1px solid var(--line); border-radius:11px; padding:10px 13px; background:#fff; color:var(--ink); font:inherit; font-weight:700; text-decoration:none; cursor:pointer; }
     button.primary { background:var(--blue); color:#fff; border-color:var(--blue); }
@@ -46,19 +47,21 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #workChanges li { margin-bottom:8px; overflow-wrap:anywhere; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:14px; }
     .checkpoint-box { padding:12px 16px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); display:grid; gap:8px; }
     .checkpoint-box input { width:100%; border:1px solid #bac7d8; border-radius:11px; padding:10px 12px; font:inherit; }
-    @media (max-width:620px) { .back { padding:8px 10px; } .bubble { max-width:94%; } .hint { display:none; } #chat { padding-left:12px; padding-right:12px; } }
+    @media (max-width:620px) { .head { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .head h1 { text-align:center; } .head-tools { grid-column:1/-1; grid-row:2; justify-content:center; } .back { padding:8px 10px; } .bubble { max-width:94%; } .hint { display:none; } #chat { padding-left:12px; padding-right:12px; } }
   </style>
 </head>
 <body>
 <main>
   <header>
     <div class="head">
-      <a class="back" href="/">← Cockpit</a>
-      <h1>Human–Adam</h1>
-      <button id="tvbcpOpenBtn" type="button">TVBCP</button>
-      <button id="workOpenBtn" type="button">Práce</button>
-      <button id="refreshBtn" type="button">Stav</button>
       <button class="primary" id="connectBtn" type="button">Připojit</button>
+      <h1>Human–Adam</h1>
+      <div class="head-tools">
+        <button id="tvbcpOpenBtn" type="button">TVBCP</button>
+        <button id="workOpenBtn" type="button">Práce</button>
+        <button id="refreshBtn" type="button">Stav</button>
+      </div>
+      <a class="back" href="/">← Cockpit</a>
     </div>
     <div class="statusline">
       <span class="badge warn" id="connectionBadge">Odpojeno</span>

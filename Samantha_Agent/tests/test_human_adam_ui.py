@@ -50,6 +50,17 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("textContent", HUMAN_ADAM_HTML)
         self.assertIn("replaceChildren", HUMAN_ADAM_HTML)
 
+    def test_header_places_connect_left_and_cockpit_right(self) -> None:
+        connect = HUMAN_ADAM_HTML.index('id="connectBtn"')
+        title = HUMAN_ADAM_HTML.index("<h1>Human–Adam</h1>")
+        tools = HUMAN_ADAM_HTML.index('class="head-tools"', title)
+        cockpit = HUMAN_ADAM_HTML.index('<a class="back" href="/">← Cockpit</a>')
+        self.assertLess(connect, title)
+        self.assertLess(title, tools)
+        self.assertLess(tools, cockpit)
+        self.assertIn("grid-template-columns:auto minmax(0,1fr) auto", HUMAN_ADAM_HTML)
+        self.assertIn(".head-tools { grid-column:1/-1; grid-row:2; justify-content:center; }", HUMAN_ADAM_HTML)
+
     def test_ui_does_not_depend_on_legacy_delivery_paths(self) -> None:
         lowered = HUMAN_ADAM_HTML.lower()
         self.assertNotIn("watcher", lowered)
