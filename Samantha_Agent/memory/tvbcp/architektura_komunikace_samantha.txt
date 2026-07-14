@@ -517,3 +517,34 @@ testů, Python syntaxe, oba JavaScripty, shell syntaxe a `git diff --check` jsou
 Další krok: nasadit tuto implementaci terminálově naposledy jako zavedení nové
 cesty. Potom z iPhonu provést malý skutečný vývojový checkpoint a použít audit i
 `Ověřit a nasadit` až po automatický restart a navázání stejného threadu.
+
+### 2026-07-14 20:03 CEST – Bezpečný workspace snapshot před každým tahem
+
+Požadavek Míly: před každým skutečným tahem Human–Adam předat modelu aktuální
+bezpečný stav izolovaného workspace, ale nezměnit původní lidský text v historii
+ani UI a nikdy nepřidávat obsah souborů nebo private cesty.
+
+Provedená implementace:
+
+- Human–Adam service sestaví pouze allowlist pěti skalárních polí:
+  `source_head`, `workspace_head`, `workspace_relation`,
+  `uncommitted_change_count` a `local_commit_count`;
+- Git HEAD hodnoty musí odpovídat bezpečnému hexadecimálnímu tvaru, relace je z
+  pevného výčtu a počty jsou omezené nezáporné hodnoty; neplatné hodnoty se
+  nahradí `unknown` nebo nulou;
+- seznam změn, názvy souborů, jejich obsah ani private cesty se do modelového
+  snapshotu vůbec nekopírují;
+- Session Hub odděluje persistovaný `user_text` od volitelného
+  `model_input_text`: transport dostane snapshot a původní pokyn, zatímco stav
+  relace, historie a UI uchovají jen původní text Míly.
+
+Důkaz: 19 cílených testů Session Hubu a Human–Adam service prošlo. Testy
+potvrzují rozdílný transportní vstup, nezměněnou persistovanou historii, všech
+pět polí a redakci nebezpečných HEAD hodnot i cest; `git diff --check` prošel.
+
+Riziko: jde zatím o otestovanou lokální implementaci bez živého tahu přes
+skutečný app-server. Snapshot je záměrně stručný a neobsahuje názvy změněných
+souborů, takže model zná stav a počty, nikoli obsah rozpracované práce.
+
+Další krok: v panelu `Práce` zkontrolovat pět změněných souborů. Checkpoint ani
+nasazení nevytvářet bez samostatného Mílova potvrzení.

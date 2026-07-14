@@ -24,6 +24,7 @@ class FakeClient:
     def __init__(self) -> None:
         self.running = True
         self.sent = 0
+        self.sent_texts: list[str] = []
         self.started_kwargs: dict[str, object] = {}
         self.resumed_thread_id = ""
         self.__class__.instances.append(self)
@@ -38,8 +39,16 @@ class FakeClient:
         self.resumed_thread_id = thread_id
         return thread_id
 
-    def send_text(self, *, thread_id: str, client_message_id: str, **_kwargs: object) -> TurnReceipt:
+    def send_text(
+        self,
+        *,
+        thread_id: str,
+        client_message_id: str,
+        text: str,
+        **_kwargs: object,
+    ) -> TurnReceipt:
         self.sent += 1
+        self.sent_texts.append(text)
         if self.__class__.block_started is not None:
             self.__class__.block_started.set()
         if self.__class__.block_release is not None:
@@ -108,6 +117,25 @@ class CanonicalSessionHubTests(unittest.TestCase):
         self.assertTrue(first["entry"]["delivery_confirmed"])
         self.assertTrue(duplicate["duplicate_prevented"])
         self.assertEqual(FakeClient.instances[0].sent, 1)
+
+    def test_model_input_is_sent_but_never_persisted_in_user_history(self) -> None:
+        model_input = "[WORKSPACE SNAPSHOT]\nsource_head=abcdef12\n\nPůvodní text"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            hub = self.make_hub(root)
+            result = hub.send(
+                text="Původní text",
+                model_input_text=model_input,
+                client_message_id="message-0002",
+            )
+            snapshot = hub.snapshot()
+            persisted = (root / "session.json").read_text(encoding="utf-8")
+
+        self.assertEqual(FakeClient.instances[0].sent_texts, [model_input])
+        self.assertEqual(result["entry"]["user_text"], "Původní text")
+        self.assertEqual(snapshot["messages"][0]["user_text"], "Původní text")
+        self.assertNotIn("WORKSPACE SNAPSHOT", persisted)
+        self.assertNotIn("source_head", persisted)
 
     def test_empty_unmaterialized_thread_can_be_replaced_without_losing_work(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

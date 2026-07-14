@@ -32,6 +32,7 @@ class HumanAdamUiTests(unittest.TestCase):
             "checkpointBtn",
             "deployMeta",
             "deployAuditBtn",
+            "deployConfirmation",
             "deployBtn",
         ):
             self.assertIn(f'id="{element_id}"', HUMAN_ADAM_HTML)
@@ -51,6 +52,9 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Checkpoint bez pushnutí", HUMAN_ADAM_HTML)
         self.assertIn("Audit nasazení", HUMAN_ADAM_HTML)
         self.assertIn("Ověřit a nasadit", HUMAN_ADAM_HTML)
+        self.assertIn('id="deployConfirmation"', HUMAN_ADAM_HTML)
+        self.assertIn('autocomplete="off"', HUMAN_ADAM_HTML)
+        self.assertIn('autocorrect="off"', HUMAN_ADAM_HTML)
         self.assertIn("window.confirm", HUMAN_ADAM_HTML)
         self.assertIn("checkpointMessage.blur();", HUMAN_ADAM_HTML)
         self.assertIn("const checkpointTitle = checkpointMessage.value.trim();", HUMAN_ADAM_HTML)
@@ -62,6 +66,9 @@ class HumanAdamUiTests(unittest.TestCase):
         )
         self.assertIn("checkpoint_token:deploymentAudit.checkpoint_token", HUMAN_ADAM_HTML)
         self.assertIn("confirmation.trim() !== required", HUMAN_ADAM_HTML)
+        self.assertIn("const confirmation = deployConfirmation.value.trim();", HUMAN_ADAM_HTML)
+        self.assertIn('deployConfirmation.addEventListener("input"', HUMAN_ADAM_HTML)
+        self.assertNotIn("window.prompt", HUMAN_ADAM_HTML)
         self.assertIn("await waitForCockpitAndReload(Number(payload.restart.pid || previousPid));", HUMAN_ADAM_HTML)
 
     def test_ui_is_manual_refresh_only_and_uses_safe_dom_text(self) -> None:

@@ -50,6 +50,8 @@ class FakeWorkspace:
         self.dirty = False
         self.local_checkpoint_ahead = False
         self.last_checkpoint_message = ""
+        self.source_head = "a" * 40
+        self.workspace_head = "a" * 40
 
     def status(self) -> dict[str, object]:
         return {
@@ -65,7 +67,8 @@ class FakeWorkspace:
             "local_checkpoint_ahead": self.local_checkpoint_ahead,
             "local_commit_count": 1 if self.local_checkpoint_ahead else 0,
             "remotes": [],
-            "head": "abc123",
+            "source_head": self.source_head,
+            "head": ("b" * 40) if self.local_checkpoint_ahead else self.workspace_head,
         }
 
     def review(self) -> dict[str, object]:
@@ -112,9 +115,21 @@ class FakeHub:
         self.connected = True
         return self.snapshot()
 
-    def send(self, *, text: str, client_message_id: str, client_sent_at: str) -> dict[str, object]:
+    def send(
+        self,
+        *,
+        text: str,
+        client_message_id: str,
+        client_sent_at: str,
+        model_input_text: str | None = None,
+    ) -> dict[str, object]:
         self.sent.append(
-            {"text": text, "client_message_id": client_message_id, "client_sent_at": client_sent_at}
+            {
+                "text": text,
+                "client_message_id": client_message_id,
+                "client_sent_at": client_sent_at,
+                "model_input_text": model_input_text or "",
+            }
         )
         return {"ok": True, "entry": {"answer": "Hotovo", "delivery_confirmed": True}}
 
@@ -204,7 +219,52 @@ class HumanAdamServiceTests(unittest.TestCase):
 
         self.assertTrue(result["ok"])
         self.assertEqual(hub.sent[0]["text"], "Proveď kontrolu")
+        self.assertTrue(hub.sent[0]["model_input_text"].endswith("\n\nProveď kontrolu"))
         self.assertEqual(result["session"]["thread_id"], "canonical-thread")
+
+    def test_send_adds_only_allowlisted_workspace_snapshot_to_model_input(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service, _runtime, workspace, hub = self.make_service(Path(temp_dir))
+            workspace.dirty = True
+            workspace.local_checkpoint_ahead = True
+            service.connect()
+            human_adam_send_action(
+                {
+                    "message": "Původní text Míly",
+                    "client_message_id": "human-adam-message-0003",
+                    "client_sent_at": "2026-07-14T08:02:00Z",
+                },
+                service=service,
+            )
+
+        model_input = hub.sent[0]["model_input_text"]
+        self.assertIn(f"source_head={'a' * 40}", model_input)
+        self.assertIn(f"workspace_head={'b' * 40}", model_input)
+        self.assertIn("workspace_relation=local_ahead", model_input)
+        self.assertIn("uncommitted_change_count=1", model_input)
+        self.assertIn("local_commit_count=1", model_input)
+        self.assertNotIn("Samantha_Agent/test.py", model_input)
+        self.assertEqual(hub.sent[0]["text"], "Původní text Míly")
+
+    def test_workspace_snapshot_redacts_unsafe_head_values(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service, _runtime, workspace, hub = self.make_service(Path(temp_dir))
+            workspace.source_head = "/private/source-head"
+            workspace.workspace_head = "../../data/private/workspace-head"
+            service.connect()
+            human_adam_send_action(
+                {
+                    "message": "Bezpečný text",
+                    "client_message_id": "human-adam-message-0004",
+                    "client_sent_at": "2026-07-14T08:03:00Z",
+                },
+                service=service,
+            )
+
+        model_input = hub.sent[0]["model_input_text"]
+        self.assertEqual(model_input.count("=unknown"), 2)
+        self.assertNotIn("/private/", model_input)
+        self.assertNotIn("../", model_input)
 
     def test_outdated_isolated_workspace_blocks_connect_before_start(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

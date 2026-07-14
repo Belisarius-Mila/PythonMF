@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import atexit
+import re
 from datetime import datetime, timezone
 from functools import partial
 from pathlib import Path
@@ -45,6 +46,41 @@ HUMAN_ADAM_DEVELOPER_INSTRUCTIONS = REMOTE_DEVELOPER_INSTRUCTIONS.replace(
 MAX_MESSAGE_CHARS = 12_000
 MAX_TVBCP_CHARS = 500_000
 CANONICAL_TVBCP_RELATIVE_PATH = Path("memory/tvbcp/architektura_komunikace_samantha.txt")
+SAFE_GIT_HEAD_RE = re.compile(r"[0-9a-fA-F]{7,64}")
+SAFE_WORKSPACE_RELATIONS = frozenset({"aligned", "local_ahead", "source_ahead", "diverged", "unknown"})
+MAX_WORKSPACE_SNAPSHOT_COUNT = 1_000_000
+
+
+def _safe_git_head(value: object) -> str:
+    candidate = str(value or "").strip()
+    return candidate.lower() if SAFE_GIT_HEAD_RE.fullmatch(candidate) else "unknown"
+
+
+def _safe_snapshot_count(value: object) -> int:
+    try:
+        count = int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+    return min(MAX_WORKSPACE_SNAPSHOT_COUNT, max(0, count))
+
+
+def workspace_model_input(user_text: str, workspace: dict[str, Any]) -> str:
+    """Add allowlisted workspace metadata without changing persisted user text."""
+    relation = str(workspace.get("workspace_relation") or "unknown").strip()
+    if relation not in SAFE_WORKSPACE_RELATIONS:
+        relation = "unknown"
+    snapshot_lines = (
+        "[SAFE_WORKSPACE_SNAPSHOT]",
+        f"source_head={_safe_git_head(workspace.get('source_head'))}",
+        f"workspace_head={_safe_git_head(workspace.get('head'))}",
+        f"workspace_relation={relation}",
+        f"uncommitted_change_count={_safe_snapshot_count(workspace.get('change_count'))}",
+        f"local_commit_count={_safe_snapshot_count(workspace.get('local_commit_count'))}",
+        "[/SAFE_WORKSPACE_SNAPSHOT]",
+        "",
+        str(user_text),
+    )
+    return "\n".join(snapshot_lines)
 
 
 class HumanAdamService:
@@ -167,11 +203,12 @@ class HumanAdamService:
         session = self.hub.snapshot()
         if not runtime.get("reachable") or not session.get("connected"):
             raise SessionHubError("Nejdřív výslovně připoj Human–Adam.")
-        self._workspace_status()
+        workspace = self._workspace_status()
         result = self.hub.send(
             text=clean_text,
             client_message_id=client_message_id,
             client_sent_at=client_sent_at,
+            model_input_text=workspace_model_input(clean_text, workspace),
         )
         return {**result, "session": self.hub.snapshot()}
 

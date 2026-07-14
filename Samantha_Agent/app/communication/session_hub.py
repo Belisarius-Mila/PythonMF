@@ -181,11 +181,21 @@ class CanonicalSessionHub:
                 return item
         return None
 
-    def send(self, *, text: str, client_message_id: str, client_sent_at: str = "") -> dict[str, Any]:
+    def send(
+        self,
+        *,
+        text: str,
+        client_message_id: str,
+        client_sent_at: str = "",
+        model_input_text: str | None = None,
+    ) -> dict[str, Any]:
         clean_text = str(text or "").strip()
+        clean_model_input = str(model_input_text if model_input_text is not None else clean_text).strip()
         clean_id = str(client_message_id or "").strip()
         if not clean_text:
             raise SessionHubError("Nelze odeslat prázdnou zprávu.")
+        if not clean_model_input:
+            raise SessionHubError("Modelový vstup kanonické relace je prázdný.")
         if not CLIENT_MESSAGE_ID_RE.fullmatch(clean_id):
             raise SessionHubError("Zpráva nemá platný client_message_id.")
 
@@ -234,7 +244,7 @@ class CanonicalSessionHub:
             try:
                 receipt: TurnReceipt = client.send_text(
                     thread_id=str(self._state["thread_id"]),
-                    text=clean_text,
+                    text=clean_model_input,
                     client_message_id=clean_id,
                     effort=self.reasoning_effort,
                     sandbox_policy=self.sandbox_policy,

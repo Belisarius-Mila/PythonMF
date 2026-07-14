@@ -106,6 +106,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <button class="primary" id="checkpointBtn" type="button" disabled>Checkpoint bez pushnutí</button>
       <div id="deployMeta">Nasazení je dostupné až po lokálním WIP checkpointu.</div>
       <button id="deployAuditBtn" type="button" disabled>Audit nasazení</button>
+      <input id="deployConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Po auditu sem vlož potvrzovací větu" hidden disabled>
       <button class="primary" id="deployBtn" type="button" disabled>Ověřit a nasadit</button>
     </div>
   </aside>
@@ -140,6 +141,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const checkpointBtn = document.getElementById("checkpointBtn");
   const deployMeta = document.getElementById("deployMeta");
   const deployAuditBtn = document.getElementById("deployAuditBtn");
+  const deployConfirmation = document.getElementById("deployConfirmation");
   const deployBtn = document.getElementById("deployBtn");
   let busy = false;
   let lastSession = null;
@@ -301,6 +303,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     else workMeta.textContent = "Workspace je čistý a odpovídá main.";
     checkpointBtn.disabled = !payload.dirty;
     deployAuditBtn.disabled = Boolean(payload.dirty) || !payload.local_checkpoint_ahead;
+    deployConfirmation.value = "";
+    deployConfirmation.hidden = true;
+    deployConfirmation.disabled = true;
     deployBtn.disabled = true;
     if (payload.dirty) deployMeta.textContent = "Nejdřív vytvoř jeden lokální WIP checkpoint.";
     else if (payload.local_checkpoint_ahead) deployMeta.textContent = "Checkpoint čeká na read-only audit cest.";
@@ -366,8 +371,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       row.textContent = `${item.status || "?"} · ${item.path || ""}`;
       workChanges.appendChild(row);
     }
-    deployMeta.textContent = `Audit OK · ${payload.checkpoint_head} · ${payload.checkpoint_subject} · ${payload.change_count} souborů`;
-    deployBtn.disabled = false;
+    deployMeta.textContent = `Audit OK · ${payload.checkpoint_head} · ${payload.checkpoint_subject} · ${payload.change_count} souborů · vlož přesně: ${payload.confirmation_text}`;
+    deployConfirmation.value = "";
+    deployConfirmation.hidden = false;
+    deployConfirmation.disabled = false;
+    deployBtn.disabled = true;
   }
 
   async function auditDeployment() {
@@ -409,8 +417,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   async function deployCheckpoint() {
     if (deployBtn.disabled || !deploymentAudit) return;
     const required = deploymentAudit.confirmation_text || "";
-    const confirmation = window.prompt(`Plná brána může trvat několik minut. Pro nasazení napiš přesně:\n\n${required}`, "");
-    if (confirmation === null) return;
+    const confirmation = deployConfirmation.value.trim();
     if (confirmation.trim() !== required) {
       deployMeta.textContent = "Potvrzovací věta nesouhlasí; nic nebylo nasazeno.";
       return;
@@ -487,6 +494,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   workRefreshBtn.addEventListener("click", loadWork);
   checkpointBtn.addEventListener("click", createCheckpoint);
   deployAuditBtn.addEventListener("click", auditDeployment);
+  deployConfirmation.addEventListener("input", () => {
+    const required = deploymentAudit ? deploymentAudit.confirmation_text || "" : "";
+    deployBtn.disabled = !required || deployConfirmation.value.trim() !== required;
+  });
   deployBtn.addEventListener("click", deployCheckpoint);
   composer.addEventListener("submit", sendMessage);
   input.addEventListener("keydown", (event) => {
