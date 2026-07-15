@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from app.codex_appserver import AppServerError
-from app.remote_work_cell import RemoteWorkCellService, RemoteWorkspaceManager
+from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
 
 
 def git(cwd: Path, *args: str) -> str:
@@ -25,8 +25,8 @@ def make_source(root: Path) -> Path:
     source = root / "source"
     source.mkdir()
     git(source, "init", "-b", "main")
-    git(source, "config", "user.name", "Remote Cell Test")
-    git(source, "config", "user.email", "remote-cell@example.invalid")
+    git(source, "config", "user.name", "Human Adam Workspace Test")
+    git(source, "config", "user.email", "human-adam-workspace@example.invalid")
     project = source / "Samantha_Agent"
     (project / "memory").mkdir(parents=True)
     (project / "AGENTS.md").write_text("Test instructions\n", encoding="utf-8")
@@ -42,52 +42,13 @@ def make_source(root: Path) -> Path:
     return source
 
 
-class RemoteWorkspaceManagerTests(unittest.TestCase):
-    def test_service_sync_response_preserves_connected_thread_status(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-
-            class FakeWorkspace:
-                project_root = root
-
-                def status(self):
-                    return {
-                        "ok": True,
-                        "prepared": True,
-                        "dirty": False,
-                        "remotes": [],
-                        "head": "new-head",
-                    }
-
-                def sync_from_main(self, *, confirmed: bool):
-                    self.confirmed = confirmed
-                    return {**self.status(), "synced": True}
-
-            class FakeLab:
-                def status(self):
-                    return {"ok": True, "connection_state": "connected", "thread_ready": True}
-
-            workspace = FakeWorkspace()
-            service = RemoteWorkCellService(
-                workspace=workspace,
-                state_path=root / "state.json",
-                profile_getter=lambda **_kwargs: {"model": "test-model"},
-            )
-            service._lab = FakeLab()
-
-            result = service.sync_from_main(confirmed=True)
-
-            self.assertTrue(workspace.confirmed)
-            self.assertTrue(result["synced"])
-            self.assertEqual(result["connection_state"], "connected")
-            self.assertTrue(result["thread_ready"])
-
+class HumanAdamWorkspaceManagerTests(unittest.TestCase):
     def test_prepare_creates_independent_main_clone_without_private_untracked_or_remote(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source = make_source(root)
             workspace = root / "private" / "workspace"
-            manager = RemoteWorkspaceManager(
+            manager = HumanAdamWorkspaceManager(
                 source_repo=source,
                 workspace_root=workspace,
                 metadata_path=root / "private" / "meta.json",
@@ -113,7 +74,7 @@ class RemoteWorkspaceManagerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source = make_source(root)
-            manager = RemoteWorkspaceManager(
+            manager = HumanAdamWorkspaceManager(
                 source_repo=source,
                 workspace_root=root / "cell",
                 metadata_path=root / "meta.json",
@@ -144,7 +105,7 @@ class RemoteWorkspaceManagerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source = make_source(root)
-            manager = RemoteWorkspaceManager(
+            manager = HumanAdamWorkspaceManager(
                 source_repo=source,
                 workspace_root=root / "cell",
                 metadata_path=root / "meta.json",
@@ -162,7 +123,7 @@ class RemoteWorkspaceManagerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source = make_source(root)
-            manager = RemoteWorkspaceManager(
+            manager = HumanAdamWorkspaceManager(
                 source_repo=source,
                 workspace_root=root / "cell",
                 metadata_path=root / "meta.json",
@@ -194,7 +155,7 @@ class RemoteWorkspaceManagerTests(unittest.TestCase):
             root = Path(temp_dir)
             source = make_source(root)
             metadata_path = root / "meta.json"
-            manager = RemoteWorkspaceManager(
+            manager = HumanAdamWorkspaceManager(
                 source_repo=source,
                 workspace_root=root / "cell",
                 metadata_path=metadata_path,
@@ -215,7 +176,7 @@ class RemoteWorkspaceManagerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source = make_source(root)
-            manager = RemoteWorkspaceManager(
+            manager = HumanAdamWorkspaceManager(
                 source_repo=source,
                 workspace_root=root / "cell",
                 metadata_path=root / "meta.json",
@@ -238,7 +199,7 @@ class RemoteWorkspaceManagerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source = make_source(root)
-            manager = RemoteWorkspaceManager(
+            manager = HumanAdamWorkspaceManager(
                 source_repo=source,
                 workspace_root=root / "cell",
                 metadata_path=root / "meta.json",
@@ -263,7 +224,7 @@ class RemoteWorkspaceManagerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source = make_source(root)
-            manager = RemoteWorkspaceManager(
+            manager = HumanAdamWorkspaceManager(
                 source_repo=source,
                 workspace_root=root / "cell",
                 metadata_path=root / "meta.json",
@@ -282,7 +243,7 @@ class RemoteWorkspaceManagerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source = make_source(root)
-            manager = RemoteWorkspaceManager(
+            manager = HumanAdamWorkspaceManager(
                 source_repo=source,
                 workspace_root=root / "cell",
                 metadata_path=root / "meta.json",
@@ -307,7 +268,7 @@ class RemoteWorkspaceManagerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source = make_source(root)
-            manager = RemoteWorkspaceManager(
+            manager = HumanAdamWorkspaceManager(
                 source_repo=source,
                 workspace_root=root / "cell",
                 metadata_path=root / "meta.json",
@@ -333,7 +294,7 @@ class RemoteWorkspaceManagerTests(unittest.TestCase):
             workspace.mkdir()
             sentinel = workspace / "keep.txt"
             sentinel.write_text("keep\n", encoding="utf-8")
-            manager = RemoteWorkspaceManager(
+            manager = HumanAdamWorkspaceManager(
                 source_repo=source,
                 workspace_root=workspace,
                 metadata_path=root / "meta.json",

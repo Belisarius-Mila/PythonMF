@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from app.remote_work_cell import RemoteWorkspaceManager
+from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
 from app.workflows.commands import WORKFLOW_COMMANDS
 from scripts import human_adam_takeover as takeover_module
 from scripts.human_adam_takeover import (
@@ -15,10 +15,10 @@ from scripts.human_adam_takeover import (
     apply_takeover,
     build_takeover_plan,
 )
-from tests.test_remote_work_cell import git, make_source
+from tests.test_human_adam_workspace import git, make_source
 
 
-def prepare_with_origin(root: Path) -> tuple[Path, RemoteWorkspaceManager]:
+def prepare_with_origin(root: Path) -> tuple[Path, HumanAdamWorkspaceManager]:
     source = make_source(root)
     remote = root / "origin.git"
     subprocess.run(
@@ -29,7 +29,7 @@ def prepare_with_origin(root: Path) -> tuple[Path, RemoteWorkspaceManager]:
     )
     git(source, "remote", "add", "origin", str(remote))
     git(source, "push", "-u", "origin", "main")
-    manager = RemoteWorkspaceManager(
+    manager = HumanAdamWorkspaceManager(
         source_repo=source,
         workspace_root=root / "cell",
         metadata_path=root / "meta.json",

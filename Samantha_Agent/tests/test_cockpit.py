@@ -223,7 +223,7 @@ class CockpitTests(unittest.TestCase):
     def test_human_adam_deploy_route_persists_restart_boundary_and_result(self) -> None:
         source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
         route_start = source.index('if parsed.path == "/api/human-adam/deploy":')
-        route_end = source.index('if parsed.path == "/api/appserver-lab/thread/new":', route_start)
+        route_end = source.index('if parsed.path == "/api/janicka/chat":', route_start)
         route_source = source[route_start:route_end]
         running = route_source.index('outcome="running"')
         restart = route_source.index("start_cockpit_restart_action(")
@@ -246,263 +246,23 @@ class CockpitTests(unittest.TestCase):
 
         self.assertEqual([], missing)
 
-    def test_appserver_lab_ui_is_isolated_and_shows_delivery_timestamps(self) -> None:
-        required_ids = (
-            "appserverLabOpenBtn",
-            "appserverLabModal",
-            "appserverLabNewBtn",
-            "appserverLabThreadSelect",
-            "appserverLabNewLabel",
-            "appserverLabResumeBtn",
-            "appserverLabDisconnectBtn",
-            "appserverLabRestartBtn",
-            "appserverLabLifecycle",
-            "appserverLabCapsuleObjective",
-            "appserverLabCapsuleState",
-            "appserverLabCapsuleNext",
-            "appserverLabCapsuleConstraints",
-            "appserverLabCapsuleSaveBtn",
-            "appserverLabInput",
-            "appserverLabSendBtn",
-        )
-        for element_id in required_ids:
-            self.assertIn(f'id="{element_id}"', COCKPIT_HTML)
-        self.assertIn("Kliknutí v zařízení", COCKPIT_HTML)
-        self.assertIn("Přijato Cockpitem", COCKPIT_HTML)
-        self.assertIn("Přijato app-serverem", COCKPIT_HTML)
-        self.assertIn("Odpověď dokončena", COCKPIT_HTML)
-        self.assertIn("Nepoužívá VoiceBridge, watcher, TTY ani screen doručování", COCKPIT_HTML)
-        self.assertIn("Lifecycle důkazy", COCKPIT_HTML)
-        self.assertIn("App-server restartován", COCKPIT_HTML)
-        self.assertIn("Context Capsule", COCKPIT_HTML)
-        self.assertIn("restart není potřeba", COCKPIT_HTML)
-        self.assertIn("Context Capsule: revize", COCKPIT_HTML)
-        self.assertIn("Vybrán jiný thread", COCKPIT_HTML)
-        self.assertIn("generation ${Number(event.previous_generation", COCKPIT_HTML)
-        self.assertIn("Uložit do TVBCP", COCKPIT_HTML)
-        self.assertIn("Uloženo v TVBCP", COCKPIT_HTML)
-        self.assertIn("/api/appserver-lab/tvbcp/append", COCKPIT_HTML)
-        self.assertIn("saveAppserverLabMessageToTvbcp", COCKPIT_HTML)
-
-    def test_appserver_lab_actions_delegate_without_voice_bridge(self) -> None:
-        calls: list[tuple[str, object]] = []
-
-        class FakeService:
-            def status(self):
-                calls.append(("status", None))
-                return {"ok": True, "thread_ready": False}
-
-            def new_thread(self, **kwargs):
-                calls.append(("new", kwargs))
-                return {"ok": True, "thread_id": "thread-1"}
-
-            def select_thread(self, **kwargs):
-                calls.append(("select", kwargs))
-                return {"ok": True}
-
-            def update_capsule(self, **kwargs):
-                calls.append(("capsule", kwargs))
-                return {"ok": True}
-
-            def resume(self):
-                calls.append(("resume", None))
-                return {"ok": True}
-
-            def disconnect(self):
-                calls.append(("disconnect", None))
-                return {"ok": True}
-
-            def restart(self):
-                calls.append(("restart", None))
-                return {"ok": True}
-
-            def send(self, **kwargs):
-                calls.append(("send", kwargs))
-                return {"ok": True, "status": "completed"}
-
-            def save_message_to_tvbcp(self, **kwargs):
-                calls.append(("tvbcp", kwargs))
-                return {"ok": True, "status": "saved_to_tvbcp"}
-
-        service = FakeService()
-        self.assertTrue(cockpit_module.appserver_lab_status_action(service=service)["ok"])
-        self.assertTrue(cockpit_module.appserver_lab_new_thread_action({"label": "Test A"}, service=service)["ok"])
-        self.assertTrue(
-            cockpit_module.appserver_lab_select_thread_action(
-                {"registry_id": "registry-1"}, service=service
-            )["ok"]
-        )
-        self.assertTrue(
-            cockpit_module.appserver_lab_capsule_update_action(
-                {
-                    "registry_id": "registry-1",
-                    "objective": "Cíl",
-                    "current_state": "Stav",
-                    "next_step": "Krok",
-                    "constraints": ["Omezení"],
-                },
-                service=service,
-            )["ok"]
-        )
-        self.assertTrue(cockpit_module.appserver_lab_resume_action(service=service)["ok"])
-        self.assertTrue(cockpit_module.appserver_lab_disconnect_action(service=service)["ok"])
-        self.assertTrue(cockpit_module.appserver_lab_restart_action(service=service)["ok"])
-        sent = cockpit_module.appserver_lab_send_action(
-            {
-                "message": "Test",
-                "client_message_id": "appserver-lab-abcdefgh",
-                "client_sent_at": "2026-07-12T20:00:00Z",
-            },
-            service=service,
-        )
-        saved = cockpit_module.appserver_lab_tvbcp_append_action(
-            {"client_message_id": "appserver-lab-abcdefgh"},
-            service=service,
-        )
-
-        self.assertTrue(sent["ok"])
-        self.assertTrue(saved["ok"])
-        self.assertEqual(
-            [item[0] for item in calls],
-            ["status", "new", "select", "capsule", "resume", "disconnect", "restart", "send", "tvbcp"],
-        )
-        self.assertEqual(calls[1][1]["label"], "Test A")
-        self.assertEqual(calls[2][1]["registry_id"], "registry-1")
-        self.assertEqual(calls[-1][1]["client_message_id"], "appserver-lab-abcdefgh")
-
-    def test_remote_work_cell_ui_exposes_write_profile_checkpoint_and_tvbcp(self) -> None:
-        required_ids = (
-            "remoteWorkOpenBtn",
-            "remoteWorkModal",
-            "remoteWorkPrepareBtn",
-            "remoteWorkSyncBtn",
-            "remoteWorkNewBtn",
-            "remoteWorkResumeBtn",
-            "remoteWorkRestartBtn",
-            "remoteWorkProfile",
-            "remoteWorkWorkspaceStatus",
-            "remoteWorkChanges",
-            "remoteWorkCapsuleObjective",
-            "remoteWorkCapsuleState",
-            "remoteWorkCapsuleNext",
-            "remoteWorkCapsuleConstraints",
-            "remoteWorkCapsuleSaveBtn",
-            "remoteWorkInput",
-            "remoteWorkSendBtn",
-            "remoteWorkCheckpointBtn",
-        )
-        for element_id in required_ids:
-            self.assertIn(f'id="{element_id}"', COCKPIT_HTML)
-        self.assertIn("reasoning high", COCKPIT_HTML)
-        self.assertIn("workspace-write", COCKPIT_HTML)
-        self.assertIn("bez Git remote", COCKPIT_HTML)
-        self.assertIn("/api/appserver-remote/status", COCKPIT_HTML)
-        self.assertIn("/api/appserver-remote/sync", COCKPIT_HTML)
-        self.assertIn("/api/appserver-remote/send", COCKPIT_HTML)
-        self.assertIn("/api/appserver-remote/checkpoint", COCKPIT_HTML)
-        self.assertIn("/api/appserver-remote/tvbcp/append", COCKPIT_HTML)
-        self.assertIn("saveRemoteWorkMessageToTvbcp", COCKPIT_HTML)
-        self.assertIn(
-            "remoteWorkSendBtn.disabled = !data.thread_ready || Boolean(workspace.sync_available)",
-            COCKPIT_HTML,
-        )
-        self.assertIn("let remoteWorkStatusRefreshPromise = null", COCKPIT_HTML)
-        self.assertIn(
-            'fetchJsonWithTimeout("/api/appserver-remote/status", 12000)',
-            COCKPIT_HTML,
-        )
-
-    def test_remote_work_cell_actions_delegate_and_require_prepare_confirmation(self) -> None:
-        calls: list[tuple[str, object]] = []
-
-        class FakeRemoteService:
-            def status(self):
-                calls.append(("status", None))
-                return {"ok": True}
-
-            def prepare(self):
-                calls.append(("prepare", None))
-                return {"ok": True}
-
-            def sync_from_main(self, **kwargs):
-                calls.append(("sync", kwargs))
-                return {"ok": True}
-
-            def new_thread(self, **kwargs):
-                calls.append(("new", kwargs))
-                return {"ok": True}
-
-            def resume(self):
-                calls.append(("resume", None))
-                return {"ok": True}
-
-            def restart(self):
-                calls.append(("restart", None))
-                return {"ok": True}
-
-            def update_capsule(self, **kwargs):
-                calls.append(("capsule", kwargs))
-                return {"ok": True}
-
-            def send(self, **kwargs):
-                calls.append(("send", kwargs))
-                return {"ok": True}
-
-            def save_message_to_tvbcp(self, **kwargs):
-                calls.append(("tvbcp", kwargs))
-                return {"ok": True}
-
-            def checkpoint(self, **kwargs):
-                calls.append(("checkpoint", kwargs))
-                return {"ok": True}
-
-        service = FakeRemoteService()
-        denied = cockpit_module.remote_work_cell_prepare_action({"confirmed": False}, service=service)
-        self.assertFalse(denied["ok"])
-        self.assertTrue(cockpit_module.remote_work_cell_status_action(service=service)["ok"])
-        self.assertTrue(cockpit_module.remote_work_cell_prepare_action({"confirmed": True}, service=service)["ok"])
-        self.assertFalse(cockpit_module.remote_work_cell_sync_action({"confirmed": False}, service=service)["ok"])
-        self.assertTrue(cockpit_module.remote_work_cell_sync_action({"confirmed": True}, service=service)["ok"])
-        self.assertTrue(cockpit_module.remote_work_cell_new_thread_action({"label": "Práce"}, service=service)["ok"])
-        self.assertTrue(cockpit_module.remote_work_cell_resume_action(service=service)["ok"])
-        self.assertTrue(cockpit_module.remote_work_cell_restart_action(service=service)["ok"])
-        self.assertTrue(
-            cockpit_module.remote_work_cell_capsule_update_action(
-                {
-                    "registry_id": "registry-1",
-                    "objective": "Cíl",
-                    "current_state": "Stav",
-                    "next_step": "Krok",
-                    "constraints": ["Bez pushnutí"],
-                },
-                service=service,
-            )["ok"]
-        )
-        self.assertTrue(
-            cockpit_module.remote_work_cell_send_action(
-                {
-                    "message": "Uprav test",
-                    "client_message_id": "appserver-lab-remote001",
-                    "client_sent_at": "2026-07-13T10:00:00Z",
-                },
-                service=service,
-            )["ok"]
-        )
-        self.assertTrue(
-            cockpit_module.remote_work_cell_tvbcp_append_action(
-                {"client_message_id": "appserver-lab-remote001"}, service=service
-            )["ok"]
-        )
-        self.assertTrue(
-            cockpit_module.remote_work_cell_checkpoint_action(
-                {"confirmed": True, "message": "WIP"}, service=service
-            )["ok"]
-        )
-        self.assertEqual(
-            [item[0] for item in calls],
-            ["status", "prepare", "sync", "new", "resume", "restart", "capsule", "send", "tvbcp", "checkpoint"],
-        )
-        self.assertEqual(calls[-1][1], {"confirmed": True, "message": "WIP"})
+    def test_retired_appserver_panels_and_routes_are_absent(self) -> None:
+        source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
+        for retired in (
+            "App-server LAB",
+            "Adam Remote",
+            "appserverLab",
+            "remoteWork",
+            "/api/appserver-lab",
+            "/api/appserver-remote",
+            "appserver_lab_",
+            "remote_work_cell_",
+        ):
+            self.assertNotIn(retired, source)
+            self.assertNotIn(retired, COCKPIT_HTML)
+        registered_paths = {item["path"] for item in COCKPIT_POST_ACTIONS}
+        self.assertFalse(any(path.startswith("/api/appserver-lab") for path in registered_paths))
+        self.assertFalse(any(path.startswith("/api/appserver-remote") for path in registered_paths))
 
     def test_library_archive_url_action_passes_url_category_and_tags(self) -> None:
         with patch("app.cockpit.archive_url") as archive_mock:

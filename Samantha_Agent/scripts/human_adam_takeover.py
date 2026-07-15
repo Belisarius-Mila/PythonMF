@@ -16,7 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.codex_appserver import AppServerError
-from app.remote_work_cell import RemoteWorkspaceManager
+from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
 
 
 CONFIRMATION_TEXT = "POTVRZUJI PREVZETI HUMAN-ADAM WIP DO MAIN"
@@ -91,8 +91,8 @@ def refresh_origin_main(source_repo: Path) -> str:
         raise TakeoverError("Nelze obnovit aktuální stav origin/main z GitHubu.") from exc
 
 
-def build_takeover_plan(*, workspace: RemoteWorkspaceManager | None = None) -> TakeoverPlan:
-    manager = workspace or RemoteWorkspaceManager()
+def build_takeover_plan(*, workspace: HumanAdamWorkspaceManager | None = None) -> TakeoverPlan:
+    manager = workspace or HumanAdamWorkspaceManager()
     source_repo = manager.source_repo
     status = manager.status()
     if status.get("workspace_relation") != "local_ahead":
@@ -155,12 +155,12 @@ def apply_takeover(
     *,
     confirmation: str,
     push: bool,
-    workspace: RemoteWorkspaceManager | None = None,
+    workspace: HumanAdamWorkspaceManager | None = None,
     progress_callback: Callable[[str, str], None] | None = None,
 ) -> dict[str, Any]:
     if str(confirmation or "").strip() != CONFIRMATION_TEXT:
         raise TakeoverError(f"Chybí přesná potvrzovací věta: {CONFIRMATION_TEXT}")
-    manager = workspace or RemoteWorkspaceManager()
+    manager = workspace or HumanAdamWorkspaceManager()
     plan = build_takeover_plan(workspace=manager)
     source_repo = manager.source_repo
 

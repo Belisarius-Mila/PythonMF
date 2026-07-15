@@ -1,4 +1,4 @@
-"""Fail-closed Codex app-server client shared by LAB and reliability tests."""
+"""Fail-closed Codex app-server client shared by Samantha communication services."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ import json
 import os
 import queue
 import re
+import shutil
 import subprocess
 import threading
 import time
@@ -16,8 +17,9 @@ from pathlib import Path
 from typing import Any, Callable
 
 
-LAB_DEVELOPER_INSTRUCTIONS = (
-    "Jsi izolovaný read-only Adam App-server LAB. Odpovídej česky, stručně a věcně. "
+DEFAULT_CODEX_BIN = os.environ.get("CODEX_BIN") or shutil.which("codex") or "/usr/local/bin/codex"
+DEFAULT_APP_SERVER_DEVELOPER_INSTRUCTIONS = (
+    "Jsi izolovaný read-only Adam pro diagnostiku app-serveru. Odpovídej česky, stručně a věcně. "
     "Nikdy nevolej nástroje, nečti soubory, neměň data a neprováděj žádné akce. "
     "Jde pouze o test spolehlivého textového chatu a návaznosti konverzace."
 )
@@ -365,7 +367,7 @@ class CodexAppServerClient:
         *,
         cwd: Path,
         ephemeral: bool = False,
-        developer_instructions: str = LAB_DEVELOPER_INSTRUCTIONS,
+        developer_instructions: str = DEFAULT_APP_SERVER_DEVELOPER_INSTRUCTIONS,
         sandbox: str = "read-only",
         approval_policy: str = "never",
         model: str | None = None,
@@ -387,7 +389,7 @@ class CodexAppServerClient:
         thread_id: str,
         *,
         cwd: Path,
-        developer_instructions: str = LAB_DEVELOPER_INSTRUCTIONS,
+        developer_instructions: str = DEFAULT_APP_SERVER_DEVELOPER_INSTRUCTIONS,
         sandbox: str = "read-only",
         approval_policy: str = "never",
         model: str | None = None,
@@ -438,7 +440,7 @@ class CodexAppServerClient:
         clean_text = str(text or "").strip()
         if not clean_text:
             raise AppServerContractError("Nelze odeslat prázdnou zprávu.")
-        message_id = str(client_message_id or f"appserver-lab-{uuid.uuid4().hex}").strip()
+        message_id = str(client_message_id or f"appserver-client-{uuid.uuid4().hex}").strip()
         requested_at = utc_now()
         started_monotonic = time.monotonic()
         params: dict[str, Any] = {

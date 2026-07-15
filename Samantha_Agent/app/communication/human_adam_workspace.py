@@ -1,8 +1,7 @@
-"""Isolated, local workspace for a write-capable Codex app-server thread."""
+"""Isolated, local Git workspace used by the canonical Human–Adam session."""
 
 from __future__ import annotations
 
-import atexit
 import json
 import subprocess
 import threading
@@ -10,27 +9,26 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
-from app.codex_appserver import AppServerError, CodexAppServerClient
-from app.codex_appserver_lab import AppServerLabService, DEFAULT_CODEX_BIN
+from app.codex_appserver import AppServerError, CodexAppServerClient, DEFAULT_CODEX_BIN
 from app.file_persistence import atomic_write_json
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SOURCE_REPO_ROOT = PROJECT_ROOT.parent
-DEFAULT_REMOTE_ROOT = PROJECT_ROOT / "data" / "private" / "appserver_remote"
-DEFAULT_WORKSPACE_ROOT = DEFAULT_REMOTE_ROOT / "workspace"
-DEFAULT_REMOTE_STATE_PATH = DEFAULT_REMOTE_ROOT / "state.json"
-DEFAULT_WORKSPACE_META_PATH = DEFAULT_REMOTE_ROOT / "workspace_meta.json"
-REMOTE_REASONING_EFFORT = "high"
-REMOTE_SANDBOX_MODE = "workspace-write"
-REMOTE_SANDBOX_POLICY: dict[str, Any] = {
+DEFAULT_HUMAN_ADAM_ROOT = PROJECT_ROOT / "data" / "private" / "appserver_remote"
+DEFAULT_HUMAN_ADAM_WORKSPACE_ROOT = DEFAULT_HUMAN_ADAM_ROOT / "workspace"
+DEFAULT_HUMAN_ADAM_WORKSPACE_META_PATH = DEFAULT_HUMAN_ADAM_ROOT / "workspace_meta.json"
+HUMAN_ADAM_REASONING_EFFORT = "high"
+HUMAN_ADAM_SANDBOX_MODE = "workspace-write"
+HUMAN_ADAM_SANDBOX_POLICY: dict[str, Any] = {
     "type": "workspaceWrite",
     "networkAccess": False,
     "writableRoots": [],
 }
-REMOTE_APPROVAL_POLICY = "never"
-REMOTE_DEVELOPER_INSTRUCTIONS = (
-    "Jsi Adam Remote, plnohodnotny projektovy spolupracovnik Mily v izolovane lokalni kopii "
+HUMAN_ADAM_APPROVAL_POLICY = "never"
+HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS = (
+    "Jsi Adam v kanonické relaci Human–Adam, plnohodnotny projektovy spolupracovnik Mily "
+    "v izolovane lokalni kopii "
     "repozitare PythonMF. Odpovidej cesky, Mílovi tykej a pracuj vecne. Pred dulezitou praci "
     "si precti AGENTS.md, Samantha_Agent/AGENTS.md, Samantha_Agent/memory/MEMORY_INDEX.md a "
     "relevantni handoff. Smis cist a upravovat pouze tuto izolovanou pracovní kopii, pouzivat "
@@ -105,7 +103,7 @@ def _status_rows(repo: Path) -> list[dict[str, str]]:
     completed = _run_git(repo, ["status", "--porcelain=v1", "--untracked-files=all"])
     if completed.returncode != 0:
         detail = (completed.stderr or completed.stdout).strip()
-        raise AppServerError(detail or "Git status Remote Work Cell selhal.")
+        raise AppServerError(detail or "Git status izolovaného Human–Adam workspace selhal.")
     output = completed.stdout.rstrip("\r\n")
     rows: list[dict[str, str]] = []
     for raw in output.splitlines():
@@ -115,15 +113,15 @@ def _status_rows(repo: Path) -> list[dict[str, str]]:
     return rows
 
 
-class RemoteWorkspaceManager:
-    """Create and inspect one non-destructive clone used only by Adam Remote."""
+class HumanAdamWorkspaceManager:
+    """Create and inspect the non-destructive clone used by Human–Adam."""
 
     def __init__(
         self,
         *,
         source_repo: Path = SOURCE_REPO_ROOT,
-        workspace_root: Path = DEFAULT_WORKSPACE_ROOT,
-        metadata_path: Path = DEFAULT_WORKSPACE_META_PATH,
+        workspace_root: Path = DEFAULT_HUMAN_ADAM_WORKSPACE_ROOT,
+        metadata_path: Path = DEFAULT_HUMAN_ADAM_WORKSPACE_META_PATH,
         project_dir_name: str = PROJECT_ROOT.name,
     ):
         self.source_repo = Path(source_repo).resolve()
@@ -152,7 +150,7 @@ class RemoteWorkspaceManager:
                 return {
                     "ok": True,
                     "prepared": False,
-                    "workspace_label": "Adam Remote – izolovaná lokální kopie",
+                    "workspace_label": "Human–Adam – izolovaná lokální kopie",
                     "source_branch": source_branch,
                     "source_head": source_head,
                     "source_pending_changes": source_pending,
@@ -164,14 +162,14 @@ class RemoteWorkspaceManager:
                 return {
                     "ok": False,
                     "prepared": False,
-                    "workspace_label": "Adam Remote – neúplná kopie",
+                    "workspace_label": "Human–Adam – neúplná kopie",
                     "source_branch": source_branch,
                     "source_head": source_head,
                     "source_pending_changes": source_pending,
                     "dirty": False,
                     "changes": [],
                     "remotes": [],
-                    "message": "Cílová složka existuje, ale není platnou Remote Work Cell; nic nepřepisuji.",
+                    "message": "Cílová složka existuje, ale není platným Human–Adam workspace; nic nepřepisuji.",
                 }
             changes = _status_rows(self.workspace_root)
             head = _git_output(self.workspace_root, ["rev-parse", "HEAD"])
@@ -204,19 +202,19 @@ class RemoteWorkspaceManager:
             source_update_available = relation == "source_ahead"
             local_checkpoint_ahead = relation == "local_ahead"
             if remotes:
-                message = "Remote Work Cell má neočekávaný Git remote; pracovní turny jsou zablokované."
+                message = "Human–Adam workspace má neočekávaný Git remote; pracovní turny jsou zablokované."
             elif relation == "source_ahead":
-                message = "Remote Work Cell je čistá, ale její základ čeká na aktualizaci z main."
+                message = "Human–Adam workspace je čistý, ale jeho základ čeká na aktualizaci z main."
             elif relation == "local_ahead":
-                message = "Remote Work Cell má lokální WIP checkpoint bez pushnutí."
+                message = "Human–Adam workspace má lokální WIP checkpoint bez pushnutí."
             elif relation == "diverged":
-                message = "Remote Work Cell a main se rozešly; automatický sync je zablokovaný."
+                message = "Human–Adam workspace a main se rozešly; automatický sync je zablokovaný."
             else:
-                message = "Remote Work Cell je připravená, aktuální a nemá Git remote."
+                message = "Human–Adam workspace je připravený, aktuální a nemá Git remote."
             return {
                 "ok": not remotes,
                 "prepared": True,
-                "workspace_label": "Adam Remote – izolovaná lokální kopie",
+                "workspace_label": "Human–Adam – izolovaná lokální kopie",
                 "source_branch": source_branch,
                 "source_head": source_head,
                 "source_pending_changes": source_pending,
@@ -266,10 +264,10 @@ class RemoteWorkspaceManager:
             if self.workspace_root.exists():
                 if existing.get("prepared") and existing.get("ok"):
                     return {**existing, "created": False}
-                raise AppServerError(str(existing.get("message") or "Remote Work Cell nelze bezpečně použít."))
+                raise AppServerError(str(existing.get("message") or "Human–Adam workspace nelze bezpečně použít."))
             source_branch = _git_output(self.source_repo, ["branch", "--show-current"])
             if source_branch != "main":
-                raise AppServerError("Remote Work Cell lze připravit pouze z hlavní větve main.")
+                raise AppServerError("Human–Adam workspace lze připravit pouze z hlavní větve main.")
             base_head = _git_output(self.source_repo, ["rev-parse", "HEAD"])
             self.workspace_root.parent.mkdir(parents=True, exist_ok=True)
             completed = subprocess.run(
@@ -315,11 +313,11 @@ class RemoteWorkspaceManager:
                 raise AppServerError("Aktualizace z main vyžaduje výslovné potvrzení v Cockpitu.")
             current = self.status()
             if not current.get("prepared") or not current.get("ok"):
-                raise AppServerError("Remote Work Cell není v bezpečném stavu pro aktualizaci.")
+                raise AppServerError("Human–Adam workspace není v bezpečném stavu pro aktualizaci.")
             if current.get("remotes"):
-                raise AppServerError("Remote Work Cell má Git remote; aktualizace je zablokovaná.")
+                raise AppServerError("Human–Adam workspace má Git remote; aktualizace je zablokovaná.")
             if current.get("branch") != "main":
-                raise AppServerError("Remote Work Cell lze aktualizovat pouze na větvi main.")
+                raise AppServerError("Human–Adam workspace lze aktualizovat pouze na větvi main.")
             if current.get("dirty"):
                 raise AppServerError("Nejdřív zkontroluj a checkpointuj rozpracované změny; workspace není čistý.")
             if current.get("source_branch") != "main":
@@ -392,7 +390,7 @@ class RemoteWorkspaceManager:
                 not self._source_sync_path_allowed(path, fetched_head=fetched_head)
                 for path in incoming_paths
             ):
-                raise AppServerError("Main obsahuje pro Remote Work Cell blokovaný private, env nebo mediální soubor.")
+                raise AppServerError("Main obsahuje pro Human–Adam blokovaný private, env nebo mediální soubor.")
 
             _git_output(self.workspace_root, ["diff", "--check", "HEAD", "FETCH_HEAD"])
             _git_output(
@@ -460,7 +458,7 @@ class RemoteWorkspaceManager:
         with self._lock:
             current = self.status()
             if not current.get("prepared") or not current.get("ok"):
-                raise AppServerError("Remote Work Cell není v bezpečném stavu pro kontrolu změn.")
+                raise AppServerError("Human–Adam workspace není v bezpečném stavu pro kontrolu změn.")
             checkpoint_changes: list[dict[str, str]] = []
             if current.get("local_checkpoint_ahead"):
                 base_head = str(current.get("base_head") or "")
@@ -497,7 +495,7 @@ class RemoteWorkspaceManager:
                 raise AppServerError("Checkpoint vyžaduje výslovné potvrzení v Cockpitu.")
             current = self.status()
             if not current.get("prepared") or not current.get("ok"):
-                raise AppServerError("Remote Work Cell není v bezpečném stavu pro checkpoint.")
+                raise AppServerError("Human–Adam workspace není v bezpečném stavu pro checkpoint.")
             changes = list(current.get("changes") or [])
             if not changes:
                 return {**current, "checkpoint_created": False, "message": "Není co checkpointovat."}
@@ -510,7 +508,7 @@ class RemoteWorkspaceManager:
             staged_paths = [item for item in staged.splitlines() if item]
             if not staged_paths or any(self._blocked_checkpoint_path(item) for item in staged_paths):
                 raise AppServerError("Checkpoint safety check odmítl staged obsah.")
-            safe_message = " ".join(str(message or "").split())[:120] or "WIP Remote Adam checkpoint"
+            safe_message = " ".join(str(message or "").split())[:120] or "WIP Human-Adam checkpoint"
             _git_output(self.workspace_root, ["commit", "-m", safe_message], timeout=60)
             result = self.status()
             return {
@@ -521,7 +519,7 @@ class RemoteWorkspaceManager:
             }
 
 
-def read_remote_runtime_profile(
+def read_human_adam_runtime_profile(
     *,
     cwd: Path,
     codex_binary: str = DEFAULT_CODEX_BIN,
@@ -546,166 +544,18 @@ def read_remote_runtime_profile(
             for item in model.get("supportedReasoningEfforts") or []
             if isinstance(item, dict)
         ]
-        if REMOTE_REASONING_EFFORT not in efforts:
+        if HUMAN_ADAM_REASONING_EFFORT not in efforts:
             raise AppServerError("Efektivní Codex model nepodporuje požadovaný reasoning high.")
         return {
             "model": model_name,
             "display_name": str(model.get("displayName") or model_name),
             "configured_reasoning_effort": str(config.get("model_reasoning_effort") or ""),
-            "reasoning_effort": REMOTE_REASONING_EFFORT,
+            "reasoning_effort": HUMAN_ADAM_REASONING_EFFORT,
             "supported_reasoning_efforts": efforts,
-            "sandbox_mode": REMOTE_SANDBOX_MODE,
-            "sandbox_policy": dict(REMOTE_SANDBOX_POLICY),
-            "approval_policy": REMOTE_APPROVAL_POLICY,
+            "sandbox_mode": HUMAN_ADAM_SANDBOX_MODE,
+            "sandbox_policy": dict(HUMAN_ADAM_SANDBOX_POLICY),
+            "approval_policy": HUMAN_ADAM_APPROVAL_POLICY,
             "network_access": False,
         }
     finally:
         client.close()
-
-
-class RemoteWorkCellService:
-    """Facade joining the isolated clone and a write-capable app-server thread."""
-
-    def __init__(
-        self,
-        *,
-        workspace: RemoteWorkspaceManager | None = None,
-        state_path: Path = DEFAULT_REMOTE_STATE_PATH,
-        codex_binary: str = DEFAULT_CODEX_BIN,
-        client_factory: Callable[..., CodexAppServerClient] = CodexAppServerClient,
-        profile_getter: Callable[..., dict[str, Any]] = read_remote_runtime_profile,
-    ):
-        self.workspace = workspace or RemoteWorkspaceManager()
-        self.state_path = Path(state_path)
-        self.codex_binary = codex_binary
-        self.client_factory = client_factory
-        self.profile_getter = profile_getter
-        self._profile: dict[str, Any] | None = None
-        self._lab: AppServerLabService | None = None
-        self._lock = threading.RLock()
-
-    def _runtime_profile(self) -> dict[str, Any]:
-        if self._profile is None:
-            self._profile = self.profile_getter(
-                cwd=self.workspace.project_root,
-                codex_binary=self.codex_binary,
-                client_factory=self.client_factory,
-            )
-        return dict(self._profile)
-
-    def _service(self) -> AppServerLabService:
-        workspace = self.workspace.status()
-        if not workspace.get("prepared") or not workspace.get("ok") or workspace.get("remotes"):
-            raise AppServerError("Remote Work Cell není připravená nebo nemá bezpečně odstraněný Git remote.")
-        if self._lab is None:
-            profile = self._runtime_profile()
-            self._lab = AppServerLabService(
-                state_path=self.state_path,
-                project_root=self.workspace.project_root,
-                client_factory=self.client_factory,
-                codex_binary=self.codex_binary,
-                developer_instructions=REMOTE_DEVELOPER_INSTRUCTIONS,
-                sandbox_mode=REMOTE_SANDBOX_MODE,
-                sandbox_policy=REMOTE_SANDBOX_POLICY,
-                approval_policy=REMOTE_APPROVAL_POLICY,
-                reasoning_effort=REMOTE_REASONING_EFFORT,
-                model=str(profile["model"]),
-                default_role="Adam Remote",
-            )
-        return self._lab
-
-    def _merge_status(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
-        workspace = self.workspace.status()
-        result = dict(payload or {})
-        result.update(
-            {
-                "ok": bool(result.get("ok", True)) and bool(workspace.get("ok", True)),
-                "remote_work_cell": True,
-                "prepared": bool(workspace.get("prepared")),
-                "workspace": workspace,
-            }
-        )
-        if workspace.get("prepared") and workspace.get("ok"):
-            result["runtime_profile"] = self._runtime_profile()
-        return result
-
-    def status(self) -> dict[str, Any]:
-        with self._lock:
-            workspace = self.workspace.status()
-            if not workspace.get("prepared") or not workspace.get("ok"):
-                return self._merge_status(
-                    {
-                        "ok": bool(workspace.get("ok", True)),
-                        "connection_state": "disconnected",
-                        "thread_ready": False,
-                        "active_thread": None,
-                        "threads": [],
-                        "messages": [],
-                        "lifecycle_events": [],
-                        "message": workspace.get("message") or "Remote Work Cell zatím není připravená.",
-                    }
-                )
-            return self._merge_status(self._service().status())
-
-    def prepare(self) -> dict[str, Any]:
-        with self._lock:
-            prepared = self.workspace.prepare()
-            result = self.status()
-            result["created"] = bool(prepared.get("created"))
-            result["message"] = (
-                "Izolovaná Remote Work Cell byla vytvořena bez private dat a bez Git remote."
-                if prepared.get("created")
-                else "Remote Work Cell už byla bezpečně připravená."
-            )
-            return result
-
-    def sync_from_main(self, *, confirmed: bool) -> dict[str, Any]:
-        with self._lock:
-            result = self.workspace.sync_from_main(confirmed=confirmed)
-            lab_status = self._lab.status() if self._lab is not None else {}
-            return self._merge_status({**lab_status, **result, "ok": True})
-
-    def new_thread(self, *, label: str = "") -> dict[str, Any]:
-        return self._merge_status(self._service().new_thread(label=label, role="Adam Remote"))
-
-    def resume(self) -> dict[str, Any]:
-        return self._merge_status(self._service().resume())
-
-    def restart(self) -> dict[str, Any]:
-        return self._merge_status(self._service().restart())
-
-    def disconnect(self) -> dict[str, Any]:
-        return self._merge_status(self._service().disconnect())
-
-    def update_capsule(self, *, registry_id: str, capsule: dict[str, Any]) -> dict[str, Any]:
-        return self._merge_status(
-            self._service().update_capsule(registry_id=registry_id, capsule=capsule)
-        )
-
-    def send(self, *, text: str, client_message_id: str, client_sent_at: str = "") -> dict[str, Any]:
-        with self._lock:
-            result = self._service().send(
-                text=text,
-                client_message_id=client_message_id,
-                client_sent_at=client_sent_at,
-            )
-            result["workspace"] = self.workspace.status()
-            result["runtime_profile"] = self._runtime_profile()
-            result["remote_work_cell"] = True
-            return result
-
-    def save_message_to_tvbcp(self, *, client_message_id: str) -> dict[str, Any]:
-        return self._service().save_message_to_tvbcp(client_message_id=client_message_id)
-
-    def checkpoint(self, *, confirmed: bool, message: str = "") -> dict[str, Any]:
-        result = self.workspace.checkpoint(confirmed=confirmed, message=message)
-        return self._merge_status({"ok": True, **result})
-
-    def close(self) -> None:
-        with self._lock:
-            if self._lab is not None:
-                self._lab.close()
-
-
-REMOTE_WORK_CELL = RemoteWorkCellService()
-atexit.register(REMOTE_WORK_CELL.close)

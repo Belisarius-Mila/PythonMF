@@ -16,7 +16,7 @@ from typing import Any, Callable, TYPE_CHECKING
 
 from app.codex_appserver import AppServerError, utc_now
 from app.file_persistence import FilePersistenceError, atomic_write_json
-from app.remote_work_cell import RemoteWorkspaceManager
+from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
 from scripts.human_adam_takeover import (
     CONFIRMATION_TEXT,
     TakeoverError,
@@ -311,7 +311,7 @@ def _public_plan(plan: TakeoverPlan) -> dict[str, Any]:
     }
 
 
-def audit_checkpoint(*, workspace: RemoteWorkspaceManager) -> dict[str, Any]:
+def audit_checkpoint(*, workspace: HumanAdamWorkspaceManager) -> dict[str, Any]:
     """Read-only proof of the exact checkpoint and paths offered for deployment."""
     refresh_origin_main(workspace.source_repo)
     return _public_plan(build_takeover_plan(workspace=workspace))
@@ -319,7 +319,7 @@ def audit_checkpoint(*, workspace: RemoteWorkspaceManager) -> dict[str, Any]:
 
 def run_checkpoint_quality_gate(
     *,
-    workspace: RemoteWorkspaceManager,
+    workspace: HumanAdamWorkspaceManager,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
     log_path: Path = DEFAULT_GATE_LOG,
     timeout: float = 420.0,
@@ -360,7 +360,7 @@ def run_checkpoint_quality_gate(
 
 def deploy_checkpoint(
     *,
-    workspace: RemoteWorkspaceManager,
+    workspace: HumanAdamWorkspaceManager,
     confirmation: str,
     expected_checkpoint_head: str,
     gate_runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,

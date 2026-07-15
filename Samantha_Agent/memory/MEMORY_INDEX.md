@@ -81,7 +81,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   odmitnuti vrati text do editoru, nejiste doruceni ho k opakovani nevraci.
   Private Tailscale Serve HTTPS cesta je aktivni pro Chrome/iPhone mikrofon,
   ukazuje na stejny lokalni Cockpit a verejny Funnel je vypnuty. Plna brana ma
-  733 testu; zachovan je i oddeleny Human–Adam checkpoint kompaktniho rozlozeni
+  721 testu po odstraneni samostatnych panelu App-server LAB a Adam Remote;
+  zachovan je i oddeleny Human–Adam checkpoint kompaktniho rozlozeni
   tlacitek nahravani a odeslani. Na iOS tlacitko nahravani bezpecne fokusuje
   editor pro diktovani klavesnice, zatimco Mac nahravaci workflow zustava stejny.
   Adam sam nesmi spoustet Git checkpoint/commit/push/nasazeni a TVBCP aktualizuje
@@ -111,9 +112,9 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   externi recovery disk se 2026-07-14 neenumeroval na USB/Thunderbolt ani jako
   disk; neprovadet First Aid, dokud jej macOS neuvidi. Posledni zaloha je z
   2026-07-09; dalsi krok je jiny datovy kabel, primy jiny port a napajeni.
-- `handoffs/appserver_remote_work_cell_v0_2026_07_13.md` - [PRIPOMENOUT] zapisujici Adam Remote v0: samostatny lokalni clone `main` bez private/nezařazenych dat a bez Git remote, runtime model `GPT-5.6-Sol`, reasoning `high`, `workspace-write`, sit vypnuta, TVBCP a lokalni checkpoint. `Aktualizovat z main` umi pouze potvrzeny lokalni fast-forward cisteho workspace a odmita dirty/diverged/mazaci/private scenare. Je nasazeno, zive syncy prosly, thread je connected, Capsule revize 2 ma skutecny cil a gate ma 651 testu vcetne JS. Dalsi krok je maly realny iPhone ukol a kontrola diffu pred checkpointem.
+- `handoffs/appserver_remote_work_cell_v0_2026_07_13.md` - historicky checkpoint vyrazeneho panelu Adam Remote. Jeho bezpecny izolovany Git workspace byl zachovan pod Human–Adam; samostatna sluzba, API a UI byly 2026-07-15 odstraneny.
 - `handoffs/colors_numbers_private_photo_gallery_proposal_2026_07_13.md` - pozastaveny navrh tlacitka `Foto` a lokalni galerie nejvyse tri fotografii v obrazovce `Numbers`; kvuli verejnemu repozitari/GitHub Pages se doporucuje pouze lokalni `IndexedDB`, komprese a odstraneni EXIF/GPS, bez commitovani rodinnych fotografii. Nic neimplementovat bez noveho rozhodnuti Mily.
-- `handoffs/appserver_lab_thread_registry_context_capsule_2026_07_13.md` - [PRIPOMENOUT] read-only App-server LAB ma private registr vice oddelenych threadu a nedestruktivni migraci. iPhone test registru i opravene turn-based capsule prosel. Pomalost cca 40 s nebyla Tailscale transportem, ale TIME_WAIT port probe/restart cyklem; probe je opraveny pres `SO_REUSEADDR`, restart limit zvysen a LAB cacheuje Codex verzi. Nasazeny plny restart trval 2,58 s a zahraty LAB status pres Tailscale 0,0036 s. Dokoncena LAB vymena se da explicitnim idempotentnim tlacitkem ulozit do private TVBCP; automaticky zapis je vypnuty. Gate ma 637 testu. Dalsi krok je kratky iPhone retest rychlosti a jednoho TVBCP zapisu.
+- `handoffs/appserver_lab_thread_registry_context_capsule_2026_07_13.md` - historicky checkpoint vyrazeneho read-only App-server LAB. Samostatna sluzba, probe, API, tlacitko a modal byly 2026-07-15 odstraneny; bez dalsiho retestu.
 - `handoffs/appserver_lab_lifecycle_verified_2026_07_13.md` - historicky zaklad read-only LAB: automaticky 50/50 reliability probe a Miluv rucni lifecycle test s disconnect/resume/restart; vsech 7 pokynu bylo dokoncenych bez chyby nebo duplicity. Navazujici stav registru a capsule je v `handoffs/appserver_lab_thread_registry_context_capsule_2026_07_13.md`.
 - `handoffs/cockpit_architecture_current_2026_07_10.md` - [PRIPOMENOUT] jediny prubezny handoff modernizace Cockpitu: Faze 2.1 az 2.4 jsou hotove. Realny outbox pilot ma 22 auditu/delivered a 0 pending; gate 606 testu. Dalsi doporuceny krok je Faze 1.4 e-mailova service vrstva pred SQLite Fazi 3.
 - `handoffs/janicka_full_adam_cockpit_recovery_ios_card_2026_07_09.md` - [PRIPOMENOUT] Janička nouzova zaloha: tlacitko `Otevřít plného Adama` spousti primy interaktivni Codex v Terminalu bez VS Code/samantha wrapperu, Mac ma viditelne launchery pro Cockpit a iPhone zkratka `Janička SOS` zobrazuje Jane kartu postupu; dalsi krok je zkratku nasdilet/importovat na Janin iPhone a spolecne projit celou cestu.

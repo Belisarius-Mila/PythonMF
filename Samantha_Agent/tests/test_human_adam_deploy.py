@@ -22,7 +22,7 @@ from app.communication.human_adam_deploy import (
 )
 from scripts.human_adam_takeover import CONFIRMATION_TEXT, TakeoverError
 from tests.test_human_adam_takeover import prepare_with_origin
-from tests.test_remote_work_cell import git
+from tests.test_human_adam_workspace import git
 
 
 def successful_gate(command, **_kwargs):

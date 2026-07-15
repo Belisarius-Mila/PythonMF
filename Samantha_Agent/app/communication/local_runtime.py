@@ -8,8 +8,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from app.codex_appserver import AppServerError, codex_environment
-from app.codex_appserver_lab import DEFAULT_CODEX_BIN
+from app.codex_appserver import AppServerError, DEFAULT_CODEX_BIN, codex_environment
 
 
 DEFAULT_RUNTIME_DIR = Path.home() / ".codex" / "samantha-communication"

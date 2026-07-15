@@ -983,3 +983,27 @@ základní cílový iPhone provoz je však ručně potvrzený.
 
 Další krok: bez okamžité vývojové akce. Případnou volbu hlasu nebo dělení velmi
 dlouhých odpovědí řešit až podle skutečné provozní potřeby.
+
+### 2026-07-15 22:53 CEST – Vyřazení samostatných panelů App-server LAB a Adam Remote
+
+Po Mílově výslovném potvrzení globální brzdy byly z hlavního Cockpitu odstraněny
+obě samostatné legacy větve: tlačítka, modaly, JavaScript, CSS, GET/POST API,
+registry karty, backendové služby a jejich výhradní testy. Historické handoffy a
+soukromá runtime data zůstaly nedotčené.
+
+Bezpečný izolovaný Git workspace nebyl zrušen, protože je živou součástí
+kanonického Human–Adam checkpointu, auditu a nasazení. Byl přesunut pod
+Human–Adam, přejmenován a znovu ověřen. Oba poslední checkpointy `3878150`
+(diagnostika jen při chybě) a `2e9c8ed` (vratný Seznam příznak Hotovo) zůstaly
+funkčně zachované.
+
+Důkaz: 334 cílených testů, samostatný retest 42 testů posledních dvou commitů,
+Python a obě JavaScript syntaxe, `git diff --check` a plná brána 721 testů
+prošly. Cockpit má po odstranění 19 993 fyzických řádků.
+
+Riziko: kompatibilní soukromé umístění existujícího Human–Adam workspace nebylo
+měněno, aby se neztratila návaznost relace ani stav nasazení. Samostatné legacy
+UI a služby se na toto umístění už nenapojují.
+
+Další krok: po commitu, pushi a restartu provést krátký smoke test hlavní stránky
+a Human–Adam; žádný LAB ani Adam Remote už nemá být v UI nebo API dostupný.

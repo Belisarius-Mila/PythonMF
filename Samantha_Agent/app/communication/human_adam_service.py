@@ -23,23 +23,21 @@ from app.communication.session_hub import (
     SessionDeliveryUnknownError,
     SessionHubError,
 )
-from app.remote_work_cell import (
+from app.communication.human_adam_workspace import (
     DEFAULT_CODEX_BIN,
-    REMOTE_APPROVAL_POLICY,
-    REMOTE_DEVELOPER_INSTRUCTIONS,
-    REMOTE_REASONING_EFFORT,
-    REMOTE_SANDBOX_MODE,
-    REMOTE_SANDBOX_POLICY,
-    RemoteWorkspaceManager,
-    read_remote_runtime_profile,
+    HUMAN_ADAM_APPROVAL_POLICY,
+    HUMAN_ADAM_REASONING_EFFORT,
+    HUMAN_ADAM_SANDBOX_MODE,
+    HUMAN_ADAM_SANDBOX_POLICY,
+    HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS,
+    HumanAdamWorkspaceManager,
+    read_human_adam_runtime_profile,
 )
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SESSION_STATE_PATH = PROJECT_ROOT / "data" / "private" / "communication" / "canonical_session.json"
-HUMAN_ADAM_DEVELOPER_INSTRUCTIONS = REMOTE_DEVELOPER_INSTRUCTIONS.replace(
-    "Jsi Adam Remote,", "Jsi Adam v kanonické relaci Human–Adam,"
-) + (
+HUMAN_ADAM_DEVELOPER_INSTRUCTIONS = HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS + (
     " Pro projekt komunikacni architektury pred vetsi praci precti "
     "Samantha_Agent/memory/tvbcp/architektura_komunikace_samantha.txt. "
     "Tento TVBCP aktualizuj vyhradne na Miluv vyslovny pokyn; nikdy do nej nezapisuj "
@@ -100,16 +98,16 @@ class HumanAdamService:
         self,
         *,
         runtime: LocalAppServerProcessController | None = None,
-        workspace: RemoteWorkspaceManager | None = None,
+        workspace: HumanAdamWorkspaceManager | None = None,
         state_path: Path = DEFAULT_SESSION_STATE_PATH,
         deployment_receipt_path: Path = DEFAULT_DEPLOYMENT_RECEIPT,
         deployment_diagnostic_path: Path | None = None,
         codex_binary: str = DEFAULT_CODEX_BIN,
-        profile_getter: Callable[..., dict[str, Any]] = read_remote_runtime_profile,
+        profile_getter: Callable[..., dict[str, Any]] = read_human_adam_runtime_profile,
         hub: CanonicalSessionHub | None = None,
     ):
         self.runtime = runtime or LocalAppServerProcessController(codex_binary=codex_binary)
-        self.workspace = workspace or RemoteWorkspaceManager()
+        self.workspace = workspace or HumanAdamWorkspaceManager()
         self.codex_binary = str(codex_binary)
         self.profile_getter = profile_getter
         self._profile: dict[str, Any] = {}
@@ -138,10 +136,10 @@ class HumanAdamService:
             workspace=self.workspace.project_root,
             client_factory=self._new_client,
             developer_instructions=HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
-            sandbox=REMOTE_SANDBOX_MODE,
-            sandbox_policy=REMOTE_SANDBOX_POLICY,
-            approval_policy=REMOTE_APPROVAL_POLICY,
-            reasoning_effort=REMOTE_REASONING_EFFORT,
+            sandbox=HUMAN_ADAM_SANDBOX_MODE,
+            sandbox_policy=HUMAN_ADAM_SANDBOX_POLICY,
+            approval_policy=HUMAN_ADAM_APPROVAL_POLICY,
+            reasoning_effort=HUMAN_ADAM_REASONING_EFFORT,
         )
         return self._hub
 
