@@ -117,7 +117,7 @@ class HumanAdamUiTests(unittest.TestCase):
 
         self.assertLess(receipt, diagnostic)
         self.assertLess(diagnostic, header_end)
-        self.assertIn('new Set(["audit","gate","receipt","fast_forward","push","workspace_alignment","restart"])', render_source)
+        self.assertIn('new Set(["audit","gate","receipt","remote_recheck","push","fast_forward","workspace_alignment","restart"])', render_source)
         self.assertIn('new Set(["running","passed","failed"])', render_source)
         self.assertIn("deploymentDiagnostic.textContent = showDiagnostic", render_source)
         self.assertIn("Poslední nasazení ${shortCommit} · ${message} · ${updatedTime}", render_source)
@@ -319,6 +319,27 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('<form class="composer" id="composer" autocomplete="off">', HUMAN_ADAM_HTML)
         self.assertIn('id="messageInput" maxlength="12000" autocomplete="off"', HUMAN_ADAM_HTML)
         self.assertIn('window.addEventListener("pageshow", clearMessageInput);', HUMAN_ADAM_HTML)
+
+    def test_confirmed_rejection_restores_draft_but_unknown_delivery_never_does(self) -> None:
+        helper_start = HUMAN_ADAM_HTML.index("function restoreRejectedMessage(text)")
+        helper_end = HUMAN_ADAM_HTML.index("function preferredVoiceMimeType()", helper_start)
+        helper_source = HUMAN_ADAM_HTML[helper_start:helper_end]
+        send_start = HUMAN_ADAM_HTML.index("async function sendMessage(event)")
+        send_end = HUMAN_ADAM_HTML.index('connectBtn.addEventListener("click", connect);', send_start)
+        send_source = HUMAN_ADAM_HTML[send_start:send_end]
+        catch_start = send_source.index("} catch (error) {")
+        unknown_start = send_source.index('const confirmedRejection = new Set(["human_adam_busy","human_adam_send_failed"])', catch_start)
+        rejected_start = send_source.index("} else {", unknown_start)
+        rejected_end = send_source.index("\n      }", rejected_start)
+
+        self.assertIn("if (input.value) return;", helper_source)
+        self.assertIn('input.value = String(text || "").slice', helper_source)
+        self.assertIn("input.focus();", helper_source)
+        self.assertIn("if (!confirmedRejection)", send_source[unknown_start:rejected_start])
+        self.assertNotIn("restoreRejectedMessage", send_source[unknown_start:rejected_start])
+        self.assertIn("restoreRejectedMessage(text);", send_source[rejected_start:rejected_end])
+        self.assertIn("Pokyn neposílej znovu.", send_source[unknown_start:rejected_start])
+        self.assertIn("Text byl vrácen do editoru.", send_source[rejected_start:rejected_end])
 
     def test_ui_does_not_depend_on_legacy_delivery_paths(self) -> None:
         lowered = HUMAN_ADAM_HTML.lower()

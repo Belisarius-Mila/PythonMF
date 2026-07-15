@@ -23,6 +23,7 @@ from scripts.human_adam_takeover import (
     TakeoverPlan,
     apply_takeover,
     build_takeover_plan,
+    refresh_origin_main,
 )
 
 if TYPE_CHECKING:
@@ -45,7 +46,16 @@ DEPLOYMENT_DIAGNOSTIC_SCHEMA = 1
 DEPLOYMENT_PENDING = "gate_passed_pending_apply"
 DEPLOYMENT_COMPLETE = "deployed"
 DEPLOYMENT_DIAGNOSTIC_STAGES = frozenset(
-    {"audit", "gate", "receipt", "fast_forward", "push", "workspace_alignment", "restart"}
+    {
+        "audit",
+        "gate",
+        "receipt",
+        "remote_recheck",
+        "push",
+        "fast_forward",
+        "workspace_alignment",
+        "restart",
+    }
 )
 DEPLOYMENT_DIAGNOSTIC_OUTCOMES = frozenset({"running", "passed", "failed"})
 DEPLOYMENT_DIAGNOSTIC_MESSAGES = {
@@ -58,6 +68,9 @@ DEPLOYMENT_DIAGNOSTIC_MESSAGES = {
     ("receipt", "running"): "Ukládám bezpečný mezistav nasazení.",
     ("receipt", "passed"): "Bezpečný mezistav nasazení je uložený.",
     ("receipt", "failed"): "Bezpečný mezistav nasazení se nepodařilo uložit.",
+    ("remote_recheck", "running"): "Znovu ověřuji aktuální main na GitHubu.",
+    ("remote_recheck", "passed"): "GitHub main se během testovací brány nezměnil.",
+    ("remote_recheck", "failed"): "GitHub main se změnil; lokální main zůstal beze změny.",
     ("fast_forward", "running"): "Probíhá fast-forward checkpointu do main.",
     ("fast_forward", "passed"): "Fast-forward checkpointu do main prošel.",
     ("fast_forward", "failed"): "Fast-forward checkpointu do main selhal.",
@@ -300,6 +313,7 @@ def _public_plan(plan: TakeoverPlan) -> dict[str, Any]:
 
 def audit_checkpoint(*, workspace: RemoteWorkspaceManager) -> dict[str, Any]:
     """Read-only proof of the exact checkpoint and paths offered for deployment."""
+    refresh_origin_main(workspace.source_repo)
     return _public_plan(build_takeover_plan(workspace=workspace))
 
 
@@ -378,6 +392,7 @@ def deploy_checkpoint(
     try:
         record("audit", "running")
         try:
+            refresh_origin_main(workspace.source_repo)
             plan = build_takeover_plan(workspace=workspace)
             if plan.checkpoint_head != expected:
                 raise HumanAdamDeployError("Checkpoint se od auditu změnil; spusť audit znovu.")

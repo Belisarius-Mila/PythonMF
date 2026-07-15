@@ -200,3 +200,16 @@ starsi selhani mimo tuto zmenu: e-mailovy archivacni test ocekaval fixni datum
 - `handoffs/colors_numbers_owl_tts_startup_prompt_2026_05_22.md` - jednorazovy
   ColorsAndNumbers soví TTS task pro 2026-05-23 a denni startovni dotaz na soví
   text.
+
+## 2026-07-15 – souběh sovího workflow a Human–Adam nasazení
+
+Soví GitHub Actions workflow zůstává zapnuté. Jeho commit je úzce omezený na
+allowlist ColorsAndNumbers souborů a push je záměrně obyčejný fast-forward bez
+`pull`, rebase nebo retry. Pokud `main` mezitím změnil jiný bezpečný writer,
+soví push atomicky selže a příští běh může výstupy znovu vygenerovat.
+
+Human–Adam nasazení po dlouhé testovací bráně znovu načte živý `origin/main`.
+Přesný auditovaný checkpoint nejdřív pushne přímo na vzdálený `main` a teprve po
+úspěchu posune lokální `main`. Když sova vyhraje závod před kontrolou nebo těsně
+po ní, non-fast-forward zablokuje převzetí a lokální `main` i WIP checkpoint
+zůstanou zachované. Regresní simulace obou pořadí a celá brána 723 testů prošly.

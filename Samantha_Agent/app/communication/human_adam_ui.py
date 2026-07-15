@@ -272,6 +272,13 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     input.defaultValue = "";
   }
 
+  function restoreRejectedMessage(text) {
+    if (input.value) return;
+    input.value = String(text || "").slice(0, Number(input.maxLength) || 12000);
+    input.defaultValue = "";
+    input.focus();
+  }
+
   function preferredVoiceMimeType() {
     if (!window.MediaRecorder || typeof window.MediaRecorder.isTypeSupported !== "function") return "";
     const candidates = ["audio/mp4", "audio/webm;codecs=opus", "audio/webm"];
@@ -420,7 +427,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   function renderDeploymentDiagnostic(diagnostic) {
-    const allowedStages = new Set(["audit","gate","receipt","fast_forward","push","workspace_alignment","restart"]);
+    const allowedStages = new Set(["audit","gate","receipt","remote_recheck","push","fast_forward","workspace_alignment","restart"]);
     const allowedOutcomes = new Set(["running","passed","failed"]);
     const shortCommit = diagnostic ? String(diagnostic.checkpoint_short || "") : "";
     const stage = diagnostic ? String(diagnostic.stage || "") : "";
@@ -737,12 +744,22 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     let failure = "";
     try {
       const payload = await api("/api/human-adam/send", {method:"POST", body:JSON.stringify({message:text,client_message_id:clientId,client_sent_at:sentAt})});
-      if (!payload.ok) throw new Error(payload.message || "Odeslání selhalo.");
+      if (!payload.ok) {
+        const error = new Error(payload.message || "Odeslání selhalo.");
+        error.status = String(payload.status || "");
+        throw error;
+      }
       renderSession(payload.session);
       renderTurnState(payload.session);
       notice.textContent = "Odpověď doručena a potvrzena.";
     } catch (error) {
-      failure = `Odeslání není potvrzené: ${error.message}`;
+      const confirmedRejection = new Set(["human_adam_busy","human_adam_send_failed"]).has(error.status);
+      if (!confirmedRejection) {
+        failure = `Stav doručení je nejistý: ${error.message} Pokyn neposílej znovu.`;
+      } else {
+        restoreRejectedMessage(text);
+        failure = `Odeslání bylo odmítnuto: ${error.message} Text byl vrácen do editoru.`;
+      }
     } finally {
       sendInFlight = false;
       syncControls();

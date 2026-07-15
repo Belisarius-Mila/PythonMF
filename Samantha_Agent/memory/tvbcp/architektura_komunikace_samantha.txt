@@ -809,3 +809,38 @@ změnou PID; diagnostika nezavádí nový polling ani komunikační mechanismus.
 Další krok: po samostatném checkpointu a nasazení z iPhonu ověřit, že sticky
 diagnostika ukáže poslední fázi před restartem a po návratu stejného vlákna stav
 `restart` bez zobrazení soukromé cesty.
+
+### 2026-07-15 14:55 CEST – Atomické nasazení při souběhu se sovím workflow
+
+Příčina neúspěšného nasazení byla potvrzena jako závod dvou legitimních writerů
+větve `main`: během dlouhé Human–Adam brány přidal denní soví workflow vlastní
+allowlistovaný commit. Původní takeover nejdřív posunul lokální `main` a až
+potom neúspěšně pushoval, takže po korektním odmítnutí vzdáleného pushnutí zůstal
+lokální a vzdálený stav rozdělený.
+
+Kanonické řešení:
+
+- sova zůstává zapnutá a její workflow záměrně nepoužívá pull, rebase ani retry;
+- Human–Adam po bráně znovu načte živý `origin/main`;
+- auditovaný checkpoint se pushne před změnou lokálního `main`; teprve úspěšný
+  push dovolí lokální fast-forward a zarovnání izolovaného workspace;
+- při vzdálené změně před kontrolou nebo mezi kontrolou a pushem převzetí
+  fail-closed skončí, lokální `main` se nezmění a WIP checkpoint zůstane pro nový
+  audit;
+- diagnostika má samostatnou bezpečnou fázi `remote_recheck`.
+
+Současně Human–Adam editor vrací rozepsaný text pouze při výslovně potvrzeném
+odmítnutí serverem. Při `delivery_unknown`, síťové chybě nebo jiném nejasném
+výsledku text neobnoví k opakovanému odeslání a dál varuje před duplicitou.
+
+Důkaz: 35 cílených testů, rozšířená sada 310 testů a plná projektová brána 723
+testů prošly; JavaScript, Python, shell a `git diff --check` jsou OK. Dvě nové
+regrese simulují obě kritická okna souběhu a v obou ověřují nezměněný lokální
+`main`.
+
+Riziko: při prohraném závodě se nasazení záměrně samo neslučuje. Je nutné obnovit
+`main`, znovu přenést nebo vytvořit checkpoint nad novým základem a zopakovat
+audit; automatický rebase by mohl smíchat nesouvisející změny.
+
+Další krok: commitnout a pushnout přesné změny, zarovnat izolovaný workspace,
+restartovat Cockpit a ručně ověřit návrat textu při potvrzeném odmítnutí.

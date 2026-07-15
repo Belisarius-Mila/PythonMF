@@ -64,5 +64,7 @@ jobs:
             echo "No generated ColorsAndNumbers changes to commit."
           else
             git commit -m "Update ColorsAndNumbers owl audio"
-            git push
+            # Záměrně bez pull/rebase/retry: pokud main mezitím změnil jiný
+            # bezpečný writer, non-fast-forward musí atomicky selhat.
+            git push origin HEAD:main
           fi

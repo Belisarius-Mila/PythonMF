@@ -79,6 +79,18 @@ def _source_pending(source_repo: Path) -> tuple[list[str], list[str]]:
     return tracked, untracked
 
 
+def refresh_origin_main(source_repo: Path) -> str:
+    """Refresh and return the live origin/main without changing the working tree."""
+    try:
+        _git(
+            source_repo,
+            ["fetch", "--no-tags", "origin", "refs/heads/main:refs/remotes/origin/main"],
+        )
+        return _git(source_repo, ["rev-parse", "origin/main"])
+    except TakeoverError as exc:
+        raise TakeoverError("Nelze obnovit aktuální stav origin/main z GitHubu.") from exc
+
+
 def build_takeover_plan(*, workspace: RemoteWorkspaceManager | None = None) -> TakeoverPlan:
     manager = workspace or RemoteWorkspaceManager()
     source_repo = manager.source_repo
@@ -153,7 +165,17 @@ def apply_takeover(
     source_repo = manager.source_repo
 
     if progress_callback is not None:
-        progress_callback("fast_forward", "running")
+        progress_callback("remote_recheck", "running")
+    live_origin_head = refresh_origin_main(source_repo)
+    live_source_head = _git(source_repo, ["rev-parse", "HEAD"])
+    if live_source_head != plan.source_head or live_origin_head != plan.source_head:
+        raise TakeoverError(
+            "GitHub main se během kontroly změnil; lokální main zůstal beze změny. "
+            "Nejdřív obnov main a potom vytvoř nový checkpoint."
+        )
+    if progress_callback is not None:
+        progress_callback("remote_recheck", "passed")
+
     _git(source_repo, ["fetch", "--no-tags", str(manager.workspace_root), "refs/heads/main"])
     fetched_head = _git(source_repo, ["rev-parse", "FETCH_HEAD"])
     if fetched_head != plan.checkpoint_head:
@@ -163,17 +185,22 @@ def apply_takeover(
         raise TakeoverError("Stav se během kontroly změnil; převzetí zopakuj.")
 
     _git(source_repo, ["diff", "--check", "HEAD", "FETCH_HEAD"])
-    _git(source_repo, ["merge", "--ff-only", "FETCH_HEAD"])
-    if progress_callback is not None:
-        progress_callback("fast_forward", "passed")
     pushed = False
     if push:
         if progress_callback is not None:
             progress_callback("push", "running")
-        _git(source_repo, ["push", "origin", "main"])
+        # Push the audited object before moving local main. If another writer (for
+        # example the daily owl workflow) wins the race, Git rejects this update
+        # and the user's local main remains untouched.
+        _git(source_repo, ["push", "origin", "FETCH_HEAD:refs/heads/main"])
         pushed = True
         if progress_callback is not None:
             progress_callback("push", "passed")
+    if progress_callback is not None:
+        progress_callback("fast_forward", "running")
+    _git(source_repo, ["merge", "--ff-only", "FETCH_HEAD"])
+    if progress_callback is not None:
+        progress_callback("fast_forward", "passed")
     if progress_callback is not None:
         progress_callback("workspace_alignment", "running")
     sync = manager.sync_from_main(confirmed=True)

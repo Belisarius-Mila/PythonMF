@@ -4,9 +4,11 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from app.remote_work_cell import RemoteWorkspaceManager
 from app.workflows.commands import WORKFLOW_COMMANDS
+from scripts import human_adam_takeover as takeover_module
 from scripts.human_adam_takeover import (
     CONFIRMATION_TEXT,
     TakeoverError,
@@ -96,14 +98,82 @@ class HumanAdamTakeoverTests(unittest.TestCase):
         self.assertEqual(
             progress,
             [
-                ("fast_forward", "running"),
-                ("fast_forward", "passed"),
+                ("remote_recheck", "running"),
+                ("remote_recheck", "passed"),
                 ("push", "running"),
                 ("push", "passed"),
+                ("fast_forward", "running"),
+                ("fast_forward", "passed"),
                 ("workspace_alignment", "running"),
                 ("workspace_alignment", "passed"),
             ],
         )
+
+    def test_remote_change_after_checkpoint_is_rejected_before_local_main_moves(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source, manager = prepare_with_origin(root)
+            original_source_head = git(source, "rev-parse", "HEAD")
+            (manager.project_root / "tracked.py").write_text("VALUE = 31\n", encoding="utf-8")
+            manager.checkpoint(confirmed=True, message="WIP loses remote race")
+
+            competitor = root / "competitor"
+            subprocess.run(
+                ["/usr/bin/git", "clone", str(root / "origin.git"), str(competitor)],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            git(competitor, "config", "user.name", "Daily Owl")
+            git(competitor, "config", "user.email", "owl@example.invalid")
+            (competitor / "owl.txt").write_text("new daily audio\n", encoding="utf-8")
+            git(competitor, "add", "owl.txt")
+            git(competitor, "commit", "-m", "Update owl audio")
+            git(competitor, "push", "origin", "main")
+
+            with self.assertRaisesRegex(TakeoverError, "GitHub main se během kontroly změnil"):
+                apply_takeover(
+                    confirmation=CONFIRMATION_TEXT,
+                    push=True,
+                    workspace=manager,
+                )
+
+            source_head = git(source, "rev-parse", "HEAD")
+            workspace_status = manager.status()
+
+        self.assertEqual(source_head, original_source_head)
+        self.assertEqual(workspace_status["workspace_relation"], "local_ahead")
+
+    def test_push_failure_never_fast_forwards_local_main(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source, manager = prepare_with_origin(Path(temp_dir))
+            original_source_head = git(source, "rev-parse", "HEAD")
+            (manager.project_root / "tracked.py").write_text("VALUE = 32\n", encoding="utf-8")
+            manager.checkpoint(confirmed=True, message="WIP atomic push failure")
+            progress: list[tuple[str, str]] = []
+            original_git = takeover_module._git
+
+            def fail_push(cwd, args, **kwargs):
+                if list(args[:2]) == ["push", "origin"]:
+                    raise TakeoverError("simulated non-fast-forward")
+                return original_git(cwd, args, **kwargs)
+
+            with patch("scripts.human_adam_takeover._git", side_effect=fail_push):
+                with self.assertRaisesRegex(TakeoverError, "simulated non-fast-forward"):
+                    apply_takeover(
+                        confirmation=CONFIRMATION_TEXT,
+                        push=True,
+                        workspace=manager,
+                        progress_callback=lambda stage, outcome: progress.append((stage, outcome)),
+                    )
+
+            source_head = git(source, "rev-parse", "HEAD")
+            workspace_status = manager.status()
+
+        self.assertEqual(source_head, original_source_head)
+        self.assertEqual(workspace_status["workspace_relation"], "local_ahead")
+        self.assertIn(("push", "running"), progress)
+        self.assertNotIn(("fast_forward", "running"), progress)
 
     def test_audit_rejects_tracked_source_changes_and_checkpoint_deletion(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

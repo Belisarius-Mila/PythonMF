@@ -116,8 +116,8 @@ class HumanAdamDeployTests(unittest.TestCase):
             diagnostic_path = root / "deployment_diagnostic.json"
 
             def fail_during_push(*, progress_callback, **_kwargs):
-                progress_callback("fast_forward", "running")
-                progress_callback("fast_forward", "passed")
+                progress_callback("remote_recheck", "running")
+                progress_callback("remote_recheck", "passed")
                 progress_callback("push", "running")
                 raise TakeoverError("tajná interní cesta /private/example nesmí ven")
 
