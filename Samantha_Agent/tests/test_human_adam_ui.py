@@ -195,6 +195,68 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('<button id="voiceRecordBtn" type="button">Nahrát pokyn</button>', HUMAN_ADAM_HTML)
         self.assertIn('<button id="voiceStopBtn" type="button" hidden disabled>', HUMAN_ADAM_HTML)
 
+    def test_completed_adam_answers_get_explicit_speech_control_only(self) -> None:
+        bubble_start = HUMAN_ADAM_HTML.index("function bubble(text, className, meta, spokenText=\"\")")
+        bubble_end = HUMAN_ADAM_HTML.index("function renderSession(session)", bubble_start)
+        bubble_source = HUMAN_ADAM_HTML[bubble_start:bubble_end]
+        render_start = bubble_end
+        render_end = HUMAN_ADAM_HTML.index("function renderDeploymentDiagnostic", render_start)
+        render_source = HUMAN_ADAM_HTML[render_start:render_end]
+
+        self.assertIn("if (spokenText) node.appendChild(answerSpeechControl(spokenText));", bubble_source)
+        self.assertIn('bubble(item.answer, "adam"', render_source)
+        self.assertIn("item.answer));", render_source)
+        pending_branch = render_source.index("else exchange.appendChild")
+        self.assertNotIn("answerSpeechControl", render_source[pending_branch:])
+        self.assertIn("Přečíst odpověď", HUMAN_ADAM_HTML)
+
+    def test_answer_speech_starts_only_from_explicit_button_click(self) -> None:
+        control_start = HUMAN_ADAM_HTML.index("function answerSpeechControl(text)")
+        control_end = HUMAN_ADAM_HTML.index("function bubble(", control_start)
+        control_source = HUMAN_ADAM_HTML[control_start:control_end]
+        speak_start = HUMAN_ADAM_HTML.index("function speakAnswer(text, button)")
+        speak_end = control_start
+        speak_source = HUMAN_ADAM_HTML[speak_start:speak_end]
+        render_start = HUMAN_ADAM_HTML.index("function renderSession(session)")
+        render_end = HUMAN_ADAM_HTML.index("function renderDeploymentDiagnostic", render_start)
+        render_source = HUMAN_ADAM_HTML[render_start:render_end]
+
+        self.assertIn('button.addEventListener("click", () => speakAnswer(text, button));', control_source)
+        self.assertIn("window.speechSynthesis.speak(utterance);", speak_source)
+        self.assertNotIn("speechSynthesis.speak", render_source)
+        self.assertNotIn("speakAnswer(", render_source)
+        self.assertNotIn("/api/", speak_source)
+
+    def test_answer_speech_uses_czech_system_voice_and_same_button_stops_it(self) -> None:
+        stop_start = HUMAN_ADAM_HTML.index("function stopAnswerSpeech(showNotice=false)")
+        stop_end = HUMAN_ADAM_HTML.index("function finishAnswerSpeech", stop_start)
+        stop_source = HUMAN_ADAM_HTML[stop_start:stop_end]
+        speak_start = HUMAN_ADAM_HTML.index("function speakAnswer(text, button)")
+        speak_end = HUMAN_ADAM_HTML.index("function answerSpeechControl(text)", speak_start)
+        speak_source = HUMAN_ADAM_HTML[speak_start:speak_end]
+
+        self.assertIn("window.speechSynthesis.cancel();", stop_source)
+        self.assertIn("if (activeSpeechButton === button)", speak_source)
+        self.assertIn("stopAnswerSpeech(true);", speak_source)
+        self.assertIn('utterance.lang = "cs-CZ";', speak_source)
+        self.assertIn("/^cs(?:-|$)/i", speak_source)
+        self.assertIn('button.textContent = "Zastavit";', speak_source)
+        self.assertIn('window.addEventListener("pagehide", () => stopAnswerSpeech(false));', HUMAN_ADAM_HTML)
+
+    def test_unsupported_answer_speech_is_fail_closed_and_understandable(self) -> None:
+        support_start = HUMAN_ADAM_HTML.index("function speechPlaybackSupported()")
+        support_end = HUMAN_ADAM_HTML.index("function resetSpeechButton", support_start)
+        support_source = HUMAN_ADAM_HTML[support_start:support_end]
+        speak_start = HUMAN_ADAM_HTML.index("function speakAnswer(text, button)")
+        speak_end = HUMAN_ADAM_HTML.index("function answerSpeechControl(text)", speak_start)
+        speak_source = HUMAN_ADAM_HTML[speak_start:speak_end]
+
+        self.assertIn("window.speechSynthesis", support_source)
+        self.assertIn("window.SpeechSynthesisUtterance", support_source)
+        self.assertIn('button.textContent = "Čtení nepodporováno";', speak_source)
+        self.assertIn("button.disabled = true;", speak_source)
+        self.assertIn("Tento prohlížeč nepodporuje systémové čtení odpovědi.", speak_source)
+
     def test_voice_transcription_failure_preserves_existing_draft(self) -> None:
         transcribe_start = HUMAN_ADAM_HTML.index("async function transcribeVoiceRecording()")
         transcribe_end = HUMAN_ADAM_HTML.index("function bubble(", transcribe_start)

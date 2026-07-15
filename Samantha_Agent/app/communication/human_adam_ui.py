@@ -44,6 +44,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .human { justify-self:end; background:#dbeafe; border-bottom-right-radius:5px; }
     .adam { justify-self:start; background:var(--soft); border-bottom-left-radius:5px; }
     .meta { display:block; margin-top:6px; color:var(--muted); font-size:12px; }
+    .reply-actions { display:flex; gap:8px; margin-top:8px; }
+    .reply-speech { padding:6px 9px; font-size:12px; white-space:nowrap; }
     .composer { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:min(920px,100%); padding:12px max(16px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); border-top:1px solid var(--line); background:rgba(255,255,255,.98); }
     textarea { width:100%; min-height:86px; max-height:230px; resize:vertical; border:1px solid #bac7d8; border-radius:13px; padding:12px; font:inherit; color:var(--ink); }
     .voice-controls { display:flex; align-items:center; gap:8px; min-width:0; }
@@ -187,6 +189,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let deploymentAudit = null;
   let completionAudioContext = null;
   let completionAudioUnlocked = false;
+  let activeSpeechButton = null;
+  let activeSpeechUtterance = null;
 
   function messageId() {
     if (window.crypto && crypto.randomUUID) return `human-adam-${crypto.randomUUID()}`;
@@ -515,7 +519,81 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     }
   }
 
-  function bubble(text, className, meta) {
+  function speechPlaybackSupported() {
+    return Boolean(window.speechSynthesis && window.SpeechSynthesisUtterance);
+  }
+
+  function resetSpeechButton(button) {
+    if (!button) return;
+    button.textContent = "Přečíst odpověď";
+    button.setAttribute("aria-pressed", "false");
+  }
+
+  function stopAnswerSpeech(showNotice=false) {
+    const previousButton = activeSpeechButton;
+    activeSpeechButton = null;
+    activeSpeechUtterance = null;
+    resetSpeechButton(previousButton);
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (showNotice) notice.textContent = "Čtení odpovědi zastaveno.";
+  }
+
+  function finishAnswerSpeech(utterance, message) {
+    if (activeSpeechUtterance !== utterance) return;
+    const previousButton = activeSpeechButton;
+    activeSpeechButton = null;
+    activeSpeechUtterance = null;
+    resetSpeechButton(previousButton);
+    notice.textContent = message;
+  }
+
+  function speakAnswer(text, button) {
+    if (!speechPlaybackSupported()) {
+      button.textContent = "Čtení nepodporováno";
+      button.disabled = true;
+      notice.textContent = "Tento prohlížeč nepodporuje systémové čtení odpovědi.";
+      return;
+    }
+    if (activeSpeechButton === button) {
+      stopAnswerSpeech(true);
+      return;
+    }
+    stopAnswerSpeech(false);
+    const utterance = new window.SpeechSynthesisUtterance(String(text || ""));
+    utterance.lang = "cs-CZ";
+    const czechVoice = window.speechSynthesis.getVoices().find(
+      (voice) => /^cs(?:-|$)/i.test(String(voice.lang || ""))
+    );
+    if (czechVoice) utterance.voice = czechVoice;
+    utterance.addEventListener("end", () => {
+      finishAnswerSpeech(utterance, "Čtení odpovědi dokončeno.");
+    }, {once:true});
+    utterance.addEventListener("error", () => {
+      finishAnswerSpeech(utterance, "Čtení odpovědi se nepodařilo dokončit.");
+    }, {once:true});
+    activeSpeechButton = button;
+    activeSpeechUtterance = utterance;
+    button.textContent = "Zastavit";
+    button.setAttribute("aria-pressed", "true");
+    notice.textContent = "Přehrávám Adamovu odpověď systémovým hlasem.";
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function answerSpeechControl(text) {
+    const actions = document.createElement("div");
+    actions.className = "reply-actions";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "reply-speech";
+    button.textContent = speechPlaybackSupported() ? "Přečíst odpověď" : "Čtení nepodporováno";
+    button.disabled = !speechPlaybackSupported();
+    button.setAttribute("aria-pressed", "false");
+    button.addEventListener("click", () => speakAnswer(text, button));
+    actions.appendChild(button);
+    return actions;
+  }
+
+  function bubble(text, className, meta, spokenText="") {
     const node = document.createElement("article");
     node.className = `bubble ${className}`;
     node.textContent = text;
@@ -523,10 +601,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     small.className = "meta";
     small.textContent = meta;
     node.appendChild(small);
+    if (spokenText) node.appendChild(answerSpeechControl(spokenText));
     return node;
   }
 
   function renderSession(session) {
+    stopAnswerSpeech(false);
     lastSession = session || null;
     chat.replaceChildren();
     const messages = session && Array.isArray(session.messages) ? session.messages : [];
@@ -535,7 +615,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       exchange.className = "exchange";
       exchange.appendChild(bubble(item.user_text || "", "human", `Odesláno ${formatTime(item.client_sent_at || item.received_at)}`));
       const confirmed = item.delivery_confirmed ? "Doručení potvrzeno" : (item.status === "delivery_unknown" ? "Doručení nejisté – neposílat automaticky znovu" : "Zpracování nedokončeno");
-      if (item.answer) exchange.appendChild(bubble(item.answer, "adam", `Adam · ${formatTime(item.completed_at)} · ${confirmed}`));
+      if (item.answer) exchange.appendChild(bubble(item.answer, "adam", `Adam · ${formatTime(item.completed_at)} · ${confirmed}`, item.answer));
       else exchange.appendChild(bubble(item.status === "pending" ? "Adam pracuje…" : confirmed, "adam", formatTime(item.received_at)));
       chat.appendChild(exchange);
     }
@@ -896,6 +976,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   connectBtn.addEventListener("click", connect);
   soundTestBtn.addEventListener("click", testCompletionSound);
   document.addEventListener("visibilitychange", restoreCompletionAudioAfterVisibility);
+  window.addEventListener("pagehide", () => stopAnswerSpeech(false));
   refreshBtn.addEventListener("click", loadStatus);
   tvbcpOpenBtn.addEventListener("click", openTvbcp);
   tvbcpCloseBtn.addEventListener("click", closeTvbcp);
