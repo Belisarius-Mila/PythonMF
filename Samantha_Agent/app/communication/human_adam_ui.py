@@ -628,7 +628,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
   }
 
-  function renderDeploymentDiagnostic(diagnostic) {
+  function renderDeploymentDiagnostic(diagnostic, confirmedCommit = "") {
     const allowedStages = new Set(["audit","gate","receipt","remote_recheck","push","fast_forward","workspace_alignment","restart"]);
     const allowedOutcomes = new Set(["running","passed","failed"]);
     const shortCommit = diagnostic ? String(diagnostic.checkpoint_short || "") : "";
@@ -636,6 +636,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     const outcome = diagnostic ? String(diagnostic.outcome || "") : "";
     const message = diagnostic ? String(diagnostic.message || "") : "";
     const updatedTime = diagnostic && diagnostic.updated_at ? formatTime(diagnostic.updated_at) : "";
+    const coveredByConfirmation = outcome === "passed" && shortCommit === confirmedCommit;
     const showDiagnostic = Boolean(
       diagnostic
       && /^[0-9a-f]{7}$/.test(shortCommit)
@@ -643,6 +644,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       && allowedOutcomes.has(outcome)
       && message
       && updatedTime
+      && !coveredByConfirmation
     );
     deploymentDiagnostic.textContent = showDiagnostic
       ? `Poslední nasazení ${shortCommit} · ${message} · ${updatedTime}`
@@ -670,7 +672,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     );
     deploymentReceipt.textContent = showConfirmation ? `Nasazeno ${shortCommit} · plná brána prošla · ${completedTime}` : "";
     deploymentReceipt.hidden = !showConfirmation;
-    renderDeploymentDiagnostic(payload && payload.deployment_diagnostic ? payload.deployment_diagnostic : null);
+    renderDeploymentDiagnostic(
+      payload && payload.deployment_diagnostic ? payload.deployment_diagnostic : null,
+      showConfirmation ? shortCommit : ""
+    );
     renderTurnState(session);
     renderSession(session);
   }

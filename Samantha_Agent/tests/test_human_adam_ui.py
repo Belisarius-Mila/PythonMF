@@ -131,7 +131,7 @@ class HumanAdamUiTests(unittest.TestCase):
         receipt = HUMAN_ADAM_HTML.index('id="deploymentReceipt"', header)
         diagnostic = HUMAN_ADAM_HTML.index('id="deploymentDiagnostic"', receipt)
         header_end = HUMAN_ADAM_HTML.index("</header>", diagnostic)
-        render_start = HUMAN_ADAM_HTML.index("function renderDeploymentDiagnostic(diagnostic)")
+        render_start = HUMAN_ADAM_HTML.index('function renderDeploymentDiagnostic(diagnostic, confirmedCommit = "")')
         render_end = HUMAN_ADAM_HTML.index("function renderStatus(payload)", render_start)
         render_source = HUMAN_ADAM_HTML[render_start:render_end]
 
@@ -142,7 +142,9 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("deploymentDiagnostic.textContent = showDiagnostic", render_source)
         self.assertIn("Poslední nasazení ${shortCommit} · ${message} · ${updatedTime}", render_source)
         self.assertIn("deploymentDiagnostic.hidden = !showDiagnostic;", render_source)
-        self.assertIn("renderDeploymentDiagnostic(payload.deployment_diagnostic || null);", HUMAN_ADAM_HTML)
+        self.assertIn('const coveredByConfirmation = outcome === "passed" && shortCommit === confirmedCommit;', render_source)
+        self.assertIn("&& !coveredByConfirmation", render_source)
+        self.assertIn('showConfirmation ? shortCommit : ""', HUMAN_ADAM_HTML)
         self.assertNotIn("diagnostic.path", render_source)
         self.assertNotIn("diagnostic.error", render_source)
 
