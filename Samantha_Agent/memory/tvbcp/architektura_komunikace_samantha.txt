@@ -844,3 +844,18 @@ audit; automatický rebase by mohl smíchat nesouvisející změny.
 
 Další krok: commitnout a pushnout přesné změny, zarovnat izolovaný workspace,
 restartovat Cockpit a ručně ověřit návrat textu při potvrzeném odmítnutí.
+
+### 2026-07-15 14:58 CEST – Nasazení atomické ochrany dokončeno
+
+Funkční commit `170fef2` byl normálně pushnut na `main`. Izolovaný workspace se
+bez merge/rebase zarovnal na stejný bod, zůstal čistý a bez Git remote. Řízený
+restart spustil nový Cockpit proces; smoke test hlavní stránky, health, live
+statusu, statusu a recovery prošel a kanonické Human–Adam vlákno bylo znovu
+připojeno bez aktivního tahu.
+
+Zdrojový `main`, známý `origin/main` a izolovaný workspace odpovídaly funkčnímu
+bodu. Uživatelský nezařazený auditní soubor nebyl čten, měněn ani commitnut.
+
+Otevřené praktické ověření: při budoucím skutečném potvrzeném odmítnutí zkontrolovat,
+že se rozepsaný text vrátí do editoru. Simulovat nejisté doručení v produkčním
+vlákně jen kvůli UI testu není vhodné; tuto větev pokrývá regresní test.

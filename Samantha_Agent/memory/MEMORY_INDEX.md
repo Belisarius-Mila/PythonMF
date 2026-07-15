@@ -75,8 +75,11 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   TVBCP, panel `Prace`, izolovany WIP a samoobsluzne nasazeni jsou opakovane
   overene z iPhonu. Audit token, plna fail-closed brana, fast-forward, push,
   rizeny restart, navazani stejneho vlakna a trvala uctenka `deployed` funguji.
-  Posledni bod je `5bac508`, gate ma 703 testu. Dalsi funkcni krok po recovery
-  zaloze je casomira dlouheho tahu a potom hlasovy vstup stejneho app-server toku.
+  Casomira dlouheho tahu i hlasovy prepis s editaci a explicitnim odeslanim jsou
+  nasazene. Bod `170fef2` resi atomicky soubeh s dennim sovim workflow: po brane
+  znovu overi GitHub a pushne checkpoint pred lokalnim fast-forwardem; potvrzene
+  odmitnuti vrati text do editoru, nejiste doruceni ho k opakovani nevraci. Plna
+  brana ma 723 testu.
 
 ## Handoffs
 
