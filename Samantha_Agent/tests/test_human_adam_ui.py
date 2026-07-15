@@ -218,6 +218,26 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("jen přes HTTPS adresu Cockpitu", record_source)
         self.assertIn("tato stránka běží přes HTTP", record_source)
 
+    def test_ios_record_button_focuses_existing_editor_without_touching_mac_recorder(self) -> None:
+        detector_start = HUMAN_ADAM_HTML.index("function isIOSDevice()")
+        detector_end = HUMAN_ADAM_HTML.index("async function startVoiceRecording()", detector_start)
+        detector_source = HUMAN_ADAM_HTML[detector_start:detector_end]
+        record_start = detector_end
+        record_end = HUMAN_ADAM_HTML.index("function stopVoiceRecording()", record_start)
+        record_source = HUMAN_ADAM_HTML[record_start:record_end]
+        ios_start = record_source.index("if (isIOSDevice())")
+        ios_end = record_source.index("\n    }", ios_start)
+        ios_source = record_source[ios_start:ios_end]
+
+        self.assertIn("iPad|iPhone|iPod", detector_source)
+        self.assertIn('navigator.platform === "MacIntel"', detector_source)
+        self.assertIn("navigator.maxTouchPoints", detector_source)
+        self.assertIn("input.focus();", ios_source)
+        self.assertIn("mikrofon klávesnice iPhonu", ios_source)
+        self.assertNotIn("getUserMedia", ios_source)
+        self.assertNotIn("MediaRecorder", ios_source)
+        self.assertLess(ios_start, record_source.index("if (!window.isSecureContext)"))
+
     def test_active_turn_blocks_new_voice_recording_but_not_manual_status(self) -> None:
         controls_start = HUMAN_ADAM_HTML.index("function syncControls()")
         controls_end = HUMAN_ADAM_HTML.index("function setBusy(", controls_start)

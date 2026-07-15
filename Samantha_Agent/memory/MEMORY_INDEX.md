@@ -81,8 +81,9 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   odmitnuti vrati text do editoru, nejiste doruceni ho k opakovani nevraci.
   Private Tailscale Serve HTTPS cesta je aktivni pro Chrome/iPhone mikrofon,
   ukazuje na stejny lokalni Cockpit a verejny Funnel je vypnuty. Plna brana ma
-  729 testu; zachovan je i oddeleny Human–Adam checkpoint kompaktniho rozlozeni
-  tlacitek nahravani a odeslani.
+  730 testu; zachovan je i oddeleny Human–Adam checkpoint kompaktniho rozlozeni
+  tlacitek nahravani a odeslani. Na iOS tlacitko nahravani bezpecne fokusuje
+  editor pro diktovani klavesnice, zatimco Mac nahravaci workflow zustava stejny.
 
 ## Handoffs
 

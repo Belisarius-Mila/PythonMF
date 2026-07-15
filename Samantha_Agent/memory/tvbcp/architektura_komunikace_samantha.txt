@@ -893,3 +893,26 @@ Další krok: po nasazení otevřít Human–Adam výhradně přes tailnetovou H
 v Chrome povolit mikrofon a ručně ověřit nahrát → ukončit → přepsat → upravit →
 výslovně odeslat. HTTP port `8770` může zůstat pro kompatibilitu, ale mikrofon na
 něm záměrně fungovat nebude.
+
+### 2026-07-15 16:33 CEST – iOS diktování jako provozní hlasová cesta
+
+Mílův ruční výsledek: vlastní nahrávací tlačítko funguje na Macu, ale na iPhonu
+v Chrome ani přes HTTPS prakticky nereagovalo. Míla zvolil jako běžný iPhone
+workaround mikrofon systémové klávesnice, který vloží diktát přímo do stejného
+editovatelného pole a zachová explicitní kontrolu před odesláním.
+
+Bezpečná úprava UI rozlišuje iOS bez zásahu do Mac workflow. Na iPhonu/iPadu
+stisk `Nahrát pokyn` pouze synchronně fokusuje existující `textarea`, zobrazí
+stručný pokyn k diktování klávesnice a vůbec nespustí `getUserMedia`,
+`MediaRecorder`, přepis audia ani automatické odeslání. Na Macu detektor neplatí
+a původní nahrávání zůstává beze změny.
+
+Nativní iOS AutoFill řádek nad klávesnicí se kódem neskrývá. Editor již používá
+`autocomplete="off"`, ale WebKit jej může ignorovat; nahrazení standardního
+`textarea` nestandardním editorem by kvůli kosmetice zhoršilo robustnost,
+přístupnost a diktování.
+
+Důkaz: 22 cílených UI testů, JavaScript syntaxe a plná brána 730 testů prošly.
+
+Další krok: na iPhonu obnovit HTTPS stránku a ověřit, že `Nahrát pokyn` přesune
+kurzor do editoru; AutoFill řádek zavřít systémovou fajfkou podle potřeby.

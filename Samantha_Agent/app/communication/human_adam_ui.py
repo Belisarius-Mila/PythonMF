@@ -313,8 +313,19 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     input.focus();
   }
 
+  function isIOSDevice() {
+    const userAgent = String(navigator.userAgent || "");
+    return /iPad|iPhone|iPod/.test(userAgent)
+      || (navigator.platform === "MacIntel" && Number(navigator.maxTouchPoints || 0) > 1);
+  }
+
   async function startVoiceRecording() {
     if (busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing) return;
+    if (isIOSDevice()) {
+      input.focus();
+      voiceStatus.textContent = "Kurzor je v poli; použij mikrofon klávesnice iPhonu a text před odesláním zkontroluj.";
+      return;
+    }
     if (!window.isSecureContext) {
       voiceStatus.textContent = "Mikrofon je na iPhonu dostupný jen přes HTTPS adresu Cockpitu; tato stránka běží přes HTTP.";
       return;
