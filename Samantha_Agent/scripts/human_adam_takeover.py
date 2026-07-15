@@ -9,7 +9,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Callable, Sequence
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
@@ -144,6 +144,7 @@ def apply_takeover(
     confirmation: str,
     push: bool,
     workspace: RemoteWorkspaceManager | None = None,
+    progress_callback: Callable[[str, str], None] | None = None,
 ) -> dict[str, Any]:
     if str(confirmation or "").strip() != CONFIRMATION_TEXT:
         raise TakeoverError(f"Chybí přesná potvrzovací věta: {CONFIRMATION_TEXT}")
@@ -151,6 +152,8 @@ def apply_takeover(
     plan = build_takeover_plan(workspace=manager)
     source_repo = manager.source_repo
 
+    if progress_callback is not None:
+        progress_callback("fast_forward", "running")
     _git(source_repo, ["fetch", "--no-tags", str(manager.workspace_root), "refs/heads/main"])
     fetched_head = _git(source_repo, ["rev-parse", "FETCH_HEAD"])
     if fetched_head != plan.checkpoint_head:
@@ -161,13 +164,23 @@ def apply_takeover(
 
     _git(source_repo, ["diff", "--check", "HEAD", "FETCH_HEAD"])
     _git(source_repo, ["merge", "--ff-only", "FETCH_HEAD"])
+    if progress_callback is not None:
+        progress_callback("fast_forward", "passed")
     pushed = False
     if push:
+        if progress_callback is not None:
+            progress_callback("push", "running")
         _git(source_repo, ["push", "origin", "main"])
         pushed = True
+        if progress_callback is not None:
+            progress_callback("push", "passed")
+    if progress_callback is not None:
+        progress_callback("workspace_alignment", "running")
     sync = manager.sync_from_main(confirmed=True)
     if sync.get("head") != sync.get("source_head") or sync.get("dirty") or sync.get("remotes"):
         raise TakeoverError("Checkpoint je převzatý, ale závěrečná kontrola workspace není čistá.")
+    if progress_callback is not None:
+        progress_callback("workspace_alignment", "passed")
     return {
         **plan.public_dict(),
         "applied": True,

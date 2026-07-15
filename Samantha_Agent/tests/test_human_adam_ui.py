@@ -35,6 +35,7 @@ class HumanAdamUiTests(unittest.TestCase):
             "deployConfirmation",
             "deployBtn",
             "deploymentReceipt",
+            "deploymentDiagnostic",
             "turnActivity",
             "voiceRecordBtn",
             "voiceStopBtn",
@@ -104,6 +105,26 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertLess(header_end, notice)
         self.assertIn("header { position:sticky;", HUMAN_ADAM_HTML)
         self.assertIn("#deploymentReceipt { margin:8px 0 0; padding:6px 10px;", HUMAN_ADAM_HTML)
+
+    def test_ui_renders_safe_persistent_deployment_stage_in_sticky_header(self) -> None:
+        header = HUMAN_ADAM_HTML.index("<header>")
+        receipt = HUMAN_ADAM_HTML.index('id="deploymentReceipt"', header)
+        diagnostic = HUMAN_ADAM_HTML.index('id="deploymentDiagnostic"', receipt)
+        header_end = HUMAN_ADAM_HTML.index("</header>", diagnostic)
+        render_start = HUMAN_ADAM_HTML.index("function renderDeploymentDiagnostic(diagnostic)")
+        render_end = HUMAN_ADAM_HTML.index("function renderStatus(payload)", render_start)
+        render_source = HUMAN_ADAM_HTML[render_start:render_end]
+
+        self.assertLess(receipt, diagnostic)
+        self.assertLess(diagnostic, header_end)
+        self.assertIn('new Set(["audit","gate","receipt","fast_forward","push","workspace_alignment","restart"])', render_source)
+        self.assertIn('new Set(["running","passed","failed"])', render_source)
+        self.assertIn("deploymentDiagnostic.textContent = showDiagnostic", render_source)
+        self.assertIn("Poslední nasazení ${shortCommit} · ${message} · ${updatedTime}", render_source)
+        self.assertIn("deploymentDiagnostic.hidden = !showDiagnostic;", render_source)
+        self.assertIn("renderDeploymentDiagnostic(payload.deployment_diagnostic || null);", HUMAN_ADAM_HTML)
+        self.assertNotIn("diagnostic.path", render_source)
+        self.assertNotIn("diagnostic.error", render_source)
 
     def test_deployment_actions_have_distinct_audit_and_apply_colors(self) -> None:
         self.assertIn(

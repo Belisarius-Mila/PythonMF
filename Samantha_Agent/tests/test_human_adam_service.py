@@ -8,6 +8,7 @@ from app.codex_appserver import AppServerError
 from app.communication.human_adam_deploy import (
     DEPLOYMENT_COMPLETE,
     DEPLOYMENT_PENDING,
+    write_deployment_diagnostic,
     write_deployment_receipt,
 )
 from app.communication.human_adam_service import (
@@ -213,6 +214,32 @@ class HumanAdamServiceTests(unittest.TestCase):
             confirmation = restarted_service.status()["deployment_confirmation"]
 
         self.assertIsNone(confirmation)
+
+    def test_status_restores_safe_deployment_diagnostic_after_restart(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            service, _runtime, workspace, _hub = self.make_service(root)
+            write_deployment_diagnostic(
+                service.deployment_diagnostic_path,
+                checkpoint_head=workspace.source_head,
+                thread_id="canonical-thread",
+                stage="push",
+                outcome="failed",
+                updated_at="2026-07-15T10:31:00+00:00",
+            )
+
+            restarted_service, _runtime, _workspace, _hub = self.make_service(root)
+            diagnostic = restarted_service.status()["deployment_diagnostic"]
+
+        self.assertEqual(diagnostic["checkpoint_short"], "aaaaaaa")
+        self.assertEqual(diagnostic["stage"], "push")
+        self.assertEqual(diagnostic["outcome"], "failed")
+        self.assertEqual(
+            diagnostic["message"],
+            "Push větve main selhal; vzdálená větev není potvrzená.",
+        )
+        self.assertNotIn("canonical-thread", str(diagnostic))
+        self.assertNotIn("private", str(diagnostic))
 
     def test_developer_instructions_require_timestamped_tvbcp_append(self) -> None:
         self.assertIn("na konec souboru", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)

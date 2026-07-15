@@ -779,3 +779,33 @@ dočasné, ale obsah nahrávky opouští zařízení za účelem přepisu.
 Další krok: bez nasazení nyní zkontrolovat změněné cesty; po samostatném
 potvrzeném nasazení ručně ověřit na iPhonu cyklus nahrát → ukončit → přepsat →
 opravit text → výslovně odeslat a zvlášť chybu přepisu.
+
+### 2026-07-15 11:16 CEST – Trvalá diagnostika fází nasazení
+
+Požadavek: po nejasném výsledku nasazení trvale a bezpečně ukázat, ve které fázi
+proces skončil, zejména zda selhala brána, fast-forward, push, zarovnání
+workspace nebo zahájení restartu.
+
+Implementace:
+
+- diagnostika je oddělená od zelené účtenky `deployed`, takže nový neúspěšný
+  pokus nesmaže poslední platné potvrzení nasazení;
+- trvalý záznam obsahuje pouze hash vlákna, commit, pevně povolenou fázi a
+  výsledek a čas. Text výjimky, obsah souborů, soukromé cesty ani citlivé údaje
+  se neukládají;
+- takeover hlásí hranice fast-forwardu, pushnutí a zarovnání. Cockpit zvlášť
+  uloží zahájení a výsledek spuštění restartu;
+- Human–Adam zobrazuje poslední bezpečnou fázi ve sticky hlavičce a obnoví ji po
+  restartu ve stejném vlákně.
+
+Důkaz: prošlo 48 cílených testů pro deployment, takeover, službu, UI a Cockpit.
+Regrese ověřují zejména přesnou fázi neúspěšného pushnutí bez úniku interního
+textu, restartovací hranici, thread scope a obnovení diagnostiky po restartu.
+
+Riziko: stav `restart passed` potvrzuje bezpečné zahájení restartovacího workeru,
+nikoli dokončení nového procesu. Skutečný návrat Cockpitu nadále ověřuje klient
+změnou PID; diagnostika nezavádí nový polling ani komunikační mechanismus.
+
+Další krok: po samostatném checkpointu a nasazení z iPhonu ověřit, že sticky
+diagnostika ukáže poslední fázi před restartem a po návratu stejného vlákna stav
+`restart` bez zobrazení soukromé cesty.
