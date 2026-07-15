@@ -746,3 +746,36 @@ odchylka může zkreslit údaj MM:SS, ale nemění serverový stav ani doručen�
 
 Další krok: po nasazení ručně zahájit delší tah, během něj obnovit stránku a
 ověřit pokračující čas, dostupnost tlačítka `Stav` a zastavení po odpovědi.
+
+### 2026-07-15 08:44 CEST – Bezpečná první fáze hlasového vstupu Human–Adam
+
+Implementace:
+
+- nový úzký POST endpoint `/api/human-adam/transcribe` volá přímo existující
+  `transcribe_audio_base64_isolated` a klientovi vrací pouze editovatelný text;
+- endpoint nic neukládá do voice inboxu, nic nedoručuje a nevolá starou hlasovou
+  koordinaci ani kanonické odeslání; dočasný audio soubor vytváří a odstraňuje
+  pouze nízkoúrovňový izolovaný helper;
+- UI nabízí `Nahrát pokyn`, jasný stav záznamu, `Ukončit záznam` a stav
+  `Přepisuji…`; výsledek se přidá do stávajícího editovatelného pole a odejde až
+  po výslovném stisknutí existujícího tlačítka `Odeslat` přes
+  `/api/human-adam/send`;
+- chyba přepisu rozepsaný text nemění. Aktivní Adamův tah blokuje zahájení
+  nového záznamu i odeslání, zatímco ruční tlačítko `Stav` zůstává dostupné;
+- nevznikl watcher, VoiceBridge, TTY, terminal bridge, automatické odeslání ani
+  automatické opakování. Nová POST cesta má samostatnou kartu registru s rizikem
+  externího AI přepisu a explicitním mikrofonním krokem bez doručení.
+
+Testy: prošlo 17 cílených UI testů a 7 cílených backendových/registry testů.
+Regrese ověřují čistý přepis bez doručení, vložení do editoru, absenci
+automatického `/send`, výhradně ruční odeslání, zachování textu při chybě, zámek
+nahrávání během tahu, registry kartu a absenci legacy závislostí. Prošla také
+JavaScriptová syntaxe, Python kompilace a `git diff --check`.
+
+Rizika: dostupnost mikrofonu a podporovaný audio formát závisejí na oprávnění a
+prohlížeči zařízení; samotný přepis používá externí OpenAI službu. Audio je jen
+dočasné, ale obsah nahrávky opouští zařízení za účelem přepisu.
+
+Další krok: bez nasazení nyní zkontrolovat změněné cesty; po samostatném
+potvrzeném nasazení ručně ověřit na iPhonu cyklus nahrát → ukončit → přepsat →
+opravit text → výslovně odeslat a zvlášť chybu přepisu.

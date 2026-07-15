@@ -8474,6 +8474,41 @@ def transcribe_audio_base64_isolated(
     return result
 
 
+def human_adam_transcribe_action(
+    payload: dict[str, Any],
+    *,
+    transcriber: Callable[..., dict[str, Any]] = transcribe_audio_base64_isolated,
+) -> dict[str, Any]:
+    """Return an editable transcript without persistence or delivery side effects."""
+    language = str(payload.get("language") or "cs").strip().casefold()
+    if language != "cs":
+        return {
+            "ok": False,
+            "status": "human_adam_transcription_failed",
+            "text": "",
+            "message": "První fáze hlasového vstupu podporuje pouze češtinu.",
+        }
+    try:
+        result = transcriber(
+            str(payload.get("audio_base64") or ""),
+            mime_type=str(payload.get("mime_type") or ""),
+            language=language,
+        )
+        text = str(result.get("text") or "").strip()
+        if not text:
+            raise TranscriptionError("Přepis je prázdný; zkus mluvit blíž k mikrofonu.")
+        if len(text) > 12_000:
+            raise TranscriptionError("Přepis je příliš dlouhý pro textové pole Human–Adam.")
+        return {"ok": True, "status": "transcribed_for_review", "text": text}
+    except (TranscriptionError, OSError, ValueError) as exc:
+        return {
+            "ok": False,
+            "status": "human_adam_transcription_failed",
+            "text": "",
+            "message": str(exc),
+        }
+
+
 def record_voice_transcription_failure(
     *,
     message: str,
@@ -9242,6 +9277,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "risk": "private_write",
         "confirmation": "technical_event_no_content",
         "handler_name": "cockpit_voice_frontend_event_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/human-adam/transcribe",
+        "label": "Prepsat hlas do editovatelneho Human-Adam konceptu",
+        "risk": "external_ai",
+        "confirmation": "explicit_microphone_recording_no_delivery",
+        "handler_name": "human_adam_transcribe_action",
         "test_level": "direct",
     },
     {
@@ -10249,6 +10292,10 @@ class CockpitServer:
                 if parsed.path == "/api/voice-bridge/frontend-event":
                     payload = self.read_json()
                     self.respond_json(cockpit_voice_frontend_event_action(payload))
+                    return
+                if parsed.path == "/api/human-adam/transcribe":
+                    payload = self.read_json()
+                    self.respond_json(human_adam_transcribe_action(payload))
                     return
                 if parsed.path == "/api/human-adam/connect":
                     self.respond_json(human_adam_connect_action(service=HUMAN_ADAM))

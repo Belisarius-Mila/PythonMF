@@ -40,6 +40,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .meta { display:block; margin-top:6px; color:var(--muted); font-size:12px; }
     .composer { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:min(920px,100%); padding:12px max(16px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); border-top:1px solid var(--line); background:rgba(255,255,255,.98); }
     textarea { width:100%; min-height:86px; max-height:230px; resize:vertical; border:1px solid #bac7d8; border-radius:13px; padding:12px; font:inherit; color:var(--ink); }
+    .voice-controls { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    #voiceRecordBtn.recording { color:#991b1b; border-color:#ef4444; background:#fef2f2; }
+    #voiceStatus { color:var(--muted); font-size:12px; }
     .compose-actions { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:8px; }
     .hint { color:var(--muted); font-size:12px; }
     .tvbcp-panel { position:fixed; z-index:5; inset:0 0 0 auto; width:min(680px,100%); display:flex; flex-direction:column; background:#fff; border-left:1px solid var(--line); box-shadow:-12px 0 40px rgba(15,23,42,.18); }
@@ -84,6 +87,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   <section id="chat" aria-label="Konverzace Human–Adam"></section>
   <form class="composer" id="composer" autocomplete="off">
     <textarea id="messageInput" maxlength="12000" autocomplete="off" placeholder="Napiš Adamovi…" aria-label="Zpráva pro Adama"></textarea>
+    <div class="voice-controls">
+      <button id="voiceRecordBtn" type="button">Nahrát pokyn</button>
+      <button id="voiceStopBtn" type="button" hidden disabled>Ukončit záznam</button>
+      <span id="voiceStatus" role="status" aria-live="polite">Přepis se vloží do pole a sám se neodešle.</span>
+    </div>
     <div class="compose-actions">
       <span class="hint">⌘/Ctrl + Enter odešle · Enter píše nový řádek</span>
       <button class="primary" id="sendBtn" type="submit">Odeslat</button>
@@ -132,6 +140,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const composer = document.getElementById("composer");
   const input = document.getElementById("messageInput");
   const sendBtn = document.getElementById("sendBtn");
+  const voiceRecordBtn = document.getElementById("voiceRecordBtn");
+  const voiceStopBtn = document.getElementById("voiceStopBtn");
+  const voiceStatus = document.getElementById("voiceStatus");
   const tvbcpOpenBtn = document.getElementById("tvbcpOpenBtn");
   const tvbcpPanel = document.getElementById("tvbcpPanel");
   const tvbcpCloseBtn = document.getElementById("tvbcpCloseBtn");
@@ -156,6 +167,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let busy = false;
   let sendInFlight = false;
   let sessionTurnBusy = false;
+  let voiceRecorder = null;
+  let voiceStream = null;
+  let voiceChunks = [];
+  let voiceStarting = false;
+  let voiceRecording = false;
+  let voiceTranscribing = false;
   let turnTimerId = null;
   let activeTurnStartedAt = "";
   let lastSession = null;
@@ -175,7 +192,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   function syncControls() {
     connectBtn.disabled = busy;
     refreshBtn.disabled = busy;
-    sendBtn.disabled = busy || sendInFlight || sessionTurnBusy;
+    sendBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
+    voiceRecordBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
+    voiceRecordBtn.classList.toggle("recording", voiceRecording);
+    voiceRecordBtn.textContent = voiceRecording ? "Nahrávám…" : "Nahrát pokyn";
+    voiceStopBtn.hidden = !voiceRecording;
+    voiceStopBtn.disabled = !voiceRecording;
   }
 
   function setBusy(value, text="") {
@@ -241,6 +263,120 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   function clearMessageInput() {
     input.value = "";
     input.defaultValue = "";
+  }
+
+  function preferredVoiceMimeType() {
+    if (!window.MediaRecorder || typeof window.MediaRecorder.isTypeSupported !== "function") return "";
+    const candidates = ["audio/mp4", "audio/webm;codecs=opus", "audio/webm"];
+    return candidates.find((candidate) => window.MediaRecorder.isTypeSupported(candidate)) || "";
+  }
+
+  function releaseVoiceStream() {
+    if (voiceStream) voiceStream.getTracks().forEach((track) => track.stop());
+    voiceStream = null;
+  }
+
+  function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        const dataUrl = String(reader.result || "");
+        resolve(dataUrl.includes(",") ? dataUrl.split(",", 2)[1] : dataUrl);
+      }, {once:true});
+      reader.addEventListener("error", () => reject(new Error("Nahrávku nelze načíst.")), {once:true});
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  function insertTranscriptForReview(text) {
+    const transcript = String(text || "").trim();
+    if (!transcript) throw new Error("Přepis je prázdný.");
+    const existing = input.value;
+    const separator = existing && !/\s$/.test(existing) ? "\n" : "";
+    const combined = `${existing}${separator}${transcript}`;
+    if (input.maxLength > 0 && combined.length > input.maxLength) {
+      throw new Error("Přepis se nevejde do textového pole; zkrať rozepsaný text.");
+    }
+    input.value = combined;
+    input.focus();
+  }
+
+  async function startVoiceRecording() {
+    if (busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
+      voiceStatus.textContent = "Tento prohlížeč nepodporuje bezpečné nahrávání mikrofonu.";
+      return;
+    }
+    try {
+      voiceStarting = true;
+      syncControls();
+      voiceStream = await navigator.mediaDevices.getUserMedia({audio:true});
+      voiceStarting = false;
+      if (sendInFlight || sessionTurnBusy) {
+        releaseVoiceStream();
+        voiceStatus.textContent = "Adam právě pracuje; nový záznam teď nelze zahájit.";
+        syncControls();
+        return;
+      }
+      voiceChunks = [];
+      const mimeType = preferredVoiceMimeType();
+      voiceRecorder = mimeType
+        ? new window.MediaRecorder(voiceStream, {mimeType})
+        : new window.MediaRecorder(voiceStream);
+      voiceRecorder.addEventListener("dataavailable", (event) => {
+        if (event.data && event.data.size > 0) voiceChunks.push(event.data);
+      });
+      voiceRecorder.addEventListener("stop", transcribeVoiceRecording, {once:true});
+      voiceRecorder.start();
+      voiceRecording = true;
+      voiceStatus.textContent = "Nahrávám… záznam ukončíš tlačítkem Ukončit záznam.";
+      syncControls();
+    } catch (error) {
+      voiceStarting = false;
+      voiceRecorder = null;
+      voiceRecording = false;
+      releaseVoiceStream();
+      syncControls();
+      voiceStatus.textContent = `Mikrofon se nepodařilo spustit: ${error.message || error}`;
+    }
+  }
+
+  function stopVoiceRecording() {
+    if (!voiceRecorder || voiceRecorder.state !== "recording") return;
+    voiceStatus.textContent = "Ukončuji záznam…";
+    voiceRecorder.stop();
+  }
+
+  async function transcribeVoiceRecording() {
+    const recorder = voiceRecorder;
+    const blob = new Blob(voiceChunks, {type:(recorder && recorder.mimeType) || "audio/webm"});
+    voiceRecorder = null;
+    voiceChunks = [];
+    voiceRecording = false;
+    releaseVoiceStream();
+    if (!blob.size) {
+      voiceStatus.textContent = "Nahrávka je prázdná. Rozepsaný text zůstal zachován.";
+      syncControls();
+      return;
+    }
+    voiceTranscribing = true;
+    voiceStatus.textContent = "Přepisuji…";
+    syncControls();
+    try {
+      const audioBase64 = await blobToBase64(blob);
+      const payload = await api("/api/human-adam/transcribe", {
+        method:"POST",
+        body:JSON.stringify({audio_base64:audioBase64,mime_type:blob.type || "audio/webm",language:"cs"}),
+      });
+      if (!payload.ok) throw new Error(payload.message || "Přepis hlasu selhal.");
+      insertTranscriptForReview(payload.text);
+      voiceStatus.textContent = "Přepis je v poli. Můžeš ho opravit a odeslat tlačítkem Odeslat.";
+    } catch (error) {
+      voiceStatus.textContent = `Přepis hlasu selhal: ${error.message || error} Rozepsaný text zůstal zachován.`;
+    } finally {
+      voiceTranscribing = false;
+      syncControls();
+    }
   }
 
   function bubble(text, className, meta) {
@@ -550,7 +686,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
   async function sendMessage(event) {
     event.preventDefault();
-    if (busy || sendInFlight || sessionTurnBusy) return;
+    if (busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing) return;
     const text = input.value.trim();
     if (!text) { notice.textContent = "Napiš nejdřív zprávu."; return; }
     clearMessageInput();
@@ -596,6 +732,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     deployBtn.disabled = !required || deployConfirmation.value.trim() !== required;
   });
   deployBtn.addEventListener("click", deployCheckpoint);
+  voiceRecordBtn.addEventListener("click", startVoiceRecording);
+  voiceStopBtn.addEventListener("click", stopVoiceRecording);
   composer.addEventListener("submit", sendMessage);
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) sendMessage(event);

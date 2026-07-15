@@ -53,6 +53,7 @@ from app.cockpit import (
     cockpit_save_voice_text_action,
     cockpit_speak_action,
     cockpit_transcribe_voice_action,
+    human_adam_transcribe_action,
     janicka_light_status_action,
     janicka_orphaned_codex_session_report,
     open_janicka_full_adam_action,
@@ -203,6 +204,20 @@ class CockpitTests(unittest.TestCase):
             self.assertTrue(item["confirmation"].strip())
             self.assertTrue(item["handler_name"].strip())
             self.assertTrue(hasattr(cockpit_module, item["handler_name"]), item["handler_name"])
+
+    def test_human_adam_transcribe_post_route_has_narrow_registry_card(self) -> None:
+        card = next(
+            item for item in COCKPIT_POST_ACTIONS if item["path"] == "/api/human-adam/transcribe"
+        )
+
+        self.assertEqual(card["risk"], "external_ai")
+        self.assertEqual(card["confirmation"], "explicit_microphone_recording_no_delivery")
+        self.assertEqual(card["handler_name"], "human_adam_transcribe_action")
+        self.assertIn("/api/human-adam/transcribe", self.cockpit_do_post_routes())
+        source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
+        route_start = source.index('if parsed.path == "/api/human-adam/transcribe":')
+        route_end = source.index('if parsed.path == "/api/human-adam/connect":', route_start)
+        self.assertIn("self.respond_json(human_adam_transcribe_action(payload))", source[route_start:route_end])
 
     def test_frontend_literal_routes_exist_in_backend(self) -> None:
         exact_backend_routes = set(self.cockpit_do_get_routes()) | set(self.cockpit_do_post_routes())
@@ -4187,6 +4202,41 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["text"], "Najdi dnešní dokumenty.")
         self.assertEqual(len(seen_temp_paths), 1)
         self.assertFalse(seen_temp_paths[0].exists())
+
+    def test_human_adam_transcribe_action_only_returns_editable_text_without_delivery(self) -> None:
+        transcribe_calls: list[dict[str, object]] = []
+
+        def fake_transcriber(audio_base64: str, **kwargs: object) -> dict[str, object]:
+            transcribe_calls.append({"audio_base64": audio_base64, **kwargs})
+            return {"ok": True, "text": "  Zkontroluj pracovní stav.  ", "private": "ignored"}
+
+        with (
+            patch("app.cockpit.cockpit_transcribe_voice_action") as legacy_transcribe,
+            patch("app.cockpit.save_voice_command_to_inbox") as voice_inbox,
+            patch("app.cockpit.human_adam_send_action") as canonical_send,
+        ):
+            result = human_adam_transcribe_action(
+                {"audio_base64": "encoded-audio", "mime_type": "audio/mp4", "language": "cs"},
+                transcriber=fake_transcriber,
+            )
+
+        self.assertEqual(
+            result,
+            {"ok": True, "status": "transcribed_for_review", "text": "Zkontroluj pracovní stav."},
+        )
+        self.assertEqual(
+            transcribe_calls,
+            [
+                {
+                    "audio_base64": "encoded-audio",
+                    "mime_type": "audio/mp4",
+                    "language": "cs",
+                }
+            ],
+        )
+        legacy_transcribe.assert_not_called()
+        voice_inbox.assert_not_called()
+        canonical_send.assert_not_called()
 
     def test_transcribe_audio_base64_isolated_reports_subprocess_failure(self) -> None:
         encoded = base64.b64encode(b"fake audio").decode("ascii")

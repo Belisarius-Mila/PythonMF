@@ -36,6 +36,9 @@ class HumanAdamUiTests(unittest.TestCase):
             "deployBtn",
             "deploymentReceipt",
             "turnActivity",
+            "voiceRecordBtn",
+            "voiceStopBtn",
+            "voiceStatus",
         ):
             self.assertIn(f'id="{element_id}"', HUMAN_ADAM_HTML)
         self.assertIn("Odesláno", HUMAN_ADAM_HTML)
@@ -51,6 +54,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("/api/human-adam/checkpoint", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/deploy-audit", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/deploy", HUMAN_ADAM_HTML)
+        self.assertIn("/api/human-adam/transcribe", HUMAN_ADAM_HTML)
         self.assertIn("Checkpoint bez pushnutí", HUMAN_ADAM_HTML)
         self.assertIn("Audit nasazení", HUMAN_ADAM_HTML)
         self.assertIn("Ověřit a nasadit", HUMAN_ADAM_HTML)
@@ -113,6 +117,69 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("button.audit-action { background:#fbbf24;", HUMAN_ADAM_HTML)
         self.assertIn("button.deploy-action { background:var(--ok);", HUMAN_ADAM_HTML)
 
+    def test_voice_transcript_is_inserted_into_existing_editable_textarea(self) -> None:
+        insert_start = HUMAN_ADAM_HTML.index("function insertTranscriptForReview(text)")
+        insert_end = HUMAN_ADAM_HTML.index("async function startVoiceRecording()", insert_start)
+        insert_source = HUMAN_ADAM_HTML[insert_start:insert_end]
+
+        self.assertIn('id="messageInput"', HUMAN_ADAM_HTML)
+        self.assertNotIn('id="messageInput" readonly', HUMAN_ADAM_HTML)
+        self.assertIn("const existing = input.value;", insert_source)
+        self.assertIn("const combined = `${existing}${separator}${transcript}`;", insert_source)
+        self.assertIn("input.value = combined;", insert_source)
+        self.assertIn("input.focus();", insert_source)
+
+    def test_voice_transcription_never_calls_canonical_send_automatically(self) -> None:
+        transcribe_start = HUMAN_ADAM_HTML.index("async function transcribeVoiceRecording()")
+        transcribe_end = HUMAN_ADAM_HTML.index("function bubble(", transcribe_start)
+        transcribe_source = HUMAN_ADAM_HTML[transcribe_start:transcribe_end]
+
+        self.assertIn('api("/api/human-adam/transcribe"', transcribe_source)
+        self.assertIn("insertTranscriptForReview(payload.text);", transcribe_source)
+        self.assertNotIn("/api/human-adam/send", transcribe_source)
+        self.assertNotIn("sendMessage", transcribe_source)
+        self.assertNotIn("requestSubmit", transcribe_source)
+        self.assertNotIn("submit()", transcribe_source)
+        self.assertNotIn("/api/speech/transcribe", HUMAN_ADAM_HTML)
+
+    def test_voice_text_is_sent_only_by_explicit_existing_submit_action(self) -> None:
+        send_start = HUMAN_ADAM_HTML.index("async function sendMessage(event)")
+        send_end = HUMAN_ADAM_HTML.index('connectBtn.addEventListener("click", connect);', send_start)
+        send_source = HUMAN_ADAM_HTML[send_start:send_end]
+
+        self.assertEqual(HUMAN_ADAM_HTML.count("/api/human-adam/send"), 1)
+        self.assertIn('/api/human-adam/send"', send_source)
+        self.assertIn('composer.addEventListener("submit", sendMessage);', HUMAN_ADAM_HTML)
+        self.assertIn('<button class="primary" id="sendBtn" type="submit">Odeslat</button>', HUMAN_ADAM_HTML)
+        self.assertIn('<button id="voiceRecordBtn" type="button">Nahrát pokyn</button>', HUMAN_ADAM_HTML)
+        self.assertIn('<button id="voiceStopBtn" type="button" hidden disabled>', HUMAN_ADAM_HTML)
+
+    def test_voice_transcription_failure_preserves_existing_draft(self) -> None:
+        transcribe_start = HUMAN_ADAM_HTML.index("async function transcribeVoiceRecording()")
+        transcribe_end = HUMAN_ADAM_HTML.index("function bubble(", transcribe_start)
+        transcribe_source = HUMAN_ADAM_HTML[transcribe_start:transcribe_end]
+        catch_start = transcribe_source.index("} catch (error) {")
+        catch_end = transcribe_source.index("} finally {", catch_start)
+        catch_source = transcribe_source[catch_start:catch_end]
+
+        self.assertIn("Rozepsaný text zůstal zachován.", catch_source)
+        self.assertNotIn("input.value", catch_source)
+        self.assertNotIn("clearMessageInput", transcribe_source)
+
+    def test_active_turn_blocks_new_voice_recording_but_not_manual_status(self) -> None:
+        controls_start = HUMAN_ADAM_HTML.index("function syncControls()")
+        controls_end = HUMAN_ADAM_HTML.index("function setBusy(", controls_start)
+        controls_source = HUMAN_ADAM_HTML[controls_start:controls_end]
+        record_start = HUMAN_ADAM_HTML.index("async function startVoiceRecording()")
+        record_end = HUMAN_ADAM_HTML.index("function stopVoiceRecording()", record_start)
+        record_source = HUMAN_ADAM_HTML[record_start:record_end]
+
+        self.assertIn("voiceRecordBtn.disabled = busy || sendInFlight || sessionTurnBusy", controls_source)
+        self.assertIn("if (busy || sendInFlight || sessionTurnBusy", record_source)
+        self.assertIn("if (sendInFlight || sessionTurnBusy)", record_source)
+        self.assertIn("refreshBtn.disabled = busy;", controls_source)
+        self.assertNotIn("refreshBtn.disabled = sessionTurnBusy", controls_source)
+
     def test_turn_timer_starts_immediately_before_send_api_call(self) -> None:
         send_start = HUMAN_ADAM_HTML.index("async function sendMessage(event)")
         send_end = HUMAN_ADAM_HTML.index('connectBtn.addEventListener("click", connect);', send_start)
@@ -158,10 +225,10 @@ class HumanAdamUiTests(unittest.TestCase):
         send_end = HUMAN_ADAM_HTML.index('connectBtn.addEventListener("click", connect);', send_start)
         send_source = HUMAN_ADAM_HTML[send_start:send_end]
 
-        self.assertIn("sendBtn.disabled = busy || sendInFlight || sessionTurnBusy;", controls_source)
+        self.assertIn("sendBtn.disabled = busy || sendInFlight || sessionTurnBusy", controls_source)
         self.assertIn("refreshBtn.disabled = busy;", controls_source)
         self.assertNotIn("refreshBtn.disabled = sessionTurnBusy", controls_source)
-        self.assertIn("if (busy || sendInFlight || sessionTurnBusy) return;", send_source)
+        self.assertIn("if (busy || sendInFlight || sessionTurnBusy", send_source)
 
     def test_turn_timer_stops_after_completion_and_marks_delivery_unknown(self) -> None:
         render_start = HUMAN_ADAM_HTML.index("function renderTurnState(session)")
