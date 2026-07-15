@@ -940,3 +940,29 @@ Důkaz: 51 cílených testů, JavaScript syntaxe, `git diff --check` a plná br�
 Další krok: po nasazení provést krátký skutečný tah v Human–Adam a ručně ověřit
 dvojcinknutí. Na iPhonu může přehrání záviset na tom, zda je stránka otevřená a
 prohlížeč nebo tichý režim dovoluje zvuk.
+
+### 2026-07-15 17:19 CEST – Oprava odemknutí dokončovacího zvuku na iPhonu
+
+Mílův první ruční test na iPhonu nepotvrdil žádné dvojcinknutí, přestože měl
+zvuk zařízení zapnutý. Kontrola proti pravidlům WebKitu ukázala slabinu první
+verze: při uživatelském klepnutí pouze volala `AudioContext.resume()`, ale
+nespustila žádný zdroj zvuku. iOS přitom vyžaduje, aby Web Audio vycházelo z
+explicitní uživatelské akce.
+
+Priming nyní při stisku `Odeslat` skutečně vytvoří a spustí jednovzorkový tichý
+`AudioBufferSourceNode`, stejně jako již ověřená audiocesta hlavního Cockpitu.
+Human–Adam navíc:
+
+- ukazuje tlačítko `Zvuk: vyzkoušet`, které při přímém klepnutí okamžitě přehraje
+  stejné dvojcinknutí a změní se na `Zvuk: připraven`;
+- kromě standardního `suspended` rozpozná i iOS/WebKit stav `interrupted`;
+- po návratu k viditelné stránce se pokusí dříve odemknutý kontext obnovit;
+- zachovává fail-open hranici: chyba zvuku nikdy nezmění potvrzené doručení tahu.
+
+Důkaz: 52 cílených testů, Human–Adam JavaScript syntaxe, `git diff --check` a
+plná brána 733 testů prošly.
+
+Další krok: po nasazení na iPhonu obnovit stránku a nejdřív přímo klepnout na
+`Zvuk: vyzkoušet`. Pokud dvojcinknutí zazní, poslat krátký tah a ponechat stránku
+otevřenou do odpovědi. Zamčenou nebo systémem úplně uspanou webovou stránku iOS
+nemusí nechat zvukem probudit; tuto hranici UI nesmí vydávat za garantovanou.

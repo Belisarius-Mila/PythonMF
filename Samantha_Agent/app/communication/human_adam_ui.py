@@ -25,6 +25,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     button:disabled { opacity:.55; cursor:wait; }
     .statusline { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; color:var(--muted); font-size:13px; }
     .badge { padding:4px 8px; border-radius:999px; background:var(--soft); }
+    button.sound-badge { padding:4px 8px; color:var(--muted); font-size:13px; font-weight:600; }
     .badge.ok { color:var(--ok); background:#ecfdf3; }
     .badge.warn { color:var(--warn); background:#fff7ed; }
     #turnActivity { margin:8px 0 0; padding:6px 10px; border-radius:10px; color:var(--warn); background:#fff7ed; font-size:13px; font-weight:700; }
@@ -83,6 +84,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <span class="badge warn" id="connectionBadge">Odpojeno</span>
       <span class="badge" id="threadBadge">Relace: —</span>
       <span class="badge" id="workspaceBadge">Izolovaný workspace</span>
+      <button class="badge sound-badge warn" id="soundTestBtn" type="button">Zvuk: vyzkoušet</button>
     </div>
     <div id="turnActivity" role="status" aria-live="polite" hidden></div>
     <div id="deploymentReceipt" role="status" aria-live="polite" hidden></div>
@@ -139,6 +141,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const connectionBadge = document.getElementById("connectionBadge");
   const threadBadge = document.getElementById("threadBadge");
   const workspaceBadge = document.getElementById("workspaceBadge");
+  const soundTestBtn = document.getElementById("soundTestBtn");
   const turnActivity = document.getElementById("turnActivity");
   const connectBtn = document.getElementById("connectBtn");
   const refreshBtn = document.getElementById("refreshBtn");
@@ -183,6 +186,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let lastSession = null;
   let deploymentAudit = null;
   let completionAudioContext = null;
+  let completionAudioUnlocked = false;
 
   function messageId() {
     if (window.crypto && crypto.randomUUID) return `human-adam-${crypto.randomUUID()}`;
@@ -198,26 +202,61 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   function getCompletionAudioContext() {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) return null;
-    if (completionAudioContext && completionAudioContext.state === "closed") completionAudioContext = null;
-    if (!completionAudioContext) completionAudioContext = new AudioContextClass();
+    if (completionAudioContext && completionAudioContext.state === "closed") {
+      completionAudioContext = null;
+      completionAudioUnlocked = false;
+    }
+    if (!completionAudioContext) {
+      completionAudioContext = new AudioContextClass();
+      const observedContext = completionAudioContext;
+      observedContext.addEventListener("statechange", () => {
+        if (completionAudioContext !== observedContext) return;
+        const ready = observedContext.state === "running" && completionAudioUnlocked;
+        updateCompletionSoundUi(ready);
+      });
+    }
     return completionAudioContext;
   }
 
-  function primeCompletionSound() {
+  function updateCompletionSoundUi(ready, supported=true) {
+    soundTestBtn.textContent = !supported ? "Zvuk: nepodporován" : (ready ? "Zvuk: připraven" : "Zvuk: vyzkoušet");
+    soundTestBtn.className = ready ? "badge sound-badge ok" : "badge sound-badge warn";
+    soundTestBtn.disabled = !supported;
+  }
+
+  async function ensureCompletionAudioRunning(context) {
+    if (!context) return false;
+    if (["suspended", "interrupted"].includes(String(context.state || ""))) await context.resume();
+    return context.state === "running";
+  }
+
+  async function primeCompletionSound() {
     try {
       const context = getCompletionAudioContext();
-      if (context && context.state === "suspended") context.resume().catch(() => {});
+      if (!context) {
+        updateCompletionSoundUi(false, false);
+        return false;
+      }
+      if (!await ensureCompletionAudioRunning(context)) throw new Error("Audiokanál se neotevřel.");
+      const source = context.createBufferSource();
+      source.buffer = context.createBuffer(1, 1, 22050);
+      source.connect(context.destination);
+      source.start(0);
+      completionAudioUnlocked = true;
+      updateCompletionSoundUi(true);
+      return true;
     } catch (_error) {
-      completionAudioContext = null;
+      completionAudioUnlocked = false;
+      updateCompletionSoundUi(false);
+      return false;
     }
   }
 
   async function playCompletionSound() {
     try {
       const context = getCompletionAudioContext();
-      if (!context) return;
-      if (context.state === "suspended") await context.resume();
-      if (context.state !== "running") return;
+      if (!context || !completionAudioUnlocked) return false;
+      if (!await ensureCompletionAudioRunning(context)) return false;
       const start = context.currentTime + 0.02;
       const notes = [
         {frequency:740, offset:0, duration:0.16},
@@ -238,8 +277,29 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         oscillator.start(noteStart);
         oscillator.stop(noteEnd + 0.02);
       }
+      updateCompletionSoundUi(true);
+      return true;
     } catch (_error) {
       // Zvuk je pouze doplňkový; nesmí změnit potvrzený stav dokončeného tahu.
+      updateCompletionSoundUi(false);
+      return false;
+    }
+  }
+
+  async function testCompletionSound() {
+    soundTestBtn.disabled = true;
+    const ready = await primeCompletionSound();
+    if (ready) await playCompletionSound();
+    soundTestBtn.disabled = false;
+  }
+
+  async function restoreCompletionAudioAfterVisibility() {
+    if (document.hidden || !completionAudioUnlocked || !completionAudioContext) return;
+    try {
+      const ready = await ensureCompletionAudioRunning(completionAudioContext);
+      updateCompletionSoundUi(ready);
+    } catch (_error) {
+      updateCompletionSoundUi(false);
     }
   }
 
@@ -792,7 +852,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     if (busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing) return;
     const text = input.value.trim();
     if (!text) { notice.textContent = "Napiš nejdřív zprávu."; return; }
-    primeCompletionSound();
+    sendInFlight = true;
+    syncControls();
+    await primeCompletionSound();
     clearMessageInput();
     const sentAt = new Date().toISOString();
     const clientId = messageId();
@@ -800,7 +862,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     const optimistic = lastSession
       ? {...lastSession, turn_busy:true, active_turn:{client_message_id:clientId,started_at:sentAt}, messages:[...(lastSession.messages || []), pendingMessage]}
       : {turn_busy:true, active_turn:{client_message_id:clientId,started_at:sentAt}, messages:[pendingMessage]};
-    sendInFlight = true;
     renderSession(optimistic);
     renderTurnState(optimistic);
     notice.textContent = `Odesláno ${formatTime(sentAt)} · Adam pracuje…`;
@@ -833,6 +894,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   connectBtn.addEventListener("click", connect);
+  soundTestBtn.addEventListener("click", testCompletionSound);
+  document.addEventListener("visibilitychange", restoreCompletionAudioAfterVisibility);
   refreshBtn.addEventListener("click", loadStatus);
   tvbcpOpenBtn.addEventListener("click", openTvbcp);
   tvbcpCloseBtn.addEventListener("click", closeTvbcp);

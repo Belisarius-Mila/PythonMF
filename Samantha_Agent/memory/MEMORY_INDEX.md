@@ -81,12 +81,14 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   odmitnuti vrati text do editoru, nejiste doruceni ho k opakovani nevraci.
   Private Tailscale Serve HTTPS cesta je aktivni pro Chrome/iPhone mikrofon,
   ukazuje na stejny lokalni Cockpit a verejny Funnel je vypnuty. Plna brana ma
-  732 testu; zachovan je i oddeleny Human–Adam checkpoint kompaktniho rozlozeni
+  733 testu; zachovan je i oddeleny Human–Adam checkpoint kompaktniho rozlozeni
   tlacitek nahravani a odeslani. Na iOS tlacitko nahravani bezpecne fokusuje
   editor pro diktovani klavesnice, zatimco Mac nahravaci workflow zustava stejny.
   Adam sam nesmi spoustet Git checkpoint/commit/push/nasazeni a TVBCP aktualizuje
-  jen na vyslovny Miluv pokyn. Po potvrzenem dokonceni tahu zazni lokalni
-  dvojcinknuti; chyba zvuku nikdy nemeni stav doruceni.
+  jen na vyslovny Miluv pokyn. Po prvnim neuspesnem iPhone testu zvuku se
+  audiokanal odemyka skutecnym tichym Web Audio zdrojem pri uzivatelskem gestu,
+  rozpoznava i stav `interrupted` a ma prime tlacitko `Zvuk: vyzkouset`;
+  chyba zvuku nikdy nemeni stav doruceni.
 
 ## Handoffs
 
