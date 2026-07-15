@@ -17968,7 +17968,7 @@ COCKPIT_HTML = """<!doctype html>
           article_id: articleId,
           image_data_url: imageDataUrl,
           filename: file.name || "attachment.jpg",
-          label: libraryAttachmentLabelInput.value.trim() || "Ručně psaný recept",
+          label: libraryAttachmentLabelInput.value.trim() || (((currentLibrarySelectedItem && currentLibrarySelectedItem.category) || currentLibraryCategory) === "travel_places" ? "Ilustrační foto" : "Ručně psaný recept"),
           tags: libraryAttachmentTagsInput.value.trim(),
           note: libraryAttachmentNoteInput.value.trim()
         });
@@ -18215,17 +18215,26 @@ COCKPIT_HTML = """<!doctype html>
       return `/api/library/attachment?id=${encodeURIComponent(articleId || "")}&attachment_id=${encodeURIComponent(attachmentId || "")}&variant=${encodeURIComponent(variant || "readable")}`;
     }
 
-    function renderLibraryAttachments(articleId, attachments) {
+    function libraryAttachmentDisplayLabel(attachment, category) {
+      const label = String(attachment && attachment.label || "").trim();
+      if (category === "travel_places" && (!label || label === "Ručně psaný recept")) {
+        return "Ilustrační foto";
+      }
+      return label || "Příloha";
+    }
+
+    function renderLibraryAttachments(articleId, attachments, category = "") {
       if (!libraryReaderAttachments) return;
       libraryReaderAttachments.innerHTML = "";
       const items = Array.isArray(attachments) ? attachments : [];
       libraryReaderAttachments.classList.toggle("hidden", items.length === 0);
       items.forEach((attachment) => {
+        const displayLabel = libraryAttachmentDisplayLabel(attachment, category);
         const card = document.createElement("div");
         card.className = "library-attachment-card";
         const title = document.createElement("div");
         title.className = "library-attachment-title";
-        title.textContent = attachment.label || "Příloha";
+        title.textContent = displayLabel;
         const meta = document.createElement("div");
         meta.className = "library-attachment-meta";
         const metaParts = [];
@@ -18246,7 +18255,7 @@ COCKPIT_HTML = """<!doctype html>
           const image = document.createElement("img");
           image.className = "library-attachment-image";
           image.src = libraryAttachmentUrl(articleId, attachmentId, attachment.has_thumb ? "thumb" : "readable");
-          image.alt = attachment.label || "Příloha";
+          image.alt = displayLabel;
           link.appendChild(image);
           card.appendChild(link);
         }
@@ -18307,7 +18316,7 @@ COCKPIT_HTML = """<!doctype html>
         libraryReaderMeta.textContent = libraryItemMeta(item);
         libraryReaderText.textContent = data.text || "";
         updateLibraryReadStateButtons(item);
-        renderLibraryAttachments(item.id || articleId, item.attachments || []);
+        renderLibraryAttachments(item.id || articleId, item.attachments || [], item.category || currentLibraryCategory);
       } catch (err) {
         recordFrontendError(err);
         libraryReaderTitle.textContent = "Chyba čtení";
