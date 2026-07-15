@@ -3032,6 +3032,7 @@ def email_header_to_processing_item(header: EmailHeader, source: str) -> dict[st
         "attachment_count": len(attachments),
         "pdf_attachment_count": len(pdf_attachments),
         "large_pdf_attachment_count": len(large_pdf_attachments),
+        "imap_flagged": bool(getattr(header, "flagged", False)),
     }
     item["id"] = email_processing_item_id(
         category,
@@ -3226,6 +3227,52 @@ def parse_email_processing_items(text: str) -> list[dict[str, Any]]:
 
 def read_email_processing_decisions(path: Path = EMAIL_PROCESSING_DECISIONS_FILE) -> dict[str, dict[str, Any]]:
     return read_email_work_decisions(path)
+
+
+def set_email_processing_done_flag(
+    *,
+    provider: str,
+    folder: str,
+    uid: str,
+    done: bool,
+    seznam_provider_factory: Callable[[], object] | None = None,
+) -> dict[str, Any]:
+    safe_provider = safe_text(provider).strip().casefold()
+    safe_folder = safe_text(folder).strip() or "INBOX"
+    safe_uid = safe_text(uid).strip()
+    if safe_provider != "seznam":
+        return {
+            "ok": False,
+            "flagged": False,
+            "message": "Příznak Hotovo je v této fázi povolený pouze pro Seznam.",
+        }
+    if not safe_uid:
+        return {"ok": False, "flagged": False, "message": "Chybí UID e-mailu."}
+    try:
+        client = (seznam_provider_factory or SeznamReadOnlyEmailProvider)()
+        set_flagged = getattr(client, "set_message_flagged", None)
+        if not callable(set_flagged):
+            return {
+                "ok": False,
+                "flagged": False,
+                "message": "Seznam provider neumí příznak Hotovo bezpečně nastavit.",
+            }
+        flagged = bool(set_flagged(uid=safe_uid, folder=safe_folder, flagged=bool(done)))
+    except (EmailConfigError, SeznamEmailProviderError) as exc:
+        return {"ok": False, "flagged": False, "message": str(exc)}
+    if flagged != bool(done):
+        return {
+            "ok": False,
+            "flagged": flagged,
+            "message": "Server nepotvrdil požadovaný stav příznaku.",
+        }
+    return {
+        "ok": True,
+        "flagged": flagged,
+        "message": "E-mail je na Seznamu označený příznakem Hotovo."
+        if flagged
+        else "Příznak Hotovo byl na Seznamu zrušen.",
+    }
 
 
 def save_email_processing_decision(
@@ -9881,6 +9928,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/email-processing/done-flag",
+        "label": "Nastavit nebo zrusit Seznam IMAP priznak Hotovo",
+        "risk": "private_write",
+        "confirmation": "explicit_ui_action_reversible",
+        "handler_name": "set_email_processing_done_flag",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/email-processing/decision",
         "label": "Ulozit pracovni rozhodnuti k e-mailu",
         "risk": "private_write",
@@ -10680,6 +10735,17 @@ class CockpitServer:
                         )
                     )
                     return
+                if parsed.path == "/api/email-processing/done-flag":
+                    payload = self.read_json()
+                    self.respond_json(
+                        set_email_processing_done_flag(
+                            provider=str(payload.get("provider", "")),
+                            folder=str(payload.get("folder", "INBOX")),
+                            uid=str(payload.get("uid", "")),
+                            done=payload.get("done") is True,
+                        )
+                    )
+                    return
                 if parsed.path == "/api/email-processing/decision":
                     payload = self.read_json()
                     item = payload.get("item")
@@ -11316,6 +11382,9 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     .email-actions label { display: inline-flex; gap: 5px; align-items: center; font-size: 13px; }
     .email-actions input { margin: 0; }
     .trash-button { background: #fee2e2; color: #991b1b; padding: 7px 10px; }
+    .done-button { background: #fff3bf; color: #704800; padding: 7px 10px; }
+    .done-button.active { background: #f5c542; color: #3d2900; }
+    .done-button:disabled { opacity: 0.55; cursor: not-allowed; }
     .decision { color: var(--green); font-size: 12px; font-weight: 650; }
     .work-button { width: 100%; }
     .work-button:disabled { opacity: 0.45; cursor: not-allowed; }
@@ -11357,12 +11426,13 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       <aside>
         <h2>Bezpečnost</h2>
         <div class="body meta">
-          <div><strong>Režim:</strong> <span class="safe">read-only</span></div>
+          <div><strong>Režim:</strong> hlavičky a čtení jsou <span class="safe">read-only</span>; tlačítko Hotovo mění pouze vratný příznak Seznamu.</div>
           <div>Okno startuje prázdné. Nové hlavičky se načtou až tlačítkem.</div>
           <div><strong>Obnovit nové:</strong> aktivuje se až po načtení seznamu a doplní jen e-maily novější než nejnovější viditelný e-mail.</div>
           <div><strong>Načti emaily:</strong> doplní jen e-maily ve zvoleném rozsahu 1-14 dní, které ještě nejsou v aktuálním seznamu ani nemají uložené rozhodnutí.</div>
           <div><strong>Načti rozpracované:</strong> vrátí do seznamu e-maily, které už mají status `Zpracovat` nebo `Koš` a čekají na Work Queue.</div>
           <div><strong>Koš:</strong> tlačítko zatím jen označí e-mail ke smazání; skutečné smazání bude samostatná potvrzená akce.</div>
+          <div><strong>Hotovo:</strong> u Seznam e-mailu nastaví nebo zruší serverový IMAP příznak, který se ve schránce zobrazí jako hvězdička či příznak.</div>
           <div><strong>Další krok:</strong> vybrat konkrétní UID a zdroj; načtení e-mailu nebo PDF až po samostatném potvrzení.</div>
           <div id="sourcePath" class="status-line"></div>
           <div id="updatedAt" class="status-line"></div>
@@ -11565,6 +11635,47 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
       return Math.min(14, Math.max(1, parsed));
     }
 
+    function updateDoneButton(button, flagged) {
+      button.classList.toggle("active", Boolean(flagged));
+      button.textContent = flagged ? "★ Hotovo" : "☆ Hotovo";
+      button.setAttribute("aria-pressed", flagged ? "true" : "false");
+    }
+
+    async function setDoneFlag(item, button, statusNode, dialogWindow = window) {
+      if (!item || String(item.provider || "").toLowerCase() !== "seznam" || !item.uid) return;
+      const nextDone = !Boolean(item.imap_flagged);
+      const prompt = nextDone
+        ? "Označit tento e-mail na Seznamu příznakem Hotovo? Ve schránce se zobrazí jako hvězdička nebo příznak."
+        : "Zrušit u tohoto e-mailu na Seznamu příznak Hotovo?";
+      if (!dialogWindow.confirm(prompt)) return;
+      button.disabled = true;
+      statusNode.textContent = nextDone ? "Nastavuji příznak Hotovo..." : "Ruším příznak Hotovo...";
+      try {
+        const res = await fetch("/api/email-processing/done-flag", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            provider: item.provider,
+            folder: item.folder || "INBOX",
+            uid: item.uid,
+            done: nextDone
+          })
+        });
+        const data = await res.json();
+        if (!data.ok) {
+          statusNode.textContent = data.message || "Příznak Hotovo se nepodařilo změnit.";
+          return;
+        }
+        item.imap_flagged = Boolean(data.flagged);
+        updateDoneButton(button, item.imap_flagged);
+        statusNode.textContent = data.message || "Příznak Hotovo byl změněn.";
+      } catch (err) {
+        statusNode.textContent = "Chyba změny příznaku Hotovo: " + err;
+      } finally {
+        button.disabled = false;
+      }
+    }
+
     function normalizeDaysInput() {
       emailDaysInput.value = String(selectedDays());
     }
@@ -11612,6 +11723,14 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
 
       const actions = document.createElement("div");
       actions.className = "email-actions";
+      if (String(item.provider || "").toLowerCase() === "seznam") {
+        const done = document.createElement("button");
+        done.className = "done-button";
+        done.type = "button";
+        updateDoneButton(done, item.imap_flagged);
+        done.addEventListener("click", () => setDoneFlag(item, done, overviewStatus));
+        actions.appendChild(done);
+      }
       [
         ["process", "Zpracovat"],
         ["ignore", "Ignorovat"]
@@ -12051,6 +12170,9 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
             '<div class="status' + (item.queueDecision ? " done" : "") + '">' + escapeHtml(decisionLabel(item)) + '</div>' +
           '</div>' +
           '<div class="detail-actions">' +
+            (String(item.provider || "").toLowerCase() === "seznam"
+              ? '<button type="button" class="done-button' + (item.imap_flagged ? " active" : "") + '" id="doneEmail" aria-pressed="' + (item.imap_flagged ? "true" : "false") + '">' + (item.imap_flagged ? "★ Hotovo" : "☆ Hotovo") + '</button>'
+              : "") +
             '<label><input type="checkbox" id="saveEmail"' + (item.queueDecision === "save" ? " checked" : "") + '> Uložit e-mail</label>' +
             '<label><input type="checkbox" id="skipEmail"' + (item.queueDecision === "skip" ? " checked" : "") + '> Neukládat</label>' +
             '<button type="button" class="danger" id="trashEmail">Koš</button>' +
@@ -12063,6 +12185,10 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
 
         bindAttachmentOpenButtons();
         bindAttachmentPreviewButtons(item);
+        const doneEmailButton = queueDoc.getElementById("doneEmail");
+        if (doneEmailButton) {
+          doneEmailButton.addEventListener("click", () => setDoneFlag(item, doneEmailButton, queueStatus, queue));
+        }
         queueDoc.getElementById("saveEmail").addEventListener("change", (event) => {
           setQueueDecision(item, event.target.checked ? "save" : "");
         });
@@ -12386,6 +12512,8 @@ EMAIL_PROCESSING_HTML = """<!doctype html>
     button.primary { background: var(--blue); color: white; }
     button.secondary { background: #e8eef8; color: #1d3b74; }
     button.danger { background: #fee2e2; color: var(--red); }
+    button.done-button { background: #fff3bf; color: #704800; }
+    button.done-button.active { background: #f5c542; color: #3d2900; }
     button:disabled { opacity: 0.45; cursor: not-allowed; }
     main { padding: 18px 20px 28px; display: grid; gap: 14px; }
     .topbar { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; }

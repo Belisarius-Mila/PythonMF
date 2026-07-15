@@ -10,11 +10,14 @@ from app.email.config import (
     EmailConfigError,
     SEZNAM_IMAP_HOST,
     SEZNAM_IMAP_PORT,
+    SeznamMailConfig,
     load_seznam_mail_config,
 )
 from app.email.seznam_provider import (
     SEZNAM_TRASH_FOLDER_CANDIDATES,
     SeznamEmailProviderError,
+    SeznamReadOnlyEmailProvider,
+    _message_data_has_flag,
     _message_data_to_email_message,
     _validate_uid,
 )
@@ -135,6 +138,91 @@ class SeznamProviderParserTests(unittest.TestCase):
         self.assertEqual(_validate_uid(" 123 "), "123")
         with self.assertRaises(SeznamEmailProviderError):
             _validate_uid("123:456")
+
+    def test_message_data_has_flag_reads_imap_flags_case_insensitively(self) -> None:
+        data = [(b"1 (UID 123 FLAGS (\\Seen \\FLAGGED))", b"")]
+
+        self.assertTrue(_message_data_has_flag(data, r"\Flagged"))
+        self.assertFalse(_message_data_has_flag(data, r"\Deleted"))
+
+
+class SeznamProviderFlagTests(unittest.TestCase):
+    def test_set_message_flagged_writes_and_verifies_server_state(self) -> None:
+        imap = _FakeFlagImap()
+        provider = SeznamReadOnlyEmailProvider(
+            SeznamMailConfig(address="user@example.com", password="secret")
+        )
+
+        with patch("app.email.seznam_provider.imaplib.IMAP4_SSL", return_value=imap):
+            self.assertTrue(provider.set_message_flagged(uid="123", folder="INBOX", flagged=True))
+            self.assertFalse(provider.set_message_flagged(uid="123", folder="INBOX", flagged=False))
+
+        self.assertEqual(imap.login_calls, [("user@example.com", "secret"), ("user@example.com", "secret")])
+        self.assertEqual(imap.select_calls, [("INBOX", False), ("INBOX", False)])
+        self.assertEqual(
+            [call for call in imap.uid_calls if call[0] == "STORE"],
+            [
+                ("STORE", b"123", "+FLAGS.SILENT", r"(\Flagged)"),
+                ("STORE", b"123", "-FLAGS.SILENT", r"(\Flagged)"),
+            ],
+        )
+
+    def test_set_message_flagged_fails_closed_when_fetch_disagrees(self) -> None:
+        imap = _FakeFlagImap(report_flagged=False)
+        provider = SeznamReadOnlyEmailProvider(
+            SeznamMailConfig(address="user@example.com", password="secret")
+        )
+
+        with patch("app.email.seznam_provider.imaplib.IMAP4_SSL", return_value=imap):
+            with self.assertRaisesRegex(SeznamEmailProviderError, "jiny stav"):
+                provider.set_message_flagged(uid="123", flagged=True)
+
+    def test_set_message_flagged_fails_closed_when_fetch_has_no_flags(self) -> None:
+        imap = _FakeFlagImap(malformed_fetch=True)
+        provider = SeznamReadOnlyEmailProvider(
+            SeznamMailConfig(address="user@example.com", password="secret")
+        )
+
+        with patch("app.email.seznam_provider.imaplib.IMAP4_SSL", return_value=imap):
+            with self.assertRaisesRegex(SeznamEmailProviderError, "overitelny seznam"):
+                provider.set_message_flagged(uid="123", flagged=False)
+
+
+class _FakeFlagImap:
+    def __init__(self, report_flagged: bool | None = None, malformed_fetch: bool = False) -> None:
+        self.flagged = False
+        self.report_flagged = report_flagged
+        self.malformed_fetch = malformed_fetch
+        self.login_calls: list[tuple[str, str]] = []
+        self.select_calls: list[tuple[str, bool]] = []
+        self.uid_calls: list[tuple[object, ...]] = []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_args) -> None:
+        return None
+
+    def login(self, address: str, password: str):
+        self.login_calls.append((address, password))
+        return "OK", []
+
+    def select(self, folder: str, readonly: bool = False):
+        self.select_calls.append((folder, readonly))
+        return "OK", [b"1"]
+
+    def uid(self, command: str, *args):
+        self.uid_calls.append((command, *args))
+        if command == "STORE":
+            self.flagged = args[1] == "+FLAGS.SILENT"
+            return "OK", []
+        if command == "FETCH" and args[-1] == "(FLAGS)":
+            if self.malformed_fetch:
+                return "OK", [b"123 (UID 123)"]
+            flagged = self.flagged if self.report_flagged is None else self.report_flagged
+            flags = b"\\Flagged" if flagged else b""
+            return "OK", [b"123 (UID 123 FLAGS (" + flags + b"))"]
+        raise AssertionError((command, args))
 
 
 def _write_temp_env(content: str) -> Path:

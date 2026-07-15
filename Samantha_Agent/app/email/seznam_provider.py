@@ -14,7 +14,7 @@ from .header_metadata import extract_attachment_metadata_from_bodystructure
 from .models import EmailAttachmentMeta, EmailHeader, EmailMessage, EmailMessageBatch, EmailSkippedMessage
 
 
-HEADER_WITH_STRUCTURE_FETCH_SPEC = "(RFC822.SIZE BODYSTRUCTURE BODY.PEEK[HEADER.FIELDS (DATE FROM SUBJECT)])"
+HEADER_WITH_STRUCTURE_FETCH_SPEC = "(RFC822.SIZE FLAGS BODYSTRUCTURE BODY.PEEK[HEADER.FIELDS (DATE FROM SUBJECT)])"
 MESSAGE_ID_FETCH_SPEC = "(BODY.PEEK[HEADER.FIELDS (MESSAGE-ID)])"
 MESSAGE_FETCH_SPEC = "(RFC822.SIZE BODY.PEEK[])"
 MESSAGE_SIZE_FETCH_SPEC = "(RFC822.SIZE)"
@@ -174,6 +174,34 @@ class SeznamReadOnlyEmailProvider:
         except OSError as exc:
             raise SeznamEmailProviderError("Nepodarilo se pripojit k Seznam Mailu.") from exc
 
+    def set_message_flagged(self, uid: str, folder: str = "INBOX", flagged: bool = True) -> bool:
+        safe_uid = _validate_uid(uid)
+        expected = bool(flagged)
+        operation = "+FLAGS.SILENT" if expected else "-FLAGS.SILENT"
+        try:
+            with imaplib.IMAP4_SSL(self._config.host, self._config.port) as imap:
+                imap.login(self._config.address, self._config.password)
+                _select_writable_folder(imap, folder)
+                status, _data = imap.uid("STORE", safe_uid.encode("ascii"), operation, r"(\Flagged)")
+                if status != "OK":
+                    raise SeznamEmailProviderError("Seznam nepotvrdil zmenu priznaku e-mailu.")
+                fetch_status, fetch_data = imap.uid("FETCH", safe_uid.encode("ascii"), "(FLAGS)")
+                if fetch_status != "OK" or not fetch_data:
+                    raise SeznamEmailProviderError("Zmenu priznaku se nepodarilo serverove overit.")
+                flags = _message_data_flags(fetch_data)
+                if flags is None:
+                    raise SeznamEmailProviderError("Server nevratil overitelny seznam priznaku e-mailu.")
+                actual = r"\flagged" in flags
+                if actual != expected:
+                    raise SeznamEmailProviderError("Seznam vratil jiny stav priznaku, nez byl pozadovan.")
+                return actual
+        except SeznamEmailProviderError:
+            raise
+        except imaplib.IMAP4.error as exc:
+            raise SeznamEmailProviderError("IMAP server Seznam odmitl zmenu priznaku.") from exc
+        except OSError as exc:
+            raise SeznamEmailProviderError("Nepodarilo se pripojit k Seznam Mailu.") from exc
+
     def permanently_delete_message_from_trash(
         self,
         *,
@@ -227,6 +255,7 @@ class SeznamReadOnlyEmailProvider:
             source="Seznam",
             folder=folder,
             attachments=extract_attachment_metadata_from_bodystructure(message_data),
+            flagged=_message_data_has_flag(message_data, r"\Flagged"),
         )
 
     def list_recent_messages(
@@ -333,6 +362,22 @@ def _first_bytes_payload(message_data: list[object]) -> bytes | None:
     return fallback
 
 
+def _message_data_has_flag(message_data: list[object], flag: str) -> bool:
+    flags = _message_data_flags(message_data)
+    return flags is not None and flag.casefold() in flags
+
+
+def _message_data_flags(message_data: list[object]) -> set[str] | None:
+    for item in message_data or []:
+        metadata = item[0] if isinstance(item, tuple) and item else item
+        if not isinstance(metadata, bytes):
+            continue
+        for match in re.finditer(rb"FLAGS\s*\(([^)]*)\)", metadata, re.IGNORECASE):
+            tokens = match.group(1).decode("ascii", errors="ignore").split()
+            return {token.casefold() for token in tokens}
+    return None
+
+
 def _first_safe_message_payload(message_data: list[object], max_bytes: int = MAX_MESSAGE_BYTES) -> bytes | None:
     for item in message_data:
         if not (isinstance(item, tuple) and len(item) >= 2):
@@ -429,6 +474,7 @@ def _message_to_header(
     source: str = "",
     folder: str = "",
     attachments: tuple[EmailAttachmentMeta, ...] = (),
+    flagged: bool = False,
 ) -> EmailHeader:
     return EmailHeader(
         internal_id=internal_id,
@@ -438,6 +484,7 @@ def _message_to_header(
         source=source,
         folder=folder,
         attachments=attachments,
+        flagged=flagged,
     )
 
 

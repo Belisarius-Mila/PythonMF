@@ -113,6 +113,7 @@ from app.cockpit import (
     session_autosave_cleanup_action,
     server_health_status,
     set_adam_voice_bridge_marker_action,
+    set_email_processing_done_flag,
     terminate_stale_codex_sessions_action,
     set_document_reading_status_action,
     selected_voice_delivery_transport,
@@ -6472,6 +6473,62 @@ Dalsi krok:
         self.assertIn("window.crypto.randomUUID", EMAIL_PROCESSING_HTML)
         self.assertIn("operation_id: operationId", EMAIL_PROCESSING_HTML)
 
+    def test_email_done_flag_action_is_seznam_only_and_server_verified(self) -> None:
+        provider = _FakeArchiveProvider(_archive_source_without_attachment())
+
+        result = set_email_processing_done_flag(
+            provider="Seznam",
+            folder="INBOX",
+            uid="155560",
+            done=True,
+            seznam_provider_factory=lambda: provider,
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertTrue(result["flagged"])
+        self.assertEqual(
+            provider.flag_calls,
+            [{"uid": "155560", "folder": "INBOX", "flagged": True}],
+        )
+
+        rejected = set_email_processing_done_flag(
+            provider="iCloud",
+            folder="INBOX",
+            uid="14157",
+            done=True,
+            seznam_provider_factory=lambda: self.fail("Seznam provider nesmí být vytvořen"),
+        )
+        self.assertFalse(rejected["ok"])
+        self.assertIn("pouze pro Seznam", rejected["message"])
+
+    def test_email_done_flag_has_explicit_ui_action_and_registry_card(self) -> None:
+        self.assertIn('fetch("/api/email-processing/done-flag"', EMAIL_PROCESSING_HTML)
+        self.assertIn('done.addEventListener("click"', EMAIL_PROCESSING_HTML)
+        self.assertIn('id="doneEmail"', EMAIL_PROCESSING_HTML)
+        self.assertIn('dialogWindow.confirm(prompt)', EMAIL_PROCESSING_HTML)
+        card = next(
+            item for item in COCKPIT_POST_ACTIONS if item["path"] == "/api/email-processing/done-flag"
+        )
+        self.assertEqual(card["risk"], "private_write")
+        self.assertEqual(card["confirmation"], "explicit_ui_action_reversible")
+        self.assertEqual(card["handler_name"], "set_email_processing_done_flag")
+
+    def test_seznam_header_flag_is_exposed_to_email_processing_ui(self) -> None:
+        item = email_header_to_processing_item(
+            EmailHeader(
+                internal_id="155560",
+                date="Wed, 15 Jul 2026 10:00:00 +0200",
+                sender="Sender <sender@example.com>",
+                subject="Zpracovaný e-mail",
+                source="Seznam",
+                folder="INBOX",
+                flagged=True,
+            ),
+            "Seznam",
+        )
+
+        self.assertTrue(item["imap_flagged"])
+
     def test_email_decision_operation_replay_returns_original_action(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             path = Path(temp_dir) / "email_processing_decisions.json"
@@ -7986,6 +8043,7 @@ class _FakeArchiveProvider:
         self.archive_calls: list[dict[str, object]] = []
         self.trash_calls: list[dict[str, object]] = []
         self.purge_calls: list[dict[str, object]] = []
+        self.flag_calls: list[dict[str, object]] = []
 
     def read_archive_source_by_uid(self, uid: str, max_chars: int = 50_000, folder: str = "INBOX") -> EmailArchiveSource:
         self.archive_calls.append({"uid": uid, "max_chars": max_chars, "folder": folder})
@@ -7994,6 +8052,10 @@ class _FakeArchiveProvider:
     def move_message_to_trash(self, uid: str, folder: str = "INBOX") -> dict[str, str]:
         self.trash_calls.append({"uid": uid, "folder": folder})
         return {"trash_folder": "Deleted Messages", "trash_uid": f"9{uid}", "message_id": f"<{uid}@example.com>"}
+
+    def set_message_flagged(self, uid: str, folder: str = "INBOX", flagged: bool = True) -> bool:
+        self.flag_calls.append({"uid": uid, "folder": folder, "flagged": flagged})
+        return flagged
 
     def permanently_delete_message_from_trash(
         self,

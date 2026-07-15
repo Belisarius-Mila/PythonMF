@@ -12,6 +12,7 @@ class EmailHeader:
     source: str = ""
     folder: str = ""
     attachments: tuple[EmailAttachmentMeta, ...] = ()
+    flagged: bool = False
 
 
 @dataclass(frozen=True)
