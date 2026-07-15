@@ -90,6 +90,11 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `handoffs/janicka_ra2_private_context_proposal_2026_07_15.md` - pozastaveny
+  navrh priority 2 pro budouci R-A2 v Cockpitu Janička: vlastni trvale
+  app-server vlakno, soukromy kompaktni dlouhodoby kontext mimo Git, bez sdileni
+  Human–Adam vlakna a vyvojoveho workspace; navazat az po dokonceni a failover
+  testu Human–Adam.
 - `handoffs/appserver_human_adam_text_remote_verified_restart_backup_2026_07_14.md` - [PRIPOMENOUT]
   priorita 1 před restartem Macu: vzdálená textová práce a samoobslužné nasazení
   jsou opakovaně ověřené až po sticky účtenku, bod `5bac508` a 703 testů. Po
