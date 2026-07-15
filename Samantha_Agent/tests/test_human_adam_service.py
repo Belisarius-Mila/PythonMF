@@ -245,6 +245,13 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertIn("na konec souboru", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
         self.assertIn("YYYY-MM-DD HH:MM TZ", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
 
+    def test_developer_instructions_reserve_git_actions_and_tvbcp_for_mila(self) -> None:
+        self.assertIn("Sam nikdy nespoustej git add", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
+        self.assertIn("git commit, checkpoint, prevzeti do main, push ani nasazeni", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
+        self.assertIn("vyhradne na Miluv vyslovny pokyn", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
+        self.assertIn("nikdy do nej nezapisuj samostatne ani pri milniku", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
+        self.assertNotIn("na Miluv pokyn nebo pri skutecnem milniku", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
+
     def test_developer_instructions_prefer_short_file_names_in_user_answers(self) -> None:
         self.assertIn("jen samotny nazev bez cele cesty", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
         self.assertIn("pouze pri shodnych nazvech", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)

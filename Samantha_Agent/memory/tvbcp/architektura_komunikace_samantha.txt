@@ -916,3 +916,27 @@ Důkaz: 22 cílených UI testů, JavaScript syntaxe a plná brána 730 testů pr
 
 Další krok: na iPhonu obnovit HTTPS stránku a ověřit, že `Nahrát pokyn` přesune
 kurzor do editoru; AutoFill řádek zavřít systémovou fajfkou podle potřeby.
+
+### 2026-07-15 17:00 CEST – Výhradní lidský checkpoint a zvuk dokončení
+
+Míla potvrdil, že malé odbočky nemají vytvářet další režim ani nový TVBCP.
+Současně požádal o trvalé zpřesnění hranice mezi Adamovou prací a lidským
+checkpointem a o zvukový signál po dokončení delšího tahu.
+
+Developer instrukce pro izolovanou práci nyní výslovně zakazuje Adamovi
+samostatně spouštět `git add`, commit, checkpoint, převzetí do `main`, push nebo
+nasazení. Tyto operace zůstávají výhradně v potvrzených ovládacích prvcích pro
+Mílu. Projektový TVBCP smí Adam změnit jen na Mílův výslovný pokyn, nikoli
+autonomně při domnělém milníku.
+
+Human–Adam po potvrzeném úspěšném dokončení tahu přehraje krátké lokální
+dvojcinknutí. Audio kontext se připraví při uživatelském stisku `Odeslat`, zvuk
+se nespouští při odmítnutí ani nejistém doručení a jakákoli chyba audia je
+oddělená od potvrzeného výsledku práce.
+
+Důkaz: 51 cílených testů, JavaScript syntaxe, `git diff --check` a plná brána
+732 testů prošly.
+
+Další krok: po nasazení provést krátký skutečný tah v Human–Adam a ručně ověřit
+dvojcinknutí. Na iPhonu může přehrání záviset na tom, zda je stránka otevřená a
+prohlížeč nebo tichý režim dovoluje zvuk.

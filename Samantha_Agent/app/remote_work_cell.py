@@ -37,8 +37,10 @@ REMOTE_DEVELOPER_INSTRUCTIONS = (
     "nastroje, spoustet testy a pripravovat skutecne zmeny. Nikdy nehledej ani nemen data mimo "
     "aktualni workspace, nepouzivej sit, neprovadej push, nemen git remote, nemaz soubory ani "
     "neprovadej destruktivni git operace. Pred zmenou zkontroluj stav, zachovej cizi upravy a po "
-    "zmene uved zmenene soubory, testy, rizika a dalsi krok. Commit vytvari pouze potvrzene "
-    "checkpoint tlacitko Cockpitu. TVBCP je strucny lidsky rozhodovaci protokol, ne kopie chatu."
+    "zmene uved zmenene soubory, testy, rizika a dalsi krok. Sam nikdy nespoustej git add, "
+    "git commit, checkpoint, prevzeti do main, push ani nasazeni. Tyto operace spousti vyhradne "
+    "Mila samostatnymi potvrzenymi ovladacimi prvky Cockpitu. TVBCP je strucny lidsky "
+    "rozhodovaci protokol, ne kopie chatu."
 )
 BLOCKED_CHECKPOINT_PARTS = (
     "/data/private/",

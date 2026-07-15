@@ -327,6 +327,26 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertNotIn("api(", timer_source)
         self.assertNotIn("loadStatus", timer_source)
 
+    def test_confirmed_completion_plays_a_primed_non_blocking_chime(self) -> None:
+        sound_start = HUMAN_ADAM_HTML.index("function getCompletionAudioContext()")
+        sound_end = HUMAN_ADAM_HTML.index("function syncControls()", sound_start)
+        sound_source = HUMAN_ADAM_HTML[sound_start:sound_end]
+        send_start = HUMAN_ADAM_HTML.index("async function sendMessage(event)")
+        send_end = HUMAN_ADAM_HTML.index('connectBtn.addEventListener("click", connect);', send_start)
+        send_source = HUMAN_ADAM_HTML[send_start:send_end]
+        catch_start = send_source.index("} catch (error) {")
+
+        self.assertIn("window.AudioContext || window.webkitAudioContext", sound_source)
+        self.assertIn("function primeCompletionSound()", sound_source)
+        self.assertIn("async function playCompletionSound()", sound_source)
+        self.assertIn("context.createOscillator()", sound_source)
+        self.assertIn("context.createGain()", sound_source)
+        self.assertIn("Zvuk je pouze doplňkový", sound_source)
+        self.assertLess(send_source.index("primeCompletionSound();"), send_source.index('await api("/api/human-adam/send"'))
+        self.assertLess(send_source.index('notice.textContent = "Odpověď doručena a potvrzena.";'), send_source.index("playCompletionSound();"))
+        self.assertLess(send_source.index("playCompletionSound();"), catch_start)
+        self.assertNotIn("playCompletionSound", send_source[catch_start:])
+
     def test_ui_is_manual_refresh_only_and_uses_safe_dom_text(self) -> None:
         self.assertNotIn("setInterval", HUMAN_ADAM_HTML)
         self.assertNotIn("innerHTML", HUMAN_ADAM_HTML)

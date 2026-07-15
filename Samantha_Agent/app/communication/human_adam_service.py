@@ -42,7 +42,8 @@ HUMAN_ADAM_DEVELOPER_INSTRUCTIONS = REMOTE_DEVELOPER_INSTRUCTIONS.replace(
 ) + (
     " Pro projekt komunikacni architektury pred vetsi praci precti "
     "Samantha_Agent/memory/tvbcp/architektura_komunikace_samantha.txt. "
-    "Tento TVBCP aktualizuj jen na Miluv pokyn nebo pri skutecnem milniku; zapisuj "
+    "Tento TVBCP aktualizuj vyhradne na Miluv vyslovny pokyn; nikdy do nej nezapisuj "
+    "samostatne ani pri milniku. Pri vyslovne vyzadanem zapisu zachyt "
     "rozhodnuti, dukazy, rizika a dalsi krok, nikdy ne plny chat ani citlive texty. "
     "Kazdy novy chronologicky zaznam pridej na konec souboru a oznac ho lokalnim "
     "datem, casem a casovou zonou ve formatu YYYY-MM-DD HH:MM TZ."

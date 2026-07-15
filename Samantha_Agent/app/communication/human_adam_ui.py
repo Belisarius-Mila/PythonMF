@@ -182,6 +182,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let activeTurnStartedAt = "";
   let lastSession = null;
   let deploymentAudit = null;
+  let completionAudioContext = null;
 
   function messageId() {
     if (window.crypto && crypto.randomUUID) return `human-adam-${crypto.randomUUID()}`;
@@ -192,6 +193,54 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     if (!value) return "čas neuveden";
     const parsed = new Date(value);
     return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString("cs-CZ", {hour:"2-digit",minute:"2-digit",second:"2-digit",day:"2-digit",month:"2-digit"});
+  }
+
+  function getCompletionAudioContext() {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return null;
+    if (completionAudioContext && completionAudioContext.state === "closed") completionAudioContext = null;
+    if (!completionAudioContext) completionAudioContext = new AudioContextClass();
+    return completionAudioContext;
+  }
+
+  function primeCompletionSound() {
+    try {
+      const context = getCompletionAudioContext();
+      if (context && context.state === "suspended") context.resume().catch(() => {});
+    } catch (_error) {
+      completionAudioContext = null;
+    }
+  }
+
+  async function playCompletionSound() {
+    try {
+      const context = getCompletionAudioContext();
+      if (!context) return;
+      if (context.state === "suspended") await context.resume();
+      if (context.state !== "running") return;
+      const start = context.currentTime + 0.02;
+      const notes = [
+        {frequency:740, offset:0, duration:0.16},
+        {frequency:988, offset:0.18, duration:0.24},
+      ];
+      for (const note of notes) {
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        const noteStart = start + note.offset;
+        const noteEnd = noteStart + note.duration;
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(note.frequency, noteStart);
+        gain.gain.setValueAtTime(0.0001, noteStart);
+        gain.gain.exponentialRampToValueAtTime(0.055, noteStart + 0.025);
+        gain.gain.exponentialRampToValueAtTime(0.0001, noteEnd);
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start(noteStart);
+        oscillator.stop(noteEnd + 0.02);
+      }
+    } catch (_error) {
+      // Zvuk je pouze doplňkový; nesmí změnit potvrzený stav dokončeného tahu.
+    }
   }
 
   function syncControls() {
@@ -743,6 +792,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     if (busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing) return;
     const text = input.value.trim();
     if (!text) { notice.textContent = "Napiš nejdřív zprávu."; return; }
+    primeCompletionSound();
     clearMessageInput();
     const sentAt = new Date().toISOString();
     const clientId = messageId();
@@ -765,6 +815,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       renderSession(payload.session);
       renderTurnState(payload.session);
       notice.textContent = "Odpověď doručena a potvrzena.";
+      playCompletionSound();
     } catch (error) {
       const confirmedRejection = new Set(["human_adam_busy","human_adam_send_failed"]).has(error.status);
       if (!confirmedRejection) {
