@@ -35,11 +35,42 @@ DEFAULT_GATE_LOG = PROJECT_ROOT / "data" / "private" / "communication" / "human_
 DEFAULT_DEPLOYMENT_RECEIPT = (
     PROJECT_ROOT / "data" / "private" / "communication" / "human_adam_deployment_receipt.json"
 )
+DEFAULT_DEPLOYMENT_DIAGNOSTIC = (
+    PROJECT_ROOT / "data" / "private" / "communication" / "human_adam_deployment_diagnostic.json"
+)
 DEPLOYMENT_LOCK = threading.Lock()
 MAX_GATE_LOG_CHARS = 2_000_000
 DEPLOYMENT_RECEIPT_SCHEMA = 1
+DEPLOYMENT_DIAGNOSTIC_SCHEMA = 1
 DEPLOYMENT_PENDING = "gate_passed_pending_apply"
 DEPLOYMENT_COMPLETE = "deployed"
+DEPLOYMENT_DIAGNOSTIC_STAGES = frozenset(
+    {"audit", "gate", "receipt", "fast_forward", "push", "workspace_alignment", "restart"}
+)
+DEPLOYMENT_DIAGNOSTIC_OUTCOMES = frozenset({"running", "passed", "failed"})
+DEPLOYMENT_DIAGNOSTIC_MESSAGES = {
+    ("audit", "running"): "Ověřuji přesný checkpoint a stav Git.",
+    ("audit", "passed"): "Audit checkpointu prošel.",
+    ("audit", "failed"): "Audit checkpointu selhal.",
+    ("gate", "running"): "Probíhá plná testovací brána.",
+    ("gate", "passed"): "Plná testovací brána prošla.",
+    ("gate", "failed"): "Plná testovací brána selhala; nic nebylo převzato.",
+    ("receipt", "running"): "Ukládám bezpečný mezistav nasazení.",
+    ("receipt", "passed"): "Bezpečný mezistav nasazení je uložený.",
+    ("receipt", "failed"): "Bezpečný mezistav nasazení se nepodařilo uložit.",
+    ("fast_forward", "running"): "Probíhá fast-forward checkpointu do main.",
+    ("fast_forward", "passed"): "Fast-forward checkpointu do main prošel.",
+    ("fast_forward", "failed"): "Fast-forward checkpointu do main selhal.",
+    ("push", "running"): "Probíhá push větve main.",
+    ("push", "passed"): "Push větve main prošel.",
+    ("push", "failed"): "Push větve main selhal; vzdálená větev není potvrzená.",
+    ("workspace_alignment", "running"): "Ověřuji zarovnání izolovaného workspace.",
+    ("workspace_alignment", "passed"): "Izolovaný workspace je zarovnaný.",
+    ("workspace_alignment", "failed"): "Zarovnání izolovaného workspace selhalo.",
+    ("restart", "running"): "Spouštím bezpečný restart Cockpitu.",
+    ("restart", "passed"): "Bezpečný restart Cockpitu byl zahájen.",
+    ("restart", "failed"): "Bezpečný restart Cockpitu se nepodařilo zahájit.",
+}
 
 
 class HumanAdamDeployError(AppServerError):
@@ -116,6 +147,109 @@ def write_deployment_receipt(
     except (FilePersistenceError, OSError) as exc:
         raise HumanAdamDeployError("Trvalé potvrzení nasazení nelze bezpečně uložit.") from exc
     return payload
+
+
+def write_deployment_diagnostic(
+    path: Path,
+    *,
+    checkpoint_head: str,
+    thread_id: str,
+    stage: str,
+    outcome: str,
+    updated_at: str,
+) -> dict[str, Any]:
+    """Persist only allowlisted deployment progress, never exception details or paths."""
+    clean_head = str(checkpoint_head or "").strip().lower()
+    clean_stage = str(stage or "").strip()
+    clean_outcome = str(outcome or "").strip()
+    clean_updated_at = str(updated_at or "").strip()
+    if not re.fullmatch(r"[0-9a-f]{40}", clean_head):
+        raise HumanAdamDeployError("Diagnostika nasazení nemá platný commit.")
+    if clean_stage not in DEPLOYMENT_DIAGNOSTIC_STAGES:
+        raise HumanAdamDeployError("Diagnostika nasazení má neplatnou fázi.")
+    if clean_outcome not in DEPLOYMENT_DIAGNOSTIC_OUTCOMES:
+        raise HumanAdamDeployError("Diagnostika nasazení má neplatný výsledek.")
+    try:
+        normalized_time = datetime.fromisoformat(clean_updated_at.replace("Z", "+00:00")).isoformat()
+    except ValueError as exc:
+        raise HumanAdamDeployError("Diagnostika nasazení nemá platný čas.") from exc
+    payload = {
+        "schema_version": DEPLOYMENT_DIAGNOSTIC_SCHEMA,
+        "thread_key": _thread_key(thread_id),
+        "checkpoint_head": clean_head,
+        "stage": clean_stage,
+        "outcome": clean_outcome,
+        "updated_at": normalized_time,
+    }
+    try:
+        atomic_write_json(Path(path), payload, ensure_ascii=False, indent=2)
+    except (FilePersistenceError, OSError) as exc:
+        raise HumanAdamDeployError("Diagnostiku nasazení nelze bezpečně uložit.") from exc
+    return payload
+
+
+def load_deployment_diagnostic(
+    path: Path,
+    *,
+    thread_id: str,
+) -> dict[str, Any] | None:
+    """Return a safe public diagnostic reconstructed from strict enums only."""
+    try:
+        raw = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(raw, dict) or raw.get("schema_version") != DEPLOYMENT_DIAGNOSTIC_SCHEMA:
+        return None
+    try:
+        expected_thread_key = _thread_key(thread_id)
+    except HumanAdamDeployError:
+        return None
+    checkpoint_head = str(raw.get("checkpoint_head") or "").strip().lower()
+    stage = str(raw.get("stage") or "").strip()
+    outcome = str(raw.get("outcome") or "").strip()
+    updated_at = str(raw.get("updated_at") or "").strip()
+    if (
+        raw.get("thread_key") != expected_thread_key
+        or not re.fullmatch(r"[0-9a-f]{40}", checkpoint_head)
+        or stage not in DEPLOYMENT_DIAGNOSTIC_STAGES
+        or outcome not in DEPLOYMENT_DIAGNOSTIC_OUTCOMES
+    ):
+        return None
+    try:
+        normalized_time = datetime.fromisoformat(updated_at.replace("Z", "+00:00")).isoformat()
+    except ValueError:
+        return None
+    return {
+        "checkpoint_short": checkpoint_head[:7],
+        "stage": stage,
+        "outcome": outcome,
+        "message": DEPLOYMENT_DIAGNOSTIC_MESSAGES[(stage, outcome)],
+        "updated_at": normalized_time,
+    }
+
+
+def _record_deployment_diagnostic(
+    path: Path | None,
+    *,
+    checkpoint_head: str,
+    thread_id: str,
+    stage: str,
+    outcome: str,
+) -> dict[str, Any] | None:
+    if path is None:
+        return None
+    try:
+        write_deployment_diagnostic(
+            path,
+            checkpoint_head=checkpoint_head,
+            thread_id=thread_id,
+            stage=stage,
+            outcome=outcome,
+            updated_at=utc_now(),
+        )
+    except (HumanAdamDeployError, FilePersistenceError, OSError, ValueError):
+        return None
+    return load_deployment_diagnostic(path, thread_id=thread_id)
 
 
 def load_deployment_confirmation(
@@ -219,6 +353,7 @@ def deploy_checkpoint(
     gate_log_path: Path = DEFAULT_GATE_LOG,
     thread_id: str = "",
     deployment_receipt_path: Path | None = None,
+    deployment_diagnostic_path: Path | None = None,
 ) -> dict[str, Any]:
     if str(confirmation or "").strip() != CONFIRMATION_TEXT:
         raise HumanAdamDeployError(f"Chybí přesná potvrzovací věta: {CONFIRMATION_TEXT}")
@@ -227,46 +362,85 @@ def deploy_checkpoint(
         raise HumanAdamDeployError("Chybí platný audit token checkpointu; spusť audit znovu.")
     if not DEPLOYMENT_LOCK.acquire(blocking=False):
         raise HumanAdamDeployError("Jiné nasazení Human–Adam už probíhá.")
+    current_stage = "audit"
+
+    def record(stage: str, outcome: str) -> dict[str, Any] | None:
+        nonlocal current_stage
+        current_stage = stage
+        return _record_deployment_diagnostic(
+            deployment_diagnostic_path,
+            checkpoint_head=expected,
+            thread_id=thread_id,
+            stage=stage,
+            outcome=outcome,
+        )
+
     try:
-        plan = build_takeover_plan(workspace=workspace)
-        if plan.checkpoint_head != expected:
-            raise HumanAdamDeployError("Checkpoint se od auditu změnil; spusť audit znovu.")
-        evidence = run_checkpoint_quality_gate(
-            workspace=workspace,
-            runner=gate_runner,
-            log_path=gate_log_path,
-        )
-        refreshed = build_takeover_plan(workspace=workspace)
-        if refreshed != plan or refreshed.checkpoint_head != expected:
-            raise HumanAdamDeployError("Stav se během plné brány změnil; nic nebylo nasazeno.")
-        receipt_recorded_at = utc_now()
-        if deployment_receipt_path is not None:
-            write_deployment_receipt(
-                deployment_receipt_path,
-                checkpoint_head=expected,
-                thread_id=thread_id,
-                state=DEPLOYMENT_PENDING,
-                recorded_at=receipt_recorded_at,
+        record("audit", "running")
+        try:
+            plan = build_takeover_plan(workspace=workspace)
+            if plan.checkpoint_head != expected:
+                raise HumanAdamDeployError("Checkpoint se od auditu změnil; spusť audit znovu.")
+            record("audit", "passed")
+
+            record("gate", "running")
+            evidence = run_checkpoint_quality_gate(
+                workspace=workspace,
+                runner=gate_runner,
+                log_path=gate_log_path,
             )
-        applied = apply_takeover(
-            confirmation=CONFIRMATION_TEXT,
-            push=True,
-            workspace=workspace,
-        )
-        final_workspace = workspace.status()
-        if (
-            applied.get("applied") is not True
-            or applied.get("pushed") is not True
-            or applied.get("workspace_aligned") is not True
-            or str(final_workspace.get("source_head") or "").strip().lower() != expected
-            or str(final_workspace.get("head") or "").strip().lower() != expected
-            or final_workspace.get("workspace_relation") != "aligned"
-            or bool(final_workspace.get("dirty"))
-            or bool(final_workspace.get("remotes"))
-        ):
-            raise HumanAdamDeployError(
-                "Nasazení neposkytlo úplný důkaz fast-forwardu, pushnutí a zarovnání workspace."
+            refreshed = build_takeover_plan(workspace=workspace)
+            if refreshed != plan or refreshed.checkpoint_head != expected:
+                raise HumanAdamDeployError("Stav se během plné brány změnil; nic nebylo nasazeno.")
+            record("gate", "passed")
+
+            receipt_recorded_at = utc_now()
+            if deployment_receipt_path is not None:
+                record("receipt", "running")
+                write_deployment_receipt(
+                    deployment_receipt_path,
+                    checkpoint_head=expected,
+                    thread_id=thread_id,
+                    state=DEPLOYMENT_PENDING,
+                    recorded_at=receipt_recorded_at,
+                )
+                record("receipt", "passed")
+
+            applied = apply_takeover(
+                confirmation=CONFIRMATION_TEXT,
+                push=True,
+                workspace=workspace,
+                progress_callback=record,
             )
+            final_workspace = workspace.status()
+            if (
+                applied.get("applied") is not True
+                or applied.get("pushed") is not True
+                or applied.get("workspace_aligned") is not True
+                or str(final_workspace.get("source_head") or "").strip().lower() != expected
+                or str(final_workspace.get("head") or "").strip().lower() != expected
+                or final_workspace.get("workspace_relation") != "aligned"
+                or bool(final_workspace.get("dirty"))
+                or bool(final_workspace.get("remotes"))
+            ):
+                if applied.get("applied") is not True:
+                    current_stage = "fast_forward"
+                elif applied.get("pushed") is not True:
+                    current_stage = "push"
+                else:
+                    current_stage = "workspace_alignment"
+                raise HumanAdamDeployError(
+                    "Nasazení neposkytlo úplný důkaz fast-forwardu, pushnutí a zarovnání workspace."
+                )
+        except (HumanAdamDeployError, TakeoverError, AppServerError, OSError, ValueError) as exc:
+            diagnostic = record(current_stage, "failed")
+            safe_message = (
+                diagnostic.get("message")
+                if diagnostic
+                else DEPLOYMENT_DIAGNOSTIC_MESSAGES[(current_stage, "failed")]
+            )
+            raise HumanAdamDeployError(str(safe_message)) from exc
+
         deployment_confirmation = None
         receipt_warning = ""
         if deployment_receipt_path is not None:
@@ -285,16 +459,41 @@ def deploy_checkpoint(
                 deployment_receipt_path,
                 thread_id=thread_id,
             )
+        deployment_diagnostic = load_deployment_diagnostic(
+            deployment_diagnostic_path,
+            thread_id=thread_id,
+        ) if deployment_diagnostic_path is not None else None
         return {
             **applied,
             "checkpoint_token": expected,
             "gate": evidence.public_dict(),
             "restart_required": True,
             "deployment_confirmation": deployment_confirmation,
+            "deployment_diagnostic": deployment_diagnostic,
             "receipt_warning": receipt_warning,
         }
     finally:
         DEPLOYMENT_LOCK.release()
+
+
+def record_deployment_restart(
+    *,
+    service: HumanAdamService,
+    checkpoint_head: str,
+    outcome: str,
+) -> dict[str, Any] | None:
+    """Persist the restart boundary without storing process details or private paths."""
+    try:
+        session = service.hub.snapshot()
+    except (AppServerError, OSError, ValueError):
+        return None
+    return _record_deployment_diagnostic(
+        service.deployment_diagnostic_path,
+        checkpoint_head=checkpoint_head,
+        thread_id=str(session.get("thread_id") or ""),
+        stage="restart",
+        outcome=outcome,
+    )
 
 
 def _turn_busy(service: HumanAdamService) -> bool:
@@ -315,17 +514,29 @@ def human_adam_deploy_action(
     *,
     service: HumanAdamService,
 ) -> dict[str, Any]:
+    thread_id = ""
     try:
         session = service.hub.snapshot()
+        thread_id = str(session.get("thread_id") or "")
         if session.get("turn_busy"):
             raise HumanAdamDeployError("Nasazení nelze spustit během aktivního tahu Adama.")
         result = deploy_checkpoint(
             workspace=service.workspace,
             confirmation=str(payload.get("confirmation") or ""),
             expected_checkpoint_head=str(payload.get("checkpoint_token") or ""),
-            thread_id=str(session.get("thread_id") or ""),
+            thread_id=thread_id,
             deployment_receipt_path=service.deployment_receipt_path,
+            deployment_diagnostic_path=service.deployment_diagnostic_path,
         )
         return {"ok": True, **result}
     except (HumanAdamDeployError, TakeoverError, AppServerError, OSError, ValueError) as exc:
-        return {"ok": False, "ready": False, "message": str(exc)}
+        diagnostic = load_deployment_diagnostic(
+            service.deployment_diagnostic_path,
+            thread_id=thread_id,
+        )
+        return {
+            "ok": False,
+            "ready": False,
+            "message": str(exc),
+            "deployment_diagnostic": diagnostic,
+        }

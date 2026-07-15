@@ -6,6 +6,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from app.communication.human_adam_deploy import (
@@ -15,9 +16,11 @@ from app.communication.human_adam_deploy import (
     audit_checkpoint,
     deploy_checkpoint,
     load_deployment_confirmation,
+    load_deployment_diagnostic,
+    record_deployment_restart,
     write_deployment_receipt,
 )
-from scripts.human_adam_takeover import CONFIRMATION_TEXT
+from scripts.human_adam_takeover import CONFIRMATION_TEXT, TakeoverError
 from tests.test_human_adam_takeover import prepare_with_origin
 from tests.test_remote_work_cell import git
 
@@ -70,6 +73,7 @@ class HumanAdamDeployTests(unittest.TestCase):
             root = Path(temp_dir)
             source, manager, checkpoint = prepare_checkpoint(root)
             receipt_path = root / "deployment_receipt.json"
+            diagnostic_path = root / "deployment_diagnostic.json"
             result = deploy_checkpoint(
                 workspace=manager,
                 confirmation=CONFIRMATION_TEXT,
@@ -78,12 +82,17 @@ class HumanAdamDeployTests(unittest.TestCase):
                 gate_log_path=root / "gate.log",
                 thread_id="canonical-thread",
                 deployment_receipt_path=receipt_path,
+                deployment_diagnostic_path=diagnostic_path,
             )
             source_head = git(source, "rev-parse", "HEAD")
             origin_head = git(source, "rev-parse", "origin/main")
             status = manager.status()
             receipt_text = receipt_path.read_text(encoding="utf-8")
             receipt = json.loads(receipt_text)
+            diagnostic = load_deployment_diagnostic(
+                diagnostic_path,
+                thread_id="canonical-thread",
+            )
 
         self.assertTrue(result["applied"])
         self.assertTrue(result["pushed"])
@@ -94,9 +103,84 @@ class HumanAdamDeployTests(unittest.TestCase):
         self.assertEqual(status["workspace_relation"], "aligned")
         self.assertEqual(result["deployment_confirmation"]["checkpoint_short"], source_head[:7])
         self.assertEqual(receipt["state"], "deployed")
+        self.assertEqual(diagnostic["stage"], "workspace_alignment")
+        self.assertEqual(diagnostic["outcome"], "passed")
         self.assertNotIn("canonical-thread", receipt_text)
         self.assertNotIn(str(root), receipt_text)
         self.assertNotIn("VALUE = 27", receipt_text)
+
+    def test_push_failure_persists_safe_exact_stage_without_exception_detail(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _source, manager, checkpoint = prepare_checkpoint(root)
+            diagnostic_path = root / "deployment_diagnostic.json"
+
+            def fail_during_push(*, progress_callback, **_kwargs):
+                progress_callback("fast_forward", "running")
+                progress_callback("fast_forward", "passed")
+                progress_callback("push", "running")
+                raise TakeoverError("tajná interní cesta /private/example nesmí ven")
+
+            with patch(
+                "app.communication.human_adam_deploy.apply_takeover",
+                side_effect=fail_during_push,
+            ):
+                with self.assertRaisesRegex(
+                    HumanAdamDeployError,
+                    "Push větve main selhal",
+                ) as raised:
+                    deploy_checkpoint(
+                        workspace=manager,
+                        confirmation=CONFIRMATION_TEXT,
+                        expected_checkpoint_head=checkpoint["checkpoint_head"],
+                        gate_runner=successful_gate,
+                        gate_log_path=root / "gate.log",
+                        thread_id="canonical-thread",
+                        deployment_receipt_path=root / "deployment_receipt.json",
+                        deployment_diagnostic_path=diagnostic_path,
+                    )
+
+            diagnostic_text = diagnostic_path.read_text(encoding="utf-8")
+            diagnostic = load_deployment_diagnostic(
+                diagnostic_path,
+                thread_id="canonical-thread",
+            )
+
+        self.assertEqual(diagnostic["stage"], "push")
+        self.assertEqual(diagnostic["outcome"], "failed")
+        self.assertNotIn("tajná", str(raised.exception))
+        self.assertNotIn("private", diagnostic_text)
+        self.assertNotIn("example", diagnostic_text)
+
+    def test_restart_result_is_persistent_safe_and_thread_scoped(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            diagnostic_path = Path(temp_dir) / "deployment_diagnostic.json"
+            service = SimpleNamespace(
+                hub=SimpleNamespace(snapshot=lambda: {"thread_id": "canonical-thread"}),
+                deployment_diagnostic_path=diagnostic_path,
+            )
+
+            running = record_deployment_restart(
+                service=service,
+                checkpoint_head="b" * 40,
+                outcome="running",
+            )
+            failed = record_deployment_restart(
+                service=service,
+                checkpoint_head="b" * 40,
+                outcome="failed",
+            )
+            wrong_thread = load_deployment_diagnostic(
+                diagnostic_path,
+                thread_id="different-thread",
+            )
+            diagnostic_text = diagnostic_path.read_text(encoding="utf-8")
+
+        self.assertEqual(running["stage"], "restart")
+        self.assertEqual(running["outcome"], "running")
+        self.assertEqual(failed["outcome"], "failed")
+        self.assertIsNone(wrong_thread)
+        self.assertNotIn("canonical-thread", diagnostic_text)
 
     def test_pending_receipt_never_becomes_public_confirmation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

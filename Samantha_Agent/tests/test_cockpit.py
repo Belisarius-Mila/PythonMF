@@ -219,6 +219,20 @@ class CockpitTests(unittest.TestCase):
         route_end = source.index('if parsed.path == "/api/human-adam/connect":', route_start)
         self.assertIn("self.respond_json(human_adam_transcribe_action(payload))", source[route_start:route_end])
 
+    def test_human_adam_deploy_route_persists_restart_boundary_and_result(self) -> None:
+        source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
+        route_start = source.index('if parsed.path == "/api/human-adam/deploy":')
+        route_end = source.index('if parsed.path == "/api/appserver-lab/thread/new":', route_start)
+        route_source = source[route_start:route_end]
+        running = route_source.index('outcome="running"')
+        restart = route_source.index("start_cockpit_restart_action(")
+        result = route_source.index('outcome="passed" if result["restart"].get("ok") else "failed"')
+
+        self.assertLess(running, restart)
+        self.assertLess(restart, result)
+        self.assertIn("record_deployment_restart(", route_source)
+        self.assertIn('result["deployment_diagnostic"]', route_source)
+
     def test_frontend_literal_routes_exist_in_backend(self) -> None:
         exact_backend_routes = set(self.cockpit_do_get_routes()) | set(self.cockpit_do_post_routes())
         prefix_backend_routes = self.cockpit_do_get_prefix_routes()

@@ -11,8 +11,10 @@ from typing import Any, Callable
 
 from app.codex_appserver import AppServerError, CodexAppServerClient, UnixSocketAppServerTransport
 from app.communication.human_adam_deploy import (
+    DEFAULT_DEPLOYMENT_DIAGNOSTIC,
     DEFAULT_DEPLOYMENT_RECEIPT,
     load_deployment_confirmation,
+    load_deployment_diagnostic,
 )
 from app.communication.local_runtime import LocalAppServerProcessController
 from app.communication.session_hub import (
@@ -100,6 +102,7 @@ class HumanAdamService:
         workspace: RemoteWorkspaceManager | None = None,
         state_path: Path = DEFAULT_SESSION_STATE_PATH,
         deployment_receipt_path: Path = DEFAULT_DEPLOYMENT_RECEIPT,
+        deployment_diagnostic_path: Path | None = None,
         codex_binary: str = DEFAULT_CODEX_BIN,
         profile_getter: Callable[..., dict[str, Any]] = read_remote_runtime_profile,
         hub: CanonicalSessionHub | None = None,
@@ -111,6 +114,15 @@ class HumanAdamService:
         self._profile: dict[str, Any] = {}
         self.state_path = Path(state_path)
         self.deployment_receipt_path = Path(deployment_receipt_path)
+        self.deployment_diagnostic_path = Path(
+            deployment_diagnostic_path
+            if deployment_diagnostic_path is not None
+            else (
+                DEFAULT_DEPLOYMENT_DIAGNOSTIC
+                if self.deployment_receipt_path == DEFAULT_DEPLOYMENT_RECEIPT
+                else self.deployment_receipt_path.with_name("deployment_diagnostic.json")
+            )
+        )
         self._hub = hub
 
     @property
@@ -169,6 +181,10 @@ class HumanAdamService:
                 self.deployment_receipt_path,
                 thread_id=str(session.get("thread_id") or ""),
             )
+            deployment_diagnostic = load_deployment_diagnostic(
+                self.deployment_diagnostic_path,
+                thread_id=str(session.get("thread_id") or ""),
+            )
             return {
                 "ok": workspace_ready,
                 "runtime": self.runtime.status(),
@@ -187,6 +203,7 @@ class HumanAdamService:
                 "profile": dict(self._profile),
                 "session": session,
                 "deployment_confirmation": deployment_confirmation,
+                "deployment_diagnostic": deployment_diagnostic,
             }
         except (AppServerError, SessionHubError, OSError, ValueError) as exc:
             return {"ok": False, "status": "human_adam_status_failed", "message": str(exc)}

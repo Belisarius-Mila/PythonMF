@@ -86,6 +86,7 @@ from app.communication.human_adam_service import (
 from app.communication.human_adam_deploy import (
     human_adam_deploy_action,
     human_adam_deploy_audit_action,
+    record_deployment_restart,
 )
 from app.communication.human_adam_ui import HUMAN_ADAM_HTML
 from app.remote_work_cell import REMOTE_WORK_CELL, RemoteWorkCellService
@@ -10312,10 +10313,21 @@ class CockpitServer:
                     payload = self.read_json()
                     result = human_adam_deploy_action(payload, service=HUMAN_ADAM)
                     if result.get("ok") and result.get("restart_required"):
+                        checkpoint_head = str(result.get("checkpoint_token") or "")
+                        record_deployment_restart(
+                            service=HUMAN_ADAM,
+                            checkpoint_head=checkpoint_head,
+                            outcome="running",
+                        )
                         result["restart"] = start_cockpit_restart_action(
                             confirmed=True,
                             host=cockpit_host,
                             port=cockpit_port,
+                        )
+                        result["deployment_diagnostic"] = record_deployment_restart(
+                            service=HUMAN_ADAM,
+                            checkpoint_head=checkpoint_head,
+                            outcome="passed" if result["restart"].get("ok") else "failed",
                         )
                     self.respond_json(result)
                     return

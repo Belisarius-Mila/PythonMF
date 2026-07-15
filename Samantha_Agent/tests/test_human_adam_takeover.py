@@ -79,6 +79,32 @@ class HumanAdamTakeoverTests(unittest.TestCase):
         self.assertEqual(workspace_status["workspace_relation"], "aligned")
         self.assertEqual(workspace_status["base_head"], source_head)
 
+    def test_apply_reports_fast_forward_push_and_alignment_boundaries(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            _source, manager = prepare_with_origin(Path(temp_dir))
+            (manager.project_root / "tracked.py").write_text("VALUE = 30\n", encoding="utf-8")
+            manager.checkpoint(confirmed=True, message="WIP progress callback")
+            progress: list[tuple[str, str]] = []
+
+            apply_takeover(
+                confirmation=CONFIRMATION_TEXT,
+                push=True,
+                workspace=manager,
+                progress_callback=lambda stage, outcome: progress.append((stage, outcome)),
+            )
+
+        self.assertEqual(
+            progress,
+            [
+                ("fast_forward", "running"),
+                ("fast_forward", "passed"),
+                ("push", "running"),
+                ("push", "passed"),
+                ("workspace_alignment", "running"),
+                ("workspace_alignment", "passed"),
+            ],
+        )
+
     def test_audit_rejects_tracked_source_changes_and_checkpoint_deletion(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
