@@ -966,3 +966,20 @@ Další krok: po nasazení na iPhonu obnovit stránku a nejdřív přímo klepno
 `Zvuk: vyzkoušet`. Pokud dvojcinknutí zazní, poslat krátký tah a ponechat stránku
 otevřenou do odpovědi. Zamčenou nebo systémem úplně uspanou webovou stránku iOS
 nemusí nechat zvukem probudit; tuto hranici UI nesmí vydávat za garantovanou.
+
+### 2026-07-15 19:30 CEST – Úspěšně ověřené čtení Adamovy odpovědi
+
+Human–Adam nabízí u každé dokončené Adamovy zprávy explicitní tlačítko `Přečíst
+odpověď`. Čtení používá systémový český hlas prohlížeče, spustí se pouze po
+klepnutí, stejné tlačítko umožní přehrávání zastavit a nevznikl žádný autoplay,
+nový backendový endpoint ani nová doručovací cesta.
+
+Důkaz: 28 cílených UI testů, JavaScriptová syntaxe, Python kompilace a
+`git diff --check` prošly. Implementace je nasazená v bodě `98754ea` a Míla ji
+ručně otestoval na iPhonu s výsledkem, že čtení odpovědi funguje skvěle.
+
+Riziko: konkrétní hlas a jeho kvalitu nadále určuje systém a prohlížeč zařízení;
+základní cílový iPhone provoz je však ručně potvrzený.
+
+Další krok: bez okamžité vývojové akce. Případnou volbu hlasu nebo dělení velmi
+dlouhých odpovědí řešit až podle skutečné provozní potřeby.
