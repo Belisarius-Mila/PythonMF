@@ -884,8 +884,10 @@ Implementace navíc:
 - úspěch vyžaduje shodný PID a code stamp lokálního a HTTPS Cockpitu.
 
 Důkaz: HTTPS i lokální health odpověděly HTTP 200 se stejným PID a code stampem,
-HTTPS stránka obsahuje nový secure-context guard a plná brána prošla 728 testy
-včetně JavaScriptu, Pythonu, shellu a `git diff --check`.
+HTTPS stránka obsahuje nový secure-context guard a výsledná plná brána prošla
+729 testy včetně JavaScriptu, Pythonu, shellu a `git diff --check`. Dřívější
+izolovaný checkpoint kompaktního rozložení tlačítek byl zachován jako rodič
+výsledného merge commitu, nikoli zahozen nebo přepsán.
 
 Další krok: po nasazení otevřít Human–Adam výhradně přes tailnetovou HTTPS adresu,
 v Chrome povolit mikrofon a ručně ověřit nahrát → ukončit → přepsat → upravit →
