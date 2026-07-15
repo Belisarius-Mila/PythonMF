@@ -82,6 +82,26 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertLess(refresh, restore)
         self.assertIn("await waitForCockpitAndReload(Number(payload.restart.pid || previousPid));", HUMAN_ADAM_HTML)
 
+    def test_composer_places_voice_left_and_send_right_in_one_compact_row(self) -> None:
+        actions_start = HUMAN_ADAM_HTML.index('<div class="compose-actions">')
+        voice = HUMAN_ADAM_HTML.index('<div class="voice-controls">', actions_start)
+        record = HUMAN_ADAM_HTML.index('id="voiceRecordBtn"', voice)
+        status = HUMAN_ADAM_HTML.index('id="voiceStatus"', record)
+        send = HUMAN_ADAM_HTML.index('id="sendBtn"', status)
+        actions_end = HUMAN_ADAM_HTML.index("</div>", send)
+
+        self.assertLess(actions_start, voice)
+        self.assertLess(voice, record)
+        self.assertLess(record, status)
+        self.assertLess(status, send)
+        self.assertLess(send, actions_end)
+        self.assertIn(
+            ".compose-actions { display:grid; grid-template-columns:auto minmax(0,1fr) auto;",
+            HUMAN_ADAM_HTML,
+        )
+        self.assertIn("#voiceStatus { min-width:0; overflow:hidden;", HUMAN_ADAM_HTML)
+        self.assertNotIn('class="hint"', HUMAN_ADAM_HTML)
+
     def test_ui_renders_persistent_safe_deployment_confirmation(self) -> None:
         self.assertIn("payload.deployment_confirmation", HUMAN_ADAM_HTML)
         self.assertIn("confirmation.gate_passed === true", HUMAN_ADAM_HTML)

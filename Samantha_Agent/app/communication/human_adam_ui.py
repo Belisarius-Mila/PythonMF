@@ -45,11 +45,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .meta { display:block; margin-top:6px; color:var(--muted); font-size:12px; }
     .composer { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:min(920px,100%); padding:12px max(16px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); border-top:1px solid var(--line); background:rgba(255,255,255,.98); }
     textarea { width:100%; min-height:86px; max-height:230px; resize:vertical; border:1px solid #bac7d8; border-radius:13px; padding:12px; font:inherit; color:var(--ink); }
-    .voice-controls { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    .voice-controls { display:flex; align-items:center; gap:8px; min-width:0; }
     #voiceRecordBtn.recording { color:#991b1b; border-color:#ef4444; background:#fef2f2; }
-    #voiceStatus { color:var(--muted); font-size:12px; }
-    .compose-actions { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:8px; }
-    .hint { color:var(--muted); font-size:12px; }
+    #voiceStatus { min-width:0; overflow:hidden; color:var(--muted); font-size:12px; text-align:center; text-overflow:ellipsis; white-space:nowrap; }
+    .compose-actions { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:10px; margin-top:8px; }
     .tvbcp-panel { position:fixed; z-index:5; inset:0 0 0 auto; width:min(680px,100%); display:flex; flex-direction:column; background:#fff; border-left:1px solid var(--line); box-shadow:-12px 0 40px rgba(15,23,42,.18); }
     .tvbcp-panel[hidden] { display:none; }
     .tvbcp-head { display:flex; align-items:center; gap:8px; padding:14px max(16px,env(safe-area-inset-right)) 14px 16px; border-bottom:1px solid var(--line); }
@@ -64,7 +63,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .checkpoint-box { padding:12px 16px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); display:grid; gap:8px; }
     .checkpoint-box input { width:100%; border:1px solid #bac7d8; border-radius:11px; padding:10px 12px; font:inherit; }
     #deployMeta { color:var(--muted); font-size:13px; line-height:1.4; }
-    @media (max-width:620px) { .head { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .head h1 { text-align:center; } .head-tools { grid-column:1/-1; grid-row:2; justify-content:center; } .back { padding:8px 10px; } .bubble { max-width:94%; } .hint { display:none; } #chat { padding-left:12px; padding-right:12px; } }
+    @media (max-width:620px) { .head { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .head h1 { text-align:center; } .head-tools { grid-column:1/-1; grid-row:2; justify-content:center; } .back { padding:8px 10px; } .bubble { max-width:94%; } #chat { padding-left:12px; padding-right:12px; } }
   </style>
 </head>
 <body>
@@ -93,13 +92,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   <section id="chat" aria-label="Konverzace Human–Adam"></section>
   <form class="composer" id="composer" autocomplete="off">
     <textarea id="messageInput" maxlength="12000" autocomplete="off" placeholder="Napiš Adamovi…" aria-label="Zpráva pro Adama"></textarea>
-    <div class="voice-controls">
-      <button id="voiceRecordBtn" type="button">Nahrát pokyn</button>
-      <button id="voiceStopBtn" type="button" hidden disabled>Ukončit záznam</button>
-      <span id="voiceStatus" role="status" aria-live="polite">Přepis se vloží do pole a sám se neodešle.</span>
-    </div>
     <div class="compose-actions">
-      <span class="hint">⌘/Ctrl + Enter odešle · Enter píše nový řádek</span>
+      <div class="voice-controls">
+        <button id="voiceRecordBtn" type="button">Nahrát pokyn</button>
+        <button id="voiceStopBtn" type="button" hidden disabled>Ukončit záznam</button>
+      </div>
+      <span id="voiceStatus" role="status" aria-live="polite">Přepis se vloží do pole a sám se neodešle.</span>
       <button class="primary" id="sendBtn" type="submit">Odeslat</button>
     </div>
   </form>
