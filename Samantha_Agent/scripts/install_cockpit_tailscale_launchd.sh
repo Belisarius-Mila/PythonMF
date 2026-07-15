@@ -9,5 +9,5 @@ if [[ ! -x "$PYTHON_BIN" ]]; then
 fi
 
 echo "Tailscale Cockpit uz nepouziva druhy Python server."
-echo "Zapinam bezpecny TCP proxy do lokalni instance s automatickym rollbackem."
+echo "Zapinam bezpecny TCP a HTTPS proxy do lokalni instance s automatickym rollbackem."
 exec "$PYTHON_BIN" "$PROJECT_DIR/scripts/migrate_cockpit_single_instance.py" --apply

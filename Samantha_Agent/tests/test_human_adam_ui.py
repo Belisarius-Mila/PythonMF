@@ -187,6 +187,17 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertNotIn("input.value", catch_source)
         self.assertNotIn("clearMessageInput", transcribe_source)
 
+    def test_voice_recording_explains_insecure_http_before_browser_capabilities(self) -> None:
+        record_start = HUMAN_ADAM_HTML.index("async function startVoiceRecording()")
+        record_end = HUMAN_ADAM_HTML.index("function stopVoiceRecording()", record_start)
+        record_source = HUMAN_ADAM_HTML[record_start:record_end]
+
+        secure_check = record_source.index("if (!window.isSecureContext)")
+        capability_check = record_source.index("if (!navigator.mediaDevices")
+        self.assertLess(secure_check, capability_check)
+        self.assertIn("jen přes HTTPS adresu Cockpitu", record_source)
+        self.assertIn("tato stránka běží přes HTTP", record_source)
+
     def test_active_turn_blocks_new_voice_recording_but_not_manual_status(self) -> None:
         controls_start = HUMAN_ADAM_HTML.index("function syncControls()")
         controls_end = HUMAN_ADAM_HTML.index("function setBusy(", controls_start)

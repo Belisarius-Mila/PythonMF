@@ -317,8 +317,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
   async function startVoiceRecording() {
     if (busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing) return;
+    if (!window.isSecureContext) {
+      voiceStatus.textContent = "Mikrofon je na iPhonu dostupný jen přes HTTPS adresu Cockpitu; tato stránka běží přes HTTP.";
+      return;
+    }
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
-      voiceStatus.textContent = "Tento prohlížeč nepodporuje bezpečné nahrávání mikrofonu.";
+      voiceStatus.textContent = "Tento prohlížeč nebo jeho oprávnění nepodporují nahrávání mikrofonu.";
       return;
     }
     try {

@@ -78,8 +78,10 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   Casomira dlouheho tahu i hlasovy prepis s editaci a explicitnim odeslanim jsou
   nasazene. Bod `170fef2` resi atomicky soubeh s dennim sovim workflow: po brane
   znovu overi GitHub a pushne checkpoint pred lokalnim fast-forwardem; potvrzene
-  odmitnuti vrati text do editoru, nejiste doruceni ho k opakovani nevraci. Plna
-  brana ma 723 testu.
+  odmitnuti vrati text do editoru, nejiste doruceni ho k opakovani nevraci.
+  Private Tailscale Serve HTTPS cesta je aktivni pro Chrome/iPhone mikrofon,
+  ukazuje na stejny lokalni Cockpit a verejny Funnel je vypnuty. Plna brana ma
+  728 testu.
 
 ## Handoffs
 

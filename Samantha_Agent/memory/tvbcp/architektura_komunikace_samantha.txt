@@ -859,3 +859,35 @@ bodu. Uživatelský nezařazený auditní soubor nebyl čten, měněn ani commit
 Otevřené praktické ověření: při budoucím skutečném potvrzeném odmítnutí zkontrolovat,
 že se rozepsaný text vrátí do editoru. Simulovat nejisté doručení v produkčním
 vlákně jen kvůli UI testu není vhodné; tuto větev pokrývá regresní test.
+
+### 2026-07-15 16:06 CEST – HTTPS cesta pro mikrofon Human–Adam
+
+Ruční test v Chrome na iPhonu ukázal hlášku o nepodporovaném bezpečném nahrávání.
+Příčinou nebyl Chrome ani MediaRecorder, ale HTTP URL vzdáleného Cockpitu:
+Tailscale TCP tunel šifroval transport, prohlížeč jej však správně nepovažoval za
+webový `secure context`, takže `navigator.mediaDevices` nebylo dostupné.
+
+Po Mílově potvrzení a samostatném souhlasu s public Certificate Transparency
+záznamem byly v tailnetové administraci povoleny HTTPS certifikáty. Registrovaný
+single-instance workflow následně přidal private Tailscale Serve HTTPS `443` do
+stejného lokálního Cockpitu; veřejný Funnel zůstal vypnutý a původní TCP `8770`
+zůstal zachovaný.
+
+Implementace navíc:
+
+- UI rozlišuje insecure HTTP od skutečně nepodporovaného browseru/oprávnění a
+  přímo vysvětlí nutnost HTTPS;
+- workflow předem kontroluje DNS i povolené certifikáty a má časový limit, takže
+  už tiše nečeká na administrátorské schválení;
+- HTTPS health používá systémový `curl`, protože Python.org CA store falešně
+  odmítl platný certifikát;
+- úspěch vyžaduje shodný PID a code stamp lokálního a HTTPS Cockpitu.
+
+Důkaz: HTTPS i lokální health odpověděly HTTP 200 se stejným PID a code stampem,
+HTTPS stránka obsahuje nový secure-context guard a plná brána prošla 728 testy
+včetně JavaScriptu, Pythonu, shellu a `git diff --check`.
+
+Další krok: po nasazení otevřít Human–Adam výhradně přes tailnetovou HTTPS adresu,
+v Chrome povolit mikrofon a ručně ověřit nahrát → ukončit → přepsat → upravit →
+výslovně odeslat. HTTP port `8770` může zůstat pro kompatibilitu, ale mikrofon na
+něm záměrně fungovat nebude.
