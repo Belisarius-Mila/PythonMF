@@ -24,6 +24,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     button.deploy-action { background:var(--ok); color:#fff; border-color:var(--ok); }
     button:disabled { opacity:.55; cursor:wait; }
     .statusline { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; color:var(--muted); font-size:13px; }
+    #mobileStatusSummary { display:none; width:100%; margin-top:10px; padding:8px 10px; align-items:center; justify-content:space-between; gap:10px; text-align:left; color:var(--muted); background:var(--soft); }
+    #mobileStatusSummary.warn { color:var(--warn); background:#fff7ed; }
+    #mobileStatusSummary.ok { color:var(--ok); background:#ecfdf3; }
+    #mobileStatusText { min-width:0; overflow-wrap:anywhere; }
+    #mobileStatusToggleText { flex:0 0 auto; font-size:12px; font-weight:600; }
     .badge { padding:4px 8px; border-radius:999px; background:var(--soft); }
     button.sound-badge { padding:4px 8px; color:var(--muted); font-size:13px; font-weight:600; }
     .badge.ok { color:var(--ok); background:#ecfdf3; }
@@ -66,7 +71,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .checkpoint-box { padding:12px 16px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); display:grid; gap:8px; }
     .checkpoint-box input { width:100%; border:1px solid #bac7d8; border-radius:11px; padding:10px 12px; font:inherit; }
     #deployMeta { color:var(--muted); font-size:13px; line-height:1.4; }
-    @media (max-width:620px) { .head { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .head h1 { text-align:center; } .head-tools { grid-column:1/-1; grid-row:2; justify-content:center; } .back { padding:8px 10px; } .bubble { max-width:94%; } #chat { padding-left:12px; padding-right:12px; } }
+    @media (max-width:620px) { .head { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .head h1 { text-align:center; } .head-tools { grid-column:1/-1; grid-row:2; justify-content:center; } .back { padding:8px 10px; } #mobileStatusSummary { display:flex; } .status-details { display:none; } .status-details.expanded { display:block; } .bubble { max-width:94%; } #chat { padding-left:12px; padding-right:12px; } }
   </style>
 </head>
 <body>
@@ -82,13 +87,19 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       </div>
       <a class="back" href="/">← Cockpit</a>
     </div>
-    <div class="statusline">
-      <span class="badge warn" id="connectionBadge">Odpojeno</span>
-      <span class="badge" id="threadBadge">Relace: —</span>
-      <span class="badge" id="workspaceBadge">Izolovaný workspace</span>
-      <button class="badge sound-badge warn" id="soundTestBtn" type="button">Zvuk: vyzkoušet</button>
+    <button id="mobileStatusSummary" type="button" aria-expanded="false" aria-controls="statusDetails">
+      <span id="mobileStatusText" role="status" aria-live="polite">Odpojeno · Izolovaný workspace · Adam není připojen</span>
+      <span id="mobileStatusToggleText">Podrobnosti</span>
+    </button>
+    <div class="status-details" id="statusDetails">
+      <div class="statusline">
+        <span class="badge warn" id="connectionBadge">Odpojeno</span>
+        <span class="badge" id="threadBadge">Relace: —</span>
+        <span class="badge" id="workspaceBadge">Izolovaný workspace</span>
+        <button class="badge sound-badge warn" id="soundTestBtn" type="button">Zvuk: vyzkoušet</button>
+      </div>
+      <div id="turnActivity" role="status" aria-live="polite" hidden></div>
     </div>
-    <div id="turnActivity" role="status" aria-live="polite" hidden></div>
     <div id="deploymentReceipt" role="status" aria-live="polite" hidden></div>
     <div id="deploymentDiagnostic" role="status" aria-live="polite" hidden></div>
   </header>
@@ -140,6 +151,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const notice = document.getElementById("notice");
   const deploymentReceipt = document.getElementById("deploymentReceipt");
   const deploymentDiagnostic = document.getElementById("deploymentDiagnostic");
+  const mobileStatusSummary = document.getElementById("mobileStatusSummary");
+  const mobileStatusText = document.getElementById("mobileStatusText");
+  const mobileStatusToggleText = document.getElementById("mobileStatusToggleText");
+  const statusDetails = document.getElementById("statusDetails");
   const connectionBadge = document.getElementById("connectionBadge");
   const threadBadge = document.getElementById("threadBadge");
   const workspaceBadge = document.getElementById("workspaceBadge");
@@ -186,6 +201,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let turnTimerId = null;
   let activeTurnStartedAt = "";
   let lastSession = null;
+  let sessionConnected = false;
+  let deliveryUncertain = false;
   let deploymentAudit = null;
   let completionAudioContext = null;
   let completionAudioUnlocked = false;
@@ -324,6 +341,34 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     if (text) notice.textContent = text;
   }
 
+  function setMobileStatusDetails(expanded) {
+    const showDetails = Boolean(expanded);
+    statusDetails.classList.toggle("expanded", showDetails);
+    mobileStatusSummary.setAttribute("aria-expanded", showDetails ? "true" : "false");
+    mobileStatusToggleText.textContent = showDetails ? "Skrýt" : "Podrobnosti";
+  }
+
+  function updateMobileStatusSummary() {
+    let text = "";
+    let tone = "";
+    if (sessionTurnBusy) {
+      text = turnActivity.textContent || "Adam pracuje · čas neznámý · pokyn neposílej znovu";
+      tone = "warn";
+    } else if (deliveryUncertain) {
+      text = "Stav doručení je nejistý · obnov stav · pokyn neposílej znovu";
+      tone = "warn";
+    } else {
+      const connectionText = connectionBadge.textContent || "Odpojeno";
+      const workspaceText = workspaceBadge.textContent || "Izolovaný workspace";
+      const adamText = sessionConnected ? "Adam čeká" : "Adam není připojen";
+      text = `${connectionText} · ${workspaceText} · ${adamText}`;
+      tone = sessionConnected && !workspaceBadge.classList.contains("warn") ? "ok" : "warn";
+    }
+    mobileStatusText.textContent = text;
+    mobileStatusSummary.classList.toggle("ok", tone === "ok");
+    mobileStatusSummary.classList.toggle("warn", tone === "warn");
+  }
+
   function elapsedClock(startedAt) {
     const startedMs = new Date(startedAt).getTime();
     if (!Number.isFinite(startedMs)) return "čas neznámý";
@@ -342,6 +387,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   function updateTurnTimer() {
     if (!activeTurnStartedAt) return;
     turnActivity.textContent = `Adam pracuje · ${elapsedClock(activeTurnStartedAt)} · pokyn neposílej znovu`;
+    updateMobileStatusSummary();
     turnTimerId = window.setTimeout(updateTurnTimer, 1000);
   }
 
@@ -364,17 +410,19 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     const latest = messages.length ? messages[messages.length - 1] : null;
     sessionTurnBusy = Boolean(session && session.turn_busy);
     if (sessionTurnBusy) {
+      deliveryUncertain = false;
       const activeTurn = session && session.active_turn ? session.active_turn : {};
       startTurnTimer(activeTurn.started_at || "");
       turnActivity.hidden = false;
     } else {
       stopTurnTimer();
-      const deliveryUnknown = Boolean(latest && latest.status === "delivery_unknown");
-      turnActivity.textContent = deliveryUnknown
+      deliveryUncertain = Boolean(latest && latest.status === "delivery_unknown");
+      turnActivity.textContent = deliveryUncertain
         ? "Stav doručení je nejistý · obnov stav · pokyn neposílej znovu"
         : "";
-      turnActivity.hidden = !deliveryUnknown;
+      turnActivity.hidden = !deliveryUncertain;
     }
+    updateMobileStatusSummary();
     syncControls();
   }
 
@@ -656,6 +704,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   function renderStatus(payload) {
     const session = payload && payload.session ? payload.session : null;
     const connected = Boolean(session && session.connected && payload.runtime && payload.runtime.reachable);
+    sessionConnected = connected;
     connectionBadge.textContent = connected ? "Připojeno" : "Odpojeno";
     connectionBadge.className = connected ? "badge ok" : "badge warn";
     const thread = session && session.thread_id ? session.thread_id : "";
@@ -979,6 +1028,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   connectBtn.addEventListener("click", connect);
+  mobileStatusSummary.addEventListener("click", () => {
+    setMobileStatusDetails(mobileStatusSummary.getAttribute("aria-expanded") !== "true");
+  });
   soundTestBtn.addEventListener("click", testCompletionSound);
   document.addEventListener("visibilitychange", restoreCompletionAudioAfterVisibility);
   window.addEventListener("pagehide", () => stopAnswerSpeech(false));

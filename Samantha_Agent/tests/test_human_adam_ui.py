@@ -37,6 +37,10 @@ class HumanAdamUiTests(unittest.TestCase):
             "deploymentReceipt",
             "deploymentDiagnostic",
             "turnActivity",
+            "mobileStatusSummary",
+            "mobileStatusText",
+            "mobileStatusToggleText",
+            "statusDetails",
             "voiceRecordBtn",
             "voiceStopBtn",
             "voiceStatus",
@@ -81,6 +85,36 @@ class HumanAdamUiTests(unittest.TestCase):
         restore = HUMAN_ADAM_HTML.index("deployMeta.textContent = deploymentFailure;", refresh)
         self.assertLess(refresh, restore)
         self.assertIn("await waitForCockpitAndReload(Number(payload.restart.pid || previousPid));", HUMAN_ADAM_HTML)
+
+    def test_mobile_summary_collapses_core_details_without_hiding_deployment_evidence(self) -> None:
+        header = HUMAN_ADAM_HTML.index("<header>")
+        summary = HUMAN_ADAM_HTML.index('id="mobileStatusSummary"', header)
+        details = HUMAN_ADAM_HTML.index('id="statusDetails"', summary)
+        badges = HUMAN_ADAM_HTML.index('<div class="statusline">', details)
+        turn = HUMAN_ADAM_HTML.index('id="turnActivity"', badges)
+        receipt = HUMAN_ADAM_HTML.index('id="deploymentReceipt"', turn)
+
+        self.assertLess(summary, details)
+        self.assertLess(details, badges)
+        self.assertLess(badges, turn)
+        self.assertLess(turn, receipt)
+        self.assertIn('aria-expanded="false" aria-controls="statusDetails"', HUMAN_ADAM_HTML)
+        self.assertIn("#mobileStatusSummary { display:none;", HUMAN_ADAM_HTML)
+        self.assertIn("#mobileStatusSummary { display:flex; }", HUMAN_ADAM_HTML)
+        self.assertIn(".status-details { display:none; }", HUMAN_ADAM_HTML)
+        self.assertIn(".status-details.expanded { display:block; }", HUMAN_ADAM_HTML)
+
+        summary_start = HUMAN_ADAM_HTML.index("function updateMobileStatusSummary()")
+        summary_end = HUMAN_ADAM_HTML.index("function elapsedClock", summary_start)
+        summary_source = HUMAN_ADAM_HTML[summary_start:summary_end]
+        self.assertIn('text = turnActivity.textContent || "Adam pracuje', summary_source)
+        self.assertIn('text = "Stav doručení je nejistý · obnov stav · pokyn neposílej znovu";', summary_source)
+        self.assertIn('const adamText = sessionConnected ? "Adam čeká" : "Adam není připojen";', summary_source)
+        self.assertIn('text = `${connectionText} · ${workspaceText} · ${adamText}`;', summary_source)
+        self.assertIn('mobileStatusSummary.setAttribute("aria-expanded"', HUMAN_ADAM_HTML)
+        self.assertIn('mobileStatusToggleText.textContent = showDetails ? "Skrýt" : "Podrobnosti";', HUMAN_ADAM_HTML)
+        self.assertIn('mobileStatusSummary.addEventListener("click"', HUMAN_ADAM_HTML)
+        self.assertIn("updateMobileStatusSummary();\n    turnTimerId", HUMAN_ADAM_HTML)
 
     def test_composer_places_voice_left_and_send_right_in_one_compact_row(self) -> None:
         actions_start = HUMAN_ADAM_HTML.index('<div class="compose-actions">')
