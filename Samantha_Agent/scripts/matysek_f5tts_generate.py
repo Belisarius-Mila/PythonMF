@@ -13,6 +13,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import Any, Callable
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -24,6 +25,7 @@ DEFAULT_VOICE_MANIFEST = (
     DEFAULT_OUTPUT_DIR / "locked_forest_journey_20260603/voice_reference_manifest.json"
 )
 MAX_REF_SECONDS = 12.0
+AFPLAY_PATH = Path("/usr/bin/afplay")
 
 
 def parse_args() -> argparse.Namespace:
@@ -53,6 +55,11 @@ def parse_args() -> argparse.Namespace:
         help="Allow ref audio over 12s. F5 may clip it, so this is usually a bad idea.",
     )
     parser.add_argument("--print-command", action="store_true")
+    parser.add_argument(
+        "--play",
+        action="store_true",
+        help="Po generovani prehrat MP3 bezpecne pres afplay; nikdy nepouziva macOS open ani Apple Music.",
+    )
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -138,6 +145,22 @@ def mp3_duration_seconds(path: Path) -> float | None:
     return None
 
 
+def play_mp3_with_afplay(
+    audio_path: Path,
+    *,
+    runner: Callable[..., Any] = subprocess.run,
+    afplay_path: Path = AFPLAY_PATH,
+) -> None:
+    safe_audio_path = audio_path.expanduser().resolve()
+    if not safe_audio_path.is_file():
+        raise SystemExit(f"MP3 pro poslech neexistuje: {safe_audio_path}")
+    if not afplay_path.is_file():
+        raise SystemExit(f"Bezpecny prehravac afplay neexistuje: {afplay_path}")
+    result = runner([str(afplay_path), str(safe_audio_path)], check=False)
+    if result.returncode != 0:
+        raise SystemExit("MP3 se nepodarilo prehrat pres afplay.")
+
+
 def main() -> int:
     args = parse_args()
 
@@ -208,6 +231,8 @@ def main() -> int:
     print(f"Cas: {elapsed:.2f} s")
     if duration is not None:
         print(f"Reference: {duration:.3f} s")
+    if args.play:
+        play_mp3_with_afplay(output_path)
     return 0
 
 

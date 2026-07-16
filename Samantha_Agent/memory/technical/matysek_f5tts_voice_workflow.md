@@ -132,6 +132,23 @@ XDG_CACHE_HOME=/private/tmp/f5tts-cache
 
 A pred spustenim odmita referenci nad 12 sekund, pokud neni vedome pouzito `--allow-long-ref`.
 
+## Bezpecny poslech MP3
+
+Pro poslech noveho MMTX kandidata pouzij primo wrapper s `--play`:
+
+```bash
+.venv/bin/python scripts/matysek_f5tts_generate.py \
+  --character bunny \
+  --gen-text "Hello, Benji." \
+  --output-file bunny_hello_test.mp3 \
+  --play
+```
+
+Wrapper prehrava hotovy soubor vyhradne pres `/usr/bin/afplay`. Pro MMTX MP3
+nepouzivej macOS `open` ani dvojklik ve Finderu: podle vychozi asociace mohou
+otevrit Music a pridat pracovni audio do hudebni knihovny. Samotne generovani
+bez `--play` soubor pouze ulozi a nic neotevira.
+
 ## Reference a vysledky z 2026-06-02
 
 Referencni soubory v `data/matysek_english/voice_references/`:
