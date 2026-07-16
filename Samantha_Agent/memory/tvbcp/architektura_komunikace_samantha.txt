@@ -1029,3 +1029,54 @@ viditelný.
 
 Další krok: při běžném používání na iPhonu ověřit čitelnost dlouhé časomíry a
 varování na úzkém displeji; další zhušťování dělat jen podle skutečné potřeby.
+
+### 2026-07-16 22:30 CEST – Failover nevyvolávat uměle a kanonický recovery postup
+
+Míla po úspěšném celodenním vývoji s Human–Adam z iPhonu rozhodl, že se zdravý
+Cockpit ani app-server nebudou záměrně vypínat jen kvůli důkazu. Terminálový
+failover proto zůstává připravenou, ale dosud neuzavřenou bránou. První skutečný
+výpadek se využije jako řízený test; do té doby se nesmí vydávat za provedený.
+
+Princip platného failover testu:
+
+1. Při poruše nejdřív nic neopakovat, zejména ne poslední Human–Adam pokyn.
+2. Před opravou read-only zachytit stav: dostupnost Cockpitu a app-server socketu,
+   ověřené procesy, stav tahu a doručení, Git `main` proti `origin/main`, Human–Adam
+   workspace a čas posledního autosave. Nečíst ani nezapisovat citlivý obsah.
+3. V novém Terminalu nebo přes SSH spustit `samantha`; pokud shell příkaz nezná,
+   nejdřív použít `source ~/.zshrc` a potom `samantha`.
+4. Samostatný terminálový Adam musí bez Cockpitu obnovit kontext z `AGENTS.md`,
+   `MEMORY_INDEX.md`, `ACTIVE_PROJECTS.md`, tohoto TVBCP, relevantního handoffu,
+   autosave metadat a skutečného stavu Gitu. První průchod je pouze read-only.
+5. Důkaz je úspěšný jen tehdy, když terminál správně určí poslední bezpečný stav,
+   rozpracovanou práci, rizika a další krok bez poškození nebo svévolné změny Gitu.
+
+Kanonický recovery postup:
+
+- Pokud selhal jen Cockpit, ponechat dosažitelný app-server běžet. Ověřit přesný
+  Cockpit proces a LaunchAgent, obnovit Cockpit registrovaným postupem a provést
+  lokální smoke check. App-server může Cockpit restart přežít; samotný výpadek
+  Cockpitu proto není důkazem výpadku obou vrstev.
+- Pokud selhal app-server, nejdřív rozlišit aktivní tah, dokončené doručení a
+  `delivery_unknown`. Při aktivním nebo nejistém tahu nic neposílat znovu.
+  Ukončovat lze pouze přesně ověřený app-server proces a pouze v rámci potvrzené
+  recovery akce.
+- Neodpovídající Unix socket se nikdy nemaže naslepo. Odstranit lze jen technický
+  runtime socket, který je prokazatelně nedosažitelný a žádný živý proces jej
+  nedrží; systémové nebo LaunchAgent zásahy podléhají globální brzdě.
+- Po obnovení Cockpitu použít Human–Adam `Připojit`. Session Hub má obnovit
+  persistované kanonické vlákno. Pokud staré vlákno obsahuje zprávy a nelze je
+  obnovit, systém musí selhat zavřeně a nesmí je potichu nahradit novým vláknem.
+- Nakonec ověřit zachovanou historii a identitu vlákna, nulovou duplicitu,
+  čistý workspace bez remote, shodu `main` s `origin/main`, lokální Cockpit,
+  privátní iPhone cestu a stav zálohy. Při jakékoli nejistotě se recovery zastaví
+  a uloží se necitlivý handoff s přesným dalším krokem.
+
+Riziko: skutečný výpadek může nastat během tahu. Persistovaný stav a zákaz
+automatického opakování mají přednost před rychlým zprovozněním. Cílem recovery
+není za každou cenu okamžitě pokračovat, ale nejdřív prokázat, co bylo a nebylo
+doručeno.
+
+Další krok: Human–Adam ponechat v běžném provozu. Při prvním skutečném výpadku
+postupovat podle tohoto záznamu a po obnově přidat redigovaný důkaz, zda failover
+prošel úplně, částečně, nebo odhalil nový otevřený krok.
