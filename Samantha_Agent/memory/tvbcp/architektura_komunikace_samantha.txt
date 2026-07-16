@@ -1007,3 +1007,25 @@ UI a služby se na toto umístění už nenapojují.
 
 Další krok: po commitu, pushi a restartu provést krátký smoke test hlavní stránky
 a Human–Adam; žádný LAB ani Adam Remote už nemá být v UI nebo API dostupný.
+
+### 2026-07-16 17:19 CEST – Jediný souhrnný stavový řádek na iPhonu
+
+Human–Adam na iPhonu zobrazuje jediný kompaktní souhrnný řádek, například
+`Připojeno · Workspace čistý · Adam čeká`. Během aktivního tahu stejný řádek
+ukazuje živou časomíru a při nejistém doručení bezpečnostní varování proti
+opakovanému odeslání pokynu.
+
+Klepnutí na `Podrobnosti` rozbalí původní stavové badge, relaci, workspace a
+ovládání zvuku. Účtenka nasazení a chyby nasazení zůstávají samostatně viditelné;
+desktopové rozložení se nemění.
+
+Důkaz: implementace je obsažena v bodě `cd4879f`; cílené UI testy kontrolují
+souhrnný klidový stav, aktivní časomíru, nejisté doručení a ovládání
+`Podrobnosti`.
+
+Riziko: kompaktní řádek záměrně skrývá sekundární diagnostiku do rozbalení, ale
+bezpečnostní stav aktivního tahu, nejistého doručení a nasazení zůstává přímo
+viditelný.
+
+Další krok: při běžném používání na iPhonu ověřit čitelnost dlouhé časomíry a
+varování na úzkém displeji; další zhušťování dělat jen podle skutečné potřeby.
