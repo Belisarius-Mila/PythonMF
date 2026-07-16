@@ -121,7 +121,7 @@ def build_takeover_plan(*, workspace: HumanAdamWorkspaceManager | None = None) -
     checkpoint_head = _git(manager.workspace_root, ["rev-parse", "HEAD"])
     checkpoint_parent = _git(manager.workspace_root, ["rev-parse", "HEAD^"])
     checkpoint_subject = _git(manager.workspace_root, ["log", "-1", "--format=%s"])
-    if checkpoint_parent != source_head or str(status.get("base_head") or "") != source_head:
+    if checkpoint_parent != source_head:
         raise TakeoverError("WIP checkpoint není přímým potomkem aktuálního main.")
 
     _git(manager.workspace_root, ["diff", "--check", "HEAD^", "HEAD"])

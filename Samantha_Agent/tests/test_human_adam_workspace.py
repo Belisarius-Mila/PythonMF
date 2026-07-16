@@ -119,6 +119,67 @@ class HumanAdamWorkspaceManagerTests(unittest.TestCase):
             self.assertTrue((manager.workspace_root / ".env").exists())
             self.assertEqual(git(manager.workspace_root, "log", "-1", "--pretty=%s"), "Initial")
 
+    def test_status_recognizes_local_checkpoint_with_stale_base_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            metadata_path = root / "meta.json"
+            manager = HumanAdamWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=metadata_path,
+            )
+            prepared = manager.prepare()
+            (manager.project_root / "tracked.py").write_text("VALUE = 9\n", encoding="utf-8")
+            checkpoint = manager.checkpoint(confirmed=True, message="WIP stale metadata")
+            metadata_path.write_text(
+                '{"schema_version": 1, "base_head": "stale"}\n',
+                encoding="utf-8",
+            )
+
+            status = manager.status()
+            review = manager.review()
+
+            self.assertEqual(status["base_head"], "stale")
+            self.assertEqual(status["workspace_relation"], "local_ahead")
+            self.assertTrue(status["local_checkpoint_ahead"])
+            self.assertEqual(status["local_commit_count"], 1)
+            self.assertEqual(status["head"], checkpoint["checkpoint_head"])
+            self.assertEqual(review["checkpoint_base_head"], prepared["head"])
+            self.assertEqual(review["checkpoint_change_count"], 1)
+            self.assertEqual(review["checkpoint_changes"][0]["path"], "Samantha_Agent/tracked.py")
+
+    def test_status_recognizes_source_ahead_with_stale_base_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            metadata_path = root / "meta.json"
+            manager = HumanAdamWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=metadata_path,
+            )
+            manager.prepare()
+            metadata_path.write_text(
+                '{"schema_version": 1, "base_head": "stale"}\n',
+                encoding="utf-8",
+            )
+            (source / "Samantha_Agent" / "tracked.py").write_text("VALUE = 10\n", encoding="utf-8")
+            git(source, "add", "Samantha_Agent/tracked.py")
+            git(source, "commit", "-m", "Source ahead with stale metadata")
+            source_head = git(source, "rev-parse", "HEAD")
+
+            status = manager.status()
+
+            self.assertEqual(status["base_head"], "stale")
+            self.assertEqual(status["workspace_relation"], "source_ahead")
+            self.assertTrue(status["source_update_available"])
+            self.assertTrue(status["sync_allowed"])
+
+            synced = manager.sync_from_main(confirmed=True)
+            self.assertEqual(synced["workspace_relation"], "aligned")
+            self.assertEqual(synced["base_head"], source_head)
+
     def test_sync_from_main_fast_forwards_clean_clone_without_remote(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -212,6 +273,13 @@ class HumanAdamWorkspaceManagerTests(unittest.TestCase):
             (source / "Samantha_Agent" / "tracked.py").write_text("SOURCE COMMIT\n", encoding="utf-8")
             git(source, "add", "Samantha_Agent/tracked.py")
             git(source, "commit", "-m", "Source diverged")
+
+            diverged = manager.status()
+
+            self.assertEqual(diverged["workspace_relation"], "diverged")
+            self.assertFalse(diverged["local_checkpoint_ahead"])
+            self.assertFalse(diverged["source_update_available"])
+            self.assertFalse(diverged["sync_allowed"])
 
             with self.assertRaises(AppServerError):
                 manager.sync_from_main(confirmed=True)

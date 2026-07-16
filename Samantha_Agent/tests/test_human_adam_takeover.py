@@ -56,6 +56,26 @@ class HumanAdamTakeoverTests(unittest.TestCase):
         self.assertNotIn("VALUE = 2", str(public))
         self.assertEqual(source_head_after, plan.source_head)
 
+    def test_audit_accepts_graph_valid_checkpoint_with_stale_base_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source, manager = prepare_with_origin(Path(temp_dir))
+            source_head = git(source, "rev-parse", "HEAD")
+            (manager.project_root / "tracked.py").write_text("VALUE = 22\n", encoding="utf-8")
+            checkpoint = manager.checkpoint(confirmed=True, message="WIP stale metadata audit")
+            manager.metadata_path.write_text(
+                '{"schema_version": 1, "base_head": "stale"}\n',
+                encoding="utf-8",
+            )
+
+            status = manager.status()
+            plan = build_takeover_plan(workspace=manager)
+
+        self.assertEqual(status["workspace_relation"], "local_ahead")
+        self.assertEqual(status["base_head"], "stale")
+        self.assertEqual(plan.source_head, source_head)
+        self.assertEqual(plan.checkpoint_parent, source_head)
+        self.assertEqual(plan.checkpoint_head, checkpoint["checkpoint_head"])
+
     def test_apply_requires_exact_confirmation_then_fast_forwards_and_pushes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             source, manager = prepare_with_origin(Path(temp_dir))

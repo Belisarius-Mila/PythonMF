@@ -99,6 +99,16 @@ def _git_output(cwd: Path, args: list[str], *, timeout: float = 30.0) -> str:
     return completed.stdout.strip()
 
 
+def _is_ancestor(repo: Path, ancestor: str, descendant: str) -> bool:
+    if not ancestor or not descendant:
+        return False
+    completed = _run_git(
+        repo,
+        ["merge-base", "--is-ancestor", ancestor, descendant],
+    )
+    return completed.returncode == 0
+
+
 def _status_rows(repo: Path) -> list[dict[str, str]]:
     completed = _run_git(repo, ["status", "--porcelain=v1", "--untracked-files=all"])
     if completed.returncode != 0:
@@ -179,23 +189,16 @@ class HumanAdamWorkspaceManager:
             relation = "aligned"
             local_commit_count = 0
             if head != source_head:
-                if base_head and base_head == source_head:
-                    ancestor = _run_git(
-                        self.workspace_root,
-                        ["merge-base", "--is-ancestor", source_head, head],
-                    )
-                    if ancestor.returncode == 0:
-                        relation = "local_ahead"
-                        local_commit_count = int(
-                            _git_output(
-                                self.workspace_root,
-                                ["rev-list", "--count", f"{source_head}..{head}"],
-                            )
-                            or 0
+                if _is_ancestor(self.workspace_root, source_head, head):
+                    relation = "local_ahead"
+                    local_commit_count = int(
+                        _git_output(
+                            self.workspace_root,
+                            ["rev-list", "--count", f"{source_head}..{head}"],
                         )
-                    else:
-                        relation = "diverged"
-                elif base_head and head == base_head:
+                        or 0
+                    )
+                elif _is_ancestor(self.source_repo, head, source_head):
                     relation = "source_ahead"
                 else:
                     relation = "diverged"
@@ -460,11 +463,14 @@ class HumanAdamWorkspaceManager:
             if not current.get("prepared") or not current.get("ok"):
                 raise AppServerError("Human–Adam workspace není v bezpečném stavu pro kontrolu změn.")
             checkpoint_changes: list[dict[str, str]] = []
+            checkpoint_base_head = ""
             if current.get("local_checkpoint_ahead"):
-                base_head = str(current.get("base_head") or "")
+                checkpoint_base_head = str(current.get("source_head") or "")
+                if not checkpoint_base_head:
+                    raise AppServerError("Human–Adam checkpoint nemá ověřitelný Git základ.")
                 diff_text = _git_output(
                     self.workspace_root,
-                    ["diff", "--name-status", "--find-renames", f"{base_head}..HEAD"],
+                    ["diff", "--name-status", "--find-renames", f"{checkpoint_base_head}..HEAD"],
                 )
                 for line in diff_text.splitlines():
                     parts = line.split("\t")
@@ -482,6 +488,7 @@ class HumanAdamWorkspaceManager:
                 "change_count": int(current.get("change_count") or 0),
                 "checkpoint_changes": checkpoint_changes[:120],
                 "checkpoint_change_count": len(checkpoint_changes),
+                "checkpoint_base_head": checkpoint_base_head,
                 "local_checkpoint_ahead": bool(current.get("local_checkpoint_ahead")),
                 "local_commit_count": int(current.get("local_commit_count") or 0),
                 "workspace_relation": str(current.get("workspace_relation") or "unknown"),
