@@ -36,6 +36,7 @@ CATEGORY_LABELS = {
 
 SUPPORTED_ATTACHMENT_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"}
 ATTACHMENT_CONFIRMATION_PHRASE = "Potvrzuji připojení obrázku"
+ATTACHMENT_REMOVE_CONFIRMATION_PHRASE = "Potvrzuji odebrání přílohy"
 DELETE_CONFIRMATION_PHRASE = "Potvrzuji vyřazení z knihovny"
 CLEANUP_CONFIRMATION_PHRASE = "Potvrzuji vyčištění článků knihovny"
 LIBRARY_EXPORT_EMAIL_MARKER = "X-Samantha-Library-Export"
@@ -533,6 +534,247 @@ def attach_article_image(
             "note": str(attachment["note"]),
             "created_at": str(attachment["created_at"]),
         }).to_summary(),
+    }
+
+
+def update_article(
+    *,
+    article_id: str,
+    title: str,
+    text: str,
+    category: str,
+    tags: list[str] | None = None,
+    source_label: str = "",
+    source_note: str = "",
+    archive_root: Path = DEFAULT_ARCHIVE_ROOT,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    item = find_article(article_id, archive_root=archive_root)
+    if item is None:
+        raise ValueError("Článek nebyl nalezen.")
+    clean_title = str(title or "").strip()[:500]
+    if not clean_title:
+        raise ValueError("Název článku nesmí být prázdný.")
+    clean_text = normalize_manual_text(text)
+    if not clean_text:
+        raise ValueError("Text článku nesmí být prázdný.")
+    text_path = resolve_archive_relative_file(archive_root, item.text_file)
+    metadata_path = article_metadata_path(item, archive_root=archive_root)
+    if text_path is None or not text_path.is_file():
+        raise ValueError("Text článku nebyl nalezen.")
+    if not metadata_path.is_file():
+        raise ValueError("Metadata článku nebyla nalezena.")
+    raw = json.loads(metadata_path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise ValueError("Metadata článku mají neplatný formát.")
+    clean_tags: list[str] = []
+    for tag in tags or []:
+        clean = str(tag).strip()[:120]
+        if clean and clean not in clean_tags:
+            clean_tags.append(clean)
+    if any(attachment.kind == "image" for attachment in item.attachments) and "ma-obrazek" not in clean_tags:
+        clean_tags.append("ma-obrazek")
+    raw["title"] = clean_title
+    raw["one_line_title"] = compact_title(clean_title)
+    raw["category"] = normalize_category(category)
+    raw["tags"] = clean_tags
+    raw["source_label"] = str(source_label or "").strip()[:160]
+    raw["source_note"] = str(source_note or "").strip()[:1000]
+    raw["text_chars"] = str(len(clean_text))
+    raw["updated_at"] = (now or datetime.now(timezone.utc)).replace(microsecond=0).isoformat()
+
+    registry_path = archive_root / "registry.jsonl"
+    original_text = text_path.read_text(encoding="utf-8")
+    original_metadata = metadata_path.read_text(encoding="utf-8")
+    original_registry = registry_path.read_text(encoding="utf-8") if registry_path.exists() else None
+    try:
+        text_path.write_text(clean_text + "\n", encoding="utf-8")
+        metadata_path.write_text(json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        update_registry(registry_path, raw)
+    except Exception:
+        text_path.write_text(original_text, encoding="utf-8")
+        metadata_path.write_text(original_metadata, encoding="utf-8")
+        if original_registry is None:
+            registry_path.unlink(missing_ok=True)
+        else:
+            registry_path.write_text(original_registry, encoding="utf-8")
+        raise
+    return {
+        "ok": True,
+        "message": "Úpravy článku byly uloženy.",
+        "item": article_item_from_raw(raw).to_summary(include_attachments=True),
+        "text": clean_text,
+    }
+
+
+def update_article_attachment(
+    *,
+    article_id: str,
+    attachment_id: str,
+    label: str,
+    note: str = "",
+    archive_root: Path = DEFAULT_ARCHIVE_ROOT,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    item = find_article(article_id, archive_root=archive_root)
+    if item is None:
+        raise ValueError("Článek nebyl nalezen.")
+    wanted = slugify(str(attachment_id or "").strip(), max_length=48)
+    metadata_path = article_metadata_path(item, archive_root=archive_root)
+    if not metadata_path.is_file():
+        raise ValueError("Metadata článku nebyla nalezena.")
+    original_metadata = metadata_path.read_text(encoding="utf-8")
+    raw = json.loads(original_metadata)
+    attachments = raw.get("attachments") if isinstance(raw, dict) else None
+    if not isinstance(raw, dict) or not isinstance(attachments, list):
+        raise ValueError("Metadata příloh mají neplatný formát.")
+    updated_attachment: dict[str, Any] | None = None
+    for entry in attachments:
+        if not isinstance(entry, dict):
+            continue
+        if slugify(str(entry.get("id", "")).strip(), max_length=48) != wanted:
+            continue
+        clean_label = str(label or "").strip()[:160]
+        if not clean_label:
+            raise ValueError("Popisek přílohy nesmí být prázdný.")
+        entry["label"] = clean_label
+        entry["note"] = str(note or "").strip()[:1000]
+        entry["updated_at"] = (now or datetime.now(timezone.utc)).replace(microsecond=0).isoformat()
+        updated_attachment = entry
+        break
+    if updated_attachment is None:
+        raise ValueError("Příloha nebyla nalezena.")
+    registry_path = archive_root / "registry.jsonl"
+    original_registry = registry_path.read_text(encoding="utf-8") if registry_path.exists() else None
+    try:
+        metadata_path.write_text(json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        update_registry(registry_path, raw)
+    except Exception:
+        metadata_path.write_text(original_metadata, encoding="utf-8")
+        if original_registry is None:
+            registry_path.unlink(missing_ok=True)
+        else:
+            registry_path.write_text(original_registry, encoding="utf-8")
+        raise
+    updated_item = article_item_from_raw(raw)
+    attachment = next(entry for entry in updated_item.attachments if entry.id == wanted)
+    return {
+        "ok": True,
+        "message": "Popisek přílohy byl uložen.",
+        "item": updated_item.to_summary(include_attachments=True),
+        "attachment": attachment.to_summary(),
+    }
+
+
+def remove_article_attachment(
+    *,
+    article_id: str,
+    attachment_id: str,
+    archive_root: Path = DEFAULT_ARCHIVE_ROOT,
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    if (
+        not user_confirmed
+        or str(confirmation_text or "").strip().casefold() != ATTACHMENT_REMOVE_CONFIRMATION_PHRASE.casefold()
+    ):
+        raise ValueError(f"Odebrání přílohy vyžaduje přesné potvrzení: {ATTACHMENT_REMOVE_CONFIRMATION_PHRASE}")
+    item = find_article(article_id, archive_root=archive_root)
+    if item is None:
+        raise ValueError("Článek nebyl nalezen.")
+    wanted = slugify(str(attachment_id or "").strip(), max_length=48)
+    metadata_path = article_metadata_path(item, archive_root=archive_root)
+    if not metadata_path.is_file():
+        raise ValueError("Metadata článku nebyla nalezena.")
+    original_metadata = metadata_path.read_text(encoding="utf-8")
+    raw = json.loads(original_metadata)
+    attachments = raw.get("attachments") if isinstance(raw, dict) else None
+    if not isinstance(raw, dict) or not isinstance(attachments, list):
+        raise ValueError("Metadata příloh mají neplatný formát.")
+    removed: dict[str, Any] | None = None
+    remaining: list[Any] = []
+    for entry in attachments:
+        if (
+            removed is None
+            and isinstance(entry, dict)
+            and slugify(str(entry.get("id", "")).strip(), max_length=48) == wanted
+        ):
+            removed = entry
+        else:
+            remaining.append(entry)
+    if removed is None:
+        raise ValueError("Příloha nebyla nalezena.")
+
+    removed_at = (now or datetime.now(timezone.utc)).replace(microsecond=0)
+    trash_root = archive_root / "trash" / "attachments"
+    trash_root.mkdir(parents=True, exist_ok=True)
+    trash_dir = next_trash_path(
+        trash_root / f"{removed_at.strftime('%Y%m%d_%H%M%S')}_{item.id}_{wanted}"
+    )
+    moved_files: list[tuple[Path, Path, str]] = []
+    seen_sources: set[Path] = set()
+    manifest_path = trash_dir / "removed_attachment.json"
+    attachment_root = (archive_root / "articles" / item.id / "attachments").resolve()
+    try:
+        for field in ("original_file", "readable_file", "thumb_file"):
+            source = resolve_archive_relative_file(archive_root, str(removed.get(field, "")))
+            if source is None or not source.is_file() or source in seen_sources:
+                continue
+            if attachment_root not in source.parents:
+                raise ValueError("Soubor přílohy je mimo bezpečný adresář článku.")
+            seen_sources.add(source)
+            target = trash_dir / field / source.name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(source), str(target))
+            moved_files.append((source, target, field))
+
+        trash_dir.mkdir(parents=True, exist_ok=True)
+        manifest = {
+            "article_id": item.id,
+            "attachment": removed,
+            "removed_at": removed_at.isoformat(),
+            "moved_files": {
+                field: str(target.relative_to(archive_root))
+                for _source, target, field in moved_files
+            },
+        }
+        manifest_path.write_text(
+            json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+
+        raw["attachments"] = remaining
+        if not any(isinstance(entry, dict) and str(entry.get("kind", "")).casefold() == "image" for entry in remaining):
+            tags = raw.get("tags", [])
+            if isinstance(tags, list):
+                raw["tags"] = [tag for tag in tags if str(tag).strip().casefold() != "ma-obrazek"]
+        raw["updated_at"] = removed_at.isoformat()
+        registry_path = archive_root / "registry.jsonl"
+        original_registry = registry_path.read_text(encoding="utf-8") if registry_path.exists() else None
+        try:
+            metadata_path.write_text(json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            update_registry(registry_path, raw)
+        except Exception:
+            metadata_path.write_text(original_metadata, encoding="utf-8")
+            if original_registry is None:
+                registry_path.unlink(missing_ok=True)
+            else:
+                registry_path.write_text(original_registry, encoding="utf-8")
+            raise
+    except Exception:
+        for source, target, _field in reversed(moved_files):
+            source.parent.mkdir(parents=True, exist_ok=True)
+            if target.exists():
+                shutil.move(str(target), str(source))
+        manifest_path.unlink(missing_ok=True)
+        raise
+    updated_item = article_item_from_raw(raw)
+    return {
+        "ok": True,
+        "message": "Příloha byla odebrána z článku a přesunuta do soukromého koše.",
+        "item": updated_item.to_summary(include_attachments=True),
+        "attachment_id": wanted,
     }
 
 

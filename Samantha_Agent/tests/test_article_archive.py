@@ -6,6 +6,7 @@ import subprocess
 import tempfile
 import urllib.error
 import unittest
+from datetime import datetime, timezone
 from email import message_from_bytes
 from io import BytesIO
 from pathlib import Path
@@ -13,6 +14,7 @@ from unittest.mock import patch
 
 from app.article_archive import (
     ATTACHMENT_CONFIRMATION_PHRASE,
+    ATTACHMENT_REMOVE_CONFIRMATION_PHRASE,
     CLEANUP_CONFIRMATION_PHRASE,
     DELETE_CONFIRMATION_PHRASE,
     LIBRARY_EXPORT_EMAIL_MARKER,
@@ -35,6 +37,9 @@ from app.article_archive import (
     send_article_pdf_export,
     set_article_read_state,
     trim_to_article_body,
+    update_article,
+    update_article_attachment,
+    remove_article_attachment,
 )
 from app.email.config import OutgoingMailConfig
 from app.email.outbound import SentCopyResult
@@ -53,6 +58,147 @@ else:
 
 
 class ArticleArchiveTests(unittest.TestCase):
+    def test_update_article_changes_editable_fields_and_preserves_attachments(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            created = archive_text_entry(
+                title="Původní název",
+                text="Původní text článku.",
+                category="other",
+                tags=["puvodni"],
+                source_label="Vložený text",
+                archive_root=archive_root,
+            )
+            article_id = created["item"]["id"]
+            metadata_path = archive_root / "articles" / article_id / "metadata.json"
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+            metadata["attachments"] = [{
+                "id": "foto-1",
+                "label": "Fotografie",
+                "kind": "image",
+                "role": "supporting_image",
+                "mime_type": "image/jpeg",
+                "original_file": "",
+                "readable_file": "",
+                "thumb_file": "",
+                "size_bytes": 10,
+                "note": "",
+                "created_at": "2026-07-16T10:00:00+00:00",
+            }]
+            metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            (archive_root / "registry.jsonl").write_text(json.dumps(metadata, ensure_ascii=False) + "\n", encoding="utf-8")
+
+            result = update_article(
+                article_id=article_id,
+                title="Nový název",
+                text="Upravený text článku s fotografií.",
+                category="science",
+                tags=["věda", "upraveno"],
+                source_label="Mílova poznámka",
+                source_note="Ověřená lokální úprava.",
+                archive_root=archive_root,
+                now=datetime(2026, 7, 16, 12, 0, tzinfo=timezone.utc),
+            )
+            loaded = get_article(article_id=article_id, archive_root=archive_root, max_chars=0)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(loaded["item"]["title"], "Nový název")
+        self.assertEqual(loaded["item"]["category"], "science")
+        self.assertEqual(loaded["item"]["tags"], ["věda", "upraveno", "ma-obrazek"])
+        self.assertEqual(loaded["item"]["attachment_count"], 1)
+        self.assertEqual(loaded["text"], "Upravený text článku s fotografií.")
+
+    def test_update_attachment_changes_only_label_and_note(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root, article_id, _files = self.make_article_with_attachment(Path(temp_dir))
+
+            result = update_article_attachment(
+                article_id=article_id,
+                attachment_id="foto-1",
+                label="Nový popisek fotografie",
+                note="Pohled od severu.",
+                archive_root=archive_root,
+                now=datetime(2026, 7, 16, 12, 5, tzinfo=timezone.utc),
+            )
+            loaded = get_article(article_id=article_id, archive_root=archive_root)
+
+        self.assertTrue(result["ok"])
+        attachment = loaded["item"]["attachments"][0]
+        self.assertEqual(attachment["label"], "Nový popisek fotografie")
+        self.assertEqual(attachment["note"], "Pohled od severu.")
+        self.assertTrue(attachment["has_original"])
+        self.assertTrue(attachment["has_readable"])
+        self.assertTrue(attachment["has_thumb"])
+
+    def test_remove_attachment_requires_exact_phrase_and_moves_files_to_trash(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root, article_id, files = self.make_article_with_attachment(Path(temp_dir))
+            with self.assertRaisesRegex(ValueError, ATTACHMENT_REMOVE_CONFIRMATION_PHRASE):
+                remove_article_attachment(
+                    article_id=article_id,
+                    attachment_id="foto-1",
+                    archive_root=archive_root,
+                    user_confirmed=True,
+                    confirmation_text="ano",
+                )
+            self.assertTrue(all(path.exists() for path in files))
+
+            result = remove_article_attachment(
+                article_id=article_id,
+                attachment_id="foto-1",
+                archive_root=archive_root,
+                user_confirmed=True,
+                confirmation_text=ATTACHMENT_REMOVE_CONFIRMATION_PHRASE,
+                now=datetime(2026, 7, 16, 12, 10, tzinfo=timezone.utc),
+            )
+            loaded = get_article(article_id=article_id, archive_root=archive_root)
+            trash_manifests = list((archive_root / "trash" / "attachments").glob("*/removed_attachment.json"))
+            files_were_moved = all(not path.exists() for path in files)
+            trash_manifest_count = len(trash_manifests)
+
+        self.assertTrue(result["ok"])
+        self.assertTrue(files_were_moved)
+        self.assertEqual(loaded["item"]["attachment_count"], 0)
+        self.assertNotIn("ma-obrazek", loaded["item"]["tags"])
+        self.assertEqual(trash_manifest_count, 1)
+
+    def make_article_with_attachment(self, archive_root: Path) -> tuple[Path, str, list[Path]]:
+        created = archive_text_entry(
+            title="Článek s fotografií",
+            text="Text k fotografii.",
+            category="travel_places",
+            tags=["ma-obrazek"],
+            archive_root=archive_root,
+        )
+        article_id = created["item"]["id"]
+        article_dir = archive_root / "articles" / article_id
+        files = [
+            article_dir / "attachments" / "original" / "foto-1.png",
+            article_dir / "attachments" / "readable" / "foto-1.jpg",
+            article_dir / "attachments" / "thumbs" / "foto-1.jpg",
+        ]
+        for index, path in enumerate(files, start=1):
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(f"image-{index}".encode("ascii"))
+        metadata_path = article_dir / "metadata.json"
+        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        metadata["attachments"] = [{
+            "id": "foto-1",
+            "label": "Ilustrační foto",
+            "kind": "image",
+            "role": "supporting_image",
+            "mime_type": "image/png",
+            "original_file": str(files[0].relative_to(archive_root)),
+            "readable_file": str(files[1].relative_to(archive_root)),
+            "thumb_file": str(files[2].relative_to(archive_root)),
+            "size_bytes": files[0].stat().st_size,
+            "note": "Původní poznámka.",
+            "created_at": "2026-07-16T10:00:00+00:00",
+        }]
+        metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        (archive_root / "registry.jsonl").write_text(json.dumps(metadata, ensure_ascii=False) + "\n", encoding="utf-8")
+        return archive_root, article_id, files
+
     def test_lists_searches_and_reads_private_article_archive(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             archive_root = Path(temp_dir)

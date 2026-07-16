@@ -30,6 +30,9 @@ from app.cockpit import (
     library_archive_url_action,
     library_attach_image_action,
     library_delete_article_action,
+    library_remove_attachment_action,
+    library_update_article_action,
+    library_update_attachment_action,
     lekarna_admin_page_html,
     lekarna_auto_import_apply_action,
     lekarna_auto_import_draft_action,
@@ -332,6 +335,89 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("svatky", kwargs["tags"])
         self.assertIn("rodinny-recept", kwargs["tags"])
         self.assertIn("prepis-overit", kwargs["tags"])
+
+    def test_library_attach_image_action_uses_generic_tags_outside_recipes(self) -> None:
+        with patch("app.cockpit.attach_article_image") as attach_mock:
+            attach_mock.return_value = {"ok": True, "item": {"id": "science-1"}, "attachment": {"id": "foto"}}
+
+            result = library_attach_image_action(
+                {
+                    "article_id": "science-1",
+                    "image_data_url": "data:image/jpeg;base64,aW1hZ2U=",
+                    "filename": "experiment.jpg",
+                    "category": "science",
+                }
+            )
+
+        self.assertTrue(result["ok"])
+        kwargs = attach_mock.call_args.kwargs
+        self.assertEqual(kwargs["label"], "Doprovodná fotografie")
+        self.assertEqual(kwargs["role"], "supporting_image")
+        self.assertIn("ma-obrazek", kwargs["tags"])
+        self.assertNotIn("rodinny-recept", kwargs["tags"])
+        self.assertNotIn("rucne-psany", kwargs["tags"])
+
+    def test_library_update_article_action_passes_editable_fields(self) -> None:
+        with patch("app.cockpit.update_article") as update_mock:
+            update_mock.return_value = {"ok": True, "item": {"id": "article-1"}}
+
+            result = library_update_article_action(
+                {
+                    "article_id": "article-1",
+                    "title": "Upravený článek",
+                    "text": "Nový text.",
+                    "category": "science",
+                    "tags": "věda; fotografie",
+                    "source_label": "Mílova poznámka",
+                    "source_note": "Lokálně upraveno.",
+                }
+            )
+
+        self.assertTrue(result["ok"])
+        update_mock.assert_called_once_with(
+            article_id="article-1",
+            title="Upravený článek",
+            text="Nový text.",
+            category="science",
+            tags=["věda", "fotografie"],
+            source_label="Mílova poznámka",
+            source_note="Lokálně upraveno.",
+        )
+
+    def test_library_attachment_edit_and_remove_actions_use_narrow_helpers(self) -> None:
+        with (
+            patch("app.cockpit.update_article_attachment") as update_mock,
+            patch("app.cockpit.remove_article_attachment") as remove_mock,
+        ):
+            update_mock.return_value = {"ok": True, "attachment": {"id": "foto-1"}}
+            remove_mock.return_value = {"ok": True, "attachment_id": "foto-1"}
+
+            updated = library_update_attachment_action(
+                {"article_id": "article-1", "attachment_id": "foto-1", "label": "Pohled", "note": "Ze severu."}
+            )
+            removed = library_remove_attachment_action(
+                {
+                    "article_id": "article-1",
+                    "attachment_id": "foto-1",
+                    "user_confirmed": True,
+                    "confirmation_text": "Potvrzuji odebrání přílohy",
+                }
+            )
+
+        self.assertTrue(updated["ok"])
+        self.assertTrue(removed["ok"])
+        update_mock.assert_called_once_with(
+            article_id="article-1",
+            attachment_id="foto-1",
+            label="Pohled",
+            note="Ze severu.",
+        )
+        remove_mock.assert_called_once_with(
+            article_id="article-1",
+            attachment_id="foto-1",
+            user_confirmed=True,
+            confirmation_text="Potvrzuji odebrání přílohy",
+        )
 
     def test_library_delete_article_action_passes_confirmation_gate(self) -> None:
         with patch("app.cockpit.delete_article") as delete_mock:
@@ -921,13 +1007,23 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("libraryExportStatus", COCKPIT_HTML)
         self.assertIn("Potvrzuji vyřazení z knihovny", COCKPIT_HTML)
         self.assertIn("libraryAttachmentFileInput", COCKPIT_HTML)
+        self.assertIn("libraryEditBtn", COCKPIT_HTML)
+        self.assertIn("Uložit úpravy", COCKPIT_HTML)
+        self.assertIn("/api/library/update", COCKPIT_HTML)
+        self.assertIn("/api/library/attachment/update", COCKPIT_HTML)
+        self.assertIn("/api/library/attachment/remove", COCKPIT_HTML)
+        self.assertIn("Upravit popisek", COCKPIT_HTML)
+        self.assertIn("Odebrat přílohu", COCKPIT_HTML)
+        self.assertIn("Potvrzuji odebrání přílohy", COCKPIT_HTML)
+        self.assertIn("&full=1", COCKPIT_HTML)
         self.assertIn("attachment_count", COCKPIT_HTML)
         self.assertIn("Otevřít přílohu", COCKPIT_HTML)
         self.assertIn("function libraryAttachmentDisplayLabel(attachment, category)", COCKPIT_HTML)
         self.assertIn('category === "travel_places" && (!label || label === "Ručně psaný recept")', COCKPIT_HTML)
         self.assertIn('return "Ilustrační foto";', COCKPIT_HTML)
         self.assertIn('currentLibrarySelectedItem && currentLibrarySelectedItem.category', COCKPIT_HTML)
-        self.assertIn('=== "travel_places" ? "Ilustrační foto" : "Ručně psaný recept"', COCKPIT_HTML)
+        self.assertIn('itemCategory === "travel_places" ? "Ilustrační foto"', COCKPIT_HTML)
+        self.assertIn('itemCategory === "recipes" ? "Ručně psaný recept" : "Doprovodná fotografie"', COCKPIT_HTML)
         self.assertIn("item.category || currentLibraryCategory", COCKPIT_HTML)
         self.assertIn('value="ai_tools"', COCKPIT_HTML)
         self.assertIn('data-library-category="ai_tools"', COCKPIT_HTML)
