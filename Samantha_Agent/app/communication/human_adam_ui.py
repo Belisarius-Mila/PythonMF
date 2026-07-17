@@ -79,6 +79,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #contextAnchorMeta,.context-anchor-help { margin:0; color:var(--muted); font-size:13px; }
     .context-anchor-actions { display:flex; justify-content:flex-end; gap:8px; }
     @media (max-width:620px) { .head { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .head h1 { text-align:center; } .head-tools { grid-column:1/-1; grid-row:2; justify-content:center; } .profile-tools { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .profile-tools select { min-width:0; width:100%; } .back { padding:8px 10px; } #mobileStatusSummary { display:flex; } .status-details { display:none; } .status-details.expanded { display:block; } .bubble { max-width:94%; } #chat { padding-left:12px; padding-right:12px; } }
+    @media (max-width:620px) {
+      .tvbcp-panel { width:100%; max-width:100vw; min-width:0; overflow-x:hidden; }
+      .tvbcp-head,.context-anchor-body { min-width:0; max-width:100%; }
+      #contextAnchorMeta,.context-anchor-help { overflow-wrap:anywhere; }
+      #contextAnchorInput { min-width:0; max-width:100%; }
+      #contextAnchorProposeBtn { width:100%; min-width:0; white-space:normal; }
+      .context-anchor-actions { width:100%; min-width:0; flex-wrap:wrap; }
+      .context-anchor-actions > button { flex:1 1 calc(50% - 4px); min-width:0; padding-left:8px; padding-right:8px; white-space:normal; }
+    }
   </style>
 </head>
 <body>

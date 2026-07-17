@@ -208,6 +208,14 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Nejdřív napiš stručný aktivní kontext k uložení.", HUMAN_ADAM_HTML)
         self.assertIn("contextAnchorInput.focus();", HUMAN_ADAM_HTML)
 
+    def test_mobile_anchor_controls_wrap_without_widening_panel(self) -> None:
+        self.assertIn(".tvbcp-panel { width:100%; max-width:100vw; min-width:0; overflow-x:hidden; }", HUMAN_ADAM_HTML)
+        self.assertIn(".tvbcp-head,.context-anchor-body { min-width:0; max-width:100%; }", HUMAN_ADAM_HTML)
+        self.assertIn("#contextAnchorInput { min-width:0; max-width:100%; }", HUMAN_ADAM_HTML)
+        self.assertIn("#contextAnchorProposeBtn { width:100%; min-width:0; white-space:normal; }", HUMAN_ADAM_HTML)
+        self.assertIn(".context-anchor-actions { width:100%; min-width:0; flex-wrap:wrap; }", HUMAN_ADAM_HTML)
+        self.assertIn("flex:1 1 calc(50% - 4px); min-width:0;", HUMAN_ADAM_HTML)
+
     def test_context_anchor_update_preserves_server_owned_state_transitions(self) -> None:
         change_start = HUMAN_ADAM_HTML.index("async function changeContextAnchor(operation)")
         change_end = HUMAN_ADAM_HTML.index("function validContextAnchorProposal", change_start)
