@@ -12633,6 +12633,7 @@ COCKPIT_HTML = """<!doctype html>
     .library-title { font-weight: 750; overflow-wrap: anywhere; }
     .library-read-badge { justify-self: start; border: 1px solid #f59e0b; border-radius: 999px; padding: 2px 7px; background: #fff7ed; color: #92400e; font-size: 12px; font-weight: 750; }
     .library-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+    .library-reader-meta { white-space: pre-line; line-height: 1.45; }
     .library-reader { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; min-height: 420px; display: flex; flex-direction: column; overflow: visible; }
     .library-reader-head { padding: 12px; border-bottom: 1px solid #edf0f4; display: grid; gap: 6px; background: white; }
     .library-reader-title { margin: 0; font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
@@ -12649,6 +12650,8 @@ COCKPIT_HTML = """<!doctype html>
     .library-attachment-section-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
     .library-attachment-section-title { margin: 0; font-size: 15px; }
     .library-reader-attachments { display: grid; gap: 10px; }
+    .library-full-text-notice { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 10px 16px; border-bottom: 1px solid #bfdbfe; background: #eff6ff; color: #1e3a5f; font-size: 13px; }
+    .library-full-text-notice.hidden { display: none; }
     .library-reader-text { flex: 1; padding: 14px 16px; white-space: pre-wrap; overflow: visible; line-height: 1.58; font-size: 15px; background: white; }
     .library-attachment-card { border: 1px solid #edf0f4; border-radius: 8px; background: white; padding: 10px; display: grid; gap: 8px; }
     .library-attachment-title { font-weight: 700; overflow-wrap: anywhere; }
@@ -13283,6 +13286,7 @@ COCKPIT_HTML = """<!doctype html>
       </div>
       <div class="modal-body">
         <div class="library-tabs" aria-label="Kategorie knihovny">
+          <button class="secondary library-tab" type="button" data-library-category="all">Všechny</button>
           <button class="secondary library-tab active" type="button" data-library-category="recipes">Recepty</button>
           <button class="secondary library-tab" type="button" data-library-category="science">Vědecké články</button>
           <button class="secondary library-tab" type="button" data-library-category="ai_tools">Samantha / AI nástroje</button>
@@ -13374,7 +13378,7 @@ COCKPIT_HTML = """<!doctype html>
           <div class="library-reader" aria-live="polite">
             <div class="library-reader-head">
               <h3 id="libraryReaderTitle" class="library-reader-title">Vyber článek</h3>
-              <div id="libraryReaderMeta" class="library-meta">Vlevo vyber položku nebo použij fulltextové hledání.</div>
+              <div id="libraryReaderMeta" class="library-meta library-reader-meta">Vlevo vyber položku nebo použij fulltextové hledání.</div>
               <div class="library-reader-actions" aria-label="Akce vybraného článku">
                 <div class="library-action-group" aria-label="Akce článku">
                   <span class="library-action-group-label">Článek</span>
@@ -13468,6 +13472,10 @@ COCKPIT_HTML = """<!doctype html>
               <div id="libraryAttachmentStatus" class="status-line">Vyber fotografii; přidá se až po stisknutí tlačítka.</div>
               <div id="libraryReaderAttachments" class="library-reader-attachments"></div>
             </section>
+            <div id="libraryFullTextNotice" class="library-full-text-notice hidden">
+              <span id="libraryFullTextMessage">Zobrazená je pouze první část dlouhého článku.</span>
+              <button class="secondary" id="libraryShowFullTextBtn" type="button">Načíst celý text</button>
+            </div>
             <div id="libraryReaderText" class="library-reader-text"></div>
           </div>
         </div>
@@ -13740,6 +13748,9 @@ COCKPIT_HTML = """<!doctype html>
     const libraryList = document.getElementById("libraryList");
     const libraryReaderTitle = document.getElementById("libraryReaderTitle");
     const libraryReaderMeta = document.getElementById("libraryReaderMeta");
+    const libraryFullTextNotice = document.getElementById("libraryFullTextNotice");
+    const libraryFullTextMessage = document.getElementById("libraryFullTextMessage");
+    const libraryShowFullTextBtn = document.getElementById("libraryShowFullTextBtn");
     const libraryReaderText = document.getElementById("libraryReaderText");
     const libraryAttachmentSection = document.getElementById("libraryAttachmentSection");
     const libraryReaderAttachments = document.getElementById("libraryReaderAttachments");
@@ -18253,6 +18264,7 @@ COCKPIT_HTML = """<!doctype html>
       libraryReaderTitle.textContent = "Vyber článek";
       libraryReaderMeta.textContent = "Vlevo vyber položku nebo použij fulltextové hledání.";
       libraryReaderText.textContent = "";
+      setLibraryFullTextNotice(false);
       renderLibraryAttachments("", []);
       try {
         const url = `/api/library/list?category=${encodeURIComponent(currentLibraryCategory)}&read_state=${encodeURIComponent(currentLibraryReadStateFilter)}&limit=200`;
@@ -18296,6 +18308,7 @@ COCKPIT_HTML = """<!doctype html>
       libraryReaderTitle.textContent = "Vyber článek";
       libraryReaderMeta.textContent = "Vlevo vyber položku z výsledků hledání.";
       libraryReaderText.textContent = "";
+      setLibraryFullTextNotice(false);
       renderLibraryAttachments("", []);
       try {
         const url = `/api/library/search?category=${encodeURIComponent(currentLibraryCategory)}&read_state=${encodeURIComponent(currentLibraryReadStateFilter)}&q=${encodeURIComponent(query)}&limit=80`;
@@ -18491,6 +18504,7 @@ COCKPIT_HTML = """<!doctype html>
         libraryReaderTitle.textContent = "Vyber článek";
         libraryReaderMeta.textContent = data.message || "Položka byla vyřazena.";
         libraryReaderText.textContent = "";
+        setLibraryFullTextNotice(false);
         updateLibraryReadStateButtons(null);
         renderLibraryAttachments("", []);
         if (librarySearchInput.value.trim().length >= 2) {
@@ -18614,7 +18628,7 @@ COCKPIT_HTML = """<!doctype html>
         }
         const item = data.item || {};
         libraryStatus.textContent = data.message || "Stav článku uložen.";
-        libraryReaderMeta.textContent = libraryItemMeta(item);
+        libraryReaderMeta.textContent = libraryItemDetailMeta(item);
         updateLibraryReadStateButtons(item);
         const targetCategory = currentLibraryReadStateFilter ? "all" : (item.category || currentLibraryCategory);
         const targetReadState = currentLibraryReadStateFilter || "";
@@ -18693,6 +18707,46 @@ COCKPIT_HTML = """<!doctype html>
       return parts.join(" | ");
     }
 
+    function libraryItemDetailMeta(item) {
+      const lines = [];
+      const summary = libraryItemMeta(item);
+      if (summary) lines.push(summary);
+      const tags = Array.isArray(item && item.tags) ? item.tags.filter(Boolean) : [];
+      if (tags.length) lines.push(`Tagy: ${tags.join(", ")}`);
+      const sourceNote = String(item && item.source_note || "").trim();
+      if (sourceNote) lines.push(`Poznámka ke zdroji: ${sourceNote}`);
+      return lines.join("\\n");
+    }
+
+    function setLibraryFullTextNotice(visible, message = "") {
+      libraryFullTextNotice.classList.toggle("hidden", !visible);
+      libraryFullTextMessage.textContent = message || "Zobrazená je pouze první část dlouhého článku.";
+      libraryShowFullTextBtn.disabled = false;
+    }
+
+    async function loadFullLibraryItemText() {
+      const articleId = currentLibrarySelectedId;
+      if (!articleId) return;
+      libraryShowFullTextBtn.disabled = true;
+      libraryFullTextMessage.textContent = "Načítám celý text článku...";
+      try {
+        const data = await fetchJson(`/api/library/item?id=${encodeURIComponent(articleId)}&full=1`);
+        if (!data.ok || currentLibrarySelectedId !== articleId) {
+          libraryFullTextMessage.textContent = data.message || "Celý text článku nelze načíst.";
+          return;
+        }
+        libraryReaderText.textContent = data.text || "";
+        currentLibrarySelectedText = data.text || "";
+        setLibraryFullTextNotice(false);
+        libraryStatus.textContent = "Celý text článku je načtený.";
+      } catch (err) {
+        recordFrontendError(err);
+        libraryFullTextMessage.textContent = `Chyba načtení celého textu: ${err}`;
+      } finally {
+        libraryShowFullTextBtn.disabled = false;
+      }
+    }
+
     function libraryAttachmentUrl(articleId, attachmentId, variant) {
       return `/api/library/attachment?id=${encodeURIComponent(articleId || "")}&attachment_id=${encodeURIComponent(attachmentId || "")}&variant=${encodeURIComponent(variant || "readable")}`;
     }
@@ -18714,7 +18768,7 @@ COCKPIT_HTML = """<!doctype html>
         renderLibraryItems(currentLibraryItems);
       }
       libraryReaderTitle.textContent = item.one_line_title || item.title || libraryReaderTitle.textContent || "Bez názvu";
-      libraryReaderMeta.textContent = libraryItemMeta(item);
+      libraryReaderMeta.textContent = libraryItemDetailMeta(item);
       updateLibraryReadStateButtons(item);
       renderLibraryAttachments(itemId, item.attachments || [], item.category || currentLibraryCategory);
     }
@@ -18879,6 +18933,7 @@ COCKPIT_HTML = """<!doctype html>
       libraryReaderTitle.textContent = "Načítám článek...";
       libraryReaderMeta.textContent = "";
       libraryReaderText.textContent = "";
+      setLibraryFullTextNotice(false);
       renderLibraryAttachments("", []);
       try {
         const data = await fetchJson(`/api/library/item?id=${encodeURIComponent(articleId)}`);
@@ -18893,9 +18948,10 @@ COCKPIT_HTML = """<!doctype html>
         }
         const item = data.item || {};
         libraryReaderTitle.textContent = item.one_line_title || item.title || "Bez názvu";
-        libraryReaderMeta.textContent = libraryItemMeta(item);
+        libraryReaderMeta.textContent = libraryItemDetailMeta(item);
         libraryReaderText.textContent = data.text || "";
         currentLibrarySelectedText = data.text || "";
+        setLibraryFullTextNotice(Boolean(data.truncated));
         updateLibraryReadStateButtons(item);
         renderLibraryAttachments(item.id || articleId, item.attachments || [], item.category || currentLibraryCategory);
       } catch (err) {
@@ -20464,6 +20520,7 @@ COCKPIT_HTML = """<!doctype html>
       field.addEventListener("change", markLibraryEditorDirty);
     });
     libraryAttachmentSaveBtn.addEventListener("click", attachLibraryImage);
+    libraryShowFullTextBtn.addEventListener("click", loadFullLibraryItemText);
     libraryOpenSourceBtn.addEventListener("click", openSelectedLibrarySource);
     libraryExportPrepareBtn.addEventListener("click", prepareSelectedLibraryPdfExport);
     libraryExportSendBtn.addEventListener("click", sendSelectedLibraryPdfExport);

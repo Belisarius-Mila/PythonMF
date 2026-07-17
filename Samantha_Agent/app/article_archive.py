@@ -1634,9 +1634,13 @@ def search_articles(
             continue
         text = read_article_text(item.id, archive_root=archive_root, max_chars=0)
         folded = text.casefold()
+        source_folded = " ".join([item.source_label, item.source_note]).casefold()
+        tags_folded = " ".join(item.tags).casefold()
         score = sum(folded.count(term) for term in terms)
         title_score = sum(item.one_line_title.casefold().count(term) for term in terms) * 3
-        total_score = score + title_score
+        source_score = sum(source_folded.count(term) for term in terms) * 2
+        tag_score = sum(tags_folded.count(term) for term in terms) * 2
+        total_score = score + title_score + source_score + tag_score
         if total_score <= 0:
             continue
         results.append((total_score, item, make_snippet(text, terms)))
@@ -1668,12 +1672,16 @@ def get_article(
     item = find_article(article_id, archive_root=archive_root)
     if item is None:
         return {"ok": False, "error": "not_found", "message": "Článek nebyl nalezen."}
-    text = read_article_text(item.id, archive_root=archive_root, max_chars=max_chars)
+    read_limit = max_chars + 1 if max_chars > 0 else 0
+    text = read_article_text(item.id, archive_root=archive_root, max_chars=read_limit)
+    truncated = max_chars > 0 and len(text) > max_chars
+    if truncated:
+        text = text[:max_chars].rstrip()
     return {
         "ok": True,
         "item": item.to_summary(include_attachments=True),
         "text": text,
-        "truncated": max_chars > 0 and len(text) >= max_chars,
+        "truncated": truncated,
     }
 
 

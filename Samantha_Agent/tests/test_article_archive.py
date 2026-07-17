@@ -336,6 +336,48 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertIn("Mouka, kakao a med", article["text"])
         self.assertEqual(article["item"]["source_note"], "Syntetizovaný recept bez původní URL.")
 
+    def test_search_includes_tags_source_label_and_source_note(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            result = archive_text_entry(
+                title="Neutrální znalostní karta",
+                text="Obecný text bez hledaných metadat.",
+                category="other",
+                tags=["unikatni-tag"],
+                source_label="Rodinný zápisník",
+                source_note="Přepis ověřit podle originálu.",
+                archive_root=archive_root,
+            )
+
+            by_tag = search_articles(query="unikatni-tag", category="all", archive_root=archive_root)
+            by_source = search_articles(query="zápisník", category="all", archive_root=archive_root)
+            by_source_note = search_articles(query="originálu", category="all", archive_root=archive_root)
+
+        self.assertEqual(by_tag["items"][0]["id"], result["item"]["id"])
+        self.assertEqual(by_source["items"][0]["id"], result["item"]["id"])
+        self.assertEqual(by_source_note["items"][0]["id"], result["item"]["id"])
+
+    def test_get_article_reports_truncation_and_can_return_full_text(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            result = archive_text_entry(
+                title="Dlouhá karta",
+                text="0123456789ABCDEFGHIJ",
+                archive_root=archive_root,
+            )
+            item_id = result["item"]["id"]
+
+            shortened = get_article(article_id=item_id, archive_root=archive_root, max_chars=10)
+            exact_length = get_article(article_id=item_id, archive_root=archive_root, max_chars=20)
+            full = get_article(article_id=item_id, archive_root=archive_root, max_chars=0)
+
+        self.assertTrue(shortened["truncated"])
+        self.assertEqual(shortened["text"], "0123456789")
+        self.assertFalse(exact_length["truncated"])
+        self.assertEqual(exact_length["text"], "0123456789ABCDEFGHIJ")
+        self.assertFalse(full["truncated"])
+        self.assertEqual(full["text"], "0123456789ABCDEFGHIJ")
+
     def test_set_article_read_state_updates_metadata_and_registry(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             archive_root = Path(temp_dir)

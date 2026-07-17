@@ -1092,6 +1092,17 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("syncLibraryCreateCategories(currentLibraryCategory);", COCKPIT_HTML)
         self.assertGreaterEqual(library_html.count('<option value="recipes" selected>Recepty</option>'), 2)
 
+    def test_library_exposes_global_search_metadata_and_full_text_loading(self) -> None:
+        self.assertIn('data-library-category="all">Všechny</button>', COCKPIT_HTML)
+        self.assertIn("function libraryItemDetailMeta(item)", COCKPIT_HTML)
+        self.assertIn('lines.push(`Tagy: ${tags.join(", ")}`);', COCKPIT_HTML)
+        self.assertIn('lines.push(`Poznámka ke zdroji: ${sourceNote}`);', COCKPIT_HTML)
+        self.assertIn('id="libraryFullTextNotice" class="library-full-text-notice hidden"', COCKPIT_HTML)
+        self.assertIn('id="libraryShowFullTextBtn"', COCKPIT_HTML)
+        self.assertIn("function loadFullLibraryItemText()", COCKPIT_HTML)
+        self.assertIn("setLibraryFullTextNotice(Boolean(data.truncated));", COCKPIT_HTML)
+        self.assertIn('libraryShowFullTextBtn.addEventListener("click", loadFullLibraryItemText);', COCKPIT_HTML)
+
     def test_document_work_status_groups_downloads_and_review_queue(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             vault = Path(temp_dir) / "documents"
