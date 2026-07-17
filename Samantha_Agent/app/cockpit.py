@@ -13825,6 +13825,7 @@ COCKPIT_HTML = """<!doctype html>
     let currentLibrarySelectedText = "";
     let currentLibrarySourceUrl = "";
     let currentLibraryExport = null;
+    let libraryEditorDirty = false;
     let currentQuantitative = null;
     let currentAutosaveCleanupPlan = null;
     let frontendLastError = "";
@@ -17907,7 +17908,10 @@ COCKPIT_HTML = """<!doctype html>
     }
 
     function closeLibraryModal() {
+      if (!confirmLibraryEditorDiscard()) return false;
+      closeLibraryEditor(true);
       libraryModal.classList.add("hidden");
+      return true;
     }
 
     function resetLibraryExportState(message) {
@@ -17940,10 +17944,38 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
-    function closeLibraryEditor() {
+    function markLibraryEditorDirty() {
+      if (libraryEditPanel.classList.contains("hidden")) return;
+      libraryEditorDirty = true;
+      libraryEditStatus.textContent = "Máš neuložené úpravy článku.";
+    }
+
+    function setLibraryEditorFieldsDisabled(disabled) {
+      [
+        libraryEditTitleInput,
+        libraryEditCategoryInput,
+        libraryEditTagsInput,
+        libraryEditSourceInput,
+        libraryEditSourceNoteInput,
+        libraryEditTextInput,
+      ].forEach((field) => {
+        field.disabled = disabled;
+      });
+    }
+
+    function confirmLibraryEditorDiscard() {
+      if (libraryEditPanel.classList.contains("hidden") || !libraryEditorDirty) return true;
+      return window.confirm("Máš neuložené úpravy článku. Chceš je zahodit?");
+    }
+
+    function closeLibraryEditor(force = false) {
+      if (!force && !confirmLibraryEditorDiscard()) return false;
       libraryEditPanel.classList.add("hidden");
+      libraryEditorDirty = false;
+      setLibraryEditorFieldsDisabled(false);
       libraryEditSaveBtn.disabled = false;
       libraryEditStatus.textContent = "Úpravy se uloží pouze do této soukromé karty.";
+      return true;
     }
 
     async function openLibraryEditor() {
@@ -17952,7 +17984,13 @@ COCKPIT_HTML = """<!doctype html>
         libraryStatus.textContent = "Nejdřív vyber položku v knihovně.";
         return;
       }
+      if (!libraryEditPanel.classList.contains("hidden")) {
+        libraryEditTitleInput.focus();
+        return;
+      }
       libraryEditBtn.disabled = true;
+      libraryEditSaveBtn.disabled = true;
+      setLibraryEditorFieldsDisabled(true);
       libraryEditStatus.textContent = "Načítám celý text k bezpečné editaci...";
       libraryEditPanel.classList.remove("hidden");
       try {
@@ -17970,6 +18008,9 @@ COCKPIT_HTML = """<!doctype html>
         libraryEditSourceInput.value = item.source_label || "";
         libraryEditSourceNoteInput.value = item.source_note || "";
         libraryEditTextInput.value = currentLibrarySelectedText;
+        libraryEditorDirty = false;
+        setLibraryEditorFieldsDisabled(false);
+        libraryEditSaveBtn.disabled = false;
         libraryEditStatus.textContent = "Můžeš upravit text i údaje a spravovat fotografie této karty.";
         libraryEditTitleInput.focus();
       } catch (err) {
@@ -17994,6 +18035,7 @@ COCKPIT_HTML = """<!doctype html>
         return;
       }
       libraryEditSaveBtn.disabled = true;
+      setLibraryEditorFieldsDisabled(true);
       libraryEditStatus.textContent = "Ukládám úpravy článku...";
       try {
         const data = await postJson("/api/library/update", {
@@ -18011,7 +18053,7 @@ COCKPIT_HTML = """<!doctype html>
         }
         const item = data.item || {};
         const targetCategory = item.category || currentLibraryCategory || "other";
-        closeLibraryEditor();
+        closeLibraryEditor(true);
         await loadLibraryCategory(targetCategory, "");
         if (item.id) await loadLibraryItem(item.id);
         libraryStatus.textContent = data.message || "Úpravy článku byly uloženy.";
@@ -18019,6 +18061,7 @@ COCKPIT_HTML = """<!doctype html>
         recordFrontendError(err);
         libraryEditStatus.textContent = `Chyba uložení úprav: ${err}`;
       } finally {
+        setLibraryEditorFieldsDisabled(false);
         libraryEditSaveBtn.disabled = false;
       }
     }
@@ -18037,11 +18080,12 @@ COCKPIT_HTML = """<!doctype html>
     }
 
     async function loadLibraryCategory(category, readState = "") {
+      if (!confirmLibraryEditorDiscard()) return false;
+      closeLibraryEditor(true);
       currentLibraryCategory = category || "other";
       currentLibraryReadStateFilter = readState || "";
       currentLibrarySelectedId = "";
       currentLibrarySelectedText = "";
-      closeLibraryEditor();
       updateLibraryReadStateButtons(null);
       setLibraryActiveTab();
       librarySearchInput.value = "";
@@ -18061,9 +18105,11 @@ COCKPIT_HTML = """<!doctype html>
         libraryStatus.textContent = currentLibraryItems.length
           ? `${label}: ${currentLibraryItems.length} položek.`
           : `${label} zatím nemá uložené položky.`;
+        return true;
       } catch (err) {
         recordFrontendError(err);
         libraryStatus.textContent = `Chyba načtení knihovny: ${err}`;
+        return false;
       }
     }
 
@@ -18081,9 +18127,10 @@ COCKPIT_HTML = """<!doctype html>
         await loadLibraryCategory(currentLibraryCategory, currentLibraryReadStateFilter);
         return;
       }
+      if (!confirmLibraryEditorDiscard()) return;
+      closeLibraryEditor(true);
       currentLibrarySelectedId = "";
       currentLibrarySelectedText = "";
-      closeLibraryEditor();
       updateLibraryReadStateButtons(null);
       libraryDeleteBtn.disabled = true;
       resetLibraryExportState();
@@ -18113,6 +18160,8 @@ COCKPIT_HTML = """<!doctype html>
         libraryArchiveUrlInput.focus();
         return;
       }
+      if (!confirmLibraryEditorDiscard()) return;
+      closeLibraryEditor(true);
       const category = libraryArchiveCategory.value || currentLibraryCategory || "other";
       const tags = libraryArchiveTagsInput.value.trim();
       libraryArchiveBtn.disabled = true;
@@ -18156,6 +18205,8 @@ COCKPIT_HTML = """<!doctype html>
         libraryTextBodyInput.focus();
         return;
       }
+      if (!confirmLibraryEditorDiscard()) return;
+      closeLibraryEditor(true);
       const category = libraryTextCategory.value || currentLibraryCategory || "other";
       const tags = libraryTextTagsInput.value.trim();
       const sourceLabel = libraryTextSourceInput.value.trim() || "Vložený text";
@@ -18230,13 +18281,13 @@ COCKPIT_HTML = """<!doctype html>
           libraryAttachmentStatus.textContent = data.message || "Obrázek se nepodařilo připojit.";
           return;
         }
-        libraryAttachmentStatus.textContent = data.message || "Obrázek připojen.";
+        const editReminder = libraryEditorDirty ? " Rozepsané úpravy článku zůstávají neuložené." : "";
+        libraryAttachmentStatus.textContent = `${data.message || "Obrázek připojen."}${editReminder}`;
         libraryAttachmentFileInput.value = "";
         libraryAttachmentLabelInput.value = "";
         libraryAttachmentTagsInput.value = "";
         libraryAttachmentNoteInput.value = "";
-        await loadLibraryCategory(currentLibraryCategory);
-        await loadLibraryItem(articleId);
+        refreshLibraryItemAfterAttachment(data.item || {}, articleId);
       } catch (err) {
         recordFrontendError(err);
         libraryAttachmentStatus.textContent = `Chyba připojení obrázku: ${err}`;
@@ -18256,6 +18307,8 @@ COCKPIT_HTML = """<!doctype html>
       if (!confirmed) {
         return;
       }
+      if (!confirmLibraryEditorDiscard()) return;
+      closeLibraryEditor(true);
       libraryDeleteBtn.disabled = true;
       libraryStatus.textContent = "Vyřazuji položku z knihovny...";
       try {
@@ -18297,6 +18350,11 @@ COCKPIT_HTML = """<!doctype html>
         libraryExportStatus.textContent = "Nejdřív vyber položku v knihovně.";
         return;
       }
+      if (libraryEditorDirty) {
+        libraryExportStatus.textContent = "Nejdřív ulož nebo zruš rozepsané úpravy článku.";
+        libraryEditSaveBtn.focus();
+        return;
+      }
       libraryExportPrepareBtn.disabled = true;
       libraryExportSendBtn.disabled = true;
       libraryExportStatus.textContent = "Připravuji PDF a e-mailový draft lokálně...";
@@ -18327,6 +18385,11 @@ COCKPIT_HTML = """<!doctype html>
     async function sendSelectedLibraryPdfExport() {
       if (!currentLibraryExport || !currentLibraryExport.export_id) {
         libraryExportStatus.textContent = "Nejdřív připrav PDF export.";
+        return;
+      }
+      if (libraryEditorDirty) {
+        libraryExportStatus.textContent = "Nejdřív ulož nebo zruš rozepsané úpravy článku.";
+        libraryEditSaveBtn.focus();
         return;
       }
       const confirmation = currentLibraryExport.confirmation_text || "";
@@ -18365,6 +18428,8 @@ COCKPIT_HTML = """<!doctype html>
         libraryStatus.textContent = "Nejdřív vyber položku v knihovně.";
         return;
       }
+      if (!confirmLibraryEditorDiscard()) return;
+      closeLibraryEditor(true);
       let note = "";
       if (readState === "to_read") {
         note = window.prompt("Volitelná poznámka k přečtení:", currentLibrarySelectedItem && currentLibrarySelectedItem.read_note ? currentLibrarySelectedItem.read_note : "") || "";
@@ -18477,6 +18542,20 @@ COCKPIT_HTML = """<!doctype html>
       return label || "Příloha";
     }
 
+    function refreshLibraryItemAfterAttachment(item, articleId) {
+      if (!item || !articleId || currentLibrarySelectedId !== articleId) return;
+      const itemId = item.id || articleId;
+      const index = currentLibraryItems.findIndex((entry) => entry.id === itemId);
+      if (index >= 0) {
+        currentLibraryItems[index] = {...currentLibraryItems[index], ...item};
+        renderLibraryItems(currentLibraryItems);
+      }
+      libraryReaderTitle.textContent = item.one_line_title || item.title || libraryReaderTitle.textContent || "Bez názvu";
+      libraryReaderMeta.textContent = libraryItemMeta(item);
+      updateLibraryReadStateButtons(item);
+      renderLibraryAttachments(itemId, item.attachments || [], item.category || currentLibraryCategory);
+    }
+
     async function editLibraryAttachment(articleId, attachment) {
       const attachmentId = String(attachment && attachment.id || "");
       if (!articleId || !attachmentId) return;
@@ -18497,9 +18576,7 @@ COCKPIT_HTML = """<!doctype html>
           libraryStatus.textContent = data.message || "Popisek přílohy se nepodařilo uložit.";
           return;
         }
-        const item = data.item || {};
-        await loadLibraryCategory(item.category || currentLibraryCategory, "");
-        await loadLibraryItem(articleId);
+        refreshLibraryItemAfterAttachment(data.item || {}, articleId);
         libraryStatus.textContent = data.message || "Popisek přílohy byl uložen.";
       } catch (err) {
         recordFrontendError(err);
@@ -18526,9 +18603,7 @@ COCKPIT_HTML = """<!doctype html>
           libraryStatus.textContent = data.message || "Přílohu se nepodařilo odebrat.";
           return;
         }
-        const item = data.item || {};
-        await loadLibraryCategory(item.category || currentLibraryCategory, "");
-        await loadLibraryItem(articleId);
+        refreshLibraryItemAfterAttachment(data.item || {}, articleId);
         libraryStatus.textContent = data.message || "Příloha byla přesunuta do soukromého koše.";
       } catch (err) {
         recordFrontendError(err);
@@ -18617,7 +18692,9 @@ COCKPIT_HTML = """<!doctype html>
 
     async function loadLibraryItem(articleId) {
       if (!articleId) return;
-      closeLibraryEditor();
+      if (articleId === currentLibrarySelectedId && !libraryEditPanel.classList.contains("hidden")) return;
+      if (!confirmLibraryEditorDiscard()) return;
+      closeLibraryEditor(true);
       currentLibrarySelectedText = "";
       currentLibrarySelectedId = articleId;
       libraryDeleteBtn.disabled = false;
@@ -20198,7 +20275,18 @@ COCKPIT_HTML = """<!doctype html>
     libraryTextSaveBtn.addEventListener("click", saveLibraryText);
     libraryEditBtn.addEventListener("click", openLibraryEditor);
     libraryEditSaveBtn.addEventListener("click", saveLibraryEdits);
-    libraryEditCancelBtn.addEventListener("click", closeLibraryEditor);
+    libraryEditCancelBtn.addEventListener("click", () => closeLibraryEditor());
+    [
+      libraryEditTitleInput,
+      libraryEditCategoryInput,
+      libraryEditTagsInput,
+      libraryEditSourceInput,
+      libraryEditSourceNoteInput,
+      libraryEditTextInput,
+    ].forEach((field) => {
+      field.addEventListener("input", markLibraryEditorDirty);
+      field.addEventListener("change", markLibraryEditorDirty);
+    });
     libraryAttachmentSaveBtn.addEventListener("click", attachLibraryImage);
     libraryOpenSourceBtn.addEventListener("click", openSelectedLibrarySource);
     libraryExportPrepareBtn.addEventListener("click", prepareSelectedLibraryPdfExport);
@@ -20227,6 +20315,11 @@ COCKPIT_HTML = """<!doctype html>
       if (event.target === libraryModal) {
         closeLibraryModal();
       }
+    });
+    window.addEventListener("beforeunload", (event) => {
+      if (libraryEditPanel.classList.contains("hidden") || !libraryEditorDirty) return;
+      event.preventDefault();
+      event.returnValue = "";
     });
     projectsCloseBtn.addEventListener("click", closeProjectsModal);
     projectsModal.addEventListener("click", (event) => {

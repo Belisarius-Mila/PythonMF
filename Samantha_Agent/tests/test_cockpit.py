@@ -1038,6 +1038,22 @@ class CockpitTests(unittest.TestCase):
         self.assertIn('row.classList.toggle("to-read"', COCKPIT_HTML)
         self.assertIn("box-shadow: inset 3px 0 0 #f59e0b", COCKPIT_HTML)
 
+    def test_library_editor_guards_unsaved_changes_and_preserves_them_during_attachment_updates(self) -> None:
+        self.assertIn("let libraryEditorDirty = false;", COCKPIT_HTML)
+        self.assertIn("function markLibraryEditorDirty()", COCKPIT_HTML)
+        self.assertIn("function setLibraryEditorFieldsDisabled(disabled)", COCKPIT_HTML)
+        self.assertIn("function confirmLibraryEditorDiscard()", COCKPIT_HTML)
+        self.assertIn("Máš neuložené úpravy článku. Chceš je zahodit?", COCKPIT_HTML)
+        self.assertIn('window.addEventListener("beforeunload"', COCKPIT_HTML)
+        self.assertIn('libraryEditCancelBtn.addEventListener("click", () => closeLibraryEditor());', COCKPIT_HTML)
+        self.assertIn("function refreshLibraryItemAfterAttachment(item, articleId)", COCKPIT_HTML)
+        self.assertEqual(
+            COCKPIT_HTML.count("refreshLibraryItemAfterAttachment(data.item || {}, articleId);"),
+            3,
+        )
+        self.assertNotIn("await loadLibraryCategory(item.category || currentLibraryCategory", COCKPIT_HTML)
+        self.assertNotIn("await loadLibraryCategory(currentLibraryCategory);\n        await loadLibraryItem(articleId);", COCKPIT_HTML)
+
     def test_document_work_status_groups_downloads_and_review_queue(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             vault = Path(temp_dir) / "documents"
