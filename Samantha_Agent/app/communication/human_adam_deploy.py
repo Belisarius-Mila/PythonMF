@@ -17,6 +17,7 @@ from typing import Any, Callable, TYPE_CHECKING
 from app.codex_appserver import AppServerError, utc_now
 from app.file_persistence import FilePersistenceError, atomic_write_json
 from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
+from app.communication.session_hub import SessionHubError
 from scripts.human_adam_takeover import (
     CONFIRMATION_TEXT,
     TakeoverError,
@@ -516,6 +517,13 @@ def _turn_busy(service: HumanAdamService) -> bool:
 
 
 def human_adam_deploy_audit_action(*, service: HumanAdamService) -> dict[str, Any]:
+    profile_operation = getattr(service, "profile_operation", None)
+    if callable(profile_operation):
+        try:
+            with profile_operation() as active_service:
+                return human_adam_deploy_audit_action(service=active_service)
+        except SessionHubError as exc:
+            return {"ok": False, "ready": False, "message": str(exc)}
     try:
         if _turn_busy(service):
             raise HumanAdamDeployError("Audit nelze spustit během aktivního tahu Adama.")
@@ -529,6 +537,15 @@ def human_adam_deploy_action(
     *,
     service: HumanAdamService,
 ) -> dict[str, Any]:
+    profile_operation = getattr(service, "profile_operation", None)
+    if callable(profile_operation):
+        try:
+            with profile_operation() as active_service:
+                profile_id = str(getattr(service, "active_profile_id", "") or "")
+                result = human_adam_deploy_action(payload, service=active_service)
+                return {**result, "_work_profile_id": profile_id}
+        except SessionHubError as exc:
+            return {"ok": False, "ready": False, "message": str(exc)}
     thread_id = ""
     try:
         session = service.hub.snapshot()

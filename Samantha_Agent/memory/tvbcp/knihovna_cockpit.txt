@@ -1,0 +1,86 @@
+TVBCP: Knihovna v Samantha Cockpitu
+
+Stav: aktivní projektový TVBCP
+Vlastník rozhodnutí: Míla
+Pracovní profil: Knihovna
+Soukromí: Git-safe rozhodnutí a technické důkazy; nikdy ne texty soukromých článků,
+přílohy, osobní metadata ani obsah soukromého koše.
+
+## Smysl
+
+Knihovna je první funkční vstup do širší osobní znalostní databáze. Spojuje
+archivaci URL a ručně vložených textů, fulltextové hledání, kategorie, stav
+čtení, přílohy a bezpečnou editaci znalostních karet v Cockpitu.
+
+## Kanonické hranice
+
+- Soukromý obsah patří pouze do `data/private/article_archive/` a nikdy do Gitu.
+- Gitový kód, testy, memory a tento TVBCP nesmějí obsahovat texty soukromých
+  článků, přílohy ani metadata konkrétních osob.
+- Mazání soukromého obsahu vyžaduje odpovídající potvrzovací bránu; kde je to
+  možné, používá se vratný soukromý koš s manifestem.
+- Internetové doplnění obsahu se používá pouze po Mílově výslovném souhlasu.
+- Adam sám nespouští checkpoint, commit, převzetí do main, push ani nasazení.
+- Adam tento TVBCP mění jen na Mílův výslovný pokyn.
+
+## Aktuální funkční základ
+
+- Ukládání URL i ručně vloženého textu do soukromého archivu.
+- Kategorie, tagy, fulltextové hledání a stav `K přečtení` / `Hotovo`.
+- Obrazové a PDF přílohy servírované bezpečnými lokálními endpointy.
+- Přímá editace názvu, textu, kategorie, tagů a údajů o zdroji.
+- Úprava popisku a poznámky přílohy.
+- Potvrzované odebrání přílohy do soukromého koše.
+- Zachování příloh a technických tagů při editaci článku.
+
+## Otevřené kroky
+
+- Při příští běžné editaci ručně ověřit, že se znovu otevře stejná karta a
+  přílohy zůstanou zachované.
+- Samostatné uživatelské obnovení přílohy z koše řešit jen podle skutečné potřeby.
+- Další vývoj vždy vést konkrétním problémem Knihovny, ne obecnou přestavbou.
+
+## Rizika
+
+- Záměna projektového vlákna nebo workspace by mohla smíchat checkpointy s
+  vývojem Human–Adam; profil proto musí přepínat vlákno, workspace i TVBCP spolu.
+- Soukromý archiv není přítomen v izolovaném vývojovém workspace; jeho absence
+  neznamená ztrátu dat a nesmí vést k vytváření náhradních soukromých položek.
+- Testy nad reálnými soukromými kartami nesmějí jejich obsah vypisovat do logů.
+
+### 2026-07-17 03:55 CEST – Založení pracovního profilu Knihovna
+
+Míla odsouhlasil druhý pracovní profil r-Adama pro nový úkol Knihovna. Profil má
+vlastní trvalé app-server vlákno, vlastní izolovaný workspace bez Git remote,
+samostatnou účtenku nasazení a tento projektový TVBCP. Původní profil Human–Adam,
+jeho vlákno, workspace a TVBCP zůstávají beze změny.
+
+Přepnutí smí proběhnout jen jako jeden celek a je fail-closed při aktivním tahu,
+nejistém doručení, necheckpointovaných změnách, čekajícím WIP checkpointu,
+divergenci nebo probíhajícím nasazení. První cílový test po nasazení je přepnout
+Human–Adam → Knihovna, ověřit nový prázdný thread a správný TVBCP, poslat krátký
+neškodný pokyn a poté se při čistém workspace vrátit zpět.
+
+Riziko: funkce zatím není ručně ověřená v živém Cockpitu; do té doby se nesmí
+vydávat za provozně potvrzenou.
+
+Další krok: dokončit testovací bránu, nasadit přes stávající potvrzený Human–Adam
+workflow a provést uvedený ruční smoke test bez změny soukromých dat Knihovny.
+
+### 2026-07-17 04:06 CEST – Implementace prošla plnou bránou
+
+Druhý profil je implementovaný v samostatném profilovém routeru a dostupný v UI
+jako výslovně potvrzované přepnutí. Kanonická quality gate byla rozšířena o nový
+modul i jeho testy a prošla 734 testy spolu s Python, JavaScript, shell a
+`git diff --check` kontrolou.
+
+Původní aktivní profil zůstal při read-only kontrole `Human–Adam`, jeho existující
+vlákno je zachované a workspace je zarovnaný. Knihovna zatím nevytvořila reálné
+vlákno ani workspace, protože ty vzniknou bezpečně až při prvním potvrzeném
+přepnutí po nasazení.
+
+Riziko: změna ještě není commitnutá, pushnutá ani nasazená. Živý ruční test obou
+směrů přepnutí proto stále chybí.
+
+Další krok: po Mílově rozhodnutí vytvořit cílený git checkpoint, pushnout a
+restartovat Cockpit; potom provést smoke test Human–Adam → Knihovna → Human–Adam.

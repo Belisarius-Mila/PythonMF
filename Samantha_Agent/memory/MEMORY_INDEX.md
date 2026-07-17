@@ -69,6 +69,11 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Project TVBCP
 
+- `tvbcp/knihovna_cockpit.txt` - [PRIPOMENOUT] nový projektový TVBCP pro druhý
+  pracovní profil r-Adama `Knihovna`: vlastní trvalé vlákno, izolovaný workspace,
+  deployment receipt a bezpečnostní hranice soukromého archivu. Implementace
+  prošla 734 testy, ale čeká na commit/push, nasazení a živý obousměrný retest.
+
 - `tvbcp/architektura_komunikace_samantha.txt` - [PRIPOMENOUT] aktivni kanonicka
   smlouva Mily a Adama pro jednoho trvaleho Adama, sdilene app-server vlakno,
   role Cockpitu Mac/iPhone a terminalu, failover, rotaci relace, stihly
@@ -93,6 +98,11 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   chyba zvuku nikdy nemeni stav doruceni.
 
 ## Handoffs
+
+- `handoffs/human_adam_knihovna_profile_2026_07_17.md` - [PRIPOMENOUT]
+  implementovaný dvouprofilový pilot Human–Adam / Knihovna s atomickým přepnutím
+  vlákna, workspace, TVBCP a deploymentu; plná brána 734 testů prošla, změna
+  čeká na cílený commit/push, restart a živý smoke test obou směrů.
 
 - `handoffs/janicka_ra2_private_context_proposal_2026_07_15.md` - aktivní návrh
   priority 2 pro R2-Adam v Cockpitu Janička: vlastní trvalé app-server vlákno,

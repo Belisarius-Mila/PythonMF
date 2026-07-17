@@ -17,6 +17,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     header { position:sticky; top:0; z-index:2; padding:14px max(16px,env(safe-area-inset-left)); border-bottom:1px solid var(--line); background:rgba(255,255,255,.96); }
     .head { display:flex; align-items:center; gap:10px; }
     .head-tools { display:flex; align-items:center; gap:10px; }
+    .profile-tools { display:flex; align-items:center; gap:8px; margin-top:10px; }
+    .profile-tools label { color:var(--muted); font-size:13px; font-weight:700; }
+    .profile-tools select { min-width:170px; border:1px solid #bac7d8; border-radius:10px; padding:8px 10px; background:#fff; color:var(--ink); font:inherit; }
     h1 { margin:0; font-size:21px; flex:1; }
     button,.back { border:1px solid var(--line); border-radius:11px; padding:10px 13px; background:#fff; color:var(--ink); font:inherit; font-weight:700; text-decoration:none; cursor:pointer; }
     button.primary { background:var(--blue); color:#fff; border-color:var(--blue); }
@@ -71,7 +74,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .checkpoint-box { padding:12px 16px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); display:grid; gap:8px; }
     .checkpoint-box input { width:100%; border:1px solid #bac7d8; border-radius:11px; padding:10px 12px; font:inherit; }
     #deployMeta { color:var(--muted); font-size:13px; line-height:1.4; }
-    @media (max-width:620px) { .head { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .head h1 { text-align:center; } .head-tools { grid-column:1/-1; grid-row:2; justify-content:center; } .back { padding:8px 10px; } #mobileStatusSummary { display:flex; } .status-details { display:none; } .status-details.expanded { display:block; } .bubble { max-width:94%; } #chat { padding-left:12px; padding-right:12px; } }
+    @media (max-width:620px) { .head { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .head h1 { text-align:center; } .head-tools { grid-column:1/-1; grid-row:2; justify-content:center; } .profile-tools { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .profile-tools select { min-width:0; width:100%; } .back { padding:8px 10px; } #mobileStatusSummary { display:flex; } .status-details { display:none; } .status-details.expanded { display:block; } .bubble { max-width:94%; } #chat { padding-left:12px; padding-right:12px; } }
   </style>
 </head>
 <body>
@@ -87,6 +90,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       </div>
       <a class="back" href="/">← Cockpit</a>
     </div>
+    <div class="profile-tools">
+      <label for="profileSelect">Pracovní profil</label>
+      <select id="profileSelect" aria-label="Pracovní profil Human–Adam"></select>
+      <button id="profileSwitchBtn" type="button" disabled>Přepnout</button>
+    </div>
     <button id="mobileStatusSummary" type="button" aria-expanded="false" aria-controls="statusDetails">
       <span id="mobileStatusText" role="status" aria-live="polite">Odpojeno · Izolovaný workspace · Adam není připojen</span>
       <span id="mobileStatusToggleText">Podrobnosti</span>
@@ -94,6 +102,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     <div class="status-details" id="statusDetails">
       <div class="statusline">
         <span class="badge warn" id="connectionBadge">Odpojeno</span>
+        <span class="badge" id="profileBadge">Profil: Human–Adam</span>
         <span class="badge" id="threadBadge">Relace: —</span>
         <span class="badge" id="workspaceBadge">Izolovaný workspace</span>
         <button class="badge sound-badge warn" id="soundTestBtn" type="button">Zvuk: vyzkoušet</button>
@@ -156,11 +165,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const mobileStatusToggleText = document.getElementById("mobileStatusToggleText");
   const statusDetails = document.getElementById("statusDetails");
   const connectionBadge = document.getElementById("connectionBadge");
+  const profileBadge = document.getElementById("profileBadge");
   const threadBadge = document.getElementById("threadBadge");
   const workspaceBadge = document.getElementById("workspaceBadge");
   const soundTestBtn = document.getElementById("soundTestBtn");
   const turnActivity = document.getElementById("turnActivity");
   const connectBtn = document.getElementById("connectBtn");
+  const profileSelect = document.getElementById("profileSelect");
+  const profileSwitchBtn = document.getElementById("profileSwitchBtn");
   const refreshBtn = document.getElementById("refreshBtn");
   const composer = document.getElementById("composer");
   const input = document.getElementById("messageInput");
@@ -202,6 +214,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let activeTurnStartedAt = "";
   let lastSession = null;
   let sessionConnected = false;
+  let activeProfileId = "";
+  let activeProfileLabel = "Human–Adam";
   let deliveryUncertain = false;
   let deploymentAudit = null;
   let completionAudioContext = null;
@@ -326,6 +340,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
   function syncControls() {
     connectBtn.disabled = busy;
+    profileSelect.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
+    profileSwitchBtn.disabled = profileSelect.disabled || !profileSelect.value || profileSelect.value === activeProfileId;
     refreshBtn.disabled = busy;
     sendBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
     voiceRecordBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
@@ -361,7 +377,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       const connectionText = connectionBadge.textContent || "Odpojeno";
       const workspaceText = workspaceBadge.textContent || "Izolovaný workspace";
       const adamText = sessionConnected ? "Adam čeká" : "Adam není připojen";
-      text = `${connectionText} · ${workspaceText} · ${adamText}`;
+      text = `${activeProfileLabel} · ${connectionText} · ${workspaceText} · ${adamText}`;
       tone = sessionConnected && !workspaceBadge.classList.contains("warn") ? "ok" : "warn";
     }
     mobileStatusText.textContent = text;
@@ -702,11 +718,13 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   function renderStatus(payload) {
+    renderProfiles(payload);
     const session = payload && payload.session ? payload.session : null;
     const connected = Boolean(session && session.connected && payload.runtime && payload.runtime.reachable);
     sessionConnected = connected;
     connectionBadge.textContent = connected ? "Připojeno" : "Odpojeno";
     connectionBadge.className = connected ? "badge ok" : "badge warn";
+    profileBadge.textContent = `Profil: ${activeProfileLabel}`;
     const thread = session && session.thread_id ? session.thread_id : "";
     threadBadge.textContent = `Relace: ${thread ? thread.slice(0,8) : "—"}`;
     const workspace = payload && payload.workspace ? payload.workspace : {};
@@ -727,6 +745,55 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     );
     renderTurnState(session);
     renderSession(session);
+  }
+
+  function renderProfiles(payload) {
+    const active = payload && payload.work_profile ? payload.work_profile : {};
+    const profiles = payload && Array.isArray(payload.work_profiles) ? payload.work_profiles : [];
+    activeProfileId = String(active.id || "");
+    activeProfileLabel = String(active.label || "Human–Adam");
+    profileSelect.replaceChildren();
+    for (const profile of profiles) {
+      const option = document.createElement("option");
+      option.value = String(profile.id || "");
+      option.textContent = String(profile.label || profile.id || "Profil");
+      option.selected = option.value === activeProfileId;
+      profileSelect.appendChild(option);
+    }
+    syncControls();
+  }
+
+  async function switchProfile() {
+    if (busy || sendInFlight || sessionTurnBusy) return;
+    const targetId = profileSelect.value;
+    const targetLabel = profileSelect.options[profileSelect.selectedIndex]?.textContent || targetId;
+    if (!targetId || targetId === activeProfileId) return;
+    if (input.value.trim()) {
+      notice.textContent = "Nejdřív odešli nebo odstraň rozepsaný pokyn; profil jsem nepřepnul.";
+      profileSelect.value = activeProfileId;
+      return;
+    }
+    if (!window.confirm(`Přepnout celý pracovní profil na „${targetLabel}“?\n\nPřepne se vlákno, workspace i TVBCP.`)) {
+      profileSelect.value = activeProfileId;
+      return;
+    }
+    setBusy(true, `Přepínám pracovní profil na ${targetLabel}…`);
+    stopAnswerSpeech(false);
+    tvbcpPanel.hidden = true;
+    workPanel.hidden = true;
+    deploymentAudit = null;
+    try {
+      const payload = await api("/api/human-adam/profile", {
+        method:"POST",
+        body:JSON.stringify({profile_id:targetId,confirmed:true}),
+      });
+      if (!payload.ok) throw new Error(payload.message || "Přepnutí profilu selhalo.");
+      renderStatus(payload);
+      notice.textContent = `Aktivní pracovní profil: ${activeProfileLabel}.`;
+    } catch (error) {
+      notice.textContent = `Profil nebyl přepnut: ${error.message}`;
+      await loadStatus();
+    } finally { setBusy(false); }
   }
 
   async function api(path, options={}) {
@@ -1028,6 +1095,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   connectBtn.addEventListener("click", connect);
+  profileSelect.addEventListener("change", syncControls);
+  profileSwitchBtn.addEventListener("click", switchProfile);
   mobileStatusSummary.addEventListener("click", () => {
     setMobileStatusDetails(mobileStatusSummary.getAttribute("aria-expanded") !== "true");
   });

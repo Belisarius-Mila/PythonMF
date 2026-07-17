@@ -1080,3 +1080,35 @@ doručeno.
 Další krok: Human–Adam ponechat v běžném provozu. Při prvním skutečném výpadku
 postupovat podle tohoto záznamu a po obnově přidat redigovaný důkaz, zda failover
 prošel úplně, částečně, nebo odhalil nový otevřený krok.
+
+### 2026-07-17 04:06 CEST – Dva atomické pracovní profily
+
+Míla odsouhlasil, že r-Adam nemá pro jiné projekty ručně měnit samotný TVBCP.
+Vznikl proto první dvouprofilový pilot: původní `Human–Adam` a nový `Knihovna`.
+Každý profil má vlastní trvalé app-server vlákno, izolovaný workspace bez Git
+remote, projektový TVBCP a oddělenou účtenku nasazení. Původní Human–Adam stavové
+soubory, identita vlákna a workspace se nemigrují ani nepřejmenovávají.
+
+Přepnutí je explicitní a atomické. Server je odmítne během tahu, aktivní operace
+nebo nasazení, při nejistém doručení, necheckpointovaných změnách, čekajícím WIP
+checkpointu, neočekávaném Git remote nebo divergenci. Čistý cílový profil lze
+bezpečně fast-forwardovat z commitnutého `main`; nebezpečný sync zůstává
+fail-closed. UI navíc odmítne přepnutí s rozepsaným pokynem.
+
+Knihovna používá `memory/tvbcp/knihovna_cockpit.txt` a vlastní instrukce, které
+zakazují ukládat soukromé texty článků, přílohy nebo osobní metadata do Gitu a
+zakazují Adamovi autonomní checkpoint, push, nasazení i TVBCP zápis.
+
+Důkaz: cílená profilová a Human–Adam sada prošla 72 testy. Kanonická Cockpit
+quality gate byla rozšířena o nový modul a jeho testy a prošla 734 testy spolu s
+Python, JavaScript, shell a `git diff --check` kontrolou. Read-only kontrola
+potvrdila, že aktivní zůstal profil Human–Adam, jeho vlákno existuje a workspace
+je zarovnaný.
+
+Riziko: změna ještě není commitnutá, pushnutá ani nasazená. Reálné vlákno a
+workspace Knihovny se záměrně vytvoří až prvním potvrzeným přepnutím po nasazení;
+živý obousměrný test proto dosud neproběhl.
+
+Další krok: po Mílově rozhodnutí cíleně commitnout a pushnout pouze tento celek,
+restartovat Cockpit a ručně ověřit Human–Adam → Knihovna → Human–Adam bez zápisu
+do soukromého obsahu Knihovny.

@@ -78,13 +78,16 @@ from app.autosave_service import (
 )
 from app.codex_appserver import AppServerError
 from app.communication.human_adam_service import (
-    HUMAN_ADAM,
     human_adam_checkpoint_action,
     human_adam_connect_action,
     human_adam_send_action,
     human_adam_status_action,
     human_adam_tvbcp_action,
     human_adam_work_review_action,
+)
+from app.communication.human_adam_profiles import (
+    HUMAN_ADAM,
+    human_adam_profile_switch_action,
 )
 from app.communication.human_adam_deploy import (
     human_adam_deploy_action,
@@ -9141,6 +9144,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/human-adam/profile",
+        "label": "Prepnout cely pracovni profil Human-Adam",
+        "risk": "local_service",
+        "confirmation": "explicit_profile_switch",
+        "handler_name": "human_adam_profile_switch_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/human-adam/send",
         "label": "Odeslat zapisujici tah Human-Adam",
         "risk": "workspace_write",
@@ -10036,6 +10047,10 @@ class CockpitServer:
                 if parsed.path == "/api/human-adam/connect":
                     self.respond_json(human_adam_connect_action(service=HUMAN_ADAM))
                     return
+                if parsed.path == "/api/human-adam/profile":
+                    payload = self.read_json()
+                    self.respond_json(human_adam_profile_switch_action(payload, service=HUMAN_ADAM))
+                    return
                 if parsed.path == "/api/human-adam/send":
                     payload = self.read_json()
                     self.respond_json(human_adam_send_action(payload, service=HUMAN_ADAM))
@@ -10047,10 +10062,16 @@ class CockpitServer:
                 if parsed.path == "/api/human-adam/deploy":
                     payload = self.read_json()
                     result = human_adam_deploy_action(payload, service=HUMAN_ADAM)
+                    deployment_profile_id = str(result.pop("_work_profile_id", "") or "")
                     if result.get("ok") and result.get("restart_required"):
+                        deployment_service = (
+                            HUMAN_ADAM.service_for_profile(deployment_profile_id)
+                            if deployment_profile_id
+                            else HUMAN_ADAM.active_service
+                        )
                         checkpoint_head = str(result.get("checkpoint_token") or "")
                         record_deployment_restart(
-                            service=HUMAN_ADAM,
+                            service=deployment_service,
                             checkpoint_head=checkpoint_head,
                             outcome="running",
                         )
@@ -10060,7 +10081,7 @@ class CockpitServer:
                             port=cockpit_port,
                         )
                         result["deployment_diagnostic"] = record_deployment_restart(
-                            service=HUMAN_ADAM,
+                            service=deployment_service,
                             checkpoint_head=checkpoint_head,
                             outcome="passed" if result["restart"].get("ok") else "failed",
                         )

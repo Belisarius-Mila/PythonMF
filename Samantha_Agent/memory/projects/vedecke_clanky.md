@@ -224,3 +224,20 @@ Další krok:
 4. U většího balíku receptů udělat read-only rozbor: počet receptů, navržené
    názvy, kategorie, tagy a stav `prepis-overit`.
 5. Až po potvrzení rozdělit balík na jednotlivé receptové karty.
+
+## Pracovní profil Knihovna 2026-07-17
+
+Pro další vývoj Knihovny vznikl druhý pracovní profil v rozhraní Human–Adam.
+Profil `Knihovna` má vlastní trvalé app-server vlákno, vlastní izolovaný workspace
+bez Git remote, samostatnou účtenku nasazení a projektový TVBCP
+`memory/tvbcp/knihovna_cockpit.txt`. Původní profil Human–Adam zůstává oddělený.
+
+Přepnutí je potvrzované a fail-closed při aktivním nebo nejistém tahu,
+rozpracovaných změnách, čekajícím checkpointu, divergenci nebo nasazení. Soukromý
+archiv článků se do izolovaného workspace nekopíruje a jeho obsah nesmí být v
+gitovém TVBCP, testech ani logu. Implementace prošla plnou bránou 734 testů, ale
+zatím není commitnutá, pushnutá, nasazená ani ručně otestovaná v živém Cockpitu.
+
+Nejbližší krok: po nasazení přepnout z Human–Adam na Knihovnu, ověřit správný
+prázdný thread a TVBCP, poslat jeden neškodný pokyn bez změny soukromých dat a
+při čistém workspace se vrátit do původního profilu.

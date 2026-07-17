@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import atexit
 import re
 from datetime import datetime, timezone
 from functools import partial
@@ -105,11 +104,17 @@ class HumanAdamService:
         codex_binary: str = DEFAULT_CODEX_BIN,
         profile_getter: Callable[..., dict[str, Any]] = read_human_adam_runtime_profile,
         hub: CanonicalSessionHub | None = None,
+        developer_instructions: str = HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
+        tvbcp_relative_path: Path = CANONICAL_TVBCP_RELATIVE_PATH,
+        tvbcp_title: str = "Architektura komunikace Samantha",
     ):
         self.runtime = runtime or LocalAppServerProcessController(codex_binary=codex_binary)
         self.workspace = workspace or HumanAdamWorkspaceManager()
         self.codex_binary = str(codex_binary)
         self.profile_getter = profile_getter
+        self.developer_instructions = str(developer_instructions).strip()
+        self.tvbcp_relative_path = Path(tvbcp_relative_path)
+        self.tvbcp_title = str(tvbcp_title).strip() or "Projektový TVBCP"
         self._profile: dict[str, Any] = {}
         self.state_path = Path(state_path)
         self.deployment_receipt_path = Path(deployment_receipt_path)
@@ -135,7 +140,7 @@ class HumanAdamService:
             state_path=self.state_path,
             workspace=self.workspace.project_root,
             client_factory=self._new_client,
-            developer_instructions=HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
+            developer_instructions=self.developer_instructions,
             sandbox=HUMAN_ADAM_SANDBOX_MODE,
             sandbox_policy=HUMAN_ADAM_SANDBOX_POLICY,
             approval_policy=HUMAN_ADAM_APPROVAL_POLICY,
@@ -250,7 +255,7 @@ class HumanAdamService:
         if not workspace.get("ok") or workspace.get("remotes"):
             raise AppServerError("TVBCP nelze číst z workspace s neočekávaným Git remote.")
         project_root = self.workspace.project_root.resolve()
-        path = (project_root / CANONICAL_TVBCP_RELATIVE_PATH).resolve()
+        path = (project_root / self.tvbcp_relative_path).resolve()
         if project_root not in path.parents or not path.is_file():
             raise AppServerError("Kanonický projektový TVBCP nebyl nalezen.")
         try:
@@ -264,11 +269,11 @@ class HumanAdamService:
             raise AppServerError("Kanonický projektový TVBCP překročil bezpečný limit zobrazení.")
         return {
             "ok": True,
-            "title": "Architektura komunikace Samantha",
+            "title": self.tvbcp_title,
             "content": content,
             "modified_at": modified_at,
             "source": "isolated_workspace",
-            "relative_path": CANONICAL_TVBCP_RELATIVE_PATH.as_posix(),
+            "relative_path": self.tvbcp_relative_path.as_posix(),
             "workspace_dirty": bool(workspace.get("dirty")),
             "workspace_change_count": int(workspace.get("change_count") or 0),
             "sync_available": bool(workspace.get("source_update_available")),
@@ -359,5 +364,10 @@ def human_adam_send_action(payload: dict[str, Any], *, service: HumanAdamService
         return {"ok": False, "status": "human_adam_send_failed", "message": str(exc)}
 
 
-HUMAN_ADAM = HumanAdamService()
-atexit.register(HUMAN_ADAM.close)
+def __getattr__(name: str) -> Any:
+    """Keep the former import path while the global instance lives in profile routing."""
+    if name == "HUMAN_ADAM":
+        from app.communication.human_adam_profiles import HUMAN_ADAM
+
+        return HUMAN_ADAM
+    raise AttributeError(name)

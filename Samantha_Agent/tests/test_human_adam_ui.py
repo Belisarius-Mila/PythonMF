@@ -9,6 +9,9 @@ class HumanAdamUiTests(unittest.TestCase):
     def test_ui_exposes_explicit_connection_send_time_and_delivery_evidence(self) -> None:
         for element_id in (
             "connectBtn",
+            "profileSelect",
+            "profileSwitchBtn",
+            "profileBadge",
             "refreshBtn",
             "connectionBadge",
             "threadBadge",
@@ -51,6 +54,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Doručení potvrzeno", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/status", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/connect", HUMAN_ADAM_HTML)
+        self.assertIn("/api/human-adam/profile", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/send", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/tvbcp", HUMAN_ADAM_HTML)
         self.assertIn("TVBCP se načte až po otevření.", HUMAN_ADAM_HTML)
@@ -110,11 +114,25 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('text = turnActivity.textContent || "Adam pracuje', summary_source)
         self.assertIn('text = "Stav doručení je nejistý · obnov stav · pokyn neposílej znovu";', summary_source)
         self.assertIn('const adamText = sessionConnected ? "Adam čeká" : "Adam není připojen";', summary_source)
-        self.assertIn('text = `${connectionText} · ${workspaceText} · ${adamText}`;', summary_source)
+        self.assertIn('text = `${activeProfileLabel} · ${connectionText} · ${workspaceText} · ${adamText}`;', summary_source)
         self.assertIn('mobileStatusSummary.setAttribute("aria-expanded"', HUMAN_ADAM_HTML)
         self.assertIn('mobileStatusToggleText.textContent = showDetails ? "Skrýt" : "Podrobnosti";', HUMAN_ADAM_HTML)
         self.assertIn('mobileStatusSummary.addEventListener("click"', HUMAN_ADAM_HTML)
         self.assertIn("updateMobileStatusSummary();\n    turnTimerId", HUMAN_ADAM_HTML)
+
+    def test_profile_switch_is_explicit_atomic_and_preserves_unsent_draft(self) -> None:
+        switch_start = HUMAN_ADAM_HTML.index("async function switchProfile()")
+        switch_end = HUMAN_ADAM_HTML.index("function scrollTvbcpToEnd", switch_start)
+        source = HUMAN_ADAM_HTML[switch_start:switch_end]
+
+        self.assertIn("if (input.value.trim())", source)
+        self.assertIn("profil jsem nepřepnul", source)
+        self.assertIn("Přepnout celý pracovní profil", source)
+        self.assertIn("Přepne se vlákno, workspace i TVBCP.", source)
+        self.assertIn('api("/api/human-adam/profile"', source)
+        self.assertIn("profile_id:targetId,confirmed:true", source)
+        self.assertIn('profileSelect.addEventListener("change", syncControls);', HUMAN_ADAM_HTML)
+        self.assertIn('profileSwitchBtn.addEventListener("click", switchProfile);', HUMAN_ADAM_HTML)
 
     def test_composer_places_voice_left_and_send_right_in_one_compact_row(self) -> None:
         actions_start = HUMAN_ADAM_HTML.index('<div class="compose-actions">')
