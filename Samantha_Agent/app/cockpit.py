@@ -12615,8 +12615,13 @@ COCKPIT_HTML = """<!doctype html>
     .library-add-panel { border: 1px solid #dbe4ef; border-radius: 8px; background: #f8fafc; padding: 12px; display: grid; gap: 8px; }
     .library-add-panel.hidden { display: none; }
     .library-add-title { margin: 0; font-size: 15px; }
+    .library-field { min-width: 0; display: grid; gap: 4px; align-content: start; }
+    .library-field > input, .library-field > select, .library-field > textarea { width: 100%; }
+    .library-field-label { color: #263244; font-size: 12px; font-weight: 750; }
+    .library-field-hint { color: var(--muted); font-size: 11px; line-height: 1.35; }
+    .library-field-button { align-self: end; }
     .library-archive-grid { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(140px, 180px) minmax(140px, 220px) auto; gap: 8px; align-items: center; }
-    .library-text-grid { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(140px, 180px) minmax(160px, 220px) auto; gap: 8px; align-items: center; }
+    .library-text-grid { display: grid; grid-template-columns: minmax(200px, 1fr) minmax(140px, 180px) minmax(180px, 1fr) minmax(200px, 1fr); gap: 8px; align-items: start; }
     .library-attachment-grid { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(160px, 220px) minmax(180px, 1fr) auto; gap: 8px; align-items: center; }
     .library-text-area { min-height: 130px; resize: vertical; }
     .library-controls { display: grid; grid-template-columns: minmax(220px, 1fr) auto; gap: 10px; align-items: center; }
@@ -13286,8 +13291,11 @@ COCKPIT_HTML = """<!doctype html>
           <button class="secondary library-tab read-queue" type="button" data-library-category="all" data-library-read-state="to_read">K přečtení</button>
         </div>
         <div class="library-controls">
-          <input id="librarySearchInput" type="search" placeholder="Hledat ve vybrané kategorii">
-          <button class="primary" id="librarySearchBtn" type="button">Hledat</button>
+          <label class="library-field">
+            <span class="library-field-label">Hledat ve vybrané kategorii</span>
+            <input id="librarySearchInput" type="search" placeholder="Název nebo slova z článku">
+          </label>
+          <button class="primary library-field-button" id="librarySearchBtn" type="button">Hledat</button>
         </div>
         <div id="libraryStatus" class="status-line">Načítám knihovnu...</div>
         <div class="library-add-toolbar" aria-label="Přidat obsah do knihovny">
@@ -13297,35 +13305,68 @@ COCKPIT_HTML = """<!doctype html>
         <div id="libraryArchivePanel" class="library-add-panel hidden">
           <h3 class="library-add-title">Přidat článek z webu</h3>
           <div class="library-archive-grid">
-            <input id="libraryArchiveUrlInput" type="url" placeholder="Vložit URL článku">
-            <select id="libraryArchiveCategory">
-              <option value="recipes">Recepty</option>
-              <option value="science">Vědecké články</option>
-              <option value="ai_tools">Samantha / AI nástroje</option>
-              <option value="travel_places">Cestování / místa</option>
-              <option value="other" selected>Ostatní</option>
-            </select>
-            <input id="libraryArchiveTagsInput" type="text" placeholder="Tagy, volitelné">
-            <button class="primary" id="libraryArchiveBtn" type="button">Uložit URL</button>
+            <label class="library-field">
+              <span class="library-field-label">Adresa článku (URL)</span>
+              <input id="libraryArchiveUrlInput" type="url" placeholder="https://…">
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Kategorie</span>
+              <select id="libraryArchiveCategory">
+                <option value="recipes" selected>Recepty</option>
+                <option value="science">Vědecké články</option>
+                <option value="ai_tools">Samantha / AI nástroje</option>
+                <option value="travel_places">Cestování / místa</option>
+                <option value="other">Ostatní</option>
+              </select>
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Tagy (volitelné)</span>
+              <input id="libraryArchiveTagsInput" type="text" placeholder="např. zdraví, studie">
+              <span class="library-field-hint">Více tagů odděluj čárkou.</span>
+            </label>
+            <button class="primary library-field-button" id="libraryArchiveBtn" type="button">Uložit URL</button>
           </div>
           <div id="libraryArchiveStatus" class="status-line">Vlož URL, vyber kategorii a ulož ji do soukromé knihovny.</div>
         </div>
         <div id="libraryTextPanel" class="library-add-panel hidden">
           <h3 class="library-add-title">Přidat vlastní text</h3>
           <div class="library-text-grid">
-            <input id="libraryTextTitleInput" type="text" placeholder="Název vloženého textu">
-            <select id="libraryTextCategory">
-              <option value="recipes">Recepty</option>
-              <option value="science">Vědecké články</option>
-              <option value="ai_tools">Samantha / AI nástroje</option>
-              <option value="travel_places">Cestování / místa</option>
-              <option value="other" selected>Ostatní</option>
-            </select>
-            <input id="libraryTextSourceInput" type="text" placeholder="Zdroj, volitelné">
+            <label class="library-field">
+              <span class="library-field-label">Název (volitelný)</span>
+              <input id="libraryTextTitleInput" type="text" placeholder="Název znalostní karty">
+              <span class="library-field-hint">Když zůstane prázdný, použije se první řádek textu.</span>
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Kategorie</span>
+              <select id="libraryTextCategory">
+                <option value="recipes" selected>Recepty</option>
+                <option value="science">Vědecké články</option>
+                <option value="ai_tools">Samantha / AI nástroje</option>
+                <option value="travel_places">Cestování / místa</option>
+                <option value="other">Ostatní</option>
+              </select>
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Zdroj nebo původ (volitelný)</span>
+              <input id="libraryTextSourceInput" type="text" placeholder="např. vlastní poznámka nebo ChatGPT">
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Poznámka ke zdroji (volitelná)</span>
+              <input id="libraryTextSourceNoteInput" type="text" placeholder="Upřesnění původu textu">
+            </label>
+          </div>
+          <label class="library-field">
+            <span class="library-field-label">Tagy (volitelné)</span>
+            <input id="libraryTextTagsInput" type="text" placeholder="např. recept, rodina">
+            <span class="library-field-hint">Více tagů odděluj čárkou.</span>
+          </label>
+          <label class="library-field">
+            <span class="library-field-label">Text karty</span>
+            <textarea id="libraryTextBodyInput" class="library-text-area" placeholder="Vlož text receptu, poznámky nebo výstřižku"></textarea>
+          </label>
+          <div class="actions compact-actions">
             <button class="primary" id="libraryTextSaveBtn" type="button">Uložit text</button>
           </div>
-          <input id="libraryTextTagsInput" type="text" placeholder="Tagy pro vložený text, volitelné">
-          <textarea id="libraryTextBodyInput" class="library-text-area" placeholder="Vložit text receptu, poznámky nebo výstřižku"></textarea>
           <div id="libraryTextStatus" class="status-line">Text bez URL se uloží jako interní znalostní karta.</div>
         </div>
         <div class="library-layout">
@@ -13360,21 +13401,39 @@ COCKPIT_HTML = """<!doctype html>
             </div>
             <div id="libraryEditPanel" class="library-edit-panel hidden">
               <div class="library-edit-grid">
-                <input id="libraryEditTitleInput" type="text" placeholder="Název článku">
-                <select id="libraryEditCategoryInput">
-                  <option value="recipes">Recepty</option>
-                  <option value="science">Vědecké články</option>
-                  <option value="ai_tools">Samantha / AI nástroje</option>
-                  <option value="travel_places">Cestování / místa</option>
-                  <option value="other">Ostatní</option>
-                </select>
+                <label class="library-field">
+                  <span class="library-field-label">Název článku</span>
+                  <input id="libraryEditTitleInput" type="text" placeholder="Název článku">
+                </label>
+                <label class="library-field">
+                  <span class="library-field-label">Kategorie</span>
+                  <select id="libraryEditCategoryInput">
+                    <option value="recipes">Recepty</option>
+                    <option value="science">Vědecké články</option>
+                    <option value="ai_tools">Samantha / AI nástroje</option>
+                    <option value="travel_places">Cestování / místa</option>
+                    <option value="other">Ostatní</option>
+                  </select>
+                </label>
               </div>
-              <input id="libraryEditTagsInput" type="text" placeholder="Tagy oddělené čárkou">
+              <label class="library-field">
+                <span class="library-field-label">Tagy</span>
+                <input id="libraryEditTagsInput" type="text" placeholder="Tagy oddělené čárkou">
+              </label>
               <div class="library-edit-source-grid">
-                <input id="libraryEditSourceInput" type="text" placeholder="Zdroj">
-                <input id="libraryEditSourceNoteInput" type="text" placeholder="Poznámka ke zdroji">
+                <label class="library-field">
+                  <span class="library-field-label">Zdroj nebo původ</span>
+                  <input id="libraryEditSourceInput" type="text" placeholder="Název zdroje">
+                </label>
+                <label class="library-field">
+                  <span class="library-field-label">Poznámka ke zdroji</span>
+                  <input id="libraryEditSourceNoteInput" type="text" placeholder="Upřesnění původu textu">
+                </label>
               </div>
-              <textarea id="libraryEditTextInput" class="library-edit-text" placeholder="Text článku"></textarea>
+              <label class="library-field">
+                <span class="library-field-label">Text článku</span>
+                <textarea id="libraryEditTextInput" class="library-edit-text" placeholder="Text článku"></textarea>
+              </label>
               <div class="actions compact-actions">
                 <button class="primary" id="libraryEditSaveBtn" type="button">Uložit úpravy</button>
                 <button class="secondary" id="libraryEditCancelBtn" type="button">Zrušit</button>
@@ -13387,12 +13446,25 @@ COCKPIT_HTML = """<!doctype html>
                 <span class="library-meta">Přidání, otevření, popisek a odebrání</span>
               </div>
               <div class="library-attachment-grid">
-                <input id="libraryAttachmentFileInput" type="file" accept="image/*">
-                <input id="libraryAttachmentLabelInput" type="text" placeholder="Popisek fotografie">
-                <input id="libraryAttachmentTagsInput" type="text" placeholder="Tagy, volitelné">
-                <button class="primary" id="libraryAttachmentSaveBtn" type="button" disabled>Přidat fotografii</button>
+                <label class="library-field">
+                  <span class="library-field-label">Fotografie</span>
+                  <input id="libraryAttachmentFileInput" type="file" accept="image/*">
+                </label>
+                <label class="library-field">
+                  <span class="library-field-label">Popisek fotografie</span>
+                  <input id="libraryAttachmentLabelInput" type="text" placeholder="Co je na fotografii">
+                </label>
+                <label class="library-field">
+                  <span class="library-field-label">Tagy přidané ke kartě (volitelné)</span>
+                  <input id="libraryAttachmentTagsInput" type="text" placeholder="např. scan, originál">
+                  <span class="library-field-hint">Přidají se celé kartě, ne pouze této příloze.</span>
+                </label>
+                <button class="primary library-field-button" id="libraryAttachmentSaveBtn" type="button" disabled>Přidat fotografii</button>
               </div>
-              <input id="libraryAttachmentNoteInput" type="text" placeholder="Poznámka k fotografii, volitelné">
+              <label class="library-field">
+                <span class="library-field-label">Poznámka k fotografii (volitelná)</span>
+                <input id="libraryAttachmentNoteInput" type="text" placeholder="Doplňující informace k příloze">
+              </label>
               <div id="libraryAttachmentStatus" class="status-line">Vyber fotografii; přidá se až po stisknutí tlačítka.</div>
               <div id="libraryReaderAttachments" class="library-reader-attachments"></div>
             </section>
@@ -13652,6 +13724,7 @@ COCKPIT_HTML = """<!doctype html>
     const libraryTextTitleInput = document.getElementById("libraryTextTitleInput");
     const libraryTextCategory = document.getElementById("libraryTextCategory");
     const libraryTextSourceInput = document.getElementById("libraryTextSourceInput");
+    const libraryTextSourceNoteInput = document.getElementById("libraryTextSourceNoteInput");
     const libraryTextSaveBtn = document.getElementById("libraryTextSaveBtn");
     const libraryTextTagsInput = document.getElementById("libraryTextTagsInput");
     const libraryTextBodyInput = document.getElementById("libraryTextBodyInput");
@@ -17970,11 +18043,19 @@ COCKPIT_HTML = """<!doctype html>
     function toggleLibraryAddMode(mode) {
       const panel = mode === "url" ? libraryArchivePanel : libraryTextPanel;
       const willOpen = panel.classList.contains("hidden");
+      if (willOpen) syncLibraryCreateCategories(currentLibraryCategory);
       setLibraryAddMode(willOpen ? mode : "");
       if (!willOpen) return;
       window.setTimeout(() => {
         (mode === "url" ? libraryArchiveUrlInput : libraryTextTitleInput).focus();
       }, 0);
+    }
+
+    function syncLibraryCreateCategories(category) {
+      const allowed = new Set(["recipes", "science", "ai_tools", "travel_places", "other"]);
+      if (!allowed.has(category)) return;
+      libraryArchiveCategory.value = category;
+      libraryTextCategory.value = category;
     }
 
     function resetLibraryExportState(message) {
@@ -18160,6 +18241,7 @@ COCKPIT_HTML = """<!doctype html>
       closeLibraryEditor(true);
       currentLibraryCategory = category || "other";
       currentLibraryReadStateFilter = readState || "";
+      syncLibraryCreateCategories(currentLibraryCategory);
       currentLibrarySelectedId = "";
       currentLibrarySelectedText = "";
       updateLibraryReadStateButtons(null);
@@ -18287,6 +18369,7 @@ COCKPIT_HTML = """<!doctype html>
       const category = libraryTextCategory.value || currentLibraryCategory || "other";
       const tags = libraryTextTagsInput.value.trim();
       const sourceLabel = libraryTextSourceInput.value.trim() || "Vložený text";
+      const sourceNote = libraryTextSourceNoteInput.value.trim();
       libraryTextSaveBtn.disabled = true;
       libraryTextStatus.textContent = "Ukládám text do znalostní databáze...";
       try {
@@ -18296,7 +18379,7 @@ COCKPIT_HTML = """<!doctype html>
           category,
           tags,
           source_label: sourceLabel,
-          source_note: sourceLabel,
+          source_note: sourceNote,
         });
         if (!data.ok) {
           libraryTextStatus.textContent = data.message || "Text se nepodařilo uložit.";
@@ -18305,6 +18388,8 @@ COCKPIT_HTML = """<!doctype html>
         const item = data.item || {};
         libraryTextStatus.textContent = data.message || "Text uložen.";
         libraryTextTitleInput.value = "";
+        libraryTextSourceInput.value = "";
+        libraryTextSourceNoteInput.value = "";
         libraryTextTagsInput.value = "";
         libraryTextBodyInput.value = "";
         setLibraryAddMode("");

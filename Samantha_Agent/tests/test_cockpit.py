@@ -1075,6 +1075,23 @@ class CockpitTests(unittest.TestCase):
         self.assertIn('id="libraryReaderAttachments"', COCKPIT_HTML[attachment_start:reader_start])
         self.assertIn('libraryAttachmentSection.classList.toggle("hidden", !hasArticle);', COCKPIT_HTML)
 
+    def test_library_fields_have_visible_labels_and_distinct_source_note(self) -> None:
+        library_start = COCKPIT_HTML.index('id="libraryModal"')
+        library_end = COCKPIT_HTML.index('id="projectsModal"')
+        library_html = COCKPIT_HTML[library_start:library_end]
+        field_count = sum(library_html.count(tag) for tag in ("<input", "<select", "<textarea"))
+        self.assertEqual(library_html.count('<label class="library-field">'), field_count)
+        self.assertIn("Když zůstane prázdný, použije se první řádek textu.", library_html)
+        self.assertIn('id="libraryTextSourceNoteInput"', library_html)
+        self.assertIn("Tagy přidané ke kartě (volitelné)", library_html)
+        self.assertIn("Přidají se celé kartě, ne pouze této příloze.", library_html)
+        self.assertIn("const sourceNote = libraryTextSourceNoteInput.value.trim();", COCKPIT_HTML)
+        self.assertIn("source_note: sourceNote,", COCKPIT_HTML)
+        self.assertNotIn("source_note: sourceLabel,", COCKPIT_HTML)
+        self.assertIn("function syncLibraryCreateCategories(category)", COCKPIT_HTML)
+        self.assertIn("syncLibraryCreateCategories(currentLibraryCategory);", COCKPIT_HTML)
+        self.assertGreaterEqual(library_html.count('<option value="recipes" selected>Recepty</option>'), 2)
+
     def test_document_work_status_groups_downloads_and_review_queue(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             vault = Path(temp_dir) / "documents"
