@@ -74,6 +74,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .checkpoint-box { padding:12px 16px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); display:grid; gap:8px; }
     .checkpoint-box input { width:100%; border:1px solid #bac7d8; border-radius:11px; padding:10px 12px; font:inherit; }
     #deployMeta { color:var(--muted); font-size:13px; line-height:1.4; }
+    .context-anchor-body { flex:1; min-height:0; overflow:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
+    #contextAnchorInput { flex:1; min-height:320px; font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; }
+    #contextAnchorMeta,.context-anchor-help { margin:0; color:var(--muted); font-size:13px; }
+    .context-anchor-actions { display:flex; justify-content:flex-end; gap:8px; }
     @media (max-width:620px) { .head { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .head h1 { text-align:center; } .head-tools { grid-column:1/-1; grid-row:2; justify-content:center; } .profile-tools { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .profile-tools select { min-width:0; width:100%; } .back { padding:8px 10px; } #mobileStatusSummary { display:flex; } .status-details { display:none; } .status-details.expanded { display:block; } .bubble { max-width:94%; } #chat { padding-left:12px; padding-right:12px; } }
   </style>
 </head>
@@ -84,6 +88,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <button class="primary" id="connectBtn" type="button">Připojit</button>
       <h1>Human–Adam</h1>
       <div class="head-tools">
+        <button id="contextAnchorOpenBtn" type="button">Plán</button>
         <button id="tvbcpOpenBtn" type="button">TVBCP</button>
         <button id="workOpenBtn" type="button">Práce</button>
         <button id="refreshBtn" type="button">Stav</button>
@@ -105,6 +110,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <span class="badge" id="profileBadge">Profil: Human–Adam</span>
         <span class="badge" id="threadBadge">Relace: —</span>
         <span class="badge" id="workspaceBadge">Izolovaný workspace</span>
+        <span class="badge" id="contextAnchorBadge">Kontext: nepřipnut</span>
         <button class="badge sound-badge warn" id="soundTestBtn" type="button">Zvuk: vyzkoušet</button>
       </div>
       <div id="turnActivity" role="status" aria-live="polite" hidden></div>
@@ -135,6 +141,22 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     <div id="tvbcpScroll" data-scroll-mode="end-anchor-v3">
       <pre id="tvbcpContent"></pre>
       <div id="tvbcpEnd" aria-hidden="true"></div>
+    </div>
+  </aside>
+  <aside class="tvbcp-panel" id="contextAnchorPanel" hidden aria-label="Připnutý aktivní kontext">
+    <div class="tvbcp-head">
+      <h2>Aktivní kontext</h2>
+      <button id="contextAnchorRefreshBtn" type="button">Obnovit</button>
+      <button id="contextAnchorCloseBtn" type="button">Zavřít</button>
+    </div>
+    <div class="context-anchor-body">
+      <p id="contextAnchorMeta">Kontext se načte až po otevření.</p>
+      <p class="context-anchor-help">Ulož pouze stručný cíl, očíslovaný plán, hotové body, rozhodnutí a další krok. Nevkládej hesla, tokeny, osobní údaje ani absolutní cesty. Novější pokyn v chatu má vždy přednost.</p>
+      <textarea id="contextAnchorInput" maxlength="6000" autocomplete="off" placeholder="Cíl:&#10;&#10;Plán:&#10;1. …&#10;&#10;Hotovo:&#10;- …&#10;&#10;Rozhodnutí:&#10;- …&#10;&#10;Další krok:&#10;- …" aria-label="Připnutý aktivní kontext"></textarea>
+      <div class="context-anchor-actions">
+        <button id="contextAnchorClearBtn" type="button">Odepnout</button>
+        <button class="primary" id="contextAnchorSaveBtn" type="button">Připnout plán</button>
+      </div>
     </div>
   </aside>
   <aside class="tvbcp-panel" id="workPanel" hidden aria-label="Pracovní změny">
@@ -168,12 +190,21 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const profileBadge = document.getElementById("profileBadge");
   const threadBadge = document.getElementById("threadBadge");
   const workspaceBadge = document.getElementById("workspaceBadge");
+  const contextAnchorBadge = document.getElementById("contextAnchorBadge");
   const soundTestBtn = document.getElementById("soundTestBtn");
   const turnActivity = document.getElementById("turnActivity");
   const connectBtn = document.getElementById("connectBtn");
   const profileSelect = document.getElementById("profileSelect");
   const profileSwitchBtn = document.getElementById("profileSwitchBtn");
   const refreshBtn = document.getElementById("refreshBtn");
+  const contextAnchorOpenBtn = document.getElementById("contextAnchorOpenBtn");
+  const contextAnchorPanel = document.getElementById("contextAnchorPanel");
+  const contextAnchorCloseBtn = document.getElementById("contextAnchorCloseBtn");
+  const contextAnchorRefreshBtn = document.getElementById("contextAnchorRefreshBtn");
+  const contextAnchorMeta = document.getElementById("contextAnchorMeta");
+  const contextAnchorInput = document.getElementById("contextAnchorInput");
+  const contextAnchorSaveBtn = document.getElementById("contextAnchorSaveBtn");
+  const contextAnchorClearBtn = document.getElementById("contextAnchorClearBtn");
   const composer = document.getElementById("composer");
   const input = document.getElementById("messageInput");
   const sendBtn = document.getElementById("sendBtn");
@@ -349,6 +380,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     voiceRecordBtn.textContent = voiceRecording ? "Nahrávám…" : "Nahrát pokyn";
     voiceStopBtn.hidden = !voiceRecording;
     voiceStopBtn.disabled = !voiceRecording;
+    contextAnchorSaveBtn.disabled = busy || sendInFlight || sessionTurnBusy;
+    contextAnchorClearBtn.disabled = busy || sendInFlight || sessionTurnBusy;
   }
 
   function setBusy(value, text="") {
@@ -730,6 +763,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     const workspace = payload && payload.workspace ? payload.workspace : {};
     workspaceBadge.textContent = workspace.has_git_remote ? "POZOR: Git remote" : (workspace.sync_available ? "Workspace čeká na sync" : (workspace.dirty ? `Workspace: ${workspace.change_count} změn` : (workspace.local_checkpoint_ahead ? `WIP checkpoint: ${workspace.local_commit_count}` : "Workspace čistý")));
     workspaceBadge.className = workspace.has_git_remote || workspace.sync_available || workspace.dirty || workspace.local_checkpoint_ahead ? "badge warn" : "badge";
+    renderContextAnchorBadge(payload && payload.context_anchor ? payload.context_anchor : null);
     const confirmation = payload && payload.deployment_confirmation ? payload.deployment_confirmation : null;
     const shortCommit = confirmation ? String(confirmation.checkpoint_short || "") : "";
     const completedAt = confirmation ? String(confirmation.completed_at || "") : "";
@@ -780,6 +814,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     setBusy(true, `Přepínám pracovní profil na ${targetLabel}…`);
     stopAnswerSpeech(false);
     tvbcpPanel.hidden = true;
+    contextAnchorPanel.hidden = true;
     workPanel.hidden = true;
     deploymentAudit = null;
     try {
@@ -838,6 +873,78 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     window.setTimeout(applyEndPosition, 120);
   }
 
+  function renderContextAnchorBadge(anchor) {
+    const failed = Boolean(anchor && anchor.ok === false);
+    const active = Boolean(anchor && anchor.ok === true && anchor.active === true);
+    contextAnchorBadge.textContent = failed ? "Kontext: chyba" : (active ? "Kontext: připnut" : "Kontext: nepřipnut");
+    contextAnchorBadge.className = failed ? "badge warn" : (active ? "badge ok" : "badge");
+  }
+
+  function renderContextAnchorEditor(anchor) {
+    renderContextAnchorBadge(anchor);
+    if (!anchor || anchor.ok === false) {
+      contextAnchorInput.value = "";
+      contextAnchorMeta.textContent = anchor && anchor.message ? anchor.message : "Aktivní kontext nelze načíst.";
+      return;
+    }
+    contextAnchorInput.value = anchor.active ? String(anchor.content || "") : "";
+    const revision = Number(anchor.revision || 0);
+    contextAnchorMeta.textContent = anchor.active
+      ? `Připnuto · revize ${revision} · ${formatTime(anchor.updated_at)}`
+      : "Žádný aktivní kontext není připnutý.";
+  }
+
+  async function loadContextAnchor() {
+    contextAnchorRefreshBtn.disabled = true;
+    contextAnchorMeta.textContent = "Načítám aktivní kontext…";
+    try {
+      const payload = await api("/api/human-adam/context-anchor");
+      renderContextAnchorEditor(payload);
+    } catch (error) {
+      contextAnchorMeta.textContent = `Aktivní kontext nelze načíst: ${error.message}`;
+    } finally {
+      contextAnchorRefreshBtn.disabled = false;
+      syncControls();
+    }
+  }
+
+  function openContextAnchor() {
+    tvbcpPanel.hidden = true;
+    workPanel.hidden = true;
+    contextAnchorPanel.hidden = false;
+    loadContextAnchor();
+  }
+
+  function closeContextAnchor() {
+    contextAnchorPanel.hidden = true;
+  }
+
+  async function saveContextAnchor(active) {
+    if (busy || sendInFlight || sessionTurnBusy) return;
+    const content = contextAnchorInput.value.trim();
+    if (active && !content) {
+      contextAnchorMeta.textContent = "Nejdřív napiš stručný aktivní kontext.";
+      contextAnchorInput.focus();
+      return;
+    }
+    if (!active && !window.confirm("Odepnout aktivní kontext tohoto profilu? Historie chatu se nezmění.")) return;
+    setBusy(true);
+    contextAnchorMeta.textContent = active ? "Připínám aktivní kontext…" : "Odepínám aktivní kontext…";
+    try {
+      const payload = await api("/api/human-adam/context-anchor", {
+        method:"POST",
+        body:JSON.stringify({content:active ? content : "",active,confirmed:true}),
+      });
+      if (!payload.ok) throw new Error(payload.message || "Aktivní kontext nelze uložit.");
+      renderContextAnchorEditor(payload);
+      notice.textContent = active
+        ? "Aktivní kontext je připnutý a od příštího tahu se přiloží pouze modelu."
+        : "Aktivní kontext je odepnutý.";
+    } catch (error) {
+      contextAnchorMeta.textContent = `Aktivní kontext nebyl změněn: ${error.message}`;
+    } finally { setBusy(false); }
+  }
+
   async function loadTvbcp() {
     tvbcpRefreshBtn.disabled = true;
     tvbcpMeta.textContent = "Načítám pracovní TVBCP…";
@@ -857,6 +964,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   function openTvbcp() {
+    contextAnchorPanel.hidden = true;
     workPanel.hidden = true;
     tvbcpPanel.hidden = false;
     loadTvbcp();
@@ -911,6 +1019,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   function openWork() {
+    contextAnchorPanel.hidden = true;
     tvbcpPanel.hidden = true;
     workPanel.hidden = false;
     loadWork();
@@ -1077,6 +1186,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       renderSession(payload.session);
       renderTurnState(payload.session);
       notice.textContent = "Odpověď doručena a potvrzena.";
+      if (payload.context_anchor_warning) {
+        notice.textContent = `Odpověď doručena. Upozornění: ${payload.context_anchor_warning}`;
+      }
       playCompletionSound();
     } catch (error) {
       const confirmedRejection = new Set(["human_adam_busy","human_adam_send_failed"]).has(error.status);
@@ -1104,6 +1216,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   document.addEventListener("visibilitychange", restoreCompletionAudioAfterVisibility);
   window.addEventListener("pagehide", () => stopAnswerSpeech(false));
   refreshBtn.addEventListener("click", loadStatus);
+  contextAnchorOpenBtn.addEventListener("click", openContextAnchor);
+  contextAnchorCloseBtn.addEventListener("click", closeContextAnchor);
+  contextAnchorRefreshBtn.addEventListener("click", loadContextAnchor);
+  contextAnchorSaveBtn.addEventListener("click", () => saveContextAnchor(true));
+  contextAnchorClearBtn.addEventListener("click", () => saveContextAnchor(false));
   tvbcpOpenBtn.addEventListener("click", openTvbcp);
   tvbcpCloseBtn.addEventListener("click", closeTvbcp);
   tvbcpRefreshBtn.addEventListener("click", loadTvbcp);

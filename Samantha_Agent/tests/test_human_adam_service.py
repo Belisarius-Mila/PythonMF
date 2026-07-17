@@ -17,6 +17,8 @@ from app.communication.human_adam_service import (
     HumanAdamService,
     human_adam_checkpoint_action,
     human_adam_connect_action,
+    human_adam_context_anchor_action,
+    human_adam_context_anchor_update_action,
     human_adam_send_action,
     human_adam_tvbcp_action,
     human_adam_work_review_action,
@@ -108,12 +110,16 @@ class FakeHub:
         self.connected = False
         self.sent: list[dict[str, str]] = []
         self.closed = 0
+        self.turn_busy = False
+        self.active_turn: dict[str, object] | None = None
 
     def snapshot(self) -> dict[str, object]:
         return {
             "thread_id": "canonical-thread",
             "connected": self.connected,
             "connection_state": "connected" if self.connected else "disconnected",
+            "turn_busy": self.turn_busy,
+            "active_turn": self.active_turn,
             "messages": [],
         }
 
@@ -165,6 +171,7 @@ class HumanAdamServiceTests(unittest.TestCase):
             runtime=runtime,  # type: ignore[arg-type]
             workspace=workspace,  # type: ignore[arg-type]
             state_path=root / "state.json",
+            context_anchor_path=root / "context_anchor.json",
             deployment_receipt_path=root / "deployment_receipt.json",
             profile_getter=fake_profile,
             hub=hub,  # type: ignore[arg-type]
@@ -310,6 +317,123 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertEqual(hub.sent[0]["text"], "Proveď kontrolu")
         self.assertTrue(hub.sent[0]["model_input_text"].endswith("\n\nProveď kontrolu"))
         self.assertEqual(result["session"]["thread_id"], "canonical-thread")
+
+    def test_explicit_context_anchor_survives_restart_and_is_sent_only_to_model(self) -> None:
+        anchor_text = "Cíl: Zachovat kontinuitu\nPlán:\n1. Ověřit kompresi\nDalší krok: Ruční test"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            service, _runtime, _workspace, hub = self.make_service(root)
+            saved = human_adam_context_anchor_update_action(
+                {"content": anchor_text, "active": True, "confirmed": True},
+                service=service,
+            )
+            service.connect()
+            result = human_adam_send_action(
+                {
+                    "message": "Původní text Míly",
+                    "client_message_id": "human-adam-anchor-0001",
+                    "client_sent_at": "2026-07-17T08:00:00Z",
+                },
+                service=service,
+            )
+            restarted, _runtime2, _workspace2, restarted_hub = self.make_service(root)
+            restored = human_adam_context_anchor_action(service=restarted)
+            status_anchor = restarted.status()["context_anchor"]
+            restarted.connect()
+            human_adam_send_action(
+                {
+                    "message": "Tah po restartu",
+                    "client_message_id": "human-adam-anchor-0003",
+                    "client_sent_at": "2026-07-17T08:02:00Z",
+                },
+                service=restarted,
+            )
+
+        self.assertTrue(saved["ok"])
+        self.assertEqual(restored["content"], anchor_text)
+        self.assertTrue(restored["active"])
+        self.assertNotIn("content", status_anchor)
+        self.assertIn("[HUMAN_ADAM_CONTEXT_ANCHOR]", hub.sent[0]["model_input_text"])
+        self.assertIn(anchor_text, hub.sent[0]["model_input_text"])
+        self.assertIn("current explicit user message below overrides this anchor", hub.sent[0]["model_input_text"])
+        self.assertTrue(hub.sent[0]["model_input_text"].endswith("\n\nPůvodní text Míly"))
+        self.assertEqual(hub.sent[0]["text"], "Původní text Míly")
+        self.assertIn(anchor_text, restarted_hub.sent[0]["model_input_text"])
+        self.assertTrue(restarted_hub.sent[0]["model_input_text"].endswith("\n\nTah po restartu"))
+        self.assertEqual(result["context_anchor_warning"], "")
+
+    def test_corrupt_context_anchor_is_ignored_without_blocking_send(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            service, _runtime, _workspace, hub = self.make_service(root)
+            service.context_anchor_path.write_text("{broken", encoding="utf-8")
+            service.connect()
+            result = human_adam_send_action(
+                {
+                    "message": "Pokračuj bezpečně",
+                    "client_message_id": "human-adam-anchor-0002",
+                    "client_sent_at": "2026-07-17T08:01:00Z",
+                },
+                service=service,
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertNotIn("HUMAN_ADAM_CONTEXT_ANCHOR", hub.sent[0]["model_input_text"])
+        self.assertIn("bude ignorován", result["context_anchor_warning"])
+
+    def test_context_anchor_requires_explicit_action_and_rejects_private_data(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service, _runtime, _workspace, _hub = self.make_service(Path(temp_dir))
+            unconfirmed = human_adam_context_anchor_update_action(
+                {"content": "Cíl: Test", "active": True, "confirmed": False},
+                service=service,
+            )
+            private_path = human_adam_context_anchor_update_action(
+                {"content": "Cíl: přečíst /Users/example/private.txt", "active": True, "confirmed": True},
+                service=service,
+            )
+            secret = human_adam_context_anchor_update_action(
+                {"content": "token=secret-value", "active": True, "confirmed": True},
+                service=service,
+            )
+
+        self.assertFalse(unconfirmed["ok"])
+        self.assertFalse(private_path["ok"])
+        self.assertIn("absolutní cestu", private_path["message"])
+        self.assertFalse(secret["ok"])
+        self.assertIn("token", secret["message"])
+
+    def test_context_anchor_can_be_deactivated_without_deleting_history(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            service, _runtime, _workspace, _hub = self.make_service(root)
+            human_adam_context_anchor_update_action(
+                {"content": "Cíl: Test", "active": True, "confirmed": True},
+                service=service,
+            )
+            cleared = human_adam_context_anchor_update_action(
+                {"content": "", "active": False, "confirmed": True},
+                service=service,
+            )
+            persisted = (root / "context_anchor.json").read_text(encoding="utf-8")
+
+        self.assertTrue(cleared["ok"])
+        self.assertFalse(cleared["active"])
+        self.assertIn('"active": false', persisted)
+        self.assertGreaterEqual(cleared["revision"], 2)
+
+    def test_context_anchor_cannot_change_during_active_turn(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service, _runtime, _workspace, hub = self.make_service(Path(temp_dir))
+            hub.turn_busy = True
+            hub.active_turn = {"started_at": "2026-07-17T08:00:00Z"}
+            result = human_adam_context_anchor_update_action(
+                {"content": "Cíl: Neměnit během tahu", "active": True, "confirmed": True},
+                service=service,
+            )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "human_adam_busy")
 
     def test_send_adds_only_allowlisted_workspace_snapshot_to_model_input(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

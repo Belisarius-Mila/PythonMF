@@ -35,7 +35,9 @@ PRIVATE_COMMUNICATION_ROOT = PROJECT_ROOT / "data" / "private" / "communication"
 PRIVATE_PROFILE_ROOT = PROJECT_ROOT / "data" / "private" / "human_adam_profiles"
 DEFAULT_PROFILE_STATE_PATH = PRIVATE_COMMUNICATION_ROOT / "human_adam_active_profile.json"
 DEFAULT_HUMAN_SESSION_PATH = PRIVATE_COMMUNICATION_ROOT / "canonical_session.json"
+DEFAULT_HUMAN_CONTEXT_ANCHOR_PATH = PRIVATE_COMMUNICATION_ROOT / "human_adam_context_anchor.json"
 KNIHOVNA_PROFILE_ROOT = PRIVATE_PROFILE_ROOT / "knihovna"
+KNIHOVNA_CONTEXT_ANCHOR_PATH = PRIVATE_COMMUNICATION_ROOT / "knihovna_context_anchor.json"
 KNIHOVNA_TVBCP_RELATIVE_PATH = Path("memory/tvbcp/knihovna_cockpit.txt")
 PROFILE_ID_RE = re.compile(r"[a-z][a-z0-9_-]{1,31}")
 PROFILE_STATE_SCHEMA = 1
@@ -206,6 +208,13 @@ class HumanAdamProfileManager:
     def tvbcp(self) -> dict[str, Any]:
         return self.active_service.tvbcp()
 
+    def context_anchor(self, *, include_content: bool = True) -> dict[str, Any]:
+        return self.active_service.context_anchor(include_content=include_content)
+
+    def set_context_anchor(self, **kwargs: Any) -> dict[str, Any]:
+        with self.profile_operation() as service:
+            return service.set_context_anchor(**kwargs)
+
     def work_review(self) -> dict[str, Any]:
         return self.active_service.work_review()
 
@@ -342,6 +351,7 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         state_path=DEFAULT_HUMAN_SESSION_PATH,
         deployment_receipt_path=DEFAULT_DEPLOYMENT_RECEIPT,
         deployment_diagnostic_path=DEFAULT_DEPLOYMENT_DIAGNOSTIC,
+        context_anchor_path=DEFAULT_HUMAN_CONTEXT_ANCHOR_PATH,
         developer_instructions=HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
     )
     knihovna_workspace = HumanAdamWorkspaceManager(
@@ -354,6 +364,7 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         state_path=PRIVATE_COMMUNICATION_ROOT / "knihovna_session.json",
         deployment_receipt_path=PRIVATE_COMMUNICATION_ROOT / "knihovna_deployment_receipt.json",
         deployment_diagnostic_path=PRIVATE_COMMUNICATION_ROOT / "knihovna_deployment_diagnostic.json",
+        context_anchor_path=KNIHOVNA_CONTEXT_ANCHOR_PATH,
         developer_instructions=KNIHOVNA_DEVELOPER_INSTRUCTIONS,
         tvbcp_relative_path=KNIHOVNA_TVBCP_RELATIVE_PATH,
         tvbcp_title="Knihovna v Cockpitu",

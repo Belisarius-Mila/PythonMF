@@ -80,6 +80,8 @@ from app.codex_appserver import AppServerError
 from app.communication.human_adam_service import (
     human_adam_checkpoint_action,
     human_adam_connect_action,
+    human_adam_context_anchor_action,
+    human_adam_context_anchor_update_action,
     human_adam_send_action,
     human_adam_status_action,
     human_adam_tvbcp_action,
@@ -9152,6 +9154,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/human-adam/context-anchor",
+        "label": "Pripnout soukromy aktivni kontext Human-Adam",
+        "risk": "private_write",
+        "confirmation": "explicit_context_anchor_button",
+        "handler_name": "human_adam_context_anchor_update_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/human-adam/send",
         "label": "Odeslat zapisujici tah Human-Adam",
         "risk": "workspace_write",
@@ -9836,6 +9846,9 @@ class CockpitServer:
                 if parsed.path == "/api/human-adam/status":
                     self.respond_json(human_adam_status_action(service=HUMAN_ADAM))
                     return
+                if parsed.path == "/api/human-adam/context-anchor":
+                    self.respond_json(human_adam_context_anchor_action(service=HUMAN_ADAM))
+                    return
                 if parsed.path == "/api/human-adam/tvbcp":
                     self.respond_json(human_adam_tvbcp_action(service=HUMAN_ADAM))
                     return
@@ -10050,6 +10063,10 @@ class CockpitServer:
                 if parsed.path == "/api/human-adam/profile":
                     payload = self.read_json()
                     self.respond_json(human_adam_profile_switch_action(payload, service=HUMAN_ADAM))
+                    return
+                if parsed.path == "/api/human-adam/context-anchor":
+                    payload = self.read_json()
+                    self.respond_json(human_adam_context_anchor_update_action(payload, service=HUMAN_ADAM))
                     return
                 if parsed.path == "/api/human-adam/send":
                     payload = self.read_json()

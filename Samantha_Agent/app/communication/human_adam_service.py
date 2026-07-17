@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from datetime import datetime, timezone
 from functools import partial
@@ -32,10 +33,12 @@ from app.communication.human_adam_workspace import (
     HumanAdamWorkspaceManager,
     read_human_adam_runtime_profile,
 )
+from app.file_persistence import FilePersistenceError, update_json_file
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SESSION_STATE_PATH = PROJECT_ROOT / "data" / "private" / "communication" / "canonical_session.json"
+DEFAULT_CONTEXT_ANCHOR_PATH = PROJECT_ROOT / "data" / "private" / "communication" / "human_adam_context_anchor.json"
 HUMAN_ADAM_DEVELOPER_INSTRUCTIONS = HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS + (
     " Pro projekt komunikacni architektury pred vetsi praci precti "
     "Samantha_Agent/memory/tvbcp/architektura_komunikace_samantha.txt. "
@@ -52,10 +55,142 @@ HUMAN_ADAM_DEVELOPER_INSTRUCTIONS = HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS 
 )
 MAX_MESSAGE_CHARS = 12_000
 MAX_TVBCP_CHARS = 500_000
+MAX_CONTEXT_ANCHOR_CHARS = 6_000
+CONTEXT_ANCHOR_SCHEMA_VERSION = 1
 CANONICAL_TVBCP_RELATIVE_PATH = Path("memory/tvbcp/architektura_komunikace_samantha.txt")
 SAFE_GIT_HEAD_RE = re.compile(r"[0-9a-fA-F]{7,64}")
 SAFE_WORKSPACE_RELATIONS = frozenset({"aligned", "local_ahead", "source_ahead", "diverged", "unknown"})
 MAX_WORKSPACE_SNAPSHOT_COUNT = 1_000_000
+PRIVATE_PATH_RE = re.compile(r"(?i)(?:file://|/(?:Users|home|private|var/folders)/|[A-Z]:\\\\Users\\\\)")
+SECRET_VALUE_RE = re.compile(
+    r"(?i)\b(?:api[_ -]?key|access[_ -]?token|auth[_ -]?token|token|password|heslo|app-specific password)\b\s*[:=]\s*\S+"
+)
+RESERVED_ANCHOR_MARKERS = ("[HUMAN_ADAM_CONTEXT_ANCHOR]", "[/HUMAN_ADAM_CONTEXT_ANCHOR]")
+
+
+class ContextAnchorError(SessionHubError):
+    """Raised when the optional private continuity anchor is unsafe or unreadable."""
+
+
+def empty_context_anchor() -> dict[str, Any]:
+    return {
+        "schema_version": CONTEXT_ANCHOR_SCHEMA_VERSION,
+        "active": False,
+        "content": "",
+        "revision": 0,
+        "updated_at": "",
+    }
+
+
+def _validated_anchor_content(value: object, *, allow_empty: bool = False) -> str:
+    content = str(value or "").strip()
+    if not content and not allow_empty:
+        raise ContextAnchorError("Aktivní kontext je prázdný.")
+    if len(content) > MAX_CONTEXT_ANCHOR_CHARS:
+        raise ContextAnchorError(f"Aktivní kontext může mít nejvýše {MAX_CONTEXT_ANCHOR_CHARS} znaků.")
+    if any(ord(character) < 32 and character not in "\n\t" for character in content):
+        raise ContextAnchorError("Aktivní kontext obsahuje nepovolené řídicí znaky.")
+    if PRIVATE_PATH_RE.search(content):
+        raise ContextAnchorError("Aktivní kontext nesmí obsahovat soukromou absolutní cestu.")
+    if SECRET_VALUE_RE.search(content) or "-----BEGIN PRIVATE KEY-----" in content.upper():
+        raise ContextAnchorError("Aktivní kontext nesmí obsahovat heslo, token ani klíč.")
+    if any(marker in content for marker in RESERVED_ANCHOR_MARKERS):
+        raise ContextAnchorError("Aktivní kontext obsahuje vyhrazenou technickou značku.")
+    return content
+
+
+def _validated_anchor_timestamp(value: object, *, allow_empty: bool = False) -> str:
+    timestamp = str(value or "").strip()
+    if not timestamp and allow_empty:
+        return ""
+    try:
+        parsed = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ContextAnchorError("Aktivní kontext má neplatný čas aktualizace; při tahu bude ignorován.") from exc
+    if parsed.tzinfo is None:
+        raise ContextAnchorError("Aktivní kontext nemá bezpečně určenou časovou zónu; při tahu bude ignorován.")
+    return timestamp
+
+
+def load_context_anchor(path: Path) -> dict[str, Any]:
+    target = Path(path)
+    if not target.exists():
+        return empty_context_anchor()
+    try:
+        raw = json.loads(target.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ContextAnchorError("Aktivní kontext nelze bezpečně načíst; při tahu bude ignorován.") from exc
+    if not isinstance(raw, dict) or raw.get("schema_version") != CONTEXT_ANCHOR_SCHEMA_VERSION:
+        raise ContextAnchorError("Aktivní kontext má neznámé schéma; při tahu bude ignorován.")
+    active = raw.get("active") is True
+    content = _validated_anchor_content(raw.get("content"), allow_empty=not active)
+    try:
+        revision = max(0, int(raw.get("revision") or 0))
+    except (TypeError, ValueError) as exc:
+        raise ContextAnchorError("Aktivní kontext má neplatnou revizi; při tahu bude ignorován.") from exc
+    updated_at = _validated_anchor_timestamp(raw.get("updated_at"), allow_empty=not active)
+    return {
+        "schema_version": CONTEXT_ANCHOR_SCHEMA_VERSION,
+        "active": active,
+        "content": content if active else "",
+        "revision": revision,
+        "updated_at": updated_at,
+    }
+
+
+def write_context_anchor(path: Path, *, content: str, active: bool) -> dict[str, Any]:
+    safe_content = _validated_anchor_content(content, allow_empty=not active) if active else ""
+
+    def updater(current: Any) -> dict[str, Any]:
+        if not isinstance(current, dict) or current.get("schema_version") != CONTEXT_ANCHOR_SCHEMA_VERSION:
+            if current != empty_context_anchor():
+                raise ContextAnchorError("Stávající aktivní kontext má neznámé schéma a nebyl přepsán.")
+            revision = 0
+        else:
+            try:
+                revision = max(0, int(current.get("revision") or 0))
+            except (TypeError, ValueError) as exc:
+                raise ContextAnchorError("Stávající aktivní kontext má neplatnou revizi a nebyl přepsán.") from exc
+        return {
+            "schema_version": CONTEXT_ANCHOR_SCHEMA_VERSION,
+            "active": bool(active),
+            "content": safe_content,
+            "revision": revision + 1,
+            "updated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        }
+
+    try:
+        stored = update_json_file(
+            Path(path),
+            updater,
+            default=empty_context_anchor(),
+            ensure_ascii=False,
+            indent=2,
+        )
+    except (ContextAnchorError, FilePersistenceError, OSError, json.JSONDecodeError, ValueError) as exc:
+        if isinstance(exc, ContextAnchorError):
+            raise
+        raise ContextAnchorError("Aktivní kontext nelze bezpečně uložit.") from exc
+    return dict(stored)
+
+
+def context_anchor_model_block(anchor: dict[str, Any]) -> str:
+    if anchor.get("active") is not True:
+        return ""
+    content = _validated_anchor_content(anchor.get("content"))
+    return "\n".join(
+        (
+            "[HUMAN_ADAM_CONTEXT_ANCHOR]",
+            "origin=explicit_user_pin",
+            f"revision={max(0, int(anchor.get('revision') or 0))}",
+            f"updated_at={str(anchor.get('updated_at') or '').strip()}",
+            "priority_rule=The current explicit user message below overrides this anchor on conflict.",
+            "purpose=Continuity reference only; do not repeat it unless relevant.",
+            "content:",
+            content,
+            "[/HUMAN_ADAM_CONTEXT_ANCHOR]",
+        )
+    )
 
 
 def _safe_git_head(value: object) -> str:
@@ -71,12 +206,17 @@ def _safe_snapshot_count(value: object) -> int:
     return min(MAX_WORKSPACE_SNAPSHOT_COUNT, max(0, count))
 
 
-def workspace_model_input(user_text: str, workspace: dict[str, Any]) -> str:
+def workspace_model_input(
+    user_text: str,
+    workspace: dict[str, Any],
+    *,
+    context_anchor_block: str = "",
+) -> str:
     """Add allowlisted workspace metadata without changing persisted user text."""
     relation = str(workspace.get("workspace_relation") or "unknown").strip()
     if relation not in SAFE_WORKSPACE_RELATIONS:
         relation = "unknown"
-    snapshot_lines = (
+    snapshot_lines = [
         "[SAFE_WORKSPACE_SNAPSHOT]",
         f"source_head={_safe_git_head(workspace.get('source_head'))}",
         f"workspace_head={_safe_git_head(workspace.get('head'))}",
@@ -85,8 +225,10 @@ def workspace_model_input(user_text: str, workspace: dict[str, Any]) -> str:
         f"local_commit_count={_safe_snapshot_count(workspace.get('local_commit_count'))}",
         "[/SAFE_WORKSPACE_SNAPSHOT]",
         "",
-        str(user_text),
-    )
+    ]
+    if context_anchor_block:
+        snapshot_lines.extend((context_anchor_block, ""))
+    snapshot_lines.append(str(user_text))
     return "\n".join(snapshot_lines)
 
 
@@ -101,6 +243,7 @@ class HumanAdamService:
         state_path: Path = DEFAULT_SESSION_STATE_PATH,
         deployment_receipt_path: Path = DEFAULT_DEPLOYMENT_RECEIPT,
         deployment_diagnostic_path: Path | None = None,
+        context_anchor_path: Path = DEFAULT_CONTEXT_ANCHOR_PATH,
         codex_binary: str = DEFAULT_CODEX_BIN,
         profile_getter: Callable[..., dict[str, Any]] = read_human_adam_runtime_profile,
         hub: CanonicalSessionHub | None = None,
@@ -117,6 +260,7 @@ class HumanAdamService:
         self.tvbcp_title = str(tvbcp_title).strip() or "Projektový TVBCP"
         self._profile: dict[str, Any] = {}
         self.state_path = Path(state_path)
+        self.context_anchor_path = Path(context_anchor_path)
         self.deployment_receipt_path = Path(deployment_receipt_path)
         self.deployment_diagnostic_path = Path(
             deployment_diagnostic_path
@@ -189,6 +333,7 @@ class HumanAdamService:
                 self.deployment_diagnostic_path,
                 thread_id=str(session.get("thread_id") or ""),
             )
+            context_anchor = self.context_anchor(include_content=False)
             return {
                 "ok": workspace_ready,
                 "runtime": self.runtime.status(),
@@ -208,6 +353,7 @@ class HumanAdamService:
                 "session": session,
                 "deployment_confirmation": deployment_confirmation,
                 "deployment_diagnostic": deployment_diagnostic,
+                "context_anchor": context_anchor,
             }
         except (AppServerError, SessionHubError, OSError, ValueError) as exc:
             return {"ok": False, "status": "human_adam_status_failed", "message": str(exc)}
@@ -240,13 +386,68 @@ class HumanAdamService:
         if not runtime.get("reachable") or not session.get("connected"):
             raise SessionHubError("Nejdřív výslovně připoj Human–Adam.")
         workspace = self._workspace_status()
+        anchor_warning = ""
+        try:
+            anchor_block = context_anchor_model_block(load_context_anchor(self.context_anchor_path))
+        except ContextAnchorError as exc:
+            anchor_block = ""
+            anchor_warning = str(exc)
         result = self.hub.send(
             text=clean_text,
             client_message_id=client_message_id,
             client_sent_at=client_sent_at,
-            model_input_text=workspace_model_input(clean_text, workspace),
+            model_input_text=workspace_model_input(
+                clean_text,
+                workspace,
+                context_anchor_block=anchor_block,
+            ),
         )
-        return {**result, "session": self.hub.snapshot()}
+        return {
+            **result,
+            "session": self.hub.snapshot(),
+            "context_anchor_warning": anchor_warning,
+        }
+
+    def context_anchor(self, *, include_content: bool = True) -> dict[str, Any]:
+        try:
+            anchor = load_context_anchor(self.context_anchor_path)
+        except ContextAnchorError as exc:
+            return {
+                "ok": False,
+                "active": False,
+                "revision": 0,
+                "updated_at": "",
+                "message": str(exc),
+                **({"content": ""} if include_content else {}),
+            }
+        payload = {
+            "ok": True,
+            "active": bool(anchor.get("active")),
+            "revision": int(anchor.get("revision") or 0),
+            "updated_at": str(anchor.get("updated_at") or ""),
+        }
+        if include_content:
+            payload["content"] = str(anchor.get("content") or "")
+        return payload
+
+    def set_context_anchor(self, *, content: str, active: bool, confirmed: bool) -> dict[str, Any]:
+        if not confirmed:
+            raise ContextAnchorError("Připnutí aktivního kontextu vyžaduje výslovnou akci uživatele.")
+        session = self.hub.snapshot()
+        if session.get("turn_busy") or session.get("active_turn"):
+            raise SessionBusyError("Aktivní kontext nelze měnit během Adamova tahu.")
+        anchor = write_context_anchor(
+            self.context_anchor_path,
+            content=str(content or ""),
+            active=bool(active),
+        )
+        return {
+            "ok": True,
+            "active": bool(anchor.get("active")),
+            "content": str(anchor.get("content") or ""),
+            "revision": int(anchor.get("revision") or 0),
+            "updated_at": str(anchor.get("updated_at") or ""),
+        }
 
     def tvbcp(self) -> dict[str, Any]:
         workspace = self.workspace.status()
@@ -317,6 +518,27 @@ def human_adam_tvbcp_action(*, service: HumanAdamService) -> dict[str, Any]:
         return service.tvbcp()
     except (AppServerError, OSError, ValueError) as exc:
         return {"ok": False, "status": "human_adam_tvbcp_failed", "message": str(exc)}
+
+
+def human_adam_context_anchor_action(*, service: HumanAdamService) -> dict[str, Any]:
+    return service.context_anchor(include_content=True)
+
+
+def human_adam_context_anchor_update_action(
+    payload: dict[str, Any],
+    *,
+    service: HumanAdamService,
+) -> dict[str, Any]:
+    try:
+        return service.set_context_anchor(
+            content=str(payload.get("content") or ""),
+            active=payload.get("active") is True,
+            confirmed=payload.get("confirmed") is True,
+        )
+    except SessionBusyError as exc:
+        return {"ok": False, "status": "human_adam_busy", "message": str(exc)}
+    except (ContextAnchorError, OSError, ValueError) as exc:
+        return {"ok": False, "status": "human_adam_context_anchor_failed", "message": str(exc)}
 
 
 def human_adam_work_review_action(*, service: HumanAdamService) -> dict[str, Any]:

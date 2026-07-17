@@ -124,6 +124,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             runtime=runtime,  # type: ignore[arg-type]
             workspace=human_workspace,  # type: ignore[arg-type]
             state_path=root / "human.json",
+            context_anchor_path=root / "human-anchor.json",
             deployment_receipt_path=root / "human-receipt.json",
             hub=human_hub,  # type: ignore[arg-type]
             profile_getter=fake_profile,
@@ -132,6 +133,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             runtime=runtime,  # type: ignore[arg-type]
             workspace=library_workspace,  # type: ignore[arg-type]
             state_path=root / "library.json",
+            context_anchor_path=root / "library-anchor.json",
             deployment_receipt_path=root / "library-receipt.json",
             hub=library_hub,  # type: ignore[arg-type]
             profile_getter=fake_profile,
@@ -186,6 +188,24 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(library_hub.connected)
         self.assertEqual(persisted["active_profile_id"], "knihovna")
         self.assertNotIn("thread", str(persisted))
+
+    def test_context_anchor_is_isolated_per_work_profile(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _human_workspace, _library_workspace, human_hub, _library_hub = self.make_manager(Path(temp_dir))
+            human_hub.connected = True
+            saved = manager.set_context_anchor(
+                content="Cíl: Human–Adam kontinuita",
+                active=True,
+                confirmed=True,
+            )
+            manager.switch(profile_id="knihovna", confirmed=True)
+            library_anchor = manager.context_anchor()
+            manager.switch(profile_id="human_adam", confirmed=True)
+            human_anchor = manager.context_anchor()
+
+        self.assertTrue(saved["active"])
+        self.assertFalse(library_anchor["active"])
+        self.assertEqual(human_anchor["content"], "Cíl: Human–Adam kontinuita")
 
     def test_switch_rejects_dirty_checkpoint_and_uncertain_delivery(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

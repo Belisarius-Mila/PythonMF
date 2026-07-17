@@ -16,6 +16,15 @@ class HumanAdamUiTests(unittest.TestCase):
             "connectionBadge",
             "threadBadge",
             "workspaceBadge",
+            "contextAnchorBadge",
+            "contextAnchorOpenBtn",
+            "contextAnchorPanel",
+            "contextAnchorCloseBtn",
+            "contextAnchorRefreshBtn",
+            "contextAnchorMeta",
+            "contextAnchorInput",
+            "contextAnchorSaveBtn",
+            "contextAnchorClearBtn",
             "chat",
             "messageInput",
             "sendBtn",
@@ -55,6 +64,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("/api/human-adam/status", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/connect", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/profile", HUMAN_ADAM_HTML)
+        self.assertIn("/api/human-adam/context-anchor", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/send", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/tvbcp", HUMAN_ADAM_HTML)
         self.assertIn("TVBCP se načte až po otevření.", HUMAN_ADAM_HTML)
@@ -133,6 +143,44 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("profile_id:targetId,confirmed:true", source)
         self.assertIn('profileSelect.addEventListener("change", syncControls);', HUMAN_ADAM_HTML)
         self.assertIn('profileSwitchBtn.addEventListener("click", switchProfile);', HUMAN_ADAM_HTML)
+
+    def test_context_anchor_is_explicit_editable_and_profile_scoped_in_ui(self) -> None:
+        panel_start = HUMAN_ADAM_HTML.index('id="contextAnchorPanel"')
+        panel_end = HUMAN_ADAM_HTML.index('</aside>', panel_start)
+        panel_source = HUMAN_ADAM_HTML[panel_start:panel_end]
+        save_start = HUMAN_ADAM_HTML.index("async function saveContextAnchor(active)")
+        save_end = HUMAN_ADAM_HTML.index("async function loadTvbcp", save_start)
+        save_source = HUMAN_ADAM_HTML[save_start:save_end]
+        switch_start = HUMAN_ADAM_HTML.index("async function switchProfile()")
+        switch_end = HUMAN_ADAM_HTML.index("function scrollTvbcpToEnd", switch_start)
+        switch_source = HUMAN_ADAM_HTML[switch_start:switch_end]
+
+        self.assertIn('maxlength="6000"', panel_source)
+        self.assertIn("Cíl:", panel_source)
+        self.assertIn("Plán:", panel_source)
+        self.assertIn("Hotovo:", panel_source)
+        self.assertIn("Rozhodnutí:", panel_source)
+        self.assertIn("Další krok:", panel_source)
+        self.assertIn("Novější pokyn v chatu má vždy přednost.", panel_source)
+        self.assertIn('api("/api/human-adam/context-anchor"', save_source)
+        self.assertIn("active,confirmed:true", save_source)
+        self.assertIn('contextAnchorSaveBtn.addEventListener("click", () => saveContextAnchor(true));', HUMAN_ADAM_HTML)
+        self.assertIn('contextAnchorClearBtn.addEventListener("click", () => saveContextAnchor(false));', HUMAN_ADAM_HTML)
+        self.assertIn("contextAnchorPanel.hidden = true;", switch_source)
+
+    def test_context_anchor_never_auto_updates_during_message_send(self) -> None:
+        send_start = HUMAN_ADAM_HTML.index("async function sendMessage(event)")
+        send_end = HUMAN_ADAM_HTML.index('connectBtn.addEventListener("click", connect);', send_start)
+        send_source = HUMAN_ADAM_HTML[send_start:send_end]
+        controls_start = HUMAN_ADAM_HTML.index("function syncControls()")
+        controls_end = HUMAN_ADAM_HTML.index("function setBusy(", controls_start)
+        controls_source = HUMAN_ADAM_HTML[controls_start:controls_end]
+
+        self.assertNotIn("saveContextAnchor", send_source)
+        self.assertNotIn("/api/human-adam/context-anchor", send_source)
+        self.assertIn("contextAnchorSaveBtn.disabled = busy || sendInFlight || sessionTurnBusy;", controls_source)
+        self.assertIn("contextAnchorClearBtn.disabled = busy || sendInFlight || sessionTurnBusy;", controls_source)
+        self.assertIn("payload.context_anchor_warning", send_source)
 
     def test_composer_places_voice_left_and_send_right_in_one_compact_row(self) -> None:
         actions_start = HUMAN_ADAM_HTML.index('<div class="compose-actions">')
