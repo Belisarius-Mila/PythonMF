@@ -192,6 +192,21 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("savedContextAnchorContent = hasContent ? content", source)
         self.assertIn("savedContextAnchorActive = hasContent && anchor.active === true", source)
         self.assertIn("Uloženo a pozastaveno", source)
+        self.assertIn("Napiš návrh do pole a stiskni Uložit návrh.", source)
+        self.assertIn("nechat připravit Adamem", source)
+        self.assertIn("nový odlišný pokyn vyžadovat potvrzení", source)
+
+    def test_empty_loaded_anchor_keeps_save_button_as_usable_entry_point(self) -> None:
+        controls_start = HUMAN_ADAM_HTML.index("function syncControls()")
+        controls_end = HUMAN_ADAM_HTML.index("function setBusy(", controls_start)
+        source = HUMAN_ADAM_HTML[controls_start:controls_end]
+        save_line = next(line for line in source.splitlines() if "contextAnchorSaveBtn.disabled" in line)
+
+        self.assertIn("anchorMutationBlocked || !contextAnchorLoaded", save_line)
+        self.assertIn("(!anchorDirty && anchorHasContent)", save_line)
+        self.assertNotIn("!contextAnchorInput.value.trim()", save_line)
+        self.assertIn("Nejdřív napiš stručný aktivní kontext k uložení.", HUMAN_ADAM_HTML)
+        self.assertIn("contextAnchorInput.focus();", HUMAN_ADAM_HTML)
 
     def test_context_anchor_update_preserves_server_owned_state_transitions(self) -> None:
         change_start = HUMAN_ADAM_HTML.index("async function changeContextAnchor(operation)")
@@ -264,7 +279,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Požadavek neposílej automaticky znovu.", proposal_source)
         self.assertEqual(proposal_source.count("api(HUMAN_ADAM_SEND_PATH"), 1)
 
-    def test_active_or_uncertain_turn_disables_anchor_proposal(self) -> None:
+    def test_active_turn_disables_anchor_proposal_and_uncertain_delivery_requires_confirmation(self) -> None:
         controls_start = HUMAN_ADAM_HTML.index("function syncControls()")
         controls_end = HUMAN_ADAM_HTML.index("function setBusy(", controls_start)
         controls_source = HUMAN_ADAM_HTML[controls_start:controls_end]
@@ -273,9 +288,13 @@ class HumanAdamUiTests(unittest.TestCase):
         proposal_source = HUMAN_ADAM_HTML[proposal_start:proposal_end]
 
         self.assertIn("contextAnchorProposeBtn.disabled = busy || sendInFlight || sessionTurnBusy", controls_source)
-        self.assertIn("!sessionConnected || deliveryUncertain", controls_source)
+        self.assertIn("|| !sessionConnected;", controls_source)
+        self.assertNotIn("!sessionConnected || deliveryUncertain", controls_source)
         self.assertIn("if (busy || sendInFlight || sessionTurnBusy", proposal_source)
-        self.assertIn("!sessionConnected || deliveryUncertain", proposal_source)
+        self.assertNotIn("!sessionConnected || deliveryUncertain", proposal_source)
+        self.assertIn("if (deliveryUncertain && !window.confirm", proposal_source)
+        self.assertIn("Odeslat nový odlišný pokyn pouze pro přípravu kotvy?", proposal_source)
+        self.assertIn("Předchozí pokyn se nebude opakovat.", proposal_source)
 
     def test_context_anchor_never_auto_updates_during_message_send(self) -> None:
         send_start = HUMAN_ADAM_HTML.index("async function sendMessage(event)")

@@ -405,11 +405,11 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     voiceRecordBtn.textContent = voiceRecording ? "Nahrávám…" : "Nahrát pokyn";
     voiceStopBtn.hidden = !voiceRecording;
     voiceStopBtn.disabled = !voiceRecording;
-    contextAnchorSaveBtn.disabled = anchorMutationBlocked || !contextAnchorInput.value.trim() || !anchorDirty;
+    contextAnchorSaveBtn.disabled = anchorMutationBlocked || !contextAnchorLoaded || (!anchorDirty && anchorHasContent);
     contextAnchorPinBtn.disabled = anchorMutationBlocked || anchorDirty || !anchorHasContent || savedContextAnchorActive;
     contextAnchorPauseBtn.disabled = anchorMutationBlocked || anchorDirty || !anchorHasContent || !savedContextAnchorActive;
     contextAnchorDeleteBtn.disabled = anchorMutationBlocked || anchorDirty || !anchorHasContent;
-    contextAnchorProposeBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || !sessionConnected || deliveryUncertain;
+    contextAnchorProposeBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || !sessionConnected;
   }
 
   function setBusy(value, text="") {
@@ -943,7 +943,9 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       ? `Připnuto · revize ${revision} · ${formatTime(anchor.updated_at)}`
       : (hasContent
         ? `Uloženo a pozastaveno · revize ${revision} · ${formatTime(anchor.updated_at)}`
-        : "Žádný aktivní kontext není uložený.");
+        : (deliveryUncertain
+          ? "Žádná kotva není uložená. Můžeš ji napsat, nebo nechat připravit Adamem; kvůli předchozímu nejistému doručení bude nový odlišný pokyn vyžadovat potvrzení."
+          : "Žádná kotva není uložená. Napiš návrh do pole a stiskni Uložit návrh."));
     syncControls();
   }
 
@@ -1023,7 +1025,8 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   }
 
   async function proposeContextAnchor() {
-    if (busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || !sessionConnected || deliveryUncertain) return;
+    if (busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || !sessionConnected) return;
+    if (deliveryUncertain && !window.confirm("Předchozí doručení je nejisté. Odeslat nový odlišný pokyn pouze pro přípravu kotvy? Předchozí pokyn se nebude opakovat.")) return;
     const editorBefore = contextAnchorInput.value;
     if (editorBefore.trim() && !window.confirm("Adamův nový návrh po dokončení nahradí současný obsah editoru. Pokračovat?")) return;
     sendInFlight = true;
