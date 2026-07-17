@@ -151,12 +151,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     </div>
     <div class="context-anchor-body">
       <p id="contextAnchorMeta">Kontext se načte až po otevření.</p>
-      <p class="context-anchor-help">Nech Adama připravit návrh, potom jej zkontroluj a teprve výslovně připni. Ulož pouze stručný cíl, očíslovaný plán, hotové body, rozhodnutí a další krok. Nevkládej hesla, tokeny, osobní údaje ani absolutní cesty. Novější pokyn v chatu má vždy přednost.</p>
+      <p class="context-anchor-help">Nech Adama připravit návrh, zkontroluj jej a nejdřív jej soukromě ulož. Připnutý plán se přikládá k tahům; pozastavený zůstává uložený, ale nepřikládá se. Ulož pouze stručný cíl, očíslovaný plán, hotové body, rozhodnutí a další krok. Nevkládej hesla, tokeny, osobní údaje ani absolutní cesty. Novější pokyn v chatu má vždy přednost.</p>
       <textarea id="contextAnchorInput" maxlength="6000" autocomplete="off" placeholder="Cíl:&#10;&#10;Plán:&#10;1. …&#10;&#10;Hotovo:&#10;- …&#10;&#10;Rozhodnutí:&#10;- …&#10;&#10;Další krok:&#10;- …" aria-label="Připnutý aktivní kontext"></textarea>
       <button id="contextAnchorProposeBtn" type="button">Adam: připravit návrh</button>
       <div class="context-anchor-actions">
-        <button id="contextAnchorClearBtn" type="button">Odepnout</button>
-        <button class="primary" id="contextAnchorSaveBtn" type="button">Připnout plán</button>
+        <button id="contextAnchorDeleteBtn" type="button">Smazat</button>
+        <button id="contextAnchorPauseBtn" type="button">Pozastavit</button>
+        <button id="contextAnchorPinBtn" type="button">Připnout</button>
+        <button class="primary" id="contextAnchorSaveBtn" type="button">Uložit návrh</button>
       </div>
     </div>
   </aside>
@@ -206,7 +208,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const contextAnchorInput = document.getElementById("contextAnchorInput");
   const contextAnchorProposeBtn = document.getElementById("contextAnchorProposeBtn");
   const contextAnchorSaveBtn = document.getElementById("contextAnchorSaveBtn");
-  const contextAnchorClearBtn = document.getElementById("contextAnchorClearBtn");
+  const contextAnchorPinBtn = document.getElementById("contextAnchorPinBtn");
+  const contextAnchorPauseBtn = document.getElementById("contextAnchorPauseBtn");
+  const contextAnchorDeleteBtn = document.getElementById("contextAnchorDeleteBtn");
   const composer = document.getElementById("composer");
   const input = document.getElementById("messageInput");
   const sendBtn = document.getElementById("sendBtn");
@@ -255,6 +259,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let completionAudioUnlocked = false;
   let activeSpeechButton = null;
   let activeSpeechUtterance = null;
+  let contextAnchorLoaded = false;
+  let savedContextAnchorContent = "";
+  let savedContextAnchorActive = false;
   const HUMAN_ADAM_SEND_PATH = "/api/human-adam/send";
   const CONTEXT_ANCHOR_PROPOSAL_PROMPT = `Připrav návrh aktivního kontextu pro další pokračování tohoto pracovního profilu. Odpověz pouze stručným českým textem do 6000 znaků v přesné struktuře:
 Cíl:
@@ -370,6 +377,10 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     soundTestBtn.disabled = false;
   }
 
+  function contextAnchorDraftDirty() {
+    return contextAnchorLoaded && contextAnchorInput.value.trim() !== savedContextAnchorContent;
+  }
+
   async function restoreCompletionAudioAfterVisibility() {
     if (document.hidden || !completionAudioUnlocked || !completionAudioContext) return;
     try {
@@ -381,6 +392,9 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   }
 
   function syncControls() {
+    const anchorMutationBlocked = busy || sendInFlight || sessionTurnBusy;
+    const anchorDirty = contextAnchorDraftDirty();
+    const anchorHasContent = Boolean(savedContextAnchorContent);
     connectBtn.disabled = busy;
     profileSelect.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
     profileSwitchBtn.disabled = profileSelect.disabled || !profileSelect.value || profileSelect.value === activeProfileId;
@@ -391,8 +405,10 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     voiceRecordBtn.textContent = voiceRecording ? "Nahrávám…" : "Nahrát pokyn";
     voiceStopBtn.hidden = !voiceRecording;
     voiceStopBtn.disabled = !voiceRecording;
-    contextAnchorSaveBtn.disabled = busy || sendInFlight || sessionTurnBusy;
-    contextAnchorClearBtn.disabled = busy || sendInFlight || sessionTurnBusy;
+    contextAnchorSaveBtn.disabled = anchorMutationBlocked || !contextAnchorInput.value.trim() || !anchorDirty;
+    contextAnchorPinBtn.disabled = anchorMutationBlocked || anchorDirty || !anchorHasContent || savedContextAnchorActive;
+    contextAnchorPauseBtn.disabled = anchorMutationBlocked || anchorDirty || !anchorHasContent || !savedContextAnchorActive;
+    contextAnchorDeleteBtn.disabled = anchorMutationBlocked || anchorDirty || !anchorHasContent;
     contextAnchorProposeBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || !sessionConnected || deliveryUncertain;
   }
 
@@ -819,6 +835,11 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       profileSelect.value = activeProfileId;
       return;
     }
+    if (contextAnchorDraftDirty()) {
+      notice.textContent = "Nejdřív ulož nebo výslovně zahoď rozepsanou změnu kotvy; profil jsem nepřepnul.";
+      profileSelect.value = activeProfileId;
+      return;
+    }
     if (!window.confirm(`Přepnout celý pracovní profil na „${targetLabel}“?\n\nPřepne se vlákno, workspace i TVBCP.`)) {
       profileSelect.value = activeProfileId;
       return;
@@ -835,6 +856,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
         body:JSON.stringify({profile_id:targetId,confirmed:true}),
       });
       if (!payload.ok) throw new Error(payload.message || "Přepnutí profilu selhalo.");
+      resetContextAnchorEditorState();
       renderStatus(payload);
       notice.textContent = `Aktivní pracovní profil: ${activeProfileLabel}.`;
     } catch (error) {
@@ -888,25 +910,45 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   function renderContextAnchorBadge(anchor) {
     const failed = Boolean(anchor && anchor.ok === false);
     const active = Boolean(anchor && anchor.ok === true && anchor.active === true);
-    contextAnchorBadge.textContent = failed ? "Kontext: chyba" : (active ? "Kontext: připnut" : "Kontext: nepřipnut");
+    const stored = Boolean(anchor && anchor.ok === true && anchor.has_content === true);
+    contextAnchorBadge.textContent = failed ? "Kontext: chyba" : (active ? "Kontext: připnut" : (stored ? "Kontext: uložen" : "Kontext: žádný"));
     contextAnchorBadge.className = failed ? "badge warn" : (active ? "badge ok" : "badge");
+  }
+
+  function resetContextAnchorEditorState() {
+    contextAnchorLoaded = false;
+    savedContextAnchorContent = "";
+    savedContextAnchorActive = false;
+    contextAnchorInput.value = "";
+    contextAnchorSaveBtn.textContent = "Uložit návrh";
+    contextAnchorMeta.textContent = "Kontext se načte až po otevření.";
+    syncControls();
   }
 
   function renderContextAnchorEditor(anchor) {
     renderContextAnchorBadge(anchor);
     if (!anchor || anchor.ok === false) {
-      contextAnchorInput.value = "";
       contextAnchorMeta.textContent = anchor && anchor.message ? anchor.message : "Aktivní kontext nelze načíst.";
       return;
     }
-    contextAnchorInput.value = anchor.active ? String(anchor.content || "") : "";
+    const content = String(anchor.content || "");
+    const hasContent = anchor.has_content === true || Boolean(content);
+    contextAnchorLoaded = true;
+    savedContextAnchorContent = hasContent ? content : "";
+    savedContextAnchorActive = hasContent && anchor.active === true;
+    contextAnchorInput.value = savedContextAnchorContent;
+    contextAnchorSaveBtn.textContent = hasContent ? "Uložit aktualizaci" : "Uložit návrh";
     const revision = Number(anchor.revision || 0);
-    contextAnchorMeta.textContent = anchor.active
+    contextAnchorMeta.textContent = savedContextAnchorActive
       ? `Připnuto · revize ${revision} · ${formatTime(anchor.updated_at)}`
-      : "Žádný aktivní kontext není připnutý.";
+      : (hasContent
+        ? `Uloženo a pozastaveno · revize ${revision} · ${formatTime(anchor.updated_at)}`
+        : "Žádný aktivní kontext není uložený.");
+    syncControls();
   }
 
   async function loadContextAnchor() {
+    if (contextAnchorDraftDirty() && !window.confirm("Zahodit rozepsanou změnu a znovu načíst naposledy uloženou kotvu?")) return false;
     contextAnchorRefreshBtn.disabled = true;
     contextAnchorMeta.textContent = "Načítám aktivní kontext…";
     try {
@@ -918,40 +960,57 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       contextAnchorRefreshBtn.disabled = false;
       syncControls();
     }
+    return true;
   }
 
   function openContextAnchor() {
     tvbcpPanel.hidden = true;
     workPanel.hidden = true;
     contextAnchorPanel.hidden = false;
-    loadContextAnchor();
+    if (!contextAnchorLoaded) loadContextAnchor();
   }
 
   function closeContextAnchor() {
     contextAnchorPanel.hidden = true;
   }
 
-  async function saveContextAnchor(active) {
+  async function changeContextAnchor(operation) {
     if (busy || sendInFlight || sessionTurnBusy) return;
     const content = contextAnchorInput.value.trim();
-    if (active && !content) {
-      contextAnchorMeta.textContent = "Nejdřív napiš stručný aktivní kontext.";
+    if (operation === "save" && !content) {
+      contextAnchorMeta.textContent = "Nejdřív napiš stručný aktivní kontext k uložení.";
       contextAnchorInput.focus();
       return;
     }
-    if (!active && !window.confirm("Odepnout aktivní kontext tohoto profilu? Historie chatu se nezmění.")) return;
+    if (operation !== "save" && contextAnchorDraftDirty()) {
+      contextAnchorMeta.textContent = "Nejdřív ulož nebo obnovou výslovně zahoď rozepsanou změnu.";
+      return;
+    }
+    if (operation === "delete" && !window.confirm("Trvale smazat uloženou kotvu tohoto profilu? Historie chatu se nezmění.")) return;
+    const progressMessages = {
+      save:"Ukládám aktivní kontext…",
+      pin:"Připínám uložený kontext…",
+      pause:"Pozastavuji připnutý kontext…",
+      delete:"Mažu uložený kontext…",
+    };
     setBusy(true);
-    contextAnchorMeta.textContent = active ? "Připínám aktivní kontext…" : "Odepínám aktivní kontext…";
+    contextAnchorMeta.textContent = progressMessages[operation] || "Měním aktivní kontext…";
     try {
       const payload = await api("/api/human-adam/context-anchor", {
         method:"POST",
-        body:JSON.stringify({content:active ? content : "",active,confirmed:true}),
+        body:JSON.stringify({operation,content:operation === "save" ? content : "",confirmed:true}),
       });
       if (!payload.ok) throw new Error(payload.message || "Aktivní kontext nelze uložit.");
       renderContextAnchorEditor(payload);
-      notice.textContent = active
-        ? "Aktivní kontext je připnutý a od příštího tahu se přiloží pouze modelu."
-        : "Aktivní kontext je odepnutý.";
+      const successMessages = {
+        save: payload.active
+          ? "Aktualizovaná připnutá kotva se použije od příštího tahu."
+          : "Kotva je soukromě uložená a zatím se k tahům nepřikládá.",
+        pin:"Kotva je připnutá a od příštího tahu se přiloží pouze modelu.",
+        pause:"Kotva je pozastavená, zůstává uložená a k tahům se nepřikládá.",
+        delete:"Uložená kotva byla smazána; historie chatu se nezměnila.",
+      };
+      notice.textContent = successMessages[operation] || "Aktivní kontext byl změněn.";
     } catch (error) {
       contextAnchorMeta.textContent = `Aktivní kontext nebyl změněn: ${error.message}`;
     } finally { setBusy(false); }
@@ -1005,7 +1064,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
         outcomeNotice = "Návrh nebyl vložen ani uložen, protože chybí povinná struktura nebo překročil limit.";
       } else {
         contextAnchorInput.value = proposal;
-        contextAnchorMeta.textContent = "Návrh Adama je vložený, ale zatím není uložený. Zkontroluj jej a stiskni Připnout plán.";
+        contextAnchorMeta.textContent = "Návrh Adama je vložený, ale zatím není uložený. Zkontroluj jej a stiskni Uložit návrh.";
         outcomeNotice = "Adamův návrh je připravený k tvé kontrole; automaticky se neuložil.";
       }
       if (payload.context_anchor_warning) {
@@ -1301,8 +1360,11 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   contextAnchorCloseBtn.addEventListener("click", closeContextAnchor);
   contextAnchorRefreshBtn.addEventListener("click", loadContextAnchor);
   contextAnchorProposeBtn.addEventListener("click", proposeContextAnchor);
-  contextAnchorSaveBtn.addEventListener("click", () => saveContextAnchor(true));
-  contextAnchorClearBtn.addEventListener("click", () => saveContextAnchor(false));
+  contextAnchorInput.addEventListener("input", syncControls);
+  contextAnchorSaveBtn.addEventListener("click", () => changeContextAnchor("save"));
+  contextAnchorPinBtn.addEventListener("click", () => changeContextAnchor("pin"));
+  contextAnchorPauseBtn.addEventListener("click", () => changeContextAnchor("pause"));
+  contextAnchorDeleteBtn.addEventListener("click", () => changeContextAnchor("delete"));
   tvbcpOpenBtn.addEventListener("click", openTvbcp);
   tvbcpCloseBtn.addEventListener("click", closeTvbcp);
   tvbcpRefreshBtn.addEventListener("click", loadTvbcp);

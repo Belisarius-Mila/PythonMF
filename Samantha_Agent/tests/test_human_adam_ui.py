@@ -25,7 +25,9 @@ class HumanAdamUiTests(unittest.TestCase):
             "contextAnchorInput",
             "contextAnchorProposeBtn",
             "contextAnchorSaveBtn",
-            "contextAnchorClearBtn",
+            "contextAnchorPinBtn",
+            "contextAnchorPauseBtn",
+            "contextAnchorDeleteBtn",
             "chat",
             "messageInput",
             "sendBtn",
@@ -142,6 +144,9 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Přepne se vlákno, workspace i TVBCP.", source)
         self.assertIn('api("/api/human-adam/profile"', source)
         self.assertIn("profile_id:targetId,confirmed:true", source)
+        self.assertIn("if (contextAnchorDraftDirty())", source)
+        self.assertIn("profil jsem nepřepnul", source)
+        self.assertIn("resetContextAnchorEditorState();", source)
         self.assertIn('profileSelect.addEventListener("change", syncControls);', HUMAN_ADAM_HTML)
         self.assertIn('profileSwitchBtn.addEventListener("click", switchProfile);', HUMAN_ADAM_HTML)
 
@@ -149,7 +154,7 @@ class HumanAdamUiTests(unittest.TestCase):
         panel_start = HUMAN_ADAM_HTML.index('id="contextAnchorPanel"')
         panel_end = HUMAN_ADAM_HTML.index('</aside>', panel_start)
         panel_source = HUMAN_ADAM_HTML[panel_start:panel_end]
-        save_start = HUMAN_ADAM_HTML.index("async function saveContextAnchor(active)")
+        save_start = HUMAN_ADAM_HTML.index("async function changeContextAnchor(operation)")
         save_end = HUMAN_ADAM_HTML.index("async function loadTvbcp", save_start)
         save_source = HUMAN_ADAM_HTML[save_start:save_end]
         switch_start = HUMAN_ADAM_HTML.index("async function switchProfile()")
@@ -164,11 +169,55 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Další krok:", panel_source)
         self.assertIn("Novější pokyn v chatu má vždy přednost.", panel_source)
         self.assertIn("Adam: připravit návrh", panel_source)
+        self.assertIn("Uložit návrh", panel_source)
+        self.assertIn("Připnout", panel_source)
+        self.assertIn("Pozastavit", panel_source)
+        self.assertIn("Smazat", panel_source)
         self.assertIn('api("/api/human-adam/context-anchor"', save_source)
-        self.assertIn("active,confirmed:true", save_source)
-        self.assertIn('contextAnchorSaveBtn.addEventListener("click", () => saveContextAnchor(true));', HUMAN_ADAM_HTML)
-        self.assertIn('contextAnchorClearBtn.addEventListener("click", () => saveContextAnchor(false));', HUMAN_ADAM_HTML)
+        self.assertIn("JSON.stringify({operation,content:operation === \"save\" ? content : \"\",confirmed:true})", save_source)
+        self.assertIn('contextAnchorSaveBtn.addEventListener("click", () => changeContextAnchor("save"));', HUMAN_ADAM_HTML)
+        self.assertIn('contextAnchorPinBtn.addEventListener("click", () => changeContextAnchor("pin"));', HUMAN_ADAM_HTML)
+        self.assertIn('contextAnchorPauseBtn.addEventListener("click", () => changeContextAnchor("pause"));', HUMAN_ADAM_HTML)
+        self.assertIn('contextAnchorDeleteBtn.addEventListener("click", () => changeContextAnchor("delete"));', HUMAN_ADAM_HTML)
         self.assertIn("contextAnchorPanel.hidden = true;", switch_source)
+
+    def test_context_anchor_renders_stored_paused_and_pinned_as_distinct_states(self) -> None:
+        badge_start = HUMAN_ADAM_HTML.index("function renderContextAnchorBadge(anchor)")
+        badge_end = HUMAN_ADAM_HTML.index("async function loadContextAnchor()", badge_start)
+        source = HUMAN_ADAM_HTML[badge_start:badge_end]
+
+        self.assertIn('active ? "Kontext: připnut"', source)
+        self.assertIn('stored ? "Kontext: uložen"', source)
+        self.assertIn('"Kontext: žádný"', source)
+        self.assertIn("savedContextAnchorContent = hasContent ? content", source)
+        self.assertIn("savedContextAnchorActive = hasContent && anchor.active === true", source)
+        self.assertIn("Uloženo a pozastaveno", source)
+
+    def test_context_anchor_update_preserves_server_owned_state_transitions(self) -> None:
+        change_start = HUMAN_ADAM_HTML.index("async function changeContextAnchor(operation)")
+        change_end = HUMAN_ADAM_HTML.index("function validContextAnchorProposal", change_start)
+        source = HUMAN_ADAM_HTML[change_start:change_end]
+
+        self.assertIn('operation === "save" ? content : ""', source)
+        self.assertNotIn("active:", source)
+        self.assertIn("payload.active", source)
+        self.assertIn("Aktualizovaná připnutá kotva se použije od příštího tahu.", source)
+        self.assertIn("Kotva je soukromě uložená a zatím se k tahům nepřikládá.", source)
+        self.assertIn("Kotva je pozastavená, zůstává uložená", source)
+
+    def test_context_anchor_draft_requires_explicit_discard_before_reload_or_delete(self) -> None:
+        load_start = HUMAN_ADAM_HTML.index("async function loadContextAnchor()")
+        load_end = HUMAN_ADAM_HTML.index("function openContextAnchor()", load_start)
+        load_source = HUMAN_ADAM_HTML[load_start:load_end]
+        change_start = HUMAN_ADAM_HTML.index("async function changeContextAnchor(operation)")
+        change_end = HUMAN_ADAM_HTML.index("function validContextAnchorProposal", change_start)
+        change_source = HUMAN_ADAM_HTML[change_start:change_end]
+
+        self.assertIn("contextAnchorDraftDirty()", load_source)
+        self.assertIn("Zahodit rozepsanou změnu", load_source)
+        self.assertIn('operation !== "save" && contextAnchorDraftDirty()', change_source)
+        self.assertIn('operation === "delete" && !window.confirm', change_source)
+        self.assertIn("Trvale smazat uloženou kotvu", change_source)
 
     def test_adam_proposes_anchor_through_existing_visible_canonical_turn(self) -> None:
         proposal_start = HUMAN_ADAM_HTML.index("async function proposeContextAnchor()")
@@ -238,8 +287,11 @@ class HumanAdamUiTests(unittest.TestCase):
 
         self.assertNotIn("saveContextAnchor", send_source)
         self.assertNotIn("/api/human-adam/context-anchor", send_source)
-        self.assertIn("contextAnchorSaveBtn.disabled = busy || sendInFlight || sessionTurnBusy;", controls_source)
-        self.assertIn("contextAnchorClearBtn.disabled = busy || sendInFlight || sessionTurnBusy;", controls_source)
+        self.assertIn("const anchorMutationBlocked = busy || sendInFlight || sessionTurnBusy;", controls_source)
+        self.assertIn("contextAnchorSaveBtn.disabled = anchorMutationBlocked", controls_source)
+        self.assertIn("contextAnchorPinBtn.disabled = anchorMutationBlocked", controls_source)
+        self.assertIn("contextAnchorPauseBtn.disabled = anchorMutationBlocked", controls_source)
+        self.assertIn("contextAnchorDeleteBtn.disabled = anchorMutationBlocked", controls_source)
         self.assertIn("payload.context_anchor_warning", send_source)
 
     def test_composer_places_voice_left_and_send_right_in_one_compact_row(self) -> None:

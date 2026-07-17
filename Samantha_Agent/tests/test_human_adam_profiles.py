@@ -194,17 +194,21 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             manager, _human_workspace, _library_workspace, human_hub, _library_hub = self.make_manager(Path(temp_dir))
             human_hub.connected = True
             saved = manager.set_context_anchor(
+                operation="save",
                 content="Cíl: Human–Adam kontinuita",
-                active=True,
                 confirmed=True,
             )
+            pinned = manager.set_context_anchor(operation="pin", confirmed=True)
             manager.switch(profile_id="knihovna", confirmed=True)
             library_anchor = manager.context_anchor()
             manager.switch(profile_id="human_adam", confirmed=True)
             human_anchor = manager.context_anchor()
 
-        self.assertTrue(saved["active"])
+        self.assertFalse(saved["active"])
+        self.assertTrue(saved["has_content"])
+        self.assertTrue(pinned["active"])
         self.assertFalse(library_anchor["active"])
+        self.assertFalse(library_anchor["has_content"])
         self.assertEqual(human_anchor["content"], "Cíl: Human–Adam kontinuita")
 
     def test_switch_rejects_dirty_checkpoint_and_uncertain_delivery(self) -> None:

@@ -324,7 +324,11 @@ class HumanAdamServiceTests(unittest.TestCase):
             root = Path(temp_dir)
             service, _runtime, _workspace, hub = self.make_service(root)
             saved = human_adam_context_anchor_update_action(
-                {"content": anchor_text, "active": True, "confirmed": True},
+                {"operation": "save", "content": anchor_text, "confirmed": True},
+                service=service,
+            )
+            pinned = human_adam_context_anchor_update_action(
+                {"operation": "pin", "confirmed": True},
                 service=service,
             )
             service.connect()
@@ -350,6 +354,9 @@ class HumanAdamServiceTests(unittest.TestCase):
             )
 
         self.assertTrue(saved["ok"])
+        self.assertFalse(saved["active"])
+        self.assertTrue(saved["has_content"])
+        self.assertTrue(pinned["active"])
         self.assertEqual(restored["content"], anchor_text)
         self.assertTrue(restored["active"])
         self.assertNotIn("content", status_anchor)
@@ -381,19 +388,36 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertNotIn("HUMAN_ADAM_CONTEXT_ANCHOR", hub.sent[0]["model_input_text"])
         self.assertIn("bude ignorován", result["context_anchor_warning"])
 
+    def test_corrupt_context_anchor_is_not_overwritten_by_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service, _runtime, _workspace, _hub = self.make_service(Path(temp_dir))
+            service.context_anchor_path.write_text("{broken", encoding="utf-8")
+            result = human_adam_context_anchor_update_action(
+                {"operation": "save", "content": "Cíl: Bezpečný návrh", "confirmed": True},
+                service=service,
+            )
+            persisted = service.context_anchor_path.read_text(encoding="utf-8")
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(persisted, "{broken")
+
     def test_context_anchor_requires_explicit_action_and_rejects_private_data(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             service, _runtime, _workspace, _hub = self.make_service(Path(temp_dir))
             unconfirmed = human_adam_context_anchor_update_action(
-                {"content": "Cíl: Test", "active": True, "confirmed": False},
+                {"operation": "save", "content": "Cíl: Test", "confirmed": False},
                 service=service,
             )
             private_path = human_adam_context_anchor_update_action(
-                {"content": "Cíl: přečíst /Users/example/private.txt", "active": True, "confirmed": True},
+                {"operation": "save", "content": "Cíl: přečíst /Users/example/private.txt", "confirmed": True},
                 service=service,
             )
             secret = human_adam_context_anchor_update_action(
-                {"content": "token=secret-value", "active": True, "confirmed": True},
+                {"operation": "save", "content": "token=secret-value", "confirmed": True},
+                service=service,
+            )
+            unknown = human_adam_context_anchor_update_action(
+                {"operation": "replace", "content": "Cíl: Test", "confirmed": True},
                 service=service,
             )
 
@@ -402,25 +426,74 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertIn("absolutní cestu", private_path["message"])
         self.assertFalse(secret["ok"])
         self.assertIn("token", secret["message"])
+        self.assertFalse(unknown["ok"])
+        self.assertIn("neznámou operaci", unknown["message"])
 
-    def test_context_anchor_can_be_deactivated_without_deleting_history(self) -> None:
+    def test_context_anchor_pause_retains_content_and_repin_restores_exact_text(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
-            service, _runtime, _workspace, _hub = self.make_service(root)
+            service, _runtime, _workspace, hub = self.make_service(root)
             human_adam_context_anchor_update_action(
-                {"content": "Cíl: Test", "active": True, "confirmed": True},
+                {"operation": "save", "content": "Cíl: Test", "confirmed": True},
                 service=service,
             )
-            cleared = human_adam_context_anchor_update_action(
-                {"content": "", "active": False, "confirmed": True},
+            human_adam_context_anchor_update_action(
+                {"operation": "pin", "confirmed": True},
+                service=service,
+            )
+            paused = human_adam_context_anchor_update_action(
+                {"operation": "pause", "confirmed": True},
+                service=service,
+            )
+            service.connect()
+            human_adam_send_action(
+                {"message": "Tah bez kotvy", "client_message_id": "anchor-paused", "client_sent_at": ""},
+                service=service,
+            )
+            repinned = human_adam_context_anchor_update_action(
+                {"operation": "pin", "confirmed": True},
                 service=service,
             )
             persisted = (root / "context_anchor.json").read_text(encoding="utf-8")
 
-        self.assertTrue(cleared["ok"])
-        self.assertFalse(cleared["active"])
-        self.assertIn('"active": false', persisted)
-        self.assertGreaterEqual(cleared["revision"], 2)
+        self.assertTrue(paused["ok"])
+        self.assertFalse(paused["active"])
+        self.assertTrue(paused["has_content"])
+        self.assertEqual(paused["content"], "Cíl: Test")
+        self.assertNotIn("HUMAN_ADAM_CONTEXT_ANCHOR", hub.sent[0]["model_input_text"])
+        self.assertTrue(repinned["active"])
+        self.assertEqual(repinned["content"], "Cíl: Test")
+        self.assertIn('"active": true', persisted)
+        self.assertIn('"content": "Cíl: Test"', persisted)
+        self.assertGreaterEqual(repinned["revision"], 4)
+
+    def test_context_anchor_updates_in_both_states_and_delete_is_distinct(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service, _runtime, _workspace, _hub = self.make_service(Path(temp_dir))
+            first = human_adam_context_anchor_update_action(
+                {"operation": "save", "content": "Cíl: První", "confirmed": True}, service=service
+            )
+            human_adam_context_anchor_update_action({"operation": "pin", "confirmed": True}, service=service)
+            active_update = human_adam_context_anchor_update_action(
+                {"operation": "save", "content": "Cíl: Druhý", "confirmed": True}, service=service
+            )
+            human_adam_context_anchor_update_action({"operation": "pause", "confirmed": True}, service=service)
+            paused_update = human_adam_context_anchor_update_action(
+                {"operation": "save", "content": "Cíl: Třetí", "confirmed": True}, service=service
+            )
+            deleted = human_adam_context_anchor_update_action(
+                {"operation": "delete", "confirmed": True}, service=service
+            )
+            restored = human_adam_context_anchor_action(service=service)
+
+        self.assertFalse(first["active"])
+        self.assertTrue(active_update["active"])
+        self.assertEqual(active_update["content"], "Cíl: Druhý")
+        self.assertFalse(paused_update["active"])
+        self.assertEqual(paused_update["content"], "Cíl: Třetí")
+        self.assertFalse(deleted["has_content"])
+        self.assertEqual(restored["content"], "")
+        self.assertFalse(restored["active"])
 
     def test_context_anchor_cannot_change_during_active_turn(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -428,7 +501,7 @@ class HumanAdamServiceTests(unittest.TestCase):
             hub.turn_busy = True
             hub.active_turn = {"started_at": "2026-07-17T08:00:00Z"}
             result = human_adam_context_anchor_update_action(
-                {"content": "Cíl: Neměnit během tahu", "active": True, "confirmed": True},
+                {"operation": "save", "content": "Cíl: Neměnit během tahu", "confirmed": True},
                 service=service,
             )
 

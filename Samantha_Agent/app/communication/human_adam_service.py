@@ -66,6 +66,7 @@ SECRET_VALUE_RE = re.compile(
     r"(?i)\b(?:api[_ -]?key|access[_ -]?token|auth[_ -]?token|token|password|heslo|app-specific password)\b\s*[:=]\s*\S+"
 )
 RESERVED_ANCHOR_MARKERS = ("[HUMAN_ADAM_CONTEXT_ANCHOR]", "[/HUMAN_ADAM_CONTEXT_ANCHOR]")
+CONTEXT_ANCHOR_OPERATIONS = frozenset({"save", "pin", "pause", "delete"})
 
 
 class ContextAnchorError(SessionHubError):
@@ -128,18 +129,21 @@ def load_context_anchor(path: Path) -> dict[str, Any]:
         revision = max(0, int(raw.get("revision") or 0))
     except (TypeError, ValueError) as exc:
         raise ContextAnchorError("Aktivní kontext má neplatnou revizi; při tahu bude ignorován.") from exc
-    updated_at = _validated_anchor_timestamp(raw.get("updated_at"), allow_empty=not active)
+    updated_at = _validated_anchor_timestamp(raw.get("updated_at"), allow_empty=not content)
     return {
         "schema_version": CONTEXT_ANCHOR_SCHEMA_VERSION,
         "active": active,
-        "content": content if active else "",
+        "content": content,
         "revision": revision,
         "updated_at": updated_at,
     }
 
 
-def write_context_anchor(path: Path, *, content: str, active: bool) -> dict[str, Any]:
-    safe_content = _validated_anchor_content(content, allow_empty=not active) if active else ""
+def write_context_anchor(path: Path, *, operation: str, content: str = "") -> dict[str, Any]:
+    safe_operation = str(operation or "").strip().lower()
+    if safe_operation not in CONTEXT_ANCHOR_OPERATIONS:
+        raise ContextAnchorError("Aktivní kontext má neznámou operaci a nebyl změněn.")
+    safe_content = _validated_anchor_content(content) if safe_operation == "save" else ""
 
     def updater(current: Any) -> dict[str, Any]:
         if not isinstance(current, dict) or current.get("schema_version") != CONTEXT_ANCHOR_SCHEMA_VERSION:
@@ -151,10 +155,29 @@ def write_context_anchor(path: Path, *, content: str, active: bool) -> dict[str,
                 revision = max(0, int(current.get("revision") or 0))
             except (TypeError, ValueError) as exc:
                 raise ContextAnchorError("Stávající aktivní kontext má neplatnou revizi a nebyl přepsán.") from exc
+        current_active = current.get("active") is True
+        current_content = _validated_anchor_content(current.get("content"), allow_empty=not current_active)
+        _validated_anchor_timestamp(current.get("updated_at"), allow_empty=not current_content)
+        if safe_operation == "save":
+            next_active = current_active
+            next_content = safe_content
+        elif safe_operation == "pin":
+            if not current_content:
+                raise ContextAnchorError("Nejdřív ulož návrh aktivního kontextu.")
+            next_active = True
+            next_content = current_content
+        elif safe_operation == "pause":
+            if not current_content:
+                raise ContextAnchorError("Není uložený žádný aktivní kontext k pozastavení.")
+            next_active = False
+            next_content = current_content
+        else:
+            next_active = False
+            next_content = ""
         return {
             "schema_version": CONTEXT_ANCHOR_SCHEMA_VERSION,
-            "active": bool(active),
-            "content": safe_content,
+            "active": next_active,
+            "content": next_content,
             "revision": revision + 1,
             "updated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         }
@@ -415,6 +438,7 @@ class HumanAdamService:
             return {
                 "ok": False,
                 "active": False,
+                "has_content": False,
                 "revision": 0,
                 "updated_at": "",
                 "message": str(exc),
@@ -423,6 +447,7 @@ class HumanAdamService:
         payload = {
             "ok": True,
             "active": bool(anchor.get("active")),
+            "has_content": bool(anchor.get("content")),
             "revision": int(anchor.get("revision") or 0),
             "updated_at": str(anchor.get("updated_at") or ""),
         }
@@ -430,20 +455,21 @@ class HumanAdamService:
             payload["content"] = str(anchor.get("content") or "")
         return payload
 
-    def set_context_anchor(self, *, content: str, active: bool, confirmed: bool) -> dict[str, Any]:
+    def set_context_anchor(self, *, operation: str, content: str = "", confirmed: bool) -> dict[str, Any]:
         if not confirmed:
-            raise ContextAnchorError("Připnutí aktivního kontextu vyžaduje výslovnou akci uživatele.")
+            raise ContextAnchorError("Změna aktivního kontextu vyžaduje výslovnou akci uživatele.")
         session = self.hub.snapshot()
         if session.get("turn_busy") or session.get("active_turn"):
             raise SessionBusyError("Aktivní kontext nelze měnit během Adamova tahu.")
         anchor = write_context_anchor(
             self.context_anchor_path,
+            operation=operation,
             content=str(content or ""),
-            active=bool(active),
         )
         return {
             "ok": True,
             "active": bool(anchor.get("active")),
+            "has_content": bool(anchor.get("content")),
             "content": str(anchor.get("content") or ""),
             "revision": int(anchor.get("revision") or 0),
             "updated_at": str(anchor.get("updated_at") or ""),
@@ -531,8 +557,8 @@ def human_adam_context_anchor_update_action(
 ) -> dict[str, Any]:
     try:
         return service.set_context_anchor(
+            operation=str(payload.get("operation") or ""),
             content=str(payload.get("content") or ""),
-            active=payload.get("active") is True,
             confirmed=payload.get("confirmed") is True,
         )
     except SessionBusyError as exc:
