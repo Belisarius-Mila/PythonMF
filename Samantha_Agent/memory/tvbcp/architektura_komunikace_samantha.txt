@@ -1134,3 +1134,33 @@ na iPhonu se má posoudit při prvním běžném použití, bez nové umělé z�
 
 Další krok: běžně používat profil Knihovna pro navazující knihovní úkoly. Další
 profil ani obecný editor profilů nepřidávat, dokud nevznikne skutečná potřeba.
+
+### 2026-07-17 16:19 CEST – Ručně připínaný aktivní kontext
+
+Míla schválil první bezpečnou ochranu kontinuity proti ztrátě pracovního plánu
+při interní kompaktaci Codex vlákna. Každý profil Human–Adam má vlastní krátký
+soukromý aktivní kontext mimo historii chatu. Uživatel jej výslovně připne nebo
+odepne v panelu `Plán`; model jej nemění automaticky a novější výslovný pokyn v
+chatu má při rozporu vždy přednost.
+
+Kotva se před každým tahem přidává pouze do technického modelového vstupu za
+bezpečný workspace snapshot. Původní Mílův text i historie zůstávají beze změny.
+Uložení je atomické a profilově oddělené, přežije restart, během aktivního tahu
+se nemění a odmítá zjevné tokeny, hesla, klíče, soukromé absolutní cesty a
+vyhrazené technické značky. Nečitelná kotva tah nezablokuje: bezpečně se přeskočí
+a UI zobrazí varování.
+
+Důkaz: implementace je obsažena v bodě `4eb9583`; source a izolovaný workspace
+jsou zarovnané a čisté. Cílená a regresní sada 100 testů prošla spolu s
+JavaScriptovou syntaxí, Python kompilací a `git diff --check`. Testy potvrzují
+oddělení od Session Hub historie, profilovou izolaci, výslovný zápis, obnovení po
+restartu, opětovné přiložení k modelu a bezpečné pokračování bez poškozené kotvy.
+
+Riziko: přirozená interní kompaktace app-serveru nebyla uměle vyvolána a Cockpit
+zatím nezobrazuje událost `thread/compacted`. Kontinuitu chrání nezávislé uložení
+a nové přiložení kotvy při každém tahu; správnost a aktuálnost připnutého obsahu
+zůstává vědomou odpovědností uživatele.
+
+Další krok: v běžném provozu připnout krátký zkušební plán, restartovat Cockpit a
+ověřit navazujícím tahem, že Adam správně uvede cíl a další krok. Událost skutečné
+kompaktace pouze pozorovat; nevyvolávat ji uměle jen kvůli důkazu.
