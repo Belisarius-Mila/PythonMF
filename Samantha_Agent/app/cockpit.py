@@ -12610,7 +12610,11 @@ COCKPIT_HTML = """<!doctype html>
     .library-tab.active { background: var(--blue); color: white; }
     .library-tab.read-queue { border-color: #f59e0b; background: #fffbeb; color: #92400e; font-weight: 750; }
     .library-tab.read-queue.active { background: #f59e0b; color: #172033; }
-    .library-archive { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; padding: 10px; display: grid; gap: 8px; }
+    .library-add-toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+    .library-add-toolbar button.active { background: var(--blue); color: white; }
+    .library-add-panel { border: 1px solid #dbe4ef; border-radius: 8px; background: #f8fafc; padding: 12px; display: grid; gap: 8px; }
+    .library-add-panel.hidden { display: none; }
+    .library-add-title { margin: 0; font-size: 15px; }
     .library-archive-grid { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(140px, 180px) minmax(140px, 220px) auto; gap: 8px; align-items: center; }
     .library-text-grid { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(140px, 180px) minmax(160px, 220px) auto; gap: 8px; align-items: center; }
     .library-attachment-grid { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(160px, 220px) minmax(180px, 1fr) auto; gap: 8px; align-items: center; }
@@ -12624,18 +12628,23 @@ COCKPIT_HTML = """<!doctype html>
     .library-title { font-weight: 750; overflow-wrap: anywhere; }
     .library-read-badge { justify-self: start; border: 1px solid #f59e0b; border-radius: 999px; padding: 2px 7px; background: #fff7ed; color: #92400e; font-size: 12px; font-weight: 750; }
     .library-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
-    .library-reader { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; min-height: 420px; display: grid; grid-template-rows: auto 1fr; overflow: visible; }
+    .library-reader { border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; min-height: 420px; display: flex; flex-direction: column; overflow: visible; }
     .library-reader-head { padding: 12px; border-bottom: 1px solid #edf0f4; display: grid; gap: 6px; background: white; }
     .library-reader-title { margin: 0; font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
-    .library-reader-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+    .library-reader-actions { display: grid; gap: 7px; }
+    .library-action-group { display: flex; gap: 7px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
+    .library-action-group-label { min-width: 58px; color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .03em; text-transform: uppercase; text-align: right; }
     .library-edit-panel { padding: 12px 16px; border-bottom: 1px solid #edf0f4; background: #f8fafc; display: grid; gap: 9px; }
     .library-edit-panel.hidden { display: none; }
     .library-edit-grid { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(150px, 190px); gap: 8px; }
     .library-edit-source-grid { display: grid; grid-template-columns: minmax(180px, .8fr) minmax(240px, 1.2fr); gap: 8px; }
     .library-edit-text { min-height: 300px; resize: vertical; }
-    .library-reader-text { padding: 14px 16px; white-space: pre-wrap; overflow: visible; line-height: 1.58; font-size: 15px; background: white; }
-    .library-reader-attachments { display: grid; gap: 10px; padding: 12px 16px; border-top: 1px solid #edf0f4; background: #fbfcfe; }
-    .library-reader-attachments.hidden { display: none; }
+    .library-attachment-section { display: grid; gap: 10px; padding: 12px 16px; border-bottom: 1px solid #edf0f4; background: #f8fafc; }
+    .library-attachment-section.hidden { display: none; }
+    .library-attachment-section-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+    .library-attachment-section-title { margin: 0; font-size: 15px; }
+    .library-reader-attachments { display: grid; gap: 10px; }
+    .library-reader-text { flex: 1; padding: 14px 16px; white-space: pre-wrap; overflow: visible; line-height: 1.58; font-size: 15px; background: white; }
     .library-attachment-card { border: 1px solid #edf0f4; border-radius: 8px; background: white; padding: 10px; display: grid; gap: 8px; }
     .library-attachment-title { font-weight: 700; overflow-wrap: anywhere; }
     .library-attachment-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
@@ -12725,7 +12734,7 @@ COCKPIT_HTML = """<!doctype html>
     .service-actions { margin-top: 10px; }
     .voice-advanced { margin-top: 8px; border-top: 1px solid var(--line); }
     @media (max-width: 1050px) { .today-dashboard { grid-template-columns: 1fr; } .work-grid { grid-template-columns: 1fr; } }
-	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .search-result-head { grid-template-columns: 1fr; } .search-result-head-actions { justify-content: flex-start; } .recovery-grid { grid-template-columns: 1fr; } .janicka-grid { grid-template-columns: 1fr; } .janicka-action { grid-template-columns: 1fr; } .library-archive-grid { grid-template-columns: 1fr; } .library-text-grid { grid-template-columns: 1fr; } .library-attachment-grid { grid-template-columns: 1fr; } .library-edit-grid { grid-template-columns: 1fr; } .library-edit-source-grid { grid-template-columns: 1fr; } .library-controls { grid-template-columns: 1fr; } .library-layout { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
+	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .search-result-head { grid-template-columns: 1fr; } .search-result-head-actions { justify-content: flex-start; } .recovery-grid { grid-template-columns: 1fr; } .janicka-grid { grid-template-columns: 1fr; } .janicka-action { grid-template-columns: 1fr; } .library-archive-grid { grid-template-columns: 1fr; } .library-text-grid { grid-template-columns: 1fr; } .library-attachment-grid { grid-template-columns: 1fr; } .library-edit-grid { grid-template-columns: 1fr; } .library-edit-source-grid { grid-template-columns: 1fr; } .library-controls { grid-template-columns: 1fr; } .library-layout { grid-template-columns: 1fr; } .library-action-group { justify-content: flex-start; } .library-action-group-label { width: 100%; text-align: left; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -13268,7 +13277,25 @@ COCKPIT_HTML = """<!doctype html>
         <button class="secondary" id="libraryCloseBtn">Zavřít</button>
       </div>
       <div class="modal-body">
-        <div class="library-archive">
+        <div class="library-tabs" aria-label="Kategorie knihovny">
+          <button class="secondary library-tab active" type="button" data-library-category="recipes">Recepty</button>
+          <button class="secondary library-tab" type="button" data-library-category="science">Vědecké články</button>
+          <button class="secondary library-tab" type="button" data-library-category="ai_tools">Samantha / AI nástroje</button>
+          <button class="secondary library-tab" type="button" data-library-category="travel_places">Cestování / místa</button>
+          <button class="secondary library-tab" type="button" data-library-category="other">Ostatní</button>
+          <button class="secondary library-tab read-queue" type="button" data-library-category="all" data-library-read-state="to_read">K přečtení</button>
+        </div>
+        <div class="library-controls">
+          <input id="librarySearchInput" type="search" placeholder="Hledat ve vybrané kategorii">
+          <button class="primary" id="librarySearchBtn" type="button">Hledat</button>
+        </div>
+        <div id="libraryStatus" class="status-line">Načítám knihovnu...</div>
+        <div class="library-add-toolbar" aria-label="Přidat obsah do knihovny">
+          <button class="secondary" id="libraryAddUrlBtn" type="button" aria-expanded="false" aria-controls="libraryArchivePanel">Přidat z webu</button>
+          <button class="secondary" id="libraryAddTextBtn" type="button" aria-expanded="false" aria-controls="libraryTextPanel">Přidat vlastní text</button>
+        </div>
+        <div id="libraryArchivePanel" class="library-add-panel hidden">
+          <h3 class="library-add-title">Přidat článek z webu</h3>
           <div class="library-archive-grid">
             <input id="libraryArchiveUrlInput" type="url" placeholder="Vložit URL článku">
             <select id="libraryArchiveCategory">
@@ -13282,6 +13309,9 @@ COCKPIT_HTML = """<!doctype html>
             <button class="primary" id="libraryArchiveBtn" type="button">Uložit URL</button>
           </div>
           <div id="libraryArchiveStatus" class="status-line">Vlož URL, vyber kategorii a ulož ji do soukromé knihovny.</div>
+        </div>
+        <div id="libraryTextPanel" class="library-add-panel hidden">
+          <h3 class="library-add-title">Přidat vlastní text</h3>
           <div class="library-text-grid">
             <input id="libraryTextTitleInput" type="text" placeholder="Název vloženého textu">
             <select id="libraryTextCategory">
@@ -13298,34 +13328,33 @@ COCKPIT_HTML = """<!doctype html>
           <textarea id="libraryTextBodyInput" class="library-text-area" placeholder="Vložit text receptu, poznámky nebo výstřižku"></textarea>
           <div id="libraryTextStatus" class="status-line">Text bez URL se uloží jako interní znalostní karta.</div>
         </div>
-        <div class="library-tabs" aria-label="Kategorie knihovny">
-          <button class="secondary library-tab active" type="button" data-library-category="recipes">Recepty</button>
-          <button class="secondary library-tab" type="button" data-library-category="science">Vědecké články</button>
-          <button class="secondary library-tab" type="button" data-library-category="ai_tools">Samantha / AI nástroje</button>
-          <button class="secondary library-tab" type="button" data-library-category="travel_places">Cestování / místa</button>
-          <button class="secondary library-tab" type="button" data-library-category="other">Ostatní</button>
-          <button class="secondary library-tab read-queue" type="button" data-library-category="all" data-library-read-state="to_read">K přečtení</button>
-        </div>
-        <div class="library-controls">
-          <input id="librarySearchInput" type="search" placeholder="Hledat ve vybrané kategorii">
-          <button class="primary" id="librarySearchBtn" type="button">Hledat</button>
-        </div>
-        <div id="libraryStatus" class="status-line">Načítám knihovnu...</div>
         <div class="library-layout">
           <div id="libraryList" class="library-list"></div>
           <div class="library-reader" aria-live="polite">
             <div class="library-reader-head">
               <h3 id="libraryReaderTitle" class="library-reader-title">Vyber článek</h3>
               <div id="libraryReaderMeta" class="library-meta">Vlevo vyber položku nebo použij fulltextové hledání.</div>
-              <div class="library-reader-actions">
-                <button class="secondary" id="libraryEditBtn" type="button" disabled>Upravit</button>
-                <button class="secondary" id="libraryOpenSourceBtn" type="button" disabled>Otevřít na webu</button>
-                <button class="secondary" id="libraryExportPrepareBtn" type="button" disabled>Připravit PDF</button>
-                <button class="primary" id="libraryExportSendBtn" type="button" disabled>Odeslat export</button>
-                <button class="secondary" id="libraryToReadBtn" type="button" disabled>K přečtení</button>
-                <button class="secondary" id="libraryDoneBtn" type="button" disabled>Hotovo</button>
-                <button class="secondary" id="libraryClearReadStateBtn" type="button" disabled>Zrušit příznak</button>
-                <button class="secondary danger" id="libraryDeleteBtn" type="button" disabled>Vyřadit z knihovny</button>
+              <div class="library-reader-actions" aria-label="Akce vybraného článku">
+                <div class="library-action-group" aria-label="Akce článku">
+                  <span class="library-action-group-label">Článek</span>
+                  <button class="secondary" id="libraryEditBtn" type="button" disabled>Upravit</button>
+                  <button class="secondary" id="libraryOpenSourceBtn" type="button" disabled>Otevřít na webu</button>
+                </div>
+                <div class="library-action-group" aria-label="Stav čtení">
+                  <span class="library-action-group-label">Čtení</span>
+                  <button class="secondary" id="libraryToReadBtn" type="button" disabled>K přečtení</button>
+                  <button class="secondary" id="libraryDoneBtn" type="button" disabled>Hotovo</button>
+                  <button class="secondary" id="libraryClearReadStateBtn" type="button" disabled>Zrušit příznak</button>
+                </div>
+                <div class="library-action-group" aria-label="Export článku">
+                  <span class="library-action-group-label">Export</span>
+                  <button class="secondary" id="libraryExportPrepareBtn" type="button" disabled>Připravit PDF</button>
+                  <button class="primary" id="libraryExportSendBtn" type="button" disabled>Odeslat export</button>
+                </div>
+                <div class="library-action-group" aria-label="Správa článku">
+                  <span class="library-action-group-label">Správa</span>
+                  <button class="secondary danger" id="libraryDeleteBtn" type="button" disabled>Vyřadit z knihovny</button>
+                </div>
               </div>
               <div id="libraryExportStatus" class="status-line">Export PDF se připraví lokálně a odešle až po potvrzení.</div>
             </div>
@@ -13346,22 +13375,28 @@ COCKPIT_HTML = """<!doctype html>
                 <input id="libraryEditSourceNoteInput" type="text" placeholder="Poznámka ke zdroji">
               </div>
               <textarea id="libraryEditTextInput" class="library-edit-text" placeholder="Text článku"></textarea>
-              <div class="library-attachment-grid">
-                <input id="libraryAttachmentFileInput" type="file" accept="image/*">
-                <input id="libraryAttachmentLabelInput" type="text" placeholder="Popisek fotografie">
-                <input id="libraryAttachmentTagsInput" type="text" placeholder="Tagy, volitelné">
-                <button class="primary" id="libraryAttachmentSaveBtn" type="button">Přidat fotografii</button>
-              </div>
-              <input id="libraryAttachmentNoteInput" type="text" placeholder="Poznámka k fotografii, volitelné">
-              <div id="libraryAttachmentStatus" class="status-line">Vyber fotografii; přidá se až po stisknutí tlačítka.</div>
               <div class="actions compact-actions">
                 <button class="primary" id="libraryEditSaveBtn" type="button">Uložit úpravy</button>
                 <button class="secondary" id="libraryEditCancelBtn" type="button">Zrušit</button>
               </div>
               <div id="libraryEditStatus" class="status-line">Úpravy se uloží pouze do této soukromé karty.</div>
             </div>
+            <section id="libraryAttachmentSection" class="library-attachment-section hidden" aria-labelledby="libraryAttachmentSectionTitle">
+              <div class="library-attachment-section-head">
+                <h4 id="libraryAttachmentSectionTitle" class="library-attachment-section-title">Přílohy</h4>
+                <span class="library-meta">Přidání, otevření, popisek a odebrání</span>
+              </div>
+              <div class="library-attachment-grid">
+                <input id="libraryAttachmentFileInput" type="file" accept="image/*">
+                <input id="libraryAttachmentLabelInput" type="text" placeholder="Popisek fotografie">
+                <input id="libraryAttachmentTagsInput" type="text" placeholder="Tagy, volitelné">
+                <button class="primary" id="libraryAttachmentSaveBtn" type="button" disabled>Přidat fotografii</button>
+              </div>
+              <input id="libraryAttachmentNoteInput" type="text" placeholder="Poznámka k fotografii, volitelné">
+              <div id="libraryAttachmentStatus" class="status-line">Vyber fotografii; přidá se až po stisknutí tlačítka.</div>
+              <div id="libraryReaderAttachments" class="library-reader-attachments"></div>
+            </section>
             <div id="libraryReaderText" class="library-reader-text"></div>
-            <div id="libraryReaderAttachments" class="library-reader-attachments hidden"></div>
           </div>
         </div>
       </div>
@@ -13605,6 +13640,10 @@ COCKPIT_HTML = """<!doctype html>
     const libraryModal = document.getElementById("libraryModal");
     const libraryCloseBtn = document.getElementById("libraryCloseBtn");
     const libraryStatus = document.getElementById("libraryStatus");
+    const libraryAddUrlBtn = document.getElementById("libraryAddUrlBtn");
+    const libraryAddTextBtn = document.getElementById("libraryAddTextBtn");
+    const libraryArchivePanel = document.getElementById("libraryArchivePanel");
+    const libraryTextPanel = document.getElementById("libraryTextPanel");
     const libraryArchiveUrlInput = document.getElementById("libraryArchiveUrlInput");
     const libraryArchiveCategory = document.getElementById("libraryArchiveCategory");
     const libraryArchiveTagsInput = document.getElementById("libraryArchiveTagsInput");
@@ -13629,6 +13668,7 @@ COCKPIT_HTML = """<!doctype html>
     const libraryReaderTitle = document.getElementById("libraryReaderTitle");
     const libraryReaderMeta = document.getElementById("libraryReaderMeta");
     const libraryReaderText = document.getElementById("libraryReaderText");
+    const libraryAttachmentSection = document.getElementById("libraryAttachmentSection");
     const libraryReaderAttachments = document.getElementById("libraryReaderAttachments");
     const libraryEditBtn = document.getElementById("libraryEditBtn");
     const libraryEditPanel = document.getElementById("libraryEditPanel");
@@ -17903,6 +17943,7 @@ COCKPIT_HTML = """<!doctype html>
     }
 
     async function openLibraryModal() {
+      setLibraryAddMode("");
       libraryModal.classList.remove("hidden");
       await loadLibraryCategory(currentLibraryCategory);
     }
@@ -17910,8 +17951,30 @@ COCKPIT_HTML = """<!doctype html>
     function closeLibraryModal() {
       if (!confirmLibraryEditorDiscard()) return false;
       closeLibraryEditor(true);
+      setLibraryAddMode("");
       libraryModal.classList.add("hidden");
       return true;
+    }
+
+    function setLibraryAddMode(mode) {
+      const showUrl = mode === "url";
+      const showText = mode === "text";
+      libraryArchivePanel.classList.toggle("hidden", !showUrl);
+      libraryTextPanel.classList.toggle("hidden", !showText);
+      libraryAddUrlBtn.classList.toggle("active", showUrl);
+      libraryAddTextBtn.classList.toggle("active", showText);
+      libraryAddUrlBtn.setAttribute("aria-expanded", showUrl ? "true" : "false");
+      libraryAddTextBtn.setAttribute("aria-expanded", showText ? "true" : "false");
+    }
+
+    function toggleLibraryAddMode(mode) {
+      const panel = mode === "url" ? libraryArchivePanel : libraryTextPanel;
+      const willOpen = panel.classList.contains("hidden");
+      setLibraryAddMode(willOpen ? mode : "");
+      if (!willOpen) return;
+      window.setTimeout(() => {
+        (mode === "url" ? libraryArchiveUrlInput : libraryTextTitleInput).focus();
+      }, 0);
     }
 
     function resetLibraryExportState(message) {
@@ -17931,6 +17994,19 @@ COCKPIT_HTML = """<!doctype html>
       currentLibrarySourceUrl = selected && item ? librarySourceUrl(item) : "";
       libraryOpenSourceBtn.disabled = !currentLibrarySourceUrl;
       libraryEditBtn.disabled = !selected;
+      setLibraryAttachmentControlsDisabled(!selected);
+    }
+
+    function setLibraryAttachmentControlsDisabled(disabled) {
+      [
+        libraryAttachmentFileInput,
+        libraryAttachmentLabelInput,
+        libraryAttachmentTagsInput,
+        libraryAttachmentNoteInput,
+        libraryAttachmentSaveBtn,
+      ].forEach((field) => {
+        field.disabled = disabled;
+      });
     }
 
     function librarySourceUrl(item) {
@@ -18178,6 +18254,7 @@ COCKPIT_HTML = """<!doctype html>
         libraryArchiveStatus.textContent = savedMessage;
         libraryArchiveUrlInput.value = "";
         libraryArchiveTagsInput.value = "";
+        setLibraryAddMode("");
         currentLibraryCategory = item.category || category;
         await loadLibraryCategory(currentLibraryCategory, "");
         if (item.id) {
@@ -18230,6 +18307,7 @@ COCKPIT_HTML = """<!doctype html>
         libraryTextTitleInput.value = "";
         libraryTextTagsInput.value = "";
         libraryTextBodyInput.value = "";
+        setLibraryAddMode("");
         currentLibraryCategory = item.category || category;
         await loadLibraryCategory(currentLibraryCategory);
         if (item.id) {
@@ -18281,18 +18359,18 @@ COCKPIT_HTML = """<!doctype html>
           libraryAttachmentStatus.textContent = data.message || "Obrázek se nepodařilo připojit.";
           return;
         }
-        const editReminder = libraryEditorDirty ? " Rozepsané úpravy článku zůstávají neuložené." : "";
-        libraryAttachmentStatus.textContent = `${data.message || "Obrázek připojen."}${editReminder}`;
         libraryAttachmentFileInput.value = "";
         libraryAttachmentLabelInput.value = "";
         libraryAttachmentTagsInput.value = "";
         libraryAttachmentNoteInput.value = "";
         refreshLibraryItemAfterAttachment(data.item || {}, articleId);
+        const editReminder = libraryEditorDirty ? " Rozepsané úpravy článku zůstávají neuložené." : "";
+        libraryAttachmentStatus.textContent = `${data.message || "Obrázek připojen."}${editReminder}`;
       } catch (err) {
         recordFrontendError(err);
         libraryAttachmentStatus.textContent = `Chyba připojení obrázku: ${err}`;
       } finally {
-        libraryAttachmentSaveBtn.disabled = false;
+        libraryAttachmentSaveBtn.disabled = !currentLibrarySelectedId;
       }
     }
 
@@ -18612,10 +18690,21 @@ COCKPIT_HTML = """<!doctype html>
     }
 
     function renderLibraryAttachments(articleId, attachments, category = "") {
-      if (!libraryReaderAttachments) return;
+      if (!libraryAttachmentSection || !libraryReaderAttachments) return;
       libraryReaderAttachments.innerHTML = "";
       const items = Array.isArray(attachments) ? attachments : [];
-      libraryReaderAttachments.classList.toggle("hidden", items.length === 0);
+      const hasArticle = Boolean(articleId);
+      libraryAttachmentSection.classList.toggle("hidden", !hasArticle);
+      setLibraryAttachmentControlsDisabled(!hasArticle);
+      libraryAttachmentStatus.textContent = hasArticle
+        ? "Vyber fotografii; přidá se až po stisknutí tlačítka."
+        : "Nejdřív vyber článek v knihovně.";
+      if (hasArticle && items.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "library-meta";
+        empty.textContent = "Tato karta zatím nemá žádné přílohy.";
+        libraryReaderAttachments.appendChild(empty);
+      }
       items.forEach((attachment) => {
         const displayLabel = libraryAttachmentDisplayLabel(attachment, category);
         const card = document.createElement("div");
@@ -20271,6 +20360,8 @@ COCKPIT_HTML = """<!doctype html>
       }
     });
     libraryCloseBtn.addEventListener("click", closeLibraryModal);
+    libraryAddUrlBtn.addEventListener("click", () => toggleLibraryAddMode("url"));
+    libraryAddTextBtn.addEventListener("click", () => toggleLibraryAddMode("text"));
     libraryArchiveBtn.addEventListener("click", archiveLibraryUrl);
     libraryTextSaveBtn.addEventListener("click", saveLibraryText);
     libraryEditBtn.addEventListener("click", openLibraryEditor);

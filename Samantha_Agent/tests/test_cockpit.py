@@ -1054,6 +1054,27 @@ class CockpitTests(unittest.TestCase):
         self.assertNotIn("await loadLibraryCategory(item.category || currentLibraryCategory", COCKPIT_HTML)
         self.assertNotIn("await loadLibraryCategory(currentLibraryCategory);\n        await loadLibraryItem(articleId);", COCKPIT_HTML)
 
+    def test_library_layout_prioritizes_browsing_and_unifies_attachment_management(self) -> None:
+        self.assertIn('id="libraryArchivePanel" class="library-add-panel hidden"', COCKPIT_HTML)
+        self.assertIn('id="libraryTextPanel" class="library-add-panel hidden"', COCKPIT_HTML)
+        self.assertIn('aria-controls="libraryArchivePanel"', COCKPIT_HTML)
+        self.assertIn('aria-controls="libraryTextPanel"', COCKPIT_HTML)
+        self.assertIn("function setLibraryAddMode(mode)", COCKPIT_HTML)
+        self.assertIn("function toggleLibraryAddMode(mode)", COCKPIT_HTML)
+        self.assertLess(COCKPIT_HTML.index('class="library-tabs"'), COCKPIT_HTML.index('id="libraryArchivePanel"'))
+        for label in ("Článek", "Čtení", "Export", "Správa"):
+            self.assertIn(f'<span class="library-action-group-label">{label}</span>', COCKPIT_HTML)
+
+        edit_start = COCKPIT_HTML.index('id="libraryEditPanel"')
+        attachment_start = COCKPIT_HTML.index('id="libraryAttachmentSection"')
+        reader_start = COCKPIT_HTML.index('id="libraryReaderText"')
+        self.assertLess(edit_start, attachment_start)
+        self.assertLess(attachment_start, reader_start)
+        self.assertNotIn('id="libraryAttachmentFileInput"', COCKPIT_HTML[edit_start:attachment_start])
+        self.assertIn('id="libraryAttachmentFileInput"', COCKPIT_HTML[attachment_start:reader_start])
+        self.assertIn('id="libraryReaderAttachments"', COCKPIT_HTML[attachment_start:reader_start])
+        self.assertIn('libraryAttachmentSection.classList.toggle("hidden", !hasArticle);', COCKPIT_HTML)
+
     def test_document_work_status_groups_downloads_and_review_queue(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             vault = Path(temp_dir) / "documents"
