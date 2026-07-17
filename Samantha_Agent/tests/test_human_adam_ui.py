@@ -23,6 +23,7 @@ class HumanAdamUiTests(unittest.TestCase):
             "contextAnchorRefreshBtn",
             "contextAnchorMeta",
             "contextAnchorInput",
+            "contextAnchorProposeBtn",
             "contextAnchorSaveBtn",
             "contextAnchorClearBtn",
             "chat",
@@ -162,11 +163,70 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Rozhodnutí:", panel_source)
         self.assertIn("Další krok:", panel_source)
         self.assertIn("Novější pokyn v chatu má vždy přednost.", panel_source)
+        self.assertIn("Adam: připravit návrh", panel_source)
         self.assertIn('api("/api/human-adam/context-anchor"', save_source)
         self.assertIn("active,confirmed:true", save_source)
         self.assertIn('contextAnchorSaveBtn.addEventListener("click", () => saveContextAnchor(true));', HUMAN_ADAM_HTML)
         self.assertIn('contextAnchorClearBtn.addEventListener("click", () => saveContextAnchor(false));', HUMAN_ADAM_HTML)
         self.assertIn("contextAnchorPanel.hidden = true;", switch_source)
+
+    def test_adam_proposes_anchor_through_existing_visible_canonical_turn(self) -> None:
+        proposal_start = HUMAN_ADAM_HTML.index("async function proposeContextAnchor()")
+        proposal_end = HUMAN_ADAM_HTML.index("async function loadTvbcp", proposal_start)
+        proposal_source = HUMAN_ADAM_HTML[proposal_start:proposal_end]
+
+        self.assertEqual(HUMAN_ADAM_HTML.count('const HUMAN_ADAM_SEND_PATH = "/api/human-adam/send";'), 1)
+        self.assertIn("CONTEXT_ANCHOR_PROPOSAL_PROMPT", proposal_source)
+        self.assertIn("user_text:CONTEXT_ANCHOR_PROPOSAL_PROMPT", proposal_source)
+        self.assertIn("api(HUMAN_ADAM_SEND_PATH", proposal_source)
+        self.assertIn("renderSession(optimistic);", proposal_source)
+        self.assertIn("renderSession(payload.session);", proposal_source)
+        self.assertNotIn("/api/human-adam/context-anchor", proposal_source)
+        self.assertNotIn("saveContextAnchor", proposal_source)
+        self.assertIn('contextAnchorProposeBtn.addEventListener("click", proposeContextAnchor);', HUMAN_ADAM_HTML)
+
+    def test_anchor_proposal_fills_editor_only_after_confirmed_structured_answer(self) -> None:
+        proposal_start = HUMAN_ADAM_HTML.index("async function proposeContextAnchor()")
+        proposal_end = HUMAN_ADAM_HTML.index("async function loadTvbcp", proposal_start)
+        proposal_source = HUMAN_ADAM_HTML[proposal_start:proposal_end]
+        validation_start = HUMAN_ADAM_HTML.index("function validContextAnchorProposal(text)")
+        validation_source = HUMAN_ADAM_HTML[validation_start:proposal_start]
+
+        self.assertIn('entry.status !== "completed" || entry.delivery_confirmed !== true', proposal_source)
+        self.assertIn("validContextAnchorProposal(proposal)", proposal_source)
+        self.assertIn("CONTEXT_ANCHOR_REQUIRED_HEADINGS.every", validation_source)
+        self.assertIn("contextAnchorInput.value = proposal;", proposal_source)
+        self.assertLess(
+            proposal_source.index('entry.delivery_confirmed !== true'),
+            proposal_source.index("contextAnchorInput.value = proposal;"),
+        )
+        self.assertIn("automaticky se neuložil", proposal_source)
+
+    def test_anchor_proposal_preserves_both_drafts_and_never_retries_unknown_delivery(self) -> None:
+        proposal_start = HUMAN_ADAM_HTML.index("async function proposeContextAnchor()")
+        proposal_end = HUMAN_ADAM_HTML.index("async function loadTvbcp", proposal_start)
+        proposal_source = HUMAN_ADAM_HTML[proposal_start:proposal_end]
+
+        self.assertIn("const editorBefore = contextAnchorInput.value;", proposal_source)
+        self.assertIn("contextAnchorInput.value !== editorBefore", proposal_source)
+        self.assertNotIn("clearMessageInput", proposal_source)
+        self.assertNotIn("restoreRejectedMessage", proposal_source)
+        self.assertNotIn("input.value =", proposal_source)
+        self.assertIn("Požadavek neposílej automaticky znovu.", proposal_source)
+        self.assertEqual(proposal_source.count("api(HUMAN_ADAM_SEND_PATH"), 1)
+
+    def test_active_or_uncertain_turn_disables_anchor_proposal(self) -> None:
+        controls_start = HUMAN_ADAM_HTML.index("function syncControls()")
+        controls_end = HUMAN_ADAM_HTML.index("function setBusy(", controls_start)
+        controls_source = HUMAN_ADAM_HTML[controls_start:controls_end]
+        proposal_start = HUMAN_ADAM_HTML.index("async function proposeContextAnchor()")
+        proposal_end = HUMAN_ADAM_HTML.index("async function loadTvbcp", proposal_start)
+        proposal_source = HUMAN_ADAM_HTML[proposal_start:proposal_end]
+
+        self.assertIn("contextAnchorProposeBtn.disabled = busy || sendInFlight || sessionTurnBusy", controls_source)
+        self.assertIn("!sessionConnected || deliveryUncertain", controls_source)
+        self.assertIn("if (busy || sendInFlight || sessionTurnBusy", proposal_source)
+        self.assertIn("!sessionConnected || deliveryUncertain", proposal_source)
 
     def test_context_anchor_never_auto_updates_during_message_send(self) -> None:
         send_start = HUMAN_ADAM_HTML.index("async function sendMessage(event)")
@@ -291,7 +351,7 @@ class HumanAdamUiTests(unittest.TestCase):
         send_source = HUMAN_ADAM_HTML[send_start:send_end]
 
         self.assertEqual(HUMAN_ADAM_HTML.count("/api/human-adam/send"), 1)
-        self.assertIn('/api/human-adam/send"', send_source)
+        self.assertIn("api(HUMAN_ADAM_SEND_PATH", send_source)
         self.assertIn('composer.addEventListener("submit", sendMessage);', HUMAN_ADAM_HTML)
         self.assertIn('<button class="primary" id="sendBtn" type="submit">Odeslat</button>', HUMAN_ADAM_HTML)
         self.assertIn('<button id="voiceRecordBtn" type="button">Nahrát pokyn</button>', HUMAN_ADAM_HTML)
@@ -426,7 +486,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertLess(send_source.index("sendInFlight = true;"), send_source.index("renderTurnState(optimistic);"))
         self.assertLess(
             send_source.index("renderTurnState(optimistic);"),
-            send_source.index('await api("/api/human-adam/send"'),
+            send_source.index("await api(HUMAN_ADAM_SEND_PATH"),
         )
         self.assertIn(
             "`Adam pracuje · ${elapsedClock(activeTurnStartedAt)} · pokyn neposílej znovu`",
@@ -509,7 +569,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("context.createOscillator()", sound_source)
         self.assertIn("context.createGain()", sound_source)
         self.assertIn("Zvuk je pouze doplňkový", sound_source)
-        self.assertLess(send_source.index("await primeCompletionSound();"), send_source.index('await api("/api/human-adam/send"'))
+        self.assertLess(send_source.index("await primeCompletionSound();"), send_source.index("await api(HUMAN_ADAM_SEND_PATH"))
         self.assertLess(send_source.index('notice.textContent = "Odpověď doručena a potvrzena.";'), send_source.index("playCompletionSound();"))
         self.assertLess(send_source.index("playCompletionSound();"), catch_start)
         self.assertNotIn("playCompletionSound", send_source[catch_start:])
@@ -560,7 +620,7 @@ class HumanAdamUiTests(unittest.TestCase):
         send_source = HUMAN_ADAM_HTML[send_start:send_end]
         capture = send_source.index("const text = input.value.trim();")
         clear = send_source.index("clearMessageInput();")
-        api_call = send_source.index('await api("/api/human-adam/send"')
+        api_call = send_source.index("await api(HUMAN_ADAM_SEND_PATH")
 
         self.assertLess(capture, clear)
         self.assertLess(clear, api_call)

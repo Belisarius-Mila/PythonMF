@@ -151,8 +151,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     </div>
     <div class="context-anchor-body">
       <p id="contextAnchorMeta">Kontext se načte až po otevření.</p>
-      <p class="context-anchor-help">Ulož pouze stručný cíl, očíslovaný plán, hotové body, rozhodnutí a další krok. Nevkládej hesla, tokeny, osobní údaje ani absolutní cesty. Novější pokyn v chatu má vždy přednost.</p>
+      <p class="context-anchor-help">Nech Adama připravit návrh, potom jej zkontroluj a teprve výslovně připni. Ulož pouze stručný cíl, očíslovaný plán, hotové body, rozhodnutí a další krok. Nevkládej hesla, tokeny, osobní údaje ani absolutní cesty. Novější pokyn v chatu má vždy přednost.</p>
       <textarea id="contextAnchorInput" maxlength="6000" autocomplete="off" placeholder="Cíl:&#10;&#10;Plán:&#10;1. …&#10;&#10;Hotovo:&#10;- …&#10;&#10;Rozhodnutí:&#10;- …&#10;&#10;Další krok:&#10;- …" aria-label="Připnutý aktivní kontext"></textarea>
+      <button id="contextAnchorProposeBtn" type="button">Adam: připravit návrh</button>
       <div class="context-anchor-actions">
         <button id="contextAnchorClearBtn" type="button">Odepnout</button>
         <button class="primary" id="contextAnchorSaveBtn" type="button">Připnout plán</button>
@@ -203,6 +204,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const contextAnchorRefreshBtn = document.getElementById("contextAnchorRefreshBtn");
   const contextAnchorMeta = document.getElementById("contextAnchorMeta");
   const contextAnchorInput = document.getElementById("contextAnchorInput");
+  const contextAnchorProposeBtn = document.getElementById("contextAnchorProposeBtn");
   const contextAnchorSaveBtn = document.getElementById("contextAnchorSaveBtn");
   const contextAnchorClearBtn = document.getElementById("contextAnchorClearBtn");
   const composer = document.getElementById("composer");
@@ -253,6 +255,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let completionAudioUnlocked = false;
   let activeSpeechButton = null;
   let activeSpeechUtterance = null;
+  const HUMAN_ADAM_SEND_PATH = "/api/human-adam/send";
+  const CONTEXT_ANCHOR_PROPOSAL_PROMPT = `Připrav návrh aktivního kontextu pro další pokračování tohoto pracovního profilu. Odpověz pouze stručným českým textem do 6000 znaků v přesné struktuře:
+Cíl:
+Plán:
+Hotovo:
+Rozhodnutí:
+Další krok:
+Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenší další krok. Při nejistotě ji výslovně označ a nic si nevymýšlej. Neuváděj obsah souborů, celé soukromé cesty, hesla, tokeny, klíče, osobní údaje ani citlivé texty.`;
+  const CONTEXT_ANCHOR_REQUIRED_HEADINGS = ["Cíl:", "Plán:", "Hotovo:", "Rozhodnutí:", "Další krok:"];
 
   function messageId() {
     if (window.crypto && crypto.randomUUID) return `human-adam-${crypto.randomUUID()}`;
@@ -382,6 +393,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     voiceStopBtn.disabled = !voiceRecording;
     contextAnchorSaveBtn.disabled = busy || sendInFlight || sessionTurnBusy;
     contextAnchorClearBtn.disabled = busy || sendInFlight || sessionTurnBusy;
+    contextAnchorProposeBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || !sessionConnected || deliveryUncertain;
   }
 
   function setBusy(value, text="") {
@@ -945,6 +957,75 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     } finally { setBusy(false); }
   }
 
+  function validContextAnchorProposal(text) {
+    const proposal = String(text || "").trim();
+    const limit = Number(contextAnchorInput.maxLength) || 6000;
+    return Boolean(proposal && proposal.length <= limit && CONTEXT_ANCHOR_REQUIRED_HEADINGS.every((heading) => proposal.includes(heading)));
+  }
+
+  async function proposeContextAnchor() {
+    if (busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || !sessionConnected || deliveryUncertain) return;
+    const editorBefore = contextAnchorInput.value;
+    if (editorBefore.trim() && !window.confirm("Adamův nový návrh po dokončení nahradí současný obsah editoru. Pokračovat?")) return;
+    sendInFlight = true;
+    syncControls();
+    await primeCompletionSound();
+    const sentAt = new Date().toISOString();
+    const clientId = messageId();
+    const pendingMessage = {user_text:CONTEXT_ANCHOR_PROPOSAL_PROMPT,client_sent_at:sentAt,received_at:sentAt,status:"pending",answer:""};
+    const optimistic = lastSession
+      ? {...lastSession,turn_busy:true,active_turn:{client_message_id:clientId,started_at:sentAt},messages:[...(lastSession.messages || []),pendingMessage]}
+      : {turn_busy:true,active_turn:{client_message_id:clientId,started_at:sentAt},messages:[pendingMessage]};
+    renderSession(optimistic);
+    renderTurnState(optimistic);
+    contextAnchorMeta.textContent = "Adam připravuje návrh; zatím se nic neukládá…";
+    notice.textContent = `Odesláno ${formatTime(sentAt)} · Adam připravuje návrh…`;
+    let outcomeNotice = "";
+    try {
+      const payload = await api(HUMAN_ADAM_SEND_PATH, {method:"POST",body:JSON.stringify({message:CONTEXT_ANCHOR_PROPOSAL_PROMPT,client_message_id:clientId,client_sent_at:sentAt})});
+      if (!payload.ok) {
+        const error = new Error(payload.message || "Příprava návrhu selhala.");
+        error.status = String(payload.status || "");
+        throw error;
+      }
+      renderSession(payload.session);
+      renderTurnState(payload.session);
+      const entry = payload.entry && typeof payload.entry === "object" ? payload.entry : {};
+      const proposal = String(entry.answer || "").trim();
+      if (entry.status !== "completed" || entry.delivery_confirmed !== true) {
+        const error = new Error("Dokončení návrhu nebylo potvrzeno.");
+        error.status = "delivery_unknown";
+        throw error;
+      }
+      if (contextAnchorInput.value !== editorBefore) {
+        contextAnchorMeta.textContent = "Editor se během čekání změnil; Adamův návrh zůstal v historii a nebyl vložen.";
+        outcomeNotice = "Návrh je potvrzený v historii, ale rozepsaný obsah kotvy jsem nepřepsal.";
+      } else if (!validContextAnchorProposal(proposal)) {
+        contextAnchorMeta.textContent = "Adamův návrh nemá bezpečnou úplnou strukturu; zůstal pouze v historii.";
+        outcomeNotice = "Návrh nebyl vložen ani uložen, protože chybí povinná struktura nebo překročil limit.";
+      } else {
+        contextAnchorInput.value = proposal;
+        contextAnchorMeta.textContent = "Návrh Adama je vložený, ale zatím není uložený. Zkontroluj jej a stiskni Připnout plán.";
+        outcomeNotice = "Adamův návrh je připravený k tvé kontrole; automaticky se neuložil.";
+      }
+      if (payload.context_anchor_warning) {
+        outcomeNotice += ` Upozornění: ${payload.context_anchor_warning}`;
+      }
+      playCompletionSound();
+    } catch (error) {
+      const confirmedRejection = new Set(["human_adam_busy","human_adam_send_failed"]).has(error.status);
+      outcomeNotice = confirmedRejection
+        ? `Příprava návrhu byla odmítnuta: ${error.message}`
+        : `Stav doručení návrhu je nejistý: ${error.message} Požadavek neposílej automaticky znovu.`;
+      contextAnchorMeta.textContent = "Návrh nebyl vložen ani uložen.";
+    } finally {
+      sendInFlight = false;
+      syncControls();
+    }
+    await loadStatus();
+    if (outcomeNotice) notice.textContent = outcomeNotice;
+  }
+
   async function loadTvbcp() {
     tvbcpRefreshBtn.disabled = true;
     tvbcpMeta.textContent = "Načítám pracovní TVBCP…";
@@ -1177,7 +1258,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     notice.textContent = `Odesláno ${formatTime(sentAt)} · Adam pracuje…`;
     let failure = "";
     try {
-      const payload = await api("/api/human-adam/send", {method:"POST", body:JSON.stringify({message:text,client_message_id:clientId,client_sent_at:sentAt})});
+      const payload = await api(HUMAN_ADAM_SEND_PATH, {method:"POST", body:JSON.stringify({message:text,client_message_id:clientId,client_sent_at:sentAt})});
       if (!payload.ok) {
         const error = new Error(payload.message || "Odeslání selhalo.");
         error.status = String(payload.status || "");
@@ -1219,6 +1300,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   contextAnchorOpenBtn.addEventListener("click", openContextAnchor);
   contextAnchorCloseBtn.addEventListener("click", closeContextAnchor);
   contextAnchorRefreshBtn.addEventListener("click", loadContextAnchor);
+  contextAnchorProposeBtn.addEventListener("click", proposeContextAnchor);
   contextAnchorSaveBtn.addEventListener("click", () => saveContextAnchor(true));
   contextAnchorClearBtn.addEventListener("click", () => saveContextAnchor(false));
   tvbcpOpenBtn.addEventListener("click", openTvbcp);
