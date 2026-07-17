@@ -13375,7 +13375,7 @@ COCKPIT_HTML = """<!doctype html>
         </div>
         <div class="library-layout">
           <div id="libraryList" class="library-list"></div>
-          <div class="library-reader" aria-live="polite">
+          <div id="libraryReader" class="library-reader" aria-live="polite">
             <div class="library-reader-head">
               <h3 id="libraryReaderTitle" class="library-reader-title">Vyber článek</h3>
               <div id="libraryReaderMeta" class="library-meta library-reader-meta">Vlevo vyber položku nebo použij fulltextové hledání.</div>
@@ -13746,6 +13746,7 @@ COCKPIT_HTML = """<!doctype html>
     const librarySearchInput = document.getElementById("librarySearchInput");
     const librarySearchBtn = document.getElementById("librarySearchBtn");
     const libraryList = document.getElementById("libraryList");
+    const libraryReader = document.getElementById("libraryReader");
     const libraryReaderTitle = document.getElementById("libraryReaderTitle");
     const libraryReaderMeta = document.getElementById("libraryReaderMeta");
     const libraryFullTextNotice = document.getElementById("libraryFullTextNotice");
@@ -14128,6 +14129,7 @@ COCKPIT_HTML = """<!doctype html>
         "libraryAttachmentStatus",
         "librarySearchInput",
         "librarySearchBtn",
+        "libraryReader",
         "libraryReaderAttachments",
         "libraryEditBtn",
         "libraryEditPanel",
@@ -18679,8 +18681,16 @@ COCKPIT_HTML = """<!doctype html>
           snippet.textContent = item.snippet;
           row.appendChild(snippet);
         }
-        row.addEventListener("click", () => loadLibraryItem(item.id || ""));
+        row.addEventListener("click", () => loadLibraryItem(item.id || "", true));
         libraryList.appendChild(row);
+      });
+    }
+
+    function scrollLibraryReaderIntoViewOnMobile() {
+      if (!window.matchMedia("(max-width: 900px)").matches) return;
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.requestAnimationFrame(() => {
+        libraryReader.scrollIntoView({behavior: reduceMotion ? "auto" : "smooth", block: "start"});
       });
     }
 
@@ -18757,6 +18767,38 @@ COCKPIT_HTML = """<!doctype html>
         return "Ilustrační foto";
       }
       return label || "Příloha";
+    }
+
+    function libraryAttachmentRoleLabel(role) {
+      const labels = {
+        handwritten_recipe_scan: "Ručně psaný originál",
+        supporting_image: "Doprovodný obrázek",
+        original_pdf: "Původní dokument",
+        source_document: "Zdrojový dokument",
+        supporting: "Doprovodná příloha"
+      };
+      return labels[String(role || "").trim().toLowerCase()] || "";
+    }
+
+    function libraryAttachmentTypeLabel(attachment) {
+      const kind = String(attachment && attachment.kind || "").trim().toLowerCase();
+      const mimeType = String(attachment && attachment.mime_type || "").trim().toLowerCase();
+      if (kind === "pdf" || mimeType === "application/pdf") return "PDF";
+      if (kind.includes("image") || mimeType.startsWith("image/")) {
+        const imageFormats = {
+          "image/jpeg": "JPEG",
+          "image/png": "PNG",
+          "image/webp": "WebP",
+          "image/heic": "HEIC",
+          "image/heif": "HEIF"
+        };
+        const format = imageFormats[mimeType] || "";
+        return format ? `Obrázek ${format}` : "Obrázek";
+      }
+      if (kind === "text" || mimeType.startsWith("text/")) return "Textový soubor";
+      if (mimeType.includes("wordprocessingml") || kind === "docx") return "Dokument Word";
+      if (kind.includes("document")) return "Dokument";
+      return "Soubor";
     }
 
     function refreshLibraryItemAfterAttachment(item, articleId) {
@@ -18854,9 +18896,9 @@ COCKPIT_HTML = """<!doctype html>
         const meta = document.createElement("div");
         meta.className = "library-attachment-meta";
         const metaParts = [];
-        if (attachment.role) metaParts.push(attachment.role);
-        if (attachment.kind) metaParts.push(attachment.kind);
-        if (attachment.mime_type) metaParts.push(attachment.mime_type);
+        const roleLabel = libraryAttachmentRoleLabel(attachment.role);
+        if (roleLabel) metaParts.push(roleLabel);
+        metaParts.push(libraryAttachmentTypeLabel(attachment));
         if (attachment.size_bytes) metaParts.push(`${Math.round(Number(attachment.size_bytes) / 1024)} kB`);
         meta.textContent = metaParts.join(" | ");
         card.appendChild(title);
@@ -18918,11 +18960,12 @@ COCKPIT_HTML = """<!doctype html>
       });
     }
 
-    async function loadLibraryItem(articleId) {
+    async function loadLibraryItem(articleId, scrollOnMobile = false) {
       if (!articleId) return;
       if (articleId === currentLibrarySelectedId && !libraryEditPanel.classList.contains("hidden")) return;
       if (!confirmLibraryEditorDiscard()) return;
       closeLibraryEditor(true);
+      if (scrollOnMobile) scrollLibraryReaderIntoViewOnMobile();
       currentLibrarySelectedText = "";
       currentLibrarySelectedId = articleId;
       libraryDeleteBtn.disabled = false;

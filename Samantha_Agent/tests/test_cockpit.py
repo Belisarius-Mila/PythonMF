@@ -1103,6 +1103,24 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("setLibraryFullTextNotice(Boolean(data.truncated));", COCKPIT_HTML)
         self.assertIn('libraryShowFullTextBtn.addEventListener("click", loadFullLibraryItemText);', COCKPIT_HTML)
 
+    def test_library_finishes_mobile_reader_and_attachment_metadata(self) -> None:
+        self.assertIn('id="libraryReader" class="library-reader"', COCKPIT_HTML)
+        self.assertIn('"libraryReader",', COCKPIT_HTML)
+        self.assertIn("function scrollLibraryReaderIntoViewOnMobile()", COCKPIT_HTML)
+        self.assertIn('window.matchMedia("(max-width: 900px)").matches', COCKPIT_HTML)
+        self.assertIn('window.matchMedia("(prefers-reduced-motion: reduce)").matches', COCKPIT_HTML)
+        self.assertIn('libraryReader.scrollIntoView({behavior: reduceMotion ? "auto" : "smooth", block: "start"});', COCKPIT_HTML)
+        self.assertIn('loadLibraryItem(item.id || "", true)', COCKPIT_HTML)
+        self.assertIn("function libraryAttachmentRoleLabel(role)", COCKPIT_HTML)
+        self.assertIn('handwritten_recipe_scan: "Ručně psaný originál"', COCKPIT_HTML)
+        self.assertIn('original_pdf: "Původní dokument"', COCKPIT_HTML)
+        self.assertIn("function libraryAttachmentTypeLabel(attachment)", COCKPIT_HTML)
+        self.assertIn('return "PDF";', COCKPIT_HTML)
+        self.assertIn('return format ? `Obrázek ${format}` : "Obrázek";', COCKPIT_HTML)
+        self.assertNotIn("if (attachment.role) metaParts.push(attachment.role);", COCKPIT_HTML)
+        self.assertNotIn("if (attachment.mime_type) metaParts.push(attachment.mime_type);", COCKPIT_HTML)
+        self.assertLess(COCKPIT_HTML.index('id="libraryAttachmentSection"'), COCKPIT_HTML.index('id="libraryReaderText"'))
+
     def test_document_work_status_groups_downloads_and_review_queue(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             vault = Path(temp_dir) / "documents"
