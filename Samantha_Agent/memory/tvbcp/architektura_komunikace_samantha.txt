@@ -1164,3 +1164,39 @@ zůstává vědomou odpovědností uživatele.
 Další krok: v běžném provozu připnout krátký zkušební plán, restartovat Cockpit a
 ověřit navazujícím tahem, že Adam správně uvede cíl a další krok. Událost skutečné
 kompaktace pouze pozorovat; nevyvolávat ji uměle jen kvůli důkazu.
+
+### 2026-07-17 22:26 CEST – Dokončení soukromé kontextové kotvy Human–Adam
+
+Původní binární připnutí bylo dokončeno na tři srozumitelné stavy. Kotva může být
+soukromě uložená a pozastavená, připnutá k modelovým vstupům, nebo úplně
+neexistovat. `Pozastavit` zachová obsah pro pozdější opětovné připnutí; pouze
+samostatné potvrzené `Smazat` jej odstraní. `Uložit návrh` vytvoří novou kotvu a
+`Uložit aktualizaci` mění uložený obsah při zachování aktivního či pozastaveného
+stavu. Změny jsou během Adamova aktivního tahu blokované.
+
+Tlačítko `Adam: připravit návrh` používá jedinou kanonickou Human–Adam send cestu.
+Potvrzená strukturovaná odpověď se vloží pouze do editovatelného pole; nikdy se
+automaticky neuloží ani nepřipne. Při historicky nejistém doručení lze výslovně
+potvrdit nový odlišný pokyn pro přípravu kotvy, ale předchozí pokyn se neopakuje.
+Rozepsaná úprava se nesmí potichu ztratit při panelovém obnovení ani přepnutí
+profilu a poškozený soukromý stav se při mutaci nepřepisuje.
+
+Mobilní panel byl uzamčen na šířku viewportu. Delší stavové texty se zalamují a
+čtyři akční prvky tvoří na iPhonu dvě stabilní řady bez vodorovného roztažení;
+desktopové rozložení se nemění. Implementační body jsou `2326e57`, `8a1eda0`,
+`68d375b` a konečná mobilní oprava `5e10d54`.
+
+Důkaz: postupné cílené sady po jednotlivých fázích prošly 68, 69 a nakonec 70
+testy spolu s JavaScriptovou syntaxí, Python kompilací a `git diff --check`.
+Zdrojový a izolovaný workspace jsou v bodě `5e10d54` čisté a zarovnané. Míla z
+iPhonu dvakrát výslovně vyvolal přípravu kotvy Adamem a obdržel požadovaný
+strukturovaný návrh, čímž je kanonická generovací cesta ručně potvrzená.
+
+Riziko: přirozená kompaktace vlákna stále nebyla uměle vyvolána. Také zbývá při
+delším běžném používání sledovat, zda Safari u všech kombinací dlouhých českých
+popisků zachová stabilní šířku panelu; funkční generování a ovládání z iPhonu je
+potvrzené.
+
+Další krok: kotvu používat úsporně pro aktuální cíl, plán, rozhodnutí a nejmenší
+další krok. Aktualizovat ji jen při skutečné změně projektu, jinak ji pozastavit;
+další automatizaci nebo napojení na TVBCP nepřidávat bez nové provozní potřeby.
