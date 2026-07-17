@@ -46,6 +46,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `projects/document_management_private_vault.md` - priorita 1 projekt soukrome spravy dokumentu mimo git; aktualni vstup je ScanDocu pro GPT PDF z Downloads a prototyp Samantha Cockpit jako ovladaci vrstva, mimo git-safe data.
 - `projects/samantha_external_backup.md` - offline zálohování `PythonMF`/Samanthy na externí disk: poslední úspěšná recovery záloha je 2026-07-01 ve snapshotu `20260701_203915`; proběhla přes Pythonový inkrementální nástroj bez `rsync/mmap`; restore drill 2026-07-01 obnovil `Samantha_Agent/AGENTS.md` do `/private/tmp/samantha_restore_drill_20260701/` a `cmp` + SHA-256 potvrdily shodu.
 - `projects/janicka_cockpit_takeover.md` - [PRIPOMENOUT] Janička Cockpit / používání a převzetí Samanthy: samostatný projekt pro živé používání Samanthy Janou bez speciálního omezení přístupu a pro vazbu na nouzové plné převzetí přes pozůstalostní plán; tlačítko `Janička` je v Cockpitu implementované, `Zeptat se Adama` cílí na light relaci `samantha_janicka` s ověřením doručení a nouzové `Otevřít plného Adama` spouští přímý interaktivní Codex v Terminalu bez VS Code.
+- `projects/janicka_r2_adam.md` - nový samostatný projekt priority 2 pro R2-Adam v Janičce: vlastní trvalé vlákno a soukromý kompaktní kontext mimo Git, read-only přístup ke zdrojovým datům Samanthy a budoucí append-only TXT export s náhledem a dvoukrokovým odesláním na pevný soukromý kontakt Jany.
 - `projects/janicka_cockpit_kucharka.md` - první git-safe kuchařka pro Janu k používání Janičky v Cockpitu: dokumenty, tisk, e-maily, Lékárna, rodinné projekty, Adam, připomenutí, nouzové převzetí a bezpečnostní hranice bez citlivých údajů.
 - `projects/pozustalost_rodinny_plan_2026_05_30.txt` - [PRIPOMENOUT] priorita 1 rodinný nouzový balíček / pozůstalost: git-safe návrh struktury pro šifrovaný private balík; technicky nestavět druhý dokumentový systém, ale použít Document Management jako hlavní trezor, pozůstalostní metadata/tagy a samostatný šifrovaný export; soukromé šablony jsou mimo git v `data/private/pozustalost/`.
 - `projects/neuberk_interier_design.md` - projekt Neuberk interiér design: soukromý pracovní prostor pro fotky, plánky, rozměry a návrhy interiéru domu; první místnost je půdní hostovská místnost `Kačenka` pro dcery s dětmi, první čistý překres jedné stěny je hotový mimo git v `data/private/neuberk_interier_design/`.
@@ -93,11 +94,11 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
-- `handoffs/janicka_ra2_private_context_proposal_2026_07_15.md` - pozastaveny
-  navrh priority 2 pro budouci R-A2 v Cockpitu Janička: vlastni trvale
-  app-server vlakno, soukromy kompaktni dlouhodoby kontext mimo Git, bez sdileni
-  Human–Adam vlakna a vyvojoveho workspace; navazat az po dokonceni a failover
-  testu Human–Adam.
+- `handoffs/janicka_ra2_private_context_proposal_2026_07_15.md` - aktivní návrh
+  priority 2 pro R2-Adam v Cockpitu Janička: vlastní trvalé app-server vlákno,
+  soukromý kompaktní kontext mimo Git, zákaz změn a mazání zdrojových dat a
+  budoucí nový TXT export s náhledem a dvoukrokovým odesláním Janě; implementace
+  ještě nezačala.
 - `handoffs/appserver_human_adam_text_remote_verified_restart_backup_2026_07_14.md` - [PRIPOMENOUT]
   priorita 1 před restartem Macu: vzdálená textová práce a samoobslužné nasazení
   jsou opakovaně ověřené až po sticky účtenku, bod `5bac508` a 703 testů. Po
