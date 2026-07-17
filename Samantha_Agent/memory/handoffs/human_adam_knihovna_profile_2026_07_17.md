@@ -1,7 +1,7 @@
 Nazev: Human–Adam – druhý pracovní profil Knihovna
 Priorita: 1
-Stav: rozpracované, implementace hotová, čeká na checkpoint a živý retest
-Pripomenout pri startu: ano
+Stav: hotovo, nasazeno a živě ověřeno
+Pripomenout pri startu: ne
 Datum: 2026-07-17
 
 Co se resilo:
@@ -29,25 +29,30 @@ Co je hotove:
   vlákno a zarovnaný workspace.
 - Kanonická quality gate byla rozšířena o nový modul/testy a prošla 734 testy;
   prošly i Python, oba JavaScripty, shell a `git diff --check`.
+- Profilový celek byl commitnut a pushnut jako `6a2e205`; Cockpit byl bezpečně
+  restartován a nová UI/API verze je živá.
+- Živý test Human–Adam → Knihovna → Human–Adam prošel. Knihovna dostala vlastní
+  čistý workspace bez remote, vlastní vlákno, správný TVBCP a jeden potvrzený
+  read-only tah. Návrat zachoval původní Human–Adam vlákno i 54 zpráv.
+- Zdrojový `main` a oba workspaces skončily na `6a2e205`, čisté, bez Git remote,
+  WIP checkpointu nebo nejistého doručení. Aktivní je opět Human–Adam.
 
 Co neni hotove:
 
-- Změny nejsou commitnuté ani pushnuté.
-- Běžící Cockpit používá dosavadní nasazenou verzi; nový přepínač zatím není živý.
-- Reálné vlákno a workspace Knihovny ještě nebyly vytvořené.
-- Nebyl proveden živý obousměrný smoke test na Macu ani iPhonu.
+- Nebyl proveden samostatný vizuální klikací test přepínače na iPhonu; backend,
+  lokální UI přítomnost a obousměrná izolace jsou však živě potvrzené.
+- Obecný editor nebo zakládání dalších profilů z UI záměrně neexistuje.
 
 Dalsi krok:
 
-- Po Mílově rozhodnutí cíleně zkontrolovat diff, commitnout a pushnout tento
-  tematický celek, restartovat Cockpit a ověřit aktivní Human–Adam.
-- Potom bez změny soukromých dat přepnout Human–Adam → Knihovna, otevřít TVBCP,
-  poslat krátký neškodný pokyn a při čistém workspace přepnout zpět.
+- Pro další knihovní úkol v Human–Adam vybrat `Knihovna`, stisknout `Přepnout`
+  a pokračovat v jejím vlastním vlákně. Po dokončení se vrátit jen při čistém
+  workspace a bez čekajícího WIP checkpointu.
 
 Navrhovane dalsi kroky:
 
-- Po úspěšném smoke testu zapsat do obou TVBCP pouze redigovaný důkaz.
-- Další profily přidávat až po ověření tohoto dvouprofilového pilotu.
+- Při prvním použití na iPhonu pouze posoudit čitelnost přepínače.
+- Další profily přidávat až podle skutečné potřeby.
 - Obecné tlačítko `Nový profil` zatím neimplementovat.
 
 Zmenene nebo relevantni soubory:

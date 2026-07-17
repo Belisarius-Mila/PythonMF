@@ -69,10 +69,11 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Project TVBCP
 
-- `tvbcp/knihovna_cockpit.txt` - [PRIPOMENOUT] nový projektový TVBCP pro druhý
+- `tvbcp/knihovna_cockpit.txt` - nový projektový TVBCP pro druhý
   pracovní profil r-Adama `Knihovna`: vlastní trvalé vlákno, izolovaný workspace,
-  deployment receipt a bezpečnostní hranice soukromého archivu. Implementace
-  prošla 734 testy, ale čeká na commit/push, nasazení a živý obousměrný retest.
+  deployment receipt a bezpečnostní hranice soukromého archivu. Commit `6a2e205`
+  je nasazený a živý test Human–Adam → Knihovna → Human–Adam prošel se zachovanou
+  historií, čistými workspaces a potvrzeným read-only tahem.
 
 - `tvbcp/architektura_komunikace_samantha.txt` - [PRIPOMENOUT] aktivni kanonicka
   smlouva Mily a Adama pro jednoho trvaleho Adama, sdilene app-server vlakno,
@@ -99,10 +100,10 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
-- `handoffs/human_adam_knihovna_profile_2026_07_17.md` - [PRIPOMENOUT]
+- `handoffs/human_adam_knihovna_profile_2026_07_17.md` -
   implementovaný dvouprofilový pilot Human–Adam / Knihovna s atomickým přepnutím
-  vlákna, workspace, TVBCP a deploymentu; plná brána 734 testů prošla, změna
-  čeká na cílený commit/push, restart a živý smoke test obou směrů.
+  vlákna, workspace, TVBCP a deploymentu; plná brána 734 testů, commit/push
+  `6a2e205`, restart i živý smoke test obou směrů prošly. Aktivní zůstal Human–Adam.
 
 - `handoffs/janicka_ra2_private_context_proposal_2026_07_15.md` - aktivní návrh
   priority 2 pro R2-Adam v Cockpitu Janička: vlastní trvalé app-server vlákno,

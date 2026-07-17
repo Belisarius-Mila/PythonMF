@@ -241,3 +241,9 @@ zatím není commitnutá, pushnutá, nasazená ani ručně otestovaná v živém
 Nejbližší krok: po nasazení přepnout z Human–Adam na Knihovnu, ověřit správný
 prázdný thread a TVBCP, poslat jeden neškodný pokyn bez změny soukromých dat a
 při čistém workspace se vrátit do původního profilu.
+
+Nasazení a živý test byly dokončeny 2026-07-17 v commitu `6a2e205`. Knihovna má
+vlastní potvrzené vlákno a čistý workspace bez Git remote; správný TVBCP i jeden
+read-only tah prošly. Návrat obnovil původní Human–Adam vlákno a oba workspaces
+zůstaly čisté a zarovnané. Další knihovní práci lze zahájit přímo výběrem profilu
+`Knihovna`; žádný další technický krok není nutný.

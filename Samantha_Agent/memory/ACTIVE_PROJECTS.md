@@ -45,9 +45,10 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
   profil r-Adama s vlastnim vlaknem, izolovanym workspace, TVBCP a deployment
   uctenkou. Atomicke prepnuti je fail-closed pri tahu, nejistem doruceni,
   rozpracovanych zmenach, WIP checkpointu, divergenci nebo nasazeni. Plna brana
-  prosla 734 testy. Zmena zatim neni commitnuta, pushnuta ani nasazena; dalsi
-  krok je cileny checkpoint a po restartu smoke test Human–Adam -> Knihovna ->
-  Human–Adam bez zmeny soukromych dat. Handoff:
+  prosla 734 testy. Commit/push `6a2e205`, restart a zivy smoke test Human–Adam
+  -> Knihovna -> Human–Adam prosly; oba workspaces jsou ciste, bez Git remote a
+  aktivni zustal Human–Adam. Dalsi knihovni ukol lze zahajit vyberem profilu
+  `Knihovna`. Handoff:
   `handoffs/human_adam_knihovna_profile_2026_07_17.md`.
 - 2026-07-14: Externí recovery disk se po USB varování neenumeruje jako USB,
   Thunderbolt ani disk a ve `/Volumes` není. Poslední úspěšná záloha je z

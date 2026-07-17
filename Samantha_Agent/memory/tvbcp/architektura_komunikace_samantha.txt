@@ -1112,3 +1112,25 @@ workspace Knihovny se záměrně vytvoří až prvním potvrzeným přepnutím p
 Další krok: po Mílově rozhodnutí cíleně commitnout a pushnout pouze tento celek,
 restartovat Cockpit a ručně ověřit Human–Adam → Knihovna → Human–Adam bez zápisu
 do soukromého obsahu Knihovny.
+
+### 2026-07-17 04:15 CEST – Dvouprofilový pilot nasazen a ověřen
+
+Commit `6a2e205` byl cíleně pushnut na `main` a Cockpit bezpečně restartován.
+Živý test vytvořil pro Knihovnu vlastní privátní workspace bez Git remote a
+vlastní prázdné app-server vlákno, ověřil správný TVBCP a dokončil jeden
+neškodný read-only tah s potvrzeným doručením.
+
+Následné přepnutí zpět obnovilo původní Human–Adam vlákno se shodným bezpečným
+otiskem a zachovanou historií 54 zpráv. Automatický fast-forward čistého
+Human–Adam workspace z nového `main` prošel. Zdrojový `main`, Human–Adam workspace
+i Knihovna workspace skončily na `6a2e205`, čisté, bez Git remote, bez WIP a bez
+nejistého doručení. Aktivní profil po testu je `Human–Adam`.
+
+Důkaz potvrzuje atomické oddělení vlákna, workspace, TVBCP i deployment identity
+pro první dva profily. Soukromý obsah Knihovny nebyl čten ani měněn.
+
+Riziko: backend a lokální UI přítomnost jsou ověřené; vizuální pohodlí přepínače
+na iPhonu se má posoudit při prvním běžném použití, bez nové umělé zátěže.
+
+Další krok: běžně používat profil Knihovna pro navazující knihovní úkoly. Další
+profil ani obecný editor profilů nepřidávat, dokud nevznikne skutečná potřeba.

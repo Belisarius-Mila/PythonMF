@@ -84,3 +84,25 @@ směrů přepnutí proto stále chybí.
 
 Další krok: po Mílově rozhodnutí vytvořit cílený git checkpoint, pushnout a
 restartovat Cockpit; potom provést smoke test Human–Adam → Knihovna → Human–Adam.
+
+### 2026-07-17 04:15 CEST – Nasazení a živý obousměrný test prošly
+
+Profilový celek byl cíleně commitnut a pushnut jako `6a2e205`; Cockpit byl
+bezpečně restartován na novou verzi. Nové UI a profilové API jsou živé.
+
+Test Human–Adam → Knihovna vytvořil vlastní privátní workspace Knihovny bez Git
+remote a vlastní prázdné app-server vlákno. Knihovna načetla správný projektový
+TVBCP a přijala jediný výslovně read-only provozní pokyn bez změny souborů,
+checkpointu nebo TVBCP. Doručení i dokončení byly jednoznačně potvrzené.
+
+Návrat Knihovna → Human–Adam obnovil původní vlákno se shodným bezpečným otiskem
+a zachovaným počtem 54 předchozích zpráv. Oba workspaces i zdrojový `main` skončily
+na `6a2e205`, čisté, bez Git remote, bez WIP checkpointu a bez nejistého doručení.
+Aktivní profil po testu zůstal `Human–Adam`.
+
+Riziko: živý test proběhl lokálně přes kanonické API Cockpitu; ruční vizuální
+kliknutí na iPhonu zatím nebylo potřeba pro důkaz backendové izolace. Při prvním
+běžném použití pouze zkontrolovat čitelnost nového přepínače na úzkém displeji.
+
+Další krok: žádná nutná vývojová akce. Pro práci na Knihovně vybrat v Human–Adam
+profil `Knihovna`, potvrdit `Přepnout` a pokračovat v jeho vlastním vlákně.
