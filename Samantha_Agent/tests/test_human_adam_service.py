@@ -324,11 +324,11 @@ class HumanAdamServiceTests(unittest.TestCase):
             root = Path(temp_dir)
             service, _runtime, _workspace, hub = self.make_service(root)
             saved = human_adam_context_anchor_update_action(
-                {"operation": "save", "content": anchor_text, "confirmed": True},
+                {"operation": "save", "expected_revision": 0, "content": anchor_text, "confirmed": True},
                 service=service,
             )
             pinned = human_adam_context_anchor_update_action(
-                {"operation": "pin", "confirmed": True},
+                {"operation": "pin", "expected_revision": saved["revision"], "confirmed": True},
                 service=service,
             )
             service.connect()
@@ -393,7 +393,7 @@ class HumanAdamServiceTests(unittest.TestCase):
             service, _runtime, _workspace, _hub = self.make_service(Path(temp_dir))
             service.context_anchor_path.write_text("{broken", encoding="utf-8")
             result = human_adam_context_anchor_update_action(
-                {"operation": "save", "content": "Cíl: Bezpečný návrh", "confirmed": True},
+                {"operation": "save", "expected_revision": 0, "content": "Cíl: Bezpečný návrh", "confirmed": True},
                 service=service,
             )
             persisted = service.context_anchor_path.read_text(encoding="utf-8")
@@ -405,23 +405,29 @@ class HumanAdamServiceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             service, _runtime, _workspace, _hub = self.make_service(Path(temp_dir))
             unconfirmed = human_adam_context_anchor_update_action(
-                {"operation": "save", "content": "Cíl: Test", "confirmed": False},
+                {"operation": "save", "expected_revision": 0, "content": "Cíl: Test", "confirmed": False},
+                service=service,
+            )
+            missing_revision = human_adam_context_anchor_update_action(
+                {"operation": "save", "content": "Cíl: Test", "confirmed": True},
                 service=service,
             )
             private_path = human_adam_context_anchor_update_action(
-                {"operation": "save", "content": "Cíl: přečíst /Users/example/private.txt", "confirmed": True},
+                {"operation": "save", "expected_revision": 0, "content": "Cíl: přečíst /Users/example/private.txt", "confirmed": True},
                 service=service,
             )
             secret = human_adam_context_anchor_update_action(
-                {"operation": "save", "content": "token=secret-value", "confirmed": True},
+                {"operation": "save", "expected_revision": 0, "content": "token=secret-value", "confirmed": True},
                 service=service,
             )
             unknown = human_adam_context_anchor_update_action(
-                {"operation": "replace", "content": "Cíl: Test", "confirmed": True},
+                {"operation": "replace", "expected_revision": 0, "content": "Cíl: Test", "confirmed": True},
                 service=service,
             )
 
         self.assertFalse(unconfirmed["ok"])
+        self.assertFalse(missing_revision["ok"])
+        self.assertIn("očekávanou revizi", missing_revision["message"])
         self.assertFalse(private_path["ok"])
         self.assertIn("absolutní cestu", private_path["message"])
         self.assertFalse(secret["ok"])
@@ -433,16 +439,16 @@ class HumanAdamServiceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             service, _runtime, _workspace, hub = self.make_service(root)
-            human_adam_context_anchor_update_action(
-                {"operation": "save", "content": "Cíl: Test", "confirmed": True},
+            saved = human_adam_context_anchor_update_action(
+                {"operation": "save", "expected_revision": 0, "content": "Cíl: Test", "confirmed": True},
                 service=service,
             )
-            human_adam_context_anchor_update_action(
-                {"operation": "pin", "confirmed": True},
+            pinned = human_adam_context_anchor_update_action(
+                {"operation": "pin", "expected_revision": saved["revision"], "confirmed": True},
                 service=service,
             )
             paused = human_adam_context_anchor_update_action(
-                {"operation": "pause", "confirmed": True},
+                {"operation": "pause", "expected_revision": pinned["revision"], "confirmed": True},
                 service=service,
             )
             service.connect()
@@ -451,7 +457,7 @@ class HumanAdamServiceTests(unittest.TestCase):
                 service=service,
             )
             repinned = human_adam_context_anchor_update_action(
-                {"operation": "pin", "confirmed": True},
+                {"operation": "pin", "expected_revision": paused["revision"], "confirmed": True},
                 service=service,
             )
             persisted = (root / "context_anchor.json").read_text(encoding="utf-8")
@@ -471,18 +477,22 @@ class HumanAdamServiceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             service, _runtime, _workspace, _hub = self.make_service(Path(temp_dir))
             first = human_adam_context_anchor_update_action(
-                {"operation": "save", "content": "Cíl: První", "confirmed": True}, service=service
+                {"operation": "save", "expected_revision": 0, "content": "Cíl: První", "confirmed": True}, service=service
             )
-            human_adam_context_anchor_update_action({"operation": "pin", "confirmed": True}, service=service)
+            pinned = human_adam_context_anchor_update_action(
+                {"operation": "pin", "expected_revision": first["revision"], "confirmed": True}, service=service
+            )
             active_update = human_adam_context_anchor_update_action(
-                {"operation": "save", "content": "Cíl: Druhý", "confirmed": True}, service=service
+                {"operation": "save", "expected_revision": pinned["revision"], "content": "Cíl: Druhý", "confirmed": True}, service=service
             )
-            human_adam_context_anchor_update_action({"operation": "pause", "confirmed": True}, service=service)
+            paused = human_adam_context_anchor_update_action(
+                {"operation": "pause", "expected_revision": active_update["revision"], "confirmed": True}, service=service
+            )
             paused_update = human_adam_context_anchor_update_action(
-                {"operation": "save", "content": "Cíl: Třetí", "confirmed": True}, service=service
+                {"operation": "save", "expected_revision": paused["revision"], "content": "Cíl: Třetí", "confirmed": True}, service=service
             )
             deleted = human_adam_context_anchor_update_action(
-                {"operation": "delete", "confirmed": True}, service=service
+                {"operation": "delete", "expected_revision": paused_update["revision"], "confirmed": True}, service=service
             )
             restored = human_adam_context_anchor_action(service=service)
 
@@ -495,13 +505,48 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertEqual(restored["content"], "")
         self.assertFalse(restored["active"])
 
+    def test_context_anchor_rejects_stale_device_revision_without_overwriting_newer_content(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service, _runtime, _workspace, _hub = self.make_service(Path(temp_dir))
+            original = human_adam_context_anchor_update_action(
+                {"operation": "save", "expected_revision": 0, "content": "Cíl: Původní", "confirmed": True},
+                service=service,
+            )
+            mac_update = human_adam_context_anchor_update_action(
+                {
+                    "operation": "save",
+                    "expected_revision": original["revision"],
+                    "content": "Cíl: Novější změna z Macu",
+                    "confirmed": True,
+                },
+                service=service,
+            )
+            stale_iphone_update = human_adam_context_anchor_update_action(
+                {
+                    "operation": "save",
+                    "expected_revision": original["revision"],
+                    "content": "Cíl: Starší editor na iPhonu",
+                    "confirmed": True,
+                },
+                service=service,
+            )
+            restored = human_adam_context_anchor_action(service=service)
+
+        self.assertTrue(mac_update["ok"])
+        self.assertFalse(stale_iphone_update["ok"])
+        self.assertEqual(stale_iphone_update["status"], "human_adam_context_anchor_conflict")
+        self.assertEqual(stale_iphone_update["expected_revision"], original["revision"])
+        self.assertEqual(stale_iphone_update["current_revision"], mac_update["revision"])
+        self.assertEqual(restored["revision"], mac_update["revision"])
+        self.assertEqual(restored["content"], "Cíl: Novější změna z Macu")
+
     def test_context_anchor_cannot_change_during_active_turn(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             service, _runtime, _workspace, hub = self.make_service(Path(temp_dir))
             hub.turn_busy = True
             hub.active_turn = {"started_at": "2026-07-17T08:00:00Z"}
             result = human_adam_context_anchor_update_action(
-                {"operation": "save", "content": "Cíl: Neměnit během tahu", "confirmed": True},
+                {"operation": "save", "expected_revision": 0, "content": "Cíl: Neměnit během tahu", "confirmed": True},
                 service=service,
             )
 

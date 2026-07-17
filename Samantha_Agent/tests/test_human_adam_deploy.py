@@ -11,13 +11,17 @@ from unittest.mock import patch
 
 from app.communication.human_adam_deploy import (
     DEPLOYMENT_PENDING,
+    MAX_DEPLOYMENT_FAILURE_RECORDS,
     HumanAdamDeployError,
     TRUSTED_PYTHON,
     audit_checkpoint,
     deploy_checkpoint,
+    human_adam_deploy_audit_action,
     load_deployment_confirmation,
     load_deployment_diagnostic,
+    load_deployment_failure_history,
     record_deployment_restart,
+    write_deployment_failure,
     write_deployment_receipt,
 )
 from scripts.human_adam_takeover import CONFIRMATION_TEXT, TakeoverError
@@ -39,6 +43,15 @@ def failing_gate(command, **_kwargs):
         command,
         1,
         stdout="Ran 19 tests in 0.100s\nFAILED\n",
+        stderr="",
+    )
+
+
+def syntax_failing_gate(command, **_kwargs):
+    return subprocess.CompletedProcess(
+        command,
+        1,
+        stdout="Python syntax: FAILED\nSyntaxError: tajná /private/example\n",
         stderr="",
     )
 
@@ -74,6 +87,15 @@ class HumanAdamDeployTests(unittest.TestCase):
             source, manager, checkpoint = prepare_checkpoint(root)
             receipt_path = root / "deployment_receipt.json"
             diagnostic_path = root / "deployment_diagnostic.json"
+            failure_history_path = root / "deployment_failures.json"
+            write_deployment_failure(
+                failure_history_path,
+                profile_id="human_adam",
+                checkpoint_head="f" * 40,
+                stage="audit",
+                failure_type="audit_failure",
+                recorded_at="2026-07-16T20:31:00+00:00",
+            )
             result = deploy_checkpoint(
                 workspace=manager,
                 confirmation=CONFIRMATION_TEXT,
@@ -83,6 +105,8 @@ class HumanAdamDeployTests(unittest.TestCase):
                 thread_id="canonical-thread",
                 deployment_receipt_path=receipt_path,
                 deployment_diagnostic_path=diagnostic_path,
+                deployment_failure_history_path=failure_history_path,
+                profile_id="human_adam",
             )
             source_head = git(source, "rev-parse", "HEAD")
             origin_head = git(source, "rev-parse", "origin/main")
@@ -93,6 +117,7 @@ class HumanAdamDeployTests(unittest.TestCase):
                 diagnostic_path,
                 thread_id="canonical-thread",
             )
+            failure_history = load_deployment_failure_history(failure_history_path)
 
         self.assertTrue(result["applied"])
         self.assertTrue(result["pushed"])
@@ -108,12 +133,15 @@ class HumanAdamDeployTests(unittest.TestCase):
         self.assertNotIn("canonical-thread", receipt_text)
         self.assertNotIn(str(root), receipt_text)
         self.assertNotIn("VALUE = 27", receipt_text)
+        self.assertEqual(len(failure_history), 1)
+        self.assertEqual(failure_history[0]["checkpoint_head"], "f" * 40)
 
     def test_push_failure_persists_safe_exact_stage_without_exception_detail(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             _source, manager, checkpoint = prepare_checkpoint(root)
             diagnostic_path = root / "deployment_diagnostic.json"
+            failure_history_path = root / "deployment_failures.json"
 
             def fail_during_push(*, progress_callback, **_kwargs):
                 progress_callback("remote_recheck", "running")
@@ -138,6 +166,8 @@ class HumanAdamDeployTests(unittest.TestCase):
                         thread_id="canonical-thread",
                         deployment_receipt_path=root / "deployment_receipt.json",
                         deployment_diagnostic_path=diagnostic_path,
+                        deployment_failure_history_path=failure_history_path,
+                        profile_id="knihovna",
                     )
 
             diagnostic_text = diagnostic_path.read_text(encoding="utf-8")
@@ -145,19 +175,39 @@ class HumanAdamDeployTests(unittest.TestCase):
                 diagnostic_path,
                 thread_id="canonical-thread",
             )
+            failure_history_text = failure_history_path.read_text(encoding="utf-8")
+            failure_history = load_deployment_failure_history(failure_history_path)
 
         self.assertEqual(diagnostic["stage"], "push")
         self.assertEqual(diagnostic["outcome"], "failed")
         self.assertNotIn("tajná", str(raised.exception))
         self.assertNotIn("private", diagnostic_text)
         self.assertNotIn("example", diagnostic_text)
+        self.assertEqual(
+            failure_history,
+            [
+                {
+                    "recorded_at": failure_history[0]["recorded_at"],
+                    "profile_id": "knihovna",
+                    "checkpoint_head": checkpoint["checkpoint_head"],
+                    "stage": "push",
+                    "failure_type": "push_failure",
+                }
+            ],
+        )
+        self.assertNotIn("tajná", failure_history_text)
+        self.assertNotIn("private", failure_history_text)
+        self.assertNotIn("example", failure_history_text)
 
     def test_restart_result_is_persistent_safe_and_thread_scoped(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             diagnostic_path = Path(temp_dir) / "deployment_diagnostic.json"
+            failure_history_path = Path(temp_dir) / "deployment_failures.json"
             service = SimpleNamespace(
                 hub=SimpleNamespace(snapshot=lambda: {"thread_id": "canonical-thread"}),
                 deployment_diagnostic_path=diagnostic_path,
+                deployment_failure_history_path=failure_history_path,
+                work_profile_id="human_adam",
             )
 
             running = record_deployment_restart(
@@ -175,12 +225,15 @@ class HumanAdamDeployTests(unittest.TestCase):
                 thread_id="different-thread",
             )
             diagnostic_text = diagnostic_path.read_text(encoding="utf-8")
+            failure_history = load_deployment_failure_history(failure_history_path)
 
         self.assertEqual(running["stage"], "restart")
         self.assertEqual(running["outcome"], "running")
         self.assertEqual(failed["outcome"], "failed")
         self.assertIsNone(wrong_thread)
         self.assertNotIn("canonical-thread", diagnostic_text)
+        self.assertEqual(failure_history[0]["stage"], "restart")
+        self.assertEqual(failure_history[0]["failure_type"], "restart_failure")
 
     def test_pending_receipt_never_becomes_public_confirmation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -248,6 +301,7 @@ class HumanAdamDeployTests(unittest.TestCase):
             source, manager, checkpoint = prepare_checkpoint(root)
             original = git(source, "rev-parse", "HEAD")
             receipt_path = root / "failed-deployment-receipt.json"
+            failure_history_path = root / "deployment_failures.json"
             with self.assertRaises(HumanAdamDeployError):
                 deploy_checkpoint(
                     workspace=manager,
@@ -265,13 +319,96 @@ class HumanAdamDeployTests(unittest.TestCase):
                     gate_log_path=root / "failed-gate.log",
                     thread_id="canonical-thread",
                     deployment_receipt_path=receipt_path,
+                    deployment_failure_history_path=failure_history_path,
+                    profile_id="human_adam",
                 )
             source_after = git(source, "rev-parse", "HEAD")
             status = manager.status()
+            failure_history = load_deployment_failure_history(failure_history_path)
 
         self.assertEqual(source_after, original)
         self.assertEqual(status["workspace_relation"], "local_ahead")
         self.assertFalse(receipt_path.exists())
+        self.assertEqual(failure_history[0]["stage"], "gate")
+        self.assertEqual(failure_history[0]["failure_type"], "test_failure")
+
+    def test_syntax_failure_is_categorized_without_storing_gate_output(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _source, manager, checkpoint = prepare_checkpoint(root)
+            failure_history_path = root / "deployment_failures.json"
+
+            with self.assertRaises(HumanAdamDeployError):
+                deploy_checkpoint(
+                    workspace=manager,
+                    confirmation=CONFIRMATION_TEXT,
+                    expected_checkpoint_head=checkpoint["checkpoint_head"],
+                    gate_runner=syntax_failing_gate,
+                    gate_log_path=root / "failed-gate.log",
+                    thread_id="canonical-thread",
+                    deployment_failure_history_path=failure_history_path,
+                    profile_id="human_adam",
+                )
+
+            failure_history_text = failure_history_path.read_text(encoding="utf-8")
+            failure_history = load_deployment_failure_history(failure_history_path)
+
+        self.assertEqual(failure_history[0]["failure_type"], "syntax_error")
+        self.assertNotIn("tajná", failure_history_text)
+        self.assertNotIn("private", failure_history_text)
+        self.assertNotIn("example", failure_history_text)
+
+    def test_failure_history_is_strict_and_keeps_only_newest_twenty_records(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            history_path = Path(temp_dir) / "deployment_failures.json"
+            for index in range(MAX_DEPLOYMENT_FAILURE_RECORDS + 5):
+                write_deployment_failure(
+                    history_path,
+                    profile_id="human_adam",
+                    checkpoint_head=f"{index:040x}",
+                    stage="audit",
+                    failure_type="audit_failure",
+                    recorded_at=f"2026-07-17T20:31:{index:02d}+00:00",
+                )
+
+            history = load_deployment_failure_history(history_path)
+
+        self.assertEqual(len(history), MAX_DEPLOYMENT_FAILURE_RECORDS)
+        self.assertEqual(history[0]["checkpoint_head"], f"{5:040x}")
+        self.assertEqual(history[-1]["checkpoint_head"], f"{24:040x}")
+        self.assertEqual(
+            set(history[-1]),
+            {"recorded_at", "profile_id", "checkpoint_head", "stage", "failure_type"},
+        )
+
+    def test_separate_audit_failure_is_registered_without_exception_text(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _source, manager, checkpoint = prepare_checkpoint(root)
+            history_path = root / "deployment_failures.json"
+            service = SimpleNamespace(
+                hub=SimpleNamespace(snapshot=lambda: {"turn_busy": False}),
+                workspace=manager,
+                deployment_failure_history_path=history_path,
+                work_profile_id="knihovna",
+            )
+
+            with patch(
+                "app.communication.human_adam_deploy.audit_checkpoint",
+                side_effect=TakeoverError("tajná /private/example"),
+            ):
+                result = human_adam_deploy_audit_action(service=service)
+
+            history_text = history_path.read_text(encoding="utf-8")
+            history = load_deployment_failure_history(history_path)
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(history[0]["checkpoint_head"], checkpoint["checkpoint_head"])
+        self.assertEqual(history[0]["profile_id"], "knihovna")
+        self.assertEqual(history[0]["failure_type"], "audit_failure")
+        self.assertNotIn("tajná", history_text)
+        self.assertNotIn("private", history_text)
+        self.assertNotIn("example", history_text)
 
     def test_deploy_requires_exact_confirmation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -15,6 +15,7 @@ from app.codex_appserver import AppServerError
 from app.communication.human_adam_deploy import (
     DEPLOYMENT_LOCK,
     DEFAULT_DEPLOYMENT_DIAGNOSTIC,
+    DEFAULT_DEPLOYMENT_FAILURE_HISTORY,
     DEFAULT_DEPLOYMENT_RECEIPT,
 )
 from app.communication.human_adam_service import (
@@ -151,6 +152,14 @@ class HumanAdamProfileManager:
     @property
     def deployment_diagnostic_path(self) -> Path:
         return self.active_service.deployment_diagnostic_path
+
+    @property
+    def deployment_failure_history_path(self) -> Path:
+        return self.active_service.deployment_failure_history_path
+
+    @property
+    def work_profile_id(self) -> str:
+        return self.active_service.work_profile_id
 
     def _profile_rows(self) -> list[dict[str, Any]]:
         active_id = self.active_profile_id
@@ -351,6 +360,8 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         state_path=DEFAULT_HUMAN_SESSION_PATH,
         deployment_receipt_path=DEFAULT_DEPLOYMENT_RECEIPT,
         deployment_diagnostic_path=DEFAULT_DEPLOYMENT_DIAGNOSTIC,
+        deployment_failure_history_path=DEFAULT_DEPLOYMENT_FAILURE_HISTORY,
+        work_profile_id="human_adam",
         context_anchor_path=DEFAULT_HUMAN_CONTEXT_ANCHOR_PATH,
         developer_instructions=HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
     )
@@ -364,6 +375,8 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         state_path=PRIVATE_COMMUNICATION_ROOT / "knihovna_session.json",
         deployment_receipt_path=PRIVATE_COMMUNICATION_ROOT / "knihovna_deployment_receipt.json",
         deployment_diagnostic_path=PRIVATE_COMMUNICATION_ROOT / "knihovna_deployment_diagnostic.json",
+        deployment_failure_history_path=PRIVATE_COMMUNICATION_ROOT / "knihovna_deployment_failures.json",
+        work_profile_id="knihovna",
         context_anchor_path=KNIHOVNA_CONTEXT_ANCHOR_PATH,
         developer_instructions=KNIHOVNA_DEVELOPER_INSTRUCTIONS,
         tvbcp_relative_path=KNIHOVNA_TVBCP_RELATIVE_PATH,

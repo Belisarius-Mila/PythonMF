@@ -12,6 +12,7 @@ from typing import Any, Callable
 from app.codex_appserver import AppServerError, CodexAppServerClient, UnixSocketAppServerTransport
 from app.communication.human_adam_deploy import (
     DEFAULT_DEPLOYMENT_DIAGNOSTIC,
+    DEFAULT_DEPLOYMENT_FAILURE_HISTORY,
     DEFAULT_DEPLOYMENT_RECEIPT,
     load_deployment_confirmation,
     load_deployment_diagnostic,
@@ -73,6 +74,18 @@ class ContextAnchorError(SessionHubError):
     """Raised when the optional private continuity anchor is unsafe or unreadable."""
 
 
+class ContextAnchorConflictError(ContextAnchorError):
+    """Raised when a stale editor tries to replace a newer anchor revision."""
+
+    def __init__(self, *, expected_revision: int, current_revision: int):
+        self.expected_revision = expected_revision
+        self.current_revision = current_revision
+        super().__init__(
+            "Kotva byla mezitím změněna na jiném zařízení. "
+            "Tento starší editor nic nepřepsal; zachovej si rozepsaný text a načti aktuální revizi."
+        )
+
+
 def empty_context_anchor() -> dict[str, Any]:
     return {
         "schema_version": CONTEXT_ANCHOR_SCHEMA_VERSION,
@@ -113,6 +126,12 @@ def _validated_anchor_timestamp(value: object, *, allow_empty: bool = False) -> 
     return timestamp
 
 
+def _validated_expected_revision(value: object) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise ContextAnchorError("Změna aktivního kontextu nemá platnou očekávanou revizi.")
+    return value
+
+
 def load_context_anchor(path: Path) -> dict[str, Any]:
     target = Path(path)
     if not target.exists():
@@ -139,10 +158,17 @@ def load_context_anchor(path: Path) -> dict[str, Any]:
     }
 
 
-def write_context_anchor(path: Path, *, operation: str, content: str = "") -> dict[str, Any]:
+def write_context_anchor(
+    path: Path,
+    *,
+    operation: str,
+    expected_revision: int,
+    content: str = "",
+) -> dict[str, Any]:
     safe_operation = str(operation or "").strip().lower()
     if safe_operation not in CONTEXT_ANCHOR_OPERATIONS:
         raise ContextAnchorError("Aktivní kontext má neznámou operaci a nebyl změněn.")
+    safe_expected_revision = _validated_expected_revision(expected_revision)
     safe_content = _validated_anchor_content(content) if safe_operation == "save" else ""
 
     def updater(current: Any) -> dict[str, Any]:
@@ -155,6 +181,11 @@ def write_context_anchor(path: Path, *, operation: str, content: str = "") -> di
                 revision = max(0, int(current.get("revision") or 0))
             except (TypeError, ValueError) as exc:
                 raise ContextAnchorError("Stávající aktivní kontext má neplatnou revizi a nebyl přepsán.") from exc
+        if revision != safe_expected_revision:
+            raise ContextAnchorConflictError(
+                expected_revision=safe_expected_revision,
+                current_revision=revision,
+            )
         current_active = current.get("active") is True
         current_content = _validated_anchor_content(current.get("content"), allow_empty=not current_active)
         _validated_anchor_timestamp(current.get("updated_at"), allow_empty=not current_content)
@@ -266,6 +297,8 @@ class HumanAdamService:
         state_path: Path = DEFAULT_SESSION_STATE_PATH,
         deployment_receipt_path: Path = DEFAULT_DEPLOYMENT_RECEIPT,
         deployment_diagnostic_path: Path | None = None,
+        deployment_failure_history_path: Path | None = None,
+        work_profile_id: str = "human_adam",
         context_anchor_path: Path = DEFAULT_CONTEXT_ANCHOR_PATH,
         codex_binary: str = DEFAULT_CODEX_BIN,
         profile_getter: Callable[..., dict[str, Any]] = read_human_adam_runtime_profile,
@@ -294,6 +327,18 @@ class HumanAdamService:
                 else self.deployment_receipt_path.with_name("deployment_diagnostic.json")
             )
         )
+        self.deployment_failure_history_path = Path(
+            deployment_failure_history_path
+            if deployment_failure_history_path is not None
+            else (
+                DEFAULT_DEPLOYMENT_FAILURE_HISTORY
+                if self.deployment_receipt_path == DEFAULT_DEPLOYMENT_RECEIPT
+                else self.deployment_receipt_path.with_name("deployment_failures.json")
+            )
+        )
+        self.work_profile_id = str(work_profile_id or "").strip().lower()
+        if not re.fullmatch(r"[a-z][a-z0-9_-]{1,31}", self.work_profile_id):
+            raise ValueError("Pracovní profil služby nemá platný bezpečný identifikátor.")
         self._hub = hub
 
     @property
@@ -455,7 +500,14 @@ class HumanAdamService:
             payload["content"] = str(anchor.get("content") or "")
         return payload
 
-    def set_context_anchor(self, *, operation: str, content: str = "", confirmed: bool) -> dict[str, Any]:
+    def set_context_anchor(
+        self,
+        *,
+        operation: str,
+        expected_revision: int,
+        content: str = "",
+        confirmed: bool,
+    ) -> dict[str, Any]:
         if not confirmed:
             raise ContextAnchorError("Změna aktivního kontextu vyžaduje výslovnou akci uživatele.")
         session = self.hub.snapshot()
@@ -464,6 +516,7 @@ class HumanAdamService:
         anchor = write_context_anchor(
             self.context_anchor_path,
             operation=operation,
+            expected_revision=expected_revision,
             content=str(content or ""),
         )
         return {
@@ -558,11 +611,20 @@ def human_adam_context_anchor_update_action(
     try:
         return service.set_context_anchor(
             operation=str(payload.get("operation") or ""),
+            expected_revision=payload.get("expected_revision"),
             content=str(payload.get("content") or ""),
             confirmed=payload.get("confirmed") is True,
         )
     except SessionBusyError as exc:
         return {"ok": False, "status": "human_adam_busy", "message": str(exc)}
+    except ContextAnchorConflictError as exc:
+        return {
+            "ok": False,
+            "status": "human_adam_context_anchor_conflict",
+            "message": str(exc),
+            "expected_revision": exc.expected_revision,
+            "current_revision": exc.current_revision,
+        }
     except (ContextAnchorError, OSError, ValueError) as exc:
         return {"ok": False, "status": "human_adam_context_anchor_failed", "message": str(exc)}
 

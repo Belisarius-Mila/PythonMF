@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any, Callable, TYPE_CHECKING
 
 from app.codex_appserver import AppServerError, utc_now
-from app.file_persistence import FilePersistenceError, atomic_write_json
+from app.file_persistence import FilePersistenceError, atomic_write_json, update_json_file
 from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
 from app.communication.session_hub import SessionHubError
 from scripts.human_adam_takeover import (
@@ -40,10 +40,15 @@ DEFAULT_DEPLOYMENT_RECEIPT = (
 DEFAULT_DEPLOYMENT_DIAGNOSTIC = (
     PROJECT_ROOT / "data" / "private" / "communication" / "human_adam_deployment_diagnostic.json"
 )
+DEFAULT_DEPLOYMENT_FAILURE_HISTORY = (
+    PROJECT_ROOT / "data" / "private" / "communication" / "human_adam_deployment_failures.json"
+)
 DEPLOYMENT_LOCK = threading.Lock()
 MAX_GATE_LOG_CHARS = 2_000_000
+MAX_DEPLOYMENT_FAILURE_RECORDS = 20
 DEPLOYMENT_RECEIPT_SCHEMA = 1
 DEPLOYMENT_DIAGNOSTIC_SCHEMA = 1
+DEPLOYMENT_FAILURE_HISTORY_SCHEMA = 1
 DEPLOYMENT_PENDING = "gate_passed_pending_apply"
 DEPLOYMENT_COMPLETE = "deployed"
 DEPLOYMENT_DIAGNOSTIC_STAGES = frozenset(
@@ -59,6 +64,22 @@ DEPLOYMENT_DIAGNOSTIC_STAGES = frozenset(
     }
 )
 DEPLOYMENT_DIAGNOSTIC_OUTCOMES = frozenset({"running", "passed", "failed"})
+DEPLOYMENT_FAILURE_TYPES = frozenset(
+    {
+        "audit_failure",
+        "syntax_error",
+        "test_failure",
+        "gate_timeout",
+        "gate_process_error",
+        "gate_failure",
+        "receipt_failure",
+        "remote_recheck_failure",
+        "push_failure",
+        "fast_forward_failure",
+        "workspace_alignment_failure",
+        "restart_failure",
+    }
+)
 DEPLOYMENT_DIAGNOSTIC_MESSAGES = {
     ("audit", "running"): "Ověřuji přesný checkpoint a stav Git.",
     ("audit", "passed"): "Audit checkpointu prošel.",
@@ -89,6 +110,16 @@ DEPLOYMENT_DIAGNOSTIC_MESSAGES = {
 
 class HumanAdamDeployError(AppServerError):
     """Raised before main changes when a deployment proof is not sufficient."""
+
+
+class HumanAdamGateError(HumanAdamDeployError):
+    """Quality-gate failure carrying only one allowlisted postmortem category."""
+
+    def __init__(self, message: str, *, failure_type: str):
+        if failure_type not in DEPLOYMENT_FAILURE_TYPES:
+            failure_type = "gate_failure"
+        self.failure_type = failure_type
+        super().__init__(message)
 
 
 @dataclass(frozen=True)
@@ -200,6 +231,162 @@ def write_deployment_diagnostic(
     except (FilePersistenceError, OSError) as exc:
         raise HumanAdamDeployError("Diagnostiku nasazení nelze bezpečně uložit.") from exc
     return payload
+
+
+def _normalized_deployment_failure_record(
+    *,
+    profile_id: str,
+    checkpoint_head: str,
+    stage: str,
+    failure_type: str,
+    recorded_at: str,
+) -> dict[str, Any]:
+    clean_profile_id = str(profile_id or "").strip().lower()
+    clean_head = str(checkpoint_head or "").strip().lower()
+    clean_stage = str(stage or "").strip()
+    clean_failure_type = str(failure_type or "").strip()
+    clean_recorded_at = str(recorded_at or "").strip()
+    if not re.fullmatch(r"[a-z][a-z0-9_-]{1,31}", clean_profile_id):
+        raise HumanAdamDeployError("Historie selhání nemá platný pracovní profil.")
+    if not re.fullmatch(r"[0-9a-f]{40}", clean_head):
+        raise HumanAdamDeployError("Historie selhání nemá platný checkpoint.")
+    if clean_stage not in DEPLOYMENT_DIAGNOSTIC_STAGES:
+        raise HumanAdamDeployError("Historie selhání nemá platnou fázi.")
+    if clean_failure_type not in DEPLOYMENT_FAILURE_TYPES:
+        raise HumanAdamDeployError("Historie selhání nemá platný typ chyby.")
+    try:
+        parsed_time = datetime.fromisoformat(clean_recorded_at.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise HumanAdamDeployError("Historie selhání nemá platný čas.") from exc
+    if parsed_time.tzinfo is None:
+        raise HumanAdamDeployError("Historie selhání nemá časovou zónu.")
+    return {
+        "recorded_at": parsed_time.isoformat(),
+        "profile_id": clean_profile_id,
+        "checkpoint_head": clean_head,
+        "stage": clean_stage,
+        "failure_type": clean_failure_type,
+    }
+
+
+def write_deployment_failure(
+    path: Path,
+    *,
+    profile_id: str,
+    checkpoint_head: str,
+    stage: str,
+    failure_type: str,
+    recorded_at: str,
+) -> dict[str, Any]:
+    """Append one redacted failure and retain only the newest bounded history."""
+    record = _normalized_deployment_failure_record(
+        profile_id=profile_id,
+        checkpoint_head=checkpoint_head,
+        stage=stage,
+        failure_type=failure_type,
+        recorded_at=recorded_at,
+    )
+
+    def updater(current: Any) -> dict[str, Any]:
+        if not isinstance(current, dict) or current.get("schema_version") != DEPLOYMENT_FAILURE_HISTORY_SCHEMA:
+            if current != {"schema_version": DEPLOYMENT_FAILURE_HISTORY_SCHEMA, "failures": []}:
+                raise HumanAdamDeployError("Stávající historie selhání má neznámé schéma a nebyla přepsána.")
+        existing = current.get("failures")
+        if not isinstance(existing, list):
+            raise HumanAdamDeployError("Stávající historie selhání je neplatná a nebyla přepsána.")
+        normalized_existing = []
+        for item in existing:
+            if not isinstance(item, dict) or set(item) != set(record):
+                raise HumanAdamDeployError("Stávající historie selhání je neplatná a nebyla přepsána.")
+            normalized_existing.append(_normalized_deployment_failure_record(**item))
+        return {
+            "schema_version": DEPLOYMENT_FAILURE_HISTORY_SCHEMA,
+            "failures": [*normalized_existing, record][-MAX_DEPLOYMENT_FAILURE_RECORDS:],
+        }
+
+    try:
+        stored = update_json_file(
+            Path(path),
+            updater,
+            default={"schema_version": DEPLOYMENT_FAILURE_HISTORY_SCHEMA, "failures": []},
+            ensure_ascii=False,
+            indent=2,
+        )
+    except (HumanAdamDeployError, FilePersistenceError, OSError, ValueError) as exc:
+        if isinstance(exc, HumanAdamDeployError):
+            raise
+        raise HumanAdamDeployError("Historii selhání nasazení nelze bezpečně uložit.") from exc
+    return dict(stored)
+
+
+def load_deployment_failure_history(path: Path) -> list[dict[str, Any]]:
+    """Load only strictly validated redacted records; malformed history is ignored."""
+    try:
+        raw = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    if not isinstance(raw, dict) or raw.get("schema_version") != DEPLOYMENT_FAILURE_HISTORY_SCHEMA:
+        return []
+    failures = raw.get("failures")
+    if not isinstance(failures, list) or len(failures) > MAX_DEPLOYMENT_FAILURE_RECORDS:
+        return []
+    normalized = []
+    try:
+        for item in failures:
+            if not isinstance(item, dict) or set(item) != {
+                "recorded_at",
+                "profile_id",
+                "checkpoint_head",
+                "stage",
+                "failure_type",
+            }:
+                return []
+            normalized.append(_normalized_deployment_failure_record(**item))
+    except HumanAdamDeployError:
+        return []
+    return normalized
+
+
+def _record_deployment_failure(
+    path: Path | None,
+    *,
+    profile_id: str,
+    checkpoint_head: str,
+    stage: str,
+    failure_type: str,
+) -> dict[str, Any] | None:
+    if path is None:
+        return None
+    try:
+        stored = write_deployment_failure(
+            path,
+            profile_id=profile_id,
+            checkpoint_head=checkpoint_head,
+            stage=stage,
+            failure_type=failure_type,
+            recorded_at=utc_now(),
+        )
+    except (HumanAdamDeployError, FilePersistenceError, OSError, ValueError):
+        return None
+    failures = stored.get("failures")
+    return dict(failures[-1]) if isinstance(failures, list) and failures else None
+
+
+def _deployment_failure_type(stage: str, exc: BaseException) -> str:
+    explicit = str(getattr(exc, "failure_type", "") or "").strip()
+    if explicit in DEPLOYMENT_FAILURE_TYPES:
+        return explicit
+    by_stage = {
+        "audit": "audit_failure",
+        "gate": "gate_failure",
+        "receipt": "receipt_failure",
+        "remote_recheck": "remote_recheck_failure",
+        "push": "push_failure",
+        "fast_forward": "fast_forward_failure",
+        "workspace_alignment": "workspace_alignment_failure",
+        "restart": "restart_failure",
+    }
+    return by_stage.get(str(stage or "").strip(), "audit_failure")
 
 
 def load_deployment_diagnostic(
@@ -327,7 +514,10 @@ def run_checkpoint_quality_gate(
 ) -> GateEvidence:
     gate_script = workspace.project_root / "scripts" / "cockpit_quality_gate.py"
     if not TRUSTED_PYTHON.is_file() or not gate_script.is_file():
-        raise HumanAdamDeployError("Chybí důvěryhodné Python prostředí nebo quality gate checkpointu.")
+        raise HumanAdamGateError(
+            "Chybí důvěryhodné Python prostředí nebo quality gate checkpointu.",
+            failure_type="gate_process_error",
+        )
     started = time.monotonic()
     try:
         completed = runner(
@@ -338,8 +528,16 @@ def run_checkpoint_quality_gate(
             timeout=timeout,
             check=False,
         )
-    except (OSError, subprocess.TimeoutExpired) as exc:
-        raise HumanAdamDeployError("Plná brána checkpointu se nedokončila; nic nebylo nasazeno.") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise HumanAdamGateError(
+            "Plná brána checkpointu se nedokončila; nic nebylo nasazeno.",
+            failure_type="gate_timeout",
+        ) from exc
+    except OSError as exc:
+        raise HumanAdamGateError(
+            "Plná brána checkpointu se nedokončila; nic nebylo nasazeno.",
+            failure_type="gate_process_error",
+        ) from exc
     duration = round(time.monotonic() - started, 1)
     output = f"{completed.stdout or ''}\n{completed.stderr or ''}".strip()
     log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -353,8 +551,15 @@ def run_checkpoint_quality_gate(
         log_path=str(log_path.relative_to(PROJECT_ROOT)) if log_path.is_relative_to(PROJECT_ROOT) else str(log_path),
     )
     if not evidence.passed:
-        raise HumanAdamDeployError(
-            f"Plná brána checkpointu neprošla; nic nebylo nasazeno. Log: {evidence.log_path}"
+        folded_output = output.casefold()
+        failure_type = (
+            "syntax_error"
+            if "syntaxerror" in folded_output or re.search(r"(?:python|javascript|shell)?\s*syntax:\s*(?:failed|error)", folded_output)
+            else ("test_failure" if "failed" in folded_output or "error" in folded_output else "gate_failure")
+        )
+        raise HumanAdamGateError(
+            f"Plná brána checkpointu neprošla; nic nebylo nasazeno. Log: {evidence.log_path}",
+            failure_type=failure_type,
         )
     return evidence
 
@@ -369,6 +574,8 @@ def deploy_checkpoint(
     thread_id: str = "",
     deployment_receipt_path: Path | None = None,
     deployment_diagnostic_path: Path | None = None,
+    deployment_failure_history_path: Path | None = None,
+    profile_id: str = "human_adam",
 ) -> dict[str, Any]:
     if str(confirmation or "").strip() != CONFIRMATION_TEXT:
         raise HumanAdamDeployError(f"Chybí přesná potvrzovací věta: {CONFIRMATION_TEXT}")
@@ -450,6 +657,13 @@ def deploy_checkpoint(
                 )
         except (HumanAdamDeployError, TakeoverError, AppServerError, OSError, ValueError) as exc:
             diagnostic = record(current_stage, "failed")
+            _record_deployment_failure(
+                deployment_failure_history_path,
+                profile_id=profile_id,
+                checkpoint_head=expected,
+                stage=current_stage,
+                failure_type=_deployment_failure_type(current_stage, exc),
+            )
             safe_message = (
                 diagnostic.get("message")
                 if diagnostic
@@ -471,6 +685,13 @@ def deploy_checkpoint(
                 )
             except (HumanAdamDeployError, FilePersistenceError, OSError):
                 receipt_warning = "Nasazení proběhlo; potvrzení zůstalo v obnovitelném mezistavu."
+                _record_deployment_failure(
+                    deployment_failure_history_path,
+                    profile_id=profile_id,
+                    checkpoint_head=expected,
+                    stage="receipt",
+                    failure_type="receipt_failure",
+                )
             deployment_confirmation = load_deployment_confirmation(
                 deployment_receipt_path,
                 thread_id=thread_id,
@@ -499,17 +720,26 @@ def record_deployment_restart(
     outcome: str,
 ) -> dict[str, Any] | None:
     """Persist the restart boundary without storing process details or private paths."""
+    if outcome == "failed":
+        _record_deployment_failure(
+            getattr(service, "deployment_failure_history_path", None),
+            profile_id=str(getattr(service, "work_profile_id", "human_adam") or "human_adam"),
+            checkpoint_head=checkpoint_head,
+            stage="restart",
+            failure_type="restart_failure",
+        )
     try:
         session = service.hub.snapshot()
     except (AppServerError, OSError, ValueError):
         return None
-    return _record_deployment_diagnostic(
+    diagnostic = _record_deployment_diagnostic(
         service.deployment_diagnostic_path,
         checkpoint_head=checkpoint_head,
         thread_id=str(session.get("thread_id") or ""),
         stage="restart",
         outcome=outcome,
     )
+    return diagnostic
 
 
 def _turn_busy(service: HumanAdamService) -> bool:
@@ -524,11 +754,25 @@ def human_adam_deploy_audit_action(*, service: HumanAdamService) -> dict[str, An
                 return human_adam_deploy_audit_action(service=active_service)
         except SessionHubError as exc:
             return {"ok": False, "ready": False, "message": str(exc)}
+    audit_started = False
     try:
         if _turn_busy(service):
             raise HumanAdamDeployError("Audit nelze spustit během aktivního tahu Adama.")
+        audit_started = True
         return audit_checkpoint(workspace=service.workspace)
     except (HumanAdamDeployError, TakeoverError, AppServerError, OSError, ValueError) as exc:
+        if audit_started:
+            try:
+                checkpoint_head = str(service.workspace.status().get("head") or "")
+            except (AppServerError, OSError, ValueError):
+                checkpoint_head = ""
+            _record_deployment_failure(
+                getattr(service, "deployment_failure_history_path", None),
+                profile_id=str(getattr(service, "work_profile_id", "human_adam") or "human_adam"),
+                checkpoint_head=checkpoint_head,
+                stage="audit",
+                failure_type=_deployment_failure_type("audit", exc),
+            )
         return {"ok": False, "ready": False, "message": str(exc)}
 
 
@@ -559,6 +803,8 @@ def human_adam_deploy_action(
             thread_id=thread_id,
             deployment_receipt_path=service.deployment_receipt_path,
             deployment_diagnostic_path=service.deployment_diagnostic_path,
+            deployment_failure_history_path=service.deployment_failure_history_path,
+            profile_id=service.work_profile_id,
         )
         return {"ok": True, **result}
     except (HumanAdamDeployError, TakeoverError, AppServerError, OSError, ValueError) as exc:

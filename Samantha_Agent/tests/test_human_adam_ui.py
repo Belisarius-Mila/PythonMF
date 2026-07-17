@@ -174,7 +174,8 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Pozastavit", panel_source)
         self.assertIn("Smazat", panel_source)
         self.assertIn('api("/api/human-adam/context-anchor"', save_source)
-        self.assertIn("JSON.stringify({operation,content:operation === \"save\" ? content : \"\",confirmed:true})", save_source)
+        self.assertIn("expected_revision:savedContextAnchorRevision", save_source)
+        self.assertIn('content:operation === "save" ? content : ""', save_source)
         self.assertIn('contextAnchorSaveBtn.addEventListener("click", () => changeContextAnchor("save"));', HUMAN_ADAM_HTML)
         self.assertIn('contextAnchorPinBtn.addEventListener("click", () => changeContextAnchor("pin"));', HUMAN_ADAM_HTML)
         self.assertIn('contextAnchorPauseBtn.addEventListener("click", () => changeContextAnchor("pause"));', HUMAN_ADAM_HTML)
@@ -191,6 +192,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('"Kontext: žádný"', source)
         self.assertIn("savedContextAnchorContent = hasContent ? content", source)
         self.assertIn("savedContextAnchorActive = hasContent && anchor.active === true", source)
+        self.assertIn("savedContextAnchorRevision = Number.isSafeInteger(revision)", source)
         self.assertIn("Uloženo a pozastaveno", source)
         self.assertIn("Napiš návrh do pole a stiskni Uložit návrh.", source)
         self.assertIn("nechat připravit Adamem", source)
@@ -222,11 +224,26 @@ class HumanAdamUiTests(unittest.TestCase):
         source = HUMAN_ADAM_HTML[change_start:change_end]
 
         self.assertIn('operation === "save" ? content : ""', source)
+        self.assertIn("expected_revision:savedContextAnchorRevision", source)
         self.assertNotIn("active:", source)
         self.assertIn("payload.active", source)
         self.assertIn("Aktualizovaná připnutá kotva se použije od příštího tahu.", source)
         self.assertIn("Kotva je soukromě uložená a zatím se k tahům nepřikládá.", source)
         self.assertIn("Kotva je pozastavená, zůstává uložená", source)
+
+    def test_context_anchor_conflict_preserves_editor_and_requires_explicit_refresh(self) -> None:
+        change_start = HUMAN_ADAM_HTML.index("async function changeContextAnchor(operation)")
+        change_end = HUMAN_ADAM_HTML.index("function validContextAnchorProposal", change_start)
+        source = HUMAN_ADAM_HTML[change_start:change_end]
+
+        self.assertIn('error.status = String(payload.status || "")', source)
+        self.assertIn('error.status === "human_adam_context_anchor_conflict"', source)
+        self.assertIn("Tento editor nic nepřepsal a jeho obsah zůstal zachovaný.", source)
+        self.assertIn("Nejdřív si případný rozepsaný text zkopíruj", source)
+        self.assertIn("potom stiskni Obnovit", source)
+        conflict_source = source[source.index('if (error.status === "human_adam_context_anchor_conflict")'):]
+        self.assertNotIn("contextAnchorInput.value =", conflict_source)
+        self.assertNotIn("loadContextAnchor()", conflict_source)
 
     def test_context_anchor_draft_requires_explicit_discard_before_reload_or_delete(self) -> None:
         load_start = HUMAN_ADAM_HTML.index("async function loadContextAnchor()")

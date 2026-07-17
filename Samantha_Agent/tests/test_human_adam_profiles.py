@@ -126,6 +126,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             state_path=root / "human.json",
             context_anchor_path=root / "human-anchor.json",
             deployment_receipt_path=root / "human-receipt.json",
+            work_profile_id="human_adam",
             hub=human_hub,  # type: ignore[arg-type]
             profile_getter=fake_profile,
         )
@@ -135,6 +136,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             state_path=root / "library.json",
             context_anchor_path=root / "library-anchor.json",
             deployment_receipt_path=root / "library-receipt.json",
+            work_profile_id="knihovna",
             hub=library_hub,  # type: ignore[arg-type]
             profile_getter=fake_profile,
             tvbcp_relative_path=Path("memory/tvbcp/knihovna_cockpit.txt"),
@@ -159,6 +161,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(status["work_profile"]["id"], "human_adam")
         self.assertEqual([item["id"] for item in status["work_profiles"]], ["human_adam", "knihovna"])
         self.assertEqual(status["work_profiles"][1]["tvbcp_title"], "Knihovna v Cockpitu")
+        self.assertEqual(manager.work_profile_id, "human_adam")
 
     def test_switch_requires_confirmation_and_preserves_active_profile(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -182,6 +185,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertTrue(result["switched"])
         self.assertEqual(result["work_profile"]["id"], "knihovna")
+        self.assertEqual(manager.work_profile_id, "knihovna")
         self.assertEqual(result["session"]["thread_id"], "library-thread")
         self.assertEqual(library_workspace.prepare_count, 1)
         self.assertEqual(human_hub.close_count, 1)
@@ -195,10 +199,15 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             human_hub.connected = True
             saved = manager.set_context_anchor(
                 operation="save",
+                expected_revision=0,
                 content="Cíl: Human–Adam kontinuita",
                 confirmed=True,
             )
-            pinned = manager.set_context_anchor(operation="pin", confirmed=True)
+            pinned = manager.set_context_anchor(
+                operation="pin",
+                expected_revision=saved["revision"],
+                confirmed=True,
+            )
             manager.switch(profile_id="knihovna", confirmed=True)
             library_anchor = manager.context_anchor()
             manager.switch(profile_id="human_adam", confirmed=True)

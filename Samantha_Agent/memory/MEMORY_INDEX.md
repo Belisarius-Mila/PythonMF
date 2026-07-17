@@ -100,6 +100,12 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `handoffs/human_adam_revision_failure_history_2026_07_17.md` - [PRIPOMENOUT]
+  priorita 1: očekávaná revize chrání soukromou kotvu před přepsáním ze starší
+  karty a oddělené private registry Human–Adam/Knihovna drží posledních 20
+  redigovaných selhání bez zpráv, logů a soukromých textů. Plná brána prošla 764
+  testy; po checkpointu/pushi zbývá řízené nasazení a živý Mac/iPhone retest.
+
 - `handoffs/human_adam_knihovna_profile_2026_07_17.md` -
   implementovaný dvouprofilový pilot Human–Adam / Knihovna s atomickým přepnutím
   vlákna, workspace, TVBCP a deploymentu; plná brána 734 testů, commit/push

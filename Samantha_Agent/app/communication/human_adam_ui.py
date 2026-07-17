@@ -271,6 +271,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let contextAnchorLoaded = false;
   let savedContextAnchorContent = "";
   let savedContextAnchorActive = false;
+  let savedContextAnchorRevision = 0;
   const HUMAN_ADAM_SEND_PATH = "/api/human-adam/send";
   const CONTEXT_ANCHOR_PROPOSAL_PROMPT = `Připrav návrh aktivního kontextu pro další pokračování tohoto pracovního profilu. Odpověz pouze stručným českým textem do 6000 znaků v přesné struktuře:
 Cíl:
@@ -928,6 +929,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     contextAnchorLoaded = false;
     savedContextAnchorContent = "";
     savedContextAnchorActive = false;
+    savedContextAnchorRevision = 0;
     contextAnchorInput.value = "";
     contextAnchorSaveBtn.textContent = "Uložit návrh";
     contextAnchorMeta.textContent = "Kontext se načte až po otevření.";
@@ -948,6 +950,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     contextAnchorInput.value = savedContextAnchorContent;
     contextAnchorSaveBtn.textContent = hasContent ? "Uložit aktualizaci" : "Uložit návrh";
     const revision = Number(anchor.revision || 0);
+    savedContextAnchorRevision = Number.isSafeInteger(revision) && revision >= 0 ? revision : 0;
     contextAnchorMeta.textContent = savedContextAnchorActive
       ? `Připnuto · revize ${revision} · ${formatTime(anchor.updated_at)}`
       : (hasContent
@@ -1009,9 +1012,19 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     try {
       const payload = await api("/api/human-adam/context-anchor", {
         method:"POST",
-        body:JSON.stringify({operation,content:operation === "save" ? content : "",confirmed:true}),
+        body:JSON.stringify({
+          operation,
+          expected_revision:savedContextAnchorRevision,
+          content:operation === "save" ? content : "",
+          confirmed:true,
+        }),
       });
-      if (!payload.ok) throw new Error(payload.message || "Aktivní kontext nelze uložit.");
+      if (!payload.ok) {
+        const error = new Error(payload.message || "Aktivní kontext nelze uložit.");
+        error.status = String(payload.status || "");
+        error.currentRevision = Number(payload.current_revision);
+        throw error;
+      }
       renderContextAnchorEditor(payload);
       const successMessages = {
         save: payload.active
@@ -1023,7 +1036,13 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       };
       notice.textContent = successMessages[operation] || "Aktivní kontext byl změněn.";
     } catch (error) {
-      contextAnchorMeta.textContent = `Aktivní kontext nebyl změněn: ${error.message}`;
+      if (error.status === "human_adam_context_anchor_conflict") {
+        const newerRevision = Number.isSafeInteger(error.currentRevision) ? ` Aktuální je revize ${error.currentRevision}.` : "";
+        contextAnchorMeta.textContent = `Kotva byla mezitím změněna na jiném zařízení.${newerRevision} Tento editor nic nepřepsal a jeho obsah zůstal zachovaný. Nejdřív si případný rozepsaný text zkopíruj, potom stiskni Obnovit.`;
+        notice.textContent = "Konflikt kotvy: novější verze z Macu nebo iPhonu zůstala bezpečně zachovaná.";
+      } else {
+        contextAnchorMeta.textContent = `Aktivní kontext nebyl změněn: ${error.message}`;
+      }
     } finally { setBusy(false); }
   }
 
