@@ -159,6 +159,8 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("if (contextAnchorDraftDirty())", source)
         self.assertIn("profil jsem nepřepnul", source)
         self.assertIn("resetContextAnchorEditorState();", source)
+        self.assertIn("showProfileSwitchFailure", source)
+        self.assertIn('notice.scrollIntoView({block:"nearest",behavior:"smooth"});', HUMAN_ADAM_HTML)
         self.assertIn('profileSelect.addEventListener("change", syncControls);', HUMAN_ADAM_HTML)
         self.assertIn('profileSwitchBtn.addEventListener("click", switchProfile);', HUMAN_ADAM_HTML)
 

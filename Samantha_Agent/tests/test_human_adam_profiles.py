@@ -249,6 +249,37 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertIn("nejisté doručení", uncertain["message"])
         self.assertEqual(manager.active_profile_id, "human_adam")
 
+    def test_confirmed_turn_after_historical_uncertainty_allows_profile_switch(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _human_workspace, _library_workspace, human_hub, _library_hub = self.make_manager(Path(temp_dir))
+            human_hub.messages = [
+                {"status": "delivery_unknown", "recovery_required": True},
+                {"status": "completed", "recovery_required": False},
+            ]
+
+            result = manager.switch(profile_id="knihovna", confirmed=True)
+
+        self.assertTrue(result["ok"])
+        self.assertTrue(result["switched"])
+        self.assertEqual(manager.active_profile_id, "knihovna")
+
+    def test_new_uncertainty_after_last_confirmed_turn_still_blocks_profile_switch(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _human_workspace, _library_workspace, human_hub, _library_hub = self.make_manager(Path(temp_dir))
+            human_hub.messages = [
+                {"status": "completed", "recovery_required": False},
+                {"status": "delivery_unknown", "recovery_required": True},
+            ]
+
+            result = human_adam_profile_switch_action(
+                {"profile_id": "knihovna", "confirmed": True},
+                service=manager,
+            )
+
+        self.assertFalse(result["ok"])
+        self.assertIn("nejisté doručení", result["message"])
+        self.assertEqual(manager.active_profile_id, "human_adam")
+
     def test_switch_safely_fast_forwards_clean_target(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, _human_workspace, library_workspace, _human_hub, _library_hub = self.make_manager(Path(temp_dir))

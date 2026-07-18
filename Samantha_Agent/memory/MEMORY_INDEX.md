@@ -100,6 +100,13 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `handoffs/human_adam_profile_switch_recovery_2026_07_18.md` - [PRIPOMENOUT]
+  priorita 1: přepínání Human–Adam / Knihovna už nemá trvale blokovat stará
+  nejistá doručení, pokud po nich proběhl potvrzeně dokončený tah. Nová nejistota
+  zůstává fail-closed a UI ukáže chybu ve viditelné části i na iPhonu. Plná brána
+  prošla 768 testy; zbývá synchronizace profilů, restart a živý test oběma
+  směry.
+
 - `handoffs/human_adam_preserved_wip_visibility_2026_07_18.md` - [PRIPOMENOUT]
   priorita 1: TVBCP checkpoint, který při souběhu vypadal jako ztracený, byl
   bezeztrátově obnoven a nasazen jako `ebd47b9`. Nová backend/UI oprava odlišuje

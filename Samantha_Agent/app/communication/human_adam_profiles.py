@@ -246,12 +246,16 @@ class HumanAdamProfileManager:
 
     @staticmethod
     def _has_uncertain_delivery(session: dict[str, Any]) -> bool:
-        return any(
-            item.get("status") in {"pending", "delivery_unknown"}
-            or item.get("recovery_required") is True
-            for item in session.get("messages") or []
-            if isinstance(item, dict)
-        )
+        """Treat a later confirmed turn as the recovery boundary for older uncertainty."""
+        for item in reversed(session.get("messages") or []):
+            if not isinstance(item, dict):
+                continue
+            status = str(item.get("status") or "")
+            if status == "completed":
+                return False
+            if status in {"pending", "delivery_unknown"} or item.get("recovery_required") is True:
+                return True
+        return False
 
     @staticmethod
     def _assert_workspace_can_leave(status: dict[str, Any]) -> None:

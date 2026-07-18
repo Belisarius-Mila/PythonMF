@@ -843,18 +843,23 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     syncControls();
   }
 
+  function showProfileSwitchFailure(message) {
+    notice.textContent = message;
+    notice.scrollIntoView({block:"nearest",behavior:"smooth"});
+  }
+
   async function switchProfile() {
     if (busy || sendInFlight || sessionTurnBusy) return;
     const targetId = profileSelect.value;
     const targetLabel = profileSelect.options[profileSelect.selectedIndex]?.textContent || targetId;
     if (!targetId || targetId === activeProfileId) return;
     if (input.value.trim()) {
-      notice.textContent = "Nejdřív odešli nebo odstraň rozepsaný pokyn; profil jsem nepřepnul.";
+      showProfileSwitchFailure("Nejdřív odešli nebo odstraň rozepsaný pokyn; profil jsem nepřepnul.");
       profileSelect.value = activeProfileId;
       return;
     }
     if (contextAnchorDraftDirty()) {
-      notice.textContent = "Nejdřív ulož nebo výslovně zahoď rozepsanou změnu kotvy; profil jsem nepřepnul.";
+      showProfileSwitchFailure("Nejdřív ulož nebo výslovně zahoď rozepsanou změnu kotvy; profil jsem nepřepnul.");
       profileSelect.value = activeProfileId;
       return;
     }
@@ -878,7 +883,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       renderStatus(payload);
       notice.textContent = `Aktivní pracovní profil: ${activeProfileLabel}.`;
     } catch (error) {
-      notice.textContent = `Profil nebyl přepnut: ${error.message}`;
+      showProfileSwitchFailure(`Profil nebyl přepnut: ${error.message}`);
       await loadStatus();
     } finally { setBusy(false); }
   }
