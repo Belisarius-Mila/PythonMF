@@ -104,6 +104,13 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `handoffs/human_adam_thread_rotation_backend_wip_2026_07_19.md` - [PRIPOMENOUT]
+  priorita 1: izolovany WIP obsahuje hotovou bezpecnou rucni rotaci dlouheho
+  profiloveho vlakna vcetne profilove zamknuteho API a ovladani v panelu `Plan`.
+  Stare vlakno a historie zustavaji zachovane; audit je fail-closed a apply
+  vyzaduje aktivni kotvu i presnou vetu. Plna brana prosla 804 testy. Zbyva
+  potvrzene prevzeti do `main`, nasazeni, vizualni kontrola a zivy profilovy test.
+
 - `handoffs/human_adam_profile_switch_recovery_2026_07_18.md` - [PRIPOMENOUT]
   priorita 1: přepínání Human–Adam / Knihovna už nemá trvale blokovat stará
   nejistá doručení, pokud po nich proběhl potvrzeně dokončený tah. Nová nejistota

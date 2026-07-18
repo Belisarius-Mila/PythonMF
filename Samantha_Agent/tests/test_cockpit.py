@@ -234,6 +234,17 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/human-adam/context-anchor", self.cockpit_do_get_routes())
         self.assertIn("/api/human-adam/context-anchor", self.cockpit_do_post_routes())
 
+    def test_human_adam_thread_rotation_has_exact_confirmation_registry_card_and_routes(self) -> None:
+        card = next(
+            item for item in COCKPIT_POST_ACTIONS if item["path"] == "/api/human-adam/thread-rotation"
+        )
+
+        self.assertEqual(card["risk"], "private_write")
+        self.assertEqual(card["confirmation"], "exact_thread_rotation_phrase")
+        self.assertEqual(card["handler_name"], "human_adam_thread_rotation_action")
+        self.assertIn("/api/human-adam/thread-rotation", self.cockpit_do_get_routes())
+        self.assertIn("/api/human-adam/thread-rotation", self.cockpit_do_post_routes())
+
     def test_human_adam_deploy_route_persists_restart_boundary_and_result(self) -> None:
         source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
         route_start = source.index('if parsed.path == "/api/human-adam/deploy":')

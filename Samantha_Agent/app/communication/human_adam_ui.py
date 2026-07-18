@@ -78,6 +78,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #contextAnchorInput { flex:1; min-height:320px; font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; }
     #contextAnchorMeta,.context-anchor-help { margin:0; color:var(--muted); font-size:13px; }
     .context-anchor-actions { display:flex; justify-content:flex-end; gap:8px; }
+    .thread-rotation-box { margin-top:14px; padding-top:12px; border-top:1px solid #dbe3ee; display:grid; gap:8px; }
+    .thread-rotation-box h3 { margin:0; font-size:15px; }
+    .thread-rotation-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    #threadRotationConfirmation { width:100%; min-width:0; }
     @media (max-width:620px) { .head { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .head h1 { text-align:center; } .head-tools { grid-column:1/-1; grid-row:2; justify-content:center; } .profile-tools { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .profile-tools select { min-width:0; width:100%; } .back { padding:8px 10px; } #mobileStatusSummary { display:flex; } .status-details { display:none; } .status-details.expanded { display:block; } .bubble { max-width:94%; } #chat { padding-left:12px; padding-right:12px; } }
     @media (max-width:620px) {
       .tvbcp-panel { width:100%; max-width:100vw; min-width:0; overflow-x:hidden; }
@@ -87,6 +91,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       #contextAnchorProposeBtn { width:100%; min-width:0; white-space:normal; }
       .context-anchor-actions { width:100%; min-width:0; flex-wrap:wrap; }
       .context-anchor-actions > button { flex:1 1 calc(50% - 4px); min-width:0; padding-left:8px; padding-right:8px; white-space:normal; }
+      .thread-rotation-actions > button { flex:1 1 100%; min-width:0; white-space:normal; }
     }
   </style>
 </head>
@@ -170,6 +175,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <button id="contextAnchorPinBtn" type="button">Připnout</button>
         <button class="primary" id="contextAnchorSaveBtn" type="button">Uložit návrh</button>
       </div>
+      <section class="thread-rotation-box" aria-label="Bezpečná rotace profilového vlákna">
+        <h3>Nové profilové vlákno</h3>
+        <p id="threadRotationMeta">Nejdřív připni aktuální kontext a spusť kontrolu připravenosti. Staré vlákno se nemaže ani nearchivuje.</p>
+        <input id="threadRotationConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Po kontrole sem vlož potvrzovací větu" hidden disabled>
+        <div class="thread-rotation-actions">
+          <button id="threadRotationAuditBtn" type="button">Prověřit nové vlákno</button>
+          <button class="primary" id="threadRotationBtn" type="button" hidden disabled>Přejít do nového vlákna</button>
+        </div>
+      </section>
     </div>
   </aside>
   <aside class="tvbcp-panel" id="workPanel" hidden aria-label="Pracovní změny">
@@ -222,6 +236,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const contextAnchorPinBtn = document.getElementById("contextAnchorPinBtn");
   const contextAnchorPauseBtn = document.getElementById("contextAnchorPauseBtn");
   const contextAnchorDeleteBtn = document.getElementById("contextAnchorDeleteBtn");
+  const threadRotationMeta = document.getElementById("threadRotationMeta");
+  const threadRotationConfirmation = document.getElementById("threadRotationConfirmation");
+  const threadRotationAuditBtn = document.getElementById("threadRotationAuditBtn");
+  const threadRotationBtn = document.getElementById("threadRotationBtn");
   const composer = document.getElementById("composer");
   const input = document.getElementById("messageInput");
   const sendBtn = document.getElementById("sendBtn");
@@ -277,6 +295,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let savedContextAnchorContent = "";
   let savedContextAnchorActive = false;
   let savedContextAnchorRevision = 0;
+  let threadRotationAudit = null;
   const HUMAN_ADAM_SEND_PATH = "/api/human-adam/send";
   const RESULT_WATCH_MAX_ATTEMPTS = 60;
   const RESULT_WATCH_MAX_DELAY_MS = 30000;
@@ -448,6 +467,10 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     contextAnchorPauseBtn.disabled = anchorMutationBlocked || anchorDirty || !anchorHasContent || !savedContextAnchorActive;
     contextAnchorDeleteBtn.disabled = anchorMutationBlocked || anchorDirty || !anchorHasContent;
     contextAnchorProposeBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || !sessionConnected;
+    threadRotationAuditBtn.disabled = busy || sendInFlight || sessionTurnBusy || !sessionConnected || anchorDirty;
+    const rotationRequired = threadRotationAudit ? String(threadRotationAudit.confirmation_text || "") : "";
+    threadRotationConfirmation.disabled = anchorMutationBlocked || !threadRotationAudit || threadRotationAudit.ready !== true;
+    threadRotationBtn.disabled = threadRotationConfirmation.disabled || !rotationRequired || threadRotationConfirmation.value.trim() !== rotationRequired;
   }
 
   function setBusy(value, text="") {
@@ -825,6 +848,11 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     connectionBadge.className = connected ? "badge ok" : "badge warn";
     profileBadge.textContent = `Profil: ${activeProfileLabel}`;
     const thread = session && session.thread_id ? session.thread_id : "";
+    const anchorRevision = Number(payload && payload.context_anchor ? payload.context_anchor.revision || 0 : 0);
+    const auditedAnchorRevision = Number(threadRotationAudit ? threadRotationAudit.context_anchor_revision || 0 : 0);
+    if (threadRotationAudit && (String(threadRotationAudit.thread_id || "") !== thread || auditedAnchorRevision !== anchorRevision)) {
+      resetThreadRotationState("Aktivní vlákno nebo kontext se změnily. Před další rotací spusť novou kontrolu.");
+    }
     threadBadge.textContent = `Relace: ${thread ? thread.slice(0,8) : "—"}`;
     const workspace = payload && payload.workspace ? payload.workspace : {};
     const workspaceDiverged = workspace.workspace_relation === "diverged";
@@ -1071,6 +1099,18 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     contextAnchorInput.value = "";
     contextAnchorSaveBtn.textContent = "Uložit návrh";
     contextAnchorMeta.textContent = "Kontext se načte až po otevření.";
+    resetThreadRotationState();
+    syncControls();
+  }
+
+  function resetThreadRotationState(message="Nejdřív připni aktuální kontext a spusť kontrolu připravenosti. Staré vlákno se nemaže ani nearchivuje.") {
+    threadRotationAudit = null;
+    threadRotationConfirmation.value = "";
+    threadRotationConfirmation.hidden = true;
+    threadRotationConfirmation.disabled = true;
+    threadRotationBtn.hidden = true;
+    threadRotationBtn.disabled = true;
+    threadRotationMeta.textContent = message;
     syncControls();
   }
 
@@ -1126,6 +1166,74 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     contextAnchorPanel.hidden = true;
   }
 
+  function renderThreadRotationAudit(payload) {
+    const blockers = payload && Array.isArray(payload.blockers) ? payload.blockers.filter(Boolean) : [];
+    if (!payload || payload.ok !== true) {
+      resetThreadRotationState(payload && payload.message ? payload.message : "Kontrolu rotace nelze načíst.");
+      return;
+    }
+    if (payload.ready !== true) {
+      resetThreadRotationState(`Rotace zatím není připravená: ${blockers.join(" ") || "zkontroluj připojení a aktivní kontext."}`);
+      return;
+    }
+    threadRotationAudit = payload;
+    const messages = Number(payload.thread_message_count || 0);
+    const rotations = Number(payload.rotation_count || 0);
+    const required = String(payload.confirmation_text || "");
+    threadRotationMeta.textContent = `Připraveno · aktuální vlákno má ${messages} zpráv · dosavadní rotace: ${rotations}. Staré vlákno zůstane zachované a nearchivované. Vlož přesně: ${required}`;
+    threadRotationConfirmation.value = "";
+    threadRotationConfirmation.hidden = false;
+    threadRotationConfirmation.disabled = false;
+    threadRotationBtn.hidden = false;
+    syncControls();
+  }
+
+  async function auditThreadRotation() {
+    if (threadRotationAuditBtn.disabled || contextAnchorDraftDirty()) return;
+    setBusy(true, "Ověřuji připnutý kontext, stav tahu a doručení…");
+    threadRotationMeta.textContent = "Kontroluji připravenost nového profilového vlákna…";
+    try {
+      const payload = await api("/api/human-adam/thread-rotation");
+      renderThreadRotationAudit(payload);
+      notice.textContent = payload.ready === true
+        ? "Rotace je připravená; nové vlákno vznikne až po přesné potvrzovací větě."
+        : "Rotace nebyla provedena. Nejdřív vyřeš uvedené podmínky.";
+    } catch (error) {
+      resetThreadRotationState(`Kontrola rotace selhala: ${error.message}`);
+    } finally { setBusy(false); }
+  }
+
+  async function rotateProfileThread() {
+    if (threadRotationBtn.disabled || !threadRotationAudit || contextAnchorDraftDirty()) return;
+    const required = String(threadRotationAudit.confirmation_text || "");
+    const confirmation = threadRotationConfirmation.value.trim();
+    if (!required || confirmation !== required) {
+      threadRotationMeta.textContent = "Potvrzovací věta nesouhlasí; vlákno nebylo změněno.";
+      return;
+    }
+    const expectedThreadId = String(threadRotationAudit.thread_id || "");
+    setBusy(true, "Zakládám nové profilové vlákno; původní zůstává zachované…");
+    let rotated = null;
+    try {
+      const payload = await api("/api/human-adam/thread-rotation", {
+        method:"POST",
+        body:JSON.stringify({confirmation,expected_thread_id:expectedThreadId}),
+      });
+      if (!payload.ok || payload.rotated !== true || payload.previous_thread_preserved !== true) {
+        throw new Error(payload.message || "Rotace vlákna nebyla potvrzena.");
+      }
+      rotated = payload;
+      resetThreadRotationState("Nové profilové vlákno bylo založeno. Připnutý kontext se použije při příštím tahu; staré vlákno zůstalo zachované.");
+    } catch (error) {
+      resetThreadRotationState(`Vlákno nebylo změněno: ${error.message}`);
+    } finally { setBusy(false); }
+    if (rotated) {
+      await loadStatus();
+      threadRotationMeta.textContent = "Nové profilové vlákno je aktivní. Připnutý kontext se přiloží k příštímu tahu; staré vlákno zůstalo zachované.";
+      notice.textContent = "Rotace dokončena bez odeslání zprávy a bez smazání starého vlákna.";
+    }
+  }
+
   async function changeContextAnchor(operation) {
     if (busy || sendInFlight || sessionTurnBusy) return;
     const content = contextAnchorInput.value.trim();
@@ -1164,6 +1272,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
         throw error;
       }
       renderContextAnchorEditor(payload);
+      resetThreadRotationState("Aktivní kontext se změnil. Před rotací spusť novou kontrolu připravenosti.");
       const successMessages = {
         save: payload.active
           ? "Aktualizovaná připnutá kotva se použije od příštího tahu."
@@ -1544,6 +1653,9 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   contextAnchorPinBtn.addEventListener("click", () => changeContextAnchor("pin"));
   contextAnchorPauseBtn.addEventListener("click", () => changeContextAnchor("pause"));
   contextAnchorDeleteBtn.addEventListener("click", () => changeContextAnchor("delete"));
+  threadRotationAuditBtn.addEventListener("click", auditThreadRotation);
+  threadRotationConfirmation.addEventListener("input", syncControls);
+  threadRotationBtn.addEventListener("click", rotateProfileThread);
   tvbcpOpenBtn.addEventListener("click", openTvbcp);
   tvbcpCloseBtn.addEventListener("click", closeTvbcp);
   tvbcpRefreshBtn.addEventListener("click", loadTvbcp);

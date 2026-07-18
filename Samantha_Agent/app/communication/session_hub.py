@@ -15,6 +15,7 @@ from app.file_persistence import atomic_write_json
 
 CLIENT_MESSAGE_ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{7,127}")
 MAX_MESSAGES = 500
+MAX_PREVIOUS_THREADS = 20
 
 
 class SessionHubError(RuntimeError):
@@ -39,6 +40,7 @@ def empty_session_state() -> dict[str, Any]:
         "connection_generation": 0,
         "active_turn": None,
         "messages": [],
+        "previous_threads": [],
     }
 
 
@@ -90,6 +92,11 @@ class CanonicalSessionHub:
         messages = loaded.get("messages")
         if isinstance(messages, list):
             state["messages"] = [copy.deepcopy(item) for item in messages if isinstance(item, dict)][-MAX_MESSAGES:]
+        previous_threads = loaded.get("previous_threads")
+        if isinstance(previous_threads, list):
+            state["previous_threads"] = [
+                copy.deepcopy(item) for item in previous_threads if isinstance(item, dict)
+            ][-MAX_PREVIOUS_THREADS:]
         for item in state["messages"]:
             if item.get("status") == "pending":
                 item["status"] = "delivery_unknown"
@@ -107,7 +114,27 @@ class CanonicalSessionHub:
             payload = copy.deepcopy(self._state)
             payload["connected"] = bool(self._client and self._client.running)
             payload["turn_busy"] = self._turn_lock.locked()
+            payload["thread_message_count"] = self._thread_message_count_locked(
+                str(self._state.get("thread_id") or "")
+            )
+            payload["rotation_count"] = len(self._state["previous_threads"])
             return payload
+
+    def _thread_message_count_locked(self, thread_id: str) -> int:
+        target = str(thread_id or "").strip()
+        if not target:
+            return 0
+        return sum(1 for item in self._state["messages"] if item.get("thread_id") == target)
+
+    def _has_unresolved_delivery_locked(self) -> bool:
+        """A later completed turn is the recovery boundary for older uncertainty."""
+        for item in reversed(self._state["messages"]):
+            status = str(item.get("status") or "")
+            if status == "completed":
+                return False
+            if status in {"pending", "delivery_unknown"} or item.get("recovery_required") is True:
+                return True
+        return False
 
     def _new_client_locked(self) -> CodexAppServerClient:
         client: CodexAppServerClient | None = None
@@ -125,7 +152,7 @@ class CanonicalSessionHub:
                         model=self.model,
                     )
                 except AppServerError:
-                    if self._state["messages"]:
+                    if self._thread_message_count_locked(thread_id):
                         raise
                     # Codex doesn't materialize a new persistent thread until its
                     # first turn. Replacing an empty, non-resumable ID loses no work.
@@ -174,6 +201,103 @@ class CanonicalSessionHub:
             self._state["connection_state"] = "disconnected"
             self._state["active_turn"] = None
             self._save_locked()
+
+    def rotation_status(self) -> dict[str, Any]:
+        with self._state_lock:
+            thread_id = str(self._state.get("thread_id") or "")
+            blockers: list[str] = []
+            if not thread_id:
+                blockers.append("Aktivní profil zatím nemá vlákno k rotaci.")
+            if self._turn_lock.locked() or self._state.get("active_turn"):
+                blockers.append("Vlákno nelze rotovat během aktivního tahu.")
+            if self._has_unresolved_delivery_locked():
+                blockers.append("Vlákno nelze rotovat při nejistém doručení.")
+            return {
+                "ok": True,
+                "ready": not blockers,
+                "thread_id": thread_id,
+                "thread_message_count": self._thread_message_count_locked(thread_id),
+                "rotation_count": len(self._state["previous_threads"]),
+                "blockers": blockers,
+            }
+
+    def rotate_thread(self, *, expected_thread_id: str) -> dict[str, Any]:
+        expected = str(expected_thread_id or "").strip()
+        if not expected:
+            raise SessionHubError("Chybí očekávané ID rotovaného vlákna.")
+        if not self._turn_lock.acquire(blocking=False):
+            raise SessionBusyError("Vlákno nelze rotovat během aktivního tahu.")
+
+        new_client: CodexAppServerClient | None = None
+        try:
+            with self._state_lock:
+                current_thread_id = str(self._state.get("thread_id") or "")
+                if not current_thread_id:
+                    raise SessionHubError("Aktivní profil zatím nemá vlákno k rotaci.")
+                if current_thread_id != expected:
+                    raise SessionHubError("Aktivní vlákno se mezitím změnilo; rotaci zopakuj.")
+                if self._state.get("active_turn"):
+                    raise SessionBusyError("Vlákno nelze rotovat během aktivního tahu.")
+                if self._has_unresolved_delivery_locked():
+                    raise SessionDeliveryUnknownError(
+                        "Vlákno nelze rotovat, dokud není vyřešené nejisté doručení."
+                    )
+
+                new_client = self.client_factory()
+                new_thread_id = new_client.start_thread(
+                    cwd=self.workspace,
+                    ephemeral=False,
+                    developer_instructions=self.developer_instructions,
+                    sandbox=self.sandbox,
+                    approval_policy=self.approval_policy,
+                    model=self.model,
+                )
+                if new_thread_id == current_thread_id:
+                    raise SessionHubError("App-server při rotaci nevrátil nové vlákno.")
+
+                old_client = self._client
+                old_state = copy.deepcopy(self._state)
+                rotated_at = utc_now()
+                self._state["previous_threads"].append(
+                    {
+                        "thread_id": current_thread_id,
+                        "thread_created_at": str(self._state.get("thread_created_at") or ""),
+                        "rotated_at": rotated_at,
+                        "message_count": self._thread_message_count_locked(current_thread_id),
+                    }
+                )
+                self._state["previous_threads"] = self._state["previous_threads"][-MAX_PREVIOUS_THREADS:]
+                self._state["thread_id"] = new_thread_id
+                self._state["thread_created_at"] = rotated_at
+                self._state["connection_state"] = "connected"
+                self._state["connection_generation"] = int(self._state["connection_generation"]) + 1
+                self._state["active_turn"] = None
+                self._client = new_client
+                try:
+                    self._save_locked()
+                except Exception:
+                    self._state = old_state
+                    self._client = old_client
+                    raise
+                new_client = None
+                if old_client is not None:
+                    try:
+                        old_client.close()
+                    except Exception:
+                        # Rotation is already atomically persisted. A stale client
+                        # connection must not turn that success into ambiguity.
+                        pass
+                return {
+                    "ok": True,
+                    "rotated": True,
+                    "previous_thread_id": current_thread_id,
+                    "thread_id": new_thread_id,
+                    "rotation_count": len(self._state["previous_threads"]),
+                }
+        finally:
+            if new_client is not None:
+                new_client.close()
+            self._turn_lock.release()
 
     def _message_locked(self, client_message_id: str) -> dict[str, Any] | None:
         for item in self._state["messages"]:

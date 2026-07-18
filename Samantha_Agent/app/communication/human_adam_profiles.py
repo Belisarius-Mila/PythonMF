@@ -248,6 +248,14 @@ class HumanAdamProfileManager:
         with self.profile_operation() as service:
             return service.set_context_anchor(**kwargs)
 
+    def thread_rotation_status(self) -> dict[str, Any]:
+        with self.profile_operation() as service:
+            return service.thread_rotation_status()
+
+    def rotate_thread(self, **kwargs: Any) -> dict[str, Any]:
+        with self.profile_operation() as service:
+            return service.rotate_thread(**kwargs)
+
     def work_review(self) -> dict[str, Any]:
         return self.active_service.work_review()
 

@@ -14,12 +14,15 @@ from app.communication.human_adam_deploy import (
 from app.communication.human_adam_service import (
     CANONICAL_TVBCP_RELATIVE_PATH,
     HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
+    THREAD_ROTATION_CONFIRMATION_TEXT,
     HumanAdamService,
     human_adam_checkpoint_action,
     human_adam_connect_action,
     human_adam_context_anchor_action,
     human_adam_context_anchor_update_action,
     human_adam_send_action,
+    human_adam_thread_rotation_action,
+    human_adam_thread_rotation_status_action,
     human_adam_tvbcp_action,
     human_adam_work_review_action,
 )
@@ -116,15 +119,44 @@ class FakeHub:
         self.closed = 0
         self.turn_busy = False
         self.active_turn: dict[str, object] | None = None
+        self.thread_id = "canonical-thread"
+        self.rotation_count = 0
 
     def snapshot(self) -> dict[str, object]:
         return {
-            "thread_id": "canonical-thread",
+            "thread_id": self.thread_id,
             "connected": self.connected,
             "connection_state": "connected" if self.connected else "disconnected",
             "turn_busy": self.turn_busy,
             "active_turn": self.active_turn,
             "messages": [],
+        }
+
+    def rotation_status(self) -> dict[str, object]:
+        blockers = []
+        if self.turn_busy or self.active_turn:
+            blockers.append("Vlákno nelze rotovat během aktivního tahu.")
+        return {
+            "ok": True,
+            "ready": not blockers,
+            "thread_id": self.thread_id,
+            "thread_message_count": 3,
+            "rotation_count": self.rotation_count,
+            "blockers": blockers,
+        }
+
+    def rotate_thread(self, *, expected_thread_id: str) -> dict[str, object]:
+        if expected_thread_id != self.thread_id:
+            raise AppServerError("stale thread")
+        previous = self.thread_id
+        self.thread_id = "rotated-thread"
+        self.rotation_count += 1
+        return {
+            "ok": True,
+            "rotated": True,
+            "previous_thread_id": previous,
+            "thread_id": self.thread_id,
+            "rotation_count": self.rotation_count,
         }
 
     def connect(self) -> dict[str, object]:
@@ -386,6 +418,79 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertIn(anchor_text, restarted_hub.sent[0]["model_input_text"])
         self.assertTrue(restarted_hub.sent[0]["model_input_text"].endswith("\n\nTah po restartu"))
         self.assertEqual(result["context_anchor_warning"], "")
+
+    def test_thread_rotation_requires_connected_profile_and_pinned_anchor(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service, _runtime, _workspace, _hub = self.make_service(Path(temp_dir))
+            initial = human_adam_thread_rotation_status_action(service=service)
+            saved = human_adam_context_anchor_update_action(
+                {
+                    "operation": "save",
+                    "expected_revision": 0,
+                    "content": "Cíl: pokračovat po rotaci\nDalší krok: ověřit nové vlákno",
+                    "confirmed": True,
+                },
+                service=service,
+            )
+            pinned = human_adam_context_anchor_update_action(
+                {
+                    "operation": "pin",
+                    "expected_revision": saved["revision"],
+                    "confirmed": True,
+                },
+                service=service,
+            )
+            service.connect()
+            ready = human_adam_thread_rotation_status_action(service=service)
+
+        self.assertFalse(initial["ready"])
+        self.assertIn("připojený", " ".join(initial["blockers"]))
+        self.assertIn("připni", " ".join(initial["blockers"]))
+        self.assertTrue(pinned["active"])
+        self.assertTrue(ready["ready"])
+        self.assertEqual(ready["thread_message_count"], 3)
+        self.assertTrue(ready["preserves_previous_thread"])
+        self.assertFalse(ready["archives_previous_thread"])
+
+    def test_thread_rotation_requires_exact_phrase_and_preserves_previous_thread(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service, _runtime, _workspace, hub = self.make_service(Path(temp_dir))
+            saved = human_adam_context_anchor_update_action(
+                {
+                    "operation": "save",
+                    "expected_revision": 0,
+                    "content": "Cíl: bezpečná rotace",
+                    "confirmed": True,
+                },
+                service=service,
+            )
+            human_adam_context_anchor_update_action(
+                {
+                    "operation": "pin",
+                    "expected_revision": saved["revision"],
+                    "confirmed": True,
+                },
+                service=service,
+            )
+            service.connect()
+            rejected = human_adam_thread_rotation_action(
+                {"confirmation": "ano", "expected_thread_id": "canonical-thread"},
+                service=service,
+            )
+            rotated = human_adam_thread_rotation_action(
+                {
+                    "confirmation": THREAD_ROTATION_CONFIRMATION_TEXT,
+                    "expected_thread_id": "canonical-thread",
+                },
+                service=service,
+            )
+
+        self.assertFalse(rejected["ok"])
+        self.assertEqual(hub.thread_id, "rotated-thread")
+        self.assertTrue(rotated["rotated"])
+        self.assertEqual(rotated["previous_thread_id"], "canonical-thread")
+        self.assertTrue(rotated["previous_thread_preserved"])
+        self.assertEqual(rotated["context_anchor_revision"], 2)
 
     def test_corrupt_context_anchor_is_ignored_without_blocking_send(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

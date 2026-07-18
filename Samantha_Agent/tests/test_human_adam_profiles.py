@@ -9,7 +9,10 @@ from app.communication.human_adam_profiles import (
     HumanAdamProfileManager,
     human_adam_profile_switch_action,
 )
-from app.communication.human_adam_service import HumanAdamService
+from app.communication.human_adam_service import (
+    THREAD_ROTATION_CONFIRMATION_TEXT,
+    HumanAdamService,
+)
 from app.communication.session_hub import SessionBusyError
 from app.codex_appserver import AppServerError
 
@@ -89,6 +92,7 @@ class FakeHub:
         self.active_turn: dict[str, object] | None = None
         self.messages: list[dict[str, object]] = []
         self.close_count = 0
+        self.rotation_count = 0
 
     def snapshot(self) -> dict[str, object]:
         return {
@@ -105,6 +109,33 @@ class FakeHub:
 
     def send(self, **_kwargs: object) -> dict[str, object]:
         return {"ok": True, "entry": {"answer": "Hotovo"}}
+
+    def rotation_status(self) -> dict[str, object]:
+        blockers = []
+        if self.turn_busy or self.active_turn:
+            blockers.append("Vlákno nelze rotovat během aktivního tahu.")
+        return {
+            "ok": True,
+            "ready": not blockers,
+            "thread_id": self.thread_id,
+            "thread_message_count": len(self.messages),
+            "rotation_count": self.rotation_count,
+            "blockers": blockers,
+        }
+
+    def rotate_thread(self, *, expected_thread_id: str) -> dict[str, object]:
+        if expected_thread_id != self.thread_id:
+            raise AppServerError("stale thread")
+        previous = self.thread_id
+        self.thread_id = f"{previous}-rotated"
+        self.rotation_count += 1
+        return {
+            "ok": True,
+            "rotated": True,
+            "previous_thread_id": previous,
+            "thread_id": self.thread_id,
+            "rotation_count": self.rotation_count,
+        }
 
     def close(self) -> None:
         self.connected = False
@@ -221,6 +252,41 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertFalse(library_anchor["active"])
         self.assertFalse(library_anchor["has_content"])
         self.assertEqual(human_anchor["content"], "Cíl: Human–Adam kontinuita")
+
+    def test_thread_rotation_is_locked_to_active_profile_bundle(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _human_workspace, _library_workspace, human_hub, library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            saved = manager.set_context_anchor(
+                operation="save",
+                expected_revision=0,
+                content="Cíl: bezpečně pokračovat v novém vlákně",
+                confirmed=True,
+            )
+            manager.set_context_anchor(
+                operation="pin",
+                expected_revision=saved["revision"],
+                confirmed=True,
+            )
+            manager.connect()
+            audit = manager.thread_rotation_status()
+            result = manager.rotate_thread(
+                confirmation=THREAD_ROTATION_CONFIRMATION_TEXT,
+                expected_thread_id="human-thread",
+            )
+
+        self.assertTrue(audit["ready"])
+        self.assertEqual(result["previous_thread_id"], "human-thread")
+        self.assertEqual(human_hub.thread_id, "human-thread-rotated")
+        self.assertEqual(library_hub.thread_id, "library-thread")
+
+    def test_thread_rotation_audit_respects_profile_operation_lock(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_rest = self.make_manager(Path(temp_dir))
+            with manager.profile_operation():
+                with self.assertRaises(SessionBusyError):
+                    manager.thread_rotation_status()
 
     def test_switch_rejects_dirty_checkpoint_and_uncertain_delivery(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

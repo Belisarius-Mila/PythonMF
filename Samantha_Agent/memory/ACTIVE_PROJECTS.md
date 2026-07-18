@@ -41,6 +41,14 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-19: Priorita 1, App-server rozhrani / novy Adam. V izolovane WIP vetvi
+  je hotovy cely rez bezpecne rucni rotace dlouheho profiloveho vlakna: backend,
+  profilove zamknute audit/apply API a ovladani v panelu `Plan`. Puvodni vlakno
+  ani lokalni historie se nemazou a rotace vyzaduje pripojeni, aktivni kotvu,
+  presnou potvrzovaci vetu a nulovou nejistotu doruceni. Cela Cockpit quality
+  gate prosla 804 testy. Stav ceka na potvrzene prevzeti do `main`, nasazeni,
+  vizualni kontrolu a zivy profilovy test. Handoff:
+  `handoffs/human_adam_thread_rotation_backend_wip_2026_07_19.md`.
 - 2026-07-18: Zdánlivě ztracený TVBCP WIP byl bezeztrátově obnoven, auditován a
   nasazen jako `ebd47b9`. Nová oprava rozlišuje přímo auditovatelný checkpoint od
   zachovaného rozvětveného WIP, ukáže jeho počet a cesty a audit ponechá

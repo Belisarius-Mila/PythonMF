@@ -11,6 +11,7 @@ from app.communication.session_hub import (
     CanonicalSessionHub,
     SessionBusyError,
     SessionDeliveryUnknownError,
+    SessionHubError,
 )
 
 
@@ -20,6 +21,7 @@ class FakeClient:
     block_release: threading.Event | None = None
     fail_send = False
     fail_resume = False
+    next_thread_ids: list[str] = []
 
     def __init__(self) -> None:
         self.running = True
@@ -31,6 +33,8 @@ class FakeClient:
 
     def start_thread(self, **kwargs: object) -> str:
         self.started_kwargs = kwargs
+        if self.__class__.next_thread_ids:
+            return self.__class__.next_thread_ids.pop(0)
         return "canonical-thread"
 
     def resume_thread(self, thread_id: str, **_kwargs: object) -> str:
@@ -81,6 +85,7 @@ class CanonicalSessionHubTests(unittest.TestCase):
         FakeClient.block_release = None
         FakeClient.fail_send = False
         FakeClient.fail_resume = False
+        FakeClient.next_thread_ids = []
 
     def make_hub(self, root: Path) -> CanonicalSessionHub:
         return CanonicalSessionHub(
@@ -166,6 +171,63 @@ class CanonicalSessionHubTests(unittest.TestCase):
                 self.make_hub(root).connect()
 
         self.assertEqual(len(FakeClient.instances), 2)
+
+    def test_rotation_preserves_previous_thread_and_local_history(self) -> None:
+        FakeClient.next_thread_ids = ["first-thread", "second-thread"]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            hub = self.make_hub(root)
+            hub.send(text="Ahoj", client_message_id="message-0001")
+            original_client = FakeClient.instances[0]
+            result = hub.rotate_thread(expected_thread_id="first-thread")
+            snapshot = hub.snapshot()
+            persisted = json.loads((root / "session.json").read_text(encoding="utf-8"))
+
+        self.assertTrue(result["rotated"])
+        self.assertEqual(result["previous_thread_id"], "first-thread")
+        self.assertEqual(result["thread_id"], "second-thread")
+        self.assertFalse(original_client.running)
+        self.assertEqual(snapshot["thread_message_count"], 0)
+        self.assertEqual(snapshot["rotation_count"], 1)
+        self.assertEqual(snapshot["messages"][0]["thread_id"], "first-thread")
+        self.assertEqual(persisted["previous_threads"][0]["thread_id"], "first-thread")
+        self.assertEqual(persisted["previous_threads"][0]["message_count"], 1)
+
+    def test_rotation_rejects_stale_thread_and_unresolved_delivery(self) -> None:
+        FakeClient.next_thread_ids = ["first-thread"]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            hub = self.make_hub(Path(temp_dir))
+            hub.connect()
+            with self.assertRaisesRegex(SessionHubError, "mezitím změnilo"):
+                hub.rotate_thread(expected_thread_id="stale-thread")
+            with hub._state_lock:
+                hub._state["messages"].append(
+                    {
+                        "client_message_id": "message-0001",
+                        "thread_id": "first-thread",
+                        "status": "delivery_unknown",
+                        "recovery_required": True,
+                    }
+                )
+            with self.assertRaises(SessionDeliveryUnknownError):
+                hub.rotate_thread(expected_thread_id="first-thread")
+
+        self.assertEqual(len(FakeClient.instances), 1)
+
+    def test_empty_rotated_thread_can_be_replaced_after_restart_with_old_history(self) -> None:
+        FakeClient.next_thread_ids = ["first-thread", "second-thread", "replacement-thread"]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            first = self.make_hub(root)
+            first.send(text="Ahoj", client_message_id="message-0001")
+            first.rotate_thread(expected_thread_id="first-thread")
+            first.close()
+            FakeClient.fail_resume = True
+            replacement = self.make_hub(root).connect()
+
+        self.assertEqual(replacement["thread_id"], "replacement-thread")
+        self.assertEqual(replacement["messages"][0]["thread_id"], "first-thread")
+        self.assertEqual(replacement["rotation_count"], 1)
 
     def test_parallel_turn_is_rejected_instead_of_queued_silently(self) -> None:
         FakeClient.block_started = threading.Event()

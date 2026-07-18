@@ -68,6 +68,7 @@ SECRET_VALUE_RE = re.compile(
 )
 RESERVED_ANCHOR_MARKERS = ("[HUMAN_ADAM_CONTEXT_ANCHOR]", "[/HUMAN_ADAM_CONTEXT_ANCHOR]")
 CONTEXT_ANCHOR_OPERATIONS = frozenset({"save", "pin", "pause", "delete"})
+THREAD_ROTATION_CONFIRMATION_TEXT = "POTVRZUJI ROTACI PROFILOVEHO VLAKNA"
 
 
 class ContextAnchorError(SessionHubError):
@@ -529,6 +530,44 @@ class HumanAdamService:
             "updated_at": str(anchor.get("updated_at") or ""),
         }
 
+    def thread_rotation_status(self) -> dict[str, Any]:
+        session = self.hub.snapshot()
+        rotation = self.hub.rotation_status()
+        anchor = self.context_anchor(include_content=False)
+        blockers = list(rotation.get("blockers") or [])
+        if not session.get("connected"):
+            blockers.append("Před rotací musí být profil připojený.")
+        if not (anchor.get("ok") and anchor.get("active") and anchor.get("has_content")):
+            blockers.append("Před rotací připni aktuální krátký kontext v panelu Plán.")
+        return {
+            "ok": True,
+            "ready": not blockers,
+            "thread_id": str(rotation.get("thread_id") or ""),
+            "thread_message_count": int(rotation.get("thread_message_count") or 0),
+            "rotation_count": int(rotation.get("rotation_count") or 0),
+            "context_anchor_revision": int(anchor.get("revision") or 0),
+            "blockers": blockers,
+            "confirmation_text": THREAD_ROTATION_CONFIRMATION_TEXT,
+            "preserves_previous_thread": True,
+            "archives_previous_thread": False,
+        }
+
+    def rotate_thread(self, *, confirmation: str, expected_thread_id: str) -> dict[str, Any]:
+        if str(confirmation or "").strip() != THREAD_ROTATION_CONFIRMATION_TEXT:
+            raise SessionHubError(
+                f"Chybí přesná potvrzovací věta: {THREAD_ROTATION_CONFIRMATION_TEXT}"
+            )
+        audit = self.thread_rotation_status()
+        if not audit.get("ready"):
+            detail = " ".join(str(item) for item in audit.get("blockers") or [])
+            raise SessionHubError(detail or "Profilové vlákno nyní nelze bezpečně rotovat.")
+        result = self.hub.rotate_thread(expected_thread_id=expected_thread_id)
+        return {
+            **result,
+            "context_anchor_revision": audit["context_anchor_revision"],
+            "previous_thread_preserved": True,
+        }
+
     def tvbcp(self) -> dict[str, Any]:
         workspace = self.workspace.status()
         if not workspace.get("prepared") or not workspace.get("project_ready"):
@@ -628,6 +667,31 @@ def human_adam_context_anchor_update_action(
         }
     except (ContextAnchorError, OSError, ValueError) as exc:
         return {"ok": False, "status": "human_adam_context_anchor_failed", "message": str(exc)}
+
+
+def human_adam_thread_rotation_status_action(*, service: HumanAdamService) -> dict[str, Any]:
+    try:
+        return service.thread_rotation_status()
+    except (AppServerError, SessionHubError, OSError, ValueError) as exc:
+        return {"ok": False, "status": "human_adam_thread_rotation_failed", "message": str(exc)}
+
+
+def human_adam_thread_rotation_action(
+    payload: dict[str, Any],
+    *,
+    service: HumanAdamService,
+) -> dict[str, Any]:
+    try:
+        return service.rotate_thread(
+            confirmation=str(payload.get("confirmation") or ""),
+            expected_thread_id=str(payload.get("expected_thread_id") or ""),
+        )
+    except SessionBusyError as exc:
+        return {"ok": False, "status": "human_adam_busy", "message": str(exc)}
+    except SessionDeliveryUnknownError as exc:
+        return {"ok": False, "status": "delivery_unknown", "message": str(exc)}
+    except (AppServerError, SessionHubError, OSError, ValueError) as exc:
+        return {"ok": False, "status": "human_adam_thread_rotation_failed", "message": str(exc)}
 
 
 def human_adam_work_review_action(*, service: HumanAdamService) -> dict[str, Any]:

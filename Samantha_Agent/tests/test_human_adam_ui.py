@@ -30,6 +30,10 @@ class HumanAdamUiTests(unittest.TestCase):
             "contextAnchorPinBtn",
             "contextAnchorPauseBtn",
             "contextAnchorDeleteBtn",
+            "threadRotationMeta",
+            "threadRotationConfirmation",
+            "threadRotationAuditBtn",
+            "threadRotationBtn",
             "chat",
             "messageInput",
             "sendBtn",
@@ -72,6 +76,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Workspace byl bezpečně aktualizovaný z main", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/profile", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/context-anchor", HUMAN_ADAM_HTML)
+        self.assertIn("/api/human-adam/thread-rotation", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/send", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/tvbcp", HUMAN_ADAM_HTML)
         self.assertIn("TVBCP se načte až po otevření.", HUMAN_ADAM_HTML)
@@ -106,6 +111,24 @@ class HumanAdamUiTests(unittest.TestCase):
         restore = HUMAN_ADAM_HTML.index("deployMeta.textContent = deploymentFailure;", refresh)
         self.assertLess(refresh, restore)
         self.assertIn("await waitForCockpitAndReload(Number(payload.restart.pid || previousPid));", HUMAN_ADAM_HTML)
+
+    def test_thread_rotation_ui_requires_audit_exact_phrase_and_preserves_old_thread(self) -> None:
+        audit_start = HUMAN_ADAM_HTML.index("async function auditThreadRotation()")
+        audit_end = HUMAN_ADAM_HTML.index("async function rotateProfileThread()", audit_start)
+        audit_source = HUMAN_ADAM_HTML[audit_start:audit_end]
+        rotate_end = HUMAN_ADAM_HTML.index("async function changeContextAnchor", audit_end)
+        rotate_source = HUMAN_ADAM_HTML[audit_end:rotate_end]
+
+        self.assertIn('api("/api/human-adam/thread-rotation")', audit_source)
+        self.assertIn('api("/api/human-adam/thread-rotation", {', rotate_source)
+        self.assertIn("confirmation !== required", rotate_source)
+        self.assertIn("expected_thread_id:expectedThreadId", rotate_source)
+        self.assertIn("payload.previous_thread_preserved !== true", rotate_source)
+        self.assertIn("bez odeslání zprávy", rotate_source)
+        self.assertIn("auditedAnchorRevision !== anchorRevision", HUMAN_ADAM_HTML)
+        self.assertIn("Staré vlákno se nemaže ani nearchivuje.", HUMAN_ADAM_HTML)
+        self.assertIn('threadRotationConfirmation.addEventListener("input", syncControls)', HUMAN_ADAM_HTML)
+        self.assertNotIn("window.prompt", rotate_source)
 
     def test_mobile_summary_collapses_core_details_without_hiding_deployment_evidence(self) -> None:
         header = HUMAN_ADAM_HTML.index("<header>")
