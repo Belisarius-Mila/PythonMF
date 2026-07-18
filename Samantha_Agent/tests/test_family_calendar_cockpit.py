@@ -165,6 +165,12 @@ class FamilyCalendarCockpitTests(unittest.TestCase):
         self.assertIn("function editFamilyCalendarPerson(personId)", COCKPIT_HTML)
         self.assertIn("familyCalendarEditorDirty", COCKPIT_HTML)
         self.assertIn(".family-calendar-form-grid { grid-template-columns: 1fr; }", COCKPIT_HTML)
+        self.assertIn('class="family-calendar-person-actions"', COCKPIT_HTML)
+        self.assertIn(">Upravit údaje</button>", COCKPIT_HTML)
+        self.assertLess(
+            COCKPIT_HTML.index('class="family-calendar-person-actions"'),
+            COCKPIT_HTML.index("formatFamilyCalendarBirthDate(person.birth_date)"),
+        )
 
     def test_cockpit_javascript_with_family_calendar_is_valid(self) -> None:
         node = shutil.which("node")

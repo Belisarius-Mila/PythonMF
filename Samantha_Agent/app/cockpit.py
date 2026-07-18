@@ -12832,8 +12832,10 @@ COCKPIT_HTML = """<!doctype html>
     .family-calendar-upcoming-list { display: flex; gap: 8px; flex-wrap: wrap; }
     .family-calendar-event { border: 1px solid #bfdbfe; border-radius: 999px; background: white; padding: 5px 9px; color: #1e3a5f; font-size: 12px; }
     .family-calendar-table-wrap { overflow-x: auto; border: 1px solid #edf0f4; border-radius: 8px; }
-    .family-calendar-table { min-width: 820px; }
+    .family-calendar-table { min-width: 720px; }
     .family-calendar-table tr.inactive { color: var(--muted); background: #f8fafc; }
+    .family-calendar-person-actions { margin-top: 7px; }
+    .family-calendar-person-actions button { padding: 6px 9px; font-size: 12px; }
     .family-calendar-empty { padding: 18px; color: var(--muted); text-align: center; }
 	    .project-toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
 	    .project-toolbar button.active { background: var(--blue); color: white; }
@@ -13724,7 +13726,6 @@ COCKPIT_HTML = """<!doctype html>
                 <th>Datum svátku</th>
                 <th>Upozornění</th>
                 <th>Stav</th>
-                <th></th>
               </tr>
             </thead>
             <tbody id="familyCalendarTableBody"></tbody>
@@ -18376,7 +18377,7 @@ COCKPIT_HTML = """<!doctype html>
       currentFamilyCalendarPeople = Array.isArray(data.people) ? data.people : [];
       renderFamilyCalendarUpcoming(data.events || []);
       if (!currentFamilyCalendarPeople.length) {
-        familyCalendarTableBody.innerHTML = '<tr><td colspan="7" class="family-calendar-empty">Zatím není uložená žádná osoba.</td></tr>';
+        familyCalendarTableBody.innerHTML = '<tr><td colspan="6" class="family-calendar-empty">Zatím není uložená žádná osoba.</td></tr>';
         familyCalendarStatus.textContent = "Rodinný kalendář je prázdný.";
         return;
       }
@@ -18385,13 +18386,15 @@ COCKPIT_HTML = """<!doctype html>
         const age = person.age === null || person.age === undefined ? "—" : `${Number(person.age)} let`;
         return `
           <tr class="${person.active ? "" : "inactive"}">
-            <td class="name"><strong>${escapeHtml(person.display_name || "")}</strong>${relation}</td>
+            <td class="name">
+              <strong>${escapeHtml(person.display_name || "")}</strong>${relation}
+              <div class="family-calendar-person-actions"><button class="secondary" type="button" data-family-person-id="${escapeHtml(person.id || "")}">Upravit údaje</button></div>
+            </td>
             <td>${escapeHtml(formatFamilyCalendarBirthDate(person.birth_date))}</td>
             <td>${escapeHtml(age)}</td>
             <td>${escapeHtml(formatFamilyCalendarNameDay(person.name_day))}</td>
             <td>${person.reminders_enabled ? "Ano" : "Ne"}</td>
             <td>${person.active ? "Aktivní" : "Skrytá"}</td>
-            <td><button class="secondary" type="button" data-family-person-id="${escapeHtml(person.id || "")}">Upravit</button></td>
           </tr>`;
       }).join("");
       const activeCount = Number((data.counts || {}).active_people || 0);
