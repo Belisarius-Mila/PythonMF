@@ -1200,3 +1200,38 @@ potvrzené.
 Další krok: kotvu používat úsporně pro aktuální cíl, plán, rozhodnutí a nejmenší
 další krok. Aktualizovat ji jen při skutečné změně projektu, jinak ji pozastavit;
 další automatizaci nebo napojení na TVBCP nepřidávat bez nové provozní potřeby.
+
+### 2026-07-18 18:54 CEST – Obnova výsledku dlouhého tahu a jediný hlasitější zvuk
+
+Při delším tahu mohl iPhone nebo mobilní spojení přerušit čekající HTTP požadavek,
+zatímco Session Hub práci dokončil a odpověď bezpečně uložil. UI poté provedlo
+jen jednu příliš časnou kontrolu a bez restartu už výsledek znovu nenačetlo.
+Tlačítko `Stav` proto během aktivního či nejistého tahu nově po výslovném klepnutí
+spustí omezené, pouze čtecí sledování stejného `client_message_id` přes existující
+stavovou cestu. Nikdy znovu neodesílá pokyn a končí při dokončení, potvrzené
+nejistotě nebo bezpečnostním limitu. Míla následně ručně potvrdil, že nové
+chování tlačítka funguje.
+
+Zvuk dokončení byl sjednocen na jedinou hlasitější mediální WAV cestu. Původní
+Web Audio tlačítko a jeho paralelní kód byly odstraněny. Mediální zvuk se při
+stisku `Odeslat` potichu připraví a přehraje až po potvrzené odpovědi, včetně
+výsledku načteného sledováním tlačítka `Stav`; jeho selhání nikdy nemění stav
+doručení. Ruční systémové `Přečíst odpověď` zůstává samostatnou funkcí. Míla
+současně zjistil, že předchozí ticho způsobovalo směrování zvuku do audiosystému
+auta, a po jeho odpojení oba tehdejší zvukové testy zazněly.
+
+Důkaz: cílená sada Human–Adam UI, service a Session Hub prošla 78 testy spolu s
+Python kompilací, JavaScriptovou syntaxí a `git diff --check`. Aktuální snapshot
+ukazuje zdrojový i izolovaný workspace čisté a zarovnané v bodě `f0ed0d3`.
+
+Riziko: nový automatický hlasitější zvuk po dlouhém asynchronním čekání ještě
+nemá výslovně zaznamenaný finální iPhone/Safari důkaz po tomto nasazení. První
+pokus o checkpoint navíc odhalil, že izolovaný klon nepřebírá lokální Git
+identitu zdrojového repozitáře a nynější implementace spoléhá na identitu
+dostupnou z okolního prostředí; trvalá oprava této mezery zatím není součástí
+workflow.
+
+Další krok: jedním běžným tahem potvrdit, že po doručení zazní právě jedno
+hlasitější cinknutí. Potom samostatně doplnit bezpečné nastavení repo-local Git
+identity při přípravě izolovaného workspace, bez globální konfigurace a bez
+oslabení výhradního lidského checkpointu.
