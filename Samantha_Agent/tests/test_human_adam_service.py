@@ -57,6 +57,8 @@ class FakeWorkspace:
         self.sync_available = False
         self.dirty = False
         self.local_checkpoint_ahead = False
+        self.local_checkpoint_preserved = False
+        self.diverged = False
         self.last_checkpoint_message = ""
         self.source_head = "a" * 40
         self.workspace_head = "a" * 40
@@ -71,12 +73,13 @@ class FakeWorkspace:
             "changes": ([{"status": " M", "path": "Samantha_Agent/test.py"}] if self.dirty else []),
             "sync_available": self.sync_available,
             "source_update_available": self.sync_available,
-            "workspace_relation": "local_ahead" if self.local_checkpoint_ahead else ("source_ahead" if self.sync_available else "aligned"),
+            "workspace_relation": "diverged" if self.diverged else ("local_ahead" if self.local_checkpoint_ahead else ("source_ahead" if self.sync_available else "aligned")),
             "local_checkpoint_ahead": self.local_checkpoint_ahead,
-            "local_commit_count": 1 if self.local_checkpoint_ahead else 0,
+            "local_checkpoint_preserved": self.local_checkpoint_preserved,
+            "local_commit_count": 1 if self.local_checkpoint_ahead or self.local_checkpoint_preserved else 0,
             "remotes": [],
             "source_head": self.source_head,
-            "head": ("b" * 40) if self.local_checkpoint_ahead else self.workspace_head,
+            "head": ("b" * 40) if self.local_checkpoint_ahead or self.local_checkpoint_preserved else self.workspace_head,
         }
 
     def review(self) -> dict[str, object]:
@@ -86,10 +89,11 @@ class FakeWorkspace:
             "dirty": self.dirty,
             "changes": status["changes"],
             "change_count": status["change_count"],
-            "checkpoint_changes": ([{"status": "M", "path": "Samantha_Agent/test.py"}] if self.local_checkpoint_ahead else []),
-            "checkpoint_change_count": 1 if self.local_checkpoint_ahead else 0,
+            "checkpoint_changes": ([{"status": "M", "path": "Samantha_Agent/test.py"}] if self.local_checkpoint_ahead or self.local_checkpoint_preserved else []),
+            "checkpoint_change_count": 1 if self.local_checkpoint_ahead or self.local_checkpoint_preserved else 0,
             "local_checkpoint_ahead": self.local_checkpoint_ahead,
-            "local_commit_count": 1 if self.local_checkpoint_ahead else 0,
+            "local_checkpoint_preserved": self.local_checkpoint_preserved,
+            "local_commit_count": 1 if self.local_checkpoint_ahead or self.local_checkpoint_preserved else 0,
             "workspace_relation": status["workspace_relation"],
             "source_update_available": self.sync_available,
             "has_git_remote": False,
@@ -247,6 +251,20 @@ class HumanAdamServiceTests(unittest.TestCase):
         )
         self.assertNotIn("canonical-thread", str(diagnostic))
         self.assertNotIn("private", str(diagnostic))
+
+    def test_status_exposes_preserved_checkpoint_without_claiming_it_is_auditable(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service, _runtime, workspace, _hub = self.make_service(Path(temp_dir))
+            workspace.diverged = True
+            workspace.local_checkpoint_preserved = True
+
+            status = service.status()
+
+        self.assertFalse(status["ok"])
+        self.assertEqual(status["workspace"]["workspace_relation"], "diverged")
+        self.assertTrue(status["workspace"]["local_checkpoint_preserved"])
+        self.assertFalse(status["workspace"]["local_checkpoint_ahead"])
+        self.assertEqual(status["workspace"]["local_commit_count"], 1)
 
     def test_developer_instructions_require_timestamped_tvbcp_append(self) -> None:
         self.assertIn("na konec souboru", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)

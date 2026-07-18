@@ -118,6 +118,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('aria-expanded="false" aria-controls="statusDetails"', HUMAN_ADAM_HTML)
         self.assertIn("#mobileStatusSummary { display:none;", HUMAN_ADAM_HTML)
         self.assertIn("#mobileStatusSummary { display:flex; }", HUMAN_ADAM_HTML)
+
         self.assertIn(".status-details { display:none; }", HUMAN_ADAM_HTML)
         self.assertIn(".status-details.expanded { display:block; }", HUMAN_ADAM_HTML)
 
@@ -132,6 +133,17 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('mobileStatusToggleText.textContent = showDetails ? "Skrýt" : "Podrobnosti";', HUMAN_ADAM_HTML)
         self.assertIn('mobileStatusSummary.addEventListener("click"', HUMAN_ADAM_HTML)
         self.assertIn("updateMobileStatusSummary();\n    turnTimerId", HUMAN_ADAM_HTML)
+
+    def test_diverged_workspace_keeps_preserved_wip_visible_but_blocks_audit(self) -> None:
+        self.assertIn('workspace.workspace_relation === "diverged"', HUMAN_ADAM_HTML)
+        self.assertIn("WIP zachován: ${workspace.local_commit_count} · nutná obnova", HUMAN_ADAM_HTML)
+        self.assertIn("WIP checkpoint je zachovaný:", HUMAN_ADAM_HTML)
+        self.assertIn("WIP je bezpečně zachovaný, ale audit je zablokovaný.", HUMAN_ADAM_HTML)
+        self.assertIn("deployAuditBtn.disabled = Boolean(payload.dirty) || !payload.local_checkpoint_ahead;", HUMAN_ADAM_HTML)
+        self.assertLess(
+            HUMAN_ADAM_HTML.index("else if (checkpointPreserved) workMeta.textContent"),
+            HUMAN_ADAM_HTML.index('else workMeta.textContent = "Workspace je čistý a odpovídá main.";'),
+        )
 
     def test_profile_switch_is_explicit_atomic_and_preserves_unsent_draft(self) -> None:
         switch_start = HUMAN_ADAM_HTML.index("async function switchProfile()")

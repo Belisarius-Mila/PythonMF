@@ -799,8 +799,16 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     const thread = session && session.thread_id ? session.thread_id : "";
     threadBadge.textContent = `Relace: ${thread ? thread.slice(0,8) : "—"}`;
     const workspace = payload && payload.workspace ? payload.workspace : {};
-    workspaceBadge.textContent = workspace.has_git_remote ? "POZOR: Git remote" : (workspace.sync_available ? "Workspace čeká na sync" : (workspace.dirty ? `Workspace: ${workspace.change_count} změn` : (workspace.local_checkpoint_ahead ? `WIP checkpoint: ${workspace.local_commit_count}` : "Workspace čistý")));
-    workspaceBadge.className = workspace.has_git_remote || workspace.sync_available || workspace.dirty || workspace.local_checkpoint_ahead ? "badge warn" : "badge";
+    const workspaceDiverged = workspace.workspace_relation === "diverged";
+    const checkpointPreserved = workspaceDiverged && workspace.local_checkpoint_preserved === true;
+    if (workspace.has_git_remote) workspaceBadge.textContent = "POZOR: Git remote";
+    else if (checkpointPreserved) workspaceBadge.textContent = `WIP zachován: ${workspace.local_commit_count} · nutná obnova`;
+    else if (workspaceDiverged) workspaceBadge.textContent = "Workspace rozvětvený · nutná kontrola";
+    else if (workspace.sync_available) workspaceBadge.textContent = "Workspace čeká na sync";
+    else if (workspace.dirty) workspaceBadge.textContent = `Workspace: ${workspace.change_count} změn`;
+    else if (workspace.local_checkpoint_ahead) workspaceBadge.textContent = `WIP checkpoint: ${workspace.local_commit_count}`;
+    else workspaceBadge.textContent = "Workspace čistý";
+    workspaceBadge.className = workspace.has_git_remote || workspaceDiverged || workspace.sync_available || workspace.dirty || workspace.local_checkpoint_ahead ? "badge warn" : "badge";
     renderContextAnchorBadge(payload && payload.context_anchor ? payload.context_anchor : null);
     const confirmation = payload && payload.deployment_confirmation ? payload.deployment_confirmation : null;
     const shortCommit = confirmation ? String(confirmation.checkpoint_short || "") : "";
@@ -1150,6 +1158,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     workChanges.replaceChildren();
     const pending = Array.isArray(payload.changes) ? payload.changes : [];
     const checkpointed = Array.isArray(payload.checkpoint_changes) ? payload.checkpoint_changes : [];
+    const checkpointPreserved = payload.workspace_relation === "diverged" && payload.local_checkpoint_preserved === true;
     const rows = pending.length ? pending : checkpointed;
     for (const item of rows) {
       const row = document.createElement("li");
@@ -1163,6 +1172,8 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     }
     if (payload.dirty) workMeta.textContent = `Necheckpointované změny: ${payload.change_count}`;
     else if (payload.local_checkpoint_ahead) workMeta.textContent = `Lokální WIP checkpoint: ${payload.local_commit_count} commitů · ${payload.checkpoint_change_count} souborů · bez pushnutí`;
+    else if (checkpointPreserved) workMeta.textContent = `WIP checkpoint je zachovaný: ${payload.local_commit_count} commitů · ${payload.checkpoint_change_count} souborů · vyžaduje obnovu`;
+    else if (payload.workspace_relation === "diverged") workMeta.textContent = "Workspace a main se rozešly; je nutná servisní kontrola.";
     else workMeta.textContent = "Workspace je čistý a odpovídá main.";
     checkpointBtn.disabled = !payload.dirty;
     deployAuditBtn.disabled = Boolean(payload.dirty) || !payload.local_checkpoint_ahead;
@@ -1172,6 +1183,8 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     deployBtn.disabled = true;
     if (payload.dirty) deployMeta.textContent = "Nejdřív vytvoř jeden lokální WIP checkpoint.";
     else if (payload.local_checkpoint_ahead) deployMeta.textContent = "Checkpoint čeká na read-only audit cest.";
+    else if (checkpointPreserved) deployMeta.textContent = "WIP je bezpečně zachovaný, ale audit je zablokovaný. Nejdřív proveď obnovu nad aktuálním main.";
+    else if (payload.workspace_relation === "diverged") deployMeta.textContent = "Audit je zablokovaný: workspace a main se rozešly.";
     else deployMeta.textContent = "Není připravený žádný WIP checkpoint k nasazení.";
   }
 

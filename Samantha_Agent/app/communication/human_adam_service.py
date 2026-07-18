@@ -413,6 +413,7 @@ class HumanAdamService:
                     "sync_available": bool(workspace.get("source_update_available")),
                     "workspace_relation": str(workspace.get("workspace_relation") or "unknown"),
                     "local_checkpoint_ahead": bool(workspace.get("local_checkpoint_ahead")),
+                    "local_checkpoint_preserved": bool(workspace.get("local_checkpoint_preserved")),
                     "local_commit_count": int(workspace.get("local_commit_count") or 0),
                     "has_git_remote": bool(workspace.get("remotes")),
                     "label": "Izolovaný lokální workspace bez Git remote",

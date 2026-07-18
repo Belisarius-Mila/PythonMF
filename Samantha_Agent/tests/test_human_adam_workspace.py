@@ -275,11 +275,18 @@ class HumanAdamWorkspaceManagerTests(unittest.TestCase):
             git(source, "commit", "-m", "Source diverged")
 
             diverged = manager.status()
+            diverged_review = manager.review()
 
             self.assertEqual(diverged["workspace_relation"], "diverged")
             self.assertFalse(diverged["local_checkpoint_ahead"])
+            self.assertTrue(diverged["local_checkpoint_preserved"])
+            self.assertEqual(diverged["local_commit_count"], 1)
             self.assertFalse(diverged["source_update_available"])
             self.assertFalse(diverged["sync_allowed"])
+            self.assertIn("zachovaný lokální WIP checkpoint", diverged["message"])
+            self.assertTrue(diverged_review["local_checkpoint_preserved"])
+            self.assertEqual(diverged_review["checkpoint_change_count"], 1)
+            self.assertEqual(diverged_review["checkpoint_changes"][0]["path"], "Samantha_Agent/tracked.py")
 
             with self.assertRaises(AppServerError):
                 manager.sync_from_main(confirmed=True)

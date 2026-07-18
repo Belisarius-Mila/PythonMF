@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import threading
 from datetime import datetime, timezone
@@ -188,6 +189,7 @@ class HumanAdamWorkspaceManager:
             base_head = self._metadata_base_head()
             relation = "aligned"
             local_commit_count = 0
+            local_checkpoint_preserved = False
             if head != source_head:
                 if _is_ancestor(self.workspace_root, source_head, head):
                     relation = "local_ahead"
@@ -202,6 +204,18 @@ class HumanAdamWorkspaceManager:
                     relation = "source_ahead"
                 else:
                     relation = "diverged"
+                    if (
+                        re.fullmatch(r"[0-9a-f]{40}", base_head)
+                        and _is_ancestor(self.workspace_root, base_head, head)
+                    ):
+                        local_commit_count = int(
+                            _git_output(
+                                self.workspace_root,
+                                ["rev-list", "--count", f"{base_head}..{head}"],
+                            )
+                            or 0
+                        )
+                        local_checkpoint_preserved = local_commit_count > 0
             source_update_available = relation == "source_ahead"
             local_checkpoint_ahead = relation == "local_ahead"
             if remotes:
@@ -211,7 +225,12 @@ class HumanAdamWorkspaceManager:
             elif relation == "local_ahead":
                 message = "Human–Adam workspace má lokální WIP checkpoint bez pushnutí."
             elif relation == "diverged":
-                message = "Human–Adam workspace a main se rozešly; automatický sync je zablokovaný."
+                message = (
+                    "Human–Adam workspace má zachovaný lokální WIP checkpoint, ale main se mezitím změnil; "
+                    "audit a automatický sync jsou zablokované."
+                    if local_checkpoint_preserved
+                    else "Human–Adam workspace a main se rozešly; automatický sync je zablokovaný."
+                )
             else:
                 message = "Human–Adam workspace je připravený, aktuální a nemá Git remote."
             return {
@@ -226,6 +245,7 @@ class HumanAdamWorkspaceManager:
                 "base_head": base_head,
                 "workspace_relation": relation,
                 "local_checkpoint_ahead": local_checkpoint_ahead,
+                "local_checkpoint_preserved": local_checkpoint_preserved,
                 "local_commit_count": local_commit_count,
                 "source_update_available": source_update_available,
                 "sync_available": source_update_available,
@@ -464,8 +484,16 @@ class HumanAdamWorkspaceManager:
                 raise AppServerError("Human–Adam workspace není v bezpečném stavu pro kontrolu změn.")
             checkpoint_changes: list[dict[str, str]] = []
             checkpoint_base_head = ""
-            if current.get("local_checkpoint_ahead"):
-                checkpoint_base_head = str(current.get("source_head") or "")
+            checkpoint_visible = bool(
+                current.get("local_checkpoint_ahead") or current.get("local_checkpoint_preserved")
+            )
+            if checkpoint_visible:
+                checkpoint_base_value = (
+                    current.get("source_head")
+                    if current.get("local_checkpoint_ahead")
+                    else current.get("base_head")
+                )
+                checkpoint_base_head = str(checkpoint_base_value or "")
                 if not checkpoint_base_head:
                     raise AppServerError("Human–Adam checkpoint nemá ověřitelný Git základ.")
                 diff_text = _git_output(
@@ -490,6 +518,7 @@ class HumanAdamWorkspaceManager:
                 "checkpoint_change_count": len(checkpoint_changes),
                 "checkpoint_base_head": checkpoint_base_head,
                 "local_checkpoint_ahead": bool(current.get("local_checkpoint_ahead")),
+                "local_checkpoint_preserved": bool(current.get("local_checkpoint_preserved")),
                 "local_commit_count": int(current.get("local_commit_count") or 0),
                 "workspace_relation": str(current.get("workspace_relation") or "unknown"),
                 "source_update_available": bool(current.get("source_update_available")),

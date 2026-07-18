@@ -100,6 +100,13 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `handoffs/human_adam_preserved_wip_visibility_2026_07_18.md` - [PRIPOMENOUT]
+  priorita 1: TVBCP checkpoint, který při souběhu vypadal jako ztracený, byl
+  bezeztrátově obnoven a nasazen jako `ebd47b9`. Nová backend/UI oprava odlišuje
+  přímo auditovatelný WIP od zachovaného rozvětveného WIP, ukáže jeho počet a
+  cesty, ale audit ponechá fail-closed. Plná brána prošla 766 testy; po
+  checkpointu/pushi zbývá restart a běžný smoke test.
+
 - `handoffs/human_adam_revision_failure_history_2026_07_17.md` - [PRIPOMENOUT]
   priorita 1: očekávaná revize chrání soukromou kotvu před přepsáním ze starší
   karty a oddělené private registry Human–Adam/Knihovna drží posledních 20
