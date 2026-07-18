@@ -99,6 +99,11 @@ from app.communication.human_adam_deploy import (
 )
 from app.communication.human_adam_ui import HUMAN_ADAM_HTML
 from app.backup.activity_state import backup_activity_status
+from app.family_calendar import (
+    DEFAULT_FAMILY_CALENDAR_PATH,
+    family_calendar_status,
+    save_family_person,
+)
 from app.documents.case_service import (
     DocumentCaseDependencies,
     document_case_detail_status as build_document_case_detail_status,
@@ -775,6 +780,70 @@ def library_delete_article_action(payload: dict[str, Any]) -> dict[str, Any]:
         return {"ok": False, "message": str(exc), "error": "invalid_delete"}
     except OSError as exc:
         return {"ok": False, "message": f"Položku se nepodařilo vyřadit: {exc}", "error": "archive_failed"}
+
+
+def family_calendar_status_action(
+    *,
+    path: Path = DEFAULT_FAMILY_CALENDAR_PATH,
+    today: date | None = None,
+) -> dict[str, Any]:
+    try:
+        return family_calendar_status(path=path, today=today)
+    except (ValueError, json.JSONDecodeError) as exc:
+        return {
+            "ok": False,
+            "message": f"Rodinný kalendář obsahuje neplatná data: {exc}",
+            "error": "invalid_family_calendar",
+        }
+    except OSError as exc:
+        return {
+            "ok": False,
+            "message": f"Rodinný kalendář se nepodařilo načíst: {exc}",
+            "error": "family_calendar_unavailable",
+        }
+
+
+def family_calendar_save_action(
+    payload: dict[str, Any],
+    *,
+    path: Path = DEFAULT_FAMILY_CALENDAR_PATH,
+    today: date | None = None,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    today_date = today or date.today()
+    try:
+        person = save_family_person(
+            person_id=str(payload.get("person_id", "")),
+            display_name=str(payload.get("display_name", "")),
+            relation=str(payload.get("relation", "")),
+            birth_date=str(payload.get("birth_date", "")),
+            name_day=str(payload.get("name_day", "")),
+            reminders_enabled=payload.get("reminders_enabled", True),
+            active=payload.get("active", True),
+            path=path,
+            today=today_date,
+            now=now,
+        )
+        status = family_calendar_status(path=path, today=today_date)
+    except (ValueError, json.JSONDecodeError) as exc:
+        return {
+            "ok": False,
+            "message": str(exc),
+            "error": "invalid_family_person",
+        }
+    except OSError as exc:
+        return {
+            "ok": False,
+            "message": f"Osobu se nepodařilo uložit: {exc}",
+            "error": "family_calendar_save_failed",
+        }
+    action_label = "upravena" if str(payload.get("person_id", "")).strip() else "přidána"
+    return {
+        "ok": True,
+        "message": f"Osoba byla {action_label} v rodinném kalendáři.",
+        "person": person.to_summary(today=today_date),
+        "status": status,
+    }
 
 
 def lekarna_retire_preview_action(payload: dict[str, Any]) -> dict[str, Any]:
@@ -9523,6 +9592,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/family-calendar/save",
+        "label": "Ulozit osobu do rodinneho kalendare",
+        "risk": "private_write",
+        "confirmation": "validated_family_person",
+        "handler_name": "family_calendar_save_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/lekarna/retire/preview",
         "label": "Nahled vyrazeni leku",
         "risk": "read_only_via_post",
@@ -9943,6 +10020,9 @@ class CockpitServer:
                     variant = params.get("variant", ["readable"])[0]
                     self.respond_library_attachment(article_id, attachment_id, variant)
                     return
+                if parsed.path == "/api/family-calendar/status":
+                    self.respond_json(family_calendar_status_action())
+                    return
                 if parsed.path == "/api/quantitative-status":
                     self.respond_json(quantitative_status_overview())
                     return
@@ -10311,6 +10391,10 @@ class CockpitServer:
                 if parsed.path == "/api/library/delete":
                     payload = self.read_json()
                     self.respond_json(library_delete_article_action(payload))
+                    return
+                if parsed.path == "/api/family-calendar/save":
+                    payload = self.read_json()
+                    self.respond_json(family_calendar_save_action(payload))
                     return
                 if parsed.path == "/api/lekarna/retire/preview":
                     payload = self.read_json()
@@ -12679,6 +12763,23 @@ COCKPIT_HTML = """<!doctype html>
     .library-attachment-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
     .library-attachment-image { max-width: 100%; max-height: 420px; object-fit: contain; border: 1px solid #edf0f4; border-radius: 6px; background: #f8fafc; }
     .library-snippet { color: #344054; font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
+    .family-calendar-modal { width: min(1080px, 100%); }
+    .family-calendar-intro { color: #344054; font-size: 13px; line-height: 1.45; }
+    .family-calendar-form { border: 1px solid #dbe4ef; border-radius: 8px; background: #f8fafc; padding: 12px; display: grid; gap: 10px; }
+    .family-calendar-form h3 { margin: 0; font-size: 15px; }
+    .family-calendar-form-grid { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(160px, .8fr) minmax(170px, .8fr) minmax(170px, .8fr); gap: 10px; align-items: start; }
+    .family-calendar-name-day { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .family-calendar-checks { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+    .family-calendar-check { display: inline-flex; gap: 7px; align-items: center; color: #263244; font-size: 13px; font-weight: 650; }
+    .family-calendar-check input { width: 17px; height: 17px; }
+    .family-calendar-upcoming { border: 1px solid #dbeafe; border-radius: 8px; background: #eff6ff; padding: 10px 12px; display: grid; gap: 6px; }
+    .family-calendar-upcoming-title { font-size: 13px; font-weight: 750; color: #1e3a5f; }
+    .family-calendar-upcoming-list { display: flex; gap: 8px; flex-wrap: wrap; }
+    .family-calendar-event { border: 1px solid #bfdbfe; border-radius: 999px; background: white; padding: 5px 9px; color: #1e3a5f; font-size: 12px; }
+    .family-calendar-table-wrap { overflow-x: auto; border: 1px solid #edf0f4; border-radius: 8px; }
+    .family-calendar-table { min-width: 820px; }
+    .family-calendar-table tr.inactive { color: var(--muted); background: #f8fafc; }
+    .family-calendar-empty { padding: 18px; color: var(--muted); text-align: center; }
 	    .project-toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
 	    .project-toolbar button.active { background: var(--blue); color: white; }
 	    .voice-command-actions button.active { background: var(--blue); color: white; }
@@ -12770,7 +12871,7 @@ COCKPIT_HTML = """<!doctype html>
     .service-actions { margin-top: 10px; }
     .voice-advanced { margin-top: 8px; border-top: 1px solid var(--line); }
     @media (max-width: 1050px) { .today-dashboard { grid-template-columns: 1fr; } .work-grid { grid-template-columns: 1fr; } }
-	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .search-result-head { grid-template-columns: 1fr; } .search-result-head-actions { justify-content: flex-start; } .recovery-grid { grid-template-columns: 1fr; } .janicka-grid { grid-template-columns: 1fr; } .janicka-action { grid-template-columns: 1fr; } .library-archive-grid { grid-template-columns: 1fr; } .library-text-grid { grid-template-columns: 1fr; } .library-attachment-grid { grid-template-columns: 1fr; } .library-edit-grid { grid-template-columns: 1fr; } .library-edit-source-grid { grid-template-columns: 1fr; } .library-controls { grid-template-columns: 1fr; } .library-layout { grid-template-columns: 1fr; } .library-action-group { justify-content: flex-start; } .library-action-group-label { width: 100%; text-align: left; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
+	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .search-result-head { grid-template-columns: 1fr; } .search-result-head-actions { justify-content: flex-start; } .recovery-grid { grid-template-columns: 1fr; } .janicka-grid { grid-template-columns: 1fr; } .janicka-action { grid-template-columns: 1fr; } .library-archive-grid { grid-template-columns: 1fr; } .library-text-grid { grid-template-columns: 1fr; } .library-attachment-grid { grid-template-columns: 1fr; } .library-edit-grid { grid-template-columns: 1fr; } .library-edit-source-grid { grid-template-columns: 1fr; } .library-controls { grid-template-columns: 1fr; } .library-layout { grid-template-columns: 1fr; } .library-action-group { justify-content: flex-start; } .library-action-group-label { width: 100%; text-align: left; } .family-calendar-form-grid { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -12782,6 +12883,7 @@ COCKPIT_HTML = """<!doctype html>
       <button class="secondary" id="refreshBtn">Obnovit</button>
       <button class="secondary" id="webAppsBtn">Webové aplikace</button>
       <button class="secondary" id="libraryBtn">Knihovna</button>
+      <button class="secondary" id="familyCalendarBtn">Rodinný kalendář</button>
       <button class="secondary" id="projectsBtn">Projekty</button>
       <button class="secondary" id="remindersBtn">Připomenutí</button>
       <button class="secondary" id="emailProcessingBtn">E-maily</button>
@@ -13511,6 +13613,71 @@ COCKPIT_HTML = """<!doctype html>
       </div>
     </div>
   </div>
+  <div id="familyCalendarModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="familyCalendarTitle">
+    <div class="modal family-calendar-modal">
+      <div class="modal-header">
+        <h2 id="familyCalendarTitle">Rodinný kalendář</h2>
+        <button class="secondary" id="familyCalendarCloseBtn" type="button">Zavřít</button>
+      </div>
+      <div class="modal-body">
+        <div class="family-calendar-intro">Přehled narozenin a svátků. Rok narození slouží k výpočtu věku; e-mailové odesílání zatím není aktivní.</div>
+        <div id="familyCalendarUpcoming" class="family-calendar-upcoming" aria-live="polite"></div>
+        <form id="familyCalendarForm" class="family-calendar-form">
+          <h3 id="familyCalendarFormTitle">Přidat osobu</h3>
+          <input id="familyCalendarPersonId" type="hidden">
+          <div class="family-calendar-form-grid">
+            <label class="library-field">
+              <span class="library-field-label">Jméno nebo oslovení</span>
+              <input id="familyCalendarNameInput" type="text" maxlength="120" autocomplete="off" placeholder="např. Alena" required>
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Vztah nebo rozlišení</span>
+              <input id="familyCalendarRelationInput" type="text" maxlength="80" autocomplete="off" placeholder="např. teta">
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Datum narození</span>
+              <input id="familyCalendarBirthDateInput" type="date">
+              <span class="library-field-hint">Včetně roku, aby Cockpit mohl zobrazit věk.</span>
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Datum svátku</span>
+              <span class="family-calendar-name-day">
+                <input id="familyCalendarNameDayDayInput" type="number" min="1" max="31" inputmode="numeric" placeholder="den" aria-label="Den svátku">
+                <input id="familyCalendarNameDayMonthInput" type="number" min="1" max="12" inputmode="numeric" placeholder="měsíc" aria-label="Měsíc svátku">
+              </span>
+              <span class="library-field-hint">Stačí den a měsíc.</span>
+            </label>
+          </div>
+          <div class="family-calendar-checks">
+            <label class="family-calendar-check"><input id="familyCalendarRemindersInput" type="checkbox" checked> Připravovat upozornění</label>
+            <label class="family-calendar-check"><input id="familyCalendarActiveInput" type="checkbox" checked> Aktivní záznam</label>
+          </div>
+          <div class="actions compact-actions">
+            <button class="primary" id="familyCalendarSaveBtn" type="submit">Uložit osobu</button>
+            <button class="secondary" id="familyCalendarResetBtn" type="button">Vyčistit formulář</button>
+          </div>
+          <div id="familyCalendarFormStatus" class="status-line">Doplň alespoň datum narození nebo datum svátku.</div>
+        </form>
+        <div id="familyCalendarStatus" class="status-line">Načítám rodinný kalendář…</div>
+        <div class="family-calendar-table-wrap">
+          <table class="family-calendar-table">
+            <thead>
+              <tr>
+                <th>Osoba</th>
+                <th>Datum narození</th>
+                <th>Věk</th>
+                <th>Datum svátku</th>
+                <th>Upozornění</th>
+                <th>Stav</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="familyCalendarTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
   <div id="projectsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="projectsTitle">
     <div class="modal">
       <div class="modal-header">
@@ -13711,6 +13878,7 @@ COCKPIT_HTML = """<!doctype html>
     const reviewNextBtn = document.getElementById("reviewNextBtn");
     const webAppsBtn = document.getElementById("webAppsBtn");
     const libraryBtn = document.getElementById("libraryBtn");
+    const familyCalendarBtn = document.getElementById("familyCalendarBtn");
     const projectsBtn = document.getElementById("projectsBtn");
     const remindersBtn = document.getElementById("remindersBtn");
     const emailProcessingBtn = document.getElementById("emailProcessingBtn");
@@ -13818,6 +13986,24 @@ COCKPIT_HTML = """<!doctype html>
     const libraryDoneBtn = document.getElementById("libraryDoneBtn");
     const libraryClearReadStateBtn = document.getElementById("libraryClearReadStateBtn");
     const libraryDeleteBtn = document.getElementById("libraryDeleteBtn");
+    const familyCalendarModal = document.getElementById("familyCalendarModal");
+    const familyCalendarCloseBtn = document.getElementById("familyCalendarCloseBtn");
+    const familyCalendarUpcoming = document.getElementById("familyCalendarUpcoming");
+    const familyCalendarForm = document.getElementById("familyCalendarForm");
+    const familyCalendarFormTitle = document.getElementById("familyCalendarFormTitle");
+    const familyCalendarPersonId = document.getElementById("familyCalendarPersonId");
+    const familyCalendarNameInput = document.getElementById("familyCalendarNameInput");
+    const familyCalendarRelationInput = document.getElementById("familyCalendarRelationInput");
+    const familyCalendarBirthDateInput = document.getElementById("familyCalendarBirthDateInput");
+    const familyCalendarNameDayDayInput = document.getElementById("familyCalendarNameDayDayInput");
+    const familyCalendarNameDayMonthInput = document.getElementById("familyCalendarNameDayMonthInput");
+    const familyCalendarRemindersInput = document.getElementById("familyCalendarRemindersInput");
+    const familyCalendarActiveInput = document.getElementById("familyCalendarActiveInput");
+    const familyCalendarSaveBtn = document.getElementById("familyCalendarSaveBtn");
+    const familyCalendarResetBtn = document.getElementById("familyCalendarResetBtn");
+    const familyCalendarFormStatus = document.getElementById("familyCalendarFormStatus");
+    const familyCalendarStatus = document.getElementById("familyCalendarStatus");
+    const familyCalendarTableBody = document.getElementById("familyCalendarTableBody");
     const projectsModal = document.getElementById("projectsModal");
     const projectsCloseBtn = document.getElementById("projectsCloseBtn");
     const projectsStatus = document.getElementById("projectsStatus");
@@ -14000,6 +14186,8 @@ COCKPIT_HTML = """<!doctype html>
     let currentLibrarySelectedText = "";
     let currentLibrarySourceUrl = "";
     let currentLibraryExport = null;
+    let currentFamilyCalendarPeople = [];
+    let familyCalendarEditorDirty = false;
     let libraryEditorDirty = false;
     let currentQuantitative = null;
     let currentAutosaveCleanupPlan = null;
@@ -18084,6 +18272,204 @@ COCKPIT_HTML = """<!doctype html>
       maybeReturnToJanicka("webApps");
     }
 
+    function formatFamilyCalendarBirthDate(value) {
+      const parts = String(value || "").split("-");
+      if (parts.length !== 3) return "—";
+      return `${Number(parts[2])}. ${Number(parts[1])}. ${parts[0]}`;
+    }
+
+    function formatFamilyCalendarNameDay(value) {
+      const parts = String(value || "").split("-");
+      if (parts.length !== 2) return "—";
+      return `${Number(parts[1])}. ${Number(parts[0])}.`;
+    }
+
+    function familyCalendarNameDayValue() {
+      const day = familyCalendarNameDayDayInput.value.trim();
+      const month = familyCalendarNameDayMonthInput.value.trim();
+      if (!day && !month) return "";
+      if (!day || !month) throw new Error("U svátku doplň den i měsíc.");
+      return `${String(Number(month)).padStart(2, "0")}-${String(Number(day)).padStart(2, "0")}`;
+    }
+
+    function familyCalendarEventTiming(event) {
+      const days = Number(event.days_until || 0);
+      if (days === 0) return "dnes";
+      if (days === 1) return "zítra";
+      if (days === 2) return "za 2 dny";
+      return formatFamilyCalendarBirthDate(event.event_date);
+    }
+
+    function renderFamilyCalendarUpcoming(events) {
+      const upcoming = Array.isArray(events) ? events : [];
+      if (!upcoming.length) {
+        familyCalendarUpcoming.innerHTML = '<div class="family-calendar-upcoming-title">Nejbližší události</div><div class="status-line">V příštích 30 dnech není žádná událost.</div>';
+        return;
+      }
+      familyCalendarUpcoming.innerHTML = `
+        <div class="family-calendar-upcoming-title">Nejbližší události</div>
+        <div class="family-calendar-upcoming-list">
+          ${upcoming.map((event) => {
+            const relation = event.relation ? ` – ${event.relation}` : "";
+            const age = event.event_type === "birthday" && event.age !== null ? `, ${event.age} let` : "";
+            return `<span class="family-calendar-event"><strong>${escapeHtml(event.display_name || "")}${escapeHtml(relation)}</strong>: ${escapeHtml(event.event_label || "událost")} ${escapeHtml(familyCalendarEventTiming(event))}${escapeHtml(age)}</span>`;
+          }).join("")}
+        </div>`;
+    }
+
+    function renderFamilyCalendar(data) {
+      currentFamilyCalendarPeople = Array.isArray(data.people) ? data.people : [];
+      renderFamilyCalendarUpcoming(data.events || []);
+      if (!currentFamilyCalendarPeople.length) {
+        familyCalendarTableBody.innerHTML = '<tr><td colspan="7" class="family-calendar-empty">Zatím není uložená žádná osoba.</td></tr>';
+        familyCalendarStatus.textContent = "Rodinný kalendář je prázdný.";
+        return;
+      }
+      familyCalendarTableBody.innerHTML = currentFamilyCalendarPeople.map((person) => {
+        const relation = person.relation ? `<div class="library-meta">${escapeHtml(person.relation)}</div>` : "";
+        const age = person.age === null || person.age === undefined ? "—" : `${Number(person.age)} let`;
+        return `
+          <tr class="${person.active ? "" : "inactive"}">
+            <td class="name"><strong>${escapeHtml(person.display_name || "")}</strong>${relation}</td>
+            <td>${escapeHtml(formatFamilyCalendarBirthDate(person.birth_date))}</td>
+            <td>${escapeHtml(age)}</td>
+            <td>${escapeHtml(formatFamilyCalendarNameDay(person.name_day))}</td>
+            <td>${person.reminders_enabled ? "Ano" : "Ne"}</td>
+            <td>${person.active ? "Aktivní" : "Skrytá"}</td>
+            <td><button class="secondary" type="button" data-family-person-id="${escapeHtml(person.id || "")}">Upravit</button></td>
+          </tr>`;
+      }).join("");
+      const activeCount = Number((data.counts || {}).active_people || 0);
+      familyCalendarStatus.textContent = `Uloženo ${currentFamilyCalendarPeople.length} osob, aktivních ${activeCount}.`;
+    }
+
+    function markFamilyCalendarDirty() {
+      familyCalendarEditorDirty = true;
+      familyCalendarFormStatus.textContent = "Formulář obsahuje neuložené změny.";
+    }
+
+    function confirmFamilyCalendarDiscard() {
+      if (!familyCalendarEditorDirty) return true;
+      return window.confirm("Formulář rodinného kalendáře obsahuje neuložené změny. Chceš je zahodit?");
+    }
+
+    function resetFamilyCalendarForm({focus = false} = {}) {
+      familyCalendarForm.reset();
+      familyCalendarPersonId.value = "";
+      familyCalendarRemindersInput.checked = true;
+      familyCalendarActiveInput.checked = true;
+      familyCalendarFormTitle.textContent = "Přidat osobu";
+      familyCalendarSaveBtn.textContent = "Uložit osobu";
+      familyCalendarFormStatus.textContent = "Doplň alespoň datum narození nebo datum svátku.";
+      familyCalendarEditorDirty = false;
+      if (focus) familyCalendarNameInput.focus();
+    }
+
+    async function loadFamilyCalendar() {
+      familyCalendarStatus.textContent = "Načítám rodinný kalendář…";
+      try {
+        const data = await fetchJson("/api/family-calendar/status");
+        if (!data.ok) {
+          familyCalendarStatus.textContent = data.message || "Rodinný kalendář se nepodařilo načíst.";
+          familyCalendarTableBody.innerHTML = "";
+          renderFamilyCalendarUpcoming([]);
+          return false;
+        }
+        renderFamilyCalendar(data);
+        return true;
+      } catch (err) {
+        recordFrontendError(err);
+        familyCalendarStatus.textContent = `Chyba načtení rodinného kalendáře: ${err}`;
+        familyCalendarTableBody.innerHTML = "";
+        renderFamilyCalendarUpcoming([]);
+        return false;
+      }
+    }
+
+    async function openFamilyCalendarModal() {
+      familyCalendarBirthDateInput.max = new Date().toISOString().slice(0, 10);
+      familyCalendarModal.classList.remove("hidden");
+      await loadFamilyCalendar();
+    }
+
+    function closeFamilyCalendarModal() {
+      if (!confirmFamilyCalendarDiscard()) return false;
+      resetFamilyCalendarForm();
+      familyCalendarModal.classList.add("hidden");
+      return true;
+    }
+
+    function editFamilyCalendarPerson(personId) {
+      if (!confirmFamilyCalendarDiscard()) return;
+      const person = currentFamilyCalendarPeople.find((item) => item.id === personId);
+      if (!person) {
+        familyCalendarFormStatus.textContent = "Vybraná osoba už není v načteném přehledu.";
+        return;
+      }
+      const nameDayParts = String(person.name_day || "").split("-");
+      familyCalendarPersonId.value = person.id || "";
+      familyCalendarNameInput.value = person.display_name || "";
+      familyCalendarRelationInput.value = person.relation || "";
+      familyCalendarBirthDateInput.value = person.birth_date || "";
+      familyCalendarNameDayMonthInput.value = nameDayParts.length === 2 ? Number(nameDayParts[0]) : "";
+      familyCalendarNameDayDayInput.value = nameDayParts.length === 2 ? Number(nameDayParts[1]) : "";
+      familyCalendarRemindersInput.checked = Boolean(person.reminders_enabled);
+      familyCalendarActiveInput.checked = Boolean(person.active);
+      familyCalendarFormTitle.textContent = "Upravit osobu";
+      familyCalendarSaveBtn.textContent = "Uložit úpravy";
+      familyCalendarFormStatus.textContent = "Uprav údaje a změny ulož.";
+      familyCalendarEditorDirty = false;
+      familyCalendarForm.scrollIntoView({behavior: "smooth", block: "start"});
+      familyCalendarNameInput.focus();
+    }
+
+    async function saveFamilyCalendarPerson(event) {
+      event.preventDefault();
+      const displayName = familyCalendarNameInput.value.trim();
+      let nameDay = "";
+      if (!displayName) {
+        familyCalendarFormStatus.textContent = "Doplň jméno nebo oslovení.";
+        familyCalendarNameInput.focus();
+        return;
+      }
+      try {
+        nameDay = familyCalendarNameDayValue();
+      } catch (err) {
+        familyCalendarFormStatus.textContent = String(err.message || err);
+        return;
+      }
+      if (!familyCalendarBirthDateInput.value && !nameDay) {
+        familyCalendarFormStatus.textContent = "Doplň datum narození nebo datum svátku.";
+        return;
+      }
+      familyCalendarSaveBtn.disabled = true;
+      familyCalendarFormStatus.textContent = "Ukládám osobu…";
+      try {
+        const data = await postJson("/api/family-calendar/save", {
+          person_id: familyCalendarPersonId.value,
+          display_name: displayName,
+          relation: familyCalendarRelationInput.value.trim(),
+          birth_date: familyCalendarBirthDateInput.value,
+          name_day: nameDay,
+          reminders_enabled: familyCalendarRemindersInput.checked,
+          active: familyCalendarActiveInput.checked,
+        });
+        if (!data.ok) {
+          familyCalendarFormStatus.textContent = data.message || "Osobu se nepodařilo uložit.";
+          return;
+        }
+        familyCalendarEditorDirty = false;
+        resetFamilyCalendarForm();
+        renderFamilyCalendar(data.status || {});
+        familyCalendarFormStatus.textContent = data.message || "Osoba byla uložena.";
+      } catch (err) {
+        recordFrontendError(err);
+        familyCalendarFormStatus.textContent = `Chyba uložení osoby: ${err}`;
+      } finally {
+        familyCalendarSaveBtn.disabled = false;
+      }
+    }
+
     async function openLibraryModal() {
       setLibraryAddMode("");
       libraryModal.classList.remove("hidden");
@@ -20593,6 +20979,7 @@ COCKPIT_HTML = """<!doctype html>
     updateVoiceModeUi();
 			    webAppsBtn.addEventListener("click", openWebAppsModal);
     libraryBtn.addEventListener("click", openLibraryModal);
+    familyCalendarBtn.addEventListener("click", openFamilyCalendarModal);
     projectsBtn.addEventListener("click", openProjectsModal);
     reviewReportBtn.addEventListener("click", loadDocumentReviewReport);
     remindersBtn.addEventListener("click", openRemindersModal);
@@ -20698,8 +21085,36 @@ COCKPIT_HTML = """<!doctype html>
         closeLibraryModal();
       }
     });
+    familyCalendarCloseBtn.addEventListener("click", closeFamilyCalendarModal);
+    familyCalendarModal.addEventListener("click", (event) => {
+      if (event.target === familyCalendarModal) {
+        closeFamilyCalendarModal();
+      }
+    });
+    familyCalendarForm.addEventListener("submit", saveFamilyCalendarPerson);
+    familyCalendarResetBtn.addEventListener("click", () => {
+      if (confirmFamilyCalendarDiscard()) resetFamilyCalendarForm({focus: true});
+    });
+    familyCalendarTableBody.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-family-person-id]");
+      if (!button) return;
+      editFamilyCalendarPerson(button.dataset.familyPersonId || "");
+    });
+    [
+      familyCalendarNameInput,
+      familyCalendarRelationInput,
+      familyCalendarBirthDateInput,
+      familyCalendarNameDayDayInput,
+      familyCalendarNameDayMonthInput,
+      familyCalendarRemindersInput,
+      familyCalendarActiveInput,
+    ].forEach((field) => {
+      field.addEventListener("input", markFamilyCalendarDirty);
+      field.addEventListener("change", markFamilyCalendarDirty);
+    });
     window.addEventListener("beforeunload", (event) => {
-      if (libraryEditPanel.classList.contains("hidden") || !libraryEditorDirty) return;
+      const libraryDirty = !libraryEditPanel.classList.contains("hidden") && libraryEditorDirty;
+      if (!libraryDirty && !familyCalendarEditorDirty) return;
       event.preventDefault();
       event.returnValue = "";
     });
@@ -20753,6 +21168,8 @@ COCKPIT_HTML = """<!doctype html>
         closeWebAppsModal();
       } else if (event.key === "Escape" && !libraryModal.classList.contains("hidden")) {
         closeLibraryModal();
+      } else if (event.key === "Escape" && !familyCalendarModal.classList.contains("hidden")) {
+        closeFamilyCalendarModal();
       } else if (event.key === "Escape" && !projectsModal.classList.contains("hidden")) {
         closeProjectsModal();
 	      } else if (event.key === "Escape" && !quickNotesModal.classList.contains("hidden")) {

@@ -1088,7 +1088,7 @@ class CockpitTests(unittest.TestCase):
 
     def test_library_fields_have_visible_labels_and_distinct_source_note(self) -> None:
         library_start = COCKPIT_HTML.index('id="libraryModal"')
-        library_end = COCKPIT_HTML.index('id="projectsModal"')
+        library_end = COCKPIT_HTML.index('id="familyCalendarModal"')
         library_html = COCKPIT_HTML[library_start:library_end]
         field_count = sum(library_html.count(tag) for tag in ("<input", "<select", "<textarea"))
         self.assertEqual(library_html.count('<label class="library-field">'), field_count)
