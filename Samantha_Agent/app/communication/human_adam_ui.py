@@ -293,6 +293,29 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString("cs-CZ", {hour:"2-digit",minute:"2-digit",second:"2-digit",day:"2-digit",month:"2-digit"});
   }
 
+  function configureCompletionAudioSession() {
+    if (typeof navigator === "undefined" || !("audioSession" in navigator) || !navigator.audioSession) return false;
+    try {
+      navigator.audioSession.type = "playback";
+      return navigator.audioSession.type === "playback";
+    } catch (_error) {
+      return false;
+    }
+  }
+
+  function discardCompletionAudioContext() {
+    const previous = completionAudioContext;
+    completionAudioContext = null;
+    completionAudioUnlocked = false;
+    if (!previous || previous.state === "closed" || typeof previous.close !== "function") return;
+    try {
+      const closing = previous.close();
+      if (closing && typeof closing.catch === "function") closing.catch(() => {});
+    } catch (_error) {
+      // Výměna iOS audiokontextu je best-effort a nesmí blokovat komunikaci.
+    }
+  }
+
   function getCompletionAudioContext() {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) return null;
@@ -313,19 +336,27 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   }
 
   function updateCompletionSoundUi(ready, supported=true) {
-    soundTestBtn.textContent = !supported ? "Zvuk: nepodporován" : (ready ? "Zvuk: připraven" : "Zvuk: vyzkoušet");
+    soundTestBtn.textContent = !supported ? "Zvuk: nepodporován" : (ready ? "Zvuk: kanál aktivní" : "Zvuk: vyzkoušet");
     soundTestBtn.className = ready ? "badge sound-badge ok" : "badge sound-badge warn";
     soundTestBtn.disabled = !supported;
   }
 
   async function ensureCompletionAudioRunning(context) {
     if (!context) return false;
-    if (["suspended", "interrupted"].includes(String(context.state || ""))) await context.resume();
+    if (["suspended", "interrupted"].includes(String(context.state || ""))) {
+      const resumeAttempt = context.resume();
+      await Promise.race([
+        resumeAttempt,
+        new Promise((resolve) => window.setTimeout(resolve, 500)),
+      ]);
+    }
     return context.state === "running";
   }
 
-  async function primeCompletionSound() {
+  async function primeCompletionSound({fresh=false}={}) {
     try {
+      configureCompletionAudioSession();
+      if (fresh) discardCompletionAudioContext();
       const context = getCompletionAudioContext();
       if (!context) {
         updateCompletionSoundUi(false, false);
@@ -364,7 +395,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
         oscillator.type = "sine";
         oscillator.frequency.setValueAtTime(note.frequency, noteStart);
         gain.gain.setValueAtTime(0.0001, noteStart);
-        gain.gain.exponentialRampToValueAtTime(0.055, noteStart + 0.025);
+        gain.gain.exponentialRampToValueAtTime(0.12, noteStart + 0.025);
         gain.gain.exponentialRampToValueAtTime(0.0001, noteEnd);
         oscillator.connect(gain);
         gain.connect(context.destination);
@@ -382,8 +413,10 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
 
   async function testCompletionSound() {
     soundTestBtn.disabled = true;
-    const ready = await primeCompletionSound();
-    if (ready) await playCompletionSound();
+    const ready = await primeCompletionSound({fresh:true});
+    const played = ready && await playCompletionSound();
+    soundTestBtn.textContent = played ? "Test zvuku odeslán" : "Zvuk: zkusit znovu";
+    soundTestBtn.className = played ? "badge sound-badge ok" : "badge sound-badge warn";
     soundTestBtn.disabled = false;
   }
 
@@ -1072,7 +1105,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     if (editorBefore.trim() && !window.confirm("Adamův nový návrh po dokončení nahradí současný obsah editoru. Pokračovat?")) return;
     sendInFlight = true;
     syncControls();
-    await primeCompletionSound();
+    await primeCompletionSound({fresh:true});
     const sentAt = new Date().toISOString();
     const clientId = messageId();
     const pendingMessage = {user_text:CONTEXT_ANCHOR_PROPOSAL_PROMPT,client_sent_at:sentAt,received_at:sentAt,status:"pending",answer:""};
@@ -1353,7 +1386,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     if (!text) { notice.textContent = "Napiš nejdřív zprávu."; return; }
     sendInFlight = true;
     syncControls();
-    await primeCompletionSound();
+    await primeCompletionSound({fresh:true});
     clearMessageInput();
     const sentAt = new Date().toISOString();
     const clientId = messageId();
