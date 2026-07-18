@@ -18,6 +18,10 @@ Co je hotove:
 - Frontend vykresluje prikazy a popisy pres `textContent`; nema tlacitko pro
   spusteni, upravu ani kopirovani.
 - Pamatovacek je dohledatelny z MEMORY_INDEX.
+- Po overeni v aktualnim oficialnim Codex manualu byly doplneny prikazy `/new`
+  pro cisty chat ve stejne CLI/screen relaci a `/exit` nebo `/quit` pro uplne
+  ukonceni Codex CLI. Text vyslovne rozlisuje oba ucely a upozornuje na
+  checkpoint nebo handoff pred opustenim rozpracovane prace.
 - Cilene testy, Python kompilace, JavaScript syntaxe, kontrola diffu a plna
   Cockpit brana prosly; plna brana mela 776 uspesnych testu.
 

@@ -135,7 +135,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   budoucí nový TXT export s náhledem a dvoukrokovým odesláním Janě; implementace
   ještě nezačala.
 - `handoffs/cockpit_command_cheatsheet_2026_07_18.md` - [PRIPOMENOUT] read-only
-  pamatováček klíčových příkazů je připravený v Servisu i Recovery centru;
+  pamatováček klíčových příkazů je připravený v Servisu i Recovery centru a
+  rozlišuje také `/new` od úplného ukončení přes `/exit` nebo `/quit`;
   plná Cockpit brána prošla 776 testy, zbývá řízený restart a vizuální retest na
   Macu nebo iPhonu.
 - `handoffs/appserver_human_adam_text_remote_verified_restart_backup_2026_07_14.md` - [PRIPOMENOUT]

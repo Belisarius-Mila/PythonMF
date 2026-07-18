@@ -15,6 +15,8 @@ i bez Adama. Je uložený v infrastrukturní paměti Samanthy a dohledatelný z
 | `source ~/.zshrc` | Znovu načte nastavení shellu, když Terminál příkaz `samantha` nezná. Potom spusť `samantha`. |
 | `screen -ls` | Jen vypíše existující `screen` relace. Stav `Attached` znamená, že Adam běží, ale je zobrazený v jiném terminálu. |
 | `screen -d -r samantha_codex` | Bez restartu převezme tutéž živou relaci do aktuálního terminálu. Zachová chat, kontext i autosave. |
+| `/new` | Zadané do vstupního pole Codexu otevře nový čistý chat ve stejné CLI a `screen` relaci. Použij ho, když je dosavadní chat příliš dlouhý; předtím dokonči checkpoint nebo handoff. |
+| `/exit` nebo `/quit` | Zadané do vstupního pole Codexu ukončí Codex CLI. Použij až po uložení důležité práce; pro pouhé vyčištění kontextu je vhodnější `/new`. |
 | `Ctrl+A`, potom `D` | Korektně odpojí aktuální terminál od `screen`; Adam a jeho práce běží dál. |
 | `Ctrl+A`, potom `Esc` | Otevře historii výstupu ve `screen`. Samotný `Esc` historii zase zavře. |
 
