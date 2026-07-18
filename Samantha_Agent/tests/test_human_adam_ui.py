@@ -17,6 +17,9 @@ class HumanAdamUiTests(unittest.TestCase):
             "threadBadge",
             "workspaceBadge",
             "contextAnchorBadge",
+            "soundTestBtn",
+            "mediaSoundTestBtn",
+            "completionMediaAudio",
             "contextAnchorOpenBtn",
             "contextAnchorPanel",
             "contextAnchorCloseBtn",
@@ -513,7 +516,9 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('utterance.lang = "cs-CZ";', speak_source)
         self.assertIn("/^cs(?:-|$)/i", speak_source)
         self.assertIn('button.textContent = "Zastavit";', speak_source)
-        self.assertIn('window.addEventListener("pagehide", () => stopAnswerSpeech(false));', HUMAN_ADAM_HTML)
+        self.assertIn('window.addEventListener("pagehide", () => {', HUMAN_ADAM_HTML)
+        self.assertIn("stopAnswerSpeech(false);", HUMAN_ADAM_HTML)
+        self.assertIn("stopCompletionMediaSound();", HUMAN_ADAM_HTML)
 
     def test_unsupported_answer_speech_is_fail_closed_and_understandable(self) -> None:
         support_start = HUMAN_ADAM_HTML.index("function speechPlaybackSupported()")
@@ -706,6 +711,24 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("async function restoreCompletionAudioAfterVisibility()", sound_source)
         self.assertIn('soundTestBtn.addEventListener("click", testCompletionSound);', HUMAN_ADAM_HTML)
         self.assertIn('document.addEventListener("visibilitychange", restoreCompletionAudioAfterVisibility);', HUMAN_ADAM_HTML)
+
+    def test_local_media_sound_probe_is_separate_from_completion_web_audio(self) -> None:
+        sound_start = HUMAN_ADAM_HTML.index("function writeWavText(")
+        sound_end = HUMAN_ADAM_HTML.index("function contextAnchorDraftDirty()", sound_start)
+        sound_source = HUMAN_ADAM_HTML[sound_start:sound_end]
+
+        self.assertIn('id="mediaSoundTestBtn"', HUMAN_ADAM_HTML)
+        self.assertIn('id="completionMediaAudio" preload="auto" playsinline hidden', HUMAN_ADAM_HTML)
+        self.assertIn("function completionMediaWavUrl()", sound_source)
+        self.assertIn('new Blob([buffer], {type:"audio/wav"})', sound_source)
+        self.assertIn("window.URL.createObjectURL", sound_source)
+        self.assertIn("completionMediaAudio.volume = 1;", sound_source)
+        self.assertIn("completionMediaAudio.play();", sound_source)
+        self.assertIn('mediaSoundTestBtn.textContent = "Test média odeslán";', sound_source)
+        self.assertNotIn("fetch(", sound_source)
+        self.assertNotIn("api(", sound_source)
+        self.assertNotIn("playCompletionSound", sound_source)
+        self.assertIn('mediaSoundTestBtn.addEventListener("click", testCompletionMediaSound);', HUMAN_ADAM_HTML)
 
     def test_ui_is_manual_refresh_only_and_uses_safe_dom_text(self) -> None:
         self.assertNotIn("setInterval", HUMAN_ADAM_HTML)

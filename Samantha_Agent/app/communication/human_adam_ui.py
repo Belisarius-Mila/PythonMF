@@ -121,6 +121,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <span class="badge" id="workspaceBadge">Izolovaný workspace</span>
         <span class="badge" id="contextAnchorBadge">Kontext: nepřipnut</span>
         <button class="badge sound-badge warn" id="soundTestBtn" type="button">Zvuk: vyzkoušet</button>
+        <button class="badge sound-badge warn" id="mediaSoundTestBtn" type="button">Zvuk média: vyzkoušet</button>
+        <audio id="completionMediaAudio" preload="auto" playsinline hidden></audio>
       </div>
       <div id="turnActivity" role="status" aria-live="polite" hidden></div>
     </div>
@@ -204,6 +206,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const workspaceBadge = document.getElementById("workspaceBadge");
   const contextAnchorBadge = document.getElementById("contextAnchorBadge");
   const soundTestBtn = document.getElementById("soundTestBtn");
+  const mediaSoundTestBtn = document.getElementById("mediaSoundTestBtn");
+  const completionMediaAudio = document.getElementById("completionMediaAudio");
   const turnActivity = document.getElementById("turnActivity");
   const connectBtn = document.getElementById("connectBtn");
   const profileSelect = document.getElementById("profileSelect");
@@ -266,6 +270,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let deploymentAudit = null;
   let completionAudioContext = null;
   let completionAudioUnlocked = false;
+  let completionMediaUrl = "";
   let activeSpeechButton = null;
   let activeSpeechUtterance = null;
   let contextAnchorLoaded = false;
@@ -418,6 +423,79 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     soundTestBtn.textContent = played ? "Test zvuku odeslán" : "Zvuk: zkusit znovu";
     soundTestBtn.className = played ? "badge sound-badge ok" : "badge sound-badge warn";
     soundTestBtn.disabled = false;
+  }
+
+  function writeWavText(view, offset, text) {
+    for (let index = 0; index < text.length; index += 1) view.setUint8(offset + index, text.charCodeAt(index));
+  }
+
+  function completionMediaWavUrl() {
+    if (completionMediaUrl) return completionMediaUrl;
+    if (!window.URL || typeof window.URL.createObjectURL !== "function" || typeof Blob === "undefined") return "";
+    const sampleRate = 22050;
+    const frameCount = Math.ceil(sampleRate * 0.55);
+    const dataLength = frameCount * 2;
+    const buffer = new ArrayBuffer(44 + dataLength);
+    const view = new DataView(buffer);
+    writeWavText(view, 0, "RIFF");
+    view.setUint32(4, 36 + dataLength, true);
+    writeWavText(view, 8, "WAVE");
+    writeWavText(view, 12, "fmt ");
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * 2, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    writeWavText(view, 36, "data");
+    view.setUint32(40, dataLength, true);
+    const notes = [
+      {frequency:740, start:0.02, duration:0.16},
+      {frequency:988, start:0.22, duration:0.24},
+    ];
+    for (let frame = 0; frame < frameCount; frame += 1) {
+      const time = frame / sampleRate;
+      let sample = 0;
+      for (const note of notes) {
+        const localTime = time - note.start;
+        if (localTime < 0 || localTime >= note.duration) continue;
+        const attack = Math.min(1, localTime / 0.015);
+        const release = Math.min(1, (note.duration - localTime) / 0.04);
+        sample += Math.sin(2 * Math.PI * note.frequency * localTime) * 0.48 * Math.min(attack, release);
+      }
+      view.setInt16(44 + frame * 2, Math.round(Math.max(-1, Math.min(1, sample)) * 32767), true);
+    }
+    completionMediaUrl = window.URL.createObjectURL(new Blob([buffer], {type:"audio/wav"}));
+    return completionMediaUrl;
+  }
+
+  function stopCompletionMediaSound() {
+    completionMediaAudio.pause();
+    try { completionMediaAudio.currentTime = 0; } catch (_error) {}
+  }
+
+  async function testCompletionMediaSound() {
+    mediaSoundTestBtn.disabled = true;
+    try {
+      const source = completionMediaWavUrl();
+      if (!source) throw new Error("Mediální zvuk není podporovaný.");
+      stopCompletionMediaSound();
+      if (completionMediaAudio.src !== source) {
+        completionMediaAudio.src = source;
+        completionMediaAudio.load();
+      }
+      completionMediaAudio.volume = 1;
+      const playback = completionMediaAudio.play();
+      if (playback && typeof playback.then === "function") await playback;
+      mediaSoundTestBtn.textContent = "Test média odeslán";
+      mediaSoundTestBtn.className = "badge sound-badge ok";
+    } catch (_error) {
+      mediaSoundTestBtn.textContent = "Zvuk média: zkusit znovu";
+      mediaSoundTestBtn.className = "badge sound-badge warn";
+    } finally {
+      mediaSoundTestBtn.disabled = false;
+    }
   }
 
   function contextAnchorDraftDirty() {
@@ -1435,8 +1513,12 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     setMobileStatusDetails(mobileStatusSummary.getAttribute("aria-expanded") !== "true");
   });
   soundTestBtn.addEventListener("click", testCompletionSound);
+  mediaSoundTestBtn.addEventListener("click", testCompletionMediaSound);
   document.addEventListener("visibilitychange", restoreCompletionAudioAfterVisibility);
-  window.addEventListener("pagehide", () => stopAnswerSpeech(false));
+  window.addEventListener("pagehide", () => {
+    stopAnswerSpeech(false);
+    stopCompletionMediaSound();
+  });
   refreshBtn.addEventListener("click", loadStatus);
   contextAnchorOpenBtn.addEventListener("click", openContextAnchor);
   contextAnchorCloseBtn.addEventListener("click", closeContextAnchor);
