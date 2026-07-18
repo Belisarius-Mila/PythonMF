@@ -64,6 +64,14 @@ class HumanAdamWorkspaceManagerTests(unittest.TestCase):
             self.assertEqual(prepared["branch"], "main")
             self.assertEqual(prepared["remotes"], [])
             self.assertEqual(prepared["source_pending_changes"], 1)
+            self.assertEqual(
+                git(workspace, "config", "--local", "--get", "user.name"),
+                git(source, "config", "--local", "--get", "user.name"),
+            )
+            self.assertEqual(
+                git(workspace, "config", "--local", "--get", "user.email"),
+                git(source, "config", "--local", "--get", "user.email"),
+            )
             self.assertFalse((workspace / "Samantha_Agent" / "data" / "private" / "secret.txt").exists())
             self.assertFalse((workspace / "AuditCockpit56_M.txt").exists())
             self.assertEqual((source / "Samantha_Agent" / "tracked.py").read_text(), "VALUE = 1\n")
@@ -100,6 +108,55 @@ class HumanAdamWorkspaceManagerTests(unittest.TestCase):
             review = manager.review()
             self.assertEqual(review["checkpoint_change_count"], 1)
             self.assertEqual(review["checkpoint_changes"][0]["path"], "Samantha_Agent/tracked.py")
+
+    def test_checkpoint_repairs_missing_workspace_local_identity(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            manager = HumanAdamWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            manager.prepare()
+            git(manager.workspace_root, "config", "--local", "--unset", "user.name")
+            git(manager.workspace_root, "config", "--local", "--unset", "user.email")
+            (manager.project_root / "tracked.py").write_text("VALUE = 4\n", encoding="utf-8")
+
+            checkpoint = manager.checkpoint(confirmed=True, message="WIP repaired identity")
+
+            self.assertTrue(checkpoint["checkpoint_created"])
+            self.assertEqual(
+                git(manager.workspace_root, "config", "--local", "--get", "user.name"),
+                git(source, "config", "--local", "--get", "user.name"),
+            )
+            self.assertEqual(
+                git(manager.workspace_root, "config", "--local", "--get", "user.email"),
+                git(source, "config", "--local", "--get", "user.email"),
+            )
+
+    def test_missing_source_identity_fails_before_checkpoint_staging(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            manager = HumanAdamWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            manager.prepare()
+            git(source, "config", "--local", "--unset", "user.name")
+            git(source, "config", "--local", "--unset", "user.email")
+            git(manager.workspace_root, "config", "--local", "--unset", "user.name")
+            git(manager.workspace_root, "config", "--local", "--unset", "user.email")
+            changed = manager.project_root / "tracked.py"
+            changed.write_text("VALUE = 5\n", encoding="utf-8")
+
+            with self.assertRaisesRegex(AppServerError, "checkpoint nic nepřipravil"):
+                manager.checkpoint(confirmed=True, message="WIP missing identity")
+
+            self.assertEqual(git(manager.workspace_root, "diff", "--cached", "--name-only"), "")
+            self.assertEqual(changed.read_text(encoding="utf-8"), "VALUE = 5\n")
 
     def test_checkpoint_rejects_env_file(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

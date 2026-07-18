@@ -120,8 +120,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <span class="badge" id="threadBadge">Relace: —</span>
         <span class="badge" id="workspaceBadge">Izolovaný workspace</span>
         <span class="badge" id="contextAnchorBadge">Kontext: nepřipnut</span>
-        <button class="badge sound-badge warn" id="soundTestBtn" type="button">Zvuk: vyzkoušet</button>
-        <button class="badge sound-badge warn" id="mediaSoundTestBtn" type="button">Zvuk média: vyzkoušet</button>
+        <button class="badge sound-badge warn" id="mediaSoundTestBtn" type="button">Zvuk odpovědi: vyzkoušet</button>
         <audio id="completionMediaAudio" preload="auto" playsinline hidden></audio>
       </div>
       <div id="turnActivity" role="status" aria-live="polite" hidden></div>
@@ -205,7 +204,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const threadBadge = document.getElementById("threadBadge");
   const workspaceBadge = document.getElementById("workspaceBadge");
   const contextAnchorBadge = document.getElementById("contextAnchorBadge");
-  const soundTestBtn = document.getElementById("soundTestBtn");
   const mediaSoundTestBtn = document.getElementById("mediaSoundTestBtn");
   const completionMediaAudio = document.getElementById("completionMediaAudio");
   const turnActivity = document.getElementById("turnActivity");
@@ -272,8 +270,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let activeProfileLabel = "Human–Adam";
   let deliveryUncertain = false;
   let deploymentAudit = null;
-  let completionAudioContext = null;
-  let completionAudioUnlocked = false;
   let completionMediaUrl = "";
   let activeSpeechButton = null;
   let activeSpeechUtterance = null;
@@ -312,123 +308,6 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     } catch (_error) {
       return false;
     }
-  }
-
-  function discardCompletionAudioContext() {
-    const previous = completionAudioContext;
-    completionAudioContext = null;
-    completionAudioUnlocked = false;
-    if (!previous || previous.state === "closed" || typeof previous.close !== "function") return;
-    try {
-      const closing = previous.close();
-      if (closing && typeof closing.catch === "function") closing.catch(() => {});
-    } catch (_error) {
-      // Výměna iOS audiokontextu je best-effort a nesmí blokovat komunikaci.
-    }
-  }
-
-  function getCompletionAudioContext() {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) return null;
-    if (completionAudioContext && completionAudioContext.state === "closed") {
-      completionAudioContext = null;
-      completionAudioUnlocked = false;
-    }
-    if (!completionAudioContext) {
-      completionAudioContext = new AudioContextClass();
-      const observedContext = completionAudioContext;
-      observedContext.addEventListener("statechange", () => {
-        if (completionAudioContext !== observedContext) return;
-        const ready = observedContext.state === "running" && completionAudioUnlocked;
-        updateCompletionSoundUi(ready);
-      });
-    }
-    return completionAudioContext;
-  }
-
-  function updateCompletionSoundUi(ready, supported=true) {
-    soundTestBtn.textContent = !supported ? "Zvuk: nepodporován" : (ready ? "Zvuk: kanál aktivní" : "Zvuk: vyzkoušet");
-    soundTestBtn.className = ready ? "badge sound-badge ok" : "badge sound-badge warn";
-    soundTestBtn.disabled = !supported;
-  }
-
-  async function ensureCompletionAudioRunning(context) {
-    if (!context) return false;
-    if (["suspended", "interrupted"].includes(String(context.state || ""))) {
-      const resumeAttempt = context.resume();
-      await Promise.race([
-        resumeAttempt,
-        new Promise((resolve) => window.setTimeout(resolve, 500)),
-      ]);
-    }
-    return context.state === "running";
-  }
-
-  async function primeCompletionSound({fresh=false}={}) {
-    try {
-      configureCompletionAudioSession();
-      if (fresh) discardCompletionAudioContext();
-      const context = getCompletionAudioContext();
-      if (!context) {
-        updateCompletionSoundUi(false, false);
-        return false;
-      }
-      if (!await ensureCompletionAudioRunning(context)) throw new Error("Audiokanál se neotevřel.");
-      const source = context.createBufferSource();
-      source.buffer = context.createBuffer(1, 1, 22050);
-      source.connect(context.destination);
-      source.start(0);
-      completionAudioUnlocked = true;
-      updateCompletionSoundUi(true);
-      return true;
-    } catch (_error) {
-      completionAudioUnlocked = false;
-      updateCompletionSoundUi(false);
-      return false;
-    }
-  }
-
-  async function playCompletionSound() {
-    try {
-      const context = getCompletionAudioContext();
-      if (!context || !completionAudioUnlocked) return false;
-      if (!await ensureCompletionAudioRunning(context)) return false;
-      const start = context.currentTime + 0.02;
-      const notes = [
-        {frequency:740, offset:0, duration:0.16},
-        {frequency:988, offset:0.18, duration:0.24},
-      ];
-      for (const note of notes) {
-        const oscillator = context.createOscillator();
-        const gain = context.createGain();
-        const noteStart = start + note.offset;
-        const noteEnd = noteStart + note.duration;
-        oscillator.type = "sine";
-        oscillator.frequency.setValueAtTime(note.frequency, noteStart);
-        gain.gain.setValueAtTime(0.0001, noteStart);
-        gain.gain.exponentialRampToValueAtTime(0.12, noteStart + 0.025);
-        gain.gain.exponentialRampToValueAtTime(0.0001, noteEnd);
-        oscillator.connect(gain);
-        gain.connect(context.destination);
-        oscillator.start(noteStart);
-        oscillator.stop(noteEnd + 0.02);
-      }
-      updateCompletionSoundUi(true);
-      return true;
-    } catch (_error) {
-      // Zvuk je pouze doplňkový; nesmí změnit potvrzený stav dokončeného tahu.
-      updateCompletionSoundUi(false);
-      return false;
-    }
-  }
-
-  async function testCompletionSound() {
-    soundTestBtn.disabled = true;
-    const ready = await primeCompletionSound({fresh:true});
-    const played = ready && await playCompletionSound();
-    soundTestBtn.textContent = played ? "Test zvuku odeslán" : "Zvuk: zkusit znovu";
-    soundTestBtn.className = played ? "badge sound-badge ok" : "badge sound-badge warn";
-    soundTestBtn.disabled = false;
   }
 
   function writeWavText(view, offset, text) {
@@ -481,24 +360,65 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     try { completionMediaAudio.currentTime = 0; } catch (_error) {}
   }
 
+  function prepareCompletionMediaSound() {
+    configureCompletionAudioSession();
+    const source = completionMediaWavUrl();
+    if (!source) throw new Error("Mediální zvuk není podporovaný.");
+    stopCompletionMediaSound();
+    if (completionMediaAudio.src !== source) {
+      completionMediaAudio.src = source;
+      completionMediaAudio.load();
+    }
+    completionMediaAudio.volume = 1;
+  }
+
+  function updateCompletionMediaSoundUi(ready) {
+    mediaSoundTestBtn.textContent = ready ? "Zvuk odpovědi: připraven" : "Zvuk odpovědi: vyzkoušet";
+    mediaSoundTestBtn.className = ready ? "badge sound-badge ok" : "badge sound-badge warn";
+  }
+
+  async function primeCompletionMediaSound() {
+    try {
+      prepareCompletionMediaSound();
+      completionMediaAudio.muted = true;
+      const playback = completionMediaAudio.play();
+      const started = playback && typeof playback.then === "function"
+        ? await Promise.race([
+          playback.then(() => true).catch(() => false),
+          new Promise((resolve) => window.setTimeout(() => resolve(false), 500)),
+        ])
+        : true;
+      if (!started) throw new Error("Mediální zvuk se nepodařilo připravit.");
+      stopCompletionMediaSound();
+      updateCompletionMediaSoundUi(true);
+      return true;
+    } catch (_error) {
+      updateCompletionMediaSoundUi(false);
+      return false;
+    } finally {
+      completionMediaAudio.muted = false;
+    }
+  }
+
+  async function playCompletionMediaSound() {
+    try {
+      prepareCompletionMediaSound();
+      completionMediaAudio.muted = false;
+      const playback = completionMediaAudio.play();
+      if (playback && typeof playback.then === "function") await playback;
+      updateCompletionMediaSoundUi(true);
+      return true;
+    } catch (_error) {
+      // Zvuk je pouze doplňkový; nesmí změnit potvrzený stav dokončeného tahu.
+      updateCompletionMediaSoundUi(false);
+      return false;
+    }
+  }
+
   async function testCompletionMediaSound() {
     mediaSoundTestBtn.disabled = true;
     try {
-      const source = completionMediaWavUrl();
-      if (!source) throw new Error("Mediální zvuk není podporovaný.");
-      stopCompletionMediaSound();
-      if (completionMediaAudio.src !== source) {
-        completionMediaAudio.src = source;
-        completionMediaAudio.load();
-      }
-      completionMediaAudio.volume = 1;
-      const playback = completionMediaAudio.play();
-      if (playback && typeof playback.then === "function") await playback;
-      mediaSoundTestBtn.textContent = "Test média odeslán";
-      mediaSoundTestBtn.className = "badge sound-badge ok";
-    } catch (_error) {
-      mediaSoundTestBtn.textContent = "Zvuk média: zkusit znovu";
-      mediaSoundTestBtn.className = "badge sound-badge warn";
+      await playCompletionMediaSound();
     } finally {
       mediaSoundTestBtn.disabled = false;
     }
@@ -506,16 +426,6 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
 
   function contextAnchorDraftDirty() {
     return contextAnchorLoaded && contextAnchorInput.value.trim() !== savedContextAnchorContent;
-  }
-
-  async function restoreCompletionAudioAfterVisibility() {
-    if (document.hidden || !completionAudioUnlocked || !completionAudioContext) return;
-    try {
-      const ready = await ensureCompletionAudioRunning(completionAudioContext);
-      updateCompletionSoundUi(ready);
-    } catch (_error) {
-      updateCompletionSoundUi(false);
-    }
   }
 
   function syncControls() {
@@ -1064,7 +974,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
         renderStatus(payload);
         stopResultWatch();
         notice.textContent = "Výsledek byl načten bez opakovaného odeslání pokynu.";
-        playCompletionSound();
+        playCompletionMediaSound();
         return;
       }
       if (watched && String(watched.status || "") === "delivery_unknown") {
@@ -1285,7 +1195,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     if (editorBefore.trim() && !window.confirm("Adamův nový návrh po dokončení nahradí současný obsah editoru. Pokračovat?")) return;
     sendInFlight = true;
     syncControls();
-    await primeCompletionSound({fresh:true});
+    await primeCompletionMediaSound();
     const sentAt = new Date().toISOString();
     const clientId = messageId();
     const pendingMessage = {user_text:CONTEXT_ANCHOR_PROPOSAL_PROMPT,client_sent_at:sentAt,received_at:sentAt,status:"pending",answer:""};
@@ -1328,7 +1238,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       if (payload.context_anchor_warning) {
         outcomeNotice += ` Upozornění: ${payload.context_anchor_warning}`;
       }
-      playCompletionSound();
+      playCompletionMediaSound();
     } catch (error) {
       const confirmedRejection = new Set(["human_adam_busy","human_adam_send_failed"]).has(error.status);
       outcomeNotice = confirmedRejection
@@ -1567,7 +1477,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     if (!text) { notice.textContent = "Napiš nejdřív zprávu."; return; }
     sendInFlight = true;
     syncControls();
-    await primeCompletionSound({fresh:true});
+    await primeCompletionMediaSound();
     clearMessageInput();
     const sentAt = new Date().toISOString();
     const clientId = messageId();
@@ -1593,7 +1503,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       if (payload.context_anchor_warning) {
         notice.textContent = `Odpověď doručena. Upozornění: ${payload.context_anchor_warning}`;
       }
-      playCompletionSound();
+      playCompletionMediaSound();
     } catch (error) {
       const confirmedRejection = new Set(["human_adam_busy","human_adam_send_failed"]).has(error.status);
       if (!confirmedRejection) {
@@ -1616,9 +1526,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   mobileStatusSummary.addEventListener("click", () => {
     setMobileStatusDetails(mobileStatusSummary.getAttribute("aria-expanded") !== "true");
   });
-  soundTestBtn.addEventListener("click", testCompletionSound);
   mediaSoundTestBtn.addEventListener("click", testCompletionMediaSound);
-  document.addEventListener("visibilitychange", restoreCompletionAudioAfterVisibility);
   window.addEventListener("pagehide", () => {
     stopResultWatch();
     stopAnswerSpeech(false);

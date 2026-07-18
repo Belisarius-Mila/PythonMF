@@ -281,12 +281,44 @@ class HumanAdamWorkspaceManager:
             indent=2,
         )
 
+    def _ensure_local_commit_identity(self) -> None:
+        """Copy missing repo-local Git identity without relying on hostname discovery."""
+        identity: dict[str, str] = {}
+        for key in ("user.name", "user.email"):
+            source_value = _run_git(
+                self.source_repo,
+                ["config", "--local", "--get", key],
+            )
+            value = source_value.stdout.strip()
+            if source_value.returncode != 0 or not value:
+                raise AppServerError(
+                    "Hlavní repozitář nemá úplnou lokální Git identitu; checkpoint nic nepřipravil."
+                )
+            identity[key] = value
+
+        for key, value in identity.items():
+            current = _run_git(
+                self.workspace_root,
+                ["config", "--local", "--get", key],
+            )
+            if current.returncode == 0 and current.stdout.strip():
+                continue
+            configured = _run_git(
+                self.workspace_root,
+                ["config", "--local", key, value],
+            )
+            if configured.returncode != 0:
+                raise AppServerError(
+                    "Lokální Git identitu izolovaného workspace se nepodařilo bezpečně nastavit."
+                )
+
     def prepare(self) -> dict[str, Any]:
         with self._lock:
             existing = self.status()
             if self.workspace_root.exists():
                 if existing.get("prepared") and existing.get("ok"):
-                    return {**existing, "created": False}
+                    self._ensure_local_commit_identity()
+                    return {**self.status(), "created": False}
                 raise AppServerError(str(existing.get("message") or "Human–Adam workspace nelze bezpečně použít."))
             source_branch = _git_output(self.source_repo, ["branch", "--show-current"])
             if source_branch != "main":
@@ -317,6 +349,7 @@ class HumanAdamWorkspaceManager:
             _git_output(self.workspace_root, ["remote", "remove", "origin"])
             if _git_output(self.workspace_root, ["remote"]):
                 raise AppServerError("Git remote se z pracovní kopie nepodařilo odstranit.")
+            self._ensure_local_commit_identity()
             self._write_metadata(
                 {
                     "schema_version": 1,
@@ -538,6 +571,7 @@ class HumanAdamWorkspaceManager:
             blocked = [row["path"] for row in changes if self._blocked_checkpoint_path(row["path"])]
             if blocked:
                 raise AppServerError("Checkpoint obsahuje blokovaný private, env nebo mediální soubor.")
+            self._ensure_local_commit_identity()
             _git_output(self.workspace_root, ["diff", "--check"])
             _git_output(self.workspace_root, ["add", "--all", "--", "."])
             staged = _git_output(self.workspace_root, ["diff", "--cached", "--name-only"])
