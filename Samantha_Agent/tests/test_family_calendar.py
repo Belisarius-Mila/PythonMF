@@ -8,6 +8,8 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from app.family_calendar import (
+    DEFAULT_FAMILY_CALENDAR_PREFILL,
+    ensure_family_calendar_prefill,
     family_calendar_status,
     load_family_people,
     notification_candidates,
@@ -18,6 +20,70 @@ from app.family_calendar import (
 
 
 class FamilyCalendarTests(unittest.TestCase):
+    def test_authorized_default_prefill_is_complete_and_valid(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "family" / "people.json"
+
+            result = ensure_family_calendar_prefill(
+                path=path,
+                today=date(2026, 7, 19),
+                now=datetime(2026, 7, 19, 8, 0, tzinfo=timezone.utc),
+            )
+            people = load_family_people(path, today=date(2026, 7, 19))
+
+        self.assertTrue(result["applied"])
+        self.assertEqual(result["count"], len(DEFAULT_FAMILY_CALENDAR_PREFILL))
+        self.assertEqual(len(people), len(DEFAULT_FAMILY_CALENDAR_PREFILL))
+        self.assertTrue(all(person.name_day is not None for person in people))
+        self.assertTrue(all(person.birth_date is None for person in people))
+
+    def test_prefill_is_idempotent_and_preserves_existing_registry(self) -> None:
+        first_records = (
+            {
+                "id": "person-seedaaaa0001",
+                "display_name": "Alena",
+                "relation": "teta",
+                "name_day": "08-13",
+            },
+        )
+        second_records = (
+            {
+                "id": "person-seedbbbb0002",
+                "display_name": "Běla",
+                "relation": "sestřenice",
+                "name_day": "01-21",
+            },
+        )
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "family" / "people.json"
+
+            first = ensure_family_calendar_prefill(
+                path=path,
+                records=first_records,
+                today=date(2026, 7, 19),
+            )
+            saved = save_family_person(
+                person_id="person-seedaaaa0001",
+                display_name="Alena",
+                relation="teta",
+                birth_date="1980-04-03",
+                name_day="08-13",
+                path=path,
+                today=date(2026, 7, 19),
+            )
+            second = ensure_family_calendar_prefill(
+                path=path,
+                records=second_records,
+                today=date(2026, 7, 19),
+            )
+            people = load_family_people(path, today=date(2026, 7, 19))
+
+        self.assertTrue(first["applied"])
+        self.assertFalse(second["applied"])
+        self.assertEqual(len(people), 1)
+        self.assertEqual(people[0].person_id, saved.person_id)
+        self.assertEqual(people[0].birth_date, date(1980, 4, 3))
+
     def test_missing_private_registry_is_an_empty_calendar(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             path = Path(temp_dir) / "family" / "people.json"

@@ -24,6 +24,23 @@ DEFAULT_LOOKAHEAD_DAYS = 30
 NOTIFICATION_OFFSETS = frozenset({1, 2})
 PERSON_ID_RE = re.compile(r"person-[a-z0-9]{8,40}")
 NAME_DAY_RE = re.compile(r"(0[1-9]|1[0-2])-([0-2][0-9]|3[01])")
+DEFAULT_FAMILY_CALENDAR_PREFILL: tuple[dict[str, str], ...] = (
+    {"id": "person-prefill0001", "display_name": "Jana", "relation": "babička", "name_day": "05-24"},
+    {"id": "person-prefill0002", "display_name": "Jana", "relation": "prababička", "name_day": "05-24"},
+    {"id": "person-prefill0003", "display_name": "Miloslav", "relation": "děda", "name_day": "12-18"},
+    {"id": "person-prefill0004", "display_name": "Karolina", "relation": "dcera", "name_day": "07-14"},
+    {"id": "person-prefill0005", "display_name": "Kateřina", "relation": "dcera", "name_day": "11-25"},
+    {"id": "person-prefill0006", "display_name": "Matěj", "relation": "vnuk", "name_day": "02-24"},
+    {"id": "person-prefill0007", "display_name": "Tomík", "relation": "vnuk", "name_day": "03-07"},
+    {"id": "person-prefill0008", "display_name": "Martinka", "relation": "vnučka", "name_day": "07-17"},
+    {"id": "person-prefill0009", "display_name": "Renata", "relation": "prababička", "name_day": "10-13"},
+    {"id": "person-prefill0010", "display_name": "Marie", "relation": "teta", "name_day": "09-12"},
+    {"id": "person-prefill0011", "display_name": "Iva", "relation": "teta", "name_day": "12-01"},
+    {"id": "person-prefill0012", "display_name": "Gisbert", "relation": "strejda", "name_day": "03-20"},
+    {"id": "person-prefill0013", "display_name": "Adam", "relation": "bratranec", "name_day": "12-24"},
+    {"id": "person-prefill0014", "display_name": "Marcela", "relation": "od Tomáše", "name_day": "04-20"},
+    {"id": "person-prefill0015", "display_name": "Tomáš", "relation": "bratranec", "name_day": "03-07"},
+)
 
 
 @dataclass(frozen=True)
@@ -99,6 +116,88 @@ def load_family_people(
         return []
     raw = json.loads(target.read_text(encoding="utf-8"))
     return _people_from_store(raw, today=today or date.today())
+
+
+def ensure_family_calendar_prefill(
+    *,
+    path: Path = DEFAULT_FAMILY_CALENDAR_PATH,
+    records: Collection[dict[str, str]] = DEFAULT_FAMILY_CALENDAR_PREFILL,
+    today: date | None = None,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Seed an empty private registry once without changing existing people."""
+
+    today_date = today or date.today()
+    timestamp = (now or datetime.now(timezone.utc)).replace(microsecond=0).isoformat()
+    prepared: list[FamilyPerson] = []
+    seen_ids: set[str] = set()
+    seen_people: set[tuple[str, str]] = set()
+    for raw in records:
+        if not isinstance(raw, dict):
+            raise ValueError("Předvyplnění musí obsahovat strukturované osoby.")
+        person_id = str(raw.get("id") or "").strip().casefold()
+        if not PERSON_ID_RE.fullmatch(person_id) or person_id in seen_ids:
+            raise ValueError("Předvyplnění obsahuje neplatnou nebo duplicitní identitu osoby.")
+        display_name = _clean_text(
+            raw.get("display_name", ""),
+            field="Jméno",
+            max_chars=120,
+            required=True,
+        )
+        relation = _clean_text(raw.get("relation", ""), field="Vztah", max_chars=80)
+        identity = (display_name.casefold(), relation.casefold())
+        if identity in seen_people:
+            raise ValueError("Předvyplnění obsahuje stejnou osobu vícekrát.")
+        birth_date = parse_birth_date(str(raw.get("birth_date") or ""), today=today_date)
+        name_day = parse_name_day(str(raw.get("name_day") or ""))
+        if birth_date is None and name_day is None:
+            raise ValueError("Předvyplněná osoba nemá datum narození ani svátku.")
+        prepared.append(
+            FamilyPerson(
+                person_id=person_id,
+                display_name=display_name,
+                relation=relation,
+                birth_date=birth_date,
+                name_day=name_day,
+                reminders_enabled=True,
+                active=True,
+                created_at=timestamp,
+                updated_at=timestamp,
+            )
+        )
+        seen_ids.add(person_id)
+        seen_people.add(identity)
+    if not prepared:
+        raise ValueError("Předvyplnění neobsahuje žádné osoby.")
+
+    target = Path(path)
+    if target.exists():
+        existing_people = load_family_people(target, today=today_date)
+        if existing_people:
+            return {"ok": True, "applied": False, "count": len(existing_people)}
+    applied = False
+
+    def update_store(current: Any) -> dict[str, Any]:
+        nonlocal applied
+        people = _people_from_store(current, today=today_date)
+        if people:
+            return _store_payload(people)
+        applied = True
+        return _store_payload(prepared)
+
+    _prepare_private_target(target)
+    update_json_file(
+        target,
+        update_store,
+        default={"schema_version": FAMILY_CALENDAR_SCHEMA_VERSION, "people": []},
+        sort_keys=True,
+    )
+    _harden_private_target(target)
+    return {
+        "ok": True,
+        "applied": applied,
+        "count": len(prepared) if applied else len(load_family_people(target, today=today_date)),
+    }
 
 
 def save_family_person(

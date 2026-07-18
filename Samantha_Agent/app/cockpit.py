@@ -18,7 +18,7 @@ import tempfile
 import threading
 import time
 import urllib.error
-from collections.abc import Callable
+from collections.abc import Callable, Collection
 from datetime import date, datetime, timezone
 from email import message_from_bytes
 from email.utils import parsedate_to_datetime
@@ -100,7 +100,9 @@ from app.communication.human_adam_deploy import (
 from app.communication.human_adam_ui import HUMAN_ADAM_HTML
 from app.backup.activity_state import backup_activity_status
 from app.family_calendar import (
+    DEFAULT_FAMILY_CALENDAR_PREFILL,
     DEFAULT_FAMILY_CALENDAR_PATH,
+    ensure_family_calendar_prefill,
     family_calendar_status,
     save_family_person,
 )
@@ -801,6 +803,47 @@ def family_calendar_status_action(
             "message": f"Rodinný kalendář se nepodařilo načíst: {exc}",
             "error": "family_calendar_unavailable",
         }
+
+
+def family_calendar_prefill_action(
+    *,
+    path: Path = DEFAULT_FAMILY_CALENDAR_PATH,
+    records: Collection[dict[str, str]] = DEFAULT_FAMILY_CALENDAR_PREFILL,
+    today: date | None = None,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    today_date = today or date.today()
+    try:
+        result = ensure_family_calendar_prefill(
+            path=path,
+            records=records,
+            today=today_date,
+            now=now,
+        )
+        status = family_calendar_status(path=path, today=today_date)
+    except (ValueError, json.JSONDecodeError) as exc:
+        return {
+            "ok": False,
+            "message": f"Předvyplnění rodinného kalendáře není platné: {exc}",
+            "error": "invalid_family_calendar_prefill",
+        }
+    except OSError as exc:
+        return {
+            "ok": False,
+            "message": f"Rodinný kalendář se nepodařilo předvyplnit: {exc}",
+            "error": "family_calendar_prefill_failed",
+        }
+    applied = bool(result.get("applied"))
+    return {
+        "ok": True,
+        "applied": applied,
+        "message": (
+            "Základní seznam osob a svátků byl předvyplněn. Narozeniny můžeš doplnit přes Upravit."
+            if applied
+            else "Rodinný kalendář už obsahuje údaje; předvyplnění nic nezměnilo."
+        ),
+        "status": status,
+    }
 
 
 def family_calendar_save_action(
@@ -9600,6 +9643,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/family-calendar/prefill",
+        "label": "Predvyplnit rodinny kalendar",
+        "risk": "private_write",
+        "confirmation": "explicit_user_authorized_defaults",
+        "handler_name": "family_calendar_prefill_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/lekarna/retire/preview",
         "label": "Nahled vyrazeni leku",
         "risk": "read_only_via_post",
@@ -10395,6 +10446,10 @@ class CockpitServer:
                 if parsed.path == "/api/family-calendar/save":
                     payload = self.read_json()
                     self.respond_json(family_calendar_save_action(payload))
+                    return
+                if parsed.path == "/api/family-calendar/prefill":
+                    self.read_json()
+                    self.respond_json(family_calendar_prefill_action())
                     return
                 if parsed.path == "/api/lekarna/retire/preview":
                     payload = self.read_json()
@@ -18374,6 +18429,18 @@ COCKPIT_HTML = """<!doctype html>
           familyCalendarTableBody.innerHTML = "";
           renderFamilyCalendarUpcoming([]);
           return false;
+        }
+        if (Number((data.counts || {}).people || 0) === 0) {
+          familyCalendarStatus.textContent = "Předvyplňuji základní seznam osob a svátků…";
+          const prefill = await postJson("/api/family-calendar/prefill", {});
+          if (!prefill.ok) {
+            renderFamilyCalendar(data);
+            familyCalendarStatus.textContent = prefill.message || "Předvyplnění rodinného kalendáře selhalo.";
+            return false;
+          }
+          renderFamilyCalendar(prefill.status || {});
+          familyCalendarStatus.textContent = prefill.message || "Rodinný kalendář byl předvyplněn.";
+          return true;
         }
         renderFamilyCalendar(data);
         return true;

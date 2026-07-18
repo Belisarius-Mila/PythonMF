@@ -39,6 +39,7 @@ except ImportError:  # pragma: no cover - isolated workspace dependency fallback
 from app.cockpit import (
     COCKPIT_HTML,
     COCKPIT_POST_ACTIONS,
+    family_calendar_prefill_action,
     family_calendar_save_action,
     family_calendar_status_action,
 )
@@ -86,6 +87,38 @@ class FamilyCalendarCockpitTests(unittest.TestCase):
         self.assertEqual(updated["person"]["relation"], "sestřenice")
         self.assertFalse(updated["person"]["reminders_enabled"])
 
+    def test_prefill_action_seeds_only_an_empty_registry(self) -> None:
+        records = (
+            {
+                "id": "person-seedaaaa0001",
+                "display_name": "Alena",
+                "relation": "teta",
+                "name_day": "08-13",
+            },
+        )
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "family" / "people.json"
+
+            first = family_calendar_prefill_action(
+                path=path,
+                records=records,
+                today=date(2026, 7, 19),
+                now=datetime(2026, 7, 19, 8, 0, tzinfo=timezone.utc),
+            )
+            second = family_calendar_prefill_action(
+                path=path,
+                records=records,
+                today=date(2026, 7, 19),
+                now=datetime(2026, 7, 19, 9, 0, tzinfo=timezone.utc),
+            )
+
+        self.assertTrue(first["ok"])
+        self.assertTrue(first["applied"])
+        self.assertEqual(first["status"]["counts"]["people"], 1)
+        self.assertTrue(second["ok"])
+        self.assertFalse(second["applied"])
+        self.assertEqual(second["status"]["counts"]["people"], 1)
+
     def test_save_action_returns_validation_error_without_writing(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             path = Path(temp_dir) / "family" / "people.json"
@@ -112,6 +145,13 @@ class FamilyCalendarCockpitTests(unittest.TestCase):
 
         self.assertEqual(route["risk"], "private_write")
         self.assertEqual(route["handler_name"], "family_calendar_save_action")
+        prefill_route = next(
+            item
+            for item in COCKPIT_POST_ACTIONS
+            if item["path"] == "/api/family-calendar/prefill"
+        )
+        self.assertEqual(prefill_route["risk"], "private_write")
+        self.assertEqual(prefill_route["handler_name"], "family_calendar_prefill_action")
         self.assertIn('id="familyCalendarBtn">Rodinný kalendář</button>', COCKPIT_HTML)
         self.assertIn('id="familyCalendarModal"', COCKPIT_HTML)
         self.assertIn('id="familyCalendarForm"', COCKPIT_HTML)
@@ -120,6 +160,7 @@ class FamilyCalendarCockpitTests(unittest.TestCase):
         self.assertIn("Datum svátku", COCKPIT_HTML)
         self.assertIn("e-mailové odesílání zatím není aktivní", COCKPIT_HTML)
         self.assertIn('fetchJson("/api/family-calendar/status")', COCKPIT_HTML)
+        self.assertIn('postJson("/api/family-calendar/prefill", {})', COCKPIT_HTML)
         self.assertIn('postJson("/api/family-calendar/save"', COCKPIT_HTML)
         self.assertIn("function editFamilyCalendarPerson(personId)", COCKPIT_HTML)
         self.assertIn("familyCalendarEditorDirty", COCKPIT_HTML)
