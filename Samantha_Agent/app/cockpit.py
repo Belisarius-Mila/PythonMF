@@ -77,6 +77,7 @@ from app.autosave_service import (
     session_autosave_cleanup_action,
 )
 from app.codex_appserver import AppServerError
+from app.command_cheatsheet import load_command_cheatsheet
 from app.communication.human_adam_service import (
     human_adam_checkpoint_action,
     human_adam_connect_action,
@@ -9878,6 +9879,9 @@ class CockpitServer:
                 if parsed.path == "/api/recovery/status":
                     self.respond_json(recovery_center_status())
                     return
+                if parsed.path == "/api/command-cheatsheet":
+                    self.respond_json(load_command_cheatsheet())
+                    return
                 if parsed.path == "/api/quick-notes/status":
                     self.respond_json(quick_notes_status())
                     return
@@ -12706,8 +12710,15 @@ COCKPIT_HTML = """<!doctype html>
 	    .recovery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 		    .recovery-card { border: 1px solid #edf0f4; border-radius: 8px; padding: 10px; background: #fbfcfe; display: grid; gap: 5px; }
 		    .recovery-card h3 { margin: 0; font-size: 13px; color: #253047; }
-		    .recovery-list { display: grid; gap: 8px; }
-		    .recovery-command { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; background: #fff; border: 1px solid #edf0f4; border-radius: 7px; padding: 8px; overflow-wrap: anywhere; }
+	    .recovery-list { display: grid; gap: 8px; }
+	    .recovery-command { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; background: #fff; border: 1px solid #edf0f4; border-radius: 7px; padding: 8px; overflow-wrap: anywhere; }
+    .command-cheatsheet-list { display: grid; gap: 10px; }
+    .command-cheatsheet-section { border: 1px solid #edf0f4; border-radius: 8px; padding: 11px; background: #fbfcfe; display: grid; gap: 8px; }
+    .command-cheatsheet-section h3 { margin: 0; font-size: 14px; color: #253047; }
+    .command-cheatsheet-row { display: grid; gap: 5px; border-top: 1px solid #edf0f4; padding-top: 8px; }
+    .command-cheatsheet-row:first-of-type { border-top: 0; padding-top: 0; }
+    .command-cheatsheet-command { font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; background: white; border: 1px solid #dbe2ea; border-radius: 7px; padding: 8px; overflow-wrap: anywhere; user-select: text; }
+    .command-cheatsheet-explanation { color: #475467; font-size: 12px; line-height: 1.4; overflow-wrap: anywhere; }
     .diagnostics-list { display: grid; gap: 8px; }
     .diagnostics-row { border: 1px solid #edf0f4; border-radius: 8px; padding: 10px; background: #fbfcfe; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
     .diagnostics-row-title { font-weight: 750; overflow-wrap: anywhere; }
@@ -13027,6 +13038,7 @@ COCKPIT_HTML = """<!doctype html>
             <button class="secondary" id="dashboardProjectAuditBtn">Systémový audit</button>
             <button class="secondary" id="dashboardQuickNotesBtn">Rychlé poznámky</button>
             <button class="secondary" id="dashboardRecoveryBtn">Recovery centrum</button>
+            <button class="secondary" id="dashboardCommandCheatsheetBtn">Pamatováček</button>
             <button class="secondary" id="dashboardAutosaveCleanupBtn">Autosave úklid</button>
             <button class="secondary" id="dashboardDiagnosticsBtn">Diagnostika</button>
             <button class="secondary" id="dashboardRestartBtn">Restart Cockpitu</button>
@@ -13575,10 +13587,25 @@ COCKPIT_HTML = """<!doctype html>
 	        <div class="recovery-card">
 	          <h3>Příkazy</h3>
 	          <div id="recoveryCommands" class="recovery-list"></div>
+	          <div class="voice-card-actions">
+	            <button class="secondary" id="recoveryCommandCheatsheetBtn" type="button">Otevřít celý pamatováček</button>
+	          </div>
 	        </div>
-		      </div>
-		    </div>
-		  </div>
+	      </div>
+	    </div>
+	  </div>
+	  <div id="commandCheatsheetModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="commandCheatsheetTitle">
+	    <div class="modal">
+	      <div class="modal-header">
+	        <h2 id="commandCheatsheetTitle">Pamatováček</h2>
+	        <button class="secondary" id="commandCheatsheetCloseBtn">Zavřít</button>
+	      </div>
+	      <div class="modal-body">
+	        <div id="commandCheatsheetStatus" class="status-line">Načítám pamatováček...</div>
+	        <div id="commandCheatsheetList" class="command-cheatsheet-list"></div>
+	      </div>
+	    </div>
+	  </div>
 	  <div id="diagnosticsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="diagnosticsTitle">
 	    <div class="modal">
 	      <div class="modal-header">
@@ -13811,6 +13838,11 @@ COCKPIT_HTML = """<!doctype html>
 		    const recoveryProject = document.getElementById("recoveryProject");
 		    const recoveryHandoffs = document.getElementById("recoveryHandoffs");
 		    const recoveryCommands = document.getElementById("recoveryCommands");
+    const commandCheatsheetModal = document.getElementById("commandCheatsheetModal");
+    const commandCheatsheetCloseBtn = document.getElementById("commandCheatsheetCloseBtn");
+    const commandCheatsheetStatus = document.getElementById("commandCheatsheetStatus");
+    const commandCheatsheetList = document.getElementById("commandCheatsheetList");
+    const recoveryCommandCheatsheetBtn = document.getElementById("recoveryCommandCheatsheetBtn");
     const diagnosticsModal = document.getElementById("diagnosticsModal");
     const diagnosticsCloseBtn = document.getElementById("diagnosticsCloseBtn");
     const diagnosticsStatus = document.getElementById("diagnosticsStatus");
@@ -13863,6 +13895,7 @@ COCKPIT_HTML = """<!doctype html>
 		    const dashboardQuickNotesBtn = document.getElementById("dashboardQuickNotesBtn");
     const dashboardUrgentRemindersBtn = document.getElementById("dashboardUrgentRemindersBtn");
     const dashboardRecoveryBtn = document.getElementById("dashboardRecoveryBtn");
+    const dashboardCommandCheatsheetBtn = document.getElementById("dashboardCommandCheatsheetBtn");
     const dashboardAutosaveCleanupBtn = document.getElementById("dashboardAutosaveCleanupBtn");
     const autosaveCleanupPreviewBtn = document.getElementById("autosaveCleanupPreviewBtn");
     const autosaveCleanupApplyBtn = document.getElementById("autosaveCleanupApplyBtn");
@@ -14179,6 +14212,12 @@ COCKPIT_HTML = """<!doctype html>
         "dashboardQuickNotesBtn",
         "dashboardUrgentRemindersBtn",
         "dashboardRecoveryBtn",
+        "dashboardCommandCheatsheetBtn",
+        "recoveryCommandCheatsheetBtn",
+        "commandCheatsheetModal",
+        "commandCheatsheetCloseBtn",
+        "commandCheatsheetStatus",
+        "commandCheatsheetList",
         "dashboardAutosaveCleanupBtn",
         "autosaveCleanupPreviewBtn",
         "autosaveCleanupApplyBtn",
@@ -19214,6 +19253,53 @@ COCKPIT_HTML = """<!doctype html>
       maybeReturnToJanicka("recovery");
     }
 
+    async function openCommandCheatsheetModal() {
+      commandCheatsheetModal.classList.remove("hidden");
+      commandCheatsheetStatus.textContent = "Načítám pamatováček...";
+      commandCheatsheetList.innerHTML = "";
+      try {
+        const data = await fetchJson("/api/command-cheatsheet");
+        if (!data.ok) throw new Error(data.message || "Pamatováček není dostupný.");
+        renderCommandCheatsheet(data);
+        commandCheatsheetCloseBtn.focus();
+      } catch (err) {
+        recordFrontendError(err);
+        commandCheatsheetStatus.textContent = `Chyba načtení pamatováčku: ${err}`;
+      }
+    }
+
+    function closeCommandCheatsheetModal() {
+      commandCheatsheetModal.classList.add("hidden");
+    }
+
+    function renderCommandCheatsheet(data) {
+      const sections = Array.isArray(data.sections) ? data.sections : [];
+      commandCheatsheetStatus.textContent = data.message || "Pamatováček je načtený pouze pro čtení.";
+      commandCheatsheetList.innerHTML = "";
+      sections.forEach((section) => {
+        const sectionCard = document.createElement("div");
+        sectionCard.className = "command-cheatsheet-section";
+        const heading = document.createElement("h3");
+        heading.textContent = section.title || "Příkazy";
+        sectionCard.appendChild(heading);
+        const items = Array.isArray(section.items) ? section.items : [];
+        items.forEach((item) => {
+          const row = document.createElement("div");
+          row.className = "command-cheatsheet-row";
+          const command = document.createElement("div");
+          command.className = "command-cheatsheet-command";
+          command.textContent = item.command || "";
+          const explanation = document.createElement("div");
+          explanation.className = "command-cheatsheet-explanation";
+          explanation.textContent = item.explanation || "";
+          row.appendChild(command);
+          row.appendChild(explanation);
+          sectionCard.appendChild(row);
+        });
+        commandCheatsheetList.appendChild(sectionCard);
+      });
+    }
+
 	    function renderRecoveryStatus(data) {
 	      const autosave = data.autosave || {};
 	      const autosaveRuntime = autosave.runtime || {};
@@ -20446,6 +20532,8 @@ COCKPIT_HTML = """<!doctype html>
     dashboardUrgentRemindersBtn.addEventListener("click", openUrgentRemindersModal);
     urgentReminderAlertBtn.addEventListener("click", openUrgentRemindersModal);
 		    dashboardRecoveryBtn.addEventListener("click", openRecoveryModal);
+    dashboardCommandCheatsheetBtn.addEventListener("click", openCommandCheatsheetModal);
+    recoveryCommandCheatsheetBtn.addEventListener("click", openCommandCheatsheetModal);
     dashboardAutosaveCleanupBtn.addEventListener("click", () => {
       servicePanel.open = true;
       previewAutosaveCleanup(dashboardAutosaveCleanupBtn);
@@ -20513,6 +20601,7 @@ COCKPIT_HTML = """<!doctype html>
 		    quickNotesCloseBtn.addEventListener("click", closeQuickNotesModal);
     urgentRemindersCloseBtn.addEventListener("click", closeUrgentRemindersModal);
 		    recoveryCloseBtn.addEventListener("click", closeRecoveryModal);
+    commandCheatsheetCloseBtn.addEventListener("click", closeCommandCheatsheetModal);
     diagnosticsCloseBtn.addEventListener("click", closeDiagnosticsModal);
 		    quantitativeCloseBtn.addEventListener("click", closeQuantitativeModal);
     projectAuditCloseBtn.addEventListener("click", closeProjectAuditModal);
@@ -20635,6 +20724,11 @@ COCKPIT_HTML = """<!doctype html>
 	        closeRecoveryModal();
 	      }
 	    });
+    commandCheatsheetModal.addEventListener("click", (event) => {
+      if (event.target === commandCheatsheetModal) {
+        closeCommandCheatsheetModal();
+      }
+    });
     diagnosticsModal.addEventListener("click", (event) => {
       if (event.target === diagnosticsModal) {
         closeDiagnosticsModal();
@@ -20665,6 +20759,8 @@ COCKPIT_HTML = """<!doctype html>
 	        closeQuickNotesModal();
       } else if (event.key === "Escape" && !urgentRemindersModal.classList.contains("hidden")) {
         closeUrgentRemindersModal();
+		      } else if (event.key === "Escape" && !commandCheatsheetModal.classList.contains("hidden")) {
+		        closeCommandCheatsheetModal();
 		      } else if (event.key === "Escape" && !recoveryModal.classList.contains("hidden")) {
 		        closeRecoveryModal();
       } else if (event.key === "Escape" && !diagnosticsModal.classList.contains("hidden")) {

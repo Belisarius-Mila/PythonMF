@@ -59,6 +59,10 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Infrastructure Recovery
 
+- `infrastructure/klicove_prikazy_pamatovacek.md` - Mílův stručný git-safe
+  pamatováček: návrat k jediné relaci Adam–Codex, bezpečné převzetí připojeného
+  `screen`, Cockpit, read-only Git stav, záloha, autosave a seznam příkazů, které
+  bez Adama nepoužívat.
 - `infrastructure/operating_model.md` - kratky provozni rozcestnik pro bezny start prace, systemove reporty, git checkpointy, reconnect recovery, sitove incidenty a kvantitativni metriky.
 - `infrastructure/macos_network_recovery.md` - [PRIPOMENOUT] rozcestnik pro DHCP failure, VPN/Tailscale recovery, network plist reset, hotspot/Wi-Fi repair, network watchdog a aktualni diagnozu domaci Wi-Fi/router vs Mac.
 - `infrastructure/codex_reconnect_recovery.md` - [PRIPOMENOUT] reconnect loop handling, navazani pres `samantha`/`screen`, `codex resume`, safe recovery after stream failure a pravidlo nejdrive cist git status + memory.
@@ -130,6 +134,10 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   soukromý kompaktní kontext mimo Git, zákaz změn a mazání zdrojových dat a
   budoucí nový TXT export s náhledem a dvoukrokovým odesláním Janě; implementace
   ještě nezačala.
+- `handoffs/cockpit_command_cheatsheet_2026_07_18.md` - [PRIPOMENOUT] read-only
+  pamatováček klíčových příkazů je připravený v Servisu i Recovery centru;
+  plná Cockpit brána prošla 776 testy, zbývá řízený restart a vizuální retest na
+  Macu nebo iPhonu.
 - `handoffs/appserver_human_adam_text_remote_verified_restart_backup_2026_07_14.md` - [PRIPOMENOUT]
   priorita 1 před restartem Macu: vzdálená textová práce a samoobslužné nasazení
   jsou opakovaně ověřené až po sticky účtenku, bod `5bac508` a 703 testů. Po

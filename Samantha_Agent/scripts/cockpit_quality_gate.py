@@ -25,6 +25,7 @@ NODE_FALLBACK_PATHS = (
 
 COMPILE_PATHS = (
     "app/cockpit.py",
+    "app/command_cheatsheet.py",
     "app/cockpit_code_stamp.py",
     "app/cockpit_status_service.py",
     "app/voice_bridge_coordinator.py",
@@ -83,6 +84,7 @@ SHELL_PATHS = (
 TEST_MODULES = (
     "tests.test_cockpit_quality_gate",
     "tests.test_cockpit_status_service",
+    "tests.test_command_cheatsheet",
     "tests.test_codex_appserver",
     "tests.test_codex_appserver_shared_thread_probe",
     "tests.test_communication_session_hub",

@@ -62,6 +62,17 @@ class CockpitHttpSecurityTests(unittest.TestCase):
             self.assertEqual(headers.get(name), value)
         self.assertNotIn("Python", headers.get("Server", ""))
 
+    def test_command_cheatsheet_endpoint_is_read_only_text_data(self) -> None:
+        with running_cockpit_server() as (host, port, _logger):
+            status, payload, headers = request_json(host, port, "GET", "/api/command-cheatsheet")
+
+        self.assertEqual(status, 200)
+        self.assertTrue(payload["ok"])
+        self.assertEqual(len(payload["sections"]), 4)
+        self.assertNotIn("action", json.dumps(payload, ensure_ascii=False))
+        self.assertNotIn("html", json.dumps(payload, ensure_ascii=False).casefold())
+        self.assertEqual(headers.get("X-Content-Type-Options"), "nosniff")
+
     def test_invalid_json_returns_controlled_400(self) -> None:
         with running_cockpit_server() as (host, port, logger):
             status, payload, _headers = request_json(
