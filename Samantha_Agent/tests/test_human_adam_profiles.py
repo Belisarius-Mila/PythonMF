@@ -10,6 +10,8 @@ from app.communication.human_adam_profiles import (
     human_adam_profile_switch_action,
 )
 from app.communication.human_adam_service import HumanAdamService
+from app.communication.session_hub import SessionBusyError
+from app.codex_appserver import AppServerError
 
 
 class FakeRuntime:
@@ -289,3 +291,48 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(library_workspace.sync_count, 1)
         self.assertFalse(library_workspace.source_ahead)
+
+    def test_connect_safely_fast_forwards_clean_active_profile(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            human_workspace.source_ahead = True
+
+            result = manager.connect()
+
+        self.assertTrue(result["ok"])
+        self.assertTrue(result["workspace_synced"])
+        self.assertEqual(result["work_profile"]["id"], "human_adam")
+        self.assertEqual(result["session"]["thread_id"], "human-thread")
+        self.assertEqual(human_workspace.sync_count, 1)
+        self.assertFalse(human_workspace.source_ahead)
+        self.assertTrue(human_hub.connected)
+
+    def test_connect_does_not_sync_unsafe_active_workspace(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            human_workspace.source_ahead = True
+            human_workspace.dirty = True
+
+            with self.assertRaises(AppServerError):
+                manager.connect()
+
+        self.assertEqual(human_workspace.sync_count, 0)
+        self.assertFalse(human_hub.connected)
+
+    def test_connect_does_not_sync_active_workspace_during_uncertain_delivery(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            human_workspace.source_ahead = True
+            human_hub.messages = [{"status": "delivery_unknown", "recovery_required": True}]
+
+            with self.assertRaises(SessionBusyError):
+                manager.connect()
+
+        self.assertEqual(human_workspace.sync_count, 0)
+        self.assertFalse(human_hub.connected)

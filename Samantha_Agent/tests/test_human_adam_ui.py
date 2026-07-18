@@ -68,6 +68,8 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Doručení potvrzeno", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/status", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/connect", HUMAN_ADAM_HTML)
+        self.assertIn("payload.workspace_synced", HUMAN_ADAM_HTML)
+        self.assertIn("Workspace byl bezpečně aktualizovaný z main", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/profile", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/context-anchor", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/send", HUMAN_ADAM_HTML)

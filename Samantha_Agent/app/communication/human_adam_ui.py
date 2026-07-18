@@ -1036,7 +1036,9 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       const payload = await api("/api/human-adam/connect", {method:"POST", body:"{}"});
       if (!payload.ok) throw new Error(payload.message || "Připojení selhalo.");
       renderStatus(payload);
-      notice.textContent = "Kanonická relace je připravená.";
+      notice.textContent = payload.workspace_synced
+        ? "Workspace byl bezpečně aktualizovaný z main a kanonická relace je připravená."
+        : "Kanonická relace je připravená.";
       input.focus();
     } catch (error) { notice.textContent = `Připojení selhalo: ${error.message}`; }
     finally { setBusy(false); }

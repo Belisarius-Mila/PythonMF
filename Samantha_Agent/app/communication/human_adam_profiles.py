@@ -206,9 +206,33 @@ class HumanAdamProfileManager:
             self._operation_lock.release()
 
     def connect(self) -> dict[str, Any]:
+        workspace_synced = False
         with self.profile_operation() as service:
+            workspace = service.workspace.status()
+            if workspace.get("source_update_available"):
+                session = service.hub.snapshot()
+                if session.get("turn_busy") or session.get("active_turn"):
+                    raise SessionBusyError(
+                        "Workspace nelze aktualizovat během aktivního tahu Adama."
+                    )
+                if self._has_uncertain_delivery(session):
+                    raise SessionBusyError(
+                        "Workspace nelze aktualizovat, dokud není vyřešené nejisté doručení."
+                    )
+                if int(workspace.get("source_pending_changes") or 0) > 0:
+                    raise AppServerError(
+                        "Zdrojový main má pracovní změny; aktivní profil nyní nelze bezpečně aktualizovat."
+                    )
+                self._assert_target_workspace(workspace)
+                workspace = service.workspace.sync_from_main(confirmed=True)
+                self._assert_target_workspace(workspace)
+                workspace_synced = True
             result = service.connect()
-        return {**result, **self._profile_status_fields()}
+        return {
+            **result,
+            **self._profile_status_fields(),
+            "workspace_synced": workspace_synced,
+        }
 
     def send(self, **kwargs: Any) -> dict[str, Any]:
         with self.profile_operation() as service:
