@@ -262,6 +262,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let voiceTranscribing = false;
   let turnTimerId = null;
   let activeTurnStartedAt = "";
+  let resultWatchTimerId = null;
+  let resultWatchActive = false;
+  let resultWatchClientMessageId = "";
+  let resultWatchAttempt = 0;
   let lastSession = null;
   let sessionConnected = false;
   let activeProfileId = "";
@@ -278,6 +282,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let savedContextAnchorActive = false;
   let savedContextAnchorRevision = 0;
   const HUMAN_ADAM_SEND_PATH = "/api/human-adam/send";
+  const RESULT_WATCH_MAX_ATTEMPTS = 60;
+  const RESULT_WATCH_MAX_DELAY_MS = 30000;
   const CONTEXT_ANCHOR_PROPOSAL_PROMPT = `Připrav návrh aktivního kontextu pro další pokračování tohoto pracovního profilu. Odpověz pouze stručným českým textem do 6000 znaků v přesné struktuře:
 Cíl:
 Plán:
@@ -519,7 +525,8 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     connectBtn.disabled = busy;
     profileSelect.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
     profileSwitchBtn.disabled = profileSelect.disabled || !profileSelect.value || profileSelect.value === activeProfileId;
-    refreshBtn.disabled = busy;
+    refreshBtn.disabled = busy || resultWatchActive;
+    refreshBtn.textContent = resultWatchActive ? "Čekám na výsledek…" : "Stav";
     sendBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
     voiceRecordBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
     voiceRecordBtn.classList.toggle("recording", voiceRecording);
@@ -1017,6 +1024,101 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     finally { setBusy(false); }
   }
 
+  function resultWatchTargetId() {
+    const activeTurn = lastSession && lastSession.active_turn ? lastSession.active_turn : {};
+    const activeId = String(activeTurn.client_message_id || "");
+    if (activeId) return activeId;
+    const messages = lastSession && Array.isArray(lastSession.messages) ? lastSession.messages : [];
+    const latest = messages.length ? messages[messages.length - 1] : null;
+    if (!latest || !["pending", "delivery_unknown"].includes(String(latest.status || ""))) return "";
+    return String(latest.client_message_id || "");
+  }
+
+  function stopResultWatch() {
+    if (resultWatchTimerId !== null) window.clearTimeout(resultWatchTimerId);
+    resultWatchTimerId = null;
+    resultWatchActive = false;
+    resultWatchClientMessageId = "";
+    resultWatchAttempt = 0;
+    syncControls();
+  }
+
+  function scheduleResultWatch() {
+    if (!resultWatchActive) return;
+    const delay = Math.min(RESULT_WATCH_MAX_DELAY_MS, 3000 + resultWatchAttempt * 2000);
+    resultWatchTimerId = window.setTimeout(checkResultWatch, delay);
+  }
+
+  async function checkResultWatch() {
+    if (!resultWatchActive) return;
+    resultWatchTimerId = null;
+    resultWatchAttempt += 1;
+    try {
+      const payload = await api("/api/human-adam/status");
+      const session = payload && payload.session ? payload.session : null;
+      const messages = session && Array.isArray(session.messages) ? session.messages : [];
+      const watched = messages.find((item) => String(item.client_message_id || "") === resultWatchClientMessageId) || null;
+      const activeTurn = session && session.active_turn ? session.active_turn : {};
+      const activeId = String(activeTurn.client_message_id || "");
+      if (watched && String(watched.status || "") === "completed") {
+        renderStatus(payload);
+        stopResultWatch();
+        notice.textContent = "Výsledek byl načten bez opakovaného odeslání pokynu.";
+        playCompletionSound();
+        return;
+      }
+      if (watched && String(watched.status || "") === "delivery_unknown") {
+        renderStatus(payload);
+        stopResultWatch();
+        notice.textContent = "Stav doručení zůstává nejistý. Pokyn neposílej znovu.";
+        return;
+      }
+      if (activeId && activeId !== resultWatchClientMessageId) {
+        renderStatus(payload);
+        stopResultWatch();
+        notice.textContent = "Aktivní tah se změnil; kontrolu výsledku jsem bezpečně zastavil.";
+        return;
+      }
+      lastSession = session || lastSession;
+      renderTurnState(session);
+      if (resultWatchAttempt >= RESULT_WATCH_MAX_ATTEMPTS) {
+        stopResultWatch();
+        notice.textContent = "Výsledek zatím nebyl potvrzen. Pokyn neposílej znovu; stav můžeš zkontrolovat znovu.";
+        return;
+      }
+      notice.textContent = "Čekám na výsledek a pouze ověřuji stav; pokyn znovu neposílám.";
+      scheduleResultWatch();
+    } catch (error) {
+      if (resultWatchAttempt >= RESULT_WATCH_MAX_ATTEMPTS) {
+        stopResultWatch();
+        notice.textContent = `Výsledek se nepodařilo ověřit: ${error.message} Pokyn neposílej znovu.`;
+        return;
+      }
+      notice.textContent = `Kontrola stavu se přerušila: ${error.message} Zkusím ji znovu bez odeslání pokynu.`;
+      scheduleResultWatch();
+    }
+  }
+
+  function startResultWatch() {
+    if (busy || resultWatchActive) return;
+    const targetId = resultWatchTargetId();
+    if (!targetId) {
+      loadStatus();
+      return;
+    }
+    resultWatchActive = true;
+    resultWatchClientMessageId = targetId;
+    resultWatchAttempt = 0;
+    notice.textContent = "Čekám na výsledek a pouze ověřuji stav; pokyn znovu neposílám.";
+    syncControls();
+    checkResultWatch();
+  }
+
+  function handleRefreshStatus() {
+    if (sessionTurnBusy || deliveryUncertain || sendInFlight) startResultWatch();
+    else loadStatus();
+  }
+
   async function connect() {
     if (busy) return;
     setBusy(true, "Připojuji kanonickou relaci…");
@@ -1202,6 +1304,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
         error.status = String(payload.status || "");
         throw error;
       }
+      stopResultWatch();
       renderSession(payload.session);
       renderTurnState(payload.session);
       const entry = payload.entry && typeof payload.entry === "object" ? payload.entry : {};
@@ -1483,6 +1586,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
         error.status = String(payload.status || "");
         throw error;
       }
+      stopResultWatch();
       renderSession(payload.session);
       renderTurnState(payload.session);
       notice.textContent = "Odpověď doručena a potvrzena.";
@@ -1516,10 +1620,11 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   mediaSoundTestBtn.addEventListener("click", testCompletionMediaSound);
   document.addEventListener("visibilitychange", restoreCompletionAudioAfterVisibility);
   window.addEventListener("pagehide", () => {
+    stopResultWatch();
     stopAnswerSpeech(false);
     stopCompletionMediaSound();
   });
-  refreshBtn.addEventListener("click", loadStatus);
+  refreshBtn.addEventListener("click", handleRefreshStatus);
   contextAnchorOpenBtn.addEventListener("click", openContextAnchor);
   contextAnchorCloseBtn.addEventListener("click", closeContextAnchor);
   contextAnchorRefreshBtn.addEventListener("click", loadContextAnchor);

@@ -588,7 +588,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("voiceRecordBtn.disabled = busy || sendInFlight || sessionTurnBusy", controls_source)
         self.assertIn("if (busy || sendInFlight || sessionTurnBusy", record_source)
         self.assertIn("if (sendInFlight || sessionTurnBusy)", record_source)
-        self.assertIn("refreshBtn.disabled = busy;", controls_source)
+        self.assertIn("refreshBtn.disabled = busy || resultWatchActive;", controls_source)
         self.assertNotIn("refreshBtn.disabled = sessionTurnBusy", controls_source)
 
     def test_turn_timer_starts_immediately_before_send_api_call(self) -> None:
@@ -637,9 +637,44 @@ class HumanAdamUiTests(unittest.TestCase):
         send_source = HUMAN_ADAM_HTML[send_start:send_end]
 
         self.assertIn("sendBtn.disabled = busy || sendInFlight || sessionTurnBusy", controls_source)
-        self.assertIn("refreshBtn.disabled = busy;", controls_source)
+        self.assertIn("refreshBtn.disabled = busy || resultWatchActive;", controls_source)
         self.assertNotIn("refreshBtn.disabled = sessionTurnBusy", controls_source)
         self.assertIn("if (busy || sendInFlight || sessionTurnBusy", send_source)
+
+    def test_status_button_starts_bounded_read_only_result_watch_for_active_turn(self) -> None:
+        watch_start = HUMAN_ADAM_HTML.index("function resultWatchTargetId()")
+        watch_end = HUMAN_ADAM_HTML.index("async function connect()", watch_start)
+        watch_source = HUMAN_ADAM_HTML[watch_start:watch_end]
+        controls_start = HUMAN_ADAM_HTML.index("function syncControls()")
+        controls_end = HUMAN_ADAM_HTML.index("function setBusy(", controls_start)
+        controls_source = HUMAN_ADAM_HTML[controls_start:controls_end]
+
+        self.assertIn("const RESULT_WATCH_MAX_ATTEMPTS = 60;", HUMAN_ADAM_HTML)
+        self.assertIn("const RESULT_WATCH_MAX_DELAY_MS = 30000;", HUMAN_ADAM_HTML)
+        self.assertIn('api("/api/human-adam/status")', watch_source)
+        self.assertNotIn("HUMAN_ADAM_SEND_PATH", watch_source)
+        self.assertNotIn("/api/human-adam/send", watch_source)
+        self.assertIn("window.setTimeout(checkResultWatch, delay);", watch_source)
+        self.assertIn("resultWatchAttempt >= RESULT_WATCH_MAX_ATTEMPTS", watch_source)
+        self.assertIn('String(watched.status || "") === "completed"', watch_source)
+        self.assertIn('String(watched.status || "") === "delivery_unknown"', watch_source)
+        self.assertIn("stopResultWatch();", watch_source)
+        self.assertIn("if (sessionTurnBusy || deliveryUncertain || sendInFlight) startResultWatch();", watch_source)
+        self.assertIn('refreshBtn.addEventListener("click", handleRefreshStatus);', HUMAN_ADAM_HTML)
+        self.assertIn('refreshBtn.textContent = resultWatchActive ? "Čekám na výsledek…" : "Stav";', controls_source)
+        self.assertIn("refreshBtn.disabled = busy || resultWatchActive;", controls_source)
+        self.assertNotIn("setInterval", watch_source)
+
+    def test_confirmed_send_completion_stops_parallel_result_watch(self) -> None:
+        send_start = HUMAN_ADAM_HTML.index("async function sendMessage(event)")
+        send_end = HUMAN_ADAM_HTML.index('connectBtn.addEventListener("click", connect);', send_start)
+        send_source = HUMAN_ADAM_HTML[send_start:send_end]
+        success = send_source.index("stopResultWatch();")
+        render = send_source.index("renderSession(payload.session);")
+
+        self.assertLess(success, render)
+        self.assertIn('notice.textContent = "Výsledek byl načten bez opakovaného odeslání pokynu.";', HUMAN_ADAM_HTML)
+        self.assertIn('notice.textContent = "Stav doručení zůstává nejistý. Pokyn neposílej znovu.";', HUMAN_ADAM_HTML)
 
     def test_turn_timer_stops_after_completion_and_marks_delivery_unknown(self) -> None:
         render_start = HUMAN_ADAM_HTML.index("function renderTurnState(session)")
