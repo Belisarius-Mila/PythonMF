@@ -41,6 +41,15 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-19: Priorita 1, App-server rozhrani / novy Adam. Mila rucne potvrdil
+  napovedu `Plan -> ?` jako v poradku. V izolovane vetvi je hotova stejna
+  staticka berlicka pro okno `Prace`: bezpecny profilovy i terminalovy postup,
+  vyznam semaforu, WIP vetve a worktree, slovnik stavu zivotniho cyklu a nouzovy
+  postup bez mazani nebo prepisu historie. Cilenych 50 UI testu a cela Cockpit
+  brana s 826 testy prosly; jediny WIP checkpoint je pripraveny a zbyva jeho
+  potvrzene prevzeti, nasazeni a rucni proklik.
+  Handoff:
+  `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md`.
 - 2026-07-19: Priorita 1, App-server rozhrani / novy Adam. Mila schvalil navrat
   k postupnemu zaziti uz naprogramovanych funkci. Prvni krok, staticka napoveda
   pod tlacitkem `?` v okne `Plan`, je nasazeny jako `5052a4c`; plna brana prosla

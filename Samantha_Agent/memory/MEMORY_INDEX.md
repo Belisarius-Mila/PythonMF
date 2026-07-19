@@ -104,6 +104,14 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
+  priorita 1: po potvrzenem navodu `Plan -> ?` je hotova stejna staticka
+  napoveda pro okno `Prace`. Vysvetluje semafor, WIP vetev, worktree, profilovy
+  i terminalovy postup, stavy zivotniho cyklu a nouzove pravidlo bez mazani,
+  resetu, rebase nebo force push. Napoveda nevola API ani nemeni stav; cilenych
+  50 UI testu a plna brana s 826 testy prosly. Jediny WIP checkpoint je
+  pripraveny; zbyva prevzeti, nasazeni a rucni proklik.
+
 - `handoffs/human_adam_plan_help_and_adoption_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: staticka napoveda `?` v okne `Plan` je implementovana bez API a
   bez moznosti menit profil, kotvu, vlakno, TVBCP nebo Git. Obsahuje beznou

@@ -51,6 +51,9 @@ class HumanAdamUiTests(unittest.TestCase):
             "workPanel",
             "workCloseBtn",
             "workRefreshBtn",
+            "workHelpBtn",
+            "workHelpPanel",
+            "workHelpCloseBtn",
             "workChanges",
             "developmentBranchAuditBtn",
             "developmentBranchAuditMeta",
@@ -232,6 +235,34 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Nic nebylo změněno", HUMAN_ADAM_HTML)
         self.assertIn("row.textContent", HUMAN_ADAM_HTML)
         self.assertIn('developmentBranchAuditBtn.addEventListener("click", loadDevelopmentBranchAudit)', HUMAN_ADAM_HTML)
+
+    def test_work_help_is_accessible_static_and_covers_semaphore_and_branch_lifecycle(self) -> None:
+        panel_start = HUMAN_ADAM_HTML.index('id="workHelpPanel"')
+        panel_end = HUMAN_ADAM_HTML.index("</section>", panel_start)
+        panel_source = HUMAN_ADAM_HTML[panel_start:panel_end]
+        toggle_start = HUMAN_ADAM_HTML.index("function setWorkHelpOpen(open)")
+        toggle_end = HUMAN_ADAM_HTML.index("function closeWork()", toggle_start)
+        toggle_source = HUMAN_ADAM_HTML[toggle_start:toggle_end]
+
+        self.assertIn('aria-label="Nápověda k Práci, vývojovému semaforu a WIP větvím"', HUMAN_ADAM_HTML)
+        self.assertIn('aria-controls="workHelpPanel"', HUMAN_ADAM_HTML)
+        self.assertIn("Běžný vývoj z r-Adama", panel_source)
+        self.assertIn("Vývoj z terminálového Adama", panel_source)
+        self.assertIn("Životní cyklus větví", panel_source)
+        self.assertIn("Není to Codex vlákno", panel_source)
+        self.assertIn("Kandidát k úklidu neznamená smazáno", panel_source)
+        self.assertIn("aktivní · rozpracováno", panel_source)
+        self.assertIn("vyžaduje revizi / nelze ověřit", panel_source)
+        self.assertIn("reset, rebase ani force push", panel_source)
+        self.assertIn("Toto je pouze nápověda", panel_source)
+        self.assertNotIn("developmentAcquireProfileBtn", panel_source)
+        self.assertNotIn("developmentAcquireTerminalBtn", panel_source)
+        self.assertNotIn("developmentBranchAuditBtn", panel_source)
+        self.assertNotIn("api(", toggle_source)
+        self.assertNotIn("fetch(", toggle_source)
+        self.assertIn('workHelpBtn.setAttribute("aria-expanded"', toggle_source)
+        self.assertIn('workHelpBtn.addEventListener("click"', HUMAN_ADAM_HTML)
+        self.assertIn('workHelpCloseBtn.addEventListener("click"', HUMAN_ADAM_HTML)
 
     def test_profile_switch_is_explicit_atomic_and_preserves_unsent_draft(self) -> None:
         switch_start = HUMAN_ADAM_HTML.index("async function switchProfile()")

@@ -89,15 +89,16 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #contextAnchorInput { flex:1; min-height:320px; font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; }
     #contextAnchorMeta,.context-anchor-help { margin:0; color:var(--muted); font-size:13px; }
     .context-anchor-actions { display:flex; justify-content:flex-end; gap:8px; }
-    .plan-help-trigger { width:38px; min-width:38px; padding:8px 0; border-radius:50%; font-weight:700; }
-    .plan-help-panel { padding:14px; border:1px solid #c9d6e5; border-radius:13px; background:#f8fafc; color:var(--ink); }
-    .plan-help-head { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-    .plan-help-head h3 { flex:1; margin:0; font-size:16px; }
-    .plan-help-panel h4 { margin:14px 0 5px; font-size:14px; }
-    .plan-help-panel p { margin:0; color:var(--muted); font-size:13px; line-height:1.45; }
-    .plan-help-panel ol,.plan-help-panel ul { margin:4px 0 0; padding-left:23px; }
-    .plan-help-panel li { margin:5px 0; line-height:1.4; }
-    .plan-help-safety { margin-top:14px !important; padding:9px 11px; border-radius:10px; background:#ecfdf3; color:var(--ok) !important; }
+    .workflow-help-trigger { width:38px; min-width:38px; padding:8px 0; border-radius:50%; font-weight:700; }
+    .workflow-help-panel { padding:14px; border:1px solid #c9d6e5; border-radius:13px; background:#f8fafc; color:var(--ink); }
+    .workflow-help-head { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+    .workflow-help-head h3 { flex:1; margin:0; font-size:16px; }
+    .workflow-help-panel h4 { margin:14px 0 5px; font-size:14px; }
+    .workflow-help-panel p { margin:0; color:var(--muted); font-size:13px; line-height:1.45; }
+    .workflow-help-panel ol,.workflow-help-panel ul { margin:4px 0 0; padding-left:23px; }
+    .workflow-help-panel li { margin:5px 0; line-height:1.4; }
+    .workflow-help-safety { margin-top:14px !important; padding:9px 11px; border-radius:10px; background:#ecfdf3; color:var(--ok) !important; }
+    .work-help-panel { flex:0 1 auto; max-height:58vh; overflow:auto; margin:12px 16px; }
     .thread-rotation-box { margin-top:14px; padding-top:12px; border-top:1px solid #dbe3ee; display:grid; gap:8px; }
     .thread-rotation-box h3 { margin:0; font-size:15px; }
     .thread-rotation-actions { display:flex; gap:8px; flex-wrap:wrap; }
@@ -113,8 +114,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       .context-anchor-actions > button { flex:1 1 calc(50% - 4px); min-width:0; padding-left:8px; padding-right:8px; white-space:normal; }
       .thread-rotation-actions > button { flex:1 1 100%; min-width:0; white-space:normal; }
       .development-semaphore-actions > button { flex:1 1 100%; min-width:0; white-space:normal; }
-      .plan-help-panel { padding:12px; }
-      .plan-help-head { align-items:flex-start; }
+      .workflow-help-panel { padding:12px; }
+      .workflow-help-head { align-items:flex-start; }
+      .work-help-panel { max-height:64vh; margin:10px 12px; }
     }
   </style>
 </head>
@@ -185,13 +187,13 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   <aside class="tvbcp-panel" id="contextAnchorPanel" hidden aria-label="Připnutý aktivní kontext">
     <div class="tvbcp-head">
       <h2>Aktivní kontext</h2>
-      <button class="plan-help-trigger" id="planHelpBtn" type="button" aria-label="Nápověda k Plánu a rotaci vlákna" aria-expanded="false" aria-controls="planHelpPanel" title="Jak pracovat s Plánem a rotací">?</button>
+      <button class="workflow-help-trigger" id="planHelpBtn" type="button" aria-label="Nápověda k Plánu a rotaci vlákna" aria-expanded="false" aria-controls="planHelpPanel" title="Jak pracovat s Plánem a rotací">?</button>
       <button id="contextAnchorRefreshBtn" type="button">Obnovit</button>
       <button id="contextAnchorCloseBtn" type="button">Zavřít</button>
     </div>
     <div class="context-anchor-body">
-      <section class="plan-help-panel" id="planHelpPanel" aria-labelledby="planHelpTitle" tabindex="-1" hidden>
-        <div class="plan-help-head">
+      <section class="workflow-help-panel" id="planHelpPanel" aria-labelledby="planHelpTitle" tabindex="-1" hidden>
+        <div class="workflow-help-head">
           <h3 id="planHelpTitle">Jak pracovat s Plánem a rotací</h3>
           <button id="planHelpCloseBtn" type="button">Zavřít návod</button>
         </div>
@@ -231,7 +233,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
           <li><strong>Po rotaci něco chybí:</strong> neposílej vývojový pokyn; nejdřív zkontroluj připnutý kontext.</li>
         </ul>
 
-        <p class="plan-help-safety"><strong>Nouzový postup:</strong> rotaci neprováděj, nic nemaž a pokračuj ve starém vlákně. Staré vlákno se při rotaci nemaže ani nearchivuje.</p>
+        <p class="workflow-help-safety"><strong>Nouzový postup:</strong> rotaci neprováděj, nic nemaž a pokračuj ve starém vlákně. Staré vlákno se při rotaci nemaže ani nearchivuje.</p>
       </section>
       <p id="contextAnchorMeta">Kontext se načte až po otevření.</p>
       <p class="context-anchor-help">Nech Adama připravit návrh, zkontroluj jej a nejdřív jej soukromě ulož. Připnutý plán se přikládá k tahům; pozastavený zůstává uložený, ale nepřikládá se. Ulož pouze stručný cíl, očíslovaný plán, hotové body, rozhodnutí a další krok. Nevkládej hesla, tokeny, osobní údaje ani absolutní cesty. Novější pokyn v chatu má vždy přednost.</p>
@@ -257,9 +259,65 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   <aside class="tvbcp-panel" id="workPanel" hidden aria-label="Pracovní změny">
     <div class="tvbcp-head">
       <h2>Pracovní změny</h2>
+      <button class="workflow-help-trigger" id="workHelpBtn" type="button" aria-label="Nápověda k Práci, vývojovému semaforu a WIP větvím" aria-expanded="false" aria-controls="workHelpPanel" title="Jak bezpečně řídit vývoj a WIP větve">?</button>
       <button id="workRefreshBtn" type="button">Obnovit</button>
       <button id="workCloseBtn" type="button">Zavřít</button>
     </div>
+    <section class="workflow-help-panel work-help-panel" id="workHelpPanel" aria-labelledby="workHelpTitle" tabindex="-1" hidden>
+      <div class="workflow-help-head">
+        <h3 id="workHelpTitle">Jak pracovat s vývojem a WIP větvemi</h3>
+        <button id="workHelpCloseBtn" type="button">Zavřít návod</button>
+      </div>
+      <p>Toto je pouze nápověda. Jejím otevřením se nemění semafor, workspace, checkpoint, větev ani Git.</p>
+
+      <h4>Co je co</h4>
+      <ul>
+        <li><strong>Vývojový semafor</strong> určuje jediného vlastníka zápisu. Ostatní Adamové zůstávají read-only.</li>
+        <li><strong>WIP větev</strong> bezpečně odděluje jeden vývojový úkol. Není to Codex vlákno a jeho existence nezaplňuje konverzaci.</li>
+        <li><strong>Worktree</strong> je oddělená pracovní kopie projektu připojená k určité větvi.</li>
+      </ul>
+
+      <h4>Běžný vývoj z r-Adama</h4>
+      <ol>
+        <li>Vyber správný profil, klikni na <strong>Připojit</strong> a nech workspace synchronizovat s `main`.</li>
+        <li>Do tématu napiš krátký název práce a klikni na <strong>Převzít pro tento profil</strong>.</li>
+        <li>Teprve potom zadej vývojový úkol. Druhý Adam zůstane read-only.</li>
+        <li>Po dokončení vytvoř <strong>Checkpoint bez pushnutí</strong> s krátkým popisem.</li>
+        <li>Spusť <strong>Audit nasazení</strong>, přečti výsledek a použij přesnou potvrzovací větu.</li>
+        <li>Po čistém nasazení a restartu se semafor uvolní. Když zůstane WIP nebo blocker, nic nepřepisuj.</li>
+      </ol>
+
+      <h4>Vývoj z terminálového Adama</h4>
+      <ol>
+        <li>Zadej téma a klikni na <strong>Převzít pro terminál</strong>.</li>
+        <li>Vývoj patří do izolovaného worktree a vlastní WIP větve.</li>
+        <li>Po testech proveď H+C+P: handoff, jeden tematický commit a push WIP větve.</li>
+        <li>Takeover do `main` vyžaduje čerstvý audit a přesnou potvrzovací větu.</li>
+        <li>Po pushi `main` proveď řízený restart, smoke test a až potom uvolni semafor.</li>
+      </ol>
+
+      <h4>Životní cyklus větví</h4>
+      <p>Tlačítko <strong>Prověřit WIP větve</strong> pouze čte stav. Nic nemaže ani neaktualizuje ze sítě.</p>
+      <ul>
+        <li><strong>aktivní · rozpracováno</strong> – worktree obsahuje změny; větev je chráněná.</li>
+        <li><strong>aktivní · čisté</strong> – worktree je připojený a čistý; větev zůstává chráněná.</li>
+        <li><strong>integrováno do main / obsah je v main</strong> – možný kandidát k později potvrzenému úklidu.</li>
+        <li><strong>vědomě archivováno</strong> – větev se záměrně zachovává.</li>
+        <li><strong>vyžaduje revizi / nelze ověřit</strong> – nic neuklízet a stav předat Adamovi.</li>
+      </ul>
+      <p><strong>Kandidát k úklidu neznamená smazáno.</strong> Úklid vždy potřebuje nový audit a samostatné přesné potvrzení.</p>
+
+      <h4>Když něco nejde</h4>
+      <ul>
+        <li><strong>Semafor nelze převzít:</strong> vývoj už vlastní jiný Adam. Nepřebíjej ho a zjisti jeho téma.</li>
+        <li><strong>Checkpoint je šedý:</strong> nejsou změny, semafor vlastní někdo jiný nebo je vývoj pozastavený.</li>
+        <li><strong>Nasazení blokuje cizí WIP:</strong> neposílej pokyn znovu a nic neslučuj; nejdřív dokonči nebo bezpečně převezmi původní práci.</li>
+        <li><strong>Workspace je za `main`:</strong> při čistém profilu klikni na Připojit a nech jej bezpečně synchronizovat.</li>
+        <li><strong>Pozastavit</strong> ponechá stejného vlastníka a blokuje ostatní zápis; <strong>Obnovit</strong> pokračuje a <strong>Uvolnit</strong> projde jen bez čekajícího WIP.</li>
+      </ul>
+
+      <p class="workflow-help-safety"><strong>Nouzový postup:</strong> nic nemaž, nepoužívej reset, rebase ani force push. Zachovej semafor i WIP a požádej Adama o read-only audit.</p>
+    </section>
     <section class="development-semaphore-box" aria-label="Globální vývojový semafor">
       <h3>Vývojový semafor</h3>
       <p id="developmentSemaphoreMeta">Stav vlastníka vývoje se načte společně s pracovním stavem.</p>
@@ -351,6 +409,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const workPanel = document.getElementById("workPanel");
   const workCloseBtn = document.getElementById("workCloseBtn");
   const workRefreshBtn = document.getElementById("workRefreshBtn");
+  const workHelpBtn = document.getElementById("workHelpBtn");
+  const workHelpPanel = document.getElementById("workHelpPanel");
+  const workHelpCloseBtn = document.getElementById("workHelpCloseBtn");
   const workMeta = document.getElementById("workMeta");
   const workChanges = document.getElementById("workChanges");
   const developmentSemaphoreMeta = document.getElementById("developmentSemaphoreMeta");
@@ -1687,7 +1748,15 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     loadWork();
   }
 
+  function setWorkHelpOpen(open) {
+    const expanded = Boolean(open);
+    workHelpPanel.hidden = !expanded;
+    workHelpBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+    if (expanded) workHelpPanel.focus();
+  }
+
   function closeWork() {
+    setWorkHelpOpen(false);
     workPanel.hidden = true;
   }
 
@@ -1904,6 +1973,11 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   tvbcpRefreshBtn.addEventListener("click", loadTvbcp);
   workOpenBtn.addEventListener("click", openWork);
   workCloseBtn.addEventListener("click", closeWork);
+  workHelpBtn.addEventListener("click", () => setWorkHelpOpen(workHelpPanel.hidden));
+  workHelpCloseBtn.addEventListener("click", () => {
+    setWorkHelpOpen(false);
+    workHelpBtn.focus();
+  });
   workRefreshBtn.addEventListener("click", loadWork);
   developmentAcquireProfileBtn.addEventListener("click", () => changeDevelopmentSemaphore("acquire_profile"));
   developmentAcquireTerminalBtn.addEventListener("click", () => changeDevelopmentSemaphore("acquire_terminal"));

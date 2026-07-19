@@ -1,6 +1,6 @@
 Nazev: Human-Adam Plan - napoveda rotace a postupne zaziti workflow
 Priorita: 1
-Stav: ceka na retest
+Stav: hotovo
 Pripomenout pri startu: ano
 Datum: 2026-07-19
 
@@ -37,19 +37,18 @@ Co je hotove:
   na GitHub a Cockpit byl rizene restartovany.
 - Po restartu bezi jedina instance pod novym PID; zakladni smoke test vsech peti
   endpointu prosel a nasazene HTML obsahuje tlacitko i cely krokovy navod.
+- Mila rucne potvrdil, ze napoveda `Plan -> ?` je v poradku.
 
 Co neni hotove:
 
 - Cvicna rotace a nekolikadenni provozni zaziti jeste neprobehly.
-- In-app prohlizec nebyl v teto relaci dostupny, proto chybi obrazovy a klikaci
-  retest skutecneho mobilniho layoutu.
 - Audit aktualnosti handoffu je pouze schvaleny budouci smer; nema se nyni
   implementovat ani spojovat s touto malou UI zmenou.
 
 Dalsi krok:
 
-- S Milou rucne otevrit `Plan` -> `?`, overit citelnost na Macu nebo iPhonu a
-  projit navod bez spusteni zbytecne rotace.
+- Stejnym malym zpusobem doplnit napovedu `?` do okna `Prace`, potom soucasne
+  workflow nekolik dni bezne pouzivat.
 
 Navrhovane dalsi kroky:
 
