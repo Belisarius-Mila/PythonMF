@@ -41,17 +41,6 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
-- 2026-07-19: Priorita 1, App-server rozhrani / novy Adam. Faze 0 je nasazena v
-  `dcdbbdd`; mala oprava 0.1 v izolovane vetvi
-  `wip/project-bootstrap-phase01-20260719` meni zalozeni na jednorazovou
-  registraci uplne noveho i jiz rozpracovaneho projektu. Nepridava volbu ani
-  dalsi krok, generovany handoff uz netvrdi, ze drivejsi implementace neexistuje,
-  a napoveda `Prace -> ?` rika, ze dalsi funkce a opravy uvnitr projektu nejsou
-  nove projekty. Cilenych 98 testu a cela Cockpit brana s 862 testy prosly.
-  Zbyva prevzeti WIP checkpointu do `main`, restart, smoke test a registrace
-  projektu Rodinny kalendar z profilu Knihovna.
-  Handoff:
-  `handoffs/human_adam_project_bootstrap_phase0_wip_2026_07_19.md`.
 - 2026-07-19: Priorita 1, App-server rozhrani / novy Adam. Mila rucne potvrdil
   obsah napovedy `Prace -> ?`, ale maly vnitrni rolovaci box byl hur citelny nez
   velke zobrazeni v `Plan`. Ergonomicka oprava v izolovane vetvi

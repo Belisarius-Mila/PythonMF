@@ -259,19 +259,6 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/human-adam/development-semaphore", self.cockpit_do_get_routes())
         self.assertIn("/api/human-adam/development-semaphore", self.cockpit_do_post_routes())
 
-    def test_project_bootstrap_has_preview_exact_confirmation_and_post_route(self) -> None:
-        card = next(
-            item
-            for item in COCKPIT_POST_ACTIONS
-            if item["path"] == "/api/human-adam/project-bootstrap"
-        )
-
-        self.assertEqual(card["risk"], "workspace_write")
-        self.assertEqual(card["confirmation"], "preview_plus_exact_project_bootstrap_phrase")
-        self.assertEqual(card["handler_name"], "human_adam_project_bootstrap_action")
-        self.assertNotIn("/api/human-adam/project-bootstrap", self.cockpit_do_get_routes())
-        self.assertIn("/api/human-adam/project-bootstrap", self.cockpit_do_post_routes())
-
     def test_development_branch_lifecycle_has_read_only_get_route(self) -> None:
         self.assertIn("/api/human-adam/development-branches", self.cockpit_do_get_routes())
         self.assertNotIn("/api/human-adam/development-branches", self.cockpit_do_post_routes())

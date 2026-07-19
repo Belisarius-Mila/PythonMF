@@ -14,5 +14,4 @@ data/startup_prompts/
 logs/*.log
 logs/*.log.*
 logs/*.lock
-memory/*.lock
 logs/network_watchdog/

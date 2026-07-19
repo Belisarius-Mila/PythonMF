@@ -7,7 +7,6 @@ from pathlib import Path
 
 from app.codex_appserver import AppServerError
 from app.project_continuity import ProjectContinuityService, parse_project_catalog
-from app.project_continuity import PROJECT_BOOTSTRAP_CONFIRMATION
 
 
 CATALOG = """\
@@ -88,73 +87,6 @@ class ProjectContinuityTests(unittest.TestCase):
 
         self.assertEqual(binding["project_label"], "Testovací projekt")
         self.assertEqual(binding["tvbcp_path"], "memory/tvbcp/test_project.txt")
-
-    def test_project_bootstrap_preview_is_read_only_and_create_writes_two_git_safe_files(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            service = self.make_project(root)
-            registry = root / "memory/ACTIVE_PROJECTS.md"
-            before = registry.read_text(encoding="utf-8")
-            preview = service.project_bootstrap_preview(
-                project_label="Rodinný kalendář",
-                priority="2",
-                goal="Připravit read-only náhled upozornění D-2 a D-1.",
-                next_step="Zobrazit náhled bez odesílání e-mailu.",
-            )
-            self.assertEqual(before, registry.read_text(encoding="utf-8"))
-            self.assertFalse((root / preview["handoff_path"]).exists())
-
-            created = service.create_project_bootstrap(
-                project_label="Rodinný kalendář",
-                priority="2",
-                goal="Připravit read-only náhled upozornění D-2 a D-1.",
-                next_step="Zobrazit náhled bez odesílání e-mailu.",
-                confirmation=PROJECT_BOOTSTRAP_CONFIRMATION,
-            )
-            handoff = root / created["handoff_path"]
-            project = next(item for item in service.catalog() if item.label == "Rodinný kalendář")
-            handoff_exists = handoff.is_file()
-            handoff_text = handoff.read_text(encoding="utf-8")
-            registry_text = registry.read_text(encoding="utf-8")
-
-        self.assertTrue(preview["read_only"])
-        self.assertFalse(preview["writes_performed"])
-        self.assertTrue(created["writes_performed"])
-        self.assertTrue(created["created"])
-        self.assertEqual(project.project_id, created["project_id"])
-        self.assertEqual(project.handoff_paths, (created["handoff_path"],))
-        self.assertTrue(handoff_exists)
-        self.assertIn("Dalsi planovana vyvojova etapa zatim nezacala", handoff_text)
-        self.assertNotIn("Vlastni implementace zatim nezacala", handoff_text)
-        self.assertIn("Samotnou registraci nevznikl novy checkpoint", handoff_text)
-        self.assertIn("Rodinný kalendář", registry_text)
-
-    def test_project_bootstrap_rejects_duplicate_unsafe_text_and_missing_confirmation(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            service = self.make_project(root)
-            with self.assertRaisesRegex(AppServerError, "už v aktivním registru"):
-                service.project_bootstrap_preview(
-                    project_label="Testovací projekt",
-                    priority="1",
-                    goal="Platný cíl projektu.",
-                    next_step="Platný první krok.",
-                )
-            with self.assertRaisesRegex(AppServerError, "bezpečný textový řádek"):
-                service.project_bootstrap_preview(
-                    project_label="Nový | projekt",
-                    priority="2",
-                    goal="Platný cíl projektu.",
-                    next_step="Platný první krok.",
-                )
-            with self.assertRaisesRegex(AppServerError, "potvrzovací věta"):
-                service.create_project_bootstrap(
-                    project_label="Nový projekt",
-                    priority="2",
-                    goal="Platný cíl projektu.",
-                    next_step="Platný první krok.",
-                    confirmation="ano",
-                )
 
     def test_audit_is_current_when_no_newer_evidence_exists(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

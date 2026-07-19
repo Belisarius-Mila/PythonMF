@@ -13,7 +13,6 @@ from app.communication.human_adam_profiles import (
     DEPLOYMENT_COMPLETION_CONFIRMATION,
     HumanAdamProfileManager,
     human_adam_development_semaphore_action,
-    human_adam_project_bootstrap_action,
     human_adam_profile_switch_action,
     human_adam_project_continuity_action,
 )
@@ -23,7 +22,7 @@ from app.communication.human_adam_service import (
 )
 from app.communication.session_hub import SessionBusyError
 from app.codex_appserver import AppServerError
-from app.project_continuity import PROJECT_BOOTSTRAP_CONFIRMATION, ProjectContinuityService
+from app.project_continuity import ProjectContinuityService
 
 
 class FakeRuntime:
@@ -251,10 +250,6 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         workspace_handoff = root / "human" / handoff_path
         workspace_handoff.parent.mkdir(parents=True)
         workspace_handoff.write_text("Aktuální handoff\n", encoding="utf-8")
-        (root / "human/memory/ACTIVE_PROJECTS.md").write_text(
-            (root / "memory/ACTIVE_PROJECTS.md").read_text(encoding="utf-8"),
-            encoding="utf-8",
-        )
         workspace_tvbcp = root / "human/memory/tvbcp/test_project.txt"
         workspace_tvbcp.parent.mkdir(parents=True)
         workspace_tvbcp.write_text("TVBCP\n", encoding="utf-8")
@@ -321,50 +316,6 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(status["audit"]["state"], "unverifiable")
         self.assertIn("nezná přesný pracovní strom", status["audit"]["message"])
         self.assertFalse(status["audit"]["blocking"])
-
-    def test_project_bootstrap_previews_then_creates_and_binds_profile_lease(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            continuity, _project_id, _handoff_path = self.make_project_continuity(root)
-            manager, human_workspace, *_rest = self.make_manager(
-                root,
-                project_continuity=continuity,
-            )
-            payload = {
-                "project_label": "Rodinný kalendář",
-                "priority": "2",
-                "goal": "Připravit read-only náhled upozornění D-2 a D-1.",
-                "next_step": "Zobrazit náhled bez skutečného odesílání.",
-            }
-            preview = human_adam_project_bootstrap_action(
-                {"operation": "preview", **payload},
-                service=manager,
-            )
-            handoff_path = human_workspace.project_root / str(preview["handoff_path"])
-            self.assertFalse(handoff_path.exists())
-            created = human_adam_project_bootstrap_action(
-                {
-                    "operation": "create",
-                    **payload,
-                    "expected_revision": preview["expected_semaphore_revision"],
-                    "confirmation": PROJECT_BOOTSTRAP_CONFIRMATION,
-                },
-                service=manager,
-            )
-            lease = manager.development_semaphore.status()
-            continuity_status = manager.project_continuity_status()
-            handoff_exists = handoff_path.is_file()
-            project_labels = [item["label"] for item in continuity_status["projects"]]
-
-        self.assertTrue(preview["read_only"])
-        self.assertFalse(preview["writes_performed"])
-        self.assertTrue(created["created"])
-        self.assertTrue(created["writes_performed"])
-        self.assertEqual(lease["owner_id"], "human_adam")
-        self.assertEqual(lease["revision"], 2)
-        self.assertEqual(lease["project_label"], "Rodinný kalendář")
-        self.assertTrue(handoff_exists)
-        self.assertIn("Rodinný kalendář", project_labels)
 
     def test_successful_checkpoint_returns_read_only_handoff_proposal(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

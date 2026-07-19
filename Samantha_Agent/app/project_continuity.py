@@ -1,4 +1,4 @@
-"""Project binding, handoff evidence, and confirmed isolated bootstrap."""
+"""Read-only project binding and handoff freshness evidence."""
 
 from __future__ import annotations
 
@@ -13,12 +13,6 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 from app.codex_appserver import AppServerError
-from app.file_persistence import (
-    FilePersistenceError,
-    atomic_replace_text_under_external_lock,
-    atomic_write_text,
-    exclusive_file_lock,
-)
 
 
 ACTIVE_PROJECTS_RELATIVE_PATH = Path("memory/ACTIVE_PROJECTS.md")
@@ -32,8 +26,6 @@ PROPOSAL_BLOCKED_PATH_PARTS = (
     "/.env",
 )
 PROPOSAL_BLOCKED_SUFFIXES = {".key", ".pem", ".p12", ".pfx"}
-PROJECT_BOOTSTRAP_CONFIRMATION = "POTVRZUJI REGISTRACI PROJEKTU"
-PROJECT_BOOTSTRAP_PRIORITIES = {"1", "2", "3"}
 
 
 class ProjectContinuityError(AppServerError):
@@ -71,51 +63,6 @@ def _project_id(label: str) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", ascii_text.casefold()).strip("-")[:52] or "project"
     suffix = hashlib.sha256(label.encode("utf-8")).hexdigest()[:8]
     return f"{slug}-{suffix}"
-
-
-def _project_slug(label: str) -> str:
-    ascii_text = unicodedata.normalize("NFKD", label).encode("ascii", "ignore").decode("ascii")
-    return re.sub(r"[^a-z0-9]+", "_", ascii_text.casefold()).strip("_")[:56] or "project"
-
-
-def _bootstrap_line(
-    value: object,
-    *,
-    label: str,
-    minimum: int,
-    maximum: int,
-) -> str:
-    raw = str(value or "").strip()
-    if any(character in raw for character in ("\n", "\r", "\x00", "|", "`", "<", ">")):
-        raise ProjectContinuityError(f"{label} musí být jeden bezpečný textový řádek.")
-    clean = " ".join(raw.split())
-    if len(clean) < minimum or len(clean) > maximum:
-        raise ProjectContinuityError(f"{label} musí mít {minimum} až {maximum} znaků.")
-    return clean
-
-
-def _append_active_project_row(text: str, row: str) -> str:
-    lines = str(text or "").splitlines()
-    header_index = next(
-        (
-            index
-            for index, line in enumerate(lines)
-            if line.strip().startswith("|")
-            and "oblast" in {_normalized_header(cell) for cell in line.strip().strip("|").split("|")}
-            and "handoff" in {_normalized_header(cell) for cell in line.strip().strip("|").split("|")}
-        ),
-        -1,
-    )
-    if header_index < 0 or header_index + 1 >= len(lines):
-        raise ProjectContinuityError("Registr aktivních projektů nemá očekávanou tabulku.")
-    separator = lines[header_index + 1].strip()
-    if not separator.startswith("|") or "---" not in separator:
-        raise ProjectContinuityError("Registr aktivních projektů nemá bezpečný oddělovač tabulky.")
-    insert_at = header_index + 2
-    while insert_at < len(lines) and lines[insert_at].strip().startswith("|"):
-        insert_at += 1
-    lines.insert(insert_at, row)
-    return "\n".join(lines) + "\n"
 
 
 def _safe_memory_path(raw: str, *, expected_dir: str) -> str:
@@ -272,7 +219,7 @@ def _proposal_change_rows(review: dict[str, Any]) -> list[dict[str, str]]:
 
 
 class ProjectContinuityService:
-    """Build safe bindings, compare evidence, and perform confirmed bootstrap writes."""
+    """Build safe bindings and compare only metadata and Git path evidence."""
 
     def __init__(self, *, project_root: Path):
         self.project_root = Path(project_root).resolve()
@@ -291,176 +238,6 @@ class ProjectContinuityService:
         wanted = " ".join(str(label or "").split())
         record = next((item for item in self.catalog() if item.label == wanted), None)
         return record.project_id if record else ""
-
-    def project_bootstrap_preview(
-        self,
-        *,
-        project_label: str,
-        priority: str,
-        goal: str,
-        next_step: str,
-    ) -> dict[str, Any]:
-        """Validate and preview a git-safe project registration without writing files."""
-        clean_label = _bootstrap_line(
-            project_label,
-            label="Název projektu",
-            minimum=3,
-            maximum=100,
-        )
-        clean_priority = str(priority or "").strip()
-        if clean_priority not in PROJECT_BOOTSTRAP_PRIORITIES:
-            raise ProjectContinuityError("Priorita registrovaného projektu musí být 1, 2 nebo 3.")
-        clean_goal = _bootstrap_line(goal, label="Cíl projektu", minimum=5, maximum=240)
-        clean_next_step = _bootstrap_line(
-            next_step,
-            label="První další krok",
-            minimum=5,
-            maximum=180,
-        )
-        if any(item.label.casefold() == clean_label.casefold() for item in self.catalog()):
-            raise ProjectContinuityError("Projekt s tímto názvem už v aktivním registru existuje.")
-        date_text = datetime.now().astimezone().date().isoformat()
-        slug = _project_slug(clean_label)
-        handoff_path = f"memory/handoffs/{slug}_start_{date_text.replace('-', '_')}.md"
-        if (self.project_root / handoff_path).exists():
-            raise ProjectContinuityError("Cílový handoff už existuje; zvol jiný název projektu.")
-        return {
-            "ok": True,
-            "ready": True,
-            "read_only": True,
-            "writes_performed": False,
-            "project_id": _project_id(clean_label),
-            "project_label": clean_label,
-            "priority": clean_priority,
-            "goal": clean_goal,
-            "next_step": clean_next_step,
-            "handoff_path": handoff_path,
-            "date": date_text,
-            "confirmation_text": PROJECT_BOOTSTRAP_CONFIRMATION,
-            "changes": [ACTIVE_PROJECTS_RELATIVE_PATH.as_posix(), handoff_path],
-            "message": "Náhled je připravený; zatím nebyl změněn žádný soubor ani semafor.",
-        }
-
-    def create_project_bootstrap(
-        self,
-        *,
-        project_label: str,
-        priority: str,
-        goal: str,
-        next_step: str,
-        confirmation: str,
-    ) -> dict[str, Any]:
-        """Register one project row and one starting handoff in an isolated workspace."""
-        if str(confirmation or "").strip() != PROJECT_BOOTSTRAP_CONFIRMATION:
-            raise ProjectContinuityError(
-                f"Chybí přesná potvrzovací věta: {PROJECT_BOOTSTRAP_CONFIRMATION}"
-            )
-        registry_path = self.project_root / ACTIVE_PROJECTS_RELATIVE_PATH
-        handoff_created = False
-        registry_written = False
-        original_registry = ""
-        handoff_path: Path | None = None
-        try:
-            with exclusive_file_lock(registry_path):
-                original_registry = registry_path.read_text(encoding="utf-8")
-                preview = self.project_bootstrap_preview(
-                    project_label=project_label,
-                    priority=priority,
-                    goal=goal,
-                    next_step=next_step,
-                )
-                handoff_relative = str(preview["handoff_path"])
-                handoff_path = self.project_root / handoff_relative
-                if handoff_path.exists():
-                    raise ProjectContinuityError(
-                        "Cílový handoff mezitím vznikl; nic jsem nepřepsal."
-                    )
-                handoff_text = "\n".join(
-                    (
-                        f"Nazev: {preview['project_label']}",
-                        f"Priorita: {preview['priority']}",
-                        "Stav: rozpracovane",
-                        "Pripomenout pri startu: ne",
-                        f"Datum: {preview['date']}",
-                        "",
-                        "Co se resilo:",
-                        f"- {preview['goal']}",
-                        "",
-                        "Co je hotove:",
-                        "- Projekt a tento vychozi handoff byly zaregistrovany potvrzenou fazi 0 v Cockpitu.",
-                        "- Vyvojovy semafor se po uspesne registraci pripne k tomuto projektu.",
-                        "",
-                        "Co neni hotove:",
-                        "- Dalsi planovana vyvojova etapa zatim nezacala.",
-                        "- Samotnou registraci nevznikl novy checkpoint, commit, push ani nasazeni.",
-                        "",
-                        "Dalsi krok:",
-                        f"- {preview['next_step']}",
-                        "",
-                        "Navrhovane dalsi kroky:",
-                        "- Po prvnim vyvoji zkontrolovat navrh handoffu pri checkpointu.",
-                        "- Pred prevzetim do main spustit audit nasazeni.",
-                        "",
-                        "Zmenene nebo relevantni soubory:",
-                        "- memory/ACTIVE_PROJECTS.md",
-                        f"- {handoff_relative}",
-                        "",
-                        "Bezpecnost / neukladat:",
-                        "- Neukladat hesla, tokeny, API klice, private texty ani osobni udaje.",
-                        "",
-                    )
-                )
-                row = (
-                    f"| {preview['project_label']} | {preview['priority']} | active | "
-                    "Zaregistrováno potvrzenou fází 0 v Cockpitu; další vývojová etapa ještě nezačala. | "
-                    f"zatím není | `{handoff_relative}` | {preview['next_step']} |"
-                )
-                updated_registry = _append_active_project_row(original_registry, row)
-                atomic_replace_text_under_external_lock(handoff_path, handoff_text)
-                handoff_created = True
-                atomic_replace_text_under_external_lock(registry_path, updated_registry)
-                registry_written = True
-                binding = self.resolve_binding(
-                    project_id=str(preview["project_id"]),
-                    handoff_path=handoff_relative,
-                )
-                return {
-                    **preview,
-                    "read_only": False,
-                    "writes_performed": True,
-                    "created": True,
-                    "binding": binding,
-                    "message": (
-                        "Projekt a výchozí handoff byly zaregistrovány v izolovaném workspace; "
-                        "nic nebylo commitnuto ani pushnuto."
-                    ),
-                }
-        except (FilePersistenceError, OSError) as exc:
-            if registry_written:
-                try:
-                    atomic_write_text(registry_path, original_registry)
-                except (FilePersistenceError, OSError):
-                    pass
-            if handoff_created and handoff_path is not None:
-                try:
-                    handoff_path.unlink(missing_ok=True)
-                except OSError:
-                    pass
-            raise ProjectContinuityError(
-                "Projekt se nepodařilo bezpečně zaregistrovat; nic existujícího jsem nepřepsal."
-            ) from exc
-        except ProjectContinuityError:
-            if registry_written:
-                try:
-                    atomic_write_text(registry_path, original_registry)
-                except (FilePersistenceError, OSError):
-                    pass
-            if handoff_created and handoff_path is not None:
-                try:
-                    handoff_path.unlink(missing_ok=True)
-                except OSError:
-                    pass
-            raise
 
     def resolve_binding(
         self,

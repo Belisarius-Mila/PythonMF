@@ -285,63 +285,6 @@ class DevelopmentSemaphore:
             )
             return {**self._write_locked(current), "changed": True}
 
-    def bind_project(
-        self,
-        *,
-        owner_id: str,
-        project_binding: dict[str, str],
-        expected_revision: int,
-        confirmed: bool,
-    ) -> dict[str, Any]:
-        """Attach a newly created project to an already owned bootstrap lease."""
-        if not confirmed:
-            raise AppServerError("Připnutí projektu vyžaduje výslovné potvrzení.")
-        binding = dict(project_binding or {})
-        clean_project_id = str(binding.get("project_id") or "").strip()
-        clean_project_label = " ".join(str(binding.get("project_label") or "").split())[:180]
-        clean_handoff_path = str(binding.get("handoff_path") or "").strip()
-        clean_tvbcp_path = str(binding.get("tvbcp_path") or "").strip()
-        if (
-            not PROJECT_BINDING_ID_RE.fullmatch(clean_project_id)
-            or not clean_project_label
-            or not PROJECT_MEMORY_PATH_RE.fullmatch(clean_handoff_path)
-            or "/handoffs/" not in clean_handoff_path
-            or (
-                clean_tvbcp_path
-                and (
-                    not PROJECT_MEMORY_PATH_RE.fullmatch(clean_tvbcp_path)
-                    or "/tvbcp/" not in clean_tvbcp_path
-                )
-            )
-        ):
-            raise AppServerError("Nová projektová vazba není bezpečně ověřená.")
-        with self._transaction():
-            current = self._load()
-            self._assert_revision(current, expected_revision)
-            if not current.get("active") or current.get("owner_id") != str(owner_id or "").strip():
-                raise AppServerError("Vývojový semafor nevlastní požadovaný profil.")
-            if current.get("mode") != "active":
-                raise AppServerError("Vývojový semafor není aktivní.")
-            existing_project_id = str(current.get("project_id") or "")
-            if existing_project_id:
-                if (
-                    existing_project_id == clean_project_id
-                    and current.get("handoff_path") == clean_handoff_path
-                ):
-                    return {**self._public(current), "changed": False}
-                raise AppServerError("Vývojový semafor už má jinou projektovou vazbu.")
-            current.update(
-                {
-                    "revision": int(current["revision"]) + 1,
-                    "project_id": clean_project_id,
-                    "project_label": clean_project_label,
-                    "handoff_path": clean_handoff_path,
-                    "tvbcp_path": clean_tvbcp_path,
-                    "updated_at": _now(),
-                }
-            )
-            return {**self._write_locked(current), "changed": True}
-
     def release(
         self,
         *,
