@@ -109,8 +109,9 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   rolovaci box byl hur citelny. Ergonomicka oprava ve vetvi
   `wip/human-adam-work-help-layout-20260719` odstranuje vlastni `max-height` a
   vnitrni scrollbar; roluje se cely velky obsahovy panel jako u `Plan`. Cilenych
-  50 UI testu i plna Cockpit brana prosly. Zbyva checkpoint, push, potvrzene
-  prevzeti do `main`, restart a rucni vizualni retest.
+  50 UI testu i plna Cockpit brana prosly. Commit `20c64a7` je v `main`, rizeny
+  restart na PID `33066`, petibodovy smoke test i zive HTML jsou zelene; zbyva
+  pouze rucni vizualni retest.
 
 - `handoffs/human_adam_plan_help_and_adoption_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: staticka napoveda `?` v okne `Plan` je implementovana bez API a

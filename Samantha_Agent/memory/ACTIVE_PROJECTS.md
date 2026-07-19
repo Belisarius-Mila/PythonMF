@@ -46,8 +46,9 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
   velke zobrazeni v `Plan`. Ergonomicka oprava v izolovane vetvi
   `wip/human-adam-work-help-layout-20260719` odstranuje vlastni vyskovy limit a
   vnitrni scrollbar; roluje se cely velky panel `Prace`. Cilenych 50 UI testu i
-  cela Cockpit brana prosly. Zbyva checkpoint, push, potvrzene prevzeti do
-  `main`, rizeny restart a rucni vizualni retest.
+  cela Cockpit brana prosly. Commit `20c64a7` je v `main`, rizeny restart na PID
+  `33066`, petibodovy smoke test i zive HTML jsou zelene; zbyva pouze rucni
+  vizualni retest.
   Handoff:
   `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md`.
 - 2026-07-19: Priorita 1, App-server rozhrani / novy Adam. Mila schvalil navrat

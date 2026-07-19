@@ -1,6 +1,6 @@
 Nazev: Human-Adam Prace - napoveda semaforu a zivotniho cyklu WIP vetvi
 Priorita: 1
-Stav: ceka na prevzeti
+Stav: ceka na retest
 Pripomenout pri startu: ano
 Datum: 2026-07-19
 
@@ -41,17 +41,24 @@ Co je hotove:
   obsahuje tlacitko `?`, oba vyvojove postupy, stavy vetvi i nouzove pravidlo.
 - Ergonomicka oprava i regresni test jsou pripravene do jednoho WIP checkpointu
   na vetvi `wip/human-adam-work-help-layout-20260719`.
+- Ergonomicky checkpoint `20c64a7` byl po cerstvem auditu potvrzenym
+  fast-forwardem prevzaty do `main` a pushnuty na GitHub bez merge commitu nebo
+  prepisu historie.
+- Cockpit byl rizene restartovany z PID `27623` na PID `33066`; nova instance ma
+  code stamp `15c51d12ca51ff0e` a vsech pet smoke kontrol proslo.
+- Zive HTML potvrzuje velky `.work-panel-body`, napovedu bez puvodniho
+  `max-height` a pritomnost celeho textu navodu.
 
 Co neni hotove:
 
-- Ergonomicka oprava jeste neni prevzata do `main`, nasazena ani rucne
-  retestovana v zivem Cockpitu.
-- V teto Codex relaci nebyl dostupny lokalni prohlizec pro obrazovou kontrolu.
+- Zbyva Mílův rucni vizualni retest velkeho zobrazeni na Macu nebo iPhonu.
+- V teto Codex relaci nebyl dostupny lokalni prohlizec pro obrazovou kontrolu;
+  zive nasazeni bylo overeno HTML kontraktem a smoke testem.
 
 Dalsi krok:
 
-- Po checkpointu a pushi provest cerstvy audit, potvrzene prevzeti do `main`,
-  rizeny restart a rucne overit velke zobrazeni `Prace -> ?`.
+- Rucne otevrit `Prace -> ?` a overit, ze se napoveda zobrazuje jako velky panel
+  bez maleho vnitrniho rolovaciho okna.
 
 Navrhovane dalsi kroky:
 
