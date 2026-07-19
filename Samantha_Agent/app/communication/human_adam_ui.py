@@ -89,6 +89,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #contextAnchorInput { flex:1; min-height:320px; font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; }
     #contextAnchorMeta,.context-anchor-help { margin:0; color:var(--muted); font-size:13px; }
     .context-anchor-actions { display:flex; justify-content:flex-end; gap:8px; }
+    .work-panel-body { flex:1; min-height:0; overflow:auto; display:flex; flex-direction:column; }
     .workflow-help-trigger { width:38px; min-width:38px; padding:8px 0; border-radius:50%; font-weight:700; }
     .workflow-help-panel { padding:14px; border:1px solid #c9d6e5; border-radius:13px; background:#f8fafc; color:var(--ink); }
     .workflow-help-head { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
@@ -98,7 +99,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .workflow-help-panel ol,.workflow-help-panel ul { margin:4px 0 0; padding-left:23px; }
     .workflow-help-panel li { margin:5px 0; line-height:1.4; }
     .workflow-help-safety { margin-top:14px !important; padding:9px 11px; border-radius:10px; background:#ecfdf3; color:var(--ok) !important; }
-    .work-help-panel { flex:0 1 auto; max-height:58vh; overflow:auto; margin:12px 16px; }
+    .work-help-panel { flex:0 0 auto; margin:12px 16px; }
     .thread-rotation-box { margin-top:14px; padding-top:12px; border-top:1px solid #dbe3ee; display:grid; gap:8px; }
     .thread-rotation-box h3 { margin:0; font-size:15px; }
     .thread-rotation-actions { display:flex; gap:8px; flex-wrap:wrap; }
@@ -116,7 +117,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       .development-semaphore-actions > button { flex:1 1 100%; min-width:0; white-space:normal; }
       .workflow-help-panel { padding:12px; }
       .workflow-help-head { align-items:flex-start; }
-      .work-help-panel { max-height:64vh; margin:10px 12px; }
+      .work-help-panel { margin:10px 12px; }
     }
   </style>
 </head>
@@ -263,6 +264,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <button id="workRefreshBtn" type="button">Obnovit</button>
       <button id="workCloseBtn" type="button">Zavřít</button>
     </div>
+    <div class="work-panel-body">
     <section class="workflow-help-panel work-help-panel" id="workHelpPanel" aria-labelledby="workHelpTitle" tabindex="-1" hidden>
       <div class="workflow-help-head">
         <h3 id="workHelpTitle">Jak pracovat s vývojem a WIP větvemi</h3>
@@ -347,6 +349,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <button class="audit-action" id="deployAuditBtn" type="button" disabled>Audit nasazení</button>
       <input id="deployConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Po auditu sem vlož potvrzovací větu" hidden disabled>
       <button class="deploy-action" id="deployBtn" type="button" disabled>Ověřit a nasadit</button>
+    </div>
     </div>
   </aside>
 </main>

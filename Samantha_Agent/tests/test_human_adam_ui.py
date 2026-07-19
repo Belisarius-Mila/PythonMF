@@ -237,6 +237,8 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('developmentBranchAuditBtn.addEventListener("click", loadDevelopmentBranchAudit)', HUMAN_ADAM_HTML)
 
     def test_work_help_is_accessible_static_and_covers_semaphore_and_branch_lifecycle(self) -> None:
+        work_panel_start = HUMAN_ADAM_HTML.index('id="workPanel"')
+        body_start = HUMAN_ADAM_HTML.index('class="work-panel-body"', work_panel_start)
         panel_start = HUMAN_ADAM_HTML.index('id="workHelpPanel"')
         panel_end = HUMAN_ADAM_HTML.index("</section>", panel_start)
         panel_source = HUMAN_ADAM_HTML[panel_start:panel_end]
@@ -246,6 +248,10 @@ class HumanAdamUiTests(unittest.TestCase):
 
         self.assertIn('aria-label="Nápověda k Práci, vývojovému semaforu a WIP větvím"', HUMAN_ADAM_HTML)
         self.assertIn('aria-controls="workHelpPanel"', HUMAN_ADAM_HTML)
+        self.assertLess(body_start, panel_start)
+        self.assertIn(".work-panel-body { flex:1; min-height:0; overflow:auto; display:flex; flex-direction:column; }", HUMAN_ADAM_HTML)
+        self.assertIn(".work-help-panel { flex:0 0 auto; margin:12px 16px; }", HUMAN_ADAM_HTML)
+        self.assertNotIn(".work-help-panel { flex:0 1 auto; max-height", HUMAN_ADAM_HTML)
         self.assertIn("Běžný vývoj z r-Adama", panel_source)
         self.assertIn("Vývoj z terminálového Adama", panel_source)
         self.assertIn("Životní cyklus větví", panel_source)

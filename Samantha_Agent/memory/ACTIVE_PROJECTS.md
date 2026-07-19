@@ -42,12 +42,12 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 ## Aktualni navazani
 
 - 2026-07-19: Priorita 1, App-server rozhrani / novy Adam. Mila rucne potvrdil
-  napovedu `Plan -> ?` jako v poradku. V izolovane vetvi je hotova stejna
-  staticka berlicka pro okno `Prace`: bezpecny profilovy i terminalovy postup,
-  vyznam semaforu, WIP vetve a worktree, slovnik stavu zivotniho cyklu a nouzovy
-  postup bez mazani nebo prepisu historie. Cilenych 50 UI testu a cela Cockpit
-  brana s 826 testy prosly. Commit `e1bc193`, rizeny restart a petibodovy smoke
-  test jsou zelene; zbyva pouze rucni proklik napovedy.
+  obsah napovedy `Prace -> ?`, ale maly vnitrni rolovaci box byl hur citelny nez
+  velke zobrazeni v `Plan`. Ergonomicka oprava v izolovane vetvi
+  `wip/human-adam-work-help-layout-20260719` odstranuje vlastni vyskovy limit a
+  vnitrni scrollbar; roluje se cely velky panel `Prace`. Cilenych 50 UI testu i
+  cela Cockpit brana prosly. Zbyva checkpoint, push, potvrzene prevzeti do
+  `main`, rizeny restart a rucni vizualni retest.
   Handoff:
   `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md`.
 - 2026-07-19: Priorita 1, App-server rozhrani / novy Adam. Mila schvalil navrat
