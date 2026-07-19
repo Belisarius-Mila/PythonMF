@@ -17,6 +17,7 @@ SAMANTHA_DIR = PROJECT_ROOT / "Samantha_Agent"
 PYTHON_BIN = SAMANTHA_DIR / ".venv" / "bin" / "python"
 BACKUP_SCRIPT = SAMANTHA_DIR / "scripts" / "backup_samantha_python.py"
 HUMAN_ADAM_TAKEOVER_SCRIPT = SAMANTHA_DIR / "scripts" / "human_adam_takeover.py"
+DEVELOPMENT_BRANCH_AUDIT_SCRIPT = SAMANTHA_DIR / "scripts" / "development_branch_audit.py"
 HUMAN_ADAM_TAKEOVER_CONFIRMATION = "POTVRZUJI PREVZETI HUMAN-ADAM WIP DO MAIN"
 SECURE_BACKUP_ROOT = Path("/Volumes/SamanthaSecureBackup/SamanthaBackups")
 DEFAULT_PENDING_COMMAND_PATH = SAMANTHA_DIR / "data" / "workflows" / "pending_command.json"
@@ -148,6 +149,37 @@ WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
             ("zaloha", "backup", "projekt", "samantha", "pythonmf"),
         ),
         preflight=lambda command: _preflight_secure_backup(command, dry_run=True),
+    ),
+    WorkflowCommand(
+        command_id="development_branch_lifecycle_audit",
+        title="Read-only audit životního cyklu vývojových větví",
+        purpose="Bez změn klasifikuje dočasné větve a připojené worktrees vůči main.",
+        aliases=(
+            "audit wip větví",
+            "audit wip vetvi",
+            "zkontroluj vývojové větve",
+            "zkontroluj vyvojove vetve",
+            "prověř životní cyklus větví",
+            "prover zivotni cyklus vetvi",
+        ),
+        argv=(str(PYTHON_BIN), str(DEVELOPMENT_BRANCH_AUDIT_SCRIPT)),
+        cwd=SAMANTHA_DIR,
+        risk="read_only_preview",
+        writes="nic, pouze čte Git reference a stav worktrees",
+        requires_confirmation=False,
+        intent_keywords=(
+            "audit",
+            "zkontroluj",
+            "prover",
+            "wip",
+            "vyvojove vetve",
+            "zivotni cyklus vetvi",
+            "worktree",
+        ),
+        required_keyword_groups=(
+            ("audit", "zkontroluj", "prover", "kontrola"),
+            ("wip", "vyvojove vetve", "vetve", "zivotni cyklus vetvi", "worktree"),
+        ),
     ),
     WorkflowCommand(
         command_id="human_adam_takeover_audit",

@@ -76,6 +76,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .development-semaphore-box p { margin:0; color:var(--muted); font-size:13px; overflow-wrap:anywhere; }
     .development-semaphore-box input { width:100%; border:1px solid #bac7d8; border-radius:11px; padding:10px 12px; font:inherit; }
     .development-semaphore-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .development-branch-audit-box { padding:12px 16px; border-bottom:1px solid var(--line); display:grid; gap:8px; }
+    .development-branch-audit-head { display:flex; align-items:center; gap:8px; }
+    .development-branch-audit-head h3 { flex:1; margin:0; font-size:15px; }
+    #developmentBranchAuditMeta { margin:0; color:var(--muted); font-size:13px; overflow-wrap:anywhere; }
+    #developmentBranchAuditList { max-height:180px; overflow:auto; margin:0; padding:0 0 0 22px; }
+    #developmentBranchAuditList li { margin-bottom:6px; overflow-wrap:anywhere; font-size:13px; }
     .checkpoint-box { padding:12px 16px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); display:grid; gap:8px; }
     .checkpoint-box input { width:100%; border:1px solid #bac7d8; border-radius:11px; padding:10px 12px; font:inherit; }
     #deployMeta { color:var(--muted); font-size:13px; line-height:1.4; }
@@ -211,6 +217,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <button id="developmentReleaseBtn" type="button" hidden>Uvolnit</button>
       </div>
     </section>
+    <section class="development-branch-audit-box" aria-label="Životní cyklus vývojových větví">
+      <div class="development-branch-audit-head">
+        <h3>Životní cyklus WIP větví</h3>
+        <button id="developmentBranchAuditBtn" type="button">Prověřit WIP větve</button>
+      </div>
+      <p id="developmentBranchAuditMeta">Kontrola je pouze read-only a spouští se výslovně.</p>
+      <ul id="developmentBranchAuditList" hidden></ul>
+    </section>
     <div id="workMeta">Stav se načte až po otevření.</div>
     <ul id="workChanges"></ul>
     <div class="checkpoint-box">
@@ -288,6 +302,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const developmentPauseBtn = document.getElementById("developmentPauseBtn");
   const developmentResumeBtn = document.getElementById("developmentResumeBtn");
   const developmentReleaseBtn = document.getElementById("developmentReleaseBtn");
+  const developmentBranchAuditBtn = document.getElementById("developmentBranchAuditBtn");
+  const developmentBranchAuditMeta = document.getElementById("developmentBranchAuditMeta");
+  const developmentBranchAuditList = document.getElementById("developmentBranchAuditList");
   const checkpointMessage = document.getElementById("checkpointMessage");
   const checkpointBtn = document.getElementById("checkpointBtn");
   const deployMeta = document.getElementById("deployMeta");
@@ -507,6 +524,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     developmentPauseBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_pause !== true;
     developmentResumeBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_resume !== true;
     developmentReleaseBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_release !== true;
+    developmentBranchAuditBtn.disabled = busy;
   }
 
   function setBusy(value, text="") {
@@ -1557,6 +1575,45 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     } finally { workRefreshBtn.disabled = false; }
   }
 
+  function renderDevelopmentBranchAudit(payload) {
+    developmentBranchAuditList.replaceChildren();
+    const branches = Array.isArray(payload.branches) ? payload.branches : [];
+    const labels = {
+      active_dirty_worktree:"aktivní · rozpracováno",
+      active_clean_worktree:"aktivní · čisté",
+      merged:"integrováno do main",
+      patch_equivalent:"obsah je v main",
+      archived:"vědomě archivováno",
+      needs_review:"vyžaduje revizi",
+      unverified:"nelze ověřit",
+      unverified_worktree:"worktree nelze ověřit",
+    };
+    for (const item of branches) {
+      const row = document.createElement("li");
+      const label = labels[item.classification] || String(item.classification || "neznámý stav");
+      row.textContent = `${item.name || "neznámá větev"} · ${label} · ${item.reason || ""}`;
+      developmentBranchAuditList.appendChild(row);
+    }
+    developmentBranchAuditList.hidden = !branches.length;
+    developmentBranchAuditMeta.textContent = `Větve: ${Number(payload.branch_count || 0)} · aktivní: ${Number(payload.active_worktree_count || 0)} · kandidáti k později potvrzenému úklidu: ${Number(payload.cleanup_candidate_count || 0)} · revize: ${Number(payload.needs_review_count || 0)}. Nic nebylo změněno.`;
+  }
+
+  async function loadDevelopmentBranchAudit() {
+    developmentBranchAuditBtn.disabled = true;
+    developmentBranchAuditMeta.textContent = "Prověřuji Git větve bez změn…";
+    try {
+      const payload = await api("/api/human-adam/development-branches");
+      if (!payload.ok) throw new Error(payload.message || "Audit větví nelze dokončit.");
+      renderDevelopmentBranchAudit(payload);
+    } catch (error) {
+      developmentBranchAuditList.replaceChildren();
+      developmentBranchAuditList.hidden = true;
+      developmentBranchAuditMeta.textContent = `Audit větví selhal bezpečně: ${error.message}`;
+    } finally {
+      developmentBranchAuditBtn.disabled = busy;
+    }
+  }
+
   function openWork() {
     contextAnchorPanel.hidden = true;
     tvbcpPanel.hidden = true;
@@ -1782,6 +1839,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   developmentPauseBtn.addEventListener("click", () => changeDevelopmentSemaphore("pause"));
   developmentResumeBtn.addEventListener("click", () => changeDevelopmentSemaphore("resume"));
   developmentReleaseBtn.addEventListener("click", () => changeDevelopmentSemaphore("release"));
+  developmentBranchAuditBtn.addEventListener("click", loadDevelopmentBranchAudit);
   checkpointBtn.addEventListener("click", createCheckpoint);
   deployAuditBtn.addEventListener("click", auditDeployment);
   deployConfirmation.addEventListener("input", () => {

@@ -74,6 +74,16 @@ class WorkflowCommandTests(unittest.TestCase):
         self.assertIn("backup_project_recovery", result)
         self.assertIn("--execute --profile recovery", result)
 
+    def test_development_branch_audit_is_registered_read_only_without_confirmation(self) -> None:
+        listed = list_workflow_commands_text()
+        preview = preview_workflow_command_text(command_id="development_branch_lifecycle_audit")
+
+        self.assertIn("development_branch_lifecycle_audit", listed)
+        self.assertIn("development_branch_audit.py", preview)
+        self.assertIn("read_only_preview", preview)
+        self.assertIn("vyzaduje potvrzeni: ne", preview)
+        self.assertIn("nic, pouze čte Git reference a stav worktrees", preview)
+
     def test_weak_generic_request_does_not_match_backup(self) -> None:
         result = preview_workflow_command_text("Uloz to")
 

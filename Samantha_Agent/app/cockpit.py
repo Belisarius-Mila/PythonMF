@@ -78,6 +78,7 @@ from app.autosave_service import (
 )
 from app.codex_appserver import AppServerError
 from app.command_cheatsheet import load_command_cheatsheet
+from app.development_branch_lifecycle import development_branch_audit_action
 from app.communication.human_adam_service import (
     human_adam_checkpoint_action,
     human_adam_connect_action,
@@ -9997,6 +9998,9 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/human-adam/development-semaphore":
                     self.respond_json(human_adam_development_semaphore_status_action(service=HUMAN_ADAM))
+                    return
+                if parsed.path == "/api/human-adam/development-branches":
+                    self.respond_json(development_branch_audit_action())
                     return
                 if parsed.path == "/api/human-adam/context-anchor":
                     self.respond_json(human_adam_context_anchor_action(service=HUMAN_ADAM))

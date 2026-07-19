@@ -35,6 +35,7 @@ COMPILE_PATHS = (
     "app/adam_service.py",
     "app/autosave_service.py",
     "app/codex_appserver.py",
+    "app/development_branch_lifecycle.py",
     "app/communication/human_adam_profiles.py",
     "app/communication/development_semaphore.py",
     "app/communication/human_adam_service.py",
@@ -76,6 +77,7 @@ COMPILE_PATHS = (
     "scripts/tvbcp.py",
     "scripts/codex_appserver_shared_thread_probe.py",
     "scripts/human_adam_takeover.py",
+    "scripts/development_branch_audit.py",
 )
 
 SHELL_PATHS = (
@@ -92,6 +94,7 @@ TEST_MODULES = (
     "tests.test_communication_session_hub",
     "tests.test_human_adam_profiles",
     "tests.test_development_semaphore",
+    "tests.test_development_branch_lifecycle",
     "tests.test_human_adam_service",
     "tests.test_human_adam_deploy",
     "tests.test_human_adam_ui",

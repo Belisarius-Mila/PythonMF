@@ -51,6 +51,9 @@ async def second():
         self.assertIn("tests.test_command_cheatsheet", TEST_MODULES)
         self.assertIn("app/communication/human_adam_profiles.py", COMPILE_PATHS)
         self.assertIn("app/command_cheatsheet.py", COMPILE_PATHS)
+        self.assertIn("app/development_branch_lifecycle.py", COMPILE_PATHS)
+        self.assertIn("scripts/development_branch_audit.py", COMPILE_PATHS)
+        self.assertIn("tests.test_development_branch_lifecycle", TEST_MODULES)
 
     def test_architecture_baselines_are_informational_and_reported(self) -> None:
         messages = architecture_messages()

@@ -258,6 +258,14 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/human-adam/development-semaphore", self.cockpit_do_get_routes())
         self.assertIn("/api/human-adam/development-semaphore", self.cockpit_do_post_routes())
 
+    def test_development_branch_lifecycle_has_read_only_get_route(self) -> None:
+        self.assertIn("/api/human-adam/development-branches", self.cockpit_do_get_routes())
+        self.assertNotIn("/api/human-adam/development-branches", self.cockpit_do_post_routes())
+        source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
+        route_start = source.index('if parsed.path == "/api/human-adam/development-branches":')
+        route_end = source.index('if parsed.path == "/api/human-adam/context-anchor":', route_start)
+        self.assertIn("self.respond_json(development_branch_audit_action())", source[route_start:route_end])
+
     def test_human_adam_deploy_route_persists_restart_boundary_and_result(self) -> None:
         source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
         route_start = source.index('if parsed.path == "/api/human-adam/deploy":')

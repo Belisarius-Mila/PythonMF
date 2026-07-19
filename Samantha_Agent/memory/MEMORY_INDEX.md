@@ -104,6 +104,14 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `handoffs/development_branch_lifecycle_phase1_wip_2026_07_19.md` - [PRIPOMENOUT]
+  priorita 1: prvni read-only faze rizeni zivotniho cyklu WIP vetvi ma
+  samostatne auditni jadro, CLI, workflow registraci, GET endpoint a male
+  ovladani v panelu `Prace`. Pripojeny nebo rozpracovany worktree je vzdy
+  chraneny, neoveritelny stav selhava uzavrene a zadny uklid se neprovadi.
+  Plna Cockpit brana prosla 824 testy; zbyva potvrzene prevzeti do `main`,
+  nasazeni, restart a zivy read-only test.
+
 - `handoffs/global_development_semaphore_wip_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: commit `90ed06c` nasadil trvaly globalni vyvojovy semafor pro
   Human-Adam, Knihovnu a terminal, read-only modelovy guard a fail-closed

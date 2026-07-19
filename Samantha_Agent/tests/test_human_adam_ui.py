@@ -49,6 +49,9 @@ class HumanAdamUiTests(unittest.TestCase):
             "workCloseBtn",
             "workRefreshBtn",
             "workChanges",
+            "developmentBranchAuditBtn",
+            "developmentBranchAuditMeta",
+            "developmentBranchAuditList",
             "checkpointMessage",
             "checkpointBtn",
             "deployMeta",
@@ -189,6 +192,18 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("checkpointBtn.disabled = !payload.dirty || semaphore.can_checkpoint !== true;", HUMAN_ADAM_HTML)
         self.assertIn("Nasazení blokuje cizí WIP", HUMAN_ADAM_HTML)
         self.assertIn("To projde jen při čistých workspaces bez čekajícího WIP", HUMAN_ADAM_HTML)
+
+    def test_development_branch_lifecycle_ui_is_explicitly_read_only(self) -> None:
+        start = HUMAN_ADAM_HTML.index("async function loadDevelopmentBranchAudit()")
+        end = HUMAN_ADAM_HTML.index("function openWork()", start)
+        source = HUMAN_ADAM_HTML[start:end]
+
+        self.assertIn('api("/api/human-adam/development-branches")', source)
+        self.assertNotIn('method:"POST"', source)
+        self.assertIn("Audit větví selhal bezpečně", source)
+        self.assertIn("Nic nebylo změněno", HUMAN_ADAM_HTML)
+        self.assertIn("row.textContent", HUMAN_ADAM_HTML)
+        self.assertIn('developmentBranchAuditBtn.addEventListener("click", loadDevelopmentBranchAudit)', HUMAN_ADAM_HTML)
 
     def test_profile_switch_is_explicit_atomic_and_preserves_unsent_draft(self) -> None:
         switch_start = HUMAN_ADAM_HTML.index("async function switchProfile()")
