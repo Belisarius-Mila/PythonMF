@@ -304,6 +304,49 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <li><strong>Potvrzené dokončení</strong> se nabídne až po novém procesu a smoke testu. Zapíše jen commit, testy, restart, smoke test, stav nasazeno a tebou zadaný další krok.</li>
       </ul>
 
+      <h4>Čtyři fáze handoffu od zahájení po nasazení</h4>
+      <ol>
+        <li>
+          <strong>Fáze 1 — projektová vazba a kontrola aktuálnosti.</strong>
+          Před první změnou vyber projekt, jeho aktuální handoff a téma práce; potom převezmi semafor. Tlačítko <strong>Prověřit handoff</strong> pouze porovná dostupné důkazy s checkpointem, kotvou a TVBCP.
+          <ul>
+            <li><strong>Aktuální</strong> znamená, že dostupné důkazy neukazují zaostávání.</li>
+            <li><strong>Čeká na aktualizaci</strong> nebo <strong>Nelze ověřit</strong> je zatím varování. Nic se nepřepisuje ani neblokuje.</li>
+            <li>Když vybraný projekt nebo handoff nesedí, nepokračuj ve vývoji a oprav výběr ještě před checkpointem.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Fáze 2 — návrh handoffu při checkpointu.</strong>
+          Po hotových změnách a testech vytvoř <strong>Checkpoint bez pushnutí</strong>. Cockpit z bezpečných Git metadat zobrazí návrh: téma, checkpoint, změněné soubory, stav a další kroky.
+          <ul>
+            <li>Návrh si přečti a zkontroluj, zda vystihuje skutečný stav práce.</li>
+            <li><strong>Návrh se sám neukládá</strong>, nemění handoff ani nevytváří další commit.</li>
+            <li>Nekopíruje chat, obsah změněných souborů, hesla, tokeny ani soukromé texty.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Fáze 3 — kontrola handoffu při převzetí do `main`.</strong>
+          Spusť <strong>Audit nasazení</strong>. Vedle běžného Git auditu se zobrazí, zda zvolený handoff patří projektu a zda je obsažen v checkpointu.
+          <ul>
+            <li><strong>Handoff odpovídá</strong> znamená, že přesný zvolený handoff je součástí checkpointu.</li>
+            <li><strong>Handoff chybí</strong> nebo <strong>Nelze ověřit</strong> je v této fázi jen viditelné varování; nasazení zatím neblokuje.</li>
+            <li>Převzetí do `main` vždy dál vyžaduje čerstvý audit a jeho přesnou potvrzovací větu.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Fáze 4 — potvrzené dokončení po nasazení.</strong>
+          Při samoobslužném nasazení z r-Adama zůstane semafor po pushi aktivní. Počkej na nový Cockpit proces, znovu otevři <strong>Práci</strong> a dokonči zelenou kartu.
+          <ul>
+            <li>Cockpit musí potvrdit nový proces, správný projekt a handoff, shodu `main` s `origin/main` a smoke test 5/5.</li>
+            <li>Zadej nejbližší další krok a přesnou větu <code>POTVRZUJI DOKONCENI HANDOFFU PO NASAZENI</code>.</li>
+            <li>Teprve potom se do handoffu přidají ověřená fakta, vznikne jediný dokončovací commit, proběhne push a semafor se uvolní.</li>
+            <li>Když karta hlásí <strong>Nelze dokončit</strong>, semafor neuvolňuj a požádej Adama o read-only kontrolu.</li>
+          </ul>
+        </li>
+      </ol>
+      <p><strong>Ruční nasazení z terminálového Adama:</strong> zelená karta fáze 4 se sama nepřipraví. Po takeoveru proto ručně proveď restart a smoke test, ověř čistý `main` a teprve potom uvolni semafor.</p>
+      <p><strong>Současná hranice:</strong> tvrdá blokace ručního uvolnění semaforu podle aktuálnosti handoffu zatím není zapnutá. Za správné dokončení fáze 4 proto stále odpovídá tento postup.</p>
+
       <h4>Běžný vývoj z r-Adama</h4>
       <ol>
         <li>Vyber správný profil, klikni na <strong>Připojit</strong> a nech workspace synchronizovat s `main`.</li>
@@ -311,7 +354,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <li>Teprve potom zadej vývojový úkol. Druhý Adam zůstane read-only.</li>
         <li>Po dokončení vytvoř <strong>Checkpoint bez pushnutí</strong> s krátkým popisem.</li>
         <li>Spusť <strong>Audit nasazení</strong>, přečti výsledek a použij přesnou potvrzovací větu.</li>
-        <li>Po čistém nasazení a restartu se semafor uvolní. Když zůstane WIP nebo blocker, nic nepřepisuj.</li>
+        <li>Po návratu nového Cockpitu znovu otevři <strong>Práci</strong> a potvrď dokončení handoffu. Až tento krok bezpečně uvolní semafor.</li>
       </ol>
 
       <h4>Vývoj z terminálového Adama</h4>
