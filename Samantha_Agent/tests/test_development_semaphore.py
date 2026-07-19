@@ -14,13 +14,20 @@ class DevelopmentSemaphoreTests(unittest.TestCase):
     def make_store(self, root: Path) -> DevelopmentSemaphore:
         return DevelopmentSemaphore(root / "development-semaphore.json")
 
-    def acquire(self, store: DevelopmentSemaphore, *, owner_id: str = "knihovna") -> dict[str, object]:
+    def acquire(
+        self,
+        store: DevelopmentSemaphore,
+        *,
+        owner_id: str = "knihovna",
+        project_binding: dict[str, str] | None = None,
+    ) -> dict[str, object]:
         return store.acquire(
             owner_id=owner_id,
             owner_label="Knihovna" if owner_id == "knihovna" else "Terminálový Adam",
             workspace_label="Profil Knihovna" if owner_id == "knihovna" else "Hlavní terminál",
             base_head="a" * 40,
             topic="Bezpečný souběh vývoje",
+            project_binding=project_binding,
             expected_revision=0,
             confirmed=True,
         )
@@ -40,6 +47,47 @@ class DevelopmentSemaphoreTests(unittest.TestCase):
         self.assertEqual(acquired["base_head_short"], "a" * 12)
         self.assertEqual(persisted["base_head"], "a" * 40)
         self.assertNotIn("path", persisted)
+
+    def test_project_binding_persists_and_survives_pause_resume(self) -> None:
+        binding = {
+            "project_id": "test-project-12345678",
+            "project_label": "Testovací projekt",
+            "handoff_path": "memory/handoffs/test_project.md",
+            "tvbcp_path": "memory/tvbcp/test_project.txt",
+        }
+        with tempfile.TemporaryDirectory() as temp_dir:
+            store = self.make_store(Path(temp_dir))
+            acquired = self.acquire(store, project_binding=binding)
+            paused = store.set_mode(
+                owner_id="knihovna",
+                mode="paused",
+                expected_revision=int(acquired["revision"]),
+                confirmed=True,
+            )
+            resumed = store.set_mode(
+                owner_id="knihovna",
+                mode="active",
+                expected_revision=int(paused["revision"]),
+                confirmed=True,
+            )
+
+        for key, value in binding.items():
+            self.assertEqual(acquired[key], value)
+            self.assertEqual(paused[key], value)
+            self.assertEqual(resumed[key], value)
+
+    def test_invalid_project_binding_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            store = self.make_store(Path(temp_dir))
+            with self.assertRaisesRegex(AppServerError, "Projektová vazba"):
+                self.acquire(
+                    store,
+                    project_binding={
+                        "project_id": "test-project-12345678",
+                        "project_label": "Testovací projekt",
+                        "handoff_path": "../private/secret.md",
+                    },
+                )
 
     def test_foreign_owner_and_stale_revision_cannot_overwrite_lease(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -75,7 +75,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .development-semaphore-box h3 { margin:0; font-size:15px; }
     .development-semaphore-box p { margin:0; color:var(--muted); font-size:13px; overflow-wrap:anywhere; }
     .development-semaphore-box input { width:100%; border:1px solid #bac7d8; border-radius:11px; padding:10px 12px; font:inherit; }
+    .development-binding-fields { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:8px; }
+    .development-binding-fields label { display:grid; gap:4px; color:var(--muted); font-size:12px; font-weight:700; }
+    .development-binding-fields select { width:100%; min-width:0; border:1px solid #bac7d8; border-radius:11px; padding:9px 10px; background:#fff; color:var(--ink); font:inherit; }
     .development-semaphore-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .project-continuity-box { padding:12px 16px; border-bottom:1px solid var(--line); display:grid; gap:8px; background:#fff; }
+    .project-continuity-head { display:flex; align-items:center; gap:8px; }
+    .project-continuity-head h3 { flex:1; margin:0; font-size:15px; }
+    #projectContinuityMeta { margin:0; color:var(--muted); font-size:13px; overflow-wrap:anywhere; }
+    #projectContinuityReasons { margin:0; padding-left:22px; color:var(--muted); font-size:13px; }
     .development-branch-audit-box { padding:12px 16px; border-bottom:1px solid var(--line); display:grid; gap:8px; }
     .development-branch-audit-head { display:flex; align-items:center; gap:8px; }
     .development-branch-audit-head h3 { flex:1; margin:0; font-size:15px; }
@@ -115,6 +123,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       .context-anchor-actions > button { flex:1 1 calc(50% - 4px); min-width:0; padding-left:8px; padding-right:8px; white-space:normal; }
       .thread-rotation-actions > button { flex:1 1 100%; min-width:0; white-space:normal; }
       .development-semaphore-actions > button { flex:1 1 100%; min-width:0; white-space:normal; }
+      .development-binding-fields { grid-template-columns:1fr; }
       .workflow-help-panel { padding:12px; }
       .workflow-help-head { align-items:flex-start; }
       .work-help-panel { margin:10px 12px; }
@@ -277,12 +286,13 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <li><strong>Vývojový semafor</strong> určuje jediného vlastníka zápisu. Ostatní Adamové zůstávají read-only.</li>
         <li><strong>WIP větev</strong> bezpečně odděluje jeden vývojový úkol. Není to Codex vlákno a jeho existence nezaplňuje konverzaci.</li>
         <li><strong>Worktree</strong> je oddělená pracovní kopie projektu připojená k určité větvi.</li>
+        <li><strong>Projektová vazba</strong> spojuje jeden vývoj se zvoleným projektem a handoffem; audit pouze čte důkazy a nic nepřepisuje.</li>
       </ul>
 
       <h4>Běžný vývoj z r-Adama</h4>
       <ol>
         <li>Vyber správný profil, klikni na <strong>Připojit</strong> a nech workspace synchronizovat s `main`.</li>
-        <li>Do tématu napiš krátký název práce a klikni na <strong>Převzít pro tento profil</strong>.</li>
+        <li>Vyber projekt a aktuální handoff, do tématu napiš krátký název práce a klikni na <strong>Převzít pro tento profil</strong>.</li>
         <li>Teprve potom zadej vývojový úkol. Druhý Adam zůstane read-only.</li>
         <li>Po dokončení vytvoř <strong>Checkpoint bez pushnutí</strong> s krátkým popisem.</li>
         <li>Spusť <strong>Audit nasazení</strong>, přečti výsledek a použij přesnou potvrzovací větu.</li>
@@ -323,6 +333,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     <section class="development-semaphore-box" aria-label="Globální vývojový semafor">
       <h3>Vývojový semafor</h3>
       <p id="developmentSemaphoreMeta">Stav vlastníka vývoje se načte společně s pracovním stavem.</p>
+      <div class="development-binding-fields">
+        <label>Projekt
+          <select id="developmentProject" aria-label="Projekt vývoje"><option value="">Načítám projekty…</option></select>
+        </label>
+        <label>Aktuální handoff
+          <select id="developmentHandoff" aria-label="Aktuální handoff projektu" disabled><option value="">Nejdřív vyber projekt</option></select>
+        </label>
+      </div>
       <input id="developmentTopic" maxlength="120" autocomplete="off" placeholder="Krátké téma vývoje">
       <div class="development-semaphore-actions">
         <button class="primary" id="developmentAcquireProfileBtn" type="button">Převzít pro tento profil</button>
@@ -331,6 +349,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <button id="developmentResumeBtn" type="button" hidden>Obnovit</button>
         <button id="developmentReleaseBtn" type="button" hidden>Uvolnit</button>
       </div>
+    </section>
+    <section class="project-continuity-box" aria-label="Aktuálnost projektového handoffu">
+      <div class="project-continuity-head">
+        <h3>Kontinuita projektu</h3>
+        <button id="projectContinuityAuditBtn" type="button">Prověřit handoff</button>
+      </div>
+      <p id="projectContinuityMeta">Audit je pouze read-only a zatím nic neblokuje.</p>
+      <ul id="projectContinuityReasons" hidden></ul>
     </section>
     <section class="development-branch-audit-box" aria-label="Životní cyklus vývojových větví">
       <div class="development-branch-audit-head">
@@ -418,12 +444,17 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const workMeta = document.getElementById("workMeta");
   const workChanges = document.getElementById("workChanges");
   const developmentSemaphoreMeta = document.getElementById("developmentSemaphoreMeta");
+  const developmentProject = document.getElementById("developmentProject");
+  const developmentHandoff = document.getElementById("developmentHandoff");
   const developmentTopic = document.getElementById("developmentTopic");
   const developmentAcquireProfileBtn = document.getElementById("developmentAcquireProfileBtn");
   const developmentAcquireTerminalBtn = document.getElementById("developmentAcquireTerminalBtn");
   const developmentPauseBtn = document.getElementById("developmentPauseBtn");
   const developmentResumeBtn = document.getElementById("developmentResumeBtn");
   const developmentReleaseBtn = document.getElementById("developmentReleaseBtn");
+  const projectContinuityAuditBtn = document.getElementById("projectContinuityAuditBtn");
+  const projectContinuityMeta = document.getElementById("projectContinuityMeta");
+  const projectContinuityReasons = document.getElementById("projectContinuityReasons");
   const developmentBranchAuditBtn = document.getElementById("developmentBranchAuditBtn");
   const developmentBranchAuditMeta = document.getElementById("developmentBranchAuditMeta");
   const developmentBranchAuditList = document.getElementById("developmentBranchAuditList");
@@ -455,6 +486,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let deliveryUncertain = false;
   let deploymentAudit = null;
   let developmentSemaphore = null;
+  let projectContinuity = null;
   let completionMediaUrl = "";
   let activeSpeechButton = null;
   let activeSpeechUtterance = null;
@@ -641,11 +673,14 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     const semaphoreValid = developmentSemaphore && developmentSemaphore.ok === true;
     const semaphoreActive = Boolean(semaphoreValid && developmentSemaphore.active);
     developmentTopic.disabled = busy || semaphoreActive;
+    developmentProject.disabled = busy || semaphoreActive || !projectContinuity || projectContinuity.ok !== true;
+    developmentHandoff.disabled = developmentProject.disabled || !developmentProject.value;
     developmentAcquireProfileBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_acquire_profile !== true;
     developmentAcquireTerminalBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_acquire_terminal !== true;
     developmentPauseBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_pause !== true;
     developmentResumeBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_resume !== true;
     developmentReleaseBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_release !== true;
+    projectContinuityAuditBtn.disabled = busy;
     developmentBranchAuditBtn.disabled = busy;
   }
 
@@ -1596,6 +1631,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
 
   function renderWork(payload) {
     deploymentAudit = null;
+    renderProjectContinuity(payload.project_continuity || null);
     renderDevelopmentSemaphore(payload.development_semaphore || null);
     workChanges.replaceChildren();
     const pending = Array.isArray(payload.changes) ? payload.changes : [];
@@ -1646,7 +1682,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     const blockers = valid && Array.isArray(developmentSemaphore.blockers) ? developmentSemaphore.blockers.filter(Boolean) : [];
     if (!valid) developmentSemaphoreMeta.textContent = developmentSemaphore && developmentSemaphore.message ? developmentSemaphore.message : "Vývojový semafor nelze ověřit; zápis je zablokovaný.";
     else if (!active) developmentSemaphoreMeta.textContent = "Semafor je volný. Převezmi jej před první změnou kódu; druhý Adam pak zůstane read-only.";
-    else developmentSemaphoreMeta.textContent = `Vlastník: ${owner} · ${developmentSemaphore.mode === "paused" ? "pozastaveno" : "aktivní"} · téma: ${topic}${blockers.length ? ` · blokery: ${blockers.join(" ")}` : ""}`;
+    else developmentSemaphoreMeta.textContent = `Vlastník: ${owner} · ${developmentSemaphore.mode === "paused" ? "pozastaveno" : "aktivní"} · projekt: ${developmentSemaphore.project_label || "bez vazby"} · téma: ${topic}${blockers.length ? ` · blokery: ${blockers.join(" ")}` : ""}`;
     developmentAcquireProfileBtn.textContent = `Převzít pro ${activeProfileLabel}`;
     developmentAcquireProfileBtn.hidden = active;
     developmentAcquireTerminalBtn.hidden = active;
@@ -1661,9 +1697,16 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     if (!developmentSemaphore || developmentSemaphore.ok !== true) return;
     const acquiring = operation === "acquire_profile" || operation === "acquire_terminal";
     const topic = developmentTopic.value.trim();
+    const projectId = developmentProject.value;
+    const handoffPath = developmentHandoff.value;
     if (acquiring && !topic) {
       developmentSemaphoreMeta.textContent = "Zadej krátké téma vývoje.";
       developmentTopic.focus();
+      return;
+    }
+    if (acquiring && (!projectId || !handoffPath)) {
+      developmentSemaphoreMeta.textContent = "Vyber projekt a jeho aktuální handoff.";
+      (projectId ? developmentHandoff : developmentProject).focus();
       return;
     }
     const labels = {
@@ -1678,7 +1721,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     try {
       const payload = await api("/api/human-adam/development-semaphore", {
         method:"POST",
-        body:JSON.stringify({operation,expected_revision:Number(developmentSemaphore.revision),topic,confirmed:true}),
+        body:JSON.stringify({operation,expected_revision:Number(developmentSemaphore.revision),topic,project_id:projectId,handoff_path:handoffPath,confirmed:true}),
       });
       if (!payload.ok) throw new Error(payload.message || "Vývojový semafor nelze změnit.");
       developmentSemaphore = payload;
@@ -1703,6 +1746,73 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       workMeta.textContent = `Pracovní stav nelze načíst: ${error.message}`;
       checkpointBtn.disabled = true;
     } finally { workRefreshBtn.disabled = false; }
+  }
+
+  function updateDevelopmentHandoffs(selectedPath="") {
+    developmentHandoff.replaceChildren();
+    const project = projectContinuity && Array.isArray(projectContinuity.projects)
+      ? projectContinuity.projects.find((item) => item.id === developmentProject.value)
+      : null;
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = project ? "Vyber aktuální handoff" : "Nejdřív vyber projekt";
+    developmentHandoff.appendChild(placeholder);
+    for (const item of project && Array.isArray(project.handoffs) ? project.handoffs : []) {
+      const option = document.createElement("option");
+      option.value = String(item.path || "");
+      option.textContent = String(item.label || item.path || "Handoff");
+      developmentHandoff.appendChild(option);
+    }
+    developmentHandoff.value = selectedPath && [...developmentHandoff.options].some((item) => item.value === selectedPath) ? selectedPath : "";
+    syncControls();
+  }
+
+  function renderProjectContinuity(payload) {
+    projectContinuity = payload && typeof payload === "object" ? payload : null;
+    projectContinuityReasons.replaceChildren();
+    const valid = projectContinuity && projectContinuity.ok === true;
+    const projects = valid && Array.isArray(projectContinuity.projects) ? projectContinuity.projects : [];
+    const binding = valid && projectContinuity.binding && typeof projectContinuity.binding === "object" ? projectContinuity.binding : {};
+    const previousProject = developmentProject.value;
+    developmentProject.replaceChildren();
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = valid ? "Vyber projekt" : "Projekty nelze ověřit";
+    developmentProject.appendChild(placeholder);
+    for (const item of projects) {
+      const option = document.createElement("option");
+      option.value = String(item.id || "");
+      option.textContent = `${item.label || "Projekt"}${item.priority ? ` · priorita ${item.priority}` : ""}`;
+      developmentProject.appendChild(option);
+    }
+    const wantedProject = String(binding.project_id || previousProject || projectContinuity.default_project_id || "");
+    developmentProject.value = [...developmentProject.options].some((item) => item.value === wantedProject) ? wantedProject : "";
+    updateDevelopmentHandoffs(String(binding.handoff_path || ""));
+    const audit = valid && projectContinuity.audit && typeof projectContinuity.audit === "object" ? projectContinuity.audit : null;
+    const reasons = audit && Array.isArray(audit.reasons) ? audit.reasons.filter(Boolean) : [];
+    for (const reason of reasons) {
+      const row = document.createElement("li");
+      row.textContent = String(reason);
+      projectContinuityReasons.appendChild(row);
+    }
+    projectContinuityReasons.hidden = !reasons.length;
+    if (!valid) projectContinuityMeta.textContent = audit && audit.message ? audit.message : "Projektovou kontinuitu nelze bezpečně ověřit.";
+    else if (!audit) projectContinuityMeta.textContent = "Audit zatím nemá výsledek. Nic nebylo změněno.";
+    else projectContinuityMeta.textContent = `${audit.label || "Nelze ověřit"} · ${audit.message || ""} · pouze read-only, nic neblokuje.`;
+    syncControls();
+  }
+
+  async function loadProjectContinuity() {
+    projectContinuityAuditBtn.disabled = true;
+    projectContinuityMeta.textContent = "Prověřuji vazbu, handoff, kotvu, TVBCP a nasazení bez zápisu…";
+    try {
+      const payload = await api("/api/human-adam/project-continuity");
+      renderProjectContinuity(payload);
+    } catch (error) {
+      projectContinuityMeta.textContent = `Audit kontinuity selhal bezpečně: ${error.message}`;
+    } finally {
+      projectContinuityAuditBtn.disabled = busy;
+    }
   }
 
   function renderDevelopmentBranchAudit(payload) {
@@ -1987,6 +2097,8 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   developmentPauseBtn.addEventListener("click", () => changeDevelopmentSemaphore("pause"));
   developmentResumeBtn.addEventListener("click", () => changeDevelopmentSemaphore("resume"));
   developmentReleaseBtn.addEventListener("click", () => changeDevelopmentSemaphore("release"));
+  developmentProject.addEventListener("change", () => updateDevelopmentHandoffs(""));
+  projectContinuityAuditBtn.addEventListener("click", loadProjectContinuity);
   developmentBranchAuditBtn.addEventListener("click", loadDevelopmentBranchAudit);
   checkpointBtn.addEventListener("click", createCheckpoint);
   deployAuditBtn.addEventListener("click", auditDeployment);

@@ -9,6 +9,7 @@ from app.communication.human_adam_profiles import (
     HumanAdamProfileManager,
     human_adam_development_semaphore_action,
     human_adam_profile_switch_action,
+    human_adam_project_continuity_action,
 )
 from app.communication.human_adam_service import (
     THREAD_ROTATION_CONFIRMATION_TEXT,
@@ -16,6 +17,7 @@ from app.communication.human_adam_service import (
 )
 from app.communication.session_hub import SessionBusyError
 from app.codex_appserver import AppServerError
+from app.project_continuity import ProjectContinuityService
 
 
 class FakeRuntime:
@@ -150,7 +152,13 @@ def fake_profile(**_kwargs: object) -> dict[str, object]:
 
 
 class HumanAdamProfileManagerTests(unittest.TestCase):
-    def make_manager(self, root: Path, *, target_prepared: bool = True):
+    def make_manager(
+        self,
+        root: Path,
+        *,
+        target_prepared: bool = True,
+        project_continuity: ProjectContinuityService | None = None,
+    ):
         runtime = FakeRuntime(root)
         human_workspace = FakeWorkspace(root / "human")
         library_workspace = FakeWorkspace(root / "library", prepared=target_prepared)
@@ -180,14 +188,48 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         )
         manager = HumanAdamProfileManager(
             profiles={
-                "human_adam": {"label": "Human–Adam", "description": "Původní", "service": human},
-                "knihovna": {"label": "Knihovna", "description": "Nový profil", "service": library},
+                "human_adam": {
+                    "label": "Human–Adam",
+                    "description": "Původní",
+                    "default_project_name": "Testovací projekt",
+                    "service": human,
+                },
+                "knihovna": {
+                    "label": "Knihovna",
+                    "description": "Nový profil",
+                    "service": library,
+                },
             },
             default_profile_id="human_adam",
             state_path=root / "active-profile.json",
             runtime=runtime,  # type: ignore[arg-type]
+            project_continuity=project_continuity,
         )
         return manager, human_workspace, library_workspace, human_hub, library_hub
+
+    @staticmethod
+    def make_project_continuity(root: Path) -> tuple[ProjectContinuityService, str, str]:
+        handoff_path = "memory/handoffs/test_project.md"
+        (root / "memory/handoffs").mkdir(parents=True)
+        (root / "memory/tvbcp").mkdir(parents=True)
+        (root / "memory/ACTIVE_PROJECTS.md").write_text(
+            """| Oblast | Priorita | Rezim | Stav | Memory soubor | Handoff | Dalsi krok |
+| --- | --- | --- | --- | --- | --- | --- |
+| Testovací projekt | 1 | active | Rozpracováno | `memory/tvbcp/test_project.txt` | `memory/handoffs/test_project.md` | Pokračovat. |
+""",
+            encoding="utf-8",
+        )
+        (root / handoff_path).write_text("Aktuální handoff\n", encoding="utf-8")
+        (root / "memory/tvbcp/test_project.txt").write_text("TVBCP\n", encoding="utf-8")
+        workspace_handoff = root / "human" / handoff_path
+        workspace_handoff.parent.mkdir(parents=True)
+        workspace_handoff.write_text("Aktuální handoff\n", encoding="utf-8")
+        workspace_tvbcp = root / "human/memory/tvbcp/test_project.txt"
+        workspace_tvbcp.parent.mkdir(parents=True)
+        workspace_tvbcp.write_text("TVBCP\n", encoding="utf-8")
+        workspace_handoff.write_text("Aktuální handoff\n", encoding="utf-8")
+        service = ProjectContinuityService(project_root=root)
+        return service, service.catalog()[0].project_id, handoff_path
 
     def test_status_advertises_two_profiles_without_changing_original_default(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -201,6 +243,53 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(status["development_semaphore"]["ok"])
         self.assertFalse(status["development_semaphore"]["active"])
         self.assertTrue(status["development_semaphore"]["can_acquire_profile"])
+
+    def test_project_binding_is_required_when_catalog_exists_and_audit_is_read_only(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            continuity, project_id, handoff_path = self.make_project_continuity(root)
+            manager, *_rest = self.make_manager(root, project_continuity=continuity)
+            with self.assertRaisesRegex(AppServerError, "Vyber projekt"):
+                manager.change_development_semaphore(
+                    operation="acquire_profile",
+                    expected_revision=0,
+                    topic="Projektová kontinuita",
+                    confirmed=True,
+                )
+            acquired = manager.change_development_semaphore(
+                operation="acquire_profile",
+                expected_revision=0,
+                topic="Projektová kontinuita",
+                project_id=project_id,
+                handoff_path=handoff_path,
+                confirmed=True,
+            )
+            status = human_adam_project_continuity_action(service=manager)
+
+        self.assertEqual(acquired["project_id"], project_id)
+        self.assertEqual(acquired["handoff_path"], handoff_path)
+        self.assertTrue(status["read_only"])
+        self.assertFalse(status["blocking"])
+        self.assertEqual(status["audit"]["state"], "current")
+
+    def test_terminal_binding_is_conservatively_unverifiable_without_registered_worktree(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            continuity, project_id, handoff_path = self.make_project_continuity(root)
+            manager, *_rest = self.make_manager(root, project_continuity=continuity)
+            manager.change_development_semaphore(
+                operation="acquire_terminal",
+                expected_revision=0,
+                topic="Terminálový WIP",
+                project_id=project_id,
+                handoff_path=handoff_path,
+                confirmed=True,
+            )
+            status = manager.project_continuity_status()
+
+        self.assertEqual(status["audit"]["state"], "unverifiable")
+        self.assertIn("nezná přesný pracovní strom", status["audit"]["message"])
+        self.assertFalse(status["audit"]["blocking"])
 
     def test_checkpoint_requires_active_owned_lease_and_pause_blocks_it(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

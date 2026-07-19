@@ -34,6 +34,7 @@ from app.communication.human_adam_workspace import (
 from app.communication.local_runtime import LocalAppServerProcessController
 from app.communication.session_hub import SessionBusyError, SessionHubError
 from app.file_persistence import atomic_write_json
+from app.project_continuity import ProjectContinuityError, ProjectContinuityService
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -85,6 +86,7 @@ class HumanAdamProfileManager:
         state_path: Path = DEFAULT_PROFILE_STATE_PATH,
         runtime: LocalAppServerProcessController | None = None,
         development_semaphore: DevelopmentSemaphore | None = None,
+        project_continuity: ProjectContinuityService | None = None,
     ):
         if not profiles or default_profile_id not in profiles:
             raise ValueError("Pracovní profily Human–Adam nemají platný výchozí profil.")
@@ -103,6 +105,8 @@ class HumanAdamProfileManager:
             else self.state_path.with_name("development_semaphore.json")
         )
         self.development_semaphore = development_semaphore or DevelopmentSemaphore(semaphore_path)
+        continuity_root = PROJECT_ROOT if self.state_path == DEFAULT_PROFILE_STATE_PATH else self.state_path.parent
+        self.project_continuity = project_continuity or ProjectContinuityService(project_root=continuity_root)
         self._state_lock = threading.RLock()
         self._operation_lock = threading.Lock()
         self._state_error = ""
@@ -308,7 +312,83 @@ class HumanAdamProfileManager:
         return {
             **self.active_service.work_review(),
             "development_semaphore": self.development_status(),
+            "project_continuity": self.project_continuity_status(),
         }
+
+    def project_continuity_status(self) -> dict[str, Any]:
+        """Return project choices and conservative read-only freshness evidence."""
+        try:
+            active_id = self.active_profile_id
+            profile = self.profiles[active_id]
+            default_label = str(profile.get("default_project_name") or "")
+            projects = self.project_continuity.public_catalog()
+            default_project_id = self.project_continuity.default_project_id(default_label)
+            lease = self.development_semaphore.status()
+            binding = {
+                "project_id": str(lease.get("project_id") or ""),
+                "project_label": str(lease.get("project_label") or ""),
+                "handoff_path": str(lease.get("handoff_path") or ""),
+                "tvbcp_path": str(lease.get("tvbcp_path") or ""),
+            }
+            include_profile_receipt = bool(
+                binding["project_id"] and binding["project_id"] == default_project_id
+            )
+            audit = self.project_continuity.audit(
+                binding=binding,
+                workspace_root=self.active_service.workspace.project_root,
+                workspace_review=self.active_service.workspace.review(),
+                context_anchor=self.active_service.context_anchor(include_content=False),
+                deployment_receipt_path=(
+                    self.active_service.deployment_receipt_path if include_profile_receipt else None
+                ),
+            )
+            if (
+                binding["project_id"]
+                and lease.get("active") is True
+                and lease.get("owner_id") == TERMINAL_OWNER_ID
+                and audit.get("state") != "unverifiable"
+            ):
+                audit = {
+                    **audit,
+                    "state": "unverifiable",
+                    "label": "Nelze ověřit",
+                    "message": (
+                        "Projektová vazba je uložená, ale Cockpit nezná přesný pracovní strom "
+                        "terminálového Adama."
+                    ),
+                    "reasons": [
+                        "Audit terminálového WIP vyžaduje pozdější bezpečnou registraci jeho workspace.",
+                        *list(audit.get("reasons") or []),
+                    ],
+                }
+            return {
+                "ok": True,
+                "read_only": True,
+                "blocking": False,
+                "projects": projects,
+                "default_project_id": default_project_id,
+                "binding": binding,
+                "audit": audit,
+            }
+        except (AppServerError, ProjectContinuityError, OSError, ValueError) as exc:
+            return {
+                "ok": False,
+                "read_only": True,
+                "blocking": False,
+                "projects": [],
+                "default_project_id": "",
+                "binding": {},
+                "audit": {
+                    "ok": False,
+                    "read_only": True,
+                    "blocking": False,
+                    "state": "unverifiable",
+                    "label": "Nelze ověřit",
+                    "message": str(exc),
+                    "reasons": [],
+                    "evidence": [],
+                },
+            }
 
     def checkpoint(self, **kwargs: Any) -> dict[str, Any]:
         with self.profile_operation() as service:
@@ -434,6 +514,8 @@ class HumanAdamProfileManager:
         expected_revision: int,
         topic: str,
         confirmed: bool,
+        project_id: str = "",
+        handoff_path: str = "",
     ) -> dict[str, Any]:
         clean_operation = str(operation or "").strip()
         if not self._operation_lock.acquire(blocking=False):
@@ -445,6 +527,28 @@ class HumanAdamProfileManager:
             active_id = self.active_profile_id
             active_profile = self.profiles[active_id]
             active_workspace = active_profile["service"].workspace.status()
+            project_binding: dict[str, str] = {}
+            if clean_operation in {"acquire_profile", "acquire_terminal"}:
+                try:
+                    projects = self.project_continuity.catalog()
+                except ProjectContinuityError:
+                    if self.state_path == DEFAULT_PROFILE_STATE_PATH:
+                        raise
+                    projects = ()
+                if projects:
+                    default_id = self.project_continuity.default_project_id(
+                        str(active_profile.get("default_project_name") or "")
+                    )
+                    fallback_tvbcp = (
+                        active_profile["service"].tvbcp_relative_path.as_posix()
+                        if str(project_id or "").strip() == default_id
+                        else ""
+                    )
+                    project_binding = self.project_continuity.resolve_binding(
+                        project_id=project_id,
+                        handoff_path=handoff_path,
+                        fallback_tvbcp_path=fallback_tvbcp,
+                    )
             if clean_operation == "acquire_profile":
                 blockers = self._foreign_wip_blockers(active_id)
                 if blockers or int(active_workspace.get("source_pending_changes") or 0) > 0:
@@ -455,6 +559,7 @@ class HumanAdamProfileManager:
                     workspace_label=f"Profil {str(active_profile.get('label') or active_id)}",
                     base_head=str(active_workspace.get("head") or ""),
                     topic=topic,
+                    project_binding=project_binding,
                     expected_revision=expected_revision,
                     confirmed=confirmed,
                 )
@@ -469,6 +574,7 @@ class HumanAdamProfileManager:
                     workspace_label="Hlavní terminál / samostatný worktree",
                     base_head=str(active_workspace.get("source_head") or ""),
                     topic=topic,
+                    project_binding=project_binding,
                     expected_revision=expected_revision,
                     confirmed=confirmed,
                 )
@@ -660,6 +766,8 @@ def human_adam_development_semaphore_action(
                 expected_revision=int(payload.get("expected_revision")),
                 topic=str(payload.get("topic") or ""),
                 confirmed=payload.get("confirmed") is True,
+                project_id=str(payload.get("project_id") or ""),
+                handoff_path=str(payload.get("handoff_path") or ""),
             ),
         }
     except (AppServerError, SessionHubError, OSError, TypeError, ValueError) as exc:
@@ -669,6 +777,13 @@ def human_adam_development_semaphore_action(
             "message": str(exc),
             "development_semaphore": service.development_status(),
         }
+
+
+def human_adam_project_continuity_action(
+    *,
+    service: HumanAdamProfileManager,
+) -> dict[str, Any]:
+    return service.project_continuity_status()
 
 
 def build_human_adam_profiles() -> HumanAdamProfileManager:
@@ -705,11 +820,13 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
             "human_adam": {
                 "label": "Human–Adam",
                 "description": "Vývoj pracovního rozhraní Human–Adam",
+                "default_project_name": "App-server rozhrani / novy Adam",
                 "service": human_service,
             },
             "knihovna": {
                 "label": "Knihovna",
                 "description": "Články, přílohy a práce s Knihovnou v Cockpitu",
+                "default_project_name": "Znalostni databaze / Knihovna clanku / Knowledge inbox",
                 "service": knihovna_service,
             },
         },

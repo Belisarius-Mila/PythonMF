@@ -211,18 +211,37 @@ class HumanAdamUiTests(unittest.TestCase):
             "developmentBadge",
             "developmentSemaphoreMeta",
             "developmentTopic",
+            "developmentProject",
+            "developmentHandoff",
             "developmentAcquireProfileBtn",
             "developmentAcquireTerminalBtn",
             "developmentPauseBtn",
             "developmentResumeBtn",
             "developmentReleaseBtn",
+            "projectContinuityAuditBtn",
+            "projectContinuityMeta",
+            "projectContinuityReasons",
         ):
             self.assertIn(f'id="{element_id}"', HUMAN_ADAM_HTML)
         self.assertIn('api("/api/human-adam/development-semaphore"', HUMAN_ADAM_HTML)
+        self.assertIn('api("/api/human-adam/project-continuity")', HUMAN_ADAM_HTML)
         self.assertIn("expected_revision:Number(developmentSemaphore.revision)", HUMAN_ADAM_HTML)
+        self.assertIn("project_id:projectId,handoff_path:handoffPath", HUMAN_ADAM_HTML)
+        self.assertIn("Vyber projekt a jeho aktuální handoff.", HUMAN_ADAM_HTML)
         self.assertIn("checkpointBtn.disabled = !payload.dirty || semaphore.can_checkpoint !== true;", HUMAN_ADAM_HTML)
         self.assertIn("Nasazení blokuje cizí WIP", HUMAN_ADAM_HTML)
         self.assertIn("To projde jen při čistých workspaces bez čekajícího WIP", HUMAN_ADAM_HTML)
+
+    def test_project_continuity_ui_is_read_only_and_non_blocking(self) -> None:
+        start = HUMAN_ADAM_HTML.index("async function loadProjectContinuity()")
+        end = HUMAN_ADAM_HTML.index("function renderDevelopmentBranchAudit", start)
+        source = HUMAN_ADAM_HTML[start:end]
+
+        self.assertIn('api("/api/human-adam/project-continuity")', source)
+        self.assertNotIn('method:"POST"', source)
+        self.assertIn("Nelze ověřit", HUMAN_ADAM_HTML)
+        self.assertIn("pouze read-only, nic neblokuje", HUMAN_ADAM_HTML)
+        self.assertIn("audit pouze čte důkazy a nic nepřepisuje", HUMAN_ADAM_HTML)
 
     def test_development_branch_lifecycle_ui_is_explicitly_read_only(self) -> None:
         start = HUMAN_ADAM_HTML.index("async function loadDevelopmentBranchAudit()")

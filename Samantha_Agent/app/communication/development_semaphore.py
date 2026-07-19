@@ -20,6 +20,8 @@ from app.file_persistence import (
 
 DEVELOPMENT_SEMAPHORE_SCHEMA = 1
 DEVELOPMENT_OWNER_RE = re.compile(r"[a-z][a-z0-9_-]{1,31}")
+PROJECT_BINDING_ID_RE = re.compile(r"[a-z0-9][a-z0-9_-]{2,79}")
+PROJECT_MEMORY_PATH_RE = re.compile(r"memory/(?:handoffs|tvbcp)/[A-Za-z0-9_.-]+\.(?:md|txt)")
 COMMIT_RE = re.compile(r"[0-9a-f]{40}")
 VALID_MODES = {"active", "paused"}
 TERMINAL_OWNER_ID = "terminal"
@@ -48,6 +50,10 @@ class DevelopmentSemaphore:
             "workspace_label": "",
             "base_head": "",
             "topic": "",
+            "project_id": "",
+            "project_label": "",
+            "handoff_path": "",
+            "tvbcp_path": "",
             "acquired_at": "",
             "updated_at": "",
         }
@@ -76,6 +82,10 @@ class DevelopmentSemaphore:
         mode = str(raw.get("mode") or "").strip()
         base_head = str(raw.get("base_head") or "").strip().lower()
         topic = " ".join(str(raw.get("topic") or "").split())[:120]
+        project_id = str(raw.get("project_id") or "").strip()
+        project_label = " ".join(str(raw.get("project_label") or "").split())[:180]
+        handoff_path = str(raw.get("handoff_path") or "").strip()
+        tvbcp_path = str(raw.get("tvbcp_path") or "").strip()
         acquired_at = str(raw.get("acquired_at") or "").strip()
         updated_at = str(raw.get("updated_at") or "").strip()
         if (
@@ -88,6 +98,14 @@ class DevelopmentSemaphore:
             or not updated_at
         ):
             raise AppServerError("Vývojový semafor obsahuje neplatný aktivní lease.")
+        if project_id and (
+            not PROJECT_BINDING_ID_RE.fullmatch(project_id)
+            or not project_label
+            or not PROJECT_MEMORY_PATH_RE.fullmatch(handoff_path)
+            or "/handoffs/" not in handoff_path
+            or (tvbcp_path and (not PROJECT_MEMORY_PATH_RE.fullmatch(tvbcp_path) or "/tvbcp/" not in tvbcp_path))
+        ):
+            raise AppServerError("Vývojový semafor obsahuje neplatnou projektovou vazbu.")
         return {
             "schema_version": DEVELOPMENT_SEMAPHORE_SCHEMA,
             "revision": revision,
@@ -98,6 +116,10 @@ class DevelopmentSemaphore:
             "workspace_label": workspace_label,
             "base_head": base_head,
             "topic": topic,
+            "project_id": project_id,
+            "project_label": project_label,
+            "handoff_path": handoff_path,
+            "tvbcp_path": tvbcp_path,
             "acquired_at": acquired_at,
             "updated_at": updated_at,
         }
@@ -114,6 +136,10 @@ class DevelopmentSemaphore:
             "workspace_label": str(state.get("workspace_label") or ""),
             "base_head_short": str(state.get("base_head") or "")[:12],
             "topic": str(state.get("topic") or ""),
+            "project_id": str(state.get("project_id") or ""),
+            "project_label": str(state.get("project_label") or ""),
+            "handoff_path": str(state.get("handoff_path") or ""),
+            "tvbcp_path": str(state.get("tvbcp_path") or ""),
             "acquired_at": str(state.get("acquired_at") or ""),
             "updated_at": str(state.get("updated_at") or ""),
         }
@@ -166,6 +192,7 @@ class DevelopmentSemaphore:
         workspace_label: str,
         base_head: str,
         topic: str,
+        project_binding: dict[str, str] | None = None,
         expected_revision: int,
         confirmed: bool,
     ) -> dict[str, Any]:
@@ -176,12 +203,28 @@ class DevelopmentSemaphore:
         clean_workspace = " ".join(str(workspace_label or "").split())[:120]
         clean_head = str(base_head or "").strip().lower()
         clean_topic = " ".join(str(topic or "").split())[:120]
+        binding = dict(project_binding or {})
+        clean_project_id = str(binding.get("project_id") or "").strip()
+        clean_project_label = " ".join(str(binding.get("project_label") or "").split())[:180]
+        clean_handoff_path = str(binding.get("handoff_path") or "").strip()
+        clean_tvbcp_path = str(binding.get("tvbcp_path") or "").strip()
         if not DEVELOPMENT_OWNER_RE.fullmatch(clean_owner):
             raise AppServerError("Vývojový semafor nemá platného vlastníka.")
         if not clean_owner_label or not clean_workspace or not COMMIT_RE.fullmatch(clean_head):
             raise AppServerError("Vývojový semafor nemá úplný ověřený základ.")
         if not clean_topic:
             raise AppServerError("Zadej krátké téma vývoje.")
+        if clean_project_id and (
+            not PROJECT_BINDING_ID_RE.fullmatch(clean_project_id)
+            or not clean_project_label
+            or not PROJECT_MEMORY_PATH_RE.fullmatch(clean_handoff_path)
+            or "/handoffs/" not in clean_handoff_path
+            or (
+                clean_tvbcp_path
+                and (not PROJECT_MEMORY_PATH_RE.fullmatch(clean_tvbcp_path) or "/tvbcp/" not in clean_tvbcp_path)
+            )
+        ):
+            raise AppServerError("Projektová vazba vývoje není bezpečně ověřená.")
         with self._transaction():
             current = self._load()
             self._assert_revision(current, expected_revision)
@@ -204,6 +247,10 @@ class DevelopmentSemaphore:
                 "workspace_label": clean_workspace,
                 "base_head": clean_head,
                 "topic": clean_topic,
+                "project_id": clean_project_id,
+                "project_label": clean_project_label,
+                "handoff_path": clean_handoff_path,
+                "tvbcp_path": clean_tvbcp_path,
                 "acquired_at": acquired_at,
                 "updated_at": now,
             }

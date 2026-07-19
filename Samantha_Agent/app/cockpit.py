@@ -95,6 +95,7 @@ from app.communication.human_adam_profiles import (
     HUMAN_ADAM,
     human_adam_development_semaphore_action,
     human_adam_development_semaphore_status_action,
+    human_adam_project_continuity_action,
     human_adam_profile_switch_action,
 )
 from app.communication.human_adam_deploy import (
@@ -10001,6 +10002,9 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/human-adam/development-branches":
                     self.respond_json(development_branch_audit_action())
+                    return
+                if parsed.path == "/api/human-adam/project-continuity":
+                    self.respond_json(human_adam_project_continuity_action(service=HUMAN_ADAM))
                     return
                 if parsed.path == "/api/human-adam/context-anchor":
                     self.respond_json(human_adam_context_anchor_action(service=HUMAN_ADAM))
