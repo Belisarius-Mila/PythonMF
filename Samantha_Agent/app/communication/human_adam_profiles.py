@@ -12,6 +12,10 @@ from pathlib import Path
 from typing import Any, Iterator
 
 from app.codex_appserver import AppServerError
+from app.communication.development_semaphore import (
+    TERMINAL_OWNER_ID,
+    DevelopmentSemaphore,
+)
 from app.communication.human_adam_deploy import (
     DEPLOYMENT_LOCK,
     DEFAULT_DEPLOYMENT_DIAGNOSTIC,
@@ -19,6 +23,7 @@ from app.communication.human_adam_deploy import (
     DEFAULT_DEPLOYMENT_RECEIPT,
 )
 from app.communication.human_adam_service import (
+    DEVELOPMENT_CONTROL_DEVELOPER_INSTRUCTIONS,
     HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
     HumanAdamService,
 )
@@ -35,6 +40,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 PRIVATE_COMMUNICATION_ROOT = PROJECT_ROOT / "data" / "private" / "communication"
 PRIVATE_PROFILE_ROOT = PROJECT_ROOT / "data" / "private" / "human_adam_profiles"
 DEFAULT_PROFILE_STATE_PATH = PRIVATE_COMMUNICATION_ROOT / "human_adam_active_profile.json"
+DEFAULT_DEVELOPMENT_SEMAPHORE_PATH = PRIVATE_COMMUNICATION_ROOT / "development_semaphore.json"
 DEFAULT_HUMAN_SESSION_PATH = PRIVATE_COMMUNICATION_ROOT / "canonical_session.json"
 DEFAULT_HUMAN_CONTEXT_ANCHOR_PATH = PRIVATE_COMMUNICATION_ROOT / "human_adam_context_anchor.json"
 KNIHOVNA_PROFILE_ROOT = PRIVATE_PROFILE_ROOT / "knihovna"
@@ -43,20 +49,24 @@ KNIHOVNA_TVBCP_RELATIVE_PATH = Path("memory/tvbcp/knihovna_cockpit.txt")
 PROFILE_ID_RE = re.compile(r"[a-z][a-z0-9_-]{1,31}")
 PROFILE_STATE_SCHEMA = 1
 
-KNIHOVNA_DEVELOPER_INSTRUCTIONS = HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS + (
-    " Aktivni pracovni profil je Knihovna v Samantha Cockpitu. Pred vetsi praci precti "
-    "Samantha_Agent/memory/projects/vedecke_clanky.md, "
-    "Samantha_Agent/memory/handoffs/knowledge_library_article_editing_2026_07_16.md a "
-    "Samantha_Agent/memory/tvbcp/knihovna_cockpit.txt. Tento TVBCP aktualizuj vyhradne "
-    "na Miluv vyslovny pokyn; nikdy do nej nezapisuj samostatne ani pri milniku. Pri "
-    "vyslovne vyzadanem zapisu zachyt rozhodnuti, dukazy, rizika a dalsi krok, nikdy "
-    "plny chat ani citlive texty. Kazdy novy chronologicky zaznam pridej na konec "
-    "souboru a oznac ho lokalnim datem, casem a casovou zonou ve formatu "
-    "YYYY-MM-DD HH:MM TZ. Soukrome texty clanku, prilohy a metadata konkretnich osob "
-    "nikdy nevypisuj do Gitu, TVBCP ani odpovedi bez Milova vyslovneho pokynu. Private "
-    "data nejsou soucasti izolovane kopie; z jejich absence nevyvozuj, ze v hlavnim "
-    "projektu neexistuji. V bezne odpovedi uvadej jen samotny nazev souboru, pripadne "
-    "nejkratsi nutnou relativni cestu pri shodnych nazvech."
+KNIHOVNA_DEVELOPER_INSTRUCTIONS = (
+    HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS
+    + DEVELOPMENT_CONTROL_DEVELOPER_INSTRUCTIONS
+    + (
+        " Aktivni pracovni profil je Knihovna v Samantha Cockpitu. Pred vetsi praci precti "
+        "Samantha_Agent/memory/projects/vedecke_clanky.md, "
+        "Samantha_Agent/memory/handoffs/knowledge_library_article_editing_2026_07_16.md a "
+        "Samantha_Agent/memory/tvbcp/knihovna_cockpit.txt. Tento TVBCP aktualizuj vyhradne "
+        "na Miluv vyslovny pokyn; nikdy do nej nezapisuj samostatne ani pri milniku. Pri "
+        "vyslovne vyzadanem zapisu zachyt rozhodnuti, dukazy, rizika a dalsi krok, nikdy "
+        "plny chat ani citlive texty. Kazdy novy chronologicky zaznam pridej na konec "
+        "souboru a oznac ho lokalnim datem, casem a casovou zonou ve formatu "
+        "YYYY-MM-DD HH:MM TZ. Soukrome texty clanku, prilohy a metadata konkretnich osob "
+        "nikdy nevypisuj do Gitu, TVBCP ani odpovedi bez Milova vyslovneho pokynu. Private "
+        "data nejsou soucasti izolovane kopie; z jejich absence nevyvozuj, ze v hlavnim "
+        "projektu neexistuji. V bezne odpovedi uvadej jen samotny nazev souboru, pripadne "
+        "nejkratsi nutnou relativni cestu pri shodnych nazvech."
+    )
 )
 
 
@@ -74,6 +84,7 @@ class HumanAdamProfileManager:
         default_profile_id: str,
         state_path: Path = DEFAULT_PROFILE_STATE_PATH,
         runtime: LocalAppServerProcessController | None = None,
+        development_semaphore: DevelopmentSemaphore | None = None,
     ):
         if not profiles or default_profile_id not in profiles:
             raise ValueError("Pracovní profily Human–Adam nemají platný výchozí profil.")
@@ -86,6 +97,12 @@ class HumanAdamProfileManager:
         self.default_profile_id = default_profile_id
         self.state_path = Path(state_path)
         self.runtime = runtime or self.profiles[default_profile_id]["service"].runtime
+        semaphore_path = (
+            DEFAULT_DEVELOPMENT_SEMAPHORE_PATH
+            if self.state_path == DEFAULT_PROFILE_STATE_PATH
+            else self.state_path.with_name("development_semaphore.json")
+        )
+        self.development_semaphore = development_semaphore or DevelopmentSemaphore(semaphore_path)
         self._state_lock = threading.RLock()
         self._operation_lock = threading.Lock()
         self._state_error = ""
@@ -187,6 +204,7 @@ class HumanAdamProfileManager:
                     "description": str(profile.get("description") or ""),
                 },
                 "work_profiles": self._profile_rows(),
+                "development_semaphore": self.development_status(),
             }
         except (AppServerError, SessionHubError, OSError, ValueError) as exc:
             return {
@@ -194,6 +212,7 @@ class HumanAdamProfileManager:
                 "status": "human_adam_profile_status_failed",
                 "message": str(exc),
                 "work_profiles": [],
+                "development_semaphore": self.development_status(),
             }
 
     @contextmanager
@@ -236,7 +255,36 @@ class HumanAdamProfileManager:
 
     def send(self, **kwargs: Any) -> dict[str, Any]:
         with self.profile_operation() as service:
-            return service.send(**kwargs)
+            lease = self.development_semaphore.status()
+            active_id = self.active_profile_id
+            writable = bool(
+                lease.get("ok") is True
+                and lease.get("active") is True
+                and lease.get("mode") == "active"
+                and lease.get("owner_id") == active_id
+            )
+            if lease.get("ok") is not True:
+                state = "invalid"
+            elif lease.get("active") is not True:
+                state = "free"
+            else:
+                state = str(lease.get("mode") or "invalid")
+            development_control_block = "\n".join(
+                (
+                    "[DEVELOPMENT_CONTROL]",
+                    "source=private_global_development_semaphore",
+                    f"profile_id={active_id}",
+                    f"lease_state={state}",
+                    f"lease_owner_id={str(lease.get('owner_id') or 'none')}",
+                    f"writable={'true' if writable else 'false'}",
+                    "rule=When writable=false, remain read-only and do not change files or Git.",
+                    "[/DEVELOPMENT_CONTROL]",
+                )
+            )
+            return service.send(
+                **kwargs,
+                development_control_block=development_control_block,
+            )
 
     def tvbcp(self) -> dict[str, Any]:
         return self.active_service.tvbcp()
@@ -257,12 +305,215 @@ class HumanAdamProfileManager:
             return service.rotate_thread(**kwargs)
 
     def work_review(self) -> dict[str, Any]:
-        return self.active_service.work_review()
+        return {
+            **self.active_service.work_review(),
+            "development_semaphore": self.development_status(),
+        }
 
     def checkpoint(self, **kwargs: Any) -> dict[str, Any]:
         with self.profile_operation() as service:
+            self.development_semaphore.assert_owner(self.active_profile_id)
             result = service.checkpoint(**kwargs)
         return result
+
+    @staticmethod
+    def _workspace_has_wip(status: dict[str, Any]) -> bool:
+        return bool(
+            status.get("dirty")
+            or status.get("local_checkpoint_ahead")
+            or status.get("local_checkpoint_preserved")
+            or status.get("workspace_relation") == "diverged"
+        )
+
+    def _development_workspace_rows(self) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        for profile_id, profile in self.profiles.items():
+            status = profile["service"].workspace.status()
+            rows.append(
+                {
+                    "id": profile_id,
+                    "label": str(profile.get("label") or profile_id),
+                    "dirty": bool(status.get("dirty")),
+                    "change_count": int(status.get("change_count") or 0),
+                    "workspace_relation": str(status.get("workspace_relation") or "unknown"),
+                    "local_checkpoint_ahead": bool(status.get("local_checkpoint_ahead")),
+                    "local_checkpoint_preserved": bool(status.get("local_checkpoint_preserved")),
+                    "local_commit_count": int(status.get("local_commit_count") or 0),
+                    "source_pending_changes": int(status.get("source_pending_changes") or 0),
+                    "head": str(status.get("head") or ""),
+                    "prepared": bool(status.get("prepared")),
+                    "ok": bool(status.get("ok")),
+                    "has_remotes": bool(status.get("remotes")),
+                    "has_wip": self._workspace_has_wip(status),
+                }
+            )
+        return rows
+
+    @staticmethod
+    def _row_blocker(row: dict[str, Any]) -> str:
+        label = str(row.get("label") or row.get("id") or "Neznámý profil")
+        if row.get("dirty"):
+            return f"{label} má {int(row.get('change_count') or 0)} necheckpointovaných změn."
+        if row.get("local_checkpoint_ahead"):
+            return f"{label} má lokální WIP checkpoint čekající na rozhodnutí."
+        if row.get("local_checkpoint_preserved"):
+            return f"{label} má zachovaný rozvětvený WIP checkpoint."
+        if row.get("workspace_relation") == "diverged":
+            return f"{label} je rozvětvený proti main."
+        if not row.get("prepared") or not row.get("ok") or row.get("has_remotes"):
+            return f"{label} nemá ověřený bezpečný workspace."
+        return ""
+
+    def _foreign_wip_blockers(self, owner_id: str) -> list[str]:
+        blockers: list[str] = []
+        for row in self._development_workspace_rows():
+            if row["id"] == owner_id:
+                continue
+            blocker = self._row_blocker(row)
+            if blocker:
+                blockers.append(blocker)
+        return blockers
+
+    def _safe_to_release(self) -> bool:
+        rows = self._development_workspace_rows()
+        return bool(
+            rows
+            and all(not self._row_blocker(row) for row in rows)
+            and all(int(row.get("source_pending_changes") or 0) == 0 for row in rows)
+        )
+
+    def development_status(self) -> dict[str, Any]:
+        lease = self.development_semaphore.status()
+        try:
+            active_id = self.active_profile_id
+            rows = self._development_workspace_rows()
+        except (AppServerError, OSError, ValueError) as exc:
+            return {
+                **lease,
+                "ok": False,
+                "message": str(exc),
+                "active_profile_id": "",
+                "workspace_rows": [],
+                "blockers": ["Stav profilových workspaces nelze bezpečně ověřit."],
+                "can_acquire_profile": False,
+                "can_acquire_terminal": False,
+                "can_checkpoint": False,
+                "can_deploy": False,
+                "can_release": False,
+            }
+        owner_id = str(lease.get("owner_id") or "")
+        blockers = self._foreign_wip_blockers(owner_id) if lease.get("active") else []
+        lease_active = lease.get("active") is True and lease.get("ok") is True
+        lease_running = lease_active and lease.get("mode") == "active"
+        free = lease.get("ok") is True and not lease.get("active")
+        any_profile_wip = any(row.get("has_wip") for row in rows)
+        source_dirty = any(int(row.get("source_pending_changes") or 0) > 0 for row in rows)
+        return {
+            **lease,
+            "active_profile_id": active_id,
+            "active_profile_label": str(self.profiles[active_id].get("label") or active_id),
+            "workspace_rows": rows,
+            "blockers": blockers,
+            "can_acquire_profile": bool(
+                free
+                and not source_dirty
+                and not any(row.get("has_wip") for row in rows if row["id"] != active_id)
+            ),
+            "can_acquire_terminal": bool(free and not any_profile_wip),
+            "can_checkpoint": bool(lease_running and owner_id == active_id),
+            "can_deploy": bool(lease_running and owner_id == active_id and not blockers),
+            "can_pause": bool(lease_running),
+            "can_resume": bool(lease_active and lease.get("mode") == "paused"),
+            "can_release": bool(lease_active and self._safe_to_release()),
+        }
+
+    def change_development_semaphore(
+        self,
+        *,
+        operation: str,
+        expected_revision: int,
+        topic: str,
+        confirmed: bool,
+    ) -> dict[str, Any]:
+        clean_operation = str(operation or "").strip()
+        if not self._operation_lock.acquire(blocking=False):
+            raise SessionBusyError("Vývojový semafor nelze změnit během jiné profilové operace.")
+        try:
+            lease = self.development_semaphore.status()
+            if lease.get("ok") is not True:
+                raise AppServerError(str(lease.get("message") or "Vývojový semafor není ověřený."))
+            active_id = self.active_profile_id
+            active_profile = self.profiles[active_id]
+            active_workspace = active_profile["service"].workspace.status()
+            if clean_operation == "acquire_profile":
+                blockers = self._foreign_wip_blockers(active_id)
+                if blockers or int(active_workspace.get("source_pending_changes") or 0) > 0:
+                    raise AppServerError("Vývoj nelze převzít: " + " ".join(blockers or ["Hlavní repo má pracovní změny."]))
+                self.development_semaphore.acquire(
+                    owner_id=active_id,
+                    owner_label=str(active_profile.get("label") or active_id),
+                    workspace_label=f"Profil {str(active_profile.get('label') or active_id)}",
+                    base_head=str(active_workspace.get("head") or ""),
+                    topic=topic,
+                    expected_revision=expected_revision,
+                    confirmed=confirmed,
+                )
+            elif clean_operation == "acquire_terminal":
+                blockers = [self._row_blocker(row) for row in self._development_workspace_rows()]
+                blockers = [item for item in blockers if item]
+                if blockers:
+                    raise AppServerError("Terminál nelze označit jako vlastníka: " + " ".join(blockers))
+                self.development_semaphore.acquire(
+                    owner_id=TERMINAL_OWNER_ID,
+                    owner_label="Terminálový Adam",
+                    workspace_label="Hlavní terminál / samostatný worktree",
+                    base_head=str(active_workspace.get("source_head") or ""),
+                    topic=topic,
+                    expected_revision=expected_revision,
+                    confirmed=confirmed,
+                )
+            elif clean_operation in {"pause", "resume"}:
+                owner_id = str(lease.get("owner_id") or "")
+                self.development_semaphore.set_mode(
+                    owner_id=owner_id,
+                    mode="paused" if clean_operation == "pause" else "active",
+                    expected_revision=expected_revision,
+                    confirmed=confirmed,
+                )
+            elif clean_operation == "release":
+                owner_id = str(lease.get("owner_id") or "")
+                self.development_semaphore.release(
+                    owner_id=owner_id,
+                    expected_revision=expected_revision,
+                    confirmed=confirmed,
+                    safe_to_release=self._safe_to_release(),
+                )
+            else:
+                raise AppServerError("Neznámá operace vývojového semaforu.")
+            return self.development_status()
+        finally:
+            self._operation_lock.release()
+
+    def assert_deployment_allowed(self, owner_id: str) -> None:
+        self.development_semaphore.assert_owner(owner_id)
+        blockers = self._foreign_wip_blockers(owner_id)
+        if blockers:
+            raise AppServerError("Nasazení blokuje cizí WIP: " + " ".join(blockers))
+
+    def finish_deployment_lease(self, owner_id: str) -> str:
+        lease = self.development_semaphore.status()
+        if lease.get("ok") is not True or lease.get("owner_id") != owner_id:
+            return "Vývojový semafor po nasazení zůstal beze změny."
+        try:
+            self.development_semaphore.release(
+                owner_id=owner_id,
+                expected_revision=int(lease.get("revision") or 0),
+                confirmed=True,
+                safe_to_release=self._safe_to_release(),
+            )
+        except AppServerError as exc:
+            return f"Nasazení proběhlo, ale vývojový semafor zůstal uzamčený: {exc}"
+        return "Vývojový semafor byl po nasazení uvolněný."
 
     def _profile_status_fields(self) -> dict[str, Any]:
         active_id = self.active_profile_id
@@ -386,6 +637,37 @@ def human_adam_profile_switch_action(
             "ok": False,
             "status": "human_adam_profile_switch_failed",
             "message": str(exc),
+        }
+
+
+def human_adam_development_semaphore_status_action(
+    *,
+    service: HumanAdamProfileManager,
+) -> dict[str, Any]:
+    return service.development_status()
+
+
+def human_adam_development_semaphore_action(
+    payload: dict[str, Any],
+    *,
+    service: HumanAdamProfileManager,
+) -> dict[str, Any]:
+    try:
+        return {
+            "ok": True,
+            **service.change_development_semaphore(
+                operation=str(payload.get("operation") or ""),
+                expected_revision=int(payload.get("expected_revision")),
+                topic=str(payload.get("topic") or ""),
+                confirmed=payload.get("confirmed") is True,
+            ),
+        }
+    except (AppServerError, SessionHubError, OSError, TypeError, ValueError) as exc:
+        return {
+            "ok": False,
+            "status": "human_adam_development_semaphore_failed",
+            "message": str(exc),
+            "development_semaphore": service.development_status(),
         }
 
 

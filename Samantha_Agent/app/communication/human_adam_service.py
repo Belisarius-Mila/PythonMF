@@ -40,19 +40,29 @@ from app.file_persistence import FilePersistenceError, update_json_file
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SESSION_STATE_PATH = PROJECT_ROOT / "data" / "private" / "communication" / "canonical_session.json"
 DEFAULT_CONTEXT_ANCHOR_PATH = PROJECT_ROOT / "data" / "private" / "communication" / "human_adam_context_anchor.json"
-HUMAN_ADAM_DEVELOPER_INSTRUCTIONS = HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS + (
-    " Pro projekt komunikacni architektury pred vetsi praci precti "
-    "Samantha_Agent/memory/tvbcp/architektura_komunikace_samantha.txt. "
-    "Tento TVBCP aktualizuj vyhradne na Miluv vyslovny pokyn; nikdy do nej nezapisuj "
-    "samostatne ani pri milniku. Pri vyslovne vyzadanem zapisu zachyt "
-    "rozhodnuti, dukazy, rizika a dalsi krok, nikdy ne plny chat ani citlive texty. "
-    "Kazdy novy chronologicky zaznam pridej na konec souboru a oznac ho lokalnim "
-    "datem, casem a casovou zonou ve formatu YYYY-MM-DD HH:MM TZ."
-    " Private backup metadata v izolovane kopii zamerne nejsou; z jejich absence "
-    "nikdy nevyvozuj, ze hlavni projekt nema zalohu. V bezne odpovedi Milovi "
-    "uvadej u souboru jen samotny nazev bez cele cesty. Nejkratsi nutnou relativni "
-    "cestu pouzij pouze pri shodnych nazvech nebo na Milovu vyslovnou zadost; "
-    "absolutni cestu do textoveho okna nevypisuj."
+DEVELOPMENT_CONTROL_DEVELOPER_INSTRUCTIONS = (
+    " Pred jakoukoli zmenou souboru nebo Gitu se rid blokem [DEVELOPMENT_CONTROL] "
+    "vlozenym pred aktualni zpravu. Zapis je povolen jen pri writable=true. Pri "
+    "writable=false zustan striktne read-only: nic nevytvarej, neupravuj, nemaz ani "
+    "necheckpointuj; muzes analyzovat, vysvetlovat a navrhovat dalsi krok."
+)
+HUMAN_ADAM_DEVELOPER_INSTRUCTIONS = (
+    HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS
+    + DEVELOPMENT_CONTROL_DEVELOPER_INSTRUCTIONS
+    + (
+        " Pro projekt komunikacni architektury pred vetsi praci precti "
+        "Samantha_Agent/memory/tvbcp/architektura_komunikace_samantha.txt. "
+        "Tento TVBCP aktualizuj vyhradne na Miluv vyslovny pokyn; nikdy do nej nezapisuj "
+        "samostatne ani pri milniku. Pri vyslovne vyzadanem zapisu zachyt "
+        "rozhodnuti, dukazy, rizika a dalsi krok, nikdy ne plny chat ani citlive texty. "
+        "Kazdy novy chronologicky zaznam pridej na konec souboru a oznac ho lokalnim "
+        "datem, casem a casovou zonou ve formatu YYYY-MM-DD HH:MM TZ."
+        " Private backup metadata v izolovane kopii zamerne nejsou; z jejich absence "
+        "nikdy nevyvozuj, ze hlavni projekt nema zalohu. V bezne odpovedi Milovi "
+        "uvadej u souboru jen samotny nazev bez cele cesty. Nejkratsi nutnou relativni "
+        "cestu pouzij pouze pri shodnych nazvech nebo na Milovu vyslovnou zadost; "
+        "absolutni cestu do textoveho okna nevypisuj."
+    )
 )
 MAX_MESSAGE_CHARS = 12_000
 MAX_TVBCP_CHARS = 500_000
@@ -266,6 +276,7 @@ def workspace_model_input(
     workspace: dict[str, Any],
     *,
     context_anchor_block: str = "",
+    development_control_block: str = "",
 ) -> str:
     """Add allowlisted workspace metadata without changing persisted user text."""
     relation = str(workspace.get("workspace_relation") or "unknown").strip()
@@ -281,6 +292,8 @@ def workspace_model_input(
         "[/SAFE_WORKSPACE_SNAPSHOT]",
         "",
     ]
+    if development_control_block:
+        snapshot_lines.extend((development_control_block, ""))
     if context_anchor_block:
         snapshot_lines.extend((context_anchor_block, ""))
     snapshot_lines.append(str(user_text))
@@ -447,7 +460,14 @@ class HumanAdamService:
             "workspace_head": workspace.get("head", ""),
         }
 
-    def send(self, *, text: str, client_message_id: str, client_sent_at: str = "") -> dict[str, Any]:
+    def send(
+        self,
+        *,
+        text: str,
+        client_message_id: str,
+        client_sent_at: str = "",
+        development_control_block: str = "",
+    ) -> dict[str, Any]:
         clean_text = str(text or "").strip()
         if len(clean_text) > MAX_MESSAGE_CHARS:
             raise SessionHubError(f"Zpráva může mít nejvýše {MAX_MESSAGE_CHARS} znaků.")
@@ -470,6 +490,7 @@ class HumanAdamService:
                 clean_text,
                 workspace,
                 context_anchor_block=anchor_block,
+                development_control_block=development_control_block,
             ),
         )
         return {

@@ -166,11 +166,29 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("WIP zachován: ${workspace.local_commit_count} · nutná obnova", HUMAN_ADAM_HTML)
         self.assertIn("WIP checkpoint je zachovaný:", HUMAN_ADAM_HTML)
         self.assertIn("WIP je bezpečně zachovaný, ale audit je zablokovaný.", HUMAN_ADAM_HTML)
-        self.assertIn("deployAuditBtn.disabled = Boolean(payload.dirty) || !payload.local_checkpoint_ahead;", HUMAN_ADAM_HTML)
+        self.assertIn("deployAuditBtn.disabled = Boolean(payload.dirty) || !payload.local_checkpoint_ahead || semaphore.can_deploy !== true;", HUMAN_ADAM_HTML)
         self.assertLess(
             HUMAN_ADAM_HTML.index("else if (checkpointPreserved) workMeta.textContent"),
             HUMAN_ADAM_HTML.index('else workMeta.textContent = "Workspace je čistý a odpovídá main.";'),
         )
+
+    def test_development_semaphore_ui_is_explicit_and_blocks_write_actions(self) -> None:
+        for element_id in (
+            "developmentBadge",
+            "developmentSemaphoreMeta",
+            "developmentTopic",
+            "developmentAcquireProfileBtn",
+            "developmentAcquireTerminalBtn",
+            "developmentPauseBtn",
+            "developmentResumeBtn",
+            "developmentReleaseBtn",
+        ):
+            self.assertIn(f'id="{element_id}"', HUMAN_ADAM_HTML)
+        self.assertIn('api("/api/human-adam/development-semaphore"', HUMAN_ADAM_HTML)
+        self.assertIn("expected_revision:Number(developmentSemaphore.revision)", HUMAN_ADAM_HTML)
+        self.assertIn("checkpointBtn.disabled = !payload.dirty || semaphore.can_checkpoint !== true;", HUMAN_ADAM_HTML)
+        self.assertIn("Nasazení blokuje cizí WIP", HUMAN_ADAM_HTML)
+        self.assertIn("To projde jen při čistých workspaces bez čekajícího WIP", HUMAN_ADAM_HTML)
 
     def test_profile_switch_is_explicit_atomic_and_preserves_unsent_draft(self) -> None:
         switch_start = HUMAN_ADAM_HTML.index("async function switchProfile()")

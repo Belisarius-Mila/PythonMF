@@ -7,6 +7,7 @@ from pathlib import Path
 
 from app.communication.human_adam_profiles import (
     HumanAdamProfileManager,
+    human_adam_development_semaphore_action,
     human_adam_profile_switch_action,
 )
 from app.communication.human_adam_service import (
@@ -91,6 +92,7 @@ class FakeHub:
         self.turn_busy = False
         self.active_turn: dict[str, object] | None = None
         self.messages: list[dict[str, object]] = []
+        self.last_send: dict[str, object] = {}
         self.close_count = 0
         self.rotation_count = 0
 
@@ -107,7 +109,8 @@ class FakeHub:
         self.connected = True
         return self.snapshot()
 
-    def send(self, **_kwargs: object) -> dict[str, object]:
+    def send(self, **kwargs: object) -> dict[str, object]:
+        self.last_send = dict(kwargs)
         return {"ok": True, "entry": {"answer": "Hotovo"}}
 
     def rotation_status(self) -> dict[str, object]:
@@ -195,6 +198,100 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual([item["id"] for item in status["work_profiles"]], ["human_adam", "knihovna"])
         self.assertEqual(status["work_profiles"][1]["tvbcp_title"], "Knihovna v Cockpitu")
         self.assertEqual(manager.work_profile_id, "human_adam")
+        self.assertTrue(status["development_semaphore"]["ok"])
+        self.assertFalse(status["development_semaphore"]["active"])
+        self.assertTrue(status["development_semaphore"]["can_acquire_profile"])
+
+    def test_checkpoint_requires_active_owned_lease_and_pause_blocks_it(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, *_rest = self.make_manager(Path(temp_dir))
+            human_workspace.dirty = True
+            with self.assertRaisesRegex(AppServerError, "převezmi globální"):
+                manager.checkpoint(confirmed=True, message="WIP")
+            acquired = manager.change_development_semaphore(
+                operation="acquire_profile",
+                expected_revision=0,
+                topic="Semafor",
+                confirmed=True,
+            )
+            checkpoint = manager.checkpoint(confirmed=True, message="WIP")
+            paused = manager.change_development_semaphore(
+                operation="pause",
+                expected_revision=int(acquired["revision"]),
+                topic="",
+                confirmed=True,
+            )
+            with self.assertRaisesRegex(AppServerError, "pozastavený"):
+                manager.checkpoint(confirmed=True, message="WIP")
+
+        self.assertIn("checkpoint_created", checkpoint)
+        self.assertEqual(paused["mode"], "paused")
+        self.assertFalse(paused["can_checkpoint"])
+
+    def test_terminal_owner_blocks_profile_checkpoint(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, *_rest = self.make_manager(Path(temp_dir))
+            acquired = manager.change_development_semaphore(
+                operation="acquire_terminal",
+                expected_revision=0,
+                topic="Terminálová změna",
+                confirmed=True,
+            )
+            human_workspace.dirty = True
+            with self.assertRaisesRegex(AppServerError, "Terminálový Adam"):
+                manager.checkpoint(confirmed=True, message="Cizí WIP")
+
+        self.assertEqual(acquired["owner_id"], "terminal")
+        self.assertFalse(acquired["can_checkpoint"])
+
+    def test_foreign_profile_wip_blocks_deployment_and_release(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _human_workspace, library_workspace, *_rest = self.make_manager(Path(temp_dir))
+            acquired = manager.change_development_semaphore(
+                operation="acquire_profile",
+                expected_revision=0,
+                topic="Human změna",
+                confirmed=True,
+            )
+            library_workspace.dirty = True
+            status = manager.development_status()
+            with self.assertRaisesRegex(AppServerError, "cizí WIP"):
+                manager.assert_deployment_allowed("human_adam")
+            release = human_adam_development_semaphore_action(
+                {
+                    "operation": "release",
+                    "expected_revision": acquired["revision"],
+                    "topic": "",
+                    "confirmed": True,
+                },
+                service=manager,
+            )
+
+        self.assertFalse(status["can_deploy"])
+        self.assertFalse(status["can_release"])
+        self.assertFalse(release["ok"])
+        self.assertIn("neuzavřený WIP", release["message"])
+
+    def test_send_injects_fail_closed_read_only_or_writable_control(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _human_workspace, _library_workspace, human_hub, _library_hub = self.make_manager(Path(temp_dir))
+            manager.connect()
+            manager.send(text="Jen analyzuj", client_message_id="read-only")
+            read_only_input = str(human_hub.last_send["model_input_text"])
+            manager.change_development_semaphore(
+                operation="acquire_profile",
+                expected_revision=0,
+                topic="Povolený vývoj",
+                confirmed=True,
+            )
+            manager.send(text="Proveď změnu", client_message_id="writable")
+            writable_input = str(human_hub.last_send["model_input_text"])
+
+        self.assertIn("[DEVELOPMENT_CONTROL]", read_only_input)
+        self.assertIn("lease_state=free", read_only_input)
+        self.assertIn("writable=false", read_only_input)
+        self.assertIn("lease_owner_id=human_adam", writable_input)
+        self.assertIn("writable=true", writable_input)
 
     def test_switch_requires_confirmation_and_preserves_active_profile(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

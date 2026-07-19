@@ -751,8 +751,10 @@ def human_adam_deploy_audit_action(*, service: HumanAdamService) -> dict[str, An
     if callable(profile_operation):
         try:
             with profile_operation() as active_service:
+                owner_id = str(getattr(active_service, "work_profile_id", "") or "")
+                service.assert_deployment_allowed(owner_id)
                 return human_adam_deploy_audit_action(service=active_service)
-        except SessionHubError as exc:
+        except (AppServerError, SessionHubError) as exc:
             return {"ok": False, "ready": False, "message": str(exc)}
     audit_started = False
     try:
@@ -785,10 +787,13 @@ def human_adam_deploy_action(
     if callable(profile_operation):
         try:
             with profile_operation() as active_service:
-                profile_id = str(getattr(service, "active_profile_id", "") or "")
+                profile_id = str(getattr(active_service, "work_profile_id", "") or "")
+                service.assert_deployment_allowed(profile_id)
                 result = human_adam_deploy_action(payload, service=active_service)
+                if result.get("ok") and result.get("applied") is True:
+                    result["development_semaphore_message"] = service.finish_deployment_lease(profile_id)
                 return {**result, "_work_profile_id": profile_id}
-        except SessionHubError as exc:
+        except (AppServerError, SessionHubError) as exc:
             return {"ok": False, "ready": False, "message": str(exc)}
     thread_id = ""
     try:

@@ -92,6 +92,8 @@ from app.communication.human_adam_service import (
 )
 from app.communication.human_adam_profiles import (
     HUMAN_ADAM,
+    human_adam_development_semaphore_action,
+    human_adam_development_semaphore_status_action,
     human_adam_profile_switch_action,
 )
 from app.communication.human_adam_deploy import (
@@ -9269,6 +9271,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/human-adam/development-semaphore",
+        "label": "Prevzit nebo zmenit globalni vyvojovy semafor",
+        "risk": "private_write",
+        "confirmation": "explicit_development_owner_change",
+        "handler_name": "human_adam_development_semaphore_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/human-adam/context-anchor",
         "label": "Pripnout soukromy aktivni kontext Human-Adam",
         "risk": "private_write",
@@ -9985,6 +9995,9 @@ class CockpitServer:
                 if parsed.path == "/api/human-adam/status":
                     self.respond_json(human_adam_status_action(service=HUMAN_ADAM))
                     return
+                if parsed.path == "/api/human-adam/development-semaphore":
+                    self.respond_json(human_adam_development_semaphore_status_action(service=HUMAN_ADAM))
+                    return
                 if parsed.path == "/api/human-adam/context-anchor":
                     self.respond_json(human_adam_context_anchor_action(service=HUMAN_ADAM))
                     return
@@ -10211,6 +10224,10 @@ class CockpitServer:
                 if parsed.path == "/api/human-adam/profile":
                     payload = self.read_json()
                     self.respond_json(human_adam_profile_switch_action(payload, service=HUMAN_ADAM))
+                    return
+                if parsed.path == "/api/human-adam/development-semaphore":
+                    payload = self.read_json()
+                    self.respond_json(human_adam_development_semaphore_action(payload, service=HUMAN_ADAM))
                     return
                 if parsed.path == "/api/human-adam/context-anchor":
                     payload = self.read_json()

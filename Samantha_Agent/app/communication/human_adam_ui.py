@@ -71,6 +71,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #workMeta { padding:10px 16px; color:var(--muted); font-size:13px; border-bottom:1px solid var(--line); }
     #workChanges { flex:1; overflow:auto; margin:0; padding:16px 34px; }
     #workChanges li { margin-bottom:8px; overflow-wrap:anywhere; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:14px; }
+    .development-semaphore-box { padding:12px 16px; border-bottom:1px solid var(--line); display:grid; gap:8px; background:#f8fafc; }
+    .development-semaphore-box h3 { margin:0; font-size:15px; }
+    .development-semaphore-box p { margin:0; color:var(--muted); font-size:13px; overflow-wrap:anywhere; }
+    .development-semaphore-box input { width:100%; border:1px solid #bac7d8; border-radius:11px; padding:10px 12px; font:inherit; }
+    .development-semaphore-actions { display:flex; gap:8px; flex-wrap:wrap; }
     .checkpoint-box { padding:12px 16px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); display:grid; gap:8px; }
     .checkpoint-box input { width:100%; border:1px solid #bac7d8; border-radius:11px; padding:10px 12px; font:inherit; }
     #deployMeta { color:var(--muted); font-size:13px; line-height:1.4; }
@@ -92,6 +97,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       .context-anchor-actions { width:100%; min-width:0; flex-wrap:wrap; }
       .context-anchor-actions > button { flex:1 1 calc(50% - 4px); min-width:0; padding-left:8px; padding-right:8px; white-space:normal; }
       .thread-rotation-actions > button { flex:1 1 100%; min-width:0; white-space:normal; }
+      .development-semaphore-actions > button { flex:1 1 100%; min-width:0; white-space:normal; }
     }
   </style>
 </head>
@@ -124,6 +130,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <span class="badge" id="profileBadge">Profil: Human–Adam</span>
         <span class="badge" id="threadBadge">Relace: —</span>
         <span class="badge" id="workspaceBadge">Izolovaný workspace</span>
+        <span class="badge warn" id="developmentBadge">Vývoj: neověřen</span>
         <span class="badge" id="contextAnchorBadge">Kontext: nepřipnut</span>
         <button class="badge sound-badge warn" id="mediaSoundTestBtn" type="button">Zvuk odpovědi: vyzkoušet</button>
         <audio id="completionMediaAudio" preload="auto" playsinline hidden></audio>
@@ -192,6 +199,18 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <button id="workRefreshBtn" type="button">Obnovit</button>
       <button id="workCloseBtn" type="button">Zavřít</button>
     </div>
+    <section class="development-semaphore-box" aria-label="Globální vývojový semafor">
+      <h3>Vývojový semafor</h3>
+      <p id="developmentSemaphoreMeta">Stav vlastníka vývoje se načte společně s pracovním stavem.</p>
+      <input id="developmentTopic" maxlength="120" autocomplete="off" placeholder="Krátké téma vývoje">
+      <div class="development-semaphore-actions">
+        <button class="primary" id="developmentAcquireProfileBtn" type="button">Převzít pro tento profil</button>
+        <button id="developmentAcquireTerminalBtn" type="button">Převzít pro terminál</button>
+        <button id="developmentPauseBtn" type="button" hidden>Pozastavit</button>
+        <button id="developmentResumeBtn" type="button" hidden>Obnovit</button>
+        <button id="developmentReleaseBtn" type="button" hidden>Uvolnit</button>
+      </div>
+    </section>
     <div id="workMeta">Stav se načte až po otevření.</div>
     <ul id="workChanges"></ul>
     <div class="checkpoint-box">
@@ -217,6 +236,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const profileBadge = document.getElementById("profileBadge");
   const threadBadge = document.getElementById("threadBadge");
   const workspaceBadge = document.getElementById("workspaceBadge");
+  const developmentBadge = document.getElementById("developmentBadge");
   const contextAnchorBadge = document.getElementById("contextAnchorBadge");
   const mediaSoundTestBtn = document.getElementById("mediaSoundTestBtn");
   const completionMediaAudio = document.getElementById("completionMediaAudio");
@@ -261,6 +281,13 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const workRefreshBtn = document.getElementById("workRefreshBtn");
   const workMeta = document.getElementById("workMeta");
   const workChanges = document.getElementById("workChanges");
+  const developmentSemaphoreMeta = document.getElementById("developmentSemaphoreMeta");
+  const developmentTopic = document.getElementById("developmentTopic");
+  const developmentAcquireProfileBtn = document.getElementById("developmentAcquireProfileBtn");
+  const developmentAcquireTerminalBtn = document.getElementById("developmentAcquireTerminalBtn");
+  const developmentPauseBtn = document.getElementById("developmentPauseBtn");
+  const developmentResumeBtn = document.getElementById("developmentResumeBtn");
+  const developmentReleaseBtn = document.getElementById("developmentReleaseBtn");
   const checkpointMessage = document.getElementById("checkpointMessage");
   const checkpointBtn = document.getElementById("checkpointBtn");
   const deployMeta = document.getElementById("deployMeta");
@@ -288,6 +315,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let activeProfileLabel = "Human–Adam";
   let deliveryUncertain = false;
   let deploymentAudit = null;
+  let developmentSemaphore = null;
   let completionMediaUrl = "";
   let activeSpeechButton = null;
   let activeSpeechUtterance = null;
@@ -471,6 +499,14 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     const rotationRequired = threadRotationAudit ? String(threadRotationAudit.confirmation_text || "") : "";
     threadRotationConfirmation.disabled = anchorMutationBlocked || !threadRotationAudit || threadRotationAudit.ready !== true;
     threadRotationBtn.disabled = threadRotationConfirmation.disabled || !rotationRequired || threadRotationConfirmation.value.trim() !== rotationRequired;
+    const semaphoreValid = developmentSemaphore && developmentSemaphore.ok === true;
+    const semaphoreActive = Boolean(semaphoreValid && developmentSemaphore.active);
+    developmentTopic.disabled = busy || semaphoreActive;
+    developmentAcquireProfileBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_acquire_profile !== true;
+    developmentAcquireTerminalBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_acquire_terminal !== true;
+    developmentPauseBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_pause !== true;
+    developmentResumeBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_resume !== true;
+    developmentReleaseBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_release !== true;
   }
 
   function setBusy(value, text="") {
@@ -865,6 +901,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     else if (workspace.local_checkpoint_ahead) workspaceBadge.textContent = `WIP checkpoint: ${workspace.local_commit_count}`;
     else workspaceBadge.textContent = "Workspace čistý";
     workspaceBadge.className = workspace.has_git_remote || workspaceDiverged || workspace.sync_available || workspace.dirty || workspace.local_checkpoint_ahead ? "badge warn" : "badge";
+    renderDevelopmentBadge(payload && payload.development_semaphore ? payload.development_semaphore : null);
     renderContextAnchorBadge(payload && payload.context_anchor ? payload.context_anchor : null);
     const confirmation = payload && payload.deployment_confirmation ? payload.deployment_confirmation : null;
     const shortCommit = confirmation ? String(confirmation.checkpoint_short || "") : "";
@@ -881,6 +918,22 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     );
     renderTurnState(session);
     renderSession(session);
+  }
+
+  function renderDevelopmentBadge(semaphore) {
+    if (!semaphore || semaphore.ok !== true) {
+      developmentBadge.textContent = "Vývoj: stav neověřen";
+      developmentBadge.className = "badge warn";
+      return;
+    }
+    if (!semaphore.active) {
+      developmentBadge.textContent = "Vývoj: volno";
+      developmentBadge.className = "badge ok";
+      return;
+    }
+    const mode = semaphore.mode === "paused" ? "pozastaven" : "aktivní";
+    developmentBadge.textContent = `Vývoj: ${semaphore.owner_label || semaphore.owner_id} · ${mode}`;
+    developmentBadge.className = semaphore.mode === "active" ? "badge" : "badge warn";
   }
 
   function renderProfiles(payload) {
@@ -1395,6 +1448,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
 
   function renderWork(payload) {
     deploymentAudit = null;
+    renderDevelopmentSemaphore(payload.development_semaphore || null);
     workChanges.replaceChildren();
     const pending = Array.isArray(payload.changes) ? payload.changes : [];
     const checkpointed = Array.isArray(payload.checkpoint_changes) ? payload.checkpoint_changes : [];
@@ -1415,17 +1469,78 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     else if (checkpointPreserved) workMeta.textContent = `WIP checkpoint je zachovaný: ${payload.local_commit_count} commitů · ${payload.checkpoint_change_count} souborů · vyžaduje obnovu`;
     else if (payload.workspace_relation === "diverged") workMeta.textContent = "Workspace a main se rozešly; je nutná servisní kontrola.";
     else workMeta.textContent = "Workspace je čistý a odpovídá main.";
-    checkpointBtn.disabled = !payload.dirty;
-    deployAuditBtn.disabled = Boolean(payload.dirty) || !payload.local_checkpoint_ahead;
+    const semaphore = payload.development_semaphore || {};
+    checkpointBtn.disabled = !payload.dirty || semaphore.can_checkpoint !== true;
+    deployAuditBtn.disabled = Boolean(payload.dirty) || !payload.local_checkpoint_ahead || semaphore.can_deploy !== true;
     deployConfirmation.value = "";
     deployConfirmation.hidden = true;
     deployConfirmation.disabled = true;
     deployBtn.disabled = true;
-    if (payload.dirty) deployMeta.textContent = "Nejdřív vytvoř jeden lokální WIP checkpoint.";
+    if (semaphore.ok !== true) deployMeta.textContent = "Checkpoint a nasazení blokuje neověřený vývojový semafor.";
+    else if (!semaphore.active) deployMeta.textContent = "Nejdřív převezmi vývojový semafor pro tento profil.";
+    else if (semaphore.owner_id !== activeProfileId) deployMeta.textContent = `Vývoj vlastní ${semaphore.owner_label || semaphore.owner_id}; checkpoint a nasazení jsou zablokované.`;
+    else if (semaphore.mode === "paused") deployMeta.textContent = "Vývojový semafor je pozastavený; nejdřív jej obnov.";
+    else if (Array.isArray(semaphore.blockers) && semaphore.blockers.length) deployMeta.textContent = `Nasazení blokuje cizí WIP: ${semaphore.blockers.join(" ")}`;
+    else if (payload.dirty) deployMeta.textContent = "Nejdřív vytvoř jeden lokální WIP checkpoint.";
     else if (payload.local_checkpoint_ahead) deployMeta.textContent = "Checkpoint čeká na read-only audit cest.";
     else if (checkpointPreserved) deployMeta.textContent = "WIP je bezpečně zachovaný, ale audit je zablokovaný. Nejdřív proveď obnovu nad aktuálním main.";
     else if (payload.workspace_relation === "diverged") deployMeta.textContent = "Audit je zablokovaný: workspace a main se rozešly.";
     else deployMeta.textContent = "Není připravený žádný WIP checkpoint k nasazení.";
+  }
+
+  function renderDevelopmentSemaphore(semaphore) {
+    developmentSemaphore = semaphore && typeof semaphore === "object" ? semaphore : null;
+    renderDevelopmentBadge(developmentSemaphore);
+    const valid = developmentSemaphore && developmentSemaphore.ok === true;
+    const active = Boolean(valid && developmentSemaphore.active);
+    const owner = active ? String(developmentSemaphore.owner_label || developmentSemaphore.owner_id || "Neznámý vlastník") : "";
+    const topic = active ? String(developmentSemaphore.topic || "bez tématu") : "";
+    const blockers = valid && Array.isArray(developmentSemaphore.blockers) ? developmentSemaphore.blockers.filter(Boolean) : [];
+    if (!valid) developmentSemaphoreMeta.textContent = developmentSemaphore && developmentSemaphore.message ? developmentSemaphore.message : "Vývojový semafor nelze ověřit; zápis je zablokovaný.";
+    else if (!active) developmentSemaphoreMeta.textContent = "Semafor je volný. Převezmi jej před první změnou kódu; druhý Adam pak zůstane read-only.";
+    else developmentSemaphoreMeta.textContent = `Vlastník: ${owner} · ${developmentSemaphore.mode === "paused" ? "pozastaveno" : "aktivní"} · téma: ${topic}${blockers.length ? ` · blokery: ${blockers.join(" ")}` : ""}`;
+    developmentAcquireProfileBtn.textContent = `Převzít pro ${activeProfileLabel}`;
+    developmentAcquireProfileBtn.hidden = active;
+    developmentAcquireTerminalBtn.hidden = active;
+    developmentPauseBtn.hidden = !active || developmentSemaphore.mode !== "active";
+    developmentResumeBtn.hidden = !active || developmentSemaphore.mode !== "paused";
+    developmentReleaseBtn.hidden = !active;
+    if (active) developmentTopic.value = topic === "bez tématu" ? "" : topic;
+    syncControls();
+  }
+
+  async function changeDevelopmentSemaphore(operation) {
+    if (!developmentSemaphore || developmentSemaphore.ok !== true) return;
+    const acquiring = operation === "acquire_profile" || operation === "acquire_terminal";
+    const topic = developmentTopic.value.trim();
+    if (acquiring && !topic) {
+      developmentSemaphoreMeta.textContent = "Zadej krátké téma vývoje.";
+      developmentTopic.focus();
+      return;
+    }
+    const labels = {
+      acquire_profile:`Převzít globální vývojový semafor pro profil ${activeProfileLabel}?`,
+      acquire_terminal:"Převzít globální vývojový semafor pro terminálového Adama?",
+      pause:"Pozastavit vývoj? Vlastník zůstane stejný a ostatní zápis zůstane zablokovaný.",
+      resume:"Obnovit pozastavený vývoj?",
+      release:"Uvolnit vývojový semafor? To projde jen při čistých workspaces bez čekajícího WIP.",
+    };
+    if (!window.confirm(labels[operation] || "Změnit vývojový semafor?")) return;
+    setBusy(true, "Aktualizuji globální vývojový semafor…");
+    try {
+      const payload = await api("/api/human-adam/development-semaphore", {
+        method:"POST",
+        body:JSON.stringify({operation,expected_revision:Number(developmentSemaphore.revision),topic,confirmed:true}),
+      });
+      if (!payload.ok) throw new Error(payload.message || "Vývojový semafor nelze změnit.");
+      developmentSemaphore = payload;
+      if (acquiring) developmentTopic.value = "";
+      notice.textContent = "Vývojový semafor byl bezpečně aktualizovaný.";
+    } catch (error) {
+      notice.textContent = `Vývojový semafor nebyl změněn: ${error.message}`;
+    } finally { setBusy(false); }
+    await loadWork();
+    await loadStatus();
   }
 
   async function loadWork() {
@@ -1662,6 +1777,11 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   workOpenBtn.addEventListener("click", openWork);
   workCloseBtn.addEventListener("click", closeWork);
   workRefreshBtn.addEventListener("click", loadWork);
+  developmentAcquireProfileBtn.addEventListener("click", () => changeDevelopmentSemaphore("acquire_profile"));
+  developmentAcquireTerminalBtn.addEventListener("click", () => changeDevelopmentSemaphore("acquire_terminal"));
+  developmentPauseBtn.addEventListener("click", () => changeDevelopmentSemaphore("pause"));
+  developmentResumeBtn.addEventListener("click", () => changeDevelopmentSemaphore("resume"));
+  developmentReleaseBtn.addEventListener("click", () => changeDevelopmentSemaphore("release"));
   checkpointBtn.addEventListener("click", createCheckpoint);
   deployAuditBtn.addEventListener("click", auditDeployment);
   deployConfirmation.addEventListener("input", () => {

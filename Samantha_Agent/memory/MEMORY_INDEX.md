@@ -104,6 +104,14 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `handoffs/global_development_semaphore_wip_2026_07_19.md` - [PRIPOMENOUT]
+  priorita 1: izolovany WIP zavadi trvaly globalni vyvojovy semafor pro
+  Human-Adam, Knihovnu a terminal, read-only modelovy guard a fail-closed
+  checkpoint/nasazeni pri cizim WIP. Plna brana prosla 815 testy. Zbyva prevzeti
+  do `main`, rizene nasazeni a zivy retest. Navazujici verzovany terminalovy
+  deployment guard nebo kontrolovany `pre-push` hook je zapsany k samostatnemu
+  navrhu a nesmi se instalovat automaticky.
+
 - `handoffs/human_adam_thread_rotation_backend_wip_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: izolovany WIP obsahuje hotovou bezpecnou rucni rotaci dlouheho
   profiloveho vlakna vcetne profilove zamknuteho API a ovladani v panelu `Plan`.
