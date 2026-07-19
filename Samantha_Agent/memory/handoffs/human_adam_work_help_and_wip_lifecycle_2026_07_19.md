@@ -1,6 +1,6 @@
 Nazev: Human-Adam Prace - napoveda semaforu a zivotniho cyklu WIP vetvi
 Priorita: 1
-Stav: ceka na prevzeti
+Stav: ceka na retest
 Pripomenout pri startu: ano
 Datum: 2026-07-19
 
@@ -30,16 +30,19 @@ Co je hotove:
 - Cela Cockpit quality gate prosla: Python, JavaScript a shell syntaxe a 826 testu.
 - Tento handoff je soucasti jedineho WIP checkpointu na vetvi
   `wip/human-adam-work-help-20260719`.
+- Checkpoint `e1bc193` byl potvrzenym fast-forwardem prevzaty do `main`, pushnuty
+  na GitHub a Cockpit byl rizene restartovany.
+- Nova instance bezi pod novym PID; petibodovy smoke test prosel a nasazene HTML
+  obsahuje tlacitko `?`, oba vyvojove postupy, stavy vetvi i nouzove pravidlo.
 
 Co neni hotove:
 
-- Napoveda zatim neni prevzata do `main` ani nasazena.
 - Rucni vizualni retest na Macu nebo iPhonu je mozny az po nasazeni.
 
 Dalsi krok:
 
-- Potvrzene prevzit jediny WIP checkpoint do `main`, nasadit a rucne overit
-  citelnost napovedy na Macu nebo iPhonu bez zmeny semaforu.
+- Rucne otevrit `Prace -> ?` a overit citelnost napovedy na Macu nebo iPhonu
+  bez zmeny semaforu.
 
 Navrhovane dalsi kroky:
 

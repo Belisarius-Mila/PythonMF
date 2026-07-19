@@ -109,8 +109,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   napoveda pro okno `Prace`. Vysvetluje semafor, WIP vetev, worktree, profilovy
   i terminalovy postup, stavy zivotniho cyklu a nouzove pravidlo bez mazani,
   resetu, rebase nebo force push. Napoveda nevola API ani nemeni stav; cilenych
-  50 UI testu a plna brana s 826 testy prosly. Jediny WIP checkpoint je
-  pripraveny; zbyva prevzeti, nasazeni a rucni proklik.
+  50 UI testu a plna brana s 826 testy prosly. Commit `e1bc193`, rizeny restart
+  a petibodovy smoke test jsou zelene; zbyva pouze rucni proklik napovedy.
 
 - `handoffs/human_adam_plan_help_and_adoption_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: staticka napoveda `?` v okne `Plan` je implementovana bez API a
