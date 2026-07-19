@@ -84,6 +84,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .project-continuity-head h3 { flex:1; margin:0; font-size:15px; }
     #projectContinuityMeta { margin:0; color:var(--muted); font-size:13px; overflow-wrap:anywhere; }
     #projectContinuityReasons { margin:0; padding-left:22px; color:var(--muted); font-size:13px; }
+    .handoff-proposal-box { margin:12px 16px; padding:14px; border:1px solid #93c5fd; border-radius:13px; display:grid; gap:8px; background:#eff6ff; }
+    .handoff-proposal-box h3 { margin:0; font-size:15px; }
+    #handoffProposalMeta { margin:0; color:var(--muted); font-size:13px; overflow-wrap:anywhere; }
+    #handoffProposalDraft { margin:0; padding:12px; border:1px solid #bfdbfe; border-radius:10px; background:#fff; white-space:pre-wrap; overflow-wrap:anywhere; font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; }
     .development-branch-audit-box { padding:12px 16px; border-bottom:1px solid var(--line); display:grid; gap:8px; }
     .development-branch-audit-head { display:flex; align-items:center; gap:8px; }
     .development-branch-audit-head h3 { flex:1; margin:0; font-size:15px; }
@@ -287,6 +291,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <li><strong>WIP větev</strong> bezpečně odděluje jeden vývojový úkol. Není to Codex vlákno a jeho existence nezaplňuje konverzaci.</li>
         <li><strong>Worktree</strong> je oddělená pracovní kopie projektu připojená k určité větvi.</li>
         <li><strong>Projektová vazba</strong> spojuje jeden vývoj se zvoleným projektem a handoffem; audit pouze čte důkazy a nic nepřepisuje.</li>
+        <li><strong>Návrh handoffu</strong> se po checkpointu sestaví jen z bezpečných metadat. Zobrazí se k přečtení, ale sám se neuloží.</li>
       </ul>
 
       <h4>Běžný vývoj z r-Adama</h4>
@@ -368,6 +373,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     </section>
     <div id="workMeta">Stav se načte až po otevření.</div>
     <ul id="workChanges"></ul>
+    <section class="handoff-proposal-box" id="handoffProposalBox" aria-label="Read-only návrh aktualizace handoffu" hidden>
+      <h3>Návrh handoffu po checkpointu</h3>
+      <p id="handoffProposalMeta">Návrh zatím není připravený.</p>
+      <pre id="handoffProposalDraft" hidden></pre>
+    </section>
     <div class="checkpoint-box">
       <input id="checkpointMessage" maxlength="120" placeholder="Krátký popis WIP checkpointu">
       <button class="primary" id="checkpointBtn" type="button" disabled>Checkpoint bez pushnutí</button>
@@ -443,6 +453,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const workHelpCloseBtn = document.getElementById("workHelpCloseBtn");
   const workMeta = document.getElementById("workMeta");
   const workChanges = document.getElementById("workChanges");
+  const handoffProposalBox = document.getElementById("handoffProposalBox");
+  const handoffProposalMeta = document.getElementById("handoffProposalMeta");
+  const handoffProposalDraft = document.getElementById("handoffProposalDraft");
   const developmentSemaphoreMeta = document.getElementById("developmentSemaphoreMeta");
   const developmentProject = document.getElementById("developmentProject");
   const developmentHandoff = document.getElementById("developmentHandoff");
@@ -1633,6 +1646,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     deploymentAudit = null;
     renderProjectContinuity(payload.project_continuity || null);
     renderDevelopmentSemaphore(payload.development_semaphore || null);
+    renderHandoffProposal(payload.handoff_proposal || null);
     workChanges.replaceChildren();
     const pending = Array.isArray(payload.changes) ? payload.changes : [];
     const checkpointed = Array.isArray(payload.checkpoint_changes) ? payload.checkpoint_changes : [];
@@ -1670,6 +1684,21 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     else if (checkpointPreserved) deployMeta.textContent = "WIP je bezpečně zachovaný, ale audit je zablokovaný. Nejdřív proveď obnovu nad aktuálním main.";
     else if (payload.workspace_relation === "diverged") deployMeta.textContent = "Audit je zablokovaný: workspace a main se rozešly.";
     else deployMeta.textContent = "Není připravený žádný WIP checkpoint k nasazení.";
+  }
+
+  function renderHandoffProposal(proposal) {
+    const valid = proposal && typeof proposal === "object";
+    const state = valid ? String(proposal.state || "") : "";
+    const visible = valid && state !== "waiting_checkpoint";
+    handoffProposalBox.hidden = !visible;
+    handoffProposalDraft.textContent = valid ? String(proposal.draft || "") : "";
+    handoffProposalDraft.hidden = !visible || proposal.available !== true || !handoffProposalDraft.textContent;
+    if (!visible) {
+      handoffProposalMeta.textContent = "Návrh vznikne až po úspěšném checkpointu.";
+      return;
+    }
+    const target = proposal.target_handoff ? ` · cíl: ${String(proposal.target_handoff).split("/").pop()}` : "";
+    handoffProposalMeta.textContent = `${proposal.label || "Nelze připravit"} · ${proposal.message || ""}${target} · nic nebylo uloženo.`;
   }
 
   function renderDevelopmentSemaphore(semaphore) {
@@ -1893,6 +1922,9 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       checkpointMessage.value = "";
       renderWork(payload.work);
       renderStatus(payload.status);
+      if (payload.work && payload.work.handoff_proposal && payload.work.handoff_proposal.available === true) {
+        handoffProposalBox.scrollIntoView({block:"nearest",behavior:"smooth"});
+      }
     } catch (error) {
       failure = `Checkpoint selhal: ${error.message}`;
       await loadWork();

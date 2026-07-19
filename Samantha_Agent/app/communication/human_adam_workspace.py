@@ -517,10 +517,16 @@ class HumanAdamWorkspaceManager:
                 raise AppServerError("Human–Adam workspace není v bezpečném stavu pro kontrolu změn.")
             checkpoint_changes: list[dict[str, str]] = []
             checkpoint_base_head = ""
+            checkpoint_head = ""
+            checkpoint_subject = ""
             checkpoint_visible = bool(
                 current.get("local_checkpoint_ahead") or current.get("local_checkpoint_preserved")
             )
             if checkpoint_visible:
+                checkpoint_head = str(current.get("head") or "")
+                checkpoint_subject = " ".join(
+                    _git_output(self.workspace_root, ["log", "-1", "--format=%s"]).split()
+                )[:120]
                 checkpoint_base_value = (
                     current.get("source_head")
                     if current.get("local_checkpoint_ahead")
@@ -550,6 +556,8 @@ class HumanAdamWorkspaceManager:
                 "checkpoint_changes": checkpoint_changes[:120],
                 "checkpoint_change_count": len(checkpoint_changes),
                 "checkpoint_base_head": checkpoint_base_head,
+                "checkpoint_head": checkpoint_head,
+                "checkpoint_subject": checkpoint_subject,
                 "local_checkpoint_ahead": bool(current.get("local_checkpoint_ahead")),
                 "local_checkpoint_preserved": bool(current.get("local_checkpoint_preserved")),
                 "local_commit_count": int(current.get("local_commit_count") or 0),

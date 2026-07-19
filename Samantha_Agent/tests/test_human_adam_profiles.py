@@ -46,6 +46,8 @@ class FakeWorkspace:
         self.diverged = False
         self.prepare_count = 0
         self.sync_count = 0
+        self.checkpoint_subject = ""
+        self.checkpoint_path = "Samantha_Agent/app.py"
 
     def status(self) -> dict[str, object]:
         relation = "diverged" if self.diverged else ("local_ahead" if self.local_ahead else ("source_ahead" if self.source_ahead else "aligned"))
@@ -80,10 +82,29 @@ class FakeWorkspace:
         return self.status()
 
     def review(self) -> dict[str, object]:
-        return {"ok": True, "dirty": self.dirty, "changes": [], "change_count": 0}
+        review: dict[str, object] = {
+            "ok": True,
+            "dirty": self.dirty,
+            "changes": [],
+            "change_count": 0,
+            "local_checkpoint_ahead": self.local_ahead,
+            "local_commit_count": 1 if self.local_ahead else 0,
+            "checkpoint_changes": (
+                [{"status": "M", "path": self.checkpoint_path}] if self.local_ahead else []
+            ),
+            "checkpoint_change_count": 1 if self.local_ahead else 0,
+            "checkpoint_head": "b" * 40 if self.local_ahead else "",
+            "checkpoint_subject": self.checkpoint_subject if self.local_ahead else "",
+        }
+        return review
 
-    def checkpoint(self, **_kwargs: object) -> dict[str, object]:
-        return {**self.status(), "checkpoint_created": False, "message": "Není co checkpointovat."}
+    def checkpoint(self, **kwargs: object) -> dict[str, object]:
+        if not self.dirty:
+            return {**self.status(), "checkpoint_created": False, "message": "Není co checkpointovat."}
+        self.checkpoint_subject = str(kwargs.get("message") or "WIP")
+        self.dirty = False
+        self.local_ahead = True
+        return {**self.status(), "checkpoint_created": True, "message": "Checkpoint vytvořen."}
 
 
 class FakeHub:
@@ -290,6 +311,54 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(status["audit"]["state"], "unverifiable")
         self.assertIn("nezná přesný pracovní strom", status["audit"]["message"])
         self.assertFalse(status["audit"]["blocking"])
+
+    def test_successful_checkpoint_returns_read_only_handoff_proposal(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            continuity, project_id, handoff_path = self.make_project_continuity(root)
+            manager, human_workspace, *_rest = self.make_manager(root, project_continuity=continuity)
+            manager.change_development_semaphore(
+                operation="acquire_profile",
+                expected_revision=0,
+                topic="Návrh handoffu po checkpointu",
+                project_id=project_id,
+                handoff_path=handoff_path,
+                confirmed=True,
+            )
+            human_workspace.dirty = True
+            before = (root / handoff_path).read_text(encoding="utf-8")
+            checkpoint = manager.checkpoint(confirmed=True, message="WIP s návrhem")
+            after = (root / handoff_path).read_text(encoding="utf-8")
+
+        proposal = checkpoint["work"]["handoff_proposal"]
+        self.assertTrue(checkpoint["checkpoint_created"])
+        self.assertTrue(proposal["available"])
+        self.assertEqual(proposal["state"], "ready")
+        self.assertFalse(proposal["writes_performed"])
+        self.assertEqual(before, after)
+        self.assertIn("WIP s návrhem", proposal["draft"])
+
+    def test_handoff_proposal_failure_does_not_undo_successful_checkpoint(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            continuity, project_id, handoff_path = self.make_project_continuity(root)
+            manager, human_workspace, *_rest = self.make_manager(root, project_continuity=continuity)
+            manager.change_development_semaphore(
+                operation="acquire_profile",
+                expected_revision=0,
+                topic="Fail-closed návrh",
+                project_id=project_id,
+                handoff_path=handoff_path,
+                confirmed=True,
+            )
+            human_workspace.dirty = True
+            human_workspace.checkpoint_path = "Samantha_Agent/data/private/secret.txt"
+            checkpoint = manager.checkpoint(confirmed=True, message="WIP zůstává platný")
+
+        proposal = checkpoint["work"]["handoff_proposal"]
+        self.assertTrue(checkpoint["checkpoint_created"])
+        self.assertEqual(proposal["state"], "unverifiable")
+        self.assertFalse(proposal["available"])
 
     def test_checkpoint_requires_active_owned_lease_and_pause_blocks_it(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

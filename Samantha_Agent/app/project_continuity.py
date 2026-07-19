@@ -17,7 +17,15 @@ from app.codex_appserver import AppServerError
 
 ACTIVE_PROJECTS_RELATIVE_PATH = Path("memory/ACTIVE_PROJECTS.md")
 PROJECT_ID_RE = re.compile(r"[a-z0-9][a-z0-9_-]{2,79}")
+COMMIT_RE = re.compile(r"[0-9a-f]{40}")
 LINK_RE = re.compile(r"`([^`]+)`")
+PROPOSAL_BLOCKED_PATH_PARTS = (
+    "/.git/",
+    "/data/private/",
+    "/data/session_autosave/",
+    "/.env",
+)
+PROPOSAL_BLOCKED_SUFFIXES = {".key", ".pem", ".p12", ".pfx"}
 
 
 class ProjectContinuityError(AppServerError):
@@ -180,6 +188,34 @@ def _changed_paths(review: dict[str, Any], *, project_dir_name: str) -> set[str]
             if raw:
                 paths.add(raw)
     return paths
+
+
+def _proposal_change_rows(review: dict[str, Any]) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for item in review.get("checkpoint_changes") or []:
+        if not isinstance(item, dict):
+            raise ProjectContinuityError("Checkpoint obsahuje neověřitelnou změnu.")
+        status = str(item.get("status") or "").strip()
+        raw_path = str(item.get("path") or "").strip().strip('"').replace("\\", "/")
+        path = PurePosixPath(raw_path)
+        normalized = f"/{raw_path.casefold()}"
+        if (
+            status not in {"A", "M"}
+            or not raw_path
+            or path.is_absolute()
+            or ".." in path.parts
+            or "\n" in raw_path
+            or "\r" in raw_path
+            or " → " in raw_path
+            or len(raw_path) > 300
+            or any(part in normalized for part in PROPOSAL_BLOCKED_PATH_PARTS)
+            or path.suffix.casefold() in PROPOSAL_BLOCKED_SUFFIXES
+        ):
+            raise ProjectContinuityError("Checkpoint obsahuje cestu nevhodnou pro návrh handoffu.")
+        rows.append({"status": status, "path": raw_path})
+    if not rows:
+        raise ProjectContinuityError("Checkpoint nemá ověřené změny pro návrh handoffu.")
+    return rows
 
 
 class ProjectContinuityService:
@@ -347,4 +383,143 @@ class ProjectContinuityService:
             "label": "Aktuální",
             "message": "Dostupné důkazy neukazují, že by handoff zaostával.",
             "evidence": evidence,
+        }
+
+    def handoff_proposal(
+        self,
+        *,
+        binding: dict[str, Any],
+        topic: str,
+        workspace_review: dict[str, Any],
+        context_anchor: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Build a metadata-only draft without writing project memory or Git."""
+        base = {
+            "ok": True,
+            "available": False,
+            "read_only": True,
+            "blocking": False,
+            "writes_performed": False,
+            "state": "waiting_checkpoint",
+            "label": "Čeká na checkpoint",
+            "message": "Návrh vznikne až po úspěšném lokálním WIP checkpointu.",
+            "draft": "",
+            "changed_files": [],
+        }
+        try:
+            resolved = self.resolve_binding(
+                project_id=str(binding.get("project_id") or ""),
+                handoff_path=str(binding.get("handoff_path") or ""),
+                fallback_tvbcp_path=str(binding.get("tvbcp_path") or ""),
+            )
+        except ProjectContinuityError as exc:
+            return {
+                **base,
+                "state": "unverifiable",
+                "label": "Nelze připravit",
+                "message": str(exc),
+            }
+        if not workspace_review.get("local_checkpoint_ahead"):
+            return {**base, "binding": resolved}
+        if int(workspace_review.get("local_commit_count") or 0) != 1:
+            return {
+                **base,
+                "binding": resolved,
+                "state": "unverifiable",
+                "label": "Nelze připravit",
+                "message": "Návrh handoffu podporuje přesně jeden lokální WIP checkpoint.",
+            }
+        checkpoint_head = str(workspace_review.get("checkpoint_head") or "").strip().casefold()
+        checkpoint_subject = " ".join(
+            str(workspace_review.get("checkpoint_subject") or "").split()
+        )[:120]
+        clean_topic = " ".join(str(topic or "").split())[:120]
+        if not COMMIT_RE.fullmatch(checkpoint_head) or not checkpoint_subject or not clean_topic:
+            return {
+                **base,
+                "binding": resolved,
+                "state": "unverifiable",
+                "label": "Nelze připravit",
+                "message": "Checkpoint nebo téma vývoje nemá úplná ověřená metadata.",
+            }
+        try:
+            changes = _proposal_change_rows(workspace_review)
+        except ProjectContinuityError as exc:
+            return {
+                **base,
+                "binding": resolved,
+                "state": "unverifiable",
+                "label": "Nelze připravit",
+                "message": str(exc),
+            }
+        project = next(
+            (item for item in self.catalog() if item.project_id == resolved["project_id"]),
+            None,
+        )
+        if project is None:
+            return {
+                **base,
+                "binding": resolved,
+                "state": "unverifiable",
+                "label": "Nelze připravit",
+                "message": "Projekt už nelze dohledat v aktivním registru.",
+            }
+        anchor_revision = int(context_anchor.get("revision") or 0)
+        anchor_state = "připnutá" if context_anchor.get("active") is True else "nepřipnutá"
+        file_lines = [f"- {row['status']} · {row['path']}" for row in changes[:40]]
+        if len(changes) > 40:
+            file_lines.append(f"- … a dalších {len(changes) - 40} souborů")
+        tvbcp_line = resolved.get("tvbcp_path") or "projekt nemá přiřazený TVBCP"
+        today = datetime.now().astimezone().date().isoformat()
+        draft = "\n".join(
+            (
+                "NÁVRH AKTUALIZACE HANDOFFU — ZATÍM NEULOŽENO",
+                "",
+                f"Název: {clean_topic}",
+                f"Priorita: {project.priority or 'doplnit'}",
+                "Stav: rozpracované",
+                "Připomenout při startu: ne",
+                f"Datum: {today}",
+                "",
+                "Co se řešilo:",
+                f"- {clean_topic}",
+                "",
+                "Co je hotové:",
+                f"- Vytvořen lokální WIP checkpoint {checkpoint_head[:12]}: {checkpoint_subject}.",
+                f"- Checkpoint obsahuje {len(changes)} bezpečně auditovaných změn.",
+                f"- Kontextová kotva: revize {anchor_revision}, {anchor_state}; její obsah nebyl čten.",
+                f"- Projektový TVBCP: {tvbcp_line}; jeho obsah nebyl čten.",
+                "",
+                "Co není hotové:",
+                "- Tento návrh zatím není uložený do handoffu.",
+                "- Převzetí do main, nasazení a restart zatím nejsou tímto návrhem potvrzené.",
+                "",
+                "Další krok:",
+                "- Zkontrolovat návrh a teprve samostatně potvrdit jeho uložení.",
+                "",
+                "Navrhované další kroky:",
+                "- Po potvrzeném handoffu provést audit checkpointu, push a bezpečné převzetí do main.",
+                "- Po nasazení doplnit skutečný výsledek testů, restartu a smoke testu.",
+                "",
+                "Změněné nebo relevantní soubory:",
+                *file_lines,
+                "",
+                "Bezpečnost / neukládat:",
+                "- Návrh vznikl pouze z Git metadat a projektové vazby; neobsahuje obsah souborů.",
+                "- Nevkládat hesla, tokeny, API klíče, private texty ani obsah e-mailů.",
+            )
+        )
+        return {
+            **base,
+            "available": True,
+            "state": "ready",
+            "label": "Návrh připraven",
+            "message": "Návrh je pouze zobrazený; nic nebylo uloženo ani změněno.",
+            "binding": resolved,
+            "target_handoff": resolved["handoff_path"],
+            "checkpoint_head": checkpoint_head,
+            "checkpoint_subject": checkpoint_subject,
+            "change_count": len(changes),
+            "changed_files": changes,
+            "draft": draft,
         }

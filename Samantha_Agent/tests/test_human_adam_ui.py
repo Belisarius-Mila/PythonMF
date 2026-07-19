@@ -221,6 +221,9 @@ class HumanAdamUiTests(unittest.TestCase):
             "projectContinuityAuditBtn",
             "projectContinuityMeta",
             "projectContinuityReasons",
+            "handoffProposalBox",
+            "handoffProposalMeta",
+            "handoffProposalDraft",
         ):
             self.assertIn(f'id="{element_id}"', HUMAN_ADAM_HTML)
         self.assertIn('api("/api/human-adam/development-semaphore"', HUMAN_ADAM_HTML)
@@ -242,6 +245,24 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Nelze ověřit", HUMAN_ADAM_HTML)
         self.assertIn("pouze read-only, nic neblokuje", HUMAN_ADAM_HTML)
         self.assertIn("audit pouze čte důkazy a nic nepřepisuje", HUMAN_ADAM_HTML)
+
+    def test_handoff_proposal_ui_is_large_read_only_and_has_no_write_action(self) -> None:
+        start = HUMAN_ADAM_HTML.index("function renderHandoffProposal(proposal)")
+        end = HUMAN_ADAM_HTML.index("function renderDevelopmentSemaphore", start)
+        source = HUMAN_ADAM_HTML[start:end]
+
+        self.assertIn('aria-label="Read-only návrh aktualizace handoffu"', HUMAN_ADAM_HTML)
+        self.assertIn("Návrh handoffu po checkpointu", HUMAN_ADAM_HTML)
+        self.assertIn("proposal.draft", source)
+        self.assertIn("textContent", source)
+        self.assertNotIn("innerHTML", source)
+        self.assertNotIn("api(", source)
+        self.assertNotIn("fetch(", source)
+        self.assertNotIn("method:\"POST\"", source)
+        self.assertNotIn("handoffProposalSaveBtn", HUMAN_ADAM_HTML)
+        self.assertNotIn("max-height", HUMAN_ADAM_HTML[HUMAN_ADAM_HTML.index(".handoff-proposal-box"):HUMAN_ADAM_HTML.index(".development-branch-audit-box")])
+        self.assertIn('handoffProposalBox.scrollIntoView({block:"nearest",behavior:"smooth"});', HUMAN_ADAM_HTML)
+        self.assertIn("Zobrazí se k přečtení, ale sám se neuloží", HUMAN_ADAM_HTML)
 
     def test_development_branch_lifecycle_ui_is_explicitly_read_only(self) -> None:
         start = HUMAN_ADAM_HTML.index("async function loadDevelopmentBranchAudit()")

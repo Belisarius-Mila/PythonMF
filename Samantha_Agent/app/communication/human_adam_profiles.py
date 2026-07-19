@@ -309,11 +309,62 @@ class HumanAdamProfileManager:
             return service.rotate_thread(**kwargs)
 
     def work_review(self) -> dict[str, Any]:
+        work = self.active_service.work_review()
         return {
-            **self.active_service.work_review(),
+            **work,
             "development_semaphore": self.development_status(),
             "project_continuity": self.project_continuity_status(),
+            "handoff_proposal": self.handoff_proposal_status(work_review=work),
         }
+
+    def handoff_proposal_status(
+        self,
+        *,
+        work_review: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Derive a non-persistent handoff draft from one owned checkpoint."""
+        waiting = {
+            "ok": True,
+            "available": False,
+            "read_only": True,
+            "blocking": False,
+            "writes_performed": False,
+            "state": "waiting_checkpoint",
+            "label": "Čeká na checkpoint",
+            "message": "Návrh vznikne až po checkpointu vlastněném tímto profilem.",
+            "draft": "",
+            "changed_files": [],
+        }
+        try:
+            active_id = self.active_profile_id
+            lease = self.development_semaphore.status()
+            if (
+                lease.get("ok") is not True
+                or lease.get("active") is not True
+                or lease.get("owner_id") != active_id
+            ):
+                return waiting
+            binding = {
+                "project_id": str(lease.get("project_id") or ""),
+                "project_label": str(lease.get("project_label") or ""),
+                "handoff_path": str(lease.get("handoff_path") or ""),
+                "tvbcp_path": str(lease.get("tvbcp_path") or ""),
+            }
+            review = work_review if work_review is not None else self.active_service.work_review()
+            return self.project_continuity.handoff_proposal(
+                binding=binding,
+                topic=str(lease.get("topic") or ""),
+                workspace_review=review,
+                context_anchor=self.active_service.context_anchor(include_content=False),
+            )
+        except (AppServerError, ProjectContinuityError, OSError, TypeError, ValueError) as exc:
+            return {
+                **waiting,
+                "ok": False,
+                "state": "unverifiable",
+                "label": "Nelze připravit",
+                "message": str(exc),
+            }
 
     def project_continuity_status(self) -> dict[str, Any]:
         """Return project choices and conservative read-only freshness evidence."""
@@ -394,6 +445,8 @@ class HumanAdamProfileManager:
         with self.profile_operation() as service:
             self.development_semaphore.assert_owner(self.active_profile_id)
             result = service.checkpoint(**kwargs)
+        if result.get("checkpoint_created"):
+            return {**result, "work": self.work_review()}
         return result
 
     @staticmethod

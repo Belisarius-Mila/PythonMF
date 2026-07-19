@@ -127,6 +127,70 @@ class ProjectContinuityTests(unittest.TestCase):
         self.assertEqual(result["state"], "unverifiable")
         self.assertIn("pracovním prostoru", str(result["message"]))
 
+    def test_handoff_proposal_is_metadata_only_ready_and_does_not_write_target(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service = self.make_project(Path(temp_dir))
+            handoff = service.project_root / "memory/handoffs/test_project.md"
+            before = handoff.read_text(encoding="utf-8")
+            result = service.handoff_proposal(
+                binding=self.binding(service),
+                topic="Bezpečný návrh handoffu",
+                workspace_review={
+                    "local_checkpoint_ahead": True,
+                    "local_commit_count": 1,
+                    "checkpoint_head": "a" * 40,
+                    "checkpoint_subject": "WIP návrh handoffu",
+                    "checkpoint_changes": [
+                        {"status": "M", "path": "Samantha_Agent/app/example.py"},
+                        {"status": "A", "path": "Samantha_Agent/tests/test_example.py"},
+                    ],
+                },
+                context_anchor={"revision": 4, "active": True},
+            )
+            after = handoff.read_text(encoding="utf-8")
+
+        self.assertTrue(result["available"])
+        self.assertEqual(result["state"], "ready")
+        self.assertTrue(result["read_only"])
+        self.assertFalse(result["blocking"])
+        self.assertFalse(result["writes_performed"])
+        self.assertEqual(before, after)
+        self.assertIn("ZATÍM NEULOŽENO", result["draft"])
+        self.assertIn("revize 4, připnutá", result["draft"])
+        self.assertIn("Samantha_Agent/app/example.py", result["draft"])
+        self.assertNotIn("Handoff\n", result["draft"])
+
+    def test_handoff_proposal_waits_for_checkpoint_and_rejects_private_path(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service = self.make_project(Path(temp_dir))
+            binding = self.binding(service)
+            waiting = service.handoff_proposal(
+                binding=binding,
+                topic="Čekající návrh",
+                workspace_review={"local_checkpoint_ahead": False},
+                context_anchor={},
+            )
+            unsafe = service.handoff_proposal(
+                binding=binding,
+                topic="Nebezpečný návrh",
+                workspace_review={
+                    "local_checkpoint_ahead": True,
+                    "local_commit_count": 1,
+                    "checkpoint_head": "b" * 40,
+                    "checkpoint_subject": "WIP private",
+                    "checkpoint_changes": [
+                        {"status": "A", "path": "Samantha_Agent/data/private/secret.txt"}
+                    ],
+                },
+                context_anchor={},
+            )
+
+        self.assertEqual(waiting["state"], "waiting_checkpoint")
+        self.assertFalse(waiting["available"])
+        self.assertEqual(unsafe["state"], "unverifiable")
+        self.assertFalse(unsafe["available"])
+        self.assertIn("nevhodnou", unsafe["message"])
+
 
 if __name__ == "__main__":
     unittest.main()

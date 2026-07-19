@@ -108,6 +108,8 @@ class HumanAdamWorkspaceManagerTests(unittest.TestCase):
             review = manager.review()
             self.assertEqual(review["checkpoint_change_count"], 1)
             self.assertEqual(review["checkpoint_changes"][0]["path"], "Samantha_Agent/tracked.py")
+            self.assertEqual(review["checkpoint_head"], after)
+            self.assertEqual(review["checkpoint_subject"], "WIP test")
 
     def test_checkpoint_repairs_missing_workspace_local_identity(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
