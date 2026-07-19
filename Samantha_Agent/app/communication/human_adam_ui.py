@@ -97,6 +97,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .checkpoint-box { padding:12px 16px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); display:grid; gap:8px; }
     .checkpoint-box input { width:100%; border:1px solid #bac7d8; border-radius:11px; padding:10px 12px; font:inherit; }
     #deployMeta { color:var(--muted); font-size:13px; line-height:1.4; }
+    #handoffTakeoverCheck { padding:10px 12px; border:1px solid #f59e0b; border-radius:11px; background:#fffbeb; color:#92400e; font-size:13px; line-height:1.45; overflow-wrap:anywhere; }
+    #handoffTakeoverCheck.verified { border-color:#86efac; background:#f0fdf4; color:#166534; }
     .context-anchor-body { flex:1; min-height:0; overflow:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
     #contextAnchorInput { flex:1; min-height:320px; font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; }
     #contextAnchorMeta,.context-anchor-help { margin:0; color:var(--muted); font-size:13px; }
@@ -292,6 +294,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <li><strong>Worktree</strong> je oddělená pracovní kopie projektu připojená k určité větvi.</li>
         <li><strong>Projektová vazba</strong> spojuje jeden vývoj se zvoleným projektem a handoffem; audit pouze čte důkazy a nic nepřepisuje.</li>
         <li><strong>Návrh handoffu</strong> se po checkpointu sestaví jen z bezpečných metadat. Zobrazí se k přečtení, ale sám se neuloží.</li>
+        <li><strong>Kontrola při převzetí</strong> ověří, zda zvolený handoff patří projektu a je v checkpointu. V této fázi pouze varuje a nasazení neblokuje.</li>
       </ul>
 
       <h4>Běžný vývoj z r-Adama</h4>
@@ -382,6 +385,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <input id="checkpointMessage" maxlength="120" placeholder="Krátký popis WIP checkpointu">
       <button class="primary" id="checkpointBtn" type="button" disabled>Checkpoint bez pushnutí</button>
       <div id="deployMeta">Nasazení je dostupné až po lokálním WIP checkpointu.</div>
+      <div id="handoffTakeoverCheck" role="status" hidden></div>
       <button class="audit-action" id="deployAuditBtn" type="button" disabled>Audit nasazení</button>
       <input id="deployConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Po auditu sem vlož potvrzovací větu" hidden disabled>
       <button class="deploy-action" id="deployBtn" type="button" disabled>Ověřit a nasadit</button>
@@ -474,6 +478,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const checkpointMessage = document.getElementById("checkpointMessage");
   const checkpointBtn = document.getElementById("checkpointBtn");
   const deployMeta = document.getElementById("deployMeta");
+  const handoffTakeoverCheck = document.getElementById("handoffTakeoverCheck");
   const deployAuditBtn = document.getElementById("deployAuditBtn");
   const deployConfirmation = document.getElementById("deployConfirmation");
   const deployBtn = document.getElementById("deployBtn");
@@ -1644,6 +1649,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
 
   function renderWork(payload) {
     deploymentAudit = null;
+    renderHandoffTakeoverCheck(null);
     renderProjectContinuity(payload.project_continuity || null);
     renderDevelopmentSemaphore(payload.development_semaphore || null);
     renderHandoffProposal(payload.handoff_proposal || null);
@@ -1934,6 +1940,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
 
   function renderDeploymentAudit(payload) {
     deploymentAudit = payload;
+    renderHandoffTakeoverCheck(payload.handoff_takeover_check || null);
     workChanges.replaceChildren();
     for (const item of payload.changes || []) {
       const row = document.createElement("li");
@@ -1945,6 +1952,19 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     deployConfirmation.hidden = false;
     deployConfirmation.disabled = false;
     deployBtn.disabled = true;
+  }
+
+  function renderHandoffTakeoverCheck(check) {
+    const valid = check && typeof check === "object";
+    handoffTakeoverCheck.hidden = !valid;
+    handoffTakeoverCheck.className = valid && check.state === "verified" ? "verified" : "";
+    if (!valid) {
+      handoffTakeoverCheck.textContent = "";
+      return;
+    }
+    const target = check.target_handoff ? ` · ${String(check.target_handoff).split("/").pop()}` : "";
+    const warning = check.state === "verified" ? "" : " · Pouze varování; nasazení zatím neblokuje.";
+    handoffTakeoverCheck.textContent = `${check.label || "Nelze ověřit"} · ${check.message || ""}${target}${warning}`;
   }
 
   async function auditDeployment() {

@@ -191,6 +191,62 @@ class ProjectContinuityTests(unittest.TestCase):
         self.assertFalse(unsafe["available"])
         self.assertIn("nevhodnou", unsafe["message"])
 
+    def test_takeover_check_verifies_registered_handoff_in_checkpoint_without_writing(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service = self.make_project(Path(temp_dir))
+            handoff = service.project_root / "memory/handoffs/test_project.md"
+            before = handoff.read_text(encoding="utf-8")
+            result = service.takeover_handoff_check(
+                binding=self.binding(service),
+                checkpoint_changes=[
+                    {"status": "M", "path": "Samantha_Agent/memory/handoffs/test_project.md"},
+                    {"status": "M", "path": "Samantha_Agent/app/example.py"},
+                ],
+                project_dir_name="Samantha_Agent",
+            )
+            after = handoff.read_text(encoding="utf-8")
+
+        self.assertEqual(result["state"], "verified")
+        self.assertTrue(result["handoff_in_checkpoint"])
+        self.assertTrue(result["read_only"])
+        self.assertFalse(result["blocking"])
+        self.assertFalse(result["writes_performed"])
+        self.assertEqual(before, after)
+
+    def test_takeover_check_warns_without_blocking_when_handoff_is_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service = self.make_project(Path(temp_dir))
+            result = service.takeover_handoff_check(
+                binding=self.binding(service),
+                checkpoint_changes=[
+                    {"status": "M", "path": "Samantha_Agent/app/example.py"},
+                ],
+                project_dir_name="Samantha_Agent",
+            )
+
+        self.assertEqual(result["state"], "warning")
+        self.assertFalse(result["handoff_in_checkpoint"])
+        self.assertFalse(result["blocking"])
+        self.assertIn("neobsahuje", result["message"])
+
+    def test_takeover_check_is_unverifiable_for_wrong_project_binding(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service = self.make_project(Path(temp_dir))
+            result = service.takeover_handoff_check(
+                binding={
+                    "project_id": "wrong-project-123",
+                    "handoff_path": "memory/handoffs/test_project.md",
+                },
+                checkpoint_changes=[
+                    {"status": "M", "path": "Samantha_Agent/memory/handoffs/test_project.md"},
+                ],
+                project_dir_name="Samantha_Agent",
+            )
+
+        self.assertEqual(result["state"], "unverifiable")
+        self.assertFalse(result["blocking"])
+        self.assertNotIn("Handoff\n", str(result))
+
 
 if __name__ == "__main__":
     unittest.main()

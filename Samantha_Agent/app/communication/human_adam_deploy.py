@@ -753,7 +753,17 @@ def human_adam_deploy_audit_action(*, service: HumanAdamService) -> dict[str, An
             with profile_operation() as active_service:
                 owner_id = str(getattr(active_service, "work_profile_id", "") or "")
                 service.assert_deployment_allowed(owner_id)
-                return human_adam_deploy_audit_action(service=active_service)
+                result = human_adam_deploy_audit_action(service=active_service)
+                checker = getattr(service, "takeover_handoff_check", None)
+                if result.get("ok") is True and result.get("ready") is True and callable(checker):
+                    result = {
+                        **result,
+                        "handoff_takeover_check": checker(
+                            deployment_audit=result,
+                            active_service=active_service,
+                        ),
+                    }
+                return result
         except (AppServerError, SessionHubError) as exc:
             return {"ok": False, "ready": False, "message": str(exc)}
     audit_started = False

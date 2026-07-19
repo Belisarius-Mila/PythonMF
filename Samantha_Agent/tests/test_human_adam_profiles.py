@@ -360,6 +360,40 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(proposal["state"], "unverifiable")
         self.assertFalse(proposal["available"])
 
+    def test_takeover_handoff_check_uses_owned_project_binding_and_is_warning_only(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            continuity, project_id, handoff_path = self.make_project_continuity(root)
+            manager, *_rest = self.make_manager(root, project_continuity=continuity)
+            manager.change_development_semaphore(
+                operation="acquire_profile",
+                expected_revision=0,
+                topic="Kontrola převzetí",
+                project_id=project_id,
+                handoff_path=handoff_path,
+                confirmed=True,
+            )
+            verified = manager.takeover_handoff_check(
+                deployment_audit={
+                    "ok": True,
+                    "ready": True,
+                    "changes": [{"status": "M", "path": f"human/{handoff_path}"}],
+                }
+            )
+            warning = manager.takeover_handoff_check(
+                deployment_audit={
+                    "ok": True,
+                    "ready": True,
+                    "changes": [{"status": "M", "path": "human/app/example.py"}],
+                }
+            )
+
+        self.assertEqual(verified["state"], "verified")
+        self.assertTrue(verified["handoff_in_checkpoint"])
+        self.assertEqual(warning["state"], "warning")
+        self.assertFalse(warning["blocking"])
+        self.assertFalse(warning["writes_performed"])
+
     def test_checkpoint_requires_active_owned_lease_and_pause_blocks_it(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, human_workspace, *_rest = self.make_manager(Path(temp_dir))

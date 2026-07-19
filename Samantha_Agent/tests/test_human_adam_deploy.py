@@ -5,6 +5,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -78,6 +79,45 @@ class HumanAdamDeployTests(unittest.TestCase):
         self.assertTrue(result["ready"])
         self.assertEqual(result["checkpoint_token"], checkpoint["checkpoint_head"])
         self.assertEqual(result["confirmation_text"], CONFIRMATION_TEXT)
+
+    def test_profile_audit_attaches_nonblocking_handoff_check_without_changing_readiness(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            _source, manager, _checkpoint = prepare_checkpoint(Path(temp_dir))
+            active_service = SimpleNamespace(
+                hub=SimpleNamespace(snapshot=lambda: {"turn_busy": False}),
+                workspace=manager,
+                work_profile_id="human_adam",
+            )
+            calls: dict[str, object] = {}
+
+            @contextmanager
+            def profile_operation():
+                yield active_service
+
+            def assert_deployment_allowed(owner_id: str) -> None:
+                calls["owner_id"] = owner_id
+
+            def takeover_handoff_check(**kwargs: object) -> dict[str, object]:
+                calls["check_kwargs"] = kwargs
+                return {
+                    "ok": True,
+                    "state": "warning",
+                    "blocking": False,
+                    "writes_performed": False,
+                }
+
+            wrapper = SimpleNamespace(
+                profile_operation=profile_operation,
+                assert_deployment_allowed=assert_deployment_allowed,
+                takeover_handoff_check=takeover_handoff_check,
+            )
+            result = human_adam_deploy_audit_action(service=wrapper)
+
+        self.assertTrue(result["ready"])
+        self.assertEqual(result["handoff_takeover_check"]["state"], "warning")
+        self.assertFalse(result["handoff_takeover_check"]["blocking"])
+        self.assertEqual(calls["owner_id"], "human_adam")
+        self.assertIs(calls["check_kwargs"]["active_service"], active_service)
         self.assertEqual(result["change_count"], 2)
         self.assertNotIn("VALUE = 27", str(result))
 

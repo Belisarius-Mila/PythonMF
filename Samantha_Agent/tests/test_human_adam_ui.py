@@ -61,6 +61,7 @@ class HumanAdamUiTests(unittest.TestCase):
             "checkpointMessage",
             "checkpointBtn",
             "deployMeta",
+            "handoffTakeoverCheck",
             "deployAuditBtn",
             "deployConfirmation",
             "deployBtn",
@@ -264,6 +265,23 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('handoffProposalBox.scrollIntoView({block:"nearest",behavior:"smooth"});', HUMAN_ADAM_HTML)
         self.assertIn("Zobrazí se k přečtení, ale sám se neuloží", HUMAN_ADAM_HTML)
 
+    def test_takeover_handoff_check_is_visible_read_only_and_does_not_block_deploy(self) -> None:
+        render_start = HUMAN_ADAM_HTML.index("function renderDeploymentAudit(payload)")
+        render_end = HUMAN_ADAM_HTML.index("async function auditDeployment()", render_start)
+        source = HUMAN_ADAM_HTML[render_start:render_end]
+
+        self.assertIn('id="handoffTakeoverCheck"', HUMAN_ADAM_HTML)
+        self.assertIn("payload.handoff_takeover_check", source)
+        self.assertIn("function renderHandoffTakeoverCheck(check)", source)
+        self.assertIn("handoffTakeoverCheck.textContent", source)
+        self.assertNotIn("innerHTML", source)
+        self.assertNotIn("api(", source)
+        self.assertNotIn("fetch(", source)
+        self.assertIn("Pouze varování; nasazení zatím neblokuje", source)
+        self.assertIn("deployConfirmation.disabled = false;", source)
+        self.assertIn("deployBtn.disabled = true;", source)
+        self.assertNotIn("check.blocking", source)
+
     def test_development_branch_lifecycle_ui_is_explicitly_read_only(self) -> None:
         start = HUMAN_ADAM_HTML.index("async function loadDevelopmentBranchAudit()")
         end = HUMAN_ADAM_HTML.index("function openWork()", start)
@@ -297,6 +315,8 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Životní cyklus větví", panel_source)
         self.assertIn("Není to Codex vlákno", panel_source)
         self.assertIn("Kandidát k úklidu neznamená smazáno", panel_source)
+        self.assertIn("Kontrola při převzetí", panel_source)
+        self.assertIn("pouze varuje a nasazení neblokuje", panel_source)
         self.assertIn("aktivní · rozpracováno", panel_source)
         self.assertIn("vyžaduje revizi / nelze ověřit", panel_source)
         self.assertIn("reset, rebase ani force push", panel_source)

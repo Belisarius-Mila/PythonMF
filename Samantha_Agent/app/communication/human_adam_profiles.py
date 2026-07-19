@@ -441,6 +441,52 @@ class HumanAdamProfileManager:
                 },
             }
 
+    def takeover_handoff_check(
+        self,
+        *,
+        deployment_audit: dict[str, Any],
+        active_service: HumanAdamService | None = None,
+    ) -> dict[str, Any]:
+        """Return a warning-only proof for the handoff selected by the lease."""
+        fallback = {
+            "ok": False,
+            "read_only": True,
+            "blocking": False,
+            "writes_performed": False,
+            "state": "unverifiable",
+            "label": "Nelze ověřit",
+            "message": "Kontrola handoffu selhala bezpečně; nasazení zatím neblokuje.",
+            "handoff_in_checkpoint": False,
+        }
+        try:
+            service = active_service or self.active_service
+            owner_id = str(getattr(service, "work_profile_id", "") or "")
+            lease = self.development_semaphore.status()
+            if (
+                lease.get("ok") is not True
+                or lease.get("active") is not True
+                or lease.get("owner_id") != owner_id
+            ):
+                return fallback
+            if deployment_audit.get("ok") is not True or deployment_audit.get("ready") is not True:
+                return fallback
+            binding = {
+                "project_id": str(lease.get("project_id") or ""),
+                "project_label": str(lease.get("project_label") or ""),
+                "handoff_path": str(lease.get("handoff_path") or ""),
+                "tvbcp_path": str(lease.get("tvbcp_path") or ""),
+            }
+            changes = deployment_audit.get("changes")
+            if not isinstance(changes, list):
+                return fallback
+            return self.project_continuity.takeover_handoff_check(
+                binding=binding,
+                checkpoint_changes=changes,
+                project_dir_name=service.workspace.project_root.name,
+            )
+        except (AppServerError, ProjectContinuityError, OSError, TypeError, ValueError):
+            return fallback
+
     def checkpoint(self, **kwargs: Any) -> dict[str, Any]:
         with self.profile_operation() as service:
             self.development_semaphore.assert_owner(self.active_profile_id)

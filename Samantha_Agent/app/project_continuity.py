@@ -523,3 +523,63 @@ class ProjectContinuityService:
             "changed_files": changes,
             "draft": draft,
         }
+
+    def takeover_handoff_check(
+        self,
+        *,
+        binding: dict[str, Any],
+        checkpoint_changes: list[dict[str, Any]],
+        project_dir_name: str,
+    ) -> dict[str, Any]:
+        """Check project/handoff checkpoint evidence without blocking or writing."""
+        base = {
+            "ok": True,
+            "read_only": True,
+            "blocking": False,
+            "writes_performed": False,
+            "state": "unverifiable",
+            "label": "Nelze ověřit",
+            "message": "Handoff checkpointu nelze bezpečně ověřit.",
+            "handoff_in_checkpoint": False,
+        }
+        try:
+            resolved = self.resolve_binding(
+                project_id=str(binding.get("project_id") or ""),
+                handoff_path=str(binding.get("handoff_path") or ""),
+                fallback_tvbcp_path=str(binding.get("tvbcp_path") or ""),
+            )
+        except ProjectContinuityError as exc:
+            return {**base, "message": str(exc)}
+
+        changed = _changed_paths(
+            {"checkpoint_changes": checkpoint_changes},
+            project_dir_name=str(project_dir_name or "").strip(),
+        )
+        if not changed:
+            return {
+                **base,
+                "binding": resolved,
+                "target_handoff": resolved["handoff_path"],
+                "message": "Audit checkpointu neposkytl ověřitelné cesty změn.",
+            }
+        if resolved["handoff_path"] not in changed:
+            return {
+                **base,
+                "binding": resolved,
+                "target_handoff": resolved["handoff_path"],
+                "state": "warning",
+                "label": "Handoff chybí v checkpointu",
+                "message": (
+                    "Vybraný handoff patří projektu, ale tento checkpoint jej neobsahuje. "
+                    "V této fázi jde pouze o varování."
+                ),
+            }
+        return {
+            **base,
+            "binding": resolved,
+            "target_handoff": resolved["handoff_path"],
+            "state": "verified",
+            "label": "Handoff odpovídá",
+            "message": "Vybraný handoff patří projektu a je obsažen v checkpointu.",
+            "handoff_in_checkpoint": True,
+        }
