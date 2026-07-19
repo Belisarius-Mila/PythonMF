@@ -124,7 +124,9 @@ class ProjectContinuityTests(unittest.TestCase):
         self.assertEqual(project.project_id, created["project_id"])
         self.assertEqual(project.handoff_paths, (created["handoff_path"],))
         self.assertTrue(handoff_exists)
-        self.assertIn("Vlastni implementace zatim nezacala", handoff_text)
+        self.assertIn("Dalsi planovana vyvojova etapa zatim nezacala", handoff_text)
+        self.assertNotIn("Vlastni implementace zatim nezacala", handoff_text)
+        self.assertIn("Samotnou registraci nevznikl novy checkpoint", handoff_text)
         self.assertIn("Rodinný kalendář", registry_text)
 
     def test_project_bootstrap_rejects_duplicate_unsafe_text_and_missing_confirmation(self) -> None:

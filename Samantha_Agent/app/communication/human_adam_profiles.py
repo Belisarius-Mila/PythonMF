@@ -389,14 +389,14 @@ class HumanAdamProfileManager:
     ) -> dict[str, Any]:
         lease = self.development_semaphore.status()
         if lease.get("ok") is not True or lease.get("active") is True:
-            raise AppServerError("Nový projekt lze založit jen při volném vývojovém semaforu.")
+            raise AppServerError("Projekt lze zaregistrovat jen při volném vývojovém semaforu.")
         active_id = self.active_profile_id
         active_row = next(
             (row for row in self._development_workspace_rows() if row["id"] == active_id),
             None,
         )
         if active_row is None or self._row_blocker(active_row):
-            raise AppServerError("Aktivní profil nemá čistý bezpečný workspace pro nový projekt.")
+            raise AppServerError("Aktivní profil nemá čistý bezpečný workspace pro registraci projektu.")
         if active_row.get("workspace_relation") != "aligned":
             raise AppServerError("Nejdřív připoj profil a synchronizuj jeho workspace s main.")
         if any(
@@ -404,9 +404,9 @@ class HumanAdamProfileManager:
             for row in self._development_workspace_rows()
             if row["id"] != active_id
         ):
-            raise AppServerError("Nový projekt blokuje cizí WIP v jiném profilu.")
+            raise AppServerError("Registraci projektu blokuje cizí WIP v jiném profilu.")
         if self.active_service.hub.snapshot().get("turn_busy"):
-            raise AppServerError("Nový projekt nelze založit během aktivního tahu Adama.")
+            raise AppServerError("Projekt nelze zaregistrovat během aktivního tahu Adama.")
         preview = self._workspace_project_continuity().project_bootstrap_preview(
             project_label=project_label,
             priority=priority,
@@ -435,7 +435,7 @@ class HumanAdamProfileManager:
                 f"Chybí přesná potvrzovací věta: {PROJECT_BOOTSTRAP_CONFIRMATION}"
             )
         if not self._operation_lock.acquire(blocking=False):
-            raise SessionBusyError("Založení projektu právě blokuje jiná profilová operace.")
+            raise SessionBusyError("Registraci projektu právě blokuje jiná profilová operace.")
         temporary_lease: dict[str, Any] | None = None
         try:
             preview = self.project_bootstrap_preview(

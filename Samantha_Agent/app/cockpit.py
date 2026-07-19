@@ -9285,7 +9285,7 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
     },
     {
         "path": "/api/human-adam/project-bootstrap",
-        "label": "Zalozit novy projekt a pocatecni handoff v izolovanem profilu",
+        "label": "Zaregistrovat projekt a vychozi handoff v izolovanem profilu",
         "risk": "workspace_write",
         "confirmation": "preview_plus_exact_project_bootstrap_phrase",
         "handler_name": "human_adam_project_bootstrap_action",

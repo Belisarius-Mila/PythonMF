@@ -32,7 +32,7 @@ PROPOSAL_BLOCKED_PATH_PARTS = (
     "/.env",
 )
 PROPOSAL_BLOCKED_SUFFIXES = {".key", ".pem", ".p12", ".pfx"}
-PROJECT_BOOTSTRAP_CONFIRMATION = "POTVRZUJI ZALOZENI NOVEHO PROJEKTU"
+PROJECT_BOOTSTRAP_CONFIRMATION = "POTVRZUJI REGISTRACI PROJEKTU"
 PROJECT_BOOTSTRAP_PRIORITIES = {"1", "2", "3"}
 
 
@@ -300,7 +300,7 @@ class ProjectContinuityService:
         goal: str,
         next_step: str,
     ) -> dict[str, Any]:
-        """Validate and preview a new git-safe project without writing files."""
+        """Validate and preview a git-safe project registration without writing files."""
         clean_label = _bootstrap_line(
             project_label,
             label="Název projektu",
@@ -309,7 +309,7 @@ class ProjectContinuityService:
         )
         clean_priority = str(priority or "").strip()
         if clean_priority not in PROJECT_BOOTSTRAP_PRIORITIES:
-            raise ProjectContinuityError("Priorita nového projektu musí být 1, 2 nebo 3.")
+            raise ProjectContinuityError("Priorita registrovaného projektu musí být 1, 2 nebo 3.")
         clean_goal = _bootstrap_line(goal, label="Cíl projektu", minimum=5, maximum=240)
         clean_next_step = _bootstrap_line(
             next_step,
@@ -350,7 +350,7 @@ class ProjectContinuityService:
         next_step: str,
         confirmation: str,
     ) -> dict[str, Any]:
-        """Create one project row and one initial handoff in an isolated workspace."""
+        """Register one project row and one starting handoff in an isolated workspace."""
         if str(confirmation or "").strip() != PROJECT_BOOTSTRAP_CONFIRMATION:
             raise ProjectContinuityError(
                 f"Chybí přesná potvrzovací věta: {PROJECT_BOOTSTRAP_CONFIRMATION}"
@@ -387,12 +387,12 @@ class ProjectContinuityService:
                         f"- {preview['goal']}",
                         "",
                         "Co je hotove:",
-                        "- Projekt a tento pocatecni handoff byly zalozeny potvrzenou fazi 0 v Cockpitu.",
-                        "- Vyvojovy semafor se po uspesnem zalozeni pripne k tomuto projektu.",
+                        "- Projekt a tento vychozi handoff byly zaregistrovany potvrzenou fazi 0 v Cockpitu.",
+                        "- Vyvojovy semafor se po uspesne registraci pripne k tomuto projektu.",
                         "",
                         "Co neni hotove:",
-                        "- Vlastni implementace zatim nezacala.",
-                        "- Nevznikl checkpoint, commit, push ani nasazeni.",
+                        "- Dalsi planovana vyvojova etapa zatim nezacala.",
+                        "- Samotnou registraci nevznikl novy checkpoint, commit, push ani nasazeni.",
                         "",
                         "Dalsi krok:",
                         f"- {preview['next_step']}",
@@ -412,7 +412,7 @@ class ProjectContinuityService:
                 )
                 row = (
                     f"| {preview['project_label']} | {preview['priority']} | active | "
-                    "Založeno potvrzenou fází 0 v Cockpitu; vlastní vývoj ještě nezačal. | "
+                    "Zaregistrováno potvrzenou fází 0 v Cockpitu; další vývojová etapa ještě nezačala. | "
                     f"zatím není | `{handoff_relative}` | {preview['next_step']} |"
                 )
                 updated_registry = _append_active_project_row(original_registry, row)
@@ -431,7 +431,7 @@ class ProjectContinuityService:
                     "created": True,
                     "binding": binding,
                     "message": (
-                        "Projekt a počáteční handoff vznikly v izolovaném workspace; "
+                        "Projekt a výchozí handoff byly zaregistrovány v izolovaném workspace; "
                         "nic nebylo commitnuto ani pushnuto."
                     ),
                 }
@@ -447,7 +447,7 @@ class ProjectContinuityService:
                 except OSError:
                     pass
             raise ProjectContinuityError(
-                "Nový projekt se nepodařilo bezpečně zapsat; nic existujícího jsem nepřepsal."
+                "Projekt se nepodařilo bezpečně zaregistrovat; nic existujícího jsem nepřepsal."
             ) from exc
         except ProjectContinuityError:
             if registry_written:

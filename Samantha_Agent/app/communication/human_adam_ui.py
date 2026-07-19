@@ -312,7 +312,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <h4>Co je co</h4>
       <ul>
         <li><strong>Vývojový semafor</strong> určuje jediného vlastníka zápisu. Ostatní Adamové zůstávají read-only.</li>
-        <li><strong>Fáze 0</strong> založí dosud neexistující projekt a jeho první handoff přímo v izolovaném workspace vybraného profilu.</li>
+        <li><strong>Fáze 0</strong> jednou zaregistruje dosud neevidovaný projekt a jeho výchozí handoff přímo v izolovaném workspace vybraného profilu. Projekt může být úplně nový, nebo už může mít existující základ.</li>
         <li><strong>WIP větev</strong> bezpečně odděluje jeden vývojový úkol. Není to Codex vlákno a jeho existence nezaplňuje konverzaci.</li>
         <li><strong>Worktree</strong> je oddělená pracovní kopie projektu připojená k určité větvi.</li>
         <li><strong>Projektová vazba</strong> spojuje jeden vývoj se zvoleným projektem a handoffem; audit pouze čte důkazy a nic nepřepisuje.</li>
@@ -321,15 +321,16 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <li><strong>Potvrzené dokončení</strong> se nabídne až po novém procesu a smoke testu. Zapíše jen commit, testy, restart, smoke test, stav nasazeno a tebou zadaný další krok.</li>
       </ul>
 
-      <h4>Fáze 0 až 4: od nového projektu po nasazení</h4>
+      <h4>Fáze 0 až 4: od registrace projektu po nasazení</h4>
       <ol>
         <li>
-          <strong>Fáze 0 — nový projekt a první handoff.</strong>
-          Použij ji jen tehdy, když požadovaný projekt ještě není v nabídce. Při volném semaforu klikni na <strong>+ Nový projekt / handoff</strong>, vyplň název, prioritu, cíl a nejbližší krok a nejdřív spusť náhled.
+          <strong>Fáze 0 — registrace projektu a výchozího handoffu.</strong>
+          Použij ji jen tehdy, když dlouhodobější projekt ještě není v nabídce. Může jít o úplně nový projekt i o existující oblast, kterou teprve zařazujeme do řízeného vývoje. Při volném semaforu klikni na <strong>+ Zaregistrovat projekt / handoff</strong>, vyplň název, prioritu, cíl a nejbližší vývojovou etapu a nejdřív spusť náhled.
           <ul>
-            <li><strong>Náhled nic nezapisuje.</strong> Ukáže přesný název handoffu, dvě cílové cesty a potvrzovací větu <code>POTVRZUJI ZALOZENI NOVEHO PROJEKTU</code>.</li>
-            <li>Po přesném potvrzení Cockpit založí projekt v <code>ACTIVE_PROJECTS.md</code> a standardní první handoff pouze v izolovaném workspace aktivního profilu.</li>
-            <li>Současně převezme a připne stejný vývojový semafor k novému projektu. Teprve potom zadej Adamovi vývojový úkol.</li>
+            <li><strong>Náhled nic nezapisuje.</strong> Ukáže přesný název handoffu, dvě cílové cesty a potvrzovací větu <code>POTVRZUJI REGISTRACI PROJEKTU</code>.</li>
+            <li>Po přesném potvrzení Cockpit přidá projekt do <code>ACTIVE_PROJECTS.md</code> a vytvoří standardní výchozí handoff pouze v izolovaném workspace aktivního profilu.</li>
+            <li>Současně převezme a připne stejný vývojový semafor k registrovanému projektu. Teprve potom zadej Adamovi vývojový úkol.</li>
+            <li><strong>Projekt se registruje jen jednou.</strong> Další funkce, opravy a malé etapy uvnitř něj už nejsou nové projekty; příště jej pouze vyber v nabídce.</li>
             <li>Fáze 0 sama nedělá commit, push, převzetí do <code>main</code> ani nasazení. Do polí nevkládej tajemství ani soukromé údaje.</li>
           </ul>
         </li>
@@ -430,23 +431,23 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <div class="development-semaphore-actions">
         <button class="primary" id="developmentAcquireProfileBtn" type="button">Převzít pro tento profil</button>
         <button id="developmentAcquireTerminalBtn" type="button">Převzít pro terminál</button>
-        <button id="developmentNewProjectBtn" type="button">+ Nový projekt / handoff</button>
+        <button id="developmentNewProjectBtn" type="button">+ Zaregistrovat projekt / handoff</button>
         <button id="developmentPauseBtn" type="button" hidden>Pozastavit</button>
         <button id="developmentResumeBtn" type="button" hidden>Obnovit</button>
         <button id="developmentReleaseBtn" type="button" hidden>Uvolnit</button>
       </div>
-      <section class="project-bootstrap-box" id="projectBootstrapBox" aria-label="Fáze 0 – nový projekt a první handoff" hidden>
+      <section class="project-bootstrap-box" id="projectBootstrapBox" aria-label="Fáze 0 – registrace projektu a výchozího handoffu" hidden>
         <div class="project-bootstrap-head">
-          <h4>Fáze 0 — nový projekt a první handoff</h4>
+          <h4>Fáze 0 — registrace projektu a výchozího handoffu</h4>
           <button id="projectBootstrapCloseBtn" type="button">Zavřít</button>
         </div>
-        <p>Nejdřív vznikne pouze read-only náhled. Potvrzený zápis proběhne jen v izolovaném workspace tohoto profilu; bez commitu, pushnutí a nasazení.</p>
+        <p>Projekt může být nový i již rozpracovaný, ale v tomto registru smí být jen jednou. Nejdřív vznikne pouze read-only náhled. Potvrzený zápis proběhne jen v izolovaném workspace tohoto profilu; bez commitu, pushnutí a nasazení.</p>
         <div class="project-bootstrap-fields">
           <label>Název projektu
             <input id="projectBootstrapLabel" maxlength="100" autocomplete="off" placeholder="Např. Náhled upozornění v kalendáři">
           </label>
           <label>Priorita
-            <select id="projectBootstrapPriority" aria-label="Priorita nového projektu">
+            <select id="projectBootstrapPriority" aria-label="Priorita registrovaného projektu">
               <option value="1">1</option>
               <option value="2" selected>2</option>
               <option value="3">3</option>
@@ -456,7 +457,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
             <input id="projectBootstrapGoal" maxlength="240" autocomplete="off" placeholder="Co má být po dokončení prokazatelně hotové">
           </label>
           <label class="wide">Nejbližší krok
-            <input id="projectBootstrapNextStep" maxlength="180" autocomplete="off" placeholder="První malý vývojový krok">
+            <input id="projectBootstrapNextStep" maxlength="180" autocomplete="off" placeholder="Nejbližší malá vývojová etapa">
           </label>
         </div>
         <div class="project-bootstrap-actions">
@@ -465,7 +466,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <p id="projectBootstrapMeta" role="status">Nevkládej hesla, tokeny, osobní údaje ani soukromé texty.</p>
         <ul id="projectBootstrapPreview" hidden></ul>
         <input id="projectBootstrapConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Po náhledu sem vlož přesnou potvrzovací větu" hidden disabled>
-        <button class="primary" id="projectBootstrapCreateBtn" type="button" hidden disabled>Založit projekt, handoff a převzít semafor</button>
+        <button class="primary" id="projectBootstrapCreateBtn" type="button" hidden disabled>Zaregistrovat projekt, handoff a převzít semafor</button>
       </section>
     </section>
     <section class="project-continuity-box" aria-label="Aktuálnost projektového handoffu">
@@ -1944,7 +1945,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
         method:"POST",
         body:JSON.stringify(projectBootstrapPayload("preview")),
       });
-      if (!payload.ok || payload.ready !== true) throw new Error(payload.message || "Náhled nového projektu nelze připravit.");
+      if (!payload.ok || payload.ready !== true) throw new Error(payload.message || "Náhled registrace projektu nelze připravit.");
       renderProjectBootstrapPreview(payload);
       notice.textContent = "Náhled fáze 0 je připravený. Žádný soubor ani semafor se nezměnil.";
     } catch (error) {
@@ -1961,20 +1962,20 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       confirmation:projectBootstrapConfirmation.value.trim(),
     };
     let outcomeNotice = "";
-    setBusy(true, "Zakládám projekt a handoff v izolovaném workspace…");
+    setBusy(true, "Registruji projekt a handoff v izolovaném workspace…");
     try {
       const payload = await api("/api/human-adam/project-bootstrap", {
         method:"POST",
         body:JSON.stringify(request),
       });
-      if (!payload.ok) throw new Error(payload.message || "Projekt a handoff nelze založit.");
+      if (!payload.ok) throw new Error(payload.message || "Projekt a handoff nelze zaregistrovat.");
       const createdLabel = String(payload.project_label || request.project_label);
       projectBootstrapLabel.value = "";
       projectBootstrapPriority.value = "2";
       projectBootstrapGoal.value = "";
       projectBootstrapNextStep.value = "";
       setProjectBootstrapOpen(false);
-      outcomeNotice = `Projekt „${createdLabel}“ a první handoff byly založeny. Semafor nyní vlastní ${activeProfileLabel}; nevznikl commit ani push.`;
+      outcomeNotice = `Projekt „${createdLabel}“ a výchozí handoff byly zaregistrovány. Semafor nyní vlastní ${activeProfileLabel}; nevznikl commit ani push.`;
     } catch (error) {
       resetProjectBootstrapPreview(`Zápis byl bezpečně zastaven: ${error.message} Připrav nový náhled.`);
       outcomeNotice = `Fáze 0 nebyla provedena: ${error.message}`;
