@@ -62,6 +62,12 @@ class HumanAdamUiTests(unittest.TestCase):
             "checkpointBtn",
             "deployMeta",
             "handoffTakeoverCheck",
+            "deploymentCompletionBox",
+            "deploymentCompletionMeta",
+            "deploymentCompletionEvidence",
+            "deploymentCompletionNextStep",
+            "deploymentCompletionConfirmation",
+            "deploymentCompletionBtn",
             "deployAuditBtn",
             "deployConfirmation",
             "deployBtn",
@@ -282,6 +288,22 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("deployBtn.disabled = true;", source)
         self.assertNotIn("check.blocking", source)
 
+    def test_post_restart_completion_requires_verified_evidence_and_exact_phrase(self) -> None:
+        start = HUMAN_ADAM_HTML.index("function renderDeploymentCompletion(payload)")
+        end = HUMAN_ADAM_HTML.index("function updateDevelopmentHandoffs", start)
+        source = HUMAN_ADAM_HTML[start:end]
+
+        self.assertIn('aria-label="Potvrzené dokončení handoffu po nasazení"', HUMAN_ADAM_HTML)
+        self.assertIn('api("/api/human-adam/deployment-completion")', source)
+        self.assertIn('method:"POST"', source)
+        self.assertIn("confirmation:deploymentCompletionConfirmation.value.trim()", source)
+        self.assertIn("next_step:deploymentCompletionNextStep.value.trim()", source)
+        self.assertIn("deploymentCompletion.ready === true", HUMAN_ADAM_HTML)
+        self.assertIn("deploymentCompletionConfirmation.value.trim() !== required", HUMAN_ADAM_HTML)
+        self.assertIn("Zapíší se pouze uvedená ověřená fakta", HUMAN_ADAM_HTML)
+        self.assertIn("textContent", source)
+        self.assertNotIn("innerHTML", source)
+
     def test_development_branch_lifecycle_ui_is_explicitly_read_only(self) -> None:
         start = HUMAN_ADAM_HTML.index("async function loadDevelopmentBranchAudit()")
         end = HUMAN_ADAM_HTML.index("function openWork()", start)
@@ -317,6 +339,8 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Kandidát k úklidu neznamená smazáno", panel_source)
         self.assertIn("Kontrola při převzetí", panel_source)
         self.assertIn("pouze varuje a nasazení neblokuje", panel_source)
+        self.assertIn("Potvrzené dokončení", panel_source)
+        self.assertIn("stav nasazeno", panel_source)
         self.assertIn("aktivní · rozpracováno", panel_source)
         self.assertIn("vyžaduje revizi / nelze ověřit", panel_source)
         self.assertIn("reset, rebase ani force push", panel_source)

@@ -801,7 +801,33 @@ def human_adam_deploy_action(
                 service.assert_deployment_allowed(profile_id)
                 result = human_adam_deploy_action(payload, service=active_service)
                 if result.get("ok") and result.get("applied") is True:
-                    result["development_semaphore_message"] = service.finish_deployment_lease(profile_id)
+                    preparer = getattr(service, "prepare_deployment_completion", None)
+                    if callable(preparer):
+                        try:
+                            result["deployment_completion"] = preparer(
+                                profile_id=profile_id,
+                                deployment_result=result,
+                                previous_pid=int(payload.get("_server_pid") or 0),
+                            )
+                            result["development_semaphore_message"] = (
+                                "Semafor zůstává aktivní do potvrzeného dokončení po restartu."
+                            )
+                        except (AppServerError, OSError, TypeError, ValueError):
+                            result["deployment_completion"] = {
+                                "ok": False,
+                                "available": True,
+                                "ready": False,
+                                "state": "unverifiable",
+                                "label": "Nelze připravit dokončení",
+                                "message": (
+                                    "Nasazení proběhlo, ale dokončení handoffu nebylo připravené; "
+                                    "semafor zůstává aktivní."
+                                ),
+                                "blocking": False,
+                                "writes_performed": False,
+                            }
+                    else:
+                        result["development_semaphore_message"] = service.finish_deployment_lease(profile_id)
                 return {**result, "_work_profile_id": profile_id}
         except (AppServerError, SessionHubError) as exc:
             return {"ok": False, "ready": False, "message": str(exc)}

@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import atexit
 import json
+import os
 import re
+import subprocess
 import threading
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -33,8 +35,13 @@ from app.communication.human_adam_workspace import (
 )
 from app.communication.local_runtime import LocalAppServerProcessController
 from app.communication.session_hub import SessionBusyError, SessionHubError
-from app.file_persistence import atomic_write_json
+from app.file_persistence import (
+    atomic_replace_text_under_external_lock,
+    atomic_write_json,
+    exclusive_file_lock,
+)
 from app.project_continuity import ProjectContinuityError, ProjectContinuityService
+from scripts.cockpit_smoke_check import run_smoke_check
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -42,6 +49,7 @@ PRIVATE_COMMUNICATION_ROOT = PROJECT_ROOT / "data" / "private" / "communication"
 PRIVATE_PROFILE_ROOT = PROJECT_ROOT / "data" / "private" / "human_adam_profiles"
 DEFAULT_PROFILE_STATE_PATH = PRIVATE_COMMUNICATION_ROOT / "human_adam_active_profile.json"
 DEFAULT_DEVELOPMENT_SEMAPHORE_PATH = PRIVATE_COMMUNICATION_ROOT / "development_semaphore.json"
+DEFAULT_DEPLOYMENT_COMPLETION_PATH = PRIVATE_COMMUNICATION_ROOT / "deployment_completion.json"
 DEFAULT_HUMAN_SESSION_PATH = PRIVATE_COMMUNICATION_ROOT / "canonical_session.json"
 DEFAULT_HUMAN_CONTEXT_ANCHOR_PATH = PRIVATE_COMMUNICATION_ROOT / "human_adam_context_anchor.json"
 KNIHOVNA_PROFILE_ROOT = PRIVATE_PROFILE_ROOT / "knihovna"
@@ -49,6 +57,8 @@ KNIHOVNA_CONTEXT_ANCHOR_PATH = PRIVATE_COMMUNICATION_ROOT / "knihovna_context_an
 KNIHOVNA_TVBCP_RELATIVE_PATH = Path("memory/tvbcp/knihovna_cockpit.txt")
 PROFILE_ID_RE = re.compile(r"[a-z][a-z0-9_-]{1,31}")
 PROFILE_STATE_SCHEMA = 1
+DEPLOYMENT_COMPLETION_SCHEMA = 1
+DEPLOYMENT_COMPLETION_CONFIRMATION = "POTVRZUJI DOKONCENI HANDOFFU PO NASAZENI"
 
 KNIHOVNA_DEVELOPER_INSTRUCTIONS = (
     HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS
@@ -75,6 +85,22 @@ def _now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
+def _git_text(repo: Path, args: list[str], *, timeout: float = 30.0) -> str:
+    try:
+        completed = subprocess.run(
+            ["/usr/bin/git", "-C", str(repo), *args],
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise AppServerError("Git důkaz dokončení nasazení nelze bezpečně ověřit.") from exc
+    if completed.returncode != 0:
+        raise AppServerError("Git důkaz dokončení nasazení nelze bezpečně ověřit.")
+    return completed.stdout.strip()
+
+
 class HumanAdamProfileManager:
     """Route one visible UI to isolated, persistent work-profile bundles."""
 
@@ -87,6 +113,7 @@ class HumanAdamProfileManager:
         runtime: LocalAppServerProcessController | None = None,
         development_semaphore: DevelopmentSemaphore | None = None,
         project_continuity: ProjectContinuityService | None = None,
+        deployment_completion_path: Path | None = None,
     ):
         if not profiles or default_profile_id not in profiles:
             raise ValueError("Pracovní profily Human–Adam nemají platný výchozí profil.")
@@ -107,6 +134,14 @@ class HumanAdamProfileManager:
         self.development_semaphore = development_semaphore or DevelopmentSemaphore(semaphore_path)
         continuity_root = PROJECT_ROOT if self.state_path == DEFAULT_PROFILE_STATE_PATH else self.state_path.parent
         self.project_continuity = project_continuity or ProjectContinuityService(project_root=continuity_root)
+        self.deployment_completion_path = Path(
+            deployment_completion_path
+            or (
+                DEFAULT_DEPLOYMENT_COMPLETION_PATH
+                if self.state_path == DEFAULT_PROFILE_STATE_PATH
+                else self.state_path.with_name("deployment_completion.json")
+            )
+        )
         self._state_lock = threading.RLock()
         self._operation_lock = threading.Lock()
         self._state_error = ""
@@ -486,6 +521,306 @@ class HumanAdamProfileManager:
             )
         except (AppServerError, ProjectContinuityError, OSError, TypeError, ValueError):
             return fallback
+
+    def _load_deployment_completion(self) -> dict[str, Any]:
+        if not self.deployment_completion_path.is_file():
+            return {}
+        try:
+            raw = json.loads(self.deployment_completion_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise AppServerError("Stav dokončení nasazení nelze bezpečně načíst.") from exc
+        if not isinstance(raw, dict) or raw.get("schema_version") != DEPLOYMENT_COMPLETION_SCHEMA:
+            raise AppServerError("Stav dokončení nasazení má neznámé schéma.")
+        return raw
+
+    def prepare_deployment_completion(
+        self,
+        *,
+        profile_id: str,
+        deployment_result: dict[str, Any],
+        previous_pid: int,
+    ) -> dict[str, Any]:
+        """Persist only safe facts required for explicit post-restart completion."""
+        lease = self.development_semaphore.status()
+        if lease.get("ok") is not True or lease.get("owner_id") != profile_id:
+            raise AppServerError("Dokončení nasazení nemá vlastněný vývojový semafor.")
+        binding = self.project_continuity.resolve_binding(
+            project_id=str(lease.get("project_id") or ""),
+            handoff_path=str(lease.get("handoff_path") or ""),
+            fallback_tvbcp_path=str(lease.get("tvbcp_path") or ""),
+        )
+        checkpoint_head = str(deployment_result.get("checkpoint_token") or "").strip().casefold()
+        gate = deployment_result.get("gate") or {}
+        test_count = int(gate.get("test_count") or 0)
+        confirmation = deployment_result.get("deployment_confirmation") or {}
+        deployed_at = str(confirmation.get("completed_at") or "").strip()
+        clean_previous_pid = int(previous_pid)
+        if (
+            not re.fullmatch(r"[0-9a-f]{40}", checkpoint_head)
+            or test_count <= 0
+            or not deployed_at
+            or clean_previous_pid <= 0
+        ):
+            raise AppServerError("Nasazení neposkytlo úplné podklady pro dokončení handoffu.")
+        record = {
+            "schema_version": DEPLOYMENT_COMPLETION_SCHEMA,
+            "state": "pending_restart",
+            "profile_id": profile_id,
+            "project_id": binding["project_id"],
+            "project_label": binding["project_label"],
+            "handoff_path": binding["handoff_path"],
+            "tvbcp_path": binding.get("tvbcp_path", ""),
+            "checkpoint_head": checkpoint_head,
+            "test_count": test_count,
+            "previous_pid": clean_previous_pid,
+            "deployed_at": deployed_at,
+            "created_at": _now(),
+            "completion_commit": "",
+            "completed_at": "",
+        }
+        atomic_write_json(self.deployment_completion_path, record, ensure_ascii=False, indent=2)
+        return {
+            "ok": True,
+            "available": True,
+            "ready": False,
+            "state": "pending_restart",
+            "label": "Čeká na restart a smoke test",
+            "message": "Po návratu Cockpitu otevři Práci a potvrď dokončení handoffu.",
+            "blocking": False,
+            "writes_performed": False,
+        }
+
+    def deployment_completion_status(self) -> dict[str, Any]:
+        """Audit restart, Git and smoke evidence without changing handoff or Git."""
+        base = {
+            "ok": True,
+            "available": False,
+            "ready": False,
+            "read_only": True,
+            "blocking": False,
+            "writes_performed": False,
+            "state": "idle",
+            "label": "Bez čekajícího dokončení",
+            "message": "Po nasazení se zde nabídne potvrzené dokončení handoffu.",
+            "confirmation_text": DEPLOYMENT_COMPLETION_CONFIRMATION,
+            "evidence": [],
+        }
+        try:
+            record = self._load_deployment_completion()
+            if not record:
+                return base
+            state = str(record.get("state") or "")
+            if state == "complete":
+                return {
+                    **base,
+                    "available": True,
+                    "state": "complete",
+                    "label": "Handoff dokončen",
+                    "message": "Ověřené dokončení je commitnuté a pushnuté v main.",
+                    "checkpoint_head": str(record.get("checkpoint_head") or ""),
+                    "completion_commit": str(record.get("completion_commit") or ""),
+                    "project_label": str(record.get("project_label") or ""),
+                    "target_handoff": str(record.get("handoff_path") or ""),
+                    "test_count": int(record.get("test_count") or 0),
+                }
+            if state not in {"pending_restart", "local_commit_pending_push"}:
+                raise AppServerError("Stav dokončení nasazení není podporovaný.")
+
+            profile_id = str(record.get("profile_id") or "")
+            binding = self.project_continuity.resolve_binding(
+                project_id=str(record.get("project_id") or ""),
+                handoff_path=str(record.get("handoff_path") or ""),
+                fallback_tvbcp_path=str(record.get("tvbcp_path") or ""),
+            )
+            lease = self.development_semaphore.status()
+            binding_matches = bool(
+                lease.get("ok") is True
+                and lease.get("active") is True
+                and lease.get("owner_id") == profile_id
+                and lease.get("project_id") == binding["project_id"]
+                and lease.get("handoff_path") == binding["handoff_path"]
+            )
+            active_profile_matches = self.active_profile_id == profile_id
+            checkpoint_head = str(record.get("checkpoint_head") or "").strip().casefold()
+            previous_pid = int(record.get("previous_pid") or 0)
+            restart_confirmed = previous_pid > 0 and os.getpid() != previous_pid
+            repo_root = Path(_git_text(self.project_continuity.project_root, ["rev-parse", "--show-toplevel"]))
+            local_head = _git_text(repo_root, ["rev-parse", "main"]).casefold()
+            origin_head = _git_text(repo_root, ["rev-parse", "origin/main"]).casefold()
+            worktree_clean = not bool(_git_text(repo_root, ["status", "--porcelain=v1"]))
+            completion_commit = str(record.get("completion_commit") or "").strip().casefold()
+            if state == "local_commit_pending_push":
+                git_aligned = bool(
+                    re.fullmatch(r"[0-9a-f]{40}", completion_commit)
+                    and local_head == completion_commit
+                    and origin_head in {checkpoint_head, completion_commit}
+                    and _git_text(repo_root, ["rev-parse", f"{completion_commit}^"]).casefold()
+                    == checkpoint_head
+                )
+            else:
+                git_aligned = local_head == checkpoint_head and origin_head == checkpoint_head
+            smoke_results = run_smoke_check("http://127.0.0.1:8770", 3.0)
+            smoke_passed = len(smoke_results) == 5 and all(item.ok for item in smoke_results)
+            evidence = [
+                {"label": "Nový proces Cockpitu", "ok": restart_confirmed},
+                {"label": "Projekt a handoff", "ok": binding_matches and active_profile_matches},
+                {"label": "Main a origin/main", "ok": git_aligned and worktree_clean},
+                {"label": "Smoke test 5/5", "ok": smoke_passed},
+            ]
+            ready = all(item["ok"] for item in evidence)
+            return {
+                **base,
+                "available": True,
+                "ready": ready,
+                "state": state if ready else "unverifiable",
+                "label": "Připraveno k potvrzení" if ready else "Nelze dokončit",
+                "message": (
+                    "Všechny důkazy jsou ověřené; zadej další krok a přesnou větu."
+                    if ready
+                    else "Dokončení čeká na všechny ověřené důkazy; nic nebylo změněno."
+                ),
+                "project_label": binding["project_label"],
+                "target_handoff": binding["handoff_path"],
+                "checkpoint_head": checkpoint_head,
+                "test_count": int(record.get("test_count") or 0),
+                "evidence": evidence,
+            }
+        except (AppServerError, ProjectContinuityError, OSError, TypeError, ValueError):
+            return {
+                **base,
+                "ok": False,
+                "available": True,
+                "state": "unverifiable",
+                "label": "Nelze dokončit",
+                "message": "Dokončení nasazení nelze bezpečně ověřit; nic nebylo změněno.",
+            }
+
+    def _finalize_deployment_completion_unlocked(
+        self,
+        *,
+        confirmation: str,
+        next_step: str,
+    ) -> dict[str, Any]:
+        """Append, commit and push one handoff entry after exact confirmation."""
+        if str(confirmation or "").strip() != DEPLOYMENT_COMPLETION_CONFIRMATION:
+            raise AppServerError(
+                f"Chybí přesná potvrzovací věta: {DEPLOYMENT_COMPLETION_CONFIRMATION}"
+            )
+        status = self.deployment_completion_status()
+        if status.get("ready") is not True:
+            raise AppServerError(str(status.get("message") or "Dokončení není připravené."))
+        record = self._load_deployment_completion()
+        repo_root = Path(_git_text(self.project_continuity.project_root, ["rev-parse", "--show-toplevel"]))
+        _git_text(repo_root, ["fetch", "origin", "main"], timeout=60)
+        checkpoint_head = str(record.get("checkpoint_head") or "").strip().casefold()
+        state = str(record.get("state") or "")
+        completion_commit = str(record.get("completion_commit") or "").strip().casefold()
+
+        if state == "pending_restart":
+            if (
+                _git_text(repo_root, ["rev-parse", "main"]).casefold() != checkpoint_head
+                or _git_text(repo_root, ["rev-parse", "origin/main"]).casefold() != checkpoint_head
+                or _git_text(repo_root, ["status", "--porcelain=v1"])
+            ):
+                raise AppServerError("Main se od ověření změnil; dokončení bylo bezpečně zastaveno.")
+            completion = self.project_continuity.deployment_completion_entry(
+                binding=record,
+                checkpoint_head=checkpoint_head,
+                test_count=int(record.get("test_count") or 0),
+                deployed_at=str(record.get("deployed_at") or ""),
+                next_step=next_step,
+            )
+            target = self.project_continuity.project_root / completion["target_handoff"]
+            original = target.read_text(encoding="utf-8")
+            if completion["marker"] in original:
+                raise AppServerError("Toto dokončení už v handoffu existuje.")
+            repo_relative = target.relative_to(repo_root).as_posix()
+            with exclusive_file_lock(self.deployment_completion_path):
+                atomic_replace_text_under_external_lock(
+                    target,
+                    original.rstrip() + "\n" + completion["entry"],
+                )
+            changed = _git_text(repo_root, ["status", "--porcelain=v1"])
+            if len(changed.splitlines()) != 1 or repo_relative not in changed:
+                with exclusive_file_lock(self.deployment_completion_path):
+                    atomic_replace_text_under_external_lock(target, original)
+                raise AppServerError("Handoff nelze izolovaně připravit k potvrzenému commitu.")
+            try:
+                _git_text(
+                    repo_root,
+                    ["commit", "--only", "-m", "Record confirmed deployment completion", "--", repo_relative],
+                    timeout=60,
+                )
+            except AppServerError:
+                with exclusive_file_lock(self.deployment_completion_path):
+                    atomic_replace_text_under_external_lock(target, original)
+                raise
+            completion_commit = _git_text(repo_root, ["rev-parse", "HEAD"]).casefold()
+            record = {
+                **record,
+                "state": "local_commit_pending_push",
+                "completion_commit": completion_commit,
+                "next_step": completion["next_step"],
+            }
+            atomic_write_json(self.deployment_completion_path, record, ensure_ascii=False, indent=2)
+
+        origin_head = _git_text(repo_root, ["rev-parse", "origin/main"]).casefold()
+        if origin_head == checkpoint_head:
+            _git_text(repo_root, ["push", "origin", "main:main"], timeout=90)
+            _git_text(repo_root, ["fetch", "origin", "main"], timeout=60)
+            origin_head = _git_text(repo_root, ["rev-parse", "origin/main"]).casefold()
+        if not completion_commit or origin_head != completion_commit:
+            raise AppServerError(
+                "Handoff je commitnutý lokálně, ale push nebyl potvrzen; semafor zůstává aktivní."
+            )
+
+        completed_record = {
+            **record,
+            "state": "complete",
+            "completion_commit": completion_commit,
+            "completed_at": _now(),
+        }
+        atomic_write_json(
+            self.deployment_completion_path,
+            completed_record,
+            ensure_ascii=False,
+            indent=2,
+        )
+        lease = self.development_semaphore.status()
+        release_message = "Vývojový semafor zůstal aktivní."
+        try:
+            self.development_semaphore.release(
+                owner_id=str(record.get("profile_id") or ""),
+                expected_revision=int(lease.get("revision") or 0),
+                confirmed=True,
+                safe_to_release=self._safe_to_release(),
+            )
+            release_message = "Vývojový semafor byl po potvrzeném dokončení uvolněn."
+        except AppServerError as exc:
+            release_message = f"Handoff je dokončený, ale semafor zůstal aktivní: {exc}"
+        return {
+            **self.deployment_completion_status(),
+            "ok": True,
+            "writes_performed": True,
+            "completion_commit": completion_commit,
+            "release_message": release_message,
+        }
+
+    def finalize_deployment_completion(
+        self,
+        *,
+        confirmation: str,
+        next_step: str,
+    ) -> dict[str, Any]:
+        if not self._operation_lock.acquire(blocking=False):
+            raise SessionBusyError("Dokončení nasazení právě provádí jinou operaci.")
+        try:
+            return self._finalize_deployment_completion_unlocked(
+                confirmation=confirmation,
+                next_step=next_step,
+            )
+        finally:
+            self._operation_lock.release()
 
     def checkpoint(self, **kwargs: Any) -> dict[str, Any]:
         with self.profile_operation() as service:
@@ -883,6 +1218,32 @@ def human_adam_project_continuity_action(
     service: HumanAdamProfileManager,
 ) -> dict[str, Any]:
     return service.project_continuity_status()
+
+
+def human_adam_deployment_completion_status_action(
+    *,
+    service: HumanAdamProfileManager,
+) -> dict[str, Any]:
+    return service.deployment_completion_status()
+
+
+def human_adam_deployment_completion_action(
+    payload: dict[str, Any],
+    *,
+    service: HumanAdamProfileManager,
+) -> dict[str, Any]:
+    try:
+        return service.finalize_deployment_completion(
+            confirmation=str(payload.get("confirmation") or ""),
+            next_step=str(payload.get("next_step") or ""),
+        )
+    except (AppServerError, ProjectContinuityError, OSError, TypeError, ValueError) as exc:
+        return {
+            "ok": False,
+            "ready": False,
+            "message": str(exc),
+            "deployment_completion": service.deployment_completion_status(),
+        }
 
 
 def build_human_adam_profiles() -> HumanAdamProfileManager:

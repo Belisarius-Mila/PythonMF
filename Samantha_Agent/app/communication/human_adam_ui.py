@@ -88,6 +88,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .handoff-proposal-box h3 { margin:0; font-size:15px; }
     #handoffProposalMeta { margin:0; color:var(--muted); font-size:13px; overflow-wrap:anywhere; }
     #handoffProposalDraft { margin:0; padding:12px; border:1px solid #bfdbfe; border-radius:10px; background:#fff; white-space:pre-wrap; overflow-wrap:anywhere; font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; }
+    .deployment-completion-box { margin:12px 16px; padding:14px; border:1px solid #86efac; border-radius:13px; display:grid; gap:8px; background:#f0fdf4; }
+    .deployment-completion-box h3 { margin:0; font-size:15px; }
+    .deployment-completion-box p { margin:0; color:var(--muted); font-size:13px; line-height:1.45; overflow-wrap:anywhere; }
+    #deploymentCompletionEvidence { margin:0; padding-left:22px; font-size:13px; }
+    #deploymentCompletionEvidence li { margin:4px 0; }
+    .deployment-completion-box input { width:100%; border:1px solid #86b99a; border-radius:11px; padding:10px 12px; font:inherit; }
     .development-branch-audit-box { padding:12px 16px; border-bottom:1px solid var(--line); display:grid; gap:8px; }
     .development-branch-audit-head { display:flex; align-items:center; gap:8px; }
     .development-branch-audit-head h3 { flex:1; margin:0; font-size:15px; }
@@ -295,6 +301,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <li><strong>Projektová vazba</strong> spojuje jeden vývoj se zvoleným projektem a handoffem; audit pouze čte důkazy a nic nepřepisuje.</li>
         <li><strong>Návrh handoffu</strong> se po checkpointu sestaví jen z bezpečných metadat. Zobrazí se k přečtení, ale sám se neuloží.</li>
         <li><strong>Kontrola při převzetí</strong> ověří, zda zvolený handoff patří projektu a je v checkpointu. V této fázi pouze varuje a nasazení neblokuje.</li>
+        <li><strong>Potvrzené dokončení</strong> se nabídne až po novém procesu a smoke testu. Zapíše jen commit, testy, restart, smoke test, stav nasazeno a tebou zadaný další krok.</li>
       </ul>
 
       <h4>Běžný vývoj z r-Adama</h4>
@@ -381,6 +388,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <p id="handoffProposalMeta">Návrh zatím není připravený.</p>
       <pre id="handoffProposalDraft" hidden></pre>
     </section>
+    <section class="deployment-completion-box" id="deploymentCompletionBox" aria-label="Potvrzené dokončení handoffu po nasazení" hidden>
+      <h3>Potvrzené dokončení po nasazení</h3>
+      <p id="deploymentCompletionMeta">Po restartu se ověří skutečný commit, nový proces a smoke test.</p>
+      <ul id="deploymentCompletionEvidence" hidden></ul>
+      <input id="deploymentCompletionNextStep" maxlength="180" placeholder="Nejbližší další krok" hidden disabled>
+      <input id="deploymentCompletionConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Přesná potvrzovací věta" hidden disabled>
+      <button class="deploy-action" id="deploymentCompletionBtn" type="button" hidden disabled>Dokončit handoff a uvolnit semafor</button>
+      <p id="deploymentCompletionSafety" hidden>Zapíší se pouze uvedená ověřená fakta. Nevkládej hesla, tokeny ani soukromý text.</p>
+    </section>
     <div class="checkpoint-box">
       <input id="checkpointMessage" maxlength="120" placeholder="Krátký popis WIP checkpointu">
       <button class="primary" id="checkpointBtn" type="button" disabled>Checkpoint bez pushnutí</button>
@@ -460,6 +476,13 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const handoffProposalBox = document.getElementById("handoffProposalBox");
   const handoffProposalMeta = document.getElementById("handoffProposalMeta");
   const handoffProposalDraft = document.getElementById("handoffProposalDraft");
+  const deploymentCompletionBox = document.getElementById("deploymentCompletionBox");
+  const deploymentCompletionMeta = document.getElementById("deploymentCompletionMeta");
+  const deploymentCompletionEvidence = document.getElementById("deploymentCompletionEvidence");
+  const deploymentCompletionNextStep = document.getElementById("deploymentCompletionNextStep");
+  const deploymentCompletionConfirmation = document.getElementById("deploymentCompletionConfirmation");
+  const deploymentCompletionBtn = document.getElementById("deploymentCompletionBtn");
+  const deploymentCompletionSafety = document.getElementById("deploymentCompletionSafety");
   const developmentSemaphoreMeta = document.getElementById("developmentSemaphoreMeta");
   const developmentProject = document.getElementById("developmentProject");
   const developmentHandoff = document.getElementById("developmentHandoff");
@@ -491,6 +514,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let voiceStarting = false;
   let voiceRecording = false;
   let voiceTranscribing = false;
+  let deploymentCompletion = null;
   let turnTimerId = null;
   let activeTurnStartedAt = "";
   let resultWatchTimerId = null;
@@ -700,6 +724,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     developmentReleaseBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_release !== true;
     projectContinuityAuditBtn.disabled = busy;
     developmentBranchAuditBtn.disabled = busy;
+    syncDeploymentCompletionControls();
   }
 
   function setBusy(value, text="") {
@@ -1781,6 +1806,77 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       workMeta.textContent = `Pracovní stav nelze načíst: ${error.message}`;
       checkpointBtn.disabled = true;
     } finally { workRefreshBtn.disabled = false; }
+    await loadDeploymentCompletion();
+  }
+
+  function syncDeploymentCompletionControls() {
+    const required = deploymentCompletion ? deploymentCompletion.confirmation_text || "" : "";
+    const ready = deploymentCompletion && deploymentCompletion.ready === true;
+    const hasNextStep = deploymentCompletionNextStep.value.trim().length >= 3;
+    deploymentCompletionBtn.disabled = busy || !ready || !hasNextStep || deploymentCompletionConfirmation.value.trim() !== required;
+  }
+
+  function renderDeploymentCompletion(payload) {
+    deploymentCompletion = payload && typeof payload === "object" ? payload : null;
+    const visible = deploymentCompletion && deploymentCompletion.available === true;
+    const ready = visible && deploymentCompletion.ready === true;
+    deploymentCompletionBox.hidden = !visible;
+    deploymentCompletionEvidence.replaceChildren();
+    for (const item of visible && Array.isArray(deploymentCompletion.evidence) ? deploymentCompletion.evidence : []) {
+      const row = document.createElement("li");
+      row.textContent = `${item.ok === true ? "OK" : "ČEKÁ"} · ${item.label || "Důkaz"}`;
+      deploymentCompletionEvidence.appendChild(row);
+    }
+    deploymentCompletionEvidence.hidden = !deploymentCompletionEvidence.children.length;
+    if (!visible) {
+      deploymentCompletionMeta.textContent = "Po restartu se ověří skutečný commit, nový proces a smoke test.";
+      deploymentCompletionNextStep.value = "";
+      deploymentCompletionConfirmation.value = "";
+    } else {
+      const target = deploymentCompletion.target_handoff ? ` · ${String(deploymentCompletion.target_handoff).split("/").pop()}` : "";
+      deploymentCompletionMeta.textContent = `${deploymentCompletion.label || "Dokončení"} · ${deploymentCompletion.message || ""}${target}`;
+    }
+    for (const element of [deploymentCompletionNextStep,deploymentCompletionConfirmation,deploymentCompletionBtn,deploymentCompletionSafety]) {
+      element.hidden = !ready;
+    }
+    deploymentCompletionNextStep.disabled = !ready;
+    deploymentCompletionConfirmation.disabled = !ready;
+    if (!ready) deploymentCompletionConfirmation.value = "";
+    syncDeploymentCompletionControls();
+  }
+
+  async function loadDeploymentCompletion() {
+    try {
+      const payload = await api("/api/human-adam/deployment-completion");
+      renderDeploymentCompletion(payload);
+    } catch (error) {
+      renderDeploymentCompletion({ok:false,available:true,ready:false,state:"unverifiable",label:"Nelze dokončit",message:error.message,evidence:[]});
+    }
+  }
+
+  async function finalizeDeploymentCompletion() {
+    if (deploymentCompletionBtn.disabled || !deploymentCompletion) return;
+    deploymentCompletionBtn.disabled = true;
+    deploymentCompletionMeta.textContent = "Znovu ověřuji důkazy, zapisuji handoff a pushuji jediný dokončovací commit…";
+    try {
+      const payload = await api("/api/human-adam/deployment-completion", {
+        method:"POST",
+        body:JSON.stringify({
+          confirmation:deploymentCompletionConfirmation.value.trim(),
+          next_step:deploymentCompletionNextStep.value.trim(),
+        }),
+      });
+      if (!payload.ok) throw new Error(payload.message || "Dokončení handoffu selhalo.");
+      deploymentCompletionNextStep.value = "";
+      deploymentCompletionConfirmation.value = "";
+      renderDeploymentCompletion(payload);
+      notice.textContent = payload.release_message || "Handoff byl potvrzeně dokončen.";
+      await loadWork();
+      await loadStatus();
+    } catch (error) {
+      deploymentCompletionMeta.textContent = `Dokončení bylo bezpečně zastaveno: ${error.message}`;
+      await loadDeploymentCompletion();
+    }
   }
 
   function updateDevelopmentHandoffs(selectedPath="") {
@@ -2152,6 +2248,9 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   developmentProject.addEventListener("change", () => updateDevelopmentHandoffs(""));
   projectContinuityAuditBtn.addEventListener("click", loadProjectContinuity);
   developmentBranchAuditBtn.addEventListener("click", loadDevelopmentBranchAudit);
+  deploymentCompletionNextStep.addEventListener("input", syncDeploymentCompletionControls);
+  deploymentCompletionConfirmation.addEventListener("input", syncDeploymentCompletionControls);
+  deploymentCompletionBtn.addEventListener("click", finalizeDeploymentCompletion);
   checkpointBtn.addEventListener("click", createCheckpoint);
   deployAuditBtn.addEventListener("click", auditDeployment);
   deployConfirmation.addEventListener("input", () => {

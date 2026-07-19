@@ -187,6 +187,7 @@ class CockpitTests(unittest.TestCase):
             "dev_runner",
             "external_ai",
             "external_send",
+            "git_commit_push",
             "git_fast_forward_push_restart",
             "local_open",
             "local_service",
@@ -287,6 +288,19 @@ class CockpitTests(unittest.TestCase):
         self.assertLess(restart, result)
         self.assertIn("record_deployment_restart(", route_source)
         self.assertIn('result["deployment_diagnostic"]', route_source)
+
+    def test_deployment_completion_has_exact_confirmation_git_card_and_routes(self) -> None:
+        card = next(
+            item
+            for item in COCKPIT_POST_ACTIONS
+            if item["path"] == "/api/human-adam/deployment-completion"
+        )
+
+        self.assertEqual(card["risk"], "git_commit_push")
+        self.assertEqual(card["confirmation"], "exact_deployment_completion_phrase")
+        self.assertEqual(card["handler_name"], "human_adam_deployment_completion_action")
+        self.assertIn("/api/human-adam/deployment-completion", self.cockpit_do_get_routes())
+        self.assertIn("/api/human-adam/deployment-completion", self.cockpit_do_post_routes())
 
     def test_frontend_literal_routes_exist_in_backend(self) -> None:
         exact_backend_routes = set(self.cockpit_do_get_routes()) | set(self.cockpit_do_post_routes())

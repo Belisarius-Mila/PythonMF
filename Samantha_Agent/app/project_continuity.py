@@ -583,3 +583,61 @@ class ProjectContinuityService:
             "message": "Vybraný handoff patří projektu a je obsažen v checkpointu.",
             "handoff_in_checkpoint": True,
         }
+
+    def deployment_completion_entry(
+        self,
+        *,
+        binding: dict[str, Any],
+        checkpoint_head: str,
+        test_count: int,
+        deployed_at: str,
+        next_step: str,
+    ) -> dict[str, Any]:
+        """Build one deterministic git-safe completion entry from verified facts."""
+        resolved = self.resolve_binding(
+            project_id=str(binding.get("project_id") or ""),
+            handoff_path=str(binding.get("handoff_path") or ""),
+            fallback_tvbcp_path=str(binding.get("tvbcp_path") or ""),
+        )
+        clean_head = str(checkpoint_head or "").strip().casefold()
+        if not COMMIT_RE.fullmatch(clean_head):
+            raise ProjectContinuityError("Dokončení nasazení nemá platný commit.")
+        clean_test_count = int(test_count)
+        if clean_test_count <= 0 or clean_test_count > 100_000:
+            raise ProjectContinuityError("Dokončení nasazení nemá ověřený počet testů.")
+        raw_next_step = str(next_step or "").strip()
+        if any(character in raw_next_step for character in ("\n", "\r", "\x00")):
+            raise ProjectContinuityError("Další krok musí být jeden krátký řádek.")
+        clean_next_step = " ".join(raw_next_step.split())
+        if len(clean_next_step) < 3 or len(clean_next_step) > 180:
+            raise ProjectContinuityError("Další krok musí mít 3 až 180 znaků.")
+        completed_time = _parse_timestamp(deployed_at)
+        if completed_time is None:
+            raise ProjectContinuityError("Dokončení nasazení nemá platný čas.")
+        local_time = completed_time.astimezone().isoformat(timespec="seconds")
+        marker = f"deployment-completion:{clean_head}"
+        entry = "\n".join(
+            (
+                "",
+                f"<!-- {marker} -->",
+                f"## Potvrzené dokončení po nasazení — {local_time}",
+                "",
+                "- Stav: nasazeno",
+                f"- Commit v `main`: `{clean_head}`",
+                f"- Testy: plná Cockpit brána, {clean_test_count} testů, OK",
+                "- Restart Cockpitu: potvrzen novým procesem",
+                "- Smoke test: 5/5 kontrol, OK",
+                f"- Další krok: {clean_next_step}",
+                "",
+            )
+        )
+        return {
+            "binding": resolved,
+            "target_handoff": resolved["handoff_path"],
+            "checkpoint_head": clean_head,
+            "test_count": clean_test_count,
+            "completed_at": local_time,
+            "next_step": clean_next_step,
+            "marker": marker,
+            "entry": entry,
+        }

@@ -93,6 +93,8 @@ from app.communication.human_adam_service import (
 )
 from app.communication.human_adam_profiles import (
     HUMAN_ADAM,
+    human_adam_deployment_completion_action,
+    human_adam_deployment_completion_status_action,
     human_adam_development_semaphore_action,
     human_adam_development_semaphore_status_action,
     human_adam_project_continuity_action,
@@ -9321,6 +9323,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/human-adam/deployment-completion",
+        "label": "Potvrdit dokončení handoffu po nasazení",
+        "risk": "git_commit_push",
+        "confirmation": "exact_deployment_completion_phrase",
+        "handler_name": "human_adam_deployment_completion_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/janicka/chat",
         "label": "Janička chat s Adamem",
         "risk": "voice_local_outbound",
@@ -10021,6 +10031,11 @@ class CockpitServer:
                 if parsed.path == "/api/human-adam/deploy-audit":
                     self.respond_json(human_adam_deploy_audit_action(service=HUMAN_ADAM))
                     return
+                if parsed.path == "/api/human-adam/deployment-completion":
+                    self.respond_json(
+                        human_adam_deployment_completion_status_action(service=HUMAN_ADAM)
+                    )
+                    return
                 if parsed.path == "/api/server/health":
                     self.respond_json(server_health_status(host=cockpit_host, port=cockpit_port))
                     return
@@ -10255,6 +10270,7 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/human-adam/deploy":
                     payload = self.read_json()
+                    payload["_server_pid"] = os.getpid()
                     result = human_adam_deploy_action(payload, service=HUMAN_ADAM)
                     deployment_profile_id = str(result.pop("_work_profile_id", "") or "")
                     if result.get("ok") and result.get("restart_required"):
@@ -10280,6 +10296,12 @@ class CockpitServer:
                             outcome="passed" if result["restart"].get("ok") else "failed",
                         )
                     self.respond_json(result)
+                    return
+                if parsed.path == "/api/human-adam/deployment-completion":
+                    payload = self.read_json()
+                    self.respond_json(
+                        human_adam_deployment_completion_action(payload, service=HUMAN_ADAM)
+                    )
                     return
                 if parsed.path == "/api/janicka/chat":
                     payload = self.read_json()
