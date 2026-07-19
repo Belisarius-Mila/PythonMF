@@ -42,11 +42,12 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 ## Aktualni navazani
 
 - 2026-07-19: Priorita 1, App-server rozhrani / novy Adam. Mila schvalil navrat
-  k postupnemu zaziti uz naprogramovanych funkci. Prvni krok je mala staticka
-  napoveda pod tlacitkem `?` v okne `Plan`: bezna prace, kdy rotovat, presny
-  postup, reseni blokeru a nouzovy navrat bez mazani stareho vlakna. Potom
-  probehne spolecne cvicne overeni a nekolik dni bezneho pouzivani; audit
-  aktualnosti handoffu se nema vyvijet drive. Handoff:
+  k postupnemu zaziti uz naprogramovanych funkci. Prvni krok, staticka napoveda
+  pod tlacitkem `?` v okne `Plan`, je nasazeny jako `5052a4c`; plna brana prosla
+  825 testy, rizeny restart a petibodovy smoke test jsou zelene. Nyni zbyva
+  rucne otevrit napovedu a projit ji bez zbytecne rotace. Potom nekolik dni
+  bezne pouzivat soucasne workflow; audit aktualnosti handoffu se nema vyvijet
+  drive. Handoff:
   `handoffs/human_adam_plan_help_and_adoption_2026_07_19.md`.
 - 2026-07-19: Priorita 1, App-server rozhrani / novy Adam. Prvni read-only faze
   rizeni zivotniho cyklu WIP vetvi je hotova v izolovane vetvi. Samostatne jadro,

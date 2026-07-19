@@ -1,6 +1,6 @@
 Nazev: Human-Adam Plan - napoveda rotace a postupne zaziti workflow
 Priorita: 1
-Stav: ceka na prevzeti
+Stav: ceka na retest
 Pripomenout pri startu: ano
 Datum: 2026-07-19
 
@@ -33,10 +33,13 @@ Co je hotove:
 - Cela Cockpit quality gate prosla: Python, JavaScript a shell syntaxe a 825 testu.
 - Tento handoff je soucasti jedineho WIP checkpointu na vetvi
   `wip/human-adam-plan-help-20260719`.
+- Checkpoint `5052a4c` byl potvrzenym fast-forwardem prevzaty do `main`, pushnuty
+  na GitHub a Cockpit byl rizene restartovany.
+- Po restartu bezi jedina instance pod novym PID; zakladni smoke test vsech peti
+  endpointu prosel a nasazene HTML obsahuje tlacitko i cely krokovy navod.
 
 Co neni hotove:
 
-- Napoveda `?` zatim neni prevzata do `main` ani nasazena.
 - Cvicna rotace a nekolikadenni provozni zaziti jeste neprobehly.
 - In-app prohlizec nebyl v teto relaci dostupny, proto chybi obrazovy a klikaci
   retest skutecneho mobilniho layoutu.
@@ -45,8 +48,8 @@ Co neni hotove:
 
 Dalsi krok:
 
-- Vytvorit WIP checkpoint, prevzit jej do `main`, nasadit a potom s Milou
-  rucne overit tlacitko `?` na Macu nebo iPhonu bez spusteni zbytecne rotace.
+- S Milou rucne otevrit `Plan` -> `?`, overit citelnost na Macu nebo iPhonu a
+  projit navod bez spusteni zbytecne rotace.
 
 Navrhovane dalsi kroky:
 
