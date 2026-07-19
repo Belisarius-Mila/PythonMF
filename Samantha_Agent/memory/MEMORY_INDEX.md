@@ -105,10 +105,10 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 ## Handoffs
 
 - `handoffs/global_development_semaphore_wip_2026_07_19.md` - [PRIPOMENOUT]
-  priorita 1: izolovany WIP zavadi trvaly globalni vyvojovy semafor pro
+  priorita 1: commit `90ed06c` nasadil trvaly globalni vyvojovy semafor pro
   Human-Adam, Knihovnu a terminal, read-only modelovy guard a fail-closed
-  checkpoint/nasazeni pri cizim WIP. Plna brana prosla 815 testy. Zbyva prevzeti
-  do `main`, rizene nasazeni a zivy retest. Navazujici verzovany terminalovy
+  checkpoint/nasazeni pri cizim WIP. Plna brana prosla 815 testy, rizeny restart
+  a read-only smoke test jsou zelene; zbyva rucni interaktivni retest. Navazujici verzovany terminalovy
   deployment guard nebo kontrolovany `pre-push` hook je zapsany k samostatnemu
   navrhu a nesmi se instalovat automaticky.
 

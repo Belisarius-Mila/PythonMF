@@ -26,20 +26,24 @@ Co je hotove:
 - Uvolneni je povolene jen pri cistych profilovych workspaces a cistem zdrojovem
   `main`; po uspesnem cistem nasazeni se lease uvolni automaticky.
 - Cela Cockpit quality gate prosla: Python, JavaScript a shell syntaxe a 815 testu.
+- WIP byl po kontrole soubehu s dennim workflow prevzaty do `main` jako
+  `90ed06c`, pushnuty na GitHub a Cockpit byl rizene restartovany.
+- Po restartu prosla read-only smoke kontrola hlavni stranky, health, live status,
+  statusu a recovery. Novy endpoint hlasi semafor `free`, revizi 0 a oba profily
+  bez WIP; lokalni `main` se shoduje s `origin/main`.
 
 Co neni hotove:
 
-- WIP v `wip/global-development-semaphore-20260719` zatim neni prevzaty do
-  `main`, nasazeny ani zive otestovany v Cockpitu.
 - V teto Codex relaci nebyl dostupny prohlizec pro klikaci a obrazovou kontrolu.
+- Nebyl proveden rucni interaktivni test prevzeti, pozastaveni, read-only druheho
+  profilu, checkpointu a cisteho uvolneni.
 - Rucne spusteny primy `git push` z terminalu muze Cockpitovy deployment guard
   technicky obejit.
 
 Dalsi krok:
 
-- Po samostatnem potvrzeni auditovat a prevzit tuto WIP vetev do `main`, rizene
-  nasadit Cockpit a zive overit prevzeti, pozastaveni, read-only druhy profil,
-  checkpoint, blokaci ciziho WIP a ciste uvolneni.
+- Zive overit prevzeti, pozastaveni, read-only druhy profil, checkpoint, blokaci
+  ciziho WIP a ciste uvolneni. Test nedelat soucasne s jinym skutecnym vyvojem.
 
 Navrhovane dalsi kroky:
 
