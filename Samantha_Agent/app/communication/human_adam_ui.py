@@ -89,6 +89,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #contextAnchorInput { flex:1; min-height:320px; font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; }
     #contextAnchorMeta,.context-anchor-help { margin:0; color:var(--muted); font-size:13px; }
     .context-anchor-actions { display:flex; justify-content:flex-end; gap:8px; }
+    .plan-help-trigger { width:38px; min-width:38px; padding:8px 0; border-radius:50%; font-weight:700; }
+    .plan-help-panel { padding:14px; border:1px solid #c9d6e5; border-radius:13px; background:#f8fafc; color:var(--ink); }
+    .plan-help-head { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+    .plan-help-head h3 { flex:1; margin:0; font-size:16px; }
+    .plan-help-panel h4 { margin:14px 0 5px; font-size:14px; }
+    .plan-help-panel p { margin:0; color:var(--muted); font-size:13px; line-height:1.45; }
+    .plan-help-panel ol,.plan-help-panel ul { margin:4px 0 0; padding-left:23px; }
+    .plan-help-panel li { margin:5px 0; line-height:1.4; }
+    .plan-help-safety { margin-top:14px !important; padding:9px 11px; border-radius:10px; background:#ecfdf3; color:var(--ok) !important; }
     .thread-rotation-box { margin-top:14px; padding-top:12px; border-top:1px solid #dbe3ee; display:grid; gap:8px; }
     .thread-rotation-box h3 { margin:0; font-size:15px; }
     .thread-rotation-actions { display:flex; gap:8px; flex-wrap:wrap; }
@@ -104,6 +113,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       .context-anchor-actions > button { flex:1 1 calc(50% - 4px); min-width:0; padding-left:8px; padding-right:8px; white-space:normal; }
       .thread-rotation-actions > button { flex:1 1 100%; min-width:0; white-space:normal; }
       .development-semaphore-actions > button { flex:1 1 100%; min-width:0; white-space:normal; }
+      .plan-help-panel { padding:12px; }
+      .plan-help-head { align-items:flex-start; }
     }
   </style>
 </head>
@@ -174,10 +185,54 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   <aside class="tvbcp-panel" id="contextAnchorPanel" hidden aria-label="Připnutý aktivní kontext">
     <div class="tvbcp-head">
       <h2>Aktivní kontext</h2>
+      <button class="plan-help-trigger" id="planHelpBtn" type="button" aria-label="Nápověda k Plánu a rotaci vlákna" aria-expanded="false" aria-controls="planHelpPanel" title="Jak pracovat s Plánem a rotací">?</button>
       <button id="contextAnchorRefreshBtn" type="button">Obnovit</button>
       <button id="contextAnchorCloseBtn" type="button">Zavřít</button>
     </div>
     <div class="context-anchor-body">
+      <section class="plan-help-panel" id="planHelpPanel" aria-labelledby="planHelpTitle" tabindex="-1" hidden>
+        <div class="plan-help-head">
+          <h3 id="planHelpTitle">Jak pracovat s Plánem a rotací</h3>
+          <button id="planHelpCloseBtn" type="button">Zavřít návod</button>
+        </div>
+        <p>Toto je pouze nápověda. Jejím otevřením se nic neukládá, nepřepíná ani neodesílá.</p>
+
+        <h4>Běžná práce s Plánem</h4>
+        <ol>
+          <li>Vyber správný pracovní profil a klikni na <strong>Připojit</strong>.</li>
+          <li>Zkontroluj uložený aktivní kontext. Když se plán změnil, nech připravit návrh a přečti jej.</li>
+          <li>Návrh nejdřív ulož a potom připni. Teprve připnutý kontext se přikládá k dalším tahům.</li>
+          <li>Pokračuj v běžné práci. Vlákno neotáčej jen preventivně.</li>
+        </ol>
+
+        <h4>Kdy přejít do nového vlákna</h4>
+        <ul>
+          <li>Dosavadní vlákno je příliš dlouhé nebo začíná ztrácet souvislosti.</li>
+          <li>Začíná nová ucelená etapa stejného projektu.</li>
+          <li>Chceš zachovat profil, workspace a plán, ale pokračovat v čistém Codex vlákně.</li>
+        </ul>
+
+        <h4>Bezpečná rotace krok za krokem</h4>
+        <ol>
+          <li>Počkej na dokončení aktivního tahu a nenechávej rozepsaný pokyn.</li>
+          <li>Aktualizuj stručný kontext: Cíl, Plán, Hotovo, Rozhodnutí a Další krok.</li>
+          <li>Kontext ulož a připni.</li>
+          <li>Klikni na <strong>Prověřit nové vlákno</strong> a přečti případné blokery.</li>
+          <li>Po zelené kontrole vlož přesnou nabídnutou potvrzovací větu.</li>
+          <li>Klikni na <strong>Přejít do nového vlákna</strong> a ověř nové ID vlákna i správný profil.</li>
+        </ol>
+
+        <h4>Když něco nejde</h4>
+        <ul>
+          <li><strong>Tlačítko je šedé:</strong> připoj profil, dokonči aktivní tah nebo ulož rozepsaný kontext.</li>
+          <li><strong>Kotva není aktuální:</strong> obnov návrh, zkontroluj jej, ulož a znovu připni.</li>
+          <li><strong>Doručení je nejisté:</strong> pokyn neposílej znovu; nejdřív klikni na Stav.</li>
+          <li><strong>Věta nefunguje:</strong> spusť nový audit a použij větu z jeho aktuální kontroly.</li>
+          <li><strong>Po rotaci něco chybí:</strong> neposílej vývojový pokyn; nejdřív zkontroluj připnutý kontext.</li>
+        </ul>
+
+        <p class="plan-help-safety"><strong>Nouzový postup:</strong> rotaci neprováděj, nic nemaž a pokračuj ve starém vlákně. Staré vlákno se při rotaci nemaže ani nearchivuje.</p>
+      </section>
       <p id="contextAnchorMeta">Kontext se načte až po otevření.</p>
       <p class="context-anchor-help">Nech Adama připravit návrh, zkontroluj jej a nejdřív jej soukromě ulož. Připnutý plán se přikládá k tahům; pozastavený zůstává uložený, ale nepřikládá se. Ulož pouze stručný cíl, očíslovaný plán, hotové body, rozhodnutí a další krok. Nevkládej hesla, tokeny, osobní údaje ani absolutní cesty. Novější pokyn v chatu má vždy přednost.</p>
       <textarea id="contextAnchorInput" maxlength="6000" autocomplete="off" placeholder="Cíl:&#10;&#10;Plán:&#10;1. …&#10;&#10;Hotovo:&#10;- …&#10;&#10;Rozhodnutí:&#10;- …&#10;&#10;Další krok:&#10;- …" aria-label="Připnutý aktivní kontext"></textarea>
@@ -263,6 +318,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const contextAnchorPanel = document.getElementById("contextAnchorPanel");
   const contextAnchorCloseBtn = document.getElementById("contextAnchorCloseBtn");
   const contextAnchorRefreshBtn = document.getElementById("contextAnchorRefreshBtn");
+  const planHelpBtn = document.getElementById("planHelpBtn");
+  const planHelpPanel = document.getElementById("planHelpPanel");
+  const planHelpCloseBtn = document.getElementById("planHelpCloseBtn");
   const contextAnchorMeta = document.getElementById("contextAnchorMeta");
   const contextAnchorInput = document.getElementById("contextAnchorInput");
   const contextAnchorProposeBtn = document.getElementById("contextAnchorProposeBtn");
@@ -1233,7 +1291,15 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     if (!contextAnchorLoaded) loadContextAnchor();
   }
 
+  function setPlanHelpOpen(open) {
+    const expanded = Boolean(open);
+    planHelpPanel.hidden = !expanded;
+    planHelpBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+    if (expanded) planHelpPanel.focus();
+  }
+
   function closeContextAnchor() {
+    setPlanHelpOpen(false);
     contextAnchorPanel.hidden = true;
   }
 
@@ -1818,6 +1884,11 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   refreshBtn.addEventListener("click", handleRefreshStatus);
   contextAnchorOpenBtn.addEventListener("click", openContextAnchor);
   contextAnchorCloseBtn.addEventListener("click", closeContextAnchor);
+  planHelpBtn.addEventListener("click", () => setPlanHelpOpen(planHelpPanel.hidden));
+  planHelpCloseBtn.addEventListener("click", () => {
+    setPlanHelpOpen(false);
+    planHelpBtn.focus();
+  });
   contextAnchorRefreshBtn.addEventListener("click", loadContextAnchor);
   contextAnchorProposeBtn.addEventListener("click", proposeContextAnchor);
   contextAnchorInput.addEventListener("input", syncControls);

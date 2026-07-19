@@ -104,6 +104,14 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `handoffs/human_adam_plan_help_and_adoption_2026_07_19.md` - [PRIPOMENOUT]
+  priorita 1: staticka napoveda `?` v okne `Plan` je implementovana bez API a
+  bez moznosti menit profil, kotvu, vlakno, TVBCP nebo Git. Obsahuje beznou
+  praci, sestikrokovou rotaci, reseni blokeru a nouzovy navrat. Plna Cockpit
+  brana prosla 825 testy; zbyva prevzeti, nasazeni a rucni proklik. Potom podle
+  navodu projit cvicne overeni a nekolik dni zazit soucasne workflow; teprve
+  potom zahajit read-only kontrolu aktualnosti handoffu.
+
 - `handoffs/development_branch_lifecycle_phase1_wip_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: prvni read-only faze rizeni zivotniho cyklu WIP vetvi ma
   samostatne auditni jadro, CLI, workflow registraci, GET endpoint a male

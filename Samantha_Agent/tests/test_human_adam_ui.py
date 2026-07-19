@@ -23,6 +23,9 @@ class HumanAdamUiTests(unittest.TestCase):
             "contextAnchorPanel",
             "contextAnchorCloseBtn",
             "contextAnchorRefreshBtn",
+            "planHelpBtn",
+            "planHelpPanel",
+            "planHelpCloseBtn",
             "contextAnchorMeta",
             "contextAnchorInput",
             "contextAnchorProposeBtn",
@@ -132,6 +135,31 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Staré vlákno se nemaže ani nearchivuje.", HUMAN_ADAM_HTML)
         self.assertIn('threadRotationConfirmation.addEventListener("input", syncControls)', HUMAN_ADAM_HTML)
         self.assertNotIn("window.prompt", rotate_source)
+
+    def test_plan_help_is_accessible_static_and_covers_rotation_workaround(self) -> None:
+        panel_start = HUMAN_ADAM_HTML.index('id="planHelpPanel"')
+        panel_end = HUMAN_ADAM_HTML.index("</section>", panel_start)
+        panel_source = HUMAN_ADAM_HTML[panel_start:panel_end]
+        toggle_start = HUMAN_ADAM_HTML.index("function setPlanHelpOpen(open)")
+        toggle_end = HUMAN_ADAM_HTML.index("function closeContextAnchor()", toggle_start)
+        toggle_source = HUMAN_ADAM_HTML[toggle_start:toggle_end]
+
+        self.assertIn('aria-label="Nápověda k Plánu a rotaci vlákna"', HUMAN_ADAM_HTML)
+        self.assertIn('aria-expanded="false"', HUMAN_ADAM_HTML)
+        self.assertIn('aria-controls="planHelpPanel"', HUMAN_ADAM_HTML)
+        self.assertIn("Běžná práce s Plánem", panel_source)
+        self.assertIn("Bezpečná rotace krok za krokem", panel_source)
+        self.assertIn("Když něco nejde", panel_source)
+        self.assertIn("Nouzový postup", panel_source)
+        self.assertIn("Staré vlákno se při rotaci nemaže ani nearchivuje", panel_source)
+        self.assertIn("Toto je pouze nápověda", panel_source)
+        self.assertNotIn("threadRotationAuditBtn", panel_source)
+        self.assertNotIn("threadRotationBtn", panel_source)
+        self.assertNotIn("api(", toggle_source)
+        self.assertNotIn("fetch(", toggle_source)
+        self.assertIn('planHelpBtn.setAttribute("aria-expanded"', toggle_source)
+        self.assertIn('planHelpBtn.addEventListener("click"', HUMAN_ADAM_HTML)
+        self.assertIn('planHelpCloseBtn.addEventListener("click"', HUMAN_ADAM_HTML)
 
     def test_mobile_summary_collapses_core_details_without_hiding_deployment_evidence(self) -> None:
         header = HUMAN_ADAM_HTML.index("<header>")
