@@ -10,10 +10,33 @@ Zadne.
 
 ## Smazane vetve
 
+- smazano 2026-07-19: `ready/active-profile-connect-sync-20260718`
+- smazano 2026-07-19: `ready/thread-rotation-api-20260719`
+- smazano 2026-07-19: `ready/thread-rotation-api-20260719-v2`
+- smazano 2026-07-19: `wip/active-profile-connect-sync-20260718`
+- smazano 2026-07-19: `wip/global-development-semaphore-20260719`
+- smazano 2026-07-19: `wip/thread-rotation-20260718`
+- smazano 2026-07-19: `wip/thread-rotation-api-20260719`
+- smazano 2026-07-19: `origin/wip/global-development-semaphore-20260719`
+- smazano 2026-07-19: `origin/wip/thread-rotation-20260718`
+- smazano 2026-07-19: `origin/wip/thread-rotation-api-20260719`
 - smazano 2026-07-13: `wip/voicebridge-freeze-2026-07-12`
 - smazano 2026-07-13: `origin/wip/voicebridge-freeze-2026-07-12`
 - smazano 2026-06-26: `cursor/matysek-scene02-mossy-stump-prototype`
 - smazano 2026-06-26: `origin/cursor/matysek-scene02-mossy-stump-prototype`
+
+Rozhodnuti 2026-07-19:
+
+- Vsechny tri pomocne worktrees byly pred odstranenim ciste, bez staged,
+  unstaged i untracked souboru.
+- Active-profile sync je zachovany v historii `main` bodem `afb82e3`.
+- Finalni profilova rotace je zachovana v `main` bodem `424d003`; starsi backend
+  a API checkpointy mely v relevantnim kodu a testech stejny vysledny obsah.
+- Globalni vyvojovy semafor je zachovany v `main` bodem `90ed06c` a jeho
+  deploymentovy zaznam bodem `7515d91`.
+- Pred smazanim byly lokalni `main` a `origin/main` shodne. Lokalni i vzdalene
+  refy byly smazany az po presnem potvrzeni globalni brzdy; `main`, tagy,
+  soukroma data ani jine pracovni plochy se nemenily.
 
 Rozhodnuti 2026-07-13:
 
