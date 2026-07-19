@@ -76,6 +76,34 @@ class DevelopmentSemaphoreTests(unittest.TestCase):
             self.assertEqual(paused[key], value)
             self.assertEqual(resumed[key], value)
 
+    def test_owned_bootstrap_lease_can_be_bound_once_to_valid_project(self) -> None:
+        binding = {
+            "project_id": "new-project-12345678",
+            "project_label": "Nový projekt",
+            "handoff_path": "memory/handoffs/new_project_start.md",
+            "tvbcp_path": "",
+        }
+        with tempfile.TemporaryDirectory() as temp_dir:
+            store = self.make_store(Path(temp_dir))
+            temporary = self.acquire(store)
+            bound = store.bind_project(
+                owner_id="knihovna",
+                project_binding=binding,
+                expected_revision=int(temporary["revision"]),
+                confirmed=True,
+            )
+            repeated = store.bind_project(
+                owner_id="knihovna",
+                project_binding=binding,
+                expected_revision=int(bound["revision"]),
+                confirmed=True,
+            )
+
+        self.assertEqual(bound["project_id"], binding["project_id"])
+        self.assertEqual(bound["handoff_path"], binding["handoff_path"])
+        self.assertEqual(bound["revision"], 2)
+        self.assertFalse(repeated["changed"])
+
     def test_invalid_project_binding_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             store = self.make_store(Path(temp_dir))

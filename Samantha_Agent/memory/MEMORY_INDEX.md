@@ -104,6 +104,14 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `handoffs/human_adam_project_bootstrap_phase0_wip_2026_07_19.md` - [PRIPOMENOUT]
+  priorita 1: v izolovane vetvi je hotova faze 0 pro zalozeni dosud chybejiciho
+  projektu a prvniho handoffu primo z `Human-Adam -> Prace`. Nejdriv ukaze
+  read-only nahled, zapis vyzaduje presnou vetu, meni jen profilovy workspace a
+  pripne stejny semafor; sama nedela commit, push ani nasazeni. Napoveda pokryva
+  fazi 0 az 4. Cilenych 106 testu i plna Cockpit brana s 862 testy prosly;
+  zbyva prevzeti do `main`, restart, smoke test a rucni profilovy proklik.
+
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni
   rolovaci box byl hur citelny. Ergonomicka oprava ve vetvi

@@ -97,6 +97,7 @@ from app.communication.human_adam_profiles import (
     human_adam_deployment_completion_status_action,
     human_adam_development_semaphore_action,
     human_adam_development_semaphore_status_action,
+    human_adam_project_bootstrap_action,
     human_adam_project_continuity_action,
     human_adam_profile_switch_action,
 )
@@ -9283,6 +9284,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/human-adam/project-bootstrap",
+        "label": "Zalozit novy projekt a pocatecni handoff v izolovanem profilu",
+        "risk": "workspace_write",
+        "confirmation": "preview_plus_exact_project_bootstrap_phrase",
+        "handler_name": "human_adam_project_bootstrap_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/human-adam/context-anchor",
         "label": "Pripnout soukromy aktivni kontext Human-Adam",
         "risk": "private_write",
@@ -10251,6 +10260,10 @@ class CockpitServer:
                 if parsed.path == "/api/human-adam/development-semaphore":
                     payload = self.read_json()
                     self.respond_json(human_adam_development_semaphore_action(payload, service=HUMAN_ADAM))
+                    return
+                if parsed.path == "/api/human-adam/project-bootstrap":
+                    payload = self.read_json()
+                    self.respond_json(human_adam_project_bootstrap_action(payload, service=HUMAN_ADAM))
                     return
                 if parsed.path == "/api/human-adam/context-anchor":
                     payload = self.read_json()

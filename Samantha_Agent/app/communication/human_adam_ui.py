@@ -79,6 +79,19 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .development-binding-fields label { display:grid; gap:4px; color:var(--muted); font-size:12px; font-weight:700; }
     .development-binding-fields select { width:100%; min-width:0; border:1px solid #bac7d8; border-radius:11px; padding:9px 10px; background:#fff; color:var(--ink); font:inherit; }
     .development-semaphore-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .project-bootstrap-box { margin-top:4px; padding:13px; border:1px solid #93c5fd; border-radius:13px; display:grid; gap:9px; background:#eff6ff; }
+    .project-bootstrap-box[hidden] { display:none; }
+    .project-bootstrap-head { display:flex; align-items:center; gap:8px; }
+    .project-bootstrap-head h4 { flex:1; margin:0; font-size:15px; }
+    .project-bootstrap-fields { display:grid; grid-template-columns:minmax(0,1fr) 100px; gap:8px; }
+    .project-bootstrap-fields label { display:grid; gap:4px; color:var(--muted); font-size:12px; font-weight:700; }
+    .project-bootstrap-fields .wide { grid-column:1/-1; }
+    .project-bootstrap-fields select { width:100%; min-width:0; border:1px solid #93b4d8; border-radius:11px; padding:9px 10px; background:#fff; color:var(--ink); font:inherit; }
+    .project-bootstrap-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    #projectBootstrapMeta { color:var(--muted); font-size:13px; line-height:1.45; overflow-wrap:anywhere; }
+    #projectBootstrapPreview { margin:0; padding-left:22px; font-size:13px; }
+    #projectBootstrapPreview li { margin:4px 0; overflow-wrap:anywhere; }
+    #projectBootstrapConfirmation { border-color:#60a5fa; }
     .project-continuity-box { padding:12px 16px; border-bottom:1px solid var(--line); display:grid; gap:8px; background:#fff; }
     .project-continuity-head { display:flex; align-items:center; gap:8px; }
     .project-continuity-head h3 { flex:1; margin:0; font-size:15px; }
@@ -135,7 +148,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       .context-anchor-actions > button { flex:1 1 calc(50% - 4px); min-width:0; padding-left:8px; padding-right:8px; white-space:normal; }
       .thread-rotation-actions > button { flex:1 1 100%; min-width:0; white-space:normal; }
       .development-semaphore-actions > button { flex:1 1 100%; min-width:0; white-space:normal; }
+      .project-bootstrap-actions > button { flex:1 1 100%; min-width:0; white-space:normal; }
       .development-binding-fields { grid-template-columns:1fr; }
+      .project-bootstrap-fields { grid-template-columns:1fr; }
+      .project-bootstrap-fields .wide { grid-column:auto; }
       .workflow-help-panel { padding:12px; }
       .workflow-help-head { align-items:flex-start; }
       .work-help-panel { margin:10px 12px; }
@@ -296,6 +312,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <h4>Co je co</h4>
       <ul>
         <li><strong>Vývojový semafor</strong> určuje jediného vlastníka zápisu. Ostatní Adamové zůstávají read-only.</li>
+        <li><strong>Fáze 0</strong> založí dosud neexistující projekt a jeho první handoff přímo v izolovaném workspace vybraného profilu.</li>
         <li><strong>WIP větev</strong> bezpečně odděluje jeden vývojový úkol. Není to Codex vlákno a jeho existence nezaplňuje konverzaci.</li>
         <li><strong>Worktree</strong> je oddělená pracovní kopie projektu připojená k určité větvi.</li>
         <li><strong>Projektová vazba</strong> spojuje jeden vývoj se zvoleným projektem a handoffem; audit pouze čte důkazy a nic nepřepisuje.</li>
@@ -304,8 +321,18 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <li><strong>Potvrzené dokončení</strong> se nabídne až po novém procesu a smoke testu. Zapíše jen commit, testy, restart, smoke test, stav nasazeno a tebou zadaný další krok.</li>
       </ul>
 
-      <h4>Čtyři fáze handoffu od zahájení po nasazení</h4>
+      <h4>Fáze 0 až 4: od nového projektu po nasazení</h4>
       <ol>
+        <li>
+          <strong>Fáze 0 — nový projekt a první handoff.</strong>
+          Použij ji jen tehdy, když požadovaný projekt ještě není v nabídce. Při volném semaforu klikni na <strong>+ Nový projekt / handoff</strong>, vyplň název, prioritu, cíl a nejbližší krok a nejdřív spusť náhled.
+          <ul>
+            <li><strong>Náhled nic nezapisuje.</strong> Ukáže přesný název handoffu, dvě cílové cesty a potvrzovací větu <code>POTVRZUJI ZALOZENI NOVEHO PROJEKTU</code>.</li>
+            <li>Po přesném potvrzení Cockpit založí projekt v <code>ACTIVE_PROJECTS.md</code> a standardní první handoff pouze v izolovaném workspace aktivního profilu.</li>
+            <li>Současně převezme a připne stejný vývojový semafor k novému projektu. Teprve potom zadej Adamovi vývojový úkol.</li>
+            <li>Fáze 0 sama nedělá commit, push, převzetí do <code>main</code> ani nasazení. Do polí nevkládej tajemství ani soukromé údaje.</li>
+          </ul>
+        </li>
         <li>
           <strong>Fáze 1 — projektová vazba a kontrola aktuálnosti.</strong>
           Před první změnou vyber projekt, jeho aktuální handoff a téma práce; potom převezmi semafor. Tlačítko <strong>Prověřit handoff</strong> pouze porovná dostupné důkazy s checkpointem, kotvou a TVBCP.
@@ -350,7 +377,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <h4>Běžný vývoj z r-Adama</h4>
       <ol>
         <li>Vyber správný profil, klikni na <strong>Připojit</strong> a nech workspace synchronizovat s `main`.</li>
-        <li>Vyber projekt a aktuální handoff, do tématu napiš krátký název práce a klikni na <strong>Převzít pro tento profil</strong>.</li>
+        <li>Pokud projekt chybí, proveď nejdřív fázi 0. Jinak vyber projekt a aktuální handoff, do tématu napiš krátký název práce a klikni na <strong>Převzít pro tento profil</strong>.</li>
         <li>Teprve potom zadej vývojový úkol. Druhý Adam zůstane read-only.</li>
         <li>Po dokončení vytvoř <strong>Checkpoint bez pushnutí</strong> s krátkým popisem.</li>
         <li>Spusť <strong>Audit nasazení</strong>, přečti výsledek a použij přesnou potvrzovací větu.</li>
@@ -403,10 +430,43 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <div class="development-semaphore-actions">
         <button class="primary" id="developmentAcquireProfileBtn" type="button">Převzít pro tento profil</button>
         <button id="developmentAcquireTerminalBtn" type="button">Převzít pro terminál</button>
+        <button id="developmentNewProjectBtn" type="button">+ Nový projekt / handoff</button>
         <button id="developmentPauseBtn" type="button" hidden>Pozastavit</button>
         <button id="developmentResumeBtn" type="button" hidden>Obnovit</button>
         <button id="developmentReleaseBtn" type="button" hidden>Uvolnit</button>
       </div>
+      <section class="project-bootstrap-box" id="projectBootstrapBox" aria-label="Fáze 0 – nový projekt a první handoff" hidden>
+        <div class="project-bootstrap-head">
+          <h4>Fáze 0 — nový projekt a první handoff</h4>
+          <button id="projectBootstrapCloseBtn" type="button">Zavřít</button>
+        </div>
+        <p>Nejdřív vznikne pouze read-only náhled. Potvrzený zápis proběhne jen v izolovaném workspace tohoto profilu; bez commitu, pushnutí a nasazení.</p>
+        <div class="project-bootstrap-fields">
+          <label>Název projektu
+            <input id="projectBootstrapLabel" maxlength="100" autocomplete="off" placeholder="Např. Náhled upozornění v kalendáři">
+          </label>
+          <label>Priorita
+            <select id="projectBootstrapPriority" aria-label="Priorita nového projektu">
+              <option value="1">1</option>
+              <option value="2" selected>2</option>
+              <option value="3">3</option>
+            </select>
+          </label>
+          <label class="wide">Cíl
+            <input id="projectBootstrapGoal" maxlength="240" autocomplete="off" placeholder="Co má být po dokončení prokazatelně hotové">
+          </label>
+          <label class="wide">Nejbližší krok
+            <input id="projectBootstrapNextStep" maxlength="180" autocomplete="off" placeholder="První malý vývojový krok">
+          </label>
+        </div>
+        <div class="project-bootstrap-actions">
+          <button class="primary" id="projectBootstrapPreviewBtn" type="button">Zobrazit bezpečný náhled</button>
+        </div>
+        <p id="projectBootstrapMeta" role="status">Nevkládej hesla, tokeny, osobní údaje ani soukromé texty.</p>
+        <ul id="projectBootstrapPreview" hidden></ul>
+        <input id="projectBootstrapConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Po náhledu sem vlož přesnou potvrzovací větu" hidden disabled>
+        <button class="primary" id="projectBootstrapCreateBtn" type="button" hidden disabled>Založit projekt, handoff a převzít semafor</button>
+      </section>
     </section>
     <section class="project-continuity-box" aria-label="Aktuálnost projektového handoffu">
       <div class="project-continuity-head">
@@ -532,9 +592,21 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const developmentTopic = document.getElementById("developmentTopic");
   const developmentAcquireProfileBtn = document.getElementById("developmentAcquireProfileBtn");
   const developmentAcquireTerminalBtn = document.getElementById("developmentAcquireTerminalBtn");
+  const developmentNewProjectBtn = document.getElementById("developmentNewProjectBtn");
   const developmentPauseBtn = document.getElementById("developmentPauseBtn");
   const developmentResumeBtn = document.getElementById("developmentResumeBtn");
   const developmentReleaseBtn = document.getElementById("developmentReleaseBtn");
+  const projectBootstrapBox = document.getElementById("projectBootstrapBox");
+  const projectBootstrapCloseBtn = document.getElementById("projectBootstrapCloseBtn");
+  const projectBootstrapLabel = document.getElementById("projectBootstrapLabel");
+  const projectBootstrapPriority = document.getElementById("projectBootstrapPriority");
+  const projectBootstrapGoal = document.getElementById("projectBootstrapGoal");
+  const projectBootstrapNextStep = document.getElementById("projectBootstrapNextStep");
+  const projectBootstrapPreviewBtn = document.getElementById("projectBootstrapPreviewBtn");
+  const projectBootstrapMeta = document.getElementById("projectBootstrapMeta");
+  const projectBootstrapPreviewList = document.getElementById("projectBootstrapPreview");
+  const projectBootstrapConfirmation = document.getElementById("projectBootstrapConfirmation");
+  const projectBootstrapCreateBtn = document.getElementById("projectBootstrapCreateBtn");
   const projectContinuityAuditBtn = document.getElementById("projectContinuityAuditBtn");
   const projectContinuityMeta = document.getElementById("projectContinuityMeta");
   const projectContinuityReasons = document.getElementById("projectContinuityReasons");
@@ -572,6 +644,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let deploymentAudit = null;
   let developmentSemaphore = null;
   let projectContinuity = null;
+  let projectBootstrapPreviewState = null;
   let completionMediaUrl = "";
   let activeSpeechButton = null;
   let activeSpeechUtterance = null;
@@ -762,11 +835,21 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     developmentHandoff.disabled = developmentProject.disabled || !developmentProject.value;
     developmentAcquireProfileBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_acquire_profile !== true;
     developmentAcquireTerminalBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_acquire_terminal !== true;
+    developmentNewProjectBtn.disabled = busy || !semaphoreValid || semaphoreActive || developmentSemaphore.can_acquire_profile !== true;
     developmentPauseBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_pause !== true;
     developmentResumeBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_resume !== true;
     developmentReleaseBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_release !== true;
     projectContinuityAuditBtn.disabled = busy;
     developmentBranchAuditBtn.disabled = busy;
+    const bootstrapBlocked = busy || !semaphoreValid || semaphoreActive || developmentSemaphore.can_acquire_profile !== true;
+    projectBootstrapLabel.disabled = bootstrapBlocked;
+    projectBootstrapPriority.disabled = bootstrapBlocked;
+    projectBootstrapGoal.disabled = bootstrapBlocked;
+    projectBootstrapNextStep.disabled = bootstrapBlocked;
+    projectBootstrapPreviewBtn.disabled = bootstrapBlocked;
+    projectBootstrapConfirmation.disabled = bootstrapBlocked || !projectBootstrapPreviewState || projectBootstrapPreviewState.ready !== true;
+    const bootstrapRequired = projectBootstrapPreviewState ? String(projectBootstrapPreviewState.confirmation_text || "") : "";
+    projectBootstrapCreateBtn.disabled = projectBootstrapConfirmation.disabled || !bootstrapRequired || projectBootstrapConfirmation.value.trim() !== bootstrapRequired;
     syncDeploymentCompletionControls();
   }
 
@@ -1789,11 +1872,116 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     developmentAcquireProfileBtn.textContent = `Převzít pro ${activeProfileLabel}`;
     developmentAcquireProfileBtn.hidden = active;
     developmentAcquireTerminalBtn.hidden = active;
+    developmentNewProjectBtn.hidden = active;
     developmentPauseBtn.hidden = !active || developmentSemaphore.mode !== "active";
     developmentResumeBtn.hidden = !active || developmentSemaphore.mode !== "paused";
     developmentReleaseBtn.hidden = !active;
     if (active) developmentTopic.value = topic === "bez tématu" ? "" : topic;
+    if (active) setProjectBootstrapOpen(false);
     syncControls();
+  }
+
+  function resetProjectBootstrapPreview(message="Nevkládej hesla, tokeny, osobní údaje ani soukromé texty.") {
+    projectBootstrapPreviewState = null;
+    projectBootstrapPreviewList.replaceChildren();
+    projectBootstrapPreviewList.hidden = true;
+    projectBootstrapConfirmation.value = "";
+    projectBootstrapConfirmation.hidden = true;
+    projectBootstrapCreateBtn.hidden = true;
+    projectBootstrapMeta.textContent = message;
+    syncControls();
+  }
+
+  function setProjectBootstrapOpen(open) {
+    const expanded = Boolean(open);
+    projectBootstrapBox.hidden = !expanded;
+    if (expanded) {
+      resetProjectBootstrapPreview("Vyplň čtyři stručná git-safe pole a nejdřív si zobraz náhled. Nic se ještě nezapíše.");
+      projectBootstrapLabel.focus();
+    } else {
+      resetProjectBootstrapPreview();
+    }
+  }
+
+  function projectBootstrapPayload(operation) {
+    return {
+      operation,
+      project_label:projectBootstrapLabel.value.trim(),
+      priority:projectBootstrapPriority.value,
+      goal:projectBootstrapGoal.value.trim(),
+      next_step:projectBootstrapNextStep.value.trim(),
+    };
+  }
+
+  function renderProjectBootstrapPreview(payload) {
+    projectBootstrapPreviewState = payload;
+    projectBootstrapPreviewList.replaceChildren();
+    const changes = Array.isArray(payload.changes) ? payload.changes : [];
+    const rows = [
+      `Projekt: ${payload.project_label || ""} · priorita ${payload.priority || ""}`,
+      `První handoff: ${String(payload.handoff_path || "").split("/").pop()}`,
+      `Změní se pouze: ${changes.join(" a ")}`,
+      `Potvrzovací věta: ${payload.confirmation_text || ""}`,
+    ];
+    for (const text of rows) {
+      const row = document.createElement("li");
+      row.textContent = text;
+      projectBootstrapPreviewList.appendChild(row);
+    }
+    projectBootstrapPreviewList.hidden = false;
+    projectBootstrapConfirmation.hidden = false;
+    projectBootstrapCreateBtn.hidden = false;
+    projectBootstrapMeta.textContent = payload.message || "Náhled je připravený; nic ještě nebylo zapsáno.";
+    syncControls();
+    projectBootstrapConfirmation.focus();
+  }
+
+  async function previewProjectBootstrap() {
+    if (projectBootstrapPreviewBtn.disabled) return;
+    setBusy(true, "Připravuji read-only náhled fáze 0…");
+    try {
+      const payload = await api("/api/human-adam/project-bootstrap", {
+        method:"POST",
+        body:JSON.stringify(projectBootstrapPayload("preview")),
+      });
+      if (!payload.ok || payload.ready !== true) throw new Error(payload.message || "Náhled nového projektu nelze připravit.");
+      renderProjectBootstrapPreview(payload);
+      notice.textContent = "Náhled fáze 0 je připravený. Žádný soubor ani semafor se nezměnil.";
+    } catch (error) {
+      resetProjectBootstrapPreview(`Náhled byl bezpečně zastaven: ${error.message}`);
+      notice.textContent = `Fázi 0 nelze připravit: ${error.message}`;
+    } finally { setBusy(false); }
+  }
+
+  async function createProjectBootstrap() {
+    if (projectBootstrapCreateBtn.disabled || !projectBootstrapPreviewState) return;
+    const request = {
+      ...projectBootstrapPayload("create"),
+      expected_revision:Number(projectBootstrapPreviewState.expected_semaphore_revision),
+      confirmation:projectBootstrapConfirmation.value.trim(),
+    };
+    let outcomeNotice = "";
+    setBusy(true, "Zakládám projekt a handoff v izolovaném workspace…");
+    try {
+      const payload = await api("/api/human-adam/project-bootstrap", {
+        method:"POST",
+        body:JSON.stringify(request),
+      });
+      if (!payload.ok) throw new Error(payload.message || "Projekt a handoff nelze založit.");
+      const createdLabel = String(payload.project_label || request.project_label);
+      projectBootstrapLabel.value = "";
+      projectBootstrapPriority.value = "2";
+      projectBootstrapGoal.value = "";
+      projectBootstrapNextStep.value = "";
+      setProjectBootstrapOpen(false);
+      outcomeNotice = `Projekt „${createdLabel}“ a první handoff byly založeny. Semafor nyní vlastní ${activeProfileLabel}; nevznikl commit ani push.`;
+    } catch (error) {
+      resetProjectBootstrapPreview(`Zápis byl bezpečně zastaven: ${error.message} Připrav nový náhled.`);
+      outcomeNotice = `Fáze 0 nebyla provedena: ${error.message}`;
+    } finally { setBusy(false); }
+    await loadWork();
+    await loadStatus();
+    if (outcomeNotice) notice.textContent = outcomeNotice;
   }
 
   async function changeDevelopmentSemaphore(operation) {
@@ -2285,6 +2473,18 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   workRefreshBtn.addEventListener("click", loadWork);
   developmentAcquireProfileBtn.addEventListener("click", () => changeDevelopmentSemaphore("acquire_profile"));
   developmentAcquireTerminalBtn.addEventListener("click", () => changeDevelopmentSemaphore("acquire_terminal"));
+  developmentNewProjectBtn.addEventListener("click", () => setProjectBootstrapOpen(true));
+  projectBootstrapCloseBtn.addEventListener("click", () => {
+    setProjectBootstrapOpen(false);
+    developmentNewProjectBtn.focus();
+  });
+  for (const field of [projectBootstrapLabel, projectBootstrapGoal, projectBootstrapNextStep]) {
+    field.addEventListener("input", () => resetProjectBootstrapPreview("Údaje se změnily. Připrav nový náhled; nic nebylo zapsáno."));
+  }
+  projectBootstrapPriority.addEventListener("change", () => resetProjectBootstrapPreview("Priorita se změnila. Připrav nový náhled; nic nebylo zapsáno."));
+  projectBootstrapPreviewBtn.addEventListener("click", previewProjectBootstrap);
+  projectBootstrapConfirmation.addEventListener("input", syncControls);
+  projectBootstrapCreateBtn.addEventListener("click", createProjectBootstrap);
   developmentPauseBtn.addEventListener("click", () => changeDevelopmentSemaphore("pause"));
   developmentResumeBtn.addEventListener("click", () => changeDevelopmentSemaphore("resume"));
   developmentReleaseBtn.addEventListener("click", () => changeDevelopmentSemaphore("release"));

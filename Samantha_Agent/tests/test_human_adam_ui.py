@@ -55,6 +55,18 @@ class HumanAdamUiTests(unittest.TestCase):
             "workHelpPanel",
             "workHelpCloseBtn",
             "workChanges",
+            "developmentNewProjectBtn",
+            "projectBootstrapBox",
+            "projectBootstrapCloseBtn",
+            "projectBootstrapLabel",
+            "projectBootstrapPriority",
+            "projectBootstrapGoal",
+            "projectBootstrapNextStep",
+            "projectBootstrapPreviewBtn",
+            "projectBootstrapMeta",
+            "projectBootstrapPreview",
+            "projectBootstrapConfirmation",
+            "projectBootstrapCreateBtn",
             "developmentBranchAuditBtn",
             "developmentBranchAuditMeta",
             "developmentBranchAuditList",
@@ -334,7 +346,10 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertNotIn(".work-help-panel { flex:0 1 auto; max-height", HUMAN_ADAM_HTML)
         self.assertIn("Běžný vývoj z r-Adama", panel_source)
         self.assertIn("Vývoj z terminálového Adama", panel_source)
-        self.assertIn("Čtyři fáze handoffu od zahájení po nasazení", panel_source)
+        self.assertIn("Fáze 0 až 4: od nového projektu po nasazení", panel_source)
+        self.assertIn("Fáze 0 — nový projekt a první handoff", panel_source)
+        self.assertIn("Náhled nic nezapisuje", panel_source)
+        self.assertIn("sama nedělá commit, push", panel_source)
         self.assertIn("Fáze 1 — projektová vazba a kontrola aktuálnosti", panel_source)
         self.assertIn("Fáze 2 — návrh handoffu při checkpointu", panel_source)
         self.assertIn("Fáze 3 — kontrola handoffu při převzetí do `main`", panel_source)
@@ -362,6 +377,26 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('workHelpBtn.setAttribute("aria-expanded"', toggle_source)
         self.assertIn('workHelpBtn.addEventListener("click"', HUMAN_ADAM_HTML)
         self.assertIn('workHelpCloseBtn.addEventListener("click"', HUMAN_ADAM_HTML)
+
+    def test_project_bootstrap_ui_requires_preview_and_exact_confirmation(self) -> None:
+        preview_start = HUMAN_ADAM_HTML.index("async function previewProjectBootstrap()")
+        create_start = HUMAN_ADAM_HTML.index("async function createProjectBootstrap()", preview_start)
+        preview_source = HUMAN_ADAM_HTML[preview_start:create_start]
+        create_end = HUMAN_ADAM_HTML.index("async function changeDevelopmentSemaphore", create_start)
+        create_source = HUMAN_ADAM_HTML[create_start:create_end]
+
+        self.assertIn('api("/api/human-adam/project-bootstrap"', preview_source)
+        self.assertIn('projectBootstrapPayload("preview")', preview_source)
+        self.assertIn('api("/api/human-adam/project-bootstrap"', create_source)
+        self.assertIn('projectBootstrapPayload("create")', create_source)
+        self.assertIn("expected_revision:Number(projectBootstrapPreviewState.expected_semaphore_revision)", create_source)
+        self.assertIn("confirmation:projectBootstrapConfirmation.value.trim()", create_source)
+        self.assertIn("POTVRZUJI ZALOZENI NOVEHO PROJEKTU", HUMAN_ADAM_HTML)
+        self.assertIn("projectBootstrapCreateBtn.disabled", HUMAN_ADAM_HTML)
+        self.assertIn("Žádný soubor ani semafor se nezměnil", preview_source)
+        self.assertIn("nevznikl commit ani push", create_source)
+        self.assertNotIn("window.confirm", preview_source)
+        self.assertNotIn("window.confirm", create_source)
 
     def test_profile_switch_is_explicit_atomic_and_preserves_unsent_draft(self) -> None:
         switch_start = HUMAN_ADAM_HTML.index("async function switchProfile()")

@@ -40,7 +40,11 @@ from app.file_persistence import (
     atomic_write_json,
     exclusive_file_lock,
 )
-from app.project_continuity import ProjectContinuityError, ProjectContinuityService
+from app.project_continuity import (
+    PROJECT_BOOTSTRAP_CONFIRMATION,
+    ProjectContinuityError,
+    ProjectContinuityService,
+)
 from scripts.cockpit_smoke_check import run_smoke_check
 
 
@@ -352,6 +356,149 @@ class HumanAdamProfileManager:
             "handoff_proposal": self.handoff_proposal_status(work_review=work),
         }
 
+    def _workspace_project_continuity(self) -> ProjectContinuityService:
+        return ProjectContinuityService(project_root=self.active_service.workspace.project_root)
+
+    def _project_continuity_for_binding(
+        self,
+        binding: dict[str, Any],
+    ) -> ProjectContinuityService:
+        try:
+            self.project_continuity.resolve_binding(
+                project_id=str(binding.get("project_id") or ""),
+                handoff_path=str(binding.get("handoff_path") or ""),
+                fallback_tvbcp_path=str(binding.get("tvbcp_path") or ""),
+            )
+            return self.project_continuity
+        except ProjectContinuityError:
+            workspace_continuity = self._workspace_project_continuity()
+            workspace_continuity.resolve_binding(
+                project_id=str(binding.get("project_id") or ""),
+                handoff_path=str(binding.get("handoff_path") or ""),
+                fallback_tvbcp_path=str(binding.get("tvbcp_path") or ""),
+            )
+            return workspace_continuity
+
+    def project_bootstrap_preview(
+        self,
+        *,
+        project_label: str,
+        priority: str,
+        goal: str,
+        next_step: str,
+    ) -> dict[str, Any]:
+        lease = self.development_semaphore.status()
+        if lease.get("ok") is not True or lease.get("active") is True:
+            raise AppServerError("Nový projekt lze založit jen při volném vývojovém semaforu.")
+        active_id = self.active_profile_id
+        active_row = next(
+            (row for row in self._development_workspace_rows() if row["id"] == active_id),
+            None,
+        )
+        if active_row is None or self._row_blocker(active_row):
+            raise AppServerError("Aktivní profil nemá čistý bezpečný workspace pro nový projekt.")
+        if active_row.get("workspace_relation") != "aligned":
+            raise AppServerError("Nejdřív připoj profil a synchronizuj jeho workspace s main.")
+        if any(
+            self._row_blocker(row)
+            for row in self._development_workspace_rows()
+            if row["id"] != active_id
+        ):
+            raise AppServerError("Nový projekt blokuje cizí WIP v jiném profilu.")
+        if self.active_service.hub.snapshot().get("turn_busy"):
+            raise AppServerError("Nový projekt nelze založit během aktivního tahu Adama.")
+        preview = self._workspace_project_continuity().project_bootstrap_preview(
+            project_label=project_label,
+            priority=priority,
+            goal=goal,
+            next_step=next_step,
+        )
+        return {
+            **preview,
+            "active_profile_id": active_id,
+            "active_profile_label": str(self.profiles[active_id].get("label") or active_id),
+            "expected_semaphore_revision": int(lease.get("revision") or 0),
+        }
+
+    def create_project_bootstrap(
+        self,
+        *,
+        project_label: str,
+        priority: str,
+        goal: str,
+        next_step: str,
+        expected_revision: int,
+        confirmation: str,
+    ) -> dict[str, Any]:
+        if str(confirmation or "").strip() != PROJECT_BOOTSTRAP_CONFIRMATION:
+            raise AppServerError(
+                f"Chybí přesná potvrzovací věta: {PROJECT_BOOTSTRAP_CONFIRMATION}"
+            )
+        if not self._operation_lock.acquire(blocking=False):
+            raise SessionBusyError("Založení projektu právě blokuje jiná profilová operace.")
+        temporary_lease: dict[str, Any] | None = None
+        try:
+            preview = self.project_bootstrap_preview(
+                project_label=project_label,
+                priority=priority,
+                goal=goal,
+                next_step=next_step,
+            )
+            if int(preview["expected_semaphore_revision"]) != int(expected_revision):
+                raise AppServerError("Vývojový semafor se mezitím změnil; obnov jeho stav.")
+            active_id = self.active_profile_id
+            profile = self.profiles[active_id]
+            workspace_status = profile["service"].workspace.status()
+            temporary_lease = self.development_semaphore.acquire(
+                owner_id=active_id,
+                owner_label=str(profile.get("label") or active_id),
+                workspace_label=f"Profil {str(profile.get('label') or active_id)}",
+                base_head=str(workspace_status.get("head") or ""),
+                topic=f"Fáze 0: {str(preview['project_label'])}"[:120],
+                expected_revision=expected_revision,
+                confirmed=True,
+            )
+            workspace_continuity = self._workspace_project_continuity()
+            created = workspace_continuity.create_project_bootstrap(
+                project_label=project_label,
+                priority=priority,
+                goal=goal,
+                next_step=next_step,
+                confirmation=confirmation,
+            )
+            binding = dict(created.get("binding") or {})
+            bound_lease = self.development_semaphore.bind_project(
+                owner_id=active_id,
+                project_binding=binding,
+                expected_revision=int(temporary_lease.get("revision") or 0),
+                confirmed=True,
+            )
+            return {
+                **created,
+                "ok": True,
+                "active_profile_id": active_id,
+                "active_profile_label": str(profile.get("label") or active_id),
+                "development_semaphore": self.development_status(),
+                "project_continuity": self.project_continuity_status(),
+                "semaphore_revision": int(bound_lease.get("revision") or 0),
+            }
+        except (AppServerError, ProjectContinuityError, OSError, TypeError, ValueError):
+            if temporary_lease is not None:
+                workspace_status = self.active_service.workspace.status()
+                if not workspace_status.get("dirty"):
+                    try:
+                        self.development_semaphore.release(
+                            owner_id=self.active_profile_id,
+                            expected_revision=int(temporary_lease.get("revision") or 0),
+                            confirmed=True,
+                            safe_to_release=self._safe_to_release(),
+                        )
+                    except AppServerError:
+                        pass
+            raise
+        finally:
+            self._operation_lock.release()
+
     def handoff_proposal_status(
         self,
         *,
@@ -386,7 +533,8 @@ class HumanAdamProfileManager:
                 "tvbcp_path": str(lease.get("tvbcp_path") or ""),
             }
             review = work_review if work_review is not None else self.active_service.work_review()
-            return self.project_continuity.handoff_proposal(
+            continuity = self._project_continuity_for_binding(binding)
+            return continuity.handoff_proposal(
                 binding=binding,
                 topic=str(lease.get("topic") or ""),
                 workspace_review=review,
@@ -416,10 +564,19 @@ class HumanAdamProfileManager:
                 "handoff_path": str(lease.get("handoff_path") or ""),
                 "tvbcp_path": str(lease.get("tvbcp_path") or ""),
             }
+            continuity = self.project_continuity
+            if lease.get("active") is True and lease.get("owner_id") == active_id:
+                workspace_projects = self._workspace_project_continuity().public_catalog()
+                known_ids = {str(item.get("id") or "") for item in projects}
+                projects.extend(
+                    item for item in workspace_projects if str(item.get("id") or "") not in known_ids
+                )
+                if binding["project_id"]:
+                    continuity = self._project_continuity_for_binding(binding)
             include_profile_receipt = bool(
                 binding["project_id"] and binding["project_id"] == default_project_id
             )
-            audit = self.project_continuity.audit(
+            audit = continuity.audit(
                 binding=binding,
                 workspace_root=self.active_service.workspace.project_root,
                 workspace_review=self.active_service.workspace.review(),
@@ -514,7 +671,8 @@ class HumanAdamProfileManager:
             changes = deployment_audit.get("changes")
             if not isinstance(changes, list):
                 return fallback
-            return self.project_continuity.takeover_handoff_check(
+            continuity = self._project_continuity_for_binding(binding)
+            return continuity.takeover_handoff_check(
                 binding=binding,
                 checkpoint_changes=changes,
                 project_dir_name=service.workspace.project_root.name,
@@ -1218,6 +1376,38 @@ def human_adam_project_continuity_action(
     service: HumanAdamProfileManager,
 ) -> dict[str, Any]:
     return service.project_continuity_status()
+
+
+def human_adam_project_bootstrap_action(
+    payload: dict[str, Any],
+    *,
+    service: HumanAdamProfileManager,
+) -> dict[str, Any]:
+    try:
+        operation = str(payload.get("operation") or "").strip()
+        common = {
+            "project_label": str(payload.get("project_label") or ""),
+            "priority": str(payload.get("priority") or ""),
+            "goal": str(payload.get("goal") or ""),
+            "next_step": str(payload.get("next_step") or ""),
+        }
+        if operation == "preview":
+            return service.project_bootstrap_preview(**common)
+        if operation == "create":
+            return service.create_project_bootstrap(
+                **common,
+                expected_revision=int(payload.get("expected_revision")),
+                confirmation=str(payload.get("confirmation") or ""),
+            )
+        raise AppServerError("Neznámá operace fáze 0.")
+    except (AppServerError, ProjectContinuityError, SessionHubError, OSError, TypeError, ValueError) as exc:
+        return {
+            "ok": False,
+            "ready": False,
+            "writes_performed": False,
+            "message": str(exc),
+            "development_semaphore": service.development_status(),
+        }
 
 
 def human_adam_deployment_completion_status_action(

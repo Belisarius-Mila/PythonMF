@@ -41,6 +41,17 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-19: Priorita 1, App-server rozhrani / novy Adam. V izolovane vetvi
+  `wip/project-bootstrap-phase0-20260719` je hotova faze 0, ktera pri volnem
+  semaforu zalozi dosud chybejici projekt a jeho prvni handoff primo z okna
+  `Prace`. Nejdriv zobrazi read-only nahled, zapis vyzaduje presnou vetu a
+  probiha jen v izolovanem workspace aktivniho profilu. Semafor se pote pripne
+  ke stejnemu projektu; nevznika commit, push ani nasazeni. Napoveda pod
+  otaznikem popisuje fazi 0 az 4. Cilenych 106 testu a cela Cockpit brana s 862
+  testy prosly. Zbyva prevzeti WIP checkpointu do `main`, restart, smoke test a
+  rucni proklik z profilu Knihovna.
+  Handoff:
+  `handoffs/human_adam_project_bootstrap_phase0_wip_2026_07_19.md`.
 - 2026-07-19: Priorita 1, App-server rozhrani / novy Adam. Mila rucne potvrdil
   obsah napovedy `Prace -> ?`, ale maly vnitrni rolovaci box byl hur citelny nez
   velke zobrazeni v `Plan`. Ergonomicka oprava v izolovane vetvi
