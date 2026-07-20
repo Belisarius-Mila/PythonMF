@@ -293,6 +293,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       </div>
       <p>Toto je pouze nápověda. Jejím otevřením se nemění semafor, workspace, checkpoint, větev ani Git.</p>
 
+      <h4>Aktuální jednoduché nasazení</h4>
+      <ol>
+        <li>Po dokončeném automatickém checkpointu otevři <strong>Práci</strong>. Workspace musí být čistý a odpovídat <code>main</code>.</li>
+        <li>Stiskni <strong>Audit nasazení</strong>. Audit ověří přesný <code>main</code>, GitHub a oba profilové workspaces; čistý druhý profil smí být bezpečně dorovnán až při potvrzeném nasazení.</li>
+        <li>Vlož zobrazenou přesnou větu a stiskni <strong>Ověřit a nasadit</strong>. Nasazení samo nepoužívá WIP větev, takeover ani vývojový semafor.</li>
+        <li>Počkej na řízený restart. Cockpit po návratu sám ověří nový proces, kódový otisk, čistý Git a smoke test 5/5; teprve potom oznámí stav <strong>Nasazeno a ověřeno</strong>.</li>
+      </ol>
+      <p><strong>Když audit nebo dokončení selže:</strong> nic neposílej znovu naslepo. Obnov stav a předej Adamovi přesnou zobrazenou chybu.</p>
+
       <h4>Co je co</h4>
       <ul>
         <li><strong>Vývojový semafor</strong> určuje jediného vlastníka zápisu. Ostatní Adamové zůstávají read-only.</li>
@@ -1759,21 +1768,21 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     else workMeta.textContent = "Workspace je čistý a odpovídá main.";
     const semaphore = payload.development_semaphore || {};
     checkpointBtn.disabled = !payload.dirty || semaphore.can_checkpoint !== true;
-    deployAuditBtn.disabled = Boolean(payload.dirty) || !payload.local_checkpoint_ahead || semaphore.can_deploy !== true;
+    const simpleDeployReady = !payload.dirty
+      && !payload.local_checkpoint_ahead
+      && payload.workspace_relation === "aligned"
+      && Number(payload.source_pending_changes || 0) === 0;
+    deployAuditBtn.disabled = !simpleDeployReady;
     deployConfirmation.value = "";
     deployConfirmation.hidden = true;
     deployConfirmation.disabled = true;
     deployBtn.disabled = true;
-    if (semaphore.ok !== true) deployMeta.textContent = "Checkpoint a nasazení blokuje neověřený vývojový semafor.";
-    else if (!semaphore.active) deployMeta.textContent = "Nejdřív převezmi vývojový semafor pro tento profil.";
-    else if (semaphore.owner_id !== activeProfileId) deployMeta.textContent = `Vývoj vlastní ${semaphore.owner_label || semaphore.owner_id}; checkpoint a nasazení jsou zablokované.`;
-    else if (semaphore.mode === "paused") deployMeta.textContent = "Vývojový semafor je pozastavený; nejdřív jej obnov.";
-    else if (Array.isArray(semaphore.blockers) && semaphore.blockers.length) deployMeta.textContent = `Nasazení blokuje cizí WIP: ${semaphore.blockers.join(" ")}`;
-    else if (payload.dirty) deployMeta.textContent = "Nejdřív vytvoř jeden lokální WIP checkpoint.";
-    else if (payload.local_checkpoint_ahead) deployMeta.textContent = "Checkpoint čeká na read-only audit cest.";
+    if (payload.dirty) deployMeta.textContent = "Nejdřív dokonči automatický checkpoint změn do main.";
+    else if (payload.local_checkpoint_ahead) deployMeta.textContent = "Je zachovaný starší lokální checkpoint; nejdřív proveď servisní kontrolu.";
     else if (checkpointPreserved) deployMeta.textContent = "WIP je bezpečně zachovaný, ale audit je zablokovaný. Nejdřív proveď obnovu nad aktuálním main.";
     else if (payload.workspace_relation === "diverged") deployMeta.textContent = "Audit je zablokovaný: workspace a main se rozešly.";
-    else deployMeta.textContent = "Není připravený žádný WIP checkpoint k nasazení.";
+    else if (simpleDeployReady) deployMeta.textContent = "Čistý main je připravený k auditu nasazení.";
+    else deployMeta.textContent = "Workspace nejdřív synchronizuj s čistým main.";
   }
 
   function renderHandoffProposal(proposal) {
@@ -2102,7 +2111,8 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       row.textContent = `${item.status || "?"} · ${item.path || ""}`;
       workChanges.appendChild(row);
     }
-    deployMeta.textContent = `Audit OK · ${payload.checkpoint_head} · ${payload.checkpoint_subject} · ${payload.change_count} souborů · vlož přesně: ${payload.confirmation_text}`;
+    const workstream = payload.workstream && payload.workstream.name ? payload.workstream.name : "aktivní pracovní proud";
+    deployMeta.textContent = `Audit OK · main ${payload.main_short || "?"} · ${workstream} · vlož přesně: ${payload.confirmation_text}`;
     deployConfirmation.value = "";
     deployConfirmation.hidden = false;
     deployConfirmation.disabled = false;
@@ -2125,7 +2135,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   async function auditDeployment() {
     deployAuditBtn.disabled = true;
     deployBtn.disabled = true;
-    deployMeta.textContent = "Ověřuji commit, rodiče, cesty a Git stav…";
+    deployMeta.textContent = "Ověřuji čistý main, GitHub a oba profilové workspaces…";
     try {
       const payload = await api("/api/human-adam/deploy-audit");
       if (!payload.ok || !payload.ready) throw new Error(payload.message || "Audit nasazení neprošel.");
@@ -2145,6 +2155,23 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
           const health = await response.json();
           const currentPid = health && health.server ? health.server.pid : 0;
           if (currentPid && currentPid !== previousPid) {
+            try {
+              const verification = await api("/api/human-adam/deploy-verification", {
+                method:"POST",
+                body:JSON.stringify({}),
+              });
+              if (!verification.ok || verification.state !== "deployed") {
+                deployMeta.textContent = `Cockpit se vrátil, ale ověření nasazení selhalo: ${verification.message || "chybí úplný důkaz."}`;
+                return;
+              }
+              const smoke = verification.smoke && verification.smoke.check_count
+                ? `${verification.smoke.check_count}/5`
+                : "5/5";
+              deployMeta.textContent = `Nasazeno a ověřeno · smoke ${smoke}.`;
+            } catch (error) {
+              deployMeta.textContent = `Cockpit se vrátil, ale ověření nasazení nelze dokončit: ${error.message}`;
+              return;
+            }
             window.location.reload();
             return;
           }
@@ -2179,7 +2206,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       }
       const payload = await api("/api/human-adam/deploy", {
         method:"POST",
-        body:JSON.stringify({confirmation,checkpoint_token:deploymentAudit.checkpoint_token}),
+        body:JSON.stringify({confirmation}),
       });
       if (!payload.ok) {
         const deploymentFailure = `Nic nebylo nasazeno: ${payload.message || "plná brána nebo audit selhaly."}`;

@@ -312,3 +312,43 @@ handoff a kanonický TVBCP. Fáze zatím není commitnutá, pushnutá ani nasaze
 Další krok: checkpoint + commit + push fáze 2.4. Potom samostatně navrhnout
 nejmenší řízené přepojení existujícího workflow na dokončenou soukromou cestu
 2.1–2.4 při zachování současného vzhledu UI.
+
+### Fáze 3.1 – přepojení stávajícího nasazovacího ovládání
+
+Dne 2026-07-20 13:22 CEST bylo existující ovládání `Audit nasazení` a `Ověřit a
+nasadit` přepojeno ze staré WIP/takeover cesty na jednoduchou cestu 2.1–2.4.
+Rozložení okna, názvy tlačítek a potvrzovací textové pole zůstaly zachované.
+Historické poznámky fází 2.3 a 2.4 o nepřítomnosti route popisují tehdejší stav;
+fáze 3.1 je záměrně nahrazuje tímto řízeným veřejným napojením.
+
+Read-only audit nyní serverově ověří aktivní kanonický pracovní proud, přesný
+čistý `main`, shodu s `origin/main`, očekávaný kódový otisk a bezpečný stav obou
+profilových workspaces. Vrací novou přesnou větu
+`POTVRZUJI NASAZENI CISTEHO MAIN`. Klient neposílá commit, PID, otisk, workspace
+ani cestu účtenky.
+
+Potvrzené nasazení volá novou aplikační akci, spustí plnou bránu, uloží soukromou
+účtenku a teprve potom řízený restart. Po návratu nového PID stejné frontendové
+okno automaticky zavolá serverovou verifikaci. Ta znovu ověří PID, otisk, Git,
+profily a smoke `5/5`; stránka se obnoví až po stavu `deployed`. Neúspěch zůstane
+viditelný a nepředstírá dokončení.
+
+Praktická synchronizace: čistý peer profil smí být při auditu bezpečně o commit
+pozadu. Potvrzené nasazení jej před plnou branou automaticky dorovná na přesný
+`main`. Dirty, lokálně napřed, rozvětvený nebo jinak nejistý profil zůstává
+blokující. Samotná deploy cesta nepoužívá WIP větev, takeover ani globální
+semafor. Starý backend zůstává v kódu, ale route jej již nevolá.
+
+Nápověda `Práce` dostala nahoře krátký aktuální čtyřkrokový postup; ostatní
+vizuální struktura zůstala zachovaná. Cílená sada backendu, profilů, UI a
+Cockpitu prošla 363 testy. Plná Cockpit brána prošla Python, JavaScript i shell
+syntaxí a 902 testy za 298,217 sekundy; celá brána skončila `OK`.
+
+Změněné implementační a testovací soubory jsou `app/cockpit.py`,
+`app/communication/human_adam_profiles.py`, `human_adam_ui.py`,
+`simple_main_deploy.py` a jejich čtyři odpovídající testovací moduly, dále tento
+handoff a TVBCP. Fáze zatím není commitnutá, pushnutá ani nasazená.
+
+Další krok: checkpoint + commit + push fáze 3.1. Potom jednorázově nasadit nový
+kód terminálovým řízeným restartem a smoke testem; teprve z nového Cockpitu lze
+provést první plný živý roundtrip nové samoobslužné cesty.

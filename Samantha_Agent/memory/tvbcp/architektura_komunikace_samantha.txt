@@ -1848,3 +1848,31 @@ sada prošla 305 testy a plná Cockpit brána prošla 898 testy za 217,666 sekun
 Další krok: checkpoint, commit a push fáze 2.4. Potom navrhnout minimální řízené
 přepojení existujícího workflow na dokončenou soukromou cestu 2.1–2.4 bez změny
 vzhledu UI.
+
+### 2026-07-20 13:22 CEST – Fáze 3.1: stávající UI používá čistý main
+
+Existující ovládací prvky `Audit nasazení` a `Ověřit a nasadit` byly bez změny
+rozložení přepojeny na jednoduchou deploy cestu 2.1–2.4. Tato fáze záměrně
+nahrazuje dřívější hranici „bez route“: audit, potvrzené spuštění i dokončení po
+restartu mají nyní úzké registrované endpointy, ale žádný technický důkaz
+nepřebírají od klienta.
+
+Audit odvozuje aktivní pracovní proud, čistý `main`, `origin/main`, kódový otisk
+a oba profily ze serveru a vrací přesnou větu
+`POTVRZUJI NASAZENI CISTEHO MAIN`. Potvrzené nasazení spustí bránu, zapíše
+soukromou účtenku a řízený restart. Po zjištění nového PID frontend před
+obnovením stránky zavolá serverovou verifikaci; stav `deployed` vznikne pouze po
+shodě otisku, Gitu, profilů a smoke testu `5/5`.
+
+Čistý peer profil může být při auditu bezpečně `source_ahead`; nasazení jej před
+plnou branou automaticky dorovná. Jakákoli dirty, lokálně napřed nebo rozvětvená
+varianta je dál fail-closed. Nová deploy route nepoužívá WIP větev, takeover ani
+globální semafor. Legacy backend zůstal zachovaný, ale není route volán.
+
+Krátký aktuální postup byl doplněn na začátek nápovědy `Práce`, vzhled a původní
+ovládací prvky zůstaly zachované. Cílená sada prošla 363 testy a plná Cockpit
+brána prošla 902 testy za 298,217 sekundy včetně obou JavaScript syntaxí.
+
+Další krok: checkpoint, commit a push fáze 3.1. Potom jednorázové terminálové
+nasazení, řízený restart a smoke test; první plný živý samoobslužný roundtrip lze
+spustit až z nově nasazeného Cockpitu.

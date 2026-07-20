@@ -10,8 +10,10 @@ from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
 from app.communication.simple_main_deploy import (
     DEPLOYED,
     PENDING_RESTART,
+    SIMPLE_MAIN_DEPLOYMENT_CONFIRMATION,
     SimpleMainDeploymentError,
     SimpleMainDeploymentRequest,
+    audit_simple_main_deployment,
     load_simple_main_deployment_receipt,
     prepare_simple_main_deployment,
     verify_simple_main_deployment,
@@ -74,6 +76,69 @@ def request(head: str) -> SimpleMainDeploymentRequest:
 
 
 class SimpleMainDeploymentTests(unittest.TestCase):
+    def test_audit_reports_exact_clean_main_without_creating_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source, primary, peer, head = prepare_clean_main(root)
+            result = audit_simple_main_deployment(
+                workspace=primary,
+                workstream_id="layer-human-adam-development",
+                peer_workspaces=(peer,),
+                code_stamp_factory=lambda _workspace: "0123456789abcdef",
+            )
+            source_status = git(source, "status", "--porcelain=v1")
+
+        self.assertTrue(result["ok"])
+        self.assertTrue(result["ready"])
+        self.assertEqual(result["main_head"], head)
+        self.assertEqual(result["main_short"], head[:12])
+        self.assertEqual(result["confirmation_text"], SIMPLE_MAIN_DEPLOYMENT_CONFIRMATION)
+        self.assertEqual(len(result["workspaces"]), 2)
+        self.assertEqual(result["changes"], [])
+        self.assertFalse(result["wip_used"])
+        self.assertFalse(result["semaphore_used"])
+        self.assertEqual(source_status, "")
+
+    def test_audit_accepts_clean_peer_behind_and_prepare_synchronizes_it(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source, primary, peer, _head = prepare_clean_main(root)
+            (source / "Samantha_Agent" / "tracked.py").write_text(
+                "VALUE = 91\n", encoding="utf-8"
+            )
+            git(source, "add", "Samantha_Agent/tracked.py")
+            git(source, "commit", "-m", "Advance clean main")
+            git(source, "push", "origin", "main:main")
+            primary.sync_from_main(confirmed=True)
+            head = git(source, "rev-parse", "HEAD")
+            receipt_path = root / "receipt.json"
+
+            audit = audit_simple_main_deployment(
+                workspace=primary,
+                workstream_id="layer-human-adam-development",
+                peer_workspaces=(peer,),
+                code_stamp_factory=lambda _workspace: "0123456789abcdef",
+            )
+            peer_before = peer.status()
+            prepared = prepare_simple_main_deployment(
+                workspace=primary,
+                request=request(head),
+                confirmed=True,
+                peer_workspaces=(peer,),
+                gate_runner=successful_gate,
+                gate_log_path=root / "gate.log",
+                receipt_path=receipt_path,
+                code_stamp_factory=lambda _workspace: "0123456789abcdef",
+            )
+            peer_after = peer.status()
+
+        self.assertTrue(audit["ready"])
+        self.assertTrue(audit["workspaces"][1]["clean_source_ahead"])
+        self.assertEqual(peer_before["workspace_relation"], "source_ahead")
+        self.assertTrue(prepared["ok"])
+        self.assertEqual(peer_after["workspace_relation"], "aligned")
+        self.assertEqual(peer_after["head"], head)
+
     def test_prepare_accepts_only_exact_clean_main_and_records_pending_restart(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

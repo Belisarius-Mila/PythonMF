@@ -57,6 +57,7 @@ from app.cockpit import (
     cockpit_speak_action,
     cockpit_transcribe_voice_action,
     human_adam_transcribe_action,
+    human_adam_simple_main_deployment_audit_action,
     human_adam_simple_main_deployment_action,
     human_adam_simple_main_deployment_verification_action,
     janicka_light_status_action,
@@ -277,19 +278,18 @@ class CockpitTests(unittest.TestCase):
         route_end = source.index('if parsed.path == "/api/human-adam/context-anchor":', route_start)
         self.assertIn("human_adam_project_continuity_action(service=HUMAN_ADAM)", source[route_start:route_end])
 
-    def test_human_adam_deploy_route_persists_restart_boundary_and_result(self) -> None:
+    def test_human_adam_deploy_route_uses_clean_main_restart_and_verification(self) -> None:
         source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
         route_start = source.index('if parsed.path == "/api/human-adam/deploy":')
         route_end = source.index('if parsed.path == "/api/janicka/chat":', route_start)
         route_source = source[route_start:route_end]
-        running = route_source.index('outcome="running"')
-        restart = route_source.index("start_cockpit_restart_action(")
-        result = route_source.index('outcome="passed" if result["restart"].get("ok") else "failed"')
 
-        self.assertLess(running, restart)
-        self.assertLess(restart, result)
-        self.assertIn("record_deployment_restart(", route_source)
-        self.assertIn('result["deployment_diagnostic"]', route_source)
+        self.assertIn("human_adam_simple_main_deployment_action(", route_source)
+        self.assertIn("confirmation == SIMPLE_MAIN_DEPLOYMENT_CONFIRMATION", route_source)
+        self.assertIn('if parsed.path == "/api/human-adam/deploy-verification":', route_source)
+        self.assertIn("human_adam_simple_main_deployment_verification_action(", route_source)
+        self.assertNotIn("human_adam_deploy_action(", route_source)
+        self.assertNotIn("record_deployment_restart(", route_source)
 
     def test_deployment_completion_has_exact_confirmation_git_card_and_routes(self) -> None:
         card = next(
@@ -4005,6 +4005,19 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["status"], "simple_main_deployment_failed")
         self.assertIn("bezpečně zastaveno", result["message"])
 
+    def test_simple_main_deployment_audit_returns_safe_manager_result(self) -> None:
+        class FakeProfileManager:
+            def audit_simple_main_deployment(self) -> dict[str, object]:
+                return {"ok": True, "ready": True, "main_short": "a" * 12}
+
+        result = human_adam_simple_main_deployment_audit_action(
+            service=FakeProfileManager()
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertTrue(result["ready"])
+        self.assertEqual(result["main_short"], "a" * 12)
+
     def test_private_simple_main_deployment_verification_uses_server_evidence(self) -> None:
         manager_calls: list[dict[str, object]] = []
 
@@ -4042,20 +4055,20 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["status"], "simple_main_deployment_verification_failed")
         self.assertIn("nebyl úplně ověřen", result["message"])
 
-    def test_private_simple_main_deployment_has_no_http_or_ui_surface(self) -> None:
-        route = "/api/human-adam/simple-main-deployment"
+    def test_simple_main_deployment_reuses_existing_controls_and_registers_verification(self) -> None:
+        handlers = {item["handler_name"] for item in COCKPIT_POST_ACTIONS}
 
-        self.assertNotIn(route, self.cockpit_do_get_routes())
-        self.assertNotIn(route, self.cockpit_do_post_routes())
-        self.assertNotIn(route, COCKPIT_HTML)
-        self.assertNotIn(
-            "human_adam_simple_main_deployment_action",
-            {item["handler_name"] for item in COCKPIT_POST_ACTIONS},
+        self.assertIn("/api/human-adam/deploy-audit", self.cockpit_do_get_routes())
+        self.assertIn("/api/human-adam/deploy", self.cockpit_do_post_routes())
+        self.assertIn("/api/human-adam/deploy-verification", self.cockpit_do_post_routes())
+        self.assertIn("/api/human-adam/deploy", cockpit_module.HUMAN_ADAM_HTML)
+        self.assertIn(
+            "/api/human-adam/deploy-verification", cockpit_module.HUMAN_ADAM_HTML
         )
-        self.assertNotIn(
-            "human_adam_simple_main_deployment_verification_action",
-            {item["handler_name"] for item in COCKPIT_POST_ACTIONS},
-        )
+        self.assertIn("human_adam_simple_main_deployment_action", handlers)
+        self.assertIn("human_adam_simple_main_deployment_verification_action", handlers)
+        self.assertEqual(cockpit_module.HUMAN_ADAM_HTML.count('id="deployAuditBtn"'), 1)
+        self.assertEqual(cockpit_module.HUMAN_ADAM_HTML.count('id="deployBtn"'), 1)
 
     def test_start_adam_voice_mode_action_launches_watcher_with_terminal_bridge_by_default(self) -> None:
         calls: list[dict[str, object]] = []

@@ -105,6 +105,9 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Checkpoint bez pushnutí", HUMAN_ADAM_HTML)
         self.assertIn("Audit nasazení", HUMAN_ADAM_HTML)
         self.assertIn("Ověřit a nasadit", HUMAN_ADAM_HTML)
+        self.assertIn("Aktuální jednoduché nasazení", HUMAN_ADAM_HTML)
+        self.assertIn("Nasazeno a ověřeno", HUMAN_ADAM_HTML)
+        self.assertIn("Nasazení samo nepoužívá WIP větev, takeover ani vývojový semafor.", HUMAN_ADAM_HTML)
         self.assertIn('id="deployConfirmation"', HUMAN_ADAM_HTML)
         self.assertIn('autocomplete="off"', HUMAN_ADAM_HTML)
         self.assertIn('autocorrect="off"', HUMAN_ADAM_HTML)
@@ -117,7 +120,8 @@ class HumanAdamUiTests(unittest.TestCase):
             HUMAN_ADAM_HTML.index("const checkpointTitle = checkpointMessage.value.trim();"),
             HUMAN_ADAM_HTML.index("window.confirm", HUMAN_ADAM_HTML.index("async function createCheckpoint()")),
         )
-        self.assertIn("checkpoint_token:deploymentAudit.checkpoint_token", HUMAN_ADAM_HTML)
+        self.assertIn("body:JSON.stringify({confirmation})", HUMAN_ADAM_HTML)
+        self.assertNotIn("checkpoint_token:deploymentAudit.checkpoint_token", HUMAN_ADAM_HTML)
         self.assertIn("confirmation.trim() !== required", HUMAN_ADAM_HTML)
         self.assertIn("const confirmation = deployConfirmation.value.trim();", HUMAN_ADAM_HTML)
         self.assertIn('deployConfirmation.addEventListener("input"', HUMAN_ADAM_HTML)
@@ -127,6 +131,10 @@ class HumanAdamUiTests(unittest.TestCase):
         restore = HUMAN_ADAM_HTML.index("deployMeta.textContent = deploymentFailure;", refresh)
         self.assertLess(refresh, restore)
         self.assertIn("await waitForCockpitAndReload(Number(payload.restart.pid || previousPid));", HUMAN_ADAM_HTML)
+        verification = HUMAN_ADAM_HTML.index('api("/api/human-adam/deploy-verification"')
+        reload_page = HUMAN_ADAM_HTML.index("window.location.reload();", verification)
+        self.assertLess(verification, reload_page)
+        self.assertIn('verification.state !== "deployed"', HUMAN_ADAM_HTML)
 
     def test_thread_rotation_ui_requires_audit_exact_phrase_and_preserves_old_thread(self) -> None:
         audit_start = HUMAN_ADAM_HTML.index("async function auditThreadRotation()")
@@ -207,7 +215,8 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("WIP zachován: ${workspace.local_commit_count} · nutná obnova", HUMAN_ADAM_HTML)
         self.assertIn("WIP checkpoint je zachovaný:", HUMAN_ADAM_HTML)
         self.assertIn("WIP je bezpečně zachovaný, ale audit je zablokovaný.", HUMAN_ADAM_HTML)
-        self.assertIn("deployAuditBtn.disabled = Boolean(payload.dirty) || !payload.local_checkpoint_ahead || semaphore.can_deploy !== true;", HUMAN_ADAM_HTML)
+        self.assertIn('payload.workspace_relation === "aligned"', HUMAN_ADAM_HTML)
+        self.assertIn("deployAuditBtn.disabled = !simpleDeployReady;", HUMAN_ADAM_HTML)
         self.assertLess(
             HUMAN_ADAM_HTML.index("else if (checkpointPreserved) workMeta.textContent"),
             HUMAN_ADAM_HTML.index('else workMeta.textContent = "Workspace je čistý a odpovídá main.";'),
@@ -239,7 +248,8 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("project_id:projectId,handoff_path:handoffPath", HUMAN_ADAM_HTML)
         self.assertIn("Vyber projekt a jeho aktuální handoff.", HUMAN_ADAM_HTML)
         self.assertIn("checkpointBtn.disabled = !payload.dirty || semaphore.can_checkpoint !== true;", HUMAN_ADAM_HTML)
-        self.assertIn("Nasazení blokuje cizí WIP", HUMAN_ADAM_HTML)
+        self.assertIn("deployAuditBtn.disabled = !simpleDeployReady;", HUMAN_ADAM_HTML)
+        self.assertNotIn("semaphore.can_deploy", HUMAN_ADAM_HTML)
         self.assertIn("To projde jen při čistých workspaces bez čekajícího WIP", HUMAN_ADAM_HTML)
 
     def test_project_continuity_ui_is_read_only_and_non_blocking(self) -> None:

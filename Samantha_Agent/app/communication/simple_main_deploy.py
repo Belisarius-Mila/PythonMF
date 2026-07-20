@@ -38,6 +38,7 @@ DEFAULT_SIMPLE_MAIN_DEPLOYMENT_RECEIPT = (
 SIMPLE_MAIN_DEPLOYMENT_SCHEMA = 1
 PENDING_RESTART = "pending_restart"
 DEPLOYED = "deployed"
+SIMPLE_MAIN_DEPLOYMENT_CONFIRMATION = "POTVRZUJI NASAZENI CISTEHO MAIN"
 _HEAD_RE = re.compile(r"[0-9a-f]{40}")
 _CODE_STAMP_RE = re.compile(r"[0-9a-f]{16}")
 _WORKSTREAM_ID_RE = re.compile(r"[a-z][a-z0-9_-]{1,63}")
@@ -91,6 +92,8 @@ def _source_and_profile_preflight(
     workspace: HumanAdamWorkspaceManager,
     peer_workspaces: Sequence[HumanAdamWorkspaceManager],
     expected_head: str,
+    allow_clean_peer_source_ahead: bool = False,
+    synchronize_clean_peers: bool = False,
 ) -> list[dict[str, Any]]:
     primary = workspace.status()
     if primary.get("source_branch") != "main":
@@ -124,6 +127,35 @@ def _source_and_profile_preflight(
     rows: list[dict[str, Any]] = []
     for index, candidate in enumerate(unique):
         status = candidate.status()
+        clean_peer_source_ahead = bool(
+            index > 0
+            and status.get("ok") is True
+            and status.get("prepared") is True
+            and status.get("project_ready") is True
+            and status.get("branch") == "main"
+            and status.get("source_branch") == "main"
+            and status.get("workspace_relation") == "source_ahead"
+            and not bool(status.get("dirty"))
+            and not bool(status.get("remotes"))
+            and not bool(status.get("local_checkpoint_ahead"))
+            and not bool(status.get("local_checkpoint_preserved"))
+            and int(status.get("local_commit_count") or 0) == 0
+            and int(status.get("source_pending_changes") or 0) == 0
+            and str(status.get("source_head") or "").casefold() == expected_head
+        )
+        if clean_peer_source_ahead and synchronize_clean_peers:
+            status = candidate.sync_from_main(confirmed=True)
+        elif clean_peer_source_ahead and allow_clean_peer_source_ahead:
+            rows.append(
+                {
+                    "workspace": f"peer-{index}",
+                    "aligned": False,
+                    "clean_source_ahead": True,
+                    "head": str(status.get("head") or "").casefold(),
+                    "target_head": expected_head,
+                }
+            )
+            continue
         if (
             status.get("ok") is not True
             or status.get("prepared") is not True
@@ -256,6 +288,52 @@ def load_simple_main_deployment_receipt(path: Path) -> dict[str, Any]:
     return normalized
 
 
+def audit_simple_main_deployment(
+    *,
+    workspace: HumanAdamWorkspaceManager,
+    workstream_id: str,
+    peer_workspaces: Sequence[HumanAdamWorkspaceManager] = (),
+    code_stamp_factory: Callable[[HumanAdamWorkspaceManager], str] = _expected_code_stamp,
+) -> dict[str, Any]:
+    """Read and refresh the exact clean-main evidence required before deployment."""
+
+    initial = workspace.status()
+    expected_head = str(initial.get("source_head") or "").strip().casefold()
+    safe_request = _safe_request(
+        SimpleMainDeploymentRequest(
+            workstream_id=workstream_id,
+            expected_head=expected_head,
+            previous_pid=1,
+        )
+    )
+    rows = _source_and_profile_preflight(
+        workspace=workspace,
+        peer_workspaces=peer_workspaces,
+        expected_head=safe_request.expected_head,
+        allow_clean_peer_source_ahead=True,
+    )
+    expected_code_stamp = str(code_stamp_factory(workspace) or "").strip().casefold()
+    if not _CODE_STAMP_RE.fullmatch(expected_code_stamp):
+        raise SimpleMainDeploymentError("Nelze odvodit očekávaný otisk Cockpitu.")
+    return {
+        "ok": True,
+        "ready": True,
+        "operation": "simple_main_deployment_audit",
+        "state": "ready",
+        "workstream_id": safe_request.workstream_id,
+        "main_head": safe_request.expected_head,
+        "main_short": safe_request.expected_head[:12],
+        "expected_code_stamp": expected_code_stamp,
+        "confirmation_text": SIMPLE_MAIN_DEPLOYMENT_CONFIRMATION,
+        "workspaces": rows,
+        "changes": [],
+        "change_count": 0,
+        "branches_created": False,
+        "wip_used": False,
+        "semaphore_used": False,
+    }
+
+
 def prepare_simple_main_deployment(
     *,
     workspace: HumanAdamWorkspaceManager,
@@ -279,6 +357,7 @@ def prepare_simple_main_deployment(
             workspace=workspace,
             peer_workspaces=peer_workspaces,
             expected_head=safe_request.expected_head,
+            synchronize_clean_peers=True,
         )
         initial_stamp = str(code_stamp_factory(workspace) or "").strip().casefold()
         if not _CODE_STAMP_RE.fullmatch(initial_stamp):

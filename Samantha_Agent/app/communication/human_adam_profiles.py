@@ -53,6 +53,7 @@ from app.communication.simple_main_checkpoint import (
 from app.communication.simple_main_deploy import (
     DEFAULT_SIMPLE_MAIN_DEPLOYMENT_RECEIPT,
     SimpleMainDeploymentRequest,
+    audit_simple_main_deployment as audit_clean_main_deployment,
     load_simple_main_deployment_receipt,
     prepare_simple_main_deployment as prepare_clean_main_deployment,
     verify_simple_main_deployment as verify_clean_main_deployment,
@@ -424,6 +425,48 @@ class HumanAdamProfileManager:
                 "name": binding.name,
             },
             "restart": restart,
+        }
+
+    def audit_simple_main_deployment(self) -> dict[str, Any]:
+        """Audit the active canonical workstream for one clean-main deployment."""
+
+        with self.profile_operation() as service:
+            self._assert_all_profile_sessions_idle()
+            active_id = self.active_profile_id
+            profile = self.profiles[active_id]
+            binding = profile.get("workstream_binding")
+            if not isinstance(binding, CanonicalWorkstreamBinding):
+                raise AppServerError(
+                    "Aktivní profil nemá v terminálu zaregistrovaný kanonický pracovní proud."
+                )
+            peers = tuple(
+                candidate["service"].workspace
+                for profile_id, candidate in self.profiles.items()
+                if profile_id != active_id
+            )
+            result = audit_clean_main_deployment(
+                workspace=service.workspace,
+                workstream_id=binding.workstream_id,
+                peer_workspaces=peers,
+            )
+        return {
+            **result,
+            "work_profile": {
+                "id": active_id,
+                "label": str(profile.get("label") or active_id),
+            },
+            "workstream": {
+                "id": binding.workstream_id,
+                "type": binding.workstream_type,
+                "name": binding.name,
+            },
+            "handoff_takeover_check": {
+                "state": "verified",
+                "label": "Kanonický pracovní proud",
+                "message": "Čistý main je svázaný s aktivním handoffem a TVBCP.",
+                "target_handoff": binding.handoff_relative_path,
+                "blocking": False,
+            },
         }
 
     def verify_simple_main_deployment(

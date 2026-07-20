@@ -102,11 +102,7 @@ from app.communication.human_adam_profiles import (
     human_adam_profile_switch_action,
 )
 from app.communication.session_hub import SessionHubError
-from app.communication.human_adam_deploy import (
-    human_adam_deploy_action,
-    human_adam_deploy_audit_action,
-    record_deployment_restart,
-)
+from app.communication.simple_main_deploy import SIMPLE_MAIN_DEPLOYMENT_CONFIRMATION
 from app.communication.human_adam_ui import HUMAN_ADAM_HTML
 from app.backup.activity_state import backup_activity_status
 from app.family_calendar import (
@@ -8151,9 +8147,10 @@ def human_adam_simple_main_deployment_action(
 ) -> dict[str, Any]:
     """Privately bind a clean-main deployment to the controlled restart worker.
 
-    Phase 2.3 intentionally exposes no HTTP route or UI control.  The app layer
-    owns the running PID and network coordinates; the profile manager owns the
-    canonical workstream, commit and workspace proof.
+    The app layer owns the running PID and network coordinates; the profile
+    manager owns the canonical workstream, commit and workspace proof.  Phase
+    3.1 wires this action to the existing deploy control without changing its
+    visual structure.
     """
 
     previous_pid = os.getpid()
@@ -8187,9 +8184,9 @@ def human_adam_simple_main_deployment_verification_action(
 ) -> dict[str, Any]:
     """Privately verify the restarted Cockpit from server-owned evidence.
 
-    Phase 2.4 has no HTTP or UI surface.  The new process PID and code stamp
-    come from the running server; the profile manager binds them to the pending
-    canonical workstream receipt and performs the full post-restart proof.
+    The new process PID and code stamp come from the running server; the profile
+    manager binds them to the pending canonical workstream receipt and performs
+    the full post-restart proof.
     """
 
     try:
@@ -8201,6 +8198,23 @@ def human_adam_simple_main_deployment_verification_action(
         return {
             "ok": False,
             "status": "simple_main_deployment_verification_failed",
+            "message": str(exc),
+        }
+
+
+def human_adam_simple_main_deployment_audit_action(
+    *,
+    service: HumanAdamProfileManager = HUMAN_ADAM,
+) -> dict[str, Any]:
+    """Return the server-derived clean-main audit used by the existing control."""
+
+    try:
+        return service.audit_simple_main_deployment()
+    except (AppServerError, SessionHubError, OSError, TypeError, ValueError) as exc:
+        return {
+            "ok": False,
+            "ready": False,
+            "status": "simple_main_deployment_audit_failed",
             "message": str(exc),
         }
 
@@ -9382,10 +9396,18 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
     },
     {
         "path": "/api/human-adam/deploy",
-        "label": "Overit a nasadit Human-Adam WIP checkpoint",
-        "risk": "git_fast_forward_push_restart",
-        "confirmation": "audit_token_plus_exact_phrase",
-        "handler_name": "human_adam_deploy_action",
+        "label": "Overit a nasadit cisty main aktivniho pracovniho proudu",
+        "risk": "local_service",
+        "confirmation": "clean_main_audit_exact_phrase",
+        "handler_name": "human_adam_simple_main_deployment_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/human-adam/deploy-verification",
+        "label": "Overit dokonceni nasazeni po restartu Cockpitu",
+        "risk": "private_write",
+        "confirmation": "pending_receipt_server_evidence",
+        "handler_name": "human_adam_simple_main_deployment_verification_action",
         "test_level": "direct",
     },
     {
@@ -10095,7 +10117,9 @@ class CockpitServer:
                     self.respond_json(human_adam_work_review_action(service=HUMAN_ADAM))
                     return
                 if parsed.path == "/api/human-adam/deploy-audit":
-                    self.respond_json(human_adam_deploy_audit_action(service=HUMAN_ADAM))
+                    self.respond_json(
+                        human_adam_simple_main_deployment_audit_action(service=HUMAN_ADAM)
+                    )
                     return
                 if parsed.path == "/api/human-adam/deployment-completion":
                     self.respond_json(
@@ -10336,32 +10360,23 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/human-adam/deploy":
                     payload = self.read_json()
-                    payload["_server_pid"] = os.getpid()
-                    result = human_adam_deploy_action(payload, service=HUMAN_ADAM)
-                    deployment_profile_id = str(result.pop("_work_profile_id", "") or "")
-                    if result.get("ok") and result.get("restart_required"):
-                        deployment_service = (
-                            HUMAN_ADAM.service_for_profile(deployment_profile_id)
-                            if deployment_profile_id
-                            else HUMAN_ADAM.active_service
-                        )
-                        checkpoint_head = str(result.get("checkpoint_token") or "")
-                        record_deployment_restart(
-                            service=deployment_service,
-                            checkpoint_head=checkpoint_head,
-                            outcome="running",
-                        )
-                        result["restart"] = start_cockpit_restart_action(
-                            confirmed=True,
+                    confirmation = str(payload.get("confirmation") or "").strip()
+                    self.respond_json(
+                        human_adam_simple_main_deployment_action(
+                            confirmed=confirmation == SIMPLE_MAIN_DEPLOYMENT_CONFIRMATION,
+                            service=HUMAN_ADAM,
                             host=cockpit_host,
                             port=cockpit_port,
                         )
-                        result["deployment_diagnostic"] = record_deployment_restart(
-                            service=deployment_service,
-                            checkpoint_head=checkpoint_head,
-                            outcome="passed" if result["restart"].get("ok") else "failed",
+                    )
+                    return
+                if parsed.path == "/api/human-adam/deploy-verification":
+                    self.read_json()
+                    self.respond_json(
+                        human_adam_simple_main_deployment_verification_action(
+                            service=HUMAN_ADAM
                         )
-                    self.respond_json(result)
+                    )
                     return
                 if parsed.path == "/api/human-adam/deployment-completion":
                     payload = self.read_json()

@@ -429,6 +429,31 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(result["restart"]["scheduled"])
         self.assertEqual(restart_calls, [True])
 
+    def test_simple_deployment_audit_derives_workstream_and_both_profiles(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, *_rest = self.make_manager(
+                Path(temp_dir)
+            )
+            with patch(
+                "app.communication.human_adam_profiles.audit_clean_main_deployment",
+                return_value={
+                    "ok": True,
+                    "ready": True,
+                    "main_head": "a" * 40,
+                    "main_short": "a" * 12,
+                    "confirmation_text": "POTVRZUJI NASAZENI CISTEHO MAIN",
+                },
+            ) as audit:
+                result = manager.audit_simple_main_deployment()
+
+        call = audit.call_args.kwargs
+        self.assertIs(call["workspace"], human_workspace)
+        self.assertEqual(call["peer_workspaces"], (library_workspace,))
+        self.assertEqual(call["workstream_id"], "layer-human-adam-development")
+        self.assertEqual(result["work_profile"]["id"], "human_adam")
+        self.assertEqual(result["workstream"]["type"], "Layer")
+        self.assertEqual(result["handoff_takeover_check"]["state"], "verified")
+
     def test_simple_deployment_uses_registered_library_without_restart_side_effect(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, human_workspace, library_workspace, *_rest = self.make_manager(
