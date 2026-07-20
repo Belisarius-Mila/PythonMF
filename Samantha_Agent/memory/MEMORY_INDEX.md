@@ -81,7 +81,9 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   historií, čistými workspaces a potvrzeným read-only tahem.
 
 - `tvbcp/architektura_komunikace_samantha.txt` - [PRIPOMENOUT] aktivni kanonicka
-  smlouva Mily a Adama pro jednoho trvaleho Adama, sdilene app-server vlakno,
+  smlouva Layeru `Human–Adam / vyvojove prostredi`, propojena s
+  `WORKSTREAMS.md` a handoffem `human_adam_layer_workstream_start_2026_07_20.md`.
+  Zachycuje dohodu Mily a Adama pro jednoho trvaleho Adama, sdilene app-server vlakno,
   role Cockpitu Mac/iPhone a terminalu, failover, rotaci relace, stihly
   `cockpit.py`, hlas, TVBCP, handoff a autosave. Textove Human–Adam UI, projektovy
   TVBCP, panel `Prace`, izolovany WIP a samoobsluzne nasazeni jsou opakovane
@@ -109,7 +111,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   priorita 1: krok 0 transformace Human–Adam zacal zalozenim kanonickeho
   pracovniho proudu `Human–Adam / vyvojove prostredi` typu `Layer`. Stary
   projektovy zaznam zustava docasnym kompatibilnim mostem a zadny funkcni kod
-  se nezmenil. Dalsi krok je propojit kanonicky TVBCP bez funkcni zmeny.
+  se nezmenil. Stavajici TVBCP architektury komunikace je potvrzen a propojen;
+  dalsi krok je zapsat novy jednoduchy model a vymezit nahrazena starsi pravidla.
 
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni

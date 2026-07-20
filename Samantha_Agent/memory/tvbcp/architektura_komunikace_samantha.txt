@@ -5,7 +5,10 @@ Formát: průběžný textový human–machine dokument
 Priorita: 1
 Založeno: 2026-07-13
 Vlastníci dohody: Míla a Adam
-Související oblast: App-server rozhraní / nový Adam; Cockpit hlavní architektura
+Pracovní proud: Layer – Human–Adam / vývojové prostředí
+ID pracovního proudu: layer-human-adam-development
+Kanonický handoff: handoffs/human_adam_layer_workstream_start_2026_07_20.md
+Kompatibilní starší oblast: App-server rozhraní / nový Adam; Cockpit hlavní architektura
 
 ## Účel dokumentu
 
@@ -1235,3 +1238,24 @@ Další krok: jedním běžným tahem potvrdit, že po doručení zazní právě
 hlasitější cinknutí. Potom samostatně doplnit bezpečné nastavení repo-local Git
 identity při přípravě izolovaného workspace, bez globální konfigurace a bez
 oslabení výhradního lidského checkpointu.
+
+### 2026-07-20 05:57 CEST – Potvrzení kanonického TVBCP pro Layer Human–Adam
+
+Míla výslovně zahájil krok 0 transformace r-Adama a v bodu 0.2 požádal o
+založení nebo potvrzení kanonického TVBCP pro pracovní proud `Layer` Human–Adam /
+vývojové prostředí. Stávající dokument už od 2026-07-13 drží rozhodnutí, milníky,
+testy a rizika stejné oblasti, proto je potvrzen jako její kanonický TVBCP.
+Nový duplicitní dokument nevzniká.
+
+TVBCP je obousměrně propojen s pracovním proudem
+`layer-human-adam-development` v `WORKSTREAMS.md` a s handoffem
+`handoffs/human_adam_layer_workstream_start_2026_07_20.md`. Starší označení
+`App-server rozhraní / nový Adam` zůstává pouze kompatibilním názvem současného
+runtime a registru aktivních oblastí; tato dokumentační změna jej nepřejmenovává.
+
+Hranice bodu 0.2: nebyl změněn kód, UI, API, profil, vlákno, workspace, Git
+workflow ani nasazení. Starší rozhodnutí TVBCP zatím nejsou přepisována.
+
+Další krok: v bodu 0.3 zapsat nový schválený jednoduchý model pracovních proudů
+a jasně označit, která starší pravidla nahrazuje. Teprve potom pokračovat
+výchozí funkční kontrolou.

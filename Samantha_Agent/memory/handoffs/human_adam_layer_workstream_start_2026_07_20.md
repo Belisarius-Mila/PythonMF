@@ -17,18 +17,19 @@ Co je hotove:
   kompatibilni zdroj, nikoli jako druhy projekt.
 - Stavajici oddelene vlakno Human–Adam je zachovane; jeho soukromy identifikator
   se do Gitu neuklada.
+- Stavajici `tvbcp/architektura_komunikace_samantha.txt` je potvrzen jako
+  kanonicky TVBCP tohoto Layeru a je obousmerne propojen s registrem i handoffem.
 - Nebyl zmenen kod, UI, API, runtime, Git workflow, nasazeni ani bezici relace.
 
 Co neni hotove:
-- Pracovni proud jeste nema propojeny kanonicky TVBCP.
 - Neni dokoncena kanonicka dohoda, vychozi funkcni kontrola ani regresni sada
   kroku 0.
 - Stary runtime nazev se zatim nesmi prejmenovat, protoze jej pouziva soucasna
   profilova konfigurace Cockpitu.
 
 Dalsi krok:
-Krok 0, bod 2: zalozit nebo potvrdit kanonicky TVBCP pro tento Layer a propojit
-jej s timto handoffem a registrem pracovnich proudu, stale bez funkcni zmeny.
+Krok 0, bod 3: zapsat do kanonickeho TVBCP schvaleny jednoduchy model pracovnich
+proudu a vymezit, ktera starsi pravidla nahrazuje, stale bez funkcni zmeny.
 
 Navrhovane dalsi kroky:
 - Zapsat do TVBCP schvaleny jednoduchy model pracovnich proudu.
