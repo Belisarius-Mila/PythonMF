@@ -491,3 +491,52 @@ Změněné soubory fáze jsou `human_adam_ui.py`, `test_human_adam_ui.py`, tento
 handoff a kanonický TVBCP. Další krok: commit + push fáze 3.2, počkat na zelenou
 vzdálenou Quality Gate a potom nasadit simple-main cestou. Míla následně ověří,
 že okno `Práce` obsahuje jen nový jednoduchý workflow.
+
+### Potvrzení fáze 3.2 a plán univerzálního katalogu
+
+Dne 2026-07-20 18:12 CEST je fáze 3.2 provozně potvrzená. Commit `6442954` byl
+pushnutý na `main`, vzdálená Cockpit Quality Gate doběhla zeleně za 2 minuty
+7 sekund a simple-main nasazení skončilo účtenkou `Nasazeno a ověřeno`, 914
+testy a smoke `5/5`. Míla v živém panelu viděl už jen čistý workspace, žádné
+pracovní změny a potvrzení nasazení.
+
+Následná kanonická dohoda nahrazuje záměr registrovat jednotlivé projekty ručně.
+Human–Adam má dostat jednotný katalog všech smysluplných pracovních proudů typu
+`Project`, `Tool`, `Layer` a `Misc`. Aktivní položky budou běžně viditelné,
+pozastavené dostupné odděleně a archivní nebudou zahlcovat běžné menu.
+
+Každý pracovní proud vlastní své samostatné Codex vlákno, kanonický handoff a
+TVBCP. Vlákno se má soukromě založit až při prvním otevření a potom trvale
+zachovat; nemají vzniknout desítky trvale běžících app-serverů ani samostatných
+WIP workspace. Aktivní může být jen jeden proud. Přepnutí vyžaduje dokončený
+tah a čistý synchronní `main`; čistý pracovní workspace lze mezi proudy
+bezpečně znovu použít.
+
+Typ `Misc` bude mít dvě výchozí samostatné položky:
+
+- `Brainstorm / nápady` pro volné přemýšlení bez změny kódu ve výchozím stavu;
+  do TVBCP patří jen potvrzená rozhodnutí, ne kopie každé myšlenky.
+- `Miscellaneous / nezařazený vývoj` pro malé skutečné změny, které zatím
+  nepatří pod projekt, tool ani layer a používají běžný direct-main checkpoint.
+
+Když se brainstorm změní na skutečný projekt, má být možné pracovní proud
+překlasifikovat na `Project` se zachováním vlákna a dosavadních rozhodnutí.
+
+Potvrzený implementační plán:
+
+1. Fáze 4.1 – vytvořit úplný validovaný katalog aktivních projektů, toolů,
+   vrstev a obou výchozích `Misc` proudů, zatím bez změny UI a bez zakládání
+   vláken.
+2. Fáze 4.2 – oddělit pracovní proud od dvou pevných profilů a zavést soukromé
+   lazy založení a pozdější obnovení vlastního vlákna.
+3. Fáze 4.3 – zajistit jeden kanonický handoff a TVBCP každého proudu a jejich
+   automatickou průběžnou aktualizaci při checkpointu.
+4. Fáze 4.4 – napojit stávající menu na skupiny `Projekty`, `Tooly`, `Vrstvy` a
+   `Ostatní`; přepnutí zároveň bezpečně synchronizuje a připojí cílový proud.
+5. Fáze 4.5 – zachovat stávající vlákna Human–Adam a Knihovny, migrovat MMTX,
+   provést malý živý MMTX vývoj a až po úspěchu odstranit pevnou dvouprofilovou
+   konstrukci.
+
+Další krok po nové Codex relaci: načíst paměť a zahájit fázi 4.1 read-only
+inventurou kanonických zdrojů a návrhem úplného katalogu. Nezačínat registrací
+samotného MMTX a nevytvářet vlákna ani měnit UI v této první fázi.

@@ -1976,3 +1976,45 @@ relaci dostupný.
 
 Další krok: commit a push fáze 3.2, vzdálená Quality Gate, simple-main nasazení
 a Mílovo vizuální potvrzení zjednodušeného panelu `Práce`.
+
+### 2026-07-20 18:12 CEST – Univerzální katalog pracovních proudů
+
+Fáze 3.2 je provozně uzavřená: commit `6442954` prošel vzdálenou Cockpit Quality
+Gate za 2 minuty 7 sekund a simple-main nasazení bylo ověřeno 914 testy a smoke
+`5/5`. Míla v živém panelu `Práce` potvrdil čistý workspace, žádné pracovní
+změny a uložený úplný serverový důkaz nasazení.
+
+Kanonická dohoda pro další transformaci: Human–Adam nebude ručně přidávat MMTX
+ani další jednotlivé profily. Vznikne jednotný validovaný katalog pracovních
+proudů typu `Project`, `Tool`, `Layer` a `Misc`. Každý proud má vlastní trvale
+zachované Codex vlákno, handoff a TVBCP, ale vlákno se zakládá soukromě a lazy
+až při prvním otevření. Nemají vzniknout desítky trvale běžících app-serverů,
+worktree ani WIP větví.
+
+Přepnout lze jen bez aktivního tahu a nad čistým synchronním `main`. Jeden čistý
+pracovní workspace lze bezpečně znovu použít, zatímco vlákno, handoff, TVBCP a
+rozhodovací kontext zůstávají oddělené podle pracovního proudu.
+
+Výchozí `Misc` proudy jsou dva:
+
+- `Brainstorm / nápady`: samostatné vlákno pro volné přemýšlení, bez zápisu do
+  kódu ve výchozím stavu; TVBCP zachycuje jen potvrzená rozhodnutí.
+- `Miscellaneous / nezařazený vývoj`: samostatný direct-main proud pro skutečný
+  vývoj, který zatím nepatří pod projekt, tool ani layer.
+
+Brainstorm lze později překlasifikovat na projekt se zachováním vlákna a
+rozhodnutí. Aktivní proudy budou v běžném menu, pozastavené odděleně a archivní
+nebudou menu zahlcovat.
+
+Implementační pořadí:
+
+1. Fáze 4.1 – úplný katalog bez UI změny a bez vytvoření vláken.
+2. Fáze 4.2 – lazy soukromá vlákna nezávislá na dvou pevných profilech.
+3. Fáze 4.3 – kanonický handoff + TVBCP a automatická aktualizace checkpointem.
+4. Fáze 4.4 – seskupené menu `Projekty`, `Tooly`, `Vrstvy`, `Ostatní` s bezpečným
+   přepnutím, synchronizací a připojením.
+5. Fáze 4.5 – zachovat Human–Adam a Knihovnu, migrovat MMTX, provést malý živý
+   MMTX vývoj a potom odstranit pevnou dvouprofilovou konstrukci.
+
+Další krok: v nové Codex relaci zahájit fázi 4.1 read-only inventurou zdrojů a
+návrhem úplného katalogu. Nezačínat samotnou registrací MMTX.
