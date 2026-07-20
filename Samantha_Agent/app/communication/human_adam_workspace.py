@@ -488,6 +488,10 @@ class HumanAdamWorkspaceManager:
             or any(part in normalized for part in BLOCKED_CHECKPOINT_PARTS)
         )
 
+    def checkpoint_path_allowed(self, path_text: str) -> bool:
+        """Return the existing checkpoint path policy without exposing contents."""
+        return not self._blocked_checkpoint_path(path_text)
+
     def _source_sync_path_allowed(self, path_text: str, *, fetched_head: str) -> bool:
         if not self._blocked_checkpoint_path(path_text):
             return True

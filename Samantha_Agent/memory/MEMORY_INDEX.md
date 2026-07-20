@@ -120,8 +120,12 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   baseline potvrdil Cockpit smoke 5/5, UI, app-server, vlakno a ciste profilove
   workspaces; oba profily pouze cekaji na synchronizaci novych pametovych
   checkpointu. Regresni baseline nasledne prosla Python a JavaScript syntaxi,
-  plnou sadou 856 testu a zivym smoke testem 5/5. Krok 0 je pripraveny k
-  checkpointu a pushi; potom se ma aktivni profil synchronizovat.
+  plnou sadou 856 testu a zivym smoke testem 5/5. Krok 0 byl commitnut a pushnut
+  v `e64b0c5`; aktivni Knihovna se pote zarovnala pres `Pripojit`. Faze 1.1
+  pripravila samostatny neaktivni backend jednoho checkpointu primo do
+  `main`: bez nove vetve a semaforu, s automatickym TVBCP + handoffem, plnou
+  branou a zarovnanim workspace. Sedm novych testu i plna sada 863 testu prosly;
+  dalsi krok je checkpoint/push a profilove napojeni bez aktivace UI.
 
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni

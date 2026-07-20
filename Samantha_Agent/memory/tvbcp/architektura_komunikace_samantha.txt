@@ -1494,3 +1494,51 @@ commitů; synchronizace nebyla součástí read-only bodů 0.4 a 0.5.
 Další krok: checkpointnout a pushnout dokončení kroku 0. Po čistém checkpointu
 nechat aktivní profil synchronizovat přes `Připojit`; první implementační fázi
 zahájit až z čistého a synchronního stavu podle dalšího potvrzeného zadání.
+
+### 2026-07-20 07:31 CEST – Fáze 1.1: backend jednoduchého checkpointu do main
+
+Míla zahájil první implementační fázi nového modelu. Vznikl samostatný backend
+`simple_main_checkpoint.py`, který zatím není připojený k API, existujícímu
+tlačítku ani živému runtime. `cockpit.py` a Human–Adam UI zůstaly beze změny.
+
+Nový backend skládá jeden potvrzený krok:
+
+1. stateless preflight čistého zdrojového `main`, aktivního profilového workspace
+   a případných dalších profilů;
+2. obnovení a ověření `origin/main`;
+3. plnou Cockpit quality gate nad rozpracovanou změnou;
+4. automatický bezpečný zápis technického checkpointu do kanonického handoffu a
+   stručného milníku do TVBCP;
+5. jeden commit na lokální profilové větvi `main`;
+6. push přesně auditovaného commit objektu a následný fast-forward zdrojového
+   `main` bez merge commitu a bez nové WIP větve;
+7. závěrečné zarovnání profilového workspace se zdrojovým `main`.
+
+Backend nevytváří persistentní semafor ani vývojovou větev. Čistý neaktivní
+profil smí být pouze pozadu za `main` a aktivní checkpoint tím neblokuje. Cizí
+necommitovaná práce, lokální commit, divergence, Git remote, nečistý zdroj,
+mazání, přejmenování, private/env/media cesta, chybějící potvrzení nebo neúspěšná
+brána krok zastaví bez změny zdrojového `main`.
+
+Když vzdálený push nebo fast-forward prohraje závod, zdrojový `main` se
+automaticky nepřepisuje a v profilovém workspace zůstane právě jeden čistý
+lokální commit včetně TVBCP a handoffu pro výslovnou obnovu. Nevzniká další
+větev ani skrytý reset.
+
+Důkaz:
+
+- 7 nových integračních testů prošlo za 33,252 sekundy;
+- testy pokrývají úspěšný přímý checkpoint, nulový přírůstek větví, potvrzení,
+  selhání brány, nečistý zdroj, cizí práci, čistý profil pozadu za main,
+  nepovolené změny a zachování jediného commitu při vzdáleném závodu;
+- plná kanonická Cockpit brána prošla 863 testy za 239,055 sekundy;
+- Python kompilace, JavaScript obou UI, shell syntaxe a `git diff --check`
+  prošly;
+- následný živý read-only Cockpit smoke test prošel 5/5.
+
+Hranice fáze 1.1: backend není aktivovaný, nebyla změněna API cesta, UI,
+checkpointové tlačítko, profil, vlákno, nasazení ani běžící Cockpit.
+
+Další krok: checkpoint a push fáze 1.1. Potom fáze 1.2 – napojit backend na
+kanonická metadata pracovního proudu a profilový manager, stále bez přepnutí
+existujícího UI na nový tok.

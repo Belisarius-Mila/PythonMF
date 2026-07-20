@@ -41,6 +41,15 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-20: Priorita 1, `Layer` Human–Adam / vyvojove prostredi. Faze 1.1
+  pripravila samostatny neaktivni backend jednoducheho checkpointu: stateless
+  preflight, plna brana, automaticky TVBCP + handoff, jeden commit na profilovem
+  `main`, push stejneho objektu, fast-forward zdrojoveho `main` a zarovnani bez
+  nove vetve a bez persistentniho semaforu. UI, API a zivy runtime nejsou
+  prepnute. Sedm novych integracnich testu proslo za 33,252 sekundy, plna brana
+  prosla 863 testy za 239,055 sekundy a smoke je 5/5. Dalsi krok je checkpoint a
+  push faze 1.1; potom profilove napojeni backendu bez aktivace UI. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-20: Priorita 1, `Layer` Human–Adam / vyvojove prostredi. Body 0.1 az
   0.5 zalozily zaznam v `WORKSTREAMS.md`, potvrdily stavajici TVBCP, zapsaly
   kanonicky jednoduchy model: vlastni vlakno, kontext, TVBCP a handoff pro kazdy
