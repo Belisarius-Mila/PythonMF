@@ -9348,9 +9348,9 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
     },
     {
         "path": "/api/human-adam/profile",
-        "label": "Prepnout cely pracovni profil Human-Adam",
+        "label": "Atomicky prepnout kanonicky pracovni proud Human-Adam",
         "risk": "local_service",
-        "confirmation": "explicit_profile_switch",
+        "confirmation": "explicit_workstream_switch",
         "handler_name": "human_adam_profile_switch_action",
         "test_level": "direct",
     },

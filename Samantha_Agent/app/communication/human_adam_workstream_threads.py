@@ -60,6 +60,19 @@ class WorkstreamThreadRegistry:
         with self._state_lock:
             return self._active_workstream_id
 
+    def active_hub(self, *, expected_workstream_id: str = "") -> CanonicalSessionHub:
+        """Return the already materialized active hub without exposing its thread ID."""
+
+        expected = str(expected_workstream_id or "").strip()
+        with self._state_lock:
+            workstream_id = self._active_workstream_id
+            hub = self._hubs.get(workstream_id) if workstream_id else None
+        if hub is None:
+            raise AppServerError("Není připojený žádný lazy pracovní proud.")
+        if expected and expected != workstream_id:
+            raise AppServerError("Aktivní lazy pracovní proud se mezitím změnil.")
+        return hub
+
     def checkpoint_workstream_id(self) -> str:
         """Return the active ID only when its thread is safe to checkpoint."""
 

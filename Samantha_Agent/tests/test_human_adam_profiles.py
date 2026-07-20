@@ -203,13 +203,18 @@ class FakeHub:
 
 
 class FakeLazyThreads:
-    def __init__(self) -> None:
+    def __init__(self, state_root: Path) -> None:
+        self.state_root = Path(state_root)
         self.active_workstream_id = ""
         self.fail_open_ids: set[str] = set()
         self.busy = False
         self.uncertain = False
         self.open_calls: list[str] = []
         self.close_calls: list[str] = []
+        self.hubs = {
+            "project-mmtx": FakeHub("mmtx-thread"),
+            "project-lekarna": FakeHub("lekarna-thread"),
+        }
 
     def status(self) -> dict[str, object]:
         ids = ("project-mmtx", "project-lekarna")
@@ -236,13 +241,23 @@ class FakeLazyThreads:
             raise SessionBusyError("Checkpoint blokuje nejisté doručení.")
         return self.active_workstream_id
 
+    def active_hub(self, *, expected_workstream_id: str = "") -> FakeHub:
+        if not self.active_workstream_id:
+            raise AppServerError("Není připojený žádný lazy pracovní proud.")
+        if expected_workstream_id and expected_workstream_id != self.active_workstream_id:
+            raise AppServerError("Aktivní lazy pracovní proud se mezitím změnil.")
+        return self.hubs[self.active_workstream_id]
+
     def open(self, *, workstream_id: str, confirmed: bool) -> dict[str, object]:
         if not confirmed:
             raise AssertionError("lazy open must be confirmed")
         self.open_calls.append(workstream_id)
         if workstream_id in self.fail_open_ids:
             raise AppServerError("Simulované selhání lazy připojení.")
+        if self.active_workstream_id:
+            self.hubs[self.active_workstream_id].close()
         self.active_workstream_id = workstream_id
+        self.hubs[workstream_id].connect()
         return {"ok": True, "opened": True}
 
     def close_active(self, *, confirmed: bool) -> dict[str, object]:
@@ -250,6 +265,7 @@ class FakeLazyThreads:
             raise AssertionError("lazy close must be confirmed")
         workstream_id = self.checkpoint_workstream_id()
         self.close_calls.append(workstream_id)
+        self.hubs[workstream_id].close()
         self.active_workstream_id = ""
         return {"ok": True, "closed": True, "workstream_id": workstream_id}
 
@@ -325,6 +341,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             state_path=root / "active-profile.json",
             runtime=runtime,  # type: ignore[arg-type]
             project_continuity=project_continuity,
+            workstream_memory=WorkstreamMemoryRegistry(),
         )
         return manager, human_workspace, library_workspace, human_hub, library_hub
 
@@ -352,7 +369,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         service = ProjectContinuityService(project_root=root)
         return service, service.catalog()[0].project_id, handoff_path
 
-    def test_status_advertises_two_profiles_without_changing_original_default(self) -> None:
+    def test_status_advertises_grouped_catalog_without_changing_legacy_default(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, _human_workspace, _library_workspace, _human_hub, _library_hub = self.make_manager(Path(temp_dir))
             status = manager.status()
@@ -365,7 +382,11 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertFalse(status["development_semaphore"]["active"])
         self.assertTrue(status["development_semaphore"]["can_acquire_profile"])
         self.assertTrue(status["workstream_selection"]["ok"])
-        self.assertEqual(status["workstream_selection"]["workstream_count"], 2)
+        self.assertEqual(status["workstream_selection"]["workstream_count"], 29)
+        self.assertEqual(
+            [group["label"] for group in status["workstream_selection"]["groups"]],
+            ["Projekty", "Tooly", "Vrstvy", "Ostatní"],
+        )
 
     def test_status_exposes_only_recent_deployment_for_active_workstream(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -808,20 +829,16 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(manager.active_profile_id, "human_adam")
         self.assertTrue(human_workspace.dirty)
 
-    def test_grouped_router_switches_legacy_to_lazy_without_api_exposure(self) -> None:
+    def test_grouped_router_switches_legacy_to_lazy_through_public_action(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, *_workspaces, human_hub, _library_hub = self.make_manager(
                 Path(temp_dir)
             )
-            lazy = FakeLazyThreads()
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
             manager.workstream_threads = lazy  # type: ignore[assignment]
             human_hub.connected = True
 
-            result = manager.activate_grouped_workstream(
-                workstream_id="project-mmtx",
-                confirmed=True,
-            )
-            public = human_adam_profile_switch_action(
+            result = human_adam_profile_switch_action(
                 {"workstream_id": "project-mmtx", "confirmed": True},
                 service=manager,
             )
@@ -834,15 +851,96 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             result["workstream_selection"]["active"]["workstream_id"],
             "project-mmtx",
         )
-        self.assertFalse(public["ok"])
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["session"]["thread_id"], "mmtx-thread")
+        self.assertEqual(result["work_profile"]["id"], "project-mmtx")
+        self.assertTrue(result["workstream_capabilities"]["lazy_backend"])
+        self.assertFalse(result["workstream_capabilities"]["development"])
         self.assertEqual(lazy.open_calls, ["project-mmtx"])
+
+    def test_lazy_active_service_routes_send_and_keeps_context_anchor_isolated(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_workspaces, human_hub, _library_hub = self.make_manager(
+                Path(temp_dir)
+            )
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.set_context_anchor(
+                operation="save",
+                expected_revision=0,
+                content="Cíl: legacy Human–Adam",
+                confirmed=True,
+            )
+            human_adam_profile_switch_action(
+                {"workstream_id": "project-mmtx", "confirmed": True},
+                service=manager,
+            )
+
+            empty_lazy_anchor = manager.context_anchor()
+            manager.set_context_anchor(
+                operation="save",
+                expected_revision=0,
+                content="Cíl: samostatný MMTX",
+                confirmed=True,
+            )
+            sent = manager.send(
+                text="Pouze read-only kontrola MMTX",
+                client_message_id="lazy-route-001",
+            )
+            human_adam_profile_switch_action(
+                {"workstream_id": "layer-human-adam-development", "confirmed": True},
+                service=manager,
+            )
+            legacy_anchor = manager.context_anchor()
+            human_adam_profile_switch_action(
+                {"workstream_id": "project-mmtx", "confirmed": True},
+                service=manager,
+            )
+            restored_lazy_anchor = manager.context_anchor()
+
+        lazy_send = lazy.hubs["project-mmtx"].last_send
+        self.assertFalse(empty_lazy_anchor["has_content"])
+        self.assertEqual(legacy_anchor["content"], "Cíl: legacy Human–Adam")
+        self.assertEqual(restored_lazy_anchor["content"], "Cíl: samostatný MMTX")
+        self.assertEqual(lazy_send["text"], "Pouze read-only kontrola MMTX")
+        self.assertIn("profile_id=project-mmtx", str(lazy_send["model_input_text"]))
+        self.assertIn("writable=false", str(lazy_send["model_input_text"]))
+        self.assertEqual(human_hub.last_send, {})
+        self.assertEqual(sent["automatic_completion"]["state"], "not_needed")
+
+    def test_lazy_service_reads_its_canonical_tvbcp_and_blocks_development(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, *_rest = self.make_manager(Path(temp_dir))
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            binding = manager.workstream_memory.binding("project-mmtx")  # type: ignore[union-attr]
+            tvbcp_path = human_workspace.project_root / binding.tvbcp_relative_path
+            tvbcp_path.parent.mkdir(parents=True)
+            tvbcp_path.write_text("# TVBCP: MMTX\n", encoding="utf-8")
+            human_adam_profile_switch_action(
+                {"workstream_id": "project-mmtx", "confirmed": True},
+                service=manager,
+            )
+
+            tvbcp = manager.tvbcp()
+            development = manager.development_status()
+            with self.assertRaisesRegex(AppServerError, "fázi 4.5"):
+                manager.checkpoint(confirmed=True, message="Zakázaný checkpoint")
+            with self.assertRaisesRegex(AppServerError, "fázi 4.5"):
+                manager.audit_simple_main_deployment()
+
+        self.assertEqual(tvbcp["content"], "# TVBCP: MMTX\n")
+        self.assertEqual(tvbcp["relative_path"], binding.tvbcp_relative_path)
+        self.assertFalse(development["can_acquire_profile"])
+        self.assertFalse(development["can_checkpoint"])
+        self.assertFalse(development["can_deploy"])
 
     def test_grouped_router_restores_original_legacy_after_lazy_failure(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, *_workspaces, human_hub, library_hub = self.make_manager(
                 Path(temp_dir)
             )
-            lazy = FakeLazyThreads()
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
             lazy.fail_open_ids.add("project-mmtx")
             manager.workstream_threads = lazy  # type: ignore[assignment]
             manager.switch(profile_id="knihovna", confirmed=True)
@@ -861,7 +959,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
     def test_grouped_router_synchronizes_shared_workspace_for_lazy_to_lazy(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, human_workspace, *_rest = self.make_manager(Path(temp_dir))
-            lazy = FakeLazyThreads()
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
             manager.workstream_threads = lazy  # type: ignore[assignment]
             manager.activate_grouped_workstream(
                 workstream_id="project-mmtx",
@@ -884,7 +982,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             manager, *_workspaces, human_hub, library_hub = self.make_manager(
                 Path(temp_dir)
             )
-            lazy = FakeLazyThreads()
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
             manager.workstream_threads = lazy  # type: ignore[assignment]
             manager.activate_grouped_workstream(
                 workstream_id="project-mmtx",
@@ -908,7 +1006,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             manager, *_workspaces, human_hub, library_hub = self.make_manager(
                 Path(temp_dir)
             )
-            lazy = FakeLazyThreads()
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
             manager.workstream_threads = lazy  # type: ignore[assignment]
             manager.activate_grouped_workstream(
                 workstream_id="project-mmtx",
@@ -930,7 +1028,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
     def test_grouped_router_keeps_lazy_active_when_turn_is_busy(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, *_rest = self.make_manager(Path(temp_dir))
-            lazy = FakeLazyThreads()
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
             manager.workstream_threads = lazy  # type: ignore[assignment]
             manager.activate_grouped_workstream(
                 workstream_id="project-mmtx",
@@ -950,7 +1048,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
     def test_grouped_router_rejects_unconfirmed_unknown_and_unavailable_target(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, *_rest = self.make_manager(Path(temp_dir))
-            lazy = FakeLazyThreads()
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
             manager.workstream_threads = lazy  # type: ignore[assignment]
 
             with self.assertRaisesRegex(AppServerError, "výslovné potvrzení"):
@@ -977,7 +1075,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             manager, human_workspace, *_workspaces, human_hub, _library_hub = (
                 self.make_manager(Path(temp_dir))
             )
-            lazy = FakeLazyThreads()
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
             manager.workstream_threads = lazy  # type: ignore[assignment]
             human_hub.connected = True
             human_workspace.dirty = True
@@ -997,7 +1095,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             manager, *_workspaces, _human_hub, library_hub = self.make_manager(
                 Path(temp_dir)
             )
-            lazy = FakeLazyThreads()
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
             manager.workstream_threads = lazy  # type: ignore[assignment]
             manager.activate_grouped_workstream(
                 workstream_id="project-mmtx",

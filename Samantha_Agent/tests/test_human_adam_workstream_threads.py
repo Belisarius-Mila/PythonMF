@@ -133,6 +133,12 @@ class WorkstreamThreadRegistryTests(unittest.TestCase):
         self.assertEqual(status["initialized_count"], 1)
         self.assertEqual(status["connected_count"], 1)
         self.assertEqual(status["active_workstream_id"], "project-mmtx")
+        self.assertIs(
+            registry.active_hub(expected_workstream_id="project-mmtx"),
+            self.hubs["project-mmtx"],
+        )
+        with self.assertRaisesRegex(AppServerError, "mezitím změnil"):
+            registry.active_hub(expected_workstream_id="project-lekarna")
         self.assertNotIn("thread_id", repr(result))
 
     def test_new_registry_resumes_persisted_thread_without_materializing_others(self) -> None:

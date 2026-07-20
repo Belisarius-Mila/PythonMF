@@ -215,6 +215,7 @@ class HumanAdamProfileManager:
             )
         )
         self.workstream_threads = workstream_threads
+        self._lazy_services: dict[str, HumanAdamService] = {}
         self._state_lock = threading.RLock()
         self._operation_lock = threading.Lock()
         self._state_error = ""
@@ -257,7 +258,50 @@ class HumanAdamProfileManager:
             return self._active_profile_id
 
     @property
+    def active_lazy_workstream_id(self) -> str:
+        if self.workstream_threads is None:
+            return ""
+        return self.workstream_threads.active_workstream_id
+
+    def _lazy_service(self, workstream_id: str) -> HumanAdamService:
+        clean_id = str(workstream_id or "").strip()
+        with self._state_lock:
+            existing = self._lazy_services.get(clean_id)
+        if existing is not None:
+            return existing
+        if self.workstream_threads is None or self.workstream_memory is None:
+            raise AppServerError("Lazy pracovní proud nemá úplný servisní backend.")
+        binding = self.workstream_memory.binding(clean_id)
+        hub = self.workstream_threads.active_hub(expected_workstream_id=clean_id)
+        base = self.profiles[self.default_profile_id]["service"]
+        state_root = self.workstream_threads.state_root / clean_id
+        service = HumanAdamService(
+            runtime=base.runtime,
+            workspace=base.workspace,
+            state_path=state_root / "session.json",
+            context_anchor_path=state_root / "context_anchor.json",
+            deployment_receipt_path=state_root / "deployment_receipt.json",
+            deployment_diagnostic_path=state_root / "deployment_diagnostic.json",
+            deployment_failure_history_path=state_root / "deployment_failures.json",
+            work_profile_id=clean_id,
+            codex_binary=base.codex_binary,
+            profile_getter=base.profile_getter,
+            hub=hub,
+            developer_instructions=base.developer_instructions,
+            tvbcp_relative_path=Path(binding.tvbcp_relative_path),
+            tvbcp_title=f"{binding.name} – TVBCP",
+        )
+        service._profile = dict(base._profile)
+        if service._profile:
+            hub.model = str(service._profile.get("model") or "") or None
+        with self._state_lock:
+            return self._lazy_services.setdefault(clean_id, service)
+
+    @property
     def active_service(self) -> HumanAdamService:
+        lazy_id = self.active_lazy_workstream_id
+        if lazy_id:
+            return self._lazy_service(lazy_id)
         return self.profiles[self.active_profile_id]["service"]
 
     def service_for_profile(self, profile_id: str) -> HumanAdamService:
@@ -548,6 +592,7 @@ class HumanAdamProfileManager:
         surface invokes this method in phase 2.2.
         """
 
+        self._assert_legacy_development_backend()
         with self.profile_operation() as service:
             self._assert_all_profile_sessions_idle()
             active_id = self.active_profile_id
@@ -605,6 +650,7 @@ class HumanAdamProfileManager:
     def audit_simple_main_deployment(self) -> dict[str, Any]:
         """Audit the active canonical workstream for one clean-main deployment."""
 
+        self._assert_legacy_development_backend()
         with self.profile_operation() as service:
             self._assert_all_profile_sessions_idle()
             active_id = self.active_profile_id
@@ -697,7 +743,7 @@ class HumanAdamProfileManager:
         }
 
     def _profile_rows(self) -> list[dict[str, Any]]:
-        active_id = self.active_profile_id
+        active_id = "" if self.active_lazy_workstream_id else self.active_profile_id
         return [
             {
                 "id": profile_id,
@@ -709,29 +755,61 @@ class HumanAdamProfileManager:
             for profile_id, profile in self.profiles.items()
         ]
 
+    def _active_work_profile(self, selection: dict[str, Any]) -> dict[str, Any]:
+        lazy_id = self.active_lazy_workstream_id
+        active = selection.get("active") if isinstance(selection, dict) else None
+        if lazy_id and isinstance(active, dict):
+            return {
+                "id": lazy_id,
+                "label": str(active.get("workstream_name") or lazy_id),
+                "description": str(active.get("workstream_type") or "Pracovní proud"),
+                "backend": "lazy_private_thread",
+            }
+        active_id = self.active_profile_id
+        profile = self.profiles[active_id]
+        return {
+            "id": active_id,
+            "label": str(profile.get("label") or active_id),
+            "description": str(profile.get("description") or ""),
+            "backend": "legacy_profile",
+        }
+
+    def _workstream_capabilities(self) -> dict[str, Any]:
+        lazy = bool(self.active_lazy_workstream_id)
+        return {
+            "conversation": True,
+            "context_anchor": True,
+            "tvbcp": True,
+            "development": not lazy,
+            "deployment": not lazy,
+            "lazy_backend": lazy,
+        }
+
+    def _assert_legacy_development_backend(self) -> None:
+        if self.active_lazy_workstream_id:
+            raise AppServerError(
+                "Vývoj a nasazení lazy pracovního proudu se aktivují až v pilotní fázi 4.5."
+            )
+
     def status(self) -> dict[str, Any]:
         try:
-            active_id = self.active_profile_id
-            profile = self.profiles[active_id]
-            payload = profile["service"].status()
-            binding = profile.get("workstream_binding")
+            selection = self.grouped_workstream_status()
+            active = selection.get("active") or {}
+            active_workstream_id = str(active.get("workstream_id") or "")
+            payload = self.active_service.status()
             recent_deployment = load_recent_simple_main_deployment(
                 self.simple_main_deployment_receipt_path
             )
             if recent_deployment and (
-                not isinstance(binding, CanonicalWorkstreamBinding)
-                or recent_deployment.get("workstream_id") != binding.workstream_id
+                recent_deployment.get("workstream_id") != active_workstream_id
             ):
                 recent_deployment = None
             return {
                 **payload,
-                "work_profile": {
-                    "id": active_id,
-                    "label": str(profile.get("label") or active_id),
-                    "description": str(profile.get("description") or ""),
-                },
+                "work_profile": self._active_work_profile(selection),
                 "work_profiles": self._profile_rows(),
-                "workstream_selection": self.workstream_status(),
+                "workstream_selection": selection,
+                "workstream_capabilities": self._workstream_capabilities(),
                 "development_semaphore": self.development_status(),
                 "recent_simple_main_deployment": recent_deployment,
             }
@@ -799,7 +877,7 @@ class HumanAdamProfileManager:
     def send(self, **kwargs: Any) -> dict[str, Any]:
         with self.profile_operation() as service:
             lease = self.development_semaphore.status()
-            active_id = self.active_profile_id
+            active_id = self.work_profile_id
             writable = bool(
                 lease.get("ok") is True
                 and lease.get("active") is True
@@ -1578,6 +1656,7 @@ class HumanAdamProfileManager:
             self._operation_lock.release()
 
     def checkpoint(self, **kwargs: Any) -> dict[str, Any]:
+        self._assert_legacy_development_backend()
         with self.profile_operation() as service:
             self.development_semaphore.assert_owner(self.active_profile_id)
             result = service.checkpoint(**kwargs)
@@ -1677,23 +1756,31 @@ class HumanAdamProfileManager:
         free = lease.get("ok") is True and not lease.get("active")
         any_profile_wip = any(row.get("has_wip") for row in rows)
         source_dirty = any(int(row.get("source_pending_changes") or 0) > 0 for row in rows)
+        lazy = bool(self.active_lazy_workstream_id)
+        public_active_id = self.work_profile_id
+        active_label = (
+            str((self.grouped_workstream_status().get("active") or {}).get("workstream_name") or public_active_id)
+            if lazy
+            else str(self.profiles[active_id].get("label") or active_id)
+        )
         return {
             **lease,
-            "active_profile_id": active_id,
-            "active_profile_label": str(self.profiles[active_id].get("label") or active_id),
+            "active_profile_id": public_active_id,
+            "active_profile_label": active_label,
             "workspace_rows": rows,
             "blockers": blockers,
             "can_acquire_profile": bool(
-                free
+                not lazy
+                and free
                 and not source_dirty
                 and not any(row.get("has_wip") for row in rows if row["id"] != active_id)
             ),
-            "can_acquire_terminal": bool(free and not any_profile_wip),
-            "can_checkpoint": bool(lease_running and owner_id == active_id),
-            "can_deploy": bool(lease_running and owner_id == active_id and not blockers),
-            "can_pause": bool(lease_running),
-            "can_resume": bool(lease_active and lease.get("mode") == "paused"),
-            "can_release": bool(lease_active and self._safe_to_release()),
+            "can_acquire_terminal": bool(not lazy and free and not any_profile_wip),
+            "can_checkpoint": bool(not lazy and lease_running and owner_id == active_id),
+            "can_deploy": bool(not lazy and lease_running and owner_id == active_id and not blockers),
+            "can_pause": bool(not lazy and lease_running),
+            "can_resume": bool(not lazy and lease_active and lease.get("mode") == "paused"),
+            "can_release": bool(not lazy and lease_active and self._safe_to_release()),
         }
 
     def change_development_semaphore(
@@ -1706,6 +1793,7 @@ class HumanAdamProfileManager:
         project_id: str = "",
         handoff_path: str = "",
     ) -> dict[str, Any]:
+        self._assert_legacy_development_backend()
         clean_operation = str(operation or "").strip()
         if not self._operation_lock.acquire(blocking=False):
             raise SessionBusyError("Vývojový semafor nelze změnit během jiné profilové operace.")
@@ -1811,16 +1899,12 @@ class HumanAdamProfileManager:
         return "Vývojový semafor byl po nasazení uvolněný."
 
     def _profile_status_fields(self) -> dict[str, Any]:
-        active_id = self.active_profile_id
-        profile = self.profiles[active_id]
+        selection = self.grouped_workstream_status()
         return {
-            "work_profile": {
-                "id": active_id,
-                "label": str(profile.get("label") or active_id),
-                "description": str(profile.get("description") or ""),
-            },
+            "work_profile": self._active_work_profile(selection),
             "work_profiles": self._profile_rows(),
-            "workstream_selection": self.workstream_status(),
+            "workstream_selection": selection,
+            "workstream_capabilities": self._workstream_capabilities(),
         }
 
     @staticmethod
@@ -1949,6 +2033,9 @@ class HumanAdamProfileManager:
         self._assert_session_can_leave(shared.hub.snapshot())
         self._assert_workspace_can_leave(shared.workspace.status())
         self._prepare_profile_workspace_unlocked(shared)
+        shared.connect(
+            recover_unreachable_runtime=self._target_recovery_allowed(shared)
+        )
         shared.hub.close()
         try:
             return threads.open(workstream_id=workstream_id, confirmed=True)
@@ -2075,6 +2162,7 @@ class HumanAdamProfileManager:
                     self._open_lazy_from_legacy_unlocked(workstream_id=clean_id)
             selection = self.grouped_workstream_status()
             return {
+                **self.status(),
                 "ok": True,
                 "switched": clean_id != previous_id,
                 "workstream": {
@@ -2126,7 +2214,7 @@ def human_adam_profile_switch_action(
     try:
         workstream_id = str(payload.get("workstream_id") or "").strip()
         if workstream_id:
-            return service.select_workstream(
+            return service.activate_grouped_workstream(
                 workstream_id=workstream_id,
                 confirmed=payload.get("confirmed") is True,
             )

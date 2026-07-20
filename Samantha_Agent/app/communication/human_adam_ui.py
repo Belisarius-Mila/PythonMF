@@ -159,8 +159,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <a class="back" href="/">← Cockpit</a>
     </div>
     <div class="profile-tools">
-      <label for="profileSelect">Pracovní profil</label>
-      <select id="profileSelect" aria-label="Pracovní profil Human–Adam"></select>
+      <label for="profileSelect">Pracovní proud</label>
+      <select id="profileSelect" aria-label="Pracovní proud Human–Adam"></select>
       <button id="profileSwitchBtn" type="button" disabled>Přepnout</button>
     </div>
     <button id="mobileStatusSummary" type="button" aria-expanded="false" aria-controls="statusDetails">
@@ -170,7 +170,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     <div class="status-details" id="statusDetails">
       <div class="statusline">
         <span class="badge warn" id="connectionBadge">Odpojeno</span>
-        <span class="badge" id="profileBadge">Profil: Human–Adam</span>
+        <span class="badge" id="profileBadge">Proud: Human–Adam</span>
         <span class="badge" id="threadBadge">Relace: —</span>
         <span class="badge" id="workspaceBadge">Izolovaný workspace</span>
         <span class="badge warn legacy-work-control" id="developmentBadge">Vývoj: neověřen</span>
@@ -608,8 +608,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let sessionConnected = false;
   let activeProfileId = "";
   let activeWorkstreamId = "";
+  let activeWorkstreamBackend = "legacy_profile";
   let activeProfileLabel = "Human–Adam";
   let usingWorkstreamCatalog = false;
+  let workstreamDevelopmentEnabled = true;
   let deliveryUncertain = false;
   let deploymentAudit = null;
   const verifiedDeploymentStorageKey = "human-adam:verified-deployment:v1";
@@ -1188,7 +1190,8 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     sessionConnected = connected;
     connectionBadge.textContent = connected ? "Připojeno" : "Odpojeno";
     connectionBadge.className = connected ? "badge ok" : "badge warn";
-    profileBadge.textContent = `Profil: ${activeProfileLabel}`;
+    profileBadge.textContent = `Proud: ${activeProfileLabel}`;
+    profileBadge.dataset.backend = activeWorkstreamBackend;
     const thread = session && session.thread_id ? session.thread_id : "";
     const anchorRevision = Number(payload && payload.context_anchor ? payload.context_anchor.revision || 0 : 0);
     const auditedAnchorRevision = Number(threadRotationAudit ? threadRotationAudit.context_anchor_revision || 0 : 0);
@@ -1246,23 +1249,48 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     const active = payload && payload.work_profile ? payload.work_profile : {};
     const profiles = payload && Array.isArray(payload.work_profiles) ? payload.work_profiles : [];
     const selection = payload && payload.workstream_selection ? payload.workstream_selection : {};
+    const capabilities = payload && payload.workstream_capabilities ? payload.workstream_capabilities : {};
     const activeWorkstream = selection && selection.active ? selection.active : {};
     const workstreams = selection && Array.isArray(selection.workstreams) ? selection.workstreams : [];
     activeProfileId = String(active.id || "");
     activeProfileLabel = String(active.label || "Human–Adam");
     usingWorkstreamCatalog = selection.ok === true && workstreams.length > 0;
+    workstreamDevelopmentEnabled = capabilities.development !== false;
     activeWorkstreamId = usingWorkstreamCatalog
       ? String(activeWorkstream.workstream_id || "")
       : activeProfileId;
-    const rows = usingWorkstreamCatalog ? workstreams : profiles;
+    activeWorkstreamBackend = usingWorkstreamCatalog
+      ? String(activeWorkstream.backend || "legacy_profile")
+      : "legacy_profile";
     profileSelect.replaceChildren();
-    for (const profile of rows) {
+    const appendOption = (parent, profile) => {
       const option = document.createElement("option");
       option.value = String(profile.id || "");
-      option.dataset.profileId = String(profile.profile_id || profile.id || "");
+      option.dataset.backend = String(profile.backend || "legacy_profile");
       option.textContent = String(profile.profile_label || profile.label || profile.name || profile.id || "Profil");
+      option.disabled = profile.available === false;
       option.selected = option.value === activeWorkstreamId;
-      profileSelect.appendChild(option);
+      parent.appendChild(option);
+    };
+    if (usingWorkstreamCatalog) {
+      const groups = Array.isArray(selection.groups) ? selection.groups : [];
+      for (const group of groups) {
+        const rows = Array.isArray(group.workstreams) ? group.workstreams : [];
+        if (!rows.length) continue;
+        const optionGroup = document.createElement("optgroup");
+        optionGroup.label = String(group.label || group.id || "Pracovní proudy");
+        for (const workstream of rows) appendOption(optionGroup, workstream);
+        profileSelect.appendChild(optionGroup);
+      }
+      const paused = Array.isArray(selection.paused) ? selection.paused : [];
+      if (paused.length) {
+        const optionGroup = document.createElement("optgroup");
+        optionGroup.label = "Pozastavené";
+        for (const workstream of paused) appendOption(optionGroup, workstream);
+        profileSelect.appendChild(optionGroup);
+      }
+    } else {
+      for (const profile of profiles) appendOption(profileSelect, profile);
     }
     syncControls();
   }
@@ -1277,23 +1305,22 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     const targetId = profileSelect.value;
     const targetOption = profileSelect.options[profileSelect.selectedIndex];
     const targetLabel = targetOption?.textContent || targetId;
-    const targetProfileId = targetOption?.dataset.profileId || targetId;
     if (!targetId || targetId === activeWorkstreamId) return;
     if (input.value.trim()) {
-      showProfileSwitchFailure("Nejdřív odešli nebo odstraň rozepsaný pokyn; profil jsem nepřepnul.");
+      showProfileSwitchFailure("Nejdřív odešli nebo odstraň rozepsaný pokyn; proud jsem nepřepnul.");
       profileSelect.value = activeWorkstreamId;
       return;
     }
     if (contextAnchorDraftDirty()) {
-      showProfileSwitchFailure("Nejdřív ulož nebo výslovně zahoď rozepsanou změnu kotvy; profil jsem nepřepnul.");
+      showProfileSwitchFailure("Nejdřív ulož nebo výslovně zahoď rozepsanou změnu kotvy; proud jsem nepřepnul.");
       profileSelect.value = activeWorkstreamId;
       return;
     }
-    if (!window.confirm(`Přepnout celý pracovní profil na „${targetLabel}“?\n\nPřepne se vlákno, workspace i TVBCP.`)) {
+    if (!window.confirm(`Přepnout pracovní proud na „${targetLabel}“?\n\nBezpečně se přepne vlákno, pracovní kontext, handoff a TVBCP; sdílený workspace se předem ověří a synchronizuje.`)) {
       profileSelect.value = activeWorkstreamId;
       return;
     }
-    setBusy(true, `Přepínám pracovní profil na ${targetLabel}…`);
+    setBusy(true, `Přepínám pracovní proud na ${targetLabel}…`);
     stopAnswerSpeech(false);
     tvbcpPanel.hidden = true;
     contextAnchorPanel.hidden = true;
@@ -1303,15 +1330,15 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       const payload = await api("/api/human-adam/profile", {
         method:"POST",
         body:JSON.stringify(usingWorkstreamCatalog
-          ? {workstream_id:targetId,profile_id:targetProfileId,confirmed:true}
-          : {profile_id:targetProfileId,confirmed:true}),
+          ? {workstream_id:targetId,confirmed:true}
+          : {profile_id:targetId,confirmed:true}),
       });
       if (!payload.ok) throw new Error(payload.message || "Přepnutí profilu selhalo.");
       resetContextAnchorEditorState();
       renderStatus(payload);
-      notice.textContent = `Aktivní pracovní profil: ${activeProfileLabel}.`;
+      notice.textContent = `Aktivní pracovní proud: ${activeProfileLabel}.`;
     } catch (error) {
-      showProfileSwitchFailure(`Profil nebyl přepnut: ${error.message}`);
+      showProfileSwitchFailure(`Pracovní proud nebyl přepnut: ${error.message}`);
       await loadStatus();
     } finally { setBusy(false); }
   }
@@ -1804,8 +1831,9 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     else if (payload.workspace_relation === "diverged") workMeta.textContent = "Workspace a main se rozešly; je nutná servisní kontrola.";
     else workMeta.textContent = "Workspace je čistý a odpovídá main.";
     const semaphore = payload.development_semaphore || {};
-    checkpointBtn.disabled = !payload.dirty || semaphore.can_checkpoint !== true;
-    const simpleDeployReady = !payload.dirty
+    checkpointBtn.disabled = !workstreamDevelopmentEnabled || !payload.dirty || semaphore.can_checkpoint !== true;
+    const simpleDeployReady = workstreamDevelopmentEnabled
+      && !payload.dirty
       && !payload.local_checkpoint_ahead
       && payload.workspace_relation === "aligned"
       && Number(payload.source_pending_changes || 0) === 0;
@@ -1814,7 +1842,8 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     deployConfirmation.hidden = true;
     deployConfirmation.disabled = true;
     deployBtn.disabled = true;
-    if (payload.dirty) deployMeta.textContent = "Nejdřív dokonči automatický checkpoint změn do main.";
+    if (!workstreamDevelopmentEnabled) deployMeta.textContent = "Vývoj a nasazení lazy proudu se bezpečně aktivují až v pilotní fázi 4.5.";
+    else if (payload.dirty) deployMeta.textContent = "Nejdřív dokonči automatický checkpoint změn do main.";
     else if (payload.local_checkpoint_ahead) deployMeta.textContent = "Je zachovaný starší lokální checkpoint; nejdřív proveď servisní kontrolu.";
     else if (checkpointPreserved) deployMeta.textContent = "WIP je bezpečně zachovaný, ale audit je zablokovaný. Nejdřív proveď obnovu nad aktuálním main.";
     else if (payload.workspace_relation === "diverged") deployMeta.textContent = "Audit je zablokovaný: workspace a main se rozešly.";
