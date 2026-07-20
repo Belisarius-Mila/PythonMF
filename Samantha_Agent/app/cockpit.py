@@ -93,6 +93,7 @@ from app.communication.human_adam_service import (
 )
 from app.communication.human_adam_profiles import (
     HUMAN_ADAM,
+    HumanAdamProfileManager,
     human_adam_deployment_completion_action,
     human_adam_deployment_completion_status_action,
     human_adam_development_semaphore_action,
@@ -100,6 +101,7 @@ from app.communication.human_adam_profiles import (
     human_adam_project_continuity_action,
     human_adam_profile_switch_action,
 )
+from app.communication.session_hub import SessionHubError
 from app.communication.human_adam_deploy import (
     human_adam_deploy_action,
     human_adam_deploy_audit_action,
@@ -8137,6 +8139,46 @@ def start_cockpit_restart_action(
         "url": f"http://{host}:{port}",
         "log": str(relative_to_project(log_file)),
     }
+
+
+def human_adam_simple_main_deployment_action(
+    *,
+    confirmed: bool,
+    service: HumanAdamProfileManager = HUMAN_ADAM,
+    host: str = "127.0.0.1",
+    port: int = COCKPIT_PORT,
+    restart_action: Callable[..., dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Privately bind a clean-main deployment to the controlled restart worker.
+
+    Phase 2.3 intentionally exposes no HTTP route or UI control.  The app layer
+    owns the running PID and network coordinates; the profile manager owns the
+    canonical workstream, commit and workspace proof.
+    """
+
+    previous_pid = os.getpid()
+    worker = restart_action or start_cockpit_restart_action
+
+    def schedule_restart() -> dict[str, Any]:
+        return worker(
+            confirmed=True,
+            host=host,
+            port=port,
+            pid=previous_pid,
+        )
+
+    try:
+        return service.prepare_simple_main_deployment(
+            previous_pid=previous_pid,
+            confirmed=confirmed,
+            restart_scheduler=schedule_restart,
+        )
+    except (AppServerError, SessionHubError, OSError, TypeError, ValueError) as exc:
+        return {
+            "ok": False,
+            "status": "simple_main_deployment_failed",
+            "message": str(exc),
+        }
 
 
 def start_adam_voice_mode_action(

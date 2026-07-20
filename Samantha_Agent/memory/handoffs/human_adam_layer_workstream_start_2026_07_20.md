@@ -261,3 +261,29 @@ pushnutá nebo nasazená. Změněné soubory jsou pouze
 kanonický TVBCP. Další krok: checkpoint + commit + push fáze 2.2; potom vytvořit
 neveřejnou app-layer akci, která manager propojí s existujícím restart workerem,
 stále bez přepnutí UI.
+
+### Fáze 2.3 – neveřejná aplikační akce řízeného restartu
+
+Dne 2026-07-20 12:20 CEST vznikla v aplikační vrstvě soukromá akce, která
+propojuje profilový koordinátor fáze 2.2 s existujícím bezpečným restart workerem
+Cockpitu. Aplikační vrstva sama odvozuje PID běžícího procesu, host a port;
+manager nadále výhradně odvozuje aktivní pracovní proud, přesný `main`, profily
+a cestu soukromé účtenky.
+
+Restart callback se předá manageru, ale worker se zavolá až po úspěšném úplném
+předrestartovém důkazu. Worker znovu ověří, že PID patří skutečnému Cockpit
+serveru, a až potom spustí oddělený `restart_cockpit.py`. Chyba manageru nebo
+restartu se vrací jako pravdivý bezpečný neúspěch; akce nevytváří větev, WIP,
+takeover ani semafor.
+
+Akce je záměrně neveřejná: nemá HTTP route, kartu v registru akcí, HTML, CSS ani
+tlačítko. Tři nové přímé testy dokazují předání serverového PID a síťového
+kontextu workeru, bezpečné vrácení chyby bez restartu a nepřítomnost API/UI
+povrchu. Širší cílená sada prošla 303 testy. Plná Cockpit brána prošla syntaxí
+a 896 testy za 210,122 sekundy; celá brána skončila `OK`.
+
+Změněné soubory fáze 2.3 jsou `app/cockpit.py`, `tests/test_cockpit.py`, tento
+handoff a kanonický TVBCP. Fáze zatím není commitnutá, pushnutá ani nasazená.
+Další krok: checkpoint + commit + push fáze 2.3; potom neveřejně napojit
+post-restartové ověření na serverem odvozený nový PID a `COCKPIT_CODE_STAMP`,
+stále bez změny UI.

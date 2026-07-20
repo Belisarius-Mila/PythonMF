@@ -1806,3 +1806,25 @@ Cockpit se nezměnily.
 
 Další krok: checkpoint, commit a push fáze 2.2. Potom připravit neveřejnou
 app-layer akci propojující manager s existujícím restart workerem bez změny UI.
+
+### 2026-07-20 12:20 CEST – Fáze 2.3: aplikační vazba na řízený restart
+
+Vznikla neveřejná aplikační akce jednoduchého nasazení. Server v ní vlastní PID
+běžícího Cockpitu, host a port a předává profilovému manageru pouze potvrzení a
+důvěryhodný callback existujícího restart workeru. Kanonický pracovní proud,
+commit, profilové workspaces a soukromou účtenku nadále odvozuje manager bez
+klientských technických vstupů.
+
+Worker smí být zavolán až po úplném předrestartovém důkazu. Sám znovu kontroluje,
+že cílový PID patří Cockpit serveru, a potom odděleně spouští
+`restart_cockpit.py`. Selhání se vrací pravdivě a neaktivuje starou větev, WIP,
+takeover ani globální semafor.
+
+Kanonická hranice fáze 2.3: žádná HTTP route, registr akce, HTML, CSS ani UI
+ovládací prvek. Tři nové testy pokrývají správné serverové napojení, bezpečný
+neúspěch a nepřítomnost veřejného povrchu. Širší cílená sada prošla 303 testy a
+plná Cockpit brána prošla 896 testy za 210,122 sekundy.
+
+Další krok: checkpoint, commit a push fáze 2.3. Potom vytvořit neveřejnou
+post-restartovou aplikační akci, která manageru předá nový serverový PID a
+`COCKPIT_CODE_STAMP`, stále bez změny UI.

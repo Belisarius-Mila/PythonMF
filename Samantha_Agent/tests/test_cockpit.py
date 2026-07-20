@@ -57,6 +57,7 @@ from app.cockpit import (
     cockpit_speak_action,
     cockpit_transcribe_voice_action,
     human_adam_transcribe_action,
+    human_adam_simple_main_deployment_action,
     janicka_light_status_action,
     janicka_orphaned_codex_session_report,
     open_janicka_full_adam_action,
@@ -3955,6 +3956,64 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("--delay", calls[0]["args"])
         self.assertIn("2.0", calls[0]["args"])
         self.assertTrue(calls[0]["start_new_session"])
+
+    def test_private_simple_main_deployment_binds_server_context_to_restart_worker(self) -> None:
+        manager_calls: list[dict[str, object]] = []
+        restart_calls: list[dict[str, object]] = []
+
+        class FakeProfileManager:
+            def prepare_simple_main_deployment(self, **kwargs: object) -> dict[str, object]:
+                manager_calls.append(kwargs)
+                restart = kwargs["restart_scheduler"]()
+                return {"ok": True, "state": "pending_restart", "restart": restart}
+
+        def fake_restart_action(**kwargs: object) -> dict[str, object]:
+            restart_calls.append(kwargs)
+            return {"ok": True, "status": "restart_started", "pid": kwargs["pid"]}
+
+        with patch.object(cockpit_module.os, "getpid", return_value=456):
+            result = human_adam_simple_main_deployment_action(
+                confirmed=True,
+                service=FakeProfileManager(),
+                host="127.0.0.1",
+                port=8770,
+                restart_action=fake_restart_action,
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(manager_calls[0]["previous_pid"], 456)
+        self.assertTrue(manager_calls[0]["confirmed"])
+        self.assertTrue(callable(manager_calls[0]["restart_scheduler"]))
+        self.assertEqual(
+            restart_calls,
+            [{"confirmed": True, "host": "127.0.0.1", "port": 8770, "pid": 456}],
+        )
+
+    def test_private_simple_main_deployment_returns_safe_manager_failure(self) -> None:
+        class FailingProfileManager:
+            def prepare_simple_main_deployment(self, **_kwargs: object) -> dict[str, object]:
+                raise cockpit_module.AppServerError("Nasazení bylo bezpečně zastaveno.")
+
+        result = human_adam_simple_main_deployment_action(
+            confirmed=True,
+            service=FailingProfileManager(),
+            restart_action=lambda **_kwargs: self.fail("restart se nesmí spustit"),
+        )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "simple_main_deployment_failed")
+        self.assertIn("bezpečně zastaveno", result["message"])
+
+    def test_private_simple_main_deployment_has_no_http_or_ui_surface(self) -> None:
+        route = "/api/human-adam/simple-main-deployment"
+
+        self.assertNotIn(route, self.cockpit_do_get_routes())
+        self.assertNotIn(route, self.cockpit_do_post_routes())
+        self.assertNotIn(route, COCKPIT_HTML)
+        self.assertNotIn(
+            "human_adam_simple_main_deployment_action",
+            {item["handler_name"] for item in COCKPIT_POST_ACTIONS},
+        )
 
     def test_start_adam_voice_mode_action_launches_watcher_with_terminal_bridge_by_default(self) -> None:
         calls: list[dict[str, object]] = []
