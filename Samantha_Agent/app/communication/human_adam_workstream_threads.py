@@ -183,9 +183,6 @@ class WorkstreamThreadRegistry:
                     raise SessionBusyError(
                         "Pracovní proud nelze přepnout, dokud není vyřešené nejisté doručení."
                     )
-                current.close()
-                with self._state_lock:
-                    self._active_workstream_id = ""
 
             target = self._hub(record)
             target_snapshot = target.snapshot()
@@ -193,7 +190,29 @@ class WorkstreamThreadRegistry:
                 raise SessionBusyError("Cílový pracovní proud už dokončuje aktivní tah.")
             if self._has_uncertain_delivery(target_snapshot):
                 raise SessionBusyError("Cílový pracovní proud čeká na vyřešení nejistého doručení.")
-            target.connect()
+            if current is not None and current_id != record.workstream_id:
+                current.close()
+                with self._state_lock:
+                    self._active_workstream_id = ""
+            try:
+                target.connect()
+            except Exception as target_error:
+                try:
+                    target.close()
+                except Exception:
+                    # The target never became authoritative. Restoration of the
+                    # previous stream is the transaction's primary obligation.
+                    pass
+                if current is not None and current_id != record.workstream_id:
+                    try:
+                        current.connect()
+                    except Exception as rollback_error:
+                        raise AppServerError(
+                            "Cílový proud se nepřipojil a původní proud nelze obnovit."
+                        ) from rollback_error
+                    with self._state_lock:
+                        self._active_workstream_id = current_id
+                raise target_error
             with self._state_lock:
                 self._active_workstream_id = record.workstream_id
             return {
@@ -210,6 +229,36 @@ class WorkstreamThreadRegistry:
                     "connected": True,
                 },
             }
+        finally:
+            self._operation_lock.release()
+
+    def close_active(self, *, confirmed: bool) -> dict[str, Any]:
+        """Disconnect the active lazy thread only after all leave guards pass."""
+
+        if not confirmed:
+            raise AppServerError("Odpojení pracovního proudu vyžaduje výslovné potvrzení.")
+        if not self._operation_lock.acquire(blocking=False):
+            raise SessionBusyError("Pracovní proud právě provádí jinou operaci.")
+        try:
+            with self._state_lock:
+                workstream_id = self._active_workstream_id
+                hub = self._hubs.get(workstream_id) if workstream_id else None
+            if hub is None:
+                return {"ok": True, "closed": False, "workstream_id": ""}
+            snapshot = hub.snapshot()
+            if snapshot.get("turn_busy") or snapshot.get("active_turn"):
+                raise SessionBusyError(
+                    "Pracovní proud nelze odpojit během aktivního tahu Adama."
+                )
+            if self._has_uncertain_delivery(snapshot):
+                raise SessionBusyError(
+                    "Pracovní proud nelze odpojit, dokud není vyřešené nejisté doručení."
+                )
+            self._assert_clean_shared_workspace(self.workspace_status())
+            hub.close()
+            with self._state_lock:
+                self._active_workstream_id = ""
+            return {"ok": True, "closed": True, "workstream_id": workstream_id}
         finally:
             self._operation_lock.release()
 

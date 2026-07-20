@@ -1856,6 +1856,239 @@ class HumanAdamProfileManager:
         if status.get("workspace_relation") == "diverged":
             raise AppServerError("Cílový workspace se rozešel s main; přepnutí je zablokované.")
 
+    def _assert_session_can_leave(self, session: dict[str, Any]) -> None:
+        if session.get("turn_busy") or session.get("active_turn"):
+            raise SessionBusyError("Profil nelze přepnout během aktivního tahu Adama.")
+        if self._has_uncertain_delivery(session):
+            raise SessionBusyError(
+                "Profil nelze přepnout, dokud není vyřešené nejisté doručení."
+            )
+
+    def _prepare_profile_workspace_unlocked(
+        self,
+        service: HumanAdamService,
+    ) -> dict[str, Any]:
+        target_status = service.workspace.status()
+        if int(target_status.get("source_pending_changes") or 0) > 0:
+            raise AppServerError(
+                "Zdrojový main má pracovní změny; nový profil nyní nelze bezpečně připravit."
+            )
+        if not target_status.get("prepared"):
+            target_status = service.workspace.prepare()
+        self._assert_target_workspace(target_status)
+        if target_status.get("source_update_available"):
+            target_status = service.workspace.sync_from_main(confirmed=True)
+        self._assert_target_workspace(target_status)
+        return target_status
+
+    @staticmethod
+    def _target_recovery_allowed(service: HumanAdamService) -> bool:
+        target_session = service.hub.snapshot()
+        return bool(
+            not target_session.get("turn_busy")
+            and not target_session.get("active_turn")
+            and not HumanAdamProfileManager._has_uncertain_delivery(target_session)
+        )
+
+    def _switch_unlocked(self, target_id: str) -> dict[str, Any]:
+        current_id = self.active_profile_id
+        if target_id == current_id:
+            return {**self.status(), "switched": False}
+        current = self.profiles[current_id]["service"]
+        target = self.profiles[target_id]["service"]
+        self._assert_session_can_leave(current.hub.snapshot())
+        self._assert_workspace_can_leave(current.workspace.status())
+        self._assert_session_can_leave(target.hub.snapshot())
+        self._prepare_profile_workspace_unlocked(target)
+
+        target.connect(
+            recover_unreachable_runtime=self._target_recovery_allowed(target)
+        )
+        try:
+            current.hub.close()
+            self._write_active_profile_id(target_id)
+        except Exception:
+            try:
+                target.hub.close()
+            finally:
+                current.connect()
+            raise
+        with self._state_lock:
+            self._active_profile_id = target_id
+            self._state_error = ""
+        return {**self.status(), "switched": True}
+
+    def _grouped_workstream_row(self, workstream_id: str) -> dict[str, Any]:
+        selection = self.grouped_workstream_status()
+        row = next(
+            (
+                item
+                for item in selection.get("workstreams") or []
+                if isinstance(item, dict) and item.get("id") == workstream_id
+            ),
+            None,
+        )
+        if row is None:
+            raise AppServerError("Požadovaný pracovní proud v katalogu neexistuje.")
+        if row.get("available") is not True:
+            raise AppServerError("Požadovaný pracovní proud zatím nelze bezpečně otevřít.")
+        return row
+
+    def _open_lazy_from_legacy_unlocked(
+        self,
+        *,
+        workstream_id: str,
+    ) -> dict[str, Any]:
+        threads = self.workstream_threads
+        if threads is None:
+            raise AppServerError("Soukromé vlákno pracovního proudu není dostupné.")
+        original_profile_id = self.active_profile_id
+        if original_profile_id != self.default_profile_id:
+            self._switch_unlocked(self.default_profile_id)
+        shared = self.profiles[self.default_profile_id]["service"]
+        self._assert_session_can_leave(shared.hub.snapshot())
+        self._assert_workspace_can_leave(shared.workspace.status())
+        self._prepare_profile_workspace_unlocked(shared)
+        shared.hub.close()
+        try:
+            return threads.open(workstream_id=workstream_id, confirmed=True)
+        except Exception as target_error:
+            try:
+                shared.connect(
+                    recover_unreachable_runtime=self._target_recovery_allowed(shared)
+                )
+                if original_profile_id != self.default_profile_id:
+                    self._switch_unlocked(original_profile_id)
+            except Exception as rollback_error:
+                raise AppServerError(
+                    "Cílový proud se nepřipojil a původní legacy proud nelze obnovit."
+                ) from rollback_error
+            raise target_error
+
+    def _restore_lazy_after_legacy_failure_unlocked(
+        self,
+        *,
+        workstream_id: str,
+    ) -> None:
+        threads = self.workstream_threads
+        if threads is None:
+            raise AppServerError("Původní lazy proud nelze obnovit.")
+        if self.active_profile_id != self.default_profile_id:
+            self._switch_unlocked(self.default_profile_id)
+        shared = self.profiles[self.default_profile_id]["service"]
+        shared.hub.close()
+        threads.open(workstream_id=workstream_id, confirmed=True)
+
+    def _activate_legacy_from_lazy_unlocked(
+        self,
+        *,
+        profile_id: str,
+        previous_lazy_id: str,
+    ) -> dict[str, Any]:
+        threads = self.workstream_threads
+        if threads is None:
+            raise AppServerError("Soukromé vlákno pracovního proudu není dostupné.")
+        if self.active_profile_id != self.default_profile_id:
+            raise AppServerError(
+                "Lazy proud nemá konzistentní vlastnictví sdíleného pracovního profilu."
+            )
+        threads.checkpoint_workstream_id()
+        shared = self.profiles[self.default_profile_id]["service"]
+        self._prepare_profile_workspace_unlocked(shared)
+        target = self.profiles[profile_id]["service"]
+        self._assert_session_can_leave(target.hub.snapshot())
+        if profile_id != self.default_profile_id:
+            self._prepare_profile_workspace_unlocked(target)
+        threads.close_active(confirmed=True)
+        try:
+            if profile_id == self.default_profile_id:
+                target.connect(
+                    recover_unreachable_runtime=self._target_recovery_allowed(target)
+                )
+                return {**self.status(), "switched": True}
+            return self._switch_unlocked(profile_id)
+        except Exception as target_error:
+            try:
+                self._restore_lazy_after_legacy_failure_unlocked(
+                    workstream_id=previous_lazy_id
+                )
+            except Exception as rollback_error:
+                raise AppServerError(
+                    "Legacy proud se nepřipojil a původní lazy proud nelze obnovit."
+                ) from rollback_error
+            raise target_error
+
+    def activate_grouped_workstream(
+        self,
+        *,
+        workstream_id: str,
+        confirmed: bool,
+    ) -> dict[str, Any]:
+        """Atomically route one private phase-4.4 selection across both backends.
+
+        The method deliberately has no Cockpit action or API route yet. It
+        proves legacy-to-lazy, lazy-to-lazy and lazy-to-legacy ownership before
+        the grouped menu becomes live.
+        """
+
+        clean_id = str(workstream_id or "").strip()
+        if not confirmed:
+            raise AppServerError("Přepnutí pracovního proudu vyžaduje výslovné potvrzení.")
+        if DEPLOYMENT_LOCK.locked():
+            raise SessionBusyError("Pracovní proud nelze přepnout během auditu nebo nasazení.")
+        if not self._operation_lock.acquire(blocking=False):
+            raise SessionBusyError("Pracovní proud nelze přepnout během aktivní operace.")
+        try:
+            target = self._grouped_workstream_row(clean_id)
+            previous = self.grouped_workstream_status().get("active") or {}
+            previous_id = str(previous.get("workstream_id") or "")
+            previous_lazy_id = (
+                self.workstream_threads.active_workstream_id
+                if self.workstream_threads is not None
+                else ""
+            )
+            if target["backend"] == "legacy_profile":
+                profile_id = str(target.get("profile_id") or "")
+                if profile_id not in self.profiles:
+                    raise AppServerError("Legacy pracovní proud nemá platný profil.")
+                if previous_lazy_id:
+                    self._activate_legacy_from_lazy_unlocked(
+                        profile_id=profile_id,
+                        previous_lazy_id=previous_lazy_id,
+                    )
+                else:
+                    self._switch_unlocked(profile_id)
+            else:
+                threads = self.workstream_threads
+                if threads is None:
+                    raise AppServerError("Soukromé vlákno pracovního proudu není dostupné.")
+                if previous_lazy_id:
+                    if self.active_profile_id != self.default_profile_id:
+                        raise AppServerError(
+                            "Lazy proud nemá konzistentní vlastnictví sdíleného pracovního profilu."
+                        )
+                    threads.checkpoint_workstream_id()
+                    shared = self.profiles[self.default_profile_id]["service"]
+                    self._prepare_profile_workspace_unlocked(shared)
+                    threads.open(workstream_id=clean_id, confirmed=True)
+                else:
+                    self._open_lazy_from_legacy_unlocked(workstream_id=clean_id)
+            selection = self.grouped_workstream_status()
+            return {
+                "ok": True,
+                "switched": clean_id != previous_id,
+                "workstream": {
+                    "id": target["id"],
+                    "type": target["type"],
+                    "name": target["name"],
+                    "mode": target["mode"],
+                    "backend": target["backend"],
+                },
+                "workstream_selection": selection,
+            }
+        finally:
+            self._operation_lock.release()
+
     def switch(self, *, profile_id: str, confirmed: bool) -> dict[str, Any]:
         target_id = str(profile_id or "").strip()
         if not confirmed:
@@ -1867,50 +2100,7 @@ class HumanAdamProfileManager:
         if not self._operation_lock.acquire(blocking=False):
             raise SessionBusyError("Profil nelze přepnout během aktivní operace.")
         try:
-            current_id = self.active_profile_id
-            if target_id == current_id:
-                return {**self.status(), "switched": False}
-            current = self.profiles[current_id]["service"]
-            target = self.profiles[target_id]["service"]
-            current_session = current.hub.snapshot()
-            if current_session.get("turn_busy") or current_session.get("active_turn"):
-                raise SessionBusyError("Profil nelze přepnout během aktivního tahu Adama.")
-            if self._has_uncertain_delivery(current_session):
-                raise SessionBusyError("Profil nelze přepnout, dokud není vyřešené nejisté doručení.")
-            self._assert_workspace_can_leave(current.workspace.status())
-
-            target_status = target.workspace.status()
-            if int(target_status.get("source_pending_changes") or 0) > 0:
-                raise AppServerError("Zdrojový main má pracovní změny; nový profil nyní nelze bezpečně připravit.")
-            if not target_status.get("prepared"):
-                target_status = target.workspace.prepare()
-            self._assert_target_workspace(target_status)
-            if target_status.get("source_update_available"):
-                target_status = target.workspace.sync_from_main(confirmed=True)
-            self._assert_target_workspace(target_status)
-
-            target_session = target.hub.snapshot()
-            target_recovery_allowed = bool(
-                not target_session.get("turn_busy")
-                and not target_session.get("active_turn")
-                and not self._has_uncertain_delivery(target_session)
-            )
-            target.connect(
-                recover_unreachable_runtime=target_recovery_allowed
-            )
-            try:
-                current.hub.close()
-                self._write_active_profile_id(target_id)
-            except Exception:
-                try:
-                    target.hub.close()
-                finally:
-                    current.connect()
-                raise
-            with self._state_lock:
-                self._active_profile_id = target_id
-                self._state_error = ""
-            return {**self.status(), "switched": True}
+            return self._switch_unlocked(target_id)
         finally:
             self._operation_lock.release()
 

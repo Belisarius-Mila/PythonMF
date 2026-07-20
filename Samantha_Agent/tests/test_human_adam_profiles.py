@@ -128,6 +128,7 @@ class FakeHub:
         self.rotation_count = 0
         self.next_answer = "Hotovo"
         self.replaced_answers: list[tuple[str, str]] = []
+        self.fail_connect = False
 
     def snapshot(self) -> dict[str, object]:
         return {
@@ -139,6 +140,8 @@ class FakeHub:
         }
 
     def connect(self) -> dict[str, object]:
+        if self.fail_connect:
+            raise AppServerError("Simulované selhání legacy připojení.")
         self.connected = True
         return self.snapshot()
 
@@ -197,6 +200,58 @@ class FakeHub:
     def close(self) -> None:
         self.connected = False
         self.close_count += 1
+
+
+class FakeLazyThreads:
+    def __init__(self) -> None:
+        self.active_workstream_id = ""
+        self.fail_open_ids: set[str] = set()
+        self.busy = False
+        self.uncertain = False
+        self.open_calls: list[str] = []
+        self.close_calls: list[str] = []
+
+    def status(self) -> dict[str, object]:
+        ids = ("project-mmtx", "project-lekarna")
+        return {
+            "ok": True,
+            "active_workstream_id": self.active_workstream_id,
+            "workstreams": [
+                {
+                    "id": workstream_id,
+                    "available": True,
+                    "initialized": workstream_id in self.open_calls,
+                    "connected": workstream_id == self.active_workstream_id,
+                }
+                for workstream_id in ids
+            ],
+        }
+
+    def checkpoint_workstream_id(self) -> str:
+        if not self.active_workstream_id:
+            raise AppServerError("Není připojený žádný lazy pracovní proud.")
+        if self.busy:
+            raise SessionBusyError("Checkpoint nelze spustit během aktivního tahu Adama.")
+        if self.uncertain:
+            raise SessionBusyError("Checkpoint blokuje nejisté doručení.")
+        return self.active_workstream_id
+
+    def open(self, *, workstream_id: str, confirmed: bool) -> dict[str, object]:
+        if not confirmed:
+            raise AssertionError("lazy open must be confirmed")
+        self.open_calls.append(workstream_id)
+        if workstream_id in self.fail_open_ids:
+            raise AppServerError("Simulované selhání lazy připojení.")
+        self.active_workstream_id = workstream_id
+        return {"ok": True, "opened": True}
+
+    def close_active(self, *, confirmed: bool) -> dict[str, object]:
+        if not confirmed:
+            raise AssertionError("lazy close must be confirmed")
+        workstream_id = self.checkpoint_workstream_id()
+        self.close_calls.append(workstream_id)
+        self.active_workstream_id = ""
+        return {"ok": True, "closed": True, "workstream_id": workstream_id}
 
 
 def fake_profile(**_kwargs: object) -> dict[str, object]:
@@ -752,6 +807,215 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
 
         self.assertEqual(manager.active_profile_id, "human_adam")
         self.assertTrue(human_workspace.dirty)
+
+    def test_grouped_router_switches_legacy_to_lazy_without_api_exposure(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_workspaces, human_hub, _library_hub = self.make_manager(
+                Path(temp_dir)
+            )
+            lazy = FakeLazyThreads()
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            human_hub.connected = True
+
+            result = manager.activate_grouped_workstream(
+                workstream_id="project-mmtx",
+                confirmed=True,
+            )
+            public = human_adam_profile_switch_action(
+                {"workstream_id": "project-mmtx", "confirmed": True},
+                service=manager,
+            )
+
+        self.assertTrue(result["switched"])
+        self.assertEqual(lazy.active_workstream_id, "project-mmtx")
+        self.assertFalse(human_hub.connected)
+        self.assertEqual(manager.active_profile_id, "human_adam")
+        self.assertEqual(
+            result["workstream_selection"]["active"]["workstream_id"],
+            "project-mmtx",
+        )
+        self.assertFalse(public["ok"])
+        self.assertEqual(lazy.open_calls, ["project-mmtx"])
+
+    def test_grouped_router_restores_original_legacy_after_lazy_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_workspaces, human_hub, library_hub = self.make_manager(
+                Path(temp_dir)
+            )
+            lazy = FakeLazyThreads()
+            lazy.fail_open_ids.add("project-mmtx")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.switch(profile_id="knihovna", confirmed=True)
+
+            with self.assertRaisesRegex(AppServerError, "lazy připojení"):
+                manager.activate_grouped_workstream(
+                    workstream_id="project-mmtx",
+                    confirmed=True,
+                )
+
+        self.assertEqual(manager.active_profile_id, "knihovna")
+        self.assertEqual(lazy.active_workstream_id, "")
+        self.assertTrue(library_hub.connected)
+        self.assertFalse(human_hub.connected)
+
+    def test_grouped_router_synchronizes_shared_workspace_for_lazy_to_lazy(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, *_rest = self.make_manager(Path(temp_dir))
+            lazy = FakeLazyThreads()
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.activate_grouped_workstream(
+                workstream_id="project-mmtx",
+                confirmed=True,
+            )
+            human_workspace.source_ahead = True
+
+            result = manager.activate_grouped_workstream(
+                workstream_id="project-lekarna",
+                confirmed=True,
+            )
+
+        self.assertTrue(result["switched"])
+        self.assertEqual(lazy.active_workstream_id, "project-lekarna")
+        self.assertEqual(human_workspace.sync_count, 1)
+        self.assertEqual(lazy.open_calls, ["project-mmtx", "project-lekarna"])
+
+    def test_grouped_router_switches_lazy_to_legacy(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_workspaces, human_hub, library_hub = self.make_manager(
+                Path(temp_dir)
+            )
+            lazy = FakeLazyThreads()
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.activate_grouped_workstream(
+                workstream_id="project-mmtx",
+                confirmed=True,
+            )
+
+            result = manager.activate_grouped_workstream(
+                workstream_id="project-knowledge-library",
+                confirmed=True,
+            )
+
+        self.assertTrue(result["switched"])
+        self.assertEqual(lazy.active_workstream_id, "")
+        self.assertEqual(lazy.close_calls, ["project-mmtx"])
+        self.assertEqual(manager.active_profile_id, "knihovna")
+        self.assertTrue(library_hub.connected)
+        self.assertFalse(human_hub.connected)
+
+    def test_grouped_router_restores_lazy_after_legacy_connect_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_workspaces, human_hub, library_hub = self.make_manager(
+                Path(temp_dir)
+            )
+            lazy = FakeLazyThreads()
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.activate_grouped_workstream(
+                workstream_id="project-mmtx",
+                confirmed=True,
+            )
+            library_hub.fail_connect = True
+
+            with self.assertRaisesRegex(AppServerError, "legacy připojení"):
+                manager.activate_grouped_workstream(
+                    workstream_id="project-knowledge-library",
+                    confirmed=True,
+                )
+
+        self.assertEqual(manager.active_profile_id, "human_adam")
+        self.assertEqual(lazy.active_workstream_id, "project-mmtx")
+        self.assertFalse(human_hub.connected)
+        self.assertFalse(library_hub.connected)
+
+    def test_grouped_router_keeps_lazy_active_when_turn_is_busy(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_rest = self.make_manager(Path(temp_dir))
+            lazy = FakeLazyThreads()
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.activate_grouped_workstream(
+                workstream_id="project-mmtx",
+                confirmed=True,
+            )
+            lazy.busy = True
+
+            with self.assertRaisesRegex(SessionBusyError, "aktivního tahu"):
+                manager.activate_grouped_workstream(
+                    workstream_id="project-knowledge-library",
+                    confirmed=True,
+                )
+
+        self.assertEqual(lazy.active_workstream_id, "project-mmtx")
+        self.assertEqual(manager.active_profile_id, "human_adam")
+
+    def test_grouped_router_rejects_unconfirmed_unknown_and_unavailable_target(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_rest = self.make_manager(Path(temp_dir))
+            lazy = FakeLazyThreads()
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+
+            with self.assertRaisesRegex(AppServerError, "výslovné potvrzení"):
+                manager.activate_grouped_workstream(
+                    workstream_id="project-mmtx",
+                    confirmed=False,
+                )
+            with self.assertRaisesRegex(AppServerError, "katalogu neexistuje"):
+                manager.activate_grouped_workstream(
+                    workstream_id="project-unknown",
+                    confirmed=True,
+                )
+            with self.assertRaisesRegex(AppServerError, "nelze bezpečně otevřít"):
+                manager.activate_grouped_workstream(
+                    workstream_id="project-vocabulary-fr",
+                    confirmed=True,
+                )
+
+        self.assertEqual(lazy.open_calls, [])
+        self.assertEqual(manager.active_profile_id, "human_adam")
+
+    def test_grouped_router_preserves_dirty_legacy_before_lazy_open(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, *_workspaces, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            lazy = FakeLazyThreads()
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            human_hub.connected = True
+            human_workspace.dirty = True
+
+            with self.assertRaisesRegex(AppServerError, "necheckpointované změny"):
+                manager.activate_grouped_workstream(
+                    workstream_id="project-mmtx",
+                    confirmed=True,
+                )
+
+        self.assertEqual(lazy.open_calls, [])
+        self.assertTrue(human_hub.connected)
+        self.assertEqual(manager.active_profile_id, "human_adam")
+
+    def test_grouped_router_preserves_lazy_on_uncertain_target_legacy(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_workspaces, _human_hub, library_hub = self.make_manager(
+                Path(temp_dir)
+            )
+            lazy = FakeLazyThreads()
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.activate_grouped_workstream(
+                workstream_id="project-mmtx",
+                confirmed=True,
+            )
+            library_hub.messages = [
+                {"status": "delivery_unknown", "recovery_required": True}
+            ]
+
+            with self.assertRaisesRegex(SessionBusyError, "nejisté doručení"):
+                manager.activate_grouped_workstream(
+                    workstream_id="project-knowledge-library",
+                    confirmed=True,
+                )
+
+        self.assertEqual(lazy.active_workstream_id, "project-mmtx")
+        self.assertEqual(lazy.close_calls, [])
+        self.assertEqual(manager.active_profile_id, "human_adam")
 
     def test_project_binding_is_required_when_catalog_exists_and_audit_is_read_only(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

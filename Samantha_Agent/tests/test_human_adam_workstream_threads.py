@@ -15,16 +15,27 @@ from app.communication.session_hub import CanonicalSessionHub, SessionBusyError
 
 
 class FakeClient:
-    def __init__(self, events: list[tuple[str, str]], next_thread_id: str):
+    def __init__(
+        self,
+        events: list[tuple[str, str]],
+        next_thread_id: str,
+        *,
+        fail_connect: bool = False,
+    ):
         self.events = events
         self.next_thread_id = next_thread_id
+        self.fail_connect = fail_connect
         self.running = True
 
     def start_thread(self, **_kwargs: Any) -> str:
+        if self.fail_connect:
+            raise AppServerError("Simulované selhání připojení.")
         self.events.append(("start", self.next_thread_id))
         return self.next_thread_id
 
     def resume_thread(self, thread_id: str, **_kwargs: Any) -> None:
+        if self.fail_connect:
+            raise AppServerError("Simulované selhání připojení.")
         self.events.append(("resume", thread_id))
 
     def close(self) -> None:
@@ -63,14 +74,21 @@ class WorkstreamThreadRegistryTests(unittest.TestCase):
         workspace_status=clean_workspace_status,
         catalog=WORKSTREAM_CATALOG,
         reserved_workstream_ids=(),
+        fail_connect_ids=(),
     ) -> WorkstreamThreadRegistry:
+        failing = frozenset(fail_connect_ids)
+
         def factory(record: CanonicalWorkstream, state_path: Path) -> CanonicalSessionHub:
             self.factory_calls.append(record.workstream_id)
             ordinal = len(self.factory_calls)
             hub = CanonicalSessionHub(
                 state_path=state_path,
                 workspace=self.root,
-                client_factory=lambda: FakeClient(self.events, f"thread-{ordinal}"),
+                client_factory=lambda: FakeClient(
+                    self.events,
+                    f"thread-{ordinal}",
+                    fail_connect=record.workstream_id in failing,
+                ),
                 developer_instructions=f"Workstream {record.workstream_id}",
                 sandbox="workspace-write",
                 sandbox_policy={},
@@ -144,6 +162,20 @@ class WorkstreamThreadRegistryTests(unittest.TestCase):
         self.assertEqual(status["connected_count"], 1)
         self.assertEqual(status["active_workstream_id"], "project-lekarna")
 
+    def test_failed_target_connect_restores_previous_lazy_thread(self) -> None:
+        registry = self.registry(fail_connect_ids={"project-lekarna"})
+        registry.open(workstream_id="project-mmtx", confirmed=True)
+
+        with self.assertRaisesRegex(AppServerError, "Simulované selhání"):
+            registry.open(workstream_id="project-lekarna", confirmed=True)
+        status = registry.status()
+
+        self.assertEqual(status["active_workstream_id"], "project-mmtx")
+        self.assertEqual(status["connected_count"], 1)
+        self.assertTrue(self.hubs["project-mmtx"].snapshot()["connected"])
+        self.assertFalse(self.hubs["project-lekarna"].snapshot()["connected"])
+        self.assertEqual(self.events[-1], ("resume", "thread-1"))
+
     def test_active_turn_blocks_switch_before_target_is_materialized(self) -> None:
         registry = self.registry()
         registry.open(workstream_id="project-mmtx", confirmed=True)
@@ -185,6 +217,31 @@ class WorkstreamThreadRegistryTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(SessionBusyError, "nejisté doručení"):
             registry.checkpoint_workstream_id()
+
+    def test_close_active_requires_idle_certain_clean_stream(self) -> None:
+        workspace = clean_workspace_status()
+        registry = self.registry(workspace_status=lambda: workspace)
+        registry.open(workstream_id="project-mmtx", confirmed=True)
+        current = self.hubs["project-mmtx"]
+        with self.assertRaisesRegex(AppServerError, "výslovné potvrzení"):
+            registry.close_active(confirmed=False)
+        current._state["messages"].append(
+            {"status": "delivery_unknown", "recovery_required": True}
+        )
+        with self.assertRaisesRegex(SessionBusyError, "nejisté doručení"):
+            registry.close_active(confirmed=True)
+        current._state["messages"].append({"status": "completed"})
+        workspace["dirty"] = True
+        with self.assertRaisesRegex(AppServerError, "není čistý"):
+            registry.close_active(confirmed=True)
+        workspace["dirty"] = False
+
+        result = registry.close_active(confirmed=True)
+
+        self.assertTrue(result["closed"])
+        self.assertEqual(result["workstream_id"], "project-mmtx")
+        self.assertEqual(registry.active_workstream_id, "")
+        self.assertFalse(current.snapshot()["connected"])
 
     def test_dirty_or_unsynchronized_workspace_blocks_before_private_write(self) -> None:
         dirty = clean_workspace_status()
