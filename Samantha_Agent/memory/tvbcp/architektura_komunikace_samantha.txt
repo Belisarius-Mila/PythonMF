@@ -1828,3 +1828,23 @@ plná Cockpit brána prošla 896 testy za 210,122 sekundy.
 Další krok: checkpoint, commit a push fáze 2.3. Potom vytvořit neveřejnou
 post-restartovou aplikační akci, která manageru předá nový serverový PID a
 `COCKPIT_CODE_STAMP`, stále bez změny UI.
+
+### 2026-07-20 12:56 CEST – Fáze 2.4: serverový důkaz po restartu
+
+Vznikla neveřejná aplikační akce dokončení jednoduchého nasazení. Nový PID bere
+přímo z běžícího procesu a kódový otisk z `COCKPIT_CODE_STAMP`; žádný z těchto
+důkazů nelze dodat klientem. Profilový manager je potom váže na čekající
+soukromou účtenku a tentýž aktivní kanonický pracovní proud.
+
+Dokončení znovu vyžaduje nový proces, přesný otisk, čistý synchronní `main`, oba
+čisté a zarovnané profilové workspaces a smoke test `5/5`. Jen úplný důkaz mění
+účtenku na `deployed`. Neúplný nebo chybný důkaz se vrátí pravdivě a stav
+`pending_restart` zůstane zachován.
+
+Kanonická hranice fáze 2.4: žádná HTTP route, registr akce, HTML, CSS ani UI.
+Dva nové testy a rozšířená kontrola veřejného povrchu jsou zelené; širší cílená
+sada prošla 305 testy a plná Cockpit brána prošla 898 testy za 217,666 sekundy.
+
+Další krok: checkpoint, commit a push fáze 2.4. Potom navrhnout minimální řízené
+přepojení existujícího workflow na dokončenou soukromou cestu 2.1–2.4 bez změny
+vzhledu UI.

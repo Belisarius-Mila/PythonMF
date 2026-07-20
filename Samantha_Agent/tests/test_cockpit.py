@@ -58,6 +58,7 @@ from app.cockpit import (
     cockpit_transcribe_voice_action,
     human_adam_transcribe_action,
     human_adam_simple_main_deployment_action,
+    human_adam_simple_main_deployment_verification_action,
     janicka_light_status_action,
     janicka_orphaned_codex_session_report,
     open_janicka_full_adam_action,
@@ -4004,6 +4005,43 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["status"], "simple_main_deployment_failed")
         self.assertIn("bezpečně zastaveno", result["message"])
 
+    def test_private_simple_main_deployment_verification_uses_server_evidence(self) -> None:
+        manager_calls: list[dict[str, object]] = []
+
+        class FakeProfileManager:
+            def verify_simple_main_deployment(self, **kwargs: object) -> dict[str, object]:
+                manager_calls.append(kwargs)
+                return {"ok": True, "state": "deployed", "smoke": {"check_count": 5}}
+
+        with patch.object(cockpit_module.os, "getpid", return_value=654):
+            result = human_adam_simple_main_deployment_verification_action(
+                service=FakeProfileManager()
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(
+            manager_calls,
+            [
+                {
+                    "observed_pid": 654,
+                    "observed_code_stamp": cockpit_module.COCKPIT_CODE_STAMP,
+                }
+            ],
+        )
+
+    def test_private_simple_main_deployment_verification_returns_safe_failure(self) -> None:
+        class FailingProfileManager:
+            def verify_simple_main_deployment(self, **_kwargs: object) -> dict[str, object]:
+                raise cockpit_module.AppServerError("Restart nebyl úplně ověřen.")
+
+        result = human_adam_simple_main_deployment_verification_action(
+            service=FailingProfileManager()
+        )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "simple_main_deployment_verification_failed")
+        self.assertIn("nebyl úplně ověřen", result["message"])
+
     def test_private_simple_main_deployment_has_no_http_or_ui_surface(self) -> None:
         route = "/api/human-adam/simple-main-deployment"
 
@@ -4012,6 +4050,10 @@ class CockpitTests(unittest.TestCase):
         self.assertNotIn(route, COCKPIT_HTML)
         self.assertNotIn(
             "human_adam_simple_main_deployment_action",
+            {item["handler_name"] for item in COCKPIT_POST_ACTIONS},
+        )
+        self.assertNotIn(
+            "human_adam_simple_main_deployment_verification_action",
             {item["handler_name"] for item in COCKPIT_POST_ACTIONS},
         )
 

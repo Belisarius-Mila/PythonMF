@@ -287,3 +287,28 @@ handoff a kanonický TVBCP. Fáze zatím není commitnutá, pushnutá ani nasaze
 Další krok: checkpoint + commit + push fáze 2.3; potom neveřejně napojit
 post-restartové ověření na serverem odvozený nový PID a `COCKPIT_CODE_STAMP`,
 stále bez změny UI.
+
+### Fáze 2.4 – neveřejné potvrzení dokončení po restartu
+
+Dne 2026-07-20 12:56 CEST vznikla soukromá aplikační akce pro druhou polovinu
+jednoduchého nasazení. Akce přijímá pouze serverem vytvořený profilový manager;
+skutečný PID nového procesu bere z běžícího Cockpitu a kódový otisk z kanonické
+konstanty `COCKPIT_CODE_STAMP`. Klient nemůže dodat ani změnit žádný důkaz.
+
+Manager váže tyto údaje na čekající soukromou účtenku a stejný aktivní pracovní
+proud. Dále používá již otestovaný kontrakt fáze 2.1: vyžaduje nový PID, přesný
+otisk, stále čistý a synchronní `main`, oba profilové workspaces a kanonický
+smoke test `5/5`. Teprve úplný důkaz změní účtenku z `pending_restart` na
+`deployed`; chyba se vrátí pravdivě a účtenka se nepovýší.
+
+Akce nemá HTTP route, kartu v registru, HTML, CSS ani tlačítko. Dva nové přímé
+testy ověřují serverový PID a otisk i bezpečné vrácení chyby; rozšířený test
+zároveň chrání nepřítomnost veřejného povrchu. Širší cílená sada prošla 305
+testy. Plná Cockpit brána prošla syntaxí a 898 testy za 217,666 sekundy; celá
+brána skončila `OK`.
+
+Změněné soubory fáze 2.4 jsou `app/cockpit.py`, `tests/test_cockpit.py`, tento
+handoff a kanonický TVBCP. Fáze zatím není commitnutá, pushnutá ani nasazená.
+Další krok: checkpoint + commit + push fáze 2.4. Potom samostatně navrhnout
+nejmenší řízené přepojení existujícího workflow na dokončenou soukromou cestu
+2.1–2.4 při zachování současného vzhledu UI.

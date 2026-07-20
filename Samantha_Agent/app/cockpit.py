@@ -8181,6 +8181,30 @@ def human_adam_simple_main_deployment_action(
         }
 
 
+def human_adam_simple_main_deployment_verification_action(
+    *,
+    service: HumanAdamProfileManager = HUMAN_ADAM,
+) -> dict[str, Any]:
+    """Privately verify the restarted Cockpit from server-owned evidence.
+
+    Phase 2.4 has no HTTP or UI surface.  The new process PID and code stamp
+    come from the running server; the profile manager binds them to the pending
+    canonical workstream receipt and performs the full post-restart proof.
+    """
+
+    try:
+        return service.verify_simple_main_deployment(
+            observed_pid=os.getpid(),
+            observed_code_stamp=COCKPIT_CODE_STAMP,
+        )
+    except (AppServerError, SessionHubError, OSError, TypeError, ValueError) as exc:
+        return {
+            "ok": False,
+            "status": "simple_main_deployment_verification_failed",
+            "message": str(exc),
+        }
+
+
 def start_adam_voice_mode_action(
     *,
     launcher: Callable[..., object] | None = None,
