@@ -43,6 +43,7 @@ COMPILE_PATHS = (
     "app/communication/human_adam_deploy.py",
     "app/communication/human_adam_ui.py",
     "app/communication/human_adam_workspace.py",
+    "app/communication/human_adam_workstream_coordinator.py",
     "app/communication/simple_main_checkpoint.py",
     "app/communication/local_runtime.py",
     "app/communication/session_hub.py",

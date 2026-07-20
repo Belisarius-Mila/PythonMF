@@ -51,26 +51,41 @@ Co je hotove:
 - Nasledny zivy read-only Cockpit smoke test prosel 5/5.
 - Faze 1.2 nepridala API route, tlacitko ani zmenu UI a neaktivovala novy tok v
   bezicim Cockpitu.
+- Faze 1.3 pridala samostatny neveřejny `HumanAdamWorkstreamCoordinator`.
+  Koordinator vede validovany katalog, mapuje ID proudu na existujici izolovany
+  profil a nikdy nevystavuje soukrome identifikatory vlaken.
+- Human–Adam je v katalogu `Layer` `layer-human-adam-development`; Knihovna je
+  zkušebne pripojena jako `Project` `project-knowledge-library` se svym
+  stavajicim vlaknem, TVBCP, handoffem a workspace.
+- Neveřejna metoda `select_workstream()` preklada vybrany proud na profil a
+  deleguje na stavajici provereny prepinac. Tim zachovava ochranu aktivniho tahu,
+  nejisteho doruceni a rozpracovane prace a automaticky fast-forwarduje cisty
+  cil z commitnuteho lokalniho `main`.
+- Zkušebni prechod Human–Adam -> Knihovna -> Human–Adam prosel vcetne
+  automaticke synchronizace obou cilu. Neznamy proud a nečisty aktualni projekt
+  zustavaji fail-closed.
+- Cilena sada ma 38 zelenych testu. Plna Cockpit brana prosla 870 testy za
+  179,167 sekundy; cela brana trvala 182,0 s a zivy smoke prosel 5/5.
+- Faze 1.3 nezmenila API, UI, bezici profil, vlakno ani nasazeni.
 
 Co neni hotove:
-- Novy backend stale neni napojeny na API ani existujici checkpointove tlacitko.
+- Koordinator ani novy checkpoint backend stale nejsou napojene na API ani
+  existujici vyber a checkpointove tlacitko.
 - Stary WIP/semafor/takeover tok zustava beze zmeny aktivniho runtime.
-- Faze 1.2 je pripravena pro tento checkpoint a push; novy backend neni
-  nasazeny ani aktivovany.
-- Knihovna nema kanonicky proud pro novy checkpoint, dokud jej Mila a Adam
-  samostatne nezaregistruji v terminalu.
+- Faze 1.3 je pripravena pro tento checkpoint a push; koordinator neni nasazeny
+  ani aktivovany v UI.
 - Stary runtime nazev se zatim nesmi prejmenovat, protoze jej pouziva soucasna
   profilova konfigurace Cockpitu.
 
 Dalsi krok:
-Po tomto checkpointu a pushi domluvit presny rozsah nejmensi integracni vrstvy;
-existujici UI zatim neprepinat.
+Po tomto checkpointu a pushi pripravit fazi 1.4: napojeni existujiciho vyberu na
+koordinator bez zmeny vzhledu a s vlastnimi testy.
 
 Navrhovane dalsi kroky:
-- Pro dalsi profil nejdrive v terminalu zaregistrovat konkretni `Project`,
-  `Tool`, `Layer` nebo `Misc`; nevymyslet vazbu pri kliknuti v r-Adamovi.
-- Existujici UI neprepinat, dokud neveřejna integracni vrstva nema vlastni
-  cilene testy a presnou chybovou odpoved.
+- Pro dalsi proud nejdrive v terminalu zaregistrovat konkretni `Project`, `Tool`,
+  `Layer` nebo `Misc`; nevymyslet vazbu pri kliknuti v r-Adamovi.
+- Ve fazi 1.4 zachovat soucasne rozlozeni a nahradit pouze zdroj polozek a akci
+  vyberu; starou cestu zatim ponechat jako vratny kompatibilni most.
 - Zachovat UI a zakladni funkce po celou dobu postupne transformace.
 
 Zmenene nebo relevantni soubory:

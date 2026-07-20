@@ -41,6 +41,16 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-20: Priorita 1, transformace Human–Adam faze 1.3. Vznikl neveřejny
+  koordinator pracovnich proudu se dvema zkušebnimi vazbami: `Layer`
+  Human–Adam a `Project` Knihovna. Vyber proudu pouziva stavajici bezpecne
+  prepnuti profilu, automaticky fast-forwarduje cisty cil z lokalniho `main` a
+  zachovava samostatne vlakno, TVBCP, handoff i workspace. Roundtrip obema smery
+  prosel; neznamy proud a nečista prace zustavaji fail-closed. Cilena sada ma 38
+  testu, plna brana prosla 870 testy za 179,167 sekundy a smoke je 5/5. API, UI
+  a runtime se nezmenily. Po checkpointu faze 1.3 je dalsi krok pripravit
+  napojeni existujiciho vyberu bez zmeny vzhledu. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-20: Priorita 1, `Layer` Human–Adam / vyvojove prostredi. Faze 1.2
   napojila neaktivni direct-main backend na profilovy manager a kanonickou vazbu
   Human–Adam: ID proudu, typ `Layer`, nazev, handoff a TVBCP uz nejsou volnym

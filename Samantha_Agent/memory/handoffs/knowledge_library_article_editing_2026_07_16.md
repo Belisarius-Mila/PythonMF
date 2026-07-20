@@ -52,6 +52,17 @@ Overeni:
 - Dne 2026-07-16 terminálově znovu prošlo 6 cílených regresních testů, Python
   kompilace obou aplikačních modulů a `git diff --check`.
 
+Infrastrukturni registrace 2026-07-20:
+- Knihovna je ve fazi 1.3 transformace Human–Adam zkušebne zaregistrovana jako
+  `Project` `project-knowledge-library`.
+- Vazba pouziva stavajici oddelene vlakno Knihovny, `knihovna_cockpit.txt`, tento
+  handoff a existujici izolovany workspace; zadny soukromy identifikator vlakna
+  se do Gitu neuklada.
+- Neveřejny koordinator umi prechod Human–Adam -> Knihovna -> Human–Adam a pri
+  aktivaci automaticky fast-forwarduje cisty cil z commitnuteho lokalniho
+  `main`. API ani UI zatim nejsou prepnute.
+- Cilena sada 38 testu, plna sada 870 testu a zivy Cockpit smoke 5/5 prosly.
+
 Bezpecnost / neukladat:
 - Do Gitu ani handoffu nepatří texty soukromých článků, přílohy, metadata
   konkrétních osob ani obsah soukromého koše.

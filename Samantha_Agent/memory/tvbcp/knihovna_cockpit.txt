@@ -106,3 +106,24 @@ běžném použití pouze zkontrolovat čitelnost nového přepínače na úzké
 
 Další krok: žádná nutná vývojová akce. Pro práci na Knihovně vybrat v Human–Adam
 profil `Knihovna`, potvrdit `Přepnout` a pokračovat v jeho vlastním vlákně.
+
+### 2026-07-20 08:28 CEST – Knihovna zaregistrována jako Project v koordinátoru
+
+V neveřejné fázi 1.3 transformace Human–Adam je Knihovna zkušebně
+zaregistrována jako pracovní proud `project-knowledge-library` typu `Project`.
+Používá své stávající oddělené vlákno, tento TVBCP, handoff
+`knowledge_library_article_editing_2026_07_16.md` a izolovaný workspace. Žádný
+soukromý identifikátor vlákna ani obsah Knihovny se do Gitu neukládá.
+
+Neveřejný koordinátor mapuje pracovní proud na existující profil a pro samotný
+přechod používá dosavadní bezpečnou transakci. Zkušební roundtrip Human–Adam ->
+Knihovna -> Human–Adam prošel v testech včetně automatického fast-forwardu obou
+čistých cílů z commitnutého lokálního `main`. Neznámý proud a nečistá
+rozpracovaná práce zůstávají fail-closed.
+
+Důkaz: cílená sada 38 testů, plná Cockpit sada 870 testů a živý read-only smoke
+5/5 prošly. API, existující výběr profilu, vzhled, běžící vlákno, workspace ani
+nasazení se v této fázi nezměnily.
+
+Další krok: checkpoint a push fáze 1.3. Teprve potom připravit napojení
+existujícího výběru na koordinátor bez změny vzhledu.

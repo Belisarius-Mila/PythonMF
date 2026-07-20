@@ -128,8 +128,12 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   ID proudu, typ, handoff a TVBCP se berou vyhradne z kanonicke konfigurace
   aktivniho profilu, ne z klienta. Human–Adam je navazan na svuj Layer,
   neregistrovana Knihovna konci fail-closed. Plna sada 866 testu prosla; API,
-  UI a runtime zustavaji beze zmeny. Po checkpointu faze 1.2 je dalsi krok
-  domluvit presny rozsah nejmensi integracni vrstvy bez prepnuti UI.
+  UI a runtime zustavaji beze zmeny. Faze 1.3 nyni registruje `Layer`
+  Human–Adam a `Project` Knihovna, preklada proud na existujici profil a pri
+  vyberu pouziva proverene ochranne a synchronizacni chovani profilu. Roundtrip
+  obema smery, 38 cilenych testu, plna sada 870 testu a smoke 5/5 prosly. API a
+  UI zustavaji beze zmeny; po checkpointu faze 1.3 je dalsi krok napojeni
+  existujiciho vyberu.
 
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni

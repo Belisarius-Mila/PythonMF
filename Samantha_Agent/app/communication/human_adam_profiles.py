@@ -9,7 +9,6 @@ import re
 import subprocess
 import threading
 from contextlib import contextmanager
-from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator
@@ -33,6 +32,11 @@ from app.communication.human_adam_service import (
 from app.communication.human_adam_workspace import (
     HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS,
     HumanAdamWorkspaceManager,
+)
+from app.communication.human_adam_workstream_coordinator import (
+    CanonicalWorkstreamBinding,
+    HumanAdamWorkstreamCoordinator,
+    canonical_workstream_binding,
 )
 from app.communication.local_runtime import LocalAppServerProcessController
 from app.communication.session_hub import SessionBusyError, SessionHubError
@@ -61,8 +65,6 @@ KNIHOVNA_PROFILE_ROOT = PRIVATE_PROFILE_ROOT / "knihovna"
 KNIHOVNA_CONTEXT_ANCHOR_PATH = PRIVATE_COMMUNICATION_ROOT / "knihovna_context_anchor.json"
 KNIHOVNA_TVBCP_RELATIVE_PATH = Path("memory/tvbcp/knihovna_cockpit.txt")
 PROFILE_ID_RE = re.compile(r"[a-z][a-z0-9_-]{1,31}")
-WORKSTREAM_ID_RE = re.compile(r"[a-z][a-z0-9_-]{1,63}")
-WORKSTREAM_TYPES = frozenset({"Project", "Tool", "Layer", "Misc"})
 PROFILE_STATE_SCHEMA = 1
 DEPLOYMENT_COMPLETION_SCHEMA = 1
 DEPLOYMENT_COMPLETION_CONFIRMATION = "POTVRZUJI DOKONCENI HANDOFFU PO NASAZENI"
@@ -86,69 +88,6 @@ KNIHOVNA_DEVELOPER_INSTRUCTIONS = (
         "nejkratsi nutnou relativni cestu pri shodnych nazvech."
     )
 )
-
-
-@dataclass(frozen=True)
-class CanonicalWorkstreamBinding:
-    """Git-safe workstream identity owned by one Human–Adam profile."""
-
-    workstream_id: str
-    workstream_type: str
-    name: str
-    handoff_relative_path: str
-    tvbcp_relative_path: str
-
-
-def _canonical_memory_path(value: object, *, kind: str) -> str:
-    text = str(value or "").strip()
-    path = Path(text)
-    expected_parent = "handoffs" if kind == "handoff" else "tvbcp"
-    suffixes = {".md"} if kind == "handoff" else {".md", ".txt"}
-    if (
-        not text
-        or path.is_absolute()
-        or ".." in path.parts
-        or len(path.parts) < 3
-        or path.parts[:2] != ("memory", expected_parent)
-        or path.suffix.casefold() not in suffixes
-    ):
-        raise ValueError(f"Kanonická vazba profilu nemá platnou cestu k {kind}.")
-    return path.as_posix()
-
-
-def _canonical_workstream_binding(
-    *,
-    profile_id: str,
-    profile: dict[str, Any],
-) -> CanonicalWorkstreamBinding | None:
-    raw = profile.get("workstream")
-    if raw is None:
-        return None
-    if not isinstance(raw, dict):
-        raise ValueError("Kanonická vazba pracovního proudu profilu není platná.")
-    workstream_id = str(raw.get("id") or "").strip().casefold()
-    workstream_type = str(raw.get("type") or "").strip()
-    name = " ".join(str(raw.get("name") or "").split())
-    if not WORKSTREAM_ID_RE.fullmatch(workstream_id):
-        raise ValueError("Kanonická vazba profilu nemá platné ID pracovního proudu.")
-    if workstream_type not in WORKSTREAM_TYPES:
-        raise ValueError("Kanonická vazba profilu nemá platný typ pracovního proudu.")
-    if not name or len(name) > 160:
-        raise ValueError("Kanonická vazba profilu nemá platný název pracovního proudu.")
-    handoff_path = _canonical_memory_path(raw.get("handoff"), kind="handoff")
-    tvbcp_path = _canonical_memory_path(raw.get("tvbcp"), kind="tvbcp")
-    service = profile["service"]
-    if service.work_profile_id != profile_id:
-        raise ValueError("Profil a jeho služba nemají shodný bezpečný identifikátor.")
-    if service.tvbcp_relative_path.as_posix() != tvbcp_path:
-        raise ValueError("Kanonický TVBCP pracovního proudu neodpovídá TVBCP profilu.")
-    return CanonicalWorkstreamBinding(
-        workstream_id=workstream_id,
-        workstream_type=workstream_type,
-        name=name,
-        handoff_relative_path=handoff_path,
-        tvbcp_relative_path=tvbcp_path,
-    )
 
 
 def _now() -> str:
@@ -196,12 +135,13 @@ class HumanAdamProfileManager:
             if profile["service"].work_profile_id != profile_id:
                 raise ValueError("Profil a jeho služba nemají shodný bezpečný identifikátor.")
             normalized = dict(profile)
-            normalized["workstream_binding"] = _canonical_workstream_binding(
+            normalized["workstream_binding"] = canonical_workstream_binding(
                 profile_id=profile_id,
                 profile=profile,
             )
             normalized_profiles[profile_id] = normalized
         self.profiles = normalized_profiles
+        self.workstream_coordinator = HumanAdamWorkstreamCoordinator(self.profiles)
         self.default_profile_id = default_profile_id
         self.state_path = Path(state_path)
         self.runtime = runtime or self.profiles[default_profile_id]["service"].runtime
@@ -299,27 +239,32 @@ class HumanAdamProfileManager:
     def simple_checkpoint_context(self) -> dict[str, Any]:
         """Return the canonical checkpoint binding of the active profile."""
 
-        active_id = self.active_profile_id
-        profile = self.profiles[active_id]
-        binding = profile.get("workstream_binding")
-        if not isinstance(binding, CanonicalWorkstreamBinding):
-            return {
-                "available": False,
-                "profile_id": active_id,
-                "profile_label": str(profile.get("label") or active_id),
-                "message": (
-                    "Aktivní profil nemá v terminálu zaregistrovaný kanonický pracovní proud."
-                ),
-            }
+        return self.workstream_coordinator.context(self.active_profile_id)
+
+    def workstream_status(self) -> dict[str, Any]:
+        """Return the private coordinator catalog without thread identifiers."""
+
+        return self.workstream_coordinator.status(self.active_profile_id)
+
+    def select_workstream(
+        self,
+        *,
+        workstream_id: str,
+        confirmed: bool,
+    ) -> dict[str, Any]:
+        """Select a registered workstream through the existing safe switch path.
+
+        This method is intentionally not exposed through Cockpit API or UI in
+        phase 1.3.  The delegated profile switch keeps the current thread,
+        delivery and workspace guards and fast-forwards a clean target from
+        committed local ``main`` when needed.
+        """
+
+        target_profile_id = self.workstream_coordinator.profile_id_for(workstream_id)
+        result = self.switch(profile_id=target_profile_id, confirmed=confirmed)
         return {
-            "available": True,
-            "profile_id": active_id,
-            "profile_label": str(profile.get("label") or active_id),
-            "workstream_id": binding.workstream_id,
-            "workstream_type": binding.workstream_type,
-            "workstream_name": binding.name,
-            "handoff_relative_path": binding.handoff_relative_path,
-            "tvbcp_relative_path": binding.tvbcp_relative_path,
+            **result,
+            "workstream_selection": self.workstream_status(),
         }
 
     def simple_main_checkpoint(
@@ -1452,6 +1397,13 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
                 "label": "Knihovna",
                 "description": "Články, přílohy a práce s Knihovnou v Cockpitu",
                 "default_project_name": "Znalostni databaze / Knihovna clanku / Knowledge inbox",
+                "workstream": {
+                    "id": "project-knowledge-library",
+                    "type": "Project",
+                    "name": "Knihovna",
+                    "handoff": "memory/handoffs/knowledge_library_article_editing_2026_07_16.md",
+                    "tvbcp": "memory/tvbcp/knihovna_cockpit.txt",
+                },
                 "service": knihovna_service,
             },
         },
