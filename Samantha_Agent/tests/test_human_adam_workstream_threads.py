@@ -40,7 +40,7 @@ def clean_workspace_status() -> dict[str, Any]:
         "dirty": False,
         "local_checkpoint_ahead": False,
         "source_pending_changes": 0,
-        "workspace_relation": "same",
+        "workspace_relation": "aligned",
         "source_update_available": False,
     }
 
@@ -170,6 +170,21 @@ class WorkstreamThreadRegistryTests(unittest.TestCase):
             registry.open(workstream_id="project-lekarna", confirmed=True)
 
         self.assertEqual(self.factory_calls, ["project-mmtx"])
+
+    def test_checkpoint_context_requires_connected_idle_certain_thread(self) -> None:
+        registry = self.registry()
+        with self.assertRaisesRegex(AppServerError, "Není připojený"):
+            registry.checkpoint_workstream_id()
+
+        registry.open(workstream_id="project-mmtx", confirmed=True)
+        self.assertEqual(registry.checkpoint_workstream_id(), "project-mmtx")
+
+        current = self.hubs["project-mmtx"]
+        current._state["messages"].append(
+            {"status": "delivery_unknown", "recovery_required": True}
+        )
+        with self.assertRaisesRegex(SessionBusyError, "nejisté doručení"):
+            registry.checkpoint_workstream_id()
 
     def test_dirty_or_unsynchronized_workspace_blocks_before_private_write(self) -> None:
         dirty = clean_workspace_status()

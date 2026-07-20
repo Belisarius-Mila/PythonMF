@@ -3,7 +3,7 @@
 Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 - `ACTIVE_PROJECTS.md` - registr projektu a oblasti vcetne rezimu `active` / `paused` / `archived`, priorit, stavu, handoffu a dalsich kroku.
-- `WORKSTREAMS.md` - kanonicky registr 29 pracovnich proudu: 23 projektu, 4 tooly a 2 `Misc`. Faze 4.2 pridava neverejny lazy backend: 27 novych proudu muze pri potvrzenem prvnim otevreni zalozit nebo pozdeji obnovit vlastni soukrome vlakno nad jednim sdilenym cistym workspace; Human–Adam a Knihovna zustavaji rezervovane legacy vazby do migrace 4.5. UI, API ani zive profily se nemenily.
+- `WORKSTREAMS.md` - kanonicky registr 29 pracovnich proudu: 23 projektu, 4 tooly a 2 `Misc`. Faze 4.2 pridala lazy soukroma vlakna nad jednim sdilenym cistym workspace. Faze 4.3 priradila kazdemu proudu prave jeden handoff a TVBCP: Human–Adam a Knihovna zachovavaji existujici dokumenty, ostatni kostry se zalozi transakcne az prvnim potvrzenym checkpointem po zelene brane. UI, API ani zive profily se nemenily.
 
 ## Core
 
@@ -112,14 +112,13 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 ## Handoffs
 
 - `handoffs/human_adam_layer_workstream_start_2026_07_20.md` - [PRIPOMENOUT]
-  priorita 1: faze 4.2 ma hotovy neverejny lazy backend vsech 29 katalogovych
-  slotu. Human–Adam a Knihovna zustavaji rezervovane legacy vazby; zbyvajicich
-  27 proudu muze potvrzene zalozit nebo obnovit vlastni soukrome vlakno bez
-  dalsiho app-server procesu ci workspace. Aktivni muze byt jen jeden proud a
-  prepnuti je fail-closed pri aktivnim tahu, nejistem doruceni nebo necistem ci
-  nesynchronnim workspace. UI, API ani zive profily se nezmenily a plna brana
-  prosla 930 testy. Dalsi krok je faze 4.3 – kanonicky handoff a TVBCP kazdeho
-  proudu. Historie: krok 0 transformace Human–Adam zacal zalozenim kanonickeho
+  priorita 1: faze 4.3 ma hotovou kanonickou handoff/TVBCP vazbu vsech 29
+  proudu. Dva legacy proudy zachovavaji sve dokumenty; ostatni kostry vzniknou
+  az prvnim potvrzenym checkpointem a zapis je transakcni i pri selhani commitu.
+  Lazy checkpoint blokuje nepripojene vlakno, aktivni tah a nejiste doruceni.
+  UI, API, menu ani zive profily se nezmenily a plna brana prosla 943 testy.
+  Dalsi krok je faze 4.4 – seskupene menu a bezpecne prepnuti ciloveho proudu.
+  Historie: krok 0 transformace Human–Adam zacal zalozenim kanonickeho
   pracovniho proudu `Human–Adam / vyvojove prostredi` typu `Layer`. Stary
   projektovy zaznam zustava docasnym kompatibilnim mostem a zadny funkcni kod
   se nezmenil. Stavajici TVBCP architektury komunikace je potvrzen a propojen;

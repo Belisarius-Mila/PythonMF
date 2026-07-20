@@ -20,6 +20,7 @@ from app.communication.human_adam_service import (
     THREAD_ROTATION_CONFIRMATION_TEXT,
     HumanAdamService,
 )
+from app.communication.human_adam_workstream_memory import WorkstreamMemoryRegistry
 from app.communication.session_hub import SessionBusyError
 from app.codex_appserver import AppServerError
 from app.project_continuity import ProjectContinuityService
@@ -428,6 +429,74 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         )
         self.assertEqual(request.tvbcp_relative_path, "memory/tvbcp/knihovna_cockpit.txt")
         self.assertEqual(result["work_profile"]["id"], "knihovna")
+
+    def test_lazy_checkpoint_uses_active_workstream_canonical_memory(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, *_rest = self.make_manager(
+                Path(temp_dir)
+            )
+            manager.workstream_memory = WorkstreamMemoryRegistry()
+            manager.workstream_threads = SimpleNamespace(
+                checkpoint_workstream_id=lambda: "project-mmtx"
+            )
+            with patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint",
+                return_value={"ok": True, "checkpoint_head": "e" * 40},
+            ) as checkpoint:
+                result = manager.simple_lazy_workstream_checkpoint(
+                    commit_message="Checkpoint MMTX",
+                    summary="MMTX dokončil jeden krok",
+                    next_step="Pokračovat dalším krokem.",
+                    confirmed=True,
+                )
+
+        call = checkpoint.call_args.kwargs
+        request = call["request"]
+        self.assertIs(call["workspace"], human_workspace)
+        self.assertEqual(call["peer_workspaces"], (library_workspace,))
+        self.assertEqual(request.workstream_id, "project-mmtx")
+        self.assertEqual(
+            request.handoff_relative_path,
+            "memory/handoffs/workstreams/project-mmtx.md",
+        )
+        self.assertEqual(
+            request.tvbcp_relative_path,
+            "memory/tvbcp/workstreams/project-mmtx.md",
+        )
+        self.assertIn("Pracovni proud: project-mmtx", request.handoff_initial_content)
+        self.assertIn("# TVBCP: MMTX", request.tvbcp_initial_content)
+        self.assertEqual(result["workstream"]["name"], "MMTX")
+
+    def test_lazy_checkpoint_requires_connected_active_workstream(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_rest = self.make_manager(Path(temp_dir))
+            manager.workstream_memory = WorkstreamMemoryRegistry()
+            def no_active_workstream() -> str:
+                raise AppServerError("Není připojený žádný lazy pracovní proud.")
+
+            manager.workstream_threads = SimpleNamespace(
+                checkpoint_workstream_id=no_active_workstream
+            )
+
+            with self.assertRaisesRegex(AppServerError, "Není připojený"):
+                manager.simple_lazy_workstream_checkpoint(
+                    commit_message="Checkpoint MMTX",
+                    summary="MMTX dokončil jeden krok",
+                    next_step="Pokračovat.",
+                    confirmed=True,
+                )
+
+    def test_memory_status_is_inert_and_covers_all_catalog_streams(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, *_rest = self.make_manager(Path(temp_dir))
+            manager.workstream_memory = WorkstreamMemoryRegistry()
+
+            status = manager.lazy_workstream_memory_status()
+
+            self.assertTrue(status["available"])
+            self.assertEqual(status["workstream_count"], 29)
+            self.assertEqual(status["ready_count"], 0)
+            self.assertFalse(Path(human_workspace.project_root).exists())
 
     def test_simple_deployment_derives_main_and_workstream_and_can_schedule_restart(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

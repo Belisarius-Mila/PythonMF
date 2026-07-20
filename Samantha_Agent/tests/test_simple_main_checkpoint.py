@@ -5,8 +5,10 @@ import tempfile
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
+from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
+from app.codex_appserver import AppServerError
 from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
 from app.communication.simple_main_checkpoint import (
     SimpleMainCheckpointError,
@@ -204,6 +206,127 @@ class SimpleMainCheckpointTests(unittest.TestCase):
         self.assertEqual(source_head_after, original_head)
         self.assertEqual(handoff_after, original_handoff)
         self.assertTrue(workspace_dirty)
+
+    def test_first_checkpoint_materializes_missing_canonical_memory_pair(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source, manager = prepare_environment(root)
+            (manager.project_root / "tracked.py").write_text("VALUE = 20\n", encoding="utf-8")
+            handoff_relative = "memory/handoffs/workstreams/project-mmtx.md"
+            tvbcp_relative = "memory/tvbcp/workstreams/project-mmtx.md"
+
+            result = complete_simple_main_checkpoint(
+                workspace=manager,
+                request=checkpoint_request(
+                    workstream_id="project-mmtx",
+                    handoff_relative_path=handoff_relative,
+                    tvbcp_relative_path=tvbcp_relative,
+                    handoff_initial_content="# Handoff MMTX\n",
+                    tvbcp_initial_content="# TVBCP MMTX\n",
+                ),
+                confirmed=True,
+                gate_runner=passing_gate_runner,
+                gate_log_path=root / "gate.log",
+                now_factory=fixed_now,
+            )
+
+            handoff = (source / "Samantha_Agent" / handoff_relative).read_text(
+                encoding="utf-8"
+            )
+            tvbcp = (source / "Samantha_Agent" / tvbcp_relative).read_text(
+                encoding="utf-8"
+            )
+            committed_paths = git(source, "show", "--format=", "--name-only", "HEAD")
+
+        self.assertTrue(result["ok"])
+        self.assertIn("# Handoff MMTX", handoff)
+        self.assertIn("Automatický checkpoint 2026-07-20 07:00 CEST", handoff)
+        self.assertIn("# TVBCP MMTX", tvbcp)
+        self.assertIn("Jednoduchý backend dokončil jeden krok", tvbcp)
+        self.assertIn(handoff_relative, committed_paths)
+        self.assertIn(tvbcp_relative, committed_paths)
+
+    def test_missing_memory_without_template_is_rejected_before_gate(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _source, manager = prepare_environment(root)
+            (manager.project_root / "tracked.py").write_text("VALUE = 21\n", encoding="utf-8")
+
+            with self.assertRaisesRegex(SimpleMainCheckpointError, "nebyl nalezen"):
+                complete_simple_main_checkpoint(
+                    workspace=manager,
+                    request=checkpoint_request(
+                        handoff_relative_path="memory/handoffs/workstreams/missing.md",
+                        tvbcp_relative_path="memory/tvbcp/workstreams/missing.md",
+                    ),
+                    confirmed=True,
+                    gate_runner=passing_gate_runner,
+                    gate_log_path=root / "gate.log",
+                )
+            self.assertFalse(
+                (manager.project_root / "memory" / "handoffs" / "workstreams").exists()
+            )
+
+    def test_gate_failure_does_not_materialize_lazy_memory(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _source, manager = prepare_environment(root)
+            (manager.project_root / "tracked.py").write_text("VALUE = 22\n", encoding="utf-8")
+            handoff = manager.project_root / "memory/handoffs/workstreams/project-mmtx.md"
+            tvbcp = manager.project_root / "memory/tvbcp/workstreams/project-mmtx.md"
+
+            with self.assertRaisesRegex(SimpleMainCheckpointError, "brána"):
+                complete_simple_main_checkpoint(
+                    workspace=manager,
+                    request=checkpoint_request(
+                        handoff_relative_path=handoff.relative_to(manager.project_root).as_posix(),
+                        tvbcp_relative_path=tvbcp.relative_to(manager.project_root).as_posix(),
+                        handoff_initial_content="# Handoff MMTX\n",
+                        tvbcp_initial_content="# TVBCP MMTX\n",
+                    ),
+                    confirmed=True,
+                    gate_runner=failing_gate_runner,
+                    gate_log_path=root / "gate.log",
+                )
+            self.assertFalse(handoff.exists())
+            self.assertFalse(tvbcp.exists())
+
+    def test_checkpoint_failure_removes_new_lazy_memory_pair(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _source, manager = prepare_environment(root)
+            changed = manager.project_root / "tracked.py"
+            changed.write_text("VALUE = 23\n", encoding="utf-8")
+            handoff = manager.project_root / "memory/handoffs/workstreams/project-mmtx.md"
+            tvbcp = manager.project_root / "memory/tvbcp/workstreams/project-mmtx.md"
+
+            with patch.object(
+                manager,
+                "checkpoint",
+                side_effect=AppServerError("simulated commit failure"),
+            ):
+                with self.assertRaisesRegex(SimpleMainCheckpointError, "nepodařilo vytvořit"):
+                    complete_simple_main_checkpoint(
+                        workspace=manager,
+                        request=checkpoint_request(
+                            handoff_relative_path=(
+                                handoff.relative_to(manager.project_root).as_posix()
+                            ),
+                            tvbcp_relative_path=tvbcp.relative_to(
+                                manager.project_root
+                            ).as_posix(),
+                            handoff_initial_content="# Handoff MMTX\n",
+                            tvbcp_initial_content="# TVBCP MMTX\n",
+                        ),
+                        confirmed=True,
+                        gate_runner=passing_gate_runner,
+                        gate_log_path=root / "gate.log",
+                    )
+
+            self.assertFalse(handoff.exists())
+            self.assertFalse(tvbcp.exists())
+            self.assertTrue(changed.exists())
+            self.assertTrue(manager.status()["dirty"])
 
     def test_gate_failure_keeps_original_dirty_work_and_memory(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -41,6 +41,17 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-20: Priorita 1, univerzalni pracovni proudy faze 4.3. Vsech 29 proudu
+  ma jednu kanonickou git-safe vazbu na handoff a TVBCP. Human–Adam a Knihovna
+  zachovavaji stavajici dokumenty; ostatni pouzivaji jedine stabilni cesty a
+  jejich kostry vzniknou transakcne az prvnim potvrzenym checkpointem po zelene
+  brane. Gate failure nic nevytvori, commit failure nove kostry odstrani a
+  puvodni prace zustane viditelna. Lazy checkpoint navic vyzaduje pripojene
+  vlakno bez aktivniho tahu a nejisteho doruceni. UI, API, menu, zive profily a
+  soukroma vlakna se nezmenily. Plna brana prosla 943 testy. Dalsi krok je faze
+  4.4 – seskupene menu a bezpecne prepnuti/synchronizace/pripojeni ciloveho
+  proudu. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-20: Priorita 1, univerzalni pracovni proudy faze 4.2. Neverejny
   backend vede 29 katalogovych slotu; Human–Adam a Knihovna zustavaji
   rezervovane pro migraci faze 4.5 a zbyvajicich 27 proudu muze lazy zalozit

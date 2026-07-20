@@ -38,6 +38,7 @@ from app.communication.human_adam_workstream_coordinator import (
     HumanAdamWorkstreamCoordinator,
     canonical_workstream_binding,
 )
+from app.communication.human_adam_workstream_memory import WorkstreamMemoryRegistry
 from app.communication.human_adam_workstream_threads import WorkstreamThreadRegistry
 from app.communication.human_adam_turn_completion import (
     ParsedTurnCompletion,
@@ -142,6 +143,7 @@ class HumanAdamProfileManager:
         deployment_completion_path: Path | None = None,
         simple_main_deployment_receipt_path: Path | None = None,
         workstream_threads: WorkstreamThreadRegistry | None = None,
+        workstream_memory: WorkstreamMemoryRegistry | None = None,
     ):
         if not profiles or default_profile_id not in profiles:
             raise ValueError("Pracovní profily Human–Adam nemají platný výchozí profil.")
@@ -161,6 +163,18 @@ class HumanAdamProfileManager:
             normalized_profiles[profile_id] = normalized
         self.profiles = normalized_profiles
         self.workstream_coordinator = HumanAdamWorkstreamCoordinator(self.profiles)
+        self.workstream_memory = workstream_memory
+        if self.workstream_memory is not None:
+            for profile in self.profiles.values():
+                binding = profile.get("workstream_binding")
+                if not isinstance(binding, CanonicalWorkstreamBinding):
+                    continue
+                memory_binding = self.workstream_memory.binding(binding.workstream_id)
+                if (
+                    binding.handoff_relative_path != memory_binding.handoff_relative_path
+                    or binding.tvbcp_relative_path != memory_binding.tvbcp_relative_path
+                ):
+                    raise ValueError("Profil neodpovídá kanonické paměti pracovního proudu.")
         self.default_profile_id = default_profile_id
         self.state_path = Path(state_path)
         self.runtime = runtime or self.profiles[default_profile_id]["service"].runtime
@@ -281,6 +295,17 @@ class HumanAdamProfileManager:
             return {"ok": True, "available": False, "workstreams": []}
         return {**self.workstream_threads.status(), "available": True}
 
+    def lazy_workstream_memory_status(self) -> dict[str, Any]:
+        """Return phase-4.3 bindings without creating missing documents."""
+
+        if self.workstream_memory is None:
+            return {"ok": True, "available": False, "workstreams": []}
+        project_root = self.profiles[self.default_profile_id]["service"].workspace.project_root
+        return {
+            **self.workstream_memory.status(project_root=project_root),
+            "available": True,
+        }
+
     def open_lazy_workstream_thread(
         self,
         *,
@@ -291,10 +316,15 @@ class HumanAdamProfileManager:
 
         if self.workstream_threads is None:
             raise AppServerError("Soukromé vlákno pracovního proudu není dostupné.")
-        return self.workstream_threads.open(
-            workstream_id=workstream_id,
-            confirmed=confirmed,
-        )
+        if not self._operation_lock.acquire(blocking=False):
+            raise SessionBusyError("Pracovní profil právě provádí jinou operaci.")
+        try:
+            return self.workstream_threads.open(
+                workstream_id=workstream_id,
+                confirmed=confirmed,
+            )
+        finally:
+            self._operation_lock.release()
 
     def select_workstream(
         self,
@@ -339,6 +369,11 @@ class HumanAdamProfileManager:
                 raise AppServerError(
                     "Aktivní profil nemá v terminálu zaregistrovaný kanonický pracovní proud."
                 )
+            memory_binding = (
+                self.workstream_memory.binding(binding.workstream_id)
+                if self.workstream_memory is not None
+                else None
+            )
             peer_workspaces = tuple(
                 candidate["service"].workspace
                 for profile_id, candidate in self.profiles.items()
@@ -351,8 +386,26 @@ class HumanAdamProfileManager:
                     commit_message=commit_message,
                     summary=summary,
                     next_step=next_step,
-                    handoff_relative_path=binding.handoff_relative_path,
-                    tvbcp_relative_path=binding.tvbcp_relative_path,
+                    handoff_relative_path=(
+                        memory_binding.handoff_relative_path
+                        if memory_binding is not None
+                        else binding.handoff_relative_path
+                    ),
+                    tvbcp_relative_path=(
+                        memory_binding.tvbcp_relative_path
+                        if memory_binding is not None
+                        else binding.tvbcp_relative_path
+                    ),
+                    handoff_initial_content=(
+                        self.workstream_memory.initial_handoff(memory_binding)
+                        if self.workstream_memory is not None and memory_binding is not None
+                        else ""
+                    ),
+                    tvbcp_initial_content=(
+                        self.workstream_memory.initial_tvbcp(memory_binding)
+                        if self.workstream_memory is not None and memory_binding is not None
+                        else ""
+                    ),
                 ),
                 confirmed=confirmed,
                 peer_workspaces=peer_workspaces,
@@ -369,6 +422,60 @@ class HumanAdamProfileManager:
                 "name": binding.name,
             },
         }
+
+    def simple_lazy_workstream_checkpoint(
+        self,
+        *,
+        commit_message: str,
+        summary: str,
+        next_step: str,
+        confirmed: bool,
+    ) -> dict[str, Any]:
+        """Checkpoint the active lazy stream from server-owned memory metadata."""
+
+        if self.workstream_threads is None or self.workstream_memory is None:
+            raise AppServerError("Lazy pracovní proud nemá kanonický checkpointový backend.")
+        if not self._operation_lock.acquire(blocking=False):
+            raise SessionBusyError("Pracovní profil právě provádí jinou operaci.")
+        try:
+            workstream_id = self.workstream_threads.checkpoint_workstream_id()
+            memory_binding = self.workstream_memory.binding(workstream_id)
+            service = self.profiles[self.default_profile_id]["service"]
+            peer_workspaces = tuple(
+                profile["service"].workspace
+                for profile in self.profiles.values()
+                if profile["service"].workspace.project_root
+                != service.workspace.project_root
+            )
+            result = complete_simple_main_checkpoint(
+                workspace=service.workspace,
+                request=SimpleMainCheckpointRequest(
+                    workstream_id=memory_binding.workstream_id,
+                    commit_message=commit_message,
+                    summary=summary,
+                    next_step=next_step,
+                    handoff_relative_path=memory_binding.handoff_relative_path,
+                    tvbcp_relative_path=memory_binding.tvbcp_relative_path,
+                    handoff_initial_content=self.workstream_memory.initial_handoff(
+                        memory_binding
+                    ),
+                    tvbcp_initial_content=self.workstream_memory.initial_tvbcp(
+                        memory_binding
+                    ),
+                ),
+                confirmed=confirmed,
+                peer_workspaces=peer_workspaces,
+            )
+            return {
+                **result,
+                "workstream": {
+                    "id": memory_binding.workstream_id,
+                    "type": memory_binding.workstream_type,
+                    "name": memory_binding.name,
+                },
+            }
+        finally:
+            self._operation_lock.release()
 
     def _assert_all_profile_sessions_idle(self) -> None:
         """Block deployment while any registered workstream has an active or uncertain turn."""
@@ -733,6 +840,11 @@ class HumanAdamProfileManager:
             raise AppServerError(
                 "Aktivní profil nemá v terminálu zaregistrovaný kanonický pracovní proud."
             )
+        memory_binding = (
+            self.workstream_memory.binding(binding.workstream_id)
+            if self.workstream_memory is not None
+            else None
+        )
         peers = tuple(
             candidate["service"].workspace
             for profile_id, candidate in self.profiles.items()
@@ -745,8 +857,26 @@ class HumanAdamProfileManager:
                 commit_message=metadata.commit_message,
                 summary=metadata.summary,
                 next_step=metadata.next_step,
-                handoff_relative_path=binding.handoff_relative_path,
-                tvbcp_relative_path=binding.tvbcp_relative_path,
+                handoff_relative_path=(
+                    memory_binding.handoff_relative_path
+                    if memory_binding is not None
+                    else binding.handoff_relative_path
+                ),
+                tvbcp_relative_path=(
+                    memory_binding.tvbcp_relative_path
+                    if memory_binding is not None
+                    else binding.tvbcp_relative_path
+                ),
+                handoff_initial_content=(
+                    self.workstream_memory.initial_handoff(memory_binding)
+                    if self.workstream_memory is not None and memory_binding is not None
+                    else ""
+                ),
+                tvbcp_initial_content=(
+                    self.workstream_memory.initial_tvbcp(memory_binding)
+                    if self.workstream_memory is not None and memory_binding is not None
+                    else ""
+                ),
             ),
             confirmed=True,
             peer_workspaces=peers,
@@ -1876,6 +2006,7 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         tvbcp_relative_path=KNIHOVNA_TVBCP_RELATIVE_PATH,
         tvbcp_title="Knihovna v Cockpitu",
     )
+    workstream_memory = WorkstreamMemoryRegistry()
     workstream_threads = WorkstreamThreadRegistry(
         state_root=PRIVATE_WORKSTREAM_THREAD_ROOT,
         hub_factory=lambda record, state_path: human_service.detached_session_hub(
@@ -1886,7 +2017,12 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
                 + record.name
                 + " ("
                 + record.workstream_id
-                + "). Projektovy handoff a TVBCP budou pripojeny v navazujici fazi 4.3."
+                + "). Kanonicky handoff: "
+                + workstream_memory.binding(record.workstream_id).handoff_relative_path
+                + ". Kanonicky TVBCP: "
+                + workstream_memory.binding(record.workstream_id).tvbcp_relative_path
+                + ". Tyto dokumenty primo nemen bez Milova vyslovneho pokynu; bezny "
+                + "potvrzeny checkpoint je aktualizuje transakcne."
             ),
         ),
         workspace_status=human_service.workspace.status,
@@ -1927,6 +2063,7 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         default_profile_id="human_adam",
         runtime=runtime,
         workstream_threads=workstream_threads,
+        workstream_memory=workstream_memory,
     )
 
 

@@ -55,6 +55,30 @@ class WorkstreamThreadRegistry:
         # IDs were validated by the public catalog and cannot traverse paths.
         return self.state_root / workstream_id / "session.json"
 
+    @property
+    def active_workstream_id(self) -> str:
+        with self._state_lock:
+            return self._active_workstream_id
+
+    def checkpoint_workstream_id(self) -> str:
+        """Return the active ID only when its thread is safe to checkpoint."""
+
+        with self._state_lock:
+            workstream_id = self._active_workstream_id
+            hub = self._hubs.get(workstream_id) if workstream_id else None
+        if hub is None:
+            raise AppServerError("Není připojený žádný lazy pracovní proud.")
+        snapshot = hub.snapshot()
+        if not snapshot.get("connected"):
+            raise AppServerError("Aktivní lazy pracovní proud není připojený.")
+        if snapshot.get("turn_busy") or snapshot.get("active_turn"):
+            raise SessionBusyError("Checkpoint nelze spustit během aktivního tahu Adama.")
+        if self._has_uncertain_delivery(snapshot):
+            raise SessionBusyError(
+                "Checkpoint nelze spustit, dokud není vyřešené nejisté doručení."
+            )
+        return workstream_id
+
     def _record(self, workstream_id: str) -> CanonicalWorkstream:
         clean_id = str(workstream_id or "").strip()
         record = self._by_id.get(clean_id)
@@ -87,7 +111,7 @@ class WorkstreamThreadRegistry:
             raise AppServerError("Pracovní proud nelze otevřít: sdílený workspace není čistý.")
         if int(status.get("source_pending_changes") or 0) > 0:
             raise AppServerError("Pracovní proud nelze otevřít: main obsahuje pracovní změny.")
-        if status.get("workspace_relation") != "same" or status.get("source_update_available"):
+        if status.get("workspace_relation") != "aligned" or status.get("source_update_available"):
             raise AppServerError("Pracovní proud nelze otevřít: workspace není synchronní s main.")
 
     def _hub(self, record: CanonicalWorkstream) -> CanonicalSessionHub:

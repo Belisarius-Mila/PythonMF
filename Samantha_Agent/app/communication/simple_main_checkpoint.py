@@ -55,6 +55,8 @@ class SimpleMainCheckpointRequest:
     next_step: str
     handoff_relative_path: str
     tvbcp_relative_path: str
+    handoff_initial_content: str = ""
+    tvbcp_initial_content: str = ""
 
 
 def _local_now() -> datetime:
@@ -85,10 +87,37 @@ def _safe_request(request: SimpleMainCheckpointRequest) -> SimpleMainCheckpointR
         next_step=_safe_line(request.next_step, label="další krok", limit=500),
         handoff_relative_path=str(request.handoff_relative_path or "").strip(),
         tvbcp_relative_path=str(request.tvbcp_relative_path or "").strip(),
+        handoff_initial_content=_safe_initial_memory(
+            request.handoff_initial_content,
+            kind="handoff",
+        ),
+        tvbcp_initial_content=_safe_initial_memory(
+            request.tvbcp_initial_content,
+            kind="TVBCP",
+        ),
     )
 
 
-def _memory_path(project_root: Path, relative_text: str, *, kind: str) -> Path:
+def _safe_initial_memory(value: object, *, kind: str) -> str:
+    content = str(value or "").strip()
+    if not content:
+        return ""
+    if len(content) > 20_000:
+        raise SimpleMainCheckpointError(f"Počáteční {kind} překročil bezpečný limit.")
+    if _SENSITIVE_TEXT_RE.search(content):
+        raise SimpleMainCheckpointError(
+            "Počáteční checkpointová paměť nesmí obsahovat heslo, token ani API klíč."
+        )
+    return content + "\n"
+
+
+def _memory_path(
+    project_root: Path,
+    relative_text: str,
+    *,
+    kind: str,
+    allow_missing: bool = False,
+) -> Path:
     relative = Path(relative_text)
     expected_parent = "handoffs" if kind == "handoff" else "tvbcp"
     allowed_suffixes = {".md"} if kind == "handoff" else {".md", ".txt"}
@@ -105,7 +134,18 @@ def _memory_path(project_root: Path, relative_text: str, *, kind: str) -> Path:
     root = project_root.resolve()
     unresolved = root / relative
     path = unresolved.resolve()
-    if root not in path.parents or not path.is_file() or unresolved.is_symlink():
+    if root not in path.parents or unresolved.is_symlink():
+        raise SimpleMainCheckpointError(f"Kanonický {kind} checkpointu nebyl nalezen.")
+    relative_parts = path.relative_to(root).parts
+    current = root
+    for part in relative_parts[:-1]:
+        current = current / part
+        if current.exists() and current.is_symlink():
+            raise SimpleMainCheckpointError(f"Kanonický {kind} checkpointu nebyl nalezen.")
+    if path.exists():
+        if not path.is_file():
+            raise SimpleMainCheckpointError(f"Kanonický {kind} checkpointu nebyl nalezen.")
+    elif not allow_missing:
         raise SimpleMainCheckpointError(f"Kanonický {kind} checkpointu nebyl nalezen.")
     return path
 
@@ -177,12 +217,16 @@ def _write_memory_pair(
     handoff_content: str,
     tvbcp_content: str,
     original_handoff: str,
+    handoff_existed: bool,
 ) -> None:
     atomic_replace_text_under_external_lock(handoff_path, handoff_content)
     try:
         atomic_replace_text_under_external_lock(tvbcp_path, tvbcp_content)
     except OSError as exc:
-        atomic_replace_text_under_external_lock(handoff_path, original_handoff)
+        if handoff_existed:
+            atomic_replace_text_under_external_lock(handoff_path, original_handoff)
+        elif handoff_path.read_text(encoding="utf-8") == handoff_content:
+            handoff_path.unlink()
         raise SimpleMainCheckpointError("TVBCP checkpointu se nepodařilo zapsat.") from exc
 
 
@@ -194,12 +238,20 @@ def _restore_memory_pair(
     original_tvbcp: str,
     written_handoff: str,
     written_tvbcp: str,
+    handoff_existed: bool = True,
+    tvbcp_existed: bool = True,
 ) -> None:
     try:
         if handoff_path.read_text(encoding="utf-8") == written_handoff:
-            atomic_replace_text_under_external_lock(handoff_path, original_handoff)
+            if handoff_existed:
+                atomic_replace_text_under_external_lock(handoff_path, original_handoff)
+            else:
+                handoff_path.unlink()
         if tvbcp_path.read_text(encoding="utf-8") == written_tvbcp:
-            atomic_replace_text_under_external_lock(tvbcp_path, original_tvbcp)
+            if tvbcp_existed:
+                atomic_replace_text_under_external_lock(tvbcp_path, original_tvbcp)
+            else:
+                tvbcp_path.unlink()
     except OSError:
         # Never overwrite an unexpected concurrent edit while handling another
         # failure.  The remaining dirty files are visible to the user.
@@ -302,11 +354,13 @@ def complete_simple_main_checkpoint(
             workspace.project_root,
             safe_request.handoff_relative_path,
             kind="handoff",
+            allow_missing=bool(safe_request.handoff_initial_content),
         )
         tvbcp_path = _memory_path(
             workspace.project_root,
             safe_request.tvbcp_relative_path,
             kind="tvbcp",
+            allow_missing=bool(safe_request.tvbcp_initial_content),
         )
         if handoff_path == tvbcp_path:
             raise SimpleMainCheckpointError("Handoff a TVBCP musí být dva různé soubory.")
@@ -323,8 +377,18 @@ def complete_simple_main_checkpoint(
             raise SimpleMainCheckpointError(str(exc)) from exc
         progress("gate", "passed")
 
-        original_handoff = _read_memory_file(handoff_path)
-        original_tvbcp = _read_memory_file(tvbcp_path)
+        handoff_existed = handoff_path.is_file()
+        tvbcp_existed = tvbcp_path.is_file()
+        original_handoff = (
+            _read_memory_file(handoff_path)
+            if handoff_existed
+            else safe_request.handoff_initial_content
+        )
+        original_tvbcp = (
+            _read_memory_file(tvbcp_path)
+            if tvbcp_existed
+            else safe_request.tvbcp_initial_content
+        )
         timestamp = _format_timestamp(now_factory())
         handoff_block, tvbcp_block = _memory_blocks(
             request=safe_request,
@@ -341,6 +405,7 @@ def complete_simple_main_checkpoint(
             handoff_content=written_handoff,
             tvbcp_content=written_tvbcp,
             original_handoff=original_handoff,
+            handoff_existed=handoff_existed,
         )
         progress("memory", "passed")
 
@@ -358,6 +423,8 @@ def complete_simple_main_checkpoint(
                 original_tvbcp=original_tvbcp,
                 written_handoff=written_handoff,
                 written_tvbcp=written_tvbcp,
+                handoff_existed=handoff_existed,
+                tvbcp_existed=tvbcp_existed,
             )
             progress("commit", "failed")
             raise SimpleMainCheckpointError("Checkpoint commit se nepodařilo vytvořit.") from exc
@@ -369,6 +436,8 @@ def complete_simple_main_checkpoint(
                 original_tvbcp=original_tvbcp,
                 written_handoff=written_handoff,
                 written_tvbcp=written_tvbcp,
+                handoff_existed=handoff_existed,
+                tvbcp_existed=tvbcp_existed,
             )
             progress("commit", "failed")
             raise SimpleMainCheckpointError("Checkpoint commit nevznikl.")

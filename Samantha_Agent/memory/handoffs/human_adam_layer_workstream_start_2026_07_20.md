@@ -606,3 +606,48 @@ Další krok: fáze 4.3 – odvodit pro každý katalogový proud jedinou git-sa
 kanonickou vazbu na handoff a TVBCP, bezpečně založit chybějící kostry a napojit
 je na checkpointový backend. UI, menu a migrace legacy vláken zůstávají mimo
 rozsah až do fází 4.4 a 4.5.
+
+### 2026-07-20 20:32 CEST – Checkpoint fáze 4.3: kanonický handoff a TVBCP
+
+Fáze 4.3 je implementačně hotová jako neveřejný backend. Nový
+`WorkstreamMemoryRegistry` odvozuje pro všech 29 validovaných proudů právě jednu
+git-safe dvojici handoff + TVBCP a odmítá neznámé proudy, nebezpečné cesty i
+sdílení stejného dokumentu dvěma proudy.
+
+Human–Adam a Knihovna zachovávají svoje dnešní potvrzené dokumenty. Zbývající
+proudy mají stabilní cesty pod `memory/handoffs/workstreams/` a
+`memory/tvbcp/workstreams/`. Katalog ani start Cockpitu je nevytváří. První
+skutečný potvrzený checkpoint po zelené bráně založí obě git-safe kostry,
+přidá časovaný handoff/TVBCP záznam a zahrne vše do stejného direct-main
+commitu.
+
+Zápis je transakční: selhání brány nevytvoří žádný dokument; selhání commitu
+odstraní obě právě založené kostry a zachová původní pracovní změny. Chybějící
+dokument bez serverem dodané kanonické kostry je odmítnut. Lazy checkpoint bere
+ID a cesty jen ze serverových registrů a vyžaduje připojené vlákno bez aktivního
+tahu a bez nejistého doručení.
+
+Stávající profilové checkpointy Human–Adam/Knihovna i automatické dokončení
+zapisovacího tahu používají stejný kanonický registr. Developer instrukce
+lazy vlákna dostává přesné git-safe cesty, ale přímou změnu dokumentů bez
+Mílova pokynu zakazuje; běžnou aktualizaci provádí potvrzený checkpoint.
+
+Při integraci byla opravena chyba fáze 4.2 v názvu čistého workspace vztahu:
+produkční `HumanAdamWorkspaceManager` používá `aligned`, nikoli testovací
+`same`. Bez opravy by první skutečné lazy otevření skončilo falešným blokem.
+
+Finální Cockpit Quality Gate prošla kontrolou diffu, Python, JavaScript i shell
+syntaxí a 943 testy za 261,953 sekundy; celá testovací část skončila `OK` za
+264,7 sekundy. Checkpoint 4.2 `efe5184` mezitím prošel i vzdálenou GitHub Quality
+Gate. Fáze 4.3 nepřidala API route, UI, menu, živé vlákno, nasazení ani restart
+a nevytvořila žádný nový proudový dokument mimo dva zachované legacy páry.
+
+Změněné aplikační soubory jsou `human_adam_workstream_memory.py`,
+`human_adam_workstream_threads.py`, `human_adam_profiles.py`,
+`simple_main_checkpoint.py`, tři odpovídající testovací moduly, nový test
+registru a manifest quality gate.
+
+Další krok: fáze 4.4 – napojit stávající výběr na skupiny `Projekty`, `Tooly`,
+`Vrstvy` a `Ostatní` a při potvrzeném přepnutí bezpečně synchronizovat sdílený
+workspace, připojit cílové lazy vlákno a zachovat legacy proudy do migrace 4.5.
+Tento checkpoint neautorizuje nasazení ani restart.

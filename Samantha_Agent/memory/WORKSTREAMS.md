@@ -25,6 +25,14 @@ znovu pouzije jeden sdileny cisty workspace a jeden app-server runtime. Aktivni
 muze byt jen jeden lazy proud; prepnuti je fail-closed pri aktivnim tahu,
 nejistem doruceni nebo necistem ci nesynchronnim workspace.
 
+Faze 4.3 pridala kanonickou git-safe pametovou vazbu vsech 29 proudu. Human–Adam
+a Knihovna zachovavaji sve dva drive potvrzene handoff/TVBCP pary. Ostatni
+proudy maji jedine stabilni cesty pod `memory/handoffs/workstreams/` a
+`memory/tvbcp/workstreams/`, ale soubory se nevytvareji hromadne. Prvni
+potvrzeny checkpoint konkretniho proudu po zelene brane transakcne zalozi obe
+kostry, doplni chronologicky zaznam a zahrne je do stejneho commitu. Selhani
+brany nebo commitu nenecha nepravdivy castecny pametovy par.
+
 ## Uplny katalog faze 4.1
 
 | ID | Typ | Kanonicky nazev | Rezim | Priorita | Kanonicky zdroj / slouceni |
@@ -85,8 +93,10 @@ starsi nazev jako kompatibilni alias; katalog ho uz kanonicky vede jako
 | `layer-human-adam-development` | Stavajici oddelene vlakno Human–Adam; soukromy identifikator se do Gitu neuklada. | `tvbcp/architektura_komunikace_samantha.txt` | `handoffs/human_adam_layer_workstream_start_2026_07_20.md` |
 | `project-knowledge-library` | Stavajici oddelene vlakno Knihovny; soukromy identifikator se do Gitu neuklada. | `tvbcp/knihovna_cockpit.txt` | `handoffs/knowledge_library_article_editing_2026_07_16.md` |
 
-Kanonicke handoff/TVBCP vazby zbyvajicich proudu nejsou soucasti faze 4.2.
-Vzniknou v navazujici fazi 4.3 pred napojenim menu a pred migraci legacy profilu.
+Kanonicke handoff/TVBCP vazby vsech proudu vlastni
+`human_adam_workstream_memory.py`. Status vystavuje pouze pripravenost dokumentu,
+nikoli soukrome vlakno nebo private cestu. Pri startu jsou materializovane jen
+dva zachovane legacy pary; dalsi vzniknou az prvnim skutecnym checkpointem.
 
 ## Pravidla registru
 
@@ -102,6 +112,10 @@ Vzniknou v navazujici fazi 4.3 pred napojenim menu a pred migraci legacy profilu
   workspace.
 - Soukromy lazy backend smi vystavit jen redigovany stav bez ID vlakna a bez
   private cesty.
+- Kazdy proud ma prave jeden kanonicky handoff a jeden kanonicky TVBCP; dva
+  proudy nesmeji sdilet stejnou cestu.
+- Chybejici proudove dokumenty se zakladaji pouze uvnitr potvrzeneho
+  checkpointu po zelene brane a pri selhani commitu se transakcne vrati zpet.
 - Otevreni proudu vyzaduje potvrzeni, cisty synchronni workspace, dokonceny tah
   a vyresene doruceni; archivni proud se neotevira.
 - Zalozeni nebo prekvalifikovani zaznamu samo nemeni UI, API, Git workflow,

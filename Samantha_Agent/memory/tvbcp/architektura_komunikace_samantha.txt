@@ -2058,3 +2058,29 @@ UI, API, handoff/TVBCP routing, nasazení a restart zůstaly beze změny. Cílen
 sada prošla 86 testy a plná Cockpit Quality Gate všemi syntaxemi a 930 testy za
 242,097 sekundy. Další krok je fáze 4.3: jeden kanonický handoff a TVBCP každého
 proudu a jejich bezpečné použití při checkpointu.
+
+### 2026-07-20 20:32 CEST – Fáze 4.3: kanonický handoff a TVBCP
+
+Všech 29 katalogových proudů má nyní právě jednu serverem vlastněnou git-safe
+vazbu na handoff a TVBCP. Human–Adam a Knihovna zachovávají existující páry;
+ostatní proudy používají stabilní cesty v podadresářích `workstreams`, ale
+jejich kostry se nevytvářejí při startu ani pouhým načtením katalogu.
+
+První potvrzený checkpoint po zelené bráně vytvoří chybějící dvojici, přidá
+časovaný chronologický záznam a zahrne dokumenty do stejného commitu jako
+pracovní změnu. Gate failure nic nevytvoří. Pokud selže commit po paměťovém
+zápisu, obě nově vytvořené kostry se odstraní a původní práce zůstane viditelná.
+Neznámý proud, nekanonická cesta, sdílený dokument nebo chybějící kostra bez
+serverové šablony jsou fail-closed.
+
+Lazy checkpoint přijímá identitu a cesty jen z interních registrů a smí běžet
+jen nad připojeným vláknem bez aktivního tahu a nejistého doručení. Stávající
+Human–Adam/Knihovna checkpoint a automatické dokončení používají tentýž registr.
+Opravena byla také produkční hodnota čistého workspace vztahu `aligned`, která
+byla ve fázi 4.2 chybně zaměněná za testovací `same`.
+
+Fáze nepřidává API, UI, menu, živé vlákno ani soukromý identifikátor a
+nematerializuje 27 nových párů před prvním použitím. Finální Cockpit Quality
+Gate prošla všemi syntaxemi a 943 testy za 261,953 sekundy; checkpoint 4.2
+`efe5184` má potvrzenou zelenou vzdálenou GitHub bránu. Další krok je fáze 4.4:
+seskupené menu a bezpečná synchronizace/připojení cílového proudu.
