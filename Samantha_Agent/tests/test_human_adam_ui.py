@@ -132,9 +132,32 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertLess(refresh, restore)
         self.assertIn("await waitForCockpitAndReload(Number(payload.restart.pid || previousPid));", HUMAN_ADAM_HTML)
         verification = HUMAN_ADAM_HTML.index('api("/api/human-adam/deploy-verification"')
+        stored = HUMAN_ADAM_HTML.index("storeVerifiedDeploymentResult(verification)", verification)
         reload_page = HUMAN_ADAM_HTML.index("window.location.reload();", verification)
-        self.assertLess(verification, reload_page)
+        self.assertLess(verification, stored)
+        self.assertLess(stored, reload_page)
         self.assertIn('verification.state !== "deployed"', HUMAN_ADAM_HTML)
+
+    def test_verified_deployment_survives_reload_and_reopens_work_panel_once(self) -> None:
+        store_start = HUMAN_ADAM_HTML.index("function storeVerifiedDeploymentResult(payload)")
+        restore_end = HUMAN_ADAM_HTML.index("async function deployCheckpoint()", store_start)
+        source = HUMAN_ADAM_HTML[store_start:restore_end]
+        restore_start = source.index("async function restoreVerifiedDeploymentResult()")
+        restore_source = source[restore_start:]
+
+        self.assertIn("window.sessionStorage.setItem", source)
+        self.assertIn("window.sessionStorage.getItem", source)
+        self.assertIn("window.sessionStorage.removeItem", source)
+        self.assertNotIn("localStorage", source)
+        self.assertIn("verifiedDeploymentMaxAgeMs", source)
+        self.assertIn("workPanel.hidden = false;", restore_source)
+        loaded = restore_source.index("await loadWork();")
+        confirmed = restore_source.index("deployMeta.textContent = verifiedDeploymentSummary(record);")
+        self.assertLess(loaded, confirmed)
+        self.assertIn("restoreVerifiedDeploymentResult();", HUMAN_ADAM_HTML)
+        self.assertIn("main ${record.main_short}", HUMAN_ADAM_HTML)
+        self.assertIn("${record.test_count} testů", HUMAN_ADAM_HTML)
+        self.assertIn("smoke ${record.smoke_count}/5", HUMAN_ADAM_HTML)
 
     def test_thread_rotation_ui_requires_audit_exact_phrase_and_preserves_old_thread(self) -> None:
         audit_start = HUMAN_ADAM_HTML.index("async function auditThreadRotation()")

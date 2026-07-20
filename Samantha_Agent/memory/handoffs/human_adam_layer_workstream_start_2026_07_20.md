@@ -352,3 +352,35 @@ handoff a TVBCP. Fáze zatím není commitnutá, pushnutá ani nasazená.
 Další krok: checkpoint + commit + push fáze 3.1. Potom jednorázově nasadit nový
 kód terminálovým řízeným restartem a smoke testem; teprve z nového Cockpitu lze
 provést první plný živý roundtrip nové samoobslužné cesty.
+
+### Fáze 3.1a – zachování potvrzení nasazení po reloadu
+
+Dne 2026-07-20 14:18 CEST byl vyhodnocen první živý roundtrip fáze 3.1. Backend
+uspěl úplně: účtenka `deployed`, commit `fca389d`, nový PID `27273`, správný
+kódový otisk, 902 testů a smoke `5/5`; oba profily byly čisté a synchronní.
+Frontend však po ověření okamžitě obnovil stránku, zavřel panel `Práce` a ukázal
+poslední starší konverzační zprávu. Její čas `11:01:48` patřil starému tahu, ne
+nasazení. Šlo o UX chybu, nikoli o selhání deploy cesty.
+
+Oprava ukládá po úplné serverové verifikaci do `sessionStorage` pouze jednorázový
+krátký záznam: zkrácený commit, počet testů, smoke `5/5`, čas dokončení a lokální
+čas uložení. Neukládá text konverzace, profil, projekt, handoff, cestu, PID ani
+jiná soukromá data. Záznam má schéma, přísnou validaci, maximální stáří 15 minut
+a při prvním načtení se vždy odstraní.
+
+Po reloadu frontend záznam jednorázově převezme, znovu otevře panel `Práce`,
+načte jeho aktuální stav a teprve potom zobrazí jasnou hlášku ve tvaru
+`Nasazeno a ověřeno · main … · … testů · smoke 5/5 · dokončeno …`. Když
+`sessionStorage` není dostupný, reload se neprovede a stejná potvrzovací hláška
+zůstane viditelná přímo v již otevřeném panelu.
+
+Serverová verifikace nově vrací již ověřený počet testů, dobu brány a čas
+dokončení z účtenky; klient si tyto hodnoty nevymýšlí. Cílená sada prošla 323
+testy. Plná Cockpit brána prošla Python, JavaScript i shell syntaxí a 903 testy
+za 227,723 sekundy; celá brána skončila `OK`.
+
+Změněné soubory jsou `simple_main_deploy.py`, `human_adam_ui.py`, jejich dva
+testovací moduly, tento handoff a TVBCP. Fáze zatím není commitnutá, pushnutá ani
+nasazená. Další krok: checkpoint + commit + push fáze 3.1a. Potom synchronizovat
+aktivní profil přes `Připojit` a novou samoobslužnou cestou nasadit právě tuto
+opravu; úspěšný test musí po restartu znovu otevřít `Práci` a zachovat potvrzení.

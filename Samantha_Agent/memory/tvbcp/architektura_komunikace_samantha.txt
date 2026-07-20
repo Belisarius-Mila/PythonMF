@@ -1876,3 +1876,28 @@ brána prošla 902 testy za 298,217 sekundy včetně obou JavaScript syntaxí.
 Další krok: checkpoint, commit a push fáze 3.1. Potom jednorázové terminálové
 nasazení, řízený restart a smoke test; první plný živý samoobslužný roundtrip lze
 spustit až z nově nasazeného Cockpitu.
+
+### 2026-07-20 14:18 CEST – Fáze 3.1a: potvrzení přežije reload
+
+První živý roundtrip nové deploy cesty byl backendově úplný: `fca389d`, nový PID
+`27273`, správný otisk, 902 testů, smoke `5/5`, stav `deployed` a oba profily
+synchronní. UX však po automatickém reloadu zavřelo panel `Práce` a odkrylo
+starou konverzační zprávu s historickým časem. To bylo matoucí, ale nešlo o
+selhání nasazení.
+
+Po úplné verifikaci se nyní do `sessionStorage` uloží jednorázově pouze zkrácený
+commit, počet testů, smoke, čas dokončení a čas uložení. Záznam má schéma,
+validaci, maximální stáří 15 minut, neobsahuje konverzaci ani soukromý projektový
+kontext a při prvním načtení se odstraní.
+
+Nová stránka po reloadu automaticky znovu otevře `Práci`, obnoví stav a zobrazí
+trvalé potvrzení s commitem, počtem testů, smoke `5/5` a lokálně formátovaným
+časem dokončení. Pokud `sessionStorage` selže, reload se přeskočí a potvrzení
+zůstane na aktuální stránce. Server vrací testy a čas výhradně z ověřené účtenky.
+
+Cílená sada prošla 323 testy a plná Cockpit brána prošla 903 testy za 227,723
+sekundy včetně Human–Adam JavaScript syntaxe.
+
+Další krok: checkpoint, commit a push fáze 3.1a. Potom synchronizovat aktivní
+profil přes `Připojit` a touto samoobslužnou cestou nasadit opravu; živý důkaz je
+znovu otevřený panel `Práce` se zachovanou potvrzovací hláškou.

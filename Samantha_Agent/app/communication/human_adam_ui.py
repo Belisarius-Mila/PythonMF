@@ -582,6 +582,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let usingWorkstreamCatalog = false;
   let deliveryUncertain = false;
   let deploymentAudit = null;
+  const verifiedDeploymentStorageKey = "human-adam:verified-deployment:v1";
+  const verifiedDeploymentMaxAgeMs = 15 * 60 * 1000;
   let developmentSemaphore = null;
   let projectContinuity = null;
   let completionMediaUrl = "";
@@ -2164,10 +2166,8 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
                 deployMeta.textContent = `Cockpit se vrátil, ale ověření nasazení selhalo: ${verification.message || "chybí úplný důkaz."}`;
                 return;
               }
-              const smoke = verification.smoke && verification.smoke.check_count
-                ? `${verification.smoke.check_count}/5`
-                : "5/5";
-              deployMeta.textContent = `Nasazeno a ověřeno · smoke ${smoke}.`;
+              deployMeta.textContent = verifiedDeploymentSummary(verification);
+              if (!storeVerifiedDeploymentResult(verification)) return;
             } catch (error) {
               deployMeta.textContent = `Cockpit se vrátil, ale ověření nasazení nelze dokončit: ${error.message}`;
               return;
@@ -2183,6 +2183,73 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       await new Promise((resolve) => window.setTimeout(resolve, 1000));
     }
     deployMeta.textContent = "Checkpoint je nasazený, ale Cockpit se nevrátil v limitu. Použij terminálový fallback.";
+  }
+
+  function verifiedDeploymentRecord(payload) {
+    const mainShort = String(payload && payload.main_short || "").trim().toLowerCase();
+    const testCount = Number(payload && payload.gate ? payload.gate.test_count : 0);
+    const smokeCount = Number(payload && payload.smoke ? payload.smoke.check_count : 0);
+    const deployedAt = String(payload && payload.deployed_at || "").trim();
+    const parsedTime = new Date(deployedAt);
+    if (!/^[0-9a-f]{7,12}$/.test(mainShort)) return null;
+    if (!Number.isInteger(testCount) || testCount <= 0) return null;
+    if (smokeCount !== 5 || Number.isNaN(parsedTime.getTime())) return null;
+    return {
+      schema_version:1,
+      main_short:mainShort,
+      test_count:testCount,
+      smoke_count:smokeCount,
+      deployed_at:parsedTime.toISOString(),
+      stored_at:Date.now(),
+    };
+  }
+
+  function verifiedDeploymentSummary(payload) {
+    const record = verifiedDeploymentRecord(payload);
+    if (!record) return "Nasazeno a ověřeno · úplný serverový důkaz je uložený.";
+    return `Nasazeno a ověřeno · main ${record.main_short} · ${record.test_count} testů · smoke ${record.smoke_count}/5 · dokončeno ${formatTime(record.deployed_at)}.`;
+  }
+
+  function storeVerifiedDeploymentResult(payload) {
+    const record = verifiedDeploymentRecord(payload);
+    if (!record) return false;
+    try {
+      window.sessionStorage.setItem(verifiedDeploymentStorageKey, JSON.stringify(record));
+      return true;
+    } catch (_error) {
+      return false;
+    }
+  }
+
+  function takeVerifiedDeploymentResult() {
+    let raw = "";
+    try {
+      raw = window.sessionStorage.getItem(verifiedDeploymentStorageKey) || "";
+      window.sessionStorage.removeItem(verifiedDeploymentStorageKey);
+    } catch (_error) {
+      return null;
+    }
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw);
+      const record = verifiedDeploymentRecord(parsed);
+      const storedAt = Number(parsed && parsed.stored_at || 0);
+      if (!record || !Number.isFinite(storedAt)) return null;
+      if (Date.now() - storedAt < 0 || Date.now() - storedAt > verifiedDeploymentMaxAgeMs) return null;
+      return record;
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  async function restoreVerifiedDeploymentResult() {
+    const record = takeVerifiedDeploymentResult();
+    if (!record) return;
+    contextAnchorPanel.hidden = true;
+    tvbcpPanel.hidden = true;
+    workPanel.hidden = false;
+    await loadWork();
+    deployMeta.textContent = verifiedDeploymentSummary(record);
   }
 
   async function deployCheckpoint() {
@@ -2353,6 +2420,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   clearMessageInput();
   window.addEventListener("pageshow", clearMessageInput);
   loadStatus();
+  restoreVerifiedDeploymentResult();
 </script>
 </body>
 </html>

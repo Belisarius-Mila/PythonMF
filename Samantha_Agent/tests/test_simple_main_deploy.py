@@ -294,6 +294,8 @@ class SimpleMainDeploymentTests(unittest.TestCase):
 
         self.assertTrue(result["ok"])
         self.assertEqual(result["state"], DEPLOYED)
+        self.assertEqual(result["gate"]["test_count"], 23)
+        self.assertEqual(result["deployed_at"], "2026-07-20T09:35:00+00:00")
         self.assertEqual(result["smoke"]["check_count"], 5)
         self.assertTrue(result["new_process_confirmed"])
         self.assertFalse(result["branches_created"])

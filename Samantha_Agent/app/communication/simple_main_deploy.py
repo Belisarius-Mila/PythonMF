@@ -468,6 +468,12 @@ def verify_simple_main_deployment(
             "main_head": receipt["main_head"],
             "main_short": str(receipt["main_head"])[:12],
             "code_stamp": clean_stamp,
+            "deployed_at": deployed_at,
+            "gate": {
+                "passed": True,
+                "test_count": int(receipt["test_count"]),
+                "duration_seconds": float(receipt["gate_duration_seconds"]),
+            },
             "new_process_confirmed": True,
             "smoke": {"passed": True, "check_count": len(smoke)},
             "workspaces": rows,
