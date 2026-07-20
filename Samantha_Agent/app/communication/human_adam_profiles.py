@@ -38,6 +38,12 @@ from app.communication.human_adam_workstream_coordinator import (
     HumanAdamWorkstreamCoordinator,
     canonical_workstream_binding,
 )
+from app.communication.human_adam_turn_completion import (
+    ParsedTurnCompletion,
+    TurnCompletionMetadata,
+    automatic_completion_instruction,
+    parse_turn_completion,
+)
 from app.communication.local_runtime import LocalAppServerProcessController
 from app.communication.session_hub import SessionBusyError, SessionHubError
 from app.communication.simple_main_checkpoint import (
@@ -431,10 +437,238 @@ class HumanAdamProfileManager:
                     "[/DEVELOPMENT_CONTROL]",
                 )
             )
-            return service.send(
+            completion_instruction = automatic_completion_instruction(writable=writable)
+            if completion_instruction:
+                development_control_block = (
+                    development_control_block + "\n\n" + completion_instruction
+                )
+            result = service.send(
                 **kwargs,
                 development_control_block=development_control_block,
             )
+            return self._complete_successful_turn(
+                service=service,
+                active_id=active_id,
+                writable=writable,
+                result=result,
+            )
+
+    @staticmethod
+    def _completion_answer(visible_answer: str, note: str) -> str:
+        clean_answer = str(visible_answer or "").strip()
+        clean_note = str(note or "").strip()
+        if clean_answer and clean_note:
+            return f"{clean_answer}\n\n—\n{clean_note}"
+        return clean_answer or clean_note
+
+    @staticmethod
+    def _store_completed_answer(
+        *,
+        service: HumanAdamService,
+        entry: dict[str, Any],
+        answer: str,
+    ) -> bool:
+        client_message_id = str(entry.get("client_message_id") or "")
+        entry["answer"] = answer
+        if client_message_id:
+            try:
+                service.hub.replace_completed_answer(
+                    client_message_id=client_message_id,
+                    answer=answer,
+                )
+                return True
+            except (SessionHubError, OSError, ValueError):
+                return False
+        return False
+
+    def _completion_checkpoint(
+        self,
+        *,
+        service: HumanAdamService,
+        active_id: str,
+        metadata: TurnCompletionMetadata,
+    ) -> dict[str, Any]:
+        profile = self.profiles[active_id]
+        binding = profile.get("workstream_binding")
+        if not isinstance(binding, CanonicalWorkstreamBinding):
+            raise AppServerError(
+                "Aktivní profil nemá v terminálu zaregistrovaný kanonický pracovní proud."
+            )
+        peers = tuple(
+            candidate["service"].workspace
+            for profile_id, candidate in self.profiles.items()
+            if profile_id != active_id
+        )
+        return complete_simple_main_checkpoint(
+            workspace=service.workspace,
+            request=SimpleMainCheckpointRequest(
+                workstream_id=binding.workstream_id,
+                commit_message=metadata.commit_message,
+                summary=metadata.summary,
+                next_step=metadata.next_step,
+                handoff_relative_path=binding.handoff_relative_path,
+                tvbcp_relative_path=binding.tvbcp_relative_path,
+            ),
+            confirmed=True,
+            peer_workspaces=peers,
+        )
+
+    def _complete_successful_turn(
+        self,
+        *,
+        service: HumanAdamService,
+        active_id: str,
+        writable: bool,
+        result: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Finish a delivered writable turn, or leave its work visibly recoverable."""
+
+        if result.get("duplicate_prevented") is True:
+            entry = result.get("entry")
+            if isinstance(entry, dict):
+                parsed = parse_turn_completion(entry.get("answer"))
+                if parsed.state != "absent":
+                    answer = self._completion_answer(
+                        parsed.visible_answer,
+                        "Opakovaná zpráva byla rozpoznána; automatické dokončení se znovu nespustilo.",
+                    )
+                    self._store_completed_answer(service=service, entry=entry, answer=answer)
+            return {
+                **result,
+                "automatic_completion": {"state": "duplicate_prevented", "attempted": False},
+            }
+        entry = result.get("entry")
+        if not isinstance(entry, dict):
+            return {
+                **result,
+                "automatic_completion": {"state": "unavailable", "attempted": False},
+            }
+        parsed: ParsedTurnCompletion = parse_turn_completion(entry.get("answer"))
+        workspace = service.workspace.status()
+        dirty = bool(workspace.get("dirty"))
+        if not dirty and parsed.state == "absent":
+            return {
+                **result,
+                "automatic_completion": {"state": "not_needed", "attempted": False},
+            }
+
+        if not dirty:
+            note = "Automatické dokončení se nespustilo: tah nezanechal změnu souborů."
+            answer = self._completion_answer(parsed.visible_answer, note)
+            answer_persisted = self._store_completed_answer(
+                service=service,
+                entry=entry,
+                answer=answer,
+            )
+            return {
+                **result,
+                "entry": entry,
+                "automatic_completion": {
+                    "state": "no_changes",
+                    "attempted": False,
+                    "answer_persisted": answer_persisted,
+                },
+            }
+
+        if not writable:
+            note = (
+                "Automatické dokončení bylo bezpečně zastaveno: tah neměl oprávnění "
+                "k zápisu. Změny zůstaly viditelné ve workspace."
+            )
+            answer = self._completion_answer(parsed.visible_answer, note)
+            answer_persisted = self._store_completed_answer(
+                service=service,
+                entry=entry,
+                answer=answer,
+            )
+            return {
+                **result,
+                "entry": entry,
+                "automatic_completion": {
+                    "state": "not_authorized",
+                    "attempted": False,
+                    "answer_persisted": answer_persisted,
+                },
+            }
+
+        if parsed.state != "valid" or parsed.metadata is None:
+            detail = parsed.error or "Chybí platná dokončovací účtenka."
+            note = (
+                f"Automatické dokončení bylo bezpečně zastaveno: {detail} "
+                "Změny zůstaly viditelné ve workspace."
+            )
+            answer = self._completion_answer(parsed.visible_answer, note)
+            answer_persisted = self._store_completed_answer(
+                service=service,
+                entry=entry,
+                answer=answer,
+            )
+            return {
+                **result,
+                "entry": entry,
+                "automatic_completion": {
+                    "state": "metadata_missing" if parsed.state == "absent" else "metadata_invalid",
+                    "attempted": False,
+                    "message": detail,
+                    "answer_persisted": answer_persisted,
+                },
+            }
+
+        try:
+            checkpoint = self._completion_checkpoint(
+                service=service,
+                active_id=active_id,
+                metadata=parsed.metadata,
+            )
+        except (AppServerError, SessionHubError, OSError, ValueError) as exc:
+            note = (
+                f"Automatické dokončení bylo bezpečně zastaveno: {exc} "
+                "Rozpracované změny nebo zachovaný lokální commit zůstaly viditelné."
+            )
+            answer = self._completion_answer(parsed.visible_answer, note)
+            answer_persisted = self._store_completed_answer(
+                service=service,
+                entry=entry,
+                answer=answer,
+            )
+            return {
+                **result,
+                "entry": entry,
+                "automatic_completion": {
+                    "state": "failed",
+                    "attempted": True,
+                    "message": str(exc),
+                    "answer_persisted": answer_persisted,
+                },
+            }
+
+        all_aligned = checkpoint.get("all_workspaces_aligned") is not False
+        alignment_note = (
+            "Všechny profilové workspaces jsou čisté a synchronizované."
+            if all_aligned
+            else "Checkpoint je hotový; jeden čistý profil se dorovná při příštím Připojit."
+        )
+        note = (
+            f"Automatické dokončení: testy prošly, commit "
+            f"`{str(checkpoint.get('checkpoint_short') or '')}` je na main a pushnutý. "
+            f"{alignment_note}"
+        )
+        answer = self._completion_answer(parsed.visible_answer, note)
+        answer_persisted = self._store_completed_answer(
+            service=service,
+            entry=entry,
+            answer=answer,
+        )
+        return {
+            **result,
+            "entry": entry,
+            "automatic_completion": {
+                "state": "completed" if all_aligned else "completed_sync_pending",
+                "attempted": True,
+                "checkpoint": checkpoint,
+                "answer_persisted": answer_persisted,
+            },
+        }
 
     def tvbcp(self) -> dict[str, Any]:
         return self.active_service.tvbcp()

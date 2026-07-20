@@ -137,8 +137,14 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   `workstream_id` a stary `profile_id` zustava fallbackem. Vzhled se nezmenil;
   93 cilenych a 871 plnych testu proslo. Commit `6f17852` je nasazeny na stampu
   `7a4440b979d98690`, smoke 5/5 a zivy endpointovy roundtrip obema smery prosly;
-  oba workspaces jsou ciste a zarovnane. Zbyva Milovo vizualni kliknuti pres
-  stejne menu, protoze vestaveny prohlizec nebyl v terminalove relaci dostupny.
+  oba workspaces jsou ciste a zarovnane; Mila potom potvrdil i vizualni kliknuti
+  obema smery. Faze 1.5 pridava private dokončovaci uctenku uspesneho
+  zapisovaciho tahu a automaticky direct-main cyklus testy -> handoff + TVBCP ->
+  commit -> push -> synchronizace cistych profilu. Neplatny nebo chybejici
+  doklad nic necommitne. UI ani API cesta se nezmenily. Pred checkpointem byla
+  navic opravena GitHub Actions regrese casove zony: zapis je vzdy v
+  `Europe/Prague`; 59 cilenych testu vcetne UTC runner pripadu a finalni plna
+  brana 880 testu prosly. Zmena ceka na checkpoint, push a samostatne nasazeni.
 
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni

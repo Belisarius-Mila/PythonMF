@@ -91,26 +91,63 @@ Co je hotove:
   proud, pripojenou relaci a cisty zarovnany workspace.
 - Zaverecny audit potvrzuje oba profilove workspaces `aligned`, ciste, bez
   remote, lokalniho checkpointu, WIP a aktivniho tahu. Aktivni zustal Human–Adam.
+- Mila nasledne rucne potvrdil i skutecne vizualni prepnuti Human–Adam ->
+  Knihovna -> Human–Adam; faze 1.4 je tim provozne uzavrena.
+- Faze 1.5 pridala private strukturovanou dokončovaci uctenku zapisovaciho tahu.
+  Model ji smi pridat pouze po uspesne zmene souboru a zelenych relevantnich
+  testech. Uctenka obsahuje jen nazev commitu, bezpecny souhrn a dalsi krok;
+  pred zobrazenim Milovi se odstrani z odpovedi.
+- Profilovy manager po platne uctence a skutecne necommitovane zmene automaticky
+  spusti existujici direct-main backend: plnou branu, zapis do kanonickeho
+  handoffu a TVBCP, jeden commit, push a zarovnani profilovych workspace.
+- Ostatni ciste profily se po uspesnem commitu automaticky fast-forwarduji na
+  stejny `main`. Pokud jejich dorovnani selze, commit zustava platny a vysledek
+  poctive hlasi sync pending misto predstiraneho uplneho uspechu.
+- Chybejici nebo neplatna uctenka, read-only tah, neuspesna brana, Git konflikt
+  nebo opakovane doruceni stejne zpravy nevytvori zadny druhy commit. Puvodni
+  zmeny nebo zachovany lokalni commit zustanou viditelne pro obnovu.
+- Technicka uctenka se bezpecne odstrani i z persistovane odpovedi Session Hubu;
+  pozdejsi idempotentni nacteni proto neukaze interní protokol ani jej nespusti
+  znovu.
+- Faze 1.5 nepridala novou API cestu, tlacitko ani zmenu HTML/CSS. Stary panel
+  Prace zustava behem transformace kompatibilnim mostem.
+- Cilena sada 59 testu prosla vcetne UTC runner regrese za 38,877 sekundy. Samostatna syntakticka brana
+  prosla Pythonem, JavaScriptem obou UI, shellem a `git diff --check`.
+- Finalni plna Cockpit brana po oprave UTC/CEST prosla 880 testy za 239,849
+  sekundy; cela testova cast brany trvala 243,6 sekundy a vysledek je `OK`.
 
 Co neni hotove:
-- Novy checkpoint backend stale neni napojeny na existujici checkpointove
-  tlacitko.
+- Faze 1.5 zatim neni commitnuta, pushnuta, nasazena ani zive overena v
+  Human–Adam tahu.
+- Existujici checkpointove tlacitko a stary nasazovaci tok zatim zustavaji
+  beze zmeny jako kompatibilni vratna cesta.
 - Stary WIP/semafor/takeover tok zustava beze zmeny aktivniho runtime.
-- Vestaveny prohlizec nebyl v teto relaci dostupny. Backendovy zivy roundtrip je
-  potvrzeny, ale skutecne vizualni kliknuti ve stejnem menu musi potvrdit Mila.
 - Stary runtime nazev se zatim nesmi prejmenovat, protoze jej pouziva soucasna
   profilova konfigurace Cockpitu.
 
+### GitHub Actions incident pred checkpointem faze 1.5
+
+Mila upozornil na dva e-maily o neuspesne Cockpit Quality Gate. Read-only GitHub
+API audit je priradil behum `99eb092` v 07:39 CEST a `bad3067` v 08:55 CEST.
+Oba mely shodnou pricinu: dva testy checkpointu ocekavaly `07:00 CEST`, ale
+macOS GitHub runner prevedl vlozeny cas na svou systemovou zonu `05:00 UTC`.
+Logika checkpointu, commitu ani push nebyla pricinou.
+
+Oprava nastavuje kanonickou projektovou zonu `Europe/Prague` pro vznik i format
+checkpointoveho casu. Novy regresni test predava cas z UTC runneru a doklada
+vystup `2026-07-20 07:00 CEST` nezavisle na zone hostitele. Cilena sada po oprave
+prosla 59 testy za 38,877 sekundy. Finalni plna brana pote prosla 880 testy za
+239,849 sekundy.
+
 Dalsi krok:
-Mila v otevrenem Human–Adam vybere `Knihovna`, potvrdi `Prepnout`, potom stejne
-zvoli `Human–Adam`. Po tomto vizualnim potvrzeni uzavrit fazi 1.4 a rozhodnout o
-automatickem dokonceni vyvojoveho kroku.
+Vytvorit checkpoint a push faze 1.5. Nasazeni, rizeny restart a prvni zivy
+zapisovaci tah proverit az samostatnym potvrzenym krokem.
 
 Navrhovane dalsi kroky:
 - Pro dalsi proud nejdrive v terminalu zaregistrovat konkretni `Project`, `Tool`,
   `Layer` nebo `Misc`; nevymyslet vazbu pri kliknuti v r-Adamovi.
-- Po rucnim overeni teprve rozhodnout o fazi automatickeho dokončeni vyvojoveho
-  kroku; stary profilovy fallback zatim ponechat jako vratny most.
+- Po nasazeni otestovat jeden maly zapisovaci tah nejdrive v Human–Adam; teprve
+  potom stejnou cestu pouzit v Knihovne.
 - Zachovat UI a zakladni funkce po celou dobu postupne transformace.
 
 Zmenene nebo relevantni soubory:
@@ -119,6 +156,8 @@ Zmenene nebo relevantni soubory:
 - `memory/handoffs/human_adam_layer_workstream_start_2026_07_20.md`
 - `memory/ACTIVE_PROJECTS.md`
 - `app/communication/human_adam_profiles.py`
+- `app/communication/human_adam_turn_completion.py`
+- `app/communication/session_hub.py`
 - `app/communication/simple_main_checkpoint.py`
 - `app/communication/human_adam_workspace.py`
 - `tests/test_simple_main_checkpoint.py`
@@ -127,4 +166,5 @@ Zmenene nebo relevantni soubory:
 Bezpecnost / neukladat:
 - Neukladat soukrome identifikatory vlaken, tokeny ani private obsah.
 - Nemenit stary runtime nazev bez samostatne overene migrace.
-- Tento checkpoint neaktivuje novy backend v API/UI a neautorizuje nasazeni.
+- Tato rozpracovana faze neautorizuje commit, push ani nasazeni bez dalsiho
+  Milova pokynu.

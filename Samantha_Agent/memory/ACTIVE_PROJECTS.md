@@ -41,12 +41,23 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-20: Transformace Human–Adam faze 1.5. Mila rucne potvrdil vizualni
+  roundtrip faze 1.4. Novy private completion protokol po uspesnem zapisovacim
+  tahu skryje technickou JSON uctenku, odvodí z ni commit/souhrn/dalsi krok a
+  spusti existujici direct-main backend: plna brana, handoff + TVBCP, commit,
+  push a zarovnani aktivniho i ostatnich cistych profilu. Chybejici nebo
+  neplatna uctenka, neuspesna brana, konflikt a opakovane doruceni zustavaji
+  fail-closed bez druheho commitu. UI ani API cesta se nezmenily. Cilena sada
+  59 cilenych testu vcetne UTC runner regrese a finalni plna Cockpit brana 880
+  testu za 239,849 sekundy prosly.
+  Faze jeste neni commitnuta, pushnuta ani nasazena. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-20: Faze 1.4 je na `main` v `6f17852`, nasazena po rizenem restartu na
   code stamp `7a4440b979d98690`; smoke prosel 5/5. Zivy endpointovy roundtrip
   kanonickymi ID Human–Adam -> Knihovna -> Human–Adam prosel a oba workspaces
   skoncily ciste, zarovnane, bez remote/WIP a aktivniho tahu. Aktivni zustal
-  Human–Adam. Vestaveny prohlizec nebyl dostupny, proto zbyva jediny Miluv
-  vizualni krok: stejnym menu kliknout na Knihovnu a zpet na Human–Adam. Handoff:
+  Human–Adam. Mila nasledne rucne potvrdil i vizualni kliknuti pres stejne menu
+  na Knihovnu a zpet na Human–Adam. Handoff:
   `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-20: Priorita 1, transformace Human–Adam faze 1.4. Stavajici vyberove
   menu je bez zmeny HTML/CSS vzhledu napojene na koordinator: status poskytuje

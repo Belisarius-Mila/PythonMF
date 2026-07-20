@@ -123,6 +123,8 @@ class FakeHub:
         self.last_send: dict[str, object] = {}
         self.close_count = 0
         self.rotation_count = 0
+        self.next_answer = "Hotovo"
+        self.replaced_answers: list[tuple[str, str]] = []
 
     def snapshot(self) -> dict[str, object]:
         return {
@@ -139,7 +141,28 @@ class FakeHub:
 
     def send(self, **kwargs: object) -> dict[str, object]:
         self.last_send = dict(kwargs)
-        return {"ok": True, "entry": {"answer": "Hotovo"}}
+        return {
+            "ok": True,
+            "entry": {
+                "client_message_id": str(kwargs.get("client_message_id") or ""),
+                "status": "completed",
+                "delivery_confirmed": True,
+                "answer": self.next_answer,
+            },
+        }
+
+    def replace_completed_answer(
+        self,
+        *,
+        client_message_id: str,
+        answer: str,
+    ) -> dict[str, object]:
+        self.replaced_answers.append((client_message_id, answer))
+        return {
+            "client_message_id": client_message_id,
+            "status": "completed",
+            "answer": answer,
+        }
 
     def rotation_status(self) -> dict[str, object]:
         blockers = []
@@ -737,6 +760,80 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertIn("writable=false", read_only_input)
         self.assertIn("lease_owner_id=human_adam", writable_input)
         self.assertIn("writable=true", writable_input)
+        self.assertNotIn("[AUTOMATIC_STEP_COMPLETION]", read_only_input)
+        self.assertIn("[AUTOMATIC_STEP_COMPLETION]", writable_input)
+
+    def test_writable_turn_with_receipt_completes_direct_main_checkpoint(self) -> None:
+        receipt = (
+            "Změna i test jsou hotové.\n\n"
+            "[HUMAN_ADAM_STEP_COMPLETION]\n"
+            '{"commit_message":"Complete phase 1.5","summary":"Automatické dokončení tahu",'
+            '"next_step":"Provést checkpoint fáze 1.5"}\n'
+            "[/HUMAN_ADAM_STEP_COMPLETION]"
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, human_hub, _library_hub = self.make_manager(
+                Path(temp_dir)
+            )
+            manager.connect()
+            manager.change_development_semaphore(
+                operation="acquire_profile",
+                expected_revision=0,
+                topic="Automatické dokončení",
+                confirmed=True,
+            )
+            human_workspace.dirty = True
+            human_hub.next_answer = receipt
+            with patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint",
+                return_value={
+                    "ok": True,
+                    "checkpoint_head": "c" * 40,
+                    "checkpoint_short": "c" * 12,
+                    "all_workspaces_aligned": True,
+                },
+            ) as checkpoint:
+                result = manager.send(
+                    text="Dokonči fázi 1.5",
+                    client_message_id="completion-001",
+                )
+
+        request = checkpoint.call_args.kwargs["request"]
+        self.assertIs(checkpoint.call_args.kwargs["workspace"], human_workspace)
+        self.assertEqual(checkpoint.call_args.kwargs["peer_workspaces"], (library_workspace,))
+        self.assertEqual(request.commit_message, "Complete phase 1.5")
+        self.assertEqual(request.summary, "Automatické dokončení tahu")
+        self.assertEqual(result["automatic_completion"]["state"], "completed")
+        self.assertNotIn("HUMAN_ADAM_STEP_COMPLETION", result["entry"]["answer"])
+        self.assertIn("testy prošly", result["entry"]["answer"])
+        self.assertEqual(human_hub.replaced_answers[-1][0], "completion-001")
+
+    def test_dirty_writable_turn_without_receipt_stays_visible_and_uncommitted(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, human_hub, _library_hub = self.make_manager(
+                Path(temp_dir)
+            )
+            manager.connect()
+            manager.change_development_semaphore(
+                operation="acquire_profile",
+                expected_revision=0,
+                topic="Nedokončený tah",
+                confirmed=True,
+            )
+            human_workspace.dirty = True
+            human_hub.next_answer = "Test ještě neprošel."
+            with patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint"
+            ) as checkpoint:
+                result = manager.send(
+                    text="Pokus se o změnu",
+                    client_message_id="completion-002",
+                )
+
+        checkpoint.assert_not_called()
+        self.assertTrue(human_workspace.dirty)
+        self.assertEqual(result["automatic_completion"]["state"], "metadata_missing")
+        self.assertIn("Změny zůstaly viditelné", result["entry"]["answer"])
 
     def test_switch_requires_confirmation_and_preserves_active_profile(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

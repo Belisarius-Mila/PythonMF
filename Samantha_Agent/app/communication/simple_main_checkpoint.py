@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Sequence
+from zoneinfo import ZoneInfo
 
 from app.codex_appserver import AppServerError
 from app.communication.human_adam_deploy import (
@@ -39,6 +40,7 @@ _SENSITIVE_TEXT_RE = re.compile(
     r"(?i)\b(?:api[_ -]?key|access[_ -]?token|auth[_ -]?token|token|password|heslo|app-specific password)\b\s*[:=]\s*\S+"
 )
 _CHECKPOINT_LOCK = threading.Lock()
+PROJECT_TIME_ZONE = ZoneInfo("Europe/Prague")
 
 
 class SimpleMainCheckpointError(AppServerError):
@@ -56,7 +58,7 @@ class SimpleMainCheckpointRequest:
 
 
 def _local_now() -> datetime:
-    return datetime.now().astimezone()
+    return datetime.now(PROJECT_TIME_ZONE)
 
 
 def _safe_line(value: object, *, label: str, limit: int) -> str:
@@ -123,7 +125,9 @@ def _append_block(content: str, block: str) -> str:
 
 
 def _format_timestamp(value: datetime) -> str:
-    local = value.astimezone()
+    if value.tzinfo is None or value.utcoffset() is None:
+        raise SimpleMainCheckpointError("Checkpoint nemá platnou časovou zónu.")
+    local = value.astimezone(PROJECT_TIME_ZONE)
     return local.strftime("%Y-%m-%d %H:%M %Z")
 
 
@@ -282,7 +286,7 @@ def complete_simple_main_checkpoint(
     try:
         progress("preflight", "running")
         initial = _preflight_workspace(workspace, require_changes=True)
-        for peer in peer_workspaces:
+        for peer_index, peer in enumerate(peer_workspaces, start=1):
             if peer.workspace_root == workspace.workspace_root:
                 continue
             _preflight_workspace(peer, require_changes=False, allow_source_ahead=True)
@@ -397,6 +401,41 @@ def complete_simple_main_checkpoint(
             raise SimpleMainCheckpointError(
                 "Checkpoint nedoložil čisté zarovnání zdrojového a profilového main."
             )
+
+        progress("peer_alignment", "running")
+        peer_rows: list[dict[str, Any]] = []
+        for peer in peer_workspaces:
+            if peer.workspace_root == workspace.workspace_root:
+                continue
+            try:
+                peer_status = peer.status()
+                if peer_status.get("source_update_available"):
+                    peer_status = peer.sync_from_main(confirmed=True)
+                aligned = bool(
+                    peer_status.get("workspace_relation") == "aligned"
+                    and not peer_status.get("dirty")
+                    and not peer_status.get("local_checkpoint_ahead")
+                    and not peer_status.get("remotes")
+                    and str(peer_status.get("head") or "") == checkpoint_head
+                    and str(peer_status.get("source_head") or "") == checkpoint_head
+                )
+                peer_rows.append(
+                    {
+                        "workspace": f"peer-{peer_index}",
+                        "aligned": aligned,
+                        "message": "" if aligned else "Čistý profil se nepodařilo doložit jako zarovnaný.",
+                    }
+                )
+            except (AppServerError, OSError, ValueError) as exc:
+                peer_rows.append(
+                    {
+                        "workspace": f"peer-{peer_index}",
+                        "aligned": False,
+                        "message": str(exc),
+                    }
+                )
+        all_workspaces_aligned = all(row["aligned"] for row in peer_rows)
+        progress("peer_alignment", "passed" if all_workspaces_aligned else "partial")
         return {
             "ok": True,
             "operation": "simple_main_checkpoint",
@@ -414,6 +453,8 @@ def complete_simple_main_checkpoint(
             "pushed": True,
             "source_aligned": True,
             "workspace_aligned": True,
+            "peer_workspaces": peer_rows,
+            "all_workspaces_aligned": all_workspaces_aligned,
             "branches_created": False,
         }
     finally:

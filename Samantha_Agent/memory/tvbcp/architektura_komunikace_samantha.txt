@@ -1671,3 +1671,61 @@ provedené. Poslední ruční krok proto provede Míla: vybere Knihovnu, potvrd�
 
 Další krok: po Mílově vizuálním potvrzení uzavřít fázi 1.4 a teprve potom
 navrhnout automatické dokončení vývojového kroku.
+
+### 2026-07-20 09:52 CEST – Fáze 1.5: automatické dokončení úspěšného tahu
+
+Míla nejdřív ručně potvrdil vizuální roundtrip Human–Adam -> Knihovna ->
+Human–Adam, čímž je fáze 1.4 provozně uzavřena. Následně schválil fázi 1.5:
+automatické dokončení jednoho úspěšného vývojového kroku bez ručního
+mezitahu `handoff + commit + push`.
+
+Zapisovací tah nyní dostává private dokončovací protokol. Až po skutečné
+úspěšné změně a zelených relevantních testech smí model na konec odpovědi
+přidat jedinou JSON účtenku se třemi bezpečnými poli: název commitu, stručný
+souhrn a další krok. Profilový manager účtenku validuje, odstraní ji před
+zobrazením i z persistované odpovědi a spustí už existující direct-main backend.
+
+Dokončovací cyklus je: plná Cockpit brána -> automatický technický zápis do
+kanonického handoffu a TVBCP -> jeden commit na profilovém `main` -> push
+přesného objektu -> fast-forward zdrojového `main` -> zarovnání aktivního i
+ostatních čistých profilových workspace. Nevzniká nová větev ani druhý commit.
+
+Fail-closed hranice:
+
+- bez skutečné změny se Git operace nespustí;
+- read-only tah nedostane dokončovací protokol;
+- chybějící, opakovaná, neplatná nebo citlivá účtenka nic necommitne;
+- neúspěšná brána zachová původní dirty změny a původní paměť;
+- vzdálený závod zachová jediný lokální commit pro explicitní obnovu;
+- idempotentní opakování dokončené zprávy automatizaci znovu nespustí;
+- selhání dodatečné synchronizace čistého peer profilu nezpochybní již
+  pushnutý commit, ale vrátí pravdivý stav `sync pending`.
+
+Fáze nemění HTML, CSS ani API cestu. Existující panel Práce, semafor a starý
+checkpoint/deployment tok zatím zůstávají jako přechodový kompatibilní most;
+jejich odstranění není součástí tohoto kroku.
+
+Důkaz: 59 cílených testů vcetne UTC runner regrese proslo za 38,877 sekundy. Python syntaxe, JavaScript
+hlavního i Human–Adam UI, shell syntaxe a `git diff --check` jsou zelené. Plná
+Finalni Cockpit brána po oprave UTC/CEST prošla 880 testy za 239,849 sekundy;
+testová část brány trvala 243,6 sekundy a skončila `OK`.
+
+Další krok: checkpoint + push fáze 1.5. Nasazení, řízený restart a první
+malý živý zapisovací tah provést až samostatně.
+
+### 2026-07-20 10:07 CEST – Oprava GitHub Actions casove zony pred checkpointem 1.5
+
+Mila upozornil na dva e-maily o neuspesne Cockpit Quality Gate. GitHub API
+potvrdilo beh `99eb092` dokonceny v 07:39 CEST a beh `bad3067` dokonceny v
+08:55 CEST. Oba selhaly ve stejnych dvou testech `simple_main_checkpoint`:
+test vlozil `07:00 CEST`, ale puvodni formatter jej podle systemove zony macOS
+runneru prevedl na `05:00 UTC`.
+
+Rozhodnuti: checkpointovy cas je projektovy lidsky cas a musi byt stabilne
+zapisovan v `Europe/Prague`, ne v nahodne zone hostitele. `_local_now()` proto
+vznika primo v kanonicke zone a formatter do ni prevadi kazdy timezone-aware
+vstup. Naivni cas bez zony konci fail-closed.
+
+Novy regresni test simuluje UTC GitHub runner a vyzaduje vystup
+`2026-07-20 07:00 CEST`. Cilena sada po oprave prosla 59 testy za 38,877
+sekundy. Finalni cela Cockpit brana pote prosla 880 testy za 239,849 sekundy.

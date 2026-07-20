@@ -123,6 +123,40 @@ class CanonicalSessionHubTests(unittest.TestCase):
         self.assertTrue(duplicate["duplicate_prevented"])
         self.assertEqual(FakeClient.instances[0].sent, 1)
 
+    def test_completed_answer_can_be_safely_post_processed_and_persisted(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            hub = self.make_hub(root)
+            hub.send(text="Ahoj", client_message_id="message-0001")
+            replaced = hub.replace_completed_answer(
+                client_message_id="message-0001",
+                answer="Hotovo bez technické účtenky.",
+            )
+            duplicate = hub.send(text="Ahoj", client_message_id="message-0001")
+            persisted = json.loads((root / "session.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(replaced["answer"], "Hotovo bez technické účtenky.")
+        self.assertEqual(duplicate["entry"]["answer"], "Hotovo bez technické účtenky.")
+        self.assertEqual(
+            persisted["messages"][0]["answer"],
+            "Hotovo bez technické účtenky.",
+        )
+
+    def test_completed_answer_replacement_rejects_unknown_or_empty_entry(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            hub = self.make_hub(Path(temp_dir))
+            with self.assertRaises(SessionHubError):
+                hub.replace_completed_answer(
+                    client_message_id="message-0001",
+                    answer="Hotovo",
+                )
+            hub.send(text="Ahoj", client_message_id="message-0001")
+            with self.assertRaises(SessionHubError):
+                hub.replace_completed_answer(
+                    client_message_id="message-0001",
+                    answer="",
+                )
+
     def test_model_input_is_sent_but_never_persisted_in_user_history(self) -> None:
         model_input = (
             "[WORKSPACE SNAPSHOT]\nsource_head=abcdef12\n\n"

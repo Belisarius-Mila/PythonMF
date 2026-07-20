@@ -3,7 +3,7 @@ from __future__ import annotations
 import subprocess
 import tempfile
 import unittest
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -12,6 +12,7 @@ from app.communication.simple_main_checkpoint import (
     SimpleMainCheckpointError,
     SimpleMainCheckpointRequest,
     complete_simple_main_checkpoint,
+    _format_timestamp,
 )
 from scripts.human_adam_takeover import TakeoverError
 from tests.test_human_adam_workspace import git, make_source
@@ -98,6 +99,14 @@ def fixed_now() -> datetime:
 
 
 class SimpleMainCheckpointTests(unittest.TestCase):
+    def test_timestamp_is_always_rendered_in_canonical_prague_time(self) -> None:
+        github_runner_time = datetime(2026, 7, 20, 5, 0, tzinfo=timezone.utc)
+
+        self.assertEqual(
+            _format_timestamp(github_runner_time),
+            "2026-07-20 07:00 CEST",
+        )
+
     def test_completes_one_commit_on_main_without_creating_branch(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -338,9 +347,10 @@ class SimpleMainCheckpointTests(unittest.TestCase):
             peer_status = peer.status()
 
         self.assertTrue(result["ok"])
-        self.assertEqual(peer_status["workspace_relation"], "source_ahead")
+        self.assertEqual(peer_status["workspace_relation"], "aligned")
         self.assertFalse(peer_status["dirty"])
         self.assertFalse(peer_status["local_checkpoint_ahead"])
+        self.assertTrue(result["all_workspaces_aligned"])
 
     def test_remote_failure_preserves_one_local_checkpoint_for_recovery(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -305,6 +305,25 @@ class CanonicalSessionHub:
                 return item
         return None
 
+    def replace_completed_answer(self, *, client_message_id: str, answer: str) -> dict[str, Any]:
+        """Persist a post-processed answer without changing turn delivery facts."""
+
+        clean_id = str(client_message_id or "").strip()
+        clean_answer = str(answer or "").strip()
+        if not CLIENT_MESSAGE_ID_RE.fullmatch(clean_id):
+            raise SessionHubError("Dokončená odpověď nemá platné client_message_id.")
+        if not clean_answer:
+            raise SessionHubError("Dokončenou odpověď nelze nahradit prázdným textem.")
+        if self._turn_lock.locked():
+            raise SessionBusyError("Odpověď nelze upravit během aktivního tahu.")
+        with self._state_lock:
+            entry = self._message_locked(clean_id)
+            if entry is None or entry.get("status") != "completed":
+                raise SessionHubError("K nahrazení není dostupná dokončená odpověď.")
+            entry["answer"] = clean_answer
+            self._save_locked()
+            return copy.deepcopy(entry)
+
     def send(
         self,
         *,
