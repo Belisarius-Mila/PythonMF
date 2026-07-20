@@ -229,3 +229,35 @@ Fáze zatím není commitnutá, pushnutá, napojená na profilový manager ani
 nasazená. Další krok: checkpoint + commit + push fáze 2.1; potom fáze 2.2 může
 backend napojit na kanonický pracovní proud a existující bezpečný restart worker,
 stále bez změny UI.
+
+### Fáze 2.2 – napojení na kanonický profilový koordinátor
+
+Dne 2026-07-20 11:59 CEST profilový manager převzal neveřejné napojení backendu
+fáze 2.1. Aktivní pracovní proud, přesný commit zdrojového `main`, primární
+workspace, všechny ostatní profilové workspaces a soukromá cesta účtenky se
+odvozují výhradně ze serverové kanonické konfigurace; klient je nemůže zadat.
+
+Příprava i dokončení nejdřív ověří, že žádný registrovaný profil nemá aktivní
+tah nebo nevyřešené doručení. Příprava může po úplném zeleném důkazu zavolat
+volitelný důvěryhodný callback existujícího řízeného restart workeru. Bez něj jen
+pravdivě hlásí, že restart je připravený; při selhání naplánování zůstane
+soukromá účtenka v obnovitelném stavu `pending_restart`.
+
+Post-restartové ověření načte pracovní proud ze soukromé účtenky a přijme jej
+jen tehdy, pokud je stále aktivní tentýž kanonický profil. Potom předá backendu
+pozorovaný PID, kódový otisk a oba serverem vybrané workspaces. Semafor, WIP,
+takeover ani klientský projektový výběr se této cesty neúčastní.
+
+Šest nových manager testů pokrývá Human–Adam, Knihovnu, serverem odvozený commit
+a peer workspace, volitelný restart worker, aktivní nebo nejistý tah v libovolném
+profilu, selhání restart scheduleru, post-restartové ověření a odmítnutí jiného
+aktivního proudu. Cílená sada `human_adam_profiles` + `simple_main_deploy` prošla
+47 testy. Plná Cockpit brána prošla 893 testy za 223,196 sekundy a skončila
+`OK` za 226,2 sekundy.
+
+Fáze 2.2 nemá API route, HTML, CSS ani změnu současného UI a nebyla commitnutá,
+pushnutá nebo nasazená. Změněné soubory jsou pouze
+`human_adam_profiles.py`, `test_human_adam_profiles.py`, tento handoff a
+kanonický TVBCP. Další krok: checkpoint + commit + push fáze 2.2; potom vytvořit
+neveřejnou app-layer akci, která manager propojí s existujícím restart workerem,
+stále bez přepnutí UI.

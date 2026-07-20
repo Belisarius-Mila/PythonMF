@@ -11,7 +11,7 @@ import threading
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Callable, Iterator
 
 from app.codex_appserver import AppServerError
 from app.communication.development_semaphore import (
@@ -49,6 +49,13 @@ from app.communication.session_hub import SessionBusyError, SessionHubError
 from app.communication.simple_main_checkpoint import (
     SimpleMainCheckpointRequest,
     complete_simple_main_checkpoint,
+)
+from app.communication.simple_main_deploy import (
+    DEFAULT_SIMPLE_MAIN_DEPLOYMENT_RECEIPT,
+    SimpleMainDeploymentRequest,
+    load_simple_main_deployment_receipt,
+    prepare_simple_main_deployment as prepare_clean_main_deployment,
+    verify_simple_main_deployment as verify_clean_main_deployment,
 )
 from app.file_persistence import (
     atomic_replace_text_under_external_lock,
@@ -129,6 +136,7 @@ class HumanAdamProfileManager:
         development_semaphore: DevelopmentSemaphore | None = None,
         project_continuity: ProjectContinuityService | None = None,
         deployment_completion_path: Path | None = None,
+        simple_main_deployment_receipt_path: Path | None = None,
     ):
         if not profiles or default_profile_id not in profiles:
             raise ValueError("Pracovní profily Human–Adam nemají platný výchozí profil.")
@@ -165,6 +173,14 @@ class HumanAdamProfileManager:
                 DEFAULT_DEPLOYMENT_COMPLETION_PATH
                 if self.state_path == DEFAULT_PROFILE_STATE_PATH
                 else self.state_path.with_name("deployment_completion.json")
+            )
+        )
+        self.simple_main_deployment_receipt_path = Path(
+            simple_main_deployment_receipt_path
+            or (
+                DEFAULT_SIMPLE_MAIN_DEPLOYMENT_RECEIPT
+                if self.state_path == DEFAULT_PROFILE_STATE_PATH
+                else self.state_path.with_name("simple_main_deployment.json")
             )
         )
         self._state_lock = threading.RLock()
@@ -312,6 +328,142 @@ class HumanAdamProfileManager:
                 ),
                 confirmed=confirmed,
                 peer_workspaces=peer_workspaces,
+            )
+        return {
+            **result,
+            "work_profile": {
+                "id": active_id,
+                "label": str(profile.get("label") or active_id),
+            },
+            "workstream": {
+                "id": binding.workstream_id,
+                "type": binding.workstream_type,
+                "name": binding.name,
+            },
+        }
+
+    def _assert_all_profile_sessions_idle(self) -> None:
+        """Block deployment while any registered workstream has an active or uncertain turn."""
+
+        for profile_id, profile in self.profiles.items():
+            session = profile["service"].hub.snapshot()
+            label = str(profile.get("label") or profile_id)
+            if session.get("turn_busy") or session.get("active_turn"):
+                raise SessionBusyError(
+                    f"Jednoduché nasazení nelze připravit: profil {label} má aktivní tah."
+                )
+            if self._has_uncertain_delivery(session):
+                raise SessionBusyError(
+                    f"Jednoduché nasazení nelze připravit: profil {label} má nevyřešené doručení."
+                )
+
+    def prepare_simple_main_deployment(
+        self,
+        *,
+        previous_pid: int,
+        confirmed: bool,
+        restart_scheduler: Callable[[], dict[str, Any]] | None = None,
+    ) -> dict[str, Any]:
+        """Bind the private clean-main deployment backend to the active workstream.
+
+        The caller cannot provide a workstream ID, commit, workspace or receipt
+        path.  An optional trusted app-layer callback can schedule the existing
+        restart worker after the full pre-restart proof succeeds.  No HTTP or UI
+        surface invokes this method in phase 2.2.
+        """
+
+        with self.profile_operation() as service:
+            self._assert_all_profile_sessions_idle()
+            active_id = self.active_profile_id
+            profile = self.profiles[active_id]
+            binding = profile.get("workstream_binding")
+            if not isinstance(binding, CanonicalWorkstreamBinding):
+                raise AppServerError(
+                    "Aktivní profil nemá v terminálu zaregistrovaný kanonický pracovní proud."
+                )
+            source_head = str(service.workspace.status().get("source_head") or "")
+            peers = tuple(
+                candidate["service"].workspace
+                for profile_id, candidate in self.profiles.items()
+                if profile_id != active_id
+            )
+            result = prepare_clean_main_deployment(
+                workspace=service.workspace,
+                request=SimpleMainDeploymentRequest(
+                    workstream_id=binding.workstream_id,
+                    expected_head=source_head,
+                    previous_pid=previous_pid,
+                ),
+                confirmed=confirmed,
+                peer_workspaces=peers,
+                receipt_path=self.simple_main_deployment_receipt_path,
+            )
+            restart: dict[str, Any] = {
+                "ready": True,
+                "scheduled": False,
+                "message": "Nasazení je připravené pro existující řízený restart worker.",
+            }
+            if restart_scheduler is not None:
+                if not callable(restart_scheduler):
+                    raise AppServerError("Řízený restart worker není platný.")
+                scheduled = restart_scheduler()
+                if not isinstance(scheduled, dict) or scheduled.get("ok") is not True:
+                    raise AppServerError(
+                        "Nasazení je ověřené, ale řízený restart se nepodařilo naplánovat."
+                    )
+                restart = {**scheduled, "ready": True, "scheduled": True}
+        return {
+            **result,
+            "work_profile": {
+                "id": active_id,
+                "label": str(profile.get("label") or active_id),
+            },
+            "workstream": {
+                "id": binding.workstream_id,
+                "type": binding.workstream_type,
+                "name": binding.name,
+            },
+            "restart": restart,
+        }
+
+    def verify_simple_main_deployment(
+        self,
+        *,
+        observed_pid: int,
+        observed_code_stamp: str,
+    ) -> dict[str, Any]:
+        """Verify a restarted clean-main deployment in its canonical workstream."""
+
+        with self.profile_operation() as service:
+            self._assert_all_profile_sessions_idle()
+            receipt = load_simple_main_deployment_receipt(
+                self.simple_main_deployment_receipt_path
+            )
+            workstream_id = str(receipt.get("workstream_id") or "")
+            owner_id = self.workstream_coordinator.profile_id_for(workstream_id)
+            active_id = self.active_profile_id
+            if owner_id != active_id:
+                raise AppServerError(
+                    "Ověření nasazení patří jinému pracovnímu proudu; nejdřív jej znovu aktivuj."
+                )
+            profile = self.profiles[active_id]
+            binding = profile.get("workstream_binding")
+            if (
+                not isinstance(binding, CanonicalWorkstreamBinding)
+                or binding.workstream_id != workstream_id
+            ):
+                raise AppServerError("Účtenka nasazení neodpovídá aktivnímu pracovnímu proudu.")
+            peers = tuple(
+                candidate["service"].workspace
+                for profile_id, candidate in self.profiles.items()
+                if profile_id != active_id
+            )
+            result = verify_clean_main_deployment(
+                workspace=service.workspace,
+                observed_pid=observed_pid,
+                observed_code_stamp=observed_code_stamp,
+                peer_workspaces=peers,
+                receipt_path=self.simple_main_deployment_receipt_path,
             )
         return {
             **result,

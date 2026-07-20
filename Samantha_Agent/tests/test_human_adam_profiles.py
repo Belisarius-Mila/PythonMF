@@ -388,6 +388,164 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(request.tvbcp_relative_path, "memory/tvbcp/knihovna_cockpit.txt")
         self.assertEqual(result["work_profile"]["id"], "knihovna")
 
+    def test_simple_deployment_derives_main_and_workstream_and_can_schedule_restart(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, *_rest = self.make_manager(
+                Path(temp_dir)
+            )
+            restart_calls: list[bool] = []
+
+            def schedule_restart() -> dict[str, object]:
+                restart_calls.append(True)
+                return {"ok": True, "status": "restart_started", "pid": 321}
+
+            with patch(
+                "app.communication.human_adam_profiles.prepare_clean_main_deployment",
+                return_value={
+                    "ok": True,
+                    "state": "pending_restart",
+                    "main_head": "a" * 40,
+                    "restart_required": True,
+                    "semaphore_used": False,
+                },
+            ) as deploy:
+                result = manager.prepare_simple_main_deployment(
+                    previous_pid=321,
+                    confirmed=True,
+                    restart_scheduler=schedule_restart,
+                )
+
+        call = deploy.call_args.kwargs
+        request = call["request"]
+        self.assertIs(call["workspace"], human_workspace)
+        self.assertEqual(call["peer_workspaces"], (library_workspace,))
+        self.assertEqual(call["receipt_path"], manager.simple_main_deployment_receipt_path)
+        self.assertTrue(call["confirmed"])
+        self.assertEqual(request.workstream_id, "layer-human-adam-development")
+        self.assertEqual(request.expected_head, "a" * 40)
+        self.assertEqual(request.previous_pid, 321)
+        self.assertEqual(result["work_profile"]["id"], "human_adam")
+        self.assertEqual(result["workstream"]["type"], "Layer")
+        self.assertTrue(result["restart"]["scheduled"])
+        self.assertEqual(restart_calls, [True])
+
+    def test_simple_deployment_uses_registered_library_without_restart_side_effect(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, *_rest = self.make_manager(
+                Path(temp_dir)
+            )
+            manager.switch(profile_id="knihovna", confirmed=True)
+            with patch(
+                "app.communication.human_adam_profiles.prepare_clean_main_deployment",
+                return_value={"ok": True, "state": "pending_restart"},
+            ) as deploy:
+                result = manager.prepare_simple_main_deployment(
+                    previous_pid=654,
+                    confirmed=True,
+                )
+
+        call = deploy.call_args.kwargs
+        self.assertIs(call["workspace"], library_workspace)
+        self.assertEqual(call["peer_workspaces"], (human_workspace,))
+        self.assertEqual(call["request"].workstream_id, "project-knowledge-library")
+        self.assertEqual(result["work_profile"]["id"], "knihovna")
+        self.assertFalse(result["restart"]["scheduled"])
+        self.assertTrue(result["restart"]["ready"])
+
+    def test_simple_deployment_blocks_active_or_uncertain_turn_in_any_profile(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _human_workspace, _library_workspace, human_hub, library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            library_hub.turn_busy = True
+            with patch(
+                "app.communication.human_adam_profiles.prepare_clean_main_deployment"
+            ) as deploy:
+                with self.assertRaisesRegex(SessionBusyError, "Knihovna má aktivní tah"):
+                    manager.prepare_simple_main_deployment(
+                        previous_pid=321,
+                        confirmed=True,
+                    )
+                deploy.assert_not_called()
+            library_hub.turn_busy = False
+            human_hub.messages = [
+                {"status": "delivery_unknown", "recovery_required": True}
+            ]
+            with patch(
+                "app.communication.human_adam_profiles.prepare_clean_main_deployment"
+            ) as deploy:
+                with self.assertRaisesRegex(SessionBusyError, "nevyřešené doručení"):
+                    manager.prepare_simple_main_deployment(
+                        previous_pid=321,
+                        confirmed=True,
+                    )
+                deploy.assert_not_called()
+
+    def test_simple_deployment_rejects_failed_restart_scheduler_but_keeps_backend_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_rest = self.make_manager(Path(temp_dir))
+            with patch(
+                "app.communication.human_adam_profiles.prepare_clean_main_deployment",
+                return_value={"ok": True, "state": "pending_restart"},
+            ) as deploy:
+                with self.assertRaisesRegex(AppServerError, "nepodařilo naplánovat"):
+                    manager.prepare_simple_main_deployment(
+                        previous_pid=321,
+                        confirmed=True,
+                        restart_scheduler=lambda: {"ok": False},
+                    )
+
+        deploy.assert_called_once()
+
+    def test_simple_deployment_verification_uses_receipt_workstream_and_profiles(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, *_rest = self.make_manager(
+                Path(temp_dir)
+            )
+            with patch(
+                "app.communication.human_adam_profiles.load_simple_main_deployment_receipt",
+                return_value={
+                    "state": "pending_restart",
+                    "workstream_id": "layer-human-adam-development",
+                },
+            ), patch(
+                "app.communication.human_adam_profiles.verify_clean_main_deployment",
+                return_value={"ok": True, "state": "deployed", "smoke": {"check_count": 5}},
+            ) as verify:
+                result = manager.verify_simple_main_deployment(
+                    observed_pid=654,
+                    observed_code_stamp="0123456789abcdef",
+                )
+
+        call = verify.call_args.kwargs
+        self.assertIs(call["workspace"], human_workspace)
+        self.assertEqual(call["peer_workspaces"], (library_workspace,))
+        self.assertEqual(call["receipt_path"], manager.simple_main_deployment_receipt_path)
+        self.assertEqual(call["observed_pid"], 654)
+        self.assertEqual(call["observed_code_stamp"], "0123456789abcdef")
+        self.assertEqual(result["work_profile"]["id"], "human_adam")
+        self.assertEqual(result["workstream"]["id"], "layer-human-adam-development")
+
+    def test_simple_deployment_verification_rejects_different_active_workstream(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_rest = self.make_manager(Path(temp_dir))
+            manager.switch(profile_id="knihovna", confirmed=True)
+            with patch(
+                "app.communication.human_adam_profiles.load_simple_main_deployment_receipt",
+                return_value={
+                    "state": "pending_restart",
+                    "workstream_id": "layer-human-adam-development",
+                },
+            ), patch(
+                "app.communication.human_adam_profiles.verify_clean_main_deployment"
+            ) as verify:
+                with self.assertRaisesRegex(AppServerError, "jinému pracovnímu proudu"):
+                    manager.verify_simple_main_deployment(
+                        observed_pid=654,
+                        observed_code_stamp="0123456789abcdef",
+                    )
+                verify.assert_not_called()
+
     def test_private_workstream_catalog_contains_human_adam_and_library(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, *_rest = self.make_manager(Path(temp_dir))

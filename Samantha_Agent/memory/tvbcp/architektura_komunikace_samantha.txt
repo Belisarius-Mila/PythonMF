@@ -1780,3 +1780,29 @@ skončila `OK` za 278,8 sekundy.
 
 Další krok: checkpoint, commit a push fáze 2.1. Potom napojit backend na
 kanonický pracovní proud a existující bezpečný restart worker bez změny UI.
+
+### 2026-07-20 11:59 CEST – Fáze 2.2: profilový koordinátor jednoduchého nasazení
+
+Neveřejný backend fáze 2.1 je napojený na profilový manager. Manager odvozuje
+aktivní pracovní proud, přesný commit zdrojového `main`, primární i peer
+workspaces a soukromou účtenku pouze z kanonické serverové konfigurace. Žádný z
+těchto údajů nepřebírá od klienta.
+
+Před přípravou i post-restartovým ověřením musí být všechny registrované profily
+bez aktivního tahu a bez nevyřešeného doručení. Důvěryhodný app-layer callback
+smí naplánovat existující řízený restart worker až po úplném předrestartovém
+důkazu. Selhání scheduleru nepředstírá restart a zachová soukromou účtenku pro
+bezpečnou obnovu.
+
+Dokončení načte pracovní proud z účtenky a vyžaduje, aby byl stále aktivní jeho
+kanonický profil. Až potom ověřuje nový PID, kódový otisk, Git, oba workspaces a
+smoke `5/5` prostřednictvím backendu fáze 2.1. Globální semafor, WIP větev,
+takeover a stará projektová vazba nejsou součástí nové cesty.
+
+Šest nových integračních testů zvyšuje cílenou sadu na 47 testů. Plná Cockpit
+brána prošla Python a JavaScript syntaxí, shell syntaxí a 893 testy za 223,196
+sekundy; celá brána skončila `OK` za 226,2 sekundy. API, HTML, CSS a běžící
+Cockpit se nezměnily.
+
+Další krok: checkpoint, commit a push fáze 2.2. Potom připravit neveřejnou
+app-layer akci propojující manager s existujícím restart workerem bez změny UI.
