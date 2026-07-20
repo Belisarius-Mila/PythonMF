@@ -11,7 +11,7 @@ API, UI, semaforu, vetvi ani nasazovaci logiky. Existujici zaznamy v
 
 | ID | Typ | Kanonicky nazev | Rezim | Docasny kompatibilni zdroj | Vlakno | TVBCP | Handoff | Dalsi krok |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `layer-human-adam-development` | `Layer` | Human–Adam / vývojové prostředí | active | `ACTIVE_PROJECTS.md`: App-server rozhrani / novy Adam | Stavajici oddelene vlakno Human–Adam; soukromy identifikator se do Gitu neuklada. | `tvbcp/architektura_komunikace_samantha.txt` | `handoffs/human_adam_layer_workstream_start_2026_07_20.md` | Faze 1.5 automatickeho dokonceni tahu je implementovana a otestovana; dalsi krok je checkpoint + push a nasledne samostatne nasazeni. |
+| `layer-human-adam-development` | `Layer` | Human–Adam / vývojové prostředí | active | `ACTIVE_PROJECTS.md`: App-server rozhrani / novy Adam | Stavajici oddelene vlakno Human–Adam; soukromy identifikator se do Gitu neuklada. | `tvbcp/architektura_komunikace_samantha.txt` | `handoffs/human_adam_layer_workstream_start_2026_07_20.md` | Faze 1.5 je na `main` v `4bfd7fc` a GitHub Quality Gate je zelena; dalsi krok je nasazeni, rizeny restart a maly zivy zapisovaci tah. |
 | `project-knowledge-library` | `Project` | Knihovna | active | `ACTIVE_PROJECTS.md`: Znalostni databaze / Knihovna clanku / Knowledge inbox | Stavajici oddelene vlakno Knihovny; soukromy identifikator se do Gitu neuklada. | `tvbcp/knihovna_cockpit.txt` | `handoffs/knowledge_library_article_editing_2026_07_16.md` | Miluv vizualni roundtrip Knihovna -> Human–Adam prosel; Knihovna je pripravena pro budouci zivy test automatickeho dokonceni. |
 
 ## Pravidla registru

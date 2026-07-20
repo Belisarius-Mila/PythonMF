@@ -117,8 +117,8 @@ Co je hotove:
   sekundy; cela testova cast brany trvala 243,6 sekundy a vysledek je `OK`.
 
 Co neni hotove:
-- Faze 1.5 zatim neni commitnuta, pushnuta, nasazena ani zive overena v
-  Human–Adam tahu.
+- Faze 1.5 je commitnuta a pushnuta v `4bfd7fc`, ale zatim neni nasazena ani
+  zive overena v Human–Adam tahu.
 - Existujici checkpointove tlacitko a stary nasazovaci tok zatim zustavaji
   beze zmeny jako kompatibilni vratna cesta.
 - Stary WIP/semafor/takeover tok zustava beze zmeny aktivniho runtime.
@@ -140,8 +140,8 @@ prosla 59 testy za 38,877 sekundy. Finalni plna brana pote prosla 880 testy za
 239,849 sekundy.
 
 Dalsi krok:
-Vytvorit checkpoint a push faze 1.5. Nasazeni, rizeny restart a prvni zivy
-zapisovaci tah proverit az samostatnym potvrzenym krokem.
+Nasazeni, rizeny restart a prvni maly zivy zapisovaci tah proverit az
+samostatnym potvrzenym krokem.
 
 Navrhovane dalsi kroky:
 - Pro dalsi proud nejdrive v terminalu zaregistrovat konkretni `Project`, `Tool`,
@@ -166,5 +166,16 @@ Zmenene nebo relevantni soubory:
 Bezpecnost / neukladat:
 - Neukladat soukrome identifikatory vlaken, tokeny ani private obsah.
 - Nemenit stary runtime nazev bez samostatne overene migrace.
-- Tato rozpracovana faze neautorizuje commit, push ani nasazeni bez dalsiho
-  Milova pokynu.
+- Mila autorizoval checkpoint, commit a push faze 1.5; nasazeni ani restart tim
+  autorizovane nejsou.
+
+### Checkpoint faze 1.5
+
+Dne 2026-07-20 10:16 CEST byla faze 1.5 vcetne opravy UTC/CEST commitnuta jako
+`4bfd7fc` (`Automate Human-Adam turn completion`) a pushnuta na `origin/main`.
+Lokalni `main` a `origin/main` se po pushi shodovaly. Skutecna GitHub Cockpit
+Quality Gate nad presnym commitem `4bfd7fc` skoncila `success`; tim je potvrzeno,
+ze predchozi runnerova regrese casove zony je opravena i mimo lokalni Mac.
+
+Tento checkpoint neautorizuje nasazeni ani restart. Dalsi krok je samostatne
+nasazeni, rizeny restart, smoke test a jeden maly zivy zapisovaci tah.

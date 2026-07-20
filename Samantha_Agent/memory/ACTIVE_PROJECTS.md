@@ -50,7 +50,8 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
   fail-closed bez druheho commitu. UI ani API cesta se nezmenily. Cilena sada
   59 cilenych testu vcetne UTC runner regrese a finalni plna Cockpit brana 880
   testu za 239,849 sekundy prosly.
-  Faze jeste neni commitnuta, pushnuta ani nasazena. Handoff:
+  Faze je commitnuta a pushnuta v `4bfd7fc`; skutecna GitHub Cockpit Quality
+  Gate skoncila `success`. Faze zatim neni nasazena. Handoff:
   `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-20: Faze 1.4 je na `main` v `6f17852`, nasazena po rizenem restartu na
   code stamp `7a4440b979d98690`; smoke prosel 5/5. Zivy endpointovy roundtrip

@@ -1729,3 +1729,16 @@ vstup. Naivni cas bez zony konci fail-closed.
 Novy regresni test simuluje UTC GitHub runner a vyzaduje vystup
 `2026-07-20 07:00 CEST`. Cilena sada po oprave prosla 59 testy za 38,877
 sekundy. Finalni cela Cockpit brana pote prosla 880 testy za 239,849 sekundy.
+
+### 2026-07-20 10:16 CEST – Checkpoint a GitHub potvrzeni faze 1.5
+
+Faze 1.5 vcetne opravy UTC/CEST byla commitnuta jako `4bfd7fc`
+(`Automate Human-Adam turn completion`) a pushnuta na `origin/main`. Lokalni a
+vzdaleny `main` se shodovaly na stejnem objektu.
+
+Skutecna GitHub Cockpit Quality Gate nad commitem `4bfd7fc` skoncila `success`.
+Tim je checkpoint potvrzen lokalni plnou branou 880 testu i nezavislym macOS
+runnerem GitHubu. Faze zatim nebyla nasazena ani zive pouzita pro zapisovaci tah.
+
+Dalsi krok: samostatne nasazeni, rizeny restart, smoke test a jeden maly zivy
+zapisovaci tah v Human–Adam.

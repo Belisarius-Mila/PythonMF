@@ -144,7 +144,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   doklad nic necommitne. UI ani API cesta se nezmenily. Pred checkpointem byla
   navic opravena GitHub Actions regrese casove zony: zapis je vzdy v
   `Europe/Prague`; 59 cilenych testu vcetne UTC runner pripadu a finalni plna
-  brana 880 testu prosly. Zmena ceka na checkpoint, push a samostatne nasazeni.
+  brana 880 testu prosly. Commit `4bfd7fc` je pushnuty a stejny commit prosel i
+  skutecnou GitHub Cockpit Quality Gate; zmena ceka na samostatne nasazeni.
 
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni
