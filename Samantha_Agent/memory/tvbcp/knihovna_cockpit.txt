@@ -160,3 +160,14 @@ Knihovny ani identifikátory vláken nebyly čteny nebo uloženy.
 Vestavěný prohlížeč nebyl v této relaci dostupný, proto zbývá pouze Mílovo
 vizuální potvrzení stejného menu: Human–Adam -> Knihovna -> Human–Adam bez
 odeslání pokynu.
+
+### 2026-07-20 11:06 CEST – Živý zapisovací test Knihovny fáze 1.6 prošel
+
+Pracovní proud: `project-knowledge-library`.
+
+Milník: Živý zapisovací test Knihovny fáze 1.6 prošel
+
+Důkaz: plná Cockpit brána: 880 testů, 265.9 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Ověřit čistý main, synchronizaci obou profilů a uvolnit přechodný semafor.
