@@ -3,7 +3,7 @@
 Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 - `ACTIVE_PROJECTS.md` - registr projektu a oblasti vcetne rezimu `active` / `paused` / `archived`, priorit, stavu, handoffu a dalsich kroku.
-- `WORKSTREAMS.md` - kanonicky registr pracovnich proudu typu `Project`, `Tool`, `Layer` a `Misc`; v kroku 0 je pouze pametovou a navigacni vrstvou bez vlivu na runtime.
+- `WORKSTREAMS.md` - kanonicky registr pracovnich proudu typu `Project`, `Tool`, `Layer` a `Misc`; revidovana faze 4.1 slucuje 28 zivych oblasti z `ACTIVE_PROJECTS.md` do lidskych pracovnich celku, pridava pozastavene projekty Vocabulary FR/IT a dva vychozi `Misc` proudy. V katalogu je 29 proudu: 23 projektu, 4 tooly a 2 `Misc`; kodovy katalog nemeni UI, profily, workspace ani vlakna.
 
 ## Core
 
@@ -112,7 +112,13 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 ## Handoffs
 
 - `handoffs/human_adam_layer_workstream_start_2026_07_20.md` - [PRIPOMENOUT]
-  priorita 1: krok 0 transformace Human–Adam zacal zalozenim kanonickeho
+  priorita 1: faze 4.1 ma hotovy validovany katalog 29 proudu: 23 projektu, 4
+  tooly a 2 `Misc`; 26 je aktivnich a iPhone Shortcuts / Mobile Input,
+  Vocabulary FR a Vocabulary IT jsou `paused`. Vsech 28 zivych radku
+  `ACTIVE_PROJECTS.md` je pokryto pres schvalena slouceni, UI ani soukroma
+  vlakna se nezmenila a plna brana prosla 922 testy. Dalsi krok po checkpointu
+  a zelenem CI je faze 4.2 – lazy soukroma vlakna nezavisla na dvou pevnych
+  profilech. Historie: krok 0 transformace Human–Adam zacal zalozenim kanonickeho
   pracovniho proudu `Human–Adam / vyvojove prostredi` typu `Layer`. Stary
   projektovy zaznam zustava docasnym kompatibilnim mostem a zadny funkcni kod
   se nezmenil. Stavajici TVBCP architektury komunikace je potvrzen a propojen;

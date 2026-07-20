@@ -540,3 +540,34 @@ Potvrzený implementační plán:
 Další krok po nové Codex relaci: načíst paměť a zahájit fázi 4.1 read-only
 inventurou kanonických zdrojů a návrhem úplného katalogu. Nezačínat registrací
 samotného MMTX a nevytvářet vlákna ani měnit UI v této první fázi.
+
+### 2026-07-20 19:42 CEST – Checkpoint fáze 4.1: úplný katalog
+
+Fáze 4.1 je implementačně hotová. Nový git-safe kodový katalog obsahuje 29
+pracovních proudů: 23 projektů, 4 tooly a 2 `Misc`; 26 proudů je `active` a
+projekty iPhone Shortcuts / Mobile Input, Vocabulary FR a Vocabulary IT jsou
+`paused`. Všech 28 živých řádků `ACTIVE_PROJECTS.md` zůstává pokryto, ale podle
+Mílova schválení se příbuzné technické řádky slučují do lidských pracovních
+celků.
+
+Kanonická rozhodnutí: Human–Adam, Cockpit, Katalog projektů a schopností,
+Samantha Infrastructure a ColorsAndNumbers jsou projekty. Recovery centrum a
+legacy VoiceBridge patří pod Cockpit; platební SMS pod Správu dokumentů; Guard
+proti mazání pod Samantha Infrastructure. Samostatné tooly jsou Záloha a
+obnova, Zmenšování obrázků, PictNew a TTS. Human–Adam si do pozdější runtime
+migrace ponechává historické ID, typ a název jako kompatibilní aliasy.
+
+Fáze nemění UI, API, profily, workspace ani soukromá vlákna. Současný runtime
+zůstává navázaný jen na Human–Adam a Knihovnu. Cílená sada prošla 107 testy,
+plná Cockpit Quality Gate prošla všemi syntaxemi a 922 testy za 248,040 sekundy
+a živý Cockpit smoke test skončil 5/5. `git diff --check` je čistý.
+
+Změněné nebo nové soubory fáze: `human_adam_workstream_catalog.py`,
+`human_adam_workstream_coordinator.py`, `test_human_adam_workstream_catalog.py`,
+`test_human_adam_profiles.py`, `cockpit_quality_gate.py`, `WORKSTREAMS.md`,
+`MEMORY_INDEX.md`, tento handoff, kanonický TVBCP a `ACTIVE_PROJECTS.md`.
+
+Další krok: po tematickém commitu, pushi a zelené vzdálené Quality Gate zahájit
+fázi 4.2 – oddělení pracovního proudu od dvou pevných profilů a bezpečné lazy
+založení či obnovení soukromého vlákna. Fáze 4.1 se nenasazuje a živé menu se v
+ní nemění.

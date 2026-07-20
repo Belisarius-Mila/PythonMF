@@ -2018,3 +2018,24 @@ Implementační pořadí:
 
 Další krok: v nové Codex relaci zahájit fázi 4.1 read-only inventurou zdrojů a
 návrhem úplného katalogu. Nezačínat samotnou registrací MMTX.
+
+### 2026-07-20 19:42 CEST – Fáze 4.1: úplný validovaný katalog
+
+Míla schválil výslednou lidskou klasifikaci pracovních proudů. Git-safe kodový
+katalog nyní obsahuje 29 proudů: 23 `Project`, 4 `Tool` a 2 `Misc`; 26 je
+aktivních a iPhone Shortcuts / Mobile Input, Vocabulary FR a Vocabulary IT jsou
+pozastavené. Všech 28 živých řádků projektového registru je pokryto. Související
+technické řádky se mohou sloučit do jednoho proudu a historický kombinovaný řádek
+TTS / Adam Voice se smí rozdělit mezi tool TTS a projekt Cockpit.
+
+Human–Adam je kanonicky projekt, ale jeho historické ID a runtime označení
+zůstávají do pozdější migrace kompatibilními aliasy. Cockpit zahrnuje Recovery
+centrum a legacy VoiceBridge, Správa dokumentů zahrnuje platební připomínky a
+Samantha Infrastructure zahrnuje Guard proti mazání. Samostatné tooly jsou
+Záloha a obnova, Zmenšování obrázků, PictNew a TTS.
+
+Hranice fáze zůstala dodržena: žádná změna UI, API, profilů, workspace,
+soukromých vláken, nasazení ani restartu. Cílená sada prošla 107 testy, plná
+Cockpit Quality Gate všemi syntaxemi a 922 testy za 248,040 sekundy a živý smoke
+test skončil 5/5. Další krok po checkpointu a zeleném CI je fáze 4.2: soukromé
+lazy vlákno nezávislé na dnešních dvou pevných profilech.

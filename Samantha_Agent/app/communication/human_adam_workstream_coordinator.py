@@ -8,16 +8,19 @@ workspace synchronization.
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
 from app.codex_appserver import AppServerError
-
-
-WORKSTREAM_ID_RE = re.compile(r"[a-z][a-z0-9_-]{1,63}")
-WORKSTREAM_TYPES = frozenset({"Project", "Tool", "Layer", "Misc"})
+from app.communication.human_adam_workstream_catalog import (
+    WORKSTREAM_CATALOG,
+    WORKSTREAM_CATALOG_BY_ID,
+    WORKSTREAM_ID_RE,
+    WORKSTREAM_TYPES,
+    CanonicalWorkstream,
+    validate_workstream_catalog,
+)
 
 
 @dataclass(frozen=True)
@@ -88,8 +91,19 @@ def canonical_workstream_binding(
 class HumanAdamWorkstreamCoordinator:
     """Resolve registered workstreams without exposing private thread state."""
 
-    def __init__(self, profiles: Mapping[str, Mapping[str, Any]]) -> None:
+    def __init__(
+        self,
+        profiles: Mapping[str, Mapping[str, Any]],
+        *,
+        catalog: tuple[CanonicalWorkstream, ...] = WORKSTREAM_CATALOG,
+    ) -> None:
         self._profiles = profiles
+        self._catalog = validate_workstream_catalog(catalog)
+        self._catalog_by_id = (
+            WORKSTREAM_CATALOG_BY_ID
+            if self._catalog is WORKSTREAM_CATALOG
+            else {record.workstream_id: record for record in self._catalog}
+        )
         self._profile_by_workstream: dict[str, str] = {}
         for profile_id, profile in profiles.items():
             binding = profile.get("workstream_binding")
@@ -99,7 +113,21 @@ class HumanAdamWorkstreamCoordinator:
                 raise ValueError("Profil obsahuje neověřenou vazbu pracovního proudu.")
             if binding.workstream_id in self._profile_by_workstream:
                 raise ValueError("Dva profily nesmějí vlastnit stejný pracovní proud.")
+            catalog_record = self._catalog_by_id.get(binding.workstream_id)
+            if catalog_record is None:
+                raise ValueError("Profil odkazuje na pracovní proud mimo kanonický katalog.")
+            if (
+                binding.workstream_type
+                not in {catalog_record.workstream_type, *catalog_record.binding_type_aliases}
+                or binding.name not in {catalog_record.name, *catalog_record.binding_aliases}
+            ):
+                raise ValueError("Profil neodpovídá kanonickému katalogu pracovních proudů.")
             self._profile_by_workstream[binding.workstream_id] = profile_id
+
+    def catalog(self) -> tuple[CanonicalWorkstream, ...]:
+        """Return the phase 4.1 catalog without creating threads or profiles."""
+
+        return self._catalog
 
     def profile_id_for(self, workstream_id: str) -> str:
         clean_id = str(workstream_id or "").strip().casefold()

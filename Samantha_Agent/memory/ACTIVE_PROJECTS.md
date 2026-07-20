@@ -41,6 +41,16 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-20: Priorita 1, univerzalni katalog pracovnich proudu faze 4.1.
+  Validovany git-safe katalog ma po Milove rucni kontrole 29 proudu: 23
+  projektu, 4 tooly a 2 `Misc`; 26 je aktivnich a iPhone Shortcuts / Mobile
+  Input, Vocabulary FR a Vocabulary IT jsou pozastavene. Vsech 28 zivych radku
+  tohoto registru zustava pokryto pres kanonicka slouceni. Human–Adam je
+  kanonicky projekt s docasnymi runtime aliasy; UI, profily, workspace ani vlakna
+  se nezmenily. Cilenych 107 testu, plna brana 922 testu za 248,040 sekundy a
+  zivy smoke 5/5 prosly. Dalsi krok po checkpointu a zelenem CI je faze 4.2 –
+  lazy soukroma vlakna nezavisla na dvou pevnych profilech. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-20: Transformace Human–Adam faze 1.5. Mila rucne potvrdil vizualni
   roundtrip faze 1.4. Novy private completion protokol po uspesnem zapisovacim
   tahu skryje technickou JSON uctenku, odvodí z ni commit/souhrn/dalsi krok a

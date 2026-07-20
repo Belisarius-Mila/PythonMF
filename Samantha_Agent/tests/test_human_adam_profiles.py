@@ -616,10 +616,12 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, *_rest = self.make_manager(Path(temp_dir))
             status = manager.workstream_status()
+            catalog = manager.workstream_coordinator.catalog()
 
         self.assertTrue(status["ok"])
         self.assertTrue(status["private_backend"])
         self.assertEqual(status["workstream_count"], 2)
+        self.assertEqual(len(catalog), 29)
         self.assertEqual(
             [(row["id"], row["type"], row["active"]) for row in status["workstreams"]],
             [
