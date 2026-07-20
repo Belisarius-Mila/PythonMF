@@ -29,11 +29,13 @@ class FakeRuntime:
     def __init__(self, root: Path) -> None:
         self.socket_path = root / "app-server.sock"
         self.reachable = False
+        self.last_start_kwargs: dict[str, object] = {}
 
     def status(self) -> dict[str, object]:
         return {"reachable": self.reachable, "running": self.reachable}
 
-    def start(self) -> dict[str, object]:
+    def start(self, **kwargs: object) -> dict[str, object]:
+        self.last_start_kwargs = dict(kwargs)
         self.reachable = True
         return self.status()
 
@@ -308,6 +310,45 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(status["development_semaphore"]["can_acquire_profile"])
         self.assertTrue(status["workstream_selection"]["ok"])
         self.assertEqual(status["workstream_selection"]["workstream_count"], 2)
+
+    def test_status_exposes_only_recent_deployment_for_active_workstream(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_rest = self.make_manager(Path(temp_dir))
+            recovery = {
+                "state": "deployed",
+                "workstream_id": "layer-human-adam-development",
+                "main_short": "abcdef012345",
+                "deployed_at": "2026-07-20T13:47:16+00:00",
+                "gate": {"passed": True, "test_count": 904, "duration_seconds": 272.5},
+                "smoke": {"passed": True, "check_count": 5},
+            }
+            with patch(
+                "app.communication.human_adam_profiles.load_recent_simple_main_deployment",
+                return_value=recovery,
+            ):
+                status = manager.status()
+                manager.switch(profile_id="knihovna", confirmed=True)
+                other_status = manager.status()
+
+        self.assertEqual(status["recent_simple_main_deployment"], recovery)
+        self.assertIsNone(other_status["recent_simple_main_deployment"])
+
+    def test_connect_allows_runtime_recovery_only_for_safe_session(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _human_workspace, _library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.connect()
+            safe_recovery = manager.runtime.last_start_kwargs
+            manager.runtime.reachable = False
+            human_hub.messages = [
+                {"status": "delivery_unknown", "recovery_required": True}
+            ]
+            manager.connect()
+            uncertain_recovery = manager.runtime.last_start_kwargs
+
+        self.assertTrue(safe_recovery["recover_unreachable_owned"])
+        self.assertFalse(uncertain_recovery["recover_unreachable_owned"])
 
     def test_simple_checkpoint_context_comes_from_active_profile_binding(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

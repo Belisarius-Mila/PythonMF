@@ -583,6 +583,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let deliveryUncertain = false;
   let deploymentAudit = null;
   const verifiedDeploymentStorageKey = "human-adam:verified-deployment:v1";
+  const verifiedDeploymentSeenStorageKey = "human-adam:verified-deployment-seen:v1";
   const verifiedDeploymentMaxAgeMs = 15 * 60 * 1000;
   let developmentSemaphore = null;
   let projectContinuity = null;
@@ -1293,13 +1294,17 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   }
 
   async function loadStatus() {
-    if (busy) return;
+    if (busy) return null;
     setBusy(true, "Načítám stav…");
     try {
       const payload = await api("/api/human-adam/status");
       renderStatus(payload);
       notice.textContent = payload.ok ? "" : (payload.message || "Human–Adam zatím není připravený.");
-    } catch (error) { notice.textContent = `Stav nelze načíst: ${error.message}`; }
+      return payload;
+    } catch (error) {
+      notice.textContent = `Stav nelze načíst: ${error.message}`;
+      return null;
+    }
     finally { setBusy(false); }
   }
 
@@ -2242,14 +2247,45 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     }
   }
 
+  function verifiedDeploymentFingerprint(record) {
+    if (!record) return "";
+    return `${record.main_short}:${record.deployed_at}`;
+  }
+
+  function recentServerDeploymentRecord(payload) {
+    const record = verifiedDeploymentRecord(payload && payload.recent_simple_main_deployment);
+    if (!record) return null;
+    const ageMs = Date.now() - new Date(record.deployed_at).getTime();
+    if (ageMs < 0 || ageMs > verifiedDeploymentMaxAgeMs) return null;
+    try {
+      if (window.sessionStorage.getItem(verifiedDeploymentSeenStorageKey) === verifiedDeploymentFingerprint(record)) {
+        return null;
+      }
+    } catch (_error) {
+      // Serverový důkaz zůstává použitelný i bez browserového úložiště.
+    }
+    return record;
+  }
+
+  function markVerifiedDeploymentSeen(record) {
+    try {
+      window.sessionStorage.setItem(verifiedDeploymentSeenStorageKey, verifiedDeploymentFingerprint(record));
+    } catch (_error) {
+      // Bez úložiště se může čerstvé potvrzení zobrazit znovu, ale neztratí se.
+    }
+  }
+
   async function restoreVerifiedDeploymentResult() {
-    const record = takeVerifiedDeploymentResult();
+    let record = takeVerifiedDeploymentResult();
+    const statusPayload = await loadStatus();
+    if (!record) record = recentServerDeploymentRecord(statusPayload);
     if (!record) return;
     contextAnchorPanel.hidden = true;
     tvbcpPanel.hidden = true;
     workPanel.hidden = false;
     await loadWork();
     deployMeta.textContent = verifiedDeploymentSummary(record);
+    markVerifiedDeploymentSeen(record);
   }
 
   async function deployCheckpoint() {
@@ -2419,7 +2455,6 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   });
   clearMessageInput();
   window.addEventListener("pageshow", clearMessageInput);
-  loadStatus();
   restoreVerifiedDeploymentResult();
 </script>
 </body>

@@ -44,7 +44,7 @@ class FakeRuntime:
             "transport": "private_local_unix_socket",
         }
 
-    def start(self) -> dict[str, object]:
+    def start(self, **_kwargs: object) -> dict[str, object]:
         self.started += 1
         self.reachable = True
         return {**self.status(), "started": True}

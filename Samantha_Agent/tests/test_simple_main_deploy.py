@@ -14,6 +14,7 @@ from app.communication.simple_main_deploy import (
     SimpleMainDeploymentError,
     SimpleMainDeploymentRequest,
     audit_simple_main_deployment,
+    load_recent_simple_main_deployment,
     load_simple_main_deployment_receipt,
     prepare_simple_main_deployment,
     verify_simple_main_deployment,
@@ -303,6 +304,55 @@ class SimpleMainDeploymentTests(unittest.TestCase):
         self.assertFalse(result["semaphore_used"])
         self.assertEqual(receipt["state"], DEPLOYED)
         self.assertEqual(receipt["observed_pid"], 654)
+
+    def test_recent_deployed_receipt_returns_only_safe_short_recovery_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            receipt_path = Path(temp_dir) / "receipt.json"
+            receipt_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "state": DEPLOYED,
+                        "workstream_id": "project-library",
+                        "main_head": "a" * 40,
+                        "expected_code_stamp": "0123456789abcdef",
+                        "previous_pid": 100,
+                        "test_count": 904,
+                        "gate_duration_seconds": 272.5,
+                        "prepared_at": "2026-07-20T13:42:00+00:00",
+                        "observed_pid": 200,
+                        "smoke_count": 5,
+                        "deployed_at": "2026-07-20T13:47:16+00:00",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            recent = load_recent_simple_main_deployment(
+                receipt_path,
+                now_factory=lambda: "2026-07-20T13:50:00+00:00",
+            )
+            stale = load_recent_simple_main_deployment(
+                receipt_path,
+                now_factory=lambda: "2026-07-20T14:10:00+00:00",
+            )
+
+        self.assertEqual(
+            recent,
+            {
+                "state": DEPLOYED,
+                "workstream_id": "project-library",
+                "main_short": "a" * 12,
+                "deployed_at": "2026-07-20T13:47:16+00:00",
+                "gate": {
+                    "passed": True,
+                    "test_count": 904,
+                    "duration_seconds": 272.5,
+                },
+                "smoke": {"passed": True, "check_count": 5},
+            },
+        )
+        self.assertIsNone(stale)
 
     def test_verify_keeps_pending_receipt_when_restart_or_smoke_evidence_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

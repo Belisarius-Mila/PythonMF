@@ -415,3 +415,49 @@ Změněné soubory jsou `.github/workflows/cockpit-quality-gate.yml`,
 `test_cockpit_quality_gate.py`, tento handoff a TVBCP. Fáze zatím není
 commitnutá ani pushnutá. Další krok: checkpoint + commit + push fáze 3.1b; změna
 workflow sama musí spustit vzdálený Cockpit Quality Gate a tím opravu potvrdit.
+
+### Fáze 3.1c – odolnost účtenky, Git fetch a app-serveru
+
+Dne 2026-07-20 16:30 CEST byly tři provozní mezery spojené do jedné úzké
+odolnostní opravy bez změny vzhledu Human–Adam. Předchozí nasazení commitu
+`38cb187` bylo serverově úplné: účtenka `deployed`, 904 testů, smoke `5/5`, nový
+PID `50753` a oba profily zarovnané. Panel `Práce` se přesto neobnovil, protože
+nasazení zahájil ještě starý JavaScript bez markeru fáze 3.1a; nový kód se načetl
+až po restartu. Šlo o jednorázovou bootstrap mezeru, ne o selhání nasazení.
+
+Server nyní z privátní jednoduché účtenky odvozuje maximálně 15 minut starý
+bezpečný souhrn jen pro aktivní kanonický pracovní proud. Do klienta neposílá
+PID, socket, cestu, kódový otisk ani soukromý obsah. Nové UI po startu nejdřív
+použije jednorázový `sessionStorage` marker; pokud chybí, převezme tento serverový
+důkaz, otevře `Práci`, načte její stav a zobrazí commit, počet testů, smoke a čas.
+V jedné browserové relaci si pouze poznamená již zobrazený otisk účtenky.
+
+Dva lokální fetch přenosy selhaly na macOS chybou `mmap failed: Resource deadlock
+avoided`. Audit prokázal, že reverse-index hlavního Git packu byl v iCloudem
+spravované Ploše označený `dataless`; následná hláška o chybějících objektech byla
+jen důsledek přerušeného přenosu. Synchronizace nyní před fetchem kontroluje
+packové soubory. Malé odložené indexy do 16 MiB bezpečně načte, velký odložený
+pack odmítne se srozumitelným pokynem `Zachovat stažené` a přesnou přechodnou
+chybu `mmap` opakuje nejvýše jednou. Míla zároveň ve Finderu zapnul `Zachovat
+stažené` pro celý `PythonMF`; následná kontrola nenašla žádný `dataless` Git
+objekt.
+
+App-server používá soukromou vlastnickou účtenku vedle socketu. Obsahuje jen
+schéma, PID, přesnou procesní identitu a socketovou cestu. Nový controller smí
+převzít i starší dosažitelný proces pouze po úspěšném socketovém handshaku a
+shodě příkazu a procesní skupiny. Neodpovídající proces smí ukončit a nahradit
+jen při úplné shodě účtenky, PID, identity, skupiny a socketu a jen pokud profil
+nemá aktivní tah ani nejisté doručení. Cizí nebo neověřitelný socket zůstává
+fail-closed. Startovací limit byl zvýšen z 12 na 30 sekund.
+
+Cílená sada prošla 159 testy. Plná Cockpit brána prošla kontrolou diffu, Python,
+oběma JavaScript a shell syntaxemi a 913 testy za 298,271 sekundy; skončila
+`OK`. Změněné aplikační soubory jsou `simple_main_deploy.py`,
+`human_adam_profiles.py`, `human_adam_ui.py`, `human_adam_workspace.py`,
+`human_adam_service.py` a `local_runtime.py` se šesti odpovídajícími testovacími
+moduly, tento handoff a TVBCP. Fáze zatím není commitnutá, pushnutá ani nasazená.
+
+Další krok: checkpoint + commit + push fáze 3.1c. Po zeleném vzdáleném Quality
+Gate ji nasadit současnou samoobslužnou cestou. Běžný reload musí obnovit panel
+z browserového markeru; nový samostatný tab otevřený do 15 minut musí totéž
+dokázat pouze ze serverové účtenky.

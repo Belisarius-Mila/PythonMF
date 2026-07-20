@@ -38,6 +38,7 @@ DEFAULT_SIMPLE_MAIN_DEPLOYMENT_RECEIPT = (
 SIMPLE_MAIN_DEPLOYMENT_SCHEMA = 1
 PENDING_RESTART = "pending_restart"
 DEPLOYED = "deployed"
+RECENT_DEPLOYMENT_MAX_AGE_SECONDS = 15 * 60
 SIMPLE_MAIN_DEPLOYMENT_CONFIRMATION = "POTVRZUJI NASAZENI CISTEHO MAIN"
 _HEAD_RE = re.compile(r"[0-9a-f]{40}")
 _CODE_STAMP_RE = re.compile(r"[0-9a-f]{16}")
@@ -286,6 +287,45 @@ def load_simple_main_deployment_receipt(path: Path) -> dict[str, Any]:
             }
         )
     return normalized
+
+
+def load_recent_simple_main_deployment(
+    path: Path,
+    *,
+    now_factory: Callable[[], str] = utc_now,
+    max_age_seconds: int = RECENT_DEPLOYMENT_MAX_AGE_SECONDS,
+) -> dict[str, Any] | None:
+    """Return a short safe summary of one recently verified deployment."""
+
+    try:
+        receipt = load_simple_main_deployment_receipt(path)
+    except SimpleMainDeploymentError:
+        return None
+    if receipt.get("state") != DEPLOYED:
+        return None
+    try:
+        now = datetime.fromisoformat(_safe_timestamp(now_factory(), label="Kontrola"))
+        deployed_at = datetime.fromisoformat(str(receipt["deployed_at"]))
+        age_seconds = (now - deployed_at).total_seconds()
+    except (KeyError, TypeError, ValueError, SimpleMainDeploymentError):
+        return None
+    if max_age_seconds <= 0 or age_seconds < 0 or age_seconds > max_age_seconds:
+        return None
+    return {
+        "state": DEPLOYED,
+        "workstream_id": str(receipt["workstream_id"]),
+        "main_short": str(receipt["main_head"])[:12],
+        "deployed_at": str(receipt["deployed_at"]),
+        "gate": {
+            "passed": True,
+            "test_count": int(receipt["test_count"]),
+            "duration_seconds": float(receipt["gate_duration_seconds"]),
+        },
+        "smoke": {
+            "passed": True,
+            "check_count": int(receipt["smoke_count"]),
+        },
+    }
 
 
 def audit_simple_main_deployment(

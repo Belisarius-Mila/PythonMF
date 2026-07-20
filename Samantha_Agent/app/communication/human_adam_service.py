@@ -441,9 +441,9 @@ class HumanAdamService:
         except (AppServerError, SessionHubError, OSError, ValueError) as exc:
             return {"ok": False, "status": "human_adam_status_failed", "message": str(exc)}
 
-    def connect(self) -> dict[str, Any]:
+    def connect(self, *, recover_unreachable_runtime: bool = False) -> dict[str, Any]:
         workspace = self._workspace_status()
-        self.runtime.start()
+        self.runtime.start(recover_unreachable_owned=recover_unreachable_runtime)
         if not self._profile:
             self._profile = self.profile_getter(
                 cwd=self.workspace.project_root,

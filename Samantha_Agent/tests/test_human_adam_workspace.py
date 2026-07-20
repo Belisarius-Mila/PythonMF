@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from app.codex_appserver import AppServerError
 from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
@@ -269,6 +270,59 @@ class HumanAdamWorkspaceManagerTests(unittest.TestCase):
             self.assertEqual(synced["remotes"], [])
             self.assertEqual((manager.project_root / "tracked.py").read_text(), "VALUE = 2\n")
             self.assertFalse((manager.workspace_root / "AuditCockpit56_M.txt").exists())
+
+    def test_fetch_materializes_dataless_metadata_and_retries_one_mmap_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            manager = HumanAdamWorkspaceManager(
+                source_repo=root / "source",
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            mmap_error = AppServerError(
+                "fatal: mmap failed: Resource deadlock avoided"
+            )
+            with patch.object(
+                manager, "_materialize_source_git_metadata", return_value=0
+            ) as materialize, patch(
+                "app.communication.human_adam_workspace._git_output",
+                side_effect=[mmap_error, ""],
+            ) as git_output:
+                manager._fetch_source_main()
+
+        self.assertEqual(materialize.call_count, 2)
+        self.assertEqual(git_output.call_count, 2)
+
+    def test_dataless_metadata_is_read_but_dataless_pack_is_blocked(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            manager = HumanAdamWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            pack_dir = source / ".git" / "objects" / "pack"
+            metadata = pack_dir / "pack-test.rev"
+            metadata.write_bytes(b"reverse-index")
+            states = iter((True, False))
+            with patch(
+                "app.communication.human_adam_workspace._path_is_dataless",
+                side_effect=lambda _path: next(states),
+            ):
+                materialized = manager._materialize_source_git_metadata()
+
+            metadata.unlink()
+            pack = pack_dir / "pack-test.pack"
+            pack.write_bytes(b"pack")
+            with patch(
+                "app.communication.human_adam_workspace._path_is_dataless",
+                return_value=True,
+            ):
+                with self.assertRaisesRegex(AppServerError, "Zachovat stažené"):
+                    manager._materialize_source_git_metadata()
+
+        self.assertEqual(materialized, 1)
 
     def test_equal_head_sync_repairs_stale_base_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

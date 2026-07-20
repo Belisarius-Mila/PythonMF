@@ -1921,3 +1921,34 @@ sekundy; celá brána skončila `OK` za 260,1 sekundy.
 
 Další krok: checkpoint, commit a push fáze 3.1b. Změna workflow musí sama spustit
 vzdálený Cockpit Quality Gate a tím potvrdit funkčnost opraveného triggeru.
+
+### 2026-07-20 16:30 CEST – Fáze 3.1c: odolnost provozních hran
+
+Nasazení `38cb187` bylo serverově úplné (904 testů, smoke `5/5`, nový PID,
+účtenka `deployed`), ale opravené UI nemohlo při svém vlastním prvním nasazení
+převzít marker, který stará stránka ještě neuměla vytvořit. Server proto nově
+poskytuje maximálně 15 minut starý bezpečný souhrn ověřené simple-main účtenky
+výhradně pro aktivní kanonický pracovní proud. UI jej použije jako jednorázový
+fallback k `sessionStorage`, znovu otevře `Práci` a ukáže commit, testy, smoke a
+čas bez zveřejnění PID, socketu, cest nebo soukromého kontextu.
+
+Opakované `mmap failed: Resource deadlock avoided` vzniklo nad `dataless`
+reverse-indexem velkého Git packu v iCloudem spravované Ploše. Git synchronizace
+proto před lokálním fetchem kontroluje packové objekty, malé odložené indexy
+materializuje, velký pack fail-closed odmítne s pokynem `Zachovat stažené` a
+přesnou přechodnou chybu opakuje jen jednou. `PythonMF` je zároveň ve Finderu
+nastavený na `Zachovat stažené` a aktuálně neobsahuje žádný `dataless` Git objekt.
+
+App-server má nově privátní vlastnickou účtenku. Zotavení je dovoleno jen při
+shodě PID, procesní identity, samostatné procesní skupiny a přesné Unix socketové
+cesty. Dosažitelný starší proces lze bezpečně adoptovat až po úspěšném handshaku;
+cizí či neověřitelný socket se nikdy nemaže. Neodpovídající ověřený proces lze
+nahradit pouze bez aktivního tahu a nejistého doručení. Startovací limit je 30
+sekund místo 12.
+
+Cílená sada prošla 159 testy. Plná Cockpit brána prošla všemi syntaxemi a 913
+testy za 298,271 sekundy; skončila `OK`.
+
+Další krok: checkpoint, commit a push fáze 3.1c. Po zeleném CI nasadit přes
+simple-main workflow a kromě běžného reloadu otevřít do 15 minut nový tab bez
+browserového markeru; i ten musí obnovit panel `Práce` ze serverové účtenky.

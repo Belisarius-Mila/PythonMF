@@ -54,6 +54,7 @@ from app.communication.simple_main_deploy import (
     DEFAULT_SIMPLE_MAIN_DEPLOYMENT_RECEIPT,
     SimpleMainDeploymentRequest,
     audit_simple_main_deployment as audit_clean_main_deployment,
+    load_recent_simple_main_deployment,
     load_simple_main_deployment_receipt,
     prepare_simple_main_deployment as prepare_clean_main_deployment,
     verify_simple_main_deployment as verify_clean_main_deployment,
@@ -539,6 +540,15 @@ class HumanAdamProfileManager:
             active_id = self.active_profile_id
             profile = self.profiles[active_id]
             payload = profile["service"].status()
+            binding = profile.get("workstream_binding")
+            recent_deployment = load_recent_simple_main_deployment(
+                self.simple_main_deployment_receipt_path
+            )
+            if recent_deployment and (
+                not isinstance(binding, CanonicalWorkstreamBinding)
+                or recent_deployment.get("workstream_id") != binding.workstream_id
+            ):
+                recent_deployment = None
             return {
                 **payload,
                 "work_profile": {
@@ -549,6 +559,7 @@ class HumanAdamProfileManager:
                 "work_profiles": self._profile_rows(),
                 "workstream_selection": self.workstream_status(),
                 "development_semaphore": self.development_status(),
+                "recent_simple_main_deployment": recent_deployment,
             }
         except (AppServerError, SessionHubError, OSError, ValueError) as exc:
             return {
@@ -579,8 +590,8 @@ class HumanAdamProfileManager:
         workspace_synced = False
         with self.profile_operation() as service:
             workspace = service.workspace.status()
+            session = service.hub.snapshot()
             if workspace.get("source_update_available"):
-                session = service.hub.snapshot()
                 if session.get("turn_busy") or session.get("active_turn"):
                     raise SessionBusyError(
                         "Workspace nelze aktualizovat během aktivního tahu Adama."
@@ -597,7 +608,14 @@ class HumanAdamProfileManager:
                 workspace = service.workspace.sync_from_main(confirmed=True)
                 self._assert_target_workspace(workspace)
                 workspace_synced = True
-            result = service.connect()
+            runtime_recovery_allowed = bool(
+                not session.get("turn_busy")
+                and not session.get("active_turn")
+                and not self._has_uncertain_delivery(session)
+            )
+            result = service.connect(
+                recover_unreachable_runtime=runtime_recovery_allowed
+            )
         return {
             **result,
             **self._profile_status_fields(),
@@ -1674,7 +1692,15 @@ class HumanAdamProfileManager:
                 target_status = target.workspace.sync_from_main(confirmed=True)
             self._assert_target_workspace(target_status)
 
-            target.connect()
+            target_session = target.hub.snapshot()
+            target_recovery_allowed = bool(
+                not target_session.get("turn_busy")
+                and not target_session.get("active_turn")
+                and not self._has_uncertain_delivery(target_session)
+            )
+            target.connect(
+                recover_unreachable_runtime=target_recovery_allowed
+            )
             try:
                 current.hub.close()
                 self._write_active_profile_id(target_id)

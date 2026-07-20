@@ -150,6 +150,10 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("window.sessionStorage.removeItem", source)
         self.assertNotIn("localStorage", source)
         self.assertIn("verifiedDeploymentMaxAgeMs", source)
+        self.assertIn("payload && payload.recent_simple_main_deployment", source)
+        self.assertIn("verifiedDeploymentSeenStorageKey", source)
+        self.assertIn("const statusPayload = await loadStatus();", restore_source)
+        self.assertIn("recentServerDeploymentRecord(statusPayload)", restore_source)
         self.assertIn("workPanel.hidden = false;", restore_source)
         loaded = restore_source.index("await loadWork();")
         confirmed = restore_source.index("deployMeta.textContent = verifiedDeploymentSummary(record);")
@@ -158,6 +162,8 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("main ${record.main_short}", HUMAN_ADAM_HTML)
         self.assertIn("${record.test_count} testů", HUMAN_ADAM_HTML)
         self.assertIn("smoke ${record.smoke_count}/5", HUMAN_ADAM_HTML)
+        startup = HUMAN_ADAM_HTML[HUMAN_ADAM_HTML.rindex("clearMessageInput();"):]
+        self.assertNotIn("\n  loadStatus();", startup)
 
     def test_thread_rotation_ui_requires_audit_exact_phrase_and_preserves_old_thread(self) -> None:
         audit_start = HUMAN_ADAM_HTML.index("async function auditThreadRotation()")

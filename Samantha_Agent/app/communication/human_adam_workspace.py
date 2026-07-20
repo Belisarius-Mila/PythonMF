@@ -71,6 +71,9 @@ PUBLIC_SOURCE_MEDIA_PREFIXES = (
     "docs/colors-numbers/",
 )
 MAX_PUBLIC_SOURCE_MEDIA_BYTES = 8 * 1024 * 1024
+MAX_AUTO_MATERIALIZE_GIT_METADATA_BYTES = 16 * 1024 * 1024
+MACOS_SF_DATALESS = 0x40000000
+GIT_PACK_OBJECT_SUFFIXES = {".bitmap", ".idx", ".pack", ".rev"}
 
 
 def _now() -> str:
@@ -122,6 +125,14 @@ def _status_rows(repo: Path) -> list[dict[str, str]]:
             continue
         rows.append({"status": raw[:2], "path": raw[3:]})
     return rows
+
+
+def _path_is_dataless(path: Path) -> bool:
+    try:
+        flags = int(getattr(path.stat(), "st_flags", 0) or 0)
+    except OSError:
+        return False
+    return bool(flags & MACOS_SF_DATALESS)
 
 
 class HumanAdamWorkspaceManager:
@@ -403,11 +414,7 @@ class HumanAdamWorkspaceManager:
                     "message": "Izolovaný workspace už odpovídá aktuálnímu commitnutému main.",
                 }
 
-            _git_output(
-                self.workspace_root,
-                ["fetch", "--no-tags", str(self.source_repo), "refs/heads/main"],
-                timeout=120,
-            )
+            self._fetch_source_main()
             if _git_output(self.workspace_root, ["remote"]):
                 raise AppServerError("Lokální fetch neočekávaně vytvořil Git remote; nic neaktualizuji.")
             fetched_head = _git_output(self.workspace_root, ["rev-parse", "FETCH_HEAD"])
@@ -477,6 +484,62 @@ class HumanAdamWorkspaceManager:
                 "incoming_change_count": len(incoming_rows),
                 "message": "Izolovaný workspace byl bezpečně fast-forwardován z lokálního main.",
             }
+
+    def _source_pack_objects(self) -> list[Path]:
+        git_dir_text = _git_output(self.source_repo, ["rev-parse", "--git-dir"])
+        git_dir = Path(git_dir_text)
+        if not git_dir.is_absolute():
+            git_dir = self.source_repo / git_dir
+        pack_dir = git_dir.resolve() / "objects" / "pack"
+        if not pack_dir.is_dir():
+            return []
+        return sorted(
+            path
+            for path in pack_dir.iterdir()
+            if path.is_file() and path.suffix.casefold() in GIT_PACK_OBJECT_SUFFIXES
+        )
+
+    def _materialize_source_git_metadata(self) -> int:
+        dataless = [path for path in self._source_pack_objects() if _path_is_dataless(path)]
+        if not dataless:
+            return 0
+        blocked = [
+            path
+            for path in dataless
+            if path.suffix.casefold() == ".pack"
+            or path.stat().st_size > MAX_AUTO_MATERIALIZE_GIT_METADATA_BYTES
+        ]
+        if blocked:
+            raise AppServerError(
+                "Git objektový pack je odložený z místního disku. "
+                "Ve Finderu použij Zachovat stažené pro PythonMF a počkej na dokončení."
+            )
+        for path in dataless:
+            try:
+                with path.open("rb") as handle:
+                    while handle.read(1024 * 1024):
+                        pass
+            except OSError as exc:
+                raise AppServerError(
+                    "Odložený Git index se nepodařilo bezpečně načíst z místního disku."
+                ) from exc
+            if _path_is_dataless(path):
+                raise AppServerError(
+                    "Git index zůstává odložený; synchronizace je bezpečně zastavená."
+                )
+        return len(dataless)
+
+    def _fetch_source_main(self) -> None:
+        self._materialize_source_git_metadata()
+        args = ["fetch", "--no-tags", str(self.source_repo), "refs/heads/main"]
+        try:
+            _git_output(self.workspace_root, args, timeout=120)
+        except AppServerError as exc:
+            detail = str(exc).casefold()
+            if "mmap failed" not in detail or "resource deadlock avoided" not in detail:
+                raise
+            self._materialize_source_git_metadata()
+            _git_output(self.workspace_root, args, timeout=120)
 
     @staticmethod
     def _blocked_checkpoint_path(path_text: str) -> bool:
