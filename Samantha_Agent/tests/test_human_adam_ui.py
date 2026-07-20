@@ -355,7 +355,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("row.textContent", HUMAN_ADAM_HTML)
         self.assertIn('developmentBranchAuditBtn.addEventListener("click", loadDevelopmentBranchAudit)', HUMAN_ADAM_HTML)
 
-    def test_work_help_is_accessible_static_and_covers_semaphore_and_branch_lifecycle(self) -> None:
+    def test_work_help_is_accessible_static_and_describes_simple_main_workflow(self) -> None:
         work_panel_start = HUMAN_ADAM_HTML.index('id="workPanel"')
         body_start = HUMAN_ADAM_HTML.index('class="work-panel-body"', work_panel_start)
         panel_start = HUMAN_ADAM_HTML.index('id="workHelpPanel"')
@@ -365,37 +365,23 @@ class HumanAdamUiTests(unittest.TestCase):
         toggle_end = HUMAN_ADAM_HTML.index("function closeWork()", toggle_start)
         toggle_source = HUMAN_ADAM_HTML[toggle_start:toggle_end]
 
-        self.assertIn('aria-label="Nápověda k Práci, vývojovému semaforu a WIP větvím"', HUMAN_ADAM_HTML)
+        self.assertIn('aria-label="Nápověda k jednoduchému vývoji a nasazení"', HUMAN_ADAM_HTML)
         self.assertIn('aria-controls="workHelpPanel"', HUMAN_ADAM_HTML)
         self.assertLess(body_start, panel_start)
         self.assertIn(".work-panel-body { flex:1; min-height:0; overflow:auto; display:flex; flex-direction:column; }", HUMAN_ADAM_HTML)
         self.assertIn(".work-help-panel { flex:0 0 auto; margin:12px 16px; }", HUMAN_ADAM_HTML)
         self.assertNotIn(".work-help-panel { flex:0 1 auto; max-height", HUMAN_ADAM_HTML)
-        self.assertIn("Běžný vývoj z r-Adama", panel_source)
-        self.assertIn("Vývoj z terminálového Adama", panel_source)
-        self.assertIn("Nový projekt", panel_source)
-        self.assertIn("se zakládá pouze v terminálovém dialogu s Adamem", panel_source)
-        self.assertIn("Pokud projekt v nabídce chybí, zde nepokračuj", panel_source)
-        self.assertIn("Čtyři fáze handoffu od zahájení po nasazení", panel_source)
-        self.assertIn("Fáze 1 — projektová vazba a kontrola aktuálnosti", panel_source)
-        self.assertIn("Fáze 2 — návrh handoffu při checkpointu", panel_source)
-        self.assertIn("Fáze 3 — kontrola handoffu při převzetí do `main`", panel_source)
-        self.assertIn("Fáze 4 — potvrzené dokončení po nasazení", panel_source)
-        self.assertIn("POTVRZUJI DOKONCENI HANDOFFU PO NASAZENI", panel_source)
-        self.assertIn("Ruční nasazení z terminálového Adama", panel_source)
-        self.assertIn("tvrdá blokace ručního uvolnění semaforu", panel_source)
-        self.assertIn("Až tento krok bezpečně uvolní semafor", panel_source)
-        self.assertIn("Životní cyklus větví", panel_source)
-        self.assertIn("Není to Codex vlákno", panel_source)
-        self.assertIn("Kandidát k úklidu neznamená smazáno", panel_source)
-        self.assertIn("Kontrola při převzetí", panel_source)
-        self.assertIn("pouze varuje a nasazení neblokuje", panel_source)
-        self.assertIn("Potvrzené dokončení", panel_source)
-        self.assertIn("stav nasazeno", panel_source)
-        self.assertIn("aktivní · rozpracováno", panel_source)
-        self.assertIn("vyžaduje revizi / nelze ověřit", panel_source)
+        self.assertIn("Jak pracovat a nasazovat", panel_source)
+        self.assertIn('class="simple-work-help"', panel_source)
+        self.assertIn("Běžný vývoj", panel_source)
+        self.assertIn("Nový projekt, tool nebo layer se zakládá pouze v terminálovém dialogu s Adamem", panel_source)
+        self.assertIn("jeden commit přímo v <code>main</code>", panel_source)
+        self.assertIn("Nasazení", panel_source)
+        self.assertIn("Audit nasazení", panel_source)
+        self.assertIn("Nasazeno a ověřeno", panel_source)
         self.assertIn("reset, rebase ani force push", panel_source)
         self.assertIn("Toto je pouze nápověda", panel_source)
+        self.assertIn("#workHelpPanel > :not(.workflow-help-head):not(.simple-work-help) { display:none !important; }", HUMAN_ADAM_HTML)
         self.assertNotIn("developmentAcquireProfileBtn", panel_source)
         self.assertNotIn("developmentAcquireTerminalBtn", panel_source)
         self.assertNotIn("developmentBranchAuditBtn", panel_source)
@@ -404,6 +390,21 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('workHelpBtn.setAttribute("aria-expanded"', toggle_source)
         self.assertIn('workHelpBtn.addEventListener("click"', HUMAN_ADAM_HTML)
         self.assertIn('workHelpCloseBtn.addEventListener("click"', HUMAN_ADAM_HTML)
+
+    def test_legacy_work_controls_are_kept_only_as_hidden_compatibility_layer(self) -> None:
+        self.assertIn(".legacy-work-control { display:none !important; }", HUMAN_ADAM_HTML)
+        for marker in (
+            'class="badge warn legacy-work-control" id="developmentBadge"',
+            'class="development-semaphore-box legacy-work-control"',
+            'class="project-continuity-box legacy-work-control"',
+            'class="development-branch-audit-box legacy-work-control"',
+            'class="handoff-proposal-box legacy-work-control"',
+            'class="deployment-completion-box legacy-work-control"',
+            'class="legacy-work-control" id="checkpointMessage"',
+            'class="primary legacy-work-control" id="checkpointBtn"',
+            'class="legacy-work-control" id="handoffTakeoverCheck"',
+        ):
+            self.assertIn(marker, HUMAN_ADAM_HTML)
 
     def test_profile_switch_is_explicit_atomic_and_preserves_unsent_draft(self) -> None:
         render_start = HUMAN_ADAM_HTML.index("function renderProfiles(payload)")

@@ -461,3 +461,33 @@ Další krok: checkpoint + commit + push fáze 3.1c. Po zeleném vzdáleném Qua
 Gate ji nasadit současnou samoobslužnou cestou. Běžný reload musí obnovit panel
 z browserového markeru; nový samostatný tab otevřený do 15 minut musí totéž
 dokázat pouze ze serverové účtenky.
+
+### Fáze 3.2 – zjednodušení běžného okna Práce
+
+Dne 2026-07-20 17:40 CEST byl po dokončení direct-main checkpointu a nasazovací
+cesty odstraněn z běžného zobrazení historický přechodový workflow. Okno
+`Práce` nyní ukazuje pouze stav workspace, případné změny, audit čistého `main`,
+přesnou potvrzovací větu a akci `Ověřit a nasadit`.
+
+Globální semafor a jeho stavový štítek, projektová vazba, audit WIP větví,
+ruční lokální WIP checkpoint, takeover kontrola, návrh handoffu a stará
+dokončovací karta jsou označené jako skrytá kompatibilní vrstva. Backend ani
+API se v této fázi nemažou, takže případná obnova zůstává vratná. Samostatné
+okno `Plán` a rotace vláken se nemění; jejich budoucí zjednodušení musí zachovat
+funkční výměnu kontextu a bude řešeno odděleně.
+
+Nápověda `Práce` má nový krátký postup: vybrat pracovní proud a připojit se,
+zadat úkol přímo Adamovi, nechat automaticky dokončit handoff + TVBCP + commit +
+push do `main` a panel otevřít až pro kontrolu nebo nasazení. Zachovává také
+stručný fail-closed postup při nečistém repu nebo chybě auditu.
+
+Cílená sada `test_human_adam_ui` prošla 56 testy. Plná Cockpit Quality Gate
+prošla kontrolou diffu, Python, oběma JavaScript a shell syntaxemi a 914 testy
+za 301,907 sekundy; celá testovací část trvala 305,8 sekundy a výsledek je `OK`.
+Vizuální kontrola nebyla v této Codex relaci dostupná, protože nebyl připojený
+ovladatelný prohlížeč.
+
+Změněné soubory fáze jsou `human_adam_ui.py`, `test_human_adam_ui.py`, tento
+handoff a kanonický TVBCP. Další krok: commit + push fáze 3.2, počkat na zelenou
+vzdálenou Quality Gate a potom nasadit simple-main cestou. Míla následně ověří,
+že okno `Práce` obsahuje jen nový jednoduchý workflow.

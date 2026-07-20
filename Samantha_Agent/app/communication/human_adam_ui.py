@@ -119,6 +119,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .workflow-help-panel ol,.workflow-help-panel ul { margin:4px 0 0; padding-left:23px; }
     .workflow-help-panel li { margin:5px 0; line-height:1.4; }
     .workflow-help-safety { margin-top:14px !important; padding:9px 11px; border-radius:10px; background:#ecfdf3; color:var(--ok) !important; }
+    #workHelpPanel > :not(.workflow-help-head):not(.simple-work-help) { display:none !important; }
+    .legacy-work-control { display:none !important; }
     .work-help-panel { flex:0 0 auto; margin:12px 16px; }
     .thread-rotation-box { margin-top:14px; padding-top:12px; border-top:1px solid #dbe3ee; display:grid; gap:8px; }
     .thread-rotation-box h3 { margin:0; font-size:15px; }
@@ -171,7 +173,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <span class="badge" id="profileBadge">Profil: Human–Adam</span>
         <span class="badge" id="threadBadge">Relace: —</span>
         <span class="badge" id="workspaceBadge">Izolovaný workspace</span>
-        <span class="badge warn" id="developmentBadge">Vývoj: neověřen</span>
+        <span class="badge warn legacy-work-control" id="developmentBadge">Vývoj: neověřen</span>
         <span class="badge" id="contextAnchorBadge">Kontext: nepřipnut</span>
         <button class="badge sound-badge warn" id="mediaSoundTestBtn" type="button">Zvuk odpovědi: vyzkoušet</button>
         <audio id="completionMediaAudio" preload="auto" playsinline hidden></audio>
@@ -281,15 +283,43 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   <aside class="tvbcp-panel" id="workPanel" hidden aria-label="Pracovní změny">
     <div class="tvbcp-head">
       <h2>Pracovní změny</h2>
-      <button class="workflow-help-trigger" id="workHelpBtn" type="button" aria-label="Nápověda k Práci, vývojovému semaforu a WIP větvím" aria-expanded="false" aria-controls="workHelpPanel" title="Jak bezpečně řídit vývoj a WIP větve">?</button>
+      <button class="workflow-help-trigger" id="workHelpBtn" type="button" aria-label="Nápověda k jednoduchému vývoji a nasazení" aria-expanded="false" aria-controls="workHelpPanel" title="Jak pracovat a nasazovat">?</button>
       <button id="workRefreshBtn" type="button">Obnovit</button>
       <button id="workCloseBtn" type="button">Zavřít</button>
     </div>
     <div class="work-panel-body">
     <section class="workflow-help-panel work-help-panel" id="workHelpPanel" aria-labelledby="workHelpTitle" tabindex="-1" hidden>
       <div class="workflow-help-head">
-        <h3 id="workHelpTitle">Jak pracovat s vývojem a WIP větvemi</h3>
+        <h3 id="workHelpTitle">Jak pracovat a nasazovat</h3>
         <button id="workHelpCloseBtn" type="button">Zavřít návod</button>
+      </div>
+      <div class="simple-work-help">
+        <p>Toto je pouze nápověda. Jejím otevřením se nic nemění, necommitne ani nenasadí.</p>
+
+        <h4>Běžný vývoj</h4>
+        <ol>
+          <li>Vyber pracovní proud, například <strong>Human–Adam</strong> nebo <strong>Knihovna</strong>, a klikni na <strong>Připojit</strong>.</li>
+          <li>Vývojový úkol napiš přímo Adamovi do textového pole. Nový projekt, tool nebo layer se zakládá pouze v terminálovém dialogu s Adamem.</li>
+          <li>Po úspěšné změně Adam automaticky spustí testy, aktualizuje handoff a TVBCP, vytvoří jeden commit přímo v <code>main</code>, pushne jej a synchronizuje čisté profily.</li>
+          <li>Okno <strong>Práce</strong> otevři až pro kontrolu stavu nebo nasazení hotového čistého <code>main</code>.</li>
+        </ol>
+
+        <h4>Nasazení</h4>
+        <ol>
+          <li>Workspace musí být čistý, synchronní a odpovídat <code>main</code>.</li>
+          <li>Stiskni <strong>Audit nasazení</strong> a přečti výsledek.</li>
+          <li>Vlož zobrazenou přesnou větu a stiskni <strong>Ověřit a nasadit</strong>.</li>
+          <li>Počkej na řízený restart a potvrzení <strong>Nasazeno a ověřeno</strong>.</li>
+        </ol>
+
+        <h4>Když něco nejde</h4>
+        <ul>
+          <li><strong>Workspace je za <code>main</code>:</strong> při čistém profilu klikni na Připojit.</li>
+          <li><strong>Audit nebo nasazení selže:</strong> nic neopakuj naslepo; obnov stav a předej Adamovi přesnou chybu.</li>
+          <li><strong>Repo není čisté:</strong> nenasazuj a nech Adama zjistit, co zůstalo rozpracované.</li>
+        </ul>
+
+        <p class="workflow-help-safety"><strong>Nouzový postup:</strong> nic nemaž, nepoužívej reset, rebase ani force push. Požádej Adama o read-only kontrolu.</p>
       </div>
       <p>Toto je pouze nápověda. Jejím otevřením se nemění semafor, workspace, checkpoint, větev ani Git.</p>
 
@@ -398,7 +428,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
       <p class="workflow-help-safety"><strong>Nouzový postup:</strong> nic nemaž, nepoužívej reset, rebase ani force push. Zachovej semafor i WIP a požádej Adama o read-only audit.</p>
     </section>
-    <section class="development-semaphore-box" aria-label="Globální vývojový semafor">
+    <section class="development-semaphore-box legacy-work-control" aria-label="Historický globální vývojový semafor">
       <h3>Vývojový semafor</h3>
       <p id="developmentSemaphoreMeta">Stav vlastníka vývoje se načte společně s pracovním stavem.</p>
       <div class="development-binding-fields">
@@ -418,7 +448,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <button id="developmentReleaseBtn" type="button" hidden>Uvolnit</button>
       </div>
     </section>
-    <section class="project-continuity-box" aria-label="Aktuálnost projektového handoffu">
+    <section class="project-continuity-box legacy-work-control" aria-label="Historická aktuálnost projektového handoffu">
       <div class="project-continuity-head">
         <h3>Kontinuita projektu</h3>
         <button id="projectContinuityAuditBtn" type="button">Prověřit handoff</button>
@@ -426,7 +456,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <p id="projectContinuityMeta">Audit je pouze read-only a zatím nic neblokuje.</p>
       <ul id="projectContinuityReasons" hidden></ul>
     </section>
-    <section class="development-branch-audit-box" aria-label="Životní cyklus vývojových větví">
+    <section class="development-branch-audit-box legacy-work-control" aria-label="Historický životní cyklus vývojových větví">
       <div class="development-branch-audit-head">
         <h3>Životní cyklus WIP větví</h3>
         <button id="developmentBranchAuditBtn" type="button">Prověřit WIP větve</button>
@@ -436,12 +466,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     </section>
     <div id="workMeta">Stav se načte až po otevření.</div>
     <ul id="workChanges"></ul>
-    <section class="handoff-proposal-box" id="handoffProposalBox" aria-label="Read-only návrh aktualizace handoffu" hidden>
+    <section class="handoff-proposal-box legacy-work-control" id="handoffProposalBox" aria-label="Read-only návrh aktualizace handoffu" hidden>
       <h3>Návrh handoffu po checkpointu</h3>
       <p id="handoffProposalMeta">Návrh zatím není připravený.</p>
       <pre id="handoffProposalDraft" hidden></pre>
     </section>
-    <section class="deployment-completion-box" id="deploymentCompletionBox" aria-label="Potvrzené dokončení handoffu po nasazení" hidden>
+    <section class="deployment-completion-box legacy-work-control" id="deploymentCompletionBox" aria-label="Potvrzené dokončení handoffu po nasazení" hidden>
       <h3>Potvrzené dokončení po nasazení</h3>
       <p id="deploymentCompletionMeta">Po restartu se ověří skutečný commit, nový proces a smoke test.</p>
       <ul id="deploymentCompletionEvidence" hidden></ul>
@@ -451,10 +481,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <p id="deploymentCompletionSafety" hidden>Zapíší se pouze uvedená ověřená fakta. Nevkládej hesla, tokeny ani soukromý text.</p>
     </section>
     <div class="checkpoint-box">
-      <input id="checkpointMessage" maxlength="120" placeholder="Krátký popis WIP checkpointu">
-      <button class="primary" id="checkpointBtn" type="button" disabled>Checkpoint bez pushnutí</button>
+      <input class="legacy-work-control" id="checkpointMessage" maxlength="120" placeholder="Historický lokální checkpoint">
+      <button class="primary legacy-work-control" id="checkpointBtn" type="button" disabled>Historický lokální checkpoint</button>
       <div id="deployMeta">Nasazení je dostupné až po lokálním WIP checkpointu.</div>
-      <div id="handoffTakeoverCheck" role="status" hidden></div>
+      <div class="legacy-work-control" id="handoffTakeoverCheck" role="status" hidden></div>
       <button class="audit-action" id="deployAuditBtn" type="button" disabled>Audit nasazení</button>
       <input id="deployConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Po auditu sem vlož potvrzovací větu" hidden disabled>
       <button class="deploy-action" id="deployBtn" type="button" disabled>Ověřit a nasadit</button>

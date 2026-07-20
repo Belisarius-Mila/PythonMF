@@ -1952,3 +1952,27 @@ testy za 298,271 sekundy; skončila `OK`.
 Další krok: checkpoint, commit a push fáze 3.1c. Po zeleném CI nasadit přes
 simple-main workflow a kromě běžného reloadu otevřít do 15 minut nový tab bez
 browserového markeru; i ten musí obnovit panel `Práce` ze serverové účtenky.
+
+### 2026-07-20 17:40 CEST – Fáze 3.2: běžné okno Práce je zjednodušené
+
+Po dokončení direct-main checkpointu a nasazovací cesty zůstává v běžném panelu
+`Práce` pouze stav workspace, případné změny, audit čistého `main`, přesná
+potvrzovací věta a akce `Ověřit a nasadit`. Historický globální semafor včetně
+stavového štítku, projektová vazba, WIP branch audit, ruční lokální checkpoint,
+takeover kontrola, návrh handoffu a dokončovací karta jsou skrytou kompatibilní
+vrstvou a uživatele nezatěžují.
+
+Backend a API těchto starších částí se zatím nemažou. Toto je záměrná vratná
+mezifáze před samostatným odstraněním mrtvého kódu po živém vizuálním potvrzení.
+Okno `Plán` a rotace profilového vlákna zůstávají beze změny, protože jejich
+zjednodušení musí zachovat bezpečnou výměnu kontextu.
+
+Nápověda `Práce` nyní popisuje jen kanonický jednoduchý tok: výběr pracovního
+proudu, připojení, zadání vývoje Adamovi, automatické handoff + TVBCP + commit +
+push do `main` a následné auditované nasazení. Cílených 56 UI testů prošlo. Plná
+Cockpit Quality Gate prošla všemi syntaxemi a 914 testy za 301,907 sekundy;
+testovací část skončila `OK` za 305,8 sekundy. Vizuální prohlížeč nebyl v této
+relaci dostupný.
+
+Další krok: commit a push fáze 3.2, vzdálená Quality Gate, simple-main nasazení
+a Mílovo vizuální potvrzení zjednodušeného panelu `Práce`.
