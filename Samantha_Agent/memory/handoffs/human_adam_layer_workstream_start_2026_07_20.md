@@ -19,21 +19,21 @@ Co je hotove:
   se do Gitu neuklada.
 - Stavajici `tvbcp/architektura_komunikace_samantha.txt` je potvrzen jako
   kanonicky TVBCP tohoto Layeru a je obousmerne propojen s registrem i handoffem.
+- TVBCP obsahuje novy kanonicky jednoduchy model pracovnich proudu a presny
+  seznam nahrazenych a zachovanych starsich pravidel.
 - Nebyl zmenen kod, UI, API, runtime, Git workflow, nasazeni ani bezici relace.
 
 Co neni hotove:
-- Neni dokoncena kanonicka dohoda, vychozi funkcni kontrola ani regresni sada
-  kroku 0.
+- Neni dokoncena vychozi funkcni kontrola ani regresni sada kroku 0.
 - Stary runtime nazev se zatim nesmi prejmenovat, protoze jej pouziva soucasna
   profilova konfigurace Cockpitu.
 
 Dalsi krok:
-Krok 0, bod 3: zapsat do kanonickeho TVBCP schvaleny jednoduchy model pracovnich
-proudu a vymezit, ktera starsi pravidla nahrazuje, stale bez funkcni zmeny.
+Krok 0, bod 4: read-only zmerit a zaznamenat vychozi funkcni stav soucasneho
+Human–Adam pred prvni implementacni zmenou.
 
 Navrhovane dalsi kroky:
-- Zapsat do TVBCP schvaleny jednoduchy model pracovnich proudu.
-- Teprve potom zmerit a zaznamenat vychozi funkcni stav Human–Adam.
+- Zmerit a zaznamenat vychozi funkcni stav Human–Adam.
 - Zachovat UI a zakladni funkce po celou dobu postupne transformace.
 
 Zmenene nebo relevantni soubory:

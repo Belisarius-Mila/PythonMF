@@ -24,7 +24,10 @@ Není kopií celého chatu ani náhradou handoffu:
 - Projektová paměť drží dlouhodobě platný kontext.
 - TVBCP nesmí obsahovat hesla, tokeny, API klíče ani zbytečné citlivé texty.
 
-## Kanonická dohoda
+## Původní kanonická dohoda z 2026-07-13
+
+Tato dohoda zůstává zachována jako historický základ. Od 2026-07-20 má při
+rozporu přednost níže uvedený zjednodušený model pracovních proudů.
 
 1. Samantha bude mít jednoho kanonického Adama: jeden trvalý Codex app-server a
    jedno aktivní konverzační vlákno.
@@ -66,6 +69,122 @@ Není kopií celého chatu ani náhradou handoffu:
     historickou nebo znovupoužitelnou hodnotu. V takovém případě se uloží
     inteligentně mimo runtime a mimo tělo Cockpitu, jasně označený jako
     neaktivní. Git historie zůstává základním archivem odstraněného kódu.
+
+## Kanonická dohoda od 2026-07-20 – jednoduchý model pracovních proudů
+
+### 1. Jedna organizační jednotka
+
+Veškerá souvislá práce patří do pracovního proudu právě jednoho typu:
+
+- `Project` – dlouhodobý produkt nebo ucelená doménová oblast;
+- `Tool` – samostatná opakovaně použitelná schopnost;
+- `Layer` – průřezová technická nebo provozní vrstva;
+- `Misc` – dočasné nezařazené práce, které zatím nedávají smysl jako Project,
+  Tool ani Layer.
+
+Nový pracovní proud zakládá Adam s Mílou v terminálovém dialogu. r-Adam nový
+proud ani projekt neregistruje. `Misc` není odkladiště pro každou drobnost;
+jednotlivá malá změna může být jen krokem existujícího proudu.
+
+### 2. Nedělitelná čtveřice pracovního proudu
+
+Každý pracovní proud má:
+
+1. vlastní trvalé Codex vlákno;
+2. vlastní krátký pracovní kontext profilu;
+3. vlastní TVBCP;
+4. vlastní handoff.
+
+TVBCP a handoff jsou neoddělitelná paměťová dvojice. TVBCP průběžně zachycuje
+Mílův cíl, společná rozhodnutí, milníky a otevřený směr. Handoff drží technický
+stav, změněné soubory, ověření a nejmenší další krok. Handoff vzniká při založení
+proudu a Adam jej aktualizuje při každém Mílou vyžádaném checkpointu.
+
+Soukromý identifikátor vlákna ani private obsah se do Gitu neukládají.
+
+### 3. Jednoduchá kontinuita vlákna
+
+Textová komunikace r-Adama zůstává ve stávajících oknech Cockpitu. Každý profil
+se připojuje ke svému pracovnímu proudu a vlastnímu vláknu. Když se Codexové
+kontextové okno opotřebuje, lze v pozadí založit nové vlákno a navázat je z
+TVBCP, handoffu a krátkého aktuálního kontextu; staré vlákno zůstává zachované.
+
+Samostatná kontextová kotva není součástí cílového modelu. Capsule může zůstat
+jen jako volitelná nouzová technická účtenka, nikoli jako další povinný krok
+běžného vývoje.
+
+### 4. Vývoj přímo na main
+
+Běžný vývoj Samanthy probíhá přímo na `main` po malých, srozumitelných krocích.
+Normální cesta nepoužívá WIP větve, jejich rotaci, převzetí do main ani globální
+vývojový semafor.
+
+Jeden krok má jednoduchý životní cyklus:
+
+1. ověřit čistý a synchronní začátek;
+2. provést jednu vymezenou změnu;
+3. přiměřeně ji otestovat;
+4. na Mílův pokyn aktualizovat handoff a TVBCP, commitnout a pushnout;
+5. pokud jde o živou funkční změnu, nasadit, řízeně restartovat a udělat smoke
+   test;
+6. skončit s čistým repem a shodným `main` / `origin/main`.
+
+Než se přejde k jinému pracovnímu proudu, předchozí vývojový krok se dokončí a
+repo vyčistí. Pokud je začátek nečistý, Adam pouze pojmenuje konkrétní změny a
+navrhne jejich dokončení nebo bezpečnou obnovu; nepřidává kvůli tomu novou
+stavovou infrastrukturu.
+
+Výjimečná experimentální větev nebo izolovaný worktree je možný jen po nové
+výslovné dohodě v terminálu. Není běžnou součástí r-Adam workflow.
+
+### 5. Rozdělení odpovědnosti
+
+- Míla určuje cíl, schvaluje významná rozhodnutí a výslovně žádá checkpoint,
+  push nebo nasazení.
+- r-Adam vede textový dialog a provádí konkrétní vývoj uvnitř vybraného proudu.
+- Adam v terminálu zakládá proudy, řeší diagnostiku, havárie, konflikty a
+  nestandardní zásahy.
+- TVBCP se průběžně soustředí na lidsky důležité rozhodnutí; handoff při
+  checkpointu automaticky doplní technickou stopu.
+
+### 6. Co se zachovává
+
+- současný vzhled a hlavní textová okna Cockpitu;
+- oddělené profily, vlákna a pracovní kontexty;
+- bezpečný reconnect, ochrana proti duplicitnímu odeslání a jeden aktivní tah;
+- TVBCP, handoff, autosave, recovery a řízená výměna Codex vlákna;
+- tenký `cockpit.py` a doménová logika v samostatných modulech;
+- potvrzení pro destruktivní operace, práci s private daty, tajemstvími a jiné
+  skutečně rizikové akce.
+
+Globální bezpečnostní brzda zůstává pro destruktivní a citlivé zásahy. Nemá se
+používat jako obecná brzda běžného vývoje, commitu, pushnutí nebo nasazení
+vlastní Samanthy.
+
+### 7. Co nový model nahrazuje
+
+1. Původní body 1 a 2 o jediném globálním vláknu nahrazuje jedno vlastní vlákno
+   pro každý pracovní proud.
+2. Původní body 10 a 11 o vícekrokové rotaci a Capsule se zužují na jednoduché
+   předání přes TVBCP, handoff a krátký aktuální kontext; Capsule je volitelná.
+3. Rozhodnutí z 2026-07-17 o samostatné kontextové kotvě je překonané. Kotva se
+   má později odstranit z cílového workflow, až bude náhrada ověřená.
+4. Pozdější workflow WIP větví, převzetí větve do main, životního cyklu větví a
+   globálního vývojového semaforu je překonané pro běžný vývoj.
+5. Registrace nového projektu nebo proudu z r-Adama je zrušená; registrace patří
+   pouze do terminálového dialogu.
+
+Původní body 3 až 9 a 12 až 16 zůstávají v platnosti, pokud nejsou výše výslovně
+zúženy. Zejména se zachovává bezpečný app-server, jeden aktivní tah v daném
+vlákně, tenký Cockpit, recovery vrstvy a řízené odstranění překonaného kódu až
+po regresním ověření.
+
+### 8. Přechodové pravidlo
+
+Toto je cílový architektonický kontrakt, ne tvrzení o dnešním runtime. Současný
+kód může dočasně stále obsahovat kotvu, WIP větve, semafor a jejich UI. Budou se
+odstraňovat postupně v malých testovaných fázích tak, aby zůstaly funkční
+základní chat, přepínání profilů, reconnect, rotace vlákna, TVBCP a nasazení.
 
 ## Zakládající konverzace
 
@@ -1259,3 +1378,28 @@ workflow ani nasazení. Starší rozhodnutí TVBCP zatím nejsou přepisována.
 Další krok: v bodu 0.3 zapsat nový schválený jednoduchý model pracovních proudů
 a jasně označit, která starší pravidla nahrazuje. Teprve potom pokračovat
 výchozí funkční kontrolou.
+
+### 2026-07-20 06:00 CEST – Nový jednoduchý model je kanonický
+
+Míla schválil dramatické zjednodušení r-Adama a v bodu 0.3 požádal zapsat nový
+model a určit nahrazená starší pravidla. Do souhrnné části TVBCP byl vložen
+kanonický model pracovních proudů `Project`, `Tool`, `Layer` a `Misc`.
+
+Rozhodnutí: každý proud má vlastní vlákno, krátký pracovní kontext, TVBCP a
+handoff. Registrace proudu probíhá v terminálu. Běžný vývoj jde po jednom malém
+kroku přímo na `main`, bez WIP větví, převzetí a globálního semaforu, a končí
+čistým synchronním repem. Handoff se doplňuje při každém Mílou vyžádaném
+checkpointu. Kontextová kotva není součástí cílového modelu.
+
+Výslovně nahrazené směry: jedno globální vlákno pro všechny oblasti, povinná
+vícekroková rotace s Capsule, kontextová kotva, běžné WIP větve a jejich životní
+cyklus, globální vývojový semafor a registrace projektu z r-Adama. Starý text a
+aktuální implementace zůstávají dočasně zachované jako historie a přechodový
+runtime; jejich odstranění není součástí tohoto dokumentačního kroku.
+
+Zachované hranice: UI a základní komunikace, profily, reconnect, ochrana proti
+duplicitnímu odeslání, jeden aktivní tah, TVBCP, handoff, autosave, recovery,
+tenký Cockpit a výslovné potvrzení skutečně destruktivních nebo citlivých akcí.
+
+Další krok: bod 0.4 – read-only zaznamenat výchozí funkční stav současného
+Human–Adam před první implementační změnou.

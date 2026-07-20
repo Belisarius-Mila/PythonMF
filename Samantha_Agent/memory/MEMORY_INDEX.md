@@ -83,7 +83,11 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `tvbcp/architektura_komunikace_samantha.txt` - [PRIPOMENOUT] aktivni kanonicka
   smlouva Layeru `Human–Adam / vyvojove prostredi`, propojena s
   `WORKSTREAMS.md` a handoffem `human_adam_layer_workstream_start_2026_07_20.md`.
-  Zachycuje dohodu Mily a Adama pro jednoho trvaleho Adama, sdilene app-server vlakno,
+  Od 2026-07-20 ma prednost jednoduchy model: kazdy proud ma vlastni vlakno,
+  kratky kontext, TVBCP a handoff; bezny vyvoj jde po jednom cistem kroku primo
+  na `main`, bez WIP vetvi, prevzeti a globalniho semaforu. Zachovava zakladni
+  UI, reconnect, recovery a skutecne bezpecnostni hranice. Historicky zachycuje
+  take dohodu Mily a Adama pro jednoho trvaleho Adama a sdilene app-server vlakno,
   role Cockpitu Mac/iPhone a terminalu, failover, rotaci relace, stihly
   `cockpit.py`, hlas, TVBCP, handoff a autosave. Textove Human–Adam UI, projektovy
   TVBCP, panel `Prace`, izolovany WIP a samoobsluzne nasazeni jsou opakovane
@@ -112,7 +116,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   pracovniho proudu `Human–Adam / vyvojove prostredi` typu `Layer`. Stary
   projektovy zaznam zustava docasnym kompatibilnim mostem a zadny funkcni kod
   se nezmenil. Stavajici TVBCP architektury komunikace je potvrzen a propojen;
-  dalsi krok je zapsat novy jednoduchy model a vymezit nahrazena starsi pravidla.
+  novy jednoduchy model i nahrazena starsi pravidla jsou zapsane. Dalsi krok je
+  read-only vychozi funkcni kontrola Human–Adam.
 
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni
