@@ -612,6 +612,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let activeProfileLabel = "Human–Adam";
   let usingWorkstreamCatalog = false;
   let workstreamDevelopmentEnabled = true;
+  let workstreamDeploymentEnabled = true;
   let deliveryUncertain = false;
   let deploymentAudit = null;
   const verifiedDeploymentStorageKey = "human-adam:verified-deployment:v1";
@@ -1256,6 +1257,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     activeProfileLabel = String(active.label || "Human–Adam");
     usingWorkstreamCatalog = selection.ok === true && workstreams.length > 0;
     workstreamDevelopmentEnabled = capabilities.development !== false;
+    workstreamDeploymentEnabled = capabilities.deployment !== false;
     activeWorkstreamId = usingWorkstreamCatalog
       ? String(activeWorkstream.workstream_id || "")
       : activeProfileId;
@@ -1832,7 +1834,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     else workMeta.textContent = "Workspace je čistý a odpovídá main.";
     const semaphore = payload.development_semaphore || {};
     checkpointBtn.disabled = !workstreamDevelopmentEnabled || !payload.dirty || semaphore.can_checkpoint !== true;
-    const simpleDeployReady = workstreamDevelopmentEnabled
+    const simpleDeployReady = workstreamDeploymentEnabled
       && !payload.dirty
       && !payload.local_checkpoint_ahead
       && payload.workspace_relation === "aligned"
@@ -1842,7 +1844,8 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     deployConfirmation.hidden = true;
     deployConfirmation.disabled = true;
     deployBtn.disabled = true;
-    if (!workstreamDevelopmentEnabled) deployMeta.textContent = "Vývoj a nasazení lazy proudu se bezpečně aktivují až v pilotní fázi 4.5.";
+    if (!workstreamDevelopmentEnabled) deployMeta.textContent = "Tento lazy proud zůstává read-only; zapisovací pilot je zatím povolen jen pro MMTX.";
+    else if (!workstreamDeploymentEnabled) deployMeta.textContent = "MMTX pilot může vyvíjet a checkpointovat; nasazení z lazy proudu zatím zůstává zavřené.";
     else if (payload.dirty) deployMeta.textContent = "Nejdřív dokonči automatický checkpoint změn do main.";
     else if (payload.local_checkpoint_ahead) deployMeta.textContent = "Je zachovaný starší lokální checkpoint; nejdřív proveď servisní kontrolu.";
     else if (checkpointPreserved) deployMeta.textContent = "WIP je bezpečně zachovaný, ale audit je zablokovaný. Nejdřív proveď obnovu nad aktuálním main.";

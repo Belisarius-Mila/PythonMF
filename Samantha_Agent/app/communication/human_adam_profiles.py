@@ -87,6 +87,7 @@ PROFILE_ID_RE = re.compile(r"[a-z][a-z0-9_-]{1,31}")
 PROFILE_STATE_SCHEMA = 1
 DEPLOYMENT_COMPLETION_SCHEMA = 1
 DEPLOYMENT_COMPLETION_CONFIRMATION = "POTVRZUJI DOKONCENI HANDOFFU PO NASAZENI"
+WRITABLE_LAZY_WORKSTREAM_IDS = frozenset({"project-mmtx"})
 
 KNIHOVNA_DEVELOPER_INSTRUCTIONS = (
     HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS
@@ -524,6 +525,7 @@ class HumanAdamProfileManager:
             raise SessionBusyError("Pracovní profil právě provádí jinou operaci.")
         try:
             workstream_id = self.workstream_threads.checkpoint_workstream_id()
+            self._assert_writable_lazy_workstream(workstream_id)
             memory_binding = self.workstream_memory.binding(workstream_id)
             service = self.profiles[self.default_profile_id]["service"]
             peer_workspaces = tuple(
@@ -592,7 +594,7 @@ class HumanAdamProfileManager:
         surface invokes this method in phase 2.2.
         """
 
-        self._assert_legacy_development_backend()
+        self._assert_legacy_only_backend(operation="Nasazení")
         with self.profile_operation() as service:
             self._assert_all_profile_sessions_idle()
             active_id = self.active_profile_id
@@ -650,7 +652,7 @@ class HumanAdamProfileManager:
     def audit_simple_main_deployment(self) -> dict[str, Any]:
         """Audit the active canonical workstream for one clean-main deployment."""
 
-        self._assert_legacy_development_backend()
+        self._assert_legacy_only_backend(operation="Audit nasazení")
         with self.profile_operation() as service:
             self._assert_all_profile_sessions_idle()
             active_id = self.active_profile_id
@@ -775,20 +777,31 @@ class HumanAdamProfileManager:
         }
 
     def _workstream_capabilities(self) -> dict[str, Any]:
-        lazy = bool(self.active_lazy_workstream_id)
+        lazy_id = self.active_lazy_workstream_id
+        lazy = bool(lazy_id)
+        writable_pilot = lazy_id in WRITABLE_LAZY_WORKSTREAM_IDS
         return {
             "conversation": True,
             "context_anchor": True,
             "tvbcp": True,
-            "development": not lazy,
+            "development": not lazy or writable_pilot,
+            "checkpoint": not lazy or writable_pilot,
             "deployment": not lazy,
             "lazy_backend": lazy,
+            "writable_pilot": writable_pilot,
         }
 
-    def _assert_legacy_development_backend(self) -> None:
+    def _assert_writable_lazy_workstream(self, workstream_id: str) -> None:
+        clean_id = str(workstream_id or "").strip()
+        if clean_id not in WRITABLE_LAZY_WORKSTREAM_IDS:
+            raise AppServerError(
+                "Tento lazy pracovní proud zůstává read-only; zapisovací pilot je povolen jen pro MMTX."
+            )
+
+    def _assert_legacy_only_backend(self, *, operation: str) -> None:
         if self.active_lazy_workstream_id:
             raise AppServerError(
-                "Vývoj a nasazení lazy pracovního proudu se aktivují až v pilotní fázi 4.5."
+                f"{operation} lazy pracovního proudu v MMTX pilotu zatím není povolené."
             )
 
     def status(self) -> dict[str, Any]:
@@ -878,25 +891,36 @@ class HumanAdamProfileManager:
         with self.profile_operation() as service:
             lease = self.development_semaphore.status()
             active_id = self.work_profile_id
-            writable = bool(
-                lease.get("ok") is True
-                and lease.get("active") is True
-                and lease.get("mode") == "active"
-                and lease.get("owner_id") == active_id
-            )
-            if lease.get("ok") is not True:
-                state = "invalid"
-            elif lease.get("active") is not True:
-                state = "free"
+            lazy_id = self.active_lazy_workstream_id
+            if lazy_id:
+                writable = lazy_id in WRITABLE_LAZY_WORKSTREAM_IDS
+                state = "pilot" if writable else "read_only"
+                control_source = (
+                    "mmtx_writable_pilot" if writable else "lazy_read_only_policy"
+                )
+                control_owner = active_id if writable else "none"
             else:
-                state = str(lease.get("mode") or "invalid")
+                writable = bool(
+                    lease.get("ok") is True
+                    and lease.get("active") is True
+                    and lease.get("mode") == "active"
+                    and lease.get("owner_id") == active_id
+                )
+                if lease.get("ok") is not True:
+                    state = "invalid"
+                elif lease.get("active") is not True:
+                    state = "free"
+                else:
+                    state = str(lease.get("mode") or "invalid")
+                control_source = "private_global_development_semaphore"
+                control_owner = str(lease.get("owner_id") or "none")
             development_control_block = "\n".join(
                 (
                     "[DEVELOPMENT_CONTROL]",
-                    "source=private_global_development_semaphore",
+                    f"source={control_source}",
                     f"profile_id={active_id}",
                     f"lease_state={state}",
-                    f"lease_owner_id={str(lease.get('owner_id') or 'none')}",
+                    f"lease_owner_id={control_owner}",
                     f"writable={'true' if writable else 'false'}",
                     "rule=When writable=false, remain read-only and do not change files or Git.",
                     "[/DEVELOPMENT_CONTROL]",
@@ -953,49 +977,79 @@ class HumanAdamProfileManager:
         active_id: str,
         metadata: TurnCompletionMetadata,
     ) -> dict[str, Any]:
-        profile = self.profiles[active_id]
-        binding = profile.get("workstream_binding")
-        if not isinstance(binding, CanonicalWorkstreamBinding):
-            raise AppServerError(
-                "Aktivní profil nemá v terminálu zaregistrovaný kanonický pracovní proud."
+        lazy_id = self.active_lazy_workstream_id
+        if lazy_id:
+            if (
+                active_id != lazy_id
+                or self.workstream_threads is None
+                or self.workstream_memory is None
+            ):
+                raise AppServerError("Aktivní lazy pracovní proud nemá úplný checkpointový backend.")
+            self._assert_writable_lazy_workstream(lazy_id)
+            checkpoint_id = self.workstream_threads.checkpoint_workstream_id()
+            if checkpoint_id != lazy_id:
+                raise AppServerError("Aktivní lazy pracovní proud se před checkpointem změnil.")
+            memory_binding = self.workstream_memory.binding(lazy_id)
+            binding_id = memory_binding.workstream_id
+            handoff_path = memory_binding.handoff_relative_path
+            tvbcp_path = memory_binding.tvbcp_relative_path
+            handoff_initial = self.workstream_memory.initial_handoff(memory_binding)
+            tvbcp_initial = self.workstream_memory.initial_tvbcp(memory_binding)
+            peers = tuple(
+                candidate["service"].workspace
+                for candidate in self.profiles.values()
+                if candidate["service"].workspace.project_root
+                != service.workspace.project_root
             )
-        memory_binding = (
-            self.workstream_memory.binding(binding.workstream_id)
-            if self.workstream_memory is not None
-            else None
-        )
-        peers = tuple(
-            candidate["service"].workspace
-            for profile_id, candidate in self.profiles.items()
-            if profile_id != active_id
-        )
+        else:
+            profile = self.profiles[active_id]
+            binding = profile.get("workstream_binding")
+            if not isinstance(binding, CanonicalWorkstreamBinding):
+                raise AppServerError(
+                    "Aktivní profil nemá v terminálu zaregistrovaný kanonický pracovní proud."
+                )
+            memory_binding = (
+                self.workstream_memory.binding(binding.workstream_id)
+                if self.workstream_memory is not None
+                else None
+            )
+            binding_id = binding.workstream_id
+            handoff_path = (
+                memory_binding.handoff_relative_path
+                if memory_binding is not None
+                else binding.handoff_relative_path
+            )
+            tvbcp_path = (
+                memory_binding.tvbcp_relative_path
+                if memory_binding is not None
+                else binding.tvbcp_relative_path
+            )
+            handoff_initial = (
+                self.workstream_memory.initial_handoff(memory_binding)
+                if self.workstream_memory is not None and memory_binding is not None
+                else ""
+            )
+            tvbcp_initial = (
+                self.workstream_memory.initial_tvbcp(memory_binding)
+                if self.workstream_memory is not None and memory_binding is not None
+                else ""
+            )
+            peers = tuple(
+                candidate["service"].workspace
+                for profile_id, candidate in self.profiles.items()
+                if profile_id != active_id
+            )
         return complete_simple_main_checkpoint(
             workspace=service.workspace,
             request=SimpleMainCheckpointRequest(
-                workstream_id=binding.workstream_id,
+                workstream_id=binding_id,
                 commit_message=metadata.commit_message,
                 summary=metadata.summary,
                 next_step=metadata.next_step,
-                handoff_relative_path=(
-                    memory_binding.handoff_relative_path
-                    if memory_binding is not None
-                    else binding.handoff_relative_path
-                ),
-                tvbcp_relative_path=(
-                    memory_binding.tvbcp_relative_path
-                    if memory_binding is not None
-                    else binding.tvbcp_relative_path
-                ),
-                handoff_initial_content=(
-                    self.workstream_memory.initial_handoff(memory_binding)
-                    if self.workstream_memory is not None and memory_binding is not None
-                    else ""
-                ),
-                tvbcp_initial_content=(
-                    self.workstream_memory.initial_tvbcp(memory_binding)
-                    if self.workstream_memory is not None and memory_binding is not None
-                    else ""
-                ),
+                handoff_relative_path=handoff_path,
+                tvbcp_relative_path=tvbcp_path,
+                handoff_initial_content=handoff_initial,
+                tvbcp_initial_content=tvbcp_initial,
             ),
             confirmed=True,
             peer_workspaces=peers,
@@ -1656,7 +1710,7 @@ class HumanAdamProfileManager:
             self._operation_lock.release()
 
     def checkpoint(self, **kwargs: Any) -> dict[str, Any]:
-        self._assert_legacy_development_backend()
+        self._assert_legacy_only_backend(operation="Ruční WIP checkpoint")
         with self.profile_operation() as service:
             self.development_semaphore.assert_owner(self.active_profile_id)
             result = service.checkpoint(**kwargs)
@@ -1793,7 +1847,7 @@ class HumanAdamProfileManager:
         project_id: str = "",
         handoff_path: str = "",
     ) -> dict[str, Any]:
-        self._assert_legacy_development_backend()
+        self._assert_legacy_only_backend(operation="Změna vývojového semaforu")
         clean_operation = str(operation or "").strip()
         if not self._operation_lock.acquire(blocking=False):
             raise SessionBusyError("Vývojový semafor nelze změnit během jiné profilové operace.")

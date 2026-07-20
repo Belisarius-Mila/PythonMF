@@ -278,7 +278,16 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Vyber projekt a jeho aktuální handoff.", HUMAN_ADAM_HTML)
         self.assertIn("checkpointBtn.disabled = !workstreamDevelopmentEnabled || !payload.dirty || semaphore.can_checkpoint !== true;", HUMAN_ADAM_HTML)
         self.assertIn("deployAuditBtn.disabled = !simpleDeployReady;", HUMAN_ADAM_HTML)
-        self.assertIn("Vývoj a nasazení lazy proudu se bezpečně aktivují až v pilotní fázi 4.5.", HUMAN_ADAM_HTML)
+        self.assertIn(
+            "Tento lazy proud zůstává read-only; zapisovací pilot je zatím povolen jen pro MMTX.",
+            HUMAN_ADAM_HTML,
+        )
+        self.assertIn("workstreamDeploymentEnabled = capabilities.deployment !== false;", HUMAN_ADAM_HTML)
+        self.assertIn("const simpleDeployReady = workstreamDeploymentEnabled", HUMAN_ADAM_HTML)
+        self.assertIn(
+            "MMTX pilot může vyvíjet a checkpointovat; nasazení z lazy proudu zatím zůstává zavřené.",
+            HUMAN_ADAM_HTML,
+        )
         self.assertNotIn("semaphore.can_deploy", HUMAN_ADAM_HTML)
         self.assertIn("To projde jen při čistých workspaces bez čekajícího WIP", HUMAN_ADAM_HTML)
 

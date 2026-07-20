@@ -855,7 +855,10 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(result["session"]["thread_id"], "mmtx-thread")
         self.assertEqual(result["work_profile"]["id"], "project-mmtx")
         self.assertTrue(result["workstream_capabilities"]["lazy_backend"])
-        self.assertFalse(result["workstream_capabilities"]["development"])
+        self.assertTrue(result["workstream_capabilities"]["development"])
+        self.assertTrue(result["workstream_capabilities"]["checkpoint"])
+        self.assertTrue(result["workstream_capabilities"]["writable_pilot"])
+        self.assertFalse(result["workstream_capabilities"]["deployment"])
         self.assertEqual(lazy.open_calls, ["project-mmtx"])
 
     def test_lazy_active_service_routes_send_and_keeps_context_anchor_isolated(self) -> None:
@@ -884,7 +887,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 confirmed=True,
             )
             sent = manager.send(
-                text="Pouze read-only kontrola MMTX",
+                text="Kontrola MMTX pilotu",
                 client_message_id="lazy-route-001",
             )
             human_adam_profile_switch_action(
@@ -902,13 +905,14 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertFalse(empty_lazy_anchor["has_content"])
         self.assertEqual(legacy_anchor["content"], "Cíl: legacy Human–Adam")
         self.assertEqual(restored_lazy_anchor["content"], "Cíl: samostatný MMTX")
-        self.assertEqual(lazy_send["text"], "Pouze read-only kontrola MMTX")
+        self.assertEqual(lazy_send["text"], "Kontrola MMTX pilotu")
         self.assertIn("profile_id=project-mmtx", str(lazy_send["model_input_text"]))
-        self.assertIn("writable=false", str(lazy_send["model_input_text"]))
+        self.assertIn("source=mmtx_writable_pilot", str(lazy_send["model_input_text"]))
+        self.assertIn("writable=true", str(lazy_send["model_input_text"]))
         self.assertEqual(human_hub.last_send, {})
         self.assertEqual(sent["automatic_completion"]["state"], "not_needed")
 
-    def test_lazy_service_reads_its_canonical_tvbcp_and_blocks_development(self) -> None:
+    def test_mmtx_service_reads_canonical_tvbcp_but_blocks_manual_checkpoint_and_deploy(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, human_workspace, *_rest = self.make_manager(Path(temp_dir))
             lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
@@ -924,9 +928,9 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
 
             tvbcp = manager.tvbcp()
             development = manager.development_status()
-            with self.assertRaisesRegex(AppServerError, "fázi 4.5"):
+            with self.assertRaisesRegex(AppServerError, "Ruční WIP checkpoint"):
                 manager.checkpoint(confirmed=True, message="Zakázaný checkpoint")
-            with self.assertRaisesRegex(AppServerError, "fázi 4.5"):
+            with self.assertRaisesRegex(AppServerError, "Audit nasazení"):
                 manager.audit_simple_main_deployment()
 
         self.assertEqual(tvbcp["content"], "# TVBCP: MMTX\n")
@@ -934,6 +938,118 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertFalse(development["can_acquire_profile"])
         self.assertFalse(development["can_checkpoint"])
         self.assertFalse(development["can_deploy"])
+
+    def test_mmtx_pilot_completes_canonical_lazy_checkpoint(self) -> None:
+        receipt = (
+            "MMTX změna je hotová.\n\n"
+            "[HUMAN_ADAM_STEP_COMPLETION]\n"
+            '{"commit_message":"Complete MMTX pilot","summary":"Malá MMTX změna",'
+            '"next_step":"Ověřit živý MMTX proud"}\n'
+            "[/HUMAN_ADAM_STEP_COMPLETION]"
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, _human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.activate_grouped_workstream(
+                workstream_id="project-mmtx",
+                confirmed=True,
+            )
+            human_workspace.dirty = True
+            lazy.hubs["project-mmtx"].next_answer = receipt
+            with patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint",
+                return_value={
+                    "ok": True,
+                    "checkpoint_head": "c" * 40,
+                    "checkpoint_short": "c" * 12,
+                    "all_workspaces_aligned": True,
+                },
+            ) as checkpoint:
+                result = manager.send(
+                    text="Proveď malou MMTX změnu",
+                    client_message_id="mmtx-pilot-001",
+                )
+
+        request = checkpoint.call_args.kwargs["request"]
+        model_input = str(lazy.hubs["project-mmtx"].last_send["model_input_text"])
+        self.assertIn("source=mmtx_writable_pilot", model_input)
+        self.assertIn("lease_state=pilot", model_input)
+        self.assertIn("lease_owner_id=project-mmtx", model_input)
+        self.assertIn("profile_id=project-mmtx", model_input)
+        self.assertIn("writable=true", model_input)
+        self.assertIs(checkpoint.call_args.kwargs["workspace"], human_workspace)
+        self.assertEqual(checkpoint.call_args.kwargs["peer_workspaces"], (library_workspace,))
+        self.assertEqual(request.workstream_id, "project-mmtx")
+        self.assertEqual(
+            request.handoff_relative_path,
+            "memory/handoffs/workstreams/project-mmtx.md",
+        )
+        self.assertEqual(
+            request.tvbcp_relative_path,
+            "memory/tvbcp/workstreams/project-mmtx.md",
+        )
+        self.assertEqual(result["automatic_completion"]["state"], "completed")
+
+    def test_nonpilot_lazy_stream_remains_read_only_even_with_matching_lease(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _human_workspace, *_rest = self.make_manager(Path(temp_dir))
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.activate_grouped_workstream(
+                workstream_id="project-lekarna",
+                confirmed=True,
+            )
+            capabilities = manager.status()["workstream_capabilities"]
+            development = manager.development_status()
+            with self.assertRaisesRegex(AppServerError, "vývojového semaforu"):
+                manager.change_development_semaphore(
+                    operation="acquire_profile",
+                    expected_revision=0,
+                    topic="Zakázaný lazy vývoj",
+                    confirmed=True,
+                )
+            manager.development_semaphore.acquire(
+                owner_id="project-lekarna",
+                owner_label="Lékárna",
+                workspace_label="Testovací lazy workspace",
+                base_head="a" * 40,
+                topic="Simulovaný cizí lease",
+                expected_revision=0,
+                confirmed=True,
+            )
+            sent = manager.send(
+                text="Tento tah musí zůstat read-only",
+                client_message_id="nonpilot-readonly-001",
+            )
+
+        model_input = str(lazy.hubs["project-lekarna"].last_send["model_input_text"])
+        self.assertFalse(capabilities["development"])
+        self.assertFalse(capabilities["checkpoint"])
+        self.assertFalse(capabilities["writable_pilot"])
+        self.assertFalse(development["can_acquire_profile"])
+        self.assertIn("source=lazy_read_only_policy", model_input)
+        self.assertIn("lease_state=read_only", model_input)
+        self.assertIn("lease_owner_id=none", model_input)
+        self.assertIn("writable=false", model_input)
+        self.assertEqual(sent["automatic_completion"]["state"], "not_needed")
+
+    def test_nonpilot_lazy_checkpoint_backend_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_rest = self.make_manager(Path(temp_dir))
+            manager.workstream_threads = SimpleNamespace(
+                checkpoint_workstream_id=lambda: "project-lekarna"
+            )
+
+            with self.assertRaisesRegex(AppServerError, "read-only"):
+                manager.simple_lazy_workstream_checkpoint(
+                    commit_message="Zakázaný checkpoint",
+                    summary="Nemá vzniknout",
+                    next_step="Zůstat read-only.",
+                    confirmed=True,
+                )
 
     def test_grouped_router_restores_original_legacy_after_lazy_failure(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
