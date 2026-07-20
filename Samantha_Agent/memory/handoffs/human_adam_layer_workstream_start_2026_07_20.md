@@ -82,19 +82,29 @@ Co je hotove:
   Cockpit brana prosla 871 testy za 170,754 sekundy; cela brana trvala 173,4 s.
 - Prednasazovaci zivy Cockpit smoke prosel 5/5, ale nove menu jeste nebylo
   nasazeno ani rucne prokliknuto.
+- Faze 1.4 byla commitnuta a pushnuta jako `6f17852`. Rizeny restart nahradil
+  PID `94492` novym PID `37611` a code stamp se zmenil z `d25fa501fc5da9d5` na
+  `7a4440b979d98690`; nasledny smoke prosel 5/5.
+- Zivy endpointovy roundtrip pouzil nova kanonicka ID proudu. Vychozi aktivni
+  Knihovna byla nejdrive bezpecne srovnana na Human–Adam, potom prosel presny
+  sled Human–Adam -> Knihovna -> Human–Adam. Kazdy krok vratil spravny profil,
+  proud, pripojenou relaci a cisty zarovnany workspace.
+- Zaverecny audit potvrzuje oba profilove workspaces `aligned`, ciste, bez
+  remote, lokalniho checkpointu, WIP a aktivniho tahu. Aktivni zustal Human–Adam.
 
 Co neni hotove:
 - Novy checkpoint backend stale neni napojeny na existujici checkpointove
-  tlacitko. Vyber proudu je napojeny, ale zatim neni nasazeny.
+  tlacitko.
 - Stary WIP/semafor/takeover tok zustava beze zmeny aktivniho runtime.
-- Faze 1.4 je pripravena pro tento checkpoint a push; nasazeni a rucni UI
-  roundtrip nasleduji az nad timto presnym commitem.
+- Vestaveny prohlizec nebyl v teto relaci dostupny. Backendovy zivy roundtrip je
+  potvrzeny, ale skutecne vizualni kliknuti ve stejnem menu musi potvrdit Mila.
 - Stary runtime nazev se zatim nesmi prejmenovat, protoze jej pouziva soucasna
   profilova konfigurace Cockpitu.
 
 Dalsi krok:
-Po tomto checkpointu a pushi fazi 1.4 nasadit, rizene restartovat Cockpit a
-rucne overit Human–Adam -> Knihovna -> Human–Adam pres stejne menu.
+Mila v otevrenem Human–Adam vybere `Knihovna`, potvrdi `Prepnout`, potom stejne
+zvoli `Human–Adam`. Po tomto vizualnim potvrzeni uzavrit fazi 1.4 a rozhodnout o
+automatickem dokonceni vyvojoveho kroku.
 
 Navrhovane dalsi kroky:
 - Pro dalsi proud nejdrive v terminalu zaregistrovat konkretni `Project`, `Tool`,

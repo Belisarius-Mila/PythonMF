@@ -145,3 +145,18 @@ prokliknutá, takže provozní roundtrip oběma směry zatím není potvrzený.
 
 Další krok: checkpoint a push fáze 1.4, nasazení, řízený restart a ruční volba
 Knihovna -> Human–Adam přes stejné menu.
+
+### 2026-07-20 09:28 CEST – Nasazený koordinátor přepnul Knihovnu oběma směry
+
+Commit `6f17852` je po řízeném restartu živý na code stampu
+`7a4440b979d98690`; Cockpit smoke prošel 5/5. Nasazený endpoint přijal kanonické
+ID `project-knowledge-library`, aktivoval správný profil Knihovna a následně se
+kanonickým ID Layeru vrátil na Human–Adam.
+
+Oba workspaces jsou po testu čisté, zarovnané, bez Git remote, lokálního
+checkpointu, WIP a aktivního tahu. Aktivní zůstal Human–Adam. Soukromý obsah
+Knihovny ani identifikátory vláken nebyly čteny nebo uloženy.
+
+Vestavěný prohlížeč nebyl v této relaci dostupný, proto zbývá pouze Mílovo
+vizuální potvrzení stejného menu: Human–Adam -> Knihovna -> Human–Adam bez
+odeslání pokynu.

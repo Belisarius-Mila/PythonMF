@@ -41,6 +41,13 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-20: Faze 1.4 je na `main` v `6f17852`, nasazena po rizenem restartu na
+  code stamp `7a4440b979d98690`; smoke prosel 5/5. Zivy endpointovy roundtrip
+  kanonickymi ID Human–Adam -> Knihovna -> Human–Adam prosel a oba workspaces
+  skoncily ciste, zarovnane, bez remote/WIP a aktivniho tahu. Aktivni zustal
+  Human–Adam. Vestaveny prohlizec nebyl dostupny, proto zbyva jediny Miluv
+  vizualni krok: stejnym menu kliknout na Knihovnu a zpet na Human–Adam. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-20: Priorita 1, transformace Human–Adam faze 1.4. Stavajici vyberove
   menu je bez zmeny HTML/CSS vzhledu napojene na koordinator: status poskytuje
   katalog proudu, stejny endpoint prijima `workstream_id` a puvodni

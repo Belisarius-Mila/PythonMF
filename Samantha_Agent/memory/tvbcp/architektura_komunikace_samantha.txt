@@ -1645,3 +1645,29 @@ roundtrip Human–Adam -> Knihovna -> Human–Adam patří až po samostatném n
 Další krok: checkpoint a push fáze 1.4. Potom nasazení, řízený restart a ruční
 roundtrip přes stejné menu; automatické dokončení vývojového kroku řešit až po
 tomto potvrzení.
+
+### 2026-07-20 09:28 CEST – Fáze 1.4 nasazena, endpointový roundtrip prošel
+
+Fáze 1.4 byla commitnuta a pushnuta jako `6f17852`. Řízený restart ukončil
+ověřený Cockpit PID `94492`; launchd obnovil jedinou instanci jako PID `37611`.
+Code stamp se změnil z `d25fa501fc5da9d5` na očekávaný `7a4440b979d98690` a
+následný smoke test prošel 5/5.
+
+Živý endpointový roundtrip použil stejnou nasazenou cestu
+`/api/human-adam/profile` a nové kanonické hodnoty `workstream_id`. Protože před
+testem byla aktivní Knihovna, nejdřív proběhlo bezpečné srovnání na Human–Adam;
+potom přesný sled Human–Adam -> Knihovna -> Human–Adam. Každý krok potvrdil
+správný pracovní proud, správný profil, připojenou relaci, žádný aktivní tah a
+čistý zarovnaný workspace.
+
+Závěrečný audit: Human–Adam i Knihovna jsou `aligned`, bez necommitovaných změn,
+lokálního checkpointu, zachovaného WIP, Git remote a pending změn ve zdrojovém
+repozitáři. Aktivní zůstal Human–Adam a `main == origin/main == 6f17852`.
+
+Vestavěný prohlížeč nebyl v této terminálové relaci dostupný. Backendový provozní
+důkaz je úplný, ale vizuální kliknutí na stejné menu nelze poctivě vydávat za
+provedené. Poslední ruční krok proto provede Míla: vybere Knihovnu, potvrdí
+`Přepnout` a stejným způsobem se vrátí na Human–Adam. Neodesílá žádný pokyn.
+
+Další krok: po Mílově vizuálním potvrzení uzavřít fázi 1.4 a teprve potom
+navrhnout automatické dokončení vývojového kroku.

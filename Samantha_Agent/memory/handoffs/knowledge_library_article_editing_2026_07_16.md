@@ -67,6 +67,11 @@ Infrastrukturni registrace 2026-07-20:
   `project-knowledge-library`; puvodni profilove ID zustava vratnym fallbackem.
 - Automatizovana sada 93 cilenych a 871 plnych testu prosla. Zmena jeste neni
   nasazena ani rucne prokliknuta v zivem Cockpitu.
+- Commit `6f17852` byl nasazen a Cockpit rizene restartovan na code stamp
+  `7a4440b979d98690`. Zivy endpointovy prechod Human–Adam -> Knihovna ->
+  Human–Adam prosel a oba workspaces skoncily ciste a zarovnane.
+- Vizualni kliknuti pres menu zatim chybi pouze proto, ze vestaveny prohlizec
+  nebyl v terminalove relaci dostupny; soukromy obsah Knihovny se necetl.
 
 Bezpecnost / neukladat:
 - Do Gitu ani handoffu nepatří texty soukromých článků, přílohy, metadata
