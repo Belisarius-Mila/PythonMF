@@ -2039,3 +2039,22 @@ soukromých vláken, nasazení ani restartu. Cílená sada prošla 107 testy, pl
 Cockpit Quality Gate všemi syntaxemi a 922 testy za 248,040 sekundy a živý smoke
 test skončil 5/5. Další krok po checkpointu a zeleném CI je fáze 4.2: soukromé
 lazy vlákno nezávislé na dnešních dvou pevných profilech.
+
+### 2026-07-20 20:08 CEST – Fáze 4.2: lazy soukromá vlákna
+
+Neveřejný backend nyní mapuje všech 29 kanonických proudů na oddělené soukromé
+session sloty. Načtení katalogu je inertní; teprve potvrzené otevření jednoho
+proudu založí nebo obnoví jeho persistentní Codex vlákno. Všechny proudy sdílí
+jeden app-server runtime a jeden čistý synchronní workspace, takže nevznikají
+desítky procesů, profilů, worktree ani WIP větví.
+
+Aktivní může být jen jeden lazy proud. Přepnutí blokuje aktivní tah, nejisté
+doručení, nečistý `main` nebo nesynchronní workspace. Stav pro vyšší vrstvy je
+redigovaný a neobsahuje ID vlákna ani private cestu. Human–Adam a Knihovna jsou
+do migrace 4.5 rezervované pro původní profily, aby fáze 4.2 nevytvořila
+duplicitní vlákna ani nezasáhla do živé relace.
+
+UI, API, handoff/TVBCP routing, nasazení a restart zůstaly beze změny. Cílená
+sada prošla 86 testy a plná Cockpit Quality Gate všemi syntaxemi a 930 testy za
+242,097 sekundy. Další krok je fáze 4.3: jeden kanonický handoff a TVBCP každého
+proudu a jejich bezpečné použití při checkpointu.

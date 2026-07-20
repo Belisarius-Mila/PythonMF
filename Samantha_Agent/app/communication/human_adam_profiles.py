@@ -38,6 +38,7 @@ from app.communication.human_adam_workstream_coordinator import (
     HumanAdamWorkstreamCoordinator,
     canonical_workstream_binding,
 )
+from app.communication.human_adam_workstream_threads import WorkstreamThreadRegistry
 from app.communication.human_adam_turn_completion import (
     ParsedTurnCompletion,
     TurnCompletionMetadata,
@@ -71,6 +72,7 @@ from scripts.cockpit_smoke_check import run_smoke_check
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 PRIVATE_COMMUNICATION_ROOT = PROJECT_ROOT / "data" / "private" / "communication"
 PRIVATE_PROFILE_ROOT = PROJECT_ROOT / "data" / "private" / "human_adam_profiles"
+PRIVATE_WORKSTREAM_THREAD_ROOT = PRIVATE_COMMUNICATION_ROOT / "workstreams"
 DEFAULT_PROFILE_STATE_PATH = PRIVATE_COMMUNICATION_ROOT / "human_adam_active_profile.json"
 DEFAULT_DEVELOPMENT_SEMAPHORE_PATH = PRIVATE_COMMUNICATION_ROOT / "development_semaphore.json"
 DEFAULT_DEPLOYMENT_COMPLETION_PATH = PRIVATE_COMMUNICATION_ROOT / "deployment_completion.json"
@@ -139,6 +141,7 @@ class HumanAdamProfileManager:
         project_continuity: ProjectContinuityService | None = None,
         deployment_completion_path: Path | None = None,
         simple_main_deployment_receipt_path: Path | None = None,
+        workstream_threads: WorkstreamThreadRegistry | None = None,
     ):
         if not profiles or default_profile_id not in profiles:
             raise ValueError("Pracovní profily Human–Adam nemají platný výchozí profil.")
@@ -185,6 +188,7 @@ class HumanAdamProfileManager:
                 else self.state_path.with_name("simple_main_deployment.json")
             )
         )
+        self.workstream_threads = workstream_threads
         self._state_lock = threading.RLock()
         self._operation_lock = threading.Lock()
         self._state_error = ""
@@ -269,6 +273,28 @@ class HumanAdamProfileManager:
         """Return the private coordinator catalog without thread identifiers."""
 
         return self.workstream_coordinator.status(self.active_profile_id)
+
+    def lazy_workstream_thread_status(self) -> dict[str, Any]:
+        """Return the private phase-4.2 backend status without exposing it to UI."""
+
+        if self.workstream_threads is None:
+            return {"ok": True, "available": False, "workstreams": []}
+        return {**self.workstream_threads.status(), "available": True}
+
+    def open_lazy_workstream_thread(
+        self,
+        *,
+        workstream_id: str,
+        confirmed: bool,
+    ) -> dict[str, Any]:
+        """Internal phase-4.2 entrypoint; Cockpit API/UI integration follows later."""
+
+        if self.workstream_threads is None:
+            raise AppServerError("Soukromé vlákno pracovního proudu není dostupné.")
+        return self.workstream_threads.open(
+            workstream_id=workstream_id,
+            confirmed=confirmed,
+        )
 
     def select_workstream(
         self,
@@ -1718,6 +1744,8 @@ class HumanAdamProfileManager:
             self._operation_lock.release()
 
     def close(self) -> None:
+        if self.workstream_threads is not None:
+            self.workstream_threads.close()
         for profile in self.profiles.values():
             service = profile["service"]
             if service._hub is None:
@@ -1848,6 +1876,25 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         tvbcp_relative_path=KNIHOVNA_TVBCP_RELATIVE_PATH,
         tvbcp_title="Knihovna v Cockpitu",
     )
+    workstream_threads = WorkstreamThreadRegistry(
+        state_root=PRIVATE_WORKSTREAM_THREAD_ROOT,
+        hub_factory=lambda record, state_path: human_service.detached_session_hub(
+            state_path=state_path,
+            developer_instructions=(
+                HUMAN_ADAM_DEVELOPER_INSTRUCTIONS
+                + " Aktivni kanonicky pracovni proud: "
+                + record.name
+                + " ("
+                + record.workstream_id
+                + "). Projektovy handoff a TVBCP budou pripojeny v navazujici fazi 4.3."
+            ),
+        ),
+        workspace_status=human_service.workspace.status,
+        reserved_workstream_ids={
+            "layer-human-adam-development",
+            "project-knowledge-library",
+        },
+    )
     return HumanAdamProfileManager(
         profiles={
             "human_adam": {
@@ -1879,6 +1926,7 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         },
         default_profile_id="human_adam",
         runtime=runtime,
+        workstream_threads=workstream_threads,
     )
 
 

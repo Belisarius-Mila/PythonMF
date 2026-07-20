@@ -359,18 +359,35 @@ class HumanAdamService:
     def hub(self) -> CanonicalSessionHub:
         return self._ensure_hub()
 
-    def _ensure_hub(self) -> CanonicalSessionHub:
-        if self._hub is not None:
-            return self._hub
-        self._hub = CanonicalSessionHub(
-            state_path=self.state_path,
+    def detached_session_hub(
+        self,
+        *,
+        state_path: Path,
+        developer_instructions: str,
+    ) -> CanonicalSessionHub:
+        """Build an inert hub that shares this service's runtime and workspace.
+
+        The returned hub does not create a private file, client or Codex thread
+        until its ``connect`` method is called.
+        """
+
+        return CanonicalSessionHub(
+            state_path=Path(state_path),
             workspace=self.workspace.project_root,
             client_factory=self._new_client,
-            developer_instructions=self.developer_instructions,
+            developer_instructions=str(developer_instructions).strip(),
             sandbox=HUMAN_ADAM_SANDBOX_MODE,
             sandbox_policy=HUMAN_ADAM_SANDBOX_POLICY,
             approval_policy=HUMAN_ADAM_APPROVAL_POLICY,
             reasoning_effort=HUMAN_ADAM_REASONING_EFFORT,
+        )
+
+    def _ensure_hub(self) -> CanonicalSessionHub:
+        if self._hub is not None:
+            return self._hub
+        self._hub = self.detached_session_hub(
+            state_path=self.state_path,
+            developer_instructions=self.developer_instructions,
         )
         return self._hub
 

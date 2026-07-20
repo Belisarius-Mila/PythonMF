@@ -41,6 +41,17 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-20: Priorita 1, univerzalni pracovni proudy faze 4.2. Neverejny
+  backend vede 29 katalogovych slotu; Human–Adam a Knihovna zustavaji
+  rezervovane pro migraci faze 4.5 a zbyvajicich 27 proudu muze lazy zalozit
+  nebo obnovit vlastni soukrome Codex vlakno nad jednim sdilenym cistym
+  workspace a runtime. Pri nacteni katalogu nevznika zadny adresar, klient ani
+  vlakno. Prepnuti vyzaduje potvrzeni a blokuje aktivni tah, nejiste doruceni,
+  necisty nebo nesynchronni workspace. UI, API, handoff/TVBCP vazby a zive
+  profily se nezmenily. Plna brana prosla 930 testy. Dalsi krok je faze 4.3 –
+  jeden kanonicky handoff a TVBCP kazdeho proudu a jejich bezpecne pouziti pri
+  checkpointu. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-20: Priorita 1, univerzalni katalog pracovnich proudu faze 4.1.
   Validovany git-safe katalog ma po Milove rucni kontrole 29 proudu: 23
   projektu, 4 tooly a 2 `Misc`; 26 je aktivnich a iPhone Shortcuts / Mobile

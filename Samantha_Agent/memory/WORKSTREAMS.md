@@ -18,6 +18,13 @@ Rezimy `paused` a `archived` jsou validni; tri projekty jsou nyni `paused`.
 Markdown se za behu neparsuje a neni zdrojem UI, vlaken, workspace, semaforu
 ani nasazovaci logiky. Faze 4.1 sama nic soukromeho nezaklada.
 
+Faze 4.2 pridala neverejny soukromy lazy backend vlaken. Katalog pri nacteni
+nevytvari adresare, klienty ani Codex vlakna. Teprve potvrzene otevreni jednoho
+konkretniho proudu zalozi nebo obnovi jeho vlastni persistentni stav a pritom
+znovu pouzije jeden sdileny cisty workspace a jeden app-server runtime. Aktivni
+muze byt jen jeden lazy proud; prepnuti je fail-closed pri aktivnim tahu,
+nejistem doruceni nebo necistem ci nesynchronnim workspace.
+
 ## Uplny katalog faze 4.1
 
 | ID | Typ | Kanonicky nazev | Rezim | Priorita | Kanonicky zdroj / slouceni |
@@ -66,15 +73,20 @@ ani nasazovaci logiky. Faze 4.1 sama nic soukromeho nezaklada.
 
 ## Stavajici runtime vazby
 
-Faze 4.1 nezaklada vlakna ani profily. Runtime zustava navazany pouze na dva
-drive overene proudy. Human–Adam si docasne ponechava historicky runtime typ
-`Layer` a starsi nazev jako kompatibilni alias; katalog ho uz kanonicky vede
-jako `Project` / `Human–Adam`.
+Faze 4.2 zachovava oba drive overene proudy jako rezervovane legacy vazby, aby
+pred migraci nevzniklo druhe vlakno Human–Adam ani Knihovny. Zbyvajicich 27
+proudu ma pripraveny lazy soukromy slot, ale zadny se nezaklada pri startu
+Cockpitu. Human–Adam si docasne ponechava historicky runtime typ `Layer` a
+starsi nazev jako kompatibilni alias; katalog ho uz kanonicky vede jako
+`Project` / `Human–Adam`.
 
 | ID | Vlakno | TVBCP | Handoff |
 | --- | --- | --- | --- |
 | `layer-human-adam-development` | Stavajici oddelene vlakno Human–Adam; soukromy identifikator se do Gitu neuklada. | `tvbcp/architektura_komunikace_samantha.txt` | `handoffs/human_adam_layer_workstream_start_2026_07_20.md` |
 | `project-knowledge-library` | Stavajici oddelene vlakno Knihovny; soukromy identifikator se do Gitu neuklada. | `tvbcp/knihovna_cockpit.txt` | `handoffs/knowledge_library_article_editing_2026_07_16.md` |
+
+Kanonicke handoff/TVBCP vazby zbyvajicich proudu nejsou soucasti faze 4.2.
+Vzniknou v navazujici fazi 4.3 pred napojenim menu a pred migraci legacy profilu.
 
 ## Pravidla registru
 
@@ -88,5 +100,9 @@ jako `Project` / `Human–Adam`.
   dokumentacni i kodovy katalog maji stejna ID a poradi.
 - Katalog neobsahuje soukrome identifikatory vlaken, profilu ani cestu k
   workspace.
+- Soukromy lazy backend smi vystavit jen redigovany stav bez ID vlakna a bez
+  private cesty.
+- Otevreni proudu vyzaduje potvrzeni, cisty synchronni workspace, dokonceny tah
+  a vyresene doruceni; archivni proud se neotevira.
 - Zalozeni nebo prekvalifikovani zaznamu samo nemeni UI, API, Git workflow,
   nasazeni ani bezici relaci Human–Adam.

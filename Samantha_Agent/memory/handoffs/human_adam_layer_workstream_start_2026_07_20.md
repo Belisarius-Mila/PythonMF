@@ -571,3 +571,38 @@ Další krok: po tematickém commitu, pushi a zelené vzdálené Quality Gate za
 fázi 4.2 – oddělení pracovního proudu od dvou pevných profilů a bezpečné lazy
 založení či obnovení soukromého vlákna. Fáze 4.1 se nenasazuje a živé menu se v
 ní nemění.
+
+### 2026-07-20 20:08 CEST – Checkpoint fáze 4.2: lazy soukromá vlákna
+
+Fáze 4.2 je implementačně hotová jako neveřejný backend bez nové API route a
+bez změny UI. `WorkstreamThreadRegistry` přebírá všech 29 validovaných identit
+z katalogu, ale samotné načtení nevytvoří soukromý adresář, app-server klienta
+ani Codex vlákno. Teprve výslovně potvrzené otevření jednoho proudu vytvoří nebo
+obnoví jeho vlastní persistentní session stav.
+
+Všechny lazy proudy znovu používají jeden app-server runtime a jeden sdílený
+čistý workspace; nevzniká sada profilů, procesů, worktree ani WIP větví. V jednu
+chvíli může být připojený nejvýše jeden lazy proud. Přepnutí skončí fail-closed,
+pokud běží aktivní tah, existuje nejisté doručení nebo workspace není čistý a
+synchronní s `main`. Redigovaný stav nevystavuje ID vlákna ani private cestu.
+
+Human–Adam a Knihovna jsou z lazy otevření záměrně rezervované, protože jejich
+existující soukromá vlákna se musí zachovat až při migraci fáze 4.5. Fáze 4.2
+nezakládá jejich duplicitní session a nemění současný profilový přepínač.
+
+Nový testovací modul ověřuje inertní načtení katalogu, vytvoření jediného
+vyžádaného vlákna, obnovení stejného uloženého vlákna po novém registru,
+odpojení předchozího proudu, blokaci aktivního tahu a nejistého doručení,
+workspace guard, explicitní potvrzení a rezervované či archivované proudy.
+Cílená sada 86 testů prošla. Plná Cockpit Quality Gate prošla kontrolou diffu,
+Python, JavaScript i shell syntaxí a 930 testy za 242,097 sekundy; celá brána
+skončila `OK`.
+
+Změněné aplikační soubory fáze jsou `human_adam_workstream_threads.py`,
+`human_adam_service.py`, `human_adam_profiles.py`, odpovídající nový test a
+manifest quality gate. Tento checkpoint neautorizuje nasazení ani restart.
+
+Další krok: fáze 4.3 – odvodit pro každý katalogový proud jedinou git-safe
+kanonickou vazbu na handoff a TVBCP, bezpečně založit chybějící kostry a napojit
+je na checkpointový backend. UI, menu a migrace legacy vláken zůstávají mimo
+rozsah až do fází 4.4 a 4.5.

@@ -1,0 +1,209 @@
+from __future__ import annotations
+
+import tempfile
+import unittest
+from pathlib import Path
+from typing import Any
+
+from app.codex_appserver import AppServerError
+from app.communication.human_adam_workstream_catalog import (
+    WORKSTREAM_CATALOG,
+    CanonicalWorkstream,
+)
+from app.communication.human_adam_workstream_threads import WorkstreamThreadRegistry
+from app.communication.session_hub import CanonicalSessionHub, SessionBusyError
+
+
+class FakeClient:
+    def __init__(self, events: list[tuple[str, str]], next_thread_id: str):
+        self.events = events
+        self.next_thread_id = next_thread_id
+        self.running = True
+
+    def start_thread(self, **_kwargs: Any) -> str:
+        self.events.append(("start", self.next_thread_id))
+        return self.next_thread_id
+
+    def resume_thread(self, thread_id: str, **_kwargs: Any) -> None:
+        self.events.append(("resume", thread_id))
+
+    def close(self) -> None:
+        self.running = False
+
+
+def clean_workspace_status() -> dict[str, Any]:
+    return {
+        "prepared": True,
+        "ok": True,
+        "project_ready": True,
+        "remotes": [],
+        "dirty": False,
+        "local_checkpoint_ahead": False,
+        "source_pending_changes": 0,
+        "workspace_relation": "same",
+        "source_update_available": False,
+    }
+
+
+class WorkstreamThreadRegistryTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp.name)
+        self.private_root = self.root / "private-workstreams"
+        self.events: list[tuple[str, str]] = []
+        self.factory_calls: list[str] = []
+        self.hubs: dict[str, CanonicalSessionHub] = {}
+
+    def tearDown(self) -> None:
+        self.temp.cleanup()
+
+    def registry(
+        self,
+        *,
+        workspace_status=clean_workspace_status,
+        catalog=WORKSTREAM_CATALOG,
+        reserved_workstream_ids=(),
+    ) -> WorkstreamThreadRegistry:
+        def factory(record: CanonicalWorkstream, state_path: Path) -> CanonicalSessionHub:
+            self.factory_calls.append(record.workstream_id)
+            ordinal = len(self.factory_calls)
+            hub = CanonicalSessionHub(
+                state_path=state_path,
+                workspace=self.root,
+                client_factory=lambda: FakeClient(self.events, f"thread-{ordinal}"),
+                developer_instructions=f"Workstream {record.workstream_id}",
+                sandbox="workspace-write",
+                sandbox_policy={},
+                approval_policy="never",
+                reasoning_effort="medium",
+            )
+            self.hubs[record.workstream_id] = hub
+            return hub
+
+        return WorkstreamThreadRegistry(
+            state_root=self.private_root,
+            hub_factory=factory,
+            workspace_status=workspace_status,
+            catalog=catalog,
+            reserved_workstream_ids=reserved_workstream_ids,
+        )
+
+    def test_catalog_status_is_inert_and_redacted(self) -> None:
+        registry = self.registry()
+
+        status = registry.status()
+
+        self.assertFalse(self.private_root.exists())
+        self.assertEqual(self.factory_calls, [])
+        self.assertEqual(len(status["workstreams"]), 29)
+        self.assertEqual(status["initialized_count"], 0)
+        self.assertEqual(status["connected_count"], 0)
+        self.assertNotIn("thread_id", repr(status))
+        self.assertNotIn(str(self.private_root), repr(status))
+
+    def test_first_open_materializes_only_requested_thread(self) -> None:
+        registry = self.registry()
+
+        result = registry.open(workstream_id="project-mmtx", confirmed=True)
+        status = registry.status()
+
+        self.assertTrue(result["thread"]["initialized"])
+        self.assertTrue(result["thread"]["connected"])
+        self.assertEqual(self.factory_calls, ["project-mmtx"])
+        self.assertEqual(self.events, [("start", "thread-1")])
+        self.assertTrue((self.private_root / "project-mmtx" / "session.json").is_file())
+        self.assertEqual(status["initialized_count"], 1)
+        self.assertEqual(status["connected_count"], 1)
+        self.assertEqual(status["active_workstream_id"], "project-mmtx")
+        self.assertNotIn("thread_id", repr(result))
+
+    def test_new_registry_resumes_persisted_thread_without_materializing_others(self) -> None:
+        first = self.registry()
+        first.open(workstream_id="project-mmtx", confirmed=True)
+        first.close()
+        self.factory_calls.clear()
+        self.hubs.clear()
+
+        second = self.registry()
+        second.open(workstream_id="project-mmtx", confirmed=True)
+
+        self.assertEqual(self.factory_calls, ["project-mmtx"])
+        self.assertEqual(self.events[-1], ("resume", "thread-1"))
+        self.assertEqual(second.status()["initialized_count"], 1)
+
+    def test_switch_disconnects_previous_and_keeps_one_connected_thread(self) -> None:
+        registry = self.registry()
+        registry.open(workstream_id="project-mmtx", confirmed=True)
+
+        registry.open(workstream_id="project-lekarna", confirmed=True)
+        status = registry.status()
+
+        self.assertEqual(self.factory_calls, ["project-mmtx", "project-lekarna"])
+        self.assertFalse(self.hubs["project-mmtx"].snapshot()["connected"])
+        self.assertTrue(self.hubs["project-lekarna"].snapshot()["connected"])
+        self.assertEqual(status["connected_count"], 1)
+        self.assertEqual(status["active_workstream_id"], "project-lekarna")
+
+    def test_active_turn_blocks_switch_before_target_is_materialized(self) -> None:
+        registry = self.registry()
+        registry.open(workstream_id="project-mmtx", confirmed=True)
+        current = self.hubs["project-mmtx"]
+        current._turn_lock.acquire()
+        try:
+            with self.assertRaisesRegex(SessionBusyError, "aktivního tahu"):
+                registry.open(workstream_id="project-lekarna", confirmed=True)
+        finally:
+            current._turn_lock.release()
+
+        self.assertEqual(self.factory_calls, ["project-mmtx"])
+        self.assertFalse((self.private_root / "project-lekarna").exists())
+
+    def test_uncertain_delivery_blocks_switch(self) -> None:
+        registry = self.registry()
+        registry.open(workstream_id="project-mmtx", confirmed=True)
+        current = self.hubs["project-mmtx"]
+        current._state["messages"].append(
+            {"status": "delivery_unknown", "recovery_required": True}
+        )
+
+        with self.assertRaisesRegex(SessionBusyError, "nejisté doručení"):
+            registry.open(workstream_id="project-lekarna", confirmed=True)
+
+        self.assertEqual(self.factory_calls, ["project-mmtx"])
+
+    def test_dirty_or_unsynchronized_workspace_blocks_before_private_write(self) -> None:
+        dirty = clean_workspace_status()
+        dirty["dirty"] = True
+        registry = self.registry(workspace_status=lambda: dirty)
+
+        with self.assertRaisesRegex(AppServerError, "není čistý"):
+            registry.open(workstream_id="project-mmtx", confirmed=True)
+
+        self.assertEqual(self.factory_calls, [])
+        self.assertFalse(self.private_root.exists())
+
+    def test_confirmation_reserved_and_archived_guards_are_fail_closed(self) -> None:
+        registry = self.registry(reserved_workstream_ids={"project-mmtx"})
+
+        with self.assertRaisesRegex(AppServerError, "výslovné potvrzení"):
+            registry.open(workstream_id="project-lekarna", confirmed=False)
+        with self.assertRaisesRegex(AppServerError, "původní pracovní profil"):
+            registry.open(workstream_id="project-mmtx", confirmed=True)
+
+        archived = CanonicalWorkstream(
+            "project-archived",
+            "Project",
+            "Archiv",
+            "archived",
+            "3",
+            ("Archivní zdroj",),
+        )
+        archived_registry = self.registry(catalog=(archived,))
+        with self.assertRaisesRegex(AppServerError, "Archivovaný"):
+            archived_registry.open(workstream_id="project-archived", confirmed=True)
+
+        self.assertEqual(self.factory_calls, [])
+
+
+if __name__ == "__main__":
+    unittest.main()
