@@ -1462,3 +1462,35 @@ mutující workflow nebyly součástí tohoto důkazu.
 
 Další krok: bod 0.5 – spustit regresní testy současného Human–Adam bez funkční
 změny a zapsat přesný výsledek před zahájením postupné implementace.
+
+### 2026-07-20 06:36 CEST – Regresní baseline 856 testů
+
+Bod 0.5 dokončil regresní důkaz současného Human–Adam před první implementační
+změnou jednoduchého modelu.
+
+Kanonická Cockpit quality gate ověřila:
+
+- `git diff --check` bez chyby;
+- Python kompilaci všech sledovaných Cockpit, Human–Adam, Session Hub, workspace,
+  nasazovacích, recovery a souvisejících modulů;
+- JavaScript syntaxi hlavního Cockpitu i samostatného Human–Adam UI;
+- syntaxi startovacích shell skriptů;
+- plnou kanonickou sadu 856 unit testů za 198,475 sekundy, výsledek `OK`, žádné
+  selhání ani chyba.
+
+Testovací sada zahrnovala mimo jiné app-server, Session Hub, profily, semafor,
+životní cyklus větví, projektovou kontinuitu, Human–Adam service, deploy, UI,
+workspace, takeover, lokální runtime, TVBCP, Cockpit HTTP a restart/recovery.
+
+Po testech zůstal zdrojový `main` čistý a shodný s `origin/main`. Následný živý
+read-only Cockpit smoke test znovu prošel 5/5. Nebyl změněn kód, konfigurace,
+profil, vlákno, workspace ani runtime.
+
+Výchozí stav kroku 0 je tím uzavřený: existuje kanonický Layer, propojený TVBCP
+a handoff, nový jednoduchý model, živý funkční baseline a zelená regresní sada.
+Profilové workspaces stále záměrně čekají na běžnou synchronizaci paměťových
+commitů; synchronizace nebyla součástí read-only bodů 0.4 a 0.5.
+
+Další krok: checkpointnout a pushnout dokončení kroku 0. Po čistém checkpointu
+nechat aktivní profil synchronizovat přes `Připojit`; první implementační fázi
+zahájit až z čistého a synchronního stavu podle dalšího potvrzeného zadání.

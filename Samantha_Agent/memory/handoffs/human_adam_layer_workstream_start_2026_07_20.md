@@ -26,21 +26,28 @@ Co je hotove:
   zdrave read-only Human–Adam API.
 - Oba profilove workspaces cekaji na beznou synchronizaci novych pametovych
   commitu ze zdrojoveho `main`; proto souhrnny status docasne hlasi `ok=false`.
+- Regresni bod 0.5 prosel: Python kompilace, JavaScript hlavniho i Human–Adam UI,
+  shell syntaxe, plna sada 856 testu za 198,475 sekundy a nasledny zivy Cockpit
+  smoke test 5/5.
 - Nebyl zmenen kod, UI, API, runtime, Git workflow, nasazeni ani bezici relace.
 
 Co neni hotove:
-- Neni dokoncena regresni sada kroku 0.
+- Implementacni transformace jeste nezacala.
+- Aktivni profil je po pametovych commitech stale potreba bezne synchronizovat
+  pres `Pripojit`, ale az po cistem checkpointu zdrojoveho repa.
 - Stary runtime nazev se zatim nesmi prejmenovat, protoze jej pouziva soucasna
   profilova konfigurace Cockpitu.
 
 Dalsi krok:
-Krok 0, bod 5: spustit regresni testy soucasneho Human–Adam bez funkcni zmeny a
-zapsat presny vysledek pred prvni implementacni zmenou.
+Checkpointnout a pushnout dokonceni kroku 0. Potom nechat aktivni profil bezne
+synchronizovat a prvni implementacni fazi zahajit z cisteho stavu podle dalsiho
+potvrzeneho zadani.
 
 Navrhovane dalsi kroky:
-- Spustit a zaznamenat regresni testy Human–Adam.
 - Po cistem checkpointu nechat aktivni profil bezne synchronizovat pres
   `Pripojit`; synchronizaci neprovadet uprostred rozpracovaneho source repa.
+- Zachovat vysledek 856 testu a smoke 5/5 jako porovnavaci baseline pro kazdou
+  dalsi implementacni fazi.
 - Zachovat UI a zakladni funkce po celou dobu postupne transformace.
 
 Zmenene nebo relevantni soubory:

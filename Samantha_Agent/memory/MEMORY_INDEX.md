@@ -119,7 +119,9 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   novy jednoduchy model i nahrazena starsi pravidla jsou zapsane. Read-only
   baseline potvrdil Cockpit smoke 5/5, UI, app-server, vlakno a ciste profilove
   workspaces; oba profily pouze cekaji na synchronizaci novych pametovych
-  checkpointu. Dalsi krok jsou regresni testy soucasneho Human–Adam.
+  checkpointu. Regresni baseline nasledne prosla Python a JavaScript syntaxi,
+  plnou sadou 856 testu a zivym smoke testem 5/5. Krok 0 je pripraveny k
+  checkpointu a pushi; potom se ma aktivni profil synchronizovat.
 
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni
