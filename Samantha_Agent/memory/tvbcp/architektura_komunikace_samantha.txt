@@ -1742,3 +1742,14 @@ runnerem GitHubu. Faze zatim nebyla nasazena ani zive pouzita pro zapisovaci tah
 
 Dalsi krok: samostatne nasazeni, rizeny restart, smoke test a jeden maly zivy
 zapisovaci tah v Human–Adam.
+
+### 2026-07-20 10:34 CEST – Živý zapisovací test fáze 1.5 prošel
+
+Pracovní proud: `layer-human-adam-development`.
+
+Milník: Živý zapisovací test fáze 1.5 prošel
+
+Důkaz: plná Cockpit brána: 880 testů, 259.9 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Ověřit čistý main, synchronizaci profilů a uvolnit přechodný semafor
