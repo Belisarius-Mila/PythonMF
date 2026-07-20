@@ -194,3 +194,38 @@ zivy zapisovaci test automatickeho dokonceni faze 1.5.
 - Změněné cesty před paměťovým zápisem (1): `Samantha_Agent/memory/handoffs/human_adam_layer_workstream_start_2026_07_20.md`
 - Commit: `Verify Human-Adam automatic completion live`
 - Další krok: Ověřit čistý main, synchronizaci profilů a uvolnit přechodný semafor
+
+### Fáze 2.1 – neveřejné jednoduché nasazení z čistého main
+
+Dne 2026-07-20 11:27 CEST vznikl samostatný backend jednoduchého nasazení z
+přesného čistého `main`. Backend nemá API route, tlačítko ani automatické
+spuštění a nemění současné UI nebo běžící Cockpit.
+
+Před restartem backend vyžaduje výslovné potvrzení, přesný očekávaný commit,
+zdrojovou větev `main`, čistý lokální `main`, shodný čerstvě načtený
+`origin/main` a všechny profilové workspaces čisté, bez remote a zarovnané na
+stejném commitu. Potom spustí plnou Cockpit bránu, znovu ověří Git i profily a
+stálý očekávaný kódový otisk. Teprve pak uloží soukromou účtenku
+`pending_restart`.
+
+Po restartu druhá část backendu vyžaduje nový PID, přesný kódový otisk, stále
+shodný `main` / `origin/main`, oba čisté profily a kanonický smoke test `5/5`.
+Jedině úplný důkaz povýší soukromou účtenku na `deployed`. Chybný otisk, stejný
+PID, neúplný smoke, nečistý profil, změna main nebo vzdálený závod ponechají
+nasazení nedokončené.
+
+Backend nevytváří větev, WIP checkpoint ani takeover a nečte ani nemění globální
+vývojový semafor. Nový testovací modul má 7 zelených scénářů; společná cílená
+sada s testy quality gate prošla 14 testy. Plná Cockpit brána prošla 887 testy
+za 275,223 sekundy a skončila `OK` za 278,8 sekundy.
+
+Změněné soubory fáze 2.1:
+
+- `app/communication/simple_main_deploy.py`
+- `tests/test_simple_main_deploy.py`
+- `scripts/cockpit_quality_gate.py`
+
+Fáze zatím není commitnutá, pushnutá, napojená na profilový manager ani
+nasazená. Další krok: checkpoint + commit + push fáze 2.1; potom fáze 2.2 může
+backend napojit na kanonický pracovní proud a existující bezpečný restart worker,
+stále bez změny UI.

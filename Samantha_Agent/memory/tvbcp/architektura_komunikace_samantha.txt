@@ -1753,3 +1753,30 @@ Důkaz: plná Cockpit brána: 880 testů, 259.9 s, výsledek OK. Checkpoint back
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Ověřit čistý main, synchronizaci profilů a uvolnit přechodný semafor
+
+### 2026-07-20 11:27 CEST – Fáze 2.1: neveřejné jednoduché nasazení z čistého main
+
+Vznikl samostatný neveřejný backend dvoukrokového nasazení z přesného čistého
+`main`. Není napojený na API ani UI a současný runtime proto nemění.
+
+Příprava nasazení fail-closed ověřuje výslovné potvrzení, očekávaný commit,
+čistou zdrojovou větev `main`, čerstvě načtený shodný `origin/main`, všechny
+profilové workspaces čisté a zarovnané na stejném commitu a stabilní kódový
+otisk. Po plné Cockpit bráně vše ověří podruhé a teprve potom vytvoří soukromou
+účtenku `pending_restart`.
+
+Dokončení po restartu vyžaduje jiný PID, přesný očekávaný kódový otisk, stále
+čistý a synchronní Git i profily a kanonický smoke test `5/5`. Teprve úplný
+důkaz změní účtenku na `deployed`. Neúspěch nic nepředstírá a účtenka zůstane v
+obnovitelném mezistavu.
+
+Kanonická hranice: backend nevytváří vývojovou větev, WIP checkpoint ani
+takeover a nepoužívá globální vývojový semafor. Sedm nových testů pokrývá
+úspěšnou cestu, nečistý zdroj nebo profil, závod na `origin/main`, neúspěšnou
+bránu, chybný restartový důkaz, neúplný smoke a striktní schéma soukromé účtenky.
+Společná cílená sada má 14 zelených testů. Plná Cockpit brána prošla Python a
+JavaScript syntaxí, shell syntaxí a 887 testy za 275,223 sekundy; celá brána
+skončila `OK` za 278,8 sekundy.
+
+Další krok: checkpoint, commit a push fáze 2.1. Potom napojit backend na
+kanonický pracovní proud a existující bezpečný restart worker bez změny UI.
