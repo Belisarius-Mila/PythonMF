@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -20,6 +21,30 @@ from scripts.cockpit_quality_gate import (
 
 
 class CockpitQualityGateTests(unittest.TestCase):
+    def test_workflow_triggers_cover_communication_layer_and_match(self) -> None:
+        workflow_path = PROJECT_ROOT.parent / ".github" / "workflows" / "cockpit-quality-gate.yml"
+        source = workflow_path.read_text(encoding="utf-8")
+
+        def trigger_paths(trigger: str, end_marker: str) -> set[str]:
+            start = source.index(f"  {trigger}:")
+            end = source.index(end_marker, start)
+            block = source[start:end]
+            return set(re.findall(r'^\s+- "([^"]+)"$', block, flags=re.MULTILINE))
+
+        pull_request_paths = trigger_paths("pull_request", "  push:")
+        push_paths = trigger_paths("push", "\npermissions:")
+        required = {
+            ".github/workflows/cockpit-quality-gate.yml",
+            "Samantha_Agent/app/communication/**",
+            "Samantha_Agent/tests/test_communication*.py",
+            "Samantha_Agent/tests/test_human_adam*.py",
+            "Samantha_Agent/tests/test_simple_main_*.py",
+            "Samantha_Agent/tests/test_local_appserver_runtime.py",
+        }
+
+        self.assertEqual(pull_request_paths, push_paths)
+        self.assertTrue(required.issubset(push_paths), required - push_paths)
+
     def test_source_metrics_counts_only_top_level_definitions(self) -> None:
         source = """class Example:
     def nested_method(self):

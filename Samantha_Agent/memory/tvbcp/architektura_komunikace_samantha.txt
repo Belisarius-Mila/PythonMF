@@ -1901,3 +1901,23 @@ sekundy včetně Human–Adam JavaScript syntaxe.
 Další krok: checkpoint, commit a push fáze 3.1a. Potom synchronizovat aktivní
 profil přes `Připojit` a touto samoobslužnou cestou nasadit opravu; živý důkaz je
 znovu otevřený panel `Práce` se zachovanou potvrzovací hláškou.
+
+### 2026-07-20 14:45 CEST – Fáze 3.1b: CI trigger pokrývá komunikaci
+
+GitHub workflow mělo dva oddělené kontrakty: samotný skript Quality Gate už
+obsahoval nové moduly a testy `app/communication`, ale YAML `paths` filtr byl
+starší ručně vyjmenovaný seznam. Větší změny mezeru maskovaly souběžnou změnou
+`app/cockpit.py`; úzká fáze 3.1a změnila jen soubory mimo starý filtr, takže
+GitHub správně podle konfigurace Quality Gate vůbec nespustil.
+
+Triggery pro `push` i `pull_request` nyní používají široké pravidlo pro celou
+`Samantha_Agent/app/communication/**` vrstvu a vzory jejích komunikačních,
+Human–Adam, simple-main a local-appserver testů. Nový regresní test čte reálný
+workflow soubor, vyžaduje tyto vzory a shodu obou množin triggerů. Tím odstraňuje
+nutnost ručně dopisovat každý nový komunikační modul a hlídá další drift.
+
+Cílená sada prošla 8 testy a plná Cockpit brána prošla 904 testy za 248,925
+sekundy; celá brána skončila `OK` za 260,1 sekundy.
+
+Další krok: checkpoint, commit a push fáze 3.1b. Změna workflow musí sama spustit
+vzdálený Cockpit Quality Gate a tím potvrdit funkčnost opraveného triggeru.

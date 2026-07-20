@@ -384,3 +384,34 @@ testovací moduly, tento handoff a TVBCP. Fáze zatím není commitnutá, pushnu
 nasazená. Další krok: checkpoint + commit + push fáze 3.1a. Potom synchronizovat
 aktivní profil přes `Připojit` a novou samoobslužnou cestou nasadit právě tuto
 opravu; úspěšný test musí po restartu znovu otevřít `Práci` a zachovat potvrzení.
+
+### Fáze 3.1b – komunikační vrstva je zahrnutá v CI triggerech
+
+Dne 2026-07-20 14:45 CEST byla opravena mezera ve spouštěcích filtrech GitHub
+workflow `Cockpit Quality Gate`. Samotný lokální i CI skript brány již dlouho
+kompiloval a testoval moduly `app/communication`, ale YAML trigger byl starší
+ručně vyjmenovaný seznam konkrétních cest. Při přidávání nových modulů a testů
+se rozšiřoval manifest brány, nikoli vždy paralelně i tento samostatný seznam.
+
+Mezeru dočasně maskovalo, že větší fáze současně měnily `app/cockpit.py` nebo
+`tests/test_cockpit.py`, které ve filtru byly a workflow tím nepřímo spustily.
+Fáze 3.1a změnila jen `human_adam_ui.py`, `simple_main_deploy.py` a jejich testy;
+žádná z těchto konkrétních cest starému filtru neodpovídala. GitHub proto přesně
+podle konfigurace spustil Pages, ale ne Cockpit Quality Gate. Nešlo o chybu
+testů, GitHubu ani commitu, nýbrž o drift dvou ručně udržovaných seznamů.
+
+Oba triggery `pull_request` i `push` nyní obsahují široké pravidlo
+`Samantha_Agent/app/communication/**` a vzory pro komunikační, Human–Adam,
+simple-main a local-appserver testy. Nový regresní test čte skutečný workflow,
+vyžaduje všechny tyto vzory a navíc vyžaduje, aby množiny cest pro push a pull
+request byly shodné. Nový komunikační modul se tedy už nemusí jednotlivě
+dopisovat a jednostranná změna triggeru test rozbije.
+
+Cílená sada workflow testů prošla 8 testy. Plná Cockpit brána prošla Python,
+JavaScript i shell syntaxí a 904 testy za 248,925 sekundy; celá brána skončila
+`OK` za 260,1 sekundy.
+
+Změněné soubory jsou `.github/workflows/cockpit-quality-gate.yml`,
+`test_cockpit_quality_gate.py`, tento handoff a TVBCP. Fáze zatím není
+commitnutá ani pushnutá. Další krok: checkpoint + commit + push fáze 3.1b; změna
+workflow sama musí spustit vzdálený Cockpit Quality Gate a tím opravu potvrdit.
