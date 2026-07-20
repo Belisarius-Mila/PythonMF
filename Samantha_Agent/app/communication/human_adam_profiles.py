@@ -39,6 +39,7 @@ from app.communication.human_adam_workstream_coordinator import (
     canonical_workstream_binding,
 )
 from app.communication.human_adam_workstream_memory import WorkstreamMemoryRegistry
+from app.communication.human_adam_workstream_selection import GroupedWorkstreamSelection
 from app.communication.human_adam_workstream_threads import WorkstreamThreadRegistry
 from app.communication.human_adam_turn_completion import (
     ParsedTurnCompletion,
@@ -163,6 +164,17 @@ class HumanAdamProfileManager:
             normalized_profiles[profile_id] = normalized
         self.profiles = normalized_profiles
         self.workstream_coordinator = HumanAdamWorkstreamCoordinator(self.profiles)
+        legacy_workstream_profiles = {
+            binding.workstream_id: profile_id
+            for profile_id, profile in self.profiles.items()
+            if isinstance(
+                (binding := profile.get("workstream_binding")),
+                CanonicalWorkstreamBinding,
+            )
+        }
+        self.grouped_workstream_selection = GroupedWorkstreamSelection(
+            legacy_profiles=legacy_workstream_profiles,
+        )
         self.workstream_memory = workstream_memory
         if self.workstream_memory is not None:
             for profile in self.profiles.values():
@@ -305,6 +317,35 @@ class HumanAdamProfileManager:
             **self.workstream_memory.status(project_root=project_root),
             "available": True,
         }
+
+    def grouped_workstream_status(self) -> dict[str, Any]:
+        """Return the private phase-4.4 menu model before UI activation."""
+
+        active_context = self.workstream_coordinator.context(self.active_profile_id)
+        active_legacy_id = str(active_context.get("workstream_id") or "")
+        active_lazy_id = (
+            self.workstream_threads.active_workstream_id
+            if self.workstream_threads is not None
+            else ""
+        )
+        return self.grouped_workstream_selection.status(
+            active_legacy_workstream_id=active_legacy_id,
+            active_lazy_workstream_id=active_lazy_id,
+            thread_status=(
+                self.workstream_threads.status()
+                if self.workstream_threads is not None
+                else None
+            ),
+            memory_status=(
+                self.workstream_memory.status(
+                    project_root=self.profiles[self.default_profile_id][
+                        "service"
+                    ].workspace.project_root
+                )
+                if self.workstream_memory is not None
+                else None
+            ),
+        )
 
     def open_lazy_workstream_thread(
         self,
