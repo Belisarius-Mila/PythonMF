@@ -218,6 +218,13 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                     "label": "Human–Adam",
                     "description": "Původní",
                     "default_project_name": "Testovací projekt",
+                    "workstream": {
+                        "id": "layer-human-adam-development",
+                        "type": "Layer",
+                        "name": "Human–Adam / vývojové prostředí",
+                        "handoff": "memory/handoffs/human_adam_layer_workstream_start_2026_07_20.md",
+                        "tvbcp": "memory/tvbcp/architektura_komunikace_samantha.txt",
+                    },
                     "service": human,
                 },
                 "knihovna": {
@@ -269,6 +276,76 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(status["development_semaphore"]["ok"])
         self.assertFalse(status["development_semaphore"]["active"])
         self.assertTrue(status["development_semaphore"]["can_acquire_profile"])
+
+    def test_simple_checkpoint_context_comes_from_active_profile_binding(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_rest = self.make_manager(Path(temp_dir))
+            context = manager.simple_checkpoint_context()
+
+        self.assertTrue(context["available"])
+        self.assertEqual(context["profile_id"], "human_adam")
+        self.assertEqual(context["workstream_id"], "layer-human-adam-development")
+        self.assertEqual(context["workstream_type"], "Layer")
+        self.assertEqual(
+            context["handoff_relative_path"],
+            "memory/handoffs/human_adam_layer_workstream_start_2026_07_20.md",
+        )
+        self.assertEqual(
+            context["tvbcp_relative_path"],
+            "memory/tvbcp/architektura_komunikace_samantha.txt",
+        )
+
+    def test_simple_checkpoint_builds_request_from_profile_and_includes_peers(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, *_rest = self.make_manager(
+                Path(temp_dir)
+            )
+            with patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint",
+                return_value={"ok": True, "checkpoint_head": "c" * 40},
+            ) as checkpoint:
+                result = manager.simple_main_checkpoint(
+                    commit_message="Checkpoint fáze 1.2",
+                    summary="Napojení profilového kontextu",
+                    next_step="Doplnit neveřejnou integrační vrstvu.",
+                    confirmed=True,
+                )
+
+        call = checkpoint.call_args.kwargs
+        request = call["request"]
+        self.assertIs(call["workspace"], human_workspace)
+        self.assertEqual(call["peer_workspaces"], (library_workspace,))
+        self.assertTrue(call["confirmed"])
+        self.assertEqual(request.workstream_id, "layer-human-adam-development")
+        self.assertEqual(
+            request.handoff_relative_path,
+            "memory/handoffs/human_adam_layer_workstream_start_2026_07_20.md",
+        )
+        self.assertEqual(
+            request.tvbcp_relative_path,
+            "memory/tvbcp/architektura_komunikace_samantha.txt",
+        )
+        self.assertEqual(result["work_profile"]["id"], "human_adam")
+        self.assertEqual(result["workstream"]["type"], "Layer")
+
+    def test_simple_checkpoint_fails_closed_for_unregistered_active_profile(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_rest = self.make_manager(Path(temp_dir))
+            manager.switch(profile_id="knihovna", confirmed=True)
+            context = manager.simple_checkpoint_context()
+            with patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint"
+            ) as checkpoint:
+                with self.assertRaisesRegex(AppServerError, "zaregistrovaný kanonický"):
+                    manager.simple_main_checkpoint(
+                        commit_message="Zakázaný checkpoint",
+                        summary="Bez registrace",
+                        next_step="Neprovést.",
+                        confirmed=True,
+                    )
+
+        self.assertFalse(context["available"])
+        checkpoint.assert_not_called()
 
     def test_project_binding_is_required_when_catalog_exists_and_audit_is_read_only(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

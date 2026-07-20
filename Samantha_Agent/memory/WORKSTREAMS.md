@@ -10,7 +10,7 @@ jejich migrace samostatne overena.
 
 | ID | Typ | Kanonicky nazev | Rezim | Docasny kompatibilni zdroj | Vlakno | TVBCP | Handoff | Dalsi krok |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `layer-human-adam-development` | `Layer` | Human–Adam / vývojové prostředí | active | `ACTIVE_PROJECTS.md`: App-server rozhrani / novy Adam | Stavajici oddelene vlakno Human–Adam; soukromy identifikator se do Gitu neuklada. | `tvbcp/architektura_komunikace_samantha.txt` | `handoffs/human_adam_layer_workstream_start_2026_07_20.md` | Checkpointnout a pushnout fazi 1.1; potom napojit jednoduchy backend na kanonicka metadata proudu a profilovy manager bez aktivace v UI. |
+| `layer-human-adam-development` | `Layer` | Human–Adam / vývojové prostředí | active | `ACTIVE_PROJECTS.md`: App-server rozhrani / novy Adam | Stavajici oddelene vlakno Human–Adam; soukromy identifikator se do Gitu neuklada. | `tvbcp/architektura_komunikace_samantha.txt` | `handoffs/human_adam_layer_workstream_start_2026_07_20.md` | Po checkpointu faze 1.2 domluvit presny rozsah nejmensi integracni vrstvy; existujici UI zatim neprepinat. |
 
 ## Pravidla prvniho zaznamu
 

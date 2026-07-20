@@ -1542,3 +1542,36 @@ checkpointové tlačítko, profil, vlákno, nasazení ani běžící Cockpit.
 Další krok: checkpoint a push fáze 1.1. Potom fáze 1.2 – napojit backend na
 kanonická metadata pracovního proudu a profilový manager, stále bez přepnutí
 existujícího UI na nový tok.
+
+### 2026-07-20 07:48 CEST – Fáze 1.2: kanonická vazba profilu a pracovního proudu
+
+Neaktivní backend jednoduchého checkpointu je nově připojený k profilovému
+manageru, ale stále nemá API route ani ovládací prvek v UI. Profil Human–Adam má
+v kanonické konfiguraci vlastní vazbu na pracovní proud
+`layer-human-adam-development` typu `Layer`, název `Human–Adam / vývojové
+prostředí`, tento TVBCP a odpovídající handoff.
+
+Rozhodnutí: identifikátor proudu, typ, handoff a TVBCP nejsou klientský vstup.
+Profilový manager je odvozuje z aktivního profilu, po celou operaci drží profilový
+zámek a předává ostatní profilové workspaces jako peer kontrolu. Výsledek vrací
+identitu skutečně použitého profilu a proudu. Konfigurace fail-closed ověřuje
+bezpečný formát ID a paměťových cest i shodu TVBCP s TVBCP služby profilu.
+
+Knihovně nebyla přiřazena domnělá vazba. Dokud Mila a Adam v terminálu
+nezaregistrují konkrétní `Project`, `Tool`, `Layer` nebo `Misc`, neveřejná metoda
+nového checkpointu ji zastaví před voláním mutujícího backendu. Starý
+WIP/semafor/takeover tok běžícího Cockpitu zůstává beze změny.
+
+Důkaz: cílená sada `test_human_adam_profiles` + `test_simple_main_checkpoint`
+prošla 34 testy za 36,347 sekundy. Tři nové testy ověřují čtení kanonické vazby,
+sestavení requestu a peer workspaceů i fail-closed Knihovnu. Plná Cockpit brána
+prošla Python syntaxí, JavaScriptem obou UI, shell syntaxí a 866 testy za
+235,895 sekundy; celá brána trvala 240,1 sekundy a skončila `OK`. Následný živý
+read-only Cockpit smoke test prošel 5/5.
+
+Hranice fáze 1.2: žádná nová API cesta, žádné nové ani přepnuté tlačítko, žádná
+změna `cockpit.py` nebo `human_adam_ui.py`, žádné nasazení, restart, změna profilu,
+vlákna ani workspace. Backend zůstává neveřejný a neaktivní.
+
+Další krok: checkpoint a push fáze 1.2. Následnou nejmenší integrační vrstvu
+zahájit až podle dalšího potvrzeného bodu a bez předčasného přepnutí UI.

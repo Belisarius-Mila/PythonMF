@@ -38,25 +38,39 @@ Co je hotove:
 - Krok 0 nemenil kod ani runtime. Faze 1.1 meni pouze novy neaktivni backend,
   workspace path-policy helper, testy a quality gate; UI, API a bezici runtime
   zustavaji beze zmeny.
+- Faze 1.2 napojila neaktivni backend na kanonickou konfiguraci aktivniho
+  profilu. Profil Human–Adam vlastni ID `layer-human-adam-development`, typ
+  `Layer`, nazev, handoff a TVBCP; klient tyto udaje nemuze volne zadat.
+- Profilovy manager sklada checkpointovy request pouze z teto vazby, drzi
+  aktivni profil po celou operaci a predava backendu ostatni profilove workspaces
+  jako peer kontrolu. Vysledek nese potvrzenou identitu profilu a proudu.
+- Knihovna nema pro novy tok vymyslenou implicitni vazbu: dokud jeji konkretni
+  proud nezaregistrujeme v terminalu, novy checkpoint skonci fail-closed.
+- Tri nove profilove testy zvysily plnou sadu na 866 testu. Cilena sada 34 testu
+  i plna Cockpit brana prosly; plna sada bezela 235,895 sekundy a gate 240,1 s.
+- Nasledny zivy read-only Cockpit smoke test prosel 5/5.
+- Faze 1.2 nepridala API route, tlacitko ani zmenu UI a neaktivovala novy tok v
+  bezicim Cockpitu.
 
 Co neni hotove:
-- Backend faze 1.1 jeste neni napojeny na profilovy manager, API ani existujici
-  checkpointove tlacitko.
+- Novy backend stale neni napojeny na API ani existujici checkpointove tlacitko.
 - Stary WIP/semafor/takeover tok zustava beze zmeny aktivniho runtime.
-- Faze 1.1 je pripravena pro tento checkpoint a push; novy backend neni
+- Faze 1.2 je pripravena pro tento checkpoint a push; novy backend neni
   nasazeny ani aktivovany.
+- Knihovna nema kanonicky proud pro novy checkpoint, dokud jej Mila a Adam
+  samostatne nezaregistruji v terminalu.
 - Stary runtime nazev se zatim nesmi prejmenovat, protoze jej pouziva soucasna
   profilova konfigurace Cockpitu.
 
 Dalsi krok:
-Checkpointnout a pushnout fazi 1.1. Potom ve fazi 1.2 napojit backend na
-kanonicka metadata pracovniho proudu a profilovy manager, stale bez aktivace
-v existujicim UI.
+Po tomto checkpointu a pushi domluvit presny rozsah nejmensi integracni vrstvy;
+existujici UI zatim neprepinat.
 
 Navrhovane dalsi kroky:
-- Ve fazi 1.2 odvodit workstream ID, TVBCP a handoff z kanonicke profilove
-  konfigurace, ne z volneho vstupu klienta.
-- Existujici UI neprepinat, dokud profilovy backend nema vlastni cilene testy.
+- Pro dalsi profil nejdrive v terminalu zaregistrovat konkretni `Project`,
+  `Tool`, `Layer` nebo `Misc`; nevymyslet vazbu pri kliknuti v r-Adamovi.
+- Existujici UI neprepinat, dokud neveřejna integracni vrstva nema vlastni
+  cilene testy a presnou chybovou odpoved.
 - Zachovat UI a zakladni funkce po celou dobu postupne transformace.
 
 Zmenene nebo relevantni soubory:

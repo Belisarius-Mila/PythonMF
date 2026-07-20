@@ -124,8 +124,12 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   v `e64b0c5`; aktivni Knihovna se pote zarovnala pres `Pripojit`. Faze 1.1
   pripravila samostatny neaktivni backend jednoho checkpointu primo do
   `main`: bez nove vetve a semaforu, s automatickym TVBCP + handoffem, plnou
-  branou a zarovnanim workspace. Sedm novych testu i plna sada 863 testu prosly;
-  dalsi krok je checkpoint/push a profilove napojeni bez aktivace UI.
+  branou a zarovnanim workspace. Faze 1.2 jej napojila na profilovy manager:
+  ID proudu, typ, handoff a TVBCP se berou vyhradne z kanonicke konfigurace
+  aktivniho profilu, ne z klienta. Human–Adam je navazan na svuj Layer,
+  neregistrovana Knihovna konci fail-closed. Plna sada 866 testu prosla; API,
+  UI a runtime zustavaji beze zmeny. Po checkpointu faze 1.2 je dalsi krok
+  domluvit presny rozsah nejmensi integracni vrstvy bez prepnuti UI.
 
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni
