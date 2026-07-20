@@ -346,6 +346,7 @@ class HumanAdamProfileManager:
                     "description": str(profile.get("description") or ""),
                 },
                 "work_profiles": self._profile_rows(),
+                "workstream_selection": self.workstream_status(),
                 "development_semaphore": self.development_status(),
             }
         except (AppServerError, SessionHubError, OSError, ValueError) as exc:
@@ -354,6 +355,13 @@ class HumanAdamProfileManager:
                 "status": "human_adam_profile_status_failed",
                 "message": str(exc),
                 "work_profiles": [],
+                "workstream_selection": {
+                    "ok": False,
+                    "private_backend": True,
+                    "active": {},
+                    "workstreams": [],
+                    "workstream_count": 0,
+                },
                 "development_semaphore": self.development_status(),
             }
 
@@ -1168,6 +1176,7 @@ class HumanAdamProfileManager:
                 "description": str(profile.get("description") or ""),
             },
             "work_profiles": self._profile_rows(),
+            "workstream_selection": self.workstream_status(),
         }
 
     @staticmethod
@@ -1271,6 +1280,12 @@ def human_adam_profile_switch_action(
     service: HumanAdamProfileManager,
 ) -> dict[str, Any]:
     try:
+        workstream_id = str(payload.get("workstream_id") or "").strip()
+        if workstream_id:
+            return service.select_workstream(
+                workstream_id=workstream_id,
+                confirmed=payload.get("confirmed") is True,
+            )
         return service.switch(
             profile_id=str(payload.get("profile_id") or ""),
             confirmed=payload.get("confirmed") is True,

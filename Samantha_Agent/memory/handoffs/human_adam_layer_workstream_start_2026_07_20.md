@@ -67,25 +67,40 @@ Co je hotove:
 - Cilena sada ma 38 zelenych testu. Plna Cockpit brana prosla 870 testy za
   179,167 sekundy; cela brana trvala 182,0 s a zivy smoke prosel 5/5.
 - Faze 1.3 nezmenila API, UI, bezici profil, vlakno ani nasazeni.
+- Faze 1.4 napojila stavajici vyberove menu na koordinator bez noveho prvku,
+  tlacitka nebo CSS zmeny. Viditelne nazvy `Human–Adam` a `Knihovna`, popisek
+  `Pracovni profil`, potvrzeni i rozlozeni zustaly zachovane.
+- Status nyni vedle kompatibilnich `work_profile` / `work_profiles` poskytuje
+  `workstream_selection`. UI bere polozky a aktivni proud prednostne odtud a pri
+  starsim nebo nedostupnem katalogu umi zobrazit puvodni profilova data.
+- Stavajici endpoint `/api/human-adam/profile` prijima `workstream_id` a vede jej
+  pres `select_workstream()`. Puvodni `profile_id` zustava kompatibilnim
+  fallbackem; pri novem payloadu ma kanonicky proud prednost.
+- Interni `activeWorkstreamId` je oddeleny od `activeProfileId`, aby stare
+  semaforove a nasazovaci vazby behem prechodu dal pracovaly s profilem.
+- Cilena sada profilu, UI a checkpointu prosla 93 testy za 26,614 sekundy. Plna
+  Cockpit brana prosla 871 testy za 170,754 sekundy; cela brana trvala 173,4 s.
+- Prednasazovaci zivy Cockpit smoke prosel 5/5, ale nove menu jeste nebylo
+  nasazeno ani rucne prokliknuto.
 
 Co neni hotove:
-- Koordinator ani novy checkpoint backend stale nejsou napojene na API ani
-  existujici vyber a checkpointove tlacitko.
+- Novy checkpoint backend stale neni napojeny na existujici checkpointove
+  tlacitko. Vyber proudu je napojeny, ale zatim neni nasazeny.
 - Stary WIP/semafor/takeover tok zustava beze zmeny aktivniho runtime.
-- Faze 1.3 je pripravena pro tento checkpoint a push; koordinator neni nasazeny
-  ani aktivovany v UI.
+- Faze 1.4 je pripravena pro tento checkpoint a push; nasazeni a rucni UI
+  roundtrip nasleduji az nad timto presnym commitem.
 - Stary runtime nazev se zatim nesmi prejmenovat, protoze jej pouziva soucasna
   profilova konfigurace Cockpitu.
 
 Dalsi krok:
-Po tomto checkpointu a pushi pripravit fazi 1.4: napojeni existujiciho vyberu na
-koordinator bez zmeny vzhledu a s vlastnimi testy.
+Po tomto checkpointu a pushi fazi 1.4 nasadit, rizene restartovat Cockpit a
+rucne overit Human–Adam -> Knihovna -> Human–Adam pres stejne menu.
 
 Navrhovane dalsi kroky:
 - Pro dalsi proud nejdrive v terminalu zaregistrovat konkretni `Project`, `Tool`,
   `Layer` nebo `Misc`; nevymyslet vazbu pri kliknuti v r-Adamovi.
-- Ve fazi 1.4 zachovat soucasne rozlozeni a nahradit pouze zdroj polozek a akci
-  vyberu; starou cestu zatim ponechat jako vratny kompatibilni most.
+- Po rucnim overeni teprve rozhodnout o fazi automatickeho dokončeni vyvojoveho
+  kroku; stary profilovy fallback zatim ponechat jako vratny most.
 - Zachovat UI a zakladni funkce po celou dobu postupne transformace.
 
 Zmenene nebo relevantni soubory:

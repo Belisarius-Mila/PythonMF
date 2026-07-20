@@ -62,6 +62,11 @@ Infrastrukturni registrace 2026-07-20:
   aktivaci automaticky fast-forwarduje cisty cil z commitnuteho lokalniho
   `main`. API ani UI zatim nejsou prepnute.
 - Cilena sada 38 testu, plna sada 870 testu a zivy Cockpit smoke 5/5 prosly.
+- Faze 1.4 dne 2026-07-20 zachovala stejny vyber a jeho vzhled, ale zdroj polozek
+  prepojila na koordinator. Knihovna se nyni v payloadu voli kanonickym ID
+  `project-knowledge-library`; puvodni profilove ID zustava vratnym fallbackem.
+- Automatizovana sada 93 cilenych a 871 plnych testu prosla. Zmena jeste neni
+  nasazena ani rucne prokliknuta v zivem Cockpitu.
 
 Bezpecnost / neukladat:
 - Do Gitu ani handoffu nepatří texty soukromých článků, přílohy, metadata

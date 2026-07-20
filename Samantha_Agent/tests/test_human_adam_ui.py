@@ -367,20 +367,29 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('workHelpCloseBtn.addEventListener("click"', HUMAN_ADAM_HTML)
 
     def test_profile_switch_is_explicit_atomic_and_preserves_unsent_draft(self) -> None:
+        render_start = HUMAN_ADAM_HTML.index("function renderProfiles(payload)")
         switch_start = HUMAN_ADAM_HTML.index("async function switchProfile()")
         switch_end = HUMAN_ADAM_HTML.index("function scrollTvbcpToEnd", switch_start)
+        render_source = HUMAN_ADAM_HTML[render_start:switch_start]
         source = HUMAN_ADAM_HTML[switch_start:switch_end]
 
+        self.assertIn("payload.workstream_selection", render_source)
+        self.assertIn("selection.workstreams", render_source)
+        self.assertIn("activeWorkstream.workstream_id", render_source)
+        self.assertIn("profile.profile_label", render_source)
+        self.assertIn("profile.profile_id", render_source)
         self.assertIn("if (input.value.trim())", source)
         self.assertIn("profil jsem nepřepnul", source)
         self.assertIn("Přepnout celý pracovní profil", source)
         self.assertIn("Přepne se vlákno, workspace i TVBCP.", source)
         self.assertIn('api("/api/human-adam/profile"', source)
-        self.assertIn("profile_id:targetId,confirmed:true", source)
+        self.assertIn("workstream_id:targetId,profile_id:targetProfileId,confirmed:true", source)
+        self.assertIn("{profile_id:targetProfileId,confirmed:true}", source)
         self.assertIn("if (contextAnchorDraftDirty())", source)
         self.assertIn("profil jsem nepřepnul", source)
         self.assertIn("resetContextAnchorEditorState();", source)
         self.assertIn("showProfileSwitchFailure", source)
+        self.assertIn('<label for="profileSelect">Pracovní profil</label>', HUMAN_ADAM_HTML)
         self.assertIn('notice.scrollIntoView({block:"nearest",behavior:"smooth"});', HUMAN_ADAM_HTML)
         self.assertIn('profileSelect.addEventListener("change", syncControls);', HUMAN_ADAM_HTML)
         self.assertIn('profileSwitchBtn.addEventListener("click", switchProfile);', HUMAN_ADAM_HTML)

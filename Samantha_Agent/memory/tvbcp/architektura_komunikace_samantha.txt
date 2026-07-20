@@ -1612,3 +1612,36 @@ výběr a WIP/semafor/takeover runtime zůstávají nedotčené.
 Další krok: checkpoint a push fáze 1.3. Potom připravit fázi 1.4 – napojení
 existujícího výběru na koordinátor bez změny vzhledu a s vratným kompatibilním
 mostem.
+
+### 2026-07-20 09:15 CEST – Fáze 1.4: existující menu napojeno na koordinátor
+
+Stávající výběrové menu Human–Adam je napojené na koordinátor pracovních proudů.
+Nevznikl nový ovládací prvek a nebylo změněno HTML rozložení, CSS, viditelné
+názvy `Human–Adam` / `Knihovna`, popisek `Pracovní profil`, tlačítko ani
+potvrzovací dialog.
+
+Backendový status nyní vedle kompatibilních polí `work_profile` a
+`work_profiles` poskytuje `workstream_selection`. UI z něj přednostně čte
+kanonická ID proudů, ale při starším nebo nedostupném katalogu umí dál zobrazit
+původní profilové řádky. Endpoint `/api/human-adam/profile` zůstal na stejné
+cestě: nový payload s `workstream_id` vede přes `select_workstream()`, zatímco
+původní `profile_id` zůstává vratným fallbackem. Pokud jsou přítomné oba údaje,
+kanonický pracovní proud má přednost.
+
+JavaScript drží odděleně `activeWorkstreamId` pro volbu menu a
+`activeProfileId` pro dosud živé semaforové a nasazovací vazby. Tím se v této
+přechodové fázi nemění ostatní ovládání panelu Práce ani deployment runtime.
+
+Důkaz: cílená sada `test_human_adam_profiles`, `test_human_adam_ui` a
+`test_simple_main_checkpoint` prošla 93 testy za 26,614 sekundy. Plná Cockpit
+brána prošla Python syntaxí, JavaScriptem obou UI, shell syntaxí a 871 testy za
+170,754 sekundy; celá brána trvala 173,4 sekundy a skončila `OK`.
+Přednasazovací živý smoke základního Cockpitu prošel 5/5.
+
+Hranice důkazu: nová verze ještě není commitnutá, pushnutá ani nasazená. Smoke
+5/5 potvrzuje zdravý dosavadní Cockpit, nikoli ruční kliknutí nové cesty. Živý
+roundtrip Human–Adam -> Knihovna -> Human–Adam patří až po samostatném nasazení.
+
+Další krok: checkpoint a push fáze 1.4. Potom nasazení, řízený restart a ruční
+roundtrip přes stejné menu; automatické dokončení vývojového kroku řešit až po
+tomto potvrzení.

@@ -41,6 +41,16 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-20: Priorita 1, transformace Human–Adam faze 1.4. Stavajici vyberove
+  menu je bez zmeny HTML/CSS vzhledu napojene na koordinator: status poskytuje
+  katalog proudu, stejny endpoint prijima `workstream_id` a puvodni
+  `profile_id` zustava vratnym fallbackem. Viditelne nazvy, potvrzeni i rozlozeni
+  zustaly stejne; profilove ID je dal oddelene pro prechodny semafor a nasazeni.
+  Cilena sada 93 testu, plna brana 871 testu za 170,754 sekundy a
+  prednasazovaci smoke 5/5 prosly. Zmena jeste neni nasazena ani rucne
+  prokliknuta. Po checkpointu faze 1.4 nasleduje nasazeni, restart a rucni
+  roundtrip obema smery. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-20: Priorita 1, transformace Human–Adam faze 1.3. Vznikl neveřejny
   koordinator pracovnich proudu se dvema zkušebnimi vazbami: `Layer`
   Human–Adam a `Project` Knihovna. Vyber proudu pouziva stavajici bezpecne

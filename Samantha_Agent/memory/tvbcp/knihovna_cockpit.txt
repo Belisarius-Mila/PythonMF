@@ -127,3 +127,21 @@ nasazení se v této fázi nezměnily.
 
 Další krok: checkpoint a push fáze 1.3. Teprve potom připravit napojení
 existujícího výběru na koordinátor bez změny vzhledu.
+
+### 2026-07-20 09:15 CEST – Výběr Knihovny napojen na koordinátor
+
+Fáze 1.4 zachovala stejné výběrové menu a jeho vzhled, ale jeho položky nyní
+přednostně pocházejí z katalogu pracovních proudů. Knihovna se volí kanonickým
+ID `project-knowledge-library`; endpoint při novém payloadu používá koordinátor
+a původní profilové ID ponechává jako vratný fallback.
+
+Viditelný název `Knihovna`, potvrzení přepnutí, vlákno, tento TVBCP, handoff i
+workspace zůstávají stejné. Oddělené profilové ID dál obsluhuje přechodný
+semaforový a nasazovací runtime, takže tato fáze nemění ostatní panel Práce.
+
+Důkaz: cílená sada 93 testů a plná sada 871 testů prošly; základní živý Cockpit
+smoke před nasazením je 5/5. Nová cesta ještě není nasazená ani ručně
+prokliknutá, takže provozní roundtrip oběma směry zatím není potvrzený.
+
+Další krok: checkpoint a push fáze 1.4, nasazení, řízený restart a ruční volba
+Knihovna -> Human–Adam přes stejné menu.

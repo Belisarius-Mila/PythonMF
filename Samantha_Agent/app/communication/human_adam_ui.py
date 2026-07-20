@@ -568,7 +568,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let lastSession = null;
   let sessionConnected = false;
   let activeProfileId = "";
+  let activeWorkstreamId = "";
   let activeProfileLabel = "Human–Adam";
+  let usingWorkstreamCatalog = false;
   let deliveryUncertain = false;
   let deploymentAudit = null;
   let developmentSemaphore = null;
@@ -738,7 +740,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     const anchorHasContent = Boolean(savedContextAnchorContent);
     connectBtn.disabled = busy;
     profileSelect.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
-    profileSwitchBtn.disabled = profileSelect.disabled || !profileSelect.value || profileSelect.value === activeProfileId;
+    profileSwitchBtn.disabled = profileSelect.disabled || !profileSelect.value || profileSelect.value === activeWorkstreamId;
     refreshBtn.disabled = busy || resultWatchActive;
     refreshBtn.textContent = resultWatchActive ? "Čekám na výsledek…" : "Stav";
     sendBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
@@ -1201,14 +1203,23 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   function renderProfiles(payload) {
     const active = payload && payload.work_profile ? payload.work_profile : {};
     const profiles = payload && Array.isArray(payload.work_profiles) ? payload.work_profiles : [];
+    const selection = payload && payload.workstream_selection ? payload.workstream_selection : {};
+    const activeWorkstream = selection && selection.active ? selection.active : {};
+    const workstreams = selection && Array.isArray(selection.workstreams) ? selection.workstreams : [];
     activeProfileId = String(active.id || "");
     activeProfileLabel = String(active.label || "Human–Adam");
+    usingWorkstreamCatalog = selection.ok === true && workstreams.length > 0;
+    activeWorkstreamId = usingWorkstreamCatalog
+      ? String(activeWorkstream.workstream_id || "")
+      : activeProfileId;
+    const rows = usingWorkstreamCatalog ? workstreams : profiles;
     profileSelect.replaceChildren();
-    for (const profile of profiles) {
+    for (const profile of rows) {
       const option = document.createElement("option");
       option.value = String(profile.id || "");
-      option.textContent = String(profile.label || profile.id || "Profil");
-      option.selected = option.value === activeProfileId;
+      option.dataset.profileId = String(profile.profile_id || profile.id || "");
+      option.textContent = String(profile.profile_label || profile.label || profile.name || profile.id || "Profil");
+      option.selected = option.value === activeWorkstreamId;
       profileSelect.appendChild(option);
     }
     syncControls();
@@ -1222,20 +1233,22 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   async function switchProfile() {
     if (busy || sendInFlight || sessionTurnBusy) return;
     const targetId = profileSelect.value;
-    const targetLabel = profileSelect.options[profileSelect.selectedIndex]?.textContent || targetId;
-    if (!targetId || targetId === activeProfileId) return;
+    const targetOption = profileSelect.options[profileSelect.selectedIndex];
+    const targetLabel = targetOption?.textContent || targetId;
+    const targetProfileId = targetOption?.dataset.profileId || targetId;
+    if (!targetId || targetId === activeWorkstreamId) return;
     if (input.value.trim()) {
       showProfileSwitchFailure("Nejdřív odešli nebo odstraň rozepsaný pokyn; profil jsem nepřepnul.");
-      profileSelect.value = activeProfileId;
+      profileSelect.value = activeWorkstreamId;
       return;
     }
     if (contextAnchorDraftDirty()) {
       showProfileSwitchFailure("Nejdřív ulož nebo výslovně zahoď rozepsanou změnu kotvy; profil jsem nepřepnul.");
-      profileSelect.value = activeProfileId;
+      profileSelect.value = activeWorkstreamId;
       return;
     }
     if (!window.confirm(`Přepnout celý pracovní profil na „${targetLabel}“?\n\nPřepne se vlákno, workspace i TVBCP.`)) {
-      profileSelect.value = activeProfileId;
+      profileSelect.value = activeWorkstreamId;
       return;
     }
     setBusy(true, `Přepínám pracovní profil na ${targetLabel}…`);
@@ -1247,7 +1260,9 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     try {
       const payload = await api("/api/human-adam/profile", {
         method:"POST",
-        body:JSON.stringify({profile_id:targetId,confirmed:true}),
+        body:JSON.stringify(usingWorkstreamCatalog
+          ? {workstream_id:targetId,profile_id:targetProfileId,confirmed:true}
+          : {profile_id:targetProfileId,confirmed:true}),
       });
       if (!payload.ok) throw new Error(payload.message || "Přepnutí profilu selhalo.");
       resetContextAnchorEditorState();

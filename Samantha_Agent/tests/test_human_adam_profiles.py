@@ -283,6 +283,8 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(status["development_semaphore"]["ok"])
         self.assertFalse(status["development_semaphore"]["active"])
         self.assertTrue(status["development_semaphore"]["can_acquire_profile"])
+        self.assertTrue(status["workstream_selection"]["ok"])
+        self.assertEqual(status["workstream_selection"]["workstream_count"], 2)
 
     def test_simple_checkpoint_context_comes_from_active_profile_binding(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -746,6 +748,26 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
 
         self.assertFalse(result["ok"])
         self.assertEqual(manager.active_profile_id, "human_adam")
+
+    def test_switch_action_routes_registered_workstream_through_coordinator(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_rest = self.make_manager(Path(temp_dir))
+            result = human_adam_profile_switch_action(
+                {
+                    "workstream_id": "project-knowledge-library",
+                    "profile_id": "human_adam",
+                    "confirmed": True,
+                },
+                service=manager,
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertTrue(result["switched"])
+        self.assertEqual(manager.active_profile_id, "knihovna")
+        self.assertEqual(
+            result["workstream_selection"]["active"]["workstream_id"],
+            "project-knowledge-library",
+        )
 
     def test_switch_prepares_target_and_persists_profile_without_thread_mix(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

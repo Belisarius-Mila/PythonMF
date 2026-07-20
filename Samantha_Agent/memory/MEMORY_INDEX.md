@@ -132,8 +132,11 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   Human–Adam a `Project` Knihovna, preklada proud na existujici profil a pri
   vyberu pouziva proverene ochranne a synchronizacni chovani profilu. Roundtrip
   obema smery, 38 cilenych testu, plna sada 870 testu a smoke 5/5 prosly. API a
-  UI zustavaji beze zmeny; po checkpointu faze 1.3 je dalsi krok napojeni
-  existujiciho vyberu.
+  UI zustaly ve fazi 1.3 beze zmeny. Faze 1.4 nyni napojila stejny vyber na
+  koordinator: polozky jdou z `workstream_selection`, endpoint prijima
+  `workstream_id` a stary `profile_id` zustava fallbackem. Vzhled se nezmenil;
+  93 cilenych a 871 plnych testu proslo. Po checkpointu faze 1.4 nasleduje
+  nasazeni a rucni roundtrip Human–Adam -> Knihovna -> Human–Adam.
 
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni

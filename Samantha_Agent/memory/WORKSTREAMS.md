@@ -11,8 +11,8 @@ API, UI, semaforu, vetvi ani nasazovaci logiky. Existujici zaznamy v
 
 | ID | Typ | Kanonicky nazev | Rezim | Docasny kompatibilni zdroj | Vlakno | TVBCP | Handoff | Dalsi krok |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `layer-human-adam-development` | `Layer` | Human–Adam / vývojové prostředí | active | `ACTIVE_PROJECTS.md`: App-server rozhrani / novy Adam | Stavajici oddelene vlakno Human–Adam; soukromy identifikator se do Gitu neuklada. | `tvbcp/architektura_komunikace_samantha.txt` | `handoffs/human_adam_layer_workstream_start_2026_07_20.md` | Po checkpointu faze 1.3 pripravit napojeni existujiciho vyberu na koordinator bez zmeny vzhledu. |
-| `project-knowledge-library` | `Project` | Knihovna | active | `ACTIVE_PROJECTS.md`: Znalostni databaze / Knihovna clanku / Knowledge inbox | Stavajici oddelene vlakno Knihovny; soukromy identifikator se do Gitu neuklada. | `tvbcp/knihovna_cockpit.txt` | `handoffs/knowledge_library_article_editing_2026_07_16.md` | Spolu s Human–Adam overit neveřejny vyber a automaticky fast-forward; UI zatim neprepinat. |
+| `layer-human-adam-development` | `Layer` | Human–Adam / vývojové prostředí | active | `ACTIVE_PROJECTS.md`: App-server rozhrani / novy Adam | Stavajici oddelene vlakno Human–Adam; soukromy identifikator se do Gitu neuklada. | `tvbcp/architektura_komunikace_samantha.txt` | `handoffs/human_adam_layer_workstream_start_2026_07_20.md` | Po checkpointu faze 1.4 nasadit, rizene restartovat a rucne overit stejny vyber obema smery. |
+| `project-knowledge-library` | `Project` | Knihovna | active | `ACTIVE_PROJECTS.md`: Znalostni databaze / Knihovna clanku / Knowledge inbox | Stavajici oddelene vlakno Knihovny; soukromy identifikator se do Gitu neuklada. | `tvbcp/knihovna_cockpit.txt` | `handoffs/knowledge_library_article_editing_2026_07_16.md` | Po nasazeni faze 1.4 rucne overit volbu Knihovna a navrat na Human–Adam bez zmeny rozlozeni. |
 
 ## Pravidla registru
 
