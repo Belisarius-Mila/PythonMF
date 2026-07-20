@@ -21,19 +21,26 @@ Co je hotove:
   kanonicky TVBCP tohoto Layeru a je obousmerne propojen s registrem i handoffem.
 - TVBCP obsahuje novy kanonicky jednoduchy model pracovnich proudu a presny
   seznam nahrazenych a zachovanych starsich pravidel.
+- Read-only baseline bodu 0.4 potvrdil Cockpit smoke 5/5, dostupne hlavni UI,
+  bezici app-server, zachovane vlakno Knihovny, dva ciste profilove workspaces a
+  zdrave read-only Human–Adam API.
+- Oba profilove workspaces cekaji na beznou synchronizaci novych pametovych
+  commitu ze zdrojoveho `main`; proto souhrnny status docasne hlasi `ok=false`.
 - Nebyl zmenen kod, UI, API, runtime, Git workflow, nasazeni ani bezici relace.
 
 Co neni hotove:
-- Neni dokoncena vychozi funkcni kontrola ani regresni sada kroku 0.
+- Neni dokoncena regresni sada kroku 0.
 - Stary runtime nazev se zatim nesmi prejmenovat, protoze jej pouziva soucasna
   profilova konfigurace Cockpitu.
 
 Dalsi krok:
-Krok 0, bod 4: read-only zmerit a zaznamenat vychozi funkcni stav soucasneho
-Human–Adam pred prvni implementacni zmenou.
+Krok 0, bod 5: spustit regresni testy soucasneho Human–Adam bez funkcni zmeny a
+zapsat presny vysledek pred prvni implementacni zmenou.
 
 Navrhovane dalsi kroky:
-- Zmerit a zaznamenat vychozi funkcni stav Human–Adam.
+- Spustit a zaznamenat regresni testy Human–Adam.
+- Po cistem checkpointu nechat aktivni profil bezne synchronizovat pres
+  `Pripojit`; synchronizaci neprovadet uprostred rozpracovaneho source repa.
 - Zachovat UI a zakladni funkce po celou dobu postupne transformace.
 
 Zmenene nebo relevantni soubory:

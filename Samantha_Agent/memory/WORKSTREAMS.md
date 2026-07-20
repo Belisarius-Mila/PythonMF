@@ -10,7 +10,7 @@ jejich migrace samostatne overena.
 
 | ID | Typ | Kanonicky nazev | Rezim | Docasny kompatibilni zdroj | Vlakno | TVBCP | Handoff | Dalsi krok |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `layer-human-adam-development` | `Layer` | Human–Adam / vývojové prostředí | active | `ACTIVE_PROJECTS.md`: App-server rozhrani / novy Adam | Stavajici oddelene vlakno Human–Adam; soukromy identifikator se do Gitu neuklada. | `tvbcp/architektura_komunikace_samantha.txt` | `handoffs/human_adam_layer_workstream_start_2026_07_20.md` | Read-only zaznamenat vychozi funkcni stav soucasneho Human–Adam pred prvni implementacni zmenou. |
+| `layer-human-adam-development` | `Layer` | Human–Adam / vývojové prostředí | active | `ACTIVE_PROJECTS.md`: App-server rozhrani / novy Adam | Stavajici oddelene vlakno Human–Adam; soukromy identifikator se do Gitu neuklada. | `tvbcp/architektura_komunikace_samantha.txt` | `handoffs/human_adam_layer_workstream_start_2026_07_20.md` | Spustit regresni testy soucasneho Human–Adam bez funkcni zmeny a zapsat presny vysledek. |
 
 ## Pravidla prvniho zaznamu
 

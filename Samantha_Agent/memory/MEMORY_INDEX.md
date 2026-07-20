@@ -116,8 +116,10 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   pracovniho proudu `Human–Adam / vyvojove prostredi` typu `Layer`. Stary
   projektovy zaznam zustava docasnym kompatibilnim mostem a zadny funkcni kod
   se nezmenil. Stavajici TVBCP architektury komunikace je potvrzen a propojen;
-  novy jednoduchy model i nahrazena starsi pravidla jsou zapsane. Dalsi krok je
-  read-only vychozi funkcni kontrola Human–Adam.
+  novy jednoduchy model i nahrazena starsi pravidla jsou zapsane. Read-only
+  baseline potvrdil Cockpit smoke 5/5, UI, app-server, vlakno a ciste profilove
+  workspaces; oba profily pouze cekaji na synchronizaci novych pametovych
+  checkpointu. Dalsi krok jsou regresni testy soucasneho Human–Adam.
 
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni

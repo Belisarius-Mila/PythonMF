@@ -1403,3 +1403,62 @@ tenký Cockpit a výslovné potvrzení skutečně destruktivních nebo citlivýc
 
 Další krok: bod 0.4 – read-only zaznamenat výchozí funkční stav současného
 Human–Adam před první implementační změnou.
+
+### 2026-07-20 06:24 CEST – Read-only výchozí funkční stav Human–Adam
+
+Bod 0.4 zaznamenal stav před první implementační změnou nového jednoduchého
+modelu. Nebyl proveden reconnect, synchronizace profilu, odeslání zprávy,
+přepnutí profilu, rotace vlákna, checkpoint, nasazení ani restart.
+
+Zdrojový stav na začátku kontroly:
+
+- `main` a `origin/main` byly čisté a shodné v bodě `35b916a`;
+- Cockpit odpověděl pětibodovým read-only smoke testem 5/5: hlavní stránka,
+  server health, live status, souhrnný status a recovery;
+- běžící server vrátil code stamp `d25fa501fc5d`;
+- stránka `/human-adam/` vrátila HTTP 200 a obsahovala hlavní prvky Human–Adam,
+  profilový výběr, `Připojit`, `Plán`, `Práce` a `Odeslat`;
+- dříve odstraněná vzdálená registrace projektu zůstala nepřítomná v UI a její
+  stará API cesta `/api/human-adam/project-bootstrap` vrátila HTTP 404.
+
+Profil a relace:
+
+- aktivní profil byl `Knihovna`; dostupné byly dva profily;
+- private app-server běžel, odpovídal přes lokální socket a nebyl vlastněný
+  aktuálním procesem Cockpitu;
+- aktivní profil měl připojené zachované vlákno, 27 technicky evidovaných zpráv,
+  žádný aktivní tah a žádné probíhající doručení;
+- žádný obsah zpráv ani soukromý identifikátor vlákna nebyl čten nebo uložen.
+
+Workspace baseline:
+
+- Human–Adam i Knihovna byly připravené, bezpečné, čisté, bez Git remote, bez
+  lokálního checkpointu a bez WIP;
+- Human–Adam workspace byl v bodě `424d003`, Knihovna v bodě `f7fa81e`;
+- oba byly v relaci `source_ahead`: zdrojový `main` obsahoval nové paměťové
+  checkpointy, které profily ještě nepřevzaly;
+- proto `/api/human-adam/status` vrátil HTTP 200, ale správně `ok=false` a
+  `sync_available=true`. Jde o čekající běžnou synchronizaci, ne o poškození
+  workspace nebo ztrátu vlákna.
+
+Read-only funkce současného workflow:
+
+- TVBCP, workspace, rotace vlákna, kotva, semafor, audit větví, projektová
+  kontinuita a dokončení nasazení odpověděly HTTP 200 a `ok=true`;
+- stará kontextová kotva byla aktivní a obsahovala připnutý kontext; rotace byla
+  připravená bez blockeru;
+- starý globální semafor byl zdravý, volný a bez blockerů;
+- audit větví odpověděl přibližně za 5,15 sekundy, ostatní měřené Human–Adam
+  statusy typicky do 1,3 sekundy.
+
+První skutečná provozní podmínka před dalším živým tahem: po dokončení tohoto
+paměťového kroku nechat čistý aktivní profil běžně synchronizovat přes
+`Připojit`. V bodu 0.4 se to kvůli read-only hranici neprovedlo.
+
+Závěr: základní Cockpit, UI, app-server, profily, vlákno, workspaces a read-only
+API jsou dostupné. Výchozí `ok=false` je vysvětlen pouze očekávaným zaostáváním
+profilových workspaces za novými paměťovými commity. End-to-end odeslání ani
+mutující workflow nebyly součástí tohoto důkazu.
+
+Další krok: bod 0.5 – spustit regresní testy současného Human–Adam bez funkční
+změny a zapsat přesný výsledek před zahájením postupné implementace.

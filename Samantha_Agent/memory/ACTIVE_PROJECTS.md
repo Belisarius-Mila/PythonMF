@@ -42,13 +42,16 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 ## Aktualni navazani
 
 - 2026-07-20: Priorita 1, `Layer` Human–Adam / vyvojove prostredi. Body 0.1 az
-  0.3 zalozily zaznam v `WORKSTREAMS.md`, potvrdily stavajici TVBCP a zapsaly
+  0.4 zalozily zaznam v `WORKSTREAMS.md`, potvrdily stavajici TVBCP, zapsaly
   kanonicky jednoduchy model: vlastni vlakno, kontext, TVBCP a handoff pro kazdy
-  proud; bezny vyvoj primo na `main` bez WIP vetvi, prevzeti a semaforu.
+  proud; bezny vyvoj primo na `main` bez WIP vetvi, prevzeti a semaforu. Read-only
+  baseline potvrdil Cockpit smoke 5/5, hlavni UI, bezici app-server, zachovane
+  vlakno Knihovny a dva ciste profilove workspaces. Oba profily pouze cekaji na
+  synchronizaci novych pametovych checkpointu ze zdrojoveho `main`.
   Existujici oblast `App-server rozhrani / novy Adam` zustava docasnym
   kompatibilnim mostem kvuli soucasne profilove konfiguraci Cockpitu. Nebyla
-  provedena zadna funkcni zmena. Dalsi krok je read-only vychozi funkcni
-  kontrola Human–Adam. Handoff:
+  provedena zadna funkcni zmena. Dalsi krok jsou regresni testy soucasneho
+  Human–Adam. Handoff:
   `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-19: Priorita 1, App-server rozhrani / novy Adam. Mila rucne potvrdil
   obsah napovedy `Prace -> ?`, ale maly vnitrni rolovaci box byl hur citelny nez
