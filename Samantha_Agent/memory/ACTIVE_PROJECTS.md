@@ -41,6 +41,13 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-20: Priorita 1, `Layer` Human–Adam / vyvojove prostredi. V kroku 0
+  vznikl prvni kanonicky zaznam v `WORKSTREAMS.md`; existujici oblast
+  `App-server rozhrani / novy Adam` zustava docasnym kompatibilnim mostem kvuli
+  soucasne profilove konfiguraci Cockpitu. Nebyla provedena zadna funkcni zmena.
+  Dalsi krok je zalozit nebo potvrdit kanonicky TVBCP a propojit jej s registrem
+  a handoffem. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-19: Priorita 1, App-server rozhrani / novy Adam. Mila rucne potvrdil
   obsah napovedy `Prace -> ?`, ale maly vnitrni rolovaci box byl hur citelny nez
   velke zobrazeni v `Plan`. Ergonomicka oprava v izolovane vetvi

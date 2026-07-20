@@ -3,6 +3,7 @@
 Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 - `ACTIVE_PROJECTS.md` - registr projektu a oblasti vcetne rezimu `active` / `paused` / `archived`, priorit, stavu, handoffu a dalsich kroku.
+- `WORKSTREAMS.md` - kanonicky registr pracovnich proudu typu `Project`, `Tool`, `Layer` a `Misc`; v kroku 0 je pouze pametovou a navigacni vrstvou bez vlivu na runtime.
 
 ## Core
 
@@ -103,6 +104,12 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   chyba zvuku nikdy nemeni stav doruceni.
 
 ## Handoffs
+
+- `handoffs/human_adam_layer_workstream_start_2026_07_20.md` - [PRIPOMENOUT]
+  priorita 1: krok 0 transformace Human–Adam zacal zalozenim kanonickeho
+  pracovniho proudu `Human–Adam / vyvojove prostredi` typu `Layer`. Stary
+  projektovy zaznam zustava docasnym kompatibilnim mostem a zadny funkcni kod
+  se nezmenil. Dalsi krok je propojit kanonicky TVBCP bez funkcni zmeny.
 
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni
