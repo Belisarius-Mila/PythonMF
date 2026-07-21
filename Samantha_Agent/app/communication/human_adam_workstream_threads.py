@@ -155,7 +155,6 @@ class WorkstreamThreadRegistry:
                     "type": record.workstream_type,
                     "name": record.name,
                     "mode": record.mode,
-                    "backend": "legacy_profile" if reserved else "lazy_private_thread",
                     "available": record.mode != "archived" and not reserved,
                     "initialized": self._state_path(record.workstream_id).is_file(),
                     "connected": bool(snapshot.get("connected")),

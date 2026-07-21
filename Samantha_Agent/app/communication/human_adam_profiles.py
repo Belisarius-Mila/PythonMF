@@ -33,6 +33,11 @@ from app.communication.human_adam_workspace import (
     HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS,
     HumanAdamWorkspaceManager,
 )
+from app.communication.human_adam_workstream_backends import (
+    COMPATIBILITY_ADAPTER_BACKEND,
+    CompatibilityWorkstreamAdapter,
+    WorkstreamBackendRegistry,
+)
 from app.communication.human_adam_workstream_catalog import CanonicalWorkstream
 from app.communication.human_adam_workstream_coordinator import (
     CanonicalWorkstreamBinding,
@@ -136,7 +141,7 @@ def _git_text(repo: Path, args: list[str], *, timeout: float = 30.0) -> str:
 
 
 class HumanAdamProfileManager:
-    """Route one visible UI to isolated, persistent work-profile bundles."""
+    """Route one visible UI through unified canonical workstream backends."""
 
     def __init__(
         self,
@@ -170,16 +175,23 @@ class HumanAdamProfileManager:
             normalized_profiles[profile_id] = normalized
         self.profiles = normalized_profiles
         self.workstream_coordinator = HumanAdamWorkstreamCoordinator(self.profiles)
-        legacy_workstream_profiles = {
-            binding.workstream_id: profile_id
+        compatibility_adapters = tuple(
+            CompatibilityWorkstreamAdapter(
+                workstream_id=binding.workstream_id,
+                profile_id=profile_id,
+                service=profile["service"],
+            )
             for profile_id, profile in self.profiles.items()
             if isinstance(
                 (binding := profile.get("workstream_binding")),
                 CanonicalWorkstreamBinding,
             )
-        }
+        )
+        self.workstream_backends = WorkstreamBackendRegistry(
+            compatibility_adapters=compatibility_adapters,
+        )
         self.grouped_workstream_selection = GroupedWorkstreamSelection(
-            legacy_profiles=legacy_workstream_profiles,
+            backend_registry=self.workstream_backends,
         )
         self.workstream_memory = workstream_memory
         if self.workstream_memory is not None:
@@ -305,10 +317,19 @@ class HumanAdamProfileManager:
 
     @property
     def active_service(self) -> HumanAdamService:
+        return self.workstream_backends.service(
+            self.active_workstream_id,
+            lazy_service_factory=self._lazy_service,
+        )
+
+    @property
+    def active_workstream_id(self) -> str:
         lazy_id = self.active_lazy_workstream_id
         if lazy_id:
-            return self._lazy_service(lazy_id)
-        return self.profiles[self.active_profile_id]["service"]
+            return lazy_id
+        return self.workstream_backends.compatibility_workstream_id(
+            self.active_profile_id
+        )
 
     def service_for_profile(self, profile_id: str) -> HumanAdamService:
         clean_id = str(profile_id or "").strip()
@@ -369,18 +390,10 @@ class HumanAdamProfileManager:
         }
 
     def grouped_workstream_status(self) -> dict[str, Any]:
-        """Return the private phase-4.4 menu model before UI activation."""
+        """Return the redacted menu model from one backend authority."""
 
-        active_context = self.workstream_coordinator.context(self.active_profile_id)
-        active_legacy_id = str(active_context.get("workstream_id") or "")
-        active_lazy_id = (
-            self.workstream_threads.active_workstream_id
-            if self.workstream_threads is not None
-            else ""
-        )
         return self.grouped_workstream_selection.status(
-            active_legacy_workstream_id=active_legacy_id,
-            active_lazy_workstream_id=active_lazy_id,
+            active_workstream_id=self.active_workstream_id,
             thread_status=(
                 self.workstream_threads.status()
                 if self.workstream_threads is not None
@@ -431,7 +444,9 @@ class HumanAdamProfileManager:
         committed local ``main`` when needed.
         """
 
-        target_profile_id = self.workstream_coordinator.profile_id_for(workstream_id)
+        target_profile_id = self.workstream_backends.compatibility_profile_id(
+            workstream_id
+        )
         result = self.switch(profile_id=target_profile_id, confirmed=confirmed)
         return {
             **result,
@@ -711,7 +726,7 @@ class HumanAdamProfileManager:
                 self.simple_main_deployment_receipt_path
             )
             workstream_id = str(receipt.get("workstream_id") or "")
-            owner_id = self.workstream_coordinator.profile_id_for(workstream_id)
+            owner_id = self.workstream_backends.compatibility_profile_id(workstream_id)
             active_id = self.active_profile_id
             if owner_id != active_id:
                 raise AppServerError(
@@ -778,7 +793,7 @@ class HumanAdamProfileManager:
             "id": active_id,
             "label": str(profile.get("label") or active_id),
             "description": str(profile.get("description") or ""),
-            "backend": "legacy_profile",
+            "backend": COMPATIBILITY_ADAPTER_BACKEND,
         }
 
     def _workstream_capabilities(self) -> dict[str, Any]:
@@ -2170,12 +2185,7 @@ class HumanAdamProfileManager:
         workstream_id: str,
         confirmed: bool,
     ) -> dict[str, Any]:
-        """Atomically route one private phase-4.4 selection across both backends.
-
-        The method deliberately has no Cockpit action or API route yet. It
-        proves legacy-to-lazy, lazy-to-lazy and lazy-to-legacy ownership before
-        the grouped menu becomes live.
-        """
+        """Atomically route one catalog selection across unified backends."""
 
         clean_id = str(workstream_id or "").strip()
         if not confirmed:
@@ -2193,10 +2203,13 @@ class HumanAdamProfileManager:
                 if self.workstream_threads is not None
                 else ""
             )
-            if target["backend"] == "legacy_profile":
-                profile_id = str(target.get("profile_id") or "")
+            backend_binding = self.workstream_backends.binding(clean_id)
+            if backend_binding.compatibility_adapter is not None:
+                profile_id = backend_binding.profile_id
                 if profile_id not in self.profiles:
-                    raise AppServerError("Legacy pracovní proud nemá platný profil.")
+                    raise AppServerError(
+                        "Kompatibilní pracovní proud nemá platný původní profil."
+                    )
                 if previous_lazy_id:
                     self._activate_legacy_from_lazy_unlocked(
                         profile_id=profile_id,

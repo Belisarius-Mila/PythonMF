@@ -608,7 +608,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let sessionConnected = false;
   let activeProfileId = "";
   let activeWorkstreamId = "";
-  let activeWorkstreamBackend = "legacy_profile";
+  let activeWorkstreamBackend = "compatibility_adapter";
   let activeProfileLabel = "Human–Adam";
   let usingWorkstreamCatalog = false;
   let workstreamDevelopmentEnabled = true;
@@ -1262,13 +1262,13 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       ? String(activeWorkstream.workstream_id || "")
       : activeProfileId;
     activeWorkstreamBackend = usingWorkstreamCatalog
-      ? String(activeWorkstream.backend || "legacy_profile")
-      : "legacy_profile";
+      ? String(activeWorkstream.backend || "compatibility_adapter")
+      : "compatibility_adapter";
     profileSelect.replaceChildren();
     const appendOption = (parent, profile) => {
       const option = document.createElement("option");
       option.value = String(profile.id || "");
-      option.dataset.backend = String(profile.backend || "legacy_profile");
+      option.dataset.backend = String(profile.backend || "compatibility_adapter");
       option.textContent = String(profile.profile_label || profile.label || profile.name || profile.id || "Profil");
       option.disabled = profile.available === false;
       option.selected = option.value === activeWorkstreamId;

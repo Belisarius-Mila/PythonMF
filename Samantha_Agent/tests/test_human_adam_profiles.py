@@ -388,6 +388,46 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             ["Projekty", "Tooly", "Vrstvy", "Ostatní"],
         )
 
+    def test_compatibility_backends_preserve_both_existing_service_bundles(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            manager, human_workspace, library_workspace, human_hub, library_hub = (
+                self.make_manager(root)
+            )
+            human_service = manager.profiles["human_adam"]["service"]
+            library_service = manager.profiles["knihovna"]["service"]
+
+            self.assertIs(
+                manager.workstream_backends.service(
+                    "layer-human-adam-development",
+                    lazy_service_factory=manager._lazy_service,
+                ),
+                human_service,
+            )
+            self.assertIs(manager.active_service, human_service)
+            self.assertIs(manager.active_service.workspace, human_workspace)
+            self.assertIs(manager.active_service.hub, human_hub)
+            self.assertEqual(manager.active_service.state_path, root / "human.json")
+            self.assertEqual(
+                manager.active_service.context_anchor_path,
+                root / "human-anchor.json",
+            )
+
+            manager.switch(profile_id="knihovna", confirmed=True)
+
+            self.assertIs(manager.active_service, library_service)
+            self.assertIs(manager.active_service.workspace, library_workspace)
+            self.assertIs(manager.active_service.hub, library_hub)
+            self.assertEqual(manager.active_service.state_path, root / "library.json")
+            self.assertEqual(
+                manager.active_service.context_anchor_path,
+                root / "library-anchor.json",
+            )
+            self.assertEqual(
+                manager.grouped_workstream_status()["active"]["backend"],
+                "compatibility_adapter",
+            )
+
     def test_status_exposes_only_recent_deployment_for_active_workstream(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, *_rest = self.make_manager(Path(temp_dir))

@@ -1,19 +1,15 @@
 """Grouped, redacted selection model for the universal workstream menu.
 
-Phase 4.4a is intentionally presentation-neutral. It merges public catalog
-identity with redacted legacy/lazy readiness, but does not switch a thread or
-expose the model through Cockpit UI until the atomic router is ready.
+Catalog identity and backend ownership come from one registry. Thread and
+memory registries contribute only redacted readiness; they do not decide which
+backend owns a workstream.
 """
 
 from __future__ import annotations
 
-from typing import Any, Iterable, Mapping
+from typing import Any, Mapping
 
-from app.communication.human_adam_workstream_catalog import (
-    WORKSTREAM_CATALOG,
-    CanonicalWorkstream,
-    validate_workstream_catalog,
-)
+from app.communication.human_adam_workstream_backends import WorkstreamBackendRegistry
 
 
 WORKSTREAM_GROUPS = (
@@ -30,19 +26,12 @@ class GroupedWorkstreamSelection:
     def __init__(
         self,
         *,
-        legacy_profiles: Mapping[str, str],
-        catalog: Iterable[CanonicalWorkstream] = WORKSTREAM_CATALOG,
+        backend_registry: WorkstreamBackendRegistry,
     ) -> None:
-        records = validate_workstream_catalog(catalog)
-        by_id = {record.workstream_id: record for record in records}
-        unknown_legacy = set(legacy_profiles) - by_id.keys()
-        if unknown_legacy:
-            raise ValueError("Legacy profil odkazuje na proud mimo katalog.")
-        self._records = records
-        self._legacy_profiles = {
-            str(workstream_id): str(profile_id)
-            for workstream_id, profile_id in legacy_profiles.items()
-        }
+        if not isinstance(backend_registry, WorkstreamBackendRegistry):
+            raise TypeError("Výběr pracovních proudů nemá jednotný backendový registr.")
+        self._backend_registry = backend_registry
+        self._records = backend_registry.catalog()
 
     @staticmethod
     def _rows_by_id(payload: Mapping[str, Any] | None) -> dict[str, dict[str, Any]]:
@@ -60,16 +49,13 @@ class GroupedWorkstreamSelection:
     def status(
         self,
         *,
-        active_legacy_workstream_id: str,
-        active_lazy_workstream_id: str,
+        active_workstream_id: str,
         thread_status: Mapping[str, Any] | None = None,
         memory_status: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
         thread_by_id = self._rows_by_id(thread_status)
         memory_by_id = self._rows_by_id(memory_status)
-        lazy_active = str(active_lazy_workstream_id or "").strip()
-        legacy_active = str(active_legacy_workstream_id or "").strip()
-        active_id = lazy_active or legacy_active
+        active_id = str(active_workstream_id or "").strip()
         rows: list[dict[str, Any]] = []
         archived_count = 0
         for record in self._records:
@@ -78,8 +64,9 @@ class GroupedWorkstreamSelection:
                 continue
             thread = thread_by_id.get(record.workstream_id, {})
             memory = memory_by_id.get(record.workstream_id, {})
-            profile_id = self._legacy_profiles.get(record.workstream_id, "")
-            backend = "legacy_profile" if profile_id else "lazy_private_thread"
+            binding = self._backend_registry.binding(record.workstream_id)
+            profile_id = binding.profile_id
+            backend = binding.backend
             rows.append(
                 {
                     "id": record.workstream_id,
@@ -92,7 +79,10 @@ class GroupedWorkstreamSelection:
                     "active": record.workstream_id == active_id,
                     "available": bool(
                         record.mode != "archived"
-                        and (profile_id or thread.get("available") is True)
+                        and (
+                            binding.compatibility_adapter is not None
+                            or thread.get("available") is True
+                        )
                     ),
                     "thread_initialized": bool(thread.get("initialized")),
                     "memory_ready": bool(memory.get("memory_ready")),

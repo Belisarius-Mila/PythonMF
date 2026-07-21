@@ -1,18 +1,34 @@
 from __future__ import annotations
 
 import unittest
+from types import SimpleNamespace
 
 from app.communication.human_adam_workstream_catalog import CanonicalWorkstream
+from app.communication.human_adam_workstream_backends import (
+    CompatibilityWorkstreamAdapter,
+    WorkstreamBackendRegistry,
+)
 from app.communication.human_adam_workstream_selection import GroupedWorkstreamSelection
 
 
 class GroupedWorkstreamSelectionTests(unittest.TestCase):
     def selection(self) -> GroupedWorkstreamSelection:
+        registry = WorkstreamBackendRegistry(
+            compatibility_adapters=(
+                CompatibilityWorkstreamAdapter(
+                    "layer-human-adam-development",
+                    "human_adam",
+                    SimpleNamespace(work_profile_id="human_adam"),
+                ),
+                CompatibilityWorkstreamAdapter(
+                    "project-knowledge-library",
+                    "knihovna",
+                    SimpleNamespace(work_profile_id="knihovna"),
+                ),
+            )
+        )
         return GroupedWorkstreamSelection(
-            legacy_profiles={
-                "layer-human-adam-development": "human_adam",
-                "project-knowledge-library": "knihovna",
-            }
+            backend_registry=registry,
         )
 
     @staticmethod
@@ -43,8 +59,7 @@ class GroupedWorkstreamSelectionTests(unittest.TestCase):
 
     def test_groups_all_active_catalog_rows_and_separates_paused(self) -> None:
         status = self.selection().status(
-            active_legacy_workstream_id="layer-human-adam-development",
-            active_lazy_workstream_id="",
+            active_workstream_id="layer-human-adam-development",
             thread_status=self.thread_status(),
             memory_status=self.memory_status(),
         )
@@ -64,10 +79,9 @@ class GroupedWorkstreamSelectionTests(unittest.TestCase):
             {"project-mobile-input", "project-vocabulary-fr", "project-vocabulary-it"},
         )
 
-    def test_lazy_active_stream_overrides_underlying_legacy_profile(self) -> None:
+    def test_one_active_workstream_identity_selects_lazy_backend(self) -> None:
         status = self.selection().status(
-            active_legacy_workstream_id="layer-human-adam-development",
-            active_lazy_workstream_id="project-mmtx",
+            active_workstream_id="project-mmtx",
             thread_status=self.thread_status(),
             memory_status=self.memory_status(),
         )
@@ -80,14 +94,17 @@ class GroupedWorkstreamSelectionTests(unittest.TestCase):
 
     def test_rows_expose_only_redacted_readiness(self) -> None:
         status = self.selection().status(
-            active_legacy_workstream_id="project-knowledge-library",
-            active_lazy_workstream_id="",
+            active_workstream_id="project-knowledge-library",
             thread_status=self.thread_status(),
             memory_status=self.memory_status(),
         )
         by_id = {row["id"]: row for row in status["workstreams"]}
 
         self.assertEqual(by_id["project-knowledge-library"]["profile_id"], "knihovna")
+        self.assertEqual(
+            by_id["project-knowledge-library"]["backend"],
+            "compatibility_adapter",
+        )
         self.assertTrue(by_id["project-knowledge-library"]["memory_ready"])
         self.assertFalse(by_id["project-mmtx"]["memory_ready"])
         self.assertFalse(by_id["project-mmtx"]["thread_initialized"])
@@ -103,21 +120,28 @@ class GroupedWorkstreamSelectionTests(unittest.TestCase):
             "3",
             ("Archiv source",),
         )
-        selection = GroupedWorkstreamSelection(legacy_profiles={}, catalog=(archived,))
+        selection = GroupedWorkstreamSelection(
+            backend_registry=WorkstreamBackendRegistry(catalog=(archived,))
+        )
 
         status = selection.status(
-            active_legacy_workstream_id="",
-            active_lazy_workstream_id="",
+            active_workstream_id="",
         )
 
         self.assertFalse(status["ok"])
         self.assertEqual(status["workstream_count"], 0)
         self.assertEqual(status["archived_count"], 1)
 
-    def test_unknown_legacy_binding_is_rejected(self) -> None:
+    def test_unknown_compatibility_binding_is_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "mimo katalog"):
-            GroupedWorkstreamSelection(
-                legacy_profiles={"project-unknown": "old-profile"}
+            WorkstreamBackendRegistry(
+                compatibility_adapters=(
+                    CompatibilityWorkstreamAdapter(
+                        "project-unknown",
+                        "old-profile",
+                        SimpleNamespace(work_profile_id="old-profile"),
+                    ),
+                )
             )
 
 

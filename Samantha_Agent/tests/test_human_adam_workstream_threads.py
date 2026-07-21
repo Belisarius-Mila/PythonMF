@@ -116,6 +116,7 @@ class WorkstreamThreadRegistryTests(unittest.TestCase):
         self.assertEqual(len(status["workstreams"]), 29)
         self.assertEqual(status["initialized_count"], 0)
         self.assertEqual(status["connected_count"], 0)
+        self.assertNotIn("backend", status["workstreams"][0])
         self.assertNotIn("thread_id", repr(status))
         self.assertNotIn(str(self.private_root), repr(status))
 
