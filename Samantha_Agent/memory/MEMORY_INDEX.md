@@ -116,9 +116,11 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   jen kanonicke `workstream_id`, `profile_id` fail-closed odmita, UI nema
   zalozni profilove menu a status/selection nezverejnuji profilove fallbacky.
   Adaptery Human–Adam/Knihovna, schema 1 a private session zustavaji zachovane.
-  Cilenych 130, sirsich 336 a plnych 980 testu proslo; zive MMTX zustalo
-  pripojene a ciste. Dalsi krok po zelenem CI je nasazeni a live kontraktni
-  proof, potom faze 4.5g-b odstraneni mrtveho koordinatoru a wrapperu.
+  Commit `427f0a6`, zelene lokalni i vzdalene CI, nasazeni s 980 testy, novy
+  proces a smoke `5/5` prosly. Live legacy payload byl odmitnut bez prepnuti a
+  kanonicke `workstream_id` vratilo stejne MMTX se zachovanymi pocty zprav;
+  workspaces jsou ciste a zarovnane. Dalsi krok je read-only hranice 4.5g-b pro
+  odstraneni mrtveho koordinatoru a wrapperu bez migrace bezpecnostnich dat.
   Historie: krok 0 transformace Human–Adam zacal zalozenim kanonickeho
   pracovniho proudu `Human–Adam / vyvojove prostredi` typu `Layer`. Stary
   projektovy zaznam zustava docasnym kompatibilnim mostem a zadny funkcni kod

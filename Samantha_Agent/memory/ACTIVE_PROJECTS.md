@@ -46,12 +46,13 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
   legacy `profile_id` fail-closed odmita, UI vzdy pouziva katalog a status uz
   nevraci `work_profile`, `work_profiles` ani profilova ID v selection modelu.
   Interni adaptery Human–Adam/Knihovna, schema 1 a private session zustavaji
-  zachovane. Cilenych 130 testu, sirsi sada 336 testu a plna Cockpit Quality
-  Gate s 980 testy prosly; zive MMTX zustalo pripojene a ciste. Dalsi krok po
-  commitu, pushi a zelenem CI je nasazeni a live kontraktni proof: legacy
-  payload musi byt odmitnut bez prepnuti a kanonicke `workstream_id` musi dal
-  fungovat. Teprve potom muze zacit 4.5g-b odstraneni mrtveho koordinatoru a
-  wrapperu. Handoff:
+  zachovane. Commit `427f0a6`, lokalni i vzdalena brana s 980 testy, nasazeni,
+  novy proces a smoke `5/5` prosly. Live `profile_id` payload byl odmitnut bez
+  prepnuti; kanonicke `workstream_id` vratilo stejne MMTX s poctem zprav `2`,
+  Human–Adam zachoval `102` zprav a vsechny tri workspaces jsou ciste a
+  zarovnane. Dalsi krok je read-only hranice 4.5g-b pro odstraneni mrtveho
+  koordinatoru a wrapperu bez migrace semaforu, deployment-completion uctenek
+  nebo private dat. Handoff:
   `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-20: Priorita 1, univerzalni pracovni proudy faze 4.3. Vsech 29 proudu
   ma jednu kanonickou git-safe vazbu na handoff a TVBCP. Human–Adam a Knihovna

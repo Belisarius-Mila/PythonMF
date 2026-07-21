@@ -2174,3 +2174,24 @@ Další krok: commit, push a zelená vzdálená CI, potom bezpečné nasazení a
 kontraktní proof. Teprve poté může fáze 4.5g-b samostatně odstranit mrtvý
 `HumanAdamWorkstreamCoordinator` a staré wrappery bez současné migrace
 vývojového semaforu nebo deployment-completion účtenek.
+
+### 2026-07-21 11:06 CEST – Fáze 4.5g-a nasazena a živě potvrzena
+
+Commit `427f0a6` prošel vzdálenou Cockpit Quality Gate za 2 minuty 43 sekund.
+Řízené nasazení zopakovalo plnou bránu s 980 testy za 276,5 sekundy, změnilo
+Cockpit proces na nový PID s očekávaným code stampem a dokončovací i závěrečný
+smoke test prošly `5/5`.
+
+Live kontraktní proof nejdřív poslal legacy `profile_id`. Nový veřejný kontrakt
+jej fail-closed odmítl bez přepnutí, připojení nebo změny historie a schéma 2
+zůstalo na Human–Adam. Následný kanonický payload
+`workstream_id=project-mmtx` uspěl a obnovil stejnou MMTX session. Identity i
+počty zpráv MMTX `2` a Human–Adam `102` zůstaly zachované. Status neobsahuje
+`work_profile`, `work_profiles` ani veřejná profilová ID; všechny tři
+workspaces jsou čisté a zarovnané na `427f0a6`. Finálně je aktivní připojené
+MMTX bez aktivního tahu.
+
+Fáze 4.5g-a je provozně uzavřena. Další krok je read-only hranice 4.5g-b pro
+odstranění mrtvého koordinátoru a wrapperů. Vývojový semafor,
+deployment-completion účtenky, migrační schéma 1 a private session zůstávají
+mimo tento krok.

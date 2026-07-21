@@ -842,3 +842,21 @@ Bezpecnost / neukladat:
 - Nemazat ani nepřesouvat private session, kotvy, workspaces nebo schéma 1.
 - Neukládat private thread ID, hash identity, obsah zpráv, tokeny ani private
   cesty.
+
+#### 2026-07-21 11:06 CEST – Post-deployment dodatek k checkpointu 4.5g-a
+
+Commit `427f0a6` prošel vzdálenou Cockpit Quality Gate za 2 minuty 43 sekund a
+Pages workflow. Řízené nasazení zopakovalo plnou bránu s 980 testy za 276,5
+sekundy, spustilo nový Cockpit proces s očekávaným code stampem a dokončovací
+smoke prošel `5/5`.
+
+Live kontraktní proof potvrdil, že payload s `profile_id` skončí fail-closed a
+nezmění aktivní Human–Adam, jeho spojení, historii ani schéma 2. Následný
+kanonický payload `workstream_id=project-mmtx` uspěl a obnovil stejnou MMTX
+session. MMTX zachovalo 2 zprávy, Human–Adam 102, status nezveřejňuje profilová
+pole a všechny tři workspaces jsou čisté a zarovnané na `427f0a6`. Finálně je
+aktivní připojené MMTX bez aktivního tahu.
+
+Další krok: read-only hranice fáze 4.5g-b pro mrtvý koordinátor a wrappery.
+Nemigrovat ve stejném kroku vývojový semafor, deployment-completion účtenky,
+schéma 1 ani private session.
