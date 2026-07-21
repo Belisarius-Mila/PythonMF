@@ -203,3 +203,8 @@ Pokracuj na MMTX a precti si MatysekANJ/PROJECT_NOTES_MMTX.md, MatysekANJ/MMTX_S
 2. Pridavat dalsi sceny z `Intro4` nebo z `owlGarden` jako samostatne bloky.
 3. Velky refaktor struktury zatim neprovadet.
 4. Postupne rozdelit `script.js` az po dalsim stabilnim checkpointu.
+
+## Human–Adam pracovní proud
+
+- Práce přes Cockpit používá pracovní proud MMTX.
+- Potvrzený automatický checkpoint udržuje kanonický handoff a TVBCP.
