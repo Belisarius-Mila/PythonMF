@@ -651,3 +651,65 @@ Další krok: fáze 4.4 – napojit stávající výběr na skupiny `Projekty`, 
 `Vrstvy` a `Ostatní` a při potvrzeném přepnutí bezpečně synchronizovat sdílený
 workspace, připojit cílové lazy vlákno a zachovat legacy proudy do migrace 4.5.
 Tento checkpoint neautorizuje nasazení ani restart.
+
+### 2026-07-21 08:03 CEST – Checkpoint fáze 4.5e: jednotný backend proudů
+
+Nazev: Univerzální pracovní proudy – fáze 4.5e
+Priorita: 1
+Stav: hotovo
+Pripomenout pri startu: ano
+Datum: 2026-07-21
+
+Co se resilo:
+Pevné rozlišení `legacy_profile` / lazy backend bylo nahrazeno jedním
+kanonickým backendovým registrem. Human–Adam a Knihovna jsou v této mezifázi
+kompatibilní adaptéry, které odkazují přímo na své dosavadní služby a private
+stav. Zbývajících 27 proudů používá existující lazy private-thread backend.
+
+Co je hotove:
+- `WorkstreamBackendRegistry` je jediná autorita typu backendu a služby pro
+  všech 29 kanonických ID.
+- Human–Adam i Knihovna zachovaly původní session, context anchor, hub,
+  workspace, handoff a TVBCP; nic se nekopírovalo ani znovu nezakládalo.
+- Menu, výběrový model, aktivní služba a atomický router rozhodují přes jednotný
+  registr; thread registry už typ backendu neurčuje duplicitně.
+- Commit `6c1a2da` byl pushnutý na `main`. Vzdálená Cockpit Quality Gate i
+  Pages deployment jsou zelené.
+- Simple-main nasazení prošlo serverovou branou 971 testů, novým procesem a
+  smoke testem `5/5`.
+- Live roundtrip `MMTX -> Human–Adam -> Knihovna -> MMTX` prošel na nasazeném
+  kódu. Hashové porovnání potvrdilo stejné identity všech tří vláken; zachovány
+  zůstaly také počty zpráv 2 / 102 / 28.
+- `main`, `origin/main`, sdílený Human–Adam workspace i Knihovna workspace jsou
+  čisté a zarovnané na `6c1a2da`. Aktivní zůstalo připojené MMTX bez aktivního
+  tahu nebo nejistého doručení.
+
+Co neni hotove:
+- Perzistentní aktivní identita je uvnitř manageru stále kompatibilně složená z
+  původního aktivního profilu a případného aktivního lazy proudu.
+- Kompatibilní profilové API, `work_profiles` fallback a starý private soubor
+  aktivního profilu zatím zůstávají; jejich odstranění nebylo součástí 4.5e.
+
+Dalsi krok:
+Fáze 4.5f – nejdřív navrhnout a otestovat jednu perzistentní autoritu
+`active_workstream_id` pro všechny proudy. Migrace musí odkazovat na existující
+služby a session beze změny; adaptéry, private stav ani fallback zatím nemazat.
+
+Navrhovane dalsi kroky:
+- Po zelené implementaci 4.5f zopakovat roundtrip přes oba adaptéry a MMTX.
+- Teprve poté samostatně odstranit veřejný profilový fallback a mrtvou
+  dvouprofilovou konstrukci.
+
+Zmenene nebo relevantni soubory:
+- `human_adam_workstream_backends.py`
+- `human_adam_profiles.py`
+- `human_adam_workstream_selection.py`
+- `human_adam_workstream_threads.py`
+- `human_adam_ui.py`
+- `cockpit_quality_gate.py`
+- odpovídající regresní testy
+
+Bezpecnost / neukladat:
+- Neukládat private thread ID, obsah zpráv, kotvy, tokeny ani private cesty.
+- Nemazat ani nepřesouvat původní session Human–Adam/Knihovna během další
+  migrace.

@@ -2084,3 +2084,24 @@ nematerializuje 27 nových párů před prvním použitím. Finální Cockpit Qu
 Gate prošla všemi syntaxemi a 943 testy za 261,953 sekundy; checkpoint 4.2
 `efe5184` má potvrzenou zelenou vzdálenou GitHub bránu. Další krok je fáze 4.4:
 seskupené menu a bezpečná synchronizace/připojení cílového proudu.
+
+### 2026-07-21 08:03 CEST – Fáze 4.5e: jednotný backend pracovních proudů
+
+Kanonické rozhodnutí: všech 29 proudů nyní řeší typ backendu a aktivní službu
+přes jeden `WorkstreamBackendRegistry`. Human–Adam a Knihovna nejsou převáděny
+na nová lazy vlákna; dočasné kompatibilní adaptéry přímo zachovávají jejich
+stávající služby, session, kotvy a oddělené workspaces. Ostatních 27 proudů
+používá dosavadní lazy private-thread factory. Thread registry už nevydává
+vlastní paralelní rozhodnutí o typu backendu.
+
+Commit `6c1a2da` prošel vzdálenou Cockpit Quality Gate i Pages workflow.
+Řízené simple-main nasazení zopakovalo plnou bránu s 971 testy a smoke `5/5`.
+Následný live roundtrip `MMTX -> Human–Adam -> Knihovna -> MMTX` prošel se
+stejnými identitami všech tří vláken, zachovanými počty zpráv, čistými
+zarovnanými workspaces a finálně aktivním připojeným MMTX.
+
+Bezpečnostní hranice: kompatibilní adaptéry, private session a původní aktivní
+profilový stav se v 4.5e nemažou ani nepřesouvají. Další krok je fáze 4.5f:
+zavést jednu perzistentní autoritu `active_workstream_id` pro všechny backendy,
+nejdřív s migračním testem a bez odstranění fallbacku; po nasazení znovu ověřit
+stejný tříproudový roundtrip.
