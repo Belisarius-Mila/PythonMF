@@ -55,6 +55,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #voiceRecordBtn.recording { color:#991b1b; border-color:#ef4444; background:#fef2f2; }
     #voiceStatus { min-width:0; overflow:hidden; color:var(--muted); font-size:12px; text-align:center; text-overflow:ellipsis; white-space:nowrap; }
     .compose-actions { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:10px; margin-top:8px; }
+    .send-controls { display:flex; align-items:center; gap:8px; }
+    #writeIntentBtn.armed { color:#fff; border-color:#b45309; background:#b45309; }
     .tvbcp-panel { position:fixed; z-index:5; inset:0 0 0 auto; width:min(680px,100%); display:flex; flex-direction:column; background:#fff; border-left:1px solid var(--line); box-shadow:-12px 0 40px rgba(15,23,42,.18); }
     .tvbcp-panel[hidden] { display:none; }
     .tvbcp-head { display:flex; align-items:center; gap:8px; padding:14px max(16px,env(safe-area-inset-right)) 14px 16px; border-bottom:1px solid var(--line); }
@@ -181,7 +183,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <button id="voiceStopBtn" type="button" hidden disabled>Ukončit záznam</button>
       </div>
       <span id="voiceStatus" role="status" aria-live="polite">Přepis se vloží do pole a sám se neodešle.</span>
-      <button class="primary" id="sendBtn" type="submit">Odeslat</button>
+      <div class="send-controls">
+        <button id="writeIntentBtn" type="button" aria-pressed="false">Zahájit vývoj</button>
+        <button class="primary" id="sendBtn" type="submit">Odeslat</button>
+      </div>
     </div>
   </form>
   <aside class="tvbcp-panel" id="tvbcpPanel" hidden aria-label="Projektový TVBCP">
@@ -512,6 +517,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const threadRotationBtn = document.getElementById("threadRotationBtn");
   const composer = document.getElementById("composer");
   const input = document.getElementById("messageInput");
+  const writeIntentBtn = document.getElementById("writeIntentBtn");
   const sendBtn = document.getElementById("sendBtn");
   const voiceRecordBtn = document.getElementById("voiceRecordBtn");
   const voiceStopBtn = document.getElementById("voiceStopBtn");
@@ -581,6 +587,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let activeWorkstreamLabel = "Human–Adam";
   let workstreamDevelopmentEnabled = true;
   let workstreamDeploymentEnabled = true;
+  let writeIntentArmed = false;
   let deliveryUncertain = false;
   let deploymentAudit = null;
   const verifiedDeploymentStorageKey = "human-adam:verified-deployment:v1";
@@ -757,6 +764,10 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     refreshBtn.disabled = busy || resultWatchActive;
     refreshBtn.textContent = resultWatchActive ? "Čekám na výsledek…" : "Stav";
     sendBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
+    writeIntentBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || !sessionConnected || !workstreamDevelopmentEnabled;
+    writeIntentBtn.classList.toggle("armed", writeIntentArmed);
+    writeIntentBtn.setAttribute("aria-pressed", writeIntentArmed ? "true" : "false");
+    writeIntentBtn.textContent = writeIntentArmed ? "Vývoj připraven" : "Zahájit vývoj";
     voiceRecordBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
     voiceRecordBtn.classList.toggle("recording", voiceRecording);
     voiceRecordBtn.textContent = voiceRecording ? "Nahrávám…" : "Nahrát pokyn";
@@ -789,6 +800,20 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     busy = value;
     syncControls();
     if (text) notice.textContent = text;
+  }
+
+  function setWriteIntentArmed(value) {
+    writeIntentArmed = Boolean(value);
+    syncControls();
+  }
+
+  function armWriteIntent() {
+    if (writeIntentBtn.disabled || writeIntentArmed) return;
+    const confirmed = window.confirm("Jednorázově povolit zápis pouze pro následující pokyn?\n\nServer před odesláním ověří čistý main a všechny vývojové workspaces. Oprávnění se po jednom pokusu zruší.");
+    if (!confirmed) return;
+    setWriteIntentArmed(true);
+    notice.textContent = "Jednorázový vývoj je připravený pro následující odeslaný pokyn.";
+    input.focus();
   }
 
   function setMobileStatusDetails(expanded) {
@@ -1131,6 +1156,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     const session = payload && payload.session ? payload.session : null;
     const connected = Boolean(session && session.connected && payload.runtime && payload.runtime.reachable);
     sessionConnected = connected;
+    if (!connected) writeIntentArmed = false;
     connectionBadge.textContent = connected ? "Připojeno" : "Odpojeno";
     connectionBadge.className = connected ? "badge ok" : "badge warn";
     profileBadge.textContent = `Proud: ${activeWorkstreamLabel}`;
@@ -1189,10 +1215,14 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     const capabilities = payload && payload.workstream_capabilities ? payload.workstream_capabilities : {};
     const activeWorkstream = selection && selection.active ? selection.active : {};
     const workstreams = selection && Array.isArray(selection.workstreams) ? selection.workstreams : [];
+    const nextWorkstreamId = String(activeWorkstream.workstream_id || "");
+    if (activeWorkstreamId && nextWorkstreamId !== activeWorkstreamId) {
+      writeIntentArmed = false;
+    }
     activeWorkstreamLabel = String(activeWorkstream.workstream_name || "Pracovní proud");
     workstreamDevelopmentEnabled = capabilities.development !== false;
     workstreamDeploymentEnabled = capabilities.deployment !== false;
-    activeWorkstreamId = String(activeWorkstream.workstream_id || "");
+    activeWorkstreamId = nextWorkstreamId;
     activeWorkstreamBackend = String(activeWorkstream.backend || "lazy_private_thread");
     profileSelect.replaceChildren();
     const appendOption = (parent, profile) => {
@@ -1248,6 +1278,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       profileSelect.value = activeWorkstreamId;
       return;
     }
+    setWriteIntentArmed(false);
     setBusy(true, `Přepínám pracovní proud na ${targetLabel}…`);
     stopAnswerSpeech(false);
     tvbcpPanel.hidden = true;
@@ -1641,6 +1672,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     if (deliveryUncertain && !window.confirm("Předchozí doručení je nejisté. Odeslat nový odlišný pokyn pouze pro přípravu kotvy? Předchozí pokyn se nebude opakovat.")) return;
     const editorBefore = contextAnchorInput.value;
     if (editorBefore.trim() && !window.confirm("Adamův nový návrh po dokončení nahradí současný obsah editoru. Pokračovat?")) return;
+    setWriteIntentArmed(false);
     sendInFlight = true;
     syncControls();
     await primeCompletionMediaSound();
@@ -2258,6 +2290,8 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     if (busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing) return;
     const text = input.value.trim();
     if (!text) { notice.textContent = "Napiš nejdřív zprávu."; return; }
+    const writeIntent = writeIntentArmed;
+    setWriteIntentArmed(false);
     sendInFlight = true;
     syncControls();
     await primeCompletionMediaSound();
@@ -2273,7 +2307,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     notice.textContent = `Odesláno ${formatTime(sentAt)} · Adam pracuje…`;
     let failure = "";
     try {
-      const payload = await api(HUMAN_ADAM_SEND_PATH, {method:"POST", body:JSON.stringify({message:text,client_message_id:clientId,client_sent_at:sentAt})});
+      const payload = await api(HUMAN_ADAM_SEND_PATH, {method:"POST", body:JSON.stringify({message:text,client_message_id:clientId,client_sent_at:sentAt,write_intent:writeIntent})});
       if (!payload.ok) {
         const error = new Error(payload.message || "Odeslání selhalo.");
         error.status = String(payload.status || "");
@@ -2304,6 +2338,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   }
 
   connectBtn.addEventListener("click", connect);
+  writeIntentBtn.addEventListener("click", armWriteIntent);
   profileSelect.addEventListener("change", syncControls);
   profileSwitchBtn.addEventListener("click", switchProfile);
   mobileStatusSummary.addEventListener("click", () => {

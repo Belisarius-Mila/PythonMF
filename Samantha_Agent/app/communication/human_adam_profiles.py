@@ -704,15 +704,18 @@ class HumanAdamProfileManager:
         lazy_id = self.active_lazy_workstream_id
         lazy = bool(lazy_id)
         writable_pilot = lazy_id in WRITABLE_LAZY_WORKSTREAM_IDS
+        one_turn_write = not lazy or writable_pilot
         return {
             "conversation": True,
             "context_anchor": True,
             "tvbcp": True,
-            "development": not lazy or writable_pilot,
-            "checkpoint": not lazy or writable_pilot,
+            "development": one_turn_write,
+            "checkpoint": one_turn_write,
             "deployment": not lazy,
             "lazy_backend": lazy,
             "writable_pilot": writable_pilot,
+            "one_turn_write": one_turn_write,
+            "write_authorization": "one_turn" if one_turn_write else "read_only",
         }
 
     def _assert_writable_lazy_workstream(self, workstream_id: str) -> None:
@@ -812,31 +815,25 @@ class HumanAdamProfileManager:
 
     def send(self, **kwargs: Any) -> dict[str, Any]:
         with self.profile_operation() as service:
-            lease = self.development_semaphore.status()
             active_id = self.work_profile_id
             lazy_id = self.active_lazy_workstream_id
-            if lazy_id:
-                writable = lazy_id in WRITABLE_LAZY_WORKSTREAM_IDS
-                state = "pilot" if writable else "read_only"
-                control_source = (
-                    "mmtx_writable_pilot" if writable else "lazy_read_only_policy"
+            write_intent = kwargs.pop("write_intent", False) is True
+            writable = False
+            state = "not_requested"
+            control_source = "one_turn_direct_main_authorization"
+            control_owner = "none"
+            if write_intent:
+                self._assert_one_turn_write_ready(
+                    service=service,
+                    active_id=active_id,
+                    lazy_id=lazy_id,
                 )
-                control_owner = active_id if writable else "none"
-            else:
-                writable = bool(
-                    lease.get("ok") is True
-                    and lease.get("active") is True
-                    and lease.get("mode") == "active"
-                    and lease.get("owner_id") == active_id
-                )
-                if lease.get("ok") is not True:
-                    state = "invalid"
-                elif lease.get("active") is not True:
-                    state = "free"
-                else:
-                    state = str(lease.get("mode") or "invalid")
-                control_source = "private_global_development_semaphore"
-                control_owner = str(lease.get("owner_id") or "none")
+                writable = True
+                state = "authorized_once"
+                control_owner = active_id
+            elif lazy_id and lazy_id not in WRITABLE_LAZY_WORKSTREAM_IDS:
+                control_source = "lazy_read_only_policy"
+                state = "read_only"
             development_control_block = "\n".join(
                 (
                     "[DEVELOPMENT_CONTROL]",
@@ -864,6 +861,66 @@ class HumanAdamProfileManager:
                 writable=writable,
                 result=result,
             )
+
+    def _assert_one_turn_write_ready(
+        self,
+        *,
+        service: HumanAdamService,
+        active_id: str,
+        lazy_id: str,
+    ) -> None:
+        if lazy_id:
+            self._assert_writable_lazy_workstream(lazy_id)
+            if self.workstream_memory is None:
+                raise AppServerError(
+                    "Pracovní proud nemá kanonickou paměť pro bezpečný checkpoint."
+                )
+            memory_binding = self.workstream_memory.binding(lazy_id)
+            if memory_binding.workstream_id != self.active_workstream_id:
+                raise AppServerError(
+                    "Aktivní pracovní proud nemá konzistentní kanonickou vazbu."
+                )
+        else:
+            binding = self.workstream_backends.binding(self.active_workstream_id)
+            adapter = binding.compatibility_adapter
+            if adapter is None or adapter.profile_id != active_id:
+                raise AppServerError(
+                    "Aktivní pracovní proud nemá konzistentní direct-main adaptér."
+                )
+
+        session = service.hub.snapshot()
+        if not session.get("connected"):
+            raise AppServerError("Nejdřív výslovně připoj Human–Adam.")
+        if session.get("turn_busy") or session.get("active_turn"):
+            raise SessionBusyError("Vývoj nelze zahájit během aktivního tahu Adama.")
+        if self._has_uncertain_delivery(session):
+            raise SessionBusyError(
+                "Vývoj nelze zahájit, dokud není vyřešené nejisté doručení."
+            )
+
+        active_workspace = service.workspace.status()
+        self._assert_target_workspace(active_workspace)
+        if int(active_workspace.get("source_pending_changes") or 0) > 0:
+            raise AppServerError(
+                "Main má pracovní změny; jednorázový vývoj zůstává uzamčený."
+            )
+        if active_workspace.get("workspace_relation") != "aligned":
+            raise AppServerError(
+                "Aktivní workspace není synchronní s main; před vývojem jej bezpečně synchronizuj."
+            )
+
+        for row in self._development_workspace_rows():
+            blocker = self._row_blocker(row)
+            if blocker:
+                raise AppServerError("Jednorázový vývoj blokuje workspace: " + blocker)
+            if int(row.get("source_pending_changes") or 0) > 0:
+                raise AppServerError(
+                    f"Main má pracovní změny viditelné z workspace {row['label']}; vývoj zůstává uzamčený."
+                )
+            if row.get("workspace_relation") != "aligned":
+                raise AppServerError(
+                    f"Workspace {row['label']} není synchronní s main; vývoj zůstává uzamčený."
+                )
 
     @staticmethod
     def _completion_answer(visible_answer: str, note: str) -> str:

@@ -127,6 +127,7 @@ class FakeHub:
         self.close_count = 0
         self.rotation_count = 0
         self.next_answer = "Hotovo"
+        self.on_send = None
         self.replaced_answers: list[tuple[str, str]] = []
         self.fail_connect = False
 
@@ -147,6 +148,8 @@ class FakeHub:
 
     def send(self, **kwargs: object) -> dict[str, object]:
         self.last_send = dict(kwargs)
+        if callable(self.on_send):
+            self.on_send()
         return {
             "ok": True,
             "entry": {
@@ -1002,6 +1005,11 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(result["workstream_capabilities"]["development"])
         self.assertTrue(result["workstream_capabilities"]["checkpoint"])
         self.assertTrue(result["workstream_capabilities"]["writable_pilot"])
+        self.assertTrue(result["workstream_capabilities"]["one_turn_write"])
+        self.assertEqual(
+            result["workstream_capabilities"]["write_authorization"],
+            "one_turn",
+        )
         self.assertFalse(result["workstream_capabilities"]["deployment"])
         self.assertEqual(lazy.open_calls, ["project-mmtx"])
         self.assertEqual(persisted["schema_version"], 2)
@@ -1053,8 +1061,12 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(restored_lazy_anchor["content"], "Cíl: samostatný MMTX")
         self.assertEqual(lazy_send["text"], "Kontrola MMTX pilotu")
         self.assertIn("profile_id=project-mmtx", str(lazy_send["model_input_text"]))
-        self.assertIn("source=mmtx_writable_pilot", str(lazy_send["model_input_text"]))
-        self.assertIn("writable=true", str(lazy_send["model_input_text"]))
+        self.assertIn(
+            "source=one_turn_direct_main_authorization",
+            str(lazy_send["model_input_text"]),
+        )
+        self.assertIn("lease_state=not_requested", str(lazy_send["model_input_text"]))
+        self.assertIn("writable=false", str(lazy_send["model_input_text"]))
         self.assertEqual(human_hub.last_send, {})
         self.assertEqual(sent["automatic_completion"]["state"], "not_needed")
 
@@ -1130,7 +1142,9 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 workstream_id="project-mmtx",
                 confirmed=True,
             )
-            human_workspace.dirty = True
+            lazy.hubs["project-mmtx"].on_send = lambda: setattr(
+                human_workspace, "dirty", True
+            )
             lazy.hubs["project-mmtx"].next_answer = receipt
             with patch(
                 "app.communication.human_adam_profiles.complete_simple_main_checkpoint",
@@ -1144,12 +1158,13 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 result = manager.send(
                     text="Proveď malou MMTX změnu",
                     client_message_id="mmtx-pilot-001",
+                    write_intent=True,
                 )
 
         request = checkpoint.call_args.kwargs["request"]
         model_input = str(lazy.hubs["project-mmtx"].last_send["model_input_text"])
-        self.assertIn("source=mmtx_writable_pilot", model_input)
-        self.assertIn("lease_state=pilot", model_input)
+        self.assertIn("source=one_turn_direct_main_authorization", model_input)
+        self.assertIn("lease_state=authorized_once", model_input)
         self.assertIn("lease_owner_id=project-mmtx", model_input)
         self.assertIn("profile_id=project-mmtx", model_input)
         self.assertIn("writable=true", model_input)
@@ -1197,11 +1212,19 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 text="Tento tah musí zůstat read-only",
                 client_message_id="nonpilot-readonly-001",
             )
+            with self.assertRaisesRegex(AppServerError, "read-only"):
+                manager.send(
+                    text="Tento zápis musí být odmítnut",
+                    client_message_id="nonpilot-write-001",
+                    write_intent=True,
+                )
 
         model_input = str(lazy.hubs["project-lekarna"].last_send["model_input_text"])
         self.assertFalse(capabilities["development"])
         self.assertFalse(capabilities["checkpoint"])
         self.assertFalse(capabilities["writable_pilot"])
+        self.assertFalse(capabilities["one_turn_write"])
+        self.assertEqual(capabilities["write_authorization"], "read_only")
         self.assertFalse(development["can_acquire_profile"])
         self.assertIn("source=lazy_read_only_policy", model_input)
         self.assertIn("lease_state=read_only", model_input)
@@ -1765,16 +1788,66 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 topic="Povolený vývoj",
                 confirmed=True,
             )
-            manager.send(text="Proveď změnu", client_message_id="writable")
+            manager.send(text="Stále jen analyzuj", client_message_id="leased-read-only")
+            leased_read_only_input = str(human_hub.last_send["model_input_text"])
+            manager.send(
+                text="Proveď změnu",
+                client_message_id="writable",
+                write_intent=True,
+            )
             writable_input = str(human_hub.last_send["model_input_text"])
+            manager.send(text="Znovu jen analyzuj", client_message_id="expired")
+            expired_input = str(human_hub.last_send["model_input_text"])
 
         self.assertIn("[DEVELOPMENT_CONTROL]", read_only_input)
-        self.assertIn("lease_state=free", read_only_input)
+        self.assertIn("lease_state=not_requested", read_only_input)
         self.assertIn("writable=false", read_only_input)
+        self.assertIn("lease_state=not_requested", leased_read_only_input)
+        self.assertIn("lease_owner_id=none", leased_read_only_input)
+        self.assertIn("writable=false", leased_read_only_input)
         self.assertIn("lease_owner_id=human_adam", writable_input)
+        self.assertIn("lease_state=authorized_once", writable_input)
         self.assertIn("writable=true", writable_input)
+        self.assertIn("lease_state=not_requested", expired_input)
+        self.assertIn("lease_owner_id=none", expired_input)
+        self.assertIn("writable=false", expired_input)
         self.assertNotIn("[AUTOMATIC_STEP_COMPLETION]", read_only_input)
         self.assertIn("[AUTOMATIC_STEP_COMPLETION]", writable_input)
+        self.assertNotIn("[AUTOMATIC_STEP_COMPLETION]", expired_input)
+
+    def test_one_turn_write_preflight_rejects_dirty_active_workspace_before_send(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.connect()
+            human_workspace.dirty = True
+
+            with self.assertRaisesRegex(AppServerError, "rozpracovanou práci"):
+                manager.send(
+                    text="Tento tah se nesmí odeslat",
+                    client_message_id="dirty-preflight-001",
+                    write_intent=True,
+                )
+
+        self.assertEqual(human_hub.last_send, {})
+
+    def test_one_turn_write_preflight_rejects_unsynced_peer_before_send(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _human_workspace, library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.connect()
+            library_workspace.source_ahead = True
+
+            with self.assertRaisesRegex(AppServerError, "Knihovna.*není synchronní"):
+                manager.send(
+                    text="Tento tah se nesmí odeslat",
+                    client_message_id="peer-preflight-001",
+                    write_intent=True,
+                )
+
+        self.assertEqual(human_hub.last_send, {})
 
     def test_writable_turn_with_receipt_completes_direct_main_checkpoint(self) -> None:
         receipt = (
@@ -1795,7 +1868,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 topic="Automatické dokončení",
                 confirmed=True,
             )
-            human_workspace.dirty = True
+            human_hub.on_send = lambda: setattr(human_workspace, "dirty", True)
             human_hub.next_answer = receipt
             with patch(
                 "app.communication.human_adam_profiles.complete_simple_main_checkpoint",
@@ -1809,6 +1882,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 result = manager.send(
                     text="Dokonči fázi 1.5",
                     client_message_id="completion-001",
+                    write_intent=True,
                 )
 
         request = checkpoint.call_args.kwargs["request"]
@@ -1833,7 +1907,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 topic="Nedokončený tah",
                 confirmed=True,
             )
-            human_workspace.dirty = True
+            human_hub.on_send = lambda: setattr(human_workspace, "dirty", True)
             human_hub.next_answer = "Test ještě neprošel."
             with patch(
                 "app.communication.human_adam_profiles.complete_simple_main_checkpoint"
@@ -1841,6 +1915,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 result = manager.send(
                     text="Pokus se o změnu",
                     client_message_id="completion-002",
+                    write_intent=True,
                 )
 
         checkpoint.assert_not_called()

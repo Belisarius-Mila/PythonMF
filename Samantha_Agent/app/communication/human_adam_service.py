@@ -446,7 +446,12 @@ class HumanAdamService:
         client_message_id: str,
         client_sent_at: str = "",
         development_control_block: str = "",
+        write_intent: bool = False,
     ) -> dict[str, Any]:
+        if write_intent:
+            raise SessionHubError(
+                "Jednorázovou autorizaci zápisu musí ověřit správce pracovních proudů."
+            )
         clean_text = str(text or "").strip()
         if len(clean_text) > MAX_MESSAGE_CHARS:
             raise SessionHubError(f"Zpráva může mít nejvýše {MAX_MESSAGE_CHARS} znaků.")
@@ -741,6 +746,7 @@ def human_adam_send_action(payload: dict[str, Any], *, service: HumanAdamService
             text=str(payload.get("message") or ""),
             client_message_id=str(payload.get("client_message_id") or ""),
             client_sent_at=str(payload.get("client_sent_at") or ""),
+            write_intent=payload.get("write_intent") is True,
         )
     except SessionBusyError as exc:
         return {"ok": False, "status": "human_adam_busy", "message": str(exc)}

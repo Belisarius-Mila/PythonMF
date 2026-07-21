@@ -39,6 +39,7 @@ class HumanAdamUiTests(unittest.TestCase):
             "threadRotationBtn",
             "chat",
             "messageInput",
+            "writeIntentBtn",
             "sendBtn",
             "tvbcpOpenBtn",
             "tvbcpPanel",
@@ -650,6 +651,40 @@ class HumanAdamUiTests(unittest.TestCase):
         )
         self.assertIn("#voiceStatus { min-width:0; overflow:hidden;", HUMAN_ADAM_HTML)
         self.assertNotIn('class="hint"', HUMAN_ADAM_HTML)
+
+    def test_one_turn_development_requires_visible_explicit_arming(self) -> None:
+        controls_start = HUMAN_ADAM_HTML.index("function syncControls()")
+        controls_end = HUMAN_ADAM_HTML.index("function setBusy(", controls_start)
+        controls_source = HUMAN_ADAM_HTML[controls_start:controls_end]
+        arm_start = HUMAN_ADAM_HTML.index("function armWriteIntent()")
+        arm_end = HUMAN_ADAM_HTML.index("function setMobileStatusDetails", arm_start)
+        arm_source = HUMAN_ADAM_HTML[arm_start:arm_end]
+        send_start = HUMAN_ADAM_HTML.index("async function sendMessage(event)")
+        send_end = HUMAN_ADAM_HTML.index(
+            'connectBtn.addEventListener("click", connect);', send_start
+        )
+        send_source = HUMAN_ADAM_HTML[send_start:send_end]
+        proposal_start = HUMAN_ADAM_HTML.index("async function proposeContextAnchor()")
+        proposal_end = HUMAN_ADAM_HTML.index("async function loadTvbcp", proposal_start)
+        proposal_source = HUMAN_ADAM_HTML[proposal_start:proposal_end]
+
+        self.assertIn(
+            '<button id="writeIntentBtn" type="button" aria-pressed="false">Zahájit vývoj</button>',
+            HUMAN_ADAM_HTML,
+        )
+        self.assertIn("let writeIntentArmed = false;", HUMAN_ADAM_HTML)
+        self.assertIn("!sessionConnected || !workstreamDevelopmentEnabled", controls_source)
+        self.assertIn("window.confirm", arm_source)
+        self.assertIn("pouze pro následující pokyn", arm_source)
+        self.assertIn("const writeIntent = writeIntentArmed;", send_source)
+        self.assertIn("setWriteIntentArmed(false);", send_source)
+        self.assertIn("write_intent:writeIntent", send_source)
+        self.assertIn("setWriteIntentArmed(false);", proposal_source)
+        self.assertNotIn("write_intent", proposal_source)
+        self.assertIn(
+            'writeIntentBtn.addEventListener("click", armWriteIntent);',
+            HUMAN_ADAM_HTML,
+        )
 
     def test_ui_renders_persistent_safe_simple_main_deployment(self) -> None:
         self.assertIn("payload.last_simple_main_deployment", HUMAN_ADAM_HTML)

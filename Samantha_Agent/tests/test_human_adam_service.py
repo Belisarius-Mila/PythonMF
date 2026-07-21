@@ -317,6 +317,25 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertTrue(hub.sent[0]["model_input_text"].endswith("\n\nProveď kontrolu"))
         self.assertEqual(result["session"]["thread_id"], "canonical-thread")
 
+    def test_raw_service_rejects_unvalidated_write_intent(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service, _runtime, _workspace, hub = self.make_service(Path(temp_dir))
+            service.connect()
+            result = human_adam_send_action(
+                {
+                    "message": "Proveď změnu",
+                    "client_message_id": "human-adam-write-0001",
+                    "client_sent_at": "2026-07-21T08:01:00Z",
+                    "write_intent": True,
+                },
+                service=service,
+            )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status"], "human_adam_send_failed")
+        self.assertIn("musí ověřit správce pracovních proudů", result["message"])
+        self.assertEqual(hub.sent, [])
+
     def test_explicit_context_anchor_survives_restart_and_is_sent_only_to_model(self) -> None:
         anchor_text = "Cíl: Zachovat kontinuitu\nPlán:\n1. Ověřit kompresi\nDalší krok: Ruční test"
         with tempfile.TemporaryDirectory() as temp_dir:
