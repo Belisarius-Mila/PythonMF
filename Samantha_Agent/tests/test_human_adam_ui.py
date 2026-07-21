@@ -333,7 +333,7 @@ class HumanAdamUiTests(unittest.TestCase):
 
     def test_orphaned_deployment_completion_ui_is_absent(self) -> None:
         self.assertNotIn("/api/human-adam/deployment-completion", HUMAN_ADAM_HTML)
-        self.assertNotIn("deploymentCompletion", HUMAN_ADAM_HTML)
+        self.assertNotIn("deploymentcompletion", HUMAN_ADAM_HTML.casefold())
         self.assertNotIn("deployment-completion-box", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/deploy-verification", HUMAN_ADAM_HTML)
 

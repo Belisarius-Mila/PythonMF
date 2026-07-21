@@ -790,7 +790,6 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     developmentReleaseBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_release !== true;
     projectContinuityAuditBtn.disabled = busy;
     developmentBranchAuditBtn.disabled = busy;
-    syncDeploymentCompletionControls();
   }
 
   function setBusy(value, text="") {
