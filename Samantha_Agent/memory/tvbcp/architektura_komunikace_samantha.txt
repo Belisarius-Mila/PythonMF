@@ -2215,3 +2215,20 @@ konstrukce; cílených 78 testů a plná Cockpit Quality Gate s 979 testy za
 Další krok: jeden tematický commit a push, zelená vzdálená Cockpit Quality Gate
 a teprve potom samostatné bezpečné nasazení s live důkazem zachování aktivního
 MMTX. Profilově pojmenovaná bezpečnostní metadata řešit až odděleným auditem.
+
+### 2026-07-21 12:25 CEST – Fáze 4.5g-b nasazena a MMTX zachováno
+
+Commit `c1b30df` prošel vzdálenou Cockpit Quality Gate s 979 testy. Schválené
+odstranění koordinátoru aktivovalo fail-closed ochranu automatického syncu;
+teprve po přesném potvrzení globální brzdy byly oba čisté profilové workspaces
+ověřeně fast-forwardovány na stejný commit bez remote, WIP nebo private cest.
+
+Řízené nasazení zopakovalo 979 testů za 259,1 sekundy, změnilo proces z PID
+`67271` na `89177`, potvrdilo code stamp `03cab696207b0c3f` a oba smoke průchody
+skončily `5/5`. Live návrat na `project-mmtx` zachoval stejnou private session,
+2 zprávy, připojení a nulový aktivní tah či nejisté doručení; Human–Adam zachoval
+102 zpráv. Main, Human–Adam i Knihovna skončily čisté a zarovnané na `c1b30df`.
+
+Další krok je samostatný read-only audit profilově pojmenovaných bezpečnostních
+metadat. Schéma 1, vývojový semafor, deployment-completion účtenky a private
+session zatím nemigrovat ani neodstraňovat.

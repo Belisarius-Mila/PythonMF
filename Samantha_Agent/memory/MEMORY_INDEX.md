@@ -116,10 +116,12 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   ctyri nepouzivane profilove wrappery. Zivy `CanonicalWorkstreamBinding` byl
   oddelen se zachovanou katalogovou, cestovou a profilovou fail-closed
   validaci. Jednotny backend, grouped router, interni `switch`, adaptery
-  Human–Adam/Knihovna, schema 1 a private session zustaly zachovane. Cilenych
-  78 testu a plna lokalni brana s 979 testy prosly; bez restartu a nasazeni.
-  Dalsi krok je commit/push, zelena vzdalena CI a pak samostatne bezpecne
-  nasazeni s live proofem zachovani aktivniho MMTX.
+  Human–Adam/Knihovna, schema 1 a private session zustaly zachovane. Commit
+  `c1b30df`, lokalni i vzdalena brana s 979 testy, rizene nasazeni, novy PID,
+  code stamp a smoke `5/5` prosly. Stejne aktivni pripojene MMTX zachovalo 2
+  zpravy, Human–Adam 102 a vsechny tri workspaces jsou ciste a zarovnane.
+  Dalsi krok je samostatny read-only audit profilove pojmenovanych
+  bezpecnostnich metadat; zatim nic nemigrovat ani neodstranovat.
   Historie: krok 0 transformace Human–Adam zacal zalozenim kanonickeho
   pracovniho proudu `Human–Adam / vyvojove prostredi` typu `Layer`. Stary
   projektovy zaznam zustava docasnym kompatibilnim mostem a zadny funkcni kod

@@ -923,3 +923,24 @@ Bezpecnost / neukladat:
   semaforové nebo deployment-completion účtenky.
 - Neukládat private thread ID, hash identity, obsah zpráv, tokeny ani private
   cesty.
+
+#### 2026-07-21 12:25 CEST – Post-deployment dodatek k checkpointu 4.5g-b
+
+Commit `c1b30df` prošel vzdálenou Cockpit Quality Gate s 979 testy a Pages
+workflow. Protože auditovaný commit obsahoval schválené odstranění koordinátoru,
+automatický synchronizační guard nejdřív fail-closed zastavil profilový update.
+Po Mílově přesném potvrzení globální brzdy byly oba čisté izolované workspaces
+ověřeně fast-forwardovány z `427f0a6` na `c1b30df`, bez remote, WIP nebo private
+cest.
+
+Řízené nasazení zopakovalo plnou serverovou bránu s 979 testy za 259,1 sekundy,
+změnilo Cockpit PID `67271 -> 89177`, potvrdilo code stamp
+`03cab696207b0c3f` a serverový i nezávislý smoke test prošly `5/5`. Live proof
+vrátil stejnou private MMTX session se stejnými 2 zprávami; Human–Adam zachoval
+102 zpráv. Finálně je aktivní připojené `project-mmtx` bez aktivního tahu nebo
+nejistého doručení a main, Human–Adam i Knihovna jsou čisté a zarovnané na
+`c1b30df`.
+
+Další krok: samostatný read-only audit zbývajících profilově pojmenovaných
+bezpečnostních metadat. Zatím nemigrovat schéma 1, vývojový semafor,
+deployment-completion účtenky ani private session.

@@ -46,10 +46,12 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
   odstranene; zivy `CanonicalWorkstreamBinding` je oddeleny v samostatnem
   modulu se zachovanou katalogovou, cestovou a profilovou fail-closed validaci.
   Jednotny backendovy registr, grouped router, interni `switch`, adaptery
-  Human–Adam/Knihovna, schema 1 a private session zustaly zachovane. Cilenych
-  78 testu a plna lokalni brana s 979 testy prosly; Cockpit nebyl restartovan
-  ani nasazen. Dalsi krok je tematicky commit/push, zelena vzdalena CI a teprve
-  potom samostatne bezpecne nasazeni s live proofem zachovani MMTX. Handoff:
+  Human–Adam/Knihovna, schema 1 a private session zustaly zachovane. Commit
+  `c1b30df`, lokalni i vzdalena brana s 979 testy, rizene nasazeni, novy PID a
+  smoke `5/5` prosly. Stejne aktivni pripojene MMTX zachovalo 2 zpravy,
+  Human–Adam 102 a vsechny tri workspaces jsou ciste a zarovnane. Dalsi krok je
+  samostatny read-only audit profilove pojmenovanych bezpecnostnich metadat; nic
+  zatim nemigrovat ani neodstranovat. Handoff:
   `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-20: Priorita 1, univerzalni pracovni proudy faze 4.3. Vsech 29 proudu
   ma jednu kanonickou git-safe vazbu na handoff a TVBCP. Human–Adam a Knihovna
