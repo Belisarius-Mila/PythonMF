@@ -10,11 +10,6 @@ from pathlib import Path
 from typing import Any, Callable
 
 from app.codex_appserver import AppServerError, CodexAppServerClient, UnixSocketAppServerTransport
-from app.communication.human_adam_deploy import (
-    DEFAULT_DEPLOYMENT_DIAGNOSTIC,
-    DEFAULT_DEPLOYMENT_FAILURE_HISTORY,
-    DEFAULT_DEPLOYMENT_RECEIPT,
-)
 from app.communication.local_runtime import LocalAppServerProcessController
 from app.communication.session_hub import (
     CanonicalSessionHub,
@@ -307,9 +302,6 @@ class HumanAdamService:
         runtime: LocalAppServerProcessController | None = None,
         workspace: HumanAdamWorkspaceManager | None = None,
         state_path: Path = DEFAULT_SESSION_STATE_PATH,
-        deployment_receipt_path: Path = DEFAULT_DEPLOYMENT_RECEIPT,
-        deployment_diagnostic_path: Path | None = None,
-        deployment_failure_history_path: Path | None = None,
         work_profile_id: str = "human_adam",
         context_anchor_path: Path = DEFAULT_CONTEXT_ANCHOR_PATH,
         codex_binary: str = DEFAULT_CODEX_BIN,
@@ -329,25 +321,6 @@ class HumanAdamService:
         self._profile: dict[str, Any] = {}
         self.state_path = Path(state_path)
         self.context_anchor_path = Path(context_anchor_path)
-        self.deployment_receipt_path = Path(deployment_receipt_path)
-        self.deployment_diagnostic_path = Path(
-            deployment_diagnostic_path
-            if deployment_diagnostic_path is not None
-            else (
-                DEFAULT_DEPLOYMENT_DIAGNOSTIC
-                if self.deployment_receipt_path == DEFAULT_DEPLOYMENT_RECEIPT
-                else self.deployment_receipt_path.with_name("deployment_diagnostic.json")
-            )
-        )
-        self.deployment_failure_history_path = Path(
-            deployment_failure_history_path
-            if deployment_failure_history_path is not None
-            else (
-                DEFAULT_DEPLOYMENT_FAILURE_HISTORY
-                if self.deployment_receipt_path == DEFAULT_DEPLOYMENT_RECEIPT
-                else self.deployment_receipt_path.with_name("deployment_failures.json")
-            )
-        )
         self.work_profile_id = str(work_profile_id or "").strip().lower()
         if not re.fullmatch(r"[a-z][a-z0-9_-]{1,31}", self.work_profile_id):
             raise ValueError("Pracovní profil služby nemá platný bezpečný identifikátor.")

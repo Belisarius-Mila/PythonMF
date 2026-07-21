@@ -16,12 +16,6 @@ from app.communication.development_semaphore import (
     TERMINAL_OWNER_ID,
     DevelopmentSemaphore,
 )
-from app.communication.human_adam_deploy import (
-    DEPLOYMENT_LOCK,
-    DEFAULT_DEPLOYMENT_DIAGNOSTIC,
-    DEFAULT_DEPLOYMENT_FAILURE_HISTORY,
-    DEFAULT_DEPLOYMENT_RECEIPT,
-)
 from app.communication.human_adam_service import (
     DEVELOPMENT_CONTROL_DEVELOPER_INSTRUCTIONS,
     HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
@@ -302,9 +296,6 @@ class HumanAdamProfileManager:
             workspace=base.workspace,
             state_path=state_root / "session.json",
             context_anchor_path=state_root / "context_anchor.json",
-            deployment_receipt_path=state_root / "deployment_receipt.json",
-            deployment_diagnostic_path=state_root / "deployment_diagnostic.json",
-            deployment_failure_history_path=state_root / "deployment_failures.json",
             work_profile_id=clean_id,
             codex_binary=base.codex_binary,
             profile_getter=base.profile_getter,
@@ -350,18 +341,6 @@ class HumanAdamProfileManager:
     @property
     def hub(self):
         return self.active_service.hub
-
-    @property
-    def deployment_receipt_path(self) -> Path:
-        return self.active_service.deployment_receipt_path
-
-    @property
-    def deployment_diagnostic_path(self) -> Path:
-        return self.active_service.deployment_diagnostic_path
-
-    @property
-    def deployment_failure_history_path(self) -> Path:
-        return self.active_service.deployment_failure_history_path
 
     @property
     def work_profile_id(self) -> str:
@@ -1837,8 +1816,6 @@ class HumanAdamProfileManager:
         clean_id = str(workstream_id or "").strip()
         if not confirmed:
             raise AppServerError("Přepnutí pracovního proudu vyžaduje výslovné potvrzení.")
-        if DEPLOYMENT_LOCK.locked():
-            raise SessionBusyError("Pracovní proud nelze přepnout během auditu nebo nasazení.")
         if not self._operation_lock.acquire(blocking=False):
             raise SessionBusyError("Pracovní proud nelze přepnout během aktivní operace.")
         try:
@@ -1926,8 +1903,6 @@ class HumanAdamProfileManager:
                 ),
                 confirmed=True,
             )
-        if DEPLOYMENT_LOCK.locked():
-            raise SessionBusyError("Profil nelze přepnout během auditu nebo nasazení.")
         if not self._operation_lock.acquire(blocking=False):
             raise SessionBusyError("Profil nelze přepnout během aktivní operace.")
         try:
@@ -2021,9 +1996,6 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
     human_service = HumanAdamService(
         runtime=runtime,
         state_path=DEFAULT_HUMAN_SESSION_PATH,
-        deployment_receipt_path=DEFAULT_DEPLOYMENT_RECEIPT,
-        deployment_diagnostic_path=DEFAULT_DEPLOYMENT_DIAGNOSTIC,
-        deployment_failure_history_path=DEFAULT_DEPLOYMENT_FAILURE_HISTORY,
         work_profile_id="human_adam",
         context_anchor_path=DEFAULT_HUMAN_CONTEXT_ANCHOR_PATH,
         developer_instructions=HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
@@ -2036,9 +2008,6 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         runtime=runtime,
         workspace=knihovna_workspace,
         state_path=PRIVATE_COMMUNICATION_ROOT / "knihovna_session.json",
-        deployment_receipt_path=PRIVATE_COMMUNICATION_ROOT / "knihovna_deployment_receipt.json",
-        deployment_diagnostic_path=PRIVATE_COMMUNICATION_ROOT / "knihovna_deployment_diagnostic.json",
-        deployment_failure_history_path=PRIVATE_COMMUNICATION_ROOT / "knihovna_deployment_failures.json",
         work_profile_id="knihovna",
         context_anchor_path=KNIHOVNA_CONTEXT_ANCHOR_PATH,
         developer_instructions=KNIHOVNA_DEVELOPER_INSTRUCTIONS,

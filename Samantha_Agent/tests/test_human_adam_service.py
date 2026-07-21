@@ -203,7 +203,6 @@ class HumanAdamServiceTests(unittest.TestCase):
             workspace=workspace,  # type: ignore[arg-type]
             state_path=root / "state.json",
             context_anchor_path=root / "context_anchor.json",
-            deployment_receipt_path=root / "deployment_receipt.json",
             profile_getter=fake_profile,
             hub=hub,  # type: ignore[arg-type]
         )

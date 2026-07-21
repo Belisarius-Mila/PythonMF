@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -298,7 +299,6 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             workspace=human_workspace,  # type: ignore[arg-type]
             state_path=root / "human.json",
             context_anchor_path=root / "human-anchor.json",
-            deployment_receipt_path=root / "human-receipt.json",
             work_profile_id="human_adam",
             hub=human_hub,  # type: ignore[arg-type]
             profile_getter=fake_profile,
@@ -308,7 +308,6 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             workspace=library_workspace,  # type: ignore[arg-type]
             state_path=root / "library.json",
             context_anchor_path=root / "library-anchor.json",
-            deployment_receipt_path=root / "library-receipt.json",
             work_profile_id="knihovna",
             hub=library_hub,  # type: ignore[arg-type]
             profile_getter=fake_profile,
@@ -784,6 +783,49 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(result["workstream"]["type"], "Layer")
         self.assertTrue(result["restart"]["scheduled"])
         self.assertEqual(restart_calls, [True])
+
+    def test_simple_deployment_operation_lock_blocks_workstream_switch(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_rest = self.make_manager(Path(temp_dir))
+            deployment_entered = threading.Event()
+            release_deployment = threading.Event()
+            worker_errors: list[BaseException] = []
+
+            def blocking_deployment(**_kwargs: object) -> dict[str, object]:
+                deployment_entered.set()
+                if not release_deployment.wait(timeout=2):
+                    raise AssertionError("Test neuvolnil simple-main nasazení.")
+                return {"ok": True, "state": "pending_restart"}
+
+            def prepare() -> None:
+                try:
+                    manager.prepare_simple_main_deployment(
+                        previous_pid=321,
+                        confirmed=True,
+                    )
+                except BaseException as exc:  # pragma: no cover - asserted below
+                    worker_errors.append(exc)
+
+            with patch(
+                "app.communication.human_adam_profiles.prepare_clean_main_deployment",
+                side_effect=blocking_deployment,
+            ):
+                worker = threading.Thread(target=prepare)
+                worker.start()
+                self.assertTrue(deployment_entered.wait(timeout=2))
+                try:
+                    with self.assertRaisesRegex(SessionBusyError, "aktivní operace"):
+                        manager.activate_grouped_workstream(
+                            workstream_id="project-knowledge-library",
+                            confirmed=True,
+                        )
+                finally:
+                    release_deployment.set()
+                    worker.join(timeout=2)
+
+        self.assertFalse(worker.is_alive())
+        self.assertEqual(worker_errors, [])
+        self.assertEqual(manager.active_workstream_id, "layer-human-adam-development")
 
     def test_simple_deployment_audit_derives_workstream_and_both_profiles(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
