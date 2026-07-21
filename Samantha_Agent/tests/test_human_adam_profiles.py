@@ -211,6 +211,7 @@ class FakeLazyThreads:
         self.uncertain = False
         self.open_calls: list[str] = []
         self.close_calls: list[str] = []
+        self.restore_calls: list[str] = []
         self.hubs = {
             "project-mmtx": FakeHub("mmtx-thread"),
             "project-lekarna": FakeHub("lekarna-thread"),
@@ -248,6 +249,11 @@ class FakeLazyThreads:
             raise AppServerError("Aktivní lazy pracovní proud se mezitím změnil.")
         return self.hubs[self.active_workstream_id]
 
+    def restore_active(self, *, workstream_id: str) -> dict[str, object]:
+        self.restore_calls.append(workstream_id)
+        self.active_workstream_id = workstream_id
+        return {"ok": True, "restored": True}
+
     def open(self, *, workstream_id: str, confirmed: bool) -> dict[str, object]:
         if not confirmed:
             raise AssertionError("lazy open must be confirmed")
@@ -281,6 +287,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         *,
         target_prepared: bool = True,
         project_continuity: ProjectContinuityService | None = None,
+        workstream_threads=None,
     ):
         runtime = FakeRuntime(root)
         human_workspace = FakeWorkspace(root / "human")
@@ -341,6 +348,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             state_path=root / "active-profile.json",
             runtime=runtime,  # type: ignore[arg-type]
             project_continuity=project_continuity,
+            workstream_threads=workstream_threads,
             workstream_memory=WorkstreamMemoryRegistry(),
         )
         return manager, human_workspace, library_workspace, human_hub, library_hub
@@ -427,6 +435,113 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 manager.grouped_workstream_status()["active"]["backend"],
                 "compatibility_adapter",
             )
+
+    def test_legacy_profile_state_is_read_without_rewrite_then_migrated(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            state_path = root / "active-profile.json"
+            state_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "active_profile_id": "knihovna",
+                        "updated_at": "2026-07-20T00:00:00+00:00",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            manager, *_rest = self.make_manager(root)
+            before = json.loads(state_path.read_text(encoding="utf-8"))
+            result = manager.activate_grouped_workstream(
+                workstream_id="project-knowledge-library",
+                confirmed=True,
+            )
+            after = json.loads(state_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(manager.active_profile_id, "knihovna")
+        self.assertEqual(manager.active_workstream_id, "project-knowledge-library")
+        self.assertEqual(before["schema_version"], 1)
+        self.assertFalse(result["switched"])
+        self.assertEqual(after["schema_version"], 2)
+        self.assertEqual(
+            after["active_workstream_id"],
+            "project-knowledge-library",
+        )
+        self.assertNotIn("active_profile_id", after)
+
+    def test_schema_two_ignores_stale_profile_field(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "active-profile.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 2,
+                        "active_workstream_id": "project-knowledge-library",
+                        "active_profile_id": "human_adam",
+                        "updated_at": "2026-07-21T00:00:00+00:00",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            manager, *_rest = self.make_manager(root)
+
+        self.assertEqual(manager.active_workstream_id, "project-knowledge-library")
+        self.assertEqual(manager.active_profile_id, "knihovna")
+
+    def test_persisted_lazy_workstream_restores_selection_without_connect(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "active-profile.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 2,
+                        "active_workstream_id": "project-mmtx",
+                        "updated_at": "2026-07-21T00:00:00+00:00",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            lazy = FakeLazyThreads(root / "lazy")
+
+            manager, *_rest = self.make_manager(
+                root,
+                workstream_threads=lazy,
+            )
+
+        self.assertEqual(manager.active_workstream_id, "project-mmtx")
+        self.assertEqual(manager.active_profile_id, "human_adam")
+        self.assertEqual(lazy.restore_calls, ["project-mmtx"])
+        self.assertFalse(lazy.hubs["project-mmtx"].connected)
+        self.assertIs(manager.active_service.hub, lazy.hubs["project-mmtx"])
+
+    def test_restored_lazy_selection_connects_same_service_only_on_demand(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "active-profile.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 2,
+                        "active_workstream_id": "project-mmtx",
+                        "updated_at": "2026-07-21T00:00:00+00:00",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            lazy = FakeLazyThreads(root / "lazy")
+            manager, *_rest = self.make_manager(
+                root,
+                workstream_threads=lazy,
+            )
+
+            result = manager.connect()
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(manager.active_workstream_id, "project-mmtx")
+        self.assertEqual(lazy.restore_calls, ["project-mmtx"])
+        self.assertEqual(lazy.open_calls, [])
+        self.assertTrue(lazy.hubs["project-mmtx"].connected)
 
     def test_status_exposes_only_recent_deployment_for_active_workstream(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -871,16 +986,20 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
 
     def test_grouped_router_switches_legacy_to_lazy_through_public_action(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
             manager, *_workspaces, human_hub, _library_hub = self.make_manager(
-                Path(temp_dir)
+                root
             )
-            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
+            lazy = FakeLazyThreads(root / "lazy")
             manager.workstream_threads = lazy  # type: ignore[assignment]
             human_hub.connected = True
 
             result = human_adam_profile_switch_action(
                 {"workstream_id": "project-mmtx", "confirmed": True},
                 service=manager,
+            )
+            persisted = json.loads(
+                (root / "active-profile.json").read_text(encoding="utf-8")
             )
 
         self.assertTrue(result["switched"])
@@ -900,6 +1019,8 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(result["workstream_capabilities"]["writable_pilot"])
         self.assertFalse(result["workstream_capabilities"]["deployment"])
         self.assertEqual(lazy.open_calls, ["project-mmtx"])
+        self.assertEqual(persisted["schema_version"], 2)
+        self.assertEqual(persisted["active_workstream_id"], "project-mmtx")
 
     def test_lazy_active_service_routes_send_and_keeps_context_anchor_isolated(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1112,6 +1233,80 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(library_hub.connected)
         self.assertFalse(human_hub.connected)
 
+    def test_lazy_persistence_failure_restores_compatibility_backend(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            manager, *_workspaces, human_hub, library_hub = self.make_manager(root)
+            lazy = FakeLazyThreads(root / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.switch(profile_id="knihovna", confirmed=True)
+            persisted_before = json.loads(
+                (root / "active-profile.json").read_text(encoding="utf-8")
+            )
+
+            with patch.object(
+                manager,
+                "_write_active_workstream_id",
+                side_effect=OSError("Simulované selhání perzistence."),
+            ):
+                with self.assertRaisesRegex(OSError, "perzistence"):
+                    manager.activate_grouped_workstream(
+                        workstream_id="project-mmtx",
+                        confirmed=True,
+                    )
+            persisted_after = json.loads(
+                (root / "active-profile.json").read_text(encoding="utf-8")
+            )
+
+        self.assertEqual(persisted_after, persisted_before)
+        self.assertEqual(manager.active_workstream_id, "project-knowledge-library")
+        self.assertEqual(manager.active_profile_id, "knihovna")
+        self.assertEqual(lazy.active_workstream_id, "")
+        self.assertTrue(library_hub.connected)
+        self.assertFalse(human_hub.connected)
+
+    def test_lazy_preparation_failure_restores_original_compatibility_backend(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            manager, *_workspaces, human_hub, library_hub = self.make_manager(root)
+            lazy = FakeLazyThreads(root / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.switch(profile_id="knihovna", confirmed=True)
+            persisted_before = json.loads(
+                (root / "active-profile.json").read_text(encoding="utf-8")
+            )
+            original_prepare = manager._prepare_profile_workspace_unlocked
+            prepare_count = 0
+
+            def fail_second_prepare(service):
+                nonlocal prepare_count
+                prepare_count += 1
+                if prepare_count == 2:
+                    raise AppServerError("Simulované selhání druhé přípravy.")
+                return original_prepare(service)
+
+            with patch.object(
+                manager,
+                "_prepare_profile_workspace_unlocked",
+                side_effect=fail_second_prepare,
+            ):
+                with self.assertRaisesRegex(AppServerError, "druhé přípravy"):
+                    manager.activate_grouped_workstream(
+                        workstream_id="project-mmtx",
+                        confirmed=True,
+                    )
+            persisted_after = json.loads(
+                (root / "active-profile.json").read_text(encoding="utf-8")
+            )
+
+        self.assertEqual(prepare_count, 3)
+        self.assertEqual(persisted_after, persisted_before)
+        self.assertEqual(manager.active_workstream_id, "project-knowledge-library")
+        self.assertEqual(manager.active_profile_id, "knihovna")
+        self.assertEqual(lazy.active_workstream_id, "")
+        self.assertTrue(library_hub.connected)
+        self.assertFalse(human_hub.connected)
+
     def test_grouped_router_synchronizes_shared_workspace_for_lazy_to_lazy(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, human_workspace, *_rest = self.make_manager(Path(temp_dir))
@@ -1132,6 +1327,48 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(lazy.active_workstream_id, "project-lekarna")
         self.assertEqual(human_workspace.sync_count, 1)
         self.assertEqual(lazy.open_calls, ["project-mmtx", "project-lekarna"])
+
+    def test_lazy_to_lazy_persistence_failure_restores_previous_selection(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            manager, *_rest = self.make_manager(root)
+            lazy = FakeLazyThreads(root / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.activate_grouped_workstream(
+                workstream_id="project-mmtx",
+                confirmed=True,
+            )
+            persisted_before = json.loads(
+                (root / "active-profile.json").read_text(encoding="utf-8")
+            )
+            original_write = manager._write_active_workstream_id
+
+            def fail_target(workstream_id: str):
+                if workstream_id == "project-lekarna":
+                    raise OSError("Simulované selhání lazy perzistence.")
+                return original_write(workstream_id)
+
+            with patch.object(
+                manager,
+                "_write_active_workstream_id",
+                side_effect=fail_target,
+            ):
+                with self.assertRaisesRegex(OSError, "lazy perzistence"):
+                    manager.activate_grouped_workstream(
+                        workstream_id="project-lekarna",
+                        confirmed=True,
+                    )
+            persisted_after = json.loads(
+                (root / "active-profile.json").read_text(encoding="utf-8")
+            )
+
+        self.assertEqual(persisted_after, persisted_before)
+        self.assertEqual(manager.active_workstream_id, "project-mmtx")
+        self.assertEqual(lazy.active_workstream_id, "project-mmtx")
+        self.assertEqual(
+            lazy.open_calls,
+            ["project-mmtx", "project-lekarna", "project-mmtx"],
+        )
 
     def test_grouped_router_switches_lazy_to_legacy(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1679,6 +1916,34 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             "project-knowledge-library",
         )
 
+    def test_profile_fallback_routes_from_lazy_through_atomic_workstream_switch(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            manager, *_rest = self.make_manager(root)
+            lazy = FakeLazyThreads(root / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.activate_grouped_workstream(
+                workstream_id="project-mmtx",
+                confirmed=True,
+            )
+
+            result = human_adam_profile_switch_action(
+                {"profile_id": "knihovna", "confirmed": True},
+                service=manager,
+            )
+            persisted = json.loads(
+                (root / "active-profile.json").read_text(encoding="utf-8")
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(manager.active_workstream_id, "project-knowledge-library")
+        self.assertEqual(manager.active_profile_id, "knihovna")
+        self.assertEqual(lazy.close_calls, ["project-mmtx"])
+        self.assertEqual(
+            persisted["active_workstream_id"],
+            "project-knowledge-library",
+        )
+
     def test_switch_prepares_target_and_persists_profile_without_thread_mix(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -1695,7 +1960,12 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(library_workspace.prepare_count, 1)
         self.assertEqual(human_hub.close_count, 1)
         self.assertTrue(library_hub.connected)
-        self.assertEqual(persisted["active_profile_id"], "knihovna")
+        self.assertEqual(persisted["schema_version"], 2)
+        self.assertEqual(
+            persisted["active_workstream_id"],
+            "project-knowledge-library",
+        )
+        self.assertNotIn("active_profile_id", persisted)
         self.assertNotIn("thread", str(persisted))
 
     def test_context_anchor_is_isolated_per_work_profile(self) -> None:

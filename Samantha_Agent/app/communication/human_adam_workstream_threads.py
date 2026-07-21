@@ -73,6 +73,41 @@ class WorkstreamThreadRegistry:
             raise AppServerError("Aktivní lazy pracovní proud se mezitím změnil.")
         return hub
 
+    def restore_active(self, *, workstream_id: str) -> dict[str, Any]:
+        """Restore one persisted selection without connecting or creating a thread."""
+
+        record = self._record(workstream_id)
+        if record.mode == "archived":
+            raise AppServerError("Archivovaný pracovní proud nelze obnovit jako aktivní.")
+        if record.workstream_id in self._reserved_ids:
+            raise AppServerError("Kompatibilní pracovní proud nepatří lazy registru.")
+        if not self._state_path(record.workstream_id).is_file():
+            raise AppServerError("Uložený aktivní proud nemá existující private session.")
+        with self._state_lock:
+            current_id = self._active_workstream_id
+        if current_id and current_id != record.workstream_id:
+            raise AppServerError("Lazy registr už vlastní jiný aktivní pracovní proud.")
+        hub = self._hub(record)
+        snapshot = hub.snapshot()
+        if snapshot.get("connected"):
+            raise AppServerError("Obnovená session nesmí být bez připojení označena jako živá.")
+        with self._state_lock:
+            self._active_workstream_id = record.workstream_id
+        return {
+            "ok": True,
+            "restored": True,
+            "workstream": {
+                "id": record.workstream_id,
+                "type": record.workstream_type,
+                "name": record.name,
+                "mode": record.mode,
+            },
+            "thread": {
+                "initialized": True,
+                "connected": False,
+            },
+        }
+
     def checkpoint_workstream_id(self) -> str:
         """Return the active ID only when its thread is safe to checkpoint."""
 

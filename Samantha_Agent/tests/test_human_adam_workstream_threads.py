@@ -156,6 +156,25 @@ class WorkstreamThreadRegistryTests(unittest.TestCase):
         self.assertEqual(self.events[-1], ("resume", "thread-1"))
         self.assertEqual(second.status()["initialized_count"], 1)
 
+    def test_restore_active_is_inert_and_requires_existing_session(self) -> None:
+        first = self.registry()
+        first.open(workstream_id="project-mmtx", confirmed=True)
+        first.close()
+        self.factory_calls.clear()
+        self.events.clear()
+        self.hubs.clear()
+        second = self.registry()
+
+        result = second.restore_active(workstream_id="project-mmtx")
+
+        self.assertTrue(result["restored"])
+        self.assertEqual(second.active_workstream_id, "project-mmtx")
+        self.assertEqual(self.factory_calls, ["project-mmtx"])
+        self.assertEqual(self.events, [])
+        self.assertFalse(self.hubs["project-mmtx"].snapshot()["connected"])
+        with self.assertRaisesRegex(AppServerError, "nemá existující"):
+            self.registry().restore_active(workstream_id="project-lekarna")
+
     def test_switch_disconnects_previous_and_keeps_one_connected_thread(self) -> None:
         registry = self.registry()
         registry.open(workstream_id="project-mmtx", confirmed=True)

@@ -94,7 +94,8 @@ KNIHOVNA_PROFILE_ROOT = PRIVATE_PROFILE_ROOT / "knihovna"
 KNIHOVNA_CONTEXT_ANCHOR_PATH = PRIVATE_COMMUNICATION_ROOT / "knihovna_context_anchor.json"
 KNIHOVNA_TVBCP_RELATIVE_PATH = Path("memory/tvbcp/knihovna_cockpit.txt")
 PROFILE_ID_RE = re.compile(r"[a-z][a-z0-9_-]{1,31}")
-PROFILE_STATE_SCHEMA = 1
+LEGACY_PROFILE_STATE_SCHEMA = 1
+WORKSTREAM_STATE_SCHEMA = 2
 DEPLOYMENT_COMPLETION_SCHEMA = 1
 DEPLOYMENT_COMPLETION_CONFIRMATION = "POTVRZUJI DOKONCENI HANDOFFU PO NASAZENI"
 WRITABLE_LAZY_WORKSTREAM_IDS = frozenset({"project-mmtx"})
@@ -237,36 +238,76 @@ class HumanAdamProfileManager:
         self._state_lock = threading.RLock()
         self._operation_lock = threading.Lock()
         self._state_error = ""
-        self._active_profile_id = self._load_active_profile_id()
+        self._active_profile_id, self._active_workstream_id = self._load_active_state()
 
-    def _load_active_profile_id(self) -> str:
+    def _load_active_state(self) -> tuple[str, str]:
+        default_workstream_id = self.workstream_backends.compatibility_workstream_id(
+            self.default_profile_id
+        )
         if not self.state_path.exists():
-            return self.default_profile_id
+            return self.default_profile_id, default_workstream_id
         try:
             raw = json.loads(self.state_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
-            self._state_error = "Stav pracovního profilu nelze bezpečně načíst."
-            return ""
-        if not isinstance(raw, dict) or raw.get("schema_version") != PROFILE_STATE_SCHEMA:
-            self._state_error = "Stav pracovního profilu má neznámé schéma."
-            return ""
-        profile_id = str(raw.get("active_profile_id") or "").strip()
-        if profile_id not in self.profiles:
-            self._state_error = "Stav odkazuje na neznámý pracovní profil."
-            return ""
-        return profile_id
+            self._state_error = "Stav pracovního proudu nelze bezpečně načíst."
+            return "", ""
+        if not isinstance(raw, dict):
+            self._state_error = "Stav pracovního proudu má neznámé schéma."
+            return "", ""
+        schema = raw.get("schema_version")
+        if schema == LEGACY_PROFILE_STATE_SCHEMA:
+            profile_id = str(raw.get("active_profile_id") or "").strip()
+            if profile_id not in self.profiles:
+                self._state_error = "Stav odkazuje na neznámý pracovní profil."
+                return "", ""
+            return (
+                profile_id,
+                self.workstream_backends.compatibility_workstream_id(profile_id),
+            )
+        if schema != WORKSTREAM_STATE_SCHEMA:
+            self._state_error = "Stav pracovního proudu má neznámé schéma."
+            return "", ""
+        workstream_id = str(raw.get("active_workstream_id") or "").strip()
+        try:
+            binding = self.workstream_backends.binding(workstream_id)
+        except AppServerError:
+            self._state_error = "Stav odkazuje na neznámý pracovní proud."
+            return "", ""
+        adapter = binding.compatibility_adapter
+        if adapter is not None:
+            return adapter.profile_id, binding.record.workstream_id
+        if self.workstream_threads is None:
+            self._state_error = "Lazy aktivní proud nemá dostupný private backend."
+            return "", ""
+        try:
+            self.workstream_threads.restore_active(
+                workstream_id=binding.record.workstream_id
+            )
+        except (AppServerError, OSError, ValueError) as exc:
+            self._state_error = str(exc)
+            return "", ""
+        return self.default_profile_id, binding.record.workstream_id
 
-    def _write_active_profile_id(self, profile_id: str) -> None:
+    def _write_active_workstream_id(self, workstream_id: str) -> str:
+        binding = self.workstream_backends.binding(workstream_id)
+        canonical_id = binding.record.workstream_id
         atomic_write_json(
             self.state_path,
             {
-                "schema_version": PROFILE_STATE_SCHEMA,
-                "active_profile_id": profile_id,
+                "schema_version": WORKSTREAM_STATE_SCHEMA,
+                "active_workstream_id": canonical_id,
                 "updated_at": _now(),
             },
             ensure_ascii=False,
             indent=2,
         )
+        return canonical_id
+
+    def _set_active_workstream_id_unlocked(self, workstream_id: str) -> None:
+        canonical_id = self._write_active_workstream_id(workstream_id)
+        with self._state_lock:
+            self._active_workstream_id = canonical_id
+            self._state_error = ""
 
     @property
     def active_profile_id(self) -> str:
@@ -324,12 +365,20 @@ class HumanAdamProfileManager:
 
     @property
     def active_workstream_id(self) -> str:
-        lazy_id = self.active_lazy_workstream_id
-        if lazy_id:
-            return lazy_id
-        return self.workstream_backends.compatibility_workstream_id(
-            self.active_profile_id
-        )
+        with self._state_lock:
+            if self._state_error or not self._active_workstream_id:
+                raise AppServerError(
+                    self._state_error or "Aktivní pracovní proud není známý."
+                )
+            workstream_id = self._active_workstream_id
+        binding = self.workstream_backends.binding(workstream_id)
+        adapter = binding.compatibility_adapter
+        if adapter is not None:
+            if self.active_lazy_workstream_id or self.active_profile_id != adapter.profile_id:
+                raise AppServerError("Aktivní kompatibilní proud nemá konzistentní backend.")
+        elif self.active_lazy_workstream_id != workstream_id:
+            raise AppServerError("Aktivní lazy proud nemá konzistentní backend.")
+        return workstream_id
 
     def service_for_profile(self, profile_id: str) -> HumanAdamService:
         clean_id = str(profile_id or "").strip()
@@ -2048,10 +2097,21 @@ class HumanAdamProfileManager:
             and not HumanAdamProfileManager._has_uncertain_delivery(target_session)
         )
 
-    def _switch_unlocked(self, target_id: str) -> dict[str, Any]:
+    def _switch_unlocked(
+        self,
+        target_id: str,
+        *,
+        persist_active_workstream: bool = True,
+    ) -> dict[str, Any]:
         current_id = self.active_profile_id
+        target_workstream_id = self.workstream_backends.compatibility_workstream_id(
+            target_id
+        )
         if target_id == current_id:
-            return {**self.status(), "switched": False}
+            if persist_active_workstream:
+                self._set_active_workstream_id_unlocked(target_workstream_id)
+                return {**self.status(), "switched": False}
+            return {"ok": True, "switched": False}
         current = self.profiles[current_id]["service"]
         target = self.profiles[target_id]["service"]
         self._assert_session_can_leave(current.hub.snapshot())
@@ -2064,7 +2124,8 @@ class HumanAdamProfileManager:
         )
         try:
             current.hub.close()
-            self._write_active_profile_id(target_id)
+            if persist_active_workstream:
+                self._set_active_workstream_id_unlocked(target_workstream_id)
         except Exception:
             try:
                 target.hub.close()
@@ -2074,7 +2135,9 @@ class HumanAdamProfileManager:
         with self._state_lock:
             self._active_profile_id = target_id
             self._state_error = ""
-        return {**self.status(), "switched": True}
+        if persist_active_workstream:
+            return {**self.status(), "switched": True}
+        return {"ok": True, "switched": True}
 
     def _grouped_workstream_row(self, workstream_id: str) -> dict[str, Any]:
         selection = self.grouped_workstream_status()
@@ -2101,28 +2164,39 @@ class HumanAdamProfileManager:
         if threads is None:
             raise AppServerError("Soukromé vlákno pracovního proudu není dostupné.")
         original_profile_id = self.active_profile_id
-        if original_profile_id != self.default_profile_id:
-            self._switch_unlocked(self.default_profile_id)
         shared = self.profiles[self.default_profile_id]["service"]
-        self._assert_session_can_leave(shared.hub.snapshot())
-        self._assert_workspace_can_leave(shared.workspace.status())
-        self._prepare_profile_workspace_unlocked(shared)
-        shared.connect(
-            recover_unreachable_runtime=self._target_recovery_allowed(shared)
-        )
-        shared.hub.close()
         try:
-            return threads.open(workstream_id=workstream_id, confirmed=True)
+            if original_profile_id != self.default_profile_id:
+                self._switch_unlocked(
+                    self.default_profile_id,
+                    persist_active_workstream=False,
+                )
+            self._assert_session_can_leave(shared.hub.snapshot())
+            self._assert_workspace_can_leave(shared.workspace.status())
+            self._prepare_profile_workspace_unlocked(shared)
+            shared.connect(
+                recover_unreachable_runtime=self._target_recovery_allowed(shared)
+            )
+            shared.hub.close()
+            result = threads.open(workstream_id=workstream_id, confirmed=True)
+            self._set_active_workstream_id_unlocked(workstream_id)
+            return result
         except Exception as target_error:
             try:
-                shared.connect(
-                    recover_unreachable_runtime=self._target_recovery_allowed(shared)
-                )
-                if original_profile_id != self.default_profile_id:
-                    self._switch_unlocked(original_profile_id)
+                if threads.active_workstream_id == workstream_id:
+                    threads.close_active(confirmed=True)
+                if self.active_profile_id == self.default_profile_id:
+                    shared.connect(
+                        recover_unreachable_runtime=self._target_recovery_allowed(shared)
+                    )
+                if self.active_profile_id != original_profile_id:
+                    self._switch_unlocked(
+                        original_profile_id,
+                        persist_active_workstream=False,
+                    )
             except Exception as rollback_error:
                 raise AppServerError(
-                    "Cílový proud se nepřipojil a původní legacy proud nelze obnovit."
+                    "Cílový proud se nepřipojil a původní kompatibilní proud nelze obnovit."
                 ) from rollback_error
             raise target_error
 
@@ -2135,10 +2209,14 @@ class HumanAdamProfileManager:
         if threads is None:
             raise AppServerError("Původní lazy proud nelze obnovit.")
         if self.active_profile_id != self.default_profile_id:
-            self._switch_unlocked(self.default_profile_id)
+            self._switch_unlocked(
+                self.default_profile_id,
+                persist_active_workstream=False,
+            )
         shared = self.profiles[self.default_profile_id]["service"]
         shared.hub.close()
         threads.open(workstream_id=workstream_id, confirmed=True)
+        self._set_active_workstream_id_unlocked(workstream_id)
 
     def _activate_legacy_from_lazy_unlocked(
         self,
@@ -2165,6 +2243,9 @@ class HumanAdamProfileManager:
             if profile_id == self.default_profile_id:
                 target.connect(
                     recover_unreachable_runtime=self._target_recovery_allowed(target)
+                )
+                self._set_active_workstream_id_unlocked(
+                    self.workstream_backends.compatibility_workstream_id(profile_id)
                 )
                 return {**self.status(), "switched": True}
             return self._switch_unlocked(profile_id)
@@ -2229,7 +2310,24 @@ class HumanAdamProfileManager:
                     threads.checkpoint_workstream_id()
                     shared = self.profiles[self.default_profile_id]["service"]
                     self._prepare_profile_workspace_unlocked(shared)
-                    threads.open(workstream_id=clean_id, confirmed=True)
+                    try:
+                        threads.open(workstream_id=clean_id, confirmed=True)
+                        self._set_active_workstream_id_unlocked(clean_id)
+                    except Exception as target_error:
+                        if (
+                            previous_lazy_id != clean_id
+                            and threads.active_workstream_id == clean_id
+                        ):
+                            try:
+                                threads.open(
+                                    workstream_id=previous_lazy_id,
+                                    confirmed=True,
+                                )
+                            except Exception as rollback_error:
+                                raise AppServerError(
+                                    "Cílový lazy proud nelze uložit a původní proud nelze obnovit."
+                                ) from rollback_error
+                        raise target_error
                 else:
                     self._open_lazy_from_legacy_unlocked(workstream_id=clean_id)
             selection = self.grouped_workstream_status()
@@ -2255,6 +2353,13 @@ class HumanAdamProfileManager:
             raise AppServerError("Přepnutí pracovního profilu vyžaduje výslovné potvrzení.")
         if target_id not in self.profiles:
             raise AppServerError("Požadovaný pracovní profil neexistuje.")
+        if self.active_lazy_workstream_id:
+            return self.activate_grouped_workstream(
+                workstream_id=self.workstream_backends.compatibility_workstream_id(
+                    target_id
+                ),
+                confirmed=True,
+            )
         if DEPLOYMENT_LOCK.locked():
             raise SessionBusyError("Profil nelze přepnout během auditu nebo nasazení.")
         if not self._operation_lock.acquire(blocking=False):
