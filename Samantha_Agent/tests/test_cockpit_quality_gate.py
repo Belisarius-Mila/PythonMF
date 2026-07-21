@@ -89,6 +89,15 @@ async def second():
         self.assertTrue(any("app/cockpit.py" in message for message in messages))
         self.assertTrue(any("app/speech/adam_voice_mode.py" in message for message in messages))
 
+    def test_orphaned_human_adam_deploy_module_is_absent(self) -> None:
+        legacy_source = "app/communication/human_adam_deploy.py"
+        legacy_test = "tests.test_human_adam_deploy"
+
+        self.assertNotIn(legacy_source, COMPILE_PATHS)
+        self.assertNotIn(legacy_test, TEST_MODULES)
+        self.assertFalse((PROJECT_ROOT / legacy_source).exists())
+        self.assertFalse((PROJECT_ROOT / "tests/test_human_adam_deploy.py").exists())
+
     def test_cockpit_javascript_source_extracts_rendered_script(self) -> None:
         source = cockpit_javascript_source()
 
