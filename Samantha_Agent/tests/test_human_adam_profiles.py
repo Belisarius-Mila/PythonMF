@@ -1025,9 +1025,36 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
 
         self.assertEqual(tvbcp["content"], "# TVBCP: MMTX\n")
         self.assertEqual(tvbcp["relative_path"], binding.tvbcp_relative_path)
+        self.assertTrue(tvbcp["initialized"])
+        self.assertTrue(tvbcp["read_only"])
+        self.assertEqual(tvbcp["source"], "isolated_workspace")
         self.assertFalse(development["can_acquire_profile"])
         self.assertFalse(development["can_checkpoint"])
         self.assertFalse(development["can_deploy"])
+
+    def test_lazy_tvbcp_previews_canonical_template_without_creating_file(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, *_rest = self.make_manager(Path(temp_dir))
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            binding = manager.workstream_memory.binding("project-mmtx")  # type: ignore[union-attr]
+            tvbcp_path = human_workspace.project_root / binding.tvbcp_relative_path
+            human_adam_profile_switch_action(
+                {"workstream_id": "project-mmtx", "confirmed": True},
+                service=manager,
+            )
+
+            tvbcp = manager.tvbcp()
+            tvbcp_created = tvbcp_path.exists()
+
+        self.assertFalse(tvbcp_created)
+        self.assertFalse(tvbcp["initialized"])
+        self.assertTrue(tvbcp["read_only"])
+        self.assertEqual(tvbcp["source"], "canonical_template")
+        self.assertEqual(tvbcp["modified_at"], "")
+        self.assertEqual(tvbcp["relative_path"], binding.tvbcp_relative_path)
+        self.assertIn("# TVBCP: MMTX", tvbcp["content"])
+        self.assertIn("Prvni zaznam prida potvrzeny checkpoint", tvbcp["content"])
 
     def test_mmtx_pilot_completes_canonical_lazy_checkpoint(self) -> None:
         receipt = (

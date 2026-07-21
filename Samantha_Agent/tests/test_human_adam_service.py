@@ -756,6 +756,8 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertEqual(result["source"], "isolated_workspace")
         self.assertEqual(result["relative_path"], CANONICAL_TVBCP_RELATIVE_PATH.as_posix())
         self.assertIn("Kanonická smlouva", result["content"])
+        self.assertTrue(result["initialized"])
+        self.assertTrue(result["read_only"])
         self.assertFalse(result["workspace_dirty"])
 
     def test_work_review_lists_paths_without_file_contents(self) -> None:

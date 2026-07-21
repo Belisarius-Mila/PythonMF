@@ -1747,7 +1747,10 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       tvbcpContent.textContent = payload.content || "";
       const workState = payload.workspace_dirty ? `pracovní kopie má ${payload.workspace_change_count} změn` : "pracovní kopie je čistá";
       const syncState = payload.sync_available ? " · čeká na aktualizaci z main" : "";
-      tvbcpMeta.textContent = `Pracovní TVBCP · ${workState}${syncState} · změněno ${formatTime(payload.modified_at)}`;
+      const initializationState = payload.initialized === false
+        ? "Dosud neinicializováno · pouze pro čtení"
+        : `změněno ${formatTime(payload.modified_at)}`;
+      tvbcpMeta.textContent = `Pracovní TVBCP · ${workState}${syncState} · ${initializationState}`;
       scrollTvbcpToEnd();
     } catch (error) {
       tvbcpContent.textContent = "";

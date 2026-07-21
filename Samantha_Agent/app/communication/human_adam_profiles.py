@@ -1154,7 +1154,16 @@ class HumanAdamProfileManager:
         }
 
     def tvbcp(self) -> dict[str, Any]:
-        return self.active_service.tvbcp()
+        service = self.active_service
+        lazy_id = self.active_lazy_workstream_id
+        if not lazy_id:
+            return service.tvbcp()
+        if self.workstream_memory is None:
+            raise AppServerError("Lazy pracovní proud nemá kanonickou paměťovou vazbu.")
+        binding = self.workstream_memory.binding(lazy_id)
+        return service.tvbcp(
+            initial_content=self.workstream_memory.initial_tvbcp(binding),
+        )
 
     def context_anchor(self, *, include_content: bool = True) -> dict[str, Any]:
         return self.active_service.context_anchor(include_content=include_content)

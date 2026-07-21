@@ -435,6 +435,15 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('profileSelect.addEventListener("change", syncControls);', HUMAN_ADAM_HTML)
         self.assertIn('profileSwitchBtn.addEventListener("click", switchProfile);', HUMAN_ADAM_HTML)
 
+    def test_uninitialized_lazy_tvbcp_is_marked_read_only(self) -> None:
+        load_start = HUMAN_ADAM_HTML.index("async function loadTvbcp()")
+        load_end = HUMAN_ADAM_HTML.index("function openTvbcp()", load_start)
+        source = HUMAN_ADAM_HTML[load_start:load_end]
+
+        self.assertIn("payload.initialized === false", source)
+        self.assertIn("Dosud neinicializováno · pouze pro čtení", source)
+        self.assertIn("tvbcpContent.textContent = payload.content", source)
+
     def test_context_anchor_is_explicit_editable_and_profile_scoped_in_ui(self) -> None:
         panel_start = HUMAN_ADAM_HTML.index('id="contextAnchorPanel"')
         panel_end = HUMAN_ADAM_HTML.index('</aside>', panel_start)

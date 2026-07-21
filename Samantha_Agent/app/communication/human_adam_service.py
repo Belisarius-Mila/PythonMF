@@ -607,7 +607,7 @@ class HumanAdamService:
             "previous_thread_preserved": True,
         }
 
-    def tvbcp(self) -> dict[str, Any]:
+    def tvbcp(self, *, initial_content: str = "") -> dict[str, Any]:
         workspace = self.workspace.status()
         if not workspace.get("prepared") or not workspace.get("project_ready"):
             raise AppServerError("Izolovaný workspace s projektovým TVBCP není připravený.")
@@ -615,15 +615,24 @@ class HumanAdamService:
             raise AppServerError("TVBCP nelze číst z workspace s neočekávaným Git remote.")
         project_root = self.workspace.project_root.resolve()
         path = (project_root / self.tvbcp_relative_path).resolve()
-        if project_root not in path.parents or not path.is_file():
+        if project_root not in path.parents:
             raise AppServerError("Kanonický projektový TVBCP nebyl nalezen.")
-        try:
-            content = path.read_text(encoding="utf-8")
-            modified_at = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).replace(
-                microsecond=0
-            ).isoformat()
-        except OSError as exc:
-            raise AppServerError("Kanonický projektový TVBCP nelze bezpečně přečíst.") from exc
+        initialized = path.is_file()
+        if path.exists() and not initialized:
+            raise AppServerError("Kanonický projektový TVBCP nebyl nalezen.")
+        if initialized:
+            try:
+                content = path.read_text(encoding="utf-8")
+                modified_at = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).replace(
+                    microsecond=0
+                ).isoformat()
+            except OSError as exc:
+                raise AppServerError("Kanonický projektový TVBCP nelze bezpečně přečíst.") from exc
+        else:
+            content = str(initial_content or "")
+            modified_at = ""
+            if not content:
+                raise AppServerError("Kanonický projektový TVBCP nebyl nalezen.")
         if len(content) > MAX_TVBCP_CHARS:
             raise AppServerError("Kanonický projektový TVBCP překročil bezpečný limit zobrazení.")
         return {
@@ -631,8 +640,10 @@ class HumanAdamService:
             "title": self.tvbcp_title,
             "content": content,
             "modified_at": modified_at,
-            "source": "isolated_workspace",
+            "source": "isolated_workspace" if initialized else "canonical_template",
             "relative_path": self.tvbcp_relative_path.as_posix(),
+            "read_only": True,
+            "initialized": initialized,
             "workspace_dirty": bool(workspace.get("dirty")),
             "workspace_change_count": int(workspace.get("change_count") or 0),
             "sync_available": bool(workspace.get("source_update_available")),
