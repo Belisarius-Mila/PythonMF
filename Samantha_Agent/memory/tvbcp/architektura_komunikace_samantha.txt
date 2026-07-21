@@ -2254,3 +2254,32 @@ simple-main deploymentu osiřelé, ale jejich producent a finalizace mají vět�
 zapisovací, Git a semaphore rozsah. Jejich případné odstranění patří do
 samostatného read-only kroku 4.5g-c2. Audit nic neměnil, nenasazoval ani
 nerestartoval; `main` byl čistý a synchronní s `origin/main` na `4566fd0`.
+
+### 2026-07-21 22:37 CEST – Uzavření legacy deployment subsystému 4.5g-c1 až c2f1
+
+Požadavek: srovnat projektovou paměť se skutečně dokončeným stavem po
+odstranění zavádějících veřejných profilových metadat a osiřelého
+deployment-completion subsystému, bez funkční změny, private zápisu,
+nasazení nebo restartu.
+
+Implementace: oddělené fáze odstranily veřejná `active_profile_*` pole,
+starý completion endpoint a UI, action surface, legacy readery, servisní
+vazby a nakonec `human_adam_deploy.py` s jeho testem. Deployment evidence je
+kanonicky v simple-main receiptu. Interní kompatibilní identity, schema 1,
+private session a workspaces zůstaly beze změny.
+
+Důkaz: nasazený checkpoint `23a219e` prošel vzdálenou Cockpit Quality Gate,
+lokální branou s 969 testy, potvrzením nového procesu a smoke `5/5`.
+Závěrečný read-only audit nenašel žádný živý import, route, registraci ani
+reader odstraněného modulu; čtyři negativní kontraktní testy prošly, HTTP
+stránka vrátila 200 a starý endpoint 404. Míla následně potvrdil funkční
+panel `Práce`. Main, Human–Adam a Knihovna jsou čisté a zarovnané.
+
+Zbývající hranice: ignorované `.pyc` cache, šest osiřelých private JSON sad
+s locky a historický název aktivního gate logu nebyly mazány ani
+přejmenovány. Běžný Python import staré cache nenachází a tracked kód nemá
+reader private legacy dat.
+
+Další krok: po tematickém commitu a pushi tohoto dokumentačního uzavření
+otevřít pouze samostatný read-only audit případné další migrace. Fyzické
+mazání cache nebo private historie vyžaduje nový audit a výslovný souhlas.

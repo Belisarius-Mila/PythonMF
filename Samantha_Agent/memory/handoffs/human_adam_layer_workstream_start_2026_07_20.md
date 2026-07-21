@@ -1020,3 +1020,66 @@ Bezpecnost / neukladat:
   dohody.
 - Neukládat private thread ID, identity hash, obsah zpráv, tokeny ani private
   cesty.
+
+### 2026-07-21 22:37 CEST – Dokumentační uzavření fází 4.5g-c1 až c2f1
+
+Nazev: Univerzální pracovní proudy – uzavření legacy deployment subsystému
+Priorita: 1
+Stav: hotovo
+Pripomenout pri startu: ano
+Datum: 2026-07-21
+
+Co se resilo:
+Po odstranění zavádějících veřejných profilových metadat byl po malých
+auditovaných krocích odpojen a odstraněn osiřelý deployment-completion
+subsystém. Závěrečný read-only audit a Mílův ruční test nyní dovolují
+srovnat kanonickou projektovou paměť se skutečným stavem.
+
+Co je hotove:
+- Veřejný semaphore status už nevrací `active_profile_id` ani
+  `active_profile_label`; interní ownership kontrakty zůstaly zachované.
+- Starý deployment-completion endpoint, UI karta, action surface a legacy
+  readery byly odstraněny. Deployment evidence patří pouze simple-main
+  receiptu.
+- Sdílená checkpoint quality gate a bezpečná read-only šablona TVBCP pro
+  dosud neinicializovaný lazy proud zůstávají živé a samostatné.
+- Servisní vazby starého deploymentu byly odpojeny bez zásahu do kompatibilních
+  adaptérů, workspace ownership, rollbacku, schématu 1 nebo private session.
+- `human_adam_deploy.py` a `test_human_adam_deploy.py` byly odstraněny.
+- Checkpoint `23a219e` prošel vzdálenou Cockpit Quality Gate a řízené nasazení
+  zopakovalo plnou bránu s 969 testy; nový proces a smoke `5/5` byly potvrzeny.
+- Závěrečný audit nenašel žádný živý import, route, registraci ani reader
+  starého subsystému. HTTP stránka i negativní kontrakty prošly a Míla
+  potvrdil funkční panel `Práce`.
+- Main, Human–Adam a Knihovna jsou čisté a zarovnané na `23a219e`.
+
+Co neni hotove:
+- Tento dokumentační checkpoint zatím není commitnutý ani pushnutý.
+- Ignorované `.pyc` cache odstraněného modulu, šest osiřelých private JSON
+  sad s locky a historicky pojmenovaný aktivní gate log nebyly smazány ani
+  přejmenovány.
+- Interní kompatibilní profilové identity a čtení migračního schématu 1
+  nebyly měněny.
+
+Dalsi krok:
+Po samostatném commitu a pushi tohoto čtyřsouborového dokumentačního
+checkpointu otevřít novou read-only hranici pro případnou další migraci.
+Nespojovat ji s mazáním private artefaktů ani s přejmenováním gate logu.
+
+Navrhovane dalsi kroky:
+- Jako samostatnou fázi lze auditovat, zda je ještě potřebné čtení schématu 1
+  a interní profilově pojmenované kompatibilní identity.
+- Fyzický cleanup ignorovaných cache nebo private historických dat provést
+  pouze po novém read-only auditu a Mílově výslovném souhlasu s mazáním.
+
+Zmenene nebo relevantni soubory:
+- `ACTIVE_PROJECTS.md`
+- `MEMORY_INDEX.md`
+- `human_adam_layer_workstream_start_2026_07_20.md`
+- `architektura_komunikace_samantha.txt`
+
+Bezpecnost / neukladat:
+- Nemazat ani nemigrovat private data, session, workspaces nebo cache v tomto
+  dokumentačním kroku.
+- Neukládat private thread ID, identity hash, obsah zpráv, tokeny ani private
+  cesty.

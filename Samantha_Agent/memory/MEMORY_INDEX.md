@@ -112,50 +112,21 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 ## Handoffs
 
 - `handoffs/human_adam_layer_workstream_start_2026_07_20.md` - [PRIPOMENOUT]
-  priorita 1: read-only audit faze 4.5g-c oddelil dve zavadejici verejna
-  metadata semaforu `active_profile_id` a `active_profile_label` od zivych
-  internich bezpecnostnich identit. Pri MMTX vydavaji kanonicky
-  `project-mmtx` za profil a Cockpit UI je necte. `owner_id`, interni
-  `active_profile_id`, kompatibilni adaptery Human–Adam/Knihovna a cteni
-  migracniho schematu 1 zustavaji zive a nesmi se hromadne prejmenovat ani
-  odstranit. Stary deployment-completion endpoint a UI jsou osirely proti
-  aktualnimu simple-main deploymentu, ale patri do samostatneho kroku. Dalsi
-  krok 4.5g-c1 ma odstranit pouze obe verejna `active_profile_*` pole a pridat
-  negativni kontraktni testy, zatim bez nasazeni a bez migrace private dat.
-  Historie: krok 0 transformace Human–Adam zacal zalozenim kanonickeho
-  pracovniho proudu `Human–Adam / vyvojove prostredi` typu `Layer`. Stary
-  projektovy zaznam zustava docasnym kompatibilnim mostem a zadny funkcni kod
-  se nezmenil. Stavajici TVBCP architektury komunikace je potvrzen a propojen;
-  novy jednoduchy model i nahrazena starsi pravidla jsou zapsane. Read-only
-  baseline potvrdil Cockpit smoke 5/5, UI, app-server, vlakno a ciste profilove
-  workspaces; oba profily pouze cekaji na synchronizaci novych pametovych
-  checkpointu. Regresni baseline nasledne prosla Python a JavaScript syntaxi,
-  plnou sadou 856 testu a zivym smoke testem 5/5. Krok 0 byl commitnut a pushnut
-  v `e64b0c5`; aktivni Knihovna se pote zarovnala pres `Pripojit`. Faze 1.1
-  pripravila samostatny neaktivni backend jednoho checkpointu primo do
-  `main`: bez nove vetve a semaforu, s automatickym TVBCP + handoffem, plnou
-  branou a zarovnanim workspace. Faze 1.2 jej napojila na profilovy manager:
-  ID proudu, typ, handoff a TVBCP se berou vyhradne z kanonicke konfigurace
-  aktivniho profilu, ne z klienta. Human–Adam je navazan na svuj Layer,
-  neregistrovana Knihovna konci fail-closed. Plna sada 866 testu prosla; API,
-  UI a runtime zustavaji beze zmeny. Faze 1.3 nyni registruje `Layer`
-  Human–Adam a `Project` Knihovna, preklada proud na existujici profil a pri
-  vyberu pouziva proverene ochranne a synchronizacni chovani profilu. Roundtrip
-  obema smery, 38 cilenych testu, plna sada 870 testu a smoke 5/5 prosly. API a
-  UI zustaly ve fazi 1.3 beze zmeny. Faze 1.4 nyni napojila stejny vyber na
-  koordinator: polozky jdou z `workstream_selection`, endpoint prijima
-  `workstream_id` a stary `profile_id` zustava fallbackem. Vzhled se nezmenil;
-  93 cilenych a 871 plnych testu proslo. Commit `6f17852` je nasazeny na stampu
-  `7a4440b979d98690`, smoke 5/5 a zivy endpointovy roundtrip obema smery prosly;
-  oba workspaces jsou ciste a zarovnane; Mila potom potvrdil i vizualni kliknuti
-  obema smery. Faze 1.5 pridava private dokončovaci uctenku uspesneho
-  zapisovaciho tahu a automaticky direct-main cyklus testy -> handoff + TVBCP ->
-  commit -> push -> synchronizace cistych profilu. Neplatny nebo chybejici
-  doklad nic necommitne. UI ani API cesta se nezmenily. Pred checkpointem byla
-  navic opravena GitHub Actions regrese casove zony: zapis je vzdy v
-  `Europe/Prague`; 59 cilenych testu vcetne UTC runner pripadu a finalni plna
-  brana 880 testu prosly. Commit `4bfd7fc` je pushnuty a stejny commit prosel i
-  skutecnou GitHub Cockpit Quality Gate; zmena ceka na samostatne nasazeni.
+  priorita 1: transformace verejneho modelu na kanonicke pracovni proudy je po
+  fazich 4.5g-c1 az c2f funkcne uzavrena. Zavadejici verejna
+  `active_profile_*` metadata, osirely deployment-completion endpoint, UI
+  karta, action surface, legacy readery a jejich servisni vazby byly odstraneny
+  v oddelenych bezpecnych krocich. Deployment evidence nyni vlastni pouze
+  simple-main receipt; `human_adam_deploy.py` a jeho test uz nejsou v Gitu ani
+  importovatelne. Nasazeny checkpoint `23a219e` prosel vzdalenou Cockpit Quality
+  Gate, lokalni branou s 969 testy, novym procesem a smoke `5/5`; Mila nasledne
+  potvrdil funkcni panel `Prace`. Zaverecny read-only audit potvrdil ciste a
+  zarovnane main, Human–Adam i Knihovna a zadny zivy call-site stareho modulu.
+  Historicke TVBCP zaznamy zustavaji chronologii. Ignorovane `.pyc` cache, sest
+  osirelych private JSON sad s locky a nazev `human_adam_deploy_gate.log` nebyly
+  mazany ani prejmenovany. Interni kompatibilni identity, schema 1, private
+  session a workspaces zustavaji chranene; dalsi zasah musi zacit samostatnym
+  read-only auditem.
 
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni
