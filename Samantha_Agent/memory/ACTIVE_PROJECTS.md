@@ -41,17 +41,17 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
-- 2026-07-21: Priorita 1, univerzalni pracovni proudy faze 4.5e. Jednotny
-  `WorkstreamBackendRegistry` je autoritou backendu a sluzby pro vsech 29
-  kanonickych ID. Human–Adam a Knihovna zustavaji docasnymi kompatibilnimi
-  adaptery nad puvodnimi session, kotvami a workspaces; dalsich 27 proudu
-  pouziva lazy private-thread backend. Commit `6c1a2da`, vzdalene CI, rizene
-  nasazeni s 971 testy, smoke `5/5` a live roundtrip
-  `MMTX -> Human–Adam -> Knihovna -> MMTX` prosly. Identity vlaken i pocty zprav
-  zustaly zachovane, vsechny workspaces jsou ciste a zarovnane a aktivni je
-  pripojene MMTX. Dalsi krok je faze 4.5f: jedna perzistentni autorita
-  `active_workstream_id` pro vsechny backendy, zatim bez mazani adapteru,
-  private stavu nebo profiloveho fallbacku. Handoff:
+- 2026-07-21: Priorita 1, univerzalni pracovni proudy faze 4.5f. Jedinou
+  perzistentni autoritou aktivniho proudu je nyni `active_workstream_id` ve
+  schematu 2; stare schema 1 zustava pouze bezpecnym migracnim vstupem a
+  potvrzeny vyber ho atomicky prepise bez kopirovani session. Commit `ccba6fe`
+  je pushnuty, vzdalena CI je zelena, serverove nasazeni proslo 980 testy a
+  smoke `5/5`. Samostatny rizeny restart zachoval aktivni MMTX, po startu je
+  spravne obnovil odpojene a explicitni pripojeni navazalo stejnou session se
+  stejnym poctem zprav. Adaptery Human–Adam/Knihovna, private data i profilovy
+  fallback zatim zustavaji. Dalsi krok je finalni live roundtrip
+  `MMTX -> Human–Adam -> Knihovna -> MMTX`; teprve potom faze 4.5g odstrani
+  verejny profilovy fallback a mrtvou dvouprofilovou konstrukci. Handoff:
   `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-20: Priorita 1, univerzalni pracovni proudy faze 4.3. Vsech 29 proudu
   ma jednu kanonickou git-safe vazbu na handoff a TVBCP. Human–Adam a Knihovna

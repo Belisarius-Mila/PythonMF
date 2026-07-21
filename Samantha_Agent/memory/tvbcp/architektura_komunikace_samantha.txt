@@ -2105,3 +2105,33 @@ profilový stav se v 4.5e nemažou ani nepřesouvají. Další krok je fáze 4.5
 zavést jednu perzistentní autoritu `active_workstream_id` pro všechny backendy,
 nejdřív s migračním testem a bez odstranění fallbacku; po nasazení znovu ověřit
 stejný tříproudový roundtrip.
+
+### 2026-07-21 09:09 CEST – Fáze 4.5f: jedna perzistentní autorita aktivního proudu
+
+Kanonické rozhodnutí: aktivní pracovní proud se napříč lazy backendy i
+kompatibilními adaptéry persistuje jedině jako `active_workstream_id` ve
+schématu 2. Staré schéma 1 s `active_profile_id` je pouze kompatibilní migrační
+vstup; pouhé načtení je inertní a první potvrzený výběr zapíše schéma 2
+atomicky bez přenosu starého profilového pole.
+
+Restartová sémantika lazy proudu je fail-closed. Pokud kanonický proud nemá
+existující private session, je archivovaný, rezervovaný nebo koliduje s jiným
+aktivním proudem, obnovení se odmítne. Platná existující session se po startu
+materializuje pouze jako vybraná a odpojená: nevzniká nové vlákno, zpráva ani
+spojení. Připojení zůstává samostatnou výslovnou akcí.
+
+Commit `ccba6fe` prošel vzdálenou Cockpit Quality Gate za 2 minuty 32 sekund.
+Řízené nasazení po jednom bezpečně zastaveném přechodném remote refreshu prošlo
+novým úplným serverovým gate s 980 testy, změnou procesu a smoke testem `5/5`.
+Potvrzený výběr MMTX migroval private volbu na schéma 2. Následující samostatný
+řízený restart zachoval aktivní `project-mmtx`, obnovil je odpojené a explicitní
+`Připojit` navázalo tutéž session se stejným počtem zpráv bez nového vlákna,
+zprávy nebo aktivního tahu. Finálně je MMTX aktivní a připojené, workspace je
+čistý a `main` je shodný s `origin/main`.
+
+Bezpečnostní hranice: adaptéry Human–Adam/Knihovna, jejich private session,
+kotvy a workspaces ani veřejný profilový fallback se ve 4.5f nemažou. Další
+krok je tříproudový live roundtrip `MMTX -> Human–Adam -> Knihovna -> MMTX`
+přes schéma 2. Teprve po zachování všech tří identit a čistých workspace může
+samostatná fáze 4.5g odstranit veřejný profilový fallback a mrtvou
+dvouprofilovou konstrukci.

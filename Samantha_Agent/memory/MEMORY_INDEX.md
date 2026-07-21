@@ -3,7 +3,7 @@
 Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 - `ACTIVE_PROJECTS.md` - registr projektu a oblasti vcetne rezimu `active` / `paused` / `archived`, priorit, stavu, handoffu a dalsich kroku.
-- `WORKSTREAMS.md` - kanonicky registr 29 pracovnich proudu: 23 projektu, 4 tooly a 2 `Misc`. Faze 4.2 pridala lazy soukroma vlakna, faze 4.3 jejich handoff/TVBCP vazby a faze 4.5e jednotny backendovy registr. Human–Adam a Knihovna jsou docasne kompatibilni adaptery nad svymi puvodnimi session a workspaces; ostatnich 27 proudu pouziva lazy private-thread backend. Aktivni zustalo MMTX po zelenem tříproudovem roundtripu.
+- `WORKSTREAMS.md` - kanonicky registr 29 pracovnich proudu: 23 projektu, 4 tooly a 2 `Misc`. Faze 4.2 pridala lazy soukroma vlakna, faze 4.3 jejich handoff/TVBCP vazby, faze 4.5e jednotny backendovy registr a faze 4.5f jednu perzistentni autoritu `active_workstream_id` ve schematu 2. Human–Adam a Knihovna jsou docasne kompatibilni adaptery nad svymi puvodnimi session a workspaces; ostatnich 27 proudu pouziva lazy private-thread backend. Restartovy proof zachoval aktivni MMTX a explicitni reconnect obnovil stejnou session bez nove zpravy.
 
 ## Core
 
@@ -112,13 +112,14 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 ## Handoffs
 
 - `handoffs/human_adam_layer_workstream_start_2026_07_20.md` - [PRIPOMENOUT]
-  priorita 1: faze 4.5e zavedla jednotny backendovy registr pro vsech 29
-  proudu. Human–Adam a Knihovna jsou kompatibilni adaptery, ktere zachovavaji
-  puvodni session, kotvy a workspaces; 27 ostatnich proudu zustava lazy.
-  Commit `6c1a2da`, vzdalene CI, nasazeni s 971 testy, smoke `5/5` a live
-  roundtrip `MMTX -> Human–Adam -> Knihovna -> MMTX` prosly se zachovanymi
-  identitami. Dalsi krok je faze 4.5f: jedna perzistentni autorita
-  `active_workstream_id`, zatim bez mazani adapteru nebo private stavu.
+  priorita 1: faze 4.5f zavedla schema 2 s jedinou perzistentni autoritou
+  `active_workstream_id`; schema 1 zustava jen migracnim vstupem. Commit
+  `ccba6fe`, zelene CI, nasazeni s 980 testy, smoke `5/5` a samostatny rizeny
+  restart prosly. MMTX zustalo aktivni, po restartu bylo bezpecne odpojene a
+  explicitni reconnect obnovil stejnou session i pocet zprav. Dalsi krok je
+  finalni live roundtrip `MMTX -> Human–Adam -> Knihovna -> MMTX`; az potom
+  faze 4.5g odstrani verejny profilovy fallback a mrtvou dvouprofilovou
+  konstrukci. Adaptery ani private data se do te doby nemazou.
   Historie: krok 0 transformace Human–Adam zacal zalozenim kanonickeho
   pracovniho proudu `Human–Adam / vyvojove prostredi` typu `Layer`. Stary
   projektovy zaznam zustava docasnym kompatibilnim mostem a zadny funkcni kod

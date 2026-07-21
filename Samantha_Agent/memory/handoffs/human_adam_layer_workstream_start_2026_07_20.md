@@ -713,3 +713,67 @@ Bezpecnost / neukladat:
 - Neukládat private thread ID, obsah zpráv, kotvy, tokeny ani private cesty.
 - Nemazat ani nepřesouvat původní session Human–Adam/Knihovna během další
   migrace.
+
+### 2026-07-21 09:09 CEST – Checkpoint fáze 4.5f: perzistentní aktivní proud
+
+Nazev: Univerzální pracovní proudy – fáze 4.5f
+Priorita: 1
+Stav: hotovo
+Pripomenout pri startu: ano
+Datum: 2026-07-21
+
+Co se resilo:
+Dosavadní složená autorita aktivního legacy profilu a případného lazy proudu
+byla nahrazena jediným perzistentním `active_workstream_id`. Stejný kanonický
+identifikátor nyní používají lazy backendy i dočasné kompatibilní adaptéry
+Human–Adam a Knihovna.
+
+Co je hotove:
+- Private stav má schéma 2 a zapisuje jen kanonický `active_workstream_id`;
+  staré `active_profile_id` se do nového schématu nepřenáší.
+- Schéma 1 zůstává čitelné jako migrační vstup. Pouhé načtení je inertní a
+  migrace nastane až při potvrzeném výběru proudu.
+- Obnovení lazy proudu po startu pouze připojí existující private session k
+  manageru v odpojeném stavu. Nevytvoří nové vlákno, zprávu ani spojení.
+- Atomický router při chybě persistence obnoví původní backend, session i stav;
+  stale profilové pole nemůže přebít kanonické ID schématu 2.
+- Commit `ccba6fe` byl pushnutý na `main` a vzdálená Cockpit Quality Gate
+  skončila `success` za 2 minuty 32 sekund.
+- Řízené nasazení prošlo plnou serverovou branou 980 testů, novým procesem a
+  kanonickým smoke testem `5/5`. První pokus bezpečně skončil bez restartu při
+  přechodném selhání závěrečného refreshu `origin/main`; nový audit prokázal
+  přesnou shodu a opakovaný úplný průchod uspěl.
+- Potvrzený výběr MMTX provedl migraci na schéma 2. Samostatný restart změnil
+  PID, zachoval aktivní `project-mmtx` a obnovil je správně jako odpojené.
+  Explicitní `Připojit` navázalo stejnou session se stejným počtem dvou zpráv,
+  bez nové zprávy, vlákna nebo aktivního tahu.
+- Finální stav: MMTX je aktivní a připojené, workspace je čistý a zarovnaný,
+  `main` se shoduje s `origin/main` a živý smoke test je `5/5`.
+
+Co neni hotove:
+- Po schématu 2 ještě nebyl zopakován celý tříproudový roundtrip přes oba
+  kompatibilní adaptéry.
+- Veřejný profilový fallback, `work_profiles` kompatibilita a původní
+  dvouprofilová konstrukce zatím zůstávají.
+
+Dalsi krok:
+Provést read-only ohraničený live roundtrip
+`MMTX -> Human–Adam -> Knihovna -> MMTX` přes schéma 2 a ověřit, že se zachovaly
+identity, počty zpráv, čisté workspaces a finálně aktivní připojené MMTX.
+
+Navrhovane dalsi kroky:
+- Po zeleném tříproudovém roundtripu zahájit fázi 4.5g.
+- Ve fázi 4.5g odstranit veřejný profilový fallback a mrtvou dvouprofilovou
+  konstrukci samostatně, bez mazání private session nebo kompatibilních dat.
+
+Zmenene nebo relevantni soubory:
+- `human_adam_profiles.py`
+- `human_adam_workstream_threads.py`
+- `test_human_adam_profiles.py`
+- `test_human_adam_workstream_threads.py`
+- `human_adam_active_profile.json` – private stav, necommitovat
+
+Bezpecnost / neukladat:
+- Neukládat private thread ID, jeho hash, obsah zpráv, kotvy, tokeny ani private
+  cesty.
+- Nemazat ani nepřesouvat legacy private session během odstranění fallbacku.
