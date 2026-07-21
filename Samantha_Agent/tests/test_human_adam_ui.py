@@ -62,12 +62,6 @@ class HumanAdamUiTests(unittest.TestCase):
             "checkpointBtn",
             "deployMeta",
             "handoffTakeoverCheck",
-            "deploymentCompletionBox",
-            "deploymentCompletionMeta",
-            "deploymentCompletionEvidence",
-            "deploymentCompletionNextStep",
-            "deploymentCompletionConfirmation",
-            "deploymentCompletionBtn",
             "deployAuditBtn",
             "deployConfirmation",
             "deployBtn",
@@ -337,21 +331,11 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("deployBtn.disabled = true;", source)
         self.assertNotIn("check.blocking", source)
 
-    def test_post_restart_completion_requires_verified_evidence_and_exact_phrase(self) -> None:
-        start = HUMAN_ADAM_HTML.index("function renderDeploymentCompletion(payload)")
-        end = HUMAN_ADAM_HTML.index("function updateDevelopmentHandoffs", start)
-        source = HUMAN_ADAM_HTML[start:end]
-
-        self.assertIn('aria-label="Potvrzené dokončení handoffu po nasazení"', HUMAN_ADAM_HTML)
-        self.assertIn('api("/api/human-adam/deployment-completion")', source)
-        self.assertIn('method:"POST"', source)
-        self.assertIn("confirmation:deploymentCompletionConfirmation.value.trim()", source)
-        self.assertIn("next_step:deploymentCompletionNextStep.value.trim()", source)
-        self.assertIn("deploymentCompletion.ready === true", HUMAN_ADAM_HTML)
-        self.assertIn("deploymentCompletionConfirmation.value.trim() !== required", HUMAN_ADAM_HTML)
-        self.assertIn("Zapíší se pouze uvedená ověřená fakta", HUMAN_ADAM_HTML)
-        self.assertIn("textContent", source)
-        self.assertNotIn("innerHTML", source)
+    def test_orphaned_deployment_completion_ui_is_absent(self) -> None:
+        self.assertNotIn("/api/human-adam/deployment-completion", HUMAN_ADAM_HTML)
+        self.assertNotIn("deploymentCompletion", HUMAN_ADAM_HTML)
+        self.assertNotIn("deployment-completion-box", HUMAN_ADAM_HTML)
+        self.assertIn("/api/human-adam/deploy-verification", HUMAN_ADAM_HTML)
 
     def test_development_branch_lifecycle_ui_is_explicitly_read_only(self) -> None:
         start = HUMAN_ADAM_HTML.index("async function loadDevelopmentBranchAudit()")
@@ -409,7 +393,6 @@ class HumanAdamUiTests(unittest.TestCase):
             'class="project-continuity-box legacy-work-control"',
             'class="development-branch-audit-box legacy-work-control"',
             'class="handoff-proposal-box legacy-work-control"',
-            'class="deployment-completion-box legacy-work-control"',
             'class="legacy-work-control" id="checkpointMessage"',
             'class="primary legacy-work-control" id="checkpointBtn"',
             'class="legacy-work-control" id="handoffTakeoverCheck"',

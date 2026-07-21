@@ -247,36 +247,5 @@ class ProjectContinuityTests(unittest.TestCase):
         self.assertFalse(result["blocking"])
         self.assertNotIn("Handoff\n", str(result))
 
-    def test_deployment_completion_entry_contains_only_verified_safe_facts(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            service = self.make_project(Path(temp_dir))
-            result = service.deployment_completion_entry(
-                binding=self.binding(service),
-                checkpoint_head="c" * 40,
-                test_count=849,
-                deployed_at="2026-07-19T12:55:31+00:00",
-                next_step="Ručně ověřit novou kartu v Cockpitu.",
-            )
-
-        self.assertEqual(result["target_handoff"], "memory/handoffs/test_project.md")
-        self.assertIn("Stav: nasazeno", result["entry"])
-        self.assertIn("849 testů, OK", result["entry"])
-        self.assertIn("Smoke test: 5/5", result["entry"])
-        self.assertIn("Ručně ověřit", result["entry"])
-        self.assertNotIn("Handoff\n", result["entry"])
-
-    def test_deployment_completion_entry_rejects_multiline_next_step(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            service = self.make_project(Path(temp_dir))
-            with self.assertRaisesRegex(AppServerError, "jeden krátký řádek"):
-                service.deployment_completion_entry(
-                    binding=self.binding(service),
-                    checkpoint_head="d" * 40,
-                    test_count=849,
-                    deployed_at="2026-07-19T12:55:31+00:00",
-                    next_step="První řádek\ndruhý řádek",
-                )
-
-
 if __name__ == "__main__":
     unittest.main()

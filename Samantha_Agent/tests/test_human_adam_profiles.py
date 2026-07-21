@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import json
-import os
-import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -10,7 +8,6 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from app.communication.human_adam_profiles import (
-    DEPLOYMENT_COMPLETION_CONFIRMATION,
     HumanAdamProfileManager,
     human_adam_development_semaphore_action,
     human_adam_development_semaphore_status_action,
@@ -1568,89 +1565,6 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(warning["state"], "warning")
         self.assertFalse(warning["blocking"])
         self.assertFalse(warning["writes_performed"])
-
-    def test_confirmed_post_restart_completion_commits_pushes_and_releases(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            continuity, project_id, handoff_path = self.make_project_continuity(root)
-            manager, *_rest = self.make_manager(root, project_continuity=continuity)
-            (root / ".gitignore").write_text(
-                "human/\nlibrary/\nactive-profile.json\ndevelopment_semaphore.json\n"
-                "deployment_completion.json\n*.json.lock\nremote.git/\n",
-                encoding="utf-8",
-            )
-
-            def git(*args: str, cwd: Path = root) -> str:
-                completed = subprocess.run(
-                    ["/usr/bin/git", "-C", str(cwd), *args],
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
-                return completed.stdout.strip()
-
-            git("init")
-            git("config", "user.name", "Test Adam")
-            git("config", "user.email", "adam@example.invalid")
-            git("add", ".gitignore", "memory")
-            git("commit", "-m", "Create project")
-            git("branch", "-M", "main")
-            git("init", "--bare", str(root / "remote.git"))
-            git("remote", "add", "origin", str(root / "remote.git"))
-            git("push", "-u", "origin", "main")
-            checkpoint_head = git("rev-parse", "HEAD")
-            manager.change_development_semaphore(
-                operation="acquire_profile",
-                expected_revision=0,
-                topic="Potvrzené dokončení",
-                project_id=project_id,
-                handoff_path=handoff_path,
-                confirmed=True,
-            )
-            prepared = manager.prepare_deployment_completion(
-                profile_id="human_adam",
-                deployment_result={
-                    "checkpoint_token": checkpoint_head,
-                    "gate": {"test_count": 849},
-                    "deployment_confirmation": {
-                        "completed_at": "2026-07-19T12:55:31+00:00"
-                    },
-                },
-                previous_pid=os.getpid() + 1000,
-            )
-            smoke = [SimpleNamespace(ok=True) for _index in range(5)]
-            with patch(
-                "app.communication.human_adam_profiles.run_smoke_check",
-                return_value=smoke,
-            ):
-                audit = manager.deployment_completion_status()
-                completed = manager.finalize_deployment_completion(
-                    confirmation=DEPLOYMENT_COMPLETION_CONFIRMATION,
-                    next_step="Ručně ověřit novou kartu v Cockpitu.",
-                )
-            handoff_text = (root / handoff_path).read_text(encoding="utf-8")
-            local_head = git("rev-parse", "main")
-            remote_head = git("rev-parse", "origin/main")
-            semaphore = manager.development_semaphore.status()
-
-        self.assertEqual(prepared["state"], "pending_restart")
-        self.assertTrue(audit["ready"])
-        self.assertEqual(audit["checkpoint_head"], checkpoint_head)
-        self.assertTrue(completed["writes_performed"])
-        self.assertEqual(completed["state"], "complete")
-        self.assertEqual(local_head, remote_head)
-        self.assertIn("Stav: nasazeno", handoff_text)
-        self.assertIn("849 testů, OK", handoff_text)
-        self.assertFalse(semaphore["active"])
-
-    def test_post_restart_completion_rejects_non_exact_confirmation_before_writes(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            manager, *_rest = self.make_manager(Path(temp_dir))
-            with self.assertRaisesRegex(AppServerError, "Chybí přesná potvrzovací věta"):
-                manager.finalize_deployment_completion(
-                    confirmation="ano",
-                    next_step="Ověřit výsledek.",
-                )
 
     def test_checkpoint_requires_active_owned_lease_and_pause_blocks_it(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

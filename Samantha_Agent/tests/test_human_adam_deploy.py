@@ -17,7 +17,6 @@ from app.communication.human_adam_deploy import (
     TRUSTED_PYTHON,
     audit_checkpoint,
     deploy_checkpoint,
-    human_adam_deploy_action,
     human_adam_deploy_audit_action,
     load_deployment_confirmation,
     load_deployment_diagnostic,
@@ -121,49 +120,6 @@ class HumanAdamDeployTests(unittest.TestCase):
         self.assertFalse(result["handoff_takeover_check"]["blocking"])
         self.assertEqual(calls["owner_id"], "human_adam")
         self.assertIs(calls["check_kwargs"]["active_service"], active_service)
-
-    def test_profile_deploy_prepares_post_restart_completion_and_keeps_lease(self) -> None:
-        active_service = SimpleNamespace(
-            hub=SimpleNamespace(snapshot=lambda: {"turn_busy": False, "thread_id": "thread"}),
-            workspace=SimpleNamespace(),
-            deployment_receipt_path=Path("receipt.json"),
-            deployment_diagnostic_path=Path("diagnostic.json"),
-            deployment_failure_history_path=Path("failures.json"),
-            work_profile_id="human_adam",
-        )
-        calls: dict[str, object] = {}
-
-        @contextmanager
-        def profile_operation():
-            yield active_service
-
-        def prepare_deployment_completion(**kwargs: object) -> dict[str, object]:
-            calls["prepare"] = kwargs
-            return {"ok": True, "state": "pending_restart"}
-
-        wrapper = SimpleNamespace(
-            profile_operation=profile_operation,
-            assert_deployment_allowed=lambda owner_id: calls.update(owner_id=owner_id),
-            prepare_deployment_completion=prepare_deployment_completion,
-            finish_deployment_lease=lambda _owner_id: self.fail("lease must remain active"),
-        )
-        deployed = {
-            "applied": True,
-            "checkpoint_token": "a" * 40,
-            "gate": {"test_count": 849},
-            "deployment_confirmation": {"completed_at": "2026-07-19T12:55:31+00:00"},
-            "restart_required": True,
-        }
-        with patch("app.communication.human_adam_deploy.deploy_checkpoint", return_value=deployed):
-            result = human_adam_deploy_action(
-                {"confirmation": CONFIRMATION_TEXT, "checkpoint_token": "a" * 40, "_server_pid": 321},
-                service=wrapper,
-            )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["deployment_completion"]["state"], "pending_restart")
-        self.assertIn("zůstává aktivní", result["development_semaphore_message"])
-        self.assertEqual(calls["prepare"]["previous_pid"], 321)
 
     def test_deploy_runs_gate_then_fast_forwards_pushes_and_aligns(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

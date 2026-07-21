@@ -291,18 +291,15 @@ class CockpitTests(unittest.TestCase):
         self.assertNotIn("human_adam_deploy_action(", route_source)
         self.assertNotIn("record_deployment_restart(", route_source)
 
-    def test_deployment_completion_has_exact_confirmation_git_card_and_routes(self) -> None:
-        card = next(
-            item
-            for item in COCKPIT_POST_ACTIONS
-            if item["path"] == "/api/human-adam/deployment-completion"
-        )
+    def test_orphaned_deployment_completion_contract_is_absent(self) -> None:
+        path = "/api/human-adam/deployment-completion"
+        source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
 
-        self.assertEqual(card["risk"], "git_commit_push")
-        self.assertEqual(card["confirmation"], "exact_deployment_completion_phrase")
-        self.assertEqual(card["handler_name"], "human_adam_deployment_completion_action")
-        self.assertIn("/api/human-adam/deployment-completion", self.cockpit_do_get_routes())
-        self.assertIn("/api/human-adam/deployment-completion", self.cockpit_do_post_routes())
+        self.assertNotIn(path, {item["path"] for item in COCKPIT_POST_ACTIONS})
+        self.assertNotIn(path, self.cockpit_do_get_routes())
+        self.assertNotIn(path, self.cockpit_do_post_routes())
+        self.assertNotIn("human_adam_deployment_completion_action", source)
+        self.assertNotIn("human_adam_deployment_completion_status_action", source)
 
     def test_frontend_literal_routes_exist_in_backend(self) -> None:
         exact_backend_routes = set(self.cockpit_do_get_routes()) | set(self.cockpit_do_post_routes())

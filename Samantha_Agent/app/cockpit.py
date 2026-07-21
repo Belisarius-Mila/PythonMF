@@ -94,8 +94,6 @@ from app.communication.human_adam_service import (
 from app.communication.human_adam_profiles import (
     HUMAN_ADAM,
     HumanAdamProfileManager,
-    human_adam_deployment_completion_action,
-    human_adam_deployment_completion_status_action,
     human_adam_development_semaphore_action,
     human_adam_development_semaphore_status_action,
     human_adam_project_continuity_action,
@@ -9411,14 +9409,6 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
-        "path": "/api/human-adam/deployment-completion",
-        "label": "Potvrdit dokončení handoffu po nasazení",
-        "risk": "git_commit_push",
-        "confirmation": "exact_deployment_completion_phrase",
-        "handler_name": "human_adam_deployment_completion_action",
-        "test_level": "direct",
-    },
-    {
         "path": "/api/janicka/chat",
         "label": "Janička chat s Adamem",
         "risk": "voice_local_outbound",
@@ -10121,11 +10111,6 @@ class CockpitServer:
                         human_adam_simple_main_deployment_audit_action(service=HUMAN_ADAM)
                     )
                     return
-                if parsed.path == "/api/human-adam/deployment-completion":
-                    self.respond_json(
-                        human_adam_deployment_completion_status_action(service=HUMAN_ADAM)
-                    )
-                    return
                 if parsed.path == "/api/server/health":
                     self.respond_json(server_health_status(host=cockpit_host, port=cockpit_port))
                     return
@@ -10376,12 +10361,6 @@ class CockpitServer:
                         human_adam_simple_main_deployment_verification_action(
                             service=HUMAN_ADAM
                         )
-                    )
-                    return
-                if parsed.path == "/api/human-adam/deployment-completion":
-                    payload = self.read_json()
-                    self.respond_json(
-                        human_adam_deployment_completion_action(payload, service=HUMAN_ADAM)
                     )
                     return
                 if parsed.path == "/api/janicka/chat":
