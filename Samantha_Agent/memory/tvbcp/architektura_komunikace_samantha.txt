@@ -2135,3 +2135,42 @@ krok je tříproudový live roundtrip `MMTX -> Human–Adam -> Knihovna -> MMTX`
 přes schéma 2. Teprve po zachování všech tří identit a čistých workspace může
 samostatná fáze 4.5g odstranit veřejný profilový fallback a mrtvou
 dvouprofilovou konstrukci.
+
+### 2026-07-21 09:53 CEST – Post-roundtrip důkaz fáze 4.5f
+
+Finální live roundtrip `MMTX -> Human–Adam -> Knihovna -> MMTX` přes schéma 2
+zachoval identity všech tří session i počty uložených zpráv `2 / 102 / 28`.
+Nevznikla nová zpráva ani vlákno, všechny tři workspaces skončily čisté a
+zarovnané na `e92ba02`, smoke test prošel `5/5` a finálně je aktivní připojené
+MMTX bez aktivního tahu. Nekanonické ID Knihovny bylo fail-closed odmítnuto a
+stav zůstal beze změny; úspěšný úsek použil katalogové
+`project-knowledge-library`.
+
+Fáze 4.5f je tím provozně uzavřena. Další krok je read-only audit 4.5g před
+odstraněním veřejného profilového fallbacku a mrtvé dvouprofilové konstrukce;
+private session, kotvy a workspaces zůstávají chráněné.
+
+### 2026-07-21 10:19 CEST – Fáze 4.5g-a: odstraněn veřejný profilový fallback
+
+Kanonický veřejný kontrakt výběru pracovního proudu nyní používá jedině
+`workstream_id`. Stávající endpointová URL zůstala stabilní, ale přítomnost
+legacy `profile_id` je fail-closed odmítnuta i vedle platného kanonického ID.
+UI vždy vykresluje seskupený katalog a už nemá záložní větev nad
+`work_profiles`. Status nevrací `work_profile` ani `work_profiles` a selection
+model nezveřejňuje profilová ID.
+
+Interní kompatibilní adaptéry Human–Adam/Knihovna, jejich služby, session,
+kotvy a workspaces, čtení migračního schématu 1 i bezpečnostní profilová
+metadata zůstávají zachované. Fáze tedy odstraňuje pouze veřejnou dvojí
+autoritu, nikoli skutečné backendové služby nebo private data.
+
+Negativní kontraktní testy potvrzují odmítnutí legacy payloadu bez změny
+aktivního proudu. Cílená sada 130 testů, širší sada 336 testů a plná Cockpit
+Quality Gate s 980 testy za 229,462 sekundy prošly včetně všech syntaxí.
+Živé MMTX zůstalo připojené, bez aktivního tahu a s čistým zarovnaným
+workspace; private ani autosave stav se nezměnil.
+
+Další krok: commit, push a zelená vzdálená CI, potom bezpečné nasazení a live
+kontraktní proof. Teprve poté může fáze 4.5g-b samostatně odstranit mrtvý
+`HumanAdamWorkstreamCoordinator` a staré wrappery bez současné migrace
+vývojového semaforu nebo deployment-completion účtenek.

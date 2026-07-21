@@ -377,14 +377,19 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         service = ProjectContinuityService(project_root=root)
         return service, service.catalog()[0].project_id, handoff_path
 
-    def test_status_advertises_grouped_catalog_without_changing_legacy_default(self) -> None:
+    def test_status_advertises_only_grouped_catalog_without_public_profile_fallback(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, _human_workspace, _library_workspace, _human_hub, _library_hub = self.make_manager(Path(temp_dir))
             status = manager.status()
 
-        self.assertEqual(status["work_profile"]["id"], "human_adam")
-        self.assertEqual([item["id"] for item in status["work_profiles"]], ["human_adam", "knihovna"])
-        self.assertEqual(status["work_profiles"][1]["tvbcp_title"], "Knihovna v Cockpitu")
+        self.assertNotIn("work_profile", status)
+        self.assertNotIn("work_profiles", status)
+        self.assertTrue(
+            all(
+                "profile_id" not in row
+                for row in status["workstream_selection"]["workstreams"]
+            )
+        )
         self.assertEqual(manager.work_profile_id, "human_adam")
         self.assertTrue(status["development_semaphore"]["ok"])
         self.assertFalse(status["development_semaphore"]["active"])
@@ -630,7 +635,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             request.tvbcp_relative_path,
             "memory/tvbcp/architektura_komunikace_samantha.txt",
         )
-        self.assertEqual(result["work_profile"]["id"], "human_adam")
+        self.assertNotIn("work_profile", result)
         self.assertEqual(result["workstream"]["type"], "Layer")
 
     def test_simple_checkpoint_uses_registered_library_workstream(self) -> None:
@@ -659,7 +664,8 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             "memory/handoffs/knowledge_library_article_editing_2026_07_16.md",
         )
         self.assertEqual(request.tvbcp_relative_path, "memory/tvbcp/knihovna_cockpit.txt")
-        self.assertEqual(result["work_profile"]["id"], "knihovna")
+        self.assertNotIn("work_profile", result)
+        self.assertEqual(result["workstream"]["id"], "project-knowledge-library")
 
     def test_lazy_checkpoint_uses_active_workstream_canonical_memory(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -765,7 +771,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(request.workstream_id, "layer-human-adam-development")
         self.assertEqual(request.expected_head, "a" * 40)
         self.assertEqual(request.previous_pid, 321)
-        self.assertEqual(result["work_profile"]["id"], "human_adam")
+        self.assertNotIn("work_profile", result)
         self.assertEqual(result["workstream"]["type"], "Layer")
         self.assertTrue(result["restart"]["scheduled"])
         self.assertEqual(restart_calls, [True])
@@ -791,7 +797,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertIs(call["workspace"], human_workspace)
         self.assertEqual(call["peer_workspaces"], (library_workspace,))
         self.assertEqual(call["workstream_id"], "layer-human-adam-development")
-        self.assertEqual(result["work_profile"]["id"], "human_adam")
+        self.assertNotIn("work_profile", result)
         self.assertEqual(result["workstream"]["type"], "Layer")
         self.assertEqual(result["handoff_takeover_check"]["state"], "verified")
 
@@ -814,7 +820,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertIs(call["workspace"], library_workspace)
         self.assertEqual(call["peer_workspaces"], (human_workspace,))
         self.assertEqual(call["request"].workstream_id, "project-knowledge-library")
-        self.assertEqual(result["work_profile"]["id"], "knihovna")
+        self.assertNotIn("work_profile", result)
         self.assertFalse(result["restart"]["scheduled"])
         self.assertTrue(result["restart"]["ready"])
 
@@ -889,7 +895,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(call["receipt_path"], manager.simple_main_deployment_receipt_path)
         self.assertEqual(call["observed_pid"], 654)
         self.assertEqual(call["observed_code_stamp"], "0123456789abcdef")
-        self.assertEqual(result["work_profile"]["id"], "human_adam")
+        self.assertNotIn("work_profile", result)
         self.assertEqual(result["workstream"]["id"], "layer-human-adam-development")
 
     def test_simple_deployment_verification_rejects_different_active_workstream(self) -> None:
@@ -1012,7 +1018,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         )
         self.assertTrue(result["ok"])
         self.assertEqual(result["session"]["thread_id"], "mmtx-thread")
-        self.assertEqual(result["work_profile"]["id"], "project-mmtx")
+        self.assertNotIn("work_profile", result)
         self.assertTrue(result["workstream_capabilities"]["lazy_backend"])
         self.assertTrue(result["workstream_capabilities"]["development"])
         self.assertTrue(result["workstream_capabilities"]["checkpoint"])
@@ -1885,18 +1891,18 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(result["automatic_completion"]["state"], "metadata_missing")
         self.assertIn("Změny zůstaly viditelné", result["entry"]["answer"])
 
-    def test_switch_requires_confirmation_and_preserves_active_profile(self) -> None:
+    def test_workstream_switch_requires_confirmation_and_preserves_active_backend(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, *_rest = self.make_manager(Path(temp_dir))
             result = human_adam_profile_switch_action(
-                {"profile_id": "knihovna", "confirmed": False},
+                {"workstream_id": "project-knowledge-library", "confirmed": False},
                 service=manager,
             )
 
         self.assertFalse(result["ok"])
         self.assertEqual(manager.active_profile_id, "human_adam")
 
-    def test_switch_action_routes_registered_workstream_through_coordinator(self) -> None:
+    def test_switch_action_rejects_legacy_profile_field_even_with_workstream_id(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, *_rest = self.make_manager(Path(temp_dir))
             result = human_adam_profile_switch_action(
@@ -1908,15 +1914,12 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 service=manager,
             )
 
-        self.assertTrue(result["ok"])
-        self.assertTrue(result["switched"])
-        self.assertEqual(manager.active_profile_id, "knihovna")
-        self.assertEqual(
-            result["workstream_selection"]["active"]["workstream_id"],
-            "project-knowledge-library",
-        )
+        self.assertFalse(result["ok"])
+        self.assertIn("profile_id", result["message"])
+        self.assertEqual(manager.active_workstream_id, "layer-human-adam-development")
+        self.assertEqual(manager.active_profile_id, "human_adam")
 
-    def test_profile_fallback_routes_from_lazy_through_atomic_workstream_switch(self) -> None:
+    def test_profile_only_payload_is_rejected_without_leaving_lazy_workstream(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             manager, *_rest = self.make_manager(root)
@@ -1935,13 +1938,14 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 (root / "active-profile.json").read_text(encoding="utf-8")
             )
 
-        self.assertTrue(result["ok"])
-        self.assertEqual(manager.active_workstream_id, "project-knowledge-library")
-        self.assertEqual(manager.active_profile_id, "knihovna")
-        self.assertEqual(lazy.close_calls, ["project-mmtx"])
+        self.assertFalse(result["ok"])
+        self.assertIn("profile_id", result["message"])
+        self.assertEqual(manager.active_workstream_id, "project-mmtx")
+        self.assertEqual(manager.active_profile_id, "human_adam")
+        self.assertEqual(lazy.close_calls, [])
         self.assertEqual(
             persisted["active_workstream_id"],
-            "project-knowledge-library",
+            "project-mmtx",
         )
 
     def test_switch_prepares_target_and_persists_profile_without_thread_mix(self) -> None:
@@ -1954,7 +1958,11 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
 
         self.assertTrue(result["ok"])
         self.assertTrue(result["switched"])
-        self.assertEqual(result["work_profile"]["id"], "knihovna")
+        self.assertNotIn("work_profile", result)
+        self.assertEqual(
+            result["workstream_selection"]["active"]["workstream_id"],
+            "project-knowledge-library",
+        )
         self.assertEqual(manager.work_profile_id, "knihovna")
         self.assertEqual(result["session"]["thread_id"], "library-thread")
         self.assertEqual(library_workspace.prepare_count, 1)
@@ -2035,19 +2043,19 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             manager, human_workspace, _library_workspace, human_hub, _library_hub = self.make_manager(Path(temp_dir))
             human_workspace.dirty = True
             dirty = human_adam_profile_switch_action(
-                {"profile_id": "knihovna", "confirmed": True},
+                {"workstream_id": "project-knowledge-library", "confirmed": True},
                 service=manager,
             )
             human_workspace.dirty = False
             human_workspace.local_ahead = True
             checkpoint = human_adam_profile_switch_action(
-                {"profile_id": "knihovna", "confirmed": True},
+                {"workstream_id": "project-knowledge-library", "confirmed": True},
                 service=manager,
             )
             human_workspace.local_ahead = False
             human_hub.messages = [{"status": "delivery_unknown", "recovery_required": True}]
             uncertain = human_adam_profile_switch_action(
-                {"profile_id": "knihovna", "confirmed": True},
+                {"workstream_id": "project-knowledge-library", "confirmed": True},
                 service=manager,
             )
 
@@ -2082,7 +2090,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             ]
 
             result = human_adam_profile_switch_action(
-                {"profile_id": "knihovna", "confirmed": True},
+                {"workstream_id": "project-knowledge-library", "confirmed": True},
                 service=manager,
             )
 
@@ -2111,7 +2119,11 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
 
         self.assertTrue(result["ok"])
         self.assertTrue(result["workspace_synced"])
-        self.assertEqual(result["work_profile"]["id"], "human_adam")
+        self.assertNotIn("work_profile", result)
+        self.assertEqual(
+            result["workstream_selection"]["active"]["workstream_id"],
+            "layer-human-adam-development",
+        )
         self.assertEqual(result["session"]["thread_id"], "human-thread")
         self.assertEqual(human_workspace.sync_count, 1)
         self.assertFalse(human_workspace.source_ahead)

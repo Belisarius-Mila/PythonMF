@@ -777,3 +777,68 @@ Bezpecnost / neukladat:
 - Neukládat private thread ID, jeho hash, obsah zpráv, kotvy, tokeny ani private
   cesty.
 - Nemazat ani nepřesouvat legacy private session během odstranění fallbacku.
+
+#### 2026-07-21 09:53 CEST – Post-roundtrip dodatek k checkpointu 4.5f
+
+Finální live roundtrip `MMTX -> Human–Adam -> Knihovna -> MMTX` přes schéma 2
+prošel bez nové zprávy nebo vlákna. Kontrolní porovnání potvrdilo zachované
+identity a stejné počty uložených zpráv `2 / 102 / 28`. Všechny tři workspaces
+skončily čisté a zarovnané na `e92ba02`; Cockpit smoke prošel `5/5` a aktivní
+zůstalo připojené MMTX bez aktivního tahu. Jeden požadavek s nekanonickým ID
+Knihovny byl fail-closed odmítnut bez změny aktivního proudu; následný krok
+použil katalogové `project-knowledge-library`.
+
+Další krok: read-only audit fáze 4.5g. Zatím nic neodstraňovat a neměnit
+adaptery, veřejné fallbacky ani private session.
+
+### 2026-07-21 10:19 CEST – Checkpoint fáze 4.5g-a: bez veřejného profilového fallbacku
+
+Nazev: Univerzální pracovní proudy – fáze 4.5g-a
+Priorita: 1
+Stav: hotovo
+Pripomenout pri startu: ano
+Datum: 2026-07-21
+
+Co se resilo:
+Veřejný kontrakt výběru už nemá paralelní profilovou cestu. Endpoint na
+stávající URL přijímá výhradně kanonické `workstream_id`; přítomnost legacy
+`profile_id` je fail-closed chyba i při současně poslaném kanonickém ID.
+
+Co je hotove:
+- UI vždy vykresluje seskupený katalog a odesílá pouze `workstream_id`.
+- Status nevrací `work_profile` ani `work_profiles`; selection model neobsahuje
+  veřejná `profile_id`.
+- Negativní testy ověřují odmítnutí legacy payloadu bez změny aktivního proudu.
+- Interní adaptéry, jejich původní služby, schéma 1 a private session zůstaly
+  beze změny.
+- Cílená sada 130 testů, širší sada 336 testů a plná Cockpit Quality Gate s
+  980 testy za 229,462 sekundy prošly včetně Python, JavaScript a shell syntaxe.
+- Živé MMTX zůstalo připojené se dvěma zprávami, bez aktivního tahu a s čistým
+  zarovnaným workspace; private ani autosave soubory se nezměnily.
+
+Co neni hotove:
+- Změna zatím není nasazená ani živě ověřená proti novému veřejnému kontraktu.
+- Interní `HumanAdamWorkstreamCoordinator`, staré wrappery a profilově
+  pojmenovaná bezpečnostní metadata zůstávají pro samostatnou fázi 4.5g-b.
+
+Dalsi krok:
+Po commitu, pushi a zelené vzdálené CI bezpečně nasadit fázi 4.5g-a. Live proof
+musí ověřit, že `profile_id` payload nic nepřepne, kanonické `workstream_id`
+funguje a finálně zůstane aktivní připojené MMTX se zachovanou session.
+
+Navrhovane dalsi kroky:
+- Po live proofu zahájit read-only hranici 4.5g-b pro odstranění mrtvého
+  koordinátoru a wrapperů.
+- Nemigrovat vývojový semafor ani deployment-completion účtenky ve stejném
+  kroku; to je samostatná bezpečnostní migrace.
+
+Zmenene nebo relevantni soubory:
+- `human_adam_profiles.py`
+- `human_adam_ui.py`
+- `human_adam_workstream_selection.py`
+- odpovídající tři testovací moduly
+
+Bezpecnost / neukladat:
+- Nemazat ani nepřesouvat private session, kotvy, workspaces nebo schéma 1.
+- Neukládat private thread ID, hash identity, obsah zpráv, tokeny ani private
+  cesty.

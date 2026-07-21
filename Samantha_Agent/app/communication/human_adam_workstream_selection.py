@@ -65,7 +65,6 @@ class GroupedWorkstreamSelection:
             thread = thread_by_id.get(record.workstream_id, {})
             memory = memory_by_id.get(record.workstream_id, {})
             binding = self._backend_registry.binding(record.workstream_id)
-            profile_id = binding.profile_id
             backend = binding.backend
             rows.append(
                 {
@@ -75,7 +74,6 @@ class GroupedWorkstreamSelection:
                     "mode": record.mode,
                     "priority": record.priority,
                     "backend": backend,
-                    "profile_id": profile_id,
                     "active": record.workstream_id == active_id,
                     "available": bool(
                         record.mode != "archived"
@@ -115,7 +113,6 @@ class GroupedWorkstreamSelection:
                     "workstream_type": active["type"],
                     "workstream_name": active["name"],
                     "backend": active["backend"],
-                    "profile_id": active["profile_id"],
                 }
                 if active is not None
                 else {}

@@ -606,11 +606,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let resultWatchAttempt = 0;
   let lastSession = null;
   let sessionConnected = false;
-  let activeProfileId = "";
   let activeWorkstreamId = "";
   let activeWorkstreamBackend = "compatibility_adapter";
-  let activeProfileLabel = "Human–Adam";
-  let usingWorkstreamCatalog = false;
+  let activeWorkstreamLabel = "Human–Adam";
   let workstreamDevelopmentEnabled = true;
   let workstreamDeploymentEnabled = true;
   let deliveryUncertain = false;
@@ -844,7 +842,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       const connectionText = connectionBadge.textContent || "Odpojeno";
       const workspaceText = workspaceBadge.textContent || "Izolovaný workspace";
       const adamText = sessionConnected ? "Adam čeká" : "Adam není připojen";
-      text = `${activeProfileLabel} · ${connectionText} · ${workspaceText} · ${adamText}`;
+      text = `${activeWorkstreamLabel} · ${connectionText} · ${workspaceText} · ${adamText}`;
       tone = sessionConnected && !workspaceBadge.classList.contains("warn") ? "ok" : "warn";
     }
     mobileStatusText.textContent = text;
@@ -1185,13 +1183,13 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   }
 
   function renderStatus(payload) {
-    renderProfiles(payload);
+    renderWorkstreams(payload);
     const session = payload && payload.session ? payload.session : null;
     const connected = Boolean(session && session.connected && payload.runtime && payload.runtime.reachable);
     sessionConnected = connected;
     connectionBadge.textContent = connected ? "Připojeno" : "Odpojeno";
     connectionBadge.className = connected ? "badge ok" : "badge warn";
-    profileBadge.textContent = `Proud: ${activeProfileLabel}`;
+    profileBadge.textContent = `Proud: ${activeWorkstreamLabel}`;
     profileBadge.dataset.backend = activeWorkstreamBackend;
     const thread = session && session.thread_id ? session.thread_id : "";
     const anchorRevision = Number(payload && payload.context_anchor ? payload.context_anchor.revision || 0 : 0);
@@ -1246,53 +1244,41 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     developmentBadge.className = semaphore.mode === "active" ? "badge" : "badge warn";
   }
 
-  function renderProfiles(payload) {
-    const active = payload && payload.work_profile ? payload.work_profile : {};
-    const profiles = payload && Array.isArray(payload.work_profiles) ? payload.work_profiles : [];
+  function renderWorkstreams(payload) {
     const selection = payload && payload.workstream_selection ? payload.workstream_selection : {};
     const capabilities = payload && payload.workstream_capabilities ? payload.workstream_capabilities : {};
     const activeWorkstream = selection && selection.active ? selection.active : {};
     const workstreams = selection && Array.isArray(selection.workstreams) ? selection.workstreams : [];
-    activeProfileId = String(active.id || "");
-    activeProfileLabel = String(active.label || "Human–Adam");
-    usingWorkstreamCatalog = selection.ok === true && workstreams.length > 0;
+    activeWorkstreamLabel = String(activeWorkstream.workstream_name || "Pracovní proud");
     workstreamDevelopmentEnabled = capabilities.development !== false;
     workstreamDeploymentEnabled = capabilities.deployment !== false;
-    activeWorkstreamId = usingWorkstreamCatalog
-      ? String(activeWorkstream.workstream_id || "")
-      : activeProfileId;
-    activeWorkstreamBackend = usingWorkstreamCatalog
-      ? String(activeWorkstream.backend || "compatibility_adapter")
-      : "compatibility_adapter";
+    activeWorkstreamId = String(activeWorkstream.workstream_id || "");
+    activeWorkstreamBackend = String(activeWorkstream.backend || "lazy_private_thread");
     profileSelect.replaceChildren();
     const appendOption = (parent, profile) => {
       const option = document.createElement("option");
       option.value = String(profile.id || "");
       option.dataset.backend = String(profile.backend || "compatibility_adapter");
-      option.textContent = String(profile.profile_label || profile.label || profile.name || profile.id || "Profil");
+      option.textContent = String(profile.name || profile.id || "Pracovní proud");
       option.disabled = profile.available === false;
       option.selected = option.value === activeWorkstreamId;
       parent.appendChild(option);
     };
-    if (usingWorkstreamCatalog) {
-      const groups = Array.isArray(selection.groups) ? selection.groups : [];
-      for (const group of groups) {
-        const rows = Array.isArray(group.workstreams) ? group.workstreams : [];
-        if (!rows.length) continue;
-        const optionGroup = document.createElement("optgroup");
-        optionGroup.label = String(group.label || group.id || "Pracovní proudy");
-        for (const workstream of rows) appendOption(optionGroup, workstream);
-        profileSelect.appendChild(optionGroup);
-      }
-      const paused = Array.isArray(selection.paused) ? selection.paused : [];
-      if (paused.length) {
-        const optionGroup = document.createElement("optgroup");
-        optionGroup.label = "Pozastavené";
-        for (const workstream of paused) appendOption(optionGroup, workstream);
-        profileSelect.appendChild(optionGroup);
-      }
-    } else {
-      for (const profile of profiles) appendOption(profileSelect, profile);
+    const groups = Array.isArray(selection.groups) ? selection.groups : [];
+    for (const group of groups) {
+      const rows = Array.isArray(group.workstreams) ? group.workstreams : [];
+      if (!rows.length) continue;
+      const optionGroup = document.createElement("optgroup");
+      optionGroup.label = String(group.label || group.id || "Pracovní proudy");
+      for (const workstream of rows) appendOption(optionGroup, workstream);
+      profileSelect.appendChild(optionGroup);
+    }
+    const paused = Array.isArray(selection.paused) ? selection.paused : [];
+    if (paused.length) {
+      const optionGroup = document.createElement("optgroup");
+      optionGroup.label = "Pozastavené";
+      for (const workstream of paused) appendOption(optionGroup, workstream);
+      profileSelect.appendChild(optionGroup);
     }
     syncControls();
   }
@@ -1331,14 +1317,12 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     try {
       const payload = await api("/api/human-adam/profile", {
         method:"POST",
-        body:JSON.stringify(usingWorkstreamCatalog
-          ? {workstream_id:targetId,confirmed:true}
-          : {profile_id:targetId,confirmed:true}),
+        body:JSON.stringify({workstream_id:targetId,confirmed:true}),
       });
       if (!payload.ok) throw new Error(payload.message || "Přepnutí profilu selhalo.");
       resetContextAnchorEditorState();
       renderStatus(payload);
-      notice.textContent = `Aktivní pracovní proud: ${activeProfileLabel}.`;
+      notice.textContent = `Aktivní pracovní proud: ${activeWorkstreamLabel}.`;
     } catch (error) {
       showProfileSwitchFailure(`Pracovní proud nebyl přepnut: ${error.message}`);
       await loadStatus();
@@ -1880,7 +1864,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     if (!valid) developmentSemaphoreMeta.textContent = developmentSemaphore && developmentSemaphore.message ? developmentSemaphore.message : "Vývojový semafor nelze ověřit; zápis je zablokovaný.";
     else if (!active) developmentSemaphoreMeta.textContent = "Semafor je volný. Převezmi jej před první změnou kódu; druhý Adam pak zůstane read-only.";
     else developmentSemaphoreMeta.textContent = `Vlastník: ${owner} · ${developmentSemaphore.mode === "paused" ? "pozastaveno" : "aktivní"} · projekt: ${developmentSemaphore.project_label || "bez vazby"} · téma: ${topic}${blockers.length ? ` · blokery: ${blockers.join(" ")}` : ""}`;
-    developmentAcquireProfileBtn.textContent = `Převzít pro ${activeProfileLabel}`;
+    developmentAcquireProfileBtn.textContent = `Převzít pro ${activeWorkstreamLabel}`;
     developmentAcquireProfileBtn.hidden = active;
     developmentAcquireTerminalBtn.hidden = active;
     developmentPauseBtn.hidden = !active || developmentSemaphore.mode !== "active";
@@ -1907,7 +1891,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       return;
     }
     const labels = {
-      acquire_profile:`Převzít globální vývojový semafor pro profil ${activeProfileLabel}?`,
+      acquire_profile:`Převzít globální vývojový semafor pro proud ${activeWorkstreamLabel}?`,
       acquire_terminal:"Převzít globální vývojový semafor pro terminálového Adama?",
       pause:"Pozastavit vývoj? Vlastník zůstane stejný a ostatní zápis zůstane zablokovaný.",
       resume:"Obnovit pozastavený vývoj?",

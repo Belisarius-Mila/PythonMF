@@ -100,7 +100,10 @@ class GroupedWorkstreamSelectionTests(unittest.TestCase):
         )
         by_id = {row["id"]: row for row in status["workstreams"]}
 
-        self.assertEqual(by_id["project-knowledge-library"]["profile_id"], "knihovna")
+        self.assertTrue(
+            all("profile_id" not in row for row in status["workstreams"])
+        )
+        self.assertNotIn("profile_id", status["active"])
         self.assertEqual(
             by_id["project-knowledge-library"]["backend"],
             "compatibility_adapter",

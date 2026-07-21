@@ -34,7 +34,6 @@ from app.communication.human_adam_workspace import (
     HumanAdamWorkspaceManager,
 )
 from app.communication.human_adam_workstream_backends import (
-    COMPATIBILITY_ADAPTER_BACKEND,
     CompatibilityWorkstreamAdapter,
     WorkstreamBackendRegistry,
 )
@@ -567,10 +566,6 @@ class HumanAdamProfileManager:
             )
         return {
             **result,
-            "work_profile": {
-                "id": active_id,
-                "label": str(profile.get("label") or active_id),
-            },
             "workstream": {
                 "id": binding.workstream_id,
                 "type": binding.workstream_type,
@@ -706,10 +701,6 @@ class HumanAdamProfileManager:
                 restart = {**scheduled, "ready": True, "scheduled": True}
         return {
             **result,
-            "work_profile": {
-                "id": active_id,
-                "label": str(profile.get("label") or active_id),
-            },
             "workstream": {
                 "id": binding.workstream_id,
                 "type": binding.workstream_type,
@@ -743,10 +734,6 @@ class HumanAdamProfileManager:
             )
         return {
             **result,
-            "work_profile": {
-                "id": active_id,
-                "label": str(profile.get("label") or active_id),
-            },
             "workstream": {
                 "id": binding.workstream_id,
                 "type": binding.workstream_type,
@@ -802,47 +789,11 @@ class HumanAdamProfileManager:
             )
         return {
             **result,
-            "work_profile": {
-                "id": active_id,
-                "label": str(profile.get("label") or active_id),
-            },
             "workstream": {
                 "id": binding.workstream_id,
                 "type": binding.workstream_type,
                 "name": binding.name,
             },
-        }
-
-    def _profile_rows(self) -> list[dict[str, Any]]:
-        active_id = "" if self.active_lazy_workstream_id else self.active_profile_id
-        return [
-            {
-                "id": profile_id,
-                "label": str(profile.get("label") or profile_id),
-                "description": str(profile.get("description") or ""),
-                "active": profile_id == active_id,
-                "tvbcp_title": profile["service"].tvbcp_title,
-            }
-            for profile_id, profile in self.profiles.items()
-        ]
-
-    def _active_work_profile(self, selection: dict[str, Any]) -> dict[str, Any]:
-        lazy_id = self.active_lazy_workstream_id
-        active = selection.get("active") if isinstance(selection, dict) else None
-        if lazy_id and isinstance(active, dict):
-            return {
-                "id": lazy_id,
-                "label": str(active.get("workstream_name") or lazy_id),
-                "description": str(active.get("workstream_type") or "Pracovní proud"),
-                "backend": "lazy_private_thread",
-            }
-        active_id = self.active_profile_id
-        profile = self.profiles[active_id]
-        return {
-            "id": active_id,
-            "label": str(profile.get("label") or active_id),
-            "description": str(profile.get("description") or ""),
-            "backend": COMPATIBILITY_ADAPTER_BACKEND,
         }
 
     def _workstream_capabilities(self) -> dict[str, Any]:
@@ -888,8 +839,6 @@ class HumanAdamProfileManager:
                 recent_deployment = None
             return {
                 **payload,
-                "work_profile": self._active_work_profile(selection),
-                "work_profiles": self._profile_rows(),
                 "workstream_selection": selection,
                 "workstream_capabilities": self._workstream_capabilities(),
                 "development_semaphore": self.development_status(),
@@ -900,7 +849,6 @@ class HumanAdamProfileManager:
                 "ok": False,
                 "status": "human_adam_profile_status_failed",
                 "message": str(exc),
-                "work_profiles": [],
                 "workstream_selection": {
                     "ok": False,
                     "private_backend": True,
@@ -952,7 +900,7 @@ class HumanAdamProfileManager:
             )
         return {
             **result,
-            **self._profile_status_fields(),
+            **self._workstream_status_fields(),
             "workspace_synced": workspace_synced,
         }
 
@@ -2021,11 +1969,9 @@ class HumanAdamProfileManager:
             return f"Nasazení proběhlo, ale vývojový semafor zůstal uzamčený: {exc}"
         return "Vývojový semafor byl po nasazení uvolněný."
 
-    def _profile_status_fields(self) -> dict[str, Any]:
+    def _workstream_status_fields(self) -> dict[str, Any]:
         selection = self.grouped_workstream_status()
         return {
-            "work_profile": self._active_work_profile(selection),
-            "work_profiles": self._profile_rows(),
             "workstream_selection": selection,
             "workstream_capabilities": self._workstream_capabilities(),
         }
@@ -2389,14 +2335,17 @@ def human_adam_profile_switch_action(
     service: HumanAdamProfileManager,
 ) -> dict[str, Any]:
     try:
-        workstream_id = str(payload.get("workstream_id") or "").strip()
-        if workstream_id:
-            return service.activate_grouped_workstream(
-                workstream_id=workstream_id,
-                confirmed=payload.get("confirmed") is True,
+        if "profile_id" in payload:
+            raise AppServerError(
+                "Pole profile_id již není podporované; použij kanonické workstream_id."
             )
-        return service.switch(
-            profile_id=str(payload.get("profile_id") or ""),
+        workstream_id = str(payload.get("workstream_id") or "").strip()
+        if not workstream_id:
+            raise AppServerError(
+                "Přepnutí pracovního proudu vyžaduje kanonické workstream_id."
+            )
+        return service.activate_grouped_workstream(
+            workstream_id=workstream_id,
             confirmed=payload.get("confirmed") is True,
         )
     except (AppServerError, SessionHubError, OSError, ValueError) as exc:
