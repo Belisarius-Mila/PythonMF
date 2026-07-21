@@ -364,6 +364,7 @@ class HumanAdamService:
         *,
         state_path: Path,
         developer_instructions: str,
+        workspace: Path | None = None,
     ) -> CanonicalSessionHub:
         """Build an inert hub that shares this service's runtime and workspace.
 
@@ -373,7 +374,7 @@ class HumanAdamService:
 
         return CanonicalSessionHub(
             state_path=Path(state_path),
-            workspace=self.workspace.project_root,
+            workspace=Path(workspace or self.workspace.project_root),
             client_factory=self._new_client,
             developer_instructions=str(developer_instructions).strip(),
             sandbox=HUMAN_ADAM_SANDBOX_MODE,

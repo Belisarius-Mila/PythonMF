@@ -56,6 +56,7 @@ class FakeRuntime:
 
 class FakeWorkspace:
     def __init__(self, root: Path) -> None:
+        self.workspace_root = root.parent
         self.project_root = root
         self.sync_available = False
         self.dirty = False
@@ -313,6 +314,23 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertIn("jen samotny nazev bez cele cesty", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
         self.assertIn("pouze pri shodnych nazvech", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
         self.assertIn("absolutni cestu do textoveho okna nevypisuj", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
+
+    def test_detached_lazy_hub_can_use_isolated_repository_root(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            service, _runtime, workspace, _hub = self.make_service(root)
+            legacy = service.detached_session_hub(
+                state_path=root / "legacy.json",
+                developer_instructions="Legacy",
+            )
+            lazy = service.detached_session_hub(
+                state_path=root / "lazy.json",
+                developer_instructions="Lazy",
+                workspace=workspace.workspace_root,
+            )
+
+        self.assertEqual(legacy.workspace, workspace.project_root.resolve())
+        self.assertEqual(lazy.workspace, workspace.workspace_root.resolve())
 
     def test_status_has_no_process_start_side_effect(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

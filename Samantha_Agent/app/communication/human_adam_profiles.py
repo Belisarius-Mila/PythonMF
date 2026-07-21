@@ -33,6 +33,7 @@ from app.communication.human_adam_workspace import (
     HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS,
     HumanAdamWorkspaceManager,
 )
+from app.communication.human_adam_workstream_catalog import CanonicalWorkstream
 from app.communication.human_adam_workstream_coordinator import (
     CanonicalWorkstreamBinding,
     HumanAdamWorkstreamCoordinator,
@@ -48,7 +49,11 @@ from app.communication.human_adam_turn_completion import (
     parse_turn_completion,
 )
 from app.communication.local_runtime import LocalAppServerProcessController
-from app.communication.session_hub import SessionBusyError, SessionHubError
+from app.communication.session_hub import (
+    CanonicalSessionHub,
+    SessionBusyError,
+    SessionHubError,
+)
 from app.communication.simple_main_checkpoint import (
     SimpleMainCheckpointRequest,
     complete_simple_main_checkpoint,
@@ -2380,24 +2385,38 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         tvbcp_title="Knihovna v Cockpitu",
     )
     workstream_memory = WorkstreamMemoryRegistry()
-    workstream_threads = WorkstreamThreadRegistry(
-        state_root=PRIVATE_WORKSTREAM_THREAD_ROOT,
-        hub_factory=lambda record, state_path: human_service.detached_session_hub(
+
+    def lazy_workstream_hub(
+        record: CanonicalWorkstream,
+        state_path: Path,
+    ) -> CanonicalSessionHub:
+        memory_binding = workstream_memory.binding(record.workstream_id)
+        project_prefix = Path(human_service.workspace.project_dir_name)
+        handoff_path = (project_prefix / memory_binding.handoff_relative_path).as_posix()
+        tvbcp_path = (project_prefix / memory_binding.tvbcp_relative_path).as_posix()
+        return human_service.detached_session_hub(
             state_path=state_path,
+            workspace=human_service.workspace.workspace_root,
             developer_instructions=(
                 HUMAN_ADAM_DEVELOPER_INSTRUCTIONS
-                + " Aktivni kanonicky pracovni proud: "
+                + " Lazy pracovni proud bezi z korene izolovane kopie repozitare PythonMF; "
+                + "projektova pamet Samantha je proto pod Samantha_Agent/memory/. Aktivni "
+                + "kanonicky pracovni proud: "
                 + record.name
                 + " ("
                 + record.workstream_id
                 + "). Kanonicky handoff: "
-                + workstream_memory.binding(record.workstream_id).handoff_relative_path
+                + handoff_path
                 + ". Kanonicky TVBCP: "
-                + workstream_memory.binding(record.workstream_id).tvbcp_relative_path
+                + tvbcp_path
                 + ". Tyto dokumenty primo nemen bez Milova vyslovneho pokynu; bezny "
                 + "potvrzeny checkpoint je aktualizuje transakcne."
             ),
-        ),
+        )
+
+    workstream_threads = WorkstreamThreadRegistry(
+        state_root=PRIVATE_WORKSTREAM_THREAD_ROOT,
+        hub_factory=lazy_workstream_hub,
         workspace_status=human_service.workspace.status,
         reserved_workstream_ids={
             "layer-human-adam-development",
