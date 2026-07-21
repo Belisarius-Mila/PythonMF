@@ -14,8 +14,6 @@ from app.communication.human_adam_deploy import (
     DEFAULT_DEPLOYMENT_DIAGNOSTIC,
     DEFAULT_DEPLOYMENT_FAILURE_HISTORY,
     DEFAULT_DEPLOYMENT_RECEIPT,
-    load_deployment_confirmation,
-    load_deployment_diagnostic,
 )
 from app.communication.local_runtime import LocalAppServerProcessController
 from app.communication.session_hub import (
@@ -425,14 +423,6 @@ class HumanAdamService:
                 and workspace.get("workspace_relation") != "diverged"
             )
             session = self.hub.snapshot()
-            deployment_confirmation = load_deployment_confirmation(
-                self.deployment_receipt_path,
-                thread_id=str(session.get("thread_id") or ""),
-            )
-            deployment_diagnostic = load_deployment_diagnostic(
-                self.deployment_diagnostic_path,
-                thread_id=str(session.get("thread_id") or ""),
-            )
             context_anchor = self.context_anchor(include_content=False)
             return {
                 "ok": workspace_ready,
@@ -452,8 +442,6 @@ class HumanAdamService:
                 },
                 "profile": dict(self._profile),
                 "session": session,
-                "deployment_confirmation": deployment_confirmation,
-                "deployment_diagnostic": deployment_diagnostic,
                 "context_anchor": context_anchor,
             }
         except (AppServerError, SessionHubError, OSError, ValueError) as exc:

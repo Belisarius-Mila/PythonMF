@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 import subprocess
 import unicodedata
@@ -18,6 +17,7 @@ from app.codex_appserver import AppServerError
 ACTIVE_PROJECTS_RELATIVE_PATH = Path("memory/ACTIVE_PROJECTS.md")
 PROJECT_ID_RE = re.compile(r"[a-z0-9][a-z0-9_-]{2,79}")
 COMMIT_RE = re.compile(r"[0-9a-f]{40}")
+SHORT_COMMIT_RE = re.compile(r"[0-9a-f]{12}")
 LINK_RE = re.compile(r"`([^`]+)`")
 PROPOSAL_BLOCKED_PATH_PARTS = (
     "/.git/",
@@ -140,6 +140,35 @@ def _parse_timestamp(value: object) -> datetime | None:
     if parsed.tzinfo is None:
         return None
     return parsed.astimezone(timezone.utc)
+
+
+def _deployment_summary_time(
+    summary: object,
+    *,
+    expected_workstream_id: str,
+) -> datetime | None:
+    if not isinstance(summary, dict):
+        return None
+    gate = summary.get("gate")
+    smoke = summary.get("smoke")
+    try:
+        test_count = int(gate.get("test_count") or 0) if isinstance(gate, dict) else 0
+        smoke_count = int(smoke.get("check_count") or 0) if isinstance(smoke, dict) else 0
+    except (TypeError, ValueError):
+        return None
+    if (
+        summary.get("state") != "deployed"
+        or summary.get("workstream_id") != expected_workstream_id
+        or not SHORT_COMMIT_RE.fullmatch(str(summary.get("main_short") or ""))
+        or not isinstance(gate, dict)
+        or gate.get("passed") is not True
+        or test_count <= 0
+        or not isinstance(smoke, dict)
+        or smoke.get("passed") is not True
+        or smoke_count != 5
+    ):
+        return None
+    return _parse_timestamp(summary.get("deployed_at"))
 
 
 def _git_output(repo: Path, args: list[str]) -> str:
@@ -278,7 +307,8 @@ class ProjectContinuityService:
         workspace_root: Path,
         workspace_review: dict[str, Any],
         context_anchor: dict[str, Any],
-        deployment_receipt_path: Path | None = None,
+        deployment_summary: dict[str, Any] | None = None,
+        expected_workstream_id: str = "",
     ) -> dict[str, Any]:
         """Return a conservative read-only status; never mutate project memory."""
         base = {
@@ -346,14 +376,10 @@ class ProjectContinuityService:
         if tvbcp_time and tvbcp_time > handoff_time:
             newer_sources.append("TVBCP")
 
-        receipt_time: datetime | None = None
-        if deployment_receipt_path is not None and Path(deployment_receipt_path).is_file():
-            try:
-                receipt = json.loads(Path(deployment_receipt_path).read_text(encoding="utf-8"))
-                if isinstance(receipt, dict) and receipt.get("state") == "deployed":
-                    receipt_time = _parse_timestamp(receipt.get("deployed_at"))
-            except (OSError, json.JSONDecodeError):
-                receipt_time = None
+        receipt_time = _deployment_summary_time(
+            deployment_summary,
+            expected_workstream_id=expected_workstream_id,
+        )
         evidence.append(
             {
                 "source": "deployment",

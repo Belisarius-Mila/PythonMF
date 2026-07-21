@@ -5,12 +5,6 @@ import unittest
 from pathlib import Path
 
 from app.codex_appserver import AppServerError
-from app.communication.human_adam_deploy import (
-    DEPLOYMENT_COMPLETE,
-    DEPLOYMENT_PENDING,
-    write_deployment_diagnostic,
-    write_deployment_receipt,
-)
 from app.communication.human_adam_service import (
     CANONICAL_TVBCP_RELATIVE_PATH,
     HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
@@ -215,75 +209,13 @@ class HumanAdamServiceTests(unittest.TestCase):
         )
         return service, runtime, workspace, hub
 
-    def test_status_exposes_persistent_confirmation_only_for_same_thread(self) -> None:
+    def test_status_omits_legacy_deployment_readers(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            service, _runtime, workspace, _hub = self.make_service(root)
-            write_deployment_receipt(
-                service.deployment_receipt_path,
-                checkpoint_head=workspace.source_head,
-                thread_id="canonical-thread",
-                state=DEPLOYMENT_COMPLETE,
-                recorded_at="2026-07-14T20:30:00+00:00",
-                deployed_at="2026-07-14T20:31:00+00:00",
-            )
+            service, _runtime, _workspace, _hub = self.make_service(Path(temp_dir))
+            status = service.status()
 
-            restarted_service, _runtime, _workspace, _hub = self.make_service(root)
-            confirmation = restarted_service.status()["deployment_confirmation"]
-
-        self.assertEqual(
-            confirmation,
-            {
-                "checkpoint_short": "aaaaaaa",
-                "gate_passed": True,
-                "completed_at": "2026-07-14T20:31:00+00:00",
-            },
-        )
-        self.assertNotIn("canonical-thread", str(confirmation))
-        self.assertNotIn("private", str(confirmation))
-
-    def test_status_rejects_pending_receipt_even_when_source_head_matches(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            service, _runtime, workspace, _hub = self.make_service(root)
-            write_deployment_receipt(
-                service.deployment_receipt_path,
-                checkpoint_head=workspace.source_head,
-                thread_id="canonical-thread",
-                state=DEPLOYMENT_PENDING,
-                recorded_at="2026-07-14T20:31:00+00:00",
-            )
-
-            restarted_service, _runtime, _workspace, _hub = self.make_service(root)
-            confirmation = restarted_service.status()["deployment_confirmation"]
-
-        self.assertIsNone(confirmation)
-
-    def test_status_restores_safe_deployment_diagnostic_after_restart(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            service, _runtime, workspace, _hub = self.make_service(root)
-            write_deployment_diagnostic(
-                service.deployment_diagnostic_path,
-                checkpoint_head=workspace.source_head,
-                thread_id="canonical-thread",
-                stage="push",
-                outcome="failed",
-                updated_at="2026-07-15T10:31:00+00:00",
-            )
-
-            restarted_service, _runtime, _workspace, _hub = self.make_service(root)
-            diagnostic = restarted_service.status()["deployment_diagnostic"]
-
-        self.assertEqual(diagnostic["checkpoint_short"], "aaaaaaa")
-        self.assertEqual(diagnostic["stage"], "push")
-        self.assertEqual(diagnostic["outcome"], "failed")
-        self.assertEqual(
-            diagnostic["message"],
-            "Push větve main selhal; vzdálená větev není potvrzená.",
-        )
-        self.assertNotIn("canonical-thread", str(diagnostic))
-        self.assertNotIn("private", str(diagnostic))
+        self.assertNotIn("deployment_confirmation", status)
+        self.assertNotIn("deployment_diagnostic", status)
 
     def test_status_exposes_preserved_checkpoint_without_claiming_it_is_auditable(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

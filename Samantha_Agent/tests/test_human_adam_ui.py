@@ -66,7 +66,6 @@ class HumanAdamUiTests(unittest.TestCase):
             "deployConfirmation",
             "deployBtn",
             "deploymentReceipt",
-            "deploymentDiagnostic",
             "turnActivity",
             "mobileStatusSummary",
             "mobileStatusText",
@@ -652,15 +651,16 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("#voiceStatus { min-width:0; overflow:hidden;", HUMAN_ADAM_HTML)
         self.assertNotIn('class="hint"', HUMAN_ADAM_HTML)
 
-    def test_ui_renders_persistent_safe_deployment_confirmation(self) -> None:
-        self.assertIn("payload.deployment_confirmation", HUMAN_ADAM_HTML)
-        self.assertIn("confirmation.gate_passed === true", HUMAN_ADAM_HTML)
-        self.assertIn("/^[0-9a-f]{7}$/.test(shortCommit)", HUMAN_ADAM_HTML)
+    def test_ui_renders_persistent_safe_simple_main_deployment(self) -> None:
+        self.assertIn("payload.last_simple_main_deployment", HUMAN_ADAM_HTML)
+        self.assertIn("verifiedDeploymentRecord(", HUMAN_ADAM_HTML)
         self.assertIn(
-            "`Nasazeno ${shortCommit} · plná brána prošla · ${completedTime}`",
+            "`Nasazeno ${deployment.main_short} · ${deployment.test_count} testů · smoke ${deployment.smoke_count}/5 · ${formatTime(deployment.deployed_at)}`",
             HUMAN_ADAM_HTML,
         )
-        self.assertIn("deploymentReceipt.hidden = !showConfirmation;", HUMAN_ADAM_HTML)
+        self.assertIn("deploymentReceipt.hidden = !deployment;", HUMAN_ADAM_HTML)
+        self.assertNotIn("payload.deployment_confirmation", HUMAN_ADAM_HTML)
+        self.assertNotIn("payload.deployment_diagnostic", HUMAN_ADAM_HTML)
 
     def test_deployment_confirmation_stays_inside_sticky_header_below_badges(self) -> None:
         header = HUMAN_ADAM_HTML.index("<header>")
@@ -676,27 +676,10 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("header { position:sticky;", HUMAN_ADAM_HTML)
         self.assertIn("#deploymentReceipt { margin:8px 0 0; padding:6px 10px;", HUMAN_ADAM_HTML)
 
-    def test_ui_renders_safe_persistent_deployment_stage_in_sticky_header(self) -> None:
-        header = HUMAN_ADAM_HTML.index("<header>")
-        receipt = HUMAN_ADAM_HTML.index('id="deploymentReceipt"', header)
-        diagnostic = HUMAN_ADAM_HTML.index('id="deploymentDiagnostic"', receipt)
-        header_end = HUMAN_ADAM_HTML.index("</header>", diagnostic)
-        render_start = HUMAN_ADAM_HTML.index('function renderDeploymentDiagnostic(diagnostic, confirmedCommit = "")')
-        render_end = HUMAN_ADAM_HTML.index("function renderStatus(payload)", render_start)
-        render_source = HUMAN_ADAM_HTML[render_start:render_end]
-
-        self.assertLess(receipt, diagnostic)
-        self.assertLess(diagnostic, header_end)
-        self.assertIn('new Set(["audit","gate","receipt","remote_recheck","push","fast_forward","workspace_alignment","restart"])', render_source)
-        self.assertIn('new Set(["running","passed","failed"])', render_source)
-        self.assertIn("deploymentDiagnostic.textContent = showDiagnostic", render_source)
-        self.assertIn("Poslední nasazení ${shortCommit} · ${message} · ${updatedTime}", render_source)
-        self.assertIn("deploymentDiagnostic.hidden = !showDiagnostic;", render_source)
-        self.assertIn('const coveredByConfirmation = outcome === "passed" && shortCommit === confirmedCommit;', render_source)
-        self.assertIn("&& !coveredByConfirmation", render_source)
-        self.assertIn('showConfirmation ? shortCommit : ""', HUMAN_ADAM_HTML)
-        self.assertNotIn("diagnostic.path", render_source)
-        self.assertNotIn("diagnostic.error", render_source)
+    def test_ui_has_no_legacy_deployment_diagnostic_surface(self) -> None:
+        self.assertNotIn('id="deploymentDiagnostic"', HUMAN_ADAM_HTML)
+        self.assertNotIn("renderDeploymentDiagnostic", HUMAN_ADAM_HTML)
+        self.assertNotIn("deployment_diagnostic", HUMAN_ADAM_HTML)
 
     def test_deployment_actions_have_distinct_audit_and_apply_colors(self) -> None:
         self.assertIn(
@@ -752,7 +735,7 @@ class HumanAdamUiTests(unittest.TestCase):
         bubble_end = HUMAN_ADAM_HTML.index("function renderSession(session)", bubble_start)
         bubble_source = HUMAN_ADAM_HTML[bubble_start:bubble_end]
         render_start = bubble_end
-        render_end = HUMAN_ADAM_HTML.index("function renderDeploymentDiagnostic", render_start)
+        render_end = HUMAN_ADAM_HTML.index("function renderStatus", render_start)
         render_source = HUMAN_ADAM_HTML[render_start:render_end]
 
         self.assertIn("if (spokenText) node.appendChild(answerSpeechControl(spokenText));", bubble_source)
@@ -770,7 +753,7 @@ class HumanAdamUiTests(unittest.TestCase):
         speak_end = control_start
         speak_source = HUMAN_ADAM_HTML[speak_start:speak_end]
         render_start = HUMAN_ADAM_HTML.index("function renderSession(session)")
-        render_end = HUMAN_ADAM_HTML.index("function renderDeploymentDiagnostic", render_start)
+        render_end = HUMAN_ADAM_HTML.index("function renderStatus", render_start)
         render_source = HUMAN_ADAM_HTML[render_start:render_end]
 
         self.assertIn('button.addEventListener("click", () => speakAnswer(text, button));', control_source)

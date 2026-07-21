@@ -41,11 +41,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #notice { min-height:24px; padding:8px 18px 0; color:var(--muted); font-size:14px; }
     #deploymentReceipt { margin:8px 0 0; padding:6px 10px; border-radius:10px; color:var(--ok); background:#ecfdf3; font-size:13px; }
     #deploymentReceipt[hidden] { display:none; }
-    #deploymentDiagnostic { margin:8px 0 0; padding:6px 10px; border-radius:10px; color:var(--muted); background:var(--soft); font-size:13px; }
-    #deploymentDiagnostic.running { color:var(--warn); background:#fff7ed; }
-    #deploymentDiagnostic.passed { color:var(--ok); background:#ecfdf3; }
-    #deploymentDiagnostic.failed { color:#991b1b; background:#fef2f2; }
-    #deploymentDiagnostic[hidden] { display:none; }
     #chat { flex:1; padding:14px 18px 180px; display:flex; flex-direction:column; gap:14px; }
     .exchange { display:grid; gap:8px; }
     .bubble { max-width:86%; padding:12px 14px; border-radius:16px; white-space:pre-wrap; overflow-wrap:anywhere; }
@@ -175,7 +170,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <div id="turnActivity" role="status" aria-live="polite" hidden></div>
     </div>
     <div id="deploymentReceipt" role="status" aria-live="polite" hidden></div>
-    <div id="deploymentDiagnostic" role="status" aria-live="polite" hidden></div>
   </header>
   <div id="notice" role="status" aria-live="polite"></div>
   <section id="chat" aria-label="Konverzace Human–Adam"></section>
@@ -481,7 +475,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const chat = document.getElementById("chat");
   const notice = document.getElementById("notice");
   const deploymentReceipt = document.getElementById("deploymentReceipt");
-  const deploymentDiagnostic = document.getElementById("deploymentDiagnostic");
   const mobileStatusSummary = document.getElementById("mobileStatusSummary");
   const mobileStatusText = document.getElementById("mobileStatusText");
   const mobileStatusToggleText = document.getElementById("mobileStatusToggleText");
@@ -1133,31 +1126,6 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
   }
 
-  function renderDeploymentDiagnostic(diagnostic, confirmedCommit = "") {
-    const allowedStages = new Set(["audit","gate","receipt","remote_recheck","push","fast_forward","workspace_alignment","restart"]);
-    const allowedOutcomes = new Set(["running","passed","failed"]);
-    const shortCommit = diagnostic ? String(diagnostic.checkpoint_short || "") : "";
-    const stage = diagnostic ? String(diagnostic.stage || "") : "";
-    const outcome = diagnostic ? String(diagnostic.outcome || "") : "";
-    const message = diagnostic ? String(diagnostic.message || "") : "";
-    const updatedTime = diagnostic && diagnostic.updated_at ? formatTime(diagnostic.updated_at) : "";
-    const coveredByConfirmation = outcome === "passed" && shortCommit === confirmedCommit;
-    const showDiagnostic = Boolean(
-      diagnostic
-      && /^[0-9a-f]{7}$/.test(shortCommit)
-      && allowedStages.has(stage)
-      && allowedOutcomes.has(outcome)
-      && message
-      && updatedTime
-      && !coveredByConfirmation
-    );
-    deploymentDiagnostic.textContent = showDiagnostic
-      ? `Poslední nasazení ${shortCommit} · ${message} · ${updatedTime}`
-      : "";
-    deploymentDiagnostic.className = showDiagnostic ? outcome : "";
-    deploymentDiagnostic.hidden = !showDiagnostic;
-  }
-
   function renderStatus(payload) {
     renderWorkstreams(payload);
     const session = payload && payload.session ? payload.session : null;
@@ -1187,19 +1155,15 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     workspaceBadge.className = workspace.has_git_remote || workspaceDiverged || workspace.sync_available || workspace.dirty || workspace.local_checkpoint_ahead ? "badge warn" : "badge";
     renderDevelopmentBadge(payload && payload.development_semaphore ? payload.development_semaphore : null);
     renderContextAnchorBadge(payload && payload.context_anchor ? payload.context_anchor : null);
-    const confirmation = payload && payload.deployment_confirmation ? payload.deployment_confirmation : null;
-    const shortCommit = confirmation ? String(confirmation.checkpoint_short || "") : "";
-    const completedAt = confirmation ? String(confirmation.completed_at || "") : "";
-    const completedTime = completedAt ? formatTime(completedAt) : "";
-    const showConfirmation = Boolean(
-      confirmation && confirmation.gate_passed === true && /^[0-9a-f]{7}$/.test(shortCommit) && completedTime
+    const deployment = verifiedDeploymentRecord(
+      payload && payload.last_simple_main_deployment
+        ? payload.last_simple_main_deployment
+        : null
     );
-    deploymentReceipt.textContent = showConfirmation ? `Nasazeno ${shortCommit} · plná brána prošla · ${completedTime}` : "";
-    deploymentReceipt.hidden = !showConfirmation;
-    renderDeploymentDiagnostic(
-      payload && payload.deployment_diagnostic ? payload.deployment_diagnostic : null,
-      showConfirmation ? shortCommit : ""
-    );
+    deploymentReceipt.textContent = deployment
+      ? `Nasazeno ${deployment.main_short} · ${deployment.test_count} testů · smoke ${deployment.smoke_count}/5 · ${formatTime(deployment.deployed_at)}`
+      : "";
+    deploymentReceipt.hidden = !deployment;
     renderTurnState(session);
     renderSession(session);
   }
@@ -2267,18 +2231,15 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       });
       if (!payload.ok) {
         const deploymentFailure = `Nic nebylo nasazeno: ${payload.message || "plná brána nebo audit selhaly."}`;
-        renderDeploymentDiagnostic(payload.deployment_diagnostic || null);
         await loadWork();
         deployMeta.textContent = deploymentFailure;
         return;
       }
       const tests = payload.gate && payload.gate.test_count ? `${payload.gate.test_count} testů` : "plná brána";
       if (!payload.restart || !payload.restart.ok) {
-        renderDeploymentDiagnostic(payload.deployment_diagnostic || null);
         deployMeta.textContent = `Checkpoint je nasazený (${tests}), ale automatický restart nezačal. Použij Restart Cockpitu nebo terminálový fallback.`;
         return;
       }
-      renderDeploymentDiagnostic(payload.deployment_diagnostic || null);
       deployMeta.textContent = `Nasazeno · ${tests} · Cockpit se restartuje…`;
       await waitForCockpitAndReload(Number(payload.restart.pid || previousPid));
     } catch (error) {

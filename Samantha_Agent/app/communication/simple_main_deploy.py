@@ -289,27 +289,21 @@ def load_simple_main_deployment_receipt(path: Path) -> dict[str, Any]:
     return normalized
 
 
-def load_recent_simple_main_deployment(
+def load_completed_simple_main_deployment(
     path: Path,
     *,
-    now_factory: Callable[[], str] = utc_now,
-    max_age_seconds: int = RECENT_DEPLOYMENT_MAX_AGE_SECONDS,
+    expected_workstream_id: str,
 ) -> dict[str, Any] | None:
-    """Return a short safe summary of one recently verified deployment."""
+    """Return a persistent safe summary for one expected canonical workstream."""
 
+    clean_expected = str(expected_workstream_id or "").strip().casefold()
+    if not _WORKSTREAM_ID_RE.fullmatch(clean_expected):
+        return None
     try:
         receipt = load_simple_main_deployment_receipt(path)
     except SimpleMainDeploymentError:
         return None
-    if receipt.get("state") != DEPLOYED:
-        return None
-    try:
-        now = datetime.fromisoformat(_safe_timestamp(now_factory(), label="Kontrola"))
-        deployed_at = datetime.fromisoformat(str(receipt["deployed_at"]))
-        age_seconds = (now - deployed_at).total_seconds()
-    except (KeyError, TypeError, ValueError, SimpleMainDeploymentError):
-        return None
-    if max_age_seconds <= 0 or age_seconds < 0 or age_seconds > max_age_seconds:
+    if receipt.get("state") != DEPLOYED or receipt.get("workstream_id") != clean_expected:
         return None
     return {
         "state": DEPLOYED,
@@ -326,6 +320,32 @@ def load_recent_simple_main_deployment(
             "check_count": int(receipt["smoke_count"]),
         },
     }
+
+
+def load_recent_simple_main_deployment(
+    path: Path,
+    *,
+    expected_workstream_id: str,
+    now_factory: Callable[[], str] = utc_now,
+    max_age_seconds: int = RECENT_DEPLOYMENT_MAX_AGE_SECONDS,
+) -> dict[str, Any] | None:
+    """Return a short safe summary of one recently verified deployment."""
+
+    summary = load_completed_simple_main_deployment(
+        path,
+        expected_workstream_id=expected_workstream_id,
+    )
+    if summary is None:
+        return None
+    try:
+        now = datetime.fromisoformat(_safe_timestamp(now_factory(), label="Kontrola"))
+        deployed_at = datetime.fromisoformat(str(summary["deployed_at"]))
+        age_seconds = (now - deployed_at).total_seconds()
+    except (KeyError, TypeError, ValueError, SimpleMainDeploymentError):
+        return None
+    if max_age_seconds <= 0 or age_seconds < 0 or age_seconds > max_age_seconds:
+        return None
+    return summary
 
 
 def audit_simple_main_deployment(

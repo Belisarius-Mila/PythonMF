@@ -576,16 +576,30 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 "gate": {"passed": True, "test_count": 904, "duration_seconds": 272.5},
                 "smoke": {"passed": True, "check_count": 5},
             }
+            def for_workstream(_path, *, expected_workstream_id, **_kwargs):
+                return (
+                    recovery
+                    if expected_workstream_id == "layer-human-adam-development"
+                    else None
+                )
+
             with patch(
+                "app.communication.human_adam_profiles.load_completed_simple_main_deployment",
+                side_effect=for_workstream,
+            ), patch(
                 "app.communication.human_adam_profiles.load_recent_simple_main_deployment",
-                return_value=recovery,
+                side_effect=for_workstream,
             ):
                 status = manager.status()
                 manager.switch(profile_id="knihovna", confirmed=True)
                 other_status = manager.status()
 
+        self.assertEqual(status["last_simple_main_deployment"], recovery)
         self.assertEqual(status["recent_simple_main_deployment"], recovery)
+        self.assertIsNone(other_status["last_simple_main_deployment"])
         self.assertIsNone(other_status["recent_simple_main_deployment"])
+        self.assertNotIn("deployment_confirmation", status)
+        self.assertNotIn("deployment_diagnostic", status)
 
     def test_connect_allows_runtime_recovery_only_for_safe_session(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1491,6 +1505,40 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(status["read_only"])
         self.assertFalse(status["blocking"])
         self.assertEqual(status["audit"]["state"], "current")
+
+    def test_project_continuity_uses_persistent_deployment_for_active_workstream(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            continuity, project_id, handoff_path = self.make_project_continuity(root)
+            manager, *_rest = self.make_manager(root, project_continuity=continuity)
+            manager.change_development_semaphore(
+                operation="acquire_profile",
+                expected_revision=0,
+                topic="Projektová kontinuita",
+                project_id=project_id,
+                handoff_path=handoff_path,
+                confirmed=True,
+            )
+            deployment = {
+                "state": "deployed",
+                "workstream_id": "layer-human-adam-development",
+                "main_short": "a" * 12,
+                "deployed_at": "2099-01-01T12:00:00+00:00",
+                "gate": {"passed": True, "test_count": 979},
+                "smoke": {"passed": True, "check_count": 5},
+            }
+            with patch(
+                "app.communication.human_adam_profiles.load_completed_simple_main_deployment",
+                return_value=deployment,
+            ) as load_completed:
+                status = manager.project_continuity_status()
+
+        self.assertEqual(status["audit"]["state"], "needs_update")
+        self.assertIn("poslední nasazení", " ".join(status["audit"]["reasons"]))
+        self.assertEqual(
+            load_completed.call_args.kwargs["expected_workstream_id"],
+            "layer-human-adam-development",
+        )
 
     def test_terminal_binding_is_conservatively_unverifiable_without_registered_worktree(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

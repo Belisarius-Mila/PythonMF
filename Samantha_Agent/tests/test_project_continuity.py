@@ -57,12 +57,16 @@ class ProjectContinuityTests(unittest.TestCase):
         review: dict[str, object] | None = None,
         anchor: dict[str, object] | None = None,
         workspace_root: Path | None = None,
+        deployment_summary: dict[str, object] | None = None,
+        expected_workstream_id: str = "",
     ) -> dict[str, object]:
         return service.audit(
             binding=binding or self.binding(service),
             workspace_root=workspace_root or service.project_root,
             workspace_review=review or {"changes": [], "checkpoint_changes": []},
             context_anchor=anchor or {},
+            deployment_summary=deployment_summary,
+            expected_workstream_id=expected_workstream_id,
         )
 
     def test_catalog_includes_only_active_projects_with_safe_handoffs(self) -> None:
@@ -118,6 +122,64 @@ class ProjectContinuityTests(unittest.TestCase):
 
         self.assertEqual(result["state"], "needs_update")
         self.assertIn("kotva", " ".join(result["reasons"]))
+
+    def test_validated_deployment_for_expected_workstream_needs_update(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service = self.make_project(Path(temp_dir))
+            result = self.audit(
+                service,
+                expected_workstream_id="layer-human-adam-development",
+                deployment_summary={
+                    "state": "deployed",
+                    "workstream_id": "layer-human-adam-development",
+                    "main_short": "a" * 12,
+                    "deployed_at": "2099-01-01T12:00:00+00:00",
+                    "gate": {"passed": True, "test_count": 979},
+                    "smoke": {"passed": True, "check_count": 5},
+                },
+            )
+
+        deployment = next(
+            item for item in result["evidence"] if item["source"] == "deployment"
+        )
+        self.assertEqual(result["state"], "needs_update")
+        self.assertTrue(deployment["available"])
+        self.assertIn("poslední nasazení", " ".join(result["reasons"]))
+
+    def test_foreign_or_malformed_deployment_is_ignored_without_error(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service = self.make_project(Path(temp_dir))
+            foreign = self.audit(
+                service,
+                expected_workstream_id="project-library",
+                deployment_summary={
+                    "state": "deployed",
+                    "workstream_id": "layer-human-adam-development",
+                    "main_short": "a" * 12,
+                    "deployed_at": "2099-01-01T12:00:00+00:00",
+                    "gate": {"passed": True, "test_count": 979},
+                    "smoke": {"passed": True, "check_count": 5},
+                },
+            )
+            malformed = self.audit(
+                service,
+                expected_workstream_id="layer-human-adam-development",
+                deployment_summary={
+                    "state": "deployed",
+                    "workstream_id": "layer-human-adam-development",
+                    "main_short": "a" * 12,
+                    "deployed_at": "2099-01-01T12:00:00+00:00",
+                    "gate": {"passed": True, "test_count": "not-a-number"},
+                    "smoke": {"passed": True, "check_count": 5},
+                },
+            )
+
+        for result in (foreign, malformed):
+            deployment = next(
+                item for item in result["evidence"] if item["source"] == "deployment"
+            )
+            self.assertEqual(result["state"], "current")
+            self.assertFalse(deployment["available"])
 
     def test_missing_workspace_handoff_is_unverifiable(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir, tempfile.TemporaryDirectory() as workspace_dir:

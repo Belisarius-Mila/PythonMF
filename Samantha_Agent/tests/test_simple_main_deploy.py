@@ -14,6 +14,7 @@ from app.communication.simple_main_deploy import (
     SimpleMainDeploymentError,
     SimpleMainDeploymentRequest,
     audit_simple_main_deployment,
+    load_completed_simple_main_deployment,
     load_recent_simple_main_deployment,
     load_simple_main_deployment_receipt,
     prepare_simple_main_deployment,
@@ -340,10 +341,12 @@ class SimpleMainDeploymentTests(unittest.TestCase):
 
             recent = load_recent_simple_main_deployment(
                 receipt_path,
+                expected_workstream_id="project-library",
                 now_factory=lambda: "2026-07-20T13:50:00+00:00",
             )
             stale = load_recent_simple_main_deployment(
                 receipt_path,
+                expected_workstream_id="project-library",
                 now_factory=lambda: "2026-07-20T14:10:00+00:00",
             )
 
@@ -363,6 +366,63 @@ class SimpleMainDeploymentTests(unittest.TestCase):
             },
         )
         self.assertIsNone(stale)
+
+    def test_completed_summary_is_persistent_and_rejects_foreign_or_invalid_receipts(self) -> None:
+        completed = {
+            "schema_version": 1,
+            "state": DEPLOYED,
+            "workstream_id": "project-library",
+            "main_head": "a" * 40,
+            "expected_code_stamp": "0123456789abcdef",
+            "previous_pid": 100,
+            "test_count": 904,
+            "gate_duration_seconds": 272.5,
+            "prepared_at": "2026-07-20T13:42:00+00:00",
+            "observed_pid": 200,
+            "smoke_count": 5,
+            "deployed_at": "2026-07-20T13:47:16+00:00",
+        }
+        with tempfile.TemporaryDirectory() as temp_dir:
+            receipt_path = Path(temp_dir) / "receipt.json"
+            receipt_path.write_text(json.dumps(completed), encoding="utf-8")
+            persistent = load_completed_simple_main_deployment(
+                receipt_path,
+                expected_workstream_id="project-library",
+            )
+            foreign = load_completed_simple_main_deployment(
+                receipt_path,
+                expected_workstream_id="project-mmtx",
+            )
+
+            pending = dict(completed)
+            pending["state"] = PENDING_RESTART
+            pending.pop("observed_pid")
+            pending.pop("smoke_count")
+            pending.pop("deployed_at")
+            receipt_path.write_text(json.dumps(pending), encoding="utf-8")
+            waiting = load_completed_simple_main_deployment(
+                receipt_path,
+                expected_workstream_id="project-library",
+            )
+
+            malformed = dict(completed)
+            malformed["smoke_count"] = 4
+            receipt_path.write_text(json.dumps(malformed), encoding="utf-8")
+            invalid = load_completed_simple_main_deployment(
+                receipt_path,
+                expected_workstream_id="project-library",
+            )
+
+        self.assertIsNotNone(persistent)
+        self.assertEqual(persistent["workstream_id"], "project-library")
+        self.assertEqual(persistent["main_short"], "a" * 12)
+        self.assertNotIn("main_head", persistent)
+        self.assertNotIn("expected_code_stamp", persistent)
+        self.assertNotIn("previous_pid", persistent)
+        self.assertNotIn("observed_pid", persistent)
+        self.assertIsNone(foreign)
+        self.assertIsNone(waiting)
+        self.assertIsNone(invalid)
 
     def test_verify_keeps_pending_receipt_when_restart_or_smoke_evidence_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

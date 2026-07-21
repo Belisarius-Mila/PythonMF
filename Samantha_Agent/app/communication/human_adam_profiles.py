@@ -63,6 +63,7 @@ from app.communication.simple_main_deploy import (
     DEFAULT_SIMPLE_MAIN_DEPLOYMENT_RECEIPT,
     SimpleMainDeploymentRequest,
     audit_simple_main_deployment as audit_clean_main_deployment,
+    load_completed_simple_main_deployment,
     load_recent_simple_main_deployment,
     load_simple_main_deployment_receipt,
     prepare_simple_main_deployment as prepare_clean_main_deployment,
@@ -754,18 +755,20 @@ class HumanAdamProfileManager:
             active = selection.get("active") or {}
             active_workstream_id = str(active.get("workstream_id") or "")
             payload = self.active_service.status()
-            recent_deployment = load_recent_simple_main_deployment(
-                self.simple_main_deployment_receipt_path
+            last_deployment = load_completed_simple_main_deployment(
+                self.simple_main_deployment_receipt_path,
+                expected_workstream_id=active_workstream_id,
             )
-            if recent_deployment and (
-                recent_deployment.get("workstream_id") != active_workstream_id
-            ):
-                recent_deployment = None
+            recent_deployment = load_recent_simple_main_deployment(
+                self.simple_main_deployment_receipt_path,
+                expected_workstream_id=active_workstream_id,
+            )
             return {
                 **payload,
                 "workstream_selection": selection,
                 "workstream_capabilities": self._workstream_capabilities(),
                 "development_semaphore": self.development_status(),
+                "last_simple_main_deployment": last_deployment,
                 "recent_simple_main_deployment": recent_deployment,
             }
         except (AppServerError, SessionHubError, OSError, ValueError) as exc:
@@ -1256,14 +1259,22 @@ class HumanAdamProfileManager:
             include_profile_receipt = bool(
                 binding["project_id"] and binding["project_id"] == default_project_id
             )
+            active_workstream_id = self.active_workstream_id
+            deployment_summary = (
+                load_completed_simple_main_deployment(
+                    self.simple_main_deployment_receipt_path,
+                    expected_workstream_id=active_workstream_id,
+                )
+                if include_profile_receipt
+                else None
+            )
             audit = self.project_continuity.audit(
                 binding=binding,
                 workspace_root=self.active_service.workspace.project_root,
                 workspace_review=self.active_service.workspace.review(),
                 context_anchor=self.active_service.context_anchor(include_content=False),
-                deployment_receipt_path=(
-                    self.active_service.deployment_receipt_path if include_profile_receipt else None
-                ),
+                deployment_summary=deployment_summary,
+                expected_workstream_id=active_workstream_id,
             )
             if (
                 binding["project_id"]
