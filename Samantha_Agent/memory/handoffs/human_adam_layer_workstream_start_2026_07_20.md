@@ -944,3 +944,79 @@ nejistého doručení a main, Human–Adam i Knihovna jsou čisté a zarovnané 
 Další krok: samostatný read-only audit zbývajících profilově pojmenovaných
 bezpečnostních metadat. Zatím nemigrovat schéma 1, vývojový semafor,
 deployment-completion účtenky ani private session.
+
+### 2026-07-21 13:21 CEST – Checkpoint fáze 4.5g-c: audit profilově pojmenovaných bezpečnostních metadat
+
+Nazev: Univerzální pracovní proudy – fáze 4.5g-c
+Priorita: 1
+Stav: hotovo
+Pripomenout pri startu: ano
+Datum: 2026-07-21
+
+Co se resilo:
+Striktní read-only audit zbývajících profilově pojmenovaných metadat po
+odstranění veřejného profilového fallbacku a mrtvého koordinátoru. Cílem bylo
+oddělit skutečně zavádějící veřejná pole od interních identit, které stále
+chrání kompatibilní služby, workspaces, rollback nebo obnovu starého stavu.
+
+Co je hotove:
+- `development_status()` veřejně vrací `active_profile_id` a
+  `active_profile_label`. Při aktivním MMTX obsahují `project-mmtx` a `MMTX`,
+  takže kanonický pracovní proud nesprávně vydávají za profil.
+- Cockpit UI ani jeho JavaScript tato dvě pole nečtou. Jejich odstranění má
+  malý lokální rozsah v normální i chybové větvi status payloadu.
+- Generický semaforový `owner_id` je živá fail-closed identita vlastníka a musí
+  zůstat. Stejně tak interní `active_profile_id`, `adapter.profile_id`,
+  `work_profile_id`, `switch` a workspace řádky stále obsluhují skutečné
+  kompatibilní backendy Human–Adam/Knihovna, ownership a rollback.
+- Private stav používá schéma 2 a zapisuje jen `active_workstream_id`. Čtení
+  schématu 1 je neaktivní pro současný stav, ale zůstává záměrnou migrační a
+  recovery kompatibilitou.
+- Aktuální simple-main deployment persistuje kanonické `workstream_id`.
+- Starý deployment-completion endpoint a UI karta jsou proti aktuálnímu
+  simple-main deploymentu osiřelé: jejich producent je v neroutovaném starém
+  deployment handleru a živý completion záznam neexistuje. Tento subsystém má
+  větší zapisovací a Git rozsah a nesmí se odstraňovat v malém kroku 4.5g-c1.
+- Audit nic nezapsal do aplikačního ani private stavu, nic nenasadil a
+  nerestartoval. `main` byl čistý a synchronní s `origin/main` na `4566fd0`.
+
+Co neni hotove:
+- Veřejná `active_profile_id` a `active_profile_label` pole zatím nebyla
+  odstraněna a kontraktní testy nebyly změněny.
+- Interní profilové identity ani schéma 1 nebyly přejmenovány nebo migrovány.
+- Osiřelý deployment-completion endpoint, UI karta a starý action surface
+  nebyly odstraněny; vyžadují samostatnou hranici 4.5g-c2.
+- Neběžel deployment, restart ani live zapisovací proof.
+
+Dalsi krok:
+Ve fázi 4.5g-c1 odstranit pouze veřejná pole `active_profile_id` a
+`active_profile_label` z obou větví `development_status()` a doplnit negativní
+kontraktní testy pro samostatný semaphore endpoint i semaphore vložený ve
+statusu. Interní ownership, schema 1, adaptéry a private data ponechat beze
+změny; implementaci zatím nenasazovat.
+
+Navrhovane dalsi kroky:
+- Po samostatném ověření a nasazení 4.5g-c1 otevřít 4.5g-c2 jako read-only audit
+  bezpečného odstranění osiřelého deployment-completion endpointu, UI karty a
+  neroutovaného starého producenta.
+- Případné přejmenování interního `work_profile_id` řešit až jako samostatnou
+  migraci servisního ownership kontraktu, nikoli jako kosmetický cleanup.
+
+Zmenene nebo relevantni soubory:
+- `human_adam_profiles.py`
+- `human_adam_workstream_backends.py`
+- `development_semaphore.py`
+- `human_adam_deploy.py`
+- `simple_main_deploy.py`
+- `human_adam_ui.py`
+- `cockpit.py`
+- `test_human_adam_profiles.py`
+- `test_cockpit.py`
+- `test_human_adam_ui.py`
+
+Bezpecnost / neukladat:
+- Nemigrovat ani nemazat schéma 1, private session, kotvy, workspaces,
+  semaphore nebo deployment-completion stav bez samostatného auditu a výslovné
+  dohody.
+- Neukládat private thread ID, identity hash, obsah zpráv, tokeny ani private
+  cesty.

@@ -112,16 +112,16 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 ## Handoffs
 
 - `handoffs/human_adam_layer_workstream_start_2026_07_20.md` - [PRIPOMENOUT]
-  priorita 1: faze 4.5g-b odstranila mrtvy `HumanAdamWorkstreamCoordinator` a
-  ctyri nepouzivane profilove wrappery. Zivy `CanonicalWorkstreamBinding` byl
-  oddelen se zachovanou katalogovou, cestovou a profilovou fail-closed
-  validaci. Jednotny backend, grouped router, interni `switch`, adaptery
-  Human–Adam/Knihovna, schema 1 a private session zustaly zachovane. Commit
-  `c1b30df`, lokalni i vzdalena brana s 979 testy, rizene nasazeni, novy PID,
-  code stamp a smoke `5/5` prosly. Stejne aktivni pripojene MMTX zachovalo 2
-  zpravy, Human–Adam 102 a vsechny tri workspaces jsou ciste a zarovnane.
-  Dalsi krok je samostatny read-only audit profilove pojmenovanych
-  bezpecnostnich metadat; zatim nic nemigrovat ani neodstranovat.
+  priorita 1: read-only audit faze 4.5g-c oddelil dve zavadejici verejna
+  metadata semaforu `active_profile_id` a `active_profile_label` od zivych
+  internich bezpecnostnich identit. Pri MMTX vydavaji kanonicky
+  `project-mmtx` za profil a Cockpit UI je necte. `owner_id`, interni
+  `active_profile_id`, kompatibilni adaptery Human–Adam/Knihovna a cteni
+  migracniho schematu 1 zustavaji zive a nesmi se hromadne prejmenovat ani
+  odstranit. Stary deployment-completion endpoint a UI jsou osirely proti
+  aktualnimu simple-main deploymentu, ale patri do samostatneho kroku. Dalsi
+  krok 4.5g-c1 ma odstranit pouze obe verejna `active_profile_*` pole a pridat
+  negativni kontraktni testy, zatim bez nasazeni a bez migrace private dat.
   Historie: krok 0 transformace Human–Adam zacal zalozenim kanonickeho
   pracovniho proudu `Human–Adam / vyvojove prostredi` typu `Layer`. Stary
   projektovy zaznam zustava docasnym kompatibilnim mostem a zadny funkcni kod

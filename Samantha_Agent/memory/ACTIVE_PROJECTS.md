@@ -41,17 +41,18 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
-- 2026-07-21: Priorita 1, univerzalni pracovni proudy faze 4.5g-b. Mrtvy
-  `HumanAdamWorkstreamCoordinator` a ctyri nepouzivane profilove wrappery jsou
-  odstranene; zivy `CanonicalWorkstreamBinding` je oddeleny v samostatnem
-  modulu se zachovanou katalogovou, cestovou a profilovou fail-closed validaci.
-  Jednotny backendovy registr, grouped router, interni `switch`, adaptery
-  Human–Adam/Knihovna, schema 1 a private session zustaly zachovane. Commit
-  `c1b30df`, lokalni i vzdalena brana s 979 testy, rizene nasazeni, novy PID a
-  smoke `5/5` prosly. Stejne aktivni pripojene MMTX zachovalo 2 zpravy,
-  Human–Adam 102 a vsechny tri workspaces jsou ciste a zarovnane. Dalsi krok je
-  samostatny read-only audit profilove pojmenovanych bezpecnostnich metadat; nic
-  zatim nemigrovat ani neodstranovat. Handoff:
+- 2026-07-21: Priorita 1, univerzalni pracovni proudy faze 4.5g-c. Read-only
+  audit potvrdil, ze verejny payload vyvojoveho semaforu stale vraci
+  `active_profile_id` a `active_profile_label`; pri MMTX tak kanonicky proud
+  `project-mmtx` nespravne oznacuje jako profil, ackoli Cockpit UI tato pole
+  necte. Semaforovy `owner_id`, interni profilove identity adapteru
+  Human–Adam/Knihovna, jejich service/workspace ownership a cteni migracniho
+  schematu 1 jsou stale zive bezpecnostni nebo recovery kontrakty. Stary
+  deployment-completion endpoint a UI jsou osirele proti aktualnimu
+  simple-main deploymentu, ale jejich uklid nesmi byt smisen s malou zmenou.
+  Dalsi krok 4.5g-c1: odstranit pouze obe verejna `active_profile_*` pole,
+  doplnit negativni kontraktni testy a zatim nenasazovat ani nemenit private
+  stav. Handoff:
   `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-20: Priorita 1, univerzalni pracovni proudy faze 4.3. Vsech 29 proudu
   ma jednu kanonickou git-safe vazbu na handoff a TVBCP. Human–Adam a Knihovna

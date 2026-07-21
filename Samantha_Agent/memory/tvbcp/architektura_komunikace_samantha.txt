@@ -2232,3 +2232,25 @@ skončily `5/5`. Live návrat na `project-mmtx` zachoval stejnou private session
 Další krok je samostatný read-only audit profilově pojmenovaných bezpečnostních
 metadat. Schéma 1, vývojový semafor, deployment-completion účtenky a private
 session zatím nemigrovat ani neodstraňovat.
+
+### 2026-07-21 13:21 CEST – Fáze 4.5g-c: audit bezpečnostních metadat
+
+Read-only audit oddělil dvě skutečně zavádějící veřejná pole semaforového
+statusu od interních profilových identit, které stále drží kompatibilní služby
+a bezpečnostní ownership. `development_status()` vrací `active_profile_id` a
+`active_profile_label`; při MMTX tím kanonický `project-mmtx` vydává za profil.
+Cockpit UI tato pole nečte. Nejmenší bezpečný krok 4.5g-c1 je proto odstranit
+jen obě veřejná `active_profile_*` pole z normální i chybové větve a kontrakt
+uzamknout negativními testy.
+
+Generický semaphore `owner_id`, interní `active_profile_id`, kompatibilní
+adaptéry Human–Adam/Knihovna, jejich service/workspace ownership, rollback a
+čtení migračního schématu 1 zůstávají živé a nesmí být součástí hromadného
+přejmenování. Private schéma 2 už zapisuje jen `active_workstream_id` a
+simple-main deployment používá `workstream_id`.
+
+Starý deployment-completion endpoint a UI karta jsou proti aktuálnímu
+simple-main deploymentu osiřelé, ale jejich producent a finalizace mají větší
+zapisovací, Git a semaphore rozsah. Jejich případné odstranění patří do
+samostatného read-only kroku 4.5g-c2. Audit nic neměnil, nenasazoval ani
+nerestartoval; `main` byl čistý a synchronní s `origin/main` na `4566fd0`.
