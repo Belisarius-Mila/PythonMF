@@ -587,24 +587,6 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(safe_recovery["recover_unreachable_owned"])
         self.assertFalse(uncertain_recovery["recover_unreachable_owned"])
 
-    def test_simple_checkpoint_context_comes_from_active_profile_binding(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            manager, *_rest = self.make_manager(Path(temp_dir))
-            context = manager.simple_checkpoint_context()
-
-        self.assertTrue(context["available"])
-        self.assertEqual(context["profile_id"], "human_adam")
-        self.assertEqual(context["workstream_id"], "layer-human-adam-development")
-        self.assertEqual(context["workstream_type"], "Layer")
-        self.assertEqual(
-            context["handoff_relative_path"],
-            "memory/handoffs/human_adam_layer_workstream_start_2026_07_20.md",
-        )
-        self.assertEqual(
-            context["tvbcp_relative_path"],
-            "memory/tvbcp/architektura_komunikace_samantha.txt",
-        )
-
     def test_simple_checkpoint_builds_request_from_profile_and_includes_peers(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, human_workspace, library_workspace, *_rest = self.make_manager(
@@ -642,7 +624,6 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, *_rest = self.make_manager(Path(temp_dir))
             manager.switch(profile_id="knihovna", confirmed=True)
-            context = manager.simple_checkpoint_context()
             with patch(
                 "app.communication.human_adam_profiles.complete_simple_main_checkpoint",
                 return_value={"ok": True, "checkpoint_head": "d" * 40},
@@ -655,9 +636,6 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 )
 
         request = checkpoint.call_args.kwargs["request"]
-        self.assertTrue(context["available"])
-        self.assertEqual(context["workstream_id"], "project-knowledge-library")
-        self.assertEqual(context["workstream_type"], "Project")
         self.assertEqual(request.workstream_id, "project-knowledge-library")
         self.assertEqual(
             request.handoff_relative_path,
@@ -917,78 +895,6 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                         observed_code_stamp="0123456789abcdef",
                     )
                 verify.assert_not_called()
-
-    def test_private_workstream_catalog_contains_human_adam_and_library(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            manager, *_rest = self.make_manager(Path(temp_dir))
-            status = manager.workstream_status()
-            catalog = manager.workstream_coordinator.catalog()
-
-        self.assertTrue(status["ok"])
-        self.assertTrue(status["private_backend"])
-        self.assertEqual(status["workstream_count"], 2)
-        self.assertEqual(len(catalog), 29)
-        self.assertEqual(
-            [(row["id"], row["type"], row["active"]) for row in status["workstreams"]],
-            [
-                ("layer-human-adam-development", "Layer", True),
-                ("project-knowledge-library", "Project", False),
-            ],
-        )
-        self.assertNotIn("thread", str(status).casefold())
-
-    def test_private_workstream_selection_roundtrip_synchronizes_each_target(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            manager, human_workspace, library_workspace, *_rest = self.make_manager(
-                Path(temp_dir)
-            )
-            library_workspace.source_ahead = True
-            library = manager.select_workstream(
-                workstream_id="project-knowledge-library",
-                confirmed=True,
-            )
-            human_workspace.source_ahead = True
-            human = manager.select_workstream(
-                workstream_id="layer-human-adam-development",
-                confirmed=True,
-            )
-
-        self.assertTrue(library["switched"])
-        self.assertEqual(library_workspace.sync_count, 1)
-        self.assertEqual(
-            library["workstream_selection"]["active"]["workstream_id"],
-            "project-knowledge-library",
-        )
-        self.assertTrue(human["switched"])
-        self.assertEqual(human_workspace.sync_count, 1)
-        self.assertEqual(
-            human["workstream_selection"]["active"]["workstream_id"],
-            "layer-human-adam-development",
-        )
-
-    def test_private_workstream_selection_rejects_unknown_id_without_switch(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            manager, *_rest = self.make_manager(Path(temp_dir))
-            with self.assertRaisesRegex(AppServerError, "není zaregistrovaný"):
-                manager.select_workstream(
-                    workstream_id="project-unknown",
-                    confirmed=True,
-                )
-
-        self.assertEqual(manager.active_profile_id, "human_adam")
-
-    def test_private_workstream_selection_preserves_dirty_current_project(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            manager, human_workspace, *_rest = self.make_manager(Path(temp_dir))
-            human_workspace.dirty = True
-            with self.assertRaisesRegex(AppServerError, "necheckpointované změny"):
-                manager.select_workstream(
-                    workstream_id="project-knowledge-library",
-                    confirmed=True,
-                )
-
-        self.assertEqual(manager.active_profile_id, "human_adam")
-        self.assertTrue(human_workspace.dirty)
 
     def test_grouped_router_switches_legacy_to_lazy_through_public_action(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

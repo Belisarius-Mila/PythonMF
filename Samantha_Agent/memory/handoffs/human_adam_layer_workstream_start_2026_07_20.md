@@ -860,3 +860,66 @@ aktivní připojené MMTX bez aktivního tahu.
 Další krok: read-only hranice fáze 4.5g-b pro mrtvý koordinátor a wrappery.
 Nemigrovat ve stejném kroku vývojový semafor, deployment-completion účtenky,
 schéma 1 ani private session.
+
+### 2026-07-21 11:45 CEST – Checkpoint fáze 4.5g-b: mrtvý koordinátor a wrappery odstraněny
+
+Nazev: Univerzální pracovní proudy – fáze 4.5g-b
+Priorita: 1
+Stav: hotovo
+Pripomenout pri startu: ano
+Datum: 2026-07-21
+
+Co se resilo:
+Read-only audit prokázal, že `HumanAdamWorkstreamCoordinator` a čtyři staré
+profilové wrappery už nemají živé call-site. Ve stejném modulu však zůstával
+živý `CanonicalWorkstreamBinding`, který chrání kompatibilní adaptéry,
+checkpointy a deployment. Implementace proto nejdřív oddělila tento kontrakt
+a teprve potom odstranila mrtvou konstrukci.
+
+Co je hotove:
+- `CanonicalWorkstreamBinding` a jeho fail-closed validátor jsou v samostatném
+  modulu `human_adam_workstream_binding.py`.
+- Validace dál kontroluje katalogové ID, povolený alias názvu a typu, kanonické
+  handoff/TVBCP cesty, identitu služby a shodu profilového TVBCP.
+- Mrtvý `HumanAdamWorkstreamCoordinator`, jeho instance a wrappery
+  `service_for_profile`, `simple_checkpoint_context`, `workstream_status` a
+  `select_workstream` byly odstraněny.
+- Živý grouped router, `WorkstreamBackendRegistry`, interní `switch`,
+  kompatibilní adaptéry Human–Adam/Knihovna, schéma 1 a private session zůstaly
+  zachované.
+- Statická kontrola nenachází žádný zbylý import ani call-site koordinátoru a
+  wrapperů. Cílených 78 testů a plná Cockpit Quality Gate s 979 testy za
+  224,084 sekundy prošly; nový binding test je zahrnutý v kanonické CI sadě.
+- `git diff --check` je čistý. Live Cockpit nebyl restartován ani nasazen.
+
+Co neni hotove:
+- Checkpoint ještě není commitnutý ani pushnutý a vzdálená CI jej zatím
+  neověřila.
+- Změna není nasazená; live Cockpit stále běží na předchozí potvrzené verzi.
+- Vývojový semafor, deployment-completion účtenky, migrační schéma 1 a private
+  session nebyly migrovány ani odstraněny.
+
+Dalsi krok:
+Vytvořit jeden tematický commit fáze 4.5g-b, pushnout `main` a počkat na zelenou
+vzdálenou Cockpit Quality Gate. Teprve potom samostatně rozhodnout o bezpečném
+nasazení a live regresním proofu se zachovaným aktivním MMTX.
+
+Navrhovane dalsi kroky:
+- Po nasazení ověřit grouped menu, kanonické `workstream_id`, zachovanou MMTX
+  session a čisté workspaces bez nové zprávy nebo vlákna.
+- Profilově pojmenovaná bezpečnostní metadata auditovat až v samostatné další
+  fázi; nespojovat je s odstraněním koordinátoru.
+
+Zmenene nebo relevantni soubory:
+- `human_adam_workstream_binding.py`
+- `human_adam_workstream_coordinator.py` – odstraněn
+- `human_adam_profiles.py`
+- `cockpit_quality_gate.py`
+- `test_human_adam_workstream_binding.py`
+- `test_human_adam_profiles.py`
+
+Bezpecnost / neukladat:
+- Nemazat ani nepřesouvat private session, kotvy, workspaces, schéma 1,
+  semaforové nebo deployment-completion účtenky.
+- Neukládat private thread ID, hash identity, obsah zpráv, tokeny ani private
+  cesty.

@@ -2195,3 +2195,23 @@ Fáze 4.5g-a je provozně uzavřena. Další krok je read-only hranice 4.5g-b pr
 odstranění mrtvého koordinátoru a wrapperů. Vývojový semafor,
 deployment-completion účtenky, migrační schéma 1 a private session zůstávají
 mimo tento krok.
+
+### 2026-07-21 11:45 CEST – Fáze 4.5g-b: odstranění mrtvého koordinátoru a wrapperů
+
+Read-only audit oddělil skutečně mrtvý `HumanAdamWorkstreamCoordinator` a čtyři
+nepoužívané profilové wrappery od stále živého `CanonicalWorkstreamBinding`.
+Binding byl přesunut do samostatného modulu a jeho katalogová, cestová i
+profilová fail-closed validace zůstala zachovaná. Teprve potom byl odstraněn
+koordinátor, jeho instance a wrappery `service_for_profile`,
+`simple_checkpoint_context`, `workstream_status` a `select_workstream`.
+
+Živou autoritou zůstává `WorkstreamBackendRegistry`, grouped selection a
+atomický router. Interní `switch`, kompatibilní adaptéry Human–Adam/Knihovna,
+schéma 1, private session, vývojový semafor i deployment-completion účtenky
+zůstaly mimo změnu. Statická kontrola nenachází zbylý call-site staré
+konstrukce; cílených 78 testů a plná Cockpit Quality Gate s 979 testy za
+224,084 sekundy prošly. Live Cockpit nebyl restartován ani nasazen.
+
+Další krok: jeden tematický commit a push, zelená vzdálená Cockpit Quality Gate
+a teprve potom samostatné bezpečné nasazení s live důkazem zachování aktivního
+MMTX. Profilově pojmenovaná bezpečnostní metadata řešit až odděleným auditem.

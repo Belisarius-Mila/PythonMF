@@ -37,12 +37,11 @@ from app.communication.human_adam_workstream_backends import (
     CompatibilityWorkstreamAdapter,
     WorkstreamBackendRegistry,
 )
-from app.communication.human_adam_workstream_catalog import CanonicalWorkstream
-from app.communication.human_adam_workstream_coordinator import (
+from app.communication.human_adam_workstream_binding import (
     CanonicalWorkstreamBinding,
-    HumanAdamWorkstreamCoordinator,
     canonical_workstream_binding,
 )
+from app.communication.human_adam_workstream_catalog import CanonicalWorkstream
 from app.communication.human_adam_workstream_memory import WorkstreamMemoryRegistry
 from app.communication.human_adam_workstream_selection import GroupedWorkstreamSelection
 from app.communication.human_adam_workstream_threads import WorkstreamThreadRegistry
@@ -174,7 +173,6 @@ class HumanAdamProfileManager:
             )
             normalized_profiles[profile_id] = normalized
         self.profiles = normalized_profiles
-        self.workstream_coordinator = HumanAdamWorkstreamCoordinator(self.profiles)
         compatibility_adapters = tuple(
             CompatibilityWorkstreamAdapter(
                 workstream_id=binding.workstream_id,
@@ -379,12 +377,6 @@ class HumanAdamProfileManager:
             raise AppServerError("Aktivní lazy proud nemá konzistentní backend.")
         return workstream_id
 
-    def service_for_profile(self, profile_id: str) -> HumanAdamService:
-        clean_id = str(profile_id or "").strip()
-        if clean_id not in self.profiles:
-            raise AppServerError("Požadovaný pracovní profil neexistuje.")
-        return self.profiles[clean_id]["service"]
-
     @property
     def workspace(self) -> HumanAdamWorkspaceManager:
         return self.active_service.workspace
@@ -408,16 +400,6 @@ class HumanAdamProfileManager:
     @property
     def work_profile_id(self) -> str:
         return self.active_service.work_profile_id
-
-    def simple_checkpoint_context(self) -> dict[str, Any]:
-        """Return the canonical checkpoint binding of the active profile."""
-
-        return self.workstream_coordinator.context(self.active_profile_id)
-
-    def workstream_status(self) -> dict[str, Any]:
-        """Return the private coordinator catalog without thread identifiers."""
-
-        return self.workstream_coordinator.status(self.active_profile_id)
 
     def lazy_workstream_thread_status(self) -> dict[str, Any]:
         """Return the private phase-4.2 backend status without exposing it to UI."""
@@ -477,29 +459,6 @@ class HumanAdamProfileManager:
             )
         finally:
             self._operation_lock.release()
-
-    def select_workstream(
-        self,
-        *,
-        workstream_id: str,
-        confirmed: bool,
-    ) -> dict[str, Any]:
-        """Select a registered workstream through the existing safe switch path.
-
-        This method is intentionally not exposed through Cockpit API or UI in
-        phase 1.3.  The delegated profile switch keeps the current thread,
-        delivery and workspace guards and fast-forwards a clean target from
-        committed local ``main`` when needed.
-        """
-
-        target_profile_id = self.workstream_backends.compatibility_profile_id(
-            workstream_id
-        )
-        result = self.switch(profile_id=target_profile_id, confirmed=confirmed)
-        return {
-            **result,
-            "workstream_selection": self.workstream_status(),
-        }
 
     def simple_main_checkpoint(
         self,

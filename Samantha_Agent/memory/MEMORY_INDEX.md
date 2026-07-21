@@ -112,15 +112,14 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 ## Handoffs
 
 - `handoffs/human_adam_layer_workstream_start_2026_07_20.md` - [PRIPOMENOUT]
-  priorita 1: faze 4.5g-a odstranila verejny profilovy fallback. API prijima
-  jen kanonicke `workstream_id`, `profile_id` fail-closed odmita, UI nema
-  zalozni profilove menu a status/selection nezverejnuji profilove fallbacky.
-  Adaptery Human–Adam/Knihovna, schema 1 a private session zustavaji zachovane.
-  Commit `427f0a6`, zelene lokalni i vzdalene CI, nasazeni s 980 testy, novy
-  proces a smoke `5/5` prosly. Live legacy payload byl odmitnut bez prepnuti a
-  kanonicke `workstream_id` vratilo stejne MMTX se zachovanymi pocty zprav;
-  workspaces jsou ciste a zarovnane. Dalsi krok je read-only hranice 4.5g-b pro
-  odstraneni mrtveho koordinatoru a wrapperu bez migrace bezpecnostnich dat.
+  priorita 1: faze 4.5g-b odstranila mrtvy `HumanAdamWorkstreamCoordinator` a
+  ctyri nepouzivane profilove wrappery. Zivy `CanonicalWorkstreamBinding` byl
+  oddelen se zachovanou katalogovou, cestovou a profilovou fail-closed
+  validaci. Jednotny backend, grouped router, interni `switch`, adaptery
+  Human–Adam/Knihovna, schema 1 a private session zustaly zachovane. Cilenych
+  78 testu a plna lokalni brana s 979 testy prosly; bez restartu a nasazeni.
+  Dalsi krok je commit/push, zelena vzdalena CI a pak samostatne bezpecne
+  nasazeni s live proofem zachovani aktivniho MMTX.
   Historie: krok 0 transformace Human–Adam zacal zalozenim kanonickeho
   pracovniho proudu `Human–Adam / vyvojove prostredi` typu `Layer`. Stary
   projektovy zaznam zustava docasnym kompatibilnim mostem a zadny funkcni kod
