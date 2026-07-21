@@ -6,15 +6,19 @@ import hashlib
 import json
 import re
 import subprocess
-import sys
 import threading
-import time
-from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, TYPE_CHECKING
 
 from app.codex_appserver import AppServerError, utc_now
+from app.communication.checkpoint_quality_gate import (
+    DEFAULT_GATE_LOG,
+    TRUSTED_PYTHON,
+    GateEvidence,
+    HumanAdamGateError as CheckpointGateError,
+    run_checkpoint_quality_gate as run_shared_checkpoint_quality_gate,
+)
 from app.file_persistence import FilePersistenceError, atomic_write_json, update_json_file
 from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
 from app.communication.session_hub import SessionHubError
@@ -32,8 +36,6 @@ if TYPE_CHECKING:
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-TRUSTED_PYTHON = Path(sys.executable)
-DEFAULT_GATE_LOG = PROJECT_ROOT / "data" / "private" / "communication" / "human_adam_deploy_gate.log"
 DEFAULT_DEPLOYMENT_RECEIPT = (
     PROJECT_ROOT / "data" / "private" / "communication" / "human_adam_deployment_receipt.json"
 )
@@ -44,7 +46,6 @@ DEFAULT_DEPLOYMENT_FAILURE_HISTORY = (
     PROJECT_ROOT / "data" / "private" / "communication" / "human_adam_deployment_failures.json"
 )
 DEPLOYMENT_LOCK = threading.Lock()
-MAX_GATE_LOG_CHARS = 2_000_000
 MAX_DEPLOYMENT_FAILURE_RECORDS = 20
 DEPLOYMENT_RECEIPT_SCHEMA = 1
 DEPLOYMENT_DIAGNOSTIC_SCHEMA = 1
@@ -120,24 +121,6 @@ class HumanAdamGateError(HumanAdamDeployError):
             failure_type = "gate_failure"
         self.failure_type = failure_type
         super().__init__(message)
-
-
-@dataclass(frozen=True)
-class GateEvidence:
-    passed: bool
-    returncode: int
-    test_count: int
-    duration_seconds: float
-    log_path: str
-
-    def public_dict(self) -> dict[str, Any]:
-        return {
-            "passed": self.passed,
-            "returncode": self.returncode,
-            "test_count": self.test_count,
-            "duration_seconds": self.duration_seconds,
-            "log_path": self.log_path,
-        }
 
 
 def _thread_key(thread_id: str) -> str:
@@ -512,56 +495,18 @@ def run_checkpoint_quality_gate(
     log_path: Path = DEFAULT_GATE_LOG,
     timeout: float = 420.0,
 ) -> GateEvidence:
-    gate_script = workspace.project_root / "scripts" / "cockpit_quality_gate.py"
-    if not TRUSTED_PYTHON.is_file() or not gate_script.is_file():
-        raise HumanAdamGateError(
-            "Chybí důvěryhodné Python prostředí nebo quality gate checkpointu.",
-            failure_type="gate_process_error",
-        )
-    started = time.monotonic()
     try:
-        completed = runner(
-            [str(TRUSTED_PYTHON), str(gate_script)],
-            cwd=str(workspace.project_root),
-            capture_output=True,
-            text=True,
+        return run_shared_checkpoint_quality_gate(
+            workspace=workspace,
+            runner=runner,
+            log_path=log_path,
             timeout=timeout,
-            check=False,
         )
-    except subprocess.TimeoutExpired as exc:
+    except CheckpointGateError as exc:
         raise HumanAdamGateError(
-            "Plná brána checkpointu se nedokončila; nic nebylo nasazeno.",
-            failure_type="gate_timeout",
+            str(exc),
+            failure_type=exc.failure_type,
         ) from exc
-    except OSError as exc:
-        raise HumanAdamGateError(
-            "Plná brána checkpointu se nedokončila; nic nebylo nasazeno.",
-            failure_type="gate_process_error",
-        ) from exc
-    duration = round(time.monotonic() - started, 1)
-    output = f"{completed.stdout or ''}\n{completed.stderr or ''}".strip()
-    log_path.parent.mkdir(parents=True, exist_ok=True)
-    log_path.write_text(output[-MAX_GATE_LOG_CHARS:] + "\n", encoding="utf-8")
-    matches = re.findall(r"Ran\s+(\d+)\s+tests", output)
-    evidence = GateEvidence(
-        passed=completed.returncode == 0 and "Cockpit quality gate: OK" in output,
-        returncode=int(completed.returncode),
-        test_count=int(matches[-1]) if matches else 0,
-        duration_seconds=duration,
-        log_path=str(log_path.relative_to(PROJECT_ROOT)) if log_path.is_relative_to(PROJECT_ROOT) else str(log_path),
-    )
-    if not evidence.passed:
-        folded_output = output.casefold()
-        failure_type = (
-            "syntax_error"
-            if "syntaxerror" in folded_output or re.search(r"(?:python|javascript|shell)?\s*syntax:\s*(?:failed|error)", folded_output)
-            else ("test_failure" if "failed" in folded_output or "error" in folded_output else "gate_failure")
-        )
-        raise HumanAdamGateError(
-            f"Plná brána checkpointu neprošla; nic nebylo nasazeno. Log: {evidence.log_path}",
-            failure_type=failure_type,
-        )
-    return evidence
 
 
 def deploy_checkpoint(

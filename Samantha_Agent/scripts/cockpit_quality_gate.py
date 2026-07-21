@@ -39,6 +39,7 @@ COMPILE_PATHS = (
     "app/project_continuity.py",
     "app/communication/human_adam_profiles.py",
     "app/communication/development_semaphore.py",
+    "app/communication/checkpoint_quality_gate.py",
     "app/communication/human_adam_service.py",
     "app/communication/human_adam_deploy.py",
     "app/communication/human_adam_ui.py",

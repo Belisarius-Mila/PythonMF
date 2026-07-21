@@ -17,7 +17,7 @@ from typing import Any, Callable, Sequence
 from zoneinfo import ZoneInfo
 
 from app.codex_appserver import AppServerError
-from app.communication.human_adam_deploy import (
+from app.communication.checkpoint_quality_gate import (
     DEFAULT_GATE_LOG,
     GateEvidence,
     HumanAdamGateError,

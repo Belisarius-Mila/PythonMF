@@ -20,7 +20,7 @@ from typing import Any, Callable, Sequence
 
 from app.codex_appserver import AppServerError, utc_now
 from app.cockpit_code_stamp import cockpit_code_stamp, default_cockpit_code_stamp_paths
-from app.communication.human_adam_deploy import (
+from app.communication.checkpoint_quality_gate import (
     DEFAULT_GATE_LOG,
     HumanAdamGateError,
     run_checkpoint_quality_gate,

@@ -77,6 +77,16 @@ def request(head: str) -> SimpleMainDeploymentRequest:
 
 
 class SimpleMainDeploymentTests(unittest.TestCase):
+    def test_simple_main_uses_shared_gate_without_legacy_deploy_import(self) -> None:
+        project_root = Path(__file__).resolve().parents[1]
+        for relative_path in (
+            "app/communication/simple_main_checkpoint.py",
+            "app/communication/simple_main_deploy.py",
+        ):
+            source = (project_root / relative_path).read_text(encoding="utf-8")
+            self.assertIn("app.communication.checkpoint_quality_gate", source)
+            self.assertNotIn("app.communication.human_adam_deploy", source)
+
     def test_audit_reports_exact_clean_main_without_creating_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
