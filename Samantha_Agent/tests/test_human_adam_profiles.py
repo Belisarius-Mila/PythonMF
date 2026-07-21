@@ -13,12 +13,14 @@ from app.communication.human_adam_profiles import (
     DEPLOYMENT_COMPLETION_CONFIRMATION,
     HumanAdamProfileManager,
     human_adam_development_semaphore_action,
+    human_adam_development_semaphore_status_action,
     human_adam_profile_switch_action,
     human_adam_project_continuity_action,
 )
 from app.communication.human_adam_service import (
     THREAD_ROTATION_CONFIRMATION_TEXT,
     HumanAdamService,
+    human_adam_status_action,
 )
 from app.communication.human_adam_workstream_memory import WorkstreamMemoryRegistry
 from app.communication.session_hub import SessionBusyError
@@ -380,7 +382,8 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
     def test_status_advertises_only_grouped_catalog_without_public_profile_fallback(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, _human_workspace, _library_workspace, _human_hub, _library_hub = self.make_manager(Path(temp_dir))
-            status = manager.status()
+            status = human_adam_status_action(service=manager)  # type: ignore[arg-type]
+            semaphore = human_adam_development_semaphore_status_action(service=manager)
 
         self.assertNotIn("work_profile", status)
         self.assertNotIn("work_profiles", status)
@@ -394,12 +397,29 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(status["development_semaphore"]["ok"])
         self.assertFalse(status["development_semaphore"]["active"])
         self.assertTrue(status["development_semaphore"]["can_acquire_profile"])
+        for payload in (semaphore, status["development_semaphore"]):
+            self.assertNotIn("active_profile_id", payload)
+            self.assertNotIn("active_profile_label", payload)
         self.assertTrue(status["workstream_selection"]["ok"])
         self.assertEqual(status["workstream_selection"]["workstream_count"], 29)
         self.assertEqual(
             [group["label"] for group in status["workstream_selection"]["groups"]],
             ["Projekty", "Tooly", "Vrstvy", "Ostatní"],
         )
+
+    def test_development_status_error_payload_omits_public_profile_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_rest = self.make_manager(Path(temp_dir))
+            with patch.object(
+                manager,
+                "_development_workspace_rows",
+                side_effect=AppServerError("Simulované selhání workspace auditu."),
+            ):
+                semaphore = human_adam_development_semaphore_status_action(service=manager)
+
+        self.assertFalse(semaphore["ok"])
+        self.assertNotIn("active_profile_id", semaphore)
+        self.assertNotIn("active_profile_label", semaphore)
 
     def test_compatibility_backends_preserve_both_existing_service_bundles(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

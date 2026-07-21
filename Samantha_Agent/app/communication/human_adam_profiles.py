@@ -1770,7 +1770,6 @@ class HumanAdamProfileManager:
                 **lease,
                 "ok": False,
                 "message": str(exc),
-                "active_profile_id": "",
                 "workspace_rows": [],
                 "blockers": ["Stav profilových workspaces nelze bezpečně ověřit."],
                 "can_acquire_profile": False,
@@ -1787,16 +1786,8 @@ class HumanAdamProfileManager:
         any_profile_wip = any(row.get("has_wip") for row in rows)
         source_dirty = any(int(row.get("source_pending_changes") or 0) > 0 for row in rows)
         lazy = bool(self.active_lazy_workstream_id)
-        public_active_id = self.work_profile_id
-        active_label = (
-            str((self.grouped_workstream_status().get("active") or {}).get("workstream_name") or public_active_id)
-            if lazy
-            else str(self.profiles[active_id].get("label") or active_id)
-        )
         return {
             **lease,
-            "active_profile_id": public_active_id,
-            "active_profile_label": active_label,
             "workspace_rows": rows,
             "blockers": blockers,
             "can_acquire_profile": bool(
