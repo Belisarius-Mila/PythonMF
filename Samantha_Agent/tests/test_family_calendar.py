@@ -9,6 +9,7 @@ from pathlib import Path
 
 from app.family_calendar import (
     DEFAULT_FAMILY_CALENDAR_PREFILL,
+    build_notification_preview,
     ensure_family_calendar_prefill,
     family_calendar_status,
     load_family_people,
@@ -305,6 +306,102 @@ class FamilyCalendarTests(unittest.TestCase):
         self.assertEqual(len(candidates), 1)
         self.assertEqual(candidates[0]["event_type"], "name_day")
         self.assertEqual(candidates[0]["delivery_kind"], "catch_up")
+
+    def test_notification_preview_contains_d2_birthday_age_and_two_recipients(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "people.json"
+            person = save_family_person(
+                display_name="Alena",
+                relation="teta",
+                birth_date="1980-12-19",
+                path=path,
+                today=date(2026, 12, 17),
+                person_id_factory=lambda: "person-previewaaaa",
+            )
+            event = upcoming_family_events(
+                [person],
+                today=date(2026, 12, 17),
+                lookahead_days=2,
+            )[0]
+
+        preview = build_notification_preview(
+            event,
+            recipients=("first@example.invalid", "second@example.invalid"),
+        )
+
+        self.assertEqual(preview["notification_offset"], "D-2")
+        self.assertEqual(preview["delivery_kind"], "scheduled")
+        self.assertEqual(
+            preview["recipients"],
+            ["first@example.invalid", "second@example.invalid"],
+        )
+        self.assertEqual(preview["age"], 46)
+        self.assertIn("Alena – narozeniny", preview["subject"])
+        self.assertIn("Za 2 dny má Alena (teta) narozeniny.", preview["body"])
+        self.assertIn("Věk v den události: 46 let.", preview["body"])
+
+    def test_notification_preview_marks_d1_name_day_as_catch_up(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "people.json"
+            person = save_family_person(
+                display_name="Alena",
+                relation="teta",
+                name_day="12-18",
+                path=path,
+                today=date(2026, 12, 17),
+                person_id_factory=lambda: "person-previewbbbb",
+            )
+            event = upcoming_family_events(
+                [person],
+                today=date(2026, 12, 17),
+                lookahead_days=1,
+            )[0]
+
+        preview = build_notification_preview(
+            event,
+            recipients=(" first@example.invalid ", "second@example.invalid"),
+        )
+
+        self.assertEqual(preview["notification_offset"], "D-1")
+        self.assertEqual(preview["delivery_kind"], "catch_up")
+        self.assertIsNone(preview["age"])
+        self.assertIn("Zítra má Alena (teta) svátek.", preview["body"])
+        self.assertNotIn("Věk v den události", preview["body"])
+
+    def test_notification_preview_rejects_wrong_or_duplicate_recipients(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "people.json"
+            person = save_family_person(
+                display_name="Alena",
+                relation="teta",
+                name_day="12-18",
+                path=path,
+                today=date(2026, 12, 17),
+                person_id_factory=lambda: "person-previewcccc",
+            )
+            event = upcoming_family_events(
+                [person],
+                today=date(2026, 12, 17),
+                lookahead_days=1,
+            )[0]
+
+        with self.assertRaisesRegex(ValueError, "přesně dva příjemce"):
+            build_notification_preview(event, recipients=("only@example.invalid",))
+        with self.assertRaisesRegex(ValueError, "dva různí"):
+            build_notification_preview(
+                event,
+                recipients=("same@example.invalid", "SAME@example.invalid"),
+            )
+        event_today = upcoming_family_events(
+            [person],
+            today=date(2026, 12, 18),
+            lookahead_days=0,
+        )[0]
+        with self.assertRaisesRegex(ValueError, "D-2 nebo D-1"):
+            build_notification_preview(
+                event_today,
+                recipients=("first@example.invalid", "second@example.invalid"),
+            )
 
     def test_february_29_birthday_uses_february_28_in_non_leap_year(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

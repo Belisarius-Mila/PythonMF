@@ -6,7 +6,7 @@ import json
 import re
 import stat
 import uuid
-from collections.abc import Callable, Collection
+from collections.abc import Callable, Collection, Sequence
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -451,6 +451,48 @@ def notification_candidates(
             }
         )
     return candidates
+
+
+def build_notification_preview(
+    event: FamilyEvent,
+    *,
+    recipients: Sequence[str],
+) -> dict[str, Any]:
+    """Build one D-2/D-1 notification preview without I/O or delivery."""
+
+    if not event.notification_due or event.days_until not in NOTIFICATION_OFFSETS:
+        raise ValueError("Náhled lze sestavit jen pro upozornění D-2 nebo D-1.")
+    if isinstance(recipients, (str, bytes)) or len(recipients) != 2:
+        raise ValueError("Náhled upozornění vyžaduje přesně dva příjemce.")
+    clean_recipients = [
+        _clean_text(recipient, field="Příjemce", max_chars=320, required=True)
+        for recipient in recipients
+    ]
+    if clean_recipients[0].casefold() == clean_recipients[1].casefold():
+        raise ValueError("Příjemci náhledu musí být dva různí.")
+
+    offset = f"D-{event.days_until}"
+    relation = f" ({event.relation})" if event.relation else ""
+    timing = "Zítra" if event.days_until == 1 else "Za 2 dny"
+    body_lines = [
+        f"Rodinný kalendář – náhled {offset}",
+        "",
+        f"{timing} má {event.display_name}{relation} {event.event_label}.",
+        f"Datum: {event.event_date.day}. {event.event_date.month}. {event.event_date.year}",
+    ]
+    if event.age is not None:
+        body_lines.append(f"Věk v den události: {event.age} let.")
+
+    return {
+        **event.to_summary(),
+        "notification_offset": offset,
+        "delivery_kind": "catch_up" if event.catch_up else "scheduled",
+        "recipients": clean_recipients,
+        "subject": (
+            f"Rodinný kalendář {offset}: {event.display_name} – {event.event_label}"
+        ),
+        "body": "\n".join(body_lines),
+    }
 
 
 def parse_birth_date(value: str, *, today: date) -> date | None:
