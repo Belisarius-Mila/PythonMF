@@ -149,3 +149,14 @@ Důkaz: plná Cockpit brána: 1025 testů, 262.6 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Propojit loader s bezpečným runnerem, který v režimu disabled nevolá koordinátor ani transport a vrací pouze redigovaný no-op stav
+
+### 2026-07-22 18:21 CEST – Bod 3a přidal redigovaný fail-closed runner bez volání koordinátoru nebo transportu
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: Bod 3a přidal redigovaný fail-closed runner bez volání koordinátoru nebo transportu
+
+Důkaz: plná Cockpit brána: 1029 testů, 260.9 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Navrhnout bod 3b s bezpečným dry-run režimem bez SMTP

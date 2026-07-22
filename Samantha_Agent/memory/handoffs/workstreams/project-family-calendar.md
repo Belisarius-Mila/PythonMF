@@ -162,3 +162,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/app/family_calendar_delivery_config.py`, `Samantha_Agent/tests/test_family_calendar_delivery_config.py`
 - Commit: `Doplnit privátní konfiguraci doručení rodinného kalendáře`
 - Další krok: Propojit loader s bezpečným runnerem, který v režimu disabled nevolá koordinátor ani transport a vrací pouze redigovaný no-op stav
+
+### Automatický checkpoint 2026-07-22 18:21 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Bod 3a přidal redigovaný fail-closed runner bez volání koordinátoru nebo transportu
+- Ověření: plná Cockpit brána: 1029 testů, 260.9 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/app/family_calendar_delivery_runner.py`, `Samantha_Agent/tests/test_family_calendar_delivery_runner.py`
+- Commit: `Doplnit bezpečný runner doručení rodinného kalendáře`
+- Další krok: Navrhnout bod 3b s bezpečným dry-run režimem bez SMTP
