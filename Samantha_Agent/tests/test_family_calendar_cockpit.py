@@ -39,6 +39,7 @@ except ImportError:  # pragma: no cover - isolated workspace dependency fallback
 from app.cockpit import (
     COCKPIT_HTML,
     COCKPIT_POST_ACTIONS,
+    family_calendar_notification_preview_action,
     family_calendar_prefill_action,
     family_calendar_save_action,
     family_calendar_status_action,
@@ -138,6 +139,64 @@ class FamilyCalendarCockpitTests(unittest.TestCase):
         self.assertIn("datum narození nebo datum svátku", result["message"])
         self.assertFalse(path.exists())
 
+    def test_notification_preview_action_is_read_only_and_server_derived(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "family" / "people.json"
+            family_calendar_save_action(
+                {
+                    "display_name": "Alena",
+                    "relation": "teta",
+                    "birth_date": "1980-12-19",
+                    "name_day": "",
+                    "reminders_enabled": True,
+                    "active": True,
+                },
+                path=path,
+                today=date(2026, 12, 17),
+                now=datetime(2026, 12, 17, 8, 0, tzinfo=timezone.utc),
+            )
+            stored_before = path.read_bytes()
+
+            result = family_calendar_notification_preview_action(
+                {
+                    "recipients": ["first@example.invalid", "second@example.invalid"],
+                    "event": {"display_name": "Podvržená osoba", "days_until": 1},
+                },
+                path=path,
+                today=date(2026, 12, 17),
+            )
+            stored_after = path.read_bytes()
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["count"], 1)
+        self.assertEqual(result["previews"][0]["display_name"], "Alena")
+        self.assertEqual(result["previews"][0]["notification_offset"], "D-2")
+        self.assertIn("Nic nebylo odesláno ani uloženo", result["message"])
+        self.assertEqual(stored_after, stored_before)
+
+    def test_notification_preview_action_validates_recipients_even_without_due_event(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "missing" / "people.json"
+
+            invalid = family_calendar_notification_preview_action(
+                {"recipients": ["not-an-email", "second@example.invalid"]},
+                path=path,
+                today=date(2026, 12, 17),
+            )
+            empty = family_calendar_notification_preview_action(
+                {"recipients": ["first@example.invalid", "second@example.invalid"]},
+                path=path,
+                today=date(2026, 12, 17),
+            )
+            path_exists_after = path.exists()
+
+        self.assertFalse(invalid["ok"])
+        self.assertEqual(invalid["error"], "invalid_notification_preview")
+        self.assertIn("platná samostatná e-mailová adresa", invalid["message"])
+        self.assertTrue(empty["ok"])
+        self.assertEqual(empty["count"], 0)
+        self.assertFalse(path_exists_after)
+
     def test_family_calendar_ui_and_route_contract_are_present(self) -> None:
         route = next(
             item for item in COCKPIT_POST_ACTIONS if item["path"] == "/api/family-calendar/save"
@@ -152,6 +211,17 @@ class FamilyCalendarCockpitTests(unittest.TestCase):
         )
         self.assertEqual(prefill_route["risk"], "private_write")
         self.assertEqual(prefill_route["handler_name"], "family_calendar_prefill_action")
+        preview_route = next(
+            item
+            for item in COCKPIT_POST_ACTIONS
+            if item["path"] == "/api/family-calendar/notification-preview"
+        )
+        self.assertEqual(preview_route["risk"], "read_only_via_post")
+        self.assertEqual(preview_route["confirmation"], "none_readonly_no_persistence")
+        self.assertEqual(
+            preview_route["handler_name"],
+            "family_calendar_notification_preview_action",
+        )
         self.assertIn('id="familyCalendarBtn">Rodinný kalendář</button>', COCKPIT_HTML)
         self.assertIn('id="familyCalendarModal"', COCKPIT_HTML)
         self.assertIn('id="familyCalendarForm"', COCKPIT_HTML)
@@ -159,9 +229,23 @@ class FamilyCalendarCockpitTests(unittest.TestCase):
         self.assertIn("Datum narození", COCKPIT_HTML)
         self.assertIn("Datum svátku", COCKPIT_HTML)
         self.assertIn("e-mailové odesílání zatím není aktivní", COCKPIT_HTML)
+        self.assertIn('id="familyCalendarPreviewForm"', COCKPIT_HTML)
+        self.assertIn('id="familyCalendarRecipientOne" type="email"', COCKPIT_HTML)
+        self.assertIn('id="familyCalendarRecipientTwo" type="email"', COCKPIT_HTML)
+        self.assertIn("Nic se neodesílá ani neukládá", COCKPIT_HTML)
         self.assertIn('fetchJson("/api/family-calendar/status")', COCKPIT_HTML)
         self.assertIn('postJson("/api/family-calendar/prefill", {})', COCKPIT_HTML)
         self.assertIn('postJson("/api/family-calendar/save"', COCKPIT_HTML)
+        self.assertIn(
+            'postJson("/api/family-calendar/notification-preview"',
+            COCKPIT_HTML,
+        )
+        self.assertIn("function renderFamilyCalendarPreviews(previews)", COCKPIT_HTML)
+        self.assertIn(
+            'subject.textContent = String(preview.subject || "Náhled upozornění")',
+            COCKPIT_HTML,
+        )
+        self.assertIn('body.textContent = String(preview.body || "")', COCKPIT_HTML)
         self.assertIn("function editFamilyCalendarPerson(personId)", COCKPIT_HTML)
         self.assertIn("familyCalendarEditorDirty", COCKPIT_HTML)
         self.assertIn(".family-calendar-form-grid { grid-template-columns: 1fr; }", COCKPIT_HTML)

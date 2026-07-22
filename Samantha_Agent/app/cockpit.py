@@ -106,8 +106,10 @@ from app.backup.activity_state import backup_activity_status
 from app.family_calendar import (
     DEFAULT_FAMILY_CALENDAR_PREFILL,
     DEFAULT_FAMILY_CALENDAR_PATH,
+    build_due_notification_previews,
     ensure_family_calendar_prefill,
     family_calendar_status,
+    load_family_people,
     save_family_person,
 )
 from app.documents.case_service import (
@@ -890,6 +892,52 @@ def family_calendar_save_action(
         "message": f"Osoba byla {action_label} v rodinném kalendáři.",
         "person": person.to_summary(today=today_date),
         "status": status,
+    }
+
+
+def family_calendar_notification_preview_action(
+    payload: dict[str, Any],
+    *,
+    path: Path = DEFAULT_FAMILY_CALENDAR_PATH,
+    today: date | None = None,
+) -> dict[str, Any]:
+    today_date = today or date.today()
+    recipients = payload.get("recipients", [])
+    if not isinstance(recipients, list):
+        return {
+            "ok": False,
+            "message": "Náhled upozornění vyžaduje seznam přesně dvou příjemců.",
+            "error": "invalid_notification_preview",
+        }
+    try:
+        people = load_family_people(path, today=today_date)
+        previews = build_due_notification_previews(
+            people,
+            today=today_date,
+            recipients=recipients,
+        )
+    except (ValueError, json.JSONDecodeError) as exc:
+        return {
+            "ok": False,
+            "message": str(exc),
+            "error": "invalid_notification_preview",
+        }
+    except OSError as exc:
+        return {
+            "ok": False,
+            "message": f"Náhled upozornění se nepodařilo sestavit: {exc}",
+            "error": "notification_preview_unavailable",
+        }
+    return {
+        "ok": True,
+        "today": today_date.isoformat(),
+        "count": len(previews),
+        "previews": previews,
+        "message": (
+            f"Připraveno náhledů: {len(previews)}. Nic nebylo odesláno ani uloženo."
+            if previews
+            else "Dnes nevychází žádné upozornění D-2 ani D-1. Nic nebylo odesláno ani uloženo."
+        ),
     }
 
 
@@ -9761,6 +9809,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/family-calendar/notification-preview",
+        "label": "Zobrazit nahled upozorneni rodinneho kalendare",
+        "risk": "read_only_via_post",
+        "confirmation": "none_readonly_no_persistence",
+        "handler_name": "family_calendar_notification_preview_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/lekarna/retire/preview",
         "label": "Nahled vyrazeni leku",
         "risk": "read_only_via_post",
@@ -10574,6 +10630,10 @@ class CockpitServer:
                 if parsed.path == "/api/family-calendar/prefill":
                     self.read_json()
                     self.respond_json(family_calendar_prefill_action())
+                    return
+                if parsed.path == "/api/family-calendar/notification-preview":
+                    payload = self.read_json()
+                    self.respond_json(family_calendar_notification_preview_action(payload))
                     return
                 if parsed.path == "/api/lekarna/retire/preview":
                     payload = self.read_json()
@@ -12955,6 +13015,14 @@ COCKPIT_HTML = """<!doctype html>
     .family-calendar-upcoming-title { font-size: 13px; font-weight: 750; color: #1e3a5f; }
     .family-calendar-upcoming-list { display: flex; gap: 8px; flex-wrap: wrap; }
     .family-calendar-event { border: 1px solid #bfdbfe; border-radius: 999px; background: white; padding: 5px 9px; color: #1e3a5f; font-size: 12px; }
+    .family-calendar-preview { border: 1px solid #bbf7d0; border-radius: 8px; background: #f0fdf4; padding: 12px; display: grid; gap: 10px; }
+    .family-calendar-preview h3 { margin: 0; font-size: 15px; color: #14532d; }
+    .family-calendar-preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .family-calendar-preview-results { display: grid; gap: 9px; }
+    .family-calendar-preview-card { border: 1px solid #bbf7d0; border-radius: 8px; background: white; padding: 10px; display: grid; gap: 7px; }
+    .family-calendar-preview-subject { font-weight: 750; color: #14532d; overflow-wrap: anywhere; }
+    .family-calendar-preview-recipients { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+    .family-calendar-preview-body { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: 13px; line-height: 1.45; color: #263244; }
     .family-calendar-table-wrap { overflow-x: auto; border: 1px solid #edf0f4; border-radius: 8px; }
     .family-calendar-table { min-width: 720px; }
     .family-calendar-table tr.inactive { color: var(--muted); background: #f8fafc; }
@@ -13052,7 +13120,7 @@ COCKPIT_HTML = """<!doctype html>
     .service-actions { margin-top: 10px; }
     .voice-advanced { margin-top: 8px; border-top: 1px solid var(--line); }
     @media (max-width: 1050px) { .today-dashboard { grid-template-columns: 1fr; } .work-grid { grid-template-columns: 1fr; } }
-	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .search-result-head { grid-template-columns: 1fr; } .search-result-head-actions { justify-content: flex-start; } .recovery-grid { grid-template-columns: 1fr; } .janicka-grid { grid-template-columns: 1fr; } .janicka-action { grid-template-columns: 1fr; } .library-archive-grid { grid-template-columns: 1fr; } .library-text-grid { grid-template-columns: 1fr; } .library-attachment-grid { grid-template-columns: 1fr; } .library-edit-grid { grid-template-columns: 1fr; } .library-edit-source-grid { grid-template-columns: 1fr; } .library-controls { grid-template-columns: 1fr; } .library-layout { grid-template-columns: 1fr; } .library-action-group { justify-content: flex-start; } .library-action-group-label { width: 100%; text-align: left; } .family-calendar-form-grid { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
+	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .search-result-head { grid-template-columns: 1fr; } .search-result-head-actions { justify-content: flex-start; } .recovery-grid { grid-template-columns: 1fr; } .janicka-grid { grid-template-columns: 1fr; } .janicka-action { grid-template-columns: 1fr; } .library-archive-grid { grid-template-columns: 1fr; } .library-text-grid { grid-template-columns: 1fr; } .library-attachment-grid { grid-template-columns: 1fr; } .library-edit-grid { grid-template-columns: 1fr; } .library-edit-source-grid { grid-template-columns: 1fr; } .library-controls { grid-template-columns: 1fr; } .library-layout { grid-template-columns: 1fr; } .library-action-group { justify-content: flex-start; } .library-action-group-label { width: 100%; text-align: left; } .family-calendar-form-grid { grid-template-columns: 1fr; } .family-calendar-preview-grid { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -13803,6 +13871,25 @@ COCKPIT_HTML = """<!doctype html>
       <div class="modal-body">
         <div class="family-calendar-intro">Přehled narozenin a svátků. Rok narození slouží k výpočtu věku; e-mailové odesílání zatím není aktivní.</div>
         <div id="familyCalendarUpcoming" class="family-calendar-upcoming" aria-live="polite"></div>
+        <form id="familyCalendarPreviewForm" class="family-calendar-preview" autocomplete="off">
+          <h3>Náhled upozornění</h3>
+          <div class="family-calendar-intro">Zobrazuje jen dnešní D-2 nebo D-1 náhledy. Nic se neodesílá ani neukládá.</div>
+          <div class="family-calendar-preview-grid">
+            <label class="library-field">
+              <span class="library-field-label">Příjemce 1</span>
+              <input id="familyCalendarRecipientOne" type="email" maxlength="320" autocomplete="off" spellcheck="false" required>
+            </label>
+            <label class="library-field">
+              <span class="library-field-label">Příjemce 2</span>
+              <input id="familyCalendarRecipientTwo" type="email" maxlength="320" autocomplete="off" spellcheck="false" required>
+            </label>
+          </div>
+          <div class="actions compact-actions">
+            <button class="secondary" id="familyCalendarPreviewBtn" type="submit">Zobrazit náhled</button>
+          </div>
+          <div id="familyCalendarPreviewStatus" class="status-line" aria-live="polite">Aplikace adresy neukládá a po zavření okna je z formuláře vymaže.</div>
+          <div id="familyCalendarPreviewResults" class="family-calendar-preview-results"></div>
+        </form>
         <form id="familyCalendarForm" class="family-calendar-form">
           <h3 id="familyCalendarFormTitle">Přidat osobu</h3>
           <input id="familyCalendarPersonId" type="hidden">
@@ -14169,6 +14256,12 @@ COCKPIT_HTML = """<!doctype html>
     const familyCalendarModal = document.getElementById("familyCalendarModal");
     const familyCalendarCloseBtn = document.getElementById("familyCalendarCloseBtn");
     const familyCalendarUpcoming = document.getElementById("familyCalendarUpcoming");
+    const familyCalendarPreviewForm = document.getElementById("familyCalendarPreviewForm");
+    const familyCalendarRecipientOne = document.getElementById("familyCalendarRecipientOne");
+    const familyCalendarRecipientTwo = document.getElementById("familyCalendarRecipientTwo");
+    const familyCalendarPreviewBtn = document.getElementById("familyCalendarPreviewBtn");
+    const familyCalendarPreviewStatus = document.getElementById("familyCalendarPreviewStatus");
+    const familyCalendarPreviewResults = document.getElementById("familyCalendarPreviewResults");
     const familyCalendarForm = document.getElementById("familyCalendarForm");
     const familyCalendarFormTitle = document.getElementById("familyCalendarFormTitle");
     const familyCalendarPersonId = document.getElementById("familyCalendarPersonId");
@@ -18525,6 +18618,58 @@ COCKPIT_HTML = """<!doctype html>
       familyCalendarStatus.textContent = `Uloženo ${currentFamilyCalendarPeople.length} osob, aktivních ${activeCount}.`;
     }
 
+    function resetFamilyCalendarPreview() {
+      familyCalendarPreviewForm.reset();
+      familyCalendarPreviewResults.replaceChildren();
+      familyCalendarPreviewStatus.textContent = "Aplikace adresy neukládá a po zavření okna je z formuláře vymaže.";
+      familyCalendarPreviewBtn.disabled = false;
+    }
+
+    function renderFamilyCalendarPreviews(previews) {
+      familyCalendarPreviewResults.replaceChildren();
+      (Array.isArray(previews) ? previews : []).forEach((preview) => {
+        const card = document.createElement("article");
+        card.className = "family-calendar-preview-card";
+        const subject = document.createElement("div");
+        subject.className = "family-calendar-preview-subject";
+        subject.textContent = String(preview.subject || "Náhled upozornění");
+        const recipients = document.createElement("div");
+        recipients.className = "family-calendar-preview-recipients";
+        recipients.textContent = `Příjemci: ${(Array.isArray(preview.recipients) ? preview.recipients : []).join(" • ")}`;
+        const body = document.createElement("pre");
+        body.className = "family-calendar-preview-body";
+        body.textContent = String(preview.body || "");
+        card.append(subject, recipients, body);
+        familyCalendarPreviewResults.append(card);
+      });
+    }
+
+    async function loadFamilyCalendarNotificationPreview(event) {
+      event.preventDefault();
+      familyCalendarPreviewBtn.disabled = true;
+      familyCalendarPreviewStatus.textContent = "Sestavuji read-only náhled…";
+      familyCalendarPreviewResults.replaceChildren();
+      try {
+        const data = await postJson("/api/family-calendar/notification-preview", {
+          recipients: [
+            familyCalendarRecipientOne.value.trim(),
+            familyCalendarRecipientTwo.value.trim(),
+          ],
+        });
+        if (!data.ok) {
+          familyCalendarPreviewStatus.textContent = data.message || "Náhled upozornění se nepodařilo sestavit.";
+          return;
+        }
+        renderFamilyCalendarPreviews(data.previews || []);
+        familyCalendarPreviewStatus.textContent = data.message || "Náhled byl sestaven bez odeslání.";
+      } catch (err) {
+        recordFrontendError(err);
+        familyCalendarPreviewStatus.textContent = `Chyba sestavení náhledu: ${err}`;
+      } finally {
+        familyCalendarPreviewBtn.disabled = false;
+      }
+    }
+
     function markFamilyCalendarDirty() {
       familyCalendarEditorDirty = true;
       familyCalendarFormStatus.textContent = "Formulář obsahuje neuložené změny.";
@@ -18589,6 +18734,7 @@ COCKPIT_HTML = """<!doctype html>
     function closeFamilyCalendarModal() {
       if (!confirmFamilyCalendarDiscard()) return false;
       resetFamilyCalendarForm();
+      resetFamilyCalendarPreview();
       familyCalendarModal.classList.add("hidden");
       return true;
     }
@@ -18654,6 +18800,7 @@ COCKPIT_HTML = """<!doctype html>
         }
         familyCalendarEditorDirty = false;
         resetFamilyCalendarForm();
+        resetFamilyCalendarPreview();
         renderFamilyCalendar(data.status || {});
         familyCalendarFormStatus.textContent = data.message || "Osoba byla uložena.";
       } catch (err) {
@@ -21286,6 +21433,7 @@ COCKPIT_HTML = """<!doctype html>
       }
     });
     familyCalendarForm.addEventListener("submit", saveFamilyCalendarPerson);
+    familyCalendarPreviewForm.addEventListener("submit", loadFamilyCalendarNotificationPreview);
     familyCalendarResetBtn.addEventListener("click", () => {
       if (confirmFamilyCalendarDiscard()) resetFamilyCalendarForm({focus: true});
     });

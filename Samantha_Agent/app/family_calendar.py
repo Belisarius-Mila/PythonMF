@@ -24,6 +24,7 @@ DEFAULT_LOOKAHEAD_DAYS = 30
 NOTIFICATION_OFFSETS = frozenset({1, 2})
 PERSON_ID_RE = re.compile(r"person-[a-z0-9]{8,40}")
 NAME_DAY_RE = re.compile(r"(0[1-9]|1[0-2])-([0-2][0-9]|3[01])")
+EMAIL_ADDRESS_RE = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+")
 DEFAULT_FAMILY_CALENDAR_PREFILL: tuple[dict[str, str], ...] = (
     {"id": "person-prefill0001", "display_name": "Jana", "relation": "babička", "name_day": "05-24"},
     {"id": "person-prefill0002", "display_name": "Jana", "relation": "prababička", "name_day": "05-24"},
@@ -462,14 +463,7 @@ def build_notification_preview(
 
     if not event.notification_due or event.days_until not in NOTIFICATION_OFFSETS:
         raise ValueError("Náhled lze sestavit jen pro upozornění D-2 nebo D-1.")
-    if isinstance(recipients, (str, bytes)) or len(recipients) != 2:
-        raise ValueError("Náhled upozornění vyžaduje přesně dva příjemce.")
-    clean_recipients = [
-        _clean_text(recipient, field="Příjemce", max_chars=320, required=True)
-        for recipient in recipients
-    ]
-    if clean_recipients[0].casefold() == clean_recipients[1].casefold():
-        raise ValueError("Příjemci náhledu musí být dva různí.")
+    clean_recipients = validate_notification_recipients(recipients)
 
     offset = f"D-{event.days_until}"
     relation = f" ({event.relation})" if event.relation else ""
@@ -493,6 +487,49 @@ def build_notification_preview(
         ),
         "body": "\n".join(body_lines),
     }
+
+
+def validate_notification_recipients(recipients: Sequence[str]) -> list[str]:
+    if isinstance(recipients, (str, bytes)) or len(recipients) != 2:
+        raise ValueError("Náhled upozornění vyžaduje přesně dva příjemce.")
+    clean_recipients = []
+    for recipient in recipients:
+        raw_recipient = str(recipient or "")
+        if "\r" in raw_recipient or "\n" in raw_recipient:
+            raise ValueError("E-mailová adresa příjemce nesmí obsahovat nový řádek.")
+        clean_recipient = _clean_text(
+            raw_recipient,
+            field="Příjemce",
+            max_chars=320,
+            required=True,
+        )
+        if not EMAIL_ADDRESS_RE.fullmatch(clean_recipient):
+            raise ValueError("Příjemce musí být platná samostatná e-mailová adresa.")
+        clean_recipients.append(clean_recipient)
+    if clean_recipients[0].casefold() == clean_recipients[1].casefold():
+        raise ValueError("Příjemci náhledu musí být dva různí.")
+    return clean_recipients
+
+
+def build_due_notification_previews(
+    people: Collection[FamilyPerson],
+    *,
+    today: date,
+    recipients: Sequence[str],
+) -> list[dict[str, Any]]:
+    """Build today's due previews without reading, writing, or sending anything."""
+
+    clean_recipients = validate_notification_recipients(recipients)
+    events = upcoming_family_events(
+        people,
+        today=today,
+        lookahead_days=max(NOTIFICATION_OFFSETS),
+    )
+    return [
+        build_notification_preview(event, recipients=clean_recipients)
+        for event in events
+        if event.notification_due
+    ]
 
 
 def parse_birth_date(value: str, *, today: date) -> date | None:

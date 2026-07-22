@@ -61,3 +61,12 @@ Bezpecnost / neukladat:
   s 980 testy za 208.0 s; `git diff --check` byl součástí zelené brány.
 - Další krok: navrhnout samostatné read-only zobrazení náhledu v Cockpitu,
   stále bez odesílání a bez persistence doručení.
+
+### Automatický checkpoint 2026-07-22 12:01 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Cockpit bezpečně zobrazuje náhledy D-2/D-1 bez odesílání a persistence
+- Ověření: plná Cockpit brána: 983 testů, 304.3 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/family_calendar.py`, `Samantha_Agent/tests/test_family_calendar.py`, `Samantha_Agent/tests/test_family_calendar_cockpit.py`
+- Commit: `Doplnit read-only náhled rodinných upozornění`
+- Další krok: Potvrdit checkpoint a potom ručně ověřit náhled na Macu nebo iPhonu

@@ -9,6 +9,7 @@ from pathlib import Path
 
 from app.family_calendar import (
     DEFAULT_FAMILY_CALENDAR_PREFILL,
+    build_due_notification_previews,
     build_notification_preview,
     ensure_family_calendar_prefill,
     family_calendar_status,
@@ -392,6 +393,11 @@ class FamilyCalendarTests(unittest.TestCase):
                 event,
                 recipients=("same@example.invalid", "SAME@example.invalid"),
             )
+        with self.assertRaisesRegex(ValueError, "platná samostatná e-mailová adresa"):
+            build_notification_preview(
+                event,
+                recipients=("not-an-email", "second@example.invalid"),
+            )
         event_today = upcoming_family_events(
             [person],
             today=date(2026, 12, 18),
@@ -402,6 +408,34 @@ class FamilyCalendarTests(unittest.TestCase):
                 event_today,
                 recipients=("first@example.invalid", "second@example.invalid"),
             )
+
+    def test_due_notification_previews_only_return_today_d2_and_d1_events(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "people.json"
+            person = save_family_person(
+                display_name="Alena",
+                relation="teta",
+                birth_date="1980-12-19",
+                name_day="12-18",
+                path=path,
+                today=date(2026, 12, 17),
+                person_id_factory=lambda: "person-previewdddd",
+            )
+
+        previews = build_due_notification_previews(
+            [person],
+            today=date(2026, 12, 17),
+            recipients=("first@example.invalid", "second@example.invalid"),
+        )
+
+        self.assertEqual(
+            [preview["notification_offset"] for preview in previews],
+            ["D-1", "D-2"],
+        )
+        self.assertEqual(
+            {preview["event_type"] for preview in previews},
+            {"birthday", "name_day"},
+        )
 
     def test_february_29_birthday_uses_february_28_in_non_leap_year(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

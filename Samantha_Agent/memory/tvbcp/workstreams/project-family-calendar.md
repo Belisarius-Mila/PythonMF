@@ -42,3 +42,14 @@ s 980 testy za 208.0 s a zahrnula čistý `git diff --check`.
 
 Další krok: navrhnout samostatné read-only zobrazení náhledu v Cockpitu,
 stále bez odesílání a bez persistence doručení.
+
+### 2026-07-22 12:01 CEST – Cockpit bezpečně zobrazuje náhledy D-2/D-1 bez odesílání a persistence
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: Cockpit bezpečně zobrazuje náhledy D-2/D-1 bez odesílání a persistence
+
+Důkaz: plná Cockpit brána: 983 testů, 304.3 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Potvrdit checkpoint a potom ručně ověřit náhled na Macu nebo iPhonu
