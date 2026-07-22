@@ -41,6 +41,18 @@ class FamilyCalendarDeliveryConfigTests(unittest.TestCase):
 
                 self.assertEqual(config.smtp_provider, provider)
 
+    def test_loads_dry_run_mode_without_exposing_recipients(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            document = _valid_document()
+            document["mode"] = "dry_run"
+            path = _write_private_config(Path(temp_dir), document)
+
+            config = load_family_calendar_delivery_config(path)
+
+        self.assertEqual(config.mode, DeliveryConfigMode.DRY_RUN)
+        self.assertEqual(config.recipient_ids, CANONICAL_RECIPIENT_IDS)
+        self.assertNotIn("@", repr(config))
+
     def test_missing_config_fails_closed_without_creating_anything(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             path = Path(temp_dir) / "family" / "notification_config.json"
@@ -51,16 +63,14 @@ class FamilyCalendarDeliveryConfigTests(unittest.TestCase):
             self.assertFalse(path.exists())
             self.assertFalse(path.parent.exists())
 
-    def test_only_disabled_mode_is_accepted_in_this_phase(self) -> None:
-        for mode in ("dry_run", "enabled"):
-            with self.subTest(mode=mode):
-                with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-                    document = _valid_document()
-                    document["mode"] = mode
-                    path = _write_private_config(Path(temp_dir), document)
+    def test_sending_mode_remains_rejected_in_this_phase(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            document = _valid_document()
+            document["mode"] = "enabled"
+            path = _write_private_config(Path(temp_dir), document)
 
-                    with self.assertRaisesRegex(DeliveryConfigError, "not enabled"):
-                        load_family_calendar_delivery_config(path)
+            with self.assertRaisesRegex(DeliveryConfigError, "not enabled"):
+                load_family_calendar_delivery_config(path)
 
     def test_requires_exactly_four_canonical_recipient_ids(self) -> None:
         invalid_recipient_sets = (

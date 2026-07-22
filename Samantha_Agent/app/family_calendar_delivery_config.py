@@ -33,6 +33,7 @@ class DeliveryConfigError(RuntimeError):
 
 class DeliveryConfigMode(str, Enum):
     DISABLED = "disabled"
+    DRY_RUN = "dry_run"
 
 
 @dataclass(frozen=True, repr=False)
@@ -55,7 +56,7 @@ class FamilyCalendarDeliveryConfig:
 def load_family_calendar_delivery_config(
     path: Path = DEFAULT_FAMILY_CALENDAR_DELIVERY_CONFIG_PATH,
 ) -> FamilyCalendarDeliveryConfig:
-    """Load a disabled, strictly validated private configuration without writing."""
+    """Load a non-sending, strictly validated private configuration without writing."""
 
     target = Path(path)
     try:

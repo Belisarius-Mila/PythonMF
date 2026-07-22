@@ -50,6 +50,7 @@ class FamilyCalendarDeliveryRunnerTests(unittest.TestCase):
 
                     self.assertEqual(result.status, "disabled")
                     self.assertEqual(result.recipient_count, 4)
+                    self.assertFalse(result.attempt_eligible)
                     self.assertFalse(result.coordinator_called)
                     self.assertFalse(result.transport_called)
             self.assertEqual(calls, {"coordinator": 0, "transport": 0})
@@ -85,6 +86,7 @@ class FamilyCalendarDeliveryRunnerTests(unittest.TestCase):
 
             self.assertEqual(result.status, "config_error")
             self.assertEqual(result.recipient_count, 0)
+            self.assertFalse(result.attempt_eligible)
             self.assertEqual(calls, {"coordinator": 0, "transport": 0})
             self.assertFalse(config_path.parent.exists())
             self.assertFalse(state_path.parent.exists())
@@ -114,6 +116,7 @@ class FamilyCalendarDeliveryRunnerTests(unittest.TestCase):
                     serialized = json.dumps(asdict(result), sort_keys=True)
                     visible = f"{result!r} {serialized}"
                     self.assertEqual(result.status, "config_error")
+                    self.assertFalse(result.attempt_eligible)
                     self.assertFalse(result.coordinator_called)
                     self.assertFalse(result.transport_called)
                     self.assertNotIn("@", visible)
@@ -141,11 +144,83 @@ class FamilyCalendarDeliveryRunnerTests(unittest.TestCase):
         for private_value in (*PRIVATE_ADDRESSES, *RECIPIENT_IDS, EVENT_KEY, "subject", "body"):
             self.assertNotIn(private_value, visible)
 
+    def test_dry_run_validates_d2_and_d1_without_runtime_effects(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            config_path = _write_private_config(root, mode="dry_run")
+            state_path, worker_path = _runtime_paths(root)
+            calls = {"coordinator": 0, "transport": 0}
 
-def _valid_document() -> dict:
+            def transport(_record):
+                calls["transport"] += 1
+                raise AssertionError("dry run must not call transport")
+
+            def coordinator(**_kwargs):
+                calls["coordinator"] += 1
+                raise AssertionError("dry run must not call coordinator")
+
+            for offset in ("D-2", "D-1"):
+                with self.subTest(offset=offset):
+                    result = run_configured_family_calendar_delivery(
+                        event_key=EVENT_KEY,
+                        offset=offset,
+                        transport=transport,
+                        config_path=config_path,
+                        state_path=state_path,
+                        worker_path=worker_path,
+                        coordinator=coordinator,
+                    )
+
+                    self.assertEqual(result.status, "dry_run")
+                    self.assertEqual(result.recipient_count, 4)
+                    self.assertTrue(result.attempt_eligible)
+                    self.assertFalse(result.coordinator_called)
+                    self.assertFalse(result.transport_called)
+                    visible = f"{result!r} {json.dumps(asdict(result), sort_keys=True)}"
+                    self.assertNotIn("@", visible)
+                    for private_value in (*PRIVATE_ADDRESSES, *RECIPIENT_IDS, EVENT_KEY):
+                        self.assertNotIn(private_value, visible)
+
+            self.assertEqual(calls, {"coordinator": 0, "transport": 0})
+            self.assertFalse(state_path.parent.exists())
+            self.assertFalse(Path(f"{worker_path}.lock").exists())
+
+    def test_dry_run_invalid_input_fails_closed_and_stays_redacted(self) -> None:
+        private_event_key = "private-person@example.invalid\ninvalid"
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            config_path = _write_private_config(root, mode="dry_run")
+            state_path, worker_path = _runtime_paths(root)
+
+            for event_key, offset in ((private_event_key, "D-2"), (EVENT_KEY, "D-3")):
+                with self.subTest(event_key=event_key, offset=offset):
+                    result = run_configured_family_calendar_delivery(
+                        event_key=event_key,
+                        offset=offset,
+                        transport=_unexpected_transport,
+                        config_path=config_path,
+                        state_path=state_path,
+                        worker_path=worker_path,
+                        coordinator=_unexpected_coordinator,
+                    )
+
+                    visible = f"{result!r} {json.dumps(asdict(result), sort_keys=True)}"
+                    self.assertEqual(result.status, "input_error")
+                    self.assertEqual(result.recipient_count, 0)
+                    self.assertFalse(result.attempt_eligible)
+                    self.assertFalse(result.coordinator_called)
+                    self.assertFalse(result.transport_called)
+                    self.assertNotIn("@", visible)
+                    self.assertNotIn("private-person", visible)
+                    self.assertNotIn(EVENT_KEY, visible)
+
+            self.assertFalse(state_path.parent.exists())
+
+
+def _valid_document(*, mode: str = "disabled") -> dict:
     return {
         "schema_version": 1,
-        "mode": "disabled",
+        "mode": mode,
         "smtp_provider": "icloud",
         "recipients": [
             {"recipient_id": recipient_id, "address": address}
@@ -154,8 +229,8 @@ def _valid_document() -> dict:
     }
 
 
-def _write_private_config(root: Path) -> Path:
-    return _write_private_text(root, json.dumps(_valid_document()))
+def _write_private_config(root: Path, *, mode: str = "disabled") -> Path:
+    return _write_private_text(root, json.dumps(_valid_document(mode=mode)))
 
 
 def _write_private_text(root: Path, content: str) -> Path:

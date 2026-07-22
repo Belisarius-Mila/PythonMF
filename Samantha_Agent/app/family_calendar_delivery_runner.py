@@ -6,7 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from app.family_calendar_delivery import NotificationOffset
+from app.family_calendar_delivery import NotificationOffset, begin_delivery, plan_delivery
 from app.family_calendar_delivery_config import (
     DEFAULT_FAMILY_CALENDAR_DELIVERY_CONFIG_PATH,
     DeliveryConfigError,
@@ -24,10 +24,11 @@ from app.family_calendar_delivery_store import DEFAULT_FAMILY_CALENDAR_DELIVERY_
 
 @dataclass(frozen=True)
 class FamilyCalendarDeliveryRunResult:
-    """Redacted no-op result safe for logs and status surfaces."""
+    """Redacted non-sending result safe for logs and status surfaces."""
 
     status: str
     recipient_count: int
+    attempt_eligible: bool
     coordinator_called: bool
     transport_called: bool
 
@@ -45,7 +46,7 @@ def run_configured_family_calendar_delivery(
     worker_path: Path = DEFAULT_FAMILY_CALENDAR_DELIVERY_WORKER_PATH,
     coordinator: DeliveryCoordinator = coordinate_delivery_attempt,
 ) -> FamilyCalendarDeliveryRunResult:
-    """Load private configuration and stop before all effects while disabled."""
+    """Validate a disabled or dry-run attempt without delivery-runtime I/O."""
 
     try:
         config = load_family_calendar_delivery_config(config_path)
@@ -53,6 +54,7 @@ def run_configured_family_calendar_delivery(
         return FamilyCalendarDeliveryRunResult(
             status="config_error",
             recipient_count=0,
+            attempt_eligible=False,
             coordinator_called=False,
             transport_called=False,
         )
@@ -61,15 +63,37 @@ def run_configured_family_calendar_delivery(
         return FamilyCalendarDeliveryRunResult(
             status="disabled",
             recipient_count=len(config.recipients),
+            attempt_eligible=False,
             coordinator_called=False,
             transport_called=False,
         )
 
-    # The loader currently rejects every active mode. Keep the runner closed if
-    # its contract is widened without an explicit implementation here.
+    if config.mode is DeliveryConfigMode.DRY_RUN:
+        try:
+            plan = plan_delivery(event_key=event_key, offset=offset)
+            record = begin_delivery(plan, recipient_ids=config.recipient_ids)
+        except ValueError:
+            return FamilyCalendarDeliveryRunResult(
+                status="input_error",
+                recipient_count=0,
+                attempt_eligible=False,
+                coordinator_called=False,
+                transport_called=False,
+            )
+        return FamilyCalendarDeliveryRunResult(
+            status="dry_run",
+            recipient_count=len(record.recipients),
+            attempt_eligible=plan.eligible,
+            coordinator_called=False,
+            transport_called=False,
+        )
+
+    # Keep the runner closed if the loader grows another mode without an
+    # explicit implementation here.
     return FamilyCalendarDeliveryRunResult(
         status="config_error",
         recipient_count=0,
+        attempt_eligible=False,
         coordinator_called=False,
         transport_called=False,
     )

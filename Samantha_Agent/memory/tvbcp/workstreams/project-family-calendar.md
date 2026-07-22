@@ -160,3 +160,14 @@ Důkaz: plná Cockpit brána: 1029 testů, 260.9 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Navrhnout bod 3b s bezpečným dry-run režimem bez SMTP
+
+### 2026-07-22 18:57 CEST – Runner podporuje redigovaný dry-run D-2 a D-1 bez runtime I/O nebo transportu
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: Runner podporuje redigovaný dry-run D-2 a D-1 bez runtime I/O nebo transportu
+
+Důkaz: plná Cockpit brána: 1032 testů, 259.9 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Doplnit čistý builder jednoho společného e-mailového obalu pro čtyři příjemce bez SMTP

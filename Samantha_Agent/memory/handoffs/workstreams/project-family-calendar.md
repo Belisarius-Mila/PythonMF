@@ -171,3 +171,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/app/family_calendar_delivery_runner.py`, `Samantha_Agent/tests/test_family_calendar_delivery_runner.py`
 - Commit: `Doplnit bezpečný runner doručení rodinného kalendáře`
 - Další krok: Navrhnout bod 3b s bezpečným dry-run režimem bez SMTP
+
+### Automatický checkpoint 2026-07-22 18:57 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Runner podporuje redigovaný dry-run D-2 a D-1 bez runtime I/O nebo transportu
+- Ověření: plná Cockpit brána: 1032 testů, 259.9 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/family_calendar_delivery_config.py`, `Samantha_Agent/app/family_calendar_delivery_runner.py`, `Samantha_Agent/tests/test_family_calendar_delivery_config.py`, `Samantha_Agent/tests/test_family_calendar_delivery_runner.py`
+- Commit: `Doplnit bezpečný dry-run doručení rodinného kalendáře`
+- Další krok: Doplnit čistý builder jednoho společného e-mailového obalu pro čtyři příjemce bez SMTP
