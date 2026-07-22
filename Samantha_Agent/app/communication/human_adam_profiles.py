@@ -731,7 +731,7 @@ class HumanAdamProfileManager:
     def _assert_legacy_only_backend(self, *, operation: str) -> None:
         if self.active_lazy_workstream_id:
             raise AppServerError(
-                f"{operation} lazy pracovního proudu v MMTX pilotu zatím není povolené."
+                f"{operation} lazy pracovního proudu zatím není povolené."
             )
 
     def status(self) -> dict[str, Any]:

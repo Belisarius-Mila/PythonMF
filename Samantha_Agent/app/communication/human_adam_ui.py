@@ -291,13 +291,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
         <h4>Běžný vývoj</h4>
         <ol>
-          <li>Vyber pracovní proud, například <strong>Human–Adam</strong> nebo <strong>Knihovna</strong>, a klikni na <strong>Připojit</strong>.</li>
+          <li>Vyber správný pracovní proud a klikni na <strong>Připojit</strong>.</li>
+          <li>Před zapisovacím úkolem klikni na <strong>Zahájit vývoj</strong> a potvrď jednorázové oprávnění. Platí pouze pro následující odeslaný pokyn; bez něj Adam zůstává read-only.</li>
           <li>Vývojový úkol napiš přímo Adamovi do textového pole. Nový projekt, tool nebo layer se zakládá pouze v terminálovém dialogu s Adamem.</li>
           <li>Po úspěšné změně Adam automaticky spustí testy, aktualizuje handoff a TVBCP, vytvoří jeden commit přímo v <code>main</code>, pushne jej a synchronizuje čisté profily.</li>
-          <li>Okno <strong>Práce</strong> otevři až pro kontrolu stavu nebo nasazení hotového čistého <code>main</code>.</li>
+          <li>Okno <strong>Práce</strong> otevři pro kontrolu čistého stavu, diagnostiku rozpracovaných změn nebo podporované nasazení.</li>
         </ol>
 
         <h4>Nasazení</h4>
+        <p>Nasazovací tlačítka se zobrazí jen u pracovního proudu, který nasazení podporuje. U ostatních proudů zůstává v okně Práce pouze stav a bezpečné vysvětlení.</p>
         <ol>
           <li>Workspace musí být čistý, synchronní a odpovídat <code>main</code>.</li>
           <li>Stiskni <strong>Audit nasazení</strong> a přečti výsledek.</li>
@@ -1798,13 +1800,15 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       && !payload.local_checkpoint_ahead
       && payload.workspace_relation === "aligned"
       && Number(payload.source_pending_changes || 0) === 0;
+    deployAuditBtn.hidden = !workstreamDeploymentEnabled;
     deployAuditBtn.disabled = !simpleDeployReady;
     deployConfirmation.value = "";
     deployConfirmation.hidden = true;
     deployConfirmation.disabled = true;
+    deployBtn.hidden = !workstreamDeploymentEnabled;
     deployBtn.disabled = true;
-    if (!workstreamDevelopmentEnabled) deployMeta.textContent = "Tento lazy proud zůstává read-only; zapisovací pilot je zatím povolen jen pro MMTX.";
-    else if (!workstreamDeploymentEnabled) deployMeta.textContent = "MMTX pilot může vyvíjet a checkpointovat; nasazení z lazy proudu zatím zůstává zavřené.";
+    if (!workstreamDevelopmentEnabled) deployMeta.textContent = "Tento pracovní proud je pouze pro čtení; vývoj zde zatím není povolen.";
+    else if (!workstreamDeploymentEnabled) deployMeta.textContent = "Vývoj spusť tlačítkem Zahájit vývoj. Po úspěšném tahu se změny automaticky checkpointují, commitnou a pushnou; nasazení z tohoto pracovního proudu zatím není dostupné.";
     else if (payload.dirty) deployMeta.textContent = "Nejdřív dokonči automatický checkpoint změn do main.";
     else if (payload.local_checkpoint_ahead) deployMeta.textContent = "Je zachovaný starší lokální checkpoint; nejdřív proveď servisní kontrolu.";
     else if (checkpointPreserved) deployMeta.textContent = "WIP je bezpečně zachovaný, ale audit je zablokovaný. Nejdřív proveď obnovu nad aktuálním main.";

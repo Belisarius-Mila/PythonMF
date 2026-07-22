@@ -271,17 +271,20 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("project_id:projectId,handoff_path:handoffPath", HUMAN_ADAM_HTML)
         self.assertIn("Vyber projekt a jeho aktuální handoff.", HUMAN_ADAM_HTML)
         self.assertIn("checkpointBtn.disabled = !workstreamDevelopmentEnabled || !payload.dirty || semaphore.can_checkpoint !== true;", HUMAN_ADAM_HTML)
+        self.assertIn("deployAuditBtn.hidden = !workstreamDeploymentEnabled;", HUMAN_ADAM_HTML)
         self.assertIn("deployAuditBtn.disabled = !simpleDeployReady;", HUMAN_ADAM_HTML)
         self.assertIn(
-            "Tento lazy proud zůstává read-only; zapisovací pilot je zatím povolen jen pro MMTX.",
+            "Tento pracovní proud je pouze pro čtení; vývoj zde zatím není povolen.",
             HUMAN_ADAM_HTML,
         )
         self.assertIn("workstreamDeploymentEnabled = capabilities.deployment !== false;", HUMAN_ADAM_HTML)
         self.assertIn("const simpleDeployReady = workstreamDeploymentEnabled", HUMAN_ADAM_HTML)
+        self.assertIn("deployBtn.hidden = !workstreamDeploymentEnabled;", HUMAN_ADAM_HTML)
         self.assertIn(
-            "MMTX pilot může vyvíjet a checkpointovat; nasazení z lazy proudu zatím zůstává zavřené.",
+            "Vývoj spusť tlačítkem Zahájit vývoj. Po úspěšném tahu se změny automaticky checkpointují, commitnou a pushnou; nasazení z tohoto pracovního proudu zatím není dostupné.",
             HUMAN_ADAM_HTML,
         )
+        self.assertNotIn("MMTX pilot", HUMAN_ADAM_HTML)
         self.assertNotIn("semaphore.can_deploy", HUMAN_ADAM_HTML)
         self.assertIn("To projde jen při čistých workspaces bez čekajícího WIP", HUMAN_ADAM_HTML)
 
@@ -368,9 +371,12 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Jak pracovat a nasazovat", panel_source)
         self.assertIn('class="simple-work-help"', panel_source)
         self.assertIn("Běžný vývoj", panel_source)
+        self.assertIn("Zahájit vývoj", panel_source)
+        self.assertIn("Platí pouze pro následující odeslaný pokyn", panel_source)
         self.assertIn("Nový projekt, tool nebo layer se zakládá pouze v terminálovém dialogu s Adamem", panel_source)
         self.assertIn("jeden commit přímo v <code>main</code>", panel_source)
         self.assertIn("Nasazení", panel_source)
+        self.assertIn("Nasazovací tlačítka se zobrazí jen u pracovního proudu", panel_source)
         self.assertIn("Audit nasazení", panel_source)
         self.assertIn("Nasazeno a ověřeno", panel_source)
         self.assertIn("reset, rebase ani force push", panel_source)

@@ -1089,7 +1089,10 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             development = manager.development_status()
             with self.assertRaisesRegex(AppServerError, "Ruční WIP checkpoint"):
                 manager.checkpoint(confirmed=True, message="Zakázaný checkpoint")
-            with self.assertRaisesRegex(AppServerError, "Audit nasazení"):
+            with self.assertRaisesRegex(
+                AppServerError,
+                "Audit nasazení lazy pracovního proudu zatím není povolené",
+            ):
                 manager.audit_simple_main_deployment()
 
         self.assertEqual(tvbcp["content"], "# TVBCP: MMTX\n")
@@ -1112,6 +1115,11 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             )
 
             capabilities = manager.status()["workstream_capabilities"]
+            with self.assertRaisesRegex(
+                AppServerError,
+                "Audit nasazení lazy pracovního proudu zatím není povolené",
+            ):
+                manager.audit_simple_main_deployment()
             read_only = manager.send(
                 text="Jen analyzuj kalendář",
                 client_message_id="calendar-read-only-001",
