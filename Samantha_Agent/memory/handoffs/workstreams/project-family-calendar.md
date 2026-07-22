@@ -135,3 +135,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/family_calendar_delivery.py`, `Samantha_Agent/tests/test_family_calendar_delivery.py`
 - Commit: `Doplnit stavový automat doručení rodinného kalendáře`
 - Další krok: Doplnit soukromou konfiguraci čtyř příjemců a atomickou persistenci stavu bez zapnutí SMTP
+
+### Automatický checkpoint 2026-07-22 16:39 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Přidáno privátní atomické úložiště delivery stavů, recovery a cílené bezpečnostní testy
+- Ověření: plná Cockpit brána: 1007 testů, 213.9 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (5): `.github/workflows/cockpit-quality-gate.yml`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/app/family_calendar_delivery_store.py`, `Samantha_Agent/tests/test_family_calendar_delivery_store.py`
+- Commit: `Doplnit atomické úložiště doručení rodinného kalendáře`
+- Další krok: Doplnit loader soukromé konfigurace přesně čtyř příjemců v režimu disabled bez zapnutí SMTP

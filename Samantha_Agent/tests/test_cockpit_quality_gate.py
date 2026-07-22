@@ -41,6 +41,7 @@ class CockpitQualityGateTests(unittest.TestCase):
             "Samantha_Agent/tests/test_simple_main_*.py",
             "Samantha_Agent/tests/test_local_appserver_runtime.py",
             "Samantha_Agent/app/family_calendar.py",
+            "Samantha_Agent/app/family_calendar_delivery*.py",
             "Samantha_Agent/tests/test_family_calendar*.py",
         }
 
@@ -83,6 +84,10 @@ async def second():
         self.assertIn("tests.test_development_branch_lifecycle", TEST_MODULES)
         self.assertIn("tests.test_project_continuity", TEST_MODULES)
         self.assertIn("app/project_continuity.py", COMPILE_PATHS)
+        self.assertIn("app/family_calendar_delivery.py", COMPILE_PATHS)
+        self.assertIn("app/family_calendar_delivery_store.py", COMPILE_PATHS)
+        self.assertIn("tests.test_family_calendar_delivery", TEST_MODULES)
+        self.assertIn("tests.test_family_calendar_delivery_store", TEST_MODULES)
 
     def test_architecture_baselines_are_informational_and_reported(self) -> None:
         messages = architecture_messages()

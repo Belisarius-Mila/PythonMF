@@ -116,3 +116,14 @@ Důkaz: plná Cockpit brána: 986 testů, 256.0 s, výsledek OK. Checkpoint back
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Doplnit soukromou konfiguraci čtyř příjemců a atomickou persistenci stavu bez zapnutí SMTP
+
+### 2026-07-22 16:39 CEST – Přidáno privátní atomické úložiště delivery stavů, recovery a cílené bezpečnostní testy
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: Přidáno privátní atomické úložiště delivery stavů, recovery a cílené bezpečnostní testy
+
+Důkaz: plná Cockpit brána: 1007 testů, 213.9 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Doplnit loader soukromé konfigurace přesně čtyř příjemců v režimu disabled bez zapnutí SMTP
