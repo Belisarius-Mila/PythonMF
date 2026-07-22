@@ -59,6 +59,7 @@ COMPILE_PATHS = (
     "app/family_calendar_delivery.py",
     "app/family_calendar_delivery_config.py",
     "app/family_calendar_delivery_config_migration.py",
+    "app/family_calendar_delivery_config_migration_runner.py",
     "app/family_calendar_delivery_coordinator.py",
     "app/family_calendar_delivery_message.py",
     "app/family_calendar_delivery_runner.py",
@@ -96,6 +97,7 @@ COMPILE_PATHS = (
     "scripts/codex_appserver_shared_thread_probe.py",
     "scripts/human_adam_takeover.py",
     "scripts/development_branch_audit.py",
+    "scripts/family_calendar_delivery_config_migrate.py",
 )
 
 SHELL_PATHS = (
@@ -137,6 +139,7 @@ TEST_MODULES = (
     "tests.test_family_calendar_delivery",
     "tests.test_family_calendar_delivery_config",
     "tests.test_family_calendar_delivery_config_migration",
+    "tests.test_family_calendar_delivery_config_migration_runner",
     "tests.test_family_calendar_delivery_coordinator",
     "tests.test_family_calendar_delivery_integration",
     "tests.test_family_calendar_delivery_message",

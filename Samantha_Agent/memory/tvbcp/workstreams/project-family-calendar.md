@@ -226,3 +226,14 @@ Důkaz: plná Cockpit brána: 1056 testů, 256.6 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Vytvořit redigovaný plán nad skutečnou privátní konfigurací s lokálně získaným odesílatelem a teprve po kontrole potvrdit apply
+
+### 2026-07-22 21:11 CEST – Dokončen bod 4d: lokální preview/apply runner, redigované CLI a cílené bezpečnostní testy
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: Dokončen bod 4d: lokální preview/apply runner, redigované CLI a cílené bezpečnostní testy
+
+Důkaz: plná Cockpit brána: 1063 testů, 255.8 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Spustit pouze redigovaný preview v prostředí vlastnícím privátní konfiguraci

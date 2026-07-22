@@ -11,6 +11,7 @@ from app.family_calendar_delivery_config_migration import (
     DELIVERY_CONFIG_MIGRATION_CONFIRMATION,
     DeliveryConfigMigrationError,
     apply_family_calendar_delivery_config_migration,
+    inspect_family_calendar_delivery_config_migration,
     plan_family_calendar_delivery_config_migration,
 )
 from app.file_persistence import lock_path_for
@@ -26,6 +27,26 @@ SENDER_ADDRESS = "sender@example.invalid"
 
 
 class FamilyCalendarDeliveryConfigMigrationTests(unittest.TestCase):
+    def test_inspection_is_read_only_and_exposes_only_safe_metadata(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = _write_legacy_config(Path(temp_dir))
+            original = path.read_bytes()
+            entries_before = tuple(sorted(path.parent.iterdir()))
+
+            inspection = inspect_family_calendar_delivery_config_migration(path=path)
+
+            self.assertEqual(inspection.smtp_provider, "icloud")
+            self.assertEqual(inspection.mode, "disabled")
+            self.assertEqual(inspection.recipient_count, 4)
+            self.assertEqual(path.read_bytes(), original)
+            self.assertEqual(tuple(sorted(path.parent.iterdir())), entries_before)
+            visible = repr(inspection)
+            self.assertIn("from_schema=1", visible)
+            self.assertIn("to_schema=2", visible)
+            self.assertNotIn("@", visible)
+            for private_value in (*ADDRESSES, str(path)):
+                self.assertNotIn(private_value, visible)
+
     def test_plan_is_read_only_and_redacts_all_private_values(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             path = _write_legacy_config(Path(temp_dir))

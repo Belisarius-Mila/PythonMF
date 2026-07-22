@@ -225,3 +225,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/app/family_calendar_delivery_config.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/app/family_calendar_delivery_config_migration.py`, `Samantha_Agent/tests/test_family_calendar_delivery_config_migration.py`
 - Commit: `Doplnit bezpečnou migraci konfigurace rodinného kalendáře`
 - Další krok: Vytvořit redigovaný plán nad skutečnou privátní konfigurací s lokálně získaným odesílatelem a teprve po kontrole potvrdit apply
+
+### Automatický checkpoint 2026-07-22 21:11 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Dokončen bod 4d: lokální preview/apply runner, redigované CLI a cílené bezpečnostní testy
+- Ověření: plná Cockpit brána: 1063 testů, 255.8 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (7): `Samantha_Agent/app/family_calendar_delivery_config_migration.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/tests/test_family_calendar_delivery_config_migration.py`, `Samantha_Agent/app/family_calendar_delivery_config_migration_runner.py`, `Samantha_Agent/scripts/family_calendar_delivery_config_migrate.py`, `Samantha_Agent/tests/test_family_calendar_delivery_config_migration_runner.py`
+- Commit: `Doplnit bezpečný lokální runner migrace konfigurace`
+- Další krok: Spustit pouze redigovaný preview v prostředí vlastnícím privátní konfiguraci

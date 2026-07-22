@@ -38,6 +38,22 @@ class DeliveryConfigMigrationError(RuntimeError):
 
 
 @dataclass(frozen=True, repr=False)
+class DeliveryConfigMigrationInspection:
+    smtp_provider: str
+    mode: str
+    recipient_count: int
+
+    def __repr__(self) -> str:
+        return (
+            "DeliveryConfigMigrationInspection("
+            f"from_schema={LEGACY_DELIVERY_CONFIG_SCHEMA_VERSION}, "
+            f"to_schema={DELIVERY_CONFIG_SCHEMA_VERSION}, "
+            f"mode={self.mode!r}, recipient_count={self.recipient_count}, "
+            "redacted=True)"
+        )
+
+
+@dataclass(frozen=True, repr=False)
 class DeliveryConfigMigrationPlan:
     path: Path
     source_digest: str
@@ -66,6 +82,31 @@ class DeliveryConfigMigrationResult:
             f"recipient_count={len(self.config.recipients)}, "
             f"backup_created={self.backup_created!r}, redacted=True)"
         )
+
+
+def inspect_family_calendar_delivery_config_migration(
+    *,
+    path: Path = DEFAULT_FAMILY_CALENDAR_DELIVERY_CONFIG_PATH,
+) -> DeliveryConfigMigrationInspection:
+    """Validate schema 1 without a real sender and return only safe metadata."""
+
+    try:
+        _, raw = _read_legacy_document(Path(path))
+        config = _schema_two_config(
+            raw,
+            sender_address="migration-preview@example.invalid",
+        )
+    except DeliveryConfigMigrationError:
+        raise
+    except Exception as exc:  # noqa: BLE001 - never expose private parser details.
+        raise DeliveryConfigMigrationError(
+            "Family-calendar delivery config migration cannot be inspected safely."
+        ) from exc
+    return DeliveryConfigMigrationInspection(
+        smtp_provider=config.smtp_provider,
+        mode=config.mode.value,
+        recipient_count=len(config.recipients),
+    )
 
 
 def plan_family_calendar_delivery_config_migration(
