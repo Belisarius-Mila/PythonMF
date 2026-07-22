@@ -85,9 +85,11 @@ async def second():
         self.assertIn("tests.test_project_continuity", TEST_MODULES)
         self.assertIn("app/project_continuity.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery.py", COMPILE_PATHS)
+        self.assertIn("app/family_calendar_delivery_config.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_coordinator.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_store.py", COMPILE_PATHS)
         self.assertIn("tests.test_family_calendar_delivery", TEST_MODULES)
+        self.assertIn("tests.test_family_calendar_delivery_config", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_coordinator", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_store", TEST_MODULES)
 
