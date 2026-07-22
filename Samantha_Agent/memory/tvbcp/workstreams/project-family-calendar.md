@@ -105,3 +105,14 @@ Důkaz: plná Cockpit brána: 986 testů, 257.7 s, výsledek OK. Checkpoint back
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Navrhnout read-only kontrakt soukromé konfigurace, odesílacího adaptéru a stavu doručení
+
+### 2026-07-22 15:59 CEST – Přidán čistý stavový automat D-2/D-1 s per-recipient výsledky a cílenými testy
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: Přidán čistý stavový automat D-2/D-1 s per-recipient výsledky a cílenými testy
+
+Důkaz: plná Cockpit brána: 986 testů, 256.0 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Doplnit soukromou konfiguraci čtyř příjemců a atomickou persistenci stavu bez zapnutí SMTP

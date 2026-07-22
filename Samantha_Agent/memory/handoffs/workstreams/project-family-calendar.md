@@ -126,3 +126,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/memory/handoffs/workstreams/project-family-calendar.md`, `Samantha_Agent/memory/tvbcp/workstreams/project-family-calendar.md`
 - Commit: `Zapsat cílový model automatických rodinných upozornění`
 - Další krok: Navrhnout read-only kontrakt soukromé konfigurace, odesílacího adaptéru a stavu doručení
+
+### Automatický checkpoint 2026-07-22 15:59 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Přidán čistý stavový automat D-2/D-1 s per-recipient výsledky a cílenými testy
+- Ověření: plná Cockpit brána: 986 testů, 256.0 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/family_calendar_delivery.py`, `Samantha_Agent/tests/test_family_calendar_delivery.py`
+- Commit: `Doplnit stavový automat doručení rodinného kalendáře`
+- Další krok: Doplnit soukromou konfiguraci čtyř příjemců a atomickou persistenci stavu bez zapnutí SMTP
