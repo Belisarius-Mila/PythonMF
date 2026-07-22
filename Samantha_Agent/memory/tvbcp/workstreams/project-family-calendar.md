@@ -127,3 +127,14 @@ Důkaz: plná Cockpit brána: 1007 testů, 213.9 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Doplnit loader soukromé konfigurace přesně čtyř příjemců v režimu disabled bez zapnutí SMTP
+
+### 2026-07-22 17:15 CEST – Přidán jedno-workerový koordinátor s recovery, fail-closed transportem a testy skutečného souběhu i pádu procesu
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: Přidán jedno-workerový koordinátor s recovery, fail-closed transportem a testy skutečného souběhu i pádu procesu
+
+Důkaz: plná Cockpit brána: 1014 testů, 213.5 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Doplnit loader soukromé konfigurace čtyř příjemců v režimu disabled a předávat ji výhradně koordinátoru
