@@ -180,3 +180,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/family_calendar_delivery_config.py`, `Samantha_Agent/app/family_calendar_delivery_runner.py`, `Samantha_Agent/tests/test_family_calendar_delivery_config.py`, `Samantha_Agent/tests/test_family_calendar_delivery_runner.py`
 - Commit: `Doplnit bezpečný dry-run doručení rodinného kalendáře`
 - Další krok: Doplnit čistý builder jednoho společného e-mailového obalu pro čtyři příjemce bez SMTP
+
+### Automatický checkpoint 2026-07-22 19:28 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Přidán čistý redigovaný builder jednoho upozornění pro čtyři příjemce
+- Ověření: plná Cockpit brána: 1037 testů, 259.9 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/app/family_calendar.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/app/family_calendar_delivery_message.py`, `Samantha_Agent/tests/test_family_calendar_delivery_message.py`
+- Commit: `Doplnit společný e-mailový obal rodinného kalendáře`
+- Další krok: Implementovat SMTP adaptér s injektovaným falešným klientem bez skutečného odesílání

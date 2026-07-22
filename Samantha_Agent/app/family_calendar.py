@@ -461,17 +461,29 @@ def build_notification_preview(
 ) -> dict[str, Any]:
     """Build one D-2/D-1 notification preview without I/O or delivery."""
 
-    if not event.notification_due or event.days_until not in NOTIFICATION_OFFSETS:
-        raise ValueError("Náhled lze sestavit jen pro upozornění D-2 nebo D-1.")
     clean_recipients = validate_notification_recipients(recipients)
+    return {
+        **build_notification_message(event),
+        "recipients": clean_recipients,
+    }
+
+
+def build_notification_message(event: FamilyEvent) -> dict[str, Any]:
+    """Build shared D-2/D-1 subject and body without recipients or I/O."""
+
+    if not event.notification_due or event.days_until not in NOTIFICATION_OFFSETS:
+        raise ValueError("Zprávu lze sestavit jen pro upozornění D-2 nebo D-1.")
+    display_name = _message_single_line(event.display_name, field="display_name")
+    relation_value = _message_single_line(event.relation, field="relation", required=False)
+    event_label = _message_single_line(event.event_label, field="event_label")
 
     offset = f"D-{event.days_until}"
-    relation = f" ({event.relation})" if event.relation else ""
+    relation = f" ({relation_value})" if relation_value else ""
     timing = "Zítra" if event.days_until == 1 else "Za 2 dny"
     body_lines = [
-        f"Rodinný kalendář – náhled {offset}",
+        f"Rodinný kalendář – upozornění {offset}",
         "",
-        f"{timing} má {event.display_name}{relation} {event.event_label}.",
+        f"{timing} má {display_name}{relation} {event_label}.",
         f"Datum: {event.event_date.day}. {event.event_date.month}. {event.event_date.year}",
     ]
     if event.age is not None:
@@ -481,12 +493,17 @@ def build_notification_preview(
         **event.to_summary(),
         "notification_offset": offset,
         "delivery_kind": "catch_up" if event.catch_up else "scheduled",
-        "recipients": clean_recipients,
-        "subject": (
-            f"Rodinný kalendář {offset}: {event.display_name} – {event.event_label}"
-        ),
+        "subject": f"Rodinný kalendář {offset}: {display_name} – {event_label}",
         "body": "\n".join(body_lines),
     }
+
+
+def _message_single_line(value: str, *, field: str, required: bool = True) -> str:
+    if not isinstance(value, str) or value != value.strip() or "\r" in value or "\n" in value:
+        raise ValueError(f"Pole zprávy {field} musí být jeden bezpečný řádek.")
+    if required and not value:
+        raise ValueError(f"Pole zprávy {field} nesmí být prázdné.")
+    return value
 
 
 def validate_notification_recipients(recipients: Sequence[str]) -> list[str]:

@@ -171,3 +171,14 @@ Důkaz: plná Cockpit brána: 1032 testů, 259.9 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Doplnit čistý builder jednoho společného e-mailového obalu pro čtyři příjemce bez SMTP
+
+### 2026-07-22 19:28 CEST – Přidán čistý redigovaný builder jednoho upozornění pro čtyři příjemce
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: Přidán čistý redigovaný builder jednoho upozornění pro čtyři příjemce
+
+Důkaz: plná Cockpit brána: 1037 testů, 259.9 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Implementovat SMTP adaptér s injektovaným falešným klientem bez skutečného odesílání
