@@ -26,6 +26,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     button.audit-action { background:#fbbf24; color:#422006; border-color:#d97706; }
     button.deploy-action { background:var(--ok); color:#fff; border-color:var(--ok); }
     button:disabled { opacity:.55; cursor:wait; }
+    #workOpenBtn.work-clean { color:var(--ok); border-color:#86efac; background:#ecfdf3; }
+    #workOpenBtn.work-attention { color:var(--warn); border-color:#fdba74; background:#fff7ed; }
     .statusline { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; color:var(--muted); font-size:13px; }
     #mobileStatusSummary { display:none; width:100%; margin-top:10px; padding:8px 10px; align-items:center; justify-content:space-between; gap:10px; text-align:left; color:var(--muted); background:var(--soft); }
     #mobileStatusSummary.warn { color:var(--warn); background:#fff7ed; }
@@ -144,7 +146,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <div class="head-tools">
         <button id="contextAnchorOpenBtn" type="button">Plán</button>
         <button id="tvbcpOpenBtn" type="button">TVBCP</button>
-        <button id="workOpenBtn" type="button">Práce</button>
+        <button id="workOpenBtn" type="button">Práce: stav</button>
         <button id="refreshBtn" type="button">Stav</button>
       </div>
       <a class="back" href="/">← Cockpit</a>
@@ -764,6 +766,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     profileSelect.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
     profileSwitchBtn.disabled = profileSelect.disabled || !profileSelect.value || profileSelect.value === activeWorkstreamId;
     refreshBtn.disabled = busy || resultWatchActive;
+    workOpenBtn.disabled = busy;
     refreshBtn.textContent = resultWatchActive ? "Čekám na výsledek…" : "Stav";
     sendBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
     writeIntentBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || !sessionConnected || !workstreamDevelopmentEnabled;
@@ -1153,6 +1156,45 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
   }
 
+  function workspaceRequiresWorkDetail(workspace) {
+    if (!workspace || typeof workspace !== "object" || !("workspace_relation" in workspace)) return true;
+    const relation = String(workspace.workspace_relation || "unknown");
+    return Boolean(
+      workspace.ok === false
+      || workspace.prepared === false
+      || workspace.ready === false
+      || workspace.has_git_remote
+      || workspace.dirty
+      || workspace.sync_available
+      || workspace.source_update_available
+      || Number(workspace.source_pending_changes || 0) > 0
+      || workspace.local_checkpoint_ahead
+      || workspace.local_checkpoint_preserved
+      || relation !== "aligned"
+    );
+  }
+
+  function renderCompactWorkStatus(workspace) {
+    const needsAttention = workspaceRequiresWorkDetail(workspace);
+    const changeCount = Number(workspace && workspace.change_count || 0);
+    workOpenBtn.classList.toggle("work-clean", !needsAttention && !workstreamDeploymentEnabled);
+    workOpenBtn.classList.toggle("work-attention", needsAttention);
+    if (workspace && workspace.dirty) {
+      workOpenBtn.textContent = `Práce: ${changeCount} změn`;
+      workOpenBtn.title = "Workspace obsahuje rozpracované změny; otevři detail.";
+    } else if (needsAttention) {
+      workOpenBtn.textContent = "Práce: kontrola";
+      workOpenBtn.title = "Pracovní stav vyžaduje kontrolu; otevři detail.";
+    } else if (workstreamDeploymentEnabled) {
+      workOpenBtn.textContent = "Práce: nasazení";
+      workOpenBtn.title = "Workspace je čistý a tento pracovní proud podporuje nasazení.";
+    } else {
+      workOpenBtn.textContent = "Práce: čistá";
+      workOpenBtn.title = "Workspace je čistý a synchronní s main; velký detail není potřeba.";
+    }
+    workOpenBtn.setAttribute("aria-label", workOpenBtn.title);
+  }
+
   function renderStatus(payload) {
     renderWorkstreams(payload);
     const session = payload && payload.session ? payload.session : null;
@@ -1181,6 +1223,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     else if (workspace.local_checkpoint_ahead) workspaceBadge.textContent = `WIP checkpoint: ${workspace.local_commit_count}`;
     else workspaceBadge.textContent = "Workspace čistý";
     workspaceBadge.className = workspace.has_git_remote || workspaceDiverged || workspace.sync_available || workspace.dirty || workspace.local_checkpoint_ahead ? "badge warn" : "badge";
+    renderCompactWorkStatus(workspace);
     renderDevelopmentBadge(payload && payload.development_semaphore ? payload.development_semaphore : null);
     renderContextAnchorBadge(payload && payload.context_anchor ? payload.context_anchor : null);
     const deployment = verifiedDeploymentRecord(
@@ -1815,6 +1858,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     else if (payload.workspace_relation === "diverged") deployMeta.textContent = "Audit je zablokovaný: workspace a main se rozešly.";
     else if (simpleDeployReady) deployMeta.textContent = "Čistý main je připravený k auditu nasazení.";
     else deployMeta.textContent = "Workspace nejdřív synchronizuj s čistým main.";
+    renderCompactWorkStatus(payload);
   }
 
   function renderHandoffProposal(proposal) {
@@ -1901,10 +1945,12 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       const payload = await api("/api/human-adam/workspace");
       if (!payload.ok) throw new Error(payload.message || "Pracovní stav nelze načíst.");
       renderWork(payload);
+      return payload;
     } catch (error) {
       workChanges.replaceChildren();
       workMeta.textContent = `Pracovní stav nelze načíst: ${error.message}`;
       checkpointBtn.disabled = true;
+      return null;
     } finally { workRefreshBtn.disabled = false; }
   }
 
@@ -2014,11 +2060,20 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     }
   }
 
-  function openWork() {
+  async function openWork() {
+    if (workOpenBtn.disabled) return;
+    workOpenBtn.disabled = true;
+    const payload = await loadWork();
+    workOpenBtn.disabled = busy;
+    const showDetail = !payload || workspaceRequiresWorkDetail(payload) || workstreamDeploymentEnabled;
+    if (!showDetail) {
+      workPanel.hidden = true;
+      notice.textContent = "Práce je čistá a synchronní s main. Detail není potřeba.";
+      return;
+    }
     contextAnchorPanel.hidden = true;
     tvbcpPanel.hidden = true;
     workPanel.hidden = false;
-    loadWork();
   }
 
   function setWorkHelpOpen(open) {

@@ -245,6 +245,50 @@ class HumanAdamUiTests(unittest.TestCase):
             HUMAN_ADAM_HTML.index('else workMeta.textContent = "Workspace je čistý a odpovídá main.";'),
         )
 
+    def test_work_button_is_compact_and_opens_detail_only_when_needed(self) -> None:
+        compact_start = HUMAN_ADAM_HTML.index("function workspaceRequiresWorkDetail(workspace)")
+        compact_end = HUMAN_ADAM_HTML.index("function renderStatus(payload)", compact_start)
+        compact_source = HUMAN_ADAM_HTML[compact_start:compact_end]
+        load_start = HUMAN_ADAM_HTML.index("async function loadWork()")
+        open_start = HUMAN_ADAM_HTML.index("async function openWork()", load_start)
+        open_end = HUMAN_ADAM_HTML.index("function setWorkHelpOpen(open)", open_start)
+        load_source = HUMAN_ADAM_HTML[load_start:open_start]
+        open_source = HUMAN_ADAM_HTML[open_start:open_end]
+
+        self.assertIn('<button id="workOpenBtn" type="button">Práce: stav</button>', HUMAN_ADAM_HTML)
+        self.assertIn("#workOpenBtn.work-clean", HUMAN_ADAM_HTML)
+        self.assertIn("#workOpenBtn.work-attention", HUMAN_ADAM_HTML)
+        for marker in (
+            "workspace.ok === false",
+            "workspace.prepared === false",
+            "workspace.ready === false",
+            "workspace.has_git_remote",
+            "workspace.dirty",
+            "workspace.sync_available",
+            "workspace.source_update_available",
+            "Number(workspace.source_pending_changes || 0) > 0",
+            "workspace.local_checkpoint_ahead",
+            "workspace.local_checkpoint_preserved",
+            'relation !== "aligned"',
+        ):
+            self.assertIn(marker, compact_source)
+        self.assertIn('workOpenBtn.textContent = "Práce: čistá";', compact_source)
+        self.assertIn('workOpenBtn.textContent = "Práce: kontrola";', compact_source)
+        self.assertIn('workOpenBtn.textContent = "Práce: nasazení";', compact_source)
+        self.assertIn("`Práce: ${changeCount} změn`", compact_source)
+        self.assertIn('workOpenBtn.setAttribute("aria-label", workOpenBtn.title);', compact_source)
+        self.assertGreaterEqual(HUMAN_ADAM_HTML.count("renderCompactWorkStatus("), 3)
+        self.assertIn("return payload;", load_source)
+        self.assertIn("return null;", load_source)
+        self.assertIn(
+            "const showDetail = !payload || workspaceRequiresWorkDetail(payload) || workstreamDeploymentEnabled;",
+            open_source,
+        )
+        self.assertIn("if (!showDetail)", open_source)
+        self.assertIn("Práce je čistá a synchronní s main. Detail není potřeba.", open_source)
+        self.assertLess(open_source.index("if (!showDetail)"), open_source.index("workPanel.hidden = false;"))
+        self.assertNotIn('method:"POST"', open_source)
+
     def test_development_semaphore_ui_is_explicit_and_blocks_write_actions(self) -> None:
         for element_id in (
             "developmentBadge",
