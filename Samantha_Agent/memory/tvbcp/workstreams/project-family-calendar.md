@@ -215,3 +215,14 @@ Důkaz: plná Cockpit brána: 1050 testů, 256.4 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Připravit explicitní bezpečnou aktualizaci soukromé konfigurace na schéma 2 a ověřit ji bez SMTP
+
+### 2026-07-22 20:54 CEST – Přidán redigovaný dvoukrokový přechod schématu 1 na 2 s atomickým zápisem a soukromou zálohou
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: Přidán redigovaný dvoukrokový přechod schématu 1 na 2 s atomickým zápisem a soukromou zálohou
+
+Důkaz: plná Cockpit brána: 1056 testů, 256.6 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Vytvořit redigovaný plán nad skutečnou privátní konfigurací s lokálně získaným odesílatelem a teprve po kontrole potvrdit apply

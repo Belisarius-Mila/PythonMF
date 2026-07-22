@@ -216,3 +216,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (3): `Samantha_Agent/app/family_calendar_delivery_config.py`, `Samantha_Agent/tests/test_family_calendar_delivery_config.py`, `Samantha_Agent/tests/test_family_calendar_delivery_runner.py`
 - Commit: `Rozšířit konfiguraci rodinného kalendáře o odesílatele`
 - Další krok: Připravit explicitní bezpečnou aktualizaci soukromé konfigurace na schéma 2 a ověřit ji bez SMTP
+
+### Automatický checkpoint 2026-07-22 20:54 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Přidán redigovaný dvoukrokový přechod schématu 1 na 2 s atomickým zápisem a soukromou zálohou
+- Ověření: plná Cockpit brána: 1056 testů, 256.6 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/app/family_calendar_delivery_config.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/app/family_calendar_delivery_config_migration.py`, `Samantha_Agent/tests/test_family_calendar_delivery_config_migration.py`
+- Commit: `Doplnit bezpečnou migraci konfigurace rodinného kalendáře`
+- Další krok: Vytvořit redigovaný plán nad skutečnou privátní konfigurací s lokálně získaným odesílatelem a teprve po kontrole potvrdit apply

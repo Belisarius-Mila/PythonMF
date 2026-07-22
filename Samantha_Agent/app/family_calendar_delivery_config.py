@@ -63,14 +63,18 @@ def load_family_calendar_delivery_config(
     try:
         _assert_private_config_file(target)
         raw = json.loads(target.read_text(encoding="utf-8"))
-        return _config_from_document(raw)
+        return parse_family_calendar_delivery_config_document(raw)
     except DeliveryConfigError:
         raise
     except (OSError, UnicodeError, json.JSONDecodeError, TypeError, ValueError) as exc:
         raise DeliveryConfigError("Family-calendar delivery configuration cannot be trusted.") from exc
 
 
-def _config_from_document(raw: Any) -> FamilyCalendarDeliveryConfig:
+def parse_family_calendar_delivery_config_document(
+    raw: Any,
+) -> FamilyCalendarDeliveryConfig:
+    """Validate one already-loaded schema-2 document without performing I/O."""
+
     expected_fields = {
         "schema_version",
         "mode",
