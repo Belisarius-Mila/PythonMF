@@ -22,9 +22,9 @@ class WorkstreamMemoryRegistryTests(unittest.TestCase):
             for path in (binding.handoff_relative_path, binding.tvbcp_relative_path)
         ]
 
-        self.assertEqual(len(bindings), 29)
-        self.assertEqual(len(paths), 58)
-        self.assertEqual(len(set(paths)), 58)
+        self.assertEqual(len(bindings), 30)
+        self.assertEqual(len(paths), 60)
+        self.assertEqual(len(set(paths)), 60)
         self.assertTrue(
             all(path.startswith("memory/handoffs/") for path in paths[0::2])
         )
@@ -68,8 +68,34 @@ class WorkstreamMemoryRegistryTests(unittest.TestCase):
             "memory/tvbcp/workstreams/project-mmtx.md",
         )
         self.assertEqual(status["ready_count"], 0)
-        self.assertEqual(status["workstream_count"], 29)
+        self.assertEqual(status["workstream_count"], 30)
         self.assertFalse((root / "memory").exists())
+
+    def test_family_calendar_uses_lazy_paths_without_materializing_documents(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            registry = WorkstreamMemoryRegistry()
+            calendar = registry.binding("project-family-calendar")
+
+            status = registry.status(project_root=root)
+            row = next(
+                item
+                for item in status["workstreams"]
+                if item["id"] == "project-family-calendar"
+            )
+            memory_created = (root / "memory").exists()
+
+        self.assertFalse(calendar.legacy_document)
+        self.assertEqual(
+            calendar.handoff_relative_path,
+            "memory/handoffs/workstreams/project-family-calendar.md",
+        )
+        self.assertEqual(
+            calendar.tvbcp_relative_path,
+            "memory/tvbcp/workstreams/project-family-calendar.md",
+        )
+        self.assertFalse(row["memory_ready"])
+        self.assertFalse(memory_created)
 
     def test_initial_templates_are_bounded_git_safe_skeletons(self) -> None:
         registry = WorkstreamMemoryRegistry()

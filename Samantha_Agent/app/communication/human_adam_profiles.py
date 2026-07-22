@@ -81,7 +81,9 @@ KNIHOVNA_TVBCP_RELATIVE_PATH = Path("memory/tvbcp/knihovna_cockpit.txt")
 PROFILE_ID_RE = re.compile(r"[a-z][a-z0-9_-]{1,31}")
 LEGACY_PROFILE_STATE_SCHEMA = 1
 WORKSTREAM_STATE_SCHEMA = 2
-WRITABLE_LAZY_WORKSTREAM_IDS = frozenset({"project-mmtx"})
+ONE_TURN_WRITABLE_LAZY_WORKSTREAM_IDS = frozenset(
+    {"project-mmtx", "project-family-calendar"}
+)
 
 KNIHOVNA_DEVELOPER_INSTRUCTIONS = (
     HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS
@@ -493,7 +495,7 @@ class HumanAdamProfileManager:
             raise SessionBusyError("Pracovní profil právě provádí jinou operaci.")
         try:
             workstream_id = self.workstream_threads.checkpoint_workstream_id()
-            self._assert_writable_lazy_workstream(workstream_id)
+            self._assert_one_turn_writable_lazy_workstream(workstream_id)
             memory_binding = self.workstream_memory.binding(workstream_id)
             service = self.profiles[self.default_profile_id]["service"]
             peer_workspaces = tuple(
@@ -703,8 +705,8 @@ class HumanAdamProfileManager:
     def _workstream_capabilities(self) -> dict[str, Any]:
         lazy_id = self.active_lazy_workstream_id
         lazy = bool(lazy_id)
-        writable_pilot = lazy_id in WRITABLE_LAZY_WORKSTREAM_IDS
-        one_turn_write = not lazy or writable_pilot
+        writable_pilot = lazy_id == "project-mmtx"
+        one_turn_write = not lazy or lazy_id in ONE_TURN_WRITABLE_LAZY_WORKSTREAM_IDS
         return {
             "conversation": True,
             "context_anchor": True,
@@ -718,11 +720,12 @@ class HumanAdamProfileManager:
             "write_authorization": "one_turn" if one_turn_write else "read_only",
         }
 
-    def _assert_writable_lazy_workstream(self, workstream_id: str) -> None:
+    def _assert_one_turn_writable_lazy_workstream(self, workstream_id: str) -> None:
         clean_id = str(workstream_id or "").strip()
-        if clean_id not in WRITABLE_LAZY_WORKSTREAM_IDS:
+        if clean_id not in ONE_TURN_WRITABLE_LAZY_WORKSTREAM_IDS:
             raise AppServerError(
-                "Tento lazy pracovní proud zůstává read-only; zapisovací pilot je povolen jen pro MMTX."
+                "Tento lazy pracovní proud zůstává read-only; jednorázový vývoj "
+                "je povolen jen pro výslovně schválené pracovní proudy."
             )
 
     def _assert_legacy_only_backend(self, *, operation: str) -> None:
@@ -831,7 +834,7 @@ class HumanAdamProfileManager:
                 writable = True
                 state = "authorized_once"
                 control_owner = active_id
-            elif lazy_id and lazy_id not in WRITABLE_LAZY_WORKSTREAM_IDS:
+            elif lazy_id and lazy_id not in ONE_TURN_WRITABLE_LAZY_WORKSTREAM_IDS:
                 control_source = "lazy_read_only_policy"
                 state = "read_only"
             development_control_block = "\n".join(
@@ -870,7 +873,7 @@ class HumanAdamProfileManager:
         lazy_id: str,
     ) -> None:
         if lazy_id:
-            self._assert_writable_lazy_workstream(lazy_id)
+            self._assert_one_turn_writable_lazy_workstream(lazy_id)
             if self.workstream_memory is None:
                 raise AppServerError(
                     "Pracovní proud nemá kanonickou paměť pro bezpečný checkpoint."
@@ -965,7 +968,7 @@ class HumanAdamProfileManager:
                 or self.workstream_memory is None
             ):
                 raise AppServerError("Aktivní lazy pracovní proud nemá úplný checkpointový backend.")
-            self._assert_writable_lazy_workstream(lazy_id)
+            self._assert_one_turn_writable_lazy_workstream(lazy_id)
             checkpoint_id = self.workstream_threads.checkpoint_workstream_id()
             if checkpoint_id != lazy_id:
                 raise AppServerError("Aktivní lazy pracovní proud se před checkpointem změnil.")

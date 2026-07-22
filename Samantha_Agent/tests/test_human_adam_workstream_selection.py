@@ -66,11 +66,11 @@ class GroupedWorkstreamSelectionTests(unittest.TestCase):
         groups = {group["id"]: group for group in status["groups"]}
 
         self.assertTrue(status["ok"])
-        self.assertEqual(status["workstream_count"], 29)
-        self.assertEqual(status["active_count"], 26)
+        self.assertEqual(status["workstream_count"], 30)
+        self.assertEqual(status["active_count"], 27)
         self.assertEqual(status["paused_count"], 3)
         self.assertEqual(status["archived_count"], 0)
-        self.assertEqual(groups["projects"]["count"], 20)
+        self.assertEqual(groups["projects"]["count"], 21)
         self.assertEqual(groups["tools"]["count"], 4)
         self.assertEqual(groups["layers"]["count"], 0)
         self.assertEqual(groups["other"]["count"], 2)

@@ -217,11 +217,12 @@ class FakeLazyThreads:
         self.restore_calls: list[str] = []
         self.hubs = {
             "project-mmtx": FakeHub("mmtx-thread"),
+            "project-family-calendar": FakeHub("family-calendar-thread"),
             "project-lekarna": FakeHub("lekarna-thread"),
         }
 
     def status(self) -> dict[str, object]:
-        ids = ("project-mmtx", "project-lekarna")
+        ids = ("project-mmtx", "project-family-calendar", "project-lekarna")
         return {
             "ok": True,
             "active_workstream_id": self.active_workstream_id,
@@ -400,7 +401,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             self.assertNotIn("active_profile_id", payload)
             self.assertNotIn("active_profile_label", payload)
         self.assertTrue(status["workstream_selection"]["ok"])
-        self.assertEqual(status["workstream_selection"]["workstream_count"], 29)
+        self.assertEqual(status["workstream_selection"]["workstream_count"], 30)
         self.assertEqual(
             [group["label"] for group in status["workstream_selection"]["groups"]],
             ["Projekty", "Tooly", "Vrstvy", "Ostatní"],
@@ -742,7 +743,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             status = manager.lazy_workstream_memory_status()
 
             self.assertTrue(status["available"])
-            self.assertEqual(status["workstream_count"], 29)
+            self.assertEqual(status["workstream_count"], 30)
             self.assertEqual(status["ready_count"], 0)
             self.assertFalse(Path(human_workspace.project_root).exists())
 
@@ -1099,6 +1100,74 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertFalse(development["can_acquire_profile"])
         self.assertFalse(development["can_checkpoint"])
         self.assertFalse(development["can_deploy"])
+
+    def test_family_calendar_has_one_turn_write_without_mmtx_pilot_label(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, *_rest = self.make_manager(Path(temp_dir))
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.activate_grouped_workstream(
+                workstream_id="project-family-calendar",
+                confirmed=True,
+            )
+
+            capabilities = manager.status()["workstream_capabilities"]
+            read_only = manager.send(
+                text="Jen analyzuj kalendář",
+                client_message_id="calendar-read-only-001",
+            )
+            read_only_input = str(
+                lazy.hubs["project-family-calendar"].last_send["model_input_text"]
+            )
+            writable = manager.send(
+                text="Bezpečný zapisovací test kalendáře",
+                client_message_id="calendar-write-001",
+                write_intent=True,
+            )
+            writable_input = str(
+                lazy.hubs["project-family-calendar"].last_send["model_input_text"]
+            )
+            expired = manager.send(
+                text="Znovu jen analyzuj kalendář",
+                client_message_id="calendar-expired-001",
+            )
+            expired_input = str(
+                lazy.hubs["project-family-calendar"].last_send["model_input_text"]
+            )
+            binding = manager.workstream_memory.binding(  # type: ignore[union-attr]
+                "project-family-calendar"
+            )
+            handoff_created = (
+                human_workspace.project_root / binding.handoff_relative_path
+            ).exists()
+            tvbcp_created = (
+                human_workspace.project_root / binding.tvbcp_relative_path
+            ).exists()
+
+        self.assertTrue(capabilities["development"])
+        self.assertTrue(capabilities["checkpoint"])
+        self.assertTrue(capabilities["one_turn_write"])
+        self.assertEqual(capabilities["write_authorization"], "one_turn")
+        self.assertFalse(capabilities["writable_pilot"])
+        self.assertIn("writable=false", read_only_input)
+        self.assertIn("lease_state=authorized_once", writable_input)
+        self.assertIn("lease_owner_id=project-family-calendar", writable_input)
+        self.assertIn("writable=true", writable_input)
+        self.assertIn("lease_state=not_requested", expired_input)
+        self.assertIn("writable=false", expired_input)
+        self.assertEqual(read_only["automatic_completion"]["state"], "not_needed")
+        self.assertEqual(writable["automatic_completion"]["state"], "not_needed")
+        self.assertEqual(expired["automatic_completion"]["state"], "not_needed")
+        self.assertEqual(
+            binding.handoff_relative_path,
+            "memory/handoffs/workstreams/project-family-calendar.md",
+        )
+        self.assertEqual(
+            binding.tvbcp_relative_path,
+            "memory/tvbcp/workstreams/project-family-calendar.md",
+        )
+        self.assertFalse(handoff_created)
+        self.assertFalse(tvbcp_created)
 
     def test_lazy_tvbcp_previews_canonical_template_without_creating_file(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

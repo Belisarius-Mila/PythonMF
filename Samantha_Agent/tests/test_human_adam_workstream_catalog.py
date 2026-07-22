@@ -61,17 +61,36 @@ class WorkstreamCatalogTests(unittest.TestCase):
             misc_ids,
             {"misc-brainstorm", "misc-unclassified-development"},
         )
-        self.assertEqual(len(WORKSTREAM_CATALOG), 29)
+        self.assertEqual(len(WORKSTREAM_CATALOG), 30)
 
-    def test_catalog_has_expected_phase_4_1_type_distribution(self) -> None:
+    def test_catalog_has_expected_type_distribution(self) -> None:
         self.assertEqual(
             Counter(record.workstream_type for record in WORKSTREAM_CATALOG),
-            {"Project": 23, "Tool": 4, "Misc": 2},
+            {"Project": 24, "Tool": 4, "Misc": 2},
         )
         self.assertEqual(
             Counter(record.mode for record in WORKSTREAM_CATALOG),
-            {"active": 26, "paused": 3},
+            {"active": 27, "paused": 3},
         )
+
+    def test_family_calendar_is_a_distinct_active_project(self) -> None:
+        calendar = next(
+            record
+            for record in WORKSTREAM_CATALOG
+            if record.workstream_id == "project-family-calendar"
+        )
+        knihovna = next(
+            record
+            for record in WORKSTREAM_CATALOG
+            if record.workstream_id == "project-knowledge-library"
+        )
+
+        self.assertEqual(calendar.name, "Rodinný kalendář")
+        self.assertEqual(calendar.workstream_type, "Project")
+        self.assertEqual(calendar.mode, "active")
+        self.assertEqual(calendar.priority, "1")
+        self.assertEqual(calendar.source_names, ("Rodinný kalendář",))
+        self.assertNotEqual(calendar.workstream_id, knihovna.workstream_id)
 
     def test_human_adam_is_a_project_with_legacy_runtime_aliases(self) -> None:
         human_adam = next(
@@ -107,7 +126,7 @@ class WorkstreamCatalogTests(unittest.TestCase):
 
     def test_memory_catalog_lists_every_code_catalog_id_once(self) -> None:
         text = (PROJECT_ROOT / "memory/WORKSTREAMS.md").read_text(encoding="utf-8")
-        catalog_section = text.split("## Uplny katalog faze 4.1", 1)[1].split(
+        catalog_section = text.split("## Uplny kanonicky katalog", 1)[1].split(
             "## Stavajici runtime vazby", 1
         )[0]
         listed_ids = re.findall(r"^\| `([^`]+)` \|", catalog_section, flags=re.MULTILINE)

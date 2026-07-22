@@ -113,7 +113,7 @@ class WorkstreamThreadRegistryTests(unittest.TestCase):
 
         self.assertFalse(self.private_root.exists())
         self.assertEqual(self.factory_calls, [])
-        self.assertEqual(len(status["workstreams"]), 29)
+        self.assertEqual(len(status["workstreams"]), 30)
         self.assertEqual(status["initialized_count"], 0)
         self.assertEqual(status["connected_count"], 0)
         self.assertNotIn("backend", status["workstreams"][0])

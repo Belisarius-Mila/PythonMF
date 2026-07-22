@@ -170,6 +170,14 @@ WORKSTREAM_CATALOG = validate_workstream_catalog(
             "Znalostni databaze / Knihovna clanku / Knowledge inbox",
         ),
         _record(
+            "project-family-calendar",
+            "Project",
+            "Rodinný kalendář",
+            "active",
+            "1",
+            "Rodinný kalendář",
+        ),
+        _record(
             "project-document-vault",
             "Project",
             "Správa dokumentů / private vault",

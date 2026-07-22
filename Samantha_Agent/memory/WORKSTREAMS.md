@@ -10,9 +10,9 @@ prace je `Project`, konkretni opakovatelny vykonavatel je `Tool`, sdilena
 infrastrukturni schopnost muze byt `Layer` a `Misc` je jen skutecne nezarazena
 prace.
 
-Katalog slucuje vsech 28 zivych oblasti z `ACTIVE_PROJECTS.md`, pridava
+Katalog slucuje vsech 29 zivych oblasti z `ACTIVE_PROJECTS.md`, pridava
 pozastavene projekty Vocabulary FR a Vocabulary IT a dva dohodnute vychozi
-proudy `Misc`. Vysledkem je 29 proudu: 23 projektu, 4 tooly a 2 `Misc`.
+proudy `Misc`. Vysledkem je 30 proudu: 24 projektu, 4 tooly a 2 `Misc`.
 Rezimy `paused` a `archived` jsou validni; tri projekty jsou nyni `paused`.
 
 Markdown se za behu neparsuje a neni zdrojem UI, vlaken, workspace, semaforu
@@ -25,7 +25,7 @@ znovu pouzije jeden sdileny cisty workspace a jeden app-server runtime. Aktivni
 muze byt jen jeden lazy proud; prepnuti je fail-closed pri aktivnim tahu,
 nejistem doruceni nebo necistem ci nesynchronnim workspace.
 
-Faze 4.3 pridala kanonickou git-safe pametovou vazbu vsech 29 proudu. Human–Adam
+Faze 4.3 pridala kanonickou git-safe pametovou vazbu tehdejsich 29 proudu. Human–Adam
 a Knihovna zachovavaji sve dva drive potvrzene handoff/TVBCP pary. Ostatni
 proudy maji jedine stabilni cesty pod `memory/handoffs/workstreams/` a
 `memory/tvbcp/workstreams/`, ale soubory se nevytvareji hromadne. Prvni
@@ -33,7 +33,12 @@ potvrzeny checkpoint konkretniho proudu po zelene brane transakcne zalozi obe
 kostry, doplni chronologicky zaznam a zahrne je do stejneho commitu. Selhani
 brany nebo commitu nenecha nepravdivy castecny pametovy par.
 
-## Uplny katalog faze 4.1
+Faze 4.5g-d2 doplnila drive dohodnuty, ale opomenuty samostatny projekt
+Rodinny kalendar. Ma lazy vlakno, stabilni dosud nematerializovane pametove
+cesty a explicitne povolenou jednorazovou direct-main autorizaci. Nadale se
+nesmi smesovat s Knihovnou clanku.
+
+## Uplny kanonicky katalog
 
 | ID | Typ | Kanonicky nazev | Rezim | Priorita | Kanonicky zdroj / slouceni |
 | --- | --- | --- | --- | --- | --- |
@@ -44,6 +49,7 @@ brany nebo commitu nenecha nepravdivy castecny pametovy par.
 | `project-neuberk-kacenka` | `Project` | Neuberk interiér / Kačenka | active | 2 | Neuberk interier design / Kacenka |
 | `project-samantha-agent-rag` | `Project` | Samantha Agent / RAG | active | 1 | Samantha Agent/RAG |
 | `project-knowledge-library` | `Project` | Knihovna | active | 2 | Znalostni databaze / Knihovna clanku / Knowledge inbox |
+| `project-family-calendar` | `Project` | Rodinný kalendář | active | 1 | Rodinný kalendář |
 | `project-document-vault` | `Project` | Správa dokumentů / private vault | active | 1 | Sprava dokumentu / private vault + Reminders / platebni SMS |
 | `project-shopping-archive` | `Project` | Nákupní průzkum a archiv nákupů | active | 2 | Nakupni pruzkum a archiv nakupu |
 | `project-email-cases` | `Project` | iCloud Mail / Email Cases | active | 1 | iCloud Mail read-only / Email Cases |
@@ -83,7 +89,8 @@ brany nebo commitu nenecha nepravdivy castecny pametovy par.
 
 Faze 4.2 zachovava oba drive overene proudy jako rezervovane legacy vazby, aby
 pred migraci nevzniklo druhe vlakno Human–Adam ani Knihovny. Zbyvajicich 27
-proudu ma pripraveny lazy soukromy slot, ale zadny se nezaklada pri startu
+proudu melo pripraveny lazy soukromy slot; po doplneni Rodinneho kalendare je
+lazy proudu 28. Zadny se nezaklada pri startu
 Cockpitu. Human–Adam si docasne ponechava historicky runtime typ `Layer` a
 starsi nazev jako kompatibilni alias; katalog ho uz kanonicky vede jako
 `Project` / `Human–Adam`.
