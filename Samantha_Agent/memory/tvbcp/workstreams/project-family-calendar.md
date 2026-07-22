@@ -53,3 +53,21 @@ Důkaz: plná Cockpit brána: 983 testů, 304.3 s, výsledek OK. Checkpoint back
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Potvrdit checkpoint a potom ručně ověřit náhled na Macu nebo iPhonu
+
+### 2026-07-22 13:20 CEST – Ruční potvrzení read-only náhledu a srovnání stavu
+
+Implementační checkpoint je dokončen: commit `021adf5` je na `main` a
+`origin/main`. Dřívější další krok „Potvrdit checkpoint a potom ručně ověřit
+náhled“ tímto novějším záznamem pozbývá platnosti.
+
+Míla ručně potvrdil, že sekce `Náhled upozornění` v Cockpitu funguje.
+Ověření dále zahrnuje 22 kalendářových testů, plnou Cockpit bránu s 983 testy,
+úspěšnou vzdálenou GitHub Gate a živý smoke test 5/5. Náhled nic neodesílá ani
+nepersistuje a automatické odesílání zůstává vypnuté.
+
+Projektová paměť, aktivní registr, aktuální souhrn handoffu a TVBCP nyní
+odpovídají skutečně dokončenému stavu.
+
+Další krok: zahájit samostatnou read-only fázi návrhu jednoho ručně
+potvrzovaného testovacího e-mailu; zatím nic neodesílat ani nezapínat
+automatiku.

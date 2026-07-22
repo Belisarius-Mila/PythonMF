@@ -8,30 +8,35 @@ Stav: rozpracovane
 Pripomenout pri startu: ne
 
 Co se resilo:
-Čistý builder náhledu D-2/D-1 byl dokončen, otestován, commitnut a pushnut.
-Následný dokumentační checkpoint srovnává kanonickou paměť a doplňuje
-kalendářové cesty do GitHub Cockpit Quality Gate.
+Čistý builder D-2/D-1 a read-only sekce `Náhled upozornění` v Cockpitu byly
+dokončeny, otestovány, commitnuty, pushnuty a ručně ověřeny Mílou.
 
 Co je hotove:
 - Builder vrací pro přesně dva různé příjemce událost, věk, režim D-2/D-1,
   předmět a tělo bez I/O nebo odesílání.
-- Implementační commit `531ed75` je na `main` a `origin/main`.
+- Cockpit přijímá dvě serverově validované adresy, události odvozuje ze
+  soukromého registru a náhled zobrazí bez odesílání nebo persistence.
+- Odpověď používá `no-store`, UI bezpečné `textContent` a při zavření okna
+  adresy z formuláře vymaže.
+- Implementační commit `021adf5` je na `main` a `origin/main`; plná brána
+  983 testů, vzdálená GitHub Gate, živý smoke 5/5 a ruční test prošly.
 - Kanonický handoff a TVBCP existují.
 
 Co neni hotove:
-- Náhled zatím není zobrazen v Cockpitu.
 - Odesílání ani persistence doručení nejsou implementované.
+- Není navržená ani potvrzená bezpečnostní brána pro testovací e-mail.
 
 Dalsi krok:
-Navrhnout samostatné read-only zobrazení náhledu v Cockpitu, stále bez
-odesílání a bez persistence doručení.
+Zahájit samostatnou read-only fázi návrhu jednoho ručně potvrzovaného
+testovacího e-mailu; zatím nic neodesílat.
 
 Navrhovane dalsi kroky:
-- Po read-only zobrazení řešit ručně potvrzený testovací e-mail jako samostatnou
-  fázi s další bezpečnostní branou.
+- Po schválení návrhu implementovat pouze minimální potvrzované testovací
+  odeslání; automatické odesílání ponechat vypnuté.
 
 Zmenene nebo relevantni soubory:
 - `app/family_calendar.py`
+- `app/cockpit.py`
 - `tests/test_family_calendar.py`
 - `tests/test_family_calendar_cockpit.py`
 - `.github/workflows/cockpit-quality-gate.yml`
@@ -70,3 +75,16 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/family_calendar.py`, `Samantha_Agent/tests/test_family_calendar.py`, `Samantha_Agent/tests/test_family_calendar_cockpit.py`
 - Commit: `Doplnit read-only náhled rodinných upozornění`
 - Další krok: Potvrdit checkpoint a potom ručně ověřit náhled na Macu nebo iPhonu
+
+### Dokumentační checkpoint 2026-07-22 13:20 CEST
+
+- Implementační checkpoint výše je dokončen: commit `021adf5` je na `main`
+  a `origin/main`. Jeho řádek „Potvrdit checkpoint“ tímto novějším záznamem
+  pozbývá platnosti.
+- Míla ručně potvrdil, že read-only náhled v Cockpitu funguje.
+- Ověření: 22 kalendářových testů, plná Cockpit brána s 983 testy, vzdálená
+  GitHub Gate a živý smoke test 5/5 prošly.
+- Projektová paměť, aktivní registr, aktuální souhrn handoffu a TVBCP jsou
+  srovnány se skutečně dokončeným stavem.
+- Další krok: samostatná read-only fáze návrhu jednoho ručně potvrzovaného
+  testovacího e-mailu; zatím nic neodesílat ani nezapínat automatiku.
