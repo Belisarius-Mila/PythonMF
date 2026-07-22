@@ -207,3 +207,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/family_calendar_smtp_adapter.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/tests/test_family_calendar_delivery_integration.py`
 - Commit: `Propojit SMTP adaptér s koordinátorem rodinného kalendáře`
 - Další krok: Rozšířit privátní konfiguraci o odesílatele a bezpečnou referenci na přihlašovací tajemství bez skutečného SMTP
+
+### Automatický checkpoint 2026-07-22 20:39 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Schéma 2 bezpečně přidává redigovanou adresu odesílatele bez hesla nebo SMTP
+- Ověření: plná Cockpit brána: 1050 testů, 256.4 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (3): `Samantha_Agent/app/family_calendar_delivery_config.py`, `Samantha_Agent/tests/test_family_calendar_delivery_config.py`, `Samantha_Agent/tests/test_family_calendar_delivery_runner.py`
+- Commit: `Rozšířit konfiguraci rodinného kalendáře o odesílatele`
+- Další krok: Připravit explicitní bezpečnou aktualizaci soukromé konfigurace na schéma 2 a ověřit ji bez SMTP

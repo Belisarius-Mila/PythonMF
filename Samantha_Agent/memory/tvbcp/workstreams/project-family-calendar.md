@@ -204,3 +204,14 @@ Důkaz: plná Cockpit brána: 1047 testů, 260.0 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Rozšířit privátní konfiguraci o odesílatele a bezpečnou referenci na přihlašovací tajemství bez skutečného SMTP
+
+### 2026-07-22 20:39 CEST – Schéma 2 bezpečně přidává redigovanou adresu odesílatele bez hesla nebo SMTP
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: Schéma 2 bezpečně přidává redigovanou adresu odesílatele bez hesla nebo SMTP
+
+Důkaz: plná Cockpit brána: 1050 testů, 256.4 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Připravit explicitní bezpečnou aktualizaci soukromé konfigurace na schéma 2 a ověřit ji bez SMTP

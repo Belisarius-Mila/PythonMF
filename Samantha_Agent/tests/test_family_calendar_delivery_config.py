@@ -24,8 +24,11 @@ class FamilyCalendarDeliveryConfigTests(unittest.TestCase):
 
         self.assertEqual(config.mode, DeliveryConfigMode.DISABLED)
         self.assertEqual(config.smtp_provider, "icloud")
+        self.assertEqual(config.sender_address, "sender@example.invalid")
         self.assertEqual(config.recipient_ids, CANONICAL_RECIPIENT_IDS)
         self.assertEqual(config.recipients[0].address, "one@example.invalid")
+        self.assertFalse(hasattr(config, "password"))
+        self.assertFalse(hasattr(config, "credential_ref"))
         self.assertNotIn("@", repr(config))
         self.assertNotIn("@", repr(config.recipients[0]))
 
@@ -53,6 +56,38 @@ class FamilyCalendarDeliveryConfigTests(unittest.TestCase):
         self.assertEqual(config.recipient_ids, CANONICAL_RECIPIENT_IDS)
         self.assertNotIn("@", repr(config))
 
+    def test_schema_two_requires_a_valid_redacted_sender_address(self) -> None:
+        self.assertEqual(DELIVERY_CONFIG_SCHEMA_VERSION, 2)
+        invalid_senders = (
+            "not-an-email",
+            "private@example.invalid\r\nBcc: hidden@example.invalid",
+        )
+        for sender_address in invalid_senders:
+            with self.subTest(sender_address=sender_address):
+                with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+                    document = _valid_document()
+                    document["sender_address"] = sender_address
+                    path = _write_private_config(Path(temp_dir), document)
+
+                    with self.assertRaises(DeliveryConfigError) as raised:
+                        load_family_calendar_delivery_config(path)
+
+                self.assertNotIn("@", str(raised.exception))
+                self.assertNotIn("private", str(raised.exception).casefold())
+
+    def test_rejects_passwords_and_free_form_credential_references(self) -> None:
+        for forbidden_field in ("password", "credential_ref", "password_env"):
+            with self.subTest(forbidden_field=forbidden_field):
+                with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+                    document = _valid_document()
+                    document[forbidden_field] = "private-secret-value"
+                    path = _write_private_config(Path(temp_dir), document)
+
+                    with self.assertRaisesRegex(DeliveryConfigError, "invalid shape") as raised:
+                        load_family_calendar_delivery_config(path)
+
+                self.assertNotIn("private-secret-value", str(raised.exception))
+
     def test_missing_config_fails_closed_without_creating_anything(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             path = Path(temp_dir) / "family" / "notification_config.json"
@@ -71,6 +106,19 @@ class FamilyCalendarDeliveryConfigTests(unittest.TestCase):
 
             with self.assertRaisesRegex(DeliveryConfigError, "not enabled"):
                 load_family_calendar_delivery_config(path)
+
+    def test_legacy_schema_without_sender_fails_closed_without_migration(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            document = _valid_document()
+            document["schema_version"] = 1
+            document.pop("sender_address")
+            path = _write_private_config(Path(temp_dir), document)
+            original = path.read_text(encoding="utf-8")
+
+            with self.assertRaises(DeliveryConfigError):
+                load_family_calendar_delivery_config(path)
+
+            self.assertEqual(path.read_text(encoding="utf-8"), original)
 
     def test_requires_exactly_four_canonical_recipient_ids(self) -> None:
         invalid_recipient_sets = (
@@ -115,7 +163,7 @@ class FamilyCalendarDeliveryConfigTests(unittest.TestCase):
     def test_unknown_schema_extra_fields_and_invalid_json_fail_closed(self) -> None:
         documents = []
         unknown_schema = _valid_document()
-        unknown_schema["schema_version"] = 2
+        unknown_schema["schema_version"] = DELIVERY_CONFIG_SCHEMA_VERSION + 1
         documents.append(json.dumps(unknown_schema))
         extra_field = _valid_document()
         extra_field["unexpected"] = True
@@ -178,6 +226,7 @@ def _valid_document() -> dict:
         "schema_version": DELIVERY_CONFIG_SCHEMA_VERSION,
         "mode": "disabled",
         "smtp_provider": "icloud",
+        "sender_address": "sender@example.invalid",
         "recipients": [
             {"recipient_id": "recipient-4", "address": "four@example.invalid"},
             {"recipient_id": "recipient-2", "address": "two@example.invalid"},

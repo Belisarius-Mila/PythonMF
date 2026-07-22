@@ -6,6 +6,7 @@ import unittest
 from dataclasses import asdict
 from pathlib import Path
 
+from app.family_calendar_delivery_config import DELIVERY_CONFIG_SCHEMA_VERSION
 from app.family_calendar_delivery_runner import run_configured_family_calendar_delivery
 
 
@@ -219,9 +220,10 @@ class FamilyCalendarDeliveryRunnerTests(unittest.TestCase):
 
 def _valid_document(*, mode: str = "disabled") -> dict:
     return {
-        "schema_version": 1,
+        "schema_version": DELIVERY_CONFIG_SCHEMA_VERSION,
         "mode": mode,
         "smtp_provider": "icloud",
+        "sender_address": "sender@example.invalid",
         "recipients": [
             {"recipient_id": recipient_id, "address": address}
             for recipient_id, address in zip(RECIPIENT_IDS, PRIVATE_ADDRESSES, strict=True)

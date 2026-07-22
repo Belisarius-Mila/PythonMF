@@ -15,7 +15,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_FAMILY_CALENDAR_DELIVERY_CONFIG_PATH = (
     PROJECT_ROOT / "data" / "private" / "family_calendar" / "notification_config.json"
 )
-DELIVERY_CONFIG_SCHEMA_VERSION = 1
+DELIVERY_CONFIG_SCHEMA_VERSION = 2
 MAX_DELIVERY_CONFIG_BYTES = 32_000
 CANONICAL_RECIPIENT_IDS = (
     "recipient-1",
@@ -46,6 +46,7 @@ class DeliveryRecipientConfig:
 class FamilyCalendarDeliveryConfig:
     mode: DeliveryConfigMode
     smtp_provider: str
+    sender_address: str
     recipients: tuple[DeliveryRecipientConfig, ...]
 
     @property
@@ -70,7 +71,13 @@ def load_family_calendar_delivery_config(
 
 
 def _config_from_document(raw: Any) -> FamilyCalendarDeliveryConfig:
-    expected_fields = {"schema_version", "mode", "smtp_provider", "recipients"}
+    expected_fields = {
+        "schema_version",
+        "mode",
+        "smtp_provider",
+        "sender_address",
+        "recipients",
+    }
     if not isinstance(raw, dict) or set(raw) != expected_fields:
         raise DeliveryConfigError("Delivery configuration has an invalid shape.")
     schema_version = raw.get("schema_version")
@@ -86,6 +93,7 @@ def _config_from_document(raw: Any) -> FamilyCalendarDeliveryConfig:
     smtp_provider = _required_string(raw.get("smtp_provider"), field="smtp_provider")
     if smtp_provider not in SUPPORTED_SMTP_PROVIDERS:
         raise DeliveryConfigError("Delivery configuration has an unsupported SMTP provider.")
+    sender_address = _email_address(raw.get("sender_address"), field="sender")
 
     raw_recipients = raw.get("recipients")
     if not isinstance(raw_recipients, list) or len(raw_recipients) != len(
@@ -109,6 +117,7 @@ def _config_from_document(raw: Any) -> FamilyCalendarDeliveryConfig:
     return FamilyCalendarDeliveryConfig(
         mode=mode,
         smtp_provider=smtp_provider,
+        sender_address=sender_address,
         recipients=tuple(recipients_by_id[recipient_id] for recipient_id in CANONICAL_RECIPIENT_IDS),
     )
 
@@ -117,10 +126,15 @@ def _recipient_from_document(raw: Any) -> DeliveryRecipientConfig:
     if not isinstance(raw, dict) or set(raw) != {"recipient_id", "address"}:
         raise DeliveryConfigError("Delivery recipient configuration has an invalid shape.")
     recipient_id = _required_string(raw.get("recipient_id"), field="recipient_id")
-    address = _required_string(raw.get("address"), field="address")
-    if len(address) > 320 or EMAIL_ADDRESS_RE.fullmatch(address) is None:
-        raise DeliveryConfigError("Delivery recipient address is invalid.")
+    address = _email_address(raw.get("address"), field="recipient")
     return DeliveryRecipientConfig(recipient_id=recipient_id, address=address)
+
+
+def _email_address(value: Any, *, field: str) -> str:
+    address = _required_string(value, field=f"{field}_address")
+    if len(address) > 320 or EMAIL_ADDRESS_RE.fullmatch(address) is None:
+        raise DeliveryConfigError(f"Delivery {field} address is invalid.")
+    return address
 
 
 def _required_string(value: Any, *, field: str) -> str:
