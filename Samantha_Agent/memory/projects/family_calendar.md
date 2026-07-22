@@ -15,7 +15,11 @@
 - Jednorázové předvyplnění proběhne pouze nad prázdným soukromým registrem.
 - Editace je v mobilním Cockpitu dostupná přes viditelné `Upravit údaje`.
 - Kandidáti upozornění podporují D-2, D-1 a ochranu přes `sent_event_keys`.
-- Čistý builder náhledu upozornění zatím není implementovaný.
+- Čistý builder náhledu upozornění je implementovaný v commitu `531ed75`:
+  přijímá hotovou událost a přesně dva různé explicitní příjemce a vrací D-2/D-1,
+  věk, režim `scheduled`/`catch_up`, předmět a tělo bez I/O nebo odesílání.
+- Cílených 19 testů a plná lokální Cockpit brána s 980 testy prošly.
+- Kanonický handoff a TVBCP byly vytvořeny prvním automatickým checkpointem.
 - E-mailové odesílání není aktivní.
 
 ## Bezpečnostní hranice
@@ -28,9 +32,7 @@
 
 ## Nejmenší další krok
 
-Implementovat jen čistou funkci pro sestavení náhledu: událost, D-2/D-1,
-věk, přesně dva příjemci, předmět a tělo. Bez endpointu, bez persistence
-odeslání a bez skutečného e-mailu.
-
-Kanonický handoff a TVBCP mají stabilní lazy cesty, ale fyzické soubory vzniknou
-až prvním potvrzeným checkpointem po zelené bráně.
+Navrhnout samostatné read-only zobrazení náhledu v Cockpitu nad hotovým
+builderem. Nadále bez odesílání, bez persistence doručení a bez skutečných
+adres v Gitu, paměti nebo testech. Ručně potvrzený testovací e-mail smí přijít
+až jako další oddělená fáze.

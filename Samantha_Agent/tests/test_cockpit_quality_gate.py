@@ -40,6 +40,8 @@ class CockpitQualityGateTests(unittest.TestCase):
             "Samantha_Agent/tests/test_human_adam*.py",
             "Samantha_Agent/tests/test_simple_main_*.py",
             "Samantha_Agent/tests/test_local_appserver_runtime.py",
+            "Samantha_Agent/app/family_calendar.py",
+            "Samantha_Agent/tests/test_family_calendar*.py",
         }
 
         self.assertEqual(pull_request_paths, push_paths)
