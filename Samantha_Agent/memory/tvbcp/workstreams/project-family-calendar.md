@@ -193,3 +193,14 @@ Důkaz: plná Cockpit brána: 1043 testů, 259.2 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Propojit adaptér s koordinátorem v end-to-end testu stále pouze s falešným SMTP klientem
+
+### 2026-07-22 20:23 CEST – Doplněn redigovaný end-to-end tok s falešným SMTP klientem, persistencí a idempotencí
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: Doplněn redigovaný end-to-end tok s falešným SMTP klientem, persistencí a idempotencí
+
+Důkaz: plná Cockpit brána: 1047 testů, 260.0 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Rozšířit privátní konfiguraci o odesílatele a bezpečnou referenci na přihlašovací tajemství bez skutečného SMTP

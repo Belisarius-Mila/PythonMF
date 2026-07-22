@@ -43,6 +43,47 @@ class SMTPClient(Protocol):
     ) -> SMTPClientResult: ...
 
 
+@dataclass(frozen=True, repr=False)
+class FamilyCalendarSMTPTransport:
+    envelope: FamilyCalendarDeliveryEnvelope
+    sender_address: str
+    client: SMTPClient
+
+    def __call__(self, record: DeliveryRecord) -> DeliveryTransportOutcome:
+        return send_family_calendar_envelope_via_smtp(
+            record,
+            envelope=self.envelope,
+            sender_address=self.sender_address,
+            client=self.client,
+        )
+
+    def __repr__(self) -> str:
+        return (
+            "FamilyCalendarSMTPTransport("
+            f"offset={self.envelope.offset.value!r}, "
+            f"recipient_count={len(self.envelope.recipients)}, redacted=True)"
+        )
+
+
+def build_family_calendar_smtp_transport(
+    *,
+    envelope: FamilyCalendarDeliveryEnvelope,
+    sender_address: str,
+    client: SMTPClient,
+) -> FamilyCalendarSMTPTransport:
+    """Build a validated, redacted transport callable for the coordinator."""
+
+    _validate_envelope(envelope)
+    clean_sender = _validate_address(sender_address, field="sender")
+    if not callable(getattr(client, "send_message", None)):
+        raise ValueError("SMTP client must provide send_message.")
+    return FamilyCalendarSMTPTransport(
+        envelope=envelope,
+        sender_address=clean_sender,
+        client=client,
+    )
+
+
 def send_family_calendar_envelope_via_smtp(
     record: DeliveryRecord,
     *,
@@ -75,10 +116,24 @@ def _validate_attempt(
 ) -> tuple[DeliveryEnvelopeRecipient, ...]:
     if not isinstance(record, DeliveryRecord) or record.state is not DeliveryState.SENDING:
         raise ValueError("SMTP adapter requires a sending delivery record.")
-    if not isinstance(envelope, FamilyCalendarDeliveryEnvelope):
-        raise ValueError("SMTP adapter requires a delivery envelope.")
+    recipients = _validate_envelope(envelope)
     if record.event_key != envelope.event_key or record.offset is not envelope.offset:
         raise ValueError("SMTP delivery record does not match its envelope.")
+
+    expected_ids = tuple(CANONICAL_RECIPIENT_IDS)
+    record_recipient_ids = tuple(recipient.recipient_id for recipient in record.recipients)
+    if record_recipient_ids != expected_ids or any(
+        recipient.state is not RecipientDeliveryState.PENDING for recipient in record.recipients
+    ):
+        raise ValueError("SMTP delivery record has invalid recipient state.")
+    return recipients
+
+
+def _validate_envelope(
+    envelope: FamilyCalendarDeliveryEnvelope,
+) -> tuple[DeliveryEnvelopeRecipient, ...]:
+    if not isinstance(envelope, FamilyCalendarDeliveryEnvelope):
+        raise ValueError("SMTP adapter requires a delivery envelope.")
     if len(envelope.recipients) != len(CANONICAL_RECIPIENT_IDS):
         raise ValueError("SMTP adapter requires exactly four envelope recipients.")
 
@@ -99,11 +154,6 @@ def _validate_attempt(
     expected_ids = tuple(CANONICAL_RECIPIENT_IDS)
     if tuple(envelope_recipient_ids) != expected_ids:
         raise ValueError("SMTP envelope recipients are not in canonical order.")
-    record_recipient_ids = tuple(recipient.recipient_id for recipient in record.recipients)
-    if record_recipient_ids != expected_ids or any(
-        recipient.state is not RecipientDeliveryState.PENDING for recipient in record.recipients
-    ):
-        raise ValueError("SMTP delivery record has invalid recipient state.")
     _validate_message_content(envelope)
     return envelope.recipients
 

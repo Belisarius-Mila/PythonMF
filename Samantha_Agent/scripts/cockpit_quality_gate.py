@@ -136,6 +136,7 @@ TEST_MODULES = (
     "tests.test_family_calendar_delivery",
     "tests.test_family_calendar_delivery_config",
     "tests.test_family_calendar_delivery_coordinator",
+    "tests.test_family_calendar_delivery_integration",
     "tests.test_family_calendar_delivery_message",
     "tests.test_family_calendar_delivery_runner",
     "tests.test_family_calendar_delivery_store",

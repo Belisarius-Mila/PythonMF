@@ -94,6 +94,7 @@ async def second():
         self.assertIn("tests.test_family_calendar_delivery", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_config", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_coordinator", TEST_MODULES)
+        self.assertIn("tests.test_family_calendar_delivery_integration", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_message", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_runner", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_store", TEST_MODULES)
