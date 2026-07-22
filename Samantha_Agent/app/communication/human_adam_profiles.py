@@ -907,6 +907,15 @@ class HumanAdamProfileManager:
             raise AppServerError(
                 "Main má pracovní změny; jednorázový vývoj zůstává uzamčený."
             )
+
+        self._sync_clean_source_ahead_workspaces_for_one_turn()
+
+        active_workspace = service.workspace.status()
+        self._assert_target_workspace(active_workspace)
+        if int(active_workspace.get("source_pending_changes") or 0) > 0:
+            raise AppServerError(
+                "Main má pracovní změny; jednorázový vývoj zůstává uzamčený."
+            )
         if active_workspace.get("workspace_relation") != "aligned":
             raise AppServerError(
                 "Aktivní workspace není synchronní s main; před vývojem jej bezpečně synchronizuj."
@@ -923,6 +932,63 @@ class HumanAdamProfileManager:
             if row.get("workspace_relation") != "aligned":
                 raise AppServerError(
                     f"Workspace {row['label']} není synchronní s main; vývoj zůstává uzamčený."
+                )
+
+    def _sync_clean_source_ahead_workspaces_for_one_turn(self) -> None:
+        rows = self._development_workspace_rows()
+        for row in rows:
+            blocker = self._row_blocker(row)
+            if blocker:
+                raise AppServerError("Jednorázový vývoj blokuje workspace: " + blocker)
+            if int(row.get("source_pending_changes") or 0) > 0:
+                raise AppServerError(
+                    f"Main má pracovní změny viditelné z workspace {row['label']}; "
+                    "vývoj zůstává uzamčený."
+                )
+            if row.get("workspace_relation") not in {"aligned", "source_ahead"}:
+                raise AppServerError(
+                    f"Workspace {row['label']} není v bezpečném stavu pro "
+                    "jednorázový vývoj."
+                )
+
+        for row in rows:
+            if row.get("workspace_relation") != "source_ahead":
+                continue
+            profile = self.profiles[str(row["id"])]
+            profile_service = profile["service"]
+            session = profile_service.hub.snapshot()
+            if session.get("turn_busy") or session.get("active_turn"):
+                raise SessionBusyError(
+                    f"Workspace {row['label']} nelze před vývojem synchronizovat "
+                    "během aktivního tahu Adama."
+                )
+            if self._has_uncertain_delivery(session):
+                raise SessionBusyError(
+                    f"Workspace {row['label']} nelze před vývojem synchronizovat, "
+                    "dokud není vyřešené nejisté doručení."
+                )
+
+            workspace = profile_service.workspace.status()
+            self._assert_target_workspace(workspace)
+            if int(workspace.get("source_pending_changes") or 0) > 0:
+                raise AppServerError(
+                    f"Main má pracovní změny viditelné z workspace {row['label']}; "
+                    "vývoj zůstává uzamčený."
+                )
+            relation = str(workspace.get("workspace_relation") or "unknown")
+            if relation == "aligned":
+                continue
+            if relation != "source_ahead":
+                raise AppServerError(
+                    f"Workspace {row['label']} se během kontroly změnil; "
+                    "vývoj zůstává uzamčený."
+                )
+            workspace = profile_service.workspace.sync_from_main(confirmed=True)
+            self._assert_target_workspace(workspace)
+            if workspace.get("workspace_relation") != "aligned":
+                raise AppServerError(
+                    f"Workspace {row['label']} se nepodařilo bezpečně "
+                    "synchronizovat s main."
                 )
 
     @staticmethod

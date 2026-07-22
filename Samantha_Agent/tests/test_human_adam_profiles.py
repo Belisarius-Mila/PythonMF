@@ -1106,7 +1106,9 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
 
     def test_family_calendar_has_one_turn_write_without_mmtx_pilot_label(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            manager, human_workspace, *_rest = self.make_manager(Path(temp_dir))
+            manager, human_workspace, library_workspace, *_rest = self.make_manager(
+                Path(temp_dir)
+            )
             lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
             manager.workstream_threads = lazy  # type: ignore[assignment]
             manager.activate_grouped_workstream(
@@ -1127,6 +1129,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             read_only_input = str(
                 lazy.hubs["project-family-calendar"].last_send["model_input_text"]
             )
+            library_workspace.source_ahead = True
             writable = manager.send(
                 text="Bezpečný zapisovací test kalendáře",
                 client_message_id="calendar-write-001",
@@ -1161,6 +1164,8 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertIn("lease_state=authorized_once", writable_input)
         self.assertIn("lease_owner_id=project-family-calendar", writable_input)
         self.assertIn("writable=true", writable_input)
+        self.assertEqual(library_workspace.sync_count, 1)
+        self.assertFalse(library_workspace.source_ahead)
         self.assertIn("lease_state=not_requested", expired_input)
         self.assertIn("writable=false", expired_input)
         self.assertEqual(read_only["automatic_completion"]["state"], "not_needed")
@@ -1909,7 +1914,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
 
         self.assertEqual(human_hub.last_send, {})
 
-    def test_one_turn_write_preflight_rejects_unsynced_peer_before_send(self) -> None:
+    def test_one_turn_write_preflight_synchronizes_clean_unsynced_peer_before_send(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, _human_workspace, library_workspace, human_hub, _library_hub = (
                 self.make_manager(Path(temp_dir))
@@ -1917,13 +1922,73 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             manager.connect()
             library_workspace.source_ahead = True
 
-            with self.assertRaisesRegex(AppServerError, "Knihovna.*není synchronní"):
+            manager.send(
+                text="Tento tah se smí odeslat po bezpečné synchronizaci",
+                client_message_id="peer-preflight-001",
+                write_intent=True,
+            )
+
+        self.assertEqual(library_workspace.sync_count, 1)
+        self.assertFalse(library_workspace.source_ahead)
+        self.assertIn("writable=true", str(human_hub.last_send["model_input_text"]))
+
+    def test_one_turn_write_preflight_rejects_dirty_unsynced_peer_without_sync(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _human_workspace, library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.connect()
+            library_workspace.source_ahead = True
+            library_workspace.dirty = True
+
+            with self.assertRaisesRegex(AppServerError, "Knihovna má 1 necheckpointovaných změn"):
                 manager.send(
                     text="Tento tah se nesmí odeslat",
-                    client_message_id="peer-preflight-001",
+                    client_message_id="dirty-peer-preflight-001",
                     write_intent=True,
                 )
 
+        self.assertEqual(library_workspace.sync_count, 0)
+        self.assertEqual(human_hub.last_send, {})
+
+    def test_one_turn_write_preflight_rejects_busy_unsynced_peer_without_sync(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _human_workspace, library_workspace, human_hub, library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.connect()
+            library_workspace.source_ahead = True
+            library_hub.active_turn = {"turn_id": "busy-peer-turn"}
+
+            with self.assertRaisesRegex(SessionBusyError, "Knihovna.*aktivního tahu"):
+                manager.send(
+                    text="Tento tah se nesmí odeslat",
+                    client_message_id="busy-peer-preflight-001",
+                    write_intent=True,
+                )
+
+        self.assertEqual(library_workspace.sync_count, 0)
+        self.assertEqual(human_hub.last_send, {})
+
+    def test_one_turn_write_preflight_rejects_uncertain_unsynced_peer_without_sync(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _human_workspace, library_workspace, human_hub, library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.connect()
+            library_workspace.source_ahead = True
+            library_hub.messages = [
+                {"status": "delivery_unknown", "recovery_required": True}
+            ]
+
+            with self.assertRaisesRegex(SessionBusyError, "Knihovna.*nejisté doručení"):
+                manager.send(
+                    text="Tento tah se nesmí odeslat",
+                    client_message_id="uncertain-peer-preflight-001",
+                    write_intent=True,
+                )
+
+        self.assertEqual(library_workspace.sync_count, 0)
         self.assertEqual(human_hub.last_send, {})
 
     def test_writable_turn_with_receipt_completes_direct_main_checkpoint(self) -> None:
