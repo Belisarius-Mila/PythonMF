@@ -90,12 +90,14 @@ async def second():
         self.assertIn("app/family_calendar_delivery_message.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_runner.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_store.py", COMPILE_PATHS)
+        self.assertIn("app/family_calendar_smtp_adapter.py", COMPILE_PATHS)
         self.assertIn("tests.test_family_calendar_delivery", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_config", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_coordinator", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_message", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_runner", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_store", TEST_MODULES)
+        self.assertIn("tests.test_family_calendar_smtp_adapter", TEST_MODULES)
 
     def test_architecture_baselines_are_informational_and_reported(self) -> None:
         messages = architecture_messages()

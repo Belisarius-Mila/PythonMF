@@ -182,3 +182,14 @@ Důkaz: plná Cockpit brána: 1037 testů, 259.9 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Implementovat SMTP adaptér s injektovaným falešným klientem bez skutečného odesílání
+
+### 2026-07-22 20:08 CEST – Přidán redigovaný SMTP adaptér s falešným klientem a čtyřmi výsledky přijetí
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: Přidán redigovaný SMTP adaptér s falešným klientem a čtyřmi výsledky přijetí
+
+Důkaz: plná Cockpit brána: 1043 testů, 259.2 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Propojit adaptér s koordinátorem v end-to-end testu stále pouze s falešným SMTP klientem
