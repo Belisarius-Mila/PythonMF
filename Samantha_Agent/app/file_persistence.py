@@ -91,6 +91,44 @@ def atomic_replace_text_under_external_lock(
     _atomic_write_bytes_unlocked(Path(path), str(text).encode(encoding))
 
 
+def atomic_create_text(
+    path: Path,
+    text: str,
+    *,
+    encoding: str = "utf-8",
+    mode: int = 0o600,
+) -> None:
+    """Atomically create a complete file, refusing every existing target."""
+
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    file_descriptor, temp_name = tempfile.mkstemp(
+        dir=str(target.parent),
+        prefix=f".{target.name}.",
+        suffix=".tmp",
+    )
+    temp_path = Path(temp_name)
+    try:
+        os.fchmod(file_descriptor, mode)
+        with os.fdopen(file_descriptor, "wb") as handle:
+            file_descriptor = -1
+            handle.write(str(text).encode(encoding))
+            handle.flush()
+            os.fsync(handle.fileno())
+        try:
+            os.link(temp_path, target, follow_symlinks=False)
+        except FileExistsError as exc:
+            raise FilePersistenceError("Create-only target already exists.") from exc
+        _fsync_directory(target.parent)
+    finally:
+        if file_descriptor >= 0:
+            os.close(file_descriptor)
+        try:
+            temp_path.unlink()
+        except FileNotFoundError:
+            pass
+
+
 def atomic_write_json(
     path: Path,
     payload: Any,

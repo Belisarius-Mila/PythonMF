@@ -237,3 +237,14 @@ Důkaz: plná Cockpit brána: 1063 testů, 255.8 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Spustit pouze redigovaný preview v prostředí vlastnícím privátní konfiguraci
+
+### 2026-07-22 22:10 CEST – Přidán create-only inicializátor schématu 2 se skrytým zadáním čtyř adres, přesným potvrzením a bezpečnostními testy
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: Přidán create-only inicializátor schématu 2 se skrytým zadáním čtyř adres, přesným potvrzením a bezpečnostními testy
+
+Důkaz: plná Cockpit brána: 1074 testů, 217.7 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Spustit inicializátor v prostředí vlastnícím privátní data a ponechat novou konfiguraci v režimu disabled

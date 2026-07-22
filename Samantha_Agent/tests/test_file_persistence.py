@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import stat
 import subprocess
 import sys
 import tempfile
@@ -10,6 +11,7 @@ from unittest.mock import patch
 
 from app.file_persistence import (
     append_jsonl_locked,
+    atomic_create_text,
     atomic_write_json,
     lock_path_for,
 )
@@ -19,6 +21,54 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 class FilePersistenceTests(unittest.TestCase):
+    def test_atomic_create_text_refuses_to_replace_existing_target(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "private.json"
+
+            atomic_create_text(path, '{"first": true}\n')
+            with self.assertRaisesRegex(RuntimeError, "already exists"):
+                atomic_create_text(path, '{"second": true}\n')
+
+            self.assertEqual(path.read_text(encoding="utf-8"), '{"first": true}\n')
+            self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o600)
+            self.assertEqual(list(path.parent.glob(f".{path.name}.*.tmp")), [])
+
+    def test_two_processes_atomic_create_exactly_one_complete_target(self) -> None:
+        script = """
+import sys
+from pathlib import Path
+from app.file_persistence import FilePersistenceError, atomic_create_text
+
+try:
+    atomic_create_text(Path(sys.argv[1]), sys.argv[2])
+except FilePersistenceError:
+    print("existing")
+else:
+    print("created")
+"""
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            path = Path(temp_dir) / "create-once.txt"
+            processes = [
+                subprocess.Popen(
+                    [sys.executable, "-c", script, str(path), payload],
+                    cwd=PROJECT_ROOT,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
+                for payload in ("complete-a", "complete-b")
+            ]
+            outputs = [process.communicate(timeout=20) for process in processes]
+
+            for process, (_stdout, stderr) in zip(processes, outputs, strict=True):
+                self.assertEqual(process.returncode, 0, stderr)
+            self.assertEqual(
+                sorted(stdout.strip() for stdout, _stderr in outputs),
+                ["created", "existing"],
+            )
+            self.assertIn(path.read_text(encoding="utf-8"), {"complete-a", "complete-b"})
+            self.assertEqual(list(path.parent.glob(f".{path.name}.*.tmp")), [])
+
     def test_atomic_json_write_replaces_complete_file_and_keeps_stable_lock(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             path = Path(temp_dir) / "state.json"
