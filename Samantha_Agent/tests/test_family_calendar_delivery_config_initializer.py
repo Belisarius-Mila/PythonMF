@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import stat
 import tempfile
 import unittest
 from collections.abc import Iterator, Mapping
 from pathlib import Path
+from unittest.mock import patch
 
 from app.family_calendar_delivery_config import load_family_calendar_delivery_config
 from app.family_calendar_delivery_config_initializer import (
@@ -193,7 +195,9 @@ class FamilyCalendarDeliveryConfigInitializerTests(unittest.TestCase):
                     "ICLOUD_MAIL_PASSWORD": "must-not-be-read",
                 }
             )
-            reader = SecretReader(tuple(value for address in ADDRESSES for value in (address, address)))
+            reader = SecretReader(
+                tuple(value for address in ADDRESSES for value in (address, address))
+            )
             output = io.StringIO()
 
             exit_code = main(
@@ -214,6 +218,87 @@ class FamilyCalendarDeliveryConfigInitializerTests(unittest.TestCase):
             _assert_redacted(self, output.getvalue(), path)
             for prompt in reader.prompts:
                 _assert_redacted(self, prompt, path)
+
+    def test_cli_reads_only_sender_from_private_project_environment_file(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            path = root / "family" / "notification_config.json"
+            env_path = root / ".env"
+            env_path.write_text(
+                "ICLOUD_MAIL_ADDRESS=sender@example.invalid\n"
+                "ICLOUD_MAIL_APP_PASSWORD=must-not-be-read\n",
+                encoding="utf-8",
+            )
+            env_path.chmod(0o600)
+            reader = SecretReader(tuple(value for address in ADDRESSES for value in (address, address)))
+            output = io.StringIO()
+
+            with patch.dict(os.environ, {}, clear=True):
+                exit_code = main(
+                    ["--provider", "icloud", "--path", str(path)],
+                    local_environment_path=env_path,
+                    secret_reader=reader,
+                    confirmation_reader=(
+                        lambda _prompt: DELIVERY_CONFIG_INITIALIZATION_CONFIRMATION
+                    ),
+                    output=output,
+                )
+
+            documents = [json.loads(line) for line in output.getvalue().splitlines()]
+            self.assertEqual(exit_code, 0)
+            self.assertEqual([item["status"] for item in documents], ["ready", "created"])
+            self.assertEqual(len(reader.prompts), 8)
+            self.assertEqual(
+                load_family_calendar_delivery_config(path).mode.value,
+                "disabled",
+            )
+            self.assertEqual(
+                env_path.read_text(encoding="utf-8"),
+                "ICLOUD_MAIL_ADDRESS=sender@example.invalid\n"
+                "ICLOUD_MAIL_APP_PASSWORD=must-not-be-read\n",
+            )
+            _assert_redacted(self, output.getvalue(), path)
+
+    def test_cli_refuses_unsafe_or_ambiguous_private_environment_without_prompt(self) -> None:
+        for case in ("unsafe_permissions", "duplicate_sender", "symlink"):
+            with self.subTest(case=case):
+                with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+                    root = Path(temp_dir)
+                    path = root / "family" / "notification_config.json"
+                    env_path = root / ".env"
+                    content = "ICLOUD_MAIL_ADDRESS=sender@example.invalid\n"
+                    if case == "duplicate_sender":
+                        content += "ICLOUD_MAIL_ADDRESS=other@example.invalid\n"
+                    if case == "symlink":
+                        source_path = root / "private-source.env"
+                        source_path.write_text(content, encoding="utf-8")
+                        source_path.chmod(0o600)
+                        env_path.symlink_to(source_path)
+                    else:
+                        env_path.write_text(content, encoding="utf-8")
+                        env_path.chmod(
+                            0o644 if case == "unsafe_permissions" else 0o600
+                        )
+                    reader = SecretReader(())
+                    output = io.StringIO()
+
+                    with patch.dict(os.environ, {}, clear=True):
+                        exit_code = main(
+                            ["--provider", "icloud", "--path", str(path)],
+                            local_environment_path=env_path,
+                            secret_reader=reader,
+                            confirmation_reader=lambda _prompt: "must-not-be-called",
+                            output=output,
+                        )
+
+                    self.assertEqual(exit_code, 1)
+                    self.assertEqual(reader.prompts, [])
+                    self.assertFalse(path.exists())
+                    self.assertEqual(
+                        json.loads(output.getvalue()),
+                        {"redacted": True, "status": "failed"},
+                    )
+                    _assert_redacted(self, output.getvalue(), path)
 
     def test_cli_missing_sender_does_not_prompt_or_read_password(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
