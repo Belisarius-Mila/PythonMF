@@ -71,3 +71,37 @@ odpovídají skutečně dokončenému stavu.
 Další krok: zahájit samostatnou read-only fázi návrhu jednoho ručně
 potvrzovaného testovacího e-mailu; zatím nic neodesílat ani nezapínat
 automatiku.
+
+### 2026-07-22 14:19 CEST – Cílový model čtyř pevných příjemců a automatického odesílání
+
+Míla rozhodl, že cílový provoz bude používat čtyři pevné e-mailové adresy
+uložené pouze v soukromé konfiguraci Samanthy mimo Git, projektovou paměť a
+testy. Všem čtyřem příjemcům se odešle jeden společný e-mail a příjemci o sobě
+mohou vědět. Po bezpečném zprovoznění má běžné odesílání probíhat automaticky
+bez ruční kontroly jednotlivých zpráv.
+
+D-2 je standardní automatický termín. D-1 je náhradní termín pouze po jistém
+neodeslání D-2. Potvrzeně odeslané D-2 se neopakuje; stav `delivery_unknown`
+zůstává fail-closed bez automatického opakování a vyžaduje diagnostické
+vyřešení. Protože společný e-mail může být poskytovatelem přijat jen pro část
+příjemců, budoucí soukromý stav musí rozlišit výsledek každé ze čtyř adres.
+Git-safe audit smí obsahovat jen redigovanou technickou identitu a stav, nikdy
+adresy ani obsah zprávy.
+
+Důkaz rozhodnutí: přímé Mílovo upřesnění cíle v pracovním proudu. Nejde o důkaz
+implementace nebo odeslání; automatika i persistence doručení jsou nadále
+vypnuté.
+
+Další krok: read-only návrh soukromé konfigurace čtyř adres, automatického
+odesílacího adaptéru, per-recipient stavu, idempotence a plánovače.
+
+### 2026-07-22 14:24 CEST – Handoff a TVBCP nyní zachycují čtyři pevné příjemce a cílové automatické odesílání
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: Handoff a TVBCP nyní zachycují čtyři pevné příjemce a cílové automatické odesílání
+
+Důkaz: plná Cockpit brána: 986 testů, 257.7 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Navrhnout read-only kontrakt soukromé konfigurace, odesílacího adaptéru a stavu doručení

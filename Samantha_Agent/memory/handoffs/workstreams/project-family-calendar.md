@@ -10,6 +10,9 @@ Pripomenout pri startu: ne
 Co se resilo:
 Čistý builder D-2/D-1 a read-only sekce `Náhled upozornění` v Cockpitu byly
 dokončeny, otestovány, commitnuty, pushnuty a ručně ověřeny Mílou.
+Míla následně upřesnil cílový provoz: čtyři pevné soukromé adresy, jeden
+společný e-mail a po bezpečném zprovoznění automatické odesílání bez běžné
+ruční kontroly.
 
 Co je hotove:
 - Builder vrací pro přesně dva různé příjemce událost, věk, režim D-2/D-1,
@@ -20,19 +23,27 @@ Co je hotove:
   adresy z formuláře vymaže.
 - Implementační commit `021adf5` je na `main` a `origin/main`; plná brána
   983 testů, vzdálená GitHub Gate, živý smoke 5/5 a ruční test prošly.
+- Cílový model čtyř pevných příjemců a automatického odesílání je potvrzený;
+  příjemci o sobě mohou vědět.
 - Kanonický handoff a TVBCP existují.
 
 Co neni hotove:
 - Odesílání ani persistence doručení nejsou implementované.
-- Není navržená ani potvrzená bezpečnostní brána pro testovací e-mail.
+- Současný builder a read-only UI stále pracují se dvěma ručně zadanými
+  adresami; cílové čtyři adresy ještě nejsou zapojené.
+- Není navržený automatický odesílací adaptér, soukromá konfigurace čtyř adres,
+  stav jednotlivých příjemců ani plánovač.
 
 Dalsi krok:
-Zahájit samostatnou read-only fázi návrhu jednoho ručně potvrzovaného
-testovacího e-mailu; zatím nic neodesílat.
+Zahájit samostatnou read-only fázi návrhu automatického odesílání jednomu
+společnému e-mailu na čtyři pevné soukromé adresy; zatím nic neodesílat.
 
 Navrhovane dalsi kroky:
-- Po schválení návrhu implementovat pouze minimální potvrzované testovací
-  odeslání; automatické odesílání ponechat vypnuté.
+- Nejdříve vymezit soukromou konfiguraci, odesílací adaptér, stav každého
+  příjemce, redigovaný audit a fail-closed pravidla.
+- D-2 odeslat automaticky jednou; D-1 použít jen jako náhradu po jistém
+  neodeslání D-2. Při nejistém výsledku D-2 automaticky neopakovat.
+- Automatiku zapnout až po samostatně otestované implementační fázi.
 
 Zmenene nebo relevantni soubory:
 - `app/family_calendar.py`
@@ -42,7 +53,8 @@ Zmenene nebo relevantni soubory:
 - `.github/workflows/cockpit-quality-gate.yml`
 
 Bezpecnost / neukladat:
-- Neukladat hesla, tokeny, API klice ani soukromy obsah.
+- Neukladat hesla, tokeny, API klice, skutečné adresy ani soukromy obsah do
+  Gitu, projektové paměti nebo testů.
 
 ### Automatický checkpoint 2026-07-22 08:48 CEST
 
@@ -88,3 +100,29 @@ Bezpecnost / neukladat:
   srovnány se skutečně dokončeným stavem.
 - Další krok: samostatná read-only fáze návrhu jednoho ručně potvrzovaného
   testovacího e-mailu; zatím nic neodesílat ani nezapínat automatiku.
+
+### Rozhodnutí o cílovém automatickém odesílání 2026-07-22 14:19 CEST
+
+- Míla potvrdil cílový počet čtyř příjemců. Adresy budou pevně uložené pouze
+  v soukromé konfiguraci Samanthy mimo Git, projektovou paměť a testy.
+- Cílem je jeden společný e-mail všem čtyřem příjemcům; příjemci o sobě mohou
+  vědět. Po bezpečném zprovoznění proběhne běžné odesílání automaticky bez
+  ruční kontroly jednotlivých zpráv.
+- D-2 je standardní automatický termín. D-1 je náhradní termín pouze tehdy,
+  když D-2 prokazatelně nebylo odesláno. Stav `delivery_unknown` se automaticky
+  neopakuje a vyžaduje diagnostické vyřešení.
+- Riziko částečného přijetí společného e-mailu se musí sledovat zvlášť pro
+  každého příjemce. Audit bude git-safe a redigovaný, bez adres a obsahu zprávy.
+- Rozhodnutí je návrhový cíl, nikoli tvrzení o hotové implementaci. V tomto
+  kroku se nic neodesílalo a automatika zůstává vypnutá.
+- Další krok: read-only návrh soukromé konfigurace, odesílacího adaptéru,
+  per-recipient stavu, idempotence a plánovače.
+
+### Automatický checkpoint 2026-07-22 14:24 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Handoff a TVBCP nyní zachycují čtyři pevné příjemce a cílové automatické odesílání
+- Ověření: plná Cockpit brána: 986 testů, 257.7 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/memory/handoffs/workstreams/project-family-calendar.md`, `Samantha_Agent/memory/tvbcp/workstreams/project-family-calendar.md`
+- Commit: `Zapsat cílový model automatických rodinných upozornění`
+- Další krok: Navrhnout read-only kontrakt soukromé konfigurace, odesílacího adaptéru a stavu doručení
