@@ -337,3 +337,23 @@ Bezpecnost / neukladat:
 - Další krok: samostatná read-only revize cesty k automatickému provozu,
   zejména plánovače, přechodu režimu, persistence, idempotence a recovery.
   Během revize nic nezapínat ani neodesílat.
+
+### Vývojový checkpoint 2026-07-23 19:52 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Přidán dedikovaný plánovací vstup, který pouze deleguje na existující
+  provozní dry-run a nemá cestu k SMTP, odesílání ani zápisu runtime stavu.
+- Ověření: 167 kalendářových testů a plná Cockpit brána 1143 testů prošly.
+  Živý redigovaný dry-run nevolal koordinátor ani transport a nevytvořil
+  stavový nebo worker soubor.
+- Readiness posun: `planner_runner_missing` je uzavřený; zbývá
+  `planner_not_installed`, chybějící Keychain reference a nedostupný
+  automatický režim.
+- Změněné cesty před paměťovým zápisem (4):
+  `Samantha_Agent/scripts/family_calendar_delivery_run.py`,
+  `Samantha_Agent/scripts/cockpit_quality_gate.py`,
+  `Samantha_Agent/tests/test_cockpit_quality_gate.py`,
+  `Samantha_Agent/tests/test_family_calendar_delivery_dry_run.py`.
+- Commit: `Doplnit bezpečný plánovací runner rodinného kalendáře`
+- Další krok: Po začlenění do `main` vytvořit pouze read-only náhled budoucí
+  LaunchAgent konfigurace; nic nezapisovat, neinstalovat ani nenačítat.

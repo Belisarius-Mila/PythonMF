@@ -12,6 +12,7 @@ from app.family_calendar_delivery_dry_run import (
 )
 from app.family_calendar_delivery_runner import FamilyCalendarDeliveryRunResult
 from scripts.family_calendar_delivery_dry_run import main
+from scripts.family_calendar_delivery_run import main as scheduled_main
 
 
 TODAY = date(2026, 12, 17)
@@ -233,6 +234,37 @@ class FamilyCalendarDeliveryOperationalDryRunTests(unittest.TestCase):
             json.loads(output.getvalue()),
             {"redacted": True, "status": "input_error"},
         )
+
+    def test_scheduled_runner_is_only_a_redacted_dry_run_entrypoint(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            paths = _private_paths(Path(temp_dir))
+            _write_people(paths[0])
+            _write_config(paths[1], mode="dry_run")
+            output = io.StringIO()
+
+            exit_code = scheduled_main(
+                [
+                    "--today",
+                    TODAY.isoformat(),
+                    "--people-path",
+                    str(paths[0]),
+                    "--config-path",
+                    str(paths[1]),
+                    "--state-path",
+                    str(paths[2]),
+                    "--worker-path",
+                    str(paths[3]),
+                ],
+                output=output,
+            )
+
+            document = json.loads(output.getvalue())
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(document["status"], "dry_run")
+            self.assertFalse(document["coordinator_called"])
+            self.assertFalse(document["transport_called"])
+            _assert_runtime_absent(self, paths)
+            _assert_redacted(self, output.getvalue(), paths)
 
 
 def _private_paths(root: Path) -> tuple[Path, Path, Path, Path]:

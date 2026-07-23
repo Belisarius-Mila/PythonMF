@@ -108,6 +108,7 @@ COMPILE_PATHS = (
     "scripts/family_calendar_delivery_config_enable_dry_run.py",
     "scripts/family_calendar_delivery_config_migrate.py",
     "scripts/family_calendar_delivery_dry_run.py",
+    "scripts/family_calendar_delivery_run.py",
     "scripts/family_calendar_delivery_readiness.py",
     "scripts/family_calendar_delivery_smtp_envelope_diagnose.py",
     "scripts/family_calendar_delivery_smtp_diagnose.py",

@@ -352,3 +352,26 @@ Mílovo rozhodnutí.
 Další krok: read-only ověřit plánovač, přechod ze současného neostrého režimu,
 persistenci per-recipient výsledků, idempotenci a recovery. Během této revize
 nic nezapínat ani neodesílat.
+
+### 2026-07-23 19:52 CEST – Přidán pouze dry-run plánovací vstup
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: vznikl dedikovaný vstup `family_calendar_delivery_run.py`, který je
+určený pro budoucí plánovač, ale v současné fázi pouze volá existující
+provozní dry-run. Nemá odesílací přepínač ani vlastní SMTP, koordinační nebo
+persistenční cestu.
+
+Důkaz: 167 kalendářových testů a plná Cockpit Quality Gate s 1143 testy
+prošly. Redigovaná zkouška nad privátní konfigurací v režimu `dry_run`
+nevolala koordinátor ani transport a nevytvořila stavový nebo worker soubor.
+Readiness nyní místo `planner_runner_missing` správně hlásí
+`planner_not_installed`; stavové úložiště ani recovery nemají blokující stav.
+
+Rozhodnutí: automatika zůstává vypnutá. Tento milník pouze uzavírá chybějící
+spustitelný vstup a neopravňuje k instalaci plánovače, práci s Keychain,
+přechodu režimu ani odesílání.
+
+Další krok: vytvořit read-only náhled budoucí LaunchAgent konfigurace s
+redigovanými metadaty. Náhled nesmí nic zapisovat, instalovat, načítat ani
+odesílat.

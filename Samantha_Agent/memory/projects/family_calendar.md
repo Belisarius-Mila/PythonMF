@@ -50,6 +50,16 @@
   výsledek a relace se korektně ukončila. Míla potvrdil skutečné doručení 4/4.
 - Jednorázová testovací brána je úspěšně uzavřená. Automatické D-2/D-1
   odesílání zůstává vypnuté.
+- Read-only kontrola připravenosti ověřuje konfiguraci, stavové úložiště,
+  recovery, plánovač a existenci Keychain reference bez čtení hesla, zápisu
+  nebo odesílání.
+- Dedikovaný plánovací vstup `family_calendar_delivery_run.py` je omezený
+  pouze na existující provozní dry-run. Živá redigovaná zkouška nevolala
+  koordinátor ani transport a nevytvořila stavový nebo worker soubor.
+- Kalendářová regrese 167 testů a plná Cockpit brána 1143 testů prošly.
+- Readiness už neblokuje chybějící runner; automatika dále zůstává bezpečně
+  blokovaná chybějící instalací plánovače, Keychain referencí a automatickým
+  režimem.
 
 ## Bezpečnostní hranice
 
@@ -65,7 +75,7 @@
 
 ## Nejmenší další krok
 
-Zahájit samostatnou read-only revizi cesty k automatickému D-2/D-1 provozu:
-ověřit plánovač, přechod ze současného neostrého režimu, persistenci
-per-recipient výsledků, idempotenci a recovery. Během revize nic nezapínat
-ani neodesílat.
+Vytvořit pouze read-only náhled budoucí konfigurace plánovače: redigovaně
+zobrazit label, absolutní cestu k Pythonu a runneru, čas spuštění a bezpečnostní
+volby. Náhled nesmí plist zapisovat, instalovat, načítat přes `launchctl`,
+pracovat s Keychain ani cokoli odesílat.

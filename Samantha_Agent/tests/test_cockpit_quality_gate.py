@@ -104,6 +104,7 @@ async def second():
         self.assertIn("scripts/family_calendar_delivery_config_enable_dry_run.py", COMPILE_PATHS)
         self.assertIn("scripts/family_calendar_delivery_config_migrate.py", COMPILE_PATHS)
         self.assertIn("scripts/family_calendar_delivery_dry_run.py", COMPILE_PATHS)
+        self.assertIn("scripts/family_calendar_delivery_run.py", COMPILE_PATHS)
         self.assertIn("scripts/family_calendar_delivery_readiness.py", COMPILE_PATHS)
         self.assertIn(
             "scripts/family_calendar_delivery_smtp_envelope_diagnose.py",
