@@ -61,6 +61,7 @@ COMPILE_PATHS = (
     "app/family_calendar_delivery_config_initializer.py",
     "app/family_calendar_delivery_config_migration.py",
     "app/family_calendar_delivery_config_migration_runner.py",
+    "app/family_calendar_delivery_config_transition.py",
     "app/family_calendar_delivery_coordinator.py",
     "app/family_calendar_delivery_message.py",
     "app/family_calendar_delivery_runner.py",
@@ -99,6 +100,7 @@ COMPILE_PATHS = (
     "scripts/human_adam_takeover.py",
     "scripts/development_branch_audit.py",
     "scripts/family_calendar_delivery_config_initialize.py",
+    "scripts/family_calendar_delivery_config_enable_dry_run.py",
     "scripts/family_calendar_delivery_config_migrate.py",
 )
 
@@ -143,6 +145,7 @@ TEST_MODULES = (
     "tests.test_family_calendar_delivery_config_initializer",
     "tests.test_family_calendar_delivery_config_migration",
     "tests.test_family_calendar_delivery_config_migration_runner",
+    "tests.test_family_calendar_delivery_config_transition",
     "tests.test_family_calendar_delivery_coordinator",
     "tests.test_family_calendar_delivery_integration",
     "tests.test_family_calendar_delivery_message",

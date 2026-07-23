@@ -248,3 +248,14 @@ Důkaz: plná Cockpit brána: 1074 testů, 217.7 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Spustit inicializátor v prostředí vlastnícím privátní data a ponechat novou konfiguraci v režimu disabled
+
+### 2026-07-23 06:32 CEST – Doplněn atomický přechod konfigurace Rodinného kalendáře z disabled do dry_run
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: Doplněn atomický přechod konfigurace Rodinného kalendáře z disabled do dry_run
+
+Důkaz: plná Cockpit brána: 1083 testů, 308.3 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: V hlavním prostředí spustit pouze read-only preview skriptu family_calendar_delivery_config_enable_dry_run.py bez --apply.
