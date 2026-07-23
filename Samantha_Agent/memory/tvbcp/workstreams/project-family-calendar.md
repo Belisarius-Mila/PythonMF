@@ -270,3 +270,14 @@ Důkaz: plná Cockpit brána: 1091 testů, 226.1 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Spustit redigovaný provozní dry-run v prostředí vlastnícím privátní kalendář a konfiguraci
+
+### 2026-07-23 07:50 CEST – Přidán iCloud STARTTLS klient s povinně injektovanou SMTP relací, redigovanými výsledky a testy bez sítě
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: Přidán iCloud STARTTLS klient s povinně injektovanou SMTP relací, redigovanými výsledky a testy bez sítě
+
+Důkaz: plná Cockpit brána: 1097 testů, 232.9 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Připravit samostatný přesně potvrzovaný testovací runner s lokálním iCloud tajemstvím

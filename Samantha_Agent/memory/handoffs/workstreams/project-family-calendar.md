@@ -261,3 +261,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/app/family_calendar_delivery_dry_run.py`, `Samantha_Agent/scripts/family_calendar_delivery_dry_run.py`, `Samantha_Agent/tests/test_family_calendar_delivery_dry_run.py`
 - Commit: `Doplnit provozní dry-run rodinného kalendáře`
 - Další krok: Spustit redigovaný provozní dry-run v prostředí vlastnícím privátní kalendář a konfiguraci
+
+### Automatický checkpoint 2026-07-23 07:50 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Přidán iCloud STARTTLS klient s povinně injektovanou SMTP relací, redigovanými výsledky a testy bez sítě
+- Ověření: plná Cockpit brána: 1097 testů, 232.9 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/app/family_calendar_icloud_smtp_client.py`, `Samantha_Agent/tests/test_family_calendar_icloud_smtp_client.py`
+- Commit: `Doplnit testovaný iCloud SMTP klient rodinného kalendáře`
+- Další krok: Připravit samostatný přesně potvrzovaný testovací runner s lokálním iCloud tajemstvím
