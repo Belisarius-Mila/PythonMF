@@ -357,3 +357,23 @@ Bezpecnost / neukladat:
 - Commit: `Doplnit bezpečný plánovací runner rodinného kalendáře`
 - Další krok: Po začlenění do `main` vytvořit pouze read-only náhled budoucí
   LaunchAgent konfigurace; nic nezapisovat, neinstalovat ani nenačítat.
+
+### Vývojový checkpoint 2026-07-23 20:03 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Přidán read-only náhled budoucí LaunchAgent konfigurace jako
+  samostatný builder a JSON CLI bez apply, instalační nebo load cesty.
+- Náhled validuje Python, plánovací runner a denní čas; kandidát pro 08:00 má
+  `RunAtLoad=false` a `ProcessType=Background`.
+- Ověření: 171 kalendářových testů a plná Cockpit brána 1147 testů prošly.
+  Živý náhled nevytvořil plist, nevolal `launchctl`, nečetl Keychain,
+  nevolal transport a neprovedl žádný zápis.
+- Změněné cesty před paměťovým zápisem (5):
+  `Samantha_Agent/app/family_calendar_delivery_planner_preview.py`,
+  `Samantha_Agent/scripts/family_calendar_delivery_planner_preview.py`,
+  `Samantha_Agent/tests/test_family_calendar_delivery_planner_preview.py`,
+  `Samantha_Agent/scripts/cockpit_quality_gate.py`,
+  `Samantha_Agent/tests/test_cockpit_quality_gate.py`.
+- Commit: `Doplnit read-only náhled plánovače kalendáře`
+- Další krok: Samostatně navrhnout potvrzovanou bránu pro zápis plist pouze
+  v režimu `dry_run`; zatím plist nezapisovat ani nenačítat.

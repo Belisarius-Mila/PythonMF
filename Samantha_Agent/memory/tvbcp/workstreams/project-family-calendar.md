@@ -375,3 +375,24 @@ přechodu režimu ani odesílání.
 Další krok: vytvořit read-only náhled budoucí LaunchAgent konfigurace s
 redigovanými metadaty. Náhled nesmí nic zapisovat, instalovat, načítat ani
 odesílat.
+
+### 2026-07-23 20:03 CEST – Vytvořen read-only náhled LaunchAgent konfigurace
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: samostatný builder a CLI sestavují pouze JSON náhled budoucí plist.
+Validují absolutní cestu k Pythonu a dry-run runneru, denní čas a bezpečné
+režimy. Kandidát používá `RunAtLoad=false` a `ProcessType=Background`.
+
+Důkaz: 171 kalendářových testů a plná Cockpit Quality Gate s 1147 testy
+prošly. Živý náhled pro 08:00 nevytvořil plist, nevolal `launchctl`, nečetl
+Keychain, nevolal transport a neprovedl zápis. CLI nemá `--apply`, výstupní
+cestu ani instalační operaci.
+
+Rozhodnutí: tento checkpoint pouze umožňuje kontrolu přesného kandidáta.
+Plánovač není nainstalovaný ani načtený, automatický režim zůstává nedostupný
+a odesílání vypnuté.
+
+Další krok: samostatně navrhnout dvoukrokovou instalační bránu pro vytvoření
+plist pouze v režimu `dry_run`: náhled a až potom zvláštní potvrzení zápisu.
+Ani tato příští fáze ještě nemá volat `launchctl`, Keychain nebo transport.

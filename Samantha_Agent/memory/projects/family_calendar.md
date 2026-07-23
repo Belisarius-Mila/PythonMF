@@ -60,6 +60,12 @@
 - Readiness už neblokuje chybějící runner; automatika dále zůstává bezpečně
   blokovaná chybějící instalací plánovače, Keychain referencí a automatickým
   režimem.
+- Read-only náhled budoucí LaunchAgent konfigurace validuje absolutní cestu
+  k Pythonu a runneru, denní čas, `RunAtLoad=false` a proces typu
+  `Background`. Výstup je pouze JSON a nemá apply, instalační ani load cestu.
+- Živý náhled pro 08:00 prošel bez vytvoření plist, volání `launchctl`, čtení
+  Keychain, transportu nebo jiného zápisu. Kalendářová regrese 171 testů a
+  plná Cockpit brána 1147 testů prošly.
 
 ## Bezpečnostní hranice
 
@@ -75,7 +81,7 @@
 
 ## Nejmenší další krok
 
-Vytvořit pouze read-only náhled budoucí konfigurace plánovače: redigovaně
-zobrazit label, absolutní cestu k Pythonu a runneru, čas spuštění a bezpečnostní
-volby. Náhled nesmí plist zapisovat, instalovat, načítat přes `launchctl`,
-pracovat s Keychain ani cokoli odesílat.
+Samostatně navrhnout dvoukrokovou instalační bránu pro vytvoření plist pouze
+v režimu `dry_run`: nejprve přesný náhled, potom zvláštní potvrzení zápisu.
+V této další fázi ještě plánovač nenačítat přes `launchctl`, nepracovat s
+Keychain, neměnit automatický režim a nic neodesílat.
