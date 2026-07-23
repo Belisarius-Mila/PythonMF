@@ -17,6 +17,7 @@ class SystemReportsTests(unittest.TestCase):
         self.assertIn("Knowledge inbox inventory", text)
         self.assertIn("Downloads inventory", text)
         self.assertIn("iPhone shortcuts status", text)
+        self.assertIn("Rodinny kalendar readiness", text)
         self.assertIn("Memory status", text)
         self.assertIn("samantha_health_check", text)
         self.assertIn("samantha_quantitative_status", text)
@@ -25,6 +26,7 @@ class SystemReportsTests(unittest.TestCase):
         self.assertIn("samantha_knowledge_inbox_inventory", text)
         self.assertIn("samantha_downloads_inventory", text)
         self.assertIn("iphone_shortcuts_playground_status", text)
+        self.assertIn("family_calendar_delivery_readiness", text)
 
     def test_system_reports_registry_has_unique_names(self) -> None:
         names = [report.name for report in SYSTEM_REPORTS]

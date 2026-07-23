@@ -30,6 +30,9 @@ from app.iphone_shortcuts import (
     format_iphone_shortcuts_status,
     prepare_iphone_shortcut_request,
 )
+from app.family_calendar_delivery_readiness import (
+    format_family_calendar_delivery_readiness,
+)
 from app.quick_notes import list_quick_notes_text, quick_notes_action_status_text, show_quick_note_detail_text
 from app.email import (
     archive_email_by_uid,
@@ -242,6 +245,12 @@ def copy_downloads_files_to_knowledge_inbox(
 def iphone_shortcuts_playground_status() -> str:
     """Return read-only readiness status for creating iPhone shortcuts via Shortcuts Playground."""
     return format_iphone_shortcuts_status()
+
+
+@function_tool
+def family_calendar_delivery_readiness() -> str:
+    """Return redacted read-only readiness for future family-calendar automation."""
+    return format_family_calendar_delivery_readiness()
 
 
 @function_tool
@@ -823,6 +832,7 @@ LOKALNI PAMET:
             samantha_downloads_inventory,
             copy_downloads_files_to_knowledge_inbox,
             iphone_shortcuts_playground_status,
+            family_calendar_delivery_readiness,
             prepare_iphone_shortcut,
             list_quick_notes,
             show_quick_note_detail,

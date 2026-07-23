@@ -60,6 +60,13 @@ CAPABILITY_AREAS = (
         next_gap="Manually import and test Najit auto v3 before broader shortcut generation.",
     ),
     CapabilityArea(
+        name="Rodinny kalendar",
+        level="L3",
+        safety="read-only redacted readiness; no secret read, state write, recovery mutation, or send",
+        tools=("family_calendar_delivery_readiness",),
+        next_gap="Implement the enabled runtime only after every readiness blocker has a reviewed design.",
+    ),
+    CapabilityArea(
         name="Quick notes",
         level="L3",
         safety="read-only local notes overview/detail",

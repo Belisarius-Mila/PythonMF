@@ -15,6 +15,7 @@ Samantha pouzit tool `samantha_system_reports`.
 | Knowledge inbox inventory | Bezpecny inventar velkych podkladu ve private knowledge inboxu bez cteni obsahu. | `.venv/bin/python scripts/samantha_knowledge_inbox.py` |
 | Downloads inventory | Bezpecny inventar top-level souboru ve Stazenych pred kopirovanim do knowledge inboxu. | `.venv/bin/python scripts/samantha_downloads_to_knowledge_inbox.py --list` |
 | iPhone shortcuts status | Kontrola pripravenosti MacStories Shortcuts Playground pro tvorbu iPhone zkratek. | `.venv/bin/python scripts/samantha_iphone_shortcuts.py --status` |
+| Rodinny kalendar readiness | Redigovana read-only kontrola rezimu, lokalniho planovace, Keychain reference, persistence a recovery blokeru bez cteni hesla, zapisu nebo odeslani. | `.venv/bin/python scripts/family_calendar_delivery_readiness.py` |
 | Memory status | Stav lokalni pameti, startup kontextu, priorit a pripomenuti. | pres Samanthu tool `memory_status` |
 
 ## Pravidla

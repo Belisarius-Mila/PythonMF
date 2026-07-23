@@ -152,6 +152,7 @@ class CapabilityRegistryTests(unittest.TestCase):
             "samantha_health_check",
             "samantha_system_reports",
             "samantha_capability_audit",
+            "family_calendar_delivery_readiness",
         ):
             with self.subTest(capability_id=capability_id):
                 record = get_capability(capability_id)

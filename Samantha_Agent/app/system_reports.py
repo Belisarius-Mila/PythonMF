@@ -71,6 +71,14 @@ SYSTEM_REPORTS = (
         saves_data="ne",
     ),
     SystemReport(
+        name="Rodinny kalendar readiness",
+        when_to_use="read-only kontrola pripravenosti automatickeho D-2/D-1 odesilani",
+        output="redigovany stav rezimu, planovace, Keychain reference, persistence a recovery blokeru",
+        command=".venv/bin/python scripts/family_calendar_delivery_readiness.py",
+        samantha_tool="family_calendar_delivery_readiness()",
+        saves_data="ne",
+    ),
+    SystemReport(
         name="Memory status",
         when_to_use="stav lokalni pameti, startup kontextu, priorit a pripomenuti",
         output="bezpecna diagnostika memory store bez e-mailu a tajemstvi",
