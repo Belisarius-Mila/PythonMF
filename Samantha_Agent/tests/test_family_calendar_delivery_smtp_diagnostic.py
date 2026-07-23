@@ -127,8 +127,8 @@ class FamilyCalendarDeliverySMTPDiagnosticTests(unittest.TestCase):
             ("factory", ICloudSMTPDiagnosticCategory.CONNECTION_FAILED),
             ("enter", ICloudSMTPDiagnosticCategory.CONNECTION_FAILED),
             ("ehlo_1", ICloudSMTPDiagnosticCategory.CONNECTION_FAILED),
-            ("starttls", ICloudSMTPDiagnosticCategory.TLS_FAILED),
-            ("ehlo_2", ICloudSMTPDiagnosticCategory.TLS_FAILED),
+            ("starttls", ICloudSMTPDiagnosticCategory.STARTTLS_FAILED),
+            ("ehlo_2", ICloudSMTPDiagnosticCategory.POST_TLS_EHLO_FAILED),
             ("login", ICloudSMTPDiagnosticCategory.AUTHENTICATION_FAILED),
             ("exit", ICloudSMTPDiagnosticCategory.OTHER_REDACTED),
         )
@@ -153,7 +153,10 @@ class FamilyCalendarDeliverySMTPDiagnosticTests(unittest.TestCase):
 
         result = client.diagnose_authentication()
 
-        self.assertEqual(result.category, ICloudSMTPDiagnosticCategory.TLS_FAILED)
+        self.assertEqual(
+            result.category,
+            ICloudSMTPDiagnosticCategory.TLS_CONTEXT_FAILED,
+        )
         self.assertEqual(factory.calls, [])
         _assert_redacted(self, repr(result))
 

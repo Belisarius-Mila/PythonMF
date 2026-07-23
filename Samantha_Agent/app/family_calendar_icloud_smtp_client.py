@@ -27,7 +27,9 @@ class ICloudSMTPClientError(RuntimeError):
 
 class ICloudSMTPDiagnosticCategory(StrEnum):
     CONNECTION_FAILED = "CONNECTION_FAILED"
-    TLS_FAILED = "TLS_FAILED"
+    TLS_CONTEXT_FAILED = "TLS_CONTEXT_FAILED"
+    STARTTLS_FAILED = "STARTTLS_FAILED"
+    POST_TLS_EHLO_FAILED = "POST_TLS_EHLO_FAILED"
     AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED"
     AUTH_OK_NO_SEND = "AUTH_OK_NO_SEND"
     OTHER_REDACTED = "OTHER_REDACTED"
@@ -159,7 +161,7 @@ class ICloudSMTPClient:
     def diagnose_authentication(self) -> ICloudSMTPDiagnosticResult:
         """Verify connection, STARTTLS and login without constructing or sending mail."""
 
-        stage = ICloudSMTPDiagnosticCategory.TLS_FAILED
+        stage = ICloudSMTPDiagnosticCategory.TLS_CONTEXT_FAILED
         try:
             tls_context = self.tls_context_factory()
             stage = ICloudSMTPDiagnosticCategory.CONNECTION_FAILED
@@ -169,8 +171,9 @@ class ICloudSMTPClient:
                 timeout=ICLOUD_SMTP_TIMEOUT_SECONDS,
             ) as smtp:
                 smtp.ehlo()
-                stage = ICloudSMTPDiagnosticCategory.TLS_FAILED
+                stage = ICloudSMTPDiagnosticCategory.STARTTLS_FAILED
                 smtp.starttls(context=tls_context)
+                stage = ICloudSMTPDiagnosticCategory.POST_TLS_EHLO_FAILED
                 smtp.ehlo()
                 stage = ICloudSMTPDiagnosticCategory.AUTHENTICATION_FAILED
                 smtp.login(self.username, self.app_password)
