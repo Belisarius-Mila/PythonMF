@@ -63,6 +63,7 @@ COMPILE_PATHS = (
     "app/family_calendar_delivery_config_migration_runner.py",
     "app/family_calendar_delivery_config_transition.py",
     "app/family_calendar_delivery_coordinator.py",
+    "app/family_calendar_delivery_dry_run.py",
     "app/family_calendar_delivery_message.py",
     "app/family_calendar_delivery_runner.py",
     "app/family_calendar_delivery_store.py",
@@ -102,6 +103,7 @@ COMPILE_PATHS = (
     "scripts/family_calendar_delivery_config_initialize.py",
     "scripts/family_calendar_delivery_config_enable_dry_run.py",
     "scripts/family_calendar_delivery_config_migrate.py",
+    "scripts/family_calendar_delivery_dry_run.py",
 )
 
 SHELL_PATHS = (
@@ -147,6 +149,7 @@ TEST_MODULES = (
     "tests.test_family_calendar_delivery_config_migration_runner",
     "tests.test_family_calendar_delivery_config_transition",
     "tests.test_family_calendar_delivery_coordinator",
+    "tests.test_family_calendar_delivery_dry_run",
     "tests.test_family_calendar_delivery_integration",
     "tests.test_family_calendar_delivery_message",
     "tests.test_family_calendar_delivery_runner",

@@ -259,3 +259,14 @@ Důkaz: plná Cockpit brána: 1083 testů, 308.3 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: V hlavním prostředí spustit pouze read-only preview skriptu family_calendar_delivery_config_enable_dry_run.py bez --apply.
+
+### 2026-07-23 07:11 CEST – Přidán read-only orchestrátor dnešních D-2/D-1 kandidátů s redigovaným CLI a aktivními pojistkami proti runtime I/O
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: Přidán read-only orchestrátor dnešních D-2/D-1 kandidátů s redigovaným CLI a aktivními pojistkami proti runtime I/O
+
+Důkaz: plná Cockpit brána: 1091 testů, 226.1 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Spustit redigovaný provozní dry-run v prostředí vlastnícím privátní kalendář a konfiguraci

@@ -252,3 +252,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/app/family_calendar_delivery_config_transition.py`, `Samantha_Agent/scripts/family_calendar_delivery_config_enable_dry_run.py`, `Samantha_Agent/tests/test_family_calendar_delivery_config_transition.py`
 - Commit: `Doplnit bezpečný přechod kalendáře do dry-run`
 - Další krok: V hlavním prostředí spustit pouze read-only preview skriptu family_calendar_delivery_config_enable_dry_run.py bez --apply.
+
+### Automatický checkpoint 2026-07-23 07:11 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Přidán read-only orchestrátor dnešních D-2/D-1 kandidátů s redigovaným CLI a aktivními pojistkami proti runtime I/O
+- Ověření: plná Cockpit brána: 1091 testů, 226.1 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/app/family_calendar_delivery_dry_run.py`, `Samantha_Agent/scripts/family_calendar_delivery_dry_run.py`, `Samantha_Agent/tests/test_family_calendar_delivery_dry_run.py`
+- Commit: `Doplnit provozní dry-run rodinného kalendáře`
+- Další krok: Spustit redigovaný provozní dry-run v prostředí vlastnícím privátní kalendář a konfiguraci
