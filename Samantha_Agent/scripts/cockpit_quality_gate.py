@@ -107,6 +107,7 @@ COMPILE_PATHS = (
     "scripts/family_calendar_delivery_config_enable_dry_run.py",
     "scripts/family_calendar_delivery_config_migrate.py",
     "scripts/family_calendar_delivery_dry_run.py",
+    "scripts/family_calendar_delivery_smtp_diagnose.py",
     "scripts/family_calendar_delivery_test_email.py",
 )
 
@@ -160,6 +161,7 @@ TEST_MODULES = (
     "tests.test_family_calendar_delivery_message",
     "tests.test_family_calendar_delivery_runner",
     "tests.test_family_calendar_delivery_store",
+    "tests.test_family_calendar_delivery_smtp_diagnostic",
     "tests.test_family_calendar_delivery_test_email",
     "tests.test_family_calendar_smtp_adapter",
     "tests.test_family_calendar_cockpit",

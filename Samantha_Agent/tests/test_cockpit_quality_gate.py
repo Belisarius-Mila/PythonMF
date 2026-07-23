@@ -103,6 +103,10 @@ async def second():
         self.assertIn("scripts/family_calendar_delivery_config_enable_dry_run.py", COMPILE_PATHS)
         self.assertIn("scripts/family_calendar_delivery_config_migrate.py", COMPILE_PATHS)
         self.assertIn("scripts/family_calendar_delivery_dry_run.py", COMPILE_PATHS)
+        self.assertIn(
+            "scripts/family_calendar_delivery_smtp_diagnose.py",
+            COMPILE_PATHS,
+        )
         self.assertIn("scripts/family_calendar_delivery_test_email.py", COMPILE_PATHS)
         self.assertIn("tests.test_family_calendar_delivery", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_icloud_smtp_client", TEST_MODULES)
@@ -119,6 +123,10 @@ async def second():
         self.assertIn("tests.test_family_calendar_delivery_message", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_runner", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_store", TEST_MODULES)
+        self.assertIn(
+            "tests.test_family_calendar_delivery_smtp_diagnostic",
+            TEST_MODULES,
+        )
         self.assertIn("tests.test_family_calendar_smtp_adapter", TEST_MODULES)
 
     def test_architecture_baselines_are_informational_and_reported(self) -> None:

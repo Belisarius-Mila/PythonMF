@@ -6,6 +6,7 @@ import ssl
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from email.message import EmailMessage
+from enum import StrEnum
 from typing import Any, Protocol
 
 from app.family_calendar_delivery_config import (
@@ -22,6 +23,37 @@ ICLOUD_SMTP_TIMEOUT_SECONDS = 30
 
 class ICloudSMTPClientError(RuntimeError):
     """Redacted iCloud SMTP failure safe for logs and status surfaces."""
+
+
+class ICloudSMTPDiagnosticCategory(StrEnum):
+    CONNECTION_FAILED = "CONNECTION_FAILED"
+    TLS_FAILED = "TLS_FAILED"
+    AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED"
+    AUTH_OK_NO_SEND = "AUTH_OK_NO_SEND"
+    OTHER_REDACTED = "OTHER_REDACTED"
+
+
+@dataclass(frozen=True, repr=False)
+class ICloudSMTPDiagnosticResult:
+    category: ICloudSMTPDiagnosticCategory
+
+    @property
+    def succeeded(self) -> bool:
+        return self.category is ICloudSMTPDiagnosticCategory.AUTH_OK_NO_SEND
+
+    def __repr__(self) -> str:
+        return (
+            "ICloudSMTPDiagnosticResult("
+            f"category={self.category.value!r}, redacted=True, send_called=False)"
+        )
+
+    def safe_document(self) -> dict[str, object]:
+        return {
+            "category": self.category.value,
+            "redacted": True,
+            "send_called": False,
+            "status": "diagnostic",
+        }
 
 
 class SMTPSession(Protocol):
@@ -123,6 +155,31 @@ class ICloudSMTPClient:
         if operation_failed:
             raise ICloudSMTPClientError("iCloud SMTP operation failed safely.")
         return SMTPClientResult(refused_addresses=refused_addresses)
+
+    def diagnose_authentication(self) -> ICloudSMTPDiagnosticResult:
+        """Verify connection, STARTTLS and login without constructing or sending mail."""
+
+        stage = ICloudSMTPDiagnosticCategory.TLS_FAILED
+        try:
+            tls_context = self.tls_context_factory()
+            stage = ICloudSMTPDiagnosticCategory.CONNECTION_FAILED
+            with self.smtp_factory(
+                ICLOUD_SMTP_HOST,
+                ICLOUD_SMTP_PORT,
+                timeout=ICLOUD_SMTP_TIMEOUT_SECONDS,
+            ) as smtp:
+                smtp.ehlo()
+                stage = ICloudSMTPDiagnosticCategory.TLS_FAILED
+                smtp.starttls(context=tls_context)
+                smtp.ehlo()
+                stage = ICloudSMTPDiagnosticCategory.AUTHENTICATION_FAILED
+                smtp.login(self.username, self.app_password)
+                stage = ICloudSMTPDiagnosticCategory.OTHER_REDACTED
+        except Exception:  # noqa: BLE001 - only the redacted stage leaves this boundary.
+            return ICloudSMTPDiagnosticResult(category=stage)
+        return ICloudSMTPDiagnosticResult(
+            category=ICloudSMTPDiagnosticCategory.AUTH_OK_NO_SEND
+        )
 
 
 def _validate_recipients(values: Sequence[str]) -> tuple[str, ...]:
