@@ -104,6 +104,10 @@ async def second():
         self.assertIn("scripts/family_calendar_delivery_config_migrate.py", COMPILE_PATHS)
         self.assertIn("scripts/family_calendar_delivery_dry_run.py", COMPILE_PATHS)
         self.assertIn(
+            "scripts/family_calendar_delivery_smtp_envelope_diagnose.py",
+            COMPILE_PATHS,
+        )
+        self.assertIn(
             "scripts/family_calendar_delivery_smtp_diagnose.py",
             COMPILE_PATHS,
         )
@@ -123,6 +127,10 @@ async def second():
         self.assertIn("tests.test_family_calendar_delivery_message", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_runner", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_store", TEST_MODULES)
+        self.assertIn(
+            "tests.test_family_calendar_delivery_smtp_envelope_diagnostic",
+            TEST_MODULES,
+        )
         self.assertIn(
             "tests.test_family_calendar_delivery_smtp_diagnostic",
             TEST_MODULES,

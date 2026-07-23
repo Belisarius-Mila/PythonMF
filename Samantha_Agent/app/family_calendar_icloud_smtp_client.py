@@ -34,6 +34,11 @@ class ICloudSMTPDiagnosticCategory(StrEnum):
     POST_TLS_EHLO_FAILED = "POST_TLS_EHLO_FAILED"
     AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED"
     AUTH_OK_NO_SEND = "AUTH_OK_NO_SEND"
+    MAIL_FROM_REJECTED = "MAIL_FROM_REJECTED"
+    RECIPIENTS_REJECTED = "RECIPIENTS_REJECTED"
+    RSET_FAILED_NO_DATA_NO_SEND = "RSET_FAILED_NO_DATA_NO_SEND"
+    SESSION_CLOSE_FAILED_NO_DATA_NO_SEND = "SESSION_CLOSE_FAILED_NO_DATA_NO_SEND"
+    ENVELOPE_OK_NO_DATA_NO_SEND = "ENVELOPE_OK_NO_DATA_NO_SEND"
     OTHER_REDACTED = "OTHER_REDACTED"
 
 
@@ -60,6 +65,51 @@ class ICloudSMTPDiagnosticResult:
         }
 
 
+@dataclass(frozen=True, repr=False)
+class ICloudSMTPEnvelopeDiagnosticResult:
+    category: ICloudSMTPDiagnosticCategory
+    recipient_count: int
+    accepted_recipient_count: int
+    rejected_recipient_count: int
+    unknown_recipient_count: int
+    rset_ok: bool | None
+    session_close_ok: bool | None
+
+    @property
+    def succeeded(self) -> bool:
+        return (
+            self.category
+            is ICloudSMTPDiagnosticCategory.ENVELOPE_OK_NO_DATA_NO_SEND
+        )
+
+    def __repr__(self) -> str:
+        return (
+            "ICloudSMTPEnvelopeDiagnosticResult("
+            f"category={self.category.value!r}, "
+            f"recipient_count={self.recipient_count}, "
+            f"accepted_recipient_count={self.accepted_recipient_count}, "
+            f"rejected_recipient_count={self.rejected_recipient_count}, "
+            f"unknown_recipient_count={self.unknown_recipient_count}, "
+            f"rset_ok={self.rset_ok!r}, session_close_ok={self.session_close_ok!r}, "
+            "redacted=True, data_called=False, send_called=False)"
+        )
+
+    def safe_document(self) -> dict[str, object]:
+        return {
+            "accepted_recipient_count": self.accepted_recipient_count,
+            "category": self.category.value,
+            "data_called": False,
+            "recipient_count": self.recipient_count,
+            "redacted": True,
+            "rejected_recipient_count": self.rejected_recipient_count,
+            "rset_ok": self.rset_ok,
+            "send_called": False,
+            "session_close_ok": self.session_close_ok,
+            "status": "diagnostic",
+            "unknown_recipient_count": self.unknown_recipient_count,
+        }
+
+
 class SMTPSession(Protocol):
     def __enter__(self) -> "SMTPSession": ...
 
@@ -75,6 +125,12 @@ class SMTPSession(Protocol):
     def starttls(self, *, context: ssl.SSLContext) -> object: ...
 
     def login(self, user: str, password: str) -> object: ...
+
+    def mail(self, sender: str) -> tuple[int, bytes]: ...
+
+    def rcpt(self, recipient: str) -> tuple[int, bytes]: ...
+
+    def rset(self) -> tuple[int, bytes]: ...
 
     def send_message(
         self,
@@ -190,6 +246,106 @@ class ICloudSMTPClient:
             return ICloudSMTPDiagnosticResult(category=stage)
         return ICloudSMTPDiagnosticResult(
             category=ICloudSMTPDiagnosticCategory.AUTH_OK_NO_SEND
+        )
+
+    def diagnose_envelope(
+        self,
+        *,
+        from_addr: str,
+        to_addrs: Sequence[str],
+    ) -> ICloudSMTPEnvelopeDiagnosticResult:
+        """Validate one SMTP envelope, then RSET before DATA can be issued."""
+
+        clean_from = _validate_address(from_addr, field="sender")
+        if clean_from.casefold() != self.username.casefold():
+            raise ICloudSMTPClientError(
+                "iCloud SMTP sender does not match its account."
+            )
+        recipients = _validate_recipients(to_addrs)
+        recipient_count = len(recipients)
+        accepted_count = 0
+        rejected_count = 0
+        envelope_category: ICloudSMTPDiagnosticCategory | None = None
+        rset_ok: bool | None = None
+        session_close_ok: bool | None = None
+        stage = ICloudSMTPDiagnosticCategory.TLS_CONTEXT_FAILED
+        try:
+            tls_context = self.tls_context_factory()
+            stage = ICloudSMTPDiagnosticCategory.CONNECTION_FAILED
+            with self.smtp_factory(
+                ICLOUD_SMTP_HOST,
+                ICLOUD_SMTP_PORT,
+                timeout=ICLOUD_SMTP_TIMEOUT_SECONDS,
+            ) as smtp:
+                smtp.ehlo()
+                stage = ICloudSMTPDiagnosticCategory.STARTTLS_FAILED
+                smtp.starttls(context=tls_context)
+                stage = ICloudSMTPDiagnosticCategory.POST_TLS_EHLO_FAILED
+                smtp.ehlo()
+                stage = ICloudSMTPDiagnosticCategory.AUTHENTICATION_FAILED
+                smtp.login(self.username, self.app_password)
+                stage = ICloudSMTPDiagnosticCategory.OTHER_REDACTED
+                transaction_attempted = False
+                try:
+                    transaction_attempted = True
+                    mail_code, _mail_reply = smtp.mail(clean_from)
+                    if mail_code != 250:
+                        envelope_category = (
+                            ICloudSMTPDiagnosticCategory.MAIL_FROM_REJECTED
+                        )
+                    else:
+                        for recipient in recipients:
+                            rcpt_code, _rcpt_reply = smtp.rcpt(recipient)
+                            if rcpt_code in {250, 251}:
+                                accepted_count += 1
+                            else:
+                                rejected_count += 1
+                        envelope_category = (
+                            ICloudSMTPDiagnosticCategory.ENVELOPE_OK_NO_DATA_NO_SEND
+                            if rejected_count == 0
+                            else ICloudSMTPDiagnosticCategory.RECIPIENTS_REJECTED
+                        )
+                except Exception:  # noqa: BLE001 - only redacted state crosses out.
+                    envelope_category = ICloudSMTPDiagnosticCategory.OTHER_REDACTED
+                finally:
+                    if transaction_attempted:
+                        try:
+                            rset_code, _rset_reply = smtp.rset()
+                        except Exception:  # noqa: BLE001 - reply details stay private.
+                            rset_ok = False
+                        else:
+                            rset_ok = rset_code == 250
+                if (
+                    rset_ok is False
+                    and envelope_category
+                    is ICloudSMTPDiagnosticCategory.ENVELOPE_OK_NO_DATA_NO_SEND
+                ):
+                    envelope_category = (
+                        ICloudSMTPDiagnosticCategory.RSET_FAILED_NO_DATA_NO_SEND
+                    )
+                stage = (
+                    ICloudSMTPDiagnosticCategory.SESSION_CLOSE_FAILED_NO_DATA_NO_SEND
+                )
+            session_close_ok = True
+        except Exception:  # noqa: BLE001 - only redacted stage leaves this boundary.
+            if envelope_category is not None:
+                session_close_ok = False
+                if (
+                    envelope_category
+                    is ICloudSMTPDiagnosticCategory.ENVELOPE_OK_NO_DATA_NO_SEND
+                ):
+                    envelope_category = stage
+            else:
+                envelope_category = stage
+        unknown_count = recipient_count - accepted_count - rejected_count
+        return ICloudSMTPEnvelopeDiagnosticResult(
+            category=envelope_category,
+            recipient_count=recipient_count,
+            accepted_recipient_count=accepted_count,
+            rejected_recipient_count=rejected_count,
+            unknown_recipient_count=unknown_count,
+            rset_ok=rset_ok,
+            session_close_ok=session_close_ok,
         )
 
 
