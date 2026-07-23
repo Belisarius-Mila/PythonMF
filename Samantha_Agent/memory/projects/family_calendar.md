@@ -86,6 +86,16 @@
 - Kalendářová regrese 185 testů a plná Cockpit brána 1167 testů prošly.
   Zbývají dva blokátory automatiky: nenačtený plánovač a nedostupný automatický
   režim. Konfigurace zůstává `dry_run`.
+- Read-only náhled budoucího načtení LaunchAgentu vrací přesné datové kroky
+  `bootstrap`, ověření přes `print`, rollback přes `bootout` a závěrečné
+  ověření odpojení. Nemá `--apply`, příkazy nespouští a před budoucím
+  načtením vyžaduje samostatné potvrzení.
+- Náhled fail-closed ověřuje režim `dry_run`, vlastnictví a práva plist
+  `0600`, `RunAtLoad=false`, proces typu `Background`, bezpečný `launchctl`
+  a fingerprint konfigurace i plist.
+- Živý read-only náhled prošel bez issues. Následný readiness audit stále
+  potvrdil `planner_not_loaded`; nic nebylo zapsáno, načteno ani odesláno.
+  Kalendářová regrese 189 testů a plná Cockpit brána 1171 testů prošly.
 
 ## Bezpečnostní hranice
 
@@ -101,6 +111,7 @@
 
 ## Nejmenší další krok
 
-Z `main` připravit pouze read-only náhled přesné operace pro budoucí načtení
-LaunchAgentu včetně ověřitelného cíle a bezpečného rollback postupu. Zatím
-`launchctl` nevolat, neměnit automatický režim a nic neodesílat.
+Po začlenění zopakovat z `main` pouze read-only náhled a ověřit shodný
+fingerprint. Teprve jako samostatnou fázi navrhnout potvrzovanou load bránu,
+která před `bootstrap` znovu ověří nezměněné vstupy a připravený rollback.
+Zatím `launchctl` nevolat, neměnit automatický režim a nic neodesílat.

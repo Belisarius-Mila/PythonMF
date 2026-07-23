@@ -443,3 +443,29 @@ Zbývají přesně tyto dva blokátory: `planner_not_loaded` a
 Další krok: z `main` připravit pouze read-only náhled přesné operace pro
 budoucí načtení LaunchAgentu a bezpečný rollback postup. Zatím nevolat
 `launchctl`, neměnit automatický režim a nic neodesílat.
+
+### 2026-07-23 22:57 CEST – Přidán read-only náhled načtení a rollbacku LaunchAgentu
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: nový náhled vrací přesné datové příkazy pro budoucí `bootstrap`,
+ověření služby přes `print`, rollback přes `bootout` a ověření odpojení.
+CLI nemá `--apply` a implementace nemá callback ani jinou cestu, která by
+`launchctl` příkazy spustila.
+
+Bezpečnostní kontrakt: náhled fail-closed ověřuje stále platný `dry_run`,
+kanonický vlastněný plist s právy `0600`, `RunAtLoad=false`, proces typu
+`Background`, bezpečný systémový `launchctl` a fingerprint svázaný s plist,
+konfigurací a uživatelskou GUI doménou. Aktuální load stav záměrně neprobuje;
+budoucí load brána jej musí znovu ověřit těsně před zápisem do runtime.
+
+Důkaz: 189 kalendářových testů a plná Cockpit Quality Gate s 1171 testy
+prošly. Živý read-only náhled neměl issues, nic nezapsal, nenačetl ani
+neodeslal. Následný readiness audit stále hlásil `planner_not_loaded`.
+
+Rozhodnutí: náhled ani jeho fingerprint nejsou souhlasem s načtením.
+Automatický režim zůstává nedostupný a konfigurace `dry_run`.
+
+Další krok: po začlenění zopakovat náhled z `main`. Teprve samostatně
+navrhnout potvrzovanou load bránu s revalidací fingerprintu, aktuálního stavu
+a rollbacku; zatím `launchctl` nevolat a nic neodesílat.
