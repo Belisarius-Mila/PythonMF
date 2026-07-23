@@ -8,53 +8,78 @@ Stav: rozpracovane
 Pripomenout pri startu: ne
 
 Co se resilo:
-Čistý builder D-2/D-1 a read-only sekce `Náhled upozornění` v Cockpitu byly
-dokončeny, otestovány, commitnuty, pushnuty a ručně ověřeny Mílou.
-Míla následně upřesnil cílový provoz: čtyři pevné soukromé adresy, jeden
-společný e-mail a po bezpečném zprovoznění automatické odesílání bez běžné
-ruční kontroly.
+Od read-only náhledu D-2/D-1 se projekt posunul přes per-recipient stav,
+privátní atomickou persistenci, idempotenci, dry-run, SMTP adaptér a přesně
+potvrzovaný jednorázový runner až k živé diagnostice iCloud SMTP. Dva dřívější
+testovací pokusy skončily jako `delivery_unknown`; pozorované doručení bylo
+nulové, ale staré výsledky zpětně nelze prohlásit za jistě neodeslané.
+No-send autentizační a envelope diagnostika později potvrdila funkční
+přihlášení i přijetí odesílatele a všech čtyř příjemců bez volání `DATA`.
+Následný hotfix oddělil potvrzení `DATA` od chyby při ukončení SMTP relace.
 
 Co je hotove:
-- Builder vrací pro přesně dva různé příjemce událost, věk, režim D-2/D-1,
-  předmět a tělo bez I/O nebo odesílání.
-- Cockpit přijímá dvě serverově validované adresy, události odvozuje ze
-  soukromého registru a náhled zobrazí bez odesílání nebo persistence.
-- Odpověď používá `no-store`, UI bezpečné `textContent` a při zavření okna
-  adresy z formuláře vymaže.
-- Implementační commit `021adf5` je na `main` a `origin/main`; plná brána
-  983 testů, vzdálená GitHub Gate, živý smoke 5/5 a ruční test prošly.
-- Cílový model čtyř pevných příjemců a automatického odesílání je potvrzený;
-  příjemci o sobě mohou vědět.
-- Kanonický handoff a TVBCP existují.
+- Read-only náhled D-2/D-1 v Cockpitu je hotový a ručně ověřený.
+- Cílový model používá jeden společný e-mail pro čtyři pevné příjemce uložené
+  pouze v soukromé konfiguraci; příjemci o sobě mohou vědět.
+- Stavový automat rozlišuje výsledek každého příjemce, podporuje recovery a
+  idempotenci a při `delivery_unknown` zůstává fail-closed.
+- Soukromá konfigurace schématu 2, atomické úložiště delivery stavů,
+  jedno-workerový koordinátor, dry-run orchestrátor, SMTP adaptér a
+  jednorázový potvrzovaný runner jsou implementované.
+- No-send diagnostika rozlišuje autentizaci, TLS a SMTP envelope. Ověřený
+  envelope preflight přijal odesílatele i všechny čtyři příjemce, provedl
+  `RSET` a nevolal `DATA` ani odeslání.
+- Commit `d38a37f` zachovává potvrzený výsledek `DATA` i při následné chybě
+  `QUIT`; bez potvrzení `DATA` zůstává výsledek `delivery_unknown`.
+- Hotfix je na `main` a `origin/main`, byl nasazen a Cockpit řízeně
+  restartován. Prošlo 158 kalendářových testů, plná brána 1134 testů,
+  vzdálená Quality Gate a smoke test 5/5.
+- První nový test po hotfixu byl ručně a přesně potvrzený. SMTP výsledek byl
+  `sent`, server přijal 4/4 příjemců, nikoho neodmítl, nezůstal žádný neznámý
+  výsledek a relace se korektně ukončila. Míla následně potvrdil skutečné
+  doručení 4/4.
+- Automatické odesílání zůstává vypnuté a při obnově neběžel žádný SMTP runner.
 
 Co neni hotove:
-- Odesílání ani persistence doručení nejsou implementované.
-- Současný builder a read-only UI stále pracují se dvěma ručně zadanými
-  adresami; cílové čtyři adresy ještě nejsou zapojené.
-- Není navržený automatický odesílací adaptér, soukromá konfigurace čtyř adres,
-  stav jednotlivých příjemců ani plánovač.
+- Dva starší výsledky `delivery_unknown` zůstávají historicky nejisté a hotfix
+  je nemůže zpětně překlasifikovat.
+- Ostrý automatický režim D-2/D-1 není zapnutý ani provozně ověřený.
+- Před případným zapnutím automatiky je potřeba samostatně ověřit provozní
+  aktivaci, plánování, persistenci výsledku a fail-closed recovery.
 
 Dalsi krok:
-Zahájit samostatnou read-only fázi návrhu automatického odesílání jednomu
-společnému e-mailu na čtyři pevné soukromé adresy; zatím nic neodesílat.
+Zahájit samostatnou read-only revizi cesty k automatickému D-2/D-1 provozu:
+ověřit plánovač, přechod ze současného neostrého režimu, persistenci
+per-recipient výsledků, idempotenci a recovery. V této revizi nic nezapínat
+ani neodesílat.
 
 Navrhovane dalsi kroky:
-- Nejdříve vymezit soukromou konfiguraci, odesílací adaptér, stav každého
-  příjemce, redigovaný audit a fail-closed pravidla.
-- D-2 odeslat automaticky jednou; D-1 použít jen jako náhradu po jistém
-  neodeslání D-2. Při nejistém výsledku D-2 automaticky neopakovat.
-- Automatiku zapnout až po samostatně otestované implementační fázi.
+- Připravit redigovaný aktivační preview a přesný seznam předpokladů bez změny
+  soukromé konfigurace.
+- Teprve podle výsledku revize samostatně rozhodnout, zda automatiku zapnout.
+- D-1 smí být náhrada jen po jistém neodeslání D-2; starý nebo nový
+  `delivery_unknown` se automaticky neopakuje.
 
 Zmenene nebo relevantni soubory:
 - `app/family_calendar.py`
-- `app/cockpit.py`
-- `tests/test_family_calendar.py`
-- `tests/test_family_calendar_cockpit.py`
-- `.github/workflows/cockpit-quality-gate.yml`
+- `app/family_calendar_delivery.py`
+- `app/family_calendar_delivery_store.py`
+- `app/family_calendar_delivery_coordinator.py`
+- `app/family_calendar_delivery_config.py`
+- `app/family_calendar_delivery_runner.py`
+- `app/family_calendar_delivery_test_email.py`
+- `app/family_calendar_icloud_smtp_client.py`
+- `app/family_calendar_smtp_adapter.py`
+- `scripts/family_calendar_delivery_test_email.py`
+- `scripts/family_calendar_delivery_smtp_diagnose.py`
+- `scripts/family_calendar_delivery_smtp_envelope_diagnose.py`
+- `tests/test_family_calendar*.py`
 
 Bezpecnost / neukladat:
-- Neukladat hesla, tokeny, API klice, skutečné adresy ani soukromy obsah do
+- Neukládat hesla, tokeny, API klíče, skutečné adresy ani soukromý obsah do
   Gitu, projektové paměti nebo testů.
+- Starý `delivery_unknown` nikdy automaticky neopakovat ani označit za jisté
+  neodeslání jen podle chybějícího pozorovaného doručení.
 
 ### Automatický checkpoint 2026-07-22 08:48 CEST
 
@@ -279,3 +304,36 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/app/family_calendar_delivery_test_email.py`, `Samantha_Agent/scripts/family_calendar_delivery_test_email.py`, `Samantha_Agent/tests/test_family_calendar_delivery_test_email.py`
 - Commit: `Doplnit potvrzovaný iCloud testovací e-mail rodinného kalendáře`
 - Další krok: Spustit pouze redigovaný preview runneru v prostředí s privátní konfigurací a teprve samostatně potvrdit jeden skutečný testovací e-mail
+
+### Dokumentační checkpoint 2026-07-23 17:07 CEST
+
+- Stav byl obnoven z nejnovějšího nouzového autosavu bez opisování soukromých
+  údajů. Dva dřívější živé testovací pokusy vrátily `delivery_unknown`;
+  pozorované doručení bylo nulové, ale tyto staré výsledky zůstávají nejisté.
+- No-send autentizační diagnostika a envelope preflight následně potvrdily
+  funkční přihlášení, přijetí odesílatele i všech čtyř příjemců, `RSET` a
+  nulové volání `DATA` nebo odeslání.
+- Diagnostický hotfix v commitu `d38a37f` oddělil potvrzení `DATA` od
+  následného `QUIT`. Potvrzené `DATA` se už při chybě ukončení relace
+  nepřeklasifikuje na `delivery_unknown`.
+- Ověření hotfixu: 158 kalendářových testů, plná brána 1134 testů, vzdálená
+  Quality Gate, nasazení, řízený restart a smoke test 5/5 prošly.
+- `d38a37f` je na `main` i `origin/main`. Automatické odesílání zůstává
+  vypnuté a při obnově neběžel žádný testovací SMTP runner.
+- Další krok: právě jeden nový, ručně a přesně potvrzený testovací e-mail přes
+  nasazený hotfix. Při jakémkoli jiném výsledku než úplně potvrzeném přijetí
+  nic automaticky neopakovat.
+
+### Dokumentační checkpoint 2026-07-23 17:25 CEST
+
+- Právě jeden nový testovací e-mail byl po redigovaném preview ručně a přesně
+  potvrzený. App-specific heslo bylo zadáno skrytě mimo chat.
+- SMTP výsledek: `status=sent`, `recipient_count=4`, `accepted_count=4`,
+  `refused_count=0`, `unknown_count=0`, `transport_called=true` a
+  `session_close_ok=true`.
+- Míla následně potvrdil skutečné doručení `RECEIVED_COUNT=4`.
+- Testovací brána je tím úspěšně uzavřená. Automatické D-2/D-1 odesílání
+  zůstává vypnuté.
+- Další krok: samostatná read-only revize cesty k automatickému provozu,
+  zejména plánovače, přechodu režimu, persistence, idempotence a recovery.
+  Během revize nic nezapínat ani neodesílat.

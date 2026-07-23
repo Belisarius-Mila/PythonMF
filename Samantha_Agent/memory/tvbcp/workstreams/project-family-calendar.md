@@ -292,3 +292,63 @@ Důkaz: plná Cockpit brána: 1105 testů, 218.5 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Spustit pouze redigovaný preview runneru v prostředí s privátní konfigurací a teprve samostatně potvrdit jeden skutečný testovací e-mail
+
+### 2026-07-23 17:07 CEST – Obnoven aktuální stav SMTP diagnostiky a nasazeného DATA/QUIT hotfixu
+
+Pracovní proud: `project-family-calendar`.
+
+Po ranním checkpointu proběhly dva ručně spuštěné živé testovací pokusy.
+Oba v tehdejší implementaci skončily jako `delivery_unknown`. Pozorované
+doručení bylo nulové, ale absence pozorovaného e-mailu není důkazem jistého
+neodeslání; staré pokusy se proto nesmějí automaticky opakovat ani zpětně
+překlasifikovat.
+
+Následná no-send diagnostika oddělila autentizaci, TLS a SMTP envelope.
+Po obnovení platného app-specific hesla prošla autentizace a envelope
+preflight potvrdil přijetí odesílatele i všech čtyř příjemců. Transakce byla
+ukončena přes `RSET`; `DATA` ani odeslání nebyly volány.
+
+Read-only audit odhalil, že původní klient mohl ztratit už potvrzený výsledek
+`DATA`, pokud následné ukončení relace přes `QUIT` vyhodilo výjimku. Commit
+`d38a37f` tento problém opravil: potvrzené `DATA` zůstane `sent` nebo
+`partial`, stav ukončení relace se hlásí samostatně a `delivery_unknown`
+zůstává pouze tam, kde potvrzení `DATA` skutečně chybí.
+
+Důkaz: 158 kalendářových testů a plná Cockpit Quality Gate s 1134 testy
+prošly. Commit `d38a37f` je na `main` a `origin/main`, nasazení má stav
+`deployed`, Cockpit byl řízeně restartován, vzdálená Quality Gate i smoke test
+5/5 prošly. Během implementace, testů a nasazení se nespustila žádná SMTP
+diagnostika ani e-mail.
+
+Rozhodnutí: automatické D-2/D-1 odesílání zůstává vypnuté. Dva staré
+`delivery_unknown` výsledky zůstávají historicky nejisté a hotfix je nemůže
+zpětně vyřešit.
+
+Další krok: spustit právě jeden nový, ručně a přesně potvrzený testovací
+e-mail čtyřem pevně nakonfigurovaným příjemcům přes nasazený hotfix.
+App-specific heslo zadat pouze skrytě mimo chat. Při `partial`, `refused`,
+`delivery_unknown` nebo chybě nic automaticky neopakovat.
+
+### 2026-07-23 17:25 CEST – Nový test po hotfixu byl přijat i doručen 4/4
+
+Pracovní proud: `project-family-calendar`.
+
+Po redigovaném preview byl spuštěn právě jeden nový ručně a přesně potvrzený
+testovací e-mail. App-specific heslo bylo zadáno skrytě mimo chat.
+
+Redigovaný SMTP důkaz: `status=sent`, `recipient_count=4`,
+`accepted_count=4`, `refused_count=0`, `unknown_count=0`,
+`transport_called=true` a `session_close_ok=true`. Míla následně ručně
+potvrdil skutečné doručení `RECEIVED_COUNT=4`.
+
+Milník: jednorázová testovací brána je úspěšně uzavřená. Nasazený hotfix
+správně rozlišil potvrzené přijetí a korektní ukončení relace. V tomto
+checkpointu nejsou adresy, heslo ani obsah zprávy.
+
+Rozhodnutí: úspěšný test sám nezapíná automatické D-2/D-1 odesílání.
+Automatika zůstává vypnutá a vyžaduje samostatnou provozní revizi a nové
+Mílovo rozhodnutí.
+
+Další krok: read-only ověřit plánovač, přechod ze současného neostrého režimu,
+persistenci per-recipient výsledků, idempotenci a recovery. Během této revize
+nic nezapínat ani neodesílat.
