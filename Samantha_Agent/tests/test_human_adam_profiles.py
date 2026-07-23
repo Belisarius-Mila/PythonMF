@@ -15,6 +15,11 @@ from app.communication.human_adam_profiles import (
     human_adam_profile_switch_action,
     human_adam_project_continuity_action,
 )
+from app.communication.human_adam_operations import (
+    FAMILY_CALENDAR_TEST_EMAIL_PREVIEW,
+    OPERATION_MARKER_END,
+    OPERATION_MARKER_START,
+)
 from app.communication.human_adam_service import (
     THREAD_ROTATION_CONFIRMATION_TEXT,
     HumanAdamService,
@@ -1161,6 +1166,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(capabilities["write_authorization"], "one_turn")
         self.assertFalse(capabilities["writable_pilot"])
         self.assertIn("writable=false", read_only_input)
+        self.assertIn("[AUTOMATIC_OPERATION_REQUEST]", read_only_input)
         self.assertIn("lease_state=authorized_once", writable_input)
         self.assertIn("lease_owner_id=project-family-calendar", writable_input)
         self.assertIn("writable=true", writable_input)
@@ -1181,6 +1187,91 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         )
         self.assertFalse(handoff_created)
         self.assertFalse(tvbcp_created)
+
+    def test_family_calendar_read_only_turn_executes_server_owned_operation(self) -> None:
+        receipt = (
+            "Spustím bezpečný preview bez odeslání.\n\n"
+            f"{OPERATION_MARKER_START}\n"
+            f'{{"operation_id":"{FAMILY_CALENDAR_TEST_EMAIL_PREVIEW}"}}\n'
+            f"{OPERATION_MARKER_END}"
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, _human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.activate_grouped_workstream(
+                workstream_id="project-family-calendar",
+                confirmed=True,
+            )
+            lazy.hubs["project-family-calendar"].next_answer = receipt
+            with patch(
+                "app.communication.human_adam_profiles.execute_human_adam_operation",
+                return_value={
+                    "status": "preview",
+                    "mode": "dry_run",
+                    "recipient_count": 4,
+                    "confirmation_required": True,
+                    "transport_called": False,
+                },
+            ) as operation:
+                result = manager.send(
+                    text="Spusť preview testovacího e-mailu",
+                    client_message_id="calendar-operation-001",
+                )
+
+        operation.assert_called_once()
+        self.assertEqual(
+            operation.call_args.kwargs["workstream_id"],
+            "project-family-calendar",
+        )
+        self.assertFalse(human_workspace.dirty)
+        self.assertEqual(result["automatic_operation"]["state"], "completed")
+        self.assertEqual(result["automatic_completion"]["state"], "not_needed")
+        self.assertNotIn(OPERATION_MARKER_START, result["entry"]["answer"])
+        self.assertIn('"status":"preview"', result["entry"]["answer"])
+        self.assertIn(
+            "[AUTOMATIC_OPERATION_REQUEST]",
+            str(lazy.hubs["project-family-calendar"].last_send["model_input_text"]),
+        )
+
+    def test_family_calendar_operation_is_blocked_when_turn_leaves_changes(self) -> None:
+        receipt = (
+            "Požaduji bezpečný preview.\n\n"
+            f"{OPERATION_MARKER_START}\n"
+            f'{{"operation_id":"{FAMILY_CALENDAR_TEST_EMAIL_PREVIEW}"}}\n'
+            f"{OPERATION_MARKER_END}"
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, _human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
+            manager.workstream_threads = lazy  # type: ignore[assignment]
+            manager.activate_grouped_workstream(
+                workstream_id="project-family-calendar",
+                confirmed=True,
+            )
+            lazy.hubs["project-family-calendar"].on_send = lambda: setattr(
+                human_workspace,
+                "dirty",
+                True,
+            )
+            lazy.hubs["project-family-calendar"].next_answer = receipt
+            with patch(
+                "app.communication.human_adam_profiles.execute_human_adam_operation"
+            ) as operation:
+                result = manager.send(
+                    text="Tento vadný tah nesmí vykonat operaci",
+                    client_message_id="calendar-operation-dirty-001",
+                )
+
+        operation.assert_not_called()
+        self.assertTrue(human_workspace.dirty)
+        self.assertEqual(result["automatic_operation"]["state"], "blocked_dirty")
+        self.assertNotIn(OPERATION_MARKER_START, result["entry"]["answer"])
+        self.assertIn("workspace obsahuje pracovní změny", result["entry"]["answer"])
 
     def test_lazy_tvbcp_previews_canonical_template_without_creating_file(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

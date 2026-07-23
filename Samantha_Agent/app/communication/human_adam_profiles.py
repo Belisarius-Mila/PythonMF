@@ -43,6 +43,13 @@ from app.communication.human_adam_turn_completion import (
     automatic_completion_instruction,
     parse_turn_completion,
 )
+from app.communication.human_adam_operations import (
+    HumanAdamOperationError,
+    ParsedHumanAdamOperation,
+    automatic_operation_instruction,
+    execute_human_adam_operation,
+    parse_human_adam_operation,
+)
 from app.communication.local_runtime import LocalAppServerProcessController
 from app.communication.session_hub import (
     CanonicalSessionHub,
@@ -854,6 +861,13 @@ class HumanAdamProfileManager:
                 development_control_block = (
                     development_control_block + "\n\n" + completion_instruction
                 )
+            operation_instruction = automatic_operation_instruction(
+                workstream_id=self.active_workstream_id,
+            )
+            if operation_instruction:
+                development_control_block = (
+                    development_control_block + "\n\n" + operation_instruction
+                )
             result = service.send(
                 **kwargs,
                 development_control_block=development_control_block,
@@ -1117,6 +1131,25 @@ class HumanAdamProfileManager:
         if result.get("duplicate_prevented") is True:
             entry = result.get("entry")
             if isinstance(entry, dict):
+                operation = parse_human_adam_operation(entry.get("answer"))
+                if operation.state != "absent":
+                    answer = self._completion_answer(
+                        operation.visible_answer,
+                        "Opakovaná zpráva byla rozpoznána; provozní operace se znovu nespustila.",
+                    )
+                    self._store_completed_answer(service=service, entry=entry, answer=answer)
+                    return {
+                        **result,
+                        "entry": entry,
+                        "automatic_operation": {
+                            "state": "duplicate_prevented",
+                            "attempted": False,
+                        },
+                        "automatic_completion": {
+                            "state": "duplicate_prevented",
+                            "attempted": False,
+                        },
+                    }
                 parsed = parse_turn_completion(entry.get("answer"))
                 if parsed.state != "absent":
                     answer = self._completion_answer(
@@ -1132,14 +1165,108 @@ class HumanAdamProfileManager:
         if not isinstance(entry, dict):
             return {
                 **result,
+                "automatic_operation": {"state": "unavailable", "attempted": False},
                 "automatic_completion": {"state": "unavailable", "attempted": False},
             }
-        parsed: ParsedTurnCompletion = parse_turn_completion(entry.get("answer"))
+        operation: ParsedHumanAdamOperation = parse_human_adam_operation(
+            entry.get("answer")
+        )
         workspace = service.workspace.status()
         dirty = bool(workspace.get("dirty"))
+        if operation.state != "absent":
+            if dirty:
+                note = (
+                    "Provozní operace se nespustila: workspace obsahuje pracovní změny. "
+                    "Změny zůstaly viditelné a bez checkpointu."
+                )
+                answer = self._completion_answer(operation.visible_answer, note)
+                answer_persisted = self._store_completed_answer(
+                    service=service,
+                    entry=entry,
+                    answer=answer,
+                )
+                return {
+                    **result,
+                    "entry": entry,
+                    "automatic_operation": {
+                        "state": "blocked_dirty",
+                        "attempted": False,
+                        "answer_persisted": answer_persisted,
+                    },
+                    "automatic_completion": {
+                        "state": "metadata_missing",
+                        "attempted": False,
+                    },
+                }
+            if operation.state != "valid" or operation.request is None:
+                note = (
+                    "Provozní operace se nespustila: "
+                    + (operation.error or "chybí platná provozní účtenka.")
+                )
+                answer = self._completion_answer(operation.visible_answer, note)
+                answer_persisted = self._store_completed_answer(
+                    service=service,
+                    entry=entry,
+                    answer=answer,
+                )
+                return {
+                    **result,
+                    "entry": entry,
+                    "automatic_operation": {
+                        "state": "invalid",
+                        "attempted": False,
+                        "answer_persisted": answer_persisted,
+                    },
+                    "automatic_completion": {
+                        "state": "not_needed",
+                        "attempted": False,
+                    },
+                }
+            try:
+                operation_document = execute_human_adam_operation(
+                    operation.request,
+                    workstream_id=self.active_workstream_id,
+                )
+                operation_state = "completed"
+            except (HumanAdamOperationError, OSError, TypeError, ValueError):
+                operation_document = {"status": "failed", "redacted": True}
+                operation_state = "failed"
+            safe_json = json.dumps(
+                operation_document,
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+            note = (
+                "Provozní operace hlavního backendu:\n\n"
+                f"```json\n{safe_json}\n```"
+            )
+            answer = self._completion_answer(operation.visible_answer, note)
+            answer_persisted = self._store_completed_answer(
+                service=service,
+                entry=entry,
+                answer=answer,
+            )
+            return {
+                **result,
+                "entry": entry,
+                "automatic_operation": {
+                    "state": operation_state,
+                    "attempted": True,
+                    "operation_id": operation.request.operation_id,
+                    "result": operation_document,
+                    "answer_persisted": answer_persisted,
+                },
+                "automatic_completion": {
+                    "state": "not_needed",
+                    "attempted": False,
+                },
+            }
+        parsed: ParsedTurnCompletion = parse_turn_completion(entry.get("answer"))
         if not dirty and parsed.state == "absent":
             return {
                 **result,
+                "automatic_operation": {"state": "not_needed", "attempted": False},
                 "automatic_completion": {"state": "not_needed", "attempted": False},
             }
 
