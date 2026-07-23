@@ -28,9 +28,14 @@ class SMTPClientResult:
     """Known SMTP refusal result returned by an injected client."""
 
     refused_addresses: tuple[str, ...] = ()
+    session_close_ok: bool = True
 
     def __repr__(self) -> str:
-        return f"SMTPClientResult(refused_count={len(self.refused_addresses)}, redacted=True)"
+        return (
+            "SMTPClientResult("
+            f"refused_count={len(self.refused_addresses)}, "
+            f"session_close_ok={self.session_close_ok!r}, redacted=True)"
+        )
 
 
 class SMTPClient(Protocol):
@@ -207,6 +212,8 @@ def _map_client_result(
 ) -> DeliveryTransportOutcome:
     if not isinstance(result, SMTPClientResult):
         raise ValueError("SMTP client returned an invalid result.")
+    if not isinstance(result.session_close_ok, bool):
+        raise ValueError("SMTP client returned an invalid session close result.")
     values = result.refused_addresses
     if isinstance(values, (str, bytes)):
         raise ValueError("SMTP client returned invalid refused recipients.")

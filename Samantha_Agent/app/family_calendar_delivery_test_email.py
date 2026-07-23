@@ -66,6 +66,7 @@ class FamilyCalendarTestEmailResult:
     refused_count: int
     unknown_count: int
     transport_called: bool
+    session_close_ok: bool | None
 
     def __repr__(self) -> str:
         return (
@@ -75,7 +76,8 @@ class FamilyCalendarTestEmailResult:
             f"accepted_count={self.accepted_count}, "
             f"refused_count={self.refused_count}, "
             f"unknown_count={self.unknown_count}, "
-            f"transport_called={self.transport_called}, redacted=True)"
+            f"transport_called={self.transport_called}, "
+            f"session_close_ok={self.session_close_ok!r}, redacted=True)"
         )
 
     def safe_document(self) -> dict[str, object]:
@@ -86,6 +88,7 @@ class FamilyCalendarTestEmailResult:
             "refused_count": self.refused_count,
             "unknown_count": self.unknown_count,
             "transport_called": self.transport_called,
+            "session_close_ok": self.session_close_ok,
         }
 
 
@@ -199,6 +202,7 @@ def send_family_calendar_test_email(
             refused_count=0,
             unknown_count=recipient_count,
             transport_called=True,
+            session_close_ok=None,
         )
 
     refused_count = len(result.refused_addresses)
@@ -216,6 +220,7 @@ def send_family_calendar_test_email(
         refused_count=refused_count,
         unknown_count=0,
         transport_called=True,
+        session_close_ok=result.session_close_ok,
     )
 
 

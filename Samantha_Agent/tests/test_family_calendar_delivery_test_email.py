@@ -51,6 +51,7 @@ class FakeSMTPSession:
 
     def __exit__(self, _exc_type, _exc, _traceback):
         self.calls.append("exit")
+        self._fail("exit")
         return None
 
     def ehlo(self):
@@ -154,6 +155,7 @@ class FamilyCalendarDeliveryTestEmailTests(unittest.TestCase):
                     "status": "sent",
                     "transport_called": True,
                     "unknown_count": 0,
+                    "session_close_ok": True,
                 },
             )
             self.assertEqual(
@@ -345,7 +347,36 @@ class FamilyCalendarDeliveryTestEmailTests(unittest.TestCase):
                         counts,
                     )
                     self.assertTrue(result.transport_called)
+                    self.assertEqual(
+                        result.session_close_ok,
+                        None if status == "delivery_unknown" else True,
+                    )
                     _assert_redacted(self, f"{result!r} {result.safe_document()!r}")
+
+    def test_confirmed_data_with_quit_failure_remains_sent(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            config_path = _config_path(Path(temp_dir))
+            _write_config(config_path)
+            plan = plan_family_calendar_test_email(config_path=config_path)
+            session = FakeSMTPSession(failure_at="exit")
+
+            result = send_family_calendar_test_email(
+                plan,
+                confirmation=FAMILY_CALENDAR_TEST_EMAIL_CONFIRMATION,
+                app_password=APP_PASSWORD,
+                smtp_factory=FakeSMTPFactory(session),
+                tls_context_factory=_tls_context,
+            )
+
+            self.assertEqual(result.status, "sent")
+            self.assertEqual(result.accepted_count, 4)
+            self.assertEqual(result.refused_count, 0)
+            self.assertEqual(result.unknown_count, 0)
+            self.assertTrue(result.transport_called)
+            self.assertFalse(result.session_close_ok)
+            self.assertEqual(session.calls.count("send_message"), 1)
+            self.assertEqual(session.calls.count("exit"), 1)
+            _assert_redacted(self, f"{result!r} {result.safe_document()!r}")
 
     def test_changed_config_or_invalid_secret_fails_before_smtp_factory(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

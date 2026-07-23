@@ -56,6 +56,7 @@ class FakeSMTPSession:
     def __exit__(self, _exc_type, _exc, _traceback):
         self.calls.append("exit")
         self.exited = True
+        self._fail("exit")
         return None
 
     def ehlo(self):
@@ -129,6 +130,7 @@ class FamilyCalendarICloudSMTPClientTests(unittest.TestCase):
         )
 
         self.assertEqual(result.refused_addresses, ())
+        self.assertTrue(result.session_close_ok)
         self.assertEqual(
             factory.calls,
             [(ICLOUD_SMTP_HOST, ICLOUD_SMTP_PORT, ICLOUD_SMTP_TIMEOUT_SECONDS)],
@@ -149,6 +151,32 @@ class FamilyCalendarICloudSMTPClientTests(unittest.TestCase):
         self.assertEqual(session.from_addr, SENDER_ADDRESS)
         self.assertEqual(session.to_addrs, ADDRESSES)
         self.assertTrue(session.exited)
+
+    def test_confirmed_data_survives_session_close_failure(self) -> None:
+        session = FakeSMTPSession(failure_at="exit")
+        client = _client(FakeSMTPFactory(session))
+        record, envelope = _attempt()
+
+        result = client.send_message(
+            _message(),
+            from_addr=SENDER_ADDRESS,
+            to_addrs=ADDRESSES,
+        )
+        outcome = send_family_calendar_envelope_via_smtp(
+            record,
+            envelope=envelope,
+            sender_address=SENDER_ADDRESS,
+            client=client,
+        )
+
+        self.assertEqual(result.refused_addresses, ())
+        self.assertFalse(result.session_close_ok)
+        self.assertEqual(outcome.accepted_recipient_ids, RECIPIENT_IDS)
+        self.assertEqual(outcome.not_sent_recipient_ids, ())
+        self.assertEqual(outcome.unknown_recipient_ids, ())
+        self.assertEqual(session.calls.count("send_message"), 2)
+        self.assertEqual(session.calls.count("exit"), 2)
+        _assert_redacted(self, f"{result!r} {outcome!r}")
 
     def test_all_partial_and_no_refusals_are_mapped_without_smtp_details(self) -> None:
         cases = {

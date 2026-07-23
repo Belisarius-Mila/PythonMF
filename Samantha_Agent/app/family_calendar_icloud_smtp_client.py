@@ -185,7 +185,7 @@ class ICloudSMTPClient:
         from_addr: str,
         to_addrs: Sequence[str],
     ) -> SMTPClientResult:
-        """Send one shared message and return only validated refused addresses."""
+        """Send once and preserve a confirmed DATA result across QUIT failure."""
 
         if not isinstance(message, EmailMessage):
             raise ICloudSMTPClientError("iCloud SMTP message is invalid.")
@@ -193,6 +193,8 @@ class ICloudSMTPClient:
         if clean_from.casefold() != self.username.casefold():
             raise ICloudSMTPClientError("iCloud SMTP sender does not match its account.")
         recipients = _validate_recipients(to_addrs)
+        confirmed_result: SMTPClientResult | None = None
+        client_error: ICloudSMTPClientError | None = None
         operation_failed = False
         try:
             tls_context = self.tls_context_factory()
@@ -210,17 +212,33 @@ class ICloudSMTPClient:
                     from_addr=clean_from,
                     to_addrs=recipients,
                 )
-            refused_addresses = _validated_refused_addresses(
-                refused,
-                recipients=recipients,
-            )
-        except ICloudSMTPClientError:
-            raise
-        except Exception:
-            operation_failed = True
+                refused_addresses = _validated_refused_addresses(
+                    refused,
+                    recipients=recipients,
+                )
+                confirmed_result = SMTPClientResult(
+                    refused_addresses=refused_addresses,
+                    session_close_ok=True,
+                )
+        except Exception as exc:  # noqa: BLE001 - SMTP details stay redacted.
+            if confirmed_result is not None:
+                return SMTPClientResult(
+                    refused_addresses=confirmed_result.refused_addresses,
+                    session_close_ok=False,
+                )
+            if isinstance(exc, ICloudSMTPClientError):
+                client_error = exc
+            else:
+                operation_failed = True
+        if client_error is not None:
+            raise client_error
         if operation_failed:
             raise ICloudSMTPClientError("iCloud SMTP operation failed safely.")
-        return SMTPClientResult(refused_addresses=refused_addresses)
+        if confirmed_result is None:
+            raise ICloudSMTPClientError(
+                "iCloud SMTP operation failed safely."
+            )
+        return confirmed_result
 
     def diagnose_authentication(self) -> ICloudSMTPDiagnosticResult:
         """Verify connection, STARTTLS and login without constructing or sending mail."""
