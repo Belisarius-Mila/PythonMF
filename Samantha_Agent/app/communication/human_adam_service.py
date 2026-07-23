@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import json
 import re
 from datetime import datetime, timezone
@@ -308,6 +309,7 @@ class HumanAdamService:
         profile_getter: Callable[..., dict[str, Any]] = read_human_adam_runtime_profile,
         hub: CanonicalSessionHub | None = None,
         developer_instructions: str = HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
+        sandbox_policy: dict[str, Any] | None = None,
         tvbcp_relative_path: Path = CANONICAL_TVBCP_RELATIVE_PATH,
         tvbcp_title: str = "Architektura komunikace Samantha",
     ):
@@ -316,6 +318,9 @@ class HumanAdamService:
         self.codex_binary = str(codex_binary)
         self.profile_getter = profile_getter
         self.developer_instructions = str(developer_instructions).strip()
+        self.sandbox_policy = copy.deepcopy(
+            HUMAN_ADAM_SANDBOX_POLICY if sandbox_policy is None else sandbox_policy
+        )
         self.tvbcp_relative_path = Path(tvbcp_relative_path)
         self.tvbcp_title = str(tvbcp_title).strip() or "Projektový TVBCP"
         self._profile: dict[str, Any] = {}
@@ -349,7 +354,7 @@ class HumanAdamService:
             client_factory=self._new_client,
             developer_instructions=str(developer_instructions).strip(),
             sandbox=HUMAN_ADAM_SANDBOX_MODE,
-            sandbox_policy=HUMAN_ADAM_SANDBOX_POLICY,
+            sandbox_policy=self.sandbox_policy,
             approval_policy=HUMAN_ADAM_APPROVAL_POLICY,
             reasoning_effort=HUMAN_ADAM_REASONING_EFFORT,
         )
@@ -424,11 +429,16 @@ class HumanAdamService:
         workspace = self._workspace_status()
         self.runtime.start(recover_unreachable_owned=recover_unreachable_runtime)
         if not self._profile:
-            self._profile = self.profile_getter(
-                cwd=self.workspace.project_root,
-                codex_binary=self.codex_binary,
-                client_factory=self._new_client,
-            )
+            self._profile = {
+                **self.profile_getter(
+                    cwd=self.workspace.project_root,
+                    codex_binary=self.codex_binary,
+                    client_factory=self._new_client,
+                ),
+                "sandbox_mode": HUMAN_ADAM_SANDBOX_MODE,
+                "sandbox_policy": copy.deepcopy(self.sandbox_policy),
+                "network_access": bool(self.sandbox_policy.get("networkAccess")),
+            }
             self.hub.model = str(self._profile.get("model") or "") or None
         session = self.hub.connect()
         return {

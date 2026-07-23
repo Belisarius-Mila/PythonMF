@@ -65,7 +65,7 @@ class CanonicalSessionHub:
         self.client_factory = client_factory
         self.developer_instructions = str(developer_instructions).strip()
         self.sandbox = str(sandbox).strip()
-        self.sandbox_policy = dict(sandbox_policy)
+        self.sandbox_policy = copy.deepcopy(sandbox_policy)
         self.approval_policy = str(approval_policy).strip()
         self.reasoning_effort = str(reasoning_effort).strip()
         self.model = str(model).strip() if model else None

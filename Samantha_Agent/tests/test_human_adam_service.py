@@ -191,7 +191,12 @@ def fake_profile(**_kwargs: object) -> dict[str, object]:
 
 
 class HumanAdamServiceTests(unittest.TestCase):
-    def make_service(self, root: Path) -> tuple[HumanAdamService, FakeRuntime, FakeWorkspace, FakeHub]:
+    def make_service(
+        self,
+        root: Path,
+        *,
+        sandbox_policy: dict[str, object] | None = None,
+    ) -> tuple[HumanAdamService, FakeRuntime, FakeWorkspace, FakeHub]:
         tvbcp_path = root / CANONICAL_TVBCP_RELATIVE_PATH
         tvbcp_path.parent.mkdir(parents=True, exist_ok=True)
         tvbcp_path.write_text("Kanonická smlouva\nBez citlivých textů.\n", encoding="utf-8")
@@ -205,6 +210,7 @@ class HumanAdamServiceTests(unittest.TestCase):
             context_anchor_path=root / "context_anchor.json",
             profile_getter=fake_profile,
             hub=hub,  # type: ignore[arg-type]
+            sandbox_policy=sandbox_policy,
         )
         return service, runtime, workspace, hub
 
@@ -263,6 +269,28 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertEqual(legacy.workspace, workspace.project_root.resolve())
         self.assertEqual(lazy.workspace, workspace.workspace_root.resolve())
 
+    def test_detached_hub_uses_private_copy_of_service_sandbox_policy(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            live_archive = root / "private-archive"
+            requested_policy: dict[str, object] = {
+                "type": "workspaceWrite",
+                "networkAccess": False,
+                "writableRoots": [str(live_archive)],
+            }
+            service, _runtime, _workspace, _hub = self.make_service(
+                root,
+                sandbox_policy=requested_policy,
+            )
+            detached = service.detached_session_hub(
+                state_path=root / "detached.json",
+                developer_instructions="Knihovna",
+            )
+            requested_policy["writableRoots"] = []
+
+        self.assertEqual(detached.sandbox_policy["writableRoots"], [str(live_archive)])
+        self.assertFalse(detached.sandbox_policy["networkAccess"])
+
     def test_status_has_no_process_start_side_effect(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             service, runtime, _workspace, _hub = self.make_service(Path(temp_dir))
@@ -282,6 +310,26 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertTrue(hub.connected)
         self.assertEqual(hub.model, "test-codex")
         self.assertEqual(result["profile"]["reasoning_effort"], "high")
+
+    def test_connect_reports_the_effective_custom_sandbox_policy(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            live_archive = root / "private-archive"
+            service, _runtime, _workspace, _hub = self.make_service(
+                root,
+                sandbox_policy={
+                    "type": "workspaceWrite",
+                    "networkAccess": False,
+                    "writableRoots": [str(live_archive)],
+                },
+            )
+            result = service.connect()
+
+        self.assertEqual(
+            result["profile"]["sandbox_policy"]["writableRoots"],
+            [str(live_archive)],
+        )
+        self.assertFalse(result["profile"]["network_access"])
 
     def test_send_requires_explicit_connection(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

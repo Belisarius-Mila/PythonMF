@@ -10,6 +10,10 @@ from unittest.mock import patch
 
 from app.communication.human_adam_profiles import (
     HumanAdamProfileManager,
+    KNIHOVNA_DEVELOPER_INSTRUCTIONS,
+    KNIHOVNA_LIVE_ARCHIVE_ROOT,
+    KNIHOVNA_PRIVATE_CONFIRMATION_CATEGORIES,
+    KNIHOVNA_SANDBOX_POLICY,
     human_adam_development_semaphore_action,
     human_adam_development_semaphore_status_action,
     human_adam_profile_switch_action,
@@ -320,6 +324,8 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             work_profile_id="knihovna",
             hub=library_hub,  # type: ignore[arg-type]
             profile_getter=fake_profile,
+            developer_instructions=KNIHOVNA_DEVELOPER_INSTRUCTIONS,
+            sandbox_policy=KNIHOVNA_SANDBOX_POLICY,
             tvbcp_relative_path=Path("memory/tvbcp/knihovna_cockpit.txt"),
             tvbcp_title="Knihovna v Cockpitu",
         )
@@ -1987,6 +1993,67 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertNotIn("[AUTOMATIC_STEP_COMPLETION]", read_only_input)
         self.assertIn("[AUTOMATIC_STEP_COMPLETION]", writable_input)
         self.assertNotIn("[AUTOMATIC_STEP_COMPLETION]", expired_input)
+
+    def test_knihovna_plain_turn_allows_only_direct_single_card_edit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _human_workspace, _library_workspace, _human_hub, library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.switch(profile_id="knihovna", confirmed=True)
+            result = manager.send(
+                text="Uprav název této jedné karty podle mého pokynu.",
+                client_message_id="knihovna-single-edit-001",
+            )
+            model_input = str(library_hub.last_send["model_input_text"])
+            capabilities = manager.status()["workstream_capabilities"]
+
+        self.assertIn("writable=false", model_input)
+        self.assertIn("workspace_writable=false", model_input)
+        self.assertIn(
+            "private_archive_access=read_diagnose_and_explicit_single_edit",
+            model_input,
+        )
+        self.assertIn(
+            f"private_archive_root={KNIHOVNA_LIVE_ARCHIVE_ROOT}",
+            model_input,
+        )
+        self.assertIn(
+            "private_archive_confirmation_required="
+            + ",".join(KNIHOVNA_PRIVATE_CONFIRMATION_CATEGORIES),
+            model_input,
+        )
+        self.assertNotIn("[AUTOMATIC_STEP_COMPLETION]", model_input)
+        self.assertEqual(result["automatic_completion"]["state"], "not_needed")
+        self.assertTrue(capabilities["private_archive_direct"])
+        self.assertTrue(capabilities["private_archive_read"])
+        self.assertTrue(capabilities["private_archive_single_edit"])
+        self.assertEqual(
+            capabilities["private_archive_confirmation_required"],
+            list(KNIHOVNA_PRIVATE_CONFIRMATION_CATEGORIES),
+        )
+
+    def test_private_archive_direct_access_is_not_advertised_outside_knihovna(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_rest = self.make_manager(Path(temp_dir))
+            capabilities = manager.status()["workstream_capabilities"]
+
+        self.assertFalse(capabilities["private_archive_direct"])
+        self.assertFalse(capabilities["private_archive_read"])
+        self.assertFalse(capabilities["private_archive_single_edit"])
+        self.assertEqual(capabilities["private_archive_confirmation_required"], [])
+
+    def test_knihovna_policy_keeps_network_closed_and_one_writable_root(self) -> None:
+        self.assertFalse(KNIHOVNA_SANDBOX_POLICY["networkAccess"])
+        self.assertEqual(
+            KNIHOVNA_SANDBOX_POLICY["writableRoots"],
+            [str(KNIHOVNA_LIVE_ARCHIVE_ROOT)],
+        )
+        self.assertIn("pres API app.article_archive", KNIHOVNA_DEVELOPER_INSTRUCTIONS)
+        self.assertIn("Mazani nebo odebirani", KNIHOVNA_DEVELOPER_INSTRUCTIONS)
+        self.assertIn("hromadna zmena", KNIHOVNA_DEVELOPER_INSTRUCTIONS)
+        self.assertIn("odeslani ven", KNIHOVNA_DEVELOPER_INSTRUCTIONS)
+        self.assertIn("systemovy zasah", KNIHOVNA_DEVELOPER_INSTRUCTIONS)
+        self.assertIn("Git, checkpoint, commit, push i nasazeni", KNIHOVNA_DEVELOPER_INSTRUCTIONS)
 
     def test_one_turn_write_preflight_rejects_dirty_active_workspace_before_send(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

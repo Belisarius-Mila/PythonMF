@@ -736,6 +736,20 @@ class HumanAdamUiTests(unittest.TestCase):
             HUMAN_ADAM_HTML,
         )
 
+    def test_work_help_explains_knihovna_direct_card_edits(self) -> None:
+        self.assertIn(
+            "Před změnou kódu nebo projektových souborů",
+            HUMAN_ADAM_HTML,
+        )
+        self.assertIn(
+            "čtení, diagnostiku a jednu jasně zadanou běžnou úpravu soukromé karty",
+            HUMAN_ADAM_HTML,
+        )
+        self.assertIn(
+            "mazání, hromadné změny, odesílání ven a systémové zásahy",
+            HUMAN_ADAM_HTML,
+        )
+
     def test_ui_renders_persistent_safe_simple_main_deployment(self) -> None:
         self.assertIn("payload.last_simple_main_deployment", HUMAN_ADAM_HTML)
         self.assertIn("verifiedDeploymentRecord(", HUMAN_ADAM_HTML)

@@ -294,7 +294,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <h4>Běžný vývoj</h4>
         <ol>
           <li>Vyber správný pracovní proud a klikni na <strong>Připojit</strong>.</li>
-          <li>Před zapisovacím úkolem klikni na <strong>Zahájit vývoj</strong> a potvrď jednorázové oprávnění. Platí pouze pro následující odeslaný pokyn; bez něj Adam zůstává read-only.</li>
+          <li>Před změnou kódu nebo projektových souborů klikni na <strong>Zahájit vývoj</strong> a potvrď jednorázové oprávnění. Platí pouze pro následující odeslaný pokyn; bez něj Adam zůstává pro workspace a Git read-only.</li>
+          <li><strong>Knihovna:</strong> čtení, diagnostiku a jednu jasně zadanou běžnou úpravu soukromé karty pošli přímo bez tlačítka Zahájit vývoj. Samostatné potvrzení zůstává pro mazání, hromadné změny, odesílání ven a systémové zásahy.</li>
           <li>Vývojový úkol napiš přímo Adamovi do textového pole. Nový projekt, tool nebo layer se zakládá pouze v terminálovém dialogu s Adamem.</li>
           <li>Po úspěšné změně Adam automaticky spustí testy, aktualizuje handoff a TVBCP, vytvoří jeden commit přímo v <code>main</code>, pushne jej a synchronizuje čisté profily.</li>
           <li>Okno <strong>Práce</strong> otevři pro kontrolu čistého stavu, diagnostiku rozpracovaných změn nebo podporované nasazení.</li>

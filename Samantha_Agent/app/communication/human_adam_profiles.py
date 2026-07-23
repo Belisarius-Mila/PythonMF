@@ -22,6 +22,7 @@ from app.communication.human_adam_service import (
     HumanAdamService,
 )
 from app.communication.human_adam_workspace import (
+    HUMAN_ADAM_SANDBOX_POLICY,
     HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS,
     HumanAdamWorkspaceManager,
 )
@@ -85,6 +86,18 @@ DEFAULT_HUMAN_CONTEXT_ANCHOR_PATH = PRIVATE_COMMUNICATION_ROOT / "human_adam_con
 KNIHOVNA_PROFILE_ROOT = PRIVATE_PROFILE_ROOT / "knihovna"
 KNIHOVNA_CONTEXT_ANCHOR_PATH = PRIVATE_COMMUNICATION_ROOT / "knihovna_context_anchor.json"
 KNIHOVNA_TVBCP_RELATIVE_PATH = Path("memory/tvbcp/knihovna_cockpit.txt")
+KNIHOVNA_WORKSTREAM_ID = "project-knowledge-library"
+KNIHOVNA_LIVE_ARCHIVE_ROOT = PROJECT_ROOT / "data" / "private" / "article_archive"
+KNIHOVNA_PRIVATE_CONFIRMATION_CATEGORIES = (
+    "delete",
+    "bulk_change",
+    "external_send",
+    "system_change",
+)
+KNIHOVNA_SANDBOX_POLICY = {
+    **HUMAN_ADAM_SANDBOX_POLICY,
+    "writableRoots": [str(KNIHOVNA_LIVE_ARCHIVE_ROOT)],
+}
 PROFILE_ID_RE = re.compile(r"[a-z][a-z0-9_-]{1,31}")
 LEGACY_PROFILE_STATE_SCHEMA = 1
 WORKSTREAM_STATE_SCHEMA = 2
@@ -105,10 +118,26 @@ KNIHOVNA_DEVELOPER_INSTRUCTIONS = (
         "plny chat ani citlive texty. Kazdy novy chronologicky zaznam pridej na konec "
         "souboru a oznac ho lokalnim datem, casem a casovou zonou ve formatu "
         "YYYY-MM-DD HH:MM TZ. Soukrome texty clanku, prilohy a metadata konkretnich osob "
-        "nikdy nevypisuj do Gitu, TVBCP ani odpovedi bez Milova vyslovneho pokynu. Private "
-        "data nejsou soucasti izolovane kopie; z jejich absence nevyvozuj, ze v hlavnim "
-        "projektu neexistuji. V bezne odpovedi uvadej jen samotny nazev souboru, pripadne "
-        "nejkratsi nutnou relativni cestu pri shodnych nazvech."
+        "nikdy automaticky nevypisuj do Gitu, logu, TVBCP ani odpovedi; zobraz jen "
+        "nejmensi rozsah, ktery si Mila vyslovne vyzada. Knihovna ma uzkou vyjimku z "
+        "obecneho zakazu prace mimo izolovany workspace: kanonicky zivy archiv je "
+        f"{KNIHOVNA_LIVE_ARCHIVE_ROOT}. Tento koren smi byt primo cten pro diagnostiku "
+        "a na Miluv jasny pokyn smi byt pres API app.article_archive upravena jedna "
+        "konkretni karta. Pro bezne cteni a jednu nedestruktivni upravu nazvu, textu, "
+        "kategorie, tagu nebo zdrojovych poznamek nevyzaduj dalsi potvrzeni a nepouzivej "
+        "tlacitko Zahajit vyvoj. Hodnota writable v DEVELOPMENT_CONTROL se tyka kodu, "
+        "izolovaneho workspace a Gitu; vyjimku z ni tvori pouze explicitni "
+        "private_archive_access ve stejnem bloku. Jedna logicka karta muze zahrnovat "
+        "jeji text, metadata a registr. Vice karet nebo mechanicka zmena celeho vyberu "
+        "je hromadna zmena. Mazani nebo odebirani, hromadna zmena, odeslani ven a "
+        "systemovy zasah vyzaduji samostatne Milovo potvrzeni; pouzij existujici presnou "
+        "potvrzovaci branu prislusneho API. Nikdy tyto operace neobchazej primym zapisem "
+        "nebo obecnym shellovym prikazem. Mimo tento jediny koren zustava vse mimo "
+        "workspace bez zapisu, sit zustava zakazana a Git, checkpoint, commit, push i "
+        "nasazeni dale obsluhuje pouze Cockpit. Pri cteni nebo uprave nevypisuj do "
+        "terminalu cely soukromy fulltext; vrat jen redigovany technicky vysledek. "
+        "V bezne odpovedi uvadej jen samotny nazev souboru, pripadne nejkratsi nutnou "
+        "relativni cestu pri shodnych nazvech."
     )
 )
 
@@ -714,6 +743,7 @@ class HumanAdamProfileManager:
         lazy = bool(lazy_id)
         writable_pilot = lazy_id == "project-mmtx"
         one_turn_write = not lazy or lazy_id in ONE_TURN_WRITABLE_LAZY_WORKSTREAM_IDS
+        direct_private_archive = self.active_workstream_id == KNIHOVNA_WORKSTREAM_ID
         return {
             "conversation": True,
             "context_anchor": True,
@@ -725,6 +755,14 @@ class HumanAdamProfileManager:
             "writable_pilot": writable_pilot,
             "one_turn_write": one_turn_write,
             "write_authorization": "one_turn" if one_turn_write else "read_only",
+            "private_archive_direct": direct_private_archive,
+            "private_archive_read": direct_private_archive,
+            "private_archive_single_edit": direct_private_archive,
+            "private_archive_confirmation_required": (
+                list(KNIHOVNA_PRIVATE_CONFIRMATION_CATEGORIES)
+                if direct_private_archive
+                else []
+            ),
         }
 
     def _assert_one_turn_writable_lazy_workstream(self, workstream_id: str) -> None:
@@ -844,18 +882,34 @@ class HumanAdamProfileManager:
             elif lazy_id and lazy_id not in ONE_TURN_WRITABLE_LAZY_WORKSTREAM_IDS:
                 control_source = "lazy_read_only_policy"
                 state = "read_only"
-            development_control_block = "\n".join(
-                (
-                    "[DEVELOPMENT_CONTROL]",
-                    f"source={control_source}",
-                    f"profile_id={active_id}",
-                    f"lease_state={state}",
-                    f"lease_owner_id={control_owner}",
-                    f"writable={'true' if writable else 'false'}",
-                    "rule=When writable=false, remain read-only and do not change files or Git.",
-                    "[/DEVELOPMENT_CONTROL]",
+            control_lines = [
+                "[DEVELOPMENT_CONTROL]",
+                f"source={control_source}",
+                f"profile_id={active_id}",
+                f"lease_state={state}",
+                f"lease_owner_id={control_owner}",
+                f"writable={'true' if writable else 'false'}",
+            ]
+            if self.active_workstream_id == KNIHOVNA_WORKSTREAM_ID:
+                control_lines.extend(
+                    (
+                        f"workspace_writable={'true' if writable else 'false'}",
+                        "private_archive_access=read_diagnose_and_explicit_single_edit",
+                        f"private_archive_root={KNIHOVNA_LIVE_ARCHIVE_ROOT}",
+                        "private_archive_confirmation_required="
+                        + ",".join(KNIHOVNA_PRIVATE_CONFIRMATION_CATEGORIES),
+                        "rule=When workspace_writable=false, do not change workspace files "
+                        "or Git. The only write exception is one explicitly requested, "
+                        "non-destructive card edit under private_archive_root through "
+                        "app.article_archive. Never bypass confirmation gates.",
+                    )
                 )
-            )
+            else:
+                control_lines.append(
+                    "rule=When writable=false, remain read-only and do not change files or Git."
+                )
+            control_lines.append("[/DEVELOPMENT_CONTROL]")
+            development_control_block = "\n".join(control_lines)
             completion_instruction = automatic_completion_instruction(writable=writable)
             if completion_instruction:
                 development_control_block = (
@@ -2264,6 +2318,7 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         work_profile_id="knihovna",
         context_anchor_path=KNIHOVNA_CONTEXT_ANCHOR_PATH,
         developer_instructions=KNIHOVNA_DEVELOPER_INSTRUCTIONS,
+        sandbox_policy=KNIHOVNA_SANDBOX_POLICY,
         tvbcp_relative_path=KNIHOVNA_TVBCP_RELATIVE_PATH,
         tvbcp_title="Knihovna v Cockpitu",
     )
