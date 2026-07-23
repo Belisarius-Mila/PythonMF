@@ -184,7 +184,14 @@ class FamilyCalendarDeliveryTestEmailTests(unittest.TestCase):
 
             documents = [json.loads(line) for line in output.getvalue().splitlines()]
             self.assertEqual(exit_code, 1)
-            self.assertEqual(documents[-1], {"redacted": True, "status": "failed"})
+            self.assertEqual(
+                documents[-1],
+                {
+                    "failure_stage": "confirmation",
+                    "redacted": True,
+                    "status": "failed",
+                },
+            )
             _assert_redacted(self, output.getvalue())
 
     def test_config_change_after_preview_prevents_secret_read_and_transport(self) -> None:
@@ -215,7 +222,82 @@ class FamilyCalendarDeliveryTestEmailTests(unittest.TestCase):
 
             documents = [json.loads(line) for line in output.getvalue().splitlines()]
             self.assertEqual(exit_code, 1)
-            self.assertEqual(documents[-1], {"redacted": True, "status": "failed"})
+            self.assertEqual(
+                documents[-1],
+                {
+                    "failure_stage": "configuration_recheck",
+                    "redacted": True,
+                    "status": "failed",
+                },
+            )
+            _assert_redacted(self, output.getvalue())
+
+    def test_failed_cli_stages_remain_redacted_and_never_open_transport(self) -> None:
+        cases = (
+            ("confirmation_input", lambda _prompt: (_ for _ in ()).throw(EOFError()), _forbidden_reader),
+            (
+                "credential_input",
+                lambda _prompt: FAMILY_CALENDAR_TEST_EMAIL_CONFIRMATION,
+                lambda _prompt: (_ for _ in ()).throw(EOFError()),
+            ),
+            (
+                "pre_transport_validation",
+                lambda _prompt: FAMILY_CALENDAR_TEST_EMAIL_CONFIRMATION,
+                lambda _prompt: " private-password ",
+            ),
+        )
+        for expected_stage, confirmation_reader, secret_reader in cases:
+            with self.subTest(stage=expected_stage):
+                with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+                    config_path = _config_path(Path(temp_dir))
+                    _write_config(config_path)
+                    output = io.StringIO()
+
+                    exit_code = main(
+                        ["--send", "--config-path", str(config_path)],
+                        confirmation_reader=confirmation_reader,
+                        secret_reader=secret_reader,
+                        smtp_factory=_forbidden_factory,
+                        output=output,
+                    )
+
+                    documents = [
+                        json.loads(line) for line in output.getvalue().splitlines()
+                    ]
+                    self.assertEqual(exit_code, 1)
+                    self.assertEqual(
+                        documents[-1],
+                        {
+                            "failure_stage": expected_stage,
+                            "redacted": True,
+                            "status": "failed",
+                        },
+                    )
+                    _assert_redacted(self, output.getvalue())
+
+    def test_preview_failure_has_redacted_stage_without_prompting(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            config_path = _config_path(Path(temp_dir))
+            _write_config(config_path, mode="disabled")
+            output = io.StringIO()
+
+            exit_code = main(
+                ["--send", "--config-path", str(config_path)],
+                confirmation_reader=_forbidden_reader,
+                secret_reader=_forbidden_reader,
+                smtp_factory=_forbidden_factory,
+                output=output,
+            )
+
+            self.assertEqual(exit_code, 1)
+            self.assertEqual(
+                json.loads(output.getvalue()),
+                {
+                    "failure_stage": "preview",
+                    "redacted": True,
+                    "status": "failed",
+                },
+            )
             _assert_redacted(self, output.getvalue())
 
     def test_accepted_partial_refused_and_unknown_results_are_counted_only(self) -> None:

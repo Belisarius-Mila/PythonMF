@@ -30,6 +30,18 @@ from app.family_calendar_delivery_test_email import (
 from app.family_calendar_icloud_smtp_client import SMTPFactory, TLSContextFactory
 
 
+FAILURE_STAGES = frozenset(
+    {
+        "preview",
+        "confirmation_input",
+        "confirmation",
+        "configuration_recheck",
+        "credential_input",
+        "pre_transport_validation",
+    }
+)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Preview one family-calendar test email; send only after exact confirmation.",
@@ -59,16 +71,31 @@ def main(
                 or DEFAULT_FAMILY_CALENDAR_DELIVERY_CONFIG_PATH
             ),
         )
-        print(json.dumps(plan.safe_document(), sort_keys=True), file=stream)
-        if not arguments.send:
-            return 0
+    except FamilyCalendarTestEmailError:
+        return _print_failure(stream, stage="preview")
+    print(json.dumps(plan.safe_document(), sort_keys=True), file=stream)
+    if not arguments.send:
+        return 0
+    try:
         confirmation = read_confirmation(
             "Pro jeden společný testovací e-mail napiš přesně "
             f"{FAMILY_CALENDAR_TEST_EMAIL_CONFIRMATION}: "
         )
+    except (EOFError, KeyboardInterrupt):
+        return _print_failure(stream, stage="confirmation_input")
+    try:
         require_family_calendar_test_email_confirmation(confirmation)
+    except FamilyCalendarTestEmailError:
+        return _print_failure(stream, stage="confirmation")
+    try:
         assert_family_calendar_test_email_plan_current(plan)
+    except FamilyCalendarTestEmailError:
+        return _print_failure(stream, stage="configuration_recheck")
+    try:
         app_password = read_secret("iCloud app-specific heslo (skrytě): ")
+    except (EOFError, KeyboardInterrupt):
+        return _print_failure(stream, stage="credential_input")
+    try:
         result = send_family_calendar_test_email(
             plan,
             confirmation=confirmation,
@@ -76,14 +103,27 @@ def main(
             smtp_factory=smtp_factory,
             tls_context_factory=tls_context_factory,
         )
-    except (FamilyCalendarTestEmailError, EOFError, KeyboardInterrupt):
-        print(
-            json.dumps({"status": "failed", "redacted": True}, sort_keys=True),
-            file=stream,
-        )
-        return 1
+    except FamilyCalendarTestEmailError:
+        return _print_failure(stream, stage="pre_transport_validation")
     print(json.dumps(result.safe_document(), sort_keys=True), file=stream)
     return 0 if result.status == "sent" else 1
+
+
+def _print_failure(stream: TextIO, *, stage: str) -> int:
+    if stage not in FAILURE_STAGES:
+        stage = "pre_transport_validation"
+    print(
+        json.dumps(
+            {
+                "status": "failed",
+                "redacted": True,
+                "failure_stage": stage,
+            },
+            sort_keys=True,
+        ),
+        file=stream,
+    )
+    return 1
 
 
 if __name__ == "__main__":
