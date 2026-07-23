@@ -66,6 +66,15 @@
 - Živý náhled pro 08:00 prošel bez vytvoření plist, volání `launchctl`, čtení
   Keychain, transportu nebo jiného zápisu. Kalendářová regrese 171 testů a
   plná Cockpit brána 1147 testů prošly.
+- Dvoukroková instalační brána nejprve vrací přesný plist, create-only cíl,
+  fingerprint a vyžadovanou potvrzovací větu. Apply znovu ověřuje nezměněný
+  fingerprint, režim `dry_run`, Python, runner a nepřítomnost cíle.
+- Potvrzený zápis používá atomické create-only uložení s právy `0600`;
+  existující soubor ani symlink nepřepíše. Brána nemá cestu k `launchctl`,
+  Keychain ani transportu.
+- Zápisová větev byla ověřena pouze v dočasných adresářích. Živě proběhl jen
+  read-only preview a systémový plist nevznikl. Kalendářová regrese 177 testů
+  a plná Cockpit brána 1153 testů prošly.
 
 ## Bezpečnostní hranice
 
@@ -81,7 +90,8 @@
 
 ## Nejmenší další krok
 
-Samostatně navrhnout dvoukrokovou instalační bránu pro vytvoření plist pouze
-v režimu `dry_run`: nejprve přesný náhled, potom zvláštní potvrzení zápisu.
-V této další fázi ještě plánovač nenačítat přes `launchctl`, nepracovat s
-Keychain, neměnit automatický režim a nic neodesílat.
+Po checkpointu spustit z `main` pouze nový read-only instalační preview.
+Skutečný create-only zápis plist provést až po samostatném Mílově rozhodnutí,
+s přesnou potvrzovací větou a fingerprintem z téhož náhledu. Ani po vytvoření
+plist zatím nevolat `launchctl`, nepracovat s Keychain, neměnit automatický
+režim a nic neodesílat.

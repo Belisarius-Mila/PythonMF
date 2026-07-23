@@ -377,3 +377,25 @@ Bezpecnost / neukladat:
 - Commit: `Doplnit read-only náhled plánovače kalendáře`
 - Další krok: Samostatně navrhnout potvrzovanou bránu pro zápis plist pouze
   v režimu `dry_run`; zatím plist nezapisovat ani nenačítat.
+
+### Vývojový checkpoint 2026-07-23 20:52 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Přidána dvoukroková create-only instalační brána pro dry-run
+  LaunchAgent plist. Preview vrací přesnou konfiguraci, fingerprint a
+  potvrzovací kontrakt; apply znovu kontroluje nezměněné vstupy.
+- Bezpečnost: zápis je atomický s právy `0600`, odmítá existující nebo
+  symlinkový cíl a nemá cestu k `launchctl`, Keychain ani transportu.
+- Ověření: 34 cílených bezpečnostních testů, 177 kalendářových testů a plná
+  Cockpit brána 1153 testů prošly. Zápisové testy používaly pouze dočasné
+  adresáře; živě proběhl pouze read-only preview a systémový plist nevznikl.
+- Změněné cesty před paměťovým zápisem (5):
+  `Samantha_Agent/app/family_calendar_delivery_planner_install.py`,
+  `Samantha_Agent/scripts/family_calendar_delivery_planner_install.py`,
+  `Samantha_Agent/tests/test_family_calendar_delivery_planner_install.py`,
+  `Samantha_Agent/scripts/cockpit_quality_gate.py`,
+  `Samantha_Agent/tests/test_cockpit_quality_gate.py`.
+- Commit: `Doplnit potvrzovanou instalaci plánovače kalendáře`
+- Další krok: Po checkpointu spustit z `main` pouze instalační preview.
+  Skutečný create-only zápis vyžaduje další Mílovo rozhodnutí, přesnou
+  potvrzovací větu a fingerprint; plist zatím nenačítat.

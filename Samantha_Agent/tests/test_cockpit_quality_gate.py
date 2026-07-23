@@ -97,6 +97,7 @@ async def second():
         self.assertIn("app/family_calendar_delivery_coordinator.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_dry_run.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_message.py", COMPILE_PATHS)
+        self.assertIn("app/family_calendar_delivery_planner_install.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_planner_preview.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_runner.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_store.py", COMPILE_PATHS)
@@ -105,6 +106,10 @@ async def second():
         self.assertIn("scripts/family_calendar_delivery_config_enable_dry_run.py", COMPILE_PATHS)
         self.assertIn("scripts/family_calendar_delivery_config_migrate.py", COMPILE_PATHS)
         self.assertIn("scripts/family_calendar_delivery_dry_run.py", COMPILE_PATHS)
+        self.assertIn(
+            "scripts/family_calendar_delivery_planner_install.py",
+            COMPILE_PATHS,
+        )
         self.assertIn(
             "scripts/family_calendar_delivery_planner_preview.py",
             COMPILE_PATHS,
@@ -133,6 +138,10 @@ async def second():
         self.assertIn("tests.test_family_calendar_delivery_dry_run", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_integration", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_message", TEST_MODULES)
+        self.assertIn(
+            "tests.test_family_calendar_delivery_planner_install",
+            TEST_MODULES,
+        )
         self.assertIn(
             "tests.test_family_calendar_delivery_planner_preview",
             TEST_MODULES,

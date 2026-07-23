@@ -396,3 +396,27 @@ a odesílání vypnuté.
 Další krok: samostatně navrhnout dvoukrokovou instalační bránu pro vytvoření
 plist pouze v režimu `dry_run`: náhled a až potom zvláštní potvrzení zápisu.
 Ani tato příští fáze ještě nemá volat `launchctl`, Keychain nebo transport.
+
+### 2026-07-23 20:52 CEST – Přidána potvrzovaná create-only instalace plist
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: instalační workflow má dvě oddělené fáze. Preview je read-only a vrací
+přesný plist, cílovou cestu, režim `0600`, fingerprint a vyžadovanou
+potvrzovací větu. Apply přijme pouze plán se shodným fingerprintem, znovu
+ověří režim `dry_run`, Python, runner a volný kanonický cíl a teprve potom
+provede atomický create-only zápis.
+
+Důkaz: 34 cílených bezpečnostních testů, 177 kalendářových testů a plná
+Cockpit Quality Gate s 1153 testy prošly. Testy potvrdily nulový zápis při
+chybné potvrzovací větě nebo fingerprintu, odmítnutí změněného runneru,
+existujícího souboru i symlinku a přesný atomický zápis s právy `0600` pouze
+v dočasném prostoru. Živý běh byl jen preview; systémový plist nevznikl.
+
+Rozhodnutí: implementace neznamená souhlas se skutečnou instalací. Brána
+nevolá `launchctl`, nečte Keychain a nemůže odeslat e-mail. Automatický režim
+zůstává nedostupný.
+
+Další krok: po checkpointu spustit z `main` jen nový instalační preview.
+Create-only zápis provést až po samostatném Mílově rozhodnutí s přesnou
+potvrzovací větou a fingerprintem. Ani po zápisu zatím plist nenačítat.
