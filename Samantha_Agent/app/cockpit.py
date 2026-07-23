@@ -63,6 +63,7 @@ from app.article_archive import (
     attach_article_image,
     list_articles,
     prepare_article_pdf_export,
+    preview_article_source_reextract,
     search_articles,
     send_article_pdf_export,
     set_article_read_state,
@@ -788,6 +789,26 @@ def library_delete_article_action(payload: dict[str, Any]) -> dict[str, Any]:
         return {"ok": False, "message": str(exc), "error": "invalid_delete"}
     except OSError as exc:
         return {"ok": False, "message": f"Položku se nepodařilo vyřadit: {exc}", "error": "archive_failed"}
+
+
+def library_article_reextract_preview_action(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return preview_article_source_reextract(
+            article_id=str(payload.get("article_id", "")),
+            source_encoding=str(payload.get("source_encoding", "")),
+        )
+    except ValueError as exc:
+        return {
+            "ok": False,
+            "message": str(exc),
+            "error": "invalid_article_reextract_preview",
+        }
+    except OSError:
+        return {
+            "ok": False,
+            "message": "Náhled nové extrakce se nepodařilo připravit.",
+            "error": "archive_failed",
+        }
 
 
 def family_calendar_status_action(
@@ -9793,6 +9814,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/library/reextract-preview",
+        "label": "Nahled nove extrakce clanku knihovny",
+        "risk": "read_only_via_post",
+        "confirmation": "none_readonly_no_persistence",
+        "handler_name": "library_article_reextract_preview_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/family-calendar/save",
         "label": "Ulozit osobu do rodinneho kalendare",
         "risk": "private_write",
@@ -10622,6 +10651,10 @@ class CockpitServer:
                 if parsed.path == "/api/library/delete":
                     payload = self.read_json()
                     self.respond_json(library_delete_article_action(payload))
+                    return
+                if parsed.path == "/api/library/reextract-preview":
+                    payload = self.read_json()
+                    self.respond_json(library_article_reextract_preview_action(payload))
                     return
                 if parsed.path == "/api/family-calendar/save":
                     payload = self.read_json()

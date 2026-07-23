@@ -101,3 +101,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/article_archive.py`, `Samantha_Agent/tests/test_article_archive.py`
 - Commit: `Fix URL article HTTP charset decoding`
 - Další krok: Nasadit opravu a samostatně obnovit dnešní kartu z uloženého source.html.
+
+### Automatický checkpoint 2026-07-23 13:12 CEST
+
+- Pracovní proud: `project-knowledge-library`
+- Souhrn: Read-only náhled nové extrakce ISO-8859-2 je připraven bez změny karty
+- Ověření: plná Cockpit brána: 1132 testů, 234.7 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/article_archive.py`, `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/tests/test_article_archive.py`, `Samantha_Agent/tests/test_cockpit.py`
+- Commit: `Add read-only article re-extraction preview`
+- Další krok: Nasadit změnu a spustit náhled nad dnešní kartou; samotnou opravu potvrdit samostatně.

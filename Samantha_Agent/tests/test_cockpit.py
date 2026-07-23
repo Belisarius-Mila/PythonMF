@@ -28,6 +28,7 @@ from app.cockpit import (
     document_reference,
     library_archive_text_action,
     library_archive_url_action,
+    library_article_reextract_preview_action,
     library_attach_image_action,
     library_delete_article_action,
     library_remove_attachment_action,
@@ -212,6 +213,48 @@ class CockpitTests(unittest.TestCase):
             self.assertTrue(item["confirmation"].strip())
             self.assertTrue(item["handler_name"].strip())
             self.assertTrue(hasattr(cockpit_module, item["handler_name"]), item["handler_name"])
+
+    def test_library_reextract_preview_action_returns_only_redacted_metrics(self) -> None:
+        safe_result = {
+            "ok": True,
+            "read_only": True,
+            "source_encoding": "iso-8859-2",
+            "changed": True,
+            "metrics": {
+                "source_bytes": 420,
+                "current_chars": 100,
+                "preview_chars": 100,
+                "char_delta": 0,
+                "different_positions": 2,
+                "current_replacement_chars": 0,
+                "preview_replacement_chars": 0,
+                "current_control_chars": 0,
+                "preview_control_chars": 0,
+            },
+        }
+        with patch(
+            "app.cockpit.preview_article_source_reextract",
+            return_value=safe_result,
+        ) as preview_mock:
+            result = library_article_reextract_preview_action(
+                {
+                    "article_id": "private-id",
+                    "source_encoding": "ISO-8859-2",
+                }
+            )
+
+        self.assertEqual(result, safe_result)
+        preview_mock.assert_called_once_with(
+            article_id="private-id",
+            source_encoding="ISO-8859-2",
+        )
+        registry_item = next(
+            item
+            for item in COCKPIT_POST_ACTIONS
+            if item["path"] == "/api/library/reextract-preview"
+        )
+        self.assertEqual(registry_item["risk"], "read_only_via_post")
+        self.assertEqual(registry_item["confirmation"], "none_readonly_no_persistence")
 
     def test_human_adam_transcribe_post_route_has_narrow_registry_card(self) -> None:
         card = next(

@@ -33,6 +33,7 @@ from app.article_archive import (
     library_export_confirmation_text,
     list_articles,
     prepare_article_pdf_export,
+    preview_article_source_reextract,
     search_articles,
     send_article_pdf_export,
     set_article_read_state,
@@ -665,6 +666,112 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertEqual(updated_metadata["text_chars"], registry["text_chars"])
         self.assertEqual(updated_metadata["last_cleanup"]["old_text_chars"], len(noisy_text.strip()))
         self.assertGreater(updated_metadata["last_cleanup"]["removed_chars"], 1000)
+
+    def test_source_reextract_preview_is_read_only_redacted_and_uses_explicit_iso_8859_2(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            article_dir = archive_root / "articles" / "synthetic-iso"
+            article_dir.mkdir(parents=True)
+            source_html = """<!doctype html>
+<html><head><title>Syntetický test</title></head>
+<body><main>
+<h1>Syntetický test</h1>
+<p>Žluťoučký kůň běží přes bezpečně dlouhý syntetický odstavec.</p>
+</main></body></html>"""
+            source_bytes = source_html.encode("iso-8859-2")
+            source_url = "https://synthetic.invalid/private-source"
+            wrong_text = extract_article(source_bytes, source_url).text.strip()
+            correct_text = extract_article(
+                source_bytes,
+                source_url,
+                http_encoding="iso-8859-2",
+            ).text.strip()
+            self.assertNotEqual(wrong_text, correct_text)
+            (article_dir / "source.html").write_bytes(source_bytes)
+            (article_dir / "article.txt").write_text(wrong_text + "\n", encoding="utf-8")
+            metadata = {
+                "id": "synthetic-iso",
+                "title": "Syntetický test",
+                "one_line_title": "Syntetický test",
+                "category": "science",
+                "archived_at": "2026-07-23T10:00:00+00:00",
+                "source_url": source_url,
+                "canonical_url": source_url,
+                "text_file": "articles/synthetic-iso/article.txt",
+                "html_file": "articles/synthetic-iso/source.html",
+                "text_chars": str(len(wrong_text)),
+                "tags": [],
+                "attachments": [],
+            }
+            (article_dir / "metadata.json").write_text(
+                json.dumps(metadata, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            (archive_root / "registry.jsonl").write_text(
+                json.dumps(metadata, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+            before = {
+                path.relative_to(archive_root): path.read_bytes()
+                for path in archive_root.rglob("*")
+                if path.is_file()
+            }
+
+            result = preview_article_source_reextract(
+                article_id="synthetic-iso",
+                source_encoding="ISO-8859-2",
+                archive_root=archive_root,
+            )
+
+            after = {
+                path.relative_to(archive_root): path.read_bytes()
+                for path in archive_root.rglob("*")
+                if path.is_file()
+            }
+
+        self.assertEqual(before, after)
+        self.assertEqual(
+            set(result),
+            {"ok", "read_only", "source_encoding", "changed", "metrics"},
+        )
+        self.assertEqual(
+            set(result["metrics"]),
+            {
+                "source_bytes",
+                "current_chars",
+                "preview_chars",
+                "char_delta",
+                "different_positions",
+                "current_replacement_chars",
+                "preview_replacement_chars",
+                "current_control_chars",
+                "preview_control_chars",
+            },
+        )
+        self.assertTrue(result["ok"])
+        self.assertTrue(result["read_only"])
+        self.assertTrue(result["changed"])
+        self.assertEqual(result["source_encoding"], "iso-8859-2")
+        self.assertGreater(result["metrics"]["different_positions"], 0)
+        self.assertEqual(result["metrics"]["preview_replacement_chars"], 0)
+        serialized = json.dumps(result, ensure_ascii=False)
+        self.assertNotIn("Syntetický test", serialized)
+        self.assertNotIn(source_url, serialized)
+        self.assertNotIn("Žluťoučký", serialized)
+        self.assertEqual(list(article_dir.glob("article_before_cleanup_*.txt")), [])
+
+    def test_source_reextract_preview_rejects_implicit_or_other_encoding(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+
+            for source_encoding in ("", "utf-8", "windows-1250"):
+                with self.subTest(source_encoding=source_encoding):
+                    with self.assertRaisesRegex(ValueError, "explicitní kódování ISO-8859-2"):
+                        preview_article_source_reextract(
+                            article_id="unused",
+                            source_encoding=source_encoding,
+                            archive_root=archive_root,
+                        )
 
     def test_delete_article_requires_confirmation_and_moves_item_to_trash(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

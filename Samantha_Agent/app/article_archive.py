@@ -49,6 +49,7 @@ READ_STATE_LABELS = {
     "to_read": "k přečtení",
     "done": "hotovo",
 }
+SOURCE_REEXTRACT_PREVIEW_ENCODING = "iso-8859-2"
 
 
 @dataclass(frozen=True)
@@ -2408,6 +2409,72 @@ def cleaned_text_from_source_html(item: ArticleArchiveItem, *, archive_root: Pat
     if html_path is None or not html_path.exists():
         return ""
     return extract_article(html_path.read_bytes(), item.source_url or item.canonical_url).text.strip()
+
+
+def preview_article_source_reextract(
+    *,
+    article_id: str,
+    source_encoding: str,
+    archive_root: Path = DEFAULT_ARCHIVE_ROOT,
+) -> dict[str, Any]:
+    normalized_encoding = str(source_encoding or "").strip().lower().replace("_", "-")
+    if normalized_encoding != SOURCE_REEXTRACT_PREVIEW_ENCODING:
+        raise ValueError("Náhled vyžaduje explicitní kódování ISO-8859-2.")
+
+    item = find_article(article_id, archive_root=archive_root)
+    if item is None:
+        raise ValueError("Článek nebyl nalezen.")
+    html_path = resolve_archive_relative_file(archive_root, item.html_file)
+    if html_path is None or not html_path.is_file():
+        raise ValueError("Článek nemá dostupné source.html pro bezpečný náhled.")
+    article_path = resolve_archive_relative_file(archive_root, item.text_file)
+    if article_path is None or not article_path.is_file():
+        raise ValueError("Soubor article.txt nebyl nalezen.")
+
+    html_bytes = html_path.read_bytes()
+    current_text = normalize_text_for_cleanup_compare(
+        article_path.read_text(encoding="utf-8", errors="replace")
+    )
+    preview_text = normalize_text_for_cleanup_compare(
+        extract_article(
+            html_bytes,
+            item.source_url or item.canonical_url,
+            http_encoding=SOURCE_REEXTRACT_PREVIEW_ENCODING,
+        ).text
+    )
+    if not preview_text:
+        raise ValueError("Nová extrakce neobsahuje žádný čitelný text.")
+
+    return {
+        "ok": True,
+        "read_only": True,
+        "source_encoding": SOURCE_REEXTRACT_PREVIEW_ENCODING,
+        "changed": current_text != preview_text,
+        "metrics": {
+            "source_bytes": len(html_bytes),
+            "current_chars": len(current_text),
+            "preview_chars": len(preview_text),
+            "char_delta": len(preview_text) - len(current_text),
+            "different_positions": text_difference_count(current_text, preview_text),
+            "current_replacement_chars": current_text.count("\ufffd"),
+            "preview_replacement_chars": preview_text.count("\ufffd"),
+            "current_control_chars": unsafe_control_character_count(current_text),
+            "preview_control_chars": unsafe_control_character_count(preview_text),
+        },
+    }
+
+
+def text_difference_count(current_text: str, preview_text: str) -> int:
+    return sum(left != right for left, right in zip(current_text, preview_text)) + abs(
+        len(current_text) - len(preview_text)
+    )
+
+
+def unsafe_control_character_count(text: str) -> int:
+    return sum(
+        (ord(character) < 32 and character not in "\n\r\t") or 127 <= ord(character) <= 159
+        for character in text
+    )
 
 
 def article_boilerplate_marker_count(text: str) -> int:

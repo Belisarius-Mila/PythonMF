@@ -182,3 +182,14 @@ Důkaz: plná Cockpit brána: 1123 testů, 216.6 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Nasadit opravu a samostatně obnovit dnešní kartu z uloženého source.html.
+
+### 2026-07-23 13:12 CEST – Read-only náhled nové extrakce ISO-8859-2 je připraven bez změny karty
+
+Pracovní proud: `project-knowledge-library`.
+
+Milník: Read-only náhled nové extrakce ISO-8859-2 je připraven bez změny karty
+
+Důkaz: plná Cockpit brána: 1132 testů, 234.7 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Nasadit změnu a spustit náhled nad dnešní kartou; samotnou opravu potvrdit samostatně.
