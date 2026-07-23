@@ -281,3 +281,14 @@ Důkaz: plná Cockpit brána: 1097 testů, 232.9 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Připravit samostatný přesně potvrzovaný testovací runner s lokálním iCloud tajemstvím
+
+### 2026-07-23 08:06 CEST – Přidán bezpečný jednorázový SMTP runner s redigovaným preview, přesným potvrzením a testy bez sítě
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: Přidán bezpečný jednorázový SMTP runner s redigovaným preview, přesným potvrzením a testy bez sítě
+
+Důkaz: plná Cockpit brána: 1105 testů, 218.5 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Spustit pouze redigovaný preview runneru v prostředí s privátní konfigurací a teprve samostatně potvrdit jeden skutečný testovací e-mail

@@ -270,3 +270,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/app/family_calendar_icloud_smtp_client.py`, `Samantha_Agent/tests/test_family_calendar_icloud_smtp_client.py`
 - Commit: `Doplnit testovaný iCloud SMTP klient rodinného kalendáře`
 - Další krok: Připravit samostatný přesně potvrzovaný testovací runner s lokálním iCloud tajemstvím
+
+### Automatický checkpoint 2026-07-23 08:06 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Přidán bezpečný jednorázový SMTP runner s redigovaným preview, přesným potvrzením a testy bez sítě
+- Ověření: plná Cockpit brána: 1105 testů, 218.5 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/app/family_calendar_delivery_test_email.py`, `Samantha_Agent/scripts/family_calendar_delivery_test_email.py`, `Samantha_Agent/tests/test_family_calendar_delivery_test_email.py`
+- Commit: `Doplnit potvrzovaný iCloud testovací e-mail rodinného kalendáře`
+- Další krok: Spustit pouze redigovaný preview runneru v prostředí s privátní konfigurací a teprve samostatně potvrdit jeden skutečný testovací e-mail
