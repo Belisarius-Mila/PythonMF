@@ -399,3 +399,22 @@ Bezpecnost / neukladat:
 - Další krok: Po checkpointu spustit z `main` pouze instalační preview.
   Skutečný create-only zápis vyžaduje další Mílovo rozhodnutí, přesnou
   potvrzovací větu a fingerprint; plist zatím nenačítat.
+
+### Automatický checkpoint 2026-07-23 22:36 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Přidán dvoukrokový create-only Keychain setup s redigovaným preview,
+  přesným potvrzením a heslem zadávaným pouze skrytým systémovým promptem.
+- Ověření: 185 kalendářových testů a plná Cockpit brána 1167 testů, výsledek
+  OK. Živý read-only readiness audit potvrdil existenci reference bez čtení
+  hesla, zápisu nebo odesílání.
+- Změněné cesty před paměťovým zápisem (5):
+  `Samantha_Agent/app/family_calendar_delivery_keychain_setup.py`,
+  `Samantha_Agent/scripts/family_calendar_delivery_keychain_setup.py`,
+  `Samantha_Agent/tests/test_family_calendar_delivery_keychain_setup.py`,
+  `Samantha_Agent/scripts/cockpit_quality_gate.py`,
+  `Samantha_Agent/tests/test_cockpit_quality_gate.py`.
+- Commit: `Doplnit bezpečný Keychain setup kalendáře`
+- Další krok: Z `main` vytvořit pouze read-only náhled budoucího načtení
+  LaunchAgentu a rollback postupu; `launchctl` zatím nevolat, neměnit
+  automatický režim a nic neodesílat.

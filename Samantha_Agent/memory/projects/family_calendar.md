@@ -75,6 +75,17 @@
 - Zápisová větev byla ověřena pouze v dočasných adresářích. Živě proběhl jen
   read-only preview a systémový plist nevznikl. Kalendářová regrese 177 testů
   a plná Cockpit brána 1153 testů prošly.
+- Plist byl následně samostatně potvrzeným create-only krokem vytvořen, ale
+  zůstává nenačtený; `launchctl` plánovač nespustil.
+- Dvoukrokový Keychain setup nejprve ukazuje pouze redigovanou identitu položky
+  a vyžaduje přesnou potvrzovací větu. Heslo přebírá skrytý systémový prompt,
+  nepředává je v argumentech procesu a existující položku nepřepisuje.
+- Samostatně potvrzené živé zadání vytvořilo pouze Keychain reference.
+  Následný read-only readiness audit hodnotu hesla nečetl, nic nezapsal ani
+  neodeslal a uzavřel blokátor chybějící reference.
+- Kalendářová regrese 185 testů a plná Cockpit brána 1167 testů prošly.
+  Zbývají dva blokátory automatiky: nenačtený plánovač a nedostupný automatický
+  režim. Konfigurace zůstává `dry_run`.
 
 ## Bezpečnostní hranice
 
@@ -90,8 +101,6 @@
 
 ## Nejmenší další krok
 
-Po checkpointu spustit z `main` pouze nový read-only instalační preview.
-Skutečný create-only zápis plist provést až po samostatném Mílově rozhodnutí,
-s přesnou potvrzovací větou a fingerprintem z téhož náhledu. Ani po vytvoření
-plist zatím nevolat `launchctl`, nepracovat s Keychain, neměnit automatický
-režim a nic neodesílat.
+Z `main` připravit pouze read-only náhled přesné operace pro budoucí načtení
+LaunchAgentu včetně ověřitelného cíle a bezpečného rollback postupu. Zatím
+`launchctl` nevolat, neměnit automatický režim a nic neodesílat.

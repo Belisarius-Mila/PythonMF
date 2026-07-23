@@ -420,3 +420,26 @@ zůstává nedostupný.
 Další krok: po checkpointu spustit z `main` jen nový instalační preview.
 Create-only zápis provést až po samostatném Mílově rozhodnutí s přesnou
 potvrzovací větou a fingerprintem. Ani po zápisu zatím plist nenačítat.
+
+### 2026-07-23 22:36 CEST – Keychain reference je vytvořená bezpečnou dvoukrokovou branou
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: vznikl samostatný Keychain setup, jehož první fáze pouze redigovaně
+ukazuje identitu budoucí položky. Zápis vyžaduje přesnou potvrzovací větu,
+odmítá existující položku a app-specific heslo přijímá pouze skrytým promptem
+macOS `security`, bez hodnoty hesla v argumentech procesu.
+
+Důkaz: 185 kalendářových testů a plná Cockpit Quality Gate s 1167 testy
+prošly. Samostatně potvrzené živé zadání vytvořilo reference; následný
+read-only readiness audit její existenci ověřil bez čtení hodnoty hesla,
+zápisu nebo transportu.
+
+Rozhodnutí: vytvořená reference sama nezapíná automatiku. Plist zůstává
+nenačtený, konfigurace je `dry_run` a automatický režim je nedostupný.
+Zbývají přesně tyto dva blokátory: `planner_not_loaded` a
+`automatic_mode_unavailable`.
+
+Další krok: z `main` připravit pouze read-only náhled přesné operace pro
+budoucí načtení LaunchAgentu a bezpečný rollback postup. Zatím nevolat
+`launchctl`, neměnit automatický režim a nic neodesílat.
