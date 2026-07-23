@@ -1,4 +1,5 @@
 openai-agents
+certifi
 Pillow
 pillow-heif
 python-dotenv

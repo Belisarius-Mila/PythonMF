@@ -7,7 +7,6 @@ import argparse
 import getpass
 import json
 import smtplib
-import ssl
 import sys
 from collections.abc import Callable, Sequence
 from pathlib import Path
@@ -31,6 +30,7 @@ from app.family_calendar_icloud_smtp_client import (
     ICloudSMTPDiagnosticCategory,
     SMTPFactory,
     TLSContextFactory,
+    create_icloud_tls_context,
 )
 
 
@@ -75,7 +75,7 @@ def main(
             app_password=app_password,
             smtp_factory=smtplib.SMTP if smtp_factory is None else smtp_factory,
             tls_context_factory=(
-                ssl.create_default_context
+                create_icloud_tls_context
                 if tls_context_factory is None
                 else tls_context_factory
             ),

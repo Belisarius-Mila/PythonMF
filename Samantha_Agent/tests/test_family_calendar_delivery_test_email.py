@@ -409,20 +409,28 @@ class FamilyCalendarDeliveryTestEmailTests(unittest.TestCase):
             plan = plan_family_calendar_test_email(config_path=config_path)
             session = FakeSMTPSession()
             factory = FakeSMTPFactory(session)
+            tls_context = _tls_context()
 
-            with patch(
-                "app.family_calendar_delivery_test_email.smtplib.SMTP",
-                factory,
+            with (
+                patch(
+                    "app.family_calendar_delivery_test_email.smtplib.SMTP",
+                    factory,
+                ),
+                patch(
+                    "app.family_calendar_delivery_test_email.create_icloud_tls_context",
+                    return_value=tls_context,
+                ) as tls_factory,
             ):
                 result = send_family_calendar_test_email(
                     plan,
                     confirmation=FAMILY_CALENDAR_TEST_EMAIL_CONFIRMATION,
                     app_password=APP_PASSWORD,
-                    tls_context_factory=_tls_context,
                 )
 
             self.assertEqual(result.status, "sent")
+            tls_factory.assert_called_once_with()
             self.assertEqual(len(factory.calls), 1)
+            self.assertIn(("starttls", tls_context), session.calls)
             self.assertEqual(session.calls.count("send_message"), 1)
 
 

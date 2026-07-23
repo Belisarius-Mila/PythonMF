@@ -4,6 +4,7 @@ import ssl
 import unittest
 from datetime import date
 from email.message import EmailMessage
+from unittest.mock import patch
 
 from app.family_calendar import FamilyEvent
 from app.family_calendar_delivery import begin_delivery, plan_delivery
@@ -15,6 +16,7 @@ from app.family_calendar_icloud_smtp_client import (
     ICLOUD_SMTP_TIMEOUT_SECONDS,
     ICloudSMTPClient,
     ICloudSMTPClientError,
+    create_icloud_tls_context,
 )
 from app.family_calendar_smtp_adapter import send_family_calendar_envelope_via_smtp
 
@@ -94,6 +96,25 @@ class FakeSMTPFactory:
 
 
 class FamilyCalendarICloudSMTPClientTests(unittest.TestCase):
+    def test_tls_context_uses_certifi_ca_bundle(self) -> None:
+        expected_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+
+        with (
+            patch(
+                "app.family_calendar_icloud_smtp_client.certifi.where",
+                return_value="/test/certifi-ca.pem",
+            ) as certifi_where,
+            patch(
+                "app.family_calendar_icloud_smtp_client.ssl.create_default_context",
+                return_value=expected_context,
+            ) as create_default_context,
+        ):
+            context = create_icloud_tls_context()
+
+        self.assertIs(context, expected_context)
+        certifi_where.assert_called_once_with()
+        create_default_context.assert_called_once_with(cafile="/test/certifi-ca.pem")
+
     def test_starttls_login_and_one_shared_message_use_injected_session(self) -> None:
         session = FakeSMTPSession()
         factory = FakeSMTPFactory(session)

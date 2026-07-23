@@ -6,6 +6,7 @@ import ssl
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from app.family_calendar_icloud_smtp_client import (
     ICLOUD_SMTP_HOST,
@@ -167,16 +168,21 @@ class FamilyCalendarDeliverySMTPDiagnosticTests(unittest.TestCase):
             factory = FakeSMTPFactory(session)
             output = io.StringIO()
             prompts: list[str] = []
+            tls_context = _tls_context()
 
-            exit_code = main(
-                ["--config-path", str(config_path)],
-                secret_reader=lambda prompt: prompts.append(prompt) or APP_PASSWORD,
-                smtp_factory=factory,
-                tls_context_factory=_tls_context,
-                output=output,
-            )
+            with patch(
+                "scripts.family_calendar_delivery_smtp_diagnose.create_icloud_tls_context",
+                return_value=tls_context,
+            ) as tls_factory:
+                exit_code = main(
+                    ["--config-path", str(config_path)],
+                    secret_reader=lambda prompt: prompts.append(prompt) or APP_PASSWORD,
+                    smtp_factory=factory,
+                    output=output,
+                )
 
             self.assertEqual(exit_code, 0)
+            tls_factory.assert_called_once_with()
             self.assertEqual(len(prompts), 1)
             self.assertIn("skrytě", prompts[0])
             self.assertEqual(
@@ -188,6 +194,7 @@ class FamilyCalendarDeliverySMTPDiagnosticTests(unittest.TestCase):
                     "status": "diagnostic",
                 },
             )
+            self.assertIn(("starttls", tls_context), session.calls)
             self.assertNotIn("send_message", session.calls)
             _assert_redacted(self, output.getvalue())
 

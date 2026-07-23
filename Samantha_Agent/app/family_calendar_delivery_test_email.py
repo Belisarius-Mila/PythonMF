@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import smtplib
-import ssl
 from dataclasses import dataclass
 from email.message import EmailMessage
 from pathlib import Path
@@ -19,6 +18,7 @@ from app.family_calendar_icloud_smtp_client import (
     ICloudSMTPClientError,
     SMTPFactory,
     TLSContextFactory,
+    create_icloud_tls_context,
 )
 
 
@@ -164,7 +164,7 @@ def send_family_calendar_test_email(
             app_password=app_password,
             smtp_factory=smtplib.SMTP if smtp_factory is None else smtp_factory,
             tls_context_factory=(
-                ssl.create_default_context
+                create_icloud_tls_context
                 if tls_context_factory is None
                 else tls_context_factory
             ),

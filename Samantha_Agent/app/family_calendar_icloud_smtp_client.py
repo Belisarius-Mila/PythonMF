@@ -9,6 +9,8 @@ from email.message import EmailMessage
 from enum import StrEnum
 from typing import Any, Protocol
 
+import certifi
+
 from app.family_calendar_delivery_config import (
     CANONICAL_RECIPIENT_IDS,
     EMAIL_ADDRESS_RE,
@@ -87,12 +89,18 @@ SMTPFactory = Callable[..., SMTPSession]
 TLSContextFactory = Callable[[], ssl.SSLContext]
 
 
+def create_icloud_tls_context() -> ssl.SSLContext:
+    """Build a verified TLS context from the application's declared CA bundle."""
+
+    return ssl.create_default_context(cafile=certifi.where())
+
+
 @dataclass(frozen=True, repr=False)
 class ICloudSMTPClient:
     username: str
     app_password: str
     smtp_factory: SMTPFactory
-    tls_context_factory: TLSContextFactory = ssl.create_default_context
+    tls_context_factory: TLSContextFactory = create_icloud_tls_context
 
     def __post_init__(self) -> None:
         clean_username = _validate_address(self.username, field="username")
