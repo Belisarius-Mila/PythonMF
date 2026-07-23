@@ -407,8 +407,17 @@ def archive_url(
     timeout: float = 25.0,
 ) -> dict[str, Any]:
     normalized_url = validate_archive_url(url)
-    html_bytes = fetch_url(normalized_url, timeout=timeout)
-    article = extract_article(html_bytes, normalized_url)
+    response_metadata: dict[str, str] = {}
+    html_bytes = fetch_url(
+        normalized_url,
+        timeout=timeout,
+        response_metadata=response_metadata,
+    )
+    article = extract_article(
+        html_bytes,
+        normalized_url,
+        http_encoding=response_metadata.get("charset", ""),
+    )
     metadata = write_article_archive(
         source_url=normalized_url,
         html_bytes=html_bytes,
@@ -915,7 +924,12 @@ def validate_archive_url(url: str) -> str:
     return value
 
 
-def fetch_url(url: str, timeout: float = 25.0) -> bytes:
+def fetch_url(
+    url: str,
+    timeout: float = 25.0,
+    *,
+    response_metadata: dict[str, str] | None = None,
+) -> bytes:
     request = urllib.request.Request(
         url,
         headers={
@@ -925,11 +939,17 @@ def fetch_url(url: str, timeout: float = 25.0) -> bytes:
     )
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
+            content_type = str(response.headers.get("Content-Type", "") or "")
+            record_http_content_type(response_metadata, content_type)
             return response.read()
     except urllib.error.URLError as exc:
         if not is_certificate_verify_failure(exc):
             raise
-        return fetch_url_with_curl(url, timeout=timeout)
+        return fetch_url_with_curl(
+            url,
+            timeout=timeout,
+            response_metadata=response_metadata,
+        )
 
 
 def is_certificate_verify_failure(exc: urllib.error.URLError) -> bool:
@@ -937,7 +957,12 @@ def is_certificate_verify_failure(exc: urllib.error.URLError) -> bool:
     return isinstance(reason, ssl.SSLCertVerificationError) or "CERTIFICATE_VERIFY_FAILED" in str(exc)
 
 
-def fetch_url_with_curl(url: str, timeout: float = 25.0) -> bytes:
+def fetch_url_with_curl(
+    url: str,
+    timeout: float = 25.0,
+    *,
+    response_metadata: dict[str, str] | None = None,
+) -> bytes:
     completed = subprocess.run(
         [
             "curl",
@@ -947,6 +972,8 @@ def fetch_url_with_curl(url: str, timeout: float = 25.0) -> bytes:
             "--show-error",
             "--max-time",
             str(max(1, int(timeout))),
+            "--dump-header",
+            "-",
             url,
         ],
         capture_output=True,
@@ -955,11 +982,52 @@ def fetch_url_with_curl(url: str, timeout: float = 25.0) -> bytes:
     if completed.returncode:
         message = completed.stderr.decode("utf-8", errors="replace").strip()
         raise urllib.error.URLError(message or f"curl failed with exit {completed.returncode}")
-    return completed.stdout
+    html_bytes, content_type = split_curl_headers(completed.stdout)
+    record_http_content_type(response_metadata, content_type)
+    return html_bytes
 
 
-def extract_article(html_bytes: bytes, source_url: str) -> ExtractedArticle:
-    html_text = decode_html_document(html_bytes)
+def record_http_content_type(
+    response_metadata: dict[str, str] | None,
+    content_type: str,
+) -> None:
+    if response_metadata is None:
+        return
+    clean_content_type = str(content_type or "").strip()
+    if clean_content_type:
+        response_metadata["content_type"] = clean_content_type
+    match = re.search(
+        r"(?:^|;)\s*charset\s*=\s*[\"']?([a-zA-Z0-9._:-]+)",
+        clean_content_type,
+        flags=re.I,
+    )
+    if match:
+        response_metadata["charset"] = match.group(1).strip()
+
+
+def split_curl_headers(payload: bytes) -> tuple[bytes, str]:
+    body = payload
+    content_type = ""
+    while body.startswith(b"HTTP/"):
+        separator = re.search(br"\r?\n\r?\n", body)
+        if separator is None:
+            break
+        header_block = body[: separator.start()]
+        body = body[separator.end() :]
+        for line in header_block.splitlines()[1:]:
+            name, separator_byte, value = line.partition(b":")
+            if separator_byte and name.strip().lower() == b"content-type":
+                content_type = value.decode("latin-1", errors="replace").strip()
+    return body, content_type
+
+
+def extract_article(
+    html_bytes: bytes,
+    source_url: str,
+    *,
+    http_encoding: str = "",
+) -> ExtractedArticle:
+    html_text = decode_html_document(html_bytes, http_encoding=http_encoding)
     title = extract_title(html_text) or urlparse(source_url).netloc or "article"
     canonical = extract_canonical_url(html_text) or strip_tracking_query(source_url)
     text = extract_preferred_readable_text(html_text)
@@ -971,12 +1039,12 @@ def extract_article(html_bytes: bytes, source_url: str) -> ExtractedArticle:
     return ExtractedArticle(title=title, text=text, canonical_url=canonical)
 
 
-def decode_html_document(html_bytes: bytes) -> str:
+def decode_html_document(html_bytes: bytes, *, http_encoding: str = "") -> str:
     if html_bytes.startswith(b"\xef\xbb\xbf"):
         return html_bytes.decode("utf-8-sig", errors="replace")
 
     declared_encoding = detect_html_declared_encoding(html_bytes)
-    candidates = [declared_encoding, "utf-8", "windows-1250", "iso-8859-2"]
+    candidates = [http_encoding, declared_encoding, "utf-8", "windows-1250", "iso-8859-2"]
     tried: set[str] = set()
     for encoding in candidates:
         if not encoding:

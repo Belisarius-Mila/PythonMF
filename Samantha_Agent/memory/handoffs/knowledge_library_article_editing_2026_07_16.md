@@ -92,3 +92,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (1): `Samantha_Agent/memory/handoffs/knowledge_library_article_editing_2026_07_16.md`
 - Commit: `Verify Knihovna automatic completion live`
 - Další krok: Ověřit čistý main, synchronizaci obou profilů a uvolnit přechodný semafor.
+
+### Automatický checkpoint 2026-07-23 10:57 CEST
+
+- Pracovní proud: `project-knowledge-library`
+- Souhrn: Import URL nyní respektuje HTTP charset včetně ISO-8859-2
+- Ověření: plná Cockpit brána: 1123 testů, 216.6 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/article_archive.py`, `Samantha_Agent/tests/test_article_archive.py`
+- Commit: `Fix URL article HTTP charset decoding`
+- Další krok: Nasadit opravu a samostatně obnovit dnešní kartu z uloženého source.html.

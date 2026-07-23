@@ -171,3 +171,14 @@ Důkaz: plná Cockpit brána: 880 testů, 265.9 s, výsledek OK. Checkpoint back
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Ověřit čistý main, synchronizaci obou profilů a uvolnit přechodný semafor.
+
+### 2026-07-23 10:57 CEST – Import URL nyní respektuje HTTP charset včetně ISO-8859-2
+
+Pracovní proud: `project-knowledge-library`.
+
+Milník: Import URL nyní respektuje HTTP charset včetně ISO-8859-2
+
+Důkaz: plná Cockpit brána: 1123 testů, 216.6 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Nasadit opravu a samostatně obnovit dnešní kartu z uloženého source.html.

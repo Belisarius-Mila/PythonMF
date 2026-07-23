@@ -261,6 +261,42 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertEqual(listed["count"], 1)
         self.assertEqual(listed["items"][0]["canonical_url"], "https://example.test/clanek")
 
+    def test_archive_url_respects_http_iso_8859_2_charset_without_meta_tag(self) -> None:
+        html = """<!doctype html>
+<html>
+<head><title>Český vědecký článek</title></head>
+<body><main><p>Příliš žluťoučký kůň úpěl ďábelské ódy.</p></main></body>
+</html>""".encode("iso-8859-2")
+
+        class FakeResponse:
+            headers = {"Content-Type": "text/html; charset=ISO-8859-2"}
+
+            def __enter__(self) -> "FakeResponse":
+                return self
+
+            def __exit__(self, *_args: object) -> None:
+                return None
+
+            def read(self) -> bytes:
+                return html
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            with patch("urllib.request.urlopen", return_value=FakeResponse()):
+                result = archive_url(
+                    url="https://example.test/veda",
+                    category="science",
+                    archive_root=archive_root,
+                )
+            article = get_article(
+                article_id=result["item"]["id"],
+                archive_root=archive_root,
+                max_chars=0,
+            )
+
+        self.assertEqual(result["item"]["title"], "Český vědecký článek")
+        self.assertEqual(article["text"], "Příliš žluťoučký kůň úpěl ďábelské ódy.")
+
     def test_extract_article_prefers_main_content_over_footer_title_duplicate(self) -> None:
         html = """<!doctype html>
 <html>
@@ -882,20 +918,33 @@ class ArticleArchiveTests(unittest.TestCase):
 
     def test_fetch_url_falls_back_to_curl_for_certificate_chain_failure(self) -> None:
         cert_error = ssl.SSLCertVerificationError("certificate verify failed")
+        html = "<html><title>Český článek</title></html>".encode("iso-8859-2")
         curl_result = subprocess.CompletedProcess(
             args=["curl"],
             returncode=0,
-            stdout=b"<html><title>OK</title></html>",
+            stdout=(
+                b"HTTP/1.1 200 OK\r\n"
+                b"Content-Type: text/html; charset=ISO-8859-2\r\n"
+                b"\r\n"
+                + html
+            ),
             stderr=b"",
         )
+        response_metadata: dict[str, str] = {}
 
         with patch("urllib.request.urlopen", side_effect=urllib.error.URLError(cert_error)):
             with patch("subprocess.run", return_value=curl_result) as run:
-                html = fetch_url("https://example.test/clanek", timeout=5)
+                fetched = fetch_url(
+                    "https://example.test/clanek",
+                    timeout=5,
+                    response_metadata=response_metadata,
+                )
 
-        self.assertEqual(html, b"<html><title>OK</title></html>")
+        self.assertEqual(fetched, html)
+        self.assertEqual(response_metadata["charset"], "ISO-8859-2")
         curl_args = run.call_args.args[0]
         self.assertIn("--fail", curl_args)
+        self.assertIn("--dump-header", curl_args)
         self.assertNotIn("--insecure", curl_args)
         self.assertNotIn("-k", curl_args)
 
