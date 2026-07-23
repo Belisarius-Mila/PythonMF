@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import gzip
 import json
 import ssl
 import subprocess
@@ -25,6 +26,7 @@ from app.article_archive import (
     article_text_cleanup_report,
     attach_article_image,
     cleanup_article_text,
+    decompress_http_body,
     delete_article,
     extract_article,
     fetch_url,
@@ -297,6 +299,71 @@ class ArticleArchiveTests(unittest.TestCase):
 
         self.assertEqual(result["item"]["title"], "Český vědecký článek")
         self.assertEqual(article["text"], "Příliš žluťoučký kůň úpěl ďábelské ódy.")
+
+    def test_archive_url_decompresses_gzip_before_utf8_decoding_and_saves_html(self) -> None:
+        html = """<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Český gzip článek</title></head>
+<body><main><p>Příliš žluťoučký kůň zůstal po rozbalení čitelný.</p></main></body>
+</html>""".encode("utf-8")
+        compressed_html = gzip.compress(html)
+
+        class FakeResponse:
+            headers = {
+                "Content-Type": "text/html",
+                "Content-Encoding": "gzip",
+            }
+
+            def __enter__(self) -> "FakeResponse":
+                return self
+
+            def __exit__(self, *_args: object) -> None:
+                return None
+
+            def read(self) -> bytes:
+                return compressed_html
+
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            archive_root = Path(temp_dir)
+            with patch("urllib.request.urlopen", return_value=FakeResponse()):
+                result = archive_url(
+                    url="https://example.test/gzip-veda",
+                    category="science",
+                    archive_root=archive_root,
+                )
+            article_id = result["item"]["id"]
+            article = get_article(
+                article_id=article_id,
+                archive_root=archive_root,
+                max_chars=0,
+            )
+            saved_source = (
+                archive_root / "articles" / article_id / "source.html"
+            ).read_bytes()
+
+        self.assertEqual(saved_source, html)
+        self.assertEqual(result["item"]["title"], "Český gzip článek")
+        self.assertEqual(
+            article["text"],
+            "Příliš žluťoučký kůň zůstal po rozbalení čitelný.",
+        )
+
+    def test_extract_article_reads_legacy_gzip_source_and_enforces_size_limit(self) -> None:
+        html = """<!doctype html>
+<html><head><meta charset="utf-8"><title>Starší gzip zdroj</title></head>
+<body><main><p>Text z dříve uloženého gzip source.html.</p></main></body></html>""".encode("utf-8")
+        compressed_html = gzip.compress(html)
+
+        article = extract_article(compressed_html, "https://example.test/legacy-gzip")
+
+        self.assertEqual(article.title, "Starší gzip zdroj")
+        self.assertEqual(article.text, "Text z dříve uloženého gzip source.html.")
+        with self.assertRaisesRegex(OSError, "bezpečný velikostní limit"):
+            decompress_http_body(
+                gzip.compress(b"x" * 128),
+                content_encoding="gzip",
+                max_decompressed_bytes=64,
+            )
 
     def test_extract_article_prefers_main_content_over_footer_title_duplicate(self) -> None:
         html = """<!doctype html>
@@ -1026,14 +1093,16 @@ class ArticleArchiveTests(unittest.TestCase):
     def test_fetch_url_falls_back_to_curl_for_certificate_chain_failure(self) -> None:
         cert_error = ssl.SSLCertVerificationError("certificate verify failed")
         html = "<html><title>Český článek</title></html>".encode("iso-8859-2")
+        compressed_html = gzip.compress(html)
         curl_result = subprocess.CompletedProcess(
             args=["curl"],
             returncode=0,
             stdout=(
                 b"HTTP/1.1 200 OK\r\n"
                 b"Content-Type: text/html; charset=ISO-8859-2\r\n"
+                b"Content-Encoding: gzip\r\n"
                 b"\r\n"
-                + html
+                + compressed_html
             ),
             stderr=b"",
         )
@@ -1049,6 +1118,7 @@ class ArticleArchiveTests(unittest.TestCase):
 
         self.assertEqual(fetched, html)
         self.assertEqual(response_metadata["charset"], "ISO-8859-2")
+        self.assertEqual(response_metadata["content_encoding"], "gzip")
         curl_args = run.call_args.args[0]
         self.assertIn("--fail", curl_args)
         self.assertIn("--dump-header", curl_args)

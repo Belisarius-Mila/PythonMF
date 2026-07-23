@@ -110,3 +110,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/article_archive.py`, `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/tests/test_article_archive.py`, `Samantha_Agent/tests/test_cockpit.py`
 - Commit: `Add read-only article re-extraction preview`
 - Další krok: Nasadit změnu a spustit náhled nad dnešní kartou; samotnou opravu potvrdit samostatně.
+
+### Automatický checkpoint 2026-07-23 22:11 CEST
+
+- Pracovní proud: `project-knowledge-library`
+- Souhrn: Import URL bezpečně rozbaluje gzip před dekódováním a regresní testy prošly
+- Ověření: plná Cockpit brána: 1159 testů, 230.7 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/article_archive.py`, `Samantha_Agent/tests/test_article_archive.py`
+- Commit: `Handle gzip-compressed article responses`
+- Další krok: Nasadit změnu a samostatným výslovným pokynem opravit dnešní kartu z uloženého zdroje.

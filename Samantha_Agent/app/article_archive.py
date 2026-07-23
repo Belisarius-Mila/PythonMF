@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import gzip
 import hashlib
 import html
 import json
@@ -50,6 +51,7 @@ READ_STATE_LABELS = {
     "done": "hotovo",
 }
 SOURCE_REEXTRACT_PREVIEW_ENCODING = "iso-8859-2"
+MAX_DECOMPRESSED_HTML_BYTES = 20 * 1024 * 1024
 
 
 @dataclass(frozen=True)
@@ -941,8 +943,13 @@ def fetch_url(
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
             content_type = str(response.headers.get("Content-Type", "") or "")
+            content_encoding = str(response.headers.get("Content-Encoding", "") or "")
             record_http_content_type(response_metadata, content_type)
-            return response.read()
+            record_http_content_encoding(response_metadata, content_encoding)
+            return decompress_http_body(
+                response.read(),
+                content_encoding=content_encoding,
+            )
     except urllib.error.URLError as exc:
         if not is_certificate_verify_failure(exc):
             raise
@@ -983,9 +990,13 @@ def fetch_url_with_curl(
     if completed.returncode:
         message = completed.stderr.decode("utf-8", errors="replace").strip()
         raise urllib.error.URLError(message or f"curl failed with exit {completed.returncode}")
-    html_bytes, content_type = split_curl_headers(completed.stdout)
+    html_bytes, content_type, content_encoding = split_curl_headers(completed.stdout)
     record_http_content_type(response_metadata, content_type)
-    return html_bytes
+    record_http_content_encoding(response_metadata, content_encoding)
+    return decompress_http_body(
+        html_bytes,
+        content_encoding=content_encoding,
+    )
 
 
 def record_http_content_type(
@@ -1006,20 +1017,72 @@ def record_http_content_type(
         response_metadata["charset"] = match.group(1).strip()
 
 
-def split_curl_headers(payload: bytes) -> tuple[bytes, str]:
+def record_http_content_encoding(
+    response_metadata: dict[str, str] | None,
+    content_encoding: str,
+) -> None:
+    if response_metadata is None:
+        return
+    clean_content_encoding = str(content_encoding or "").strip()
+    if clean_content_encoding:
+        response_metadata["content_encoding"] = clean_content_encoding
+
+
+def split_curl_headers(payload: bytes) -> tuple[bytes, str, str]:
     body = payload
     content_type = ""
+    content_encoding = ""
     while body.startswith(b"HTTP/"):
         separator = re.search(br"\r?\n\r?\n", body)
         if separator is None:
             break
         header_block = body[: separator.start()]
         body = body[separator.end() :]
+        block_content_type = ""
+        block_content_encoding = ""
         for line in header_block.splitlines()[1:]:
             name, separator_byte, value = line.partition(b":")
-            if separator_byte and name.strip().lower() == b"content-type":
-                content_type = value.decode("latin-1", errors="replace").strip()
-    return body, content_type
+            if not separator_byte:
+                continue
+            normalized_name = name.strip().lower()
+            decoded_value = value.decode("latin-1", errors="replace").strip()
+            if normalized_name == b"content-type":
+                block_content_type = decoded_value
+            elif normalized_name == b"content-encoding":
+                block_content_encoding = decoded_value
+        content_type = block_content_type
+        content_encoding = block_content_encoding
+    return body, content_type, content_encoding
+
+
+def decompress_http_body(
+    payload: bytes,
+    *,
+    content_encoding: str = "",
+    max_decompressed_bytes: int = MAX_DECOMPRESSED_HTML_BYTES,
+) -> bytes:
+    encodings = [
+        part.strip().casefold()
+        for part in str(content_encoding or "").split(",")
+        if part.strip() and part.strip().casefold() != "identity"
+    ]
+    if not encodings and payload.startswith(b"\x1f\x8b"):
+        encodings = ["gzip"]
+    unsupported = [encoding for encoding in encodings if encoding not in {"gzip", "x-gzip"}]
+    if unsupported:
+        raise OSError("HTTP odpověď používá nepodporované komprimované kódování.")
+
+    body = payload
+    for _encoding in reversed(encodings):
+        try:
+            with gzip.GzipFile(fileobj=BytesIO(body)) as compressed:
+                decompressed = compressed.read(max_decompressed_bytes + 1)
+        except (EOFError, OSError) as exc:
+            raise OSError("Gzip HTTP odpověď je poškozená.") from exc
+        if len(decompressed) > max_decompressed_bytes:
+            raise OSError("Rozbalená HTTP odpověď překračuje bezpečný velikostní limit.")
+        body = decompressed
+    return body
 
 
 def extract_article(
@@ -1028,6 +1091,7 @@ def extract_article(
     *,
     http_encoding: str = "",
 ) -> ExtractedArticle:
+    html_bytes = decompress_http_body(html_bytes)
     html_text = decode_html_document(html_bytes, http_encoding=http_encoding)
     title = extract_title(html_text) or urlparse(source_url).netloc or "article"
     canonical = extract_canonical_url(html_text) or strip_tracking_query(source_url)
