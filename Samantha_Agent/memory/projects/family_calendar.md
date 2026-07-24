@@ -117,6 +117,16 @@
   `not running` a celkovou připravenost `planner_ready`.
 - Stavový ani worker soubor nevznikl; nebyl evidován žádný záznam ve stavu
   `sending`, `partial` nebo `delivery_unknown`. Automatika zůstává neaktivní.
+- Read-only náhled budoucí aktivace přesně popisuje jedinou zamýšlenou změnu
+  `dry_run` na `enabled`, provozní předpoklady, D-2/D-1 podmínky, idempotenci,
+  pořadí odpojení a načtení plánovače i fail-closed rollback.
+- Náhled nemá `--apply` ani aktivační nebo odesílací větev. Skutečný režim
+  `enabled` zůstává neimplementovaný a je samostatně označený blokátorem
+  `automatic_mode_unavailable`.
+- Živý read-only náhled prošel bez issues a potvrdil připravenou konfiguraci,
+  načtený plánovač, Keychain reference a prázdný neblokující stav. Neprovedl
+  zápis, runtime mutaci, čtení hesla ani transport.
+- Kalendářová regrese 203 testů a plná Cockpit Quality Gate 1185 testů prošly.
 
 ## Bezpečnostní hranice
 
@@ -132,6 +142,6 @@
 
 ## Nejmenší další krok
 
-Vytvořit pouze read-only návrh přechodu z `dry_run` do automatického režimu,
-včetně potvrzovacího, rollback a recovery kontraktu. Režim zatím neměnit a nic
-neodesílat.
+Po začlenění zopakovat z `main` živý read-only náhled. Potom samostatně
+implementovat potvrzovanou aktivační bránu a ostrý plánovací vstup podle
+schváleného kontraktu; režim zatím neměnit a nic neodesílat.

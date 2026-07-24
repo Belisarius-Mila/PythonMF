@@ -85,6 +85,10 @@ async def second():
         self.assertIn("tests.test_project_continuity", TEST_MODULES)
         self.assertIn("app/project_continuity.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery.py", COMPILE_PATHS)
+        self.assertIn(
+            "app/family_calendar_delivery_automation_preview.py",
+            COMPILE_PATHS,
+        )
         self.assertIn("app/family_calendar_icloud_smtp_client.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_test_email.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_config.py", COMPILE_PATHS)
@@ -106,6 +110,10 @@ async def second():
         self.assertIn("app/family_calendar_delivery_store.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_smtp_adapter.py", COMPILE_PATHS)
         self.assertIn("scripts/family_calendar_delivery_config_initialize.py", COMPILE_PATHS)
+        self.assertIn(
+            "scripts/family_calendar_delivery_automation_preview.py",
+            COMPILE_PATHS,
+        )
         self.assertIn("scripts/family_calendar_delivery_config_enable_dry_run.py", COMPILE_PATHS)
         self.assertIn("scripts/family_calendar_delivery_config_migrate.py", COMPILE_PATHS)
         self.assertIn("scripts/family_calendar_delivery_dry_run.py", COMPILE_PATHS)
@@ -141,6 +149,10 @@ async def second():
         )
         self.assertIn("scripts/family_calendar_delivery_test_email.py", COMPILE_PATHS)
         self.assertIn("tests.test_family_calendar_delivery", TEST_MODULES)
+        self.assertIn(
+            "tests.test_family_calendar_delivery_automation_preview",
+            TEST_MODULES,
+        )
         self.assertIn("tests.test_family_calendar_icloud_smtp_client", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_test_email", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_config", TEST_MODULES)

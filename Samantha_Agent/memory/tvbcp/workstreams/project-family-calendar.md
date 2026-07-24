@@ -525,3 +525,37 @@ s přechodem do automatického režimu.
 Další krok: připravit pouze read-only návrh přechodu z `dry_run` do
 automatického režimu včetně potvrzovacího, rollback a recovery kontraktu.
 Režim zatím neměnit a nic neodesílat.
+
+### 2026-07-24 08:34 CEST – Read-only návrh aktivace je ověřený
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: nový náhled přesně popisuje jedinou budoucí změnu konfigurace
+`dry_run` na `enabled`. Současně zachycuje podmínky D-2/D-1, čtyři kanonické
+příjemce, identitu operace podle události a offsetu, jednoho workera a trvalý
+stav `sending` před případným transportem.
+
+Aktivační kontrakt: po revalidaci fingerprintu a provozních předpokladů se má
+plánovač nejprve odpojit a jeho stav ověřit. Teprve potom smí následovat
+atomická změna konfigurace s právy `0600`, ověření režimu, nové načtení a
+závěrečný readiness audit.
+
+Rollback a recovery: před obnovou `dry_run` se musí plánovač vždy znovu
+odpojit a ověřit. Pokud není možné bezpečný stav potvrdit, plánovač zůstane
+odpojený, konfigurace vyžaduje ruční audit a automatický retry je zakázaný.
+`sending` a `delivery_unknown` blokují aktivaci; `partial` vyžaduje ruční
+revizi před případným retry.
+
+Důkaz: 203 kalendářových testů a plná Cockpit Quality Gate s 1185 testy
+prošly. Živý read-only náhled neměl issues, provozní předpoklady byly
+připravené a jediný implementační blokátor byl
+`automatic_mode_unavailable`. Náhled nezapsal data, nezměnil runtime, nečetl
+heslo a nevolal transport.
+
+Rozhodnutí: návrh není souhlasem s aktivací. Nemá `--apply`, režim `enabled`
+ani ostrý plánovací vstup zatím nejsou implementované a automatické odesílání
+zůstává vypnuté.
+
+Další krok: po začlenění zopakovat živý read-only náhled z `main`. Potom
+samostatně implementovat potvrzovanou aktivační bránu a ostrý plánovací vstup
+podle tohoto kontraktu; režim zatím neměnit a nic neodesílat.

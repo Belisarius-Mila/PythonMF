@@ -473,3 +473,27 @@ Bezpecnost / neukladat:
   synchronizované na commitu `9842ac5`.
 - Další krok: pouze read-only návrh přechodu do automatického režimu; zatím
   režim neměnit ani nic neodesílat.
+
+### Automatický checkpoint 2026-07-24 08:34 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Přidán přesný read-only náhled budoucí aktivace z `dry_run` do
+  `enabled`, včetně D-2/D-1 podmínek, idempotence, potvrzovacího kontraktu,
+  bezpečného pořadí runtime kroků a fail-closed rollbacku.
+- Bezpečnost: náhled nemá `--apply`, aktivační ani odesílací cestu. Režim
+  `enabled` zůstává neimplementovaný; nebyl proveden zápis, runtime mutace,
+  čtení hesla ani transport.
+- Ověření: 203 kalendářových testů a plná Cockpit Quality Gate 1185 testů,
+  výsledek OK. Živý náhled prošel bez issues; provozní předpoklady jsou
+  připravené a jediný implementační blokátor je
+  `automatic_mode_unavailable`.
+- Změněné cesty před paměťovým zápisem (5):
+  `Samantha_Agent/app/family_calendar_delivery_automation_preview.py`,
+  `Samantha_Agent/scripts/family_calendar_delivery_automation_preview.py`,
+  `Samantha_Agent/tests/test_family_calendar_delivery_automation_preview.py`,
+  `Samantha_Agent/scripts/cockpit_quality_gate.py`,
+  `Samantha_Agent/tests/test_cockpit_quality_gate.py`.
+- Commit: `Doplnit read-only náhled aktivace kalendáře`
+- Další krok: po začlenění zopakovat z `main` živý read-only náhled. Potom
+  samostatně implementovat potvrzovanou aktivační bránu a ostrý plánovací
+  vstup; zatím režim neměnit ani nic neodesílat.
