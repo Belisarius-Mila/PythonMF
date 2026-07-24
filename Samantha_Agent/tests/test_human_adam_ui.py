@@ -170,6 +170,9 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertNotIn("\n  loadStatus();", startup)
 
     def test_verified_deployment_reconnect_is_narrow_and_fail_closed(self) -> None:
+        uncertainty_start = HUMAN_ADAM_HTML.index(
+            "function hasCurrentUncertainDelivery(messages)"
+        )
         guard_start = HUMAN_ADAM_HTML.index(
             "function safePostDeploymentReconnectStatus(payload)"
         )
@@ -177,14 +180,29 @@ class HumanAdamUiTests(unittest.TestCase):
             "async function restoreVerifiedDeploymentResult()",
             guard_start,
         )
+        uncertainty_source = HUMAN_ADAM_HTML[uncertainty_start:guard_start]
         source = HUMAN_ADAM_HTML[guard_start:restore_start]
 
+        self.assertIn(
+            "for (let index = rows.length - 1; index >= 0; index -= 1)",
+            uncertainty_source,
+        )
+        completed = uncertainty_source.index('status === "completed"')
+        pending = uncertainty_source.index('status === "pending"')
+        unknown = uncertainty_source.index('status === "delivery_unknown"')
+        recovery = uncertainty_source.index("item.recovery_required === true")
+        self.assertLess(completed, pending)
+        self.assertLess(completed, unknown)
+        self.assertLess(completed, recovery)
+        self.assertNotIn(".some(", uncertainty_source)
         self.assertIn("payload.runtime.reachable !== true", source)
         self.assertIn('String(session.connection_state || "") === "disconnected"', source)
         self.assertIn("session.turn_busy !== true", source)
         self.assertIn("!session.active_turn", source)
-        self.assertIn('"delivery_unknown"', source)
-        self.assertIn("item.recovery_required !== false", source)
+        self.assertIn(
+            "hasCurrentUncertainDelivery(session.messages)",
+            source,
+        )
         self.assertIn('api("/api/human-adam/connect"', source)
         self.assertIn("renderStatus(payload);", source)
         self.assertIn("finally {", source)

@@ -1389,3 +1389,47 @@ Zmenene nebo relevantni soubory:
 Bezpecnost / neukladat:
 - Neukládat obsah změněných souborů ani soukromých zpráv.
 - Nespouštět automatický merge, rebase, commit, push nebo přepis WIP.
+
+### 2026-07-24 18:38 CEST – Recovery hranice automatického připojení
+
+Nazev: Human–Adam – stará nejistota už neblokuje návrat po nasazení
+Priorita: 1
+Stav: ceka na nasazeni
+Pripomenout pri startu: ano
+Datum: 2026-07-24
+
+Co se resilo:
+Živé ověření po nasazení ukázalo, že UI guard blokoval automatické připojení
+kvůli každému historickému `delivery_unknown`, i když pozdější potvrzená
+odpověď už tuto nejistotu podle backendového pravidla uzavřela.
+
+Co je hotove:
+- UI prochází technickou historii doručení odzadu stejně jako backend.
+- Poslední `completed` uzavírá starší `pending`, `delivery_unknown` i recovery
+  požadavky.
+- Novější `pending`, `delivery_unknown` nebo `recovery_required=true` připojení
+  nadále bezpečně blokují.
+- Původní globální `messages.some(...)` kontrola byla odstraněna.
+- UI testy prošly 62 testy, pět přímých JavaScriptových scénářů prošlo, širší
+  sada prošla 457 testy a úplná Cockpit Quality Gate prošla 1201 testy.
+
+Co neni hotove:
+- Změna ještě není commitnutá, pushnutá ani nasazená.
+- Neběžel živý restart s automatickým připojením nad existující historií.
+
+Dalsi krok:
+Commitnout, pushnout a potvrzovaně nasadit opravu. Po restartu ověřit, že
+Human–Adam se automaticky připojí bez ručního zásahu.
+
+Navrhovane dalsi kroky:
+- Při zeleném živém testu uzavřít incident návratu po nasazení.
+- Při selhání zachytit pouze technické stavy doručení bez textů zpráv.
+
+Zmenene nebo relevantni soubory:
+- `human_adam_ui.py`
+- `test_human_adam_ui.py`
+- tento handoff, kanonický TVBCP a `ACTIVE_PROJECTS.md`
+
+Bezpecnost / neukladat:
+- Neukládat texty zpráv ani identity relace.
+- Skutečně aktuální nejistotu vždy ponechat fail-closed.

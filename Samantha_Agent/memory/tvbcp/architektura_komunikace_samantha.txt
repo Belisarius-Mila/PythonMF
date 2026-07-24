@@ -2463,3 +2463,28 @@ Navrhované další kroky:
 Technický důkaz:
 - Cílených 168, širších 457 a úplných 1201 testů prošlo.
 - JavaScript syntaxe a `git diff --check` jsou v pořádku.
+
+### 2026-07-24 18:38 CEST – Recovery hranice automatického připojení
+
+Hotovo:
+- UI guard návratu po nasazení používá stejnou recovery hranici jako backend.
+- Stará nejistota před posledním potvrzeným `completed` už automatické
+  připojení neblokuje.
+
+Rozhodnutí:
+- Novější `pending`, `delivery_unknown` a `recovery_required=true` zůstávají
+  fail-closed.
+- Technická historie se vyhodnocuje odzadu; neplatí globální zákaz kvůli
+  libovolné staré nejistotě.
+
+Další krok:
+- Nasadit opravu a živě ověřit automatické připojení po restartu bez ručního
+  zásahu.
+
+Navrhované další kroky:
+- Při zeleném live proofu incident návratu po nasazení uzavřít.
+
+Technický důkaz:
+- UI testy 62/62, pět přímých JavaScriptových scénářů a širších 457 testů
+  prošlo.
+- Úplná Cockpit Quality Gate prošla 1201 testy.

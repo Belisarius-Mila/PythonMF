@@ -2178,14 +2178,27 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     }
   }
 
+  function hasCurrentUncertainDelivery(messages) {
+    const rows = Array.isArray(messages) ? messages : [];
+    for (let index = rows.length - 1; index >= 0; index -= 1) {
+      const item = rows[index] && typeof rows[index] === "object" ? rows[index] : {};
+      const status = String(item.status || "");
+      if (status === "completed") return false;
+      if (
+        status === "pending"
+        || status === "delivery_unknown"
+        || item.recovery_required === true
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   function safePostDeploymentReconnectStatus(payload) {
     if (!payload || payload.ok !== true || !payload.runtime || payload.runtime.reachable !== true) return false;
     const session = payload.session || {};
-    const messages = Array.isArray(session.messages) ? session.messages : [];
-    const uncertain = messages.some((item) =>
-      String(item && item.status || "") === "delivery_unknown"
-      && item.recovery_required !== false
-    );
+    const uncertain = hasCurrentUncertainDelivery(session.messages);
     return (
       session.connected !== true
       && String(session.connection_state || "") === "disconnected"

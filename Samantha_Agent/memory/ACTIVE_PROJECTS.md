@@ -42,6 +42,14 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-24: Priorita 1, Human–Adam / recovery hranice automatického připojení.
+  Post-deployment UI guard nyní stejně jako backend prochází historii odzadu:
+  poslední potvrzený `completed` uzavře starší nejistoty, zatímco novější
+  `pending`, `delivery_unknown` nebo `recovery_required=true` zůstávají
+  fail-closed. Pět přímých JavaScriptových scénářů, 457 širších testů a úplná
+  Quality Gate s 1201 testy prošly. Další krok je nasazení a živé ověření
+  automatického připojení nad existující historií. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-24: Priorita 1, Human–Adam / read-only audit čekající integrace.
   Panel `Práce` nyní rozlišuje dirty zdrojový `main`, čistý společný základ,
   posun `main` s překryvem změněných cest a fail-closed blokaci cizím nebo
