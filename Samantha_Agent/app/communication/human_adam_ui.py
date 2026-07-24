@@ -87,12 +87,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .handoff-proposal-box h3 { margin:0; font-size:15px; }
     #handoffProposalMeta { margin:0; color:var(--muted); font-size:13px; overflow-wrap:anywhere; }
     #handoffProposalDraft { margin:0; padding:12px; border:1px solid #bfdbfe; border-radius:10px; background:#fff; white-space:pre-wrap; overflow-wrap:anywhere; font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; }
-    .development-branch-audit-box { padding:12px 16px; border-bottom:1px solid var(--line); display:grid; gap:8px; }
-    .development-branch-audit-head { display:flex; align-items:center; gap:8px; }
-    .development-branch-audit-head h3 { flex:1; margin:0; font-size:15px; }
-    #developmentBranchAuditMeta { margin:0; color:var(--muted); font-size:13px; overflow-wrap:anywhere; }
-    #developmentBranchAuditList { max-height:180px; overflow:auto; margin:0; padding:0 0 0 22px; }
-    #developmentBranchAuditList li { margin-bottom:6px; overflow-wrap:anywhere; font-size:13px; }
     .checkpoint-box { padding:12px 16px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); display:grid; gap:8px; }
     .checkpoint-box input { width:100%; border:1px solid #bac7d8; border-radius:11px; padding:10px 12px; font:inherit; }
     #deployMeta { color:var(--muted); font-size:13px; line-height:1.4; }
@@ -347,14 +341,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <p id="projectContinuityMeta">Audit je pouze read-only a zatím nic neblokuje.</p>
       <ul id="projectContinuityReasons" hidden></ul>
     </section>
-    <section class="development-branch-audit-box legacy-work-control" aria-label="Historický životní cyklus vývojových větví">
-      <div class="development-branch-audit-head">
-        <h3>Životní cyklus WIP větví</h3>
-        <button id="developmentBranchAuditBtn" type="button">Prověřit WIP větve</button>
-      </div>
-      <p id="developmentBranchAuditMeta">Kontrola je pouze read-only a spouští se výslovně.</p>
-      <ul id="developmentBranchAuditList" hidden></ul>
-    </section>
     <div id="workMeta">Stav se načte až po otevření.</div>
     <ul id="workChanges"></ul>
     <section class="handoff-proposal-box legacy-work-control" id="handoffProposalBox" aria-label="Read-only návrh aktualizace handoffu" hidden>
@@ -453,9 +439,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const projectContinuityAuditBtn = document.getElementById("projectContinuityAuditBtn");
   const projectContinuityMeta = document.getElementById("projectContinuityMeta");
   const projectContinuityReasons = document.getElementById("projectContinuityReasons");
-  const developmentBranchAuditBtn = document.getElementById("developmentBranchAuditBtn");
-  const developmentBranchAuditMeta = document.getElementById("developmentBranchAuditMeta");
-  const developmentBranchAuditList = document.getElementById("developmentBranchAuditList");
   const checkpointMessage = document.getElementById("checkpointMessage");
   const checkpointBtn = document.getElementById("checkpointBtn");
   const deployMeta = document.getElementById("deployMeta");
@@ -692,7 +675,6 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     developmentResumeBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_resume !== true;
     developmentReleaseBtn.disabled = busy || !semaphoreValid || developmentSemaphore.can_release !== true;
     projectContinuityAuditBtn.disabled = busy;
-    developmentBranchAuditBtn.disabled = busy;
   }
 
   function setBusy(value, text="") {
@@ -1915,45 +1897,6 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     }
   }
 
-  function renderDevelopmentBranchAudit(payload) {
-    developmentBranchAuditList.replaceChildren();
-    const branches = Array.isArray(payload.branches) ? payload.branches : [];
-    const labels = {
-      active_dirty_worktree:"aktivní · rozpracováno",
-      active_clean_worktree:"aktivní · čisté",
-      merged:"integrováno do main",
-      patch_equivalent:"obsah je v main",
-      archived:"vědomě archivováno",
-      needs_review:"vyžaduje revizi",
-      unverified:"nelze ověřit",
-      unverified_worktree:"worktree nelze ověřit",
-    };
-    for (const item of branches) {
-      const row = document.createElement("li");
-      const label = labels[item.classification] || String(item.classification || "neznámý stav");
-      row.textContent = `${item.name || "neznámá větev"} · ${label} · ${item.reason || ""}`;
-      developmentBranchAuditList.appendChild(row);
-    }
-    developmentBranchAuditList.hidden = !branches.length;
-    developmentBranchAuditMeta.textContent = `Větve: ${Number(payload.branch_count || 0)} · aktivní: ${Number(payload.active_worktree_count || 0)} · kandidáti k později potvrzenému úklidu: ${Number(payload.cleanup_candidate_count || 0)} · revize: ${Number(payload.needs_review_count || 0)}. Nic nebylo změněno.`;
-  }
-
-  async function loadDevelopmentBranchAudit() {
-    developmentBranchAuditBtn.disabled = true;
-    developmentBranchAuditMeta.textContent = "Prověřuji Git větve bez změn…";
-    try {
-      const payload = await api("/api/human-adam/development-branches");
-      if (!payload.ok) throw new Error(payload.message || "Audit větví nelze dokončit.");
-      renderDevelopmentBranchAudit(payload);
-    } catch (error) {
-      developmentBranchAuditList.replaceChildren();
-      developmentBranchAuditList.hidden = true;
-      developmentBranchAuditMeta.textContent = `Audit větví selhal bezpečně: ${error.message}`;
-    } finally {
-      developmentBranchAuditBtn.disabled = busy;
-    }
-  }
-
   async function openWork() {
     if (workOpenBtn.disabled) return;
     workOpenBtn.disabled = true;
@@ -2339,7 +2282,6 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   developmentReleaseBtn.addEventListener("click", () => changeDevelopmentSemaphore("release"));
   developmentProject.addEventListener("change", () => updateDevelopmentHandoffs(""));
   projectContinuityAuditBtn.addEventListener("click", loadProjectContinuity);
-  developmentBranchAuditBtn.addEventListener("click", loadDevelopmentBranchAudit);
   checkpointBtn.addEventListener("click", createCheckpoint);
   deployAuditBtn.addEventListener("click", auditDeployment);
   deployConfirmation.addEventListener("input", () => {

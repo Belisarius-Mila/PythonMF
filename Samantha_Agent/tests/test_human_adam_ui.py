@@ -56,9 +56,6 @@ class HumanAdamUiTests(unittest.TestCase):
             "workHelpPanel",
             "workHelpCloseBtn",
             "workChanges",
-            "developmentBranchAuditBtn",
-            "developmentBranchAuditMeta",
-            "developmentBranchAuditList",
             "checkpointMessage",
             "checkpointBtn",
             "deployMeta",
@@ -331,7 +328,7 @@ class HumanAdamUiTests(unittest.TestCase):
 
     def test_project_continuity_ui_is_read_only_and_non_blocking(self) -> None:
         start = HUMAN_ADAM_HTML.index("async function loadProjectContinuity()")
-        end = HUMAN_ADAM_HTML.index("function renderDevelopmentBranchAudit", start)
+        end = HUMAN_ADAM_HTML.index("async function openWork()", start)
         source = HUMAN_ADAM_HTML[start:end]
 
         self.assertIn('api("/api/human-adam/project-continuity")', source)
@@ -353,7 +350,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertNotIn("fetch(", source)
         self.assertNotIn("method:\"POST\"", source)
         self.assertNotIn("handoffProposalSaveBtn", HUMAN_ADAM_HTML)
-        self.assertNotIn("max-height", HUMAN_ADAM_HTML[HUMAN_ADAM_HTML.index(".handoff-proposal-box"):HUMAN_ADAM_HTML.index(".development-branch-audit-box")])
+        self.assertNotIn("max-height", HUMAN_ADAM_HTML[HUMAN_ADAM_HTML.index(".handoff-proposal-box"):HUMAN_ADAM_HTML.index(".checkpoint-box")])
         self.assertIn('handoffProposalBox.scrollIntoView({block:"nearest",behavior:"smooth"});', HUMAN_ADAM_HTML)
 
     def test_takeover_handoff_check_is_visible_read_only_and_does_not_block_deploy(self) -> None:
@@ -379,17 +376,11 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertNotIn("deployment-completion-box", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/deploy-verification", HUMAN_ADAM_HTML)
 
-    def test_development_branch_lifecycle_ui_is_explicitly_read_only(self) -> None:
-        start = HUMAN_ADAM_HTML.index("async function loadDevelopmentBranchAudit()")
-        end = HUMAN_ADAM_HTML.index("function openWork()", start)
-        source = HUMAN_ADAM_HTML[start:end]
-
-        self.assertIn('api("/api/human-adam/development-branches")', source)
-        self.assertNotIn('method:"POST"', source)
-        self.assertIn("Audit větví selhal bezpečně", source)
-        self.assertIn("Nic nebylo změněno", HUMAN_ADAM_HTML)
-        self.assertIn("row.textContent", HUMAN_ADAM_HTML)
-        self.assertIn('developmentBranchAuditBtn.addEventListener("click", loadDevelopmentBranchAudit)', HUMAN_ADAM_HTML)
+    def test_development_branch_lifecycle_ui_is_absent(self) -> None:
+        self.assertNotIn("/api/human-adam/development-branches", HUMAN_ADAM_HTML)
+        self.assertNotIn("developmentBranchAudit", HUMAN_ADAM_HTML)
+        self.assertNotIn("development-branch-audit", HUMAN_ADAM_HTML)
+        self.assertNotIn("Životní cyklus WIP větví", HUMAN_ADAM_HTML)
 
     def test_work_help_is_accessible_static_and_describes_simple_main_workflow(self) -> None:
         work_panel_start = HUMAN_ADAM_HTML.index('id="workPanel"')
@@ -439,7 +430,6 @@ class HumanAdamUiTests(unittest.TestCase):
             'class="badge warn legacy-work-control" id="developmentBadge"',
             'class="development-semaphore-box legacy-work-control"',
             'class="project-continuity-box legacy-work-control"',
-            'class="development-branch-audit-box legacy-work-control"',
             'class="handoff-proposal-box legacy-work-control"',
             'class="legacy-work-control" id="checkpointMessage"',
             'class="primary legacy-work-control" id="checkpointBtn"',
