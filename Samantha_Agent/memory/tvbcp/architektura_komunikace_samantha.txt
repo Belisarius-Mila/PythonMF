@@ -2411,3 +2411,29 @@ Navrhované další kroky:
 Technický důkaz:
 - plná Cockpit brána: 1194 testů, 213.6 s, výsledek OK.
 - Pracovní proud: `layer-human-adam-development`.
+
+### 2026-07-24 13:56 CEST – Bezpečný návrat Human–Adam po nasazení
+
+Hotovo:
+- Po serverově ověřeném nasazení se stránka vždy obnoví, i když prohlížeč
+  neuloží dočasnou informaci o nasazení.
+- Čerstvá serverová účtenka umožní po návratu Cockpitu bezpečně znovu připojit
+  Human–Adam.
+
+Rozhodnutí:
+- Automatické připojení patří pouze do návratu po ověřeném nasazení. Běžné
+  otevření stránky zůstává beze změny.
+- Aktivní tah, vytížení, nejisté doručení nebo nedostupný runtime připojení
+  zablokují.
+
+Další krok:
+- Nasadit checkpoint a živě ověřit sled malý vývoj -> nasazení -> další pokyn
+  bez ručního obnovení nebo připojení.
+
+Navrhované další kroky:
+- Při zeleném živém testu incident uzavřít.
+- Při selhání zachytit jen bezpečný technický stav UI a serveru.
+
+Technický důkaz:
+- Cílených 191 a úplných 1195 testů prošlo.
+- JavaScript syntaxe a `git diff --check` jsou v pořádku.

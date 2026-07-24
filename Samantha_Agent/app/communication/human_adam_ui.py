@@ -2017,7 +2017,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
                 return;
               }
               deployMeta.textContent = verifiedDeploymentSummary(verification);
-              if (!storeVerifiedDeploymentResult(verification)) return;
+              storeVerifiedDeploymentResult(verification);
             } catch (error) {
               deployMeta.textContent = `Cockpit se vrátil, ale ověření nasazení nelze dokončit: ${error.message}`;
               return;
@@ -2120,16 +2120,60 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     }
   }
 
+  function safePostDeploymentReconnectStatus(payload) {
+    if (!payload || payload.ok !== true || !payload.runtime || payload.runtime.reachable !== true) return false;
+    const session = payload.session || {};
+    const messages = Array.isArray(session.messages) ? session.messages : [];
+    const uncertain = messages.some((item) =>
+      String(item && item.status || "") === "delivery_unknown"
+      && item.recovery_required !== false
+    );
+    return (
+      session.connected !== true
+      && String(session.connection_state || "") === "disconnected"
+      && session.turn_busy !== true
+      && !session.active_turn
+      && !uncertain
+    );
+  }
+
+  async function reconnectAfterVerifiedDeployment(statusPayload) {
+    if (!safePostDeploymentReconnectStatus(statusPayload)) {
+      return {payload:statusPayload,reconnected:false};
+    }
+    setBusy(true, "Nasazení je ověřené · znovu připojuji Human–Adam…");
+    try {
+      const payload = await api("/api/human-adam/connect", {
+        method:"POST",
+        body:JSON.stringify({}),
+      });
+      if (!payload.ok) throw new Error(payload.message || "Připojení po nasazení selhalo.");
+      renderStatus(payload);
+      return {
+        payload,
+        reconnected:Boolean(payload.session && payload.session.connected),
+      };
+    } catch (error) {
+      notice.textContent = `Nasazení je dokončené, ale Human–Adam se nepodařilo znovu připojit: ${error.message}`;
+      return {payload:statusPayload,reconnected:false};
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function restoreVerifiedDeploymentResult() {
     let record = takeVerifiedDeploymentResult();
-    const statusPayload = await loadStatus();
+    let statusPayload = await loadStatus();
     if (!record) record = recentServerDeploymentRecord(statusPayload);
     if (!record) return;
+    const reconnectResult = await reconnectAfterVerifiedDeployment(statusPayload);
+    statusPayload = reconnectResult.payload;
     contextAnchorPanel.hidden = true;
     tvbcpPanel.hidden = true;
     workPanel.hidden = false;
     await loadWork();
-    deployMeta.textContent = verifiedDeploymentSummary(record);
+    deployMeta.textContent = verifiedDeploymentSummary(record)
+      + (reconnectResult.reconnected ? " Human–Adam je znovu připojený." : "");
     markVerifiedDeploymentSeen(record);
   }
 

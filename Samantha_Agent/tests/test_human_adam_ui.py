@@ -124,6 +124,10 @@ class HumanAdamUiTests(unittest.TestCase):
         reload_page = HUMAN_ADAM_HTML.index("window.location.reload();", verification)
         self.assertLess(verification, stored)
         self.assertLess(stored, reload_page)
+        self.assertNotIn(
+            "if (!storeVerifiedDeploymentResult(verification)) return;",
+            HUMAN_ADAM_HTML,
+        )
         self.assertIn('verification.state !== "deployed"', HUMAN_ADAM_HTML)
 
     def test_verified_deployment_survives_reload_and_reopens_work_panel_once(self) -> None:
@@ -140,18 +144,52 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("verifiedDeploymentMaxAgeMs", source)
         self.assertIn("payload && payload.recent_simple_main_deployment", source)
         self.assertIn("verifiedDeploymentSeenStorageKey", source)
-        self.assertIn("const statusPayload = await loadStatus();", restore_source)
+        self.assertIn("let statusPayload = await loadStatus();", restore_source)
         self.assertIn("recentServerDeploymentRecord(statusPayload)", restore_source)
+        reconnect = restore_source.index(
+            "await reconnectAfterVerifiedDeployment(statusPayload)"
+        )
+        no_record = restore_source.index("if (!record) return;")
+        self.assertLess(no_record, reconnect)
         self.assertIn("workPanel.hidden = false;", restore_source)
         loaded = restore_source.index("await loadWork();")
-        confirmed = restore_source.index("deployMeta.textContent = verifiedDeploymentSummary(record);")
+        confirmed = restore_source.index(
+            "deployMeta.textContent = verifiedDeploymentSummary(record)"
+        )
+        self.assertLess(reconnect, loaded)
         self.assertLess(loaded, confirmed)
+        self.assertIn("Human–Adam je znovu připojený.", restore_source)
         self.assertIn("restoreVerifiedDeploymentResult();", HUMAN_ADAM_HTML)
         self.assertIn("main ${record.main_short}", HUMAN_ADAM_HTML)
         self.assertIn("${record.test_count} testů", HUMAN_ADAM_HTML)
         self.assertIn("smoke ${record.smoke_count}/5", HUMAN_ADAM_HTML)
         startup = HUMAN_ADAM_HTML[HUMAN_ADAM_HTML.rindex("clearMessageInput();"):]
         self.assertNotIn("\n  loadStatus();", startup)
+
+    def test_verified_deployment_reconnect_is_narrow_and_fail_closed(self) -> None:
+        guard_start = HUMAN_ADAM_HTML.index(
+            "function safePostDeploymentReconnectStatus(payload)"
+        )
+        restore_start = HUMAN_ADAM_HTML.index(
+            "async function restoreVerifiedDeploymentResult()",
+            guard_start,
+        )
+        source = HUMAN_ADAM_HTML[guard_start:restore_start]
+
+        self.assertIn("payload.runtime.reachable !== true", source)
+        self.assertIn('String(session.connection_state || "") === "disconnected"', source)
+        self.assertIn("session.turn_busy !== true", source)
+        self.assertIn("!session.active_turn", source)
+        self.assertIn('"delivery_unknown"', source)
+        self.assertIn("item.recovery_required !== false", source)
+        self.assertIn('api("/api/human-adam/connect"', source)
+        self.assertIn("renderStatus(payload);", source)
+        self.assertIn("finally {", source)
+        self.assertIn("setBusy(false);", source)
+        self.assertIn(
+            "Nasazení je dokončené, ale Human–Adam se nepodařilo znovu připojit",
+            source,
+        )
 
     def test_thread_rotation_ui_requires_audit_exact_phrase_and_preserves_old_thread(self) -> None:
         audit_start = HUMAN_ADAM_HTML.index("async function auditThreadRotation()")

@@ -42,6 +42,14 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-24: Priorita 1, Human–Adam / návrat po samoobslužném nasazení.
+  Ověřené nasazení nyní obnoví stránku i při selhání `sessionStorage` a po
+  návratu Cockpitu bezpečně znovu připojí Human–Adam pouze tehdy, když není
+  aktivní tah, nejisté doručení ani nedostupný runtime. Běžné otevření stránky
+  se automaticky nepřipojuje. Cílených 191 testů a celá Cockpit Quality Gate
+  s 1195 testy prošly. Další krok je commit, push, potvrzované nasazení a jeden
+  živý test malý vývoj -> nasazení -> další pokyn. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-24: Priorita 1, lepsi projektove TVBCP – faze 1. Pravidla,
   automaticka dokoncovaci uctenka a checkpointovy generator nyni pro nove
   appendovane zaznamy uprednostnuji `Hotovo`, `Rozhodnuti`, jeden

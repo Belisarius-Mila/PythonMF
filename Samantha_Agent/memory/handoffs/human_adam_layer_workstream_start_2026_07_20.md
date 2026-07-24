@@ -1292,3 +1292,49 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/tests/test_human_adam_ui.py`
 - Commit: `Upresnit stav rotace bez kotvy`
 - Další krok: Po nasazení ručně ověřit text kontroly rotace bez kotvy
+
+### 2026-07-24 13:56 CEST – Bezpečný návrat Human–Adam po nasazení
+
+Nazev: Human–Adam – obnovení stránky a spojení po samoobslužném nasazení
+Priorita: 1
+Stav: ceka na nasazeni
+Pripomenout pri startu: ano
+Datum: 2026-07-24
+
+Co se resilo:
+Po úspěšném nasazení se backend správně restartoval, ale stránka mohla zůstat
+ve starém zakázaném stavu. Při selhání úložiště prohlížeče se vůbec neobnovila
+a po běžném restartu nebylo spojení automaticky navázáno.
+
+Co je hotove:
+- Po serverově ověřeném nasazení se stránka obnoví bez ohledu na výsledek zápisu
+  do `sessionStorage`.
+- Obnovená stránka znovu připojí Human–Adam pouze po dohledání čerstvého
+  ověřeného nasazení.
+- Připojení zůstává fail-closed při aktivním tahu, vytížení, nejistém doručení
+  nebo nedostupném runtime.
+- Běžné otevření Human–Adam bez ověřeného nasazení se automaticky nepřipojuje.
+- Cílená sada prošla 191 testy, JavaScript syntaktickou kontrolou a úplná
+  Cockpit Quality Gate prošla 1195 testy.
+
+Co neni hotove:
+- Změna ještě není commitnutá, pushnutá ani nasazená.
+- Neběžel živý test návratu stránky a dalšího pokynu po skutečném nasazení.
+
+Dalsi krok:
+Commitnout, pushnout a potvrzovaně nasadit tento checkpoint. Potom provést jeden
+malý živý vývoj, nasazení z panelu `Práce` a ověřit, že Human–Adam přijme další
+pokyn bez ručního obnovování nebo připojování.
+
+Navrhovane dalsi kroky:
+- Pokud živý test projde, uzavřít incident jako vyřešený.
+- Pokud neprojde, zachytit pouze bezpečný stav UI a serveru bez obsahu zpráv.
+
+Zmenene nebo relevantni soubory:
+- `human_adam_ui.py`
+- `test_human_adam_ui.py`
+- tento handoff, kanonický TVBCP a `ACTIVE_PROJECTS.md`
+
+Bezpecnost / neukladat:
+- Neukládat obsah soukromých zpráv, identity relace ani private stav.
+- Automatické připojení nikdy nespouštět při aktivní nebo nejisté práci.
