@@ -456,3 +456,20 @@ Bezpecnost / neukladat:
 - Další krok: Po začlenění a pushi spustit z `main` pouze read-only preview.
   Skutečný `bootstrap` vyžaduje novou globální i lokální potvrzovací větu a
   shodný fingerprint; automatický režim ani odesílání nezapínat.
+
+### Provozní checkpoint 2026-07-24 08:12 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Milník: LaunchAgent byl po přesné globální i lokální potvrzovací větě a
+  ověření shodného fingerprintu načten. `bootstrap` skončil nulovým návratovým
+  kódem, runtime probe potvrdil `loaded` a rollback nebyl potřeba.
+- První naplánovaný dry-run: 2026-07-24 v 08:00; read-only audit v 08:10
+  potvrdil `runs=1`, poslední návratový kód `0`, stav `not running` a
+  `planner_ready`.
+- Bezpečnost: konfigurace zůstala `dry_run`, `automation_active=false`,
+  stavový ani worker soubor nevznikl a nebyl evidován stav `sending`,
+  `partial` ani `delivery_unknown`. Transport ani e-mail nebyly spuštěny.
+- Git: `main` a `origin/main` byly před tímto dokumentačním zápisem čisté a
+  synchronizované na commitu `9842ac5`.
+- Další krok: pouze read-only návrh přechodu do automatického režimu; zatím
+  režim neměnit ani nic neodesílat.

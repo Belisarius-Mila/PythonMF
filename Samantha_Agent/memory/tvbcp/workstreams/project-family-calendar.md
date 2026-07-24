@@ -498,3 +498,30 @@ a žádný e-mail nebyl odeslán.
 Další krok: po začlenění a pushi zopakovat z `main` pouze read-only load
 preview. Skutečné načtení provést až po nové přesné globální i lokální
 potvrzovací větě a se shodným fingerprintem; konfiguraci ponechat `dry_run`.
+
+### 2026-07-24 08:12 CEST – První naplánovaný dry-run prošel bez transportu
+
+Pracovní proud: `project-family-calendar`.
+
+Provozní milník: po přesné globální i lokální potvrzovací větě a ověření
+shodného fingerprintu byl dry-run LaunchAgent načten. `bootstrap` skončil
+nulovým návratovým kódem, následný probe potvrdil `loaded` a rollback nebyl
+potřeba. Protože plist zachoval `RunAtLoad=false`, samotné načtení úlohu
+nespustilo.
+
+Důkaz prvního plánu: úloha byla naplánována na 2026-07-24 v 08:00. Read-only
+audit v 08:10 CEST zaznamenal `runs=1`, poslední návratový kód `0` a stav
+`not running`. Readiness zůstal `planner_ready`; jedinou zbývající překážkou
+automatiky je nedostupný automatický režim.
+
+Bezpečnostní výsledek: konfigurace zůstala `dry_run`,
+`automation_active=false`, stavový ani worker soubor nevznikl a nebyl
+evidován žádný záznam ve stavu `sending`, `partial` nebo `delivery_unknown`.
+Heslo nebylo čteno, transport nebyl volán a žádný e-mail nebyl odeslán.
+
+Rozhodnutí: dry-run plánovač je provozně ověřený. Tento důkaz není souhlasem
+s přechodem do automatického režimu.
+
+Další krok: připravit pouze read-only návrh přechodu z `dry_run` do
+automatického režimu včetně potvrzovacího, rollback a recovery kontraktu.
+Režim zatím neměnit a nic neodesílat.

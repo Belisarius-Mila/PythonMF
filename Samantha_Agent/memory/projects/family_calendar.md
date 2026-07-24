@@ -106,6 +106,17 @@
   `print`, který vrátil kanonický kód nenačtené služby; readiness nadále hlásil
   `planner_not_loaded`. Kalendářová regrese 198 testů a plná Cockpit brána
   1180 testů prošly.
+- Po samostatné globální a lokální potvrzovací větě a ověření shodného
+  fingerprintu byl dry-run LaunchAgent úspěšně načten. `bootstrap` skončil
+  nulovým návratovým kódem, následný probe potvrdil `loaded` a rollback nebyl
+  potřeba.
+- Konfigurace zůstala `dry_run`, automatické odesílání vypnuté a při načtení
+  nedošlo ke čtení tajemství, volání transportu ani odeslání zprávy.
+- První naplánovaný dry-run proběhl 2026-07-24 v 08:00. Read-only audit v
+  08:10 CEST potvrdil `runs=1`, poslední návratový kód `0`, stav
+  `not running` a celkovou připravenost `planner_ready`.
+- Stavový ani worker soubor nevznikl; nebyl evidován žádný záznam ve stavu
+  `sending`, `partial` nebo `delivery_unknown`. Automatika zůstává neaktivní.
 
 ## Bezpečnostní hranice
 
@@ -121,7 +132,6 @@
 
 ## Nejmenší další krok
 
-Po začlenění a pushi zopakovat z `main` pouze read-only load preview. Skutečný
-`bootstrap` provést až po nové přesné globální i lokální potvrzovací větě a se
-shodným fingerprintem. Načtení stále ponechá konfiguraci `dry_run`; automatický
-režim ani odesílání tím nezapínat.
+Vytvořit pouze read-only návrh přechodu z `dry_run` do automatického režimu,
+včetně potvrzovacího, rollback a recovery kontraktu. Režim zatím neměnit a nic
+neodesílat.
