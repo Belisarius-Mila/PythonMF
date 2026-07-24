@@ -63,6 +63,7 @@ class FakeWorkspace:
         self.diverged = False
         self.prepare_count = 0
         self.sync_count = 0
+        self.source_pending_changes = 0
         self.checkpoint_subject = ""
         self.checkpoint_path = "Samantha_Agent/app.py"
 
@@ -81,7 +82,7 @@ class FakeWorkspace:
             "local_checkpoint_ahead": self.local_ahead,
             "local_commit_count": 1 if self.local_ahead else 0,
             "remotes": [],
-            "source_pending_changes": 0,
+            "source_pending_changes": self.source_pending_changes,
             "source_head": "a" * 40,
             "head": "b" * 40 if self.local_ahead else "a" * 40,
         }
@@ -2460,6 +2461,100 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(human_workspace.sync_count, 1)
         self.assertFalse(human_workspace.source_ahead)
         self.assertTrue(human_hub.connected)
+
+    def test_send_safely_fast_forwards_clean_idle_active_profile(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.connect()
+            human_workspace.source_ahead = True
+
+            result = manager.send(
+                text="Navrhni další bezpečný krok",
+                client_message_id="auto-sync-send-001",
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertTrue(result["workspace_synced"])
+        self.assertEqual(human_workspace.sync_count, 1)
+        self.assertFalse(human_workspace.source_ahead)
+        self.assertEqual(
+            human_hub.last_send["client_message_id"],
+            "auto-sync-send-001",
+        )
+
+    def test_send_reports_no_sync_when_active_workspace_is_aligned(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, _human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.connect()
+
+            result = manager.send(
+                text="Jen pokračuj",
+                client_message_id="aligned-send-001",
+            )
+
+        self.assertFalse(result["workspace_synced"])
+        self.assertEqual(human_workspace.sync_count, 0)
+
+    def test_send_does_not_sync_dirty_or_busy_active_workspace(self) -> None:
+        cases = ("dirty", "busy")
+        for case in cases:
+            with self.subTest(case=case):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    manager, human_workspace, _library_workspace, human_hub, _library_hub = (
+                        self.make_manager(Path(temp_dir))
+                    )
+                    manager.connect()
+                    human_workspace.source_ahead = True
+                    if case == "dirty":
+                        human_workspace.dirty = True
+                        expected_error = AppServerError
+                    else:
+                        human_hub.active_turn = {"turn_id": "busy-turn"}
+                        expected_error = SessionBusyError
+
+                    with self.assertRaises(expected_error):
+                        manager.send(
+                            text="Tento pokyn se nesmí odeslat",
+                            client_message_id=f"blocked-auto-sync-{case}",
+                        )
+
+                self.assertEqual(human_workspace.sync_count, 0)
+                self.assertEqual(human_hub.last_send, {})
+
+    def test_send_does_not_sync_uncertain_or_dirty_source_main(self) -> None:
+        cases = ("uncertain", "source_dirty")
+        for case in cases:
+            with self.subTest(case=case):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    manager, human_workspace, _library_workspace, human_hub, _library_hub = (
+                        self.make_manager(Path(temp_dir))
+                    )
+                    manager.connect()
+                    human_workspace.source_ahead = True
+                    if case == "uncertain":
+                        human_hub.messages = [
+                            {
+                                "status": "delivery_unknown",
+                                "recovery_required": True,
+                            }
+                        ]
+                        expected_error = SessionBusyError
+                    else:
+                        human_workspace.source_pending_changes = 1
+                        expected_error = AppServerError
+
+                    with self.assertRaises(expected_error):
+                        manager.send(
+                            text="Tento pokyn se nesmí odeslat",
+                            client_message_id=f"blocked-auto-sync-{case}",
+                        )
+
+                self.assertEqual(human_workspace.sync_count, 0)
+                self.assertEqual(human_hub.last_send, {})
 
     def test_connect_does_not_sync_unsafe_active_workspace(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

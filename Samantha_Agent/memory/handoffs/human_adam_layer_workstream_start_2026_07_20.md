@@ -1083,3 +1083,60 @@ Bezpecnost / neukladat:
   dokumentačním kroku.
 - Neukládat private thread ID, identity hash, obsah zpráv, tokeny ani private
   cesty.
+
+### 2026-07-24 09:37 CEST – Automatický sync čistého workspace při odeslání
+
+Nazev: Human–Adam – odstranění zbytečného ručního připojení po čistém pushi
+Priorita: 1
+Stav: rozpracovane
+Pripomenout pri startu: ano
+Datum: 2026-07-24
+
+Co se resilo:
+Human–Adam po terminálovém commitu a pushi někdy odmítl další pokyn jen proto,
+že jeho čistý izolovaný workspace zůstal za zdrojovým `main`. Ruční
+`Připojit` stav dorovnalo, ale přidávalo zbytečný mezikrok.
+
+Co je hotove:
+- Odeslání nyní před samotným tahem kontroluje aktivní workspace.
+- Čistý, nečinný a důvěryhodný workspace, který je pouze za zdrojovým `main`,
+  se bezpečně fast-forwarduje stejnou cestou jako ruční připojení.
+- Po synchronizaci se znovu ověří zarovnání a teprve potom se odešle původní
+  pokyn.
+- Špinavý workspace, aktivní tah, nejisté doručení, špinavý zdrojový `main`,
+  divergence nebo nejednoznačný stav zůstávají fail-closed.
+- Odpověď výslovně uvádí, zda synchronizace proběhla.
+- Cílených 187 testů prošlo a celá Cockpit Quality Gate skončila 1189 testy
+  bez chyby. `git diff --check` je čistý.
+
+Co neni hotove:
+- Implementace v okamžiku checkpointu ještě není commitnutá, pushnutá ani
+  nasazená do běžícího Cockpitu.
+- Oprava neumožňuje dva současné zapisující vývoje. Pokud je zdrojový `main`
+  rozpracovaný, zapisovací pokyn Human–Adam je stále záměrně blokovaný.
+
+Dalsi krok:
+Dokončit přesný commit, push a potvrzované nasazení tohoto checkpointu.
+
+Navrhovane dalsi kroky:
+- Přednostně navrhnout a po malém auditu implementovat izolovanou souběžnou
+  práci Human–Adam při terminálovém WIP.
+- V takovém režimu povolit editaci a testy jen uvnitř vlastního izolovaného
+  workspace; checkpoint, push a začlenění blokovat, dokud není zdrojový `main`
+  čistý a neproběhne audit konfliktů.
+- Nepřidávat automatický rebase, reset, merge, mazání ani skryté přepisování
+  uživatelského WIP.
+
+Zmenene nebo relevantni soubory:
+- `human_adam_profiles.py`
+- `test_human_adam_profiles.py`
+- `ACTIVE_PROJECTS.md`
+- `MEMORY_INDEX.md`
+- `human_adam_layer_workstream_start_2026_07_20.md`
+- `architektura_komunikace_samantha.txt`
+
+Bezpecnost / neukladat:
+- Do Git paměti nepatří obsah zpráv, private identity, session, cesty ani
+  tajemství.
+- Synchronizace nesmí obejít nečistý stav, nejisté doručení, aktivní tah nebo
+  konflikt historie.

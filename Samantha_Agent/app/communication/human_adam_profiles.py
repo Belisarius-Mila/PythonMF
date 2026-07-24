@@ -826,27 +826,11 @@ class HumanAdamProfileManager:
             self._operation_lock.release()
 
     def connect(self) -> dict[str, Any]:
-        workspace_synced = False
         with self.profile_operation() as service:
-            workspace = service.workspace.status()
+            workspace_synced = self._sync_clean_active_workspace_from_main(
+                service=service,
+            )
             session = service.hub.snapshot()
-            if workspace.get("source_update_available"):
-                if session.get("turn_busy") or session.get("active_turn"):
-                    raise SessionBusyError(
-                        "Workspace nelze aktualizovat během aktivního tahu Adama."
-                    )
-                if self._has_uncertain_delivery(session):
-                    raise SessionBusyError(
-                        "Workspace nelze aktualizovat, dokud není vyřešené nejisté doručení."
-                    )
-                if int(workspace.get("source_pending_changes") or 0) > 0:
-                    raise AppServerError(
-                        "Zdrojový main má pracovní změny; aktivní profil nyní nelze bezpečně aktualizovat."
-                    )
-                self._assert_target_workspace(workspace)
-                workspace = service.workspace.sync_from_main(confirmed=True)
-                self._assert_target_workspace(workspace)
-                workspace_synced = True
             runtime_recovery_allowed = bool(
                 not session.get("turn_busy")
                 and not session.get("active_turn")
@@ -863,6 +847,9 @@ class HumanAdamProfileManager:
 
     def send(self, **kwargs: Any) -> dict[str, Any]:
         with self.profile_operation() as service:
+            workspace_synced = self._sync_clean_active_workspace_from_main(
+                service=service,
+            )
             active_id = self.work_profile_id
             lazy_id = self.active_lazy_workstream_id
             write_intent = kwargs.pop("write_intent", False) is True
@@ -926,12 +913,57 @@ class HumanAdamProfileManager:
                 **kwargs,
                 development_control_block=development_control_block,
             )
-            return self._complete_successful_turn(
+            completed = self._complete_successful_turn(
                 service=service,
                 active_id=active_id,
                 writable=writable,
                 result=result,
             )
+            return {
+                **completed,
+                "workspace_synced": workspace_synced,
+            }
+
+    def _sync_clean_active_workspace_from_main(
+        self,
+        *,
+        service: HumanAdamService,
+    ) -> bool:
+        """Fast-forward one clean idle active workspace before connect or send."""
+
+        workspace = service.workspace.status()
+        if not workspace.get("source_update_available"):
+            return False
+        session = service.hub.snapshot()
+        if session.get("turn_busy") or session.get("active_turn"):
+            raise SessionBusyError(
+                "Workspace nelze aktualizovat během aktivního tahu Adama."
+            )
+        if self._has_uncertain_delivery(session):
+            raise SessionBusyError(
+                "Workspace nelze aktualizovat, dokud není vyřešené nejisté doručení."
+            )
+        if int(workspace.get("source_pending_changes") or 0) > 0:
+            raise AppServerError(
+                "Zdrojový main má pracovní změny; aktivní profil nyní nelze "
+                "bezpečně aktualizovat."
+            )
+        self._assert_target_workspace(workspace)
+        if workspace.get("workspace_relation") != "source_ahead":
+            raise AppServerError(
+                "Aktivní workspace není v jednoznačném stavu pro automatickou "
+                "synchronizaci."
+            )
+        workspace = service.workspace.sync_from_main(confirmed=True)
+        self._assert_target_workspace(workspace)
+        if (
+            workspace.get("source_update_available")
+            or workspace.get("workspace_relation") != "aligned"
+        ):
+            raise AppServerError(
+                "Aktivní workspace se nepodařilo bezpečně synchronizovat s main."
+            )
+        return True
 
     def _assert_one_turn_write_ready(
         self,

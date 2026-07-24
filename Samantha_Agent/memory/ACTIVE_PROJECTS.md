@@ -42,6 +42,18 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-24: Priorita 1, Human–Adam / vyvojove prostredi. Odeslani z aktivniho
+  profilu nove pred samotnym tahem bezpecne dorovna cisty, necinny a duveryhodny
+  izolovany workspace, pokud je pouze za zdrojovym `main`. Spinavy workspace,
+  aktivni tah, nejiste doruceni, spinavy zdrojovy `main` nebo divergence
+  zustavaji fail-closed. Cilenych 187 testu a cela Cockpit Quality Gate s 1189
+  testy prosly. Tato oprava resi zbytecne rucni `Pripojit` po cistem terminalovem
+  commitu a pushi; neresi soubezne dva zapisujici vyvojare. Nasledujici
+  prednostni vyvoj je izolovana soubezna prace Human–Adam pri terminalovem WIP:
+  editace a testy mohou bezet ve vlastnim workspace, ale checkpoint, push a
+  zacleneni zustanou blokovane do cisteho `main` a auditu konfliktu. Bez
+  automatickeho rebase, resetu, merge nebo mazani. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-21: Priorita 1, univerzalni pracovni proudy faze 4.5g-c1 az c2f1.
   Verejna zavadejici `active_profile_*` metadata a cely osirely
   deployment-completion surface byly po oddelenych auditech odstraneny.

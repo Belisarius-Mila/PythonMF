@@ -2283,3 +2283,26 @@ reader private legacy dat.
 Další krok: po tematickém commitu a pushi tohoto dokumentačního uzavření
 otevřít pouze samostatný read-only audit případné další migrace. Fyzické
 mazání cache nebo private historie vyžaduje nový audit a výslovný souhlas.
+
+### 2026-07-24 09:37 CEST – Čistý stale workspace se dorovná při odeslání
+
+Problém: po čistém terminálovém commitu a pushi zůstal izolovaný workspace
+Human–Adam někdy za zdrojovým `main`. Běžný pokyn pak neprošel, dokud Míla
+ručně nepoužil `Připojit`, přestože stav neobsahoval konflikt ani cizí WIP.
+
+Rozhodnutí a implementace: aktivní profil před každým odesláním ověří svůj
+workspace. Pokud je čistý, nečinný, důvěryhodný a pouze `source_ahead`, použije
+stejný bezpečný fast-forward jako ruční připojení, znovu ověří zarovnání a až
+potom odešle původní pokyn. Výsledek zveřejní jen technický příznak, zda
+synchronizace proběhla. Dirty workspace, aktivní tah, `delivery_unknown`,
+špinavý zdrojový `main`, divergence a nejednoznačný stav zůstávají fail-closed.
+
+Důkaz: cílená sada Human–Adam má 187 zelených testů. Celá Cockpit Quality Gate
+prošla 1189 testy a `git diff --check` je čistý.
+
+Hranice: tato oprava odstraňuje zbytečné ruční připojení po čistém pushi, ale
+neřeší skutečně souběžný zapisovací vývoj. Přednostní další fáze má umožnit
+Human–Adam editovat a testovat pouze ve vlastním izolovaném workspace i během
+terminálového WIP. Checkpoint, push a začlenění musí zůstat blokované do
+čistého zdrojového `main` a auditu konfliktů. Automatický rebase, reset, merge,
+mazání nebo skryté přepisování WIP jsou mimo návrh.
