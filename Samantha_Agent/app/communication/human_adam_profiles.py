@@ -857,14 +857,21 @@ class HumanAdamProfileManager:
             state = "not_requested"
             control_source = "one_turn_direct_main_authorization"
             control_owner = "none"
+            integration_deferred = False
             if write_intent:
-                self._assert_one_turn_write_ready(
+                integration_deferred = self._assert_one_turn_write_ready(
                     service=service,
                     active_id=active_id,
                     lazy_id=lazy_id,
                 )
                 writable = True
-                state = "authorized_once"
+                state = (
+                    "authorized_isolated_source_wip"
+                    if integration_deferred
+                    else "authorized_once"
+                )
+                if integration_deferred:
+                    control_source = "one_turn_isolated_source_wip_authorization"
                 control_owner = active_id
             elif lazy_id and lazy_id not in ONE_TURN_WRITABLE_LAZY_WORKSTREAM_IDS:
                 control_source = "lazy_read_only_policy"
@@ -876,6 +883,7 @@ class HumanAdamProfileManager:
                 f"lease_state={state}",
                 f"lease_owner_id={control_owner}",
                 f"writable={'true' if writable else 'false'}",
+                f"integration_deferred={'true' if integration_deferred else 'false'}",
             ]
             if self.active_workstream_id == KNIHOVNA_WORKSTREAM_ID:
                 control_lines.extend(
@@ -892,12 +900,24 @@ class HumanAdamProfileManager:
                     )
                 )
             else:
-                control_lines.append(
-                    "rule=When writable=false, remain read-only and do not change files or Git."
-                )
+                if integration_deferred:
+                    control_lines.extend(
+                        (
+                            "rule=You may edit and test only inside the isolated workspace.",
+                            "rule=The source main has terminal WIP. Do not run git add, "
+                            "commit, checkpoint, push, merge, rebase, reset or deployment. "
+                            "Leave successful changes uncommitted for a later conflict audit.",
+                        )
+                    )
+                else:
+                    control_lines.append(
+                        "rule=When writable=false, remain read-only and do not change files or Git."
+                    )
             control_lines.append("[/DEVELOPMENT_CONTROL]")
             development_control_block = "\n".join(control_lines)
-            completion_instruction = automatic_completion_instruction(writable=writable)
+            completion_instruction = automatic_completion_instruction(
+                writable=writable and not integration_deferred
+            )
             if completion_instruction:
                 development_control_block = (
                     development_control_block + "\n\n" + completion_instruction
@@ -917,6 +937,7 @@ class HumanAdamProfileManager:
                 service=service,
                 active_id=active_id,
                 writable=writable,
+                integration_deferred=integration_deferred,
                 result=result,
             )
             return {
@@ -971,7 +992,7 @@ class HumanAdamProfileManager:
         service: HumanAdamService,
         active_id: str,
         lazy_id: str,
-    ) -> None:
+    ) -> bool:
         if lazy_id:
             self._assert_one_turn_writable_lazy_workstream(lazy_id)
             if self.workstream_memory is None:
@@ -1004,9 +1025,14 @@ class HumanAdamProfileManager:
         active_workspace = service.workspace.status()
         self._assert_target_workspace(active_workspace)
         if int(active_workspace.get("source_pending_changes") or 0) > 0:
-            raise AppServerError(
-                "Main má pracovní změny; jednorázový vývoj zůstává uzamčený."
+            if active_id != "human_adam" or lazy_id:
+                raise AppServerError(
+                    "Main má pracovní změny; jednorázový vývoj zůstává uzamčený."
+                )
+            self._assert_isolated_source_wip_write_ready(
+                active_workspace=active_workspace,
             )
+            return True
 
         self._sync_clean_source_ahead_workspaces_for_one_turn()
 
@@ -1032,6 +1058,29 @@ class HumanAdamProfileManager:
             if row.get("workspace_relation") != "aligned":
                 raise AppServerError(
                     f"Workspace {row['label']} není synchronní s main; vývoj zůstává uzamčený."
+                )
+        return False
+
+    def _assert_isolated_source_wip_write_ready(
+        self,
+        *,
+        active_workspace: dict[str, Any],
+    ) -> None:
+        """Allow only isolated edits while terminal WIP keeps integration locked."""
+
+        if active_workspace.get("workspace_relation") != "aligned":
+            raise AppServerError(
+                "Main má pracovní změny a aktivní workspace není zarovnaný s "
+                "posledním commitem; izolovaný vývoj zůstává uzamčený."
+            )
+        for row in self._development_workspace_rows():
+            blocker = self._row_blocker(row)
+            if blocker:
+                raise AppServerError("Izolovaný vývoj blokuje workspace: " + blocker)
+            if row.get("workspace_relation") != "aligned":
+                raise AppServerError(
+                    f"Workspace {row['label']} není zarovnaný s posledním commitem; "
+                    "izolovaný vývoj zůstává uzamčený."
                 )
 
     def _sync_clean_source_ahead_workspaces_for_one_turn(self) -> None:
@@ -1210,6 +1259,7 @@ class HumanAdamProfileManager:
         service: HumanAdamService,
         active_id: str,
         writable: bool,
+        integration_deferred: bool = False,
         result: dict[str, Any],
     ) -> dict[str, Any]:
         """Finish a delivered writable turn, or leave its work visibly recoverable."""
@@ -1369,6 +1419,28 @@ class HumanAdamProfileManager:
                 "entry": entry,
                 "automatic_completion": {
                     "state": "no_changes",
+                    "attempted": False,
+                    "answer_persisted": answer_persisted,
+                },
+            }
+
+        if integration_deferred:
+            note = (
+                "Změny a testy zůstaly bezpečně v izolovaném workspace bez commitu. "
+                "Zdrojový main obsahuje terminálový WIP; checkpoint, push a začlenění "
+                "čekají na čistý main a samostatný audit konfliktů."
+            )
+            answer = self._completion_answer(parsed.visible_answer, note)
+            answer_persisted = self._store_completed_answer(
+                service=service,
+                entry=entry,
+                answer=answer,
+            )
+            return {
+                **result,
+                "entry": entry,
+                "automatic_completion": {
+                    "state": "deferred_source_wip",
                     "attempted": False,
                     "answer_persisted": answer_persisted,
                 },

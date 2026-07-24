@@ -2306,3 +2306,31 @@ Human–Adam editovat a testovat pouze ve vlastním izolovaném workspace i běh
 terminálového WIP. Checkpoint, push a začlenění musí zůstat blokované do
 čistého zdrojového `main` a auditu konfliktů. Automatický rebase, reset, merge,
 mazání nebo skryté přepisování WIP jsou mimo návrh.
+
+### 2026-07-24 10:09 CEST – Izolovaný zapisovací tah při terminálovém WIP
+
+Požadavek: odstranit neefektivní úplnou blokaci vývoje Human–Adam v době, kdy
+terminálový Adam připravuje jinou změnu na zdrojovém `main`, bez zavedení dvou
+souběžných zapisovatelů do stejné Git historie.
+
+Implementace: zapisovací předlet má nový úzký režim pouze pro kanonický
+Human–Adam. Povolí editaci a testy tehdy, když aktivní i kompatibilní peer
+workspaces jsou čisté, bezpečné a zarovnané s posledním commitem. Model dostane
+výslovný příznak odložené integrace a zákaz `git add`, commitu, checkpointu,
+push, merge, rebase, resetu a nasazení. Automatická dokončovací účtenka se
+nevydává; případná neočekávaná účtenka nemůže spustit checkpoint a je
+odstraněna z viditelné odpovědi. Změny zůstávají necommitnuté v izolovaném
+workspace.
+
+Bezpečnostní hranice: Knihovna, dirty workspace, aktivní tah,
+`delivery_unknown`, nezarovnaný peer nebo rozvětvená historie zůstávají
+fail-closed. Převzetí izolovaného WIP do `main` není součástí této fáze a smí
+začít až po vyčištění zdrojového `main` a samostatném auditu konfliktů.
+
+Důkaz: cílená sada Human–Adam prošla 190 testy. Celá Cockpit Quality Gate
+prošla 1192 testy, syntaktickými kontrolami a `git diff --check`. UI se
+nezměnilo.
+
+Další krok: commit, push a potvrzované nasazení. Potom jeden malý živý test
+izolované editace při kontrolovaném terminálovém WIP, bez checkpointu nebo
+zásahu do zdrojového `main`.

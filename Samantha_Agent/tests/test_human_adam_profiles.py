@@ -2150,6 +2150,93 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(library_workspace.sync_count, 0)
         self.assertEqual(human_hub.last_send, {})
 
+    def test_human_adam_write_during_source_wip_stays_isolated_and_uncommitted(self) -> None:
+        receipt = (
+            "Změna i test jsou hotové.\n\n"
+            "[HUMAN_ADAM_STEP_COMPLETION]\n"
+            '{"commit_message":"Must not commit","summary":"Must stay isolated",'
+            '"next_step":"Wait for clean main"}\n'
+            "[/HUMAN_ADAM_STEP_COMPLETION]"
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.connect()
+            human_workspace.source_pending_changes = 2
+            library_workspace.source_pending_changes = 2
+            human_hub.on_send = lambda: setattr(human_workspace, "dirty", True)
+            human_hub.next_answer = receipt
+            with patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint"
+            ) as checkpoint:
+                result = manager.send(
+                    text="Implementuj změnu jen v izolovaném workspace",
+                    client_message_id="isolated-source-wip-001",
+                    write_intent=True,
+                )
+
+        model_input = str(human_hub.last_send["model_input_text"])
+        checkpoint.assert_not_called()
+        self.assertTrue(human_workspace.dirty)
+        self.assertIn("writable=true", model_input)
+        self.assertIn("lease_state=authorized_isolated_source_wip", model_input)
+        self.assertIn("integration_deferred=true", model_input)
+        self.assertIn("Leave successful changes uncommitted", model_input)
+        self.assertNotIn("[AUTOMATIC_STEP_COMPLETION]", model_input)
+        self.assertEqual(
+            result["automatic_completion"]["state"],
+            "deferred_source_wip",
+        )
+        self.assertNotIn(
+            "HUMAN_ADAM_STEP_COMPLETION",
+            result["entry"]["answer"],
+        )
+        self.assertIn("bez commitu", result["entry"]["answer"])
+
+    def test_source_wip_isolated_write_rejects_unsynced_peer(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.connect()
+            human_workspace.source_pending_changes = 1
+            library_workspace.source_pending_changes = 1
+            library_workspace.source_ahead = True
+
+            with self.assertRaisesRegex(
+                AppServerError,
+                "Knihovna není zarovnaný",
+            ):
+                manager.send(
+                    text="Tento izolovaný tah se nesmí odeslat",
+                    client_message_id="isolated-source-wip-unsynced-001",
+                    write_intent=True,
+                )
+
+        self.assertEqual(human_hub.last_send, {})
+
+    def test_source_wip_does_not_unlock_knihovna_code_development(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, _human_hub, library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.switch(profile_id="knihovna", confirmed=True)
+            human_workspace.source_pending_changes = 1
+            library_workspace.source_pending_changes = 1
+
+            with self.assertRaisesRegex(
+                AppServerError,
+                "jednorázový vývoj zůstává uzamčený",
+            ):
+                manager.send(
+                    text="Tento vývoj se nesmí odemknout",
+                    client_message_id="knihovna-source-wip-001",
+                    write_intent=True,
+                )
+
+        self.assertEqual(library_hub.last_send, {})
+
     def test_writable_turn_with_receipt_completes_direct_main_checkpoint(self) -> None:
         receipt = (
             "Změna i test jsou hotové.\n\n"

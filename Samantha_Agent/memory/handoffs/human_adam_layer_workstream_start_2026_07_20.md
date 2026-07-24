@@ -1140,3 +1140,64 @@ Bezpecnost / neukladat:
   tajemství.
 - Synchronizace nesmí obejít nečistý stav, nejisté doručení, aktivní tah nebo
   konflikt historie.
+
+### 2026-07-24 10:09 CEST – Izolovaný vývoj při terminálovém WIP
+
+Nazev: Human–Adam – souběžná izolovaná editace bez automatické integrace
+Priorita: 1
+Stav: ceka na nasazeni
+Pripomenout pri startu: ano
+Datum: 2026-07-24
+
+Co se resilo:
+Běžící Human–Adam odmítal každý zapisovací pokyn, jakmile zdrojový `main`
+obsahoval terminálové pracovní změny. Read-only pokyny přitom fungovaly.
+Cílem bylo povolit užitečnou izolovanou editaci a testy, nikoli dva souběžné
+zápisy do stejného `main`.
+
+Co je hotove:
+- Human–Adam může při terminálovém WIP zahájit zapisovací tah jen tehdy, když
+  jeho workspace i všechny kompatibilní peery zůstávají čisté, bezpečné a
+  zarovnané s posledním commitem.
+- Tah je označen jako izolovaný s odloženou integrací a model dostane výslovný
+  zákaz `git add`, commitu, checkpointu, push, merge, rebase, resetu a
+  nasazení.
+- Automatická dokončovací účtenka se modelu neposílá. I kdyby se v odpovědi
+  objevila, checkpoint se nespustí a značka se nezobrazí uživateli.
+- Úspěšné změny zůstanou viditelné a necommitnuté pro pozdější audit
+  konfliktů.
+- Výjimka platí pouze pro kanonický Human–Adam. Knihovna, dirty workspace,
+  aktivní nebo nejistý tah a nezarovnaný peer zůstávají fail-closed.
+- Cílená sada prošla 190 testy a celá Cockpit Quality Gate 1192 testy.
+  `git diff --check` je čistý.
+
+Co neni hotove:
+- Checkpoint ještě není commitnutý, pushnutý ani nasazený.
+- Neběžel živý test proti skutečnému Human–Adam workspace. Ten je smysluplný
+  až po nasazení nové backendové logiky.
+- Pozdější převzetí izolovaného WIP do `main` zatím záměrně není
+  automatizované; vyžaduje čistý `main` a samostatný audit konfliktů.
+
+Dalsi krok:
+Commitnout, pushnout a potvrzovaně nasadit tento checkpoint. Potom připojit
+Human–Adam a provést jeden malý živý zapisovací test při kontrolovaném
+terminálovém WIP, bez checkpointu.
+
+Navrhovane dalsi kroky:
+- Po živém důkazu navrhnout read-only audit bezpečného převzetí izolovaného
+  WIP po vyčištění `main`.
+- Automatický merge, rebase, reset, mazání nebo přepis existující práce
+  nepřidávat.
+
+Zmenene nebo relevantni soubory:
+- `human_adam_profiles.py`
+- `test_human_adam_profiles.py`
+- `ACTIVE_PROJECTS.md`
+- `MEMORY_INDEX.md`
+- `human_adam_layer_workstream_start_2026_07_20.md`
+- `architektura_komunikace_samantha.txt`
+
+Bezpecnost / neukladat:
+- Neukládat obsah soukromých zpráv, private identity, session, cesty ani
+  tajemství.
+- Izolovaný režim nesmí sám vytvářet Git historii nebo měnit zdrojový `main`.

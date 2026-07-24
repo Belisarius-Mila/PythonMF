@@ -128,10 +128,12 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   mazany ani prejmenovany. Interni kompatibilni identity, schema 1, private
   session a workspaces zustavaji chranene. Dne 2026-07-24 byl pripraven
   bezpecny auto-sync cisteho a necinneho aktivniho workspace pred odeslanim;
-  cilenych 187 testu a cela brana s 1189 testy prosly. Dalsi priorita je
-  samostatny navrh skutecne soubezne izolovane prace Human–Adam pri
-  terminalovem WIP, s blokovanou integraci do cisteho `main` a bez
-  automatickeho rebase, resetu, merge nebo mazani.
+  cilenych 187 testu a cela brana s 1189 testy prosly. Navazujici uzky rez
+  soubezne izolovane prace pri terminalovem WIP je implementovany: povoluje jen
+  editaci a testy v cistem zarovnanem Human–Adam workspace a blokuje
+  automaticky checkpoint, commit, push i integraci do cisteho `main` a auditu
+  konfliktu. Knihovna a nezarovnany peer zustavaji uzamcene. Cilenych 190 testu
+  a cela brana s 1192 testy prosly; zmena ceka na nasazeni a zivy test.
 
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni

@@ -42,6 +42,16 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-24: Priorita 1, Human–Adam / vyvojove prostredi. Je pripraven uzky
+  rez soubezne izolovane prace pri terminalovem WIP: zapisovaci tah smi
+  editovat a testovat pouze v cistem workspace zarovnanem s poslednim commitem,
+  ale nedostane automatickou dokoncovaci uctenku a checkpoint, commit, push,
+  merge, rebase, reset i nasazeni zustavaji odlozene do cisteho `main` a auditu
+  konfliktu. Rezim je omezen na Human–Adam; Knihovna, spinavy nebo nezarovnany
+  peer zustavaji fail-closed. Cilenych 190 testu a cela Cockpit Quality Gate s
+  1192 testy prosly. Zmena ceka na commit, push a potvrzovane nasazeni; teprve
+  potom ma nasledovat zivy test. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-24: Priorita 1, Human–Adam / vyvojove prostredi. Odeslani z aktivniho
   profilu nove pred samotnym tahem bezpecne dorovna cisty, necinny a duveryhodny
   izolovany workspace, pokud je pouze za zdrojovym `main`. Spinavy workspace,
