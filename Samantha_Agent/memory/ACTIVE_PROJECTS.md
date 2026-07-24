@@ -42,6 +42,14 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-25 00:14 CEST: Priorita 1, Human–Adam / servisní integrace rotace
+  bez kotvy. Přednasazovací audit zachytil čtyřsouborový WIP na starším základu
+  bez ownership markeru; `main` mezitím postoupil a dvě cesty se překrývaly.
+  Míla výslovně potvrdil servisní začlenění. Přenesené plus/minus řádky přesně
+  odpovídají zachovanému WIP: kontrola rotace už není rušena změnou revize
+  volitelné kotvy, nadále ji však váže identita auditovaného vlákna. Cílených
+  92 a úplných 1216 testů prošlo. Zbývá checkpoint/push, bezpečné zarovnání
+  profilů, potvrzené nasazení a ruční retest.
 - 2026-07-24 23:23 CEST: Priorita 1, Human–Adam / fáze 2 handoffu a
   potvrzovaná integrace. Budoucí automatický checkpoint bude v témže jediném
   commitu aktualizovat markerově ohraničený `Aktuální stav` v handoffu i TVBCP;

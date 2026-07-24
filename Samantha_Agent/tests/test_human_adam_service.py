@@ -446,7 +446,7 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertIn("připojený", " ".join(initial["blockers"]))
         self.assertNotIn("připni", " ".join(initial["blockers"]))
         self.assertTrue(ready["ready"])
-        self.assertEqual(ready["context_anchor_revision"], 0)
+        self.assertNotIn("context_anchor_revision", ready)
         self.assertEqual(ready["thread_message_count"], 3)
         self.assertTrue(ready["preserves_previous_thread"])
         self.assertFalse(ready["archives_previous_thread"])
@@ -472,7 +472,7 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertTrue(rotated["rotated"])
         self.assertEqual(rotated["previous_thread_id"], "canonical-thread")
         self.assertTrue(rotated["previous_thread_preserved"])
-        self.assertEqual(rotated["context_anchor_revision"], 0)
+        self.assertNotIn("context_anchor_revision", rotated)
 
     def test_corrupt_context_anchor_is_ignored_without_blocking_send(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

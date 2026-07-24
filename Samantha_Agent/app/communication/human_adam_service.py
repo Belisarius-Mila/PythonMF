@@ -548,7 +548,6 @@ class HumanAdamService:
     def thread_rotation_status(self) -> dict[str, Any]:
         session = self.hub.snapshot()
         rotation = self.hub.rotation_status()
-        anchor = self.context_anchor(include_content=False)
         blockers = list(rotation.get("blockers") or [])
         if not session.get("connected"):
             blockers.append("Před rotací musí být profil připojený.")
@@ -558,7 +557,6 @@ class HumanAdamService:
             "thread_id": str(rotation.get("thread_id") or ""),
             "thread_message_count": int(rotation.get("thread_message_count") or 0),
             "rotation_count": int(rotation.get("rotation_count") or 0),
-            "context_anchor_revision": int(anchor.get("revision") or 0),
             "blockers": blockers,
             "confirmation_text": THREAD_ROTATION_CONFIRMATION_TEXT,
             "preserves_previous_thread": True,
@@ -577,7 +575,6 @@ class HumanAdamService:
         result = self.hub.rotate_thread(expected_thread_id=expected_thread_id)
         return {
             **result,
-            "context_anchor_revision": audit["context_anchor_revision"],
             "previous_thread_preserved": True,
         }
 

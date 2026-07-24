@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-24 23:53 CEST
-- Poslední dokončený vývojový výsledek: Fáze 2 handoffu/TVBCP a potvrzovaná integrace přesného odloženého WIP jsou implementované a otestované
+- Obnoveno potvrzeným checkpointem: 2026-07-25 00:14 CEST
+- Poslední dokončený vývojový výsledek: Zachovaný čtyřsouborový WIP rotace bez kotvy byl po servisním rozhodnutí přesně přenesen na aktuální main
 - Stav při vytvoření checkpointu: změna je otestovaná (1216 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
-- Git před checkpointem: `main == origin/main` na `bf233eeea60d`.
-- Poslední serverově potvrzené nasazení: `bf233eeea60d` · odpovídá ověřenému main před tímto checkpointem · 1201 testů · smoke 5/5 · 2026-07-24T16:58:54+00:00.
-- Rozhodnutí: Private ownership marker je povinný; posunutý main zůstává servisním rozhodnutím bez automatického merge nebo rebase.
-- Bezprostřední další krok: Samostatně potvrdit nasazení čistého main a potom provést úplný živý souběžný test.
-- Navrhované další kroky: Ověřit celý tok od terminálového WIP po potvrzené převzetí.; Širší automatizaci zvažovat až po živém důkazu.
+- Git před checkpointem: `main == origin/main` na `dbb6de71c630`.
+- Poslední serverově potvrzené nasazení: `bf233eeea60d` · je starší než ověřený main před tímto checkpointem · 1201 testů · smoke 5/5 · 2026-07-24T16:58:54+00:00.
+- Rozhodnutí: Kontrola rotace je vázaná na identitu auditovaného vlákna, nikoli na revizi volitelné kontextové kotvy.
+- Bezprostřední další krok: Pushnout servisní checkpoint, bezpečně zarovnat profilové workspaces a potvrzeně nasadit čistý main.
+- Navrhované další kroky: Po nasazení ručně ověřit rotaci po změně nebo pozastavení kotvy.; Potom pokračovat úplným živým testem odložené integrace.
 - Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -1573,3 +1573,53 @@ Technicky dukaz:
 - Úplná Cockpit Quality Gate, rozšířená výslovně o nový markerový modul a jeho
   testy, prošla 1216 testy.
 - Python i JavaScript syntaxe a `git diff --check` jsou v pořádku.
+
+### 2026-07-25 00:14 CEST – Servisní integrace rotace bez kotvy
+
+Nazev: Human–Adam – převzetí zachovaného WIP po posunu main
+Priorita: 1
+Stav: ceka na nasazeni
+Pripomenout pri startu: ano
+Datum: 2026-07-25
+
+Co se resilo:
+Přednasazovací audit správně zablokoval nasazení, protože Human–Adam workspace
+obsahoval čtyřsouborový WIP na starším základu, `main` mezitím postoupil a
+ownership marker ještě neexistoval. Míla následně výslovně potvrdil servisní
+začlenění tohoto přesného WIP.
+
+Co je hotove:
+- Plus/minus řádky ručně přenesené přes `apply_patch` přesně odpovídají
+  zachovanému WIP; automatický merge ani rebase nebyl použit.
+- Kontrola připravenosti rotace a výsledek rotace už nečtou ani nevracejí
+  revizi kontextové kotvy.
+- UI nezahazuje platný audit rotace jen kvůli změně, pozastavení nebo uložení
+  volitelné kotvy.
+- Změna auditovaného vlákna nadále audit správně zneplatní.
+- Cílených 92 a úplných 1216 testů prošlo.
+
+Co neni hotove:
+- Servisní checkpoint ještě není commitnutý ani pushnutý.
+- Starý Human–Adam workspace je stále bezpečně zachovaný a bude zarovnán až po
+  důkazu, že commit na `main` obsahuje přesný WIP.
+- Nasazení, restart, smoke test a ruční retest rotace ještě neproběhly.
+
+Dalsi krok:
+Commitnout a pushnout servisní checkpoint, ověřit jeho shodu, bezpečně zarovnat
+profilové workspaces a spustit již potvrzené nasazení.
+
+Navrhovane dalsi kroky:
+- Po nasazení změnit nebo pozastavit kotvu a ověřit, že dříve provedený audit
+  stejného vlákna zůstane použitelný.
+- Potom provést celý živý scénář nové potvrzované integrace s ownership markerem.
+
+Zmenene nebo relevantni soubory:
+- `human_adam_service.py`
+- `human_adam_ui.py`
+- `test_human_adam_service.py`
+- `test_human_adam_ui.py`
+- tento handoff, kanonický TVBCP, `ACTIVE_PROJECTS.md` a `MEMORY_INDEX.md`
+
+Bezpecnost / neukladat:
+- Neukládat identity vláken, texty zpráv ani private obsah kotvy.
+- Starý WIP neuvolnit, dokud není prokazatelně obsažen v pushnutém `main`.

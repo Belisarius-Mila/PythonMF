@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-24 23:53 CEST
-- Poslední dokončený vývojový výsledek: Fáze 2 handoffu/TVBCP a potvrzovaná integrace přesného odloženého WIP jsou implementované a otestované
+- Obnoveno potvrzeným checkpointem: 2026-07-25 00:14 CEST
+- Poslední dokončený vývojový výsledek: Zachovaný čtyřsouborový WIP rotace bez kotvy byl po servisním rozhodnutí přesně přenesen na aktuální main
 - Stav při vytvoření checkpointu: změna je otestovaná (1216 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
-- Git před checkpointem: `main == origin/main` na `bf233eeea60d`.
-- Poslední serverově potvrzené nasazení: `bf233eeea60d` · odpovídá ověřenému main před tímto checkpointem · 1201 testů · smoke 5/5 · 2026-07-24T16:58:54+00:00.
-- Rozhodnutí: Private ownership marker je povinný; posunutý main zůstává servisním rozhodnutím bez automatického merge nebo rebase.
-- Bezprostřední další krok: Samostatně potvrdit nasazení čistého main a potom provést úplný živý souběžný test.
-- Navrhované další kroky: Ověřit celý tok od terminálového WIP po potvrzené převzetí.; Širší automatizaci zvažovat až po živém důkazu.
+- Git před checkpointem: `main == origin/main` na `dbb6de71c630`.
+- Poslední serverově potvrzené nasazení: `bf233eeea60d` · je starší než ověřený main před tímto checkpointem · 1201 testů · smoke 5/5 · 2026-07-24T16:58:54+00:00.
+- Rozhodnutí: Kontrola rotace je vázaná na identitu auditovaného vlákna, nikoli na revizi volitelné kontextové kotvy.
+- Bezprostřední další krok: Pushnout servisní checkpoint, bezpečně zarovnat profilové workspaces a potvrzeně nasadit čistý main.
+- Navrhované další kroky: Po nasazení ručně ověřit rotaci po změně nebo pozastavení kotvy.; Potom pokračovat úplným živým testem odložené integrace.
 - Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -2573,3 +2573,32 @@ Technický důkaz:
 - Markerové testy dokazují atomický soubor s právy `0600`, absenci path textů
   v uloženém JSON a fail-closed reakci na chybějící marker, změněný WIP nebo
   posunutý základ.
+
+### 2026-07-25 00:14 CEST – Servisní převzetí rotace bez kotvy
+
+Hotovo:
+- Přednasazovací audit odhalil a zachoval čtyřsouborový WIP na starším základu.
+- Po Mílově výslovném servisním rozhodnutí byl patch přesně přenesen na
+  aktuální `main` bez automatického merge nebo rebase.
+- Rotace zůstává vázaná na auditované vlákno, ale už není falešně vázaná na
+  revizi volitelné kontextové kotvy.
+
+Rozhodnutí:
+- Chybějící ownership marker a posunutý `main` se řešily ručně jako servisní
+  případ; tím se potvrzuje dohodnutá fail-closed hranice nové automatiky.
+- Změna kotvy sama nemění připravenost rotace. Změna identity vlákna ji mění.
+- Starý workspace se smí uvolnit až po commitu, pushi a důkazu přesné shody.
+
+Další krok:
+- Commitnout a pushnout servisní integraci, zarovnat workspaces a dokončit
+  potvrzené nasazení včetně restartu a smoke testu.
+
+Navrhované další kroky:
+- Po nasazení ručně ověřit audit rotace přes změnu nebo pozastavení kotvy.
+- Potom provést první živý scénář odložené integrace s ownership markerem.
+
+Technický důkaz:
+- Přenesené plus/minus řádky jsou shodné se zachovaným WIP.
+- Cílených 92 testů prošlo.
+- Úplná Cockpit Quality Gate prošla 1216 testy; Python i JavaScript syntaxe a
+  `git diff --check` jsou v pořádku.

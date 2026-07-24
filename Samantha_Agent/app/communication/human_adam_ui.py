@@ -1103,10 +1103,8 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     profileBadge.textContent = `Proud: ${activeWorkstreamLabel}`;
     profileBadge.dataset.backend = activeWorkstreamBackend;
     const thread = session && session.thread_id ? session.thread_id : "";
-    const anchorRevision = Number(payload && payload.context_anchor ? payload.context_anchor.revision || 0 : 0);
-    const auditedAnchorRevision = Number(threadRotationAudit ? threadRotationAudit.context_anchor_revision || 0 : 0);
-    if (threadRotationAudit && (String(threadRotationAudit.thread_id || "") !== thread || auditedAnchorRevision !== anchorRevision)) {
-      resetThreadRotationState("Aktivní vlákno nebo kontext se změnily. Před další rotací spusť novou kontrolu.");
+    if (threadRotationAudit && String(threadRotationAudit.thread_id || "") !== thread) {
+      resetThreadRotationState("Aktivní vlákno se změnilo. Před další rotací spusť novou kontrolu.");
     }
     threadBadge.textContent = `Relace: ${thread ? thread.slice(0,8) : "—"}`;
     const workspace = payload && payload.workspace ? payload.workspace : {};
@@ -1582,7 +1580,6 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
         throw error;
       }
       renderContextAnchorEditor(payload);
-      resetThreadRotationState("Aktivní kontext se změnil. Před rotací spusť novou kontrolu připravenosti.");
       const successMessages = {
         save: payload.active
           ? "Aktualizovaná připnutá kotva se použije od příštího tahu."

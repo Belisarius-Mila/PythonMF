@@ -147,7 +147,12 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   otiskem path-level zmen. Posun `main`, cizi WIP, divergence nebo neshoda
   markeru zustavaji servisnim rozhodnutim bez automatickeho merge/rebase.
   Cilenych 446 a uplnych 1216 testu proslo; zbyva checkpoint/push, nasazeni a
-  skutecny zivy soubezny test.
+  skutecny zivy soubezny test. Dne 2026-07-25 prednasazovaci audit zachytil
+  starsi ctyrsouborovy WIP rotace bez kotvy bez ownership markeru. Mila
+  vyslovne potvrdil servisni zacleneni; patch byl radkove shodny, cilene testy
+  92/92 a plna brana 1216/1216 prosly. Kontrola rotace je vazana na identitu
+  vlakna, nikoli na revizi volitelne kotvy. Zbyva checkpoint/push, zarovnani
+  profilu, nasazeni a rucni retest.
 
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni
