@@ -1338,3 +1338,54 @@ Zmenene nebo relevantni soubory:
 Bezpecnost / neukladat:
 - Neukládat obsah soukromých zpráv, identity relace ani private stav.
 - Automatické připojení nikdy nespouštět při aktivní nebo nejisté práci.
+
+### 2026-07-24 18:01 CEST – Read-only audit čekající integrace
+
+Nazev: Human–Adam – diagnostika odloženého WIP bez integračních zápisů
+Priorita: 1
+Stav: ceka na nasazeni
+Pripomenout pri startu: ano
+Datum: 2026-07-24
+
+Co se resilo:
+Odložený izolovaný vývoj při terminálovém WIP bezpečně zachoval změny, ale po
+vyčištění nebo posunu zdrojového `main` chyběla přesná samoobslužná diagnostika
+dalšího kroku.
+
+Co je hotove:
+- Panel `Práce` obsahuje samostatný read-only audit čekající integrace.
+- Audit rozliší čekání na čistý `main`, společný čistý základ, posunutý `main`
+  a neověřenou nebo rozvětvenou historii.
+- Při posunu `main` ukáže pouze počet a bezpečné názvy překrývajících se cest.
+- Cizí WIP v jiném profilovém workspace přepne výsledek do fail-closed blokace.
+- Audit ani UI nemají zapisovací akci a nespouštějí commit, push, merge, rebase,
+  reset nebo nasazení.
+- Cílených 168, širších 457 a úplných 1201 testů prošlo.
+
+Co neni hotove:
+- Neexistuje integrační brána ani samoobslužné začlenění změn do `main`.
+- Neexistuje trvalý ownership marker, proto audit potvrzuje strukturální stav,
+  nikoli původ nebo vlastnictví změn.
+- Cestový překryv neověřuje sémantickou kompatibilitu obsahu.
+- Změna ještě není commitnutá, pushnutá ani nasazená.
+
+Dalsi krok:
+Commitnout, pushnout a potvrzovaně nasadit read-only audit. Potom v panelu
+`Práce` ověřit čistý stav bez čekající integrace.
+
+Navrhovane dalsi kroky:
+- Samostatně navrhnout potvrzovanou integrační bránu pouze pro ověřený společný
+  základ.
+- Pro posunutý `main` zachovat servisní rozhodnutí i při nulovém překryvu cest.
+- Ownership marker případně řešit jako zvláštní předpoklad před automatizací.
+
+Zmenene nebo relevantni soubory:
+- `human_adam_workspace.py`
+- `human_adam_profiles.py`
+- `human_adam_ui.py`
+- příslušné cílené testy
+- tento handoff, kanonický TVBCP a `ACTIVE_PROJECTS.md`
+
+Bezpecnost / neukladat:
+- Neukládat obsah změněných souborů ani soukromých zpráv.
+- Nespouštět automatický merge, rebase, commit, push nebo přepis WIP.

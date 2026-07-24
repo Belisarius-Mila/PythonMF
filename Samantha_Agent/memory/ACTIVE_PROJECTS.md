@@ -42,6 +42,14 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-24: Priorita 1, Human–Adam / read-only audit čekající integrace.
+  Panel `Práce` nyní rozlišuje dirty zdrojový `main`, čistý společný základ,
+  posun `main` s překryvem změněných cest a fail-closed blokaci cizím nebo
+  rozvětveným WIP. Audit nic necommitne, neslučuje ani nepřepisuje a výslovně
+  neprokazuje vlastnictví změn. Cílených 168, širších 457 a úplných 1201 testů
+  prošlo. Další krok je nasazení, kontrola čistého stavu a teprve potom návrh
+  samostatně potvrzované integrační brány. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-24: Priorita 1, Human–Adam / návrat po samoobslužném nasazení.
   Ověřené nasazení nyní obnoví stránku i při selhání `sessionStorage` a po
   návratu Cockpitu bezpečně znovu připojí Human–Adam pouze tehdy, když není

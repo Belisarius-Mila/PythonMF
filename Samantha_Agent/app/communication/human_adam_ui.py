@@ -83,6 +83,13 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .project-continuity-head h3 { flex:1; margin:0; font-size:15px; }
     #projectContinuityMeta { margin:0; color:var(--muted); font-size:13px; overflow-wrap:anywhere; }
     #projectContinuityReasons { margin:0; padding-left:22px; color:var(--muted); font-size:13px; }
+    .integration-audit-box { margin:12px 16px; padding:14px; border:1px solid #93c5fd; border-radius:13px; display:grid; gap:8px; background:#eff6ff; }
+    .integration-audit-box.ready { border-color:#86efac; background:#f0fdf4; }
+    .integration-audit-box.warn { border-color:#fbbf24; background:#fffbeb; }
+    .integration-audit-box.blocked { border-color:#fca5a5; background:#fef2f2; }
+    .integration-audit-box h3 { margin:0; font-size:15px; }
+    #integrationAuditMeta { margin:0; color:var(--muted); font-size:13px; line-height:1.45; overflow-wrap:anywhere; }
+    #integrationAuditPaths { margin:0; padding-left:22px; font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace; overflow-wrap:anywhere; }
     .handoff-proposal-box { margin:12px 16px; padding:14px; border:1px solid #93c5fd; border-radius:13px; display:grid; gap:8px; background:#eff6ff; }
     .handoff-proposal-box h3 { margin:0; font-size:15px; }
     #handoffProposalMeta { margin:0; color:var(--muted); font-size:13px; overflow-wrap:anywhere; }
@@ -305,6 +312,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <h4>Když něco nejde</h4>
         <ul>
           <li><strong>Workspace je za <code>main</code>:</strong> při čistém profilu klikni na Připojit.</li>
+          <li><strong>Čekající integrace:</strong> přečti read-only audit. Při posunu <code>main</code> vždy vyžádej servisní rozhodnutí, i když audit nenajde překryv cest.</li>
           <li><strong>Audit nebo nasazení selže:</strong> nic neopakuj naslepo; obnov stav a předej Adamovi přesnou chybu.</li>
           <li><strong>Repo není čisté:</strong> nenasazuj a nech Adama zjistit, co zůstalo rozpracované.</li>
         </ul>
@@ -342,6 +350,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     </section>
     <div id="workMeta">Stav se načte až po otevření.</div>
     <ul id="workChanges"></ul>
+    <section class="integration-audit-box" id="integrationAuditBox" aria-label="Read-only audit čekající integrace" hidden>
+      <h3>Čekající integrace</h3>
+      <p id="integrationAuditMeta">Audit se načte společně s pracovním stavem.</p>
+      <ul id="integrationAuditPaths" hidden></ul>
+    </section>
     <section class="handoff-proposal-box legacy-work-control" id="handoffProposalBox" aria-label="Read-only návrh aktualizace handoffu" hidden>
       <h3>Návrh handoffu po checkpointu</h3>
       <p id="handoffProposalMeta">Návrh zatím není připravený.</p>
@@ -423,6 +436,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const workHelpCloseBtn = document.getElementById("workHelpCloseBtn");
   const workMeta = document.getElementById("workMeta");
   const workChanges = document.getElementById("workChanges");
+  const integrationAuditBox = document.getElementById("integrationAuditBox");
+  const integrationAuditMeta = document.getElementById("integrationAuditMeta");
+  const integrationAuditPaths = document.getElementById("integrationAuditPaths");
   const handoffProposalBox = document.getElementById("handoffProposalBox");
   const handoffProposalMeta = document.getElementById("handoffProposalMeta");
   const handoffProposalDraft = document.getElementById("handoffProposalDraft");
@@ -1685,12 +1701,53 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     tvbcpPanel.hidden = true;
   }
 
+  function renderPendingIntegrationAudit(audit) {
+    const valid = audit && typeof audit === "object" && audit.ok === true;
+    const state = valid ? String(audit.state || "") : "audit_unavailable";
+    integrationAuditBox.hidden = state === "not_applicable";
+    integrationAuditBox.className = "integration-audit-box";
+    if (
+      state === "waiting_source_clean"
+      || state === "source_advanced_service_decision"
+    ) {
+      integrationAuditBox.classList.add("warn");
+    } else if (
+      state === "not_pending"
+      || state === "ready_for_confirmed_integration"
+    ) {
+      integrationAuditBox.classList.add("ready");
+    } else {
+      integrationAuditBox.classList.add("blocked");
+    }
+    const label = valid ? String(audit.label || "Audit bez popisu") : "Audit čekající integrace není dostupný";
+    const message = valid ? String(audit.message || "") : "Stav nelze bezpečně ověřit.";
+    const nextStep = valid ? String(audit.next_step || "") : "Nic neintegruj.";
+    integrationAuditMeta.textContent = `${label} · ${message}${nextStep ? ` Další krok: ${nextStep}` : ""}`;
+    integrationAuditPaths.replaceChildren();
+    const paths = valid && Array.isArray(audit.overlap_paths) ? audit.overlap_paths : [];
+    if (state === "source_advanced_service_decision") {
+      if (!paths.length) {
+        const row = document.createElement("li");
+        row.textContent = "Audit nenašel přesný překryv cest; servisní rozhodnutí je přesto povinné.";
+        integrationAuditPaths.appendChild(row);
+      } else {
+        for (const path of paths) {
+          const row = document.createElement("li");
+          row.textContent = String(path || "");
+          integrationAuditPaths.appendChild(row);
+        }
+      }
+    }
+    integrationAuditPaths.hidden = !integrationAuditPaths.children.length;
+  }
+
   function renderWork(payload) {
     deploymentAudit = null;
     renderHandoffTakeoverCheck(null);
     renderProjectContinuity(payload.project_continuity || null);
     renderDevelopmentSemaphore(payload.development_semaphore || null);
     renderHandoffProposal(payload.handoff_proposal || null);
+    renderPendingIntegrationAudit(payload.pending_integration_audit || null);
     workChanges.replaceChildren();
     const pending = Array.isArray(payload.changes) ? payload.changes : [];
     const checkpointed = Array.isArray(payload.checkpoint_changes) ? payload.checkpoint_changes : [];
@@ -1824,6 +1881,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     } catch (error) {
       workChanges.replaceChildren();
       workMeta.textContent = `Pracovní stav nelze načíst: ${error.message}`;
+      renderPendingIntegrationAudit(null);
       checkpointBtn.disabled = true;
       return null;
     } finally { workRefreshBtn.disabled = false; }

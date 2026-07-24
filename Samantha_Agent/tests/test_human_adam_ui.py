@@ -56,6 +56,9 @@ class HumanAdamUiTests(unittest.TestCase):
             "workHelpPanel",
             "workHelpCloseBtn",
             "workChanges",
+            "integrationAuditBox",
+            "integrationAuditMeta",
+            "integrationAuditPaths",
             "checkpointMessage",
             "checkpointBtn",
             "deployMeta",
@@ -281,6 +284,33 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertLess(
             HUMAN_ADAM_HTML.index("else if (checkpointPreserved) workMeta.textContent"),
             HUMAN_ADAM_HTML.index('else workMeta.textContent = "Workspace je čistý a odpovídá main.";'),
+        )
+
+    def test_pending_integration_audit_is_read_only_and_fail_closed_in_work_panel(
+        self,
+    ) -> None:
+        render_start = HUMAN_ADAM_HTML.index(
+            "function renderPendingIntegrationAudit(audit)"
+        )
+        render_end = HUMAN_ADAM_HTML.index("function renderWork(payload)", render_start)
+        source = HUMAN_ADAM_HTML[render_start:render_end]
+
+        self.assertIn("pending_integration_audit", HUMAN_ADAM_HTML)
+        self.assertIn("waiting_source_clean", source)
+        self.assertIn("ready_for_confirmed_integration", HUMAN_ADAM_HTML)
+        self.assertIn("source_advanced_service_decision", source)
+        self.assertIn('integrationAuditBox.classList.add("blocked");', source)
+        self.assertLess(
+            source.index('state === "ready_for_confirmed_integration"'),
+            source.index('integrationAuditBox.classList.add("ready");'),
+        )
+        self.assertIn("servisní rozhodnutí je přesto povinné", source)
+        self.assertIn("audit.overlap_paths", source)
+        self.assertNotIn('method:"POST"', source)
+        self.assertNotIn("fetch(", source)
+        self.assertIn(
+            "Při posunu <code>main</code> vždy vyžádej servisní rozhodnutí",
+            HUMAN_ADAM_HTML,
         )
 
     def test_work_button_is_compact_and_opens_detail_only_when_needed(self) -> None:

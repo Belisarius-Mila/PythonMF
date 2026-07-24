@@ -80,6 +80,7 @@ class FakeWorkspace:
             "sync_available": self.source_ahead,
             "workspace_relation": relation,
             "local_checkpoint_ahead": self.local_ahead,
+            "local_checkpoint_preserved": False,
             "local_commit_count": 1 if self.local_ahead else 0,
             "remotes": [],
             "source_pending_changes": self.source_pending_changes,
@@ -100,12 +101,42 @@ class FakeWorkspace:
         return self.status()
 
     def review(self) -> dict[str, object]:
+        relation = (
+            "diverged"
+            if self.diverged
+            else (
+                "local_ahead"
+                if self.local_ahead
+                else ("source_ahead" if self.source_ahead else "aligned")
+            )
+        )
+        if not self.dirty:
+            audit_state = "not_pending"
+            service_decision = False
+        elif self.diverged or self.local_ahead:
+            audit_state = "blocked_workspace_history"
+            service_decision = True
+        elif self.source_pending_changes:
+            audit_state = "waiting_source_clean"
+            service_decision = False
+        elif self.source_ahead:
+            audit_state = "source_advanced_service_decision"
+            service_decision = True
+        else:
+            audit_state = "ready_for_confirmed_integration"
+            service_decision = False
         review: dict[str, object] = {
             "ok": True,
             "dirty": self.dirty,
-            "changes": [],
-            "change_count": 0,
+            "changes": (
+                [{"status": " M", "path": "Samantha_Agent/app.py"}]
+                if self.dirty
+                else []
+            ),
+            "change_count": 1 if self.dirty else 0,
+            "source_pending_changes": self.source_pending_changes,
             "local_checkpoint_ahead": self.local_ahead,
+            "local_checkpoint_preserved": False,
             "local_commit_count": 1 if self.local_ahead else 0,
             "checkpoint_changes": (
                 [{"status": "M", "path": self.checkpoint_path}] if self.local_ahead else []
@@ -113,6 +144,20 @@ class FakeWorkspace:
             "checkpoint_change_count": 1 if self.local_ahead else 0,
             "checkpoint_head": "b" * 40 if self.local_ahead else "",
             "checkpoint_subject": self.checkpoint_subject if self.local_ahead else "",
+            "workspace_relation": relation,
+            "pending_integration_audit": {
+                "ok": True,
+                "read_only": True,
+                "writes_performed": False,
+                "pending": self.dirty,
+                "state": audit_state,
+                "label": audit_state,
+                "message": "Testovací audit.",
+                "next_step": "Testovací další krok.",
+                "requires_service_decision": service_decision,
+                "overlap_count": 0,
+                "overlap_paths": [],
+            },
         }
         return review
 
@@ -432,6 +477,39 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertFalse(semaphore["ok"])
         self.assertNotIn("active_profile_id", semaphore)
         self.assertNotIn("active_profile_label", semaphore)
+
+    def test_pending_integration_audit_classifies_source_and_foreign_wip_read_only(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, *_rest = self.make_manager(
+                Path(temp_dir)
+            )
+
+            clean = manager.work_review()["pending_integration_audit"]
+            human_workspace.dirty = True
+            human_workspace.source_pending_changes = 1
+            waiting = manager.work_review()["pending_integration_audit"]
+            human_workspace.source_pending_changes = 0
+            ready = manager.work_review()["pending_integration_audit"]
+            human_workspace.source_ahead = True
+            advanced = manager.work_review()["pending_integration_audit"]
+            library_workspace.dirty = True
+            blocked = manager.work_review()["pending_integration_audit"]
+
+        self.assertEqual(clean["state"], "not_pending")
+        self.assertEqual(waiting["state"], "waiting_source_clean")
+        self.assertEqual(ready["state"], "ready_for_confirmed_integration")
+        self.assertEqual(advanced["state"], "source_advanced_service_decision")
+        self.assertTrue(advanced["requires_service_decision"])
+        self.assertEqual(blocked["state"], "blocked_foreign_wip")
+        self.assertEqual(blocked["foreign_blocker_count"], 1)
+        self.assertTrue(blocked["read_only"])
+        self.assertFalse(blocked["writes_performed"])
+        self.assertTrue(human_workspace.dirty)
+        self.assertTrue(library_workspace.dirty)
+        self.assertEqual(human_workspace.sync_count, 0)
+        self.assertEqual(library_workspace.sync_count, 0)
 
     def test_compatibility_backends_preserve_both_existing_service_bundles(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -1579,10 +1579,76 @@ class HumanAdamProfileManager:
         work = self.active_service.work_review()
         return {
             **work,
+            "pending_integration_audit": self.pending_integration_status(
+                work_review=work
+            ),
             "development_semaphore": self.development_status(),
             "project_continuity": self.project_continuity_status(),
             "handoff_proposal": self.handoff_proposal_status(work_review=work),
         }
+
+    def pending_integration_status(
+        self,
+        *,
+        work_review: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Add profile-level fail-closed checks to the workspace-only audit."""
+
+        try:
+            active_id = self.active_profile_id
+            if self.active_lazy_workstream_id or active_id != "human_adam":
+                return {
+                    "ok": True,
+                    "read_only": True,
+                    "writes_performed": False,
+                    "pending": False,
+                    "state": "not_applicable",
+                    "label": "Audit čekající integrace se zde nepoužívá",
+                    "message": "Odložená integrace je povolená pouze pro Human–Adam.",
+                    "next_step": "Použij pravidla aktivního pracovního proudu.",
+                    "requires_service_decision": False,
+                    "overlap_count": 0,
+                    "overlap_paths": [],
+                }
+            review = (
+                work_review
+                if isinstance(work_review, dict)
+                else self.active_service.work_review()
+            )
+            audit = review.get("pending_integration_audit")
+            if not isinstance(audit, dict) or audit.get("ok") is not True:
+                raise AppServerError(
+                    "Workspace neposkytl ověřený audit čekající integrace."
+                )
+            result = dict(audit)
+            if result.get("pending") is not True:
+                return result
+            foreign_blockers = self._foreign_wip_blockers(active_id)
+            if not foreign_blockers:
+                return result
+            return {
+                **result,
+                "state": "blocked_foreign_wip",
+                "label": "Integraci blokuje cizí WIP",
+                "message": "Jiný profil má rozpracovanou nebo neověřenou práci.",
+                "next_step": "Nejdřív bezpečně vyřeš cizí WIP; nic neintegruj.",
+                "requires_service_decision": True,
+                "foreign_blocker_count": len(foreign_blockers),
+            }
+        except (AppServerError, OSError, TypeError, ValueError) as exc:
+            return {
+                "ok": False,
+                "read_only": True,
+                "writes_performed": False,
+                "pending": False,
+                "state": "audit_unavailable",
+                "label": "Audit čekající integrace není dostupný",
+                "message": str(exc),
+                "next_step": "Nic neintegruj; nejdřív obnov bezpečný audit.",
+                "requires_service_decision": True,
+                "overlap_count": 0,
+                "overlap_paths": [],
+            }
 
     def handoff_proposal_status(
         self,

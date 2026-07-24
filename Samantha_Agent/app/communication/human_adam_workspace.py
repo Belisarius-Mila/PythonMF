@@ -127,6 +127,29 @@ def _status_rows(repo: Path) -> list[dict[str, str]]:
     return rows
 
 
+def _name_status_rows(output: str) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for line in output.splitlines():
+        parts = line.split("\t")
+        if len(parts) >= 2:
+            rows.append(
+                {
+                    "status": parts[0],
+                    "path": " → ".join(parts[1:]),
+                }
+            )
+    return rows
+
+
+def _row_paths(row: dict[str, str]) -> set[str]:
+    path_text = str(row.get("path") or "").strip()
+    return {
+        item.strip()
+        for item in re.split(r"\s+(?:->|→)\s+", path_text)
+        if item.strip()
+    }
+
+
 def _path_is_dataless(path: Path) -> bool:
     try:
         flags = int(getattr(path.stat(), "st_flags", 0) or 0)
@@ -576,6 +599,134 @@ class HumanAdamWorkspaceManager:
             return False
         return 0 <= size <= MAX_PUBLIC_SOURCE_MEDIA_BYTES
 
+    def _pending_integration_audit(
+        self,
+        current: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Classify uncommitted work without modifying either repository."""
+
+        base = {
+            "ok": True,
+            "read_only": True,
+            "writes_performed": False,
+            "pending": bool(current.get("dirty")),
+            "workspace_change_count": int(current.get("change_count") or 0),
+            "source_pending_change_count": int(
+                current.get("source_pending_changes") or 0
+            ),
+            "source_advanced": current.get("workspace_relation") == "source_ahead",
+            "source_change_count": 0,
+            "overlap_count": 0,
+            "overlap_paths": [],
+            "requires_service_decision": False,
+        }
+        if not current.get("dirty"):
+            return {
+                **base,
+                "state": "not_pending",
+                "label": "Žádná čekající integrace",
+                "message": "Izolovaný workspace nemá necommitnuté změny.",
+                "next_step": "Není potřeba žádný integrační krok.",
+            }
+        if (
+            not current.get("prepared")
+            or not current.get("ok")
+            or current.get("remotes")
+            or current.get("branch") != "main"
+            or current.get("source_branch") != "main"
+        ):
+            return {
+                **base,
+                "state": "blocked_unverified_workspace",
+                "label": "Integrace je zablokovaná",
+                "message": "Workspace nemá ověřený bezpečný stav pro integrační audit.",
+                "next_step": "Proveď servisní kontrolu workspace; nic neintegruj.",
+                "requires_service_decision": True,
+            }
+        if (
+            current.get("local_checkpoint_ahead")
+            or current.get("local_checkpoint_preserved")
+            or current.get("workspace_relation") == "diverged"
+        ):
+            return {
+                **base,
+                "state": "blocked_workspace_history",
+                "label": "Historie workspace se rozešla",
+                "message": "Automatický merge ani rebase není povolený.",
+                "next_step": "Vyžádej servisní rozhodnutí nad zachovaným WIP.",
+                "requires_service_decision": True,
+            }
+        if int(current.get("source_pending_changes") or 0) > 0:
+            return {
+                **base,
+                "state": "waiting_source_clean",
+                "label": "Čeká se na čistý main",
+                "message": "Zdrojový main stále obsahuje terminálové pracovní změny.",
+                "next_step": "Nejdřív dokonči nebo zaparkuj terminálový WIP.",
+            }
+        relation = str(current.get("workspace_relation") or "unknown")
+        if relation == "aligned":
+            return {
+                **base,
+                "state": "ready_for_confirmed_integration",
+                "label": "Připraveno k potvrzené integraci",
+                "message": (
+                    "Main je čistý a workspace stojí na stejném commitu. "
+                    "Audit neprokazuje vlastnictví změn."
+                ),
+                "next_step": "Použij budoucí samostatně potvrzenou integrační bránu.",
+            }
+        if relation != "source_ahead":
+            return {
+                **base,
+                "state": "blocked_workspace_relation",
+                "label": "Integrace je zablokovaná",
+                "message": "Vztah workspace k main není jednoznačně bezpečný.",
+                "next_step": "Proveď servisní kontrolu; nic automaticky neslučuj.",
+                "requires_service_decision": True,
+            }
+
+        workspace_head = str(current.get("head") or "")
+        source_head = str(current.get("source_head") or "")
+        incoming = _name_status_rows(
+            _git_output(
+                self.source_repo,
+                [
+                    "diff",
+                    "--name-status",
+                    "--find-renames",
+                    f"{workspace_head}..{source_head}",
+                ],
+            )
+        )
+        pending_paths: set[str] = set()
+        for row in current.get("changes") or []:
+            if isinstance(row, dict):
+                pending_paths.update(_row_paths(row))
+        incoming_paths: set[str] = set()
+        for row in incoming:
+            incoming_paths.update(_row_paths(row))
+        overlap_paths = sorted(pending_paths & incoming_paths)
+        visible_overlap_paths = [
+            path for path in overlap_paths if self.checkpoint_path_allowed(path)
+        ]
+        return {
+            **base,
+            "state": "source_advanced_service_decision",
+            "label": "Main mezitím postoupil",
+            "message": (
+                f"Překryv změněných cest: {len(overlap_paths)}. "
+                "Výsledek je pouze diagnostický."
+            ),
+            "next_step": "Vyžádej servisní rozhodnutí; merge ani rebase se nespouští.",
+            "source_change_count": len(incoming),
+            "overlap_count": len(overlap_paths),
+            "overlap_paths": visible_overlap_paths[:80],
+            "overlap_paths_omitted": len(overlap_paths)
+            - len(visible_overlap_paths[:80]),
+            "requires_service_decision": True,
+        }
+
     def review(self) -> dict[str, Any]:
         """Return path-level work evidence without exposing file contents."""
         with self._lock:
@@ -606,20 +757,16 @@ class HumanAdamWorkspaceManager:
                     self.workspace_root,
                     ["diff", "--name-status", "--find-renames", f"{checkpoint_base_head}..HEAD"],
                 )
-                for line in diff_text.splitlines():
-                    parts = line.split("\t")
-                    if len(parts) >= 2:
-                        checkpoint_changes.append(
-                            {
-                                "status": parts[0],
-                                "path": " → ".join(parts[1:]),
-                            }
-                        )
+                checkpoint_changes = _name_status_rows(diff_text)
+            pending_integration_audit = self._pending_integration_audit(current)
             return {
                 "ok": True,
                 "dirty": bool(current.get("dirty")),
                 "changes": list(current.get("changes") or []),
                 "change_count": int(current.get("change_count") or 0),
+                "source_pending_changes": int(
+                    current.get("source_pending_changes") or 0
+                ),
                 "checkpoint_changes": checkpoint_changes[:120],
                 "checkpoint_change_count": len(checkpoint_changes),
                 "checkpoint_base_head": checkpoint_base_head,
@@ -631,6 +778,7 @@ class HumanAdamWorkspaceManager:
                 "workspace_relation": str(current.get("workspace_relation") or "unknown"),
                 "source_update_available": bool(current.get("source_update_available")),
                 "has_git_remote": bool(current.get("remotes")),
+                "pending_integration_audit": pending_integration_audit,
             }
 
     def checkpoint(self, *, confirmed: bool, message: str = "") -> dict[str, Any]:

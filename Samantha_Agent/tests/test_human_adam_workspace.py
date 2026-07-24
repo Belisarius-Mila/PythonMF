@@ -240,6 +240,132 @@ class HumanAdamWorkspaceManagerTests(unittest.TestCase):
             self.assertEqual(synced["workspace_relation"], "aligned")
             self.assertEqual(synced["base_head"], source_head)
 
+    def test_pending_integration_audit_waits_while_source_main_is_dirty(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            git(source, "add", "AuditCockpit56_M.txt")
+            git(source, "commit", "-m", "Track fixture")
+            manager = HumanAdamWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            manager.prepare()
+            (manager.project_root / "tracked.py").write_text(
+                "VALUE = 20\n", encoding="utf-8"
+            )
+            (source / "Samantha_Agent" / "tracked.py").write_text(
+                "VALUE = 21\n", encoding="utf-8"
+            )
+            source_head = git(source, "rev-parse", "HEAD")
+            workspace_head = git(manager.workspace_root, "rev-parse", "HEAD")
+
+            audit = manager.review()["pending_integration_audit"]
+
+            self.assertEqual(audit["state"], "waiting_source_clean")
+            self.assertTrue(audit["pending"])
+            self.assertTrue(audit["read_only"])
+            self.assertFalse(audit["writes_performed"])
+            self.assertGreater(audit["source_pending_change_count"], 0)
+            self.assertEqual(git(source, "rev-parse", "HEAD"), source_head)
+            self.assertEqual(
+                git(manager.workspace_root, "rev-parse", "HEAD"),
+                workspace_head,
+            )
+
+    def test_pending_integration_audit_marks_clean_aligned_base_ready(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            git(source, "add", "AuditCockpit56_M.txt")
+            git(source, "commit", "-m", "Track fixture")
+            manager = HumanAdamWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            manager.prepare()
+            (manager.project_root / "tracked.py").write_text(
+                "VALUE = 30\n", encoding="utf-8"
+            )
+
+            audit = manager.review()["pending_integration_audit"]
+
+            self.assertEqual(
+                audit["state"],
+                "ready_for_confirmed_integration",
+            )
+            self.assertTrue(audit["pending"])
+            self.assertFalse(audit["requires_service_decision"])
+            self.assertIn("neprokazuje vlastnictví", audit["message"])
+
+    def test_pending_integration_audit_reports_path_overlap_when_main_advanced(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            git(source, "add", "AuditCockpit56_M.txt")
+            git(source, "commit", "-m", "Track fixture")
+            manager = HumanAdamWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            manager.prepare()
+            workspace_file = manager.project_root / "tracked.py"
+            workspace_file.write_text("VALUE = 40\n", encoding="utf-8")
+            (source / "Samantha_Agent" / "tracked.py").write_text(
+                "VALUE = 41\n", encoding="utf-8"
+            )
+            git(source, "add", "Samantha_Agent/tracked.py")
+            git(source, "commit", "-m", "Advance same path")
+            workspace_head = git(manager.workspace_root, "rev-parse", "HEAD")
+            workspace_text = workspace_file.read_text(encoding="utf-8")
+
+            audit = manager.review()["pending_integration_audit"]
+
+            self.assertEqual(audit["state"], "source_advanced_service_decision")
+            self.assertTrue(audit["source_advanced"])
+            self.assertTrue(audit["requires_service_decision"])
+            self.assertEqual(audit["overlap_count"], 1)
+            self.assertEqual(
+                audit["overlap_paths"],
+                ["Samantha_Agent/tracked.py"],
+            )
+            self.assertEqual(git(manager.workspace_root, "rev-parse", "HEAD"), workspace_head)
+            self.assertEqual(workspace_file.read_text(encoding="utf-8"), workspace_text)
+
+    def test_pending_integration_audit_still_requires_service_without_overlap(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            git(source, "add", "AuditCockpit56_M.txt")
+            git(source, "commit", "-m", "Track fixture")
+            manager = HumanAdamWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            manager.prepare()
+            (manager.project_root / "tracked.py").write_text(
+                "VALUE = 50\n", encoding="utf-8"
+            )
+            index = source / "Samantha_Agent" / "memory" / "MEMORY_INDEX.md"
+            index.write_text("# Index\nAdvanced\n", encoding="utf-8")
+            git(source, "add", "Samantha_Agent/memory/MEMORY_INDEX.md")
+            git(source, "commit", "-m", "Advance different path")
+
+            audit = manager.review()["pending_integration_audit"]
+
+            self.assertEqual(audit["state"], "source_advanced_service_decision")
+            self.assertEqual(audit["overlap_count"], 0)
+            self.assertEqual(audit["overlap_paths"], [])
+            self.assertTrue(audit["requires_service_decision"])
+
     def test_sync_from_main_fast_forwards_clean_clone_without_remote(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

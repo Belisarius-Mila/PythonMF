@@ -2437,3 +2437,29 @@ Navrhované další kroky:
 Technický důkaz:
 - Cílených 191 a úplných 1195 testů prošlo.
 - JavaScript syntaxe a `git diff --check` jsou v pořádku.
+
+### 2026-07-24 18:01 CEST – Read-only audit čekající integrace
+
+Hotovo:
+- Panel `Práce` rozlišuje čekání na čistý `main`, společný čistý základ,
+  posunutý `main` s překryvem cest a cizí nebo rozvětvený WIP.
+- Audit používá pouze Git metadata a názvy cest; nic necommitne, neslučuje ani
+  nepřepisuje.
+
+Rozhodnutí:
+- První fáze zůstává striktně read-only.
+- Posun `main` vždy vyžaduje servisní rozhodnutí, i když se názvy změněných cest
+  nepřekrývají.
+- Bez trvalého ownership markeru audit nesmí tvrdit, kdo změny vytvořil.
+
+Další krok:
+- Nasadit audit a ověřit v panelu `Práce` stav bez čekající integrace.
+
+Navrhované další kroky:
+- Navrhnout samostatně potvrzovanou integrační bránu jen pro ověřený společný
+  základ.
+- Před případnou automatizací rozhodnout o trvalém ownership markeru.
+
+Technický důkaz:
+- Cílených 168, širších 457 a úplných 1201 testů prošlo.
+- JavaScript syntaxe a `git diff --check` jsou v pořádku.
