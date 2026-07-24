@@ -25,6 +25,8 @@ class TurnCompletionMetadata:
     commit_message: str
     summary: str
     next_step: str
+    decision: str = ""
+    proposed_next_steps: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -43,8 +45,12 @@ def automatic_completion_instruction(*, writable: bool) -> str:
     example = json.dumps(
         {
             "commit_message": "Complete one development step",
-            "summary": "Dokončen jeden malý vývojový krok",
+            "summary": "Nový TVBCP zápis zvýrazňuje výsledek a další plán",
+            "decision": "Technické důkazy budou až v poslední stručné sekci",
             "next_step": "Ověřit výsledek nebo pokračovat dalším krokem",
+            "proposed_next_steps": [
+                "Po živém ověření použít stejný formát i v dalším projektu"
+            ],
         },
         ensure_ascii=False,
         separators=(",", ":"),
@@ -56,6 +62,9 @@ def automatic_completion_instruction(*, writable: bool) -> str:
             "rule=Use the receipt only after you changed files successfully and relevant tests passed.",
             "rule=Do not create a Git commit, push, handoff entry or TVBCP entry yourself.",
             "rule=If work is incomplete or tests failed, do not emit the receipt.",
+            "rule=Write summary as a short user-visible outcome, not as a commit or test report.",
+            "rule=Put only a genuinely agreed canonical decision into decision; otherwise use an empty string.",
+            "rule=Preserve useful future plans from the conversation in proposed_next_steps; use an empty list when none exist.",
             f"receipt_start={COMPLETION_MARKER_START}",
             f"receipt_json_example={example}",
             f"receipt_end={COMPLETION_MARKER_END}",
@@ -74,6 +83,26 @@ def _safe_field(value: object, *, label: str, limit: int) -> str:
     if _SENSITIVE_TEXT_RE.search(text) or "-----BEGIN PRIVATE KEY-----" in text.upper():
         raise ValueError("Automatická účtenka nesmí obsahovat heslo, token ani klíč.")
     return text
+
+
+def _safe_optional_field(value: object, *, label: str, limit: int) -> str:
+    text = " ".join(str(value or "").split())
+    if not text:
+        return ""
+    return _safe_field(text, label=label, limit=limit)
+
+
+def _safe_proposed_next_steps(value: object) -> tuple[str, ...]:
+    if value is None:
+        return ()
+    if not isinstance(value, list):
+        raise ValueError("Navrhované další kroky automatického dokončení musí být seznam.")
+    if len(value) > 4:
+        raise ValueError("Automatická účtenka smí obsahovat nejvýše čtyři navrhované kroky.")
+    return tuple(
+        _safe_field(item, label="navrhovaný další krok", limit=300)
+        for item in value
+    )
 
 
 def parse_turn_completion(answer: object) -> ParsedTurnCompletion:
@@ -109,12 +138,18 @@ def parse_turn_completion(answer: object) -> ParsedTurnCompletion:
     ].strip()
     try:
         payload = json.loads(payload_text)
-        if not isinstance(payload, dict) or set(payload) != {
+        legacy_fields = {
             "commit_message",
             "summary",
             "next_step",
+        }
+        current_fields = legacy_fields | {"decision", "proposed_next_steps"}
+        payload_fields = frozenset(payload) if isinstance(payload, dict) else frozenset()
+        if not isinstance(payload, dict) or payload_fields not in {
+            frozenset(legacy_fields),
+            frozenset(current_fields),
         }:
-            raise ValueError("Automatická účtenka nemá přesně tři povolená pole.")
+            raise ValueError("Automatická účtenka nemá přesně povolená pole.")
         metadata = TurnCompletionMetadata(
             commit_message=_safe_field(
                 payload.get("commit_message"),
@@ -126,6 +161,14 @@ def parse_turn_completion(answer: object) -> ParsedTurnCompletion:
                 payload.get("next_step"),
                 label="další krok",
                 limit=500,
+            ),
+            decision=_safe_optional_field(
+                payload.get("decision"),
+                label="rozhodnutí",
+                limit=400,
+            ),
+            proposed_next_steps=_safe_proposed_next_steps(
+                payload.get("proposed_next_steps")
             ),
         )
     except (json.JSONDecodeError, TypeError, ValueError) as exc:

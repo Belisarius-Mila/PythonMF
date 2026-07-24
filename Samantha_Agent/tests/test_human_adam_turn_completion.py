@@ -21,7 +21,9 @@ class HumanAdamTurnCompletionTests(unittest.TestCase):
             "Hotovo a ověřeno.\n\n"
             "[HUMAN_ADAM_STEP_COMPLETION]\n"
             '{"commit_message":"Add safe completion","summary":"Doplněna účtenka",'
-            '"next_step":"Spustit cílené testy"}\n'
+            '"decision":"Plány budou zachované samostatně",'
+            '"next_step":"Spustit cílené testy",'
+            '"proposed_next_steps":["Ověřit nový TVBCP záznam","Pokračovat podle výsledku"]}\n'
             "[/HUMAN_ADAM_STEP_COMPLETION]"
         )
 
@@ -30,6 +32,26 @@ class HumanAdamTurnCompletionTests(unittest.TestCase):
         self.assertIsNotNone(parsed.metadata)
         assert parsed.metadata is not None
         self.assertEqual(parsed.metadata.commit_message, "Add safe completion")
+        self.assertEqual(
+            parsed.metadata.decision,
+            "Plány budou zachované samostatně",
+        )
+        self.assertEqual(
+            parsed.metadata.proposed_next_steps,
+            ("Ověřit nový TVBCP záznam", "Pokračovat podle výsledku"),
+        )
+
+    def test_legacy_three_field_receipt_remains_compatible(self) -> None:
+        parsed = parse_turn_completion(
+            "Hotovo\n[HUMAN_ADAM_STEP_COMPLETION]\n"
+            '{"commit_message":"A","summary":"B","next_step":"C"}\n'
+            "[/HUMAN_ADAM_STEP_COMPLETION]"
+        )
+
+        self.assertEqual(parsed.state, "valid")
+        assert parsed.metadata is not None
+        self.assertEqual(parsed.metadata.decision, "")
+        self.assertEqual(parsed.metadata.proposed_next_steps, ())
 
     def test_receipt_must_be_unique_final_and_exact(self) -> None:
         trailing = parse_turn_completion(
@@ -63,6 +85,31 @@ class HumanAdamTurnCompletionTests(unittest.TestCase):
         self.assertEqual(extra.state, "invalid")
         self.assertEqual(secret.state, "invalid")
         self.assertIn("token", secret.error)
+
+    def test_receipt_rejects_invalid_or_sensitive_future_plans(self) -> None:
+        invalid_type = parse_turn_completion(
+            "Hotovo\n[HUMAN_ADAM_STEP_COMPLETION]\n"
+            '{"commit_message":"A","summary":"B","decision":"","next_step":"C",'
+            '"proposed_next_steps":"D"}\n'
+            "[/HUMAN_ADAM_STEP_COMPLETION]"
+        )
+        too_many = parse_turn_completion(
+            "Hotovo\n[HUMAN_ADAM_STEP_COMPLETION]\n"
+            '{"commit_message":"A","summary":"B","decision":"","next_step":"C",'
+            '"proposed_next_steps":["1","2","3","4","5"]}\n'
+            "[/HUMAN_ADAM_STEP_COMPLETION]"
+        )
+        sensitive = parse_turn_completion(
+            "Hotovo\n[HUMAN_ADAM_STEP_COMPLETION]\n"
+            '{"commit_message":"A","summary":"B","decision":"","next_step":"C",'
+            '"proposed_next_steps":["heslo=secret"]}\n'
+            "[/HUMAN_ADAM_STEP_COMPLETION]"
+        )
+
+        self.assertEqual(invalid_type.state, "invalid")
+        self.assertEqual(too_many.state, "invalid")
+        self.assertEqual(sensitive.state, "invalid")
+        self.assertIn("heslo", sensitive.error)
 
 
 if __name__ == "__main__":

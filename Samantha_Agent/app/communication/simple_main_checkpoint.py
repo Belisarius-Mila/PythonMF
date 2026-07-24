@@ -57,6 +57,8 @@ class SimpleMainCheckpointRequest:
     tvbcp_relative_path: str
     handoff_initial_content: str = ""
     tvbcp_initial_content: str = ""
+    decision: str = ""
+    proposed_next_steps: tuple[str, ...] = ()
 
 
 def _local_now() -> datetime:
@@ -74,6 +76,30 @@ def _safe_line(value: object, *, label: str, limit: int) -> str:
             "Checkpointový zápis nesmí obsahovat heslo, token ani API klíč."
         )
     return text
+
+
+def _safe_optional_line(value: object, *, label: str, limit: int) -> str:
+    text = " ".join(str(value or "").split())
+    if not text:
+        return ""
+    return _safe_line(text, label=label, limit=limit)
+
+
+def _safe_proposed_next_steps(value: object) -> tuple[str, ...]:
+    if value is None:
+        return ()
+    if isinstance(value, (str, bytes)) or not isinstance(value, Sequence):
+        raise SimpleMainCheckpointError(
+            "Navrhované další kroky checkpointu musí být seznam."
+        )
+    if len(value) > 4:
+        raise SimpleMainCheckpointError(
+            "Checkpoint smí obsahovat nejvýše čtyři navrhované další kroky."
+        )
+    return tuple(
+        _safe_line(item, label="navrhovaný další krok", limit=300)
+        for item in value
+    )
 
 
 def _safe_request(request: SimpleMainCheckpointRequest) -> SimpleMainCheckpointRequest:
@@ -94,6 +120,14 @@ def _safe_request(request: SimpleMainCheckpointRequest) -> SimpleMainCheckpointR
         tvbcp_initial_content=_safe_initial_memory(
             request.tvbcp_initial_content,
             kind="TVBCP",
+        ),
+        decision=_safe_optional_line(
+            request.decision,
+            label="rozhodnutí",
+            limit=400,
+        ),
+        proposed_next_steps=_safe_proposed_next_steps(
+            request.proposed_next_steps
         ),
     )
 
@@ -196,16 +230,33 @@ def _memory_blocks(
 - Commit: `{request.commit_message}`
 - Další krok: {request.next_step}
 """
+    decision_text = (
+        f"- {request.decision}"
+        if request.decision
+        else "- V tomto kroku nebylo přijato nové kanonické rozhodnutí."
+    )
+    proposed_steps_text = (
+        "\n".join(f"- {item}" for item in request.proposed_next_steps)
+        if request.proposed_next_steps
+        else "- Nebyly zachyceny další návrhy nad rámec bezprostředního kroku."
+    )
     tvbcp_block = f"""### {timestamp} – {request.summary}
 
-Pracovní proud: `{request.workstream_id}`.
+Hotovo:
+- {request.summary}
 
-Milník: {request.summary}
+Rozhodnutí:
+{decision_text}
 
-Důkaz: {test_text}. Checkpoint backend připravuje jeden commit na lokální
-profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+Další krok:
+- {request.next_step}
 
-Další krok: {request.next_step}
+Navrhované další kroky:
+{proposed_steps_text}
+
+Technický důkaz:
+- {test_text}.
+- Pracovní proud: `{request.workstream_id}`.
 """
     return handoff_block, tvbcp_block
 

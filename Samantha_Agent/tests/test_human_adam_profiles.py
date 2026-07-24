@@ -2242,7 +2242,9 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             "Změna i test jsou hotové.\n\n"
             "[HUMAN_ADAM_STEP_COMPLETION]\n"
             '{"commit_message":"Complete phase 1.5","summary":"Automatické dokončení tahu",'
-            '"next_step":"Provést checkpoint fáze 1.5"}\n'
+            '"decision":"TVBCP bude upřednostňovat lidský stav",'
+            '"next_step":"Provést checkpoint fáze 1.5",'
+            '"proposed_next_steps":["Ověřit nový záznam","Pokračovat druhou fází"]}\n'
             "[/HUMAN_ADAM_STEP_COMPLETION]"
         )
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -2278,6 +2280,14 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(checkpoint.call_args.kwargs["peer_workspaces"], (library_workspace,))
         self.assertEqual(request.commit_message, "Complete phase 1.5")
         self.assertEqual(request.summary, "Automatické dokončení tahu")
+        self.assertEqual(
+            request.decision,
+            "TVBCP bude upřednostňovat lidský stav",
+        )
+        self.assertEqual(
+            request.proposed_next_steps,
+            ("Ověřit nový záznam", "Pokračovat druhou fází"),
+        )
         self.assertEqual(result["automatic_completion"]["state"], "completed")
         self.assertNotIn("HUMAN_ADAM_STEP_COMPLETION", result["entry"]["answer"])
         self.assertIn("testy prošly", result["entry"]["answer"])

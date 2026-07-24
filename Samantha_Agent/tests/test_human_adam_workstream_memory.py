@@ -107,6 +107,9 @@ class WorkstreamMemoryRegistryTests(unittest.TestCase):
         self.assertIn("Bezpecnost / neukladat", handoff)
         self.assertIn("# TVBCP: MMTX", tvbcp)
         self.assertIn("Chronologicke zaznamy", tvbcp)
+        self.assertIn("Hotovo", tvbcp)
+        self.assertIn("Navrhovane dalsi kroky", tvbcp)
+        self.assertIn("Starsi zaznamy se zpetne neprepisuji", tvbcp)
         self.assertNotIn("thread_id", handoff + tvbcp)
 
     def test_unknown_stream_and_unsafe_or_duplicate_paths_fail_closed(self) -> None:

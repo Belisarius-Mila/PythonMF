@@ -1248,6 +1248,8 @@ class HumanAdamProfileManager:
                 tvbcp_relative_path=tvbcp_path,
                 handoff_initial_content=handoff_initial,
                 tvbcp_initial_content=tvbcp_initial,
+                decision=metadata.decision,
+                proposed_next_steps=metadata.proposed_next_steps,
             ),
             confirmed=True,
             peer_workspaces=peers,

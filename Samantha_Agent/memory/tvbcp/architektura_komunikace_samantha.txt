@@ -2345,3 +2345,29 @@ Důkaz: plná Cockpit brána: 1192 testů, 220.5 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Provést read-only audit skrytého UI auditu WIP větví
+
+### 2026-07-24 10:57 CEST – Nové TVBCP záznamy upřednostňují výsledek a plán
+
+Hotovo:
+- Pravidla, dokončovací účtenka a checkpointový generátor nově zapisují lidský
+  výsledek, skutečná rozhodnutí a zachované budoucí plány před technickými
+  údaji.
+- Změna platí pouze pro nové appendované bloky; existující historie zůstala
+  beze změny.
+
+Rozhodnutí:
+- Kanonické pořadí nového záznamu je `Hotovo`, `Rozhodnutí`, `Další krok`,
+  `Navrhované další kroky` a až nakonec stručný `Technický důkaz`.
+
+Další krok:
+- Nasadit fázi 1 a ověřit jediný nový automaticky appendovaný TVBCP záznam.
+
+Navrhované další kroky:
+- Po živém testu rozhodnout, zda nový chronologický formát sám stačí pro
+  rychlou orientaci.
+- Pouze při skutečné potřebě navrhnout ve fázi 2 kompaktní aktuální souhrn bez
+  přepisování historických bloků.
+
+Technický důkaz:
+- Cílených 108, širších 227 a úplných 1194 testů prošlo.
+- `git diff --check` je čistý a žádný dřívější TVBCP blok nebyl přepsán.

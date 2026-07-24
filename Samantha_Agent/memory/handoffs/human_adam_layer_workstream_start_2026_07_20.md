@@ -1210,3 +1210,58 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/tests/test_human_adam_ui.py`
 - Commit: `Remove obsolete Human-Adam work help`
 - Další krok: Provést read-only audit skrytého UI auditu WIP větví
+
+### 2026-07-24 10:57 CEST – Lepší TVBCP, fáze 1
+
+Nazev: Nové TVBCP záznamy zaměřené na výsledek a další plán
+Priorita: 1
+Stav: ceka na nasazeni
+Pripomenout pri startu: ano
+Datum: 2026-07-24
+
+Co se resilo:
+TVBCP sice průběžně vznikal, ale automatické záznamy zvýrazňovaly hlavně
+technický checkpoint, commit a push. Míla potřebuje rychle vidět, co je hotové,
+co bylo rozhodnuto a kam může projekt dál pokračovat.
+
+Co je hotove:
+- Pravidla i checkpointový generátor používají pro nové záznamy pořadí
+  `Hotovo`, `Rozhodnutí`, `Další krok`, `Navrhované další kroky` a nakonec
+  stručný `Technický důkaz`.
+- Neveřejná dokončovací účtenka zachová skutečné rozhodnutí a nejvýše čtyři
+  budoucí plány z rozhovoru.
+- Pokud rozhodnutí nebo další návrhy nevznikly, systém je nevymýšlí.
+- Citlivé hodnoty jsou odmítnuty a staré třípolové účtenky zůstávají
+  kompatibilní.
+- Budoucí TVBCP šablony obsahují nový kontrakt od prvního checkpointu.
+- Žádný dřívější TVBCP blok nebyl přepsán ani zpětně přeformátován.
+- Cílených 108, širších 227 a úplných 1194 testů prošlo.
+
+Co neni hotove:
+- Změna ještě není commitnutá, pushnutá ani nasazená.
+- Neběžel živý automatický checkpoint s novou pětipolovou účtenkou.
+- Fáze 2 nebyla zahájena.
+
+Dalsi krok:
+Commitnout, pushnout a potvrzovaně nasadit fázi 1. Potom vytvořit jediný malý
+živý checkpoint a zkontrolovat pouze jeho nový appendovaný TVBCP blok.
+
+Navrhovane dalsi kroky:
+- Po živém testu vyhodnotit, zda nový chronologický formát stačí pro rychlou
+  orientaci Míly.
+- Jen pokud nebude stačit, otevřít read-only návrh kompaktního aktuálního
+  souhrnu bez přepisování historických záznamů.
+
+Zmenene nebo relevantni soubory:
+- `AGENTS.md`
+- `human_adam_profiles.py`
+- `human_adam_turn_completion.py`
+- `human_adam_workstream_memory.py`
+- `simple_main_checkpoint.py`
+- `project_tvbcp_rules.md`
+- příslušné cílené testy
+
+Bezpecnost / neukladat:
+- Nepřepisovat ani hromadně nepřeformátovávat starší TVBCP záznamy.
+- Neukládat do rozhodnutí, plánů ani technických důkazů citlivý nebo private
+  obsah.

@@ -83,17 +83,22 @@ def prepare_environment(
     return source, manager
 
 
-def checkpoint_request(**overrides: str) -> SimpleMainCheckpointRequest:
-    values = {
+def checkpoint_request(**overrides: object) -> SimpleMainCheckpointRequest:
+    values: dict[str, object] = {
         "workstream_id": "layer-human-adam-development",
         "commit_message": "Complete one simple step",
         "summary": "Jednoduchý backend dokončil jeden krok",
         "next_step": "Ručně ověřit výsledek",
         "handoff_relative_path": "memory/handoffs/demo.md",
         "tvbcp_relative_path": "memory/tvbcp/demo.txt",
+        "decision": "Nové TVBCP zápisy mají lidský souhrn před technickým důkazem",
+        "proposed_next_steps": (
+            "Ověřit nový záznam v jednom projektu",
+            "Podle výsledku pokračovat druhou fází",
+        ),
     }
     values.update(overrides)
-    return SimpleMainCheckpointRequest(**values)
+    return SimpleMainCheckpointRequest(**values)  # type: ignore[arg-type]
 
 
 def fixed_now() -> datetime:
@@ -172,6 +177,25 @@ class SimpleMainCheckpointTests(unittest.TestCase):
         self.assertIn("plná Cockpit brána: 12 testů", handoff)
         self.assertIn("### 2026-07-20 07:00 CEST", tvbcp)
         self.assertIn("Jednoduchý backend dokončil jeden krok", tvbcp)
+        section_positions = [
+            tvbcp.index(label)
+            for label in (
+                "Hotovo:",
+                "Rozhodnutí:",
+                "Další krok:",
+                "Navrhované další kroky:",
+                "Technický důkaz:",
+            )
+        ]
+        self.assertEqual(section_positions, sorted(section_positions))
+        self.assertIn(
+            "Nové TVBCP zápisy mají lidský souhrn před technickým důkazem",
+            tvbcp,
+        )
+        self.assertIn("Ověřit nový záznam v jednom projektu", tvbcp)
+        self.assertNotIn("Milník:", tvbcp)
+        self.assertNotIn("Checkpoint backend připravuje", tvbcp)
+        self.assertTrue(tvbcp.startswith("# Demo TVBCP\n\n### "))
         self.assertEqual(progress[0:4], [
             ("preflight", "running"),
             ("preflight", "passed"),

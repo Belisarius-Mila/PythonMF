@@ -101,6 +101,12 @@ pri dalsim navazani videl, kam se da rozumne pokracovat.
   `memory/MEMORY_INDEX.md` a prislusne polozky v `memory/ACTIVE_PROJECTS.md`.
 - Prubezne do nej zapisuj jen podstatne navrhy, kanonicka rozhodnuti, milniky,
   dulezite testy, otevrene kroky a rizika; vynechavej provozni mezistavy a omacku.
+- Novy chronologicky zaznam pis pro Milu v poradi `Hotovo`, `Rozhodnuti`,
+  `Dalsi krok`, `Navrhovane dalsi kroky` a teprve nakonec kratky
+  `Technicky dukaz`. Vysledek a budoucí plan maji prednost pred commity,
+  pushi a internimi provoznimi detaily.
+- Historicke zaznamy kvuli novemu formatu neprepisuj ani zpetne
+  nepreformatovavej; pravidlo plati jen pro nove appendovane bloky.
 - Kazdy novy chronologicky zaznam pridej na konec TVBCP a oznac lokalnim datem,
   casem a casovou zonou ve formatu `YYYY-MM-DD HH:MM TZ`, aby byl nejnovejsi
   zapis vzdy dohledatelny dole. Souhrnne sekce lze prubezne aktualizovat.

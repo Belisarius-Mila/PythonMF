@@ -133,7 +133,12 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   editaci a testy v cistem zarovnanem Human–Adam workspace a blokuje
   automaticky checkpoint, commit, push i integraci do cisteho `main` a auditu
   konfliktu. Knihovna a nezarovnany peer zustavaji uzamcene. Cilenych 190 testu
-  a cela brana s 1192 testy prosly; zmena ceka na nasazeni a zivy test.
+  a cela brana s 1192 testy prosly; zivy test nasledne prosel a automaticky
+  checkpoint `f1521de` skoncil ciste. Faze 1 lepsiho TVBCP je pripravena k
+  nasazeni: nove appendovane zaznamy maji lidske poradi `Hotovo`,
+  `Rozhodnuti`, `Dalsi krok`, `Navrhovane dalsi kroky` a az potom kratky
+  technicky dukaz. Historie se neprepisuje; stare uctenky zustavaji
+  kompatibilni. Proslo 227 sirsich a 1194 uplnych testu.
 
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni

@@ -160,6 +160,10 @@ Tento git-safe TVBCP zachycuje pouze potvrzena rozhodnuti, dulezite milniky,
 testy, rizika a dalsi kroky pracovniho proudu. Neni kopii chatu a nesmi
 obsahovat hesla, tokeny, API klice ani soukromy obsah.
 
+Nove chronologicke zaznamy uprednostni lidsky stav v poradi Hotovo,
+Rozhodnuti, Dalsi krok a Navrhovane dalsi kroky. Technicky dukaz je az
+posledni kratka sekce. Starsi zaznamy se zpetne neprepisuji.
+
 ## Chronologicke zaznamy
 
 Prvni zaznam prida potvrzeny checkpoint nize.

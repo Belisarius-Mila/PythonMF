@@ -41,8 +41,23 @@ opakování a textovou omáčku.
 - Souhrnné sekce, tabulky milníků a otevřené kroky lze aktualizovat na jejich
   místě, ale odpovídající nový vývojový záznam musí být současně dohledatelný na
   konci dokumentu.
-- Jeden časovaný záznam stručně oddělí požadavek nebo rozhodnutí, provedenou
-  implementaci, důkaz testu a další krok. Nekopíruje celý chat.
+- Nový záznam je určen především Mílovi. V tomto pořadí stručně oddělí:
+  `Hotovo`, `Rozhodnutí`, `Další krok`, `Navrhované další kroky` a až nakonec
+  `Technický důkaz`.
+- `Hotovo` popisuje uživatelský výsledek nebo novou schopnost, ne název commitu,
+  čas pushnutí ani interní průběh nástrojů.
+- `Rozhodnutí` obsahuje jen skutečně přijaté kanonické rozhodnutí. Pokud žádné
+  nové nevzniklo, uvede to jednou krátkou větou a nic nevymýšlí.
+- `Další krok` je jeden bezprostřední krok. `Navrhované další kroky` zachovají
+  nejvýše čtyři užitečné plány, které v rozhovoru skutečně vznikly; nejde o
+  automatický seznam obecných doporučení.
+- `Technický důkaz` je krátký a vedlejší. Uvede jen důkaz potřebný k důvěře ve
+  výsledek, typicky počet testů nebo podstatný ruční retest. Běžné provozní
+  mezistavy, časy commitů a pushů se nevypisují.
+- Jeden časovaný záznam nekopíruje celý chat ani citlivé texty.
+- Nový formát platí pouze pro nově přidávané záznamy. Starší chronologické
+  záznamy se kvůli změně šablony nepřepisují, nepřesouvají ani zpětně
+  nepřeformátovávají.
 
 ## Vztah k ostatním vrstvám paměti
 

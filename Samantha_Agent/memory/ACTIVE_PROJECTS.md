@@ -42,6 +42,16 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-24: Priorita 1, lepsi projektove TVBCP – faze 1. Pravidla,
+  automaticka dokoncovaci uctenka a checkpointovy generator nyni pro nove
+  appendovane zaznamy uprednostnuji `Hotovo`, `Rozhodnuti`, jeden
+  `Dalsi krok` a zachovane `Navrhovane dalsi kroky`; technicky dukaz je az
+  posledni kratka sekce. Starsi zaznamy se neprepisuji. Stare tripolove
+  uctenky zustavaji kompatibilni, plany maji limit ctyr polozek a citlive
+  hodnoty jsou odmitnuty. Proslo 227 sirsich testu a cela Cockpit Quality Gate
+  s 1194 testy. Dalsi krok je nasazeni a jeden zivy append-only test noveho
+  formatu. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-24: Priorita 1, Human–Adam / vyvojove prostredi. Je pripraven uzky
   rez soubezne izolovane prace pri terminalovem WIP: zapisovaci tah smi
   editovat a testovat pouze v cistem workspace zarovnanem s poslednim commitem,
