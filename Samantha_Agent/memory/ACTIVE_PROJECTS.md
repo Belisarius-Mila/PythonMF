@@ -42,6 +42,31 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-24 23:23 CEST: Priorita 1, Human–Adam / fáze 2 handoffu a
+  potvrzovaná integrace. Budoucí automatický checkpoint bude v témže jediném
+  commitu aktualizovat markerově ohraničený `Aktuální stav` v handoffu i TVBCP;
+  starší chronologické bloky zůstanou beze změny jako snapshoty. Souhrn smí
+  vycházet jen z ověřeného zarovnání `main == origin/main` a poslední
+  deployment účtenky, ne z odhadu starých textů. Pro odložený Human–Adam WIP je
+  implementovaná samostatně potvrzovaná integrační brána. Vyžaduje soukromý
+  ownership marker svázaný s pracovním proudem, base commitem a otiskem seznamu
+  změněných cest; marker neobsahuje obsah souborů ani chat a zůstává mimo Git.
+  Při posunu `main`, neshodě markeru, cizím WIP nebo divergenci je integrace
+  fail-closed a vyžaduje servisní rozhodnutí; automatický merge ani rebase
+  nevznikl. Cílených 446 testů a úplná Cockpit Quality Gate s 1216 testy
+  prošly. Zbývá checkpoint/push, potvrzené nasazení a úplný živý souběžný test.
+- 2026-07-24 22:49 CEST: Priorita 1, Human–Adam / aktuální autoritativní
+  souhrn. Míla ručně dokončil celý test rotace bez připnuté kontextové kotvy:
+  kotvu pozastavil, provedl rotaci, ověřil zachování starého vlákna a
+  kontinuitu přes handoff a TVBCP. Funkce je tím provozně ověřená. Starší
+  položky níže jsou chronologické snapshoty; jejich text `čeká na nasazení`
+  nevyjadřuje dnešní stav, pokud jej uzavřel pozdější commit, nasazení nebo
+  ruční důkaz. Automatický Human–Adam checkpoint zapisuje do handoffu správný
+  stav vývojového kroku v okamžiku checkpointu, ale následný terminalový push,
+  nasazení a ruční retest starší blok automaticky neaktualizují. Aktuální
+  otevřený vývoj zůstává potvrzovaná integrační brána odloženého WIP; samostatně
+  zbývá skutečný živý test izolovaného vývoje při současném terminálovém WIP.
+  Handoff: `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-24: Priorita 1, Human–Adam / recovery hranice automatického připojení.
   Post-deployment UI guard nyní stejně jako backend prochází historii odzadu:
   poslední potvrzený `completed` uzavře starší nejistoty, zatímco novější

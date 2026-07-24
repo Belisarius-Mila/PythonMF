@@ -14,11 +14,17 @@ from app.communication.human_adam_profiles import (
     KNIHOVNA_LIVE_ARCHIVE_ROOT,
     KNIHOVNA_PRIVATE_CONFIRMATION_CATEGORIES,
     KNIHOVNA_SANDBOX_POLICY,
+    human_adam_deferred_integration_action,
     human_adam_development_semaphore_action,
     human_adam_development_semaphore_status_action,
     human_adam_profile_switch_action,
     human_adam_project_continuity_action,
 )
+from app.communication.deferred_integration import (
+    DEFERRED_INTEGRATION_CONFIRMATION,
+    DeferredIntegrationError,
+)
+from app.communication.human_adam_turn_completion import TurnCompletionMetadata
 from app.communication.human_adam_operations import (
     FAMILY_CALENDAR_TEST_EMAIL_PREVIEW,
     OPERATION_MARKER_END,
@@ -499,7 +505,8 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
 
         self.assertEqual(clean["state"], "not_pending")
         self.assertEqual(waiting["state"], "waiting_source_clean")
-        self.assertEqual(ready["state"], "ready_for_confirmed_integration")
+        self.assertEqual(ready["state"], "blocked_ownership_unverified")
+        self.assertFalse(ready["can_integrate"])
         self.assertEqual(advanced["state"], "source_advanced_service_decision")
         self.assertTrue(advanced["requires_service_decision"])
         self.assertEqual(blocked["state"], "blocked_foreign_wip")
@@ -510,6 +517,34 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(library_workspace.dirty)
         self.assertEqual(human_workspace.sync_count, 0)
         self.assertEqual(library_workspace.sync_count, 0)
+
+    def test_pending_integration_requires_exact_marker_before_confirmation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, *_rest = self.make_manager(
+                Path(temp_dir)
+            )
+            human_workspace.dirty = True
+            human_workspace.source_pending_changes = 1
+            manager.deferred_integration_store.save(
+                workstream_id="layer-human-adam-development",
+                workspace_status=human_workspace.status(),
+                completion=TurnCompletionMetadata(
+                    commit_message="Integrate deferred step",
+                    summary="Odložený krok je hotový",
+                    next_step="Potvrdit integraci",
+                ),
+            )
+            human_workspace.source_pending_changes = 0
+
+            ready = manager.work_review()["pending_integration_audit"]
+
+        self.assertEqual(ready["state"], "ready_for_confirmed_integration")
+        self.assertTrue(ready["ownership_marker_verified"])
+        self.assertTrue(ready["can_integrate"])
+        self.assertEqual(
+            ready["confirmation_text"],
+            DEFERRED_INTEGRATION_CONFIRMATION,
+        )
 
     def test_compatibility_backends_preserve_both_existing_service_bundles(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -2261,16 +2296,175 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertIn("lease_state=authorized_isolated_source_wip", model_input)
         self.assertIn("integration_deferred=true", model_input)
         self.assertIn("Leave successful changes uncommitted", model_input)
-        self.assertNotIn("[AUTOMATIC_STEP_COMPLETION]", model_input)
+        self.assertIn("[AUTOMATIC_STEP_COMPLETION]", model_input)
+        self.assertIn("Integration is deferred", model_input)
         self.assertEqual(
             result["automatic_completion"]["state"],
             "deferred_source_wip",
         )
+        self.assertTrue(result["automatic_completion"]["ownership_marker"])
         self.assertNotIn(
             "HUMAN_ADAM_STEP_COMPLETION",
             result["entry"]["answer"],
         )
         self.assertIn("bez commitu", result["entry"]["answer"])
+
+    def test_confirmed_deferred_integration_reuses_canonical_checkpoint_once(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, *_rest = self.make_manager(
+                Path(temp_dir)
+            )
+            human_workspace.dirty = True
+            human_workspace.source_pending_changes = 1
+            manager.deferred_integration_store.save(
+                workstream_id="layer-human-adam-development",
+                workspace_status=human_workspace.status(),
+                completion=TurnCompletionMetadata(
+                    commit_message="Integrate deferred step",
+                    summary="Odložený krok je hotový",
+                    decision="Posun main zůstává servisní rozhodnutí",
+                    next_step="Nasadit čistý main samostatně",
+                    proposed_next_steps=("Provést živý souběžný test",),
+                ),
+            )
+            human_workspace.source_pending_changes = 0
+            with patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint",
+                return_value={
+                    "ok": True,
+                    "checkpoint_short": "c" * 12,
+                    "push_completed": True,
+                },
+            ) as checkpoint:
+                result = manager.integrate_deferred_changes(
+                    confirmation=DEFERRED_INTEGRATION_CONFIRMATION
+                )
+
+            self.assertFalse(manager.deferred_integration_store.path.exists())
+
+        checkpoint.assert_called_once()
+        request = checkpoint.call_args.kwargs["request"]
+        self.assertEqual(request.commit_message, "Integrate deferred step")
+        self.assertEqual(
+            request.decision,
+            "Posun main zůstává servisní rozhodnutí",
+        )
+        self.assertEqual(
+            request.proposed_next_steps,
+            ("Provést živý souběžný test",),
+        )
+        self.assertEqual(result["operation"], "confirmed_deferred_integration")
+        self.assertFalse(result["source_advanced_automation"])
+
+    def test_deferred_turn_without_completion_receipt_never_creates_marker(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.connect()
+            human_workspace.source_pending_changes = 1
+            library_workspace.source_pending_changes = 1
+            human_hub.on_send = lambda: setattr(human_workspace, "dirty", True)
+            human_hub.next_answer = "Změna zůstala rozpracovaná."
+
+            result = manager.send(
+                text="Proveď odložený vývoj bez dokončovací účtenky",
+                client_message_id="deferred-no-receipt-001",
+                write_intent=True,
+            )
+
+            self.assertFalse(manager.deferred_integration_store.path.exists())
+
+        self.assertTrue(human_workspace.dirty)
+        self.assertEqual(
+            result["automatic_completion"]["state"],
+            "deferred_metadata_missing",
+        )
+        self.assertFalse(result["automatic_completion"]["ownership_marker"])
+
+    def test_deferred_turn_marker_write_failure_stays_service_blocked(self) -> None:
+        receipt = (
+            "Změna i test jsou hotové.\n\n"
+            "[HUMAN_ADAM_STEP_COMPLETION]\n"
+            '{"commit_message":"Keep deferred","summary":"Deferred work stays safe",'
+            '"next_step":"Resolve marker service failure"}\n'
+            "[/HUMAN_ADAM_STEP_COMPLETION]"
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.connect()
+            human_workspace.source_pending_changes = 1
+            library_workspace.source_pending_changes = 1
+            human_hub.on_send = lambda: setattr(human_workspace, "dirty", True)
+            human_hub.next_answer = receipt
+            with patch.object(
+                manager.deferred_integration_store,
+                "save",
+                side_effect=DeferredIntegrationError(
+                    "Private ownership marker nelze bezpečně uložit."
+                ),
+            ):
+                result = manager.send(
+                    text="Proveď odložený vývoj při selhání markeru",
+                    client_message_id="deferred-marker-failure-001",
+                    write_intent=True,
+                )
+
+        self.assertTrue(human_workspace.dirty)
+        self.assertEqual(
+            result["automatic_completion"]["state"],
+            "deferred_marker_failed",
+        )
+        self.assertFalse(result["automatic_completion"]["ownership_marker"])
+        self.assertIn("servisně blokovaná", result["entry"]["answer"])
+
+    def test_deferred_integration_refuses_wrong_confirmation_and_source_advance(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, *_rest = self.make_manager(
+                Path(temp_dir)
+            )
+            human_workspace.dirty = True
+            human_workspace.source_pending_changes = 1
+            manager.deferred_integration_store.save(
+                workstream_id="layer-human-adam-development",
+                workspace_status=human_workspace.status(),
+                completion=TurnCompletionMetadata(
+                    commit_message="Integrate deferred step",
+                    summary="Odložený krok je hotový",
+                    next_step="Potvrdit integraci",
+                ),
+            )
+            human_workspace.source_pending_changes = 0
+
+            with self.assertRaisesRegex(AppServerError, "přesnou potvrzovací"):
+                manager.integrate_deferred_changes(confirmation="ano")
+
+            human_workspace.source_ahead = True
+            with patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint"
+            ) as checkpoint:
+                with self.assertRaisesRegex(AppServerError, "servisní"):
+                    manager.integrate_deferred_changes(
+                        confirmation=DEFERRED_INTEGRATION_CONFIRMATION
+                    )
+
+        checkpoint.assert_not_called()
+
+    def test_deferred_integration_action_returns_safe_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_rest = self.make_manager(Path(temp_dir))
+            result = human_adam_deferred_integration_action(
+                {"confirmation": "nesouhlasí"},
+                service=manager,
+            )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(
+            result["status"],
+            "human_adam_deferred_integration_failed",
+        )
 
     def test_source_wip_isolated_write_rejects_unsynced_peer(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

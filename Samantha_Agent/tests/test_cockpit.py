@@ -305,6 +305,48 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("/api/human-adam/development-semaphore", self.cockpit_do_get_routes())
         self.assertIn("/api/human-adam/development-semaphore", self.cockpit_do_post_routes())
 
+    def test_human_adam_deferred_integration_has_exact_marker_registry_card_and_route(
+        self,
+    ) -> None:
+        card = next(
+            item
+            for item in COCKPIT_POST_ACTIONS
+            if item["path"] == "/api/human-adam/deferred-integration"
+        )
+
+        self.assertEqual(card["risk"], "git_commit_push")
+        self.assertEqual(
+            card["confirmation"],
+            "exact_deferred_integration_phrase_and_ownership_marker",
+        )
+        self.assertEqual(
+            card["handler_name"],
+            "human_adam_deferred_integration_action",
+        )
+        self.assertIn(
+            "/api/human-adam/deferred-integration",
+            self.cockpit_do_post_routes(),
+        )
+        self.assertNotIn(
+            "/api/human-adam/deferred-integration",
+            self.cockpit_do_get_routes(),
+        )
+        source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
+        route_start = source.index(
+            'if parsed.path == "/api/human-adam/deferred-integration":'
+        )
+        route_end = source.index(
+            'if parsed.path == "/api/human-adam/context-anchor":',
+            route_start,
+        )
+        route_source = source[route_start:route_end]
+        self.assertIn(
+            "human_adam_deferred_integration_action(payload, service=HUMAN_ADAM)",
+            route_source,
+        )
+        self.assertNotIn("merge", route_source.casefold())
+        self.assertNotIn("rebase", route_source.casefold())
+
     def test_development_branch_lifecycle_browser_route_is_absent(self) -> None:
         self.assertNotIn("/api/human-adam/development-branches", self.cockpit_do_get_routes())
         self.assertNotIn("/api/human-adam/development-branches", self.cockpit_do_post_routes())

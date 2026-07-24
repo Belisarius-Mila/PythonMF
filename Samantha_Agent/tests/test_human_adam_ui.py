@@ -59,6 +59,8 @@ class HumanAdamUiTests(unittest.TestCase):
             "integrationAuditBox",
             "integrationAuditMeta",
             "integrationAuditPaths",
+            "integrationConfirmation",
+            "integrationBtn",
             "checkpointMessage",
             "checkpointBtn",
             "deployMeta",
@@ -310,7 +312,9 @@ class HumanAdamUiTests(unittest.TestCase):
         render_start = HUMAN_ADAM_HTML.index(
             "function renderPendingIntegrationAudit(audit)"
         )
-        render_end = HUMAN_ADAM_HTML.index("function renderWork(payload)", render_start)
+        render_end = HUMAN_ADAM_HTML.index(
+            "async function integrateDeferredChanges()", render_start
+        )
         source = HUMAN_ADAM_HTML[render_start:render_end]
 
         self.assertIn("pending_integration_audit", HUMAN_ADAM_HTML)
@@ -328,6 +332,47 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertNotIn("fetch(", source)
         self.assertIn(
             "Při posunu <code>main</code> vždy vyžádej servisní rozhodnutí",
+            HUMAN_ADAM_HTML,
+        )
+
+    def test_deferred_integration_button_requires_verified_marker_and_exact_phrase(
+        self,
+    ) -> None:
+        render_start = HUMAN_ADAM_HTML.index(
+            "function renderPendingIntegrationAudit(audit)"
+        )
+        render_end = HUMAN_ADAM_HTML.index(
+            "async function integrateDeferredChanges()", render_start
+        )
+        render_source = HUMAN_ADAM_HTML[render_start:render_end]
+        integrate_start = render_end
+        integrate_end = HUMAN_ADAM_HTML.index(
+            "function renderWork(payload)", integrate_start
+        )
+        integrate_source = HUMAN_ADAM_HTML[integrate_start:integrate_end]
+
+        self.assertIn('state === "ready_for_confirmed_integration"', render_source)
+        self.assertIn("audit.can_integrate === true", render_source)
+        self.assertIn("audit.ownership_marker_verified === true", render_source)
+        self.assertIn("integrationBtn.hidden = !canIntegrate;", render_source)
+        self.assertIn("integrationBtn.disabled = true;", render_source)
+        self.assertIn(
+            'api("/api/human-adam/deferred-integration"',
+            integrate_source,
+        )
+        self.assertIn('method:"POST"', integrate_source)
+        self.assertIn("body:JSON.stringify({confirmation})", integrate_source)
+        self.assertIn("confirmation !== required", integrate_source)
+        self.assertIn("Nasazení zůstává samostatný krok", integrate_source)
+        self.assertNotIn("merge", integrate_source.casefold())
+        self.assertNotIn("rebase", integrate_source.casefold())
+        self.assertNotIn("reset", integrate_source.casefold())
+        self.assertIn(
+            'integrationConfirmation.addEventListener("input"',
+            HUMAN_ADAM_HTML,
+        )
+        self.assertIn(
+            'integrationBtn.addEventListener("click", integrateDeferredChanges);',
             HUMAN_ADAM_HTML,
         )
 

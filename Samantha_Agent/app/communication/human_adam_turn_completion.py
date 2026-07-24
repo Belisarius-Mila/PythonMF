@@ -37,7 +37,11 @@ class ParsedTurnCompletion:
     error: str = ""
 
 
-def automatic_completion_instruction(*, writable: bool) -> str:
+def automatic_completion_instruction(
+    *,
+    writable: bool,
+    integration_deferred: bool = False,
+) -> str:
     """Return a private model protocol only for an authorized writable turn."""
 
     if not writable:
@@ -55,8 +59,7 @@ def automatic_completion_instruction(*, writable: bool) -> str:
         ensure_ascii=False,
         separators=(",", ":"),
     )
-    return "\n".join(
-        (
+    rules = [
             "[AUTOMATIC_STEP_COMPLETION]",
             "enabled=true",
             "rule=Use the receipt only after you changed files successfully and relevant tests passed.",
@@ -69,9 +72,18 @@ def automatic_completion_instruction(*, writable: bool) -> str:
             f"receipt_json_example={example}",
             f"receipt_end={COMPLETION_MARKER_END}",
             "rule=The receipt must be the final block, contain one JSON object and no secrets or private content.",
-            "[/AUTOMATIC_STEP_COMPLETION]",
+    ]
+    if integration_deferred:
+        rules.extend(
+            (
+                "rule=Integration is deferred. Emit metadata only; leave all changes "
+                "uncommitted and do not run any Git or deployment action.",
+                "rule=The private owner marker may use only this redacted receipt, "
+                "the base commit and a digest of path-level changes.",
+            )
         )
-    )
+    rules.append("[/AUTOMATIC_STEP_COMPLETION]")
+    return "\n".join(rules)
 
 
 def _safe_field(value: object, *, label: str, limit: int) -> str:

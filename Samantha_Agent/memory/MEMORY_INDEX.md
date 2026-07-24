@@ -127,18 +127,27 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   osirelych private JSON sad s locky a nazev `human_adam_deploy_gate.log` nebyly
   mazany ani prejmenovany. Interni kompatibilni identity, schema 1, private
   session a workspaces zustavaji chranene. Dne 2026-07-24 byl pripraven
-  bezpecny auto-sync cisteho a necinneho aktivniho workspace pred odeslanim;
-  cilenych 187 testu a cela brana s 1189 testy prosly. Navazujici uzky rez
-  soubezne izolovane prace pri terminalovem WIP je implementovany: povoluje jen
-  editaci a testy v cistem zarovnanem Human–Adam workspace a blokuje
-  automaticky checkpoint, commit, push i integraci do cisteho `main` a auditu
-  konfliktu. Knihovna a nezarovnany peer zustavaji uzamcene. Cilenych 190 testu
-  a cela brana s 1192 testy prosly; zivy test nasledne prosel a automaticky
-  checkpoint `f1521de` skoncil ciste. Faze 1 lepsiho TVBCP je pripravena k
-  nasazeni: nove appendovane zaznamy maji lidske poradi `Hotovo`,
-  `Rozhodnuti`, `Dalsi krok`, `Navrhovane dalsi kroky` a az potom kratky
-  technicky dukaz. Historie se neprepisuje; stare uctenky zustavaji
-  kompatibilni. Proslo 227 sirsich a 1194 uplnych testu.
+  a nasazen bezpecny auto-sync cisteho a necinneho aktivniho workspace pred
+  odeslanim i uzky rez soubezne izolovane prace pri terminalovem WIP. Ten
+  povoluje jen editaci a testy v cistem zarovnanem Human–Adam workspace a
+  blokuje automaticky checkpoint, commit, push i integraci do cisteho `main` a
+  auditu konfliktu. Skutecny zivy test teto soubezne vetve pri soucasnem
+  terminalovem WIP jeste chybi. Faze 1 lepsiho TVBCP je nasazena a zive
+  vytvorila novy append-only format `Hotovo`, `Rozhodnuti`, `Dalsi krok`,
+  `Navrhovane dalsi kroky` a kratky technicky dukaz. Read-only audit cekajici
+  integrace i sjednocena recovery hranice automatickeho pripojeni jsou nasazene.
+  Mila dne 2026-07-24 rucne dokoncil rotaci bez pripnute kotvy vcetne zachovani
+  stareho vlakna a kontinuity z handoffu/TVBCP. Starsi handoff bloky zustavaji
+  historickymi snapshoty; jejich `ceka na nasazeni` se po terminalovem
+  nasazeni automaticky neuzavira. Faze 2 je implementovana: dalsi potvrzeny
+  checkpoint aktualizuje v jednom commitu markerove ohraniceny `Aktualni stav`
+  z overeneho `main == origin/main` a posledni deployment uctenky, zatimco
+  chronologii neprepise. Potvrzovana integracni brana odlozeneho WIP vyzaduje
+  private ownership marker svazany s pracovnim proudem, base commitem a
+  otiskem path-level zmen. Posun `main`, cizi WIP, divergence nebo neshoda
+  markeru zustavaji servisnim rozhodnutim bez automatickeho merge/rebase.
+  Cilenych 446 a uplnych 1216 testu proslo; zbyva checkpoint/push, nasazeni a
+  skutecny zivy soubezny test.
 
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni

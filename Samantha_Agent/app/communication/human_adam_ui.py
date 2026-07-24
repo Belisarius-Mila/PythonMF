@@ -88,6 +88,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .integration-audit-box.warn { border-color:#fbbf24; background:#fffbeb; }
     .integration-audit-box.blocked { border-color:#fca5a5; background:#fef2f2; }
     .integration-audit-box h3 { margin:0; font-size:15px; }
+    .integration-audit-box input { width:100%; border:1px solid #bac7d8; border-radius:11px; padding:10px 12px; font:inherit; }
     #integrationAuditMeta { margin:0; color:var(--muted); font-size:13px; line-height:1.45; overflow-wrap:anywhere; }
     #integrationAuditPaths { margin:0; padding-left:22px; font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace; overflow-wrap:anywhere; }
     .handoff-proposal-box { margin:12px 16px; padding:14px; border:1px solid #93c5fd; border-radius:13px; display:grid; gap:8px; background:#eff6ff; }
@@ -350,10 +351,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     </section>
     <div id="workMeta">Stav se načte až po otevření.</div>
     <ul id="workChanges"></ul>
-    <section class="integration-audit-box" id="integrationAuditBox" aria-label="Read-only audit čekající integrace" hidden>
+    <section class="integration-audit-box" id="integrationAuditBox" aria-label="Audit a potvrzovaná brána čekající integrace" hidden>
       <h3>Čekající integrace</h3>
       <p id="integrationAuditMeta">Audit se načte společně s pracovním stavem.</p>
       <ul id="integrationAuditPaths" hidden></ul>
+      <input id="integrationConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Potvrzovací věta" hidden disabled>
+      <button class="deploy-action" id="integrationBtn" type="button" hidden disabled>Převzít přesný WIP do main</button>
     </section>
     <section class="handoff-proposal-box legacy-work-control" id="handoffProposalBox" aria-label="Read-only návrh aktualizace handoffu" hidden>
       <h3>Návrh handoffu po checkpointu</h3>
@@ -439,6 +442,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const integrationAuditBox = document.getElementById("integrationAuditBox");
   const integrationAuditMeta = document.getElementById("integrationAuditMeta");
   const integrationAuditPaths = document.getElementById("integrationAuditPaths");
+  const integrationConfirmation = document.getElementById("integrationConfirmation");
+  const integrationBtn = document.getElementById("integrationBtn");
   const handoffProposalBox = document.getElementById("handoffProposalBox");
   const handoffProposalMeta = document.getElementById("handoffProposalMeta");
   const handoffProposalDraft = document.getElementById("handoffProposalDraft");
@@ -486,6 +491,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let writeIntentArmed = false;
   let deliveryUncertain = false;
   let deploymentAudit = null;
+  let pendingIntegrationAudit = null;
   const verifiedDeploymentStorageKey = "human-adam:verified-deployment:v1";
   const verifiedDeploymentSeenStorageKey = "human-adam:verified-deployment-seen:v1";
   const verifiedDeploymentMaxAgeMs = 15 * 60 * 1000;
@@ -1704,6 +1710,12 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   function renderPendingIntegrationAudit(audit) {
     const valid = audit && typeof audit === "object" && audit.ok === true;
     const state = valid ? String(audit.state || "") : "audit_unavailable";
+    const canIntegrate = valid
+      && state === "ready_for_confirmed_integration"
+      && audit.can_integrate === true
+      && audit.ownership_marker_verified === true
+      && Boolean(String(audit.confirmation_text || "").trim());
+    pendingIntegrationAudit = canIntegrate ? audit : null;
     integrationAuditBox.hidden = state === "not_applicable";
     integrationAuditBox.className = "integration-audit-box";
     if (
@@ -1713,7 +1725,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       integrationAuditBox.classList.add("warn");
     } else if (
       state === "not_pending"
-      || state === "ready_for_confirmed_integration"
+      || canIntegrate
     ) {
       integrationAuditBox.classList.add("ready");
     } else {
@@ -1739,6 +1751,44 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       }
     }
     integrationAuditPaths.hidden = !integrationAuditPaths.children.length;
+    integrationConfirmation.value = "";
+    integrationConfirmation.placeholder = canIntegrate
+      ? String(audit.confirmation_text)
+      : "Potvrzovací věta";
+    integrationConfirmation.hidden = !canIntegrate;
+    integrationConfirmation.disabled = !canIntegrate;
+    integrationBtn.hidden = !canIntegrate;
+    integrationBtn.disabled = true;
+  }
+
+  async function integrateDeferredChanges() {
+    if (integrationBtn.disabled || !pendingIntegrationAudit) return;
+    const required = String(pendingIntegrationAudit.confirmation_text || "").trim();
+    const confirmation = integrationConfirmation.value.trim();
+    if (!required || confirmation !== required) {
+      integrationAuditMeta.textContent = "Potvrzovací věta nesouhlasí; nic nebylo integrováno.";
+      return;
+    }
+    integrationConfirmation.disabled = true;
+    integrationBtn.disabled = true;
+    integrationAuditMeta.textContent = "Ověřuji marker, společný základ a přesný WIP…";
+    try {
+      const payload = await api("/api/human-adam/deferred-integration", {
+        method:"POST",
+        body:JSON.stringify({confirmation}),
+      });
+      if (!payload.ok) {
+        const failure = payload.message || "Integrační brána selhala.";
+        await loadWork();
+        integrationAuditMeta.textContent = `Nic nebylo integrováno: ${failure}`;
+        return;
+      }
+      await loadWork();
+      notice.textContent = `Odložený WIP je v main a pushnutý jako ${payload.checkpoint_short || "nový checkpoint"}. Nasazení zůstává samostatný krok.`;
+    } catch (error) {
+      await loadWork();
+      integrationAuditMeta.textContent = `Stav integrace nelze potvrdit: ${error.message}`;
+    }
   }
 
   function renderWork(payload) {
@@ -2389,6 +2439,13 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     workHelpBtn.focus();
   });
   workRefreshBtn.addEventListener("click", loadWork);
+  integrationConfirmation.addEventListener("input", () => {
+    const required = pendingIntegrationAudit
+      ? String(pendingIntegrationAudit.confirmation_text || "").trim()
+      : "";
+    integrationBtn.disabled = !required || integrationConfirmation.value.trim() !== required;
+  });
+  integrationBtn.addEventListener("click", integrateDeferredChanges);
   developmentAcquireProfileBtn.addEventListener("click", () => changeDevelopmentSemaphore("acquire_profile"));
   developmentAcquireTerminalBtn.addEventListener("click", () => changeDevelopmentSemaphore("acquire_terminal"));
   developmentPauseBtn.addEventListener("click", () => changeDevelopmentSemaphore("pause"));

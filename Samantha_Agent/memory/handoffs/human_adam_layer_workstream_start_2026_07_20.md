@@ -1,3 +1,17 @@
+<!-- SAMANTHA_CURRENT_STATUS_START -->
+## Aktuální stav
+
+- Obnoveno potvrzeným checkpointem: 2026-07-24 23:53 CEST
+- Poslední dokončený vývojový výsledek: Fáze 2 handoffu/TVBCP a potvrzovaná integrace přesného odloženého WIP jsou implementované a otestované
+- Stav při vytvoření checkpointu: změna je otestovaná (1216 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
+- Git před checkpointem: `main == origin/main` na `bf233eeea60d`.
+- Poslední serverově potvrzené nasazení: `bf233eeea60d` · odpovídá ověřenému main před tímto checkpointem · 1201 testů · smoke 5/5 · 2026-07-24T16:58:54+00:00.
+- Rozhodnutí: Private ownership marker je povinný; posunutý main zůstává servisním rozhodnutím bez automatického merge nebo rebase.
+- Bezprostřední další krok: Samostatně potvrdit nasazení čistého main a potom provést úplný živý souběžný test.
+- Navrhované další kroky: Ověřit celý tok od terminálového WIP po potvrzené převzetí.; Širší automatizaci zvažovat až po živém důkazu.
+- Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 Nazev: Human–Adam / vyvojove prostredi - zalozeni pracovniho proudu Layer
 Priorita: 1
 Stav: rozpracovane
@@ -1433,3 +1447,129 @@ Zmenene nebo relevantni soubory:
 Bezpecnost / neukladat:
 - Neukládat texty zpráv ani identity relace.
 - Skutečně aktuální nejistotu vždy ponechat fail-closed.
+
+### 2026-07-24 22:49 CEST – Ručně ověřená rotace bez kotvy a hranice handoffu
+
+Nazev: Human–Adam – dokončení provozního testu rotace a zpřesnění aktuálního stavu
+Priorita: 1
+Stav: hotovo
+Pripomenout pri startu: ano
+Datum: 2026-07-24
+
+Co se resilo:
+Míla dokončil dříve otevřený ruční test rotace profilového vlákna bez připnuté
+kontextové kotvy. Současně se ukázalo, že starší append-only záznamy mohou pro
+rychlou orientaci působit jako aktuální stav, přestože je pozdější nasazení nebo
+ruční důkaz již uzavřely.
+
+Co je hotove:
+- Kotva byla pozastavena a rotace bez připnuté kotvy proběhla.
+- Míla ověřil zachování starého vlákna.
+- Kontinuita nového vlákna z kanonického handoffu a TVBCP byla ověřena.
+- Funkce je implementovaná, nasazená a provozně potvrzená.
+- Automatický checkpoint Human–Adam zapisuje do handoffu bezpečný technický
+  snapshot dokončeného vývojového kroku: souhrn, testovací důkaz, změněné cesty,
+  commitovou zprávu a bezprostřední další krok.
+
+Co neni hotove:
+- Handoff nemá automatickou lifecycle finalizaci po pozdějším terminalovém
+  pushi, nasazení nebo ručním retestu. Starší `čeká na nasazení` proto zůstává
+  historicky pravdivým snapshotem, ale nesmí být čten jako dnešní stav.
+- Potvrzovaná integrační brána odloženého Human–Adam WIP zatím neexistuje.
+- Skutečný živý test izolovaného vývoje při současném terminálovém WIP ještě
+  neproběhl.
+
+Dalsi krok:
+Po návratu od Rodinného kalendáře navrhnout úzkou potvrzovanou integrační bránu
+pro odložený WIP na ověřeném společném základu.
+
+Navrhovane dalsi kroky:
+- Potom provést jeden úplný živý test: terminálový WIP, izolovaný vývoj
+  Human–Adam, vyčištění `main`, audit a potvrzené začlenění.
+- Zvážit kompaktní aktuální souhrn handoffu/TVBCP, který nebude přepisovat
+  chronologickou historii.
+- Lifecycle uzavření po nasazení řešit odděleně od správného append-only
+  checkpointu; staré bloky hromadně nepřepisovat.
+
+Zmenene nebo relevantni soubory:
+- `human_adam_layer_workstream_start_2026_07_20.md`
+- `architektura_komunikace_samantha.txt`
+- `ACTIVE_PROJECTS.md`
+- `MEMORY_INDEX.md`
+- `simple_main_checkpoint.py`
+- `human_adam_turn_completion.py`
+
+Bezpecnost / neukladat:
+- Neukládat ID vláken, texty soukromých zpráv, identity relace ani private stav.
+- Historické bloky zachovat; aktuální stav zpřesňovat novým časovaným záznamem.
+
+### 2026-07-24 23:23 CEST – Fáze 2 handoffu a potvrzovaná integrace
+
+Nazev: Human–Adam – aktuální souhrn a bezpečné převzetí odloženého WIP
+Priorita: 1
+Stav: rozpracovane
+Pripomenout pri startu: ano
+Datum: 2026-07-24
+
+Co se resilo:
+Navázala druhá fáze životního cyklu handoffu/TVBCP a úzká samoobslužná cesta
+odloženého Human–Adam WIP zpět do `main`.
+
+Co je hotove:
+- Generátor checkpointu umí v handoffu i TVBCP vložit nebo nahradit právě jeden
+  markerově ohraničený blok `Aktuální stav`; zbytek dokumentu zachová beze změny.
+- Aktuální souhrn vzniká před jediným commitem z ověřeného
+  `main == origin/main`, výsledku checkpointu a poslední bezpečné deployment
+  účtenky. Nevytváří následný opravný commit po pushi.
+- Nový chronologický blok výslovně říká, že popisuje stav při checkpointu a
+  sám nepotvrzuje pozdější push ani nasazení.
+- Chybějící, zdvojené nebo poškozené markery selžou uzavřeně.
+- Odložený tah vytváří soukromý ownership marker mimo Git. Obsahuje jen ID
+  pracovního proudu, base commit, počet a kryptografický otisk path-level změn
+  a redigovanou dokončovací účtenku.
+- Panel `Práce` nabídne integrační tlačítko jen při přesné shodě markeru,
+  společného základu a aktuálního WIP. Akce vyžaduje přesnou samostatnou
+  potvrzovací větu a používá existující kanonický jednoccommitový checkpoint a
+  push backend.
+- Při posunu `main`, cizím WIP, divergenci, chybějícím markeru nebo neshodě
+  změn je brána fail-closed.
+
+Co neni hotove:
+- Změny nejsou commitnuté, pushnuté ani nasazené.
+- Nový blok `Aktuální stav` se má poprvé vytvořit až uvnitř následujícího
+  potvrzeného checkpointu.
+- Neběžel úplný živý test: současný terminálový WIP, izolovaný Human–Adam tah,
+  vyčištění `main`, audit markeru a potvrzené převzetí.
+
+Dalsi krok:
+Provést samostatný checkpoint a push; nasazení zůstává další samostatně
+potvrzený krok.
+
+Navrhovane dalsi kroky:
+- Po nasazení provést úplný živý souběžný test na malém bezpečném vývoji.
+- Teprve podle živého důkazu rozhodnout, zda rozšiřovat automatizaci; trvalý
+  ownership marker zůstává předpokladem.
+- Případ posunutého `main` neautomatizovat. Má zůstat servisním rozhodnutím i
+  při nulovém překryvu cest.
+
+Zmenene nebo relevantni soubory:
+- `simple_main_checkpoint.py`
+- `deferred_integration.py`
+- `human_adam_turn_completion.py`
+- `human_adam_profiles.py`
+- `human_adam_ui.py`
+- `cockpit.py`
+- příslušné regresní testy
+- tento handoff, kanonický TVBCP, `ACTIVE_PROJECTS.md` a `MEMORY_INDEX.md`
+
+Bezpecnost / neukladat:
+- Ownership marker neukládá obsah souborů, chat, identity, hesla ani tajemství.
+- Marker patří do private úložiště mimo Git a má práva pouze pro vlastníka.
+- Automatický merge, rebase, reset ani řešení posunutého `main` nejsou součástí
+  této brány.
+
+Technicky dukaz:
+- Cílených 446 testů prošlo.
+- Úplná Cockpit Quality Gate, rozšířená výslovně o nový markerový modul a jeho
+  testy, prošla 1216 testy.
+- Python i JavaScript syntaxe a `git diff --check` jsou v pořádku.

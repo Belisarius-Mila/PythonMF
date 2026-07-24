@@ -16,6 +16,11 @@ from app.communication.development_semaphore import (
     TERMINAL_OWNER_ID,
     DevelopmentSemaphore,
 )
+from app.communication.deferred_integration import (
+    DEFERRED_INTEGRATION_CONFIRMATION,
+    DeferredIntegrationError,
+    DeferredIntegrationStore,
+)
 from app.communication.human_adam_service import (
     DEVELOPMENT_CONTROL_DEVELOPER_INSTRUCTIONS,
     HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
@@ -86,6 +91,7 @@ DEFAULT_HUMAN_CONTEXT_ANCHOR_PATH = PRIVATE_COMMUNICATION_ROOT / "human_adam_con
 KNIHOVNA_PROFILE_ROOT = PRIVATE_PROFILE_ROOT / "knihovna"
 KNIHOVNA_CONTEXT_ANCHOR_PATH = PRIVATE_COMMUNICATION_ROOT / "knihovna_context_anchor.json"
 KNIHOVNA_TVBCP_RELATIVE_PATH = Path("memory/tvbcp/knihovna_cockpit.txt")
+HUMAN_ADAM_WORKSTREAM_ID = "layer-human-adam-development"
 KNIHOVNA_WORKSTREAM_ID = "project-knowledge-library"
 KNIHOVNA_LIVE_ARCHIVE_ROOT = PROJECT_ROOT / "data" / "private" / "article_archive"
 KNIHOVNA_PRIVATE_CONFIRMATION_CATEGORIES = (
@@ -159,6 +165,7 @@ class HumanAdamProfileManager:
         development_semaphore: DevelopmentSemaphore | None = None,
         project_continuity: ProjectContinuityService | None = None,
         simple_main_deployment_receipt_path: Path | None = None,
+        deferred_integration_store: DeferredIntegrationStore | None = None,
         workstream_threads: WorkstreamThreadRegistry | None = None,
         workstream_memory: WorkstreamMemoryRegistry | None = None,
     ):
@@ -226,6 +233,17 @@ class HumanAdamProfileManager:
                 DEFAULT_SIMPLE_MAIN_DEPLOYMENT_RECEIPT
                 if self.state_path == DEFAULT_PROFILE_STATE_PATH
                 else self.state_path.with_name("simple_main_deployment.json")
+            )
+        )
+        self.deferred_integration_store = (
+            deferred_integration_store
+            or DeferredIntegrationStore(
+                (
+                    PRIVATE_COMMUNICATION_ROOT
+                    / "human_adam_deferred_integration.json"
+                )
+                if self.state_path == DEFAULT_PROFILE_STATE_PATH
+                else self.state_path.with_name("deferred_integration.json")
             )
         )
         self.workstream_threads = workstream_threads
@@ -502,6 +520,7 @@ class HumanAdamProfileManager:
                         if self.workstream_memory is not None and memory_binding is not None
                         else ""
                     ),
+                    **self._checkpoint_deployment_snapshot(binding.workstream_id),
                 ),
                 confirmed=confirmed,
                 peer_workspaces=peer_workspaces,
@@ -555,6 +574,9 @@ class HumanAdamProfileManager:
                     tvbcp_initial_content=self.workstream_memory.initial_tvbcp(
                         memory_binding
                     ),
+                    **self._checkpoint_deployment_snapshot(
+                        memory_binding.workstream_id
+                    ),
                 ),
                 confirmed=confirmed,
                 peer_workspaces=peer_workspaces,
@@ -569,6 +591,29 @@ class HumanAdamProfileManager:
             }
         finally:
             self._operation_lock.release()
+
+    def _checkpoint_deployment_snapshot(
+        self,
+        workstream_id: str,
+    ) -> dict[str, object]:
+        deployment = load_completed_simple_main_deployment(
+            self.simple_main_deployment_receipt_path,
+            expected_workstream_id=workstream_id,
+        )
+        if not deployment:
+            return {}
+        gate = deployment.get("gate")
+        smoke = deployment.get("smoke")
+        if not isinstance(gate, dict) or not isinstance(smoke, dict):
+            return {}
+        return {
+            "last_deployed_main_short": str(
+                deployment.get("main_short") or ""
+            ),
+            "last_deployed_at": str(deployment.get("deployed_at") or ""),
+            "last_deployed_test_count": int(gate.get("test_count") or 0),
+            "last_deployed_smoke_count": int(smoke.get("check_count") or 0),
+        }
 
     def _assert_all_profile_sessions_idle(self) -> None:
         """Block deployment while any registered workstream has an active or uncertain turn."""
@@ -916,7 +961,8 @@ class HumanAdamProfileManager:
             control_lines.append("[/DEVELOPMENT_CONTROL]")
             development_control_block = "\n".join(control_lines)
             completion_instruction = automatic_completion_instruction(
-                writable=writable and not integration_deferred
+                writable=writable,
+                integration_deferred=integration_deferred,
             )
             if completion_instruction:
                 development_control_block = (
@@ -1250,6 +1296,7 @@ class HumanAdamProfileManager:
                 tvbcp_initial_content=tvbcp_initial,
                 decision=metadata.decision,
                 proposed_next_steps=metadata.proposed_next_steps,
+                **self._checkpoint_deployment_snapshot(binding_id),
             ),
             confirmed=True,
             peer_workspaces=peers,
@@ -1427,10 +1474,60 @@ class HumanAdamProfileManager:
             }
 
         if integration_deferred:
+            if parsed.state != "valid" or parsed.metadata is None:
+                detail = parsed.error or "Chybí platná dokončovací účtenka."
+                note = (
+                    f"Změny zůstaly bezpečně v izolovaném workspace, ale ownership "
+                    f"marker nevznikl: {detail} Integrace zůstává servisně blokovaná."
+                )
+                answer = self._completion_answer(parsed.visible_answer, note)
+                answer_persisted = self._store_completed_answer(
+                    service=service,
+                    entry=entry,
+                    answer=answer,
+                )
+                return {
+                    **result,
+                    "entry": entry,
+                    "automatic_completion": {
+                        "state": "deferred_metadata_missing",
+                        "attempted": False,
+                        "ownership_marker": False,
+                        "answer_persisted": answer_persisted,
+                    },
+                }
+            try:
+                self.deferred_integration_store.save(
+                    workstream_id=self.active_workstream_id,
+                    workspace_status=workspace,
+                    completion=parsed.metadata,
+                )
+            except DeferredIntegrationError as exc:
+                note = (
+                    f"Změny zůstaly bezpečně v izolovaném workspace, ale ownership "
+                    f"marker nelze doložit: {exc} Integrace zůstává servisně blokovaná."
+                )
+                answer = self._completion_answer(parsed.visible_answer, note)
+                answer_persisted = self._store_completed_answer(
+                    service=service,
+                    entry=entry,
+                    answer=answer,
+                )
+                return {
+                    **result,
+                    "entry": entry,
+                    "automatic_completion": {
+                        "state": "deferred_marker_failed",
+                        "attempted": False,
+                        "ownership_marker": False,
+                        "answer_persisted": answer_persisted,
+                    },
+                }
             note = (
                 "Změny a testy zůstaly bezpečně v izolovaném workspace bez commitu. "
                 "Zdrojový main obsahuje terminálový WIP; checkpoint, push a začlenění "
-                "čekají na čistý main a samostatný audit konfliktů."
+                "čekají na čistý main, shodu private ownership markeru a samostatné "
+                "potvrzení integrace."
             )
             answer = self._completion_answer(parsed.visible_answer, note)
             answer_persisted = self._store_completed_answer(
@@ -1444,6 +1541,7 @@ class HumanAdamProfileManager:
                 "automatic_completion": {
                     "state": "deferred_source_wip",
                     "attempted": False,
+                    "ownership_marker": True,
                     "answer_persisted": answer_persisted,
                 },
             }
@@ -1622,18 +1720,65 @@ class HumanAdamProfileManager:
                 )
             result = dict(audit)
             if result.get("pending") is not True:
-                return result
+                return {
+                    **result,
+                    "ownership_marker_required": True,
+                    "ownership_marker_verified": False,
+                    "can_integrate": False,
+                }
             foreign_blockers = self._foreign_wip_blockers(active_id)
-            if not foreign_blockers:
-                return result
+            if foreign_blockers:
+                return {
+                    **result,
+                    "state": "blocked_foreign_wip",
+                    "label": "Integraci blokuje cizí WIP",
+                    "message": "Jiný profil má rozpracovanou nebo neověřenou práci.",
+                    "next_step": "Nejdřív bezpečně vyřeš cizí WIP; nic neintegruj.",
+                    "requires_service_decision": True,
+                    "foreign_blocker_count": len(foreign_blockers),
+                    "ownership_marker_required": True,
+                    "ownership_marker_verified": False,
+                    "can_integrate": False,
+                }
+            if result.get("state") != "ready_for_confirmed_integration":
+                return {
+                    **result,
+                    "ownership_marker_required": True,
+                    "ownership_marker_verified": False,
+                    "can_integrate": False,
+                }
+            workspace_status = self.active_service.workspace.status()
+            try:
+                self.deferred_integration_store.verify(
+                    workstream_id=self.active_workstream_id,
+                    workspace_status=workspace_status,
+                )
+            except DeferredIntegrationError as exc:
+                return {
+                    **result,
+                    "state": "blocked_ownership_unverified",
+                    "label": "Chybí ověřený původ odloženého WIP",
+                    "message": str(exc),
+                    "next_step": (
+                        "Použij servisní rozhodnutí; bez shodného private markeru "
+                        "nic neintegruj."
+                    ),
+                    "requires_service_decision": True,
+                    "ownership_marker_required": True,
+                    "ownership_marker_verified": False,
+                    "can_integrate": False,
+                }
             return {
                 **result,
-                "state": "blocked_foreign_wip",
-                "label": "Integraci blokuje cizí WIP",
-                "message": "Jiný profil má rozpracovanou nebo neověřenou práci.",
-                "next_step": "Nejdřív bezpečně vyřeš cizí WIP; nic neintegruj.",
-                "requires_service_decision": True,
-                "foreign_blocker_count": len(foreign_blockers),
+                "message": (
+                    "Main je čistý, workspace stojí na společném commitu a private "
+                    "ownership marker odpovídá přesnému WIP."
+                ),
+                "next_step": "Použij samostatně potvrzenou integrační bránu.",
+                "ownership_marker_required": True,
+                "ownership_marker_verified": True,
+                "can_integrate": True,
+                "confirmation_text": DEFERRED_INTEGRATION_CONFIRMATION,
             }
         except (AppServerError, OSError, TypeError, ValueError) as exc:
             return {
@@ -1648,6 +1793,112 @@ class HumanAdamProfileManager:
                 "requires_service_decision": True,
                 "overlap_count": 0,
                 "overlap_paths": [],
+            }
+
+    def integrate_deferred_changes(
+        self,
+        *,
+        confirmation: str,
+    ) -> dict[str, Any]:
+        """Integrate one exact deferred Human–Adam turn on an unchanged base."""
+
+        if str(confirmation or "").strip() != DEFERRED_INTEGRATION_CONFIRMATION:
+            raise AppServerError(
+                "Integrace odloženého WIP vyžaduje přesnou potvrzovací větu."
+            )
+        with self.profile_operation() as service:
+            if (
+                self.active_lazy_workstream_id
+                or self.active_profile_id != "human_adam"
+                or self.active_workstream_id != HUMAN_ADAM_WORKSTREAM_ID
+            ):
+                raise AppServerError(
+                    "Odloženou integraci lze použít jen v kanonickém Human–Adam proudu."
+                )
+            review = service.work_review()
+            audit = self.pending_integration_status(work_review=review)
+            if (
+                audit.get("state") != "ready_for_confirmed_integration"
+                or audit.get("can_integrate") is not True
+                or audit.get("ownership_marker_verified") is not True
+            ):
+                if audit.get("requires_service_decision") is True:
+                    raise AppServerError(
+                        "Odložená integrace vyžaduje servisní rozhodnutí; "
+                        f"{str(audit.get('next_step') or 'nic neintegruj.')}"
+                    )
+                raise AppServerError(
+                    str(audit.get("next_step") or "Odložená integrace není připravená.")
+                )
+            workspace_status = service.workspace.status()
+            record = self.deferred_integration_store.verify(
+                workstream_id=HUMAN_ADAM_WORKSTREAM_ID,
+                workspace_status=workspace_status,
+            )
+            profile = self.profiles["human_adam"]
+            binding = profile.get("workstream_binding")
+            if not isinstance(binding, CanonicalWorkstreamBinding):
+                raise AppServerError(
+                    "Human–Adam nemá kanonickou paměťovou vazbu pro integraci."
+                )
+            memory_binding = (
+                self.workstream_memory.binding(binding.workstream_id)
+                if self.workstream_memory is not None
+                else None
+            )
+            peers = tuple(
+                candidate["service"].workspace
+                for profile_id, candidate in self.profiles.items()
+                if profile_id != "human_adam"
+            )
+            result = complete_simple_main_checkpoint(
+                workspace=service.workspace,
+                request=SimpleMainCheckpointRequest(
+                    workstream_id=binding.workstream_id,
+                    commit_message=record.completion.commit_message,
+                    summary=record.completion.summary,
+                    next_step=record.completion.next_step,
+                    handoff_relative_path=(
+                        memory_binding.handoff_relative_path
+                        if memory_binding is not None
+                        else binding.handoff_relative_path
+                    ),
+                    tvbcp_relative_path=(
+                        memory_binding.tvbcp_relative_path
+                        if memory_binding is not None
+                        else binding.tvbcp_relative_path
+                    ),
+                    handoff_initial_content=(
+                        self.workstream_memory.initial_handoff(memory_binding)
+                        if self.workstream_memory is not None
+                        and memory_binding is not None
+                        else ""
+                    ),
+                    tvbcp_initial_content=(
+                        self.workstream_memory.initial_tvbcp(memory_binding)
+                        if self.workstream_memory is not None
+                        and memory_binding is not None
+                        else ""
+                    ),
+                    decision=record.completion.decision,
+                    proposed_next_steps=record.completion.proposed_next_steps,
+                    **self._checkpoint_deployment_snapshot(binding.workstream_id),
+                ),
+                confirmed=True,
+                peer_workspaces=peers,
+            )
+            marker_cleared = True
+            try:
+                self.deferred_integration_store.clear()
+            except DeferredIntegrationError:
+                marker_cleared = False
+            return {
+                **result,
+                "operation": "confirmed_deferred_integration",
+                "ownership_marker_required": True,
+                "ownership_marker_verified": True,
+                "ownership_marker_cleared": marker_cleared,
+                "source_advanced_automation": False,
             }
 
     def handoff_proposal_status(
@@ -2435,6 +2686,34 @@ def human_adam_development_semaphore_status_action(
     service: HumanAdamProfileManager,
 ) -> dict[str, Any]:
     return service.development_status()
+
+
+def human_adam_deferred_integration_action(
+    payload: dict[str, Any],
+    *,
+    service: HumanAdamProfileManager,
+) -> dict[str, Any]:
+    try:
+        return {
+            "ok": True,
+            **service.integrate_deferred_changes(
+                confirmation=str(payload.get("confirmation") or ""),
+            ),
+        }
+    except (
+        AppServerError,
+        DeferredIntegrationError,
+        SessionHubError,
+        OSError,
+        TypeError,
+        ValueError,
+    ) as exc:
+        return {
+            "ok": False,
+            "status": "human_adam_deferred_integration_failed",
+            "message": str(exc),
+            "pending_integration_audit": service.pending_integration_status(),
+        }
 
 
 def human_adam_development_semaphore_action(

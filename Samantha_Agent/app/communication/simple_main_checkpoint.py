@@ -35,7 +35,10 @@ from scripts.human_adam_takeover import (
 
 MAX_MEMORY_FILE_CHARS = 2_000_000
 MAX_CHANGED_PATHS_IN_HANDOFF = 40
+CURRENT_STATUS_START = "<!-- SAMANTHA_CURRENT_STATUS_START -->"
+CURRENT_STATUS_END = "<!-- SAMANTHA_CURRENT_STATUS_END -->"
 _WORKSTREAM_ID_RE = re.compile(r"[a-z][a-z0-9_-]{1,63}")
+_SHORT_HEAD_RE = re.compile(r"[0-9a-f]{7,12}")
 _SENSITIVE_TEXT_RE = re.compile(
     r"(?i)\b(?:api[_ -]?key|access[_ -]?token|auth[_ -]?token|token|password|heslo|app-specific password)\b\s*[:=]\s*\S+"
 )
@@ -59,6 +62,10 @@ class SimpleMainCheckpointRequest:
     tvbcp_initial_content: str = ""
     decision: str = ""
     proposed_next_steps: tuple[str, ...] = ()
+    last_deployed_main_short: str = ""
+    last_deployed_at: str = ""
+    last_deployed_test_count: int = 0
+    last_deployed_smoke_count: int = 0
 
 
 def _local_now() -> datetime:
@@ -106,6 +113,7 @@ def _safe_request(request: SimpleMainCheckpointRequest) -> SimpleMainCheckpointR
     workstream_id = str(request.workstream_id or "").strip().casefold()
     if not _WORKSTREAM_ID_RE.fullmatch(workstream_id):
         raise SimpleMainCheckpointError("Checkpoint nemá platný identifikátor pracovního proudu.")
+    deployment = _safe_deployment_snapshot(request)
     return SimpleMainCheckpointRequest(
         workstream_id=workstream_id,
         commit_message=_safe_line(request.commit_message, label="název", limit=120),
@@ -129,7 +137,51 @@ def _safe_request(request: SimpleMainCheckpointRequest) -> SimpleMainCheckpointR
         proposed_next_steps=_safe_proposed_next_steps(
             request.proposed_next_steps
         ),
+        **deployment,
     )
+
+
+def _safe_deployment_snapshot(
+    request: SimpleMainCheckpointRequest,
+) -> dict[str, object]:
+    main_short = str(request.last_deployed_main_short or "").strip().casefold()
+    deployed_at = str(request.last_deployed_at or "").strip()
+    try:
+        test_count = int(request.last_deployed_test_count or 0)
+        smoke_count = int(request.last_deployed_smoke_count or 0)
+    except (TypeError, ValueError) as exc:
+        raise SimpleMainCheckpointError(
+            "Poslední nasazení checkpointu nemá platné číselné důkazy."
+        ) from exc
+    values_present = bool(main_short or deployed_at or test_count or smoke_count)
+    if not values_present:
+        return {
+            "last_deployed_main_short": "",
+            "last_deployed_at": "",
+            "last_deployed_test_count": 0,
+            "last_deployed_smoke_count": 0,
+        }
+    try:
+        parsed_at = datetime.fromisoformat(deployed_at.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise SimpleMainCheckpointError(
+            "Poslední nasazení checkpointu nemá platný čas."
+        ) from exc
+    if (
+        not _SHORT_HEAD_RE.fullmatch(main_short)
+        or parsed_at.tzinfo is None
+        or test_count <= 0
+        or smoke_count != 5
+    ):
+        raise SimpleMainCheckpointError(
+            "Poslední nasazení checkpointu nemá úplný serverový důkaz."
+        )
+    return {
+        "last_deployed_main_short": main_short,
+        "last_deployed_at": parsed_at.isoformat(),
+        "last_deployed_test_count": test_count,
+        "last_deployed_smoke_count": smoke_count,
+    }
 
 
 def _safe_initial_memory(value: object, *, kind: str) -> str:
@@ -198,6 +250,30 @@ def _append_block(content: str, block: str) -> str:
     return content.rstrip() + "\n\n" + block.strip() + "\n"
 
 
+def _replace_current_status(content: str, block: str) -> str:
+    """Replace only one generated current-status section, preserving history."""
+
+    start_count = content.count(CURRENT_STATUS_START)
+    end_count = content.count(CURRENT_STATUS_END)
+    clean_block = block.strip()
+    if start_count == 0 and end_count == 0:
+        if not content:
+            return clean_block + "\n"
+        return clean_block + "\n\n" + content
+    if start_count != 1 or end_count != 1:
+        raise SimpleMainCheckpointError(
+            "Aktuální souhrn paměti má nejednoznačné značky; checkpoint nic nepřepíše."
+        )
+    start = content.index(CURRENT_STATUS_START)
+    end = content.index(CURRENT_STATUS_END, start)
+    end += len(CURRENT_STATUS_END)
+    if start >= end:
+        raise SimpleMainCheckpointError(
+            "Aktuální souhrn paměti má neplatné pořadí značek."
+        )
+    return content[:start] + clean_block + content[end:]
+
+
 def _format_timestamp(value: datetime) -> str:
     if value.tzinfo is None or value.utcoffset() is None:
         raise SimpleMainCheckpointError("Checkpoint nemá platnou časovou zónu.")
@@ -225,6 +301,7 @@ def _memory_blocks(
 
 - Pracovní proud: `{request.workstream_id}`
 - Souhrn: {request.summary}
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější push ani nasazení.
 - Ověření: {test_text}
 - Změněné cesty před paměťovým zápisem ({len(changes)}): {path_text}
 - Commit: `{request.commit_message}`
@@ -259,6 +336,57 @@ Technický důkaz:
 - Pracovní proud: `{request.workstream_id}`.
 """
     return handoff_block, tvbcp_block
+
+
+def _current_status_block(
+    *,
+    request: SimpleMainCheckpointRequest,
+    evidence: GateEvidence,
+    timestamp: str,
+    source_head: str,
+) -> str:
+    source_short = str(source_head or "").strip().casefold()[:12]
+    if not _SHORT_HEAD_RE.fullmatch(source_short):
+        raise SimpleMainCheckpointError(
+            "Aktuální souhrn nemá ověřený commit zdrojového main."
+        )
+    if request.last_deployed_main_short:
+        deployment_relation = (
+            "odpovídá ověřenému main před tímto checkpointem"
+            if source_short.startswith(request.last_deployed_main_short)
+            or request.last_deployed_main_short.startswith(source_short)
+            else "je starší než ověřený main před tímto checkpointem"
+        )
+        deployment_text = (
+            f"`{request.last_deployed_main_short}` · {deployment_relation} · "
+            f"{request.last_deployed_test_count} testů · "
+            f"smoke {request.last_deployed_smoke_count}/5 · "
+            f"{request.last_deployed_at}"
+        )
+    else:
+        deployment_text = "serverová deployment receipt pro tento proud není dostupná"
+    decision_text = (
+        request.decision
+        or "V tomto kroku nebylo přijato nové kanonické rozhodnutí."
+    )
+    proposed_text = (
+        "; ".join(request.proposed_next_steps)
+        if request.proposed_next_steps
+        else "žádné další návrhy nad rámec bezprostředního kroku"
+    )
+    return f"""{CURRENT_STATUS_START}
+## Aktuální stav
+
+- Obnoveno potvrzeným checkpointem: {timestamp}
+- Poslední dokončený vývojový výsledek: {request.summary}
+- Stav při vytvoření checkpointu: změna je otestovaná ({evidence.test_count} testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
+- Git před checkpointem: `main == origin/main` na `{source_short}`.
+- Poslední serverově potvrzené nasazení: {deployment_text}.
+- Rozhodnutí: {decision_text}
+- Bezprostřední další krok: {request.next_step}
+- Navrhované další kroky: {proposed_text}
+- Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+{CURRENT_STATUS_END}"""
 
 
 def _write_memory_pair(
@@ -447,8 +575,20 @@ def complete_simple_main_checkpoint(
             timestamp=timestamp,
             changes=list(initial.get("changes") or []),
         )
-        written_handoff = _append_block(original_handoff, handoff_block)
-        written_tvbcp = _append_block(original_tvbcp, tvbcp_block)
+        current_status = _current_status_block(
+            request=safe_request,
+            evidence=evidence,
+            timestamp=timestamp,
+            source_head=live_origin_head,
+        )
+        written_handoff = _append_block(
+            _replace_current_status(original_handoff, current_status),
+            handoff_block,
+        )
+        written_tvbcp = _append_block(
+            _replace_current_status(original_tvbcp, current_status),
+            tvbcp_block,
+        )
         progress("memory", "running")
         _write_memory_pair(
             handoff_path=handoff_path,

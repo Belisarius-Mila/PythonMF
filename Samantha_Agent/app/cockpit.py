@@ -94,6 +94,7 @@ from app.communication.human_adam_service import (
 from app.communication.human_adam_profiles import (
     HUMAN_ADAM,
     HumanAdamProfileManager,
+    human_adam_deferred_integration_action,
     human_adam_development_semaphore_action,
     human_adam_development_semaphore_status_action,
     human_adam_project_continuity_action,
@@ -9429,6 +9430,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/human-adam/deferred-integration",
+        "label": "Potvrzene prevzit presne odlozeny Human-Adam WIP do main",
+        "risk": "git_commit_push",
+        "confirmation": "exact_deferred_integration_phrase_and_ownership_marker",
+        "handler_name": "human_adam_deferred_integration_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/human-adam/context-anchor",
         "label": "Pripnout soukromy aktivni kontext Human-Adam",
         "risk": "private_write",
@@ -10407,6 +10416,10 @@ class CockpitServer:
                 if parsed.path == "/api/human-adam/development-semaphore":
                     payload = self.read_json()
                     self.respond_json(human_adam_development_semaphore_action(payload, service=HUMAN_ADAM))
+                    return
+                if parsed.path == "/api/human-adam/deferred-integration":
+                    payload = self.read_json()
+                    self.respond_json(human_adam_deferred_integration_action(payload, service=HUMAN_ADAM))
                     return
                 if parsed.path == "/api/human-adam/context-anchor":
                     payload = self.read_json()

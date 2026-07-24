@@ -11,8 +11,11 @@ from zoneinfo import ZoneInfo
 from app.codex_appserver import AppServerError
 from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
 from app.communication.simple_main_checkpoint import (
+    CURRENT_STATUS_END,
+    CURRENT_STATUS_START,
     SimpleMainCheckpointError,
     SimpleMainCheckpointRequest,
+    _replace_current_status,
     complete_simple_main_checkpoint,
     _format_timestamp,
 )
@@ -156,6 +159,9 @@ class SimpleMainCheckpointTests(unittest.TestCase):
             )
             source_clean = git(source, "status", "--porcelain")
             workspace_clean = git(manager.workspace_root, "status", "--porcelain")
+            commit_count = int(
+                git(source, "rev-list", "--count", f"{original_head}..HEAD")
+            )
 
         self.assertTrue(result["ok"])
         self.assertEqual(result["operation"], "simple_main_checkpoint")
@@ -174,11 +180,16 @@ class SimpleMainCheckpointTests(unittest.TestCase):
         self.assertEqual(source_clean, "")
         self.assertEqual(workspace_clean, "")
         self.assertIn("Automatický checkpoint 2026-07-20 07:00 CEST", handoff)
+        self.assertIn("Stav při vytvoření checkpointu:", handoff)
+        self.assertIn("## Aktuální stav", handoff)
         self.assertIn("plná Cockpit brána: 12 testů", handoff)
         self.assertIn("### 2026-07-20 07:00 CEST", tvbcp)
         self.assertIn("Jednoduchý backend dokončil jeden krok", tvbcp)
+        chronological_start = tvbcp.index(
+            "### 2026-07-20 07:00 CEST – Jednoduchý backend dokončil jeden krok"
+        )
         section_positions = [
-            tvbcp.index(label)
+            tvbcp.index(label, chronological_start)
             for label in (
                 "Hotovo:",
                 "Rozhodnutí:",
@@ -195,7 +206,14 @@ class SimpleMainCheckpointTests(unittest.TestCase):
         self.assertIn("Ověřit nový záznam v jednom projektu", tvbcp)
         self.assertNotIn("Milník:", tvbcp)
         self.assertNotIn("Checkpoint backend připravuje", tvbcp)
-        self.assertTrue(tvbcp.startswith("# Demo TVBCP\n\n### "))
+        self.assertTrue(tvbcp.startswith(CURRENT_STATUS_START))
+        self.assertIn("# Demo TVBCP\n\n### ", tvbcp)
+        self.assertEqual(handoff.count(CURRENT_STATUS_START), 1)
+        self.assertEqual(handoff.count(CURRENT_STATUS_END), 1)
+        self.assertEqual(tvbcp.count(CURRENT_STATUS_START), 1)
+        self.assertEqual(tvbcp.count(CURRENT_STATUS_END), 1)
+        self.assertNotIn("čeká na nasazení", handoff)
+        self.assertEqual(commit_count, 1)
         self.assertEqual(progress[0:4], [
             ("preflight", "running"),
             ("preflight", "passed"),
@@ -204,6 +222,70 @@ class SimpleMainCheckpointTests(unittest.TestCase):
         ])
         self.assertIn(("push", "passed"), progress)
         self.assertIn(("workspace_alignment", "passed"), progress)
+
+    def test_current_status_replaces_only_generated_summary_and_keeps_history(
+        self,
+    ) -> None:
+        original_history = "# Handoff\n\n### 2026-07-19\nHistorický blok.\n"
+        first = (
+            f"{CURRENT_STATUS_START}\n## Aktuální stav\n\n- První\n"
+            f"{CURRENT_STATUS_END}"
+        )
+        second = (
+            f"{CURRENT_STATUS_START}\n## Aktuální stav\n\n- Druhý\n"
+            f"{CURRENT_STATUS_END}"
+        )
+
+        with_first = _replace_current_status(original_history, first)
+        with_second = _replace_current_status(with_first, second)
+
+        self.assertIn("- Druhý", with_second)
+        self.assertNotIn("- První", with_second)
+        self.assertIn(original_history, with_second)
+        self.assertEqual(with_second.count(CURRENT_STATUS_START), 1)
+        self.assertEqual(with_second.count(CURRENT_STATUS_END), 1)
+
+    def test_current_status_fails_closed_on_ambiguous_markers(self) -> None:
+        malformed = (
+            f"{CURRENT_STATUS_START}\nA\n{CURRENT_STATUS_END}\n"
+            f"{CURRENT_STATUS_START}\nB\n{CURRENT_STATUS_END}\n"
+        )
+
+        with self.assertRaisesRegex(SimpleMainCheckpointError, "nejednoznačné"):
+            _replace_current_status(malformed, "nový blok")
+
+    def test_current_status_uses_safe_previous_deployment_snapshot(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _source, manager = prepare_environment(root)
+            previous_head = git(manager.source_repo, "rev-parse", "HEAD")[:12]
+            (manager.project_root / "tracked.py").write_text(
+                "VALUE = 24\n",
+                encoding="utf-8",
+            )
+
+            complete_simple_main_checkpoint(
+                workspace=manager,
+                request=checkpoint_request(
+                    last_deployed_main_short=previous_head,
+                    last_deployed_at="2026-07-20T06:30:00+00:00",
+                    last_deployed_test_count=11,
+                    last_deployed_smoke_count=5,
+                ),
+                confirmed=True,
+                gate_runner=passing_gate_runner,
+                gate_log_path=root / "gate.log",
+                now_factory=fixed_now,
+            )
+
+            handoff = (
+                manager.project_root / "memory" / "handoffs" / "demo.md"
+            ).read_text(encoding="utf-8")
+
+        self.assertIn(f"`{previous_head}`", handoff)
+        self.assertIn("odpovídá ověřenému main před tímto checkpointem", handoff)
+        self.assertIn("11 testů", handoff)
+        self.assertIn("smoke 5/5", handoff)
 
     def test_confirmation_is_required_before_any_write(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

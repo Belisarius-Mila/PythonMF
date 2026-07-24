@@ -1,3 +1,17 @@
+<!-- SAMANTHA_CURRENT_STATUS_START -->
+## Aktuální stav
+
+- Obnoveno potvrzeným checkpointem: 2026-07-24 23:53 CEST
+- Poslední dokončený vývojový výsledek: Fáze 2 handoffu/TVBCP a potvrzovaná integrace přesného odloženého WIP jsou implementované a otestované
+- Stav při vytvoření checkpointu: změna je otestovaná (1216 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
+- Git před checkpointem: `main == origin/main` na `bf233eeea60d`.
+- Poslední serverově potvrzené nasazení: `bf233eeea60d` · odpovídá ověřenému main před tímto checkpointem · 1201 testů · smoke 5/5 · 2026-07-24T16:58:54+00:00.
+- Rozhodnutí: Private ownership marker je povinný; posunutý main zůstává servisním rozhodnutím bez automatického merge nebo rebase.
+- Bezprostřední další krok: Samostatně potvrdit nasazení čistého main a potom provést úplný živý souběžný test.
+- Navrhované další kroky: Ověřit celý tok od terminálového WIP po potvrzené převzetí.; Širší automatizaci zvažovat až po živém důkazu.
+- Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 # TVBCP – Architektura komunikace Samantha
 
 Stav: aktivní kanonická smlouva o vývoji
@@ -2488,3 +2502,74 @@ Technický důkaz:
 - UI testy 62/62, pět přímých JavaScriptových scénářů a širších 457 testů
   prošlo.
 - Úplná Cockpit Quality Gate prošla 1201 testy.
+
+### 2026-07-24 22:49 CEST – Rotace bez kotvy provozně potvrzena
+
+Hotovo:
+- Míla dokončil celý ruční test rotace bez připnuté kontextové kotvy.
+- Ověřil zachování starého vlákna a kontinuitu nového vlákna z handoffu a
+  TVBCP.
+
+Rozhodnutí:
+- Rotace bez kotvy je implementovaná, nasazená a provozně uzavřená.
+- Starší `čeká na nasazení` v append-only handoffu je historický snapshot,
+  nikoli automaticky udržovaný aktuální stav.
+- Human–Adam zapisuje checkpoint vývojového kroku korektně, ale pozdější
+  terminalový push, nasazení a ruční retest starší handoff blok automaticky
+  nefinalizují.
+
+Další krok:
+- Po návratu od Rodinného kalendáře navrhnout potvrzovanou integrační bránu
+  odloženého WIP pro ověřený společný základ.
+
+Navrhované další kroky:
+- Provést úplný živý test skutečného izolovaného vývoje při současném
+  terminálovém WIP a jeho následného potvrzeného začlenění.
+- Zvážit kompaktní aktuální souhrn bez přepisování chronologické historie.
+
+Technický důkaz:
+- Uživatelský ruční důkaz potvrdil rotaci, zachování starého vlákna a
+  kontinuitu bez ukládání identit nebo textů zpráv.
+- Kontrola generátoru potvrdila, že handoff checkpoint je append-only snapshot;
+  lifecycle finalizace po nasazení v něm není.
+
+### 2026-07-24 23:23 CEST – Fáze 2 handoffu a integrační brána
+
+Hotovo:
+- Budoucí automatický checkpoint aktualizuje jeden markerový `Aktuální stav`
+  v handoffu i TVBCP a ve stejném jediném commitu přidá chronologický snapshot.
+- Aktuální souhrn používá ověřený stav `main == origin/main` a poslední
+  deployment účtenku; historii nepřepisuje a nevytváří druhý post-push commit.
+- Odložený Human–Adam tah dostal private ownership marker a samostatně
+  potvrzovanou cestu do kanonického checkpoint/push backendu.
+- Cockpit nabídne integraci jen při shodě pracovního proudu, base commitu,
+  path-level otisku změn a redigované dokončovací účtenky.
+
+Rozhodnutí:
+- Trvalý úsporný ownership marker je nutný už pro tuto úzkou integrační bránu a
+  je povinným předpokladem před jakoukoli širší automatizací.
+- Marker zůstává mimo Git, s právy jen pro vlastníka, a nesmí obsahovat obsah
+  souborů, chat, identity ani tajemství.
+- Posun `main` vždy zůstává servisním rozhodnutím. Automatický merge, rebase,
+  reset ani rozhodování podle nulového překryvu cest se nepřidává.
+- Deployment zůstává oddělený od potvrzeného převzetí WIP.
+
+Další krok:
+- Checkpointnout a pushnout jeden čistý tematický celek; nasazení potvrdit
+  samostatně.
+
+Navrhované další kroky:
+- Po nasazení provést úplný živý souběžný test od terminálového WIP až po
+  potvrzenou integraci.
+- Teprve po živém důkazu posoudit případné rozšíření automatizace pro nezměněný
+  společný základ.
+
+Technický důkaz:
+- Syntaxe dotčených Python modulů prošla.
+- Cílených 446 testů markeru, profilů, checkpointu, UI a Cockpit registru
+  prošlo.
+- Úplná Cockpit Quality Gate, rozšířená o markerový modul a jeho samostatné
+  testy, prošla 1216 testy.
+- Markerové testy dokazují atomický soubor s právy `0600`, absenci path textů
+  v uloženém JSON a fail-closed reakci na chybějící marker, změněný WIP nebo
+  posunutý základ.
