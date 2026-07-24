@@ -552,8 +552,6 @@ class HumanAdamService:
         blockers = list(rotation.get("blockers") or [])
         if not session.get("connected"):
             blockers.append("Před rotací musí být profil připojený.")
-        if not (anchor.get("ok") and anchor.get("active") and anchor.get("has_content")):
-            blockers.append("Před rotací připni aktuální krátký kontext v panelu Plán.")
         return {
             "ok": True,
             "ready": not blockers,

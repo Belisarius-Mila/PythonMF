@@ -1274,3 +1274,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_human_adam_ui.py`
 - Commit: `Remove hidden WIP branch audit UI`
 - Další krok: Vytvořit potvrzený checkpoint a ověřit Human–Adam rozhraní po nasazení
+
+### Automatický checkpoint 2026-07-24 11:37 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Souhrn: Rotace profilového vlákna již nevyžaduje připnutou kontextovou kotvu
+- Ověření: plná Cockpit brána: 1194 testů, 210.3 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/communication/human_adam_service.py`, `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/tests/test_human_adam_service.py`, `Samantha_Agent/tests/test_human_adam_ui.py`
+- Commit: `Make context anchor optional for thread rotation`
+- Další krok: Po nasazení ručně ověřit rotaci bez kotvy a kontinuitu přes pracovní proud, handoff a TVBCP

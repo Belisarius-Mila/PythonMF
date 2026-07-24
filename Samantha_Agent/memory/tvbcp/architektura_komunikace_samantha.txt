@@ -2382,3 +2382,14 @@ Důkaz: plná Cockpit brána: 1194 testů, 207.1 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Vytvořit potvrzený checkpoint a ověřit Human–Adam rozhraní po nasazení
+
+### 2026-07-24 11:37 CEST – Rotace profilového vlákna již nevyžaduje připnutou kontextovou kotvu
+
+Pracovní proud: `layer-human-adam-development`.
+
+Milník: Rotace profilového vlákna již nevyžaduje připnutou kontextovou kotvu
+
+Důkaz: plná Cockpit brána: 1194 testů, 210.3 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Po nasazení ručně ověřit rotaci bez kotvy a kontinuitu přes pracovní proud, handoff a TVBCP

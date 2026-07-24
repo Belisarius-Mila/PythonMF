@@ -435,35 +435,18 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertTrue(restarted_hub.sent[0]["model_input_text"].endswith("\n\nTah po restartu"))
         self.assertEqual(result["context_anchor_warning"], "")
 
-    def test_thread_rotation_requires_connected_profile_and_pinned_anchor(self) -> None:
+    def test_thread_rotation_requires_connected_profile_but_not_pinned_anchor(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             service, _runtime, _workspace, _hub = self.make_service(Path(temp_dir))
             initial = human_adam_thread_rotation_status_action(service=service)
-            saved = human_adam_context_anchor_update_action(
-                {
-                    "operation": "save",
-                    "expected_revision": 0,
-                    "content": "Cíl: pokračovat po rotaci\nDalší krok: ověřit nové vlákno",
-                    "confirmed": True,
-                },
-                service=service,
-            )
-            pinned = human_adam_context_anchor_update_action(
-                {
-                    "operation": "pin",
-                    "expected_revision": saved["revision"],
-                    "confirmed": True,
-                },
-                service=service,
-            )
             service.connect()
             ready = human_adam_thread_rotation_status_action(service=service)
 
         self.assertFalse(initial["ready"])
         self.assertIn("připojený", " ".join(initial["blockers"]))
-        self.assertIn("připni", " ".join(initial["blockers"]))
-        self.assertTrue(pinned["active"])
+        self.assertNotIn("připni", " ".join(initial["blockers"]))
         self.assertTrue(ready["ready"])
+        self.assertEqual(ready["context_anchor_revision"], 0)
         self.assertEqual(ready["thread_message_count"], 3)
         self.assertTrue(ready["preserves_previous_thread"])
         self.assertFalse(ready["archives_previous_thread"])
@@ -471,23 +454,6 @@ class HumanAdamServiceTests(unittest.TestCase):
     def test_thread_rotation_requires_exact_phrase_and_preserves_previous_thread(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             service, _runtime, _workspace, hub = self.make_service(Path(temp_dir))
-            saved = human_adam_context_anchor_update_action(
-                {
-                    "operation": "save",
-                    "expected_revision": 0,
-                    "content": "Cíl: bezpečná rotace",
-                    "confirmed": True,
-                },
-                service=service,
-            )
-            human_adam_context_anchor_update_action(
-                {
-                    "operation": "pin",
-                    "expected_revision": saved["revision"],
-                    "confirmed": True,
-                },
-                service=service,
-            )
             service.connect()
             rejected = human_adam_thread_rotation_action(
                 {"confirmation": "ano", "expected_thread_id": "canonical-thread"},
@@ -506,7 +472,7 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertTrue(rotated["rotated"])
         self.assertEqual(rotated["previous_thread_id"], "canonical-thread")
         self.assertTrue(rotated["previous_thread_preserved"])
-        self.assertEqual(rotated["context_anchor_revision"], 2)
+        self.assertEqual(rotated["context_anchor_revision"], 0)
 
     def test_corrupt_context_anchor_is_ignored_without_blocking_send(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

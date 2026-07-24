@@ -229,8 +229,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <h4>Bezpečná rotace krok za krokem</h4>
         <ol>
           <li>Počkej na dokončení aktivního tahu a nenechávej rozepsaný pokyn.</li>
-          <li>Aktualizuj stručný kontext: Cíl, Plán, Hotovo, Rozhodnutí a Další krok.</li>
-          <li>Kontext ulož a připni.</li>
+          <li>Kotva není pro rotaci povinná. Pokud ji chceš použít i v novém vlákně, aktualizuj ji, ulož a připni.</li>
           <li>Klikni na <strong>Prověřit nové vlákno</strong> a přečti případné blokery.</li>
           <li>Po zelené kontrole vlož přesnou nabídnutou potvrzovací větu.</li>
           <li>Klikni na <strong>Přejít do nového vlákna</strong> a ověř nové ID vlákna i správný profil.</li>
@@ -242,7 +241,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
           <li><strong>Kotva není aktuální:</strong> obnov návrh, zkontroluj jej, ulož a znovu připni.</li>
           <li><strong>Doručení je nejisté:</strong> pokyn neposílej znovu; nejdřív klikni na Stav.</li>
           <li><strong>Věta nefunguje:</strong> spusť nový audit a použij větu z jeho aktuální kontroly.</li>
-          <li><strong>Po rotaci něco chybí:</strong> neposílej vývojový pokyn; nejdřív zkontroluj připnutý kontext.</li>
+          <li><strong>Po rotaci něco chybí:</strong> neposílej vývojový pokyn; nejdřív zkontroluj pracovní proud, handoff a TVBCP.</li>
         </ul>
 
         <p class="workflow-help-safety"><strong>Nouzový postup:</strong> rotaci neprováděj, nic nemaž a pokračuj ve starém vlákně. Staré vlákno se při rotaci nemaže ani nearchivuje.</p>
@@ -259,7 +258,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       </div>
       <section class="thread-rotation-box" aria-label="Bezpečná rotace profilového vlákna">
         <h3>Nové profilové vlákno</h3>
-        <p id="threadRotationMeta">Nejdřív připni aktuální kontext a spusť kontrolu připravenosti. Staré vlákno se nemaže ani nearchivuje.</p>
+        <p id="threadRotationMeta">Spusť kontrolu připravenosti. Kotva není pro rotaci povinná a staré vlákno se nemaže ani nearchivuje.</p>
         <input id="threadRotationConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Po kontrole sem vlož potvrzovací větu" hidden disabled>
         <div class="thread-rotation-actions">
           <button id="threadRotationAuditBtn" type="button">Prověřit nové vlákno</button>
@@ -1384,7 +1383,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     syncControls();
   }
 
-  function resetThreadRotationState(message="Nejdřív připni aktuální kontext a spusť kontrolu připravenosti. Staré vlákno se nemaže ani nearchivuje.") {
+  function resetThreadRotationState(message="Spusť kontrolu připravenosti. Kotva není pro rotaci povinná a staré vlákno se nemaže ani nearchivuje.") {
     threadRotationAudit = null;
     threadRotationConfirmation.value = "";
     threadRotationConfirmation.hidden = true;
@@ -1518,7 +1517,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     } finally { setBusy(false); }
     if (rotated) {
       await loadStatus();
-      threadRotationMeta.textContent = "Nové profilové vlákno je aktivní. Připnutý kontext se přiloží k příštímu tahu; staré vlákno zůstalo zachované.";
+      threadRotationMeta.textContent = "Nové profilové vlákno je aktivní; staré vlákno zůstalo zachované.";
       notice.textContent = "Rotace dokončena bez odeslání zprávy a bez smazání starého vlákna.";
     }
   }
