@@ -161,6 +161,10 @@ class HumanAdamUiTests(unittest.TestCase):
         rotate_source = HUMAN_ADAM_HTML[audit_end:rotate_end]
 
         self.assertIn('api("/api/human-adam/thread-rotation")', audit_source)
+        self.assertIn("Ověřuji připojení, stav tahu a doručení", audit_source)
+        self.assertIn("zkontroluj připojení a stav relace", HUMAN_ADAM_HTML)
+        self.assertNotIn("Ověřuji připnutý kontext", audit_source)
+        self.assertNotIn("zkontroluj připojení a aktivní kontext", HUMAN_ADAM_HTML)
         self.assertIn('api("/api/human-adam/thread-rotation", {', rotate_source)
         self.assertIn("confirmation !== required", rotate_source)
         self.assertIn("expected_thread_id:expectedThreadId", rotate_source)

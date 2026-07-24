@@ -1283,3 +1283,12 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/communication/human_adam_service.py`, `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/tests/test_human_adam_service.py`, `Samantha_Agent/tests/test_human_adam_ui.py`
 - Commit: `Make context anchor optional for thread rotation`
 - Další krok: Po nasazení ručně ověřit rotaci bez kotvy a kontinuitu přes pracovní proud, handoff a TVBCP
+
+### Automatický checkpoint 2026-07-24 12:16 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Souhrn: Kontrola rotace už nepředstírá, že připnutá kotva je povinná
+- Ověření: plná Cockpit brána: 1194 testů, 213.6 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/tests/test_human_adam_ui.py`
+- Commit: `Upresnit stav rotace bez kotvy`
+- Další krok: Po nasazení ručně ověřit text kontroly rotace bez kotvy

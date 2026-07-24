@@ -1461,7 +1461,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       return;
     }
     if (payload.ready !== true) {
-      resetThreadRotationState(`Rotace zatím není připravená: ${blockers.join(" ") || "zkontroluj připojení a aktivní kontext."}`);
+      resetThreadRotationState(`Rotace zatím není připravená: ${blockers.join(" ") || "zkontroluj připojení a stav relace."}`);
       return;
     }
     threadRotationAudit = payload;
@@ -1478,7 +1478,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
 
   async function auditThreadRotation() {
     if (threadRotationAuditBtn.disabled || contextAnchorDraftDirty()) return;
-    setBusy(true, "Ověřuji připnutý kontext, stav tahu a doručení…");
+    setBusy(true, "Ověřuji připojení, stav tahu a doručení…");
     threadRotationMeta.textContent = "Kontroluji připravenost nového profilového vlákna…";
     try {
       const payload = await api("/api/human-adam/thread-rotation");

@@ -2393,3 +2393,21 @@ Důkaz: plná Cockpit brána: 1194 testů, 210.3 s, výsledek OK. Checkpoint bac
 profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
 
 Další krok: Po nasazení ručně ověřit rotaci bez kotvy a kontinuitu přes pracovní proud, handoff a TVBCP
+
+### 2026-07-24 12:16 CEST – Kontrola rotace už nepředstírá, že připnutá kotva je povinná
+
+Hotovo:
+- Kontrola rotace už nepředstírá, že připnutá kotva je povinná
+
+Rozhodnutí:
+- Kontrola rotace bude popisovat připojení a stav relace, protože kotva není povinná
+
+Další krok:
+- Po nasazení ručně ověřit text kontroly rotace bez kotvy
+
+Navrhované další kroky:
+- Read-only ověřit nový TVBCP blok a jeho pořadí výsledku, rozhodnutí, plánů a technického důkazu
+
+Technický důkaz:
+- plná Cockpit brána: 1194 testů, 213.6 s, výsledek OK.
+- Pracovní proud: `layer-human-adam-development`.
