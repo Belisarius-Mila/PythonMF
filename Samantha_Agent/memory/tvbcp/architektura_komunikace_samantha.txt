@@ -2334,3 +2334,14 @@ nezměnilo.
 Další krok: commit, push a potvrzované nasazení. Potom jeden malý živý test
 izolované editace při kontrolovaném terminálovém WIP, bez checkpointu nebo
 zásahu do zdrojového `main`.
+
+### 2026-07-24 10:45 CEST – Odstraněna skrytá zastaralá nápověda Human–Adam
+
+Pracovní proud: `layer-human-adam-development`.
+
+Milník: Odstraněna skrytá zastaralá nápověda Human–Adam
+
+Důkaz: plná Cockpit brána: 1192 testů, 220.5 s, výsledek OK. Checkpoint backend připravuje jeden commit na lokální
+profilové `main`; zdrojový `main` přebírá tentýž objekt pouze fast-forwardem.
+
+Další krok: Provést read-only audit skrytého UI auditu WIP větví

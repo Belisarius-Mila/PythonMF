@@ -1201,3 +1201,12 @@ Bezpecnost / neukladat:
 - Neukládat obsah soukromých zpráv, private identity, session, cesty ani
   tajemství.
 - Izolovaný režim nesmí sám vytvářet Git historii nebo měnit zdrojový `main`.
+
+### Automatický checkpoint 2026-07-24 10:45 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Souhrn: Odstraněna skrytá zastaralá nápověda Human–Adam
+- Ověření: plná Cockpit brána: 1192 testů, 220.5 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/tests/test_human_adam_ui.py`
+- Commit: `Remove obsolete Human-Adam work help`
+- Další krok: Provést read-only audit skrytého UI auditu WIP větví

@@ -96,12 +96,9 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("/api/human-adam/deploy-audit", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/deploy", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/transcribe", HUMAN_ADAM_HTML)
-        self.assertIn("Checkpoint bez pushnutí", HUMAN_ADAM_HTML)
         self.assertIn("Audit nasazení", HUMAN_ADAM_HTML)
         self.assertIn("Ověřit a nasadit", HUMAN_ADAM_HTML)
-        self.assertIn("Aktuální jednoduché nasazení", HUMAN_ADAM_HTML)
         self.assertIn("Nasazeno a ověřeno", HUMAN_ADAM_HTML)
-        self.assertIn("Nasazení samo nepoužívá WIP větev, takeover ani vývojový semafor.", HUMAN_ADAM_HTML)
         self.assertIn('id="deployConfirmation"', HUMAN_ADAM_HTML)
         self.assertIn('autocomplete="off"', HUMAN_ADAM_HTML)
         self.assertIn('autocorrect="off"', HUMAN_ADAM_HTML)
@@ -341,7 +338,6 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertNotIn('method:"POST"', source)
         self.assertIn("Nelze ověřit", HUMAN_ADAM_HTML)
         self.assertIn("pouze read-only, nic neblokuje", HUMAN_ADAM_HTML)
-        self.assertIn("audit pouze čte důkazy a nic nepřepisuje", HUMAN_ADAM_HTML)
 
     def test_handoff_proposal_ui_is_large_read_only_and_has_no_write_action(self) -> None:
         start = HUMAN_ADAM_HTML.index("function renderHandoffProposal(proposal)")
@@ -359,7 +355,6 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertNotIn("handoffProposalSaveBtn", HUMAN_ADAM_HTML)
         self.assertNotIn("max-height", HUMAN_ADAM_HTML[HUMAN_ADAM_HTML.index(".handoff-proposal-box"):HUMAN_ADAM_HTML.index(".development-branch-audit-box")])
         self.assertIn('handoffProposalBox.scrollIntoView({block:"nearest",behavior:"smooth"});', HUMAN_ADAM_HTML)
-        self.assertIn("Zobrazí se k přečtení, ale sám se neuloží", HUMAN_ADAM_HTML)
 
     def test_takeover_handoff_check_is_visible_read_only_and_does_not_block_deploy(self) -> None:
         render_start = HUMAN_ADAM_HTML.index("function renderDeploymentAudit(payload)")
@@ -425,7 +420,10 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Nasazeno a ověřeno", panel_source)
         self.assertIn("reset, rebase ani force push", panel_source)
         self.assertIn("Toto je pouze nápověda", panel_source)
-        self.assertIn("#workHelpPanel > :not(.workflow-help-head):not(.simple-work-help) { display:none !important; }", HUMAN_ADAM_HTML)
+        self.assertNotIn("#workHelpPanel > :not(.workflow-help-head):not(.simple-work-help)", HUMAN_ADAM_HTML)
+        self.assertNotIn("Vývojový semafor", panel_source)
+        self.assertNotIn("WIP větev", panel_source)
+        self.assertNotIn("takeover", panel_source.casefold())
         self.assertNotIn("developmentAcquireProfileBtn", panel_source)
         self.assertNotIn("developmentAcquireTerminalBtn", panel_source)
         self.assertNotIn("developmentBranchAuditBtn", panel_source)

@@ -112,7 +112,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .workflow-help-panel ol,.workflow-help-panel ul { margin:4px 0 0; padding-left:23px; }
     .workflow-help-panel li { margin:5px 0; line-height:1.4; }
     .workflow-help-safety { margin-top:14px !important; padding:9px 11px; border-radius:10px; background:#ecfdf3; color:var(--ok) !important; }
-    #workHelpPanel > :not(.workflow-help-head):not(.simple-work-help) { display:none !important; }
     .legacy-work-control { display:none !important; }
     .work-help-panel { flex:0 0 auto; margin:12px 16px; }
     .thread-rotation-box { margin-top:14px; padding-top:12px; border-top:1px solid #dbe3ee; display:grid; gap:8px; }
@@ -319,112 +318,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
         <p class="workflow-help-safety"><strong>Nouzový postup:</strong> nic nemaž, nepoužívej reset, rebase ani force push. Požádej Adama o read-only kontrolu.</p>
       </div>
-      <p>Toto je pouze nápověda. Jejím otevřením se nemění semafor, workspace, checkpoint, větev ani Git.</p>
-
-      <h4>Aktuální jednoduché nasazení</h4>
-      <ol>
-        <li>Po dokončeném automatickém checkpointu otevři <strong>Práci</strong>. Workspace musí být čistý a odpovídat <code>main</code>.</li>
-        <li>Stiskni <strong>Audit nasazení</strong>. Audit ověří přesný <code>main</code>, GitHub a oba profilové workspaces; čistý druhý profil smí být bezpečně dorovnán až při potvrzeném nasazení.</li>
-        <li>Vlož zobrazenou přesnou větu a stiskni <strong>Ověřit a nasadit</strong>. Nasazení samo nepoužívá WIP větev, takeover ani vývojový semafor.</li>
-        <li>Počkej na řízený restart. Cockpit po návratu sám ověří nový proces, kódový otisk, čistý Git a smoke test 5/5; teprve potom oznámí stav <strong>Nasazeno a ověřeno</strong>.</li>
-      </ol>
-      <p><strong>Když audit nebo dokončení selže:</strong> nic neposílej znovu naslepo. Obnov stav a předej Adamovi přesnou zobrazenou chybu.</p>
-
-      <h4>Co je co</h4>
-      <ul>
-        <li><strong>Vývojový semafor</strong> určuje jediného vlastníka zápisu. Ostatní Adamové zůstávají read-only.</li>
-        <li><strong>Nový projekt</strong> se zakládá pouze v terminálovém dialogu s Adamem. r-Adam pracuje jen s projekty a handoffy, které už jsou v nabídce.</li>
-        <li><strong>WIP větev</strong> bezpečně odděluje jeden vývojový úkol. Není to Codex vlákno a jeho existence nezaplňuje konverzaci.</li>
-        <li><strong>Worktree</strong> je oddělená pracovní kopie projektu připojená k určité větvi.</li>
-        <li><strong>Projektová vazba</strong> spojuje jeden vývoj se zvoleným projektem a handoffem; audit pouze čte důkazy a nic nepřepisuje.</li>
-        <li><strong>Návrh handoffu</strong> se po checkpointu sestaví jen z bezpečných metadat. Zobrazí se k přečtení, ale sám se neuloží.</li>
-        <li><strong>Kontrola při převzetí</strong> ověří, zda zvolený handoff patří projektu a je v checkpointu. V této fázi pouze varuje a nasazení neblokuje.</li>
-        <li><strong>Potvrzené dokončení</strong> se nabídne až po novém procesu a smoke testu. Zapíše jen commit, testy, restart, smoke test, stav nasazeno a tebou zadaný další krok.</li>
-      </ul>
-
-      <h4>Čtyři fáze handoffu od zahájení po nasazení</h4>
-      <ol>
-        <li>
-          <strong>Fáze 1 — projektová vazba a kontrola aktuálnosti.</strong>
-          Před první změnou vyber projekt, jeho aktuální handoff a téma práce; potom převezmi semafor. Tlačítko <strong>Prověřit handoff</strong> pouze porovná dostupné důkazy s checkpointem, kotvou a TVBCP.
-          <ul>
-            <li><strong>Aktuální</strong> znamená, že dostupné důkazy neukazují zaostávání.</li>
-            <li><strong>Čeká na aktualizaci</strong> nebo <strong>Nelze ověřit</strong> je zatím varování. Nic se nepřepisuje ani neblokuje.</li>
-            <li>Když vybraný projekt nebo handoff nesedí, nepokračuj ve vývoji a oprav výběr ještě před checkpointem.</li>
-          </ul>
-        </li>
-        <li>
-          <strong>Fáze 2 — návrh handoffu při checkpointu.</strong>
-          Po hotových změnách a testech vytvoř <strong>Checkpoint bez pushnutí</strong>. Cockpit z bezpečných Git metadat zobrazí návrh: téma, checkpoint, změněné soubory, stav a další kroky.
-          <ul>
-            <li>Návrh si přečti a zkontroluj, zda vystihuje skutečný stav práce.</li>
-            <li><strong>Návrh se sám neukládá</strong>, nemění handoff ani nevytváří další commit.</li>
-            <li>Nekopíruje chat, obsah změněných souborů, hesla, tokeny ani soukromé texty.</li>
-          </ul>
-        </li>
-        <li>
-          <strong>Fáze 3 — kontrola handoffu při převzetí do `main`.</strong>
-          Spusť <strong>Audit nasazení</strong>. Vedle běžného Git auditu se zobrazí, zda zvolený handoff patří projektu a zda je obsažen v checkpointu.
-          <ul>
-            <li><strong>Handoff odpovídá</strong> znamená, že přesný zvolený handoff je součástí checkpointu.</li>
-            <li><strong>Handoff chybí</strong> nebo <strong>Nelze ověřit</strong> je v této fázi jen viditelné varování; nasazení zatím neblokuje.</li>
-            <li>Převzetí do `main` vždy dál vyžaduje čerstvý audit a jeho přesnou potvrzovací větu.</li>
-          </ul>
-        </li>
-        <li>
-          <strong>Fáze 4 — potvrzené dokončení po nasazení.</strong>
-          Při samoobslužném nasazení z r-Adama zůstane semafor po pushi aktivní. Počkej na nový Cockpit proces, znovu otevři <strong>Práci</strong> a dokonči zelenou kartu.
-          <ul>
-            <li>Cockpit musí potvrdit nový proces, správný projekt a handoff, shodu `main` s `origin/main` a smoke test 5/5.</li>
-            <li>Zadej nejbližší další krok a přesnou větu <code>POTVRZUJI DOKONCENI HANDOFFU PO NASAZENI</code>.</li>
-            <li>Teprve potom se do handoffu přidají ověřená fakta, vznikne jediný dokončovací commit, proběhne push a semafor se uvolní.</li>
-            <li>Když karta hlásí <strong>Nelze dokončit</strong>, semafor neuvolňuj a požádej Adama o read-only kontrolu.</li>
-          </ul>
-        </li>
-      </ol>
-      <p><strong>Ruční nasazení z terminálového Adama:</strong> zelená karta fáze 4 se sama nepřipraví. Po takeoveru proto ručně proveď restart a smoke test, ověř čistý `main` a teprve potom uvolni semafor.</p>
-      <p><strong>Současná hranice:</strong> tvrdá blokace ručního uvolnění semaforu podle aktuálnosti handoffu zatím není zapnutá. Za správné dokončení fáze 4 proto stále odpovídá tento postup.</p>
-
-      <h4>Běžný vývoj z r-Adama</h4>
-      <ol>
-        <li>Vyber správný profil, klikni na <strong>Připojit</strong> a nech workspace synchronizovat s `main`.</li>
-        <li>Pokud projekt v nabídce chybí, zde nepokračuj: založ jej v terminálovém dialogu s Adamem a po synchronizaci se vrať. Jinak vyber projekt a aktuální handoff, do tématu napiš krátký název práce a klikni na <strong>Převzít pro tento profil</strong>.</li>
-        <li>Teprve potom zadej vývojový úkol. Druhý Adam zůstane read-only.</li>
-        <li>Po dokončení vytvoř <strong>Checkpoint bez pushnutí</strong> s krátkým popisem.</li>
-        <li>Spusť <strong>Audit nasazení</strong>, přečti výsledek a použij přesnou potvrzovací větu.</li>
-        <li>Po návratu nového Cockpitu znovu otevři <strong>Práci</strong> a potvrď dokončení handoffu. Až tento krok bezpečně uvolní semafor.</li>
-      </ol>
-
-      <h4>Vývoj z terminálového Adama</h4>
-      <ol>
-        <li>Zadej téma a klikni na <strong>Převzít pro terminál</strong>.</li>
-        <li>Vývoj patří do izolovaného worktree a vlastní WIP větve.</li>
-        <li>Po testech proveď H+C+P: handoff, jeden tematický commit a push WIP větve.</li>
-        <li>Takeover do `main` vyžaduje čerstvý audit a přesnou potvrzovací větu.</li>
-        <li>Po pushi `main` proveď řízený restart, smoke test a až potom uvolni semafor.</li>
-      </ol>
-
-      <h4>Životní cyklus větví</h4>
-      <p>Tlačítko <strong>Prověřit WIP větve</strong> pouze čte stav. Nic nemaže ani neaktualizuje ze sítě.</p>
-      <ul>
-        <li><strong>aktivní · rozpracováno</strong> – worktree obsahuje změny; větev je chráněná.</li>
-        <li><strong>aktivní · čisté</strong> – worktree je připojený a čistý; větev zůstává chráněná.</li>
-        <li><strong>integrováno do main / obsah je v main</strong> – možný kandidát k později potvrzenému úklidu.</li>
-        <li><strong>vědomě archivováno</strong> – větev se záměrně zachovává.</li>
-        <li><strong>vyžaduje revizi / nelze ověřit</strong> – nic neuklízet a stav předat Adamovi.</li>
-      </ul>
-      <p><strong>Kandidát k úklidu neznamená smazáno.</strong> Úklid vždy potřebuje nový audit a samostatné přesné potvrzení.</p>
-
-      <h4>Když něco nejde</h4>
-      <ul>
-        <li><strong>Semafor nelze převzít:</strong> vývoj už vlastní jiný Adam. Nepřebíjej ho a zjisti jeho téma.</li>
-        <li><strong>Checkpoint je šedý:</strong> nejsou změny, semafor vlastní někdo jiný nebo je vývoj pozastavený.</li>
-        <li><strong>Nasazení blokuje cizí WIP:</strong> neposílej pokyn znovu a nic neslučuj; nejdřív dokonči nebo bezpečně převezmi původní práci.</li>
-        <li><strong>Workspace je za `main`:</strong> při čistém profilu klikni na Připojit a nech jej bezpečně synchronizovat.</li>
-        <li><strong>Pozastavit</strong> ponechá stejného vlastníka a blokuje ostatní zápis; <strong>Obnovit</strong> pokračuje a <strong>Uvolnit</strong> projde jen bez čekajícího WIP.</li>
-      </ul>
-
-      <p class="workflow-help-safety"><strong>Nouzový postup:</strong> nic nemaž, nepoužívej reset, rebase ani force push. Zachovej semafor i WIP a požádej Adama o read-only audit.</p>
     </section>
     <section class="development-semaphore-box legacy-work-control" aria-label="Historický globální vývojový semafor">
       <h3>Vývojový semafor</h3>
