@@ -469,3 +469,32 @@ Automatický režim zůstává nedostupný a konfigurace `dry_run`.
 Další krok: po začlenění zopakovat náhled z `main`. Teprve samostatně
 navrhnout potvrzovanou load bránu s revalidací fingerprintu, aktuálního stavu
 a rollbacku; zatím `launchctl` nevolat a nic neodesílat.
+
+### 2026-07-24 07:32 CEST – Přidána potvrzovaná load brána s ověřovaným rollbackem
+
+Pracovní proud: `project-family-calendar`.
+
+Milník: samostatná load brána navazuje na read-only preview a před jakoukoli
+runtime mutací vyžaduje přesnou globální bezpečnostní větu, lokální potvrzení
+`LOAD_FAMILY_CALENDAR_DRY_RUN_PLANNER` a shodný fingerprint. Potom znovu
+ověří nezměněný `dry_run` kontrakt, plist i skutečně nenačtenou službu.
+
+Provozní kontrakt: stav služby se neodvozuje z libovolné chyby. Nenačtená
+služba má přesný očekávaný návratový kód. Po `bootstrap` se stav znovu probuje
+a výsledek se označí jako `loaded`, `unloaded` nebo `unknown`. Neznámý stav
+spustí připravený `bootout` rollback a další probe. Jakákoli runtime mutace
+zakazuje automatický retry, i když se následně podaří potvrdit odpojení.
+
+Důkaz: 18 cílených bezpečnostních testů, 198 kalendářových testů a plná
+Cockpit Quality Gate s 1180 testy prošly. Testy simulovaly úspěch, změněné
+vstupy, nečekané návratové kódy, selhání bootstrapu, potvrzený rollback i
+nevyřešený stav. Živě proběhl jen read-only `launchctl print`; fingerprint
+zůstal shodný a readiness dál hlásil `planner_not_loaded`.
+
+Rozhodnutí: implementace ani testy nejsou souhlasem se skutečným načtením.
+Nebyl volán `bootstrap` ani `bootout`, automatický režim zůstává nedostupný
+a žádný e-mail nebyl odeslán.
+
+Další krok: po začlenění a pushi zopakovat z `main` pouze read-only load
+preview. Skutečné načtení provést až po nové přesné globální i lokální
+potvrzovací větě a se shodným fingerprintem; konfiguraci ponechat `dry_run`.

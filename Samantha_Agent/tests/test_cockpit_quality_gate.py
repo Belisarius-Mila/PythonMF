@@ -99,6 +99,7 @@ async def second():
         self.assertIn("app/family_calendar_delivery_message.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_planner_install.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_keychain_setup.py", COMPILE_PATHS)
+        self.assertIn("app/family_calendar_delivery_launchctl_load.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_launchctl_preview.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_planner_preview.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_runner.py", COMPILE_PATHS)
@@ -114,6 +115,10 @@ async def second():
         )
         self.assertIn(
             "scripts/family_calendar_delivery_keychain_setup.py",
+            COMPILE_PATHS,
+        )
+        self.assertIn(
+            "scripts/family_calendar_delivery_launchctl_load.py",
             COMPILE_PATHS,
         )
         self.assertIn(
@@ -154,6 +159,10 @@ async def second():
         )
         self.assertIn(
             "tests.test_family_calendar_delivery_keychain_setup",
+            TEST_MODULES,
+        )
+        self.assertIn(
+            "tests.test_family_calendar_delivery_launchctl_load",
             TEST_MODULES,
         )
         self.assertIn(

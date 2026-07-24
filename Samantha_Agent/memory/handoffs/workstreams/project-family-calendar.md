@@ -437,3 +437,22 @@ Bezpecnost / neukladat:
 - Další krok: Po začlenění spustit z `main` pouze stejný read-only náhled.
   Samostatně pak navrhnout potvrzovanou load bránu; zatím `launchctl` nevolat,
   neměnit automatický režim a nic neodesílat.
+
+### Automatický checkpoint 2026-07-24 07:32 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Přidána dvoukroková potvrzovaná load brána pro dry-run LaunchAgent
+  s revalidací fingerprintu, přesným stavovým probem a ověřovaným rollbackem.
+- Ověření: 198 kalendářových testů a plná Cockpit brána 1180 testů, výsledek
+  OK. Živě proběhl pouze read-only `launchctl print`; readiness nadále
+  potvrdil `planner_not_loaded`.
+- Změněné cesty před paměťovým zápisem (5):
+  `Samantha_Agent/app/family_calendar_delivery_launchctl_load.py`,
+  `Samantha_Agent/scripts/family_calendar_delivery_launchctl_load.py`,
+  `Samantha_Agent/tests/test_family_calendar_delivery_launchctl_load.py`,
+  `Samantha_Agent/scripts/cockpit_quality_gate.py`,
+  `Samantha_Agent/tests/test_cockpit_quality_gate.py`.
+- Commit: `Doplnit potvrzovanou load bránu plánovače`
+- Další krok: Po začlenění a pushi spustit z `main` pouze read-only preview.
+  Skutečný `bootstrap` vyžaduje novou globální i lokální potvrzovací větu a
+  shodný fingerprint; automatický režim ani odesílání nezapínat.

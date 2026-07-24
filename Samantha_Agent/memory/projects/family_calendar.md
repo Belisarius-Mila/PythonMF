@@ -96,6 +96,16 @@
 - Živý read-only náhled prošel bez issues. Následný readiness audit stále
   potvrdil `planner_not_loaded`; nic nebylo zapsáno, načteno ani odesláno.
   Kalendářová regrese 189 testů a plná Cockpit brána 1171 testů prošly.
+- Potvrzovaná load brána vyžaduje globální bezpečnostní větu, samostatné
+  `LOAD_FAMILY_CALENDAR_DRY_RUN_PLANNER` a shodný fingerprint. Těsně před
+  `bootstrap` znovu ověřuje všechny vstupy a přesný stav nenačtené služby.
+- Po pokusu brána ověřuje runtime stav přes `print`. Rozlišuje `loaded`,
+  `unloaded` a `unknown`; při neznámém výsledku provede `bootout`, znovu
+  probuje stav a zakáže automatický retry, pokud rollback není potvrzený.
+- Simulované testy nevolaly skutečný `launchctl`. Živě proběhl pouze read-only
+  `print`, který vrátil kanonický kód nenačtené služby; readiness nadále hlásil
+  `planner_not_loaded`. Kalendářová regrese 198 testů a plná Cockpit brána
+  1180 testů prošly.
 
 ## Bezpečnostní hranice
 
@@ -111,7 +121,7 @@
 
 ## Nejmenší další krok
 
-Po začlenění zopakovat z `main` pouze read-only náhled a ověřit shodný
-fingerprint. Teprve jako samostatnou fázi navrhnout potvrzovanou load bránu,
-která před `bootstrap` znovu ověří nezměněné vstupy a připravený rollback.
-Zatím `launchctl` nevolat, neměnit automatický režim a nic neodesílat.
+Po začlenění a pushi zopakovat z `main` pouze read-only load preview. Skutečný
+`bootstrap` provést až po nové přesné globální i lokální potvrzovací větě a se
+shodným fingerprintem. Načtení stále ponechá konfiguraci `dry_run`; automatický
+režim ani odesílání tím nezapínat.
