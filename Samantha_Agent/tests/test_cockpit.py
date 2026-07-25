@@ -58,6 +58,8 @@ from app.cockpit import (
     cockpit_speak_action,
     cockpit_transcribe_voice_action,
     human_adam_transcribe_action,
+    human_adam_main_remote_sync_action,
+    human_adam_main_remote_sync_audit_action,
     human_adam_simple_main_deployment_audit_action,
     human_adam_simple_main_deployment_action,
     human_adam_simple_main_deployment_verification_action,
@@ -192,6 +194,7 @@ class CockpitTests(unittest.TestCase):
             "external_ai",
             "external_send",
             "git_commit_push",
+            "git_fast_forward",
             "git_fast_forward_push_restart",
             "local_open",
             "local_service",
@@ -4098,6 +4101,71 @@ class CockpitTests(unittest.TestCase):
         self.assertTrue(result["ready"])
         self.assertEqual(result["main_short"], "a" * 12)
 
+    def test_main_remote_sync_actions_bind_audit_heads_and_confirmation(self) -> None:
+        calls: list[dict[str, object]] = []
+
+        class FakeProfileManager:
+            def audit_main_remote_sync(self) -> dict[str, object]:
+                return {
+                    "ok": True,
+                    "state": "fast_forward_available",
+                    "can_fast_forward": True,
+                }
+
+            def apply_main_remote_sync(self, **kwargs: object) -> dict[str, object]:
+                calls.append(kwargs)
+                return {"ok": True, "state": "aligned", "main_short": "b" * 12}
+
+        manager = FakeProfileManager()
+        audit = human_adam_main_remote_sync_audit_action(service=manager)
+        result = human_adam_main_remote_sync_action(
+            {
+                "confirmed": True,
+                "expected_local_head": "a" * 40,
+                "expected_origin_head": "b" * 40,
+            },
+            service=manager,
+        )
+
+        self.assertTrue(audit["can_fast_forward"])
+        self.assertTrue(result["ok"])
+        self.assertEqual(
+            calls,
+            [
+                {
+                    "expected_local_head": "a" * 40,
+                    "expected_origin_head": "b" * 40,
+                    "confirmed": True,
+                }
+            ],
+        )
+
+    def test_main_remote_sync_actions_fail_closed(self) -> None:
+        class FailingProfileManager:
+            def audit_main_remote_sync(self) -> dict[str, object]:
+                raise cockpit_module.AppServerError("Main je rozvětvený.")
+
+            def apply_main_remote_sync(self, **_kwargs: object) -> dict[str, object]:
+                raise cockpit_module.AppServerError("Auditovaný commit se změnil.")
+
+        audit = human_adam_main_remote_sync_audit_action(
+            service=FailingProfileManager()
+        )
+        result = human_adam_main_remote_sync_action(
+            {
+                "confirmed": True,
+                "expected_local_head": "a" * 40,
+                "expected_origin_head": "b" * 40,
+            },
+            service=FailingProfileManager(),
+        )
+
+        self.assertFalse(audit["ok"])
+        self.assertFalse(audit["can_fast_forward"])
+        self.assertTrue(audit["read_only"])
+        self.assertFalse(result["ok"])
+        self.assertIn("změnil", result["message"])
+
     def test_private_simple_main_deployment_verification_uses_server_evidence(self) -> None:
         manager_calls: list[dict[str, object]] = []
 
@@ -4139,15 +4207,20 @@ class CockpitTests(unittest.TestCase):
         handlers = {item["handler_name"] for item in COCKPIT_POST_ACTIONS}
 
         self.assertIn("/api/human-adam/deploy-audit", self.cockpit_do_get_routes())
+        self.assertIn("/api/human-adam/main-sync-audit", self.cockpit_do_get_routes())
         self.assertIn("/api/human-adam/deploy", self.cockpit_do_post_routes())
+        self.assertIn("/api/human-adam/main-sync", self.cockpit_do_post_routes())
         self.assertIn("/api/human-adam/deploy-verification", self.cockpit_do_post_routes())
         self.assertIn("/api/human-adam/deploy", cockpit_module.HUMAN_ADAM_HTML)
+        self.assertIn("/api/human-adam/main-sync", cockpit_module.HUMAN_ADAM_HTML)
         self.assertIn(
             "/api/human-adam/deploy-verification", cockpit_module.HUMAN_ADAM_HTML
         )
         self.assertIn("human_adam_simple_main_deployment_action", handlers)
+        self.assertIn("human_adam_main_remote_sync_action", handlers)
         self.assertIn("human_adam_simple_main_deployment_verification_action", handlers)
         self.assertEqual(cockpit_module.HUMAN_ADAM_HTML.count('id="deployAuditBtn"'), 1)
+        self.assertEqual(cockpit_module.HUMAN_ADAM_HTML.count('id="mainSyncBtn"'), 1)
         self.assertEqual(cockpit_module.HUMAN_ADAM_HTML.count('id="deployBtn"'), 1)
 
     def test_start_adam_voice_mode_action_launches_watcher_with_terminal_bridge_by_default(self) -> None:

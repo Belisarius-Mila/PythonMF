@@ -313,6 +313,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <h4>Když něco nejde</h4>
         <ul>
           <li><strong>Workspace je za <code>main</code>:</strong> při čistém profilu klikni na Připojit.</li>
+          <li><strong>GitHub je před lokálním <code>main</code>:</strong> audit nabídne tlačítko Dorovnat main s GitHubem pouze při čistém jednoznačném fast-forwardu. Nejdřív zkontroluj commit a seznam souborů.</li>
           <li><strong>Čekající integrace:</strong> přečti read-only audit. Při posunu <code>main</code> vždy vyžádej servisní rozhodnutí, i když audit nenajde překryv cest.</li>
           <li><strong>Audit nebo nasazení selže:</strong> nic neopakuj naslepo; obnov stav a předej Adamovi přesnou chybu.</li>
           <li><strong>Repo není čisté:</strong> nenasazuj a nech Adama zjistit, co zůstalo rozpracované.</li>
@@ -367,6 +368,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <input class="legacy-work-control" id="checkpointMessage" maxlength="120" placeholder="Historický lokální checkpoint">
       <button class="primary legacy-work-control" id="checkpointBtn" type="button" disabled>Historický lokální checkpoint</button>
       <div id="deployMeta">Nasazení je dostupné až po lokálním WIP checkpointu.</div>
+      <section class="integration-audit-box" id="mainSyncBox" aria-label="Ruční dorovnání lokálního main s GitHubem" hidden>
+        <h3>Dorovnání main s GitHubem</h3>
+        <p id="mainSyncMeta">Nejdřív spusť audit nasazení.</p>
+        <ul id="mainSyncChanges" hidden></ul>
+        <button class="audit-action" id="mainSyncBtn" type="button" disabled>Dorovnat main s GitHubem</button>
+      </section>
       <div class="legacy-work-control" id="handoffTakeoverCheck" role="status" hidden></div>
       <button class="audit-action" id="deployAuditBtn" type="button" disabled>Audit nasazení</button>
       <input id="deployConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Po auditu sem vlož potvrzovací větu" hidden disabled>
@@ -462,6 +469,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const checkpointMessage = document.getElementById("checkpointMessage");
   const checkpointBtn = document.getElementById("checkpointBtn");
   const deployMeta = document.getElementById("deployMeta");
+  const mainSyncBox = document.getElementById("mainSyncBox");
+  const mainSyncMeta = document.getElementById("mainSyncMeta");
+  const mainSyncChanges = document.getElementById("mainSyncChanges");
+  const mainSyncBtn = document.getElementById("mainSyncBtn");
   const handoffTakeoverCheck = document.getElementById("handoffTakeoverCheck");
   const deployAuditBtn = document.getElementById("deployAuditBtn");
   const deployConfirmation = document.getElementById("deployConfirmation");
@@ -491,6 +502,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let writeIntentArmed = false;
   let deliveryUncertain = false;
   let deploymentAudit = null;
+  let mainRemoteSyncAudit = null;
   let pendingIntegrationAudit = null;
   const verifiedDeploymentStorageKey = "human-adam:verified-deployment:v1";
   const verifiedDeploymentSeenStorageKey = "human-adam:verified-deployment-seen:v1";
@@ -1788,8 +1800,107 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     }
   }
 
+  function renderMainRemoteSyncAudit(audit, deploymentFailure="") {
+    mainRemoteSyncAudit = audit && typeof audit === "object" ? audit : null;
+    const state = mainRemoteSyncAudit ? String(mainRemoteSyncAudit.state || "") : "";
+    const canFastForward = Boolean(
+      mainRemoteSyncAudit
+      && mainRemoteSyncAudit.ok === true
+      && mainRemoteSyncAudit.can_fast_forward === true
+      && state === "fast_forward_available"
+    );
+    const visible = Boolean(mainRemoteSyncAudit && state && state !== "aligned");
+    mainSyncBox.hidden = !visible;
+    mainSyncBtn.disabled = !canFastForward;
+    mainSyncChanges.replaceChildren();
+    const changes = mainRemoteSyncAudit && Array.isArray(mainRemoteSyncAudit.changes)
+      ? mainRemoteSyncAudit.changes
+      : [];
+    for (const item of changes) {
+      const row = document.createElement("li");
+      const path = item.from_path
+        ? `${item.from_path} → ${item.path || ""}`
+        : (item.path || "");
+      row.textContent = `${item.status || "?"} · ${path}`;
+      mainSyncChanges.appendChild(row);
+    }
+    mainSyncChanges.hidden = !changes.length;
+    if (!mainRemoteSyncAudit) {
+      mainSyncMeta.textContent = "Nejdřív spusť audit nasazení.";
+    } else if (canFastForward) {
+      const commits = Number(mainRemoteSyncAudit.commit_count || 0);
+      const files = Number(mainRemoteSyncAudit.change_count || 0);
+      const target = String(mainRemoteSyncAudit.origin_short || "");
+      const truncated = mainRemoteSyncAudit.changes_truncated ? " · seznam je zkrácený" : "";
+      mainSyncMeta.textContent = `GitHub je napřed o ${commits} commitů · cíl ${target} · ${files} změněných souborů${truncated} · lze použít pouze fast-forward.`;
+    } else if (state === "local_ahead") {
+      mainSyncMeta.textContent = "Lokální main je napřed; automatický fast-forward není možný.";
+    } else if (state === "diverged") {
+      mainSyncMeta.textContent = "Lokální main a GitHub se rozešly; je nutné servisní rozhodnutí.";
+    } else {
+      mainSyncMeta.textContent = deploymentFailure
+        ? `Dorovnání není bezpečně dostupné: ${deploymentFailure}`
+        : (mainRemoteSyncAudit.message || "Dorovnání není bezpečně dostupné.");
+    }
+  }
+
+  async function auditMainRemoteSync(deploymentFailure="") {
+    try {
+      const payload = await api("/api/human-adam/main-sync-audit");
+      renderMainRemoteSyncAudit(payload, deploymentFailure);
+      return payload;
+    } catch (error) {
+      renderMainRemoteSyncAudit({
+        ok:false,
+        state:"audit_failed",
+        can_fast_forward:false,
+        message:error.message,
+      }, deploymentFailure || error.message);
+      return null;
+    }
+  }
+
+  async function applyMainRemoteSync() {
+    if (mainSyncBtn.disabled || !mainRemoteSyncAudit) return;
+    const commits = Number(mainRemoteSyncAudit.commit_count || 0);
+    const target = String(mainRemoteSyncAudit.origin_short || "");
+    if (!window.confirm(
+      `Dorovnat čistý lokální main s GitHubem?\n\n${commits} commitů · cíl ${target}\n\nPoužije se pouze fast-forward; merge, rebase ani přepis historie se neprovedou.`
+    )) return;
+    mainSyncBtn.disabled = true;
+    mainSyncMeta.textContent = "Znovu ověřuji GitHub a přesný auditovaný commit…";
+    try {
+      const payload = await api("/api/human-adam/main-sync", {
+        method:"POST",
+        body:JSON.stringify({
+          confirmed:true,
+          expected_local_head:String(mainRemoteSyncAudit.local_head || ""),
+          expected_origin_head:String(mainRemoteSyncAudit.origin_head || ""),
+        }),
+      });
+      if (!payload.ok) {
+        if (payload.main_fast_forwarded) {
+          mainSyncMeta.textContent = payload.message || "Main je dorovnaný, profil ještě čeká na synchronizaci.";
+          await loadWork();
+          await loadStatus();
+          return;
+        }
+        throw new Error(payload.message || "Ruční dorovnání main selhalo.");
+      }
+      renderMainRemoteSyncAudit(null);
+      notice.textContent = `Main i čisté profily jsou dorovnané na ${payload.main_short || "auditovaný commit"}.`;
+      await loadWork();
+      await loadStatus();
+      await auditDeployment();
+    } catch (error) {
+      mainSyncMeta.textContent = `Nic nebylo dorovnáno: ${error.message}`;
+      mainSyncBtn.disabled = false;
+    }
+  }
+
   function renderWork(payload) {
     deploymentAudit = null;
+    renderMainRemoteSyncAudit(null);
     renderHandoffTakeoverCheck(null);
     renderProjectContinuity(payload.project_continuity || null);
     renderDevelopmentSemaphore(payload.development_semaphore || null);
@@ -2096,11 +2207,13 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     try {
       const payload = await api("/api/human-adam/deploy-audit");
       if (!payload.ok || !payload.ready) throw new Error(payload.message || "Audit nasazení neprošel.");
+      renderMainRemoteSyncAudit(null);
       renderDeploymentAudit(payload);
     } catch (error) {
       deploymentAudit = null;
       deployMeta.textContent = `Audit nasazení selhal: ${error.message}`;
       deployAuditBtn.disabled = false;
+      await auditMainRemoteSync(error.message);
     }
   }
 
@@ -2452,6 +2565,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   projectContinuityAuditBtn.addEventListener("click", loadProjectContinuity);
   checkpointBtn.addEventListener("click", createCheckpoint);
   deployAuditBtn.addEventListener("click", auditDeployment);
+  mainSyncBtn.addEventListener("click", applyMainRemoteSync);
   deployConfirmation.addEventListener("input", () => {
     const required = deploymentAudit ? deploymentAudit.confirmation_text || "" : "";
     deployBtn.disabled = !required || deployConfirmation.value.trim() !== required;

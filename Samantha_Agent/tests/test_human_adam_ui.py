@@ -349,7 +349,7 @@ class HumanAdamUiTests(unittest.TestCase):
         render_source = HUMAN_ADAM_HTML[render_start:render_end]
         integrate_start = render_end
         integrate_end = HUMAN_ADAM_HTML.index(
-            "function renderWork(payload)", integrate_start
+            "function renderMainRemoteSyncAudit(audit", integrate_start
         )
         integrate_source = HUMAN_ADAM_HTML[integrate_start:integrate_end]
 
@@ -918,6 +918,32 @@ class HumanAdamUiTests(unittest.TestCase):
         )
         self.assertIn("button.audit-action { background:#fbbf24;", HUMAN_ADAM_HTML)
         self.assertIn("button.deploy-action { background:var(--ok);", HUMAN_ADAM_HTML)
+
+    def test_failed_deployment_audit_offers_general_confirmed_fast_forward(self) -> None:
+        audit_start = HUMAN_ADAM_HTML.index("async function auditDeployment()")
+        audit_end = HUMAN_ADAM_HTML.index(
+            "async function waitForCockpitAndReload", audit_start
+        )
+        audit_source = HUMAN_ADAM_HTML[audit_start:audit_end]
+        apply_start = HUMAN_ADAM_HTML.index("async function applyMainRemoteSync()")
+        apply_end = HUMAN_ADAM_HTML.index("function renderWork(", apply_start)
+        apply_source = HUMAN_ADAM_HTML[apply_start:apply_end]
+
+        self.assertIn('id="mainSyncBox"', HUMAN_ADAM_HTML)
+        self.assertIn('id="mainSyncBtn"', HUMAN_ADAM_HTML)
+        self.assertIn("Dorovnat main s GitHubem", HUMAN_ADAM_HTML)
+        self.assertIn('await auditMainRemoteSync(error.message);', audit_source)
+        self.assertIn("/api/human-adam/main-sync-audit", HUMAN_ADAM_HTML)
+        self.assertIn("/api/human-adam/main-sync", apply_source)
+        self.assertIn("window.confirm(", apply_source)
+        self.assertIn("expected_local_head", apply_source)
+        self.assertIn("expected_origin_head", apply_source)
+        self.assertIn("Použije se pouze fast-forward", apply_source)
+        self.assertIn("merge, rebase ani přepis historie", apply_source)
+        self.assertIn(
+            'mainSyncBtn.addEventListener("click", applyMainRemoteSync);',
+            HUMAN_ADAM_HTML,
+        )
 
     def test_voice_transcript_is_inserted_into_existing_editable_textarea(self) -> None:
         insert_start = HUMAN_ADAM_HTML.index("function insertTranscriptForReview(text)")

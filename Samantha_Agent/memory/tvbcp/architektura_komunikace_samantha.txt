@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-25 00:14 CEST
-- Poslední dokončený vývojový výsledek: Zachovaný čtyřsouborový WIP rotace bez kotvy byl po servisním rozhodnutí přesně přenesen na aktuální main
-- Stav při vytvoření checkpointu: změna je otestovaná (1216 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
-- Git před checkpointem: `main == origin/main` na `dbb6de71c630`.
-- Poslední serverově potvrzené nasazení: `bf233eeea60d` · je starší než ověřený main před tímto checkpointem · 1201 testů · smoke 5/5 · 2026-07-24T16:58:54+00:00.
-- Rozhodnutí: Kontrola rotace je vázaná na identitu auditovaného vlákna, nikoli na revizi volitelné kontextové kotvy.
-- Bezprostřední další krok: Pushnout servisní checkpoint, bezpečně zarovnat profilové workspaces a potvrzeně nasadit čistý main.
-- Navrhované další kroky: Po nasazení ručně ověřit rotaci po změně nebo pozastavení kotvy.; Potom pokračovat úplným živým testem odložené integrace.
+- Obnoveno potvrzeným checkpointem: 2026-07-25 10:32 CEST
+- Poslední dokončený vývojový výsledek: Panel Práce umí po neúspěšném auditu nabídnout obecné ruční dorovnání čistého lokálního main z origin/main
+- Stav při vytvoření checkpointu: změna je otestovaná (1227 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
+- Git před checkpointem: `main == origin/main` na `84327a8de6a7`.
+- Poslední serverově potvrzené nasazení: `84327a8de6a7` · odpovídá ověřenému main před tímto checkpointem · 1216 testů · smoke 5/5 · 2026-07-25T07:31:37+00:00.
+- Rozhodnutí: Nevznikla výjimka pro sovu; obecná cesta odděluje read-only audit od potvrzeného fast-forwardu svázaného s přesným lokálním a vzdáleným commitem.
+- Bezprostřední další krok: Commitnout a pushnout tento checkpoint a potom samostatně potvrzeně nasadit čistý main.
+- Navrhované další kroky: Po nasazení ověřit tlačítko při příštím přirozeném bezpečném posunu origin/main.; Pokračovat úplným živým testem odložené integrace.
 - Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -2602,3 +2602,32 @@ Technický důkaz:
 - Cílených 92 testů prošlo.
 - Úplná Cockpit Quality Gate prošla 1216 testy; Python i JavaScript syntaxe a
   `git diff --check` jsou v pořádku.
+
+### 2026-07-25 10:32 CEST – Obecné ruční dorovnání čistého main
+
+Hotovo:
+- Panel Práce po neúspěšném auditu nasazení spustí samostatný read-only audit
+  lokálního `main` proti čerstvému `origin/main`.
+- Při jednoznačném fast-forwardu zobrazí cílový commit, počet commitů, změněné
+  cesty a samostatné potvrzované tlačítko.
+- Apply znovu ověří přesný auditovaný lokální i vzdálený commit, použije pouze
+  `git merge --ff-only` a potom dorovná oba čisté profilové workspaces.
+- Cílená sada 426 testů a úplná Cockpit Quality Gate s 1227 testy prošly.
+
+Rozhodnutí:
+- Řešení je obecné a neobsahuje allowlist nebo zvláštní kód pro soví workflow.
+- Audit je oddělený od zápisu. Tlačítko se nepovolí při WIP, aktivním nebo
+  nejistém tahu, dirty stavu, lokálním náskoku, divergenci ani změně GitHubu.
+- Automatický pull, merge, rebase, reset a přepis historie zůstávají zakázané.
+
+Další krok:
+- Commitnout a pushnout checkpoint a samostatně potvrzeně nasadit čistý main.
+
+Navrhované další kroky:
+- Živý test provést až při příštím přirozeném bezpečném posunu `origin/main`;
+  nevytvářet kvůli němu umělý vzdálený commit.
+
+Technický důkaz:
+- Python, JavaScript a shell syntaxe prošly.
+- `git diff --check` je čistý.
+- Plná brána: 1227 testů, 221,9 sekundy, stav OK.

@@ -8286,6 +8286,48 @@ def human_adam_simple_main_deployment_audit_action(
         }
 
 
+def human_adam_main_remote_sync_audit_action(
+    *,
+    service: HumanAdamProfileManager = HUMAN_ADAM,
+) -> dict[str, Any]:
+    """Return a read-only exact fast-forward plan for clean origin/main."""
+
+    try:
+        return service.audit_main_remote_sync()
+    except (AppServerError, SessionHubError, OSError, TypeError, ValueError) as exc:
+        return {
+            "ok": False,
+            "read_only": True,
+            "writes_performed": False,
+            "state": "audit_failed",
+            "can_fast_forward": False,
+            "status": "main_remote_sync_audit_failed",
+            "message": str(exc),
+        }
+
+
+def human_adam_main_remote_sync_action(
+    payload: dict[str, Any],
+    *,
+    service: HumanAdamProfileManager = HUMAN_ADAM,
+) -> dict[str, Any]:
+    """Apply one explicitly confirmed fast-forward bound to its audit heads."""
+
+    try:
+        return service.apply_main_remote_sync(
+            expected_local_head=str(payload.get("expected_local_head") or ""),
+            expected_origin_head=str(payload.get("expected_origin_head") or ""),
+            confirmed=payload.get("confirmed") is True,
+        )
+    except (AppServerError, SessionHubError, OSError, TypeError, ValueError) as exc:
+        return {
+            "ok": False,
+            "state": "main_remote_sync_failed",
+            "status": "main_remote_sync_failed",
+            "message": str(exc),
+        }
+
+
 def start_adam_voice_mode_action(
     *,
     launcher: Callable[..., object] | None = None,
@@ -9478,6 +9520,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/human-adam/main-sync",
+        "label": "Potvrzene fast-forwardovat cisty lokalni main z origin/main",
+        "risk": "git_fast_forward",
+        "confirmation": "explicit_button_and_exact_audited_heads",
+        "handler_name": "human_adam_main_remote_sync_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/human-adam/deploy-verification",
         "label": "Overit dokonceni nasazeni po restartu Cockpitu",
         "risk": "private_write",
@@ -10201,6 +10251,11 @@ class CockpitServer:
                         human_adam_simple_main_deployment_audit_action(service=HUMAN_ADAM)
                     )
                     return
+                if parsed.path == "/api/human-adam/main-sync-audit":
+                    self.respond_json(
+                        human_adam_main_remote_sync_audit_action(service=HUMAN_ADAM)
+                    )
+                    return
                 if parsed.path == "/api/server/health":
                     self.respond_json(server_health_status(host=cockpit_host, port=cockpit_port))
                     return
@@ -10446,6 +10501,15 @@ class CockpitServer:
                             service=HUMAN_ADAM,
                             host=cockpit_host,
                             port=cockpit_port,
+                        )
+                    )
+                    return
+                if parsed.path == "/api/human-adam/main-sync":
+                    payload = self.read_json()
+                    self.respond_json(
+                        human_adam_main_remote_sync_action(
+                            payload,
+                            service=HUMAN_ADAM,
                         )
                     )
                     return

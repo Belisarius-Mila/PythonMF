@@ -42,6 +42,17 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-25 10:32 CEST: Priorita 1, Human–Adam / obecné ruční dorovnání
+  čistého `main` s GitHubem. Po neúspěšném auditu nasazení umí panel Práce
+  samostatně ověřit, zda je `origin/main` jednoznačným potomkem čistého
+  lokálního `main`. Při bezpečném stavu ukáže cílový commit, počet commitů a
+  změněné cesty a nabídne potvrzované tlačítko. Apply znovu ověří oba přesné
+  commity, použije pouze fast-forward a dorovná oba čisté profily. WIP, aktivní
+  nebo nejistý tah, dirty stav, lokální náskok, divergence a závod na GitHubu
+  zůstávají fail-closed. Řešení je obecné, bez soví výjimky. Cílených 426 a
+  úplných 1227 testů prošlo. Zbývá commit/push, potvrzené nasazení a pozdější
+  živý test při přirozeném vzdáleném posunu. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-25 00:14 CEST: Priorita 1, Human–Adam / servisní integrace rotace
   bez kotvy. Přednasazovací audit zachytil čtyřsouborový WIP na starším základu
   bez ownership markeru; `main` mezitím postoupil a dvě cesty se překrývaly.

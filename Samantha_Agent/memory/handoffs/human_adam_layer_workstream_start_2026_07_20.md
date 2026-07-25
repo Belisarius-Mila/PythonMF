@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-25 00:14 CEST
-- Poslední dokončený vývojový výsledek: Zachovaný čtyřsouborový WIP rotace bez kotvy byl po servisním rozhodnutí přesně přenesen na aktuální main
-- Stav při vytvoření checkpointu: změna je otestovaná (1216 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
-- Git před checkpointem: `main == origin/main` na `dbb6de71c630`.
-- Poslední serverově potvrzené nasazení: `bf233eeea60d` · je starší než ověřený main před tímto checkpointem · 1201 testů · smoke 5/5 · 2026-07-24T16:58:54+00:00.
-- Rozhodnutí: Kontrola rotace je vázaná na identitu auditovaného vlákna, nikoli na revizi volitelné kontextové kotvy.
-- Bezprostřední další krok: Pushnout servisní checkpoint, bezpečně zarovnat profilové workspaces a potvrzeně nasadit čistý main.
-- Navrhované další kroky: Po nasazení ručně ověřit rotaci po změně nebo pozastavení kotvy.; Potom pokračovat úplným živým testem odložené integrace.
+- Obnoveno potvrzeným checkpointem: 2026-07-25 10:32 CEST
+- Poslední dokončený vývojový výsledek: Panel Práce umí po neúspěšném auditu nabídnout obecné ruční dorovnání čistého lokálního main z origin/main
+- Stav při vytvoření checkpointu: změna je otestovaná (1227 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
+- Git před checkpointem: `main == origin/main` na `84327a8de6a7`.
+- Poslední serverově potvrzené nasazení: `84327a8de6a7` · odpovídá ověřenému main před tímto checkpointem · 1216 testů · smoke 5/5 · 2026-07-25T07:31:37+00:00.
+- Rozhodnutí: Nevznikla výjimka pro sovu; obecná cesta odděluje read-only audit od potvrzeného fast-forwardu svázaného s přesným lokálním a vzdáleným commitem.
+- Bezprostřední další krok: Commitnout a pushnout tento checkpoint a potom samostatně potvrzeně nasadit čistý main.
+- Navrhované další kroky: Po nasazení ověřit tlačítko při příštím přirozeném bezpečném posunu origin/main.; Pokračovat úplným živým testem odložené integrace.
 - Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -1573,6 +1573,65 @@ Technicky dukaz:
 - Úplná Cockpit Quality Gate, rozšířená výslovně o nový markerový modul a jeho
   testy, prošla 1216 testy.
 - Python i JavaScript syntaxe a `git diff --check` jsou v pořádku.
+
+### 2026-07-25 10:32 CEST – Obecné ruční dorovnání main s GitHubem
+
+Nazev: Human–Adam – samoobslužný čistý fast-forward
+Priorita: 1
+Stav: ceka na nasazeni
+Pripomenout pri startu: ano
+Datum: 2026-07-25
+
+Co se resilo:
+Po automatickém vzdáleném commitu zůstal čistý lokální `main` o jeden commit za
+`origin/main`. Audit nasazení rozdíl správně zablokoval, ale panel nenabídl
+bezpečnou samoobslužnou cestu k nápravě.
+
+Co je hotove:
+- Vznikl obecný read-only audit lokálního `main` proti čerstvému
+  `origin/main`; nejde o výjimku pro konkrétní automatizaci.
+- Audit rozlišuje zarovnaný stav, lokální náskok, divergenci a jednoznačný
+  fast-forward a při dostupném dorovnání ukáže cílový commit, počet commitů a
+  změněné cesty.
+- Potvrzená brána znovu načte GitHub a vyžaduje přesnou shodu lokálního i
+  vzdáleného commitu s předchozím auditem.
+- Po čistém `git merge --ff-only` synchronizuje oba ověřené profilové
+  workspaces z lokálního `main`.
+- Aktivní nebo nejistý tah, dirty stav, profilový WIP, lokální náskok,
+  divergence nebo změna GitHubu zůstávají fail-closed.
+
+Co neni hotove:
+- Checkpoint ještě není commitnutý, pushnutý ani nasazený.
+- Tlačítko zatím nebylo živě použito na přirozeném novém vzdáleném commitu.
+
+Dalsi krok:
+Commitnout a pushnout jeden tematický checkpoint a potom samostatně potvrzeně
+nasadit čistý `main`.
+
+Navrhovane dalsi kroky:
+- Při příštím přirozeném bezpečném posunu `origin/main` projít audit, náhled,
+  potvrzení a závěrečný zelený audit nasazení.
+- Nevytvářet umělý vzdálený commit jen kvůli živému testu.
+
+Zmenene nebo relevantni soubory:
+- `main_remote_sync.py`
+- `human_adam_profiles.py`
+- `human_adam_ui.py`
+- `cockpit.py`
+- `cockpit_quality_gate.py`
+- příslušné regresní testy
+- tento handoff, kanonický TVBCP, `ACTIVE_PROJECTS.md` a `MEMORY_INDEX.md`
+
+Bezpecnost / neukladat:
+- Audit ani účtenka nesmí ukládat obsah souborů, chat, tajemství nebo private
+  runtime data.
+- Brána nepoužívá pull, automatický merge, rebase, reset ani přepis historie.
+- Pokud se stav od auditu změní, nic se nedorovná a je nutná nová kontrola.
+
+Technicky dukaz:
+- Cílená integrační sada prošla 426 testy.
+- Úplná Cockpit Quality Gate prošla 1227 testy za 221,9 sekundy.
+- Python, JavaScript a shell syntaxe i `git diff --check` jsou v pořádku.
 
 ### 2026-07-25 00:14 CEST – Servisní integrace rotace bez kotvy
 

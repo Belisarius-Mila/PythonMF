@@ -57,6 +57,10 @@ from app.communication.human_adam_operations import (
     parse_human_adam_operation,
 )
 from app.communication.local_runtime import LocalAppServerProcessController
+from app.communication.main_remote_sync import (
+    apply_main_remote_sync as apply_clean_main_remote_sync,
+    audit_main_remote_sync as audit_clean_main_remote_sync,
+)
 from app.communication.session_hub import (
     CanonicalSessionHub,
     SessionBusyError,
@@ -615,20 +619,134 @@ class HumanAdamProfileManager:
             "last_deployed_smoke_count": int(smoke.get("check_count") or 0),
         }
 
-    def _assert_all_profile_sessions_idle(self) -> None:
-        """Block deployment while any registered workstream has an active or uncertain turn."""
+    def _assert_all_profile_sessions_idle(
+        self,
+        *,
+        operation: str = "Jednoduché nasazení",
+    ) -> None:
+        """Block a shared Git operation while any profile turn is active or uncertain."""
 
         for profile_id, profile in self.profiles.items():
             session = profile["service"].hub.snapshot()
             label = str(profile.get("label") or profile_id)
             if session.get("turn_busy") or session.get("active_turn"):
                 raise SessionBusyError(
-                    f"Jednoduché nasazení nelze připravit: profil {label} má aktivní tah."
+                    f"{operation} nelze připravit: profil {label} má aktivní tah."
                 )
             if self._has_uncertain_delivery(session):
                 raise SessionBusyError(
-                    f"Jednoduché nasazení nelze připravit: profil {label} má nevyřešené doručení."
+                    f"{operation} nelze připravit: profil {label} má nevyřešené doručení."
                 )
+
+    def _main_remote_sync_workspaces(self) -> tuple[HumanAdamWorkspaceManager, ...]:
+        """Return unique clean profiles aligned with the current local main."""
+
+        unique: list[HumanAdamWorkspaceManager] = []
+        seen: set[Path] = set()
+        for profile in self.profiles.values():
+            workspace = profile["service"].workspace
+            key = workspace.workspace_root.resolve()
+            if key in seen:
+                continue
+            seen.add(key)
+            status = workspace.status()
+            if (
+                status.get("ok") is not True
+                or status.get("prepared") is not True
+                or status.get("project_ready") is not True
+                or status.get("branch") != "main"
+                or status.get("source_branch") != "main"
+                or status.get("workspace_relation") != "aligned"
+                or bool(status.get("dirty"))
+                or bool(status.get("remotes"))
+                or bool(status.get("local_checkpoint_ahead"))
+                or bool(status.get("local_checkpoint_preserved"))
+                or int(status.get("local_commit_count") or 0) != 0
+                or int(status.get("source_pending_changes") or 0) != 0
+                or str(status.get("head") or "")
+                != str(status.get("source_head") or "")
+            ):
+                raise AppServerError(
+                    "Ruční dorovnání blokuje profilový WIP, divergence nebo "
+                    "workspace, který není čistě zarovnaný s lokálním main."
+                )
+            unique.append(workspace)
+        if not unique:
+            raise AppServerError(
+                "Ruční dorovnání nemá žádný ověřený profilový workspace."
+            )
+        return tuple(unique)
+
+    def audit_main_remote_sync(self) -> dict[str, Any]:
+        """Offer a general read-only fast-forward plan for clean origin/main."""
+
+        self._assert_legacy_only_backend(operation="Audit dorovnání main")
+        with self.profile_operation() as service:
+            self._assert_all_profile_sessions_idle(operation="Dorovnání main")
+            workspaces = self._main_remote_sync_workspaces()
+            result = audit_clean_main_remote_sync(
+                source_repo=service.workspace.source_repo,
+            )
+        return {
+            **result,
+            "profiles_ready": True,
+            "profile_workspace_count": len(workspaces),
+        }
+
+    def apply_main_remote_sync(
+        self,
+        *,
+        expected_local_head: str,
+        expected_origin_head: str,
+        confirmed: bool,
+    ) -> dict[str, Any]:
+        """Apply one exact audited fast-forward and align every clean profile."""
+
+        self._assert_legacy_only_backend(operation="Dorovnání main")
+        with self.profile_operation() as service:
+            self._assert_all_profile_sessions_idle(operation="Dorovnání main")
+            workspaces = self._main_remote_sync_workspaces()
+            result = apply_clean_main_remote_sync(
+                source_repo=service.workspace.source_repo,
+                expected_local_head=expected_local_head,
+                expected_origin_head=expected_origin_head,
+                confirmed=confirmed,
+            )
+            rows: list[dict[str, Any]] = []
+            for index, workspace in enumerate(workspaces):
+                status = workspace.sync_from_main(confirmed=True)
+                aligned = bool(
+                    status.get("workspace_relation") == "aligned"
+                    and not status.get("dirty")
+                    and not status.get("remotes")
+                    and str(status.get("head") or "")
+                    == str(result.get("main_head") or "")
+                )
+                rows.append(
+                    {
+                        "workspace": "primary" if index == 0 else f"peer-{index}",
+                        "aligned": aligned,
+                        "head": str(status.get("head") or ""),
+                    }
+                )
+                if not aligned:
+                    return {
+                        **result,
+                        "ok": False,
+                        "state": "main_aligned_profile_sync_pending",
+                        "message": (
+                            "Main je bezpečně dorovnaný, ale jeden čistý profil "
+                            "ještě čeká na synchronizaci."
+                        ),
+                        "workspaces": rows,
+                    }
+        return {
+            **result,
+            "ok": True,
+            "state": "aligned",
+            "message": "Main i všechny čisté profilové workspaces jsou dorovnané.",
+            "workspaces": rows,
+        }
 
     def prepare_simple_main_deployment(
         self,

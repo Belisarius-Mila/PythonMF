@@ -62,6 +62,8 @@ class FakeRuntime:
 class FakeWorkspace:
     def __init__(self, root: Path, *, prepared: bool = True) -> None:
         self.project_root = root
+        self.workspace_root = root
+        self.source_repo = root.parent
         self.prepared = prepared
         self.dirty = False
         self.local_ahead = False
@@ -79,6 +81,8 @@ class FakeWorkspace:
             "ok": True,
             "prepared": self.prepared,
             "project_ready": self.prepared,
+            "branch": "main",
+            "source_branch": "main",
             "dirty": self.dirty,
             "change_count": 1 if self.dirty else 0,
             "changes": [{"status": " M", "path": "Samantha_Agent/app.py"}] if self.dirty else [],
@@ -980,6 +984,76 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertNotIn("work_profile", result)
         self.assertEqual(result["workstream"]["type"], "Layer")
         self.assertEqual(result["handoff_takeover_check"]["state"], "verified")
+
+    def test_main_remote_sync_audit_requires_idle_clean_aligned_profiles(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, human_hub, library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            with patch(
+                "app.communication.human_adam_profiles.audit_clean_main_remote_sync",
+                return_value={
+                    "ok": True,
+                    "state": "fast_forward_available",
+                    "can_fast_forward": True,
+                    "local_head": "a" * 40,
+                    "origin_head": "b" * 40,
+                },
+            ) as audit:
+                result = manager.audit_main_remote_sync()
+
+            self.assertTrue(result["profiles_ready"])
+            self.assertEqual(result["profile_workspace_count"], 2)
+            self.assertEqual(
+                audit.call_args.kwargs["source_repo"],
+                human_workspace.source_repo,
+            )
+
+            library_workspace.dirty = True
+            with patch(
+                "app.communication.human_adam_profiles.audit_clean_main_remote_sync"
+            ) as blocked_audit:
+                with self.assertRaisesRegex(AppServerError, "profilový WIP"):
+                    manager.audit_main_remote_sync()
+                blocked_audit.assert_not_called()
+            library_workspace.dirty = False
+            library_hub.turn_busy = True
+            with patch(
+                "app.communication.human_adam_profiles.audit_clean_main_remote_sync"
+            ) as busy_audit:
+                with self.assertRaisesRegex(SessionBusyError, "aktivní tah"):
+                    manager.audit_main_remote_sync()
+                busy_audit.assert_not_called()
+            self.assertFalse(human_hub.turn_busy)
+
+    def test_confirmed_main_remote_sync_aligns_both_clean_profiles(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, *_rest = self.make_manager(
+                Path(temp_dir)
+            )
+            with patch(
+                "app.communication.human_adam_profiles.apply_clean_main_remote_sync",
+                return_value={
+                    "ok": True,
+                    "state": "main_fast_forwarded",
+                    "main_fast_forwarded": True,
+                    "main_head": "a" * 40,
+                    "main_short": "a" * 12,
+                },
+            ) as apply_sync:
+                result = manager.apply_main_remote_sync(
+                    expected_local_head="a" * 40,
+                    expected_origin_head="b" * 40,
+                    confirmed=True,
+                )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["state"], "aligned")
+        self.assertEqual(human_workspace.sync_count, 1)
+        self.assertEqual(library_workspace.sync_count, 1)
+        self.assertEqual(len(result["workspaces"]), 2)
+        self.assertTrue(all(row["aligned"] for row in result["workspaces"]))
+        self.assertTrue(apply_sync.call_args.kwargs["confirmed"])
 
     def test_simple_deployment_uses_registered_library_without_restart_side_effect(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
