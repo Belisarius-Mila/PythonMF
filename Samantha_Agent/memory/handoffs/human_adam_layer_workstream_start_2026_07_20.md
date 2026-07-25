@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-25 23:47 CEST
-- Poslední dokončený vývojový výsledek: Kontextová kotva je definitivně odstraněná z produkčního kódu, konstruktorů a profilového sestavení; negativní testy brání jejímu návratu
-- Stav při vytvoření checkpointu: změna je otestovaná (1216 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
-- Git před checkpointem: `main == origin/main` na `3e75b09`.
-- Poslední serverově potvrzené nasazení: `3e75b09` · 1221 testů · smoke 5/5 · 2026-07-25 23:02 CEST.
-- Rozhodnutí: Legacy private soubory zůstávají nedotčené; odstranění mrtvého kódu neznamená jejich smazání ani migraci
-- Bezprostřední další krok: Samostatně potvrzeně nasadit čistý main a ověřit start Cockpitu, běžný chat a přepnutí pracovního proudu
-- Navrhované další kroky: Rotaci vlákna ověřit při přirozené potřebě; případné smazání historických private souborů ponechat na samostatné výslovné rozhodnutí
+- Obnoveno potvrzeným checkpointem: 2026-07-26 00:35 CEST
+- Poslední dokončený vývojový výsledek: Fáze 8.1 přidala společný redigovaný read-only generátor živého stavu pracovního proudu; zatím není napojený na UI, model ani checkpointový zápis
+- Stav při vytvoření checkpointu: cílená a sousední sada prošla 115 testy; tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
+- Git před checkpointem: `main == origin/main` na `2a49602`.
+- Poslední serverově potvrzené nasazení: `2a49602` · 1216 testů · smoke 5/5 · 2026-07-25 23:56 CEST.
+- Rozhodnutí: Generátor pouze skládá předané bezpečné snapshoty, nic nečte ani nezapisuje a při chybějícím nebo rozporném důkazu končí jako `unverified`
+- Bezprostřední další krok: Implementovat checkpointovou projekci, která při potvrzeném checkpointu převede živé důkazy na stručné Hotovo / Otevřeno / Rizika / Další krok
+- Navrhované další kroky: Potom předat stejný živý snapshot UI a r-Adamovi; nasazení provést až s první skutečně zapojenou konzumní vrstvou
 - Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -1896,3 +1896,13 @@ Bezpecnost / neukladat:
 - Změněné cesty (8): `Samantha_Agent/app/communication/human_adam_profiles.py`, `Samantha_Agent/app/communication/human_adam_service.py`, `Samantha_Agent/memory/ACTIVE_PROJECTS.md`, `Samantha_Agent/memory/handoffs/human_adam_layer_workstream_start_2026_07_20.md`, `Samantha_Agent/memory/tvbcp/architektura_komunikace_samantha.txt`, `Samantha_Agent/tests/test_communication_session_hub.py`, `Samantha_Agent/tests/test_human_adam_profiles.py`, `Samantha_Agent/tests/test_human_adam_service.py`
 - Commit: `Dokončit odstranění kontextové kotvy`
 - Další krok: Samostatně potvrzeně nasadit čistý main a ověřit běžný chat a přepnutí pracovního proudu
+
+### Automatický checkpoint 2026-07-26 00:35 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Souhrn: Společný read-only generátor skládá redigovaný živý stav main, deploymentu, profilových workspace a runtime bez I/O nebo změny chování
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější push ani nasazení.
+- Ověření: 9 nových regresních testů; širší sousední sada 115/115; Python syntaxe a whitespace OK
+- Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/communication/workstream_live_status.py`, `Samantha_Agent/tests/test_workstream_live_status.py`
+- Commit: `Přidat generátor živého stavu pracovního proudu`
+- Další krok: Napojit generátor na checkpointovou projekci; UI, model a runtime zatím neměnit

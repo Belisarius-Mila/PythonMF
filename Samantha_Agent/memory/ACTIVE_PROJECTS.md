@@ -42,6 +42,15 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-26 00:35 CEST: Priorita 1, Human–Adam / živý stav pracovního proudu,
+  fáze 8.1. Vznikl společný čistě read-only generátor, který z předaných
+  bezpečných snapshotů skládá redigovaný stav `main`/`origin/main`,
+  deploymentu, profilových workspace a runtime. Sám neprovádí I/O, sync,
+  reconnect ani zápis do handoffu/TVBCP; chybějící nebo rozporný důkaz končí
+  jako `unverified`. Nových testů 9/9, širší sousední sada 115/115. Další krok
+  je checkpointová projekce; UI a r-Adam se zapojí až potom a nasazení počká
+  na první aktivní konzumní vrstvu. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-25 10:32 CEST: Priorita 1, Human–Adam / obecné ruční dorovnání
   čistého `main` s GitHubem. Po neúspěšném auditu nasazení umí panel Práce
   samostatně ověřit, zda je `origin/main` jednoznačným potomkem čistého
