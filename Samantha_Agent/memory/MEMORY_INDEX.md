@@ -160,8 +160,11 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   proslo. Zivy soubezny test pote uspesne prosel od terminaloveho WIP pres
   validni ownership marker a potvrzenou integraci az po commit, push a
   nasazeni `cba953e`; oba profilove workspaces zustaly ciste. Napoveda
-  `Prace -> ?` nyni popisuje i odlozeny tah a rucni dorovnani po sovim commitu;
-  64 UI testu proslo. Zbyva commit/push a potvrzene nasazeni teto napovedy.
+  `Prace -> ?` nyni popisuje i odlozeny tah a rucni dorovnani po sovim commitu.
+  Navazujici zpresneni odstranilo pevne pojmenovanou Knihovnu z obecne
+  napovedy; pravidlo soukromeho archivu se zobrazi jen pri capability
+  `private_archive_direct` aktivniho proudu. Cilenych 66 testu proslo; zbyva
+  commit/push a potvrzene nasazeni tohoto zpresneni.
 
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni

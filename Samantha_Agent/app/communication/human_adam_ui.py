@@ -295,7 +295,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <ol>
           <li>Vyber správný pracovní proud a klikni na <strong>Připojit</strong>.</li>
           <li>Před změnou kódu nebo projektových souborů klikni na <strong>Zahájit vývoj</strong> a potvrď jednorázové oprávnění. Platí pouze pro následující odeslaný pokyn; bez něj Adam zůstává pro workspace a Git read-only.</li>
-          <li><strong>Knihovna:</strong> čtení, diagnostiku a jednu jasně zadanou běžnou úpravu soukromé karty pošli přímo bez tlačítka Zahájit vývoj. Samostatné potvrzení zůstává pro mazání, hromadné změny, odesílání ven a systémové zásahy.</li>
+          <li id="privateArchiveHelp" hidden><strong>Soukromý archiv aktivního proudu:</strong> čtení, diagnostiku a jednu jasně zadanou běžnou nedestruktivní úpravu pošli přímo bez tlačítka Zahájit vývoj. Samostatné potvrzení zůstává pro mazání, hromadné změny, odesílání ven a systémové zásahy.</li>
           <li>Vývojový úkol napiš přímo Adamovi do textového pole. Nový projekt, tool nebo layer se zakládá pouze v terminálovém dialogu s Adamem.</li>
           <li>Při běžném čistém a zarovnaném <code>main</code> Adam po úspěšné změně automaticky spustí testy, aktualizuje handoff a TVBCP, vytvoří jeden commit přímo v <code>main</code>, pushne jej a synchronizuje čisté profily.</li>
           <li>Pokud začlenění blokuje rozpracovaná terminálová práce, tah zůstane bezpečně odložený bez commitu a pushnutí. Okno <strong>Práce</strong> potom ukáže read-only audit čekající integrace a nabídne samostatně potvrzované převzetí pouze při čistém nezměněném <code>main</code> a ověřeném původu přesného WIP.</li>
@@ -445,6 +445,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const workHelpBtn = document.getElementById("workHelpBtn");
   const workHelpPanel = document.getElementById("workHelpPanel");
   const workHelpCloseBtn = document.getElementById("workHelpCloseBtn");
+  const privateArchiveHelp = document.getElementById("privateArchiveHelp");
   const workMeta = document.getElementById("workMeta");
   const workChanges = document.getElementById("workChanges");
   const integrationAuditBox = document.getElementById("integrationAuditBox");
@@ -1175,6 +1176,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     activeWorkstreamLabel = String(activeWorkstream.workstream_name || "Pracovní proud");
     workstreamDevelopmentEnabled = capabilities.development !== false;
     workstreamDeploymentEnabled = capabilities.deployment !== false;
+    privateArchiveHelp.hidden = capabilities.private_archive_direct !== true;
     activeWorkstreamId = nextWorkstreamId;
     activeWorkstreamBackend = String(activeWorkstream.backend || "lazy_private_thread");
     profileSelect.replaceChildren();

@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-25 13:50 CEST
-- Poslední dokončený vývojový výsledek: Nápověda `Práce -> ?` přesně popisuje běžný checkpoint, odloženou integraci a ruční dorovnání po sovím commitu
-- Stav při vytvoření checkpointu: změna je otestovaná (64 UI testů); tento snapshot je součástí plánované commit/push operace a sám nepotvrzuje její pozdější nasazení.
-- Git před checkpointem: `main == origin/main` na `cba953ec36ec`.
-- Poslední serverově potvrzené nasazení: `cba953ec36ec` · 1227 testů · smoke 5/5 · 2026-07-25T11:43:32+00:00.
-- Rozhodnutí: Dorovnání po vzdáleném sovím commitu zůstává ruční čistý fast-forward; posunutý základ čekajícího WIP zůstává servisním rozhodnutím
-- Bezprostřední další krok: Commitnout a pushnout aktualizovanou nápovědu a samostatně potvrzeně nasadit čistý main
-- Navrhované další kroky: Po nasazení jednou ručně otevřít `Práce -> ?`; potom lze pokračovat Rodinným kalendářem
+- Obnoveno potvrzeným checkpointem: 2026-07-25 14:43 CEST
+- Poslední dokončený vývojový výsledek: Pravidlo soukromého archivu se v nápovědě řídí schopností aktivního proudu a nejmenuje Knihovnu
+- Stav při vytvoření checkpointu: změna je otestovaná (66 cílených testů); tento snapshot je součástí plánované commit/push operace a sám nepotvrzuje její pozdější nasazení.
+- Git před checkpointem: `main == origin/main` na `3d0fa3c6b891`.
+- Poslední serverově potvrzené nasazení: `3d0fa3c6b891` · 1227 testů · smoke 5/5 · 2026-07-25T12:02:19+00:00.
+- Rozhodnutí: Obecná nápověda nejmenuje konkrétní proud; kontextové pravidlo se ukáže pouze při capability `private_archive_direct`
+- Bezprostřední další krok: Commitnout a pushnout capability-based nápovědu a samostatně potvrzeně nasadit čistý main
+- Navrhované další kroky: Pozdější převod hardcoded knihovní capability do obecné konfigurace ponechat jako samostatný refaktor
 - Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -2676,4 +2676,29 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Cílená sada `tests.test_human_adam_ui` prošla 64/64.
+- `git diff --check` je čistý.
+
+### 2026-07-25 14:43 CEST – Soukromý archiv jako capability aktivního proudu
+
+Hotovo:
+- Obecná nápověda už nejmenuje Knihovnu jako zvláštní pracovní proud.
+- Pravidlo přímého soukromého archivu je výchozí skryté a UI je zobrazí pouze
+  při capability `private_archive_direct` aktivního proudu.
+- Existující backendová oprávnění a potvrzovací brány zůstaly beze změny.
+
+Rozhodnutí:
+- Organizační identita pracovního proudu se v obecné nápovědě nesmí směšovat
+  s jeho bezpečnostními schopnostmi.
+- Převod hardcoded knihovní capability do obecné konfigurace není součástí
+  tohoto malého UI kroku.
+
+Další krok:
+- Commitnout a pushnout checkpoint a samostatně potvrzeně nasadit čistý
+  `main`.
+
+Navrhované další kroky:
+- Případný backendový capability refaktor vést jako samostatnou etapu.
+
+Technický důkaz:
+- Cílených 66 UI a capability testů prošlo.
 - `git diff --check` je čistý.

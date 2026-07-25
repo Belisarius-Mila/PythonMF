@@ -544,6 +544,13 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Zahájit vývoj", panel_source)
         self.assertIn("Platí pouze pro následující odeslaný pokyn", panel_source)
         self.assertIn("Nový projekt, tool nebo layer se zakládá pouze v terminálovém dialogu s Adamem", panel_source)
+        self.assertNotIn("<strong>Knihovna:</strong>", panel_source)
+        self.assertIn('id="privateArchiveHelp" hidden', panel_source)
+        self.assertIn("Soukromý archiv aktivního proudu", panel_source)
+        self.assertIn(
+            "privateArchiveHelp.hidden = capabilities.private_archive_direct !== true;",
+            HUMAN_ADAM_HTML,
+        )
         self.assertIn("Při běžném čistém a zarovnaném <code>main</code>", panel_source)
         self.assertIn("jeden commit přímo v <code>main</code>", panel_source)
         self.assertIn("tah zůstane bezpečně odložený bez commitu a pushnutí", panel_source)
@@ -872,13 +879,21 @@ class HumanAdamUiTests(unittest.TestCase):
             HUMAN_ADAM_HTML,
         )
 
-    def test_work_help_explains_knihovna_direct_card_edits(self) -> None:
+    def test_work_help_shows_private_archive_guidance_only_from_capability(
+        self,
+    ) -> None:
         self.assertIn(
             "Před změnou kódu nebo projektových souborů",
             HUMAN_ADAM_HTML,
         )
         self.assertIn(
-            "čtení, diagnostiku a jednu jasně zadanou běžnou úpravu soukromé karty",
+            "Soukromý archiv aktivního proudu",
+            HUMAN_ADAM_HTML,
+        )
+        self.assertIn('id="privateArchiveHelp" hidden', HUMAN_ADAM_HTML)
+        self.assertNotIn("<strong>Knihovna:</strong>", HUMAN_ADAM_HTML)
+        self.assertIn(
+            "privateArchiveHelp.hidden = capabilities.private_archive_direct !== true;",
             HUMAN_ADAM_HTML,
         )
         self.assertIn(
