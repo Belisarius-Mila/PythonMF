@@ -273,16 +273,22 @@ class CockpitTests(unittest.TestCase):
         route_end = source.index('if parsed.path == "/api/human-adam/connect":', route_start)
         self.assertIn("self.respond_json(human_adam_transcribe_action(payload))", source[route_start:route_end])
 
-    def test_human_adam_context_anchor_has_private_explicit_registry_card_and_routes(self) -> None:
-        card = next(
-            item for item in COCKPIT_POST_ACTIONS if item["path"] == "/api/human-adam/context-anchor"
+    def test_human_adam_context_anchor_http_api_is_fully_retired(self) -> None:
+        self.assertNotIn(
+            "/api/human-adam/context-anchor",
+            {item["path"] for item in COCKPIT_POST_ACTIONS},
         )
-
-        self.assertEqual(card["risk"], "private_write")
-        self.assertEqual(card["confirmation"], "explicit_context_anchor_button")
-        self.assertEqual(card["handler_name"], "human_adam_context_anchor_update_action")
-        self.assertIn("/api/human-adam/context-anchor", self.cockpit_do_get_routes())
-        self.assertIn("/api/human-adam/context-anchor", self.cockpit_do_post_routes())
+        self.assertNotIn(
+            "/api/human-adam/context-anchor",
+            self.cockpit_do_get_routes(),
+        )
+        self.assertNotIn(
+            "/api/human-adam/context-anchor",
+            self.cockpit_do_post_routes(),
+        )
+        source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
+        self.assertNotIn("human_adam_context_anchor_action", source)
+        self.assertNotIn("human_adam_context_anchor_update_action", source)
 
     def test_human_adam_thread_rotation_has_exact_confirmation_registry_card_and_routes(self) -> None:
         card = next(
@@ -339,7 +345,7 @@ class CockpitTests(unittest.TestCase):
             'if parsed.path == "/api/human-adam/deferred-integration":'
         )
         route_end = source.index(
-            'if parsed.path == "/api/human-adam/context-anchor":',
+            'if parsed.path == "/api/human-adam/thread-rotation":',
             route_start,
         )
         route_source = source[route_start:route_end]
@@ -361,7 +367,7 @@ class CockpitTests(unittest.TestCase):
         self.assertNotIn("/api/human-adam/project-continuity", self.cockpit_do_post_routes())
         source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
         route_start = source.index('if parsed.path == "/api/human-adam/project-continuity":')
-        route_end = source.index('if parsed.path == "/api/human-adam/context-anchor":', route_start)
+        route_end = source.index('if parsed.path == "/api/human-adam/thread-rotation":', route_start)
         self.assertIn("human_adam_project_continuity_action(service=HUMAN_ADAM)", source[route_start:route_end])
 
     def test_human_adam_deploy_route_uses_clean_main_restart_and_verification(self) -> None:

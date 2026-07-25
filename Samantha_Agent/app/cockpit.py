@@ -82,8 +82,6 @@ from app.command_cheatsheet import load_command_cheatsheet
 from app.communication.human_adam_service import (
     human_adam_checkpoint_action,
     human_adam_connect_action,
-    human_adam_context_anchor_action,
-    human_adam_context_anchor_update_action,
     human_adam_send_action,
     human_adam_status_action,
     human_adam_thread_rotation_action,
@@ -9480,14 +9478,6 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
-        "path": "/api/human-adam/context-anchor",
-        "label": "Pripnout soukromy aktivni kontext Human-Adam",
-        "risk": "private_write",
-        "confirmation": "explicit_context_anchor_button",
-        "handler_name": "human_adam_context_anchor_update_action",
-        "test_level": "direct",
-    },
-    {
         "path": "/api/human-adam/thread-rotation",
         "label": "Potvrzena rotace profiloveho vlakna Human-Adam",
         "risk": "private_write",
@@ -10234,9 +10224,6 @@ class CockpitServer:
                 if parsed.path == "/api/human-adam/project-continuity":
                     self.respond_json(human_adam_project_continuity_action(service=HUMAN_ADAM))
                     return
-                if parsed.path == "/api/human-adam/context-anchor":
-                    self.respond_json(human_adam_context_anchor_action(service=HUMAN_ADAM))
-                    return
                 if parsed.path == "/api/human-adam/thread-rotation":
                     self.respond_json(human_adam_thread_rotation_status_action(service=HUMAN_ADAM))
                     return
@@ -10475,10 +10462,6 @@ class CockpitServer:
                 if parsed.path == "/api/human-adam/deferred-integration":
                     payload = self.read_json()
                     self.respond_json(human_adam_deferred_integration_action(payload, service=HUMAN_ADAM))
-                    return
-                if parsed.path == "/api/human-adam/context-anchor":
-                    payload = self.read_json()
-                    self.respond_json(human_adam_context_anchor_update_action(payload, service=HUMAN_ADAM))
                     return
                 if parsed.path == "/api/human-adam/thread-rotation":
                     payload = self.read_json()

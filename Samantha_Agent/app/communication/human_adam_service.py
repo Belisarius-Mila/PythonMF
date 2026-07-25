@@ -665,36 +665,6 @@ def human_adam_tvbcp_action(*, service: HumanAdamService) -> dict[str, Any]:
         return {"ok": False, "status": "human_adam_tvbcp_failed", "message": str(exc)}
 
 
-def human_adam_context_anchor_action(*, service: HumanAdamService) -> dict[str, Any]:
-    return service.context_anchor(include_content=True)
-
-
-def human_adam_context_anchor_update_action(
-    payload: dict[str, Any],
-    *,
-    service: HumanAdamService,
-) -> dict[str, Any]:
-    try:
-        return service.set_context_anchor(
-            operation=str(payload.get("operation") or ""),
-            expected_revision=payload.get("expected_revision"),
-            content=str(payload.get("content") or ""),
-            confirmed=payload.get("confirmed") is True,
-        )
-    except SessionBusyError as exc:
-        return {"ok": False, "status": "human_adam_busy", "message": str(exc)}
-    except ContextAnchorConflictError as exc:
-        return {
-            "ok": False,
-            "status": "human_adam_context_anchor_conflict",
-            "message": str(exc),
-            "expected_revision": exc.expected_revision,
-            "current_revision": exc.current_revision,
-        }
-    except (ContextAnchorError, OSError, ValueError) as exc:
-        return {"ok": False, "status": "human_adam_context_anchor_failed", "message": str(exc)}
-
-
 def human_adam_thread_rotation_status_action(*, service: HumanAdamService) -> dict[str, Any]:
     try:
         return service.thread_rotation_status()
