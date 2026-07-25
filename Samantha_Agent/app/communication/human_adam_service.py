@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import copy
-import json
 import re
 from datetime import datetime, timezone
 from functools import partial
@@ -28,12 +27,10 @@ from app.communication.human_adam_workspace import (
     HumanAdamWorkspaceManager,
     read_human_adam_runtime_profile,
 )
-from app.file_persistence import FilePersistenceError, update_json_file
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SESSION_STATE_PATH = PROJECT_ROOT / "data" / "private" / "communication" / "canonical_session.json"
-DEFAULT_CONTEXT_ANCHOR_PATH = PROJECT_ROOT / "data" / "private" / "communication" / "human_adam_context_anchor.json"
 DEVELOPMENT_CONTROL_DEVELOPER_INSTRUCTIONS = (
     " Pred jakoukoli zmenou souboru nebo Gitu se rid blokem [DEVELOPMENT_CONTROL] "
     "vlozenym pred aktualni zpravu. Zapis je povolen jen pri writable=true. Pri "
@@ -60,177 +57,11 @@ HUMAN_ADAM_DEVELOPER_INSTRUCTIONS = (
 )
 MAX_MESSAGE_CHARS = 12_000
 MAX_TVBCP_CHARS = 500_000
-MAX_CONTEXT_ANCHOR_CHARS = 6_000
-CONTEXT_ANCHOR_SCHEMA_VERSION = 1
 CANONICAL_TVBCP_RELATIVE_PATH = Path("memory/tvbcp/architektura_komunikace_samantha.txt")
 SAFE_GIT_HEAD_RE = re.compile(r"[0-9a-fA-F]{7,64}")
 SAFE_WORKSPACE_RELATIONS = frozenset({"aligned", "local_ahead", "source_ahead", "diverged", "unknown"})
 MAX_WORKSPACE_SNAPSHOT_COUNT = 1_000_000
-PRIVATE_PATH_RE = re.compile(r"(?i)(?:file://|/(?:Users|home|private|var/folders)/|[A-Z]:\\\\Users\\\\)")
-SECRET_VALUE_RE = re.compile(
-    r"(?i)\b(?:api[_ -]?key|access[_ -]?token|auth[_ -]?token|token|password|heslo|app-specific password)\b\s*[:=]\s*\S+"
-)
-RESERVED_ANCHOR_MARKERS = ("[HUMAN_ADAM_CONTEXT_ANCHOR]", "[/HUMAN_ADAM_CONTEXT_ANCHOR]")
-CONTEXT_ANCHOR_OPERATIONS = frozenset({"save", "pin", "pause", "delete"})
 THREAD_ROTATION_CONFIRMATION_TEXT = "POTVRZUJI ROTACI PROFILOVEHO VLAKNA"
-
-
-class ContextAnchorError(SessionHubError):
-    """Raised when the optional private continuity anchor is unsafe or unreadable."""
-
-
-class ContextAnchorConflictError(ContextAnchorError):
-    """Raised when a stale editor tries to replace a newer anchor revision."""
-
-    def __init__(self, *, expected_revision: int, current_revision: int):
-        self.expected_revision = expected_revision
-        self.current_revision = current_revision
-        super().__init__(
-            "Kotva byla mezitím změněna na jiném zařízení. "
-            "Tento starší editor nic nepřepsal; zachovej si rozepsaný text a načti aktuální revizi."
-        )
-
-
-def empty_context_anchor() -> dict[str, Any]:
-    return {
-        "schema_version": CONTEXT_ANCHOR_SCHEMA_VERSION,
-        "active": False,
-        "content": "",
-        "revision": 0,
-        "updated_at": "",
-    }
-
-
-def _validated_anchor_content(value: object, *, allow_empty: bool = False) -> str:
-    content = str(value or "").strip()
-    if not content and not allow_empty:
-        raise ContextAnchorError("Aktivní kontext je prázdný.")
-    if len(content) > MAX_CONTEXT_ANCHOR_CHARS:
-        raise ContextAnchorError(f"Aktivní kontext může mít nejvýše {MAX_CONTEXT_ANCHOR_CHARS} znaků.")
-    if any(ord(character) < 32 and character not in "\n\t" for character in content):
-        raise ContextAnchorError("Aktivní kontext obsahuje nepovolené řídicí znaky.")
-    if PRIVATE_PATH_RE.search(content):
-        raise ContextAnchorError("Aktivní kontext nesmí obsahovat soukromou absolutní cestu.")
-    if SECRET_VALUE_RE.search(content) or "-----BEGIN PRIVATE KEY-----" in content.upper():
-        raise ContextAnchorError("Aktivní kontext nesmí obsahovat heslo, token ani klíč.")
-    if any(marker in content for marker in RESERVED_ANCHOR_MARKERS):
-        raise ContextAnchorError("Aktivní kontext obsahuje vyhrazenou technickou značku.")
-    return content
-
-
-def _validated_anchor_timestamp(value: object, *, allow_empty: bool = False) -> str:
-    timestamp = str(value or "").strip()
-    if not timestamp and allow_empty:
-        return ""
-    try:
-        parsed = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
-    except ValueError as exc:
-        raise ContextAnchorError("Aktivní kontext má neplatný čas aktualizace; při tahu bude ignorován.") from exc
-    if parsed.tzinfo is None:
-        raise ContextAnchorError("Aktivní kontext nemá bezpečně určenou časovou zónu; při tahu bude ignorován.")
-    return timestamp
-
-
-def _validated_expected_revision(value: object) -> int:
-    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
-        raise ContextAnchorError("Změna aktivního kontextu nemá platnou očekávanou revizi.")
-    return value
-
-
-def load_context_anchor(path: Path) -> dict[str, Any]:
-    target = Path(path)
-    if not target.exists():
-        return empty_context_anchor()
-    try:
-        raw = json.loads(target.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise ContextAnchorError("Aktivní kontext nelze bezpečně načíst; při tahu bude ignorován.") from exc
-    if not isinstance(raw, dict) or raw.get("schema_version") != CONTEXT_ANCHOR_SCHEMA_VERSION:
-        raise ContextAnchorError("Aktivní kontext má neznámé schéma; při tahu bude ignorován.")
-    active = raw.get("active") is True
-    content = _validated_anchor_content(raw.get("content"), allow_empty=not active)
-    try:
-        revision = max(0, int(raw.get("revision") or 0))
-    except (TypeError, ValueError) as exc:
-        raise ContextAnchorError("Aktivní kontext má neplatnou revizi; při tahu bude ignorován.") from exc
-    updated_at = _validated_anchor_timestamp(raw.get("updated_at"), allow_empty=not content)
-    return {
-        "schema_version": CONTEXT_ANCHOR_SCHEMA_VERSION,
-        "active": active,
-        "content": content,
-        "revision": revision,
-        "updated_at": updated_at,
-    }
-
-
-def write_context_anchor(
-    path: Path,
-    *,
-    operation: str,
-    expected_revision: int,
-    content: str = "",
-) -> dict[str, Any]:
-    safe_operation = str(operation or "").strip().lower()
-    if safe_operation not in CONTEXT_ANCHOR_OPERATIONS:
-        raise ContextAnchorError("Aktivní kontext má neznámou operaci a nebyl změněn.")
-    safe_expected_revision = _validated_expected_revision(expected_revision)
-    safe_content = _validated_anchor_content(content) if safe_operation == "save" else ""
-
-    def updater(current: Any) -> dict[str, Any]:
-        if not isinstance(current, dict) or current.get("schema_version") != CONTEXT_ANCHOR_SCHEMA_VERSION:
-            if current != empty_context_anchor():
-                raise ContextAnchorError("Stávající aktivní kontext má neznámé schéma a nebyl přepsán.")
-            revision = 0
-        else:
-            try:
-                revision = max(0, int(current.get("revision") or 0))
-            except (TypeError, ValueError) as exc:
-                raise ContextAnchorError("Stávající aktivní kontext má neplatnou revizi a nebyl přepsán.") from exc
-        if revision != safe_expected_revision:
-            raise ContextAnchorConflictError(
-                expected_revision=safe_expected_revision,
-                current_revision=revision,
-            )
-        current_active = current.get("active") is True
-        current_content = _validated_anchor_content(current.get("content"), allow_empty=not current_active)
-        _validated_anchor_timestamp(current.get("updated_at"), allow_empty=not current_content)
-        if safe_operation == "save":
-            next_active = current_active
-            next_content = safe_content
-        elif safe_operation == "pin":
-            if not current_content:
-                raise ContextAnchorError("Nejdřív ulož návrh aktivního kontextu.")
-            next_active = True
-            next_content = current_content
-        elif safe_operation == "pause":
-            if not current_content:
-                raise ContextAnchorError("Není uložený žádný aktivní kontext k pozastavení.")
-            next_active = False
-            next_content = current_content
-        else:
-            next_active = False
-            next_content = ""
-        return {
-            "schema_version": CONTEXT_ANCHOR_SCHEMA_VERSION,
-            "active": next_active,
-            "content": next_content,
-            "revision": revision + 1,
-            "updated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-        }
-
-    try:
-        stored = update_json_file(
-            Path(path),
-            updater,
-            default=empty_context_anchor(),
-            ensure_ascii=False,
-            indent=2,
-        )
-    except (ContextAnchorError, FilePersistenceError, OSError, json.JSONDecodeError, ValueError) as exc:
-        if isinstance(exc, ContextAnchorError):
-            raise
-        raise ContextAnchorError("Aktivní kontext nelze bezpečně uložit.") from exc
-    return dict(stored)
 
 
 def _safe_git_head(value: object) -> str:
@@ -282,7 +113,6 @@ class HumanAdamService:
         workspace: HumanAdamWorkspaceManager | None = None,
         state_path: Path = DEFAULT_SESSION_STATE_PATH,
         work_profile_id: str = "human_adam",
-        context_anchor_path: Path = DEFAULT_CONTEXT_ANCHOR_PATH,
         codex_binary: str = DEFAULT_CODEX_BIN,
         profile_getter: Callable[..., dict[str, Any]] = read_human_adam_runtime_profile,
         hub: CanonicalSessionHub | None = None,
@@ -303,7 +133,6 @@ class HumanAdamService:
         self.tvbcp_title = str(tvbcp_title).strip() or "Projektový TVBCP"
         self._profile: dict[str, Any] = {}
         self.state_path = Path(state_path)
-        self.context_anchor_path = Path(context_anchor_path)
         self.work_profile_id = str(work_profile_id or "").strip().lower()
         if not re.fullmatch(r"[a-z][a-z0-9_-]{1,31}", self.work_profile_id):
             raise ValueError("Pracovní profil služby nemá platný bezpečný identifikátor.")
@@ -464,58 +293,6 @@ class HumanAdamService:
         return {
             **result,
             "session": self.hub.snapshot(),
-        }
-
-    def context_anchor(self, *, include_content: bool = True) -> dict[str, Any]:
-        try:
-            anchor = load_context_anchor(self.context_anchor_path)
-        except ContextAnchorError as exc:
-            return {
-                "ok": False,
-                "active": False,
-                "has_content": False,
-                "revision": 0,
-                "updated_at": "",
-                "message": str(exc),
-                **({"content": ""} if include_content else {}),
-            }
-        payload = {
-            "ok": True,
-            "active": bool(anchor.get("active")),
-            "has_content": bool(anchor.get("content")),
-            "revision": int(anchor.get("revision") or 0),
-            "updated_at": str(anchor.get("updated_at") or ""),
-        }
-        if include_content:
-            payload["content"] = str(anchor.get("content") or "")
-        return payload
-
-    def set_context_anchor(
-        self,
-        *,
-        operation: str,
-        expected_revision: int,
-        content: str = "",
-        confirmed: bool,
-    ) -> dict[str, Any]:
-        if not confirmed:
-            raise ContextAnchorError("Změna aktivního kontextu vyžaduje výslovnou akci uživatele.")
-        session = self.hub.snapshot()
-        if session.get("turn_busy") or session.get("active_turn"):
-            raise SessionBusyError("Aktivní kontext nelze měnit během Adamova tahu.")
-        anchor = write_context_anchor(
-            self.context_anchor_path,
-            operation=operation,
-            expected_revision=expected_revision,
-            content=str(content or ""),
-        )
-        return {
-            "ok": True,
-            "active": bool(anchor.get("active")),
-            "has_content": bool(anchor.get("content")),
-            "content": str(anchor.get("content") or ""),
-            "revision": int(anchor.get("revision") or 0),
-            "updated_at": str(anchor.get("updated_at") or ""),
         }
 
     def thread_rotation_status(self) -> dict[str, Any]:

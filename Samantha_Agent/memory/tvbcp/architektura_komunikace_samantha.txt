@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-25 22:50 CEST
-- Poslední dokončený vývojový výsledek: Nový kanonický Cockpit po automatickém restartu sám dokončí čekající deployment receipt; pozdější ověření z prohlížeče je idempotentní
-- Stav při vytvoření checkpointu: změna je otestovaná (1221 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
-- Git před checkpointem: `main == origin/main` na `ec4e46a`.
-- Poslední serverově potvrzené nasazení: `ec4e46a` · 1218 testů · smoke 5/5 · 2026-07-25 22:23 CEST.
-- Rozhodnutí: Restart serveru po změně kódu zůstává automatickou součástí nasazení; dokončení serverového důkazu nesmí záviset na otevřeném prohlížeči
-- Bezprostřední další krok: Samostatně potvrzeně nasadit čistý main a bez otevřeného Human–Adam UI ověřit, že čekající receipt sama přejde do stavu deployed
-- Navrhované další kroky: Po živém důkazu rozlišit případné pouhé obnovení stránky od ručního restartu serveru; potom se vrátit k podrobné diskusi o odstraněné kontextové kotvě
+- Obnoveno potvrzeným checkpointem: 2026-07-25 23:47 CEST
+- Poslední dokončený vývojový výsledek: Kontextová kotva je definitivně odstraněná z produkčního kódu, konstruktorů a profilového sestavení; negativní testy brání jejímu návratu
+- Stav při vytvoření checkpointu: změna je otestovaná (1216 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
+- Git před checkpointem: `main == origin/main` na `3e75b09`.
+- Poslední serverově potvrzené nasazení: `3e75b09` · 1221 testů · smoke 5/5 · 2026-07-25 23:02 CEST.
+- Rozhodnutí: Legacy private soubory zůstávají nedotčené; odstranění mrtvého kódu neznamená jejich smazání ani migraci
+- Bezprostřední další krok: Samostatně potvrzeně nasadit čistý main a ověřit start Cockpitu, běžný chat a přepnutí pracovního proudu
+- Navrhované další kroky: Rotaci vlákna ověřit při přirozené potřebě; případné smazání historických private souborů ponechat na samostatné výslovné rozhodnutí
 - Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -2826,3 +2826,66 @@ Technický důkaz:
   regresní sada restartu, profilů a UI prošla 160 testy.
 - Změna je omezená na serverový startup verifier, idempotentní deployment
   verification a jejich testy.
+
+### 2026-07-25 23:22 CEST – Legacy kotvy neobsahují chybějící aktuální plán
+
+Hotovo:
+- Oba zachované profilové anchor soubory byly read-only auditovány bez vypsání
+  nebo kopírování jejich soukromého textu.
+- Jde o krátké starší testovací záznamy. Human–Adam kotva je pozastavená;
+  knihovní soubor má pouze historický příznak aktivity, který současný runtime
+  nekonzumuje.
+- Strukturální a tematické porovnání s příslušnými handoffy, TVBCP a provozními
+  pravidly nenašlo unikátní aktuální plán k migraci.
+
+Rozhodnutí:
+- Do kanonické paměti se přenáší pouze výsledek auditu, nikoli obsah kotev.
+- Legacy private soubory zůstávají beze změny. Cleanup mrtvého kódu nesmí
+  implicitně znamenat jejich smazání nebo migraci.
+
+Další krok:
+- V jednom malém testovaném řezu odstranit interní storage helpery, service
+  metody, konstruktorové parametry a odpovídající legacy testy kotvy.
+
+Navrhované další kroky:
+- Potom ověřit běžný chat, přepnutí pracovního proudu a rotaci vlákna.
+- O případném odstranění historických private souborů rozhodnout samostatně.
+
+Technický důkaz:
+- Audit četl jen lokální private soubory a do výstupu propustil pouze metadata,
+  strukturální příznaky a míru tematického pokrytí.
+- Text kotvy nebyl zapsán do Gitu, logů, chatu ani TVBCP.
+- Před paměťovým zápisem byl `main` čistý a shodný s `origin/main` na
+  `3e75b09`.
+
+### 2026-07-25 23:47 CEST – Kontextová kotva definitivně odstraněna z kódu
+
+Hotovo:
+- Z produkční služby byly odstraněny všechny konstanty, výjimky, validační a
+  persistence helpery kontextové kotvy.
+- Služba ani profilové sestavení už nepřijímají ani neukládají anchor cestu;
+  změna platí pro Human–Adam, Knihovnu i lazy pracovní proudy.
+- Metody pro čtení a mutaci kotvy už neexistují.
+- Testy nyní hlídají definitivní nepřítomnost funkce a zachování existujícího
+  legacy souboru bez zápisu.
+
+Rozhodnutí:
+- Historické private soubory zůstávají beze změny. Tento cleanup je nečte za
+  běhu, nemaže je a nemigruje.
+- V produkčním kódu nesmí zůstat žádná reference `context_anchor`,
+  `CONTEXT_ANCHOR` ani `ContextAnchor`.
+
+Další krok:
+- Samostatně potvrzeně nasadit čistý `main` a ověřit start Cockpitu, běžný chat
+  a přepnutí pracovního proudu.
+
+Navrhované další kroky:
+- Rotaci vlákna ověřit až při přirozené potřebě.
+- O případném odstranění historických private souborů rozhodnout samostatně.
+
+Technický důkaz:
+- Cílená sada prošla 183 testy a širší regrese 303 testy.
+- Plná Cockpit quality gate prošla 1216 testy za 320,2 sekundy.
+- Produkční reference kotvy: 0.
+- Oba private soubory si po testech zachovaly původní velikost a časy změn
+  z 18./19. července 2026.

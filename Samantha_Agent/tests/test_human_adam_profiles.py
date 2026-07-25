@@ -376,7 +376,6 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             runtime=runtime,  # type: ignore[arg-type]
             workspace=human_workspace,  # type: ignore[arg-type]
             state_path=root / "human.json",
-            context_anchor_path=root / "human-anchor.json",
             work_profile_id="human_adam",
             hub=human_hub,  # type: ignore[arg-type]
             profile_getter=fake_profile,
@@ -385,7 +384,6 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             runtime=runtime,  # type: ignore[arg-type]
             workspace=library_workspace,  # type: ignore[arg-type]
             state_path=root / "library.json",
-            context_anchor_path=root / "library-anchor.json",
             work_profile_id="knihovna",
             hub=library_hub,  # type: ignore[arg-type]
             profile_getter=fake_profile,
@@ -579,10 +577,6 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             self.assertIs(manager.active_service.workspace, human_workspace)
             self.assertIs(manager.active_service.hub, human_hub)
             self.assertEqual(manager.active_service.state_path, root / "human.json")
-            self.assertEqual(
-                manager.active_service.context_anchor_path,
-                root / "human-anchor.json",
-            )
 
             manager.switch(profile_id="knihovna", confirmed=True)
 
@@ -590,10 +584,6 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             self.assertIs(manager.active_service.workspace, library_workspace)
             self.assertIs(manager.active_service.hub, library_hub)
             self.assertEqual(manager.active_service.state_path, root / "library.json")
-            self.assertEqual(
-                manager.active_service.context_anchor_path,
-                root / "library-anchor.json",
-            )
             self.assertEqual(
                 manager.grouped_workstream_status()["active"]["backend"],
                 "compatibility_adapter",
@@ -1225,40 +1215,18 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(persisted["schema_version"], 2)
         self.assertEqual(persisted["active_workstream_id"], "project-mmtx")
 
-    def test_lazy_active_service_routes_send_without_legacy_anchor_injection(self) -> None:
+    def test_lazy_active_service_routes_send_without_obsolete_anchor_injection(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, *_workspaces, human_hub, _library_hub = self.make_manager(
                 Path(temp_dir)
             )
             lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
             manager.workstream_threads = lazy  # type: ignore[assignment]
-            legacy_saved = manager.active_service.set_context_anchor(
-                operation="save",
-                expected_revision=0,
-                content="Cíl: legacy Human–Adam",
-                confirmed=True,
-            )
-            manager.active_service.set_context_anchor(
-                operation="pin",
-                expected_revision=legacy_saved["revision"],
-                confirmed=True,
-            )
             human_adam_profile_switch_action(
                 {"workstream_id": "project-mmtx", "confirmed": True},
                 service=manager,
             )
 
-            lazy_saved = manager.active_service.set_context_anchor(
-                operation="save",
-                expected_revision=0,
-                content="Cíl: samostatný MMTX",
-                confirmed=True,
-            )
-            manager.active_service.set_context_anchor(
-                operation="pin",
-                expected_revision=lazy_saved["revision"],
-                confirmed=True,
-            )
             sent = manager.send(
                 text="Kontrola MMTX pilotu",
                 client_message_id="lazy-route-001",
@@ -1266,8 +1234,10 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
 
         lazy_send = lazy.hubs["project-mmtx"].last_send
         self.assertEqual(lazy_send["text"], "Kontrola MMTX pilotu")
-        self.assertNotIn("legacy Human–Adam", str(lazy_send["model_input_text"]))
-        self.assertNotIn("samostatný MMTX", str(lazy_send["model_input_text"]))
+        self.assertNotIn(
+            "HUMAN_ADAM_CONTEXT_ANCHOR",
+            str(lazy_send["model_input_text"]),
+        )
         self.assertIn("profile_id=project-mmtx", str(lazy_send["model_input_text"]))
         self.assertIn(
             "source=one_turn_direct_main_authorization",
@@ -2780,16 +2750,19 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertNotIn("active_profile_id", persisted)
         self.assertNotIn("thread", str(persisted))
 
-    def test_context_anchor_manager_api_is_retired_but_private_paths_remain(self) -> None:
+    def test_context_anchor_api_and_service_paths_are_fully_removed(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, *_rest = self.make_manager(Path(temp_dir))
-            human_anchor_path = manager.active_service.context_anchor_path
+            human_service = manager.active_service
             manager.switch(profile_id="knihovna", confirmed=True)
-            library_anchor_path = manager.active_service.context_anchor_path
+            library_service = manager.active_service
 
         self.assertFalse(hasattr(manager, "context_anchor"))
         self.assertFalse(hasattr(manager, "set_context_anchor"))
-        self.assertNotEqual(human_anchor_path, library_anchor_path)
+        for service in (human_service, library_service):
+            self.assertFalse(hasattr(service, "context_anchor"))
+            self.assertFalse(hasattr(service, "set_context_anchor"))
+            self.assertFalse(hasattr(service, "context_anchor_path"))
 
     def test_thread_rotation_is_locked_to_active_profile_bundle(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

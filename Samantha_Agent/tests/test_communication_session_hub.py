@@ -160,7 +160,7 @@ class CanonicalSessionHubTests(unittest.TestCase):
     def test_model_input_is_sent_but_never_persisted_in_user_history(self) -> None:
         model_input = (
             "[WORKSPACE SNAPSHOT]\nsource_head=abcdef12\n\n"
-            "[HUMAN_ADAM_CONTEXT_ANCHOR]\nCíl: kontinuita\n[/HUMAN_ADAM_CONTEXT_ANCHOR]\n\n"
+            "[DEVELOPMENT_CONTROL]\nwritable=false\n[/DEVELOPMENT_CONTROL]\n\n"
             "Původní text"
         )
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -179,8 +179,8 @@ class CanonicalSessionHubTests(unittest.TestCase):
         self.assertEqual(snapshot["messages"][0]["user_text"], "Původní text")
         self.assertNotIn("WORKSPACE SNAPSHOT", persisted)
         self.assertNotIn("source_head", persisted)
-        self.assertNotIn("HUMAN_ADAM_CONTEXT_ANCHOR", persisted)
-        self.assertNotIn("Cíl: kontinuita", persisted)
+        self.assertNotIn("DEVELOPMENT_CONTROL", persisted)
+        self.assertNotIn("writable=false", persisted)
 
     def test_empty_unmaterialized_thread_can_be_replaced_without_losing_work(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

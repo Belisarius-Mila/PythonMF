@@ -95,9 +95,7 @@ PRIVATE_WORKSTREAM_THREAD_ROOT = PRIVATE_COMMUNICATION_ROOT / "workstreams"
 DEFAULT_PROFILE_STATE_PATH = PRIVATE_COMMUNICATION_ROOT / "human_adam_active_profile.json"
 DEFAULT_DEVELOPMENT_SEMAPHORE_PATH = PRIVATE_COMMUNICATION_ROOT / "development_semaphore.json"
 DEFAULT_HUMAN_SESSION_PATH = PRIVATE_COMMUNICATION_ROOT / "canonical_session.json"
-DEFAULT_HUMAN_CONTEXT_ANCHOR_PATH = PRIVATE_COMMUNICATION_ROOT / "human_adam_context_anchor.json"
 KNIHOVNA_PROFILE_ROOT = PRIVATE_PROFILE_ROOT / "knihovna"
-KNIHOVNA_CONTEXT_ANCHOR_PATH = PRIVATE_COMMUNICATION_ROOT / "knihovna_context_anchor.json"
 KNIHOVNA_TVBCP_RELATIVE_PATH = Path("memory/tvbcp/knihovna_cockpit.txt")
 HUMAN_ADAM_WORKSTREAM_ID = "layer-human-adam-development"
 KNIHOVNA_WORKSTREAM_ID = "project-knowledge-library"
@@ -411,7 +409,6 @@ class HumanAdamProfileManager:
             runtime=base.runtime,
             workspace=base.workspace,
             state_path=state_root / "session.json",
-            context_anchor_path=state_root / "context_anchor.json",
             work_profile_id=clean_id,
             codex_binary=base.codex_binary,
             profile_getter=base.profile_getter,
@@ -2921,7 +2918,6 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         runtime=runtime,
         state_path=DEFAULT_HUMAN_SESSION_PATH,
         work_profile_id="human_adam",
-        context_anchor_path=DEFAULT_HUMAN_CONTEXT_ANCHOR_PATH,
         developer_instructions=HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
     )
     knihovna_workspace = HumanAdamWorkspaceManager(
@@ -2933,7 +2929,6 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         workspace=knihovna_workspace,
         state_path=PRIVATE_COMMUNICATION_ROOT / "knihovna_session.json",
         work_profile_id="knihovna",
-        context_anchor_path=KNIHOVNA_CONTEXT_ANCHOR_PATH,
         developer_instructions=KNIHOVNA_DEVELOPER_INSTRUCTIONS,
         sandbox_policy=workstream_sandbox_policy(_KNIHOVNA_CAPABILITIES),
         tvbcp_relative_path=KNIHOVNA_TVBCP_RELATIVE_PATH,
