@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from pathlib import PurePosixPath
 from typing import Iterable
 
 
@@ -31,6 +32,47 @@ class CanonicalWorkstreamCapabilities:
     private_archive_read: bool = False
     private_archive_single_edit: bool = False
     private_archive_confirmation_required: tuple[str, ...] = ()
+    private_archive_root: str = ""
+
+    def validate(self) -> None:
+        flags = (
+            self.private_archive_direct,
+            self.private_archive_read,
+            self.private_archive_single_edit,
+        )
+        if any(type(flag) is not bool for flag in flags):
+            raise ValueError("Pracovní proud má neplatné private archive capability.")
+        if not isinstance(self.private_archive_confirmation_required, tuple):
+            raise ValueError("Pracovní proud má neplatné private archive capability.")
+        enabled = any(flags)
+        if not enabled:
+            if self.private_archive_confirmation_required or self.private_archive_root:
+                raise ValueError("Pracovní proud má neplatné private archive capability.")
+            return
+        if not all(flags):
+            raise ValueError("Pracovní proud má neúplné private archive capability.")
+        if (
+            self.private_archive_confirmation_required
+            != PRIVATE_ARCHIVE_CONFIRMATION_CATEGORIES
+        ):
+            raise ValueError("Pracovní proud má neplatné private archive potvrzovací kategorie.")
+        if not isinstance(self.private_archive_root, str):
+            raise ValueError("Pracovní proud má neplatný private archive root.")
+        root = PurePosixPath(self.private_archive_root)
+        if (
+            not self.private_archive_root
+            or root.is_absolute()
+            or ".." in root.parts
+            or root.parts[:2] != ("data", "private")
+            or len(root.parts) < 3
+            or root.as_posix() != self.private_archive_root
+        ):
+            raise ValueError("Pracovní proud má neplatný private archive root.")
+
+    @property
+    def private_archive_enabled(self) -> bool:
+        self.validate()
+        return self.private_archive_direct
 
     def status_fields(self) -> dict[str, object]:
         return {
@@ -119,6 +161,7 @@ def validate_workstream_catalog(
             raise ValueError("Pracovní proud nemá jednoznačné aliasy typu runtime vazby.")
         if not isinstance(record.capabilities, CanonicalWorkstreamCapabilities):
             raise ValueError("Pracovní proud nemá platná capability metadata.")
+        record.capabilities.validate()
         seen_ids.add(record.workstream_id)
         seen_names.add(folded_name)
     return catalog
@@ -206,6 +249,7 @@ WORKSTREAM_CATALOG = validate_workstream_catalog(
                 private_archive_confirmation_required=(
                     PRIVATE_ARCHIVE_CONFIRMATION_CATEGORIES
                 ),
+                private_archive_root="data/private/article_archive",
             ),
         ),
         _record(

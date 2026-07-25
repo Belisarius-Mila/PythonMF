@@ -40,8 +40,9 @@ from app.communication.human_adam_workstream_binding import (
     canonical_workstream_binding,
 )
 from app.communication.human_adam_workstream_catalog import (
-    PRIVATE_ARCHIVE_CONFIRMATION_CATEGORIES,
+    WORKSTREAM_CATALOG,
     CanonicalWorkstream,
+    CanonicalWorkstreamCapabilities,
 )
 from app.communication.human_adam_workstream_memory import WorkstreamMemoryRegistry
 from app.communication.human_adam_workstream_selection import GroupedWorkstreamSelection
@@ -100,18 +101,86 @@ KNIHOVNA_CONTEXT_ANCHOR_PATH = PRIVATE_COMMUNICATION_ROOT / "knihovna_context_an
 KNIHOVNA_TVBCP_RELATIVE_PATH = Path("memory/tvbcp/knihovna_cockpit.txt")
 HUMAN_ADAM_WORKSTREAM_ID = "layer-human-adam-development"
 KNIHOVNA_WORKSTREAM_ID = "project-knowledge-library"
-KNIHOVNA_LIVE_ARCHIVE_ROOT = PROJECT_ROOT / "data" / "private" / "article_archive"
-KNIHOVNA_PRIVATE_CONFIRMATION_CATEGORIES = PRIVATE_ARCHIVE_CONFIRMATION_CATEGORIES
-KNIHOVNA_SANDBOX_POLICY = {
-    **HUMAN_ADAM_SANDBOX_POLICY,
-    "writableRoots": [str(KNIHOVNA_LIVE_ARCHIVE_ROOT)],
-}
 PROFILE_ID_RE = re.compile(r"[a-z][a-z0-9_-]{1,31}")
 LEGACY_PROFILE_STATE_SCHEMA = 1
 WORKSTREAM_STATE_SCHEMA = 2
 ONE_TURN_WRITABLE_LAZY_WORKSTREAM_IDS = frozenset(
     {"project-mmtx", "project-family-calendar"}
 )
+
+
+def _catalog_workstream(workstream_id: str) -> CanonicalWorkstream:
+    clean_id = str(workstream_id or "").strip().casefold()
+    record = next(
+        (item for item in WORKSTREAM_CATALOG if item.workstream_id == clean_id),
+        None,
+    )
+    if record is None:
+        raise ValueError("Pracovní proud nemá kanonickou capability konfiguraci.")
+    record.capabilities.validate()
+    return record
+
+
+def private_archive_root(
+    capabilities: CanonicalWorkstreamCapabilities,
+    *,
+    project_root: Path = PROJECT_ROOT,
+) -> Path | None:
+    capabilities.validate()
+    if not capabilities.private_archive_enabled:
+        return None
+    root = (Path(project_root).resolve() / capabilities.private_archive_root).resolve()
+    private_root = (Path(project_root).resolve() / "data" / "private").resolve()
+    if root == private_root or private_root not in root.parents:
+        raise ValueError("Private archive capability míří mimo povolený private root.")
+    return root
+
+
+def workstream_sandbox_policy(
+    capabilities: CanonicalWorkstreamCapabilities,
+    *,
+    project_root: Path = PROJECT_ROOT,
+) -> dict[str, Any]:
+    root = private_archive_root(capabilities, project_root=project_root)
+    policy = {
+        **HUMAN_ADAM_SANDBOX_POLICY,
+        "networkAccess": False,
+        "writableRoots": [str(root)] if root is not None else [],
+    }
+    return policy
+
+
+def private_archive_developer_instructions(
+    capabilities: CanonicalWorkstreamCapabilities,
+    *,
+    project_root: Path = PROJECT_ROOT,
+) -> str:
+    root = private_archive_root(capabilities, project_root=project_root)
+    if root is None:
+        return ""
+    return (
+        " Tento pracovní proud ma uzkou vyjimku z obecneho zakazu prace mimo "
+        "izolovany workspace: deklarovany zivy archiv je "
+        f"{root}. Tento koren smi byt primo cten pro diagnostiku a na Miluv jasny "
+        "pokyn smi byt pres API app.article_archive upravena jedna konkretni karta. "
+        "Pro bezne cteni a jednu nedestruktivni upravu nazvu, textu, kategorie, tagu "
+        "nebo zdrojovych poznamek nevyzaduj dalsi potvrzeni a nepouzivej tlacitko "
+        "Zahajit vyvoj. Hodnota writable v DEVELOPMENT_CONTROL se tyka kodu, "
+        "izolovaneho workspace a Gitu; vyjimku z ni tvori pouze explicitni "
+        "private_archive_access ve stejnem bloku. Jedna logicka karta muze zahrnovat "
+        "jeji text, metadata a registr. Vice karet nebo mechanicka zmena celeho vyberu "
+        "je hromadna zmena. Mazani nebo odebirani, hromadna zmena, odeslani ven a "
+        "systemovy zasah vyzaduji samostatne Milovo potvrzeni; pouzij existujici "
+        "presnou potvrzovaci branu prislusneho API. Nikdy tyto operace neobchazej "
+        "primym zapisem nebo obecnym shellovym prikazem. Mimo deklarovany koren "
+        "zustava vse mimo workspace bez zapisu, sit zustava zakazana a Git, "
+        "checkpoint, commit, push i nasazeni dale obsluhuje pouze Cockpit. Pri cteni "
+        "nebo uprave nevypisuj do terminalu cely soukromy fulltext; vrat jen redigovany "
+        "technicky vysledek."
+    )
+
+
+_KNIHOVNA_CAPABILITIES = _catalog_workstream(KNIHOVNA_WORKSTREAM_ID).capabilities
 
 KNIHOVNA_DEVELOPER_INSTRUCTIONS = (
     HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS
@@ -127,26 +196,11 @@ KNIHOVNA_DEVELOPER_INSTRUCTIONS = (
         "souboru a oznac ho lokalnim datem, casem a casovou zonou ve formatu "
         "YYYY-MM-DD HH:MM TZ. Soukrome texty clanku, prilohy a metadata konkretnich osob "
         "nikdy automaticky nevypisuj do Gitu, logu, TVBCP ani odpovedi; zobraz jen "
-        "nejmensi rozsah, ktery si Mila vyslovne vyzada. Knihovna ma uzkou vyjimku z "
-        "obecneho zakazu prace mimo izolovany workspace: kanonicky zivy archiv je "
-        f"{KNIHOVNA_LIVE_ARCHIVE_ROOT}. Tento koren smi byt primo cten pro diagnostiku "
-        "a na Miluv jasny pokyn smi byt pres API app.article_archive upravena jedna "
-        "konkretni karta. Pro bezne cteni a jednu nedestruktivni upravu nazvu, textu, "
-        "kategorie, tagu nebo zdrojovych poznamek nevyzaduj dalsi potvrzeni a nepouzivej "
-        "tlacitko Zahajit vyvoj. Hodnota writable v DEVELOPMENT_CONTROL se tyka kodu, "
-        "izolovaneho workspace a Gitu; vyjimku z ni tvori pouze explicitni "
-        "private_archive_access ve stejnem bloku. Jedna logicka karta muze zahrnovat "
-        "jeji text, metadata a registr. Vice karet nebo mechanicka zmena celeho vyberu "
-        "je hromadna zmena. Mazani nebo odebirani, hromadna zmena, odeslani ven a "
-        "systemovy zasah vyzaduji samostatne Milovo potvrzeni; pouzij existujici presnou "
-        "potvrzovaci branu prislusneho API. Nikdy tyto operace neobchazej primym zapisem "
-        "nebo obecnym shellovym prikazem. Mimo tento jediny koren zustava vse mimo "
-        "workspace bez zapisu, sit zustava zakazana a Git, checkpoint, commit, push i "
-        "nasazeni dale obsluhuje pouze Cockpit. Pri cteni nebo uprave nevypisuj do "
-        "terminalu cely soukromy fulltext; vrat jen redigovany technicky vysledek. "
+        "nejmensi rozsah, ktery si Mila vyslovne vyzada. "
         "V bezne odpovedi uvadej jen samotny nazev souboru, pripadne nejkratsi nutnou "
         "relativni cestu pri shodnych nazvech."
     )
+    + private_archive_developer_instructions(_KNIHOVNA_CAPABILITIES)
 )
 
 
@@ -346,9 +400,13 @@ class HumanAdamProfileManager:
         if self.workstream_threads is None or self.workstream_memory is None:
             raise AppServerError("Lazy pracovní proud nemá úplný servisní backend.")
         binding = self.workstream_memory.binding(clean_id)
+        record = self.workstream_backends.binding(clean_id).record
         hub = self.workstream_threads.active_hub(expected_workstream_id=clean_id)
         base = self.profiles[self.default_profile_id]["service"]
         state_root = self.workstream_threads.state_root / clean_id
+        capability_instructions = private_archive_developer_instructions(
+            record.capabilities
+        )
         service = HumanAdamService(
             runtime=base.runtime,
             workspace=base.workspace,
@@ -358,7 +416,8 @@ class HumanAdamProfileManager:
             codex_binary=base.codex_binary,
             profile_getter=base.profile_getter,
             hub=hub,
-            developer_instructions=base.developer_instructions,
+            developer_instructions=base.developer_instructions + capability_instructions,
+            sandbox_policy=workstream_sandbox_policy(record.capabilities),
             tvbcp_relative_path=Path(binding.tvbcp_relative_path),
             tvbcp_title=f"{binding.name} – TVBCP",
         )
@@ -1041,14 +1100,20 @@ class HumanAdamProfileManager:
                 f"writable={'true' if writable else 'false'}",
                 f"integration_deferred={'true' if integration_deferred else 'false'}",
             ]
-            if self.active_workstream_id == KNIHOVNA_WORKSTREAM_ID:
+            capability_metadata = self.workstream_backends.binding(
+                self.active_workstream_id
+            ).record.capabilities
+            archive_root = private_archive_root(capability_metadata)
+            if archive_root is not None:
                 control_lines.extend(
                     (
                         f"workspace_writable={'true' if writable else 'false'}",
                         "private_archive_access=read_diagnose_and_explicit_single_edit",
-                        f"private_archive_root={KNIHOVNA_LIVE_ARCHIVE_ROOT}",
+                        f"private_archive_root={archive_root}",
                         "private_archive_confirmation_required="
-                        + ",".join(KNIHOVNA_PRIVATE_CONFIRMATION_CATEGORIES),
+                        + ",".join(
+                            capability_metadata.private_archive_confirmation_required
+                        ),
                         "rule=When workspace_writable=false, do not change workspace files "
                         "or Git. The only write exception is one explicitly requested, "
                         "non-destructive card edit under private_archive_root through "
@@ -2880,7 +2945,7 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         work_profile_id="knihovna",
         context_anchor_path=KNIHOVNA_CONTEXT_ANCHOR_PATH,
         developer_instructions=KNIHOVNA_DEVELOPER_INSTRUCTIONS,
-        sandbox_policy=KNIHOVNA_SANDBOX_POLICY,
+        sandbox_policy=workstream_sandbox_policy(_KNIHOVNA_CAPABILITIES),
         tvbcp_relative_path=KNIHOVNA_TVBCP_RELATIVE_PATH,
         tvbcp_title="Knihovna v Cockpitu",
     )
@@ -2894,6 +2959,9 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         project_prefix = Path(human_service.workspace.project_dir_name)
         handoff_path = (project_prefix / memory_binding.handoff_relative_path).as_posix()
         tvbcp_path = (project_prefix / memory_binding.tvbcp_relative_path).as_posix()
+        capability_instructions = private_archive_developer_instructions(
+            record.capabilities
+        )
         return human_service.detached_session_hub(
             state_path=state_path,
             workspace=human_service.workspace.workspace_root,
@@ -2911,7 +2979,9 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
                 + tvbcp_path
                 + ". Tyto dokumenty primo nemen bez Milova vyslovneho pokynu; bezny "
                 + "potvrzeny checkpoint je aktualizuje transakcne."
+                + capability_instructions
             ),
+            sandbox_policy=workstream_sandbox_policy(record.capabilities),
         )
 
     workstream_threads = WorkstreamThreadRegistry(

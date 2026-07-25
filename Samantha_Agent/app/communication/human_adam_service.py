@@ -341,6 +341,7 @@ class HumanAdamService:
         state_path: Path,
         developer_instructions: str,
         workspace: Path | None = None,
+        sandbox_policy: dict[str, Any] | None = None,
     ) -> CanonicalSessionHub:
         """Build an inert hub that shares this service's runtime and workspace.
 
@@ -354,7 +355,11 @@ class HumanAdamService:
             client_factory=self._new_client,
             developer_instructions=str(developer_instructions).strip(),
             sandbox=HUMAN_ADAM_SANDBOX_MODE,
-            sandbox_policy=self.sandbox_policy,
+            sandbox_policy=(
+                self.sandbox_policy
+                if sandbox_policy is None
+                else copy.deepcopy(sandbox_policy)
+            ),
             approval_policy=HUMAN_ADAM_APPROVAL_POLICY,
             reasoning_effort=HUMAN_ADAM_REASONING_EFFORT,
         )

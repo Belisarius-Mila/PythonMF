@@ -130,6 +130,7 @@ class WorkstreamCatalogTests(unittest.TestCase):
                 private_archive_confirmation_required=(
                     PRIVATE_ARCHIVE_CONFIRMATION_CATEGORIES
                 ),
+                private_archive_root="data/private/article_archive",
             ),
         )
         self.assertTrue(other_records)
@@ -150,6 +151,7 @@ class WorkstreamCatalogTests(unittest.TestCase):
             private_archive_confirmation_required=(
                 PRIVATE_ARCHIVE_CONFIRMATION_CATEGORIES
             ),
+            private_archive_root="data/private/example_archive",
         )
         record = CanonicalWorkstream(
             "project-capable-example",
@@ -162,7 +164,29 @@ class WorkstreamCatalogTests(unittest.TestCase):
         )
 
         self.assertEqual(validate_workstream_catalog((record,)), (record,))
-        self.assertEqual(record.capabilities.status_fields()["private_archive_direct"], True)
+        self.assertTrue(record.capabilities.status_fields()["private_archive_direct"])
+
+    def test_invalid_private_archive_capability_fails_closed(self) -> None:
+        invalid = CanonicalWorkstream(
+            "project-invalid-private-archive",
+            "Project",
+            "Neplatný private archiv",
+            "active",
+            "2",
+            ("Zdroj neplatného archivu",),
+            capabilities=CanonicalWorkstreamCapabilities(
+                private_archive_direct=True,
+                private_archive_read=True,
+                private_archive_single_edit=True,
+                private_archive_confirmation_required=(
+                    PRIVATE_ARCHIVE_CONFIRMATION_CATEGORIES
+                ),
+                private_archive_root="../private/article_archive",
+            ),
+        )
+
+        with self.assertRaisesRegex(ValueError, "private archive root"):
+            validate_workstream_catalog((invalid,))
 
     def test_paused_vocabulary_projects_come_from_confirmed_capability_map(self) -> None:
         capability_map = (PROJECT_ROOT / "memory/technical/project_capability_map.md").read_text(

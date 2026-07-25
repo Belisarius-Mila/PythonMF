@@ -11,20 +11,20 @@ from unittest.mock import patch
 from app.communication.human_adam_profiles import (
     HumanAdamProfileManager,
     KNIHOVNA_DEVELOPER_INSTRUCTIONS,
-    KNIHOVNA_LIVE_ARCHIVE_ROOT,
-    KNIHOVNA_PRIVATE_CONFIRMATION_CATEGORIES,
-    KNIHOVNA_SANDBOX_POLICY,
     human_adam_deferred_integration_action,
     human_adam_development_semaphore_action,
     human_adam_development_semaphore_status_action,
     human_adam_profile_switch_action,
     human_adam_project_continuity_action,
+    private_archive_root,
+    workstream_sandbox_policy,
 )
 from app.communication.deferred_integration import (
     DEFERRED_INTEGRATION_CONFIRMATION,
     DeferredIntegrationError,
 )
 from app.communication.human_adam_turn_completion import TurnCompletionMetadata
+from app.communication.human_adam_workstream_catalog import WORKSTREAM_CATALOG
 from app.communication.human_adam_operations import (
     FAMILY_CALENDAR_TEST_EMAIL_PREVIEW,
     OPERATION_MARKER_END,
@@ -349,6 +349,14 @@ def fake_profile(**_kwargs: object) -> dict[str, object]:
     return {"model": "test-codex", "reasoning_effort": "high"}
 
 
+def workstream_capabilities(workstream_id: str):
+    return next(
+        record.capabilities
+        for record in WORKSTREAM_CATALOG
+        if record.workstream_id == workstream_id
+    )
+
+
 class HumanAdamProfileManagerTests(unittest.TestCase):
     def make_manager(
         self,
@@ -363,6 +371,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         library_workspace = FakeWorkspace(root / "library", prepared=target_prepared)
         human_hub = FakeHub("human-thread")
         library_hub = FakeHub("library-thread")
+        library_capabilities = workstream_capabilities("project-knowledge-library")
         human = HumanAdamService(
             runtime=runtime,  # type: ignore[arg-type]
             workspace=human_workspace,  # type: ignore[arg-type]
@@ -381,7 +390,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             hub=library_hub,  # type: ignore[arg-type]
             profile_getter=fake_profile,
             developer_instructions=KNIHOVNA_DEVELOPER_INSTRUCTIONS,
-            sandbox_policy=KNIHOVNA_SANDBOX_POLICY,
+            sandbox_policy=workstream_sandbox_policy(library_capabilities),
             tvbcp_relative_path=Path("memory/tvbcp/knihovna_cockpit.txt"),
             tvbcp_title="Knihovna v Cockpitu",
         )
@@ -2194,6 +2203,10 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             )
             model_input = str(library_hub.last_send["model_input_text"])
             capabilities = manager.status()["workstream_capabilities"]
+            expected_capabilities = workstream_capabilities(
+                "project-knowledge-library"
+            )
+            expected_root = private_archive_root(expected_capabilities)
 
         self.assertIn("writable=false", model_input)
         self.assertIn("workspace_writable=false", model_input)
@@ -2202,12 +2215,14 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             model_input,
         )
         self.assertIn(
-            f"private_archive_root={KNIHOVNA_LIVE_ARCHIVE_ROOT}",
+            f"private_archive_root={expected_root}",
             model_input,
         )
         self.assertIn(
             "private_archive_confirmation_required="
-            + ",".join(KNIHOVNA_PRIVATE_CONFIRMATION_CATEGORIES),
+            + ",".join(
+                expected_capabilities.private_archive_confirmation_required
+            ),
             model_input,
         )
         self.assertNotIn("[AUTOMATIC_STEP_COMPLETION]", model_input)
@@ -2217,24 +2232,38 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(capabilities["private_archive_single_edit"])
         self.assertEqual(
             capabilities["private_archive_confirmation_required"],
-            list(KNIHOVNA_PRIVATE_CONFIRMATION_CATEGORIES),
+            list(expected_capabilities.private_archive_confirmation_required),
         )
 
     def test_private_archive_direct_access_is_not_advertised_outside_knihovna(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            manager, *_rest = self.make_manager(Path(temp_dir))
+            manager, _human_workspace, _library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
             capabilities = manager.status()["workstream_capabilities"]
+            manager.connect()
+            manager.send(text="Jen analyzuj.", client_message_id="human-read-only")
+            model_input = str(human_hub.last_send["model_input_text"])
+            sandbox_policy = manager.active_service.sandbox_policy
 
         self.assertFalse(capabilities["private_archive_direct"])
         self.assertFalse(capabilities["private_archive_read"])
         self.assertFalse(capabilities["private_archive_single_edit"])
         self.assertEqual(capabilities["private_archive_confirmation_required"], [])
+        self.assertNotIn("private_archive_access=", model_input)
+        self.assertNotIn("private_archive_root=", model_input)
+        self.assertEqual(sandbox_policy["writableRoots"], [])
+        self.assertFalse(sandbox_policy["networkAccess"])
 
     def test_knihovna_policy_keeps_network_closed_and_one_writable_root(self) -> None:
-        self.assertFalse(KNIHOVNA_SANDBOX_POLICY["networkAccess"])
+        capabilities = workstream_capabilities("project-knowledge-library")
+        sandbox_policy = workstream_sandbox_policy(capabilities)
+        archive_root = private_archive_root(capabilities)
+
+        self.assertFalse(sandbox_policy["networkAccess"])
         self.assertEqual(
-            KNIHOVNA_SANDBOX_POLICY["writableRoots"],
-            [str(KNIHOVNA_LIVE_ARCHIVE_ROOT)],
+            sandbox_policy["writableRoots"],
+            [str(archive_root)],
         )
         self.assertIn("pres API app.article_archive", KNIHOVNA_DEVELOPER_INSTRUCTIONS)
         self.assertIn("Mazani nebo odebirani", KNIHOVNA_DEVELOPER_INSTRUCTIONS)

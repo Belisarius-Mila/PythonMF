@@ -291,6 +291,27 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertEqual(detached.sandbox_policy["writableRoots"], [str(live_archive)])
         self.assertFalse(detached.sandbox_policy["networkAccess"])
 
+    def test_detached_hub_accepts_a_capability_derived_sandbox_override(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            live_archive = root / "private-archive"
+            service, _runtime, _workspace, _hub = self.make_service(root)
+            requested_policy: dict[str, object] = {
+                "type": "workspaceWrite",
+                "networkAccess": False,
+                "writableRoots": [str(live_archive)],
+            }
+            detached = service.detached_session_hub(
+                state_path=root / "detached.json",
+                developer_instructions="Capability instructions",
+                sandbox_policy=requested_policy,
+            )
+            requested_policy["writableRoots"] = []
+
+        self.assertEqual(detached.sandbox_policy["writableRoots"], [str(live_archive)])
+        self.assertEqual(service.sandbox_policy["writableRoots"], [])
+        self.assertFalse(detached.sandbox_policy["networkAccess"])
+
     def test_status_has_no_process_start_side_effect(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             service, runtime, _workspace, _hub = self.make_service(Path(temp_dir))

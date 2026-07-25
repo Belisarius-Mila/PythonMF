@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-25 15:07 CEST
-- Poslední dokončený vývojový výsledek: Schopnosti soukromého archivu se nyní načítají z deklarace kanonického pracovního proudu a výsledné chování zůstává stejné
-- Stav při vytvoření checkpointu: změna je otestovaná (1229 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
-- Git před checkpointem: `main == origin/main` na `cc5d7456ff38`.
-- Poslední serverově potvrzené nasazení: `cc5d7456ff38` · odpovídá ověřenému main před tímto checkpointem · 1227 testů · smoke 5/5 · 2026-07-25T12:51:58+00:00.
-- Rozhodnutí: Schopnosti pracovních proudů se přiřazují deklarativně v kanonickém katalogu, nikoli podmínkou na konkrétní ID
-- Bezprostřední další krok: Provést běžný checkpoint a ověřit stejný capability výstup v Cockpitu
-- Navrhované další kroky: V další samostatné fázi lze stejným způsobem převést další rozdíly mezi pracovními proudy
+- Obnoveno potvrzeným checkpointem: 2026-07-25 17:49 CEST
+- Poslední dokončený vývojový výsledek: Přístup k soukromému archivu nyní bezpečně řídí výhradně deklarativní metadata aktivního pracovního proudu
+- Stav při vytvoření checkpointu: změna je otestovaná (1231 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
+- Git před checkpointem: `main == origin/main` na `d83aee6fb7a3`.
+- Poslední serverově potvrzené nasazení: `cc5d7456ff38` · je starší než ověřený main před tímto checkpointem · 1227 testů · smoke 5/5 · 2026-07-25T12:51:58+00:00.
+- Rozhodnutí: Private-archive oprávnění, instrukce a sandboxový root vycházejí pouze z validovaných capability metadat; chybějící nebo neplatná konfigurace selže uzavřeně
+- Bezprostřední další krok: Provést běžný checkpoint a po nasazení ověřit Knihovnu i proud bez private-archive capability
+- Navrhované další kroky: Stejným deklarativním způsobem lze v dalších samostatných fázích převést další rozdíly mezi pracovními proudy
 - Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -1787,3 +1787,13 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (3): `Samantha_Agent/app/communication/human_adam_profiles.py`, `Samantha_Agent/app/communication/human_adam_workstream_catalog.py`, `Samantha_Agent/tests/test_human_adam_workstream_catalog.py`
 - Commit: `Declare workstream private archive capabilities`
 - Další krok: Provést běžný checkpoint a ověřit stejný capability výstup v Cockpitu
+
+### Automatický checkpoint 2026-07-25 17:49 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Souhrn: Přístup k soukromému archivu nyní bezpečně řídí výhradně deklarativní metadata aktivního pracovního proudu
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější push ani nasazení.
+- Ověření: plná Cockpit brána: 1231 testů, 241.0 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (6): `Samantha_Agent/app/communication/human_adam_profiles.py`, `Samantha_Agent/app/communication/human_adam_service.py`, `Samantha_Agent/app/communication/human_adam_workstream_catalog.py`, `Samantha_Agent/tests/test_human_adam_profiles.py`, `Samantha_Agent/tests/test_human_adam_service.py`, `Samantha_Agent/tests/test_human_adam_workstream_catalog.py`
+- Commit: `Drive private archive access from workstream capabilities`
+- Další krok: Provést běžný checkpoint a po nasazení ověřit Knihovnu i proud bez private-archive capability
