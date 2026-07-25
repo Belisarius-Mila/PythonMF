@@ -146,8 +146,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   private ownership marker svazany s pracovnim proudem, base commitem a
   otiskem path-level zmen. Posun `main`, cizi WIP, divergence nebo neshoda
   markeru zustavaji servisnim rozhodnutim bez automatickeho merge/rebase.
-  Cilenych 446 a uplnych 1216 testu proslo; zbyva checkpoint/push, nasazeni a
-  skutecny zivy soubezny test. Dne 2026-07-25 prednasazovaci audit zachytil
+  Cilenych 446 a uplnych 1216 testu proslo. Dne 2026-07-25 prednasazovaci audit zachytil
   starsi ctyrsouborovy WIP rotace bez kotvy bez ownership markeru. Mila
   vyslovne potvrdil servisni zacleneni; patch byl radkove shodny, cilene testy
   92/92 a plna brana 1216/1216 prosly. Kontrola rotace je vazana na identitu
@@ -158,7 +157,11 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   apply znovu overi oba commity, pouzije pouze fast-forward a synchronizuje
   ciste profily. WIP, aktivni nebo nejisty tah, dirty stav, lokalni naskok,
   divergence a zmena GitHubu ji blokuji. Cilenych 426 a uplnych 1227 testu
-  proslo; zbyva commit/push a nasazeni.
+  proslo. Zivy soubezny test pote uspesne prosel od terminaloveho WIP pres
+  validni ownership marker a potvrzenou integraci az po commit, push a
+  nasazeni `cba953e`; oba profilove workspaces zustaly ciste. Napoveda
+  `Prace -> ?` nyni popisuje i odlozeny tah a rucni dorovnani po sovim commitu;
+  64 UI testu proslo. Zbyva commit/push a potvrzene nasazeni teto napovedy.
 
 - `handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md` - [PRIPOMENOUT]
   priorita 1: obsah napovedy `Prace -> ?` byl rucne potvrzeny, ale maly vnitrni

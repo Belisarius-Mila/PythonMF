@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-25 13:33 CEST
-- Poslední dokončený vývojový výsledek: Read-only stavy synchronizace main mají jednotný příznak úplnosti změn
-- Stav při vytvoření checkpointu: změna je otestovaná (1227 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
-- Git před checkpointem: `main == origin/main` na `4bf3221d78e5`.
-- Poslední serverově potvrzené nasazení: `4bf3221d78e5` · odpovídá ověřenému main před tímto checkpointem · 1227 testů · smoke 5/5 · 2026-07-25T08:43:28+00:00.
-- Rozhodnutí: Stavy aligned, local_ahead a diverged vždy vracejí changes_truncated=false
-- Bezprostřední další krok: Po vyčištění zdrojového main provést audit konfliktů a potvrzené začlenění
-- Navrhované další kroky: žádné další návrhy nad rámec bezprostředního kroku
+- Obnoveno potvrzeným checkpointem: 2026-07-25 13:50 CEST
+- Poslední dokončený vývojový výsledek: Nápověda `Práce -> ?` přesně popisuje běžný checkpoint, odloženou integraci a ruční dorovnání po sovím commitu
+- Stav při vytvoření checkpointu: změna je otestovaná (64 UI testů); tento snapshot je součástí plánované commit/push operace a sám nepotvrzuje její pozdější nasazení.
+- Git před checkpointem: `main == origin/main` na `cba953ec36ec`.
+- Poslední serverově potvrzené nasazení: `cba953ec36ec` · 1227 testů · smoke 5/5 · 2026-07-25T11:43:32+00:00.
+- Rozhodnutí: Dorovnání po vzdáleném sovím commitu zůstává ruční čistý fast-forward; posunutý základ čekajícího WIP zůstává servisním rozhodnutím
+- Bezprostřední další krok: Commitnout a pushnout aktualizovanou nápovědu a samostatně potvrzeně nasadit čistý main
+- Navrhované další kroky: Po nasazení jednou ručně otevřít `Práce -> ?`; potom lze pokračovat Rodinným kalendářem
 - Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -1692,3 +1692,48 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/communication/main_remote_sync.py`, `Samantha_Agent/tests/test_main_remote_sync.py`
 - Commit: `Unify main remote sync audit schema`
 - Další krok: Po vyčištění zdrojového main provést audit konfliktů a potvrzené začlenění
+
+### 2026-07-25 13:50 CEST – Aktuální nápověda odložené integrace a sovího dorovnání
+
+Nazev: Human–Adam – aktualizace nápovědy Práce
+Priorita: 1
+Stav: ceka na nasazeni
+Pripomenout pri startu: ano
+Datum: 2026-07-25
+
+Co se resilo:
+Živý souběžný test odložené integrace byl úspěšně dokončen od terminálového WIP
+přes ověřený private marker až po commit, push a nasazení. Nápověda pod
+`Práce -> ?` ještě tento nový provozní postup nepopisovala přesně.
+
+Co je hotove:
+- Běžný automatický checkpoint je výslovně omezen na čistý zarovnaný `main`.
+- Odložený tah bez commitu a pushnutí má popsaný read-only audit a samostatně
+  potvrzované převzetí přesného WIP.
+- Denní soví commit je uveden jako příklad bezpečného ručního fast-forwardu;
+  dorovnání se nespouští automaticky.
+- Posun `main`, cizí WIP, divergence a neshoda markeru nadále vyžadují servisní
+  rozhodnutí.
+- Cílených 64 UI testů prošlo a `git diff --check` je čistý.
+
+Co neni hotove:
+- Tento checkpoint ještě není commitnutý ani pushnutý.
+- Aktualizovaná nápověda ještě není nasazená ani ručně vizuálně ověřená.
+
+Dalsi krok:
+Commitnout a pushnout tematický checkpoint a potom samostatně potvrzeně nasadit
+čistý `main`.
+
+Navrhovane dalsi kroky:
+- Po nasazení jednou otevřít `Práce -> ?` a ověřit čitelnost nových bodů.
+- Potom lze pokračovat projektem Rodinný kalendář.
+
+Zmenene nebo relevantni soubory:
+- `human_adam_ui.py`
+- `test_human_adam_ui.py`
+- tento handoff, kanonický TVBCP, `ACTIVE_PROJECTS.md` a `MEMORY_INDEX.md`
+
+Bezpecnost / neukladat:
+- Nápověda ani checkpoint neobsahují chat, tajemství, private obsah nebo
+  identifikátory vláken.
+- Automatický merge, rebase, reset ani dorovnání při WIP se nepřidává.

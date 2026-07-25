@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-25 13:33 CEST
-- Poslední dokončený vývojový výsledek: Read-only stavy synchronizace main mají jednotný příznak úplnosti změn
-- Stav při vytvoření checkpointu: změna je otestovaná (1227 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
-- Git před checkpointem: `main == origin/main` na `4bf3221d78e5`.
-- Poslední serverově potvrzené nasazení: `4bf3221d78e5` · odpovídá ověřenému main před tímto checkpointem · 1227 testů · smoke 5/5 · 2026-07-25T08:43:28+00:00.
-- Rozhodnutí: Stavy aligned, local_ahead a diverged vždy vracejí changes_truncated=false
-- Bezprostřední další krok: Po vyčištění zdrojového main provést audit konfliktů a potvrzené začlenění
-- Navrhované další kroky: žádné další návrhy nad rámec bezprostředního kroku
+- Obnoveno potvrzeným checkpointem: 2026-07-25 13:50 CEST
+- Poslední dokončený vývojový výsledek: Nápověda `Práce -> ?` přesně popisuje běžný checkpoint, odloženou integraci a ruční dorovnání po sovím commitu
+- Stav při vytvoření checkpointu: změna je otestovaná (64 UI testů); tento snapshot je součástí plánované commit/push operace a sám nepotvrzuje její pozdější nasazení.
+- Git před checkpointem: `main == origin/main` na `cba953ec36ec`.
+- Poslední serverově potvrzené nasazení: `cba953ec36ec` · 1227 testů · smoke 5/5 · 2026-07-25T11:43:32+00:00.
+- Rozhodnutí: Dorovnání po vzdáleném sovím commitu zůstává ruční čistý fast-forward; posunutý základ čekajícího WIP zůstává servisním rozhodnutím
+- Bezprostřední další krok: Commitnout a pushnout aktualizovanou nápovědu a samostatně potvrzeně nasadit čistý main
+- Navrhované další kroky: Po nasazení jednou ručně otevřít `Práce -> ?`; potom lze pokračovat Rodinným kalendářem
 - Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -2649,3 +2649,31 @@ Navrhované další kroky:
 Technický důkaz:
 - plná Cockpit brána: 1227 testů, 224.1 s, výsledek OK.
 - Pracovní proud: `layer-human-adam-development`.
+
+### 2026-07-25 13:50 CEST – Nápověda uzavírá živě ověřený integrační postup
+
+Hotovo:
+- Živý test prošel od terminálového WIP přes validní ownership marker,
+  samostatně potvrzenou integraci, commit a push až po ověřené nasazení.
+- Nápověda `Práce -> ?` nyní rozlišuje běžný automatický checkpoint od
+  bezpečně odloženého tahu.
+- Nápověda popisuje potvrzené převzetí přesného WIP i ruční fast-forward po
+  vzdáleném commitu, například po denním sovím workflow.
+
+Rozhodnutí:
+- Soví souběh se řeší obecným ručním dorovnáním čistého `main`, nikoli
+  speciálním automatickým kódem.
+- Posun základu čekajícího WIP, cizí WIP, divergence nebo neshoda markeru
+  zůstávají fail-closed servisním rozhodnutím.
+
+Další krok:
+- Commitnout a pushnout checkpoint a samostatně potvrzeně nasadit čistý
+  `main`.
+
+Navrhované další kroky:
+- Po nasazení jednou vizuálně otevřít nápovědu.
+- Potom pokračovat projektem Rodinný kalendář.
+
+Technický důkaz:
+- Cílená sada `tests.test_human_adam_ui` prošla 64/64.
+- `git diff --check` je čistý.

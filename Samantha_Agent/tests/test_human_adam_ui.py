@@ -333,7 +333,8 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertNotIn('method:"POST"', source)
         self.assertNotIn("fetch(", source)
         self.assertIn(
-            "Při posunu <code>main</code> vždy vyžádej servisní rozhodnutí",
+            "Při posunu <code>main</code>, cizím WIP, divergenci nebo neshodě markeru "
+            "nic nezačleňuj a vyžádej servisní rozhodnutí",
             HUMAN_ADAM_HTML,
         )
 
@@ -543,7 +544,15 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Zahájit vývoj", panel_source)
         self.assertIn("Platí pouze pro následující odeslaný pokyn", panel_source)
         self.assertIn("Nový projekt, tool nebo layer se zakládá pouze v terminálovém dialogu s Adamem", panel_source)
+        self.assertIn("Při běžném čistém a zarovnaném <code>main</code>", panel_source)
         self.assertIn("jeden commit přímo v <code>main</code>", panel_source)
+        self.assertIn("tah zůstane bezpečně odložený bez commitu a pushnutí", panel_source)
+        self.assertIn("read-only audit čekající integrace", panel_source)
+        self.assertIn("denní soví workflow vytvořilo nový commit", panel_source)
+        self.assertIn("dorovnání se nespouští automaticky", panel_source)
+        self.assertIn("Převzít přesný WIP do main", panel_source)
+        self.assertIn("private ownership marker odpovídá přesnému WIP", panel_source)
+        self.assertIn("cizím WIP, divergenci nebo neshodě markeru", panel_source)
         self.assertIn("Nasazení", panel_source)
         self.assertIn("Nasazovací tlačítka se zobrazí jen u pracovního proudu", panel_source)
         self.assertIn("Audit nasazení", panel_source)

@@ -297,7 +297,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
           <li>Před změnou kódu nebo projektových souborů klikni na <strong>Zahájit vývoj</strong> a potvrď jednorázové oprávnění. Platí pouze pro následující odeslaný pokyn; bez něj Adam zůstává pro workspace a Git read-only.</li>
           <li><strong>Knihovna:</strong> čtení, diagnostiku a jednu jasně zadanou běžnou úpravu soukromé karty pošli přímo bez tlačítka Zahájit vývoj. Samostatné potvrzení zůstává pro mazání, hromadné změny, odesílání ven a systémové zásahy.</li>
           <li>Vývojový úkol napiš přímo Adamovi do textového pole. Nový projekt, tool nebo layer se zakládá pouze v terminálovém dialogu s Adamem.</li>
-          <li>Po úspěšné změně Adam automaticky spustí testy, aktualizuje handoff a TVBCP, vytvoří jeden commit přímo v <code>main</code>, pushne jej a synchronizuje čisté profily.</li>
+          <li>Při běžném čistém a zarovnaném <code>main</code> Adam po úspěšné změně automaticky spustí testy, aktualizuje handoff a TVBCP, vytvoří jeden commit přímo v <code>main</code>, pushne jej a synchronizuje čisté profily.</li>
+          <li>Pokud začlenění blokuje rozpracovaná terminálová práce, tah zůstane bezpečně odložený bez commitu a pushnutí. Okno <strong>Práce</strong> potom ukáže read-only audit čekající integrace a nabídne samostatně potvrzované převzetí pouze při čistém nezměněném <code>main</code> a ověřeném původu přesného WIP.</li>
           <li>Okno <strong>Práce</strong> otevři pro kontrolu čistého stavu, diagnostiku rozpracovaných změn nebo podporované nasazení.</li>
         </ol>
 
@@ -313,8 +314,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <h4>Když něco nejde</h4>
         <ul>
           <li><strong>Workspace je za <code>main</code>:</strong> při čistém profilu klikni na Připojit.</li>
-          <li><strong>GitHub je před lokálním <code>main</code>:</strong> audit nabídne tlačítko Dorovnat main s GitHubem pouze při čistém jednoznačném fast-forwardu. Nejdřív zkontroluj commit a seznam souborů.</li>
-          <li><strong>Čekající integrace:</strong> přečti read-only audit. Při posunu <code>main</code> vždy vyžádej servisní rozhodnutí, i když audit nenajde překryv cest.</li>
+          <li><strong>GitHub je před lokálním <code>main</code>:</strong> například denní soví workflow vytvořilo nový commit. Audit nabídne tlačítko <strong>Dorovnat main s GitHubem</strong> pouze při čistém jednoznačném fast-forwardu. Nejdřív zkontroluj cílový commit a seznam souborů; dorovnání se nespouští automaticky.</li>
+          <li><strong>Čekající integrace:</strong> přečti read-only audit. Pokud je <code>main</code> čistý, nezměněný a private ownership marker odpovídá přesnému WIP, vlož nabídnutou potvrzovací větu a klikni na <strong>Převzít přesný WIP do main</strong>. Při posunu <code>main</code>, cizím WIP, divergenci nebo neshodě markeru nic nezačleňuj a vyžádej servisní rozhodnutí.</li>
           <li><strong>Audit nebo nasazení selže:</strong> nic neopakuj naslepo; obnov stav a předej Adamovi přesnou chybu.</li>
           <li><strong>Repo není čisté:</strong> nenasazuj a nech Adama zjistit, co zůstalo rozpracované.</li>
         </ul>
