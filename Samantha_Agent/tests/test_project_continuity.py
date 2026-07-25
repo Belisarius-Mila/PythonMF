@@ -55,7 +55,6 @@ class ProjectContinuityTests(unittest.TestCase):
         *,
         binding: dict[str, str] | None = None,
         review: dict[str, object] | None = None,
-        anchor: dict[str, object] | None = None,
         workspace_root: Path | None = None,
         deployment_summary: dict[str, object] | None = None,
         expected_workstream_id: str = "",
@@ -64,7 +63,6 @@ class ProjectContinuityTests(unittest.TestCase):
             binding=binding or self.binding(service),
             workspace_root=workspace_root or service.project_root,
             workspace_review=review or {"changes": [], "checkpoint_changes": []},
-            context_anchor=anchor or {},
             deployment_summary=deployment_summary,
             expected_workstream_id=expected_workstream_id,
         )
@@ -111,17 +109,6 @@ class ProjectContinuityTests(unittest.TestCase):
 
         self.assertEqual(result["state"], "needs_update")
         self.assertIn("handoff mezi nimi není", " ".join(result["reasons"]))
-
-    def test_newer_anchor_needs_update(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            service = self.make_project(Path(temp_dir))
-            result = self.audit(
-                service,
-                anchor={"revision": 3, "updated_at": "2099-01-01T12:00:00+00:00"},
-            )
-
-        self.assertEqual(result["state"], "needs_update")
-        self.assertIn("kotva", " ".join(result["reasons"]))
 
     def test_validated_deployment_for_expected_workstream_needs_update(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -207,7 +194,6 @@ class ProjectContinuityTests(unittest.TestCase):
                         {"status": "A", "path": "Samantha_Agent/tests/test_example.py"},
                     ],
                 },
-                context_anchor={"revision": 4, "active": True},
             )
             after = handoff.read_text(encoding="utf-8")
 
@@ -218,7 +204,7 @@ class ProjectContinuityTests(unittest.TestCase):
         self.assertFalse(result["writes_performed"])
         self.assertEqual(before, after)
         self.assertIn("ZATÍM NEULOŽENO", result["draft"])
-        self.assertIn("revize 4, připnutá", result["draft"])
+        self.assertNotIn("Kontextová kotva", result["draft"])
         self.assertIn("Samantha_Agent/app/example.py", result["draft"])
         self.assertNotIn("Handoff\n", result["draft"])
 
@@ -230,7 +216,6 @@ class ProjectContinuityTests(unittest.TestCase):
                 binding=binding,
                 topic="Čekající návrh",
                 workspace_review={"local_checkpoint_ahead": False},
-                context_anchor={},
             )
             unsafe = service.handoff_proposal(
                 binding=binding,
@@ -244,7 +229,6 @@ class ProjectContinuityTests(unittest.TestCase):
                         {"status": "A", "path": "Samantha_Agent/data/private/secret.txt"}
                     ],
                 },
-                context_anchor={},
             )
 
         self.assertEqual(waiting["state"], "waiting_checkpoint")

@@ -407,7 +407,7 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertIn("musí ověřit správce pracovních proudů", result["message"])
         self.assertEqual(hub.sent, [])
 
-    def test_explicit_context_anchor_survives_restart_and_is_sent_only_to_model(self) -> None:
+    def test_legacy_context_anchor_survives_restart_but_is_not_sent_or_reported(self) -> None:
         anchor_text = "Cíl: Zachovat kontinuitu\nPlán:\n1. Ověřit kompresi\nDalší krok: Ruční test"
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -434,7 +434,7 @@ class HumanAdamServiceTests(unittest.TestCase):
             )
             restarted, _runtime2, _workspace2, restarted_hub = self.make_service(root)
             restored = restarted.context_anchor()
-            status_anchor = restarted.status()["context_anchor"]
+            status_payload = restarted.status()
             restarted.connect()
             human_adam_send_action(
                 {
@@ -451,15 +451,14 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertTrue(pinned["active"])
         self.assertEqual(restored["content"], anchor_text)
         self.assertTrue(restored["active"])
-        self.assertNotIn("content", status_anchor)
-        self.assertIn("[HUMAN_ADAM_CONTEXT_ANCHOR]", hub.sent[0]["model_input_text"])
-        self.assertIn(anchor_text, hub.sent[0]["model_input_text"])
-        self.assertIn("current explicit user message below overrides this anchor", hub.sent[0]["model_input_text"])
+        self.assertNotIn("context_anchor", status_payload)
+        self.assertNotIn("[HUMAN_ADAM_CONTEXT_ANCHOR]", hub.sent[0]["model_input_text"])
+        self.assertNotIn(anchor_text, hub.sent[0]["model_input_text"])
         self.assertTrue(hub.sent[0]["model_input_text"].endswith("\n\nPůvodní text Míly"))
         self.assertEqual(hub.sent[0]["text"], "Původní text Míly")
-        self.assertIn(anchor_text, restarted_hub.sent[0]["model_input_text"])
+        self.assertNotIn(anchor_text, restarted_hub.sent[0]["model_input_text"])
         self.assertTrue(restarted_hub.sent[0]["model_input_text"].endswith("\n\nTah po restartu"))
-        self.assertEqual(result["context_anchor_warning"], "")
+        self.assertNotIn("context_anchor_warning", result)
 
     def test_context_anchor_http_adapters_are_retired_without_deleting_internal_state(self) -> None:
         cockpit_source = (
@@ -478,6 +477,9 @@ class HumanAdamServiceTests(unittest.TestCase):
         )
         self.assertTrue(hasattr(HumanAdamService, "context_anchor"))
         self.assertTrue(hasattr(HumanAdamService, "set_context_anchor"))
+        self.assertFalse(
+            hasattr(human_adam_service_module, "context_anchor_model_block")
+        )
 
     def test_thread_rotation_requires_connected_profile_but_not_pinned_anchor(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -518,7 +520,7 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertTrue(rotated["previous_thread_preserved"])
         self.assertNotIn("context_anchor_revision", rotated)
 
-    def test_corrupt_context_anchor_is_ignored_without_blocking_send(self) -> None:
+    def test_corrupt_legacy_context_anchor_is_not_read_during_send(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             service, _runtime, _workspace, hub = self.make_service(root)
@@ -535,7 +537,7 @@ class HumanAdamServiceTests(unittest.TestCase):
 
         self.assertTrue(result["ok"])
         self.assertNotIn("HUMAN_ADAM_CONTEXT_ANCHOR", hub.sent[0]["model_input_text"])
-        self.assertIn("bude ignorován", result["context_anchor_warning"])
+        self.assertNotIn("context_anchor_warning", result)
 
     def test_internal_context_anchor_mutation_remains_fail_closed(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

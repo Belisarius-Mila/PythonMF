@@ -16,7 +16,6 @@ class HumanAdamUiTests(unittest.TestCase):
             "connectionBadge",
             "threadBadge",
             "workspaceBadge",
-            "contextAnchorBadge",
             "mediaSoundTestBtn",
             "completionMediaAudio",
             "threadRotationOpenBtn",
@@ -652,29 +651,30 @@ class HumanAdamUiTests(unittest.TestCase):
             "/api/human-adam/context-anchor",
             ".context-anchor-body",
             ".context-anchor-actions",
+            'id="contextAnchorBadge"',
+            "renderContextAnchorBadge",
+            "context_anchor_warning",
+            "Starší kontext:",
         ):
             self.assertNotIn(removed, HUMAN_ADAM_HTML)
 
-    def test_context_anchor_status_is_passive_redacted_and_warning_remains(self) -> None:
-        badge_start = HUMAN_ADAM_HTML.index("function renderContextAnchorBadge(anchor)")
-        badge_end = HUMAN_ADAM_HTML.index(
-            "function resetThreadRotationState",
-            badge_start,
+    def test_send_and_status_ui_no_longer_consume_context_anchor_state(self) -> None:
+        status_start = HUMAN_ADAM_HTML.index("function renderStatus(payload)")
+        status_end = HUMAN_ADAM_HTML.index(
+            "function renderDevelopmentBadge",
+            status_start,
         )
-        badge_source = HUMAN_ADAM_HTML[badge_start:badge_end]
+        status_source = HUMAN_ADAM_HTML[status_start:status_end]
         send_start = HUMAN_ADAM_HTML.index("async function sendMessage(event)")
         send_end = HUMAN_ADAM_HTML.index('connectBtn.addEventListener("click", connect);', send_start)
         send_source = HUMAN_ADAM_HTML[send_start:send_end]
 
-        self.assertIn("anchor.active === true", badge_source)
-        self.assertIn("anchor.has_content === true", badge_source)
-        self.assertIn("Starší kontext: stále aktivní", badge_source)
-        self.assertIn("Starší kontext: uložený", badge_source)
-        self.assertIn("Starší kontext: žádný", badge_source)
-        self.assertNotIn("anchor.content", badge_source)
-        self.assertNotIn("anchor.revision", badge_source)
-        self.assertNotIn("anchor.updated_at", badge_source)
-        self.assertIn("payload.context_anchor_warning", send_source)
+        self.assertNotIn("context_anchor", status_source)
+        self.assertNotIn("context_anchor", send_source)
+        self.assertIn(
+            'notice.textContent = "Odpověď doručena a potvrzena.";',
+            send_source,
+        )
 
     def test_composer_places_voice_left_and_send_right_in_one_compact_row(self) -> None:
         actions_start = HUMAN_ADAM_HTML.index('<div class="compose-actions">')

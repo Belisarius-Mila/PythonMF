@@ -968,7 +968,6 @@ class HumanAdamProfileManager:
         ).record.capabilities
         return {
             "conversation": True,
-            "context_anchor": True,
             "tvbcp": True,
             "development": one_turn_write,
             "checkpoint": one_turn_write,
@@ -1834,13 +1833,6 @@ class HumanAdamProfileManager:
             initial_content=self.workstream_memory.initial_tvbcp(binding),
         )
 
-    def context_anchor(self, *, include_content: bool = True) -> dict[str, Any]:
-        return self.active_service.context_anchor(include_content=include_content)
-
-    def set_context_anchor(self, **kwargs: Any) -> dict[str, Any]:
-        with self.profile_operation() as service:
-            return service.set_context_anchor(**kwargs)
-
     def thread_rotation_status(self) -> dict[str, Any]:
         with self.profile_operation() as service:
             return service.thread_rotation_status()
@@ -2115,7 +2107,6 @@ class HumanAdamProfileManager:
                 binding=binding,
                 topic=str(lease.get("topic") or ""),
                 workspace_review=review,
-                context_anchor=self.active_service.context_anchor(include_content=False),
             )
         except (AppServerError, ProjectContinuityError, OSError, TypeError, ValueError) as exc:
             return {
@@ -2157,7 +2148,6 @@ class HumanAdamProfileManager:
                 binding=binding,
                 workspace_root=self.active_service.workspace.project_root,
                 workspace_review=self.active_service.workspace.review(),
-                context_anchor=self.active_service.context_anchor(include_content=False),
                 deployment_summary=deployment_summary,
                 expected_workstream_id=active_workstream_id,
             )

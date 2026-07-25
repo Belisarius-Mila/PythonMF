@@ -162,7 +162,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <span class="badge" id="threadBadge">Relace: —</span>
         <span class="badge" id="workspaceBadge">Izolovaný workspace</span>
         <span class="badge warn legacy-work-control" id="developmentBadge">Vývoj: neověřen</span>
-        <span class="badge" id="contextAnchorBadge">Starší kontext: neověřen</span>
         <button class="badge sound-badge warn" id="mediaSoundTestBtn" type="button">Zvuk odpovědi: vyzkoušet</button>
         <audio id="completionMediaAudio" preload="auto" playsinline hidden></audio>
       </div>
@@ -336,7 +335,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const threadBadge = document.getElementById("threadBadge");
   const workspaceBadge = document.getElementById("workspaceBadge");
   const developmentBadge = document.getElementById("developmentBadge");
-  const contextAnchorBadge = document.getElementById("contextAnchorBadge");
   const mediaSoundTestBtn = document.getElementById("mediaSoundTestBtn");
   const completionMediaAudio = document.getElementById("completionMediaAudio");
   const turnActivity = document.getElementById("turnActivity");
@@ -1040,7 +1038,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     workspaceBadge.className = workspace.has_git_remote || workspaceDiverged || workspace.sync_available || workspace.dirty || workspace.local_checkpoint_ahead ? "badge warn" : "badge";
     renderCompactWorkStatus(workspace);
     renderDevelopmentBadge(payload && payload.development_semaphore ? payload.development_semaphore : null);
-    renderContextAnchorBadge(payload && payload.context_anchor ? payload.context_anchor : null);
     const deployment = verifiedDeploymentRecord(
       payload && payload.last_simple_main_deployment
         ? payload.last_simple_main_deployment
@@ -1297,18 +1294,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       requestAnimationFrame(applyEndPosition);
     });
     window.setTimeout(applyEndPosition, 120);
-  }
-
-  function renderContextAnchorBadge(anchor) {
-    const failed = Boolean(anchor && anchor.ok === false);
-    const active = Boolean(anchor && anchor.ok === true && anchor.active === true);
-    const stored = Boolean(anchor && anchor.ok === true && anchor.has_content === true);
-    contextAnchorBadge.textContent = failed
-      ? "Starší kontext: chyba"
-      : (active
-        ? "Starší kontext: stále aktivní"
-        : (stored ? "Starší kontext: uložený" : "Starší kontext: žádný"));
-    contextAnchorBadge.className = failed || active ? "badge warn" : "badge";
   }
 
   function resetThreadRotationState(message="Spusť kontrolu připravenosti. Staré vlákno se nemaže ani nearchivuje.") {
@@ -2203,9 +2188,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       renderSession(payload.session);
       renderTurnState(payload.session);
       notice.textContent = "Odpověď doručena a potvrzena.";
-      if (payload.context_anchor_warning) {
-        notice.textContent = `Odpověď doručena. Upozornění: ${payload.context_anchor_warning}`;
-      }
       playCompletionMediaSound();
     } catch (error) {
       const confirmedRejection = new Set(["human_adam_busy","human_adam_send_failed"]).has(error.status);

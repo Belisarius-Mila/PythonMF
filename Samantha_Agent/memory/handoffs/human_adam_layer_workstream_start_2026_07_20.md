@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-25 19:04 CEST
-- Poslední dokončený vývojový výsledek: Kontextovou kotvu už nelze číst ani měnit přes veřejné HTTP API; její private stav a dočasná modelová injekce zůstaly zachované
-- Stav při vytvoření checkpointu: změna je otestovaná (1219 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
-- Git před checkpointem: `main == origin/main` na `a67053acfd4c`.
+- Obnoveno potvrzeným checkpointem: 2026-07-25 19:34 CEST
+- Poslední dokončený vývojový výsledek: Kontextová kotva už neovlivňuje model, status, UI ani projektovou kontinuitu; její private data zůstala bezpečně zachovaná a neaktivní
+- Stav při vytvoření checkpointu: změna je otestovaná (1218 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
+- Git před checkpointem: `main == origin/main` na `0b2cf38a88ce`.
 - Poslední serverově potvrzené nasazení: serverová deployment receipt pro tento proud není dostupná.
-- Rozhodnutí: Endpointy kotvy jsou vyřazené bez mazání private stavu a bez změny modelové injekce
-- Bezprostřední další krok: Po checkpointu a nasazení ověřit nepřístupnost starých endpointů a funkčnost chatu, statusu a rotace
-- Navrhované další kroky: Ve fázi 7.3 odstranit modelovou injekci a související pasivní badge; Private soubory ponechat zachované bez mazání, dokud nebude samostatné rozhodnutí
+- Rozhodnutí: Legacy private stav kotvy zůstává bez aktivních runtime konzumentů a nebude se mazat bez samostatného rozhodnutí
+- Bezprostřední další krok: Po checkpointu a nasazení ručně ověřit běžný chat, přepnutí proudu, panel Vlákno a projektovou kontinuitu
+- Navrhované další kroky: Samostatně rozhodnout, zda někdy odstranit nevolaný storage kód; Private soubory nemazat ani nemigrovat bez výslovného rozhodnutí
 - Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -1817,3 +1817,13 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/communication/human_adam_service.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_human_adam_service.py`
 - Commit: `Vyřadit endpointy kontextové kotvy`
 - Další krok: Po checkpointu a nasazení ověřit nepřístupnost starých endpointů a funkčnost chatu, statusu a rotace
+
+### Automatický checkpoint 2026-07-25 19:34 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Souhrn: Kontextová kotva už neovlivňuje model, status, UI ani projektovou kontinuitu; její private data zůstala bezpečně zachovaná a neaktivní
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější push ani nasazení.
+- Ověření: plná Cockpit brána: 1218 testů, 235.0 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (8): `Samantha_Agent/app/communication/human_adam_profiles.py`, `Samantha_Agent/app/communication/human_adam_service.py`, `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/app/project_continuity.py`, `Samantha_Agent/tests/test_human_adam_profiles.py`, `Samantha_Agent/tests/test_human_adam_service.py`, `Samantha_Agent/tests/test_human_adam_ui.py`, `Samantha_Agent/tests/test_project_continuity.py`
+- Commit: `Odpojit modelovou injekci kontextové kotvy`
+- Další krok: Po checkpointu a nasazení ručně ověřit běžný chat, přepnutí proudu, panel Vlákno a projektovou kontinuitu

@@ -306,7 +306,6 @@ class ProjectContinuityService:
         binding: dict[str, Any],
         workspace_root: Path,
         workspace_review: dict[str, Any],
-        context_anchor: dict[str, Any],
         deployment_summary: dict[str, Any] | None = None,
         expected_workstream_id: str = "",
     ) -> dict[str, Any]:
@@ -352,18 +351,6 @@ class ProjectContinuityService:
                 reasons.append("Workspace obsahuje vývojové změny, ale vybraný handoff mezi nimi není.")
 
         newer_sources: list[str] = []
-        anchor_time = _parse_timestamp(context_anchor.get("updated_at"))
-        evidence.append(
-            {
-                "source": "anchor",
-                "available": anchor_time is not None,
-                "revision": int(context_anchor.get("revision") or 0),
-                "updated_at": anchor_time.isoformat(timespec="seconds") if anchor_time else "",
-            }
-        )
-        if anchor_time and anchor_time > handoff_time:
-            newer_sources.append("kotva")
-
         tvbcp_path = resolved.get("tvbcp_path", "")
         tvbcp_time = _file_evidence_time(root, tvbcp_path) if tvbcp_path else None
         evidence.append(
@@ -417,7 +404,6 @@ class ProjectContinuityService:
         binding: dict[str, Any],
         topic: str,
         workspace_review: dict[str, Any],
-        context_anchor: dict[str, Any],
     ) -> dict[str, Any]:
         """Build a metadata-only draft without writing project memory or Git."""
         base = {
@@ -490,8 +476,6 @@ class ProjectContinuityService:
                 "label": "Nelze připravit",
                 "message": "Projekt už nelze dohledat v aktivním registru.",
             }
-        anchor_revision = int(context_anchor.get("revision") or 0)
-        anchor_state = "připnutá" if context_anchor.get("active") is True else "nepřipnutá"
         file_lines = [f"- {row['status']} · {row['path']}" for row in changes[:40]]
         if len(changes) > 40:
             file_lines.append(f"- … a dalších {len(changes) - 40} souborů")
@@ -513,7 +497,6 @@ class ProjectContinuityService:
                 "Co je hotové:",
                 f"- Vytvořen lokální WIP checkpoint {checkpoint_head[:12]}: {checkpoint_subject}.",
                 f"- Checkpoint obsahuje {len(changes)} bezpečně auditovaných změn.",
-                f"- Kontextová kotva: revize {anchor_revision}, {anchor_state}; její obsah nebyl čten.",
                 f"- Projektový TVBCP: {tvbcp_line}; jeho obsah nebyl čten.",
                 "",
                 "Co není hotové:",

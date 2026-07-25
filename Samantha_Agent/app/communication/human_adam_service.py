@@ -233,25 +233,6 @@ def write_context_anchor(
     return dict(stored)
 
 
-def context_anchor_model_block(anchor: dict[str, Any]) -> str:
-    if anchor.get("active") is not True:
-        return ""
-    content = _validated_anchor_content(anchor.get("content"))
-    return "\n".join(
-        (
-            "[HUMAN_ADAM_CONTEXT_ANCHOR]",
-            "origin=explicit_user_pin",
-            f"revision={max(0, int(anchor.get('revision') or 0))}",
-            f"updated_at={str(anchor.get('updated_at') or '').strip()}",
-            "priority_rule=The current explicit user message below overrides this anchor on conflict.",
-            "purpose=Continuity reference only; do not repeat it unless relevant.",
-            "content:",
-            content,
-            "[/HUMAN_ADAM_CONTEXT_ANCHOR]",
-        )
-    )
-
-
 def _safe_git_head(value: object) -> str:
     candidate = str(value or "").strip()
     return candidate.lower() if SAFE_GIT_HEAD_RE.fullmatch(candidate) else "unknown"
@@ -269,7 +250,6 @@ def workspace_model_input(
     user_text: str,
     workspace: dict[str, Any],
     *,
-    context_anchor_block: str = "",
     development_control_block: str = "",
 ) -> str:
     """Add allowlisted workspace metadata without changing persisted user text."""
@@ -288,8 +268,6 @@ def workspace_model_input(
     ]
     if development_control_block:
         snapshot_lines.extend((development_control_block, ""))
-    if context_anchor_block:
-        snapshot_lines.extend((context_anchor_block, ""))
     snapshot_lines.append(str(user_text))
     return "\n".join(snapshot_lines)
 
@@ -406,7 +384,6 @@ class HumanAdamService:
                 and workspace.get("workspace_relation") != "diverged"
             )
             session = self.hub.snapshot()
-            context_anchor = self.context_anchor(include_content=False)
             return {
                 "ok": workspace_ready,
                 "runtime": self.runtime.status(),
@@ -425,7 +402,6 @@ class HumanAdamService:
                 },
                 "profile": dict(self._profile),
                 "session": session,
-                "context_anchor": context_anchor,
             }
         except (AppServerError, SessionHubError, OSError, ValueError) as exc:
             return {"ok": False, "status": "human_adam_status_failed", "message": str(exc)}
@@ -475,12 +451,6 @@ class HumanAdamService:
         if not runtime.get("reachable") or not session.get("connected"):
             raise SessionHubError("Nejdřív výslovně připoj Human–Adam.")
         workspace = self._workspace_status()
-        anchor_warning = ""
-        try:
-            anchor_block = context_anchor_model_block(load_context_anchor(self.context_anchor_path))
-        except ContextAnchorError as exc:
-            anchor_block = ""
-            anchor_warning = str(exc)
         result = self.hub.send(
             text=clean_text,
             client_message_id=client_message_id,
@@ -488,14 +458,12 @@ class HumanAdamService:
             model_input_text=workspace_model_input(
                 clean_text,
                 workspace,
-                context_anchor_block=anchor_block,
                 development_control_block=development_control_block,
             ),
         )
         return {
             **result,
             "session": self.hub.snapshot(),
-            "context_anchor_warning": anchor_warning,
         }
 
     def context_anchor(self, *, include_content: bool = True) -> dict[str, Any]:

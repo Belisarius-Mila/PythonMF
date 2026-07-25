@@ -1215,6 +1215,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(result["workstream_capabilities"]["checkpoint"])
         self.assertTrue(result["workstream_capabilities"]["writable_pilot"])
         self.assertTrue(result["workstream_capabilities"]["one_turn_write"])
+        self.assertNotIn("context_anchor", result["workstream_capabilities"])
         self.assertEqual(
             result["workstream_capabilities"]["write_authorization"],
             "one_turn",
@@ -1224,17 +1225,22 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(persisted["schema_version"], 2)
         self.assertEqual(persisted["active_workstream_id"], "project-mmtx")
 
-    def test_lazy_active_service_routes_send_and_keeps_context_anchor_isolated(self) -> None:
+    def test_lazy_active_service_routes_send_without_legacy_anchor_injection(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, *_workspaces, human_hub, _library_hub = self.make_manager(
                 Path(temp_dir)
             )
             lazy = FakeLazyThreads(Path(temp_dir) / "lazy")
             manager.workstream_threads = lazy  # type: ignore[assignment]
-            manager.set_context_anchor(
+            legacy_saved = manager.active_service.set_context_anchor(
                 operation="save",
                 expected_revision=0,
                 content="Cíl: legacy Human–Adam",
+                confirmed=True,
+            )
+            manager.active_service.set_context_anchor(
+                operation="pin",
+                expected_revision=legacy_saved["revision"],
                 confirmed=True,
             )
             human_adam_profile_switch_action(
@@ -1242,33 +1248,26 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 service=manager,
             )
 
-            empty_lazy_anchor = manager.context_anchor()
-            manager.set_context_anchor(
+            lazy_saved = manager.active_service.set_context_anchor(
                 operation="save",
                 expected_revision=0,
                 content="Cíl: samostatný MMTX",
+                confirmed=True,
+            )
+            manager.active_service.set_context_anchor(
+                operation="pin",
+                expected_revision=lazy_saved["revision"],
                 confirmed=True,
             )
             sent = manager.send(
                 text="Kontrola MMTX pilotu",
                 client_message_id="lazy-route-001",
             )
-            human_adam_profile_switch_action(
-                {"workstream_id": "layer-human-adam-development", "confirmed": True},
-                service=manager,
-            )
-            legacy_anchor = manager.context_anchor()
-            human_adam_profile_switch_action(
-                {"workstream_id": "project-mmtx", "confirmed": True},
-                service=manager,
-            )
-            restored_lazy_anchor = manager.context_anchor()
 
         lazy_send = lazy.hubs["project-mmtx"].last_send
-        self.assertFalse(empty_lazy_anchor["has_content"])
-        self.assertEqual(legacy_anchor["content"], "Cíl: legacy Human–Adam")
-        self.assertEqual(restored_lazy_anchor["content"], "Cíl: samostatný MMTX")
         self.assertEqual(lazy_send["text"], "Kontrola MMTX pilotu")
+        self.assertNotIn("legacy Human–Adam", str(lazy_send["model_input_text"]))
+        self.assertNotIn("samostatný MMTX", str(lazy_send["model_input_text"]))
         self.assertIn("profile_id=project-mmtx", str(lazy_send["model_input_text"]))
         self.assertIn(
             "source=one_turn_direct_main_authorization",
@@ -2781,48 +2780,21 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertNotIn("active_profile_id", persisted)
         self.assertNotIn("thread", str(persisted))
 
-    def test_context_anchor_is_isolated_per_work_profile(self) -> None:
+    def test_context_anchor_manager_api_is_retired_but_private_paths_remain(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            manager, _human_workspace, _library_workspace, human_hub, _library_hub = self.make_manager(Path(temp_dir))
-            human_hub.connected = True
-            saved = manager.set_context_anchor(
-                operation="save",
-                expected_revision=0,
-                content="Cíl: Human–Adam kontinuita",
-                confirmed=True,
-            )
-            pinned = manager.set_context_anchor(
-                operation="pin",
-                expected_revision=saved["revision"],
-                confirmed=True,
-            )
+            manager, *_rest = self.make_manager(Path(temp_dir))
+            human_anchor_path = manager.active_service.context_anchor_path
             manager.switch(profile_id="knihovna", confirmed=True)
-            library_anchor = manager.context_anchor()
-            manager.switch(profile_id="human_adam", confirmed=True)
-            human_anchor = manager.context_anchor()
+            library_anchor_path = manager.active_service.context_anchor_path
 
-        self.assertFalse(saved["active"])
-        self.assertTrue(saved["has_content"])
-        self.assertTrue(pinned["active"])
-        self.assertFalse(library_anchor["active"])
-        self.assertFalse(library_anchor["has_content"])
-        self.assertEqual(human_anchor["content"], "Cíl: Human–Adam kontinuita")
+        self.assertFalse(hasattr(manager, "context_anchor"))
+        self.assertFalse(hasattr(manager, "set_context_anchor"))
+        self.assertNotEqual(human_anchor_path, library_anchor_path)
 
     def test_thread_rotation_is_locked_to_active_profile_bundle(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, _human_workspace, _library_workspace, human_hub, library_hub = (
                 self.make_manager(Path(temp_dir))
-            )
-            saved = manager.set_context_anchor(
-                operation="save",
-                expected_revision=0,
-                content="Cíl: bezpečně pokračovat v novém vlákně",
-                confirmed=True,
-            )
-            manager.set_context_anchor(
-                operation="pin",
-                expected_revision=saved["revision"],
-                confirmed=True,
             )
             manager.connect()
             audit = manager.thread_rotation_status()
