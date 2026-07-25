@@ -10,14 +10,22 @@ from app.communication.main_remote_sync import (
     apply_main_remote_sync,
     audit_main_remote_sync,
 )
-from tests.test_human_adam_takeover import prepare_with_origin
-from tests.test_human_adam_workspace import git
+from tests.test_human_adam_workspace import git, make_source
 
 
 def prepare_clean_origin(root: Path):
-    source, workspace = prepare_with_origin(root)
+    source = make_source(root)
+    remote = root / "origin.git"
+    subprocess.run(
+        ["/usr/bin/git", "init", "--bare", str(remote)],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    git(source, "remote", "add", "origin", str(remote))
+    git(source, "push", "-u", "origin", "main")
     (source / "AuditCockpit56_M.txt").unlink()
-    return source, workspace
+    return source, None
 
 
 def advance_origin(root: Path, *, filename: str, value: str) -> str:
@@ -53,6 +61,7 @@ class MainRemoteSyncTests(unittest.TestCase):
         self.assertFalse(result["can_fast_forward"])
         self.assertEqual(result["local_head"], head)
         self.assertEqual(final_head, head)
+        self.assertFalse(result["changes_truncated"])
 
     def test_audit_offers_exact_fast_forward_and_path_preview(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -185,6 +194,28 @@ class MainRemoteSyncTests(unittest.TestCase):
 
         self.assertEqual(result["state"], "local_ahead")
         self.assertFalse(result["can_fast_forward"])
+        self.assertFalse(result["changes_truncated"])
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source, _workspace = prepare_clean_origin(root)
+            (source / "Samantha_Agent" / "tracked.py").write_text(
+                "VALUE = 6\n",
+                encoding="utf-8",
+            )
+            git(source, "add", "Samantha_Agent/tracked.py")
+            git(source, "commit", "-m", "Local divergent commit")
+            advance_origin(
+                root,
+                filename="remote-divergent.txt",
+                value="remote\n",
+            )
+
+            result = audit_main_remote_sync(source_repo=source)
+
+        self.assertEqual(result["state"], "diverged")
+        self.assertFalse(result["can_fast_forward"])
+        self.assertFalse(result["changes_truncated"])
 
 
 if __name__ == "__main__":

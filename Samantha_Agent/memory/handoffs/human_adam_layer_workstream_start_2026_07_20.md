@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-25 10:32 CEST
-- Poslední dokončený vývojový výsledek: Panel Práce umí po neúspěšném auditu nabídnout obecné ruční dorovnání čistého lokálního main z origin/main
+- Obnoveno potvrzeným checkpointem: 2026-07-25 13:33 CEST
+- Poslední dokončený vývojový výsledek: Read-only stavy synchronizace main mají jednotný příznak úplnosti změn
 - Stav při vytvoření checkpointu: změna je otestovaná (1227 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
-- Git před checkpointem: `main == origin/main` na `84327a8de6a7`.
-- Poslední serverově potvrzené nasazení: `84327a8de6a7` · odpovídá ověřenému main před tímto checkpointem · 1216 testů · smoke 5/5 · 2026-07-25T07:31:37+00:00.
-- Rozhodnutí: Nevznikla výjimka pro sovu; obecná cesta odděluje read-only audit od potvrzeného fast-forwardu svázaného s přesným lokálním a vzdáleným commitem.
-- Bezprostřední další krok: Commitnout a pushnout tento checkpoint a potom samostatně potvrzeně nasadit čistý main.
-- Navrhované další kroky: Po nasazení ověřit tlačítko při příštím přirozeném bezpečném posunu origin/main.; Pokračovat úplným živým testem odložené integrace.
+- Git před checkpointem: `main == origin/main` na `4bf3221d78e5`.
+- Poslední serverově potvrzené nasazení: `4bf3221d78e5` · odpovídá ověřenému main před tímto checkpointem · 1227 testů · smoke 5/5 · 2026-07-25T08:43:28+00:00.
+- Rozhodnutí: Stavy aligned, local_ahead a diverged vždy vracejí changes_truncated=false
+- Bezprostřední další krok: Po vyčištění zdrojového main provést audit konfliktů a potvrzené začlenění
+- Navrhované další kroky: žádné další návrhy nad rámec bezprostředního kroku
 - Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -1682,3 +1682,13 @@ Zmenene nebo relevantni soubory:
 Bezpecnost / neukladat:
 - Neukládat identity vláken, texty zpráv ani private obsah kotvy.
 - Starý WIP neuvolnit, dokud není prokazatelně obsažen v pushnutém `main`.
+
+### Automatický checkpoint 2026-07-25 13:33 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Souhrn: Read-only stavy synchronizace main mají jednotný příznak úplnosti změn
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější push ani nasazení.
+- Ověření: plná Cockpit brána: 1227 testů, 224.1 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/communication/main_remote_sync.py`, `Samantha_Agent/tests/test_main_remote_sync.py`
+- Commit: `Unify main remote sync audit schema`
+- Další krok: Po vyčištění zdrojového main provést audit konfliktů a potvrzené začlenění
