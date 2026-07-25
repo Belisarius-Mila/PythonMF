@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-25 14:43 CEST
-- Poslední dokončený vývojový výsledek: Pravidlo soukromého archivu se v nápovědě řídí schopností aktivního proudu a nejmenuje Knihovnu
-- Stav při vytvoření checkpointu: změna je otestovaná (66 cílených testů); tento snapshot je součástí plánované commit/push operace a sám nepotvrzuje její pozdější nasazení.
-- Git před checkpointem: `main == origin/main` na `3d0fa3c6b891`.
-- Poslední serverově potvrzené nasazení: `3d0fa3c6b891` · 1227 testů · smoke 5/5 · 2026-07-25T12:02:19+00:00.
-- Rozhodnutí: Obecná nápověda nejmenuje konkrétní proud; kontextové pravidlo se ukáže pouze při capability `private_archive_direct`
-- Bezprostřední další krok: Commitnout a pushnout capability-based nápovědu a samostatně potvrzeně nasadit čistý main
-- Navrhované další kroky: Pozdější převod hardcoded knihovní capability do obecné konfigurace ponechat jako samostatný refaktor
+- Obnoveno potvrzeným checkpointem: 2026-07-25 15:07 CEST
+- Poslední dokončený vývojový výsledek: Schopnosti soukromého archivu se nyní načítají z deklarace kanonického pracovního proudu a výsledné chování zůstává stejné
+- Stav při vytvoření checkpointu: změna je otestovaná (1229 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
+- Git před checkpointem: `main == origin/main` na `cc5d7456ff38`.
+- Poslední serverově potvrzené nasazení: `cc5d7456ff38` · odpovídá ověřenému main před tímto checkpointem · 1227 testů · smoke 5/5 · 2026-07-25T12:51:58+00:00.
+- Rozhodnutí: Schopnosti pracovních proudů se přiřazují deklarativně v kanonickém katalogu, nikoli podmínkou na konkrétní ID
+- Bezprostřední další krok: Provést běžný checkpoint a ověřit stejný capability výstup v Cockpitu
+- Navrhované další kroky: V další samostatné fázi lze stejným způsobem převést další rozdíly mezi pracovními proudy
 - Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -1777,3 +1777,13 @@ Zmenene nebo relevantni soubory:
 Bezpecnost / neukladat:
 - Do nápovědy ani testů nepřidávat obsah soukromého archivu.
 - Capability pouze řídí zobrazení existujícího pravidla; nerozšiřuje oprávnění.
+
+### Automatický checkpoint 2026-07-25 15:07 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Souhrn: Schopnosti soukromého archivu se nyní načítají z deklarace kanonického pracovního proudu a výsledné chování zůstává stejné
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější push ani nasazení.
+- Ověření: plná Cockpit brána: 1229 testů, 222.6 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (3): `Samantha_Agent/app/communication/human_adam_profiles.py`, `Samantha_Agent/app/communication/human_adam_workstream_catalog.py`, `Samantha_Agent/tests/test_human_adam_workstream_catalog.py`
+- Commit: `Declare workstream private archive capabilities`
+- Další krok: Provést běžný checkpoint a ověřit stejný capability výstup v Cockpitu

@@ -6,8 +6,10 @@ from collections import Counter
 from pathlib import Path
 
 from app.communication.human_adam_workstream_catalog import (
+    PRIVATE_ARCHIVE_CONFIRMATION_CATEGORIES,
     WORKSTREAM_CATALOG,
     CanonicalWorkstream,
+    CanonicalWorkstreamCapabilities,
     validate_workstream_catalog,
 )
 
@@ -106,6 +108,61 @@ class WorkstreamCatalogTests(unittest.TestCase):
             human_adam.binding_aliases,
             ("Human–Adam / vývojové prostředí",),
         )
+
+    def test_private_archive_capabilities_are_declared_only_for_knihovna(self) -> None:
+        knihovna = next(
+            record
+            for record in WORKSTREAM_CATALOG
+            if record.workstream_id == "project-knowledge-library"
+        )
+        other_records = tuple(
+            record
+            for record in WORKSTREAM_CATALOG
+            if record.workstream_id != knihovna.workstream_id
+        )
+
+        self.assertEqual(
+            knihovna.capabilities,
+            CanonicalWorkstreamCapabilities(
+                private_archive_direct=True,
+                private_archive_read=True,
+                private_archive_single_edit=True,
+                private_archive_confirmation_required=(
+                    PRIVATE_ARCHIVE_CONFIRMATION_CATEGORIES
+                ),
+            ),
+        )
+        self.assertTrue(other_records)
+        self.assertTrue(
+            all(
+                record.capabilities == CanonicalWorkstreamCapabilities()
+                for record in other_records
+            )
+        )
+
+    def test_private_archive_capability_metadata_is_not_tied_to_one_catalog_id(
+        self,
+    ) -> None:
+        capabilities = CanonicalWorkstreamCapabilities(
+            private_archive_direct=True,
+            private_archive_read=True,
+            private_archive_single_edit=True,
+            private_archive_confirmation_required=(
+                PRIVATE_ARCHIVE_CONFIRMATION_CATEGORIES
+            ),
+        )
+        record = CanonicalWorkstream(
+            "project-capable-example",
+            "Project",
+            "Schopný příklad",
+            "active",
+            "2",
+            ("Zdroj schopného příkladu",),
+            capabilities=capabilities,
+        )
+
+        self.assertEqual(validate_workstream_catalog((record,)), (record,))
+        self.assertEqual(record.capabilities.status_fields()["private_archive_direct"], True)
 
     def test_paused_vocabulary_projects_come_from_confirmed_capability_map(self) -> None:
         capability_map = (PROJECT_ROOT / "memory/technical/project_capability_map.md").read_text(

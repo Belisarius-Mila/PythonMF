@@ -15,6 +15,32 @@ from typing import Iterable
 WORKSTREAM_ID_RE = re.compile(r"[a-z][a-z0-9_-]{1,63}")
 WORKSTREAM_TYPES = frozenset({"Project", "Tool", "Layer", "Misc"})
 WORKSTREAM_MODES = frozenset({"active", "paused", "archived"})
+PRIVATE_ARCHIVE_CONFIRMATION_CATEGORIES = (
+    "delete",
+    "bulk_change",
+    "external_send",
+    "system_change",
+)
+
+
+@dataclass(frozen=True)
+class CanonicalWorkstreamCapabilities:
+    """Declarative, git-safe capability metadata for one workstream."""
+
+    private_archive_direct: bool = False
+    private_archive_read: bool = False
+    private_archive_single_edit: bool = False
+    private_archive_confirmation_required: tuple[str, ...] = ()
+
+    def status_fields(self) -> dict[str, object]:
+        return {
+            "private_archive_direct": self.private_archive_direct,
+            "private_archive_read": self.private_archive_read,
+            "private_archive_single_edit": self.private_archive_single_edit,
+            "private_archive_confirmation_required": list(
+                self.private_archive_confirmation_required
+            ),
+        }
 
 
 @dataclass(frozen=True)
@@ -29,6 +55,7 @@ class CanonicalWorkstream:
     source_names: tuple[str, ...]
     binding_aliases: tuple[str, ...] = ()
     binding_type_aliases: tuple[str, ...] = ()
+    capabilities: CanonicalWorkstreamCapabilities = CanonicalWorkstreamCapabilities()
 
 
 def _clean_label(value: str, *, kind: str) -> str:
@@ -90,6 +117,8 @@ def validate_workstream_catalog(
             raise ValueError("Kanonický typ nesmí být zopakován jako alias.")
         if len(set(record.binding_type_aliases)) != len(record.binding_type_aliases):
             raise ValueError("Pracovní proud nemá jednoznačné aliasy typu runtime vazby.")
+        if not isinstance(record.capabilities, CanonicalWorkstreamCapabilities):
+            raise ValueError("Pracovní proud nemá platná capability metadata.")
         seen_ids.add(record.workstream_id)
         seen_names.add(folded_name)
     return catalog
@@ -104,6 +133,7 @@ def _record(
     *source_names: str,
     binding_aliases: tuple[str, ...] = (),
     binding_type_aliases: tuple[str, ...] = (),
+    capabilities: CanonicalWorkstreamCapabilities = CanonicalWorkstreamCapabilities(),
 ) -> CanonicalWorkstream:
     return CanonicalWorkstream(
         workstream_id=workstream_id,
@@ -114,6 +144,7 @@ def _record(
         source_names=source_names,
         binding_aliases=binding_aliases,
         binding_type_aliases=binding_type_aliases,
+        capabilities=capabilities,
     )
 
 
@@ -168,6 +199,14 @@ WORKSTREAM_CATALOG = validate_workstream_catalog(
             "active",
             "2",
             "Znalostni databaze / Knihovna clanku / Knowledge inbox",
+            capabilities=CanonicalWorkstreamCapabilities(
+                private_archive_direct=True,
+                private_archive_read=True,
+                private_archive_single_edit=True,
+                private_archive_confirmation_required=(
+                    PRIVATE_ARCHIVE_CONFIRMATION_CATEGORIES
+                ),
+            ),
         ),
         _record(
             "project-family-calendar",

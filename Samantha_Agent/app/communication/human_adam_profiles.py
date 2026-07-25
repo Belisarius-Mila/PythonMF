@@ -39,7 +39,10 @@ from app.communication.human_adam_workstream_binding import (
     CanonicalWorkstreamBinding,
     canonical_workstream_binding,
 )
-from app.communication.human_adam_workstream_catalog import CanonicalWorkstream
+from app.communication.human_adam_workstream_catalog import (
+    PRIVATE_ARCHIVE_CONFIRMATION_CATEGORIES,
+    CanonicalWorkstream,
+)
 from app.communication.human_adam_workstream_memory import WorkstreamMemoryRegistry
 from app.communication.human_adam_workstream_selection import GroupedWorkstreamSelection
 from app.communication.human_adam_workstream_threads import WorkstreamThreadRegistry
@@ -98,12 +101,7 @@ KNIHOVNA_TVBCP_RELATIVE_PATH = Path("memory/tvbcp/knihovna_cockpit.txt")
 HUMAN_ADAM_WORKSTREAM_ID = "layer-human-adam-development"
 KNIHOVNA_WORKSTREAM_ID = "project-knowledge-library"
 KNIHOVNA_LIVE_ARCHIVE_ROOT = PROJECT_ROOT / "data" / "private" / "article_archive"
-KNIHOVNA_PRIVATE_CONFIRMATION_CATEGORIES = (
-    "delete",
-    "bulk_change",
-    "external_send",
-    "system_change",
-)
+KNIHOVNA_PRIVATE_CONFIRMATION_CATEGORIES = PRIVATE_ARCHIVE_CONFIRMATION_CATEGORIES
 KNIHOVNA_SANDBOX_POLICY = {
     **HUMAN_ADAM_SANDBOX_POLICY,
     "writableRoots": [str(KNIHOVNA_LIVE_ARCHIVE_ROOT)],
@@ -906,7 +904,9 @@ class HumanAdamProfileManager:
         lazy = bool(lazy_id)
         writable_pilot = lazy_id == "project-mmtx"
         one_turn_write = not lazy or lazy_id in ONE_TURN_WRITABLE_LAZY_WORKSTREAM_IDS
-        direct_private_archive = self.active_workstream_id == KNIHOVNA_WORKSTREAM_ID
+        capability_metadata = self.workstream_backends.binding(
+            self.active_workstream_id
+        ).record.capabilities
         return {
             "conversation": True,
             "context_anchor": True,
@@ -918,14 +918,7 @@ class HumanAdamProfileManager:
             "writable_pilot": writable_pilot,
             "one_turn_write": one_turn_write,
             "write_authorization": "one_turn" if one_turn_write else "read_only",
-            "private_archive_direct": direct_private_archive,
-            "private_archive_read": direct_private_archive,
-            "private_archive_single_edit": direct_private_archive,
-            "private_archive_confirmation_required": (
-                list(KNIHOVNA_PRIVATE_CONFIRMATION_CATEGORIES)
-                if direct_private_archive
-                else []
-            ),
+            **capability_metadata.status_fields(),
         }
 
     def _assert_one_turn_writable_lazy_workstream(self, workstream_id: str) -> None:
