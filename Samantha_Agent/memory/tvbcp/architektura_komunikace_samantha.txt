@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-25 19:34 CEST
-- Poslední dokončený vývojový výsledek: Kontextová kotva už neovlivňuje model, status, UI ani projektovou kontinuitu; její private data zůstala bezpečně zachovaná a neaktivní
-- Stav při vytvoření checkpointu: změna je otestovaná (1218 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
-- Git před checkpointem: `main == origin/main` na `0b2cf38a88ce`.
-- Poslední serverově potvrzené nasazení: serverová deployment receipt pro tento proud není dostupná.
-- Rozhodnutí: Legacy private stav kotvy zůstává bez aktivních runtime konzumentů a nebude se mazat bez samostatného rozhodnutí
-- Bezprostřední další krok: Po checkpointu a nasazení ručně ověřit běžný chat, přepnutí proudu, panel Vlákno a projektovou kontinuitu
-- Navrhované další kroky: Samostatně rozhodnout, zda někdy odstranit nevolaný storage kód; Private soubory nemazat ani nemigrovat bez výslovného rozhodnutí
+- Obnoveno potvrzeným checkpointem: 2026-07-25 22:50 CEST
+- Poslední dokončený vývojový výsledek: Nový kanonický Cockpit po automatickém restartu sám dokončí čekající deployment receipt; pozdější ověření z prohlížeče je idempotentní
+- Stav při vytvoření checkpointu: změna je otestovaná (1221 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
+- Git před checkpointem: `main == origin/main` na `ec4e46a`.
+- Poslední serverově potvrzené nasazení: `ec4e46a` · 1218 testů · smoke 5/5 · 2026-07-25 22:23 CEST.
+- Rozhodnutí: Restart serveru po změně kódu zůstává automatickou součástí nasazení; dokončení serverového důkazu nesmí záviset na otevřeném prohlížeči
+- Bezprostřední další krok: Samostatně potvrzeně nasadit čistý main a bez otevřeného Human–Adam UI ověřit, že čekající receipt sama přejde do stavu deployed
+- Navrhované další kroky: Po živém důkazu rozlišit případné pouhé obnovení stránky od ručního restartu serveru; potom se vrátit k podrobné diskusi o odstraněné kontextové kotvě
 - Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -2795,3 +2795,34 @@ Navrhované další kroky:
 Technický důkaz:
 - plná Cockpit brána: 1218 testů, 235.0 s, výsledek OK.
 - Pracovní proud: `layer-human-adam-development`.
+
+### 2026-07-25 22:50 CEST – Server sám dokončí důkaz nasazení po restartu
+
+Hotovo:
+- Nový kanonický Cockpit po automatickém restartu sám ověří čekající
+  deployment receipt.
+- Dokončení serverového důkazu už nezávisí na pozdějším volání z otevřeného
+  prohlížeče.
+- Opakované ověření stejného dokončeného nasazení je idempotentní, ale jiný
+  proces, otisk kódu nebo stav Git workspace zůstává fail-closed.
+
+Rozhodnutí:
+- Restart serveru po změně kódu zůstává nutnou, ale automaticky řízenou součástí
+  nasazení.
+- Ruční obnovení stránky může být potřeba jen pro načtení nového klientského UI;
+  nesmí dokončovat ani nahrazovat serverový důkaz.
+
+Další krok:
+- Samostatně potvrzeně nasadit čistý `main` a bez otevřeného Human–Adam UI
+  ověřit, že čekající receipt sama přejde do stavu `deployed`.
+
+Navrhované další kroky:
+- Po živém důkazu se vrátit k podrobné diskusi o záměrném odstranění
+  kontextové kotvy.
+
+Technický důkaz:
+- Plná Cockpit brána prošla 1221 testy za 320,3 sekundy.
+- Cílená sada pro Cockpit a simple-main deployment prošla 278 testy; navazující
+  regresní sada restartu, profilů a UI prošla 160 testy.
+- Změna je omezená na serverový startup verifier, idempotentní deployment
+  verification a jejich testy.

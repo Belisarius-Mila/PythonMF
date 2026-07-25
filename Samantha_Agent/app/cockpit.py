@@ -99,7 +99,12 @@ from app.communication.human_adam_profiles import (
     human_adam_profile_switch_action,
 )
 from app.communication.session_hub import SessionHubError
-from app.communication.simple_main_deploy import SIMPLE_MAIN_DEPLOYMENT_CONFIRMATION
+from app.communication.simple_main_deploy import (
+    PENDING_RESTART,
+    SIMPLE_MAIN_DEPLOYMENT_CONFIRMATION,
+    SimpleMainDeploymentError,
+    load_simple_main_deployment_receipt,
+)
 from app.communication.human_adam_ui import HUMAN_ADAM_HTML
 from app.backup.activity_state import backup_activity_status
 from app.family_calendar import (
@@ -8267,6 +8272,91 @@ def human_adam_simple_main_deployment_verification_action(
         }
 
 
+def human_adam_pending_deployment_startup_verification_action(
+    *,
+    service: HumanAdamProfileManager = HUMAN_ADAM,
+    verification_action: Callable[..., dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Finish one pending deployment from the restarted server itself."""
+
+    receipt_path = Path(service.simple_main_deployment_receipt_path)
+    if not receipt_path.exists():
+        return {
+            "ok": True,
+            "state": "not_pending",
+            "verification_needed": False,
+        }
+    try:
+        receipt = load_simple_main_deployment_receipt(receipt_path)
+    except (SimpleMainDeploymentError, OSError, TypeError, ValueError) as exc:
+        return {
+            "ok": False,
+            "status": "simple_main_deployment_receipt_invalid",
+            "message": str(exc),
+        }
+    if receipt.get("state") != PENDING_RESTART:
+        return {
+            "ok": True,
+            "state": str(receipt.get("state") or "not_pending"),
+            "verification_needed": False,
+        }
+    verifier = (
+        verification_action
+        or human_adam_simple_main_deployment_verification_action
+    )
+    return verifier(service=service)
+
+
+def schedule_pending_deployment_startup_verification(
+    *,
+    host: str,
+    port: int,
+    service: HumanAdamProfileManager = HUMAN_ADAM,
+    attempts: int = 60,
+    delay_seconds: float = 0.5,
+    verification_action: Callable[..., dict[str, Any]] | None = None,
+) -> bool:
+    """Verify a restart-bound receipt after the canonical server starts serving."""
+
+    if host not in {"127.0.0.1", "localhost"} or int(port) != COCKPIT_PORT:
+        return False
+
+    def worker() -> None:
+        last_message = ""
+        for _attempt in range(max(1, int(attempts))):
+            if delay_seconds > 0:
+                time.sleep(delay_seconds)
+            result = human_adam_pending_deployment_startup_verification_action(
+                service=service,
+                verification_action=verification_action,
+            )
+            if result.get("ok") is True:
+                if result.get("state") == "deployed" and result.get(
+                    "verification_needed"
+                ) is not False:
+                    print(
+                        "Čekající nasazení bylo po restartu serverově ověřeno.",
+                        flush=True,
+                    )
+                return
+            last_message = str(
+                result.get("message")
+                or "Čekající nasazení zatím nelze serverově ověřit."
+            )
+        print(
+            "Automatické ověření čekajícího nasazení zůstalo fail-closed: "
+            + last_message,
+            flush=True,
+        )
+
+    threading.Thread(
+        target=worker,
+        name="cockpit-deployment-verifier",
+        daemon=True,
+    ).start()
+    return True
+
+
 def human_adam_simple_main_deployment_audit_action(
     *,
     service: HumanAdamProfileManager = HUMAN_ADAM,
@@ -10080,6 +10170,10 @@ class CockpitServer:
     def serve(self) -> None:
         server = ThreadingHTTPServer((self.host, self.port), self.make_handler())
         print(f"Samantha Cockpit běží na http://{self.host}:{self.port}", flush=True)
+        schedule_pending_deployment_startup_verification(
+            host=self.host,
+            port=self.port,
+        )
         server.serve_forever()
 
     def make_handler(self):

@@ -4196,6 +4196,125 @@ class CockpitTests(unittest.TestCase):
             ],
         )
 
+    def test_restarted_server_verifies_only_a_pending_deployment_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            receipt_path = Path(temp_dir) / "receipt.json"
+            pending = {
+                "schema_version": 1,
+                "state": "pending_restart",
+                "workstream_id": "layer-human-adam-development",
+                "main_head": "a" * 40,
+                "expected_code_stamp": "0123456789abcdef",
+                "previous_pid": 100,
+                "test_count": 1218,
+                "gate_duration_seconds": 290.7,
+                "prepared_at": "2026-07-25T19:50:42+00:00",
+            }
+            receipt_path.write_text(json.dumps(pending), encoding="utf-8")
+            service = SimpleNamespace(
+                simple_main_deployment_receipt_path=receipt_path
+            )
+            calls: list[object] = []
+
+            def verifier(*, service: object) -> dict[str, object]:
+                calls.append(service)
+                return {"ok": True, "state": "deployed"}
+
+            verified = (
+                cockpit_module.human_adam_pending_deployment_startup_verification_action(
+                    service=service,
+                    verification_action=verifier,
+                )
+            )
+            receipt_path.write_text(
+                json.dumps(
+                    {
+                        **pending,
+                        "state": "deployed",
+                        "observed_pid": 200,
+                        "smoke_count": 5,
+                        "deployed_at": "2026-07-25T19:51:00+00:00",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            already_done = (
+                cockpit_module.human_adam_pending_deployment_startup_verification_action(
+                    service=service,
+                    verification_action=lambda **_kwargs: self.fail(
+                        "Dokončená účtenka se nesmí znovu ověřovat při startu."
+                    ),
+                )
+            )
+
+        self.assertTrue(verified["ok"])
+        self.assertEqual(verified["state"], "deployed")
+        self.assertEqual(calls, [service])
+        self.assertTrue(already_done["ok"])
+        self.assertEqual(already_done["state"], "deployed")
+        self.assertFalse(already_done["verification_needed"])
+
+    def test_canonical_server_schedules_pending_deployment_verification(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            receipt_path = Path(temp_dir) / "receipt.json"
+            receipt_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "state": "pending_restart",
+                        "workstream_id": "layer-human-adam-development",
+                        "main_head": "a" * 40,
+                        "expected_code_stamp": "0123456789abcdef",
+                        "previous_pid": 100,
+                        "test_count": 1218,
+                        "gate_duration_seconds": 290.7,
+                        "prepared_at": "2026-07-25T19:50:42+00:00",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            service = SimpleNamespace(
+                simple_main_deployment_receipt_path=receipt_path
+            )
+            calls: list[object] = []
+
+            class ImmediateThread:
+                def __init__(self, *, target, **_kwargs):
+                    self.target = target
+
+                def start(self) -> None:
+                    self.target()
+
+            def verifier(*, service: object) -> dict[str, object]:
+                calls.append(service)
+                return {"ok": True, "state": "deployed"}
+
+            with patch.object(cockpit_module.threading, "Thread", ImmediateThread):
+                scheduled = (
+                    cockpit_module.schedule_pending_deployment_startup_verification(
+                        host="127.0.0.1",
+                        port=8770,
+                        service=service,
+                        attempts=1,
+                        delay_seconds=0,
+                        verification_action=verifier,
+                    )
+                )
+                skipped = (
+                    cockpit_module.schedule_pending_deployment_startup_verification(
+                        host="127.0.0.1",
+                        port=8771,
+                        service=service,
+                        attempts=1,
+                        delay_seconds=0,
+                        verification_action=verifier,
+                    )
+                )
+
+        self.assertTrue(scheduled)
+        self.assertFalse(skipped)
+        self.assertEqual(calls, [service])
+
     def test_private_simple_main_deployment_verification_returns_safe_failure(self) -> None:
         class FailingProfileManager:
             def verify_simple_main_deployment(self, **_kwargs: object) -> dict[str, object]:
@@ -4211,6 +4330,7 @@ class CockpitTests(unittest.TestCase):
 
     def test_simple_main_deployment_reuses_existing_controls_and_registers_verification(self) -> None:
         handlers = {item["handler_name"] for item in COCKPIT_POST_ACTIONS}
+        cockpit_source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
 
         self.assertIn("/api/human-adam/deploy-audit", self.cockpit_do_get_routes())
         self.assertIn("/api/human-adam/main-sync-audit", self.cockpit_do_get_routes())
@@ -4225,6 +4345,10 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("human_adam_simple_main_deployment_action", handlers)
         self.assertIn("human_adam_main_remote_sync_action", handlers)
         self.assertIn("human_adam_simple_main_deployment_verification_action", handlers)
+        self.assertIn(
+            "schedule_pending_deployment_startup_verification(",
+            cockpit_source,
+        )
         self.assertEqual(cockpit_module.HUMAN_ADAM_HTML.count('id="deployAuditBtn"'), 1)
         self.assertEqual(cockpit_module.HUMAN_ADAM_HTML.count('id="mainSyncBtn"'), 1)
         self.assertEqual(cockpit_module.HUMAN_ADAM_HTML.count('id="deployBtn"'), 1)

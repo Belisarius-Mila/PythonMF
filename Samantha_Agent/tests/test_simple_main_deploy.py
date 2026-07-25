@@ -316,6 +316,60 @@ class SimpleMainDeploymentTests(unittest.TestCase):
         self.assertEqual(receipt["state"], DEPLOYED)
         self.assertEqual(receipt["observed_pid"], 654)
 
+    def test_verify_reuses_completed_proof_for_the_same_running_process(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _source, primary, peer, head = prepare_clean_main(root)
+            receipt_path = root / "receipt.json"
+            prepare_simple_main_deployment(
+                workspace=primary,
+                request=request(head),
+                confirmed=True,
+                peer_workspaces=(peer,),
+                gate_runner=successful_gate,
+                gate_log_path=root / "gate.log",
+                receipt_path=receipt_path,
+                now_factory=lambda: "2026-07-20T09:30:00+00:00",
+                code_stamp_factory=lambda _workspace: "0123456789abcdef",
+            )
+            verify_simple_main_deployment(
+                workspace=primary,
+                observed_pid=654,
+                observed_code_stamp="0123456789abcdef",
+                peer_workspaces=(peer,),
+                receipt_path=receipt_path,
+                smoke_runner=successful_smoke,
+                now_factory=lambda: "2026-07-20T09:35:00+00:00",
+            )
+
+            reused = verify_simple_main_deployment(
+                workspace=primary,
+                observed_pid=654,
+                observed_code_stamp="0123456789abcdef",
+                peer_workspaces=(peer,),
+                receipt_path=receipt_path,
+                smoke_runner=lambda: self.fail("Dokončený smoke se nesmí opakovat."),
+                now_factory=lambda: "2026-07-20T10:00:00+00:00",
+            )
+            with self.assertRaisesRegex(
+                SimpleMainDeploymentError,
+                "nepatří běžícímu procesu",
+            ):
+                verify_simple_main_deployment(
+                    workspace=primary,
+                    observed_pid=777,
+                    observed_code_stamp="0123456789abcdef",
+                    peer_workspaces=(peer,),
+                    receipt_path=receipt_path,
+                    smoke_runner=successful_smoke,
+                )
+
+        self.assertTrue(reused["ok"])
+        self.assertEqual(reused["state"], DEPLOYED)
+        self.assertTrue(reused["verification_reused"])
+        self.assertEqual(reused["deployed_at"], "2026-07-20T09:35:00+00:00")
+        self.assertEqual(reused["smoke"]["check_count"], 5)
+
     def test_recent_deployed_receipt_returns_only_safe_short_recovery_summary(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             receipt_path = Path(temp_dir) / "receipt.json"

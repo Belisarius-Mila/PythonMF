@@ -475,6 +475,42 @@ def _default_smoke_runner() -> Sequence[SmokeResult]:
     return run_smoke_check("http://127.0.0.1:8770", 3.0)
 
 
+def _verified_deployment_result(
+    *,
+    receipt: dict[str, Any],
+    code_stamp: str,
+    workspaces: Sequence[dict[str, Any]],
+    verification_reused: bool = False,
+) -> dict[str, Any]:
+    result = {
+        "ok": True,
+        "operation": "simple_main_deployment",
+        "state": DEPLOYED,
+        "workstream_id": receipt["workstream_id"],
+        "main_head": receipt["main_head"],
+        "main_short": str(receipt["main_head"])[:12],
+        "code_stamp": code_stamp,
+        "deployed_at": str(receipt["deployed_at"]),
+        "gate": {
+            "passed": True,
+            "test_count": int(receipt["test_count"]),
+            "duration_seconds": float(receipt["gate_duration_seconds"]),
+        },
+        "new_process_confirmed": True,
+        "smoke": {
+            "passed": True,
+            "check_count": int(receipt["smoke_count"]),
+        },
+        "workspaces": list(workspaces),
+        "branches_created": False,
+        "wip_used": False,
+        "semaphore_used": False,
+    }
+    if verification_reused:
+        result["verification_reused"] = True
+    return result
+
+
 def verify_simple_main_deployment(
     *,
     workspace: HumanAdamWorkspaceManager,
@@ -490,17 +526,33 @@ def verify_simple_main_deployment(
         raise SimpleMainDeploymentError("Jiné jednoduché nasazení právě probíhá.")
     try:
         receipt = load_simple_main_deployment_receipt(receipt_path)
-        if receipt.get("state") != PENDING_RESTART:
-            raise SimpleMainDeploymentError("Nasazení nečeká na ověření restartu.")
         try:
             new_pid = int(observed_pid)
         except (TypeError, ValueError) as exc:
             raise SimpleMainDeploymentError("Restart neposkytl platný PID Cockpitu.") from exc
-        if new_pid <= 0 or new_pid == int(receipt["previous_pid"]):
-            raise SimpleMainDeploymentError("Nebyl doložen nový proces Cockpitu po restartu.")
         clean_stamp = str(observed_code_stamp or "").strip().casefold()
         if clean_stamp != receipt["expected_code_stamp"]:
             raise SimpleMainDeploymentError("Běžící Cockpit nemá očekávaný kódový otisk.")
+        if receipt.get("state") == DEPLOYED:
+            if new_pid <= 0 or new_pid != int(receipt["observed_pid"]):
+                raise SimpleMainDeploymentError(
+                    "Dokončené nasazení nepatří běžícímu procesu Cockpitu."
+                )
+            rows = _source_and_profile_preflight(
+                workspace=workspace,
+                peer_workspaces=peer_workspaces,
+                expected_head=str(receipt["main_head"]),
+            )
+            return _verified_deployment_result(
+                receipt=receipt,
+                code_stamp=clean_stamp,
+                workspaces=rows,
+                verification_reused=True,
+            )
+        if receipt.get("state") != PENDING_RESTART:
+            raise SimpleMainDeploymentError("Nasazení nečeká na ověření restartu.")
+        if new_pid <= 0 or new_pid == int(receipt["previous_pid"]):
+            raise SimpleMainDeploymentError("Nebyl doložen nový proces Cockpitu po restartu.")
         rows = _source_and_profile_preflight(
             workspace=workspace,
             peer_workspaces=peer_workspaces,
@@ -520,26 +572,10 @@ def verify_simple_main_deployment(
             "deployed_at": deployed_at,
         }
         _write_receipt(receipt_path, completed)
-        return {
-            "ok": True,
-            "operation": "simple_main_deployment",
-            "state": DEPLOYED,
-            "workstream_id": receipt["workstream_id"],
-            "main_head": receipt["main_head"],
-            "main_short": str(receipt["main_head"])[:12],
-            "code_stamp": clean_stamp,
-            "deployed_at": deployed_at,
-            "gate": {
-                "passed": True,
-                "test_count": int(receipt["test_count"]),
-                "duration_seconds": float(receipt["gate_duration_seconds"]),
-            },
-            "new_process_confirmed": True,
-            "smoke": {"passed": True, "check_count": len(smoke)},
-            "workspaces": rows,
-            "branches_created": False,
-            "wip_used": False,
-            "semaphore_used": False,
-        }
+        return _verified_deployment_result(
+            receipt=completed,
+            code_stamp=clean_stamp,
+            workspaces=rows,
+        )
     finally:
         _DEPLOYMENT_LOCK.release()
