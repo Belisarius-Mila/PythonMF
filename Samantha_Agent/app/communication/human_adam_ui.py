@@ -100,10 +100,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #deployMeta { color:var(--muted); font-size:13px; line-height:1.4; }
     #handoffTakeoverCheck { padding:10px 12px; border:1px solid #f59e0b; border-radius:11px; background:#fffbeb; color:#92400e; font-size:13px; line-height:1.45; overflow-wrap:anywhere; }
     #handoffTakeoverCheck.verified { border-color:#86efac; background:#f0fdf4; color:#166534; }
-    .context-anchor-body { flex:1; min-height:0; overflow:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
-    #contextAnchorInput { flex:1; min-height:320px; font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; }
-    #contextAnchorMeta,.context-anchor-help { margin:0; color:var(--muted); font-size:13px; }
-    .context-anchor-actions { display:flex; justify-content:flex-end; gap:8px; }
+    .thread-rotation-panel-body { flex:1; min-height:0; overflow:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
+    .thread-rotation-help { margin:0; color:var(--muted); font-size:13px; line-height:1.45; }
     .work-panel-body { flex:1; min-height:0; overflow:auto; display:flex; flex-direction:column; }
     .workflow-help-trigger { width:38px; min-width:38px; padding:8px 0; border-radius:50%; font-weight:700; }
     .workflow-help-panel { padding:14px; border:1px solid #c9d6e5; border-radius:13px; background:#f8fafc; color:var(--ink); }
@@ -123,12 +121,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     @media (max-width:620px) { .head { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .head h1 { text-align:center; } .head-tools { grid-column:1/-1; grid-row:2; justify-content:center; } .profile-tools { display:grid; grid-template-columns:auto minmax(0,1fr) auto; } .profile-tools select { min-width:0; width:100%; } .back { padding:8px 10px; } #mobileStatusSummary { display:flex; } .status-details { display:none; } .status-details.expanded { display:block; } .bubble { max-width:94%; } #chat { padding-left:12px; padding-right:12px; } }
     @media (max-width:620px) {
       .tvbcp-panel { width:100%; max-width:100vw; min-width:0; overflow-x:hidden; }
-      .tvbcp-head,.context-anchor-body { min-width:0; max-width:100%; }
-      #contextAnchorMeta,.context-anchor-help { overflow-wrap:anywhere; }
-      #contextAnchorInput { min-width:0; max-width:100%; }
-      #contextAnchorProposeBtn { width:100%; min-width:0; white-space:normal; }
-      .context-anchor-actions { width:100%; min-width:0; flex-wrap:wrap; }
-      .context-anchor-actions > button { flex:1 1 calc(50% - 4px); min-width:0; padding-left:8px; padding-right:8px; white-space:normal; }
+      .tvbcp-head,.thread-rotation-panel-body { min-width:0; max-width:100%; }
+      .thread-rotation-help { overflow-wrap:anywhere; }
       .thread-rotation-actions > button { flex:1 1 100%; min-width:0; white-space:normal; }
       .development-semaphore-actions > button { flex:1 1 100%; min-width:0; white-space:normal; }
       .development-binding-fields { grid-template-columns:1fr; }
@@ -145,7 +139,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <button class="primary" id="connectBtn" type="button">Připojit</button>
       <h1>Human–Adam</h1>
       <div class="head-tools">
-        <button id="contextAnchorOpenBtn" type="button">Plán</button>
+        <button id="threadRotationOpenBtn" type="button">Vlákno</button>
         <button id="tvbcpOpenBtn" type="button">TVBCP</button>
         <button id="workOpenBtn" type="button">Práce: stav</button>
         <button id="refreshBtn" type="button">Stav</button>
@@ -168,7 +162,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <span class="badge" id="threadBadge">Relace: —</span>
         <span class="badge" id="workspaceBadge">Izolovaný workspace</span>
         <span class="badge warn legacy-work-control" id="developmentBadge">Vývoj: neověřen</span>
-        <span class="badge" id="contextAnchorBadge">Kontext: nepřipnut</span>
+        <span class="badge" id="contextAnchorBadge">Starší kontext: neověřen</span>
         <button class="badge sound-badge warn" id="mediaSoundTestBtn" type="button">Zvuk odpovědi: vyzkoušet</button>
         <audio id="completionMediaAudio" preload="auto" playsinline hidden></audio>
       </div>
@@ -204,69 +198,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <div id="tvbcpEnd" aria-hidden="true"></div>
     </div>
   </aside>
-  <aside class="tvbcp-panel" id="contextAnchorPanel" hidden aria-label="Připnutý aktivní kontext">
+  <aside class="tvbcp-panel" id="threadRotationPanel" hidden aria-label="Bezpečná rotace profilového vlákna">
     <div class="tvbcp-head">
-      <h2>Aktivní kontext</h2>
-      <button class="workflow-help-trigger" id="planHelpBtn" type="button" aria-label="Nápověda k Plánu a rotaci vlákna" aria-expanded="false" aria-controls="planHelpPanel" title="Jak pracovat s Plánem a rotací">?</button>
-      <button id="contextAnchorRefreshBtn" type="button">Obnovit</button>
-      <button id="contextAnchorCloseBtn" type="button">Zavřít</button>
+      <h2>Nové profilové vlákno</h2>
+      <button id="threadRotationCloseBtn" type="button">Zavřít</button>
     </div>
-    <div class="context-anchor-body">
-      <section class="workflow-help-panel" id="planHelpPanel" aria-labelledby="planHelpTitle" tabindex="-1" hidden>
-        <div class="workflow-help-head">
-          <h3 id="planHelpTitle">Jak pracovat s Plánem a rotací</h3>
-          <button id="planHelpCloseBtn" type="button">Zavřít návod</button>
-        </div>
-        <p>Toto je pouze nápověda. Jejím otevřením se nic neukládá, nepřepíná ani neodesílá.</p>
-
-        <h4>Běžná práce s Plánem</h4>
-        <ol>
-          <li>Vyber správný pracovní profil a klikni na <strong>Připojit</strong>.</li>
-          <li>Zkontroluj uložený aktivní kontext. Když se plán změnil, nech připravit návrh a přečti jej.</li>
-          <li>Návrh nejdřív ulož a potom připni. Teprve připnutý kontext se přikládá k dalším tahům.</li>
-          <li>Pokračuj v běžné práci. Vlákno neotáčej jen preventivně.</li>
-        </ol>
-
-        <h4>Kdy přejít do nového vlákna</h4>
-        <ul>
-          <li>Dosavadní vlákno je příliš dlouhé nebo začíná ztrácet souvislosti.</li>
-          <li>Začíná nová ucelená etapa stejného projektu.</li>
-          <li>Chceš zachovat profil, workspace a plán, ale pokračovat v čistém Codex vlákně.</li>
-        </ul>
-
-        <h4>Bezpečná rotace krok za krokem</h4>
-        <ol>
-          <li>Počkej na dokončení aktivního tahu a nenechávej rozepsaný pokyn.</li>
-          <li>Kotva není pro rotaci povinná. Pokud ji chceš použít i v novém vlákně, aktualizuj ji, ulož a připni.</li>
-          <li>Klikni na <strong>Prověřit nové vlákno</strong> a přečti případné blokery.</li>
-          <li>Po zelené kontrole vlož přesnou nabídnutou potvrzovací větu.</li>
-          <li>Klikni na <strong>Přejít do nového vlákna</strong> a ověř nové ID vlákna i správný profil.</li>
-        </ol>
-
-        <h4>Když něco nejde</h4>
-        <ul>
-          <li><strong>Tlačítko je šedé:</strong> připoj profil, dokonči aktivní tah nebo ulož rozepsaný kontext.</li>
-          <li><strong>Kotva není aktuální:</strong> obnov návrh, zkontroluj jej, ulož a znovu připni.</li>
-          <li><strong>Doručení je nejisté:</strong> pokyn neposílej znovu; nejdřív klikni na Stav.</li>
-          <li><strong>Věta nefunguje:</strong> spusť nový audit a použij větu z jeho aktuální kontroly.</li>
-          <li><strong>Po rotaci něco chybí:</strong> neposílej vývojový pokyn; nejdřív zkontroluj pracovní proud, handoff a TVBCP.</li>
-        </ul>
-
-        <p class="workflow-help-safety"><strong>Nouzový postup:</strong> rotaci neprováděj, nic nemaž a pokračuj ve starém vlákně. Staré vlákno se při rotaci nemaže ani nearchivuje.</p>
-      </section>
-      <p id="contextAnchorMeta">Kontext se načte až po otevření.</p>
-      <p class="context-anchor-help">Nech Adama připravit návrh, zkontroluj jej a nejdřív jej soukromě ulož. Připnutý plán se přikládá k tahům; pozastavený zůstává uložený, ale nepřikládá se. Ulož pouze stručný cíl, očíslovaný plán, hotové body, rozhodnutí a další krok. Nevkládej hesla, tokeny, osobní údaje ani absolutní cesty. Novější pokyn v chatu má vždy přednost.</p>
-      <textarea id="contextAnchorInput" maxlength="6000" autocomplete="off" placeholder="Cíl:&#10;&#10;Plán:&#10;1. …&#10;&#10;Hotovo:&#10;- …&#10;&#10;Rozhodnutí:&#10;- …&#10;&#10;Další krok:&#10;- …" aria-label="Připnutý aktivní kontext"></textarea>
-      <button id="contextAnchorProposeBtn" type="button">Adam: připravit návrh</button>
-      <div class="context-anchor-actions">
-        <button id="contextAnchorDeleteBtn" type="button">Smazat</button>
-        <button id="contextAnchorPauseBtn" type="button">Pozastavit</button>
-        <button id="contextAnchorPinBtn" type="button">Připnout</button>
-        <button class="primary" id="contextAnchorSaveBtn" type="button">Uložit návrh</button>
-      </div>
+    <div class="thread-rotation-panel-body">
+      <p class="thread-rotation-help">Rotaci použij, když je dosavadní vlákno příliš dlouhé nebo začíná nová ucelená etapa stejného pracovního proudu. Nejdřív dokonči aktivní tah, spusť kontrolu a použij přesnou nabídnutou potvrzovací větu. Staré vlákno zůstane zachované a nearchivované; kontinuita pokračuje z handoffu, TVBCP a krátkého aktuálního kontextu.</p>
       <section class="thread-rotation-box" aria-label="Bezpečná rotace profilového vlákna">
-        <h3>Nové profilové vlákno</h3>
-        <p id="threadRotationMeta">Spusť kontrolu připravenosti. Kotva není pro rotaci povinná a staré vlákno se nemaže ani nearchivuje.</p>
+        <p id="threadRotationMeta">Spusť kontrolu připravenosti. Staré vlákno se nemaže ani nearchivuje.</p>
         <input id="threadRotationConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Po kontrole sem vlož potvrzovací větu" hidden disabled>
         <div class="thread-rotation-actions">
           <button id="threadRotationAuditBtn" type="button">Prověřit nové vlákno</button>
@@ -404,20 +344,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const profileSelect = document.getElementById("profileSelect");
   const profileSwitchBtn = document.getElementById("profileSwitchBtn");
   const refreshBtn = document.getElementById("refreshBtn");
-  const contextAnchorOpenBtn = document.getElementById("contextAnchorOpenBtn");
-  const contextAnchorPanel = document.getElementById("contextAnchorPanel");
-  const contextAnchorCloseBtn = document.getElementById("contextAnchorCloseBtn");
-  const contextAnchorRefreshBtn = document.getElementById("contextAnchorRefreshBtn");
-  const planHelpBtn = document.getElementById("planHelpBtn");
-  const planHelpPanel = document.getElementById("planHelpPanel");
-  const planHelpCloseBtn = document.getElementById("planHelpCloseBtn");
-  const contextAnchorMeta = document.getElementById("contextAnchorMeta");
-  const contextAnchorInput = document.getElementById("contextAnchorInput");
-  const contextAnchorProposeBtn = document.getElementById("contextAnchorProposeBtn");
-  const contextAnchorSaveBtn = document.getElementById("contextAnchorSaveBtn");
-  const contextAnchorPinBtn = document.getElementById("contextAnchorPinBtn");
-  const contextAnchorPauseBtn = document.getElementById("contextAnchorPauseBtn");
-  const contextAnchorDeleteBtn = document.getElementById("contextAnchorDeleteBtn");
+  const threadRotationOpenBtn = document.getElementById("threadRotationOpenBtn");
+  const threadRotationPanel = document.getElementById("threadRotationPanel");
+  const threadRotationCloseBtn = document.getElementById("threadRotationCloseBtn");
   const threadRotationMeta = document.getElementById("threadRotationMeta");
   const threadRotationConfirmation = document.getElementById("threadRotationConfirmation");
   const threadRotationAuditBtn = document.getElementById("threadRotationAuditBtn");
@@ -514,22 +443,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let completionMediaUrl = "";
   let activeSpeechButton = null;
   let activeSpeechUtterance = null;
-  let contextAnchorLoaded = false;
-  let savedContextAnchorContent = "";
-  let savedContextAnchorActive = false;
-  let savedContextAnchorRevision = 0;
   let threadRotationAudit = null;
   const HUMAN_ADAM_SEND_PATH = "/api/human-adam/send";
   const RESULT_WATCH_MAX_ATTEMPTS = 60;
   const RESULT_WATCH_MAX_DELAY_MS = 30000;
-  const CONTEXT_ANCHOR_PROPOSAL_PROMPT = `Připrav návrh aktivního kontextu pro další pokračování tohoto pracovního profilu. Odpověz pouze stručným českým textem do 6000 znaků v přesné struktuře:
-Cíl:
-Plán:
-Hotovo:
-Rozhodnutí:
-Další krok:
-Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenší další krok. Při nejistotě ji výslovně označ a nic si nevymýšlej. Neuváděj obsah souborů, celé soukromé cesty, hesla, tokeny, klíče, osobní údaje ani citlivé texty.`;
-  const CONTEXT_ANCHOR_REQUIRED_HEADINGS = ["Cíl:", "Plán:", "Hotovo:", "Rozhodnutí:", "Další krok:"];
 
   function messageId() {
     if (window.crypto && crypto.randomUUID) return `human-adam-${crypto.randomUUID()}`;
@@ -666,14 +583,8 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     }
   }
 
-  function contextAnchorDraftDirty() {
-    return contextAnchorLoaded && contextAnchorInput.value.trim() !== savedContextAnchorContent;
-  }
-
   function syncControls() {
-    const anchorMutationBlocked = busy || sendInFlight || sessionTurnBusy;
-    const anchorDirty = contextAnchorDraftDirty();
-    const anchorHasContent = Boolean(savedContextAnchorContent);
+    const rotationBlocked = busy || sendInFlight || sessionTurnBusy;
     connectBtn.disabled = busy;
     profileSelect.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing;
     profileSwitchBtn.disabled = profileSelect.disabled || !profileSelect.value || profileSelect.value === activeWorkstreamId;
@@ -690,14 +601,9 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     voiceRecordBtn.textContent = voiceRecording ? "Nahrávám…" : "Nahrát pokyn";
     voiceStopBtn.hidden = !voiceRecording;
     voiceStopBtn.disabled = !voiceRecording;
-    contextAnchorSaveBtn.disabled = anchorMutationBlocked || !contextAnchorLoaded || (!anchorDirty && anchorHasContent);
-    contextAnchorPinBtn.disabled = anchorMutationBlocked || anchorDirty || !anchorHasContent || savedContextAnchorActive;
-    contextAnchorPauseBtn.disabled = anchorMutationBlocked || anchorDirty || !anchorHasContent || !savedContextAnchorActive;
-    contextAnchorDeleteBtn.disabled = anchorMutationBlocked || anchorDirty || !anchorHasContent;
-    contextAnchorProposeBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || !sessionConnected;
-    threadRotationAuditBtn.disabled = busy || sendInFlight || sessionTurnBusy || !sessionConnected || anchorDirty;
+    threadRotationAuditBtn.disabled = rotationBlocked || !sessionConnected;
     const rotationRequired = threadRotationAudit ? String(threadRotationAudit.confirmation_text || "") : "";
-    threadRotationConfirmation.disabled = anchorMutationBlocked || !threadRotationAudit || threadRotationAudit.ready !== true;
+    threadRotationConfirmation.disabled = rotationBlocked || !threadRotationAudit || threadRotationAudit.ready !== true;
     threadRotationBtn.disabled = threadRotationConfirmation.disabled || !rotationRequired || threadRotationConfirmation.value.trim() !== rotationRequired;
     const semaphoreValid = developmentSemaphore && developmentSemaphore.ok === true;
     const semaphoreActive = Boolean(semaphoreValid && developmentSemaphore.active);
@@ -1224,11 +1130,6 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       profileSelect.value = activeWorkstreamId;
       return;
     }
-    if (contextAnchorDraftDirty()) {
-      showProfileSwitchFailure("Nejdřív ulož nebo výslovně zahoď rozepsanou změnu kotvy; proud jsem nepřepnul.");
-      profileSelect.value = activeWorkstreamId;
-      return;
-    }
     if (!window.confirm(`Přepnout pracovní proud na „${targetLabel}“?\n\nBezpečně se přepne vlákno, pracovní kontext, handoff a TVBCP; sdílený workspace se předem ověří a synchronizuje.`)) {
       profileSelect.value = activeWorkstreamId;
       return;
@@ -1237,7 +1138,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     setBusy(true, `Přepínám pracovní proud na ${targetLabel}…`);
     stopAnswerSpeech(false);
     tvbcpPanel.hidden = true;
-    contextAnchorPanel.hidden = true;
+    threadRotationPanel.hidden = true;
     workPanel.hidden = true;
     deploymentAudit = null;
     try {
@@ -1246,7 +1147,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
         body:JSON.stringify({workstream_id:targetId,confirmed:true}),
       });
       if (!payload.ok) throw new Error(payload.message || "Přepnutí profilu selhalo.");
-      resetContextAnchorEditorState();
+      resetThreadRotationState();
       renderStatus(payload);
       notice.textContent = `Aktivní pracovní proud: ${activeWorkstreamLabel}.`;
     } catch (error) {
@@ -1402,23 +1303,15 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     const failed = Boolean(anchor && anchor.ok === false);
     const active = Boolean(anchor && anchor.ok === true && anchor.active === true);
     const stored = Boolean(anchor && anchor.ok === true && anchor.has_content === true);
-    contextAnchorBadge.textContent = failed ? "Kontext: chyba" : (active ? "Kontext: připnut" : (stored ? "Kontext: uložen" : "Kontext: žádný"));
-    contextAnchorBadge.className = failed ? "badge warn" : (active ? "badge ok" : "badge");
+    contextAnchorBadge.textContent = failed
+      ? "Starší kontext: chyba"
+      : (active
+        ? "Starší kontext: stále aktivní"
+        : (stored ? "Starší kontext: uložený" : "Starší kontext: žádný"));
+    contextAnchorBadge.className = failed || active ? "badge warn" : "badge";
   }
 
-  function resetContextAnchorEditorState() {
-    contextAnchorLoaded = false;
-    savedContextAnchorContent = "";
-    savedContextAnchorActive = false;
-    savedContextAnchorRevision = 0;
-    contextAnchorInput.value = "";
-    contextAnchorSaveBtn.textContent = "Uložit návrh";
-    contextAnchorMeta.textContent = "Kontext se načte až po otevření.";
-    resetThreadRotationState();
-    syncControls();
-  }
-
-  function resetThreadRotationState(message="Spusť kontrolu připravenosti. Kotva není pro rotaci povinná a staré vlákno se nemaže ani nearchivuje.") {
+  function resetThreadRotationState(message="Spusť kontrolu připravenosti. Staré vlákno se nemaže ani nearchivuje.") {
     threadRotationAudit = null;
     threadRotationConfirmation.value = "";
     threadRotationConfirmation.hidden = true;
@@ -1429,64 +1322,14 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     syncControls();
   }
 
-  function renderContextAnchorEditor(anchor) {
-    renderContextAnchorBadge(anchor);
-    if (!anchor || anchor.ok === false) {
-      contextAnchorMeta.textContent = anchor && anchor.message ? anchor.message : "Aktivní kontext nelze načíst.";
-      return;
-    }
-    const content = String(anchor.content || "");
-    const hasContent = anchor.has_content === true || Boolean(content);
-    contextAnchorLoaded = true;
-    savedContextAnchorContent = hasContent ? content : "";
-    savedContextAnchorActive = hasContent && anchor.active === true;
-    contextAnchorInput.value = savedContextAnchorContent;
-    contextAnchorSaveBtn.textContent = hasContent ? "Uložit aktualizaci" : "Uložit návrh";
-    const revision = Number(anchor.revision || 0);
-    savedContextAnchorRevision = Number.isSafeInteger(revision) && revision >= 0 ? revision : 0;
-    contextAnchorMeta.textContent = savedContextAnchorActive
-      ? `Připnuto · revize ${revision} · ${formatTime(anchor.updated_at)}`
-      : (hasContent
-        ? `Uloženo a pozastaveno · revize ${revision} · ${formatTime(anchor.updated_at)}`
-        : (deliveryUncertain
-          ? "Žádná kotva není uložená. Můžeš ji napsat, nebo nechat připravit Adamem; kvůli předchozímu nejistému doručení bude nový odlišný pokyn vyžadovat potvrzení."
-          : "Žádná kotva není uložená. Napiš návrh do pole a stiskni Uložit návrh."));
-    syncControls();
-  }
-
-  async function loadContextAnchor() {
-    if (contextAnchorDraftDirty() && !window.confirm("Zahodit rozepsanou změnu a znovu načíst naposledy uloženou kotvu?")) return false;
-    contextAnchorRefreshBtn.disabled = true;
-    contextAnchorMeta.textContent = "Načítám aktivní kontext…";
-    try {
-      const payload = await api("/api/human-adam/context-anchor");
-      renderContextAnchorEditor(payload);
-    } catch (error) {
-      contextAnchorMeta.textContent = `Aktivní kontext nelze načíst: ${error.message}`;
-    } finally {
-      contextAnchorRefreshBtn.disabled = false;
-      syncControls();
-    }
-    return true;
-  }
-
-  function openContextAnchor() {
+  function openThreadRotation() {
     tvbcpPanel.hidden = true;
     workPanel.hidden = true;
-    contextAnchorPanel.hidden = false;
-    if (!contextAnchorLoaded) loadContextAnchor();
+    threadRotationPanel.hidden = false;
   }
 
-  function setPlanHelpOpen(open) {
-    const expanded = Boolean(open);
-    planHelpPanel.hidden = !expanded;
-    planHelpBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
-    if (expanded) planHelpPanel.focus();
-  }
-
-  function closeContextAnchor() {
-    setPlanHelpOpen(false);
-    contextAnchorPanel.hidden = true;
+  function closeThreadRotation() {
+    threadRotationPanel.hidden = true;
   }
 
   function renderThreadRotationAudit(payload) {
@@ -1512,7 +1355,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   }
 
   async function auditThreadRotation() {
-    if (threadRotationAuditBtn.disabled || contextAnchorDraftDirty()) return;
+    if (threadRotationAuditBtn.disabled) return;
     setBusy(true, "Ověřuji připojení, stav tahu a doručení…");
     threadRotationMeta.textContent = "Kontroluji připravenost nového profilového vlákna…";
     try {
@@ -1527,7 +1370,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   }
 
   async function rotateProfileThread() {
-    if (threadRotationBtn.disabled || !threadRotationAudit || contextAnchorDraftDirty()) return;
+    if (threadRotationBtn.disabled || !threadRotationAudit) return;
     const required = String(threadRotationAudit.confirmation_text || "");
     const confirmation = threadRotationConfirmation.value.trim();
     if (!required || confirmation !== required) {
@@ -1546,7 +1389,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
         throw new Error(payload.message || "Rotace vlákna nebyla potvrzena.");
       }
       rotated = payload;
-      resetThreadRotationState("Nové profilové vlákno bylo založeno. Připnutý kontext se použije při příštím tahu; staré vlákno zůstalo zachované.");
+      resetThreadRotationState("Nové profilové vlákno bylo založeno; staré vlákno zůstalo zachované.");
     } catch (error) {
       resetThreadRotationState(`Vlákno nebylo změněno: ${error.message}`);
     } finally { setBusy(false); }
@@ -1555,136 +1398,6 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       threadRotationMeta.textContent = "Nové profilové vlákno je aktivní; staré vlákno zůstalo zachované.";
       notice.textContent = "Rotace dokončena bez odeslání zprávy a bez smazání starého vlákna.";
     }
-  }
-
-  async function changeContextAnchor(operation) {
-    if (busy || sendInFlight || sessionTurnBusy) return;
-    const content = contextAnchorInput.value.trim();
-    if (operation === "save" && !content) {
-      contextAnchorMeta.textContent = "Nejdřív napiš stručný aktivní kontext k uložení.";
-      contextAnchorInput.focus();
-      return;
-    }
-    if (operation !== "save" && contextAnchorDraftDirty()) {
-      contextAnchorMeta.textContent = "Nejdřív ulož nebo obnovou výslovně zahoď rozepsanou změnu.";
-      return;
-    }
-    if (operation === "delete" && !window.confirm("Trvale smazat uloženou kotvu tohoto profilu? Historie chatu se nezmění.")) return;
-    const progressMessages = {
-      save:"Ukládám aktivní kontext…",
-      pin:"Připínám uložený kontext…",
-      pause:"Pozastavuji připnutý kontext…",
-      delete:"Mažu uložený kontext…",
-    };
-    setBusy(true);
-    contextAnchorMeta.textContent = progressMessages[operation] || "Měním aktivní kontext…";
-    try {
-      const payload = await api("/api/human-adam/context-anchor", {
-        method:"POST",
-        body:JSON.stringify({
-          operation,
-          expected_revision:savedContextAnchorRevision,
-          content:operation === "save" ? content : "",
-          confirmed:true,
-        }),
-      });
-      if (!payload.ok) {
-        const error = new Error(payload.message || "Aktivní kontext nelze uložit.");
-        error.status = String(payload.status || "");
-        error.currentRevision = Number(payload.current_revision);
-        throw error;
-      }
-      renderContextAnchorEditor(payload);
-      const successMessages = {
-        save: payload.active
-          ? "Aktualizovaná připnutá kotva se použije od příštího tahu."
-          : "Kotva je soukromě uložená a zatím se k tahům nepřikládá.",
-        pin:"Kotva je připnutá a od příštího tahu se přiloží pouze modelu.",
-        pause:"Kotva je pozastavená, zůstává uložená a k tahům se nepřikládá.",
-        delete:"Uložená kotva byla smazána; historie chatu se nezměnila.",
-      };
-      notice.textContent = successMessages[operation] || "Aktivní kontext byl změněn.";
-    } catch (error) {
-      if (error.status === "human_adam_context_anchor_conflict") {
-        const newerRevision = Number.isSafeInteger(error.currentRevision) ? ` Aktuální je revize ${error.currentRevision}.` : "";
-        contextAnchorMeta.textContent = `Kotva byla mezitím změněna na jiném zařízení.${newerRevision} Tento editor nic nepřepsal a jeho obsah zůstal zachovaný. Nejdřív si případný rozepsaný text zkopíruj, potom stiskni Obnovit.`;
-        notice.textContent = "Konflikt kotvy: novější verze z Macu nebo iPhonu zůstala bezpečně zachovaná.";
-      } else {
-        contextAnchorMeta.textContent = `Aktivní kontext nebyl změněn: ${error.message}`;
-      }
-    } finally { setBusy(false); }
-  }
-
-  function validContextAnchorProposal(text) {
-    const proposal = String(text || "").trim();
-    const limit = Number(contextAnchorInput.maxLength) || 6000;
-    return Boolean(proposal && proposal.length <= limit && CONTEXT_ANCHOR_REQUIRED_HEADINGS.every((heading) => proposal.includes(heading)));
-  }
-
-  async function proposeContextAnchor() {
-    if (busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || !sessionConnected) return;
-    if (deliveryUncertain && !window.confirm("Předchozí doručení je nejisté. Odeslat nový odlišný pokyn pouze pro přípravu kotvy? Předchozí pokyn se nebude opakovat.")) return;
-    const editorBefore = contextAnchorInput.value;
-    if (editorBefore.trim() && !window.confirm("Adamův nový návrh po dokončení nahradí současný obsah editoru. Pokračovat?")) return;
-    setWriteIntentArmed(false);
-    sendInFlight = true;
-    syncControls();
-    await primeCompletionMediaSound();
-    const sentAt = new Date().toISOString();
-    const clientId = messageId();
-    const pendingMessage = {user_text:CONTEXT_ANCHOR_PROPOSAL_PROMPT,client_sent_at:sentAt,received_at:sentAt,status:"pending",answer:""};
-    const optimistic = lastSession
-      ? {...lastSession,turn_busy:true,active_turn:{client_message_id:clientId,started_at:sentAt},messages:[...(lastSession.messages || []),pendingMessage]}
-      : {turn_busy:true,active_turn:{client_message_id:clientId,started_at:sentAt},messages:[pendingMessage]};
-    renderSession(optimistic);
-    renderTurnState(optimistic);
-    contextAnchorMeta.textContent = "Adam připravuje návrh; zatím se nic neukládá…";
-    notice.textContent = `Odesláno ${formatTime(sentAt)} · Adam připravuje návrh…`;
-    let outcomeNotice = "";
-    try {
-      const payload = await api(HUMAN_ADAM_SEND_PATH, {method:"POST",body:JSON.stringify({message:CONTEXT_ANCHOR_PROPOSAL_PROMPT,client_message_id:clientId,client_sent_at:sentAt})});
-      if (!payload.ok) {
-        const error = new Error(payload.message || "Příprava návrhu selhala.");
-        error.status = String(payload.status || "");
-        throw error;
-      }
-      stopResultWatch();
-      renderSession(payload.session);
-      renderTurnState(payload.session);
-      const entry = payload.entry && typeof payload.entry === "object" ? payload.entry : {};
-      const proposal = String(entry.answer || "").trim();
-      if (entry.status !== "completed" || entry.delivery_confirmed !== true) {
-        const error = new Error("Dokončení návrhu nebylo potvrzeno.");
-        error.status = "delivery_unknown";
-        throw error;
-      }
-      if (contextAnchorInput.value !== editorBefore) {
-        contextAnchorMeta.textContent = "Editor se během čekání změnil; Adamův návrh zůstal v historii a nebyl vložen.";
-        outcomeNotice = "Návrh je potvrzený v historii, ale rozepsaný obsah kotvy jsem nepřepsal.";
-      } else if (!validContextAnchorProposal(proposal)) {
-        contextAnchorMeta.textContent = "Adamův návrh nemá bezpečnou úplnou strukturu; zůstal pouze v historii.";
-        outcomeNotice = "Návrh nebyl vložen ani uložen, protože chybí povinná struktura nebo překročil limit.";
-      } else {
-        contextAnchorInput.value = proposal;
-        contextAnchorMeta.textContent = "Návrh Adama je vložený, ale zatím není uložený. Zkontroluj jej a stiskni Uložit návrh.";
-        outcomeNotice = "Adamův návrh je připravený k tvé kontrole; automaticky se neuložil.";
-      }
-      if (payload.context_anchor_warning) {
-        outcomeNotice += ` Upozornění: ${payload.context_anchor_warning}`;
-      }
-      playCompletionMediaSound();
-    } catch (error) {
-      const confirmedRejection = new Set(["human_adam_busy","human_adam_send_failed"]).has(error.status);
-      outcomeNotice = confirmedRejection
-        ? `Příprava návrhu byla odmítnuta: ${error.message}`
-        : `Stav doručení návrhu je nejistý: ${error.message} Požadavek neposílej automaticky znovu.`;
-      contextAnchorMeta.textContent = "Návrh nebyl vložen ani uložen.";
-    } finally {
-      sendInFlight = false;
-      syncControls();
-    }
-    await loadStatus();
-    if (outcomeNotice) notice.textContent = outcomeNotice;
   }
 
   async function loadTvbcp() {
@@ -1709,7 +1422,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
   }
 
   function openTvbcp() {
-    contextAnchorPanel.hidden = true;
+    threadRotationPanel.hidden = true;
     workPanel.hidden = true;
     tvbcpPanel.hidden = false;
     loadTvbcp();
@@ -2104,7 +1817,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
 
   async function loadProjectContinuity() {
     projectContinuityAuditBtn.disabled = true;
-    projectContinuityMeta.textContent = "Prověřuji vazbu, handoff, kotvu, TVBCP a nasazení bez zápisu…";
+    projectContinuityMeta.textContent = "Prověřuji vazbu, handoff, TVBCP a nasazení bez zápisu…";
     try {
       const payload = await api("/api/human-adam/project-continuity");
       renderProjectContinuity(payload);
@@ -2126,7 +1839,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
       notice.textContent = "Práce je čistá a synchronní s main. Detail není potřeba.";
       return;
     }
-    contextAnchorPanel.hidden = true;
+    threadRotationPanel.hidden = true;
     tvbcpPanel.hidden = true;
     workPanel.hidden = false;
   }
@@ -2402,7 +2115,7 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     if (!record) return;
     const reconnectResult = await reconnectAfterVerifiedDeployment(statusPayload);
     statusPayload = reconnectResult.payload;
-    contextAnchorPanel.hidden = true;
+    threadRotationPanel.hidden = true;
     tvbcpPanel.hidden = true;
     workPanel.hidden = false;
     await loadWork();
@@ -2524,20 +2237,8 @@ Zachyť jen současný plán, prokazatelně hotové body, rozhodnutí a nejmenš
     stopCompletionMediaSound();
   });
   refreshBtn.addEventListener("click", handleRefreshStatus);
-  contextAnchorOpenBtn.addEventListener("click", openContextAnchor);
-  contextAnchorCloseBtn.addEventListener("click", closeContextAnchor);
-  planHelpBtn.addEventListener("click", () => setPlanHelpOpen(planHelpPanel.hidden));
-  planHelpCloseBtn.addEventListener("click", () => {
-    setPlanHelpOpen(false);
-    planHelpBtn.focus();
-  });
-  contextAnchorRefreshBtn.addEventListener("click", loadContextAnchor);
-  contextAnchorProposeBtn.addEventListener("click", proposeContextAnchor);
-  contextAnchorInput.addEventListener("input", syncControls);
-  contextAnchorSaveBtn.addEventListener("click", () => changeContextAnchor("save"));
-  contextAnchorPinBtn.addEventListener("click", () => changeContextAnchor("pin"));
-  contextAnchorPauseBtn.addEventListener("click", () => changeContextAnchor("pause"));
-  contextAnchorDeleteBtn.addEventListener("click", () => changeContextAnchor("delete"));
+  threadRotationOpenBtn.addEventListener("click", openThreadRotation);
+  threadRotationCloseBtn.addEventListener("click", closeThreadRotation);
   threadRotationAuditBtn.addEventListener("click", auditThreadRotation);
   threadRotationConfirmation.addEventListener("input", syncControls);
   threadRotationBtn.addEventListener("click", rotateProfileThread);

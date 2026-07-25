@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-25 17:49 CEST
-- Poslední dokončený vývojový výsledek: Přístup k soukromému archivu nyní bezpečně řídí výhradně deklarativní metadata aktivního pracovního proudu
-- Stav při vytvoření checkpointu: změna je otestovaná (1231 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
-- Git před checkpointem: `main == origin/main` na `d83aee6fb7a3`.
-- Poslední serverově potvrzené nasazení: `cc5d7456ff38` · je starší než ověřený main před tímto checkpointem · 1227 testů · smoke 5/5 · 2026-07-25T12:51:58+00:00.
-- Rozhodnutí: Private-archive oprávnění, instrukce a sandboxový root vycházejí pouze z validovaných capability metadat; chybějící nebo neplatná konfigurace selže uzavřeně
-- Bezprostřední další krok: Provést běžný checkpoint a po nasazení ověřit Knihovnu i proud bez private-archive capability
-- Navrhované další kroky: Stejným deklarativním způsobem lze v dalších samostatných fázích převést další rozdíly mezi pracovními proudy
+- Obnoveno potvrzeným checkpointem: 2026-07-25 18:35 CEST
+- Poslední dokončený vývojový výsledek: Editor staré kontextové kotvy zmizel, rotace má vlastní panel a legacy stav zůstává viditelný pouze redigovaným upozorněním
+- Stav při vytvoření checkpointu: změna je otestovaná (1221 testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
+- Git před checkpointem: `main == origin/main` na `1e95d1fecfed`.
+- Poslední serverově potvrzené nasazení: serverová deployment receipt pro tento proud není dostupná.
+- Rozhodnutí: Do odstranění modelové injekce zůstává pouze pasivní upozornění na aktivní nebo uložený legacy kontext
+- Bezprostřední další krok: Po checkpointu a nasazení ručně ověřit panel Vlákno, pasivní badge, běžný chat a přepnutí pracovního proudu
+- Navrhované další kroky: Ve fázi 7.2 samostatně vyřadit endpointy bez mazání private stavu; Ve fázi 7.3 odstranit modelovou injekci a následně pasivní badge
 - Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -1797,3 +1797,13 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (6): `Samantha_Agent/app/communication/human_adam_profiles.py`, `Samantha_Agent/app/communication/human_adam_service.py`, `Samantha_Agent/app/communication/human_adam_workstream_catalog.py`, `Samantha_Agent/tests/test_human_adam_profiles.py`, `Samantha_Agent/tests/test_human_adam_service.py`, `Samantha_Agent/tests/test_human_adam_workstream_catalog.py`
 - Commit: `Drive private archive access from workstream capabilities`
 - Další krok: Provést běžný checkpoint a po nasazení ověřit Knihovnu i proud bez private-archive capability
+
+### Automatický checkpoint 2026-07-25 18:35 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Souhrn: Editor staré kontextové kotvy zmizel, rotace má vlastní panel a legacy stav zůstává viditelný pouze redigovaným upozorněním
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější push ani nasazení.
+- Ověření: plná Cockpit brána: 1221 testů, 238.6 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/tests/test_human_adam_ui.py`
+- Commit: `Vyřadit interaktivní UI kontextové kotvy`
+- Další krok: Po checkpointu a nasazení ručně ověřit panel Vlákno, pasivní badge, běžný chat a přepnutí pracovního proudu
