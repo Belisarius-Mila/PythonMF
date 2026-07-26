@@ -62,8 +62,12 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
         self.assertIn("/api/speech/edge-tts", html)
         self.assertIn('id="codexApprovalCard"', html)
         self.assertIn("renderCodexApproval(data.codex_approval || {});", html)
+        self.assertIn("/api/codex-approval/clear", html)
+        self.assertNotIn("/api/voice-mode/codex-approval/clear", html)
         self.assertIn('id="tvbcpOpenBtn"', html)
         self.assertIn("openTvbcpModal", html)
+        self.assertIn("/api/tvbcp", html)
+        self.assertNotIn("/api/voice-bridge/tvbcp", html)
 
     def test_human_adam_microphone_and_legacy_backend_routes_remain(self) -> None:
         cockpit_source = (PROJECT_ROOT / "app" / "cockpit.py").read_text(encoding="utf-8")
@@ -87,6 +91,15 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
         ):
             with self.subTest(route=route):
                 self.assertIn(route, cockpit_source)
+
+    def test_surviving_generic_routes_have_no_voice_aliases(self) -> None:
+        source = (PROJECT_ROOT / "app" / "cockpit.py").read_text(encoding="utf-8")
+
+        self.assertIn('"path": "/api/codex-approval/clear"', source)
+        self.assertIn('if parsed.path == "/api/codex-approval/clear"', source)
+        self.assertIn('if parsed.path == "/api/tvbcp"', source)
+        self.assertNotIn("/api/voice-mode/codex-approval/clear", source)
+        self.assertNotIn("/api/voice-bridge/tvbcp", source)
 
 
 if __name__ == "__main__":

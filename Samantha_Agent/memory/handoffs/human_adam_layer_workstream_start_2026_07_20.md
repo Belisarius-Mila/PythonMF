@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-26 15:47 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-26 16:15 CEST
 
 ### Hotovo
-- Cockpit už neobsahuje starý oddíl Hlas ani jeho Voice Bridge JavaScript; Human–Adam mikrofon, předčítání a obecné ovládání zůstaly zachované
+- Codex approval a TVBCP používají obecné API cesty a jejich staré voice aliasy už nejsou veřejně dostupné
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -14,19 +14,19 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Provést checkpoint, push a nasazení ovládacími prvky Cockpitu a vizuálně ověřit hlavní obrazovku, předčítání, TVBCP a Human–Adam mikrofon
+- Provést checkpoint, push a nasazení a živě ověřit otevření TVBCP, vyčištění Codex approval karty a nepřístupnost starých cest
 
 ### Rozhodnutí
-- Legacy oddíl Hlas se z Cockpitu odstraňuje, zatímco Human–Adam mikrofon, obecné předčítání, backendové endpointy a private stav zůstávají zachované
+- Stále používané obecné funkce nesmějí zůstávat pod legacy Voice Mode nebo Voice Bridge názvy
 
 ### Navrhované další kroky
-- Po živém ověření připravit samostatný audit dalšího backendového řezu Voice Bridge
-- Private stav nemazat ani nemigrovat bez samostatného rozhodnutí
+- Po živém ověření pokračovat fází 9.3b odstraněním nepoužívaných legacy Voice Bridge a Voice Mode endpointů
+- Private stav a interní moduly ponechat do samostatného pozdějšího rozhodnutí
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1259 testů).
-- Git před checkpointem: `main == origin/main` na `14a2dc06f750`.
-- Poslední serverově potvrzené nasazení: `14a2dc06f750` · odpovídá ověřenému main před tímto checkpointem · 1258 testů · smoke 5/5 · 2026-07-26T12:46:36+00:00.
+- Změna je otestovaná (1261 testů).
+- Git před checkpointem: `main == origin/main` na `bfd38183f31d`.
+- Poslední serverově potvrzené nasazení: `bfd38183f31d` · odpovídá ověřenému main před tímto checkpointem · 1259 testů · smoke 5/5 · 2026-07-26T13:57:58+00:00.
 - Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -2112,3 +2112,15 @@ Technicky dukaz:
 - Změněné cesty před paměťovým zápisem (6): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/tests/test_codex_approval_cockpit_contract.py`, `Samantha_Agent/tests/test_cockpit_voice_frontend_retirement.py`
 - Commit: `Remove legacy Hlas frontend from Cockpit`
 - Další krok: Provést checkpoint, push a nasazení ovládacími prvky Cockpitu a vizuálně ověřit hlavní obrazovku, předčítání, TVBCP a Human–Adam mikrofon
+
+### Automatický checkpoint 2026-07-26 16:15 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Codex approval a TVBCP používají obecné API cesty a jejich staré voice aliasy už nejsou veřejně dostupné; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: plná Cockpit brána: 1261 testů, 305.1 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_voice_frontend_retirement.py`, `Samantha_Agent/tests/test_codex_approval_cockpit_contract.py`
+- Commit: `Move surviving APIs outside legacy voice namespaces`
+- Další krok: Provést checkpoint, push a nasazení a živě ověřit otevření TVBCP, vyčištění Codex approval karty a nepřístupnost starých cest

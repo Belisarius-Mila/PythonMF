@@ -3030,7 +3030,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("Co má Míla udělat", COCKPIT_HTML)
         self.assertIn("codexApprovalRisk", COCKPIT_HTML)
         self.assertIn("renderCodexApproval", COCKPIT_HTML)
-        self.assertIn("/api/voice-mode/codex-approval/clear", COCKPIT_HTML)
+        self.assertIn("/api/codex-approval/clear", COCKPIT_HTML)
+        self.assertNotIn("/api/voice-mode/codex-approval/clear", COCKPIT_HTML)
         self.assertIn("clearCodexApprovalCard", COCKPIT_HTML)
         self.assertIn("codexApprovalOpenHumanAdamBtn", COCKPIT_HTML)
         self.assertIn("Otevřít Human–Adam", COCKPIT_HTML)
@@ -3062,6 +3063,18 @@ class CockpitTests(unittest.TestCase):
 
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "confirmation_required")
+
+    def test_generic_codex_approval_and_tvbcp_routes_replace_voice_names(self) -> None:
+        registered_paths = {item["path"] for item in COCKPIT_POST_ACTIONS}
+        post_routes = set(self.cockpit_do_post_routes())
+        get_routes = set(self.cockpit_do_get_routes())
+
+        self.assertIn("/api/codex-approval/clear", registered_paths)
+        self.assertIn("/api/codex-approval/clear", post_routes)
+        self.assertNotIn("/api/voice-mode/codex-approval/clear", registered_paths)
+        self.assertNotIn("/api/voice-mode/codex-approval/clear", post_routes)
+        self.assertIn("/api/tvbcp", get_routes)
+        self.assertNotIn("/api/voice-bridge/tvbcp", get_routes)
 
     def test_live_status_refresh_renders_only_codex_approval(self) -> None:
         start = COCKPIT_HTML.index("async function refreshLiveStatus()")

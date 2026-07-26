@@ -9724,7 +9724,7 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "voice_tests",
     },
     {
-        "path": "/api/voice-mode/codex-approval/clear",
+        "path": "/api/codex-approval/clear",
         "label": "Vycistit Codex approval kartu",
         "risk": "private_write",
         "confirmation": "ui_confirm_boolean",
@@ -10310,7 +10310,7 @@ class CockpitServer:
                 if parsed.path == "/api/live-status":
                     self.respond_json(cockpit_live_status())
                     return
-                if parsed.path == "/api/voice-bridge/tvbcp":
+                if parsed.path == "/api/tvbcp":
                     self.respond_json(tvbcp_status())
                     return
                 if parsed.path == "/api/human-adam/status":
@@ -10659,7 +10659,7 @@ class CockpitServer:
                     payload = self.read_json()
                     self.respond_json(cockpit_voice_approval_action(payload))
                     return
-                if parsed.path == "/api/voice-mode/codex-approval/clear":
+                if parsed.path == "/api/codex-approval/clear":
                     payload = self.read_json()
                     self.respond_json(cockpit_codex_approval_clear_action(payload))
                     return
@@ -16605,7 +16605,7 @@ COCKPIT_HTML = """<!doctype html>
     async function refreshTvbcpModal() {
       tvbcpStatus.textContent = "Načítám pracovní protokol…";
       try {
-        const data = await fetchJson("/api/voice-bridge/tvbcp");
+        const data = await fetchJson("/api/tvbcp");
         tvbcpContent.textContent = data.content || "TVBCP je prázdný.";
         window.requestAnimationFrame(() => {
           tvbcpContent.scrollTop = tvbcpContent.scrollHeight;
@@ -17369,7 +17369,7 @@ COCKPIT_HTML = """<!doctype html>
 		    async function clearCodexApprovalCard() {
 		      if (codexApprovalClearBtn) codexApprovalClearBtn.disabled = true;
 		      try {
-		        const data = await postJson("/api/voice-mode/codex-approval/clear", {
+		        const data = await postJson("/api/codex-approval/clear", {
 		          confirmed: true,
 		          note: "Vyčištěno z Cockpitu po ručním vyřešení nebo zrušení systémového potvrzení."
 		        });

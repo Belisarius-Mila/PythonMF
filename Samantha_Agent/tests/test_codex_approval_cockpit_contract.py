@@ -29,6 +29,8 @@ class CodexApprovalCockpitContractTests(unittest.TestCase):
         self.assertNotIn('id="voiceCommandDetails"', source)
         self.assertIn('id="codexApprovalOpenHumanAdamBtn"', source)
         self.assertIn('window.location.href = "/human-adam/"', source)
+        self.assertIn('postJson("/api/codex-approval/clear"', source)
+        self.assertNotIn("/api/voice-mode/codex-approval/clear", source)
         self.assertNotIn("codexApprovalSendConfirmationBtn", source)
         self.assertNotIn("sendCodexApprovalConfirmation", source)
         self.assertNotIn('data-safe-readonly="git_status"', source)
