@@ -14,6 +14,7 @@ from app.communication.human_adam_profiles import (
     human_adam_deferred_integration_action,
     human_adam_development_semaphore_action,
     human_adam_development_semaphore_status_action,
+    human_adam_owned_wip_recovery_action,
     human_adam_profile_switch_action,
     human_adam_project_continuity_action,
     private_archive_root,
@@ -21,6 +22,9 @@ from app.communication.human_adam_profiles import (
 )
 from app.communication.deferred_integration import (
     DEFERRED_INTEGRATION_CONFIRMATION,
+    OWNED_WIP_MISSING_METADATA,
+    OWNED_WIP_RECOVERY_CONFIRMATION,
+    READY_FOR_CONFIRMED_INTEGRATION,
     DeferredIntegrationError,
 )
 from app.communication.human_adam_turn_completion import TurnCompletionMetadata
@@ -2619,6 +2623,51 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(library_workspace.sync_count, 0)
         self.assertEqual(human_hub.last_send, {})
 
+    def test_writable_turn_creates_provisional_marker_before_model_send(self) -> None:
+        receipt = (
+            "Změna je hotová.\n\n"
+            "[HUMAN_ADAM_STEP_COMPLETION]\n"
+            '{"commit_message":"Complete owned step","summary":"Owned step is complete",'
+            '"next_step":"Deploy separately"}\n'
+            "[/HUMAN_ADAM_STEP_COMPLETION]"
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.connect()
+            observed_states: list[str] = []
+
+            def observe_marker() -> None:
+                observed_states.append(
+                    manager.deferred_integration_store.load().state
+                )
+                human_workspace.dirty = True
+
+            human_hub.on_send = observe_marker
+            human_hub.next_answer = receipt
+            with patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint",
+                return_value={
+                    "ok": True,
+                    "checkpoint_short": "c" * 12,
+                    "all_workspaces_aligned": True,
+                },
+            ):
+                result = manager.send(
+                    text="Proveď jeden vlastněný krok",
+                    client_message_id="owned-turn-start-001",
+                    write_intent=True,
+                )
+
+            self.assertFalse(manager.deferred_integration_store.path.exists())
+
+        self.assertEqual(observed_states, ["in_progress"])
+        self.assertEqual(result["automatic_completion"]["state"], "completed")
+        self.assertTrue(
+            result["automatic_completion"]["ownership_marker_cleared"]
+        )
+
     def test_human_adam_write_during_source_wip_stays_isolated_and_uncommitted(self) -> None:
         receipt = (
             "Změna i test jsou hotové.\n\n"
@@ -2712,7 +2761,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(result["operation"], "confirmed_deferred_integration")
         self.assertFalse(result["source_advanced_automation"])
 
-    def test_deferred_turn_without_completion_receipt_never_creates_marker(self) -> None:
+    def test_deferred_turn_without_completion_receipt_keeps_owned_recoverable_marker(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, human_workspace, library_workspace, human_hub, _library_hub = (
                 self.make_manager(Path(temp_dir))
@@ -2729,14 +2778,62 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 write_intent=True,
             )
 
-            self.assertFalse(manager.deferred_integration_store.path.exists())
+            marker = manager.deferred_integration_store.load()
+            human_workspace.source_pending_changes = 0
+            audit = manager.pending_integration_status()
 
         self.assertTrue(human_workspace.dirty)
+        self.assertEqual(marker.state, OWNED_WIP_MISSING_METADATA)
         self.assertEqual(
             result["automatic_completion"]["state"],
             "deferred_metadata_missing",
         )
-        self.assertFalse(result["automatic_completion"]["ownership_marker"])
+        self.assertTrue(result["automatic_completion"]["ownership_marker"])
+        self.assertEqual(audit["state"], OWNED_WIP_MISSING_METADATA)
+        self.assertTrue(audit["ownership_marker_verified"])
+        self.assertTrue(audit["can_recover"])
+        self.assertFalse(audit["can_integrate"])
+
+    def test_confirmed_owned_wip_recovery_attaches_metadata_and_checkpoints_once(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, _library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.connect()
+            human_hub.on_send = lambda: setattr(human_workspace, "dirty", True)
+            human_hub.next_answer = "Hotovo bez strukturované účtenky."
+            manager.send(
+                text="Proveď krok bez účtenky",
+                client_message_id="owned-recovery-turn-001",
+                write_intent=True,
+            )
+
+            with patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint",
+                return_value={
+                    "ok": True,
+                    "checkpoint_short": "d" * 12,
+                    "all_workspaces_aligned": True,
+                },
+            ) as checkpoint:
+                result = manager.recover_owned_changes(
+                    confirmation=OWNED_WIP_RECOVERY_CONFIRMATION,
+                    commit_message="Recover owned step",
+                    summary="Vlastněný krok je bezpečně dokončený",
+                    next_step="Nasadit samostatně",
+                )
+
+            self.assertFalse(manager.deferred_integration_store.path.exists())
+
+        checkpoint.assert_called_once()
+        request = checkpoint.call_args.kwargs["request"]
+        self.assertEqual(request.commit_message, "Recover owned step")
+        self.assertEqual(
+            request.summary,
+            "Vlastněný krok je bezpečně dokončený",
+        )
+        self.assertEqual(result["operation"], "confirmed_owned_wip_recovery")
+        self.assertTrue(result["ownership_marker_cleared"])
 
     def test_deferred_turn_marker_write_failure_stays_service_blocked(self) -> None:
         receipt = (
@@ -2757,7 +2854,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             human_hub.next_answer = receipt
             with patch.object(
                 manager.deferred_integration_store,
-                "save",
+                "finalize",
                 side_effect=DeferredIntegrationError(
                     "Private ownership marker nelze bezpečně uložit."
                 ),
@@ -2771,10 +2868,10 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertTrue(human_workspace.dirty)
         self.assertEqual(
             result["automatic_completion"]["state"],
-            "deferred_marker_failed",
+            "ownership_finalize_failed",
         )
         self.assertFalse(result["automatic_completion"]["ownership_marker"])
-        self.assertIn("servisně blokovaná", result["entry"]["answer"])
+        self.assertIn("servisně blokované", result["entry"]["answer"])
 
     def test_deferred_integration_refuses_wrong_confirmation_and_source_advance(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -2820,6 +2917,25 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(
             result["status"],
             "human_adam_deferred_integration_failed",
+        )
+
+    def test_owned_wip_recovery_action_returns_safe_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_rest = self.make_manager(Path(temp_dir))
+            result = human_adam_owned_wip_recovery_action(
+                {
+                    "confirmation": "nesouhlasí",
+                    "commit_message": "Recover step",
+                    "summary": "Recovered",
+                    "next_step": "Deploy",
+                },
+                service=manager,
+            )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(
+            result["status"],
+            "human_adam_owned_wip_recovery_failed",
         )
 
     def test_source_wip_isolated_write_rejects_unsynced_peer(self) -> None:

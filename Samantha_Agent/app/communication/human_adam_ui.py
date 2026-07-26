@@ -89,6 +89,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .integration-audit-box.blocked { border-color:#fca5a5; background:#fef2f2; }
     .integration-audit-box h3 { margin:0; font-size:15px; }
     .integration-audit-box input { width:100%; border:1px solid #bac7d8; border-radius:11px; padding:10px 12px; font:inherit; }
+    .integration-recovery-fields { display:grid; gap:8px; }
+    .integration-recovery-fields[hidden] { display:none; }
+    .integration-recovery-fields label { display:grid; gap:4px; color:var(--muted); font-size:12px; }
     #integrationAuditMeta { margin:0; color:var(--muted); font-size:13px; line-height:1.45; overflow-wrap:anywhere; }
     #integrationAuditPaths { margin:0; padding-left:22px; font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace; overflow-wrap:anywhere; }
     .handoff-proposal-box { margin:12px 16px; padding:14px; border:1px solid #93c5fd; border-radius:13px; display:grid; gap:8px; background:#eff6ff; }
@@ -261,7 +264,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <ul>
           <li><strong>Workspace je za <code>main</code>:</strong> při čistém profilu klikni na Připojit.</li>
           <li><strong>GitHub je před lokálním <code>main</code>:</strong> například denní soví workflow vytvořilo nový commit. Audit nabídne tlačítko <strong>Dorovnat main s GitHubem</strong> pouze při čistém jednoznačném fast-forwardu. Nejdřív zkontroluj cílový commit a seznam souborů; dorovnání se nespouští automaticky.</li>
-          <li><strong>Čekající integrace:</strong> přečti read-only audit. Pokud je <code>main</code> čistý, nezměněný a private ownership marker odpovídá přesnému WIP, vlož nabídnutou potvrzovací větu a klikni na <strong>Převzít přesný WIP do main</strong>. Při posunu <code>main</code>, cizím WIP, divergenci nebo neshodě markeru nic nezačleňuj a vyžádej servisní rozhodnutí.</li>
+          <li><strong>Čekající integrace:</strong> přečti read-only audit. Pokud je <code>main</code> čistý, nezměněný a private ownership marker odpovídá přesnému WIP, vlož nabídnutou potvrzovací větu a klikni na <strong>Převzít přesný WIP do main</strong>. Když model zapomene dokončovací účtenku, marker vytvořený před tahem zachová původ změn a panel nabídne <strong>Dokončit vlastněný WIP</strong> po doplnění git-safe popisu. Při posunu <code>main</code>, cizím WIP, divergenci nebo neshodě markeru nic nezačleňuj a vyžádej servisní rozhodnutí; totéž platí při nejistém doručení.</li>
           <li><strong>Audit nebo nasazení selže:</strong> nic neopakuj naslepo; obnov stav a předej Adamovi přesnou chybu.</li>
           <li><strong>Repo není čisté:</strong> nenasazuj a nech Adama zjistit, co zůstalo rozpracované.</li>
         </ul>
@@ -308,8 +311,20 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <h3>Čekající integrace</h3>
       <p id="integrationAuditMeta">Audit se načte společně s pracovním stavem.</p>
       <ul id="integrationAuditPaths" hidden></ul>
+      <div class="integration-recovery-fields" id="integrationRecoveryFields" hidden>
+        <label>Název commitu
+          <input id="integrationRecoveryCommit" maxlength="120" autocomplete="off" placeholder="Krátký git-safe název">
+        </label>
+        <label>Co je hotové
+          <input id="integrationRecoverySummary" maxlength="400" autocomplete="off" placeholder="Stručný redigovaný výsledek">
+        </label>
+        <label>Další krok
+          <input id="integrationRecoveryNextStep" maxlength="500" autocomplete="off" placeholder="Praktický následující krok">
+        </label>
+      </div>
       <input id="integrationConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Potvrzovací věta" hidden disabled>
       <button class="deploy-action" id="integrationBtn" type="button" hidden disabled>Převzít přesný WIP do main</button>
+      <button class="deploy-action" id="integrationRecoveryBtn" type="button" hidden disabled>Dokončit vlastněný WIP</button>
     </section>
     <section class="handoff-proposal-box legacy-work-control" id="handoffProposalBox" aria-label="Read-only návrh aktualizace handoffu" hidden>
       <h3>Návrh handoffu po checkpointu</h3>
@@ -393,8 +408,13 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const integrationAuditBox = document.getElementById("integrationAuditBox");
   const integrationAuditMeta = document.getElementById("integrationAuditMeta");
   const integrationAuditPaths = document.getElementById("integrationAuditPaths");
+  const integrationRecoveryFields = document.getElementById("integrationRecoveryFields");
+  const integrationRecoveryCommit = document.getElementById("integrationRecoveryCommit");
+  const integrationRecoverySummary = document.getElementById("integrationRecoverySummary");
+  const integrationRecoveryNextStep = document.getElementById("integrationRecoveryNextStep");
   const integrationConfirmation = document.getElementById("integrationConfirmation");
   const integrationBtn = document.getElementById("integrationBtn");
+  const integrationRecoveryBtn = document.getElementById("integrationRecoveryBtn");
   const handoffProposalBox = document.getElementById("handoffProposalBox");
   const handoffProposalMeta = document.getElementById("handoffProposalMeta");
   const handoffProposalDraft = document.getElementById("handoffProposalDraft");
@@ -448,6 +468,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let deploymentAudit = null;
   let mainRemoteSyncAudit = null;
   let pendingIntegrationAudit = null;
+  let pendingIntegrationRecovery = null;
   const verifiedDeploymentStorageKey = "human-adam:verified-deployment:v1";
   const verifiedDeploymentSeenStorageKey = "human-adam:verified-deployment-seen:v1";
   const verifiedDeploymentMaxAgeMs = 15 * 60 * 1000;
@@ -1440,7 +1461,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       && audit.can_integrate === true
       && audit.ownership_marker_verified === true
       && Boolean(String(audit.confirmation_text || "").trim());
+    const canRecover = valid
+      && state === "owned_wip_missing_metadata"
+      && audit.can_recover === true
+      && audit.ownership_marker_verified === true
+      && audit.metadata_required === true
+      && Boolean(String(audit.confirmation_text || "").trim());
     pendingIntegrationAudit = canIntegrate ? audit : null;
+    pendingIntegrationRecovery = canRecover ? audit : null;
     integrationAuditBox.hidden = state === "not_applicable";
     integrationAuditBox.className = "integration-audit-box";
     if (
@@ -1451,6 +1479,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     } else if (
       state === "not_pending"
       || canIntegrate
+      || canRecover
     ) {
       integrationAuditBox.classList.add("ready");
     } else {
@@ -1476,14 +1505,23 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       }
     }
     integrationAuditPaths.hidden = !integrationAuditPaths.children.length;
+    integrationRecoveryFields.hidden = !canRecover;
+    integrationRecoveryCommit.value = "";
+    integrationRecoverySummary.value = "";
+    integrationRecoveryNextStep.value = "";
+    integrationRecoveryFields.querySelectorAll("input").forEach((field) => {
+      field.disabled = !canRecover;
+    });
     integrationConfirmation.value = "";
-    integrationConfirmation.placeholder = canIntegrate
+    integrationConfirmation.placeholder = canIntegrate || canRecover
       ? String(audit.confirmation_text)
       : "Potvrzovací věta";
-    integrationConfirmation.hidden = !canIntegrate;
-    integrationConfirmation.disabled = !canIntegrate;
+    integrationConfirmation.hidden = !canIntegrate && !canRecover;
+    integrationConfirmation.disabled = !canIntegrate && !canRecover;
     integrationBtn.hidden = !canIntegrate;
     integrationBtn.disabled = true;
+    integrationRecoveryBtn.hidden = !canRecover;
+    integrationRecoveryBtn.disabled = true;
   }
 
   async function integrateDeferredChanges() {
@@ -1513,6 +1551,54 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     } catch (error) {
       await loadWork();
       integrationAuditMeta.textContent = `Stav integrace nelze potvrdit: ${error.message}`;
+    }
+  }
+
+  function syncIntegrationRecoveryAction() {
+    const audit = pendingIntegrationRecovery || pendingIntegrationAudit;
+    const required = audit ? String(audit.confirmation_text || "").trim() : "";
+    const confirmed = Boolean(required && integrationConfirmation.value.trim() === required);
+    integrationBtn.disabled = !pendingIntegrationAudit || !confirmed;
+    integrationRecoveryBtn.disabled = !pendingIntegrationRecovery
+      || !confirmed
+      || !integrationRecoveryCommit.value.trim()
+      || !integrationRecoverySummary.value.trim()
+      || !integrationRecoveryNextStep.value.trim();
+  }
+
+  async function recoverOwnedChanges() {
+    if (integrationRecoveryBtn.disabled || !pendingIntegrationRecovery) return;
+    const required = String(pendingIntegrationRecovery.confirmation_text || "").trim();
+    const confirmation = integrationConfirmation.value.trim();
+    if (!required || confirmation !== required) {
+      integrationAuditMeta.textContent = "Potvrzovací věta nesouhlasí; nic nebylo integrováno.";
+      return;
+    }
+    integrationRecoveryFields.querySelectorAll("input").forEach((field) => { field.disabled = true; });
+    integrationConfirmation.disabled = true;
+    integrationRecoveryBtn.disabled = true;
+    integrationAuditMeta.textContent = "Ověřuji předběžný marker, přesný WIP a úplnou testovací bránu…";
+    try {
+      const payload = await api("/api/human-adam/owned-wip-recovery", {
+        method:"POST",
+        body:JSON.stringify({
+          confirmation,
+          commit_message:integrationRecoveryCommit.value.trim(),
+          summary:integrationRecoverySummary.value.trim(),
+          next_step:integrationRecoveryNextStep.value.trim(),
+        }),
+      });
+      if (!payload.ok) {
+        const failure = payload.message || "Recovery vlastněného WIP selhala.";
+        await loadWork();
+        integrationAuditMeta.textContent = `Nic nebylo integrováno: ${failure}`;
+        return;
+      }
+      await loadWork();
+      notice.textContent = `Vlastněný WIP je v main a pushnutý jako ${payload.checkpoint_short || "nový checkpoint"}. Nasazení zůstává samostatný krok.`;
+    } catch (error) {
+      await loadWork();
+      integrationAuditMeta.textContent = `Stav recovery nelze potvrdit: ${error.message}`;
     }
   }
 
@@ -2337,13 +2423,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     workHelpBtn.focus();
   });
   workRefreshBtn.addEventListener("click", loadWork);
-  integrationConfirmation.addEventListener("input", () => {
-    const required = pendingIntegrationAudit
-      ? String(pendingIntegrationAudit.confirmation_text || "").trim()
-      : "";
-    integrationBtn.disabled = !required || integrationConfirmation.value.trim() !== required;
-  });
+  integrationConfirmation.addEventListener("input", syncIntegrationRecoveryAction);
+  integrationRecoveryCommit.addEventListener("input", syncIntegrationRecoveryAction);
+  integrationRecoverySummary.addEventListener("input", syncIntegrationRecoveryAction);
+  integrationRecoveryNextStep.addEventListener("input", syncIntegrationRecoveryAction);
   integrationBtn.addEventListener("click", integrateDeferredChanges);
+  integrationRecoveryBtn.addEventListener("click", recoverOwnedChanges);
   developmentAcquireProfileBtn.addEventListener("click", () => changeDevelopmentSemaphore("acquire_profile"));
   developmentAcquireTerminalBtn.addEventListener("click", () => changeDevelopmentSemaphore("acquire_terminal"));
   developmentPauseBtn.addEventListener("click", () => changeDevelopmentSemaphore("pause"));

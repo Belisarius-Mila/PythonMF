@@ -1,32 +1,37 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-26 19:44 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-26 20:36 CEST
 
 ### Hotovo
-- Nepoužívané veřejné legacy Voice Bridge a Voice Mode endpointy byly odstraněny; obecné TTS, Human–Adam mikrofon, Codex approval a TVBCP zůstávají zachované.
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Zapisovací tah Human–Adam zakládá před voláním modelu soukromý provizorní ownership marker.
+- Chybějící dokončovací účtenka už nezanechá WIP bez doložitelného původu; panel `Práce` umí jeho samostatně potvrzované dokončení kanonickou integrační cestou.
+- Předchozí stav `main` (`f95f691`) byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Nový checkpoint ještě nemá vlastní serverový důkaz nasazení.
+- Zbývá živě vyzkoušet jeden úmyslně vyvolaný případ chybějící účtenky.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Automatický druhý modelový pokus nevznikl; obnova je záměrně deterministická a vyžaduje potvrzení člověka.
+- Posun `main`, změněný otisk WIP, cizí změny nebo nejisté doručení zůstávají fail-closed a mohou vyžadovat servisní rozhodnutí.
 
 ### Další krok
-- Samostatně potvrzeně nasadit čistý main a živě ověřit obecné TTS, Human–Adam mikrofon, TVBCP, Codex approval a nedostupnost odstraněných cest.
+- Samostatně potvrzeně nasadit nový čistý `main` a potom provést živý test obnovy vlastněného WIP bez dokončovací účtenky.
 
 ### Rozhodnutí
-- Odstraňujeme pouze veřejné nepoužívané legacy routy; private stav a interní moduly zatím zachováváme.
+- Důkaz původu WIP nesmí záviset pouze na textové účtence modelu; vzniká před zapisovacím tahem a neobsahuje obsah souborů, zprávy, private cesty ani tajemství.
+- Bezpečná samoobslužná obnova znovu používá plnou bránu, checkpoint, push a kontrolu zarovnání; neprovádí automatický merge ani rebase.
 
 ### Navrhované další kroky
-- Doplnit provizorní ownership marker zapisovacího tahu a bezpečnou recovery cestu pro chybějící dokončovací účtenku.
-- Až po živém ověření auditovat nepoužívané interní Voice Bridge moduly.
+- Až podle živého důkazu rozhodnout, zda má smysl doplnit jeden omezený read-only pokus o získání metadat bez dalšího zapisovacího tahu.
+- Po ověření pokračovat prioritní Cockpit dietou po malých behavior-preserving řezech.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1268 testů).
-- Git před checkpointem: `main == origin/main` na `8a7957e32a95`.
-- Poslední serverově potvrzené nasazení: `8a7957e32a95` · odpovídá ověřenému main před tímto checkpointem · 1267 testů · smoke 5/5 · 2026-07-26T16:13:57+00:00.
+- Změna je otestovaná (429 cílených a 1275 úplných testů).
+- Python, JavaScript, shell, whitespace a Git safety kontroly prošly.
+- Git před checkpointem: `main == origin/main` na `f95f6919346f`.
+- Poslední serverově potvrzené nasazení: `f95f6919346f` · 1268 testů · smoke 5/5.
 - Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -2154,3 +2159,32 @@ Technický důkaz:
 - Změněné cesty před paměťovým zápisem (3): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/tests/test_cockpit_http_security.py`, `Samantha_Agent/tests/test_cockpit_voice_frontend_retirement.py`
 - Commit: `Retire unused legacy voice endpoints`
 - Další krok: Samostatně potvrzeně nasadit čistý main a živě ověřit obecné TTS, Human–Adam mikrofon, TVBCP, Codex approval a nedostupnost odstraněných cest.
+
+### 2026-07-26 20:36 CEST – Obnova vlastněného WIP bez dokončovací účtenky
+
+Hotovo:
+- Provizorní private ownership marker vzniká před každým zapisovacím tahem a
+  po jeho dokončení bezpečně zachová původ změn i bez platné modelové účtenky.
+- Panel `Práce` rozliší rozpracovaný tah, nejisté doručení, vlastněný WIP bez
+  metadat a WIP připravený k potvrzené integraci.
+- Samostatně potvrzovaná obnova doplní pouze git-safe metadata a znovu použije
+  kanonickou plnou bránu, checkpoint, push a kontrolu zarovnání.
+
+Rozhodnutí:
+- Původ změn je provozní bezpečnostní důkaz a nesmí záviset pouze na textovém
+  výstupu modelu.
+- Automatický druhý modelový pokus se nyní nepřidává; obnova je deterministická
+  a její zápisovací dokončení zůstává explicitně potvrzené.
+
+Otevřeno:
+- Commit a push tohoto checkpointu.
+- Samostatně potvrzené nasazení a živý test jednoho záměrně chybějícího receiptu.
+
+Rizika:
+- Posun `main`, neshoda otisku změn, cizí WIP nebo nejisté doručení zůstávají
+  fail-closed a nesmějí být automaticky sloučeny.
+
+Technický důkaz:
+- Cílená regresní sada prošla 429 testy.
+- Plná Cockpit Quality Gate prošla 1275 testy za 335,3 s.
+- Python, JavaScript, shell, whitespace a Git safety kontroly jsou zelené.

@@ -42,6 +42,18 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-26 20:36 CEST: Priorita 1, Human–Adam / obnova vlastněného WIP bez
+  dokončovací účtenky. Před každým zapisovacím tahem nyní vznikne soukromý
+  provizorní ownership marker svázaný s pracovním proudem, klientem, výchozím
+  commitem a otiskem změněných cest. Pokud model platnou účtenku nevrátí,
+  dokončený tah už nezůstane bez doložitelného původu: panel `Práce` nabídne
+  samostatně potvrzované dokončení přes stejnou kanonickou plnou bránu,
+  checkpoint, push a kontrolu zarovnání. Posun `main`, změna otisku, cizí WIP
+  nebo nejisté doručení zůstávají fail-closed. Marker neobsahuje obsah souborů,
+  zprávy, private cesty ani tajemství. Cílených 429 a úplných 1275 testů
+  prošlo. Zbývá commit/push, samostatně potvrzené nasazení a živý test s
+  úmyslně chybějící účtenkou. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-26 17:52 CEST: Priorita 1, Human–Adam / opakovaný Git index lock.
   Tři shodné incidenty potvrdily, že automatický read-only `git status`
   zbytečně obnovoval Git index a po přerušené transakci mohl zanechat pouze

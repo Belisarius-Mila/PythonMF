@@ -377,6 +377,48 @@ class HumanAdamUiTests(unittest.TestCase):
             HUMAN_ADAM_HTML,
         )
 
+    def test_owned_wip_recovery_requires_marker_metadata_and_exact_phrase(self) -> None:
+        render_start = HUMAN_ADAM_HTML.index(
+            "function renderPendingIntegrationAudit(audit)"
+        )
+        render_end = HUMAN_ADAM_HTML.index(
+            "async function integrateDeferredChanges()", render_start
+        )
+        render_source = HUMAN_ADAM_HTML[render_start:render_end]
+        recovery_start = HUMAN_ADAM_HTML.index(
+            "async function recoverOwnedChanges()"
+        )
+        recovery_end = HUMAN_ADAM_HTML.index(
+            "function renderMainRemoteSyncAudit", recovery_start
+        )
+        recovery_source = HUMAN_ADAM_HTML[recovery_start:recovery_end]
+
+        for element_id in (
+            "integrationRecoveryFields",
+            "integrationRecoveryCommit",
+            "integrationRecoverySummary",
+            "integrationRecoveryNextStep",
+            "integrationRecoveryBtn",
+        ):
+            self.assertIn(f'id="{element_id}"', HUMAN_ADAM_HTML)
+        self.assertIn('state === "owned_wip_missing_metadata"', render_source)
+        self.assertIn("audit.can_recover === true", render_source)
+        self.assertIn("audit.ownership_marker_verified === true", render_source)
+        self.assertIn("audit.metadata_required === true", render_source)
+        self.assertIn(
+            'api("/api/human-adam/owned-wip-recovery"',
+            recovery_source,
+        )
+        self.assertIn('method:"POST"', recovery_source)
+        self.assertIn("commit_message:integrationRecoveryCommit.value.trim()", recovery_source)
+        self.assertIn("summary:integrationRecoverySummary.value.trim()", recovery_source)
+        self.assertIn("next_step:integrationRecoveryNextStep.value.trim()", recovery_source)
+        self.assertIn(
+            'integrationRecoveryBtn.addEventListener("click", recoverOwnedChanges);',
+            HUMAN_ADAM_HTML,
+        )
+        self.assertIn("Dokončit vlastněný WIP", HUMAN_ADAM_HTML)
+
     def test_work_button_is_compact_and_opens_detail_only_when_needed(self) -> None:
         compact_start = HUMAN_ADAM_HTML.index("function workspaceRequiresWorkDetail(workspace)")
         compact_end = HUMAN_ADAM_HTML.index("function renderStatus(payload)", compact_start)

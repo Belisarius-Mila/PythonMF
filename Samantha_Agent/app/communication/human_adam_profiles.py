@@ -17,7 +17,12 @@ from app.communication.development_semaphore import (
     DevelopmentSemaphore,
 )
 from app.communication.deferred_integration import (
+    DELIVERY_UNKNOWN,
     DEFERRED_INTEGRATION_CONFIRMATION,
+    IN_PROGRESS,
+    OWNED_WIP_MISSING_METADATA,
+    OWNED_WIP_RECOVERY_CONFIRMATION,
+    READY_FOR_CONFIRMED_INTEGRATION,
     DeferredIntegrationError,
     DeferredIntegrationStore,
 )
@@ -48,6 +53,8 @@ from app.communication.human_adam_workstream_memory import WorkstreamMemoryRegis
 from app.communication.human_adam_workstream_selection import GroupedWorkstreamSelection
 from app.communication.human_adam_workstream_threads import WorkstreamThreadRegistry
 from app.communication.human_adam_turn_completion import (
+    COMPLETION_MARKER_END,
+    COMPLETION_MARKER_START,
     ParsedTurnCompletion,
     TurnCompletionMetadata,
     automatic_completion_instruction,
@@ -1245,15 +1252,47 @@ class HumanAdamProfileManager:
                 development_control_block = (
                     development_control_block + "\n\n" + operation_instruction
                 )
-            result = service.send(
-                **kwargs,
-                development_control_block=development_control_block,
+            ownership_started = bool(
+                write_intent
+                and active_id == "human_adam"
+                and not lazy_id
             )
+            client_message_id = str(kwargs.get("client_message_id") or "").strip()
+            if ownership_started:
+                self.deferred_integration_store.begin(
+                    workstream_id=self.active_workstream_id,
+                    client_message_id=client_message_id,
+                    workspace_status=service.workspace.status(),
+                    integration_deferred=integration_deferred,
+                )
+            try:
+                result = service.send(
+                    **kwargs,
+                    development_control_block=development_control_block,
+                )
+            except Exception:
+                if ownership_started:
+                    try:
+                        session = service.hub.snapshot()
+                        if self._has_uncertain_delivery(session):
+                            self.deferred_integration_store.mark_delivery_unknown(
+                                workstream_id=self.active_workstream_id,
+                                client_message_id=client_message_id,
+                                workspace_status=service.workspace.status(),
+                            )
+                        else:
+                            self.deferred_integration_store.clear(
+                                client_message_id=client_message_id,
+                            )
+                    except (DeferredIntegrationError, OSError, TypeError, ValueError):
+                        pass
+                raise
             completed = self._complete_successful_turn(
                 service=service,
                 active_id=active_id,
                 writable=writable,
                 integration_deferred=integration_deferred,
+                ownership_started=ownership_started,
                 result=result,
             )
             return {
@@ -1582,11 +1621,18 @@ class HumanAdamProfileManager:
         active_id: str,
         writable: bool,
         integration_deferred: bool = False,
+        ownership_started: bool = False,
         result: dict[str, Any],
     ) -> dict[str, Any]:
         """Finish a delivered writable turn, or leave its work visibly recoverable."""
 
         if result.get("duplicate_prevented") is True:
+            if ownership_started:
+                try:
+                    if not service.workspace.status().get("dirty"):
+                        self.deferred_integration_store.clear()
+                except (DeferredIntegrationError, OSError, TypeError, ValueError):
+                    pass
             entry = result.get("entry")
             if isinstance(entry, dict):
                 operation = parse_human_adam_operation(entry.get("answer"))
@@ -1631,6 +1677,48 @@ class HumanAdamProfileManager:
         )
         workspace = service.workspace.status()
         dirty = bool(workspace.get("dirty"))
+        parsed: ParsedTurnCompletion = parse_turn_completion(entry.get("answer"))
+        ownership_record = None
+        if ownership_started:
+            client_message_id = str(entry.get("client_message_id") or "").strip()
+            try:
+                if dirty:
+                    ownership_record = self.deferred_integration_store.finalize(
+                        workstream_id=self.active_workstream_id,
+                        client_message_id=client_message_id,
+                        workspace_status=workspace,
+                        completion=(
+                            parsed.metadata
+                            if parsed.state == "valid"
+                            else None
+                        ),
+                    )
+                else:
+                    self.deferred_integration_store.clear(
+                        client_message_id=client_message_id,
+                    )
+            except DeferredIntegrationError as exc:
+                note = (
+                    f"Zapisovací tah skončil, ale private ownership marker nelze "
+                    f"bezpečně dokončit: {exc} Změny zůstaly viditelné a další "
+                    f"zápis i integrace zůstávají servisně blokované."
+                )
+                answer = self._completion_answer(parsed.visible_answer, note)
+                answer_persisted = self._store_completed_answer(
+                    service=service,
+                    entry=entry,
+                    answer=answer,
+                )
+                return {
+                    **result,
+                    "entry": entry,
+                    "automatic_completion": {
+                        "state": "ownership_finalize_failed",
+                        "attempted": False,
+                        "ownership_marker": False,
+                        "answer_persisted": answer_persisted,
+                    },
+                }
         if operation.state != "absent":
             if dirty:
                 note = (
@@ -1720,7 +1808,6 @@ class HumanAdamProfileManager:
                     "attempted": False,
                 },
             }
-        parsed: ParsedTurnCompletion = parse_turn_completion(entry.get("answer"))
         if not dirty and parsed.state == "absent":
             return {
                 **result,
@@ -1750,8 +1837,9 @@ class HumanAdamProfileManager:
             if parsed.state != "valid" or parsed.metadata is None:
                 detail = parsed.error or "Chybí platná dokončovací účtenka."
                 note = (
-                    f"Změny zůstaly bezpečně v izolovaném workspace, ale ownership "
-                    f"marker nevznikl: {detail} Integrace zůstává servisně blokovaná."
+                    f"Změny zůstaly bezpečně v izolovaném workspace a jejich původ "
+                    f"je doložený private markerem, ale chybí dokončovací údaje: "
+                    f"{detail} Použij potvrzenou recovery v panelu Práce."
                 )
                 answer = self._completion_answer(parsed.visible_answer, note)
                 answer_persisted = self._store_completed_answer(
@@ -1765,34 +1853,8 @@ class HumanAdamProfileManager:
                     "automatic_completion": {
                         "state": "deferred_metadata_missing",
                         "attempted": False,
-                        "ownership_marker": False,
-                        "answer_persisted": answer_persisted,
-                    },
-                }
-            try:
-                self.deferred_integration_store.save(
-                    workstream_id=self.active_workstream_id,
-                    workspace_status=workspace,
-                    completion=parsed.metadata,
-                )
-            except DeferredIntegrationError as exc:
-                note = (
-                    f"Změny zůstaly bezpečně v izolovaném workspace, ale ownership "
-                    f"marker nelze doložit: {exc} Integrace zůstává servisně blokovaná."
-                )
-                answer = self._completion_answer(parsed.visible_answer, note)
-                answer_persisted = self._store_completed_answer(
-                    service=service,
-                    entry=entry,
-                    answer=answer,
-                )
-                return {
-                    **result,
-                    "entry": entry,
-                    "automatic_completion": {
-                        "state": "deferred_marker_failed",
-                        "attempted": False,
-                        "ownership_marker": False,
+                        "ownership_marker": bool(ownership_record),
+                        "metadata_recovery_required": True,
                         "answer_persisted": answer_persisted,
                     },
                 }
@@ -1814,7 +1876,7 @@ class HumanAdamProfileManager:
                 "automatic_completion": {
                     "state": "deferred_source_wip",
                     "attempted": False,
-                    "ownership_marker": True,
+                    "ownership_marker": bool(ownership_record),
                     "answer_persisted": answer_persisted,
                 },
             }
@@ -1843,8 +1905,9 @@ class HumanAdamProfileManager:
         if parsed.state != "valid" or parsed.metadata is None:
             detail = parsed.error or "Chybí platná dokončovací účtenka."
             note = (
-                f"Automatické dokončení bylo bezpečně zastaveno: {detail} "
-                "Změny zůstaly viditelné ve workspace."
+                f"Automatický checkpoint byl bezpečně zastaven: {detail} "
+                "Změny zůstaly viditelné, jejich původ je doložený private "
+                "markerem a panel Práce nabídne potvrzenou recovery."
             )
             answer = self._completion_answer(parsed.visible_answer, note)
             answer_persisted = self._store_completed_answer(
@@ -1859,6 +1922,8 @@ class HumanAdamProfileManager:
                     "state": "metadata_missing" if parsed.state == "absent" else "metadata_invalid",
                     "attempted": False,
                     "message": detail,
+                    "ownership_marker": bool(ownership_record),
+                    "metadata_recovery_required": True,
                     "answer_persisted": answer_persisted,
                 },
             }
@@ -1908,6 +1973,14 @@ class HumanAdamProfileManager:
             entry=entry,
             answer=answer,
         )
+        marker_cleared = True
+        if ownership_started:
+            try:
+                self.deferred_integration_store.clear(
+                    client_message_id=str(entry.get("client_message_id") or ""),
+                )
+            except DeferredIntegrationError:
+                marker_cleared = False
         return {
             **result,
             "entry": entry,
@@ -1915,6 +1988,7 @@ class HumanAdamProfileManager:
                 "state": "completed" if all_aligned else "completed_sync_pending",
                 "attempted": True,
                 "checkpoint": checkpoint,
+                "ownership_marker_cleared": marker_cleared,
                 "answer_persisted": answer_persisted,
             },
         }
@@ -2080,12 +2154,56 @@ class HumanAdamProfileManager:
                     "Workspace neposkytl ověřený audit čekající integrace."
                 )
             result = dict(audit)
+            marker = None
+            marker_error = ""
+            try:
+                marker = self.deferred_integration_store.load()
+            except DeferredIntegrationError as exc:
+                marker_error = str(exc)
+            if marker is not None and marker.state == DELIVERY_UNKNOWN:
+                return {
+                    **result,
+                    "pending": True,
+                    "state": "blocked_delivery_unknown",
+                    "label": "Zapisovací tah má nejisté doručení",
+                    "message": (
+                        "Provizorní ownership marker existuje, ale dokončení tahu "
+                        "nebylo potvrzené."
+                    ),
+                    "next_step": (
+                        "Nic neopakuj ani neintegruj; nejdřív vyřeš nejisté doručení."
+                    ),
+                    "requires_service_decision": True,
+                    "ownership_marker_required": True,
+                    "ownership_marker_verified": False,
+                    "can_integrate": False,
+                    "can_recover": False,
+                }
+            if marker is not None and marker.state == IN_PROGRESS:
+                return {
+                    **result,
+                    "pending": True,
+                    "state": "blocked_turn_interrupted",
+                    "label": "Zapisovací tah nemá konečný důkaz",
+                    "message": (
+                        "Provizorní ownership marker zůstal ve stavu probíhajícího tahu."
+                    ),
+                    "next_step": (
+                        "Nic neopakuj ani neintegruj; nejdřív proveď servisní kontrolu relace."
+                    ),
+                    "requires_service_decision": True,
+                    "ownership_marker_required": True,
+                    "ownership_marker_verified": False,
+                    "can_integrate": False,
+                    "can_recover": False,
+                }
             if result.get("pending") is not True:
                 return {
                     **result,
                     "ownership_marker_required": True,
                     "ownership_marker_verified": False,
                     "can_integrate": False,
+                    "can_recover": False,
                 }
             foreign_blockers = self._foreign_wip_blockers(active_id)
             if foreign_blockers:
@@ -2100,6 +2218,7 @@ class HumanAdamProfileManager:
                     "ownership_marker_required": True,
                     "ownership_marker_verified": False,
                     "can_integrate": False,
+                    "can_recover": False,
                 }
             if result.get("state") != "ready_for_confirmed_integration":
                 return {
@@ -2107,8 +2226,52 @@ class HumanAdamProfileManager:
                     "ownership_marker_required": True,
                     "ownership_marker_verified": False,
                     "can_integrate": False,
+                    "can_recover": False,
                 }
             workspace_status = self.active_service.workspace.status()
+            if marker is not None and marker.state == OWNED_WIP_MISSING_METADATA:
+                try:
+                    self.deferred_integration_store.verify_owned(
+                        workstream_id=self.active_workstream_id,
+                        workspace_status=workspace_status,
+                        allowed_states=frozenset({OWNED_WIP_MISSING_METADATA}),
+                    )
+                except DeferredIntegrationError as exc:
+                    return {
+                        **result,
+                        "state": "blocked_ownership_mismatch",
+                        "label": "Ownership marker neodpovídá aktuálnímu WIP",
+                        "message": str(exc),
+                        "next_step": (
+                            "Nic neintegruj; změna základu nebo fingerprintu "
+                            "vyžaduje servisní rozhodnutí."
+                        ),
+                        "requires_service_decision": True,
+                        "ownership_marker_required": True,
+                        "ownership_marker_verified": False,
+                        "can_integrate": False,
+                        "can_recover": False,
+                    }
+                return {
+                    **result,
+                    "state": OWNED_WIP_MISSING_METADATA,
+                    "label": "WIP je bezpečně vlastněný, chybí dokončovací údaje",
+                    "message": (
+                        "Private marker vznikl před zapisovacím tahem a odpovídá "
+                        "přesnému WIP; model pouze vynechal dokončovací účtenku."
+                    ),
+                    "next_step": (
+                        "Doplň git-safe název, souhrn a další krok a použij "
+                        "samostatně potvrzenou recovery bránu."
+                    ),
+                    "requires_service_decision": False,
+                    "ownership_marker_required": True,
+                    "ownership_marker_verified": True,
+                    "metadata_required": True,
+                    "can_integrate": False,
+                    "can_recover": True,
+                    "confirmation_text": OWNED_WIP_RECOVERY_CONFIRMATION,
+                }
             try:
                 self.deferred_integration_store.verify(
                     workstream_id=self.active_workstream_id,
@@ -2119,7 +2282,7 @@ class HumanAdamProfileManager:
                     **result,
                     "state": "blocked_ownership_unverified",
                     "label": "Chybí ověřený původ odloženého WIP",
-                    "message": str(exc),
+                    "message": marker_error or str(exc),
                     "next_step": (
                         "Použij servisní rozhodnutí; bez shodného private markeru "
                         "nic neintegruj."
@@ -2128,6 +2291,7 @@ class HumanAdamProfileManager:
                     "ownership_marker_required": True,
                     "ownership_marker_verified": False,
                     "can_integrate": False,
+                    "can_recover": False,
                 }
             return {
                 **result,
@@ -2139,6 +2303,7 @@ class HumanAdamProfileManager:
                 "ownership_marker_required": True,
                 "ownership_marker_verified": True,
                 "can_integrate": True,
+                "can_recover": False,
                 "confirmation_text": DEFERRED_INTEGRATION_CONFIRMATION,
             }
         except (AppServerError, OSError, TypeError, ValueError) as exc:
@@ -2155,6 +2320,117 @@ class HumanAdamProfileManager:
                 "overlap_count": 0,
                 "overlap_paths": [],
             }
+
+    @staticmethod
+    def _recovery_completion_metadata(
+        *,
+        commit_message: str,
+        summary: str,
+        next_step: str,
+    ) -> TurnCompletionMetadata:
+        payload = json.dumps(
+            {
+                "commit_message": str(commit_message or ""),
+                "summary": str(summary or ""),
+                "decision": "",
+                "next_step": str(next_step or ""),
+                "proposed_next_steps": [],
+            },
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
+        parsed = parse_turn_completion(
+            "Recovery dokončovacích údajů.\n\n"
+            f"{COMPLETION_MARKER_START}\n{payload}\n{COMPLETION_MARKER_END}"
+        )
+        if parsed.state != "valid" or parsed.metadata is None:
+            raise AppServerError(
+                parsed.error or "Recovery nemá platné dokončovací údaje."
+            )
+        return parsed.metadata
+
+    def _integrate_deferred_record(
+        self,
+        *,
+        service: HumanAdamService,
+        record: Any,
+        operation: str,
+    ) -> dict[str, Any]:
+        completion = record.completion
+        if not isinstance(completion, TurnCompletionMetadata):
+            raise AppServerError(
+                "Ownership marker nemá platné dokončovací údaje."
+            )
+        profile = self.profiles["human_adam"]
+        binding = profile.get("workstream_binding")
+        if not isinstance(binding, CanonicalWorkstreamBinding):
+            raise AppServerError(
+                "Human–Adam nemá kanonickou paměťovou vazbu pro integraci."
+            )
+        memory_binding = (
+            self.workstream_memory.binding(binding.workstream_id)
+            if self.workstream_memory is not None
+            else None
+        )
+        peers = tuple(
+            candidate["service"].workspace
+            for profile_id, candidate in self.profiles.items()
+            if profile_id != "human_adam"
+        )
+        result = complete_simple_main_checkpoint(
+            workspace=service.workspace,
+            request=SimpleMainCheckpointRequest(
+                workstream_id=binding.workstream_id,
+                commit_message=completion.commit_message,
+                summary=completion.summary,
+                next_step=completion.next_step,
+                handoff_relative_path=(
+                    memory_binding.handoff_relative_path
+                    if memory_binding is not None
+                    else binding.handoff_relative_path
+                ),
+                tvbcp_relative_path=(
+                    memory_binding.tvbcp_relative_path
+                    if memory_binding is not None
+                    else binding.tvbcp_relative_path
+                ),
+                handoff_initial_content=(
+                    self.workstream_memory.initial_handoff(memory_binding)
+                    if self.workstream_memory is not None
+                    and memory_binding is not None
+                    else ""
+                ),
+                tvbcp_initial_content=(
+                    self.workstream_memory.initial_tvbcp(memory_binding)
+                    if self.workstream_memory is not None
+                    and memory_binding is not None
+                    else ""
+                ),
+                decision=completion.decision,
+                proposed_next_steps=completion.proposed_next_steps,
+                **self._checkpoint_operational_snapshot(
+                    binding.workstream_id,
+                    service=service,
+                ),
+            ),
+            confirmed=True,
+            peer_workspaces=peers,
+        )
+        marker_cleared = True
+        try:
+            self.deferred_integration_store.clear(
+                client_message_id=record.client_message_id,
+            )
+        except DeferredIntegrationError:
+            marker_cleared = False
+        return {
+            **result,
+            "operation": operation,
+            "ownership_marker_required": True,
+            "ownership_marker_verified": True,
+            "ownership_marker_cleared": marker_cleared,
+            "source_advanced_automation": False,
+        }
 
     def integrate_deferred_changes(
         self,
@@ -2196,74 +2472,66 @@ class HumanAdamProfileManager:
                 workstream_id=HUMAN_ADAM_WORKSTREAM_ID,
                 workspace_status=workspace_status,
             )
-            profile = self.profiles["human_adam"]
-            binding = profile.get("workstream_binding")
-            if not isinstance(binding, CanonicalWorkstreamBinding):
+            return self._integrate_deferred_record(
+                service=service,
+                record=record,
+                operation="confirmed_deferred_integration",
+            )
+
+    def recover_owned_changes(
+        self,
+        *,
+        confirmation: str,
+        commit_message: str,
+        summary: str,
+        next_step: str,
+    ) -> dict[str, Any]:
+        """Complete one exact owned WIP whose model receipt was missing."""
+
+        if str(confirmation or "").strip() != OWNED_WIP_RECOVERY_CONFIRMATION:
+            raise AppServerError(
+                "Recovery vlastněného WIP vyžaduje přesnou potvrzovací větu."
+            )
+        metadata = self._recovery_completion_metadata(
+            commit_message=commit_message,
+            summary=summary,
+            next_step=next_step,
+        )
+        with self.profile_operation() as service:
+            if (
+                self.active_lazy_workstream_id
+                or self.active_profile_id != "human_adam"
+                or self.active_workstream_id != HUMAN_ADAM_WORKSTREAM_ID
+            ):
                 raise AppServerError(
-                    "Human–Adam nemá kanonickou paměťovou vazbu pro integraci."
+                    "Recovery vlastněného WIP lze použít jen v kanonickém Human–Adam proudu."
                 )
-            memory_binding = (
-                self.workstream_memory.binding(binding.workstream_id)
-                if self.workstream_memory is not None
-                else None
+            review = service.work_review()
+            audit = self.pending_integration_status(work_review=review)
+            if (
+                audit.get("state") != OWNED_WIP_MISSING_METADATA
+                or audit.get("can_recover") is not True
+                or audit.get("ownership_marker_verified") is not True
+            ):
+                if audit.get("requires_service_decision") is True:
+                    raise AppServerError(
+                        "Recovery vyžaduje servisní rozhodnutí; "
+                        f"{str(audit.get('next_step') or 'nic neintegruj.')}"
+                    )
+                raise AppServerError(
+                    str(audit.get("next_step") or "Recovery není připravená.")
+                )
+            workspace_status = service.workspace.status()
+            record = self.deferred_integration_store.attach_completion(
+                workstream_id=HUMAN_ADAM_WORKSTREAM_ID,
+                workspace_status=workspace_status,
+                completion=metadata,
             )
-            peers = tuple(
-                candidate["service"].workspace
-                for profile_id, candidate in self.profiles.items()
-                if profile_id != "human_adam"
+            return self._integrate_deferred_record(
+                service=service,
+                record=record,
+                operation="confirmed_owned_wip_recovery",
             )
-            result = complete_simple_main_checkpoint(
-                workspace=service.workspace,
-                request=SimpleMainCheckpointRequest(
-                    workstream_id=binding.workstream_id,
-                    commit_message=record.completion.commit_message,
-                    summary=record.completion.summary,
-                    next_step=record.completion.next_step,
-                    handoff_relative_path=(
-                        memory_binding.handoff_relative_path
-                        if memory_binding is not None
-                        else binding.handoff_relative_path
-                    ),
-                    tvbcp_relative_path=(
-                        memory_binding.tvbcp_relative_path
-                        if memory_binding is not None
-                        else binding.tvbcp_relative_path
-                    ),
-                    handoff_initial_content=(
-                        self.workstream_memory.initial_handoff(memory_binding)
-                        if self.workstream_memory is not None
-                        and memory_binding is not None
-                        else ""
-                    ),
-                    tvbcp_initial_content=(
-                        self.workstream_memory.initial_tvbcp(memory_binding)
-                        if self.workstream_memory is not None
-                        and memory_binding is not None
-                        else ""
-                    ),
-                    decision=record.completion.decision,
-                    proposed_next_steps=record.completion.proposed_next_steps,
-                    **self._checkpoint_operational_snapshot(
-                        binding.workstream_id,
-                        service=service,
-                    ),
-                ),
-                confirmed=True,
-                peer_workspaces=peers,
-            )
-            marker_cleared = True
-            try:
-                self.deferred_integration_store.clear()
-            except DeferredIntegrationError:
-                marker_cleared = False
-            return {
-                **result,
-                "operation": "confirmed_deferred_integration",
-                "ownership_marker_required": True,
-                "ownership_marker_verified": True,
-                "ownership_marker_cleared": marker_cleared,
-                "source_advanced_automation": False,
-            }
 
     def handoff_proposal_status(
         self,
@@ -3073,6 +3341,37 @@ def human_adam_deferred_integration_action(
         return {
             "ok": False,
             "status": "human_adam_deferred_integration_failed",
+            "message": str(exc),
+            "pending_integration_audit": service.pending_integration_status(),
+        }
+
+
+def human_adam_owned_wip_recovery_action(
+    payload: dict[str, Any],
+    *,
+    service: HumanAdamProfileManager,
+) -> dict[str, Any]:
+    try:
+        return {
+            "ok": True,
+            **service.recover_owned_changes(
+                confirmation=str(payload.get("confirmation") or ""),
+                commit_message=str(payload.get("commit_message") or ""),
+                summary=str(payload.get("summary") or ""),
+                next_step=str(payload.get("next_step") or ""),
+            ),
+        }
+    except (
+        AppServerError,
+        DeferredIntegrationError,
+        SessionHubError,
+        OSError,
+        TypeError,
+        ValueError,
+    ) as exc:
+        return {
+            "ok": False,
+            "status": "human_adam_owned_wip_recovery_failed",
             "message": str(exc),
             "pending_integration_audit": service.pending_integration_status(),
         }

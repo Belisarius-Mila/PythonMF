@@ -7,6 +7,10 @@ import unittest
 from pathlib import Path
 
 from app.communication.deferred_integration import (
+    DELIVERY_UNKNOWN,
+    IN_PROGRESS,
+    OWNED_WIP_MISSING_METADATA,
+    READY_FOR_CONFIRMED_INTEGRATION,
     DeferredIntegrationError,
     DeferredIntegrationStore,
     change_fingerprint,
@@ -31,19 +35,101 @@ class DeferredIntegrationStoreTests(unittest.TestCase):
         source_pending_changes: int,
         relation: str = "aligned",
         changes: list[dict[str, str]] | None = None,
+        dirty: bool = True,
     ) -> dict[str, object]:
         return {
-            "dirty": True,
+            "dirty": dirty,
             "workspace_relation": relation,
             "source_pending_changes": source_pending_changes,
             "head": "a" * 40,
             "source_head": "a" * 40 if relation == "aligned" else "b" * 40,
-            "changes": changes
-            or [
-                {"status": " M", "path": "app/communication/example.py"},
-                {"status": "??", "path": "tests/test_example.py"},
-            ],
+            "changes": (
+                []
+                if not dirty
+                else (
+                    changes
+                    or [
+                        {"status": " M", "path": "app/communication/example.py"},
+                        {"status": "??", "path": "tests/test_example.py"},
+                    ]
+                )
+            ),
         }
+
+    def test_provisional_marker_precedes_turn_and_recovers_missing_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            marker_path = Path(temp_dir) / "marker.json"
+            store = DeferredIntegrationStore(marker_path)
+            started = store.begin(
+                workstream_id="layer-human-adam-development",
+                client_message_id="owned-turn-001",
+                workspace_status=self.status(
+                    source_pending_changes=0,
+                    dirty=False,
+                ),
+                integration_deferred=False,
+                now_factory=lambda: "2026-07-26T18:00:00+00:00",
+            )
+            raw_started = marker_path.read_text(encoding="utf-8")
+            owned = store.finalize(
+                workstream_id="layer-human-adam-development",
+                client_message_id="owned-turn-001",
+                workspace_status=self.status(source_pending_changes=0),
+                completion=None,
+                now_factory=lambda: "2026-07-26T18:01:00+00:00",
+            )
+            completed = store.attach_completion(
+                workstream_id="layer-human-adam-development",
+                workspace_status=self.status(source_pending_changes=0),
+                completion=self.completion(),
+                now_factory=lambda: "2026-07-26T18:02:00+00:00",
+            )
+            verified = store.verify(
+                workstream_id="layer-human-adam-development",
+                workspace_status=self.status(source_pending_changes=0),
+            )
+
+            self.assertEqual(stat.S_IMODE(marker_path.stat().st_mode), 0o600)
+
+        self.assertEqual(started.state, IN_PROGRESS)
+        self.assertNotIn("app/communication/example.py", raw_started)
+        self.assertEqual(owned.state, OWNED_WIP_MISSING_METADATA)
+        self.assertIsNone(owned.completion)
+        self.assertEqual(completed.state, READY_FOR_CONFIRMED_INTEGRATION)
+        self.assertEqual(verified, completed)
+
+    def test_delivery_unknown_marker_stays_fail_closed_without_chat_text(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            marker_path = Path(temp_dir) / "marker.json"
+            store = DeferredIntegrationStore(marker_path)
+            store.begin(
+                workstream_id="layer-human-adam-development",
+                client_message_id="uncertain-turn-001",
+                workspace_status=self.status(
+                    source_pending_changes=0,
+                    dirty=False,
+                ),
+                integration_deferred=False,
+            )
+            record = store.mark_delivery_unknown(
+                workstream_id="layer-human-adam-development",
+                client_message_id="uncertain-turn-001",
+                workspace_status=self.status(source_pending_changes=0),
+            )
+            raw = marker_path.read_text(encoding="utf-8")
+
+            with self.assertRaisesRegex(
+                DeferredIntegrationError,
+                "servisní rozhodnutí",
+            ):
+                store.verify_owned(
+                    workstream_id="layer-human-adam-development",
+                    workspace_status=self.status(source_pending_changes=0),
+                )
+
+        self.assertEqual(record.state, DELIVERY_UNKNOWN)
+        self.assertNotIn("chat", raw.casefold())
+        self.assertNotIn("user_text", raw)
 
     def test_save_load_and_verify_exact_private_marker(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
