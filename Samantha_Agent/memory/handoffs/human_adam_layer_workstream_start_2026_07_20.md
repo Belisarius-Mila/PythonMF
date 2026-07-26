@@ -1,37 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-26 20:36 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-26 22:23 CEST
 
 ### Hotovo
-- Zapisovací tah Human–Adam zakládá před voláním modelu soukromý provizorní ownership marker.
-- Chybějící dokončovací účtenka už nezanechá WIP bez doložitelného původu; panel `Práce` umí jeho samostatně potvrzované dokončení kanonickou integrační cestou.
-- Předchozí stav `main` (`f95f691`) byl před tímto checkpointem serverově nasazený a ověřený.
+- Statusy Cockpitu už nenačítají ani nezveřejňují legacy Voice Mode a Voice Bridge stav
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
-- Nový checkpoint ještě nemá vlastní serverový důkaz nasazení.
-- Zbývá živě vyzkoušet jeden úmyslně vyvolaný případ chybějící účtenky.
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 
 ### Rizika
-- Automatický druhý modelový pokus nevznikl; obnova je záměrně deterministická a vyžaduje potvrzení člověka.
-- Posun `main`, změněný otisk WIP, cizí změny nebo nejisté doručení zůstávají fail-closed a mohou vyžadovat servisní rozhodnutí.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Samostatně potvrzeně nasadit nový čistý `main` a potom provést živý test obnovy vlastněného WIP bez dokončovací účtenky.
+- Provést checkpoint, push a nasazení a ověřit pět smoke kontrol
 
 ### Rozhodnutí
-- Důkaz původu WIP nesmí záviset pouze na textové účtence modelu; vzniká před zapisovacím tahem a neobsahuje obsah souborů, zprávy, private cesty ani tajemství.
-- Bezpečná samoobslužná obnova znovu používá plnou bránu, checkpoint, push a kontrolu zarovnání; neprovádí automatický merge ani rebase.
+- Legacy hlasový stav nebude součástí obecných statusových endpointů Cockpitu
 
 ### Navrhované další kroky
-- Až podle živého důkazu rozhodnout, zda má smysl doplnit jeden omezený read-only pokus o získání metadat bez dalšího zapisovacího tahu.
-- Po ověření pokračovat prioritní Cockpit dietou po malých behavior-preserving řezech.
+- Po živém ověření pokračovat fází 9.3d odstraněním osiřelých Cockpit handlerů a importů
+- Před odstraněním markeru a runtime modulů nejdřív oddělit živé vazby Janičky a diagnostických skriptů
 
 ### Technický stav checkpointu
-- Změna je otestovaná (429 cílených a 1275 úplných testů).
-- Python, JavaScript, shell, whitespace a Git safety kontroly prošly.
-- Git před checkpointem: `main == origin/main` na `f95f6919346f`.
-- Poslední serverově potvrzené nasazení: `f95f6919346f` · 1268 testů · smoke 5/5.
+- Změna je otestovaná (1277 testů).
+- Git před checkpointem: `main == origin/main` na `e81db045de7e`.
+- Poslední serverově potvrzené nasazení: `e81db045de7e` · odpovídá ověřenému main před tímto checkpointem · 1275 testů · smoke 5/5 · 2026-07-26T19:27:49+00:00.
 - Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -2188,3 +2183,15 @@ Technický důkaz:
 - Cílená regresní sada prošla 429 testy.
 - Plná Cockpit Quality Gate prošla 1275 testy za 335,3 s.
 - Python, JavaScript, shell, whitespace a Git safety kontroly jsou zelené.
+
+### Automatický checkpoint 2026-07-26 22:23 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Statusy Cockpitu už nenačítají ani nezveřejňují legacy Voice Mode a Voice Bridge stav; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: plná Cockpit brána: 1277 testů, 249.3 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/cockpit_status_service.py`, `Samantha_Agent/scripts/cockpit_smoke_check.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_status_service.py`
+- Commit: `Retire legacy voice status sections`
+- Další krok: Provést checkpoint, push a nasazení a ověřit pět smoke kontrol

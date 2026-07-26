@@ -79,17 +79,22 @@ def check_endpoint(
             if not isinstance(server, dict) or not server.get("code_stamp"):
                 return SmokeResult(name, path, False, status_code, "invalid server health")
         if path == "/api/status":
-            for required_key in ("generated_at", "backup_status", "voice_bridge"):
+            for required_key in ("generated_at", "backup_status"):
                 if required_key not in payload:
                     return SmokeResult(name, path, False, status_code, f"missing {required_key}")
+            if any(key in payload for key in ("voice_mode", "voice_bridge")):
+                return SmokeResult(name, path, False, status_code, "status contains retired voice sections")
             backup_status = payload.get("backup_status")
             if not isinstance(backup_status, dict) or "status" not in backup_status:
                 return SmokeResult(name, path, False, status_code, "invalid backup_status")
         if path == "/api/live-status":
-            for required_key in ("generated_at", "voice_mode", "voice_bridge", "live_status_timing"):
+            for required_key in ("generated_at", "codex_approval", "live_status_timing"):
                 if required_key not in payload:
                     return SmokeResult(name, path, False, status_code, f"missing {required_key}")
-            if any(key in payload for key in ("document_work", "backup_status", "git")):
+            if any(
+                key in payload
+                for key in ("document_work", "backup_status", "git", "voice_mode", "voice_bridge")
+            ):
                 return SmokeResult(name, path, False, status_code, "live status contains heavy sections")
     elif not body:
         return SmokeResult(name, path, False, status_code, "empty response body")

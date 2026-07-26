@@ -242,7 +242,6 @@ from app.codex_approval_state import (
 )
 from app.cockpit_code_stamp import cockpit_code_stamp
 from app.cockpit_status_service import (
-    LIVE_STATUS_BRIDGE_CACHE_TTL_SECONDS,
     CockpitStatusLoaders,
     build_cockpit_live_status,
     build_cockpit_status,
@@ -4572,10 +4571,6 @@ def cockpit_status() -> dict[str, Any]:
         vault=document_vault_status_summary,
         scandocu=probe_scandocu,
         codex_approval=load_codex_approval_request,
-        voice_mode=load_voice_mode_status,
-        voice_bridge=lambda: adam_voice_bridge_status(
-            orphaned_janicka_reporter=janicka_orphaned_codex_session_report
-        ),
         git=git_status_summary,
     )
     return build_cockpit_status(loaders=loaders, code_stamp=COCKPIT_CODE_STAMP)
@@ -4584,23 +4579,10 @@ def cockpit_status() -> dict[str, Any]:
 def cockpit_live_status(
     *,
     codex_approval_loader: Callable[[], dict[str, Any]] | None = None,
-    voice_mode_loader: Callable[..., dict[str, Any]] | None = None,
-    voice_bridge_loader: Callable[[], dict[str, Any]] | None = None,
-    monotonic_clock: Callable[[], float] | None = None,
-    bridge_cache: dict[str, Any] | None = None,
-    bridge_cache_ttl_seconds: float = LIVE_STATUS_BRIDGE_CACHE_TTL_SECONDS,
 ) -> dict[str, Any]:
-    """Return frequently changing approval and legacy voice state."""
-    load_voice_bridge = voice_bridge_loader or (
-        lambda: adam_voice_bridge_status(orphaned_janicka_reporter=janicka_orphaned_codex_session_report)
-    )
+    """Return the lightweight, frequently changing approval state."""
     return build_cockpit_live_status(
         codex_approval_loader=codex_approval_loader or load_codex_approval_request,
-        voice_mode_loader=voice_mode_loader or load_voice_mode_status,
-        voice_bridge_loader=load_voice_bridge,
-        monotonic_clock=monotonic_clock or time.monotonic,
-        bridge_cache=bridge_cache,
-        bridge_cache_ttl_seconds=bridge_cache_ttl_seconds,
     )
 
 

@@ -3450,8 +3450,6 @@ class CockpitTests(unittest.TestCase):
                 "app.cockpit.load_codex_approval_request",
                 return_value={"ok": True, "active": False, "status": "none"},
             ),
-            patch("app.cockpit.load_voice_mode_status", return_value={"ok": True, "running": False, "state": "stopped"}),
-            patch("app.cockpit.adam_voice_bridge_status", return_value={"ok": True, "status": "ok"}),
             patch("app.cockpit.git_status_summary", return_value={"ok": True}),
         ):
             status = cockpit_status()
@@ -3466,16 +3464,16 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(status["backup_status"]["status"], "ok")
         self.assertIn("reminders", status)
         self.assertEqual(status["codex_approval"]["status"], "none")
-        self.assertNotIn("codex_approval", status["voice_mode"])
-        self.assertIn("voice_mode", status)
-        self.assertIn("voice_bridge", status)
+        self.assertNotIn("voice_mode", status)
+        self.assertNotIn("voice_bridge", status)
         self.assertIn("git", status)
         self.assertIn("status_timing", status)
         timing = status["status_timing"]
         self.assertIsInstance(timing["total_ms"], float)
         self.assertIn("sections_ms", timing)
         self.assertIn("document_work", timing["sections_ms"])
-        self.assertIn("voice_bridge", timing["sections_ms"])
+        self.assertNotIn("voice_mode", timing["sections_ms"])
+        self.assertNotIn("voice_bridge", timing["sections_ms"])
         self.assertIn("slowest_sections", timing)
         self.assertLessEqual(len(timing["slowest_sections"]), 3)
         self.assertNotIn("quantitative", status)
@@ -3495,59 +3493,29 @@ class CockpitTests(unittest.TestCase):
         self.assertNotIn("projects", status)
         self.assertNotIn("consistency", status)
 
-    def test_cockpit_live_status_refreshes_voice_mode_and_caches_expensive_bridge(self) -> None:
+    def test_cockpit_live_status_contains_only_current_codex_approval(self) -> None:
         codex_approval_calls = 0
-        voice_mode_calls = 0
-        voice_bridge_calls = 0
-        cache: dict[str, object] = {}
-        clock_values = iter((100.0, 101.0, 116.0))
 
         def codex_approval_loader() -> dict[str, object]:
             nonlocal codex_approval_calls
             codex_approval_calls += 1
             return {"ok": True, "active": codex_approval_calls == 1}
 
-        def voice_mode_loader() -> dict[str, object]:
-            nonlocal voice_mode_calls
-            voice_mode_calls += 1
-            return {"ok": True, "running": False, "sequence": voice_mode_calls}
-
-        def voice_bridge_loader() -> dict[str, object]:
-            nonlocal voice_bridge_calls
-            voice_bridge_calls += 1
-            return {"ok": True, "status": "ok", "sequence": voice_bridge_calls}
-
         first = cockpit_live_status(
             codex_approval_loader=codex_approval_loader,
-            voice_mode_loader=voice_mode_loader,
-            voice_bridge_loader=voice_bridge_loader,
-            monotonic_clock=lambda: next(clock_values),
-            bridge_cache=cache,
         )
         second = cockpit_live_status(
             codex_approval_loader=codex_approval_loader,
-            voice_mode_loader=voice_mode_loader,
-            voice_bridge_loader=voice_bridge_loader,
-            monotonic_clock=lambda: next(clock_values),
-            bridge_cache=cache,
-        )
-        third = cockpit_live_status(
-            codex_approval_loader=codex_approval_loader,
-            voice_mode_loader=voice_mode_loader,
-            voice_bridge_loader=voice_bridge_loader,
-            monotonic_clock=lambda: next(clock_values),
-            bridge_cache=cache,
         )
 
-        self.assertEqual(codex_approval_calls, 3)
-        self.assertEqual(voice_mode_calls, 3)
-        self.assertEqual(voice_bridge_calls, 2)
-        self.assertFalse(first["live_status_timing"]["voice_bridge_cache_hit"])
-        self.assertTrue(second["live_status_timing"]["voice_bridge_cache_hit"])
-        self.assertFalse(third["live_status_timing"]["voice_bridge_cache_hit"])
+        self.assertEqual(codex_approval_calls, 2)
+        self.assertTrue(first["codex_approval"]["active"])
         self.assertFalse(second["codex_approval"]["active"])
-        self.assertEqual(second["voice_mode"]["sequence"], 2)
-        self.assertEqual(second["voice_bridge"]["sequence"], 1)
+        self.assertNotIn("voice_mode", second)
+        self.assertNotIn("voice_bridge", second)
+        self.assertNotIn("voice_mode_ms", second["live_status_timing"])
+        self.assertNotIn("voice_bridge_ms", second["live_status_timing"])
+        self.assertNotIn("voice_bridge_cache_hit", second["live_status_timing"])
         self.assertNotIn("document_work", second)
         self.assertNotIn("backup_status", second)
         self.assertNotIn("git", second)

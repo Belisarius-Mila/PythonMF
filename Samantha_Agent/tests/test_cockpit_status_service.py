@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import threading
+import json
 import unittest
+from unittest.mock import patch
 
 from app.cockpit_status_service import (
     CockpitStatusLoaders,
@@ -9,6 +10,7 @@ from app.cockpit_status_service import (
     build_cockpit_status,
     build_server_health_status,
 )
+from scripts.cockpit_smoke_check import check_endpoint
 
 
 class CockpitStatusServiceTests(unittest.TestCase):
@@ -87,8 +89,6 @@ class CockpitStatusServiceTests(unittest.TestCase):
             vault=simple_loader("vault", "vault ok"),
             scandocu=simple_loader("scandocu", {"running": False}),
             codex_approval=simple_loader("codex_approval", {"active": False}),
-            voice_mode=simple_loader("voice_mode", {"running": True}),
-            voice_bridge=simple_loader("voice_bridge", {"status": "ok"}),
             git=simple_loader("git", {"clean": True}),
         )
 
@@ -116,8 +116,6 @@ class CockpitStatusServiceTests(unittest.TestCase):
                 "vault",
                 "scandocu",
                 "codex_approval",
-                "voice_mode",
-                "voice_bridge",
                 "git",
             ],
         )
@@ -126,43 +124,97 @@ class CockpitStatusServiceTests(unittest.TestCase):
         self.assertIs(status["downloads"], downloads)
         self.assertIs(status["document_work"], document_work)
         self.assertEqual(status["backup"], "backup ok")
-        self.assertEqual(len(status["status_timing"]["sections_ms"]), 16)
+        self.assertEqual(len(status["status_timing"]["sections_ms"]), 14)
         self.assertEqual(status["codex_approval"], {"active": False})
+        self.assertNotIn("voice_mode", status)
+        self.assertNotIn("voice_bridge", status)
+        self.assertNotIn("voice_mode", status["status_timing"]["sections_ms"])
+        self.assertNotIn("voice_bridge", status["status_timing"]["sections_ms"])
         self.assertLessEqual(len(status["status_timing"]["slowest_sections"]), 3)
 
-    def test_live_status_cache_remains_inside_service(self) -> None:
-        bridge_calls = 0
-        cache: dict[str, object] = {}
-        lock = threading.Lock()
-
-        def load_bridge() -> dict[str, object]:
-            nonlocal bridge_calls
-            bridge_calls += 1
-            return {"sequence": bridge_calls}
-
-        first = build_cockpit_live_status(
-            codex_approval_loader=lambda: {"active": True},
-            voice_mode_loader=lambda: {"running": True},
-            voice_bridge_loader=load_bridge,
-            monotonic_clock=lambda: 100.0,
-            bridge_cache=cache,
-            bridge_cache_lock=lock,
-        )
-        second = build_cockpit_live_status(
+    def test_live_status_contains_only_codex_approval_and_timing(self) -> None:
+        clock_values = iter((1.0, 1.001, 1.002, 1.003))
+        status = build_cockpit_live_status(
             codex_approval_loader=lambda: {"active": False},
-            voice_mode_loader=lambda: {"running": False},
-            voice_bridge_loader=load_bridge,
-            monotonic_clock=lambda: 101.0,
-            bridge_cache=cache,
-            bridge_cache_lock=lock,
+            performance_clock=lambda: next(clock_values),
+            timestamp_loader=lambda: "2026-07-26T20:00:00+00:00",
         )
 
-        self.assertEqual(bridge_calls, 1)
-        self.assertFalse(first["live_status_timing"]["voice_bridge_cache_hit"])
-        self.assertTrue(second["live_status_timing"]["voice_bridge_cache_hit"])
-        self.assertEqual(second["codex_approval"], {"active": False})
-        self.assertEqual(second["voice_mode"], {"running": False})
-        self.assertEqual(second["voice_bridge"], {"sequence": 1})
+        self.assertEqual(
+            status,
+            {
+                "generated_at": "2026-07-26T20:00:00+00:00",
+                "codex_approval": {"active": False},
+                "live_status_timing": {
+                    "total_ms": 3.0,
+                    "codex_approval_ms": 1.0,
+                },
+            },
+        )
+        self.assertNotIn("voice_mode", status)
+        self.assertNotIn("voice_bridge", status)
+
+    def test_smoke_contract_accepts_status_payloads_without_voice_sections(self) -> None:
+        headers = {
+            "x-content-type-options": "nosniff",
+            "x-frame-options": "SAMEORIGIN",
+            "referrer-policy": "no-referrer",
+            "content-security-policy": "default-src 'self'",
+        }
+        payloads = {
+            "/api/status": {
+                "generated_at": "2026-07-26T20:00:00+00:00",
+                "backup_status": {"status": "ok"},
+            },
+            "/api/live-status": {
+                "generated_at": "2026-07-26T20:00:00+00:00",
+                "codex_approval": {"active": False},
+                "live_status_timing": {"total_ms": 1.0},
+            },
+        }
+
+        for path, payload in payloads.items():
+            with (
+                self.subTest(path=path),
+                patch(
+                    "scripts.cockpit_smoke_check.fetch_url",
+                    return_value=(200, json.dumps(payload).encode("utf-8"), headers),
+                ),
+            ):
+                result = check_endpoint("http://127.0.0.1:8770", "status", path, timeout=1.0)
+                self.assertTrue(result.ok)
+
+    def test_smoke_contract_rejects_retired_voice_status_sections(self) -> None:
+        headers = {
+            "x-content-type-options": "nosniff",
+            "x-frame-options": "SAMEORIGIN",
+            "referrer-policy": "no-referrer",
+            "content-security-policy": "default-src 'self'",
+        }
+        payloads = {
+            "/api/status": {
+                "generated_at": "2026-07-26T20:00:00+00:00",
+                "backup_status": {"status": "ok"},
+                "voice_bridge": {},
+            },
+            "/api/live-status": {
+                "generated_at": "2026-07-26T20:00:00+00:00",
+                "codex_approval": {"active": False},
+                "live_status_timing": {"total_ms": 1.0},
+                "voice_mode": {},
+            },
+        }
+
+        for path, payload in payloads.items():
+            with (
+                self.subTest(path=path),
+                patch(
+                    "scripts.cockpit_smoke_check.fetch_url",
+                    return_value=(200, json.dumps(payload).encode("utf-8"), headers),
+                ),
+            ):
+                result = check_endpoint("http://127.0.0.1:8770", "status", path, timeout=1.0)
+                self.assertFalse(result.ok)
 
 
 if __name__ == "__main__":
