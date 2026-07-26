@@ -84,7 +84,10 @@ from app.communication.simple_main_deploy import (
     prepare_simple_main_deployment as prepare_clean_main_deployment,
     verify_simple_main_deployment as verify_clean_main_deployment,
 )
-from app.communication.workstream_live_status import build_workstream_live_status
+from app.communication.workstream_live_status import (
+    build_workstream_live_status,
+    workstream_live_status_model_block,
+)
 from app.file_persistence import atomic_write_json
 from app.project_continuity import ProjectContinuityError, ProjectContinuityService
 
@@ -1146,6 +1149,9 @@ class HumanAdamProfileManager:
             workspace_synced = self._sync_clean_active_workspace_from_main(
                 service=service,
             )
+            observed_code_stamp = str(
+                kwargs.pop("observed_code_stamp", "") or ""
+            )
             active_id = self.work_profile_id
             lazy_id = self.active_lazy_workstream_id
             write_intent = kwargs.pop("write_intent", False) is True
@@ -1216,7 +1222,14 @@ class HumanAdamProfileManager:
                         "rule=When writable=false, remain read-only and do not change files or Git."
                     )
             control_lines.append("[/DEVELOPMENT_CONTROL]")
-            development_control_block = "\n".join(control_lines)
+            live_status_block = workstream_live_status_model_block(
+                self.workstream_live_status(
+                    observed_code_stamp=observed_code_stamp
+                )
+            )
+            development_control_block = (
+                live_status_block + "\n\n" + "\n".join(control_lines)
+            )
             completion_instruction = automatic_completion_instruction(
                 writable=writable,
                 integration_deferred=integration_deferred,

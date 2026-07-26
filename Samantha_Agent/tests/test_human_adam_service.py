@@ -385,6 +385,35 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertTrue(hub.sent[0]["model_input_text"].endswith("\n\nProveď kontrolu"))
         self.assertEqual(result["session"]["thread_id"], "canonical-thread")
 
+    def test_send_action_forwards_observed_server_stamp(self) -> None:
+        calls: list[str] = []
+
+        class SendService:
+            def send(
+                self,
+                *,
+                text: str,
+                client_message_id: str,
+                client_sent_at: str,
+                write_intent: bool,
+                observed_code_stamp: str,
+            ) -> dict[str, object]:
+                del text, client_message_id, client_sent_at, write_intent
+                calls.append(observed_code_stamp)
+                return {"ok": True}
+
+        result = human_adam_send_action(
+            {
+                "message": "Test",
+                "client_message_id": "human-adam-message-stamp",
+            },
+            service=SendService(),  # type: ignore[arg-type]
+            observed_code_stamp="0123456789abcdef",
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(calls, ["0123456789abcdef"])
+
     def test_raw_service_rejects_unvalidated_write_intent(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             service, _runtime, _workspace, hub = self.make_service(Path(temp_dir))

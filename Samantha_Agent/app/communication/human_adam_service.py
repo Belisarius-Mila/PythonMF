@@ -267,7 +267,9 @@ class HumanAdamService:
         client_sent_at: str = "",
         development_control_block: str = "",
         write_intent: bool = False,
+        observed_code_stamp: str = "",
     ) -> dict[str, Any]:
+        del observed_code_stamp
         if write_intent:
             raise SessionHubError(
                 "Jednorázovou autorizaci zápisu musí ověřit správce pracovních proudů."
@@ -474,13 +476,19 @@ def human_adam_connect_action(*, service: HumanAdamService) -> dict[str, Any]:
         return {"ok": False, "status": "human_adam_connect_failed", "message": str(exc)}
 
 
-def human_adam_send_action(payload: dict[str, Any], *, service: HumanAdamService) -> dict[str, Any]:
+def human_adam_send_action(
+    payload: dict[str, Any],
+    *,
+    service: HumanAdamService,
+    observed_code_stamp: str = "",
+) -> dict[str, Any]:
     try:
         return service.send(
             text=str(payload.get("message") or ""),
             client_message_id=str(payload.get("client_message_id") or ""),
             client_sent_at=str(payload.get("client_sent_at") or ""),
             write_intent=payload.get("write_intent") is True,
+            observed_code_stamp=observed_code_stamp,
         )
     except SessionBusyError as exc:
         return {"ok": False, "status": "human_adam_busy", "message": str(exc)}

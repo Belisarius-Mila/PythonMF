@@ -10568,7 +10568,13 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/human-adam/send":
                     payload = self.read_json()
-                    self.respond_json(human_adam_send_action(payload, service=HUMAN_ADAM))
+                    self.respond_json(
+                        human_adam_send_action(
+                            payload,
+                            service=HUMAN_ADAM,
+                            observed_code_stamp=COCKPIT_CODE_STAMP,
+                        )
+                    )
                     return
                 if parsed.path == "/api/human-adam/checkpoint":
                     payload = self.read_json()

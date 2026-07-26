@@ -29,6 +29,44 @@ _REMOTE_STATES = {
     "local_ahead": "local_ahead",
     "diverged": "diverged",
 }
+_OVERALL_STATES = frozenset(
+    {"current", "current_runtime_disconnected", "attention_required", "unverified"}
+)
+_MAIN_STATES = frozenset(
+    {
+        "aligned",
+        "dirty",
+        "origin_ahead",
+        "local_ahead",
+        "diverged",
+        "origin_unverified",
+        "unverified",
+    }
+)
+_DEPLOYMENT_STATES = frozenset(
+    {
+        "verified_current",
+        "pending_restart",
+        "verified_other_main",
+        "code_mismatch",
+        "current_head_server_unverified",
+        "unavailable",
+        "unverified",
+    }
+)
+_WORKSPACE_STATES = frozenset(
+    {"aligned_clean", "attention_required", "unverified"}
+)
+_RUNTIME_STATES = frozenset(
+    {
+        "connected",
+        "disconnected",
+        "unreachable",
+        "busy",
+        "delivery_uncertain",
+        "unverified",
+    }
+)
 
 
 def _safe_count(value: object) -> int:
@@ -67,6 +105,19 @@ def _safe_timestamp(value: object) -> str:
 
 def _safe_mapping(value: object) -> Mapping[str, Any]:
     return value if isinstance(value, Mapping) else {}
+
+
+def _safe_state(value: object, allowed: frozenset[str]) -> str:
+    candidate = str(value or "").strip()
+    return candidate if candidate in allowed else "unverified"
+
+
+def _safe_bool_text(value: object) -> str:
+    if value is True:
+        return "true"
+    if value is False:
+        return "false"
+    return "unknown"
 
 
 def _main_status(
@@ -379,3 +430,63 @@ def build_workstream_live_status(
         "workspaces": workspaces,
         "runtime": runtime,
     }
+
+
+def workstream_live_status_model_block(live_status: object) -> str:
+    """Serialize only the redacted schema into one compact model-input block."""
+
+    value = _safe_mapping(live_status)
+    clean_workstream_id = str(value.get("workstream_id") or "").strip().casefold()
+    valid = bool(
+        value.get("schema_version") == LIVE_STATUS_SCHEMA_VERSION
+        and value.get("read_only") is True
+        and value.get("writes_performed") is False
+        and _WORKSTREAM_ID_RE.fullmatch(clean_workstream_id)
+    )
+    if not valid:
+        clean_workstream_id = "unknown"
+        value = {}
+
+    main = _safe_mapping(value.get("main"))
+    deployment = _safe_mapping(value.get("deployment"))
+    workspaces = _safe_mapping(value.get("workspaces"))
+    runtime = _safe_mapping(value.get("runtime"))
+    overall_state = _safe_state(value.get("state"), _OVERALL_STATES)
+    main_state = _safe_state(main.get("state"), _MAIN_STATES)
+    deployment_state = _safe_state(
+        deployment.get("state"),
+        _DEPLOYMENT_STATES,
+    )
+    workspace_state = _safe_state(
+        workspaces.get("state"),
+        _WORKSPACE_STATES,
+    )
+    runtime_state = _safe_state(runtime.get("state"), _RUNTIME_STATES)
+    return "\n".join(
+        (
+            "[WORKSTREAM_LIVE_STATUS]",
+            f"schema_version={LIVE_STATUS_SCHEMA_VERSION}",
+            "read_only=true",
+            "writes_performed=false",
+            f"state={overall_state}",
+            f"workstream_id={clean_workstream_id}",
+            f"main_state={main_state}",
+            f"main_head={_safe_deployment_head(main.get('head_short')) or 'unknown'}",
+            f"origin_head={_safe_deployment_head(main.get('origin_short')) or 'unknown'}",
+            f"deployment_state={deployment_state}",
+            f"deployment_main={_safe_deployment_head(deployment.get('main_short')) or 'unknown'}",
+            f"deployment_test_count={_safe_count(deployment.get('test_count'))}",
+            f"deployment_smoke_count={_safe_count(deployment.get('smoke_count'))}",
+            f"deployment_code_stamp_verified={_safe_bool_text(deployment.get('code_stamp_verified'))}",
+            f"workspaces_state={workspace_state}",
+            f"workspace_count={_safe_count(workspaces.get('count'))}",
+            f"aligned_workspace_count={_safe_count(workspaces.get('aligned_count'))}",
+            f"dirty_workspace_count={_safe_count(workspaces.get('dirty_count'))}",
+            f"runtime_state={runtime_state}",
+            f"runtime_reachable={_safe_bool_text(runtime.get('reachable'))}",
+            f"runtime_connected={_safe_bool_text(runtime.get('connected'))}",
+            f"turn_busy={_safe_bool_text(runtime.get('turn_busy'))}",
+            f"delivery_uncertain={_safe_bool_text(runtime.get('delivery_uncertain'))}",
+            "[/WORKSTREAM_LIVE_STATUS]",
+        )
+    )

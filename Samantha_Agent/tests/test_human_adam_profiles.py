@@ -2330,6 +2330,119 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertNotIn("[AUTOMATIC_STEP_COMPLETION]", read_only_input)
         self.assertIn("[AUTOMATIC_STEP_COMPLETION]", writable_input)
         self.assertNotIn("[AUTOMATIC_STEP_COMPLETION]", expired_input)
+        self.assertEqual(read_only_input.count("[WORKSTREAM_LIVE_STATUS]"), 1)
+        self.assertEqual(writable_input.count("[WORKSTREAM_LIVE_STATUS]"), 1)
+        self.assertLess(
+            read_only_input.index("[WORKSTREAM_LIVE_STATUS]"),
+            read_only_input.index("[DEVELOPMENT_CONTROL]"),
+        )
+
+    def test_send_injects_same_redacted_live_snapshot_into_model_input(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.runtime.reachable = True
+            human_hub.connected = True
+            human_hub.messages = [
+                {
+                    "status": "completed",
+                    "recovery_required": False,
+                    "user_text": "never return this private text",
+                    "answer": "never return this private answer",
+                    "path": "/private/never-return-this",
+                    "pid": 98765,
+                }
+            ]
+            receipt = {
+                "state": "deployed",
+                "workstream_id": "layer-human-adam-development",
+                "main_head": "a" * 40,
+                "expected_code_stamp": "0123456789abcdef",
+                "test_count": 1232,
+                "smoke_count": 5,
+                "deployed_at": "2026-07-26T07:15:00+00:00",
+                "prepared_at": "2026-07-26T07:10:00+00:00",
+            }
+            remote = {
+                "ok": True,
+                "read_only": True,
+                "writes_performed": False,
+                "state": "aligned",
+                "local_head": "a" * 40,
+                "origin_head": "a" * 40,
+            }
+            with patch(
+                "app.communication.human_adam_profiles.load_simple_main_deployment_receipt",
+                return_value=receipt,
+            ), patch(
+                "app.communication.human_adam_profiles.audit_clean_main_remote_sync",
+                return_value=remote,
+            ):
+                result = manager.send(
+                    text="Zkontroluj připravenost.",
+                    client_message_id="live-status-model-input-001",
+                    observed_code_stamp="0123456789abcdef",
+                )
+
+        model_input = str(human_hub.last_send["model_input_text"])
+        self.assertTrue(result["ok"])
+        self.assertEqual(model_input.count("[WORKSTREAM_LIVE_STATUS]"), 1)
+        self.assertIn("state=current", model_input)
+        self.assertIn("workstream_id=layer-human-adam-development", model_input)
+        self.assertIn("main_state=aligned", model_input)
+        self.assertIn(f"main_head={'a' * 12}", model_input)
+        self.assertIn(f"origin_head={'a' * 12}", model_input)
+        self.assertIn("deployment_state=verified_current", model_input)
+        self.assertIn("deployment_test_count=1232", model_input)
+        self.assertIn("deployment_smoke_count=5", model_input)
+        self.assertIn("workspaces_state=aligned_clean", model_input)
+        self.assertIn("workspace_count=2", model_input)
+        self.assertIn("runtime_state=connected", model_input)
+        self.assertIn("runtime_connected=true", model_input)
+        self.assertLess(
+            model_input.index("[WORKSTREAM_LIVE_STATUS]"),
+            model_input.index("[DEVELOPMENT_CONTROL]"),
+        )
+        self.assertTrue(model_input.endswith("\n\nZkontroluj připravenost."))
+        self.assertNotIn("never return", model_input.casefold())
+        self.assertNotIn("/private/", model_input)
+        self.assertNotIn("98765", model_input)
+        self.assertEqual(human_workspace.prepare_count, 0)
+        self.assertEqual(human_workspace.sync_count, 0)
+        self.assertEqual(library_workspace.prepare_count, 0)
+        self.assertEqual(library_workspace.sync_count, 0)
+        self.assertEqual(manager.runtime.last_start_kwargs, {})
+
+    def test_send_continues_with_fail_closed_live_status_when_remote_audit_fails(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _human_workspace, _library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.runtime.reachable = True
+            human_hub.connected = True
+            with patch(
+                "app.communication.human_adam_profiles.audit_clean_main_remote_sync",
+                side_effect=AppServerError(
+                    "private diagnostic detail must stay out"
+                ),
+            ):
+                result = manager.send(
+                    text="Pokračuj v read-only kontrole.",
+                    client_message_id="live-status-model-input-002",
+                    observed_code_stamp="0123456789abcdef",
+                )
+
+        model_input = str(human_hub.last_send["model_input_text"])
+        self.assertTrue(result["ok"])
+        self.assertIn("state=unverified", model_input)
+        self.assertIn("main_state=origin_unverified", model_input)
+        self.assertIn("[DEVELOPMENT_CONTROL]", model_input)
+        self.assertIn("writable=false", model_input)
+        self.assertTrue(model_input.endswith("\n\nPokračuj v read-only kontrole."))
+        self.assertNotIn("private diagnostic detail", model_input)
 
     def test_knihovna_plain_turn_allows_only_direct_single_card_edit(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

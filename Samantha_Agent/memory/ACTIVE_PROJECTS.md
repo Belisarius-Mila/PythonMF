@@ -42,6 +42,16 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-26 10:09 CEST: Priorita 1, Human–Adam / fáze 8.3b. Stejný redigovaný
+  živý snapshot z fáze 8.1 nyní vstupuje také do modelového kontextu r-Adama,
+  vždy právě jednou před vývojová oprávnění. Serializer propouští jen pevně
+  povolené stavy, krátké Git otisky, počty a booleovské důkazy; neplatný nebo
+  neúplný stav skončí jako `unverified` a výpadek read-only GitHub auditu
+  nezablokuje konverzaci. UI, persistence, reconnect, synchronizace a write
+  oprávnění se nemění. Plná brána prošla 1237 testy. Běžící Cockpit zůstává
+  ověřený na `6854fd2`; 8.3b čeká na samostatně potvrzené nasazení a následný
+  krátký živý read-only test. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-26 09:07 CEST: Priorita 1, Human–Adam / fáze 8.3a. Panel `Práce`
   dostal prvního přímého UI konzumenta společného redigovaného snapshotu z 8.1:
   odděleně ukáže main/GitHub, nasazení, profilové workspaces a runtime.

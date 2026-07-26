@@ -4,7 +4,10 @@ import copy
 import json
 import unittest
 
-from app.communication.workstream_live_status import build_workstream_live_status
+from app.communication.workstream_live_status import (
+    build_workstream_live_status,
+    workstream_live_status_model_block,
+)
 
 
 HEAD = "a" * 40
@@ -133,6 +136,52 @@ class WorkstreamLiveStatusTests(unittest.TestCase):
         build(**values)
 
         self.assertEqual(values, before)
+
+    def test_model_block_contains_only_compact_allowlisted_live_evidence(
+        self,
+    ) -> None:
+        live = build()
+        live["private_path"] = "/private/never-return-this"
+        live["runtime"]["private_message"] = "never return this"
+
+        block = workstream_live_status_model_block(live)
+
+        self.assertIn("[WORKSTREAM_LIVE_STATUS]", block)
+        self.assertIn("state=current", block)
+        self.assertIn("workstream_id=layer-human-adam-development", block)
+        self.assertIn("main_state=aligned", block)
+        self.assertIn(f"main_head={HEAD[:12]}", block)
+        self.assertIn("deployment_state=verified_current", block)
+        self.assertIn("deployment_test_count=1216", block)
+        self.assertIn("workspaces_state=aligned_clean", block)
+        self.assertIn("runtime_state=connected", block)
+        self.assertIn("runtime_connected=true", block)
+        self.assertNotIn("never return", block.casefold())
+        self.assertNotIn("/private/", block)
+        self.assertNotIn("message", block.casefold())
+        self.assertNotIn("path", block.casefold())
+        self.assertNotIn("pid", block.casefold())
+
+    def test_model_block_fails_closed_for_untrusted_payload(self) -> None:
+        block = workstream_live_status_model_block(
+            {
+                "schema_version": 1,
+                "read_only": False,
+                "writes_performed": False,
+                "workstream_id": "layer-human-adam-development",
+                "state": "current",
+                "main": {
+                    "state": "aligned",
+                    "private_text": "never return this",
+                },
+            }
+        )
+
+        self.assertIn("state=unverified", block)
+        self.assertIn("workstream_id=unknown", block)
+        self.assertIn("main_state=unverified", block)
+        self.assertIn("runtime_connected=unknown", block)
+        self.assertNotIn("never return", block.casefold())
 
     def test_main_remote_drift_and_workspace_wip_require_attention(self) -> None:
         result = build(
