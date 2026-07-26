@@ -2952,6 +2952,8 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("urgent-reminder-body", COCKPIT_HTML)
         self.assertIn("Důležitá připomenutí: chyba načtení", COCKPIT_HTML)
         self.assertIn("hasLoadError", COCKPIT_HTML)
+        self.assertIn("pendingDownloadCount", COCKPIT_HTML)
+        self.assertIn("iCloud čeká", COCKPIT_HTML)
         self.assertIn("markUrgentReminderDone", COCKPIT_HTML)
         self.assertIn("dashboardRecoveryBtn", COCKPIT_HTML)
         self.assertIn("recoveryModal", COCKPIT_HTML)
@@ -5489,6 +5491,50 @@ Dalsi krok:
         self.assertEqual(sleep_mock.call_count, 3)
         self.assertEqual(result["counts"]["open"], 1)
         self.assertEqual(result["items"][0]["body_text"], "Po několika deadlocích načteno celé.")
+
+    def test_urgent_reminders_status_reports_pending_icloud_download(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            inbox = root / "Shortcuts"
+            inbox.mkdir()
+            index_path = root / "private" / "urgent_reminders" / "index.json"
+            reminder = SimpleNamespace(
+                reminder_number=21,
+                priority="urgent",
+                status="open",
+                created_at="2026-07-26 10:09:26",
+                modified_at="2026-07-26 10:09:26",
+                title="Samantha důležité připomenutí",
+                summary="Poslední platný index.",
+                body_text="Poslední platný index.",
+                size_bytes=135,
+            )
+
+            def pending_sync(**kwargs: object) -> list[SimpleNamespace]:
+                diagnostics = kwargs["sync_diagnostics"]
+                assert isinstance(diagnostics, dict)
+                diagnostics.update(
+                    {
+                        "checked_file_count": 22,
+                        "readable_file_count": 21,
+                        "pending_download_count": 1,
+                    }
+                )
+                return [reminder]
+
+            with patch(
+                "app.cockpit.sync_urgent_reminders_index",
+                side_effect=pending_sync,
+            ):
+                result = urgent_reminders_status(inbox_dir=inbox, index_path=index_path)
+
+        self.assertTrue(result["ok"])
+        self.assertTrue(result["sync_pending"])
+        self.assertEqual(result["pending_download_count"], 1)
+        self.assertIn("čeká na stažení", result["message"])
+        self.assertEqual(result["counts"]["open"], 1)
+        self.assertEqual(result["items"][0]["reminder_number"], 21)
+        self.assertNotIn("source_path", result["items"][0])
 
     def test_urgent_reminder_done_action_hides_open_item_without_deleting_record(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

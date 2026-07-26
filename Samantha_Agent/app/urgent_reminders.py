@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import errno
 import json
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable, Sequence
 
 from app.file_persistence import update_json_file
 from app.quick_notes import DEFAULT_ICLOUD_SHORTCUTS_INBOX, SUPPORTED_SUFFIXES
@@ -14,6 +16,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_PRIVATE_DIR = PROJECT_ROOT / "data" / "private" / "urgent_reminders"
 DEFAULT_INDEX_PATH = DEFAULT_PRIVATE_DIR / "index.json"
 URGENT_REMINDER_FILE_PREFIX = "samantha_reminder_"
+DEFAULT_HYDRATION_RETRY_DELAYS = (0.5, 1.0, 2.0, 4.0)
 
 
 @dataclass(frozen=True)
@@ -38,12 +41,23 @@ def sync_urgent_reminders_index(
     *,
     inbox_dir: Path = DEFAULT_ICLOUD_SHORTCUTS_INBOX,
     index_path: Path = DEFAULT_INDEX_PATH,
+    sync_diagnostics: dict[str, int] | None = None,
+    hydration_retry_delays: Sequence[float] = DEFAULT_HYDRATION_RETRY_DELAYS,
+    sleeper: Callable[[float], None] = time.sleep,
 ) -> list[UrgentReminder]:
     observed: list[dict[str, Any]] = []
+    reminder_files = _iter_reminder_files(inbox_dir)
+    readable_texts, pending_downloads = _read_texts_with_hydration_retry(
+        reminder_files,
+        retry_delays=hydration_retry_delays,
+        sleeper=sleeper,
+    )
     now = _now_iso()
-    for source_path in _iter_reminder_files(inbox_dir):
+    for source_path in reminder_files:
+        text = readable_texts.get(source_path)
+        if text is None:
+            continue
         stat = source_path.stat()
-        text = _read_text(source_path)
         observed.append(
             {
                 "source_path": str(source_path),
@@ -93,6 +107,16 @@ def sync_urgent_reminders_index(
             sort_keys=True,
         )
         records = _index_records(updated)
+
+    if sync_diagnostics is not None:
+        sync_diagnostics.clear()
+        sync_diagnostics.update(
+            {
+                "checked_file_count": len(reminder_files),
+                "readable_file_count": len(observed),
+                "pending_download_count": len(pending_downloads),
+            }
+        )
 
     return [
         _record_to_reminder(record)
@@ -172,6 +196,31 @@ def _iter_reminder_files(inbox_dir: Path) -> list[Path]:
 
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
+
+
+def _read_texts_with_hydration_retry(
+    paths: Sequence[Path],
+    *,
+    retry_delays: Sequence[float],
+    sleeper: Callable[[float], None],
+) -> tuple[dict[Path, str], tuple[Path, ...]]:
+    delays = tuple(max(0.0, float(delay)) for delay in retry_delays)
+    readable: dict[Path, str] = {}
+    pending = list(paths)
+    for attempt in range(len(delays) + 1):
+        next_pending: list[Path] = []
+        for path in pending:
+            try:
+                readable[path] = _read_text(path)
+            except OSError as exc:
+                if exc.errno != errno.EDEADLK:
+                    raise
+                next_pending.append(path)
+        pending = next_pending
+        if not pending or attempt >= len(delays):
+            break
+        sleeper(delays[attempt])
+    return readable, tuple(pending)
 
 
 def _extract_title(text: str, path: Path) -> str:

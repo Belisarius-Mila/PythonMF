@@ -2100,10 +2100,15 @@ def urgent_reminders_status(
 ) -> dict[str, Any]:
     inbox_exists = inbox_dir.exists()
     sync_error: OSError | ValueError | None = None
+    sync_diagnostics: dict[str, int] = {}
     try:
         for attempt in range(5):
             try:
-                reminders = sync_urgent_reminders_index(inbox_dir=inbox_dir, index_path=index_path)
+                reminders = sync_urgent_reminders_index(
+                    inbox_dir=inbox_dir,
+                    index_path=index_path,
+                    sync_diagnostics=sync_diagnostics,
+                )
                 break
             except OSError as exc:
                 sync_error = exc
@@ -2141,8 +2146,21 @@ def urgent_reminders_status(
         reverse=True,
     )
     shown = open_items[: max(1, limit)]
+    pending_download_count = max(
+        0,
+        int(sync_diagnostics.get("pending_download_count", 0) or 0),
+    )
     if not inbox_exists:
         message = "Inbox pro mobilní vstupy zatím není synchronizovaný na Mac."
+    elif pending_download_count:
+        if pending_download_count == 1:
+            pending_message = "1 nový iCloud soubor čeká na stažení."
+        else:
+            pending_message = f"{pending_download_count} nové iCloud soubory čekají na stažení."
+        message = (
+            f"{pending_message} Zobrazuji poslední platný index; "
+            "kontrola se automaticky zopakuje."
+        )
     elif not open_items:
         message = "Žádná otevřená důležitá připomenutí."
     else:
@@ -2153,6 +2171,8 @@ def urgent_reminders_status(
         "inbox_exists": inbox_exists,
         "inbox": str(inbox_dir),
         "index": str(relative_to_project(index_path)),
+        "sync_pending": pending_download_count > 0,
+        "pending_download_count": pending_download_count,
         "counts": {"open": len(open_items), "total": len(reminders)},
         "items": [
             {
@@ -19062,8 +19082,10 @@ COCKPIT_HTML = """<!doctype html>
     function renderUrgentReminderAlert(data) {
       const counts = data.counts || {};
       const openCount = counts.open || 0;
+      const pendingDownloadCount = Number(data.pending_download_count || 0);
+      const hasPendingDownload = pendingDownloadCount > 0;
       const hasLoadError = data && data.ok === false;
-      urgentReminderAlert.classList.toggle("hidden", openCount <= 0 && !hasLoadError);
+      urgentReminderAlert.classList.toggle("hidden", openCount <= 0 && !hasLoadError && !hasPendingDownload);
       urgentReminderAlertList.innerHTML = "";
       if (hasLoadError) {
         urgentReminderAlertTitle.textContent = "Důležitá připomenutí: chyba načtení";
@@ -19073,11 +19095,21 @@ COCKPIT_HTML = """<!doctype html>
         urgentReminderAlertList.appendChild(line);
         return;
       }
+      if (hasPendingDownload) {
+        const pendingLine = document.createElement("div");
+        pendingLine.className = "urgent-alert-detail";
+        pendingLine.textContent = data.message || `${pendingDownloadCount} iCloud položek čeká na stažení.`;
+        urgentReminderAlertList.appendChild(pendingLine);
+      }
       if (openCount <= 0) {
-        urgentReminderAlertTitle.textContent = "Důležitá připomenutí";
+        urgentReminderAlertTitle.textContent = hasPendingDownload
+          ? `Důležitá připomenutí · iCloud čeká: ${pendingDownloadCount}`
+          : "Důležitá připomenutí";
         return;
       }
-      urgentReminderAlertTitle.textContent = `Důležitá připomenutí: ${openCount}`;
+      urgentReminderAlertTitle.textContent = hasPendingDownload
+        ? `Důležitá připomenutí: ${openCount} · iCloud čeká: ${pendingDownloadCount}`
+        : `Důležitá připomenutí: ${openCount}`;
       (data.items || []).slice(0, 3).forEach((item) => {
         const row = document.createElement("div");
         row.className = "urgent-alert-item";
@@ -19112,7 +19144,9 @@ COCKPIT_HTML = """<!doctype html>
       if (!items.length) {
         const empty = document.createElement("div");
         empty.className = "status-line";
-        empty.textContent = data.inbox_exists ? "Žádná otevřená důležitá připomenutí." : "Inbox zatím není synchronizovaný na Mac.";
+        empty.textContent = data.sync_pending
+          ? (data.message || "Nový iCloud soubor čeká na stažení.")
+          : (data.inbox_exists ? "Žádná otevřená důležitá připomenutí." : "Inbox zatím není synchronizovaný na Mac.");
         urgentRemindersList.appendChild(empty);
         return;
       }

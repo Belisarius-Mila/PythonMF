@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import errno
 import json
 import subprocess
 import sys
@@ -65,6 +66,76 @@ class UrgentRemindersTests(unittest.TestCase):
 
             self.assertEqual(index_path.read_bytes(), original)
             self.assertEqual(list(index_path.parent.glob(f".{index_path.name}.*.tmp")), [])
+
+    def test_sync_retries_one_hydrating_file_and_reports_it_without_losing_index(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            inbox = root / "inbox"
+            inbox.mkdir()
+            index_path = root / "private" / "urgent_reminders" / "index.json"
+            readable = inbox / "samantha_reminder_a.md"
+            pending = inbox / "samantha_reminder_b.md"
+            _write_reminder(readable, "První připomenutí")
+            _write_reminder(pending, "Čekající připomenutí")
+            diagnostics: dict[str, int] = {}
+
+            def read_with_pending(path: Path) -> str:
+                if path == pending:
+                    raise OSError(errno.EDEADLK, "Resource deadlock avoided")
+                return path.read_text(encoding="utf-8")
+
+            with (
+                patch("app.urgent_reminders._read_text", side_effect=read_with_pending),
+                patch("app.urgent_reminders.time.sleep", return_value=None) as sleep_mock,
+            ):
+                reminders = sync_urgent_reminders_index(
+                    inbox_dir=inbox,
+                    index_path=index_path,
+                    sync_diagnostics=diagnostics,
+                    hydration_retry_delays=(0.5, 1.0),
+                    sleeper=time.sleep,
+                )
+
+            self.assertEqual([item.reminder_number for item in reminders], [1])
+            self.assertEqual(diagnostics["checked_file_count"], 2)
+            self.assertEqual(diagnostics["readable_file_count"], 1)
+            self.assertEqual(diagnostics["pending_download_count"], 1)
+            self.assertEqual(sleep_mock.call_count, 2)
+            self.assertEqual(len(json.loads(index_path.read_text(encoding="utf-8"))["reminders"]), 1)
+
+    def test_sync_indexes_file_when_hydration_finishes_during_retry(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            inbox = root / "inbox"
+            inbox.mkdir()
+            index_path = root / "private" / "urgent_reminders" / "index.json"
+            source = inbox / "samantha_reminder_a.md"
+            _write_reminder(source, "Po hydrataci")
+            diagnostics: dict[str, int] = {}
+            original_read_text = source.read_text
+
+            with (
+                patch(
+                    "app.urgent_reminders._read_text",
+                    side_effect=[
+                        OSError(errno.EDEADLK, "Resource deadlock avoided"),
+                        OSError(errno.EDEADLK, "Resource deadlock avoided"),
+                        original_read_text(encoding="utf-8"),
+                    ],
+                ),
+                patch("app.urgent_reminders.time.sleep", return_value=None) as sleep_mock,
+            ):
+                reminders = sync_urgent_reminders_index(
+                    inbox_dir=inbox,
+                    index_path=index_path,
+                    sync_diagnostics=diagnostics,
+                    hydration_retry_delays=(0.5, 1.0, 2.0),
+                    sleeper=time.sleep,
+                )
+
+            self.assertEqual([item.reminder_number for item in reminders], [1])
+            self.assertEqual(diagnostics["pending_download_count"], 0)
+            self.assertEqual(sleep_mock.call_count, 2)
 
     def test_two_processes_merge_urgent_reminders_with_unique_stable_numbers(self) -> None:
         script = """
