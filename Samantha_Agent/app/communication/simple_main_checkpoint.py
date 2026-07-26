@@ -1,8 +1,8 @@
-"""One confirmed Human–Adam checkpoint completed directly on ``main``.
+"""One confirmed canonical workstream checkpoint completed on ``main``.
 
-The module is intentionally not wired to Cockpit routes yet.  Phase 1.1 keeps
-the existing UI untouched and provides a tested backend boundary that can later
-replace the semaphore/WIP/takeover sequence.
+The backend runs the established gate and Git transaction, then projects one
+redacted live-status snapshot into the same handoff/TVBCP commit.  It never
+creates a second post-push documentation commit.
 """
 
 from __future__ import annotations
@@ -10,7 +10,8 @@ from __future__ import annotations
 import re
 import subprocess
 import threading
-from dataclasses import dataclass
+from collections.abc import Mapping
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Sequence
@@ -24,6 +25,10 @@ from app.communication.checkpoint_quality_gate import (
     run_checkpoint_quality_gate,
 )
 from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
+from app.communication.workstream_live_status import (
+    LIVE_STATUS_SCHEMA_VERSION,
+    build_workstream_live_status,
+)
 from app.file_persistence import atomic_replace_text_under_external_lock
 from scripts.human_adam_takeover import (
     CONFIRMATION_TEXT as LEGACY_FAST_FORWARD_CONFIRMATION,
@@ -66,6 +71,19 @@ class SimpleMainCheckpointRequest:
     last_deployed_at: str = ""
     last_deployed_test_count: int = 0
     last_deployed_smoke_count: int = 0
+    operational_context: Mapping[str, Any] = field(
+        default_factory=dict,
+        repr=False,
+        compare=False,
+    )
+
+
+@dataclass(frozen=True)
+class CheckpointStatusProjection:
+    completed: tuple[str, ...]
+    open_items: tuple[str, ...]
+    risks: tuple[str, ...]
+    next_step: str
 
 
 def _local_now() -> datetime:
@@ -137,8 +155,75 @@ def _safe_request(request: SimpleMainCheckpointRequest) -> SimpleMainCheckpointR
         proposed_next_steps=_safe_proposed_next_steps(
             request.proposed_next_steps
         ),
+        operational_context=_safe_operational_context(
+            request.operational_context
+        ),
         **deployment,
     )
+
+
+def _safe_operational_context(value: object) -> dict[str, Any]:
+    """Copy only evidence fields consumed by the redacted live-status builder."""
+
+    if not isinstance(value, Mapping):
+        return {}
+    deployment = value.get("deployment")
+    deployment_map = deployment if isinstance(deployment, Mapping) else {}
+    safe_deployment = {
+        key: deployment_map.get(key)
+        for key in (
+            "state",
+            "main_head",
+            "main_short",
+            "expected_code_stamp",
+            "test_count",
+            "smoke_count",
+            "gate_passed",
+            "smoke_passed",
+            "deployed_at",
+            "prepared_at",
+        )
+    }
+    runtime = value.get("runtime")
+    runtime_map = runtime if isinstance(runtime, Mapping) else {}
+    session = value.get("session")
+    session_map = session if isinstance(session, Mapping) else {}
+    messages = session_map.get("messages")
+    safe_messages: list[dict[str, Any]] = []
+    if isinstance(messages, Sequence) and not isinstance(messages, (str, bytes)):
+        for item in messages[-200:]:
+            if not isinstance(item, Mapping):
+                continue
+            safe_messages.append(
+                {
+                    "status": str(item.get("status") or ""),
+                    "recovery_required": item.get("recovery_required") is True,
+                }
+            )
+    server = value.get("server")
+    server_map = server if isinstance(server, Mapping) else {}
+    return {
+        "deployment_expected": value.get("deployment_expected")
+        if isinstance(value.get("deployment_expected"), bool)
+        else None,
+        "deployment": safe_deployment,
+        "runtime": {
+            "reachable": runtime_map.get("reachable")
+            if isinstance(runtime_map.get("reachable"), bool)
+            else None,
+        },
+        "session": {
+            "connected": session_map.get("connected")
+            if isinstance(session_map.get("connected"), bool)
+            else None,
+            "turn_busy": bool(session_map.get("turn_busy")),
+            "active_turn": bool(session_map.get("active_turn")),
+            "messages": safe_messages,
+        },
+        "server": {
+            "code_stamp": str(server_map.get("code_stamp") or ""),
+        },
+    }
 
 
 def _safe_deployment_snapshot(
@@ -281,12 +366,162 @@ def _format_timestamp(value: datetime) -> str:
     return local.strftime("%Y-%m-%d %H:%M %Z")
 
 
+def _checkpoint_live_status(
+    *,
+    request: SimpleMainCheckpointRequest,
+    observed_at: datetime,
+    source_snapshot: Mapping[str, Any],
+    origin_head: str,
+    workspace_snapshots: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    context = request.operational_context
+    source_head = str(source_snapshot.get("source_head") or "")
+    return build_workstream_live_status(
+        workstream_id=request.workstream_id,
+        observed_at=observed_at.isoformat(),
+        source_snapshot=source_snapshot,
+        remote_snapshot={
+            "state": "aligned",
+            "local_head": source_head,
+            "origin_head": origin_head,
+            "read_only": True,
+            "writes_performed": False,
+        },
+        workspace_snapshots=workspace_snapshots,
+        deployment_snapshot=context.get("deployment"),
+        runtime_snapshot=context.get("runtime"),
+        session_snapshot=context.get("session"),
+        server_snapshot=context.get("server"),
+    )
+
+
+def _checkpoint_status_projection(
+    *,
+    request: SimpleMainCheckpointRequest,
+    live_status: Mapping[str, Any],
+) -> CheckpointStatusProjection:
+    completed = [request.summary]
+    deployment_expected = request.operational_context.get(
+        "deployment_expected"
+    )
+    open_items: list[str] = []
+    if deployment_expected is True:
+        open_items.append(
+            "Pozdější nasazení nového checkpointu zatím není tímto "
+            "snapshotem doložené."
+        )
+    elif deployment_expected is None:
+        open_items.append(
+            "Potřeba následného nasazení tohoto checkpointu není v provozním "
+            "snapshotu určená."
+        )
+    risks: list[str] = []
+    valid_live_status = bool(
+        live_status.get("schema_version") == LIVE_STATUS_SCHEMA_VERSION
+        and live_status.get("read_only") is True
+        and live_status.get("writes_performed") is False
+        and live_status.get("workstream_id") == request.workstream_id
+    )
+    if not valid_live_status:
+        risks.append(
+            "Živý provozní stav nebyl pro tento checkpoint bezpečně ověřen."
+        )
+    else:
+        main = live_status.get("main")
+        deployment = live_status.get("deployment")
+        runtime = live_status.get("runtime")
+        main_map = main if isinstance(main, Mapping) else {}
+        deployment_map = deployment if isinstance(deployment, Mapping) else {}
+        runtime_map = runtime if isinstance(runtime, Mapping) else {}
+
+        main_state = str(main_map.get("state") or "unverified")
+        if main_state != "aligned":
+            risks.append(
+                "Stav lokálního main a origin/main nebyl v živém snapshotu "
+                "doložen jako zarovnaný."
+            )
+
+        if deployment_expected is True:
+            deployment_state = str(
+                deployment_map.get("state") or "unverified"
+            )
+            if deployment_state == "verified_current":
+                completed.append(
+                    "Předchozí stav main byl před tímto checkpointem serverově "
+                    "nasazený a ověřený."
+                )
+            elif deployment_state == "pending_restart":
+                open_items.append(
+                    "Předchozí nasazení čeká na dokončení restartu a "
+                    "serverového důkazu."
+                )
+            elif deployment_state == "verified_other_main":
+                risks.append(
+                    "Poslední ověřené nasazení patří jinému commitu než main "
+                    "před tímto checkpointem."
+                )
+            elif deployment_state == "code_mismatch":
+                risks.append(
+                    "Deployment receipt a kódový otisk běžícího serveru se "
+                    "neshodují."
+                )
+            elif deployment_state == "current_head_server_unverified":
+                risks.append(
+                    "Commit nasazení odpovídá main, ale běžící server nemá "
+                    "úplný ověřený kódový důkaz."
+                )
+            elif deployment_state == "unavailable":
+                risks.append(
+                    "Pro tento pracovní proud není dostupný serverový důkaz "
+                    "nasazení."
+                )
+            else:
+                risks.append(
+                    "Serverový důkaz posledního nasazení nelze bezpečně ověřit."
+                )
+
+        runtime_state = str(runtime_map.get("state") or "unverified")
+        if runtime_state == "delivery_uncertain":
+            risks.append(
+                "Aktivní relace má neuzavřenou nejistotu doručení."
+            )
+        elif runtime_state == "busy":
+            risks.append("Aktivní relace měla při snapshotu rozpracovaný tah.")
+
+    if not risks:
+        risks.append("Žádné další doložené provozní riziko.")
+    if not open_items:
+        open_items.append(
+            "Žádný samostatný provozní bod nad rámec dalšího kroku."
+        )
+    return CheckpointStatusProjection(
+        completed=tuple(completed),
+        open_items=tuple(open_items),
+        risks=tuple(risks),
+        next_step=request.next_step,
+    )
+
+
+def _projection_lines(items: Sequence[str]) -> str:
+    return "\n".join(f"- {item}" for item in items)
+
+
+def _live_state_text(live_status: Mapping[str, Any]) -> str:
+    return (
+        f"main=`{_safe_mapping_state(live_status, 'main')}`, "
+        f"deployment=`{_safe_mapping_state(live_status, 'deployment')}`, "
+        f"runtime=`{_safe_mapping_state(live_status, 'runtime')}`"
+    )
+
+
 def _memory_blocks(
     *,
     request: SimpleMainCheckpointRequest,
     evidence: GateEvidence,
     timestamp: str,
     changes: Sequence[dict[str, str]],
+    projection: CheckpointStatusProjection,
+    live_status: Mapping[str, Any],
 ) -> tuple[str, str]:
     paths = [str(item.get("path") or "").strip() for item in changes]
     paths = [item for item in paths if item][:MAX_CHANGED_PATHS_IN_HANDOFF]
@@ -297,15 +532,20 @@ def _memory_blocks(
         f"plná Cockpit brána: {evidence.test_count} testů, "
         f"{evidence.duration_seconds:.1f} s, výsledek OK"
     )
+    completed_text = "; ".join(projection.completed)
+    open_text = "; ".join(projection.open_items)
+    risk_text = "; ".join(projection.risks)
     handoff_block = f"""### Automatický checkpoint {timestamp}
 
 - Pracovní proud: `{request.workstream_id}`
-- Souhrn: {request.summary}
-- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější push ani nasazení.
+- Hotovo: {completed_text}
+- Otevřeno: {open_text}
+- Rizika: {risk_text}
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
 - Ověření: {test_text}
 - Změněné cesty před paměťovým zápisem ({len(changes)}): {path_text}
 - Commit: `{request.commit_message}`
-- Další krok: {request.next_step}
+- Další krok: {projection.next_step}
 """
     decision_text = (
         f"- {request.decision}"
@@ -320,13 +560,19 @@ def _memory_blocks(
     tvbcp_block = f"""### {timestamp} – {request.summary}
 
 Hotovo:
-- {request.summary}
+{_projection_lines(projection.completed)}
+
+Otevřeno:
+{_projection_lines(projection.open_items)}
+
+Rizika:
+{_projection_lines(projection.risks)}
 
 Rozhodnutí:
 {decision_text}
 
 Další krok:
-- {request.next_step}
+- {projection.next_step}
 
 Navrhované další kroky:
 {proposed_steps_text}
@@ -334,8 +580,17 @@ Navrhované další kroky:
 Technický důkaz:
 - {test_text}.
 - Pracovní proud: `{request.workstream_id}`.
+- Read-only živý stav při checkpointu: {_live_state_text(live_status)}.
 """
     return handoff_block, tvbcp_block
+
+
+def _safe_mapping_state(value: Mapping[str, Any], key: str) -> str:
+    nested = value.get(key)
+    if not isinstance(nested, Mapping):
+        return "unverified"
+    state = str(nested.get("state") or "unverified").strip()
+    return state if re.fullmatch(r"[a-z][a-z0-9_]{1,63}", state) else "unverified"
 
 
 def _current_status_block(
@@ -344,6 +599,8 @@ def _current_status_block(
     evidence: GateEvidence,
     timestamp: str,
     source_head: str,
+    projection: CheckpointStatusProjection,
+    live_status: Mapping[str, Any],
 ) -> str:
     source_short = str(source_head or "").strip().casefold()[:12]
     if not _SHORT_HEAD_RE.fullmatch(source_short):
@@ -370,22 +627,40 @@ def _current_status_block(
         or "V tomto kroku nebylo přijato nové kanonické rozhodnutí."
     )
     proposed_text = (
-        "; ".join(request.proposed_next_steps)
+        "\n".join(f"- {item}" for item in request.proposed_next_steps)
         if request.proposed_next_steps
-        else "žádné další návrhy nad rámec bezprostředního kroku"
+        else "- Žádné další návrhy nad rámec bezprostředního kroku."
     )
     return f"""{CURRENT_STATUS_START}
 ## Aktuální stav
 
 - Obnoveno potvrzeným checkpointem: {timestamp}
-- Poslední dokončený vývojový výsledek: {request.summary}
-- Stav při vytvoření checkpointu: změna je otestovaná ({evidence.test_count} testů); tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
+
+### Hotovo
+{_projection_lines(projection.completed)}
+
+### Otevřeno
+{_projection_lines(projection.open_items)}
+
+### Rizika
+{_projection_lines(projection.risks)}
+
+### Další krok
+- {projection.next_step}
+
+### Rozhodnutí
+- {decision_text}
+
+### Navrhované další kroky
+{proposed_text}
+
+### Technický stav checkpointu
+- Změna je otestovaná ({evidence.test_count} testů).
 - Git před checkpointem: `main == origin/main` na `{source_short}`.
 - Poslední serverově potvrzené nasazení: {deployment_text}.
-- Rozhodnutí: {decision_text}
-- Bezprostřední další krok: {request.next_step}
-- Navrhované další kroky: {proposed_text}
-- Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+- Read-only živý stav: {_live_state_text(live_status)}.
+- Tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
+- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 {CURRENT_STATUS_END}"""
 
 
@@ -517,10 +792,17 @@ def complete_simple_main_checkpoint(
     try:
         progress("preflight", "running")
         initial = _preflight_workspace(workspace, require_changes=True)
+        peer_preflight_statuses: list[dict[str, Any]] = []
         for peer_index, peer in enumerate(peer_workspaces, start=1):
             if peer.workspace_root == workspace.workspace_root:
                 continue
-            _preflight_workspace(peer, require_changes=False, allow_source_ahead=True)
+            peer_preflight_statuses.append(
+                _preflight_workspace(
+                    peer,
+                    require_changes=False,
+                    allow_source_ahead=True,
+                )
+            )
         live_origin_head = refresh_origin_main(workspace.source_repo)
         refreshed = _preflight_workspace(workspace, require_changes=True)
         if str(refreshed.get("source_head") or "") != live_origin_head:
@@ -568,18 +850,34 @@ def complete_simple_main_checkpoint(
             if tvbcp_existed
             else safe_request.tvbcp_initial_content
         )
-        timestamp = _format_timestamp(now_factory())
+        observed_at = now_factory()
+        timestamp = _format_timestamp(observed_at)
+        live_status = _checkpoint_live_status(
+            request=safe_request,
+            observed_at=observed_at,
+            source_snapshot=refreshed,
+            origin_head=live_origin_head,
+            workspace_snapshots=(refreshed, *peer_preflight_statuses),
+        )
+        projection = _checkpoint_status_projection(
+            request=safe_request,
+            live_status=live_status,
+        )
         handoff_block, tvbcp_block = _memory_blocks(
             request=safe_request,
             evidence=evidence,
             timestamp=timestamp,
             changes=list(initial.get("changes") or []),
+            projection=projection,
+            live_status=live_status,
         )
         current_status = _current_status_block(
             request=safe_request,
             evidence=evidence,
             timestamp=timestamp,
             source_head=live_origin_head,
+            projection=projection,
+            live_status=live_status,
         )
         written_handoff = _append_block(
             _replace_current_status(original_handoff, current_status),

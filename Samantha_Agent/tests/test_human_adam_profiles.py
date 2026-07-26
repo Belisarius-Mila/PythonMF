@@ -782,6 +782,84 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertNotIn("work_profile", result)
         self.assertEqual(result["workstream"]["type"], "Layer")
 
+    def test_checkpoint_request_contains_only_redacted_operational_context(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, _human_workspace, _library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.runtime.reachable = True
+            human_hub.connected = True
+            human_hub.messages = [
+                {
+                    "status": "completed",
+                    "recovery_required": False,
+                    "user_text": "never return this private text",
+                    "answer": "never return this private answer",
+                }
+            ]
+            completed = {
+                "state": "deployed",
+                "workstream_id": "layer-human-adam-development",
+                "main_short": "a" * 12,
+                "deployed_at": "2026-07-25T21:56:59+00:00",
+                "gate": {
+                    "passed": True,
+                    "test_count": 1216,
+                    "duration_seconds": 314.9,
+                },
+                "smoke": {"passed": True, "check_count": 5},
+            }
+            receipt = {
+                "state": "deployed",
+                "workstream_id": "layer-human-adam-development",
+                "main_head": "a" * 40,
+                "expected_code_stamp": "0123456789abcdef",
+                "test_count": 1216,
+                "smoke_count": 5,
+                "deployed_at": "2026-07-25T21:56:59+00:00",
+                "prepared_at": "2026-07-25T21:50:00+00:00",
+            }
+            with patch(
+                "app.communication.human_adam_profiles.load_completed_simple_main_deployment",
+                return_value=completed,
+            ), patch(
+                "app.communication.human_adam_profiles.load_simple_main_deployment_receipt",
+                return_value=receipt,
+            ), patch(
+                "app.communication.human_adam_profiles.complete_simple_main_checkpoint",
+                return_value={"ok": True, "checkpoint_head": "c" * 40},
+            ) as checkpoint:
+                manager.simple_main_checkpoint(
+                    commit_message="Checkpoint fáze 8.2",
+                    summary="Checkpointová projekce",
+                    next_step="Ověřit projekci.",
+                    confirmed=True,
+                )
+
+        request = checkpoint.call_args.kwargs["request"]
+        encoded = json.dumps(request.operational_context, ensure_ascii=False)
+        self.assertNotIn("never return", encoded.casefold())
+        self.assertNotIn("user_text", encoded)
+        self.assertNotIn("answer", encoded)
+        self.assertEqual(
+            request.operational_context["deployment"]["main_head"],
+            "a" * 40,
+        )
+        self.assertTrue(
+            request.operational_context["deployment_expected"]
+        )
+        self.assertEqual(
+            request.operational_context["server"]["code_stamp"],
+            "0123456789abcdef",
+        )
+        self.assertTrue(request.operational_context["runtime"]["reachable"])
+        self.assertEqual(
+            request.operational_context["session"]["messages"],
+            [{"status": "completed", "recovery_required": False}],
+        )
+
     def test_simple_checkpoint_uses_registered_library_workstream(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, *_rest = self.make_manager(Path(temp_dir))
@@ -842,6 +920,9 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         )
         self.assertIn("Pracovni proud: project-mmtx", request.handoff_initial_content)
         self.assertIn("# TVBCP: MMTX", request.tvbcp_initial_content)
+        self.assertFalse(
+            request.operational_context["deployment_expected"]
+        )
         self.assertEqual(result["workstream"]["name"], "MMTX")
 
     def test_lazy_checkpoint_requires_connected_active_workstream(self) -> None:

@@ -15,6 +15,7 @@ from app.communication.simple_main_checkpoint import (
     CURRENT_STATUS_START,
     SimpleMainCheckpointError,
     SimpleMainCheckpointRequest,
+    _checkpoint_status_projection,
     _replace_current_status,
     complete_simple_main_checkpoint,
     _format_timestamp,
@@ -192,6 +193,8 @@ class SimpleMainCheckpointTests(unittest.TestCase):
             tvbcp.index(label, chronological_start)
             for label in (
                 "Hotovo:",
+                "Otevřeno:",
+                "Rizika:",
                 "Rozhodnutí:",
                 "Další krok:",
                 "Navrhované další kroky:",
@@ -286,6 +289,113 @@ class SimpleMainCheckpointTests(unittest.TestCase):
         self.assertIn("odpovídá ověřenému main před tímto checkpointem", handoff)
         self.assertIn("11 testů", handoff)
         self.assertIn("smoke 5/5", handoff)
+
+    def test_checkpoint_projects_live_evidence_into_semantic_sections(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _source, manager = prepare_environment(root)
+            previous_head = git(manager.source_repo, "rev-parse", "HEAD")
+            (manager.project_root / "tracked.py").write_text(
+                "VALUE = 25\n",
+                encoding="utf-8",
+            )
+            context = {
+                "deployment_expected": True,
+                "deployment": {
+                    "state": "deployed",
+                    "main_head": previous_head,
+                    "expected_code_stamp": "0123456789abcdef",
+                    "test_count": 11,
+                    "smoke_count": 5,
+                    "gate_passed": True,
+                    "smoke_passed": True,
+                    "deployed_at": "2026-07-20T06:30:00+00:00",
+                    "private_path": "/never/return/this",
+                },
+                "runtime": {
+                    "reachable": True,
+                    "socket_path": "/never/return/this",
+                },
+                "session": {
+                    "connected": True,
+                    "turn_busy": False,
+                    "active_turn": None,
+                    "messages": [
+                        {
+                            "status": "completed",
+                            "user_text": "never return this private text",
+                        }
+                    ],
+                },
+                "server": {
+                    "code_stamp": "0123456789abcdef",
+                    "pid": 12345,
+                },
+            }
+
+            complete_simple_main_checkpoint(
+                workspace=manager,
+                request=checkpoint_request(
+                    last_deployed_main_short=previous_head[:12],
+                    last_deployed_at="2026-07-20T06:30:00+00:00",
+                    last_deployed_test_count=11,
+                    last_deployed_smoke_count=5,
+                    operational_context=context,
+                ),
+                confirmed=True,
+                gate_runner=passing_gate_runner,
+                gate_log_path=root / "gate.log",
+                now_factory=fixed_now,
+            )
+
+            handoff = (
+                manager.project_root / "memory" / "handoffs" / "demo.md"
+            ).read_text(encoding="utf-8")
+            tvbcp = (
+                manager.project_root / "memory" / "tvbcp" / "demo.txt"
+            ).read_text(encoding="utf-8")
+
+        self.assertIn("### Hotovo", handoff)
+        self.assertIn("### Otevřeno", handoff)
+        self.assertIn("### Rizika", handoff)
+        self.assertIn(
+            "Předchozí stav main byl před tímto checkpointem serverově",
+            handoff,
+        )
+        self.assertIn(
+            "Pozdější nasazení nového checkpointu zatím není",
+            handoff,
+        )
+        self.assertIn("Žádné další doložené provozní riziko", handoff)
+        self.assertIn("Hotovo:", tvbcp)
+        self.assertIn("Otevřeno:", tvbcp)
+        self.assertIn("Rizika:", tvbcp)
+        self.assertNotIn("never return", handoff.casefold())
+        self.assertNotIn("never return", tvbcp.casefold())
+        self.assertNotIn("12345", handoff)
+        self.assertNotIn("12345", tvbcp)
+
+    def test_projection_fails_closed_for_foreign_or_malformed_live_status(
+        self,
+    ) -> None:
+        request = checkpoint_request()
+        projection = _checkpoint_status_projection(
+            request=request,
+            live_status={
+                "schema_version": 1,
+                "read_only": True,
+                "writes_performed": False,
+                "workstream_id": "project-other",
+                "main": {"state": "aligned"},
+                "deployment": {"state": "verified_current"},
+                "runtime": {"state": "connected"},
+                "private_text": "never return this",
+            },
+        )
+
+        self.assertEqual(projection.completed, (request.summary,))
+        self.assertIn("nebyl", projection.risks[0])
+        self.assertNotIn("never return", " ".join(projection.risks).casefold())
 
     def test_confirmation_is_required_before_any_write(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

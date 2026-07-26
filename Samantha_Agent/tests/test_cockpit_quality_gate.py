@@ -78,6 +78,10 @@ async def second():
         self.assertIn("tests.test_cockpit_quality_gate", TEST_MODULES)
         self.assertIn("tests.test_command_cheatsheet", TEST_MODULES)
         self.assertIn("app/communication/human_adam_profiles.py", COMPILE_PATHS)
+        self.assertIn(
+            "app/communication/workstream_live_status.py",
+            COMPILE_PATHS,
+        )
         self.assertIn("app/command_cheatsheet.py", COMPILE_PATHS)
         self.assertIn("app/development_branch_lifecycle.py", COMPILE_PATHS)
         self.assertIn("scripts/development_branch_audit.py", COMPILE_PATHS)
@@ -161,6 +165,7 @@ async def second():
         self.assertIn("tests.test_family_calendar_delivery_config_migration_runner", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_config_transition", TEST_MODULES)
         self.assertIn("tests.test_human_adam_operations", TEST_MODULES)
+        self.assertIn("tests.test_workstream_live_status", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_coordinator", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_dry_run", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_integration", TEST_MODULES)

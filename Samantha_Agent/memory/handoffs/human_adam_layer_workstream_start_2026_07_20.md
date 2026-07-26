@@ -1,15 +1,51 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-26 00:35 CEST
-- Poslední dokončený vývojový výsledek: Fáze 8.1 přidala společný redigovaný read-only generátor živého stavu pracovního proudu; zatím není napojený na UI, model ani checkpointový zápis
-- Stav při vytvoření checkpointu: cílená a sousední sada prošla 115 testy; tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
-- Git před checkpointem: `main == origin/main` na `2a49602`.
+- Obnoveno potvrzeným checkpointem: 2026-07-26 07:57 CEST
+
+### Hotovo
+- Fáze 8.1 poskytuje společný redigovaný read-only generátor živého stavu.
+- Fáze 8.2 jej napojuje na potvrzovaný checkpoint: živé důkazy převádí na
+  stručné sekce Hotovo / Otevřeno / Rizika / Další krok v handoffu a TVBCP.
+- Předchozí serverově doložené nasazení se může uzavřít jako hotové; nový
+  checkpoint zůstává otevřený do vlastního důkazu nasazení.
+- Proud bez deployment capability nedostane falešný blocker nasazení.
+
+### Otevřeno
+- Fáze 8.1 a 8.2 ještě nejsou nasazené v běžícím Cockpitu.
+- Skutečnou podobu automaticky vytvořené projekce je potřeba ověřit prvním
+  následným checkpointem po nasazení.
+
+### Rizika
+- Chybějící nebo neshodný provozní důkaz zůstává fail-closed a promítne se jako
+  stručné riziko.
+- Běžící Cockpit je stále na starším serverově potvrzeném bodu `2a49602`.
+
+### Další krok
+- Commitnout a pushnout fázi 8.2, čerstvě ověřit `main == origin/main` a
+  samostatně potvrzeně nasadit fáze 8.1 a 8.2 společně.
+
+### Rozhodnutí
+- Do verzovaných dokumentů vstupuje jen bezpečná sémantická projekce; transientní
+  snapshot ani soukromé cesty, zprávy, odpovědi a PID se neukládají.
+- Projekce vzniká ve stejné checkpointové transakci a nevytváří druhý
+  dokumentační commit po pushi.
+
+### Navrhované další kroky
+- Ve fázi 8.3 předat stejný živý snapshot UI a r-Adamovi bez druhé rozhodovací
+  logiky.
+- Později přejmenovat marker na přesnější `Stav při posledním checkpointu`;
+  historické bloky nepřepisovat.
+
+### Technický stav checkpointu
+- Plná Cockpit Quality Gate prošla 1228 testy.
+- Širší checkpointová a provozní sada prošla 404 testy; závěrečná cílená sada
+  129 testy.
+- Git před checkpointem: `main == origin/main` na `12dd208`.
 - Poslední serverově potvrzené nasazení: `2a49602` · 1216 testů · smoke 5/5 · 2026-07-25 23:56 CEST.
-- Rozhodnutí: Generátor pouze skládá předané bezpečné snapshoty, nic nečte ani nezapisuje a při chybějícím nebo rozporném důkazu končí jako `unverified`
-- Bezprostřední další krok: Implementovat checkpointovou projekci, která při potvrzeném checkpointu převede živé důkazy na stručné Hotovo / Otevřeno / Rizika / Další krok
-- Navrhované další kroky: Potom předat stejný živý snapshot UI a r-Adamovi; nasazení provést až s první skutečně zapojenou konzumní vrstvou
-- Aktuálnost: tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+- Tento snapshot sám nepotvrzuje pozdější push ani nasazení.
+- Tato sekce nahrazuje jen předchozí aktuální souhrn; chronologické bloky níže
+  zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 Nazev: Human–Adam / vyvojove prostredi - zalozeni pracovniho proudu Layer
@@ -1906,3 +1942,62 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/communication/workstream_live_status.py`, `Samantha_Agent/tests/test_workstream_live_status.py`
 - Commit: `Přidat generátor živého stavu pracovního proudu`
 - Další krok: Napojit generátor na checkpointovou projekci; UI, model a runtime zatím neměnit
+
+### 2026-07-26 07:57 CEST – Fáze 8.2: sémantická checkpointová projekce
+
+Nazev: Human–Adam – živý stav v projektovém checkpointu
+Priorita: 1
+Stav: ceka na nasazeni
+Pripomenout pri startu: ano
+Datum: 2026-07-26
+
+Co se resilo:
+Checkpoint měl místo převahy technických údajů zachytit stručně, co je hotové,
+co zůstává otevřené, jaká jsou rizika a jaký je skutečný další krok.
+
+Co je hotove:
+- Společný generátor z fáze 8.1 je napojený na potvrzovaný checkpoint.
+- Handoff, TVBCP a jejich aktuální marker dostávají sémantické sekce Hotovo /
+  Otevřeno / Rizika / Další krok.
+- Předchozí serverově doložené nasazení se uzavře jako hotové, zatímco nový
+  checkpoint zůstane otevřený do vlastního deployment důkazu.
+- Pracovní proud bez deployment capability nedostane falešný blocker.
+- Chybějící nebo neshodné důkazy selžou uzavřeně a zobrazí stručné riziko.
+- Zápis zůstává součástí jediné checkpointové transakce; nevzniká následný
+  dokumentační commit po pushi.
+- Do dokumentů se nepropouštějí private cesty, texty zpráv, odpovědi ani PID.
+
+Co neni hotove:
+- Fáze 8.1 a 8.2 ještě nejsou nasazené v běžícím Cockpitu.
+- První automaticky vytvořená projekce v reálném checkpointu bude ověřena až po
+  nasazení této verze.
+- UI a modelový vstup r-Adama zatím společný snapshot nekonzumují.
+
+Dalsi krok:
+Commitnout a pushnout checkpoint, čerstvě ověřit čistý shodný `main` a
+samostatně potvrzeně nasadit fáze 8.1 a 8.2 společně.
+
+Navrhovane dalsi kroky:
+- Ve fázi 8.3 použít stejný snapshot v UI a modelovém vstupu bez duplikace
+  rozhodovací logiky.
+- V pozdější samostatné fázi přejmenovat aktuální marker na přesnější
+  `Stav při posledním checkpointu`; historické bloky nepřepisovat.
+
+Zmenene nebo relevantni soubory:
+- `human_adam_profiles.py`
+- `simple_main_checkpoint.py`
+- `cockpit_quality_gate.py`
+- odpovídající testy
+- tento handoff, kanonický TVBCP a `ACTIVE_PROJECTS.md`
+
+Bezpecnost / neukladat:
+- Neukládat transientní snapshot, private cesty, zprávy, odpovědi, PID ani
+  citlivý obsah.
+- Neodvozovat aktuální stav přepisem historických checkpointových bloků.
+
+Technicky dukaz:
+- Plná Cockpit Quality Gate prošla 1228 testy.
+- Širší checkpointová a provozní sada prošla 404 testy; závěrečná cílená sada
+  129 testy.
+- `git diff --check`, Python kompilace, JavaScript, shell a Git safety byly
+  zelené.

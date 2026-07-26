@@ -578,7 +578,10 @@ class HumanAdamProfileManager:
                         if self.workstream_memory is not None and memory_binding is not None
                         else ""
                     ),
-                    **self._checkpoint_deployment_snapshot(binding.workstream_id),
+                    **self._checkpoint_operational_snapshot(
+                        binding.workstream_id,
+                        service=service,
+                    ),
                 ),
                 confirmed=confirmed,
                 peer_workspaces=peer_workspaces,
@@ -632,8 +635,9 @@ class HumanAdamProfileManager:
                     tvbcp_initial_content=self.workstream_memory.initial_tvbcp(
                         memory_binding
                     ),
-                    **self._checkpoint_deployment_snapshot(
-                        memory_binding.workstream_id
+                    **self._checkpoint_operational_snapshot(
+                        memory_binding.workstream_id,
+                        service=service,
                     ),
                 ),
                 confirmed=confirmed,
@@ -650,27 +654,107 @@ class HumanAdamProfileManager:
         finally:
             self._operation_lock.release()
 
-    def _checkpoint_deployment_snapshot(
+    def _checkpoint_operational_snapshot(
         self,
         workstream_id: str,
+        *,
+        service: HumanAdamService | None = None,
     ) -> dict[str, object]:
-        deployment = load_completed_simple_main_deployment(
-            self.simple_main_deployment_receipt_path,
-            expected_workstream_id=workstream_id,
-        )
-        if not deployment:
-            return {}
-        gate = deployment.get("gate")
-        smoke = deployment.get("smoke")
-        if not isinstance(gate, dict) or not isinstance(smoke, dict):
-            return {}
+        selected_service = service or self.active_service
+        receipt: dict[str, Any] = {}
+        try:
+            loaded = load_simple_main_deployment_receipt(
+                self.simple_main_deployment_receipt_path
+            )
+            if str(loaded.get("workstream_id") or "") == workstream_id:
+                receipt = loaded
+        except (AppServerError, OSError, TypeError, ValueError):
+            receipt = {}
+        legacy: dict[str, object] = {}
+        deployment_evidence: dict[str, Any] = {}
+        server_evidence: dict[str, Any] = {}
+        if receipt:
+            state = str(receipt.get("state") or "")
+            deployment_evidence = {
+                "state": state,
+                "main_head": str(receipt.get("main_head") or ""),
+                "expected_code_stamp": str(
+                    receipt.get("expected_code_stamp") or ""
+                ),
+                "test_count": int(receipt.get("test_count") or 0),
+                "smoke_count": int(receipt.get("smoke_count") or 0),
+                "gate_passed": int(receipt.get("test_count") or 0) > 0,
+                "smoke_passed": state == "deployed",
+                "deployed_at": str(receipt.get("deployed_at") or ""),
+                "prepared_at": str(receipt.get("prepared_at") or ""),
+            }
+            if state == "deployed":
+                legacy = {
+                    "last_deployed_main_short": str(
+                        receipt.get("main_head") or ""
+                    )[:12],
+                    "last_deployed_at": str(
+                        receipt.get("deployed_at") or ""
+                    ),
+                    "last_deployed_test_count": int(
+                        receipt.get("test_count") or 0
+                    ),
+                    "last_deployed_smoke_count": int(
+                        receipt.get("smoke_count") or 0
+                    ),
+                }
+                server_evidence = {
+                    "code_stamp": str(
+                        receipt.get("expected_code_stamp") or ""
+                    )
+                }
+        try:
+            runtime_status = selected_service.runtime.status()
+        except (AppServerError, OSError, TypeError, ValueError):
+            runtime_status = {}
+        if not isinstance(runtime_status, dict):
+            runtime_status = {}
+        try:
+            session = selected_service.hub.snapshot()
+        except (AppServerError, SessionHubError, OSError, TypeError, ValueError):
+            session = {}
+        if not isinstance(session, dict):
+            session = {}
+        messages = session.get("messages")
+        message_rows = messages if isinstance(messages, list) else []
+        safe_messages = [
+            {
+                "status": str(item.get("status") or ""),
+                "recovery_required": item.get("recovery_required") is True,
+            }
+            for item in message_rows[-200:]
+            if isinstance(item, dict)
+        ]
         return {
-            "last_deployed_main_short": str(
-                deployment.get("main_short") or ""
-            ),
-            "last_deployed_at": str(deployment.get("deployed_at") or ""),
-            "last_deployed_test_count": int(gate.get("test_count") or 0),
-            "last_deployed_smoke_count": int(smoke.get("check_count") or 0),
+            **legacy,
+            "operational_context": {
+                "deployment_expected": (
+                    self.workstream_backends.binding(
+                        workstream_id
+                    ).compatibility_adapter
+                    is not None
+                ),
+                "deployment": deployment_evidence,
+                "runtime": {
+                    "reachable": runtime_status.get("reachable")
+                    if isinstance(runtime_status.get("reachable"), bool)
+                    else None,
+                },
+                "session": {
+                    "connected": session.get("connected")
+                    if isinstance(session.get("connected"), bool)
+                    else None,
+                    "turn_busy": bool(session.get("turn_busy")),
+                    "active_turn": bool(session.get("active_turn")),
+                    "messages": safe_messages,
+                },
+                "server": server_evidence,
+            },
         }
 
     def _assert_all_profile_sessions_idle(
@@ -1468,7 +1552,10 @@ class HumanAdamProfileManager:
                 tvbcp_initial_content=tvbcp_initial,
                 decision=metadata.decision,
                 proposed_next_steps=metadata.proposed_next_steps,
-                **self._checkpoint_deployment_snapshot(binding_id),
+                **self._checkpoint_operational_snapshot(
+                    binding_id,
+                    service=service,
+                ),
             ),
             confirmed=True,
             peer_workspaces=peers,
@@ -2047,7 +2134,10 @@ class HumanAdamProfileManager:
                     ),
                     decision=record.completion.decision,
                     proposed_next_steps=record.completion.proposed_next_steps,
-                    **self._checkpoint_deployment_snapshot(binding.workstream_id),
+                    **self._checkpoint_operational_snapshot(
+                        binding.workstream_id,
+                        service=service,
+                    ),
                 ),
                 confirmed=True,
                 peer_workspaces=peers,

@@ -42,6 +42,16 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-26 07:57 CEST: Priorita 1, Human–Adam / checkpointová projekce
+  živého stavu. Fáze 8.2 napojuje společný redigovaný generátor z fáze 8.1 na
+  potvrzovaný checkpoint a promítá do handoffu a TVBCP stručné Hotovo /
+  Otevřeno / Rizika / Další krok. Předchozí serverově doložené nasazení se
+  uzavře jako hotové, nový checkpoint zůstane otevřený do vlastního důkazu a
+  proud bez deployment capability nedostane falešný blocker. Neúplné důkazy
+  selžou uzavřeně; private cesty, zprávy, odpovědi a PID se neukládají. Plná
+  brána prošla 1228 testy. Zbývá commit/push, čerstvý audit kvůli možnému
+  sovímu commitu a potvrzené společné nasazení fází 8.1 a 8.2. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-26 00:35 CEST: Priorita 1, Human–Adam / živý stav pracovního proudu,
   fáze 8.1. Vznikl společný čistě read-only generátor, který z předaných
   bezpečných snapshotů skládá redigovaný stav `main`/`origin/main`,
