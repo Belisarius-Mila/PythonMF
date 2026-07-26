@@ -1,48 +1,50 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-26 07:57 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-26 09:07 CEST
 
 ### Hotovo
-- Fáze 8.1 poskytuje společný redigovaný read-only generátor živého stavu.
-- Fáze 8.2 jej napojuje na potvrzovaný checkpoint a převádí živé důkazy na
-  stručné Hotovo / Otevřeno / Rizika / Další krok.
-- Předchozí serverově doložené nasazení se může uzavřít jako hotové; nový
-  checkpoint zůstává otevřený do vlastního důkazu nasazení.
-- Proud bez deployment capability nedostane falešný blocker nasazení.
+- Fáze 8.1 a 8.2 jsou serverově nasazené a ověřené na `a1e75ba`: plná brána
+  1228 testů, smoke 5/5 a shodný serverový otisk.
+- Fáze 8.3a napojuje tentýž redigovaný snapshot na panel `Práce`.
+- UI čitelně odděluje stav main/GitHubu, nasazení, profilových workspace a
+  runtime; neznámý nebo neshodný důkaz zobrazí jako `Neověřeno`.
+- Načtení snapshotu nic nesynchronizuje, nepřipojuje, nepřipravuje ani
+  nezapisuje.
 
 ### Otevřeno
-- Fáze 8.1 a 8.2 ještě nejsou nasazené v běžícím Cockpitu.
-- Skutečnou podobu automaticky vytvořené projekce je potřeba ověřit prvním
-  následným checkpointem po nasazení.
+- Fáze 8.3a ještě není nasazená v běžícím Cockpitu.
+- Po nasazení zbývá ručně otevřít panel `Práce` a zkontrolovat nový box na Macu
+  nebo iPhonu.
+- První skutečný checkpoint automaticky promítnutý backendem 8.2 ještě nebyl
+  provozně vytvořen; tento terminálový checkpoint jej nenahrazuje.
 
 ### Rizika
-- Chybějící nebo neshodný provozní důkaz zůstává fail-closed a promítne se jako
-  stručné riziko.
-- Běžící Cockpit je stále na starším serverově potvrzeném bodu `2a49602`.
+- Selhání read-only GitHub auditu nezablokuje zbytek panelu, ale živý stav
+  správně zůstane `Neověřeno`.
+- Modelový vstup r-Adama se v 8.3a nemění; jeho zapojení patří až do 8.3b.
 
 ### Další krok
-- Commitnout a pushnout fázi 8.2, čerstvě ověřit `main == origin/main` a
-  samostatně potvrzeně nasadit fáze 8.1 a 8.2 společně.
+- Commitnout a pushnout 8.3a, bezpečně zarovnat čisté profilové workspaces a
+  potom samostatně potvrzeně nasadit a vizuálně ověřit nový box.
 
 ### Rozhodnutí
-- Do verzovaných dokumentů vstupuje jen bezpečná sémantická projekce; transientní
-  snapshot ani soukromé cesty, zprávy, odpovědi a PID se neukládají.
-- Projekce vzniká ve stejné checkpointové transakci a nevytváří druhý
-  dokumentační commit po pushi.
+- UI spotřebovává jediný společný snapshot z 8.1; nevznikla druhá backendová
+  klasifikace provozního stavu.
+- Validace identity proudu, `read_only=true` a `writes_performed=false` je
+  fail-closed. UI používá pouze `textContent`.
 
 ### Navrhované další kroky
-- Ve fázi 8.3 předat stejný živý snapshot UI a r-Adamovi bez druhé rozhodovací
-  logiky.
+- Po nasazení provést krátký vizuální test aktuálního a neověřeného stavu.
+- Ve fázi 8.3b předat tentýž snapshot r-Adamovi bez druhé rozhodovací logiky.
 - Později přejmenovat marker na přesnější `Stav při posledním checkpointu`;
   historické bloky nepřepisovat.
 
 ### Technický stav checkpointu
-- Plná Cockpit Quality Gate prošla 1228 testy.
-- Širší checkpointová a provozní sada prošla 404 testy; závěrečná cílená sada
-  129 testy.
-- Git před checkpointem: `main == origin/main` na `12dd208`.
-- Poslední serverově potvrzené nasazení: `2a49602` · 1216 testů · smoke 5/5 · 2026-07-25 23:56 CEST.
+- Plná Cockpit Quality Gate prošla 1232 testy za 215,1 s.
+- Širší regrese prošla 487 testy; cílená sada 183 testy.
+- Git před checkpointem: `main == origin/main` na `a1e75ba`.
+- Poslední serverově potvrzené nasazení: `a1e75ba` · 1228 testů · smoke 5/5 · 2026-07-26 08:33 CEST.
 - Tento snapshot sám nepotvrzuje pozdější push ani nasazení.
 - Tato sekce nahrazuje jen předchozí aktuální souhrn; chronologické bloky níže
   zůstávají historickými snapshoty.
@@ -2993,3 +2995,36 @@ Technický důkaz:
   129 testy.
 - `git diff --check`, Python kompilace, JavaScript, shell a Git safety byly
   zelené.
+
+### 2026-07-26 09:07 CEST – Fáze 8.3a: živý stav v panelu Práce
+
+Hotovo:
+- Panel `Práce` zobrazuje jeden redigovaný read-only snapshot ve čtyřech
+  oddělených osách: main/GitHub, nasazení, profilové workspaces a runtime.
+- Server sestavuje snapshot přes společný generátor z 8.1 a předává skutečný
+  otisk právě běžícího Cockpitu.
+- UI ověřuje schéma, identitu aktivního proudu a read-only příznaky; neúplný
+  nebo neshodný důkaz zobrazí jako `Neověřeno`.
+- Načtení snapshotu nespouští prepare, sync, reconnect ani zápis a soukromé
+  zprávy, odpovědi, cesty, PID či identifikátory vláken se do něj nedostanou.
+
+Rozhodnutí:
+- UI používá jedinou backendovou klasifikaci z 8.1. JavaScript pouze převádí
+  pevné stavové kódy na české popisky a skládá text přes `textContent`.
+- Modelový vstup r-Adama zůstává v 8.3a beze změny.
+
+Další krok:
+- Commitnout a pushnout 8.3a, bezpečně zarovnat čisté profilové workspaces a
+  potom samostatně potvrzeně nasadit a vizuálně ověřit nový box.
+
+Navrhované další kroky:
+- Ve fázi 8.3b předat tentýž snapshot r-Adamovi bez druhé rozhodovací logiky.
+- Později přejmenovat aktuální marker na `Stav při posledním checkpointu`;
+  historické bloky nepřepisovat.
+
+Technický důkaz:
+- Plná Cockpit Quality Gate prošla 1232 testy za 215,1 s.
+- Širší regrese prošla 487 testy; cílená sada 183 testy.
+- Python, JavaScript, shell, whitespace a Git safety jsou zelené.
+- Lokální read-only smoke správně rozlišil necommitovaný main, neshodný
+  serverový otisk a čisté zarovnané profilové workspaces bez zápisu.

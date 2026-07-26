@@ -860,6 +860,96 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             [{"status": "completed", "recovery_required": False}],
         )
 
+    def test_work_review_exposes_one_redacted_read_only_live_status(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, human_workspace, library_workspace, human_hub, _library_hub = (
+                self.make_manager(Path(temp_dir))
+            )
+            manager.runtime.reachable = True
+            human_hub.connected = True
+            human_hub.messages = [
+                {
+                    "status": "completed",
+                    "recovery_required": False,
+                    "user_text": "never return this private text",
+                    "answer": "never return this private answer",
+                }
+            ]
+            receipt = {
+                "state": "deployed",
+                "workstream_id": "layer-human-adam-development",
+                "main_head": "a" * 40,
+                "expected_code_stamp": "0123456789abcdef",
+                "test_count": 1228,
+                "smoke_count": 5,
+                "deployed_at": "2026-07-26T06:33:07+00:00",
+                "prepared_at": "2026-07-26T06:20:00+00:00",
+            }
+            remote = {
+                "ok": True,
+                "read_only": True,
+                "writes_performed": False,
+                "state": "aligned",
+                "local_head": "a" * 40,
+                "origin_head": "a" * 40,
+            }
+            with patch(
+                "app.communication.human_adam_profiles.load_simple_main_deployment_receipt",
+                return_value=receipt,
+            ), patch(
+                "app.communication.human_adam_profiles.audit_clean_main_remote_sync",
+                return_value=remote,
+            ):
+                result = manager.work_review(
+                    observed_code_stamp="0123456789abcdef"
+                )
+
+        live = result["workstream_live_status"]
+        encoded = json.dumps(live, ensure_ascii=False)
+        self.assertTrue(result["ok"])
+        self.assertEqual(live["state"], "current")
+        self.assertTrue(live["read_only"])
+        self.assertFalse(live["writes_performed"])
+        self.assertEqual(
+            live["workstream_id"],
+            "layer-human-adam-development",
+        )
+        self.assertEqual(live["main"]["state"], "aligned")
+        self.assertEqual(live["deployment"]["state"], "verified_current")
+        self.assertEqual(live["workspaces"]["state"], "aligned_clean")
+        self.assertEqual(live["workspaces"]["count"], 2)
+        self.assertEqual(live["runtime"]["state"], "connected")
+        self.assertNotIn("never return", encoded.casefold())
+        self.assertNotIn("user_text", encoded)
+        self.assertNotIn("answer", encoded)
+        self.assertNotIn("pid", encoded.casefold())
+        self.assertNotIn("path", encoded.casefold())
+        self.assertEqual(human_workspace.prepare_count, 0)
+        self.assertEqual(human_workspace.sync_count, 0)
+        self.assertEqual(library_workspace.prepare_count, 0)
+        self.assertEqual(library_workspace.sync_count, 0)
+        self.assertEqual(manager.runtime.last_start_kwargs, {})
+
+    def test_work_review_keeps_live_status_fail_closed_when_remote_fails(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager, *_rest = self.make_manager(Path(temp_dir))
+            with patch(
+                "app.communication.human_adam_profiles.audit_clean_main_remote_sync",
+                side_effect=AppServerError("GitHub není dostupný."),
+            ):
+                result = manager.work_review(
+                    observed_code_stamp="0123456789abcdef"
+                )
+
+        live = result["workstream_live_status"]
+        self.assertTrue(result["ok"])
+        self.assertEqual(live["state"], "unverified")
+        self.assertEqual(live["main"]["state"], "origin_unverified")
+        self.assertTrue(live["read_only"])
+        self.assertFalse(live["writes_performed"])
+
     def test_simple_checkpoint_uses_registered_library_workstream(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, *_rest = self.make_manager(Path(temp_dir))

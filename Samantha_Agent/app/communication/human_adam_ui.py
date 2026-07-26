@@ -114,6 +114,13 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .workflow-help-safety { margin-top:14px !important; padding:9px 11px; border-radius:10px; background:#ecfdf3; color:var(--ok) !important; }
     .legacy-work-control { display:none !important; }
     .work-help-panel { flex:0 0 auto; margin:12px 16px; }
+    .live-work-status-box { margin:0 0 14px; padding:12px; border:1px solid #dbe3ee; border-radius:12px; background:#f8fafc; }
+    .live-work-status-box[data-state="current"],.live-work-status-box[data-state="current_runtime_disconnected"] { border-color:#bbf7d0; background:#f0fdf4; }
+    .live-work-status-box[data-state="attention_required"],.live-work-status-box[data-state="unverified"] { border-color:#fed7aa; background:#fff7ed; }
+    .live-work-status-box h3 { margin:0 0 5px; font-size:15px; }
+    .live-work-status-box p { margin:0; color:var(--muted); font-size:13px; }
+    .live-work-status-box ul { margin:8px 0 0; padding-left:22px; }
+    .live-work-status-box li { margin:4px 0; line-height:1.35; }
     .thread-rotation-box { margin-top:14px; padding-top:12px; border-top:1px solid #dbe3ee; display:grid; gap:8px; }
     .thread-rotation-box h3 { margin:0; font-size:15px; }
     .thread-rotation-actions { display:flex; gap:8px; flex-wrap:wrap; }
@@ -290,6 +297,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <p id="projectContinuityMeta">Audit je pouze read-only a zatím nic neblokuje.</p>
       <ul id="projectContinuityReasons" hidden></ul>
     </section>
+    <section class="live-work-status-box" id="liveWorkStatusBox" data-state="unverified" aria-label="Read-only živý stav pracovního proudu">
+      <h3>Živý stav</h3>
+      <p id="liveWorkStatusMeta" role="status">Stav se načte až po otevření panelu Práce.</p>
+      <ul id="liveWorkStatusAxes"></ul>
+    </section>
     <div id="workMeta">Stav se načte až po otevření.</div>
     <ul id="workChanges"></ul>
     <section class="integration-audit-box" id="integrationAuditBox" aria-label="Audit a potvrzovaná brána čekající integrace" hidden>
@@ -373,6 +385,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const workHelpPanel = document.getElementById("workHelpPanel");
   const workHelpCloseBtn = document.getElementById("workHelpCloseBtn");
   const privateArchiveHelp = document.getElementById("privateArchiveHelp");
+  const liveWorkStatusBox = document.getElementById("liveWorkStatusBox");
+  const liveWorkStatusMeta = document.getElementById("liveWorkStatusMeta");
+  const liveWorkStatusAxes = document.getElementById("liveWorkStatusAxes");
   const workMeta = document.getElementById("workMeta");
   const workChanges = document.getElementById("workChanges");
   const integrationAuditBox = document.getElementById("integrationAuditBox");
@@ -1607,6 +1622,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     renderDevelopmentSemaphore(payload.development_semaphore || null);
     renderHandoffProposal(payload.handoff_proposal || null);
     renderPendingIntegrationAudit(payload.pending_integration_audit || null);
+    renderWorkstreamLiveStatus(payload.workstream_live_status || null);
     workChanges.replaceChildren();
     const pending = Array.isArray(payload.changes) ? payload.changes : [];
     const checkpointed = Array.isArray(payload.checkpoint_changes) ? payload.checkpoint_changes : [];
@@ -1650,6 +1666,91 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     else if (simpleDeployReady) deployMeta.textContent = "Čistý main je připravený k auditu nasazení.";
     else deployMeta.textContent = "Workspace nejdřív synchronizuj s čistým main.";
     renderCompactWorkStatus(payload);
+  }
+
+  const LIVE_WORK_STATUS_LABELS = Object.freeze({
+    overall: Object.freeze({
+      current:"Aktuální",
+      current_runtime_disconnected:"Aktuální · Adam je odpojený",
+      attention_required:"Vyžaduje kontrolu",
+      unverified:"Neověřeno",
+    }),
+    main: Object.freeze({
+      aligned:"Shodné s GitHubem",
+      dirty:"Main obsahuje pracovní změny",
+      origin_ahead:"GitHub je napřed",
+      local_ahead:"Lokální main je napřed",
+      diverged:"Main a GitHub se rozešly",
+      origin_unverified:"GitHub nelze ověřit",
+      unverified:"Neověřeno",
+    }),
+    deployment: Object.freeze({
+      verified_current:"Ověřeno pro tento main",
+      pending_restart:"Čeká na restart",
+      verified_other_main:"Ověřeno pro jiný main",
+      code_mismatch:"Serverový otisk nesouhlasí",
+      current_head_server_unverified:"Serverový otisk nelze ověřit",
+      unavailable:"Není dostupné",
+      unverified:"Neověřeno",
+    }),
+    workspaces: Object.freeze({
+      aligned_clean:"Čisté a zarovnané",
+      attention_required:"Vyžadují kontrolu",
+      unverified:"Neověřeno",
+    }),
+    runtime: Object.freeze({
+      connected:"Připojeno",
+      disconnected:"Odpojeno",
+      unreachable:"Runtime není dostupný",
+      busy:"Adam pracuje",
+      delivery_uncertain:"Nejisté doručení",
+      unverified:"Neověřeno",
+    }),
+  });
+
+  function liveWorkStatusLabel(group, state) {
+    const labels = LIVE_WORK_STATUS_LABELS[group] || {};
+    return labels[String(state || "")] || "Neověřeno";
+  }
+
+  function renderWorkstreamLiveStatus(liveStatus) {
+    const valid = Boolean(
+      liveStatus
+      && typeof liveStatus === "object"
+      && Number(liveStatus.schema_version) === 1
+      && liveStatus.read_only === true
+      && liveStatus.writes_performed === false
+      && String(liveStatus.workstream_id || "") === activeWorkstreamId
+    );
+    const status = valid ? liveStatus : {};
+    const overallState = valid ? String(status.state || "unverified") : "unverified";
+    liveWorkStatusBox.dataset.state = overallState;
+    const observed = valid ? formatTime(status.observed_at) : "čas neověřen";
+    liveWorkStatusMeta.textContent = `${liveWorkStatusLabel("overall", overallState)} · read-only snapshot · ${observed}`;
+    liveWorkStatusAxes.replaceChildren();
+
+    const main = valid && status.main && typeof status.main === "object" ? status.main : {};
+    const deployment = valid && status.deployment && typeof status.deployment === "object" ? status.deployment : {};
+    const workspaces = valid && status.workspaces && typeof status.workspaces === "object" ? status.workspaces : {};
+    const runtime = valid && status.runtime && typeof status.runtime === "object" ? status.runtime : {};
+    const mainHead = main.head_short ? ` · ${String(main.head_short)}` : "";
+    const deploymentEvidence = Number(deployment.test_count || 0) > 0
+      ? ` · ${Number(deployment.test_count)} testů · smoke ${Number(deployment.smoke_count || 0)}/5`
+      : "";
+    const workspaceCount = Number(workspaces.count || 0) > 0
+      ? ` · ${Number(workspaces.aligned_count || 0)}/${Number(workspaces.count)} zarovnáno`
+      : "";
+    const rows = [
+      `Main a GitHub: ${liveWorkStatusLabel("main", main.state)}${mainHead}`,
+      `Nasazení: ${liveWorkStatusLabel("deployment", deployment.state)}${deploymentEvidence}`,
+      `Workspaces: ${liveWorkStatusLabel("workspaces", workspaces.state)}${workspaceCount}`,
+      `Runtime: ${liveWorkStatusLabel("runtime", runtime.state)}`,
+    ];
+    for (const text of rows) {
+      const row = document.createElement("li");
+      row.textContent = text;
+      liveWorkStatusAxes.appendChild(row);
+    }
   }
 
   function renderHandoffProposal(proposal) {
@@ -1740,6 +1841,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     } catch (error) {
       workChanges.replaceChildren();
       workMeta.textContent = `Pracovní stav nelze načíst: ${error.message}`;
+      renderWorkstreamLiveStatus(null);
       renderPendingIntegrationAudit(null);
       checkpointBtn.disabled = true;
       return null;

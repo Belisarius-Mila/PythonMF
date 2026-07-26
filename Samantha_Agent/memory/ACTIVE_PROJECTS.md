@@ -42,6 +42,16 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-26 09:07 CEST: Priorita 1, Human–Adam / fáze 8.3a. Panel `Práce`
+  dostal prvního přímého UI konzumenta společného redigovaného snapshotu z 8.1:
+  odděleně ukáže main/GitHub, nasazení, profilové workspaces a runtime.
+  Neúplný nebo neshodný důkaz skončí jako `Neověřeno`; načtení nespouští
+  prepare, sync, reconnect ani zápis a nepropouští soukromé cesty, zprávy,
+  odpovědi, PID či identifikátory vláken. Fáze 8.1 a 8.2 jsou nasazené na
+  `a1e75ba`; 8.3a čeká na commit/push a samostatně potvrzené nasazení. Plná
+  brána prošla 1232 testy. Po nasazení zbývá vizuální test panelu; fáze 8.3b
+  později předá stejný snapshot r-Adamovi. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-26 07:57 CEST: Priorita 1, Human–Adam / checkpointová projekce
   živého stavu. Fáze 8.2 napojuje společný redigovaný generátor z fáze 8.1 na
   potvrzovaný checkpoint a promítá do handoffu a TVBCP stručné Hotovo /

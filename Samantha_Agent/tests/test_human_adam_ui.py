@@ -43,6 +43,9 @@ class HumanAdamUiTests(unittest.TestCase):
             "workHelpBtn",
             "workHelpPanel",
             "workHelpCloseBtn",
+            "liveWorkStatusBox",
+            "liveWorkStatusMeta",
+            "liveWorkStatusAxes",
             "workChanges",
             "integrationAuditBox",
             "integrationAuditMeta",
@@ -417,6 +420,54 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Práce je čistá a synchronní s main. Detail není potřeba.", open_source)
         self.assertLess(open_source.index("if (!showDetail)"), open_source.index("workPanel.hidden = false;"))
         self.assertNotIn('method:"POST"', open_source)
+
+    def test_work_panel_renders_shared_read_only_live_status_fail_closed(
+        self,
+    ) -> None:
+        render_start = HUMAN_ADAM_HTML.index(
+            "function renderWorkstreamLiveStatus(liveStatus)"
+        )
+        render_end = HUMAN_ADAM_HTML.index(
+            "function renderHandoffProposal(",
+            render_start,
+        )
+        render_source = HUMAN_ADAM_HTML[render_start:render_end]
+        work_start = HUMAN_ADAM_HTML.index("function renderWork(payload)")
+        work_end = HUMAN_ADAM_HTML.index(
+            "const LIVE_WORK_STATUS_LABELS",
+            work_start,
+        )
+        work_source = HUMAN_ADAM_HTML[work_start:work_end]
+
+        self.assertIn("liveStatus.read_only === true", render_source)
+        self.assertIn("liveStatus.writes_performed === false", render_source)
+        self.assertIn(
+            'String(liveStatus.workstream_id || "") === activeWorkstreamId',
+            render_source,
+        )
+        self.assertIn('overallState = valid ? String(status.state || "unverified") : "unverified"', render_source)
+        self.assertIn("liveWorkStatusMeta.textContent", render_source)
+        self.assertIn("liveWorkStatusAxes.replaceChildren()", render_source)
+        self.assertIn('document.createElement("li")', render_source)
+        self.assertIn("row.textContent = text", render_source)
+        self.assertNotIn("innerHTML", render_source)
+        self.assertNotIn('method:"POST"', render_source)
+        self.assertIn(
+            "renderWorkstreamLiveStatus(payload.workstream_live_status || null)",
+            work_source,
+        )
+        self.assertIn(
+            "renderWorkstreamLiveStatus(null)",
+            HUMAN_ADAM_HTML,
+        )
+        for label in (
+            "Shodné s GitHubem",
+            "Ověřeno pro tento main",
+            "Čisté a zarovnané",
+            "Nejisté doručení",
+            "Neověřeno",
+        ):
+            self.assertIn(label, HUMAN_ADAM_HTML)
 
     def test_development_semaphore_ui_is_explicit_and_blocks_write_actions(self) -> None:
         for element_id in (

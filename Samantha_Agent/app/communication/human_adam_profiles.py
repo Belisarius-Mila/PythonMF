@@ -84,6 +84,7 @@ from app.communication.simple_main_deploy import (
     prepare_simple_main_deployment as prepare_clean_main_deployment,
     verify_simple_main_deployment as verify_clean_main_deployment,
 )
+from app.communication.workstream_live_status import build_workstream_live_status
 from app.file_persistence import atomic_write_json
 from app.project_continuity import ProjectContinuityError, ProjectContinuityService
 
@@ -1925,10 +1926,105 @@ class HumanAdamProfileManager:
         with self.profile_operation() as service:
             return service.rotate_thread(**kwargs)
 
-    def work_review(self) -> dict[str, Any]:
+    def workstream_live_status(
+        self,
+        *,
+        observed_code_stamp: str = "",
+    ) -> dict[str, Any]:
+        """Build one redacted read-only snapshot for UI and later consumers."""
+
+        observed_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+        try:
+            service = self.active_service
+            workstream_id = self.active_workstream_id
+        except (AppServerError, SessionHubError, OSError, TypeError, ValueError):
+            return build_workstream_live_status(
+                workstream_id="unknown",
+                observed_at=observed_at,
+                source_snapshot={},
+                remote_snapshot={},
+                workspace_snapshots=(),
+            )
+
+        try:
+            source_snapshot = service.workspace.status()
+        except (AppServerError, OSError, TypeError, ValueError):
+            source_snapshot = {}
+        try:
+            remote_snapshot = audit_clean_main_remote_sync(
+                source_repo=service.workspace.source_repo
+            )
+        except (AppServerError, OSError, TypeError, ValueError):
+            remote_snapshot = {}
+
+        workspace_snapshots: list[dict[str, Any]] = []
+        seen_workspaces: set[int] = set()
+        candidate_services = [
+            service,
+            *(
+                candidate["service"]
+                for candidate in self.profiles.values()
+                if isinstance(candidate.get("service"), HumanAdamService)
+            ),
+        ]
+        for candidate_service in candidate_services:
+            workspace = candidate_service.workspace
+            identity = id(workspace)
+            if identity in seen_workspaces:
+                continue
+            seen_workspaces.add(identity)
+            try:
+                snapshot = workspace.status()
+            except (AppServerError, OSError, TypeError, ValueError):
+                snapshot = {}
+            workspace_snapshots.append(
+                dict(snapshot) if isinstance(snapshot, dict) else {}
+            )
+
+        operational = self._checkpoint_operational_snapshot(
+            workstream_id,
+            service=service,
+        ).get("operational_context")
+        context = operational if isinstance(operational, dict) else {}
+        return build_workstream_live_status(
+            workstream_id=workstream_id,
+            observed_at=observed_at,
+            source_snapshot=(
+                source_snapshot if isinstance(source_snapshot, dict) else {}
+            ),
+            remote_snapshot=(
+                remote_snapshot if isinstance(remote_snapshot, dict) else {}
+            ),
+            workspace_snapshots=tuple(workspace_snapshots),
+            deployment_snapshot=(
+                context.get("deployment")
+                if isinstance(context.get("deployment"), dict)
+                else {}
+            ),
+            runtime_snapshot=(
+                context.get("runtime")
+                if isinstance(context.get("runtime"), dict)
+                else {}
+            ),
+            session_snapshot=(
+                context.get("session")
+                if isinstance(context.get("session"), dict)
+                else {}
+            ),
+            server_snapshot={"code_stamp": str(observed_code_stamp or "")},
+        )
+
+    def work_review(
+        self,
+        *,
+        observed_code_stamp: str = "",
+    ) -> dict[str, Any]:
         work = self.active_service.work_review()
         return {
             **work,
+            "workstream_live_status": self.workstream_live_status(
+                observed_code_stamp=observed_code_stamp
+            ),
             "pending_integration_audit": self.pending_integration_status(
                 work_review=work
             ),

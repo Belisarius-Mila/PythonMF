@@ -370,7 +370,12 @@ class HumanAdamService:
             "sync_available": bool(workspace.get("source_update_available")),
         }
 
-    def work_review(self) -> dict[str, Any]:
+    def work_review(
+        self,
+        *,
+        observed_code_stamp: str = "",
+    ) -> dict[str, Any]:
+        del observed_code_stamp
         return self.workspace.review()
 
     def checkpoint(self, *, confirmed: bool, message: str = "") -> dict[str, Any]:
@@ -435,9 +440,13 @@ def human_adam_thread_rotation_action(
         return {"ok": False, "status": "human_adam_thread_rotation_failed", "message": str(exc)}
 
 
-def human_adam_work_review_action(*, service: HumanAdamService) -> dict[str, Any]:
+def human_adam_work_review_action(
+    *,
+    service: HumanAdamService,
+    observed_code_stamp: str = "",
+) -> dict[str, Any]:
     try:
-        return service.work_review()
+        return service.work_review(observed_code_stamp=observed_code_stamp)
     except (AppServerError, OSError, ValueError) as exc:
         return {"ok": False, "status": "human_adam_work_review_failed", "message": str(exc)}
 

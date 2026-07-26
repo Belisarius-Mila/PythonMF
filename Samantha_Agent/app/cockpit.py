@@ -10325,7 +10325,12 @@ class CockpitServer:
                     self.respond_json(human_adam_tvbcp_action(service=HUMAN_ADAM))
                     return
                 if parsed.path == "/api/human-adam/workspace":
-                    self.respond_json(human_adam_work_review_action(service=HUMAN_ADAM))
+                    self.respond_json(
+                        human_adam_work_review_action(
+                            service=HUMAN_ADAM,
+                            observed_code_stamp=COCKPIT_CODE_STAMP,
+                        )
+                    )
                     return
                 if parsed.path == "/api/human-adam/deploy-audit":
                     self.respond_json(

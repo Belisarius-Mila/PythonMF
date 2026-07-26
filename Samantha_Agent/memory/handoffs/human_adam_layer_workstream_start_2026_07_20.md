@@ -1,48 +1,50 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-26 07:57 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-26 09:07 CEST
 
 ### Hotovo
-- Fáze 8.1 poskytuje společný redigovaný read-only generátor živého stavu.
-- Fáze 8.2 jej napojuje na potvrzovaný checkpoint: živé důkazy převádí na
-  stručné sekce Hotovo / Otevřeno / Rizika / Další krok v handoffu a TVBCP.
-- Předchozí serverově doložené nasazení se může uzavřít jako hotové; nový
-  checkpoint zůstává otevřený do vlastního důkazu nasazení.
-- Proud bez deployment capability nedostane falešný blocker nasazení.
+- Fáze 8.1 a 8.2 jsou serverově nasazené a ověřené na `a1e75ba`: plná brána
+  1228 testů, smoke 5/5 a shodný serverový otisk.
+- Fáze 8.3a napojuje tentýž redigovaný snapshot na panel `Práce`.
+- UI čitelně odděluje stav main/GitHubu, nasazení, profilových workspace a
+  runtime; neznámý nebo neshodný důkaz zobrazí jako `Neověřeno`.
+- Načtení snapshotu nic nesynchronizuje, nepřipojuje, nepřipravuje ani
+  nezapisuje.
 
 ### Otevřeno
-- Fáze 8.1 a 8.2 ještě nejsou nasazené v běžícím Cockpitu.
-- Skutečnou podobu automaticky vytvořené projekce je potřeba ověřit prvním
-  následným checkpointem po nasazení.
+- Fáze 8.3a ještě není nasazená v běžícím Cockpitu.
+- Po nasazení zbývá ručně otevřít panel `Práce` a zkontrolovat nový box na Macu
+  nebo iPhonu.
+- První skutečný checkpoint automaticky promítnutý backendem 8.2 ještě nebyl
+  provozně vytvořen; tento terminálový checkpoint jej nenahrazuje.
 
 ### Rizika
-- Chybějící nebo neshodný provozní důkaz zůstává fail-closed a promítne se jako
-  stručné riziko.
-- Běžící Cockpit je stále na starším serverově potvrzeném bodu `2a49602`.
+- Selhání read-only GitHub auditu nezablokuje zbytek panelu, ale živý stav
+  správně zůstane `Neověřeno`.
+- Modelový vstup r-Adama se v 8.3a nemění; jeho zapojení patří až do 8.3b.
 
 ### Další krok
-- Commitnout a pushnout fázi 8.2, čerstvě ověřit `main == origin/main` a
-  samostatně potvrzeně nasadit fáze 8.1 a 8.2 společně.
+- Commitnout a pushnout 8.3a, bezpečně zarovnat čisté profilové workspaces a
+  potom samostatně potvrzeně nasadit a vizuálně ověřit nový box.
 
 ### Rozhodnutí
-- Do verzovaných dokumentů vstupuje jen bezpečná sémantická projekce; transientní
-  snapshot ani soukromé cesty, zprávy, odpovědi a PID se neukládají.
-- Projekce vzniká ve stejné checkpointové transakci a nevytváří druhý
-  dokumentační commit po pushi.
+- UI spotřebovává jediný společný snapshot z 8.1; nevznikla druhá backendová
+  klasifikace provozního stavu.
+- Validace identity proudu, `read_only=true` a `writes_performed=false` je
+  fail-closed. UI používá pouze `textContent`.
 
 ### Navrhované další kroky
-- Ve fázi 8.3 předat stejný živý snapshot UI a r-Adamovi bez druhé rozhodovací
-  logiky.
+- Po nasazení provést krátký vizuální test aktuálního a neověřeného stavu.
+- Ve fázi 8.3b předat tentýž snapshot r-Adamovi bez druhé rozhodovací logiky.
 - Později přejmenovat marker na přesnější `Stav při posledním checkpointu`;
   historické bloky nepřepisovat.
 
 ### Technický stav checkpointu
-- Plná Cockpit Quality Gate prošla 1228 testy.
-- Širší checkpointová a provozní sada prošla 404 testy; závěrečná cílená sada
-  129 testy.
-- Git před checkpointem: `main == origin/main` na `12dd208`.
-- Poslední serverově potvrzené nasazení: `2a49602` · 1216 testů · smoke 5/5 · 2026-07-25 23:56 CEST.
+- Plná Cockpit Quality Gate prošla 1232 testy za 215,1 s.
+- Širší regrese prošla 487 testy; cílená sada 183 testy.
+- Git před checkpointem: `main == origin/main` na `a1e75ba`.
+- Poslední serverově potvrzené nasazení: `a1e75ba` · 1228 testů · smoke 5/5 · 2026-07-26 08:33 CEST.
 - Tento snapshot sám nepotvrzuje pozdější push ani nasazení.
 - Tato sekce nahrazuje jen předchozí aktuální souhrn; chronologické bloky níže
   zůstávají historickými snapshoty.
@@ -2001,3 +2003,60 @@ Technicky dukaz:
   129 testy.
 - `git diff --check`, Python kompilace, JavaScript, shell a Git safety byly
   zelené.
+
+### 2026-07-26 09:07 CEST – Fáze 8.3a: živý stav v panelu Práce
+
+Nazev: Human–Adam – read-only živý stav v UI
+Priorita: 1
+Stav: ceka na nasazeni
+Pripomenout pri startu: ano
+Datum: 2026-07-26
+
+Co se resilo:
+Společný redigovaný snapshot z fáze 8.1 měl dostat prvního přímého provozního
+konzumenta v UI bez vzniku druhé klasifikační logiky.
+
+Co je hotove:
+- Panel `Práce` dostal samostatný box `Živý stav`.
+- Box odděleně ukazuje main/GitHub, nasazení, profilové workspaces a runtime.
+- Server předává právě běžící kódový otisk a používá existující read-only audit
+  GitHubu, deployment účtenku, workspace statusy a session metadata.
+- Neúplný, neshodný nebo cizí snapshot se zobrazí jako `Neověřeno`.
+- UI ověřuje schéma, identitu aktivního proudu, `read_only=true` a
+  `writes_performed=false`; text skládá pouze přes `textContent`.
+- Načtení nic nesynchronizuje, nepřipojuje, nepřipravuje ani nezapisuje.
+
+Co neni hotove:
+- Fáze 8.3a ještě není nasazená v běžícím Cockpitu.
+- Po nasazení zbývá ruční vizuální test panelu `Práce`.
+- Modelový vstup r-Adama zatím snapshot nekonzumuje.
+- První skutečný automatický checkpoint promítnutý backendem 8.2 zůstává
+  provozně neověřený; tento terminálový checkpoint jej nenahrazuje.
+
+Dalsi krok:
+Commitnout a pushnout checkpoint, bezpečně zarovnat čisté profilové workspaces
+a potom samostatně potvrzeně nasadit a vizuálně ověřit nový box.
+
+Navrhovane dalsi kroky:
+- Ve fázi 8.3b předat tentýž snapshot r-Adamovi bez druhé rozhodovací logiky.
+- Později přejmenovat marker na `Stav při posledním checkpointu`; historické
+  bloky nepřepisovat.
+
+Zmenene nebo relevantni soubory:
+- `cockpit.py`
+- `human_adam_profiles.py`
+- `human_adam_service.py`
+- `human_adam_ui.py`
+- odpovídající tři testovací soubory
+- tento handoff, kanonický TVBCP a `ACTIVE_PROJECTS.md`
+
+Bezpecnost / neukladat:
+- Neukládat ani zobrazovat private cesty, obsah změn, zprávy, odpovědi, PID nebo
+  identifikátory vláken.
+- Read-only status nesmí získat sync, reconnect ani jiný zapisovací vedlejší
+  efekt.
+
+Technicky dukaz:
+- Plná Cockpit Quality Gate prošla 1232 testy za 215,1 s.
+- Širší regrese prošla 487 testy; cílená sada 183 testy.
+- Python, JavaScript, shell, whitespace a Git safety jsou zelené.

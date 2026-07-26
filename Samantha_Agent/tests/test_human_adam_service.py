@@ -572,12 +572,35 @@ class HumanAdamServiceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             service, _runtime, workspace, _hub = self.make_service(Path(temp_dir))
             workspace.dirty = True
-            result = human_adam_work_review_action(service=service)
+            result = human_adam_work_review_action(
+                service=service,
+                observed_code_stamp="0123456789abcdef",
+            )
 
         self.assertTrue(result["ok"])
         self.assertEqual(result["change_count"], 1)
         self.assertEqual(result["changes"][0]["path"], "Samantha_Agent/test.py")
         self.assertNotIn("content", result["changes"][0])
+
+    def test_work_review_action_forwards_observed_server_stamp(self) -> None:
+        calls: list[str] = []
+
+        class ReviewService:
+            def work_review(
+                self,
+                *,
+                observed_code_stamp: str = "",
+            ) -> dict[str, object]:
+                calls.append(observed_code_stamp)
+                return {"ok": True, "workstream_live_status": {}}
+
+        result = human_adam_work_review_action(
+            service=ReviewService(),  # type: ignore[arg-type]
+            observed_code_stamp="0123456789abcdef",
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(calls, ["0123456789abcdef"])
 
     def test_checkpoint_requires_confirmation_and_keeps_local_wip_usable(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
