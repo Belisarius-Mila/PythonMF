@@ -352,3 +352,69 @@ Kontrola po nasazeni:
 - rizenou 400 odpoved pro chybny JSON overil i zivy server,
 - POST se shodnym Tailscale Origin prosel,
 - lokalni a vzdaleny health nadale vraceji stejny PID jedine instance.
+
+
+AKTUALIZACE ROADMAPY 26. 7. 2026 - COCKPIT DIETA, PRIORITA 1
+
+Mila potvrdil navrat k postupne architektonicke diete Cockpitu jako priorite 1.
+Nejde o prepis od nuly, odstranovani schopnosti ani honbu za libovolnym poctem
+radku. Cilem je zmensovat koncentraci odpovednosti a provazanost tak, aby slo
+jednotlive oblasti vyvijet, testovat a nasazovat v mensich bezpecnych krocich.
+
+Aktualni opakovatelne mereni fyzickych radku:
+- `app/cockpit.py`: 20 745 vsech a 19 620 neprazdnych radku;
+- uzsi provozni jadro Cockpitu: 20 764 neprazdnych radku bez testu a 29 805
+  s primo souvisejicimi testy;
+- cely rozsah Cockpit quality gate: 111 produkcnich souboru a 57 079
+  neprazdnych produkcnich radku;
+- testovaci cast gate: 96 souboru a 34 139 neprazdnych radku;
+- produkce a testy cele gate dohromady: 91 218 neprazdnych radku.
+
+Pro orientaci ma cela gitove sledovana Samantha 201 196 fyzickych textovych
+radku, z toho 175 091 neprazdnych. Toto celkove cislo ale zahrnuje samostatne
+projekty, 42 401 radku testu a 37 197 radku pameti a dokumentace. Neni proto
+samo o sobe spravnou metrikou kvality ani cilem mazani. Hlavni riziko zustava
+velikost `app/cockpit.py` a siroky dopad kazde integracni zmeny.
+
+Kanonicka pravidla diety:
+1. Nova vetsi business logika nevznika v `app/cockpit.py`; monolit obsahuje
+   pouze tenky adapter, registraci nebo kompatibilni routu.
+2. Kazdy rez zachova URL, payloady, potvrzovaci brany, private cesty a dosavadni
+   uzivatelske chovani.
+3. Kazdy novy modul dostane prime testy. Plna Cockpit quality gate zustava
+   release pojistkou, dokud nebude rozdeleni prokazatelne bezpecne.
+4. Pocet radku je smerova metrika, ne duvod k mazani funkcnosti, testu,
+   bezpecnostnich kontrol nebo dokumentace.
+5. V jednom rezu se nemicha backendova extrakce, UI redesign, datova migrace,
+   legacy cleanup ani zmena frameworku.
+
+Aktualizovane poradi:
+
+Dieta D0 - read-only mapa hranic:
+- znovu zmapovat dnesni odpovednosti a call-site zavislosti `app/cockpit.py`;
+- rozlisit tenke adaptery od business logiky, HTML/CSS/JavaScriptu a HTTP
+  infrastruktury;
+- vybrat jednu soudrznou e-mailovou skupinu pro Fazi 1.4;
+- nic nemenit, nemigrovat ani nenasazovat.
+
+Dieta D1 - Faze 1.4, jeden e-mailovy rez:
+- vyjmout pouze vybranou skupinu e-mailovych rout/service logiky nad hotovym
+  work modelem a repository adapterem;
+- v monolitu ponechat kompatibilni adaptery;
+- zachovat vsechny send/delete/archivacni potvrzovaci hranice;
+- projit primymi testy, plnou gate a po potvrzenem nasazeni smoke testem 5/5.
+
+Dieta D2 - frontend:
+- po stabilizaci backendovych hranic postupne vyjmout HTML, CSS a JavaScript do
+  samostatnych statickych souboru;
+- nedelat soucasne redesign hlavni obrazovky.
+
+Dieta D3 - rychlejsi vyvojova zpetna vazba:
+- ponechat plnou branu pro release;
+- doplnovat mensi domenove sady, aby bezny maly rez nemusel byt diagnostikovan
+  jen pres celou integracni sadu;
+- oslabeni plne brany je mozne az po samostatnem dukazu, ne predem.
+
+Prvni skutecny krok po tomto zapisu je pouze Dieta D0. Stary e-mailovy parser,
+lokalni Janicka vetev, podezrele API cesty a private data zustavaji beze zmeny,
+dokud neprobehne jejich samostatny audit a rozhodnuti.

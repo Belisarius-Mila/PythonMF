@@ -528,6 +528,38 @@ Rucni retest po prvnim vykonovem kroku:
   Vsechny cesty maji fallback na primou URL, kdyz prohlizec odmitne zavrit nebo
   fokusovat popup. Gate ma 607 testu; oba smoke checky prosly na PID 87379.
 
+Aktualizace 2026-07-26 16:37 CEST - Cockpit dieta, priorita 1:
+
+- Mila potvrdil, ze dalsi postupne zmensovani a rozvolnovani Cockpitu ma byt
+  znovu vedeno jako priorita 1. Nejde o prepis od nuly ani o mazani schopnosti.
+- Aktualni opakovatelne mereni fyzickych radku ukazalo:
+  - `app/cockpit.py`: 20 745 vsech a 19 620 neprazdnych radku;
+  - uzsi provozni jadro Cockpitu: 20 764 neprazdnych radku bez testu a
+    29 805 s primo souvisejicimi testy;
+  - cely rozsah Cockpit quality gate: 57 079 neprazdnych produkcnich radku,
+    34 139 testovacich radku a 91 218 dohromady.
+- Celkova velikost Samanthy sama neni spravny cil diety, protoze zahrnuje
+  samostatne projekty, testy a projektovou pamet. Skutecny problem je
+  koncentrace UI, HTTP routingu a integracni logiky v `app/cockpit.py` a siroka
+  provazanost jedne plne brany.
+- Kanonicke rozhodnuti:
+  1. kazda nova vetsi business logika ma vznikat mimo `app/cockpit.py`;
+     monolit ma dostavat jen tenky adapter, registraci nebo kompatibilni routu;
+  2. dieta bude probihat po malych behavior-preserving rezech se zachovanim
+     endpointu, payloadu, potvrzovacich bran a private datovych cest;
+  3. plna Cockpit brana zustava release pojistkou, ale kazdy novy modul ma mit
+     take malou primou regresni sadu;
+  4. zadny tvrdy cil poctu radku nema ospravedlnit mazani funkcnosti nebo
+     slouceni nesouvisejicich zmen.
+- Nejmensi dalsi krok je read-only audit dnesnich hranic `app/cockpit.py`:
+  aktualizovat mapu odpovednosti a call-site zavislosti a vybrat jedinou
+  soudrznou skupinu e-mailovych rout/service logiky pro Fazi 1.4. Audit nema
+  menit kod, endpointy, private data ani nasazeni.
+- Prvni nasledny implementacni rez ma vyjmout jen vybranou e-mailovou skupinu
+  do samostatneho modulu nad hotovym work modelem/repository, ponechat v
+  `app/cockpit.py` tenke kompatibilni adaptery a projit primymi testy, plnou
+  quality gate a po potvrzenem nasazeni smoke testem 5/5.
+
 Co neni hotove:
 
 - Zakladni stabilizace, HTTP hranice a iPhone hlas jsou funkcne potvrzene; PDF
@@ -555,10 +587,12 @@ Co neni hotove:
 
 Dalsi krok:
 
-Faze 2.1 az 2.4 jsou uzavrene a overene. Pred Fazi 3 je doporuceny navrat k
-Fazi 1.4: vyjmout e-mailove routy a service vrstvu z Cockpit monolitu s vyuzitim
-hotoveho work modelu a repository adapteru. Dokumentovy reindex a dalsi writery
-zustavaji oddelenou persistence roadmapou.
+Faze 2.1 az 2.4 jsou uzavrene a overene. Priorita 1 je nyni Cockpit dieta.
+Nejdrive provest read-only audit aktualnich hranic monolitu a vybrat jednu
+soudrznou e-mailovou skupinu pro Fazi 1.4. Teprve potom vyjmout tuto jedinou
+skupinu rout a service logiky s vyuzitim hotoveho work modelu a repository
+adapteru. Dokumentovy reindex a dalsi writery zustavaji oddelenou persistence
+roadmapou.
 Dokumentovy reindex zustava vedlejsi persistence roadmapou. Stary e-mailovy
 parser, lokalni Janicka vetev a pet podezrelych API cest zatim nemenit. PDF
 browser a post-call audio retest jsou odlozene.

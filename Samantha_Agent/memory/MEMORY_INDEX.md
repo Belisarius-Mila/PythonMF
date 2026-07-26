@@ -13,7 +13,12 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Reports
 
-- `../AuditCockpit56.txt` - [PRIPOMENOUT] hlavni hluboky audit architektury Samantha Cockpitu, VoiceBridge, dokumentu a e-mailu z 2026-07-10; obsahuje prioritizovana rizika, cilovou architekturu a fazovy implementacni plan. Prvni krok s lehkym `/api/live-status` je hotovy v commitu `23abbaa`.
+- `../AuditCockpit56.txt` - [PRIPOMENOUT] hlavni hluboky audit architektury
+  Samantha Cockpitu, VoiceBridge, dokumentu a e-mailu z 2026-07-10. Aktualizace
+  2026-07-26 znovu stanovila Cockpit dietu jako prioritu 1: bez prepisu a
+  plosneho mazani, po malych behavior-preserving rezech. Nejmensi dalsi krok
+  Dieta D0 je read-only mapa aktualnich hranic monolitu a vyber jedine
+  e-mailove skupiny pro Fazi 1.4.
 - `reports/cockpit_quality_gate_2026_07_10.md` - git-safe popis kanonicke lokalni a GitHub Actions pojistky; Faze 2.4, e-mailova navigace a docasny TVBCP VoiceBridge protokol maji 611 testu. Realny redigovany outbox pilot overil 22 auditu/delivered, budoucí purge identita prezije zavreni Work Queue a obe e-mailova okna maji explicitni navrat do Cockpitu.
 - `reports/cockpit_persistence_write_map_2026_07_10.md` - git-safe mapa runtime persistence; Faze 2.4 ma repository/idempotency, e-mailovy decision adapter, lease/retry/ack a realny redigovany auditni pilot. Stare nekompletni purge zaznamy se neobnovuji; budoucí trash davky persistuji bezpecnou technickou identitu.
 - `reports/cockpit_dead_legacy_code_inventory_2026_07_10.md` - [PRIPOMENOUT] read-only inventura mrtveho a legacy kodu Cockpitu bez cteni private obsahu: POST registry a JavaScript/DOM vazby jsou konzistentni; Cleanup R1 odstranil jen 39 radku jednoznacnych helperu/importu a prosel 458 testy i obema smoke checky. Stary e-mailovy parser, Janicka vetev a pet API cest zustavaji do samostatneho rozhodnuti.
@@ -260,7 +265,12 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `handoffs/colors_numbers_private_photo_gallery_proposal_2026_07_13.md` - pozastaveny navrh tlacitka `Foto` a lokalni galerie nejvyse tri fotografii v obrazovce `Numbers`; kvuli verejnemu repozitari/GitHub Pages se doporucuje pouze lokalni `IndexedDB`, komprese a odstraneni EXIF/GPS, bez commitovani rodinnych fotografii. Nic neimplementovat bez noveho rozhodnuti Mily.
 - `handoffs/appserver_lab_thread_registry_context_capsule_2026_07_13.md` - historicky checkpoint vyrazeneho read-only App-server LAB. Samostatna sluzba, probe, API, tlacitko a modal byly 2026-07-15 odstraneny; bez dalsiho retestu.
 - `handoffs/appserver_lab_lifecycle_verified_2026_07_13.md` - historicky zaklad read-only LAB: automaticky 50/50 reliability probe a Miluv rucni lifecycle test s disconnect/resume/restart; vsech 7 pokynu bylo dokoncenych bez chyby nebo duplicity. Navazujici stav registru a capsule je v `handoffs/appserver_lab_thread_registry_context_capsule_2026_07_13.md`.
-- `handoffs/cockpit_architecture_current_2026_07_10.md` - [PRIPOMENOUT] jediny prubezny handoff modernizace Cockpitu: Faze 2.1 az 2.4 jsou hotove. Realny outbox pilot ma 22 auditu/delivered a 0 pending; gate 606 testu. Dalsi doporuceny krok je Faze 1.4 e-mailova service vrstva pred SQLite Fazi 3.
+- `handoffs/cockpit_architecture_current_2026_07_10.md` - [PRIPOMENOUT] jediny
+  prubezny handoff modernizace Cockpitu. Faze 2.1 az 2.4 jsou historicky hotove;
+  aktualni priorita 1 je Cockpit dieta. Mereni 2026-07-26 ukazuje 19 620
+  neprazdnych radku v `app/cockpit.py` a 91 218 produkcnich plus testovacich
+  radku v cele gate. Dalsi krok je pouze read-only Dieta D0, potom jeden
+  potvrzeny e-mailovy rez Faze 1.4.
 - `handoffs/janicka_full_adam_cockpit_recovery_ios_card_2026_07_09.md` - [PRIPOMENOUT] Janička nouzova zaloha: tlacitko `Otevřít plného Adama` spousti primy interaktivni Codex v Terminalu bez VS Code/samantha wrapperu, Mac ma viditelne launchery pro Cockpit a iPhone zkratka `Janička SOS` zobrazuje Jane kartu postupu; dalsi krok je zkratku nasdilet/importovat na Janin iPhone a spolecne projit celou cestu.
 - `handoffs/cockpit_email_archive_browser_2026_07_09.md` - Cockpit Archiv e-mailu: read-only prohlizec EmailArchiveVault na `/email-archive/`, katalog Webove aplikace, bezpecne otevreni lokalniho HTML/textu/originalniho EML, metadat a stazenych priloh; dalsi krok je rucni UI retest na znamych archivovanych UID.
 - `handoffs/cockpit_voice_janicka_stability_checkpoint_2026_07_09.md` - [PRIPOMENOUT] Cockpit / VoiceBridge / Janicka stabilita: hlavni VoiceBridge rozlisuje Adam relaci, managed relace a orphaned Janicka relace, Janicka okno umi nabidnout cleanup starych relaci, recoverable `Load failed` se po health checku cisti a automaticka watcher odpoved je jasne oznacena jako automaticka; dalsi krok je retest Janicka bez VS Code po commitu/pushi.
