@@ -15,6 +15,7 @@ from app.family_calendar_delivery_config import (
 )
 from app.family_calendar_delivery_coordinator import (
     DEFAULT_FAMILY_CALENDAR_DELIVERY_WORKER_PATH,
+    DeliveryCoordinatorError,
     DeliveryCoordinatorResult,
     DeliveryTransport,
     coordinate_delivery_attempt,
@@ -46,7 +47,7 @@ def run_configured_family_calendar_delivery(
     worker_path: Path = DEFAULT_FAMILY_CALENDAR_DELIVERY_WORKER_PATH,
     coordinator: DeliveryCoordinator = coordinate_delivery_attempt,
 ) -> FamilyCalendarDeliveryRunResult:
-    """Validate a disabled or dry-run attempt without delivery-runtime I/O."""
+    """Run one configured attempt, keeping disabled and dry-run free of runtime I/O."""
 
     try:
         config = load_family_calendar_delivery_config(config_path)
@@ -86,6 +87,52 @@ def run_configured_family_calendar_delivery(
             attempt_eligible=plan.eligible,
             coordinator_called=False,
             transport_called=False,
+        )
+
+    if config.mode is DeliveryConfigMode.ENABLED:
+        try:
+            coordinated = coordinator(
+                event_key=event_key,
+                offset=offset,
+                recipient_ids=config.recipient_ids,
+                transport=transport,
+                state_path=state_path,
+                worker_path=worker_path,
+            )
+        except ValueError:
+            return FamilyCalendarDeliveryRunResult(
+                status="input_error",
+                recipient_count=0,
+                attempt_eligible=False,
+                coordinator_called=True,
+                transport_called=False,
+            )
+        except DeliveryCoordinatorError as exc:
+            return FamilyCalendarDeliveryRunResult(
+                status=(
+                    "delivery_unknown"
+                    if exc.transport_called
+                    else "runtime_error"
+                ),
+                recipient_count=len(config.recipients),
+                attempt_eligible=False,
+                coordinator_called=True,
+                transport_called=exc.transport_called,
+            )
+        except Exception:  # noqa: BLE001 - injected runtime details stay redacted.
+            return FamilyCalendarDeliveryRunResult(
+                status="runtime_error",
+                recipient_count=len(config.recipients),
+                attempt_eligible=False,
+                coordinator_called=True,
+                transport_called=False,
+            )
+        return FamilyCalendarDeliveryRunResult(
+            status=coordinated.status,
+            recipient_count=len(config.recipients),
+            attempt_eligible=coordinated.plan.eligible,
+            coordinator_called=True,
+            transport_called=coordinated.transport_called,
         )
 
     # Keep the runner closed if the loader grows another mode without an

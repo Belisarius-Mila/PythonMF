@@ -34,6 +34,7 @@ class DeliveryConfigError(RuntimeError):
 class DeliveryConfigMode(str, Enum):
     DISABLED = "disabled"
     DRY_RUN = "dry_run"
+    ENABLED = "enabled"
 
 
 @dataclass(frozen=True, repr=False)
@@ -97,6 +98,10 @@ def parse_family_calendar_delivery_config_document(
     smtp_provider = _required_string(raw.get("smtp_provider"), field="smtp_provider")
     if smtp_provider not in SUPPORTED_SMTP_PROVIDERS:
         raise DeliveryConfigError("Delivery configuration has an unsupported SMTP provider.")
+    if mode is DeliveryConfigMode.ENABLED and smtp_provider != "icloud":
+        raise DeliveryConfigError(
+            "Enabled family-calendar delivery requires the iCloud SMTP provider."
+        )
     sender_address = _email_address(raw.get("sender_address"), field="sender")
 
     raw_recipients = raw.get("recipients")

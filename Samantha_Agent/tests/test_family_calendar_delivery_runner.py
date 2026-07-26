@@ -7,6 +7,11 @@ from dataclasses import asdict
 from pathlib import Path
 
 from app.family_calendar_delivery_config import DELIVERY_CONFIG_SCHEMA_VERSION
+from app.family_calendar_delivery import plan_delivery
+from app.family_calendar_delivery_coordinator import (
+    DeliveryCoordinatorError,
+    DeliveryCoordinatorResult,
+)
 from app.family_calendar_delivery_runner import run_configured_family_calendar_delivery
 
 
@@ -216,6 +221,76 @@ class FamilyCalendarDeliveryRunnerTests(unittest.TestCase):
                     self.assertNotIn(EVENT_KEY, visible)
 
             self.assertFalse(state_path.parent.exists())
+
+    def test_enabled_mode_delegates_exactly_once_to_persistent_coordinator(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            config_path = _write_private_config(root, mode="enabled")
+            state_path, worker_path = _runtime_paths(root)
+            calls = []
+
+            def coordinator(**kwargs):
+                calls.append(kwargs)
+                return DeliveryCoordinatorResult(
+                    status="smtp_accepted",
+                    plan=plan_delivery(event_key=EVENT_KEY, offset="D-2"),
+                    record=None,
+                    transport_called=True,
+                    recovered_operation_ids=(),
+                )
+
+            result = run_configured_family_calendar_delivery(
+                event_key=EVENT_KEY,
+                offset="D-2",
+                transport=lambda _record: None,
+                config_path=config_path,
+                state_path=state_path,
+                worker_path=worker_path,
+                coordinator=coordinator,
+            )
+
+        self.assertEqual(result.status, "smtp_accepted")
+        self.assertEqual(result.recipient_count, 4)
+        self.assertTrue(result.attempt_eligible)
+        self.assertTrue(result.coordinator_called)
+        self.assertTrue(result.transport_called)
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(calls[0]["recipient_ids"], RECIPIENT_IDS)
+        self.assertEqual(calls[0]["state_path"], state_path)
+        self.assertEqual(calls[0]["worker_path"], worker_path)
+
+    def test_enabled_coordinator_failure_preserves_transport_uncertainty(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            config_path = _write_private_config(root, mode="enabled")
+            state_path, worker_path = _runtime_paths(root)
+
+            for transport_called, expected_status in (
+                (False, "runtime_error"),
+                (True, "delivery_unknown"),
+            ):
+                with self.subTest(transport_called=transport_called):
+                    def coordinator(**_kwargs):
+                        raise DeliveryCoordinatorError(
+                            "private@example.invalid",
+                            transport_called=transport_called,
+                        )
+
+                    result = run_configured_family_calendar_delivery(
+                        event_key=EVENT_KEY,
+                        offset="D-2",
+                        transport=lambda _record: None,
+                        config_path=config_path,
+                        state_path=state_path,
+                        worker_path=worker_path,
+                        coordinator=coordinator,
+                    )
+
+                    visible = f"{result!r} {json.dumps(asdict(result))}"
+                    self.assertEqual(result.status, expected_status)
+                    self.assertEqual(result.transport_called, transport_called)
+                    self.assertTrue(result.coordinator_called)
+                    self.assertNotIn("@", visible)
 
 
 def _valid_document(*, mode: str = "disabled") -> dict:

@@ -63,15 +63,12 @@ class FamilyCalendarAutomationPreviewTests(unittest.TestCase):
         self.assertEqual(document["current_configuration"]["recipient_count"], 4)
         self.assertEqual(len(document["plan_fingerprint"]), 64)
         self.assertTrue(document["operational_prerequisites_ready"])
-        self.assertEqual(
-            document["implementation_blockers"],
-            ["automatic_mode_unavailable"],
-        )
+        self.assertEqual(document["implementation_blockers"], [])
         self.assertNotIn(
             "automatic_mode",
             {check["name"] for check in document["prerequisite_checks"]},
         )
-        self.assertFalse(document["target_mode_supported_by_runtime"])
+        self.assertTrue(document["target_mode_supported_by_runtime"])
         self.assertFalse(document["activation_implementation_available"])
         self.assertFalse(document["apply_available"])
         self.assertFalse(document["automatic_sending_enabled"])

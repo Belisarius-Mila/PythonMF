@@ -56,6 +56,20 @@ class FamilyCalendarDeliveryConfigTests(unittest.TestCase):
         self.assertEqual(config.recipient_ids, CANONICAL_RECIPIENT_IDS)
         self.assertNotIn("@", repr(config))
 
+    def test_loads_enabled_icloud_mode_without_credential_fields(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            document = _valid_document()
+            document["mode"] = "enabled"
+            path = _write_private_config(Path(temp_dir), document)
+
+            config = load_family_calendar_delivery_config(path)
+
+        self.assertEqual(config.mode, DeliveryConfigMode.ENABLED)
+        self.assertEqual(config.smtp_provider, "icloud")
+        self.assertFalse(hasattr(config, "password"))
+        self.assertFalse(hasattr(config, "credential_ref"))
+        self.assertNotIn("@", repr(config))
+
     def test_schema_two_requires_a_valid_redacted_sender_address(self) -> None:
         self.assertEqual(DELIVERY_CONFIG_SCHEMA_VERSION, 2)
         invalid_senders = (
@@ -98,13 +112,14 @@ class FamilyCalendarDeliveryConfigTests(unittest.TestCase):
             self.assertFalse(path.exists())
             self.assertFalse(path.parent.exists())
 
-    def test_sending_mode_remains_rejected_in_this_phase(self) -> None:
+    def test_enabled_mode_rejects_provider_without_runtime_adapter(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             document = _valid_document()
             document["mode"] = "enabled"
+            document["smtp_provider"] = "seznam"
             path = _write_private_config(Path(temp_dir), document)
 
-            with self.assertRaisesRegex(DeliveryConfigError, "not enabled"):
+            with self.assertRaisesRegex(DeliveryConfigError, "iCloud"):
                 load_family_calendar_delivery_config(path)
 
     def test_legacy_schema_without_sender_fails_closed_without_migration(self) -> None:

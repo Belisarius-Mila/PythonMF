@@ -89,6 +89,7 @@ async def second():
         self.assertIn("tests.test_project_continuity", TEST_MODULES)
         self.assertIn("app/project_continuity.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery.py", COMPILE_PATHS)
+        self.assertIn("app/family_calendar_delivery_automatic.py", COMPILE_PATHS)
         self.assertIn(
             "app/family_calendar_delivery_automation_preview.py",
             COMPILE_PATHS,
@@ -107,6 +108,7 @@ async def second():
         self.assertIn("app/family_calendar_delivery_message.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_planner_install.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_keychain_setup.py", COMPILE_PATHS)
+        self.assertIn("app/family_calendar_delivery_keychain.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_launchctl_load.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_launchctl_preview.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_delivery_planner_preview.py", COMPILE_PATHS)
@@ -114,6 +116,7 @@ async def second():
         self.assertIn("app/family_calendar_delivery_store.py", COMPILE_PATHS)
         self.assertIn("app/family_calendar_smtp_adapter.py", COMPILE_PATHS)
         self.assertIn("scripts/family_calendar_delivery_config_initialize.py", COMPILE_PATHS)
+        self.assertIn("scripts/family_calendar_delivery_automatic.py", COMPILE_PATHS)
         self.assertIn(
             "scripts/family_calendar_delivery_automation_preview.py",
             COMPILE_PATHS,
@@ -153,6 +156,7 @@ async def second():
         )
         self.assertIn("scripts/family_calendar_delivery_test_email.py", COMPILE_PATHS)
         self.assertIn("tests.test_family_calendar_delivery", TEST_MODULES)
+        self.assertIn("tests.test_family_calendar_delivery_automatic", TEST_MODULES)
         self.assertIn(
             "tests.test_family_calendar_delivery_automation_preview",
             TEST_MODULES,
@@ -191,6 +195,7 @@ async def second():
             TEST_MODULES,
         )
         self.assertIn("tests.test_family_calendar_delivery_readiness", TEST_MODULES)
+        self.assertIn("tests.test_family_calendar_delivery_keychain", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_runner", TEST_MODULES)
         self.assertIn("tests.test_family_calendar_delivery_store", TEST_MODULES)
         self.assertIn(

@@ -4,7 +4,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 - `ACTIVE_PROJECTS.md` - registr projektu a oblasti vcetne rezimu `active` / `paused` / `archived`, priorit, stavu, handoffu a dalsich kroku.
 - `WORKSTREAMS.md` - kanonicky registr 30 pracovnich proudu: 24 projektu, 4 tooly a 2 `Misc`. Faze 4.2 pridala lazy soukroma vlakna, faze 4.3 jejich handoff/TVBCP vazby, faze 4.5e jednotny backendovy registr a faze 4.5f jednu perzistentni autoritu `active_workstream_id` ve schematu 2. Human–Adam a Knihovna jsou docasne kompatibilni adaptery nad svymi puvodnimi session a workspaces; ostatnich 28 proudu pouziva lazy private-thread backend. Faze 4.5g-d2 doplnila chybejici samostatny proud Rodinny kalendar s jednorazovou direct-main autorizaci.
-- `projects/family_calendar.md` - Rodinný kalendář jako samostatný projekt mimo Knihovnu; shrnuje git-safe stav registru a editace, soukromé hranice a nejmenší další krok náhledu upozornění D-2/D-1 bez odesílání.
+- `projects/family_calendar.md` - Rodinný kalendář jako samostatný projekt mimo Knihovnu; shrnuje dry-run provoz, připravenou ostrou větev `enabled`, fail-closed recovery, soukromé hranice a další krok potvrzované aktivace.
 
 ## Core
 

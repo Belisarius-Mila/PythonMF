@@ -72,7 +72,7 @@ class FamilyCalendarDeliveryReadinessTests(unittest.TestCase):
             self.assertNotIn(PRIVATE_ADDRESS, rendered)
             self.assertNotIn(PRIVATE_EVENT_KEY, rendered)
 
-    def test_current_runtime_without_enabled_mode_is_a_blocker(self) -> None:
+    def test_reported_runtime_without_enabled_mode_is_a_blocker(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             paths = _readiness_paths(Path(temp_dir))
             _write_config(paths["config"])
@@ -85,6 +85,7 @@ class FamilyCalendarDeliveryReadinessTests(unittest.TestCase):
                 planner_runner_path=paths["runner"],
                 command_runner=lambda _argv: 0,
                 executable_locator=_find_test_executable,
+                automatic_mode_probe=lambda: False,
             )
 
         self.assertEqual(result.status, "not_ready")

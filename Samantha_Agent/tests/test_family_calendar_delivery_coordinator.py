@@ -221,11 +221,41 @@ coordinate_delivery_attempt(
             recovered = _coordinate(state_path, worker_path, transport)
             stored = load_delivery_records(state_path)
 
-        self.assertEqual(recovered.status, "skipped")
+        self.assertEqual(recovered.status, "recovery_required")
         self.assertFalse(recovered.transport_called)
         self.assertEqual(recovered.recovered_operation_ids, (f"{EVENT_KEY}:D-2",))
         self.assertEqual(calls, 0)
         self.assertEqual(stored[0].state, DeliveryState.DELIVERY_UNKNOWN)
+
+    def test_existing_unknown_blocks_an_unrelated_attempt_globally(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            state_path, worker_path = _paths(Path(temp_dir))
+            _coordinate(
+                state_path,
+                worker_path,
+                lambda _record: DeliveryTransportOutcome(
+                    unknown_recipient_ids=RECIPIENT_IDS
+                ),
+            )
+            calls = 0
+
+            def transport(_record):
+                nonlocal calls
+                calls += 1
+                return DeliveryTransportOutcome(accepted_recipient_ids=RECIPIENT_IDS)
+
+            blocked = coordinate_delivery_attempt(
+                event_key="person-other:name_day:2026-12-20",
+                offset=NotificationOffset.D2,
+                recipient_ids=RECIPIENT_IDS,
+                transport=transport,
+                state_path=state_path,
+                worker_path=worker_path,
+            )
+
+        self.assertEqual(blocked.status, "recovery_required")
+        self.assertFalse(blocked.transport_called)
+        self.assertEqual(calls, 0)
 
 
 def _paths(root: Path) -> tuple[Path, Path]:

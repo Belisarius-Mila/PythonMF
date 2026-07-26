@@ -10,14 +10,18 @@ from pathlib import Path
 from app.family_calendar_delivery import (
     DeliveryPlan,
     DeliveryRecord,
+    DeliveryState,
     NotificationOffset,
+    begin_delivery,
     complete_delivery,
+    plan_delivery,
 )
 from app.family_calendar_delivery_store import (
     DEFAULT_FAMILY_CALENDAR_DELIVERY_PATH,
     DeliveryStoreError,
     begin_stored_delivery,
     complete_stored_delivery,
+    load_delivery_records,
     recover_interrupted_deliveries,
 )
 from app.file_persistence import FilePersistenceError, exclusive_file_lock, lock_path_for
@@ -31,6 +35,10 @@ DEFAULT_FAMILY_CALENDAR_DELIVERY_WORKER_PATH = (
 
 class DeliveryCoordinatorError(RuntimeError):
     """Raised when a coordinated attempt cannot finish safely."""
+
+    def __init__(self, message: str, *, transport_called: bool = False) -> None:
+        super().__init__(message)
+        self.transport_called = bool(transport_called)
 
 
 @dataclass(frozen=True)
@@ -49,7 +57,66 @@ class DeliveryCoordinatorResult:
     recovered_operation_ids: tuple[str, ...]
 
 
+@dataclass(frozen=True, repr=False)
+class DeliveryRuntimeRecoveryResult:
+    status: str
+    blocking_count: int
+    recovered_operation_ids: tuple[str, ...]
+
+    def __repr__(self) -> str:
+        return (
+            "DeliveryRuntimeRecoveryResult("
+            f"status={self.status!r}, blocking_count={self.blocking_count}, "
+            f"recovered_count={len(self.recovered_operation_ids)}, redacted=True)"
+        )
+
+
 DeliveryTransport = Callable[[DeliveryRecord], DeliveryTransportOutcome]
+
+
+def recover_delivery_runtime(
+    *,
+    state_path: Path = DEFAULT_FAMILY_CALENDAR_DELIVERY_PATH,
+    worker_path: Path = DEFAULT_FAMILY_CALENDAR_DELIVERY_WORKER_PATH,
+    lock_timeout: float = 10.0,
+) -> DeliveryRuntimeRecoveryResult:
+    """Recover interrupted records and report global blockers before credentials."""
+
+    state_target = Path(state_path)
+    worker_target = Path(worker_path)
+    try:
+        records = load_delivery_records(state_target)
+        if any(record.state is DeliveryState.SENDING for record in records):
+            _prepare_worker_target(worker_target)
+            with exclusive_file_lock(worker_target, timeout=lock_timeout):
+                _harden_worker_target(worker_target)
+                recovered = recover_interrupted_deliveries(state_target)
+                records = load_delivery_records(state_target)
+        else:
+            recovered = ()
+        blocking_count = sum(
+            record.state
+            in {
+                DeliveryState.SENDING,
+                DeliveryState.PARTIAL,
+                DeliveryState.DELIVERY_UNKNOWN,
+            }
+            for record in records
+        )
+        return DeliveryRuntimeRecoveryResult(
+            status="recovery_required" if blocking_count else "ready",
+            blocking_count=blocking_count,
+            recovered_operation_ids=tuple(
+                record.operation_id for record in recovered
+            ),
+        )
+    except (DeliveryStoreError, FilePersistenceError, OSError) as exc:
+        raise DeliveryCoordinatorError(
+            "Family-calendar delivery recovery failed safely."
+        ) from exc
+    finally:
+        if worker_target.exists() or lock_path_for(worker_target).exists():
+            _harden_worker_target_best_effort(worker_target)
 
 
 def coordinate_delivery_attempt(
@@ -66,14 +133,46 @@ def coordinate_delivery_attempt(
 
     if not callable(transport):
         raise ValueError("Delivery transport must be callable.")
+    validation_plan = plan_delivery(event_key=event_key, offset=offset)
+    begin_delivery(validation_plan, recipient_ids=recipient_ids)
     worker_target = Path(worker_path)
     state_target = Path(state_path)
+    transport_called = False
     try:
         _prepare_worker_target(worker_target)
         with exclusive_file_lock(worker_target, timeout=lock_timeout):
             _harden_worker_target(worker_target)
             recovered = recover_interrupted_deliveries(state_target)
             recovered_ids = tuple(record.operation_id for record in recovered)
+            records = load_delivery_records(state_target)
+            current_plan = plan_delivery(
+                event_key=event_key,
+                offset=offset,
+                records=records,
+            )
+            if any(
+                record.state
+                in {
+                    DeliveryState.SENDING,
+                    DeliveryState.PARTIAL,
+                    DeliveryState.DELIVERY_UNKNOWN,
+                }
+                for record in records
+            ):
+                return DeliveryCoordinatorResult(
+                    status="recovery_required",
+                    plan=current_plan,
+                    record=next(
+                        (
+                            record
+                            for record in records
+                            if record.operation_id == current_plan.operation_id
+                        ),
+                        None,
+                    ),
+                    transport_called=False,
+                    recovered_operation_ids=recovered_ids,
+                )
             started = begin_stored_delivery(
                 event_key=event_key,
                 offset=offset,
@@ -93,6 +192,7 @@ def coordinate_delivery_attempt(
 
             record = started.record
             try:
+                transport_called = True
                 outcome = transport(record)
                 _validate_transport_outcome(record, outcome)
             except Exception:  # noqa: BLE001 - the transport is the external-effect boundary.
@@ -122,7 +222,10 @@ def coordinate_delivery_attempt(
     except DeliveryCoordinatorError:
         raise
     except (DeliveryStoreError, FilePersistenceError, OSError) as exc:
-        raise DeliveryCoordinatorError("Family-calendar delivery attempt failed safely.") from exc
+        raise DeliveryCoordinatorError(
+            "Family-calendar delivery attempt failed safely.",
+            transport_called=transport_called,
+        ) from exc
     finally:
         _harden_worker_target_best_effort(worker_target)
 

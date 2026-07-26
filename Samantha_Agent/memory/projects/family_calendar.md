@@ -53,9 +53,10 @@
 - Read-only kontrola připravenosti ověřuje konfiguraci, stavové úložiště,
   recovery, plánovač a existenci Keychain reference bez čtení hesla, zápisu
   nebo odesílání.
-- Dedikovaný plánovací vstup `family_calendar_delivery_run.py` je omezený
-  pouze na existující provozní dry-run. Živá redigovaná zkouška nevolala
-  koordinátor ani transport a nevytvořila stavový nebo worker soubor.
+- Dedikovaný plánovací vstup `family_calendar_delivery_run.py` bezpečně
+  rozlišuje `disabled`, `dry_run` a `enabled`. Ostrá větev je dostupná pouze
+  při skutečně aktivním režimu `enabled`; současný živý provoz zůstává
+  `dry_run`.
 - Kalendářová regrese 167 testů a plná Cockpit brána 1143 testů prošly.
 - Readiness už neblokuje chybějící runner; automatika dále zůstává bezpečně
   blokovaná chybějící instalací plánovače, Keychain referencí a automatickým
@@ -120,13 +121,26 @@
 - Read-only náhled budoucí aktivace přesně popisuje jedinou zamýšlenou změnu
   `dry_run` na `enabled`, provozní předpoklady, D-2/D-1 podmínky, idempotenci,
   pořadí odpojení a načtení plánovače i fail-closed rollback.
-- Náhled nemá `--apply` ani aktivační nebo odesílací větev. Skutečný režim
-  `enabled` zůstává neimplementovaný a je samostatně označený blokátorem
-  `automatic_mode_unavailable`.
+- Runtime režim `enabled` je implementovaný. Používá atomickou persistenci
+  `sending` před transportem, jedno-workerový zámek, D-2/D-1 idempotenci,
+  recovery přerušených pokusů, pevnou Keychain identitu a existující
+  redigovaný iCloud SMTP adaptér.
+- Přerušené `sending` se při recovery změní na `delivery_unknown`.
+  Jakýkoli `partial` nebo `delivery_unknown` globálně zastaví další
+  automatické pokusy do ručního auditu; automatický retry zůstává zakázaný.
+- Keychain tajemství se čte až po ověření režimu, recovery a nalezení
+  kandidáta. Není předáváno v argumentech procesu ani zobrazováno v bezpečném
+  výsledku. `disabled` a `dry_run` Keychain ani SMTP nevolají.
+- Aktivační náhled po implementaci nemá implementační blokátor a potvrzuje
+  podporu cílového režimu. Stále ale nemá zápisovou apply větev:
+  `activation_implementation_available=false` a `apply_available=false`.
 - Živý read-only náhled prošel bez issues a potvrdil připravenou konfiguraci,
   načtený plánovač, Keychain reference a prázdný neblokující stav. Neprovedl
   zápis, runtime mutaci, čtení hesla ani transport.
-- Kalendářová regrese 203 testů a plná Cockpit Quality Gate 1185 testů prošly.
+- Kalendářová regrese 218 testů a plná Cockpit Quality Gate 1252 testů
+  prošly. Kontrolní běh živého plánovače zůstal `dry_run`, našel nula
+  kandidátů, nevolal koordinátor ani transport a nezměnil konfiguraci nebo
+  stavové úložiště.
 
 ## Bezpečnostní hranice
 
@@ -142,6 +156,13 @@
 
 ## Nejmenší další krok
 
-Po začlenění zopakovat z `main` živý read-only náhled. Potom samostatně
-implementovat potvrzovanou aktivační bránu a ostrý plánovací vstup podle
-schváleného kontraktu; režim zatím neměnit a nic neodesílat.
+Samostatně implementovat potvrzovanou aktivační bránu podle už schváleného
+pořadí: znovu ověřit fingerprint a předpoklady, odpojit plánovač, atomicky
+změnit pouze režim na `enabled`, konfiguraci ověřit, znovu načíst plánovač a
+ověřit readiness. Do té doby režim neměnit a nic automaticky neodesílat.
+
+## Otevřené riziko
+
+Stav `partial` nebo `delivery_unknown` správně zastaví další automatiku, ale
+zatím neexistuje samostatný potvrzovaný workflow pro jeho ruční uzavření.
+Takový workflow se nesmí spojovat s aktivační branou ani automatickým retry.

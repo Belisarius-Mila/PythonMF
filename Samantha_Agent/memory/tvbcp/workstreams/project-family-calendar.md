@@ -559,3 +559,32 @@ zůstává vypnuté.
 Další krok: po začlenění zopakovat živý read-only náhled z `main`. Potom
 samostatně implementovat potvrzovanou aktivační bránu a ostrý plánovací vstup
 podle tohoto kontraktu; režim zatím neměnit a nic neodesílat.
+
+### 2026-07-26 13:59 CEST – Ostrá runtime větev je připravená, ale neaktivní
+
+Hotovo: plánovací vstup umí podle soukromé konfigurace bezpečně zvolit
+`disabled`, `dry_run` nebo `enabled`. Ostrá větev propojuje existující
+atomickou persistenci, D-2/D-1 idempotenci, recovery, pevnou Keychain identitu
+a redigovaný iCloud SMTP adaptér. Tajemství se čte až po recovery kontrole a
+nalezení kandidáta.
+
+Rozhodnutí: `partial`, `delivery_unknown` nebo přerušené `sending` nesmí vést
+k automatickému retry. Recovery přerušený stav uzavře jako
+`delivery_unknown` a všechny další automatické pokusy zablokuje do ručního
+auditu. Runtime implementace sama není souhlasem s aktivací.
+
+Další krok: implementovat samostatně potvrzovanou aktivační apply bránu podle
+už schváleného pořadí unload, atomická změna jediného pole `mode`, ověření,
+load a závěrečný readiness audit.
+
+Navrhované další kroky:
+
+- Po začlenění zopakovat read-only aktivační preview z čistého `main`.
+- Skutečnou aktivaci provést jen po nové globální a lokální potvrzovací větě.
+- Zvlášť navrhnout ruční workflow pro uzavření blokujícího
+  `partial`/`delivery_unknown`; nespojovat jej s automatickým retry.
+
+Technický důkaz: prošlo 218 kalendářových testů a úplná Cockpit Quality Gate
+s 1252 testy. Živý kontrolní běh zůstal `dry_run`, našel nula kandidátů,
+nevolal koordinátor ani transport a nezměnil konfiguraci nebo stavové
+úložiště. Skutečné Keychain tajemství ani síť nebyly při tomto kroku použity.

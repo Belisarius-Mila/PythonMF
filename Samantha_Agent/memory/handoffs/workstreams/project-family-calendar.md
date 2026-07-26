@@ -39,24 +39,33 @@ Co je hotove:
   výsledek a relace se korektně ukončila. Míla následně potvrdil skutečné
   doručení 4/4.
 - Automatické odesílání zůstává vypnuté a při obnově neběžel žádný SMTP runner.
+- Ostrý runtime režim `enabled` je implementovaný nad existující atomickou
+  persistencí, idempotencí, recovery, Keychain a iCloud SMTP adaptérem.
+- Plánovací vstup volí režim podle soukromé konfigurace. `disabled` a
+  `dry_run` nemají cestu ke čtení tajemství nebo transportu.
+- Recovery mění přerušené `sending` na `delivery_unknown`; každý `partial`
+  nebo `delivery_unknown` globálně blokuje další automatické pokusy.
 
 Co neni hotove:
 - Dva starší výsledky `delivery_unknown` zůstávají historicky nejisté a hotfix
   je nemůže zpětně překlasifikovat.
 - Ostrý automatický režim D-2/D-1 není zapnutý ani provozně ověřený.
-- Před případným zapnutím automatiky je potřeba samostatně ověřit provozní
-  aktivaci, plánování, persistenci výsledku a fail-closed recovery.
+- Potvrzovaná aktivační apply brána zatím není implementovaná.
+- Neexistuje samostatný potvrzovaný workflow pro ruční uzavření blokujícího
+  `partial` nebo `delivery_unknown`.
 
 Dalsi krok:
-Zahájit samostatnou read-only revizi cesty k automatickému D-2/D-1 provozu:
-ověřit plánovač, přechod ze současného neostrého režimu, persistenci
-per-recipient výsledků, idempotenci a recovery. V této revizi nic nezapínat
-ani neodesílat.
+Samostatně implementovat potvrzovanou aktivační bránu s revalidací
+fingerprintu, bezpečným odpojením plánovače, atomickou změnou jediného pole
+`mode`, ověřením konfigurace, novým načtením a závěrečným readiness auditem.
+Do samostatného potvrzení režim neměnit ani nic automaticky neodesílat.
 
 Navrhovane dalsi kroky:
-- Připravit redigovaný aktivační preview a přesný seznam předpokladů bez změny
-  soukromé konfigurace.
-- Teprve podle výsledku revize samostatně rozhodnout, zda automatiku zapnout.
+- Po začlenění znovu spustit redigovaný aktivační preview z čistého `main`.
+- Teprve po samostatné globální a lokální potvrzovací větě rozhodnout, zda
+  automatiku skutečně aktivovat.
+- Navrhnout zvláštní ruční workflow pro uzavření blokujícího stavu; nespojovat
+  jej s aktivační branou.
 - D-1 smí být náhrada jen po jistém neodeslání D-2; starý nebo nový
   `delivery_unknown` se automaticky neopakuje.
 
@@ -67,10 +76,13 @@ Zmenene nebo relevantni soubory:
 - `app/family_calendar_delivery_coordinator.py`
 - `app/family_calendar_delivery_config.py`
 - `app/family_calendar_delivery_runner.py`
+- `app/family_calendar_delivery_automatic.py`
+- `app/family_calendar_delivery_keychain.py`
 - `app/family_calendar_delivery_test_email.py`
 - `app/family_calendar_icloud_smtp_client.py`
 - `app/family_calendar_smtp_adapter.py`
 - `scripts/family_calendar_delivery_test_email.py`
+- `scripts/family_calendar_delivery_automatic.py`
 - `scripts/family_calendar_delivery_smtp_diagnose.py`
 - `scripts/family_calendar_delivery_smtp_envelope_diagnose.py`
 - `tests/test_family_calendar*.py`
@@ -497,3 +509,21 @@ Bezpecnost / neukladat:
 - Další krok: po začlenění zopakovat z `main` živý read-only náhled. Potom
   samostatně implementovat potvrzovanou aktivační bránu a ostrý plánovací
   vstup; zatím režim neměnit ani nic neodesílat.
+
+### Vývojový checkpoint 2026-07-26 13:59 CEST
+
+- Pracovní proud: `project-family-calendar`
+- Souhrn: Ostrá plánovací větev `enabled` propojuje atomickou persistenci,
+  idempotenci, recovery, pevnou Keychain identitu a redigovaný iCloud SMTP
+  adaptér. `disabled` a `dry_run` zůstávají bez čtení tajemství a transportu.
+- Recovery: přerušené `sending` přechází na `delivery_unknown`; každý
+  `partial` nebo `delivery_unknown` zastaví všechny další automatické pokusy
+  do ručního auditu.
+- Ověření: 218 kalendářových testů a plná Cockpit Quality Gate 1252 testů,
+  výsledek OK. Živý kontrolní běh zůstal `dry_run`, nevolal koordinátor ani
+  transport a nezměnil konfiguraci nebo delivery stav.
+- Bezpečnost: skutečné tajemství nebylo při vývoji ani testech načteno,
+  síť ani SMTP transport nebyly použity a automatika nebyla aktivována.
+- Commit: `Doplnit ostrý režim rodinného kalendáře`
+- Další krok: samostatně implementovat potvrzovanou aktivační apply bránu.
+  Režim zatím neměnit a nic automaticky neodesílat.
