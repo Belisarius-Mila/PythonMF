@@ -1,32 +1,38 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-27 00:17 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-27 00:54 CEST
 
 ### Hotovo
-- Cockpit už neobsahuje osiřelé Voice Bridge handlery ani jejich glue kód; Janička, diagnostika, Human–Adam mikrofon a TTS zůstaly zachované
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Pozdní serverová receipt prokázala, že nasazení `3df4410` uspělo navzdory browserovému timeoutu.
+- Klient čeká na nový Cockpit až 120 sekund a přechodnou chybu ověřovacího endpointu nepovažuje za konečný neúspěch.
+- Před závěrečným varováním read-only ověří serverovou receipt svázanou s přesným auditovaným commitem.
+- Předchozí `main` (`3df4410`) byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Nový checkpoint ještě nemá vlastní serverový důkaz nasazení.
+- Zbývá jeden živý restartovací test, který ověří pozdní úspěch nebo bezpečný neznámý výsledek bez falešného fallbacku.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Ani delší klientský limit nedokazuje úspěch sám o sobě; autoritativní zůstává serverová receipt přesného commitu.
+- Pokud server skutečně neodpovídá a receipt nelze načíst, UI správně ponechá výsledek jako nepotvrzený a zakáže slepé opakování.
 
 ### Další krok
-- Provést checkpoint, push a nasazení a ověřit úplnou testovací bránu i pět smoke kontrol
+- Provést read-only audit nového `main`, jednou jej potvrzeně nasadit do Cockpitu a ověřit návrat stránky bez falešného terminálového fallbacku.
 
 ### Rozhodnutí
-- Po odstranění veřejných rout a statusových polí se z Cockpitu odstraňuje pouze nedostupná legacy implementace, nikoli samostatné moduly ani private stav
+- Browserový timeout není důkaz selhání nasazení.
+- Klient musí před fallbackem ověřit serverovou receipt přesného auditovaného commitu; terminálový fallback patří jen ke skutečně nedostupnému serveru.
 
 ### Navrhované další kroky
-- Po živém ověření pokračovat fází 9.3e oddělením ochrany relací Janičky a diagnostických skriptů od Voice Bridge markeru
-- Samostatné Voice Bridge moduly a private stav řešit až v pozdější auditované fázi 9.4
+- Po živém ověření se vrátit k fázi 9.3e oddělení ochrany relací Janičky a diagnostických skriptů od Voice Bridge markeru.
+- Samostatné Voice Bridge moduly a private stav řešit až v pozdější auditované fázi 9.4.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1250 testů).
-- Git před checkpointem: `main == origin/main` na `7c759d92832b`.
-- Poslední serverově potvrzené nasazení: `7c759d92832b` · odpovídá ověřenému main před tímto checkpointem · 1278 testů · smoke 5/5 · 2026-07-26T21:53:58+00:00.
+- Změna je otestovaná (294 cílených a 1251 úplných testů).
+- Python, oba JavaScripty, shell, whitespace a Git safety kontroly prošly.
+- Git před checkpointem: `main == origin/main` na `3df44105a642`.
+- Poslední serverově potvrzené nasazení: `3df44105a642` · 1250 testů · smoke 5/5.
 - Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -2239,3 +2245,31 @@ Technický důkaz:
 - Změněné cesty před paměťovým zápisem (3): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_voice_frontend_retirement.py`
 - Commit: `Remove orphaned Cockpit voice handlers`
 - Další krok: Provést checkpoint, push a nasazení a ověřit úplnou testovací bránu i pět smoke kontrol
+
+### 2026-07-27 00:54 CEST – Pozdní úspěch nasazení už není falešný timeout
+
+Hotovo:
+- Serverová receipt zpětně prokázala, že nasazení `3df4410` uspělo: nový
+  proces běžel, plná brána měla 1250 testů a smoke prošel 5/5.
+- Browser nyní čeká až 120 sekund a přechodnou chybu ověřovacího endpointu
+  ukládá jako průběžný stav místo okamžitého ukončení.
+- Před závěrečným varováním načte stav a přijme pouze receipt odpovídající
+  přesnému auditovanému commitu.
+
+Rozhodnutí:
+- Vypršení klientského čekání není důkaz neúspěchu.
+- Neověřený výsledek se nesmí slepě opakovat; terminálový fallback se doporučí
+  pouze při skutečně nedostupném serveru.
+
+Otevřeno:
+- Commit a push této opravy.
+- Potvrzené nasazení a jeden živý restartovací test.
+
+Rizika:
+- Pokud se server nevrátí ani receipt není dostupná, stav zůstane správně
+  nepotvrzený a vyžaduje read-only kontrolu.
+
+Technický důkaz:
+- Cílená UI a Cockpit sada prošla 294 testy.
+- Plná Cockpit Quality Gate prošla 1251 testy za 321,9 s.
+- Python, oba JavaScripty, shell, whitespace a Git safety jsou zelené.

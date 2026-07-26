@@ -114,7 +114,11 @@ class HumanAdamUiTests(unittest.TestCase):
         refresh = HUMAN_ADAM_HTML.index("await loadWork();", failure)
         restore = HUMAN_ADAM_HTML.index("deployMeta.textContent = deploymentFailure;", refresh)
         self.assertLess(refresh, restore)
-        self.assertIn("await waitForCockpitAndReload(Number(payload.restart.pid || previousPid));", HUMAN_ADAM_HTML)
+        self.assertIn("await waitForCockpitAndReload(", HUMAN_ADAM_HTML)
+        self.assertIn(
+            "String(payload.main_short || auditedMainShort)",
+            HUMAN_ADAM_HTML,
+        )
         verification = HUMAN_ADAM_HTML.index('api("/api/human-adam/deploy-verification"')
         stored = HUMAN_ADAM_HTML.index("storeVerifiedDeploymentResult(verification)", verification)
         reload_page = HUMAN_ADAM_HTML.index("window.location.reload();", verification)
@@ -125,6 +129,63 @@ class HumanAdamUiTests(unittest.TestCase):
             HUMAN_ADAM_HTML,
         )
         self.assertIn('verification.state !== "deployed"', HUMAN_ADAM_HTML)
+
+    def test_deployment_wait_recovers_late_success_without_false_fallback(self) -> None:
+        wait_start = HUMAN_ADAM_HTML.index(
+            "async function waitForCockpitAndReload(previousPid, expectedMainShort)"
+        )
+        wait_end = HUMAN_ADAM_HTML.index(
+            "function verifiedDeploymentRecord(payload)",
+            wait_start,
+        )
+        wait_source = HUMAN_ADAM_HTML[wait_start:wait_end]
+        match_start = HUMAN_ADAM_HTML.index(
+            "function expectedDeploymentRecord(payload, expectedMainShort)"
+        )
+        match_end = HUMAN_ADAM_HTML.index(
+            "function verifiedDeploymentSummary(payload)",
+            match_start,
+        )
+        match_source = HUMAN_ADAM_HTML[match_start:match_end]
+
+        self.assertIn("const deploymentReturnMaxAttempts = 120;", HUMAN_ADAM_HTML)
+        self.assertIn(
+            "attempt <= deploymentReturnMaxAttempts",
+            wait_source,
+        )
+        self.assertIn(
+            "lastVerificationMessage = error.message;",
+            wait_source,
+        )
+        self.assertIn(
+            'api("/api/human-adam/status")',
+            wait_source,
+        )
+        self.assertIn(
+            "status && status.last_simple_main_deployment",
+            wait_source,
+        )
+        self.assertIn(
+            "expectedDeploymentRecord(verification, expected)",
+            wait_source,
+        )
+        self.assertIn(
+            "storeVerifiedDeploymentResult(status.last_simple_main_deployment)",
+            wait_source,
+        )
+        self.assertIn("Nasazení neopakuj", wait_source)
+        self.assertIn(
+            "terminálový fallback použij pouze tehdy, když server skutečně neodpovídá",
+            wait_source,
+        )
+        self.assertNotIn(
+            "nový Cockpit se nevrátil v limitu. Použij terminálový fallback",
+            HUMAN_ADAM_HTML,
+        )
+        self.assertIn(
+            "record.main_short !== expected",
+            match_source,
+        )
 
     def test_verified_deployment_survives_reload_and_reopens_work_panel_once(self) -> None:
         store_start = HUMAN_ADAM_HTML.index("function storeVerifiedDeploymentResult(payload)")
@@ -659,6 +720,18 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("právě jednou následující dva kroky", panel_source)
         self.assertIn("Git/main", panel_source)
         self.assertIn("Nasazení nespouštěj současně", panel_source)
+        self.assertIn(
+            "Čekání na nový Cockpit dosáhne limitu",
+            panel_source,
+        )
+        self.assertIn(
+            "neznamená to automaticky neúspěšné nasazení",
+            panel_source,
+        )
+        self.assertIn(
+            "Terminálový fallback použij pouze tehdy",
+            panel_source,
+        )
         self.assertIn("reset, rebase ani force push", panel_source)
         self.assertIn("Toto je pouze nápověda", panel_source)
         self.assertNotIn("#workHelpPanel > :not(.workflow-help-head):not(.simple-work-help)", HUMAN_ADAM_HTML)

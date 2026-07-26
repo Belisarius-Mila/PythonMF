@@ -42,6 +42,17 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-27 00:54 CEST: Priorita 1, Human–Adam / falešný timeout po úspěšném
+  nasazení. Browser po 60 sekundách tvrdil, že nový Cockpit nepřišel, ale
+  serverová receipt následně prokázala `deployed` pro `3df4410`, nový proces,
+  1250 testů a smoke 5/5; runtime byl dosažitelný a Human–Adam připojený.
+  Klient nyní čeká nejvýše 120 sekund, přechodné `profil právě provádí jinou
+  operaci` nepovažuje za konečný neúspěch a před varováním read-only ověří
+  přesnou receipt auditovaného commitu. Neznámý výsledek zakáže slepé
+  opakování; terminálový fallback doporučí jen při skutečně nedostupném
+  serveru. Cílených 294 a úplných 1251 testů prošlo. Zbývá commit/push,
+  potvrzené nasazení a jeden živý restartovací test. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-26 23:29 CEST: Priorita 1, Human–Adam / jednoznačné rozlišení Gitu
   a běžícího Cockpitu. Automatická účtenka už neoznačuje commit/push jako celé
   nasazení: samostatně uvede nový `Git/main` a serverově ověřený commit

@@ -269,6 +269,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
           <li><strong>GitHub je před lokálním <code>main</code>:</strong> například denní soví workflow vytvořilo nový commit. Audit nabídne tlačítko <strong>Dorovnat main s GitHubem</strong> pouze při čistém jednoznačném fast-forwardu. Nejdřív zkontroluj cílový commit a seznam souborů; dorovnání se nespouští automaticky.</li>
           <li><strong>Čekající integrace:</strong> přečti read-only audit. Pokud je <code>main</code> čistý, nezměněný a private ownership marker odpovídá přesnému WIP, vlož nabídnutou potvrzovací větu a klikni na <strong>Převzít přesný WIP do main</strong>. Když model zapomene dokončovací účtenku, marker vytvořený před tahem zachová původ změn a panel nabídne <strong>Dokončit vlastněný WIP</strong> po doplnění git-safe popisu. Při posunu <code>main</code>, cizím WIP, divergenci nebo neshodě markeru nic nezačleňuj a vyžádej servisní rozhodnutí; totéž platí při nejistém doručení.</li>
           <li><strong>Audit nebo nasazení do Cockpitu selže:</strong> nic neopakuj naslepo; obnov stav a předej Adamovi přesnou chybu.</li>
+          <li><strong>Čekání na nový Cockpit dosáhne limitu:</strong> neznamená to automaticky neúspěšné nasazení. Nasazení neopakuj, nejdřív obnov stav a zkontroluj serverovou účtenku. Terminálový fallback použij pouze tehdy, když Cockpit skutečně neodpovídá.</li>
           <li><strong>Repo není čisté:</strong> nenasazuj a nech Adama zjistit, co zůstalo rozpracované.</li>
         </ul>
 
@@ -475,6 +476,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const verifiedDeploymentStorageKey = "human-adam:verified-deployment:v1";
   const verifiedDeploymentSeenStorageKey = "human-adam:verified-deployment-seen:v1";
   const verifiedDeploymentMaxAgeMs = 15 * 60 * 1000;
+  const deploymentReturnMaxAttempts = 120;
   let developmentSemaphore = null;
   let projectContinuity = null;
   let completionMediaUrl = "";
@@ -2124,8 +2126,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     }
   }
 
-  async function waitForCockpitAndReload(previousPid) {
-    for (let attempt = 1; attempt <= 60; attempt += 1) {
+  async function waitForCockpitAndReload(previousPid, expectedMainShort) {
+    const expected = String(expectedMainShort || "").trim().toLowerCase();
+    let lastVerificationMessage = "";
+    for (let attempt = 1; attempt <= deploymentReturnMaxAttempts; attempt += 1) {
       try {
         const response = await fetch("/api/server/health", {cache:"no-store"});
         if (response.ok) {
@@ -2137,27 +2141,50 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
                 method:"POST",
                 body:JSON.stringify({}),
               });
-              if (!verification.ok || verification.state !== "deployed") {
-                deployMeta.textContent = `Cockpit se vrátil, ale ověření nasazení selhalo: ${verification.message || "chybí úplný důkaz."}`;
+              const verified = expectedDeploymentRecord(verification, expected);
+              if (!verification.ok || verification.state !== "deployed" || !verified) {
+                lastVerificationMessage = verification.message || "Server ještě nemá úplný důkaz pro auditovaný main.";
+              } else {
+                deployMeta.textContent = verifiedDeploymentSummary(verification);
+                storeVerifiedDeploymentResult(verification);
+                window.location.reload();
                 return;
               }
-              deployMeta.textContent = verifiedDeploymentSummary(verification);
-              storeVerifiedDeploymentResult(verification);
             } catch (error) {
-              deployMeta.textContent = `Cockpit se vrátil, ale ověření nasazení nelze dokončit: ${error.message}`;
-              return;
+              lastVerificationMessage = error.message;
             }
-            window.location.reload();
-            return;
           }
         }
       } catch (_error) {
         // Očekávané krátké odpojení během restartu Cockpitu.
       }
-      deployMeta.textContent = `Restart probíhá · čekám na nový Cockpit ${attempt}/60…`;
+      const verificationNote = lastVerificationMessage
+        ? " · server ještě dokončuje ověření"
+        : "";
+      deployMeta.textContent = `Restart a ověření probíhají · neopakuj nasazení · ${attempt}/${deploymentReturnMaxAttempts}${verificationNote}`;
       await new Promise((resolve) => window.setTimeout(resolve, 1000));
     }
-    deployMeta.textContent = "Nasazení bylo připravené, ale nový Cockpit se nevrátil v limitu. Použij terminálový fallback.";
+    try {
+      const status = await api("/api/human-adam/status");
+      const record = expectedDeploymentRecord(
+        status && status.last_simple_main_deployment,
+        expected,
+      );
+      if (record) {
+        deployMeta.textContent = verifiedDeploymentSummary(
+          status.last_simple_main_deployment,
+        );
+        storeVerifiedDeploymentResult(status.last_simple_main_deployment);
+        window.location.reload();
+        return;
+      }
+    } catch (error) {
+      lastVerificationMessage = error.message;
+    }
+    const detail = lastVerificationMessage
+      ? ` Poslední kontrola: ${lastVerificationMessage}`
+      : "";
+    deployMeta.textContent = `Výsledek nasazení zatím nelze potvrdit.${detail} Nasazení neopakuj. Nejdřív obnov stav; terminálový fallback použij pouze tehdy, když server skutečně neodpovídá.`;
   }
 
   function verifiedDeploymentRecord(payload) {
@@ -2177,6 +2204,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       deployed_at:parsedTime.toISOString(),
       stored_at:Date.now(),
     };
+  }
+
+  function expectedDeploymentRecord(payload, expectedMainShort) {
+    const expected = String(expectedMainShort || "").trim().toLowerCase();
+    const record = verifiedDeploymentRecord(payload);
+    if (!/^[0-9a-f]{7,12}$/.test(expected)) return null;
+    if (!record || record.main_short !== expected) return null;
+    return record;
   }
 
   function verifiedDeploymentSummary(payload) {
@@ -2328,6 +2363,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     checkpointBtn.disabled = true;
     deployMeta.textContent = "Spouštím plnou bránu nad přesným main před nasazením do Cockpitu…";
     let previousPid = 0;
+    const auditedMainShort = String(deploymentAudit.main_short || "");
     try {
       const healthResponse = await fetch("/api/server/health", {cache:"no-store"});
       if (healthResponse.ok) {
@@ -2350,11 +2386,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         return;
       }
       deployMeta.textContent = `Plná brána prošla · ${tests} · Cockpit se restartuje na auditovaný main…`;
-      await waitForCockpitAndReload(Number(payload.restart.pid || previousPid));
+      await waitForCockpitAndReload(
+        Number(payload.restart.pid || previousPid),
+        String(payload.main_short || auditedMainShort),
+      );
     } catch (error) {
       if (previousPid) {
         deployMeta.textContent = "Spojení se přerušilo; ověřuji, zda probíhá restart po nasazení…";
-        await waitForCockpitAndReload(previousPid);
+        await waitForCockpitAndReload(previousPid, auditedMainShort);
       } else {
         deployMeta.textContent = `Nasazení nebylo potvrzeno: ${error.message}`;
         await loadWork();
