@@ -12,12 +12,10 @@ from app.file_persistence import lock_path_for
 from app.speech.adam_voice_mode import (
     append_manual_voice_history_turn,
     build_spoken_result_for_command,
-    clear_codex_approval_request,
     format_automatic_watcher_response,
     format_voice_history_for_prompt,
     generate_direct_voice_response,
     handle_voice_command,
-    load_codex_approval_request,
     load_last_adam_response,
     load_pending_for_adam,
     load_voice_history,
@@ -25,7 +23,6 @@ from app.speech.adam_voice_mode import (
     mark_pending_for_adam_processed,
     save_pending_for_adam,
     save_last_adam_response,
-    save_codex_approval_request,
     spoken_notice_for_command,
     update_pending_approval,
     voice_command_needs_codex_work,
@@ -654,37 +651,6 @@ print(json.dumps({"ok": result.get("ok"), "status": result.get("status"), "respo
         self.assertFalse(pending["pending"])
         self.assertEqual(pending["status"], "none")
 
-    def test_codex_approval_request_roundtrip_and_status(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            approval_path = Path(temp_dir) / "codex_approval_request.json"
-            saved = save_codex_approval_request(
-                reason="Codex potřebuje povolit kontrolu procesu.",
-                command="ps -o pid,command -ax",
-                risk="Read-only systémová kontrola běžících procesů.",
-                next_step="Na iPhonu otevři Codex a rozhodni systémové potvrzení.",
-                confirmation_text="Potvrzuji bezpečnou kontrolu procesu.",
-                path=approval_path,
-            )
-            loaded = load_codex_approval_request(path=approval_path)
-            status = load_voice_mode_status(
-                status_path=Path(temp_dir) / "missing_status.json",
-                pending_path=Path(temp_dir) / "missing_pending.json",
-                history_path=Path(temp_dir) / "missing_history.jsonl",
-                last_response_path=Path(temp_dir) / "missing_response.json",
-                codex_approval_path=approval_path,
-            )
-            cleared = clear_codex_approval_request(note="Vyřešeno.", path=approval_path)
-
-        self.assertTrue(saved["active"])
-        self.assertEqual(loaded["status"], "waiting_for_codex_approval")
-        self.assertIn("Read-only", loaded["risk"])
-        self.assertEqual(loaded["confirmation_text"], "Potvrzuji bezpečnou kontrolu procesu.")
-        self.assertTrue(status["codex_approval"]["active"])
-        self.assertEqual(status["codex_approval"]["confirmation_text"], "Potvrzuji bezpečnou kontrolu procesu.")
-        self.assertIn("kontrolu procesu", status["codex_approval"]["reason"])
-        self.assertFalse(cleared["active"])
-        self.assertEqual(cleared["status"], "cleared")
-
     def test_append_history_saves_last_adam_response_for_cockpit(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             history_path = Path(temp_dir) / "adam_voice_history.jsonl"
@@ -856,6 +822,7 @@ for index in range(30):
         self.assertTrue(status["ok"])
         self.assertFalse(status["running"])
         self.assertEqual(status["state"], "stopped")
+        self.assertNotIn("codex_approval", status)
 
     def test_load_voice_mode_status_reports_current_process_running(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

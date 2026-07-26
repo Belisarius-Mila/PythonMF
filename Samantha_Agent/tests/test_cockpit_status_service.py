@@ -86,6 +86,7 @@ class CockpitStatusServiceTests(unittest.TestCase):
             action_queue=load_action_queue,
             vault=simple_loader("vault", "vault ok"),
             scandocu=simple_loader("scandocu", {"running": False}),
+            codex_approval=simple_loader("codex_approval", {"active": False}),
             voice_mode=simple_loader("voice_mode", {"running": True}),
             voice_bridge=simple_loader("voice_bridge", {"status": "ok"}),
             git=simple_loader("git", {"clean": True}),
@@ -114,6 +115,7 @@ class CockpitStatusServiceTests(unittest.TestCase):
                 "action_queue",
                 "vault",
                 "scandocu",
+                "codex_approval",
                 "voice_mode",
                 "voice_bridge",
                 "git",
@@ -124,7 +126,8 @@ class CockpitStatusServiceTests(unittest.TestCase):
         self.assertIs(status["downloads"], downloads)
         self.assertIs(status["document_work"], document_work)
         self.assertEqual(status["backup"], "backup ok")
-        self.assertEqual(len(status["status_timing"]["sections_ms"]), 15)
+        self.assertEqual(len(status["status_timing"]["sections_ms"]), 16)
+        self.assertEqual(status["codex_approval"], {"active": False})
         self.assertLessEqual(len(status["status_timing"]["slowest_sections"]), 3)
 
     def test_live_status_cache_remains_inside_service(self) -> None:
@@ -138,6 +141,7 @@ class CockpitStatusServiceTests(unittest.TestCase):
             return {"sequence": bridge_calls}
 
         first = build_cockpit_live_status(
+            codex_approval_loader=lambda: {"active": True},
             voice_mode_loader=lambda: {"running": True},
             voice_bridge_loader=load_bridge,
             monotonic_clock=lambda: 100.0,
@@ -145,6 +149,7 @@ class CockpitStatusServiceTests(unittest.TestCase):
             bridge_cache_lock=lock,
         )
         second = build_cockpit_live_status(
+            codex_approval_loader=lambda: {"active": False},
             voice_mode_loader=lambda: {"running": False},
             voice_bridge_loader=load_bridge,
             monotonic_clock=lambda: 101.0,
@@ -155,6 +160,7 @@ class CockpitStatusServiceTests(unittest.TestCase):
         self.assertEqual(bridge_calls, 1)
         self.assertFalse(first["live_status_timing"]["voice_bridge_cache_hit"])
         self.assertTrue(second["live_status_timing"]["voice_bridge_cache_hit"])
+        self.assertEqual(second["codex_approval"], {"active": False})
         self.assertEqual(second["voice_mode"], {"running": False})
         self.assertEqual(second["voice_bridge"], {"sequence": 1})
 

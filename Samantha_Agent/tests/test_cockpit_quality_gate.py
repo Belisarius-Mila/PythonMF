@@ -74,9 +74,12 @@ async def second():
             self.assertTrue((PROJECT_ROOT / relative_path).is_file(), relative_path)
         self.assertIn("tests.test_cockpit", TEST_MODULES)
         self.assertIn("tests.test_adam_voice_mode", TEST_MODULES)
+        self.assertIn("tests.test_codex_approval_cockpit_contract", TEST_MODULES)
+        self.assertIn("tests.test_codex_approval_state", TEST_MODULES)
         self.assertIn("tests.test_human_adam_profiles", TEST_MODULES)
         self.assertIn("tests.test_cockpit_quality_gate", TEST_MODULES)
         self.assertIn("tests.test_command_cheatsheet", TEST_MODULES)
+        self.assertIn("app/codex_approval_state.py", COMPILE_PATHS)
         self.assertIn("app/communication/human_adam_profiles.py", COMPILE_PATHS)
         self.assertIn(
             "app/communication/workstream_live_status.py",

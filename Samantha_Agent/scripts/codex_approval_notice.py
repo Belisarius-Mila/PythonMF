@@ -10,7 +10,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.speech.adam_voice_mode import clear_codex_approval_request, save_codex_approval_request
+from app.codex_approval_state import clear_codex_approval_request, save_codex_approval_request
 
 
 def build_parser() -> argparse.ArgumentParser:

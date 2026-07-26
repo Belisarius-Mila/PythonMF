@@ -3037,10 +3037,19 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("renderCodexApproval", COCKPIT_HTML)
         self.assertIn("/api/voice-mode/codex-approval/clear", COCKPIT_HTML)
         self.assertIn("clearCodexApprovalCard", COCKPIT_HTML)
+        self.assertIn("codexApprovalOpenHumanAdamBtn", COCKPIT_HTML)
+        self.assertIn("Otevřít Human–Adam", COCKPIT_HTML)
+        self.assertNotIn("codexApprovalSendConfirmationBtn", COCKPIT_HTML)
+        self.assertNotIn("sendCodexApprovalConfirmation", COCKPIT_HTML)
+        self.assertLess(
+            COCKPIT_HTML.index('id="codexApprovalCard"'),
+            COCKPIT_HTML.index('id="voiceCommandDetails"'),
+        )
         self.assertIn("safeReadonlyCard", COCKPIT_HTML)
         self.assertIn("Bezpečné kontroly", COCKPIT_HTML)
         self.assertIn("data-safe-readonly=\"codex_sessions\"", COCKPIT_HTML)
-        self.assertIn("data-safe-readonly=\"git_status\"", COCKPIT_HTML)
+        self.assertNotIn("data-safe-readonly=\"git_status\"", COCKPIT_HTML)
+        self.assertNotIn("data-safe-readonly=\"backup_status\"", COCKPIT_HTML)
         self.assertIn("/api/voice-mode/safe-readonly/run", COCKPIT_HTML)
         self.assertIn("runSafeReadonlyCapability", COCKPIT_HTML)
         self.assertIn("voiceApprovalCard", COCKPIT_HTML)
@@ -3078,7 +3087,6 @@ class CockpitTests(unittest.TestCase):
         result = cockpit_codex_approval_clear_action(
             {"confirmed": False},
             clearer=lambda **kwargs: {"ok": True, "active": False, "status": "cleared"},
-            status_loader=lambda **kwargs: {"ok": True},
         )
 
         self.assertFalse(result["ok"])
@@ -3167,7 +3175,6 @@ class CockpitTests(unittest.TestCase):
         result = cockpit_codex_approval_clear_action(
             {"confirmed": True, "note": "Vyřešeno v terminálu."},
             clearer=fake_clearer,
-            status_loader=lambda **kwargs: {"ok": True, "codex_approval": {"active": False}},
         )
 
         self.assertTrue(result["ok"])
@@ -3488,6 +3495,10 @@ class CockpitTests(unittest.TestCase):
             patch("app.cockpit.document_vault_status_summary", return_value="vault ok"),
             patch("app.cockpit.reminders_status", return_value={"ok": True, "counts": {}}),
             patch("app.cockpit.probe_scandocu", return_value={"running": False}),
+            patch(
+                "app.cockpit.load_codex_approval_request",
+                return_value={"ok": True, "active": False, "status": "none"},
+            ),
             patch("app.cockpit.load_voice_mode_status", return_value={"ok": True, "running": False, "state": "stopped"}),
             patch("app.cockpit.adam_voice_bridge_status", return_value={"ok": True, "status": "ok"}),
             patch("app.cockpit.git_status_summary", return_value={"ok": True}),
@@ -3503,6 +3514,8 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(status["backup"], "backup ok")
         self.assertEqual(status["backup_status"]["status"], "ok")
         self.assertIn("reminders", status)
+        self.assertEqual(status["codex_approval"]["status"], "none")
+        self.assertNotIn("codex_approval", status["voice_mode"])
         self.assertIn("voice_mode", status)
         self.assertIn("voice_bridge", status)
         self.assertIn("git", status)
@@ -3532,10 +3545,16 @@ class CockpitTests(unittest.TestCase):
         self.assertNotIn("consistency", status)
 
     def test_cockpit_live_status_refreshes_voice_mode_and_caches_expensive_bridge(self) -> None:
+        codex_approval_calls = 0
         voice_mode_calls = 0
         voice_bridge_calls = 0
         cache: dict[str, object] = {}
         clock_values = iter((100.0, 101.0, 116.0))
+
+        def codex_approval_loader() -> dict[str, object]:
+            nonlocal codex_approval_calls
+            codex_approval_calls += 1
+            return {"ok": True, "active": codex_approval_calls == 1}
 
         def voice_mode_loader() -> dict[str, object]:
             nonlocal voice_mode_calls
@@ -3548,29 +3567,34 @@ class CockpitTests(unittest.TestCase):
             return {"ok": True, "status": "ok", "sequence": voice_bridge_calls}
 
         first = cockpit_live_status(
+            codex_approval_loader=codex_approval_loader,
             voice_mode_loader=voice_mode_loader,
             voice_bridge_loader=voice_bridge_loader,
             monotonic_clock=lambda: next(clock_values),
             bridge_cache=cache,
         )
         second = cockpit_live_status(
+            codex_approval_loader=codex_approval_loader,
             voice_mode_loader=voice_mode_loader,
             voice_bridge_loader=voice_bridge_loader,
             monotonic_clock=lambda: next(clock_values),
             bridge_cache=cache,
         )
         third = cockpit_live_status(
+            codex_approval_loader=codex_approval_loader,
             voice_mode_loader=voice_mode_loader,
             voice_bridge_loader=voice_bridge_loader,
             monotonic_clock=lambda: next(clock_values),
             bridge_cache=cache,
         )
 
+        self.assertEqual(codex_approval_calls, 3)
         self.assertEqual(voice_mode_calls, 3)
         self.assertEqual(voice_bridge_calls, 2)
         self.assertFalse(first["live_status_timing"]["voice_bridge_cache_hit"])
         self.assertTrue(second["live_status_timing"]["voice_bridge_cache_hit"])
         self.assertFalse(third["live_status_timing"]["voice_bridge_cache_hit"])
+        self.assertFalse(second["codex_approval"]["active"])
         self.assertEqual(second["voice_mode"]["sequence"], 2)
         self.assertEqual(second["voice_bridge"]["sequence"], 1)
         self.assertNotIn("document_work", second)

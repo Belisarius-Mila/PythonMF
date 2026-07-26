@@ -34,6 +34,7 @@ class CockpitStatusLoaders:
     action_queue: Callable[[Any, Any, Any], Any]
     vault: StatusLoader
     scandocu: StatusLoader
+    codex_approval: StatusLoader
     voice_mode: StatusLoader
     voice_bridge: StatusLoader
     git: StatusLoader
@@ -97,6 +98,7 @@ def build_cockpit_status(
     )
     vault = timed_section("vault", loaders.vault)
     scandocu = timed_section("scandocu", loaders.scandocu)
+    codex_approval = timed_section("codex_approval", loaders.codex_approval)
     voice_mode = timed_section("voice_mode", loaders.voice_mode)
     voice_bridge = timed_section("voice_bridge", loaders.voice_bridge)
     git_status = timed_section("git", loaders.git)
@@ -130,6 +132,7 @@ def build_cockpit_status(
         "reminders": reminders,
         "urgent_reminders": urgent,
         "scandocu": scandocu,
+        "codex_approval": codex_approval,
         "voice_mode": voice_mode,
         "voice_bridge": voice_bridge,
         "git": git_status,
@@ -138,6 +141,7 @@ def build_cockpit_status(
 
 def build_cockpit_live_status(
     *,
+    codex_approval_loader: StatusLoader,
     voice_mode_loader: StatusLoader,
     voice_bridge_loader: StatusLoader,
     monotonic_clock: Callable[[], float] = time.monotonic,
@@ -147,9 +151,13 @@ def build_cockpit_live_status(
     bridge_cache_ttl_seconds: float = LIVE_STATUS_BRIDGE_CACHE_TTL_SECONDS,
     bridge_cache_lock: threading.Lock = _LIVE_STATUS_BRIDGE_CACHE_LOCK,
 ) -> dict[str, Any]:
-    """Build frequently changing voice state without the full dashboard work."""
+    """Build frequently changing approval and legacy voice state."""
     started_at = performance_clock()
     cache = bridge_cache if bridge_cache is not None else _LIVE_STATUS_BRIDGE_CACHE
+
+    codex_approval_started_at = performance_clock()
+    codex_approval = codex_approval_loader()
+    codex_approval_ms = round((performance_clock() - codex_approval_started_at) * 1000, 2)
 
     voice_mode_started_at = performance_clock()
     voice_mode = voice_mode_loader()
@@ -173,10 +181,12 @@ def build_cockpit_live_status(
 
     return {
         "generated_at": timestamp_loader(),
+        "codex_approval": codex_approval,
         "voice_mode": voice_mode,
         "voice_bridge": voice_bridge,
         "live_status_timing": {
             "total_ms": round((performance_clock() - started_at) * 1000, 2),
+            "codex_approval_ms": codex_approval_ms,
             "voice_mode_ms": voice_mode_ms,
             "voice_bridge_ms": voice_bridge_ms,
             "voice_bridge_cache_hit": cache_hit,
