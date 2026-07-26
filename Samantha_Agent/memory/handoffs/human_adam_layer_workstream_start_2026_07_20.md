@@ -1,32 +1,38 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-26 22:23 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-26 23:29 CEST
 
 ### Hotovo
-- Statusy Cockpitu už nenačítají ani nezveřejňují legacy Voice Mode a Voice Bridge stav
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Automatická dokončovací účtenka výslovně odděluje Git checkpoint od verze načtené v běžícím Cockpitu.
+- Stavový banner porovnává aktuální `Git/main` se serverově ověřeným runtime commitem a rozdíl zobrazuje jako čekající nasazení.
+- Nápověda a tlačítka jednoznačně popisují jeden audit a jedno potvrzené nasazení do Cockpitu pro každý nový runtime commit.
+- Předchozí `main` (`b9a7716`) byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Nový checkpoint ještě nemá vlastní serverový důkaz nasazení.
+- První přechodové nasazení použije potvrzovací větu z právě běžící starší UI; po restartu platí nová jednoznačná věta.
 
 ### Rizika
-- Žádné další doložené provozní riziko.
+- Automatické nasazení nebylo přidáno: commit/push a restart běžícího Cockpitu zůstávají záměrně oddělené.
+- Současné spuštění nasazení z Cockpitu a terminálového Adama může vytvořit souběžný požadavek; nápověda jej nyní výslovně zakazuje a backend druhý požadavek odmítne.
 
 ### Další krok
-- Provést checkpoint, push a nasazení a ověřit pět smoke kontrol
+- Provést read-only audit nového `main`, jednou jej potvrzeně nasadit do Cockpitu větou z běžící UI a ověřit nový stavový banner.
 
 ### Rozhodnutí
-- Legacy hlasový stav nebude součástí obecných statusových endpointů Cockpitu
+- `main` je Git větev; používáme termín `začlenit do main`, nikoli `nasadit na main`.
+- Termín `nasadit` je vyhrazen pro načtení aktuálního `main` do běžícího Cockpitu přes plnou bránu, řízený restart a smoke.
 
 ### Navrhované další kroky
-- Po živém ověření pokračovat fází 9.3d odstraněním osiřelých Cockpit handlerů a importů
-- Před odstraněním markeru a runtime modulů nejdřív oddělit živé vazby Janičky a diagnostických skriptů
+- Po živém ověření zvážit automatické spuštění pouze read-only auditu po checkpointu; samotné nasazení ponechat potvrzované.
+- Potom se vrátit k plánované prioritě podle aktuálního projektu.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1277 testů).
-- Git před checkpointem: `main == origin/main` na `e81db045de7e`.
-- Poslední serverově potvrzené nasazení: `e81db045de7e` · odpovídá ověřenému main před tímto checkpointem · 1275 testů · smoke 5/5 · 2026-07-26T19:27:49+00:00.
+- Změna je otestovaná (171 cílených a 1278 úplných testů).
+- Python, oba JavaScripty, shell, whitespace a Git safety kontroly prošly.
+- Git před checkpointem: `main == origin/main` na `b9a771692109`.
+- Poslední serverově potvrzené nasazení: `b9a771692109` · 1277 testů · smoke 5/5.
 - Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -2195,3 +2201,35 @@ Technický důkaz:
 - Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/cockpit_status_service.py`, `Samantha_Agent/scripts/cockpit_smoke_check.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_status_service.py`
 - Commit: `Retire legacy voice status sections`
 - Další krok: Provést checkpoint, push a nasazení a ověřit pět smoke kontrol
+
+### 2026-07-26 23:29 CEST – Git/main a běžící Cockpit jsou jednoznačně oddělené
+
+Hotovo:
+- Automatická účtenka nově říká `Git dokončen`, pojmenuje commit začleněný do
+  `main` a pushnutý na GitHub a samostatně uvede serverově ověřený runtime
+  commit.
+- Stavový banner při rozdílu oranžově ukáže `Git/main`, běžící Cockpit a
+  čekající nasazení; při shodě zobrazí jediný zelený stav.
+- Nápověda i dynamické tlačítko říkají, že jeden nový runtime commit vyžaduje
+  právě jeden audit a jedno potvrzené nasazení do Cockpitu.
+
+Rozhodnutí:
+- `Začlenit do main` označuje Git operaci; `nasadit do Cockpitu` označuje plnou
+  bránu, řízený restart a serverové smoke ověření.
+- Potvrzovací věta nově výslovně jmenuje nasazení aktuálního `main` do
+  Cockpitu; bezpečnostní model a dvoukroková brána zůstávají stejné.
+
+Otevřeno:
+- Commit a push tohoto checkpointu.
+- Přechodové nasazení větou z právě běžící starší UI a vizuální ověření
+  oranžového i zeleného banneru.
+
+Rizika:
+- Automatický checkpoint nadále sám nerestartuje Cockpit.
+- Souběžné spuštění stejného nasazení dvěma ovládacími cestami backend odmítne;
+  nápověda nyní výslovně říká používat jen jednu cestu.
+
+Technický důkaz:
+- Cílená sada prošla 171 testy.
+- Plná Cockpit Quality Gate prošla 1278 testy za 228,2 s.
+- Python, oba JavaScripty, shell, whitespace a Git safety kontroly jsou zelené.

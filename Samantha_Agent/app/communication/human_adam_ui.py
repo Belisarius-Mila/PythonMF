@@ -42,6 +42,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #turnActivity[hidden] { display:none; }
     #notice { min-height:24px; padding:8px 18px 0; color:var(--muted); font-size:14px; }
     #deploymentReceipt { margin:8px 0 0; padding:6px 10px; border-radius:10px; color:var(--ok); background:#ecfdf3; font-size:13px; }
+    #deploymentReceipt.stale { color:var(--warn); background:#fff7ed; }
     #deploymentReceipt[hidden] { display:none; }
     #chat { flex:1; padding:14px 18px 180px; display:flex; flex-direction:column; gap:14px; }
     .exchange { display:grid; gap:8px; }
@@ -253,19 +254,21 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
         <h4>Nasazení</h4>
         <p>Nasazovací tlačítka se zobrazí jen u pracovního proudu, který nasazení podporuje. U ostatních proudů zůstává v okně Práce pouze stav a bezpečné vysvětlení.</p>
+        <p><strong>Automatické dokončení vývoje dokončí Git, nikoli běžící Cockpit.</strong> Commit se začlení do <code>main</code>, pushne na GitHub a synchronizuje do čistých profilů, ale již spuštěný Python proces dál používá dříve načtený kód. Pokud má nový commit ovlivnit Cockpit, pro tento commit proveď právě jednou následující dva kroky.</p>
         <ol>
           <li>Workspace musí být čistý, synchronní a odpovídat <code>main</code>.</li>
-          <li>Stiskni <strong>Audit nasazení</strong> a přečti výsledek.</li>
-          <li>Vlož zobrazenou přesnou větu a stiskni <strong>Ověřit a nasadit</strong>.</li>
-          <li>Počkej na řízený restart a potvrzení <strong>Nasazeno a ověřeno</strong>.</li>
+          <li>Jednou stiskni <strong>Audit nasazení do Cockpitu</strong> a přečti výsledek.</li>
+          <li>Vlož zobrazenou přesnou větu a jednou stiskni <strong>Restartovat Cockpit na auditovaný commit a ověřit</strong>.</li>
+          <li>Počkej na řízený restart a potvrzení <strong>Běžící Cockpit ověřen</strong>.</li>
         </ol>
+        <p>Stavový řádek vždy rozlišuje aktuální <code>Git/main</code> od commitu načteného v běžícím Cockpitu. Zelená shoda znamená, že běží aktuální <code>main</code>; oranžový rozdíl znamená, že nový commit ještě čeká na nasazení do Cockpitu. Nasazení nespouštěj současně z Cockpitu a z terminálového Adama.</p>
 
         <h4>Když něco nejde</h4>
         <ul>
           <li><strong>Workspace je za <code>main</code>:</strong> při čistém profilu klikni na Připojit.</li>
           <li><strong>GitHub je před lokálním <code>main</code>:</strong> například denní soví workflow vytvořilo nový commit. Audit nabídne tlačítko <strong>Dorovnat main s GitHubem</strong> pouze při čistém jednoznačném fast-forwardu. Nejdřív zkontroluj cílový commit a seznam souborů; dorovnání se nespouští automaticky.</li>
           <li><strong>Čekající integrace:</strong> přečti read-only audit. Pokud je <code>main</code> čistý, nezměněný a private ownership marker odpovídá přesnému WIP, vlož nabídnutou potvrzovací větu a klikni na <strong>Převzít přesný WIP do main</strong>. Když model zapomene dokončovací účtenku, marker vytvořený před tahem zachová původ změn a panel nabídne <strong>Dokončit vlastněný WIP</strong> po doplnění git-safe popisu. Při posunu <code>main</code>, cizím WIP, divergenci nebo neshodě markeru nic nezačleňuj a vyžádej servisní rozhodnutí; totéž platí při nejistém doručení.</li>
-          <li><strong>Audit nebo nasazení selže:</strong> nic neopakuj naslepo; obnov stav a předej Adamovi přesnou chybu.</li>
+          <li><strong>Audit nebo nasazení do Cockpitu selže:</strong> nic neopakuj naslepo; obnov stav a předej Adamovi přesnou chybu.</li>
           <li><strong>Repo není čisté:</strong> nenasazuj a nech Adama zjistit, co zůstalo rozpracované.</li>
         </ul>
 
@@ -342,9 +345,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <button class="audit-action" id="mainSyncBtn" type="button" disabled>Dorovnat main s GitHubem</button>
       </section>
       <div class="legacy-work-control" id="handoffTakeoverCheck" role="status" hidden></div>
-      <button class="audit-action" id="deployAuditBtn" type="button" disabled>Audit nasazení</button>
+      <button class="audit-action" id="deployAuditBtn" type="button" disabled>Audit nasazení do Cockpitu</button>
       <input id="deployConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Po auditu sem vlož potvrzovací větu" hidden disabled>
-      <button class="deploy-action" id="deployBtn" type="button" disabled>Ověřit a nasadit</button>
+      <button class="deploy-action" id="deployBtn" type="button" disabled>Nasadit aktuální main do Cockpitu</button>
     </div>
     </div>
   </aside>
@@ -1079,9 +1082,21 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         ? payload.last_simple_main_deployment
         : null
     );
-    deploymentReceipt.textContent = deployment
-      ? `Nasazeno ${deployment.main_short} · ${deployment.test_count} testů · smoke ${deployment.smoke_count}/5 · ${formatTime(deployment.deployed_at)}`
-      : "";
+    const sourceHead = String(workspace.source_head || "").trim().toLowerCase();
+    const mainShort = /^[0-9a-f]{40}$/.test(sourceHead) ? sourceHead.slice(0,12) : "";
+    const deploymentCurrent = Boolean(
+      deployment && mainShort && deployment.main_short === mainShort
+    );
+    if (deployment && mainShort && !deploymentCurrent) {
+      deploymentReceipt.textContent = `Git/main ${mainShort} · běžící Cockpit ${deployment.main_short} · nový commit čeká na nasazení do Cockpitu`;
+    } else if (deployment && deploymentCurrent) {
+      deploymentReceipt.textContent = `Git/main i běžící Cockpit ${mainShort} · ${deployment.test_count} testů · smoke ${deployment.smoke_count}/5 · ${formatTime(deployment.deployed_at)}`;
+    } else if (deployment) {
+      deploymentReceipt.textContent = `Běžící Cockpit ${deployment.main_short} · aktuální Git/main nelze ověřit`;
+    } else {
+      deploymentReceipt.textContent = "";
+    }
+    deploymentReceipt.classList.toggle("stale", Boolean(deployment && !deploymentCurrent));
     deploymentReceipt.hidden = !deployment;
     renderTurnState(session);
     renderSession(session);
@@ -1743,13 +1758,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     deployConfirmation.disabled = true;
     deployBtn.hidden = !workstreamDeploymentEnabled;
     deployBtn.disabled = true;
+    deployBtn.textContent = "Nasadit aktuální main do Cockpitu";
     if (!workstreamDevelopmentEnabled) deployMeta.textContent = "Tento pracovní proud je pouze pro čtení; vývoj zde zatím není povolen.";
     else if (!workstreamDeploymentEnabled) deployMeta.textContent = "Vývoj spusť tlačítkem Zahájit vývoj. Po úspěšném tahu se změny automaticky checkpointují, commitnou a pushnou; nasazení z tohoto pracovního proudu zatím není dostupné.";
     else if (payload.dirty) deployMeta.textContent = "Nejdřív dokonči automatický checkpoint změn do main.";
     else if (payload.local_checkpoint_ahead) deployMeta.textContent = "Je zachovaný starší lokální checkpoint; nejdřív proveď servisní kontrolu.";
     else if (checkpointPreserved) deployMeta.textContent = "WIP je bezpečně zachovaný, ale audit je zablokovaný. Nejdřív proveď obnovu nad aktuálním main.";
     else if (payload.workspace_relation === "diverged") deployMeta.textContent = "Audit je zablokovaný: workspace a main se rozešly.";
-    else if (simpleDeployReady) deployMeta.textContent = "Čistý main je připravený k auditu nasazení.";
+    else if (simpleDeployReady) deployMeta.textContent = "Čistý main je připravený k auditu nasazení do Cockpitu.";
     else deployMeta.textContent = "Workspace nejdřív synchronizuj s čistým main.";
     renderCompactWorkStatus(payload);
   }
@@ -2069,7 +2085,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       workChanges.appendChild(row);
     }
     const workstream = payload.workstream && payload.workstream.name ? payload.workstream.name : "aktivní pracovní proud";
-    deployMeta.textContent = `Audit OK · main ${payload.main_short || "?"} · ${workstream} · vlož přesně: ${payload.confirmation_text}`;
+    const target = payload.main_short || "?";
+    deployMeta.textContent = `Audit OK · Git/main ${target} · připraveno k nasazení do běžícího Cockpitu · ${workstream} · vlož přesně: ${payload.confirmation_text}`;
+    deployBtn.textContent = `Restartovat Cockpit na ${target} a ověřit`;
     deployConfirmation.value = "";
     deployConfirmation.hidden = false;
     deployConfirmation.disabled = false;
@@ -2092,15 +2110,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   async function auditDeployment() {
     deployAuditBtn.disabled = true;
     deployBtn.disabled = true;
-    deployMeta.textContent = "Ověřuji čistý main, GitHub a oba profilové workspaces…";
+    deployMeta.textContent = "Audituji nasazení aktuálního main do Cockpitu: ověřuji GitHub a oba profilové workspaces…";
     try {
       const payload = await api("/api/human-adam/deploy-audit");
-      if (!payload.ok || !payload.ready) throw new Error(payload.message || "Audit nasazení neprošel.");
+      if (!payload.ok || !payload.ready) throw new Error(payload.message || "Audit nasazení do Cockpitu neprošel.");
       renderMainRemoteSyncAudit(null);
       renderDeploymentAudit(payload);
     } catch (error) {
       deploymentAudit = null;
-      deployMeta.textContent = `Audit nasazení selhal: ${error.message}`;
+      deployMeta.textContent = `Audit nasazení do Cockpitu selhal: ${error.message}`;
       deployAuditBtn.disabled = false;
       await auditMainRemoteSync(error.message);
     }
@@ -2136,10 +2154,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       } catch (_error) {
         // Očekávané krátké odpojení během restartu Cockpitu.
       }
-      deployMeta.textContent = `Nasazeno · čekám na Cockpit ${attempt}/60…`;
+      deployMeta.textContent = `Restart probíhá · čekám na nový Cockpit ${attempt}/60…`;
       await new Promise((resolve) => window.setTimeout(resolve, 1000));
     }
-    deployMeta.textContent = "Checkpoint je nasazený, ale Cockpit se nevrátil v limitu. Použij terminálový fallback.";
+    deployMeta.textContent = "Nasazení bylo připravené, ale nový Cockpit se nevrátil v limitu. Použij terminálový fallback.";
   }
 
   function verifiedDeploymentRecord(payload) {
@@ -2163,8 +2181,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
   function verifiedDeploymentSummary(payload) {
     const record = verifiedDeploymentRecord(payload);
-    if (!record) return "Nasazeno a ověřeno · úplný serverový důkaz je uložený.";
-    return `Nasazeno a ověřeno · main ${record.main_short} · ${record.test_count} testů · smoke ${record.smoke_count}/5 · dokončeno ${formatTime(record.deployed_at)}.`;
+    if (!record) return "Běžící Cockpit ověřen · úplný serverový důkaz je uložený.";
+    return `Běžící Cockpit ověřen na main ${record.main_short} · ${record.test_count} testů · smoke ${record.smoke_count}/5 · dokončeno ${formatTime(record.deployed_at)}.`;
   }
 
   function storeVerifiedDeploymentResult(payload) {
@@ -2308,7 +2326,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     deployAuditBtn.disabled = true;
     deployBtn.disabled = true;
     checkpointBtn.disabled = true;
-    deployMeta.textContent = "Spouštím plnou bránu nad přesným checkpointem…";
+    deployMeta.textContent = "Spouštím plnou bránu nad přesným main před nasazením do Cockpitu…";
     let previousPid = 0;
     try {
       const healthResponse = await fetch("/api/server/health", {cache:"no-store"});
@@ -2328,10 +2346,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       }
       const tests = payload.gate && payload.gate.test_count ? `${payload.gate.test_count} testů` : "plná brána";
       if (!payload.restart || !payload.restart.ok) {
-        deployMeta.textContent = `Checkpoint je nasazený (${tests}), ale automatický restart nezačal. Použij Restart Cockpitu nebo terminálový fallback.`;
+        deployMeta.textContent = `Plná brána prošla (${tests}), ale restart Cockpitu nezačal. Kód ještě neběží; použij Restart Cockpitu nebo terminálový fallback.`;
         return;
       }
-      deployMeta.textContent = `Nasazeno · ${tests} · Cockpit se restartuje…`;
+      deployMeta.textContent = `Plná brána prošla · ${tests} · Cockpit se restartuje na auditovaný main…`;
       await waitForCockpitAndReload(Number(payload.restart.pid || previousPid));
     } catch (error) {
       if (previousPid) {

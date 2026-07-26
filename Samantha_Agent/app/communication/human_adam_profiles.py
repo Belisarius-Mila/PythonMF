@@ -1962,10 +1962,38 @@ class HumanAdamProfileManager:
             if all_aligned
             else "Checkpoint je hotový; jeden čistý profil se dorovná při příštím Připojit."
         )
+        checkpoint_short = str(checkpoint.get("checkpoint_short") or "")
+        profile = self.profiles.get(active_id) or {}
+        binding = profile.get("workstream_binding")
+        deployed = (
+            load_completed_simple_main_deployment(
+                self.simple_main_deployment_receipt_path,
+                expected_workstream_id=binding.workstream_id,
+            )
+            if isinstance(binding, CanonicalWorkstreamBinding)
+            else None
+        )
+        deployed_short = str((deployed or {}).get("main_short") or "")
+        if deployed_short and deployed_short == checkpoint_short:
+            runtime_note = (
+                f"Běžící Cockpit je serverově ověřený na stejném commitu "
+                f"`{checkpoint_short}`."
+            )
+        elif deployed_short:
+            runtime_note = (
+                f"Běžící Cockpit používá commit `{deployed_short}`; nový commit "
+                f"`{checkpoint_short}` v něm zatím neběží. Pokud má změna ovlivnit "
+                "Cockpit, proveď v panelu Práce jednou audit nasazení do Cockpitu "
+                "a jednou potvrzené nasazení."
+            )
+        else:
+            runtime_note = (
+                "Běžící verzi Cockpitu nelze serverově potvrdit; tento Git checkpoint "
+                "sám nasazení do Cockpitu nedokládá."
+            )
         note = (
-            f"Automatické dokončení: testy prošly, commit "
-            f"`{str(checkpoint.get('checkpoint_short') or '')}` je na main a pushnutý. "
-            f"{alignment_note}"
+            f"Git dokončen: testy prošly, commit `{checkpoint_short}` je začleněný "
+            f"do main a pushnutý na GitHub. {alignment_note} {runtime_note}"
         )
         answer = self._completion_answer(parsed.visible_answer, note)
         answer_persisted = self._store_completed_answer(

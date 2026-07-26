@@ -78,6 +78,12 @@ def request(head: str) -> SimpleMainDeploymentRequest:
 
 
 class SimpleMainDeploymentTests(unittest.TestCase):
+    def test_confirmation_names_runtime_target_unambiguously(self) -> None:
+        self.assertEqual(
+            SIMPLE_MAIN_DEPLOYMENT_CONFIRMATION,
+            "POTVRZUJI NASAZENI AKTUALNIHO MAIN DO COCKPITU",
+        )
+
     def test_simple_main_uses_shared_gate_without_legacy_deploy_import(self) -> None:
         project_root = Path(__file__).resolve().parents[1]
         for relative_path in (

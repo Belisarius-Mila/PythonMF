@@ -1146,7 +1146,9 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                     "ready": True,
                     "main_head": "a" * 40,
                     "main_short": "a" * 12,
-                    "confirmation_text": "POTVRZUJI NASAZENI CISTEHO MAIN",
+                    "confirmation_text": (
+                        "POTVRZUJI NASAZENI AKTUALNIHO MAIN DO COCKPITU"
+                    ),
                 },
             ) as audit:
                 result = manager.audit_simple_main_deployment()
@@ -3012,7 +3014,14 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                     "checkpoint_short": "c" * 12,
                     "all_workspaces_aligned": True,
                 },
-            ) as checkpoint:
+            ) as checkpoint, patch(
+                "app.communication.human_adam_profiles.load_completed_simple_main_deployment",
+                return_value={
+                    "state": "deployed",
+                    "workstream_id": "layer-human-adam-development",
+                    "main_short": "d" * 12,
+                },
+            ):
                 result = manager.send(
                     text="Dokonči fázi 1.5",
                     client_message_id="completion-001",
@@ -3035,6 +3044,17 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(result["automatic_completion"]["state"], "completed")
         self.assertNotIn("HUMAN_ADAM_STEP_COMPLETION", result["entry"]["answer"])
         self.assertIn("testy prošly", result["entry"]["answer"])
+        self.assertIn("Git dokončen", result["entry"]["answer"])
+        self.assertIn("začleněný do main a pushnutý na GitHub", result["entry"]["answer"])
+        self.assertIn(
+            f"Běžící Cockpit používá commit `{'d' * 12}`",
+            result["entry"]["answer"],
+        )
+        self.assertIn(
+            f"nový commit `{'c' * 12}` v něm zatím neběží",
+            result["entry"]["answer"],
+        )
+        self.assertIn("jednou audit nasazení do Cockpitu", result["entry"]["answer"])
         self.assertEqual(human_hub.replaced_answers[-1][0], "completion-001")
 
     def test_dirty_writable_turn_without_receipt_stays_visible_and_uncommitted(self) -> None:

@@ -89,9 +89,9 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("/api/human-adam/deploy-audit", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/deploy", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/transcribe", HUMAN_ADAM_HTML)
-        self.assertIn("Audit nasazení", HUMAN_ADAM_HTML)
-        self.assertIn("Ověřit a nasadit", HUMAN_ADAM_HTML)
-        self.assertIn("Nasazeno a ověřeno", HUMAN_ADAM_HTML)
+        self.assertIn("Audit nasazení do Cockpitu", HUMAN_ADAM_HTML)
+        self.assertIn("Nasadit aktuální main do Cockpitu", HUMAN_ADAM_HTML)
+        self.assertIn("Běžící Cockpit ověřen", HUMAN_ADAM_HTML)
         self.assertIn('id="deployConfirmation"', HUMAN_ADAM_HTML)
         self.assertIn('autocomplete="off"', HUMAN_ADAM_HTML)
         self.assertIn('autocorrect="off"', HUMAN_ADAM_HTML)
@@ -650,8 +650,15 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("cizím WIP, divergenci nebo neshodě markeru", panel_source)
         self.assertIn("Nasazení", panel_source)
         self.assertIn("Nasazovací tlačítka se zobrazí jen u pracovního proudu", panel_source)
-        self.assertIn("Audit nasazení", panel_source)
-        self.assertIn("Nasazeno a ověřeno", panel_source)
+        self.assertIn("Audit nasazení do Cockpitu", panel_source)
+        self.assertIn("Běžící Cockpit ověřen", panel_source)
+        self.assertIn(
+            "Automatické dokončení vývoje dokončí Git, nikoli běžící Cockpit.",
+            panel_source,
+        )
+        self.assertIn("právě jednou následující dva kroky", panel_source)
+        self.assertIn("Git/main", panel_source)
+        self.assertIn("Nasazení nespouštěj současně", panel_source)
         self.assertIn("reset, rebase ani force push", panel_source)
         self.assertIn("Toto je pouze nápověda", panel_source)
         self.assertNotIn("#workHelpPanel > :not(.workflow-help-head):not(.simple-work-help)", HUMAN_ADAM_HTML)
@@ -843,7 +850,15 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("payload.last_simple_main_deployment", HUMAN_ADAM_HTML)
         self.assertIn("verifiedDeploymentRecord(", HUMAN_ADAM_HTML)
         self.assertIn(
-            "`Nasazeno ${deployment.main_short} · ${deployment.test_count} testů · smoke ${deployment.smoke_count}/5 · ${formatTime(deployment.deployed_at)}`",
+            "`Git/main ${mainShort} · běžící Cockpit ${deployment.main_short} · nový commit čeká na nasazení do Cockpitu`",
+            HUMAN_ADAM_HTML,
+        )
+        self.assertIn(
+            "`Git/main i běžící Cockpit ${mainShort} · ${deployment.test_count} testů · smoke ${deployment.smoke_count}/5 · ${formatTime(deployment.deployed_at)}`",
+            HUMAN_ADAM_HTML,
+        )
+        self.assertIn(
+            'deploymentReceipt.classList.toggle("stale", Boolean(deployment && !deploymentCurrent));',
             HUMAN_ADAM_HTML,
         )
         self.assertIn("deploymentReceipt.hidden = !deployment;", HUMAN_ADAM_HTML)
@@ -863,6 +878,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertLess(header_end, notice)
         self.assertIn("header { position:sticky;", HUMAN_ADAM_HTML)
         self.assertIn("#deploymentReceipt { margin:8px 0 0; padding:6px 10px;", HUMAN_ADAM_HTML)
+        self.assertIn("#deploymentReceipt.stale { color:var(--warn);", HUMAN_ADAM_HTML)
 
     def test_ui_has_no_legacy_deployment_diagnostic_surface(self) -> None:
         self.assertNotIn('id="deploymentDiagnostic"', HUMAN_ADAM_HTML)

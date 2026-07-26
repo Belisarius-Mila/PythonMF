@@ -42,6 +42,17 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-26 23:29 CEST: Priorita 1, Human–Adam / jednoznačné rozlišení Gitu
+  a běžícího Cockpitu. Automatická účtenka už neoznačuje commit/push jako celé
+  nasazení: samostatně uvede nový `Git/main` a serverově ověřený commit
+  načtený v Cockpitu. Stavový banner při rozdílu oranžově hlásí čekající
+  nasazení, při shodě je zelený. Nápověda i tlačítka výslovně popisují jeden
+  audit a jedno potvrzené nasazení do Cockpitu pro každý nový runtime commit;
+  souběh Cockpitu a terminálového Adama zakazují. Potvrzovací věta nově jmenuje
+  cíl `aktuální main do Cockpitu`; backendová brána, řízený restart a smoke se
+  nemění. Cílených 171 a úplných 1278 testů prošlo. Zbývá commit/push a
+  přechodové nasazení větou z právě běžící starší UI; potom platí nový text.
+  Handoff: `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-26 20:36 CEST: Priorita 1, Human–Adam / obnova vlastněného WIP bez
   dokončovací účtenky. Před každým zapisovacím tahem nyní vznikne soukromý
   provizorní ownership marker svázaný s pracovním proudem, klientem, výchozím
