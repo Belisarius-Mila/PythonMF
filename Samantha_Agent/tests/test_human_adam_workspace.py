@@ -7,7 +7,10 @@ from pathlib import Path
 from unittest.mock import patch
 
 from app.codex_appserver import AppServerError
-from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
+from app.communication.human_adam_workspace import (
+    HumanAdamWorkspaceManager,
+    _status_rows,
+)
 
 
 def git(cwd: Path, *args: str) -> str:
@@ -44,6 +47,83 @@ def make_source(root: Path) -> Path:
 
 
 class HumanAdamWorkspaceManagerTests(unittest.TestCase):
+    def test_background_status_does_not_refresh_git_index(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            index_path = source / ".git" / "index"
+            tracked = source / "Samantha_Agent" / "tracked.py"
+            before_bytes = index_path.read_bytes()
+            before_mtime_ns = index_path.stat().st_mtime_ns
+            tracked.touch()
+
+            rows = _status_rows(source)
+
+            self.assertEqual(
+                rows,
+                [{"status": "??", "path": "AuditCockpit56_M.txt"}],
+            )
+            self.assertEqual(index_path.read_bytes(), before_bytes)
+            self.assertEqual(index_path.stat().st_mtime_ns, before_mtime_ns)
+
+    def test_interrupted_index_is_blocked_without_mass_deletion_wip(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            manager = HumanAdamWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            manager.prepare()
+            index_path = manager.workspace_root / ".git" / "index"
+            lock_path = manager.workspace_root / ".git" / "index.lock"
+            expected_index = index_path.read_bytes()
+            index_path.rename(lock_path)
+
+            status = manager.status()
+
+            self.assertFalse(status["ok"])
+            self.assertTrue(status["prepared"])
+            self.assertFalse(status["dirty"])
+            self.assertEqual(status["changes"], [])
+            self.assertEqual(status["change_count"], 0)
+            self.assertEqual(status["workspace_relation"], "git_index_interrupted")
+            self.assertEqual(status["git_index_state"], "interrupted")
+            self.assertTrue(status["git_index_recovery_candidate"])
+            self.assertFalse(status["sync_allowed"])
+            self.assertEqual(lock_path.read_bytes(), expected_index)
+            self.assertFalse(index_path.exists())
+
+            with self.assertRaises(AppServerError):
+                manager.sync_from_main(confirmed=True)
+            with self.assertRaises(AppServerError):
+                manager.checkpoint(confirmed=True)
+            with self.assertRaises(AppServerError):
+                manager.review()
+
+    def test_missing_index_without_lock_is_blocked_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            manager = HumanAdamWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            manager.prepare()
+            index_path = manager.workspace_root / ".git" / "index"
+            index_path.unlink()
+
+            status = manager.status()
+
+            self.assertFalse(status["ok"])
+            self.assertFalse(status["dirty"])
+            self.assertEqual(status["changes"], [])
+            self.assertEqual(status["workspace_relation"], "git_index_missing")
+            self.assertEqual(status["git_index_state"], "missing")
+            self.assertFalse(status["git_index_recovery_candidate"])
+
     def test_prepare_creates_independent_main_clone_without_private_untracked_or_remote(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

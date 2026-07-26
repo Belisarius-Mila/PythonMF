@@ -42,6 +42,15 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-26 17:52 CEST: Priorita 1, Human–Adam / opakovaný Git index lock.
+  Tři shodné incidenty potvrdily, že automatický read-only `git status`
+  zbytečně obnovoval Git index a po přerušené transakci mohl zanechat pouze
+  plný `index.lock`. Fáze 1–3 zakazují volitelné Git zámky při statusu,
+  klasifikují chybějící index jako samostatný fail-closed stav a regresními
+  testy dokazují nulový zápis indexu. Plná brána prošla 1267 testy. Oprava
+  čeká na commit/push; současný recovery kandidát se smí obnovit až po přesné
+  globální brzdě a potom lze společně nasadit i hotfix Důležitých připomenutí.
+  Handoff: `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-26 16:37 CEST: Priorita 1, Cockpit hlavni architektura / dieta.
   Kanonicky handoff i hlavni TXT roadmapa byly obnoveny podle aktualniho
   mereni. `app/cockpit.py` ma 20 745 fyzickych a 19 620 neprazdnych radku;

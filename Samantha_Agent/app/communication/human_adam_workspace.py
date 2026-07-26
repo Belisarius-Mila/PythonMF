@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import threading
@@ -85,13 +86,19 @@ def _run_git(
     args: list[str],
     *,
     timeout: float = 60.0,
+    optional_locks: bool = True,
 ) -> subprocess.CompletedProcess[str]:
+    env = None
+    if not optional_locks:
+        env = os.environ.copy()
+        env["GIT_OPTIONAL_LOCKS"] = "0"
     return subprocess.run(
         ["/usr/bin/git", "-C", str(cwd), *args],
         capture_output=True,
         text=True,
         timeout=timeout,
         check=False,
+        env=env,
     )
 
 
@@ -114,7 +121,11 @@ def _is_ancestor(repo: Path, ancestor: str, descendant: str) -> bool:
 
 
 def _status_rows(repo: Path) -> list[dict[str, str]]:
-    completed = _run_git(repo, ["status", "--porcelain=v1", "--untracked-files=all"])
+    completed = _run_git(
+        repo,
+        ["status", "--porcelain=v1", "--untracked-files=all"],
+        optional_locks=False,
+    )
     if completed.returncode != 0:
         detail = (completed.stderr or completed.stdout).strip()
         raise AppServerError(detail or "Git status izolovaného Human–Adam workspace selhal.")
@@ -186,6 +197,68 @@ class HumanAdamWorkspaceManager:
             and (self.project_root / "memory" / "MEMORY_INDEX.md").is_file()
         )
 
+    def _workspace_index_state(self) -> str:
+        git_dir = self.workspace_root / ".git"
+        if (git_dir / "index").is_file():
+            return "ready"
+        if (git_dir / "index.lock").is_file():
+            return "interrupted"
+        return "missing"
+
+    def _blocked_index_status(
+        self,
+        *,
+        index_state: str,
+        source_head: str,
+        source_branch: str,
+        source_pending: int,
+    ) -> dict[str, Any]:
+        head = _git_output(self.workspace_root, ["rev-parse", "HEAD"])
+        branch = _git_output(self.workspace_root, ["branch", "--show-current"])
+        remotes = [
+            item
+            for item in _git_output(self.workspace_root, ["remote"]).splitlines()
+            if item
+        ]
+        interrupted = index_state == "interrupted"
+        relation = "git_index_interrupted" if interrupted else "git_index_missing"
+        message = (
+            "Git index izolovaného workspace má nedokončenou transakci. "
+            "Soubory nejsou vyhodnocené jako pracovní změny; synchronizace, "
+            "checkpoint i nasazení zůstávají zablokované."
+            if interrupted
+            else (
+                "Git index izolovaného workspace chybí bez bezpečného kandidáta "
+                "obnovy. Synchronizace, checkpoint i nasazení zůstávají zablokované."
+            )
+        )
+        return {
+            "ok": False,
+            "prepared": True,
+            "workspace_label": "Human–Adam – izolovaná lokální kopie",
+            "source_branch": source_branch,
+            "source_head": source_head,
+            "source_pending_changes": source_pending,
+            "branch": branch,
+            "head": head,
+            "base_head": self._metadata_base_head(),
+            "workspace_relation": relation,
+            "git_index_state": index_state,
+            "git_index_recovery_candidate": interrupted,
+            "local_checkpoint_ahead": False,
+            "local_checkpoint_preserved": False,
+            "local_commit_count": 0,
+            "source_update_available": False,
+            "sync_available": False,
+            "sync_allowed": False,
+            "dirty": False,
+            "changes": [],
+            "change_count": 0,
+            "remotes": remotes,
+            "project_ready": self.project_root.is_dir(),
+            "message": message,
+        }
+
     def status(self) -> dict[str, Any]:
         with self._lock:
             source_head = _git_output(self.source_repo, ["rev-parse", "HEAD"])
@@ -216,6 +289,14 @@ class HumanAdamWorkspaceManager:
                     "remotes": [],
                     "message": "Cílová složka existuje, ale není platným Human–Adam workspace; nic nepřepisuji.",
                 }
+            index_state = self._workspace_index_state()
+            if index_state != "ready":
+                return self._blocked_index_status(
+                    index_state=index_state,
+                    source_head=source_head,
+                    source_branch=source_branch,
+                    source_pending=source_pending,
+                )
             changes = _status_rows(self.workspace_root)
             head = _git_output(self.workspace_root, ["rev-parse", "HEAD"])
             branch = _git_output(self.workspace_root, ["branch", "--show-current"])
@@ -278,6 +359,8 @@ class HumanAdamWorkspaceManager:
                 "head": head,
                 "base_head": base_head,
                 "workspace_relation": relation,
+                "git_index_state": "ready",
+                "git_index_recovery_candidate": False,
                 "local_checkpoint_ahead": local_checkpoint_ahead,
                 "local_checkpoint_preserved": local_checkpoint_preserved,
                 "local_commit_count": local_commit_count,
