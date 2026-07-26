@@ -9528,30 +9528,6 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "ui_presence",
     },
     {
-        "path": "/api/speech/transcribe",
-        "label": "Prepis a doruceni hlasoveho pokynu",
-        "risk": "voice_local_outbound",
-        "confirmation": "terminal_bridge_triage",
-        "handler_name": "cockpit_transcribe_voice_action",
-        "test_level": "voice_tests",
-    },
-    {
-        "path": "/api/speech/voice-text",
-        "label": "Doruceni textoveho hlasoveho pokynu",
-        "risk": "voice_local_outbound",
-        "confirmation": "terminal_bridge_triage",
-        "handler_name": "cockpit_save_voice_text_action",
-        "test_level": "voice_tests",
-    },
-    {
-        "path": "/api/voice-bridge/frontend-event",
-        "label": "Technicky voice frontend event",
-        "risk": "private_write",
-        "confirmation": "technical_event_no_content",
-        "handler_name": "cockpit_voice_frontend_event_action",
-        "test_level": "direct",
-    },
-    {
         "path": "/api/human-adam/transcribe",
         "label": "Prepsat hlas do editovatelneho Human-Adam konceptu",
         "risk": "external_ai",
@@ -9720,43 +9696,11 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "ui_presence",
     },
     {
-        "path": "/api/voice-mode/start",
-        "label": "Spustit voice watcher",
-        "risk": "local_service",
-        "confirmation": "fixed_workflow",
-        "handler_name": "start_adam_voice_mode_action",
-        "test_level": "ui_presence",
-    },
-    {
-        "path": "/api/voice-mode/stop",
-        "label": "Zastavit voice watcher",
-        "risk": "local_service",
-        "confirmation": "pid_exists",
-        "handler_name": "stop_adam_voice_mode_action",
-        "test_level": "ui_presence",
-    },
-    {
-        "path": "/api/voice-mode/approval",
-        "label": "Schvalit hlasovy pokyn",
-        "risk": "private_write",
-        "confirmation": "approval_decision_payload",
-        "handler_name": "cockpit_voice_approval_action",
-        "test_level": "voice_tests",
-    },
-    {
         "path": "/api/codex-approval/clear",
         "label": "Vycistit Codex approval kartu",
         "risk": "private_write",
         "confirmation": "ui_confirm_boolean",
         "handler_name": "cockpit_codex_approval_clear_action",
-        "test_level": "direct",
-    },
-    {
-        "path": "/api/voice-mode/safe-readonly/run",
-        "label": "Spustit read-only kontrolu",
-        "risk": "read_only_via_post",
-        "confirmation": "allowlist_only",
-        "handler_name": "cockpit_safe_readonly_run_action",
         "test_level": "direct",
     },
     {
@@ -9773,22 +9717,6 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "risk": "local_open",
         "confirmation": "allowlist_only",
         "handler_name": "open_desktop_app_action",
-        "test_level": "direct",
-    },
-    {
-        "path": "/api/voice-bridge/marker",
-        "label": "Nastavit voice bridge marker",
-        "risk": "private_write",
-        "confirmation": "active_tty_validation",
-        "handler_name": "set_adam_voice_bridge_marker_action",
-        "test_level": "direct",
-    },
-    {
-        "path": "/api/voice-bridge/terminate-stale",
-        "label": "Ukoncit stare Codex relace",
-        "risk": "local_service",
-        "confirmation": "preview_then_ui_confirm",
-        "handler_name": "terminate_stale_codex_sessions_action",
         "test_level": "direct",
     },
     {
@@ -10524,12 +10452,6 @@ class CockpitServer:
                     case_ref = params.get("case_ref", [""])[0]
                     self.respond_json(document_case_detail_status(case_ref=case_ref))
                     return
-                if parsed.path == "/api/voice-mode/latest-response":
-                    self.respond_json(cockpit_voice_latest_response_action())
-                    return
-                if parsed.path == "/api/voice-mode/safe-readonly":
-                    self.respond_json(cockpit_safe_readonly_capabilities_action())
-                    return
                 if parsed.path == "/api/dev-runner/actions":
                     self.respond_json(cockpit_dev_runner_actions())
                     return
@@ -10554,18 +10476,6 @@ class CockpitServer:
                 if parsed.path == "/api/speech/edge-tts":
                     payload = self.read_json()
                     self.respond_json(cockpit_edge_tts_action(text=str(payload.get("text", ""))))
-                    return
-                if parsed.path == "/api/speech/transcribe":
-                    payload = self.read_json()
-                    self.respond_json(cockpit_transcribe_voice_action(payload, frozen=VOICE_BRIDGE_FROZEN))
-                    return
-                if parsed.path == "/api/speech/voice-text":
-                    payload = self.read_json()
-                    self.respond_json(cockpit_save_voice_text_action(payload, frozen=VOICE_BRIDGE_FROZEN))
-                    return
-                if parsed.path == "/api/voice-bridge/frontend-event":
-                    payload = self.read_json()
-                    self.respond_json(cockpit_voice_frontend_event_action(payload))
                     return
                 if parsed.path == "/api/human-adam/transcribe":
                     payload = self.read_json()
@@ -10669,23 +10579,9 @@ class CockpitServer:
                     payload = self.read_json()
                     self.respond_json(terminate_orphaned_janicka_sessions_action(payload))
                     return
-                if parsed.path == "/api/voice-mode/start":
-                    self.respond_json(voice_bridge_frozen_result() if VOICE_BRIDGE_FROZEN else start_adam_voice_mode_action())
-                    return
-                if parsed.path == "/api/voice-mode/stop":
-                    self.respond_json(stop_adam_voice_mode_action())
-                    return
-                if parsed.path == "/api/voice-mode/approval":
-                    payload = self.read_json()
-                    self.respond_json(cockpit_voice_approval_action(payload))
-                    return
                 if parsed.path == "/api/codex-approval/clear":
                     payload = self.read_json()
                     self.respond_json(cockpit_codex_approval_clear_action(payload))
-                    return
-                if parsed.path == "/api/voice-mode/safe-readonly/run":
-                    payload = self.read_json()
-                    self.respond_json(cockpit_safe_readonly_run_action(payload))
                     return
                 if parsed.path == "/api/dev-runner/run":
                     payload = self.read_json()
@@ -10694,14 +10590,6 @@ class CockpitServer:
                 if parsed.path == "/api/desktop-apps/open":
                     payload = self.read_json()
                     self.respond_json(open_desktop_app_action(payload))
-                    return
-                if parsed.path == "/api/voice-bridge/marker":
-                    payload = self.read_json()
-                    self.respond_json(set_adam_voice_bridge_marker_action(str(payload.get("tty", ""))))
-                    return
-                if parsed.path == "/api/voice-bridge/terminate-stale":
-                    payload = self.read_json()
-                    self.respond_json(terminate_stale_codex_sessions_action(payload))
                     return
                 if parsed.path == "/api/cockpit/restart":
                     payload = self.read_json()

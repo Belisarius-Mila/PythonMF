@@ -79,7 +79,7 @@ class CockpitHttpSecurityTests(unittest.TestCase):
                 host,
                 port,
                 "POST",
-                "/api/speech/voice-text",
+                "/api/speech/speak",
                 body="{",
                 headers={
                     "Content-Type": "application/json",
@@ -97,7 +97,7 @@ class CockpitHttpSecurityTests(unittest.TestCase):
                 host,
                 port,
                 "POST",
-                "/api/speech/voice-text",
+                "/api/speech/speak",
                 body="{}",
                 headers={
                     "Content-Type": "text/plain",
@@ -112,7 +112,7 @@ class CockpitHttpSecurityTests(unittest.TestCase):
         with running_cockpit_server() as (host, port, _logger):
             connection = http.client.HTTPConnection(host, port, timeout=5.0)
             try:
-                connection.putrequest("POST", "/api/speech/voice-text", skip_host=True)
+                connection.putrequest("POST", "/api/speech/speak", skip_host=True)
                 connection.putheader("Host", f"{host}:{port}")
                 connection.putheader("Origin", f"http://{host}:{port}")
                 connection.putheader("Content-Type", "application/json")

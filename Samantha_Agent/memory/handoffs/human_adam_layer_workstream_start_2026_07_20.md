@@ -1,47 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-26 17:52 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-26 19:44 CEST
 
 ### Hotovo
-- Opakovaný incident osiřelého Git indexu byl potvrzen třemi shodnými případy.
-- Automatický `git status` izolovaných workspace už nepoužívá volitelné zámky
-  a nezapisuje index jako vedlejší efekt.
-- Chybějící index s recovery kandidátem se klasifikuje jako
-  `git_index_interrupted`, nikoli jako tisíce uživatelských smazání.
-- Chybějící index bez kandidáta zůstává samostatně fail-closed zablokovaný.
+- Nepoužívané veřejné legacy Voice Bridge a Voice Mode endpointy byly odstraněny; obecné TTS, Human–Adam mikrofon, Codex approval a TVBCP zůstávají zachované.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
-- Oprava locku a dříve pushnutý hotfix Důležitých připomenutí ještě nejsou
-  nasazené.
-- Současný Human–Adam workspace má zachovaný čistý recovery kandidát; jeho
-  obnova čeká na přesnou globální brzdu.
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 
 ### Rizika
-- Běžící Cockpit stále používá starší kód a do potvrzené obnovy zůstává
-  Human–Adam workspace provozně zablokovaný.
-- Recovery nesmí být automatická ani odvozena pouze z názvu locku.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Commitnout a pushnout tento checkpoint, po přesné globální brzdě ověřit a
-  obnovit index a potom společně nasadit opravu locku i připomenutí.
+- Samostatně potvrzeně nasadit čistý main a živě ověřit obecné TTS, Human–Adam mikrofon, TVBCP, Codex approval a nedostupnost odstraněných cest.
 
 ### Rozhodnutí
-- Read-only provozní status nesmí zapisovat Git index.
-- Přerušená indexová transakce není pracovní WIP a všechny zapisovací brány
-  musí zůstat fail-closed.
+- Odstraňujeme pouze veřejné nepoužívané legacy routy; private stav a interní moduly zatím zachováváme.
 
 ### Navrhované další kroky
-- Po nasazení sledovat několik synchronizací a jednu plnou deployment bránu,
-  zda se nový osiřelý lock neobjeví.
-- Samoobslužnou recovery bránu vyvíjet až jako samostatně potvrzovaný krok.
+- Doplnit provizorní ownership marker zapisovacího tahu a bezpečnou recovery cestu pro chybějící dokončovací účtenku.
+- Až po živém ověření auditovat nepoužívané interní Voice Bridge moduly.
 
 ### Technický stav checkpointu
-- Změna je otestovaná plnou Cockpit Quality Gate: 1267 testů.
-- Navazující profilová a nasazovací sada prošla 183 testy.
-- Git před checkpointem: `main == origin/main` na `daac52bddc5b`.
-- Živý read-only důkaz vrátil `git_index_interrupted`, `dirty=false`,
-  `change_count=0` a zachoval recovery kandidát byte-for-byte i časově.
+- Změna je otestovaná (1268 testů).
+- Git před checkpointem: `main == origin/main` na `8a7957e32a95`.
+- Poslední serverově potvrzené nasazení: `8a7957e32a95` · odpovídá ověřenému main před tímto checkpointem · 1267 testů · smoke 5/5 · 2026-07-26T16:13:57+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -2156,3 +2142,15 @@ Technický důkaz:
 - Navazující profilová a nasazovací sada: 183 testů.
 - Plná Cockpit Quality Gate: 1267 testů.
 - Živá read-only kontrola nezměnila obsah ani časy recovery kandidáta.
+
+### Automatický checkpoint 2026-07-26 19:44 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Nepoužívané veřejné legacy Voice Bridge a Voice Mode endpointy byly odstraněny; obecné TTS, Human–Adam mikrofon, Codex approval a TVBCP zůstávají zachované.; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: plná Cockpit brána: 1268 testů, 352.9 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (3): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/tests/test_cockpit_http_security.py`, `Samantha_Agent/tests/test_cockpit_voice_frontend_retirement.py`
+- Commit: `Retire unused legacy voice endpoints`
+- Další krok: Samostatně potvrzeně nasadit čistý main a živě ověřit obecné TTS, Human–Adam mikrofon, TVBCP, Codex approval a nedostupnost odstraněných cest.
