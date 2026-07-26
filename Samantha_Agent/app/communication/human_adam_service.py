@@ -69,6 +69,11 @@ def _safe_git_head(value: object) -> str:
     return candidate.lower() if SAFE_GIT_HEAD_RE.fullmatch(candidate) else "unknown"
 
 
+def _safe_git_head_short(value: object) -> str:
+    candidate = _safe_git_head(value)
+    return candidate[:12] if candidate != "unknown" and len(candidate) >= 12 else ""
+
+
 def _safe_snapshot_count(value: object) -> int:
     try:
         count = int(value or 0)
@@ -221,6 +226,9 @@ class HumanAdamService:
                     "ready": bool(workspace.get("project_ready")),
                     "dirty": bool(workspace.get("dirty")),
                     "change_count": int(workspace.get("change_count") or 0),
+                    "source_head_short": _safe_git_head_short(
+                        workspace.get("source_head")
+                    ),
                     "sync_available": bool(workspace.get("source_update_available")),
                     "workspace_relation": str(workspace.get("workspace_relation") or "unknown"),
                     "local_checkpoint_ahead": bool(workspace.get("local_checkpoint_ahead")),

@@ -235,6 +235,18 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertFalse(status["workspace"]["local_checkpoint_ahead"])
         self.assertEqual(status["workspace"]["local_commit_count"], 1)
 
+    def test_status_exposes_only_safe_short_source_head(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            service, _runtime, workspace, _hub = self.make_service(Path(temp_dir))
+
+            status = service.status()
+            workspace.source_head = "not-a-git-head"
+            invalid_status = service.status()
+
+        self.assertEqual(status["workspace"]["source_head_short"], "a" * 12)
+        self.assertNotIn("source_head", status["workspace"])
+        self.assertEqual(invalid_status["workspace"]["source_head_short"], "")
+
     def test_developer_instructions_require_timestamped_tvbcp_append(self) -> None:
         self.assertIn("na konec souboru", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
         self.assertIn("YYYY-MM-DD HH:MM TZ", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)

@@ -1084,8 +1084,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         ? payload.last_simple_main_deployment
         : null
     );
-    const sourceHead = String(workspace.source_head || "").trim().toLowerCase();
-    const mainShort = /^[0-9a-f]{40}$/.test(sourceHead) ? sourceHead.slice(0,12) : "";
+    const sourceHeadShort = String(workspace.source_head_short || "").trim().toLowerCase();
+    const mainShort = /^[0-9a-f]{12}$/.test(sourceHeadShort) ? sourceHeadShort : "";
     const deploymentCurrent = Boolean(
       deployment && mainShort && deployment.main_short === mainShort
     );

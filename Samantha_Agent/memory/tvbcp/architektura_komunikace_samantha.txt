@@ -1,38 +1,46 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-27 00:54 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-27 01:21 CEST
 
 ### Hotovo
-- Pozdní serverová receipt prokázala, že nasazení `3df4410` uspělo navzdory browserovému timeoutu.
-- Klient čeká na nový Cockpit až 120 sekund a přechodnou chybu ověřovacího endpointu nepovažuje za konečný neúspěch.
-- Před závěrečným varováním read-only ověří serverovou receipt svázanou s přesným auditovaným commitem.
-- Předchozí `main` (`3df4410`) byl před tímto checkpointem serverově nasazený a ověřený.
+- Předchozí `main` (`28885b957d34`) je zarovnaný s GitHubem, serverově nasazený
+  a Human–Adam je připojený.
+- Redigovaný status nově vydává pouze bezpečný 12znakový `source_head_short`;
+  celý Git hash ani private metadata nezveřejňuje.
+- Stavový banner porovnává tento bezpečný otisk s deployment receipt a při shodě
+  jednoznačně potvrdí společný commit `Git/main` a běžícího Cockpitu.
+- Neplatný nebo chybějící otisk zůstává fail-closed a nesmí být vydáván za shodu.
 
 ### Otevřeno
-- Nový checkpoint ještě nemá vlastní serverový důkaz nasazení.
-- Zbývá jeden živý restartovací test, který ověří pozdní úspěch nebo bezpečný neznámý výsledek bez falešného fallbacku.
+- Tento nový checkpoint ještě nemá vlastní serverový důkaz nasazení.
+- Zbývá jediné potvrzené nasazení a vizuální kontrola, že banner po restartu
+  ukazuje shodu a už nehlásí `aktuální Git/main nelze ověřit`.
 
 ### Rizika
-- Ani delší klientský limit nedokazuje úspěch sám o sobě; autoritativní zůstává serverová receipt přesného commitu.
-- Pokud server skutečně neodpovídá a receipt nelze načíst, UI správně ponechá výsledek jako nepotvrzený a zakáže slepé opakování.
+- Zkrácený otisk slouží pouze k provoznímu porovnání; autoritativní důkaz
+  nasazení nadále drží serverová receipt.
+- Chybějící nebo neplatný otisk záměrně ponechá stav jako neověřený.
 
 ### Další krok
-- Provést read-only audit nového `main`, jednou jej potvrzeně nasadit do Cockpitu a ověřit návrat stránky bez falešného terminálového fallbacku.
+- Provést read-only audit nového `main`, jednou jej potvrzeně nasadit do
+  Cockpitu a vizuálně ověřit zelený banner se společným krátkým commitem.
 
 ### Rozhodnutí
-- Browserový timeout není důkaz selhání nasazení.
-- Klient musí před fallbackem ověřit serverovou receipt přesného auditovaného commitu; terminálový fallback patří jen ke skutečně nedostupnému serveru.
+- Veřejný status nebude kvůli banneru rozšiřován o celý Git hash.
+- Jediným novým kontraktem je allowlistovaný 12znakový otisk; při neplatném
+  formátu musí porovnání selhat uzavřeně.
 
 ### Navrhované další kroky
-- Po živém ověření se vrátit k fázi 9.3e oddělení ochrany relací Janičky a diagnostických skriptů od Voice Bridge markeru.
+- Po živém ověření se vrátit k fázi 9.3e oddělení ochrany relací Janičky a
+  diagnostických skriptů od Voice Bridge markeru.
 - Samostatné Voice Bridge moduly a private stav řešit až v pozdější auditované fázi 9.4.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (294 cílených a 1251 úplných testů).
+- Změna je otestovaná (83 úzkých, 338 širších a 1252 úplných testů).
 - Python, oba JavaScripty, shell, whitespace a Git safety kontroly prošly.
-- Git před checkpointem: `main == origin/main` na `3df44105a642`.
-- Poslední serverově potvrzené nasazení: `3df44105a642` · 1250 testů · smoke 5/5.
+- Git před checkpointem: `main == origin/main` na `28885b957d34`.
+- Poslední serverově potvrzené nasazení: `28885b957d34` · 1251 testů · smoke 5/5.
 - Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -3301,3 +3309,31 @@ Další krok:
 Technický důkaz:
 - Cílených 294 a úplných 1251 testů prošlo.
 - Plná brána doběhla za 321,9 s; syntaxe i Git safety jsou zelené.
+
+### 2026-07-27 01:21 CEST – Banner bezpečně ověří aktuální Git/main
+
+Hotovo:
+- Redigovaný status poskytuje allowlistovaný 12znakový `source_head_short`,
+  nikoli celý Git hash.
+- Human–Adam porovná tento otisk s deployment receipt a při shodě zobrazí
+  společný commit `Git/main` a běžícího Cockpitu.
+- Neplatný nebo chybějící otisk zůstane jako neověřený stav.
+
+Rozhodnutí:
+- Oprava nerozšiřuje veřejný status o plný Git hash ani private metadata.
+- Serverová deployment receipt zůstává autoritativním důkazem nasazení.
+
+Další krok:
+- Jednou potvrzeně nasadit nový čistý `main` do Cockpitu a vizuálně ověřit
+  zelený banner se společným krátkým commitem.
+
+Navrhované další kroky:
+- Po živém ověření se vrátit k fázi 9.3e oddělení ochrany relací Janičky a
+  diagnostických skriptů od Voice Bridge markeru.
+- Samostatné Voice Bridge moduly a private stav řešit až v pozdější auditované
+  fázi 9.4.
+
+Technický důkaz:
+- Cílených 83, širších 338 a úplných 1252 testů prošlo.
+- Plná Cockpit Quality Gate doběhla za 326,1 s; syntaxe, JavaScript, shell,
+  whitespace a Git safety jsou zelené.

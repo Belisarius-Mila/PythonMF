@@ -42,6 +42,16 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-27 01:21 CEST: Priorita 1, Human–Adam / přesné ověření shody
+  `Git/main` a běžícího Cockpitu. Dosavadní checkpoint `28885b957d34` je
+  zarovnaný s GitHubem, serverově nasazený a Human–Adam je připojený. Zavádějící
+  hláška `aktuální Git/main nelze ověřit` vznikala proto, že redigovaný status
+  celé `source_head` správně nevydával, ale UI ji přesto očekávalo. Status nyní
+  poskytuje pouze allowlistovaný 12znakový `source_head_short`; UI jej porovná
+  s deployment receipt a neplatnou hodnotu ponechá fail-closed. Cílených 83,
+  širších 338 a úplných 1252 testů prošlo. Zbývá commit/push, jediné potvrzené
+  nasazení do Cockpitu a vizuální kontrola zelené shody. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-27 00:54 CEST: Priorita 1, Human–Adam / falešný timeout po úspěšném
   nasazení. Browser po 60 sekundách tvrdil, že nový Cockpit nepřišel, ale
   serverová receipt následně prokázala `deployed` pro `3df4410`, nový proces,

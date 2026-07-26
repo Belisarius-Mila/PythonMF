@@ -922,6 +922,8 @@ class HumanAdamUiTests(unittest.TestCase):
     def test_ui_renders_persistent_safe_simple_main_deployment(self) -> None:
         self.assertIn("payload.last_simple_main_deployment", HUMAN_ADAM_HTML)
         self.assertIn("verifiedDeploymentRecord(", HUMAN_ADAM_HTML)
+        self.assertIn("workspace.source_head_short", HUMAN_ADAM_HTML)
+        self.assertNotIn("workspace.source_head ||", HUMAN_ADAM_HTML)
         self.assertIn(
             "`Git/main ${mainShort} · běžící Cockpit ${deployment.main_short} · nový commit čeká na nasazení do Cockpitu`",
             HUMAN_ADAM_HTML,
