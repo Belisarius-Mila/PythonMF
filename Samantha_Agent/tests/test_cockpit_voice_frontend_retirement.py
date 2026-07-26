@@ -184,6 +184,56 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
                 self.assertIn(route, post_routes)
         self.assertIn("/api/tvbcp", get_routes)
 
+    def test_orphaned_cockpit_voice_handlers_and_glue_are_retired(self) -> None:
+        source = (PROJECT_ROOT / "app" / "cockpit.py").read_text(encoding="utf-8")
+        retired_markers = (
+            "from app.voice_bridge_coordinator import (",
+            "def terminate_stale_codex_sessions_action(",
+            "def set_adam_voice_bridge_marker_action(",
+            "def start_adam_voice_mode_action(",
+            "def stop_adam_voice_mode_action(",
+            "def cockpit_voice_approval_action(",
+            "SAFE_READONLY_CAPABILITIES",
+            "def cockpit_safe_readonly_capabilities_action(",
+            "def cockpit_safe_readonly_run_action(",
+            "def safe_readonly_codex_sessions_result(",
+            "def safe_readonly_voice_bridge_result(",
+            "def safe_readonly_git_status_result(",
+            "def safe_readonly_backup_status_result(",
+            "def default_safe_readonly_handlers(",
+            "def cockpit_voice_latest_response_action(",
+            "def cockpit_voice_frontend_event_action(",
+            "def deliver_saved_voice_command_inline(",
+            "def deliver_voice_command_via_managed_screen(",
+            "def deliver_voice_command_by_configured_transport(",
+            "def record_voice_transcription_failure(",
+            "def cockpit_transcribe_voice_action(",
+            "def cockpit_save_voice_text_action(",
+            "def voice_bridge_frozen_result(",
+            "VOICE_BRIDGE_FROZEN",
+            "ADAM_VOICE_MODE_SCRIPT",
+            "ADAM_VOICE_MODE_LOG_FILE",
+            "VOICE_COMMAND_INBOX_DIR",
+        )
+        preserved_markers = (
+            "voice_bridge_status as build_voice_bridge_status",
+            "def adam_voice_bridge_status(",
+            "def janicka_orphaned_codex_session_report(",
+            "def terminate_orphaned_janicka_sessions_action(",
+            "def janicka_latest_codex_reply_action(",
+            "def transcribe_audio_base64_isolated(",
+            "def human_adam_transcribe_action(",
+            "def cockpit_speak_action(",
+            "def cockpit_edge_tts_action(",
+        )
+
+        for marker in retired_markers:
+            with self.subTest(retired=marker):
+                self.assertNotIn(marker, source)
+        for marker in preserved_markers:
+            with self.subTest(preserved=marker):
+                self.assertIn(marker, source)
+
 
 if __name__ == "__main__":
     unittest.main()

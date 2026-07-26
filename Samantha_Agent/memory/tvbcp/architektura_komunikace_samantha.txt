@@ -1,38 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-26 23:29 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-27 00:17 CEST
 
 ### Hotovo
-- Automatická dokončovací účtenka výslovně odděluje Git checkpoint od verze načtené v běžícím Cockpitu.
-- Stavový banner porovnává aktuální `Git/main` se serverově ověřeným runtime commitem a rozdíl zobrazuje jako čekající nasazení.
-- Nápověda a tlačítka jednoznačně popisují jeden audit a jedno potvrzené nasazení do Cockpitu pro každý nový runtime commit.
-- Předchozí `main` (`b9a7716`) byl před tímto checkpointem serverově nasazený a ověřený.
+- Cockpit už neobsahuje osiřelé Voice Bridge handlery ani jejich glue kód; Janička, diagnostika, Human–Adam mikrofon a TTS zůstaly zachované
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
-- Nový checkpoint ještě nemá vlastní serverový důkaz nasazení.
-- První přechodové nasazení použije potvrzovací větu z právě běžící starší UI; po restartu platí nová jednoznačná věta.
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 
 ### Rizika
-- Automatické nasazení nebylo přidáno: commit/push a restart běžícího Cockpitu zůstávají záměrně oddělené.
-- Současné spuštění nasazení z Cockpitu a terminálového Adama může vytvořit souběžný požadavek; nápověda jej nyní výslovně zakazuje a backend druhý požadavek odmítne.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Provést read-only audit nového `main`, jednou jej potvrzeně nasadit do Cockpitu větou z běžící UI a ověřit nový stavový banner.
+- Provést checkpoint, push a nasazení a ověřit úplnou testovací bránu i pět smoke kontrol
 
 ### Rozhodnutí
-- `main` je Git větev; používáme termín `začlenit do main`, nikoli `nasadit na main`.
-- Termín `nasadit` je vyhrazen pro načtení aktuálního `main` do běžícího Cockpitu přes plnou bránu, řízený restart a smoke.
+- Po odstranění veřejných rout a statusových polí se z Cockpitu odstraňuje pouze nedostupná legacy implementace, nikoli samostatné moduly ani private stav
 
 ### Navrhované další kroky
-- Po živém ověření zvážit automatické spuštění pouze read-only auditu po checkpointu; samotné nasazení ponechat potvrzované.
-- Potom se vrátit k plánované prioritě podle aktuálního projektu.
+- Po živém ověření pokračovat fází 9.3e oddělením ochrany relací Janičky a diagnostických skriptů od Voice Bridge markeru
+- Samostatné Voice Bridge moduly a private stav řešit až v pozdější auditované fázi 9.4
 
 ### Technický stav checkpointu
-- Změna je otestovaná (171 cílených a 1278 úplných testů).
-- Python, oba JavaScripty, shell, whitespace a Git safety kontroly prošly.
-- Git před checkpointem: `main == origin/main` na `b9a771692109`.
-- Poslední serverově potvrzené nasazení: `b9a771692109` · 1277 testů · smoke 5/5.
+- Změna je otestovaná (1250 testů).
+- Git před checkpointem: `main == origin/main` na `7c759d92832b`.
+- Poslední serverově potvrzené nasazení: `7c759d92832b` · odpovídá ověřenému main před tímto checkpointem · 1278 testů · smoke 5/5 · 2026-07-26T21:53:58+00:00.
 - Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -3245,3 +3239,30 @@ Další krok:
 Technický důkaz:
 - Cílených 171 a úplných 1278 testů prošlo.
 - Plná brána doběhla za 228,2 s; syntaxe i Git safety jsou zelené.
+
+### 2026-07-27 00:17 CEST – Cockpit už neobsahuje osiřelé Voice Bridge handlery ani jejich glue kód; Janička, diagnostika, Human–Adam mikrofon a TTS zůstaly zachované
+
+Hotovo:
+- Cockpit už neobsahuje osiřelé Voice Bridge handlery ani jejich glue kód; Janička, diagnostika, Human–Adam mikrofon a TTS zůstaly zachované
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Po odstranění veřejných rout a statusových polí se z Cockpitu odstraňuje pouze nedostupná legacy implementace, nikoli samostatné moduly ani private stav
+
+Další krok:
+- Provést checkpoint, push a nasazení a ověřit úplnou testovací bránu i pět smoke kontrol
+
+Navrhované další kroky:
+- Po živém ověření pokračovat fází 9.3e oddělením ochrany relací Janičky a diagnostických skriptů od Voice Bridge markeru
+- Samostatné Voice Bridge moduly a private stav řešit až v pozdější auditované fázi 9.4
+
+Technický důkaz:
+- plná Cockpit brána: 1250 testů, 313.1 s, výsledek OK.
+- Pracovní proud: `layer-human-adam-development`.
+- Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.

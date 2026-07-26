@@ -174,7 +174,6 @@ from app.documents.vault import (
     read_json_file,
     relative_to_project,
     run_document_print_job,
-    safe_ascii_slug,
     safe_filename,
     safe_text,
     safe_slug,
@@ -266,40 +265,14 @@ from app.speech.edge_tts_mp3 import (
 from app.speech.local_tts import DEFAULT_VOICE
 from app.speech.adam_voice_mode import (
     ADAM_LAST_RESPONSE_PATH,
-    ADAM_PENDING_COMMAND_PATH,
-    ADAM_VOICE_HISTORY_PATH,
-    load_voice_mode_status,
     load_last_adam_response,
-    pid_exists,
-    update_pending_approval,
-    write_voice_mode_status,
 )
 from app.speech.terminal_bridge import (
     CURRENT_CODEX_TTY_PATH,
-    deliver_voice_command_to_terminal,
     discover_codex_ttys,
     normalize_tty,
 )
-from app.speech.voice_inbox import VoiceCommand
-from app.voice_bridge_coordinator import (
-    VOICE_FRONTEND_EVENTS_PATH,
-    VoiceBridgeCommandDependencies,
-    coordinate_text_voice_command,
-    coordinate_transcribed_voice_command,
-    deliver_saved_voice_command_inline as coordinate_inline_voice_delivery,
-    deliver_voice_command_by_configured_transport as coordinate_configured_voice_delivery,
-    deliver_voice_command_via_managed_screen as coordinate_managed_screen_voice_delivery,
-    record_voice_delivery_attempt,
-    record_voice_delivery_issue_for_cockpit,
-    record_voice_transcription_failure as record_coordinator_transcription_failure,
-    save_voice_command_to_inbox,
-    selected_voice_delivery_transport,
-    watcher_will_deliver_result as voice_watcher_will_deliver_result,
-)
 from app.voice_bridge_runtime import (
-    set_voice_bridge_marker,
-    start_voice_mode_watcher,
-    stop_voice_mode_watcher,
     voice_bridge_status as build_voice_bridge_status,
 )
 from app.tvbcp import tvbcp_status
@@ -309,7 +282,6 @@ from scripts.autosave_status import autosave_status as read_autosave_runtime_sta
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 COCKPIT_PORT = 8770
 COCKPIT_URL = f"http://127.0.0.1:{COCKPIT_PORT}"
-VOICE_BRIDGE_FROZEN = True
 DEFAULT_PURCHASES_DIR = PROJECT_ROOT / "data" / "private" / "purchases"
 SCANDOCU_URL = "http://127.0.0.1:8766"
 SCANDOCU_PORT = 8766
@@ -317,8 +289,6 @@ SCANDOCU_LOG_DIR = PROJECT_ROOT / "data" / "private" / "documents" / "scandocu"
 SCANDOCU_LOG_FILE = SCANDOCU_LOG_DIR / "server.log"
 SCANDOCU_SERVER_SCRIPT = PROJECT_ROOT / "scripts" / "scandocu_server.py"
 COCKPIT_RESTART_SCRIPT = PROJECT_ROOT / "scripts" / "restart_cockpit.py"
-ADAM_VOICE_MODE_SCRIPT = PROJECT_ROOT / "scripts" / "adam_voice_mode.py"
-ADAM_VOICE_MODE_LOG_FILE = PROJECT_ROOT / "data" / "private" / "voice_inbox" / "adam_voice_mode.log"
 EMAIL_SESSION_HANDOFF_DIR = PROJECT_ROOT / "data" / "private" / "email_session_handoffs"
 LOCAL_SEZNAM_EMAIL_DIR = PROJECT_ROOT / "data" / "private" / "email_seznam"
 EMAIL_PROCESSING_DECISIONS_FILE = EMAIL_SESSION_HANDOFF_DIR / "email_processing_decisions.json"
@@ -334,7 +304,6 @@ ACTIVE_PROJECTS_PATH = PROJECT_ROOT / "memory" / "ACTIVE_PROJECTS.md"
 PROJECT_CAPABILITY_MAP_PATH = PROJECT_ROOT / "memory" / "technical" / "project_capability_map.md"
 JANICKA_COOKBOOK_PATH = PROJECT_ROOT / "memory" / "projects" / "janicka_cockpit_kucharka.md"
 JANICKA_TAKEOVER_PATH = PROJECT_ROOT / "memory" / "projects" / "janicka_cockpit_takeover.md"
-VOICE_COMMAND_INBOX_DIR = PROJECT_ROOT / "data" / "private" / "voice_inbox"
 MEMORY_INDEX_PATH = PROJECT_ROOT / "memory" / "MEMORY_INDEX.md"
 RECOVERY_HANDOFF_PATHS = (
     PROJECT_ROOT / "memory" / "handoffs" / "cockpit_recovery_center_priority_2026_06_03.md",
@@ -4691,107 +4660,6 @@ def discover_codex_process_sessions(
     return result
 
 
-def terminate_stale_codex_sessions_action(
-    payload: dict[str, Any],
-    *,
-    marker_path: Path = CURRENT_CODEX_TTY_PATH,
-    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
-    screen_runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
-    managed_codex_tty_labeler: Callable[[], dict[str, str]] | None = None,
-    killer: Callable[[int, int], None] = os.kill,
-) -> dict[str, Any]:
-    confirmed = bool(payload.get("confirmed"))
-    sessions = discover_codex_process_sessions(runner=runner)
-    codex_ttys = [str(session.get("tty") or "") for session in sessions if session.get("tty")]
-    bridge = adam_voice_bridge_status(
-        marker_path=marker_path,
-        codex_tty_discoverer=lambda: codex_ttys,
-        managed_codex_tty_labeler=managed_codex_tty_labeler,
-        screen_runner=screen_runner,
-        expected_codex_session_limit=1,
-    )
-    protected_tty = str(bridge.get("effective_tty") or "")
-    if not protected_tty:
-        return {
-            "ok": False,
-            "status": "no_protected_tty",
-            "message": "Neukončuji staré Codex relace: voice bridge nemá jednoznačný chráněný cíl.",
-            "voice_bridge": bridge,
-            "sessions": sessions,
-        }
-
-    protected_ttys = {protected_tty, *[str(tty) for tty in bridge.get("managed_codex_ttys", []) if tty]}
-    stale_sessions = [session for session in sessions if session.get("tty") not in protected_ttys]
-    stale_ttys = [str(session.get("tty") or "") for session in stale_sessions]
-    root_pids = sorted({int(pid) for session in stale_sessions for pid in session.get("root_pids", [])})
-    if not stale_sessions:
-        return {
-            "ok": True,
-            "status": "no_stale_sessions",
-            "message": f"Žádné staré Codex relace k ukončení. Chráněný cíl je {protected_tty}.",
-            "protected_tty": protected_tty,
-            "protected_ttys": sorted(protected_ttys),
-            "managed_codex_ttys": bridge.get("managed_codex_ttys", []),
-            "voice_bridge": bridge,
-            "sessions": sessions,
-        }
-    if not confirmed:
-        return {
-            "ok": False,
-            "status": "confirmation_required",
-            "message": f"K ukončení jsou připravené staré Codex relace: {', '.join(stale_ttys)}. Akci je potřeba potvrdit.",
-            "protected_tty": protected_tty,
-            "protected_ttys": sorted(protected_ttys),
-            "managed_codex_ttys": bridge.get("managed_codex_ttys", []),
-            "stale_ttys": stale_ttys,
-            "root_pids": root_pids,
-            "voice_bridge": bridge,
-            "sessions": sessions,
-        }
-
-    killed: list[int] = []
-    errors: list[str] = []
-    for pid in root_pids:
-        try:
-            killer(pid, signal.SIGTERM)
-            killed.append(pid)
-        except OSError as exc:
-            errors.append(f"PID {pid}: {exc}")
-    if errors:
-        return {
-            "ok": False,
-            "status": "partial_or_failed",
-            "message": f"Některé staré Codex relace se nepodařilo ukončit: {' | '.join(errors)}",
-            "protected_tty": protected_tty,
-            "protected_ttys": sorted(protected_ttys),
-            "managed_codex_ttys": bridge.get("managed_codex_ttys", []),
-            "stale_ttys": stale_ttys,
-            "killed_pids": killed,
-            "errors": errors,
-        }
-    return {
-        "ok": True,
-        "status": "stale_sessions_terminated",
-        "message": f"Ukončil jsem staré Codex relace: {', '.join(stale_ttys)}. Chráněný cíl {protected_tty} zůstal běžet.",
-        "protected_tty": protected_tty,
-        "protected_ttys": sorted(protected_ttys),
-        "managed_codex_ttys": bridge.get("managed_codex_ttys", []),
-        "stale_ttys": stale_ttys,
-        "killed_pids": killed,
-    }
-
-
-def set_adam_voice_bridge_marker_action(
-    tty: str,
-    *,
-    marker_path: Path = CURRENT_CODEX_TTY_PATH,
-    codex_tty_discoverer: Callable[[], list[str]] = discover_codex_ttys,
-) -> dict[str, Any]:
-    return set_voice_bridge_marker(
-        tty,
-        marker_path=marker_path,
-        codex_tty_discoverer=codex_tty_discoverer,
-    )
 def action_queue_status(
     document_work: dict[str, Any] | None = None,
     reminders: dict[str, Any] | None = None,
@@ -8425,43 +8293,6 @@ def human_adam_main_remote_sync_action(
         }
 
 
-def start_adam_voice_mode_action(
-    *,
-    launcher: Callable[..., object] | None = None,
-    log_file: Path = ADAM_VOICE_MODE_LOG_FILE,
-    terminal_bridge: bool | None = None,
-) -> dict[str, Any]:
-    return start_voice_mode_watcher(
-        status_loader=load_voice_mode_status,
-        status_writer=write_voice_mode_status,
-        launcher=launcher or subprocess.Popen,
-        log_file=log_file,
-        project_root=PROJECT_ROOT,
-        script_path=ADAM_VOICE_MODE_SCRIPT,
-        path_formatter=relative_to_project,
-        terminal_bridge=terminal_bridge,
-        sleeper=time.sleep,
-    )
-def stop_adam_voice_mode_action() -> dict[str, Any]:
-    return stop_voice_mode_watcher(
-        status_loader=load_voice_mode_status,
-        status_writer=write_voice_mode_status,
-        pid_checker=pid_exists,
-        killer=os.kill,
-    )
-def cockpit_voice_approval_action(payload: dict[str, Any]) -> dict[str, Any]:
-    decision = str(payload.get("decision") or "").strip().lower()
-    note = safe_text(str(payload.get("note") or ""))[:500]
-    result = update_pending_approval(decision=decision, note=note)
-    return {
-        "ok": bool(result.get("ok")),
-        "status": result.get("status"),
-        "message": result.get("message") or "Rozhodnutí k hlasovému pokynu bylo uloženo.",
-        "pending_for_adam": result,
-        "voice_mode": load_voice_mode_status(stale_after_seconds=60.0),
-    }
-
-
 def cockpit_codex_approval_clear_action(
     payload: dict[str, Any],
     *,
@@ -8480,135 +8311,6 @@ def cockpit_codex_approval_clear_action(
         "status": result.get("status"),
         "message": "Karta čekání na Codex potvrzení byla vyčištěna.",
         "codex_approval": result,
-    }
-
-
-SAFE_READONLY_CAPABILITIES: tuple[dict[str, str], ...] = (
-    {
-        "id": "codex_sessions",
-        "label": "Codex relace",
-        "summary": "Read-only kontrola aktivních Codex relací, TTY a voice bridge cíle.",
-    },
-    {
-        "id": "voice_bridge",
-        "label": "Voice bridge",
-        "summary": "Read-only kontrola markeru, efektivního cíle a připravenosti terminálového bridge.",
-    },
-    {
-        "id": "git_status",
-        "label": "Git stav",
-        "summary": "Read-only souhrn pracovního stromu bez commitování nebo pushování.",
-    },
-    {
-        "id": "backup_status",
-        "label": "Záloha",
-        "summary": "Read-only souhrn poslední lokální zálohovací aktivity.",
-    },
-)
-
-
-def cockpit_safe_readonly_capabilities_action() -> dict[str, Any]:
-    return {
-        "ok": True,
-        "status": "available",
-        "message": "Načtené jsou jen pevně povolené read-only kontroly.",
-        "capabilities": [dict(item) for item in SAFE_READONLY_CAPABILITIES],
-    }
-
-
-def safe_readonly_codex_sessions_result() -> dict[str, Any]:
-    sessions = discover_codex_process_sessions()
-    bridge = adam_voice_bridge_status(orphaned_janicka_reporter=janicka_orphaned_codex_session_report)
-    safe_sessions = [
-        {
-            "tty": safe_text(str(session.get("tty") or ""))[:40],
-            "pids": [int(pid) for pid in session.get("pids", [])],
-            "root_pids": [int(pid) for pid in session.get("root_pids", [])],
-        }
-        for session in sessions
-    ]
-    return {
-        "ok": True,
-        "summary": f"Nalezeno {len(safe_sessions)} Codex relací. Efektivní voice bridge cíl: {bridge.get('effective_tty') or 'nezjištěno'}.",
-        "sessions": safe_sessions,
-        "voice_bridge": bridge,
-    }
-
-
-def safe_readonly_voice_bridge_result() -> dict[str, Any]:
-    bridge = adam_voice_bridge_status(orphaned_janicka_reporter=janicka_orphaned_codex_session_report)
-    return {
-        "ok": bool(bridge.get("ok", True)),
-        "summary": str(bridge.get("message") or "Voice bridge stav načten."),
-        "voice_bridge": bridge,
-    }
-
-
-def safe_readonly_git_status_result() -> dict[str, Any]:
-    git = git_status_summary()
-    return {
-        "ok": bool(git.get("ok", True)),
-        "summary": str(git.get("message") or "Git stav načten."),
-        "git": git,
-    }
-
-
-def safe_readonly_backup_status_result() -> dict[str, Any]:
-    backup = backup_activity_status()
-    return {
-        "ok": bool(backup.get("ok", True)),
-        "summary": str(backup.get("message") or "Stav zálohy načten."),
-        "backup": backup,
-    }
-
-
-def default_safe_readonly_handlers() -> dict[str, Callable[[], dict[str, Any]]]:
-    return {
-        "codex_sessions": safe_readonly_codex_sessions_result,
-        "voice_bridge": safe_readonly_voice_bridge_result,
-        "git_status": safe_readonly_git_status_result,
-        "backup_status": safe_readonly_backup_status_result,
-    }
-
-
-def cockpit_safe_readonly_run_action(
-    payload: dict[str, Any],
-    *,
-    handlers: dict[str, Callable[[], dict[str, Any]]] | None = None,
-) -> dict[str, Any]:
-    capability_id = safe_slug(str(payload.get("capability_id") or ""), default="", limit=80).replace("-", "_")
-    meta_by_id = {item["id"]: item for item in SAFE_READONLY_CAPABILITIES}
-    if capability_id not in meta_by_id:
-        return {
-            "ok": False,
-            "status": "unknown_capability",
-            "message": "Tahle kontrola není v Cockpit allowlistu read-only schopností.",
-            "capability_id": capability_id,
-        }
-    selected_handlers = handlers or default_safe_readonly_handlers()
-    handler = selected_handlers.get(capability_id)
-    if handler is None:
-        return {
-            "ok": False,
-            "status": "handler_missing",
-            "message": "Kontrola je v allowlistu, ale nemá registrovaný handler.",
-            "capability": meta_by_id[capability_id],
-        }
-    try:
-        result = handler()
-    except Exception as exc:  # pragma: no cover - defensive boundary for UI endpoint
-        return {
-            "ok": False,
-            "status": "capability_failed",
-            "message": f"Read-only kontrola selhala: {exc}",
-            "capability": meta_by_id[capability_id],
-        }
-    return {
-        "ok": bool(result.get("ok", True)),
-        "status": "completed",
-        "message": str(result.get("summary") or "Read-only kontrola dokončena."),
-        "capability": meta_by_id[capability_id],
-        "result": result,
     }
 
 
@@ -8712,46 +8414,6 @@ def cockpit_dev_runner_run_action(
         "stderr": _dev_runner_output(completed.stderr),
         "started_at": started_at.isoformat(),
         "finished_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-    }
-
-
-def cockpit_voice_latest_response_action(
-    *,
-    response_path: Path = ADAM_LAST_RESPONSE_PATH,
-) -> dict[str, Any]:
-    return load_last_adam_response(path=response_path)
-
-
-def cockpit_voice_frontend_event_action(
-    payload: dict[str, Any],
-    *,
-    events_path: Path = VOICE_FRONTEND_EVENTS_PATH,
-    now: datetime | None = None,
-) -> dict[str, Any]:
-    kind = safe_ascii_slug(str(payload.get("kind") or ""), default="unknown", limit=80)
-    raw_detail = payload.get("detail")
-    detail = raw_detail if isinstance(raw_detail, dict) else {}
-    safe_detail: dict[str, Any] = {}
-    for key in ("ok", "status", "step", "text_chars", "audio_kb", "recorded_seconds", "url", "visibility"):
-        if key in detail:
-            value = detail[key]
-            if isinstance(value, (bool, int, float)) or value is None:
-                safe_detail[key] = value
-            else:
-                safe_detail[key] = safe_text(str(value))[:220]
-    if "error" in detail:
-        safe_detail["error"] = safe_text(str(detail.get("error") or ""))[:300]
-    record = {
-        "created_at": (now or datetime.now(timezone.utc)).replace(microsecond=0).isoformat(),
-        "kind": kind,
-        "detail": safe_detail,
-    }
-    append_jsonl(events_path, record)
-    return {
-        "ok": True,
-        "status": "recorded",
-        "message": "Technická událost hlasového frontendu byla zapsána.",
-        "path": str(relative_to_project(events_path)),
     }
 
 
@@ -8877,51 +8539,6 @@ def cockpit_edge_tts_action(
     }
 
 
-def deliver_saved_voice_command_inline(
-    *,
-    inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
-    terminal_bridge: Callable[..., dict[str, Any]] | None = None,
-    pending_path: Path = ADAM_PENDING_COMMAND_PATH,
-    history_path: Path = ADAM_VOICE_HISTORY_PATH,
-) -> dict[str, Any]:
-    return coordinate_inline_voice_delivery(
-        inbox_dir=inbox_dir,
-        configured_bridge=deliver_voice_command_by_configured_transport,
-        terminal_bridge=terminal_bridge,
-        pending_path=pending_path,
-        history_path=history_path,
-        attempt_recorder=record_voice_delivery_attempt,
-        issue_recorder=record_voice_delivery_issue_for_cockpit,
-    )
-
-
-def deliver_voice_command_via_managed_screen(
-    command: VoiceCommand,
-    *,
-    submit: bool = True,
-    starter: Callable[..., dict[str, Any]] | None = None,
-    ready_waiter: Callable[[], dict[str, Any]] | None = None,
-    screen_deliverer: Callable[..., dict[str, Any]] | None = None,
-) -> dict[str, Any]:
-    return coordinate_managed_screen_voice_delivery(
-        command,
-        submit=submit,
-        starter=starter or start_adam_service,
-        ready_waiter=ready_waiter or wait_for_adam_ready,
-        screen_deliverer=screen_deliverer or deliver_prompt_to_adam_screen,
-    )
-
-
-def deliver_voice_command_by_configured_transport(command: VoiceCommand, *, submit: bool = True) -> dict[str, Any]:
-    return coordinate_configured_voice_delivery(
-        command,
-        transport=selected_voice_delivery_transport(),
-        local_deliverer=deliver_voice_command_to_terminal,
-        managed_deliverer=deliver_voice_command_via_managed_screen,
-        submit=submit,
-    )
-
-
 def transcribe_audio_base64_isolated(
     audio_base64: str,
     *,
@@ -9017,90 +8634,6 @@ def human_adam_transcribe_action(
             "text": "",
             "message": str(exc),
         }
-
-
-def record_voice_transcription_failure(
-    *,
-    message: str,
-    status: str = "transcription_failed",
-    events_path: Path | None = None,
-) -> None:
-    record_coordinator_transcription_failure(
-        message=message,
-        status=status,
-        events_path=events_path or VOICE_FRONTEND_EVENTS_PATH,
-    )
-
-
-def cockpit_transcribe_voice_action(
-    payload: dict[str, Any],
-    *,
-    inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
-    terminal_bridge: Callable[..., dict[str, Any]] | None = None,
-    pending_path: Path = ADAM_PENDING_COMMAND_PATH,
-    history_path: Path = ADAM_VOICE_HISTORY_PATH,
-    transcriber: Callable[..., dict[str, Any]] = transcribe_audio_base64_isolated,
-    frozen: bool = False,
-) -> dict[str, Any]:
-    if frozen:
-        return voice_bridge_frozen_result()
-    dependencies = VoiceBridgeCommandDependencies(
-        save_command=save_voice_command_to_inbox,
-        load_voice_mode=load_voice_mode_status,
-        deliver_inline=deliver_saved_voice_command_inline,
-        record_transcription_failure=record_voice_transcription_failure,
-        sanitize_text=safe_text,
-    )
-    return coordinate_transcribed_voice_command(
-        payload,
-        dependencies=dependencies,
-        inbox_dir=inbox_dir,
-        terminal_bridge=terminal_bridge,
-        pending_path=pending_path,
-        history_path=history_path,
-        transcriber=transcriber,
-    )
-
-
-def cockpit_save_voice_text_action(
-    payload: dict[str, Any],
-    *,
-    inbox_dir: Path = VOICE_COMMAND_INBOX_DIR,
-    terminal_bridge: Callable[..., dict[str, Any]] | None = None,
-    pending_path: Path = ADAM_PENDING_COMMAND_PATH,
-    history_path: Path = ADAM_VOICE_HISTORY_PATH,
-    frozen: bool = False,
-) -> dict[str, Any]:
-    if frozen:
-        return voice_bridge_frozen_result()
-    dependencies = VoiceBridgeCommandDependencies(
-        save_command=save_voice_command_to_inbox,
-        load_voice_mode=load_voice_mode_status,
-        deliver_inline=deliver_saved_voice_command_inline,
-        record_transcription_failure=record_voice_transcription_failure,
-        sanitize_text=safe_text,
-    )
-    return coordinate_text_voice_command(
-        payload,
-        dependencies=dependencies,
-        inbox_dir=inbox_dir,
-        terminal_bridge=terminal_bridge,
-        pending_path=pending_path,
-        history_path=history_path,
-    )
-
-
-def voice_bridge_frozen_result() -> dict[str, Any]:
-    return {
-        "ok": False,
-        "saved": False,
-        "status": "voice_bridge_frozen",
-        "voice_delivery_status": "voice_bridge_frozen",
-        "message": (
-            "VoiceBridge je dočasně pozastavený, protože předání do živého Codex chatu není spolehlivé. "
-            "Pokyn nebyl uložen ani odeslán. Pro komunikaci použij aktivní samantha/SSH relaci."
-        ),
-    }
 
 
 def janicka_chat_memory_context(

@@ -48,15 +48,9 @@ from app.cockpit import (
     library_read_state_action,
     cockpit_edge_tts_action,
     cockpit_codex_approval_clear_action,
-    cockpit_safe_readonly_capabilities_action,
-    cockpit_safe_readonly_run_action,
     cockpit_dev_runner_actions,
     cockpit_dev_runner_run_action,
-    cockpit_voice_approval_action,
-    cockpit_voice_frontend_event_action,
-    cockpit_save_voice_text_action,
     cockpit_speak_action,
-    cockpit_transcribe_voice_action,
     human_adam_transcribe_action,
     human_adam_main_remote_sync_action,
     human_adam_main_remote_sync_audit_action,
@@ -67,7 +61,6 @@ from app.cockpit import (
     janicka_orphaned_codex_session_report,
     open_janicka_full_adam_action,
     terminate_orphaned_janicka_sessions_action,
-    save_voice_command_to_inbox,
     transcribe_audio_base64_isolated,
     document_intake_email_scan_status,
     document_intake_status,
@@ -121,14 +114,9 @@ from app.cockpit import (
     search_document_index,
     session_autosave_cleanup_action,
     server_health_status,
-    set_adam_voice_bridge_marker_action,
     set_email_processing_done_flag,
-    terminate_stale_codex_sessions_action,
     set_document_reading_status_action,
-    selected_voice_delivery_transport,
-    start_adam_voice_mode_action,
     start_cockpit_restart_action,
-    stop_adam_voice_mode_action,
     stored_documents_review_status,
     urgent_reminder_done_action,
     urgent_reminders_status,
@@ -3178,38 +3166,6 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(result["codex_approval"]["note"], "Vyřešeno v terminálu.")
         self.assertEqual(calls, [{"note": "Vyřešeno v terminálu."}])
 
-    def test_cockpit_safe_readonly_capabilities_action_lists_allowlist(self) -> None:
-        result = cockpit_safe_readonly_capabilities_action()
-        ids = {item["id"] for item in result["capabilities"]}
-
-        self.assertTrue(result["ok"])
-        self.assertIn("codex_sessions", ids)
-        self.assertIn("git_status", ids)
-
-    def test_cockpit_safe_readonly_run_action_rejects_unknown_capability(self) -> None:
-        result = cockpit_safe_readonly_run_action({"capability_id": "rm -rf"})
-
-        self.assertFalse(result["ok"])
-        self.assertEqual(result["status"], "unknown_capability")
-
-    def test_cockpit_safe_readonly_run_action_runs_registered_handler(self) -> None:
-        result = cockpit_safe_readonly_run_action(
-            {"capability_id": "codex_sessions"},
-            handlers={
-                "codex_sessions": lambda: {
-                    "ok": True,
-                    "summary": "Nalezeno 1 Codex relací.",
-                    "sessions": [{"tty": "ttys000", "pids": [123], "root_pids": [123]}],
-                }
-            },
-        )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "completed")
-        self.assertEqual(result["capability"]["id"], "codex_sessions")
-        self.assertIn("Nalezeno 1", result["message"])
-        self.assertEqual(result["result"]["sessions"][0]["tty"], "ttys000")
-
     def test_cockpit_dev_runner_actions_lists_allowlist(self) -> None:
         result = cockpit_dev_runner_actions()
         ids = {item["id"] for item in result["actions"]}
@@ -3783,142 +3739,6 @@ class CockpitTests(unittest.TestCase):
         self.assertTrue(result["marker_pid_fallback"])
         self.assertIn("screen běží", result["message"])
 
-    def test_set_adam_voice_bridge_marker_only_allows_active_codex_tty(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            marker_path = Path(temp_dir) / "current_codex_tty.json"
-
-            result = set_adam_voice_bridge_marker_action(
-                "ttys003",
-                marker_path=marker_path,
-                codex_tty_discoverer=lambda: ["ttys002", "ttys003"],
-            )
-
-            self.assertTrue(result["ok"])
-            self.assertEqual(result["marked_tty"], "ttys003")
-            payload = json.loads(marker_path.read_text(encoding="utf-8"))
-            self.assertEqual(payload["tty"], "ttys003")
-
-            rejected = set_adam_voice_bridge_marker_action(
-                "ttys004",
-                marker_path=marker_path,
-                codex_tty_discoverer=lambda: ["ttys002", "ttys003"],
-            )
-
-        self.assertFalse(rejected["ok"])
-        self.assertEqual(rejected["status"], "tty_not_active")
-        self.assertEqual(rejected["codex_ttys"], ["ttys002", "ttys003"])
-
-    def test_terminate_stale_codex_sessions_requires_confirmation(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            marker_path = Path(temp_dir) / "current_codex_tty.json"
-            marker_path.write_text('{"tty": "ttys001"}', encoding="utf-8")
-
-            def fake_runner(*args, **kwargs):
-                return subprocess.CompletedProcess(
-                    args=args[0],
-                    returncode=0,
-                    stdout=(
-                        "100 10 ttys001 node node /usr/local/bin/codex -C /repo .\n"
-                        "101 100 ttys001 codex /vendor/bin/codex -C /repo .\n"
-                        "200 20 ttys003 node node /usr/local/bin/codex -C /repo .\n"
-                        "201 200 ttys003 codex /vendor/bin/codex -C /repo .\n"
-                    ),
-                    stderr="",
-                )
-
-            killed: list[tuple[int, int]] = []
-            fake_screen_runner = lambda *args, **kwargs: subprocess.CompletedProcess(args=args[0], returncode=1, stdout="", stderr="No Sockets found\n")
-            result = terminate_stale_codex_sessions_action(
-                {"confirmed": False},
-                marker_path=marker_path,
-                runner=fake_runner,
-                screen_runner=fake_screen_runner,
-                managed_codex_tty_labeler=lambda: {},
-                killer=lambda pid, sig: killed.append((pid, sig)),
-            )
-
-        self.assertFalse(result["ok"])
-        self.assertEqual(result["status"], "confirmation_required")
-        self.assertEqual(result["protected_tty"], "ttys001")
-        self.assertEqual(result["stale_ttys"], ["ttys003"])
-        self.assertEqual(result["root_pids"], [200])
-        self.assertEqual(killed, [])
-
-    def test_terminate_stale_codex_sessions_kills_only_stale_roots(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            marker_path = Path(temp_dir) / "current_codex_tty.json"
-            marker_path.write_text('{"tty": "ttys001"}', encoding="utf-8")
-
-            def fake_runner(*args, **kwargs):
-                return subprocess.CompletedProcess(
-                    args=args[0],
-                    returncode=0,
-                    stdout=(
-                        "100 10 ttys001 node node /usr/local/bin/codex -C /repo .\n"
-                        "101 100 ttys001 codex /vendor/bin/codex -C /repo .\n"
-                        "200 20 ttys003 node node /usr/local/bin/codex -C /repo .\n"
-                        "201 200 ttys003 codex /vendor/bin/codex -C /repo .\n"
-                        "300 30 ?? codex codex app-server --analytics-default-enabled\n"
-                    ),
-                    stderr="",
-                )
-
-            killed: list[tuple[int, int]] = []
-            fake_screen_runner = lambda *args, **kwargs: subprocess.CompletedProcess(args=args[0], returncode=1, stdout="", stderr="No Sockets found\n")
-            result = terminate_stale_codex_sessions_action(
-                {"confirmed": True},
-                marker_path=marker_path,
-                runner=fake_runner,
-                screen_runner=fake_screen_runner,
-                managed_codex_tty_labeler=lambda: {},
-                killer=lambda pid, sig: killed.append((pid, sig)),
-            )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "stale_sessions_terminated")
-        self.assertEqual(result["protected_tty"], "ttys001")
-        self.assertEqual(result["stale_ttys"], ["ttys003"])
-        self.assertEqual(result["killed_pids"], [200])
-        self.assertEqual(killed, [(200, signal.SIGTERM)])
-
-    def test_terminate_stale_codex_sessions_preserves_managed_janicka_session(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            marker_path = Path(temp_dir) / "current_codex_tty.json"
-            marker_path.write_text('{"tty": "ttys001"}', encoding="utf-8")
-
-            def fake_runner(*args, **kwargs):
-                return subprocess.CompletedProcess(
-                    args=args[0],
-                    returncode=0,
-                    stdout=(
-                        "100 10 ttys001 node node /usr/local/bin/codex -C /repo .\n"
-                        "101 100 ttys001 codex /vendor/bin/codex -C /repo .\n"
-                        "200 20 ttys003 node node /usr/local/bin/codex -C /repo .\n"
-                        "201 200 ttys003 codex /vendor/bin/codex -C /repo .\n"
-                        "400 40 ttys004 node node /usr/local/bin/codex -C /repo .\n"
-                        "401 400 ttys004 codex /vendor/bin/codex -C /repo .\n"
-                    ),
-                    stderr="",
-                )
-
-            killed: list[tuple[int, int]] = []
-            fake_screen_runner = lambda *args, **kwargs: subprocess.CompletedProcess(args=args[0], returncode=1, stdout="", stderr="No Sockets found\n")
-            result = terminate_stale_codex_sessions_action(
-                {"confirmed": True},
-                marker_path=marker_path,
-                runner=fake_runner,
-                screen_runner=fake_screen_runner,
-                managed_codex_tty_labeler=lambda: {"ttys004": "Janička light"},
-                killer=lambda pid, sig: killed.append((pid, sig)),
-            )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["stale_ttys"], ["ttys003"])
-        self.assertEqual(result["managed_codex_ttys"], ["ttys004"])
-        self.assertEqual(result["protected_ttys"], ["ttys001", "ttys004"])
-        self.assertEqual(result["killed_pids"], [200])
-        self.assertEqual(killed, [(200, signal.SIGTERM)])
-
     def test_codex_session_discovery_ignores_screen_attach_name(self) -> None:
         def fake_runner(*args, **kwargs):
             return subprocess.CompletedProcess(
@@ -4296,168 +4116,6 @@ class CockpitTests(unittest.TestCase):
         self.assertEqual(cockpit_module.HUMAN_ADAM_HTML.count('id="mainSyncBtn"'), 1)
         self.assertEqual(cockpit_module.HUMAN_ADAM_HTML.count('id="deployBtn"'), 1)
 
-    def test_start_adam_voice_mode_action_launches_watcher_with_terminal_bridge_by_default(self) -> None:
-        calls: list[dict[str, object]] = []
-
-        def fake_launcher(args, **kwargs):
-            calls.append({"args": args, **kwargs})
-            return SimpleNamespace(pid=12345)
-
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            log_file = Path(temp_dir) / "adam_voice_mode.log"
-            with (
-                patch("app.cockpit.load_voice_mode_status", return_value={"running": False}),
-                patch("app.cockpit.write_voice_mode_status") as write_status,
-            ):
-                result = start_adam_voice_mode_action(launcher=fake_launcher, log_file=log_file)
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "started")
-        self.assertEqual(result["pid"], 12345)
-        self.assertTrue(result["terminal_bridge"])
-        self.assertEqual(calls[0]["args"][1], str(cockpit_module.ADAM_VOICE_MODE_SCRIPT))
-        self.assertIn("--poll", calls[0]["args"])
-        self.assertIn("--terminal-bridge", calls[0]["args"])
-        self.assertTrue(calls[0]["start_new_session"])
-        write_status.assert_called()
-
-    def test_start_adam_voice_mode_action_can_disable_terminal_bridge(self) -> None:
-        calls: list[dict[str, object]] = []
-
-        def fake_launcher(args, **kwargs):
-            calls.append({"args": args, **kwargs})
-            return SimpleNamespace(pid=12345)
-
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            log_file = Path(temp_dir) / "adam_voice_mode.log"
-            with (
-                patch("app.cockpit.load_voice_mode_status", return_value={"running": False}),
-                patch("app.cockpit.write_voice_mode_status"),
-            ):
-                result = start_adam_voice_mode_action(
-                    launcher=fake_launcher,
-                    log_file=log_file,
-                    terminal_bridge=False,
-                )
-
-        self.assertTrue(result["ok"])
-        self.assertFalse(result["terminal_bridge"])
-        self.assertNotIn("--terminal-bridge", calls[0]["args"])
-
-    def test_start_adam_voice_mode_action_can_enable_terminal_bridge(self) -> None:
-        calls: list[dict[str, object]] = []
-
-        def fake_launcher(args, **kwargs):
-            calls.append({"args": args, **kwargs})
-            return SimpleNamespace(pid=12345)
-
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            log_file = Path(temp_dir) / "adam_voice_mode.log"
-            with (
-                patch("app.cockpit.load_voice_mode_status", return_value={"running": False}),
-                patch("app.cockpit.write_voice_mode_status"),
-            ):
-                result = start_adam_voice_mode_action(
-                    launcher=fake_launcher,
-                    log_file=log_file,
-                    terminal_bridge=True,
-                )
-
-        self.assertTrue(result["ok"])
-        self.assertTrue(result["terminal_bridge"])
-        self.assertIn("--terminal-bridge", calls[0]["args"])
-
-    def test_start_adam_voice_mode_action_reports_immediate_exit(self) -> None:
-        class ExitedProcess:
-            pid = 12345
-
-            def poll(self) -> int:
-                return 2
-
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            log_file = Path(temp_dir) / "adam_voice_mode.log"
-            log_file.write_text("traceback line\n", encoding="utf-8")
-            with (
-                patch("app.cockpit.load_voice_mode_status", return_value={"running": False}),
-                patch("app.cockpit.write_voice_mode_status") as write_status,
-                patch("app.cockpit.time.sleep"),
-            ):
-                result = start_adam_voice_mode_action(launcher=lambda *args, **kwargs: ExitedProcess(), log_file=log_file)
-
-        self.assertFalse(result["ok"])
-        self.assertEqual(result["status"], "watcher_exited")
-        self.assertEqual(result["returncode"], 2)
-        self.assertIn("traceback line", result["recent_log"])
-        write_status.assert_called()
-
-    def test_start_adam_voice_mode_action_reuses_running_watcher(self) -> None:
-        with patch("app.cockpit.load_voice_mode_status", return_value={"running": True, "pid": 12345}):
-            result = start_adam_voice_mode_action(launcher=lambda *args, **kwargs: self.fail("should not launch"))
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "already_running")
-        self.assertEqual(result["pid"], 12345)
-
-    def test_stop_adam_voice_mode_action_stops_running_watcher(self) -> None:
-        with (
-            patch("app.cockpit.load_voice_mode_status", return_value={"running": True, "pid": 12345}),
-            patch("app.cockpit.pid_exists", return_value=True),
-            patch("app.cockpit.os.kill") as kill,
-            patch("app.cockpit.write_voice_mode_status") as write_status,
-        ):
-            result = stop_adam_voice_mode_action()
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "stopped")
-        kill.assert_called_once_with(12345, cockpit_module.signal.SIGTERM)
-        write_status.assert_called()
-
-    def test_cockpit_voice_approval_action_updates_pending_state(self) -> None:
-        with (
-            patch(
-                "app.cockpit.update_pending_approval",
-                return_value={
-                    "ok": True,
-                    "status": "approved_in_cockpit",
-                    "message": "Žádost byla schválena v Cockpitu.",
-                    "pending": True,
-                },
-            ) as update,
-            patch("app.cockpit.load_voice_mode_status", return_value={"ok": True, "running": True}) as load_status,
-        ):
-            result = cockpit_voice_approval_action({"decision": "approved", "note": "ok"})
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "approved_in_cockpit")
-        self.assertEqual(result["pending_for_adam"]["pending"], True)
-        self.assertEqual(result["voice_mode"]["running"], True)
-        update.assert_called_once_with(decision="approved", note="ok")
-        load_status.assert_called_once()
-
-    def test_cockpit_voice_frontend_event_action_records_technical_detail_only(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            events_path = Path(temp_dir) / "frontend_events.jsonl"
-            result = cockpit_voice_frontend_event_action(
-                {
-                    "kind": "voice_text_post_failed",
-                    "detail": {
-                        "text": "tajný obsah se nesmí zapsat",
-                        "text_chars": 25,
-                        "status": "Load failed",
-                        "error": "TypeError: Load failed",
-                    },
-                },
-                events_path=events_path,
-                now=datetime(2026, 6, 30, 1, 0, tzinfo=timezone.utc),
-            )
-            events = self.read_jsonl(events_path)
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(events[0]["kind"], "voice_text_post_failed")
-        self.assertEqual(events[0]["detail"]["text_chars"], 25)
-        self.assertEqual(events[0]["detail"]["status"], "Load failed")
-        self.assertNotIn("tajný obsah", json.dumps(events[0], ensure_ascii=False))
-
     def test_cockpit_speak_action_returns_speech_result(self) -> None:
         with patch("app.cockpit.speak_text", return_value={"ok": True, "message": "Přečteno."}) as speak:
             result = cockpit_speak_action("Stav Cockpitu je v pořádku.")
@@ -4492,47 +4150,6 @@ class CockpitTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "edge_tts_failed")
         self.assertIn("síť není dostupná", result["message"])
-
-    def test_cockpit_transcribe_voice_action_returns_transcript(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            transcribe_calls = []
-
-            def fake_transcriber(*args, **kwargs):
-                transcribe_calls.append({"args": args, "kwargs": kwargs})
-                return {"ok": True, "text": "Najdi dnešní dokumenty."}
-
-            with self.subTest("isolated transcriber"):
-                bridge_calls = []
-
-                def fake_bridge(command):
-                    bridge_calls.append(command.text)
-                    return {"ok": True, "verified": True, "status": "delivered"}
-
-                result = cockpit_transcribe_voice_action(
-                    {"audio_base64": "abc", "mime_type": "audio/webm", "language": "cs"},
-                    inbox_dir=Path(temp_dir),
-                    terminal_bridge=fake_bridge,
-                    pending_path=Path(temp_dir) / "pending_for_adam.json",
-                    history_path=Path(temp_dir) / "adam_voice_history.jsonl",
-                    transcriber=fake_transcriber,
-                )
-                attempts = self.read_jsonl(Path(temp_dir) / "delivery_attempts.jsonl")
-                pending_exists = (Path(temp_dir) / "pending_for_adam.json").exists()
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["text"], "Najdi dnešní dokumenty.")
-        self.assertTrue(result["saved"])
-        self.assertIn("latest_voice_command.md", result["latest_voice_command_path"])
-        self.assertEqual(result["voice_delivery_status"], "voice_command_delivered")
-        self.assertIn("předán přímo do Codexu", result["message"])
-        self.assertEqual(bridge_calls, ["Najdi dnešní dokumenty."])
-        self.assertEqual(
-            transcribe_calls,
-            [{"args": ("abc",), "kwargs": {"mime_type": "audio/webm", "language": "cs"}}],
-        )
-        self.assertEqual(attempts[0]["delivery_status"], "voice_command_delivered")
-        self.assertEqual(attempts[0]["text_chars"], len("Najdi dnešní dokumenty."))
-        self.assertFalse(pending_exists)
 
     def test_transcribe_audio_base64_isolated_runs_subprocess_and_cleans_temp_file(self) -> None:
         encoded = base64.b64encode(b"fake audio").decode("ascii")
@@ -4583,11 +4200,7 @@ class CockpitTests(unittest.TestCase):
             transcribe_calls.append({"audio_base64": audio_base64, **kwargs})
             return {"ok": True, "text": "  Zkontroluj pracovní stav.  ", "private": "ignored"}
 
-        with (
-            patch("app.cockpit.cockpit_transcribe_voice_action") as legacy_transcribe,
-            patch("app.cockpit.save_voice_command_to_inbox") as voice_inbox,
-            patch("app.cockpit.human_adam_send_action") as canonical_send,
-        ):
+        with patch("app.cockpit.human_adam_send_action") as canonical_send:
             result = human_adam_transcribe_action(
                 {"audio_base64": "encoded-audio", "mime_type": "audio/mp4", "language": "cs"},
                 transcriber=fake_transcriber,
@@ -4607,8 +4220,6 @@ class CockpitTests(unittest.TestCase):
                 }
             ],
         )
-        legacy_transcribe.assert_not_called()
-        voice_inbox.assert_not_called()
         canonical_send.assert_not_called()
 
     def test_transcribe_audio_base64_isolated_reports_subprocess_failure(self) -> None:
@@ -4626,262 +4237,6 @@ class CockpitTests(unittest.TestCase):
             transcribe_audio_base64_isolated(encoded, mime_type="audio/webm", runner=fake_runner)
 
         self.assertIn("Resource deadlock avoided", str(cm.exception))
-
-    def test_cockpit_transcribe_voice_action_leaves_delivery_to_running_watcher(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            def fake_transcriber(*args, **kwargs):
-                return {"ok": True, "text": "Najdi dnešní dokumenty."}
-
-            with patch(
-                "app.cockpit.load_voice_mode_status",
-                return_value={"ok": True, "running": True, "pid": 12345},
-            ):
-                result = cockpit_transcribe_voice_action(
-                    {"audio_base64": "abc", "mime_type": "audio/webm", "language": "cs"},
-                    inbox_dir=Path(temp_dir),
-                    terminal_bridge=None,
-                    pending_path=Path(temp_dir) / "pending_for_adam.json",
-                    history_path=Path(temp_dir) / "adam_voice_history.jsonl",
-                    transcriber=fake_transcriber,
-                )
-            attempts_exists = (Path(temp_dir) / "delivery_attempts.jsonl").exists()
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["voice_delivery_status"], "watcher_will_deliver")
-        self.assertIn("Běžící watcher", result["message"])
-        self.assertIn("latest_voice_command.md", result["latest_voice_command_path"])
-        self.assertFalse(attempts_exists)
-
-    def test_cockpit_save_voice_text_action_writes_inbox(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            bridge_calls = []
-
-            def fake_bridge(command):
-                bridge_calls.append(command.text)
-                return {"ok": True, "verified": False, "status": "delivered_tty"}
-
-            result = cockpit_save_voice_text_action(
-                {"text": "Adame, spočítej dnešní handoffy."},
-                inbox_dir=Path(temp_dir),
-                terminal_bridge=fake_bridge,
-                pending_path=Path(temp_dir) / "pending_for_adam.json",
-                history_path=Path(temp_dir) / "adam_voice_history.jsonl",
-            )
-            latest_path = Path(temp_dir) / "latest_voice_command.md"
-            pending_path = Path(temp_dir) / "pending_for_adam.json"
-            history_path = Path(temp_dir) / "adam_voice_history.jsonl"
-
-            self.assertTrue(result["ok"])
-            self.assertEqual(result["status"], "voice_text_saved")
-            self.assertTrue(result["saved"])
-            self.assertIn("latest_voice_command.md", result["latest_voice_command_path"])
-            self.assertIn("Adame, spočítej dnešní handoffy.", latest_path.read_text(encoding="utf-8"))
-            self.assertEqual(result["voice_delivery_status"], "voice_command_delivery_unverified")
-            self.assertIn("vložena do hlasového inboxu", result["message"])
-            self.assertIn("Čekám na Adamovu odpověď", result["message"])
-            self.assertNotIn("předána do Codex terminálu", result["message"])
-            self.assertEqual(bridge_calls, ["Adame, spočítej dnešní handoffy."])
-            pending = json.loads(pending_path.read_text(encoding="utf-8"))
-            self.assertTrue(pending["pending"])
-            self.assertEqual(pending["reason"], "terminal_delivery_pending_reply")
-            self.assertEqual(pending["text"], "Adame, spočítej dnešní handoffy.")
-            history = self.read_jsonl(history_path)
-            self.assertEqual(history[-1]["route"], "terminal_delivery_pending_reply")
-            self.assertEqual(history[-1]["adam_response"], result["message"])
-            attempts = self.read_jsonl(Path(temp_dir) / "delivery_attempts.jsonl")
-            self.assertEqual(attempts[-1]["delivery_status"], "voice_command_delivery_unverified")
-            self.assertEqual(attempts[-1]["bridge_status"], "delivered_tty")
-            self.assertNotIn("spočítej", json.dumps(attempts[-1], ensure_ascii=False))
-
-    def test_cockpit_save_voice_text_action_leaves_delivery_to_running_watcher(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            bridge_calls = []
-
-            def fake_bridge(command):
-                bridge_calls.append(command.text)
-                return {"ok": True, "verified": True, "status": "delivered"}
-
-            with patch(
-                "app.cockpit.load_voice_mode_status",
-                return_value={"ok": True, "running": True, "pid": 12345},
-            ):
-                result = cockpit_save_voice_text_action(
-                    {"text": "Adame, zpracuj jeden test."},
-                    inbox_dir=Path(temp_dir),
-                    terminal_bridge=None,
-                    pending_path=Path(temp_dir) / "pending_for_adam.json",
-                    history_path=Path(temp_dir) / "adam_voice_history.jsonl",
-                )
-
-            latest_path = Path(temp_dir) / "latest_voice_command.md"
-            self.assertTrue(result["ok"])
-            self.assertEqual(result["voice_delivery_status"], "watcher_will_deliver")
-            self.assertIn("Běžící watcher", result["message"])
-            self.assertEqual(bridge_calls, [])
-            self.assertIn("Adame, zpracuj jeden test.", latest_path.read_text(encoding="utf-8"))
-            self.assertFalse((Path(temp_dir) / "delivery_attempts.jsonl").exists())
-
-    def test_running_watcher_prevents_inline_delivery_for_text_and_recording(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            inbox = Path(temp_dir)
-            voice_mode = {"ok": True, "running": True, "pid": 12345}
-            with (
-                patch("app.cockpit.load_voice_mode_status", return_value=voice_mode),
-                patch(
-                    "app.cockpit.deliver_saved_voice_command_inline",
-                    side_effect=AssertionError("inline delivery must not run while watcher is active"),
-                ) as inline_delivery,
-            ):
-                text_result = cockpit_save_voice_text_action(
-                    {"text": "Adame, ověř textovou cestu."},
-                    inbox_dir=inbox,
-                    terminal_bridge=None,
-                    pending_path=inbox / "pending_for_adam.json",
-                    history_path=inbox / "adam_voice_history.jsonl",
-                )
-                recording_result = cockpit_transcribe_voice_action(
-                    {"audio_base64": "abc", "mime_type": "audio/webm", "language": "cs"},
-                    inbox_dir=inbox,
-                    terminal_bridge=None,
-                    pending_path=inbox / "pending_for_adam.json",
-                    history_path=inbox / "adam_voice_history.jsonl",
-                    transcriber=lambda *args, **kwargs: {"ok": True, "text": "Adame, ověř nahranou cestu."},
-                )
-
-            self.assertEqual(text_result["voice_delivery_status"], "watcher_will_deliver")
-            self.assertEqual(recording_result["voice_delivery_status"], "watcher_will_deliver")
-            inline_delivery.assert_not_called()
-            self.assertFalse((inbox / "delivery_attempts.jsonl").exists())
-
-    def test_cockpit_save_voice_text_action_uses_inline_fallback_without_watcher(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            bridge_calls = []
-
-            def fake_bridge(command):
-                bridge_calls.append(command.text)
-                return {"ok": True, "verified": True, "status": "delivered"}
-
-            result = cockpit_save_voice_text_action(
-                {"text": "Adame, zpracuj fallback."},
-                inbox_dir=Path(temp_dir),
-                terminal_bridge=fake_bridge,
-                pending_path=Path(temp_dir) / "pending_for_adam.json",
-                history_path=Path(temp_dir) / "adam_voice_history.jsonl",
-            )
-
-            self.assertTrue(result["ok"])
-            self.assertEqual(result["voice_delivery_status"], "voice_command_delivered")
-            self.assertEqual(bridge_calls, ["Adame, zpracuj fallback."])
-
-    def test_selected_voice_delivery_transport_defaults_to_local_tty(self) -> None:
-        with patch.dict("os.environ", {}, clear=True):
-            self.assertEqual(selected_voice_delivery_transport(), "local_tty")
-
-    def test_selected_voice_delivery_transport_accepts_sshl_alias(self) -> None:
-        with patch.dict("os.environ", {"ADAM_VOICE_TRANSPORT": "sslh"}):
-            self.assertEqual(selected_voice_delivery_transport(), "managed_screen")
-
-    def test_cockpit_save_voice_text_action_uses_configured_managed_screen_transport(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            starts = []
-            deliveries = []
-
-            def fake_start():
-                starts.append(True)
-                return {"ok": True, "status": "already_running"}
-
-            def fake_wait():
-                self.fail("already running service should not wait")
-
-            def fake_deliver(prompt, **kwargs):
-                deliveries.append({"prompt": prompt, "kwargs": kwargs})
-                return {"ok": True, "verified": True, "status": "delivered_screen", "message": "screen ok"}
-
-            with (
-                patch.dict("os.environ", {"ADAM_VOICE_TRANSPORT": "managed_screen"}),
-                patch("app.cockpit.load_voice_mode_status", return_value={"ok": True, "running": False}),
-                patch("app.cockpit.start_adam_service", side_effect=fake_start),
-                patch("app.cockpit.wait_for_adam_ready", side_effect=fake_wait),
-                patch("app.cockpit.deliver_prompt_to_adam_screen", side_effect=fake_deliver),
-            ):
-                result = cockpit_save_voice_text_action(
-                    {"text": "Adame, řekni krátký stav."},
-                    inbox_dir=Path(temp_dir),
-                    pending_path=Path(temp_dir) / "pending_for_adam.json",
-                    history_path=Path(temp_dir) / "adam_voice_history.jsonl",
-                )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["voice_delivery_status"], "voice_command_delivered")
-        self.assertEqual(result["voice_delivery"]["voice_transport"], "managed_screen")
-        self.assertEqual(starts, [True])
-        self.assertEqual(deliveries[0]["kwargs"], {"submit": True})
-        self.assertIn("Adame, řekni krátký stav.", deliveries[0]["prompt"])
-
-    def test_cockpit_save_voice_text_action_rejects_empty_text(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            result = cockpit_save_voice_text_action({"text": "   "}, inbox_dir=Path(temp_dir))
-
-            self.assertFalse(result["ok"])
-            self.assertEqual(result["status"], "empty_voice_text")
-            self.assertFalse((Path(temp_dir) / "latest_voice_command.md").exists())
-
-    def test_frozen_voice_bridge_rejects_text_before_saving(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            result = cockpit_save_voice_text_action(
-                {"text": "Tento text se nesmí uložit."},
-                inbox_dir=Path(temp_dir),
-                frozen=True,
-            )
-
-            self.assertFalse(result["ok"])
-            self.assertFalse(result["saved"])
-            self.assertEqual(result["status"], "voice_bridge_frozen")
-            self.assertFalse((Path(temp_dir) / "latest_voice_command.md").exists())
-
-    def test_cockpit_html_does_not_expose_frozen_voice_bridge_controls(self) -> None:
-        self.assertNotIn('id="voiceRecordBtn"', COCKPIT_HTML)
-        self.assertNotIn('id="voiceTranscript"', COCKPIT_HTML)
-        self.assertNotIn('id="voiceTranscriptSendBtn"', COCKPIT_HTML)
-        self.assertNotIn('id="voiceModeStartBtn"', COCKPIT_HTML)
-        self.assertNotIn("const VOICE_BRIDGE_FROZEN", COCKPIT_HTML)
-        self.assertNotIn("VoiceBridge je pozastavený", COCKPIT_HTML)
-
-    def test_save_voice_command_to_inbox_writes_latest_and_index(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            result = save_voice_command_to_inbox(
-                {"text": "Najdi poslední PDF."},
-                inbox_dir=Path(temp_dir),
-            )
-            latest_path = Path(temp_dir) / "latest_voice_command.md"
-            index_path = Path(temp_dir) / "index.jsonl"
-
-            self.assertTrue(result["saved"])
-            self.assertTrue(latest_path.exists())
-            self.assertTrue(index_path.exists())
-            self.assertIn("Najdi poslední PDF.", latest_path.read_text(encoding="utf-8"))
-            self.assertIn("transcribed_only_not_executed", latest_path.read_text(encoding="utf-8"))
-            self.assertIn("voice_command_", result["voice_command_path"])
-            self.assertIn("latest_voice_command.md", result["latest_voice_command_path"])
-
-    def test_cockpit_transcribe_voice_action_reports_error(self) -> None:
-        def fail(*args, **kwargs):
-            raise cockpit_module.TranscriptionError("Chybí OPENAI_API_KEY")
-
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            events_path = Path(temp_dir) / "frontend_events.jsonl"
-            with patch("app.cockpit.VOICE_FRONTEND_EVENTS_PATH", events_path):
-                result = cockpit_transcribe_voice_action(
-                    {"audio_base64": "", "mime_type": "audio/webm"},
-                    transcriber=fail,
-                )
-            events = self.read_jsonl(events_path)
-
-        self.assertFalse(result["ok"])
-        self.assertEqual(result["status"], "transcription_failed")
-        self.assertIn("Chybí OPENAI_API_KEY", result["message"])
-        self.assertEqual(events[-1]["kind"], "backend_transcribe_failed")
-        self.assertIn("Chybí OPENAI_API_KEY", events[-1]["detail"]["error"])
 
     def test_parse_active_projects_table_and_summary(self) -> None:
         text = """# Active Projects
