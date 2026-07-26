@@ -1,59 +1,35 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-26 10:09 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-26 15:47 CEST
 
 ### Hotovo
-- Fáze 8.1 až 8.3a jsou serverově nasazené a ověřené. Běžící Cockpit je na
-  `6854fd2`: plná brána 1232 testů, smoke 5/5 a shodný serverový otisk.
-- Míla vizuálně potvrdil panel `Práce`: main/GitHub, nasazení, oba profilové
-  workspaces i runtime byly čitelné a aktuální.
-- Fáze 8.3b předává tentýž společný redigovaný snapshot také do modelového
-  vstupu r-Adama, vždy právě jednou před blokem vývojových oprávnění.
-- Modelový blok používá jen pevně povolené stavové kódy, krátké Git otisky,
-  počty a booleovské důkazy. Neobsahuje zprávy, odpovědi, soukromé cesty, PID
-  ani identifikátory vláken.
+- Cockpit už neobsahuje starý oddíl Hlas ani jeho Voice Bridge JavaScript; Human–Adam mikrofon, předčítání a obecné ovládání zůstaly zachované
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
-- Fáze 8.3b vstoupí do běžícího Cockpitu až samostatně potvrzeným nasazením;
-  tento checkpoint sám runtime nemění.
-- Po nasazení zbývá jeden krátký živý read-only tah r-Adama a kontrola, že
-  konverzace pokračuje i při stavu `unverified`.
-- První skutečný checkpoint automaticky promítnutý backendem 8.2 ještě nebyl
-  provozně vytvořen; tento terminálový checkpoint jej nenahrazuje.
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 
 ### Rizika
-- Každý tah r-Adama přidává jeden read-only audit GitHubu. Jeho selhání může
-  zhoršit přesnost nebo odezvu, ale nezablokuje konverzaci a stav zůstane
-  fail-closed jako `unverified`.
-- Neověřený nebo cizí snapshot se nikdy nepovýší na aktuální a nepropustí
-  nepovolená pole.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Samostatně potvrzeně nasadit checkpoint 8.3b a provést krátký živý read-only
-  test r-Adama.
+- Provést checkpoint, push a nasazení ovládacími prvky Cockpitu a vizuálně ověřit hlavní obrazovku, předčítání, TVBCP a Human–Adam mikrofon
 
 ### Rozhodnutí
-- UI i r-Adam spotřebovávají jedinou backendovou klasifikaci z fáze 8.1.
-  Modelový serializer pouze allowlistuje výstup; nevytváří druhou rozhodovací
-  logiku.
-- Fáze 8.3b nemění UI, persistence, reconnect, synchronizaci ani write
-  oprávnění.
+- Legacy oddíl Hlas se z Cockpitu odstraňuje, zatímco Human–Adam mikrofon, obecné předčítání, backendové endpointy a private stav zůstávají zachované
 
 ### Navrhované další kroky
-- Později přejmenovat marker na přesnější `Stav při posledním checkpointu`;
-  historické bloky nepřepisovat.
-- Po živém testu uzavřít fázi 8.3 a vrátit se k dalšímu plánovanému projektu.
+- Po živém ověření připravit samostatný audit dalšího backendového řezu Voice Bridge
+- Private stav nemazat ani nemigrovat bez samostatného rozhodnutí
 
 ### Technický stav checkpointu
-- Plná Cockpit Quality Gate prošla 1237 testy za 324,1 s.
-- Cílená sada prošla 134 testy; širší Cockpit regrese 329 testy.
-- Git před checkpointem: `main == origin/main` na `6854fd2`.
-- Poslední serverově potvrzené nasazení: `6854fd2` · 1232 testů · smoke 5/5 ·
-  2026-07-26 09:22 CEST.
-- Tento snapshot sám nepotvrzuje pozdější push ani nasazení.
-- Tato sekce nahrazuje jen předchozí aktuální souhrn; chronologické bloky níže
-  zůstávají historickými snapshoty.
+- Změna je otestovaná (1259 testů).
+- Git před checkpointem: `main == origin/main` na `14a2dc06f750`.
+- Poslední serverově potvrzené nasazení: `14a2dc06f750` · odpovídá ověřenému main před tímto checkpointem · 1258 testů · smoke 5/5 · 2026-07-26T12:46:36+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+- Tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
+- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP – Architektura komunikace Samantha
@@ -3065,3 +3041,30 @@ Technický důkaz:
 - Plná Cockpit Quality Gate prošla 1237 testy za 324,1 s.
 - Cílená sada 134 testů a širší Cockpit sada 329 testů prošly.
 - Python, JavaScript, shell, whitespace a Git safety jsou zelené.
+
+### 2026-07-26 15:47 CEST – Cockpit už neobsahuje starý oddíl Hlas ani jeho Voice Bridge JavaScript; Human–Adam mikrofon, předčítání a obecné ovládání zůstaly zachované
+
+Hotovo:
+- Cockpit už neobsahuje starý oddíl Hlas ani jeho Voice Bridge JavaScript; Human–Adam mikrofon, předčítání a obecné ovládání zůstaly zachované
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+Otevřeno:
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- Legacy oddíl Hlas se z Cockpitu odstraňuje, zatímco Human–Adam mikrofon, obecné předčítání, backendové endpointy a private stav zůstávají zachované
+
+Další krok:
+- Provést checkpoint, push a nasazení ovládacími prvky Cockpitu a vizuálně ověřit hlavní obrazovku, předčítání, TVBCP a Human–Adam mikrofon
+
+Navrhované další kroky:
+- Po živém ověření připravit samostatný audit dalšího backendového řezu Voice Bridge
+- Private stav nemazat ani nemigrovat bez samostatného rozhodnutí
+
+Technický důkaz:
+- plná Cockpit brána: 1259 testů, 307.7 s, výsledek OK.
+- Pracovní proud: `layer-human-adam-development`.
+- Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.

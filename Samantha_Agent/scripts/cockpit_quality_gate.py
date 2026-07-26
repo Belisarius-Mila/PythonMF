@@ -214,6 +214,7 @@ TEST_MODULES = (
     "tests.test_cockpit",
     "tests.test_codex_approval_cockpit_contract",
     "tests.test_codex_approval_state",
+    "tests.test_cockpit_voice_frontend_retirement",
     "tests.test_cockpit_http_security",
     "tests.test_adam_service",
     "tests.test_safety_quick_checks",

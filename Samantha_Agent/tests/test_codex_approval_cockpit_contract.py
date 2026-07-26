@@ -19,16 +19,14 @@ class CodexApprovalCockpitContractTests(unittest.TestCase):
         self.assertIn("codex_approval=load_codex_approval_request", source)
         self.assertIn("codex_approval_loader=codex_approval_loader or load_codex_approval_request", source)
         self.assertIn("codex_approval: data.codex_approval || {}", source)
-        self.assertIn("const codexApproval = data.codex_approval || {};", source)
+        self.assertIn("renderCodexApproval(data.codex_approval || {});", source)
         self.assertNotIn("voiceMode.codex_approval", source)
 
-    def test_approval_card_is_outside_voice_and_has_no_legacy_delivery(self) -> None:
+    def test_approval_card_remains_after_voice_section_retirement(self) -> None:
         source = (PROJECT_ROOT / "app" / "cockpit.py").read_text(encoding="utf-8")
 
-        self.assertLess(
-            source.index('id="codexApprovalCard"'),
-            source.index('id="voiceCommandDetails"'),
-        )
+        self.assertIn('id="codexApprovalCard"', source)
+        self.assertNotIn('id="voiceCommandDetails"', source)
         self.assertIn('id="codexApprovalOpenHumanAdamBtn"', source)
         self.assertIn('window.location.href = "/human-adam/"', source)
         self.assertNotIn("codexApprovalSendConfirmationBtn", source)

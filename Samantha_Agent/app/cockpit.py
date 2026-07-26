@@ -13101,13 +13101,6 @@ COCKPIT_HTML = """<!doctype html>
     section h2 { margin: 0; padding: 12px 14px; font-size: 14px; border-bottom: 1px solid var(--line); background: #f8fafc; }
     .body { padding: 13px 14px; }
     .status-line { color: var(--muted); font-size: 13px; }
-    .voice-command-grid { display: grid; gap: 10px; }
-    .voice-command-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-    .voice-command-actions.voice-primary-actions { justify-content: flex-start; }
-    .voice-command-actions.voice-text-actions { justify-content: flex-end; }
-    .voice-command-actions button.recording { background: #fee2e2; color: var(--red); }
-    .voice-command-actions button.voice-audio-unlock.active { background: var(--green); color: white; }
-    .voice-command-actions button:disabled { cursor: not-allowed; }
     .voice-card { border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: #f8fafc; display: grid; gap: 8px; }
     .voice-card.warn { border-color: #fbbf24; background: #fffbeb; }
     .voice-card-title { font-size: 13px; font-weight: 700; color: var(--ink); }
@@ -13115,10 +13108,7 @@ COCKPIT_HTML = """<!doctype html>
     .voice-card-field { display: grid; gap: 2px; }
     .voice-card-label { color: var(--muted); font-size: 12px; font-weight: 700; }
     .voice-card-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-    .voice-card-actions button.needs-tap { background: var(--blue); color: white; }
     .voice-card.hidden { display: none; }
-    .voice-transcript-row { display: grid; gap: 6px; }
-    .voice-transcript-row label { color: #253047; font-size: 12px; font-weight: 750; }
     .pills { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; }
     .pill { border: 1px solid var(--line); border-radius: 999px; padding: 5px 8px; font-size: 12px; background: #f8fafc; color: #344054; }
     .ok { color: var(--green); }
@@ -13229,7 +13219,6 @@ COCKPIT_HTML = """<!doctype html>
     .family-calendar-empty { padding: 18px; color: var(--muted); text-align: center; }
 	    .project-toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
 	    .project-toolbar button.active { background: var(--blue); color: white; }
-	    .voice-command-actions button.active { background: var(--blue); color: white; }
 	    .project-list { display: grid; gap: 9px; }
 	    .project-card { border: 1px solid #edf0f4; border-radius: 8px; padding: 11px; background: #fbfcfe; display: grid; gap: 7px; }
 	    .project-card.needs-attention { border-color: #fed7aa; background: #fffaf3; }
@@ -13305,8 +13294,7 @@ COCKPIT_HTML = """<!doctype html>
     .consistency-finding-meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
     .section-toggle { margin: 18px 0; }
     .section-toggle > summary,
-    .service-panel > summary,
-    .voice-advanced > summary {
+    .service-panel > summary {
       cursor: pointer;
       font-weight: 750;
       color: #172033;
@@ -13316,7 +13304,6 @@ COCKPIT_HTML = """<!doctype html>
     .section-toggle > summary { font-size: 20px; }
     .service-panel { margin-top: 12px; border-top: 1px solid var(--line); }
     .service-actions { margin-top: 10px; }
-    .voice-advanced { margin-top: 8px; border-top: 1px solid var(--line); }
     @media (max-width: 1050px) { .today-dashboard { grid-template-columns: 1fr; } .work-grid { grid-template-columns: 1fr; } }
 	    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .dashboard-metrics { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } .health-grid { grid-template-columns: 1fr; } .search-controls { grid-template-columns: 1fr; } .search-result-head { grid-template-columns: 1fr; } .search-result-head-actions { justify-content: flex-start; } .recovery-grid { grid-template-columns: 1fr; } .janicka-grid { grid-template-columns: 1fr; } .janicka-action { grid-template-columns: 1fr; } .library-archive-grid { grid-template-columns: 1fr; } .library-text-grid { grid-template-columns: 1fr; } .library-attachment-grid { grid-template-columns: 1fr; } .library-edit-grid { grid-template-columns: 1fr; } .library-edit-source-grid { grid-template-columns: 1fr; } .library-controls { grid-template-columns: 1fr; } .library-layout { grid-template-columns: 1fr; } .library-action-group { justify-content: flex-start; } .library-action-group-label { width: 100%; text-align: left; } .family-calendar-form-grid { grid-template-columns: 1fr; } .family-calendar-preview-grid { grid-template-columns: 1fr; } header { height: auto; padding: 12px 16px; align-items: flex-start; gap: 10px; flex-direction: column; } .app-card { grid-template-columns: 1fr; } }
   </style>
@@ -13362,7 +13349,6 @@ COCKPIT_HTML = """<!doctype html>
           <div id="dashboardMorningSentence" class="status-line">Ranní stav se načte spolu s Cockpitem.</div>
           <div class="dashboard-row"><span class="dashboard-label">Dokumenty</span><span id="dashboardDocuments" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Připomenutí</span><span id="dashboardReminders" class="dashboard-value"></span></div>
-          <div class="dashboard-row"><span class="dashboard-label">Hlas</span><span id="dashboardVoiceMode" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Záloha</span><span id="dashboardBackup" class="dashboard-value"></span></div>
           <div class="dashboard-row"><span class="dashboard-label">Systém</span><span id="dashboardQuantitative" class="dashboard-value"></span></div>
           <details class="service-panel">
@@ -13403,6 +13389,9 @@ COCKPIT_HTML = """<!doctype html>
 		      <div class="body">
 		        <div id="actionQueueStatus" class="status-line">Načítám doporučené akce...</div>
 		        <div id="actionQueueList" class="action-queue"></div>
+            <div class="actions">
+              <button class="secondary" id="tvbcpOpenBtn">TVBCP – pracovní protokol</button>
+            </div>
 		      </div>
 		    </section>
         <section id="codexApprovalCard" class="voice-card warn hidden" aria-live="assertive">
@@ -13434,70 +13423,6 @@ COCKPIT_HTML = """<!doctype html>
             <button class="secondary" id="codexApprovalClearBtn">Vyčistit kartu</button>
           </div>
         </section>
-        <details id="voiceCommandDetails" class="section-toggle">
-          <summary>Hlas</summary>
-		    <section id="voiceCommandPanel">
-		      <h2>Hlas / text pro Adama</h2>
-		      <div class="body voice-command-grid">
-		        <div class="voice-command-actions voice-primary-actions">
-		          <button class="primary" id="voiceRecordBtn" disabled>Nahrávání pozastaveno</button>
-		          <button class="secondary hidden" id="voiceStopBtn" disabled>Zastavit</button>
-		        </div>
-		        <div id="voiceCommandStatus" class="status-line warn">VoiceBridge je pozastavený. Pro komunikaci použij aktivní samantha/SSH relaci.</div>
-	        <div class="voice-transcript-row">
-	          <label for="voiceTranscript">Textový pokyn</label>
-	          <textarea id="voiceTranscript" placeholder="VoiceBridge je dočasně pozastavený." spellcheck="true" disabled></textarea>
-	        </div>
-		        <div class="voice-command-actions voice-text-actions">
-		          <button class="secondary voice-audio-unlock" id="voiceAudioUnlockBtn">Otevřít audiokanál</button>
-		          <button class="primary" id="voiceTranscriptSendBtn" disabled>Odesílání pozastaveno</button>
-		          <button class="secondary" id="tvbcpOpenBtn">TVBCP – pracovní protokol</button>
-		        </div>
-            <details class="voice-advanced">
-              <summary>Technické nastavení</summary>
-		        <div class="voice-command-actions">
-		          <button class="secondary" id="voiceModeToggleBtn" aria-pressed="false" disabled>Starý poslech: vypnuto</button>
-		          <button class="secondary" id="voiceModeStartBtn" disabled>Watcher pozastaven</button>
-		          <button class="secondary" id="voiceModeStopBtn">Zastavit watcher</button>
-		        </div>
-		          <div id="voiceModeRuntimeStatus" class="status-line">Adam Voice Mode watcher: čekám na kontrolu.</div>
-		          <div id="voiceBridgeStatus" class="status-line">Terminálový bridge: čekám na kontrolu.</div>
-		          <div id="voiceBridgeSessions" class="status-line">Codex relace: čekám na kontrolu.</div>
-		          <div id="voiceBridgeSwitcher" class="voice-card hidden">
-		            <div class="voice-card-title">Voice bridge cíl</div>
-		            <div id="voiceBridgeSwitcherStatus" class="status-line">Načítám dostupné Codex relace.</div>
-		            <div id="voiceBridgeSwitcherActions" class="voice-card-actions"></div>
-		          </div>
-		          <div id="safeReadonlyCard" class="voice-card">
-		            <div class="voice-card-title">Bezpečné kontroly</div>
-		            <div class="status-line">Pevný read-only allowlist bez volného shell příkazu.</div>
-		            <div class="voice-card-actions">
-		              <button class="secondary" data-safe-readonly="codex_sessions">Codex relace</button>
-		              <button class="secondary" data-safe-readonly="voice_bridge">Voice bridge</button>
-		            </div>
-		            <pre id="safeReadonlyResult" class="voice-card-text"></pre>
-		          </div>
-            </details>
-		        <div id="voicePendingStatus" class="status-line">Žádný hlasový pokyn nečeká na Adama.</div>
-		        <div id="voiceLastResponseCard" class="voice-card hidden">
-		          <div class="voice-card-title">Poslední Adamova odpověď</div>
-		          <div id="voiceLastResponseText" class="voice-card-text"></div>
-		          <div class="voice-card-actions">
-		            <button class="secondary" id="voiceLastResponseSpeakBtn">Přehrát Adamovu odpověď</button>
-		          </div>
-		        </div>
-		        <div id="voiceApprovalCard" class="voice-card warn hidden">
-		          <div class="voice-card-title">Schválení přes Cockpit</div>
-		          <div id="voiceApprovalReason" class="status-line"></div>
-		          <div id="voiceApprovalText" class="voice-card-text"></div>
-		          <div class="voice-card-actions">
-		            <button class="primary" id="voiceApprovalApproveBtn">Schválit</button>
-		            <button class="secondary" id="voiceApprovalRejectBtn">Zamítnout</button>
-		          </div>
-		        </div>
-	      </div>
-	    </section>
-        </details>
     <details id="documentsPanel" class="section-toggle">
       <summary>Dokumenty</summary>
 		    <section>
@@ -14531,7 +14456,6 @@ COCKPIT_HTML = """<!doctype html>
     const dashboardDocuments = document.getElementById("dashboardDocuments");
     const dashboardScanDocu = document.getElementById("dashboardScanDocu");
     const dashboardReminders = document.getElementById("dashboardReminders");
-    const dashboardVoiceMode = document.getElementById("dashboardVoiceMode");
     const dashboardProjects = document.getElementById("dashboardProjects");
     const dashboardQuantitative = document.getElementById("dashboardQuantitative");
     const dashboardConsistency = document.getElementById("dashboardConsistency");
@@ -14564,25 +14488,6 @@ COCKPIT_HTML = """<!doctype html>
     const devRunnerPanel = document.getElementById("devRunnerPanel");
     const devRunnerOutput = document.getElementById("devRunnerOutput");
     const dashboardActionHint = document.getElementById("dashboardActionHint");
-    const voiceCommandDetails = document.getElementById("voiceCommandDetails");
-    const voiceModeToggleBtn = document.getElementById("voiceModeToggleBtn");
-    const voiceModeStartBtn = document.getElementById("voiceModeStartBtn");
-    const voiceModeStopBtn = document.getElementById("voiceModeStopBtn");
-    const voiceRecordBtn = document.getElementById("voiceRecordBtn");
-    const voiceStopBtn = document.getElementById("voiceStopBtn");
-    const voiceCommandStatus = document.getElementById("voiceCommandStatus");
-    const voiceModeRuntimeStatus = document.getElementById("voiceModeRuntimeStatus");
-    const voiceBridgeStatus = document.getElementById("voiceBridgeStatus");
-    const voiceBridgeSessions = document.getElementById("voiceBridgeSessions");
-    const voiceBridgeSwitcher = document.getElementById("voiceBridgeSwitcher");
-    const voiceBridgeSwitcherStatus = document.getElementById("voiceBridgeSwitcherStatus");
-    const voiceBridgeSwitcherActions = document.getElementById("voiceBridgeSwitcherActions");
-    const safeReadonlyCard = document.getElementById("safeReadonlyCard");
-    const safeReadonlyResult = document.getElementById("safeReadonlyResult");
-    const voicePendingStatus = document.getElementById("voicePendingStatus");
-    const voiceLastResponseCard = document.getElementById("voiceLastResponseCard");
-    const voiceLastResponseText = document.getElementById("voiceLastResponseText");
-    const voiceLastResponseSpeakBtn = document.getElementById("voiceLastResponseSpeakBtn");
     const codexApprovalCard = document.getElementById("codexApprovalCard");
     const codexApprovalReason = document.getElementById("codexApprovalReason");
     const codexApprovalCommand = document.getElementById("codexApprovalCommand");
@@ -14594,14 +14499,6 @@ COCKPIT_HTML = """<!doctype html>
     const codexApprovalCopyConfirmationBtn = document.getElementById("codexApprovalCopyConfirmationBtn");
     const codexApprovalOpenHumanAdamBtn = document.getElementById("codexApprovalOpenHumanAdamBtn");
     const codexApprovalClearBtn = document.getElementById("codexApprovalClearBtn");
-    const voiceApprovalCard = document.getElementById("voiceApprovalCard");
-    const voiceApprovalReason = document.getElementById("voiceApprovalReason");
-    const voiceApprovalText = document.getElementById("voiceApprovalText");
-    const voiceApprovalApproveBtn = document.getElementById("voiceApprovalApproveBtn");
-    const voiceApprovalRejectBtn = document.getElementById("voiceApprovalRejectBtn");
-    const voiceTranscript = document.getElementById("voiceTranscript");
-    const voiceAudioUnlockBtn = document.getElementById("voiceAudioUnlockBtn");
-    const voiceTranscriptSendBtn = document.getElementById("voiceTranscriptSendBtn");
     const tvbcpOpenBtn = document.getElementById("tvbcpOpenBtn");
     const urgentReminderAlert = document.getElementById("urgentReminderAlert");
     const urgentReminderAlertTitle = document.getElementById("urgentReminderAlertTitle");
@@ -14702,32 +14599,6 @@ COCKPIT_HTML = """<!doctype html>
         ...frontendErrorHistory
       ].slice(0, 8);
       setHealthValue(frontendHealthError, text.slice(0, 220), "bad");
-    }
-
-    function recordVoiceFrontendEvent(kind, detail = {}) {
-      const payload = {
-        kind,
-        detail: {
-          ...detail,
-          visibility: document.hidden ? "hidden" : "visible",
-          url: window.location.host || ""
-        }
-      };
-      try {
-        const body = JSON.stringify(payload);
-        if (navigator.sendBeacon) {
-          const blob = new Blob([body], {type: "application/json"});
-          if (navigator.sendBeacon("/api/voice-bridge/frontend-event", blob)) return;
-        }
-        fetch("/api/voice-bridge/frontend-event", {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body,
-          keepalive: true
-        }).catch(() => {});
-      } catch (_) {
-        // Voice diagnostics must never block the UI.
-      }
     }
 
     function clearFrontendErrorsMatching(matchText) {
@@ -14884,17 +14755,6 @@ COCKPIT_HTML = """<!doctype html>
         "dashboardSpeakBtn",
         "dashboardSpeakSelectionBtn",
         "dashboardRefreshBtn",
-        "voiceCommandDetails",
-        "voiceModeToggleBtn",
-        "voiceModeStartBtn",
-        "voiceModeStopBtn",
-        "voiceModeRuntimeStatus",
-        "voiceBridgeStatus",
-        "voiceBridgeSessions",
-        "voicePendingStatus",
-        "voiceLastResponseCard",
-        "voiceLastResponseText",
-        "voiceLastResponseSpeakBtn",
         "codexApprovalCard",
         "codexApprovalReason",
         "codexApprovalCommand",
@@ -14903,15 +14763,6 @@ COCKPIT_HTML = """<!doctype html>
         "codexApprovalCopyConfirmationBtn",
         "codexApprovalOpenHumanAdamBtn",
         "codexApprovalClearBtn",
-        "voiceApprovalCard",
-        "voiceApprovalReason",
-        "voiceApprovalText",
-        "voiceApprovalApproveBtn",
-        "voiceApprovalRejectBtn",
-        "voiceRecordBtn",
-        "voiceStopBtn",
-        "voiceAudioUnlockBtn",
-        "voiceTranscriptSendBtn",
         "urgentReminderAlertBtn",
         "reviewReportBtn",
         "documentSearchBtn",
@@ -15055,7 +14906,6 @@ COCKPIT_HTML = """<!doctype html>
         if (reason.includes("záloh")) return "zkontrolovat stav zálohy";
         if (reason.includes("audit")) return "otevřít auditní detail";
         if (reason.includes("dokument")) return "otevřít dokumentovou frontu nebo ScanDocu";
-        if (reason.includes("hlas")) return "zkontrolovat terminálový bridge, případně poslat text znovu";
         return "otevřít detail dané oblasti a rozhodnout další krok";
       }
       return "nic akutního";
@@ -15069,7 +14919,6 @@ COCKPIT_HTML = """<!doctype html>
         reminders: "Připomenutí",
         backup: "Záloha",
         git: "Git",
-        voice: "Hlas",
         projects: "Projekty",
         quickNotes: "QN",
         quantitative: "Systém",
@@ -15139,7 +14988,6 @@ COCKPIT_HTML = """<!doctype html>
     }
 
     const FULL_STATUS_MONITOR_MS = 5 * 60 * 1000;
-    const VOICE_BRIDGE_FROZEN = true;
     const INTAKE_EMAIL_MONITOR_MS = 30 * 60 * 1000;
     const URGENT_REMINDERS_MONITOR_MS = 30 * 1000;
     let refreshInFlight = false;
@@ -15215,14 +15063,11 @@ COCKPIT_HTML = """<!doctype html>
         if (!latestMainStatusData) return;
         latestMainStatusData = {
           ...latestMainStatusData,
-          codex_approval: data.codex_approval || {},
-          voice_mode: data.voice_mode || {},
-          voice_bridge: data.voice_bridge || {}
+          codex_approval: data.codex_approval || {}
         };
-        renderVoiceStatus(latestMainStatusData);
+        renderCodexApproval(latestMainStatusData.codex_approval);
       } catch (err) {
         recordFrontendError(err);
-        setDashboardStatusSignal("voice", "warn", `Živý stav hlasu: ${err}`);
       } finally {
         liveStatusRefreshInFlight = false;
       }
@@ -16231,7 +16076,7 @@ COCKPIT_HTML = """<!doctype html>
             : "Připomenutí bez akutní akce"
       );
 
-      renderVoiceStatus(data);
+      renderCodexApproval(data.codex_approval || {});
 
       setDashboardPendingIfEmpty(dashboardProjects, "načítám samostatně");
       setDashboardPendingIfEmpty(dashboardQuantitative, "načítám samostatně");
@@ -16285,120 +16130,12 @@ COCKPIT_HTML = """<!doctype html>
 	      renderDashboardMorningSentence(data);
 	    }
 
-    function renderVoiceStatus(data) {
-      const voiceMode = data.voice_mode || {};
-      const voiceBridge = data.voice_bridge || {};
-      latestVoiceModeRuntime = voiceMode;
-      const voiceRunning = Boolean(voiceMode.running);
-      const voiceState = voiceMode.state || "unknown";
-      const voiceMessage = voiceMode.message || "Adam Voice Mode stav není načtený.";
-      const voiceBridgeWarn = voiceBridge.status === "warn" || voiceBridge.status === "missing";
-      const voiceBridgeMessage = voiceBridge.message || "Terminálový bridge stav není načtený.";
-      const totalCodexSessions = Number(voiceBridge.codex_tty_count || 0);
-      const humanCodexSessions = Number(voiceBridge.human_codex_tty_count || 0);
-      const managedCodexSessions = Array.isArray(voiceBridge.managed_codex_ttys)
-        ? voiceBridge.managed_codex_ttys.length
-        : 0;
-      const codexSessionOverview = `relace ${totalCodexSessions}: běžné ${humanCodexSessions}, spravované ${managedCodexSessions}`;
-      const voicePending = voiceMode.pending_for_adam || {};
-      const voicePendingActive = Boolean(voicePending.pending);
-      const voicePendingApprovalStatus = String(voicePending.approval_status || "");
-      const voicePendingNeedsApproval = pendingNeedsCockpitApproval(voicePending);
-      const voicePendingActionable = voicePendingActive && voicePendingNeedsApproval && voicePendingApprovalStatus !== "approved";
-      const voicePendingText = String(voicePending.text || "");
-      const voicePendingMessage = String(voicePending.message || "").trim();
-      const voicePendingShort = voicePendingText.length > 160 ? `${voicePendingText.slice(0, 160)}...` : voicePendingText;
-      const codexApproval = data.codex_approval || {};
-      const voiceReady = !voiceBridgeWarn && (voiceBridge.status === "ok" || voiceBridge.status === "unknown" || !voiceBridge.status);
-      const voiceBridgeDashboard = voiceBridgeWarn ? `<br><span class="warn">${escapeHtml(voiceBridgeMessage)}</span>` : "";
-      dashboardVoiceMode.innerHTML = voicePendingActive
-        ? `<span class="warn">${voicePendingActionable ? "čeká potvrzení" : "hlasový pokyn"}</span><br>${escapeHtml(voicePendingMessage || voicePendingShort || voiceState)}${voiceBridgeDashboard}`
-        : voiceBridgeWarn
-          ? `<span class="warn">zkontrolovat</span><br>${escapeHtml(voiceBridgeMessage)}`
-          : `<span class="${voiceReady ? "ok" : "warn"}">${voiceReady ? "připraveno" : "nezjištěno"}</span><br>přímé odeslání z Cockpitu | ${escapeHtml(codexSessionOverview)}`;
-      if (voiceModeRuntimeStatus) {
-        voiceModeRuntimeStatus.textContent = voiceRunning
-          ? `Adam Voice Mode watcher běží: ${voiceMessage}`
-          : `Adam Voice Mode watcher neběží: ${voiceMessage}`;
-      }
-      if (voiceBridgeStatus) {
-        voiceBridgeStatus.textContent = `Terminálový bridge: ${voiceBridgeMessage}`;
-        voiceBridgeStatus.classList.toggle("warn", voiceBridgeWarn);
-        voiceBridgeStatus.classList.toggle("ok", !voiceBridgeWarn);
-      }
-      if (voiceBridgeSessions) {
-        const markedTty = String(voiceBridge.marked_tty || "");
-        const effectiveTty = String(voiceBridge.effective_tty || "");
-        const managedLabels = voiceBridge.managed_codex_labels && typeof voiceBridge.managed_codex_labels === "object"
-          ? voiceBridge.managed_codex_labels
-          : {};
-        const orphanedLabels = voiceBridge.orphaned_janicka_labels && typeof voiceBridge.orphaned_janicka_labels === "object"
-          ? voiceBridge.orphaned_janicka_labels
-          : {};
-        const sessionLabels = {...managedLabels, ...orphanedLabels};
-        const codexTtys = Array.isArray(voiceBridge.codex_ttys)
-          ? voiceBridge.codex_ttys.map((item) => String(item || "")).filter(Boolean)
-          : [];
-        const sessionParts = codexTtys.map((tty) => (
-          sessionLabels[tty]
-            ? `${tty} -> ${sessionLabels[tty]}`
-            : tty === markedTty
-            ? `${tty} -> voice marker`
-            : tty === effectiveTty
-              ? `${tty} -> voice bridge`
-              : `${tty} -> Codex`
-        ));
-        if (markedTty && !codexTtys.includes(markedTty)) {
-          sessionParts.unshift(`${markedTty} -> voice bridge mimo běžící Codex relace`);
-        }
-        voiceBridgeSessions.textContent = sessionParts.length
-          ? `Codex relace: ${sessionParts.join(" | ")}`
-          : "Codex relace: žádná běžící relace nebyla nalezena";
-        voiceBridgeSessions.classList.toggle("warn", voiceBridgeWarn || (markedTty && !codexTtys.includes(markedTty)));
-        voiceBridgeSessions.classList.toggle("ok", !voiceBridgeWarn && (!markedTty || codexTtys.includes(markedTty)));
-      }
-      renderVoiceBridgeSwitcher(voiceBridge);
-      if (voicePendingStatus) {
-        voicePendingStatus.textContent = voicePendingActive
-          ? voicePendingActionable
-            ? `Čeká potvrzení: ${voicePendingMessage || voicePendingShort || "bez textu"}`
-            : voicePendingMessage || `Čeká hlasový pokyn na Adama: ${voicePendingShort || "bez textu"}`
-          : "Žádný hlasový pokyn nečeká na Adama.";
-      }
-	      renderVoiceLastResponse(voiceMode.last_adam_response || {}, {
-	        autoSpeak: voiceAudioUnlocked,
-	        allowAlreadyRenderedAutoSpeak: true
-	      });
-      renderCodexApproval(codexApproval);
-      renderVoiceApproval(voicePending);
-      if (voiceModeStartBtn) {
-        voiceModeStartBtn.disabled = voiceRunning;
-        voiceModeStartBtn.textContent = voiceRunning ? "Watcher běží" : "Spustit watcher";
-        voiceModeStartBtn.classList.toggle("active", voiceRunning);
-      }
-      if (voiceModeStopBtn) {
-        voiceModeStopBtn.disabled = !voiceRunning;
-        voiceModeStopBtn.textContent = voiceRunning ? "Zastavit watcher" : "Watcher neběží";
-      }
-      setDashboardStatusSignal(
-        "voice",
-        voicePendingActionable || voiceBridgeWarn ? "warn" : "ok",
-        voicePendingActionable
-          ? "Čeká hlasový pokyn na převzetí Adamem"
-          : voiceBridgeWarn
-          ? voiceBridgeMessage
-          : "Hlasový vstup v Cockpitu je připravený"
-      );
-      updateVoiceModeUi();
-    }
-
 	    function renderDashboardMorningSentence(data) {
       if (!dashboardMorningSentence) return;
       const stable = ["Cockpit odpovídá"];
       const warnings = [];
       const backup = data.backup_status || {};
       const git = data.git || {};
-      const bridge = data.voice_bridge || {};
 
       if (backup.status === "ok") {
         stable.push("záloha je v pořádku");
@@ -16410,10 +16147,6 @@ COCKPIT_HTML = """<!doctype html>
       } else {
         warnings.push("git");
       }
-      if (bridge.status && bridge.status !== "ok") {
-        warnings.push("Adam bridge");
-      }
-
       dashboardMorningSentence.textContent = warnings.length
         ? `Ranní stav: Samantha je vzhůru; ${stable.join(", ")}; zkontrolovat: ${warnings.join(", ")}.`
         : `Ranní stav: Samantha je vzhůru; ${stable.join(", ")}.`;
@@ -16604,7 +16337,6 @@ COCKPIT_HTML = """<!doctype html>
         reminders: 70,
         backup: 60,
         git: 50,
-        voice: 45,
         projects: 40,
         quickNotes: 35,
         quantitative: 30,
@@ -17377,22 +17109,12 @@ COCKPIT_HTML = """<!doctype html>
 	    let voiceSpeechInProgress = false;
 	    const VOICE_AUDIO_DECODE_TIMEOUT_MS = 5000;
 
-	    function updateVoiceAudioUnlockUi(opened) {
-	      if (!voiceAudioUnlockBtn) return;
-	      voiceAudioUnlockBtn.classList.toggle("active", Boolean(opened));
-	      voiceAudioUnlockBtn.textContent = opened ? "Audiokanál otevřený" : "Otevřít audiokanál";
-	      voiceAudioUnlockBtn.title = opened
-	        ? "Audio v tomto prohlížeči je připravené pro Adamovy odpovědi."
-	        : "Na iPhonu jednou klepni, aby prohlížeč dovolil přehrávat Adamovy odpovědi.";
-	    }
-
 	    function getVoiceAudioContext() {
 	      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
 	      if (!AudioContextClass) return null;
 	      if (voiceAudioContext && voiceAudioContext.state === "closed") {
 	        voiceAudioContext = null;
 	        voiceAudioUnlocked = false;
-	        updateVoiceAudioUnlockUi(false);
 	      }
 	      if (!voiceAudioContext) {
 	        voiceAudioContext = new AudioContextClass();
@@ -17402,8 +17124,6 @@ COCKPIT_HTML = """<!doctype html>
 	          const state = String(observedContext.state || "unknown");
 	          const running = state === "running";
 	          if (!running) voiceAudioUnlocked = false;
-	          updateVoiceAudioUnlockUi(running && voiceAudioUnlocked);
-	          recordVoiceFrontendEvent("audio_context_state_changed", {state});
 	        });
 	      }
 	      return voiceAudioContext;
@@ -17429,52 +17149,9 @@ COCKPIT_HTML = """<!doctype html>
 	      source.buffer = context.createBuffer(1, 1, 22050);
 	      source.connect(context.destination);
 	      source.start(0);
-	      if (!voiceAudioUnlocked) {
-	        autoSpokenAdamResponseKey = latestAdamResponseKey;
-	      }
 	      voiceAudioUnlocked = true;
-	      updateVoiceAudioUnlockUi(true);
 	      return true;
 	    }
-
-	    async function primeMobileVoiceAudioForCommandGesture(source = "voice_command") {
-	      if (!isRemoteCockpitClient() || !isMobileCockpitClient()) return voiceAudioUnlocked;
-	      const contextState = voiceAudioContext ? String(voiceAudioContext.state || "unknown") : "missing";
-	      if (voiceAudioUnlocked && contextState === "running") return true;
-	      try {
-	        const opened = await primeVoiceAudioContextFromGesture();
-	        recordVoiceFrontendEvent(opened ? "audio_channel_auto_opened" : "audio_channel_auto_open_unavailable", {source});
-	        return opened;
-	      } catch (err) {
-	        updateVoiceAudioUnlockUi(false);
-	        recordVoiceFrontendEvent("audio_channel_auto_open_failed", {source, error: String(err)});
-	        return false;
-	      }
-	    }
-
-		    async function openVoiceAudioChannel() {
-		      if (!voiceAudioUnlockBtn) return;
-		      voiceAudioUnlockBtn.disabled = true;
-		      showMessage("Otevírám audiokanál pro odpovědi Adama...");
-		      if (voiceCommandStatus) voiceCommandStatus.textContent = "Otevírám audiokanál pro odpovědi Adama...";
-		      try {
-		        const opened = await primeVoiceAudioContextFromGesture();
-		        if (opened) {
-		          showMessage("Audiokanál je otevřený. Stav watcheru se nemění.");
-		          if (voiceCommandStatus) voiceCommandStatus.textContent = "Audiokanál je otevřený. Watcher zůstává v dosavadním stavu.";
-		        } else {
-		          showMessage("Tento prohlížeč nepodporuje otevření webového audiokanálu.");
-		          if (voiceCommandStatus) voiceCommandStatus.textContent = "Tento prohlížeč nepodporuje otevření webového audiokanálu.";
-		        }
-		      } catch (err) {
-		        recordFrontendError(err);
-		        updateVoiceAudioUnlockUi(false);
-		        showMessage(`Audiokanál se nepodařilo otevřít: ${err}`);
-		        if (voiceCommandStatus) voiceCommandStatus.textContent = `Audiokanál se nepodařilo otevřít: ${err}`;
-		      } finally {
-		        voiceAudioUnlockBtn.disabled = false;
-		      }
-		    }
 
 	    function base64ToArrayBuffer(base64) {
 	      const binary = window.atob(String(base64 || ""));
@@ -17530,15 +17207,6 @@ COCKPIT_HTML = """<!doctype html>
 	      return true;
 	    }
 
-	    function markVoiceResponseNeedsTap(message) {
-	      if (voiceLastResponseSpeakBtn) {
-	        voiceLastResponseSpeakBtn.textContent = isRemoteCockpitClient() ? "Přehrát v iPhonu" : "Přehrát Adamovu odpověď";
-	        voiceLastResponseSpeakBtn.classList.add("needs-tap");
-	        voiceLastResponseSpeakBtn.disabled = false;
-	      }
-	      showMessage(message || "Prohlížeč zablokoval automatické přehrání. Klepni na tlačítko Přehrát v iPhonu.");
-	    }
-
 	    function isExpectedAudioAutoplayBlock(error) {
 	      const name = String(error && error.name || "").toLowerCase();
 	      const message = String(error && error.message || error || "").toLowerCase();
@@ -17554,24 +17222,17 @@ COCKPIT_HTML = """<!doctype html>
 	        showMessage("Nejdřív označ text, který mám přečíst.");
 	        return;
 	      }
-	      if (voiceSpeechInProgress) {
-	        recordVoiceFrontendEvent("audio_speak_skipped_in_progress", {source: options.userGesture ? "manual" : "automatic"});
-	        return;
-	      }
+	      if (voiceSpeechInProgress) return;
 	      voiceSpeechInProgress = true;
 	      const allowSystemFallback = options.allowSystemFallback !== false && shouldUseSystemSpeechFallback();
 	      button.disabled = true;
-	      button.classList.remove("needs-tap");
 	      showMessage(label || "Čtu nahlas...");
 	      try {
-	        if (options.userGesture && isRemoteCockpitClient()) {
+	        if (isRemoteCockpitClient()) {
 	          try {
-	            const recovered = await primeVoiceAudioContextFromGesture();
-	            recordVoiceFrontendEvent(recovered ? "audio_context_recovered_from_gesture" : "audio_context_recovery_unavailable", {source: "manual_play"});
+	            await primeVoiceAudioContextFromGesture();
 	          } catch (audioPrimeErr) {
 	            voiceAudioUnlocked = false;
-	            updateVoiceAudioUnlockUi(false);
-	            recordVoiceFrontendEvent("audio_context_recovery_failed", {source: "manual_play", error: String(audioPrimeErr)});
 	          }
 	        }
 	        const edgeRes = await fetch("/api/speech/edge-tts", {
@@ -17584,45 +17245,34 @@ COCKPIT_HTML = """<!doctype html>
 	          if (isRemoteCockpitClient() && voiceAudioUnlocked) {
 	            try {
 	              await playVoiceAudioBase64(edgeData);
-	              updateVoiceAudioUnlockUi(true);
-	              button.textContent = button === voiceLastResponseSpeakBtn ? "Přehrát Adamovu odpověď" : button.textContent;
-	              recordVoiceFrontendEvent("audio_play_succeeded", {player: "audio_context"});
 	              showMessage(edgeData.message || "Přehráno v tomto prohlížeči.");
 	              return;
 	            } catch (contextPlayErr) {
 	              if (isExpectedAudioAutoplayBlock(contextPlayErr)) {
 	                voiceAudioUnlocked = false;
-	                updateVoiceAudioUnlockUi(false);
-	                recordVoiceFrontendEvent("audio_autoplay_blocked", {player: "audio_context"});
-	              } else {
-	                recordVoiceFrontendEvent("audio_context_fallback", {error: String(contextPlayErr)});
 	              }
 	            }
 	          }
 	          const audio = new Audio(`data:${edgeData.mime_type || "audio/mpeg"};base64,${edgeData.audio_base64}`);
 	          try {
 	            await audio.play();
-	            button.textContent = button === voiceLastResponseSpeakBtn ? "Přehrát Adamovu odpověď" : button.textContent;
-	            recordVoiceFrontendEvent("audio_play_succeeded", {player: "html_audio"});
 	            showMessage(edgeData.message || "Přečteno českým mužským hlasem.");
 	            return;
 	          } catch (playErr) {
 	            const autoplayBlocked = isExpectedAudioAutoplayBlock(playErr);
-	            if (autoplayBlocked) {
-	              recordVoiceFrontendEvent("audio_autoplay_blocked", {player: "html_audio"});
-	            } else {
+	            if (!autoplayBlocked) {
 	              recordFrontendError(playErr);
 	            }
 	            if (!allowSystemFallback) {
-	              markVoiceResponseNeedsTap(autoplayBlocked
-	                ? "iPhone zablokoval automatické přehrání. Klepni na Přehrát v iPhonu."
-	                : "Přehrání v prohlížeči se nepodařilo. Klepni na Přehrát v iPhonu.");
+	              showMessage(autoplayBlocked
+	                ? "Prohlížeč zablokoval přehrání. Klepni na tlačítko pro předčítání znovu."
+	                : "Přehrání v prohlížeči se nepodařilo.");
 	              return;
 	            }
 	          }
 	        }
 	        if (!allowSystemFallback) {
-	          markVoiceResponseNeedsTap("Přehrání v prohlížeči se nepodařilo. Klepni na Přehrát v iPhonu.");
+	          showMessage("Přehrání v prohlížeči se nepodařilo.");
 	          return;
 	        }
 	        const res = await fetch("/api/speech/speak", {
@@ -17660,239 +17310,6 @@ COCKPIT_HTML = """<!doctype html>
 	      const text = currentSelection || lastSelectedSpeechText;
 	      await speakText(text, dashboardSpeakSelectionBtn, "Čtu vybraný text nahlas...");
 	    }
-
-	    let voiceRecorder = null;
-	    let voiceStream = null;
-	    let voiceChunks = [];
-	    let voiceStopTimer = null;
-		    let voiceRecordingStartedAt = 0;
-		    let voiceModeEnabled = localStorage.getItem("samanthaVoiceModeEnabled") === "true";
-		    let latestVoiceModeRuntime = null;
-		    let latestAdamResponseText = "";
-		    let latestAdamResponseKey = "";
-		    let autoSpokenAdamResponseKey = "";
-		    let voiceReplyPollTimer = null;
-		    let voiceReplyPollUntil = 0;
-		    let voiceReplyExpectedUserText = "";
-		    let voiceReplyMinCreatedAt = 0;
-
-	    function preferredVoiceMimeType() {
-	      if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) {
-	        return "";
-	      }
-	      const candidates = [
-	        "audio/webm;codecs=opus",
-	        "audio/webm",
-	        "audio/mp4",
-	        "audio/aac"
-	      ];
-	      return candidates.find((candidate) => MediaRecorder.isTypeSupported(candidate)) || "";
-	    }
-
-	    function directVoiceRecordingSupported() {
-	      return Boolean(
-	        window.isSecureContext &&
-	        navigator.mediaDevices &&
-	        navigator.mediaDevices.getUserMedia &&
-	        window.MediaRecorder
-	      );
-	    }
-
-	    function updateVoiceRecordingAvailability() {
-	      if (directVoiceRecordingSupported()) {
-	        voiceRecordBtn.textContent = "Nahrát pokyn";
-	        voiceRecordBtn.title = "";
-	        voiceRecordBtn.classList.remove("secondary");
-	        voiceRecordBtn.classList.add("primary");
-	        return;
-	      }
-	      voiceRecordBtn.textContent = "Diktovat text";
-	      voiceRecordBtn.title = "Na iPhonu přes HTTP prohlížeč nepustí mikrofon. Použij diktování do textového pole.";
-	      voiceRecordBtn.classList.remove("primary");
-	      voiceRecordBtn.classList.add("secondary");
-	    }
-
-	    function createVoiceRecorder(stream, mimeType) {
-	      const baseOptions = mimeType ? {mimeType} : {};
-	      try {
-	        return new MediaRecorder(stream, {
-	          ...baseOptions,
-	          audioBitsPerSecond: 32000
-	        });
-	      } catch (err) {
-	        return new MediaRecorder(stream, baseOptions);
-	      }
-	    }
-
-	    function blobToDataUrl(blob) {
-	      return new Promise((resolve, reject) => {
-	        const reader = new FileReader();
-	        reader.onloadend = () => resolve(String(reader.result || ""));
-	        reader.onerror = () => reject(reader.error || new Error("Audio se nepodařilo načíst."));
-	        reader.readAsDataURL(blob);
-	      });
-	    }
-
-	    function resetVoiceRecordingUi() {
-	      voiceRecordBtn.disabled = false;
-	      voiceRecordBtn.classList.remove("recording");
-	      voiceStopBtn.disabled = true;
-	      voiceStopBtn.classList.add("hidden");
-	      if (voiceStopTimer) {
-	        window.clearTimeout(voiceStopTimer);
-	        voiceStopTimer = null;
-	      }
-	    }
-
-		    function updateVoiceModeUi() {
-		      if (VOICE_BRIDGE_FROZEN) {
-		        voiceModeToggleBtn.disabled = true;
-		        voiceModeStartBtn.disabled = true;
-		        voiceModeStartBtn.textContent = "Watcher pozastaven";
-		        voiceCommandStatus.textContent = "VoiceBridge je pozastavený. Pro komunikaci použij aktivní samantha/SSH relaci.";
-		        return;
-		      }
-		      voiceModeToggleBtn.textContent = voiceModeEnabled ? "Starý poslech: zapnuto" : "Starý poslech: vypnuto";
-		      voiceModeToggleBtn.setAttribute("aria-pressed", voiceModeEnabled ? "true" : "false");
-		      voiceModeToggleBtn.classList.toggle("active", voiceModeEnabled);
-		      const watcherRunning = Boolean(latestVoiceModeRuntime && latestVoiceModeRuntime.running);
-		      if (voiceModeEnabled) {
-		        voiceCommandStatus.textContent = watcherRunning
-		          ? "Nahraj pokyn, nebo napiš text. Cockpit ho pošle Adamovi přímo; starý watcher běží jen jako záloha."
-		          : "Nahraj pokyn, nebo napiš text. Cockpit ho pošle Adamovi přímo.";
-		      } else {
-		        voiceCommandStatus.textContent = "Nahraj pokyn, nebo napiš text. Cockpit ho pošle Adamovi přímo.";
-		      }
-		    }
-
-		    function voiceResponseKey(lastResponse) {
-		      const text = String(lastResponse && lastResponse.adam_response || "").trim();
-		      if (!text) return "";
-		      const createdAt = String(lastResponse && lastResponse.created_at || "").trim();
-		      return `${createdAt}|${text}`;
-		    }
-
-		    function normalizeVoiceText(value) {
-		      return String(value || "").replace(/\\s+/g, " ").trim();
-		    }
-
-		    function voiceResponseMatchesCurrentRequest(lastResponse, options = {}) {
-		      const expectedUserText = normalizeVoiceText(options.expectedUserText || "");
-		      if (expectedUserText) {
-		        const actualUserText = normalizeVoiceText(lastResponse && lastResponse.user_text || "");
-		        if (actualUserText !== expectedUserText) {
-		          return false;
-		        }
-		      }
-		      const minCreatedAt = Number(options.minCreatedAt || 0);
-		      if (minCreatedAt) {
-		        const createdAtMs = Date.parse(String(lastResponse && lastResponse.created_at || ""));
-		        if (!Number.isFinite(createdAtMs) || createdAtMs < minCreatedAt) {
-		          return false;
-		        }
-		      }
-		      return true;
-		    }
-
-		    function renderVoiceLastResponse(lastResponse, options = {}) {
-		      const text = String(lastResponse && lastResponse.adam_response || "").trim();
-		      const responseKey = voiceResponseKey(lastResponse);
-		      const isNewResponse = Boolean(responseKey && responseKey !== latestAdamResponseKey);
-		      latestAdamResponseText = text;
-		      if (responseKey) {
-		        latestAdamResponseKey = responseKey;
-		      }
-		      if (!voiceLastResponseCard || !voiceLastResponseText) return;
-		      voiceLastResponseCard.classList.toggle("hidden", !text);
-		      voiceLastResponseText.textContent = text || "Zatím není uložená žádná Adamova odpověď.";
-		      if (voiceLastResponseSpeakBtn) {
-		        voiceLastResponseSpeakBtn.disabled = !text;
-		      }
-		      if (text && voiceCommandDetails && (options.openPanel || isNewResponse)) {
-		        voiceCommandDetails.open = true;
-		      }
-	      const allowRenderedAutoSpeak = options.allowAlreadyRenderedAutoSpeak === true;
-	      if (text && options.autoSpeak && responseKey && responseKey !== autoSpokenAdamResponseKey && (isNewResponse || allowRenderedAutoSpeak)) {
-	        autoSpokenAdamResponseKey = responseKey;
-	        recordVoiceFrontendEvent("voice_autospeak_requested", {response_created_at: String(lastResponse && lastResponse.created_at || "")});
-	        speakText(text, voiceLastResponseSpeakBtn, "Čtu Adamovu odpověď nahlas...", {allowSystemFallback: shouldUseSystemSpeechFallback()});
-	      }
-		    }
-
-		    async function refreshVoiceLatestResponse(options = {}) {
-		      try {
-		        const res = await fetch("/api/voice-mode/latest-response");
-		        const data = await res.json();
-		        if (data && data.available) {
-		          if (!voiceResponseMatchesCurrentRequest(data, options)) {
-		            return null;
-		          }
-		          renderVoiceLastResponse(data, {
-		            openPanel: true,
-		            autoSpeak: options.autoSpeak === true,
-		            allowAlreadyRenderedAutoSpeak: true
-		          });
-		          return data;
-		        }
-		      } catch (err) {
-		        recordFrontendError(err);
-		      }
-		      return null;
-		    }
-
-		    const VOICE_REPLY_POLL_DURATION_MS = 600000;
-
-		    function startVoiceReplyPolling({autoSpeak = true, durationMs = VOICE_REPLY_POLL_DURATION_MS, expectedUserText = ""} = {}) {
-		      voiceReplyExpectedUserText = expectedUserText;
-		      voiceReplyMinCreatedAt = Date.now() - 5000;
-		      voiceReplyPollUntil = Math.max(voiceReplyPollUntil, Date.now() + durationMs);
-		      if (voiceReplyPollTimer) return;
-		      voiceReplyPollTimer = window.setInterval(async () => {
-		        if (Date.now() > voiceReplyPollUntil) {
-		          window.clearInterval(voiceReplyPollTimer);
-			          voiceReplyPollTimer = null;
-			          return;
-			        }
-			        await refreshVoiceLatestResponse({
-			          autoSpeak,
-			          expectedUserText: voiceReplyExpectedUserText,
-			          minCreatedAt: voiceReplyMinCreatedAt
-			        });
-			      }, 3000);
-			      window.setTimeout(async () => {
-			        await refreshVoiceLatestResponse({
-			          autoSpeak,
-			          expectedUserText: voiceReplyExpectedUserText,
-			          minCreatedAt: voiceReplyMinCreatedAt
-			        });
-			      }, 1000);
-			    }
-
-		    function pendingNeedsCockpitApproval(pending) {
-		      if (!pending || !pending.pending) return false;
-		      if (pending.approval_status === "approved") return false;
-		      const reason = String(pending.reason || pending.status || "");
-		      return [
-		        "requires_confirmation",
-		        "outbound_confirmation"
-		      ].includes(reason);
-		    }
-
-		    function renderVoiceApproval(pending) {
-		      const visible = pendingNeedsCockpitApproval(pending);
-		      if (!voiceApprovalCard) return;
-		      voiceApprovalCard.classList.toggle("hidden", !visible);
-		      if (!visible) return;
-		      const reason = String(pending.reason || pending.status || "čeká na rozhodnutí");
-		      const message = String(pending.message || "").trim();
-		      const text = String(pending.text || "").trim();
-		      if (voiceApprovalReason) {
-		        voiceApprovalReason.textContent = message ? `${reason}: ${message}` : reason;
-		      }
-		      if (voiceApprovalText) {
-		        voiceApprovalText.textContent = text || "Pokyn nemá uložený text.";
-		      }
-		    }
 
 		    function renderCodexApproval(approval) {
 		      if (!codexApprovalCard) return;
@@ -17949,180 +17366,6 @@ COCKPIT_HTML = """<!doctype html>
 			      }
 			    }
 
-		    function renderVoiceBridgeSwitcher(voiceBridge) {
-		      if (!voiceBridgeSwitcher || !voiceBridgeSwitcherStatus || !voiceBridgeSwitcherActions) return;
-		      const markedTty = String(voiceBridge.marked_tty || "");
-		      const effectiveTty = String(voiceBridge.effective_tty || "");
-		      const managedLabels = voiceBridge.managed_codex_labels && typeof voiceBridge.managed_codex_labels === "object"
-		        ? voiceBridge.managed_codex_labels
-		        : {};
-		      const orphanedLabels = voiceBridge.orphaned_janicka_labels && typeof voiceBridge.orphaned_janicka_labels === "object"
-		        ? voiceBridge.orphaned_janicka_labels
-		        : {};
-		      const nonTargetLabels = {...managedLabels, ...orphanedLabels};
-		      const codexTtys = Array.isArray(voiceBridge.codex_ttys)
-		        ? voiceBridge.codex_ttys.map((item) => String(item || "")).filter(Boolean)
-		        : [];
-		      const bridgeTtys = codexTtys.filter((tty) => !nonTargetLabels[tty]);
-		      const staleTtys = bridgeTtys.filter((tty) => tty !== effectiveTty);
-		      voiceBridgeSwitcher.classList.toggle("hidden", codexTtys.length === 0);
-		      if (codexTtys.length === 0) {
-		        voiceBridgeSwitcherStatus.textContent = "Není nalezená žádná aktivní Codex relace.";
-		        voiceBridgeSwitcherActions.innerHTML = "";
-		        return;
-		      }
-		      const managedText = Object.keys(managedLabels).length
-		        ? ` Spravované relace: ${Object.keys(managedLabels).map((tty) => `${tty}=${managedLabels[tty]}`).join(", ")}.`
-		        : "";
-		      const orphanedText = Object.keys(orphanedLabels).length
-		        ? ` Staré Janička relace: ${Object.keys(orphanedLabels).map((tty) => `${tty}=${orphanedLabels[tty]}`).join(", ")}.`
-		        : "";
-		      voiceBridgeSwitcherStatus.textContent = markedTty
-		        ? `Marker: ${markedTty}. Efektivní cíl: ${effectiveTty || "nezjištěno"}.${managedText}${orphanedText}`
-		        : `Marker zatím není nastavený. Efektivní cíl: ${effectiveTty || "nezjištěno"}.${managedText}${orphanedText}`;
-		      voiceBridgeSwitcherActions.innerHTML = bridgeTtys.map((tty) => {
-		        const active = tty === markedTty;
-		        const effective = tty === effectiveTty && tty !== markedTty;
-		        const label = active
-		          ? `${tty} ✓ marker`
-		          : effective
-		            ? `${tty} ✓ aktivní cíl`
-		            : `Nastavit ${tty}`;
-		        return `<button class="${active || effective ? "primary" : "secondary"}" data-voice-bridge-tty="${escapeHtml(tty)}">${escapeHtml(label)}</button>`;
-		      }).join("");
-		      if (effectiveTty && staleTtys.length > 0) {
-		        voiceBridgeSwitcherActions.insertAdjacentHTML(
-		          "beforeend",
-		          `<button class="secondary" data-voice-bridge-cleanup="1">Ukončit staré relace (${staleTtys.length})</button>`
-		        );
-		      }
-		    }
-
-		    async function setVoiceBridgeMarker(tty, button) {
-		      const targetTty = String(tty || "").trim();
-		      if (!targetTty) return;
-		      if (button) button.disabled = true;
-		      try {
-		        const data = await postJson("/api/voice-bridge/marker", {tty: targetTty});
-		        showMessage(data.message || (data.ok ? `Voice bridge marker nastaven na ${targetTty}.` : "Marker se nepodařilo nastavit."));
-		        await refresh({silent: true, includeSecondary: false});
-		      } catch (err) {
-		        recordFrontendError(err);
-		        showMessage(`Nastavení voice bridge markeru selhalo: ${err}`);
-		      } finally {
-		        if (button) button.disabled = false;
-		      }
-		    }
-
-		    async function terminateStaleVoiceBridgeSessions(button) {
-		      if (button) button.disabled = true;
-		      try {
-		        const preview = await postJson("/api/voice-bridge/terminate-stale", {confirmed: false});
-		        const staleTtys = Array.isArray(preview.stale_ttys) ? preview.stale_ttys.join(", ") : "";
-		        if (preview.status === "no_stale_sessions") {
-		          showMessage(preview.message || "Žádné staré Codex relace k ukončení.");
-		          await refresh({silent: true, includeSecondary: false});
-		          return;
-		        }
-		        if (preview.status !== "confirmation_required") {
-		          showMessage(preview.message || "Staré Codex relace nejde bezpečně určit.");
-		          return;
-		        }
-		        const protectedTty = preview.protected_tty || "nezjištěno";
-		        const ok = window.confirm(`Ukončit staré Codex relace ${staleTtys}? Chráněná relace ${protectedTty} zůstane běžet.`);
-		        if (!ok) {
-		          showMessage("Ukončení starých Codex relací zrušeno.");
-		          return;
-		        }
-		        const data = await postJson("/api/voice-bridge/terminate-stale", {confirmed: true});
-		        showMessage(data.message || (data.ok ? "Staré Codex relace ukončeny." : "Ukončení starých Codex relací selhalo."));
-		        await refresh({silent: true, includeSecondary: false});
-		      } catch (err) {
-		        recordFrontendError(err);
-		        showMessage(`Ukončení starých Codex relací selhalo: ${err}`);
-		      } finally {
-		        if (button) button.disabled = false;
-		      }
-		    }
-
-		    function formatSafeReadonlyResult(data) {
-		      const capability = data.capability || {};
-		      const result = data.result || {};
-		      const lines = [
-		        `${capability.label || "Kontrola"}: ${data.message || "hotovo"}`,
-		      ];
-		      if (result.voice_bridge && result.voice_bridge.message) {
-		        lines.push(`Voice bridge: ${result.voice_bridge.message}`);
-		      }
-		      if (Array.isArray(result.sessions)) {
-		        const sessions = result.sessions.map((item) => {
-		          const pids = Array.isArray(item.pids) ? item.pids.join(",") : "";
-		          const roots = Array.isArray(item.root_pids) ? item.root_pids.join(",") : "";
-		          return `${item.tty || "?"} pids=${pids || "-"} roots=${roots || "-"}`;
-		        });
-		        lines.push(`Codex relace: ${sessions.length ? sessions.join(" | ") : "žádná"}`);
-		      }
-		      if (result.git && result.git.message) {
-		        lines.push(`Git: ${result.git.message}`);
-		      }
-		      if (result.backup && result.backup.message) {
-		        lines.push(`Záloha: ${result.backup.message}`);
-		      }
-		      return lines.join("\\n");
-		    }
-
-		    async function runSafeReadonlyCapability(capabilityId, button) {
-		      const capability = String(capabilityId || "").trim();
-		      if (!capability) return;
-		      if (button) button.disabled = true;
-		      if (safeReadonlyResult) {
-		        safeReadonlyResult.textContent = "Spouštím read-only kontrolu...";
-		      }
-		      try {
-		        const data = await postJson("/api/voice-mode/safe-readonly/run", {capability_id: capability});
-		        if (safeReadonlyResult) {
-		          safeReadonlyResult.textContent = data.ok
-		            ? formatSafeReadonlyResult(data)
-		            : (data.message || "Read-only kontrola selhala.");
-		        }
-		        showMessage(data.message || (data.ok ? "Read-only kontrola dokončena." : "Read-only kontrola selhala."));
-		        await refresh({silent: true, includeSecondary: false});
-		      } catch (err) {
-		        recordFrontendError(err);
-		        if (safeReadonlyResult) {
-		          safeReadonlyResult.textContent = `Read-only kontrola selhala: ${err}`;
-		        }
-		        showMessage(`Read-only kontrola selhala: ${err}`);
-		      } finally {
-		        if (button) button.disabled = false;
-		      }
-		    }
-
-		    async function speakLastAdamResponse() {
-		      await speakText(
-		        latestAdamResponseText,
-		        voiceLastResponseSpeakBtn,
-		        "Přehrávám poslední Adamovu odpověď v tomto prohlížeči...",
-		        {userGesture: true, allowSystemFallback: false}
-		      );
-		    }
-
-		    async function submitVoiceApproval(decision) {
-		      const button = decision === "approved" ? voiceApprovalApproveBtn : voiceApprovalRejectBtn;
-		      if (button) button.disabled = true;
-		      try {
-		        const data = await postJson("/api/voice-mode/approval", {decision});
-		        showMessage(data.message || (data.ok ? "Rozhodnutí bylo uloženo." : "Rozhodnutí se nepodařilo uložit."));
-		        await refresh({silent: true, includeSecondary: false});
-		      } catch (err) {
-		        recordFrontendError(err);
-		        showMessage(`Schválení hlasového pokynu selhalo: ${err}`);
-		      } finally {
-		        if (voiceApprovalApproveBtn) voiceApprovalApproveBtn.disabled = false;
-		        if (voiceApprovalRejectBtn) voiceApprovalRejectBtn.disabled = false;
-		      }
-		    }
-
 		    async function clearCodexApprovalCard() {
 		      if (codexApprovalClearBtn) codexApprovalClearBtn.disabled = true;
 		      try {
@@ -18162,210 +17405,6 @@ COCKPIT_HTML = """<!doctype html>
 		        if (codexApprovalCopyConfirmationBtn) codexApprovalCopyConfirmationBtn.disabled = false;
 		      }
 		    }
-
-		    function toggleVoiceMode() {
-		      voiceModeEnabled = !voiceModeEnabled;
-		      localStorage.setItem("samanthaVoiceModeEnabled", voiceModeEnabled ? "true" : "false");
-		      updateVoiceModeUi();
-		    }
-
-		    function isVoiceModeWatcherRunning() {
-		      return Boolean(latestVoiceModeRuntime && latestVoiceModeRuntime.running);
-		    }
-
-		    async function startVoiceModeWatcher() {
-		      if (isVoiceModeWatcherRunning()) {
-		        if (voiceCommandStatus) voiceCommandStatus.textContent = "Adam Voice Mode watcher už běží.";
-		        updateVoiceModeUi();
-		        return;
-		      }
-		      if (voiceModeStartBtn) voiceModeStartBtn.disabled = true;
-		      if (voiceCommandStatus) {
-		        voiceCommandStatus.textContent = "Spouštím záložní Adam Voice Mode watcher na výslovný pokyn...";
-		      }
-		      try {
-		        const data = await postJson("/api/voice-mode/start", {});
-		        if (voiceCommandStatus) voiceCommandStatus.textContent = data.message || "Záložní Adam Voice Mode watcher spuštěn.";
-		        if (data.ok) {
-		          voiceModeEnabled = true;
-		          localStorage.setItem("samanthaVoiceModeEnabled", "true");
-		        }
-		        await refresh({silent: true, includeSecondary: false});
-		      } catch (err) {
-		        recordFrontendError(err);
-		        if (voiceCommandStatus) voiceCommandStatus.textContent = `Adam Voice Mode watcher se nepodařilo spustit: ${err}`;
-		      } finally {
-		        updateVoiceModeUi();
-		      }
-		    }
-
-		    async function stopVoiceModeWatcher() {
-		      voiceModeStopBtn.disabled = true;
-		      voiceCommandStatus.textContent = "Zastavuji záložní Adam Voice Mode watcher...";
-		      try {
-		        const data = await postJson("/api/voice-mode/stop", {});
-		        voiceCommandStatus.textContent = data.message || "Záložní Adam Voice Mode watcher zastaven.";
-		        await refresh({silent: true, includeSecondary: false});
-		      } catch (err) {
-		        recordFrontendError(err);
-		        voiceCommandStatus.textContent = `Adam Voice Mode watcher se nepodařilo zastavit: ${err}`;
-		      } finally {
-		        updateVoiceModeUi();
-		      }
-		    }
-
-	    async function startVoiceRecording() {
-	      recordVoiceFrontendEvent("record_start_clicked", {step: "start_recording"});
-	      if (voiceCommandDetails) {
-	        voiceCommandDetails.open = true;
-	      }
-	      if (!directVoiceRecordingSupported()) {
-	        voiceCommandStatus.textContent = "Na iPhonu přes tuto HTTP adresu prohlížeč nepovolí přímý mikrofon. Klepni do pole Textový pokyn, použij iOS diktování a potom Odeslat Adamovi.";
-	        recordVoiceFrontendEvent("record_start_failed", {step: "direct_recording_supported", error: "direct recording not supported"});
-	        voiceTranscript.focus();
-	        return;
-	      }
-	      voiceRecordBtn.disabled = true;
-	      voiceCommandStatus.textContent = "Žádám o přístup k mikrofonu...";
-	      try {
-	        voiceStream = await navigator.mediaDevices.getUserMedia({
-	          audio: {
-	            channelCount: 1,
-	            echoCancellation: true,
-	            noiseSuppression: true,
-	            autoGainControl: true
-	          }
-	        });
-	        voiceChunks = [];
-	        const mimeType = preferredVoiceMimeType();
-	        voiceRecorder = createVoiceRecorder(voiceStream, mimeType);
-	        voiceRecorder.addEventListener("dataavailable", (event) => {
-	          if (event.data && event.data.size > 0) {
-	            voiceChunks.push(event.data);
-	          }
-	        });
-	        voiceRecorder.addEventListener("stop", transcribeVoiceRecording);
-	        voiceRecorder.start();
-	        voiceRecordingStartedAt = Date.now();
-	        voiceRecordBtn.classList.add("recording");
-	        voiceStopBtn.disabled = false;
-	        voiceStopBtn.classList.remove("hidden");
-	        voiceCommandStatus.textContent = "Nahrávám hlasový pokyn. Limit je 30 sekund.";
-	        recordVoiceFrontendEvent("record_started", {step: "recording"});
-	        voiceStopTimer = window.setTimeout(stopVoiceRecording, 30000);
-	      } catch (err) {
-	        recordFrontendError(err);
-	        recordVoiceFrontendEvent("record_start_failed", {step: "start_recording", error: String(err)});
-	        voiceCommandStatus.textContent = `Mikrofon se nepodařilo spustit: ${err}`;
-	        resetVoiceRecordingUi();
-	      }
-	    }
-
-	    function stopVoiceRecording() {
-	      recordVoiceFrontendEvent("record_stop_clicked", {step: "stop_recording"});
-	      if (voiceRecorder && voiceRecorder.state === "recording") {
-	        voiceCommandStatus.textContent = "Zastavuji nahrávání a připravuji přepis...";
-	        voiceRecorder.stop();
-	      }
-	      resetVoiceRecordingUi();
-	    }
-
-	    async function transcribeVoiceRecording() {
-	      if (voiceStream) {
-	        voiceStream.getTracks().forEach((track) => track.stop());
-	        voiceStream = null;
-	      }
-	      const blob = new Blob(voiceChunks, {type: (voiceRecorder && voiceRecorder.mimeType) || "audio/webm"});
-	      voiceRecorder = null;
-	      voiceChunks = [];
-	      if (!blob.size) {
-	        voiceCommandStatus.textContent = "Nahrávka je prázdná. Zkus to znovu.";
-	        recordVoiceFrontendEvent("record_empty", {step: "transcribe", audio_kb: 0});
-	        return;
-	      }
-	      const recordedSeconds = voiceRecordingStartedAt ? Math.max(0, Math.round((Date.now() - voiceRecordingStartedAt) / 1000)) : 0;
-	      const audioKb = Math.round(blob.size / 1024);
-	      const requestStartedAt = Date.now();
-	      voiceCommandStatus.textContent = `Přepisuji hlasový pokyn (${recordedSeconds} s, ${audioKb} kB)...`;
-	      recordVoiceFrontendEvent("transcribe_post_start", {step: "transcribe", recorded_seconds: recordedSeconds, audio_kb: audioKb});
-	      try {
-	        const dataUrl = await blobToDataUrl(blob);
-	        const audioBase64 = dataUrl.includes(",") ? dataUrl.split(",", 2)[1] : dataUrl;
-	        const res = await fetch("/api/speech/transcribe", {
-	          method: "POST",
-	          headers: {"Content-Type": "application/json"},
-	          body: JSON.stringify({
-	            audio_base64: audioBase64,
-	            mime_type: blob.type || "audio/webm",
-	            language: "cs"
-	          })
-	        });
-	        const data = await res.json();
-	        recordVoiceFrontendEvent("transcribe_post_result", {
-	          step: "transcribe",
-	          ok: Boolean(data.ok),
-	          status: data.status || "",
-	          error: data.ok ? "" : (data.message || ""),
-	          audio_kb: data.audio_kb || audioKb,
-	          recorded_seconds: recordedSeconds
-	        });
-		        if (data.ok) {
-		          voiceTranscript.value = data.text || "";
-	          startVoiceReplyPolling({autoSpeak: true, expectedUserText: data.text || ""});
-	          const totalMs = Date.now() - requestStartedAt;
-	          const serverMs = data.duration_ms || 0;
-	          const openaiMs = data.timing && data.timing.openai_ms ? data.timing.openai_ms : 0;
-	          const timing = `celkem ${Math.round(totalMs / 1000)} s, server ${Math.round(serverMs / 1000)} s, OpenAI ${Math.round(openaiMs / 1000)} s, audio ${data.audio_kb || audioKb} kB`;
-	          const savedHint = data.latest_voice_command_path ? ` Uloženo: ${data.latest_voice_command_path}.` : "";
-		          voiceCommandStatus.textContent = `${data.message || "Hlasový pokyn byl přepsán a odeslán Adamovi."}${savedHint} (${timing})`;
-	        } else {
-	          voiceCommandStatus.textContent = data.message || "Přepis hlasu selhal.";
-	        }
-	      } catch (err) {
-	        recordFrontendError(err);
-	        recordVoiceFrontendEvent("transcribe_post_failed", {step: "transcribe", error: String(err), audio_kb: audioKb, recorded_seconds: recordedSeconds});
-	        voiceCommandStatus.textContent = `Přepis hlasu selhal: ${err}`;
-	      }
-	    }
-
-	    async function submitVoiceTranscript() {
-	      const text = voiceTranscript.value.trim();
-	      recordVoiceFrontendEvent("voice_text_submit_clicked", {step: "voice_text", text_chars: text.length});
-	      if (!text) {
-	        voiceCommandStatus.textContent = "Nejdřív napiš nebo nadiktuj text do pole Textový pokyn.";
-	        recordVoiceFrontendEvent("voice_text_submit_blocked", {step: "voice_text", status: "empty_text", text_chars: 0});
-	        voiceTranscript.focus();
-	        return;
-	      }
-	      await primeMobileVoiceAudioForCommandGesture("voice_text_submit");
-	      voiceTranscriptSendBtn.disabled = true;
-	      voiceCommandStatus.textContent = "Odesílám text Adamovi...";
-	      recordVoiceFrontendEvent("voice_text_post_start", {step: "voice_text", text_chars: text.length});
-	      try {
-	        const data = await postJson("/api/speech/voice-text", {text});
-	        recordVoiceFrontendEvent("voice_text_post_result", {
-	          step: "voice_text",
-	          ok: Boolean(data.ok),
-	          status: data.status || data.voice_delivery_status || "",
-	          text_chars: text.length
-	        });
-	        if (data.ok) {
-	          const savedHint = data.latest_voice_command_path ? ` Uloženo: ${data.latest_voice_command_path}.` : "";
-	          voiceCommandStatus.textContent = `${data.message || "Textový pokyn byl odeslán Adamovi."}${savedHint}`;
-	          voiceTranscript.value = "";
-	          startVoiceReplyPolling({autoSpeak: true, expectedUserText: text});
-	          await refresh({silent: true, includeSecondary: false});
-	        } else {
-	          voiceCommandStatus.textContent = data.message || "Textový hlasový pokyn se nepodařilo uložit.";
-	        }
-	      } catch (err) {
-	        recordFrontendError(err);
-	        recordVoiceFrontendEvent("voice_text_post_failed", {step: "voice_text", error: String(err), text_chars: text.length});
-	        voiceCommandStatus.textContent = `Textový hlasový pokyn se nepodařilo uložit: ${err}`;
-	      } finally {
-	        voiceTranscriptSendBtn.disabled = false;
-	      }
-	    }
 
 	    async function searchDocuments() {
       const query = documentSearchInput.value.trim();
@@ -21445,38 +20484,10 @@ COCKPIT_HTML = """<!doctype html>
     dashboardSpeakSelectionBtn.addEventListener("pointerdown", captureSelectedSpeechText);
     dashboardSpeakSelectionBtn.addEventListener("mousedown", captureSelectedSpeechText);
     dashboardSpeakSelectionBtn.addEventListener("click", speakSelectedText);
-    voiceModeToggleBtn.addEventListener("click", toggleVoiceMode);
-    voiceModeStartBtn.addEventListener("click", startVoiceModeWatcher);
-    voiceModeStopBtn.addEventListener("click", stopVoiceModeWatcher);
-    voiceRecordBtn.addEventListener("click", startVoiceRecording);
-    voiceStopBtn.addEventListener("click", stopVoiceRecording);
-    voiceAudioUnlockBtn.addEventListener("click", openVoiceAudioChannel);
-    voiceTranscriptSendBtn.addEventListener("click", submitVoiceTranscript);
     tvbcpOpenBtn.addEventListener("click", openTvbcpModal);
-    voiceLastResponseSpeakBtn.addEventListener("click", speakLastAdamResponse);
     codexApprovalCopyConfirmationBtn.addEventListener("click", copyCodexApprovalConfirmation);
     codexApprovalOpenHumanAdamBtn.addEventListener("click", () => { window.location.href = "/human-adam/"; });
     codexApprovalClearBtn.addEventListener("click", clearCodexApprovalCard);
-    voiceApprovalApproveBtn.addEventListener("click", () => submitVoiceApproval("approved"));
-    voiceApprovalRejectBtn.addEventListener("click", () => submitVoiceApproval("rejected"));
-    voiceBridgeSwitcherActions.addEventListener("click", (event) => {
-      const cleanupButton = event.target.closest("button[data-voice-bridge-cleanup]");
-      if (cleanupButton) {
-        terminateStaleVoiceBridgeSessions(cleanupButton);
-        return;
-      }
-      const button = event.target.closest("button[data-voice-bridge-tty]");
-      if (!button) return;
-      setVoiceBridgeMarker(button.dataset.voiceBridgeTty || "", button);
-    });
-    safeReadonlyCard.addEventListener("click", (event) => {
-      const button = event.target.closest("button[data-safe-readonly]");
-      if (!button) return;
-      runSafeReadonlyCapability(button.dataset.safeReadonly || "", button);
-    });
-    updateVoiceRecordingAvailability();
-    updateVoiceAudioUnlockUi(false);
-    updateVoiceModeUi();
 			    webAppsBtn.addEventListener("click", openWebAppsModal);
     libraryBtn.addEventListener("click", openLibraryModal);
     familyCalendarBtn.addEventListener("click", openFamilyCalendarModal);
@@ -21722,7 +20733,6 @@ COCKPIT_HTML = """<!doctype html>
         }
       });
 	    refresh();
-      window.setTimeout(() => refreshVoiceLatestResponse({autoSpeak: false}), 2000);
       window.setTimeout(refreshUrgentRemindersSummary, 3000);
       window.setTimeout(runEmailIntakeMonitor, 5000);
 	  </script>
