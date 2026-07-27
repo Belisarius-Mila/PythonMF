@@ -55,6 +55,11 @@ class HumanAdamUiTests(unittest.TestCase):
             "checkpointMessage",
             "checkpointBtn",
             "deployMeta",
+            "githubBatchBox",
+            "githubBatchMeta",
+            "githubBatchCommits",
+            "githubBatchConfirmation",
+            "githubBatchBtn",
             "handoffTakeoverCheck",
             "deployAuditBtn",
             "deployConfirmation",
@@ -88,10 +93,14 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("/api/human-adam/checkpoint", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/deploy-audit", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/deploy", HUMAN_ADAM_HTML)
+        self.assertIn("/api/human-adam/github-batch-audit", HUMAN_ADAM_HTML)
+        self.assertIn("/api/human-adam/github-batch", HUMAN_ADAM_HTML)
         self.assertIn("/api/human-adam/transcribe", HUMAN_ADAM_HTML)
         self.assertIn("Audit nasazení do Cockpitu", HUMAN_ADAM_HTML)
         self.assertIn("Nasadit aktuální main do Cockpitu", HUMAN_ADAM_HTML)
         self.assertIn("Běžící Cockpit ověřen", HUMAN_ADAM_HTML)
+        self.assertIn("GitHub čeká na denní balíček", HUMAN_ADAM_HTML)
+        self.assertIn("před jedním pushem proběhne úplná brána", HUMAN_ADAM_HTML)
         self.assertIn('id="deployConfirmation"', HUMAN_ADAM_HTML)
         self.assertIn('autocomplete="off"', HUMAN_ADAM_HTML)
         self.assertIn('autocorrect="off"', HUMAN_ADAM_HTML)
@@ -701,11 +710,13 @@ class HumanAdamUiTests(unittest.TestCase):
             HUMAN_ADAM_HTML,
         )
         self.assertIn("Při běžném čistém a zarovnaném <code>main</code>", panel_source)
-        self.assertIn("jeden commit přímo v <code>main</code>", panel_source)
+        self.assertIn("samostatný commit přímo v <code>main</code>", panel_source)
+        self.assertIn("GitHub běžný denní vývoj nezdržuje", panel_source)
+        self.assertIn("jedním pushem odešle všechny čekající commity", panel_source)
         self.assertIn("tah zůstane bezpečně odložený bez commitu a pushnutí", panel_source)
         self.assertIn("read-only audit čekající integrace", panel_source)
-        self.assertIn("denní soví workflow vytvořilo nový commit", panel_source)
-        self.assertIn("dorovnání se nespouští automaticky", panel_source)
+        self.assertIn("denní balíček se bezpečně zastaví", panel_source)
+        self.assertIn("žádný merge, rebase ani force push se nespustí automaticky", panel_source)
         self.assertIn("Převzít přesný WIP do main", panel_source)
         self.assertIn("private ownership marker odpovídá přesnému WIP", panel_source)
         self.assertIn("cizím WIP, divergenci nebo neshodě markeru", panel_source)
@@ -714,7 +725,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("Audit nasazení do Cockpitu", panel_source)
         self.assertIn("Běžící Cockpit ověřen", panel_source)
         self.assertIn(
-            "Automatické dokončení vývoje dokončí Git, nikoli běžící Cockpit.",
+            "Automatické dokončení vývoje dokončí lokální Git, nikoli běžící Cockpit.",
             panel_source,
         )
         self.assertIn("právě jednou následující dva kroky", panel_source)
@@ -929,7 +940,7 @@ class HumanAdamUiTests(unittest.TestCase):
             HUMAN_ADAM_HTML,
         )
         self.assertIn(
-            "`Git/main i běžící Cockpit ${mainShort} · ${deployment.test_count} testů · smoke ${deployment.smoke_count}/5 · ${formatTime(deployment.deployed_at)}`",
+            "`Git/main i běžící Cockpit ${mainShort} · ${validation} · smoke ${deployment.smoke_count}/5 · ${formatTime(deployment.deployed_at)}`",
             HUMAN_ADAM_HTML,
         )
         self.assertIn(

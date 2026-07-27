@@ -35,7 +35,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SIMPLE_MAIN_DEPLOYMENT_RECEIPT = (
     PROJECT_ROOT / "data" / "private" / "communication" / "simple_main_deployment.json"
 )
-SIMPLE_MAIN_DEPLOYMENT_SCHEMA = 1
+SIMPLE_MAIN_DEPLOYMENT_SCHEMA = 2
+LEGACY_SIMPLE_MAIN_DEPLOYMENT_SCHEMA = 1
 PENDING_RESTART = "pending_restart"
 DEPLOYED = "deployed"
 RECENT_DEPLOYMENT_MAX_AGE_SECONDS = 15 * 60
@@ -97,6 +98,8 @@ def _source_and_profile_preflight(
     expected_head: str,
     allow_clean_peer_source_ahead: bool = False,
     synchronize_clean_peers: bool = False,
+    allow_origin_behind: bool = False,
+    refresh_remote: bool = True,
 ) -> list[dict[str, Any]]:
     primary = workspace.status()
     if primary.get("source_branch") != "main":
@@ -106,17 +109,28 @@ def _source_and_profile_preflight(
     if str(primary.get("source_head") or "").casefold() != expected_head:
         raise SimpleMainDeploymentError("Zdrojový main se liší od očekávaného commitu.")
     try:
-        origin_head = refresh_origin_main(workspace.source_repo).casefold()
-    except TakeoverError as exc:
-        raise SimpleMainDeploymentError("Nelze ověřit aktuální origin/main.") from exc
+        origin_head = (
+            refresh_origin_main(workspace.source_repo).casefold()
+            if refresh_remote
+            else _git(workspace.source_repo, ["rev-parse", "origin/main"]).casefold()
+        )
+    except (TakeoverError, SimpleMainDeploymentError) as exc:
+        raise SimpleMainDeploymentError("Nelze ověřit známý origin/main.") from exc
     refreshed = workspace.status()
+    origin_allowed = bool(
+        origin_head == expected_head
+        or allow_origin_behind
+    )
     if (
         int(refreshed.get("source_pending_changes") or 0) != 0
         or str(refreshed.get("source_head") or "").casefold() != expected_head
-        or origin_head != expected_head
     ):
         raise SimpleMainDeploymentError(
-            "Lokální main a origin/main nejsou čisté a shodné na očekávaném commitu."
+            "Lokální main není čistý nebo neodpovídá auditovanému commitu."
+        )
+    if not origin_allowed:
+        raise SimpleMainDeploymentError(
+            "origin/main se během kontroly změnil; nasazení bylo zastaveno."
         )
 
     unique: list[HumanAdamWorkspaceManager] = []
@@ -196,16 +210,35 @@ def _expected_code_stamp(workspace: HumanAdamWorkspaceManager) -> str:
     return value
 
 
+def _git(repo: Path, args: Sequence[str]) -> str:
+    completed = subprocess.run(
+        ["/usr/bin/git", "-C", str(repo), *args],
+        capture_output=True,
+        text=True,
+        timeout=120,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise SimpleMainDeploymentError("Git stav nasazení nelze ověřit.")
+    return completed.stdout.strip()
+
+
 def _pending_receipt(
     *,
     request: SimpleMainDeploymentRequest,
     expected_code_stamp: str,
     test_count: int,
     gate_duration_seconds: float,
+    gate_mode: str,
     prepared_at: str,
 ) -> dict[str, Any]:
-    if test_count <= 0:
-        raise SimpleMainDeploymentError("Plná brána neposkytla počet testů.")
+    clean_mode = str(gate_mode or "").strip()
+    if clean_mode not in {"full", "quick"}:
+        raise SimpleMainDeploymentError("Nasazení nemá platný režim ověření.")
+    if (clean_mode == "full" and test_count <= 0) or (
+        clean_mode == "quick" and test_count != 0
+    ):
+        raise SimpleMainDeploymentError("Nasazení nemá platný důkaz ověření.")
     if not _CODE_STAMP_RE.fullmatch(expected_code_stamp):
         raise SimpleMainDeploymentError("Nasazení nemá platný očekávaný otisk Cockpitu.")
     return {
@@ -217,6 +250,7 @@ def _pending_receipt(
         "previous_pid": request.previous_pid,
         "test_count": int(test_count),
         "gate_duration_seconds": float(gate_duration_seconds),
+        "gate_mode": clean_mode,
         "prepared_at": _safe_timestamp(prepared_at, label="Příprava"),
     }
 
@@ -233,8 +267,12 @@ def load_simple_main_deployment_receipt(path: Path) -> dict[str, Any]:
         raw = json.loads(Path(path).read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
         raise SimpleMainDeploymentError("Soukromou účtenku nasazení nelze načíst.") from exc
-    if not isinstance(raw, dict) or raw.get("schema_version") != SIMPLE_MAIN_DEPLOYMENT_SCHEMA:
+    if not isinstance(raw, dict) or raw.get("schema_version") not in {
+        LEGACY_SIMPLE_MAIN_DEPLOYMENT_SCHEMA,
+        SIMPLE_MAIN_DEPLOYMENT_SCHEMA,
+    }:
         raise SimpleMainDeploymentError("Soukromá účtenka nasazení má neznámé schéma.")
+    schema_version = int(raw.get("schema_version") or 0)
     state = str(raw.get("state") or "")
     required = {
         "schema_version",
@@ -247,6 +285,8 @@ def load_simple_main_deployment_receipt(path: Path) -> dict[str, Any]:
         "gate_duration_seconds",
         "prepared_at",
     }
+    if schema_version == SIMPLE_MAIN_DEPLOYMENT_SCHEMA:
+        required.add("gate_mode")
     if state == DEPLOYED:
         required |= {"observed_pid", "smoke_count", "deployed_at"}
     if state not in {PENDING_RESTART, DEPLOYED} or set(raw) != required:
@@ -261,6 +301,11 @@ def load_simple_main_deployment_receipt(path: Path) -> dict[str, Any]:
         )
         test_count = int(raw.get("test_count") or 0)
         gate_duration_seconds = float(raw.get("gate_duration_seconds") or 0.0)
+        gate_mode = (
+            str(raw.get("gate_mode") or "")
+            if schema_version == SIMPLE_MAIN_DEPLOYMENT_SCHEMA
+            else "full"
+        )
     except (TypeError, ValueError) as exc:
         raise SimpleMainDeploymentError("Soukromá účtenka nasazení má neplatné číselné údaje.") from exc
     if gate_duration_seconds < 0:
@@ -273,6 +318,7 @@ def load_simple_main_deployment_receipt(path: Path) -> dict[str, Any]:
         expected_code_stamp=expected_code_stamp,
         test_count=test_count,
         gate_duration_seconds=gate_duration_seconds,
+        gate_mode=gate_mode,
         prepared_at=str(raw.get("prepared_at") or ""),
     )
     if state == DEPLOYED:
@@ -316,6 +362,7 @@ def load_completed_simple_main_deployment(
             "passed": True,
             "test_count": int(receipt["test_count"]),
             "duration_seconds": float(receipt["gate_duration_seconds"]),
+            "mode": str(receipt["gate_mode"]),
         },
         "smoke": {
             "passed": True,
@@ -356,6 +403,7 @@ def audit_simple_main_deployment(
     workstream_id: str,
     peer_workspaces: Sequence[HumanAdamWorkspaceManager] = (),
     code_stamp_factory: Callable[[HumanAdamWorkspaceManager], str] = _expected_code_stamp,
+    allow_origin_behind: bool = False,
 ) -> dict[str, Any]:
     """Read and refresh the exact clean-main evidence required before deployment."""
 
@@ -373,6 +421,8 @@ def audit_simple_main_deployment(
         peer_workspaces=peer_workspaces,
         expected_head=safe_request.expected_head,
         allow_clean_peer_source_ahead=True,
+        allow_origin_behind=allow_origin_behind,
+        refresh_remote=not allow_origin_behind,
     )
     expected_code_stamp = str(code_stamp_factory(workspace) or "").strip().casefold()
     if not _CODE_STAMP_RE.fullmatch(expected_code_stamp):
@@ -393,6 +443,7 @@ def audit_simple_main_deployment(
         "branches_created": False,
         "wip_used": False,
         "semaphore_used": False,
+        "remote_push_deferred": allow_origin_behind,
     }
 
 
@@ -407,6 +458,8 @@ def prepare_simple_main_deployment(
     receipt_path: Path = DEFAULT_SIMPLE_MAIN_DEPLOYMENT_RECEIPT,
     now_factory: Callable[[], str] = utc_now,
     code_stamp_factory: Callable[[HumanAdamWorkspaceManager], str] = _expected_code_stamp,
+    allow_origin_behind: bool = False,
+    quick_validation: bool = False,
 ) -> dict[str, Any]:
     """Prove an exact clean main and prepare one restart-bound deployment."""
     if not confirmed:
@@ -420,6 +473,8 @@ def prepare_simple_main_deployment(
             peer_workspaces=peer_workspaces,
             expected_head=safe_request.expected_head,
             synchronize_clean_peers=True,
+            allow_origin_behind=allow_origin_behind,
+            refresh_remote=not allow_origin_behind,
         )
         initial_stamp = str(code_stamp_factory(workspace) or "").strip().casefold()
         if not _CODE_STAMP_RE.fullmatch(initial_stamp):
@@ -429,6 +484,7 @@ def prepare_simple_main_deployment(
                 workspace=workspace,
                 runner=gate_runner,
                 log_path=gate_log_path,
+                skip_unit_tests=quick_validation,
             )
         except HumanAdamGateError as exc:
             raise SimpleMainDeploymentError(str(exc)) from exc
@@ -436,6 +492,8 @@ def prepare_simple_main_deployment(
             workspace=workspace,
             peer_workspaces=peer_workspaces,
             expected_head=safe_request.expected_head,
+            allow_origin_behind=allow_origin_behind,
+            refresh_remote=not allow_origin_behind,
         )
         final_stamp = str(code_stamp_factory(workspace) or "").strip().casefold()
         if final_stamp != initial_stamp:
@@ -447,6 +505,7 @@ def prepare_simple_main_deployment(
             expected_code_stamp=final_stamp,
             test_count=evidence.test_count,
             gate_duration_seconds=evidence.duration_seconds,
+            gate_mode=evidence.mode,
             prepared_at=now_factory(),
         )
         _write_receipt(receipt_path, receipt)
@@ -462,12 +521,14 @@ def prepare_simple_main_deployment(
                 "passed": True,
                 "test_count": evidence.test_count,
                 "duration_seconds": evidence.duration_seconds,
+                "mode": evidence.mode,
             },
             "workspaces": final_rows or initial_rows,
             "restart_required": True,
             "branches_created": False,
             "wip_used": False,
             "semaphore_used": False,
+            "remote_push_deferred": allow_origin_behind,
         }
     finally:
         _DEPLOYMENT_LOCK.release()
@@ -497,6 +558,7 @@ def _verified_deployment_result(
             "passed": True,
             "test_count": int(receipt["test_count"]),
             "duration_seconds": float(receipt["gate_duration_seconds"]),
+            "mode": str(receipt["gate_mode"]),
         },
         "new_process_confirmed": True,
         "smoke": {
@@ -522,6 +584,7 @@ def verify_simple_main_deployment(
     receipt_path: Path = DEFAULT_SIMPLE_MAIN_DEPLOYMENT_RECEIPT,
     smoke_runner: Callable[[], Sequence[SmokeResult]] = _default_smoke_runner,
     now_factory: Callable[[], str] = utc_now,
+    allow_origin_behind: bool = False,
 ) -> dict[str, Any]:
     """Verify the restarted Cockpit and promote only complete evidence."""
     if not _DEPLOYMENT_LOCK.acquire(blocking=False):
@@ -544,6 +607,8 @@ def verify_simple_main_deployment(
                 workspace=workspace,
                 peer_workspaces=peer_workspaces,
                 expected_head=str(receipt["main_head"]),
+                allow_origin_behind=allow_origin_behind,
+                refresh_remote=not allow_origin_behind,
             )
             return _verified_deployment_result(
                 receipt=receipt,
@@ -559,6 +624,8 @@ def verify_simple_main_deployment(
             workspace=workspace,
             peer_workspaces=peer_workspaces,
             expected_head=str(receipt["main_head"]),
+            allow_origin_behind=allow_origin_behind,
+            refresh_remote=not allow_origin_behind,
         )
         smoke = list(smoke_runner())
         expected_pairs = list(DEFAULT_CHECKS)

@@ -8248,6 +8248,49 @@ def human_adam_main_remote_sync_audit_action(
         }
 
 
+def human_adam_github_batch_audit_action(
+    *,
+    service: HumanAdamProfileManager = HUMAN_ADAM,
+) -> dict[str, Any]:
+    """Return an exact read-only plan for the accumulated daily GitHub batch."""
+
+    try:
+        return service.audit_github_batch()
+    except (AppServerError, SessionHubError, OSError, TypeError, ValueError) as exc:
+        return {
+            "ok": False,
+            "read_only": True,
+            "writes_performed": False,
+            "state": "audit_failed",
+            "ready": False,
+            "pending": False,
+            "status": "github_batch_audit_failed",
+            "message": str(exc),
+        }
+
+
+def human_adam_github_batch_action(
+    payload: dict[str, Any],
+    *,
+    service: HumanAdamProfileManager = HUMAN_ADAM,
+) -> dict[str, Any]:
+    """Run one confirmed full gate and push the exact audited daily batch."""
+
+    try:
+        return service.push_github_batch(
+            expected_origin_head=str(payload.get("expected_origin_head") or ""),
+            expected_local_head=str(payload.get("expected_local_head") or ""),
+            confirmation=str(payload.get("confirmation") or ""),
+        )
+    except (AppServerError, SessionHubError, OSError, TypeError, ValueError) as exc:
+        return {
+            "ok": False,
+            "state": "github_batch_failed",
+            "status": "github_batch_failed",
+            "message": str(exc),
+        }
+
+
 def human_adam_main_remote_sync_action(
     payload: dict[str, Any],
     *,
@@ -9089,6 +9132,14 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/human-adam/github-batch",
+        "label": "Odeslat potvrzeny denni balik lokalnich main commitu na GitHub",
+        "risk": "git_push",
+        "confirmation": "exact_phrase_and_exact_audited_heads",
+        "handler_name": "human_adam_github_batch_action",
+        "test_level": "direct",
+    },
+    {
         "path": "/api/human-adam/deploy-verification",
         "label": "Overit dokonceni nasazeni po restartu Cockpitu",
         "risk": "private_write",
@@ -9775,6 +9826,11 @@ class CockpitServer:
                         human_adam_main_remote_sync_audit_action(service=HUMAN_ADAM)
                     )
                     return
+                if parsed.path == "/api/human-adam/github-batch-audit":
+                    self.respond_json(
+                        human_adam_github_batch_audit_action(service=HUMAN_ADAM)
+                    )
+                    return
                 if parsed.path == "/api/server/health":
                     self.respond_json(server_health_status(host=cockpit_host, port=cockpit_port))
                     return
@@ -10015,6 +10071,15 @@ class CockpitServer:
                     payload = self.read_json()
                     self.respond_json(
                         human_adam_main_remote_sync_action(
+                            payload,
+                            service=HUMAN_ADAM,
+                        )
+                    )
+                    return
+                if parsed.path == "/api/human-adam/github-batch":
+                    payload = self.read_json()
+                    self.respond_json(
+                        human_adam_github_batch_action(
                             payload,
                             service=HUMAN_ADAM,
                         )

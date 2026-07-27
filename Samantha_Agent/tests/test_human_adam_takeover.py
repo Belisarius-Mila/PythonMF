@@ -129,6 +129,116 @@ class HumanAdamTakeoverTests(unittest.TestCase):
             ],
         )
 
+    def test_deferred_push_fast_forwards_local_main_while_origin_stays_behind(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source, manager = prepare_with_origin(Path(temp_dir))
+            origin_head = git(source, "rev-parse", "origin/main")
+            (manager.project_root / "tracked.py").write_text(
+                "VALUE = 301\n", encoding="utf-8"
+            )
+            checkpoint = manager.checkpoint(
+                confirmed=True,
+                message="Local daytime checkpoint",
+            )
+
+            first = apply_takeover(
+                confirmation=CONFIRMATION_TEXT,
+                push=False,
+                defer_remote_push=True,
+                workspace=manager,
+            )
+            first_local_head = git(source, "rev-parse", "HEAD")
+            first_origin_head = git(source, "rev-parse", "origin/main")
+
+            (manager.project_root / "tracked.py").write_text(
+                "VALUE = 302\n", encoding="utf-8"
+            )
+            second_checkpoint = manager.checkpoint(
+                confirmed=True,
+                message="Second local daytime checkpoint",
+            )
+            second = apply_takeover(
+                confirmation=CONFIRMATION_TEXT,
+                push=False,
+                defer_remote_push=True,
+                workspace=manager,
+            )
+            second_local_head = git(source, "rev-parse", "HEAD")
+            second_origin_head = git(source, "rev-parse", "origin/main")
+
+        self.assertTrue(first["applied"])
+        self.assertFalse(first["pushed"])
+        self.assertTrue(first["remote_push_deferred"])
+        self.assertEqual(first_local_head, checkpoint["checkpoint_head"])
+        self.assertEqual(first_origin_head, origin_head)
+        self.assertTrue(second["applied"])
+        self.assertFalse(second["pushed"])
+        self.assertEqual(second_local_head, second_checkpoint["checkpoint_head"])
+        self.assertEqual(second_origin_head, origin_head)
+
+    def test_local_takeover_without_push_requires_batch_mode(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            _source, manager = prepare_with_origin(Path(temp_dir))
+            (manager.project_root / "tracked.py").write_text(
+                "VALUE = 303\n", encoding="utf-8"
+            )
+            manager.checkpoint(confirmed=True, message="Local checkpoint")
+
+            with self.assertRaisesRegex(TakeoverError, "dávkový režim"):
+                apply_takeover(
+                    confirmation=CONFIRMATION_TEXT,
+                    push=False,
+                    workspace=manager,
+                )
+
+    def test_remote_divergence_does_not_block_another_deferred_local_takeover(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source, manager = prepare_with_origin(root)
+            local_base = source / "Samantha_Agent" / "local_base.py"
+            local_base.write_text("LOCAL = 1\n", encoding="utf-8")
+            git(source, "add", str(local_base.relative_to(source)))
+            git(source, "commit", "-m", "Existing local daytime work")
+            manager.sync_from_main(confirmed=True)
+
+            competitor = root / "competitor-divergence"
+            subprocess.run(
+                ["/usr/bin/git", "clone", str(root / "origin.git"), str(competitor)],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            git(competitor, "config", "user.name", "Other writer")
+            git(competitor, "config", "user.email", "other@example.invalid")
+            (competitor / "remote.txt").write_text("remote\n", encoding="utf-8")
+            git(competitor, "add", "remote.txt")
+            git(competitor, "commit", "-m", "Remote divergent work")
+            git(competitor, "push", "origin", "main")
+            git(source, "fetch", "origin", "main:refs/remotes/origin/main")
+
+            (manager.project_root / "tracked.py").write_text(
+                "VALUE = 304\n",
+                encoding="utf-8",
+            )
+            checkpoint = manager.checkpoint(
+                confirmed=True,
+                message="Continue local work after divergence",
+            )
+            result = apply_takeover(
+                confirmation=CONFIRMATION_TEXT,
+                push=False,
+                defer_remote_push=True,
+                workspace=manager,
+            )
+
+            local_head = git(source, "rev-parse", "HEAD")
+            remote_head = git(source, "rev-parse", "origin/main")
+
+        self.assertTrue(result["applied"])
+        self.assertTrue(result["remote_push_deferred"])
+        self.assertEqual(local_head, checkpoint["checkpoint_head"])
+        self.assertNotEqual(local_head, remote_head)
+
     def test_remote_change_after_checkpoint_is_rejected_before_local_main_moves(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

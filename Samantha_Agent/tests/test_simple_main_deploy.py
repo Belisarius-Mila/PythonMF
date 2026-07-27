@@ -84,6 +84,97 @@ class SimpleMainDeploymentTests(unittest.TestCase):
             "POTVRZUJI NASAZENI AKTUALNIHO MAIN DO COCKPITU",
         )
 
+    def test_batch_mode_deploys_local_ahead_main_with_quick_gate(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source, primary, peer, _head = prepare_clean_main(root)
+            origin_before = git(source, "rev-parse", "origin/main")
+            target = source / "Samantha_Agent" / "ordinary.py"
+            target.write_text("VALUE = 27\n", encoding="utf-8")
+            git(source, "add", "Samantha_Agent/ordinary.py")
+            git(source, "commit", "-m", "Local deployment target")
+            head = git(source, "rev-parse", "HEAD")
+            primary.sync_from_main(confirmed=True)
+            receipt_path = root / "receipt.json"
+
+            audit = audit_simple_main_deployment(
+                workspace=primary,
+                workstream_id="layer-human-adam-development",
+                peer_workspaces=(peer,),
+                code_stamp_factory=lambda _workspace: "0123456789abcdef",
+                allow_origin_behind=True,
+            )
+            prepared = prepare_simple_main_deployment(
+                workspace=primary,
+                request=request(head),
+                confirmed=True,
+                peer_workspaces=(peer,),
+                gate_runner=successful_gate,
+                gate_log_path=root / "gate.log",
+                receipt_path=receipt_path,
+                now_factory=lambda: "2026-07-27T10:00:00+00:00",
+                code_stamp_factory=lambda _workspace: "0123456789abcdef",
+                allow_origin_behind=True,
+                quick_validation=True,
+            )
+            verified = verify_simple_main_deployment(
+                workspace=primary,
+                observed_pid=654,
+                observed_code_stamp="0123456789abcdef",
+                peer_workspaces=(peer,),
+                receipt_path=receipt_path,
+                smoke_runner=successful_smoke,
+                now_factory=lambda: "2026-07-27T10:01:00+00:00",
+                allow_origin_behind=True,
+            )
+            receipt = load_simple_main_deployment_receipt(receipt_path)
+            origin_after = git(source, "rev-parse", "origin/main")
+
+        self.assertTrue(audit["ready"])
+        self.assertTrue(audit["remote_push_deferred"])
+        self.assertEqual(prepared["gate"]["mode"], "quick")
+        self.assertEqual(prepared["gate"]["test_count"], 0)
+        self.assertEqual(verified["state"], DEPLOYED)
+        self.assertEqual(verified["gate"]["mode"], "quick")
+        self.assertEqual(receipt["gate_mode"], "quick")
+        self.assertEqual(origin_after, origin_before)
+
+    def test_batch_mode_local_deploy_audit_survives_remote_divergence(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source, primary, peer, _head = prepare_clean_main(root)
+            target = source / "Samantha_Agent" / "local_diverged.py"
+            target.write_text("VALUE = 28\n", encoding="utf-8")
+            git(source, "add", "Samantha_Agent/local_diverged.py")
+            git(source, "commit", "-m", "Local divergent deployment target")
+            primary.sync_from_main(confirmed=True)
+
+            competitor = root / "competitor-deploy-divergence"
+            subprocess.run(
+                ["/usr/bin/git", "clone", str(root / "origin.git"), str(competitor)],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            git(competitor, "config", "user.name", "Other writer")
+            git(competitor, "config", "user.email", "other@example.invalid")
+            (competitor / "remote.txt").write_text("remote\n", encoding="utf-8")
+            git(competitor, "add", "remote.txt")
+            git(competitor, "commit", "-m", "Remote divergent deployment work")
+            git(competitor, "push", "origin", "main")
+            git(source, "fetch", "origin", "main:refs/remotes/origin/main")
+
+            result = audit_simple_main_deployment(
+                workspace=primary,
+                workstream_id="layer-human-adam-development",
+                peer_workspaces=(peer,),
+                code_stamp_factory=lambda _workspace: "0123456789abcdef",
+                allow_origin_behind=True,
+            )
+
+        self.assertTrue(result["ready"])
+        self.assertTrue(result["remote_push_deferred"])
+
     def test_simple_main_uses_shared_gate_without_legacy_deploy_import(self) -> None:
         project_root = Path(__file__).resolve().parents[1]
         for relative_path in (
@@ -421,6 +512,7 @@ class SimpleMainDeploymentTests(unittest.TestCase):
                     "passed": True,
                     "test_count": 904,
                     "duration_seconds": 272.5,
+                    "mode": "full",
                 },
                 "smoke": {"passed": True, "check_count": 5},
             },

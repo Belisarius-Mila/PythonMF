@@ -49,6 +49,22 @@ _SENSITIVE_TEXT_RE = re.compile(
 )
 _CHECKPOINT_LOCK = threading.Lock()
 PROJECT_TIME_ZONE = ZoneInfo("Europe/Prague")
+_FULL_GATE_PATH_PREFIXES = (
+    ".github/workflows/",
+    "Samantha_Agent/requirements.txt",
+    "Samantha_Agent/app/cockpit.py",
+    "Samantha_Agent/app/file_persistence.py",
+    "Samantha_Agent/app/backup/",
+    "Samantha_Agent/app/documents/transactions.py",
+    "Samantha_Agent/app/email/work_outbox.py",
+    "Samantha_Agent/app/family_calendar_delivery",
+    "Samantha_Agent/app/communication/checkpoint_quality_gate.py",
+    "Samantha_Agent/app/communication/github_batch.py",
+    "Samantha_Agent/app/communication/main_remote_sync.py",
+    "Samantha_Agent/app/communication/simple_main_checkpoint.py",
+    "Samantha_Agent/app/communication/simple_main_deploy.py",
+    "Samantha_Agent/scripts/human_adam_takeover.py",
+)
 
 
 class SimpleMainCheckpointError(AppServerError):
@@ -179,6 +195,7 @@ def _safe_operational_context(value: object) -> dict[str, Any]:
             "test_count",
             "smoke_count",
             "gate_passed",
+            "gate_mode",
             "smoke_passed",
             "deployed_at",
             "prepared_at",
@@ -372,16 +389,25 @@ def _checkpoint_live_status(
     observed_at: datetime,
     source_snapshot: Mapping[str, Any],
     origin_head: str,
+    remote_state: str = "",
     workspace_snapshots: Sequence[Mapping[str, Any]],
 ) -> dict[str, Any]:
     context = request.operational_context
     source_head = str(source_snapshot.get("source_head") or "")
+    clean_remote_state = str(remote_state or "").strip()
+    if clean_remote_state not in {
+        "aligned",
+        "local_ahead",
+        "fast_forward_available",
+        "diverged",
+    }:
+        clean_remote_state = "aligned" if source_head == origin_head else "local_ahead"
     return build_workstream_live_status(
         workstream_id=request.workstream_id,
         observed_at=observed_at.isoformat(),
         source_snapshot=source_snapshot,
         remote_snapshot={
-            "state": "aligned",
+            "state": clean_remote_state,
             "local_head": source_head,
             "origin_head": origin_head,
             "read_only": True,
@@ -435,7 +461,11 @@ def _checkpoint_status_projection(
         runtime_map = runtime if isinstance(runtime, Mapping) else {}
 
         main_state = str(main_map.get("state") or "unverified")
-        if main_state != "aligned":
+        if main_state == "local_ahead":
+            open_items.append(
+                "Lokální commity čekají na samostatný denní GitHub balíček."
+            )
+        elif main_state != "aligned":
             risks.append(
                 "Stav lokálního main a origin/main nebyl v živém snapshotu "
                 "doložen jako zarovnaný."
@@ -528,10 +558,7 @@ def _memory_blocks(
     path_text = ", ".join(f"`{item}`" for item in paths) or "bez pojmenované cesty"
     if len(changes) > len(paths):
         path_text += f", … a dalších {len(changes) - len(paths)}"
-    test_text = (
-        f"plná Cockpit brána: {evidence.test_count} testů, "
-        f"{evidence.duration_seconds:.1f} s, výsledek OK"
-    )
+    test_text = _validation_text(evidence)
     completed_text = "; ".join(projection.completed)
     open_text = "; ".join(projection.open_items)
     risk_text = "; ".join(projection.risks)
@@ -593,6 +620,19 @@ def _safe_mapping_state(value: Mapping[str, Any], key: str) -> str:
     return state if re.fullmatch(r"[a-z][a-z0-9_]{1,63}", state) else "unverified"
 
 
+def _validation_text(evidence: GateEvidence) -> str:
+    if evidence.mode == "quick":
+        return (
+            "rychlá Cockpit brána syntaxe a whitespace: "
+            f"{evidence.duration_seconds:.1f} s, výsledek OK; "
+            "cílené testy potvrdila dokončovací účtenka vývojového tahu"
+        )
+    return (
+        f"plná Cockpit brána: {evidence.test_count} testů, "
+        f"{evidence.duration_seconds:.1f} s, výsledek OK"
+    )
+
+
 def _current_status_block(
     *,
     request: SimpleMainCheckpointRequest,
@@ -601,6 +641,7 @@ def _current_status_block(
     source_head: str,
     projection: CheckpointStatusProjection,
     live_status: Mapping[str, Any],
+    remote_push_deferred: bool = False,
 ) -> str:
     source_short = str(source_head or "").strip().casefold()[:12]
     if not _SHORT_HEAD_RE.fullmatch(source_short):
@@ -631,6 +672,25 @@ def _current_status_block(
         if request.proposed_next_steps
         else "- Žádné další návrhy nad rámec bezprostředního kroku."
     )
+    validation_line = (
+        "- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila "
+        "dokončovací účtenka vývojového tahu."
+        if evidence.mode == "quick"
+        else f"- Změna je otestovaná ({evidence.test_count} testů)."
+    )
+    git_line = (
+        f"- Git před checkpointem: lokální `main` na `{source_short}`; "
+        "GitHub může být starší a čeká na denní balíček."
+        if remote_push_deferred
+        else f"- Git před checkpointem: `main == origin/main` na `{source_short}`."
+    )
+    transaction_line = (
+        "- Tento snapshot je součástí lokálního checkpointu; push na GitHub "
+        "zůstává odložený do potvrzeného denního balíčku."
+        if remote_push_deferred
+        else "- Tento snapshot je součástí jediné potvrzené commit/push operace "
+        "a sám nepotvrzuje pozdější nasazení."
+    )
     return f"""{CURRENT_STATUS_START}
 ## Aktuální stav
 
@@ -655,11 +715,11 @@ def _current_status_block(
 {proposed_text}
 
 ### Technický stav checkpointu
-- Změna je otestovaná ({evidence.test_count} testů).
-- Git před checkpointem: `main == origin/main` na `{source_short}`.
+{validation_line}
+{git_line}
 - Poslední serverově potvrzené nasazení: {deployment_text}.
 - Read-only živý stav: {_live_state_text(live_status)}.
-- Tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
+{transaction_line}
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 {CURRENT_STATUS_END}"""
 
@@ -732,6 +792,52 @@ def _validate_change_rows(
             )
 
 
+def _requires_full_gate(changes: Sequence[dict[str, str]]) -> bool:
+    for item in changes:
+        path = str(item.get("path") or "").strip().replace("\\", "/")
+        if any(
+            path == prefix or path.startswith(prefix)
+            for prefix in _FULL_GATE_PATH_PREFIXES
+        ):
+            return True
+    return False
+
+
+def _known_origin_main(source_repo: Path) -> str:
+    completed = subprocess.run(
+        ["/usr/bin/git", "-C", str(source_repo), "rev-parse", "origin/main"],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    value = completed.stdout.strip().casefold()
+    if completed.returncode != 0 or not re.fullmatch(r"[0-9a-f]{40}", value):
+        raise SimpleMainCheckpointError(
+            "Lokální reference origin/main není dostupná; dávkový checkpoint je zablokovaný."
+        )
+    return value
+
+
+def _is_ancestor(source_repo: Path, ancestor: str, descendant: str) -> bool:
+    completed = subprocess.run(
+        [
+            "/usr/bin/git",
+            "-C",
+            str(source_repo),
+            "merge-base",
+            "--is-ancestor",
+            ancestor,
+            descendant,
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    return completed.returncode == 0
+
+
 def _preflight_workspace(
     workspace: HumanAdamWorkspaceManager,
     *,
@@ -771,12 +877,14 @@ def complete_simple_main_checkpoint(
     now_factory: Callable[[], datetime] = _local_now,
     progress_callback: Callable[[str, str], None] | None = None,
     takeover: Callable[..., dict[str, Any]] = apply_takeover,
+    defer_remote_push: bool = False,
+    allow_quick_gate: bool = False,
 ) -> dict[str, Any]:
-    """Test, record, commit, push and align one workstream step.
+    """Validate, record, commit and align one workstream step.
 
-    No persistent semaphore or WIP branch is created.  If the remote update
-    loses a race, the single local checkpoint commit remains preserved in the
-    profile workspace for explicit recovery.
+    In daily-batch mode the local commit is integrated without contacting or
+    changing GitHub.  A later separately confirmed batch runs the full gate and
+    pushes all accumulated commits together.
     """
 
     if not confirmed:
@@ -803,12 +911,16 @@ def complete_simple_main_checkpoint(
                     allow_source_ahead=True,
                 )
             )
-        live_origin_head = refresh_origin_main(workspace.source_repo)
         refreshed = _preflight_workspace(workspace, require_changes=True)
-        if str(refreshed.get("source_head") or "") != live_origin_head:
-            raise SimpleMainCheckpointError(
-                "Lokální main a origin/main se neshodují; nejdřív obnov zdrojový main."
-            )
+        source_head = str(refreshed.get("source_head") or "").casefold()
+        if defer_remote_push:
+            live_origin_head = _known_origin_main(workspace.source_repo)
+        else:
+            live_origin_head = refresh_origin_main(workspace.source_repo)
+            if source_head != live_origin_head:
+                raise SimpleMainCheckpointError(
+                    "Lokální main a origin/main se neshodují; nejdřív obnov zdrojový main."
+                )
         progress("preflight", "passed")
 
         handoff_path = _memory_path(
@@ -827,11 +939,18 @@ def complete_simple_main_checkpoint(
             raise SimpleMainCheckpointError("Handoff a TVBCP musí být dva různé soubory.")
 
         progress("gate", "running")
+        initial_changes = list(initial.get("changes") or [])
+        quick_gate = bool(
+            defer_remote_push
+            and allow_quick_gate
+            and not _requires_full_gate(initial_changes)
+        )
         try:
             evidence = run_checkpoint_quality_gate(
                 workspace=workspace,
                 runner=gate_runner,
                 log_path=gate_log_path,
+                skip_unit_tests=quick_gate,
             )
         except HumanAdamGateError as exc:
             progress("gate", "failed")
@@ -852,11 +971,20 @@ def complete_simple_main_checkpoint(
         )
         observed_at = now_factory()
         timestamp = _format_timestamp(observed_at)
+        if source_head == live_origin_head:
+            checkpoint_remote_state = "aligned"
+        elif _is_ancestor(workspace.source_repo, live_origin_head, source_head):
+            checkpoint_remote_state = "local_ahead"
+        elif _is_ancestor(workspace.source_repo, source_head, live_origin_head):
+            checkpoint_remote_state = "fast_forward_available"
+        else:
+            checkpoint_remote_state = "diverged"
         live_status = _checkpoint_live_status(
             request=safe_request,
             observed_at=observed_at,
             source_snapshot=refreshed,
             origin_head=live_origin_head,
+            remote_state=checkpoint_remote_state,
             workspace_snapshots=(refreshed, *peer_preflight_statuses),
         )
         projection = _checkpoint_status_projection(
@@ -875,9 +1003,10 @@ def complete_simple_main_checkpoint(
             request=safe_request,
             evidence=evidence,
             timestamp=timestamp,
-            source_head=live_origin_head,
+            source_head=source_head,
             projection=projection,
             live_status=live_status,
+            remote_push_deferred=defer_remote_push,
         )
         written_handoff = _append_block(
             _replace_current_status(original_handoff, current_status),
@@ -935,7 +1064,8 @@ def complete_simple_main_checkpoint(
         try:
             applied = takeover(
                 confirmation=LEGACY_FAST_FORWARD_CONFIRMATION,
-                push=True,
+                push=not defer_remote_push,
+                defer_remote_push=defer_remote_push,
                 workspace=workspace,
                 progress_callback=progress,
             )
@@ -948,7 +1078,14 @@ def complete_simple_main_checkpoint(
         checkpoint_head = str(checkpoint.get("checkpoint_head") or "")
         if (
             applied.get("applied") is not True
-            or applied.get("pushed") is not True
+            or (
+                not defer_remote_push
+                and applied.get("pushed") is not True
+            )
+            or (
+                defer_remote_push
+                and applied.get("remote_push_deferred") is not True
+            )
             or applied.get("workspace_aligned") is not True
             or final.get("workspace_relation") != "aligned"
             or final.get("dirty")
@@ -994,6 +1131,23 @@ def complete_simple_main_checkpoint(
                 )
         all_workspaces_aligned = all(row["aligned"] for row in peer_rows)
         progress("peer_alignment", "passed" if all_workspaces_aligned else "partial")
+        pending_remote_commit_count = int(
+            subprocess.run(
+                [
+                    "/usr/bin/git",
+                    "-C",
+                    str(workspace.source_repo),
+                    "rev-list",
+                    "--count",
+                    "origin/main..HEAD",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=True,
+            ).stdout.strip()
+            or 0
+        )
         return {
             "ok": True,
             "operation": "simple_main_checkpoint",
@@ -1005,10 +1159,13 @@ def complete_simple_main_checkpoint(
                 "passed": True,
                 "test_count": evidence.test_count,
                 "duration_seconds": evidence.duration_seconds,
+                "mode": evidence.mode,
             },
             "handoff_path": safe_request.handoff_relative_path,
             "tvbcp_path": safe_request.tvbcp_relative_path,
-            "pushed": True,
+            "pushed": not defer_remote_push,
+            "remote_push_deferred": defer_remote_push,
+            "pending_remote_commit_count": pending_remote_commit_count,
             "source_aligned": True,
             "workspace_aligned": True,
             "peer_workspaces": peer_rows,

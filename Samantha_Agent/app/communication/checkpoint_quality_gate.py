@@ -46,6 +46,7 @@ class GateEvidence:
     test_count: int
     duration_seconds: float
     log_path: str
+    mode: str = "full"
 
     def public_dict(self) -> dict[str, Any]:
         return {
@@ -54,6 +55,7 @@ class GateEvidence:
             "test_count": self.test_count,
             "duration_seconds": self.duration_seconds,
             "log_path": self.log_path,
+            "mode": self.mode,
         }
 
 
@@ -63,6 +65,7 @@ def run_checkpoint_quality_gate(
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
     log_path: Path = DEFAULT_GATE_LOG,
     timeout: float = 420.0,
+    skip_unit_tests: bool = False,
 ) -> GateEvidence:
     gate_script = workspace.project_root / "scripts" / "cockpit_quality_gate.py"
     if not TRUSTED_PYTHON.is_file() or not gate_script.is_file():
@@ -72,8 +75,11 @@ def run_checkpoint_quality_gate(
         )
     started = time.monotonic()
     try:
+        command = [str(TRUSTED_PYTHON), str(gate_script)]
+        if skip_unit_tests:
+            command.append("--skip-unit-tests")
         completed = runner(
-            [str(TRUSTED_PYTHON), str(gate_script)],
+            command,
             cwd=str(workspace.project_root),
             capture_output=True,
             text=True,
@@ -82,12 +88,12 @@ def run_checkpoint_quality_gate(
         )
     except subprocess.TimeoutExpired as exc:
         raise HumanAdamGateError(
-            "Plná brána checkpointu se nedokončila; nic nebylo nasazeno.",
+            "Kontrolní brána checkpointu se nedokončila; nic nebylo nasazeno.",
             failure_type="gate_timeout",
         ) from exc
     except OSError as exc:
         raise HumanAdamGateError(
-            "Plná brána checkpointu se nedokončila; nic nebylo nasazeno.",
+            "Kontrolní brána checkpointu se nedokončila; nic nebylo nasazeno.",
             failure_type="gate_process_error",
         ) from exc
     duration = round(time.monotonic() - started, 1)
@@ -98,13 +104,14 @@ def run_checkpoint_quality_gate(
     evidence = GateEvidence(
         passed=completed.returncode == 0 and "Cockpit quality gate: OK" in output,
         returncode=int(completed.returncode),
-        test_count=int(matches[-1]) if matches else 0,
+        test_count=0 if skip_unit_tests else (int(matches[-1]) if matches else 0),
         duration_seconds=duration,
         log_path=(
             str(log_path.relative_to(PROJECT_ROOT))
             if log_path.is_relative_to(PROJECT_ROOT)
             else str(log_path)
         ),
+        mode="quick" if skip_unit_tests else "full",
     )
     if not evidence.passed:
         folded_output = output.casefold()
@@ -122,7 +129,7 @@ def run_checkpoint_quality_gate(
             )
         )
         raise HumanAdamGateError(
-            f"Plná brána checkpointu neprošla; nic nebylo nasazeno. Log: {evidence.log_path}",
+            f"Kontrolní brána checkpointu neprošla; nic nebylo nasazeno. Log: {evidence.log_path}",
             failure_type=failure_type,
         )
     return evidence

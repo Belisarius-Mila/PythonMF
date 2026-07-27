@@ -67,6 +67,10 @@ from app.communication.human_adam_operations import (
     execute_human_adam_operation,
     parse_human_adam_operation,
 )
+from app.communication.github_batch import (
+    audit_github_batch as audit_daily_github_batch,
+    push_github_batch as push_daily_github_batch,
+)
 from app.communication.local_runtime import LocalAppServerProcessController
 from app.communication.main_remote_sync import (
     apply_main_remote_sync as apply_clean_main_remote_sync,
@@ -233,6 +237,7 @@ class HumanAdamProfileManager:
         deferred_integration_store: DeferredIntegrationStore | None = None,
         workstream_threads: WorkstreamThreadRegistry | None = None,
         workstream_memory: WorkstreamMemoryRegistry | None = None,
+        github_batch_mode: bool = False,
     ):
         if not profiles or default_profile_id not in profiles:
             raise ValueError("Pracovní profily Human–Adam nemají platný výchozí profil.")
@@ -312,6 +317,7 @@ class HumanAdamProfileManager:
             )
         )
         self.workstream_threads = workstream_threads
+        self.github_batch_mode = bool(github_batch_mode)
         self._lazy_services: dict[str, HumanAdamService] = {}
         self._state_lock = threading.RLock()
         self._operation_lock = threading.Lock()
@@ -596,6 +602,8 @@ class HumanAdamProfileManager:
                 ),
                 confirmed=confirmed,
                 peer_workspaces=peer_workspaces,
+                defer_remote_push=self.github_batch_mode,
+                allow_quick_gate=self.github_batch_mode,
             )
         return {
             **result,
@@ -653,6 +661,8 @@ class HumanAdamProfileManager:
                 ),
                 confirmed=confirmed,
                 peer_workspaces=peer_workspaces,
+                defer_remote_push=self.github_batch_mode,
+                allow_quick_gate=self.github_batch_mode,
             )
             return {
                 **result,
@@ -694,7 +704,9 @@ class HumanAdamProfileManager:
                 ),
                 "test_count": int(receipt.get("test_count") or 0),
                 "smoke_count": int(receipt.get("smoke_count") or 0),
-                "gate_passed": int(receipt.get("test_count") or 0) > 0,
+                "gate_mode": str(receipt.get("gate_mode") or "full"),
+                "gate_passed": str(receipt.get("gate_mode") or "full")
+                in {"full", "quick"},
                 "smoke_passed": state == "deployed",
                 "deployed_at": str(receipt.get("deployed_at") or ""),
                 "prepared_at": str(receipt.get("prepared_at") or ""),
@@ -842,6 +854,50 @@ class HumanAdamProfileManager:
             "profile_workspace_count": len(workspaces),
         }
 
+    def audit_github_batch(self) -> dict[str, Any]:
+        """Audit accumulated local commits without changing GitHub or main."""
+
+        if not self.github_batch_mode:
+            raise AppServerError("Dávkový GitHub režim není aktivní.")
+        self._assert_legacy_only_backend(operation="Audit denního GitHub balíčku")
+        with self.profile_operation() as service:
+            self._assert_all_profile_sessions_idle(
+                operation="Audit denního GitHub balíčku"
+            )
+            workspaces = self._main_remote_sync_workspaces()
+            result = audit_daily_github_batch(
+                source_repo=service.workspace.source_repo,
+            )
+        return {
+            **result,
+            "profiles_ready": True,
+            "profile_workspace_count": len(workspaces),
+        }
+
+    def push_github_batch(
+        self,
+        *,
+        expected_origin_head: str,
+        expected_local_head: str,
+        confirmation: str,
+    ) -> dict[str, Any]:
+        """Run the full gate once and push one exact audited daily batch."""
+
+        if not self.github_batch_mode:
+            raise AppServerError("Dávkový GitHub režim není aktivní.")
+        self._assert_legacy_only_backend(operation="Denní GitHub balíček")
+        with self.profile_operation() as service:
+            self._assert_all_profile_sessions_idle(
+                operation="Denní GitHub balíček"
+            )
+            self._main_remote_sync_workspaces()
+            return push_daily_github_batch(
+                workspace=service.workspace,
+                expected_origin_head=expected_origin_head,
+                expected_local_head=expected_local_head,
+                confirmation=confirmation,
+            )
+
     def apply_main_remote_sync(
         self,
         *,
@@ -938,6 +994,8 @@ class HumanAdamProfileManager:
                 confirmed=confirmed,
                 peer_workspaces=peers,
                 receipt_path=self.simple_main_deployment_receipt_path,
+                allow_origin_behind=self.github_batch_mode,
+                quick_validation=self.github_batch_mode,
             )
             restart: dict[str, Any] = {
                 "ready": True,
@@ -985,6 +1043,7 @@ class HumanAdamProfileManager:
                 workspace=service.workspace,
                 workstream_id=binding.workstream_id,
                 peer_workspaces=peers,
+                allow_origin_behind=self.github_batch_mode,
             )
         return {
             **result,
@@ -1040,6 +1099,7 @@ class HumanAdamProfileManager:
                 observed_code_stamp=observed_code_stamp,
                 peer_workspaces=peers,
                 receipt_path=self.simple_main_deployment_receipt_path,
+                allow_origin_behind=self.github_batch_mode,
             )
         return {
             **result,
@@ -1064,6 +1124,7 @@ class HumanAdamProfileManager:
             "development": one_turn_write,
             "checkpoint": one_turn_write,
             "deployment": not lazy,
+            "github_batch": self.github_batch_mode and not lazy,
             "lazy_backend": lazy,
             "writable_pilot": writable_pilot,
             "one_turn_write": one_turn_write,
@@ -1103,6 +1164,7 @@ class HumanAdamProfileManager:
                 **payload,
                 "workstream_selection": selection,
                 "workstream_capabilities": self._workstream_capabilities(),
+                "github_batch_mode": self.github_batch_mode,
                 "development_semaphore": self.development_status(),
                 "last_simple_main_deployment": last_deployment,
                 "recent_simple_main_deployment": recent_deployment,
@@ -1119,6 +1181,7 @@ class HumanAdamProfileManager:
                     "workstreams": [],
                     "workstream_count": 0,
                 },
+                "github_batch_mode": self.github_batch_mode,
                 "development_semaphore": self.development_status(),
             }
 
@@ -1612,6 +1675,8 @@ class HumanAdamProfileManager:
             ),
             confirmed=True,
             peer_workspaces=peers,
+            defer_remote_push=self.github_batch_mode,
+            allow_quick_gate=self.github_batch_mode,
         )
 
     def _complete_successful_turn(
@@ -1992,8 +2057,17 @@ class HumanAdamProfileManager:
                 "sám nasazení do Cockpitu nedokládá."
             )
         note = (
-            f"Git dokončen: testy prošly, commit `{checkpoint_short}` je začleněný "
-            f"do main a pushnutý na GitHub. {alignment_note} {runtime_note}"
+            (
+                f"Lokální Git dokončen: commit `{checkpoint_short}` je začleněný "
+                f"do main; GitHub push čeká v denním balíčku "
+                f"({int(checkpoint.get('pending_remote_commit_count') or 0)} commitů). "
+                if checkpoint.get("remote_push_deferred") is True
+                else (
+                    f"Git dokončen: testy prošly, commit `{checkpoint_short}` je "
+                    "začleněný do main a pushnutý na GitHub. "
+                )
+            )
+            + f"{alignment_note} {runtime_note}"
         )
         answer = self._completion_answer(parsed.visible_answer, note)
         answer_persisted = self._store_completed_answer(
@@ -2066,9 +2140,15 @@ class HumanAdamProfileManager:
         except (AppServerError, OSError, TypeError, ValueError):
             source_snapshot = {}
         try:
-            remote_snapshot = audit_clean_main_remote_sync(
-                source_repo=service.workspace.source_repo
-            )
+            if self.github_batch_mode:
+                remote_snapshot = audit_daily_github_batch(
+                    source_repo=service.workspace.source_repo,
+                    refresh_remote=False,
+                )
+            else:
+                remote_snapshot = audit_clean_main_remote_sync(
+                    source_repo=service.workspace.source_repo
+                )
         except (AppServerError, OSError, TypeError, ValueError):
             remote_snapshot = {}
 
@@ -2137,6 +2217,7 @@ class HumanAdamProfileManager:
         work = self.active_service.work_review()
         return {
             **work,
+            "github_batch_mode": self.github_batch_mode,
             "workstream_live_status": self.workstream_live_status(
                 observed_code_stamp=observed_code_stamp
             ),
@@ -2443,6 +2524,8 @@ class HumanAdamProfileManager:
             ),
             confirmed=True,
             peer_workspaces=peers,
+            defer_remote_push=self.github_batch_mode,
+            allow_quick_gate=self.github_batch_mode,
         )
         marker_cleared = True
         try:
@@ -3537,6 +3620,7 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         runtime=runtime,
         workstream_threads=workstream_threads,
         workstream_memory=workstream_memory,
+        github_batch_mode=True,
     )
 
 

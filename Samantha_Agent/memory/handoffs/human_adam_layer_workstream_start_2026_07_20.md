@@ -1,55 +1,52 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-27 08:25 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-27 11:19 CEST
 
 ### Hotovo
-- Fáze 9.3e odstranila závislost živých diagnostik, přehledu Codex relací a
-  starého Adam fallbacku na Voice Bridge markeru.
-- Ochrana Janička relací používá vlastní registry spravovaných relací; pokud
-  je nelze ověřit, report i potvrzený cleanup selžou uzavřeně.
-- Runtime VoiceBridge modul, jeho specializované testy a private data zůstávají
-  zachované pro samostatnou pozdější fázi.
-- Automatická integrace správně zastavila WIP po vzdáleném sovím commitu.
-  Servisní převzetí doložilo nulový překryv cest, zachovalo lokální checkpoint,
-  fast-forwardnulo sovu a začlenilo WIP nad nový základ.
+- Dávkový GitHub režim zachovává přes den samostatné lokální commity v `main`
+  bez skrytého fetche nebo pushnutí při běžném dokončení vývoje.
+- Běžné změny používají cílené testy a rychlou lokální syntax/whitespace bránu;
+  vyjmenované rizikové cesty nadále ihned spouštějí úplnou Cockpit bránu.
+- Lokální nasazení do Cockpitu může pracovat s čistým lokálním `main`, i když
+  GitHub čeká na večerní balíček.
+- Panel Práce má jednu ruční bránu denního balíčku: read-only audit ukáže přesné
+  commity a po přesné potvrzovací větě provede jednu úplnou bránu a jeden push.
 
 ### Otevřeno
-- Dokončit checkpointový commit, push a zarovnání obou profilových workspaces.
-- Nový checkpoint ještě nemá vlastní serverový důkaz nasazení.
-- Po samostatně potvrzeném nasazení živě ověřit Janička cleanup audit,
-  `codex_session_report.py` a obecný rychlý systémový přehled.
+- Vytvořit a pushnout bootstrap commit této změny.
+- Samostatně potvrzeně nasadit nový čistý `main` do Cockpitu.
+- Po nasazení ručně ověřit jeden malý lokální vývoj a zobrazení čekajícího
+  commitu v panelu Práce; čas případné večerní automatizace zatím není určen.
 
 ### Rizika
-- Automatická integrace při posunu `main` zůstává správně servisním rozhodnutím;
-  bez kontroly překryvu se nesmí sama sloučit.
-- VoiceBridge marker a private soubory stále existují pro zbývající specializovaný
-  runtime; tato fáze je nemaže ani nemigruje.
+- Divergence GitHubu zablokuje pouze denní push a vyžádá servisní rozhodnutí;
+  další lokální checkpoint a lokální nasazení zůstávají dostupné.
+- Denní balíček nikdy automaticky nedělá merge, rebase, squash ani force push.
+- Do prvního bootstrap nasazení běží Cockpit ještě podle starého okamžitého
+  commit/push kontraktu.
 
 ### Další krok
-- Pushnout otestovaný checkpoint, zarovnat profily a potom samostatně
-  potvrzeně nasadit aktuální čistý `main` do Cockpitu.
+- Commitnout a pushnout tento checkpoint a potom přes samostatnou potvrzovací
+  bránu nasadit aktuální čistý `main` do Cockpitu.
 
 ### Rozhodnutí
-- Obecné diagnostiky a Janička cleanup nesmějí používat Voice Bridge marker
-  jako autoritu vlastnictví relace.
-- Nedostupný registr spravovaných Janička relací blokuje cleanup; bezpečnost
-  se nesmí nahrazovat odhadem z markeru.
+- Lokální `main` je přes den provozní autorita; GitHub je dávkový vzdálený cíl.
+- Jednotlivé commity se nesquashují. Večer proběhne jedna úplná brána a jeden
+  přesný push všech čekajících commitů.
+- Neúspěšný nebo divergentní večerní balíček nesmí zastavit další lokální vývoj.
 
 ### Navrhované další kroky
-- Po živém ověření připravit read-only audit fáze 9.4 samostatných VoiceBridge
-  modulů, call-sites a private stavu.
-- Nic z private VoiceBridge stavu nemazat ani nemigrovat bez nového rozhodnutí.
+- Po živém retestu určit vhodný večerní čas nebo ponechat ruční spouštění.
+- Teprve podle provozní zkušenosti zvážit další zjednodušení Git procedury.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (313 cílených a 1254 úplných testů).
-- Python, oba JavaScripty, shell, whitespace a Git safety kontroly prošly.
-- Git před paměťovým doplněním: lokální `main` na `0c29352a5aeb`, vzdálený
-  `origin/main` na sovím `c10dfa010aba`; lokální checkpoint čeká na push.
-- Obnovitelný izolovaný WIP checkpoint: `3d064dc5beb7`.
-- Poslední serverově potvrzené nasazení: `1f35f9668581` · 1252 testů · smoke 5/5.
-- Runtime je dosažitelný a Human–Adam připojený; nový checkpoint dosud neběží.
-- Tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
+- Úplná Cockpit Quality Gate prošla 1269 testy.
+- Python, oba JavaScripty, shell a `git diff --check` jsou zelené.
+- Výchozí `main == origin/main` je `1959b383dcf9`; změny jsou před commitem
+  záměrně viditelné v pracovním stromu.
+- Nebyla čtena ani ukládána private data, hesla nebo citlivé texty.
+- Tento snapshot sám ještě nepotvrzuje push ani nasazení.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -2346,3 +2343,27 @@ Technický důkaz:
 - Cílená sada prošla 313 testy.
 - Plná Cockpit Quality Gate prošla 1254 testy za 300,1 s.
 - Soví commit měnil jen čtyři cesty mimo Samantha Agent a s WIP neměl překryv.
+
+### 2026-07-27 11:19 CEST – Dávkový GitHub režim
+
+Hotovo:
+- Běžné dokončení ukládá přes den samostatné lokální commity bez pushnutí.
+- Lokální nasazení není blokované starším nebo divergentním GitHubem.
+- Panel Práce umí auditovat a potvrzeně odeslat všechny čekající commity jedním
+  večerním pushem po jedné úplné bráně.
+
+Rozhodnutí:
+- Lokální `main` je přes den provozní autorita.
+- Divergence blokuje jen večerní balíček, nikoli další lokální práci.
+- Merge, rebase, squash a force push se automaticky nepoužívají.
+
+Další krok:
+- Pushnout bootstrap commit a samostatně potvrzeně nasadit nový `main`.
+
+Navrhované další kroky:
+- Po živém malém vývoji rozhodnout, zda zůstane balíček ruční, nebo dostane
+  pevný večerní čas.
+
+Technický důkaz:
+- Úplná Cockpit Quality Gate prošla 1269 testy; syntaxe, oba JavaScripty, shell
+  a whitespace kontrola jsou zelené.

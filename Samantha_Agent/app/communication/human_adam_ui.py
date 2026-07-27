@@ -247,14 +247,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
           <li>Před změnou kódu nebo projektových souborů klikni na <strong>Zahájit vývoj</strong> a potvrď jednorázové oprávnění. Platí pouze pro následující odeslaný pokyn; bez něj Adam zůstává pro workspace a Git read-only.</li>
           <li id="privateArchiveHelp" hidden><strong>Soukromý archiv aktivního proudu:</strong> čtení, diagnostiku a jednu jasně zadanou běžnou nedestruktivní úpravu pošli přímo bez tlačítka Zahájit vývoj. Samostatné potvrzení zůstává pro mazání, hromadné změny, odesílání ven a systémové zásahy.</li>
           <li>Vývojový úkol napiš přímo Adamovi do textového pole. Nový projekt, tool nebo layer se zakládá pouze v terminálovém dialogu s Adamem.</li>
-          <li>Při běžném čistém a zarovnaném <code>main</code> Adam po úspěšné změně automaticky spustí testy, aktualizuje handoff a TVBCP, vytvoří jeden commit přímo v <code>main</code>, pushne jej a synchronizuje čisté profily.</li>
+          <li>Při běžném čistém a zarovnaném <code>main</code> Adam po úspěšné změně spustí cílené testy a rychlou lokální bránu, aktualizuje handoff a TVBCP, vytvoří samostatný commit přímo v <code>main</code> a synchronizuje čisté profily. GitHub běžný denní vývoj nezdržuje.</li>
+          <li>Lokální commity se přes den zachovávají jednotlivě. V okně <strong>Práce</strong> uvidíš jejich počet; až budeš chtít denní balíček odeslat, vložíš přesnou potvrzovací větu. Cockpit pak jednou spustí úplnou bránu a jedním pushem odešle všechny čekající commity na GitHub.</li>
           <li>Pokud začlenění blokuje rozpracovaná terminálová práce, tah zůstane bezpečně odložený bez commitu a pushnutí. Okno <strong>Práce</strong> potom ukáže read-only audit čekající integrace a nabídne samostatně potvrzované převzetí pouze při čistém nezměněném <code>main</code> a ověřeném původu přesného WIP.</li>
           <li>Okno <strong>Práce</strong> otevři pro kontrolu čistého stavu, diagnostiku rozpracovaných změn nebo podporované nasazení.</li>
         </ol>
 
         <h4>Nasazení</h4>
         <p>Nasazovací tlačítka se zobrazí jen u pracovního proudu, který nasazení podporuje. U ostatních proudů zůstává v okně Práce pouze stav a bezpečné vysvětlení.</p>
-        <p><strong>Automatické dokončení vývoje dokončí Git, nikoli běžící Cockpit.</strong> Commit se začlení do <code>main</code>, pushne na GitHub a synchronizuje do čistých profilů, ale již spuštěný Python proces dál používá dříve načtený kód. Pokud má nový commit ovlivnit Cockpit, pro tento commit proveď právě jednou následující dva kroky.</p>
+        <p><strong>Automatické dokončení vývoje dokončí lokální Git, nikoli běžící Cockpit.</strong> Commit se začlení do lokálního <code>main</code> a synchronizuje do čistých profilů; GitHub čeká na denní balíček. Již spuštěný Python proces dál používá dříve načtený kód. Pokud má nový commit ovlivnit Cockpit, pro tento commit proveď právě jednou následující dva kroky.</p>
         <ol>
           <li>Workspace musí být čistý, synchronní a odpovídat <code>main</code>.</li>
           <li>Jednou stiskni <strong>Audit nasazení do Cockpitu</strong> a přečti výsledek.</li>
@@ -266,7 +267,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <h4>Když něco nejde</h4>
         <ul>
           <li><strong>Workspace je za <code>main</code>:</strong> při čistém profilu klikni na Připojit.</li>
-          <li><strong>GitHub je před lokálním <code>main</code>:</strong> například denní soví workflow vytvořilo nový commit. Audit nabídne tlačítko <strong>Dorovnat main s GitHubem</strong> pouze při čistém jednoznačném fast-forwardu. Nejdřív zkontroluj cílový commit a seznam souborů; dorovnání se nespouští automaticky.</li>
+          <li><strong>GitHub je před lokálním <code>main</code>:</strong> denní balíček se bezpečně zastaví. Audit nabídne tlačítko <strong>Dorovnat main s GitHubem</strong> pouze při čistém jednoznačném fast-forwardu. Při divergenci rozhodne servis; žádný merge, rebase ani force push se nespustí automaticky.</li>
           <li><strong>Čekající integrace:</strong> přečti read-only audit. Pokud je <code>main</code> čistý, nezměněný a private ownership marker odpovídá přesnému WIP, vlož nabídnutou potvrzovací větu a klikni na <strong>Převzít přesný WIP do main</strong>. Když model zapomene dokončovací účtenku, marker vytvořený před tahem zachová původ změn a panel nabídne <strong>Dokončit vlastněný WIP</strong> po doplnění git-safe popisu. Při posunu <code>main</code>, cizím WIP, divergenci nebo neshodě markeru nic nezačleňuj a vyžádej servisní rozhodnutí; totéž platí při nejistém doručení.</li>
           <li><strong>Audit nebo nasazení do Cockpitu selže:</strong> nic neopakuj naslepo; obnov stav a předej Adamovi přesnou chybu.</li>
           <li><strong>Čekání na nový Cockpit dosáhne limitu:</strong> neznamená to automaticky neúspěšné nasazení. Nasazení neopakuj, nejdřív obnov stav a zkontroluj serverovou účtenku. Terminálový fallback použij pouze tehdy, když Cockpit skutečně neodpovídá.</li>
@@ -344,6 +345,13 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <p id="mainSyncMeta">Nejdřív spusť audit nasazení.</p>
         <ul id="mainSyncChanges" hidden></ul>
         <button class="audit-action" id="mainSyncBtn" type="button" disabled>Dorovnat main s GitHubem</button>
+      </section>
+      <section class="integration-audit-box" id="githubBatchBox" aria-label="Denní GitHub balíček" hidden>
+        <h3>Denní GitHub balíček</h3>
+        <p id="githubBatchMeta">Stav se prověří při otevření panelu Práce.</p>
+        <ul id="githubBatchCommits" hidden></ul>
+        <input id="githubBatchConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Po auditu sem vlož potvrzovací větu" hidden disabled>
+        <button class="deploy-action" id="githubBatchBtn" type="button" hidden disabled>Odeslat denní balíček na GitHub</button>
       </section>
       <div class="legacy-work-control" id="handoffTakeoverCheck" role="status" hidden></div>
       <button class="audit-action" id="deployAuditBtn" type="button" disabled>Audit nasazení do Cockpitu</button>
@@ -441,6 +449,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const mainSyncMeta = document.getElementById("mainSyncMeta");
   const mainSyncChanges = document.getElementById("mainSyncChanges");
   const mainSyncBtn = document.getElementById("mainSyncBtn");
+  const githubBatchBox = document.getElementById("githubBatchBox");
+  const githubBatchMeta = document.getElementById("githubBatchMeta");
+  const githubBatchCommits = document.getElementById("githubBatchCommits");
+  const githubBatchConfirmation = document.getElementById("githubBatchConfirmation");
+  const githubBatchBtn = document.getElementById("githubBatchBtn");
   const handoffTakeoverCheck = document.getElementById("handoffTakeoverCheck");
   const deployAuditBtn = document.getElementById("deployAuditBtn");
   const deployConfirmation = document.getElementById("deployConfirmation");
@@ -471,6 +484,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let deliveryUncertain = false;
   let deploymentAudit = null;
   let mainRemoteSyncAudit = null;
+  let githubBatchAudit = null;
+  let githubBatchModeEnabled = false;
   let pendingIntegrationAudit = null;
   let pendingIntegrationRecovery = null;
   const verifiedDeploymentStorageKey = "human-adam:verified-deployment:v1";
@@ -1092,7 +1107,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     if (deployment && mainShort && !deploymentCurrent) {
       deploymentReceipt.textContent = `Git/main ${mainShort} · běžící Cockpit ${deployment.main_short} · nový commit čeká na nasazení do Cockpitu`;
     } else if (deployment && deploymentCurrent) {
-      deploymentReceipt.textContent = `Git/main i běžící Cockpit ${mainShort} · ${deployment.test_count} testů · smoke ${deployment.smoke_count}/5 · ${formatTime(deployment.deployed_at)}`;
+      const validation = deployment.gate_mode === "quick"
+        ? "rychlá lokální brána"
+        : `${deployment.test_count} testů`;
+      deploymentReceipt.textContent = `Git/main i běžící Cockpit ${mainShort} · ${validation} · smoke ${deployment.smoke_count}/5 · ${formatTime(deployment.deployed_at)}`;
     } else if (deployment) {
       deploymentReceipt.textContent = `Běžící Cockpit ${deployment.main_short} · aktuální Git/main nelze ověřit`;
     } else {
@@ -1564,7 +1582,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         return;
       }
       await loadWork();
-      notice.textContent = `Odložený WIP je v main a pushnutý jako ${payload.checkpoint_short || "nový checkpoint"}. Nasazení zůstává samostatný krok.`;
+      const remote = payload.remote_push_deferred
+        ? " GitHub čeká na denní balíček."
+        : " Commit je pushnutý.";
+      notice.textContent = `Odložený WIP je v main jako ${payload.checkpoint_short || "nový checkpoint"}.${remote} Nasazení zůstává samostatný krok.`;
     } catch (error) {
       await loadWork();
       integrationAuditMeta.textContent = `Stav integrace nelze potvrdit: ${error.message}`;
@@ -1612,7 +1633,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         return;
       }
       await loadWork();
-      notice.textContent = `Vlastněný WIP je v main a pushnutý jako ${payload.checkpoint_short || "nový checkpoint"}. Nasazení zůstává samostatný krok.`;
+      const remote = payload.remote_push_deferred
+        ? " GitHub čeká na denní balíček."
+        : " Commit je pushnutý.";
+      notice.textContent = `Vlastněný WIP je v main jako ${payload.checkpoint_short || "nový checkpoint"}.${remote} Nasazení zůstává samostatný krok.`;
     } catch (error) {
       await loadWork();
       integrationAuditMeta.textContent = `Stav recovery nelze potvrdit: ${error.message}`;
@@ -1653,7 +1677,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       const truncated = mainRemoteSyncAudit.changes_truncated ? " · seznam je zkrácený" : "";
       mainSyncMeta.textContent = `GitHub je napřed o ${commits} commitů · cíl ${target} · ${files} změněných souborů${truncated} · lze použít pouze fast-forward.`;
     } else if (state === "local_ahead") {
-      mainSyncMeta.textContent = "Lokální main je napřed; automatický fast-forward není možný.";
+      mainSyncMeta.textContent = githubBatchModeEnabled
+        ? "Lokální main je napřed; commity patří do denního GitHub balíčku."
+        : "Lokální main je napřed; automatický fast-forward není možný.";
     } else if (state === "diverged") {
       mainSyncMeta.textContent = "Lokální main a GitHub se rozešly; je nutné servisní rozhodnutí.";
     } else {
@@ -1717,8 +1743,111 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     }
   }
 
+  function renderGithubBatchAudit(audit) {
+    githubBatchAudit = audit && typeof audit === "object" ? audit : null;
+    githubBatchBox.hidden = !githubBatchModeEnabled;
+    githubBatchCommits.replaceChildren();
+    githubBatchConfirmation.value = "";
+    githubBatchConfirmation.hidden = true;
+    githubBatchConfirmation.disabled = true;
+    githubBatchBtn.hidden = true;
+    githubBatchBtn.disabled = true;
+    if (!githubBatchModeEnabled) return;
+    if (!githubBatchAudit) {
+      githubBatchMeta.textContent = "Denní balíček zatím nebyl ověřen.";
+      return;
+    }
+    const state = String(githubBatchAudit.state || "");
+    const commits = Array.isArray(githubBatchAudit.commits) ? githubBatchAudit.commits : [];
+    for (const item of commits) {
+      const row = document.createElement("li");
+      row.textContent = `${item.head || "?"} · ${item.subject || "commit bez popisu"}`;
+      githubBatchCommits.appendChild(row);
+    }
+    githubBatchCommits.hidden = !commits.length;
+    if (githubBatchAudit.ready === true && state === "ready") {
+      const count = Number(githubBatchAudit.commit_count || 0);
+      const files = Number(githubBatchAudit.change_count || 0);
+      githubBatchMeta.textContent = `${count} čekajících commitů · ${files} změněných souborů · před jedním pushem proběhne úplná brána · vlož přesně: ${githubBatchAudit.confirmation_text || ""}`;
+      githubBatchConfirmation.hidden = false;
+      githubBatchConfirmation.disabled = false;
+      githubBatchBtn.hidden = false;
+      return;
+    }
+    if (state === "aligned") {
+      githubBatchMeta.textContent = "GitHub je aktuální; žádný denní balíček nečeká.";
+      return;
+    }
+    if (state === "origin_ahead") {
+      githubBatchMeta.textContent = "GitHub je napřed. Nejdřív použij bezpečné dorovnání main; balíček se neodeslal.";
+      return;
+    }
+    if (state === "diverged") {
+      githubBatchMeta.textContent = "Lokální main a GitHub se rozešly. Balíček je zablokovaný a vyžaduje servisní rozhodnutí.";
+      return;
+    }
+    githubBatchMeta.textContent = githubBatchAudit.message || "Denní balíček nelze bezpečně ověřit.";
+  }
+
+  async function auditGithubBatch() {
+    if (!githubBatchModeEnabled) {
+      renderGithubBatchAudit(null);
+      return null;
+    }
+    githubBatchBox.hidden = false;
+    githubBatchMeta.textContent = "Ověřuji GitHub a přesný seznam čekajících lokálních commitů…";
+    try {
+      const payload = await api("/api/human-adam/github-batch-audit");
+      renderGithubBatchAudit(payload);
+      return payload;
+    } catch (error) {
+      renderGithubBatchAudit({
+        ok:false,
+        state:"audit_failed",
+        ready:false,
+        message:error.message,
+      });
+      return null;
+    }
+  }
+
+  async function pushGithubBatch() {
+    if (githubBatchBtn.disabled || !githubBatchAudit) return;
+    const required = String(githubBatchAudit.confirmation_text || "").trim();
+    const confirmation = githubBatchConfirmation.value.trim();
+    if (!required || confirmation !== required) {
+      githubBatchMeta.textContent = "Potvrzovací věta nesouhlasí; nic se neodeslalo.";
+      return;
+    }
+    githubBatchBtn.disabled = true;
+    githubBatchConfirmation.disabled = true;
+    githubBatchMeta.textContent = "Spouštím jednu úplnou bránu a potom jeden přesný push denního balíčku…";
+    try {
+      const payload = await api("/api/human-adam/github-batch", {
+        method:"POST",
+        body:JSON.stringify({
+          confirmation,
+          expected_origin_head:String(githubBatchAudit.origin_head || ""),
+          expected_local_head:String(githubBatchAudit.local_head || ""),
+        }),
+      });
+      if (!payload.ok || payload.pushed !== true) {
+        throw new Error(payload.message || "Denní GitHub balíček se neodeslal.");
+      }
+      notice.textContent = `Denní GitHub balíček byl odeslaný: ${Number(payload.commit_count || 0)} commitů · main ${payload.local_short || ""}.`;
+      await loadWork();
+      await loadStatus();
+    } catch (error) {
+      githubBatchMeta.textContent = `Nic se neodeslalo: ${error.message}`;
+      githubBatchConfirmation.disabled = false;
+      githubBatchBtn.disabled = false;
+    }
+  }
+
   function renderWork(payload) {
     deploymentAudit = null;
+    githubBatchModeEnabled = payload.github_batch_mode === true;
+    if (!githubBatchModeEnabled) renderGithubBatchAudit(null);
     renderMainRemoteSyncAudit(null);
     renderHandoffTakeoverCheck(null);
     renderProjectContinuity(payload.project_continuity || null);
@@ -1840,7 +1969,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     const mainHead = main.head_short ? ` · ${String(main.head_short)}` : "";
     const deploymentEvidence = Number(deployment.test_count || 0) > 0
       ? ` · ${Number(deployment.test_count)} testů · smoke ${Number(deployment.smoke_count || 0)}/5`
-      : "";
+      : (deployment.gate_mode === "quick" && Number(deployment.smoke_count || 0) === 5
+        ? " · rychlá lokální brána · smoke 5/5"
+        : "");
     const workspaceCount = Number(workspaces.count || 0) > 0
       ? ` · ${Number(workspaces.aligned_count || 0)}/${Number(workspaces.count)} zarovnáno`
       : "";
@@ -1941,6 +2072,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       const payload = await api("/api/human-adam/workspace");
       if (!payload.ok) throw new Error(payload.message || "Pracovní stav nelze načíst.");
       renderWork(payload);
+      if (githubBatchModeEnabled && !workPanel.hidden) await auditGithubBatch();
       return payload;
     } catch (error) {
       workChanges.replaceChildren();
@@ -2033,6 +2165,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     threadRotationPanel.hidden = true;
     tvbcpPanel.hidden = true;
     workPanel.hidden = false;
+    if (payload && payload.github_batch_mode === true) await auditGithubBatch();
   }
 
   function setWorkHelpOpen(open) {
@@ -2112,7 +2245,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   async function auditDeployment() {
     deployAuditBtn.disabled = true;
     deployBtn.disabled = true;
-    deployMeta.textContent = "Audituji nasazení aktuálního main do Cockpitu: ověřuji GitHub a oba profilové workspaces…";
+    deployMeta.textContent = "Audituji nasazení aktuálního lokálního main do Cockpitu: ověřuji oba profilové workspaces…";
     try {
       const payload = await api("/api/human-adam/deploy-audit");
       if (!payload.ok || !payload.ready) throw new Error(payload.message || "Audit nasazení do Cockpitu neprošel.");
@@ -2189,17 +2322,27 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
   function verifiedDeploymentRecord(payload) {
     const mainShort = String(payload && payload.main_short || "").trim().toLowerCase();
-    const testCount = Number(payload && payload.gate ? payload.gate.test_count : 0);
-    const smokeCount = Number(payload && payload.smoke ? payload.smoke.check_count : 0);
+    const testCount = Number(
+      payload && payload.gate ? payload.gate.test_count : (payload && payload.test_count || 0)
+    );
+    const gateMode = String(
+      payload && payload.gate ? payload.gate.mode : (payload && payload.gate_mode || "full")
+    ).trim();
+    const smokeCount = Number(
+      payload && payload.smoke ? payload.smoke.check_count : (payload && payload.smoke_count || 0)
+    );
     const deployedAt = String(payload && payload.deployed_at || "").trim();
     const parsedTime = new Date(deployedAt);
     if (!/^[0-9a-f]{7,12}$/.test(mainShort)) return null;
-    if (!Number.isInteger(testCount) || testCount <= 0) return null;
+    if (!["full","quick"].includes(gateMode)) return null;
+    if (!Number.isInteger(testCount)) return null;
+    if ((gateMode === "full" && testCount <= 0) || (gateMode === "quick" && testCount !== 0)) return null;
     if (smokeCount !== 5 || Number.isNaN(parsedTime.getTime())) return null;
     return {
       schema_version:1,
       main_short:mainShort,
       test_count:testCount,
+      gate_mode:gateMode,
       smoke_count:smokeCount,
       deployed_at:parsedTime.toISOString(),
       stored_at:Date.now(),
@@ -2217,7 +2360,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   function verifiedDeploymentSummary(payload) {
     const record = verifiedDeploymentRecord(payload);
     if (!record) return "Běžící Cockpit ověřen · úplný serverový důkaz je uložený.";
-    return `Běžící Cockpit ověřen na main ${record.main_short} · ${record.test_count} testů · smoke ${record.smoke_count}/5 · dokončeno ${formatTime(record.deployed_at)}.`;
+    const validation = record.gate_mode === "quick"
+      ? "rychlá lokální brána"
+      : `${record.test_count} testů`;
+    return `Běžící Cockpit ověřen na main ${record.main_short} · ${validation} · smoke ${record.smoke_count}/5 · dokončeno ${formatTime(record.deployed_at)}.`;
   }
 
   function storeVerifiedDeploymentResult(payload) {
@@ -2361,7 +2507,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     deployAuditBtn.disabled = true;
     deployBtn.disabled = true;
     checkpointBtn.disabled = true;
-    deployMeta.textContent = "Spouštím plnou bránu nad přesným main před nasazením do Cockpitu…";
+    deployMeta.textContent = "Spouštím rychlou lokální bránu nad přesným main před nasazením do Cockpitu…";
     let previousPid = 0;
     const auditedMainShort = String(deploymentAudit.main_short || "");
     try {
@@ -2375,17 +2521,19 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         body:JSON.stringify({confirmation}),
       });
       if (!payload.ok) {
-        const deploymentFailure = `Nic nebylo nasazeno: ${payload.message || "plná brána nebo audit selhaly."}`;
+        const deploymentFailure = `Nic nebylo nasazeno: ${payload.message || "lokální brána nebo audit selhaly."}`;
         await loadWork();
         deployMeta.textContent = deploymentFailure;
         return;
       }
-      const tests = payload.gate && payload.gate.test_count ? `${payload.gate.test_count} testů` : "plná brána";
+      const gateLabel = payload.gate && payload.gate.mode === "quick"
+        ? "rychlá lokální brána"
+        : (payload.gate && payload.gate.test_count ? `${payload.gate.test_count} testů` : "úplná brána");
       if (!payload.restart || !payload.restart.ok) {
-        deployMeta.textContent = `Plná brána prošla (${tests}), ale restart Cockpitu nezačal. Kód ještě neběží; použij Restart Cockpitu nebo terminálový fallback.`;
+        deployMeta.textContent = `${gateLabel} prošla, ale restart Cockpitu nezačal. Kód ještě neběží; použij Restart Cockpitu nebo terminálový fallback.`;
         return;
       }
-      deployMeta.textContent = `Plná brána prošla · ${tests} · Cockpit se restartuje na auditovaný main…`;
+      deployMeta.textContent = `${gateLabel} prošla · Cockpit se restartuje na auditovaný main…`;
       await waitForCockpitAndReload(
         Number(payload.restart.pid || previousPid),
         String(payload.main_short || auditedMainShort),
@@ -2480,6 +2628,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     workHelpBtn.focus();
   });
   workRefreshBtn.addEventListener("click", loadWork);
+  githubBatchConfirmation.addEventListener("input", () => {
+    const required = githubBatchAudit ? String(githubBatchAudit.confirmation_text || "") : "";
+    githubBatchBtn.disabled = !required || githubBatchConfirmation.value.trim() !== required;
+  });
+  githubBatchBtn.addEventListener("click", pushGithubBatch);
   integrationConfirmation.addEventListener("input", syncIntegrationRecoveryAction);
   integrationRecoveryCommit.addEventListener("input", syncIntegrationRecoveryAction);
   integrationRecoverySummary.addEventListener("input", syncIntegrationRecoveryAction);

@@ -42,6 +42,14 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-27 11:19 CEST: Priorita 1, Human–Adam / dávkový GitHub režim.
+  Lokální `main` je přes den autorita, jednotlivé commity se zachovávají a
+  GitHub čeká na ruční denní balíček. Běžné změny mají rychlou lokální bránu,
+  rizikové změny úplnou; večerní balíček provede jednu úplnou bránu a jeden
+  push. Divergence blokuje jen balíček, nikoli další lokální checkpoint nebo
+  lokální nasazení. Úplná brána prošla 1269 testy. Zbývá bootstrap commit,
+  push a samostatně potvrzené nasazení do Cockpitu. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-27 08:25 CEST: Priorita 1, Human–Adam / fáze 9.3e a servisní
   převzetí po sovím commitu. Živé diagnostiky, přehled Codex relací a stav
   starého Adam fallbacku už nezávisí na Voice Bridge markeru. Ochrana Janička

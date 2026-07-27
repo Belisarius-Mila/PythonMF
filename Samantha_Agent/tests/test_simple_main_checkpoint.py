@@ -118,6 +118,122 @@ class SimpleMainCheckpointTests(unittest.TestCase):
             "2026-07-20 07:00 CEST",
         )
 
+    def test_daily_batch_checkpoint_uses_quick_gate_and_keeps_origin_behind(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source, manager = prepare_environment(root)
+            origin_before = git(source, "rev-parse", "origin/main")
+            (manager.project_root / "tracked.py").write_text(
+                "VALUE = 17\n",
+                encoding="utf-8",
+            )
+
+            result = complete_simple_main_checkpoint(
+                workspace=manager,
+                request=checkpoint_request(commit_message="Local daytime step"),
+                confirmed=True,
+                gate_runner=passing_gate_runner,
+                gate_log_path=root / "gate.log",
+                now_factory=fixed_now,
+                defer_remote_push=True,
+                allow_quick_gate=True,
+            )
+
+            source_head = git(source, "rev-parse", "HEAD")
+            origin_after = git(source, "rev-parse", "origin/main")
+            workspace_head = git(manager.workspace_root, "rev-parse", "HEAD")
+            handoff = (
+                manager.project_root / "memory" / "handoffs" / "demo.md"
+            ).read_text(encoding="utf-8")
+
+        self.assertTrue(result["ok"])
+        self.assertFalse(result["pushed"])
+        self.assertTrue(result["remote_push_deferred"])
+        self.assertEqual(result["pending_remote_commit_count"], 1)
+        self.assertEqual(result["gate"]["mode"], "quick")
+        self.assertEqual(result["gate"]["test_count"], 0)
+        self.assertNotEqual(source_head, origin_before)
+        self.assertEqual(origin_after, origin_before)
+        self.assertEqual(workspace_head, source_head)
+        self.assertIn("rychlou syntax/whitespace bránou", handoff)
+        self.assertIn("čeká na denní balíček", handoff)
+
+    def test_high_risk_batch_checkpoint_keeps_full_gate(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source, manager = prepare_environment(root)
+            target = manager.project_root / "app" / "communication" / "github_batch.py"
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text("ENABLED = True\n", encoding="utf-8")
+
+            result = complete_simple_main_checkpoint(
+                workspace=manager,
+                request=checkpoint_request(commit_message="High risk local step"),
+                confirmed=True,
+                gate_runner=passing_gate_runner,
+                gate_log_path=root / "gate.log",
+                now_factory=fixed_now,
+                defer_remote_push=True,
+                allow_quick_gate=True,
+            )
+
+            origin_head = git(source, "rev-parse", "origin/main")
+            local_head = git(source, "rev-parse", "HEAD")
+
+        self.assertEqual(result["gate"]["mode"], "full")
+        self.assertEqual(result["gate"]["test_count"], 12)
+        self.assertNotEqual(local_head, origin_head)
+
+    def test_failed_remote_batch_audit_does_not_block_next_local_checkpoint(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source, manager = prepare_environment(root)
+            local_base = source / "Samantha_Agent" / "local_base.py"
+            local_base.write_text("LOCAL = 2\n", encoding="utf-8")
+            git(source, "add", "Samantha_Agent/local_base.py")
+            git(source, "commit", "-m", "Existing local daytime commit")
+            manager.sync_from_main(confirmed=True)
+
+            competitor = root / "competitor-checkpoint-divergence"
+            subprocess.run(
+                ["/usr/bin/git", "clone", str(root / "origin.git"), str(competitor)],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            git(competitor, "config", "user.name", "Other writer")
+            git(competitor, "config", "user.email", "other@example.invalid")
+            (competitor / "remote.txt").write_text("remote\n", encoding="utf-8")
+            git(competitor, "add", "remote.txt")
+            git(competitor, "commit", "-m", "Remote divergent commit")
+            git(competitor, "push", "origin", "main")
+            git(source, "fetch", "origin", "main:refs/remotes/origin/main")
+
+            (manager.project_root / "tracked.py").write_text(
+                "VALUE = 18\n",
+                encoding="utf-8",
+            )
+            result = complete_simple_main_checkpoint(
+                workspace=manager,
+                request=checkpoint_request(
+                    commit_message="Continue after failed batch audit"
+                ),
+                confirmed=True,
+                gate_runner=passing_gate_runner,
+                gate_log_path=root / "gate.log",
+                now_factory=fixed_now,
+                defer_remote_push=True,
+                allow_quick_gate=True,
+            )
+
+            local_head = git(source, "rev-parse", "HEAD")
+            remote_head = git(source, "rev-parse", "origin/main")
+
+        self.assertTrue(result["ok"])
+        self.assertTrue(result["remote_push_deferred"])
+        self.assertEqual(result["pending_remote_commit_count"], 2)
+        self.assertNotEqual(local_head, remote_head)
+
     def test_completes_one_commit_on_main_without_creating_branch(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

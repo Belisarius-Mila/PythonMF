@@ -51,6 +51,8 @@ from app.cockpit import (
     cockpit_dev_runner_run_action,
     cockpit_speak_action,
     human_adam_transcribe_action,
+    human_adam_github_batch_action,
+    human_adam_github_batch_audit_action,
     human_adam_main_remote_sync_action,
     human_adam_main_remote_sync_audit_action,
     human_adam_simple_main_deployment_audit_action,
@@ -187,6 +189,7 @@ class CockpitTests(unittest.TestCase):
             "external_ai",
             "external_send",
             "git_commit_push",
+            "git_push",
             "git_fast_forward",
             "git_fast_forward_push_restart",
             "local_open",
@@ -3939,6 +3942,45 @@ class CockpitTests(unittest.TestCase):
         self.assertTrue(audit["read_only"])
         self.assertFalse(result["ok"])
         self.assertIn("změnil", result["message"])
+
+    def test_github_batch_actions_bind_exact_audit_heads_and_confirmation(self) -> None:
+        calls: list[dict[str, object]] = []
+
+        class FakeProfileManager:
+            def audit_github_batch(self) -> dict[str, object]:
+                return {"ok": True, "state": "ready", "ready": True}
+
+            def push_github_batch(self, **kwargs: object) -> dict[str, object]:
+                calls.append(kwargs)
+                return {"ok": True, "state": "pushed", "pushed": True}
+
+        manager = FakeProfileManager()
+        audit = human_adam_github_batch_audit_action(service=manager)
+        result = human_adam_github_batch_action(
+            {
+                "confirmation": "POTVRZUJI ODESLANI DENNIHO GITHUB BALICKU",
+                "expected_origin_head": "a" * 40,
+                "expected_local_head": "b" * 40,
+            },
+            service=manager,
+        )
+
+        self.assertTrue(audit["ready"])
+        self.assertTrue(result["pushed"])
+        self.assertEqual(
+            calls,
+            [
+                {
+                    "expected_origin_head": "a" * 40,
+                    "expected_local_head": "b" * 40,
+                    "confirmation": "POTVRZUJI ODESLANI DENNIHO GITHUB BALICKU",
+                }
+            ],
+        )
+        self.assertIn(
+            "/api/human-adam/github-batch",
+            {item["path"] for item in COCKPIT_POST_ACTIONS},
+        )
 
     def test_private_simple_main_deployment_verification_uses_server_evidence(self) -> None:
         manager_calls: list[dict[str, object]] = []

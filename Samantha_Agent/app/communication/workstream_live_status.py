@@ -27,6 +27,7 @@ _REMOTE_STATES = {
     "aligned": "aligned",
     "fast_forward_available": "origin_ahead",
     "local_ahead": "local_ahead",
+    "ready": "local_ahead",
     "diverged": "diverged",
 }
 _OVERALL_STATES = frozenset(
@@ -277,6 +278,9 @@ def _deployment_status(
     )
     gate = _safe_mapping(deployment.get("gate"))
     smoke = _safe_mapping(deployment.get("smoke"))
+    gate_mode = str(
+        deployment.get("gate_mode") or gate.get("mode") or "full"
+    ).strip()
     test_count = _safe_count(
         deployment.get("test_count") or gate.get("test_count")
     )
@@ -292,6 +296,10 @@ def _deployment_status(
     deployed_at = _safe_timestamp(deployment.get("deployed_at"))
     expected_stamp = _safe_code_stamp(deployment.get("expected_code_stamp"))
     observed_stamp = _safe_code_stamp(server.get("code_stamp"))
+    gate_evidence_valid = bool(
+        (gate_mode == "full" and test_count > 0)
+        or (gate_mode == "quick" and test_count == 0)
+    )
     head_matches = bool(
         deployment_head
         and current_head_short
@@ -304,14 +312,18 @@ def _deployment_status(
     if not deployment:
         state = "unavailable"
     elif raw_state == "pending_restart":
-        state = "pending_restart" if deployment_head and test_count else "unverified"
+        state = (
+            "pending_restart"
+            if deployment_head and gate_evidence_valid
+            else "unverified"
+        )
     elif (
         raw_state != "deployed"
         or not deployment_head
         or not deployed_at
         or not gate_passed
         or not smoke_passed
-        or test_count <= 0
+        or not gate_evidence_valid
         or smoke_count <= 0
     ):
         state = "unverified"
@@ -328,6 +340,7 @@ def _deployment_status(
         "main_short": deployment_head[:12],
         "deployed_at": deployed_at,
         "test_count": test_count,
+        "gate_mode": gate_mode if gate_mode in {"full", "quick"} else "unknown",
         "smoke_count": smoke_count,
         "current_head": head_matches,
         "code_stamp_verified": state == "verified_current",

@@ -91,7 +91,11 @@ def refresh_origin_main(source_repo: Path) -> str:
         raise TakeoverError("Nelze obnovit aktuální stav origin/main z GitHubu.") from exc
 
 
-def build_takeover_plan(*, workspace: HumanAdamWorkspaceManager | None = None) -> TakeoverPlan:
+def build_takeover_plan(
+    *,
+    workspace: HumanAdamWorkspaceManager | None = None,
+    allow_source_ahead_of_origin: bool = False,
+) -> TakeoverPlan:
     manager = workspace or HumanAdamWorkspaceManager()
     source_repo = manager.source_repo
     status = manager.status()
@@ -115,7 +119,7 @@ def build_takeover_plan(*, workspace: HumanAdamWorkspaceManager | None = None) -
         origin_head = _git(source_repo, ["rev-parse", "origin/main"])
     except TakeoverError as exc:
         raise TakeoverError("Nelze ověřit lokální referenci origin/main.") from exc
-    if source_head != origin_head:
+    if source_head != origin_head and not allow_source_ahead_of_origin:
         raise TakeoverError("Lokální main a známý origin/main se neshodují; nejdřív obnov vzdálený stav.")
 
     checkpoint_head = _git(manager.workspace_root, ["rev-parse", "HEAD"])
@@ -155,32 +159,55 @@ def apply_takeover(
     *,
     confirmation: str,
     push: bool,
+    defer_remote_push: bool = False,
     workspace: HumanAdamWorkspaceManager | None = None,
     progress_callback: Callable[[str, str], None] | None = None,
 ) -> dict[str, Any]:
     if str(confirmation or "").strip() != CONFIRMATION_TEXT:
         raise TakeoverError(f"Chybí přesná potvrzovací věta: {CONFIRMATION_TEXT}")
     manager = workspace or HumanAdamWorkspaceManager()
-    plan = build_takeover_plan(workspace=manager)
+    if push and defer_remote_push:
+        raise TakeoverError("Push nelze současně provést a odložit.")
+    plan = build_takeover_plan(
+        workspace=manager,
+        allow_source_ahead_of_origin=defer_remote_push,
+    )
     source_repo = manager.source_repo
 
-    if progress_callback is not None:
-        progress_callback("remote_recheck", "running")
-    live_origin_head = refresh_origin_main(source_repo)
     live_source_head = _git(source_repo, ["rev-parse", "HEAD"])
-    if live_source_head != plan.source_head or live_origin_head != plan.source_head:
+    if live_source_head != plan.source_head:
         raise TakeoverError(
-            "GitHub main se během kontroly změnil; lokální main zůstal beze změny. "
-            "Nejdřív obnov main a potom vytvoř nový checkpoint."
+            "Lokální main se během kontroly změnil; převzetí zopakuj."
         )
-    if progress_callback is not None:
-        progress_callback("remote_recheck", "passed")
+    if push:
+        if progress_callback is not None:
+            progress_callback("remote_recheck", "running")
+        live_origin_head = refresh_origin_main(source_repo)
+        if live_origin_head != plan.source_head:
+            raise TakeoverError(
+                "GitHub main se během kontroly změnil; lokální main zůstal beze změny. "
+                "Nejdřív obnov main a potom vytvoř nový checkpoint."
+            )
+        if progress_callback is not None:
+            progress_callback("remote_recheck", "passed")
+    elif defer_remote_push:
+        # Daytime local main is authoritative.  The ref must exist for the
+        # later batch audit, but its relationship must not block another local
+        # checkpoint after an evening audit discovered remote divergence.
+        _git(source_repo, ["rev-parse", "origin/main"])
+    else:
+        raise TakeoverError(
+            "Lokální převzetí bez pushnutí vyžaduje výslovně zapnutý dávkový režim."
+        )
 
     _git(source_repo, ["fetch", "--no-tags", str(manager.workspace_root), "refs/heads/main"])
     fetched_head = _git(source_repo, ["rev-parse", "FETCH_HEAD"])
     if fetched_head != plan.checkpoint_head:
         raise TakeoverError("Lokální fetch vrátil jiný checkpoint; nic nepřebírám.")
-    refreshed = build_takeover_plan(workspace=manager)
+    refreshed = build_takeover_plan(
+        workspace=manager,
+        allow_source_ahead_of_origin=defer_remote_push,
+    )
     if refreshed != plan:
         raise TakeoverError("Stav se během kontroly změnil; převzetí zopakuj.")
 
@@ -212,6 +239,7 @@ def apply_takeover(
         **plan.public_dict(),
         "applied": True,
         "pushed": pushed,
+        "remote_push_deferred": bool(defer_remote_push and not pushed),
         "workspace_aligned": True,
     }
 

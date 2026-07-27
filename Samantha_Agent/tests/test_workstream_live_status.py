@@ -121,6 +121,19 @@ class WorkstreamLiveStatusTests(unittest.TestCase):
         self.assertNotIn("path", encoded.casefold())
         self.assertNotIn("pid", encoded.casefold())
 
+    def test_quick_local_deployment_is_valid_current_evidence(self) -> None:
+        result = build(
+            deployment_snapshot=deployment_snapshot(
+                gate_mode="quick",
+                test_count=0,
+            )
+        )
+
+        self.assertEqual(result["state"], "current")
+        self.assertEqual(result["deployment"]["state"], "verified_current")
+        self.assertEqual(result["deployment"]["gate_mode"], "quick")
+        self.assertEqual(result["deployment"]["test_count"], 0)
+
     def test_inputs_are_not_mutated(self) -> None:
         values = {
             "source_snapshot": source_snapshot(),
