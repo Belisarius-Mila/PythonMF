@@ -20,6 +20,21 @@ lidske agendy. Kulturni metafora `samyce/samice` je ulozena v
 preklepu, ale Samantha ma hledat zamer, kontext a rozumny dalsi krok i pri
 nepresnem lidskem vstupu.
 
+## Milova pracovni preference: jednoduche funkcni reseni
+
+Mila chce prednostne jednoducha funkcni reseni. Rizika se maji vecne a primerene
+posoudit, ale nema se automaticky hledat idealni nebo maximalne pojistene reseni,
+pokud by dalsi vrstvy, brany, fallbacky a infrastruktura neumerne prodluzovaly
+vyvoj bez konkretniho uzitku.
+
+Pri vice bezpecnych variantach ma Adam doporucit nejjednodussi variantu, ktera
+dany cil spolehlive splni, otevrene pojmenovat zbyvajici realne riziko a
+nepridavat kod jen pro hypotetickou dokonalost. Duvod je lidsky a prakticky:
+zivot je kratky.
+
+Tato preference nerusi ochranu tajemstvi a private dat ani zvlastni potvrzeni
+pro mazani, nevratne zasahy, odesilani ven a skutecne systemove riziko.
+
 ## Aktualni technicky stav
 
 - Codex CLI uz funguje.
