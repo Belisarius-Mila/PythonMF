@@ -18,7 +18,6 @@ from app.speech.adam_voice_mode import (
     mark_pending_for_adam_processing_started,
     mark_pending_for_adam_processed,
 )
-from app.adam_service import record_adam_text_reply
 from app.speech.voice_inbox import VOICE_COMMAND_INBOX_DIR, load_latest_voice_command
 
 
@@ -41,16 +40,6 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Zapsat jen textový mezistav, že Codex pokyn převzal a začal ho zpracovávat.",
     )
     parser.add_argument(
-        "--user-text",
-        default="",
-        help="Explicitní text uživatelského dotazu, ke kterému se odpověď ukládá.",
-    )
-    parser.add_argument(
-        "--request-id",
-        default="",
-        help="ID textového dotazu z managed Adam fronty.",
-    )
-    parser.add_argument(
         "--route",
         default="codex_terminal_final",
         help="Název kanálu odpovědi pro Cockpit.",
@@ -71,42 +60,6 @@ def main(argv: list[str] | None = None) -> int:
     elif not response:
         print("Chybí text odpovědi.", file=sys.stderr)
         return 2
-    elif args.request_id.strip():
-        request_result = record_adam_text_reply(
-            request_id=args.request_id.strip(),
-            response=response,
-        )
-        turn = append_manual_voice_history_turn(
-            user_text=args.user_text.strip(),
-            adam_response=response,
-            route=args.route.strip() or "codex_terminal_final",
-            path=args.history_path,
-        )
-        result = {
-            "ok": bool(request_result.get("ok")),
-            "status": "recorded_text_request_reply",
-            "processed_at": turn.get("created_at"),
-            "response": response,
-            "user_text": args.user_text.strip(),
-            "route": args.route.strip() or "codex_terminal_final",
-            "request_id": args.request_id.strip(),
-            "request": request_result,
-        }
-    elif args.user_text.strip():
-        turn = append_manual_voice_history_turn(
-            user_text=args.user_text.strip(),
-            adam_response=response,
-            route=args.route.strip() or "codex_terminal_final",
-            path=args.history_path,
-        )
-        result = {
-            "ok": True,
-            "status": "recorded_explicit_user_text_reply",
-            "processed_at": turn.get("created_at"),
-            "response": response,
-            "user_text": args.user_text.strip(),
-            "route": args.route.strip() or "codex_terminal_final",
-        }
     elif args.latest_command:
         command = load_latest_voice_command(inbox_dir=args.inbox_dir)
         pending = load_pending_for_adam(path=args.path)

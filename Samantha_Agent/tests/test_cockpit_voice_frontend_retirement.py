@@ -297,21 +297,23 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
         self.assertIn('id="voiceRecordBtn"', human_adam_ui)
         self.assertIn("/api/human-adam/transcribe", human_adam_ui)
 
-        adam_service = (PROJECT_ROOT / "app" / "adam_service.py").read_text(encoding="utf-8")
-        self.assertIn("def submit_janicka_text_request(", adam_service)
-        self.assertIn("def start_janicka_light_session(", adam_service)
+        self.assertFalse((PROJECT_ROOT / "app" / "adam_service.py").exists())
+        voice_reply = (PROJECT_ROOT / "scripts" / "adam_voice_reply.py").read_text(encoding="utf-8")
+        self.assertNotIn("from app.adam_service import", voice_reply)
+        self.assertNotIn('"--request-id"', voice_reply)
+        self.assertNotIn('"--user-text"', voice_reply)
+        self.assertIn('"--processing-started"', voice_reply)
+        self.assertIn('"--latest-command"', voice_reply)
 
     def test_live_diagnostics_do_not_depend_on_voice_bridge_marker(self) -> None:
         quick_check = (PROJECT_ROOT / "scripts" / "system_quick_check.py").read_text(encoding="utf-8")
         session_report = (PROJECT_ROOT / "scripts" / "codex_session_report.py").read_text(encoding="utf-8")
         readiness = (PROJECT_ROOT / "scripts" / "adam_bridge_readiness_report.py").read_text(encoding="utf-8")
-        adam_service = (PROJECT_ROOT / "app" / "adam_service.py").read_text(encoding="utf-8")
 
         for name, source in (
             ("quick_check", quick_check),
             ("session_report", session_report),
             ("readiness", readiness),
-            ("adam_service", adam_service),
         ):
             with self.subTest(source=name):
                 self.assertNotIn("current_codex_tty", source)

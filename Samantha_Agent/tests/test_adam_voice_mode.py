@@ -1232,39 +1232,6 @@ for index in range(30):
         self.assertEqual(history[-1]["route"], "codex_manual")
         self.assertIn("mezistavy jsou textové", history[-1]["adam_response"])
 
-    def test_adam_voice_reply_cli_can_record_explicit_janicka_text_reply(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            inbox = Path(temp_dir)
-            history_path = inbox / "adam_voice_history.jsonl"
-
-            completed = subprocess.run(
-                [
-                    sys.executable,
-                    "scripts/adam_voice_reply.py",
-                    "--inbox-dir",
-                    str(inbox),
-                    "--history-path",
-                    str(history_path),
-                    "--user-text",
-                    "Jak funguje hlasový chat?",
-                    "--route",
-                    "janicka_text_bridge",
-                    "Hlasový chat teď nepoužívej; Janička posílá text přímo do Codexu.",
-                ],
-                capture_output=True,
-                text=True,
-                timeout=8,
-                check=False,
-            )
-            history = load_voice_history(path=history_path, limit=3)
-            last_response = load_last_adam_response(path=inbox / "last_adam_response.json")
-
-        self.assertEqual(completed.returncode, 0, completed.stderr)
-        self.assertIn("recorded_explicit_user_text_reply", completed.stdout)
-        self.assertEqual(history[-1]["route"], "janicka_text_bridge")
-        self.assertEqual(history[-1]["user_text"], "Jak funguje hlasový chat?")
-        self.assertIn("posílá text přímo do Codexu", last_response["adam_response"])
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -132,12 +132,12 @@ class CockpitHttpSecurityTests(unittest.TestCase):
 
     def test_cross_origin_post_is_rejected_before_action(self) -> None:
         with running_cockpit_server() as (host, port, _logger):
-            with patch("app.cockpit.adam_service_status") as action:
+            with patch("app.cockpit.cockpit_speak_action") as action:
                 status, payload, _headers = request_json(
                     host,
                     port,
                     "POST",
-                    "/api/adam/status",
+                    "/api/speech/speak",
                     headers={"Origin": "https://example.invalid"},
                 )
 
@@ -147,10 +147,10 @@ class CockpitHttpSecurityTests(unittest.TestCase):
 
     def test_tailscale_host_and_matching_origin_are_allowed(self) -> None:
         with running_cockpit_server() as (host, port, _logger):
-            with patch("app.cockpit.adam_service_status", return_value={"ok": True, "status": "ready"}):
+            with patch("app.cockpit.cockpit_speak_action", return_value={"ok": True, "status": "ready"}):
                 connection = http.client.HTTPConnection(host, port, timeout=5.0)
                 try:
-                    connection.putrequest("POST", "/api/adam/status", skip_host=True)
+                    connection.putrequest("POST", "/api/speech/speak", skip_host=True)
                     connection.putheader("Host", "100.64.0.10:8770")
                     connection.putheader("Origin", "http://100.64.0.10:8770")
                     connection.putheader("Content-Length", "0")
