@@ -800,6 +800,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     input.defaultValue = "";
   }
 
+  function runSendUiBestEffort(action) {
+    try {
+      action();
+    } catch (_error) {
+      // Zobrazení je pomocné; nesmí zablokovat ani změnit výsledek transportu.
+    }
+  }
+
   function restoreRejectedMessage(text) {
     if (input.value) return;
     input.value = String(text || "").slice(0, Number(input.maxLength) || 12000);
@@ -2623,33 +2631,31 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     const text = input.value.trim();
     if (!text) { notice.textContent = "Napiš nejdřív zprávu."; return; }
     const writeIntent = writeIntentArmed;
-    setWriteIntentArmed(false);
+    writeIntentArmed = false;
     sendInFlight = true;
-    syncControls();
-    primeCompletionMediaSound().catch(() => {});
     clearMessageInput();
+    runSendUiBestEffort(syncControls);
+    primeCompletionMediaSound().catch(() => {});
     const sentAt = new Date().toISOString();
     const clientId = messageId();
     const pendingMessage = {user_text:text,client_sent_at:sentAt,received_at:sentAt,status:"pending",answer:""};
     const optimistic = lastSession
       ? {...lastSession, turn_busy:true, active_turn:{client_message_id:clientId,started_at:sentAt}, messages:[...(lastSession.messages || []), pendingMessage]}
       : {turn_busy:true, active_turn:{client_message_id:clientId,started_at:sentAt}, messages:[pendingMessage]};
-    renderSession(optimistic);
-    renderTurnState(optimistic);
-    notice.textContent = `Odesláno ${formatTime(sentAt)} · Adam pracuje…`;
+    runSendUiBestEffort(() => {
+      renderSession(optimistic);
+      renderTurnState(optimistic);
+      notice.textContent = `Odesláno ${formatTime(sentAt)} · Adam pracuje…`;
+    });
     let failure = "";
+    let payload = null;
     try {
-      const payload = await api(HUMAN_ADAM_SEND_PATH, {method:"POST", body:JSON.stringify({message:text,client_message_id:clientId,client_sent_at:sentAt,write_intent:writeIntent})});
+      payload = await api(HUMAN_ADAM_SEND_PATH, {method:"POST", body:JSON.stringify({message:text,client_message_id:clientId,client_sent_at:sentAt,write_intent:writeIntent})});
       if (!payload.ok) {
         const error = new Error(payload.message || "Odeslání selhalo.");
         error.status = String(payload.status || "");
         throw error;
       }
-      stopResultWatch();
-      renderSession(payload.session);
-      renderTurnState(payload.session);
-      notice.textContent = "Odpověď doručena a potvrzena.";
-      playCompletionMediaSound();
     } catch (error) {
       const confirmedRejection = new Set(["human_adam_busy","human_adam_send_failed"]).has(error.status);
       if (!confirmedRejection) {
@@ -2660,12 +2666,22 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       }
     } finally {
       sendInFlight = false;
-      syncControls();
+      runSendUiBestEffort(syncControls);
+    }
+    if (payload && payload.ok) {
+      runSendUiBestEffort(() => {
+        stopResultWatch();
+        renderSession(payload.session);
+        renderTurnState(payload.session);
+        notice.textContent = "Odpověď doručena a potvrzena.";
+        playCompletionMediaSound();
+      });
     }
     await loadStatus();
     if (failure) notice.textContent = failure;
   }
 
+  composer.addEventListener("submit", sendMessage);
   connectBtn.addEventListener("click", connect);
   writeIntentBtn.addEventListener("click", armWriteIntent);
   profileSelect.addEventListener("change", syncControls);
@@ -2724,7 +2740,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   deployBtn.addEventListener("click", deployCheckpoint);
   voiceRecordBtn.addEventListener("click", startVoiceRecording);
   voiceStopBtn.addEventListener("click", stopVoiceRecording);
-  composer.addEventListener("submit", sendMessage);
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) sendMessage(event);
   });

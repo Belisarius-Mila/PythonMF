@@ -933,7 +933,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("window.confirm", arm_source)
         self.assertIn("pouze pro následující pokyn", arm_source)
         self.assertIn("const writeIntent = writeIntentArmed;", send_source)
-        self.assertIn("setWriteIntentArmed(false);", send_source)
+        self.assertIn("writeIntentArmed = false;", send_source)
         self.assertIn("write_intent:writeIntent", send_source)
         self.assertIn(
             'writeIntentBtn.addEventListener("click", armWriteIntent);',
@@ -1330,16 +1330,25 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("primeCompletionMediaSound().catch(() => {});", send_source)
         self.assertNotIn("await primeCompletionMediaSound();", send_source)
         self.assertLess(
-            send_source.index("primeCompletionMediaSound().catch(() => {});"),
             send_source.index("clearMessageInput();"),
+            send_source.index("primeCompletionMediaSound().catch(() => {});"),
         )
         self.assertLess(
-            send_source.index("clearMessageInput();"),
+            send_source.index("primeCompletionMediaSound().catch(() => {});"),
             send_source.index("await api(HUMAN_ADAM_SEND_PATH"),
         )
-        self.assertLess(send_source.index('notice.textContent = "Odpověď doručena a potvrzena.";'), send_source.index("playCompletionMediaSound();"))
-        self.assertLess(send_source.index("playCompletionMediaSound();"), catch_start)
-        self.assertNotIn("playCompletionMediaSound", send_source[catch_start:])
+        success_start = send_source.index("if (payload && payload.ok)")
+        success_source = send_source[success_start:]
+        self.assertLess(
+            success_source.index(
+                'notice.textContent = "Odpověď doručena a potvrzena.";'
+            ),
+            success_source.index("playCompletionMediaSound();"),
+        )
+        self.assertNotIn(
+            "playCompletionMediaSound",
+            send_source[catch_start:success_start],
+        )
 
     def test_only_the_loud_media_sound_control_remains(self) -> None:
         sound_start = HUMAN_ADAM_HTML.index("function configureCompletionAudioSession()")
@@ -1398,13 +1407,32 @@ class HumanAdamUiTests(unittest.TestCase):
 
         self.assertLess(capture, clear)
         self.assertLess(clear, api_call)
+        self.assertLess(
+            send_source.index("writeIntentArmed = false;"),
+            clear,
+        )
+        self.assertIn("runSendUiBestEffort(syncControls);", send_source)
         self.assertIn("renderSession(optimistic);", send_source)
         self.assertNotIn("input.value = text", send_source)
         self.assertNotIn('input.value = ""', send_source)
         self.assertIn('function clearMessageInput() {\n    input.value = "";\n    input.defaultValue = "";', HUMAN_ADAM_HTML)
+        self.assertIn(
+            "function runSendUiBestEffort(action) {",
+            HUMAN_ADAM_HTML,
+        )
         self.assertIn('<form class="composer" id="composer" autocomplete="off">', HUMAN_ADAM_HTML)
         self.assertIn('id="messageInput" maxlength="12000" autocomplete="off"', HUMAN_ADAM_HTML)
         self.assertIn('window.addEventListener("pageshow", clearMessageInput);', HUMAN_ADAM_HTML)
+
+    def test_submit_listener_is_registered_before_auxiliary_control_listeners(self) -> None:
+        submit_listener = HUMAN_ADAM_HTML.index(
+            'composer.addEventListener("submit", sendMessage);'
+        )
+        first_auxiliary_listener = HUMAN_ADAM_HTML.index(
+            'connectBtn.addEventListener("click", connect);'
+        )
+
+        self.assertLess(submit_listener, first_auxiliary_listener)
 
     def test_confirmed_rejection_restores_draft_but_unknown_delivery_never_does(self) -> None:
         helper_start = HUMAN_ADAM_HTML.index("function restoreRejectedMessage(text)")
