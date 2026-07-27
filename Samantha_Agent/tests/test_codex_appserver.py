@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import json
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from app.codex_appserver import (
     AppServerContractError,
     CodexVersion,
     TurnReceipt,
+    UNIX_APP_SERVER_MAX_MESSAGE_BYTES,
     UnixSocketAppServerTransport,
     codex_environment,
 )
@@ -48,6 +51,55 @@ class CodexContractTests(unittest.TestCase):
     def test_unix_transport_rejects_relative_socket_before_connecting(self) -> None:
         with self.assertRaises(AppServerContractError):
             UnixSocketAppServerTransport(socket_path=Path("relative.sock"))
+
+    def test_unix_transport_accepts_thread_resume_payload_larger_than_one_megabyte(
+        self,
+    ) -> None:
+        message = {
+            "id": 1,
+            "result": {
+                "thread": {
+                    "id": "thread-large-resume",
+                    "history": "x" * 1_100_000,
+                }
+            },
+        }
+        connection = _FakeUnixConnection([json.dumps(message)])
+
+        with patch(
+            "websockets.sync.client.unix_connect",
+            return_value=connection,
+        ) as unix_connect:
+            transport = UnixSocketAppServerTransport(
+                socket_path=Path("/private/tmp/samantha-app-server.sock"),
+                timeout=1,
+            )
+            received = transport.receive(
+                lambda payload: payload.get("id") == 1,
+                description="velký thread/resume výsledek",
+            )
+
+        self.assertEqual(received["result"]["thread"]["id"], "thread-large-resume")
+        self.assertGreater(UNIX_APP_SERVER_MAX_MESSAGE_BYTES, 1_100_000)
+        self.assertEqual(
+            unix_connect.call_args.kwargs["max_size"],
+            UNIX_APP_SERVER_MAX_MESSAGE_BYTES,
+        )
+
+
+class _FakeUnixConnection:
+    def __init__(self, messages: list[str]) -> None:
+        self.messages = list(messages)
+        self.closed = False
+
+    def __iter__(self):
+        return iter(self.messages)
+
+    def send(self, _message: str) -> None:
+        return None
+
+    def close(self) -> None:
+        self.closed = True
 
 
 if __name__ == "__main__":

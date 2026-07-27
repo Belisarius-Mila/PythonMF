@@ -31,6 +31,7 @@ CODEX_PATH_PREFIXES = (
     "/usr/sbin",
     "/sbin",
 )
+UNIX_APP_SERVER_MAX_MESSAGE_BYTES = 8 * 1024 * 1024
 
 
 def utc_now() -> str:
@@ -278,6 +279,7 @@ class UnixSocketAppServerTransport(StdioAppServerTransport):
                 open_timeout=timeout,
                 close_timeout=5,
                 compression=None,
+                max_size=UNIX_APP_SERVER_MAX_MESSAGE_BYTES,
             )
         except (OSError, TimeoutError, WebSocketException) as exc:
             raise AppServerError(f"K Unix app-server socketu se nelze připojit: {exc}") from exc
