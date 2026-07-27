@@ -2626,7 +2626,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     setWriteIntentArmed(false);
     sendInFlight = true;
     syncControls();
-    await primeCompletionMediaSound();
+    primeCompletionMediaSound().catch(() => {});
     clearMessageInput();
     const sentAt = new Date().toISOString();
     const clientId = messageId();

@@ -1327,7 +1327,16 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("completionMediaAudio.muted = false;", sound_source)
         self.assertIn("completionMediaAudio.play();", sound_source)
         self.assertIn("Zvuk je pouze doplňkový", sound_source)
-        self.assertLess(send_source.index("await primeCompletionMediaSound();"), send_source.index("await api(HUMAN_ADAM_SEND_PATH"))
+        self.assertIn("primeCompletionMediaSound().catch(() => {});", send_source)
+        self.assertNotIn("await primeCompletionMediaSound();", send_source)
+        self.assertLess(
+            send_source.index("primeCompletionMediaSound().catch(() => {});"),
+            send_source.index("clearMessageInput();"),
+        )
+        self.assertLess(
+            send_source.index("clearMessageInput();"),
+            send_source.index("await api(HUMAN_ADAM_SEND_PATH"),
+        )
         self.assertLess(send_source.index('notice.textContent = "Odpověď doručena a potvrzena.";'), send_source.index("playCompletionMediaSound();"))
         self.assertLess(send_source.index("playCompletionMediaSound();"), catch_start)
         self.assertNotIn("playCompletionMediaSound", send_source[catch_start:])
