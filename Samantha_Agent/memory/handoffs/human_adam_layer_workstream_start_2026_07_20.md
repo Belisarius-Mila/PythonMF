@@ -1,57 +1,36 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno terminálovým checkpointem: 2026-07-27 12:05 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-27 17:15 CEST
 
 ### Hotovo
-- Dávkový GitHub backend je nasazený a lokální `main` je přes den provozní
-  autorita. Human–Adam i terminálový Adam ukládají dokončené kroky jako
-  samostatné lokální commity bez automatického denního pushnutí.
-- Čistý lokální `main` napřed je stav `GitHub batch pending`, který neblokuje
-  další téma ani další vývoj; profilové workspaces se bezpečně zarovnávají.
-- Panel `Práce` má připravené pořadí `lokální vývoj -> případné nasazení do
-  Cockpitu -> pozdější denní GitHub balíček` a nový dynamický doporučený krok.
-- Nápověda používá stejné tři fáze a přesné názvy skutečných tlačítek. Starý text
-  o automatickém pushnutí po každém tahu byl odstraněn.
+- Start Samanthy ani aktivní pravidla už nevytvářejí a nepřebírají Voice Bridge marker
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
-- Samostatně potvrzeně nasadit aktuální lokální `main` do Cockpitu.
-- Po nasazení ručně otevřít `Práce` a `Práce -> ?`, ověřit pořadí, čitelnost
-  doporučeného kroku a přesné názvy tlačítek.
-- Provést jeden malý skutečný vývoj přes Human–Adam a ověřit automatický lokální
-  commit bez pushnutí, možnost hned navázat a rostoucí počet commitů v balíčku.
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Lokální commity čekají na samostatný denní GitHub balíček.
 
 ### Rizika
-- Běžící Cockpit používá starší UI až do samostatně potvrzeného nasazení.
-- Automatizovaný browser nebyl v terminálové relaci dostupný; vizuální důkaz
-  proto musí vzniknout ručně až nad skutečně nasazeným Cockpitem.
-- Divergence GitHubu zablokuje pouze denní push a vyžádá servisní rozhodnutí.
-- Denní balíček nikdy automaticky nedělá merge, rebase, squash ani force push.
+- Žádné další doložené provozní riziko.
 
 ### Další krok
-- Přes samostatnou potvrzovací bránu nasadit aktuální lokální `main` do Cockpitu
-  a provést krátký vizuální a vzdálený přijímací test.
+- Provést checkpoint a nasazení; potom pokračovat fází 9.4d odstraněním zbývajícího Voice Bridge runtime a spotřeby markeru
 
 ### Rozhodnutí
-- Lokální `main` je přes den provozní autorita; GitHub je dávkový vzdálený cíl.
-- Lokální commit, nasazení do Cockpitu a GitHub push jsou tři odlišné kroky.
-- Nasazení je potřeba jen pro změnu běžícího UI nebo backendu; dokumentační
-  checkpoint ani další lokální vývoj je nevyžadují.
-- Jednotlivé commity se nesquashují. Při uzavření balíčku proběhne jedna úplná
-  brána a jeden přesný push všech čekajících commitů.
-- Neúspěšný nebo divergentní večerní balíček nesmí zastavit další lokální vývoj.
+- Private marker se přestává aktivně spravovat, ale jeho existující stav se nemaže a zachovaný Voice Bridge runtime se řeší samostatně
 
 ### Navrhované další kroky
-- Po živém retestu určit vhodný večerní čas nebo ponechat ruční spouštění.
-- Další zjednodušení dělat pouze podle skutečného provozního problému.
+- V 9.4d auditovaně odstranit Voice Bridge moduly, terminal bridge a spotřebu markeru
+- V 9.4e uklidit zastaralé projektové poznámky a spustit úplnou regresní bránu
+- Adam-R2 vyvíjet samostatně až po dokončení amputace legacy komunikace
 
 ### Technický stav checkpointu
-- Cílených 58 UI testů a úplných 1272 testů prošlo.
-- Python, oba JavaScripty, shell a `git diff --check` jsou zelené.
-- Terminálový dávkový režim je uložený v lokálním commitu `6b9ac52`; tato UI
-  fáze se přidává jako další samostatný lokální commit stejného denního balíčku.
-- Nebyla čtena ani ukládána private data, hesla nebo citlivé texty.
-- Tento snapshot nepotvrzuje GitHub push, nasazení ani vizuální živý test.
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `62442a1a1bb3`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `62442a1a1bb3` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-27T15:08:46+00:00.
+- Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
@@ -2401,3 +2380,15 @@ Navrhované další kroky:
 Technický důkaz:
 - Cílených 65 testů a úplných 1239 Cockpit testů prošlo.
 - Python, JavaScript, shell a `git diff --check` jsou zelené.
+
+### Automatický checkpoint 2026-07-27 17:15 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Start Samanthy ani aktivní pravidla už nevytvářejí a nepřebírají Voice Bridge marker; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 6.4 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/AGENTS.md`, `Samantha_Agent/memory/technical/session_recovery_rules.md`, `Samantha_Agent/scripts/mark_current_codex_tty.py`, `Samantha_Agent/scripts/samantha_screen_entry.sh`, `Samantha_Agent/tests/test_codex_session_report.py`
+- Commit: `Retire Voice Bridge marker lifecycle`
+- Další krok: Provést checkpoint a nasazení; potom pokračovat fází 9.4d odstraněním zbývajícího Voice Bridge runtime a spotřeby markeru

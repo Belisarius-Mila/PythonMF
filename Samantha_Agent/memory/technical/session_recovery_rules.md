@@ -51,11 +51,8 @@ Skript:
 - jinak zalozi novou `screen` relaci,
 - prevezme volitelny startovni pokyn z prikazu `samantha "..."`,
 - pred predanim rizeni vypise kratky read-only report bezicich Codex relaci pres
-  `scripts/codex_session_report.py`, vcetne aktualniho TTY, bridge markeru, stari
+  `scripts/codex_session_report.py`, vcetne aktualniho TTY, stari
   relaci a kandidatu na rucni ukonceni,
-- pri vzniku nove `screen` relace se pred spustenim Codexu zepta, jestli ma
-  nastavit voice marker na tuto relaci; vychozi odpoved je `ano`, `ne` ponecha
-  dosavadni marker beze zmeny,
 - spusti Codex v `~/Desktop/PythonMF/Samantha_Agent`,
 - spusti automaticky autosave posledni Codex session kazdych 10 minut do
   `data/session_autosave/`,
@@ -138,31 +135,6 @@ Ukonci relaci ttysXXX
 Codex ma pred ukoncenim znovu overit `ps`, zkontrolovat, ze na danem TTY opravdu
 bezi Codex v `Samantha_Agent`, a ukoncit jen odpovidajici Codex procesy, ne jine
 prace ani soukrome datove procesy.
-
-## Rucni prevzeti voice markeru
-
-Kdyz bezi vice Codex relaci a Mila v terminalu napise:
-
-```text
-Prosím převezmi voice marker
-```
-
-nebo podobnou jasnou vetu o prevzeti voice markeru touto relaci, Codex nema marker
-prepisovat hned. Nejdrive se zepta presne:
-
-```text
-Mám převzít voice marker? y/n
-```
-
-Teprve po odpovedi `y` nebo `ano` spusti:
-
-```bash
-.venv/bin/python scripts/mark_current_codex_tty.py
-```
-
-Pri odpovedi `n` nebo `ne` marker nemeni. Duvod: pri vice paralelnich relacich je
-prepnuti voice bridge cile zamerne, ale stale ma byt potvrzene jednim jednoduchym
-krokem.
 
 ## Pravidlo pro nestabilni spojeni a dlouhe ukoly
 

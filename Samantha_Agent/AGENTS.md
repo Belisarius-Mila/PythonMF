@@ -26,11 +26,6 @@ Tyto instrukce plati pro praci ve slozce `Samantha_Agent/`.
   Samantha Cockpit pres `scripts/start_cockpit.sh`. Cockpit bezi lokalne na
   `http://127.0.0.1:8770`. Pokud uz bezi, jen otevrit existujici adresu v
   prohlizeci; neukoncovat bezici relaci.
-- Kdyz Mila v Codex terminalu napise `Prosím převezmi voice marker` nebo podobnou
-  jasnou vetu o prevzeti voice markeru touto relaci, nejdrive odpovez presne:
-  `Mám převzít voice marker? y/n`. Teprve po odpovedi `y` nebo `ano` spust
-  `.venv/bin/python scripts/mark_current_codex_tty.py`. Pri `n` nebo `ne`
-  marker nemen.
 - Pri praci z iPhonu/SSH nebo kdykoliv hrozi, ze Codex bude cekat na systemove
   potvrzeni tool callu, pouzij pravidlo
   `memory/technical/codex_remote_approval_notice.md`: pred zadosti o systemove

@@ -73,13 +73,13 @@ class CodexSessionReportTests(unittest.TestCase):
         self.assertEqual(format_age(2 * 86400 + 9 * 3600), "2d 9h")
         self.assertEqual(format_age(10 * 3600 + 5 * 60), "10h 5m")
 
-    def test_screen_entry_prompts_for_voice_marker_with_default_yes(self) -> None:
+    def test_screen_entry_has_no_voice_marker_lifecycle(self) -> None:
         script = (REPO_ROOT / "scripts" / "samantha_screen_entry.sh").read_text(encoding="utf-8")
 
-        self.assertIn("Mám nastavit voice marker na tuto relaci? [Y/n]", script)
-        self.assertIn("SAMANTHA_MARK_VOICE_TTY", script)
-        self.assertIn("scripts/mark_current_codex_tty.py", script)
-        self.assertIn('""|1|true|yes|y|ano|a', script)
+        self.assertNotIn("voice marker", script.casefold())
+        self.assertNotIn("SAMANTHA_MARK_VOICE_TTY", script)
+        self.assertNotIn("mark_current_codex_tty.py", script)
+        self.assertFalse((REPO_ROOT / "scripts" / "mark_current_codex_tty.py").exists())
 
     def test_screen_entry_keeps_screen_alive_when_codex_exits(self) -> None:
         script = (REPO_ROOT / "scripts" / "samantha_screen_entry.sh").read_text(encoding="utf-8")
@@ -88,17 +88,17 @@ class CodexSessionReportTests(unittest.TestCase):
         self.assertIn("CODEX_EXIT_STATUS=$?", script)
         self.assertIn("Screen relace zůstává otevřená", script)
         self.assertIn("Znovu spustit Codex v této screen relaci? [Y/n]", script)
-        self.assertIn("Voice marker se automaticky nemění", script)
+        self.assertIn("Spouštím nový Codex v zachované screen relaci.", script)
         self.assertIn("exec /bin/zsh -l", script)
 
-    def test_manual_voice_marker_takeover_requires_confirmation(self) -> None:
+    def test_active_rules_have_no_manual_voice_marker_takeover(self) -> None:
         agents = (REPO_ROOT / "AGENTS.md").read_text(encoding="utf-8")
         rules = (REPO_ROOT / "memory" / "technical" / "session_recovery_rules.md").read_text(encoding="utf-8")
 
         for text in (agents, rules):
-            self.assertIn("Prosím převezmi voice marker", text)
-            self.assertIn("Mám převzít voice marker? y/n", text)
-            self.assertIn(".venv/bin/python scripts/mark_current_codex_tty.py", text)
+            self.assertNotIn("Prosím převezmi voice marker", text)
+            self.assertNotIn("Mám převzít voice marker? y/n", text)
+            self.assertNotIn("mark_current_codex_tty.py", text)
 
 
 if __name__ == "__main__":
