@@ -29,7 +29,6 @@ from app.communication.deferred_integration import (
 )
 from app.communication.human_adam_turn_completion import TurnCompletionMetadata
 from app.communication.human_adam_workstream_catalog import WORKSTREAM_CATALOG
-from app.communication.human_adam_workspace import CANONICAL_PRIVATE_ROOT
 from app.communication.human_adam_operations import (
     FAMILY_CALENDAR_TEST_EMAIL_PREVIEW,
     OPERATION_MARKER_END,
@@ -69,6 +68,7 @@ class FakeWorkspace:
         self.project_root = root
         self.workspace_root = root
         self.source_repo = root.parent
+        self.project_dir_name = root.name
         self.prepared = prepared
         self.dirty = False
         self.local_ahead = False
@@ -79,6 +79,14 @@ class FakeWorkspace:
         self.source_pending_changes = 0
         self.checkpoint_subject = ""
         self.checkpoint_path = "Samantha_Agent/app.py"
+
+    @property
+    def canonical_project_root(self) -> Path:
+        return (self.source_repo / self.project_dir_name).resolve()
+
+    @property
+    def canonical_private_root(self) -> Path:
+        return (self.canonical_project_root / "data" / "private").resolve()
 
     def status(self) -> dict[str, object]:
         relation = "diverged" if self.diverged else ("local_ahead" if self.local_ahead else ("source_ahead" if self.source_ahead else "aligned"))
@@ -2417,7 +2425,11 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         )
         self.assertTrue(model_input.endswith("\n\nZkontroluj připravenost."))
         self.assertNotIn("never return", model_input.casefold())
-        self.assertNotIn("/private/", model_input)
+        self.assertIn(
+            f"canonical_private_root={human_workspace.canonical_private_root}",
+            model_input,
+        )
+        self.assertNotIn("/private/never-return-this", model_input)
         self.assertNotIn("98765", model_input)
         self.assertEqual(human_workspace.prepare_count, 0)
         self.assertEqual(human_workspace.sync_count, 0)
@@ -2457,7 +2469,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
 
     def test_knihovna_plain_turn_allows_only_direct_single_card_edit(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            manager, _human_workspace, _library_workspace, _human_hub, library_hub = (
+            manager, _human_workspace, library_workspace, _human_hub, library_hub = (
                 self.make_manager(Path(temp_dir))
             )
             manager.switch(profile_id="knihovna", confirmed=True)
@@ -2470,7 +2482,10 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             expected_capabilities = workstream_capabilities(
                 "project-knowledge-library"
             )
-            expected_root = private_archive_root(expected_capabilities)
+            expected_root = private_archive_root(
+                expected_capabilities,
+                project_root=library_workspace.canonical_project_root,
+            )
 
         self.assertIn("writable=false", model_input)
         self.assertIn("workspace_writable=false", model_input)
@@ -2501,7 +2516,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
 
     def test_canonical_private_access_is_available_outside_knihovna(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            manager, _human_workspace, _library_workspace, human_hub, _library_hub = (
+            manager, human_workspace, _library_workspace, human_hub, _library_hub = (
                 self.make_manager(Path(temp_dir))
             )
             capabilities = manager.status()["workstream_capabilities"]
@@ -2509,7 +2524,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             manager.send(text="Jen analyzuj.", client_message_id="human-read-only")
             model_input = str(human_hub.last_send["model_input_text"])
             sandbox_policy = manager.active_service.sandbox_policy
-            expected_root = CANONICAL_PRIVATE_ROOT
+            expected_root = human_workspace.canonical_private_root
 
         self.assertFalse(capabilities["private_archive_direct"])
         self.assertFalse(capabilities["private_archive_read"])

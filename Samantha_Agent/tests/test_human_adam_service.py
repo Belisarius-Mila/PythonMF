@@ -21,9 +21,6 @@ from app.communication.human_adam_service import (
     human_adam_tvbcp_action,
     human_adam_work_review_action,
 )
-from app.communication.human_adam_workspace import CANONICAL_PRIVATE_ROOT
-
-
 class FakeRuntime:
     def __init__(self, root: Path) -> None:
         self.socket_path = root / "app-server.sock"
@@ -54,6 +51,8 @@ class FakeWorkspace:
     def __init__(self, root: Path) -> None:
         self.workspace_root = root.parent
         self.project_root = root
+        self.source_repo = root.parent
+        self.project_dir_name = root.name
         self.sync_available = False
         self.dirty = False
         self.local_checkpoint_ahead = False
@@ -62,6 +61,14 @@ class FakeWorkspace:
         self.last_checkpoint_message = ""
         self.source_head = "a" * 40
         self.workspace_head = "a" * 40
+
+    @property
+    def canonical_project_root(self) -> Path:
+        return (self.source_repo / self.project_dir_name).resolve()
+
+    @property
+    def canonical_private_root(self) -> Path:
+        return (self.canonical_project_root / "data" / "private").resolve()
 
     def status(self) -> dict[str, object]:
         return {
@@ -264,7 +271,10 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertIn("jen samotny nazev bez cele cesty", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
         self.assertIn("pouze pri shodnych nazvech", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
         self.assertIn("absolutni cestu do textoveho okna nevypisuj", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
-        self.assertIn(str(CANONICAL_PRIVATE_ROOT), HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
+        self.assertIn(
+            "uvedena v aktualnim bloku DEVELOPMENT_CONTROL",
+            HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
+        )
         self.assertIn(
             "jednu nedestruktivni upravu",
             CANONICAL_PRIVATE_DEVELOPER_INSTRUCTIONS,
@@ -317,7 +327,7 @@ class HumanAdamServiceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             live_archive = root / "private-archive"
-            service, _runtime, _workspace, _hub = self.make_service(root)
+            service, _runtime, workspace, _hub = self.make_service(root)
             requested_policy: dict[str, object] = {
                 "type": "workspaceWrite",
                 "networkAccess": False,
@@ -333,7 +343,7 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertEqual(detached.sandbox_policy["writableRoots"], [str(live_archive)])
         self.assertEqual(
             service.sandbox_policy["writableRoots"],
-            [str(CANONICAL_PRIVATE_ROOT)],
+            [str(workspace.canonical_private_root)],
         )
         self.assertFalse(detached.sandbox_policy["networkAccess"])
 

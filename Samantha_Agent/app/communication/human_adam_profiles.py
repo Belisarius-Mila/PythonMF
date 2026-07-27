@@ -32,7 +32,6 @@ from app.communication.human_adam_service import (
     HumanAdamService,
 )
 from app.communication.human_adam_workspace import (
-    CANONICAL_PRIVATE_ROOT,
     HUMAN_ADAM_SANDBOX_POLICY,
     HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS,
     HumanAdamWorkspaceManager,
@@ -429,7 +428,8 @@ class HumanAdamProfileManager:
         base = self.profiles[self.default_profile_id]["service"]
         state_root = self.workstream_threads.state_root / clean_id
         capability_instructions = private_archive_developer_instructions(
-            record.capabilities
+            record.capabilities,
+            project_root=base.workspace.canonical_project_root,
         )
         service = HumanAdamService(
             runtime=base.runtime,
@@ -440,7 +440,10 @@ class HumanAdamProfileManager:
             profile_getter=base.profile_getter,
             hub=hub,
             developer_instructions=base.developer_instructions + capability_instructions,
-            sandbox_policy=workstream_sandbox_policy(record.capabilities),
+            sandbox_policy=workstream_sandbox_policy(
+                record.capabilities,
+                project_root=base.workspace.canonical_project_root,
+            ),
             tvbcp_relative_path=Path(binding.tvbcp_relative_path),
             tvbcp_title=f"{binding.name} – TVBCP",
         )
@@ -1272,7 +1275,10 @@ class HumanAdamProfileManager:
             capability_metadata = self.workstream_backends.binding(
                 self.active_workstream_id
             ).record.capabilities
-            archive_root = private_archive_root(capability_metadata)
+            archive_root = private_archive_root(
+                capability_metadata,
+                project_root=service.workspace.canonical_project_root,
+            )
             if archive_root is not None:
                 control_lines.extend(
                     (
@@ -1290,11 +1296,12 @@ class HumanAdamProfileManager:
                     )
                 )
             else:
+                canonical_private_root = service.workspace.canonical_private_root
                 control_lines.extend(
                     (
                         f"workspace_writable={'true' if writable else 'false'}",
                         "canonical_private_access=read_diagnose_and_explicit_single_edit",
-                        f"canonical_private_root={CANONICAL_PRIVATE_ROOT}",
+                        f"canonical_private_root={canonical_private_root}",
                         "canonical_private_confirmation_required="
                         "delete,bulk_change,external_send,secret_operation,system_change",
                         "rule=When workspace_writable=false, do not change workspace files "
@@ -3549,8 +3556,10 @@ def human_adam_project_continuity_action(
 
 def build_human_adam_profiles() -> HumanAdamProfileManager:
     runtime = LocalAppServerProcessController()
+    human_workspace = HumanAdamWorkspaceManager()
     human_service = HumanAdamService(
         runtime=runtime,
+        workspace=human_workspace,
         state_path=DEFAULT_HUMAN_SESSION_PATH,
         work_profile_id="human_adam",
         developer_instructions=HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
@@ -3565,7 +3574,10 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         state_path=PRIVATE_COMMUNICATION_ROOT / "knihovna_session.json",
         work_profile_id="knihovna",
         developer_instructions=KNIHOVNA_DEVELOPER_INSTRUCTIONS,
-        sandbox_policy=workstream_sandbox_policy(_KNIHOVNA_CAPABILITIES),
+        sandbox_policy=workstream_sandbox_policy(
+            _KNIHOVNA_CAPABILITIES,
+            project_root=knihovna_workspace.canonical_project_root,
+        ),
         tvbcp_relative_path=KNIHOVNA_TVBCP_RELATIVE_PATH,
         tvbcp_title="Knihovna v Cockpitu",
     )
@@ -3580,7 +3592,8 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         handoff_path = (project_prefix / memory_binding.handoff_relative_path).as_posix()
         tvbcp_path = (project_prefix / memory_binding.tvbcp_relative_path).as_posix()
         capability_instructions = private_archive_developer_instructions(
-            record.capabilities
+            record.capabilities,
+            project_root=human_service.workspace.canonical_project_root,
         )
         private_context_instructions = private_context_developer_instructions(
             workstream_id=record.workstream_id,
@@ -3605,7 +3618,10 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
                 + capability_instructions
                 + private_context_instructions
             ),
-            sandbox_policy=workstream_sandbox_policy(record.capabilities),
+            sandbox_policy=workstream_sandbox_policy(
+                record.capabilities,
+                project_root=human_service.workspace.canonical_project_root,
+            ),
         )
 
     workstream_threads = WorkstreamThreadRegistry(

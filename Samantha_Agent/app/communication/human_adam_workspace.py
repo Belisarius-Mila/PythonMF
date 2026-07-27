@@ -197,6 +197,18 @@ class HumanAdamWorkspaceManager:
     def project_root(self) -> Path:
         return self.workspace_root / self.project_dir_name
 
+    @property
+    def canonical_project_root(self) -> Path:
+        """Return the explicit source-repository project authority."""
+
+        return (self.source_repo / self.project_dir_name).resolve()
+
+    @property
+    def canonical_private_root(self) -> Path:
+        """Return private data from the source authority, never from the clone."""
+
+        return (self.canonical_project_root / "data" / "private").resolve()
+
     def _valid_workspace(self) -> bool:
         return (
             (self.workspace_root / ".git").exists()

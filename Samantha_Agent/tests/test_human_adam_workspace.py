@@ -72,6 +72,27 @@ class HumanAdamWorkspaceManagerTests(unittest.TestCase):
             [str(CANONICAL_PRIVATE_ROOT)],
         )
 
+    def test_canonical_private_root_comes_from_source_not_isolated_clone(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "canonical-pythonmf"
+            workspace = root / "private" / "isolated-workspace"
+            manager = HumanAdamWorkspaceManager(
+                source_repo=source,
+                workspace_root=workspace,
+                metadata_path=root / "workspace-meta.json",
+                project_dir_name="Samantha_Agent",
+            )
+
+        self.assertEqual(
+            manager.canonical_private_root,
+            (source / "Samantha_Agent" / "data" / "private").resolve(),
+        )
+        self.assertNotEqual(
+            manager.canonical_private_root,
+            (manager.project_root / "data" / "private").resolve(),
+        )
+
     def test_background_status_does_not_refresh_git_index(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

@@ -18,7 +18,6 @@ from app.communication.session_hub import (
     SessionHubError,
 )
 from app.communication.human_adam_workspace import (
-    CANONICAL_PRIVATE_ROOT,
     DEFAULT_CODEX_BIN,
     HUMAN_ADAM_APPROVAL_POLICY,
     HUMAN_ADAM_REASONING_EFFORT,
@@ -41,9 +40,10 @@ DEVELOPMENT_CONTROL_DEVELOPER_INSTRUCTIONS = (
     "Jinak zustan read-only a pouze analyzuj, vysvetluj nebo navrhuj dalsi krok."
 )
 CANONICAL_PRIVATE_DEVELOPER_INSTRUCTIONS = (
-    f" Kanonicka soukroma oblast je {CANONICAL_PRIVATE_ROOT}. Je oddelena od "
-    "izolovane kopie a jeji skutecny stav vzdy overuj primo zde, nikoli pres "
-    "PROJECT_ROOT izolovaneho workspace. Cteni a diagnostika jsou bezne povolene. "
+    " Kanonicka soukroma oblast je uvedena v aktualnim bloku DEVELOPMENT_CONTROL. "
+    "Je oddelena od izolovane kopie a jeji skutecny stav vzdy overuj primo v teto "
+    "uvedene oblasti, nikoli pres PROJECT_ROOT izolovaneho workspace. Cteni a "
+    "diagnostika jsou bezne povolene. "
     "Na Miluv jasny pokyn smíš primo provest jednu nedestruktivni upravu jednoho "
     "logickeho zaznamu nebo souboru. Dalsi zvlastni potvrzeni vyzaduj jen pro "
     "mazani nebo odebirani, hromadne zmeny, odesilani ven, praci s tajemstvimi "
@@ -146,8 +146,12 @@ class HumanAdamService:
         self.codex_binary = str(codex_binary)
         self.profile_getter = profile_getter
         self.developer_instructions = str(developer_instructions).strip()
+        default_sandbox_policy = {
+            **HUMAN_ADAM_SANDBOX_POLICY,
+            "writableRoots": [str(self.workspace.canonical_private_root)],
+        }
         self.sandbox_policy = copy.deepcopy(
-            HUMAN_ADAM_SANDBOX_POLICY if sandbox_policy is None else sandbox_policy
+            default_sandbox_policy if sandbox_policy is None else sandbox_policy
         )
         self.tvbcp_relative_path = Path(tvbcp_relative_path)
         self.tvbcp_title = str(tvbcp_title).strip() or "Projektový TVBCP"
