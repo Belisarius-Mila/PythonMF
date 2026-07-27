@@ -4,7 +4,6 @@ import base64
 import csv
 import json
 import re
-import signal
 import subprocess
 import tempfile
 import unittest
@@ -58,10 +57,6 @@ from app.cockpit import (
     human_adam_simple_main_deployment_audit_action,
     human_adam_simple_main_deployment_action,
     human_adam_simple_main_deployment_verification_action,
-    janicka_light_status_action,
-    janicka_orphaned_codex_session_report,
-    open_janicka_full_adam_action,
-    terminate_orphaned_janicka_sessions_action,
     transcribe_audio_base64_isolated,
     document_intake_email_scan_status,
     document_intake_status,
@@ -71,7 +66,6 @@ from app.cockpit import (
     document_due_candidates_status,
     document_review_report_status,
     document_work_status,
-    discover_codex_process_sessions,
     email_archive_detail_status,
     email_archive_list_status,
     email_header_to_processing_item,
@@ -411,7 +405,7 @@ class CockpitTests(unittest.TestCase):
     def test_human_adam_deploy_route_uses_clean_main_restart_and_verification(self) -> None:
         source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
         route_start = source.index('if parsed.path == "/api/human-adam/deploy":')
-        route_end = source.index('if parsed.path == "/api/janicka/chat":', route_start)
+        route_end = source.index('if parsed.path == "/api/codex-approval/clear":', route_start)
         route_source = source[route_start:route_end]
 
         self.assertIn("human_adam_simple_main_deployment_action(", route_source)
@@ -2861,39 +2855,23 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("janickaFamilyModal", COCKPIT_HTML)
         self.assertIn("janickaFamilyOrganizerBtn", COCKPIT_HTML)
         self.assertIn("janickaFamilyProjectsBtn", COCKPIT_HTML)
-        self.assertIn("janickaAskAdamBtn", COCKPIT_HTML)
-        self.assertIn("janickaFullAdamBtn", COCKPIT_HTML)
-        self.assertIn("janickaFullAdamStatus", COCKPIT_HTML)
-        self.assertIn("Když Adam light nestačí", COCKPIT_HTML)
-        self.assertIn("/api/janicka/full-adam/open", COCKPIT_HTML)
-        self.assertIn("openFullAdamForJanicka", COCKPIT_HTML)
-        self.assertIn("janickaChatModal", COCKPIT_HTML)
-        self.assertIn("janickaChatInput", COCKPIT_HTML)
-        self.assertIn("janickaChatSendBtn", COCKPIT_HTML)
-        self.assertIn("/api/janicka/chat", COCKPIT_HTML)
-        self.assertIn("/api/janicka/chat/latest", COCKPIT_HTML)
-        self.assertIn("/api/adam/status", COCKPIT_HTML)
-        self.assertIn("/api/adam/start", COCKPIT_HTML)
-        self.assertIn("/api/adam/restart", COCKPIT_HTML)
-        self.assertIn("/api/adam/stop", COCKPIT_HTML)
-        self.assertIn("/api/janicka/light/status", COCKPIT_HTML)
-        self.assertIn("/api/janicka/light/start", COCKPIT_HTML)
-        self.assertIn("/api/janicka/light/stop", COCKPIT_HTML)
-        self.assertIn("/api/janicka/light/cleanup-orphans", COCKPIT_HTML)
-        self.assertIn("janickaAdamStartBtn", COCKPIT_HTML)
-        self.assertIn("janickaAdamRestartBtn", COCKPIT_HTML)
-        self.assertIn("janickaAdamStopBtn", COCKPIT_HTML)
-        self.assertIn("janickaLightStatus", COCKPIT_HTML)
-        self.assertIn("janickaLightStartBtn", COCKPIT_HTML)
-        self.assertIn("janickaLightStopBtn", COCKPIT_HTML)
-        self.assertIn("janickaLightCleanupOrphansBtn", COCKPIT_HTML)
-        self.assertIn("Janička chat: čekám na kontrolu.", COCKPIT_HTML)
-        self.assertIn("Servisní fallback", COCKPIT_HTML)
-        self.assertIn("Spustit Janičku", COCKPIT_HTML)
-        self.assertIn("Zastavit Janičku", COCKPIT_HTML)
-        self.assertIn("Spustit fallback", COCKPIT_HTML)
-        self.assertIn("submitJanickaChat", COCKPIT_HTML)
-        self.assertIn("pollJanickaCodexReply", COCKPIT_HTML)
+        for retired_marker in (
+            "janickaAskAdamBtn",
+            "janickaFullAdamBtn",
+            "janickaChatModal",
+            "/api/janicka/chat",
+            "/api/janicka/light/",
+            "/api/janicka/full-adam/open",
+            "/api/adam/status",
+            "/api/adam/start",
+            "/api/adam/restart",
+            "/api/adam/stop",
+            "submitJanickaChat",
+            "pollJanickaCodexReply",
+            "Servisní fallback",
+        ):
+            with self.subTest(retired_marker=retired_marker):
+                self.assertNotIn(retired_marker, COCKPIT_HTML)
         self.assertIn("janickaRecoveryBtn", COCKPIT_HTML)
         self.assertIn("janickaCookbookBtn", COCKPIT_HTML)
         self.assertIn("/janicka-kucharka/", COCKPIT_HTML)
@@ -3228,7 +3206,6 @@ class CockpitTests(unittest.TestCase):
         self.assertNotIn("submitVoiceApproval", COCKPIT_HTML)
         self.assertNotIn("/api/voice-mode/latest-response", COCKPIT_HTML)
         self.assertNotIn("voiceBridgeSessions", COCKPIT_HTML)
-        self.assertIn("janickaLightStopBtn.disabled = !running", COCKPIT_HTML)
         self.assertIn("Autosave watchery:", COCKPIT_HTML)
         self.assertNotIn("voiceModeStartBtn", COCKPIT_HTML)
         self.assertNotIn("voiceModeStopBtn", COCKPIT_HTML)
@@ -3746,25 +3723,6 @@ class CockpitTests(unittest.TestCase):
         self.assertTrue(result["marker_parent_pid_unverified"])
         self.assertTrue(result["marker_pid_fallback"])
         self.assertIn("screen běží", result["message"])
-
-    def test_codex_session_discovery_ignores_screen_attach_name(self) -> None:
-        def fake_runner(*args, **kwargs):
-            return subprocess.CompletedProcess(
-                args=args[0],
-                returncode=0,
-                stdout=(
-                    "100 10 ttys000 node node /usr/local/bin/codex -C /repo .\n"
-                    "101 100 ttys000 codex /vendor/bin/codex -C /repo .\n"
-                    "200 20 ttys003 screen screen -U -r samantha_codex\n"
-                    "300 30 ?? codex codex app-server --analytics-default-enabled\n"
-                ),
-                stderr="",
-            )
-
-        sessions = discover_codex_process_sessions(runner=fake_runner)
-
-        self.assertEqual([session["tty"] for session in sessions], ["ttys000"])
-        self.assertEqual(sessions[0]["root_pids"], [100])
 
     def test_git_dirty_line_classification_separates_private_family_and_safe_changes(self) -> None:
         app_item = cockpit_module.classify_git_dirty_line(" M Samantha_Agent/app/cockpit.py")
@@ -5669,236 +5627,6 @@ Dalsi krok:
         self.assertIn("/purchases/pdf?purchase_id=purref-test", page)
         self.assertIn("Faktura &amp; záruka", page)
 
-    def test_janicka_chat_action_submits_managed_adam_request_without_agent(self) -> None:
-        calls = []
-
-        def fake_submitter(**kwargs) -> dict[str, object]:
-            calls.append(kwargs)
-            return {"ok": True, "status": "delivered_to_adam", "request_id": "req-1"}
-
-        result = cockpit_module.janicka_chat_action(
-            {
-                "message": "Kde najdu dokument?",
-                "history": [
-                    {"role": "user", "content": "Ahoj"},
-                    {"role": "assistant", "content": "Dobrý den."},
-                ],
-            },
-            asker=lambda _: self.fail("Janička chat must not call the separate text agent"),
-            service_submitter=fake_submitter,
-        )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "delivered_to_adam")
-        self.assertTrue(result["poll_latest"])
-        self.assertEqual(result["request_id"], "req-1")
-        self.assertIn("Dotaz jsem předal Adamovi", result["answer"])
-        self.assertEqual(calls[0]["message"], "Kde najdu dokument?")
-        self.assertEqual(calls[0]["history"][0]["content"], "Ahoj")
-
-    def test_janicka_chat_action_rejects_empty_message(self) -> None:
-        result = cockpit_module.janicka_chat_action({"message": "   "}, asker=lambda _: "x")
-
-        self.assertFalse(result["ok"])
-        self.assertEqual(result["status"], "empty_message")
-
-    def test_janicka_chat_action_routes_latest_qn_to_managed_adam(self) -> None:
-        calls = []
-
-        def fake_submitter(**kwargs) -> dict[str, object]:
-            calls.append(kwargs)
-            return {"ok": True, "status": "delivered_to_adam", "request_id": "req-qn"}
-
-        result = cockpit_module.janicka_chat_action(
-            {"message": "Najdi mi poslední QN."},
-            asker=lambda _: self.fail("Janička chat must not call the separate text agent"),
-            service_submitter=fake_submitter,
-        )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "delivered_to_adam")
-        self.assertEqual(result["request_id"], "req-qn")
-        self.assertEqual(calls[0]["message"], "Najdi mi poslední QN.")
-
-    def test_janicka_chat_action_routes_followup_detail_to_managed_adam(self) -> None:
-        calls = []
-
-        def fake_submitter(**kwargs) -> dict[str, object]:
-            calls.append(kwargs)
-            return {"ok": True, "status": "delivered_to_adam", "request_id": "req-detail"}
-
-        result = cockpit_module.janicka_chat_action(
-            {
-                "message": "Ano, detail.",
-                "history": [
-                    {
-                        "role": "assistant",
-                        "content": "Poslední QN je **#37** z **2026-06-05 05:14:45**.",
-                    }
-                ],
-            },
-            asker=lambda _: self.fail("Janička chat must not call the separate text agent"),
-            service_submitter=fake_submitter,
-        )
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "delivered_to_adam")
-        self.assertEqual(calls[0]["message"], "Ano, detail.")
-        self.assertIn("Poslední QN je **#37**", calls[0]["history"][0]["content"])
-
-    def test_janicka_latest_codex_reply_matches_text_bridge_response(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            response_path = Path(temp_dir) / "last_adam_response.json"
-            response_path.write_text(
-                json.dumps(
-                    {
-                        "ok": True,
-                        "available": True,
-                        "route": "janicka_text_bridge",
-                        "user_text": "Kde najdu dokument?",
-                        "adam_response": "Dokument najdeš přes tlačítko Najít dokument.",
-                        "created_at": "2026-06-07T10:00:00+00:00",
-                    },
-                    ensure_ascii=False,
-                ),
-                encoding="utf-8",
-            )
-
-            result = cockpit_module.janicka_latest_codex_reply_action(
-                {"message": "Kde najdu dokument?"},
-                response_path=response_path,
-            )
-
-        self.assertTrue(result["ok"])
-        self.assertTrue(result["available"])
-        self.assertEqual(result["answer"], "Dokument najdeš přes tlačítko Najít dokument.")
-
-    def test_janicka_chat_memory_context_includes_project_files(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            base = Path(temp_dir)
-            cookbook = base / "cookbook.md"
-            takeover = base / "takeover.md"
-            active = base / "active.md"
-            index = base / "index.md"
-            cookbook.write_text("Kuchařka: Zeptat se Adama je textový chat.", encoding="utf-8")
-            takeover.write_text("Projekt: Janička Cockpit pro Janu.", encoding="utf-8")
-            active.write_text("Aktivní projekty: další krok Rodinné projekty.", encoding="utf-8")
-            index.write_text("Memory index: janicka_cockpit_takeover.md.", encoding="utf-8")
-
-            context = cockpit_module.janicka_chat_memory_context(
-                cookbook_path=cookbook,
-                takeover_path=takeover,
-                active_projects_path=active,
-                memory_index_path=index,
-            )
-
-        self.assertIn("Kuchařka: Zeptat se Adama", context)
-        self.assertIn("Projekt: Janička Cockpit", context)
-        self.assertIn("Aktivní projekty", context)
-        self.assertIn("Memory index", context)
-
-    def test_janicka_orphaned_codex_session_report_detects_only_unmanaged_janicka(self) -> None:
-        def fake_runner(*args, **kwargs):
-            stdout = (
-                "100 10 ttys000 node node /usr/local/bin/codex -C /repo běžný Adam\n"
-                "101 100 ttys000 codex /vendor/bin/codex -C /repo běžný Adam\n"
-                "200 20 ttys003 node node /usr/local/bin/codex -C /repo Jsi lehká Samantha/Adam relace pro okno Janička v Samantha Cockpitu. jen čekej na textové dotazy z Janičky.\n"
-                "201 200 ttys003 codex /vendor/bin/codex -C /repo Jsi lehká Samantha/Adam relace pro okno Janička v Samantha Cockpitu. jen čekej na textové dotazy z Janičky.\n"
-                "300 30 ttys004 node node /usr/local/bin/codex -C /repo Jsi lehká Samantha/Adam relace pro okno Janička v Samantha Cockpitu. jen čekej na textové dotazy z Janičky.\n"
-                "301 300 ttys004 codex /vendor/bin/codex -C /repo Jsi lehká Samantha/Adam relace pro okno Janička v Samantha Cockpitu. jen čekej na textové dotazy z Janičky.\n"
-            )
-            return subprocess.CompletedProcess(args=args[0], returncode=0, stdout=stdout, stderr="")
-
-        report = janicka_orphaned_codex_session_report(
-            runner=fake_runner,
-            managed_codex_tty_labeler=lambda: {"ttys004": "Janička light"},
-        )
-
-        self.assertEqual(report["status"], "orphaned_found")
-        self.assertEqual(report["orphaned_ttys"], ["ttys003"])
-        self.assertEqual(report["orphaned_sessions"][0]["root_pids"], [200])
-
-    def test_janicka_light_status_action_surfaces_orphan_cleanup_hint(self) -> None:
-        result = janicka_light_status_action(
-            status_getter=lambda: {
-                "ok": True,
-                "running": True,
-                "state": "running",
-                "message": "Janička light Samantha běží ve spravované Codex relaci.",
-                "managed_codex_ttys": ["ttys004"],
-            },
-            orphan_reporter=lambda: {
-                "ok": True,
-                "orphaned_ttys": ["ttys003"],
-                "orphaned_count": 1,
-                "message": "Nalezené staré Janička Codex relace mimo správu: ttys003",
-            },
-        )
-
-        self.assertEqual(result["orphaned_janicka_ttys"], ["ttys003"])
-        self.assertEqual(result["orphaned_janicka_count"], 1)
-        self.assertIn("staré Janička relace mimo správu: ttys003", result["message"])
-
-    def test_janicka_orphan_report_fails_closed_when_managed_labels_are_unavailable(self) -> None:
-        def fake_runner(*args, **kwargs):
-            stdout = (
-                "200 20 ttys003 node node /usr/local/bin/codex -C /repo "
-                "Jsi lehká Samantha/Adam relace pro okno Janička v Samantha Cockpitu. "
-                "jen čekej na textové dotazy z Janičky.\n"
-            )
-            return subprocess.CompletedProcess(args=args[0], returncode=0, stdout=stdout, stderr="")
-
-        report = janicka_orphaned_codex_session_report(
-            runner=fake_runner,
-            managed_codex_tty_labeler=lambda: (_ for _ in ()).throw(RuntimeError("screen audit failed")),
-        )
-        cleanup = terminate_orphaned_janicka_sessions_action(
-            {"confirmed": True},
-            runner=fake_runner,
-            managed_codex_tty_labeler=lambda: (_ for _ in ()).throw(RuntimeError("screen audit failed")),
-        )
-
-        self.assertFalse(report["ok"])
-        self.assertEqual(report["status"], "managed_session_check_failed")
-        self.assertEqual(report["orphaned_sessions"], [])
-        self.assertFalse(cleanup["ok"])
-        self.assertEqual(cleanup["status"], "managed_session_check_failed")
-
-    def test_terminate_orphaned_janicka_sessions_requires_confirmation_and_kills_only_orphan_root(self) -> None:
-        def fake_runner(*args, **kwargs):
-            stdout = (
-                "100 10 ttys000 node node /usr/local/bin/codex -C /repo běžný Adam\n"
-                "101 100 ttys000 codex /vendor/bin/codex -C /repo běžný Adam\n"
-                "200 20 ttys003 node node /usr/local/bin/codex -C /repo Jsi lehká Samantha/Adam relace pro okno Janička v Samantha Cockpitu. jen čekej na textové dotazy z Janičky.\n"
-                "201 200 ttys003 codex /vendor/bin/codex -C /repo Jsi lehká Samantha/Adam relace pro okno Janička v Samantha Cockpitu. jen čekej na textové dotazy z Janičky.\n"
-                "300 30 ttys004 node node /usr/local/bin/codex -C /repo Jsi lehká Samantha/Adam relace pro okno Janička v Samantha Cockpitu. jen čekej na textové dotazy z Janičky.\n"
-                "301 300 ttys004 codex /vendor/bin/codex -C /repo Jsi lehká Samantha/Adam relace pro okno Janička v Samantha Cockpitu. jen čekej na textové dotazy z Janičky.\n"
-            )
-            return subprocess.CompletedProcess(args=args[0], returncode=0, stdout=stdout, stderr="")
-
-        killed: list[tuple[int, int]] = []
-        preview = terminate_orphaned_janicka_sessions_action(
-            {"confirmed": False},
-            runner=fake_runner,
-            managed_codex_tty_labeler=lambda: {"ttys004": "Janička light"},
-            killer=lambda pid, sig: killed.append((pid, sig)),
-        )
-        result = terminate_orphaned_janicka_sessions_action(
-            {"confirmed": True},
-            runner=fake_runner,
-            managed_codex_tty_labeler=lambda: {"ttys004": "Janička light"},
-            killer=lambda pid, sig: killed.append((pid, sig)),
-        )
-
-        self.assertEqual(preview["status"], "confirmation_required")
-        self.assertEqual(preview["stale_ttys"], ["ttys003"])
-        self.assertEqual(preview["root_pids"], [200])
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "orphaned_janicka_sessions_terminated")
-        self.assertEqual(result["killed_pids"], [200])
-        self.assertEqual(result["protected_ttys"], ["ttys004"])
-        self.assertEqual(killed, [(200, signal.SIGTERM)])
-
     def test_janicka_cookbook_page_renders_markdown_safely(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             path = Path(temp_dir) / "cookbook.md"
@@ -5921,27 +5649,6 @@ Dalsi krok:
         self.assertIn("<li>Najít dokument</li>", page)
         self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", page)
         self.assertNotIn("<script>alert(1)</script>", page)
-
-    def test_open_janicka_full_adam_action_uses_fixed_terminal_command(self) -> None:
-        calls: list[list[str]] = []
-
-        def fake_runner(args, **kwargs):
-            calls.append(args)
-            return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
-
-        result = open_janicka_full_adam_action(runner=fake_runner)
-
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["status"], "terminal_opened")
-        self.assertEqual(calls[0][0], "/usr/bin/osascript")
-        self.assertIn("Terminal", calls[0][2])
-        self.assertIn("codex", calls[0][2])
-        self.assertIn("--no-alt-screen", calls[0][2])
-        self.assertIn("plný Adam/Codex pro Janu", calls[0][2])
-        self.assertIn("Jana nemusí znát žádnou syntaxi", calls[0][2])
-        self.assertIn("manual_steps", result)
-        self.assertIn("cd ", result["manual_command"])
-        self.assertIn("codex --no-alt-screen", result["manual_command"])
 
     def test_document_search_returns_structured_redacted_results(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

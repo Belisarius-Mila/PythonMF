@@ -12,7 +12,6 @@ import mimetypes
 import os
 import re
 import shutil
-import signal
 import subprocess
 import tempfile
 import threading
@@ -34,22 +33,6 @@ except ImportError:  # pragma: no cover - optional local convenience dependency
     def load_dotenv(*_args: object, **_kwargs: object) -> bool:
         return False
 
-from app.adam_service import (
-    ADAM_SERVICE_SESSION,
-    JANICKA_LIGHT_SESSION,
-    adam_service_status,
-    deliver_prompt_to_adam_screen,
-    discover_managed_adam_codex_ttys,
-    janicka_light_status,
-    load_adam_text_reply,
-    restart_adam_service,
-    start_adam_service,
-    start_janicka_light_session,
-    stop_adam_service,
-    stop_janicka_light_session,
-    submit_janicka_text_request,
-    wait_for_adam_ready,
-)
 from app.article_archive import (
     ATTACHMENT_CONFIRMATION_PHRASE,
     ATTACHMENT_REMOVE_CONFIRMATION_PHRASE,
@@ -263,14 +246,6 @@ from app.speech.edge_tts_mp3 import (
     synthesize_edge_tts_mp3_sync,
 )
 from app.speech.local_tts import DEFAULT_VOICE
-from app.speech.adam_voice_mode import (
-    ADAM_LAST_RESPONSE_PATH,
-    load_last_adam_response,
-)
-from app.speech.terminal_bridge import (
-    discover_codex_ttys,
-    normalize_tty,
-)
 from app.tvbcp import tvbcp_status
 from scripts.autosave_status import autosave_status as read_autosave_runtime_status
 
@@ -299,7 +274,6 @@ GIT_ROOT = PROJECT_ROOT.parent
 ACTIVE_PROJECTS_PATH = PROJECT_ROOT / "memory" / "ACTIVE_PROJECTS.md"
 PROJECT_CAPABILITY_MAP_PATH = PROJECT_ROOT / "memory" / "technical" / "project_capability_map.md"
 JANICKA_COOKBOOK_PATH = PROJECT_ROOT / "memory" / "projects" / "janicka_cockpit_kucharka.md"
-JANICKA_TAKEOVER_PATH = PROJECT_ROOT / "memory" / "projects" / "janicka_cockpit_takeover.md"
 MEMORY_INDEX_PATH = PROJECT_ROOT / "memory" / "MEMORY_INDEX.md"
 RECOVERY_HANDOFF_PATHS = (
     PROJECT_ROOT / "memory" / "handoffs" / "cockpit_recovery_center_priority_2026_06_03.md",
@@ -4551,92 +4525,6 @@ def cockpit_live_status(
     )
 
 
-def managed_codex_session_tty_labels() -> dict[str, str]:
-    labels: dict[str, str] = {}
-    for session_name, label in (
-        (ADAM_SERVICE_SESSION, "Adam managed"),
-        (JANICKA_LIGHT_SESSION, "Janička light"),
-    ):
-        for tty in discover_managed_adam_codex_ttys(session_name=session_name):
-            normalized = normalize_tty(tty)
-            if normalized:
-                labels[normalized] = label
-    return labels
-
-
-CODEX_SESSION_PS_COMMAND = ["ps", "-axo", "pid=,ppid=,tty=,comm=,args="]
-
-
-def is_codex_cli_process(comm: str, args: str) -> bool:
-    folded = f"{comm} {args}".casefold()
-    if "app-server" in folded:
-        return False
-    tokens = [comm, *str(args or "").split()]
-    return any(Path(token).name == "codex" for token in tokens if token)
-
-
-def discover_codex_process_sessions(
-    *,
-    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
-) -> list[dict[str, Any]]:
-    try:
-        completed = runner(
-            CODEX_SESSION_PS_COMMAND,
-            capture_output=True,
-            text=True,
-            timeout=4,
-            check=False,
-        )
-    except (OSError, subprocess.TimeoutExpired):
-        return []
-    if completed.returncode != 0:
-        return []
-
-    rows: list[dict[str, Any]] = []
-    codex_pids: set[int] = set()
-    for line in completed.stdout.splitlines():
-        parts = line.strip().split(None, 4)
-        if len(parts) < 5:
-            continue
-        pid_text, ppid_text, tty, comm, args = parts
-        try:
-            pid = int(pid_text)
-            ppid = int(ppid_text)
-        except ValueError:
-            continue
-        if not is_codex_cli_process(comm, args):
-            continue
-        codex_pids.add(pid)
-        rows.append(
-            {
-                "pid": pid,
-                "ppid": ppid,
-                "tty": normalize_tty(tty),
-                "command": str(args or comm).strip(),
-            }
-        )
-
-    sessions: dict[str, dict[str, Any]] = {}
-    for row in rows:
-        tty = str(row.get("tty") or "")
-        if not tty or tty == "??":
-            continue
-        session = sessions.setdefault(tty, {"tty": tty, "pids": [], "root_pids": [], "commands": []})
-        pid = int(row["pid"])
-        session["pids"].append(pid)
-        session["commands"].append(row["command"])
-        if int(row["ppid"]) not in codex_pids:
-            session["root_pids"].append(pid)
-
-    result: list[dict[str, Any]] = []
-    for tty in sorted(sessions):
-        session = sessions[tty]
-        session["pids"] = sorted(set(session["pids"]))
-        session["root_pids"] = sorted(set(session["root_pids"] or session["pids"]))
-        result.append(session)
-    return result
-
-
 def action_queue_status(
     document_work: dict[str, Any] | None = None,
     reminders: dict[str, Any] | None = None,
@@ -8472,54 +8360,6 @@ def open_codex_cli() -> dict[str, Any]:
     return open_terminal_command("source ~/.zshrc; codex resume --last || codex", "Codex CLI")
 
 
-def janicka_full_adam_prompt() -> str:
-    return """Jsi plný Adam/Codex pro Janu, otevřený z nouzového tlačítka `Janička`.
-
-Odpovídej česky, jednoduše a prakticky. Jana nemusí znát žádnou syntaxi příkazů.
-Když Jana napíše běžnou větou, co potřebuje, nejdřív vysvětli nejbližší bezpečný krok a pak ho podle možností proveď.
-
-Bezpečnost:
-- Čtení a hledání dokumentů/e-mailů je v pořádku.
-- Nic neposílej, nemaž, nepřesouvej, neplať a neměň účty bez jasného potvrzení.
-- Pokud je potřeba technický příkaz, nečekej, že ho Jana zná; navrhni ho sám a vysvětli, co udělá.
-- Citlivé texty neopisuj zbytečně do chatu ani do gitu.
-
-Začni krátkou větou pro Janu: `Jano, jsem plný Adam. Piš normální větou, co potřebuješ; příkazy znát nemusíš.`"""
-
-
-def open_janicka_full_adam_action(
-    *,
-    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
-) -> dict[str, Any]:
-    codex_bin = shutil.which("codex") or "/usr/local/bin/codex"
-    prompt = janicka_full_adam_prompt()
-    command = (
-        "source ~/.zshrc; "
-        "echo 'Oteviram plneho Adama pro Janu.'; "
-        "echo 'Az se Adam ozve, pis normalni vetou. Prikazy znat nemusis.'; "
-        f"{shell_quote_for_applescript(codex_bin)} --no-alt-screen -C {shell_quote_for_applescript(str(PROJECT_ROOT))} "
-        f"{shell_quote_for_applescript(prompt)}"
-    )
-    result = open_terminal_command(command, "Nouzový plný Adam", runner=runner)
-    manual_steps = [
-        "Když se okno neotevře, otevři aplikaci Terminal.",
-        f"Do Terminalu napiš: cd {PROJECT_ROOT}",
-        "Potom napiš: codex --no-alt-screen",
-        "Až se Adam spustí, napiš běžnou větou, co potřebuješ. Příkazy znát nemusíš.",
-    ]
-    return {
-        **result,
-        "status": "terminal_opened" if result.get("ok") else "terminal_open_failed",
-        "manual_command": f"cd {PROJECT_ROOT} && codex --no-alt-screen",
-        "manual_steps": manual_steps,
-        "message": (
-            "Otevřel jsem plného Adama. Do nového okna může Jana psát normální větou; příkazy znát nemusí."
-            if result.get("ok")
-            else f"{result.get('message', 'Terminál se nepodařilo otevřít')} Ruční postup je zobrazený v Janičce."
-        ),
-    }
-
-
 def cockpit_speak_action(text: str, *, voice: str = DEFAULT_VOICE) -> dict[str, Any]:
     try:
         return speak_text(text, voice=voice)
@@ -8654,356 +8494,6 @@ def human_adam_transcribe_action(
             "text": "",
             "message": str(exc),
         }
-
-
-def janicka_chat_memory_context(
-    *,
-    cookbook_path: Path = JANICKA_COOKBOOK_PATH,
-    takeover_path: Path = JANICKA_TAKEOVER_PATH,
-    active_projects_path: Path = ACTIVE_PROJECTS_PATH,
-    memory_index_path: Path = MEMORY_INDEX_PATH,
-    max_chars_per_file: int = 7000,
-) -> str:
-    sections: list[str] = []
-    for label, path in (
-        ("Kuchařka pro Janu", cookbook_path),
-        ("Projekt Janička Cockpit", takeover_path),
-        ("Aktivní projekty", active_projects_path),
-        ("Memory index", memory_index_path),
-    ):
-        try:
-            text = path.read_text(encoding="utf-8").strip()
-        except OSError:
-            continue
-        if not text:
-            continue
-        if len(text) > max_chars_per_file:
-            text = text[:max_chars_per_file].rstrip() + "\n\n[Zkráceno.]"
-        sections.append(f"## {label}\n{text}")
-    if not sections:
-        return "Projektová paměť Janičky se teď nepodařila načíst."
-    return "\n\n---\n\n".join(sections)
-
-
-def janicka_quick_note_chat_answer(message: str, history: list[Any]) -> str | None:
-    normalized = message.casefold()
-    mentions_qn = bool(re.search(r"\bqn\b|quick\s*notes?|rychl[áa]\s+pozn", normalized))
-    wants_latest = any(term in normalized for term in ("posled", "nejnov", "latest", "last"))
-    wants_detail = any(term in normalized for term in ("detail", "cel", "přeč", "prect", "ukaž", "ukaz"))
-    explicit_match = re.search(r"(?:\bqn\b|quick\s*note)\s*#?\s*(\d+)|#\s*(\d+)", normalized)
-
-    note_number: int | None = None
-    if explicit_match:
-        note_number = int(next(group for group in explicit_match.groups() if group))
-    elif wants_detail and not mentions_qn:
-        note_number = _latest_quick_note_number_from_history(history)
-
-    if mentions_qn and wants_latest:
-        status = quick_notes_status(limit=1)
-        notes = status.get("notes", [])
-        if not status.get("ok") or not notes:
-            return str(status.get("message") or "Quick Notes se teď nepodařilo načíst.")
-        latest = notes[0]
-        note_number = int(latest.get("note_number") or 0)
-        if wants_detail and note_number > 0:
-            return _format_janicka_quick_note_detail(note_number)
-        return _format_janicka_quick_note_summary(latest, status)
-
-    if note_number is not None and (mentions_qn or wants_detail):
-        return _format_janicka_quick_note_detail(note_number)
-
-    return None
-
-
-def _latest_quick_note_number_from_history(history: list[Any]) -> int | None:
-    for item in reversed(history):
-        if not isinstance(item, dict):
-            continue
-        content = safe_text(str(item.get("content", "") or ""))
-        match = re.search(r"(?:QN|Quick Note)\s*#\s*(\d+)|#\s*(\d+)", content, flags=re.IGNORECASE)
-        if match:
-            return int(next(group for group in match.groups() if group))
-    return None
-
-
-def _format_janicka_quick_note_summary(note: dict[str, Any], status: dict[str, Any]) -> str:
-    note_number = int(note.get("note_number") or 0)
-    created_at = safe_text(str(note.get("created_at", "") or ""))[:80]
-    snippet = safe_text(str(note.get("snippet", "") or ""))[:500]
-    counts = status.get("counts", {}) if isinstance(status.get("counts"), dict) else {}
-    active_count = int(counts.get("active") or 0)
-    lines = [
-        f"Poslední QN je **#{note_number}** z **{created_at}**:",
-        snippet,
-    ]
-    if active_count:
-        lines.append(f"V aktivním QN inboxu je teď celkem {active_count} poznámek.")
-    lines.append("Chceš k ní i detail?")
-    return "\n\n".join(line for line in lines if line)
-
-
-def _format_janicka_quick_note_detail(note_number: int) -> str:
-    detail = quick_note_detail_status(note_number, max_chars=6000)
-    if not detail.get("ok"):
-        return str(detail.get("message") or f"Quick Note #{note_number} se nepodařilo načíst.")
-    created_at = safe_text(str(detail.get("created_at", "") or ""))[:80]
-    body = "\n".join(
-        safe_text(line)
-        for line in str(detail.get("body_text", "") or "").replace("\x00", " ").splitlines()
-    ).strip()
-    if detail.get("truncated"):
-        body += "\n\n[Zkráceno.]"
-    return f"Detail QN **#{note_number}** z **{created_at}**:\n\n{body}"
-
-
-def janicka_latest_codex_reply_action(
-    payload: dict[str, Any],
-    *,
-    response_path: Path = ADAM_LAST_RESPONSE_PATH,
-) -> dict[str, Any]:
-    request_id = safe_text(str(payload.get("request_id", "") or "")).strip()
-    if request_id:
-        return load_adam_text_reply(request_id=request_id)
-    expected_user_text = safe_text(str(payload.get("message", "") or "")).strip()
-    response = load_last_adam_response(path=response_path)
-    if not response.get("ok"):
-        return response
-    if not response.get("available"):
-        return {
-            "ok": True,
-            "available": False,
-            "status": "no_reply",
-            "message": "Adamova odpověď z Codexu zatím není zapsaná.",
-        }
-    user_text = safe_text(str(response.get("user_text", "") or "")).strip()
-    route = safe_text(str(response.get("route", "") or "")).strip()
-    if expected_user_text and user_text != expected_user_text:
-        return {
-            "ok": True,
-            "available": False,
-            "status": "different_reply",
-            "message": "Poslední uložená odpověď patří k jinému dotazu.",
-            "route": route,
-        }
-    if route != "janicka_text_bridge":
-        return {
-            "ok": True,
-            "available": False,
-            "status": "different_route",
-            "message": "Poslední uložená odpověď není z Janička text bridge.",
-            "route": route,
-        }
-    return {
-        "ok": True,
-        "available": True,
-        "status": "reply_available",
-        "message": "Adamova odpověď z Codexu je připravená.",
-        "answer": safe_text(str(response.get("adam_response", "") or "")).strip(),
-        "created_at": response.get("created_at"),
-        "route": route,
-    }
-
-
-def janicka_chat_action(
-    payload: dict[str, Any],
-    *,
-    asker: Callable[[str], str] | None = None,
-    service_submitter: Callable[..., dict[str, Any]] = submit_janicka_text_request,
-) -> dict[str, Any]:
-    message = safe_text(str(payload.get("message", "") or "")).strip()
-    if not message:
-        return {
-            "ok": False,
-            "status": "empty_message",
-            "message": "Napiš otázku nebo pokyn pro Adama.",
-        }
-    history = payload.get("history", [])
-    try:
-        result = service_submitter(message=message, history=history if isinstance(history, list) else [])
-    except Exception as exc:  # pragma: no cover - exact macOS/terminal exceptions vary.
-        return {
-            "ok": False,
-            "status": "adam_service_failed",
-            "message": f"Dotaz se nepodařilo předat Adamovi: {exc}",
-        }
-    if not result.get("ok"):
-        return {
-            "ok": False,
-            "status": str(result.get("status") or "adam_service_failed"),
-            "message": str(result.get("message") or "Dotaz se nepodařilo předat Adamovi."),
-            "request_id": result.get("request_id"),
-            "service": result,
-        }
-    bridge_message = (
-        "Dotaz jsem předal Adamovi v light Samantha relaci. Pokud ještě neběžela, Cockpit ji zkusil spustit. "
-        "Odpověď se zobrazí tady, až ji Adam zapíše zpět."
-    )
-    return {
-        "ok": True,
-        "status": "delivered_to_adam",
-        "message": "Dotaz předán Adamovi v Codexu.",
-        "answer": bridge_message,
-        "request_id": result.get("request_id"),
-        "service": result,
-        "poll_latest": True,
-    }
-
-
-JANICKA_ORPHAN_SIGNATURES = (
-    "Jsi lehká Samantha/Adam relace pro okno Janička",
-    "jen čekej na textové dotazy z Janičky",
-)
-
-
-def janicka_orphaned_codex_session_report(
-    *,
-    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
-    managed_codex_tty_labeler: Callable[[], dict[str, str]] | None = None,
-) -> dict[str, Any]:
-    sessions = discover_codex_process_sessions(runner=runner)
-    try:
-        managed_labels = managed_codex_tty_labeler() if managed_codex_tty_labeler else managed_codex_session_tty_labels()
-    except Exception as exc:
-        return {
-            "ok": False,
-            "status": "managed_session_check_failed",
-            "message": f"Spravované Janička relace se nepodařilo bezpečně ověřit: {exc}",
-            "orphaned_ttys": [],
-            "orphaned_count": 0,
-            "orphaned_sessions": [],
-            "managed_codex_ttys": [],
-        }
-    managed_ttys = {normalize_tty(str(tty)) for tty in managed_labels if normalize_tty(str(tty))}
-    orphaned: list[dict[str, Any]] = []
-    for session in sessions:
-        tty = normalize_tty(str(session.get("tty") or ""))
-        if not tty or tty in managed_ttys:
-            continue
-        command_text = "\n".join(str(command or "") for command in session.get("commands", []))
-        folded_command = command_text.casefold()
-        if not all(signature.casefold() in folded_command for signature in JANICKA_ORPHAN_SIGNATURES):
-            continue
-        orphaned.append(
-            {
-                "tty": tty,
-                "pids": [int(pid) for pid in session.get("pids", [])],
-                "root_pids": [int(pid) for pid in session.get("root_pids", [])],
-            }
-        )
-    return {
-        "ok": True,
-        "status": "orphaned_found" if orphaned else "none",
-        "message": (
-            "Nalezené staré Janička Codex relace mimo správu: "
-            + ", ".join(item["tty"] for item in orphaned)
-            if orphaned
-            else "Žádné staré Janička Codex relace mimo správu nejsou nalezené."
-        ),
-        "orphaned_ttys": [item["tty"] for item in orphaned],
-        "orphaned_count": len(orphaned),
-        "orphaned_sessions": orphaned,
-        "managed_codex_ttys": sorted(managed_ttys),
-    }
-
-
-def janicka_light_status_action(
-    *,
-    status_getter: Callable[[], dict[str, Any]] = janicka_light_status,
-    orphan_reporter: Callable[[], dict[str, Any]] = janicka_orphaned_codex_session_report,
-) -> dict[str, Any]:
-    status = status_getter()
-    try:
-        orphan_report = orphan_reporter()
-    except Exception as exc:
-        return {
-            **status,
-            "orphaned_janicka_check_ok": False,
-            "orphaned_janicka_message": f"Kontrola starých Janička relací selhala: {exc}",
-            "orphaned_janicka_ttys": [],
-            "orphaned_janicka_count": 0,
-        }
-    orphaned_ttys = [safe_text(str(tty))[:40] for tty in orphan_report.get("orphaned_ttys", [])]
-    if orphaned_ttys:
-        base_message = str(status.get("message") or "").rstrip()
-        status["message"] = (
-            f"{base_message} Pozor: staré Janička relace mimo správu: {', '.join(orphaned_ttys)}."
-            if base_message
-            else f"Pozor: staré Janička relace mimo správu: {', '.join(orphaned_ttys)}."
-        )
-    return {
-        **status,
-        "orphaned_janicka_check_ok": bool(orphan_report.get("ok", True)),
-        "orphaned_janicka_message": str(orphan_report.get("message") or ""),
-        "orphaned_janicka_ttys": orphaned_ttys,
-        "orphaned_janicka_count": int(orphan_report.get("orphaned_count") or 0),
-    }
-
-
-def terminate_orphaned_janicka_sessions_action(
-    payload: dict[str, Any],
-    *,
-    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
-    managed_codex_tty_labeler: Callable[[], dict[str, str]] | None = None,
-    killer: Callable[[int, int], None] = os.kill,
-) -> dict[str, Any]:
-    confirmed = bool(payload.get("confirmed"))
-    report = janicka_orphaned_codex_session_report(
-        runner=runner,
-        managed_codex_tty_labeler=managed_codex_tty_labeler,
-    )
-    if not report.get("ok", True):
-        return report
-    orphaned_sessions = list(report.get("orphaned_sessions", []))
-    if not orphaned_sessions:
-        return {
-            **report,
-            "ok": True,
-            "status": "no_orphaned_janicka_sessions",
-            "message": "Žádné staré Janička relace mimo správu k ukončení.",
-        }
-
-    protected_ttys = sorted(set(report.get("managed_codex_ttys", [])))
-    stale_ttys = [str(session.get("tty") or "") for session in orphaned_sessions]
-    root_pids = sorted({int(pid) for session in orphaned_sessions for pid in session.get("root_pids", [])})
-    if not confirmed:
-        return {
-            **report,
-            "ok": False,
-            "status": "confirmation_required",
-            "message": f"K ukončení jsou připravené staré Janička relace: {', '.join(stale_ttys)}.",
-            "stale_ttys": stale_ttys,
-            "root_pids": root_pids,
-            "protected_ttys": protected_ttys,
-        }
-
-    killed: list[int] = []
-    errors: list[str] = []
-    for pid in root_pids:
-        try:
-            killer(pid, signal.SIGTERM)
-            killed.append(pid)
-        except OSError as exc:
-            errors.append(f"PID {pid}: {exc}")
-    if errors:
-        return {
-            **report,
-            "ok": False,
-            "status": "partial_or_failed",
-            "message": f"Některé staré Janička relace se nepodařilo ukončit: {' | '.join(errors)}",
-            "stale_ttys": stale_ttys,
-            "killed_pids": killed,
-            "errors": errors,
-            "protected_ttys": protected_ttys,
-        }
-    return {
-        **report,
-        "ok": True,
-        "status": "orphaned_janicka_sessions_terminated",
-        "message": f"Ukončil jsem staré Janička relace mimo správu: {', '.join(stale_ttys)}.",
-        "stale_ttys": stale_ttys,
-        "killed_pids": killed,
-        "protected_ttys": protected_ttys,
-    }
 
 
 def shell_quote_for_applescript(value: str) -> str:
@@ -9148,86 +8638,6 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
-        "path": "/api/janicka/chat",
-        "label": "Janička chat s Adamem",
-        "risk": "voice_local_outbound",
-        "confirmation": "managed_adam_route",
-        "handler_name": "janicka_chat_action",
-        "test_level": "direct",
-    },
-    {
-        "path": "/api/janicka/chat/latest",
-        "label": "Posledni Janička odpoved",
-        "risk": "read_only_via_post",
-        "confirmation": "none_readonly",
-        "handler_name": "janicka_latest_codex_reply_action",
-        "test_level": "direct",
-    },
-    {
-        "path": "/api/adam/status",
-        "label": "Adam status",
-        "risk": "read_only_via_post",
-        "confirmation": "none_readonly",
-        "handler_name": "adam_service_status",
-        "test_level": "ui_presence",
-    },
-    {
-        "path": "/api/adam/start",
-        "label": "Spustit Adama",
-        "risk": "local_service",
-        "confirmation": "fixed_workflow",
-        "handler_name": "start_adam_service",
-        "test_level": "ui_presence",
-    },
-    {
-        "path": "/api/adam/restart",
-        "label": "Restartovat Adama",
-        "risk": "local_service",
-        "confirmation": "ui_confirm_boolean",
-        "handler_name": "restart_adam_service",
-        "test_level": "ui_presence",
-    },
-    {
-        "path": "/api/adam/stop",
-        "label": "Zastavit Adama",
-        "risk": "local_service",
-        "confirmation": "ui_confirm_boolean",
-        "handler_name": "stop_adam_service",
-        "test_level": "ui_presence",
-    },
-    {
-        "path": "/api/janicka/light/status",
-        "label": "Janička light Samantha status",
-        "risk": "read_only_via_post",
-        "confirmation": "none_readonly",
-        "handler_name": "janicka_light_status_action",
-        "test_level": "ui_presence",
-    },
-    {
-        "path": "/api/janicka/light/start",
-        "label": "Spustit Janička light Samantha",
-        "risk": "local_service",
-        "confirmation": "fixed_workflow",
-        "handler_name": "start_janicka_light_session",
-        "test_level": "ui_presence",
-    },
-    {
-        "path": "/api/janicka/light/stop",
-        "label": "Zastavit Janička light Samantha",
-        "risk": "local_service",
-        "confirmation": "ui_confirm_boolean",
-        "handler_name": "stop_janicka_light_session",
-        "test_level": "ui_presence",
-    },
-    {
-        "path": "/api/janicka/light/cleanup-orphans",
-        "label": "Ukoncit stare Janicka relace mimo spravu",
-        "risk": "local_service",
-        "confirmation": "ui_confirm_boolean",
-        "handler_name": "terminate_orphaned_janicka_sessions_action",
-        "test_level": "ui_presence",
-    },
-    {
         "path": "/api/codex-approval/clear",
         "label": "Vycistit Codex approval kartu",
         "risk": "private_write",
@@ -9290,14 +8700,6 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "confirmation": "fixed_terminal_command",
         "handler_name": "open_codex_cli",
         "test_level": "indirect",
-    },
-    {
-        "path": "/api/janicka/full-adam/open",
-        "label": "Janička nouzove otevrit plneho Adama",
-        "risk": "local_open",
-        "confirmation": "fixed_terminal_command",
-        "handler_name": "open_janicka_full_adam_action",
-        "test_level": "direct",
     },
     {
         "path": "/api/reminders/done",
@@ -10093,42 +9495,6 @@ class CockpitServer:
                         )
                     )
                     return
-                if parsed.path == "/api/janicka/chat":
-                    payload = self.read_json()
-                    self.respond_json(janicka_chat_action(payload))
-                    return
-                if parsed.path == "/api/janicka/chat/latest":
-                    payload = self.read_json()
-                    self.respond_json(janicka_latest_codex_reply_action(payload))
-                    return
-                if parsed.path == "/api/adam/status":
-                    self.respond_json(adam_service_status())
-                    return
-                if parsed.path == "/api/adam/start":
-                    self.respond_json(start_adam_service())
-                    return
-                if parsed.path == "/api/adam/restart":
-                    payload = self.read_json()
-                    self.respond_json(restart_adam_service(confirmed=bool(payload.get("confirmed"))))
-                    return
-                if parsed.path == "/api/adam/stop":
-                    payload = self.read_json()
-                    self.respond_json(stop_adam_service(confirmed=bool(payload.get("confirmed"))))
-                    return
-                if parsed.path == "/api/janicka/light/status":
-                    self.respond_json(janicka_light_status_action())
-                    return
-                if parsed.path == "/api/janicka/light/start":
-                    self.respond_json(start_janicka_light_session())
-                    return
-                if parsed.path == "/api/janicka/light/stop":
-                    payload = self.read_json()
-                    self.respond_json(stop_janicka_light_session(confirmed=bool(payload.get("confirmed"))))
-                    return
-                if parsed.path == "/api/janicka/light/cleanup-orphans":
-                    payload = self.read_json()
-                    self.respond_json(terminate_orphaned_janicka_sessions_action(payload))
-                    return
                 if parsed.path == "/api/codex-approval/clear":
                     payload = self.read_json()
                     self.respond_json(cockpit_codex_approval_clear_action(payload))
@@ -10170,9 +9536,6 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/codex/open":
                     self.respond_json(open_codex_cli())
-                    return
-                if parsed.path == "/api/janicka/full-adam/open":
-                    self.respond_json(open_janicka_full_adam_action())
                     return
                 if parsed.path == "/api/reminders/done":
                     payload = self.read_json()
@@ -12485,20 +11848,8 @@ COCKPIT_HTML = """<!doctype html>
     .janicka-action button.emergency { background: #b91c1c; color: white; }
     .janicka-note { border: 1px solid #fed7aa; border-radius: 8px; background: #fffbeb; color: #5f370e; padding: 11px 12px; font-size: 13px; line-height: 1.45; }
     .janicka-return { position: fixed; right: 18px; bottom: 18px; z-index: 14; box-shadow: 0 10px 28px rgba(88, 28, 53, .22); background: #be185d; color: white; }
-    .janicka-chat-modal { width: min(920px, 100%); background: #fff7fb; border-color: #fbcfe8; }
-    .janicka-chat-log { min-height: 320px; max-height: 48vh; overflow: auto; display: grid; gap: 10px; padding: 10px; border: 1px solid #fbcfe8; border-radius: 8px; background: white; }
-    .janicka-chat-message { border: 1px solid #edf0f4; border-radius: 8px; padding: 10px; background: #fbfcfe; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.45; }
-    .janicka-chat-message.user { background: #fce7f3; border-color: #fbcfe8; }
-    .janicka-chat-message.assistant { background: #fff; border-color: #fbcfe8; }
-    .janicka-chat-meta { font-size: 12px; font-weight: 750; color: #831843; margin-bottom: 4px; }
-    .janicka-chat-runtime { display: grid; gap: 8px; padding: 10px; border: 1px solid #fbcfe8; border-radius: 8px; background: #fff; }
-    .janicka-service-details { border-top: 1px solid #f3f4f6; padding-top: 8px; }
-    .janicka-service-details summary { cursor: pointer; color: var(--muted); font-size: 13px; font-weight: 700; }
-    .janicka-service-details[open] { display: grid; gap: 8px; }
     .compact-actions { gap: 8px; }
     .compact-actions button { min-height: 34px; padding: 6px 10px; }
-    .janicka-chat-input { display: grid; gap: 8px; }
-    .janicka-chat-input textarea { width: 100%; min-height: 110px; resize: vertical; border: 1px solid #fbcfe8; border-radius: 8px; padding: 10px; font: inherit; line-height: 1.45; }
     .janicka-family-modal { width: min(860px, 100%); background: #fff7fb; border-color: #fbcfe8; }
     .janicka-family-list { display: grid; gap: 10px; }
     .health-panel { border: 1px solid #cfd7e3; border-radius: 8px; background: #fbfcfe; padding: 10px 12px; display: grid; gap: 7px; }
@@ -13067,13 +12418,6 @@ COCKPIT_HTML = """<!doctype html>
           <p class="janicka-subtitle">Tahle obrazovka je vstup pro Janu. Neomezuje přístup; jen převádí hotové části Samanthy do srozumitelných kroků.</p>
         </div>
         <div class="janicka-grid" aria-label="Janička rozcestník">
-          <div class="janicka-action emergency">
-            <div>
-              <div class="janicka-action-title">Když Adam light nestačí</div>
-              <div class="janicka-action-text">Otevře plného Adama, kde Jana píše normální větou. Není potřeba znát příkazy.</div>
-            </div>
-            <button class="emergency" id="janickaFullAdamBtn" type="button">Otevřít plného Adama</button>
-          </div>
           <div class="janicka-action">
             <div>
               <div class="janicka-action-title">Najít dokument</div>
@@ -13111,13 +12455,6 @@ COCKPIT_HTML = """<!doctype html>
           </div>
           <div class="janicka-action">
             <div>
-              <div class="janicka-action-title">Zeptat se Adama</div>
-              <div class="janicka-action-text">Napsat nebo nadiktovat běžný pokyn bez technických příkazů.</div>
-            </div>
-            <button id="janickaAskAdamBtn" type="button">Zeptat se</button>
-          </div>
-          <div class="janicka-action">
-            <div>
               <div class="janicka-action-title">Připomenutí</div>
               <div class="janicka-action-text">Zobrazit důležité termíny a otevřené připomínky.</div>
             </div>
@@ -13131,7 +12468,6 @@ COCKPIT_HTML = """<!doctype html>
             <button class="secondary" id="janickaRecoveryBtn" type="button">Otevřít</button>
           </div>
         </div>
-        <div id="janickaFullAdamStatus" class="janicka-note">Když běžný chat nestačí, tlačítko otevře plného Adama v Terminalu. Jana potom píše normální větou. Kdyby automatika selhala: otevřít aplikaci Terminal, napsat <code>cd /Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent</code>, stisknout Enter, potom napsat <code>codex --no-alt-screen</code>.</div>
         <div class="actions">
           <button class="secondary" id="janickaWebAppsBtn" type="button">Všechny aplikace</button>
           <button class="secondary" id="janickaProjectsBtn" type="button">Projekty</button>
@@ -13141,47 +12477,6 @@ COCKPIT_HTML = """<!doctype html>
     </div>
   </div>
   <button class="janicka-return hidden" id="janickaReturnBtn" type="button">Zpět k Janičce</button>
-  <div id="janickaChatModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="janickaChatTitle">
-    <div class="modal janicka-chat-modal">
-      <div class="modal-header">
-        <h2 id="janickaChatTitle">Zeptat se Adama</h2>
-        <button class="secondary" id="janickaChatCloseBtn">Zpět k Janičce</button>
-      </div>
-      <div class="modal-body">
-        <div class="janicka-intro">
-          <h3 class="janicka-title">Textový chat</h3>
-          <p class="janicka-subtitle">Napiš běžnou větou, co potřebuješ. Cockpit Adama podle potřeby spustí a předá mu dotaz.</p>
-        </div>
-        <div class="janicka-chat-runtime">
-          <div id="janickaLightStatus" class="status-line">Janička chat: čekám na kontrolu.</div>
-          <div class="actions compact-actions">
-            <button class="secondary" id="janickaLightStartBtn" type="button">Spustit Janičku</button>
-            <button class="secondary" id="janickaLightStopBtn" type="button">Zastavit Janičku</button>
-            <button class="secondary hidden" id="janickaLightCleanupOrphansBtn" type="button">Uklidit staré relace</button>
-          </div>
-          <details class="janicka-service-details">
-            <summary>Servisní fallback</summary>
-            <div id="janickaAdamStatus" class="status-line">Starý Adam fallback: čekám na kontrolu.</div>
-            <div class="actions compact-actions">
-              <button class="secondary" id="janickaAdamStartBtn" type="button">Spustit fallback</button>
-              <button class="secondary" id="janickaAdamRestartBtn" type="button">Restartovat fallback</button>
-              <button class="secondary" id="janickaAdamStopBtn" type="button">Zastavit fallback</button>
-            </div>
-          </details>
-        </div>
-        <div id="janickaChatLog" class="janicka-chat-log" aria-live="polite"></div>
-        <div class="janicka-chat-input">
-          <label for="janickaChatInput">Otázka nebo pokyn</label>
-          <textarea id="janickaChatInput" spellcheck="true" placeholder="Například: Najdi mi dokument k pojištění auta."></textarea>
-          <div class="actions">
-            <button class="primary" id="janickaChatSendBtn" type="button">Odeslat Adamovi</button>
-            <button class="secondary" id="janickaChatClearBtn" type="button">Vyčistit chat</button>
-          </div>
-          <div id="janickaChatStatus" class="status-line">Připraveno.</div>
-        </div>
-      </div>
-    </div>
-  </div>
   <div id="janickaFamilyModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="janickaFamilyTitle">
     <div class="modal janicka-family-modal">
       <div class="modal-header">
@@ -13738,35 +13033,17 @@ COCKPIT_HTML = """<!doctype html>
     const janickaEmailBtn = document.getElementById("janickaEmailBtn");
     const janickaLekarnaBtn = document.getElementById("janickaLekarnaBtn");
     const janickaFamilyBtn = document.getElementById("janickaFamilyBtn");
-    const janickaAskAdamBtn = document.getElementById("janickaAskAdamBtn");
-    const janickaFullAdamBtn = document.getElementById("janickaFullAdamBtn");
-    const janickaFullAdamStatus = document.getElementById("janickaFullAdamStatus");
     const janickaRemindersBtn = document.getElementById("janickaRemindersBtn");
     const janickaRecoveryBtn = document.getElementById("janickaRecoveryBtn");
     const janickaWebAppsBtn = document.getElementById("janickaWebAppsBtn");
     const janickaProjectsBtn = document.getElementById("janickaProjectsBtn");
     const janickaCookbookBtn = document.getElementById("janickaCookbookBtn");
     const janickaReturnBtn = document.getElementById("janickaReturnBtn");
-    const janickaChatModal = document.getElementById("janickaChatModal");
-    const janickaChatCloseBtn = document.getElementById("janickaChatCloseBtn");
-    const janickaChatLog = document.getElementById("janickaChatLog");
-    const janickaChatInput = document.getElementById("janickaChatInput");
-    const janickaChatSendBtn = document.getElementById("janickaChatSendBtn");
-    const janickaChatClearBtn = document.getElementById("janickaChatClearBtn");
-    const janickaChatStatus = document.getElementById("janickaChatStatus");
     const janickaFamilyModal = document.getElementById("janickaFamilyModal");
     const janickaFamilyCloseBtn = document.getElementById("janickaFamilyCloseBtn");
     const janickaFamilyOrganizerBtn = document.getElementById("janickaFamilyOrganizerBtn");
     const janickaFamilyProjectsBtn = document.getElementById("janickaFamilyProjectsBtn");
     const janickaFamilyStatus = document.getElementById("janickaFamilyStatus");
-    const janickaAdamStatus = document.getElementById("janickaAdamStatus");
-    const janickaAdamStartBtn = document.getElementById("janickaAdamStartBtn");
-    const janickaAdamRestartBtn = document.getElementById("janickaAdamRestartBtn");
-    const janickaAdamStopBtn = document.getElementById("janickaAdamStopBtn");
-    const janickaLightStatus = document.getElementById("janickaLightStatus");
-    const janickaLightStartBtn = document.getElementById("janickaLightStartBtn");
-    const janickaLightStopBtn = document.getElementById("janickaLightStopBtn");
-    const janickaLightCleanupOrphansBtn = document.getElementById("janickaLightCleanupOrphansBtn");
     const remindersModal = document.getElementById("remindersModal");
     const remindersCloseBtn = document.getElementById("remindersCloseBtn");
     const remindersStatus = document.getElementById("remindersStatus");
@@ -14122,28 +13399,15 @@ COCKPIT_HTML = """<!doctype html>
         "janickaEmailBtn",
         "janickaLekarnaBtn",
         "janickaFamilyBtn",
-        "janickaAskAdamBtn",
-        "janickaFullAdamBtn",
-        "janickaFullAdamStatus",
         "janickaRemindersBtn",
         "janickaRecoveryBtn",
         "janickaWebAppsBtn",
         "janickaProjectsBtn",
         "janickaCookbookBtn",
         "janickaReturnBtn",
-        "janickaChatCloseBtn",
-        "janickaChatInput",
-        "janickaChatSendBtn",
-        "janickaChatClearBtn",
         "janickaFamilyCloseBtn",
         "janickaFamilyOrganizerBtn",
         "janickaFamilyProjectsBtn",
-        "janickaAdamStartBtn",
-        "janickaAdamRestartBtn",
-        "janickaAdamStopBtn",
-        "janickaLightStatus",
-        "janickaLightStartBtn",
-        "janickaLightStopBtn",
         "webAppsBtn",
         "libraryBtn",
         "libraryCloseBtn",
@@ -19468,48 +18732,6 @@ COCKPIT_HTML = """<!doctype html>
       }
     }
 
-    function focusAdamForJanicka() {
-      closeJanickaModal();
-      openJanickaChatModal();
-    }
-
-    async function openFullAdamForJanicka() {
-      janickaFullAdamBtn.disabled = true;
-      janickaFullAdamStatus.textContent = "Otevírám plného Adama v Terminalu...";
-      try {
-        const data = await postJson("/api/janicka/full-adam/open", {});
-        const steps = Array.isArray(data.manual_steps) ? data.manual_steps.filter(Boolean) : [];
-        const manual = data.manual_command ? `\\n\\nRuční příkaz: ${data.manual_command}` : "";
-        const stepsText = steps.length ? `\\n\\nKdyž se okno neotevře:\\n- ${steps.join("\\n- ")}` : "";
-        janickaFullAdamStatus.textContent = `${data.message || "Hotovo."}${manual}${stepsText}`;
-      } catch (err) {
-        recordFrontendError(err);
-        janickaFullAdamStatus.textContent =
-          `Plného Adama se nepodařilo otevřít: ${err}\n\n` +
-          "Ruční postup: otevři aplikaci Terminal, napiš cd /Users/miloslavfalta/Desktop/PythonMF/Samantha_Agent, stiskni Enter a potom napiš codex --no-alt-screen.";
-      } finally {
-        janickaFullAdamBtn.disabled = false;
-      }
-    }
-
-    let janickaChatHistory = [];
-
-    function openJanickaChatModal() {
-      janickaReturnBtn.classList.add("hidden");
-      janickaChatModal.classList.remove("hidden");
-      if (!janickaChatHistory.length) {
-        renderJanickaChat();
-      }
-      refreshJanickaAdamStatus();
-      refreshJanickaLightStatus();
-      window.setTimeout(() => janickaChatInput.focus(), 0);
-    }
-
-    function closeJanickaChatModal() {
-      janickaChatModal.classList.add("hidden");
-      openJanickaModal();
-    }
-
     function openJanickaFamilyModal() {
       closeJanickaModal();
       janickaFamilyStatus.textContent = "Vyber, co chceš otevřít.";
@@ -19530,250 +18752,6 @@ COCKPIT_HTML = """<!doctype html>
       janickaFamilyModal.classList.add("hidden");
       armJanickaModalReturn("projects");
       openProjectsModal();
-    }
-
-    function renderJanickaChat() {
-      janickaChatLog.innerHTML = "";
-      if (!janickaChatHistory.length) {
-        const empty = document.createElement("div");
-        empty.className = "janicka-chat-message assistant";
-        empty.innerHTML = '<div class="janicka-chat-meta">Adam</div>Napiš mi běžnou větou, co potřebuješ. Nejde o hlasový pokyn a nic se samo neprovede.';
-        janickaChatLog.appendChild(empty);
-        return;
-      }
-      janickaChatHistory.forEach((item) => {
-        const row = document.createElement("div");
-        row.className = `janicka-chat-message ${item.role === "user" ? "user" : "assistant"}`;
-        const meta = document.createElement("div");
-        meta.className = "janicka-chat-meta";
-        meta.textContent = item.role === "user" ? "Jana" : "Adam";
-        const text = document.createElement("div");
-        text.textContent = item.content || "";
-        row.appendChild(meta);
-        row.appendChild(text);
-        janickaChatLog.appendChild(row);
-      });
-      janickaChatLog.scrollTop = janickaChatLog.scrollHeight;
-    }
-
-    async function submitJanickaChat() {
-      const message = janickaChatInput.value.trim();
-      if (!message) {
-        janickaChatStatus.textContent = "Napiš otázku nebo pokyn.";
-        janickaChatInput.focus();
-        return;
-      }
-      janickaChatHistory.push({role: "user", content: message});
-      janickaChatInput.value = "";
-      renderJanickaChat();
-      janickaChatSendBtn.disabled = true;
-      janickaChatStatus.textContent = "Předávám dotaz light Samanthě do Codexu...";
-      try {
-        const data = await postJson("/api/janicka/chat", {
-          message,
-          history: janickaChatHistory.slice(-10)
-        });
-        if (data.ok) {
-          janickaChatHistory.push({role: "assistant", content: data.answer || ""});
-          janickaChatStatus.textContent = data.message || "Adam odpověděl.";
-          if (data.status === "delivered_to_codex" && data.poll_latest) {
-            renderJanickaChat();
-            pollJanickaCodexReply(message, data.request_id || "");
-            return;
-          }
-          if (data.status === "delivered_to_adam" && data.poll_latest) {
-            renderJanickaChat();
-            pollJanickaCodexReply(message, data.request_id || "");
-            refreshJanickaAdamStatus();
-            refreshJanickaLightStatus();
-            return;
-          }
-        } else {
-          janickaChatHistory.push({role: "assistant", content: data.message || "Adam teď neodpověděl."});
-          janickaChatStatus.textContent = data.message || "Adam teď neodpověděl.";
-        }
-        renderJanickaChat();
-      } catch (err) {
-        recordFrontendError(err);
-        janickaChatHistory.push({role: "assistant", content: `Adam teď neodpověděl: ${err}`});
-        janickaChatStatus.textContent = `Adam teď neodpověděl: ${err}`;
-        renderJanickaChat();
-      } finally {
-        janickaChatSendBtn.disabled = false;
-        janickaChatInput.focus();
-      }
-    }
-
-    async function pollJanickaCodexReply(message, requestId) {
-      const maxAttempts = 60;
-      const delayMs = 2000;
-      for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-        await new Promise((resolve) => window.setTimeout(resolve, delayMs));
-        try {
-          const data = await postJson("/api/janicka/chat/latest", {message, request_id: requestId});
-          if (data.ok && data.available && data.answer) {
-            janickaChatHistory.push({role: "assistant", content: data.answer});
-            janickaChatStatus.textContent = "Adamova odpověď z Codexu je tady.";
-            renderJanickaChat();
-            return;
-          }
-        } catch (err) {
-          recordFrontendError(err);
-        }
-      }
-      janickaChatStatus.textContent = "Odpověď se zatím nevrátila do okna. Adam může ještě odpovídat ve své spravované relaci.";
-    }
-
-    async function refreshJanickaAdamStatus() {
-      try {
-        const data = await postJson("/api/adam/status", {});
-        const running = Boolean(data.running);
-        const managedTtys = Array.isArray(data.managed_codex_ttys) ? data.managed_codex_ttys.filter(Boolean) : [];
-        const managedTarget = managedTtys.length ? ` Relace: ${managedTtys.join(", ")}.` : "";
-        const pending = Number(data.pending_count || 0);
-        const ready = running && managedTtys.length > 0;
-        const stateText = ready
-          ? `Starý Adam fallback běží.${managedTarget}`
-          : "Starý Adam fallback neběží nebo není připravený.";
-        janickaAdamStatus.textContent = `${stateText}${pending ? ` Starých nevyřízených dotazů: ${pending}.` : ""}`;
-        janickaAdamStatus.classList.toggle("ok", ready);
-        janickaAdamStatus.classList.toggle("warn", !ready);
-        janickaAdamStartBtn.disabled = running;
-      } catch (err) {
-        recordFrontendError(err);
-        janickaAdamStatus.textContent = `Fallback status se nepodařilo načíst: ${err}`;
-        janickaAdamStatus.classList.add("warn");
-      }
-    }
-
-    async function startJanickaAdam() {
-      janickaAdamStatus.textContent = "Spouštím fallback...";
-      try {
-        const data = await postJson("/api/adam/start", {});
-        janickaAdamStatus.textContent = data.message || "Fallback se spouští.";
-        await refreshJanickaAdamStatus();
-      } catch (err) {
-        recordFrontendError(err);
-        janickaAdamStatus.textContent = `Fallback se nepodařilo spustit: ${err}`;
-      }
-    }
-
-    async function restartJanickaAdam() {
-      if (!window.confirm("Restartovat starý Adam fallback? Rozpracovaná odpověď ve fallback relaci se může přerušit.")) return;
-      janickaAdamStatus.textContent = "Restartuji fallback...";
-      try {
-        const data = await postJson("/api/adam/restart", {confirmed: true});
-        janickaAdamStatus.textContent = data.message || "Fallback se restartuje.";
-        await refreshJanickaAdamStatus();
-      } catch (err) {
-        recordFrontendError(err);
-        janickaAdamStatus.textContent = `Fallback se nepodařilo restartovat: ${err}`;
-      }
-    }
-
-    async function stopJanickaAdam() {
-      if (!window.confirm("Zastavit starý Adam fallback? Běžně není potřeba na něj sahat.")) return;
-      janickaAdamStatus.textContent = "Zastavuji fallback...";
-      try {
-        const data = await postJson("/api/adam/stop", {confirmed: true});
-        janickaAdamStatus.textContent = data.message || "Fallback byl zastaven.";
-        await refreshJanickaAdamStatus();
-      } catch (err) {
-        recordFrontendError(err);
-        janickaAdamStatus.textContent = `Fallback se nepodařilo zastavit: ${err}`;
-      }
-    }
-
-    async function refreshJanickaLightStatus() {
-      try {
-        const data = await postJson("/api/janicka/light/status", {});
-        const running = Boolean(data.running);
-        const managedTtys = Array.isArray(data.managed_codex_ttys) ? data.managed_codex_ttys.filter(Boolean) : [];
-        const orphanedTtys = Array.isArray(data.orphaned_janicka_ttys) ? data.orphaned_janicka_ttys.filter(Boolean) : [];
-        const managedTarget = managedTtys.length ? ` Relace: ${managedTtys.join(", ")}.` : "";
-        const orphanedText = orphanedTtys.length ? ` Staré relace mimo správu: ${orphanedTtys.join(", ")}.` : "";
-        const ready = running && managedTtys.length > 0;
-        janickaLightStatus.textContent = ready
-          ? `Janička chat běží.${managedTarget}${orphanedText}`
-          : `Janička chat není připravený.${managedTarget}${orphanedText}`;
-        janickaLightStatus.classList.toggle("ok", ready && !orphanedTtys.length);
-        janickaLightStatus.classList.toggle("warn", !ready || orphanedTtys.length > 0);
-        janickaLightStartBtn.disabled = running;
-        janickaLightStopBtn.disabled = !running;
-        janickaLightCleanupOrphansBtn.classList.toggle("hidden", orphanedTtys.length === 0);
-        janickaLightCleanupOrphansBtn.disabled = orphanedTtys.length === 0;
-      } catch (err) {
-        recordFrontendError(err);
-        janickaLightStatus.textContent = `Janička chat status se nepodařilo načíst: ${err}`;
-        janickaLightStatus.classList.add("warn");
-        janickaLightStopBtn.disabled = true;
-        janickaLightCleanupOrphansBtn.classList.add("hidden");
-        janickaLightCleanupOrphansBtn.disabled = true;
-      }
-    }
-
-    async function startJanickaLight() {
-      janickaLightStatus.textContent = "Spouštím Janička chat...";
-      try {
-        const data = await postJson("/api/janicka/light/start", {});
-        janickaLightStatus.textContent = data.message || "Janička chat se spouští.";
-        await refreshJanickaLightStatus();
-      } catch (err) {
-        recordFrontendError(err);
-        janickaLightStatus.textContent = `Janička chat se nepodařilo spustit: ${err}`;
-      }
-    }
-
-    async function stopJanickaLight() {
-      if (!window.confirm("Zastavit Janička chat?")) return;
-      janickaLightStatus.textContent = "Zastavuji Janička chat...";
-      try {
-        const data = await postJson("/api/janicka/light/stop", {confirmed: true});
-        janickaLightStatus.textContent = data.message || "Janička chat byl zastaven.";
-        await refreshJanickaLightStatus();
-      } catch (err) {
-        recordFrontendError(err);
-        janickaLightStatus.textContent = `Janička chat se nepodařilo zastavit: ${err}`;
-      }
-    }
-
-    async function cleanupJanickaLightOrphans() {
-      janickaLightCleanupOrphansBtn.disabled = true;
-      try {
-        const preview = await postJson("/api/janicka/light/cleanup-orphans", {confirmed: false});
-        const staleTtys = Array.isArray(preview.stale_ttys) ? preview.stale_ttys.join(", ") : "";
-        if (preview.status === "no_orphaned_janicka_sessions") {
-          janickaLightStatus.textContent = preview.message || "Žádné staré Janička relace k úklidu.";
-          await refreshJanickaLightStatus();
-          return;
-        }
-        if (preview.status !== "confirmation_required") {
-          janickaLightStatus.textContent = preview.message || "Staré Janička relace nejde bezpečně určit.";
-          await refreshJanickaLightStatus();
-          return;
-        }
-        const ok = window.confirm(`Ukončit staré Janička relace mimo správu ${staleTtys}? Aktuální Janička i hlavní Adam zůstanou běžet.`);
-        if (!ok) {
-          janickaLightStatus.textContent = "Úklid starých Janička relací zrušen.";
-          await refreshJanickaLightStatus();
-          return;
-        }
-        const data = await postJson("/api/janicka/light/cleanup-orphans", {confirmed: true});
-        janickaLightStatus.textContent = data.message || "Staré Janička relace byly uklizeny.";
-        await refreshJanickaLightStatus();
-      } catch (err) {
-        recordFrontendError(err);
-        janickaLightStatus.textContent = `Úklid starých Janička relací selhal: ${err}`;
-      } finally {
-        janickaLightCleanupOrphansBtn.disabled = false;
-      }
-    }
-
-    function clearJanickaChat() {
-      janickaChatHistory = [];
-      janickaChatStatus.textContent = "Chat je vyčištěný.";
-      renderJanickaChat();
-      janickaChatInput.focus();
     }
 
     async function openCatalogAppById(appId) {
@@ -19859,8 +18837,6 @@ COCKPIT_HTML = """<!doctype html>
       openCatalogAppById("lekarna");
     });
     janickaFamilyBtn.addEventListener("click", openJanickaFamilyModal);
-    janickaAskAdamBtn.addEventListener("click", focusAdamForJanicka);
-    janickaFullAdamBtn.addEventListener("click", openFullAdamForJanicka);
     janickaRemindersBtn.addEventListener("click", () => {
       armJanickaModalReturn("reminders");
       closeJanickaModal();
@@ -19894,24 +18870,9 @@ COCKPIT_HTML = """<!doctype html>
       }
     });
     janickaReturnBtn.addEventListener("click", openJanickaModal);
-    janickaChatCloseBtn.addEventListener("click", closeJanickaChatModal);
-    janickaChatSendBtn.addEventListener("click", submitJanickaChat);
-    janickaChatClearBtn.addEventListener("click", clearJanickaChat);
     janickaFamilyCloseBtn.addEventListener("click", closeJanickaFamilyModal);
     janickaFamilyOrganizerBtn.addEventListener("click", openJanickaFamilyOrganizer);
     janickaFamilyProjectsBtn.addEventListener("click", openJanickaFamilyProjects);
-    janickaAdamStartBtn.addEventListener("click", startJanickaAdam);
-    janickaAdamRestartBtn.addEventListener("click", restartJanickaAdam);
-    janickaAdamStopBtn.addEventListener("click", stopJanickaAdam);
-    janickaLightStartBtn.addEventListener("click", startJanickaLight);
-    janickaLightStopBtn.addEventListener("click", stopJanickaLight);
-    janickaLightCleanupOrphansBtn.addEventListener("click", cleanupJanickaLightOrphans);
-    janickaChatInput.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
-        event.preventDefault();
-        submitJanickaChat();
-      }
-    });
     humanAdamOpenBtn.addEventListener("click", () => { window.location.href = "/human-adam/"; });
     refreshBtn.addEventListener("click", refresh);
     serviceBtn.addEventListener("click", () => {
@@ -19985,11 +18946,6 @@ COCKPIT_HTML = """<!doctype html>
     janickaModal.addEventListener("click", (event) => {
       if (event.target === janickaModal) {
         closeJanickaModal();
-      }
-    });
-    janickaChatModal.addEventListener("click", (event) => {
-      if (event.target === janickaChatModal) {
-        closeJanickaChatModal();
       }
     });
     janickaFamilyModal.addEventListener("click", (event) => {
@@ -20167,8 +19123,6 @@ COCKPIT_HTML = """<!doctype html>
         closeDiagnosticsModal();
 		      } else if (event.key === "Escape" && !janickaModal.classList.contains("hidden")) {
 		        closeJanickaModal();
-		      } else if (event.key === "Escape" && !janickaChatModal.classList.contains("hidden")) {
-		        closeJanickaChatModal();
 		      } else if (event.key === "Escape" && !janickaFamilyModal.classList.contains("hidden")) {
 		        closeJanickaFamilyModal();
       }

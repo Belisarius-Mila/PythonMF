@@ -219,11 +219,17 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
             "CURRENT_CODEX_TTY_PATH",
             "protected_by_voice_marker",
             "Mílův hlasový bridge:",
-        )
-        preserved_markers = (
+            "from app.adam_service import (",
+            "def managed_codex_session_tty_labels(",
+            "def discover_codex_process_sessions(",
+            "def janicka_chat_memory_context(",
+            "def janicka_chat_action(",
             "def janicka_orphaned_codex_session_report(",
             "def terminate_orphaned_janicka_sessions_action(",
             "def janicka_latest_codex_reply_action(",
+            "def open_janicka_full_adam_action(",
+        )
+        preserved_markers = (
             "def transcribe_audio_base64_isolated(",
             "def human_adam_transcribe_action(",
             "def cockpit_speak_action(",
@@ -236,6 +242,64 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
         for marker in preserved_markers:
             with self.subTest(preserved=marker):
                 self.assertIn(marker, source)
+
+    def test_janicka_legacy_communication_surface_is_retired(self) -> None:
+        source = (PROJECT_ROOT / "app" / "cockpit.py").read_text(encoding="utf-8")
+        post_paths = cockpit_post_action_paths()
+        html = cockpit_html()
+        retired_paths = {
+            "/api/janicka/chat",
+            "/api/janicka/chat/latest",
+            "/api/adam/status",
+            "/api/adam/start",
+            "/api/adam/restart",
+            "/api/adam/stop",
+            "/api/janicka/light/status",
+            "/api/janicka/light/start",
+            "/api/janicka/light/stop",
+            "/api/janicka/light/cleanup-orphans",
+            "/api/janicka/full-adam/open",
+        }
+        retired_frontend_markers = (
+            "janickaAskAdamBtn",
+            "janickaFullAdamBtn",
+            "janickaChatModal",
+            "janickaLightStatus",
+            "janickaAdamStatus",
+            "submitJanickaChat",
+            "pollJanickaCodexReply",
+            "openFullAdamForJanicka",
+            "Servisní fallback",
+        )
+
+        self.assertTrue(retired_paths.isdisjoint(post_paths))
+        for path in retired_paths:
+            with self.subTest(retired_path=path):
+                self.assertNotIn(path, source)
+        for marker in retired_frontend_markers:
+            with self.subTest(retired_frontend=marker):
+                self.assertNotIn(marker, html)
+
+        for preserved_marker in (
+            "janickaFindDocumentBtn",
+            "janickaEmailBtn",
+            "janickaLekarnaBtn",
+            "janickaFamilyBtn",
+            "janickaRemindersBtn",
+            "janickaRecoveryBtn",
+            "janickaCookbookBtn",
+            "speakText",
+        ):
+            with self.subTest(preserved_frontend=preserved_marker):
+                self.assertIn(preserved_marker, html)
+
+        human_adam_ui = (PROJECT_ROOT / "app" / "communication" / "human_adam_ui.py").read_text(encoding="utf-8")
+        self.assertIn('id="voiceRecordBtn"', human_adam_ui)
+        self.assertIn("/api/human-adam/transcribe", human_adam_ui)
+
+        adam_service = (PROJECT_ROOT / "app" / "adam_service.py").read_text(encoding="utf-8")
+        self.assertIn("def submit_janicka_text_request(", adam_service)
+        self.assertIn("def start_janicka_light_session(", adam_service)
 
     def test_live_diagnostics_do_not_depend_on_voice_bridge_marker(self) -> None:
         quick_check = (PROJECT_ROOT / "scripts" / "system_quick_check.py").read_text(encoding="utf-8")
@@ -255,7 +319,6 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
                 self.assertNotIn("load_marked_codex_tty", source)
         self.assertNotIn("adam_voice_bridge_status", quick_check)
         self.assertIn("from scripts.codex_session_report import main", readiness)
-        self.assertIn('"status": "managed_session_check_failed"', (PROJECT_ROOT / "app" / "cockpit.py").read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":
