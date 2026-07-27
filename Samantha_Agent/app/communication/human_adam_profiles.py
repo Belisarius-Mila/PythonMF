@@ -50,6 +50,9 @@ from app.communication.human_adam_workstream_catalog import (
     CanonicalWorkstreamCapabilities,
 )
 from app.communication.human_adam_workstream_memory import WorkstreamMemoryRegistry
+from app.communication.legacy_tvbcp_migration import (
+    private_context_developer_instructions,
+)
 from app.communication.human_adam_workstream_selection import GroupedWorkstreamSelection
 from app.communication.human_adam_workstream_threads import WorkstreamThreadRegistry
 from app.communication.human_adam_turn_completion import (
@@ -3559,6 +3562,10 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         capability_instructions = private_archive_developer_instructions(
             record.capabilities
         )
+        private_context_instructions = private_context_developer_instructions(
+            workstream_id=record.workstream_id,
+            project_prefix=project_prefix,
+        )
         return human_service.detached_session_hub(
             state_path=state_path,
             workspace=human_service.workspace.workspace_root,
@@ -3577,6 +3584,7 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
                 + ". Tyto dokumenty primo nemen bez Milova vyslovneho pokynu; bezny "
                 + "potvrzeny checkpoint je aktualizuje transakcne."
                 + capability_instructions
+                + private_context_instructions
             ),
             sandbox_policy=workstream_sandbox_policy(record.capabilities),
         )

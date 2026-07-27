@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-27 20:59 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-27 22:05 CEST
 
 ### Hotovo
-- Poslední mrtvé runtime jádro Voice Bridge je odstraněné a servisní runner je obecný
+- Přidána potvrzovaná bezeztrátová migrace starého private TVBCP do soukromého kontextu proudu Brainstorm včetně bezpečných instrukcí a testů.
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,20 +15,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Provést checkpoint a nasazení, potom zahájit závěrečný úklid 9.4e
+- Nasadit aktuální main; samotnou private migraci spustit až samostatnou přesnou potvrzovací větou.
 
 ### Rozhodnutí
-- Private Voice Bridge stav zůstává nedotčený; jeho migrace nebo smazání vyžaduje samostatné rozhodnutí
+- V tomto kroku nebylo přijato nové kanonické rozhodnutí.
 
 ### Navrhované další kroky
-- V 9.4e auditovat a uklidit aktivní zastaralé názvy a projektové poznámky
-- Spustit úplnou Cockpit regresní bránu v kanonickém prostředí
-- Adam-R2 zahájit samostatně až po uzavření amputace legacy komunikace
+- Žádné další návrhy nad rámec bezprostředního kroku.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (1141 testů).
-- Git před checkpointem: lokální `main` na `ede95b8ff8f5`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `ede95b8ff8f5` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-27T17:10:10+00:00.
+- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
+- Git před checkpointem: lokální `main` na `9976bd01b51a`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `9976bd01b51a` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-27T19:28:59+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -2416,3 +2414,15 @@ Technický důkaz:
 - Změněné cesty před paměťovým zápisem (15): `Samantha_Agent/app/cockpit.py`, `Samantha_Agent/app/speech/adam_voice_mode.py`, `Samantha_Agent/app/speech/terminal_bridge.py`, `Samantha_Agent/app/speech/voice_inbox.py`, `Samantha_Agent/app/voice_bridge_state.py`, `Samantha_Agent/scripts/adam_voice_reply.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_adam_voice_mode.py`, `Samantha_Agent/tests/test_cockpit.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_voice_frontend_retirement.py`, `Samantha_Agent/tests/test_codex_approval_cockpit_contract.py`, `Samantha_Agent/tests/test_terminal_bridge.py`, `Samantha_Agent/tests/test_voice_bridge_state.py`, `Samantha_Agent/tests/test_voice_inbox.py`
 - Commit: `Complete Voice Bridge runtime amputation`
 - Další krok: Provést checkpoint a nasazení, potom zahájit závěrečný úklid 9.4e
+
+### Automatický checkpoint 2026-07-27 22:05 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Přidána potvrzovaná bezeztrátová migrace starého private TVBCP do soukromého kontextu proudu Brainstorm včetně bezpečných instrukcí a testů.; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 6.9 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/app/communication/human_adam_profiles.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/app/communication/legacy_tvbcp_migration.py`, `Samantha_Agent/scripts/migrate_legacy_tvbcp_to_brainstorm.py`, `Samantha_Agent/tests/test_legacy_tvbcp_migration.py`
+- Commit: `Add legacy TVBCP migration to Brainstorm`
+- Další krok: Nasadit aktuální main; samotnou private migraci spustit až samostatnou přesnou potvrzovací větou.
