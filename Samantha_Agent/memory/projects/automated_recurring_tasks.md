@@ -213,3 +213,25 @@ Přesný auditovaný checkpoint nejdřív pushne přímo na vzdálený `main` a 
 úspěchu posune lokální `main`. Když sova vyhraje závod před kontrolou nebo těsně
 po ní, non-fast-forward zablokuje převzetí a lokální `main` i WIP checkpoint
 zůstanou zachované. Regresní simulace obou pořadí a celá brána 723 testů prošly.
+
+## 2026-07-27 – Pages artifact bez zápisu do `main`
+
+Míla rozhodl odstranit soví workflow jako cizího zapisovatele do vývojového
+`main`. Dnešní audio bylo znovu vygenerováno z nového zadaného textu do obou
+webových kopií; text se zde záměrně neopakuje.
+
+Workflow nyní:
+
+- čte obsah repozitáře přes `contents: read`;
+- nemá `git add`, commit ani push;
+- po vygenerování nahraje pouze veřejnou složku `docs` jako GitHub Pages
+  artifact;
+- artifact nasadí samostatným jobem s `pages: write` a `id-token: write`.
+
+Cílených 14 testů denní rutiny a 8 workflow testů prošlo. Python syntaxe, YAML
+parse a `git diff --check` jsou čisté.
+
+Otevřený nasazovací krok: současné Pages stále používají legacy zdroj
+`main/docs`. Po tomto checkpointu je potřeba samostatně potvrzeně přepnout zdroj
+na GitHub Actions, spustit první ruční workflow a ověřit veřejné audio i
+nezměněný commit `main`.

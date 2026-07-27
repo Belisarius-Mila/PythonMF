@@ -8,10 +8,16 @@ on:
     - cron: "0 1 * * *"
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
 
 jobs:
-  daily-3am:
+  build-pages:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -36,35 +42,21 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         run: python scripts/daily_3am.py
 
-      - name: Commit generated ColorsAndNumbers audio
-        working-directory: .
-        run: |
-          set -euo pipefail
-          shopt -s nullglob
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          files=(
-            "ColorsAndNumbers/web_colors_numbers/app.js"
-            "docs/colors-numbers/app.js"
-            ColorsAndNumbers/web_colors_numbers/owl_*.mp3
-            docs/colors-numbers/owl_*.mp3
-          )
-          existing=()
-          for file in "${files[@]}"; do
-            if [ -e "$file" ]; then
-              existing+=("$file")
-            fi
-          done
-          if [ "${#existing[@]}" -eq 0 ]; then
-            echo "No generated ColorsAndNumbers files exist."
-            exit 0
-          fi
-          git add "${existing[@]}"
-          if git diff --cached --quiet; then
-            echo "No generated ColorsAndNumbers changes to commit."
-          else
-            git commit -m "Update ColorsAndNumbers owl audio"
-            # Záměrně bez pull/rebase/retry: pokud main mezitím změnil jiný
-            # bezpečný writer, non-fast-forward musí atomicky selhat.
-            git push origin HEAD:main
-          fi
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload generated site without changing main
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./docs
+
+  deploy-pages:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build-pages
+    steps:
+      - name: Deploy generated site
+        id: deployment
+        uses: actions/deploy-pages@v4

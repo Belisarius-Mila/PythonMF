@@ -8,6 +8,12 @@ from pathlib import Path
 
 
 SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "daily_3am.py"
+WORKFLOW_PATH = (
+    Path(__file__).resolve().parents[2]
+    / ".github"
+    / "workflows"
+    / "samantha-daily-3am.yml"
+)
 SPEC = importlib.util.spec_from_file_location("daily_3am", SCRIPT_PATH)
 daily_3am = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
@@ -16,6 +22,21 @@ SPEC.loader.exec_module(daily_3am)
 
 
 class Daily3AmTests(unittest.TestCase):
+    def test_github_workflow_deploys_pages_without_writing_main(self):
+        workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("contents: read", workflow)
+        self.assertIn("pages: write", workflow)
+        self.assertIn("id-token: write", workflow)
+        self.assertIn("actions/configure-pages@v5", workflow)
+        self.assertIn("actions/upload-pages-artifact@v4", workflow)
+        self.assertIn("actions/deploy-pages@v4", workflow)
+        self.assertIn("path: ./docs", workflow)
+        self.assertNotIn("contents: write", workflow)
+        self.assertNotIn("git add", workflow)
+        self.assertNotIn("git commit", workflow)
+        self.assertNotIn("git push", workflow)
+
     def test_first_run_marks_day_completed_and_second_run_is_noop(self):
         with tempfile.TemporaryDirectory() as tmp:
             project_dir = Path(tmp)
