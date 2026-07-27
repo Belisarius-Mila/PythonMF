@@ -3008,7 +3008,8 @@ class CockpitTests(unittest.TestCase):
         self.assertNotIn("Za pár sekund stránku obnovím", COCKPIT_HTML)
         self.assertIn("devRunnerPanel", COCKPIT_HTML)
         self.assertIn("Vývojový runner", COCKPIT_HTML)
-        self.assertIn("data-dev-runner=\"cockpit_voice_tests\"", COCKPIT_HTML)
+        self.assertIn("data-dev-runner=\"cockpit_tests\"", COCKPIT_HTML)
+        self.assertNotIn("cockpit_voice_tests", COCKPIT_HTML)
         self.assertIn("data-dev-runner=\"git_diff_check\"", COCKPIT_HTML)
         self.assertIn("/api/dev-runner/run", COCKPIT_HTML)
         self.assertIn("runDevRunnerAction", COCKPIT_HTML)
@@ -3151,7 +3152,8 @@ class CockpitTests(unittest.TestCase):
         ids = {item["id"] for item in result["actions"]}
 
         self.assertTrue(result["ok"])
-        self.assertIn("cockpit_voice_tests", ids)
+        self.assertIn("cockpit_tests", ids)
+        self.assertNotIn("cockpit_voice_tests", ids)
         self.assertIn("git_diff_check", ids)
 
     def test_cockpit_dev_runner_run_action_rejects_unknown_action(self) -> None:

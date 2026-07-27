@@ -33,14 +33,10 @@ class CodexApprovalCockpitContractTests(unittest.TestCase):
         self.assertNotIn('data-safe-readonly="git_status"', source)
         self.assertNotIn('data-safe-readonly="backup_status"', source)
 
-    def test_voice_mode_and_notice_script_no_longer_own_approval_state(self) -> None:
-        voice_source = (PROJECT_ROOT / "app" / "speech" / "adam_voice_mode.py").read_text(encoding="utf-8")
+    def test_notice_script_owns_approval_state_without_voice_mode(self) -> None:
         script_source = (PROJECT_ROOT / "scripts" / "codex_approval_notice.py").read_text(encoding="utf-8")
 
-        self.assertNotIn("CODEX_APPROVAL_REQUEST_PATH", voice_source)
-        self.assertNotIn("def save_codex_approval_request", voice_source)
-        self.assertNotIn("def clear_codex_approval_request", voice_source)
-        self.assertNotIn("def load_codex_approval_request", voice_source)
+        self.assertFalse((PROJECT_ROOT / "app" / "speech" / "adam_voice_mode.py").exists())
         self.assertIn(
             "from app.codex_approval_state import clear_codex_approval_request, save_codex_approval_request",
             script_source,

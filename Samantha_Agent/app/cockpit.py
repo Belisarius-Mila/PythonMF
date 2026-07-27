@@ -8224,17 +8224,17 @@ def cockpit_codex_approval_clear_action(
 
 DEV_RUNNER_ACTIONS: tuple[dict[str, Any], ...] = (
     {
-        "id": "cockpit_voice_tests",
-        "label": "Testy Cockpit + voice",
-        "summary": "Spustí cílené unittesty pro Cockpit, Adam voice mode a terminal bridge.",
-        "command": [str(PROJECT_ROOT / ".venv" / "bin" / "python"), "-m", "unittest", "tests.test_cockpit", "tests.test_adam_voice_mode", "tests.test_terminal_bridge"],
+        "id": "cockpit_tests",
+        "label": "Testy Cockpitu",
+        "summary": "Spustí cílené unittesty pro Cockpit.",
+        "command": [str(PROJECT_ROOT / ".venv" / "bin" / "python"), "-m", "unittest", "tests.test_cockpit"],
         "timeout": 90,
     },
     {
         "id": "cockpit_py_compile",
         "label": "Python syntax",
-        "summary": "Zkontroluje syntaxi hlavních Cockpit/voice Python souborů.",
-        "command": [str(PROJECT_ROOT / ".venv" / "bin" / "python"), "-m", "py_compile", "app/cockpit.py", "app/speech/adam_voice_mode.py", "app/speech/terminal_bridge.py"],
+        "summary": "Zkontroluje syntaxi hlavního Cockpit Python souboru.",
+        "command": [str(PROJECT_ROOT / ".venv" / "bin" / "python"), "-m", "py_compile", "app/cockpit.py"],
         "timeout": 30,
     },
     {
@@ -12362,7 +12362,7 @@ COCKPIT_HTML = """<!doctype html>
             <div class="voice-card-title">Pevné vývojové akce</div>
             <div class="status-line">Spouští jen allowlistované příkazy pro opakované ladění, ne volný shell.</div>
             <div class="voice-card-actions">
-              <button class="secondary" data-dev-runner="cockpit_voice_tests">Testy Cockpit + voice</button>
+              <button class="secondary" data-dev-runner="cockpit_tests">Testy Cockpitu</button>
               <button class="secondary" data-dev-runner="cockpit_py_compile">Python syntax</button>
               <button class="secondary" data-dev-runner="git_diff_check">Diff check</button>
             </div>

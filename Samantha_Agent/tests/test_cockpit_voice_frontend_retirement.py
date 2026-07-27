@@ -298,12 +298,7 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
         self.assertIn("/api/human-adam/transcribe", human_adam_ui)
 
         self.assertFalse((PROJECT_ROOT / "app" / "adam_service.py").exists())
-        voice_reply = (PROJECT_ROOT / "scripts" / "adam_voice_reply.py").read_text(encoding="utf-8")
-        self.assertNotIn("from app.adam_service import", voice_reply)
-        self.assertNotIn('"--request-id"', voice_reply)
-        self.assertNotIn('"--user-text"', voice_reply)
-        self.assertIn('"--processing-started"', voice_reply)
-        self.assertIn('"--latest-command"', voice_reply)
+        self.assertFalse((PROJECT_ROOT / "scripts" / "adam_voice_reply.py").exists())
 
     def test_live_diagnostics_do_not_depend_on_voice_bridge_marker(self) -> None:
         quick_check = (PROJECT_ROOT / "scripts" / "system_quick_check.py").read_text(encoding="utf-8")
@@ -319,14 +314,35 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
                 self.assertNotIn("load_marked_codex_tty", source)
         self.assertNotIn("adam_voice_bridge_status", quick_check)
 
+    def test_cockpit_dev_runner_no_longer_references_voice_bridge_runtime(self) -> None:
+        source = (PROJECT_ROOT / "app" / "cockpit.py").read_text(encoding="utf-8")
+
+        self.assertIn('"id": "cockpit_tests"', source)
+        self.assertIn('data-dev-runner="cockpit_tests"', source)
+        self.assertIn('"tests.test_cockpit"', source)
+        self.assertNotIn("cockpit_voice_tests", source)
+        self.assertNotIn("tests.test_adam_voice_mode", source)
+        self.assertNotIn("tests.test_terminal_bridge", source)
+        self.assertNotIn("app/speech/adam_voice_mode.py", source)
+        self.assertNotIn("app/speech/terminal_bridge.py", source)
+
     def test_dead_voice_bridge_entry_layers_are_absent(self) -> None:
         retired_paths = (
             "app/voice_bridge_coordinator.py",
             "app/voice_bridge_runtime.py",
+            "app/voice_bridge_state.py",
+            "app/speech/adam_voice_mode.py",
+            "app/speech/terminal_bridge.py",
+            "app/speech/voice_inbox.py",
             "tests/test_voice_bridge_coordinator.py",
             "tests/test_voice_bridge_runtime.py",
+            "tests/test_voice_bridge_state.py",
+            "tests/test_adam_voice_mode.py",
+            "tests/test_terminal_bridge.py",
+            "tests/test_voice_inbox.py",
             "scripts/adam_voice_mode.py",
             "scripts/adam_voice_pending.py",
+            "scripts/adam_voice_reply.py",
             "scripts/voice_inbox_triage.py",
             "scripts/adam_bridge_readiness_report.py",
         )

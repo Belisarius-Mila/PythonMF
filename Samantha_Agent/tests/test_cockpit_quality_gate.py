@@ -73,7 +73,7 @@ async def second():
         for relative_path in COMPILE_PATHS:
             self.assertTrue((PROJECT_ROOT / relative_path).is_file(), relative_path)
         self.assertIn("tests.test_cockpit", TEST_MODULES)
-        self.assertIn("tests.test_adam_voice_mode", TEST_MODULES)
+        self.assertNotIn("tests.test_adam_voice_mode", TEST_MODULES)
         self.assertIn("tests.test_codex_approval_cockpit_contract", TEST_MODULES)
         self.assertIn("tests.test_codex_approval_state", TEST_MODULES)
         self.assertIn("tests.test_cockpit_voice_frontend_retirement", TEST_MODULES)
@@ -219,9 +219,9 @@ async def second():
     def test_architecture_baselines_are_informational_and_reported(self) -> None:
         messages = architecture_messages()
 
-        self.assertEqual(len(ARCHITECTURE_BASELINES), 2)
+        self.assertEqual(len(ARCHITECTURE_BASELINES), 1)
         self.assertTrue(any("app/cockpit.py" in message for message in messages))
-        self.assertTrue(any("app/speech/adam_voice_mode.py" in message for message in messages))
+        self.assertFalse(any("app/speech/adam_voice_mode.py" in message for message in messages))
 
     def test_orphaned_human_adam_deploy_module_is_absent(self) -> None:
         legacy_source = "app/communication/human_adam_deploy.py"
@@ -236,10 +236,19 @@ async def second():
         retired_sources = (
             "app/voice_bridge_coordinator.py",
             "app/voice_bridge_runtime.py",
+            "app/voice_bridge_state.py",
+            "app/speech/adam_voice_mode.py",
+            "app/speech/terminal_bridge.py",
+            "app/speech/voice_inbox.py",
+            "scripts/adam_voice_reply.py",
         )
         retired_tests = (
             "tests.test_voice_bridge_coordinator",
             "tests.test_voice_bridge_runtime",
+            "tests.test_voice_bridge_state",
+            "tests.test_adam_voice_mode",
+            "tests.test_terminal_bridge",
+            "tests.test_voice_inbox",
         )
 
         for retired_source in retired_sources:

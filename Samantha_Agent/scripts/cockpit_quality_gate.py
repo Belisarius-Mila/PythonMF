@@ -30,7 +30,6 @@ COMPILE_PATHS = (
     "app/cockpit_code_stamp.py",
     "app/cockpit_status_service.py",
     "app/codex_approval_state.py",
-    "app/voice_bridge_state.py",
     "app/tvbcp.py",
     "app/autosave_service.py",
     "app/codex_appserver.py",
@@ -101,8 +100,6 @@ COMPILE_PATHS = (
     "app/urgent_reminders.py",
     "app/reminders/store.py",
     "app/reminders/query_tools.py",
-    "app/speech/adam_voice_mode.py",
-    "app/speech/terminal_bridge.py",
     "scripts/cockpit_server.py",
     "scripts/codex_approval_notice.py",
     "scripts/open_cockpit.py",
@@ -169,7 +166,6 @@ TEST_MODULES = (
     "tests.test_workstream_live_status",
     "tests.test_human_adam_takeover",
     "tests.test_local_appserver_runtime",
-    "tests.test_voice_bridge_state",
     "tests.test_tvbcp",
     "tests.test_file_persistence",
     "tests.test_family_calendar",
@@ -215,8 +211,6 @@ TEST_MODULES = (
     "tests.test_cockpit_voice_frontend_retirement",
     "tests.test_cockpit_http_security",
     "tests.test_safety_quick_checks",
-    "tests.test_terminal_bridge",
-    "tests.test_adam_voice_mode",
     "tests.test_speech_transcribe",
     "tests.test_email_outbound_tools",
     "tests.test_email_work_outbox",
@@ -246,7 +240,6 @@ class SourceMetrics:
 
 ARCHITECTURE_BASELINES = {
     "app/cockpit.py": SourceMetrics(lines=22_465, functions=332, classes=2),
-    "app/speech/adam_voice_mode.py": SourceMetrics(lines=1_105, functions=39, classes=1),
 }
 
 
