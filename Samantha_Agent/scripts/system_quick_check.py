@@ -13,7 +13,6 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.backup.activity_state import backup_activity_status
-from app.cockpit import adam_voice_bridge_status
 from scripts.autosave_status import autosave_status
 from scripts.cockpit_smoke_check import run_smoke_check
 
@@ -59,12 +58,6 @@ def cockpit_line(base_url: str, timeout: float) -> CheckLine:
     if failed:
         return CheckLine("cockpit", False, "; ".join(f"{item.name}: {item.message}" for item in failed))
     return CheckLine("cockpit", True, f"{base_url} smoke OK")
-
-
-def bridge_line() -> CheckLine:
-    status = adam_voice_bridge_status()
-    ok = status.get("status") == "ok"
-    return CheckLine("adam_bridge", ok, str(status.get("message", "")))
 
 
 def autosave_line(path: Path | None = None, warn_minutes: int = DEFAULT_AUTOSAVE_WARN_MINUTES) -> CheckLine:
@@ -121,7 +114,6 @@ def main() -> int:
         git_status_line(),
         backup_line(),
         cockpit_line(args.base_url, args.timeout),
-        bridge_line(),
         autosave_line(warn_minutes=args.autosave_warn_minutes),
     ]
     print(format_quick_check(lines))

@@ -13,12 +13,10 @@ from pathlib import Path
 from typing import Any, Callable
 
 from app.speech.terminal_bridge import (
-    CURRENT_CODEX_TTY_PATH,
     deliver_prompt_to_terminal,
     deliver_prompt_to_tty,
     deliver_prompt_to_vscode,
     discover_codex_ttys,
-    load_marked_codex_tty,
     normalize_tty,
 )
 
@@ -247,7 +245,6 @@ def adam_service_status(
     screen_runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
     codex_tty_discoverer: Callable[[], list[str]] = discover_codex_ttys,
     managed_codex_tty_discoverer: Callable[[], list[str]] = discover_managed_adam_codex_ttys,
-    marker_path: Path = CURRENT_CODEX_TTY_PATH,
     requests_dir: Path = ADAM_REQUESTS_DIR,
 ) -> dict[str, Any]:
     running = screen_session_exists(session_name=session_name, runner=screen_runner)
@@ -259,7 +256,6 @@ def adam_service_status(
         managed_codex_ttys = managed_codex_tty_discoverer()
     except Exception:
         managed_codex_ttys = []
-    marked_tty = load_marked_codex_tty(marker_path)
     pending = 0
     answered = 0
     if requests_dir.exists():
@@ -287,7 +283,6 @@ def adam_service_status(
         "state": state,
         "message": message,
         "session_name": session_name,
-        "marked_tty": marked_tty,
         "codex_ttys": codex_ttys,
         "managed_codex_ttys": managed_codex_ttys,
         "pending_count": pending,

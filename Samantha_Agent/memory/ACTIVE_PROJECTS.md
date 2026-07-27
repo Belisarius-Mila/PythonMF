@@ -42,6 +42,19 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-27 08:25 CEST: Priorita 1, Human–Adam / fáze 9.3e a servisní
+  převzetí po sovím commitu. Živé diagnostiky, přehled Codex relací a stav
+  starého Adam fallbacku už nezávisí na Voice Bridge markeru. Ochrana Janička
+  relací používá vlastní registry spravovaných relací a při jejich
+  nedostupnosti selže uzavřeně. Runtime VoiceBridge modul a private data
+  zůstávají zachované. Automatická integrace správně zastavila devítisouborový
+  WIP, když GitHub postoupil sovím commitem `c10dfa0`; cesty se nepřekrývaly.
+  Servisní převzetí vytvořilo obnovitelný WIP checkpoint, fast-forwardnulo
+  sovu a změny začlenilo nad ni. Před integrací bylo nalezeno a opraveno sedm
+  regresí přímého runtime testu. Cílených 313 a úplných 1254 testů prošlo.
+  Zbývá doplnit checkpointový commit, push, zarovnat profily a samostatně
+  potvrzeně nasadit nový `main`. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-27 01:21 CEST: Priorita 1, Human–Adam / přesné ověření shody
   `Git/main` a běžícího Cockpitu. Dosavadní checkpoint `28885b957d34` je
   zarovnaný s GitHubem, serverově nasazený a Human–Adam je připojený. Zavádějící

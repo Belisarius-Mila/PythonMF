@@ -120,13 +120,11 @@ class AdamServiceTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertEqual(result["status"], "confirmation_required")
 
-    def test_adam_service_status_reports_running_marker_and_counts(self) -> None:
+    def test_adam_service_status_reports_managed_session_and_counts(self) -> None:
         def fake_runner(args, **kwargs):
             return subprocess.CompletedProcess(args=args, returncode=0, stdout="\t123.samantha_adam\t(Detached)\n", stderr="")
 
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            marker = Path(temp_dir) / "current_codex_tty.json"
-            marker.write_text('{"tty": "ttys005"}', encoding="utf-8")
             requests = Path(temp_dir) / "requests"
             requests.mkdir()
             (requests / "one.json").write_text('{"status": "queued"}', encoding="utf-8")
@@ -136,13 +134,12 @@ class AdamServiceTests(unittest.TestCase):
                 screen_runner=fake_runner,
                 codex_tty_discoverer=lambda: ["ttys005"],
                 managed_codex_tty_discoverer=lambda: ["ttys005"],
-                marker_path=marker,
                 requests_dir=requests,
             )
 
         self.assertTrue(status["running"])
         self.assertEqual(status["state"], "running")
-        self.assertEqual(status["marked_tty"], "ttys005")
+        self.assertNotIn("marked_tty", status)
         self.assertEqual(status["managed_codex_ttys"], ["ttys005"])
         self.assertEqual(status["pending_count"], 1)
         self.assertEqual(status["answered_count"], 1)
@@ -152,14 +149,10 @@ class AdamServiceTests(unittest.TestCase):
             return subprocess.CompletedProcess(args=args, returncode=0, stdout="\t123.samantha_adam\t(Detached)\n", stderr="")
 
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            marker = Path(temp_dir) / "current_codex_tty.json"
-            marker.write_text('{"tty": "ttys005"}', encoding="utf-8")
-
             status = adam_service_status(
                 screen_runner=fake_runner,
                 codex_tty_discoverer=lambda: ["ttys005"],
                 managed_codex_tty_discoverer=lambda: [],
-                marker_path=marker,
                 requests_dir=Path(temp_dir) / "requests",
             )
 

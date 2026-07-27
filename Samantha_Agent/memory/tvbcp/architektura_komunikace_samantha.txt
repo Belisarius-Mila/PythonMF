@@ -1,47 +1,54 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-27 01:21 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-27 08:25 CEST
 
 ### Hotovo
-- Předchozí `main` (`28885b957d34`) je zarovnaný s GitHubem, serverově nasazený
-  a Human–Adam je připojený.
-- Redigovaný status nově vydává pouze bezpečný 12znakový `source_head_short`;
-  celý Git hash ani private metadata nezveřejňuje.
-- Stavový banner porovnává tento bezpečný otisk s deployment receipt a při shodě
-  jednoznačně potvrdí společný commit `Git/main` a běžícího Cockpitu.
-- Neplatný nebo chybějící otisk zůstává fail-closed a nesmí být vydáván za shodu.
+- Fáze 9.3e odstranila závislost živých diagnostik, přehledu Codex relací a
+  starého Adam fallbacku na Voice Bridge markeru.
+- Ochrana Janička relací používá vlastní registry spravovaných relací; pokud
+  je nelze ověřit, report i potvrzený cleanup selžou uzavřeně.
+- Runtime VoiceBridge modul, jeho specializované testy a private data zůstávají
+  zachované pro samostatnou pozdější fázi.
+- Automatická integrace správně zastavila WIP po vzdáleném sovím commitu.
+  Servisní převzetí doložilo nulový překryv cest, zachovalo lokální checkpoint,
+  fast-forwardnulo sovu a začlenilo WIP nad nový základ.
 
 ### Otevřeno
-- Tento nový checkpoint ještě nemá vlastní serverový důkaz nasazení.
-- Zbývá jediné potvrzené nasazení a vizuální kontrola, že banner po restartu
-  ukazuje shodu a už nehlásí `aktuální Git/main nelze ověřit`.
+- Dokončit checkpointový commit, push a zarovnání obou profilových workspaces.
+- Nový checkpoint ještě nemá vlastní serverový důkaz nasazení.
+- Po samostatně potvrzeném nasazení živě ověřit Janička cleanup audit,
+  `codex_session_report.py` a obecný rychlý systémový přehled.
 
 ### Rizika
-- Zkrácený otisk slouží pouze k provoznímu porovnání; autoritativní důkaz
-  nasazení nadále drží serverová receipt.
-- Chybějící nebo neplatný otisk záměrně ponechá stav jako neověřený.
+- Automatická integrace při posunu `main` zůstává správně servisním rozhodnutím;
+  bez kontroly překryvu se nesmí sama sloučit.
+- VoiceBridge marker a private soubory stále existují pro zbývající specializovaný
+  runtime; tato fáze je nemaže ani nemigruje.
 
 ### Další krok
-- Provést read-only audit nového `main`, jednou jej potvrzeně nasadit do
-  Cockpitu a vizuálně ověřit zelený banner se společným krátkým commitem.
+- Pushnout otestovaný checkpoint, zarovnat profily a potom samostatně
+  potvrzeně nasadit aktuální čistý `main` do Cockpitu.
 
 ### Rozhodnutí
-- Veřejný status nebude kvůli banneru rozšiřován o celý Git hash.
-- Jediným novým kontraktem je allowlistovaný 12znakový otisk; při neplatném
-  formátu musí porovnání selhat uzavřeně.
+- Obecné diagnostiky a Janička cleanup nesmějí používat Voice Bridge marker
+  jako autoritu vlastnictví relace.
+- Nedostupný registr spravovaných Janička relací blokuje cleanup; bezpečnost
+  se nesmí nahrazovat odhadem z markeru.
 
 ### Navrhované další kroky
-- Po živém ověření se vrátit k fázi 9.3e oddělení ochrany relací Janičky a
-  diagnostických skriptů od Voice Bridge markeru.
-- Samostatné Voice Bridge moduly a private stav řešit až v pozdější auditované fázi 9.4.
+- Po živém ověření připravit read-only audit fáze 9.4 samostatných VoiceBridge
+  modulů, call-sites a private stavu.
+- Nic z private VoiceBridge stavu nemazat ani nemigrovat bez nového rozhodnutí.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (83 úzkých, 338 širších a 1252 úplných testů).
+- Změna je otestovaná (313 cílených a 1254 úplných testů).
 - Python, oba JavaScripty, shell, whitespace a Git safety kontroly prošly.
-- Git před checkpointem: `main == origin/main` na `28885b957d34`.
-- Poslední serverově potvrzené nasazení: `28885b957d34` · 1251 testů · smoke 5/5.
-- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+- Git před paměťovým doplněním: lokální `main` na `0c29352a5aeb`, vzdálený
+  `origin/main` na sovím `c10dfa010aba`; lokální checkpoint čeká na push.
+- Obnovitelný izolovaný WIP checkpoint: `3d064dc5beb7`.
+- Poslední serverově potvrzené nasazení: `1f35f9668581` · 1252 testů · smoke 5/5.
+- Runtime je dosažitelný a Human–Adam připojený; nový checkpoint dosud neběží.
 - Tento snapshot je součástí jediné potvrzené commit/push operace a sám nepotvrzuje pozdější nasazení.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -3337,3 +3344,36 @@ Technický důkaz:
 - Cílených 83, širších 338 a úplných 1252 testů prošlo.
 - Plná Cockpit Quality Gate doběhla za 326,1 s; syntaxe, JavaScript, shell,
   whitespace a Git safety jsou zelené.
+
+### 2026-07-27 08:25 CEST – Fáze 9.3e a servisní převzetí po sovím commitu
+
+Hotovo:
+- Živé diagnostiky, přehled Codex relací a starý Adam fallback už nečtou Voice
+  Bridge marker jako obecnou provozní autoritu.
+- Janička orphan audit a cleanup používají vlastní registry spravovaných relací
+  a při jejich nedostupnosti selžou uzavřeně.
+- Automatická integrace zachovala devítisouborový WIP, když GitHub během tahu
+  postoupil sovím commitem. Servisní kontrola potvrdila nulový překryv cest,
+  vytvořila obnovitelný checkpoint a začlenila změny nad sovu.
+- Před checkpointem bylo odhaleno a opraveno sedm regresí testovacího přechodu
+  z odstraněného Cockpit wrapperu na přímý runtime modul.
+
+Rozhodnutí:
+- Voice Bridge marker není autoritou vlastnictví Janička ani obecných Codex
+  relací.
+- Posun `main` během odloženého WIP se dál řeší fail-closed a servisně podle
+  přesného překryvu cest; tato kontrola se neobchází automatickým merge/rebase.
+
+Další krok:
+- Doplnit checkpointový commit, push a zarovnání profilů; potom samostatně
+  potvrzeně nasadit čistý `main` do Cockpitu.
+
+Navrhované další kroky:
+- Po živém ověření připravit read-only audit fáze 9.4 samostatných VoiceBridge
+  modulů, call-sites a private stavu.
+- Nic z private VoiceBridge stavu nemazat ani nemigrovat bez nového rozhodnutí.
+
+Technický důkaz:
+- Cílená sada prošla 313 testy.
+- Plná Cockpit Quality Gate prošla 1254 testy za 300,1 s.
+- Soví commit měnil jen čtyři cesty mimo Samantha Agent a s WIP neměl překryv.

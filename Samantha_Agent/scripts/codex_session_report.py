@@ -11,7 +11,6 @@ from typing import Any, Callable
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-MARKER_PATH = PROJECT_ROOT / "data/private/voice_inbox/current_codex_tty.json"
 LABELS_PATH = PROJECT_ROOT / "data/private/voice_inbox/codex_session_labels.json"
 PS_COMMAND = ["ps", "-axo", "pid=,ppid=,tty=,etime=,command="]
 DEFAULT_STALE_HOURS = 36.0
@@ -138,14 +137,6 @@ def current_tty() -> str:
         return ""
 
 
-def load_marked_tty(path: Path = MARKER_PATH) -> str:
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return ""
-    return normalize_tty(str(payload.get("tty") or ""))
-
-
 def load_labels(path: Path = LABELS_PATH) -> dict[str, dict[str, Any]]:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
@@ -185,7 +176,6 @@ def discover_sessions(
     rows: list[ProcessRow],
     *,
     current_tty_value: str = "",
-    marked_tty: str = "",
     labels: dict[str, dict[str, Any]] | None = None,
     stale_after_hours: float = DEFAULT_STALE_HOURS,
 ) -> list[CodexSession]:
@@ -203,7 +193,6 @@ def discover_sessions(
     sessions: list[CodexSession] = []
     stale_after_seconds = int(stale_after_hours * 3600)
     current_tty_value = normalize_tty(current_tty_value)
-    marked_tty = normalize_tty(marked_tty)
     for tty, tty_rows in sorted(grouped.items()):
         oldest = max(row.elapsed_seconds for row in tty_rows)
         pids = tuple(sorted(row.pid for row in tty_rows))
@@ -213,8 +202,6 @@ def discover_sessions(
         protected = bool(configured.get("protected"))
         if tty == current_tty_value:
             role_parts.append("tato terminálová relace")
-        if tty == marked_tty:
-            role_parts.append("hlasový bridge")
         if tty in ssh:
             role_parts.append("SSH")
         if protected:
@@ -223,9 +210,9 @@ def discover_sessions(
 
         candidate = False
         reason = ""
-        if tty != current_tty_value and tty != marked_tty and not protected and oldest >= stale_after_seconds:
+        if tty != current_tty_value and not protected and oldest >= stale_after_seconds:
             candidate = True
-            reason = f"běží déle než {format_age(stale_after_seconds)} a není aktuální ani bridge"
+            reason = f"běží déle než {format_age(stale_after_seconds)} a není aktuální ani chráněná"
 
         sessions.append(
             CodexSession(
@@ -246,12 +233,10 @@ def build_report(
     sessions: list[CodexSession],
     *,
     current_tty_value: str,
-    marked_tty: str,
 ) -> str:
     lines = ["Codex relace:"]
     current_tty_value = current_tty_value or "nezjištěno"
-    marked_tty = marked_tty or "nezjištěno"
-    lines.append(f"- aktuální terminál: {current_tty_value}; hlasový bridge: {marked_tty}")
+    lines.append(f"- aktuální terminál: {current_tty_value}")
     if not sessions:
         lines.append("- žádná další Codex relace nebyla nalezena")
         return "\n".join(lines)
@@ -279,18 +264,16 @@ def main() -> int:
     args = parser.parse_args()
 
     current = current_tty()
-    marked = load_marked_tty()
     labels = load_labels()
     sessions = discover_sessions(
         run_ps(),
         current_tty_value=current,
-        marked_tty=marked,
         labels=labels,
         stale_after_hours=args.stale_hours,
     )
     if not args.include_current:
         sessions = [session for session in sessions if session.tty != current]
-    print(build_report(sessions, current_tty_value=current, marked_tty=marked))
+    print(build_report(sessions, current_tty_value=current))
     return 0
 
 

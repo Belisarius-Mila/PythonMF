@@ -19,7 +19,6 @@ from app.cockpit import (
     COCKPIT_POST_ACTIONS,
     EMAIL_PROCESSING_HTML,
     action_queue_status,
-    adam_voice_bridge_status,
     accept_document_classification_suggestion_action,
     cancel_payment_reminder_action,
     cockpit_live_status,
@@ -125,6 +124,12 @@ from app.cockpit import (
 )
 from app.email.archive_models import EmailArchiveSource
 from app.email.models import EmailAttachmentMeta, EmailHeader, EmailMessage
+from app.voice_bridge_runtime import voice_bridge_status as _voice_bridge_status
+
+
+def adam_voice_bridge_status(**kwargs):
+    kwargs.setdefault("orphaned_janicka_reporter", None)
+    return _voice_bridge_status(**kwargs)
 
 
 class CockpitTests(unittest.TestCase):
@@ -5792,6 +5797,31 @@ Dalsi krok:
         self.assertEqual(result["orphaned_janicka_count"], 1)
         self.assertIn("staré Janička relace mimo správu: ttys003", result["message"])
 
+    def test_janicka_orphan_report_fails_closed_when_managed_labels_are_unavailable(self) -> None:
+        def fake_runner(*args, **kwargs):
+            stdout = (
+                "200 20 ttys003 node node /usr/local/bin/codex -C /repo "
+                "Jsi lehká Samantha/Adam relace pro okno Janička v Samantha Cockpitu. "
+                "jen čekej na textové dotazy z Janičky.\n"
+            )
+            return subprocess.CompletedProcess(args=args[0], returncode=0, stdout=stdout, stderr="")
+
+        report = janicka_orphaned_codex_session_report(
+            runner=fake_runner,
+            managed_codex_tty_labeler=lambda: (_ for _ in ()).throw(RuntimeError("screen audit failed")),
+        )
+        cleanup = terminate_orphaned_janicka_sessions_action(
+            {"confirmed": True},
+            runner=fake_runner,
+            managed_codex_tty_labeler=lambda: (_ for _ in ()).throw(RuntimeError("screen audit failed")),
+        )
+
+        self.assertFalse(report["ok"])
+        self.assertEqual(report["status"], "managed_session_check_failed")
+        self.assertEqual(report["orphaned_sessions"], [])
+        self.assertFalse(cleanup["ok"])
+        self.assertEqual(cleanup["status"], "managed_session_check_failed")
+
     def test_terminate_orphaned_janicka_sessions_requires_confirmation_and_kills_only_orphan_root(self) -> None:
         def fake_runner(*args, **kwargs):
             stdout = (
@@ -5804,25 +5834,19 @@ Dalsi krok:
             )
             return subprocess.CompletedProcess(args=args[0], returncode=0, stdout=stdout, stderr="")
 
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            marker = Path(temp_dir) / "current_codex_tty.json"
-            marker.write_text('{"tty": "ttys000"}', encoding="utf-8")
-            killed: list[tuple[int, int]] = []
-
-            preview = terminate_orphaned_janicka_sessions_action(
-                {"confirmed": False},
-                runner=fake_runner,
-                managed_codex_tty_labeler=lambda: {"ttys004": "Janička light"},
-                marker_path=marker,
-                killer=lambda pid, sig: killed.append((pid, sig)),
-            )
-            result = terminate_orphaned_janicka_sessions_action(
-                {"confirmed": True},
-                runner=fake_runner,
-                managed_codex_tty_labeler=lambda: {"ttys004": "Janička light"},
-                marker_path=marker,
-                killer=lambda pid, sig: killed.append((pid, sig)),
-            )
+        killed: list[tuple[int, int]] = []
+        preview = terminate_orphaned_janicka_sessions_action(
+            {"confirmed": False},
+            runner=fake_runner,
+            managed_codex_tty_labeler=lambda: {"ttys004": "Janička light"},
+            killer=lambda pid, sig: killed.append((pid, sig)),
+        )
+        result = terminate_orphaned_janicka_sessions_action(
+            {"confirmed": True},
+            runner=fake_runner,
+            managed_codex_tty_labeler=lambda: {"ttys004": "Janička light"},
+            killer=lambda pid, sig: killed.append((pid, sig)),
+        )
 
         self.assertEqual(preview["status"], "confirmation_required")
         self.assertEqual(preview["stale_ttys"], ["ttys003"])
@@ -5830,6 +5854,7 @@ Dalsi krok:
         self.assertTrue(result["ok"])
         self.assertEqual(result["status"], "orphaned_janicka_sessions_terminated")
         self.assertEqual(result["killed_pids"], [200])
+        self.assertEqual(result["protected_ttys"], ["ttys004"])
         self.assertEqual(killed, [(200, signal.SIGTERM)])
 
     def test_janicka_cookbook_page_renders_markdown_safely(self) -> None:

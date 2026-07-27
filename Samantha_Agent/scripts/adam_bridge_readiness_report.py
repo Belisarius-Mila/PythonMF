@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only report of Adam Voice terminal bridge readiness."""
+"""Compatibility entry point for the read-only Codex session report."""
 
 from __future__ import annotations
 
@@ -9,28 +9,7 @@ import sys
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.cockpit import adam_voice_bridge_status
-
-
-def main() -> int:
-    status = adam_voice_bridge_status()
-    warnings = status.get("warnings") or []
-    print("Adam Voice bridge readiness:")
-    print(f"- stav: {status.get('status')}")
-    print(f"- cíl markeru: {status.get('marked_tty') or 'nezjištěno'}")
-    if status.get("marker_pid_fallback") and not status.get("codex_ttys"):
-        print(f"- aktivní Codex TTY: neověřeno přes ps; používá se marker {status.get('effective_tty') or 'nezjištěno'}")
-    else:
-        print(f"- aktivní Codex TTY: {', '.join(status.get('codex_ttys') or []) or 'žádné'}")
-    print(f"- screen: {status.get('screen_status')} ({status.get('screen_message')})")
-    if warnings:
-        print("- varování:")
-        for warning in warnings:
-            print(f"  - {warning}")
-    else:
-        print("- varování: žádné")
-    print(f"- shrnutí: {status.get('message')}")
-    return 0
+from scripts.codex_session_report import main
 
 
 if __name__ == "__main__":

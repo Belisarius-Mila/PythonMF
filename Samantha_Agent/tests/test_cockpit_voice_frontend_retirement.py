@@ -214,10 +214,13 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
             "ADAM_VOICE_MODE_SCRIPT",
             "ADAM_VOICE_MODE_LOG_FILE",
             "VOICE_COMMAND_INBOX_DIR",
-        )
-        preserved_markers = (
             "voice_bridge_status as build_voice_bridge_status",
             "def adam_voice_bridge_status(",
+            "CURRENT_CODEX_TTY_PATH",
+            "protected_by_voice_marker",
+            "Mílův hlasový bridge:",
+        )
+        preserved_markers = (
             "def janicka_orphaned_codex_session_report(",
             "def terminate_orphaned_janicka_sessions_action(",
             "def janicka_latest_codex_reply_action(",
@@ -233,6 +236,26 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
         for marker in preserved_markers:
             with self.subTest(preserved=marker):
                 self.assertIn(marker, source)
+
+    def test_live_diagnostics_do_not_depend_on_voice_bridge_marker(self) -> None:
+        quick_check = (PROJECT_ROOT / "scripts" / "system_quick_check.py").read_text(encoding="utf-8")
+        session_report = (PROJECT_ROOT / "scripts" / "codex_session_report.py").read_text(encoding="utf-8")
+        readiness = (PROJECT_ROOT / "scripts" / "adam_bridge_readiness_report.py").read_text(encoding="utf-8")
+        adam_service = (PROJECT_ROOT / "app" / "adam_service.py").read_text(encoding="utf-8")
+
+        for name, source in (
+            ("quick_check", quick_check),
+            ("session_report", session_report),
+            ("readiness", readiness),
+            ("adam_service", adam_service),
+        ):
+            with self.subTest(source=name):
+                self.assertNotIn("current_codex_tty", source)
+                self.assertNotIn("CURRENT_CODEX_TTY_PATH", source)
+                self.assertNotIn("load_marked_codex_tty", source)
+        self.assertNotIn("adam_voice_bridge_status", quick_check)
+        self.assertIn("from scripts.codex_session_report import main", readiness)
+        self.assertIn('"status": "managed_session_check_failed"', (PROJECT_ROOT / "app" / "cockpit.py").read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

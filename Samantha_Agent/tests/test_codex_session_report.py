@@ -21,7 +21,7 @@ class CodexSessionReportTests(unittest.TestCase):
         self.assertEqual(parse_etime("01:09:32"), 3600 + 9 * 60 + 32)
         self.assertEqual(parse_etime("22:45"), 22 * 60 + 45)
 
-    def test_discover_sessions_marks_only_stale_non_current_non_bridge_as_candidate(self) -> None:
+    def test_discover_sessions_marks_only_stale_non_current_unprotected_as_candidate(self) -> None:
         rows = parse_process_rows(
             "\n".join(
                 [
@@ -42,7 +42,6 @@ class CodexSessionReportTests(unittest.TestCase):
         sessions = discover_sessions(
             rows,
             current_tty_value="ttys005",
-            marked_tty="ttys005",
             labels={"ttys004": {"label": "USA", "protected": True}},
             stale_after_hours=36,
         )
@@ -54,18 +53,19 @@ class CodexSessionReportTests(unittest.TestCase):
         self.assertFalse(by_tty["ttys004"].candidate)
         self.assertIn("chráněná", by_tty["ttys004"].role)
         self.assertFalse(by_tty["ttys005"].candidate)
-        self.assertIn("hlasový bridge", by_tty["ttys005"].role)
+        self.assertIn("tato terminálová relace", by_tty["ttys005"].role)
 
     def test_build_report_includes_exact_shutdown_instruction(self) -> None:
         rows = parse_process_rows(
             "23045 22995 ttys001 2-09:05:05 node /usr/local/bin/codex -C /repo .\n"
             "23106 23045 ttys001 2-09:05:05 /vendor/bin/codex -C /repo .\n"
         )
-        sessions = discover_sessions(rows, current_tty_value="ttys005", marked_tty="ttys005", stale_after_hours=36)
+        sessions = discover_sessions(rows, current_tty_value="ttys005", stale_after_hours=36)
 
-        report = build_report(sessions, current_tty_value="ttys005", marked_tty="ttys005")
+        report = build_report(sessions, current_tty_value="ttys005")
 
         self.assertIn("ttys001", report)
+        self.assertNotIn("hlasový bridge", report)
         self.assertIn("Kandidáti na ukončení", report)
         self.assertIn("Ukonči relaci ttysXXX", report)
 

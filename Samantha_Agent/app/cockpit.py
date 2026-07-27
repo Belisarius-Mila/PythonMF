@@ -268,12 +268,8 @@ from app.speech.adam_voice_mode import (
     load_last_adam_response,
 )
 from app.speech.terminal_bridge import (
-    CURRENT_CODEX_TTY_PATH,
     discover_codex_ttys,
     normalize_tty,
-)
-from app.voice_bridge_runtime import (
-    voice_bridge_status as build_voice_bridge_status,
 )
 from app.tvbcp import tvbcp_status
 from scripts.autosave_status import autosave_status as read_autosave_runtime_status
@@ -4555,25 +4551,6 @@ def cockpit_live_status(
     )
 
 
-def adam_voice_bridge_status(
-    *,
-    marker_path: Path = CURRENT_CODEX_TTY_PATH,
-    codex_tty_discoverer: Callable[[], list[str]] = discover_codex_ttys,
-    managed_codex_tty_labeler: Callable[[], dict[str, str]] | None = None,
-    orphaned_janicka_reporter: Callable[[], dict[str, Any]] | None = None,
-    screen_runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
-    marker_pid_checker: Callable[[int], bool] | None = None,
-    expected_codex_session_limit: int = 1,
-) -> dict[str, Any]:
-    return build_voice_bridge_status(
-        marker_path=marker_path,
-        codex_tty_discoverer=codex_tty_discoverer,
-        managed_codex_tty_labeler=managed_codex_tty_labeler or managed_codex_session_tty_labels,
-        orphaned_janicka_reporter=orphaned_janicka_reporter,
-        screen_runner=screen_runner,
-        marker_pid_checker=marker_pid_checker,
-        expected_codex_session_limit=expected_codex_session_limit,
-    )
 def managed_codex_session_tty_labels() -> dict[str, str]:
     labels: dict[str, str] = {}
     for session_name, label in (
@@ -8843,8 +8820,16 @@ def janicka_orphaned_codex_session_report(
     sessions = discover_codex_process_sessions(runner=runner)
     try:
         managed_labels = managed_codex_tty_labeler() if managed_codex_tty_labeler else managed_codex_session_tty_labels()
-    except Exception:
-        managed_labels = {}
+    except Exception as exc:
+        return {
+            "ok": False,
+            "status": "managed_session_check_failed",
+            "message": f"Spravované Janička relace se nepodařilo bezpečně ověřit: {exc}",
+            "orphaned_ttys": [],
+            "orphaned_count": 0,
+            "orphaned_sessions": [],
+            "managed_codex_ttys": [],
+        }
     managed_ttys = {normalize_tty(str(tty)) for tty in managed_labels if normalize_tty(str(tty))}
     orphaned: list[dict[str, Any]] = []
     for session in sessions:
@@ -8916,7 +8901,6 @@ def terminate_orphaned_janicka_sessions_action(
     *,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
     managed_codex_tty_labeler: Callable[[], dict[str, str]] | None = None,
-    marker_path: Path = CURRENT_CODEX_TTY_PATH,
     killer: Callable[[int, int], None] = os.kill,
 ) -> dict[str, Any]:
     confirmed = bool(payload.get("confirmed"))
@@ -8924,6 +8908,8 @@ def terminate_orphaned_janicka_sessions_action(
         runner=runner,
         managed_codex_tty_labeler=managed_codex_tty_labeler,
     )
+    if not report.get("ok", True):
+        return report
     orphaned_sessions = list(report.get("orphaned_sessions", []))
     if not orphaned_sessions:
         return {
@@ -8933,36 +8919,9 @@ def terminate_orphaned_janicka_sessions_action(
             "message": "Žádné staré Janička relace mimo správu k ukončení.",
         }
 
-    protected_ttys = set(report.get("managed_codex_ttys", []))
-    try:
-        marker = json.loads(marker_path.read_text(encoding="utf-8"))
-        marked_tty = normalize_tty(str(marker.get("tty") or ""))
-        if marked_tty:
-            protected_ttys.add(marked_tty)
-    except (OSError, json.JSONDecodeError):
-        marked_tty = ""
-
-    killable_sessions = [session for session in orphaned_sessions if session.get("tty") not in protected_ttys]
-    protected_orphaned_ttys = [
-        str(session.get("tty") or "")
-        for session in orphaned_sessions
-        if session.get("tty") in protected_ttys
-    ]
-    if protected_orphaned_ttys and not killable_sessions:
-        return {
-            **report,
-            "ok": False,
-            "status": "protected_by_voice_marker",
-            "message": (
-                "Staré Janička relace jsou teď chráněné voice markerem. "
-                "Nejdřív nastav VoiceBridge na hlavního Adama, potom cleanup zopakuj."
-            ),
-            "protected_ttys": sorted(protected_ttys),
-            "protected_orphaned_ttys": protected_orphaned_ttys,
-        }
-
-    stale_ttys = [str(session.get("tty") or "") for session in killable_sessions]
-    root_pids = sorted({int(pid) for session in killable_sessions for pid in session.get("root_pids", [])})
+    protected_ttys = sorted(set(report.get("managed_codex_ttys", [])))
+    stale_ttys = [str(session.get("tty") or "") for session in orphaned_sessions]
+    root_pids = sorted({int(pid) for session in orphaned_sessions for pid in session.get("root_pids", [])})
     if not confirmed:
         return {
             **report,
@@ -8971,8 +8930,7 @@ def terminate_orphaned_janicka_sessions_action(
             "message": f"K ukončení jsou připravené staré Janička relace: {', '.join(stale_ttys)}.",
             "stale_ttys": stale_ttys,
             "root_pids": root_pids,
-            "protected_ttys": sorted(protected_ttys),
-            "protected_orphaned_ttys": protected_orphaned_ttys,
+            "protected_ttys": protected_ttys,
         }
 
     killed: list[int] = []
@@ -8992,7 +8950,7 @@ def terminate_orphaned_janicka_sessions_action(
             "stale_ttys": stale_ttys,
             "killed_pids": killed,
             "errors": errors,
-            "protected_ttys": sorted(protected_ttys),
+            "protected_ttys": protected_ttys,
         }
     return {
         **report,
@@ -9001,8 +8959,7 @@ def terminate_orphaned_janicka_sessions_action(
         "message": f"Ukončil jsem staré Janička relace mimo správu: {', '.join(stale_ttys)}.",
         "stale_ttys": stale_ttys,
         "killed_pids": killed,
-        "protected_ttys": sorted(protected_ttys),
-        "protected_orphaned_ttys": protected_orphaned_ttys,
+        "protected_ttys": protected_ttys,
     }
 
 
@@ -19608,12 +19565,11 @@ COCKPIT_HTML = """<!doctype html>
         const running = Boolean(data.running);
         const managedTtys = Array.isArray(data.managed_codex_ttys) ? data.managed_codex_ttys.filter(Boolean) : [];
         const managedTarget = managedTtys.length ? ` Relace: ${managedTtys.join(", ")}.` : "";
-        const marker = data.marked_tty ? ` Mílův hlasový bridge: ${data.marked_tty}.` : "";
         const pending = Number(data.pending_count || 0);
         const ready = running && managedTtys.length > 0;
         const stateText = ready
-          ? `Starý Adam fallback běží.${managedTarget}${marker}`
-          : `Starý Adam fallback neběží nebo není připravený.${marker}`;
+          ? `Starý Adam fallback běží.${managedTarget}`
+          : "Starý Adam fallback neběží nebo není připravený.";
         janickaAdamStatus.textContent = `${stateText}${pending ? ` Starých nevyřízených dotazů: ${pending}.` : ""}`;
         janickaAdamStatus.classList.toggle("ok", ready);
         janickaAdamStatus.classList.toggle("warn", !ready);
