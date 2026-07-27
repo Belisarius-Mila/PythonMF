@@ -131,6 +131,80 @@ class DeferredIntegrationStoreTests(unittest.TestCase):
         self.assertNotIn("chat", raw.casefold())
         self.assertNotIn("user_text", raw)
 
+    def test_clean_new_turn_replaces_completed_marker_without_wip(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            marker_path = Path(temp_dir) / "marker.json"
+            store = DeferredIntegrationStore(marker_path)
+            store.begin(
+                workstream_id="layer-human-adam-development",
+                client_message_id="completed-turn-001",
+                workspace_status=self.status(
+                    source_pending_changes=0,
+                    dirty=False,
+                ),
+                integration_deferred=False,
+                now_factory=lambda: "2026-07-26T18:00:00+00:00",
+            )
+            store.finalize(
+                workstream_id="layer-human-adam-development",
+                client_message_id="completed-turn-001",
+                workspace_status=self.status(source_pending_changes=0),
+                completion=self.completion(),
+                now_factory=lambda: "2026-07-26T18:01:00+00:00",
+            )
+
+            replacement = store.begin(
+                workstream_id="layer-human-adam-development",
+                client_message_id="new-clean-turn-002",
+                workspace_status=self.status(
+                    source_pending_changes=0,
+                    dirty=False,
+                ),
+                integration_deferred=False,
+                now_factory=lambda: "2026-07-27T12:00:00+00:00",
+            )
+
+        self.assertEqual(replacement.state, IN_PROGRESS)
+        self.assertEqual(replacement.client_message_id, "new-clean-turn-002")
+        self.assertEqual(replacement.change_count, 0)
+
+    def test_clean_new_turn_keeps_uncertain_marker_fail_closed(self) -> None:
+        for state in (IN_PROGRESS, DELIVERY_UNKNOWN):
+            with self.subTest(state=state), tempfile.TemporaryDirectory() as temp_dir:
+                store = DeferredIntegrationStore(Path(temp_dir) / "marker.json")
+                store.begin(
+                    workstream_id="layer-human-adam-development",
+                    client_message_id="uncertain-turn-001",
+                    workspace_status=self.status(
+                        source_pending_changes=0,
+                        dirty=False,
+                    ),
+                    integration_deferred=False,
+                )
+                if state == DELIVERY_UNKNOWN:
+                    store.mark_delivery_unknown(
+                        workstream_id="layer-human-adam-development",
+                        client_message_id="uncertain-turn-001",
+                        workspace_status=self.status(
+                            source_pending_changes=0,
+                            dirty=False,
+                        ),
+                    )
+
+                with self.assertRaisesRegex(
+                    DeferredIntegrationError,
+                    "není uzavřený",
+                ):
+                    store.begin(
+                        workstream_id="layer-human-adam-development",
+                        client_message_id="new-clean-turn-002",
+                        workspace_status=self.status(
+                            source_pending_changes=0,
+                            dirty=False,
+                        ),
+                        integration_deferred=False,
+                    )
+
     def test_save_load_and_verify_exact_private_marker(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             marker_path = Path(temp_dir) / "marker.json"

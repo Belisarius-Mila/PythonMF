@@ -224,10 +224,20 @@ class DeferredIntegrationStore:
                 and existing.base_head == head
             ):
                 return existing
-            raise DeferredIntegrationError(
-                "Předchozí ownership marker není uzavřený; nový zapisovací tah "
-                "zůstává zablokovaný."
-            )
+            if existing.state in {
+                OWNED_WIP_MISSING_METADATA,
+                READY_FOR_CONFIRMED_INTEGRATION,
+            }:
+                # Vstupní validace už doložila čistý a zarovnaný workspace bez
+                # jediné změny. Dokončený marker proto nemůže dál vlastnit WIP;
+                # jeho změny byly převzaté nebo jinak uzavřené. Nejisté stavy
+                # IN_PROGRESS a DELIVERY_UNKNOWN zůstávají vždy fail-closed.
+                self.clear(client_message_id=existing.client_message_id)
+            else:
+                raise DeferredIntegrationError(
+                    "Předchozí ownership marker není uzavřený; nový zapisovací tah "
+                    "zůstává zablokovaný."
+                )
         created_at = _validated_timestamp(now_factory(), label="zahájení")
         return self._write(
             DeferredIntegrationRecord(
