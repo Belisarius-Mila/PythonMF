@@ -16,11 +16,14 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.codex_appserver import AppServerError
-from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
+from app.communication.human_adam_workspace import (
+    MAX_SAFE_DELETED_PATHS_PER_STEP,
+    SAFE_CHECKPOINT_CHANGE_TYPES,
+    HumanAdamWorkspaceManager,
+)
 
 
 CONFIRMATION_TEXT = "POTVRZUJI PREVZETI HUMAN-ADAM WIP DO MAIN"
-SAFE_CHANGE_TYPES = {"A", "M"}
 
 
 class TakeoverError(RuntimeError):
@@ -134,16 +137,26 @@ def build_takeover_plan(
         ["diff", "--name-status", "--find-renames", "HEAD^", "HEAD"],
     )
     changes: list[dict[str, str]] = []
+    deletion_count = 0
     for line in diff_text.splitlines():
         parts = line.split("\t")
-        if len(parts) != 2 or parts[0][:1] not in SAFE_CHANGE_TYPES:
-            raise TakeoverError("Checkpoint obsahuje mazání, přejmenování nebo netypickou změnu.")
+        if (
+            len(parts) != 2
+            or parts[0][:1] not in SAFE_CHECKPOINT_CHANGE_TYPES
+        ):
+            raise TakeoverError("Checkpoint obsahuje přejmenování nebo netypickou změnu.")
         path = parts[1]
         if manager._blocked_checkpoint_path(path):
             raise TakeoverError("Checkpoint obsahuje blokovanou private, env nebo mediální cestu.")
+        if parts[0][:1] == "D":
+            deletion_count += 1
         changes.append({"status": parts[0], "path": path})
     if not changes:
         raise TakeoverError("Checkpoint neobsahuje žádnou převzatelnou změnu.")
+    if deletion_count > MAX_SAFE_DELETED_PATHS_PER_STEP:
+        raise TakeoverError(
+            "Checkpoint obsahuje hromadné mazání; převzetí vyžaduje servisní potvrzení."
+        )
 
     return TakeoverPlan(
         source_head=source_head,

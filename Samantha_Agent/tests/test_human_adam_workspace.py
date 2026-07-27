@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from app.codex_appserver import AppServerError
 from app.communication.human_adam_workspace import (
+    HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS,
     HumanAdamWorkspaceManager,
     _status_rows,
 )
@@ -47,6 +48,16 @@ def make_source(root: Path) -> Path:
 
 
 class HumanAdamWorkspaceManagerTests(unittest.TestCase):
+    def test_workspace_instructions_allow_only_explicit_non_bulk_deletion(self) -> None:
+        self.assertIn(
+            "schvaleneho vyvojoveho planu",
+            HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS,
+        )
+        self.assertIn(
+            "nikdy neprovadej hromadne mazani",
+            HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS,
+        )
+
     def test_background_status_does_not_refresh_git_index(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -614,7 +625,7 @@ class HumanAdamWorkspaceManagerTests(unittest.TestCase):
             self.assertEqual(clone_file.read_text(), "REMOTE COMMIT\n")
             self.assertEqual(git(manager.workspace_root, "remote"), "")
 
-    def test_sync_from_main_rejects_incoming_deletion(self) -> None:
+    def test_sync_from_main_allows_small_incoming_deletion(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source = make_source(root)
@@ -627,10 +638,43 @@ class HumanAdamWorkspaceManagerTests(unittest.TestCase):
             git(source, "update-index", "--force-remove", "Samantha_Agent/tracked.py")
             git(source, "commit", "-m", "Delete tracked")
 
-            with self.assertRaises(AppServerError):
+            synced = manager.sync_from_main(confirmed=True)
+
+            self.assertTrue(synced["synced"])
+            self.assertFalse((manager.project_root / "tracked.py").exists())
+            self.assertEqual(synced["workspace_relation"], "aligned")
+            self.assertEqual(git(manager.workspace_root, "remote"), "")
+
+    def test_sync_from_main_rejects_bulk_incoming_deletion(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = make_source(root)
+            relative_paths = [
+                f"Samantha_Agent/delete-{index:02d}.py"
+                for index in range(11)
+            ]
+            for relative_path in relative_paths:
+                (source / relative_path).write_text("DELETE = True\n", encoding="utf-8")
+            git(source, "add", *relative_paths)
+            git(source, "commit", "-m", "Add bulk deletion fixtures")
+            manager = HumanAdamWorkspaceManager(
+                source_repo=source,
+                workspace_root=root / "cell",
+                metadata_path=root / "meta.json",
+            )
+            manager.prepare()
+            git(source, "rm", *relative_paths)
+            git(source, "commit", "-m", "Delete bulk fixtures")
+
+            with self.assertRaisesRegex(AppServerError, "hromadné mazání"):
                 manager.sync_from_main(confirmed=True)
 
-            self.assertTrue((manager.project_root / "tracked.py").exists())
+            self.assertTrue(
+                all(
+                    (manager.workspace_root / relative_path).exists()
+                    for relative_path in relative_paths
+                )
+            )
             self.assertEqual(git(manager.workspace_root, "remote"), "")
 
     def test_sync_from_main_allows_small_versioned_public_web_media(self) -> None:

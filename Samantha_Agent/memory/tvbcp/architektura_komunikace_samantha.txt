@@ -3450,3 +3450,32 @@ Technický důkaz:
 - Terminálový kontrakt je v lokálním commitu `6b9ac52`; tato UI fáze se ukládá
   jako další lokální commit denního balíčku.
 - Nebyla čtena ani ukládána private data, hesla nebo citlivé texty.
+
+### 2026-07-27 16:50 CEST – Malé verzované mazání už neblokuje dokončení vývoje
+
+Hotovo:
+- Schválený vývojový krok může automaticky checkpointovat, převzít do `main`
+  a synchronizovat až deset smazaných verzovaných souborů.
+- Stejné pravidlo používá modelový kontrakt, checkpoint, integrační převzetí
+  i dorovnání čistých profilových workspace.
+- Zastaralý approval kontraktní test po fázi 9.4b nyní ověřuje samostatný
+  Codex approval stav bez závislosti na odstraněném Voice Mode importu.
+
+Rozhodnutí:
+- Jednotlivé smazání je běžná obnovitelná Git změna, pokud je výslovnou
+  součástí Mílova zadání nebo schváleného vývojového plánu.
+- Jedenáct a více smazaných cest zůstává hromadnou změnou se servisním
+  potvrzením; blokované private, env a mediální cesty zůstávají nepovolené.
+
+Další krok:
+- Vytvořit lokální commit, dorovnat oba workspaces a samostatně potvrzeně
+  nasadit aktuální `main` do Cockpitu.
+
+Navrhované další kroky:
+- Při příštím skutečném malém cleanupu ověřit, že automatické dokončení projde
+  bez servisního převzetí.
+- Limit měnit pouze podle doložené provozní potřeby.
+
+Technický důkaz:
+- Cílených 65 testů a úplných 1239 Cockpit testů prošlo.
+- Python, JavaScript, shell a `git diff --check` jsou zelené.

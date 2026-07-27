@@ -24,7 +24,11 @@ from app.communication.checkpoint_quality_gate import (
     HumanAdamGateError,
     run_checkpoint_quality_gate,
 )
-from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
+from app.communication.human_adam_workspace import (
+    MAX_SAFE_DELETED_PATHS_PER_STEP,
+    SAFE_CHECKPOINT_CHANGE_TYPES,
+    HumanAdamWorkspaceManager,
+)
 from app.communication.workstream_live_status import (
     LIVE_STATUS_SCHEMA_VERSION,
     build_workstream_live_status,
@@ -788,18 +792,27 @@ def _validate_change_rows(
 ) -> None:
     if not changes:
         raise SimpleMainCheckpointError("Workspace neobsahuje změnu k checkpointu.")
+    deletion_count = 0
     for item in changes:
         status = str(item.get("status") or "")
         path = str(item.get("path") or "")
         symbols = set(status.replace(" ", ""))
-        if status != "??" and (not symbols or not symbols.issubset({"A", "M"})):
+        if status != "??" and (
+            not symbols or not symbols.issubset(SAFE_CHECKPOINT_CHANGE_TYPES)
+        ):
             raise SimpleMainCheckpointError(
-                "Jednoduchý checkpoint nepodporuje mazání, přejmenování ani netypickou změnu."
+                "Jednoduchý checkpoint nepodporuje přejmenování ani netypickou změnu."
             )
         if not workspace.checkpoint_path_allowed(path):
             raise SimpleMainCheckpointError(
                 "Checkpoint obsahuje blokovanou private, env nebo mediální cestu."
             )
+        if "D" in symbols:
+            deletion_count += 1
+    if deletion_count > MAX_SAFE_DELETED_PATHS_PER_STEP:
+        raise SimpleMainCheckpointError(
+            "Jednoduchý checkpoint obsahuje hromadné mazání; vyžaduje servisní potvrzení."
+        )
 
 
 def _requires_full_gate(changes: Sequence[dict[str, str]]) -> bool:

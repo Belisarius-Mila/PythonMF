@@ -10,12 +10,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 class CodexApprovalCockpitContractTests(unittest.TestCase):
     def test_cockpit_uses_generic_state_and_top_level_payload(self) -> None:
         source = (PROJECT_ROOT / "app" / "cockpit.py").read_text(encoding="utf-8")
-        voice_import_start = source.index("from app.speech.adam_voice_mode import (")
-        voice_import_end = source.index(")\n", voice_import_start)
-        voice_import = source[voice_import_start:voice_import_end]
 
         self.assertIn("from app.codex_approval_state import (", source)
-        self.assertNotIn("clear_codex_approval_request", voice_import)
+        self.assertNotIn("from app.speech.adam_voice_mode import", source)
         self.assertIn("codex_approval=load_codex_approval_request", source)
         self.assertIn("codex_approval_loader=codex_approval_loader or load_codex_approval_request", source)
         self.assertIn("codex_approval: data.codex_approval || {}", source)

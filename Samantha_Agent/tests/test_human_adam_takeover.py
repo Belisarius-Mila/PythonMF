@@ -305,7 +305,7 @@ class HumanAdamTakeoverTests(unittest.TestCase):
         self.assertIn(("push", "running"), progress)
         self.assertNotIn(("fast_forward", "running"), progress)
 
-    def test_audit_rejects_tracked_source_changes_and_checkpoint_deletion(self) -> None:
+    def test_audit_rejects_tracked_source_changes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source, manager = prepare_with_origin(root)
@@ -315,11 +315,38 @@ class HumanAdamTakeoverTests(unittest.TestCase):
             with self.assertRaises(TakeoverError):
                 build_takeover_plan(workspace=manager)
 
+    def test_audit_accepts_small_checkpoint_deletion(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            source, manager = prepare_with_origin(Path(temp_dir))
+            _source, manager = prepare_with_origin(Path(temp_dir))
             (manager.project_root / "tracked.py").unlink()
             manager.checkpoint(confirmed=True, message="WIP deletion")
-            with self.assertRaises(TakeoverError):
+
+            plan = build_takeover_plan(workspace=manager)
+
+        self.assertEqual(
+            plan.changes,
+            ({"status": "D", "path": "Samantha_Agent/tracked.py"},),
+        )
+
+    def test_audit_rejects_bulk_checkpoint_deletion(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source, manager = prepare_with_origin(root)
+            relative_paths = [
+                f"Samantha_Agent/delete-{index:02d}.py"
+                for index in range(11)
+            ]
+            for relative_path in relative_paths:
+                (source / relative_path).write_text("DELETE = True\n", encoding="utf-8")
+            git(source, "add", *relative_paths)
+            git(source, "commit", "-m", "Add bulk deletion fixtures")
+            git(source, "push", "origin", "main")
+            manager.sync_from_main(confirmed=True)
+            for relative_path in relative_paths:
+                (manager.workspace_root / relative_path).unlink()
+            manager.checkpoint(confirmed=True, message="WIP bulk deletion")
+
+            with self.assertRaisesRegex(TakeoverError, "hromadné mazání"):
                 build_takeover_plan(workspace=manager)
 
     def test_takeover_commands_are_registered_with_confirmation_only_on_apply(self) -> None:

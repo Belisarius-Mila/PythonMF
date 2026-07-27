@@ -766,13 +766,48 @@ class SimpleMainCheckpointTests(unittest.TestCase):
                     gate_log_path=root / "gate.log",
                 )
 
-    def test_deletion_and_unsafe_memory_request_fail_before_checkpoint(self) -> None:
+    def test_small_tracked_deletion_completes_checkpoint(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source, manager = prepare_environment(root)
-            original_head = git(source, "rev-parse", "HEAD")
             (manager.project_root / "tracked.py").unlink()
-            with self.assertRaisesRegex(SimpleMainCheckpointError, "nepodporuje mazání"):
+
+            result = complete_simple_main_checkpoint(
+                workspace=manager,
+                request=checkpoint_request(),
+                confirmed=True,
+                gate_runner=passing_gate_runner,
+                gate_log_path=root / "gate.log",
+            )
+
+            self.assertTrue(result["ok"])
+            self.assertFalse((source / "Samantha_Agent" / "tracked.py").exists())
+            self.assertFalse((manager.project_root / "tracked.py").exists())
+            self.assertEqual(
+                git(source, "rev-parse", "HEAD"),
+                git(source, "rev-parse", "origin/main"),
+            )
+            self.assertEqual(manager.status()["workspace_relation"], "aligned")
+
+    def test_bulk_deletion_and_unsafe_memory_request_fail_before_checkpoint(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source, manager = prepare_environment(root)
+            relative_paths = [
+                f"Samantha_Agent/delete-{index:02d}.py"
+                for index in range(11)
+            ]
+            for relative_path in relative_paths:
+                (source / relative_path).write_text("DELETE = True\n", encoding="utf-8")
+            git(source, "add", *relative_paths)
+            git(source, "commit", "-m", "Add bulk deletion fixtures")
+            git(source, "push", "origin", "main")
+            manager.sync_from_main(confirmed=True)
+            original_head = git(source, "rev-parse", "HEAD")
+            for relative_path in relative_paths:
+                (manager.workspace_root / relative_path).unlink()
+
+            with self.assertRaisesRegex(SimpleMainCheckpointError, "hromadné mazání"):
                 complete_simple_main_checkpoint(
                     workspace=manager,
                     request=checkpoint_request(),

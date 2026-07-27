@@ -35,8 +35,10 @@ HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS = (
     "si precti AGENTS.md, Samantha_Agent/AGENTS.md, Samantha_Agent/memory/MEMORY_INDEX.md a "
     "relevantni handoff. Smis cist a upravovat pouze tuto izolovanou pracovní kopii, pouzivat "
     "nastroje, spoustet testy a pripravovat skutecne zmeny. Nikdy nehledej ani nemen data mimo "
-    "aktualni workspace, nepouzivej sit, neprovadej push, nemen git remote, nemaz soubory ani "
-    "neprovadej destruktivni git operace. Pred zmenou zkontroluj stav, zachovej cizi upravy a po "
+    "aktualni workspace, nepouzivej sit, neprovadej push ani nemen git remote. Jednotlive "
+    "verzovane soubory smes smazat jen kdyz je to vyslovne soucasti Milova zadani nebo jim "
+    "schvaleneho vyvojoveho planu; nikdy neprovadej hromadne mazani ani destruktivni git operace. "
+    "Pred zmenou zkontroluj stav, zachovej cizi upravy a po "
     "zmene uved zmenene soubory, testy, rizika a dalsi krok. Sam nikdy nespoustej git add, "
     "git commit, checkpoint, prevzeti do main, push ani nasazeni. Tyto operace spousti vyhradne "
     "Mila samostatnymi potvrzenymi ovladacimi prvky Cockpitu. TVBCP je strucny lidsky "
@@ -73,6 +75,8 @@ PUBLIC_SOURCE_MEDIA_PREFIXES = (
 )
 MAX_PUBLIC_SOURCE_MEDIA_BYTES = 8 * 1024 * 1024
 MAX_AUTO_MATERIALIZE_GIT_METADATA_BYTES = 16 * 1024 * 1024
+MAX_SAFE_DELETED_PATHS_PER_STEP = 10
+SAFE_CHECKPOINT_CHANGE_TYPES = frozenset({"A", "D", "M"})
 MACOS_SF_DATALESS = 0x40000000
 GIT_PACK_OBJECT_SUFFIXES = {".bitmap", ".idx", ".pack", ".rev"}
 
@@ -549,10 +553,21 @@ class HumanAdamWorkspaceManager:
                 parts = line.split("\t")
                 if len(parts) >= 2:
                     incoming_rows.append((parts[0], parts[1:]))
-            unsafe_types = [status for status, _ in incoming_rows if status[:1] not in {"A", "M"}]
+            unsafe_types = [
+                status
+                for status, _ in incoming_rows
+                if status[:1] not in SAFE_CHECKPOINT_CHANGE_TYPES
+            ]
             if unsafe_types:
                 raise AppServerError(
-                    "Main obsahuje mazání, přejmenování nebo netypickou změnu; automatický update je odmítnutý."
+                    "Main obsahuje přejmenování nebo netypickou změnu; automatický update je odmítnutý."
+                )
+            deletion_count = sum(
+                1 for status, _ in incoming_rows if status[:1] == "D"
+            )
+            if deletion_count > MAX_SAFE_DELETED_PATHS_PER_STEP:
+                raise AppServerError(
+                    "Main obsahuje hromadné mazání; automatický update vyžaduje servisní potvrzení."
                 )
             incoming_paths = [path for _, paths in incoming_rows for path in paths]
             if any(
