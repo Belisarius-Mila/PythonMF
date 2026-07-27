@@ -7,6 +7,7 @@ from app.email.models import EmailHeader, EmailTextSearchHit
 from app.email.text_search_tools import (
     has_explicit_text_search_confirmation,
     search_email_text_year_text,
+    search_seznam_email_text_year_text,
 )
 from app.email.icloud_provider import _search_text_uids
 
@@ -73,6 +74,29 @@ class EmailTextSearchToolsTests(unittest.TestCase):
         self.assertNotIn("tajne telo", result)
         self.assertNotIn("https://", result)
 
+    def test_seznam_search_requires_provider_name_in_confirmation(self) -> None:
+        fake_provider = _FakeProvider()
+
+        rejected = search_seznam_email_text_year_text(
+            terms=["schody"],
+            year=2026,
+            user_confirmed=True,
+            confirmation_text=_confirmation(terms="schody"),
+            provider_factory=lambda: fake_provider,
+        )
+        accepted = search_seznam_email_text_year_text(
+            terms=["schody"],
+            year=2026,
+            user_confirmed=True,
+            confirmation_text=_confirmation(terms="schody", provider="Seznam "),
+            provider_factory=lambda: fake_provider,
+        )
+
+        self.assertIn("Bez toho provider nevolam", rejected)
+        self.assertIn("Fulltext Seznam e-mailu za rok 2026", accepted)
+        self.assertIn("UID: 123", accepted)
+        self.assertEqual(len(fake_provider.calls), 1)
+
     def test_provider_text_search_empty_payload_means_no_uids(self) -> None:
         fake_imap = _FakeImap(status="OK", data=[None])
 
@@ -120,10 +144,14 @@ class _FakeImap:
         return self.status, self.data
 
 
-def _confirmation() -> str:
+def _confirmation(
+    *,
+    terms: str = "Pojištění a připojištění",
+    provider: str = "",
+) -> str:
     return (
-        "Potvrzuji read-only hledani v textech e-mailu za rok 2026 "
-        "pro vyrazy Pojištění a připojištění. "
+        f"Potvrzuji {provider}read-only hledani v textech e-mailu za rok 2026 "
+        f"pro vyrazy {terms}. "
         "Neotevirat odkazy. Nestahovat prilohy. Nic neodesilat. "
         "Nemazat. Nepresouvat. Neoznacovat jako prectene."
     )

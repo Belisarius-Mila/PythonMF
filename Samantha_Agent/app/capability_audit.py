@@ -89,6 +89,7 @@ CAPABILITY_AREAS = (
             "show_new_email_overview",
             "list_unified_email_headers",
             "search_email_text_year",
+            "search_seznam_email_text_year",
             "read_email_body_by_uid",
             "read_seznam_email_body_by_uid",
             "run_email_triage_session",

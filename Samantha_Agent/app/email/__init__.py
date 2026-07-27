@@ -90,6 +90,8 @@ from .text_search_tools import (
     has_explicit_text_search_confirmation,
     search_email_text_year,
     search_email_text_year_text,
+    search_seznam_email_text_year,
+    search_seznam_email_text_year_text,
 )
 from .triage_tools import (
     DEFAULT_TRIAGE_REPORT_DIR,
@@ -182,6 +184,8 @@ __all__ = [
     "search_seznam_email_headers",
     "search_email_text_year",
     "search_email_text_year_text",
+    "search_seznam_email_text_year",
+    "search_seznam_email_text_year_text",
     "show_email_case_links",
     "show_email_case_links_text",
     "show_email_archive_links",

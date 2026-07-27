@@ -11,6 +11,7 @@ from .config import EmailConfigError
 from .icloud_provider import EmailProviderError, ICloudReadOnlyEmailProvider
 from .models import EmailTextSearchHit
 from .redaction import redact_email_addresses
+from .seznam_provider import SeznamEmailProviderError, SeznamReadOnlyEmailProvider
 
 
 DENIAL_PHRASES = {
@@ -63,6 +64,24 @@ def search_email_text_year(
     )
 
 
+@function_tool
+def search_seznam_email_text_year(
+    terms: list[str],
+    year: int = 2026,
+    limit: int = 50,
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+) -> str:
+    """Search Seznam Mail message text for terms in one year; returns headers only."""
+    return search_seznam_email_text_year_text(
+        terms=terms,
+        year=year,
+        limit=limit,
+        user_confirmed=user_confirmed,
+        confirmation_text=confirmation_text,
+    )
+
+
 def search_email_text_year_text(
     terms: list[str] | tuple[str, ...],
     year: int = 2026,
@@ -70,6 +89,51 @@ def search_email_text_year_text(
     user_confirmed: bool = False,
     confirmation_text: str = "",
     provider_factory: Callable[[], object] = ICloudReadOnlyEmailProvider,
+) -> str:
+    return _search_email_text_year_text(
+        terms=terms,
+        year=year,
+        limit=limit,
+        user_confirmed=user_confirmed,
+        confirmation_text=confirmation_text,
+        provider_factory=provider_factory,
+        provider_error=EmailProviderError,
+        provider_label="iCloud",
+    )
+
+
+def search_seznam_email_text_year_text(
+    terms: list[str] | tuple[str, ...],
+    year: int = 2026,
+    limit: int = 50,
+    user_confirmed: bool = False,
+    confirmation_text: str = "",
+    provider_factory: Callable[[], object] = SeznamReadOnlyEmailProvider,
+) -> str:
+    return _search_email_text_year_text(
+        terms=terms,
+        year=year,
+        limit=limit,
+        user_confirmed=user_confirmed,
+        confirmation_text=confirmation_text,
+        provider_factory=provider_factory,
+        provider_error=SeznamEmailProviderError,
+        provider_label="Seznam",
+        required_confirmation_provider="Seznam",
+    )
+
+
+def _search_email_text_year_text(
+    *,
+    terms: list[str] | tuple[str, ...],
+    year: int,
+    limit: int,
+    user_confirmed: bool,
+    confirmation_text: str,
+    provider_factory: Callable[[], object],
+    provider_error: type[Exception],
+    provider_label: str,
+    required_confirmation_provider: str = "",
 ) -> str:
     safe_year = _validate_year(year)
     safe_terms = _normalize_terms(terms)
@@ -79,11 +143,13 @@ def search_email_text_year_text(
         terms=safe_terms,
         year=safe_year,
         confirmation_text=confirmation_text,
+        required_provider=required_confirmation_provider,
     ):
         terms_text = ", ".join(safe_terms)
         return (
             "Nejdrive potrebuji jasne potvrzeni od Mily v aktualni zprave. "
             f"Potvrzeni musi obsahovat rok {safe_year}, hledane vyrazy ({terms_text}), "
+            f"{'provider ' + required_confirmation_provider + ', ' if required_confirmation_provider else ''}"
             "souhlas s read-only hledanim v textech/tělech e-mailu a zakazy: "
             "neotevirat odkazy, nestahovat prilohy, nic neodesilat, nemazat, "
             "nepresouvat a neoznacovat jako prectene. Bez toho provider nevolam."
@@ -100,16 +166,17 @@ def search_email_text_year_text(
         )
     except EmailConfigError:
         return (
-            "Chybi lokalni konfigurace pro iCloud Mail. "
+            f"Chybi lokalni konfigurace pro {provider_label} Mail. "
             "Zkontroluj lokalni .env; neposilej heslo do chatu."
         )
-    except EmailProviderError as exc:
-        return f"Fulltextove vyhledani v iCloud Mailu selhalo: {exc}"
+    except provider_error as exc:
+        return f"Fulltextove vyhledani v {provider_label} Mailu selhalo: {exc}"
 
     return format_email_text_search_result(
         hits=hits,
         terms=safe_terms,
         year=safe_year,
+        provider_label=provider_label,
     )
 
 
@@ -117,9 +184,16 @@ def has_explicit_text_search_confirmation(
     terms: list[str] | tuple[str, ...],
     year: int,
     confirmation_text: str,
+    required_provider: str = "",
 ) -> bool:
     normalized = _strip_accents(confirmation_text.casefold())
+    provider_confirmed = (
+        not required_provider
+        or _strip_accents(required_provider.casefold()) in normalized
+    )
     return (
+        provider_confirmed
+        and
         str(year) in normalized
         and any(word in normalized for word in ("potvrzuji", "souhlasim", "ano"))
         and any(word in normalized for word in ("read-only", "readonly", "jen cteni", "ctenim"))
@@ -136,9 +210,10 @@ def format_email_text_search_result(
     hits: list[EmailTextSearchHit],
     terms: list[str] | tuple[str, ...],
     year: int,
+    provider_label: str = "iCloud",
 ) -> str:
     lines = [
-        f"Fulltext e-mailu za rok {year}",
+        f"Fulltext {provider_label} e-mailu za rok {year}",
         f"Hledane vyrazy: {', '.join(terms)}",
         "",
     ]

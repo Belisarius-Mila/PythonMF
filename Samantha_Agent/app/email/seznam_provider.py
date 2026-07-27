@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import imaplib
 import re
+from datetime import date
 from email import message_from_bytes
 from email.header import decode_header
 from email.message import Message
@@ -11,7 +12,14 @@ from .archive_models import EmailArchiveSource
 from .archive_service import email_message_to_archive_source
 from .config import SeznamMailConfig, load_seznam_mail_config
 from .header_metadata import extract_attachment_metadata_from_bodystructure
-from .models import EmailAttachmentMeta, EmailHeader, EmailMessage, EmailMessageBatch, EmailSkippedMessage
+from .models import (
+    EmailAttachmentMeta,
+    EmailHeader,
+    EmailMessage,
+    EmailMessageBatch,
+    EmailSkippedMessage,
+    EmailTextSearchHit,
+)
 
 
 HEADER_WITH_STRUCTURE_FETCH_SPEC = "(RFC822.SIZE FLAGS BODYSTRUCTURE BODY.PEEK[HEADER.FIELDS (DATE FROM SUBJECT)])"
@@ -78,6 +86,60 @@ class SeznamReadOnlyEmailProvider:
                 if len(matches) >= safe_limit:
                     break
         return matches
+
+    def search_text_headers(
+        self,
+        terms: list[str] | tuple[str, ...],
+        since: date,
+        before: date,
+        limit: int = 50,
+    ) -> list[EmailTextSearchHit]:
+        safe_terms = _validate_search_terms(terms)
+        safe_limit = min(max(1, limit), 200)
+        since_imap = _format_imap_date(since)
+        before_imap = _format_imap_date(before)
+        term_order = {term.casefold(): index for index, term in enumerate(safe_terms)}
+
+        try:
+            with imaplib.IMAP4_SSL(self._config.host, self._config.port) as imap:
+                imap.login(self._config.address, self._config.password)
+                _select_readonly_folder(imap, "INBOX")
+
+                uid_matches: dict[bytes, set[str]] = {}
+                for term in safe_terms:
+                    for uid in _search_text_uids(
+                        imap=imap,
+                        term=term,
+                        since_imap=since_imap,
+                        before_imap=before_imap,
+                    ):
+                        uid_matches.setdefault(uid, set()).add(term)
+
+                recent_uids = sorted(uid_matches, key=lambda uid: int(uid))[-safe_limit:]
+                hits: list[EmailTextSearchHit] = []
+                for uid in reversed(recent_uids):
+                    header = self._fetch_header(imap=imap, uid=uid, folder="INBOX")
+                    if header is None:
+                        continue
+                    matched_terms = tuple(
+                        sorted(
+                            uid_matches[uid],
+                            key=lambda term: term_order.get(term.casefold(), 999),
+                        )
+                    )
+                    hits.append(
+                        EmailTextSearchHit(
+                            header=header,
+                            matched_terms=matched_terms,
+                        )
+                    )
+                return hits
+        except SeznamEmailProviderError:
+            raise
+        except imaplib.IMAP4.error as exc:
+            raise SeznamEmailProviderError("IMAP server Seznam odmitl pozadavek.") from exc
+        except OSError as exc:
+            raise SeznamEmailProviderError("Nepodarilo se pripojit k Seznam Mailu.") from exc
 
     def read_message_by_uid(self, uid: str, max_chars: int = 4_000) -> EmailMessage:
         return self.read_message_by_uid_from_folder(uid=uid, max_chars=max_chars, folder="INBOX")
@@ -617,6 +679,58 @@ def _delete_uid_and_expunge(imap: imaplib.IMAP4_SSL, uid: bytes) -> None:
 
 def _quote_imap_search_value(value: str) -> str:
     return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
+def _search_text_uids(
+    imap: imaplib.IMAP4_SSL,
+    term: str,
+    since_imap: str,
+    before_imap: str,
+) -> list[bytes]:
+    status, data = imap.uid(
+        "SEARCH",
+        "CHARSET",
+        "UTF-8",
+        "SINCE",
+        since_imap,
+        "BEFORE",
+        before_imap,
+        "TEXT",
+        _quote_imap_utf8(term),
+    )
+    if status != "OK" or not data:
+        raise SeznamEmailProviderError("Nepodarilo se fulltextove vyhledat zpravy.")
+    if data[0] is None:
+        return []
+    return data[0].split()
+
+
+def _quote_imap_utf8(value: str) -> bytes:
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'.encode("utf-8")
+
+
+def _validate_search_terms(terms: list[str] | tuple[str, ...]) -> list[str]:
+    safe_terms: list[str] = []
+    seen: set[str] = set()
+    for term in terms:
+        normalized = " ".join(str(term).split())
+        folded = normalized.casefold()
+        if not normalized or folded in seen:
+            continue
+        if len(normalized) > 80:
+            raise SeznamEmailProviderError("Hledany vyraz je prilis dlouhy.")
+        safe_terms.append(normalized)
+        seen.add(folded)
+    if not safe_terms:
+        raise SeznamEmailProviderError("Chybi hledany vyraz.")
+    if len(safe_terms) > 10:
+        raise SeznamEmailProviderError("Prilis mnoho hledanych vyrazu.")
+    return safe_terms
+
+
+def _format_imap_date(value: date) -> str:
+    return value.strftime("%d-%b-%Y")
 
 
 def _mailbox_command_arg(folder: str) -> str:

@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
 from unittest.mock import patch
 
@@ -19,6 +20,7 @@ from app.email.seznam_provider import (
     SeznamReadOnlyEmailProvider,
     _message_data_has_flag,
     _message_data_to_email_message,
+    _search_text_uids,
     _validate_uid,
 )
 
@@ -139,6 +141,53 @@ class SeznamProviderParserTests(unittest.TestCase):
         with self.assertRaises(SeznamEmailProviderError):
             _validate_uid("123:456")
 
+    def test_search_text_uids_uses_read_only_year_bounds(self) -> None:
+        imap = _FakeTextSearchImap()
+
+        result = _search_text_uids(
+            imap=imap,
+            term="zábradlí",
+            since_imap="01-Jan-2020",
+            before_imap="01-Jan-2021",
+        )
+
+        self.assertEqual(result, [b"10", b"20"])
+        self.assertEqual(
+            imap.uid_calls,
+            [
+                (
+                    "SEARCH",
+                    "CHARSET",
+                    "UTF-8",
+                    "SINCE",
+                    "01-Jan-2020",
+                    "BEFORE",
+                    "01-Jan-2021",
+                    "TEXT",
+                    '"zábradlí"'.encode("utf-8"),
+                )
+            ],
+        )
+
+    def test_provider_text_search_returns_headers_and_matched_terms_only(self) -> None:
+        imap = _FakeTextSearchImap(with_headers=True)
+        provider = SeznamReadOnlyEmailProvider(
+            SeznamMailConfig(address="user@example.com", password="secret")
+        )
+
+        with patch("app.email.seznam_provider.imaplib.IMAP4_SSL", return_value=imap):
+            hits = provider.search_text_headers(
+                terms=["Tomáš", "schody"],
+                since=date(2020, 1, 1),
+                before=date(2021, 1, 1),
+                limit=10,
+            )
+
+        self.assertEqual([hit.header.internal_id for hit in hits], ["20", "10"])
+        self.assertEqual(hits[0].matched_terms, ("Tomáš", "schody"))
+        self.assertEqual(hits[1].matched_terms, ("Tomáš",))
+        self.assertEqual(imap.select_calls, [("INBOX", True)])
+
     def test_message_data_has_flag_reads_imap_flags_case_insensitively(self) -> None:
         data = [(b"1 (UID 123 FLAGS (\\Seen \\FLAGGED))", b"")]
 
@@ -222,6 +271,47 @@ class _FakeFlagImap:
             flagged = self.flagged if self.report_flagged is None else self.report_flagged
             flags = b"\\Flagged" if flagged else b""
             return "OK", [b"123 (UID 123 FLAGS (" + flags + b"))"]
+        raise AssertionError((command, args))
+
+
+class _FakeTextSearchImap:
+    def __init__(self, *, with_headers: bool = False) -> None:
+        self.with_headers = with_headers
+        self.uid_calls: list[tuple[object, ...]] = []
+        self.select_calls: list[tuple[str, bool]] = []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_args) -> None:
+        return None
+
+    def login(self, _address: str, _password: str):
+        return "OK", []
+
+    def select(self, folder: str, readonly: bool = False):
+        self.select_calls.append((folder, readonly))
+        return "OK", [b"2"]
+
+    def uid(self, command: str, *args):
+        self.uid_calls.append((command, *args))
+        if command == "SEARCH":
+            term = args[-1]
+            if not self.with_headers:
+                return "OK", [b"10 20"]
+            if term == '"Tomáš"'.encode("utf-8"):
+                return "OK", [b"10 20"]
+            if term == b'"schody"':
+                return "OK", [b"20"]
+            return "OK", [b""]
+        if command == "FETCH":
+            uid = args[0].decode("ascii")
+            raw = (
+                f"From: Dilna {uid} <dilna{uid}@example.com>\\r\\n"
+                f"Date: Tue, {uid} Dec 2020 08:00:00 +0100\\r\\n"
+                f"Subject: Nabidka {uid}\\r\\n\\r\\n"
+            ).encode("utf-8")
+            return "OK", [(b"1 (RFC822.SIZE 200)", raw)]
         raise AssertionError((command, args))
 
 

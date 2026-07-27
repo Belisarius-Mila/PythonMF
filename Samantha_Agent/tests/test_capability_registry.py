@@ -193,6 +193,7 @@ class CapabilityRegistryTests(unittest.TestCase):
             "build_email_action_case_from_uid",
             "build_rixo_insurance_case_from_uids",
             "search_email_text_year",
+            "search_seznam_email_text_year",
             "read_email_body_by_uid",
             "read_seznam_email_body_by_uid",
             "show_email_archive_links",

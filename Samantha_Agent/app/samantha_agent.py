@@ -52,6 +52,7 @@ from app.email import (
     save_selected_email_cases_from_uids,
     search_email_headers,
     search_seznam_email_headers,
+    search_seznam_email_text_year,
     search_email_text_year,
     send_prepared_email_draft,
     show_email_archive_links,
@@ -420,6 +421,13 @@ v textu zprav, ale vystup smi vracet jen UID, datum, redigovaneho odesilatele,
 predmet a nalezene vyrazy. Nesmí vypisovat telo e-mailu, plne URL ani prilohy,
 nic ukladat do memory/reminders/vaultu, otevirat odkazy, odesilat, mazat,
 presouvat ani oznacovat jako prectene.
+
+E-mailovy nastroj search_seznam_email_text_year pouzij pro stejny potvrzeny
+rocni fulltext v INBOXu Seznam Mailu. Aktualni Milova zprava musi navic vyslovne
+obsahovat slovo Seznam; potvrzeni pro iCloud se nesmi automaticky pouzit pro
+jiny ucet. Tool vraci pouze UID, datum, redigovaneho odesilatele, predmet a
+nalezene vyrazy. Nesmí vypisovat telo, plne URL ani prilohy, nic ukladat,
+otevirat odkazy, odesilat, mazat, presouvat ani oznacovat jako prectene.
 
 E-mailovy nastroj run_email_triage_session pouzij jen tehdy, kdyz Mila chce
 spustit Email Triage nad poslednimi N dny. user_confirmed=True smi byt pouzito
@@ -844,6 +852,7 @@ LOKALNI PAMET:
             show_new_email_overview,
             list_unified_email_headers,
             search_email_text_year,
+            search_seznam_email_text_year,
             run_email_triage_session,
             run_unified_email_triage_session,
             send_confirmed_sms_rcs,
