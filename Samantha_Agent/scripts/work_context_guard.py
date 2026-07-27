@@ -31,10 +31,24 @@ class WorkContextStatus:
     branch_warning: str = ""
 
     @property
+    def batch_pending(self) -> bool:
+        """Return whether only clean local commits are waiting for the GitHub batch."""
+        return (
+            self.current_branch == self.base_branch
+            and self.ahead > 0
+            and self.behind == 0
+            and self.staged_count == 0
+            and self.unstaged_count == 0
+            and self.untracked_count == 0
+            and not self.git_operation
+            and not self.unmerged_branches
+            and not self.branch_warning
+        )
+
+    @property
     def clean(self) -> bool:
         return not (
             self.current_branch != self.base_branch
-            or self.ahead
             or self.behind
             or self.staged_count
             or self.unstaged_count
@@ -170,7 +184,9 @@ def format_work_context_guard(status: WorkContextStatus) -> str:
     else:
         lines.append("- OK no staged, unstaged or untracked changes")
 
-    if status.ahead or status.behind:
+    if status.batch_pending:
+        lines.append(f"- OK GitHub batch pending: {status.ahead} local commit(s)")
+    elif status.ahead or status.behind:
         lines.append(f"- WARN branch sync: ahead {status.ahead}, behind {status.behind}")
     else:
         lines.append("- OK no unpushed or missing upstream commits")
@@ -188,10 +204,15 @@ def format_work_context_guard(status: WorkContextStatus) -> str:
     else:
         lines.append(f"- OK no unmerged branches outside `{status.base_branch}`")
 
-    if status.clean:
+    if status.batch_pending:
+        lines.append("Next: safe to switch topic; local commits wait for the daily GitHub batch.")
+    elif status.clean:
         lines.append("Next: safe to switch topic.")
     else:
-        lines.append("Next: checkpoint current work before switching topic: commit/push finished work, create a WIP branch, or write a handoff.")
+        lines.append(
+            "Next: checkpoint current work before switching topic: commit finished work locally, "
+            "create a WIP branch, or write a handoff. Do not push only to satisfy this guard."
+        )
     return "\n".join(lines)
 
 

@@ -139,6 +139,32 @@ pri dalsim navazani videl, kam se da rozumne pokracovat.
 - Shellove postupy patri do workflow registry, Pythonove operace do bezpecnych
   toolu s testy a potvrzovacimi branami podle citlivosti.
 
+## Davkovy GitHub rezim pro terminaloveho Adama
+
+- Pri beznem vyvoji na `main` po dokonceni funkcniho kroku automaticky vytvor
+  jeden lokalni commit jen z konkretne zkontrolovanych souboru daneho ukolu.
+  Mila kvuli tomu nemusi psat `c+c`; pokud vyslovne rekne `bez commitu`, commit
+  nevytvarej. Read-only audit ani diagnostika samy o sobe commit nevytvareji.
+- Jednotlive hotove kroky behem dne automaticky nepushuj. Po commitu oznam kratke
+  ID a pocet lokalnich commitu cekajicich v dennim GitHub balicku. Push proved
+  jen na Miluv vyslovny pokyn, pri potvrzenem uzavreni denniho balicku nebo kdyz
+  je nutny pro vyslovne zadany vzdaleny provoz.
+- Pred lokalnim commitem bezne zmeny spust cilene testy a rychlou statickou branu.
+  Plnou branu spust ihned u rizikovych zmen workflow, zavislosti, checkpointu,
+  davkoveho push/deploy procesu, persistence, zaloh, transakci nebo odchoziho
+  e-mailu a kalendare.
+- Nepouzivej `git add .`; zachovej vsechny nesouvisejici zmeny. Handoff a TVBCP
+  aktualizuj podle jejich vlastnich pravidel, ne jen kvuli kazdemu commitu.
+- Po lokalnim commitu zarovnej pouze ciste profilove workspaces Human-Adam a
+  Knihovna na lokalni `main`, aby mohly navazat. Spinavy nebo divergentni
+  workspace automaticky neprepisuj.
+- Cisty `main`, ktery je pouze napred pred `origin/main`, je platny stav
+  `GitHub batch pending` a neblokuje dalsi tema. Pokud se vzdaleny `main`
+  mezitim rozejde, zachovej lokalni praci a zablokuj jen davkovy push; bez
+  servisniho rozhodnuti nedavej merge, rebase ani force push.
+- Nasazeni do beziciho Cockpitu je oddelena akce a dal vyzaduje odpovidajici
+  samostatne potvrzeni.
+
 ## Styl prace
 
 - Nejdriv si ujasni cil ukolu a dostupny kontext.

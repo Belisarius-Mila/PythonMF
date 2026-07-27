@@ -426,6 +426,47 @@ class WorkContextGuardTests(unittest.TestCase):
         self.assertIn("safe to switch topic", text)
         self.assertIn("OK no staged", text)
 
+    def test_work_context_guard_accepts_clean_main_ahead_as_batch_pending(self) -> None:
+        status = WorkContextStatus(
+            current_branch="main",
+            base_branch="main",
+            ahead=3,
+            behind=0,
+            staged_count=0,
+            unstaged_count=0,
+            untracked_count=0,
+            git_operation="",
+            unmerged_branches=(),
+        )
+
+        text = format_work_context_guard(status)
+
+        self.assertTrue(status.clean)
+        self.assertTrue(status.batch_pending)
+        self.assertIn("OK GitHub batch pending: 3 local commit(s)", text)
+        self.assertIn("safe to switch topic", text)
+        self.assertIn("wait for the daily GitHub batch", text)
+
+    def test_work_context_guard_blocks_dirty_main_with_batch_commits(self) -> None:
+        status = WorkContextStatus(
+            current_branch="main",
+            base_branch="main",
+            ahead=2,
+            behind=0,
+            staged_count=1,
+            unstaged_count=0,
+            untracked_count=0,
+            git_operation="",
+            unmerged_branches=(),
+        )
+
+        text = format_work_context_guard(status)
+
+        self.assertFalse(status.clean)
+        self.assertFalse(status.batch_pending)
+        self.assertIn("pending changes", text)
+        self.assertIn("WARN branch sync: ahead 2, behind 0", text)
+
     def test_work_context_guard_blocks_mixed_pending_work(self) -> None:
         status = WorkContextStatus(
             current_branch="feature/demo",

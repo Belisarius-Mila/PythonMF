@@ -20,6 +20,26 @@ seka a nechce dlouze hledat v memory. Kanonicka pravidla ale zustavaji zde:
 root karticka ma byt jen kratka pripominka a nesmi obchazet bezpecne git
 principy.
 
+## Davkovy GitHub rezim od 2026-07-27
+
+Pro bezny vyvoj Samanthy na `main` je kanonicky postup:
+
+1. Kazdy dokonceny a overeny vyvojovy krok ulozit jako samostatny lokalni
+   commit z presne vybranych souboru.
+2. Jednotlive denni commity automaticky nepushovat. Cisty lokalni `main` muze
+   byt napred pred `origin/main`; tento stav se oznacuje `GitHub batch pending`
+   a neblokuje dalsi vyvoj ani zmenu tematu.
+3. GitHub balicek uzavrit na vyslovny Miluv pokyn jednou plnou branou a jednim
+   pushem. Urgentni push nebo vzdaleny provoz lze zadat samostatne.
+4. Pokud se `origin/main` mezitim rozejde, lokalni praci zachovat a zablokovat
+   jen davkovy push. Merge, rebase ani force push se bez servisniho rozhodnuti
+   automaticky neprovadi.
+5. Nasazeni do beziciho Cockpitu zustava oddelena, samostatne potvrzovana akce.
+
+Podrobna pravidla pro terminaloveho Adama jsou v `AGENTS.md`. Starsi
+low-friction pravidlo automatickeho pushnuti po kazdem commitu je timto pro
+bezny vyvoj nahrazeno.
+
 ## Pred rizikovym krokem
 
 1. Zkontrolovat stav:
@@ -63,19 +83,21 @@ git add <soubor1> <soubor2>
 git commit -m "Strucny popis"
 ```
 
-Push:
+Rucni nebo potvrzeny davkovy push:
 
 ```bash
 git push origin main
 ```
 
-Od 2026-06-26 plati osobni low-friction pravidlo pro Mílu:
+Od 2026-06-26 historicky platilo osobni low-friction pravidlo pro Mílu:
 
 ```text
 push na main po commitu smi probehnout bez dalsiho dotazu, pokud projde guard.
 ```
 
-Pred rutinnim pushem spustit:
+Od 2026-07-27 je toto pravidlo pro bezny vyvoj nahrazeno davkovym rezimem vyse:
+lokalni commit se vytvori hned, push az pri uzavreni balicku. Pred potvrzenym
+pushem spustit:
 
 ```bash
 .venv/bin/python scripts/git_push_guard.py
@@ -130,13 +152,14 @@ Guard hleda:
 
 - jinou vetev nez `main`,
 - staged, unstaged nebo untracked zmeny,
-- nepushnute nebo chybejici upstream commity,
+- chybejici upstream commity nebo divergenci; samotne ciste lokalni commity
+  napred oznaci jako neblokujici `GitHub batch pending`,
 - rozbehnuty merge/rebase/cherry-pick/revert,
 - neintegrovane vetve mimo `main`.
 
-Pokud guard nehlasi cisty stav, nejdriv udelat maly checkpoint: commit/push hotove
-casti, WIP vetev pro rozpracovanou praci, nebo handoff s presnym dalsim krokem.
-Teprve potom menit tema.
+Pokud guard nehlasi cisty stav ani `GitHub batch pending`, nejdriv udelat maly
+checkpoint: lokalni commit hotove casti, WIP vetev pro rozpracovanou praci, nebo
+handoff s presnym dalsim krokem. Push se nedela jen kvuli zmene tematu.
 
 ## Zakazy
 

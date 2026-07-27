@@ -24,6 +24,7 @@ NODE_FALLBACK_PATHS = (
 )
 
 COMPILE_PATHS = (
+    "scripts/work_context_guard.py",
     "app/cockpit.py",
     "app/command_cheatsheet.py",
     "app/cockpit_code_stamp.py",
