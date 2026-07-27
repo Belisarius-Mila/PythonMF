@@ -24,6 +24,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     button,.back { border:1px solid var(--line); border-radius:11px; padding:10px 13px; background:#fff; color:var(--ink); font:inherit; font-weight:700; text-decoration:none; cursor:pointer; }
     button.primary { background:var(--blue); color:#fff; border-color:var(--blue); }
     button.audit-action { background:#fbbf24; color:#422006; border-color:#d97706; }
+    button.audit-action.deployment-current:disabled { opacity:1; cursor:default; color:var(--ok); border-color:#86efac; background:#ecfdf3; }
     button.deploy-action { background:var(--ok); color:#fff; border-color:var(--ok); }
     button:disabled { opacity:.55; cursor:wait; }
     #workOpenBtn.work-clean { color:var(--ok); border-color:#86efac; background:#ecfdf3; }
@@ -506,6 +507,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let githubBatchModeEnabled = false;
   let pendingIntegrationAudit = null;
   let pendingIntegrationRecovery = null;
+  let currentWorkstreamLiveStatus = null;
   const verifiedDeploymentStorageKey = "human-adam:verified-deployment:v1";
   const verifiedDeploymentSeenStorageKey = "human-adam:verified-deployment-seen:v1";
   const verifiedDeploymentMaxAgeMs = 15 * 60 * 1000;
@@ -1074,7 +1076,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   function renderCompactWorkStatus(workspace) {
     const needsAttention = workspaceRequiresWorkDetail(workspace);
     const changeCount = Number(workspace && workspace.change_count || 0);
-    workOpenBtn.classList.toggle("work-clean", !needsAttention && !workstreamDeploymentEnabled);
+    const liveDeployment = activeWorkstreamLiveDeployment();
+    const deploymentCurrent = String(liveDeployment.state || "") === "verified_current";
+    const deployedMain = String(liveDeployment.main_short || "").trim();
+    const deployedSmokeCount = Number(liveDeployment.smoke_count || 0);
+    workOpenBtn.classList.toggle(
+      "work-clean",
+      !needsAttention && (!workstreamDeploymentEnabled || deploymentCurrent),
+    );
     workOpenBtn.classList.toggle("work-attention", needsAttention);
     if (workspace && workspace.dirty) {
       workOpenBtn.textContent = `Práce: ${changeCount} změn`;
@@ -1082,6 +1091,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     } else if (needsAttention) {
       workOpenBtn.textContent = "Práce: kontrola";
       workOpenBtn.title = "Pracovní stav vyžaduje kontrolu; otevři detail.";
+    } else if (workstreamDeploymentEnabled && deploymentCurrent) {
+      workOpenBtn.textContent = "Práce: nasazeno ✓";
+      workOpenBtn.title = `Cockpit běží na aktuálním main${deployedMain ? ` ${deployedMain}` : ""} · smoke ${deployedSmokeCount}/5.`;
     } else if (workstreamDeploymentEnabled) {
       workOpenBtn.textContent = "Práce: nasazení";
       workOpenBtn.title = "Workspace je čistý a tento pracovní proud podporuje nasazení.";
@@ -1090,6 +1102,18 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       workOpenBtn.title = "Workspace je čistý a synchronní s main; velký detail není potřeba.";
     }
     workOpenBtn.setAttribute("aria-label", workOpenBtn.title);
+  }
+
+  function activeWorkstreamLiveDeployment() {
+    if (
+      !currentWorkstreamLiveStatus
+      || String(currentWorkstreamLiveStatus.workstream_id || "") !== activeWorkstreamId
+      || !currentWorkstreamLiveStatus.deployment
+      || typeof currentWorkstreamLiveStatus.deployment !== "object"
+    ) {
+      return {};
+    }
+    return currentWorkstreamLiveStatus.deployment;
   }
 
   function renderStatus(payload) {
@@ -1952,22 +1976,32 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     else if (payload.workspace_relation === "diverged") workMeta.textContent = "Workspace a main se rozešly; je nutná servisní kontrola.";
     else workMeta.textContent = "Workspace je čistý a odpovídá main.";
     const semaphore = payload.development_semaphore || {};
+    const liveDeployment = activeWorkstreamLiveDeployment();
+    const deploymentCurrent = String(liveDeployment.state || "") === "verified_current";
+    const deployedMain = String(liveDeployment.main_short || "").trim();
+    const deployedSmokeCount = Number(liveDeployment.smoke_count || 0);
     checkpointBtn.disabled = !workstreamDevelopmentEnabled || !payload.dirty || semaphore.can_checkpoint !== true;
     const simpleDeployReady = workstreamDeploymentEnabled
+      && !deploymentCurrent
       && !payload.dirty
       && !payload.local_checkpoint_ahead
       && payload.workspace_relation === "aligned"
       && Number(payload.source_pending_changes || 0) === 0;
     deployAuditBtn.hidden = !workstreamDeploymentEnabled;
     deployAuditBtn.disabled = !simpleDeployReady;
+    deployAuditBtn.textContent = deploymentCurrent
+      ? "Nasazení je aktuální ✓"
+      : "Audit nasazení do Cockpitu";
+    deployAuditBtn.classList.toggle("deployment-current", deploymentCurrent);
     deployConfirmation.value = "";
     deployConfirmation.hidden = true;
     deployConfirmation.disabled = true;
-    deployBtn.hidden = !workstreamDeploymentEnabled;
+    deployBtn.hidden = !workstreamDeploymentEnabled || deploymentCurrent;
     deployBtn.disabled = true;
     deployBtn.textContent = "Nasadit aktuální main do Cockpitu";
-    if (!workstreamDevelopmentEnabled) deployMeta.textContent = "Tento pracovní proud je pouze pro čtení; vývoj zde zatím není povolen.";
-    else if (!workstreamDeploymentEnabled) deployMeta.textContent = "Vývoj spusť tlačítkem Zahájit vývoj. Po úspěšném tahu vznikne lokální commit; GitHub počká na denní balíček. Nasazení z tohoto pracovního proudu není dostupné.";
+    if (!workstreamDeploymentEnabled) deployMeta.textContent = "Vývoj spusť tlačítkem Zahájit vývoj. Po úspěšném tahu vznikne lokální commit; GitHub počká na denní balíček. Nasazení z tohoto pracovního proudu není dostupné.";
+    else if (deploymentCurrent) deployMeta.textContent = `Cockpit už běží na aktuálním main${deployedMain ? ` ${deployedMain}` : ""} · smoke ${deployedSmokeCount}/5. Audit ani opakované nasazení nejsou potřeba.`;
+    else if (!workstreamDevelopmentEnabled) deployMeta.textContent = "Tento pracovní proud je pouze pro čtení; vývoj zde zatím není povolen.";
     else if (payload.dirty) deployMeta.textContent = "Nejdřív dokonči automatický checkpoint změn do main.";
     else if (payload.local_checkpoint_ahead) deployMeta.textContent = "Je zachovaný starší lokální checkpoint; nejdřív proveď servisní kontrolu.";
     else if (checkpointPreserved) deployMeta.textContent = "WIP je bezpečně zachovaný, ale audit je zablokovaný. Nejdřív proveď obnovu nad aktuálním main.";
@@ -2032,6 +2066,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       && String(liveStatus.workstream_id || "") === activeWorkstreamId
     );
     const status = valid ? liveStatus : {};
+    currentWorkstreamLiveStatus = valid ? status : null;
     const overallState = valid ? String(status.state || "unverified") : "unverified";
     liveWorkStatusBox.dataset.state = overallState;
     const observed = valid ? formatTime(status.observed_at) : "čas neověřen";

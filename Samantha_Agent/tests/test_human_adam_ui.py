@@ -524,6 +524,8 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('workOpenBtn.textContent = "Práce: čistá";', compact_source)
         self.assertIn('workOpenBtn.textContent = "Práce: kontrola";', compact_source)
         self.assertIn('workOpenBtn.textContent = "Práce: nasazení";', compact_source)
+        self.assertIn('workOpenBtn.textContent = "Práce: nasazeno ✓";', compact_source)
+        self.assertIn("activeWorkstreamLiveDeployment()", compact_source)
         self.assertIn("`Práce: ${changeCount} změn`", compact_source)
         self.assertIn('workOpenBtn.setAttribute("aria-label", workOpenBtn.title);', compact_source)
         self.assertGreaterEqual(HUMAN_ADAM_HTML.count("renderCompactWorkStatus("), 3)
@@ -565,6 +567,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('overallState = valid ? String(status.state || "unverified") : "unverified"', render_source)
         self.assertIn("liveWorkStatusMeta.textContent", render_source)
         self.assertIn("liveWorkStatusAxes.replaceChildren()", render_source)
+        self.assertIn("currentWorkstreamLiveStatus = valid ? status : null;", render_source)
         self.assertIn('document.createElement("li")', render_source)
         self.assertIn("row.textContent = text", render_source)
         self.assertNotIn("innerHTML", render_source)
@@ -620,7 +623,12 @@ class HumanAdamUiTests(unittest.TestCase):
         )
         self.assertIn("workstreamDeploymentEnabled = capabilities.deployment !== false;", HUMAN_ADAM_HTML)
         self.assertIn("const simpleDeployReady = workstreamDeploymentEnabled", HUMAN_ADAM_HTML)
-        self.assertIn("deployBtn.hidden = !workstreamDeploymentEnabled;", HUMAN_ADAM_HTML)
+        self.assertIn("deployBtn.hidden = !workstreamDeploymentEnabled || deploymentCurrent;", HUMAN_ADAM_HTML)
+        self.assertIn("&& !deploymentCurrent", HUMAN_ADAM_HTML)
+        self.assertIn('"Nasazení je aktuální ✓"', HUMAN_ADAM_HTML)
+        self.assertIn('deployAuditBtn.classList.toggle("deployment-current", deploymentCurrent);', HUMAN_ADAM_HTML)
+        self.assertIn("Audit ani opakované nasazení nejsou potřeba.", HUMAN_ADAM_HTML)
+        self.assertIn("button.audit-action.deployment-current:disabled", HUMAN_ADAM_HTML)
         self.assertIn(
             "Vývoj spusť tlačítkem Zahájit vývoj. Po úspěšném tahu vznikne lokální commit; GitHub počká na denní balíček. Nasazení z tohoto pracovního proudu není dostupné.",
             HUMAN_ADAM_HTML,

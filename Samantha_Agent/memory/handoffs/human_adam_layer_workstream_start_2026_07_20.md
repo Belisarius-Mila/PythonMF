@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-27 17:15 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-27 18:09 CEST
 
 ### Hotovo
-- Start Samanthy ani aktivní pravidla už nevytvářejí a nepřebírají Voice Bridge marker
+- Panel Práce nyní jasně ukazuje aktuální nasazení a nenabízí zbytečný opakovaný audit
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,20 +15,19 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Provést checkpoint a nasazení; potom pokračovat fází 9.4d odstraněním zbývajícího Voice Bridge runtime a spotřeby markeru
+- Provést checkpoint a nasazení hotfixu a živě ověřit zelený stav na mobilu i Macu
 
 ### Rozhodnutí
-- Private marker se přestává aktivně spravovat, ale jeho existující stav se nemaže a zachovaný Voice Bridge runtime se řeší samostatně
+- Ověřené aktuální nasazení deaktivuje audit a zůstává viditelné přímo na tlačítku Práce
 
 ### Navrhované další kroky
-- V 9.4d auditovaně odstranit Voice Bridge moduly, terminal bridge a spotřebu markeru
-- V 9.4e uklidit zastaralé projektové poznámky a spustit úplnou regresní bránu
-- Adam-R2 vyvíjet samostatně až po dokončení amputace legacy komunikace
+- Po živém ověření pokračovat fází 9.4d odstranění zbývajícího Voice Bridge runtime
+- Úplnou Cockpit bránu spustit v kanonickém prostředí s dostupnými závislostmi
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `62442a1a1bb3`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `62442a1a1bb3` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-27T15:08:46+00:00.
+- Git před checkpointem: lokální `main` na `fc44ca315873`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `fc44ca315873` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-27T15:27:04+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -2392,3 +2391,15 @@ Technický důkaz:
 - Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/AGENTS.md`, `Samantha_Agent/memory/technical/session_recovery_rules.md`, `Samantha_Agent/scripts/mark_current_codex_tty.py`, `Samantha_Agent/scripts/samantha_screen_entry.sh`, `Samantha_Agent/tests/test_codex_session_report.py`
 - Commit: `Retire Voice Bridge marker lifecycle`
 - Další krok: Provést checkpoint a nasazení; potom pokračovat fází 9.4d odstraněním zbývajícího Voice Bridge runtime a spotřeby markeru
+
+### Automatický checkpoint 2026-07-27 18:09 CEST
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Panel Práce nyní jasně ukazuje aktuální nasazení a nenabízí zbytečný opakovaný audit; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 4.3 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/tests/test_human_adam_ui.py`
+- Commit: `Clarify current Cockpit deployment status`
+- Další krok: Provést checkpoint a nasazení hotfixu a živě ověřit zelený stav na mobilu i Macu
