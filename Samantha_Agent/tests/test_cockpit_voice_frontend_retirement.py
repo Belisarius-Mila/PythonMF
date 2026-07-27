@@ -308,19 +308,32 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
     def test_live_diagnostics_do_not_depend_on_voice_bridge_marker(self) -> None:
         quick_check = (PROJECT_ROOT / "scripts" / "system_quick_check.py").read_text(encoding="utf-8")
         session_report = (PROJECT_ROOT / "scripts" / "codex_session_report.py").read_text(encoding="utf-8")
-        readiness = (PROJECT_ROOT / "scripts" / "adam_bridge_readiness_report.py").read_text(encoding="utf-8")
 
         for name, source in (
             ("quick_check", quick_check),
             ("session_report", session_report),
-            ("readiness", readiness),
         ):
             with self.subTest(source=name):
                 self.assertNotIn("current_codex_tty", source)
                 self.assertNotIn("CURRENT_CODEX_TTY_PATH", source)
                 self.assertNotIn("load_marked_codex_tty", source)
         self.assertNotIn("adam_voice_bridge_status", quick_check)
-        self.assertIn("from scripts.codex_session_report import main", readiness)
+
+    def test_dead_voice_bridge_entry_layers_are_absent(self) -> None:
+        retired_paths = (
+            "app/voice_bridge_coordinator.py",
+            "app/voice_bridge_runtime.py",
+            "tests/test_voice_bridge_coordinator.py",
+            "tests/test_voice_bridge_runtime.py",
+            "scripts/adam_voice_mode.py",
+            "scripts/adam_voice_pending.py",
+            "scripts/voice_inbox_triage.py",
+            "scripts/adam_bridge_readiness_report.py",
+        )
+
+        for retired_path in retired_paths:
+            with self.subTest(retired_path=retired_path):
+                self.assertFalse((PROJECT_ROOT / retired_path).exists())
 
 
 if __name__ == "__main__":

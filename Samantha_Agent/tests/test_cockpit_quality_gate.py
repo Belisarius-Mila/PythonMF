@@ -232,6 +232,27 @@ async def second():
         self.assertFalse((PROJECT_ROOT / legacy_source).exists())
         self.assertFalse((PROJECT_ROOT / "tests/test_human_adam_deploy.py").exists())
 
+    def test_dead_voice_bridge_entry_layers_are_not_in_quality_gate(self) -> None:
+        retired_sources = (
+            "app/voice_bridge_coordinator.py",
+            "app/voice_bridge_runtime.py",
+        )
+        retired_tests = (
+            "tests.test_voice_bridge_coordinator",
+            "tests.test_voice_bridge_runtime",
+        )
+
+        for retired_source in retired_sources:
+            with self.subTest(retired_source=retired_source):
+                self.assertNotIn(retired_source, COMPILE_PATHS)
+                self.assertFalse((PROJECT_ROOT / retired_source).exists())
+        for retired_test in retired_tests:
+            with self.subTest(retired_test=retired_test):
+                self.assertNotIn(retired_test, TEST_MODULES)
+                self.assertFalse(
+                    (PROJECT_ROOT / f"{retired_test.replace('.', '/')}.py").exists()
+                )
+
     def test_cockpit_javascript_source_extracts_rendered_script(self) -> None:
         source = cockpit_javascript_source()
 
