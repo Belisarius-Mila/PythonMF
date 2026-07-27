@@ -32,6 +32,7 @@ from app.communication.human_adam_service import (
     HumanAdamService,
 )
 from app.communication.human_adam_workspace import (
+    CANONICAL_PRIVATE_ROOT,
     HUMAN_ADAM_SANDBOX_POLICY,
     HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS,
     HumanAdamWorkspaceManager,
@@ -158,10 +159,15 @@ def workstream_sandbox_policy(
     project_root: Path = PROJECT_ROOT,
 ) -> dict[str, Any]:
     root = private_archive_root(capabilities, project_root=project_root)
+    canonical_private_root = (
+        Path(project_root).resolve() / "data" / "private"
+    ).resolve()
     policy = {
         **HUMAN_ADAM_SANDBOX_POLICY,
         "networkAccess": False,
-        "writableRoots": [str(root)] if root is not None else [],
+        "writableRoots": [
+            str(root if root is not None else canonical_private_root)
+        ],
     }
     return policy
 
@@ -1284,6 +1290,20 @@ class HumanAdamProfileManager:
                     )
                 )
             else:
+                control_lines.extend(
+                    (
+                        f"workspace_writable={'true' if writable else 'false'}",
+                        "canonical_private_access=read_diagnose_and_explicit_single_edit",
+                        f"canonical_private_root={CANONICAL_PRIVATE_ROOT}",
+                        "canonical_private_confirmation_required="
+                        "delete,bulk_change,external_send,secret_operation,system_change",
+                        "rule=When workspace_writable=false, do not change workspace files "
+                        "or Git. One clearly requested, non-destructive private edit under "
+                        "canonical_private_root remains allowed. Read and diagnose this "
+                        "canonical root directly; never infer its absence from the isolated "
+                        "workspace. Never copy private content into Git, logs, handoff or TVBCP.",
+                    )
+                )
                 if integration_deferred:
                     control_lines.extend(
                         (
@@ -3564,7 +3584,6 @@ def build_human_adam_profiles() -> HumanAdamProfileManager:
         )
         private_context_instructions = private_context_developer_instructions(
             workstream_id=record.workstream_id,
-            project_prefix=project_prefix,
         )
         return human_service.detached_session_hub(
             state_path=state_path,

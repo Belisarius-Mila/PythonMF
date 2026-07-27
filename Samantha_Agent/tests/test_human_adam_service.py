@@ -8,6 +8,7 @@ from pathlib import Path
 from app.codex_appserver import AppServerError
 from app.communication import human_adam_service as human_adam_service_module
 from app.communication.human_adam_service import (
+    CANONICAL_PRIVATE_DEVELOPER_INSTRUCTIONS,
     CANONICAL_TVBCP_RELATIVE_PATH,
     HUMAN_ADAM_DEVELOPER_INSTRUCTIONS,
     THREAD_ROTATION_CONFIRMATION_TEXT,
@@ -20,6 +21,7 @@ from app.communication.human_adam_service import (
     human_adam_tvbcp_action,
     human_adam_work_review_action,
 )
+from app.communication.human_adam_workspace import CANONICAL_PRIVATE_ROOT
 
 
 class FakeRuntime:
@@ -262,6 +264,15 @@ class HumanAdamServiceTests(unittest.TestCase):
         self.assertIn("jen samotny nazev bez cele cesty", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
         self.assertIn("pouze pri shodnych nazvech", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
         self.assertIn("absolutni cestu do textoveho okna nevypisuj", HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
+        self.assertIn(str(CANONICAL_PRIVATE_ROOT), HUMAN_ADAM_DEVELOPER_INSTRUCTIONS)
+        self.assertIn(
+            "jednu nedestruktivni upravu",
+            CANONICAL_PRIVATE_DEVELOPER_INSTRUCTIONS,
+        )
+        self.assertIn(
+            "nevytvarej novou branu pro kazdou operaci",
+            CANONICAL_PRIVATE_DEVELOPER_INSTRUCTIONS,
+        )
 
     def test_detached_lazy_hub_can_use_isolated_repository_root(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -320,7 +331,10 @@ class HumanAdamServiceTests(unittest.TestCase):
             requested_policy["writableRoots"] = []
 
         self.assertEqual(detached.sandbox_policy["writableRoots"], [str(live_archive)])
-        self.assertEqual(service.sandbox_policy["writableRoots"], [])
+        self.assertEqual(
+            service.sandbox_policy["writableRoots"],
+            [str(CANONICAL_PRIVATE_ROOT)],
+        )
         self.assertFalse(detached.sandbox_policy["networkAccess"])
 
     def test_status_has_no_process_start_side_effect(self) -> None:

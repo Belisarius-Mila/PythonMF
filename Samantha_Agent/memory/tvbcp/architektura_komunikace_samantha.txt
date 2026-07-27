@@ -3491,6 +3491,39 @@ Technický důkaz:
 - Pracovní proud: `layer-human-adam-development`.
 - Read-only živý stav při checkpointu: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 
+### 2026-07-27 22:50 CEST – Přímá práce Human–Adam s kanonickými private daty
+
+Hotovo:
+- Izolovaný workspace zůstává autoritou pro kód a Git, zatímco skutečná
+  soukromá data se čtou a upravují přímo v kanonické private oblasti.
+- Human–Adam může bez nové mezibrány provést čtení, diagnostiku a jednu jasně
+  zadanou běžnou nedestruktivní úpravu.
+- Knihovna dál používá užší archivní rozsah.
+- Dokončení se posuzuje podle konečného zeleného opakování testů, nikoli podle
+  již opraveného neúspěšného meziběhu.
+
+Rozhodnutí:
+- Nové per-operation brány se nepřidávají. Samostatné potvrzení dál vyžadují
+  pouze mazání, hromadné změny, odesílání ven, tajemství a systémové zásahy.
+- Human–Adam nesmí odvozovat neexistenci kanonických dat z jejich absence v
+  izolované kopii a nesmí private obsah přenášet do git-safe výstupů.
+
+Další krok:
+- Lokálně checkpointovat změnu a po samostatně potvrzeném nasazení provést
+  malý živý test neškodné private operace.
+
+Navrhované další kroky:
+- Po úspěšném živém testu pokračovat bez dalších obecných bezpečnostních vrstev;
+  případné změny dělat jen podle konkrétně doloženého problému.
+
+Rizika:
+- Obecný private rozsah je záměrně širší. Bezpečnost rizikových akcí zajišťuje
+  stávající modelový a globální kontrakt, nikoli nová backendová brána.
+
+Technický důkaz:
+- Prošlo 167 cílených testů a úplná Cockpit Quality Gate se 1150 testy.
+- Python, JavaScript, shell, whitespace a Git safety kontroly jsou zelené.
+
 ### 2026-07-27 18:09 CEST – Panel Práce nyní jasně ukazuje aktuální nasazení a nenabízí zbytečný opakovaný audit
 
 Hotovo:

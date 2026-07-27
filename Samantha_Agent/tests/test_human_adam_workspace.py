@@ -8,6 +8,8 @@ from unittest.mock import patch
 
 from app.codex_appserver import AppServerError
 from app.communication.human_adam_workspace import (
+    CANONICAL_PRIVATE_ROOT,
+    HUMAN_ADAM_SANDBOX_POLICY,
     HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS,
     HumanAdamWorkspaceManager,
     _status_rows,
@@ -56,6 +58,18 @@ class HumanAdamWorkspaceManagerTests(unittest.TestCase):
         self.assertIn(
             "nikdy neprovadej hromadne mazani",
             HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS,
+        )
+        self.assertIn(
+            "kanonicka soukroma oblast",
+            HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS,
+        )
+        self.assertIn(
+            "nikdy neposuzuj podle izolovane",
+            HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS,
+        )
+        self.assertEqual(
+            HUMAN_ADAM_SANDBOX_POLICY["writableRoots"],
+            [str(CANONICAL_PRIVATE_ROOT)],
         )
 
     def test_background_status_does_not_refresh_git_index(self) -> None:

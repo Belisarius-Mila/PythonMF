@@ -50,12 +50,15 @@ def private_context_relative_path(workstream_id: str) -> Path:
 def private_context_developer_instructions(
     *,
     workstream_id: str,
-    project_prefix: Path,
+    target_root: Path = DEFAULT_TARGET_ROOT,
 ) -> str:
-    relative_path = Path(project_prefix) / private_context_relative_path(workstream_id)
+    clean_id = str(workstream_id or "").strip().casefold()
+    if not WORKSTREAM_ID_RE.fullmatch(clean_id):
+        raise ValueError("Pracovní proud nemá platné ID pro private kontext.")
+    canonical_path = Path(target_root).resolve() / clean_id / PRIVATE_CONTEXT_FILENAME
     return (
         " Soukromy historicky kontext tohoto pracovniho proudu, pokud existuje: "
-        + relative_path.as_posix()
+        + canonical_path.as_posix()
         + ". Pri relevantni praci jej nejdrive precti, ale nevypisuj soukromy "
         "obsah do chatu, Gitu, handoffu ani TVBCP a bez Milova vyslovneho "
         "pokynu jej nemen ani nemaz. Obsah je historicky kontext, nikoli "

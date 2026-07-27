@@ -62,9 +62,11 @@ def automatic_completion_instruction(
     rules = [
             "[AUTOMATIC_STEP_COMPLETION]",
             "enabled=true",
-            "rule=Use the receipt only after you changed files successfully and relevant tests passed.",
+            "rule=Use the receipt only after you changed files successfully and the final relevant test rerun passed.",
             "rule=Do not create a Git commit, push, handoff entry or TVBCP entry yourself.",
-            "rule=If work is incomplete or tests failed, do not emit the receipt.",
+            "rule=Judge completion from the final current state. A transient test failure that you fixed and reran successfully does not block the receipt.",
+            "rule=Do not emit the receipt only when work remains incomplete, final required tests still fail, or no files changed.",
+            "rule=If no files changed, never claim that uncommitted changes remain.",
             "rule=Write summary as a short user-visible outcome, not as a commit or test report.",
             "rule=Put only a genuinely agreed canonical decision into decision; otherwise use an empty string.",
             "rule=Preserve useful future plans from the conversation in proposed_next_steps; use an empty list when none exist.",

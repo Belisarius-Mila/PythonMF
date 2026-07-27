@@ -2426,3 +2426,40 @@ Technický důkaz:
 - Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/app/communication/human_adam_profiles.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/app/communication/legacy_tvbcp_migration.py`, `Samantha_Agent/scripts/migrate_legacy_tvbcp_to_brainstorm.py`, `Samantha_Agent/tests/test_legacy_tvbcp_migration.py`
 - Commit: `Add legacy TVBCP migration to Brainstorm`
 - Další krok: Nasadit aktuální main; samotnou private migraci spustit až samostatnou přesnou potvrzovací větou.
+
+### 2026-07-27 22:50 CEST – Human–Adam má obecný přímý přístup ke kanonickým private datům
+
+Hotovo:
+- Human–Adam rozlišuje izolovaný workspace pro kód a Git od kanonické soukromé
+  oblasti pro skutečná provozní data.
+- V kanonické soukromé oblasti může přímo číst, diagnostikovat a na jasný
+  Mílův pokyn provést jednu běžnou nedestruktivní úpravu.
+- Knihovna si zachovává užší přístup pouze ke svému soukromému archivu.
+- Dokončovací účtenka se řídí konečným stavem posledního relevantního opakování
+  testů; opravený meziběh už sám o sobě dokončení neblokuje.
+
+Rozhodnutí:
+- Nevznikají nové operace ani další potvrzovací brány. Stávající zvláštní
+  potvrzení zůstává jen pro mazání, hromadné změny, odesílání ven, práci s
+  tajemstvím a systémové zásahy.
+- Absence soukromého souboru v izolované kopii nesmí být vydávána za absenci
+  kanonických dat.
+
+Další krok:
+- Po samostatně potvrzeném nasazení provést jeden malý živý Human–Adam test nad
+  neškodnou soukromou operací bez opisování jejího obsahu.
+
+Navrhované další kroky:
+- Pokud živý test uspěje, nepřidávat další obecné brány a řešit už jen konkrétní
+  doložené provozní chyby.
+
+Rizika:
+- Přístup k obecné soukromé oblasti je širší než dřívější profilová výjimka.
+  Hranice rizikových akcí proto stojí na stávajícím modelovém a globálním
+  bezpečnostním kontraktu; private texty nesmějí do Gitu, logů, handoffu,
+  TVBCP ani odpovědi.
+
+Technický důkaz:
+- Prošlo 167 cílených testů.
+- Úplná Cockpit Quality Gate prošla 1150 testy; Python, JavaScript, shell,
+  whitespace a Git safety kontroly jsou zelené.

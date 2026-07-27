@@ -17,6 +17,7 @@ from app.file_persistence import atomic_write_json
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SOURCE_REPO_ROOT = PROJECT_ROOT.parent
+CANONICAL_PRIVATE_ROOT = PROJECT_ROOT / "data" / "private"
 DEFAULT_HUMAN_ADAM_ROOT = PROJECT_ROOT / "data" / "private" / "appserver_remote"
 DEFAULT_HUMAN_ADAM_WORKSPACE_ROOT = DEFAULT_HUMAN_ADAM_ROOT / "workspace"
 DEFAULT_HUMAN_ADAM_WORKSPACE_META_PATH = DEFAULT_HUMAN_ADAM_ROOT / "workspace_meta.json"
@@ -25,7 +26,7 @@ HUMAN_ADAM_SANDBOX_MODE = "workspace-write"
 HUMAN_ADAM_SANDBOX_POLICY: dict[str, Any] = {
     "type": "workspaceWrite",
     "networkAccess": False,
-    "writableRoots": [],
+    "writableRoots": [str(CANONICAL_PRIVATE_ROOT)],
 }
 HUMAN_ADAM_APPROVAL_POLICY = "never"
 HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS = (
@@ -33,9 +34,11 @@ HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS = (
     "v izolovane lokalni kopii "
     "repozitare PythonMF. Odpovidej cesky, Mílovi tykej a pracuj vecne. Pred dulezitou praci "
     "si precti AGENTS.md, Samantha_Agent/AGENTS.md, Samantha_Agent/memory/MEMORY_INDEX.md a "
-    "relevantni handoff. Smis cist a upravovat pouze tuto izolovanou pracovní kopii, pouzivat "
-    "nastroje, spoustet testy a pripravovat skutecne zmeny. Nikdy nehledej ani nemen data mimo "
-    "aktualni workspace, nepouzivej sit, neprovadej push ani nemen git remote. Jednotlive "
+    "relevantni handoff. Kod, testy a Git smíš cist a upravovat pouze v teto izolovane pracovni "
+    "kopii. Jedina obecna vyjimka mimo ni je kanonicka soukroma oblast uvedena v aktualnim "
+    "bloku DEVELOPMENT_CONTROL. Tu smíš primo cist pro diagnostiku a na jasny Miluv pokyn v ni "
+    "provest jednu beznou nedestruktivni upravu. Jeji absenci nikdy neposuzuj podle izolovane "
+    "kopie ani podle jejiho PROJECT_ROOT. Nepouzivej sit, neprovadej push ani nemen git remote. Jednotlive "
     "verzovane soubory smes smazat jen kdyz je to vyslovne soucasti Milova zadani nebo jim "
     "schvaleneho vyvojoveho planu; nikdy neprovadej hromadne mazani ani destruktivni git operace. "
     "Pred zmenou zkontroluj stav, zachovej cizi upravy a po "

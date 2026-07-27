@@ -29,6 +29,7 @@ from app.communication.deferred_integration import (
 )
 from app.communication.human_adam_turn_completion import TurnCompletionMetadata
 from app.communication.human_adam_workstream_catalog import WORKSTREAM_CATALOG
+from app.communication.human_adam_workspace import CANONICAL_PRIVATE_ROOT
 from app.communication.human_adam_operations import (
     FAMILY_CALENDAR_TEST_EMAIL_PREVIEW,
     OPERATION_MARKER_END,
@@ -2498,7 +2499,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             list(expected_capabilities.private_archive_confirmation_required),
         )
 
-    def test_private_archive_direct_access_is_not_advertised_outside_knihovna(self) -> None:
+    def test_canonical_private_access_is_available_outside_knihovna(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager, _human_workspace, _library_workspace, human_hub, _library_hub = (
                 self.make_manager(Path(temp_dir))
@@ -2508,6 +2509,7 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
             manager.send(text="Jen analyzuj.", client_message_id="human-read-only")
             model_input = str(human_hub.last_send["model_input_text"])
             sandbox_policy = manager.active_service.sandbox_policy
+            expected_root = CANONICAL_PRIVATE_ROOT
 
         self.assertFalse(capabilities["private_archive_direct"])
         self.assertFalse(capabilities["private_archive_read"])
@@ -2515,7 +2517,21 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertEqual(capabilities["private_archive_confirmation_required"], [])
         self.assertNotIn("private_archive_access=", model_input)
         self.assertNotIn("private_archive_root=", model_input)
-        self.assertEqual(sandbox_policy["writableRoots"], [])
+        self.assertIn(
+            "canonical_private_access=read_diagnose_and_explicit_single_edit",
+            model_input,
+        )
+        self.assertIn(f"canonical_private_root={expected_root}", model_input)
+        self.assertIn(
+            "canonical_private_confirmation_required="
+            "delete,bulk_change,external_send,secret_operation,system_change",
+            model_input,
+        )
+        self.assertIn(
+            "never infer its absence from the isolated workspace",
+            model_input,
+        )
+        self.assertEqual(sandbox_policy["writableRoots"], [str(expected_root)])
         self.assertFalse(sandbox_policy["networkAccess"])
 
     def test_knihovna_policy_keeps_network_closed_and_one_writable_root(self) -> None:
@@ -2534,6 +2550,21 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
         self.assertIn("odeslani ven", KNIHOVNA_DEVELOPER_INSTRUCTIONS)
         self.assertIn("systemovy zasah", KNIHOVNA_DEVELOPER_INSTRUCTIONS)
         self.assertIn("Git, checkpoint, commit, push i nasazeni", KNIHOVNA_DEVELOPER_INSTRUCTIONS)
+
+    def test_non_archive_workstream_uses_one_canonical_private_root(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir) / "Samantha_Agent"
+            capabilities = workstream_capabilities("project-family-calendar")
+            sandbox_policy = workstream_sandbox_policy(
+                capabilities,
+                project_root=project_root,
+            )
+
+        self.assertFalse(sandbox_policy["networkAccess"])
+        self.assertEqual(
+            sandbox_policy["writableRoots"],
+            [str((project_root / "data" / "private").resolve())],
+        )
 
     def test_one_turn_write_preflight_rejects_dirty_active_workspace_before_send(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

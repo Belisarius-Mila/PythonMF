@@ -11,10 +11,15 @@ from app.communication.human_adam_turn_completion import (
 class HumanAdamTurnCompletionTests(unittest.TestCase):
     def test_read_only_turn_gets_no_completion_protocol(self) -> None:
         self.assertEqual(automatic_completion_instruction(writable=False), "")
+        instruction = automatic_completion_instruction(writable=True)
+        self.assertIn("[HUMAN_ADAM_STEP_COMPLETION]", instruction)
+        self.assertIn("final current state", instruction)
         self.assertIn(
-            "[HUMAN_ADAM_STEP_COMPLETION]",
-            automatic_completion_instruction(writable=True),
+            "transient test failure that you fixed and reran successfully",
+            instruction,
         )
+        self.assertIn("final required tests still fail", instruction)
+        self.assertIn("If no files changed", instruction)
 
     def test_valid_final_receipt_is_parsed_and_hidden(self) -> None:
         parsed = parse_turn_completion(

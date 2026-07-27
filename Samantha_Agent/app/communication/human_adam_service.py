@@ -18,6 +18,7 @@ from app.communication.session_hub import (
     SessionHubError,
 )
 from app.communication.human_adam_workspace import (
+    CANONICAL_PRIVATE_ROOT,
     DEFAULT_CODEX_BIN,
     HUMAN_ADAM_APPROVAL_POLICY,
     HUMAN_ADAM_REASONING_EFFORT,
@@ -34,12 +35,26 @@ DEFAULT_SESSION_STATE_PATH = PROJECT_ROOT / "data" / "private" / "communication"
 DEVELOPMENT_CONTROL_DEVELOPER_INSTRUCTIONS = (
     " Pred jakoukoli zmenou souboru nebo Gitu se rid blokem [DEVELOPMENT_CONTROL] "
     "vlozenym pred aktualni zpravu. Zapis je povolen jen pri writable=true. Pri "
-    "writable=false zustan striktne read-only: nic nevytvarej, neupravuj, nemaz ani "
-    "necheckpointuj; muzes analyzovat, vysvetlovat a navrhovat dalsi krok."
+    "writable=false nemen izolovany workspace ani Git. Jedinou vyjimkou je bezna "
+    "nedestruktivni private operace, pokud aktualni blok vyslovne obsahuje "
+    "canonical_private_access nebo private_archive_access a Mila ji jasne zadal. "
+    "Jinak zustan read-only a pouze analyzuj, vysvetluj nebo navrhuj dalsi krok."
+)
+CANONICAL_PRIVATE_DEVELOPER_INSTRUCTIONS = (
+    f" Kanonicka soukroma oblast je {CANONICAL_PRIVATE_ROOT}. Je oddelena od "
+    "izolovane kopie a jeji skutecny stav vzdy overuj primo zde, nikoli pres "
+    "PROJECT_ROOT izolovaneho workspace. Cteni a diagnostika jsou bezne povolene. "
+    "Na Miluv jasny pokyn smíš primo provest jednu nedestruktivni upravu jednoho "
+    "logickeho zaznamu nebo souboru. Dalsi zvlastni potvrzeni vyzaduj jen pro "
+    "mazani nebo odebirani, hromadne zmeny, odesilani ven, praci s tajemstvimi "
+    "a systemove zasahy; pouzij existujici bezpecnostni pravidla, nevytvarej novou "
+    "branu pro kazdou operaci. Private obsah nikdy nevypisuj do Gitu, logu, "
+    "handoffu, TVBCP ani odpovedi a pri vysledku vrat jen nezbytny redigovany dukaz."
 )
 HUMAN_ADAM_DEVELOPER_INSTRUCTIONS = (
     HUMAN_ADAM_WORKSPACE_DEVELOPER_INSTRUCTIONS
     + DEVELOPMENT_CONTROL_DEVELOPER_INSTRUCTIONS
+    + CANONICAL_PRIVATE_DEVELOPER_INSTRUCTIONS
     + (
         " Pro projekt komunikacni architektury pred vetsi praci precti "
         "Samantha_Agent/memory/tvbcp/architektura_komunikace_samantha.txt. "
