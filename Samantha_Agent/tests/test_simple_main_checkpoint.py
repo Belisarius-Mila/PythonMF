@@ -16,6 +16,7 @@ from app.communication.simple_main_checkpoint import (
     SimpleMainCheckpointError,
     SimpleMainCheckpointRequest,
     _checkpoint_status_projection,
+    _safe_deployment_snapshot,
     _replace_current_status,
     complete_simple_main_checkpoint,
     _format_timestamp,
@@ -110,6 +111,40 @@ def fixed_now() -> datetime:
 
 
 class SimpleMainCheckpointTests(unittest.TestCase):
+    def test_quick_deployment_snapshot_is_complete_with_smoke_five_of_five(
+        self,
+    ) -> None:
+        snapshot = _safe_deployment_snapshot(
+            checkpoint_request(
+                last_deployed_main_short="a" * 12,
+                last_deployed_at="2026-07-27T12:25:30+00:00",
+                last_deployed_test_count=0,
+                last_deployed_smoke_count=5,
+                last_deployed_gate_mode="quick",
+            )
+        )
+
+        self.assertEqual(snapshot["last_deployed_gate_mode"], "quick")
+        self.assertEqual(snapshot["last_deployed_test_count"], 0)
+        self.assertEqual(snapshot["last_deployed_smoke_count"], 5)
+
+    def test_deployment_snapshot_rejects_inconsistent_gate_counts(self) -> None:
+        for gate_mode, test_count in (("full", 0), ("quick", 1)):
+            with self.subTest(gate_mode=gate_mode, test_count=test_count):
+                with self.assertRaisesRegex(
+                    SimpleMainCheckpointError,
+                    "úplný serverový důkaz",
+                ):
+                    _safe_deployment_snapshot(
+                        checkpoint_request(
+                            last_deployed_main_short="a" * 12,
+                            last_deployed_at="2026-07-27T12:25:30+00:00",
+                            last_deployed_test_count=test_count,
+                            last_deployed_smoke_count=5,
+                            last_deployed_gate_mode=gate_mode,
+                        )
+                    )
+
     def test_timestamp_is_always_rendered_in_canonical_prague_time(self) -> None:
         github_runner_time = datetime(2026, 7, 20, 5, 0, tzinfo=timezone.utc)
 

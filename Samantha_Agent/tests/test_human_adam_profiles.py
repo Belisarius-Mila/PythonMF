@@ -820,8 +820,9 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
                 "workstream_id": "layer-human-adam-development",
                 "main_head": "a" * 40,
                 "expected_code_stamp": "0123456789abcdef",
-                "test_count": 1216,
+                "test_count": 0,
                 "smoke_count": 5,
+                "gate_mode": "quick",
                 "deployed_at": "2026-07-25T21:56:59+00:00",
                 "prepared_at": "2026-07-25T21:50:00+00:00",
             }
@@ -844,6 +845,9 @@ class HumanAdamProfileManagerTests(unittest.TestCase):
 
         request = checkpoint.call_args.kwargs["request"]
         encoded = json.dumps(request.operational_context, ensure_ascii=False)
+        self.assertEqual(request.last_deployed_gate_mode, "quick")
+        self.assertEqual(request.last_deployed_test_count, 0)
+        self.assertEqual(request.last_deployed_smoke_count, 5)
         self.assertNotIn("never return", encoded.casefold())
         self.assertNotIn("user_text", encoded)
         self.assertNotIn("answer", encoded)

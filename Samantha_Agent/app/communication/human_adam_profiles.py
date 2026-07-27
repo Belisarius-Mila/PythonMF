@@ -725,6 +725,9 @@ class HumanAdamProfileManager:
                     "last_deployed_smoke_count": int(
                         receipt.get("smoke_count") or 0
                     ),
+                    "last_deployed_gate_mode": str(
+                        receipt.get("gate_mode") or "full"
+                    ),
                 }
                 server_evidence = {
                     "code_stamp": str(

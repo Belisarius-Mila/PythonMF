@@ -87,6 +87,7 @@ class SimpleMainCheckpointRequest:
     last_deployed_at: str = ""
     last_deployed_test_count: int = 0
     last_deployed_smoke_count: int = 0
+    last_deployed_gate_mode: str = ""
     operational_context: Mapping[str, Any] = field(
         default_factory=dict,
         repr=False,
@@ -248,6 +249,7 @@ def _safe_deployment_snapshot(
 ) -> dict[str, object]:
     main_short = str(request.last_deployed_main_short or "").strip().casefold()
     deployed_at = str(request.last_deployed_at or "").strip()
+    gate_mode = str(request.last_deployed_gate_mode or "").strip().casefold()
     try:
         test_count = int(request.last_deployed_test_count or 0)
         smoke_count = int(request.last_deployed_smoke_count or 0)
@@ -255,14 +257,19 @@ def _safe_deployment_snapshot(
         raise SimpleMainCheckpointError(
             "Poslední nasazení checkpointu nemá platné číselné důkazy."
         ) from exc
-    values_present = bool(main_short or deployed_at or test_count or smoke_count)
+    values_present = bool(
+        main_short or deployed_at or test_count or smoke_count or gate_mode
+    )
     if not values_present:
         return {
             "last_deployed_main_short": "",
             "last_deployed_at": "",
             "last_deployed_test_count": 0,
             "last_deployed_smoke_count": 0,
+            "last_deployed_gate_mode": "",
         }
+    if not gate_mode:
+        gate_mode = "full"
     try:
         parsed_at = datetime.fromisoformat(deployed_at.replace("Z", "+00:00"))
     except ValueError as exc:
@@ -272,7 +279,9 @@ def _safe_deployment_snapshot(
     if (
         not _SHORT_HEAD_RE.fullmatch(main_short)
         or parsed_at.tzinfo is None
-        or test_count <= 0
+        or (gate_mode == "full" and test_count <= 0)
+        or (gate_mode == "quick" and test_count != 0)
+        or gate_mode not in {"full", "quick"}
         or smoke_count != 5
     ):
         raise SimpleMainCheckpointError(
@@ -283,6 +292,7 @@ def _safe_deployment_snapshot(
         "last_deployed_at": parsed_at.isoformat(),
         "last_deployed_test_count": test_count,
         "last_deployed_smoke_count": smoke_count,
+        "last_deployed_gate_mode": gate_mode,
     }
 
 
