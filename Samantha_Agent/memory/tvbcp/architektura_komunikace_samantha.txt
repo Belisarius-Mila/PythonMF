@@ -3398,3 +3398,55 @@ Navrhované další kroky:
 Technický důkaz:
 - Úplná Cockpit Quality Gate prošla 1269 testy; syntaxe, oba JavaScripty, shell
   a whitespace kontrola jsou zelené.
+
+### 2026-07-27 12:05 CEST – Dávkový režim má jednoznačné UI a terminálový kontrakt
+
+Hotovo:
+- Terminálový Adam používá stejný denní model jako Human–Adam: dokončený krok
+  uloží jako přesně omezený lokální commit, ale automaticky jej nepushuje.
+- `work_context_guard` přijímá čistý lokální `main` napřed jako
+  `GitHub batch pending`; dirty stav, divergence, cizí větev a rozpracovaná Git
+  operace zůstávají blokující.
+- Panel `Práce` vede běžný tok v pořadí lokální vývoj, případné nasazení do
+  Cockpitu a až potom denní GitHub balíček.
+- Nový dynamický souhrn vysvětluje doporučený další krok a odděleně ukazuje
+  lokální vývoj, běžící Cockpit a počet commitů čekajících na GitHub.
+- Nápověda byla zkrácena na stejné tři fáze, používá přesné názvy tlačítek a
+  odstranila poslední zavádějící text o okamžitém pushnutí.
+
+Rozhodnutí:
+- Lokální commit, nasazení do běžícího Cockpitu a GitHub push jsou tři různé
+  události a UI je nesmí směšovat.
+- Po čistém lokálním commitu může další vývoj ihned pokračovat. Cockpit se
+  nasazuje jen tehdy, když změna ovlivňuje jeho běžící UI nebo backend.
+- GitHub zůstává ručně potvrzovaným pozdějším balíčkem s jednou úplnou branou
+  a jedním přesným pushem.
+
+Otevřeno:
+- Samostatně potvrzeně nasadit aktuální lokální `main` do Cockpitu.
+- Ručně ověřit panel `Práce`, jeho nápovědu a doporučený další krok v reálném
+  browseru.
+- Provést malý vzdálený vývoj přes Human–Adam a doložit automatický lokální
+  commit bez pushnutí, okamžité navázání a správný počet čekajících commitů.
+
+Rizika:
+- Vizuální automatizace nebyla v terminálové relaci dostupná; DOM kontrakt a
+  JavaScript jsou otestované, ale živé vykreslení čeká na ruční proof.
+- Divergence GitHubu nadále blokuje pouze denní push a vyžaduje servisní
+  rozhodnutí; lokální commity se nemažou ani automaticky nepřepisují.
+
+Další krok:
+- Nasadit lokální `main` do Cockpitu jedinou potvrzenou cestou a bezprostředně
+  provést krátký vizuální a vzdálený přijímací test.
+
+Navrhované další kroky:
+- Až po provozním testu rozhodnout, zda denní balíček zůstane ruční, nebo dostane
+  pevný večerní čas.
+- Další Git zjednodušení přidávat jen při doloženém problému, ne preventivně.
+
+Technický důkaz:
+- Cílených 58 UI testů a úplných 1272 Cockpit testů prošlo.
+- Python, oba JavaScripty, shell a whitespace kontrola jsou zelené.
+- Terminálový kontrakt je v lokálním commitu `6b9ac52`; tato UI fáze se ukládá
+  jako další lokální commit denního balíčku.
+- Nebyla čtena ani ukládána private data, hesla nebo citlivé texty.

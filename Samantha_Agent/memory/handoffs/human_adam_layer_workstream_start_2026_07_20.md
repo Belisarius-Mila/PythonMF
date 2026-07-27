@@ -1,52 +1,57 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-27 11:19 CEST
+- Aktualizováno terminálovým checkpointem: 2026-07-27 12:05 CEST
 
 ### Hotovo
-- Dávkový GitHub režim zachovává přes den samostatné lokální commity v `main`
-  bez skrytého fetche nebo pushnutí při běžném dokončení vývoje.
-- Běžné změny používají cílené testy a rychlou lokální syntax/whitespace bránu;
-  vyjmenované rizikové cesty nadále ihned spouštějí úplnou Cockpit bránu.
-- Lokální nasazení do Cockpitu může pracovat s čistým lokálním `main`, i když
-  GitHub čeká na večerní balíček.
-- Panel Práce má jednu ruční bránu denního balíčku: read-only audit ukáže přesné
-  commity a po přesné potvrzovací větě provede jednu úplnou bránu a jeden push.
+- Dávkový GitHub backend je nasazený a lokální `main` je přes den provozní
+  autorita. Human–Adam i terminálový Adam ukládají dokončené kroky jako
+  samostatné lokální commity bez automatického denního pushnutí.
+- Čistý lokální `main` napřed je stav `GitHub batch pending`, který neblokuje
+  další téma ani další vývoj; profilové workspaces se bezpečně zarovnávají.
+- Panel `Práce` má připravené pořadí `lokální vývoj -> případné nasazení do
+  Cockpitu -> pozdější denní GitHub balíček` a nový dynamický doporučený krok.
+- Nápověda používá stejné tři fáze a přesné názvy skutečných tlačítek. Starý text
+  o automatickém pushnutí po každém tahu byl odstraněn.
 
 ### Otevřeno
-- Vytvořit a pushnout bootstrap commit této změny.
-- Samostatně potvrzeně nasadit nový čistý `main` do Cockpitu.
-- Po nasazení ručně ověřit jeden malý lokální vývoj a zobrazení čekajícího
-  commitu v panelu Práce; čas případné večerní automatizace zatím není určen.
+- Samostatně potvrzeně nasadit aktuální lokální `main` do Cockpitu.
+- Po nasazení ručně otevřít `Práce` a `Práce -> ?`, ověřit pořadí, čitelnost
+  doporučeného kroku a přesné názvy tlačítek.
+- Provést jeden malý skutečný vývoj přes Human–Adam a ověřit automatický lokální
+  commit bez pushnutí, možnost hned navázat a rostoucí počet commitů v balíčku.
 
 ### Rizika
-- Divergence GitHubu zablokuje pouze denní push a vyžádá servisní rozhodnutí;
-  další lokální checkpoint a lokální nasazení zůstávají dostupné.
+- Běžící Cockpit používá starší UI až do samostatně potvrzeného nasazení.
+- Automatizovaný browser nebyl v terminálové relaci dostupný; vizuální důkaz
+  proto musí vzniknout ručně až nad skutečně nasazeným Cockpitem.
+- Divergence GitHubu zablokuje pouze denní push a vyžádá servisní rozhodnutí.
 - Denní balíček nikdy automaticky nedělá merge, rebase, squash ani force push.
-- Do prvního bootstrap nasazení běží Cockpit ještě podle starého okamžitého
-  commit/push kontraktu.
 
 ### Další krok
-- Commitnout a pushnout tento checkpoint a potom přes samostatnou potvrzovací
-  bránu nasadit aktuální čistý `main` do Cockpitu.
+- Přes samostatnou potvrzovací bránu nasadit aktuální lokální `main` do Cockpitu
+  a provést krátký vizuální a vzdálený přijímací test.
 
 ### Rozhodnutí
 - Lokální `main` je přes den provozní autorita; GitHub je dávkový vzdálený cíl.
-- Jednotlivé commity se nesquashují. Večer proběhne jedna úplná brána a jeden
-  přesný push všech čekajících commitů.
+- Lokální commit, nasazení do Cockpitu a GitHub push jsou tři odlišné kroky.
+- Nasazení je potřeba jen pro změnu běžícího UI nebo backendu; dokumentační
+  checkpoint ani další lokální vývoj je nevyžadují.
+- Jednotlivé commity se nesquashují. Při uzavření balíčku proběhne jedna úplná
+  brána a jeden přesný push všech čekajících commitů.
 - Neúspěšný nebo divergentní večerní balíček nesmí zastavit další lokální vývoj.
 
 ### Navrhované další kroky
 - Po živém retestu určit vhodný večerní čas nebo ponechat ruční spouštění.
-- Teprve podle provozní zkušenosti zvážit další zjednodušení Git procedury.
+- Další zjednodušení dělat pouze podle skutečného provozního problému.
 
 ### Technický stav checkpointu
-- Úplná Cockpit Quality Gate prošla 1269 testy.
+- Cílených 58 UI testů a úplných 1272 testů prošlo.
 - Python, oba JavaScripty, shell a `git diff --check` jsou zelené.
-- Výchozí `main == origin/main` je `1959b383dcf9`; změny jsou před commitem
-  záměrně viditelné v pracovním stromu.
+- Terminálový dávkový režim je uložený v lokálním commitu `6b9ac52`; tato UI
+  fáze se přidává jako další samostatný lokální commit stejného denního balíčku.
 - Nebyla čtena ani ukládána private data, hesla nebo citlivé texty.
-- Tento snapshot sám ještě nepotvrzuje push ani nasazení.
+- Tento snapshot nepotvrzuje GitHub push, nasazení ani vizuální živý test.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 

@@ -42,6 +42,15 @@ Registr projektu a oblasti. Sloupec `Rezim` urcuje viditelnost: `active` je bezn
 
 ## Aktualni navazani
 
+- 2026-07-27 12:05 CEST: Priorita 1, Human–Adam / uzavření dávkového UI.
+  Panel `Práce` nyní vede v pořadí lokální vývoj, případné nasazení do Cockpitu
+  a až potom denní GitHub balíček. Nový dynamický souhrn říká, zda lze pokračovat
+  vývojem, zda lokální kód čeká na nasazení a kolik commitů čeká na GitHub.
+  Nápověda používá stejné tři kroky, přesné názvy tlačítek a již neslibuje
+  automatický push po každém tahu. Cílených 58 a úplných 1272 testů prošlo.
+  Fáze je v lokálním denním balíčku; zbývá samostatné nasazení a ruční vizuální
+  plus jeden malý vzdálený přijímací test. Handoff:
+  `handoffs/human_adam_layer_workstream_start_2026_07_20.md`.
 - 2026-07-27 11:19 CEST: Priorita 1, Human–Adam / dávkový GitHub režim.
   Lokální `main` je přes den autorita, jednotlivé commity se zachovávají a
   GitHub čeká na ruční denní balíček. Běžné změny mají rychlou lokální bránu,

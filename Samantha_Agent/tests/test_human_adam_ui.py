@@ -43,6 +43,11 @@ class HumanAdamUiTests(unittest.TestCase):
             "workHelpBtn",
             "workHelpPanel",
             "workHelpCloseBtn",
+            "batchWorkflowBox",
+            "batchWorkflowNext",
+            "batchWorkflowLocal",
+            "batchWorkflowDeploy",
+            "batchWorkflowGithub",
             "liveWorkStatusBox",
             "liveWorkStatusMeta",
             "liveWorkStatusAxes",
@@ -617,7 +622,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("const simpleDeployReady = workstreamDeploymentEnabled", HUMAN_ADAM_HTML)
         self.assertIn("deployBtn.hidden = !workstreamDeploymentEnabled;", HUMAN_ADAM_HTML)
         self.assertIn(
-            "Vývoj spusť tlačítkem Zahájit vývoj. Po úspěšném tahu se změny automaticky checkpointují, commitnou a pushnou; nasazení z tohoto pracovního proudu zatím není dostupné.",
+            "Vývoj spusť tlačítkem Zahájit vývoj. Po úspěšném tahu vznikne lokální commit; GitHub počká na denní balíček. Nasazení z tohoto pracovního proudu není dostupné.",
             HUMAN_ADAM_HTML,
         )
         self.assertNotIn("MMTX pilot", HUMAN_ADAM_HTML)
@@ -709,26 +714,24 @@ class HumanAdamUiTests(unittest.TestCase):
             "privateArchiveHelp.hidden = capabilities.private_archive_direct !== true;",
             HUMAN_ADAM_HTML,
         )
-        self.assertIn("Při běžném čistém a zarovnaném <code>main</code>", panel_source)
-        self.assertIn("samostatný commit přímo v <code>main</code>", panel_source)
-        self.assertIn("GitHub běžný denní vývoj nezdržuje", panel_source)
-        self.assertIn("jedním pushem odešle všechny čekající commity", panel_source)
-        self.assertIn("tah zůstane bezpečně odložený bez commitu a pushnutí", panel_source)
-        self.assertIn("read-only audit čekající integrace", panel_source)
+        self.assertIn("samostatný lokální commit přímo v <code>main</code>", panel_source)
+        self.assertIn("Nic tím ještě neposílá na GitHub ani nenačítá do běžícího Cockpitu", panel_source)
+        self.assertIn("můžeš hned zadat další vývoj", panel_source)
+        self.assertIn("GitHub běžný vývoj nezdržuje", panel_source)
+        self.assertIn("jedním pushem odešle celý balíček", panel_source)
         self.assertIn("denní balíček se bezpečně zastaví", panel_source)
         self.assertIn("žádný merge, rebase ani force push se nespustí automaticky", panel_source)
         self.assertIn("Převzít přesný WIP do main", panel_source)
         self.assertIn("private ownership marker odpovídá přesnému WIP", panel_source)
         self.assertIn("cizím WIP, divergenci nebo neshodě markeru", panel_source)
         self.assertIn("Nasazení", panel_source)
-        self.assertIn("Nasazovací tlačítka se zobrazí jen u pracovního proudu", panel_source)
         self.assertIn("Audit nasazení do Cockpitu", panel_source)
+        self.assertIn("Nasadit aktuální main do Cockpitu", panel_source)
         self.assertIn("Běžící Cockpit ověřen", panel_source)
         self.assertIn(
-            "Automatické dokončení vývoje dokončí lokální Git, nikoli běžící Cockpit.",
+            "Lokální commit není nasazení.",
             panel_source,
         )
-        self.assertIn("právě jednou následující dva kroky", panel_source)
         self.assertIn("Git/main", panel_source)
         self.assertIn("Nasazení nespouštěj současně", panel_source)
         self.assertIn(
@@ -757,6 +760,35 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('workHelpBtn.setAttribute("aria-expanded"', toggle_source)
         self.assertIn('workHelpBtn.addEventListener("click"', HUMAN_ADAM_HTML)
         self.assertIn('workHelpCloseBtn.addEventListener("click"', HUMAN_ADAM_HTML)
+
+    def test_batch_workflow_guide_prioritizes_local_deploy_then_github(self) -> None:
+        panel_start = HUMAN_ADAM_HTML.index('id="workPanel"')
+        deploy = HUMAN_ADAM_HTML.index('id="deployAuditBtn"', panel_start)
+        batch = HUMAN_ADAM_HTML.index('id="githubBatchBox"', panel_start)
+        render_start = HUMAN_ADAM_HTML.index("function renderBatchWorkflow(payload)")
+        render_end = HUMAN_ADAM_HTML.index(
+            "function renderGithubBatchAudit(audit)",
+            render_start,
+        )
+        render_source = HUMAN_ADAM_HTML[render_start:render_end]
+
+        self.assertLess(deploy, batch)
+        self.assertIn("Dnešní jednoduchý režim", HUMAN_ADAM_HTML)
+        self.assertIn(
+            "Můžeš pokračovat dalším vývojem. GitHub nemusí čekání přerušit.",
+            render_source,
+        )
+        self.assertIn(
+            "nasazuj jen změnu běžícího UI nebo backendu",
+            render_source,
+        )
+        self.assertIn(
+            "GitHub: ověřuji počet commitů čekajících v denním balíčku.",
+            render_source,
+        )
+        self.assertIn("renderBatchWorkflow(payload)", HUMAN_ADAM_HTML)
+        self.assertNotIn("method:", render_source)
+        self.assertNotIn("api(", render_source)
 
     def test_legacy_work_controls_are_kept_only_as_hidden_compatibility_layer(self) -> None:
         self.assertIn(".legacy-work-control { display:none !important; }", HUMAN_ADAM_HTML)

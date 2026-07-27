@@ -118,6 +118,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .workflow-help-safety { margin-top:14px !important; padding:9px 11px; border-radius:10px; background:#ecfdf3; color:var(--ok) !important; }
     .legacy-work-control { display:none !important; }
     .work-help-panel { flex:0 0 auto; margin:12px 16px; }
+    .batch-workflow-box { margin:0 16px 14px; padding:14px; border:1px solid #bfdbfe; border-radius:13px; background:#eff6ff; }
+    .batch-workflow-box h3 { margin:0 0 5px; font-size:15px; }
+    .batch-workflow-box p { margin:0; color:var(--blue); font-size:14px; font-weight:700; }
+    .batch-workflow-box ol { margin:9px 0 0; padding-left:23px; }
+    .batch-workflow-box li { margin:5px 0; line-height:1.4; }
     .live-work-status-box { margin:0 0 14px; padding:12px; border:1px solid #dbe3ee; border-radius:12px; background:#f8fafc; }
     .live-work-status-box[data-state="current"],.live-work-status-box[data-state="current_runtime_disconnected"] { border-color:#bbf7d0; background:#f0fdf4; }
     .live-work-status-box[data-state="attention_required"],.live-work-status-box[data-state="unverified"] { border-color:#fed7aa; background:#fff7ed; }
@@ -241,28 +246,27 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <div class="simple-work-help">
         <p>Toto je pouze nápověda. Jejím otevřením se nic nemění, necommitne ani nenasadí.</p>
 
-        <h4>Běžný vývoj</h4>
+        <h4>1. Běžný vývoj</h4>
         <ol>
           <li>Vyber správný pracovní proud a klikni na <strong>Připojit</strong>.</li>
           <li>Před změnou kódu nebo projektových souborů klikni na <strong>Zahájit vývoj</strong> a potvrď jednorázové oprávnění. Platí pouze pro následující odeslaný pokyn; bez něj Adam zůstává pro workspace a Git read-only.</li>
           <li id="privateArchiveHelp" hidden><strong>Soukromý archiv aktivního proudu:</strong> čtení, diagnostiku a jednu jasně zadanou běžnou nedestruktivní úpravu pošli přímo bez tlačítka Zahájit vývoj. Samostatné potvrzení zůstává pro mazání, hromadné změny, odesílání ven a systémové zásahy.</li>
           <li>Vývojový úkol napiš přímo Adamovi do textového pole. Nový projekt, tool nebo layer se zakládá pouze v terminálovém dialogu s Adamem.</li>
-          <li>Při běžném čistém a zarovnaném <code>main</code> Adam po úspěšné změně spustí cílené testy a rychlou lokální bránu, aktualizuje handoff a TVBCP, vytvoří samostatný commit přímo v <code>main</code> a synchronizuje čisté profily. GitHub běžný denní vývoj nezdržuje.</li>
-          <li>Lokální commity se přes den zachovávají jednotlivě. V okně <strong>Práce</strong> uvidíš jejich počet; až budeš chtít denní balíček odeslat, vložíš přesnou potvrzovací větu. Cockpit pak jednou spustí úplnou bránu a jedním pushem odešle všechny čekající commity na GitHub.</li>
-          <li>Pokud začlenění blokuje rozpracovaná terminálová práce, tah zůstane bezpečně odložený bez commitu a pushnutí. Okno <strong>Práce</strong> potom ukáže read-only audit čekající integrace a nabídne samostatně potvrzované převzetí pouze při čistém nezměněném <code>main</code> a ověřeném původu přesného WIP.</li>
-          <li>Okno <strong>Práce</strong> otevři pro kontrolu čistého stavu, diagnostiku rozpracovaných změn nebo podporované nasazení.</li>
+          <li>Po úspěšné změně Adam spustí odpovídající testy, vytvoří samostatný lokální commit přímo v <code>main</code> a synchronizuje čisté profily. Nic tím ještě neposílá na GitHub ani nenačítá do běžícího Cockpitu.</li>
+          <li>Pokud panel ukazuje čistý stav, můžeš hned zadat další vývoj. Lokální commity se přes den bezpečně skládají do denního balíčku.</li>
         </ol>
 
-        <h4>Nasazení</h4>
-        <p>Nasazovací tlačítka se zobrazí jen u pracovního proudu, který nasazení podporuje. U ostatních proudů zůstává v okně Práce pouze stav a bezpečné vysvětlení.</p>
-        <p><strong>Automatické dokončení vývoje dokončí lokální Git, nikoli běžící Cockpit.</strong> Commit se začlení do lokálního <code>main</code> a synchronizuje do čistých profilů; GitHub čeká na denní balíček. Již spuštěný Python proces dál používá dříve načtený kód. Pokud má nový commit ovlivnit Cockpit, pro tento commit proveď právě jednou následující dva kroky.</p>
+        <h4>2. Nasazení do Cockpitu</h4>
+        <p><strong>Lokální commit není nasazení.</strong> Nasazuj jen tehdy, když má nový kód změnit běžící rozhraní nebo backend Cockpitu. Dokumentační změna ani další běžný vývoj nasazení nepotřebují.</p>
         <ol>
-          <li>Workspace musí být čistý, synchronní a odpovídat <code>main</code>.</li>
-          <li>Jednou stiskni <strong>Audit nasazení do Cockpitu</strong> a přečti výsledek.</li>
-          <li>Vlož zobrazenou přesnou větu a jednou stiskni <strong>Restartovat Cockpit na auditovaný commit a ověřit</strong>.</li>
+          <li>V okně <strong>Práce</strong> jednou stiskni <strong>Audit nasazení do Cockpitu</strong>.</li>
+          <li>Vlož zobrazenou přesnou větu a jednou stiskni <strong>Nasadit aktuální main do Cockpitu</strong>.</li>
           <li>Počkej na řízený restart a potvrzení <strong>Běžící Cockpit ověřen</strong>.</li>
         </ol>
-        <p>Stavový řádek vždy rozlišuje aktuální <code>Git/main</code> od commitu načteného v běžícím Cockpitu. Zelená shoda znamená, že běží aktuální <code>main</code>; oranžový rozdíl znamená, že nový commit ještě čeká na nasazení do Cockpitu. Nasazení nespouštěj současně z Cockpitu a z terminálového Adama.</p>
+        <p>Nasazení nespouštěj současně z Cockpitu a z terminálového Adama. Stavový řádek vždy rozlišuje lokální <code>Git/main</code> od kódu načteného v běžícím Cockpitu.</p>
+
+        <h4>3. Denní GitHub balíček</h4>
+        <p>GitHub běžný vývoj nezdržuje. Až budeš chtít uzavřít denní balíček, otevři <strong>Práce</strong>, zkontroluj seznam čekajících commitů a vlož přesnou potvrzovací větu. Cockpit potom jednou spustí úplnou bránu a jedním pushem odešle celý balíček.</p>
 
         <h4>Když něco nejde</h4>
         <ul>
@@ -276,6 +280,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
         <p class="workflow-help-safety"><strong>Nouzový postup:</strong> nic nemaž, nepoužívej reset, rebase ani force push. Požádej Adama o read-only kontrolu.</p>
       </div>
+    </section>
+    <section class="batch-workflow-box" id="batchWorkflowBox" aria-label="Dnešní jednoduchý vývojový režim" hidden>
+      <h3>Dnešní jednoduchý režim</h3>
+      <p id="batchWorkflowNext" role="status">Načítám doporučený další krok.</p>
+      <ol>
+        <li id="batchWorkflowLocal">Vývoj: stav se načítá.</li>
+        <li id="batchWorkflowDeploy">Cockpit: stav se načítá.</li>
+        <li id="batchWorkflowGithub">GitHub: stav se načítá.</li>
+      </ol>
     </section>
     <section class="development-semaphore-box legacy-work-control" aria-label="Historický globální vývojový semafor">
       <h3>Vývojový semafor</h3>
@@ -346,6 +359,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <ul id="mainSyncChanges" hidden></ul>
         <button class="audit-action" id="mainSyncBtn" type="button" disabled>Dorovnat main s GitHubem</button>
       </section>
+      <div class="legacy-work-control" id="handoffTakeoverCheck" role="status" hidden></div>
+      <button class="audit-action" id="deployAuditBtn" type="button" disabled>Audit nasazení do Cockpitu</button>
+      <input id="deployConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Po auditu sem vlož potvrzovací větu" hidden disabled>
+      <button class="deploy-action" id="deployBtn" type="button" disabled>Nasadit aktuální main do Cockpitu</button>
       <section class="integration-audit-box" id="githubBatchBox" aria-label="Denní GitHub balíček" hidden>
         <h3>Denní GitHub balíček</h3>
         <p id="githubBatchMeta">Stav se prověří při otevření panelu Práce.</p>
@@ -353,10 +370,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <input id="githubBatchConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Po auditu sem vlož potvrzovací větu" hidden disabled>
         <button class="deploy-action" id="githubBatchBtn" type="button" hidden disabled>Odeslat denní balíček na GitHub</button>
       </section>
-      <div class="legacy-work-control" id="handoffTakeoverCheck" role="status" hidden></div>
-      <button class="audit-action" id="deployAuditBtn" type="button" disabled>Audit nasazení do Cockpitu</button>
-      <input id="deployConfirmation" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="Po auditu sem vlož potvrzovací větu" hidden disabled>
-      <button class="deploy-action" id="deployBtn" type="button" disabled>Nasadit aktuální main do Cockpitu</button>
     </div>
     </div>
   </aside>
@@ -412,6 +425,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const workHelpPanel = document.getElementById("workHelpPanel");
   const workHelpCloseBtn = document.getElementById("workHelpCloseBtn");
   const privateArchiveHelp = document.getElementById("privateArchiveHelp");
+  const batchWorkflowBox = document.getElementById("batchWorkflowBox");
+  const batchWorkflowNext = document.getElementById("batchWorkflowNext");
+  const batchWorkflowLocal = document.getElementById("batchWorkflowLocal");
+  const batchWorkflowDeploy = document.getElementById("batchWorkflowDeploy");
+  const batchWorkflowGithub = document.getElementById("batchWorkflowGithub");
   const liveWorkStatusBox = document.getElementById("liveWorkStatusBox");
   const liveWorkStatusMeta = document.getElementById("liveWorkStatusMeta");
   const liveWorkStatusAxes = document.getElementById("liveWorkStatusAxes");
@@ -1743,6 +1761,49 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     }
   }
 
+  function renderBatchWorkflow(payload) {
+    batchWorkflowBox.hidden = !githubBatchModeEnabled;
+    if (!githubBatchModeEnabled) return;
+    const workspace = payload && typeof payload === "object" ? payload : {};
+    const live = workspace.workstream_live_status && typeof workspace.workstream_live_status === "object"
+      ? workspace.workstream_live_status
+      : {};
+    const deployment = live.deployment && typeof live.deployment === "object"
+      ? live.deployment
+      : {};
+    const deploymentState = String(deployment.state || "unverified");
+    const relation = String(workspace.workspace_relation || "unknown");
+
+    if (workspace.dirty) {
+      batchWorkflowLocal.textContent = `Vývoj: čeká dokončení ${Number(workspace.change_count || 0)} pracovních změn.`;
+      batchWorkflowNext.textContent = "Nejdřív nech Adama bezpečně dokončit lokální commit.";
+    } else if (relation !== "aligned") {
+      batchWorkflowLocal.textContent = "Vývoj: workspace není čistě zarovnaný s lokálním main.";
+      batchWorkflowNext.textContent = "Nejdřív přečti zobrazený audit; nic neopakuj naslepo.";
+    } else {
+      batchWorkflowLocal.textContent = "Vývoj: lokální main i profily jsou čisté; můžeš zadat další krok.";
+      batchWorkflowNext.textContent = "Můžeš pokračovat dalším vývojem. GitHub nemusí čekání přerušit.";
+    }
+
+    if (!workstreamDeploymentEnabled) {
+      batchWorkflowDeploy.textContent = "Cockpit: tento pracovní proud nemá vlastní nasazení.";
+    } else if (deploymentState === "verified_current") {
+      batchWorkflowDeploy.textContent = "Cockpit: běží aktuální lokální main; nasazení není potřeba.";
+    } else if (
+      deploymentState === "pending_restart"
+      || deploymentState === "verified_other_main"
+      || deploymentState === "code_mismatch"
+    ) {
+      batchWorkflowDeploy.textContent = "Cockpit: lokální main je novější; nasazuj jen změnu běžícího UI nebo backendu.";
+      if (!workspace.dirty && relation === "aligned") {
+        batchWorkflowNext.textContent = "Můžeš pokračovat; pokud změna ovlivňuje Cockpit, použij jednou jeho audit a nasazení.";
+      }
+    } else {
+      batchWorkflowDeploy.textContent = "Cockpit: shodu s lokálním main zatím nelze potvrdit.";
+    }
+    batchWorkflowGithub.textContent = "GitHub: ověřuji počet commitů čekajících v denním balíčku.";
+  }
+
   function renderGithubBatchAudit(audit) {
     githubBatchAudit = audit && typeof audit === "object" ? audit : null;
     githubBatchBox.hidden = !githubBatchModeEnabled;
@@ -1755,6 +1816,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     if (!githubBatchModeEnabled) return;
     if (!githubBatchAudit) {
       githubBatchMeta.textContent = "Denní balíček zatím nebyl ověřen.";
+      batchWorkflowGithub.textContent = "GitHub: denní balíček zatím nebyl ověřen.";
       return;
     }
     const state = String(githubBatchAudit.state || "");
@@ -1769,6 +1831,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       const count = Number(githubBatchAudit.commit_count || 0);
       const files = Number(githubBatchAudit.change_count || 0);
       githubBatchMeta.textContent = `${count} čekajících commitů · ${files} změněných souborů · před jedním pushem proběhne úplná brána · vlož přesně: ${githubBatchAudit.confirmation_text || ""}`;
+      batchWorkflowGithub.textContent = `GitHub: ${count} lokálních commitů bezpečně čeká na pozdější denní balíček.`;
       githubBatchConfirmation.hidden = false;
       githubBatchConfirmation.disabled = false;
       githubBatchBtn.hidden = false;
@@ -1776,17 +1839,21 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     }
     if (state === "aligned") {
       githubBatchMeta.textContent = "GitHub je aktuální; žádný denní balíček nečeká.";
+      batchWorkflowGithub.textContent = "GitHub: žádný lokální commit nečeká.";
       return;
     }
     if (state === "origin_ahead") {
       githubBatchMeta.textContent = "GitHub je napřed. Nejdřív použij bezpečné dorovnání main; balíček se neodeslal.";
+      batchWorkflowGithub.textContent = "GitHub: je napřed; další lokální vývoj může pokračovat, ale balíček čeká na dorovnání.";
       return;
     }
     if (state === "diverged") {
       githubBatchMeta.textContent = "Lokální main a GitHub se rozešly. Balíček je zablokovaný a vyžaduje servisní rozhodnutí.";
+      batchWorkflowGithub.textContent = "GitHub: balíček blokuje divergence; lokální práci nemaž.";
       return;
     }
     githubBatchMeta.textContent = githubBatchAudit.message || "Denní balíček nelze bezpečně ověřit.";
+    batchWorkflowGithub.textContent = "GitHub: denní balíček nelze bezpečně ověřit.";
   }
 
   async function auditGithubBatch() {
@@ -1855,6 +1922,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     renderHandoffProposal(payload.handoff_proposal || null);
     renderPendingIntegrationAudit(payload.pending_integration_audit || null);
     renderWorkstreamLiveStatus(payload.workstream_live_status || null);
+    renderBatchWorkflow(payload);
     workChanges.replaceChildren();
     const pending = Array.isArray(payload.changes) ? payload.changes : [];
     const checkpointed = Array.isArray(payload.checkpoint_changes) ? payload.checkpoint_changes : [];
@@ -1891,7 +1959,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     deployBtn.disabled = true;
     deployBtn.textContent = "Nasadit aktuální main do Cockpitu";
     if (!workstreamDevelopmentEnabled) deployMeta.textContent = "Tento pracovní proud je pouze pro čtení; vývoj zde zatím není povolen.";
-    else if (!workstreamDeploymentEnabled) deployMeta.textContent = "Vývoj spusť tlačítkem Zahájit vývoj. Po úspěšném tahu se změny automaticky checkpointují, commitnou a pushnou; nasazení z tohoto pracovního proudu zatím není dostupné.";
+    else if (!workstreamDeploymentEnabled) deployMeta.textContent = "Vývoj spusť tlačítkem Zahájit vývoj. Po úspěšném tahu vznikne lokální commit; GitHub počká na denní balíček. Nasazení z tohoto pracovního proudu není dostupné.";
     else if (payload.dirty) deployMeta.textContent = "Nejdřív dokonči automatický checkpoint změn do main.";
     else if (payload.local_checkpoint_ahead) deployMeta.textContent = "Je zachovaný starší lokální checkpoint; nejdřív proveď servisní kontrolu.";
     else if (checkpointPreserved) deployMeta.textContent = "WIP je bezpečně zachovaný, ale audit je zablokovaný. Nejdřív proveď obnovu nad aktuálním main.";
