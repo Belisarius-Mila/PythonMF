@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from app.documents.search_service import (
+    document_reference,
     document_search_intent_bonus,
     document_search_query_intent,
     search_document_index,
@@ -55,6 +56,42 @@ class DocumentSearchServiceTests(unittest.TestCase):
         self.assertEqual(result["count"], 1)
         self.assertEqual(result["results"][0]["source_type"], "document")
         self.assertEqual(result["results"][0]["reading_status"], "needs_review")
+
+    def test_machine_document_id_with_long_digits_is_not_content_redacted(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            vault = Path(temp_dir) / "documents"
+            index = vault / "index"
+            index.mkdir(parents=True)
+            document_id = "kooperativa-pojisteni-vozidla-6300720621-2023"
+            record = {
+                "document_id": document_id,
+                "title": "Pojištění vozidla",
+                "domain": "insurance",
+            }
+            (index / "documents_index.jsonl").write_text(
+                json.dumps(record, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+            (index / "text_index.jsonl").write_text("", encoding="utf-8")
+
+            result = search_document_index(
+                "pojištění vozidla",
+                vault_dir=vault,
+                source_type="document",
+            )
+
+        self.assertEqual(result["count"], 1)
+        self.assertEqual(result["results"][0]["document_id"], document_id)
+        self.assertEqual(
+            result["results"][0]["document_ref"],
+            document_reference(document_id),
+        )
+        self.assertNotIn(
+            "[rodne cislo redigovano]",
+            result["results"][0]["document_id"],
+        )
 
     def test_search_pages_preserve_total_count_and_stable_order(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

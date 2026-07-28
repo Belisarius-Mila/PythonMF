@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-28 19:19 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-28 20:50 CEST
 
 ### Hotovo
-- R2-Adam umí bezpečně vytvořit úplný soupis nebo přehled z více než pěti potvrzených dokumentů bez tichého oříznutí výsledků.
+- R2-Adam nyní bezpečně zpracuje úplnou potvrzenou sadu pojišťovacích dokumentů a používá strukturované údaje z celého dokumentu.
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -15,19 +15,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Vytvořit checkpoint, nasadit změnu a živě ověřit soupis z více než pěti dokumentů.
+- Vytvořit checkpoint, nasadit změnu a zopakovat praktický přehled šesti dokumentů v chatu R2-Adam.
 
 ### Rozhodnutí
-- Požadavek na všechny dokumenty se nesmí tiše omezit na prvních pět; názvy se zpracují z metadat a obsahové přehledy po dávkách.
+- Chybějící nebo nejednoznačné údaje se označí jako nezjištěno a nikdy se nedomýšlejí.
 
 ### Navrhované další kroky
-- Po živém ověření doplnit samostatně potvrzovaný tisk dokumentu.
-- Později doplnit potvrzované odeslání dokumentu e-mailem.
+- Po nasazení potvrdit zobrazenou šestici a ověřit výsledný TXT v dokumentové čtečce.
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `37bb35bb2862`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `37bb35bb2862` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T16:45:46+00:00.
+- Git před checkpointem: lokální `main` na `9bf1b8660125`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `9bf1b8660125` · odpovídá ověřenému main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-07-28T17:31:08+00:00.
 - Read-only živý stav: main=`local_ahead`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -206,3 +205,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (10): `Samantha_Agent/app/communication/janicka_r2_backend.py`, `Samantha_Agent/app/communication/janicka_r2_chat.py`, `Samantha_Agent/app/communication/janicka_r2_compiler.py`, `Samantha_Agent/app/communication/janicka_r2_document_selection.py`, `Samantha_Agent/app/documents/search_service.py`, `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/tests/test_document_search_service.py`, `Samantha_Agent/tests/test_janicka_r2_chat.py`, `Samantha_Agent/tests/test_janicka_r2_complete_selection.py`
 - Commit: `Support complete batched R2 document sets`
 - Další krok: Vytvořit checkpoint, nasadit změnu a živě ověřit soupis z více než pěti dokumentů.
+
+### Automatický checkpoint 2026-07-28 20:50 CEST
+
+- Pracovní proud: `project-r2-adam-janicka`
+- Hotovo: R2-Adam nyní bezpečně zpracuje úplnou potvrzenou sadu pojišťovacích dokumentů a používá strukturované údaje z celého dokumentu.; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.; Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 4.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (10): `Samantha_Agent/app/communication/janicka_r2_backend.py`, `Samantha_Agent/app/communication/janicka_r2_chat.py`, `Samantha_Agent/app/documents/consistency_audit.py`, `Samantha_Agent/app/documents/search_service.py`, `Samantha_Agent/app/documents/vault.py`, `Samantha_Agent/tests/test_document_consistency_audit.py`, `Samantha_Agent/tests/test_document_search_service.py`, `Samantha_Agent/tests/test_document_vault_tools.py`, `Samantha_Agent/tests/test_janicka_r2_chat.py`, `Samantha_Agent/tests/test_janicka_r2_complete_selection.py`
+- Commit: `Fix complete R2 insurance overviews`
+- Další krok: Vytvořit checkpoint, nasadit změnu a zopakovat praktický přehled šesti dokumentů v chatu R2-Adam.

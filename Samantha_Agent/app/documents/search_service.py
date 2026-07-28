@@ -48,6 +48,14 @@ READING_STATUS_ALIASES = {
 MAX_DOCUMENT_SEARCH_PAGE_SIZE = 20
 
 
+def validated_document_id(value: object) -> str:
+    """Keep one machine identifier intact after strict slug validation."""
+
+    raw = str(value or "").strip()
+    normalized = safe_slug(raw, default="", limit=140)
+    return raw if raw and normalized == raw else ""
+
+
 def normalize_reading_status(value: str) -> str:
     normalized = safe_slug(value, default="", limit=80)
     if normalized in READING_STATUS_LABELS:
@@ -156,13 +164,15 @@ def search_document_index(
     results: list[dict[str, Any]] = []
     for score, metadata, snippet, text_chars in sorted(scored, key=lambda row: row[0], reverse=True):
         reading_status = effective_document_reading_status(metadata, text_chars=text_chars)
+        raw_document_id = str(metadata.get("document_id", "")).strip()
+        document_id = validated_document_id(raw_document_id)
         results.append(
             {
                 "score": score,
                 "source_type": "document",
                 "source_label": "Dokument",
-                "document_ref": document_reference(str(metadata.get("document_id", ""))),
-                "document_id": safe_text(str(metadata.get("document_id", ""))),
+                "document_ref": document_reference(raw_document_id),
+                "document_id": document_id,
                 "title": safe_text(str(metadata.get("title") or metadata.get("original_filename") or "")),
                 "original_filename": safe_text(str(metadata.get("original_filename", ""))),
                 "domain": safe_text(str(metadata.get("domain", ""))),

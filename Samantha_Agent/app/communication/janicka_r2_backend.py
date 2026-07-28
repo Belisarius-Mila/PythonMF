@@ -135,7 +135,9 @@ class JanickaR2Backend:
             "result_set_ref a nikdy nevydavej oriznuty vysledek za uplny. Pro pouhy "
             "soupis nazvu pouzij compile_complete_title_list bez fulltextove inspekce. "
             "Pro obsahovy prehled nacti potvrzenou sadu pres "
-            "prepare_complete_source_batch po davkach a zapis ji jen pres "
+            "prepare_complete_source_batch po davkach. Pokud inspekce vrati kratke "
+            "strukturovane udaje z celeho dokumentu, pouzij je; chybejici hodnoty "
+            "zachovej jako nezjisteno a nikdy je nedomyslej. Zapis jen pres "
             "compile_complete_overview se vsemi batch_refs."
         )
 
@@ -167,5 +169,7 @@ class JanickaR2Backend:
             "a truncated search as complete. A title-only list must use "
             "compile_complete_title_list without fulltext inspection. A content overview "
             "must prepare every confirmed five-source batch and pass every batch_ref to "
-            "compile_complete_overview. Overly broad searches must fail closed.",
+            "compile_complete_overview. When structured full-document fields are "
+            "available, use them, preserve missing values as nezjisteno, and never infer "
+            "them. Overly broad searches must fail closed.",
         )

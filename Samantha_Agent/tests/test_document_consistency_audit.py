@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 
 from app.documents.consistency_audit import (
+    extract_primary_payment_amount,
     format_document_consistency_audit,
     run_document_consistency_audit,
     save_audit_decision,
@@ -13,6 +14,14 @@ from app.documents.consistency_audit import (
 
 
 class DocumentConsistencyAuditTests(unittest.TestCase):
+    def test_primary_payment_amount_fails_closed_on_equal_candidates(self) -> None:
+        amount = extract_primary_payment_amount(
+            "Datum splatnosti: 31. 8. 2026. "
+            "Pojistné varianta A 4 000 Kč a pojistné varianta B 5 000 Kč."
+        )
+
+        self.assertIsNone(amount)
+
     def test_audit_reports_duplicate_reminders_and_parallel_policies_without_resolved_option_noise(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)

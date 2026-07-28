@@ -15,6 +15,10 @@ from app.reminders.store import DEFAULT_REMINDERS_PATH, load_reminders_store
 
 DEFAULT_AUDIT_DECISIONS_PATH = DEFAULT_DOCUMENTS_DIR / "index" / "consistency_audit_decisions.json"
 AMOUNT_PATTERN = re.compile(r"(?P<amount>\d{1,3}(?:[ .]\d{3})*)\s*K[čc]")
+PAYMENT_AMOUNT_PATTERN = re.compile(
+    r"\b\d{1,3}(?:[ .\u00a0]\d{3})*(?:,\d{1,2})?\s*(?:K[čc]|CZK)\b",
+    re.IGNORECASE,
+)
 POLICY_PATTERN = re.compile(
     r"(?:pojistn[áé]\s+smlouva|n[áa]vrh(?:u)?\s+pojistn[ée]\s+smlouvy|variabiln[íi]\s+symbol)\D{0,80}(\d{10})",
     re.IGNORECASE,
@@ -578,6 +582,74 @@ def extract_payment_amounts(text: str) -> tuple[dict[str, str], ...]:
             amounts.append({"kind": "payment_due", "label": "částka k úhradě", "amount": normalize_amount(transfer_match.group(1))})
 
     return tuple(dedupe_amounts(amounts))
+
+
+def extract_primary_payment_amount(text: str) -> dict[str, str] | None:
+    """Choose one conservative payable insurance amount from the full text."""
+
+    structured = extract_payment_amounts(text)
+    for preferred_kind in ("payment_due", "base_renewal"):
+        preferred = [
+            item
+            for item in structured
+            if item.get("kind") == preferred_kind and item.get("amount")
+        ]
+        preferred_amounts = {
+            str(item.get("amount", "")).strip()
+            for item in preferred
+            if str(item.get("amount", "")).strip()
+        }
+        if len(preferred_amounts) == 1:
+            return dict(preferred[0])
+        if len(preferred_amounts) > 1:
+            return None
+
+    scored: list[tuple[int, str]] = []
+    for match in PAYMENT_AMOUNT_PATTERN.finditer(text):
+        context = text[
+            max(0, match.start() - 350) : min(len(text), match.end() + 350)
+        ].casefold()
+        score = 0
+        if any(
+            marker in context
+            for marker in (
+                "částka k úhradě",
+                "castka k uhrade",
+                "celkem k úhradě",
+                "celkem k uhrade",
+                "k zaplacení",
+                "k zaplaceni",
+            )
+        ):
+            score += 100
+        if "splatnost" in context:
+            score += 60
+        if "pojistné" in context or "pojistne" in context:
+            score += 40
+        if "ročně" in context or "rocne" in context:
+            score += 15
+        if any(
+            marker in context
+            for marker in ("maxi", "voliteln", "doplňkov", "doplnkov")
+        ):
+            score -= 50
+        scored.append((score, safe_text(match.group(0))[:80]))
+
+    if not scored:
+        return None
+    best_score = max(score for score, _amount in scored)
+    best_amounts = {
+        " ".join(amount.replace("\u00a0", " ").split())
+        for score, amount in scored
+        if score == best_score and amount
+    }
+    if best_score < 60 or len(best_amounts) != 1:
+        return None
+    return {
+        "kind": "contextual_payment",
+        "label": "částka určená z platebního kontextu",
+        "amount": next(iter(best_amounts)),
+    }
 
 
 def normalize_amount(value: str) -> str:

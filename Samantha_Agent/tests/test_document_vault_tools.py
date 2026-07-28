@@ -2030,6 +2030,68 @@ print(json.dumps(result, ensure_ascii=False))
             self.assertIn("valid_until", result)
             self.assertIn("2026-07-31", result)
 
+    def test_inspection_exposes_structured_invoice_fields_from_full_document(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            vault = root / "documents"
+            stored = (
+                vault
+                / "vault"
+                / "insurance"
+                / "doc-pojisteni"
+                / "pojisteni.txt"
+            )
+            stored.parent.mkdir(parents=True)
+            stored.write_text(
+                "Úvodní syntetický text. "
+                + ("x" * 1400)
+                + (
+                    " Česká podnikatelská pojišťovna, a. s. "
+                    "Datum splatnosti: 31. 8. 2026. "
+                    "ČÁSTKA K ÚHRADĚ 4 956 Kč."
+                ),
+                encoding="utf-8",
+            )
+            index = vault / "index" / "documents_index.jsonl"
+            index.parent.mkdir()
+            index.write_text(
+                json.dumps(
+                    {
+                        "document_id": "doc-pojisteni",
+                        "stored_path": (
+                            "data/private/documents/vault/insurance/"
+                            "doc-pojisteni/pojisteni.txt"
+                        ),
+                        "counterparty": "",
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            result = inspect_document_text_text(
+                document_id="doc-pojisteni",
+                vault_dir=vault,
+            )
+
+        self.assertIn(
+            "Strukturovane udaje pro prehled (z celeho dokumentu):",
+            result,
+        )
+        self.assertIn("- Datum splatnosti: 2026-08-31", result)
+        self.assertIn(
+            "- Pojistovna / protistrana: Česká podnikatelská pojišťovna",
+            result,
+        )
+        self.assertIn("- Castka pojisteni: 4 956 Kč", result)
+        self.assertNotIn(
+            "ČÁSTKA K ÚHRADĚ 4 956 Kč",
+            result.split("Nahled textu:", 1)[1],
+        )
+
     def test_inspect_document_by_id_uses_explicit_vault_for_project_relative_path(
         self,
     ) -> None:
@@ -2062,6 +2124,7 @@ print(json.dumps(result, ensure_ascii=False))
 
             self.assertIn("Inspekce dokumentu (read-only):", result)
             self.assertIn("Prenositelny synteticky vytah.", result)
+            self.assertNotIn("Strukturovane udaje pro prehled", result)
 
     def test_inspect_document_by_id_rejects_index_path_outside_explicit_vault(
         self,

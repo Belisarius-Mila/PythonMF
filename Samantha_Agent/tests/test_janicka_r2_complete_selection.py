@@ -150,7 +150,7 @@ class JanickaR2CompleteSelectionTests(unittest.TestCase):
             self.assertIn(f"{number}. Recept {number:03d}", stored)
             self.assertNotIn(f"doc-recept-{number:03d}", stored)
 
-    def test_complete_content_overview_requires_every_five_source_batch(
+    def test_complete_six_source_overview_requires_five_plus_one_batches(
         self,
     ) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -167,7 +167,7 @@ class JanickaR2CompleteSelectionTests(unittest.TestCase):
 
             backend, flow, _paged_search = self._flow(
                 private_root,
-                rows=[_document_row(number) for number in range(1, 8)],
+                rows=[_document_row(number) for number in range(1, 7)],
                 inspector=inspect_document,
             )
             search_result = flow.search_complete_document_set("všechny recepty")
@@ -187,18 +187,18 @@ class JanickaR2CompleteSelectionTests(unittest.TestCase):
                 query="všechny recepty",
                 result_set_ref=search_result.result_set_ref,
                 batch_refs=[first.batch_ref, second.batch_ref],
-                overview_text="Souhrn sedmi syntetických receptů.",
+                overview_text="Souhrn šesti syntetických receptů.",
             )
             stored = backend.document_store().read_text("Přehled receptů.txt")
 
         self.assertEqual(first.batch_count, 2)
         self.assertEqual(len(first.sources), 5)
-        self.assertEqual(len(second.sources), 2)
+        self.assertEqual(len(second.sources), 1)
         self.assertNotIn("Syntetický obsah", repr(first))
-        self.assertEqual(compiled.source_count, 7)
-        self.assertEqual(len(inspected_ids), 14)
-        self.assertIn("Počet potvrzených zdrojů: 7", stored)
-        self.assertIn("Souhrn sedmi syntetických receptů.", stored)
+        self.assertEqual(compiled.source_count, 6)
+        self.assertEqual(len(inspected_ids), 12)
+        self.assertIn("Počet potvrzených zdrojů: 6", stored)
+        self.assertIn("Souhrn šesti syntetických receptů.", stored)
         self.assertNotIn("doc-recept-", stored)
 
     def test_changed_complete_result_set_requires_new_human_confirmation(self) -> None:

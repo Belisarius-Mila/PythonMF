@@ -912,6 +912,15 @@ def inspect_document_text_summary(
 
     extraction = extract_text(resolved)
     due_dates = find_due_date_candidates(extraction.text)
+    safe_document_id = safe_slug(document_id, default="", limit=140)
+    metadata = next(
+        (
+            item
+            for item in read_jsonl(vault_dir / "index" / "documents_index.jsonl")
+            if str(item.get("document_id", "")).strip() == safe_document_id
+        ),
+        {},
+    )
     lines = [
         "Inspekce dokumentu (read-only):",
         f"- Soubor: {resolved.name}",
@@ -933,6 +942,43 @@ def inspect_document_text_summary(
     else:
         lines.append("- Nenalezeny")
 
+    if r2_insurance_overview_applicable(
+        text=extraction.text,
+        metadata=metadata,
+    ):
+        from app.documents.consistency_audit import (
+            extract_insurer,
+            extract_primary_payment_amount,
+        )
+
+        payment_dates = r2_payment_due_dates(
+            text=extraction.text,
+            due_dates=due_dates,
+        )
+        insurer = extract_insurer(
+            text=extraction.text,
+            fallback=str(metadata.get("counterparty", "")),
+        )
+        payment_amount = extract_primary_payment_amount(extraction.text)
+        lines.append("")
+        lines.append("Strukturovane udaje pro prehled (z celeho dokumentu):")
+        lines.append(
+            "- Datum splatnosti: "
+            + (", ".join(payment_dates) if payment_dates else "nezjisteno")
+        )
+        lines.append(
+            "- Pojistovna / protistrana: "
+            + (safe_text(insurer) if insurer else "nezjisteno")
+        )
+        lines.append(
+            "- Castka pojisteni: "
+            + (
+                safe_text(str(payment_amount.get("amount", "")))
+                if payment_amount
+                else "nezjisteno"
+            )
+        )
+
     snippet = sanitize_output(extraction.text[:1000].strip())
     lines.append("")
     lines.append("Nahled textu:")
@@ -940,6 +986,84 @@ def inspect_document_text_summary(
     lines.append("")
     lines.append("Bezpecnost: dokument nebyl presunut, zkopirovan ani ulozen do memory.")
     return "\n".join(lines)
+
+
+def r2_insurance_overview_applicable(
+    *,
+    text: str,
+    metadata: dict[str, Any],
+) -> bool:
+    metadata_text = " ".join(
+        str(metadata.get(field, ""))
+        for field in ("domain", "document_type", "title", "counterparty")
+    ).casefold()
+    text_prefix = text[:8000].casefold()
+    insurance_markers = ("insurance", "pojist", "pojišť")
+    return any(
+        marker in metadata_text or marker in text_prefix
+        for marker in insurance_markers
+    )
+
+
+def r2_payment_due_dates(
+    *,
+    text: str,
+    due_dates: list[dict[str, Any]],
+) -> tuple[str, ...]:
+    """Return only dates conservatively tied to a payment-due context."""
+
+    scored: list[tuple[int, str]] = []
+    for match in iter_date_matches(text):
+        parsed = parse_date_match(match.group(0))
+        if not parsed:
+            continue
+        context = text[
+            max(0, match.start() - 350) : min(len(text), match.end() + 350)
+        ].casefold()
+        score = 0
+        if "datum splatnosti" in context:
+            score += 120
+        elif "splatnost" in context:
+            score += 80
+        if any(
+            marker in context
+            for marker in ("k úhradě", "k uhrade", "zaplatit", "uhradit")
+        ):
+            score += 40
+        if any(
+            marker in context
+            for marker in (
+                "platnost od",
+                "počátek",
+                "pocatek",
+                "vystavení",
+                "vystaveni",
+            )
+        ):
+            score -= 40
+        scored.append((score, parsed))
+
+    if scored:
+        best_score = max(score for score, _date in scored)
+        best_dates = sorted(
+            {
+                date_value
+                for score, date_value in scored
+                if score == best_score and score >= 80
+            }
+        )
+        if best_dates:
+            return tuple(best_dates)
+
+    return tuple(
+        sorted(
+            {
+                str(item.get("date", ""))
+                for item in due_dates
+                if item.get("type") == "payment_due" and item.get("date")
+            }
+        )
+    )
 
 
 def apply_document_import_file(
