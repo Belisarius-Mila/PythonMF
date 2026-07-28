@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-07-28 09:26 CEST
+- Obnoveno potvrzeným checkpointem: 2026-07-28 09:42 CEST
 
 ### Hotovo
-- R2-Adam má bezpečný backendový prostor pro vlastní TXT dokumenty bez rozšiřování Cockpitu a bez přístupu k zápisu do ostatních dat Samanthy.
+- Janička může ve svém dokumentovém prostoru vytvářet a číst TXT dokumenty do velikosti 10 MiB.
 
 ### Otevřeno
 - Lokální commity čekají na samostatný denní GitHub balíček.
@@ -13,18 +13,18 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Napojit document store na backend R2-Adama a povolit sandboxový zápis pouze do tohoto jediného adresáře.
+- Pokračovat backendovým napojením document store na R2-Adama.
 
 ### Rozhodnutí
-- Janička smí spravovat dokumenty pouze ve svém vyhrazeném private adresáři; ostatní zdroje Samanthy zůstávají read-only a odesílání bude možné jen po potvrzení na přednastavený kontakt.
+- Maximální velikost jednoho TXT dokumentu R2-Adama je 10 MiB.
 
 ### Navrhované další kroky
-- Přidat kompilaci dokumentu z prvního registrovaného read-only zdroje.
-- Později přidat náhled a potvrzované odeslání na pevný soukromý kontakt.
+- Při budoucím náhledu zobrazovat jen omezenou část velkého dokumentu.
+- Při e-mailovém draftu kontrolovat velikost přílohy samostatně.
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `890f5e4cc134`; GitHub může být starší a čeká na denní balíček.
+- Git před checkpointem: lokální `main` na `8aa7cfc51814`; GitHub může být starší a čeká na denní balíček.
 - Poslední serverově potvrzené nasazení: serverová deployment receipt pro tento proud není dostupná.
 - Read-only živý stav: main=`local_ahead`, deployment=`unverified`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
@@ -72,3 +72,15 @@ Bezpecnost / neukladat:
 - Změněné cesty před paměťovým zápisem (4): `Samantha_Agent/scripts/cockpit_quality_gate.py`, `Samantha_Agent/tests/test_cockpit_quality_gate.py`, `Samantha_Agent/app/communication/janicka_r2_documents.py`, `Samantha_Agent/tests/test_janicka_r2_documents.py`
 - Commit: `Add isolated Janička R2 document store`
 - Další krok: Napojit document store na backend R2-Adama a povolit sandboxový zápis pouze do tohoto jediného adresáře.
+
+### Automatický checkpoint 2026-07-28 09:42 CEST
+
+- Pracovní proud: `project-r2-adam-janicka`
+- Hotovo: Janička může ve svém dokumentovém prostoru vytvářet a číst TXT dokumenty do velikosti 10 MiB.
+- Otevřeno: Lokální commity čekají na samostatný denní GitHub balíček.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: rychlá Cockpit brána syntaxe a whitespace: 7.1 s, výsledek OK; cílené testy potvrdila dokončovací účtenka vývojového tahu
+- Změněné cesty před paměťovým zápisem (2): `Samantha_Agent/app/communication/janicka_r2_documents.py`, `Samantha_Agent/tests/test_janicka_r2_documents.py`
+- Commit: `Raise Janička R2 text limit to 10 MiB`
+- Další krok: Pokračovat backendovým napojením document store na R2-Adama.

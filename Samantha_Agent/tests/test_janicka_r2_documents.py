@@ -194,6 +194,16 @@ class JanickaR2DocumentStoreTests(unittest.TestCase):
                 (private_root / R2_DOCUMENTS_RELATIVE_ROOT).exists()
             )
 
+    def test_exact_ten_mib_text_limit_is_accepted(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            store, _private_root = self.make_store(temp_dir)
+            content = "x" * MAX_R2_DOCUMENT_TEXT_BYTES
+
+            created = store.create_text(name="Deset MiB.txt", text=content)
+
+            self.assertEqual(created.size_bytes, 10 * 1024 * 1024)
+            self.assertEqual(len(store.read_text("Deset MiB.txt")), 10 * 1024 * 1024)
+
     def test_store_requires_existing_absolute_non_symlink_private_root(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             base = Path(temp_dir)
