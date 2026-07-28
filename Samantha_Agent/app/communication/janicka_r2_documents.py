@@ -364,7 +364,7 @@ class JanickaR2DocumentStore:
         modified = datetime.fromtimestamp(
             file_stat.st_mtime,
             tz=timezone.utc,
-        ).replace(microsecond=0)
+        )
         return JanickaR2DocumentInfo(
             name=path.name,
             size_bytes=file_stat.st_size,

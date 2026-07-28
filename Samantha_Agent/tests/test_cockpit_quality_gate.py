@@ -34,6 +34,7 @@ class CockpitQualityGateTests(unittest.TestCase):
 
         self.assertIn("async function ensureConnected()", source)
         self.assertIn("async function sendMessage(event)", source)
+        self.assertIn("async function loadDocument()", source)
 
     def test_workflow_triggers_cover_communication_layer_and_match(self) -> None:
         workflow_path = PROJECT_ROOT.parent / ".github" / "workflows" / "cockpit-quality-gate.yml"

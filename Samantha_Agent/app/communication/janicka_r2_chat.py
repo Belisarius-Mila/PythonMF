@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
+import hmac
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -10,7 +13,11 @@ from app.codex_appserver import AppServerError
 from app.communication.human_adam_service import HumanAdamService, MAX_MESSAGE_CHARS
 from app.communication.human_adam_workspace import HUMAN_ADAM_SANDBOX_POLICY
 from app.communication.janicka_r2_backend import JanickaR2Backend
-from app.communication.janicka_r2_documents import R2_DOCUMENTS_RELATIVE_ROOT
+from app.communication.janicka_r2_documents import (
+    R2_DOCUMENTS_RELATIVE_ROOT,
+    JanickaR2DocumentError,
+    JanickaR2DocumentInfo,
+)
 from app.communication.session_hub import (
     SessionBusyError,
     SessionDeliveryUnknownError,
@@ -33,11 +40,13 @@ R2_CHAT_DEVELOPER_INSTRUCTIONS = (
     "schopnosti a jen v rozsahu konkretniho lidskeho zadani. Nevypisuj tajemstvi "
     "ani systemove autentizacni udaje. Jediny zapis uzivatelskeho obsahu je prace "
     "s vlastnimi TXT dokumenty pres JanickaR2DocumentStore v povolenem adresari. "
-    "Novy dokument vytvor jen na jasne zadani a ukaz jeho obsah v chatu ke kontrole. "
+    "Novy dokument vytvor jen na jasne zadani. Do chatu nevkladej jeho plny obsah; "
+    "oznam jen vysledek a odkaz Janu na dokumentovou listu a samostatnou ctecku. "
     "Tisk ani e-mail nikdy neproved bez samostatne registrovane schopnosti, nahledu "
     "a vyslovneho potvrzeni konkretni akce; dokud schopnost neni dostupna, otevrene "
     "rekni, ze akci zatim nelze dokoncit."
 )
+R2_DOCUMENT_REF_RE = re.compile(r"r2doc-[0-9a-f]{32}")
 _PUBLIC_MESSAGE_FIELDS = (
     "client_message_id",
     "client_sent_at",
@@ -49,6 +58,22 @@ _PUBLIC_MESSAGE_FIELDS = (
     "delivery_confirmed",
     "recovery_required",
 )
+
+
+def _document_ref(name: str) -> str:
+    digest = hashlib.blake2s(
+        str(name).encode("utf-8"),
+        digest_size=16,
+        person=b"R2DocRef",
+    ).hexdigest()
+    return f"r2doc-{digest}"
+
+
+def _public_document(info: JanickaR2DocumentInfo) -> dict[str, object]:
+    return {
+        "document_ref": _document_ref(info.name),
+        **info.as_dict(),
+    }
 
 
 def _public_session(value: object) -> dict[str, Any]:
@@ -166,6 +191,40 @@ class JanickaR2ChatAdapter:
     def connect(self) -> dict[str, Any]:
         return self._public_payload(self.service.connect())
 
+    def documents(self) -> dict[str, Any]:
+        documents = sorted(
+            self.backend.document_store().list_documents(),
+            key=lambda item: (item.modified_at, item.name.casefold()),
+            reverse=True,
+        )
+        return {
+            "ok": True,
+            "count": len(documents),
+            "documents": [_public_document(item) for item in documents],
+        }
+
+    def document(self, document_ref: object) -> dict[str, Any]:
+        safe_ref = str(document_ref or "").strip()
+        if not R2_DOCUMENT_REF_RE.fullmatch(safe_ref):
+            raise JanickaR2DocumentError(
+                "Dokument nemá platný bezpečný odkaz."
+            )
+        store = self.backend.document_store()
+        selected: JanickaR2DocumentInfo | None = None
+        for item in store.list_documents():
+            if hmac.compare_digest(_document_ref(item.name), safe_ref):
+                selected = item
+                break
+        if selected is None:
+            raise JanickaR2DocumentError(
+                "Dokument nebyl v prostoru R2-Adama nalezen."
+            )
+        return {
+            "ok": True,
+            "document": _public_document(selected),
+            "text": store.read_text(selected.name),
+        }
+
     def send(self, payload: object) -> dict[str, Any]:
         body = payload if isinstance(payload, dict) else {}
         text = str(body.get("message") or "").strip()
@@ -223,6 +282,37 @@ def janicka_r2_chat_connect_action(
         }
 
 
+def janicka_r2_chat_documents_action(
+    *,
+    adapter: JanickaR2ChatAdapter,
+) -> dict[str, Any]:
+    try:
+        return adapter.documents()
+    except (JanickaR2DocumentError, OSError, ValueError) as exc:
+        return {
+            "ok": False,
+            "status": "r2_chat_documents_failed",
+            "message": str(exc),
+            "count": 0,
+            "documents": [],
+        }
+
+
+def janicka_r2_chat_document_action(
+    document_ref: object,
+    *,
+    adapter: JanickaR2ChatAdapter,
+) -> dict[str, Any]:
+    try:
+        return adapter.document(document_ref)
+    except (JanickaR2DocumentError, OSError, ValueError) as exc:
+        return {
+            "ok": False,
+            "status": "r2_chat_document_failed",
+            "message": str(exc),
+        }
+
+
 def janicka_r2_chat_send_action(
     payload: object,
     *,
@@ -267,6 +357,18 @@ R2_ADAM_CHAT_HTML = r"""<!doctype html>
     .meta { display:block; margin-top:6px; color:var(--muted); font-size:12px; }
     .empty { color:var(--muted); text-align:center; margin:30px 0; }
     .composer { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:min(920px,100%); padding:12px max(16px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); border-top:1px solid var(--line); background:rgba(255,255,255,.98); }
+    body.has-documents #chat { padding-bottom:330px; }
+    .document-shelf { margin-bottom:10px; padding:10px; border:1px solid #bfdbfe; border-radius:13px; background:#eff6ff; }
+    .document-shelf.updated { border-color:#86efac; background:#f0fdf4; }
+    .document-current,.document-row { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:10px; }
+    .document-copy { min-width:0; display:grid; gap:2px; }
+    .document-label { color:var(--muted); font-size:12px; font-weight:700; }
+    .document-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .document-meta { color:var(--muted); font-size:12px; }
+    .document-open,.document-toggle { padding:7px 10px; background:#fff; color:var(--blue); }
+    .document-toggle { width:100%; margin-top:8px; border-color:#bfdbfe; }
+    .document-list { max-height:128px; margin-top:8px; overflow:auto; border-top:1px solid #bfdbfe; }
+    .document-row { padding:8px 0; border-bottom:1px solid #dbeafe; }
     textarea { width:100%; min-height:76px; max-height:230px; resize:vertical; border:1px solid #bac7d8; border-radius:13px; padding:12px; font:inherit; color:var(--ink); }
     .compose-actions { display:flex; justify-content:flex-end; margin-top:8px; }
     button { border:1px solid var(--blue); border-radius:11px; padding:10px 15px; background:var(--blue); color:#fff; font:inherit; font-weight:700; cursor:pointer; }
@@ -293,6 +395,18 @@ R2_ADAM_CHAT_HTML = r"""<!doctype html>
   <div id="notice" role="status" aria-live="polite"></div>
   <section id="chat" aria-label="Konverzace R2-Adam"></section>
   <form class="composer" id="composer" autocomplete="off">
+    <section class="document-shelf" id="documentShelf" aria-label="Dokumenty R2-Adama" hidden>
+      <div class="document-current">
+        <div class="document-copy">
+          <span class="document-label">Aktuální dokument</span>
+          <strong class="document-name" id="currentDocumentName"></strong>
+          <span class="document-meta" id="currentDocumentMeta"></span>
+        </div>
+        <button class="document-open" id="currentDocumentOpenBtn" type="button">Otevřít</button>
+      </div>
+      <button class="document-toggle" id="documentListToggleBtn" type="button" hidden aria-expanded="false">Další dokumenty</button>
+      <div class="document-list" id="documentList" hidden></div>
+    </section>
     <textarea id="messageInput" maxlength="12000" autocomplete="off" placeholder="Napiš R2-Adamovi…" aria-label="Zpráva pro R2-Adama"></textarea>
     <div class="compose-actions">
       <button id="sendBtn" type="submit" disabled>Odeslat</button>
@@ -303,6 +417,7 @@ R2_ADAM_CHAT_HTML = r"""<!doctype html>
   const STATUS_PATH = "/api/r2-adam/status";
   const CONNECT_PATH = "/api/r2-adam/connect";
   const SEND_PATH = "/api/r2-adam/send";
+  const DOCUMENTS_PATH = "/api/r2-adam/documents";
   const connectionBadge = document.getElementById("connectionBadge");
   const activity = document.getElementById("activity");
   const notice = document.getElementById("notice");
@@ -310,10 +425,17 @@ R2_ADAM_CHAT_HTML = r"""<!doctype html>
   const composer = document.getElementById("composer");
   const input = document.getElementById("messageInput");
   const sendBtn = document.getElementById("sendBtn");
+  const documentShelf = document.getElementById("documentShelf");
+  const currentDocumentName = document.getElementById("currentDocumentName");
+  const currentDocumentMeta = document.getElementById("currentDocumentMeta");
+  const currentDocumentOpenBtn = document.getElementById("currentDocumentOpenBtn");
+  const documentListToggleBtn = document.getElementById("documentListToggleBtn");
+  const documentList = document.getElementById("documentList");
   let connected = false;
   let turnBusy = false;
   let sendInFlight = false;
   let lastMessagesFingerprint = "";
+  let lastDocumentsFingerprint = "";
 
   async function api(path, options={}) {
     const response = await fetch(path, {
@@ -333,6 +455,91 @@ R2_ADAM_CHAT_HTML = r"""<!doctype html>
     return Number.isNaN(date.getTime())
       ? ""
       : date.toLocaleTimeString("cs-CZ", {hour:"2-digit", minute:"2-digit"});
+  }
+
+  function formatDocumentTime(value) {
+    const date = new Date(value || "");
+    return Number.isNaN(date.getTime())
+      ? "čas není dostupný"
+      : date.toLocaleString("cs-CZ", {dateStyle:"short", timeStyle:"short"});
+  }
+
+  function formatBytes(value) {
+    const bytes = Math.max(0, Number(value || 0));
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} kB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  function openDocument(documentRef) {
+    const safeRef = String(documentRef || "");
+    if (!safeRef) return;
+    const target = `/r2-adam/document/?ref=${encodeURIComponent(safeRef)}`;
+    const reader = window.open(target, "_blank", "noopener");
+    if (!reader) window.location.href = target;
+  }
+
+  function documentRow(documentInfo) {
+    const row = document.createElement("div");
+    row.className = "document-row";
+    const copy = document.createElement("div");
+    copy.className = "document-copy";
+    const name = document.createElement("strong");
+    name.className = "document-name";
+    name.textContent = documentInfo.name || "Dokument";
+    const meta = document.createElement("span");
+    meta.className = "document-meta";
+    meta.textContent = `${formatDocumentTime(documentInfo.modified_at)} · ${formatBytes(documentInfo.size_bytes)}`;
+    const button = document.createElement("button");
+    button.className = "document-open";
+    button.type = "button";
+    button.textContent = "Otevřít";
+    button.addEventListener("click", () => openDocument(documentInfo.document_ref));
+    copy.append(name, meta);
+    row.append(copy, button);
+    return row;
+  }
+
+  function renderDocuments(documents) {
+    const rows = Array.isArray(documents) ? documents : [];
+    const fingerprint = JSON.stringify(rows);
+    if (fingerprint === lastDocumentsFingerprint) return;
+    const previouslyLoaded = Boolean(lastDocumentsFingerprint);
+    lastDocumentsFingerprint = fingerprint;
+    documentList.replaceChildren();
+    documentList.hidden = true;
+    documentListToggleBtn.setAttribute("aria-expanded", "false");
+    if (!rows.length) {
+      documentShelf.hidden = true;
+      document.body.classList.remove("has-documents");
+      return;
+    }
+    const current = rows[0];
+    documentShelf.hidden = false;
+    document.body.classList.add("has-documents");
+    currentDocumentName.textContent = current.name || "Dokument";
+    currentDocumentMeta.textContent = `${formatDocumentTime(current.modified_at)} · ${formatBytes(current.size_bytes)}`;
+    currentDocumentOpenBtn.onclick = () => openDocument(current.document_ref);
+    const remaining = rows.slice(1);
+    documentListToggleBtn.hidden = !remaining.length;
+    documentListToggleBtn.textContent = `Další dokumenty (${remaining.length})`;
+    remaining.forEach((item) => documentList.appendChild(documentRow(item)));
+    if (previouslyLoaded) {
+      documentShelf.classList.add("updated");
+      window.setTimeout(() => documentShelf.classList.remove("updated"), 1600);
+    }
+  }
+
+  async function refreshDocuments({quiet=false}={}) {
+    try {
+      const payload = await api(DOCUMENTS_PATH);
+      if (!payload.ok) throw new Error(payload.message || "Dokumenty nelze načíst.");
+      renderDocuments(payload.documents);
+      return payload;
+    } catch (error) {
+      if (!quiet) notice.textContent = error.message;
+      return null;
+    }
   }
 
   function bubble(text, className, meta) {
@@ -408,6 +615,7 @@ R2_ADAM_CHAT_HTML = r"""<!doctype html>
   }
 
   async function ensureConnected() {
+    await refreshDocuments({quiet:true});
     const status = await refreshStatus({quiet:true});
     if (status && status.ok && status.session && status.session.connected) return true;
     connectionBadge.textContent = "Připojuji…";
@@ -457,11 +665,17 @@ R2_ADAM_CHAT_HTML = r"""<!doctype html>
     } finally {
       sendInFlight = false;
       await refreshStatus({quiet:true});
+      await refreshDocuments({quiet:true});
       input.focus();
     }
   }
 
   composer.addEventListener("submit", sendMessage);
+  documentListToggleBtn.addEventListener("click", () => {
+    const nextExpanded = documentList.hidden;
+    documentList.hidden = !nextExpanded;
+    documentListToggleBtn.setAttribute("aria-expanded", String(nextExpanded));
+  });
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -469,7 +683,110 @@ R2_ADAM_CHAT_HTML = r"""<!doctype html>
     }
   });
   ensureConnected();
-  window.setInterval(() => refreshStatus({quiet:true}), 4000);
+  window.setInterval(() => {
+    refreshStatus({quiet:true});
+    refreshDocuments({quiet:true});
+  }, 4000);
+</script>
+</body>
+</html>
+"""
+
+
+R2_ADAM_DOCUMENT_READER_HTML = r"""<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Dokument R2-Adam</title>
+  <style>
+    :root { color-scheme:light; --ink:#172033; --muted:#64748b; --line:#dbe3ee; --soft:#f3f6fb; --warn:#b45309; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:#eef2f7; color:var(--ink); font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    main { width:min(1120px,100%); min-height:100vh; margin:0 auto; background:#fff; }
+    header { position:sticky; top:0; z-index:2; padding:13px max(16px,env(safe-area-inset-left)); border-bottom:1px solid var(--line); background:rgba(255,255,255,.97); }
+    .head { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:14px; }
+    .back { border:1px solid var(--line); border-radius:11px; padding:9px 12px; background:#fff; color:var(--ink); font-weight:700; text-decoration:none; }
+    .title { min-width:0; }
+    h1 { margin:0; overflow:hidden; font-size:20px; text-overflow:ellipsis; white-space:nowrap; }
+    #documentMeta { color:var(--muted); font-size:13px; }
+    #readerStatus { padding:18px 22px 0; color:var(--muted); }
+    #readerStatus.warn { color:var(--warn); }
+    #documentText { margin:0; padding:20px 22px calc(28px + env(safe-area-inset-bottom)); white-space:pre-wrap; overflow-wrap:anywhere; font:16px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace; tab-size:4; }
+    @media (max-width:620px) {
+      .head { gap:9px; }
+      .back { padding:8px 10px; }
+      h1 { font-size:18px; }
+      #readerStatus,#documentText { padding-left:14px; padding-right:14px; }
+      #documentText { font-size:15px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="head">
+      <a class="back" href="/r2-adam/">← R2-Adam</a>
+      <div class="title">
+        <h1 id="documentTitle">Načítám dokument…</h1>
+        <div id="documentMeta"></div>
+      </div>
+    </div>
+  </header>
+  <div id="readerStatus" role="status" aria-live="polite">Načítám bezpečný TXT dokument…</div>
+  <pre id="documentText"></pre>
+</main>
+<script>
+  const documentTitle = document.getElementById("documentTitle");
+  const documentMeta = document.getElementById("documentMeta");
+  const readerStatus = document.getElementById("readerStatus");
+  const documentText = document.getElementById("documentText");
+
+  function formatDocumentTime(value) {
+    const date = new Date(value || "");
+    return Number.isNaN(date.getTime())
+      ? "čas není dostupný"
+      : date.toLocaleString("cs-CZ", {dateStyle:"long", timeStyle:"short"});
+  }
+
+  function formatBytes(value) {
+    const bytes = Math.max(0, Number(value || 0));
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} kB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  async function loadDocument() {
+    const documentRef = new URLSearchParams(window.location.search).get("ref") || "";
+    if (!documentRef) {
+      readerStatus.textContent = "Chybí bezpečný odkaz na dokument.";
+      readerStatus.className = "warn";
+      return;
+    }
+    try {
+      const response = await fetch(
+        `/api/r2-adam/document?ref=${encodeURIComponent(documentRef)}`,
+        {cache:"no-store"}
+      );
+      const payload = await response.json();
+      if (!payload.ok || !payload.document) {
+        throw new Error(payload.message || "Dokument nelze načíst.");
+      }
+      documentTitle.textContent = payload.document.name || "Dokument R2-Adam";
+      documentMeta.textContent = `${formatDocumentTime(payload.document.modified_at)} · ${formatBytes(payload.document.size_bytes)}`;
+      documentText.textContent = payload.text || "";
+      readerStatus.textContent = "";
+      window.document.title = `${payload.document.name || "Dokument"} – R2-Adam`;
+    } catch (error) {
+      documentTitle.textContent = "Dokument není dostupný";
+      documentMeta.textContent = "";
+      documentText.textContent = "";
+      readerStatus.textContent = error.message || "Dokument nelze načíst.";
+      readerStatus.className = "warn";
+    }
+  }
+
+  loadDocument();
 </script>
 </body>
 </html>

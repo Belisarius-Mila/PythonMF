@@ -370,11 +370,14 @@ def r2_adam_chat_javascript_source() -> str:
     project_root = str(PROJECT_ROOT)
     if project_root not in sys.path:
         sys.path.insert(0, project_root)
-    from app.communication.janicka_r2_chat import R2_ADAM_CHAT_HTML
+    from app.communication.janicka_r2_chat import (
+        R2_ADAM_CHAT_HTML,
+        R2_ADAM_DOCUMENT_READER_HTML,
+    )
 
     scripts = re.findall(
         r"<script(?:\s[^>]*)?>(.*?)</script>",
-        R2_ADAM_CHAT_HTML,
+        R2_ADAM_CHAT_HTML + R2_ADAM_DOCUMENT_READER_HTML,
         flags=re.DOTALL,
     )
     if not scripts:

@@ -92,8 +92,11 @@ from app.communication.simple_main_deploy import (
 from app.communication.human_adam_ui import HUMAN_ADAM_HTML
 from app.communication.janicka_r2_chat import (
     R2_ADAM_CHAT_HTML,
+    R2_ADAM_DOCUMENT_READER_HTML,
     JanickaR2ChatAdapter,
     janicka_r2_chat_connect_action,
+    janicka_r2_chat_document_action,
+    janicka_r2_chat_documents_action,
     janicka_r2_chat_send_action,
     janicka_r2_chat_status_action,
 )
@@ -9211,6 +9214,9 @@ class CockpitServer:
                 if parsed.path == "/r2-adam/":
                     self.respond_html(R2_ADAM_CHAT_HTML)
                     return
+                if parsed.path == "/r2-adam/document/":
+                    self.respond_html(R2_ADAM_DOCUMENT_READER_HTML)
+                    return
                 if parsed.path == "/email-processing/":
                     self.respond_html(EMAIL_PROCESSING_HTML)
                     return
@@ -9255,6 +9261,20 @@ class CockpitServer:
                 if parsed.path == "/api/r2-adam/status":
                     self.respond_json(
                         janicka_r2_chat_status_action(adapter=JANICKA_R2_CHAT)
+                    )
+                    return
+                if parsed.path == "/api/r2-adam/documents":
+                    self.respond_json(
+                        janicka_r2_chat_documents_action(adapter=JANICKA_R2_CHAT)
+                    )
+                    return
+                if parsed.path == "/api/r2-adam/document":
+                    params = parse_qs(parsed.query)
+                    self.respond_json(
+                        janicka_r2_chat_document_action(
+                            params.get("ref", [""])[0],
+                            adapter=JANICKA_R2_CHAT,
+                        )
                     )
                     return
                 if parsed.path == "/api/human-adam/status":

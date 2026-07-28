@@ -9,9 +9,12 @@ from app.communication.human_adam_service import HumanAdamService
 from app.communication.janicka_r2_backend import JanickaR2Backend
 from app.communication.janicka_r2_chat import (
     R2_ADAM_CHAT_HTML,
+    R2_ADAM_DOCUMENT_READER_HTML,
     R2_CHAT_DEVELOPER_INSTRUCTIONS,
     R2_CHAT_PROFILE_ID,
     JanickaR2ChatAdapter,
+    janicka_r2_chat_document_action,
+    janicka_r2_chat_documents_action,
     janicka_r2_chat_send_action,
 )
 from app.communication.janicka_r2_documents import R2_DOCUMENTS_RELATIVE_ROOT
@@ -94,6 +97,58 @@ class JanickaR2ChatTests(unittest.TestCase):
             backend=backend,
         )
 
+    def test_document_list_is_metadata_only_and_reader_uses_opaque_ref(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            (root / "private").mkdir()
+            adapter = self._adapter(root)
+            store = adapter.backend.document_store()
+            store.create_text(
+                name="Syntetický přehled.txt",
+                text="Pouze syntetický obsah čtečky.",
+            )
+
+            listing = janicka_r2_chat_documents_action(adapter=adapter)
+            document = listing["documents"][0]
+            opened = janicka_r2_chat_document_action(
+                document["document_ref"],
+                adapter=adapter,
+            )
+
+        self.assertTrue(listing["ok"])
+        self.assertEqual(listing["count"], 1)
+        self.assertEqual(document["name"], "Syntetický přehled.txt")
+        self.assertRegex(str(document["document_ref"]), r"^r2doc-[0-9a-f]{32}$")
+        self.assertNotIn("path", document)
+        self.assertNotIn("text", document)
+        self.assertTrue(opened["ok"])
+        self.assertEqual(opened["text"], "Pouze syntetický obsah čtečky.")
+        self.assertEqual(opened["document"], document)
+
+    def test_document_reader_rejects_name_path_and_unknown_ref(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            root = Path(temp_dir)
+            (root / "private").mkdir()
+            adapter = self._adapter(root)
+            adapter.backend.document_store().create_text(
+                name="Bezpečný dokument.txt",
+                text="Syntetický text.",
+            )
+
+            raw_name = janicka_r2_chat_document_action(
+                "Bezpečný dokument.txt",
+                adapter=adapter,
+            )
+            unknown = janicka_r2_chat_document_action(
+                "r2doc-00000000000000000000000000000000",
+                adapter=adapter,
+            )
+
+        self.assertFalse(raw_name["ok"])
+        self.assertFalse(unknown["ok"])
+        self.assertNotIn("text", raw_name)
+        self.assertNotIn("text", unknown)
+
     def test_bind_owns_separate_session_and_only_document_write_root(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             root = Path(temp_dir)
@@ -119,6 +174,10 @@ class JanickaR2ChatTests(unittest.TestCase):
             )
             self.assertFalse(adapter.service.sandbox_policy["networkAccess"])
             self.assertIn("Nejsi vyvojovy Adam", R2_CHAT_DEVELOPER_INSTRUCTIONS)
+            self.assertIn(
+                "Do chatu nevkladej jeho plny obsah",
+                R2_CHAT_DEVELOPER_INSTRUCTIONS,
+            )
             self.assertIn(
                 "nikdy nevyvijej",
                 adapter.service.developer_instructions,
@@ -173,6 +232,9 @@ class JanickaR2ChatTests(unittest.TestCase):
         self.assertIn("/api/r2-adam/status", R2_ADAM_CHAT_HTML)
         self.assertIn("/api/r2-adam/connect", R2_ADAM_CHAT_HTML)
         self.assertIn("/api/r2-adam/send", R2_ADAM_CHAT_HTML)
+        self.assertIn("/api/r2-adam/documents", R2_ADAM_CHAT_HTML)
+        self.assertIn('id="documentShelf"', R2_ADAM_CHAT_HTML)
+        self.assertIn('id="currentDocumentOpenBtn"', R2_ADAM_CHAT_HTML)
         self.assertIn("textContent", R2_ADAM_CHAT_HTML)
         self.assertNotIn("innerHTML", R2_ADAM_CHAT_HTML)
         for forbidden in (
@@ -185,13 +247,25 @@ class JanickaR2ChatTests(unittest.TestCase):
         ):
             self.assertNotIn(forbidden, R2_ADAM_CHAT_HTML)
 
+    def test_full_page_reader_loads_text_outside_chat_without_private_path(self) -> None:
+        self.assertIn('id="documentText"', R2_ADAM_DOCUMENT_READER_HTML)
+        self.assertIn("/api/r2-adam/document?ref=", R2_ADAM_DOCUMENT_READER_HTML)
+        self.assertIn('href="/r2-adam/"', R2_ADAM_DOCUMENT_READER_HTML)
+        self.assertIn("documentText.textContent", R2_ADAM_DOCUMENT_READER_HTML)
+        self.assertNotIn("innerHTML", R2_ADAM_DOCUMENT_READER_HTML)
+        self.assertNotIn("stored_path", R2_ADAM_DOCUMENT_READER_HTML)
+        self.assertNotIn("document_id", R2_ADAM_DOCUMENT_READER_HTML)
+
     def test_cockpit_opens_r2_chat_and_exposes_only_chat_post_actions(self) -> None:
         self.assertIn('id="janickaR2ChatBtn"', cockpit_module.COCKPIT_HTML)
         self.assertNotIn('id="janickaR2DocumentsBtn"', cockpit_module.COCKPIT_HTML)
         self.assertIn("/r2-adam/", cockpit_module.COCKPIT_HTML)
         source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
         self.assertIn('if parsed.path == "/r2-adam/":', source)
+        self.assertIn('if parsed.path == "/r2-adam/document/":', source)
         self.assertIn('if parsed.path == "/api/r2-adam/status":', source)
+        self.assertIn('if parsed.path == "/api/r2-adam/documents":', source)
+        self.assertIn('if parsed.path == "/api/r2-adam/document":', source)
 
         cards = {
             item["path"]: item
